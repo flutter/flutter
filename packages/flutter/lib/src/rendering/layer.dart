@@ -520,8 +520,8 @@ class OffsetLayer extends ContainerLayer {
   /// Capture an image of the current state of this layer and its children.
   ///
   /// The returned [ui.Image] has uncompressed raw RGBA bytes, will be offset
-  /// by [bounds.topLeft], and have dimensions of [bounds.size] multiplied by
-  /// [pixelRatio].
+  /// by the top-left corner of [bounds], and have dimensions equal to the size
+  /// of [bounds] multiplied by [pixelRatio].
   ///
   /// The [pixelRatio] describes the scale between the logical pixels and the
   /// size of the output image. It is independent of the
@@ -537,9 +537,7 @@ class OffsetLayer extends ContainerLayer {
     assert(bounds != null);
     assert(pixelRatio != null);
     final ui.SceneBuilder builder = new ui.SceneBuilder();
-    final Matrix4 transform = new Matrix4.identity();
-    transform.translate(bounds.left, bounds.top);
-    transform.translate(-offset.dx, -offset.dy);
+    final Matrix4 transform = new Matrix4.translationValues(bounds.left - offset.dx, bounds.top - offset.dy, 0.0);
     transform.scale(pixelRatio, pixelRatio);
     builder.pushTransform(transform.storage);
     addToScene(builder, Offset.zero);
