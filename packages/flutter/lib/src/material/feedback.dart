@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import 'package:flutter/rendering.dart';
 import 'package:flutter/semantics.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
@@ -87,7 +88,10 @@ class Feedback {
   ///  * [wrapForTap] to trigger platform-specific feedback before executing a
   ///    [GestureTapCallback].
   static Future<Null> forTap(BuildContext context) async {
-    SemanticsService.tap();
+    final RenderObject object = context.findRenderObject();
+    final SemanticsNode semantics = unsafeSemantics(object);
+    assert(semantics != null);
+    semantics.sendEvent(const TapSemanticEvent());
     switch (_platform(context)) {
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
@@ -126,7 +130,10 @@ class Feedback {
   ///  * [wrapForLongPress] to trigger platform-specific feedback before
   ///    executing a [GestureLongPressCallback].
   static Future<Null> forLongPress(BuildContext context) {
-    SemanticsService.longPress();
+    final RenderObject object = context.findRenderObject();
+    final SemanticsNode semantics = unsafeSemantics(object);
+    assert(semantics != null);
+    semantics.sendEvent(const LongPressSemanticsEvent());
     switch (_platform(context)) {
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:

@@ -110,7 +110,8 @@ class TooltipSemanticsEvent extends SemanticsEvent {
 
 /// An event which triggers long press semantic feedback.
 /// 
-/// Only used on Android.
+/// Currently only honored on Android.  Triggers a long-press specific sound
+/// when TalkBack is enabled.
 class LongPressSemanticsEvent extends SemanticsEvent {
 
   /// Constructs an event that triggers a long-press semantic feedback by the platform.
@@ -122,7 +123,8 @@ class LongPressSemanticsEvent extends SemanticsEvent {
 
 /// An event which triggers tap semantic feedback.
 /// 
-/// Only used on Android.
+/// Currently only honored on Android.  Triggers a tap specific sound when
+/// TalkBack is enabled.
 class TapSemanticEvent extends SemanticsEvent {
 
   /// Constructs an event that triggers a long-press semantic feedback by the platform.

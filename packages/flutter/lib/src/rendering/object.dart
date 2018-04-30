@@ -3315,3 +3315,13 @@ class _SemanticsGeometry {
     return _rect.isEmpty;
   }
 }
+
+/// Retrieve the first non-null [SemanticsNode] from [object] and it's parents,
+/// or null if one cannot be found.
+SemanticsNode unsafeSemantics(RenderObject object) {
+  if (object._semantics != null)
+    return object._semantics;
+  if (object.parent != null)
+    return unsafeSemantics(object.parent);
+  return null;
+}

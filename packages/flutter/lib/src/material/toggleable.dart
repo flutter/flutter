@@ -285,7 +285,9 @@ abstract class RenderToggleable extends RenderConstrainedBox {
         onChanged(false);
         break;
     }
-    SemanticsService.tap();
+    final SemanticsNode semantics = unsafeSemantics(this);
+    assert(semantics != null);
+    semantics.sendEvent(const TapSemanticEvent());
   }
 
   void _handleTapUp(TapUpDetails details) {
