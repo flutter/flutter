@@ -13,6 +13,7 @@ import 'demos.dart';
 const String _kGalleryAssetsPackage = 'flutter_gallery_assets';
 const Color _kFlutterBlue = const Color(0xFF003D75);
 const double _kDemoItemHeight = 64.0;
+const Duration _kFrontLayerSwitchDuration = const Duration(milliseconds: 300);
 
 class _FlutterLogo extends StatelessWidget {
   const _FlutterLogo({ Key key }) : super(key: key);
@@ -104,6 +105,7 @@ class _CategoriesPage extends StatelessWidget {
     final int columnCount = (MediaQuery.of(context).orientation == Orientation.portrait) ? 2 : 3;
 
     return new SingleChildScrollView(
+      key: const PageStorageKey<String>('categories'),
       child: new LayoutBuilder(
         builder: (BuildContext context, BoxConstraints constraints) {
           final double columnWidth = constraints.biggest.width / columnCount.toDouble();
@@ -130,7 +132,7 @@ class _CategoriesPage extends StatelessWidget {
                     child: new _CategoryItem(
                       category: category,
                       onTap: () {
-                        Navigator.pushNamed(context, '/${category.name}');
+                        onCategoryTap(category);
                       },
                     ),
                   );
@@ -213,51 +215,21 @@ class _DemoItem extends StatelessWidget {
   }
 }
 
-class DemosPage extends StatelessWidget {
-  const DemosPage({
-    Key key,
-    this.category,
-    this.optionsPage,
-  }) : super(key: key);
+class _DemosPage extends StatelessWidget {
+  const _DemosPage(this.category);
 
   final GalleryDemoCategory category;
-  final Widget optionsPage;
 
   @override
   Widget build(BuildContext context) {
-    final ThemeData theme = Theme.of(context);
-    final bool isDark = theme.brightness == Brightness.dark;
-
-    return new Scaffold(
-      backgroundColor: isDark ? _kFlutterBlue : theme.primaryColor,
-      body: new SafeArea(
-        child: new SizedBox.expand(
-          child: new Backdrop(
-            backTitle: const Text('Options'),
-            backLayer: optionsPage,
-            frontAction: const BackButton(),
-            frontTitle: new Text(category.name),
-            frontHeading: new Container(
-              height: 40.0,
-              alignment: Alignment.bottomCenter,
-              padding: const EdgeInsets.symmetric(horizontal: 16.0),
-              child: const Divider(
-                color: const Color(0xFFD5D7DA),
-                height: 1.0
-              ),
-            ),
-            frontLayer: new Padding(
-              padding: const EdgeInsets.only(top: 40.0),
-              child: new ListView(
-                key: const ValueKey<String>('GalleryDemoList'), // So tests can find it.
-                padding: const EdgeInsets.only(top: 8.0),
-                children: kGalleryCategoryToDemos[category].map<Widget>((GalleryDemo demo) {
-                  return new _DemoItem(demo: demo);
-                }).toList(),
-              ),
-            ),
-          ),
-        ),
+    return new KeyedSubtree(
+      key: const ValueKey<String>('GalleryDemoList'), // So the tests can find this ListView
+      child: new ListView(
+        key: new PageStorageKey<String>(category.name),
+        padding: const EdgeInsets.only(top: 8.0),
+        children: kGalleryCategoryToDemos[category].map<Widget>((GalleryDemo demo) {
+          return new _DemoItem(demo: demo);
+        }).toList(),
       ),
     );
   }
@@ -282,6 +254,7 @@ class GalleryHome extends StatefulWidget {
 class _GalleryHomeState extends State<GalleryHome> with SingleTickerProviderStateMixin {
   static final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
   AnimationController _controller;
+  GalleryDemoCategory _category;
 
   @override
   void initState() {
@@ -312,11 +285,39 @@ class _GalleryHomeState extends State<GalleryHome> with SingleTickerProviderStat
         child: new Backdrop(
           backTitle: const Text('Options'),
           backLayer: widget.optionsPage,
-          frontAction: const _FlutterLogo(),
-          frontTitle: const Text('Flutter gallery'),
+          frontAction: new AnimatedSwitcher(
+            duration: _kFrontLayerSwitchDuration,
+            child: _category == null
+              ? const _FlutterLogo()
+              : new IconButton(
+                icon: const BackButtonIcon(),
+                tooltip: 'Back',
+                onPressed: () {
+                  setState(() {
+                    _category = null;
+                  });
+                },
+              ),
+          ),
+          frontTitle:  new AnimatedSwitcher(
+            duration: _kFrontLayerSwitchDuration,
+            child: _category == null
+              ? const Text('Flutter gallery')
+              : new Text(_category.name),
+          ),
           frontHeading: new Container(height: 24.0),
-          frontLayer: new _CategoriesPage(
-            categories: kAllGalleryDemoCategories,
+          frontLayer: new AnimatedSwitcher(
+            duration: _kFrontLayerSwitchDuration,
+            child: _category != null
+              ? new _DemosPage(_category)
+              : new _CategoriesPage(
+                categories: kAllGalleryDemoCategories,
+                onCategoryTap: (GalleryDemoCategory category) {
+                  setState(() {
+                    _category = category;
+                  });
+                },
+              ),
           ),
         ),
       ),
