@@ -50,6 +50,9 @@ class AndroidShellHolder {
   ThreadHost thread_host_;
   std::unique_ptr<Shell> shell_;
   bool is_valid_ = false;
+  pthread_key_t thread_destruct_key_;
+
+  static void ThreadDestructCallback(void* value);
 
   FXL_DISALLOW_COPY_AND_ASSIGN(AndroidShellHolder);
 };
