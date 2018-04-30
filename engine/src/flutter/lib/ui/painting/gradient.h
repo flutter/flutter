@@ -43,6 +43,15 @@ class CanvasGradient : public Shader {
                   SkShader::TileMode tile_mode,
                   const tonic::Float64List& matrix4);
 
+  void initSweep(double center_x,
+                 double center_y,
+                 const tonic::Int32List& colors,
+                 const tonic::Float32List& color_stops,
+                 SkShader::TileMode tile_mode,
+                 double start_angle,
+                 double end_angle,
+                 const tonic::Float64List& matrix4);
+
   static void RegisterNatives(tonic::DartLibraryNatives* natives);
 
  private:
