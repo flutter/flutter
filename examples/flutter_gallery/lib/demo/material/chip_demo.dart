@@ -116,6 +116,16 @@ class ChipDemo extends StatefulWidget {
 }
 
 class _ChipDemoState extends State<ChipDemo> {
+  _ChipDemoState() {
+    _reset();
+  }
+
+  final Set<String> _materials = new Set<String>();
+  String _selectedMaterial = '';
+  String _selectedAction = '';
+  final Set<String> _tools = new Set<String>();
+  final Set<String> _selectedTools = new Set<String>();
+  final Set<String> _actions = new Set<String>();
   bool _showShapeBorder = false;
 
   // Initialize members with the default data.
@@ -287,7 +297,7 @@ class _ChipDemoState extends State<ChipDemo> {
                 _showShapeBorder = !_showShapeBorder;
               });
             },
-            icon: const Icon(Icons.sentiment_very_satisfied),
+            icon: const Icon(Icons.vignette),
           )
         ],
       ),

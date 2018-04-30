@@ -1295,9 +1295,9 @@ class _RawChipState extends State<RawChip> with TickerProviderStateMixin<RawChip
     // is always white or black.
     return new Color.fromARGB(
       0xff,
-      (foreground.red * alpha / 255.0 + invAlpha).toInt(),
-      (foreground.green * alpha / 255.0 + invAlpha).toInt(),
-      (foreground.blue * alpha / 255.0 + invAlpha).toInt(),
+      foreground.red * alpha ~/ 255 + invAlpha,
+      foreground.green * alpha ~/ 255 + invAlpha,
+      foreground.blue * alpha ~/ 255 + invAlpha,
     );
   }
 
