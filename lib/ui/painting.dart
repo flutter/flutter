@@ -2231,8 +2231,8 @@ Float32List _encodeTwoPoints(Offset pointA, Offset pointB) {
 
 /// A shader (as used by [Paint.shader]) that renders a color gradient.
 ///
-/// There are two useful types of gradients, created by [new Gradient.linear]
-/// and [new Gradient.radial].
+/// There are several types of gradients, represented by the various constructors
+/// on this class.
 class Gradient extends Shader {
 
   void _constructor() native 'Gradient_constructor';
@@ -2306,9 +2306,8 @@ class Gradient extends Shader {
   ]) : assert(_offsetIsValid(center)),
        assert(colors != null),
        assert(tileMode != null),
+       assert(matrix4 == null || _matrix4IsValid(matrix4)),
        super._() {
-    if (matrix4 != null && matrix4.length != 16)
-      throw new ArgumentError('"matrix4" must have 16 entries.');
     _validateColorStops(colors, colorStops);
     final Int32List colorsBuffer = _encodeColorList(colors);
     final Float32List colorStopsBuffer = colorStops == null ? null : new Float32List.fromList(colorStops);
@@ -2316,6 +2315,56 @@ class Gradient extends Shader {
     _initRadial(center.dx, center.dy, radius, colorsBuffer, colorStopsBuffer, tileMode.index, matrix4);
   }
   void _initRadial(double centerX, double centerY, double radius, Int32List colors, Float32List colorStops, int tileMode, Float64List matrix4) native 'Gradient_initRadial';
+
+  /// Creates a sweep gradient centered at `center` that starts at `startAngle`
+  /// and ends at `endAngle`.
+  ///
+  /// `startAngle` and `endAngle` should be provided in radians, with zero
+  /// radians being the horizontal line to the right of the `center` and with
+  /// positive angles going clockwise around the `center`.
+  ///
+  /// If `colorStops` is provided, `colorStops[i]` is a number from 0.0 to 1.0
+  /// that specifies where `color[i]` begins in the gradient. If `colorStops` is
+  /// not provided, then only two stops, at 0.0 and 1.0, are implied (and
+  /// `color` must therefore only have two entries).
+  ///
+  /// The behavior before `startAngle` and after `endAngle` is described by the
+  /// `tileMode` argument. For details, see the [TileMode] enum.
+  ///
+  /// ![](https://flutter.github.io/assets-for-api-docs/dart-ui/tile_mode_clamp_sweep.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/dart-ui/tile_mode_mirror_sweep.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/dart-ui/tile_mode_repeated_sweep.png)
+  ///
+  /// If `center`, `colors`, `tileMode`, `startAngle`, or `endAngle` are null,
+  /// or if `colors` or `colorStops` contain null values, this constructor will
+  /// throw a [NoSuchMethodError].
+  ///
+  /// If `matrix4` is provided, the gradient fill will be transformed by the 
+  /// specified 4x4 matrix relative to the local coordinate system. `matrix4` must
+  /// be a column-major matrix packed into a list of 16 values.
+  Gradient.sweep(
+    Offset center,
+    List<Color> colors, [
+    List<double> colorStops,
+    TileMode tileMode = TileMode.clamp,
+    double startAngle = 0.0,
+    double endAngle = math.pi * 2,
+    Float64List matrix4,
+  ]) : assert(_offsetIsValid(center)),
+       assert(colors != null),
+       assert(tileMode != null),
+       assert(startAngle != null),
+       assert(endAngle != null),
+       assert(startAngle < endAngle),
+       assert(matrix4 == null || _matrix4IsValid(matrix4)),
+       super._() {
+    _validateColorStops(colors, colorStops);
+    final Int32List colorsBuffer = _encodeColorList(colors);
+    final Float32List colorStopsBuffer = colorStops == null ? null : new Float32List.fromList(colorStops);
+    _constructor();
+    _initSweep(center.dx, center.dy, colorsBuffer, colorStopsBuffer, tileMode.index, startAngle, endAngle, matrix4);
+  }
+  void _initSweep(double centerX, double centerY, Int32List colors, Float32List colorStops, int tileMode, double startAngle, double endAngle, Float64List matrix) native 'Gradient_initSweep';
 
   static void _validateColorStops(List<Color> colors, List<double> colorStops) {
     if (colorStops == null) {
