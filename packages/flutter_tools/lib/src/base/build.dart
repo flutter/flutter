@@ -275,9 +275,7 @@ class Snapshotter {
     outputDir.createSync(recursive: true);
 
     final String vmSnapshotData = fs.path.join(outputDir.path, 'vm_snapshot_data');
-    final String vmSnapshotInstructions = fs.path.join(outputDir.path, 'vm_snapshot_instr');
     final String isolateSnapshotData = fs.path.join(outputDir.path, 'isolate_snapshot_data');
-    final String isolateSnapshotInstructions = fs.path.join(outputDir.path, 'isolate_snapshot_instr');
     final String depfilePath = fs.path.join(outputDir.path, 'snapshot.d');
     final String assembly = fs.path.join(outputDir.path, 'snapshot_assembly.S');
     final String assemblyO = fs.path.join(outputDir.path, 'snapshot_assembly.o');
@@ -307,44 +305,8 @@ class Snapshotter {
     final String uiPath = fs.path.join(skyEnginePkg, 'lib', 'ui', 'ui.dart');
     final String vmServicePath = fs.path.join(skyEnginePkg, 'sdk_ext', 'vmservice_io.dart');
 
-    final List<String> inputPaths = <String>[
-      vmEntryPoints,
-      ioEntryPoints,
-      uiPath,
-      vmServicePath,
-      mainPath,
-    ];
-
+    final List<String> inputPaths = <String>[vmEntryPoints, ioEntryPoints, uiPath, vmServicePath, mainPath];
     final Set<String> outputPaths = new Set<String>();
-
-    // These paths are used only on iOS.
-    String snapshotDartIOS;
-
-    switch (platform) {
-      case TargetPlatform.android_arm:
-      case TargetPlatform.android_arm64:
-      case TargetPlatform.android_x64:
-      case TargetPlatform.android_x86:
-        if (compileToSharedLibrary) {
-          outputPaths.add(assemblySo);
-        } else {
-          outputPaths.addAll(<String>[
-            vmSnapshotData,
-            isolateSnapshotData,
-          ]);
-        }
-        break;
-      case TargetPlatform.ios:
-        snapshotDartIOS = artifacts.getArtifactPath(Artifact.snapshotDart, platform, buildMode);
-        inputPaths.add(snapshotDartIOS);
-        break;
-      case TargetPlatform.darwin_x64:
-      case TargetPlatform.linux_x64:
-      case TargetPlatform.windows_x64:
-      case TargetPlatform.fuchsia:
-      case TargetPlatform.tester:
-        assert(false);
-    }
 
     final Iterable<String> missingInputs = inputPaths.where((String p) => !fs.isFileSync(p));
     if (missingInputs.isNotEmpty) {
@@ -376,8 +338,6 @@ class Snapshotter {
     const String kIsolateSnapshotData = 'kDartIsolateSnapshotData';
 
     // iOS snapshot generated files, compiled object files.
-    final String kVmSnapshotDataC = fs.path.join(outputDir.path, '$kVmSnapshotData.c');
-    final String kIsolateSnapshotDataC = fs.path.join(outputDir.path, '$kIsolateSnapshotData.c');
     final String kVmSnapshotDataO = fs.path.join(outputDir.path, '$kVmSnapshotData.o');
     final String kIsolateSnapshotDataO = fs.path.join(outputDir.path, '$kIsolateSnapshotData.o');
 
@@ -386,11 +346,17 @@ class Snapshotter {
       case TargetPlatform.android_arm64:
       case TargetPlatform.android_x64:
       case TargetPlatform.android_x86:
+        final String vmSnapshotInstructions = fs.path.join(outputDir.path, 'vm_snapshot_instr');
+        final String isolateSnapshotInstructions = fs.path.join(outputDir.path, 'isolate_snapshot_instr');
         if (compileToSharedLibrary) {
+          outputPaths.add(assemblySo);
           genSnapshotArgs.add('--snapshot_kind=app-aot-assembly');
           genSnapshotArgs.add('--assembly=$assembly');
-          outputPaths.add(assemblySo);
         } else {
+          outputPaths.addAll(<String>[
+            vmSnapshotData,
+            isolateSnapshotData,
+          ]);
           genSnapshotArgs.addAll(<String>[
             '--snapshot_kind=app-aot-blobs',
             '--vm_snapshot_instructions=$vmSnapshotInstructions',
@@ -405,6 +371,8 @@ class Snapshotter {
         }
         break;
       case TargetPlatform.ios:
+        final String snapshotDartIOS = artifacts.getArtifactPath(Artifact.snapshotDart, platform, buildMode);
+        inputPaths.add(snapshotDartIOS);
         if (interpreter) {
           genSnapshotArgs.add('--snapshot_kind=core');
           genSnapshotArgs.add(snapshotDartIOS);
@@ -467,6 +435,9 @@ class Snapshotter {
     // end-developer can link into their app.
     if (platform == TargetPlatform.ios) {
       printStatus('Building App.framework...');
+
+      final String kVmSnapshotDataC = fs.path.join(outputDir.path, '$kVmSnapshotData.c');
+      final String kIsolateSnapshotDataC = fs.path.join(outputDir.path, '$kIsolateSnapshotData.c');
 
       const List<String> commonBuildOptions = const <String>['-arch', 'arm64', '-miphoneos-version-min=8.0'];
 
