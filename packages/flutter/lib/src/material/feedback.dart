@@ -137,7 +137,7 @@ class Feedback {
     switch (_platform(context)) {
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
-          return HapticFeedback.vibrate();
+        return HapticFeedback.vibrate();
       default:
         return new Future<Null>.value();
     }
