@@ -150,10 +150,11 @@ Future<Null> smokeGallery(WidgetTester tester) async {
   expect(find.text(kGalleryTitle), findsOneWidget);
 
   for (GalleryDemoCategory category in kAllGalleryDemoCategories) {
+    await Scrollable.ensureVisible(tester.element(find.text(category.name)), alignment: 0.5);
     await tester.tap(find.text(category.name));
     await tester.pumpAndSettle();
     for (GalleryDemo demo in kGalleryCategoryToDemos[category]) {
-      Scrollable.ensureVisible(tester.element(find.text(demo.title)), alignment: 0.5);
+      await Scrollable.ensureVisible(tester.element(find.text(demo.title)), alignment: 0.0);
       await smokeDemo(tester, demo);
       tester.binding.debugAssertNoTransientCallbacks('A transient callback was still active after running $demo');
     }
