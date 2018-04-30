@@ -1235,7 +1235,7 @@ class _MatchesGoldenFile extends AsyncMatcher {
     }
     assert(!renderObject.debugNeedsPaint);
     final OffsetLayer layer = renderObject.layer;
-    final Future<ui.Image> imageFuture = layer.toImage(element.size);
+    final Future<ui.Image> imageFuture = layer.toImage(renderObject.paintBounds);
 
     final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized();
     return binding.runAsync<String>(() async {
