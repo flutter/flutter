@@ -2119,6 +2119,13 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   /// is different from the rect returned by [describeApproximatePaintClip].
   /// If the semantics clip rect and the paint clip rect are the same, this
   /// method returns null.
+  ///
+  /// A viewport would typically implement this method to include semantic nodes
+  /// in the semantics tree that are currently hidden just before the leading
+  /// or just after the trailing edge. These nodes have to be included in the
+  /// semantics tree to implement implicit accessibility scrolling on iOS where
+  /// the viewport scrolls implicitly when moving the accessibility focus from
+  /// a the last visible node in the viewport to the first hidden one.
   Rect describeSemanticsClip(covariant RenderObject child) => null;
 
   // SEMANTICS
