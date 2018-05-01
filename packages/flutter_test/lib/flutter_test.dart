@@ -11,9 +11,9 @@
 ///
 /// ### Per test or per file
 ///
-/// Due to its foundation on top of `package:test`, tests may be initialized
-/// using the constructs found in `package:test`. These include the `setUp()`
-/// and `setUpAll()` methods.
+/// Due to its use of `package:test` as a foundation, the testing library
+/// allows for tests to be initialized using the existing constructs found in
+/// `package:test`. These include the [setUp] and [setUpAll] methods.
 ///
 /// ### Per directory hierarchy
 ///
@@ -31,13 +31,15 @@
 /// ```
 ///
 /// The test framework will execute that method and pass it the `main()` method
-/// of the test. It is the responsibility of the configuration file's `main()`
-/// method to invoke the test's `main()` method.
+/// of the test. It is then the responsibility of the configuration file's
+/// `main()` method to invoke the test's `main()` method.
 ///
 /// After the test framework finds a configuration file, it will stop scanning
-/// the directory hierarchy. In other words, the test configuration file closest
-/// to the test file will "win", and all other test configuration files will be
-/// ignored.
+/// the directory hierarchy. In other words, the test configuration file that
+/// lives closest to the test file will "win", and all other test configuration
+/// files will be ignored. Likewise, it will stop scanning the directory
+/// hierarchy when it finds a `pubspec.yaml`, since that signals the root of
+/// the project.
 ///
 /// If no configuration file is located, the test will be executed like normal.
 library flutter_test;

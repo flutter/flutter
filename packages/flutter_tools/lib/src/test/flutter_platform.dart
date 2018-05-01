@@ -41,10 +41,13 @@ const Duration _kTestProcessTimeout = const Duration(minutes: 5);
 /// hold that against the test.
 const String _kStartTimeoutTimerMessage = 'sky_shell test process has entered main method';
 
-/// The name of the test configuration file whose main method will wrap the
-/// test's main method if such a file is found in the directory hierarchy of
-/// the test file.
+/// The name of the test configuration file that will be discovered by the
+/// test harness if it exists in the project directory hierarchy.
 const String _kTestConfigFileName = 'flutter_test_config.dart';
+
+/// The name of the file that signals the root of the project and that will
+/// cause the test harness to stop scanning for configuration files.
+const String _kProjectRootSentinel = 'pubspec.yaml';
 
 /// The address at which our WebSocket server resides and at which the sky_shell
 /// processes will host the Observatory server.
@@ -636,6 +639,11 @@ class _FlutterPlatform extends PlatformPlugin {
       if (configFile.existsSync()) {
         printTrace('Discovered $_kTestConfigFileName in ${directory.path}');
         testConfigFile = configFile;
+        break;
+      }
+      if (directory.childFile(_kProjectRootSentinel).existsSync()) {
+        printTrace('Stopping scan for $_kTestConfigFileName; '
+                   'found project root at ${directory.path}');
         break;
       }
       directory = directory.parent;
