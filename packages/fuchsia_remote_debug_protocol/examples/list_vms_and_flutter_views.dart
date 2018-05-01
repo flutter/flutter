@@ -46,10 +46,13 @@ Future<Null> main(List<String> args) async {
     print('\t${view.name ?? view.id}');
   }
 
+  /*
   connection.onDartVmEvent.listen((DartVmEvent event) {
     print('DartVM event: ${event.eventType} for '
         '${event.servicePort} at ${event.uri}');
   }, onDone: () async {
     await connection.stop();
   });
+  */
+  print(await connection.getMainIsolatesByPattern('image'));
 }

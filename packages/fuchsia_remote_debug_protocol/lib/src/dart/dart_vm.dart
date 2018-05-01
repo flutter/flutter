@@ -93,9 +93,12 @@ class RpcFormatError extends Error {
 /// Either wraps existing RPC calls to the Dart VM service, or runs raw RPC
 /// function calls via [invokeRpc].
 class DartVm {
-  DartVm._(this._peer);
+  DartVm._(this._peer, this.uri);
 
   final json_rpc.Peer _peer;
+
+  // The URI through which this DartVM instance is connected.
+  final Uri rui;
 
   /// Attempts to connect to the given [Uri].
   ///
@@ -108,7 +111,22 @@ class DartVm {
     if (peer == null) {
       return null;
     }
-    return new DartVm._(peer);
+    return new DartVm._(peer, uri);
+  }
+
+  /// Returns a [List] of [IsolateRef] objects whose name matches `pattern`.
+  Future<List<IsolateRef>> getIsolatesByPattern(Pattern pattern) async {
+    final Map<String, dynamic> jsonVmRef =
+        await invokeRpc('getVM', timeout: _kRpcTimeout);
+    final List<Map<String, dynamic>> jsonIsolates = jsonVmRef['isolates'];
+    final List<IsolateRef> result = <IsolateRef>[];
+    for (Map<String, dynamic> jsonIsolate in jsonIsolates) {
+      final String name = jsonIsolate['name'];
+      if (name.contains(pattern) && name.contains(new RegExp(r':main\(\)'))) {
+        result.add(new IsolateRef._fromJson(jsonIsolate, this));
+      }
+    }
+    return result;
   }
 
   /// Invokes a raw JSON RPC command with the VM service.
@@ -207,4 +225,46 @@ class FlutterView {
   ///
   /// May be null if there is no associated isolate.
   String get name => _name;
+}
+
+/// This is a wrapper class for the `@Isolate` RPC object.
+///
+/// See:
+/// https://github.com/dart-lang/sdk/blob/master/runtime/vm/service/service.md#isolate
+///
+/// This class contains information about the Isolate like its name and ID, as
+/// well as a reference to the parent DartVM on which it is running.
+class IsolateRef {
+  IsolateRef._(this.name, this.id, this.dartVm);
+
+  factory IsolateRef._fromJson(Map<String, dynamic> json, DartVm dartVm) {
+    final String id = json['id'];
+    final String name = json['name'];
+    final String type = json['type'];
+    if (type == null) {
+      throw new RpcFormatError('Unable to find type within JSON "$json"');
+    }
+    if (type != '@Isolate') {
+      throw new RpcFormatError('Type "$type" does not match for IsolateRef');
+    }
+    if (id == null) {
+      throw new RpcFormatError(
+          'Unable to find ID for isolate ref within JSON "$json"');
+    }
+    if (name == null) {
+      throw new RpcFormatError(
+          'Unable to find name for isolate ref within JSON "$json"');
+    }
+    return new IsolateRef._(
+        name, int.parse(id.replaceFirst('isolates/', '')), dartVm);
+  }
+
+  /// The full name of this Isolate (not guaranteed to be unique).
+  final String name;
+
+  /// The unique ID of this isolate.
+  final int id;
+
+  /// The parent [DartVm] on which this Isolate lives.
+  final DartVm dartVm;
 }

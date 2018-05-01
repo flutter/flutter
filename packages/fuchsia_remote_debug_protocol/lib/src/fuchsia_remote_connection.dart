@@ -194,6 +194,34 @@ class FuchsiaRemoteConnection {
     _pollDartVms = false;
   }
 
+  /// Returns all Isolates running `main()` as matched by the [Pattern].
+  ///
+  /// In the current state this is not capable of listening for an
+  /// Isolate to start up. The Isolate must already be running.
+  Future<List<IsolateRef>> getMainIsolatesByPattern(Pattern pattern) async {
+    if (_forwardedVmServicePorts.isEmpty) {
+      return null;
+    }
+    List<Future<List<IsolateRef>>> isolates = <Future<List<IsolateRef>>>[];
+    for (PortForwarder fp in _forwardedVmServicePorts) {
+      final DartVm vmService = await _getDartVm(fp.port);
+      isolates.add(vmService.getIsolatesByPattern(pattern));
+    }
+    return Future.wait(isolates).then((listOfLists) {
+      print('THIS WUT WE GOT: $listOfLists');
+      List<List<IsolateRef>> mutableListOfLists = new List.from(listOfLists)
+        ..retainWhere((list) => !list.isEmpty);
+      // Folds the list of lists into one flat list.
+      return mutableListOfLists.fold<List<IsolateRef>>(
+        <IsolateRef>[],
+        (prevValue, element) {
+          prevValue.addAll(element);
+          return prevValue;
+        },
+      );
+    });
+  }
+
   /// Returns a list of [FlutterView] objects.
   ///
   /// This is run across all connected Dart VM connections that this class is
