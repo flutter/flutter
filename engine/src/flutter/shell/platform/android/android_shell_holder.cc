@@ -84,9 +84,24 @@ AndroidShellHolder::AndroidShellHolder(
 
   if (is_valid_) {
     task_runners.GetGPUTaskRunner()->PostTask(
-        []() { ::setpriority(PRIO_PROCESS, gettid(), -2); });
+        []() {
+          // Android describes -8 as "most important display threads, for
+          // compositing the screen and retrieving input events". Conservatively
+          // set the GPU thread to slightly lower priority than it.
+          if (::setpriority(PRIO_PROCESS, gettid(), -5) != 0) {
+            // Defensive fallback. Depending on the OEM, it may not be possible
+            // to set priority to -5.
+            if (::setpriority(PRIO_PROCESS, gettid(), -2) != 0) {
+              FXL_LOG(ERROR) << "Failed to set GPU task runner priority";
+            }
+          }
+        });
     task_runners.GetUITaskRunner()->PostTask(
-        []() { ::setpriority(PRIO_PROCESS, gettid(), -1); });
+        []() {
+          if (::setpriority(PRIO_PROCESS, gettid(), -1) != 0) {
+            FXL_LOG(ERROR) << "Failed to set UI task runner priority";
+          }
+        });
   }
 }
 
