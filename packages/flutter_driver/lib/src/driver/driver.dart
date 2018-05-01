@@ -167,8 +167,8 @@ class FlutterDriver {
     final VMServiceClient client = connection.client;
     final VM vm = await client.getVM();
     _log.trace('Looking for the isolate');
-    VMIsolateRef isolateRef =
-        vm.isolates.firstWhere((isolate) => isolate.number == isolateId);
+    final VMIsolateRef isolateRef = vm.isolates
+        .firstWhere((VMIsolateRef isolate) => isolate.number == isolateId);
     return FlutterDriver._connectToIsolate(
       isolateRef: isolateRef,
       vm: vm,
@@ -217,7 +217,7 @@ class FlutterDriver {
     final VMServiceClient client = connection.client;
     final VM vm = await client.getVM();
     _log.trace('Looking for the isolate');
-    VMIsolateRef isolateRef = vm.isolates.first;
+    final VMIsolateRef isolateRef = vm.isolates.first;
 
     return FlutterDriver._connectToIsolate(
       isolateRef: isolateRef,
@@ -244,7 +244,7 @@ class FlutterDriver {
       throw new TimeoutException(
           'Timeout while waiting for the isolate to become runnable');
     });
-    VMServiceClient client = connection.client;
+    final VMServiceClient client = connection.client;
 
     // TODO(yjbanov): vm_service_client does not support "None" pause event yet.
     // It is currently reported as null, but we cannot rely on it because
@@ -429,7 +429,9 @@ class FlutterDriver {
   }
 
   void _logCommunication(String message) {
-    if (_printCommunication) _log.info(message);
+    if (_printCommunication) {
+      _log.info(message);
+    }
     if (_logCommunicationToFile) {
       final f.File file = fs.file(p.join(
           testOutputsDirectory, 'flutter_driver_commands_$_driverId.log'));
@@ -883,7 +885,9 @@ Future<VMServiceClientConnection> _waitAndConnect(String url) async {
 
   Future<VMServiceClientConnection> attemptConnection() async {
     Uri uri = Uri.parse(url);
-    if (uri.scheme == 'http') uri = uri.replace(scheme: 'ws', path: '/ws');
+    if (uri.scheme == 'http') {
+      uri = uri.replace(scheme: 'ws', path: '/ws');
+    }
 
     WebSocket ws1;
     WebSocket ws2;

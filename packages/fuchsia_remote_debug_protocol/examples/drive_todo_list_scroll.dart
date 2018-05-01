@@ -40,26 +40,26 @@ Future<Null> main(List<String> args) async {
   final FuchsiaRemoteConnection connection =
       await FuchsiaRemoteConnection.connect(address, interface, sshConfigPath);
 
-  Pattern isolatePattern = 'todo_list';
+  const Pattern isolatePattern = 'todo_list';
   print('Finding $isolatePattern');
-  List<IsolateRef> refs =
+  final List<IsolateRef> refs =
       await connection.getMainIsolatesByPattern('todo_list');
 
-  IsolateRef ref = refs.first;
+  final IsolateRef ref = refs.first;
   print('Driving ${ref.name}');
-  FlutterDriver driver = await FlutterDriver.connectToIsolate(
+  final FlutterDriver driver = await FlutterDriver.connectToIsolate(
       ref.dartVm.uri.toString(),
       isolateId: ref.id,
       printCommunication: true,
       logCommunicationToFile: false);
   for (int i = 0; i < 5; ++i) {
     // Scrolls down 300px.
-    await driver.scroll(
-        find.byType('Scaffold'), 0.0, -300.0, new Duration(milliseconds: 300));
-    await new Future<Null>.delayed(new Duration(milliseconds: 500));
+    await driver.scroll(find.byType('Scaffold'), 0.0, -300.0,
+        const Duration(milliseconds: 300));
+    await new Future<Null>.delayed(const Duration(milliseconds: 500));
     // Scrolls up 300px.
-    await driver.scroll(
-        find.byType('Scaffold'), 300.0, 300.0, new Duration(milliseconds: 300));
+    await driver.scroll(find.byType('Scaffold'), 300.0, 300.0,
+        const Duration(milliseconds: 300));
   }
   await driver.close();
   await connection.stop();

@@ -7,7 +7,6 @@ import 'dart:io';
 
 import 'package:meta/meta.dart';
 import 'package:process/process.dart';
-import 'package:stream_channel/stream_channel.dart';
 
 import 'common/logging.dart';
 import 'common/network.dart';
@@ -120,11 +119,11 @@ class FuchsiaRemoteConnection {
         isIpV6Address(commandRunner.address), commandRunner);
     await connection._forwardLocalPortsToDeviceServicePorts();
 
-    Stream<int> dartVmStream() {
+    Stream<DartVmEvent> dartVmStream() {
       Future<Null> listen() async {
         while (connection._pollDartVms) {
           await connection._pollVms();
-          await new Future.delayed(_kVmPollInterval);
+          await new Future<Null>.delayed(_kVmPollInterval);
         }
         connection._dartVmEventController.close();
       }
@@ -187,7 +186,7 @@ class FuchsiaRemoteConnection {
       await pf.stop();
     }
     for (PortForwarder pf in _dartVmPortMap.values) {
-      final DartVmService vmService = _dartVmCache[pf.port];
+      final DartVm vmService = _dartVmCache[pf.port];
       _dartVmCache[pf.port] = null;
       await vmService?.stop();
       await pf.stop();
@@ -209,21 +208,27 @@ class FuchsiaRemoteConnection {
     if (_dartVmPortMap.isEmpty) {
       return null;
     }
-    List<Future<List<IsolateRef>>> isolates = <Future<List<IsolateRef>>>[];
+    // Accumulate a list of eventual IsolateRef lists so that they can be loaded
+    // simultaneously via Future.wait.
+    final List<Future<List<IsolateRef>>> isolates =
+        <Future<List<IsolateRef>>>[];
     for (PortForwarder fp in _dartVmPortMap.values) {
       final DartVm vmService = await _getDartVm(fp.port);
       isolates.add(vmService.getMainIsolatesByPattern(pattern));
     }
-    Completer<List<IsolateRef>> completer = new Completer<List<IsolateRef>>();
-    List<IsolateRef> result = await Future.wait(isolates).then((listOfLists) {
-      List<List<IsolateRef>> mutableListOfLists = new List.from(listOfLists)
-        ..retainWhere((list) => !list.isEmpty);
+    final Completer<List<IsolateRef>> completer =
+        new Completer<List<IsolateRef>>();
+    final List<IsolateRef> result =
+        await Future.wait(isolates).then((List<List<IsolateRef>> listOfLists) {
+      final List<List<IsolateRef>> mutableListOfLists =
+          new List<List<IsolateRef>>.from(listOfLists)
+            ..retainWhere((List<IsolateRef> list) => list.isNotEmpty);
       // Folds the list of lists into one flat list.
       return mutableListOfLists.fold<List<IsolateRef>>(
         <IsolateRef>[],
-        (prevValue, element) {
-          prevValue.addAll(element);
-          return prevValue;
+        (List<IsolateRef> accumulator, List<IsolateRef> element) {
+          accumulator.addAll(element);
+          return accumulator;
         },
       );
     });
@@ -246,7 +251,7 @@ class FuchsiaRemoteConnection {
             final DartVm vmService = await _getDartVm(event.uri.port);
             final List<IsolateRef> result =
                 await vmService.getMainIsolatesByPattern(pattern);
-            if (!result.isEmpty) {
+            if (result.isNotEmpty) {
               completer.complete(result);
             }
           }
@@ -285,7 +290,7 @@ class FuchsiaRemoteConnection {
   // will be shut down and removed from tracking.
   Future<List<E>> _invokeForAllVms<E>(
     Future<E> vmFunction(DartVm vmService), [
-    queueEvents = true,
+    bool queueEvents = true,
   ]) async {
     final List<E> result = <E>[];
 
@@ -315,10 +320,7 @@ class FuchsiaRemoteConnection {
         await shutDownPortForwarder(pf);
       }
     }
-
-    for (int stalePort in _stalePorts) {
-      _dartVmPortMap.remove(stalePort);
-    }
+    _stalePorts.forEach(_dartVmPortMap.remove);
     return result;
   }
 
@@ -370,7 +372,7 @@ class FuchsiaRemoteConnection {
   /// Runs a dummy heartbeat command on all Dart VM instances.
   ///
   /// Removes any failing ports from the cache.
-  Future<Null> _checkPorts([queueEvents = true]) async {
+  Future<Null> _checkPorts([bool queueEvents = true]) async {
     // Filters out stale ports after connecting. Ignores results.
     await _invokeForAllVms<Map<String, dynamic>>(
       (DartVm vmService) async {
@@ -529,7 +531,7 @@ class _SshPortForwarder implements PortForwarder {
     // want to connect immediately after an event is surfaced).
     final ProcessResult processResult = await _processManager.run(command);
     _log.fine("'${command.join(' ')}' exited with exit code "
-        "${processResult.exitCode}");
+        '${processResult.exitCode}');
     if (processResult.exitCode != 0) {
       return null;
     }
