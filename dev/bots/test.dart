@@ -55,11 +55,11 @@ Future<Null> main(List<String> args) async {
     print('${bold}SHARD=$shard$reset');
     await _kShards[shard]();
   } else {
-    //for (String currentShard in _kShards.keys) {
-    //print('${bold}SHARD=$currentShard$reset');
+    for (String currentShard in _kShards.keys) {
+      print('${bold}SHARD=$currentShard$reset');
       await _kShards['tests']();
       print('');
-      //}
+    }
   }
 }
 
@@ -143,7 +143,6 @@ Future<Null> _analyzeRepo() async {
 
 Future<Null> _runTests({List<String> options: const <String>[]}) async {
   // Verify that the tests actually return failure on failure and success on success.
-  /*
   final String automatedTests = path.join(flutterRoot, 'dev', 'automated_tests');
   await _runFlutterTest(automatedTests,
     script: path.join('test_smoke_test', 'fail_test.dart'),
@@ -203,9 +202,7 @@ Future<Null> _runTests({List<String> options: const <String>[]}) async {
   await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter'), options: options);
   await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter_localizations'), options: options);
   await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter_driver'), options: options);
-  */
   await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter_test'), options: options);
-  /*
   await _runFlutterTest(path.join(flutterRoot, 'packages',
         'fuchsia_remote_debug_protocol'), options: options);
   await _pubRunTest(path.join(flutterRoot, 'packages', 'flutter_tools'));
@@ -219,7 +216,6 @@ Future<Null> _runTests({List<String> options: const <String>[]}) async {
   await _runFlutterTest(path.join(flutterRoot, 'examples', 'stocks'), options: options);
   await _runFlutterTest(path.join(flutterRoot, 'examples', 'flutter_gallery'), options: options);
   await _runFlutterTest(path.join(flutterRoot, 'examples', 'catalog'), options: options);
-  */
 
   print('${bold}DONE: All tests successful.$reset');
 }

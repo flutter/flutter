@@ -628,16 +628,13 @@ class _FlutterPlatform extends PlatformPlugin {
     Uri testUrl,
     String encodedWebsocketUrl,
   }) {
-    print('Generating test main for $testUrl');
     assert(testUrl.scheme == 'file');
     File testConfigFile;
     Directory directory = fs.file(testUrl).parent;
-    print('Initial directory is ${directory.path}');
     while (directory.path != directory.parent.path) {
-      print('Inspecting ${directory.path}');
       final File configFile = directory.childFile(_kTestConfigFileName);
       if (configFile.existsSync()) {
-        print('Discovered $_kTestConfigFileName in ${directory.path}');
+        printTrace('Discovered $_kTestConfigFileName in ${directory.path}');
         testConfigFile = configFile;
         break;
       }
