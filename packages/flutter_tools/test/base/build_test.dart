@@ -662,8 +662,6 @@ void main() {
       expect(genSnapshot.snapshotType.mode, BuildMode.profile);
       expect(genSnapshot.packagesPath, '.packages');
       expect(genSnapshot.additionalArgs, <String>[
-        '--vm_snapshot_data=${fs.path.join(outputPath, 'vm_snapshot_data')}',
-        '--isolate_snapshot_data=${fs.path.join(outputPath, 'isolate_snapshot_data')}',
         '--url_mapping=dart:ui,${fs.path.join(skyEnginePath, 'lib', 'ui', 'ui.dart')}',
         '--url_mapping=dart:vmservice_io,${fs.path.join(skyEnginePath, 'sdk_ext', 'vmservice_io.dart')}',
         '--embedder_entry_points_manifest=$kVmEntrypoints',
@@ -706,8 +704,6 @@ void main() {
       expect(genSnapshot.snapshotType.mode, BuildMode.release);
       expect(genSnapshot.packagesPath, '.packages');
       expect(genSnapshot.additionalArgs, <String>[
-        '--vm_snapshot_data=${fs.path.join(outputPath, 'vm_snapshot_data')}',
-        '--isolate_snapshot_data=${fs.path.join(outputPath, 'isolate_snapshot_data')}',
         '--url_mapping=dart:ui,${fs.path.join(skyEnginePath, 'lib', 'ui', 'ui.dart')}',
         '--url_mapping=dart:vmservice_io,${fs.path.join(skyEnginePath, 'sdk_ext', 'vmservice_io.dart')}',
         '--embedder_entry_points_manifest=$kVmEntrypoints',
