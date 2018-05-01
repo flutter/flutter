@@ -56,10 +56,16 @@ abstract class GoldenFileComparator {
 /// encoded PNGs, returning true only if there's an exact match.
 ///
 /// Callers may choose to override the default comparator by setting this to a
-/// custom comparator during test set-up. For example, some projects may wish to
-/// install a more intelligent comparator that knows how to decode the PNG
-/// images to raw pixels and compare pixel vales, reporting specific differences
-/// between the images.
+/// custom comparator during test set-up (or using directory-level test
+/// configuration). For example, some projects may wish to install a more
+/// intelligent comparator that knows how to decode the PNG images to raw
+/// pixels and compare pixel vales, reporting specific differences between the
+/// images.
+///
+/// See also:
+///
+///  * [flutter_test] for more information about how to configure tests at the
+///    directory-level.
 GoldenFileComparator goldenFileComparator = const _UninitializedComparator();
 
 /// Whether golden files should be automatically updated during tests rather
