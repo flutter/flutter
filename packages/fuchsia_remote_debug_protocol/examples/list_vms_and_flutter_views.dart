@@ -45,5 +45,11 @@ Future<Null> main(List<String> args) async {
   for (FlutterView view in await connection.getFlutterViews()) {
     print('\t${view.name ?? view.id}');
   }
-  await connection.stop();
+
+  connection.onDartVmEvent.listen((DartVmEvent event) {
+    print('DartVM event: ${event.eventType} for '
+        '${event.servicePort} at ${event.uri}');
+  }, onDone: () async {
+    await connection.stop();
+  });
 }

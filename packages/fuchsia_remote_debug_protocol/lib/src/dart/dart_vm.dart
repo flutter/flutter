@@ -119,7 +119,7 @@ class DartVm {
   Future<Map<String, dynamic>> invokeRpc(
     String function, {
     Map<String, dynamic> params,
-    Duration timeout,
+    Duration timeout = _kRpcTimeout,
   }) async {
     final Future<Map<String, dynamic>> future = _peer.sendRequest(
       function,
