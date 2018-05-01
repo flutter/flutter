@@ -218,7 +218,7 @@ void main() {
     expect(checkboxValue, true);
     expect(semanticEvent, <String, dynamic>{
       'type': 'tap',
-      'nodeId': unsafeSemantics(object).id,
+      'nodeId': object.debugSemantics.id,
       'data': <String, dynamic>{},
     });
 

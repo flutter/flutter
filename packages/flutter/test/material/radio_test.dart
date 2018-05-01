@@ -190,7 +190,7 @@ void main() {
     expect(radioValue, 1);
     expect(semanticEvent, <String, dynamic>{
       'type': 'tap',
-      'nodeId': unsafeSemantics(object).id,
+      'nodeId': object.debugSemantics.id,
       'data': <String, dynamic>{},
     });
 

@@ -634,7 +634,7 @@ void main() {
     expect(semanticEvents, unorderedEquals(<dynamic>[
       <String, dynamic>{
         'type': 'longPress',
-        'nodeId': unsafeSemantics(object).id,
+        'nodeId': findDebugSemantics(object).id,
         'data': <String, dynamic>{},
       },
       <String, dynamic>{
@@ -720,4 +720,10 @@ void main() {
     semantics.dispose();
   });
 
+}
+
+SemanticsNode findDebugSemantics(RenderObject object) {
+  if (object.debugSemantics != null)
+    return object.debugSemantics;
+  return findDebugSemantics(object.parent);
 }

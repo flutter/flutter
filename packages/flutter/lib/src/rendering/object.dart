@@ -2165,6 +2165,21 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
     // Nothing to do by default.
   }
 
+  /// Sends a [SemanticsEvent] associated with this render object's [SemanticsNode].
+  ///
+  /// If this render object has no semantics information, the first parent
+  /// render object with a non-null semantic node is used.
+  ///
+  /// See [SemanticsNode.sendEvent] for a full description of the behavior.
+  void sendSemanticsEvent(SemanticsEvent semanticsEvent) {
+    if (_semantics != null) {
+      _semantics.sendEvent(semanticsEvent);
+    } else if (parent != null) {
+      final RenderObject renderParent = parent;
+      renderParent.sendSemanticsEvent(semanticsEvent);
+    }
+  }
+
   // Use [_semanticsConfiguration] to access.
   SemanticsConfiguration _cachedSemanticsConfiguration;
 
@@ -3314,14 +3329,4 @@ class _SemanticsGeometry {
   bool get isInvisible {
     return _rect.isEmpty;
   }
-}
-
-/// Retrieve the first non-null [SemanticsNode] from [object] and it's parents,
-/// or null if one cannot be found.
-SemanticsNode unsafeSemantics(RenderObject object) {
-  if (object._semantics != null)
-    return object._semantics;
-  if (object.parent != null)
-    return unsafeSemantics(object.parent);
-  return null;
 }

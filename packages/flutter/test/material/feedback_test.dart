@@ -59,7 +59,7 @@ void main () {
       expect(feedback.clickSoundCount, 1);
       expect(semanticEvents.single, <String, dynamic>{
         'type': 'tap',
-        'nodeId': unsafeSemantics(object).id,
+        'nodeId': object.debugSemantics.id,
         'data': <String, dynamic>{},
       });
 
@@ -94,7 +94,7 @@ void main () {
       expect(callbackCount, 1);
       expect(semanticEvents.single, <String, dynamic>{
         'type': 'tap',
-        'nodeId': unsafeSemantics(object).id,
+        'nodeId': object.debugSemantics.id,
         'data': <String, dynamic>{},
       });
       
@@ -121,7 +121,7 @@ void main () {
       expect(feedback.clickSoundCount, 0);
       expect(semanticEvents.single, <String, dynamic>{
         'type': 'longPress',
-        'nodeId': unsafeSemantics(object).id,
+        'nodeId': object.debugSemantics.id,
         'data': <String, dynamic>{},
       });
 
@@ -156,7 +156,7 @@ void main () {
       expect(callbackCount, 1);
       expect(semanticEvents.single, <String, dynamic>{
         'type': 'longPress',
-        'nodeId': unsafeSemantics(object).id,
+        'nodeId': object.debugSemantics.id,
         'data': <String, dynamic>{},
       });
 
