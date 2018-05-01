@@ -100,11 +100,11 @@ void CanvasGradient::initSweep(double center_x,
     sk_matrix = ToSkMatrix(matrix4);
   }
 
-  set_shader(SkGradientShader::MakeSweep(
+  set_shader(UIDartState::CreateGPUObject(SkGradientShader::MakeSweep(
       center_x, center_y, reinterpret_cast<const SkColor*>(colors.data()),
       color_stops.data(), colors.num_elements(), tile_mode,
       start_angle * 180.0 / M_PI, end_angle * 180.0 / M_PI, 0,
-      has_matrix ? &sk_matrix : nullptr));
+      has_matrix ? &sk_matrix : nullptr)));
 }
 
 CanvasGradient::CanvasGradient() = default;
