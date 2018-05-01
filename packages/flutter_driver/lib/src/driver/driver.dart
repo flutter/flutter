@@ -175,7 +175,7 @@ class FlutterDriver {
       connection: connection,
       printCommunication: printCommunication,
       logCommunicationToFile: logCommunicationToFile,
-      isoalteReadyTimeout: isolateReadyTimeout,
+      isolateReadyTimeout: isolateReadyTimeout,
     );
   }
 
@@ -235,6 +235,7 @@ class FlutterDriver {
     VM vm,
     VMServiceClientConnection connection,
     bool printCommunication,
+    bool logCommunicationToFile,
     Duration isolateReadyTimeout,
   }) async {
     VMIsolate isolate = await isolateRef
@@ -243,6 +244,7 @@ class FlutterDriver {
       throw new TimeoutException(
           'Timeout while waiting for the isolate to become runnable');
     });
+    VMServiceClient client = connection.client;
 
     // TODO(yjbanov): vm_service_client does not support "None" pause event yet.
     // It is currently reported as null, but we cannot rely on it because

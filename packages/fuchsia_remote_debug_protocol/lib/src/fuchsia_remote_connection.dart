@@ -20,7 +20,9 @@ final String _ipv6Loopback = InternetAddress.LOOPBACK_IP_V6.address;
 
 const ProcessManager _processManager = const LocalProcessManager();
 
-const Duration _kIsolateFindTimeout = const Duration(seconds: 10);
+const Duration _kIsolateFindTimeout = const Duration(minutes: 1);
+
+const Duration _kVmPollInterval = const Duration(milliseconds: 1500);
 
 final Logger _log = new Logger('FuchsiaRemoteConnection');
 
@@ -100,6 +102,7 @@ class FuchsiaRemoteConnection {
   final Set<int> _stalePorts = new Set<int>();
 
   /// A broadcast stream that emits events relating to Dart VM's as they update.
+  Stream<DartVmEvent> get onDartVmEvent => _onDartVmEvent;
   Stream<DartVmEvent> _onDartVmEvent;
   final StreamController<DartVmEvent> _dartVmEventController =
       new StreamController<DartVmEvent>();
@@ -121,13 +124,13 @@ class FuchsiaRemoteConnection {
       Future<Null> listen() async {
         while (connection._pollDartVms) {
           await connection._pollVms();
-          await new Future.delayed(const Duration(milliseconds: 1500));
+          await new Future.delayed(_kVmPollInterval);
         }
         connection._dartVmEventController.close();
       }
 
       connection._dartVmEventController.onListen = listen;
-      return connection._dartVmEventController.stream;
+      return connection._dartVmEventController.stream.asBroadcastStream();
     }
 
     connection._onDartVmEvent = dartVmStream();
