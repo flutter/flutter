@@ -318,47 +318,27 @@ class Snapshotter {
       genSnapshotArgs.addAll(extraGenSnapshotOptions);
     }
 
-    // Compile-to-assembly outputs.
     final String assembly = fs.path.join(outputDir.path, 'snapshot_assembly.S');
-    final String assemblyO = fs.path.join(outputDir.path, 'snapshot_assembly.o');
-    final String assemblySo = fs.path.join(outputDir.path, 'app.so');
+    if (compileToSharedLibrary || platform == TargetPlatform.ios) {
+      // Assembly AOT snapshot.
+      outputPaths.add(assembly);
+      genSnapshotArgs.add('--snapshot_kind=app-aot-assembly');
+      genSnapshotArgs.add('--assembly=$assembly');
+    } else {
+      // Blob AOT snapshot.
+      final String vmSnapshotInstructions = fs.path.join(outputDir.path, 'vm_snapshot_instr');
+      final String isolateSnapshotInstructions = fs.path.join(outputDir.path, 'isolate_snapshot_instr');
+      outputPaths.addAll(<String>[vmSnapshotData, isolateSnapshotData]);
+      genSnapshotArgs.addAll(<String>[
+        '--snapshot_kind=app-aot-blobs',
+        '--vm_snapshot_instructions=$vmSnapshotInstructions',
+        '--isolate_snapshot_instructions=$isolateSnapshotInstructions',
+      ]);
+    }
 
-    switch (platform) {
-      case TargetPlatform.android_arm:
-      case TargetPlatform.android_arm64:
-      case TargetPlatform.android_x64:
-      case TargetPlatform.android_x86:
-        if (compileToSharedLibrary) {
-          outputPaths.add(assemblySo);
-          genSnapshotArgs.add('--snapshot_kind=app-aot-assembly');
-          genSnapshotArgs.add('--assembly=$assembly');
-        } else {
-          final String vmSnapshotInstructions = fs.path.join(outputDir.path, 'vm_snapshot_instr');
-          final String isolateSnapshotInstructions = fs.path.join(outputDir.path, 'isolate_snapshot_instr');
-          outputPaths.addAll(<String>[vmSnapshotData, isolateSnapshotData]);
-          genSnapshotArgs.addAll(<String>[
-            '--snapshot_kind=app-aot-blobs',
-            '--vm_snapshot_instructions=$vmSnapshotInstructions',
-            '--isolate_snapshot_instructions=$isolateSnapshotInstructions',
-          ]);
-        }
-        if (platform == TargetPlatform.android_arm) {
-          genSnapshotArgs.addAll(<String>[
-            '--no-use-integer-division', // Not supported by the Pixel in 32-bit mode.
-          ]);
-        }
-        break;
-      case TargetPlatform.ios:
-        genSnapshotArgs.add('--snapshot_kind=app-aot-assembly');
-        genSnapshotArgs.add('--assembly=$assembly');
-        outputPaths.add(assemblyO);
-        break;
-      case TargetPlatform.darwin_x64:
-      case TargetPlatform.linux_x64:
-      case TargetPlatform.windows_x64:
-      case TargetPlatform.fuchsia:
-      case TargetPlatform.tester:
-        assert(false);
+    if (platform == TargetPlatform.android_arm) {
+      // Not supported by the Pixel in 32-bit mode.
+      genSnapshotArgs.add('--no-use-integer-division');
     }
 
     genSnapshotArgs.add(mainPath);
@@ -397,8 +377,9 @@ class Snapshotter {
     // end-developer can link into their app.
     if (platform == TargetPlatform.ios) {
       printStatus('Building App.framework...');
-
       const List<String> commonBuildOptions = const <String>['-arch', 'arm64', '-miphoneos-version-min=8.0'];
+
+      final String assemblyO = fs.path.join(outputDir.path, 'snapshot_assembly.o');
       await xcode.cc(commonBuildOptions.toList()..addAll(<String>['-c', assembly, '-o', assemblyO]));
 
       final String frameworkDir = fs.path.join(outputDir.path, 'App.framework');
@@ -422,6 +403,7 @@ class Snapshotter {
         // based upon libunwind use just one and ignore the contents of the other
         // (which causes it to not look into the other section and therefore not
         // find the correct unwinding information).
+        final String assemblySo = fs.path.join(outputDir.path, 'app.so');
         await runCheckedAsync(<String>[androidSdk.ndkCompiler]
             ..addAll(androidSdk.ndkCompilerArgs)
             ..addAll(<String>[ '-shared', '-nostdlib', '-o', assemblySo, assembly ]));
