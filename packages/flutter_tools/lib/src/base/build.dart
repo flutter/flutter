@@ -249,12 +249,8 @@ class AOTSnapshotter {
     final List<String> inputPaths = <String>[uiPath, vmServicePath, vmEntryPoints, ioEntryPoints, mainPath];
     final Set<String> outputPaths = new Set<String>();
 
-    final String vmSnapshotData = fs.path.join(outputDir.path, 'vm_snapshot_data');
-    final String isolateSnapshotData = fs.path.join(outputDir.path, 'isolate_snapshot_data');
     final String depfilePath = fs.path.join(outputDir.path, 'snapshot.d');
     final List<String> genSnapshotArgs = <String>[
-      '--vm_snapshot_data=$vmSnapshotData',
-      '--isolate_snapshot_data=$isolateSnapshotData',
       '--url_mapping=dart:ui,$uiPath',
       '--url_mapping=dart:vmservice_io,$vmServicePath',
       '--embedder_entry_points_manifest=$vmEntryPoints',
@@ -286,11 +282,15 @@ class AOTSnapshotter {
       genSnapshotArgs.add('--assembly=$assembly');
     } else {
       // Blob AOT snapshot.
+      final String vmSnapshotData = fs.path.join(outputDir.path, 'vm_snapshot_data');
+      final String isolateSnapshotData = fs.path.join(outputDir.path, 'isolate_snapshot_data');
       final String vmSnapshotInstructions = fs.path.join(outputDir.path, 'vm_snapshot_instr');
       final String isolateSnapshotInstructions = fs.path.join(outputDir.path, 'isolate_snapshot_instr');
-      outputPaths.addAll(<String>[vmSnapshotData, isolateSnapshotData]);
+      outputPaths.addAll(<String>[vmSnapshotData, isolateSnapshotData, vmSnapshotInstructions, isolateSnapshotInstructions]);
       genSnapshotArgs.addAll(<String>[
         '--snapshot_kind=app-aot-blobs',
+        '--vm_snapshot_data=$vmSnapshotData',
+        '--isolate_snapshot_data=$isolateSnapshotData',
         '--vm_snapshot_instructions=$vmSnapshotInstructions',
         '--isolate_snapshot_instructions=$isolateSnapshotInstructions',
       ]);
