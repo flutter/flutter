@@ -141,5 +141,5 @@ Sample: AppBarBottomSample
 
 See also:
   - The "Components-Tabs" section of the material design specification:
-    <https://material.io/guidelines/components/tabs.html>
+    <https://material.io/go/design-tabs>
 */
