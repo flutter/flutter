@@ -96,7 +96,7 @@ Future<Null> smokeDemo(WidgetTester tester, GalleryDemo demo) async {
 }
 
 Future<Null> smokeOptionsPage(WidgetTester tester) async {
-  final Finder showOptionsPageButton = find.byTooltip('Show options page');
+  final Finder showOptionsPageButton = find.byTooltip('Toggle options page');
 
   // Show the options page
   await tester.tap(showOptionsPageButton);
