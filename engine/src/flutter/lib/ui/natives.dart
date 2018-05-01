@@ -37,15 +37,11 @@ void _setupHooks() {
 
 void _scheduleMicrotask(void callback()) native 'ScheduleMicrotask';
 
-String _baseURL;
-Uri _getBaseURL() => Uri.parse(_baseURL);
-
 // Required for gen_snapshot to work correctly.
 int _isolateId;
 
 Function _getPrintClosure() => _print;
 Function _getScheduleMicrotaskClosure() => _scheduleMicrotask;
-Function _getGetBaseURLClosure() => _getBaseURL;
 
 // Though the "main" symbol is not included in any of the libraries imported
 // above, the builtin library will be included manually during VM setup. This

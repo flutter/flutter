@@ -88,9 +88,9 @@ static void InitDartInternal(Dart_Handle builtin_library, bool is_ui_isolate) {
 }
 
 static void InitDartCore(Dart_Handle builtin, const std::string& script_uri) {
-  DART_CHECK_VALID(
-      Dart_SetField(builtin, ToDart("_baseURL"), ToDart(script_uri)));
-  Dart_Handle get_base_url = GetClosure(builtin, "_getGetBaseURLClosure");
+  Dart_Handle io_lib = Dart_LookupLibrary(ToDart("dart:io"));
+  Dart_Handle get_base_url =
+      Dart_Invoke(io_lib, ToDart("_getUriBaseClosure"), 0, NULL);
   Dart_Handle core_library = Dart_LookupLibrary(ToDart("dart:core"));
   DART_CHECK_VALID(
       Dart_SetField(core_library, ToDart("_uriBaseClosure"), get_base_url));
