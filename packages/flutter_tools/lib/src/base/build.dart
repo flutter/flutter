@@ -264,15 +264,35 @@ class Snapshotter {
     @required bool preferSharedLibrary,
     List<String> extraGenSnapshotOptions: const <String>[],
   }) async {
-    if (!_isValidAotPlatform(platform)) {
+    if (!(platform == TargetPlatform.android_arm ||
+          platform == TargetPlatform.android_arm64 ||
+          platform == TargetPlatform.ios)) {
       printError('${getNameForTargetPlatform(platform)} does not support AOT compilation.');
       return -2;
     }
 
-    final bool compileToSharedLibrary = preferSharedLibrary && androidSdk.ndkCompiler != null;
+    final Directory outputDir = fs.directory(outputPath);
+    outputDir.createSync(recursive: true);
+
+    final String vmSnapshotData = fs.path.join(outputDir.path, 'vm_snapshot_data');
+    final String isolateSnapshotData = fs.path.join(outputDir.path, 'isolate_snapshot_data');
+    final String depfilePath = fs.path.join(outputDir.path, 'snapshot.d');
+    final String assembly = fs.path.join(outputDir.path, 'snapshot_assembly.S');
+    final String assemblyO = fs.path.join(outputDir.path, 'snapshot_assembly.o');
+    final String assemblySo = fs.path.join(outputDir.path, 'app.so');
+    final bool compileToSharedLibrary =
+        preferSharedLibrary && androidSdk.ndkCompiler != null;
+
     if (preferSharedLibrary && !compileToSharedLibrary) {
-      printStatus('Could not find NDK compiler. Not building in shared library mode.');
+      printStatus(
+          'Could not find NDK compiler. Not building in shared library mode');
     }
+
+    final String vmEntryPoints = artifacts.getArtifactPath(Artifact.dartVmEntryPointsTxt, platform, buildMode);
+    assert(vmEntryPoints != null);
+
+    final String ioEntryPoints = artifacts.getArtifactPath(Artifact.dartIoEntriesTxt, platform, buildMode);
+    assert(ioEntryPoints != null);
 
     final PackageMap packageMap = new PackageMap(packagesPath);
     final String packageMapError = packageMap.checkValid();
@@ -281,19 +301,19 @@ class Snapshotter {
       return -3;
     }
 
-    final Directory outputDir = fs.directory(outputPath);
-    outputDir.createSync(recursive: true);
-
     final String skyEnginePkg = _getPackagePath(packageMap, 'sky_engine');
     final String uiPath = fs.path.join(skyEnginePkg, 'lib', 'ui', 'ui.dart');
     final String vmServicePath = fs.path.join(skyEnginePkg, 'sdk_ext', 'vmservice_io.dart');
 
-    final List<String> inputPaths = <String>[uiPath, vmServicePath, mainPath];
+    final List<String> inputPaths = <String>[vmEntryPoints, ioEntryPoints, uiPath, vmServicePath, mainPath];
     final Set<String> outputPaths = new Set<String>();
 
-    final String vmSnapshotData = fs.path.join(outputDir.path, 'vm_snapshot_data');
-    final String isolateSnapshotData = fs.path.join(outputDir.path, 'isolate_snapshot_data');
-    final String depfilePath = fs.path.join(outputDir.path, 'snapshot.d');
+    final Iterable<String> missingInputs = inputPaths.where((String p) => !fs.isFileSync(p));
+    if (missingInputs.isNotEmpty) {
+      printError('Missing input files: $missingInputs');
+      return -4;
+    }
+
     final List<String> genSnapshotArgs = <String>[
       '--vm_snapshot_data=$vmSnapshotData',
       '--isolate_snapshot_data=$isolateSnapshotData',
@@ -301,56 +321,42 @@ class Snapshotter {
       '--url_mapping=dart:vmservice_io,$vmServicePath',
       '--dependencies=$depfilePath',
     ];
-    if (previewDart2) {
-      genSnapshotArgs.addAll(<String>[
-        '--reify-generic-functions',
-        '--strong',
-      ]);
-    }
-    if (buildMode != BuildMode.release) {
-      genSnapshotArgs.addAll(<String>[
-        '--no-checked',
-        '--conditional_directives',
-      ]);
-    }
-    if (extraGenSnapshotOptions != null && extraGenSnapshotOptions.isNotEmpty) {
-      printTrace('Extra gen_snapshot options: $extraGenSnapshotOptions');
+
+    if ((extraGenSnapshotOptions != null) && extraGenSnapshotOptions.isNotEmpty) {
+      printTrace('Extra gen-snapshot options: $extraGenSnapshotOptions');
       genSnapshotArgs.addAll(extraGenSnapshotOptions);
     }
 
     final bool interpreter = _isInterpreted(platform, buildMode);
     if (!interpreter) {
-      final String vmEntryPoints = artifacts.getArtifactPath(Artifact.dartVmEntryPointsTxt, platform, buildMode);
-      final String ioEntryPoints = artifacts.getArtifactPath(Artifact.dartIoEntriesTxt, platform, buildMode);
       genSnapshotArgs.add('--embedder_entry_points_manifest=$vmEntryPoints');
       genSnapshotArgs.add('--embedder_entry_points_manifest=$ioEntryPoints');
-      inputPaths..addAll(<String>[vmEntryPoints, ioEntryPoints]);
     }
 
-    // iOS snapshot generated files, compiled object files.
+    // iOS symbols used to load snapshot data in the engine.
     const String kVmSnapshotData = 'kDartVmSnapshotData';
     const String kIsolateSnapshotData = 'kDartIsolateSnapshotData';
+
+    // iOS snapshot generated files, compiled object files.
     final String kVmSnapshotDataO = fs.path.join(outputDir.path, '$kVmSnapshotData.o');
     final String kIsolateSnapshotDataO = fs.path.join(outputDir.path, '$kIsolateSnapshotData.o');
-
-    // Compile-to-assembly outputs.
-    final String assembly = fs.path.join(outputDir.path, 'snapshot_assembly.S');
-    final String assemblyO = fs.path.join(outputDir.path, 'snapshot_assembly.o');
-    final String assemblySo = fs.path.join(outputDir.path, 'app.so');
 
     switch (platform) {
       case TargetPlatform.android_arm:
       case TargetPlatform.android_arm64:
       case TargetPlatform.android_x64:
       case TargetPlatform.android_x86:
+        final String vmSnapshotInstructions = fs.path.join(outputDir.path, 'vm_snapshot_instr');
+        final String isolateSnapshotInstructions = fs.path.join(outputDir.path, 'isolate_snapshot_instr');
         if (compileToSharedLibrary) {
           outputPaths.add(assemblySo);
           genSnapshotArgs.add('--snapshot_kind=app-aot-assembly');
           genSnapshotArgs.add('--assembly=$assembly');
         } else {
-          final String vmSnapshotInstructions = fs.path.join(outputDir.path, 'vm_snapshot_instr');
-          final String isolateSnapshotInstructions = fs.path.join(outputDir.path, 'isolate_snapshot_instr');
-          outputPaths.addAll(<String>[vmSnapshotData, isolateSnapshotData]);
+          outputPaths.addAll(<String>[
+            vmSnapshotData,
+            isolateSnapshotData,
+          ]);
           genSnapshotArgs.addAll(<String>[
             '--snapshot_kind=app-aot-blobs',
             '--vm_snapshot_instructions=$vmSnapshotInstructions',
@@ -388,14 +394,13 @@ class Snapshotter {
         assert(false);
     }
 
-    // Verify that all required inputs exist.
-    final Iterable<String> missingInputs = inputPaths.where((String p) => !fs.isFileSync(p));
-    if (missingInputs.isNotEmpty) {
-      printError('Missing input files: $missingInputs from $inputPaths');
-      return -4;
+    if (buildMode != BuildMode.release) {
+      genSnapshotArgs.addAll(<String>[
+        '--no-checked',
+        '--conditional_directives',
+      ]);
     }
 
-    // If inputs and outputs have not changed since last run, skip the build.
     final String fingerprintPath = '$depfilePath.fingerprint';
     final SnapshotType snapshotType = new SnapshotType(platform, buildMode);
     if (!await _isBuildRequired(snapshotType, outputPaths, depfilePath, mainPath, fingerprintPath)) {
@@ -403,6 +408,12 @@ class Snapshotter {
       return 0;
     }
 
+    if (previewDart2) {
+      genSnapshotArgs.addAll(<String>[
+        '--reify-generic-functions',
+        '--strong',
+      ]);
+    }
     genSnapshotArgs.add(mainPath);
 
     final int genSnapshotExitCode = await genSnapshot.run(
@@ -425,10 +436,12 @@ class Snapshotter {
     if (platform == TargetPlatform.ios) {
       printStatus('Building App.framework...');
 
+      final String kVmSnapshotDataC = fs.path.join(outputDir.path, '$kVmSnapshotData.c');
+      final String kIsolateSnapshotDataC = fs.path.join(outputDir.path, '$kIsolateSnapshotData.c');
+
       const List<String> commonBuildOptions = const <String>['-arch', 'arm64', '-miphoneos-version-min=8.0'];
+
       if (interpreter) {
-        final String kVmSnapshotDataC = fs.path.join(outputDir.path, '$kVmSnapshotData.c');
-        final String kIsolateSnapshotDataC = fs.path.join(outputDir.path, '$kIsolateSnapshotData.c');
         await fs.file(vmSnapshotData).rename(fs.path.join(outputDir.path, kVmSnapshotData));
         await fs.file(isolateSnapshotData).rename(fs.path.join(outputDir.path, kIsolateSnapshotData));
 
@@ -482,14 +495,6 @@ class Snapshotter {
     // Compute and record build fingerprint.
     await _writeFingerprint(snapshotType, outputPaths, depfilePath, mainPath, fingerprintPath);
     return 0;
-  }
-
-  bool _isValidAotPlatform(TargetPlatform platform) {
-    return const <TargetPlatform>[
-      TargetPlatform.android_arm,
-      TargetPlatform.android_arm64,
-      TargetPlatform.ios,
-    ].contains(platform);
   }
 
   /// Returns true if the specified platform and build mode require running in interpreted mode.
