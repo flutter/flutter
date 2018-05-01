@@ -3,6 +3,43 @@
 // found in the LICENSE file.
 
 /// Testing library for flutter, built on top of `package:test`.
+///
+/// ## Test Configuration
+///
+/// The testing library exposes a few constructs by which projects may configure
+/// their tests.
+///
+/// ### Per test or per file
+///
+/// Due to its foundation on top of `package:test`, tests may be initialized
+/// using the constructs found in `package:test`. These include the `setUp()`
+/// and `setUpAll()` methods.
+///
+/// ### Per directory hierarchy
+///
+/// In addition to the constructs provided by `package:test`, this library
+/// supports the configuration of tests at the directory level.
+///
+/// Before a test file is executed, the Flutter test framework will scan up the
+/// directory hierarchy, starting from the directory in which the test file
+/// resides, looking for a file named `flutter_test_config.dart`. If it finds
+/// such a configuration file, the file will be assumed to have a `main` method
+/// with the following signature:
+///
+/// ```
+/// void main(FutureOr<void> testMain());
+/// ```
+///
+/// The test framework will execute that method and pass it the `main()` method
+/// of the test. It is the responsibility of the configuration file's `main()`
+/// method to invoke the test's `main()` method.
+///
+/// After the test framework finds a configuration file, it will stop scanning
+/// the directory hierarchy. In other words, the test configuration file closest
+/// to the test file will "win", and all other test configuration files will be
+/// ignored.
+///
+/// If no configuration file is located, the test will be executed like normal.
 library flutter_test;
 
 export 'dart:async' show Future;

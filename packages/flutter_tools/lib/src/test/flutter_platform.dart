@@ -41,6 +41,9 @@ const Duration _kTestProcessTimeout = const Duration(minutes: 5);
 /// hold that against the test.
 const String _kStartTimeoutTimerMessage = 'sky_shell test process has entered main method';
 
+/// The name of the test configuration file whose main method will wrap the
+/// test's main method if such a file is found in the directory hierarchy of
+/// the test file.
 const String _kTestConfigFileName = 'flutter_test_config.dart';
 
 /// The address at which our WebSocket server resides and at which the sky_shell
@@ -633,6 +636,7 @@ class _FlutterPlatform extends PlatformPlugin {
       if (configFile.existsSync()) {
         printTrace('Discovered $_kTestConfigFileName in ${directory.path}');
         testConfigFile = configFile;
+        break;
       }
       directory = directory.parent;
     }
@@ -673,11 +677,16 @@ void main() {
     );
     if (testConfigFile != null) {
       buffer.write('''
-    test_config.main();
+    return () {
+      test_config.main(test.main);
+    };
+''');
+    } else {
+      buffer.write('''
+    return test.main;
 ''');
     }
     buffer.write('''
-    return test.main;
   });
   WebSocket.connect(server).then((WebSocket socket) {
     socket.map((dynamic x) {
