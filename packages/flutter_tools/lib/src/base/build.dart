@@ -221,14 +221,10 @@ class Snapshotter {
     outputDir.createSync(recursive: true);
 
     printTrace('Compiling Dart to kernel: $mainPath');
-    final bool aot = !_isInterpreted(platform, buildMode);
-    final List<String> entryPointsJsonFiles = <String>[];
-    if (aot) {
-      entryPointsJsonFiles.addAll(<String>[
-        artifacts.getArtifactPath(Artifact.entryPointsJson, platform, buildMode),
-        artifacts.getArtifactPath(Artifact.entryPointsExtraJson, platform, buildMode),
-      ]);
-    }
+    final List<String> entryPointsJsonFiles = <String>[
+      artifacts.getArtifactPath(Artifact.entryPointsJson, platform, buildMode),
+      artifacts.getArtifactPath(Artifact.entryPointsExtraJson, platform, buildMode),
+    ];
 
     if ((extraFrontEndOptions != null) && extraFrontEndOptions.isNotEmpty)
       printTrace('Extra front-end options: $extraFrontEndOptions');
@@ -241,7 +237,7 @@ class Snapshotter {
       depFilePath: depfilePath,
       extraFrontEndOptions: extraFrontEndOptions,
       linkPlatformKernelIn: true,
-      aot: aot,
+      aot: true,
       entryPointsJsonFiles: entryPointsJsonFiles,
       trackWidgetCreation: false,
     );
@@ -264,9 +260,9 @@ class Snapshotter {
     @required bool preferSharedLibrary,
     List<String> extraGenSnapshotOptions: const <String>[],
   }) async {
-    if (!_isValidAotPlatform(platform)) {
+    if (!_isValidAotPlatform(platform, buildMode)) {
       printError('${getNameForTargetPlatform(platform)} does not support AOT compilation.');
-      return -2;
+      return -1;
     }
 
     final bool compileToSharedLibrary = preferSharedLibrary && androidSdk.ndkCompiler != null;
@@ -278,7 +274,7 @@ class Snapshotter {
     final String packageMapError = packageMap.checkValid();
     if (packageMapError != null) {
       printError(packageMapError);
-      return -3;
+      return -2;
     }
 
     final Directory outputDir = fs.directory(outputPath);
@@ -287,8 +283,10 @@ class Snapshotter {
     final String skyEnginePkg = _getPackagePath(packageMap, 'sky_engine');
     final String uiPath = fs.path.join(skyEnginePkg, 'lib', 'ui', 'ui.dart');
     final String vmServicePath = fs.path.join(skyEnginePkg, 'sdk_ext', 'vmservice_io.dart');
+    final String vmEntryPoints = artifacts.getArtifactPath(Artifact.dartVmEntryPointsTxt, platform, buildMode);
+    final String ioEntryPoints = artifacts.getArtifactPath(Artifact.dartIoEntriesTxt, platform, buildMode);
 
-    final List<String> inputPaths = <String>[uiPath, vmServicePath, mainPath];
+    final List<String> inputPaths = <String>[uiPath, vmServicePath, vmEntryPoints, ioEntryPoints, mainPath];
     final Set<String> outputPaths = new Set<String>();
 
     final String vmSnapshotData = fs.path.join(outputDir.path, 'vm_snapshot_data');
@@ -299,6 +297,8 @@ class Snapshotter {
       '--isolate_snapshot_data=$isolateSnapshotData',
       '--url_mapping=dart:ui,$uiPath',
       '--url_mapping=dart:vmservice_io,$vmServicePath',
+      '--embedder_entry_points_manifest=$vmEntryPoints',
+      '--embedder_entry_points_manifest=$ioEntryPoints',
       '--dependencies=$depfilePath',
     ];
     if (previewDart2) {
@@ -317,21 +317,6 @@ class Snapshotter {
       printTrace('Extra gen_snapshot options: $extraGenSnapshotOptions');
       genSnapshotArgs.addAll(extraGenSnapshotOptions);
     }
-
-    final bool interpreter = _isInterpreted(platform, buildMode);
-    if (!interpreter) {
-      final String vmEntryPoints = artifacts.getArtifactPath(Artifact.dartVmEntryPointsTxt, platform, buildMode);
-      final String ioEntryPoints = artifacts.getArtifactPath(Artifact.dartIoEntriesTxt, platform, buildMode);
-      genSnapshotArgs.add('--embedder_entry_points_manifest=$vmEntryPoints');
-      genSnapshotArgs.add('--embedder_entry_points_manifest=$ioEntryPoints');
-      inputPaths..addAll(<String>[vmEntryPoints, ioEntryPoints]);
-    }
-
-    // iOS snapshot generated files, compiled object files.
-    const String kVmSnapshotData = 'kDartVmSnapshotData';
-    const String kIsolateSnapshotData = 'kDartIsolateSnapshotData';
-    final String kVmSnapshotDataO = fs.path.join(outputDir.path, '$kVmSnapshotData.o');
-    final String kIsolateSnapshotDataO = fs.path.join(outputDir.path, '$kIsolateSnapshotData.o');
 
     // Compile-to-assembly outputs.
     final String assembly = fs.path.join(outputDir.path, 'snapshot_assembly.S');
@@ -365,14 +350,9 @@ class Snapshotter {
         }
         break;
       case TargetPlatform.ios:
-        if (interpreter) {
-          genSnapshotArgs.add('--snapshot_kind=core');
-          outputPaths.addAll(<String>[kVmSnapshotDataO, kIsolateSnapshotDataO]);
-        } else {
-          genSnapshotArgs.add('--snapshot_kind=app-aot-assembly');
-          genSnapshotArgs.add('--assembly=$assembly');
-          outputPaths.add(assemblyO);
-        }
+        genSnapshotArgs.add('--snapshot_kind=app-aot-assembly');
+        genSnapshotArgs.add('--assembly=$assembly');
+        outputPaths.add(assemblyO);
         break;
       case TargetPlatform.darwin_x64:
       case TargetPlatform.linux_x64:
@@ -382,19 +362,13 @@ class Snapshotter {
         assert(false);
     }
 
-    if (interpreter) {
-      final String snapshotDartIOS = artifacts.getArtifactPath(Artifact.snapshotDart, platform, buildMode);
-      inputPaths.add(snapshotDartIOS);
-      genSnapshotArgs.add(snapshotDartIOS);
-    } else {
-      genSnapshotArgs.add(mainPath);
-    }
+    genSnapshotArgs.add(mainPath);
 
     // Verify that all required inputs exist.
     final Iterable<String> missingInputs = inputPaths.where((String p) => !fs.isFileSync(p));
     if (missingInputs.isNotEmpty) {
       printError('Missing input files: $missingInputs from $inputPaths');
-      return -4;
+      return -3;
     }
 
     // If inputs and outputs have not changed since last run, skip the build.
@@ -413,7 +387,7 @@ class Snapshotter {
     );
     if (genSnapshotExitCode != 0) {
       printError('Dart snapshot generator failed with exit code $genSnapshotExitCode');
-      return -6;
+      return -4;
     }
 
     // Write path to gen_snapshot, since snapshots have to be re-generated when we roll
@@ -426,26 +400,7 @@ class Snapshotter {
       printStatus('Building App.framework...');
 
       const List<String> commonBuildOptions = const <String>['-arch', 'arm64', '-miphoneos-version-min=8.0'];
-      if (interpreter) {
-        final String kVmSnapshotDataC = fs.path.join(outputDir.path, '$kVmSnapshotData.c');
-        final String kIsolateSnapshotDataC = fs.path.join(outputDir.path, '$kIsolateSnapshotData.c');
-        await fs.file(vmSnapshotData).rename(fs.path.join(outputDir.path, kVmSnapshotData));
-        await fs.file(isolateSnapshotData).rename(fs.path.join(outputDir.path, kIsolateSnapshotData));
-
-        await xxd.run(
-          <String>['--include', kVmSnapshotData, fs.path.basename(kVmSnapshotDataC)],
-          workingDirectory: outputDir.path,
-        );
-        await xxd.run(
-          <String>['--include', kIsolateSnapshotData, fs.path.basename(kIsolateSnapshotDataC)],
-          workingDirectory: outputDir.path,
-        );
-
-        await xcode.cc(commonBuildOptions.toList()..addAll(<String>['-c', kVmSnapshotDataC, '-o', kVmSnapshotDataO]));
-        await xcode.cc(commonBuildOptions.toList()..addAll(<String>['-c', kIsolateSnapshotDataC, '-o', kIsolateSnapshotDataO]));
-      } else {
-        await xcode.cc(commonBuildOptions.toList()..addAll(<String>['-c', assembly, '-o', assemblyO]));
-      }
+      await xcode.cc(commonBuildOptions.toList()..addAll(<String>['-c', assembly, '-o', assemblyO]));
 
       final String frameworkDir = fs.path.join(outputDir.path, 'App.framework');
       fs.directory(frameworkDir).createSync(recursive: true);
@@ -456,13 +411,8 @@ class Snapshotter {
           '-Xlinker', '-rpath', '-Xlinker', '@loader_path/Frameworks',
           '-install_name', '@rpath/App.framework/App',
           '-o', appLib,
+          assemblyO,
       ]);
-      if (interpreter) {
-        linkArgs.add(kVmSnapshotDataO);
-        linkArgs.add(kIsolateSnapshotDataO);
-      } else {
-        linkArgs.add(assemblyO);
-      }
       await xcode.clang(linkArgs);
     } else {
       if (compileToSharedLibrary) {
@@ -484,17 +434,14 @@ class Snapshotter {
     return 0;
   }
 
-  bool _isValidAotPlatform(TargetPlatform platform) {
+  bool _isValidAotPlatform(TargetPlatform platform, BuildMode buildMode) {
+    if (platform == TargetPlatform.ios && buildMode == BuildMode.debug)
+      return false;
     return const <TargetPlatform>[
       TargetPlatform.android_arm,
       TargetPlatform.android_arm64,
       TargetPlatform.ios,
     ].contains(platform);
-  }
-
-  /// Returns true if the specified platform and build mode require running in interpreted mode.
-  bool _isInterpreted(TargetPlatform platform, BuildMode buildMode) {
-    return platform == TargetPlatform.ios && buildMode == BuildMode.debug;
   }
 
   String _getPackagePath(PackageMap packageMap, String package) {

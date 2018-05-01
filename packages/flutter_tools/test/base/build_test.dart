@@ -22,7 +22,6 @@ import '../src/context.dart';
 class MockFlutterVersion extends Mock implements FlutterVersion {}
 class MockArtifacts extends Mock implements Artifacts {}
 class MockXcode extends Mock implements Xcode {}
-class MockXxd extends Mock implements Xxd {}
 
 class _FakeGenSnapshot implements GenSnapshot {
   _FakeGenSnapshot({
@@ -586,7 +585,6 @@ void main() {
     Snapshotter snapshotter;
     MockArtifacts mockArtifacts;
     MockXcode mockXcode;
-    MockXxd mockXxd;
 
     setUp(() async {
       fs = new MemoryFileSystem();
@@ -608,7 +606,6 @@ void main() {
       snapshotter = new Snapshotter();
       mockArtifacts = new MockArtifacts();
       mockXcode = new MockXcode();
-      mockXxd = new MockXxd();
       for (BuildMode mode in BuildMode.values) {
         when(mockArtifacts.getArtifactPath(Artifact.dartVmEntryPointsTxt, TargetPlatform.ios, mode)).thenReturn(kVmEntrypoints);
         when(mockArtifacts.getArtifactPath(Artifact.dartIoEntriesTxt, TargetPlatform.ios, mode)).thenReturn(kIoEntries);
@@ -623,25 +620,11 @@ void main() {
       FileSystem: () => fs,
       GenSnapshot: () => genSnapshot,
       Xcode: () => mockXcode,
-      Xxd: () => mockXxd,
     };
 
-    testUsingContext('builds iOS debug AOT snapshot', () async {
-      fs.file('main.dill').writeAsStringSync('binary magic');
-
+    testUsingContext('iOS debug AOT snapshot is invalid', () async {
       final String outputPath = fs.path.join('build', 'foo');
-      fs.directory(outputPath).createSync(recursive: true);
-
-      genSnapshot.outputs = <String, String>{
-        fs.path.join(outputPath, 'vm_snapshot_data'): '',
-        fs.path.join(outputPath, 'vm_snapshot_instr'): '',
-        fs.path.join(outputPath, 'isolate_snapshot_data'): '',
-        fs.path.join(outputPath, 'isolate_snapshot_instr'): '',
-        fs.path.join(outputPath, 'snapshot.d'): '',
-        fs.path.join(outputPath, 'snapshot_assembly.S'): '',
-      };
-
-      final int genSnapshotExitCode = await snapshotter.buildAotSnapshot(
+      expect(await snapshotter.buildAotSnapshot(
         platform: TargetPlatform.ios,
         buildMode: BuildMode.debug,
         mainPath: 'main.dill',
@@ -649,26 +632,7 @@ void main() {
         outputPath: outputPath,
         preferSharedLibrary: false,
         previewDart2: true,
-      );
-
-      expect(genSnapshotExitCode, 0);
-      expect(genSnapshot.callCount, 1);
-      expect(genSnapshot.snapshotType.platform, TargetPlatform.ios);
-      expect(genSnapshot.snapshotType.mode, BuildMode.debug);
-      expect(genSnapshot.packagesPath, '.packages');
-      expect(genSnapshot.additionalArgs, <String>[
-        '--vm_snapshot_data=${fs.path.join(outputPath, 'vm_snapshot_data')}',
-        '--isolate_snapshot_data=${fs.path.join(outputPath, 'isolate_snapshot_data')}',
-        '--url_mapping=dart:ui,${fs.path.join(skyEnginePath, 'lib', 'ui', 'ui.dart')}',
-        '--url_mapping=dart:vmservice_io,${fs.path.join(skyEnginePath, 'sdk_ext', 'vmservice_io.dart')}',
-        '--dependencies=${fs.path.join(outputPath, 'snapshot.d')}',
-        '--reify-generic-functions',
-        '--strong',
-        '--no-checked',
-        '--conditional_directives',
-        '--snapshot_kind=core',
-        'snapshot.dart',
-      ]);
+      ), isNot(equals(0)));
     }, overrides: contextOverrides);
 
     testUsingContext('builds iOS profile AOT snapshot', () async {
@@ -702,13 +666,13 @@ void main() {
         '--isolate_snapshot_data=${fs.path.join(outputPath, 'isolate_snapshot_data')}',
         '--url_mapping=dart:ui,${fs.path.join(skyEnginePath, 'lib', 'ui', 'ui.dart')}',
         '--url_mapping=dart:vmservice_io,${fs.path.join(skyEnginePath, 'sdk_ext', 'vmservice_io.dart')}',
+        '--embedder_entry_points_manifest=$kVmEntrypoints',
+        '--embedder_entry_points_manifest=$kIoEntries',
         '--dependencies=${fs.path.join(outputPath, 'snapshot.d')}',
         '--reify-generic-functions',
         '--strong',
         '--no-checked',
         '--conditional_directives',
-        '--embedder_entry_points_manifest=$kVmEntrypoints',
-        '--embedder_entry_points_manifest=$kIoEntries',
         '--snapshot_kind=app-aot-assembly',
         '--assembly=${fs.path.join(outputPath, 'snapshot_assembly.S')}',
         'main.dill',
@@ -746,11 +710,11 @@ void main() {
         '--isolate_snapshot_data=${fs.path.join(outputPath, 'isolate_snapshot_data')}',
         '--url_mapping=dart:ui,${fs.path.join(skyEnginePath, 'lib', 'ui', 'ui.dart')}',
         '--url_mapping=dart:vmservice_io,${fs.path.join(skyEnginePath, 'sdk_ext', 'vmservice_io.dart')}',
+        '--embedder_entry_points_manifest=$kVmEntrypoints',
+        '--embedder_entry_points_manifest=$kIoEntries',
         '--dependencies=${fs.path.join(outputPath, 'snapshot.d')}',
         '--reify-generic-functions',
         '--strong',
-        '--embedder_entry_points_manifest=$kVmEntrypoints',
-        '--embedder_entry_points_manifest=$kIoEntries',
         '--snapshot_kind=app-aot-assembly',
         '--assembly=${fs.path.join(outputPath, 'snapshot_assembly.S')}',
         'main.dill',
