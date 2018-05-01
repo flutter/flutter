@@ -6,7 +6,6 @@ import 'dart:developer';
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 
 import 'backdrop.dart';
 import 'demos.dart';
@@ -277,9 +276,6 @@ class _GalleryHomeState extends State<GalleryHome> with SingleTickerProviderStat
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
     final bool isDark = theme.brightness == Brightness.dark;
-    SystemChrome.setSystemUIOverlayStyle(isDark
-      ? SystemUiOverlayStyle.dark
-      : SystemUiOverlayStyle.light);
 
     Widget home = new Scaffold(
       key: _scaffoldKey,

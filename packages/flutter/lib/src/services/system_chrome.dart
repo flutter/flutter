@@ -93,7 +93,7 @@ class SystemUiOverlayStyle {
   /// System overlays should be drawn with a light color. Intended for
   /// applications with a dark background.
   static const SystemUiOverlayStyle light = const SystemUiOverlayStyle(
-    navigationBarColor: 0xFFFFFFFF,
+    navigationBarColor: 0xFF000000,
     navigationDividerColor: null,
     statusBarColor: null,
     navigationIconTheme: SystemChromeTheme.light,
@@ -103,7 +103,7 @@ class SystemUiOverlayStyle {
   /// System overlays should be drawn with a dark color. Intended for
   /// applications with a light background.
   static const SystemUiOverlayStyle dark = const SystemUiOverlayStyle(
-    navigationBarColor: 0xFF000000,
+    navigationBarColor: 0xFFFFFFFF,
     navigationDividerColor: null,
     statusBarColor: null,
     navigationIconTheme: SystemChromeTheme.dark,
