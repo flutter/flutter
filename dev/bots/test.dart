@@ -57,7 +57,7 @@ Future<Null> main(List<String> args) async {
   } else {
     for (String currentShard in _kShards.keys) {
       print('${bold}SHARD=$currentShard$reset');
-      await _kShards['tests']();
+      await _kShards[currentShard]();
       print('');
     }
   }
