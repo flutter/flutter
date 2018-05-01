@@ -41,6 +41,8 @@ const Duration _kTestProcessTimeout = const Duration(minutes: 5);
 /// hold that against the test.
 const String _kStartTimeoutTimerMessage = 'sky_shell test process has entered main method';
 
+const String _kTestConfigFileName = 'flutter_test_config.dart';
+
 /// The address at which our WebSocket server resides and at which the sky_shell
 /// processes will host the Observatory server.
 final Map<InternetAddressType, InternetAddress> _kHosts = <InternetAddressType, InternetAddress>{
@@ -623,7 +625,19 @@ class _FlutterPlatform extends PlatformPlugin {
     Uri testUrl,
     String encodedWebsocketUrl,
   }) {
-    return '''
+    assert(testUrl.scheme == 'file');
+    File testConfigFile;
+    Directory directory = fs.file(testUrl.path).parent;
+    while (directory.path != directory.parent.path) {
+      final File configFile = directory.childFile(_kTestConfigFileName);
+      if (configFile.existsSync()) {
+        printTrace('Discovered $_kTestConfigFileName in ${directory.path}');
+        testConfigFile = configFile;
+      }
+      directory = directory.parent;
+    }
+    final StringBuffer buffer = new StringBuffer();
+    buffer.write('''
 import 'dart:convert';
 import 'dart:io';  // ignore: dart_io_import
 
@@ -637,6 +651,15 @@ import 'package:stream_channel/stream_channel.dart';
 import 'package:test/src/runner/vm/catch_isolate_errors.dart';
 
 import '$testUrl' as test;
+'''
+    );
+    if (testConfigFile != null) {
+      buffer.write('''
+import '${new Uri.file(testConfigFile.path)}' as test_config;
+'''
+      );
+    }
+    buffer.write('''
 
 void main() {
   print('$_kStartTimeoutTimerMessage');
@@ -646,6 +669,14 @@ void main() {
     catchIsolateErrors();
     goldenFileComparator = new LocalFileComparator(Uri.parse('$testUrl'));
     autoUpdateGoldenFiles = $updateGoldens;
+'''
+    );
+    if (testConfigFile != null) {
+      buffer.write('''
+    test_config.main();
+''');
+    }
+    buffer.write('''
     return test.main;
   });
   WebSocket.connect(server).then((WebSocket socket) {
@@ -656,7 +687,9 @@ void main() {
     socket.addStream(channel.stream.map(json.encode));
   });
 }
-''';
+'''
+    );
+    return buffer.toString();
   }
 
   File _cachedFontConfig;
