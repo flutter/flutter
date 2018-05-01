@@ -4,10 +4,10 @@ os:
   - osx
 osx_image: xcode9.2
 env:
-  - SHARD=analyze
+#  - SHARD=analyze
   - SHARD=tests
-  - SHARD=docs
-  - SHARD=build_and_deploy_gallery
+#  - SHARD=docs
+#  - SHARD=build_and_deploy_gallery
 matrix:
   exclude:
   - os: osx
