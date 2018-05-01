@@ -12,6 +12,8 @@ import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/base/build.dart';
 import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
+import 'package:flutter_tools/src/base/io.dart';
+import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/ios/mac.dart';
 import 'package:flutter_tools/src/version.dart';
 import 'package:mockito/mockito.dart';
@@ -646,6 +648,10 @@ void main() {
         fs.path.join(outputPath, 'snapshot.d'): '',
       };
 
+      final RunResult successResult = new RunResult(new ProcessResult(1, 0, '', ''));
+      when(xcode.cc(any)).thenAnswer((_) => new Future<RunResult>.value(successResult));
+      when(xcode.clang(any)).thenAnswer((_) => new Future<RunResult>.value(successResult));
+
       final int genSnapshotExitCode = await snapshotter.build(
         platform: TargetPlatform.ios,
         buildMode: BuildMode.profile,
@@ -687,6 +693,10 @@ void main() {
         fs.path.join(outputPath, 'snapshot_assembly.S'): '',
         fs.path.join(outputPath, 'snapshot.d'): '',
       };
+
+      final RunResult successResult = new RunResult(new ProcessResult(1, 0, '', ''));
+      when(xcode.cc(any)).thenAnswer((_) => new Future<RunResult>.value(successResult));
+      when(xcode.clang(any)).thenAnswer((_) => new Future<RunResult>.value(successResult));
 
       final int genSnapshotExitCode = await snapshotter.build(
         platform: TargetPlatform.ios,

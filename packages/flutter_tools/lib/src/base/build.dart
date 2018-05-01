@@ -336,43 +336,66 @@ class AOTSnapshotter {
     // On iOS, we use Xcode to compile the snapshot into a dynamic library that the
     // end-developer can link into their app.
     if (platform == TargetPlatform.ios) {
-      printStatus('Building App.framework...');
-      const List<String> commonBuildOptions = const <String>['-arch', 'arm64', '-miphoneos-version-min=8.0'];
-
-      final String assemblyO = fs.path.join(outputDir.path, 'snapshot_assembly.o');
-      await xcode.cc(commonBuildOptions.toList()..addAll(<String>['-c', assembly, '-o', assemblyO]));
-
-      final String frameworkDir = fs.path.join(outputDir.path, 'App.framework');
-      fs.directory(frameworkDir).createSync(recursive: true);
-      final String appLib = fs.path.join(frameworkDir, 'App');
-      final List<String> linkArgs = commonBuildOptions.toList()..addAll(<String>[
-          '-dynamiclib',
-          '-Xlinker', '-rpath', '-Xlinker', '@executable_path/Frameworks',
-          '-Xlinker', '-rpath', '-Xlinker', '@loader_path/Frameworks',
-          '-install_name', '@rpath/App.framework/App',
-          '-o', appLib,
-          assemblyO,
-      ]);
-      await xcode.clang(linkArgs);
-    } else {
-      if (compileToSharedLibrary) {
-        // A word of warning: Instead of compiling via two steps, to a .o file and
-        // then to a .so file we use only one command. When using two commands
-        // gcc will end up putting a .eh_frame and a .debug_frame into the shared
-        // library. Without stripping .debug_frame afterwards, unwinding tools
-        // based upon libunwind use just one and ignore the contents of the other
-        // (which causes it to not look into the other section and therefore not
-        // find the correct unwinding information).
-        final String assemblySo = fs.path.join(outputDir.path, 'app.so');
-        await runCheckedAsync(<String>[androidSdk.ndkCompiler]
-            ..addAll(androidSdk.ndkCompilerArgs)
-            ..addAll(<String>[ '-shared', '-nostdlib', '-o', assemblySo, assembly ]));
-      }
+      final RunResult result = await _buildIosFramework(assemblyPath: assembly, outputPath: outputDir.path);
+      if (result.exitCode != 0)
+        return result.exitCode;
+    } else if (compileToSharedLibrary) {
+      final RunResult result = await _buildAndroidSharedLibrary(assemblyPath: assembly, outputPath: outputDir.path);
+      if (result.exitCode != 0)
+        return result.exitCode;
     }
 
     // Compute and record build fingerprint.
     await _writeFingerprint(snapshotType, outputPaths, depfilePath, mainPath, fingerprintPath);
     return 0;
+  }
+
+  /// Builds an iOS framework at [outputPath]/App.framework from the assembly
+  /// source at [assemblyPath].
+  Future<RunResult> _buildIosFramework({
+    @required String assemblyPath,
+    @required String outputPath,
+  }) async {
+    printStatus('Building App.framework...');
+    const List<String> commonBuildOptions = const <String>['-arch', 'arm64', '-miphoneos-version-min=8.0'];
+
+    final String assemblyO = fs.path.join(outputPath, 'snapshot_assembly.o');
+    final RunResult compileResult = await xcode.cc(commonBuildOptions.toList()..addAll(<String>['-c', assemblyPath, '-o', assemblyO]));
+    if (compileResult.exitCode != 0)
+      return compileResult;
+
+    final String frameworkDir = fs.path.join(outputPath, 'App.framework');
+    fs.directory(frameworkDir).createSync(recursive: true);
+    final String appLib = fs.path.join(frameworkDir, 'App');
+    final List<String> linkArgs = commonBuildOptions.toList()..addAll(<String>[
+        '-dynamiclib',
+        '-Xlinker', '-rpath', '-Xlinker', '@executable_path/Frameworks',
+        '-Xlinker', '-rpath', '-Xlinker', '@loader_path/Frameworks',
+        '-install_name', '@rpath/App.framework/App',
+        '-o', appLib,
+        assemblyO,
+    ]);
+    final RunResult linkResult = await xcode.clang(linkArgs);
+    return linkResult;
+  }
+
+  /// Builds an Android shared library at [outputPath]/app.so from the assembly
+  /// source at [assemblyPath].
+  Future<RunResult> _buildAndroidSharedLibrary({
+    @required String assemblyPath,
+    @required String outputPath,
+  }) async {
+    // A word of warning: Instead of compiling via two steps, to a .o file and
+    // then to a .so file we use only one command. When using two commands
+    // gcc will end up putting a .eh_frame and a .debug_frame into the shared
+    // library. Without stripping .debug_frame afterwards, unwinding tools
+    // based upon libunwind use just one and ignore the contents of the other
+    // (which causes it to not look into the other section and therefore not
+    // find the correct unwinding information).
+    final String assemblySo = fs.path.join(outputPath, 'app.so');
+    return await runCheckedAsync(<String>[androidSdk.ndkCompiler]
+        ..addAll(androidSdk.ndkCompilerArgs)
+        ..addAll(<String>[ '-shared', '-nostdlib', '-o', assemblySo, assemblyPath ]));
   }
 
   /// Compiles a Dart file to kernel.
