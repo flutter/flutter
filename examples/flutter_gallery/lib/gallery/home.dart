@@ -52,7 +52,8 @@ class _CategoryItem extends StatelessWidget {
     final ThemeData theme = Theme.of(context);
     final bool isDark = theme.brightness == Brightness.dark;
 
-    // Contain the repaint from the splash.
+    // This repaint boundary prevents the entire _CategoriesPage from being
+    // repainted when the button's ink splash animates.
     return new RepaintBoundary(
       child: new RawMaterialButton(
         padding: EdgeInsets.zero,
@@ -115,8 +116,9 @@ class _CategoriesPage extends StatelessWidget {
           final double rowHeight = columnWidth * aspectRatio;
           final int rowCount = (categories.length + columnCount - 1) ~/ columnCount;
 
-          // When the LayoutBuilder shifts from the backdrop motion, repaints
-          // can be triggered.
+          // This repaint boundary prevents the inner contents of the front layer
+          // from repainting when the backdrop toggle triggers a repaint on the
+          // LayoutBuilder.
           return new RepaintBoundary(
             child: new Column(
               mainAxisAlignment: MainAxisAlignment.center,
