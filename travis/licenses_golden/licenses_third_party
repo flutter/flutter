@@ -1,4 +1,4 @@
-Signature: bfac9a8729a57762b4763a2562020f52
+Signature: d817d994a56938d75e1cb5ace14dc096
 
 UNUSED LICENSES:
 
@@ -20071,7 +20071,6 @@ FILE: ../../../third_party/skia/src/core/SkAlphaRuns.cpp
 FILE: ../../../third_party/skia/src/core/SkAnalyticEdge.cpp
 FILE: ../../../third_party/skia/src/core/SkAnalyticEdge.h
 FILE: ../../../third_party/skia/src/core/SkAntiRun.h
-FILE: ../../../third_party/skia/src/core/SkAutoKern.h
 FILE: ../../../third_party/skia/src/core/SkBlitBWMaskTemplate.h
 FILE: ../../../third_party/skia/src/core/SkBlitter.cpp
 FILE: ../../../third_party/skia/src/core/SkBlitter.h
