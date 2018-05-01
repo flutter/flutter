@@ -1,4 +1,4 @@
-Signature: 7526f0e4696c7a824c1b985317d9f69f
+Signature: c1ceba4b426874919ff0d08583bd74a1
 
 UNUSED LICENSES:
 
@@ -17183,6 +17183,8 @@ FILE: ../../../third_party/skia/experimental/sksg/geometry/SkSGGeometryTransform
 FILE: ../../../third_party/skia/experimental/sksg/geometry/SkSGGeometryTransform.h
 FILE: ../../../third_party/skia/experimental/sksg/geometry/SkSGPlane.cpp
 FILE: ../../../third_party/skia/experimental/sksg/geometry/SkSGPlane.h
+FILE: ../../../third_party/skia/experimental/sksg/geometry/SkSGRoundEffect.cpp
+FILE: ../../../third_party/skia/experimental/sksg/geometry/SkSGRoundEffect.h
 FILE: ../../../third_party/skia/experimental/sksg/geometry/SkSGText.cpp
 FILE: ../../../third_party/skia/experimental/sksg/geometry/SkSGText.h
 FILE: ../../../third_party/skia/experimental/sksg/paint/SkSGGradient.cpp
