@@ -13,6 +13,6 @@ dependencies:
 flutter:
   uses-material-design: true
   assets:
-    - assets/
+    - assets/flutter-mark-square-64.png
 
 # PUBSPEC CHECKSUM: 6c9f
