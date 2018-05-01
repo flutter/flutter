@@ -166,9 +166,9 @@ Future<Set<String>> readDepfile(String depfilePath) async {
 ///     suitable for loading with `mmap`.
 ///   * Assembly AOT snapshot: architecture-specific ahead-of-time compile to
 ///     assembly suitable for compilation as a static or dynamic library.
-class Snapshotter {
+class ScriptSnapshotter {
   /// Builds an architecture-independent snapshot of the specified script.
-  Future<int> buildScriptSnapshot({
+  Future<int> build({
     @required String mainPath,
     @required String snapshotPath,
     @required String depfilePath,
@@ -206,51 +206,11 @@ class Snapshotter {
     await _writeFingerprint(snapshotType, outputPaths, depfilePath, mainPath, fingerprintPath);
     return exitCode;
   }
+}
 
-  /// Compiles a Dart file to kernel.
-  ///
-  /// Returns the output kernel file path, or null on failure.
-  Future<String> compileKernel({
-    @required TargetPlatform platform,
-    @required BuildMode buildMode,
-    @required String mainPath,
-    @required String outputPath,
-    List<String> extraFrontEndOptions: const <String>[],
-  }) async {
-    final Directory outputDir = fs.directory(outputPath);
-    outputDir.createSync(recursive: true);
-
-    printTrace('Compiling Dart to kernel: $mainPath');
-    final List<String> entryPointsJsonFiles = <String>[
-      artifacts.getArtifactPath(Artifact.entryPointsJson, platform, buildMode),
-      artifacts.getArtifactPath(Artifact.entryPointsExtraJson, platform, buildMode),
-    ];
-
-    if ((extraFrontEndOptions != null) && extraFrontEndOptions.isNotEmpty)
-      printTrace('Extra front-end options: $extraFrontEndOptions');
-
-    final String depfilePath = fs.path.join(outputPath, 'kernel_compile.d');
-    final CompilerOutput compilerOutput = await kernelCompiler.compile(
-      sdkRoot: artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath),
-      mainPath: mainPath,
-      outputFilePath: fs.path.join(outputPath, 'app.dill'),
-      depFilePath: depfilePath,
-      extraFrontEndOptions: extraFrontEndOptions,
-      linkPlatformKernelIn: true,
-      aot: true,
-      entryPointsJsonFiles: entryPointsJsonFiles,
-      trackWidgetCreation: false,
-    );
-
-    // Write path to frontend_server, since things need to be re-generated when that changes.
-    final String frontendPath = artifacts.getArtifactPath(Artifact.frontendServerSnapshotForEngineDartSdk);
-    await fs.directory(outputPath).childFile('frontend_server.d').writeAsString('frontend_server.d: $frontendPath\n');
-
-    return compilerOutput?.outputFilename;
-  }
-
+class AOTSnapshotter {
   /// Builds an architecture-specific ahead-of-time compiled snapshot of the specified script.
-  Future<int> buildAotSnapshot({
+  Future<int> build({
     @required TargetPlatform platform,
     @required BuildMode buildMode,
     @required String mainPath,
@@ -415,6 +375,48 @@ class Snapshotter {
     return 0;
   }
 
+  /// Compiles a Dart file to kernel.
+  ///
+  /// Returns the output kernel file path, or null on failure.
+  Future<String> compileKernel({
+    @required TargetPlatform platform,
+    @required BuildMode buildMode,
+    @required String mainPath,
+    @required String outputPath,
+    List<String> extraFrontEndOptions: const <String>[],
+  }) async {
+    final Directory outputDir = fs.directory(outputPath);
+    outputDir.createSync(recursive: true);
+
+    printTrace('Compiling Dart to kernel: $mainPath');
+    final List<String> entryPointsJsonFiles = <String>[
+      artifacts.getArtifactPath(Artifact.entryPointsJson, platform, buildMode),
+      artifacts.getArtifactPath(Artifact.entryPointsExtraJson, platform, buildMode),
+    ];
+
+    if ((extraFrontEndOptions != null) && extraFrontEndOptions.isNotEmpty)
+      printTrace('Extra front-end options: $extraFrontEndOptions');
+
+    final String depfilePath = fs.path.join(outputPath, 'kernel_compile.d');
+    final CompilerOutput compilerOutput = await kernelCompiler.compile(
+      sdkRoot: artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath),
+      mainPath: mainPath,
+      outputFilePath: fs.path.join(outputPath, 'app.dill'),
+      depFilePath: depfilePath,
+      extraFrontEndOptions: extraFrontEndOptions,
+      linkPlatformKernelIn: true,
+      aot: true,
+      entryPointsJsonFiles: entryPointsJsonFiles,
+      trackWidgetCreation: false,
+    );
+
+    // Write path to frontend_server, since things need to be re-generated when that changes.
+    final String frontendPath = artifacts.getArtifactPath(Artifact.frontendServerSnapshotForEngineDartSdk);
+    await fs.directory(outputPath).childFile('frontend_server.d').writeAsString('frontend_server.d: $frontendPath\n');
+
+    return compilerOutput?.outputFilename;
+  }
+
   bool _isValidAotPlatform(TargetPlatform platform, BuildMode buildMode) {
     if (platform == TargetPlatform.ios && buildMode == BuildMode.debug)
       return false;
@@ -428,49 +430,49 @@ class Snapshotter {
   String _getPackagePath(PackageMap packageMap, String package) {
     return fs.path.dirname(fs.path.fromUri(packageMap.map[package]));
   }
+}
 
-  Future<bool> _isBuildRequired(SnapshotType type, Set<String> outputPaths, String depfilePath, String mainPath, String fingerprintPath) async {
-    final File fingerprintFile = fs.file(fingerprintPath);
-    final List<String> requiredFiles = <String>[fingerprintPath, depfilePath]..addAll(outputPaths);
-    if (!requiredFiles.every(fs.isFileSync))
-      return true;
-
-    try {
-      if (fingerprintFile.existsSync()) {
-        final Fingerprint oldFingerprint = new Fingerprint.fromJson(await fingerprintFile.readAsString());
-        final Set<String> inputFilePaths = await readDepfile(depfilePath)..add(mainPath)..addAll(outputPaths);
-        final Fingerprint newFingerprint = createFingerprint(type, mainPath, inputFilePaths);
-        return oldFingerprint != newFingerprint;
-      }
-    } catch (e) {
-      // Log exception and continue, this step is a performance improvement only.
-      printTrace('Rebuilding snapshot due to fingerprint check error: $e');
-    }
+Future<bool> _isBuildRequired(SnapshotType type, Set<String> outputPaths, String depfilePath, String mainPath, String fingerprintPath) async {
+  final File fingerprintFile = fs.file(fingerprintPath);
+  final List<String> requiredFiles = <String>[fingerprintPath, depfilePath]..addAll(outputPaths);
+  if (!requiredFiles.every(fs.isFileSync))
     return true;
-  }
 
-  Future<Null> _writeFingerprint(SnapshotType type, Set<String> outputPaths, String depfilePath, String mainPath, String fingerprintPath) async {
-    try {
-      final Set<String> inputFilePaths = await readDepfile(depfilePath)
-        ..add(mainPath)
-        ..addAll(outputPaths);
-      final Fingerprint fingerprint = createFingerprint(type, mainPath, inputFilePaths);
-      await fs.file(fingerprintPath).writeAsString(fingerprint.toJson());
-    } catch (e, s) {
-      // Log exception and continue, this step is a performance improvement only.
-      printStatus('Error during snapshot fingerprinting: $e\n$s');
+  try {
+    if (fingerprintFile.existsSync()) {
+      final Fingerprint oldFingerprint = new Fingerprint.fromJson(await fingerprintFile.readAsString());
+      final Set<String> inputFilePaths = await readDepfile(depfilePath)..add(mainPath)..addAll(outputPaths);
+      final Fingerprint newFingerprint = createFingerprint(type, mainPath, inputFilePaths);
+      return oldFingerprint != newFingerprint;
     }
+  } catch (e) {
+    // Log exception and continue, this step is a performance improvement only.
+    printTrace('Rebuilding snapshot due to fingerprint check error: $e');
   }
+  return true;
+}
 
-  static Fingerprint createFingerprint(SnapshotType type, String mainPath, Iterable<String> inputFilePaths) {
-    final Map<String, String> properties = <String, String>{
-      'buildMode': type.mode.toString(),
-      'targetPlatform': type.platform?.toString() ?? '',
-      'entryPoint': mainPath,
-    };
-    final List<String> pathsWithSnapshotData = inputFilePaths.toList()
-      ..add(artifacts.getArtifactPath(Artifact.vmSnapshotData))
-      ..add(artifacts.getArtifactPath(Artifact.isolateSnapshotData));
-    return new Fingerprint.fromBuildInputs(properties, pathsWithSnapshotData);
+Future<Null> _writeFingerprint(SnapshotType type, Set<String> outputPaths, String depfilePath, String mainPath, String fingerprintPath) async {
+  try {
+    final Set<String> inputFilePaths = await readDepfile(depfilePath)
+      ..add(mainPath)
+      ..addAll(outputPaths);
+    final Fingerprint fingerprint = createFingerprint(type, mainPath, inputFilePaths);
+    await fs.file(fingerprintPath).writeAsString(fingerprint.toJson());
+  } catch (e, s) {
+    // Log exception and continue, this step is a performance improvement only.
+    printStatus('Error during snapshot fingerprinting: $e\n$s');
   }
+}
+
+Fingerprint createFingerprint(SnapshotType type, String mainPath, Iterable<String> inputFilePaths) {
+  final Map<String, String> properties = <String, String>{
+    'buildMode': type.mode.toString(),
+    'targetPlatform': type.platform?.toString() ?? '',
+    'entryPoint': mainPath,
+  };
+  final List<String> pathsWithSnapshotData = inputFilePaths.toList()
+    ..add(artifacts.getArtifactPath(Artifact.vmSnapshotData))
+    ..add(artifacts.getArtifactPath(Artifact.isolateSnapshotData));
+  return new Fingerprint.fromBuildInputs(properties, pathsWithSnapshotData);
 }
