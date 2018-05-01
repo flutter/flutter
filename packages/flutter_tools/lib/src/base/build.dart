@@ -344,7 +344,6 @@ class Snapshotter {
         }
         if (platform == TargetPlatform.android_arm) {
           genSnapshotArgs.addAll(<String>[
-            '--no-sim-use-hardfp', // Android uses the softfloat ABI.
             '--no-use-integer-division', // Not supported by the Pixel in 32-bit mode.
           ]);
         }
