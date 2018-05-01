@@ -98,7 +98,7 @@ class DartVm {
   final json_rpc.Peer _peer;
 
   // The URI through which this DartVM instance is connected.
-  final Uri rui;
+  final Uri uri;
 
   /// Attempts to connect to the given [Uri].
   ///
@@ -115,7 +115,9 @@ class DartVm {
   }
 
   /// Returns a [List] of [IsolateRef] objects whose name matches `pattern`.
-  Future<List<IsolateRef>> getIsolatesByPattern(Pattern pattern) async {
+  ///
+  /// Also checks to make sure it is running the 'main()' function.
+  Future<List<IsolateRef>> getMainIsolatesByPattern(Pattern pattern) async {
     final Map<String, dynamic> jsonVmRef =
         await invokeRpc('getVM', timeout: _kRpcTimeout);
     final List<Map<String, dynamic>> jsonIsolates = jsonVmRef['isolates'];

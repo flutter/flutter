@@ -20,6 +20,8 @@ final String _ipv6Loopback = InternetAddress.LOOPBACK_IP_V6.address;
 
 const ProcessManager _processManager = const LocalProcessManager();
 
+const Duration _kIsolateFindTimeout = const Duration(seconds: 10);
+
 final Logger _log = new Logger('FuchsiaRemoteConnection');
 
 /// A function for forwarding ports on the local machine to a remote device.
@@ -98,7 +100,6 @@ class FuchsiaRemoteConnection {
   final Set<int> _stalePorts = new Set<int>();
 
   /// A broadcast stream that emits events relating to Dart VM's as they update.
-  Stream<DartVmEvent> get onDartVmEvent => _onDartVmEvent;
   Stream<DartVmEvent> _onDartVmEvent;
   final StreamController<DartVmEvent> _dartVmEventController =
       new StreamController<DartVmEvent>();
@@ -118,7 +119,7 @@ class FuchsiaRemoteConnection {
 
     Stream<int> dartVmStream() {
       Future<Null> listen() async {
-        while (connection._pollDartVms && connection._stalePorts.length < 10) {
+        while (connection._pollDartVms) {
           await connection._pollVms();
           await new Future.delayed(const Duration(milliseconds: 1500));
         }
@@ -198,17 +199,20 @@ class FuchsiaRemoteConnection {
   ///
   /// In the current state this is not capable of listening for an
   /// Isolate to start up. The Isolate must already be running.
-  Future<List<IsolateRef>> getMainIsolatesByPattern(Pattern pattern) async {
-    if (_forwardedVmServicePorts.isEmpty) {
+  Future<List<IsolateRef>> getMainIsolatesByPattern(
+    Pattern pattern, [
+    Duration timeout = _kIsolateFindTimeout,
+  ]) async {
+    if (_dartVmPortMap.isEmpty) {
       return null;
     }
     List<Future<List<IsolateRef>>> isolates = <Future<List<IsolateRef>>>[];
-    for (PortForwarder fp in _forwardedVmServicePorts) {
+    for (PortForwarder fp in _dartVmPortMap.values) {
       final DartVm vmService = await _getDartVm(fp.port);
-      isolates.add(vmService.getIsolatesByPattern(pattern));
+      isolates.add(vmService.getMainIsolatesByPattern(pattern));
     }
-    return Future.wait(isolates).then((listOfLists) {
-      print('THIS WUT WE GOT: $listOfLists');
+    Completer<List<IsolateRef>> completer = new Completer<List<IsolateRef>>();
+    List<IsolateRef> result = await Future.wait(isolates).then((listOfLists) {
       List<List<IsolateRef>> mutableListOfLists = new List.from(listOfLists)
         ..retainWhere((list) => !list.isEmpty);
       // Folds the list of lists into one flat list.
@@ -220,6 +224,35 @@ class FuchsiaRemoteConnection {
         },
       );
     });
+
+    // If no VM instance anywhere has this, it's possible it hasn't spun up
+    // anywhere.
+    //
+    // For the time being one Flutter Isolate runs at a time in each VM, so for
+    // now this will wait until the timer runs out or a new Dart VM starts that
+    // contains the Isolate in question.
+    //
+    // TODO(awdavies): Set this up to handle multiple Isolates per Dart VM.
+    if (result.isEmpty) {
+      _log.fine('No instance of the Isolate found. Awaiting new VM startup');
+      _onDartVmEvent.listen(
+        (DartVmEvent event) async {
+          if (event.eventType == DartVmEventType.started) {
+            _log.fine('New VM found on port: ${event.servicePort}. Searching '
+                'for Isolate: $pattern');
+            final DartVm vmService = await _getDartVm(event.uri.port);
+            final List<IsolateRef> result =
+                await vmService.getMainIsolatesByPattern(pattern);
+            if (!result.isEmpty) {
+              completer.complete(result);
+            }
+          }
+        },
+      );
+    } else {
+      completer.complete(result);
+    }
+    return completer.future.timeout(timeout);
   }
 
   /// Returns a list of [FlutterView] objects.
@@ -433,7 +466,6 @@ class _SshPortForwarder implements PortForwarder {
     this._remoteAddress,
     this._remotePort,
     this._localSocket,
-    this._process,
     this._interface,
     this._sshConfigPath,
     this._ipV6,
@@ -442,7 +474,6 @@ class _SshPortForwarder implements PortForwarder {
   final String _remoteAddress;
   final int _remotePort;
   final ServerSocket _localSocket;
-  final Process _process;
   final String _sshConfigPath;
   final String _interface;
   final bool _ipV6;
@@ -490,12 +521,17 @@ class _SshPortForwarder implements PortForwarder {
       dummyRemoteCommand,
     ]);
     _log.fine("_SshPortForwarder running '${command.join(' ')}'");
-    final Process process = await _processManager.start(command);
-    final _SshPortForwarder result = new _SshPortForwarder._(address,
-        remotePort, localSocket, process, interface, sshConfigPath, isIpV6);
-    process.exitCode.then((int c) {
-      _log.fine("'${command.join(' ')}' exited with exit code $c");
-    });
+    // Must await for the port forwarding function to completer here, as
+    // forwarding must be completed before surfacing VM events (as the user may
+    // want to connect immediately after an event is surfaced).
+    final ProcessResult processResult = await _processManager.run(command);
+    _log.fine("'${command.join(' ')}' exited with exit code "
+        "${processResult.exitCode}");
+    if (processResult.exitCode != 0) {
+      return null;
+    }
+    final _SshPortForwarder result = new _SshPortForwarder._(
+        address, remotePort, localSocket, interface, sshConfigPath, isIpV6);
     _log.fine('Set up forwarding from ${localSocket.port} '
         'to $address port $remotePort');
     return result;
@@ -505,8 +541,6 @@ class _SshPortForwarder implements PortForwarder {
   /// runs the SSH 'cancel' command to shut down port forwarding completely.
   @override
   Future<Null> stop() async {
-    // Kill the original SSH process if it is still around.
-    _process.kill();
     // Cancel the forwarding request. See [start] for commentary about why this
     // uses the IPv4 loopback.
     final String formattedForwardingUrl =

@@ -22,7 +22,7 @@ Future<Null> main(List<String> args) async {
   // Log only at info level within the library. If issues arise, this can be
   // changed to [LoggingLevel.all] or [LoggingLevel.fine] to see more
   // information.
-  Logger.globalLevel = LoggingLevel.info;
+  Logger.globalLevel = LoggingLevel.fine;
   if (args.isEmpty) {
     print('Expects an IP address and/or network interface');
     return;
@@ -46,13 +46,6 @@ Future<Null> main(List<String> args) async {
     print('\t${view.name ?? view.id}');
   }
 
-  /*
-  connection.onDartVmEvent.listen((DartVmEvent event) {
-    print('DartVM event: ${event.eventType} for '
-        '${event.servicePort} at ${event.uri}');
-  }, onDone: () async {
-    await connection.stop();
-  });
-  */
   print(await connection.getMainIsolatesByPattern('image'));
+  await connection.stop();
 }
