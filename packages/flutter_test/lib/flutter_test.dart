@@ -26,7 +26,7 @@
 /// such a configuration file, the file will be assumed to have a `main` method
 /// with the following signature:
 ///
-/// ```
+/// ```dart
 /// void main(FutureOr<void> testMain());
 /// ```
 ///
