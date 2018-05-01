@@ -22,7 +22,7 @@ Future<Null> main(List<String> args) async {
   // Log only at info level within the library. If issues arise, this can be
   // changed to [LoggingLevel.all] or [LoggingLevel.fine] to see more
   // information.
-  Logger.globalLevel = LoggingLevel.fine;
+  Logger.globalLevel = LoggingLevel.info;
   if (args.isEmpty) {
     print('Expects an IP address and/or network interface');
     return;
@@ -45,7 +45,5 @@ Future<Null> main(List<String> args) async {
   for (FlutterView view in await connection.getFlutterViews()) {
     print('\t${view.name ?? view.id}');
   }
-
-  print(await connection.getMainIsolatesByPattern('image'));
   await connection.stop();
 }
