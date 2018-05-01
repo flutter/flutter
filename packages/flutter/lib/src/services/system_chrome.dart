@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
 
@@ -77,17 +78,97 @@ enum SystemUiOverlay {
   bottom,
 }
 
+/// Specifies a dark vs light preference for certain system chrome options.
+enum SystemChromeTheme {
+  /// Whether the setting should be drawn to be compatible with a light color.
+  light,
+  /// Whether the setting should be drawn to be compatible with a dark color.
+  dark,
+}
+
 /// Specifies a preference for the style of the system overlays.
 ///
 /// Used by [SystemChrome.setSystemUIOverlayStyle].
-enum SystemUiOverlayStyle {
+class SystemUiOverlayStyle {
   /// System overlays should be drawn with a light color. Intended for
   /// applications with a dark background.
-  light,
+  static const SystemUiOverlayStyle light = const SystemUiOverlayStyle(
+    navigationBarColor: 0xFFFFFFFF,
+    navigationDividerColor: null,
+    statusBarColor: null,
+    navigationIconTheme: SystemChromeTheme.light,
+    statusBarTheme: SystemChromeTheme.light,
+  );
 
   /// System overlays should be drawn with a dark color. Intended for
   /// applications with a light background.
-  dark,
+  static const SystemUiOverlayStyle dark = const SystemUiOverlayStyle(
+    navigationBarColor: 0xFF000000,
+    navigationDividerColor: null,
+    statusBarColor: null,
+    navigationIconTheme: SystemChromeTheme.dark,
+    statusBarTheme: SystemChromeTheme.dark,
+  );
+
+  /// Creates a new [SystemUiOverlayStyle].
+  const SystemUiOverlayStyle({
+    this.navigationBarColor,
+    this.navigationDividerColor,
+    this.statusBarColor,
+    this.statusBarTheme,
+    this.navigationIconTheme,
+  });
+
+  /// The color of the bottom navigation bar.
+  /// 
+  /// Only honored in Android versions O and greater.
+  final int navigationBarColor;
+
+  /// The color of the divider between the bottom navigation and content.
+  /// 
+  /// Only honored in Android versions P and greater.
+  final int navigationDividerColor;
+
+  /// The color of top status bar.
+  /// 
+  /// Only honored in Android version O and greater.
+  final int statusBarColor;
+
+  /// The theme of top status bar.
+  /// 
+  /// Only honored in iOS and Android version O and greater.
+  final SystemChromeTheme statusBarTheme;
+
+  /// The theme of the navigation bar buttons.
+  /// 
+  /// Only honored in Android versions O and greater.
+  final SystemChromeTheme navigationIconTheme;
+
+  /// Convert this event to a map for serialization.
+  Map<String, dynamic> toMap() {
+    return <String, dynamic>{
+      'navigationBarColor': navigationBarColor,
+      'navigationDividerColor': navigationDividerColor,
+      'statusBarColor': statusBarColor,
+      'statusBarTheme': statusBarTheme?.toString(),
+      'navigationIconTheme': navigationIconTheme?.toString(),
+    };
+  }
+
+  @override
+  int get hashCode => hashValues(navigationBarColor, navigationDividerColor, statusBarColor, statusBarTheme, statusBarColor);
+
+  @override
+  bool operator ==(dynamic other) {
+    if (other.runtimeType != runtimeType)
+      return false;
+    final SystemUiOverlayStyle typedOther = other;
+    return typedOther.navigationBarColor == navigationBarColor
+      && typedOther.navigationDividerColor == navigationDividerColor
+      && typedOther.statusBarColor == statusBarColor
+      && typedOther.statusBarTheme == statusBarTheme
+      && typedOther.navigationIconTheme == navigationIconTheme;
+  }
 }
 
 List<String> _stringify(List<dynamic> list) {
@@ -195,7 +276,7 @@ class SystemChrome {
       if (_pendingStyle != _latestStyle) {
         SystemChannels.platform.invokeMethod(
           'SystemChrome.setSystemUIOverlayStyle',
-          _pendingStyle.toString(),
+          _pendingStyle.toMap(),
         );
         _latestStyle = _pendingStyle;
       }
