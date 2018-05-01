@@ -631,7 +631,7 @@ class _FlutterPlatform extends PlatformPlugin {
     print('Generating test main for $testUrl');
     assert(testUrl.scheme == 'file');
     File testConfigFile;
-    Directory directory = fs.file(testUrl.path).parent;
+    Directory directory = fs.file(testUrl).parent;
     print('Initial directory is ${directory.path}');
     while (directory.path != directory.parent.path) {
       print('Inspecting ${directory.path}');
