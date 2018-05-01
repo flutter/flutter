@@ -66,7 +66,7 @@ class MaterialColor extends ColorSwatch<int> {
 /// See also:
 ///
 ///  * [Colors], which defines all of the standard material colors.
-///  * <https://material.io/guidelines/style/color.html#color-color-schemes>
+///  * <https://material.io/go/design-theming#color-color-schemes>
 class MaterialAccentColor extends ColorSwatch<int> {
   /// Creates a color swatch with a variety of shades appropriate for accent
   /// colors.
