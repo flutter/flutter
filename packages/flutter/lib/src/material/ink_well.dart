@@ -382,6 +382,10 @@ class InkResponse extends StatefulWidget {
       gestures.add('double tap');
     if (onLongPress != null)
       gestures.add('long press');
+    if (onTapDown != null)
+      gestures.add('tap down');
+    if (onTapCancel != null)
+      gestures.add('tap cancel');
     properties.add(new IterableProperty<String>('gestures', gestures, ifEmpty: '<none>'));
     properties.add(new DiagnosticsProperty<bool>('containedInkWell', containedInkWell, level: DiagnosticLevel.fine));
     properties.add(new DiagnosticsProperty<BoxShape>(

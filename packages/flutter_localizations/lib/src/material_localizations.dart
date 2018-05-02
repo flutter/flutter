@@ -50,6 +50,7 @@ import 'widgets_localizations.dart';
 ///   * it - Italian
 ///   * ja - Japanese
 ///   * ko - Korean
+///   * ms - Malay
 ///   * nl - Dutch
 ///   * no - Norwegian
 ///   * pl - Polish
@@ -60,6 +61,7 @@ import 'widgets_localizations.dart';
 ///   * th - Thai
 ///   * tr - Turkish
 ///   * ur - Urdu
+///   * vi - Vietnamese
 ///   * zh - Simplified Chinese
 ///
 /// See also:
@@ -133,8 +135,7 @@ class GlobalMaterialLocalizations implements MaterialLocalizations {
   intl.DateFormat _yearMonthFormat;
 
   static String _computeLocaleName(Locale locale) {
-    final String localeName = locale.countryCode.isEmpty ? locale.languageCode : locale.toString();
-    return intl.Intl.canonicalizedLocale(localeName);
+    return intl.Intl.canonicalizedLocale(locale.toString());
   }
 
   @override
@@ -525,6 +526,7 @@ class _MaterialLocalizationsDelegate extends LocalizationsDelegate<MaterialLocal
     'it', // Italian
     'ja', // Japanese
     'ko', // Korean
+    'ms', // Malay
     'nl', // Dutch
     'no', // Norwegian
     'pl', // Polish
@@ -535,6 +537,7 @@ class _MaterialLocalizationsDelegate extends LocalizationsDelegate<MaterialLocal
     'th', // Thai
     'tr', // Turkish
     'ur', // Urdu
+    'vi', // Vietnamese
     'zh', // Chinese (simplified)
   ];
 

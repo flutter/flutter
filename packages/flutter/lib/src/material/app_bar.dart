@@ -383,6 +383,15 @@ class _AppBarState extends State<AppBar> {
 
     Widget title = widget.title;
     if (title != null) {
+      switch (defaultTargetPlatform) {
+        case TargetPlatform.android:
+        case TargetPlatform.fuchsia:
+           title = new Semantics(namesRoute: true, child: title);
+           break;
+        case TargetPlatform.iOS:
+          break;
+      }
+
       title = new DefaultTextStyle(
         style: centerStyle,
         softWrap: false,
@@ -473,10 +482,14 @@ class _AppBarState extends State<AppBar> {
       );
     }
 
-    return new Material(
-      color: widget.backgroundColor ?? themeData.primaryColor,
-      elevation: widget.elevation,
-      child: appBar,
+    return new Semantics(
+      container: true,
+      explicitChildNodes: true,
+      child: new Material(
+        color: widget.backgroundColor ?? themeData.primaryColor,
+        elevation: widget.elevation,
+        child: appBar,
+      ),
     );
   }
 }

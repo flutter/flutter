@@ -1103,6 +1103,15 @@ abstract class State<T extends StatefulWidget> extends Diagnosticable {
           'consider breaking the reference to this object during dispose().'
         );
       }
+      if (_debugLifecycleState == _StateLifecycle.created && !mounted) {
+        throw new FlutterError(
+          'setState() called in constructor: $this\n'
+          'This happens when you call setState() on a State object for a widget that '
+          'hasn\'t been inserted into the widget tree yet. It is not necessary to call '
+          'setState() in the constructor, since the state is already assumed to be dirty '
+          'when it is initially created.'
+        );
+      }
       return true;
     }());
     final dynamic result = fn() as dynamic;

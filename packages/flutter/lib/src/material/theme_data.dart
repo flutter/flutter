@@ -296,7 +296,7 @@ class ThemeData extends Diagnosticable {
        assert(iconTheme != null),
        assert(primaryIconTheme != null),
        assert(accentIconTheme != null),
-       assert(sliderTheme != null), 
+       assert(sliderTheme != null),
        assert(chipTheme != null),
        assert(platform != null);
 
@@ -624,7 +624,7 @@ class ThemeData extends Diagnosticable {
     // more towards using light text than WCAG20 recommends. Material Design spec
     // doesn't say what value to use, but 0.15 seemed close to what the Material
     // Design spec shows for its color palette on
-    // <https://material.io/guidelines/style/color.html#color-color-palette>.
+    // <https://material.io/go/design-theming#color-color-palette>.
     const double kThreshold = 0.15;
     if ((relativeLuminance + 0.05) * (relativeLuminance + 0.05) > kThreshold)
       return Brightness.light;

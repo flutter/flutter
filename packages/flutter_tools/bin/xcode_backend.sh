@@ -109,14 +109,7 @@ BuildApp() {
     preview_dart_2_flag="--no-preview-dart-2"
   fi
 
-  if [[ "$CURRENT_ARCH" != "x86_64" ]]; then
-    local aot_flags=""
-    if [[ "$build_mode" == "debug" ]]; then
-      aot_flags="--interpreter --debug"
-    else
-      aot_flags="--${build_mode}"
-    fi
-
+  if [[ "${build_mode}" != "debug" ]]; then
     StreamOutput " ├─Building Dart code..."
     RunCommand "${FLUTTER_ROOT}/bin/flutter" --suppress-analytics           \
       ${verbose_flag}                                                       \
@@ -124,7 +117,7 @@ BuildApp() {
       --output-dir="${build_dir}/aot"                                       \
       --target-platform=ios                                                 \
       --target="${target_path}"                                             \
-      ${aot_flags}                                                          \
+      --${build_mode}                                                       \
       ${local_engine_flag}                                                  \
       ${preview_dart_2_flag}
 
@@ -138,6 +131,7 @@ BuildApp() {
   else
     RunCommand mkdir -p -- "${derived_dir}/App.framework"
     RunCommand eval "$(echo "static const int Moo = 88;" | xcrun clang -x c \
+        -arch "$CURRENT_ARCH" \
         -dynamiclib \
         -Xlinker -rpath -Xlinker '@executable_path/Frameworks' \
         -Xlinker -rpath -Xlinker '@loader_path/Frameworks' \

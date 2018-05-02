@@ -771,11 +771,11 @@ class _RenderDecoration extends RenderBox {
       + contentPadding.right);
 
     boxConstraints = boxConstraints.copyWith(maxWidth: inputWidth);
-    layoutLineBox(hint);
     if (label != null) // The label is not baseline aligned.
       label.layout(boxConstraints, parentUsesSize: true);
 
     boxConstraints = boxConstraints.copyWith(minWidth: inputWidth);
+    layoutLineBox(hint);
     layoutLineBox(input);
 
     double inputBaseline = contentPadding.top + aboveBaseline;

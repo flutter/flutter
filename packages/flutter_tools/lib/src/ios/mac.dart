@@ -175,6 +175,14 @@ class Xcode {
       return minorVersion >= kXcodeRequiredVersionMinor;
     return false;
   }
+
+  Future<RunResult> cc(List<String> args) {
+    return runCheckedAsync(<String>['xcrun', 'cc']..addAll(args));
+  }
+
+  Future<RunResult> clang(List<String> args) {
+    return runCheckedAsync(<String>['xcrun', 'clang']..addAll(args));
+  }
 }
 
 Future<XcodeBuildResult> buildXcodeProject({
@@ -299,28 +307,10 @@ Future<XcodeBuildResult> buildXcodeProject({
     }
   }
 
-  final Status cleanStatus =
-      logger.startProgress('Running Xcode clean...', expectSlowOperation: true);
-  final RunResult cleanResult = await runAsync(
-    <String>[
-      '/usr/bin/env',
-      'xcrun',
-      'xcodebuild',
-      'clean',
-      '-configuration', configuration,
-    ],
-    workingDirectory: app.appDirectory,
-  );
-  cleanStatus.stop();
-  if (cleanResult.exitCode != 0) {
-    throwToolExit('Xcode failed to clean\n${cleanResult.stderr}');
-  }
-
   final List<String> buildCommands = <String>[
     '/usr/bin/env',
     'xcrun',
     'xcodebuild',
-    'build',
     '-configuration', configuration,
     'ONLY_ACTIVE_ARCH=YES',
   ];
@@ -516,7 +506,7 @@ Future<Null> diagnoseXcodeBuildFailure(XcodeBuildResult result) async {
   }
   if (result.xcodeBuildExecution != null &&
       result.xcodeBuildExecution.buildForPhysicalDevice &&
-      result.xcodeBuildExecution.buildSettings['PRODUCT_BUNDLE_IDENTIFIER'].contains('com.example')) {
+      result.xcodeBuildExecution.buildSettings['PRODUCT_BUNDLE_IDENTIFIER']?.contains('com.example') == true) {
     printError('');
     printError('It appears that your application still contains the default signing identifier.');
     printError("Try replacing 'com.example' with your signing id in Xcode:");

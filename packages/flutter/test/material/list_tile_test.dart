@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' show SemanticsFlag;
-
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -48,7 +46,7 @@ class TestTextState extends State<TestText> {
 
 void main() {
   testWidgets('ListTile geometry (LTR)', (WidgetTester tester) async {
-    // See https://material.io/guidelines/components/lists.html
+    // See https://material.io/go/design-lists
 
     final Key leadingKey = new GlobalKey();
     final Key trailingKey = new GlobalKey();

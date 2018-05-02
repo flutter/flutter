@@ -2,10 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' show window;
+import 'dart:ui' show window, SemanticsFlag;
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
+
+import '../widgets/semantics_tester.dart';
 
 void main() {
   testWidgets('Navigator.push works within a PopupMenuButton', (WidgetTester tester) async {
@@ -426,6 +428,39 @@ void main() {
     await tester.pump();
 
     expect(MediaQuery.of(popupContext).padding, EdgeInsets.zero);
+  });
+
+  testWidgets('PopupMenu includes route semantics', (WidgetTester tester) async {
+    final SemanticsTester semantics = new SemanticsTester(tester);
+    await tester.pumpWidget(new MaterialApp(
+      home: new Material(
+        child: new PopupMenuButton<int>(
+          itemBuilder: (BuildContext context) {
+            return <PopupMenuItem<int>>[
+              const PopupMenuItem<int>(value: 2, child: const Text('2')),
+              const PopupMenuItem<int>(value: 3, child: const Text('3')),
+            ];
+          },
+          child: const SizedBox(
+            height: 100.0,
+            width: 100.0,
+            child: const Text('XXX'),
+          ),
+        ),
+      ),
+    ));
+    await tester.tap(find.text('XXX'));
+    await tester.pumpAndSettle();
+
+    expect(semantics, includesNodeWith(
+      label: 'Popup menu',
+      flags: <SemanticsFlag>[
+        SemanticsFlag.namesRoute,
+        SemanticsFlag.scopesRoute,
+      ],
+    ));
+
+    semantics.dispose();
   });
 }
 

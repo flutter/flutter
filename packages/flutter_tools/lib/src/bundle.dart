@@ -56,8 +56,7 @@ Future<void> build({
 
     // In a precompiled snapshot, the instruction buffer contains script
     // content equivalents
-    final Snapshotter snapshotter = new Snapshotter();
-    final int result = await snapshotter.buildScriptSnapshot(
+    final int result = await new ScriptSnapshotter().build(
       mainPath: mainPath,
       snapshotPath: snapshotPath,
       depfilePath: depfilePath,
@@ -85,6 +84,7 @@ Future<void> build({
         ..add(mainPath);
       final Map<String, String> properties = <String, String>{
         'entryPoint': mainPath,
+        'trackWidgetCreation': trackWidgetCreation.toString(),
       };
       return new Fingerprint.fromBuildInputs(properties, compilerInputPaths);
     }
@@ -105,7 +105,7 @@ Future<void> build({
     String kernelBinaryFilename;
     if (needBuild) {
       ensureDirectoryExists(applicationKernelFilePath);
-      final CompilerOutput compilerOutput = await compile(
+      final CompilerOutput compilerOutput = await kernelCompiler.compile(
         sdkRoot: artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath),
         incrementalCompilerByteStorePath: fs.path.absolute(getIncrementalCompilerByteStoreDirectory()),
         mainPath: fs.file(mainPath).absolute.path,

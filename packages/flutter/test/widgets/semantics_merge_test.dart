@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' show SemanticsFlag;
-
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
@@ -44,12 +42,10 @@ void main() {
           new TestSemantics.rootChild(
             id: 1,
             label: 'test1',
-            nextNodeId: 2,
           ),
           new TestSemantics.rootChild(
             id: 2,
             label: 'test2',
-            previousNodeId: 1,
           ),
         ],
       ),
@@ -113,8 +109,8 @@ void main() {
     expect(semantics, hasSemantics(
       new TestSemantics.root(
         children: <TestSemantics>[
-          new TestSemantics.rootChild(id: 6, label: 'test1', nextNodeId: 7),
-          new TestSemantics.rootChild(id: 7, label: 'test2', previousNodeId: 6),
+          new TestSemantics.rootChild(id: 6, label: 'test1'),
+          new TestSemantics.rootChild(id: 7, label: 'test2'),
         ],
       ),
       ignoreRect: true,

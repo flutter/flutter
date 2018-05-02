@@ -14,87 +14,82 @@ void main() {
 
   testWidgets('Flutter Gallery drawer item test', (WidgetTester tester) async {
     bool hasFeedback = false;
-    void mockOnSendFeedback() {
-      hasFeedback = true;
-    }
 
-    await tester.pumpWidget(new GalleryApp(onSendFeedback: mockOnSendFeedback));
+    await tester.pumpWidget(
+      new GalleryApp(
+        onSendFeedback: () {
+          hasFeedback = true;
+        },
+      ),
+    );
     await tester.pump(); // see https://github.com/flutter/flutter/issues/1865
     await tester.pump(); // triggers a frame
 
-    final Finder finder = find.byWidgetPredicate((Widget widget) {
-      return widget is Tooltip && widget.message == 'Open navigation menu';
-    });
-    expect(finder, findsOneWidget);
-
-    // Open drawer
-    await tester.tap(finder);
-    await tester.pump(); // start animation
-    await tester.pump(const Duration(seconds: 1)); // end animation
+    // Show the options page
+    await tester.tap(find.byTooltip('Toggle options page'));
+    await tester.pumpAndSettle();
 
     MaterialApp app = find.byType(MaterialApp).evaluate().first.widget;
     expect(app.theme.brightness, equals(Brightness.light));
 
-    // Change theme
-    await tester.tap(find.text('Dark'));
-    await tester.pump(); // start animation
-    await tester.pump(const Duration(seconds: 1)); // end animation
+    // Switch to the dark theme: first switch control
+    await tester.tap(find.byType(Switch).first);
+    await tester.pumpAndSettle();
     app = find.byType(MaterialApp).evaluate().first.widget;
     expect(app.theme.brightness, equals(Brightness.dark));
     expect(app.theme.platform, equals(TargetPlatform.android));
 
-    // Change platform
-    await tester.tap(find.text('iOS'));
-    await tester.pump(); // start animation
-    await tester.pump(const Duration(seconds: 1)); // end animation
+    // Popup the platform menu: second menu button, choose 'Cupertino'
+    await tester.tap(find.byIcon(Icons.arrow_drop_down).at(1));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Cupertino').at(1));
+    await tester.pumpAndSettle();
     app = find.byType(MaterialApp).evaluate().first.widget;
     expect(app.theme.platform, equals(TargetPlatform.iOS));
 
     // Verify the font scale.
-    final Size origTextSize = tester.getSize(find.text('Small'));
-    expect(origTextSize, equals(const Size(176.0, 14.0)));
+    final Size origTextSize = tester.getSize(find.text('Text size'));
+    expect(origTextSize, equals(const Size(144.0, 16.0)));
 
-    // Switch font scale.
+    // Popup the text size menu: first menu button, choose 'Small'
+    await tester.tap(find.byIcon(Icons.arrow_drop_down).first);
+    await tester.pumpAndSettle();
     await tester.tap(find.text('Small'));
-    await tester.pump();
-    await tester.pump(const Duration(seconds: 1)); // Wait until it's changed.
-    final Size textSize = tester.getSize(find.text('Small'));
-    expect(textSize, equals(const Size(176.0, 11.0)));
+    await tester.pumpAndSettle();
+    Size textSize = tester.getSize(find.text('Text size'));
+    expect(textSize, equals(const Size(116.0, 13.0)));
 
-    // Set font scale back to default.
+    // Set font scale back to the default.
+    await tester.tap(find.byIcon(Icons.arrow_drop_down).first);
+    await tester.pumpAndSettle();
     await tester.tap(find.text('System Default'));
-    await tester.pump();
-    await tester.pump(const Duration(seconds: 1)); // Wait until it's changed.
-    final Size newTextSize = tester.getSize(find.text('Small'));
-    expect(newTextSize, equals(origTextSize));
+    await tester.pumpAndSettle();
+    textSize = tester.getSize(find.text('Text size'));
+    expect(textSize, origTextSize);
 
-    // Scroll to the bottom of the menu.
-    await tester.drag(find.text('Small'), const Offset(0.0, -1000.0));
-    await tester.pump();
-    await tester.pump(const Duration(seconds: 1)); // Wait until it's changed.
-
-    // Test slow animations.
-    expect(timeDilation, equals(1.0));
-    await tester.tap(find.text('Animate Slowly'));
-    await tester.pump();
-    await tester.pump(const Duration(seconds: 1)); // Wait until it's changed.
+    // Switch to slow animation: third switch control
+    expect(timeDilation, 1.0);
+    await tester.tap(find.byType(Switch).at(2));
+    await tester.pumpAndSettle();
     expect(timeDilation, greaterThan(1.0));
 
-    // Put back time dilation (so as not to throw off tests after this one).
-    await tester.tap(find.text('Animate Slowly'));
-    await tester.pump();
-    await tester.pump(const Duration(seconds: 1)); // Wait until it's changed.
-    expect(timeDilation, equals(1.0));
+    // Restore normal animation: third switch control
+    await tester.tap(find.byType(Switch).at(2));
+    await tester.pumpAndSettle();
+    expect(timeDilation, 1.0);
 
     // Send feedback.
     expect(hasFeedback, false);
+
+    // Scroll to the end
+    await tester.drag(find.text('Text size'), const Offset(0.0, -1000.0));
+    await tester.pumpAndSettle();
     await tester.tap(find.text('Send feedback'));
-    await tester.pump();
+    await tester.pumpAndSettle();
     expect(hasFeedback, true);
 
-    // Close drawer
-    await tester.tap(find.byType(DrawerController));
-    await tester.pump(); // start animation
-    await tester.pump(const Duration(seconds: 1)); // end animation
+    // Hide the options page
+    await tester.tap(find.byTooltip('Toggle options page'));
+    await tester.pumpAndSettle();
   });
 }

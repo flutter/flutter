@@ -37,7 +37,7 @@
   "showAccountsLabel": "Konten anzeigen",
   "modalBarrierDismissLabel": "Schließen",
   "drawerLabel": "Navigationsmenü",
-  "popupMenuLabel": "Popup-Menü",
-  "dialogLabel": "Dialog",
+  "popupMenuLabel": "Pop-up-Menü",
+  "dialogLabel": "Dialogfeld",
   "alertDialogLabel": "Aufmerksam"
 }

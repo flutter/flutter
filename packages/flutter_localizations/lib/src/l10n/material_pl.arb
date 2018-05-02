@@ -37,8 +37,8 @@
   "hideAccountsLabel": "Ukryj konta",
   "showAccountsLabel": "Pokaż konta",
   "modalBarrierDismissLabel": "Zamknij",
-  "drawerLabel": "Menu nawigacji",
-  "popupMenuLabel": "Menu podręczne",
-  "dialogLabel": "Dialog",
+  "drawerLabel": "Menu nawigacyjne",
+  "popupMenuLabel": "Wyskakujące menu",
+  "dialogLabel": "Okno dialogowe",
   "alertDialogLabel": "Alarm"
 }

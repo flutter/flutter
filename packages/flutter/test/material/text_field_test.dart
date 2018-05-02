@@ -4,7 +4,6 @@
 
 import 'dart:async';
 import 'dart:io' show Platform;
-import 'dart:ui' show SemanticsFlag;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -1169,7 +1168,7 @@ void main() {
       ),
     );
     final double iconRight = tester.getTopRight(find.byType(Icon)).dx;
-    // Per https://material.io/guidelines/components/text-fields.html#text-fields-layout
+    // Per https://material.io/go/design-text-fields#text-fields-layout
     // There's a 16 dps gap between the right edge of the icon and the text field's
     // container, and the 12dps more padding between the left edge of the container
     // and the left edge of the input and label.

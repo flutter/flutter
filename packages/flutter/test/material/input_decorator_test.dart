@@ -259,6 +259,8 @@ void main() {
     expect(tester.getBottomLeft(find.text('hint')).dy, 28.0);
     expect(getBorderBottom(tester), 40.0);
     expect(getBorderWeight(tester), 1.0);
+
+    expect(tester.getSize(find.text('hint')).width, tester.getSize(find.text('text')).width);
   });
 
   testWidgets('InputDecorator input/label/hint layout', (WidgetTester tester) async {

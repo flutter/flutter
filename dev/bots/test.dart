@@ -71,24 +71,19 @@ Future<Null> _verifyInternationalizations() async {
   final EvalResult genResult = await _evalCommand(
     dart,
     <String>[
+      '--preview-dart-2',
       path.join('dev', 'tools', 'gen_localizations.dart'),
     ],
     workingDirectory: flutterRoot,
   );
 
   final String localizationsFile = path.join('packages', 'flutter_localizations', 'lib', 'src', 'l10n', 'localizations.dart');
+  final String expectedResult = await new File(localizationsFile).readAsString();
 
-  final String executable = Platform.isWindows ? 'powershell' : 'cat';
-  final List<String> args = Platform.isWindows ?
-      <String>['\$PSDefaultParameterValues["*:Encoding"]="utf8";(gc $localizationsFile) -join "`n"']:
-      <String>[localizationsFile];
-
-  final EvalResult sourceContents = await _evalCommand(executable, args, workingDirectory: flutterRoot);
-
-  if (genResult.stdout.trim() != sourceContents.stdout.trim()) {
+  if (genResult.stdout.trim() != expectedResult.trim()) {
     stderr
       ..writeln('<<<<<<< $localizationsFile')
-      ..writeln(sourceContents.stdout.trim())
+      ..writeln(expectedResult.trim())
       ..writeln('=======')
       ..writeln(genResult.stdout.trim())
       ..writeln('>>>>>>> gen_localizations')
@@ -117,7 +112,8 @@ Future<Null> _analyzeRepo() async {
   );
 
   // Analyze all the sample code in the repo
-  await _runCommand(dart, <String>[path.join(flutterRoot, 'dev', 'bots', 'analyze-sample-code.dart')],
+  await _runCommand(dart,
+    <String>['--preview-dart-2', path.join(flutterRoot, 'dev', 'bots', 'analyze-sample-code.dart')],
     workingDirectory: flutterRoot,
   );
 
@@ -128,7 +124,8 @@ Future<Null> _analyzeRepo() async {
   );
 
   // Try an analysis against a big version of the gallery.
-  await _runCommand(dart, <String>[path.join(flutterRoot, 'dev', 'tools', 'mega_gallery.dart')],
+  await _runCommand(dart,
+    <String>['--preview-dart-2', path.join(flutterRoot, 'dev', 'tools', 'mega_gallery.dart')],
     workingDirectory: flutterRoot,
   );
   await _runFlutterAnalyze(path.join(flutterRoot, 'dev', 'benchmarks', 'mega_gallery'),
@@ -340,8 +337,10 @@ Future<Null> _runCommand(String executable, List<String> arguments, {
 
   Future<List<List<int>>> savedStdout, savedStderr;
   if (printOutput) {
-    stdout.addStream(process.stdout);
-    stderr.addStream(process.stderr);
+    await Future.wait(<Future<Null>>[
+      stdout.addStream(process.stdout),
+      stderr.addStream(process.stderr)
+    ]);
   } else {
     savedStdout = process.stdout.toList();
     savedStderr = process.stderr.toList();
@@ -391,7 +390,7 @@ Future<Null> _runAllDartTests(String workingDirectory, {
   Map<String, String> environment,
   List<String> options,
 }) {
-  final List<String> args = <String>['--checked'];
+  final List<String> args = <String>['--preview-dart-2'];
   if (options != null) {
     args.addAll(options);
   }

@@ -106,7 +106,9 @@ class _BottomAppBarState extends State<BottomAppBar> {
       color: widget.color ?? Theme.of(context).bottomAppBarColor,
       child: new Material(
         type: MaterialType.transparency,
-        child: widget.child,
+        child: widget.child == null
+          ? null
+          : new SafeArea(child: widget.child),
       ),
     );
   }

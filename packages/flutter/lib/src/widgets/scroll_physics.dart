@@ -345,8 +345,10 @@ class BouncingScrollPhysics extends ScrollPhysics {
         math.min(0.000816 * math.pow(existingVelocity.abs(), 1.967).toDouble(), 40000.0);
   }
 
+  // Eyeballed from observation to counter the effect of an unintended scroll
+  // from the natural motion of lifting the finger after a scroll.
   @override
-  double get dragStartDistanceMotionThreshold => 3.5; // Eyeballed from observation.
+  double get dragStartDistanceMotionThreshold => 3.5;
 }
 
 /// Scroll physics for environments that prevent the scroll offset from reaching

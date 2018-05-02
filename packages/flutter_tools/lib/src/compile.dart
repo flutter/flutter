@@ -9,17 +9,20 @@ import 'package:usage/uuid/uuid.dart';
 
 import 'artifacts.dart';
 import 'base/common.dart';
+import 'base/context.dart';
 import 'base/io.dart';
 import 'base/process_manager.dart';
 import 'globals.dart';
 
+KernelCompiler get kernelCompiler => context[KernelCompiler];
+
 typedef void CompilerMessageConsumer(String message);
 
 class CompilerOutput {
-  String outputFilename;
-  int errorCount;
+  final String outputFilename;
+  final int errorCount;
 
-  CompilerOutput(this.outputFilename, this.errorCount);
+  const CompilerOutput(this.outputFilename, this.errorCount);
 }
 
 class _StdoutHandler {
@@ -59,8 +62,11 @@ class _StdoutHandler {
   }
 }
 
-Future<CompilerOutput> compile(
-    {String sdkRoot,
+class KernelCompiler {
+  const KernelCompiler();
+
+  Future<CompilerOutput> compile({
+    String sdkRoot,
     String mainPath,
     String outputFilePath,
     String depFilePath,
@@ -72,81 +78,83 @@ Future<CompilerOutput> compile(
     String incrementalCompilerByteStorePath,
     String packagesPath,
     List<String> fileSystemRoots,
-    String fileSystemScheme}) async {
-  final String frontendServer = artifacts.getArtifactPath(
-    Artifact.frontendServerSnapshotForEngineDartSdk
-  );
+    String fileSystemScheme,
+  }) async {
+    final String frontendServer = artifacts.getArtifactPath(
+      Artifact.frontendServerSnapshotForEngineDartSdk
+    );
 
-  // This is a URI, not a file path, so the forward slash is correct even on Windows.
-  if (!sdkRoot.endsWith('/'))
-    sdkRoot = '$sdkRoot/';
-  final String engineDartPath = artifacts.getArtifactPath(Artifact.engineDartBinary);
-  if (!processManager.canRun(engineDartPath)) {
-    throwToolExit('Unable to find Dart binary at $engineDartPath');
-  }
-  final List<String> command = <String>[
-    engineDartPath,
-    frontendServer,
-    '--sdk-root',
-    sdkRoot,
-    '--strong',
-    '--target=flutter',
-  ];
-  if (trackWidgetCreation)
-    command.add('--track-widget-creation');
-  if (!linkPlatformKernelIn)
-    command.add('--no-link-platform');
-  if (aot) {
-    command.add('--aot');
-    command.add('--tfa');
-  }
-  if (entryPointsJsonFiles != null) {
-    for (String entryPointsJson in entryPointsJsonFiles) {
-      command.addAll(<String>['--entry-points', entryPointsJson]);
+    // This is a URI, not a file path, so the forward slash is correct even on Windows.
+    if (!sdkRoot.endsWith('/'))
+      sdkRoot = '$sdkRoot/';
+    final String engineDartPath = artifacts.getArtifactPath(Artifact.engineDartBinary);
+    if (!processManager.canRun(engineDartPath)) {
+      throwToolExit('Unable to find Dart binary at $engineDartPath');
     }
-  }
-  if (incrementalCompilerByteStorePath != null) {
-    command.add('--incremental');
-  }
-  if (packagesPath != null) {
-    command.addAll(<String>['--packages', packagesPath]);
-  }
-  if (outputFilePath != null) {
-    command.addAll(<String>['--output-dill', outputFilePath]);
-  }
-  if (depFilePath != null && (fileSystemRoots == null || fileSystemRoots.isEmpty)) {
-    command.addAll(<String>['--depfile', depFilePath]);
-  }
-  if (fileSystemRoots != null) {
-    for (String root in fileSystemRoots) {
-      command.addAll(<String>['--filesystem-root', root]);
+    final List<String> command = <String>[
+      engineDartPath,
+      frontendServer,
+      '--sdk-root',
+      sdkRoot,
+      '--strong',
+      '--target=flutter',
+    ];
+    if (trackWidgetCreation)
+      command.add('--track-widget-creation');
+    if (!linkPlatformKernelIn)
+      command.add('--no-link-platform');
+    if (aot) {
+      command.add('--aot');
+      command.add('--tfa');
     }
+    if (entryPointsJsonFiles != null) {
+      for (String entryPointsJson in entryPointsJsonFiles) {
+        command.addAll(<String>['--entry-points', entryPointsJson]);
+      }
+    }
+    if (incrementalCompilerByteStorePath != null) {
+      command.add('--incremental');
+    }
+    if (packagesPath != null) {
+      command.addAll(<String>['--packages', packagesPath]);
+    }
+    if (outputFilePath != null) {
+      command.addAll(<String>['--output-dill', outputFilePath]);
+    }
+    if (depFilePath != null && (fileSystemRoots == null || fileSystemRoots.isEmpty)) {
+      command.addAll(<String>['--depfile', depFilePath]);
+    }
+    if (fileSystemRoots != null) {
+      for (String root in fileSystemRoots) {
+        command.addAll(<String>['--filesystem-root', root]);
+      }
+    }
+    if (fileSystemScheme != null) {
+      command.addAll(<String>['--filesystem-scheme', fileSystemScheme]);
+    }
+
+    if (extraFrontEndOptions != null)
+      command.addAll(extraFrontEndOptions);
+    command.add(mainPath);
+    printTrace(command.join(' '));
+    final Process server = await processManager
+        .start(command)
+        .catchError((dynamic error, StackTrace stack) {
+      printError('Failed to start frontend server $error, $stack');
+    });
+
+    final _StdoutHandler stdoutHandler = new _StdoutHandler();
+
+    server.stderr
+      .transform(utf8.decoder)
+      .listen((String s) { printError('compiler message: $s'); });
+    server.stdout
+      .transform(utf8.decoder)
+      .transform(const LineSplitter())
+      .listen(stdoutHandler.handler);
+    final int exitCode = await server.exitCode;
+    return exitCode == 0 ? stdoutHandler.compilerOutput.future : null;
   }
-  if (fileSystemScheme != null) {
-    command.addAll(<String>['--filesystem-scheme', fileSystemScheme]);
-  }
-
-  if (extraFrontEndOptions != null)
-    command.addAll(extraFrontEndOptions);
-  command.add(mainPath);
-  printTrace(command.join(' '));
-  final Process server = await processManager
-      .start(command)
-      .catchError((dynamic error, StackTrace stack) {
-    printError('Failed to start frontend server $error, $stack');
-  });
-
-  final _StdoutHandler stdoutHandler = new _StdoutHandler();
-
-  server.stderr
-    .transform(utf8.decoder)
-    .listen((String s) { printError('compiler message: $s'); });
-  server.stdout
-    .transform(utf8.decoder)
-    .transform(const LineSplitter())
-    .listen(stdoutHandler.handler);
-  final int exitCode = await server.exitCode;
-  return exitCode == 0 ? stdoutHandler.compilerOutput.future : null;
 }
 
 /// Wrapper around incremental frontend server compiler, that communicates with
@@ -208,7 +216,7 @@ class ResidentCompiler {
     final String frontendServer = artifacts.getArtifactPath(
       Artifact.frontendServerSnapshotForEngineDartSdk
     );
-    final List<String> args = <String>[
+    final List<String> command = <String>[
       artifacts.getArtifactPath(Artifact.engineDartBinary),
       frontendServer,
       '--sdk-root',
@@ -218,26 +226,27 @@ class ResidentCompiler {
       '--target=flutter',
     ];
     if (outputPath != null) {
-      args.addAll(<String>['--output-dill', outputPath]);
+      command.addAll(<String>['--output-dill', outputPath]);
     }
     if (packagesFilePath != null) {
-      args.addAll(<String>['--packages', packagesFilePath]);
+      command.addAll(<String>['--packages', packagesFilePath]);
     }
     if (_trackWidgetCreation) {
-      args.add('--track-widget-creation');
+      command.add('--track-widget-creation');
     }
     if (_packagesPath != null) {
-      args.addAll(<String>['--packages', _packagesPath]);
+      command.addAll(<String>['--packages', _packagesPath]);
     }
     if (_fileSystemRoots != null) {
       for (String root in _fileSystemRoots) {
-        args.addAll(<String>['--filesystem-root', root]);
+        command.addAll(<String>['--filesystem-root', root]);
       }
     }
     if (_fileSystemScheme != null) {
-      args.addAll(<String>['--filesystem-scheme', _fileSystemScheme]);
+      command.addAll(<String>['--filesystem-scheme', _fileSystemScheme]);
     }
-    _server = await processManager.start(args);
+    printTrace(command.join(' '));
+    _server = await processManager.start(command);
     _server.stdout
       .transform(utf8.decoder)
       .transform(const LineSplitter())

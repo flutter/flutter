@@ -727,7 +727,8 @@ void main() {
       expect(controller.selectedItem, 46);
       // A tester.fling creates and pumps 50 pointer events.
       expect(scrolledPositions.length, 50);
-      expect(scrolledPositions.last, moreOrLessEquals(40 * 100.0 + 567.0, epsilon: 0.2));
+      // iOS flings ease-in initially.
+      expect(scrolledPositions.last, moreOrLessEquals(40 * 100.0 + 556.826666666673, epsilon: 0.2));
 
       // Let the spring back simulation finish.
       await tester.pumpAndSettle();
@@ -737,7 +738,7 @@ void main() {
       // Lands on 49.
       expect(controller.selectedItem, 49);
       // More importantly, lands tightly on 49.
-      expect(scrolledPositions.last, moreOrLessEquals(49 * 100.0, epsilon: 0.2));
+      expect(scrolledPositions.last, moreOrLessEquals(49 * 100.0, epsilon: 0.3));
 
       debugDefaultTargetPlatformOverride = null;
     });
