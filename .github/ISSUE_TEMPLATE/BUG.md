@@ -3,7 +3,6 @@ name: I have a problem with my Flutter application.
 about: You are writing an application with Flutter but a widget is rendering
   incorrectly, the application is crashing, there's an exception in the logs,
   a widget is behaving badly, or some other such problem is manifesting.
-  
 
 ---
 
