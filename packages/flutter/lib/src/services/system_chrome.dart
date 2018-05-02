@@ -134,7 +134,7 @@ class SystemUiOverlayStyle {
   /// Only honored in Android versions O and greater.
   final Color systemNavigationBarColor;
 
-  /// The color of the divider between the system bottom navigation and content.
+  /// The color of the divider between the system's bottom navigation bar and the app's content.
   /// 
   /// Only honored in Android versions P and greater.
   final Color systemNavigationBarDividerColor;
@@ -171,7 +171,7 @@ class SystemUiOverlayStyle {
     };
   }
 
-  /// Creates a copy of this theme but with the given fields replaced with new values.
+  /// Creates a copy of this theme with the given fields replaced with new values.
   SystemUiOverlayStyle copyWith({
     Color systemNavigationBarColor,
     Color systemNavigationBarDividerColor,
