@@ -379,7 +379,7 @@ class FlutterDriver {
   /// JSON-RPC client useful for sending raw JSON requests.
   final rpc.Peer _peer;
   /// The main isolate hosting the Flutter application
-  final VMIsolateRef _appIsolate;
+  final VMIsolate _appIsolate;
   /// Whether to print communication between host and app to `stdout`.
   final bool _printCommunication;
   /// Whether to log communication between host and app to `flutter_driver_commands.log`.
