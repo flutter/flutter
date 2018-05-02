@@ -66,7 +66,11 @@ abstract class GoldenFileComparator {
 ///
 ///  * [flutter_test] for more information about how to configure tests at the
 ///    directory-level.
-GoldenFileComparator goldenFileComparator = const _UninitializedComparator();
+GoldenFileComparator _goldenFileComparator = const _UninitializedComparator();
+GoldenFileComparator get goldenFileComparator => _goldenFileComparator;
+set goldenFileComparator(GoldenFileComparator comparator) {
+  _goldenFileComparator = comparator ?? const _UninitializedComparator();
+}
 
 /// Whether golden files should be automatically updated during tests rather
 /// than compared to the image bytes recorded by the tests.
@@ -149,6 +153,7 @@ class LocalFileComparator implements GoldenFileComparator {
   @override
   Future<void> update(Uri golden, Uint8List imageBytes) async {
     final File goldenFile = _getFile(golden);
+    await goldenFile.parent.create(recursive: true);
     await goldenFile.writeAsBytes(imageBytes, flush: true);
   }
 
