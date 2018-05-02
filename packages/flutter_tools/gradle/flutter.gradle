@@ -371,12 +371,20 @@ abstract class BaseFlutterTask extends DefaultTask {
     @Optional @Input
     String extraGenSnapshotOptions
 
-    @OutputFile
-    File getDependenciesFile() {
+    @OutputFiles
+    FileCollection getDependenciesFiles() {
         if (buildMode != 'debug') {
-            return project.file("${intermediateDir}/snapshot.d")
+            // For AOT builds, include the gen_snapshot depfile.
+            FileCollection depfiles = project.files("${intermediateDir}/snapshot.d")
+            if (previewDart2) {
+                // For Dart 2, also include the kernel compiler depfile, since
+                // kernel compile is the first stage of AOT build in this mode,
+                // and it includes all the Dart sources.
+                depfiles += project.files("${intermediateDir}/kernel_compile.d")
+            }
+            return depfiles
         }
-        return project.file("${intermediateDir}/snapshot_blob.bin.d")
+        return project.files("${intermediateDir}/snapshot_blob.bin.d")
     }
 
     void buildBundle() {
@@ -499,31 +507,27 @@ class FlutterTask extends BaseFlutterTask {
                 logger.error("Error reading dependency file ${dependenciesFile}: ${e}")
             }
         }
-        return null
+        return project.files()
     }
 
     @InputFiles
     FileCollection getSourceFiles() {
-        File dependenciesFile = getDependenciesFile()
-        FileCollection sources = readDependencies(dependenciesFile)
-        if (sources != null) {
+        FileCollection sources = project.files()
+        for (File depfile in getDependenciesFiles()) {
+          sources += readDependencies(depfile)
+        }
+        if (!sources.isEmpty()) {
             // We have a dependencies file. Add a dependency on gen_snapshot as well, since the
             // snapshots have to be rebuilt if it changes.
-            FileCollection snapshotter = readDependencies(project.file("${intermediateDir}/gen_snapshot.d"))
-            if (snapshotter != null) {
-                sources = sources.plus(snapshotter)
-            }
+            sources += readDependencies(project.file("${intermediateDir}/gen_snapshot.d"))
             if (previewDart2) {
-                FileCollection frontendServer = readDependencies(project.file("${intermediateDir}/frontend_server.d"))
-                if (frontendServer != null) {
-                    sources = sources.plus(frontendServer)
-                }
+                sources += readDependencies(project.file("${intermediateDir}/frontend_server.d"))
             }
             if (localEngineSrcPath != null) {
-                sources = sources.plus(project.files("$localEngineSrcPath/$localEngine"))
+                sources += project.files("$localEngineSrcPath/$localEngine")
             }
             // Finally, add a dependency on pubspec.yaml as well.
-            return sources.plus(project.files('pubspec.yaml'))
+            return sources + project.files('pubspec.yaml')
         }
         // No dependencies file (or problems parsing it). Fall back to source files.
         return project.fileTree(
