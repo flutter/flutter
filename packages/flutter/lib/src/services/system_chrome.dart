@@ -78,12 +78,19 @@ enum SystemUiOverlay {
   bottom,
 }
 
-/// Specifies a dark vs light preference for certain system chrome options.
-enum SystemChromeTheme {
-  /// Whether the setting should be drawn to be compatible with a light color.
-  light,
-  /// Whether the setting should be drawn to be compatible with a dark color.
+/// Describes the contrast needs of a color.
+enum Brightness {
+  /// The color is dark and will require a light text color to achieve readable
+  /// contrast.
+  ///
+  /// For example, the color might be dark grey, requiring white text.
   dark,
+
+  /// The color is light and will require a dark text color to achieve readable
+  /// contrast.
+  ///
+  /// For example, the color might be bright white, requiring black text.
+  light,
 }
 
 /// Specifies a preference for the style of the system overlays.
@@ -93,81 +100,118 @@ class SystemUiOverlayStyle {
   /// System overlays should be drawn with a light color. Intended for
   /// applications with a dark background.
   static const SystemUiOverlayStyle light = const SystemUiOverlayStyle(
-    navigationBarColor: 0xFF000000,
-    navigationDividerColor: null,
+    systemNavigationBarColor: const Color(0xFFFFFFFF),
+    systemNavigationBarDividerColor: null,
     statusBarColor: null,
-    navigationIconTheme: SystemChromeTheme.light,
-    statusBarTheme: SystemChromeTheme.light,
+    navigationBarIconBrightness: Brightness.dark,
+    statusBarIconBrightness: Brightness.dark,
+    statusBarBrightness:  Brightness.dark,
   );
 
   /// System overlays should be drawn with a dark color. Intended for
   /// applications with a light background.
   static const SystemUiOverlayStyle dark = const SystemUiOverlayStyle(
-    navigationBarColor: 0xFFFFFFFF,
-    navigationDividerColor: null,
+    systemNavigationBarColor: const Color(0xFF000000),
+    systemNavigationBarDividerColor: null,
     statusBarColor: null,
-    navigationIconTheme: SystemChromeTheme.dark,
-    statusBarTheme: SystemChromeTheme.dark,
+    navigationBarIconBrightness: Brightness.light,
+    statusBarIconBrightness: Brightness.light,
+    statusBarBrightness: Brightness.light,
   );
 
   /// Creates a new [SystemUiOverlayStyle].
   const SystemUiOverlayStyle({
-    this.navigationBarColor,
-    this.navigationDividerColor,
+    this.systemNavigationBarColor,
+    this.systemNavigationBarDividerColor,
     this.statusBarColor,
-    this.statusBarTheme,
-    this.navigationIconTheme,
+    this.statusBarBrightness,
+    this.statusBarIconBrightness,
+    this.navigationBarIconBrightness,
   });
 
-  /// The color of the bottom navigation bar.
+  /// The color of the system bottom navigation bar.
   /// 
   /// Only honored in Android versions O and greater.
-  final int navigationBarColor;
+  final Color systemNavigationBarColor;
 
-  /// The color of the divider between the bottom navigation and content.
+  /// The color of the divider between the system bottom navigation and content.
   /// 
   /// Only honored in Android versions P and greater.
-  final int navigationDividerColor;
+  final Color systemNavigationBarDividerColor;
 
   /// The color of top status bar.
   /// 
   /// Only honored in Android version O and greater.
-  final int statusBarColor;
+  final Color statusBarColor;
 
-  /// The theme of top status bar.
+  /// The brightness of top status bar.
   /// 
-  /// Only honored in iOS and Android version O and greater.
-  final SystemChromeTheme statusBarTheme;
+  /// Only honored in iOS .
+  final Brightness statusBarBrightness;
 
-  /// The theme of the navigation bar buttons.
+  /// The brightness of the top status bar icons.
+  /// 
+  /// Only honored in Android version O and greater.
+  final Brightness statusBarIconBrightness;
+
+  /// The brightness of the navigation bar icons.
   /// 
   /// Only honored in Android versions O and greater.
-  final SystemChromeTheme navigationIconTheme;
+  final Brightness navigationBarIconBrightness;
 
   /// Convert this event to a map for serialization.
   Map<String, dynamic> toMap() {
     return <String, dynamic>{
-      'navigationBarColor': navigationBarColor,
-      'navigationDividerColor': navigationDividerColor,
-      'statusBarColor': statusBarColor,
-      'statusBarTheme': statusBarTheme?.toString(),
-      'navigationIconTheme': navigationIconTheme?.toString(),
+      'systemNavigationBarColor': systemNavigationBarColor?.value,
+      'systemNavigationBarDividerColor': systemNavigationBarDividerColor?.value,
+      'statusBarColor': statusBarColor?.value,
+      'statusBarBrightness': statusBarBrightness?.toString(),
+      'statusBarIconBrightness': statusBarIconBrightness?.toString(),
+      'navigationBarIconBrightness': navigationBarIconBrightness?.toString(),
     };
   }
 
+  /// Creates a copy of this theme but with the given fields replaced with new values.
+  SystemUiOverlayStyle copyWith({
+    Color systemNavigationBarColor,
+    Color systemNavigationBarDividerColor,
+    Color statusBarColor,
+    Brightness statusBarBrightness,
+    Brightness statusBarIconBrightness,
+    Brightness navigationBarIconBrightness,
+  }) {
+    return new SystemUiOverlayStyle(
+      systemNavigationBarColor: systemNavigationBarColor ?? this.systemNavigationBarColor,
+      systemNavigationBarDividerColor: systemNavigationBarDividerColor ?? this.systemNavigationBarDividerColor,
+      statusBarColor: statusBarColor ?? this.statusBarColor,
+      statusBarIconBrightness: statusBarIconBrightness ?? this.statusBarIconBrightness,
+      statusBarBrightness: statusBarBrightness ?? this.statusBarBrightness,
+      navigationBarIconBrightness: navigationBarIconBrightness ?? this.navigationBarIconBrightness,
+    );
+  }
+
   @override
-  int get hashCode => hashValues(navigationBarColor, navigationDividerColor, statusBarColor, statusBarTheme, statusBarColor);
+  int get hashCode => 
+    hashValues(
+      systemNavigationBarColor,
+      systemNavigationBarDividerColor,
+      statusBarColor,
+      statusBarBrightness,
+      statusBarIconBrightness,
+      navigationBarIconBrightness,
+    );
 
   @override
   bool operator ==(dynamic other) {
     if (other.runtimeType != runtimeType)
       return false;
     final SystemUiOverlayStyle typedOther = other;
-    return typedOther.navigationBarColor == navigationBarColor
-      && typedOther.navigationDividerColor == navigationDividerColor
+    return typedOther.systemNavigationBarColor == systemNavigationBarColor
+      && typedOther.systemNavigationBarDividerColor == systemNavigationBarDividerColor
       && typedOther.statusBarColor == statusBarColor
-      && typedOther.statusBarTheme == statusBarTheme
-      && typedOther.navigationIconTheme == navigationIconTheme;
+      && typedOther.statusBarIconBrightness == statusBarIconBrightness
+      && typedOther.statusBarBrightness == statusBarBrightness
+      && typedOther.navigationBarIconBrightness == navigationBarIconBrightness;
   }
 }
 

@@ -294,9 +294,18 @@ Widget _wrapWithBackground({
   );
 
   final bool darkBackground = backgroundColor.computeLuminance() < 0.179;
-  SystemChrome.setSystemUIOverlayStyle(
-    darkBackground ? SystemUiOverlayStyle.light : SystemUiOverlayStyle.dark
-  );
+  // TODO(jonahwilliams): remove once we have platform themes.
+  switch (defaultTargetPlatform) {
+    case TargetPlatform.iOS:
+      SystemChrome.setSystemUIOverlayStyle(
+        darkBackground ? SystemUiOverlayStyle.light : SystemUiOverlayStyle.dark
+      );
+      break;
+    case TargetPlatform.android:
+    case TargetPlatform.fuchsia:
+      SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle.dark);
+  }
+
 
   if (backgroundColor.alpha == 0xFF)
     return childWithBackground;
