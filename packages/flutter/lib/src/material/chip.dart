@@ -1285,7 +1285,20 @@ class _RawChipState extends State<RawChip> with TickerProviderStateMixin<RawChip
       begin: backgroundTween.evaluate(enableController),
       end: widget.selectedColor ?? theme.selectedColor,
     );
-    return selectTween.evaluate(selectionFade);
+
+    // Combine the resulting color as if it were a transparent color over top
+    // of white or black.
+    final Color foreground = selectTween.evaluate(selectionFade);
+    final int alpha = foreground.alpha;
+    final int invAlpha = theme.brightness == Brightness.dark ? 0 : 255 - alpha;
+    // This is simpler than a normal alpha blend, because the background color
+    // is always white or black.
+    return new Color.fromARGB(
+      0xff,
+      foreground.red * alpha ~/ 255 + invAlpha,
+      foreground.green * alpha ~/ 255 + invAlpha,
+      foreground.blue * alpha ~/ 255 + invAlpha,
+    );
   }
 
   @override
@@ -1358,6 +1371,15 @@ class _RawChipState extends State<RawChip> with TickerProviderStateMixin<RawChip
     );
   }
 
+  Widget _simpleMaterial({double elevation, ShapeBorder shape, Widget child}) {
+    return new Material(
+      elevation: isTapping ? _kPressElevation : 0.0,
+      animationDuration: pressedAnimationDuration,
+      shape: shape,
+      child: child,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterial(context));
@@ -1369,26 +1391,19 @@ class _RawChipState extends State<RawChip> with TickerProviderStateMixin<RawChip
     final TextDirection textDirection = Directionality.of(context);
     final ShapeBorder shape = widget.shape ?? chipTheme.shape;
 
-    return new Material(
-      elevation: isTapping ? _kPressElevation : 0.0,
-      animationDuration: pressedAnimationDuration,
-      shape: shape,
-      child: new InkResponse(
-        onTap: canTap ? _handleTap : null,
-        onTapDown: canTap ? _handleTapDown : null,
-        onTapCancel: canTap ? _handleTapCancel : null,
-        child: new AnimatedBuilder(
-          animation: new Listenable.merge(<Listenable>[selectController, enableController]),
-          builder: (BuildContext context, Widget child) {
-            return new Container(
-              decoration: new ShapeDecoration(
-                shape: shape,
-                color: getBackgroundColor(chipTheme),
-              ),
-              child: child,
-            );
-          },
-          child: _wrapWithTooltip(
+    return new AnimatedBuilder(
+      animation: new Listenable.merge(<Listenable>[selectController, enableController]),
+      builder: (BuildContext context, Widget _) {
+        return _simpleMaterial(
+          elevation: isTapping ? _kPressElevation : 0.0,
+          shape: shape,
+          child: new InkResponse(
+            highlightShape: BoxShape.circle,
+            containedInkWell: true,
+            onTap: canTap ? _handleTap : null,
+            onTapDown: canTap ? _handleTapDown : null,
+            onTapCancel: canTap ? _handleTapCancel : null,
+            child: _wrapWithTooltip(
               new _ChipRenderWidget(
                 theme: new _ChipRenderTheme(
                   label: new DefaultTextStyle(
@@ -1399,16 +1414,18 @@ class _RawChipState extends State<RawChip> with TickerProviderStateMixin<RawChip
                     style: widget.labelStyle ?? chipTheme.labelStyle,
                     child: widget.label,
                   ),
-                  avatar: new AnimatedSwitcher(
-                    child: widget.avatar,
-                    duration: _kDrawerDuration,
-                    switchInCurve: Curves.fastOutSlowIn,
-                  ),
-                  deleteIcon: new AnimatedSwitcher(
-                    child: _buildDeleteIcon(context, theme, chipTheme),
-                    duration: _kDrawerDuration,
-                    switchInCurve: Curves.fastOutSlowIn,
-                  ),
+//                  avatar: new AnimatedSwitcher(
+//                    child: widget.avatar,
+//                    duration: _kDrawerDuration,
+//                    switchInCurve: Curves.fastOutSlowIn,
+//                  ),
+//                  deleteIcon: new AnimatedSwitcher(
+//                    child: _buildDeleteIcon(context, theme, chipTheme),
+//                    duration: _kDrawerDuration,
+//                    switchInCurve: Curves.fastOutSlowIn,
+//                  ),
+                  avatar: widget.avatar ?? new Container(),
+                  deleteIcon: _buildDeleteIcon(context, theme, chipTheme) ?? new Container(),
                   brightness: chipTheme.brightness,
                   padding: (widget.padding ?? chipTheme.padding).resolve(textDirection),
                   labelPadding: (widget.labelPadding ?? chipTheme.labelPadding).resolve(textDirection),
@@ -1424,9 +1441,11 @@ class _RawChipState extends State<RawChip> with TickerProviderStateMixin<RawChip
                 isEnabled: widget.isEnabled,
               ),
               widget.tooltip,
-              widget.onPressed),
-        ),
-      ),
+              widget.onPressed,
+            ),
+          ),
+        );
+      },
     );
   }
 }
