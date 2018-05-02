@@ -55,7 +55,7 @@ class FlutterGoldenFileComparator implements GoldenFileComparator {
     final LocalFileComparator defaultComparator = goldenFileComparator;
     final GoldensClient goldens = new GoldensClient();
     await goldens.prepare();
-    return FlutterGoldenFileComparator(goldens, defaultComparator.basedir);
+    return new FlutterGoldenFileComparator(goldens, defaultComparator.basedir);
   }
 
   @override
@@ -190,10 +190,10 @@ class GoldensClient {
 
 /// Exception that signals a process' exit with a non-zero exit code.
 class NonZeroExitCode implements Exception {
+  const NonZeroExitCode(this.exitCode, this.stderr) : assert(exitCode != 0);
+
   final int exitCode;
   final String stderr;
-
-  const NonZeroExitCode(this.exitCode, this.stderr) : assert(exitCode != 0);
 
   @override
   String toString() {
