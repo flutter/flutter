@@ -38,9 +38,17 @@ android {
 
     buildTypes {
         release {
+            
+            // Minification and obfuscation disabled by default
+            minifyEnabled false
+            shrinkResources false
+            useProguard false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro' 
+
             // TODO: Add your own signing config for the release build.
             // Signing with the debug keys for now, so `flutter run --release` works.
             signingConfig signingConfigs.debug
+            
         }
     }
 }
