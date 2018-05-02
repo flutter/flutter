@@ -140,7 +140,7 @@ List<GalleryDemo> _buildGalleryDemos() {
     ),
     new GalleryDemo(
       title: 'Bottom app bar',
-      subtitle: 'With repositionable floating action button',
+      subtitle: 'Optional floating action button notch',
       icon: GalleryIcons.bottom_app_bar,
       category: _kMaterialComponents,
       routeName: BottomAppBarDemo.routeName,
