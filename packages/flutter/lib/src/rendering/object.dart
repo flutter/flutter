@@ -2169,9 +2169,13 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   ///
   /// If this render object has no semantics information, the first parent
   /// render object with a non-null semantic node is used.
+  /// 
+  /// If semantics are disabled, no events are dispatched.
   ///
   /// See [SemanticsNode.sendEvent] for a full description of the behavior.
   void sendSemanticsEvent(SemanticsEvent semanticsEvent) {
+    if (owner.semanticsOwner == null)
+      return;
     if (_semantics != null) {
       _semantics.sendEvent(semanticsEvent);
     } else if (parent != null) {

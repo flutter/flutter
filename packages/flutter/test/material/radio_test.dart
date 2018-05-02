@@ -193,6 +193,7 @@ void main() {
       'nodeId': object.debugSemantics.id,
       'data': <String, dynamic>{},
     });
+    expect(object.debugSemantics.getSemanticsData().hasAction(SemanticsAction.tap), true);
 
     semantics.dispose();
     SystemChannels.accessibility.setMockMessageHandler(null);

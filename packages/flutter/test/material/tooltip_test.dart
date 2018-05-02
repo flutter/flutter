@@ -644,7 +644,6 @@ void main() {
         },
       },
     ]));
-
     semantics.dispose();
     SystemChannels.accessibility.setMockMessageHandler(null);
   });
