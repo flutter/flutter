@@ -24,8 +24,8 @@ final Tween<BorderRadius> _kFrontHeadingBevelRadius = new BorderRadiusTween(
   ),
 );
 
-class _IgnorePointerWhileStatusIsNot extends StatefulWidget {
-  const _IgnorePointerWhileStatusIsNot(this.status, {
+class _TappableWhileStatusIs extends StatefulWidget {
+  const _TappableWhileStatusIs(this.status, {
     Key key,
     this.controller,
     this.child,
@@ -36,17 +36,17 @@ class _IgnorePointerWhileStatusIsNot extends StatefulWidget {
   final Widget child;
 
   @override
-  _IgnorePointerWhileStatusIsNotState createState() => new _IgnorePointerWhileStatusIsNotState();
+  _TappableWhileStatusIsState createState() => new _TappableWhileStatusIsState();
 }
 
-class _IgnorePointerWhileStatusIsNotState extends State<_IgnorePointerWhileStatusIsNot> {
-  bool _ignoring;
+class _TappableWhileStatusIsState extends State<_TappableWhileStatusIs> {
+  bool _active;
 
   @override
   void initState() {
     super.initState();
     widget.controller.addStatusListener(_handleStatusChange);
-    _ignoring = widget.controller.status != widget.status;
+    _active = widget.controller.status == widget.status;
   }
 
   @override
@@ -55,20 +55,24 @@ class _IgnorePointerWhileStatusIsNotState extends State<_IgnorePointerWhileStatu
     super.dispose();
   }
 
-  void _handleStatusChange(AnimationStatus _) {
-    final bool value = widget.controller.status != widget.status;
-    if (_ignoring != value) {
+  void _handleStatusChange(AnimationStatus status) {
+    final bool value = widget.controller.status == widget.status;
+    if (_active != value) {
       setState(() {
-        _ignoring = value;
+        _active = value;
       });
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    return new IgnorePointer(
-      ignoring: _ignoring,
-      child: widget.child,
+    return new AbsorbPointer(
+      absorbing: !_active,
+      // Redundant. TODO(xster): remove after https://github.com/flutter/flutter/issues/17179.
+      child: new IgnorePointer(
+        ignoring: !_active,
+        child: widget.child
+      ),
     );
   }
 }
@@ -103,26 +107,20 @@ class _CrossFadeTransition extends AnimatedWidget {
     return new Stack(
       alignment: alignment,
       children: <Widget>[
-        new IgnorePointer(
-          ignoring: opacity1 < 1.0,
-          child: new Opacity(
-            opacity: opacity1,
-            child: new Semantics(
-              scopesRoute: true,
-              explicitChildNodes: true,
-              child: child1,
-            ),
+        new Opacity(
+          opacity: opacity1,
+          child: new Semantics(
+            scopesRoute: true,
+            explicitChildNodes: true,
+            child: child1,
           ),
         ),
-        new IgnorePointer(
-          ignoring: opacity2 < 1.0,
-          child: new Opacity(
-            opacity: opacity2,
-            child: new Semantics(
-              scopesRoute: true,
-              explicitChildNodes: true,
-              child: child0,
-            ),
+        new Opacity(
+          opacity: opacity2,
+          child: new Semantics(
+            scopesRoute: true,
+            explicitChildNodes: true,
+            child: child0,
           ),
         ),
       ],
@@ -291,7 +289,7 @@ class _BackdropState extends State<Backdrop> with SingleTickerProviderStateMixin
               ),
             ),
             new Expanded(
-              child: new _IgnorePointerWhileStatusIsNot(
+              child: new _TappableWhileStatusIs(
                 AnimationStatus.dismissed,
                 controller: _controller,
                 child: widget.backLayer,
@@ -316,7 +314,7 @@ class _BackdropState extends State<Backdrop> with SingleTickerProviderStateMixin
                 child: child,
               );
             },
-            child: new _IgnorePointerWhileStatusIsNot(
+            child: new _TappableWhileStatusIs(
               AnimationStatus.completed,
               controller: _controller,
               child: new FadeTransition(
