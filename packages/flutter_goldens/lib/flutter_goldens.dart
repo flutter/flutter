@@ -152,7 +152,7 @@ class GoldensClient {
     await _runCommands(
       <String>[
         'git init',
-        'git remote add origin git@github.com:flutter/goldens.git',
+        'git remote add origin https://github.com/flutter/goldens.git',
         'git pull origin master',
       ],
       workingDirectory: repositoryRoot,
