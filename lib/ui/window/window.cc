@@ -112,16 +112,8 @@ void _RespondToPlatformMessage(Dart_NativeArguments args) {
 }  // namespace
 
 Dart_Handle ToByteData(const std::vector<uint8_t>& buffer) {
-  return ToTypedData(Dart_TypedData_kByteData, buffer);
-}
-
-Dart_Handle ToTypedData(Dart_TypedData_Type data_type,
-                        const std::vector<uint8_t>& buffer) {
-  FXL_DCHECK(data_type == Dart_TypedData_kByteData ||
-             data_type == Dart_TypedData_kInt8 ||
-             data_type == Dart_TypedData_kUint8);
-
-  Dart_Handle data_handle = Dart_NewTypedData(data_type, buffer.size());
+  Dart_Handle data_handle =
+      Dart_NewTypedData(Dart_TypedData_kByteData, buffer.size());
   if (Dart_IsError(data_handle))
     return data_handle;
 
