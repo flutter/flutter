@@ -166,9 +166,9 @@ Future<Set<String>> readDepfile(String depfilePath) async {
 ///     suitable for loading with `mmap`.
 ///   * Assembly AOT snapshot: architecture-specific ahead-of-time compile to
 ///     assembly suitable for compilation as a static or dynamic library.
-class Snapshotter {
+class ScriptSnapshotter {
   /// Builds an architecture-independent snapshot of the specified script.
-  Future<int> buildScriptSnapshot({
+  Future<int> build({
     @required String mainPath,
     @required String snapshotPath,
     @required String depfilePath,
@@ -206,51 +206,11 @@ class Snapshotter {
     await _writeFingerprint(snapshotType, outputPaths, depfilePath, mainPath, fingerprintPath);
     return exitCode;
   }
+}
 
-  /// Compiles a Dart file to kernel.
-  ///
-  /// Returns the output kernel file path, or null on failure.
-  Future<String> compileKernel({
-    @required TargetPlatform platform,
-    @required BuildMode buildMode,
-    @required String mainPath,
-    @required String outputPath,
-    List<String> extraFrontEndOptions: const <String>[],
-  }) async {
-    final Directory outputDir = fs.directory(outputPath);
-    outputDir.createSync(recursive: true);
-
-    printTrace('Compiling Dart to kernel: $mainPath');
-    final List<String> entryPointsJsonFiles = <String>[
-      artifacts.getArtifactPath(Artifact.entryPointsJson, platform, buildMode),
-      artifacts.getArtifactPath(Artifact.entryPointsExtraJson, platform, buildMode),
-    ];
-
-    if ((extraFrontEndOptions != null) && extraFrontEndOptions.isNotEmpty)
-      printTrace('Extra front-end options: $extraFrontEndOptions');
-
-    final String depfilePath = fs.path.join(outputPath, 'kernel_compile.d');
-    final CompilerOutput compilerOutput = await kernelCompiler.compile(
-      sdkRoot: artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath),
-      mainPath: mainPath,
-      outputFilePath: fs.path.join(outputPath, 'app.dill'),
-      depFilePath: depfilePath,
-      extraFrontEndOptions: extraFrontEndOptions,
-      linkPlatformKernelIn: true,
-      aot: true,
-      entryPointsJsonFiles: entryPointsJsonFiles,
-      trackWidgetCreation: false,
-    );
-
-    // Write path to frontend_server, since things need to be re-generated when that changes.
-    final String frontendPath = artifacts.getArtifactPath(Artifact.frontendServerSnapshotForEngineDartSdk);
-    await fs.directory(outputPath).childFile('frontend_server.d').writeAsString('frontend_server.d: $frontendPath\n');
-
-    return compilerOutput?.outputFilename;
-  }
-
+class AOTSnapshotter {
   /// Builds an architecture-specific ahead-of-time compiled snapshot of the specified script.
-  Future<int> buildAotSnapshot({
+  Future<int> build({
     @required TargetPlatform platform,
     @required BuildMode buildMode,
     @required String mainPath,
@@ -289,12 +249,8 @@ class Snapshotter {
     final List<String> inputPaths = <String>[uiPath, vmServicePath, vmEntryPoints, ioEntryPoints, mainPath];
     final Set<String> outputPaths = new Set<String>();
 
-    final String vmSnapshotData = fs.path.join(outputDir.path, 'vm_snapshot_data');
-    final String isolateSnapshotData = fs.path.join(outputDir.path, 'isolate_snapshot_data');
     final String depfilePath = fs.path.join(outputDir.path, 'snapshot.d');
     final List<String> genSnapshotArgs = <String>[
-      '--vm_snapshot_data=$vmSnapshotData',
-      '--isolate_snapshot_data=$isolateSnapshotData',
       '--url_mapping=dart:ui,$uiPath',
       '--url_mapping=dart:vmservice_io,$vmServicePath',
       '--embedder_entry_points_manifest=$vmEntryPoints',
@@ -326,11 +282,15 @@ class Snapshotter {
       genSnapshotArgs.add('--assembly=$assembly');
     } else {
       // Blob AOT snapshot.
+      final String vmSnapshotData = fs.path.join(outputDir.path, 'vm_snapshot_data');
+      final String isolateSnapshotData = fs.path.join(outputDir.path, 'isolate_snapshot_data');
       final String vmSnapshotInstructions = fs.path.join(outputDir.path, 'vm_snapshot_instr');
       final String isolateSnapshotInstructions = fs.path.join(outputDir.path, 'isolate_snapshot_instr');
-      outputPaths.addAll(<String>[vmSnapshotData, isolateSnapshotData]);
+      outputPaths.addAll(<String>[vmSnapshotData, isolateSnapshotData, vmSnapshotInstructions, isolateSnapshotInstructions]);
       genSnapshotArgs.addAll(<String>[
         '--snapshot_kind=app-aot-blobs',
+        '--vm_snapshot_data=$vmSnapshotData',
+        '--isolate_snapshot_data=$isolateSnapshotData',
         '--vm_snapshot_instructions=$vmSnapshotInstructions',
         '--isolate_snapshot_instructions=$isolateSnapshotInstructions',
       ]);
@@ -376,43 +336,108 @@ class Snapshotter {
     // On iOS, we use Xcode to compile the snapshot into a dynamic library that the
     // end-developer can link into their app.
     if (platform == TargetPlatform.ios) {
-      printStatus('Building App.framework...');
-      const List<String> commonBuildOptions = const <String>['-arch', 'arm64', '-miphoneos-version-min=8.0'];
-
-      final String assemblyO = fs.path.join(outputDir.path, 'snapshot_assembly.o');
-      await xcode.cc(commonBuildOptions.toList()..addAll(<String>['-c', assembly, '-o', assemblyO]));
-
-      final String frameworkDir = fs.path.join(outputDir.path, 'App.framework');
-      fs.directory(frameworkDir).createSync(recursive: true);
-      final String appLib = fs.path.join(frameworkDir, 'App');
-      final List<String> linkArgs = commonBuildOptions.toList()..addAll(<String>[
-          '-dynamiclib',
-          '-Xlinker', '-rpath', '-Xlinker', '@executable_path/Frameworks',
-          '-Xlinker', '-rpath', '-Xlinker', '@loader_path/Frameworks',
-          '-install_name', '@rpath/App.framework/App',
-          '-o', appLib,
-          assemblyO,
-      ]);
-      await xcode.clang(linkArgs);
-    } else {
-      if (compileToSharedLibrary) {
-        // A word of warning: Instead of compiling via two steps, to a .o file and
-        // then to a .so file we use only one command. When using two commands
-        // gcc will end up putting a .eh_frame and a .debug_frame into the shared
-        // library. Without stripping .debug_frame afterwards, unwinding tools
-        // based upon libunwind use just one and ignore the contents of the other
-        // (which causes it to not look into the other section and therefore not
-        // find the correct unwinding information).
-        final String assemblySo = fs.path.join(outputDir.path, 'app.so');
-        await runCheckedAsync(<String>[androidSdk.ndkCompiler]
-            ..addAll(androidSdk.ndkCompilerArgs)
-            ..addAll(<String>[ '-shared', '-nostdlib', '-o', assemblySo, assembly ]));
-      }
+      final RunResult result = await _buildIosFramework(assemblyPath: assembly, outputPath: outputDir.path);
+      if (result.exitCode != 0)
+        return result.exitCode;
+    } else if (compileToSharedLibrary) {
+      final RunResult result = await _buildAndroidSharedLibrary(assemblyPath: assembly, outputPath: outputDir.path);
+      if (result.exitCode != 0)
+        return result.exitCode;
     }
 
     // Compute and record build fingerprint.
     await _writeFingerprint(snapshotType, outputPaths, depfilePath, mainPath, fingerprintPath);
     return 0;
+  }
+
+  /// Builds an iOS framework at [outputPath]/App.framework from the assembly
+  /// source at [assemblyPath].
+  Future<RunResult> _buildIosFramework({
+    @required String assemblyPath,
+    @required String outputPath,
+  }) async {
+    printStatus('Building App.framework...');
+    const List<String> commonBuildOptions = const <String>['-arch', 'arm64', '-miphoneos-version-min=8.0'];
+
+    final String assemblyO = fs.path.join(outputPath, 'snapshot_assembly.o');
+    final RunResult compileResult = await xcode.cc(commonBuildOptions.toList()..addAll(<String>['-c', assemblyPath, '-o', assemblyO]));
+    if (compileResult.exitCode != 0)
+      return compileResult;
+
+    final String frameworkDir = fs.path.join(outputPath, 'App.framework');
+    fs.directory(frameworkDir).createSync(recursive: true);
+    final String appLib = fs.path.join(frameworkDir, 'App');
+    final List<String> linkArgs = commonBuildOptions.toList()..addAll(<String>[
+        '-dynamiclib',
+        '-Xlinker', '-rpath', '-Xlinker', '@executable_path/Frameworks',
+        '-Xlinker', '-rpath', '-Xlinker', '@loader_path/Frameworks',
+        '-install_name', '@rpath/App.framework/App',
+        '-o', appLib,
+        assemblyO,
+    ]);
+    final RunResult linkResult = await xcode.clang(linkArgs);
+    return linkResult;
+  }
+
+  /// Builds an Android shared library at [outputPath]/app.so from the assembly
+  /// source at [assemblyPath].
+  Future<RunResult> _buildAndroidSharedLibrary({
+    @required String assemblyPath,
+    @required String outputPath,
+  }) async {
+    // A word of warning: Instead of compiling via two steps, to a .o file and
+    // then to a .so file we use only one command. When using two commands
+    // gcc will end up putting a .eh_frame and a .debug_frame into the shared
+    // library. Without stripping .debug_frame afterwards, unwinding tools
+    // based upon libunwind use just one and ignore the contents of the other
+    // (which causes it to not look into the other section and therefore not
+    // find the correct unwinding information).
+    final String assemblySo = fs.path.join(outputPath, 'app.so');
+    return await runCheckedAsync(<String>[androidSdk.ndkCompiler]
+        ..addAll(androidSdk.ndkCompilerArgs)
+        ..addAll(<String>[ '-shared', '-nostdlib', '-o', assemblySo, assemblyPath ]));
+  }
+
+  /// Compiles a Dart file to kernel.
+  ///
+  /// Returns the output kernel file path, or null on failure.
+  Future<String> compileKernel({
+    @required TargetPlatform platform,
+    @required BuildMode buildMode,
+    @required String mainPath,
+    @required String outputPath,
+    List<String> extraFrontEndOptions: const <String>[],
+  }) async {
+    final Directory outputDir = fs.directory(outputPath);
+    outputDir.createSync(recursive: true);
+
+    printTrace('Compiling Dart to kernel: $mainPath');
+    final List<String> entryPointsJsonFiles = <String>[
+      artifacts.getArtifactPath(Artifact.entryPointsJson, platform, buildMode),
+      artifacts.getArtifactPath(Artifact.entryPointsExtraJson, platform, buildMode),
+    ];
+
+    if ((extraFrontEndOptions != null) && extraFrontEndOptions.isNotEmpty)
+      printTrace('Extra front-end options: $extraFrontEndOptions');
+
+    final String depfilePath = fs.path.join(outputPath, 'kernel_compile.d');
+    final CompilerOutput compilerOutput = await kernelCompiler.compile(
+      sdkRoot: artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath),
+      mainPath: mainPath,
+      outputFilePath: fs.path.join(outputPath, 'app.dill'),
+      depFilePath: depfilePath,
+      extraFrontEndOptions: extraFrontEndOptions,
+      linkPlatformKernelIn: true,
+      aot: true,
+      entryPointsJsonFiles: entryPointsJsonFiles,
+      trackWidgetCreation: false,
+    );
+
+    // Write path to frontend_server, since things need to be re-generated when that changes.
+    final String frontendPath = artifacts.getArtifactPath(Artifact.frontendServerSnapshotForEngineDartSdk);
+    await fs.directory(outputPath).childFile('frontend_server.d').writeAsString('frontend_server.d: $frontendPath\n');
+
+    return compilerOutput?.outputFilename;
   }
 
   bool _isValidAotPlatform(TargetPlatform platform, BuildMode buildMode) {
@@ -428,49 +453,49 @@ class Snapshotter {
   String _getPackagePath(PackageMap packageMap, String package) {
     return fs.path.dirname(fs.path.fromUri(packageMap.map[package]));
   }
+}
 
-  Future<bool> _isBuildRequired(SnapshotType type, Set<String> outputPaths, String depfilePath, String mainPath, String fingerprintPath) async {
-    final File fingerprintFile = fs.file(fingerprintPath);
-    final List<String> requiredFiles = <String>[fingerprintPath, depfilePath]..addAll(outputPaths);
-    if (!requiredFiles.every(fs.isFileSync))
-      return true;
-
-    try {
-      if (fingerprintFile.existsSync()) {
-        final Fingerprint oldFingerprint = new Fingerprint.fromJson(await fingerprintFile.readAsString());
-        final Set<String> inputFilePaths = await readDepfile(depfilePath)..add(mainPath)..addAll(outputPaths);
-        final Fingerprint newFingerprint = createFingerprint(type, mainPath, inputFilePaths);
-        return oldFingerprint != newFingerprint;
-      }
-    } catch (e) {
-      // Log exception and continue, this step is a performance improvement only.
-      printTrace('Rebuilding snapshot due to fingerprint check error: $e');
-    }
+Future<bool> _isBuildRequired(SnapshotType type, Set<String> outputPaths, String depfilePath, String mainPath, String fingerprintPath) async {
+  final File fingerprintFile = fs.file(fingerprintPath);
+  final List<String> requiredFiles = <String>[fingerprintPath, depfilePath]..addAll(outputPaths);
+  if (!requiredFiles.every(fs.isFileSync))
     return true;
-  }
 
-  Future<Null> _writeFingerprint(SnapshotType type, Set<String> outputPaths, String depfilePath, String mainPath, String fingerprintPath) async {
-    try {
-      final Set<String> inputFilePaths = await readDepfile(depfilePath)
-        ..add(mainPath)
-        ..addAll(outputPaths);
-      final Fingerprint fingerprint = createFingerprint(type, mainPath, inputFilePaths);
-      await fs.file(fingerprintPath).writeAsString(fingerprint.toJson());
-    } catch (e, s) {
-      // Log exception and continue, this step is a performance improvement only.
-      printStatus('Error during snapshot fingerprinting: $e\n$s');
+  try {
+    if (fingerprintFile.existsSync()) {
+      final Fingerprint oldFingerprint = new Fingerprint.fromJson(await fingerprintFile.readAsString());
+      final Set<String> inputFilePaths = await readDepfile(depfilePath)..add(mainPath)..addAll(outputPaths);
+      final Fingerprint newFingerprint = createFingerprint(type, mainPath, inputFilePaths);
+      return oldFingerprint != newFingerprint;
     }
+  } catch (e) {
+    // Log exception and continue, this step is a performance improvement only.
+    printTrace('Rebuilding snapshot due to fingerprint check error: $e');
   }
+  return true;
+}
 
-  static Fingerprint createFingerprint(SnapshotType type, String mainPath, Iterable<String> inputFilePaths) {
-    final Map<String, String> properties = <String, String>{
-      'buildMode': type.mode.toString(),
-      'targetPlatform': type.platform?.toString() ?? '',
-      'entryPoint': mainPath,
-    };
-    final List<String> pathsWithSnapshotData = inputFilePaths.toList()
-      ..add(artifacts.getArtifactPath(Artifact.vmSnapshotData))
-      ..add(artifacts.getArtifactPath(Artifact.isolateSnapshotData));
-    return new Fingerprint.fromBuildInputs(properties, pathsWithSnapshotData);
+Future<Null> _writeFingerprint(SnapshotType type, Set<String> outputPaths, String depfilePath, String mainPath, String fingerprintPath) async {
+  try {
+    final Set<String> inputFilePaths = await readDepfile(depfilePath)
+      ..add(mainPath)
+      ..addAll(outputPaths);
+    final Fingerprint fingerprint = createFingerprint(type, mainPath, inputFilePaths);
+    await fs.file(fingerprintPath).writeAsString(fingerprint.toJson());
+  } catch (e, s) {
+    // Log exception and continue, this step is a performance improvement only.
+    printStatus('Error during snapshot fingerprinting: $e\n$s');
   }
+}
+
+Fingerprint createFingerprint(SnapshotType type, String mainPath, Iterable<String> inputFilePaths) {
+  final Map<String, String> properties = <String, String>{
+    'buildMode': type.mode.toString(),
+    'targetPlatform': type.platform?.toString() ?? '',
+    'entryPoint': mainPath,
+  };
+  final List<String> pathsWithSnapshotData = inputFilePaths.toList()
+    ..add(artifacts.getArtifactPath(Artifact.vmSnapshotData))
+    ..add(artifacts.getArtifactPath(Artifact.isolateSnapshotData));
+  return new Fingerprint.fromBuildInputs(properties, pathsWithSnapshotData);
 }
