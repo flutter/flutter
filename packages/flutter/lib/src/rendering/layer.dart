@@ -519,8 +519,9 @@ class OffsetLayer extends ContainerLayer {
 
   /// Capture an image of the current state of this layer and its children.
   ///
-  /// The returned [ui.Image] has uncompressed raw RGBA bytes, in the
-  /// dimensions [logicalSize] multiplied by the [pixelRatio].
+  /// The returned [ui.Image] has uncompressed raw RGBA bytes, will be offset
+  /// by the top-left corner of [bounds], and have dimensions equal to the size
+  /// of [bounds] multiplied by [pixelRatio].
   ///
   /// The [pixelRatio] describes the scale between the logical pixels and the
   /// size of the output image. It is independent of the
@@ -532,11 +533,12 @@ class OffsetLayer extends ContainerLayer {
   ///
   ///  * [RenderRepaintBoundary.toImage] for a similar API at the render object level.
   ///  * [dart:ui.Scene.toImage] for more information about the image returned.
-  Future<ui.Image> toImage(Size logicalSize, {double pixelRatio: 1.0}) async {
+  Future<ui.Image> toImage(Rect bounds, {double pixelRatio: 1.0}) async {
+    assert(bounds != null);
     assert(pixelRatio != null);
     final ui.SceneBuilder builder = new ui.SceneBuilder();
-    final Matrix4 transform = new Matrix4.diagonal3Values(pixelRatio, pixelRatio, 1.0);
-    transform.translate(-offset.dx, -offset.dy, 0.0);
+    final Matrix4 transform = new Matrix4.translationValues(bounds.left - offset.dx, bounds.top - offset.dy, 0.0);
+    transform.scale(pixelRatio, pixelRatio);
     builder.pushTransform(transform.storage);
     addToScene(builder, Offset.zero);
     final ui.Scene scene = builder.build();
@@ -544,8 +546,8 @@ class OffsetLayer extends ContainerLayer {
       // Size is rounded up to the next pixel to make sure we don't clip off
       // anything.
       return await scene.toImage(
-        (pixelRatio * logicalSize.width).ceil(),
-        (pixelRatio * logicalSize.height).ceil(),
+        (pixelRatio * bounds.width).ceil(),
+        (pixelRatio * bounds.height).ceil(),
       );
     } finally {
       scene.dispose();

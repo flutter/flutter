@@ -52,37 +52,41 @@ class _CategoryItem extends StatelessWidget {
     final ThemeData theme = Theme.of(context);
     final bool isDark = theme.brightness == Brightness.dark;
 
-    return new RawMaterialButton(
-      padding: EdgeInsets.zero,
-      splashColor: theme.primaryColor.withOpacity(0.12),
-      highlightColor: Colors.transparent,
-      onPressed: onTap,
-      child: new Column(
-        mainAxisAlignment: MainAxisAlignment.end,
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: <Widget>[
-          new Padding(
-            padding: const EdgeInsets.all(6.0),
-            child: new Icon(
-              category.icon,
-              size: 60.0,
-              color: isDark ? Colors.white : _kFlutterBlue,
-            ),
-          ),
-          const SizedBox(height: 10.0),
-          new Container(
-            height: 48.0,
-            alignment: Alignment.center,
-            child: new Text(
-              category.name,
-              textAlign: TextAlign.center,
-              style: theme.textTheme.subhead.copyWith(
-                fontFamily: 'GoogleSans',
+    // This repaint boundary prevents the entire _CategoriesPage from being
+    // repainted when the button's ink splash animates.
+    return new RepaintBoundary(
+      child: new RawMaterialButton(
+        padding: EdgeInsets.zero,
+        splashColor: theme.primaryColor.withOpacity(0.12),
+        highlightColor: Colors.transparent,
+        onPressed: onTap,
+        child: new Column(
+          mainAxisAlignment: MainAxisAlignment.end,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: <Widget>[
+            new Padding(
+              padding: const EdgeInsets.all(6.0),
+              child: new Icon(
+                category.icon,
+                size: 60.0,
                 color: isDark ? Colors.white : _kFlutterBlue,
               ),
             ),
-          ),
-        ],
+            const SizedBox(height: 10.0),
+            new Container(
+              height: 48.0,
+              alignment: Alignment.center,
+              child: new Text(
+                category.name,
+                textAlign: TextAlign.center,
+                style: theme.textTheme.subhead.copyWith(
+                  fontFamily: 'GoogleSans',
+                  color: isDark ? Colors.white : _kFlutterBlue,
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -112,33 +116,38 @@ class _CategoriesPage extends StatelessWidget {
           final double rowHeight = columnWidth * aspectRatio;
           final int rowCount = (categories.length + columnCount - 1) ~/ columnCount;
 
-          return new Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: new List<Widget>.generate(rowCount, (int rowIndex) {
-              final int columnCountForRow = rowIndex == rowCount - 1
-                ? categories.length - columnCount * math.max(0, rowCount - 1)
-                : columnCount;
+          // This repaint boundary prevents the inner contents of the front layer
+          // from repainting when the backdrop toggle triggers a repaint on the
+          // LayoutBuilder.
+          return new RepaintBoundary(
+            child: new Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: new List<Widget>.generate(rowCount, (int rowIndex) {
+                final int columnCountForRow = rowIndex == rowCount - 1
+                  ? categories.length - columnCount * math.max(0, rowCount - 1)
+                  : columnCount;
 
-              return new Row(
-                children: new List<Widget>.generate(columnCountForRow, (int columnIndex) {
-                  final int index = rowIndex * columnCount + columnIndex;
-                  final GalleryDemoCategory category = categoriesList[index];
+                return new Row(
+                  children: new List<Widget>.generate(columnCountForRow, (int columnIndex) {
+                    final int index = rowIndex * columnCount + columnIndex;
+                    final GalleryDemoCategory category = categoriesList[index];
 
-                  return new SizedBox(
-                    width: columnWidth,
-                    height: rowHeight,
-                    child: new _CategoryItem(
-                      category: category,
-                      onTap: () {
-                        onCategoryTap(category);
-                      },
-                    ),
-                  );
-                }),
-              );
-            }),
+                    return new SizedBox(
+                      width: columnWidth,
+                      height: rowHeight,
+                      child: new _CategoryItem(
+                        category: category,
+                        onTap: () {
+                          onCategoryTap(category);
+                        },
+                      ),
+                    );
+                  }),
+                );
+              }),
+            ),
           );
         },
       ),

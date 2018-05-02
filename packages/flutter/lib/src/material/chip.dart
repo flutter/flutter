@@ -17,7 +17,6 @@ import 'icons.dart';
 import 'ink_well.dart';
 import 'material.dart';
 import 'material_localizations.dart';
-import 'shadows.dart';
 import 'theme.dart';
 import 'tooltip.dart';
 
@@ -516,7 +515,13 @@ class Chip extends StatelessWidget implements ChipAttributes, DeletableChipAttri
 ///  * [Wrap], A widget that displays its children in multiple horizontal or
 ///    vertical runs.
 ///  * <https://material.google.com/components/chips.html>
-class InputChip extends StatelessWidget implements ChipAttributes, DeletableChipAttributes, SelectableChipAttributes, DisabledChipAttributes, TappableChipAttributes {
+class InputChip extends StatelessWidget
+    implements
+        ChipAttributes,
+        DeletableChipAttributes,
+        SelectableChipAttributes,
+        DisabledChipAttributes,
+        TappableChipAttributes {
   /// Creates an [InputChip].
   ///
   /// The [onPressed] and [onSelected] callbacks must not both be specified at
@@ -663,7 +668,11 @@ class InputChip extends StatelessWidget implements ChipAttributes, DeletableChip
 ///  * [Wrap], A widget that displays its children in multiple horizontal or
 ///    vertical runs.
 ///  * <https://material.google.com/components/chips.html>
-class ChoiceChip extends StatelessWidget implements ChipAttributes, SelectableChipAttributes, DisabledChipAttributes {
+class ChoiceChip extends StatelessWidget
+    implements
+        ChipAttributes,
+        SelectableChipAttributes,
+        DisabledChipAttributes {
   /// Create a chip that acts like a radio button.
   ///
   /// The [label] and [selected] attributes must not be null.
@@ -822,7 +831,11 @@ class ChoiceChip extends StatelessWidget implements ChipAttributes, SelectableCh
 ///  * [Wrap], A widget that displays its children in multiple horizontal or
 ///    vertical runs.
 ///  * <https://material.google.com/components/chips.html>
-class FilterChip extends StatelessWidget implements ChipAttributes, SelectableChipAttributes, DisabledChipAttributes {
+class FilterChip extends StatelessWidget
+    implements
+        ChipAttributes,
+        SelectableChipAttributes,
+        DisabledChipAttributes {
   /// Create a chip that acts like a checkbox.
   ///
   /// The [selected] and [label] attributes must not be null.
@@ -956,9 +969,10 @@ class ActionChip extends StatelessWidget implements ChipAttributes, TappableChip
     this.padding,
   })  : assert(label != null),
         assert(
-            onPressed != null,
-            'Rather than disabling an ActionChip by setting onPressed to null, '
-            'remove it from the interface entirely.',),
+          onPressed != null,
+          'Rather than disabling an ActionChip by setting onPressed to null, '
+          'remove it from the interface entirely.',
+        ),
         super(key: key);
 
   @override
@@ -1028,7 +1042,13 @@ class ActionChip extends StatelessWidget implements ChipAttributes, TappableChip
 ///  * [Wrap], A widget that displays its children in multiple horizontal or
 ///    vertical runs.
 ///  * <https://material.google.com/components/chips.html>
-class RawChip extends StatefulWidget implements ChipAttributes, DeletableChipAttributes, SelectableChipAttributes, DisabledChipAttributes, TappableChipAttributes {
+class RawChip extends StatefulWidget
+    implements
+        ChipAttributes,
+        DeletableChipAttributes,
+        SelectableChipAttributes,
+        DisabledChipAttributes,
+        TappableChipAttributes {
   /// Creates a RawChip
   ///
   /// The [onPressed] and [onSelected] callbacks must not both be specified at
@@ -1351,14 +1371,11 @@ class _RawChipState extends State<RawChip> with TickerProviderStateMixin<RawChip
     );
   }
 
-  Widget _simpleMaterial({double elevation, ShapeBorder shape, ChipThemeData chipTheme, Widget child}) {
-    return new AnimatedContainer(
-      duration: pressedAnimationDuration,
-      decoration: new ShapeDecoration(
-        shape: shape,
-        color: getBackgroundColor(chipTheme),
-        shadows: kElevationToShadow[elevation.toInt()],
-      ),
+  Widget _simpleMaterial({double elevation, ShapeBorder shape, Widget child}) {
+    return new Material(
+      elevation: isTapping ? _kPressElevation : 0.0,
+      animationDuration: pressedAnimationDuration,
+      shape: shape,
       child: child,
     );
   }
@@ -1380,7 +1397,6 @@ class _RawChipState extends State<RawChip> with TickerProviderStateMixin<RawChip
         return _simpleMaterial(
           elevation: isTapping ? _kPressElevation : 0.0,
           shape: shape,
-          chipTheme: chipTheme,
           child: new InkResponse(
             highlightShape: BoxShape.circle,
             containedInkWell: true,
@@ -1826,14 +1842,22 @@ class _RenderChip extends RenderBox {
     // The overall padding isn't affected by missing avatar or delete icon
     // because we add the padding regardless to give extra padding for the label
     // when they're missing.
-    final double overallPadding = theme.padding.horizontal + theme.labelPadding.horizontal;
-    return overallPadding + _minWidth(avatar, height) + _minWidth(label, height) + _minWidth(deleteIcon, height);
+    final double overallPadding = theme.padding.horizontal +
+        theme.labelPadding.horizontal;
+    return overallPadding +
+        _minWidth(avatar, height) +
+        _minWidth(label, height) +
+        _minWidth(deleteIcon, height);
   }
 
   @override
   double computeMaxIntrinsicWidth(double height) {
-    final double overallPadding = theme.padding.vertical + theme.labelPadding.horizontal;
-    return overallPadding + _maxWidth(avatar, height) + _maxWidth(label, height) + _maxWidth(deleteIcon, height);
+    final double overallPadding = theme.padding.vertical +
+        theme.labelPadding.horizontal;
+    return overallPadding +
+        _maxWidth(avatar, height) +
+        _maxWidth(label, height) +
+        _maxWidth(deleteIcon, height);
   }
 
   @override
@@ -2017,7 +2041,9 @@ class _RenderChip extends RenderBox {
           pressRect = new Rect.fromLTWH(
             0.0,
             0.0,
-            deleteIconShowing ? start + theme.padding.left : overallSize.width + theme.padding.horizontal,
+            deleteIconShowing
+                ? start + theme.padding.left
+                : overallSize.width + theme.padding.horizontal,
             overallSize.height + theme.padding.vertical,
           );
         } else {
@@ -2101,13 +2127,17 @@ class _RenderChip extends RenderBox {
 
     final ColorTween fadeTween = new ColorTween(begin: Colors.transparent, end: paintColor);
 
-    paintColor = checkmarkAnimation.status == AnimationStatus.reverse ? fadeTween.evaluate(checkmarkAnimation) : paintColor;
+    paintColor = checkmarkAnimation.status == AnimationStatus.reverse
+        ? fadeTween.evaluate(checkmarkAnimation)
+        : paintColor;
 
     final Paint paint = new Paint()
       ..color = paintColor
       ..style = PaintingStyle.stroke
       ..strokeWidth = _kCheckmarkStrokeWidth * (avatar != null ? avatar.size.height / 24.0 : 1.0);
-    final double t = checkmarkAnimation.status == AnimationStatus.reverse ? 1.0 : checkmarkAnimation.value;
+    final double t = checkmarkAnimation.status == AnimationStatus.reverse
+        ? 1.0
+        : checkmarkAnimation.value;
     if (t == 0.0) {
       // Nothing to draw.
       return;
@@ -2145,7 +2175,8 @@ class _RenderChip extends RenderBox {
       }
       // Need to make the check mark be a little smaller than the avatar.
       final double checkSize = avatar.size.height * 0.75;
-      final Offset checkOffset = _boxParentData(avatar).offset + new Offset(avatar.size.height * 0.125, avatar.size.height * 0.125);
+      final Offset checkOffset = _boxParentData(avatar).offset +
+          new Offset(avatar.size.height * 0.125, avatar.size.height * 0.125);
       _paintCheck(context.canvas, offset + checkOffset, checkSize);
     }
   }

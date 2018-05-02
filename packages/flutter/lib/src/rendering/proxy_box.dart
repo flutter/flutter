@@ -2515,7 +2515,7 @@ class RenderRepaintBoundary extends RenderProxyBox {
   ///  * [dart:ui.Scene.toImage] for more information about the image returned.
   Future<ui.Image> toImage({double pixelRatio: 1.0}) {
     assert(!debugNeedsPaint);
-    return layer.toImage(size, pixelRatio: pixelRatio);
+    return layer.toImage(Offset.zero & size, pixelRatio: pixelRatio);
   }
 
 

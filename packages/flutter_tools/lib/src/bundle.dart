@@ -56,8 +56,7 @@ Future<void> build({
 
     // In a precompiled snapshot, the instruction buffer contains script
     // content equivalents
-    final Snapshotter snapshotter = new Snapshotter();
-    final int result = await snapshotter.buildScriptSnapshot(
+    final int result = await new ScriptSnapshotter().build(
       mainPath: mainPath,
       snapshotPath: snapshotPath,
       depfilePath: depfilePath,
