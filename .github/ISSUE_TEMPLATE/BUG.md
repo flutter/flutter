@@ -1,8 +1,9 @@
 ---
-name: I am having difficulty installing Flutter or getting it to work
-about: You have run into problems while downloading or installing Flutter,
-  or the "flutter" tool is crashing, or you are running into some other
-  issue before even being able to use "flutter run".
+name: I have a problem with my Flutter application.
+about: You are writing an application with Flutter but a widget is rendering
+  incorrectly, the application is crashing, there's an exception in the logs,
+  a widget is behaving badly, or some other such problem is manifesting.
+  
 
 ---
 
