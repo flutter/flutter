@@ -174,10 +174,11 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
     markNeedsLayout();
   }
 
+  /// {@template flutter.rendering.viewport.cacheExtent}
   /// The viewport has an area before and after the visible area to cache items
   /// that are about to become visible when the user scrolls.
   ///
-  /// Items that fall in this cache area are rendered even though they are not
+  /// Items that fall in this cache area are laid out even though they are not
   /// (yet) visible on screen. The [cacheExtent] describes how many pixels
   /// the cache area extends before the leading edge and after the trailing edge
   /// of the viewport.
@@ -188,8 +189,9 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
   ///
   /// The cache area is also used to implement implicit accessibility scrolling
   /// on iOS: When the accessibility focus moves from an item in the visible
-  /// viewport to an invisible item in the cache area, th framework will bring
+  /// viewport to an invisible item in the cache area, the framework will bring
   /// that item into view with an (implicit) scroll action.
+  /// {@endtemplate}
   double get cacheExtent => _cacheExtent;
   double _cacheExtent;
   set cacheExtent(double value) {
@@ -380,7 +382,7 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
     }
 
     // we made it without a correction, whee!
-    return  0.0;
+    return 0.0;
   }
 
   @override
@@ -416,7 +418,8 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
 
   @override
   Rect describeSemanticsClip(RenderSliver child) {
-    switch(axis) {
+    assert (axis != null);
+    switch (axis) {
       case Axis.vertical:
         return new Rect.fromLTRB(
           semanticBounds.left,
@@ -432,7 +435,6 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
           semanticBounds.bottom,
         );
     }
-    assert(false);
     return null;
   }
 

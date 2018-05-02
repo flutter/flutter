@@ -903,7 +903,8 @@ class SliverMultiBoxAdaptorElement extends RenderObjectElement implements Render
           break;
       }
 
-      return parentData.layoutOffset < renderObject.constraints.scrollOffset + renderObject.constraints.remainingPaintExtent && parentData.layoutOffset + itemExtent > renderObject.constraints.scrollOffset;
+      return parentData.layoutOffset < renderObject.constraints.scrollOffset + renderObject.constraints.remainingPaintExtent &&
+          parentData.layoutOffset + itemExtent > renderObject.constraints.scrollOffset;
     }).forEach(visitor);
   }
 }

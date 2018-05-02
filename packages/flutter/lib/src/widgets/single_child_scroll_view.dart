@@ -217,22 +217,7 @@ class _RenderSingleChildViewport extends RenderBox with RenderObjectWithChildMix
     markNeedsLayout();
   }
 
-  /// The viewport has an area before and after the visible area to cache items
-  /// that are about to become visible when the user scrolls.
-  ///
-  /// Items that fall in this cache area are rendered even though they are not
-  /// (yet) visible on screen. The [cacheExtent] describes how many pixels
-  /// the cache area extends before the leading edge and after the trailing edge
-  /// of the viewport.
-  ///
-  /// The total extent, which the viewport will try to cover with children, is
-  /// [cacheExtent] before the leading edge + extent of the main axis +
-  /// [cacheExtent] after the trailing edge.
-  ///
-  /// The cache area is also used to implement implicit accessibility scrolling
-  /// on iOS: When the accessibility focus moves from an item in the visible
-  /// viewport to an invisible item in the cache area, th framework will bring
-  /// that item into view with an (implicit) scroll action.
+  /// {@macro flutter.rendering.viewport.cacheExtent}
   double get cacheExtent => _cacheExtent;
   double _cacheExtent;
   set cacheExtent(double value) {
@@ -477,7 +462,8 @@ class _RenderSingleChildViewport extends RenderBox with RenderObjectWithChildMix
 
   @override
   Rect describeSemanticsClip(RenderObject child) {
-    switch(axis) {
+    assert(axis != null);
+    switch (axis) {
       case Axis.vertical:
         return new Rect.fromLTRB(
           semanticBounds.left,
@@ -493,7 +479,6 @@ class _RenderSingleChildViewport extends RenderBox with RenderObjectWithChildMix
           semanticBounds.bottom,
         );
     }
-    assert(false);
     return null;
   }
 }
