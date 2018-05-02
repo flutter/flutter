@@ -91,11 +91,10 @@ class ImageCache {
           : 0.0;
         _pending.remove(key);
         _currentSize += size;
-        if (_currentSize > _maximumSize)
-          _evictImages();
-        //
         _cache[key] = new _SizedImage(completer, size);
         completer.removeListener(listener);
+        if (_currentSize > _maximumSize)
+          _evictImages();
       };
       completer.addListener(listener);
     }
