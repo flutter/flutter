@@ -31,7 +31,7 @@ class ImageCache {
   /// Network images don't immediately have a size and don't contribute to the
   /// current cache limits until they resolve.
   final Map<Object, ImageStreamCompleter> _pending = <Object, ImageStreamCompleter>{};
-  final Map<Object, _SizedImage> cache = <Object, _SizedImage>{};
+  final Map<Object, _SizedImage> _cache = <Object, _SizedImage>{};
 
   double _currentSize = 0.0;
   /// The current size of the cache in kilobytes.
@@ -59,7 +59,7 @@ class ImageCache {
   // TODO(ianh): Provide a way to target individual images. This is currently non-trivial
   // because by the time we get to the imageCache, the keys we're using are opaque.
   void clear() {
-    cache.clear();
+    _cache.clear();
   }
 
   /// Returns the previously cached [ImageStream] for the given key, if available;
@@ -70,12 +70,12 @@ class ImageCache {
   ImageStreamCompleter putIfAbsent(Object key, ImageStreamCompleter loader()) {
     assert(key != null);
     assert(loader != null);
-    final _SizedImage result = cache[key];
+    final _SizedImage result = _cache[key];
     if (result != null) {
       // Remove the provider from the list so that we can put it back in below
       // and thus move it to the end of the list.
-      cache.remove(key);
-      cache[key] = result;
+      _cache.remove(key);
+      _cache[key] = result;
       return result.image;
     }
     ImageStreamCompleter completer = _pending[key];
@@ -94,7 +94,7 @@ class ImageCache {
         if (_currentSize > _maximumSize)
           _evictImages();
         //
-        cache[key] = new _SizedImage(completer, size);
+        _cache[key] = new _SizedImage(completer, size);
         completer.removeListener(listener);
       };
       completer.addListener(listener);
@@ -108,16 +108,16 @@ class ImageCache {
     // first determine how many images need to be removed.
     double removedSize = 0.0;
     int removeCount = 0;
-    for (Object key in cache.keys) {
+    for (Object key in _cache.keys) {
       if (_currentSize - removedSize <= maximumSize) {
         break;
       }
-      final _SizedImage image = cache[key];
+      final _SizedImage image = _cache[key];
       removedSize += image.size;
       removeCount += 1;
     }
     for (int i = 0; i < removeCount; i++) {
-      cache.remove(cache.keys.first);
+      _cache.remove(_cache.keys.first);
     }
     _currentSize -= removedSize;
   }
