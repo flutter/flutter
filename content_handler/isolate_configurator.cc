@@ -15,13 +15,13 @@
 namespace flutter {
 
 IsolateConfigurator::IsolateConfigurator(
-    const UniqueFDIONS& fdio_ns,
+    UniqueFDIONS fdio_ns,
     fidl::InterfaceHandle<views_v1::ViewContainer> view_container,
     fidl::InterfaceHandle<component::ApplicationEnvironment>
         application_environment,
     fidl::InterfaceRequest<component::ServiceProvider>
         outgoing_services_request)
-    : fdio_ns_(fdio_ns),
+    : fdio_ns_(std::move(fdio_ns)),
       view_container_(std::move(view_container)),
       application_environment_(std::move(application_environment)),
       outgoing_services_request_(std::move(outgoing_services_request)) {}
@@ -38,6 +38,10 @@ bool IsolateConfigurator::ConfigureCurrentIsolate() {
   BindZircon();
   BindDartIO();
   BindScenic();
+
+  // This is now owned by the Dart bindings. So relinquish our ownership of the
+  // handle.
+  (void)fdio_ns_.release();
 
   return true;
 }

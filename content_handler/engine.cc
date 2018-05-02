@@ -39,7 +39,7 @@ Engine::Engine(Delegate& delegate,
                component::ApplicationContext& application_context,
                blink::Settings settings,
                fidl::InterfaceRequest<views_v1_token::ViewOwner> view_owner,
-               const UniqueFDIONS& fdio_ns,
+               UniqueFDIONS fdio_ns,
                fidl::InterfaceRequest<component::ServiceProvider>
                    outgoing_services_request)
     : delegate_(delegate),
@@ -182,7 +182,7 @@ Engine::Engine(Delegate& delegate,
     application_context.ConnectToEnvironmentService(
         application_environment.NewRequest());
     isolate_configurator_ = std::make_unique<IsolateConfigurator>(
-        fdio_ns,                              //
+        std::move(fdio_ns),                   //
         std::move(view_container),            //
         std::move(application_environment),   //
         std::move(outgoing_services_request)  //

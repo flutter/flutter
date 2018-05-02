@@ -30,7 +30,7 @@ class Engine final {
          component::ApplicationContext& application_context,
          blink::Settings settings,
          fidl::InterfaceRequest<views_v1_token::ViewOwner> view_owner,
-         const UniqueFDIONS& fdio_ns,
+         UniqueFDIONS fdio_ns,
          fidl::InterfaceRequest<component::ServiceProvider>
              outgoing_services_request);
 

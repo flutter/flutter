@@ -20,7 +20,7 @@ namespace flutter {
 class IsolateConfigurator final : mozart::NativesDelegate {
  public:
   IsolateConfigurator(
-      const UniqueFDIONS& fdio_ns,
+      UniqueFDIONS fdio_ns,
       fidl::InterfaceHandle<views_v1::ViewContainer> view_container,
       fidl::InterfaceHandle<component::ApplicationEnvironment>
           application_environment,
@@ -35,7 +35,7 @@ class IsolateConfigurator final : mozart::NativesDelegate {
 
  private:
   bool used_ = false;
-  const UniqueFDIONS& fdio_ns_;
+  UniqueFDIONS fdio_ns_;
   fidl::InterfaceHandle<views_v1::ViewContainer> view_container_;
   fidl::InterfaceHandle<component::ApplicationEnvironment>
       application_environment_;

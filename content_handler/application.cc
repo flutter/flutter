@@ -41,7 +41,7 @@ Application::Create(
   return {std::move(thread), std::move(application)};
 }
 
-static std::string DebugLabelForURL(const std::string url) {
+static std::string DebugLabelForURL(const std::string& url) {
   auto found = url.rfind("/");
   if (found == std::string::npos) {
     return url;
@@ -302,14 +302,14 @@ void Application::CreateView(
   // This method may be called multiple times. Care must be taken to ensure that
   // all arguments can be accessed or synthesized multiple times.
   // TODO(chinmaygarde): Figure out how to re-create the outgoing service
-  // request handle.
+  // request handle and the FDIO namespace.
   shell_holders_.emplace(std::make_unique<Engine>(
       *this,                                 // delegate
       debug_label_,                          // thread label
       *application_context_,                 // application context
       settings_,                             // settings
       std::move(view_owner),                 // view owner
-      fdio_ns_,                              // FDIO namespace
+      std::move(fdio_ns_),                   // FDIO namespace
       std::move(outgoing_services_request_)  // outgoing request
       ));
 }

@@ -21,7 +21,7 @@ VulkanSurfaceProducer::VulkanSurfaceProducer(
   valid_ = Initialize(mozart_session);
 
   if (valid_) {
-    FXL_LOG(INFO)
+    FXL_DLOG(INFO)
         << "Flutter engine: Vulkan surface producer initialization: Successful";
   } else {
     FXL_LOG(ERROR)

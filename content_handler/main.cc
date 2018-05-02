@@ -14,10 +14,10 @@ int main(int argc, char const* argv[]) {
   trace::TraceProvider provider(loop.async());
   FXL_DCHECK(provider.is_valid()) << "Trace provider must be valid.";
 
-  FXL_LOG(INFO) << "Flutter application services initialized.";
+  FXL_DLOG(INFO) << "Flutter application services initialized.";
   flutter::ApplicationRunner runner([&loop]() {
     loop.PostQuitTask();
-    FXL_LOG(INFO) << "Flutter application services terminated. Good bye...";
+    FXL_DLOG(INFO) << "Flutter application services terminated. Good bye...";
   });
 
   loop.Run();

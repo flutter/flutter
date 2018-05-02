@@ -24,7 +24,7 @@ template <class T>
 void SetInterfaceErrorHandler(fidl::InterfacePtr<T>& interface,
                               std::string name) {
   interface.set_error_handler(
-      [name]() { FXL_DLOG(ERROR) << "Interface error on: " << name; });
+      [name]() { FXL_LOG(ERROR) << "Interface error on: " << name; });
 }
 
 PlatformView::PlatformView(
