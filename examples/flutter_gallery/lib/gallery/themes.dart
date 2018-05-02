@@ -33,6 +33,7 @@ ThemeData _buildDarkTheme() {
     canvasColor: const Color(0xFF202124),
     scaffoldBackgroundColor: const Color(0xFF202124),
     backgroundColor: const Color(0xFF202124),
+    errorColor: const Color(0xFFB00020),
     buttonTheme: const ButtonThemeData(
       textTheme: ButtonTextTheme.primary,
     ),
@@ -55,6 +56,7 @@ ThemeData _buildLightTheme() {
     canvasColor: Colors.white,
     scaffoldBackgroundColor: Colors.white,
     backgroundColor: Colors.white,
+    errorColor: const Color(0xFFB00020),
     buttonTheme: const ButtonThemeData(
       textTheme: ButtonTextTheme.primary,
     ),
