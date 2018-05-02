@@ -103,7 +103,7 @@ class SystemUiOverlayStyle {
     systemNavigationBarColor: const Color(0xFFFFFFFF),
     systemNavigationBarDividerColor: null,
     statusBarColor: null,
-    navigationBarIconBrightness: Brightness.dark,
+    systemNavigationBarIconBrightness: Brightness.dark,
     statusBarIconBrightness: Brightness.dark,
     statusBarBrightness:  Brightness.dark,
   );
@@ -114,7 +114,7 @@ class SystemUiOverlayStyle {
     systemNavigationBarColor: const Color(0xFF000000),
     systemNavigationBarDividerColor: null,
     statusBarColor: null,
-    navigationBarIconBrightness: Brightness.light,
+    systemNavigationBarIconBrightness: Brightness.light,
     statusBarIconBrightness: Brightness.light,
     statusBarBrightness: Brightness.light,
   );
@@ -126,7 +126,7 @@ class SystemUiOverlayStyle {
     this.statusBarColor,
     this.statusBarBrightness,
     this.statusBarIconBrightness,
-    this.navigationBarIconBrightness,
+    this.systemNavigationBarIconBrightness,
   });
 
   /// The color of the system bottom navigation bar.
@@ -154,10 +154,10 @@ class SystemUiOverlayStyle {
   /// Only honored in Android version O and greater.
   final Brightness statusBarIconBrightness;
 
-  /// The brightness of the navigation bar icons.
+  /// The brightness of the system navigation bar icons.
   /// 
   /// Only honored in Android versions O and greater.
-  final Brightness navigationBarIconBrightness;
+  final Brightness systemNavigationBarIconBrightness;
 
   /// Convert this event to a map for serialization.
   Map<String, dynamic> toMap() {
@@ -167,7 +167,7 @@ class SystemUiOverlayStyle {
       'statusBarColor': statusBarColor?.value,
       'statusBarBrightness': statusBarBrightness?.toString(),
       'statusBarIconBrightness': statusBarIconBrightness?.toString(),
-      'navigationBarIconBrightness': navigationBarIconBrightness?.toString(),
+      'systemNavigationBarIconBrightness': systemNavigationBarIconBrightness?.toString(),
     };
   }
 
@@ -178,7 +178,7 @@ class SystemUiOverlayStyle {
     Color statusBarColor,
     Brightness statusBarBrightness,
     Brightness statusBarIconBrightness,
-    Brightness navigationBarIconBrightness,
+    Brightness systemNavigationBarIconBrightness,
   }) {
     return new SystemUiOverlayStyle(
       systemNavigationBarColor: systemNavigationBarColor ?? this.systemNavigationBarColor,
@@ -186,7 +186,7 @@ class SystemUiOverlayStyle {
       statusBarColor: statusBarColor ?? this.statusBarColor,
       statusBarIconBrightness: statusBarIconBrightness ?? this.statusBarIconBrightness,
       statusBarBrightness: statusBarBrightness ?? this.statusBarBrightness,
-      navigationBarIconBrightness: navigationBarIconBrightness ?? this.navigationBarIconBrightness,
+      systemNavigationBarIconBrightness: systemNavigationBarIconBrightness ?? this.systemNavigationBarIconBrightness,
     );
   }
 
@@ -198,7 +198,7 @@ class SystemUiOverlayStyle {
       statusBarColor,
       statusBarBrightness,
       statusBarIconBrightness,
-      navigationBarIconBrightness,
+      systemNavigationBarIconBrightness,
     );
 
   @override
@@ -211,7 +211,7 @@ class SystemUiOverlayStyle {
       && typedOther.statusBarColor == statusBarColor
       && typedOther.statusBarIconBrightness == statusBarIconBrightness
       && typedOther.statusBarBrightness == statusBarBrightness
-      && typedOther.navigationBarIconBrightness == navigationBarIconBrightness;
+      && typedOther.systemNavigationBarIconBrightness == systemNavigationBarIconBrightness;
   }
 }
 
