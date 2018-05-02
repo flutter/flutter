@@ -38,6 +38,11 @@ bool debugPaintLayerBordersEnabled = false;
 bool debugPaintPointersEnabled = false;
 
 /// Overlay a rotating set of colors when repainting layers in checked mode.
+///
+/// See also:
+///
+///  * [RepaintBoundary] which can be used to contain repaints when unchanged
+///    areas are being excessively repainted.
 bool debugRepaintRainbowEnabled = false;
 
 /// Overlay a rotating set of colors when repainting text in checked mode.
@@ -109,6 +114,9 @@ bool debugCheckIntrinsicSizes = false;
 ///    equivalent.
 ///
 ///  * The discussion at [RendererBinding.drawFrame].
+///
+///  * [RepaintBoundary] which can be used to contain repaints when unchanged
+///    areas are being excessively repainted.
 bool debugProfilePaintsEnabled = false;
 
 /// Setting to true will cause all clipping effects from the layer tree to be
