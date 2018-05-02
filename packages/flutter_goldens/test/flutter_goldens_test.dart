@@ -3,7 +3,9 @@
 // found in the LICENSE file.
 
 import 'dart:io' as io;
+import 'dart:typed_data';
 
+import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_goldens/flutter_goldens.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -19,12 +21,12 @@ const String _kGoldensVersion = '123456abcdef';
 void main() {
   MemoryFileSystem fs;
   FakePlatform platform;
-  FakeProcessManager process;
+  MockProcessManager process;
 
   setUp(() {
     fs = new MemoryFileSystem();
     platform = new FakePlatform(environment: <String, String>{'FLUTTER_ROOT': _kFlutterRoot});
-    process = new FakeProcessManager();
+    process = new MockProcessManager();
     fs.directory(_kFlutterRoot).createSync(recursive: true);
     fs.directory(_kRepositoryRoot).createSync(recursive: true);
     fs.file(_kVersionFile).createSync(recursive: true);
@@ -49,16 +51,77 @@ void main() {
         await goldens.prepare();
 
         // Verify that we only spawned `git rev-parse HEAD`
-        final VerificationResult revParse =
+        final VerificationResult verifyProcessRun =
             verify(process.run(typed(captureAny), workingDirectory: typed(captureAny, named: 'workingDirectory')));
-        revParse.called(1);
-        expect(revParse.captured.first, <String>['git', 'rev-parse', 'HEAD']);
-        expect(revParse.captured.last, _kRepositoryRoot);
+        verifyProcessRun.called(1);
+        expect(verifyProcessRun.captured.first, <String>['git', 'rev-parse', 'HEAD']);
+        expect(verifyProcessRun.captured.last, _kRepositoryRoot);
       });
     });
   });
 
-  group('FlutterRepoComparator', () {});
+  group('FlutterGoldenFileComparator', () {
+    GoldensClient goldens;
+    MemoryFileSystem fs;
+    FlutterGoldenFileComparator comparator;
+
+    setUp(() {
+      goldens = new MockGoldensClient();
+      fs = new MemoryFileSystem();
+      final Directory flutterRoot = fs.directory('/path/to/flutter')..createSync(recursive: true);
+      final Directory goldensRoot = flutterRoot.childDirectory('bin/cache/goldens')..createSync(recursive: true);
+      final Directory testDirectory = flutterRoot.childDirectory('test/foo/bar')..createSync(recursive: true);
+      comparator = new FlutterGoldenFileComparator(goldens, new Uri.directory(testDirectory.path), fs: fs);
+      when(goldens.flutterRoot).thenReturn(flutterRoot);
+      when(goldens.repositoryRoot).thenReturn(goldensRoot);
+    });
+
+    group('compare', () {
+      test('throws if golden file is not found', () async {
+        try {
+          await comparator.compare(new Uint8List.fromList(<int>[1, 2, 3]), Uri.parse('test.png'));
+          fail('TestFailure expected but not thrown');
+        } on TestFailure catch (error) {
+          expect(error.message, contains('Could not be compared against non-existent file'));
+        }
+      });
+
+      test('returns false if golden bytes do not match', () async {
+        final File goldenFile = fs.file('/path/to/flutter/bin/cache/goldens/test/foo/bar/test.png')
+          ..createSync(recursive: true);
+        goldenFile.writeAsBytesSync(<int>[4, 5, 6], flush: true);
+        final bool result = await comparator.compare(new Uint8List.fromList(<int>[1, 2, 3]), Uri.parse('test.png'));
+        expect(result, isFalse);
+      });
+
+      test('returns true if golden bytes match', () async {
+        final File goldenFile = fs.file('/path/to/flutter/bin/cache/goldens/test/foo/bar/test.png')
+          ..createSync(recursive: true);
+        goldenFile.writeAsBytesSync(<int>[1, 2, 3], flush: true);
+        final bool result = await comparator.compare(new Uint8List.fromList(<int>[1, 2, 3]), Uri.parse('test.png'));
+        expect(result, isTrue);
+      });
+    });
+
+    group('update', () {
+      test('creates golden file if it does not already exist', () async {
+        final File goldenFile = fs.file('/path/to/flutter/bin/cache/goldens/test/foo/bar/test.png');
+        expect(goldenFile.existsSync(), isFalse);
+        await comparator.update(Uri.parse('test.png'), new Uint8List.fromList(<int>[1, 2, 3]));
+        expect(goldenFile.existsSync(), isTrue);
+        expect(goldenFile.readAsBytesSync(), <int>[1, 2, 3]);
+      });
+
+      test('overwrites golden bytes if golden file already exist', () async {
+        final File goldenFile = fs.file('/path/to/flutter/bin/cache/goldens/test/foo/bar/test.png')
+          ..createSync(recursive: true);
+        goldenFile.writeAsBytesSync(<int>[4, 5, 6], flush: true);
+        await comparator.update(Uri.parse('test.png'), new Uint8List.fromList(<int>[1, 2, 3]));
+        expect(goldenFile.readAsBytesSync(), <int>[1, 2, 3]);
+      });
+    });
+  });
 }
 
-class FakeProcessManager extends Mock implements ProcessManager {}
+class MockProcessManager extends Mock implements ProcessManager {}
+class MockGoldensClient extends Mock implements GoldensClient {}

@@ -16,20 +16,23 @@ import 'package:process/process.dart';
 
 const String _kFlutterRootKey = 'FLUTTER_ROOT';
 
+/// Main method that can be used in a `flutter_test_config.dart` file to set
+/// [goldenFileComparator] to an instance of [FlutterGoldenFileComparator] that
+/// works for the current test.
 Future<void> main(FutureOr<void> testMain()) async {
   goldenFileComparator = await FlutterGoldenFileComparator.fromDefaultComparator();
   await testMain();
 }
 
-/// A golden file comparator specific to the Flutter repository.
+/// A golden file comparator specific to the `flutter/flutter` repository.
 ///
-/// Within the `flutter/flutter` repository, it's important not to check in
-/// binaries in order to keep the size of the repository to a minimum. To
-/// satisfy this requirement, this comparator retrieves the golden files from
-/// a sibling repository, `flutter/goldens`.
+/// Within the https://github.com/flutter/flutter repository, it's important
+/// not to check-in binaries in order to keep the size of the repository to a
+/// minimum. To satisfy this requirement, this comparator retrieves the golden
+/// files from a sibling repository, `flutter/goldens`.
 ///
 /// This comparator will locally clone the `flutter/goldens` repository into
-/// the `bin/cache/pkg/goldens` folder, then perform the comparison against
+/// the `$FLUTTER_ROOT/bin/cache/pkg/goldens` folder, then perform the comparison against
 /// the files therein.
 class FlutterGoldenFileComparator implements GoldenFileComparator {
   @visibleForTesting
@@ -62,6 +65,7 @@ class FlutterGoldenFileComparator implements GoldenFileComparator {
       throw new TestFailure('Could not be compared against non-existent file: "$golden"');
     }
     final List<int> goldenBytes = await goldenFile.readAsBytes();
+    // TODO(tvolkert): Improve the intelligence of this comparison.
     return const ListEquality<int>().equals(goldenBytes, imageBytes);
   }
 
@@ -80,6 +84,9 @@ class FlutterGoldenFileComparator implements GoldenFileComparator {
   }
 }
 
+/// A class that represents a clone of the https://github.com/flutter/goldens
+/// repository, nested within the `bin/cache` directory of the caller's Flutter
+/// repository.
 @visibleForTesting
 class GoldensClient {
   GoldensClient({
@@ -98,6 +105,16 @@ class GoldensClient {
 
   Directory get repositoryRoot => flutterRoot.childDirectory(fs.path.join('bin', 'cache', 'pkg', 'goldens'));
 
+  /// Prepares the local clone of the `flutter/goldens` repository for golden
+  /// file testing.
+  ///
+  /// This ensures that the goldens repository has been cloned into its
+  /// expected location within `bin/cache` and that it is synced to the Git
+  /// revision specified in `bin/internal/goldens.version`.
+  ///
+  /// While this is preparing the repository, it obtains a file lock such that
+  /// [GoldensClient] instances in other processes or isolates will not
+  /// duplicate the work that this is doing.
   Future<void> prepare() async {
     if (await _isSyncRequired()) {
       await _obtainLock();
@@ -171,6 +188,7 @@ class GoldensClient {
   }
 }
 
+/// Exception that signals a process' exit with a non-zero exit code.
 class NonZeroExitCode implements Exception {
   final int exitCode;
   final String stderr;
