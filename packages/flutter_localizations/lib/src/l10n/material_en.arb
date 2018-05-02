@@ -1,7 +1,7 @@
 {
   "scriptCategory": "English-like",
   "@scriptCategory": {
-    "description": "The name of the language's script category (see https://material.io/guidelines/style/typography.html#typography-language-categories-reference)."
+    "description": "The name of the language's script category (see https://material.io/go/design-typography#typography-language-categories-reference)."
   },
 
   "timeOfDayFormat": "h:mm a",

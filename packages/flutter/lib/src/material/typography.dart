@@ -17,7 +17,7 @@ import 'colors.dart';
 /// [BuildContext] and read the [ThemeData.textTheme] property.
 ///
 /// The following image [from the material design
-/// specification](https://material.io/guidelines/style/typography.html#typography-styles)
+/// specification](https://material.io/go/design-typography#typography-styles)
 /// shows the recommended styles for each of the properties of a [TextTheme].
 /// This image uses the `Roboto` font, which is the font used on Android. On
 /// iOS, the [San Francisco
@@ -435,8 +435,8 @@ class Typography {
 /// expected to use [Theme.of] to get [TextTheme] objects fully populated with
 /// font properties.
 ///
-/// See also: https://material.io/guidelines/style/typography.html
-// TODO(yjbanov): implement font fallback (see "Font stack" at https://material.io/guidelines/style/typography.html)
+/// See also: https://material.io/go/design-typography
+// TODO(yjbanov): implement font fallback (see "Font stack" at https://material.io/go/design-typography)
 class _MaterialTextColorThemes {
   static const TextTheme blackMountainView = const TextTheme(
     display4: const TextStyle(debugLabel: 'blackMountainView display4', fontFamily: 'Roboto',         inherit: true, color: Colors.black54, decoration: TextDecoration.none),
@@ -496,7 +496,7 @@ class _MaterialTextColorThemes {
 }
 
 /// Defines text geometries for the three language categories defined in
-/// https://material.io/guidelines/style/typography.html.
+/// https://material.io/go/design-typography.
 class MaterialTextGeometry {
   /// The name of the English-like script category.
   static const String englishLikeCategory = 'English-like';

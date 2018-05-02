@@ -72,7 +72,7 @@ class BuildAotCommand extends BuildSubCommand {
     try {
       final bool previewDart2 = argResults['preview-dart-2'];
       String mainPath = findMainDartFile(targetFile);
-      final Snapshotter snapshotter = new Snapshotter();
+      final AOTSnapshotter snapshotter = new AOTSnapshotter();
 
       // Compile to kernel, if Dart 2.
       if (previewDart2) {
@@ -90,7 +90,7 @@ class BuildAotCommand extends BuildSubCommand {
       }
 
       // Build AOT snapshot.
-      final int snapshotExitCode = await snapshotter.buildAotSnapshot(
+      final int snapshotExitCode = await snapshotter.build(
         platform: platform,
         buildMode: buildMode,
         mainPath: mainPath,
