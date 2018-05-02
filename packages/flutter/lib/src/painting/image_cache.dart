@@ -31,7 +31,7 @@ class ImageCache {
   /// Network images don't immediately have a size and don't contribute to the
   /// current cache limits until they resolve.
   final Map<Object, ImageStreamCompleter> _pending = <Object, ImageStreamCompleter>{};
-  final Map<Object, _SizedImage> _cache = <Object, _SizedImage>{};
+  final Map<Object, _SizedImage> cache = <Object, _SizedImage>{};
 
   double _currentSize = 0.0;
   /// The current size of the cache in kilobytes.
@@ -59,7 +59,7 @@ class ImageCache {
   // TODO(ianh): Provide a way to target individual images. This is currently non-trivial
   // because by the time we get to the imageCache, the keys we're using are opaque.
   void clear() {
-    _cache.clear();
+    cache.clear();
   }
 
   /// Returns the previously cached [ImageStream] for the given key, if available;
@@ -70,28 +70,34 @@ class ImageCache {
   ImageStreamCompleter putIfAbsent(Object key, ImageStreamCompleter loader()) {
     assert(key != null);
     assert(loader != null);
-    final _SizedImage result = _cache[key];
+    final _SizedImage result = cache[key];
     if (result != null) {
       // Remove the provider from the list so that we can put it back in below
       // and thus move it to the end of the list.
-      _cache.remove(key);
-      _cache[key] = result;
+      cache.remove(key);
+      cache[key] = result;
       return result.image;
     }
     ImageStreamCompleter completer = _pending[key];
     if (completer == null) {
       completer = loader();
-      completer.addListener((ImageInfo info, bool syncCall) {
+      ImageListener listener;
+      // The listener can be invoked synchronously if syncCall is true, so
+      // add the completer to pending immediately.
+      _pending[key] = completer;
+      listener = (ImageInfo info, bool syncCall) {
         final double size = info.image != null 
           ? (info.image.width * info.image.height * 4) / 1024
           : 0.0;
         _pending.remove(key);
-        _cache[key] = new _SizedImage(completer, size);
         _currentSize += size;
         if (_currentSize > _maximumSize)
           _evictImages();
-      });
-      _pending[key] = completer;
+        //
+        cache[key] = new _SizedImage(completer, size);
+        completer.removeListener(listener);
+      };
+      completer.addListener(listener);
     }
     return completer;
   }
@@ -102,16 +108,16 @@ class ImageCache {
     // first determine how many images need to be removed.
     double removedSize = 0.0;
     int removeCount = 0;
-    for (Object key in _cache.keys) {
+    for (Object key in cache.keys) {
       if (_currentSize - removedSize <= maximumSize) {
         break;
       }
-      final _SizedImage image = _cache[key];
+      final _SizedImage image = cache[key];
       removedSize += image.size;
       removeCount += 1;
     }
     for (int i = 0; i < removeCount; i++) {
-      _cache.remove(_cache.keys.first);
+      cache.remove(cache.keys.first);
     }
     _currentSize -= removedSize;
   }
@@ -122,5 +128,7 @@ class _SizedImage {
   _SizedImage(this.image, this.size);
 
   final ImageStreamCompleter image;
+
+  /// Size of the image in kilobytes.
   final double size;
 }

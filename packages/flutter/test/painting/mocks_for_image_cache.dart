@@ -4,7 +4,7 @@
 
 import 'dart:async';
 import 'dart:typed_data';
-import 'dart:ui' as ui show Image;
+import 'dart:ui' as ui show Image, ImageByteFormat;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
@@ -69,7 +69,7 @@ class FakeImage implements ui.Image {
   void dispose() {}
 
   @override
-  Future<ByteData> toByteData() {
+  Future<ByteData> toByteData({ui.ImageByteFormat format: ui.ImageByteFormat.rawRgba}) {
     return new Future<ByteData>.error(
       new UnsupportedError('Not supported in FakeImage'));
   }  
