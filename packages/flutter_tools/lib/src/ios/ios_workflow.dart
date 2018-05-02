@@ -196,7 +196,7 @@ class IOSWorkflow extends DoctorValidator implements Workflow {
             '$cocoaPodsInstallInstructions'
           ));
         } else {
-          messages.add(new ValidationMessage.error(
+          messages.add(new ValidationMessage.hint(
             'CocoaPods out of date (${cocoaPods.cocoaPodsRecommendedVersion} is recommended).\n'
             '$noCocoaPodsConsequence\n'
             'To upgrade:\n'
