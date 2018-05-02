@@ -23,13 +23,18 @@ task:
       docs_script: ./dev/bots/docs.sh
     - name: analyze
       test_script: dart ./dev/bots/test.dart
-    - name: tests
+    - name: tests-linux
+      env:
+        SHARD: tests
       test_script: dart ./dev/bots/test.dart
       container:
         cpu: 4
         memory: 8G
 
-windows_task:
+task:
+  name: tests-windows
+  env:
+    SHARD: tests
   windows_container:
     dockerfile: dev/bots/docker/Dockerfile.windows
   env:
