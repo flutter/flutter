@@ -43,7 +43,7 @@ Future<Null> main(List<String> args) async {
   const Pattern isolatePattern = 'todo_list';
   print('Finding $isolatePattern');
   final List<IsolateRef> refs =
-      await connection.getMainIsolatesByPattern('todo_list');
+      await connection.getMainIsolatesByPattern(isolatePattern);
 
   final IsolateRef ref = refs.first;
   print('Driving ${ref.name}');
