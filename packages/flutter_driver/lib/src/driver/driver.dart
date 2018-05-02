@@ -62,6 +62,9 @@ const List<TimelineStream> _defaultStreams = const <TimelineStream>[TimelineStre
 /// Default timeout for short-running RPCs.
 const Duration _kShortTimeout = const Duration(seconds: 5);
 
+/// Default timeout for awaiting an Isolate to become runnable.
+const Duration _kIsolateLoadRunnableTimeout = const Duration(minutes: 1);
+
 /// Default timeout for long-running RPCs.
 final Duration _kLongTimeout = _kShortTimeout * 6;
 
@@ -132,6 +135,39 @@ class FlutterDriver {
 
   static int _nextDriverId = 0;
 
+  /// Connects to an Isolate of the specific ID.
+  ///
+  /// Assumes:
+  /// -- The Isolate is already running (will not wait for it to start).
+  /// -- The Isolate specified by the [isolateId] exists on the Dart VM.
+  /// -- [dartVmServiceUrl] points to a valid instance of the DartVM.
+  ///
+  /// Remaining params are identical to [FlutterDriver.connect].
+  static Future<FlutterDriver> connectToIsolate(
+    String dartVmServiceUrl, {
+    int isolateId,
+    bool printCommunication: false,
+    bool logCommunicationToFile: true,
+    Duration isolateReadyTimeout: _kIsolateLoadRunnableTimeout,
+  }) async {
+    _log.info('Connecting to Isolate $isolateId.');
+    final VMServiceClientConnection connection =
+        await vmServiceConnectFunction(dartVmServiceUrl);
+    final VMServiceClient client = connection.client;
+    final VM vm = await client.getVM();
+    _log.trace('Looking for the isolate');
+    final VMIsolateRef isolateRef = vm.isolates
+        .firstWhere((VMIsolateRef isolate) => isolate.number == isolateId);
+    return FlutterDriver._connectToIsolate(
+      isolateRef: isolateRef,
+      vm: vm,
+      connection: connection,
+      printCommunication: printCommunication,
+      logCommunicationToFile: logCommunicationToFile,
+      isolateReadyTimeout: isolateReadyTimeout,
+    );
+  }
+
   /// Connects to a Flutter application.
   ///
   /// Resumes the application if it is currently paused (e.g. at a breakpoint).
@@ -152,28 +188,52 @@ class FlutterDriver {
     String dartVmServiceUrl,
     bool printCommunication: false,
     bool logCommunicationToFile: true,
-    Duration isolateReadyTimeout: const Duration(minutes: 1),
+    Duration isolateReadyTimeout: _kIsolateLoadRunnableTimeout,
   }) async {
     dartVmServiceUrl ??= Platform.environment['VM_SERVICE_URL'];
 
     if (dartVmServiceUrl == null) {
       throw new DriverError(
-        'Could not determine URL to connect to application.\n'
-        'Either the VM_SERVICE_URL environment variable should be set, or an explicit\n'
-        'URL should be provided to the FlutterDriver.connect() method.'
-      );
+          'Could not determine URL to connect to application.\n'
+          'Either the VM_SERVICE_URL environment variable should be set, or an explicit\n'
+          'URL should be provided to the FlutterDriver.connect() method.');
     }
 
     // Connect to Dart VM services
     _log.info('Connecting to Flutter application at $dartVmServiceUrl');
-    final VMServiceClientConnection connection = await vmServiceConnectFunction(dartVmServiceUrl);
+    final VMServiceClientConnection connection =
+        await vmServiceConnectFunction(dartVmServiceUrl);
     final VMServiceClient client = connection.client;
     final VM vm = await client.getVM();
     _log.trace('Looking for the isolate');
-    VMIsolate isolate = await vm.isolates.first.loadRunnable()
+    final VMIsolateRef isolateRef = vm.isolates.first;
+
+    return FlutterDriver._connectToIsolate(
+      isolateRef: isolateRef,
+      vm: vm,
+      connection: connection,
+      printCommunication: printCommunication,
+      logCommunicationToFile: logCommunicationToFile,
+      isolateReadyTimeout: isolateReadyTimeout,
+    );
+  }
+
+  /// Helper function that finishes insantiating the [FlutterDriver].
+  static Future<FlutterDriver> _connectToIsolate({
+    VMIsolateRef isolateRef,
+    VM vm,
+    VMServiceClientConnection connection,
+    bool printCommunication,
+    bool logCommunicationToFile,
+    Duration isolateReadyTimeout,
+  }) async {
+    VMIsolate isolate = await isolateRef
+        .loadRunnable()
         .timeout(isolateReadyTimeout, onTimeout: () {
-          throw new TimeoutException('Timeout while waiting for the isolate to become runnable');
-        });
+      throw new TimeoutException(
+          'Timeout while waiting for the isolate to become runnable');
+    });
+    final VMServiceClient client = connection.client;
 
     // TODO(yjbanov): vm_service_client does not support "None" pause event yet.
     // It is currently reported as null, but we cannot rely on it because
@@ -189,7 +249,7 @@ class FlutterDriver {
         isolate.pauseEvent is! VMPauseInterruptedEvent &&
         isolate.pauseEvent is! VMResumeEvent) {
       await new Future<Null>.delayed(_kShortTimeout ~/ 10);
-      isolate = await vm.isolates.first.loadRunnable();
+      isolate = await isolateRef.loadRunnable();
     }
 
     final FlutterDriver driver = new FlutterDriver.connectedTo(
