@@ -150,8 +150,8 @@ class FlutterDriver {
   /// between the test and the app should be logged to `flutter_driver_commands.log`.
   ///
   /// [isolateNumber] (optional) determines the specific isolate to connect to.
-  /// If this is left as zero, will connect to the first isolate found running
-  /// on [dartVmServiceUrl].
+  /// If this is left as `null`, will connect to the first isolate found
+  /// running on [dartVmServiceUrl].
   ///
   /// [isolateReadyTimeout] determines how long after we connect to the VM
   /// service we will wait for the first isolate to become runnable.
@@ -159,7 +159,7 @@ class FlutterDriver {
     String dartVmServiceUrl,
     bool printCommunication: false,
     bool logCommunicationToFile: true,
-    int isolateNumber: 0,
+    int isolateNumber: null,
     Duration isolateReadyTimeout: _kIsolateLoadRunnableTimeout,
   }) async {
     dartVmServiceUrl ??= Platform.environment['VM_SERVICE_URL'];
@@ -178,9 +178,9 @@ class FlutterDriver {
     final VMServiceClient client = connection.client;
     final VM vm = await client.getVM();
     final VMIsolateRef isolateRef = isolateNumber ==
-        0 ? vm.isolates.first :
-            vm.isolates.firstWhere(
-                (VMIsolateRef isolate) => isolate.number == isolateNumber);
+        null ? vm.isolates.first :
+               vm.isolates.firstWhere(
+                   (VMIsolateRef isolate) => isolate.number == isolateNumber);
     _log.trace('Isolate found with number: ${isolateRef.number}');
 
     VMIsolate isolate = await isolateRef
