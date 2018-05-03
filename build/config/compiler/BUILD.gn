@@ -599,6 +599,7 @@ if (is_win) {
   default_warning_flags += [
     # Permanent.
     "/wd4091",  # typedef warning from dbghelp.h
+    "/wd4722",  # destructor never returns
 
     # Investigate.
     "/wd4312",  # int to pointer of greater size conversion.
