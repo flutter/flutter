@@ -159,7 +159,7 @@ class FlutterDriver {
     String dartVmServiceUrl,
     bool printCommunication: false,
     bool logCommunicationToFile: true,
-    int isolateNumber: null,
+    int isolateNumber,
     Duration isolateReadyTimeout: _kIsolateLoadRunnableTimeout,
   }) async {
     dartVmServiceUrl ??= Platform.environment['VM_SERVICE_URL'];
