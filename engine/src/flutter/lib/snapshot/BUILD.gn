@@ -3,6 +3,7 @@
 # found in the LICENSE file.
 
 import("$flutter_root/lib/ui/dart_ui.gni")
+import("//build/compiled_action.gni")
 import("//third_party/dart/utils/compile_platform.gni")
 import("//third_party/dart/utils/generate_entry_points_json.gni")
 
@@ -255,6 +256,53 @@ group("kernel_platform_files") {
     ":non_strong_platform",
     ":strong_platform",
   ]
+}
+
+# Template to generate entry points JSON file using gen_snapshot tool.
+# List of entry points is generated as a by-product while doing precompilation.
+#
+# This template expects the following arguments:
+#  - input: Name of the input dart script for precompilation.
+#  - output: Name of the output entry points JSON file.
+#  - extra_args: Extra arguments to pass to dart_bootstrap (optional).
+#  - extra_inputs: Extra input dependencies (optional).
+#
+template("generate_entry_points_json_with_gen_snapshot") {
+  assert(defined(invoker.input), "Must define input dart script")
+  assert(defined(invoker.output), "Must define output json file")
+  extra_args = []
+  if (defined(invoker.extra_args)) {
+    extra_args += invoker.extra_args
+  }
+  extra_inputs = []
+  if (defined(invoker.extra_inputs)) {
+    extra_inputs += invoker.extra_inputs
+  }
+  compiled_action(target_name) {
+    # Printing precompiler entry points is folded into precompilation, so gen_snapshot is invoked
+    # with correct arguments to generate app-aot snapshot.
+
+    input = invoker.input
+    output = invoker.output
+
+    tool = "//third_party/dart/runtime/bin:gen_snapshot"
+    inputs = [
+      input,
+    ] + extra_inputs
+    outputs = [
+      output,
+    ]
+    args = [
+      "--print-precompiler-entry-points=" + rebase_path(output),
+      "--snapshot-kind=app-aot-blobs",
+      "--vm_snapshot_data=" + rebase_path("$target_gen_dir/dummy.vm_data.snapshot"),
+      "--vm_snapshot_instructions=" + rebase_path("$target_gen_dir/dummy.vm_instr.snapshot"),
+      "--isolate_snapshot_data=" + rebase_path("$target_gen_dir/dummy.isolate_data.snapshot"),
+      "--isolate_snapshot_instructions=" + rebase_path("$target_gen_dir/dummy.isolate_instr.snapshot"),
+    ] + extra_args + [
+      rebase_path(input),
+    ]
+  }
 }
 
 generate_entry_points_json_with_gen_snapshot("entry_points_json") {
