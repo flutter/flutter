@@ -1868,8 +1868,9 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   ///
   /// See also:
   ///
-  ///  * [RepaintBoundary] to contain render objects marked with [markNeedsPaint]
-  ///    to only render subtrees that visually changed for best performance.
+  ///  * [RepaintBoundary], to contain render objects marked with
+  ///    [markNeedsPaint] to only render subtrees that visually changed for best
+  ///    performance.
   void markNeedsPaint() {
     assert(owner == null || !owner.debugDoingPaint);
     if (_needsPaint)
