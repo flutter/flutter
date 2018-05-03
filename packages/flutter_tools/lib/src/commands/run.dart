@@ -216,7 +216,7 @@ class RunCommand extends RunCommandBase {
     if (getCurrentHostPlatform() == HostPlatform.darwin_x64 &&
         xcode.isInstalledAndMeetsVersionCheck) {
       printStatus('');
-      printStatus('To run on a simulator, launch it first: open -a Simulator.app');
+      printStatus("Run 'flutter emulators' to list and start any available device emulators.");
       printStatus('');
       printStatus('If you expected your device to be detected, please run "flutter doctor" to diagnose');
       printStatus('potential issues, or visit https://flutter.io/setup/ for troubleshooting tips.');
