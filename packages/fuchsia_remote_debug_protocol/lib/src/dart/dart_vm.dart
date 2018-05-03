@@ -116,7 +116,7 @@ class DartVm {
 
   /// Returns a [List] of [IsolateRef] objects whose name matches `pattern`.
   ///
-  /// Also checks to make sure it is running the 'main()' function.
+  /// Also checks to make sure it was launched from the `main()` function.
   Future<List<IsolateRef>> getMainIsolatesByPattern(Pattern pattern) async {
     final Map<String, dynamic> jsonVmRef =
         await invokeRpc('getVM', timeout: _kRpcTimeout);
