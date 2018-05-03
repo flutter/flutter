@@ -141,7 +141,7 @@ class SystemUiOverlayStyle {
 
   /// The color of top status bar.
   /// 
-  /// Only honored in Android version O and greater.
+  /// Only honored in Android version M and greater.
   final Color statusBarColor;
 
   /// The brightness of top status bar.
@@ -151,7 +151,7 @@ class SystemUiOverlayStyle {
 
   /// The brightness of the top status bar icons.
   /// 
-  /// Only honored in Android version O and greater.
+  /// Only honored in Android version M and greater.
   final Brightness statusBarIconBrightness;
 
   /// The brightness of the system navigation bar icons.
