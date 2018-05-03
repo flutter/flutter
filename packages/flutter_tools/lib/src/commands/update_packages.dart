@@ -656,12 +656,10 @@ class PubspecYaml {
       }
     }
 
-    // By this point we should know where to put our transitive dependencies.
-    // Only if there were no dependencies or dev_dependencies sections could
-    // we get here with these still null, and we should not have any such files
-    // in our repo.
-    assert(endOfDirectDependencies != null);
-    assert(endOfDevDependencies != null);
+    // If there are no dependencies or dev_dependencies sections, these will be
+    // null. We have such files in our tests, so account for them here.
+    endOfDirectDependencies ??= output.length;
+    endOfDevDependencies ??= output.length;
 
     // Now include all the transitive dependencies and transitive dev dependencies.
     // The blocks of text to insert for each dependency section.
