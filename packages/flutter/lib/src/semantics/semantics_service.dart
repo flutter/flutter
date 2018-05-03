@@ -34,8 +34,7 @@ class SemanticsService {
 
   /// Sends a semantic announcement of a tooltip.
   /// 
-  /// Currently only honored on Android. The contents of [message] will be
-  /// read by TalkBack.
+  /// This is only used by Android.
   static Future<Null> tooltip(String message) async {
     final TooltipSemanticsEvent event = new TooltipSemanticsEvent(message);
     await SystemChannels.accessibility.send(event.toMap());
