@@ -65,6 +65,4 @@ class _MockEmulator extends Emulator {
   void launch() {
     throw new UnimplementedError('Not implemented in Mock');
   }
-
-  
 }
