@@ -285,6 +285,7 @@ abstract class RenderToggleable extends RenderConstrainedBox {
         onChanged(false);
         break;
     }
+    sendSemanticsEvent(const TapSemanticEvent());
   }
 
   void _handleTapUp(TapUpDetails details) {
