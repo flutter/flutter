@@ -77,6 +77,12 @@ class RelativeRect {
   /// May be negative if the bottom side of the rectangle is outside of the container.
   final double bottom;
 
+  /// Returns whether any of the values are greater than zero.
+  ///
+  /// This corresponds to one of the sides ([left], [top], [right], or [bottom]) having
+  /// some positive inset towards the center.
+  bool get hasInsets => left > 0.0 || top > 0.0 || right > 0.0 || bottom > 0.0;
+
   /// Returns a new rectangle object translated by the given offset.
   RelativeRect shift(Offset offset) {
     return new RelativeRect.fromLTRB(left + offset.dx, top + offset.dy, right - offset.dx, bottom - offset.dy);
