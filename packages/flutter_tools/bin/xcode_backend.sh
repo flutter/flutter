@@ -184,7 +184,8 @@ GetFrameworkExecutablePath() {
 LipoExecutable() {
   local executable="$1"
   shift
-  local archs=("$@")
+  # Split $@ into an array.
+  read -r -a archs <<< "$@"
 
   # Extract architecture-specific framework executables.
   local all_executables=()
@@ -225,11 +226,10 @@ LipoExecutable() {
 ThinFramework() {
   local framework_dir="$1"
   shift
-  local archs=("$@")
 
   local plist_path="${framework_dir}/Info.plist"
   local executable="$(GetFrameworkExecutablePath "${framework_dir}")"
-  LipoExecutable "${executable}" "${archs[@]}"
+  LipoExecutable "${executable}" "$@"
 }
 
 ThinAppFrameworks() {
