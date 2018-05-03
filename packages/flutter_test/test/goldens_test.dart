@@ -24,6 +24,16 @@ void main() {
     fs = new MemoryFileSystem(style: style);
   });
 
+  /// Converts posix-style paths to the style associated with [fs].
+  ///
+  /// This allows us to deal in posix-style paths in the tests.
+  String fix(String path) {
+    if (path.startsWith('/')) {
+      path = '${fs.style.drive}$path';
+    }
+    return path.replaceAll('/', fs.path.separator);
+  }
+
   void test(String description, FutureOr<void> body()) {
     test_package.test(description, () {
       return io.IOOverrides.runZoned(
@@ -59,18 +69,18 @@ void main() {
     LocalFileComparator comparator;
 
     setUp(() {
-      comparator = new LocalFileComparator(new Uri.file('/golden_test.dart'));
+      comparator = new LocalFileComparator(fs.file(fix('/golden_test.dart')).uri, pathStyle: fs.path.style);
     });
 
     test('calculates basedir correctly', () {
-      expect(comparator.basedir, new Uri.file('/'));
-      comparator = new LocalFileComparator(new Uri.file('/foo/bar/golden_test.dart'));
-      expect(comparator.basedir, new Uri.file('/foo/bar/'));
+      expect(comparator.basedir, fs.file(fix('/')).uri);
+      comparator = new LocalFileComparator(fs.file(fix('/foo/bar/golden_test.dart')).uri, pathStyle: fs.path.style);
+      expect(comparator.basedir, fs.directory(fix('/foo/bar/')).uri);
     });
 
     group('compare', () {
       Future<bool> doComparison([String golden = 'golden.png']) {
-        final Uri uri = new Uri.file(golden);
+        final Uri uri = fs.file(fix(golden)).uri;
         return comparator.compare(
           new Uint8List.fromList(_kExpectedBytes),
           uri,
@@ -79,13 +89,13 @@ void main() {
 
       group('succeeds', () {
         test('when golden file is in same folder as test', () async {
-          fs.file('/golden.png').writeAsBytesSync(_kExpectedBytes);
+          fs.file(fix('/golden.png')).writeAsBytesSync(_kExpectedBytes);
           final bool success = await doComparison();
           expect(success, isTrue);
         });
 
         test('when golden file is in subfolder of test', () async {
-          fs.file('/sub/foo.png')
+          fs.file(fix('/sub/foo.png'))
             ..createSync(recursive: true)
             ..writeAsBytesSync(_kExpectedBytes);
           final bool success = await doComparison('sub/foo.png');
@@ -100,32 +110,32 @@ void main() {
         });
 
         test('when golden bytes are leading subset of image bytes', () async {
-          fs.file('/golden.png').writeAsBytesSync(<int>[1, 2]);
+          fs.file(fix('/golden.png')).writeAsBytesSync(<int>[1, 2]);
           expect(await doComparison(), isFalse);
         });
 
         test('when golden bytes are leading superset of image bytes', () async {
-          fs.file('/golden.png').writeAsBytesSync(<int>[1, 2, 3, 4]);
+          fs.file(fix('/golden.png')).writeAsBytesSync(<int>[1, 2, 3, 4]);
           expect(await doComparison(), isFalse);
         });
 
         test('when golden bytes are trailing subset of image bytes', () async {
-          fs.file('/golden.png').writeAsBytesSync(<int>[2, 3]);
+          fs.file(fix('/golden.png')).writeAsBytesSync(<int>[2, 3]);
           expect(await doComparison(), isFalse);
         });
 
         test('when golden bytes are trailing superset of image bytes', () async {
-          fs.file('/golden.png').writeAsBytesSync(<int>[0, 1, 2, 3]);
+          fs.file(fix('/golden.png')).writeAsBytesSync(<int>[0, 1, 2, 3]);
           expect(await doComparison(), isFalse);
         });
 
         test('when golden bytes are disjoint from image bytes', () async {
-          fs.file('/golden.png').writeAsBytesSync(<int>[4, 5, 6]);
+          fs.file(fix('/golden.png')).writeAsBytesSync(<int>[4, 5, 6]);
           expect(await doComparison(), isFalse);
         });
 
         test('when golden bytes are empty', () async {
-          fs.file('/golden.png').writeAsBytesSync(<int>[]);
+          fs.file(fix('/golden.png')).writeAsBytesSync(<int>[]);
           expect(await doComparison(), isFalse);
         });
       });
@@ -133,18 +143,18 @@ void main() {
 
     group('update', () {
       test('updates existing file', () async {
-        fs.file('/golden.png').writeAsBytesSync(_kExpectedBytes);
+        fs.file(fix('/golden.png')).writeAsBytesSync(_kExpectedBytes);
         const List<int> newBytes = const <int>[11, 12, 13];
-        await comparator.update(new Uri.file('golden.png'), new Uint8List.fromList(newBytes));
-        expect(fs.file('/golden.png').readAsBytesSync(), newBytes);
+        await comparator.update(fs.file('golden.png').uri, new Uint8List.fromList(newBytes));
+        expect(fs.file(fix('/golden.png')).readAsBytesSync(), newBytes);
       });
 
       test('creates non-existent file', () async {
-        expect(fs.file('/foo.png').existsSync(), isFalse);
+        expect(fs.file(fix('/foo.png')).existsSync(), isFalse);
         const List<int> newBytes = const <int>[11, 12, 13];
-        await comparator.update(new Uri.file('foo.png'), new Uint8List.fromList(newBytes));
-        expect(fs.file('/foo.png').existsSync(), isTrue);
-        expect(fs.file('/foo.png').readAsBytesSync(), newBytes);
+        await comparator.update(fs.file('foo.png').uri, new Uint8List.fromList(newBytes));
+        expect(fs.file(fix('/foo.png')).existsSync(), isTrue);
+        expect(fs.file(fix('/foo.png')).readAsBytesSync(), newBytes);
       });
     });
   });

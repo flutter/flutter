@@ -124,21 +124,30 @@ class LocalFileComparator implements GoldenFileComparator {
   /// directory in which [testFile] resides.
   ///
   /// The [testFile] URI must represent a file.
-  LocalFileComparator(Uri testFile)
+  LocalFileComparator(Uri testFile, {path.Style pathStyle})
       : assert(testFile.scheme == 'file'),
-        basedir = new Uri.directory(_path.dirname(_path.fromUri(testFile)));
+        basedir = _getBasedir(testFile, pathStyle),
+        _path = _getPath(pathStyle);
 
-  // Due to https://github.com/flutter/flutter/issues/17118, we need to
-  // explicitly set the path style.
-  static final path.Context _path = new path.Context(style: Platform.isWindows
-      ? path.Style.windows
-      : path.Style.posix);
+  static path.Context _getPath(path.Style style) {
+    return new path.Context(style: style ?? path.Style.platform);
+  }
+
+  static Uri _getBasedir(Uri testFile, path.Style pathStyle) {
+    final path.Context context = _getPath(pathStyle);
+    return context.toUri(context.dirname(context.fromUri(testFile)) + context.separator);
+  }
 
   /// The directory in which the test was loaded.
   ///
   /// Golden file keys will be interpreted as file paths relative to this
   /// directory.
   final Uri basedir;
+
+  /// Path context exists as an instance variable rather than just using the
+  /// system path context in order to support testing, where we can spoof the
+  /// platform to test behaviors with arbitrary path styles.
+  final path.Context _path;
 
   @override
   Future<bool> compare(Uint8List imageBytes, Uri golden) async {
@@ -158,7 +167,7 @@ class LocalFileComparator implements GoldenFileComparator {
   }
 
   File _getFile(Uri golden) {
-    return new File(_path.join(_path.fromUri(basedir), golden.path));
+    return new File(_path.join(_path.fromUri(basedir), _path.fromUri(golden.path)));
   }
 
   static bool _areListsEqual<T>(List<T> list1, List<T> list2) {
