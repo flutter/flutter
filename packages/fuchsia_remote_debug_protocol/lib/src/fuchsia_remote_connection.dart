@@ -19,6 +19,10 @@ final String _ipv6Loopback = InternetAddress.LOOPBACK_IP_V6.address;
 
 const ProcessManager _processManager = const LocalProcessManager();
 
+const Duration _kIsolateFindTimeout = const Duration(minutes: 1);
+
+const Duration _kVmPollInterval = const Duration(milliseconds: 1500);
+
 final Logger _log = new Logger('FuchsiaRemoteConnection');
 
 /// A function for forwarding ports on the local machine to a remote device.
@@ -43,6 +47,35 @@ void restoreFuchsiaPortForwardingFunction() {
   fuchsiaPortForwardingFunction = _SshPortForwarder.start;
 }
 
+/// An enum specifying a Dart VM's state.
+enum DartVmEventType {
+  /// The Dart VM has started.
+  started,
+
+  /// The Dart VM has stopped.
+  ///
+  /// This can mean either the host machine cannot be connect to, the VM service
+  /// has shut down cleanly, or the VM service has crashed.
+  stopped,
+}
+
+/// An event regarding the Dart VM.
+///
+/// Specifies the type of the event (whether the VM has started or has stopped),
+/// and contains the service port of the VM as well as a URI to connect to it.
+class DartVmEvent {
+  DartVmEvent._({this.eventType, this.servicePort, this.uri});
+
+  /// The URI used to connect to the Dart VM.
+  final Uri uri;
+
+  /// The type of event regarding this instance of the Dart VM.
+  final DartVmEventType eventType;
+
+  /// The port on the host machine that the Dart VM service is/was running on.
+  final int servicePort;
+}
+
 /// Manages a remote connection to a Fuchsia Device.
 ///
 /// Provides affordances to observe and connect to Flutter views, isolates, and
@@ -51,15 +84,31 @@ void restoreFuchsiaPortForwardingFunction() {
 /// Note that this class can be connected to several instances of the Fuchsia
 /// device's Dart VM at any given time.
 class FuchsiaRemoteConnection {
+  FuchsiaRemoteConnection._(this._useIpV6Loopback, this._sshCommandRunner)
+      : _pollDartVms = false;
+
+  bool _pollDartVms;
   final List<PortForwarder> _forwardedVmServicePorts = <PortForwarder>[];
   final SshCommandRunner _sshCommandRunner;
   final bool _useIpV6Loopback;
 
+  /// A mapping of Dart VM ports (as seen on the target machine), to
+  /// [PortForwarder] instances mapping from the local machine to the target
+  /// machine.
+  final Map<int, PortForwarder> _dartVmPortMap = <int, PortForwarder>{};
+
+  /// Tracks stale ports so as not to reconnect while polling.
+  final Set<int> _stalePorts = new Set<int>();
+
+  /// A broadcast stream that emits events relating to Dart VM's as they update.
+  Stream<DartVmEvent> get onDartVmEvent => _onDartVmEvent;
+  Stream<DartVmEvent> _onDartVmEvent;
+  final StreamController<DartVmEvent> _dartVmEventController =
+      new StreamController<DartVmEvent>();
+
   /// VM service cache to avoid repeating handshakes across function
   /// calls. Keys a forwarded port to a DartVm connection instance.
   final Map<int, DartVm> _dartVmCache = <int, DartVm>{};
-
-  FuchsiaRemoteConnection._(this._useIpV6Loopback, this._sshCommandRunner);
 
   /// Same as [FuchsiaRemoteConnection.connect] albeit with a provided
   /// [SshCommandRunner] instance.
@@ -69,6 +118,21 @@ class FuchsiaRemoteConnection {
     final FuchsiaRemoteConnection connection = new FuchsiaRemoteConnection._(
         isIpV6Address(commandRunner.address), commandRunner);
     await connection._forwardLocalPortsToDeviceServicePorts();
+
+    Stream<DartVmEvent> dartVmStream() {
+      Future<Null> listen() async {
+        while (connection._pollDartVms) {
+          await connection._pollVms();
+          await new Future<Null>.delayed(_kVmPollInterval);
+        }
+        connection._dartVmEventController.close();
+      }
+
+      connection._dartVmEventController.onListen = listen;
+      return connection._dartVmEventController.stream.asBroadcastStream();
+    }
+
+    connection._onDartVmEvent = dartVmStream();
     return connection;
   }
 
@@ -121,8 +185,82 @@ class FuchsiaRemoteConnection {
       await vmService?.stop();
       await pf.stop();
     }
+    for (PortForwarder pf in _dartVmPortMap.values) {
+      final DartVm vmService = _dartVmCache[pf.port];
+      _dartVmCache[pf.port] = null;
+      await vmService?.stop();
+      await pf.stop();
+    }
     _dartVmCache.clear();
     _forwardedVmServicePorts.clear();
+    _dartVmPortMap.clear();
+    _pollDartVms = false;
+  }
+
+  /// Returns all Isolates running `main()` as matched by the [Pattern].
+  ///
+  /// In the current state this is not capable of listening for an
+  /// Isolate to start up. The Isolate must already be running.
+  Future<List<IsolateRef>> getMainIsolatesByPattern(
+    Pattern pattern, [
+    Duration timeout = _kIsolateFindTimeout,
+  ]) async {
+    if (_dartVmPortMap.isEmpty) {
+      return null;
+    }
+    // Accumulate a list of eventual IsolateRef lists so that they can be loaded
+    // simultaneously via Future.wait.
+    final List<Future<List<IsolateRef>>> isolates =
+        <Future<List<IsolateRef>>>[];
+    for (PortForwarder fp in _dartVmPortMap.values) {
+      final DartVm vmService = await _getDartVm(fp.port);
+      isolates.add(vmService.getMainIsolatesByPattern(pattern));
+    }
+    final Completer<List<IsolateRef>> completer =
+        new Completer<List<IsolateRef>>();
+    final List<IsolateRef> result =
+        await Future.wait(isolates).then((List<List<IsolateRef>> listOfLists) {
+      final List<List<IsolateRef>> mutableListOfLists =
+          new List<List<IsolateRef>>.from(listOfLists)
+            ..retainWhere((List<IsolateRef> list) => list.isNotEmpty);
+      // Folds the list of lists into one flat list.
+      return mutableListOfLists.fold<List<IsolateRef>>(
+        <IsolateRef>[],
+        (List<IsolateRef> accumulator, List<IsolateRef> element) {
+          accumulator.addAll(element);
+          return accumulator;
+        },
+      );
+    });
+
+    // If no VM instance anywhere has this, it's possible it hasn't spun up
+    // anywhere.
+    //
+    // For the time being one Flutter Isolate runs at a time in each VM, so for
+    // now this will wait until the timer runs out or a new Dart VM starts that
+    // contains the Isolate in question.
+    //
+    // TODO(awdavies): Set this up to handle multiple Isolates per Dart VM.
+    if (result.isEmpty) {
+      _log.fine('No instance of the Isolate found. Awaiting new VM startup');
+      _onDartVmEvent.listen(
+        (DartVmEvent event) async {
+          if (event.eventType == DartVmEventType.started) {
+            _log.fine('New VM found on port: ${event.servicePort}. Searching '
+                'for Isolate: $pattern');
+            final DartVm vmService = await _getDartVm(event.uri.port);
+            final List<IsolateRef> result =
+                await vmService.getMainIsolatesByPattern(pattern);
+            if (result.isNotEmpty) {
+              completer.complete(result);
+            }
+          }
+        },
+      );
+    } else {
+      completer.complete(result);
+    }
+    return completer.future.timeout(timeout);
   }
 
   /// Returns a list of [FlutterView] objects.
@@ -130,7 +268,7 @@ class FuchsiaRemoteConnection {
   /// This is run across all connected Dart VM connections that this class is
   /// managing.
   Future<List<FlutterView>> getFlutterViews() async {
-    if (_forwardedVmServicePorts.isEmpty) {
+    if (_dartVmPortMap.isEmpty) {
       return <FlutterView>[];
     }
     final List<List<FlutterView>> flutterViewLists =
@@ -151,38 +289,100 @@ class FuchsiaRemoteConnection {
   // will be updated in the event that ports are found to be broken/stale: they
   // will be shut down and removed from tracking.
   Future<List<E>> _invokeForAllVms<E>(
-      Future<E> vmFunction(DartVm vmService)) async {
+    Future<E> vmFunction(DartVm vmService), [
+    bool queueEvents = true,
+  ]) async {
     final List<E> result = <E>[];
-    final Set<int> stalePorts = new Set<int>();
-    for (PortForwarder pf in _forwardedVmServicePorts) {
+
+    // Helper function loop.
+    Future<Null> shutDownPortForwarder(PortForwarder pf) async {
+      await pf.stop();
+      _stalePorts.add(pf.remotePort);
+      if (queueEvents) {
+        _dartVmEventController.add(new DartVmEvent._(
+          eventType: DartVmEventType.stopped,
+          servicePort: pf.remotePort,
+          uri: _getDartVmUri(pf.port),
+        ));
+      }
+    }
+
+    for (PortForwarder pf in _dartVmPortMap.values) {
+      // When raising an HttpException this means that there is no instance of
+      // the Dart VM to communicate with.  The TimeoutException is raised when
+      // the Dart VM instance is shut down in the middle of communicating.
       try {
         final DartVm service = await _getDartVm(pf.port);
         result.add(await vmFunction(service));
       } on HttpException {
-        await pf.stop();
-        stalePorts.add(pf.port);
+        await shutDownPortForwarder(pf);
+      } on TimeoutException {
+        await shutDownPortForwarder(pf);
       }
     }
-    // Clean up the ports after finished with iterating.
-    _forwardedVmServicePorts
-        .removeWhere((PortForwarder pf) => stalePorts.contains(pf.port));
+    _stalePorts.forEach(_dartVmPortMap.remove);
     return result;
+  }
+
+  Uri _getDartVmUri(int port) {
+    // While the IPv4 loopback can be used for the initial port forwarding
+    // (see [PortForwarder.start]), the address is actually bound to the IPv6
+    // loopback device, so connecting to the IPv4 loopback would fail when the
+    // target address is IPv6 link-local.
+    final String addr = _useIpV6Loopback
+        ? 'http://\[$_ipv6Loopback\]:$port'
+        : 'http://$_ipv4Loopback:$port';
+    final Uri uri = Uri.parse(addr);
+    return uri;
   }
 
   Future<DartVm> _getDartVm(int port) async {
     if (!_dartVmCache.containsKey(port)) {
-      // While the IPv4 loopback can be used for the initial port forwarding
-      // (see [PortForwarder.start]), the address is actually bound to the IPv6
-      // loopback device, so connecting to the IPv4 loopback would fail when the
-      // target address is IPv6 link-local.
-      final String addr = _useIpV6Loopback
-          ? 'http://\[$_ipv6Loopback\]:$port'
-          : 'http://$_ipv4Loopback:$port';
-      final Uri uri = Uri.parse(addr);
-      final DartVm dartVm = await DartVm.connect(uri);
+      final DartVm dartVm = await DartVm.connect(_getDartVmUri(port));
       _dartVmCache[port] = dartVm;
     }
     return _dartVmCache[port];
+  }
+
+  /// Checks for changes in the list of Dart VM instances.
+  ///
+  /// If there are new instances of the Dart VM, then connections will be
+  /// attempted (after clearing out stale connections).
+  Future<Null> _pollVms() async {
+    await _checkPorts();
+    final List<int> servicePorts = await getDeviceServicePorts();
+    for (int servicePort in servicePorts) {
+      if (!_stalePorts.contains(servicePort) &&
+          !_dartVmPortMap.containsKey(servicePort)) {
+        _dartVmPortMap[servicePort] = await fuchsiaPortForwardingFunction(
+            _sshCommandRunner.address,
+            servicePort,
+            _sshCommandRunner.interface,
+            _sshCommandRunner.sshConfigPath);
+
+        _dartVmEventController.add(new DartVmEvent._(
+          eventType: DartVmEventType.started,
+          servicePort: servicePort,
+          uri: _getDartVmUri(_dartVmPortMap[servicePort].port),
+        ));
+      }
+    }
+  }
+
+  /// Runs a dummy heartbeat command on all Dart VM instances.
+  ///
+  /// Removes any failing ports from the cache.
+  Future<Null> _checkPorts([bool queueEvents = true]) async {
+    // Filters out stale ports after connecting. Ignores results.
+    await _invokeForAllVms<Map<String, dynamic>>(
+      (DartVm vmService) async {
+        final Map<String, dynamic> res =
+            await vmService.invokeRpc('getVersion');
+        _log.fine('DartVM version check result: $res');
+        return res;
+      },
+      queueEvents,
+    );
   }
 
   /// Forwards a series of local device ports to the remote device.
@@ -192,24 +392,24 @@ class FuchsiaRemoteConnection {
   Future<Null> _forwardLocalPortsToDeviceServicePorts() async {
     await stop();
     final List<int> servicePorts = await getDeviceServicePorts();
-    _forwardedVmServicePorts
-        .addAll(await Future.wait(servicePorts.map((int deviceServicePort) {
+    final List<PortForwarder> forwardedVmServicePorts =
+        await Future.wait(servicePorts.map((int deviceServicePort) {
       return fuchsiaPortForwardingFunction(
           _sshCommandRunner.address,
           deviceServicePort,
           _sshCommandRunner.interface,
           _sshCommandRunner.sshConfigPath);
-    })));
+    }));
 
-    // Filters out stale ports after connecting. Ignores results.
-    await _invokeForAllVms<Map<String, dynamic>>(
-      (DartVm vmService) async {
-        final Map<String, dynamic> res =
-            await vmService.invokeRpc('getVersion');
-        _log.fine('DartVM version check result: $res');
-        return res;
-      },
-    );
+    for (PortForwarder pf in forwardedVmServicePorts) {
+      // TODO(awdavies): Handle duplicates.
+      _dartVmPortMap[pf.remotePort] = pf;
+    }
+
+    // Don't queue events, since this is the initial forwarding.
+    await _checkPorts(false);
+
+    _pollDartVms = true;
   }
 
   /// Gets the open Dart VM service ports on a remote Fuchsia device.
@@ -271,7 +471,6 @@ class _SshPortForwarder implements PortForwarder {
     this._remoteAddress,
     this._remotePort,
     this._localSocket,
-    this._process,
     this._interface,
     this._sshConfigPath,
     this._ipV6,
@@ -280,7 +479,6 @@ class _SshPortForwarder implements PortForwarder {
   final String _remoteAddress;
   final int _remotePort;
   final ServerSocket _localSocket;
-  final Process _process;
   final String _sshConfigPath;
   final String _interface;
   final bool _ipV6;
@@ -328,12 +526,17 @@ class _SshPortForwarder implements PortForwarder {
       dummyRemoteCommand,
     ]);
     _log.fine("_SshPortForwarder running '${command.join(' ')}'");
-    final Process process = await _processManager.start(command);
-    final _SshPortForwarder result = new _SshPortForwarder._(address,
-        remotePort, localSocket, process, interface, sshConfigPath, isIpV6);
-    process.exitCode.then((int c) {
-      _log.fine("'${command.join(' ')}' exited with exit code $c");
-    });
+    // Must await for the port forwarding function to completer here, as
+    // forwarding must be completed before surfacing VM events (as the user may
+    // want to connect immediately after an event is surfaced).
+    final ProcessResult processResult = await _processManager.run(command);
+    _log.fine("'${command.join(' ')}' exited with exit code "
+        '${processResult.exitCode}');
+    if (processResult.exitCode != 0) {
+      return null;
+    }
+    final _SshPortForwarder result = new _SshPortForwarder._(
+        address, remotePort, localSocket, interface, sshConfigPath, isIpV6);
     _log.fine('Set up forwarding from ${localSocket.port} '
         'to $address port $remotePort');
     return result;
@@ -343,8 +546,6 @@ class _SshPortForwarder implements PortForwarder {
   /// runs the SSH 'cancel' command to shut down port forwarding completely.
   @override
   Future<Null> stop() async {
-    // Kill the original SSH process if it is still around.
-    _process.kill();
     // Cancel the forwarding request. See [start] for commentary about why this
     // uses the IPv4 loopback.
     final String formattedForwardingUrl =
