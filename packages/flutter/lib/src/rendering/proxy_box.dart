@@ -2848,7 +2848,9 @@ class RenderAbsorbPointer extends RenderProxyBox {
 
   @override
   bool hitTest(HitTestResult result, { Offset position }) {
-    return absorbing ? true : super.hitTest(result, position: position);
+    return absorbing
+        ? size.contains(position)
+        : super.hitTest(result, position: position);
   }
 
   @override

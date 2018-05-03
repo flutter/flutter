@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import 'about.dart';
@@ -96,17 +95,19 @@ class _OptionsItem extends StatelessWidget {
   Widget build(BuildContext context) {
     final double textScaleFactor = MediaQuery.of(context)?.textScaleFactor ?? 1.0;
 
-    return new Container(
-      constraints: new BoxConstraints(minHeight: _kItemHeight * textScaleFactor),
-      padding: _kItemPadding,
-      alignment: AlignmentDirectional.centerStart,
-      child: new DefaultTextStyle(
-        style: DefaultTextStyle.of(context).style,
-        maxLines: 2,
-        overflow: TextOverflow.fade,
-        child: new IconTheme(
-          data: Theme.of(context).primaryIconTheme,
-          child: child,
+    return new MergeSemantics(
+      child: new Container(
+        constraints: new BoxConstraints(minHeight: _kItemHeight * textScaleFactor),
+        padding: _kItemPadding,
+        alignment: AlignmentDirectional.centerStart,
+        child: new DefaultTextStyle(
+          style: DefaultTextStyle.of(context).style,
+          maxLines: 2,
+          overflow: TextOverflow.fade,
+          child: new IconTheme(
+            data: Theme.of(context).primaryIconTheme,
+            child: child,
+          ),
         ),
       ),
     );

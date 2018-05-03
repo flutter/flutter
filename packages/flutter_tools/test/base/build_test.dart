@@ -12,6 +12,8 @@ import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/base/build.dart';
 import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
+import 'package:flutter_tools/src/base/io.dart';
+import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/ios/mac.dart';
 import 'package:flutter_tools/src/version.dart';
 import 'package:mockito/mockito.dart';
@@ -22,7 +24,6 @@ import '../src/context.dart';
 class MockFlutterVersion extends Mock implements FlutterVersion {}
 class MockArtifacts extends Mock implements Artifacts {}
 class MockXcode extends Mock implements Xcode {}
-class MockXxd extends Mock implements Xxd {}
 
 class _FakeGenSnapshot implements GenSnapshot {
   _FakeGenSnapshot({
@@ -336,7 +337,7 @@ void main() {
     _FakeGenSnapshot genSnapshot;
     MemoryFileSystem fs;
     MockFlutterVersion mockVersion;
-    Snapshotter snapshotter;
+    ScriptSnapshotter snapshotter;
     MockArtifacts mockArtifacts;
 
     setUp(() {
@@ -350,7 +351,7 @@ void main() {
       };
       mockVersion = new MockFlutterVersion();
       when(mockVersion.frameworkRevision).thenReturn(kVersion);
-      snapshotter = new Snapshotter();
+      snapshotter = new ScriptSnapshotter();
       mockArtifacts = new MockArtifacts();
       when(mockArtifacts.getArtifactPath(Artifact.isolateSnapshotData)).thenReturn(kIsolateSnapshotData);
       when(mockArtifacts.getArtifactPath(Artifact.vmSnapshotData)).thenReturn(kVmSnapshotData);
@@ -396,7 +397,7 @@ void main() {
       await fs.file('main.dart').writeAsString('void main() {}');
       await fs.file('output.snapshot').create();
       await fs.file('output.snapshot.d').writeAsString('snapshot : main.dart');
-      await snapshotter.buildScriptSnapshot(
+      await snapshotter.build(
         mainPath: 'main.dart',
         snapshotPath: 'output.snapshot',
         depfilePath: 'output.snapshot.d',
@@ -430,7 +431,7 @@ void main() {
         'main.dart': '27f5ebf0f8c559b2af9419d190299a5e',
         'output.snapshot': 'deadbeef000b204e9800998ecaaaaa',
       });
-      await snapshotter.buildScriptSnapshot(
+      await snapshotter.build(
         mainPath: 'main.dart',
         snapshotPath: 'output.snapshot',
         depfilePath: 'output.snapshot.d',
@@ -451,7 +452,7 @@ void main() {
         'main.dart': '27f5ebf0f8c559b2af9419d190299a5e',
         'output.snapshot': 'd41d8cd98f00b204e9800998ecf8427e',
       });
-      await snapshotter.buildScriptSnapshot(
+      await snapshotter.build(
         mainPath: 'main.dart',
         snapshotPath: 'output.snapshot',
         depfilePath: 'output.snapshot.d',
@@ -480,7 +481,7 @@ void main() {
         'output.snapshot.d': 'output.snapshot : main.dart other.dart',
       };
 
-      await snapshotter.buildScriptSnapshot(
+      await snapshotter.build(
         mainPath: 'other.dart',
         snapshotPath: 'output.snapshot',
         depfilePath: 'output.snapshot.d',
@@ -506,7 +507,7 @@ void main() {
         'main.dart': '27f5ebf0f8c559b2af9419d190299a5e',
         'output.snapshot': 'd41d8cd98f00b204e9800998ecf8427e',
       });
-      await snapshotter.buildScriptSnapshot(
+      await snapshotter.build(
         mainPath: 'main.dart',
         snapshotPath: 'output.snapshot',
         depfilePath: 'output.snapshot.d',
@@ -530,7 +531,7 @@ void main() {
         kIsolateSnapshotData,
       ];
       testUsingContext('creates fingerprint with target platform', () {
-        final Fingerprint fingerprint = Snapshotter.createFingerprint(
+        final Fingerprint fingerprint = createFingerprint(
           new SnapshotType(TargetPlatform.android_x64, BuildMode.release),
           'a.dart',
           <String>[],
@@ -542,7 +543,7 @@ void main() {
         }, artifactPaths));
       }, overrides: contextOverrides);
       testUsingContext('creates fingerprint without target platform', () {
-        final Fingerprint fingerprint = Snapshotter.createFingerprint(
+        final Fingerprint fingerprint = createFingerprint(
           new SnapshotType(null, BuildMode.release),
           'a.dart',
           <String>[],
@@ -556,7 +557,7 @@ void main() {
       testUsingContext('creates fingerprint with file checksums', () async {
         await fs.file('a.dart').create();
         await fs.file('b.dart').create();
-        final Fingerprint fingerprint = Snapshotter.createFingerprint(
+        final Fingerprint fingerprint = createFingerprint(
           new SnapshotType(TargetPlatform.android_x64, BuildMode.release),
           'a.dart',
           <String>['a.dart', 'b.dart'],
@@ -583,10 +584,9 @@ void main() {
 
     _FakeGenSnapshot genSnapshot;
     MemoryFileSystem fs;
-    Snapshotter snapshotter;
+    AOTSnapshotter snapshotter;
     MockArtifacts mockArtifacts;
     MockXcode mockXcode;
-    MockXxd mockXxd;
 
     setUp(() async {
       fs = new MemoryFileSystem();
@@ -605,10 +605,9 @@ void main() {
       fs.file(fs.path.join(skyEnginePath, 'sdk_ext', 'vmservice_io.dart')).createSync();
 
       genSnapshot = new _FakeGenSnapshot();
-      snapshotter = new Snapshotter();
+      snapshotter = new AOTSnapshotter();
       mockArtifacts = new MockArtifacts();
       mockXcode = new MockXcode();
-      mockXxd = new MockXxd();
       for (BuildMode mode in BuildMode.values) {
         when(mockArtifacts.getArtifactPath(Artifact.dartVmEntryPointsTxt, TargetPlatform.ios, mode)).thenReturn(kVmEntrypoints);
         when(mockArtifacts.getArtifactPath(Artifact.dartIoEntriesTxt, TargetPlatform.ios, mode)).thenReturn(kIoEntries);
@@ -623,25 +622,11 @@ void main() {
       FileSystem: () => fs,
       GenSnapshot: () => genSnapshot,
       Xcode: () => mockXcode,
-      Xxd: () => mockXxd,
     };
 
-    testUsingContext('builds iOS debug AOT snapshot', () async {
-      fs.file('main.dill').writeAsStringSync('binary magic');
-
+    testUsingContext('iOS debug AOT snapshot is invalid', () async {
       final String outputPath = fs.path.join('build', 'foo');
-      fs.directory(outputPath).createSync(recursive: true);
-
-      genSnapshot.outputs = <String, String>{
-        fs.path.join(outputPath, 'vm_snapshot_data'): '',
-        fs.path.join(outputPath, 'vm_snapshot_instr'): '',
-        fs.path.join(outputPath, 'isolate_snapshot_data'): '',
-        fs.path.join(outputPath, 'isolate_snapshot_instr'): '',
-        fs.path.join(outputPath, 'snapshot.d'): '',
-        fs.path.join(outputPath, 'snapshot_assembly.S'): '',
-      };
-
-      final int genSnapshotExitCode = await snapshotter.buildAotSnapshot(
+      expect(await snapshotter.build(
         platform: TargetPlatform.ios,
         buildMode: BuildMode.debug,
         mainPath: 'main.dill',
@@ -649,27 +634,7 @@ void main() {
         outputPath: outputPath,
         preferSharedLibrary: false,
         previewDart2: true,
-      );
-
-      expect(genSnapshotExitCode, 0);
-      expect(genSnapshot.callCount, 1);
-      expect(genSnapshot.snapshotType.platform, TargetPlatform.ios);
-      expect(genSnapshot.snapshotType.mode, BuildMode.debug);
-      expect(genSnapshot.packagesPath, '.packages');
-      expect(genSnapshot.additionalArgs, <String>[
-        '--vm_snapshot_data=${fs.path.join(outputPath, 'vm_snapshot_data')}',
-        '--isolate_snapshot_data=${fs.path.join(outputPath, 'isolate_snapshot_data')}',
-        '--url_mapping=dart:ui,${fs.path.join(skyEnginePath, 'lib', 'ui', 'ui.dart')}',
-        '--url_mapping=dart:vmservice_io,${fs.path.join(skyEnginePath, 'sdk_ext', 'vmservice_io.dart')}',
-        '--dependencies=${fs.path.join(outputPath, 'snapshot.d')}',
-        '--snapshot_kind=core',
-        'snapshot.dart',
-        '--no-checked',
-        '--conditional_directives',
-        '--reify-generic-functions',
-        '--strong',
-        'main.dill',
-      ]);
+      ), isNot(equals(0)));
     }, overrides: contextOverrides);
 
     testUsingContext('builds iOS profile AOT snapshot', () async {
@@ -683,7 +648,11 @@ void main() {
         fs.path.join(outputPath, 'snapshot.d'): '',
       };
 
-      final int genSnapshotExitCode = await snapshotter.buildAotSnapshot(
+      final RunResult successResult = new RunResult(new ProcessResult(1, 0, '', ''));
+      when(xcode.cc(any)).thenAnswer((_) => new Future<RunResult>.value(successResult));
+      when(xcode.clang(any)).thenAnswer((_) => new Future<RunResult>.value(successResult));
+
+      final int genSnapshotExitCode = await snapshotter.build(
         platform: TargetPlatform.ios,
         buildMode: BuildMode.profile,
         mainPath: 'main.dill',
@@ -699,19 +668,17 @@ void main() {
       expect(genSnapshot.snapshotType.mode, BuildMode.profile);
       expect(genSnapshot.packagesPath, '.packages');
       expect(genSnapshot.additionalArgs, <String>[
-        '--vm_snapshot_data=${fs.path.join(outputPath, 'vm_snapshot_data')}',
-        '--isolate_snapshot_data=${fs.path.join(outputPath, 'isolate_snapshot_data')}',
         '--url_mapping=dart:ui,${fs.path.join(skyEnginePath, 'lib', 'ui', 'ui.dart')}',
         '--url_mapping=dart:vmservice_io,${fs.path.join(skyEnginePath, 'sdk_ext', 'vmservice_io.dart')}',
-        '--dependencies=${fs.path.join(outputPath, 'snapshot.d')}',
         '--embedder_entry_points_manifest=$kVmEntrypoints',
         '--embedder_entry_points_manifest=$kIoEntries',
-        '--snapshot_kind=app-aot-assembly',
-        '--assembly=${fs.path.join(outputPath, 'snapshot_assembly.S')}',
-        '--no-checked',
-        '--conditional_directives',
+        '--dependencies=${fs.path.join(outputPath, 'snapshot.d')}',
         '--reify-generic-functions',
         '--strong',
+        '--no-checked',
+        '--conditional_directives',
+        '--snapshot_kind=app-aot-assembly',
+        '--assembly=${fs.path.join(outputPath, 'snapshot_assembly.S')}',
         'main.dill',
       ]);
     }, overrides: contextOverrides);
@@ -727,7 +694,11 @@ void main() {
         fs.path.join(outputPath, 'snapshot.d'): '',
       };
 
-      final int genSnapshotExitCode = await snapshotter.buildAotSnapshot(
+      final RunResult successResult = new RunResult(new ProcessResult(1, 0, '', ''));
+      when(xcode.cc(any)).thenAnswer((_) => new Future<RunResult>.value(successResult));
+      when(xcode.clang(any)).thenAnswer((_) => new Future<RunResult>.value(successResult));
+
+      final int genSnapshotExitCode = await snapshotter.build(
         platform: TargetPlatform.ios,
         buildMode: BuildMode.release,
         mainPath: 'main.dill',
@@ -743,17 +714,15 @@ void main() {
       expect(genSnapshot.snapshotType.mode, BuildMode.release);
       expect(genSnapshot.packagesPath, '.packages');
       expect(genSnapshot.additionalArgs, <String>[
-        '--vm_snapshot_data=${fs.path.join(outputPath, 'vm_snapshot_data')}',
-        '--isolate_snapshot_data=${fs.path.join(outputPath, 'isolate_snapshot_data')}',
         '--url_mapping=dart:ui,${fs.path.join(skyEnginePath, 'lib', 'ui', 'ui.dart')}',
         '--url_mapping=dart:vmservice_io,${fs.path.join(skyEnginePath, 'sdk_ext', 'vmservice_io.dart')}',
-        '--dependencies=${fs.path.join(outputPath, 'snapshot.d')}',
         '--embedder_entry_points_manifest=$kVmEntrypoints',
         '--embedder_entry_points_manifest=$kIoEntries',
-        '--snapshot_kind=app-aot-assembly',
-        '--assembly=${fs.path.join(outputPath, 'snapshot_assembly.S')}',
+        '--dependencies=${fs.path.join(outputPath, 'snapshot.d')}',
         '--reify-generic-functions',
         '--strong',
+        '--snapshot_kind=app-aot-assembly',
+        '--assembly=${fs.path.join(outputPath, 'snapshot_assembly.S')}',
         'main.dill',
       ]);
     }, overrides: contextOverrides);
