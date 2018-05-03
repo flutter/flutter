@@ -787,7 +787,12 @@ double Paragraph::GetLineXOffset(size_t line_number,
   if (align == TextAlign::right ||
       (align == TextAlign::start && direction == TextDirection::rtl) ||
       (align == TextAlign::end && direction == TextDirection::ltr)) {
-    return width_ - line_total_advance;
+    // If this line has a soft break, then use the line width calculated by the
+    // line breaker because that width excludes the soft break's whitespace.
+    double text_width = line_ranges_[line_number].hard_break
+                            ? line_total_advance
+                            : line_widths_[line_number];
+    return width_ - text_width;
   } else if (paragraph_style_.text_align == TextAlign::center) {
     return (width_ - line_widths_[line_number]) / 2;
   } else {
