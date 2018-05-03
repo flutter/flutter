@@ -14,7 +14,7 @@ void main() {
     testUsingContext('getEmulators', () async {
       // Test that EmulatorManager.getEmulators() doesn't throw.
       final EmulatorManager emulatorManager = new EmulatorManager();
-      final List<Emulator> emulators = await emulatorManager.getAllAvailableEmulators().toList();
+      final List<Emulator> emulators = await emulatorManager.getAllAvailableEmulators();
       expect(emulators, isList);
     });
 
@@ -26,7 +26,7 @@ void main() {
       final EmulatorManager emulatorManager = new TestEmulatorManager(emulators);
 
       Future<Null> expectEmulator(String id, List<Emulator> expected) async {
-        expect(await emulatorManager.getEmulatorsMatching(id).toList(), expected);
+        expect(await emulatorManager.getEmulatorsMatching(id), expected);
       }
       expectEmulator('Nexus_5', <Emulator>[emulator1]);
       expectEmulator('Nexus_5X', <Emulator>[emulator2]);
@@ -44,8 +44,8 @@ class TestEmulatorManager extends EmulatorManager {
   TestEmulatorManager(this.allEmulators);
 
   @override
-  Stream<Emulator> getAllAvailableEmulators() {
-    return new Stream<Emulator>.fromIterable(allEmulators);
+  Future<List<Emulator>> getAllAvailableEmulators() {
+    return new Future<List<Emulator>>.value(allEmulators);
   }
 }
 
