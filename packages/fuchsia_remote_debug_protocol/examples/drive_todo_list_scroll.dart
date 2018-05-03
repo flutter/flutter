@@ -47,9 +47,9 @@ Future<Null> main(List<String> args) async {
 
   final IsolateRef ref = refs.first;
   print('Driving ${ref.name}');
-  final FlutterDriver driver = await FlutterDriver.connectToIsolate(
-      ref.dartVm.uri.toString(),
-      isolateId: ref.id,
+  final FlutterDriver driver = await FlutterDriver.connect(
+      dartVmServiceUrl: ref.dartVm.uri.toString(),
+      isolateNumber: ref.number,
       printCommunication: true,
       logCommunicationToFile: false);
   for (int i = 0; i < 5; ++i) {

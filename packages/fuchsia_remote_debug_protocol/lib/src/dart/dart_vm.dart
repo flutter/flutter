@@ -237,10 +237,10 @@ class FlutterView {
 /// This class contains information about the Isolate like its name and ID, as
 /// well as a reference to the parent DartVM on which it is running.
 class IsolateRef {
-  IsolateRef._(this.name, this.id, this.dartVm);
+  IsolateRef._(this.name, this.number, this.dartVm);
 
   factory IsolateRef._fromJson(Map<String, dynamic> json, DartVm dartVm) {
-    final String id = json['id'];
+    final String number = json['number'];
     final String name = json['name'];
     final String type = json['type'];
     if (type == null) {
@@ -249,23 +249,22 @@ class IsolateRef {
     if (type != '@Isolate') {
       throw new RpcFormatError('Type "$type" does not match for IsolateRef');
     }
-    if (id == null) {
+    if (number == null) {
       throw new RpcFormatError(
-          'Unable to find ID for isolate ref within JSON "$json"');
+          'Unable to find number for isolate ref within JSON "$json"');
     }
     if (name == null) {
       throw new RpcFormatError(
           'Unable to find name for isolate ref within JSON "$json"');
     }
-    return new IsolateRef._(
-        name, int.parse(id.replaceFirst('isolates/', '')), dartVm);
+    return new IsolateRef._(name, int.parse(number), dartVm);
   }
 
   /// The full name of this Isolate (not guaranteed to be unique).
   final String name;
 
-  /// The unique ID of this isolate.
-  final int id;
+  /// The unique number ID of this isolate.
+  final int number;
 
   /// The parent [DartVm] on which this Isolate lives.
   final DartVm dartVm;
