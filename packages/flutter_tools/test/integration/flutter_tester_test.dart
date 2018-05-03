@@ -138,8 +138,9 @@ Future<void> _getPackages() async {
     'get'
   ];
   final Process process = await processManager.start(command);
-  process.stderr.transform(utf8.decoder).listen(print);
+  final StringBuffer errorOutput = new StringBuffer();
+  process.stderr.transform(utf8.decoder).listen(errorOutput.write);
   final int exitCode = await process.exitCode;
   if (exitCode != 0)
-    throw new Exception('flutter packages get failed');
+    throw new Exception('flutter packages get failed: ${errorOutput.toString()}');
 }
