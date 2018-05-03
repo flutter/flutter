@@ -177,25 +177,6 @@ class _DemoItem extends StatelessWidget {
     final bool isDark = theme.brightness == Brightness.dark;
     final double textScaleFactor = MediaQuery.of(context)?.textScaleFactor ?? 1.0;
 
-    final List<Widget> titleChildren = <Widget>[
-      new Text(
-        demo.title,
-        style: theme.textTheme.subhead.copyWith(
-          color: isDark ? Colors.white : const Color(0xFF202124),
-        ),
-      ),
-    ];
-    if (demo.subtitle != null) {
-      titleChildren.add(
-        new Text(
-          demo.subtitle,
-          style: theme.textTheme.body1.copyWith(
-            color: isDark ? Colors.white : const Color(0xFF60646B)
-          ),
-        ),
-      );
-    }
-
     return new RawMaterialButton(
       padding: EdgeInsets.zero,
       splashColor: theme.primaryColor.withOpacity(0.12),
@@ -221,7 +202,19 @@ class _DemoItem extends StatelessWidget {
               child: new Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: titleChildren,
+                children: <Widget>[
+                  new Text(
+                    demo.title,
+                    style: theme.textTheme.subhead.copyWith(
+                      color: isDark ? Colors.white : const Color(0xFF202124),
+                    ),
+                  ),
+                  new Text(
+                    demo.subtitle,
+                    style: theme.textTheme.body1.copyWith(
+                      color: isDark ? Colors.white : const Color(0xFF60646B)),
+                  ),
+                ],
               ),
             ),
             const SizedBox(width: 44.0),

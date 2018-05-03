@@ -21,8 +21,8 @@ const FileSystem _fs = const LocalFileSystem();
 // --trace-startup, as we do in this test, the VM stores trace events in an
 // endless buffer instead of a ring buffer.
 //
-// These names must match GalleryItem titles from kAllGalleryDemos
-// in examples/flutter_gallery/lib/gallery/demos.dart
+// These names must match GalleryItem titles from  kAllGalleryItems
+// in examples/flutter_gallery/lib/gallery.item.dart
 const List<String> kProfiledDemos = const <String>[
   'Shrine',
   'Contact profile',
@@ -31,14 +31,14 @@ const List<String> kProfiledDemos = const <String>[
   'Buttons',
   'Cards',
   'Chips',
-  'Pickers',
-  'Dialogs',
+  'Date and time pickers',
+  'Dialog',
 ];
 
 // Demos that will be backed out of within FlutterDriver.runUnsynchronized();
 //
-// These names must match GalleryItem titles from kAllGalleryDemos
-// in examples/flutter_gallery/lib/gallery/demos.dart
+// These names must match GalleryItem titles from  kAllGalleryItems
+// in examples/flutter_gallery/lib/gallery.item.dart
 const List<String> kUnsynchronizedDemos = const <String>[
   'Progress indicators',
   'Activity Indicator',
