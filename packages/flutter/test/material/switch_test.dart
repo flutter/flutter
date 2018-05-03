@@ -4,11 +4,9 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../rendering/mock_canvas.dart';
-import '../widgets/semantics_tester.dart';
 
 void main() {
   testWidgets('Switch can toggle on tap', (WidgetTester tester) async {
@@ -188,49 +186,5 @@ void main() {
         ..circle(color: const Color(0x1f000000))
         ..circle(color: Colors.red[500])
     );
-  });
-
-  testWidgets('switch has semantic events', (WidgetTester tester) async {
-    dynamic semanticEvent;
-    bool value = false;
-    SystemChannels.accessibility.setMockMessageHandler((dynamic message) {
-      semanticEvent = message;
-    });
-    final SemanticsTester semanticsTester = new SemanticsTester(tester);
-
-    await tester.pumpWidget(
-      new Directionality(
-        textDirection: TextDirection.ltr,
-        child: new StatefulBuilder(
-          builder: (BuildContext context, StateSetter setState) {
-            return new Material(
-              child: new Center(
-                child: new Switch(
-                  value: value,
-                  onChanged: (bool newValue) {
-                    setState(() {
-                      value = newValue;
-                    });
-                  },
-                ),
-              ),
-            );
-          },
-        ),
-      ),
-    );
-    await tester.tap(find.byType(Switch));
-    final RenderObject object = tester.firstRenderObject(find.byType(Switch));
-    
-    expect(value, true);
-    expect(semanticEvent, <String, dynamic>{
-      'type': 'tap',
-      'nodeId': object.debugSemantics.id,
-      'data': <String, dynamic>{},
-    });
-    expect(object.debugSemantics.getSemanticsData().hasAction(SemanticsAction.tap), true);
-
-    semanticsTester.dispose();
-    SystemChannels.accessibility.setMockMessageHandler(null);
   });
 }
