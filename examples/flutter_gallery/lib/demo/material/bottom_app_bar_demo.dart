@@ -293,7 +293,7 @@ class _DemoBottomAppBar extends StatelessWidget {
   final FloatingActionButtonLocation fabLocation;
   final bool showNotch;
 
-  static const List<FloatingActionButtonLocation> kCenterLocations = <FloatingActionButtonLocation>[
+  static final List<FloatingActionButtonLocation> kCenterLocations = <FloatingActionButtonLocation>[
     FloatingActionButtonLocation.centerDocked,
     FloatingActionButtonLocation.centerFloat,
   ];
