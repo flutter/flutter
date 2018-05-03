@@ -116,12 +116,18 @@ class GoldensClient {
   /// [GoldensClient] instances in other processes or isolates will not
   /// duplicate the work that this is doing.
   Future<void> prepare() async {
-    if (await _isSyncRequired()) {
+    final String goldensCommit = await _getGoldensCommit();
+    String currentCommit = await _getCurrentCommit();
+    if (currentCommit != goldensCommit) {
       await _obtainLock();
       try {
-        // Check if sync is required again now that we have the lock.
-        if (await _isSyncRequired()) {
-          await _doSync();
+        // Check the current commit again now that we have the lock.
+        currentCommit = await _getCurrentCommit();
+        if (currentCommit != goldensCommit) {
+          if (currentCommit == null) {
+            await _initRepository();
+          }
+          await _syncTo(goldensCommit);
         }
       } finally {
         await _releaseLock();
@@ -129,31 +135,40 @@ class GoldensClient {
     }
   }
 
-  Future<bool> _isSyncRequired() async {
+  Future<String> _getGoldensCommit() async {
+    final File versionFile = flutterRoot.childFile(fs.path.join('bin', 'internal', 'goldens.version'));
+    return (await versionFile.readAsString()).trim();
+  }
+
+  Future<String> _getCurrentCommit() async {
     if (!repositoryRoot.existsSync()) {
-      return true;
+      return null;
     } else {
       final io.ProcessResult revParse = await process.run(
         <String>['git', 'rev-parse', 'HEAD'],
         workingDirectory: repositoryRoot.path,
       );
-      if (revParse.exitCode != 0) {
-        return true;
-      }
-      final File versionFile = flutterRoot.childFile(fs.path.join('bin', 'internal', 'goldens.version'));
-      final String currentVersion = revParse.stdout.trim();
-      final String goldensVersion = (await versionFile.readAsString()).trim();
-      return currentVersion != goldensVersion;
+      return revParse.exitCode == 0 ? revParse.stdout.trim() : null;
     }
   }
 
-  Future<void> _doSync() async {
+  Future<void> _initRepository() async {
     await repositoryRoot.create(recursive: true);
     await _runCommands(
       <String>[
         'git init',
-        'git remote add origin https://github.com/flutter/goldens.git',
-        'git pull origin master',
+        'git remote add upstream https://github.com/flutter/goldens.git',
+      ],
+      workingDirectory: repositoryRoot,
+    );
+  }
+
+  Future<void> _syncTo(String commit) async {
+    await _runCommands(
+      <String>[
+        'git pull upstream master',
+        'git fetch upstream $commit',
+        'git reset --hard FETCH_HEAD',
       ],
       workingDirectory: repositoryRoot,
     );
