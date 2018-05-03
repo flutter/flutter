@@ -1,4 +1,4 @@
-Signature: 759192b81fc370d3de4de0d021329916
+Signature: 0bb9afe000319cd63fc59230bab57873
 
 UNUSED LICENSES:
 
@@ -5663,7 +5663,6 @@ FILE: ../../../third_party/dart/runtime/bin/vmservice/server.dart
 FILE: ../../../third_party/dart/runtime/bin/vmservice/vmservice_io.dart
 FILE: ../../../third_party/dart/runtime/bin/vmservice_impl.cc
 FILE: ../../../third_party/dart/runtime/bin/vmservice_impl.h
-FILE: ../../../third_party/dart/runtime/include/dart_mirrors_api.h
 FILE: ../../../third_party/dart/runtime/include/dart_native_api.h
 FILE: ../../../third_party/dart/runtime/lib/collection_patch.dart
 FILE: ../../../third_party/dart/runtime/lib/core_patch.dart
@@ -5800,7 +5799,6 @@ FILE: ../../../third_party/dart/runtime/vm/isolate.cc
 FILE: ../../../third_party/dart/runtime/vm/isolate.h
 FILE: ../../../third_party/dart/runtime/vm/json_stream.cc
 FILE: ../../../third_party/dart/runtime/vm/json_stream.h
-FILE: ../../../third_party/dart/runtime/vm/mirrors_api_impl.cc
 FILE: ../../../third_party/dart/runtime/vm/native_api_impl.cc
 FILE: ../../../third_party/dart/runtime/vm/native_symbol.h
 FILE: ../../../third_party/dart/runtime/vm/native_symbol_android.cc

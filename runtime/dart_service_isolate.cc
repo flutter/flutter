@@ -137,11 +137,10 @@ bool DartServiceIsolate::Startup(std::string server_ip,
   // Make runnable.
   Dart_ExitScope();
   Dart_ExitIsolate();
-  bool retval = Dart_IsolateMakeRunnable(isolate);
-  if (!retval) {
+  *error = Dart_IsolateMakeRunnable(isolate);
+  if (*error) {
     Dart_EnterIsolate(isolate);
     Dart_ShutdownIsolate();
-    *error = strdup("Invalid isolate state - Unable to make it runnable.");
     return false;
   }
   Dart_EnterIsolate(isolate);

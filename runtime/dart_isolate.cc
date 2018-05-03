@@ -409,7 +409,10 @@ bool DartIsolate::MarkIsolateRunnable() {
   // There must be no current isolate to mark an isolate as being runnable.
   Dart_ExitIsolate();
 
-  if (!Dart_IsolateMakeRunnable(isolate())) {
+  char* error = Dart_IsolateMakeRunnable(isolate());
+  if (error) {
+    FXL_DLOG(ERROR) << error;
+    ::free(error);
     // Failed. Restore the isolate.
     Dart_EnterIsolate(isolate());
     return false;
