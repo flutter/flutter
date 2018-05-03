@@ -31,8 +31,8 @@ const List<String> kProfiledDemos = const <String>[
   'Buttons',
   'Cards',
   'Chips',
-  'Date and time pickers',
-  'Dialog',
+  'Date and time selection widgets',
+  'Dialogs',
 ];
 
 // Demos that will be backed out of within FlutterDriver.runUnsynchronized();
@@ -167,7 +167,7 @@ void main([List<String> args = const <String>[]]) {
       driver = await FlutterDriver.connect();
 
       if (args.contains('--with_semantics')) {
-        print('Enabeling semantics...');
+        print('Enabling semantics...');
         await driver.setSemantics(true);
       }
 
