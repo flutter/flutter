@@ -32,7 +32,7 @@ void main() {
       when(request.close()).thenAnswer((_) => new Future<HttpClientResponse>.value(response));
       when(response.contentLength).thenReturn(kTransparentImage.length);
       when(response.statusCode).thenReturn(HttpStatus.OK);
-      when(response.listen(typed(any))).thenAnswer((Invocation invocation) {
+      when(response.listen(typed(any), onError: typed(any, named: 'onError'), onDone: typed(any, named: 'onDone'), cancelOnError: typed(any, named: 'cancelOnError'))).thenAnswer((Invocation invocation) {
         final void Function(List<int>) onData = invocation.positionalArguments[0];
         final void Function() onDone = invocation.namedArguments[#onDone];
         final void Function(Object, [StackTrace]) onError = invocation.namedArguments[#onError];
