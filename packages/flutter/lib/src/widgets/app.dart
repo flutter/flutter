@@ -5,7 +5,6 @@
 import 'dart:async';
 import 'dart:ui' as ui show window;
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 
 import 'banner.dart';

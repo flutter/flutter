@@ -14,6 +14,14 @@ import 'focus_manager.dart';
 
 export 'dart:ui' show hashValues, hashList;
 
+export 'package:flutter/foundation.dart' show
+  immutable,
+  mustCallSuper,
+  optionalTypeArgs,
+  protected,
+  required,
+  visibleForTesting;
+
 export 'package:flutter/foundation.dart' show FlutterError, debugPrint, debugPrintStack;
 export 'package:flutter/foundation.dart' show VoidCallback, ValueChanged, ValueGetter, ValueSetter;
 export 'package:flutter/foundation.dart' show DiagnosticLevel;
