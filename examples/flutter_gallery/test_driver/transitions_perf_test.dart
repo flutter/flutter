@@ -31,7 +31,7 @@ const List<String> kProfiledDemos = const <String>[
   'Buttons',
   'Cards',
   'Chips',
-  'Date and time selection widgets',
+  'Pickers',
   'Dialogs',
 ];
 
@@ -167,7 +167,7 @@ void main([List<String> args = const <String>[]]) {
       driver = await FlutterDriver.connect();
 
       if (args.contains('--with_semantics')) {
-        print('Enabling semantics...');
+        print('Enabeling semantics...');
         await driver.setSemantics(true);
       }
 
