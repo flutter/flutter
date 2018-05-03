@@ -47,7 +47,7 @@ class EmulatorsCommand extends FlutterCommand {
 
   Future<Null> _launchEmulator(String id) async {
     final List<Emulator> emulators =
-        await emulatorManager.getEmulatorsMatching(id).toList();
+        await emulatorManager.getEmulatorsMatching(id);
 
     if (emulators.isEmpty) {
       printStatus("No emulator found that matches '$id'.");
@@ -62,8 +62,8 @@ class EmulatorsCommand extends FlutterCommand {
   Future<Null> _listEmulators(String searchText) async {
     final List<Emulator> emulators =
         searchText == null
-        ? await emulatorManager.getAllAvailableEmulators().toList()
-        : await emulatorManager.getEmulatorsMatching(searchText).toList();
+        ? await emulatorManager.getAllAvailableEmulators()
+        : await emulatorManager.getEmulatorsMatching(searchText);
 
     if (emulators.isEmpty) {
       printStatus('No emulators available.\n\n'

@@ -24,8 +24,8 @@ class EmulatorManager {
 
   final List<EmulatorDiscovery> _emulatorDiscoverers = <EmulatorDiscovery>[];
 
-  Stream<Emulator> getEmulatorsMatching(String searchText) async* {
-    final List<Emulator> emulators = await getAllAvailableEmulators().toList();
+  Future<List<Emulator>> getEmulatorsMatching(String searchText) async {
+    final List<Emulator> emulators = await getAllAvailableEmulators();
     searchText = searchText.toLowerCase();
     bool exactlyMatchesEmulatorId(Emulator emulator) =>
         emulator.id?.toLowerCase() == searchText ||
@@ -37,13 +37,11 @@ class EmulatorManager {
     final Emulator exactMatch = emulators.firstWhere(
         exactlyMatchesEmulatorId, orElse: () => null);
     if (exactMatch != null) {
-      yield exactMatch;
-      return;
+      return <Emulator>[exactMatch];
     }
 
     // Match on a id or name starting with [emulatorId].
-    for (Emulator emulator in emulators.where(startsWithEmulatorId))
-      yield emulator;
+    return emulators.where(startsWithEmulatorId).toList();
   }
 
   Iterable<EmulatorDiscovery> get _platformDiscoverers {
@@ -51,12 +49,12 @@ class EmulatorManager {
   }
 
   /// Return the list of all available emulators.
-  Stream<Emulator> getAllAvailableEmulators() async* {
-    for (EmulatorDiscovery discoverer in _platformDiscoverers) {
-      for (Emulator emulator in await discoverer.emulators) {
-        yield emulator;
-      }
-    }
+  Future<List<Emulator>> getAllAvailableEmulators() async {
+    final List<Emulator> emulators = <Emulator>[];
+    Future.forEach(_platformDiscoverers, (EmulatorDiscovery discoverer) async {
+      emulators.addAll(await discoverer.emulators);
+    });
+    return emulators;
   }
 
   /// Whether we're capable of listing any emulators given the current environment configuration.
