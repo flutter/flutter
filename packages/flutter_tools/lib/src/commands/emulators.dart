@@ -14,15 +14,15 @@ import '../runner/flutter_command.dart';
 
 class EmulatorsCommand extends FlutterCommand {
   EmulatorsCommand() {
-    argParser.addOption('start',
-        help: 'The full or partial ID of the emulator to start.');
+    argParser.addOption('launch',
+        help: 'The full or partial ID of the emulator to launch.');
   }
 
   @override
   final String name = 'emulators';
 
   @override
-  final String description = 'List and start available emulators.';
+  final String description = 'List and launch available emulators.';
 
   @override
   Future<Null> runCommand() async {
@@ -34,8 +34,8 @@ class EmulatorsCommand extends FlutterCommand {
           exitCode: 1);
     }
 
-    if (argResults.wasParsed('start')) {
-      await _startEmulator(argResults['start']);
+    if (argResults.wasParsed('launch')) {
+      await _launchEmulator(argResults['launch']);
     } else {
       final String searchText =
           argResults.rest != null && argResults.rest.isNotEmpty
@@ -45,7 +45,7 @@ class EmulatorsCommand extends FlutterCommand {
     }
   }
 
-  Future<Null> _startEmulator(String id) async {
+  Future<Null> _launchEmulator(String id) async {
     final List<Emulator> emulators =
         await emulatorManager.getEmulatorsMatching(id).toList();
 
