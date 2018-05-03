@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
 import 'dart:developer';
 import 'dart:math' as math;
 
@@ -298,42 +299,46 @@ class _GalleryHomeState extends State<GalleryHome> with SingleTickerProviderStat
       backgroundColor: isDark ? _kFlutterBlue : theme.primaryColor,
       body: new SafeArea(
         bottom: false,
-        child: new Backdrop(
-          backTitle: const Text('Options'),
-          backLayer: widget.optionsPage,
-          frontAction: new AnimatedSwitcher(
-            duration: _kFrontLayerSwitchDuration,
-            child: _category == null
-              ? const _FlutterLogo()
-              : new IconButton(
-                icon: const BackButtonIcon(),
-                tooltip: 'Back',
-                onPressed: () {
-                  setState(() {
-                    _category = null;
-                  });
-                },
-              ),
-          ),
-          frontTitle:  new AnimatedSwitcher(
-            duration: _kFrontLayerSwitchDuration,
-            child: _category == null
-              ? const Text('Flutter gallery')
-              : new Text(_category.name),
-          ),
-          frontHeading: new Container(height: 24.0),
-          frontLayer: new AnimatedSwitcher(
-            duration: _kFrontLayerSwitchDuration,
-            child: _category != null
-              ? new _DemosPage(_category)
-              : new _CategoriesPage(
-                categories: kAllGalleryDemoCategories,
-                onCategoryTap: (GalleryDemoCategory category) {
-                  setState(() {
-                    _category = category;
-                  });
-                },
-              ),
+        child: new WillPopScope(
+          onWillPop: () {
+            // Pop the category page if Android back button is pressed.
+            if (_category != null) {
+              setState(() => _category = null);
+              return new Future<bool>.value(false);
+            }
+            return new Future<bool>.value(true);
+          },
+          child: new Backdrop(
+            backTitle: const Text('Options'),
+            backLayer: widget.optionsPage,
+            frontAction: new AnimatedSwitcher(
+              duration: _kFrontLayerSwitchDuration,
+              child: _category == null
+                ? const _FlutterLogo()
+                : new IconButton(
+                  icon: const BackButtonIcon(),
+                  tooltip: 'Back',
+                  onPressed: () => setState(() => _category = null),
+                ),
+            ),
+            frontTitle:  new AnimatedSwitcher(
+              duration: _kFrontLayerSwitchDuration,
+              child: _category == null
+                ? const Text('Flutter gallery')
+                : new Text(_category.name),
+            ),
+            frontHeading: new Container(height: 24.0),
+            frontLayer: new AnimatedSwitcher(
+              duration: _kFrontLayerSwitchDuration,
+              child: _category != null
+                ? new _DemosPage(_category)
+                : new _CategoriesPage(
+                  categories: kAllGalleryDemoCategories,
+                  onCategoryTap: (GalleryDemoCategory category) {
+                    setState(() => _category = category);
+                  },
+                ),
+            ),
           ),
         ),
       ),
