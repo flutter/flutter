@@ -51,7 +51,7 @@ class EmulatorManager {
   /// Return the list of all available emulators.
   Future<List<Emulator>> getAllAvailableEmulators() async {
     final List<Emulator> emulators = <Emulator>[];
-    Future.forEach(_platformDiscoverers, (EmulatorDiscovery discoverer) async {
+    await Future.forEach(_platformDiscoverers, (EmulatorDiscovery discoverer) async {
       emulators.addAll(await discoverer.emulators);
     });
     return emulators;
