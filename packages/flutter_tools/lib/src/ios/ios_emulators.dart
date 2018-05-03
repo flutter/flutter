@@ -11,8 +11,6 @@ import '../emulator.dart';
 import '../globals.dart';
 import 'ios_workflow.dart';
 
-// TODO(dantup): Is there a better name for this? We already have IOSSimulator classes
-// that represent *running* simulators, but this is about "unlaunched images"...
 class IOSEmulators extends EmulatorDiscovery {
   @override
   bool get supportsPlatform => platform.isMacOS;
