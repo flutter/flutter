@@ -383,7 +383,11 @@ DartVM::DartVM(const Settings& settings,
   for (size_t i = 0; i < settings.dart_flags.size(); i++)
     args.push_back(settings.dart_flags[i].c_str());
 
-  FXL_CHECK(Dart_SetVMFlags(args.size(), args.data()));
+  char* flags_error = Dart_SetVMFlags(args.size(), args.data());
+  if (flags_error) {
+    FXL_LOG(FATAL) << "Error while setting Dart VM flags: " << flags_error;
+    ::free(flags_error);
+  }
 
   DartUI::InitForGlobal();
 
