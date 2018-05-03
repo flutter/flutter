@@ -14,7 +14,7 @@ import 'focus_manager.dart';
 
 export 'dart:ui' show hashValues, hashList;
 
-export 'package:meta/meta.dart' show
+export 'package:flutter/foundation.dart' show
   immutable,
   mustCallSuper,
   optionalTypeArgs,
