@@ -281,10 +281,6 @@ class AccessibilityBridge extends AccessibilityNodeProvider implements BasicMess
                 mOwner.dispatchSemanticsAction(virtualViewId, Action.TAP);
                 return true;
             }
-            case AccessibilityNodeInfo.ACTION_LONG_CLICK: {
-                mOwner.dispatchSemanticsAction(virtualViewId, Action.LONG_PRESS);
-                return true;
-            }
             case AccessibilityNodeInfo.ACTION_SCROLL_FORWARD: {
                 if (object.hasAction(Action.SCROLL_UP)) {
                     mOwner.dispatchSemanticsAction(virtualViewId, Action.SCROLL_UP);
@@ -564,13 +560,6 @@ class AccessibilityBridge extends AccessibilityNodeProvider implements BasicMess
                 sendAccessibilityEvent(event);
             }
             if (mA11yFocusedObject != null && mA11yFocusedObject.id == object.id
-                    && object.hadFlag(Flag.HAS_CHECKED_STATE)
-                    && object.hasFlag(Flag.HAS_CHECKED_STATE)
-                    && object.hadFlag(Flag.IS_CHECKED) != object.hasFlag(Flag.IS_CHECKED)) {
-                // Simulate a click so TalkBack announces the change in checked state.
-                sendAccessibilityEvent(object.id, AccessibilityEvent.TYPE_VIEW_CLICKED);
-            }
-            if (mA11yFocusedObject != null && mA11yFocusedObject.id == object.id
                     && !object.hadFlag(Flag.IS_SELECTED) && object.hasFlag(Flag.IS_SELECTED)) {
                 AccessibilityEvent event =
                         obtainAccessibilityEvent(object.id, AccessibilityEvent.TYPE_VIEW_SELECTED);
@@ -671,6 +660,22 @@ class AccessibilityBridge extends AccessibilityNodeProvider implements BasicMess
             case "announce":
                 mOwner.announceForAccessibility((String) data.get("message"));
                 break;
+            case "longPress": {
+                Integer nodeId = (Integer) annotatedEvent.get("nodeId");
+                if (nodeId == null) {
+                    return;
+                }
+                sendAccessibilityEvent(nodeId, AccessibilityEvent.TYPE_VIEW_LONG_CLICKED);
+                break;
+            }
+            case "tap": {
+                Integer nodeId = (Integer) annotatedEvent.get("nodeId");
+                if (nodeId == null) {
+                    return;
+                }
+                sendAccessibilityEvent(nodeId, AccessibilityEvent.TYPE_VIEW_CLICKED);
+                break;
+            }
             case "tooltip": {
                 AccessibilityEvent e = obtainAccessibilityEvent(ROOT_NODE_ID, AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED);
                 e.getText().add((String) data.get("message"));
