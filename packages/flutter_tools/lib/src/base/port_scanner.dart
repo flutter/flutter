@@ -46,7 +46,7 @@ class HostPortScanner extends PortScanner {
   Future<bool> isPortAvailable(int port) async {
     try {
       // TODO(ianh): This is super racy.
-      final ServerSocket socket = await ServerSocket.bind(InternetAddress.LOOPBACK_IP_V4, port);
+      final ServerSocket socket = await ServerSocket.bind(InternetAddress.loopbackIPv4, port);
       await socket.close();
       return true;
     } catch (error) {
@@ -58,9 +58,9 @@ class HostPortScanner extends PortScanner {
   Future<int> findAvailablePort() async {
     ServerSocket socket;
     try {
-      socket = await ServerSocket.bind(InternetAddress.LOOPBACK_IP_V4, 0);
+      socket = await ServerSocket.bind(InternetAddress.loopbackIPv4, 0);
     } on SocketException {
-      socket = await ServerSocket.bind(InternetAddress.LOOPBACK_IP_V6, 0, v6Only: true);
+      socket = await ServerSocket.bind(InternetAddress.loopbackIPv6, 0, v6Only: true);
     }
     final int port = socket.port;
     await socket.close();

@@ -78,7 +78,7 @@ class _ManifestAssetBundle implements AssetBundle {
       return true;
 
     final FileStat stat = fs.file(manifestPath).statSync();
-    if (stat.type == FileSystemEntityType.NOT_FOUND)
+    if (stat.type == FileSystemEntityType.notFound)
       return true;
 
     return stat.modified.isAfter(_lastBuildTimestamp);

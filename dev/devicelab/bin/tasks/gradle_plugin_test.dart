@@ -131,7 +131,7 @@ class FlutterProject {
     final File buildScript = new File(
       path.join(androidPath, 'app', 'build.gradle'),
     );
-    buildScript.openWrite(mode: FileMode.APPEND).write('''
+    buildScript.openWrite(mode: FileMode.append).write('''
 
 android {
     buildTypes {
@@ -147,7 +147,7 @@ android {
     final File buildScript = new File(
       path.join(androidPath, 'app', 'build.gradle'),
     );
-    buildScript.openWrite(mode: FileMode.APPEND).write('''
+    buildScript.openWrite(mode: FileMode.append).write('''
 
 android {
     flavorDimensions "mode"
