@@ -121,13 +121,15 @@ Future<Null> main(List<String> arguments) async {
     dartdocBaseArgs.add('--no-validate-links');
   }
   // Generate the documentation.
+  // We don't need to exclude flutter_tools in this list because it's not in the
+  // recursive dependencies of the package defined at dev/docs/pubspec.yaml
   final List<String> dartdocArgs = <String>[]..addAll(dartdocBaseArgs)..addAll(<String>[
     '--header', 'styles.html',
     '--header', 'analytics.html',
     '--header', 'survey.html',
     '--footer-text', 'lib/footer.html',
     '--exclude-packages',
-'analyzer,args,barback,cli_util,csslib,front_end,glob,html,http_multi_server,io,isolate,js,kernel,logging,mime,mockito,node_preamble,plugin,shelf,shelf_packages_handler,shelf_static,shelf_web_socket,utf,watcher,yaml',
+'analyzer,args,barback,cli_util,csslib,flutter_goldens,front_end,glob,html,http_multi_server,io,isolate,js,kernel,logging,mime,mockito,node_preamble,plugin,shelf,shelf_packages_handler,shelf_static,shelf_web_socket,utf,watcher,yaml',
     '--exclude',
   'package:Flutter/temp_doc.dart,package:http/browser_client.dart,package:intl/intl_browser.dart,package:matcher/mirror_matchers.dart,package:quiver/mirrors.dart,package:quiver/io.dart,package:vm_service_client/vm_service_client.dart,package:web_socket_channel/html.dart',
     '--favicon=favicon.ico',

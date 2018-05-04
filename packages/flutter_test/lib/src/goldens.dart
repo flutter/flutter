@@ -66,8 +66,8 @@ abstract class GoldenFileComparator {
 ///
 ///  * [flutter_test] for more information about how to configure tests at the
 ///    directory-level.
-GoldenFileComparator _goldenFileComparator = const _UninitializedComparator();
 GoldenFileComparator get goldenFileComparator => _goldenFileComparator;
+GoldenFileComparator _goldenFileComparator = const _UninitializedComparator();
 set goldenFileComparator(GoldenFileComparator comparator) {
   _goldenFileComparator = comparator ?? const _UninitializedComparator();
 }
