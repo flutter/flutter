@@ -266,6 +266,10 @@ public class FlutterView extends SurfaceView
         mActivityLifecycleListeners.add(listener);
     }
 
+    public void onStart() {
+        mFlutterLifecycleChannel.send("AppLifecycleState.inactive");
+    }
+
     public void onPause() {
         mFlutterLifecycleChannel.send("AppLifecycleState.inactive");
     }

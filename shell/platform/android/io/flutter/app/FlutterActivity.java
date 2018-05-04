@@ -82,6 +82,12 @@ public class FlutterActivity extends Activity implements FlutterView.Provider, P
     }
 
     @Override
+    protected void onStart() {
+        super.onStart();
+        eventDelegate.onStart();
+    }
+
+    @Override
     protected void onResume() {
         super.onResume();
         eventDelegate.onResume();
