@@ -40,6 +40,11 @@ public interface FlutterActivityEvents
     void onPause();
 
     /**
+     * @see android.app.Activity#onStart()
+     */
+    void onStart();
+
+    /**
      * @see android.app.Activity#onResume()
      */
     void onResume();

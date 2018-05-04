@@ -207,6 +207,13 @@ public final class FlutterActivityDelegate
     }
 
     @Override
+    public void onStart() {
+        if (flutterView != null) {
+            flutterView.onStart();
+        }
+    }
+
+    @Override
     public void onResume() {
         Application app = (Application) activity.getApplicationContext();
         if (app instanceof FlutterApplication) {
