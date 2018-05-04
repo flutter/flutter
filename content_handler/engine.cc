@@ -173,14 +173,14 @@ Engine::Engine(Delegate& delegate,
   // Shell has been created. Before we run the engine, setup the isolate
   // configurator.
   {
-    PlatformView* platform_view =
-        static_cast<PlatformView*>(shell_->GetPlatformView().get());
-    auto& view = platform_view->GetMozartView();
-    fidl::InterfaceHandle<views_v1::ViewContainer> view_container;
-    view->GetContainer(view_container.NewRequest());
+    auto view_container =
+        static_cast<PlatformView*>(shell_->GetPlatformView().get())
+            ->TakeViewContainer();
+
     component::ApplicationEnvironmentPtr application_environment;
     application_context.ConnectToEnvironmentService(
         application_environment.NewRequest());
+
     isolate_configurator_ = std::make_unique<IsolateConfigurator>(
         std::move(fdio_ns),                   //
         std::move(view_container),            //

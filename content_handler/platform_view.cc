@@ -66,6 +66,10 @@ PlatformView::PlatformView(
   // Get the services from the created view.
   view_->GetServiceProvider(service_provider_.NewRequest());
 
+  // Get the view conatiner. This will need to be returned to the isolate
+  // configurator so that it can setup Mozart bindings later.
+  view_->GetContainer(view_container_.NewRequest());
+
   // Get the input connection from the services of the view.
   component::ConnectToService(service_provider_.get(),
                               input_connection_.NewRequest());
@@ -96,9 +100,9 @@ void PlatformView::RegisterPlatformMessageHandlers() {
                 std::placeholders::_1);
 }
 
-views_v1::ViewPtr& PlatformView::GetMozartView() {
-  FXL_DCHECK(view_.is_bound());
-  return view_;
+fidl::InterfaceHandle<views_v1::ViewContainer>
+PlatformView::TakeViewContainer() {
+  return std::move(view_container_);
 }
 
 // |views_v1::ViewListener|

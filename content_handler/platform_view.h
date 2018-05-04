@@ -43,12 +43,13 @@ class PlatformView final : public shell::PlatformView,
 
   void UpdateViewportMetrics(double pixel_ratio);
 
-  views_v1::ViewPtr& GetMozartView();
+  fidl::InterfaceHandle<views_v1::ViewContainer> TakeViewContainer();
 
  private:
   const std::string debug_label_;
   views_v1::ViewManagerPtr view_manager_;
   views_v1::ViewPtr view_;
+  fidl::InterfaceHandle<views_v1::ViewContainer> view_container_;
   component::ServiceProviderPtr service_provider_;
   fidl::Binding<views_v1::ViewListener> view_listener_;
   input::InputConnectionPtr input_connection_;
