@@ -131,7 +131,8 @@ class FlutterProject {
     final File buildScript = new File(
       path.join(androidPath, 'app', 'build.gradle'),
     );
-    buildScript.openWrite(mode: FileMode.append).write('''
+    // ignore: deprecated_member_use
+    buildScript.openWrite(mode: FileMode.APPEND).write('''
 
 android {
     buildTypes {
@@ -147,7 +148,8 @@ android {
     final File buildScript = new File(
       path.join(androidPath, 'app', 'build.gradle'),
     );
-    buildScript.openWrite(mode: FileMode.append).write('''
+    // ignore: deprecated_member_use
+    buildScript.openWrite(mode: FileMode.APPEND).write('''
 
 android {
     flavorDimensions "mode"
