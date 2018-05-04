@@ -126,13 +126,14 @@ bool Rasterizer::DrawToSurface(flow::LayerTree& layer_tree) {
   return false;
 }
 
-static sk_sp<SkPicture> ScreenshotLayerTreeAsPicture(flow::LayerTree* tree) {
+static sk_sp<SkPicture> ScreenshotLayerTreeAsPicture(
+    flow::LayerTree* tree,
+    flow::CompositorContext& compositor_context) {
   FXL_DCHECK(tree != nullptr);
   SkPictureRecorder recorder;
   recorder.beginRecording(
       SkRect::MakeWH(tree->frame_size().width(), tree->frame_size().height()));
 
-  flow::CompositorContext compositor_context;
   auto frame = compositor_context.AcquireFrame(
       nullptr, recorder.getRecordingCanvas(), false);
 
@@ -158,9 +159,11 @@ static sk_sp<SkSurface> CreateSnapshotSurface(GrContext* surface_context,
   return SkSurface::MakeRaster(image_info);
 }
 
-static sk_sp<SkData> ScreenshotLayerTreeAsImage(flow::LayerTree* tree,
-                                                GrContext* surface_context,
-                                                bool compressed) {
+static sk_sp<SkData> ScreenshotLayerTreeAsImage(
+    flow::LayerTree* tree,
+    flow::CompositorContext& compositor_context,
+    GrContext* surface_context,
+    bool compressed) {
   // Attempt to create a snapshot surface depending on whether we have access to
   // a valid GPU rendering context.
   auto snapshot_surface =
@@ -170,7 +173,6 @@ static sk_sp<SkData> ScreenshotLayerTreeAsImage(flow::LayerTree* tree,
   }
 
   // Draw the current layer tree into the snapshot surface.
-  flow::CompositorContext compositor_context;
   auto canvas = snapshot_surface->getCanvas();
   auto frame = compositor_context.AcquireFrame(surface_context, canvas, false);
   canvas->clear(SK_ColorBLACK);
@@ -219,13 +221,16 @@ Rasterizer::Screenshot Rasterizer::ScreenshotLastLayerTree(
 
   switch (type) {
     case ScreenshotType::SkiaPicture:
-      data = ScreenshotLayerTreeAsPicture(layer_tree)->serialize();
+      data = ScreenshotLayerTreeAsPicture(layer_tree, *compositor_context_)
+                 ->serialize();
       break;
     case ScreenshotType::UncompressedImage:
-      data = ScreenshotLayerTreeAsImage(layer_tree, surface_context, false);
+      data = ScreenshotLayerTreeAsImage(layer_tree, *compositor_context_,
+                                        surface_context, false);
       break;
     case ScreenshotType::CompressedImage:
-      data = ScreenshotLayerTreeAsImage(layer_tree, surface_context, true);
+      data = ScreenshotLayerTreeAsImage(layer_tree, *compositor_context_,
+                                        surface_context, true);
       break;
   }
 
