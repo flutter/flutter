@@ -1,4 +1,4 @@
-Signature: 74e81516618f30e45f76acc3d9cb9b68
+Signature: 48c518dee9548840b952d65c0b12d344
 
 UNUSED LICENSES:
 
@@ -17300,6 +17300,8 @@ FILE: ../../../third_party/skia/src/gpu/effects/GrYUVtoRGBEffect.fp
 FILE: ../../../third_party/skia/src/gpu/effects/GrYUVtoRGBEffect.h
 FILE: ../../../third_party/skia/src/gpu/text/GrAtlasManager.cpp
 FILE: ../../../third_party/skia/src/gpu/text/GrAtlasManager.h
+FILE: ../../../third_party/skia/src/gpu/text/GrSDFMaskFilter.cpp
+FILE: ../../../third_party/skia/src/gpu/text/GrSDFMaskFilter.h
 FILE: ../../../third_party/skia/src/gpu/vk/GrVkImageLayout.h
 FILE: ../../../third_party/skia/src/gpu/vk/GrVkTypesPriv.cpp
 FILE: ../../../third_party/skia/src/opts/SkOpts_hsw.cpp
@@ -19942,6 +19944,7 @@ FILE: ../../../third_party/skia/fuzz/oss_fuzz/FuzzNullCanvas.cpp
 FILE: ../../../third_party/skia/fuzz/oss_fuzz/FuzzPNGEncoder.cpp
 FILE: ../../../third_party/skia/fuzz/oss_fuzz/FuzzPathMeasure.cpp
 FILE: ../../../third_party/skia/fuzz/oss_fuzz/FuzzRasterN32Canvas.cpp
+FILE: ../../../third_party/skia/fuzz/oss_fuzz/FuzzSkottieJSON.cpp
 FILE: ../../../third_party/skia/fuzz/oss_fuzz/FuzzTextBlobDeserialize.cpp
 FILE: ../../../third_party/skia/fuzz/oss_fuzz/FuzzWEBPEncoder.cpp
 ----------------------------------------------------------------------------------------------------
