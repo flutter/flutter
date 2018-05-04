@@ -238,7 +238,7 @@ void injectPlugins({String directory}) {
     _writeAndroidPluginRegistrant(directory, plugins);
   if (fs.isDirectorySync(fs.path.join(directory, 'ios'))) {
     _writeIOSPluginRegistrant(directory, plugins);
-    final CocoaPods cocoaPods = new CocoaPods();
+    const CocoaPods cocoaPods = const CocoaPods();
     if (plugins.isNotEmpty)
       cocoaPods.setupPodfile(directory);
     if (changed)
