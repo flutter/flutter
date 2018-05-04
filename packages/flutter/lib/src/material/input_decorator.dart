@@ -809,7 +809,7 @@ class _RenderDecoration extends RenderBox {
       layoutLineBox(counter);
 
       // The helper or error text can occupy the full width less the space
-      // occupied by the counter
+      // occupied by the icon and counter.
       boxConstraints = boxConstraints.copyWith(
         maxWidth: boxConstraints.maxWidth
           - _boxSize(icon).width
@@ -936,7 +936,7 @@ class _RenderDecoration extends RenderBox {
       ? layout.inputBaseline
       : layout.outlineBaseline;
 
-     if (icon != null) {
+    if (icon != null) {
       final double x = textDirection == TextDirection.rtl ? overallWidth - icon.size.width : 0.0;
       centerLayout(icon, x);
     }
@@ -2254,8 +2254,8 @@ class InputDecorationTheme extends Diagnosticable {
   /// Creates a value for [ThemeData.inputDecorationTheme] that
   /// defines default values for [InputDecorator].
   ///
-  /// The values of [isDense], [isCollapsed], [isFilled], errorMaxLines,
-  /// and [border] must not be null.
+  /// The values of [isDense], [isCollapsed], [isFilled], and [border] must
+  /// not be null.
   const InputDecorationTheme({
     this.labelStyle,
     this.helperStyle,

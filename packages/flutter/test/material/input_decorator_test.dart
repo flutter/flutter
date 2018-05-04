@@ -651,7 +651,7 @@ void main() {
     expect(tester.getBottomLeft(find.text(kError2)), const Offset(12.0, 88.0));
 
     // Overall height for this InputDecorator is 24 less than the first
-    // one, 88dps, because errorText only occupies two lines.
+    // one, 88dps, because errorText only occupies one line.
 
     await tester.pumpWidget(
       buildInputDecorator(
