@@ -4755,7 +4755,11 @@ class Listener extends SingleChildRenderObjectWidget {
 /// the surrounding parts of the tree.
 ///
 /// This is useful since [RenderObject.paint] may be triggered even if its
-/// associated [Widget] instances' did not change or rebuild, such as when an
+/// associated [Widget] instances' did not change or rebuild. A [RenderObject]
+/// will repaint whenever any [RenderObject] that shares the same [Layer] is
+/// marked as being dirty and needing paint (see [RenderObject.markNeedsPaint]).
+///
+/// such as when an
 /// ancestor scrolls or when an ancestor or descendent's widget is going through
 /// an animation.
 ///
@@ -4775,12 +4779,15 @@ class Listener extends SingleChildRenderObjectWidget {
 /// [RepaintBoundary] is therefore used both while propagating the
 /// `markNeedsPaint` flag up the render tree and while traversing down the
 /// render tree via [RenderObject.paintChild] to strategically contain repaints
-/// to the render subtree that visually changed for performance.
+/// to the render subtree that visually changed for performance. This is done
+/// because the [RepaintBoundary] widget creates a [RenderObject] that always
+/// has a [Layer], decoupling ancestor render objects from the descendant
+/// render objects.
 ///
-/// While propagating up, `markNeedsPaint` will no longer be marked on
-/// [RenderObject]s past the first ancestor [RepaintBoundary]. The repainting
-/// children can re-record its display list without re-recording the display list
-/// for the surround tree.
+/// The upward propagation of the `markNeedsPaint` flag will stop when a
+/// [RepaintBoundary]'s render object is reached. The repainting children can
+/// re-record its display list without re-recording the display list for the
+/// surround tree.
 ///
 /// While traversing down, the repainting ancestor can re-use the display list
 /// we recorded previously on descendents behind a [RepaintBoundary], stopping
@@ -4795,10 +4802,10 @@ class Listener extends SingleChildRenderObjectWidget {
 ///
 /// The [RepaintBoundary] is also automatically inserted by the framework in
 /// widgets that are likely to mark natural separation points in apps. For
-/// instance, contents in Material Design drawers usually don't simultaneously
-/// change with contents outside the drawer. So repaints are automatically
-/// contained inside the drawer or outside the drawer when using the [Drawer]
-/// widget.
+/// instance, contents in Material Design drawers typically don't change during
+/// the drawer toggle. So repaints are automatically contained inside the drawer
+/// or outside the drawer when using the [Drawer] widget during toggle
+/// transitions.
 class RepaintBoundary extends SingleChildRenderObjectWidget {
   /// Creates a widget that isolates repaints.
   const RepaintBoundary({ Key key, Widget child }) : super(key: key, child: child);
