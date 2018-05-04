@@ -11,6 +11,10 @@ class BottomAppBarDemo extends StatefulWidget {
   State createState() => new _BottomAppBarDemoState();
 }
 
+// Flutter generally frowns upon abbrevation however this class uses two
+// abbrevations extensively: "fab" for floating action button, and "bab"
+// for bottom application bar.
+
 class _BottomAppBarDemoState extends State<BottomAppBarDemo> {
   static final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
 
