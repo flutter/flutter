@@ -78,6 +78,11 @@ void main() {
       expect(comparator.basedir, fs.directory(fix('/foo/bar/')).uri);
     });
 
+    test('can be instantiated with uri that represents file in same folder', () {
+      comparator = new LocalFileComparator(Uri.parse('foo_test.dart'), pathStyle: fs.path.style);
+      expect(comparator.basedir, Uri.parse('./'));
+    });
+
     group('compare', () {
       Future<bool> doComparison([String golden = 'golden.png']) {
         final Uri uri = fs.file(fix(golden)).uri;
@@ -100,6 +105,28 @@ void main() {
             ..writeAsBytesSync(_kExpectedBytes);
           final bool success = await doComparison('sub/foo.png');
           expect(success, isTrue);
+        });
+
+        group('when comparator instantiated with uri that represents file in same folder', () {
+          test('and golden file is in same folder as test', () async {
+            fs.file(fix('/foo/bar/golden.png'))
+              ..createSync(recursive: true)
+              ..writeAsBytesSync(_kExpectedBytes);
+            fs.currentDirectory = fix('/foo/bar');
+            comparator = new LocalFileComparator(Uri.parse('local_test.dart'), pathStyle: fs.path.style);
+            final bool success = await doComparison('golden.png');
+            expect(success, isTrue);
+          });
+
+          test('and golden file is in subfolder of test', () async {
+            fs.file(fix('/foo/bar/baz/golden.png'))
+              ..createSync(recursive: true)
+              ..writeAsBytesSync(_kExpectedBytes);
+            fs.currentDirectory = fix('/foo/bar');
+            comparator = new LocalFileComparator(Uri.parse('local_test.dart'), pathStyle: fs.path.style);
+            final bool success = await doComparison('baz/golden.png');
+            expect(success, isTrue);
+          });
         });
       });
 
