@@ -27,7 +27,7 @@ Future<Null> test(WidgetTester tester, double offset, EdgeInsetsGeometry padding
 }
 
 void verify(WidgetTester tester, List<Rect> answerKey) {
-  final List<Rect> testAnswers = tester.renderObjectList<RenderBox>(find.byType(SizedBox)).map<Rect>(
+  final List<Rect> testAnswers = tester.renderObjectList<RenderBox>(find.byType(SizedBox, skipOffstage: false)).map<Rect>(
     (RenderBox target) {
       final Offset topLeft = target.localToGlobal(Offset.zero);
       final Offset bottomRight = target.localToGlobal(target.size.bottomRight(Offset.zero));
@@ -45,14 +45,14 @@ void main() {
     verify(tester, <Rect>[
       new Rect.fromLTWH(0.0, 0.0, 800.0, 400.0),
       new Rect.fromLTWH(25.0, 420.0, 760.0, 400.0),
-      new Rect.fromLTWH(0.0, 600.0, 800.0, 400.0),
+      new Rect.fromLTWH(0.0, 855.0, 800.0, 400.0),
     ]);
 
     await test(tester, 200.0, padding, AxisDirection.down, TextDirection.ltr);
     verify(tester, <Rect>[
       new Rect.fromLTWH(0.0, -200.0, 800.0, 400.0),
       new Rect.fromLTWH(25.0, 220.0, 760.0, 400.0),
-      new Rect.fromLTWH(0.0, 600.0, 800.0, 400.0),
+      new Rect.fromLTWH(0.0, 655.0, 800.0, 400.0),
     ]);
 
     await test(tester, 390.0, padding, AxisDirection.down, TextDirection.ltr);
@@ -84,14 +84,14 @@ void main() {
     verify(tester, <Rect>[
       new Rect.fromLTWH(0.0, 0.0, 800.0, 400.0),
       new Rect.fromLTWH(25.0, 420.0, 760.0, 400.0),
-      new Rect.fromLTWH(0.0, 600.0, 800.0, 400.0),
+      new Rect.fromLTWH(0.0, 855.0, 800.0, 400.0),
     ]);
 
     await test(tester, 200.0, padding, AxisDirection.down, TextDirection.ltr);
     verify(tester, <Rect>[
       new Rect.fromLTWH(0.0, -200.0, 800.0, 400.0),
       new Rect.fromLTWH(25.0, 220.0, 760.0, 400.0),
-      new Rect.fromLTWH(0.0, 600.0, 800.0, 400.0),
+      new Rect.fromLTWH(0.0, 655.0, 800.0, 400.0),
     ]);
 
     await test(tester, 390.0, padding, AxisDirection.down, TextDirection.ltr);
@@ -123,14 +123,14 @@ void main() {
     verify(tester, <Rect>[
       new Rect.fromLTWH(0.0, 0.0, 800.0, 400.0),
       new Rect.fromLTWH(15.0, 420.0, 760.0, 400.0),
-      new Rect.fromLTWH(0.0, 600.0, 800.0, 400.0),
+      new Rect.fromLTWH(0.0, 855.0, 800.0, 400.0),
     ]);
 
     await test(tester, 200.0, padding, AxisDirection.down, TextDirection.rtl);
     verify(tester, <Rect>[
       new Rect.fromLTWH(0.0, -200.0, 800.0, 400.0),
       new Rect.fromLTWH(15.0, 220.0, 760.0, 400.0),
-      new Rect.fromLTWH(0.0, 600.0, 800.0, 400.0),
+      new Rect.fromLTWH(0.0, 655.0, 800.0, 400.0),
     ]);
 
     await test(tester, 390.0, padding, AxisDirection.down, TextDirection.rtl);
@@ -363,6 +363,7 @@ void main() {
       return new Directionality(
         textDirection: TextDirection.ltr,
         child: new CustomScrollView(
+          cacheExtent: 0.0,
           slivers: <Widget>[
             new SliverPadding(
               padding: EdgeInsets.zero,

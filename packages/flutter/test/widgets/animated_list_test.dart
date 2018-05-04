@@ -60,9 +60,9 @@ void main() {
       ),
     );
 
-    double itemHeight(int index) => tester.getSize(find.byKey(new ValueKey<int>(index))).height;
-    double itemTop(int index) => tester.getTopLeft(find.byKey(new ValueKey<int>(index))).dy;
-    double itemBottom(int index) => tester.getBottomLeft(find.byKey(new ValueKey<int>(index))).dy;
+    double itemHeight(int index) => tester.getSize(find.byKey(new ValueKey<int>(index), skipOffstage: false)).height;
+    double itemTop(int index) => tester.getTopLeft(find.byKey(new ValueKey<int>(index), skipOffstage: false)).dy;
+    double itemBottom(int index) => tester.getBottomLeft(find.byKey(new ValueKey<int>(index), skipOffstage: false)).dy;
 
     listKey.currentState.insertItem(0, duration: const Duration(milliseconds: 100));
     await tester.pump();

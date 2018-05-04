@@ -83,6 +83,7 @@ void main() {
       axisDirection: AxisDirection.down,
       crossAxisDirection: AxisDirection.right,
       offset: new ViewportOffset.zero(),
+      cacheExtent: 0.0,
       children: <RenderSliver>[
         inner = childManager.createRenderObject(),
       ],
@@ -161,6 +162,7 @@ void main() {
       children: <RenderSliver>[
         inner = childManager.createRenderObject(),
       ],
+      cacheExtent: 0.0,
     );
     layout(root);
 

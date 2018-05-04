@@ -54,16 +54,11 @@ ScrollController primaryScrollController(WidgetTester tester) {
   return PrimaryScrollController.of(tester.element(find.byType(CustomScrollView)));
 }
 
-bool appBarIsVisible(WidgetTester tester) {
-  final RenderSliver sliver = tester.element(find.byType(SliverAppBar)).findRenderObject();
-  return sliver.geometry.visible;
-}
+double appBarHeight(WidgetTester tester) => tester.getSize(find.byType(AppBar, skipOffstage: false)).height;
+double appBarTop(WidgetTester tester) => tester.getTopLeft(find.byType(AppBar, skipOffstage: false)).dy;
+double appBarBottom(WidgetTester tester) => tester.getBottomLeft(find.byType(AppBar, skipOffstage: false)).dy;
 
-double appBarHeight(WidgetTester tester) => tester.getSize(find.byType(AppBar)).height;
-double appBarTop(WidgetTester tester) => tester.getTopLeft(find.byType(AppBar)).dy;
-double appBarBottom(WidgetTester tester) => tester.getBottomLeft(find.byType(AppBar)).dy;
-
-double tabBarHeight(WidgetTester tester) => tester.getSize(find.byType(TabBar)).height;
+double tabBarHeight(WidgetTester tester) => tester.getSize(find.byType(TabBar, skipOffstage: false)).height;
 
 void main() {
   setUp(() {
@@ -592,7 +587,7 @@ void main() {
 
     final ScrollController controller = primaryScrollController(tester);
     expect(controller.offset, 0.0);
-    expect(appBarIsVisible(tester), true);
+    expect(find.byType(SliverAppBar), findsOneWidget);
 
     final double initialAppBarHeight = appBarHeight(tester);
     final double initialTabBarHeight = tabBarHeight(tester);
@@ -600,21 +595,21 @@ void main() {
     // Scroll the not-pinned appbar partially out of view
     controller.jumpTo(50.0);
     await tester.pump();
-    expect(appBarIsVisible(tester), true);
+    expect(find.byType(SliverAppBar), findsOneWidget);
     expect(appBarHeight(tester), initialAppBarHeight);
     expect(tabBarHeight(tester), initialTabBarHeight);
 
     // Scroll the not-pinned appbar out of view
     controller.jumpTo(600.0);
     await tester.pump();
-    expect(appBarIsVisible(tester), false);
+    expect(find.byType(SliverAppBar), findsNothing);
     expect(appBarHeight(tester), initialAppBarHeight);
     expect(tabBarHeight(tester), initialTabBarHeight);
 
     // Scroll the not-pinned appbar back into view
     controller.jumpTo(0.0);
     await tester.pump();
-    expect(appBarIsVisible(tester), true);
+    expect(find.byType(SliverAppBar), findsOneWidget);
     expect(appBarHeight(tester), initialAppBarHeight);
     expect(tabBarHeight(tester), initialTabBarHeight);
   });
@@ -629,7 +624,7 @@ void main() {
 
     final ScrollController controller = primaryScrollController(tester);
     expect(controller.offset, 0.0);
-    expect(appBarIsVisible(tester), true);
+    expect(find.byType(SliverAppBar), findsOneWidget);
     expect(appBarHeight(tester), 128.0);
 
     const double initialAppBarHeight = 128.0;
@@ -639,7 +634,7 @@ void main() {
     // point both the toolbar and the tabbar are visible.
     controller.jumpTo(600.0);
     await tester.pump();
-    expect(appBarIsVisible(tester), true);
+    expect(find.byType(SliverAppBar), findsOneWidget);
     expect(tabBarHeight(tester), initialTabBarHeight);
     expect(appBarHeight(tester), lessThan(initialAppBarHeight));
     expect(appBarHeight(tester), greaterThan(initialTabBarHeight));
@@ -647,7 +642,7 @@ void main() {
     // Scroll the not-pinned appbar back into view
     controller.jumpTo(0.0);
     await tester.pump();
-    expect(appBarIsVisible(tester), true);
+    expect(find.byType(SliverAppBar), findsOneWidget);
     expect(appBarHeight(tester), initialAppBarHeight);
     expect(tabBarHeight(tester), initialTabBarHeight);
   });
@@ -662,7 +657,7 @@ void main() {
 
     final ScrollController controller = primaryScrollController(tester);
     expect(controller.offset, 0.0);
-    expect(appBarIsVisible(tester), true);
+    expect(find.byType(SliverAppBar), findsOneWidget);
     expect(appBarHeight(tester), 128.0);
 
     const double initialAppBarHeight = 128.0;
@@ -672,7 +667,7 @@ void main() {
     // point only the tabBar is visible.
     controller.jumpTo(600.0);
     await tester.pump();
-    expect(appBarIsVisible(tester), true);
+    expect(find.byType(SliverAppBar), findsOneWidget);
     expect(tabBarHeight(tester), initialTabBarHeight);
     expect(appBarHeight(tester), lessThan(initialAppBarHeight));
     expect(appBarHeight(tester), initialTabBarHeight);
@@ -680,7 +675,7 @@ void main() {
     // Scroll the floating-pinned appbar back into view
     controller.jumpTo(0.0);
     await tester.pump();
-    expect(appBarIsVisible(tester), true);
+    expect(find.byType(SliverAppBar), findsOneWidget);
     expect(appBarHeight(tester), initialAppBarHeight);
     expect(tabBarHeight(tester), initialTabBarHeight);
   });
@@ -692,7 +687,7 @@ void main() {
       snap: true,
       expandedHeight: 128.0,
     ));
-    expect(appBarIsVisible(tester), true);
+    expect(find.byType(SliverAppBar), findsOneWidget);
     expect(appBarTop(tester), 0.0);
     expect(appBarHeight(tester), 128.0);
     expect(appBarBottom(tester), 128.0);
@@ -701,7 +696,7 @@ void main() {
     final ScrollPosition position = tester.state<ScrollableState>(find.byType(Scrollable)).position;
     position.jumpTo(256.00);
     await tester.pumpAndSettle();
-    expect(appBarIsVisible(tester), false);
+    expect(find.byType(SliverAppBar), findsNothing);
     expect(appBarTop(tester), lessThanOrEqualTo(-128.0));
 
     // Drag the scrollable up and down. The app bar should not snap open, its
@@ -773,7 +768,7 @@ void main() {
       snap: true,
       expandedHeight: 128.0,
     ));
-    expect(appBarIsVisible(tester), true);
+    expect(find.byType(SliverAppBar), findsOneWidget);
     expect(appBarTop(tester), 0.0);
     expect(appBarHeight(tester), 128.0);
     expect(appBarBottom(tester), 128.0);
@@ -783,7 +778,7 @@ void main() {
     final ScrollPosition position = tester.state<ScrollableState>(find.byType(Scrollable)).position;
     position.jumpTo(256.0);
     await tester.pumpAndSettle();
-    expect(appBarIsVisible(tester), true);
+    expect(find.byType(SliverAppBar), findsOneWidget);
     expect(appBarTop(tester), 0.0);
     expect(appBarHeight(tester), kTextTabBarHeight);
 
