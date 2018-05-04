@@ -596,6 +596,82 @@ void main() {
     expect(tester.getTopRight(find.text('counter')), const Offset(788.0, 56.0));
   });
 
+  testWidgets('InputDecoration errorMaxLines', (WidgetTester tester) async {
+    const String kError1 = 'e0';
+    const String kError2 = 'e0\ne1';
+    const String kError3 = 'e0\ne1\ne2';
+
+    await tester.pumpWidget(
+      buildInputDecorator(
+        isEmpty: true,
+        // isFocused: false (default)
+        decoration: const InputDecoration(
+          labelText: 'label',
+          helperText: 'helper',
+          errorText: kError3,
+          errorMaxLines: 3,
+          filled: true,
+        ),
+      ),
+    );
+
+    // Overall height for this InputDecorator is 100dps:
+    //
+    //   12 - top padding
+    //   12 - floating label (ahem font size 16dps * 0.75 = 12)
+    //    4 - floating label / input text gap
+    //   16 - input text (ahem font size 16dps)
+    //   12 - bottom padding
+    //    8 - below the border padding
+    //   36 - error text (3 lines, ahem font size 12dps)
+
+    expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, 100.0));
+    expect(tester.getTopLeft(find.text(kError3)), const Offset(12.0, 64.0));
+    expect(tester.getBottomLeft(find.text(kError3)), const Offset(12.0, 100.0));
+
+    // Overall height for this InputDecorator is 12 less than the first
+    // one, 88dps, because errorText only occupies two lines.
+
+    await tester.pumpWidget(
+      buildInputDecorator(
+        isEmpty: true,
+        // isFocused: false (default)
+        decoration: const InputDecoration(
+          labelText: 'label',
+          helperText: 'helper',
+          errorText: kError2,
+          errorMaxLines: 3,
+          filled: true,
+        ),
+      ),
+    );
+
+    expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, 88.0));
+    expect(tester.getTopLeft(find.text(kError2)), const Offset(12.0, 64.0));
+    expect(tester.getBottomLeft(find.text(kError2)), const Offset(12.0, 88.0));
+
+    // Overall height for this InputDecorator is 24 less than the first
+    // one, 88dps, because errorText only occupies one line.
+
+    await tester.pumpWidget(
+      buildInputDecorator(
+        isEmpty: true,
+        // isFocused: false (default)
+        decoration: const InputDecoration(
+          labelText: 'label',
+          helperText: 'helper',
+          errorText: kError1,
+          errorMaxLines: 3,
+          filled: true,
+        ),
+      ),
+    );
+
+    expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, 76.0));
+    expect(tester.getTopLeft(find.text(kError1)), const Offset(12.0, 64.0));
+    expect(tester.getBottomLeft(find.text(kError1)), const Offset(12.0, 76.0));
+  });
+
   testWidgets('InputDecorator prefix/suffix', (WidgetTester tester) async {
     await tester.pumpWidget(
       buildInputDecorator(
@@ -758,6 +834,46 @@ void main() {
     expect(tester.getTopLeft(find.text('s')).dx, 12.0);
     expect(tester.getTopRight(find.text('s')).dx, lessThanOrEqualTo(tester.getTopLeft(find.text('text')).dx));
     expect(tester.getTopRight(find.text('text')).dx, lessThanOrEqualTo(tester.getTopLeft(find.text('p')).dx));
+  });
+
+  testWidgets('InputDecorator contentPadding RTL layout', (WidgetTester tester) async {
+    // LTR: content left edge is contentPadding.start: 40.0
+    await tester.pumpWidget(
+      buildInputDecorator(
+        // isEmpty: false (default)
+        // isFocused: false (default)
+        textDirection: TextDirection.ltr,
+        decoration: const InputDecoration(
+          contentPadding: const EdgeInsetsDirectional.only(start: 40.0, top: 12.0, bottom: 12.0),
+          labelText: 'label',
+          hintText: 'hint',
+          filled: true,
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, 56.0));
+    expect(tester.getTopLeft(find.text('text')).dx, 40.0);
+    expect(tester.getTopLeft(find.text('label')).dx, 40.0);
+    expect(tester.getTopLeft(find.text('hint')).dx, 40.0);
+
+    // RTL: content right edge is 800 - contentPadding.start: 760.0.
+    await tester.pumpWidget(
+      buildInputDecorator(
+        // isEmpty: false (default)
+        isFocused: true, // label is floating, still adjusted for contentPadding
+        textDirection: TextDirection.rtl,
+        decoration: const InputDecoration(
+          contentPadding: const EdgeInsetsDirectional.only(start: 40.0, top: 12.0, bottom: 12.0),
+          labelText: 'label',
+          hintText: 'hint',
+          filled: true,
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, 56.0));
+    expect(tester.getTopRight(find.text('text')).dx, 760.0);
+    expect(tester.getTopRight(find.text('label')).dx, 760.0);
+    expect(tester.getTopRight(find.text('hint')).dx, 760.0);
   });
 
   testWidgets('InputDecorator prefix/suffix dense layout', (WidgetTester tester) async {
@@ -1194,6 +1310,7 @@ void main() {
         helperStyle: themeStyle,
         hintStyle: themeStyle,
         errorStyle: themeStyle,
+        errorMaxLines: 4,
         isDense: true,
         contentPadding: const EdgeInsets.all(1.0),
         prefixStyle: themeStyle,
@@ -1209,6 +1326,7 @@ void main() {
     expect(decoration.helperStyle, decorationStyle);
     expect(decoration.hintStyle, decorationStyle);
     expect(decoration.errorStyle, decorationStyle);
+    expect(decoration.errorMaxLines, 4);
     expect(decoration.isDense, false);
     expect(decoration.contentPadding, const EdgeInsets.all(4.0));
     expect(decoration.prefixStyle, decorationStyle);
