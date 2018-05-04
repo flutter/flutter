@@ -1,4 +1,4 @@
-Signature: eff403e0942aac3ffa7aaf9502175e7d
+Signature: 603f99debe1751f0bb3a517295ba7072
 
 UNUSED LICENSES:
 
@@ -17496,7 +17496,6 @@ FILE: ../../../third_party/skia/infra/bots/recipe_modules/core/examples/full.exp
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/core/examples/full.expected/Housekeeper-Weekly-RecreateSKPs.json
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/core/examples/full.expected/cross_repo_trybot.json
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/core/examples/full.expected/flutter_trybot.json
-FILE: ../../../third_party/skia/infra/bots/recipe_modules/core/examples/full.expected/no_persistent_checkout.json
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/core/examples/full.expected/parent_revision.json
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/core/examples/full.expected/parent_revision_trybot.json
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/core/examples/full.expected/test.json
