@@ -9,6 +9,7 @@
 // Code is denoted by markdown ```dart / ``` markers.
 //
 // Only code in "## Sample code" or "### Sample code" sections is examined.
+// Subheadings can also be specified, as in "## Sample code: foo".
 //
 // There are several kinds of sample code you can specify:
 //
@@ -162,7 +163,10 @@ Future<Null> main() async {
             assert(block.isEmpty);
             startLine = new Line(file.path, lineNumber + 1, 3);
             inPreamble = true;
-          } else if (trimmedLine == '/// ## Sample code' || trimmedLine == '/// ### Sample code') {
+          } else if (trimmedLine == '/// ## Sample code' ||
+                     trimmedLine.startsWith('/// ## Sample code:') ||
+                     trimmedLine == '/// ### Sample code' ||
+                     trimmedLine.startsWith('/// ### Sample code:')) {
             inSampleSection = true;
             foundDart = false;
             sampleCodeSections += 1;

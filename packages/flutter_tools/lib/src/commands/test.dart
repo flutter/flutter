@@ -78,6 +78,11 @@ class TestCommand extends FlutterCommand {
         hide: !verboseHelp,
         help: 'Track widget creation locations.\n'
               'This enables testing of features such as the widget inspector.',
+      )
+      ..addFlag('update-goldens',
+        negatable: false,
+        help: 'Whether matchesGoldenFile() calls within your test methods should\n'
+              'update the golden files rather than test for an existing match.',
       );
   }
 
@@ -220,6 +225,7 @@ class TestCommand extends FlutterCommand {
       machine: machine,
       previewDart2: argResults['preview-dart-2'],
       trackWidgetCreation: argResults['track-widget-creation'],
+      updateGoldens: argResults['update-goldens'],
     );
 
     if (collector != null) {

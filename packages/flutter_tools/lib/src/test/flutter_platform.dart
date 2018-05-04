@@ -41,6 +41,14 @@ const Duration _kTestProcessTimeout = const Duration(minutes: 5);
 /// hold that against the test.
 const String _kStartTimeoutTimerMessage = 'sky_shell test process has entered main method';
 
+/// The name of the test configuration file that will be discovered by the
+/// test harness if it exists in the project directory hierarchy.
+const String _kTestConfigFileName = 'flutter_test_config.dart';
+
+/// The name of the file that signals the root of the project and that will
+/// cause the test harness to stop scanning for configuration files.
+const String _kProjectRootSentinel = 'pubspec.yaml';
+
 /// The address at which our WebSocket server resides and at which the sky_shell
 /// processes will host the Observatory server.
 final Map<InternetAddressType, InternetAddress> _kHosts = <InternetAddressType, InternetAddress>{
@@ -63,6 +71,7 @@ void installHook({
   int port: 0,
   String precompiledDillPath,
   bool trackWidgetCreation: false,
+  bool updateGoldens: false,
   int observatoryPort,
   InternetAddressType serverType: InternetAddressType.IP_V4,
 }) {
@@ -81,6 +90,7 @@ void installHook({
       port: port,
       precompiledDillPath: precompiledDillPath,
       trackWidgetCreation: trackWidgetCreation,
+      updateGoldens: updateGoldens,
     ),
   );
 }
@@ -211,6 +221,7 @@ class _FlutterPlatform extends PlatformPlugin {
     this.port,
     this.precompiledDillPath,
     this.trackWidgetCreation,
+    this.updateGoldens,
   }) : assert(shellPath != null);
 
   final String shellPath;
@@ -224,6 +235,7 @@ class _FlutterPlatform extends PlatformPlugin {
   final int port;
   final String precompiledDillPath;
   final bool trackWidgetCreation;
+  final bool updateGoldens;
 
   _Compiler compiler;
 
@@ -568,7 +580,7 @@ class _FlutterPlatform extends PlatformPlugin {
     final File listenerFile = fs.file('${temporaryDirectory.path}/listener.dart');
     listenerFile.createSync();
     listenerFile.writeAsStringSync(_generateTestMain(
-      testUrl: fs.path.toUri(fs.path.absolute(testPath)).toString(),
+      testUrl: fs.path.toUri(fs.path.absolute(testPath)),
       encodedWebsocketUrl: Uri.encodeComponent(_getWebSocketUrl()),
     ));
     return listenerFile.path;
@@ -596,6 +608,7 @@ class _FlutterPlatform extends PlatformPlugin {
     final File vmPlatformStrongDill = fs.file(
       artifacts.getArtifactPath(Artifact.platformKernelDill),
     );
+    printTrace('Copying platform.dill file from ${vmPlatformStrongDill.path}');
     final File platformDill = vmPlatformStrongDill.copySync(
       tempBundleDirectory
           .childFile('platform.dill')
@@ -615,10 +628,28 @@ class _FlutterPlatform extends PlatformPlugin {
   }
 
   String _generateTestMain({
-    String testUrl,
+    Uri testUrl,
     String encodedWebsocketUrl,
   }) {
-    return '''
+    assert(testUrl.scheme == 'file');
+    File testConfigFile;
+    Directory directory = fs.file(testUrl).parent;
+    while (directory.path != directory.parent.path) {
+      final File configFile = directory.childFile(_kTestConfigFileName);
+      if (configFile.existsSync()) {
+        printTrace('Discovered $_kTestConfigFileName in ${directory.path}');
+        testConfigFile = configFile;
+        break;
+      }
+      if (directory.childFile(_kProjectRootSentinel).existsSync()) {
+        printTrace('Stopping scan for $_kTestConfigFileName; '
+                   'found project root at ${directory.path}');
+        break;
+      }
+      directory = directory.parent;
+    }
+    final StringBuffer buffer = new StringBuffer();
+    buffer.write('''
 import 'dart:convert';
 import 'dart:io';  // ignore: dart_io_import
 
@@ -627,10 +658,20 @@ import 'dart:io';  // ignore: dart_io_import
 // to add a dependency on package:test.
 import 'package:test/src/runner/plugin/remote_platform_helpers.dart';
 
+import 'package:flutter_test/flutter_test.dart';
 import 'package:stream_channel/stream_channel.dart';
 import 'package:test/src/runner/vm/catch_isolate_errors.dart';
 
 import '$testUrl' as test;
+'''
+    );
+    if (testConfigFile != null) {
+      buffer.write('''
+import '${new Uri.file(testConfigFile.path)}' as test_config;
+'''
+      );
+    }
+    buffer.write('''
 
 void main() {
   print('$_kStartTimeoutTimerMessage');
@@ -638,7 +679,20 @@ void main() {
   String server = Uri.decodeComponent('$encodedWebsocketUrl:\$serverPort');
   StreamChannel channel = serializeSuite(() {
     catchIsolateErrors();
+    goldenFileComparator = new LocalFileComparator(Uri.parse('$testUrl'));
+    autoUpdateGoldenFiles = $updateGoldens;
+'''
+    );
+    if (testConfigFile != null) {
+      buffer.write('''
+    return () => test_config.main(test.main);
+''');
+    } else {
+      buffer.write('''
     return test.main;
+''');
+    }
+    buffer.write('''
   });
   WebSocket.connect(server).then((WebSocket socket) {
     socket.map((dynamic x) {
@@ -648,7 +702,9 @@ void main() {
     socket.addStream(channel.stream.map(json.encode));
   });
 }
-''';
+'''
+    );
+    return buffer.toString();
   }
 
   File _cachedFontConfig;

@@ -4,8 +4,6 @@
 
 import 'dart:ui' show Color;
 
-import 'package:flutter/foundation.dart';
-
 import 'framework.dart';
 
 /// An interactive button within either material's [BottomNavigationBar]

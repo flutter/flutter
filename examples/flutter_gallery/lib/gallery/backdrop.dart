@@ -4,12 +4,11 @@
 
 import 'dart:math' as math;
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/material.dart';
 
 const double _kFrontHeadingHeight = 32.0; // front layer beveled rectangle
-const double _kFrontClosedHeight = 72.0; // front layer height when closed
+const double _kFrontClosedHeight = 92.0; // front layer height when closed
 const double _kBackAppBarHeight = 56.0; // back layer (options) appbar height
 
 // The size of the front layer heading's left and right beveled corners.
@@ -24,8 +23,8 @@ final Tween<BorderRadius> _kFrontHeadingBevelRadius = new BorderRadiusTween(
   ),
 );
 
-class _IgnorePointerWhileStatusIsNot extends StatefulWidget {
-  const _IgnorePointerWhileStatusIsNot(this.status, {
+class _TappableWhileStatusIs extends StatefulWidget {
+  const _TappableWhileStatusIs(this.status, {
     Key key,
     this.controller,
     this.child,
@@ -36,17 +35,17 @@ class _IgnorePointerWhileStatusIsNot extends StatefulWidget {
   final Widget child;
 
   @override
-  _IgnorePointerWhileStatusIsNotState createState() => new _IgnorePointerWhileStatusIsNotState();
+  _TappableWhileStatusIsState createState() => new _TappableWhileStatusIsState();
 }
 
-class _IgnorePointerWhileStatusIsNotState extends State<_IgnorePointerWhileStatusIsNot> {
-  bool _ignoring;
+class _TappableWhileStatusIsState extends State<_TappableWhileStatusIs> {
+  bool _active;
 
   @override
   void initState() {
     super.initState();
     widget.controller.addStatusListener(_handleStatusChange);
-    _ignoring = widget.controller.status != AnimationStatus.completed;
+    _active = widget.controller.status == widget.status;
   }
 
   @override
@@ -55,20 +54,24 @@ class _IgnorePointerWhileStatusIsNotState extends State<_IgnorePointerWhileStatu
     super.dispose();
   }
 
-  void _handleStatusChange(AnimationStatus _) {
-    final bool value = widget.controller.status != widget.status;
-    if (_ignoring != value) {
+  void _handleStatusChange(AnimationStatus status) {
+    final bool value = widget.controller.status == widget.status;
+    if (_active != value) {
       setState(() {
-        _ignoring = value;
+        _active = value;
       });
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    return new IgnorePointer(
-      ignoring: _ignoring,
-      child: widget.child,
+    return new AbsorbPointer(
+      absorbing: !_active,
+      // Redundant. TODO(xster): remove after https://github.com/flutter/flutter/issues/17179.
+      child: new IgnorePointer(
+        ignoring: !_active,
+        child: widget.child
+      ),
     );
   }
 }
@@ -103,17 +106,19 @@ class _CrossFadeTransition extends AnimatedWidget {
     return new Stack(
       alignment: alignment,
       children: <Widget>[
-        new IgnorePointer(
-          ignoring: opacity1 < 1.0,
-          child: new Opacity(
-            opacity: opacity1,
+        new Opacity(
+          opacity: opacity1,
+          child: new Semantics(
+            scopesRoute: true,
+            explicitChildNodes: true,
             child: child1,
           ),
         ),
-        new IgnorePointer(
-          ignoring: opacity2 <1.0,
-          child: new Opacity(
-            opacity: opacity2,
+        new Opacity(
+          opacity: opacity2,
+          child: new Semantics(
+            scopesRoute: true,
+            explicitChildNodes: true,
             child: child0,
           ),
         ),
@@ -196,6 +201,7 @@ class Backdrop extends StatefulWidget {
 class _BackdropState extends State<Backdrop> with SingleTickerProviderStateMixin {
   final GlobalKey _backdropKey = new GlobalKey(debugLabel: 'Backdrop');
   AnimationController _controller;
+  Animation<double> _frontOpacity;
 
   @override
   void initState() {
@@ -205,6 +211,14 @@ class _BackdropState extends State<Backdrop> with SingleTickerProviderStateMixin
       value: 1.0,
       vsync: this,
     );
+
+    _frontOpacity =
+      new Tween<double>(begin: 0.2, end: 1.0).animate(
+        new CurvedAnimation(
+          parent: _controller,
+          curve: const Interval(0.0, 0.4, curve: Curves.easeInOut),
+        ),
+      );
   }
 
   @override
@@ -261,12 +275,12 @@ class _BackdropState extends State<Backdrop> with SingleTickerProviderStateMixin
               title: new _CrossFadeTransition(
                 progress: _controller,
                 alignment: AlignmentDirectional.centerStart,
-                child0: widget.frontTitle,
-                child1: widget.backTitle,
+                child0: new Semantics(namesRoute: true, child: widget.frontTitle),
+                child1: new Semantics(namesRoute: true, child: widget.backTitle),
               ),
               trailing: new IconButton(
                 onPressed: _toggleFrontLayer,
-                tooltip: 'Show options page',
+                tooltip: 'Toggle options page',
                 icon: new AnimatedIcon(
                   icon: AnimatedIcons.close_menu,
                   progress: _controller,
@@ -274,7 +288,7 @@ class _BackdropState extends State<Backdrop> with SingleTickerProviderStateMixin
               ),
             ),
             new Expanded(
-              child: new _IgnorePointerWhileStatusIsNot(
+              child: new _TappableWhileStatusIs(
                 AnimationStatus.dismissed,
                 controller: _controller,
                 child: widget.backLayer,
@@ -299,23 +313,28 @@ class _BackdropState extends State<Backdrop> with SingleTickerProviderStateMixin
                 child: child,
               );
             },
-            child: new _IgnorePointerWhileStatusIsNot(
+            child: new _TappableWhileStatusIs(
               AnimationStatus.completed,
               controller: _controller,
-              child: widget.frontLayer,
+              child: new FadeTransition(
+                opacity: _frontOpacity,
+                child: widget.frontLayer,
+              ),
             ),
           ),
         ),
         new PositionedTransition(
           rect: frontRelativeRect,
-          child: new Container(
-            alignment: Alignment.topLeft,
-            child: new GestureDetector(
-              behavior: HitTestBehavior.opaque,
-              onTap: _toggleFrontLayer,
-              onVerticalDragUpdate: _handleDragUpdate,
-              onVerticalDragEnd: _handleDragEnd,
-              child: widget.frontHeading,
+          child: new ExcludeSemantics(
+            child: new Container(
+              alignment: Alignment.topLeft,
+              child: new GestureDetector(
+                behavior: HitTestBehavior.opaque,
+                onTap: _toggleFrontLayer,
+                onVerticalDragUpdate: _handleDragUpdate,
+                onVerticalDragEnd: _handleDragEnd,
+                child: widget.frontHeading,
+              ),
             ),
           ),
         ),

@@ -5,7 +5,7 @@ source.
 
 ### Documentation
 
-* **Main site: [flutter.io]()**
+* **Main site: [flutter.io](https://flutter.io/)**
 * [Install](https://flutter.io/setup/)
 * [Get started](https://flutter.io/getting-started/)
 * [Contribute](CONTRIBUTING.md)

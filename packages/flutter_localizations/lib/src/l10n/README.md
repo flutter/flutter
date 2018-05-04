@@ -135,7 +135,7 @@ a string that matches one of the formats defined by
 https://docs.flutter.io/flutter/material/TimeOfDayFormat-class.html.
 
 The value of `scriptCategory` is based on the
-[Language categories reference](https://material.io/guidelines/style/typography.html#typography-language-categories-reference)
+[Language categories reference](https://material.io/go/design-typography#typography-language-categories-reference)
 section in the Material spec. The `scriptCategory` value is used when looking up
 the `TextTheme`, see the
 [MaterialTextGeometry](https://docs.flutter.io/flutter/material/MaterialTextGeometry/forScriptCategory.html)

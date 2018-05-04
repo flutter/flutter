@@ -1,4 +1,4 @@
-// Copyright 2018 The Flutter Authors. All rights reserved.
+// Copyright 2018 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -10,7 +10,7 @@ import 'package:web_socket_channel/io.dart';
 
 import '../common/logging.dart';
 
-const Duration _kConnectTimeout = const Duration(seconds: 30);
+const Duration _kConnectTimeout = const Duration(seconds: 9);
 
 const Duration _kReconnectAttemptInterval = const Duration(seconds: 3);
 
@@ -41,7 +41,14 @@ Future<json_rpc.Peer> _waitAndConnect(Uri uri) async {
       socket = await WebSocket.connect(uri.toString());
       peer = new json_rpc.Peer(new IOWebSocketChannel(socket).cast())..listen();
       return peer;
+    } on HttpException catch (e) {
+      // This is a fine warning as this most likely means the port is stale.
+      _log.fine('$e: ${e.message}');
+      await peer?.close();
+      await socket?.close();
+      rethrow;
     } catch (e) {
+      // Other unknown errors will be handled with reconnects.
       await peer?.close();
       await socket?.close();
       if (timer.elapsed < _kConnectTimeout) {
@@ -86,9 +93,12 @@ class RpcFormatError extends Error {
 /// Either wraps existing RPC calls to the Dart VM service, or runs raw RPC
 /// function calls via [invokeRpc].
 class DartVm {
-  DartVm._(this._peer);
+  DartVm._(this._peer, this.uri);
 
   final json_rpc.Peer _peer;
+
+  /// The URI through which this DartVM instance is connected.
+  final Uri uri;
 
   /// Attempts to connect to the given [Uri].
   ///
@@ -101,7 +111,24 @@ class DartVm {
     if (peer == null) {
       return null;
     }
-    return new DartVm._(peer);
+    return new DartVm._(peer, uri);
+  }
+
+  /// Returns a [List] of [IsolateRef] objects whose name matches `pattern`.
+  ///
+  /// Also checks to make sure it was launched from the `main()` function.
+  Future<List<IsolateRef>> getMainIsolatesByPattern(Pattern pattern) async {
+    final Map<String, dynamic> jsonVmRef =
+        await invokeRpc('getVM', timeout: _kRpcTimeout);
+    final List<Map<String, dynamic>> jsonIsolates = jsonVmRef['isolates'];
+    final List<IsolateRef> result = <IsolateRef>[];
+    for (Map<String, dynamic> jsonIsolate in jsonIsolates) {
+      final String name = jsonIsolate['name'];
+      if (name.contains(pattern) && name.contains(new RegExp(r':main\(\)'))) {
+        result.add(new IsolateRef._fromJson(jsonIsolate, this));
+      }
+    }
+    return result;
   }
 
   /// Invokes a raw JSON RPC command with the VM service.
@@ -112,7 +139,7 @@ class DartVm {
   Future<Map<String, dynamic>> invokeRpc(
     String function, {
     Map<String, dynamic> params,
-    Duration timeout,
+    Duration timeout = _kRpcTimeout,
   }) async {
     final Future<Map<String, dynamic>> future = _peer.sendRequest(
       function,
@@ -200,4 +227,45 @@ class FlutterView {
   ///
   /// May be null if there is no associated isolate.
   String get name => _name;
+}
+
+/// This is a wrapper class for the `@Isolate` RPC object.
+///
+/// See:
+/// https://github.com/dart-lang/sdk/blob/master/runtime/vm/service/service.md#isolate
+///
+/// This class contains information about the Isolate like its name and ID, as
+/// well as a reference to the parent DartVM on which it is running.
+class IsolateRef {
+  IsolateRef._(this.name, this.number, this.dartVm);
+
+  factory IsolateRef._fromJson(Map<String, dynamic> json, DartVm dartVm) {
+    final String number = json['number'];
+    final String name = json['name'];
+    final String type = json['type'];
+    if (type == null) {
+      throw new RpcFormatError('Unable to find type within JSON "$json"');
+    }
+    if (type != '@Isolate') {
+      throw new RpcFormatError('Type "$type" does not match for IsolateRef');
+    }
+    if (number == null) {
+      throw new RpcFormatError(
+          'Unable to find number for isolate ref within JSON "$json"');
+    }
+    if (name == null) {
+      throw new RpcFormatError(
+          'Unable to find name for isolate ref within JSON "$json"');
+    }
+    return new IsolateRef._(name, int.parse(number), dartVm);
+  }
+
+  /// The full name of this Isolate (not guaranteed to be unique).
+  final String name;
+
+  /// The unique number ID of this isolate.
+  final int number;
+
+  /// The parent [DartVm] on which this Isolate lives.
+  final DartVm dartVm;
 }

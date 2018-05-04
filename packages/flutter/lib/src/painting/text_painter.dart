@@ -13,8 +13,6 @@ import 'text_span.dart';
 
 export 'package:flutter/services.dart' show TextRange, TextSelection;
 
-final String _kZeroWidthSpace = new String.fromCharCode(0x200B);
-
 /// An object that paints a [TextSpan] tree into a [Canvas].
 ///
 /// To use a [TextPainter], follow these steps:
@@ -222,7 +220,7 @@ class TextPainter {
     );
   }
 
-  /// The height of a zero-width space in [text] in logical pixels.
+  /// The height of a space in [text] in logical pixels.
   ///
   /// Not every line of text in [text] will have this height, but this height
   /// is "typical" for text in [text] and useful for sizing other objects
@@ -238,10 +236,10 @@ class TextPainter {
     if (_layoutTemplate == null) {
       final ui.ParagraphBuilder builder = new ui.ParagraphBuilder(
         _createParagraphStyle(TextDirection.rtl),
-      ); // direction doesn't matter, text is just a zero width space
+      ); // direction doesn't matter, text is just a space
       if (text?.style != null)
         builder.pushStyle(text.style.getTextStyle(textScaleFactor: textScaleFactor));
-      builder.addText(_kZeroWidthSpace);
+      builder.addText(' ');
       _layoutTemplate = builder.build()
         ..layout(new ui.ParagraphConstraints(width: double.infinity));
     }

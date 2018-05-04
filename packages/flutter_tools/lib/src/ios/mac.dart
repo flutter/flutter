@@ -175,6 +175,14 @@ class Xcode {
       return minorVersion >= kXcodeRequiredVersionMinor;
     return false;
   }
+
+  Future<RunResult> cc(List<String> args) {
+    return runCheckedAsync(<String>['xcrun', 'cc']..addAll(args));
+  }
+
+  Future<RunResult> clang(List<String> args) {
+    return runCheckedAsync(<String>['xcrun', 'clang']..addAll(args));
+  }
 }
 
 Future<XcodeBuildResult> buildXcodeProject({

@@ -5,8 +5,6 @@
 import 'dart:collection';
 import 'dart:developer' show Timeline; // to disambiguate reference in dartdocs below
 
-import 'package:flutter/foundation.dart';
-
 import 'basic.dart';
 import 'framework.dart';
 import 'media_query.dart';

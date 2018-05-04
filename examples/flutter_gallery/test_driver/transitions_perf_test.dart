@@ -126,12 +126,15 @@ Future<Null> runDemos(List<String> demos, FlutterDriver driver) async {
   for (String demo in demos) {
     final String demoAtCategory = _allDemos.firstWhere((String s) => s.startsWith(demo));
     final String demoCategory = demoAtCategory.substring(demoAtCategory.indexOf('@') + 1);
+    print('> $demoAtCategory');
 
     if (currentDemoCategory == null) {
       await driver.tap(find.text(demoCategory));
     } else if (currentDemoCategory != demoCategory) {
       await driver.tap(find.byTooltip('Back'));
       await driver.tap(find.text(demoCategory));
+      // Scroll back to the top
+      await driver.scroll(demoList, 0.0, 10000.0, const Duration(milliseconds: 100));
     }
     currentDemoCategory = demoCategory;
 
@@ -150,7 +153,7 @@ Future<Null> runDemos(List<String> demos, FlutterDriver driver) async {
       }
     }
 
-    print('Success');
+    print('< Success');
   }
 
   // Return to the home screen
