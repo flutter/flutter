@@ -55,7 +55,7 @@ class CocoaPods {
   Future<String> get cocoaPodsVersionText {
     _versionText ??= runAsync(<String>['pod', '--version']).then<String>((RunResult result) {
       return result.exitCode == 0 ? result.stdout.trim() : null;
-    });
+    }, onError: (dynamic _) => null);
     return _versionText;
   }
 

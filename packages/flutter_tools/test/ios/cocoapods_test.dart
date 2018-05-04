@@ -17,13 +17,27 @@ import 'package:test/test.dart';
 
 import '../src/context.dart';
 
+typedef Future<ProcessResult> InvokeProcess();
+
 void main() {
   FileSystem fs;
   ProcessManager mockProcessManager;
   MockXcodeProjectInterpreter mockXcodeProjectInterpreter;
   Directory projectUnderTest;
   CocoaPods cocoaPodsUnderTest;
-  ProcessResult resultOfPodVersion;
+  InvokeProcess resultOfPodVersion;
+
+  void pretendPodIsNotInstalled() {
+    resultOfPodVersion = () async => throw 'Executable does not exist';
+  }
+
+  void pretendPodVersionFails() {
+    resultOfPodVersion = () async => exitsWithError();
+  }
+
+  void pretendPodVersionIs(String versionText) {
+    resultOfPodVersion = () async => exitsHappy(versionText);
+  }
 
   setUp(() {
     Cache.flutterRoot = 'flutter';
@@ -32,7 +46,7 @@ void main() {
     mockXcodeProjectInterpreter = new MockXcodeProjectInterpreter();
     projectUnderTest = fs.directory(fs.path.join('project', 'ios'))..createSync(recursive: true);
     cocoaPodsUnderTest = new CocoaPods();
-    resultOfPodVersion = exitsHappy('1.5.0');
+    pretendPodVersionIs('1.5.0');
     fs.file(fs.path.join(
       Cache.flutterRoot, 'packages', 'flutter_tools', 'templates', 'cocoapods', 'Podfile-objc'
     ))
@@ -48,7 +62,7 @@ void main() {
       <String>['pod', '--version'],
       workingDirectory: any,
       environment: any,
-    )).thenAnswer((_) async => resultOfPodVersion);
+    )).thenAnswer((_) => resultOfPodVersion());
     when(mockProcessManager.run(
       <String>['pod', 'install', '--verbose'],
       workingDirectory: 'project/ios',
@@ -56,17 +70,16 @@ void main() {
     )).thenAnswer((_) async => exitsHappy());
   });
 
-  void pretendPodIsNotInstalled() {
-    resultOfPodVersion = exitsWithError();
-  }
-
-  void pretendPodVersionIs(String versionText) {
-    resultOfPodVersion = exitsHappy(versionText);
-  }
-
   group('Evaluate installation', () {
-    testUsingContext('detects not installed', () async {
+    testUsingContext('detects not installed, if pod exec does not exist', () async {
       pretendPodIsNotInstalled();
+      expect(await cocoaPodsUnderTest.evaluateCocoaPodsInstallation, CocoaPodsStatus.notInstalled);
+    }, overrides: <Type, Generator>{
+      ProcessManager: () => mockProcessManager,
+    });
+
+    testUsingContext('detects not installed, if pod version fails', () async {
+      pretendPodVersionFails();
       expect(await cocoaPodsUnderTest.evaluateCocoaPodsInstallation, CocoaPodsStatus.notInstalled);
     }, overrides: <Type, Generator>{
       ProcessManager: () => mockProcessManager,
