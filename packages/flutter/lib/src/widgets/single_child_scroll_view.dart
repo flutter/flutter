@@ -323,11 +323,14 @@ class _RenderSingleChildViewport extends RenderBox with RenderObjectWithChildMix
   _RenderSingleChildViewport({
     AxisDirection axisDirection: AxisDirection.down,
     @required ViewportOffset offset,
+    double cacheExtent: RenderAbstractViewport.defaultCacheExtent,
     RenderBox child,
   }) : assert(axisDirection != null),
        assert(offset != null),
+       assert(cacheExtent != null),
        _axisDirection = axisDirection,
-       _offset = offset {
+       _offset = offset,
+       _cacheExtent = cacheExtent {
     this.child = child;
   }
 
@@ -354,6 +357,17 @@ class _RenderSingleChildViewport extends RenderBox with RenderObjectWithChildMix
     _offset = value;
     if (attached)
       _offset.addListener(_hasScrolled);
+    markNeedsLayout();
+  }
+
+  /// {@macro flutter.rendering.viewport.cacheExtent}
+  double get cacheExtent => _cacheExtent;
+  double _cacheExtent;
+  set cacheExtent(double value) {
+    assert(value != null);
+    if (value == _cacheExtent)
+      return;
+    _cacheExtent = value;
     markNeedsLayout();
   }
 
@@ -587,5 +601,27 @@ class _RenderSingleChildViewport extends RenderBox with RenderObjectWithChildMix
 
     // Make sure the viewport itself is on screen.
     super.showOnScreen();
+  }
+
+  @override
+  Rect describeSemanticsClip(RenderObject child) {
+    assert(axis != null);
+    switch (axis) {
+      case Axis.vertical:
+        return new Rect.fromLTRB(
+          semanticBounds.left,
+          semanticBounds.top - cacheExtent,
+          semanticBounds.right,
+          semanticBounds.bottom + cacheExtent,
+        );
+      case Axis.horizontal:
+        return new Rect.fromLTRB(
+          semanticBounds.left - cacheExtent,
+          semanticBounds.top,
+          semanticBounds.right + cacheExtent,
+          semanticBounds.bottom,
+        );
+    }
+    return null;
   }
 }

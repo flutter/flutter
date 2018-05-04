@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/rendering.dart';
@@ -361,6 +363,12 @@ void main() {
                 new TestSemantics(
                   label: r'item 1',
                   textDirection: TextDirection.ltr,
+                ),
+                new TestSemantics(
+                  flags: <SemanticsFlag>[
+                    SemanticsFlag.isHidden,
+                  ],
+                  label: r'item 2',
                 ),
               ],
             ),

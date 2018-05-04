@@ -21,9 +21,9 @@ void main() {
       ),
     ));
 
-    final LocalizationTrackerState outerTracker = tester.state(find.byKey(const ValueKey<String>('outer')));
+    final LocalizationTrackerState outerTracker = tester.state(find.byKey(const ValueKey<String>('outer'), skipOffstage: false));
     expect(outerTracker.captionFontSize, 12.0);
-    final LocalizationTrackerState innerTracker = tester.state(find.byKey(const ValueKey<String>('inner')));
+    final LocalizationTrackerState innerTracker = tester.state(find.byKey(const ValueKey<String>('inner'), skipOffstage: false));
     expect(innerTracker.captionFontSize, 13.0);
   });
 
