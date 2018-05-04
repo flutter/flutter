@@ -9,6 +9,7 @@ import 'asset.dart';
 import 'base/build.dart';
 import 'base/common.dart';
 import 'base/file_system.dart';
+import 'base/fingerprint.dart';
 import 'build_info.dart';
 import 'compile.dart';
 import 'dart/package_map.dart';
@@ -70,36 +71,20 @@ Future<void> build({
 
   DevFSContent kernelContent;
   if (!precompiledSnapshot && previewDart2) {
-    final File fingerprintFile = fs.file('$depfilePath.fingerprint');
-    final List<String> inputPaths = <String>[
-      mainPath,
-    ];
-
     bool needBuild = true;
-    final List<File> fingerprintFiles = <File>[fingerprintFile, fs.file(depfilePath)]
-      ..addAll(inputPaths.map(fs.file));
-
-    Future<Fingerprint> makeFingerprint() async {
-      final Set<String> compilerInputPaths = await readDepfile(depfilePath)
-        ..add(mainPath);
-      final Map<String, String> properties = <String, String>{
+    final Fingerprinter fingerprinter = new Fingerprinter(
+      fingerprintPath: '$depfilePath.fingerprint',
+      paths: <String>[mainPath],
+      properties: <String, String>{
         'entryPoint': mainPath,
         'trackWidgetCreation': trackWidgetCreation.toString(),
-      };
-      return new Fingerprint.fromBuildInputs(properties, compilerInputPaths);
-    }
+      },
+      depfilePaths: <String>[depfilePath],
+    );
 
-    if (fingerprintFiles.every((File file) => file.existsSync())) {
-      try {
-        final String json = await fingerprintFile.readAsString();
-        final Fingerprint oldFingerprint = new Fingerprint.fromJson(json);
-        if (oldFingerprint == await makeFingerprint()) {
-          needBuild = false;
-          printStatus('Skipping compilation. Fingerprint match.');
-        }
-      } catch (e) {
-        printTrace('Rebuilding kernel file due to fingerprint check error: $e');
-      }
+    if (await fingerprinter.doesFingerprintMatch()) {
+      needBuild = false;
+      printStatus('Skipping compilation. Fingerprint match.');
     }
 
     String kernelBinaryFilename;
@@ -121,13 +106,7 @@ Future<void> build({
         throwToolExit('Compiler failed on $mainPath');
       }
       // Compute and record build fingerprint.
-      try {
-        final Fingerprint fingerprint = await makeFingerprint();
-        await fingerprintFile.writeAsString(fingerprint.toJson());
-      } catch (e, s) {
-        // Log exception and continue, this step is a performance improvement only.
-        printStatus('Error during compilation output fingerprinting: $e\n$s');
-      }
+      await fingerprinter.writeFingerprint();
     } else {
       kernelBinaryFilename = applicationKernelFilePath;
     }
