@@ -38,7 +38,7 @@ void DrawCheckerboard(SkCanvas* canvas, const SkRect& rect) {
   canvas->clipRect(rect);
 
   auto checkerboard_color =
-      SkColorSetARGBInline(64, rand() % 256, rand() % 256, rand() % 256);
+      SkColorSetARGB(64, rand() % 256, rand() % 256, rand() % 256);
 
   DrawCheckerboard(canvas, checkerboard_color, 0x00000000, 12);
   canvas->restore();
