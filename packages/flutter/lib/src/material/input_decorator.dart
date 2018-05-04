@@ -242,6 +242,7 @@ class _HelperError extends StatefulWidget {
     this.helperStyle,
     this.errorText,
     this.errorStyle,
+    this.errorMaxLines,
   }) : super(key: key);
 
   final TextAlign textAlign;
@@ -249,6 +250,7 @@ class _HelperError extends StatefulWidget {
   final TextStyle helperStyle;
   final String errorText;
   final TextStyle errorStyle;
+  final int errorMaxLines;
 
   @override
   _HelperErrorState createState() => new _HelperErrorState();
@@ -343,6 +345,7 @@ class _HelperErrorState extends State<_HelperError> with SingleTickerProviderSta
           style: widget.errorStyle,
           textAlign: widget.textAlign,
           overflow: TextOverflow.ellipsis,
+          maxLines: widget.errorMaxLines,
         ),
       ),
     );
@@ -444,7 +447,7 @@ class _Decoration {
        assert(floatingLabelHeight != null),
        assert(floatingLabelProgress != null);
 
-  final EdgeInsets contentPadding;
+  final EdgeInsetsGeometry contentPadding;
   final bool isCollapsed;
   final double floatingLabelHeight;
   final double floatingLabelProgress;
@@ -800,10 +803,20 @@ class _RenderDecoration extends RenderBox {
     double subtextBaseline = 0.0;
     double subtextHeight = 0.0;
     if (helperError != null || counter != null) {
+      boxConstraints = layoutConstraints.loosen();
       aboveBaseline = 0.0;
       belowBaseline = 0.0;
-      layoutLineBox(helperError);
       layoutLineBox(counter);
+
+      // The helper or error text can occupy the full width less the space
+      // occupied by the icon and counter.
+      boxConstraints = boxConstraints.copyWith(
+        maxWidth: boxConstraints.maxWidth
+          - _boxSize(icon).width
+          - _boxSize(counter).width
+          - contentPadding.horizontal,
+      );
+      layoutLineBox(helperError);
 
       if (aboveBaseline + belowBaseline > 0.0) {
         const double subtextGap = 8.0;
@@ -1637,39 +1650,44 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
       helperStyle: _getHelperStyle(themeData),
       errorText: decoration.errorText,
       errorStyle: _getErrorStyle(themeData),
+      errorMaxLines: decoration.errorMaxLines,
     );
 
     final Widget counter = decoration.counterText == null ? null :
       new Text(
         decoration.counterText,
         style: _getHelperStyle(themeData).merge(decoration.counterStyle),
-        textAlign: textAlign == TextAlign.end ? TextAlign.start : TextAlign.end,
         overflow: TextOverflow.ellipsis,
       );
+
+    // The _Decoration widget and _RenderDecoration assume that contentPadding
+    // has been resolved to EdgeInsets.
+    final TextDirection textDirection = Directionality.of(context);
+    final EdgeInsets decorationContentPadding = decoration.contentPadding?.resolve(textDirection);
 
     EdgeInsets contentPadding;
     double floatingLabelHeight;
     if (decoration.isCollapsed) {
       floatingLabelHeight = 0.0;
-      contentPadding = decoration.contentPadding ?? EdgeInsets.zero;
+      contentPadding = decorationContentPadding ?? EdgeInsets.zero;
     } else if (!decoration.border.isOutline) {
       // 4.0: the vertical gap between the inline elements and the floating label.
       floatingLabelHeight = 4.0 + 0.75 * inlineLabelStyle.fontSize;
       if (decoration.filled == true) { // filled == null same as filled == false
-        contentPadding = decoration.contentPadding ?? (decorationIsDense
+        contentPadding = decorationContentPadding ?? (decorationIsDense
           ? const EdgeInsets.fromLTRB(12.0, 8.0, 12.0, 8.0)
           : const EdgeInsets.fromLTRB(12.0, 12.0, 12.0, 12.0));
       } else {
         // Not left or right padding for underline borders that aren't filled
         // is a small concession to backwards compatibility. This eliminates
         // the most noticeable layout change introduced by #13734.
-        contentPadding = decoration.contentPadding ?? (decorationIsDense
+        contentPadding = decorationContentPadding ?? (decorationIsDense
           ? const EdgeInsets.fromLTRB(0.0, 8.0, 0.0, 8.0)
           : const EdgeInsets.fromLTRB(0.0, 12.0, 0.0, 12.0));
       }
     } else {
       floatingLabelHeight = 0.0;
-      contentPadding = decoration.contentPadding ?? (decorationIsDense
+      contentPadding = decorationContentPadding ?? (decorationIsDense
         ? const EdgeInsets.fromLTRB(12.0, 20.0, 12.0, 12.0)
         : const EdgeInsets.fromLTRB(12.0, 24.0, 12.0, 16.0));
     }
@@ -1720,8 +1738,9 @@ class InputDecoration {
   ///
   /// Unless specified by [ThemeData.inputDecorationTheme],
   /// [InputDecorator] defaults [isDense] to true, and [filled] to false,
-  /// Similarly, the default border is an instance of [UnderlineInputBorder].
-  /// If [border] is [InputBorder.none] then no border is drawn.
+  /// and [maxLines] to 1. The default border is an instance
+  /// of [UnderlineInputBorder]. If [border] is [InputBorder.none] then
+  /// no border is drawn.
   ///
   /// The [enabled] argument must not be null.
   const InputDecoration({
@@ -1734,6 +1753,7 @@ class InputDecoration {
     this.hintStyle,
     this.errorText,
     this.errorStyle,
+    this.errorMaxLines,
     this.isDense,
     this.contentPadding,
     this.prefixIcon,
@@ -1770,6 +1790,7 @@ class InputDecoration {
        helperStyle = null,
        errorText = null,
        errorStyle = null,
+       errorMaxLines = null,
        isDense = false,
        contentPadding = EdgeInsets.zero,
        isCollapsed = true,
@@ -1861,6 +1882,16 @@ class InputDecoration {
   /// input field and the current [Theme].
   final TextStyle errorStyle;
 
+
+  /// The maximum number of lines the [errorText] can occupy.
+  ///
+  /// Defaults to null, which means that the [errorText] will be limited
+  /// to a single line with [TextOverflow.ellipsis].
+  ///
+  /// This value is passed along to the [Text.maxLines] attribute
+  /// of the [Text] widget used to display the error.
+  final int errorMaxLines;
+
   /// Whether the input [child] is part of a dense form (i.e., uses less vertical
   /// space).
   ///
@@ -1877,7 +1908,7 @@ class InputDecoration {
   /// By default the `contentPadding` reflects [isDense] and the type of the
   /// [border]. If [isCollapsed] is true then `contentPadding` is
   /// [EdgeInsets.zero].
-  final EdgeInsets contentPadding;
+  final EdgeInsetsGeometry contentPadding;
 
   /// Whether the decoration is the same size as the input field.
   ///
@@ -2024,8 +2055,9 @@ class InputDecoration {
     TextStyle hintStyle,
     String errorText,
     TextStyle errorStyle,
+    int errorMaxLines,
     bool isDense,
-    EdgeInsets contentPadding,
+    EdgeInsetsGeometry contentPadding,
     Widget prefixIcon,
     String prefixText,
     TextStyle prefixStyle,
@@ -2049,6 +2081,7 @@ class InputDecoration {
       hintStyle: hintStyle ?? this.hintStyle,
       errorText: errorText ?? this.errorText,
       errorStyle: errorStyle ?? this.errorStyle,
+      errorMaxLines: errorMaxLines ?? this.errorMaxLines,
       isDense: isDense ?? this.isDense,
       contentPadding: contentPadding ?? this.contentPadding,
       prefixIcon: prefixIcon ?? this.prefixIcon,
@@ -2077,6 +2110,7 @@ class InputDecoration {
       helperStyle: helperStyle ?? theme.helperStyle,
       hintStyle: hintStyle ?? theme.hintStyle,
       errorStyle: errorStyle ?? theme.errorStyle,
+      errorMaxLines: errorMaxLines ?? theme.errorMaxLines,
       isDense: isDense ?? theme.isDense,
       contentPadding: contentPadding ?? theme.contentPadding,
       prefixStyle: prefixStyle ?? theme.prefixStyle,
@@ -2104,6 +2138,7 @@ class InputDecoration {
         && typedOther.hintStyle == hintStyle
         && typedOther.errorText == errorText
         && typedOther.errorStyle == errorStyle
+        && typedOther.errorMaxLines == errorMaxLines
         && typedOther.isDense == isDense
         && typedOther.contentPadding == contentPadding
         && typedOther.isCollapsed == isCollapsed
@@ -2129,11 +2164,12 @@ class InputDecoration {
       labelStyle,
       helperText,
       helperStyle,
+      hintText,
       hashValues( // Over 20 fields...
-        hintText,
         hintStyle,
         errorText,
         errorStyle,
+        errorMaxLines,
         isDense,
         contentPadding,
         isCollapsed,
@@ -2166,6 +2202,10 @@ class InputDecoration {
       description.add('hintText: "$hintText"');
     if (errorText != null)
       description.add('errorText: "$errorText"');
+    if (errorStyle != null)
+      description.add('errorStyle: "$errorStyle"');
+    if (errorMaxLines != null)
+      description.add('errorMaxLines: "$errorMaxLines"');
     if (isDense ?? false)
       description.add('isDense: $isDense');
     if (contentPadding != null)
@@ -2221,6 +2261,7 @@ class InputDecorationTheme extends Diagnosticable {
     this.helperStyle,
     this.hintStyle,
     this.errorStyle,
+    this.errorMaxLines,
     this.isDense: false,
     this.contentPadding,
     this.isCollapsed: false,
@@ -2264,6 +2305,15 @@ class InputDecorationTheme extends Diagnosticable {
   /// input field and the current [Theme].
   final TextStyle errorStyle;
 
+  /// The maximum number of lines the [errorText] can occupy.
+  ///
+  /// Defaults to null, which means that the [errorText] will be limited
+  /// to a single line with [TextOverflow.ellipsis].
+  ///
+  /// This value is passed along to the [Text.maxLines] attribute
+  /// of the [Text] widget used to display the error.
+  final int errorMaxLines;
+
   /// Whether the input decorator's child is part of a dense form (i.e., uses
   /// less vertical space).
   ///
@@ -2282,7 +2332,7 @@ class InputDecorationTheme extends Diagnosticable {
   /// By default the `contentPadding` reflects [isDense] and the type of the
   /// [border]. If [isCollapsed] is true then `contentPadding` is
   /// [EdgeInsets.zero].
-  final EdgeInsets contentPadding;
+  final EdgeInsetsGeometry contentPadding;
 
   /// Whether the decoration is the same size as the input field.
   ///
@@ -2355,6 +2405,7 @@ class InputDecorationTheme extends Diagnosticable {
     properties.add(new DiagnosticsProperty<TextStyle>('helperStyle', helperStyle, defaultValue: defaultTheme.helperStyle));
     properties.add(new DiagnosticsProperty<TextStyle>('hintStyle', hintStyle, defaultValue: defaultTheme.hintStyle));
     properties.add(new DiagnosticsProperty<TextStyle>('errorStyle', errorStyle, defaultValue: defaultTheme.errorStyle));
+    properties.add(new DiagnosticsProperty<int>('errorMaxLines', errorMaxLines, defaultValue: defaultTheme.errorMaxLines));
     properties.add(new DiagnosticsProperty<bool>('isDense', isDense, defaultValue: defaultTheme.isDense));
     properties.add(new DiagnosticsProperty<EdgeInsets>('contentPadding', contentPadding, defaultValue: defaultTheme.contentPadding));
     properties.add(new DiagnosticsProperty<bool>('isCollapsed', isCollapsed, defaultValue: defaultTheme.isCollapsed));
