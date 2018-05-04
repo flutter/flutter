@@ -5,6 +5,7 @@
 import 'dart:async';
 import 'dart:collection';
 import 'dart:convert';
+import 'dart:io';
 import 'dart:ui' show hashValues;
 
 import 'package:flutter/foundation.dart';
@@ -54,6 +55,17 @@ const String _kAssetManifestFileName = 'AssetManifest.json';
 /// icons/heart.png
 /// icons/1.5x/heart.png
 /// icons/2.0x/heart.png
+/// ```
+/// The variant asset must be directly under a folder with the ratio identifier,
+/// which means that
+/// ```
+/// assets/3.0x/icons/heart.png
+/// ```
+///
+/// is not a valid variant for
+///
+/// ```
+/// assets/icons/heart.png
 /// ```
 ///
 /// ## Fetching assets
@@ -173,7 +185,7 @@ class AssetImage extends AssetBundleImageProvider {
           configuration,
           manifest == null ? null : manifest[keyName]
         );
-        final double chosenScale = _parseScale(chosenName);
+        final double chosenScale = parseScale(chosenName);
         final AssetBundleImageKey key = new AssetBundleImageKey(
           bundle: chosenBundle,
           name: chosenName,
@@ -229,7 +241,7 @@ class AssetImage extends AssetBundleImageProvider {
     // TODO(ianh): Consider moving this parsing logic into _manifestParser.
     final SplayTreeMap<double, String> mapping = new SplayTreeMap<double, String>();
     for (String candidate in candidates)
-      mapping[_parseScale(candidate)] = candidate;
+      mapping[parseScale(candidate)] = candidate;
     // TODO(ianh): implement support for config.locale, config.textDirection,
     // config.size, config.platform (then document this over in the Image.asset
     // docs)
@@ -252,10 +264,19 @@ class AssetImage extends AssetBundleImageProvider {
       return candidates[lower];
   }
 
-  static final RegExp _extractRatioRegExp = new RegExp(r'/?(\d+(\.\d*)?)x/');
+  static final RegExp _extractRatioRegExp = new RegExp(r'/?(\d+(\.\d*)?)x$');
 
-  double _parseScale(String key) {
-    final Match match = _extractRatioRegExp.firstMatch(key);
+  @visibleForTesting
+  double parseScale(String key) {
+
+    if ( key == assetName){
+      return _naturalResolution;
+    }
+
+    final File assetPath = new File(key);
+    final Directory assetDir = assetPath.parent;
+
+    final Match match = _extractRatioRegExp.firstMatch(assetDir.path);
     if (match != null && match.groupCount > 0)
       return double.parse(match.group(1));
     return _naturalResolution; // i.e. default to 1.0x
