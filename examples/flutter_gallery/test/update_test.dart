@@ -26,7 +26,7 @@ void main() {
     await tester.tap(find.text('NO THANKS'));
     await tester.pump();
 
-    await tester.tap(find.text('Vignettes'));
+    await tester.tap(find.text('Studies'));
     await tester.pump(); // Launch
     await tester.pump(const Duration(seconds: 1)); // transition is complete
 

@@ -138,6 +138,16 @@ class _BottomAppBarDemoState extends State<BottomAppBarDemo> {
       appBar: new AppBar(
         title: const Text('Bottom app bar'),
         elevation: 0.0,
+        actions: <Widget>[
+          new IconButton(
+            icon: const Icon(Icons.sentiment_very_satisfied),
+            onPressed: () {
+              setState(() {
+                _fabShape = _fabShape == kCircularFab ? kDiamondFab : kCircularFab;
+              });
+            },
+          ),
+        ],
       ),
       body: new ListView(
         padding: const EdgeInsets.only(bottom: 88.0),
@@ -155,7 +165,7 @@ class _BottomAppBarDemoState extends State<BottomAppBarDemo> {
           new _RadioItem<bool>(kShowNotchFalse, _showNotch, _onShowNotchChanged),
 
           const Divider(),
-          const _Heading('Notch'),
+          const _Heading('FAB Position'),
 
           new _RadioItem<FloatingActionButtonLocation>(kFabEndDocked, _fabLocation, _onFabLocationChanged),
           new _RadioItem<FloatingActionButtonLocation>(kFabCenterDocked, _fabLocation, _onFabLocationChanged),
@@ -214,10 +224,18 @@ class _RadioItem<T> extends StatelessWidget {
             ),
             new Expanded(
               child: new Semantics(
+                container: true,
+                button: true,
                 label: value.label,
-                child: new Text(
-                  value.title,
-                  style: theme.textTheme.subhead,
+                child: new GestureDetector(
+                  behavior: HitTestBehavior.opaque,
+                  onTap: () {
+                    onChanged(value);
+                  },
+                  child: new Text(
+                    value.title,
+                    style: theme.textTheme.subhead,
+                  ),
                 ),
               ),
             ),
@@ -252,7 +270,7 @@ class _ColorsItem extends StatelessWidget {
             fillColor: color,
             shape: new CircleBorder(
               side: new BorderSide(
-                color: color == null ? Colors.black : const Color(0xFFD5D7DA),
+                color: color == selectedColor ? Colors.black : const Color(0xFFD5D7DA),
                 width: 2.0,
               ),
             ),
@@ -339,9 +357,7 @@ class _DemoBottomAppBar extends StatelessWidget {
     return new BottomAppBar(
       color: color,
       hasNotch: showNotch,
-      child: new Row(
-        children: rowContents,
-      ),
+      child: new Row(children: rowContents),
     );
   }
 }
