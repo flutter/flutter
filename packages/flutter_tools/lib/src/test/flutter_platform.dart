@@ -52,8 +52,8 @@ const String _kProjectRootSentinel = 'pubspec.yaml';
 /// The address at which our WebSocket server resides and at which the sky_shell
 /// processes will host the Observatory server.
 final Map<InternetAddressType, InternetAddress> _kHosts = <InternetAddressType, InternetAddress>{
-  InternetAddressType.IPv4: InternetAddress.loopbackIPv4,
-  InternetAddressType.IPv6: InternetAddress.loopbackIPv6,
+  InternetAddressType.IP_V4: InternetAddress.LOOPBACK_IP_V4, // ignore: deprecated_member_use
+  InternetAddressType.IP_V6: InternetAddress.LOOPBACK_IP_V6, // ignore: deprecated_member_use
 };
 
 /// Configure the `test` package to work with Flutter.
@@ -73,7 +73,7 @@ void installHook({
   bool trackWidgetCreation: false,
   bool updateGoldens: false,
   int observatoryPort,
-  InternetAddressType serverType: InternetAddressType.IPv4,
+  InternetAddressType serverType: InternetAddressType.IP_V4, // ignore: deprecated_member_use
 }) {
   assert(!enableObservatory || (!startPaused && observatoryPort == null));
   hack.registerPlatformPlugin(
@@ -622,7 +622,7 @@ class _FlutterPlatform extends PlatformPlugin {
   }
 
   String _getWebSocketUrl() {
-    return host.type == InternetAddressType.IPv4
+    return host.type == InternetAddressType.IP_V4 // ignore: deprecated_member_use
         ? 'ws://${host.address}'
         : 'ws://[${host.address}]';
   }
@@ -766,7 +766,7 @@ void main() {
     } else {
       command.add('--disable-observatory');
     }
-    if (host.type == InternetAddressType.IPv6)
+    if (host.type == InternetAddressType.IP_V6) // ignore: deprecated_member_use
       command.add('--ipv6');
     if (bundlePath != null) {
       command.add('--flutter-assets-dir=$bundlePath');
@@ -838,13 +838,13 @@ void main() {
         return 'Shell subprocess cleanly reported an error $when. Check the logs above for an error message.';
       case 0:
         return 'Shell subprocess ended cleanly $when. Did main() call exit()?';
-      case -0x0f: // ProcessSignal.sigterm
+      case -0x0f: // ProcessSignal.SIGTERM
         return 'Shell subprocess crashed with SIGTERM ($exitCode) $when.';
-      case -0x0b: // ProcessSignal.sigsegv
+      case -0x0b: // ProcessSignal.SIGSEGV
         return 'Shell subprocess crashed with segmentation fault $when.';
-      case -0x06: // ProcessSignal.sigabrt
+      case -0x06: // ProcessSignal.SIGABRT
         return 'Shell subprocess crashed with SIGABRT ($exitCode) $when.';
-      case -0x02: // ProcessSignal.sigint
+      case -0x02: // ProcessSignal.SIGINT
         return 'Shell subprocess terminated by ^C (SIGINT, $exitCode) $when.';
       default:
         return 'Shell subprocess crashed with unexpected exit code $exitCode $when.';
