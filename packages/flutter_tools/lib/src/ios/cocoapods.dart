@@ -58,21 +58,23 @@ class CocoaPods {
   /// Whether CocoaPods ran 'pod setup' once where the costly pods' specs are cloned.
   Future<bool> get isCocoaPodsInitialized => fs.isDirectory(fs.path.join(homeDirPath, '.cocoapods', 'repos', 'master'));
 
-  Future<Null> processPods({
+  Future<bool> processPods({
     @required Directory appIosDirectory,
     // For backward compatibility with previously created Podfile only.
     @required String iosEngineDir,
     bool isSwift: false,
-    bool flutterPodChanged: true,
+    bool dependenciesChanged: true,
   }) async {
     if (!(await appIosDirectory.childFile('Podfile').exists())) {
       throwToolExit('Podfile missing');
     }
     if (await _checkPodCondition()) {
-      if (_shouldRunPodInstall(appIosDirectory, flutterPodChanged)) {
+      if (_shouldRunPodInstall(appIosDirectory, dependenciesChanged)) {
         await _runPodInstall(appIosDirectory, iosEngineDir);
+        return true;
       }
     }
+    return false;
   }
 
   /// Make sure the CocoaPods tools are in the right states.
@@ -157,8 +159,8 @@ class CocoaPods {
   // 2. The podfile.lock doesn't exist
   // 3. The Pods/Manifest.lock doesn't exist (It is deleted when plugins change)
   // 4. The podfile.lock doesn't match Pods/Manifest.lock.
-  bool _shouldRunPodInstall(Directory appIosDirectory, bool flutterPodChanged) {
-    if (flutterPodChanged)
+  bool _shouldRunPodInstall(Directory appIosDirectory, bool dependenciesChanged) {
+    if (dependenciesChanged)
       return true;
     // Check if podfile.lock and Pods/Manifest.lock exist and match.
     final File podfileLockFile = appIosDirectory.childFile('Podfile.lock');
