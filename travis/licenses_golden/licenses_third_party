@@ -1,4 +1,4 @@
-Signature: 603f99debe1751f0bb3a517295ba7072
+Signature: 3c18b73f359ed000bbec63b04444934b
 
 UNUSED LICENSES:
 
@@ -17165,8 +17165,8 @@ FILE: ../../../third_party/skia/bench/GrCCGeometryBench.cpp
 FILE: ../../../third_party/skia/bench/ShaderMaskFilterBench.cpp
 FILE: ../../../third_party/skia/experimental/skottie/SkottieAdapter.cpp
 FILE: ../../../third_party/skia/experimental/skottie/SkottieAdapter.h
-FILE: ../../../third_party/skia/experimental/skottie/SkottieParser.cpp
-FILE: ../../../third_party/skia/experimental/skottie/SkottieParser.h
+FILE: ../../../third_party/skia/experimental/skottie/SkottieJson.cpp
+FILE: ../../../third_party/skia/experimental/skottie/SkottieJson.h
 FILE: ../../../third_party/skia/experimental/sksg/SkSGImage.cpp
 FILE: ../../../third_party/skia/experimental/sksg/SkSGImage.h
 FILE: ../../../third_party/skia/experimental/sksg/SkSGScene.cpp
