@@ -11,10 +11,14 @@ import 'basic_types.dart';
 
 /// A shadow cast by a box.
 ///
-/// BoxShadow can cast non-rectangular shadows if the box is non-rectangular
+/// [BoxShadow] can cast non-rectangular shadows if the box is non-rectangular
 /// (e.g., has a border radius or a circular shape).
 ///
 /// This class is similar to CSS box-shadow.
+///
+/// See also:
+///
+///  * [Canvas.drawShadow], which is a more efficient way to draw shadows.
 @immutable
 class BoxShadow {
   /// Creates a box shadow.
@@ -54,6 +58,18 @@ class BoxShadow {
   ///
   /// See the sigma argument to [MaskFilter.blur].
   double get blurSigma => convertRadiusToSigma(blurRadius);
+
+  /// Create the [Paint] object that corresponds to this shadow description.
+  ///
+  /// The [offset] and [spreadRadius] are not represented in the [Paint] object.
+  /// To honor those as well, the shape should be inflated by [spreadRadius] pixels
+  /// in every direction and then translated by [offset] before being filled using
+  /// this [Paint].
+  Paint toPaint() {
+    return new Paint()
+      ..color = color
+      ..maskFilter = new MaskFilter.blur(BlurStyle.normal, blurSigma);
+  }
 
   /// Returns a new box shadow with its offset, blurRadius, and spreadRadius scaled by the given factor.
   BoxShadow scale(double factor) {

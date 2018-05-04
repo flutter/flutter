@@ -366,9 +366,7 @@ class _BoxDecorationPainter extends BoxPainter {
     if (_decoration.boxShadow == null)
       return;
     for (BoxShadow boxShadow in _decoration.boxShadow) {
-      final Paint paint = new Paint()
-        ..color = boxShadow.color
-        ..maskFilter = new MaskFilter.blur(BlurStyle.normal, boxShadow.blurSigma);
+      final Paint paint = boxShadow.toPaint();
       final Rect bounds = rect.shift(boxShadow.offset).inflate(boxShadow.spreadRadius);
       _paintBox(canvas, bounds, paint, textDirection);
     }
