@@ -273,8 +273,6 @@ class AnalyzeOnce extends AnalyzeBase {
       return false;
     if (filenameComponents[flutterRootComponents.length + 1] == 'flutter_tools')
       return false;
-    if (filenameComponents[flutterRootComponents.length + 1] == 'flutter_goldens')
-      return false;
     if (filenameComponents[flutterRootComponents.length + 2] != 'lib')
       return false;
     return true;
