@@ -125,8 +125,7 @@ class LocalFileComparator implements GoldenFileComparator {
   ///
   /// The [testFile] URI must represent a file.
   LocalFileComparator(Uri testFile, {path.Style pathStyle})
-      : assert(testFile.scheme == 'file'),
-        basedir = _getBasedir(testFile, pathStyle),
+      : basedir = _getBasedir(testFile, pathStyle),
         _path = _getPath(pathStyle);
 
   static path.Context _getPath(path.Style style) {
@@ -135,7 +134,9 @@ class LocalFileComparator implements GoldenFileComparator {
 
   static Uri _getBasedir(Uri testFile, path.Style pathStyle) {
     final path.Context context = _getPath(pathStyle);
-    return context.toUri(context.dirname(context.fromUri(testFile)) + context.separator);
+    final String testFilePath = context.fromUri(testFile);
+    final String testDirectoryPath = context.dirname(testFilePath);
+    return context.toUri(testDirectoryPath + context.separator);
   }
 
   /// The directory in which the test was loaded.
