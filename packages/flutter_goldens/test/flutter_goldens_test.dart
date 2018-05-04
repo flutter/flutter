@@ -61,19 +61,31 @@ void main() {
   });
 
   group('FlutterGoldenFileComparator', () {
-    GoldensClient goldens;
     MemoryFileSystem fs;
     FlutterGoldenFileComparator comparator;
 
     setUp(() {
-      goldens = new MockGoldensClient();
       fs = new MemoryFileSystem();
       final Directory flutterRoot = fs.directory('/path/to/flutter')..createSync(recursive: true);
       final Directory goldensRoot = flutterRoot.childDirectory('bin/cache/goldens')..createSync(recursive: true);
-      final Directory testDirectory = flutterRoot.childDirectory('test/foo/bar')..createSync(recursive: true);
-      comparator = new FlutterGoldenFileComparator(goldens, new Uri.directory(testDirectory.path), fs: fs);
-      when(goldens.flutterRoot).thenReturn(flutterRoot);
-      when(goldens.repositoryRoot).thenReturn(goldensRoot);
+      final Directory testDirectory = goldensRoot.childDirectory('test/foo/bar')..createSync(recursive: true);
+      comparator = new FlutterGoldenFileComparator(testDirectory.uri, fs: fs);
+    });
+
+    group('fromDefaultComparator', () {
+      test('calculates the basedir correctly', () async {
+        final MockGoldensClient goldens = new MockGoldensClient();
+        final MockLocalFileComparator defaultComparator = new MockLocalFileComparator();
+        final Directory flutterRoot = fs.directory('/foo')..createSync(recursive: true);
+        final Directory goldensRoot = flutterRoot.childDirectory('bar')..createSync(recursive: true);
+        when(goldens.fs).thenReturn(fs);
+        when(goldens.flutterRoot).thenReturn(flutterRoot);
+        when(goldens.repositoryRoot).thenReturn(goldensRoot);
+        when(defaultComparator.basedir).thenReturn(flutterRoot.childDirectory('baz').uri);
+        comparator = await FlutterGoldenFileComparator.fromDefaultComparator(
+            goldens: goldens, defaultComparator: defaultComparator);
+        expect(comparator.basedir, fs.directory('/foo/bar/baz').uri);
+      });
     });
 
     group('compare', () {
@@ -125,3 +137,4 @@ void main() {
 
 class MockProcessManager extends Mock implements ProcessManager {}
 class MockGoldensClient extends Mock implements GoldensClient {}
+class MockLocalFileComparator extends Mock implements LocalFileComparator {}
