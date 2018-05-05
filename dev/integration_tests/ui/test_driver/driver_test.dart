@@ -36,7 +36,7 @@ void main() {
     test('waitForAbsent should resolve when text "present" disappears', () async {
       // Begin waiting for it to disappear
       final Completer<Null> whenWaitForAbsentResolves = new Completer<Null>();
-      await driver.waitForAbsent(presentText).then(
+      driver.waitForAbsent(presentText).then(
         whenWaitForAbsentResolves.complete,
         onError: whenWaitForAbsentResolves.completeError,
       );
@@ -61,7 +61,7 @@ void main() {
     test('waitFor should resolve when text "present" reappears', () async {
       // Begin waiting for it to reappear
       final Completer<Null> whenWaitForResolves = new Completer<Null>();
-      await driver.waitFor(presentText).then(
+      driver.waitFor(presentText).then(
         whenWaitForResolves.complete,
         onError: whenWaitForResolves.completeError,
       );
