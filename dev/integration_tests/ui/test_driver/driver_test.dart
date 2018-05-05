@@ -14,6 +14,8 @@ void main() {
 
     setUpAll(() async {
       driver = await FlutterDriver.connect();
+      // TODO(cbracken): remove when source of test flakiness is resolved.
+      await new Future<Null>.delayed(const Duration(seconds: 1));
     });
 
     tearDownAll(() async {
