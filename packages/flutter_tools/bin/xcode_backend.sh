@@ -130,16 +130,8 @@ BuildApp() {
     RunCommand cp -r -- "${build_dir}/aot/App.framework" "${derived_dir}"
   else
     RunCommand mkdir -p -- "${derived_dir}/App.framework"
-
-    # Build stub for all requested architectures.
-    local arch_flags=""
-    read -r -a archs <<< "$ARCHS"
-    for arch in "${archs[@]}"; do
-      arch_flags="${arch_flags}-arch $arch "
-    done
-
     RunCommand eval "$(echo "static const int Moo = 88;" | xcrun clang -x c \
-        ${arch_flags} \
+        -arch "$CURRENT_ARCH" \
         -dynamiclib \
         -Xlinker -rpath -Xlinker '@executable_path/Frameworks' \
         -Xlinker -rpath -Xlinker '@loader_path/Frameworks' \
