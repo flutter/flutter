@@ -415,7 +415,10 @@ String decodeSyslog(String line) {
 }
 
 class _IOSDeviceLogReader extends DeviceLogReader {
-  RegExp _lineRegex;
+  // Matches a syslog line from the runner.
+  RegExp _runnerLineRegex;
+  // Matches a syslog line from any app.
+  RegExp _anyLineRegex;
 
   _IOSDeviceLogReader(this.device, ApplicationPackage app) {
     _linesController = new StreamController<String>.broadcast(
@@ -428,7 +431,11 @@ class _IOSDeviceLogReader extends DeviceLogReader {
     // iOS 9 format:  Runner[297] <Notice>:
     // iOS 10 format: Runner(Flutter)[297] <Notice>:
     final String appName = app == null ? '' : app.name.replaceAll('.app', '');
-    _lineRegex = new RegExp(appName + r'(\(Flutter\))?\[[\d]+\] <[A-Za-z]+>: ');
+    _runnerLineRegex = new RegExp(appName + r'(\(Flutter\))?\[[\d]+\] <[A-Za-z]+>: ');
+    // Similar to above, but allows ~arbitrary components instead of "Runner"
+    // and "Flutter". The regex tries to strike a balance between not producing
+    // false positives and not producing false negatives.
+    _anyLineRegex = new RegExp(r'\w+(\([^)]*\))?\[\d+\] <[A-Za-z]+>: ');
   }
 
   final IOSDevice device;
@@ -445,8 +452,8 @@ class _IOSDeviceLogReader extends DeviceLogReader {
   void _start() {
     iMobileDevice.startLogger().then<Null>((Process process) {
       _process = process;
-      _process.stdout.transform(utf8.decoder).transform(const LineSplitter()).listen(_onLine);
-      _process.stderr.transform(utf8.decoder).transform(const LineSplitter()).listen(_onLine);
+      _process.stdout.transform(utf8.decoder).transform(const LineSplitter()).listen(_newLineHandler());
+      _process.stderr.transform(utf8.decoder).transform(const LineSplitter()).listen(_newLineHandler());
       _process.exitCode.whenComplete(() {
         if (_linesController.hasListener)
           _linesController.close();
@@ -454,14 +461,35 @@ class _IOSDeviceLogReader extends DeviceLogReader {
     });
   }
 
-  void _onLine(String line) {
-    final Match match = _lineRegex.firstMatch(line);
+  // Returns a stateful line handler to properly capture multi-line output.
+  //
+  // For multi-line log messages, any line after the first is logged without
+  // any specific prefix. To properly capture those, we enter "printing" mode
+  // after matching a log line from the runner. When in printing mode, we print
+  // all lines until we find the start of another log message (from any app).
+  Function _newLineHandler() {
+    bool printing = false;
 
-    if (match != null) {
-      final String logLine = line.substring(match.end);
-      // Only display the log line after the initial device and executable information.
-      _linesController.add(decodeSyslog(logLine));
-    }
+    return (String line) {
+      if (printing) {
+        if (!_anyLineRegex.hasMatch(line)) {
+          _linesController.add(decodeSyslog(line));
+          return;
+        }
+
+        printing = false;
+      }
+
+      final Match match = _runnerLineRegex.firstMatch(line);
+
+      if (match != null) {
+        final String logLine = line.substring(match.end);
+        // Only display the log line after the initial device and executable information.
+        _linesController.add(decodeSyslog(logLine));
+
+        printing = true;
+      }
+    };
   }
 
   void _stop() {
