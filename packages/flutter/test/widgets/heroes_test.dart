@@ -781,6 +781,7 @@ void main() {
       builder: (BuildContext context) {
         return new Material(
           child: new ListView(
+            cacheExtent: 0.0,
             children: <Widget>[
               const SizedBox(height: 100.0),
               // This container will appear at Y=100

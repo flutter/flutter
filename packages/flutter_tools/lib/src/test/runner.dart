@@ -31,6 +31,7 @@ Future<int> runTests(
     bool machine: false,
     bool previewDart2: false,
     bool trackWidgetCreation: false,
+    bool updateGoldens: false,
     TestWatcher watcher,
     }) async {
   if (trackWidgetCreation && !previewDart2) {
@@ -76,7 +77,7 @@ Future<int> runTests(
     throwToolExit('Cannot find Flutter shell at $shellPath');
 
   final InternetAddressType serverType =
-      ipv6 ? InternetAddressType.IP_V6 : InternetAddressType.IP_V4;
+      ipv6 ? InternetAddressType.IP_V6 : InternetAddressType.IP_V4; // ignore: deprecated_member_use
 
   loader.installHook(
     shellPath: shellPath,
@@ -87,6 +88,7 @@ Future<int> runTests(
     serverType: serverType,
     previewDart2: previewDart2,
     trackWidgetCreation: trackWidgetCreation,
+    updateGoldens: updateGoldens,
   );
 
   // Make the global packages path absolute.

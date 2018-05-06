@@ -46,7 +46,7 @@ abstract class DevFSContent {
   Stream<List<int>> contentsAsStream();
 
   Stream<List<int>> contentsAsCompressedStream() {
-    return contentsAsStream().transform(GZIP.encoder);
+    return contentsAsStream().transform(GZIP.encoder); // ignore: deprecated_member_use
   }
 
   /// Return the list of files this content depends on.
@@ -86,7 +86,7 @@ class DevFSFileContent extends DevFSContent {
       return;
     }
     _fileStat = file.statSync();
-    if (_fileStat.type == FileSystemEntityType.LINK) {
+    if (_fileStat.type == FileSystemEntityType.LINK) { // ignore: deprecated_member_use
       // Resolve, stat, and maybe cache the symlink target.
       final String resolved = file.resolveSymbolicLinksSync();
       final FileSystemEntity linkTarget = fs.file(resolved);
@@ -661,7 +661,7 @@ class DevFS {
           try {
             final FileSystemEntityType linkType =
                 fs.statSync(file.resolveSymbolicLinksSync()).type;
-            if (linkType == FileSystemEntityType.DIRECTORY)
+            if (linkType == FileSystemEntityType.DIRECTORY) // ignore: deprecated_member_use
               continue;
           } on FileSystemException catch (e) {
             _printScanDirectoryError(file.path, e);

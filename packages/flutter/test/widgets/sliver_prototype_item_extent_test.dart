@@ -131,7 +131,7 @@ void main() {
     );
 
     // Item 0 exists in the list and as the prototype item.
-    expect(tester.widgetList(find.text('Item 0')).length, 2);
+    expect(tester.widgetList(find.text('Item 0', skipOffstage: false)).length, 2);
 
     for (int i = 1; i < 10; i += 1)
       expect(find.text('Item $i'), findsOneWidget);

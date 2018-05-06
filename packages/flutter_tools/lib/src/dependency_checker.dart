@@ -30,7 +30,7 @@ class DependencyChecker {
     for (String path in _dependencies) {
       final File file = fs.file(path);
       final FileStat stat = file.statSync();
-      if (stat.type == FileSystemEntityType.NOT_FOUND) {
+      if (stat.type == FileSystemEntityType.NOT_FOUND) { // ignore: deprecated_member_use
         printTrace('DependencyChecker: Error stating $path.');
         return true;
       }

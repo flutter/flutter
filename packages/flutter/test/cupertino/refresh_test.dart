@@ -430,11 +430,11 @@ void main() {
 
       // Now the sliver is scrolled off screen.
       expect(
-        tester.getTopLeft(find.widgetWithText(Center, '-1')).dy,
+        tester.getTopLeft(find.widgetWithText(Center, '-1', skipOffstage: false)).dy,
         moreOrLessEquals(-175.38461538461536),
       );
       expect(
-        tester.getBottomLeft(find.widgetWithText(Center, '-1')).dy,
+        tester.getBottomLeft(find.widgetWithText(Center, '-1', skipOffstage: false)).dy,
         moreOrLessEquals(-115.38461538461536),
       );
       expect(
@@ -720,11 +720,11 @@ void main() {
 
         // Now the sliver is scrolled off screen.
         expect(
-          tester.getTopLeft(find.widgetWithText(Center, '-1')).dy,
+          tester.getTopLeft(find.widgetWithText(Center, '-1', skipOffstage: false)).dy,
           moreOrLessEquals(-175.38461538461536),
         );
         expect(
-          tester.getBottomLeft(find.widgetWithText(Center, '-1')).dy,
+          tester.getBottomLeft(find.widgetWithText(Center, '-1', skipOffstage: false)).dy,
           moreOrLessEquals(-115.38461538461536),
         );
 
@@ -872,7 +872,7 @@ void main() {
       );
 
       expect(
-        CupertinoRefreshControl.state(tester.element(find.byType(LayoutBuilder))),
+        CupertinoRefreshControl.state(tester.element(find.byType(LayoutBuilder, skipOffstage: false))),
         RefreshIndicatorMode.inactive,
       );
 
@@ -907,7 +907,7 @@ void main() {
       await tester.pump(const Duration(seconds: 2));
 
       expect(
-        CupertinoRefreshControl.state(tester.element(find.byType(LayoutBuilder))),
+        CupertinoRefreshControl.state(tester.element(find.byType(LayoutBuilder, skipOffstage: false))),
         RefreshIndicatorMode.inactive,
       );
 
@@ -1147,7 +1147,7 @@ void main() {
           moreOrLessEquals(-145.0332383665717),
         );
         expect(
-          CupertinoRefreshControl.state(tester.element(find.byType(LayoutBuilder))),
+          CupertinoRefreshControl.state(tester.element(find.byType(LayoutBuilder, skipOffstage: false))),
           RefreshIndicatorMode.refresh,
         );
 
@@ -1155,7 +1155,7 @@ void main() {
         // The sliver layout extent is removed on next frame.
         await tester.pump();
         expect(
-          CupertinoRefreshControl.state(tester.element(find.byType(LayoutBuilder))),
+          CupertinoRefreshControl.state(tester.element(find.byType(LayoutBuilder, skipOffstage: false))),
           RefreshIndicatorMode.inactive,
         );
         // Nothing moved.
@@ -1208,7 +1208,7 @@ void main() {
         await tester.pump(const Duration(seconds: 5));
         // In refresh mode but has no UI.
         expect(
-          CupertinoRefreshControl.state(tester.element(find.byType(LayoutBuilder))),
+          CupertinoRefreshControl.state(tester.element(find.byType(LayoutBuilder, skipOffstage: false))),
           RefreshIndicatorMode.refresh,
         );
         expect(
@@ -1221,7 +1221,7 @@ void main() {
         await tester.pump();
         // Goes to inactive right away since the sliver is already collapsed.
         expect(
-          CupertinoRefreshControl.state(tester.element(find.byType(LayoutBuilder))),
+          CupertinoRefreshControl.state(tester.element(find.byType(LayoutBuilder, skipOffstage: false))),
           RefreshIndicatorMode.inactive,
         );
 

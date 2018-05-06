@@ -182,6 +182,25 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   /// this method works when the test is run with `flutter run`.
   Future<Null> pump([ Duration duration, EnginePhase newPhase = EnginePhase.sendSemanticsUpdate ]);
 
+  /// Runs a [callback] that performs real asynchronous work.
+  ///
+  /// This is intended for callers who need to call asynchronous methods where
+  /// the methods spawn isolates or OS threads and thus cannot be executed
+  /// synchronously by calling [pump].
+  ///
+  /// If [callback] completes successfully, this will return the future
+  /// returned by [callback].
+  ///
+  /// If [callback] completes with an error, the error will be caught by the
+  /// Flutter framework and made available via [takeException], and this method
+  /// will return a future that completes will `null`.
+  ///
+  /// Re-entrant calls to this method are not allowed; callers of this method
+  /// are required to wait for the returned future to complete before calling
+  /// this method again. Attempts to do otherwise will result in a
+  /// [TestFailure] error being thrown.
+  Future<T> runAsync<T>(Future<T> callback());
+
   /// Artificially calls dispatchLocaleChanged on the Widget binding,
   /// then flushes microtasks.
   Future<Null> setLocale(String languageCode, String countryCode) {
@@ -541,6 +560,7 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
   }
 
   FakeAsync _fakeAsync;
+  Completer<void> _pendingAsyncTasks;
 
   @override
   Clock get clock => _clock;
@@ -579,6 +599,41 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
       }
       _fakeAsync.flushMicrotasks();
       return new Future<Null>.value();
+    });
+  }
+
+  @override
+  Future<T> runAsync<T>(Future<T> callback()) {
+    assert(() {
+      if (_pendingAsyncTasks == null)
+        return true;
+      throw new test_package.TestFailure(
+          'Reentrant call to runAsync() denied.\n'
+          'runAsync() was called, then before its future completed, it '
+          'was called again. You must wait for the first returned future '
+          'to complete before calling runAsync() again.'
+      );
+    }());
+
+    return Zone.root.run(() {
+      _pendingAsyncTasks = new Completer<void>();
+      return callback().catchError((dynamic exception, StackTrace stack) {
+        FlutterError.reportError(new FlutterErrorDetails(
+          exception: exception,
+          stack: stack,
+          library: 'Flutter test framework',
+          context: 'while running async test code',
+        ));
+        return null;
+      }).whenComplete(() {
+        // We complete the _pendingAsyncTasks future successfully regardless of
+        // whether an exception occurred because in the case of an exception,
+        // we already reported the exception to FlutterError. Moreover,
+        // completing the future with an error would trigger an unhandled
+        // exception due to zone error boundaries.
+        _pendingAsyncTasks.complete();
+        _pendingAsyncTasks = null;
+      });
     });
   }
 
@@ -646,12 +701,22 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
       testBodyResult = _runTest(testBody, invariantTester, description);
       assert(inTest);
     });
-    // testBodyResult is a Future that was created in the Zone of the fakeAsync.
-    // This means that if we call .then() on it (as the test framework is about to),
-    // it will register a microtask to handle the future _in the fake async zone_.
-    // To avoid this, we wrap it in a Future that we've created _outside_ the fake
-    // async zone.
-    return new Future<Null>.value(testBodyResult);
+
+    return new Future<Null>.microtask(() async {
+      // Resolve interplay between fake async and real async calls.
+      _fakeAsync.flushMicrotasks();
+      while (_pendingAsyncTasks != null) {
+        await _pendingAsyncTasks.future;
+        _fakeAsync.flushMicrotasks();
+      }
+
+      // testBodyResult is a Future that was created in the Zone of the
+      // fakeAsync. This means that if we await it here, it will register a
+      // microtask to handle the future _in the fake async zone_. We avoid this
+      // by returning the wrapped microtask future that we've created _outside_
+      // the fake async zone.
+      return testBodyResult;
+    });
   }
 
   @override
@@ -779,6 +844,7 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
   Completer<Null> _pendingFrame;
   bool _expectingFrame = false;
   bool _viewNeedsPaint = false;
+  bool _runningAsyncTasks = false;
 
   /// Whether to have [pump] with a duration only pump a single frame
   /// (as would happen in a normal test environment using
@@ -947,6 +1013,35 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
       _pendingFrame = new Completer<Null>();
       return _pendingFrame.future;
     });
+  }
+
+  @override
+  Future<T> runAsync<T>(Future<T> callback()) async {
+    assert(() {
+      if (!_runningAsyncTasks)
+        return true;
+      throw new test_package.TestFailure(
+          'Reentrant call to runAsync() denied.\n'
+          'runAsync() was called, then before its future completed, it '
+          'was called again. You must wait for the first returned future '
+          'to complete before calling runAsync() again.'
+      );
+    }());
+
+    _runningAsyncTasks = true;
+    try {
+      return await callback();
+    } catch (error, stack) {
+      FlutterError.reportError(new FlutterErrorDetails(
+        exception: error,
+        stack: stack,
+        library: 'Flutter test framework',
+        context: 'while running async test code',
+      ));
+      return null;
+    } finally {
+      _runningAsyncTasks = false;
+    }
   }
 
   @override

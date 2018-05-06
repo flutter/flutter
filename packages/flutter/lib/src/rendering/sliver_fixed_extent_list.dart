@@ -140,11 +140,11 @@ abstract class RenderSliverFixedExtentBoxAdaptor extends RenderSliverMultiBoxAda
 
     final double itemExtent = this.itemExtent;
 
-    final double scrollOffset = constraints.scrollOffset;
+    final double scrollOffset = constraints.scrollOffset + constraints.cacheOrigin;
     assert(scrollOffset >= 0.0);
-    final double remainingPaintExtent = constraints.remainingPaintExtent;
-    assert(remainingPaintExtent >= 0.0);
-    final double targetEndScrollOffset = scrollOffset + remainingPaintExtent;
+    final double remainingExtent = constraints.remainingCacheExtent;
+    assert(remainingExtent >= 0.0);
+    final double targetEndScrollOffset = scrollOffset + remainingExtent;
 
     final BoxConstraints childConstraints = constraints.asBoxConstraints(
       minExtent: itemExtent,
@@ -242,9 +242,16 @@ abstract class RenderSliverFixedExtentBoxAdaptor extends RenderSliverMultiBoxAda
       to: trailingScrollOffset,
     );
 
+    final double cacheExtent = calculateCacheOffset(
+      constraints,
+      from: leadingScrollOffset,
+      to: trailingScrollOffset,
+    );
+
     geometry = new SliverGeometry(
       scrollExtent: estimatedMaxScrollOffset,
       paintExtent: paintExtent,
+      cacheExtent: cacheExtent,
       maxPaintExtent: estimatedMaxScrollOffset,
       // Conservative to avoid flickering away the clip during scroll.
       hasVisualOverflow: (targetLastIndex != null && lastIndex >= targetLastIndex)

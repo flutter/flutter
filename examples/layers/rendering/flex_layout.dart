@@ -10,7 +10,7 @@ import 'package:flutter/rendering.dart';
 import 'src/solid_color_box.dart';
 
 void main() {
-  final RenderFlex table = new RenderFlex(direction: Axis.vertical);
+  final RenderFlex table = new RenderFlex(direction: Axis.vertical, textDirection: TextDirection.ltr);
 
   void addAlignmentRow(CrossAxisAlignment crossAxisAlignment) {
     TextStyle style = const TextStyle(color: const Color(0xFF000000));
@@ -19,7 +19,7 @@ void main() {
       textDirection: TextDirection.ltr,
     );
     table.add(new RenderPadding(child: paragraph, padding: const EdgeInsets.only(top: 20.0)));
-    final RenderFlex row = new RenderFlex(crossAxisAlignment: crossAxisAlignment, textBaseline: TextBaseline.alphabetic);
+    final RenderFlex row = new RenderFlex(crossAxisAlignment: crossAxisAlignment, textBaseline: TextBaseline.alphabetic, textDirection: TextDirection.ltr);
     style = const TextStyle(fontSize: 15.0, color: const Color(0xFF000000));
     row.add(new RenderDecoratedBox(
       decoration: const BoxDecoration(color: const Color(0x7FFFCCCC)),
@@ -36,7 +36,7 @@ void main() {
         textDirection: TextDirection.ltr,
       ),
     ));
-    final RenderFlex subrow = new RenderFlex(crossAxisAlignment: crossAxisAlignment, textBaseline: TextBaseline.alphabetic);
+    final RenderFlex subrow = new RenderFlex(crossAxisAlignment: crossAxisAlignment, textBaseline: TextBaseline.alphabetic, textDirection: TextDirection.ltr);
     style = const TextStyle(fontSize: 25.0, color: const Color(0xFF000000));
     subrow.add(new RenderDecoratedBox(
       decoration: const BoxDecoration(color: const Color(0x7FCCCCFF)),
@@ -65,7 +65,7 @@ void main() {
       textDirection: TextDirection.ltr,
     );
     table.add(new RenderPadding(child: paragraph, padding: const EdgeInsets.only(top: 20.0)));
-    final RenderFlex row = new RenderFlex(direction: Axis.horizontal);
+    final RenderFlex row = new RenderFlex(direction: Axis.horizontal, textDirection: TextDirection.ltr);
     row.add(new RenderSolidColorBox(const Color(0xFFFFCCCC), desiredSize: const Size(80.0, 60.0)));
     row.add(new RenderSolidColorBox(const Color(0xFFCCFFCC), desiredSize: const Size(64.0, 60.0)));
     row.add(new RenderSolidColorBox(const Color(0xFFCCCCFF), desiredSize: const Size(160.0, 60.0)));
@@ -83,7 +83,7 @@ void main() {
 
   final RenderDecoratedBox root = new RenderDecoratedBox(
     decoration: const BoxDecoration(color: const Color(0xFFFFFFFF)),
-    child: new RenderPadding(child: table, padding: const EdgeInsets.symmetric(vertical: 50.0))
+    child: new RenderPadding(child: table, padding: const EdgeInsets.symmetric(vertical: 50.0)),
   );
 
   new RenderingFlutterBinding(root: root);

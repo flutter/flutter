@@ -109,7 +109,7 @@ BuildApp() {
     preview_dart_2_flag="--no-preview-dart-2"
   fi
 
-  if [[ "$CURRENT_ARCH" != "x86_64" ]]; then
+  if [[ "${build_mode}" != "debug" ]]; then
     StreamOutput " ├─Building Dart code..."
     RunCommand "${FLUTTER_ROOT}/bin/flutter" --suppress-analytics           \
       ${verbose_flag}                                                       \
@@ -131,6 +131,7 @@ BuildApp() {
   else
     RunCommand mkdir -p -- "${derived_dir}/App.framework"
     RunCommand eval "$(echo "static const int Moo = 88;" | xcrun clang -x c \
+        -arch "$CURRENT_ARCH" \
         -dynamiclib \
         -Xlinker -rpath -Xlinker '@executable_path/Frameworks' \
         -Xlinker -rpath -Xlinker '@loader_path/Frameworks' \
@@ -183,7 +184,8 @@ GetFrameworkExecutablePath() {
 LipoExecutable() {
   local executable="$1"
   shift
-  local archs=("$@")
+  # Split $@ into an array.
+  read -r -a archs <<< "$@"
 
   # Extract architecture-specific framework executables.
   local all_executables=()
@@ -224,11 +226,10 @@ LipoExecutable() {
 ThinFramework() {
   local framework_dir="$1"
   shift
-  local archs=("$@")
 
   local plist_path="${framework_dir}/Info.plist"
   local executable="$(GetFrameworkExecutablePath "${framework_dir}")"
-  LipoExecutable "${executable}" "${archs[@]}"
+  LipoExecutable "${executable}" "$@"
 }
 
 ThinAppFrameworks() {

@@ -408,12 +408,12 @@ String _validateProjectDir(String dirPath, { String flutterRoot }) {
 
   final FileSystemEntityType type = fs.typeSync(dirPath);
 
-  if (type != FileSystemEntityType.NOT_FOUND) {
+  if (type != FileSystemEntityType.NOT_FOUND) { // ignore: deprecated_member_use
     switch (type) {
-      case FileSystemEntityType.FILE:
+      case FileSystemEntityType.FILE: // ignore: deprecated_member_use
         // Do not overwrite files.
         return "Invalid project name: '$dirPath' - file exists.";
-      case FileSystemEntityType.LINK:
+      case FileSystemEntityType.LINK: // ignore: deprecated_member_use
         // Do not overwrite links.
         return "Invalid project name: '$dirPath' - refers to a link.";
     }

@@ -289,7 +289,7 @@ void main() {
     }
 
     StateMarkerState findStateMarkerState(String name) {
-      return tester.state(find.widgetWithText(StateMarker, name));
+      return tester.state(find.widgetWithText(StateMarker, name, skipOffstage: false));
     }
 
     await tester.pumpWidget(builder());

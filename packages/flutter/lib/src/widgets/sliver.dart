@@ -888,6 +888,25 @@ class SliverMultiBoxAdaptorElement extends RenderObjectElement implements Render
    assert(!_childElements.values.any((Element child) => child == null));
     _childElements.values.toList().forEach(visitor);
   }
+
+  @override
+  void debugVisitOnstageChildren(ElementVisitor visitor) {
+    _childElements.values.where((Element child) {
+      final SliverMultiBoxAdaptorParentData parentData = child.renderObject.parentData;
+      double itemExtent;
+      switch (renderObject.constraints.axis) {
+        case Axis.horizontal:
+          itemExtent = child.renderObject.paintBounds.width;
+          break;
+        case Axis.vertical:
+          itemExtent = child.renderObject.paintBounds.height;
+          break;
+      }
+
+      return parentData.layoutOffset < renderObject.constraints.scrollOffset + renderObject.constraints.remainingPaintExtent &&
+          parentData.layoutOffset + itemExtent > renderObject.constraints.scrollOffset;
+    }).forEach(visitor);
+  }
 }
 
 /// A sliver that contains a single box child that fills the remaining space in

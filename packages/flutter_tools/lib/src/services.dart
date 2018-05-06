@@ -105,6 +105,6 @@ File generateServiceDefinitions(
 
   final Map<String, dynamic> jsonObject = <String, dynamic>{ 'services': services };
   final File servicesFile = fs.file(fs.path.join(dir, 'services.json'));
-  servicesFile.writeAsStringSync(json.encode(jsonObject), mode: FileMode.WRITE, flush: true);
+  servicesFile.writeAsStringSync(json.encode(jsonObject), mode: FileMode.WRITE, flush: true); // ignore: deprecated_member_use
   return servicesFile;
 }
