@@ -10,6 +10,9 @@ import 'gesture_tester.dart';
 void main() {
   setUp(ensureGestureBinding);
 
+
+
+
   testGesture('Should recognize scale gestures', (GestureTester tester) {
     final ScaleGestureRecognizer scale = new ScaleGestureRecognizer();
     final TapGestureRecognizer tap = new TapGestureRecognizer();
@@ -22,8 +25,10 @@ void main() {
     };
 
     double updatedScale;
+    double updatedRotation;
     scale.onUpdate = (ScaleUpdateDetails details) {
       updatedScale = details.scale;
+      updatedRotation = details.rotation;
       updatedFocalPoint = details.focalPoint;
     };
 
@@ -65,6 +70,8 @@ void main() {
     updatedFocalPoint = null;
     expect(updatedScale, 1.0);
     updatedScale = null;
+    expect(updatedRotation, 0.0);
+    updatedRotation = null;
     expect(didEndScale, isFalse);
     expect(didTap, isFalse);
 
@@ -81,6 +88,7 @@ void main() {
     expect(updatedScale, isNull);
     expect(updatedFocalPoint, isNull);
     expect(didStartScale, isFalse);
+
 
     // Zoom in
     tester.route(pointer2.move(const Offset(0.0, 10.0)));

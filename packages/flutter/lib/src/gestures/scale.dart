@@ -117,13 +117,13 @@ class _LineBetweenPointers{
   /// [pointerEndLocation] and [pointerEndId] must be null. [pointerStartId] and [pointerEndId]
   /// should be different.
   _LineBetweenPointers({
-    this.pointerStartLocation,
-    this.pointerStartId,
-    this.pointerEndLocation,
-    this.pointerEndId
+    this.pointerStartLocation = Offset.zero,
+    this.pointerStartId = 0,
+    this.pointerEndLocation = Offset.zero,
+    this.pointerEndId = 1
   }) : assert(pointerStartLocation != null && pointerEndLocation != null),
-        assert(pointerStartId != null && pointerEndId != null),
-        assert(pointerStartId != pointerEndId);
+       assert(pointerStartId != null && pointerEndId != null),
+       assert(pointerStartId != pointerEndId);
 
   /// The location and the id of the pointer that marks the start of the line,
   final Offset pointerStartLocation;
@@ -202,7 +202,7 @@ class ScaleGestureRecognizer extends OneSequenceGestureRecognizer {
       _initialSpan = 0.0;
       _currentSpan = 0.0;
       _pointerLocations = <int, Offset>{};
-      _pointerQueue = [];
+      _pointerQueue = <int>[];
     }
   }
 
