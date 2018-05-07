@@ -32,7 +32,7 @@ class GalleryDemoCategory {
 }
 
 const GalleryDemoCategory _kDemos = const GalleryDemoCategory._(
-  name: 'Vignettes',
+  name: 'Studies',
   icon: GalleryIcons.animation,
 );
 
