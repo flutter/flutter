@@ -35,15 +35,12 @@ class IOSEmulator extends Emulator {
   String get label => null;
 
   @override
-  Future<bool> launch() async {
+  Future<void> launch() async {
     final RunResult launchResult =
         await runAsync(<String>['open', '-a', getSimulatorPath()]);
     if (launchResult.exitCode != 0) {
       printError('$launchResult');
-      return false;
     }
-
-    return true;
   }
 }
 

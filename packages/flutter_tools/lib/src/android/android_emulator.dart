@@ -41,15 +41,13 @@ class AndroidEmulator extends Emulator {
   String get label => _properties['avd.ini.displayname'];
 
   @override
-  Future<bool> launch() async {
+  Future<void> launch() async {
     final RunResult launchResult =
         await runAsync(<String>[getEmulatorPath(), '-avd', id]);
+
     if (launchResult.exitCode != 0) {
       printError('$launchResult');
-      return false;
     }
-
-    return true;
   }
 }
 
