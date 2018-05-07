@@ -24,9 +24,9 @@ const FileSystem _fs = const LocalFileSystem();
 // These names must match GalleryItem titles from kAllGalleryDemos
 // in examples/flutter_gallery/lib/gallery/demos.dart
 const List<String> kProfiledDemos = const <String>[
-  'Shrine@Vignettes',
-  'Contact profile@Vignettes',
-  'Animation@Vignettes',
+  'Shrine@Studies',
+  'Contact profile@Studies',
+  'Animation@Studies',
   'Bottom navigation@Material',
   'Buttons@Material',
   'Cards@Material',

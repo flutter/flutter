@@ -26,7 +26,7 @@ void main() {
     await tester.pump(); // see https://github.com/flutter/flutter/issues/1865
     await tester.pump(); // triggers a frame
 
-    await tester.tap(find.text('Vignettes'));
+    await tester.tap(find.text('Studies'));
     await tester.pumpAndSettle();
 
     await tester.tap(find.text('Pesto'));
@@ -47,7 +47,7 @@ void main() {
     await tester.pump(); // see https://github.com/flutter/flutter/issues/1865
     await tester.pump(); // triggers a frame
 
-    await tester.tap(find.text('Vignettes'));
+    await tester.tap(find.text('Studies'));
     await tester.pumpAndSettle();
 
     await tester.tap(find.text('Pesto'));
