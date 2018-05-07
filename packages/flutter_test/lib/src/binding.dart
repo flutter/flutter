@@ -19,6 +19,7 @@ import 'package:test/test.dart' as test_package;
 import 'package:stack_trace/stack_trace.dart' as stack_trace;
 import 'package:vector_math/vector_math_64.dart';
 
+import 'goldens.dart';
 import 'stack_manipulation.dart';
 import 'test_async_utils.dart';
 import 'test_text_input.dart';
@@ -492,6 +493,8 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
     runApp(new Container(key: new UniqueKey(), child: _kPreTestMessage)); // Reset the tree to a known state.
     await pump();
 
+    final bool autoUpdateGoldensBeforeTest = autoUpdateGoldenFiles;
+
     // run the test
     await testBody();
     asyncBarrier(); // drains the microtasks in `flutter test` mode (when using AutomatedTestWidgetsFlutterBinding)
@@ -503,6 +506,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
       runApp(new Container(key: new UniqueKey(), child: _kPostTestMessage)); // Unmount any remaining widgets.
       await pump();
       invariantTester();
+      _verifyAutoUpdateGoldensUnset(autoUpdateGoldensBeforeTest);
       _verifyInvariants();
     }
 
@@ -531,6 +535,21 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
     assert(debugAssertAllSchedulerVarsUnset(
       'The value of a scheduler debug variable was changed by the test.',
     ));
+  }
+
+  void _verifyAutoUpdateGoldensUnset(bool valueBeforeTest) {
+    assert(() {
+      if (autoUpdateGoldenFiles != valueBeforeTest) {
+        FlutterError.reportError(new FlutterErrorDetails(
+          exception: new FlutterError(
+              'The value of autoUpdateGoldenFiles was changed by the test.',
+          ),
+          stack: StackTrace.current,
+          library: 'Flutter test framework',
+        ));
+      }
+      return true;
+    }());
   }
 
   /// Called by the [testWidgets] function after a test is executed.
@@ -823,6 +842,12 @@ enum LiveTestWidgetsFlutterBindingFramePolicy {
 /// doesn't trigger a paint, since then you could not see anything
 /// anyway.)
 class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
+  @override
+  void initInstances() {
+    super.initInstances();
+    assert(!autoUpdateGoldenFiles);
+  }
+
   @override
   bool get inTest => _inTest;
   bool _inTest = false;
