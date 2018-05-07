@@ -609,7 +609,11 @@ void _tests() {
       );
 
       expect(semantics, hasSemantics(
-        new TestSemantics.root(children: <TestSemantics>[expected]),
+        new TestSemantics.root(children: <TestSemantics>[
+          new TestSemantics(
+            children: <TestSemantics>[expected],
+          ),
+        ]),
         ignoreId: true,
         ignoreTransform: true,
         ignoreRect: true,

@@ -41,7 +41,7 @@ export 'dart:io'
         exitCode,
         // File              NO! Use `file_system.dart`
         // FileSystemEntity  NO! Use `file_system.dart`
-        GZIP,
+        GZIP, // ignore: deprecated_member_use
         HandshakeException,
         HttpClient,
         HttpClientRequest,
@@ -71,7 +71,7 @@ export 'dart:io'
         // stdout,           NO! Use `io.dart`
         Socket,
         SocketException,
-        SYSTEM_ENCODING,
+        SYSTEM_ENCODING, // ignore: deprecated_member_use
         WebSocket,
         WebSocketException,
         WebSocketTransformer;
@@ -116,11 +116,11 @@ class ProcessSignal implements io.ProcessSignal {
   @visibleForTesting
   const ProcessSignal(this._delegate);
 
-  static const ProcessSignal SIGWINCH = const _PosixProcessSignal._(io.ProcessSignal.SIGWINCH);
-  static const ProcessSignal SIGTERM = const _PosixProcessSignal._(io.ProcessSignal.SIGTERM);
-  static const ProcessSignal SIGUSR1 = const _PosixProcessSignal._(io.ProcessSignal.SIGUSR1);
-  static const ProcessSignal SIGUSR2 = const _PosixProcessSignal._(io.ProcessSignal.SIGUSR2);
-  static const ProcessSignal SIGINT =  const ProcessSignal(io.ProcessSignal.SIGINT);
+  static const ProcessSignal SIGWINCH = const _PosixProcessSignal._(io.ProcessSignal.SIGWINCH); // ignore: deprecated_member_use
+  static const ProcessSignal SIGTERM = const _PosixProcessSignal._(io.ProcessSignal.SIGTERM); // ignore: deprecated_member_use
+  static const ProcessSignal SIGUSR1 = const _PosixProcessSignal._(io.ProcessSignal.SIGUSR1); // ignore: deprecated_member_use
+  static const ProcessSignal SIGUSR2 = const _PosixProcessSignal._(io.ProcessSignal.SIGUSR2); // ignore: deprecated_member_use
+  static const ProcessSignal SIGINT =  const ProcessSignal(io.ProcessSignal.SIGINT); // ignore: deprecated_member_use
 
   final io.ProcessSignal _delegate;
 

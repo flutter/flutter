@@ -794,11 +794,39 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
     }
   }
 
-  /// The clip rect from an ancestor that was applied to this node.
+  /// The semantic clip from an ancestor that was applied to this node.
   ///
   /// Expressed in the coordinate system of the node. May be null if no clip has
   /// been applied.
-  Rect parentClipRect;
+  ///
+  /// Descendant [SemanticsNode]s that are positioned outside of this rect will
+  /// be excluded from the semantics tree. Descendant [SemanticsNode]s that are
+  /// overlapping with this rect, but are outside of [parentPaintClipRect] will
+  /// be included in the tree, but they will be marked as hidden because they
+  /// are assumed to be not visible on screen.
+  ///
+  /// If this rect is null, all descendant [SemanticsNode]s outside of
+  /// [parentPaintClipRect] will be excluded from the tree.
+  ///
+  /// If this rect is non-null it has to completely enclose
+  /// [parentPaintClipRect]. If [parentPaintClipRect] is null this property is
+  /// also null.
+  Rect parentSemanticsClipRect;
+
+  /// The paint clip from an ancestor that was applied to this node.
+  ///
+  /// Expressed in the coordinate system of the node. May be null if no clip has
+  /// been applied.
+  ///
+  /// Descendant [SemanticsNode]s that are positioned outside of this rect will
+  /// either be excluded from the semantics tree (if they have no overlap with
+  /// [parentSemanticsClipRect]) or they will be included and marked as hidden
+  /// (if they are overlapping with [parentSemanticsClipRect]).
+  ///
+  /// This rect is completely enclosed by [parentSemanticsClipRect].
+  ///
+  /// If this rect is null [parentSemanticsClipRect] also has to be null.
+  Rect parentPaintClipRect;
 
   /// Whether the node is invisible.
   ///

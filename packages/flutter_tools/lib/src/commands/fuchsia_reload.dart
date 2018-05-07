@@ -27,7 +27,7 @@ import '../vmservice.dart';
 // $ flutter fuchsia_reload -f ~/fuchsia -a 192.168.1.39 \
 //       -g //lib/flutter/examples/flutter_gallery:flutter_gallery
 
-final String ipv4Loopback = InternetAddress.LOOPBACK_IP_V4.address;
+final String ipv4Loopback = InternetAddress.LOOPBACK_IP_V4.address; // ignore: deprecated_member_use
 
 class FuchsiaReloadCommand extends FlutterCommand {
   FuchsiaReloadCommand() {

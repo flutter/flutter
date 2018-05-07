@@ -460,7 +460,7 @@ Future<int> findAvailablePort() async {
   while (true) {
     try {
       final ServerSocket socket =
-          await ServerSocket.bind(InternetAddress.LOOPBACK_IP_V4, port);
+          await ServerSocket.bind(InternetAddress.LOOPBACK_IP_V4, port); // ignore: deprecated_member_use
       await socket.close();
       return port;
     } catch (_) {

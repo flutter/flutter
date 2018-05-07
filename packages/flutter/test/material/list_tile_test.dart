@@ -46,7 +46,7 @@ class TestTextState extends State<TestText> {
 
 void main() {
   testWidgets('ListTile geometry (LTR)', (WidgetTester tester) async {
-    // See https://material.io/guidelines/components/lists.html
+    // See https://material.io/go/design-lists
 
     final Key leadingKey = new GlobalKey();
     final Key trailingKey = new GlobalKey();

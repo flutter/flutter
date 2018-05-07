@@ -126,6 +126,7 @@ Future<Map<String, double>> _readJsonResults(Process process) {
     if (line.contains(jsonEnd)) {
       jsonStarted = false;
       processWasKilledIntentionally = true;
+      // ignore: deprecated_member_use
       process.kill(ProcessSignal.SIGINT); // flutter run doesn't quit automatically
       final String jsonOutput = jsonBuf.toString();
       try {

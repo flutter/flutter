@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:flutter_gallery/gallery/app.dart';
+import 'package:flutter_gallery/gallery/app.dart' show GalleryApp;
 
 Future<String> mockUpdateUrlFetcher() {
   // A real implementation would connect to the network to retrieve this value
@@ -26,8 +26,8 @@ void main() {
     await tester.tap(find.text('NO THANKS'));
     await tester.pump();
 
-    await tester.tap(find.text('Shrine'));
-    await tester.pump(); // Launch shrine
+    await tester.tap(find.text('Studies'));
+    await tester.pump(); // Launch
     await tester.pump(const Duration(seconds: 1)); // transition is complete
 
     final Finder backButton = find.byTooltip('Back');

@@ -180,7 +180,7 @@ abstract class MaterialLocalizations {
   /// obtained from [Theme.of] no longer inherits text style properties and
   /// contains a complete set of properties needed to style a [Text] widget.
   ///
-  /// See also: https://material.io/guidelines/style/typography.html
+  /// See also: https://material.io/go/design-typography
   TextTheme get localTextGeometry;
 
   /// Formats [number] as a decimal, inserting locale-appropriate thousands

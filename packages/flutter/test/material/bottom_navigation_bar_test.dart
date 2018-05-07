@@ -4,7 +4,6 @@
 
 import 'dart:ui';
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -519,22 +518,27 @@ void main() {
           children: <TestSemantics>[
             new TestSemantics(
               id: 2,
-              flags: <SemanticsFlag>[SemanticsFlag.isSelected],
-              actions: <SemanticsAction>[SemanticsAction.tap],
-              label: 'AC\nTab 1 of 3',
-              textDirection: TextDirection.ltr,
-            ),
-            new TestSemantics(
-              id: 3,
-              actions: <SemanticsAction>[SemanticsAction.tap],
-              label: 'Alarm\nTab 2 of 3',
-              textDirection: TextDirection.ltr,
-            ),
-            new TestSemantics(
-              id: 4,
-              actions: <SemanticsAction>[SemanticsAction.tap],
-              label: 'Hot Tub\nTab 3 of 3',
-              textDirection: TextDirection.ltr,
+              children: <TestSemantics>[
+                new TestSemantics(
+                  id: 3,
+                  flags: <SemanticsFlag>[SemanticsFlag.isSelected],
+                  actions: <SemanticsAction>[SemanticsAction.tap],
+                  label: 'AC\nTab 1 of 3',
+                  textDirection: TextDirection.ltr,
+                ),
+                new TestSemantics(
+                  id: 4,
+                  actions: <SemanticsAction>[SemanticsAction.tap],
+                  label: 'Alarm\nTab 2 of 3',
+                  textDirection: TextDirection.ltr,
+                ),
+                new TestSemantics(
+                  id: 5,
+                  actions: <SemanticsAction>[SemanticsAction.tap],
+                  label: 'Hot Tub\nTab 3 of 3',
+                  textDirection: TextDirection.ltr,
+                ),
+              ],
             ),
           ],
         ),

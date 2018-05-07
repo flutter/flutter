@@ -4,7 +4,6 @@
 
 import 'dart:math' as math;
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 
 import 'basic.dart';
@@ -31,6 +30,150 @@ import 'scrollable.dart';
 /// width of the screen, consider [ListView], which is vastly more efficient
 /// that a [SingleChildScrollView] containing a [ListBody] or [Column] with
 /// many children.
+///
+/// ## Sample code: Using [SingleChildScrollView] with a [Column]
+///
+/// Sometimes a layout is designed around the flexible properties of a
+/// [Column], but there is the concern that in some cases, there might not
+/// be enough room to see the entire contents. This could be because some
+/// devices have unusually small screens, or because the application can
+/// be used in landscape mode where the aspect ratio isn't what was
+/// originally envisioned, or because the application is being shown in a
+/// small window in split-screen mode. In any case, as a result, it might
+/// make sense to wrap the layout in a [SingleChildScrollView].
+///
+/// Simply doing so, however, usually results in a conflict between the [Column],
+/// which typically tries to grow as big as it can, and the [SingleChildScrollView],
+/// which provides its children with an infinite amount of space.
+///
+/// To resolve this apparent conflict, there are a couple of techniques, as
+/// discussed below. These techniques should only be used when the content is
+/// normally expected to fit on the screen, so that the lazy instantiation of
+/// a sliver-based [ListView] or [CustomScrollView] is not expected to provide
+/// any performance benefit. If the viewport is expected to usually contain
+/// content beyond the dimensions of the screen, then [SingleChildScrollView]
+/// would be very expensive.
+///
+/// ### Centering, spacing, or aligning fixed-height content
+///
+/// If the content has fixed (or intrinsic) dimensions but needs to be spaced out,
+/// centered, or otherwise positioned using the [Flex] layout model of a [Column],
+/// the following technique can be used to provide the [Column] with a minimum
+/// dimension while allowing it to shrink-wrap the contents when there isn't enough
+/// room to apply these spacing or alignment needs.
+///
+/// A [LayoutBuilder] is used to obtain the size of the viewport (implicitly via
+/// the constraints that the [SingleChildScrollView] sees, since viewports
+/// typically grow to fit their maximum height constraint). Then, inside the
+/// scroll view, a [ConstrainedBox] is used to set the minimum height of the
+/// [Column].
+///
+/// The [Column] has no [Expanded] children, so rather than take on the infinite
+/// height from its [BoxConstraints.maxHeight], (the viewport provides no maximum height
+/// constraint), it automatically tries to shrink to fit its children. It cannot
+/// be smaller than its [BoxConstraints.minHeight], though, and It therefore
+/// becomes the bigger of the minimum height provided by the
+/// [ConstrainedBox] and the sum of the heights of the children.
+///
+/// If the children aren't enough to fit that minimum size, the [Column] ends up
+/// with some remaining space to allocate as specified by its
+/// [Column.mainAxisAlignment] argument.
+///
+/// In this example, the children are spaced out equally, unless there's no
+/// more room, in which case they stack vertically and scroll.
+///
+/// ```dart
+/// new LayoutBuilder(
+///   builder: (BuildContext context, BoxConstraints viewportConstraints) {
+///     return SingleChildScrollView(
+///       child: new ConstrainedBox(
+///         constraints: new BoxConstraints(
+///           minHeight: viewportConstraints.maxHeight,
+///         ),
+///         child: new Column(
+///           mainAxisSize: MainAxisSize.min,
+///           mainAxisAlignment: MainAxisAlignment.spaceAround,
+///           children: <Widget>[
+///             new Container(
+///               // A fixed-height child.
+///               color: Colors.yellow,
+///               height: 120.0,
+///             ),
+///             new Container(
+///               // Another fixed-height child.
+///               color: Colors.green,
+///               height: 120.0,
+///             ),
+///           ],
+///         ),
+///       ),
+///     );
+///   },
+/// )
+/// ```
+///
+/// When using this technique, [Expanded] and [Flexible] are not useful, because
+/// in both cases the "available space" is infinite (since this is in a viewport).
+/// The next section describes a technique for providing a maximum height constraint.
+///
+/// ### Expanding content to fit the viewport
+///
+/// The following example builds on the previous one. In addition to providing a
+/// minimum dimension for the child [Column], an [IntrinsicHeight] widget is used
+/// to force the column to be exactly as big as its contents. This constraint
+/// combines with the [ConstrainedBox] constraints discussed previously to ensure
+/// that the column becomes either as big as viewport, or as big as the contents,
+/// whichever is biggest.
+///
+/// Both constraints must be used to get the desired effect. If only the
+/// [IntrinsicHeight] was specified, then the column would not grow to fit the
+/// entire viewport when its children were smaller than the whole screen. If only
+/// the size of the viewport was used, then the [Column] would overflow if the
+/// children were bigger than the viewport.
+///
+/// The widget that is to grow to fit the remaining space so provided is wrapped
+/// in an [Expanded] widget.
+///
+/// ```dart
+/// new LayoutBuilder(
+///   builder: (BuildContext context, BoxConstraints viewportConstraints) {
+///     return SingleChildScrollView(
+///       child: new ConstrainedBox(
+///         constraints: new BoxConstraints(
+///           minHeight: viewportConstraints.maxHeight,
+///         ),
+///         child: new IntrinsicHeight(
+///           child: new Column(
+///             children: <Widget>[
+///               new Container(
+///                 // A fixed-height child.
+///                 color: Colors.yellow,
+///                 height: 120.0,
+///               ),
+///               new Expanded(
+///                 // A flexible child that will grow to fit the viewport but
+///                 // still be at least as big as necessary to fit its contents.
+///                 child: new Container(
+///                   color: Colors.blue,
+///                   height: 120.0,
+///                 ),
+///               ),
+///             ],
+///           ),
+///         ),
+///       ),
+///     );
+///   },
+/// )
+/// ```
+///
+/// This technique is quite expensive, as it more or less requires that the contents
+/// of the viewport be laid out twice (once to find their intrinsic dimensions, and
+/// once to actually lay them out). The number of widgets within the column should
+/// therefore be kept small. Alternatively, subsets of the children that have known
+/// dimensions can be wrapped in a [SizedBox] that has tight vertical constraints,
+/// so that the intrinsic sizing algorithm can short-circuit the computation when it
+/// reaches those parts of the subtree.
 ///
 /// See also:
 ///
@@ -180,11 +323,14 @@ class _RenderSingleChildViewport extends RenderBox with RenderObjectWithChildMix
   _RenderSingleChildViewport({
     AxisDirection axisDirection: AxisDirection.down,
     @required ViewportOffset offset,
+    double cacheExtent: RenderAbstractViewport.defaultCacheExtent,
     RenderBox child,
   }) : assert(axisDirection != null),
        assert(offset != null),
+       assert(cacheExtent != null),
        _axisDirection = axisDirection,
-       _offset = offset {
+       _offset = offset,
+       _cacheExtent = cacheExtent {
     this.child = child;
   }
 
@@ -211,6 +357,17 @@ class _RenderSingleChildViewport extends RenderBox with RenderObjectWithChildMix
     _offset = value;
     if (attached)
       _offset.addListener(_hasScrolled);
+    markNeedsLayout();
+  }
+
+  /// {@macro flutter.rendering.viewport.cacheExtent}
+  double get cacheExtent => _cacheExtent;
+  double _cacheExtent;
+  set cacheExtent(double value) {
+    assert(value != null);
+    if (value == _cacheExtent)
+      return;
+    _cacheExtent = value;
     markNeedsLayout();
   }
 
@@ -444,5 +601,27 @@ class _RenderSingleChildViewport extends RenderBox with RenderObjectWithChildMix
 
     // Make sure the viewport itself is on screen.
     super.showOnScreen();
+  }
+
+  @override
+  Rect describeSemanticsClip(RenderObject child) {
+    assert(axis != null);
+    switch (axis) {
+      case Axis.vertical:
+        return new Rect.fromLTRB(
+          semanticBounds.left,
+          semanticBounds.top - cacheExtent,
+          semanticBounds.right,
+          semanticBounds.bottom + cacheExtent,
+        );
+      case Axis.horizontal:
+        return new Rect.fromLTRB(
+          semanticBounds.left - cacheExtent,
+          semanticBounds.top,
+          semanticBounds.right + cacheExtent,
+          semanticBounds.bottom,
+        );
+    }
+    return null;
   }
 }

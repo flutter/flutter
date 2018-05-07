@@ -5,7 +5,6 @@
 import 'dart:async';
 import 'dart:math' as math;
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/physics.dart';
 import 'package:flutter/rendering.dart';
 
@@ -565,6 +564,7 @@ class _PageViewState extends State<PageView> {
         physics: physics,
         viewportBuilder: (BuildContext context, ViewportOffset position) {
           return new Viewport(
+            cacheExtent: 0.0,
             axisDirection: axisDirection,
             offset: position,
             slivers: <Widget>[

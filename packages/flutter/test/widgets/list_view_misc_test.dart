@@ -150,7 +150,7 @@ void main() {
       ),
     );
 
-    final SliverMultiBoxAdaptorElement element = tester.element(find.byType(SliverList));
+    final SliverMultiBoxAdaptorElement element = tester.element(find.byType(SliverList, skipOffstage: false));
 
     final double maxScrollOffset = element.estimateMaxScrollOffset(
       null,
