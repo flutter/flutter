@@ -178,6 +178,9 @@ class _ListDemoState extends State<ListDemo> {
         items.insert(newIndex, item);
       });
     }
+    if (index >= items.length) {
+      return new _DraggableListItem<int>(index: index, child: null, onSwap: onSwap, isDraggable: false);
+    }
     final String item = items[index];
     Widget secondary;
     if (_itemType == _MaterialListType.twoLine) {
@@ -190,7 +193,7 @@ class _ListDemoState extends State<ListDemo> {
     final Widget listTile = new ListTile(
       isThreeLine: _itemType == _MaterialListType.threeLine,
       dense: _dense,
-      leading: _showAvatars ? new ExcludeSemantics(child: new CircleAvatar(child: new FlatButton(child: new Text(item), onPressed: () => Scaffold.of(context).showSnackBar(const SnackBar(content: const Text('pushed'),)),))) : null,
+      leading: _showAvatars ? new ExcludeSemantics(child: new CircleAvatar(child: new Text(item))) : null,
       title: new Text('This item represents $item.'),
       subtitle: secondary,
       trailing: _showIcons ? new Icon(Icons.info, color: Theme.of(context).disabledColor) : null,
@@ -245,9 +248,10 @@ class _ListDemoState extends State<ListDemo> {
       ),
       body: new Scrollbar(
         child: new AnimatedList(
-          itemBuilder: (BuildContext context, int index, Animation<double> animation) => 
-              new SizeTransition(sizeFactor: animation, child: buildListTile(context, index)),
-          initialItemCount: 10,
+          itemBuilder: (BuildContext context, int index, Animation<double> animation) {
+            return new SizeTransition(sizeFactor: animation, child: buildListTile(context, index));
+          },
+          initialItemCount: items.length + 1,
           padding: new EdgeInsets.symmetric(vertical: _dense ? 4.0 : 8.0),
         ),
       ),
@@ -256,11 +260,12 @@ class _ListDemoState extends State<ListDemo> {
 }
 
 class _DraggableListItem<T> extends StatefulWidget {
-  const _DraggableListItem({Key key, @required this.child, @required this.index, @required this.onSwap}) : super(key: key);
+  const _DraggableListItem({Key key, @required this.child, @required this.index, @required this.onSwap, this.isDraggable: true}) : super(key: key);
 
   final Widget child;
   final int index;
   final void Function(int, int) onSwap;
+  final bool isDraggable;
 
   @override
   State<_DraggableListItem<T>> createState() => new _DraggableListItemState<T>();
@@ -289,26 +294,24 @@ class _DraggableListItemState<T> extends State<_DraggableListItem<T>> with Ticke
   }
 
   Widget _buildEmptyTile(BuildContext context) {
-    return new ListTile(isThreeLine: (widget.child as ListTile)?.isThreeLine, subtitle: const SizedBox(),);
+    return new ListTile(isThreeLine: (widget?.child as ListTile)?.isThreeLine ?? false, subtitle: const SizedBox(),);
   }
 
   Widget _buildDragTarget(BuildContext context, List<int> acceptedCandidates, List<dynamic> rejectedCandidates) {
-    return new Column(children: <Widget>[
-      new SizeTransition(
-        sizeFactor: _targetAnimation.view,
-        child: _buildEmptyTile(context),
-      ),
-      new ListDraggable<int>(
+    final Widget child = widget.child ?? _buildEmptyTile(context);
+    Widget draggableWidget;
+    if (widget.isDraggable) {
+      draggableWidget = new ListDraggable<int>(
         data: widget.index,
         axis: Axis.vertical,
         feedback: new Material(
           elevation: 6.0,
           child: new SizedBox(
             width: MediaQuery.of(context).size.width,
-            child: widget.child,
+            child: child,
           ),
         ),
-        child: widget.child,
+        child: child,
         childWhenDragging: new SizeTransition(
           sizeFactor: _tileAnimation.view,
           child: _buildEmptyTile(context),
@@ -320,7 +323,17 @@ class _DraggableListItemState<T> extends State<_DraggableListItem<T>> with Ticke
           _targetAnimation.reverse();
           _tileAnimation.forward(from: 0.0);
         },
+      );
+    } else {
+      draggableWidget = child;
+    }
+      
+    return new Column(children: <Widget>[
+      new SizeTransition(
+        sizeFactor: _targetAnimation.view,
+        child: _buildEmptyTile(context),
       ),
+      draggableWidget,
     ]);
   }
 
@@ -414,7 +427,7 @@ class ListDraggable<T> extends LongPressDraggable<T> {
         );
         return result;
       };
-  } 
+  }
 }
 
 // Wraps a [Drag], but restricting its motion delta to only one axis.
