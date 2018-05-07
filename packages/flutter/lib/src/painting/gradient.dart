@@ -37,8 +37,8 @@ _ColorsAndStops _interpolateColorsAndStops(List<Color> aColors, List<double> aSt
 
 /// A 2D gradient.
 ///
-/// This is an interface that allows [LinearGradient] and [RadialGradient]
-/// classes to be used interchangeably in [BoxDecoration]s.
+/// This is an interface that allows [LinearGradient], [RadialGradient], and
+/// [SweepGradient] classes to be used interchangeably in [BoxDecoration]s.
 ///
 /// See also:
 ///
@@ -258,6 +258,8 @@ abstract class Gradient {
 ///
 ///  * [RadialGradient], which displays a gradient in concentric circles, and
 ///    has an example which shows a different way to use [Gradient] objects.
+///  * [SweepGradient], which displays a gradient in a sweeping arc around a
+///    center point.
 ///  * [BoxDecoration], which can take a [LinearGradient] in its
 ///    [BoxDecoration.gradient] property.
 class LinearGradient extends Gradient {
@@ -483,6 +485,8 @@ class LinearGradient extends Gradient {
 ///
 ///  * [LinearGradient], which displays a gradient in parallel lines, and has an
 ///    example which shows a different way to use [Gradient] objects.
+///  * [SweepGradient], which displays a gradient in a sweeping arc around a
+///    center point.
 ///  * [BoxDecoration], which can take a [RadialGradient] in its
 ///    [BoxDecoration.gradient] property.
 ///  * [CustomPainter], which shows how to use the above sample code in a custom
@@ -658,11 +662,9 @@ class RadialGradient extends Gradient {
 /// out the arguments to the [new ui.Gradient.sweep] constructor from the
 /// `dart:ui` library.
 ///
-/// A gradient has two anchor points, [begin] and [end]. The [begin] point
-/// corresponds to 0.0, and the [end] point corresponds to 1.0. These points are
-/// expressed in fractions, so that the same gradient can be reused with varying
-/// sized boxes without changing the parameters. (This contrasts with [new
-/// ui.Gradient.linear], whose arguments are expressed in logical pixels.)
+/// A gradient has a [center], a [startAngle], and an [endAngle]. The [startAngle]
+/// corresponds to 0.0, and the [endAngle] corresponds to 1.0. These angles are
+/// expressed in radians.
 ///
 /// The [colors] are described by a list of [Color] objects. There must be at
 /// least two colors. The [stops] list, if specified, must have the same length
@@ -678,27 +680,35 @@ class RadialGradient extends Gradient {
 ///
 /// ## Sample code
 ///
-/// This sample draws a picture that looks like vertical window shades by having
-/// a [Container] display a [BoxDecoration] with a [LinearGradient].
+/// This sample draws a different color in each quadrant.
 ///
 /// ```dart
 /// new Container(
 ///   decoration: new BoxDecoration(
-///     gradient: new LinearGradient(
-///       begin: Alignment.topLeft,
-///       end: new Alignment(0.8, 0.0), // 10% of the width, so there are ten blinds.
-///       colors: [const Color(0xFFFFFFEE), const Color(0xFF999999)], // whitish to gray
-///       tileMode: TileMode.repeated, // repeats the gradient over the canvas
-///     ),
+///     gradient: new SweepGradient(
+///       center: FractionalOffset.center,
+///       startAngle: 0.0,
+///       endAngle: math.pi * 2,
+///       colors: const <Color>[
+///         const Color(0xFF4285F4), // blue
+///         const Color(0xFF34A853), // green
+///         const Color(0xFFFBBC05), // yellow
+///         const Color(0xFFEA4335), // red
+///         const Color(0xFF4285F4), // blue again to seamlessly transition to the start
+///       ],
+///       stops: const <double>[0.0, 0.25, 0.5, 0.75, 1.0],
+///      ),
 ///   ),
-/// )
+///  );
 /// ```
 ///
 /// See also:
 ///
+///  * [LinearGradient], which displays a gradient in parallel lines, and has an
+///    example which shows a different way to use [Gradient] objects.
 ///  * [RadialGradient], which displays a gradient in concentric circles, and
 ///    has an example which shows a different way to use [Gradient] objects.
-///  * [BoxDecoration], which can take a [LinearGradient] in its
+///  * [BoxDecoration], which can take a [SweepGradient] in its
 ///    [BoxDecoration.gradient] property.
 class SweepGradient extends Gradient {
   /// Creates a sweep gradient.
@@ -713,15 +723,15 @@ class SweepGradient extends Gradient {
     List<double> stops,
     this.tileMode: TileMode.clamp,
   }) : assert(center != null),
-       assert(tileMode != null),
        assert(startAngle != null),
        assert(endAngle != null),
+       assert(tileMode != null),
        super(colors: colors, stops: stops);
 
   /// The center of the gradient, as an offset into the (-1.0, -1.0) x (1.0, 1.0)
   /// square describing the gradient which will be mapped onto the paint box.
   ///
-  /// For example, an alignment of (0.0, 0.0) will place the radial
+  /// For example, an alignment of (0.0, 0.0) will place the sweep
   /// gradient in the center of the box.
   ///
   /// If this is a [Alignment], then it is expressed as a vector from
@@ -741,7 +751,7 @@ class SweepGradient extends Gradient {
 
   /// The angle in radians at which stop 1.0 of the gradient is placed.
   ///
-  /// Defaults to 0.0.
+  /// Defaults to math.pi * 2.
   final double endAngle;
 
   /// How this gradient should tile the plane beyond in the region before
@@ -749,9 +759,9 @@ class SweepGradient extends Gradient {
   ///
   /// For details, see [TileMode].
   ///
-  /// ![](https://flutter.github.io/assets-for-api-docs/dart-ui/tile_mode_clamp_linear.png)
-  /// ![](https://flutter.github.io/assets-for-api-docs/dart-ui/tile_mode_mirror_linear.png)
-  /// ![](https://flutter.github.io/assets-for-api-docs/dart-ui/tile_mode_repeated_linear.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/dart-ui/tile_mode_clamp_sweep.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/dart-ui/tile_mode_mirror_sweep.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/dart-ui/tile_mode_repeated_sweep.png)
   final TileMode tileMode;
 
   @override
@@ -764,7 +774,7 @@ class SweepGradient extends Gradient {
     );
   }
 
-  /// Returns a new [LinearGradient] with its properties (in particular the
+  /// Returns a new [SweepGradient] with its properties (in particular the
   /// colors) scaled by the given factor.
   ///
   /// If the factor is 0.0 or less, then the gradient is fully transparent.
