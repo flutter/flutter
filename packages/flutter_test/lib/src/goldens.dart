@@ -6,6 +6,7 @@ import 'dart:async';
 import 'dart:io';
 import 'dart:typed_data';
 
+import 'package:flutter/foundation.dart';
 import 'package:path/path.dart' as path;
 import 'package:test/test.dart' show TestFailure;
 
@@ -107,7 +108,7 @@ class _UninitializedComparator implements GoldenFileComparator {
 
   @override
   Future<bool> compare(Uint8List imageBytes, Uri golden) {
-    print('Golden file comparison requested for "$golden"; skipping...');
+    debugPrint('Golden file comparison requested for "$golden"; skipping...');
     return new Future<bool>.value(true);
   }
 
