@@ -55,7 +55,7 @@ class EmulatorsCommand extends FlutterCommand {
       printStatus("More than one emulator matches '$id':\n");
       Emulator.printEmulators(emulators);
     } else {
-      emulators.first.launch();
+      await emulators.first.launch();
     }
   }
 
