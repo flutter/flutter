@@ -193,6 +193,7 @@ tasks:
       Runs end-to-end Flutter tests on Android.
     stage: devicelab
     required_agent_capabilities: ["mac/android"]
+    flaky: true
 
   commands_test:
     description: >
