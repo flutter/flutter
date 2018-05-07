@@ -94,7 +94,7 @@ class DriveCommand extends RunCommandBase {
     if (device == null)
       throwToolExit(null);
 
-    if (await fs.type(testFile) != FileSystemEntityType.FILE)
+    if (await fs.type(testFile) != FileSystemEntityType.FILE) // ignore: deprecated_member_use
       throwToolExit('Test file not found: $testFile');
 
     String observatoryUri;
@@ -225,7 +225,7 @@ void restoreAppStarter() {
 
 Future<LaunchResult> _startApp(DriveCommand command) async {
   final String mainPath = findMainDartFile(command.targetFile);
-  if (await fs.type(mainPath) != FileSystemEntityType.FILE) {
+  if (await fs.type(mainPath) != FileSystemEntityType.FILE) { // ignore: deprecated_member_use
     printError('Tried to run $mainPath, but that file does not exist.');
     return null;
   }

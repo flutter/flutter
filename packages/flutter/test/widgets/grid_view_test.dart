@@ -168,8 +168,16 @@ void main() {
       0, 1, 2, // col 0
       3, 4, 5, // col 1
       6, 7, 8, // col 2
+      9, 10, 11, // col 3 (in cached area)
     ]));
     log.clear();
+
+    for (int i = 0; i < 9; i++) {
+      expect(find.text('$i'), findsOneWidget);
+    }
+    for (int i = 9; i < 80; i++) {
+      expect(find.text('$i'), findsNothing);
+    }
 
     final ScrollableState state = tester.state(find.byType(Scrollable));
     final ScrollPosition position = state.position;
@@ -179,12 +187,24 @@ void main() {
     await tester.pump();
 
     expect(log, equals(<int>[
+      30, 31, 32, // col 10 (in cached area)
       33, 34, 35, // col 11
       36, 37, 38, // col 12
       39, 40, 41, // col 13
       42, 43, 44, // col 14
+      45, 46, 47, // col 15 (in cached area)
     ]));
     log.clear();
+
+    for (int i = 0; i < 33; i++) {
+      expect(find.text('$i'), findsNothing);
+    }
+    for (int i = 33; i < 45; i++) {
+      expect(find.text('$i'), findsOneWidget);
+    }
+    for (int i = 45; i < 80; i++) {
+      expect(find.text('$i'), findsNothing);
+    }
 
     position.jumpTo(975.0);
 
@@ -192,12 +212,24 @@ void main() {
     await tester.pump();
 
     expect(log, equals(<int>[
+      6, 7, 8, // col2 (in cached area)
       9, 10, 11, // col 3
       12, 13, 14, // col 4
       15, 16, 17, // col 5
       18, 19, 20, // col 6
+      21, 22, 23, // col 7 (in cached area)
     ]));
     log.clear();
+
+    for (int i = 0; i < 9; i++) {
+      expect(find.text('$i'), findsNothing);
+    }
+    for (int i = 9; i < 21; i++) {
+      expect(find.text('$i'), findsOneWidget);
+    }
+    for (int i = 21; i < 80; i++) {
+      expect(find.text('$i'), findsNothing);
+    }
   });
 
   testWidgets('GridView - change crossAxisCount', (WidgetTester tester) async {
@@ -230,7 +262,15 @@ void main() {
       0, 1, 2, 3, // row 0
       4, 5, 6, 7, // row 1
       8, 9, 10, 11, // row 2
+      12, 13, 14, 15, // row 3 (in cached area)
+      16, 17, 18, 19, // row 4 (in cached area)
     ]));
+    for (int i = 0; i < 12; i++) {
+      expect(find.text('$i'), findsOneWidget);
+    }
+    for (int i = 12; i < 40; i++) {
+      expect(find.text('$i'), findsNothing);
+    }
     log.clear();
 
     await tester.pumpWidget(
@@ -258,6 +298,8 @@ void main() {
       0, 1, 2, 3, // row 0
       4, 5, 6, 7, // row 1
       8, 9, 10, 11, // row 2
+      12, 13, 14, 15, // row 3 (in cached area)
+      16, 17, 18, 19, // row 4 (in cached area)
     ]));
     log.clear();
 
@@ -295,7 +337,15 @@ void main() {
       0, 1, 2, 3, // row 0
       4, 5, 6, 7, // row 1
       8, 9, 10, 11, // row 2
+      12, 13, 14, 15, // row 3 (in cached area)
+      16, 17, 18, 19, // row 4 (in cached area)
     ]));
+    for (int i = 0; i < 12; i++) {
+      expect(find.text('$i'), findsOneWidget);
+    }
+    for (int i = 12; i < 40; i++) {
+      expect(find.text('$i'), findsNothing);
+    }
     log.clear();
 
     await tester.pumpWidget(
@@ -323,6 +373,8 @@ void main() {
       0, 1, 2, 3, // row 0
       4, 5, 6, 7, // row 1
       8, 9, 10, 11, // row 2
+      12, 13, 14, 15, // row 3 (in cached area)
+      16, 17, 18, 19, // row 4 (in cached area)
     ]));
     log.clear();
 
@@ -346,6 +398,7 @@ void main() {
           child: new SizedBox(
             height: 200.0,
             child: new GridView.count(
+              cacheExtent: 0.0,
               crossAxisCount: 2,
               children: <Widget>[ container, container, container, container ],
             ),
@@ -379,7 +432,7 @@ void main() {
       ),
     );
 
-    expect(find.text('0'), findsOneWidget);
+    expect(find.text('0'), findsNothing);
     expect(find.text('1'), findsNothing);
   });
 

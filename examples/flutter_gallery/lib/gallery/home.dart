@@ -122,7 +122,6 @@ class _CategoriesPage extends StatelessWidget {
           // LayoutBuilder.
           return new RepaintBoundary(
             child: new Column(
-              mainAxisAlignment: MainAxisAlignment.center,
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: new List<Widget>.generate(rowCount, (int rowIndex) {
@@ -289,10 +288,20 @@ class _GalleryHomeState extends State<GalleryHome> with SingleTickerProviderStat
     super.dispose();
   }
 
+  static Widget _animatedSwitcherLayoutBuilder(List<Widget> children) {
+    return new Stack(
+      children: children,
+      alignment: Alignment.topLeft,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
     final bool isDark = theme.brightness == Brightness.dark;
+
+    const Curve switchOutCurve = const Interval(0.4, 1.0, curve: Curves.fastOutSlowIn);
+    const Curve switchInCurve = const Interval(0.4, 1.0, curve: Curves.fastOutSlowIn);
 
     Widget home = new Scaffold(
       key: _scaffoldKey,
@@ -313,6 +322,9 @@ class _GalleryHomeState extends State<GalleryHome> with SingleTickerProviderStat
             backLayer: widget.optionsPage,
             frontAction: new AnimatedSwitcher(
               duration: _kFrontLayerSwitchDuration,
+              switchOutCurve: switchOutCurve,
+              switchInCurve: switchInCurve,
+              layoutBuilder: _animatedSwitcherLayoutBuilder,
               child: _category == null
                 ? const _FlutterLogo()
                 : new IconButton(
@@ -330,6 +342,9 @@ class _GalleryHomeState extends State<GalleryHome> with SingleTickerProviderStat
             frontHeading: new Container(height: 24.0),
             frontLayer: new AnimatedSwitcher(
               duration: _kFrontLayerSwitchDuration,
+              switchOutCurve: switchOutCurve,
+              switchInCurve: switchInCurve,
+              layoutBuilder: _animatedSwitcherLayoutBuilder,
               child: _category != null
                 ? new _DemosPage(_category)
                 : new _CategoriesPage(

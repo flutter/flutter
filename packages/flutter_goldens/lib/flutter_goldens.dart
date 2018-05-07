@@ -35,15 +35,21 @@ Future<void> main(FutureOr<void> testMain()) async {
 /// the `$FLUTTER_ROOT/bin/cache/pkg/goldens` folder, then perform the comparison against
 /// the files therein.
 class FlutterGoldenFileComparator implements GoldenFileComparator {
+  /// Creates a [FlutterGoldenFileComparator] that will resolve golden file
+  /// URIs relative to the specified [basedir].
+  ///
+  /// The [fs] parameter exists for testing purposes only.
   @visibleForTesting
   FlutterGoldenFileComparator(
-    this.goldens,
     this.basedir, {
     this.fs: const LocalFileSystem(),
   });
 
-  final GoldensClient goldens;
+  /// The directory to which golden file URIs will be resolved in [compare] and [update].
   final Uri basedir;
+
+  /// The file system used to perform file access.
+  @visibleForTesting
   final FileSystem fs;
 
   /// Creates a new [FlutterGoldenFileComparator] that mirrors the relative
@@ -51,11 +57,24 @@ class FlutterGoldenFileComparator implements GoldenFileComparator {
   ///
   /// By the time the future completes, the clone of the `flutter/goldens`
   /// repository is guaranteed to be ready use.
-  static Future<FlutterGoldenFileComparator> fromDefaultComparator() async {
-    final LocalFileComparator defaultComparator = goldenFileComparator;
-    final GoldensClient goldens = new GoldensClient();
+  ///
+  /// The [goldens] and [defaultComparator] parameters are visible for testing
+  /// purposes only.
+  static Future<FlutterGoldenFileComparator> fromDefaultComparator({
+    GoldensClient goldens,
+    LocalFileComparator defaultComparator,
+  }) async {
+    defaultComparator ??= goldenFileComparator;
+
+    // Prepare the goldens repo.
+    goldens ??= new GoldensClient();
     await goldens.prepare();
-    return new FlutterGoldenFileComparator(goldens, defaultComparator.basedir);
+
+    // Calculate the appropriate basedir for the current test context.
+    final FileSystem fs = goldens.fs;
+    final Directory testDirectory = fs.directory(defaultComparator.basedir);
+    final String testDirectoryRelativePath = fs.path.relative(testDirectory.path, from: goldens.flutterRoot.path);
+    return new FlutterGoldenFileComparator(goldens.repositoryRoot.childDirectory(testDirectoryRelativePath).uri);
   }
 
   @override
@@ -77,10 +96,7 @@ class FlutterGoldenFileComparator implements GoldenFileComparator {
   }
 
   File _getGoldenFile(Uri uri) {
-    final File relativeFile = fs.file(uri);
-    final Directory testDirectory = fs.directory(basedir);
-    final String relativeBase = fs.path.relative(testDirectory.path, from: goldens.flutterRoot.path);
-    return goldens.repositoryRoot.childDirectory(relativeBase).childFile(relativeFile.path);
+    return fs.directory(basedir).childFile(fs.file(uri).path);
   }
 }
 
@@ -193,8 +209,8 @@ class GoldensClient {
   Future<void> _obtainLock() async {
     final File lockFile = flutterRoot.childFile(fs.path.join('bin', 'cache', 'goldens.lockfile'));
     await lockFile.create(recursive: true);
-    _lock = await lockFile.open(mode: io.FileMode.WRITE);
-    await _lock.lock(io.FileLock.BLOCKING_EXCLUSIVE);
+    _lock = await lockFile.open(mode: io.FileMode.WRITE); // ignore: deprecated_member_use
+    await _lock.lock(io.FileLock.BLOCKING_EXCLUSIVE); // ignore: deprecated_member_use
   }
 
   Future<void> _releaseLock() async {

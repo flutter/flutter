@@ -124,7 +124,7 @@ class MockFileSystem extends ForwardingFileSystem {
 
 class MockFile extends Mock implements File {
   @override
-  Future<RandomAccessFile> open({FileMode mode: FileMode.READ}) async {
+  Future<RandomAccessFile> open({FileMode mode: FileMode.READ}) async { // ignore: deprecated_member_use
     return new MockRandomAccessFile();
   }
 }

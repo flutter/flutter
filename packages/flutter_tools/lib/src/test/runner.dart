@@ -77,7 +77,7 @@ Future<int> runTests(
     throwToolExit('Cannot find Flutter shell at $shellPath');
 
   final InternetAddressType serverType =
-      ipv6 ? InternetAddressType.IP_V6 : InternetAddressType.IP_V4;
+      ipv6 ? InternetAddressType.IP_V6 : InternetAddressType.IP_V4; // ignore: deprecated_member_use
 
   loader.installHook(
     shellPath: shellPath,

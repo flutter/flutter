@@ -7,10 +7,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_driver/driver_extension.dart';
 
 void main() {
-  enableFlutterDriverExtension(handler: (String message) async {
-    // TODO(cbernaschina) remove when test flakiness is resolved
-    return 'driver';
-  });
+  enableFlutterDriverExtension();
   runApp(new DriverTestApp());
 }
 

@@ -379,6 +379,7 @@ void main() {
       expect(comparator.invocation, _ComparatorInvocation.update);
       expect(comparator.imageBytes, hasLength(greaterThan(0)));
       expect(comparator.golden, Uri.parse('foo.png'));
+      autoUpdateGoldenFiles = false;
     });
   });
 }

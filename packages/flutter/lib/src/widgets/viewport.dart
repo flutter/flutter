@@ -56,6 +56,7 @@ class Viewport extends MultiChildRenderObjectWidget {
     this.anchor: 0.0,
     @required this.offset,
     this.center,
+    this.cacheExtent,
     List<Widget> slivers: const <Widget>[],
   }) : assert(offset != null),
        assert(slivers != null),
@@ -108,6 +109,9 @@ class Viewport extends MultiChildRenderObjectWidget {
   /// The [center] must be the key of a child of the viewport.
   final Key center;
 
+  /// {@macro flutter.rendering.viewport.cacheExtent}
+  final double cacheExtent;
+
   /// Given a [BuildContext] and an [AxisDirection], determine the correct cross
   /// axis direction.
   ///
@@ -135,6 +139,7 @@ class Viewport extends MultiChildRenderObjectWidget {
       crossAxisDirection: crossAxisDirection ?? Viewport.getDefaultCrossAxisDirection(context, axisDirection),
       anchor: anchor,
       offset: offset,
+      cacheExtent: cacheExtent,
     );
   }
 
@@ -144,7 +149,8 @@ class Viewport extends MultiChildRenderObjectWidget {
       ..axisDirection = axisDirection
       ..crossAxisDirection = crossAxisDirection ?? Viewport.getDefaultCrossAxisDirection(context, axisDirection)
       ..anchor = anchor
-      ..offset = offset;
+      ..offset = offset
+      ..cacheExtent = cacheExtent;
   }
 
   @override
@@ -198,6 +204,14 @@ class _ViewportElement extends MultiChildRenderObjectElement {
     } else {
       renderObject.center = null;
     }
+  }
+
+  @override
+  void debugVisitOnstageChildren(ElementVisitor visitor) {
+    children.where((Element e) {
+      final RenderSliver renderSliver = e.renderObject;
+      return renderSliver.geometry.visible;
+    }).forEach(visitor);
   }
 }
 

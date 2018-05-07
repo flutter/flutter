@@ -21,28 +21,32 @@ const FileSystem _fs = const LocalFileSystem();
 // --trace-startup, as we do in this test, the VM stores trace events in an
 // endless buffer instead of a ring buffer.
 //
-// These names must match GalleryItem titles from  kAllGalleryItems
-// in examples/flutter_gallery/lib/gallery.item.dart
+// These names must match GalleryItem titles from kAllGalleryDemos
+// in examples/flutter_gallery/lib/gallery/demos.dart
 const List<String> kProfiledDemos = const <String>[
-  'Shrine',
-  'Contact profile',
-  'Animation',
-  'Bottom navigation',
-  'Buttons',
-  'Cards',
-  'Chips',
-  'Date and time pickers',
-  'Dialog',
+  'Shrine@Studies',
+  'Contact profile@Studies',
+  'Animation@Studies',
+  'Bottom navigation@Material',
+  'Buttons@Material',
+  'Cards@Material',
+  'Chips@Material',
+  'Dialogs@Material',
+  'Pickers@Material',
 ];
 
 // Demos that will be backed out of within FlutterDriver.runUnsynchronized();
 //
-// These names must match GalleryItem titles from  kAllGalleryItems
-// in examples/flutter_gallery/lib/gallery.item.dart
+// These names must match GalleryItem titles from kAllGalleryDemos
+// in examples/flutter_gallery/lib/gallery/demos.dart
 const List<String> kUnsynchronizedDemos = const <String>[
-  'Progress indicators',
-  'Activity Indicator',
-  'Video',
+  'Progress indicators@Material',
+  'Activity Indicator@Cupertino',
+  'Video@Media',
+];
+
+const List<String> kSkippedDemos = const <String>[
+  'Pull to refresh@Cupertino', // The back button lacks a tooltip.
 ];
 
 // All of the gallery demos, identified as "title@category".
@@ -124,9 +128,12 @@ Future<Null> runDemos(List<String> demos, FlutterDriver driver) async {
   String currentDemoCategory;
 
   for (String demo in demos) {
-    final String demoAtCategory = _allDemos.firstWhere((String s) => s.startsWith(demo));
-    final String demoCategory = demoAtCategory.substring(demoAtCategory.indexOf('@') + 1);
-    print('> $demoAtCategory');
+    if (kSkippedDemos.contains(demo))
+      continue;
+
+    final String demoName = demo.substring(0, demo.indexOf('@'));
+    final String demoCategory = demo.substring(demo.indexOf('@') + 1);
+    print('> $demo');
 
     if (currentDemoCategory == null) {
       await driver.tap(find.text(demoCategory));
@@ -138,7 +145,7 @@ Future<Null> runDemos(List<String> demos, FlutterDriver driver) async {
     }
     currentDemoCategory = demoCategory;
 
-    final SerializableFinder demoItem = find.text(demo);
+    final SerializableFinder demoItem = find.text(demoName);
     await driver.scrollUntilVisible(demoList, demoItem, dyScroll: -48.0,  alignment: 0.5);
 
     for (int i = 0; i < 2; i += 1) {
@@ -204,8 +211,7 @@ void main([List<String> args = const <String>[]]) {
       await saveDurationsHistogram(timeline.json['traceEvents'], histogramPath);
 
       // Execute the remaining tests.
-      final List<String> allDemoNames = _allDemos.map((String s) => s.substring(0, s.indexOf('@')));
-      final Set<String> unprofiledDemos = new Set<String>.from(allDemoNames)..removeAll(kProfiledDemos);
+      final Set<String> unprofiledDemos = new Set<String>.from(_allDemos)..removeAll(kProfiledDemos);
       await runDemos(unprofiledDemos.toList(), driver);
 
     }, timeout: const Timeout(const Duration(minutes: 5)));

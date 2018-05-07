@@ -52,8 +52,8 @@ const String _kProjectRootSentinel = 'pubspec.yaml';
 /// The address at which our WebSocket server resides and at which the sky_shell
 /// processes will host the Observatory server.
 final Map<InternetAddressType, InternetAddress> _kHosts = <InternetAddressType, InternetAddress>{
-  InternetAddressType.IP_V4: InternetAddress.LOOPBACK_IP_V4,
-  InternetAddressType.IP_V6: InternetAddress.LOOPBACK_IP_V6,
+  InternetAddressType.IP_V4: InternetAddress.LOOPBACK_IP_V4, // ignore: deprecated_member_use
+  InternetAddressType.IP_V6: InternetAddress.LOOPBACK_IP_V6, // ignore: deprecated_member_use
 };
 
 /// Configure the `test` package to work with Flutter.
@@ -73,7 +73,7 @@ void installHook({
   bool trackWidgetCreation: false,
   bool updateGoldens: false,
   int observatoryPort,
-  InternetAddressType serverType: InternetAddressType.IP_V4,
+  InternetAddressType serverType: InternetAddressType.IP_V4, // ignore: deprecated_member_use
 }) {
   assert(!enableObservatory || (!startPaused && observatoryPort == null));
   hack.registerPlatformPlugin(
@@ -93,6 +93,95 @@ void installHook({
       updateGoldens: updateGoldens,
     ),
   );
+}
+
+/// Generates the bootstrap entry point script that will be used to launch an
+/// individual test file.
+///
+/// The [testUrl] argument specifies the path to the test file that is being
+/// launched.
+///
+/// The [host] argument specifies the address at which the test harness is
+/// running.
+///
+/// If [testConfigFile] is specified, it must follow the conventions of test
+/// configuration files as outlined in the [flutter_test] library. By default,
+/// the test file will be launched directly.
+///
+/// The [updateGoldens] argument will set the [autoUpdateGoldens] global
+/// variable in the [flutter_test] package before invoking the test.
+String generateTestBootstrap({
+  @required Uri testUrl,
+  @required InternetAddress host,
+  File testConfigFile,
+  bool updateGoldens: false,
+}) {
+  assert(testUrl != null);
+  assert(host != null);
+  assert(updateGoldens != null);
+
+  final String websocketUrl = host.type == InternetAddressType.IP_V4 // ignore: deprecated_member_use
+      ? 'ws://${host.address}'
+      : 'ws://[${host.address}]';
+  final String encodedWebsocketUrl = Uri.encodeComponent(websocketUrl);
+
+  final StringBuffer buffer = new StringBuffer();
+  buffer.write('''
+import 'dart:convert';
+import 'dart:io';  // ignore: dart_io_import
+
+// We import this library first in order to trigger an import error for
+// package:test (rather than package:stream_channel) when the developer forgets
+// to add a dependency on package:test.
+import 'package:test/src/runner/plugin/remote_platform_helpers.dart';
+
+import 'package:flutter_test/flutter_test.dart';
+import 'package:stream_channel/stream_channel.dart';
+import 'package:test/src/runner/vm/catch_isolate_errors.dart';
+
+import '$testUrl' as test;
+'''
+  );
+  if (testConfigFile != null) {
+    buffer.write('''
+import '${new Uri.file(testConfigFile.path)}' as test_config;
+'''
+    );
+  }
+  buffer.write('''
+
+void main() {
+  print('$_kStartTimeoutTimerMessage');
+  String serverPort = Platform.environment['SERVER_PORT'];
+  String server = Uri.decodeComponent('$encodedWebsocketUrl:\$serverPort');
+  StreamChannel channel = serializeSuite(() {
+    catchIsolateErrors();
+    goldenFileComparator = new LocalFileComparator(Uri.parse('$testUrl'));
+    autoUpdateGoldenFiles = $updateGoldens;
+'''
+  );
+  if (testConfigFile != null) {
+    buffer.write('''
+    return () => test_config.main(test.main);
+''');
+  } else {
+    buffer.write('''
+    return test.main;
+''');
+  }
+  buffer.write('''
+  });
+  WebSocket.connect(server).then((WebSocket socket) {
+    socket.map((dynamic x) {
+      assert(x is String);
+      return json.decode(x);
+    }).pipe(channel.sink);
+    socket.addStream(channel.stream.map(json.encode));
+  });
+}
+'''
+  );
+  return buffer.toString();
 }
 
 enum _InitialResult { crashed, timedOut, connected }
@@ -581,7 +670,6 @@ class _FlutterPlatform extends PlatformPlugin {
     listenerFile.createSync();
     listenerFile.writeAsStringSync(_generateTestMain(
       testUrl: fs.path.toUri(fs.path.absolute(testPath)),
-      encodedWebsocketUrl: Uri.encodeComponent(_getWebSocketUrl()),
     ));
     return listenerFile.path;
   }
@@ -621,15 +709,8 @@ class _FlutterPlatform extends PlatformPlugin {
     return tempBundleDirectory.path;
   }
 
-  String _getWebSocketUrl() {
-    return host.type == InternetAddressType.IP_V4
-        ? 'ws://${host.address}'
-        : 'ws://[${host.address}]';
-  }
-
   String _generateTestMain({
     Uri testUrl,
-    String encodedWebsocketUrl,
   }) {
     assert(testUrl.scheme == 'file');
     File testConfigFile;
@@ -648,63 +729,12 @@ class _FlutterPlatform extends PlatformPlugin {
       }
       directory = directory.parent;
     }
-    final StringBuffer buffer = new StringBuffer();
-    buffer.write('''
-import 'dart:convert';
-import 'dart:io';  // ignore: dart_io_import
-
-// We import this library first in order to trigger an import error for
-// package:test (rather than package:stream_channel) when the developer forgets
-// to add a dependency on package:test.
-import 'package:test/src/runner/plugin/remote_platform_helpers.dart';
-
-import 'package:flutter_test/flutter_test.dart';
-import 'package:stream_channel/stream_channel.dart';
-import 'package:test/src/runner/vm/catch_isolate_errors.dart';
-
-import '$testUrl' as test;
-'''
+    return generateTestBootstrap(
+      testUrl: testUrl,
+      testConfigFile: testConfigFile,
+      host: host,
+      updateGoldens: updateGoldens,
     );
-    if (testConfigFile != null) {
-      buffer.write('''
-import '${new Uri.file(testConfigFile.path)}' as test_config;
-'''
-      );
-    }
-    buffer.write('''
-
-void main() {
-  print('$_kStartTimeoutTimerMessage');
-  String serverPort = Platform.environment['SERVER_PORT'];
-  String server = Uri.decodeComponent('$encodedWebsocketUrl:\$serverPort');
-  StreamChannel channel = serializeSuite(() {
-    catchIsolateErrors();
-    goldenFileComparator = new LocalFileComparator(Uri.parse('$testUrl'));
-    autoUpdateGoldenFiles = $updateGoldens;
-'''
-    );
-    if (testConfigFile != null) {
-      buffer.write('''
-    return () => test_config.main(test.main);
-''');
-    } else {
-      buffer.write('''
-    return test.main;
-''');
-    }
-    buffer.write('''
-  });
-  WebSocket.connect(server).then((WebSocket socket) {
-    socket.map((dynamic x) {
-      assert(x is String);
-      return json.decode(x);
-    }).pipe(channel.sink);
-    socket.addStream(channel.stream.map(json.encode));
-  });
-}
-'''
-    );
-    return buffer.toString();
   }
 
   File _cachedFontConfig;
@@ -766,7 +796,7 @@ void main() {
     } else {
       command.add('--disable-observatory');
     }
-    if (host.type == InternetAddressType.IP_V6)
+    if (host.type == InternetAddressType.IP_V6) // ignore: deprecated_member_use
       command.add('--ipv6');
     if (bundlePath != null) {
       command.add('--flutter-assets-dir=$bundlePath');

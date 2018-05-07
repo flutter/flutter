@@ -111,6 +111,8 @@ BuildApp() {
 
   if [[ "${build_mode}" != "debug" ]]; then
     StreamOutput " ├─Building Dart code..."
+    # Transform ARCHS to comma-separated list of target architectures.
+    local archs="${ARCHS// /,}"
     RunCommand "${FLUTTER_ROOT}/bin/flutter" --suppress-analytics           \
       ${verbose_flag}                                                       \
       build aot                                                             \
@@ -118,6 +120,7 @@ BuildApp() {
       --target-platform=ios                                                 \
       --target="${target_path}"                                             \
       --${build_mode}                                                       \
+      --ios-arch="${archs}"                                                 \
       ${local_engine_flag}                                                  \
       ${preview_dart_2_flag}
 
@@ -130,8 +133,16 @@ BuildApp() {
     RunCommand cp -r -- "${build_dir}/aot/App.framework" "${derived_dir}"
   else
     RunCommand mkdir -p -- "${derived_dir}/App.framework"
+
+    # Build stub for all requested architectures.
+    local arch_flags=""
+    read -r -a archs <<< "$ARCHS"
+    for arch in "${archs[@]}"; do
+      arch_flags="${arch_flags}-arch $arch "
+    done
+
     RunCommand eval "$(echo "static const int Moo = 88;" | xcrun clang -x c \
-        -arch "$CURRENT_ARCH" \
+        ${arch_flags} \
         -dynamiclib \
         -Xlinker -rpath -Xlinker '@executable_path/Frameworks' \
         -Xlinker -rpath -Xlinker '@loader_path/Frameworks' \
