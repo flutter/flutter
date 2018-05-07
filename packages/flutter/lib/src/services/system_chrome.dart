@@ -195,7 +195,11 @@ class SystemChrome {
       if (_pendingStyle != _latestStyle) {
         SystemChannels.platform.invokeMethod(
           'SystemChrome.setSystemUIOverlayStyle',
-          _pendingStyle.toString(),
+          <String, dynamic>{
+            'statusBarBrightness': _pendingStyle == SystemUiOverlayStyle.light 
+              ? 'Brightness.light'
+              : 'Brightness.dark',
+          }
         );
         _latestStyle = _pendingStyle;
       }
