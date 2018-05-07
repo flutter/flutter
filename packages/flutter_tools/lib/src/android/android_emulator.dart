@@ -42,12 +42,20 @@ class AndroidEmulator extends Emulator {
 
   @override
   Future<void> launch() async {
-    final RunResult launchResult =
-        await runAsync(<String>[getEmulatorPath(), '-avd', id]);
-
-    if (launchResult.exitCode != 0) {
-      printError('$launchResult');
-    }
+    final Future<void> launchResult =
+        runAsync(<String>[getEmulatorPath(), '-avd', id])
+            .then((RunResult runResult) {
+              if (runResult.exitCode != 0) {
+                printError('$runResult');
+              }
+            });
+    // emulator continues running on a successful launch so if we
+    // haven't quit within 3 seconds we assume that's a success and just
+    // return.
+    await Future.any<void>(<Future<void>>[
+      launchResult,
+      new Future<void>.delayed(const Duration(seconds: 3))
+    ]);
   }
 }
 
