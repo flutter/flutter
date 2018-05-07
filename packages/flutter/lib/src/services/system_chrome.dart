@@ -193,6 +193,7 @@ class SystemChrome {
     scheduleMicrotask(() {
       assert(_pendingStyle != null);
       if (_pendingStyle != _latestStyle) {
+        // TODO(jonahwilliams): remove when rolling chrome change
         SystemChannels.platform.invokeMethod(
           'SystemChrome.setSystemUIOverlayStyle',
           <String, dynamic>{
