@@ -1,4 +1,5 @@
 import 'package:flutter/foundation.dart';
+import 'package:flutter/gestures.dart';
 // Copyright 2016 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
@@ -173,11 +174,8 @@ class _ListDemoState extends State<ListDemo> {
   Widget buildListTile(BuildContext context, int index) {
     void onSwap(int oldIndex, int newIndex) {
       setState(() {
-        items.insert(newIndex, items[oldIndex]);
-        if (newIndex < oldIndex) {
-          oldIndex--;
-        }
-        items.removeAt(oldIndex);
+        final String item = items.removeAt(oldIndex);
+        items.insert(newIndex, item);
       });
     }
     final String item = items[index];
@@ -192,13 +190,13 @@ class _ListDemoState extends State<ListDemo> {
     final Widget listTile = new ListTile(
       isThreeLine: _itemType == _MaterialListType.threeLine,
       dense: _dense,
-      leading: _showAvatars ? new ExcludeSemantics(child: new CircleAvatar(child: new Text(item))) : null,
+      leading: _showAvatars ? new ExcludeSemantics(child: new CircleAvatar(child: new FlatButton(child: new Text(item), onPressed: () => Scaffold.of(context).showSnackBar(const SnackBar(content: const Text('pushed'),)),))) : null,
       title: new Text('This item represents $item.'),
       subtitle: secondary,
       trailing: _showIcons ? new Icon(Icons.info, color: Theme.of(context).disabledColor) : null,
     );
     return new MergeSemantics(
-      child: new _DraggableListItem<int>(index: index, child: listTile, onSwap: onSwap),
+      child: new _DraggableListItem<int>(key: new Key(item), index: index, child: listTile, onSwap: onSwap),
     );
   }
 
@@ -249,7 +247,7 @@ class _ListDemoState extends State<ListDemo> {
         child: new AnimatedList(
           itemBuilder: (BuildContext context, int index, Animation<double> animation) => 
               new SizeTransition(sizeFactor: animation, child: buildListTile(context, index)),
-          initialItemCount: 5,
+          initialItemCount: 10,
           padding: new EdgeInsets.symmetric(vertical: _dense ? 4.0 : 8.0),
         ),
       ),
@@ -258,7 +256,8 @@ class _ListDemoState extends State<ListDemo> {
 }
 
 class _DraggableListItem<T> extends StatefulWidget {
-  const _DraggableListItem({@required this.child, @required this.index, @required this.onSwap});
+  const _DraggableListItem({Key key, @required this.child, @required this.index, @required this.onSwap}) : super(key: key);
+
   final Widget child;
   final int index;
   final void Function(int, int) onSwap;
@@ -289,16 +288,21 @@ class _DraggableListItemState<T> extends State<_DraggableListItem<T>> with Ticke
     _tileAnimation.reverse();
   }
 
+  Widget _buildEmptyTile(BuildContext context) {
+    return new ListTile(isThreeLine: (widget.child as ListTile)?.isThreeLine, subtitle: const SizedBox(),);
+  }
+
   Widget _buildDragTarget(BuildContext context, List<int> acceptedCandidates, List<dynamic> rejectedCandidates) {
     return new Column(children: <Widget>[
       new SizeTransition(
-        sizeFactor: _targetAnimation.view, 
-        child: const ListTile(),
+        sizeFactor: _targetAnimation.view,
+        child: _buildEmptyTile(context),
       ),
-      new Draggable<int>(
+      new ListDraggable<int>(
         data: widget.index,
+        axis: Axis.vertical,
         feedback: new Material(
-          elevation: 6.0, 
+          elevation: 6.0,
           child: new SizedBox(
             width: MediaQuery.of(context).size.width,
             child: widget.child,
@@ -307,14 +311,14 @@ class _DraggableListItemState<T> extends State<_DraggableListItem<T>> with Ticke
         child: widget.child,
         childWhenDragging: new SizeTransition(
           sizeFactor: _tileAnimation.view,
-          child: const ListTile(), 
+          child: _buildEmptyTile(context),
         ),
         dragAnchor: DragAnchor.child,
         onDragStarted: _tileAnimation.reverse,
         onDraggableCanceled: (_, __) => _tileAnimation.forward(),
         onDragCompleted: () {
           _targetAnimation.reverse();
-          _tileAnimation.reverse();
+          _tileAnimation.forward(from: 0.0);
         },
       ),
     ]);
@@ -325,15 +329,18 @@ class _DraggableListItemState<T> extends State<_DraggableListItem<T>> with Ticke
     return 
       new DragTarget<int>(
         builder: _buildDragTarget,
-        onWillAccept: (_) {
+        onWillAccept: (int oldIndex) {
           _targetAnimation.forward();
           return true;
         },
-        onLeave: (_) {
+        onLeave: (int oldIndex) {
           _targetAnimation.reverse();
         },
         onAccept: (int oldIndex) {
           _targetAnimation.reverse();
+          if (oldIndex == widget.index) {
+            return;
+          }
           _accept(oldIndex);
         },
       );
@@ -341,8 +348,126 @@ class _DraggableListItemState<T> extends State<_DraggableListItem<T>> with Ticke
           
   void _accept(int oldIndex) {
     final AnimatedListState animatedList = AnimatedList.of(context);
-    animatedList.removeItem(oldIndex, (_, __) => const SizedBox());
-    animatedList.insertItem(widget.index);
-    widget.onSwap(oldIndex, widget.index);
+    if (oldIndex + 1 == widget.index) {
+      return;
+    }
+    animatedList.removeItem(
+      oldIndex, 
+      (BuildContext context, Animation<double> animation) => const SizedBox(),
+      duration: const Duration(milliseconds: 0),
+    );
+    final int newIndex = widget.index > oldIndex ? widget.index - 1 : widget.index;
+    animatedList.insertItem(newIndex, duration: const Duration(milliseconds: 0));
+    widget.onSwap(oldIndex, newIndex);
+  }
+}
+
+/// [LongPressDraggable] that restricts drag to a single axis.
+class ListDraggable<T> extends LongPressDraggable<T> {
+  /// Creates a widget that can be dragged starting from long press.
+  ///
+  /// The [child] and [feedback] arguments must not be null. If
+  /// [maxSimultaneousDrags] is non-null, it must be non-negative.
+  const ListDraggable({
+    Key key,
+    @required this.axis,
+    @required Widget child,
+    @required Widget feedback,
+    T data,
+    Widget childWhenDragging,
+    Offset feedbackOffset: Offset.zero,
+    DragAnchor dragAnchor: DragAnchor.child,
+    int maxSimultaneousDrags,
+    VoidCallback onDragStarted,
+    DraggableCanceledCallback onDraggableCanceled,
+    VoidCallback onDragCompleted
+  }) : assert(axis != null), 
+       super(
+        key: key,
+        child: child,
+        feedback: feedback,
+        data: data,
+        childWhenDragging: childWhenDragging,
+        feedbackOffset: feedbackOffset,
+        dragAnchor: dragAnchor,
+        maxSimultaneousDrags: maxSimultaneousDrags,
+        onDragStarted: onDragStarted,
+        onDraggableCanceled: onDraggableCanceled,
+        onDragCompleted: onDragCompleted
+      );
+
+
+  /// The [Axis] to retrict drag to.
+  /// 
+  /// An [Axis.vertical] will only drag vertically,
+  /// and an [Axis.horizontal] will only drag horizontally.
+  final Axis axis;
+   
+  @override
+  DelayedMultiDragGestureRecognizer createRecognizer(GestureMultiDragStartCallback onStart) {
+    final DelayedMultiDragGestureRecognizer superRecognizer = super.createRecognizer(onStart);
+    return new DelayedMultiDragGestureRecognizer()
+      ..onStart = (Offset position) {
+        final Drag result = new _SingleAxisDrag(
+          axis: axis,
+          delegate: superRecognizer.onStart(position),
+        );
+        return result;
+      };
+  } 
+}
+
+// Wraps a [Drag], but restricting its motion delta to only one axis.
+class _SingleAxisDrag implements Drag {
+  // Creates a [SingleAxisDrag].
+  _SingleAxisDrag({@required this.axis, @required this.delegate}) : 
+      assert(axis != null), 
+      assert(delegate != null);
+
+  /// The [Axis] to retrict this [Drag] to.
+  /// 
+  /// An [Axis.vertical] will only drag vertically,
+  /// and an [Axis.horizontal] will only drag horizontally.
+  final Axis axis;
+
+  /// The [Drag] object that actually handles the underlying motion events.
+  final Drag delegate;
+
+  @override
+  void cancel() {
+    delegate.cancel();
+  }
+
+  @override
+  void end(DragEndDetails details) {
+    final DragEndDetails restrictedDetails = new DragEndDetails(
+      velocity: _restrictVelocityAxis(details.velocity),
+      primaryVelocity: details.primaryVelocity,
+    );
+    return delegate.end(restrictedDetails);
+  }
+
+  @override
+  void update(DragUpdateDetails details) {
+    final DragUpdateDetails restrictedDetails = new DragUpdateDetails(
+      delta: _restrictAxis(details.delta),
+      globalPosition: details.globalPosition,
+      primaryDelta: details.primaryDelta,
+    );
+    return delegate.update(restrictedDetails);
+  }
+
+  Velocity _restrictVelocityAxis(Velocity velocity) {
+    return new Velocity(pixelsPerSecond: _restrictAxis(velocity.pixelsPerSecond));
+  }
+
+  Offset _restrictAxis(Offset offset) {
+    Offset restrictedOffset;
+    if (axis == Axis.horizontal) {
+      restrictedOffset = new Offset(offset.dx, 0.0);
+    } else {
+      restrictedOffset = new Offset(0.0, offset.dy);
+    }
+    return restrictedOffset;
   }
 }
