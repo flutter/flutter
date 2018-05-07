@@ -160,6 +160,41 @@ enum TargetPlatform {
   tester,
 }
 
+/// iOS target device architecture.
+//
+// TODO(cbracken): split TargetPlatform.ios into ios_armv7, ios_arm64.
+enum IOSArch {
+  armv7,
+  arm64,
+}
+
+/// The default set of iOS device architectures to build for.
+const List<IOSArch> defaultIOSArchs = const <IOSArch>[
+  IOSArch.arm64,
+];
+
+String getNameForIOSArch(IOSArch arch) {
+  switch (arch) {
+    case IOSArch.armv7:
+      return 'armv7';
+    case IOSArch.arm64:
+      return 'arm64';
+  }
+  assert(false);
+  return null;
+}
+
+IOSArch getIOSArchForName(String arch) {
+  switch (arch) {
+    case 'armv7':
+      return IOSArch.armv7;
+    case 'arm64':
+      return IOSArch.arm64;
+  }
+  assert(false);
+  return null;
+}
+
 String getNameForTargetPlatform(TargetPlatform platform) {
   switch (platform) {
     case TargetPlatform.android_arm:

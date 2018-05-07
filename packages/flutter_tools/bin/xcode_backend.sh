@@ -111,6 +111,8 @@ BuildApp() {
 
   if [[ "${build_mode}" != "debug" ]]; then
     StreamOutput " ├─Building Dart code..."
+    # Transform ARCHS to comma-separated list of target architectures.
+    local archs="${ARCHS// /,}"
     RunCommand "${FLUTTER_ROOT}/bin/flutter" --suppress-analytics           \
       ${verbose_flag}                                                       \
       build aot                                                             \
@@ -118,6 +120,7 @@ BuildApp() {
       --target-platform=ios                                                 \
       --target="${target_path}"                                             \
       --${build_mode}                                                       \
+      --ios-arch="${archs}"                                                 \
       ${local_engine_flag}                                                  \
       ${preview_dart_2_flag}
 
