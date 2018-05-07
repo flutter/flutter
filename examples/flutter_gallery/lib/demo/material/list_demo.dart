@@ -171,6 +171,8 @@ class _ListDemoState extends State<ListDemo> {
     });
   }
 
+  Map<String, bool> valueToCheckboxState = <String, bool>{};
+
   Widget buildListTile(BuildContext context, int index) {
     void onSwap(int oldIndex, int newIndex) {
       setState(() {
@@ -193,10 +195,10 @@ class _ListDemoState extends State<ListDemo> {
     final Widget listTile = new ListTile(
       isThreeLine: _itemType == _MaterialListType.threeLine,
       dense: _dense,
-      leading: _showAvatars ? new ExcludeSemantics(child: new CircleAvatar(child: new Text(item))) : null,
+      trailing: new Checkbox(value: valueToCheckboxState[item] ?? false, onChanged: (bool newValue) {setState(() {valueToCheckboxState[item] = newValue;});},),
       title: new Text('This item represents $item.'),
       subtitle: secondary,
-      trailing: _showIcons ? new Icon(Icons.info, color: Theme.of(context).disabledColor) : null,
+      leading: const Icon(Icons.drag_handle),
     );
     return new MergeSemantics(
       child: new _DraggableListItem<int>(key: new Key(item), index: index, child: listTile, onSwap: onSwap),
