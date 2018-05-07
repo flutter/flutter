@@ -40,6 +40,7 @@ class GenSnapshot {
     @required SnapshotType snapshotType,
     @required String packagesPath,
     @required String depfilePath,
+    IOSArch iosArch,
     Iterable<String> additionalArgs: const <String>[],
   }) {
     final List<String> args = <String>[
@@ -56,8 +57,8 @@ class GenSnapshot {
     // code. /usr/bin/arch can be used to run binaries with the specified
     // architecture.
     if (snapshotType.platform == TargetPlatform.ios) {
-      // TODO(cbracken): for the moment, always generate only arm64 code.
-      return runCommandAndStreamOutput(<String>['/usr/bin/arch', '-x86_64', snapshotterPath]..addAll(args));
+      final String hostArch = iosArch == IOSArch.armv7 ? '-i386' : '-x86_64';
+      return runCommandAndStreamOutput(<String>['/usr/bin/arch', hostArch, snapshotterPath]..addAll(args));
     }
     return runCommandAndStreamOutput(<String>[snapshotterPath]..addAll(args));
   }
@@ -137,12 +138,15 @@ class AOTSnapshotter {
     @required String outputPath,
     @required bool previewDart2,
     @required bool preferSharedLibrary,
+    IOSArch iosArch,
     List<String> extraGenSnapshotOptions: const <String>[],
   }) async {
     if (!_isValidAotPlatform(platform, buildMode)) {
       printError('${getNameForTargetPlatform(platform)} does not support AOT compilation.');
       return -1;
     }
+    // TODO(cbracken): replace IOSArch with TargetPlatform.ios_{armv7,arm64}.
+    assert(platform != TargetPlatform.ios || iosArch != null);
 
     final bool compileToSharedLibrary = preferSharedLibrary && androidSdk.ndkCompiler != null;
     if (preferSharedLibrary && !compileToSharedLibrary) {
@@ -215,7 +219,7 @@ class AOTSnapshotter {
       ]);
     }
 
-    if (platform == TargetPlatform.android_arm) {
+    if (platform == TargetPlatform.android_arm || iosArch == IOSArch.armv7) {
       // Not supported by the Pixel in 32-bit mode.
       genSnapshotArgs.add('--no-use-integer-division');
     }
@@ -253,6 +257,7 @@ class AOTSnapshotter {
       packagesPath: packageMap.packagesPath,
       depfilePath: depfilePath,
       additionalArgs: genSnapshotArgs,
+      iosArch: iosArch,
     );
     if (genSnapshotExitCode != 0) {
       printError('Dart snapshot generator failed with exit code $genSnapshotExitCode');
@@ -266,7 +271,7 @@ class AOTSnapshotter {
     // On iOS, we use Xcode to compile the snapshot into a dynamic library that the
     // end-developer can link into their app.
     if (platform == TargetPlatform.ios) {
-      final RunResult result = await _buildIosFramework(assemblyPath: assembly, outputPath: outputDir.path);
+      final RunResult result = await _buildIosFramework(iosArch: iosArch, assemblyPath: assembly, outputPath: outputDir.path);
       if (result.exitCode != 0)
         return result.exitCode;
     } else if (compileToSharedLibrary) {
@@ -283,11 +288,13 @@ class AOTSnapshotter {
   /// Builds an iOS framework at [outputPath]/App.framework from the assembly
   /// source at [assemblyPath].
   Future<RunResult> _buildIosFramework({
+    @required IOSArch iosArch,
     @required String assemblyPath,
     @required String outputPath,
   }) async {
-    printStatus('Building App.framework...');
-    const List<String> commonBuildOptions = const <String>['-arch', 'arm64', '-miphoneos-version-min=8.0'];
+    final String targetArch = iosArch == IOSArch.armv7 ? 'armv7' : 'arm64';
+    printStatus('Building App.framework for $targetArch...');
+    final List<String> commonBuildOptions = <String>['-arch', targetArch, '-miphoneos-version-min=8.0'];
 
     final String assemblyO = fs.path.join(outputPath, 'snapshot_assembly.o');
     final RunResult compileResult = await xcode.cc(commonBuildOptions.toList()..addAll(<String>['-c', assemblyPath, '-o', assemblyO]));

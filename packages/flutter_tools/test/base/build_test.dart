@@ -52,6 +52,7 @@ class _FakeGenSnapshot implements GenSnapshot {
     SnapshotType snapshotType,
     String packagesPath,
     String depfilePath,
+    IOSArch iosArch,
     Iterable<String> additionalArgs,
   }) async {
     _callCount += 1;
@@ -361,6 +362,7 @@ void main() {
         outputPath: outputPath,
         preferSharedLibrary: false,
         previewDart2: true,
+        iosArch: IOSArch.arm64,
       );
 
       expect(genSnapshotExitCode, 0);
@@ -407,6 +409,7 @@ void main() {
         outputPath: outputPath,
         preferSharedLibrary: false,
         previewDart2: true,
+        iosArch: IOSArch.arm64,
       );
 
       expect(genSnapshotExitCode, 0);
