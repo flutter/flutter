@@ -84,7 +84,7 @@ Future<void> build({
 
     if (await fingerprinter.doesFingerprintMatch()) {
       needBuild = false;
-      printStatus('Skipping compilation. Fingerprint match.');
+      printTrace('Skipping kernel compilation. Fingerprint match.');
     }
 
     String kernelBinaryFilename;
