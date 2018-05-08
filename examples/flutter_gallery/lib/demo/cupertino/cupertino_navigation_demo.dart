@@ -699,7 +699,7 @@ class CupertinoDemoTab3 extends StatelessWidget {
   Widget build(BuildContext context) {
     return new CupertinoPageScaffold(
       navigationBar: const CupertinoNavigationBar(
-        middle: const Text('Moments'),
+        middle: const Text('Account'),
         trailing: const ExitButton(),
       ),
       child: new DecoratedBox(
