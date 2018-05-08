@@ -1,4 +1,4 @@
-Signature: f547876d2dbbd8022cc9ed0de6872504
+Signature: 7cc17682e6b6e0b68fc9c876eb587159
 
 UNUSED LICENSES:
 
@@ -17165,8 +17165,8 @@ FILE: ../../../third_party/skia/bench/GrCCGeometryBench.cpp
 FILE: ../../../third_party/skia/bench/ShaderMaskFilterBench.cpp
 FILE: ../../../third_party/skia/experimental/skottie/SkottieAdapter.cpp
 FILE: ../../../third_party/skia/experimental/skottie/SkottieAdapter.h
-FILE: ../../../third_party/skia/experimental/skottie/SkottieJson.cpp
-FILE: ../../../third_party/skia/experimental/skottie/SkottieJson.h
+FILE: ../../../third_party/skia/experimental/skottie/SkottieParser.cpp
+FILE: ../../../third_party/skia/experimental/skottie/SkottieParser.h
 FILE: ../../../third_party/skia/experimental/sksg/SkSGImage.cpp
 FILE: ../../../third_party/skia/experimental/sksg/SkSGImage.h
 FILE: ../../../third_party/skia/experimental/sksg/SkSGScene.cpp
@@ -17300,8 +17300,6 @@ FILE: ../../../third_party/skia/src/gpu/effects/GrYUVtoRGBEffect.fp
 FILE: ../../../third_party/skia/src/gpu/effects/GrYUVtoRGBEffect.h
 FILE: ../../../third_party/skia/src/gpu/text/GrAtlasManager.cpp
 FILE: ../../../third_party/skia/src/gpu/text/GrAtlasManager.h
-FILE: ../../../third_party/skia/src/gpu/text/GrSDFMaskFilter.cpp
-FILE: ../../../third_party/skia/src/gpu/text/GrSDFMaskFilter.h
 FILE: ../../../third_party/skia/src/gpu/vk/GrVkImageLayout.h
 FILE: ../../../third_party/skia/src/gpu/vk/GrVkTypesPriv.cpp
 FILE: ../../../third_party/skia/src/opts/SkOpts_hsw.cpp
@@ -17496,8 +17494,10 @@ FILE: ../../../third_party/skia/infra/bots/recipe_modules/core/examples/full.exp
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/core/examples/full.expected/Housekeeper-Weekly-RecreateSKPs.json
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/core/examples/full.expected/cross_repo_trybot.json
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/core/examples/full.expected/flutter_trybot.json
+FILE: ../../../third_party/skia/infra/bots/recipe_modules/core/examples/full.expected/no_persistent_checkout.json
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/core/examples/full.expected/parent_revision.json
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/core/examples/full.expected/parent_revision_trybot.json
+FILE: ../../../third_party/skia/infra/bots/recipe_modules/core/examples/full.expected/pdfium_trybot.json
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/core/examples/full.expected/test.json
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/ct/examples/full.expected/failed_gsutil.json
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/ct/examples/full.expected/test.json
@@ -17521,6 +17521,8 @@ FILE: ../../../third_party/skia/infra/bots/recipe_modules/flavor/examples/full.e
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/flavor/examples/full.expected/Build-Debian9-GCC-x86_64-Release-ANGLE.json
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/flavor/examples/full.expected/Build-Debian9-GCC-x86_64-Release-Flutter_Android.json
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/flavor/examples/full.expected/Build-Debian9-GCC-x86_64-Release-NoGPU.json
+FILE: ../../../third_party/skia/infra/bots/recipe_modules/flavor/examples/full.expected/Build-Debian9-GCC-x86_64-Release-PDFium.json
+FILE: ../../../third_party/skia/infra/bots/recipe_modules/flavor/examples/full.expected/Build-Debian9-GCC-x86_64-Release-PDFium_SkiaPaths.json
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/flavor/examples/full.expected/Build-Debian9-GCC-x86_64-Release-Shared.json
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/flavor/examples/full.expected/Build-Mac-Clang-arm64-Debug-Android_Vulkan.json
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/flavor/examples/full.expected/Build-Mac-Clang-arm64-Debug-iOS.json
@@ -17604,6 +17606,7 @@ FILE: ../../../third_party/skia/infra/bots/recipe_modules/vars/examples/full.exp
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/vars/examples/full.expected/Build-Debian9-Clang-x86_64-Release-ParentRevision.json
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/vars/examples/full.expected/Build-Debian9-Clang-x86_64-Release-SKNX_NO_SIMD.json
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/vars/examples/full.expected/Build-Debian9-GCC-x86_64-Release-Flutter_Android.json
+FILE: ../../../third_party/skia/infra/bots/recipe_modules/vars/examples/full.expected/Build-Debian9-GCC-x86_64-Release-PDFium.json
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/vars/examples/full.expected/Build-Mac-Clang-x86_64-Debug-CommandBuffer.json
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/vars/examples/full.expected/Build-Win-Clang-x86_64-Release-Vulkan.json
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/vars/examples/full.expected/Calmbench-Debian9-Clang-GCE-CPU-AVX2-x86_64-Release-All.json
@@ -17647,6 +17650,8 @@ FILE: ../../../third_party/skia/infra/bots/recipes/compile.expected/Build-Debian
 FILE: ../../../third_party/skia/infra/bots/recipes/compile.expected/Build-Debian9-GCC-x86_64-Debug-NoGPU.json
 FILE: ../../../third_party/skia/infra/bots/recipes/compile.expected/Build-Debian9-GCC-x86_64-Release-ANGLE.json
 FILE: ../../../third_party/skia/infra/bots/recipes/compile.expected/Build-Debian9-GCC-x86_64-Release-Flutter_Android.json
+FILE: ../../../third_party/skia/infra/bots/recipes/compile.expected/Build-Debian9-GCC-x86_64-Release-PDFium.json
+FILE: ../../../third_party/skia/infra/bots/recipes/compile.expected/Build-Debian9-GCC-x86_64-Release-PDFium_SkiaPaths.json
 FILE: ../../../third_party/skia/infra/bots/recipes/compile.expected/Build-Debian9-GCC-x86_64-Release-Shared.json
 FILE: ../../../third_party/skia/infra/bots/recipes/compile.expected/Build-Mac-Clang-arm64-Debug-Android.json
 FILE: ../../../third_party/skia/infra/bots/recipes/compile.expected/Build-Mac-Clang-arm64-Debug-iOS.json
@@ -17660,6 +17665,7 @@ FILE: ../../../third_party/skia/infra/bots/recipes/compile.expected/Build-Win-Cl
 FILE: ../../../third_party/skia/infra/bots/recipes/compile.expected/Build-Win-Clang-x86_64-Release-Vulkan.json
 FILE: ../../../third_party/skia/infra/bots/recipes/compile.expected/alternate_repo.json
 FILE: ../../../third_party/skia/infra/bots/recipes/compile.expected/flutter_trybot.json
+FILE: ../../../third_party/skia/infra/bots/recipes/compile.expected/pdfium_trybot.json
 FILE: ../../../third_party/skia/infra/bots/recipes/compile.expected/trybot.json
 FILE: ../../../third_party/skia/infra/bots/recipes/ct_skps.expected/CT_10k_SKPs_UnknownBuilder.json
 FILE: ../../../third_party/skia/infra/bots/recipes/ct_skps.expected/CT_CPU_BENCH_10k_SKPs.json
@@ -17729,7 +17735,6 @@ FILE: ../../../third_party/skia/infra/bots/recipes/test.expected/Test-Android-Cl
 FILE: ../../../third_party/skia/infra/bots/recipes/test.expected/Test-Android-Clang-NVIDIA_Shield-GPU-TegraX1-arm64-Debug-All-Android.json
 FILE: ../../../third_party/skia/infra/bots/recipes/test.expected/Test-Android-Clang-NVIDIA_Shield-GPU-TegraX1-arm64-Debug-All-Android_CCPR.json
 FILE: ../../../third_party/skia/infra/bots/recipes/test.expected/Test-Android-Clang-Nexus5-GPU-Adreno330-arm-Release-All-Android.json
-FILE: ../../../third_party/skia/infra/bots/recipes/test.expected/Test-Android-Clang-Nexus5x-CPU-Snapdragon808-arm-Release-All-Android_ASAN.json
 FILE: ../../../third_party/skia/infra/bots/recipes/test.expected/Test-Android-Clang-Nexus5x-GPU-Adreno418-arm-Debug-All-Android_ASAN.json
 FILE: ../../../third_party/skia/infra/bots/recipes/test.expected/Test-Android-Clang-Nexus5x-GPU-Adreno418-arm64-Debug-All-Android_ASAN.json
 FILE: ../../../third_party/skia/infra/bots/recipes/test.expected/Test-Android-Clang-Nexus5x-GPU-Adreno418-arm64-Debug-All-Android_NoGPUThreads.json
@@ -17739,8 +17744,6 @@ FILE: ../../../third_party/skia/infra/bots/recipes/test.expected/Test-Android-Cl
 FILE: ../../../third_party/skia/infra/bots/recipes/test.expected/Test-Android-Clang-NexusPlayer-GPU-PowerVR-x86-Release-All-Android_Vulkan.json
 FILE: ../../../third_party/skia/infra/bots/recipes/test.expected/Test-Android-Clang-Pixel-GPU-Adreno530-arm64-Debug-All-Android_CCPR.json
 FILE: ../../../third_party/skia/infra/bots/recipes/test.expected/Test-Android-Clang-Pixel-GPU-Adreno530-arm64-Debug-All-Android_Vulkan.json
-FILE: ../../../third_party/skia/infra/bots/recipes/test.expected/Test-Android-Clang-Pixel2XL-GPU-Adreno540-arm64-Debug-All-Android_DDL1_Vulkan.json
-FILE: ../../../third_party/skia/infra/bots/recipes/test.expected/Test-Android-Clang-Pixel2XL-GPU-Adreno540-arm64-Debug-All-Android_DDL3_Vulkan.json
 FILE: ../../../third_party/skia/infra/bots/recipes/test.expected/Test-ChromeOS-Clang-ASUSChromebookFlipC100-GPU-MaliT764-arm-Debug-All.json
 FILE: ../../../third_party/skia/infra/bots/recipes/test.expected/Test-ChromeOS-Clang-AcerChromebookR13Convertible-GPU-PowerVRGX6250-arm-Debug-All.json
 FILE: ../../../third_party/skia/infra/bots/recipes/test.expected/Test-Chromecast-GCC-Chorizo-CPU-Cortex_A7-arm-Release-All.json
@@ -17748,7 +17751,6 @@ FILE: ../../../third_party/skia/infra/bots/recipes/test.expected/Test-Chromecast
 FILE: ../../../third_party/skia/infra/bots/recipes/test.expected/Test-Debian9-Clang-GCE-CPU-AVX2-x86_64-Debug-All-ASAN.json
 FILE: ../../../third_party/skia/infra/bots/recipes/test.expected/Test-Debian9-Clang-GCE-CPU-AVX2-x86_64-Debug-All-MSAN.json
 FILE: ../../../third_party/skia/infra/bots/recipes/test.expected/Test-Debian9-Clang-GCE-CPU-AVX2-x86_64-Debug-All-SK_USE_DISCARDABLE_SCALEDIMAGECACHE.json
-FILE: ../../../third_party/skia/infra/bots/recipes/test.expected/Test-Debian9-Clang-GCE-CPU-AVX2-x86_64-Debug-All-T8888.json
 FILE: ../../../third_party/skia/infra/bots/recipes/test.expected/Test-Debian9-Clang-GCE-CPU-AVX2-x86_64-Debug-shard_00_10-Coverage.json
 FILE: ../../../third_party/skia/infra/bots/recipes/test.expected/Test-Debian9-Clang-GCE-CPU-AVX2-x86_64-Release-All-SK_FORCE_RASTER_PIPELINE_BLITTER.json
 FILE: ../../../third_party/skia/infra/bots/recipes/test.expected/Test-Debian9-Clang-GCE-CPU-AVX2-x86_64-Release-All-SwiftShader.json
@@ -19940,7 +19942,6 @@ FILE: ../../../third_party/skia/fuzz/oss_fuzz/FuzzNullCanvas.cpp
 FILE: ../../../third_party/skia/fuzz/oss_fuzz/FuzzPNGEncoder.cpp
 FILE: ../../../third_party/skia/fuzz/oss_fuzz/FuzzPathMeasure.cpp
 FILE: ../../../third_party/skia/fuzz/oss_fuzz/FuzzRasterN32Canvas.cpp
-FILE: ../../../third_party/skia/fuzz/oss_fuzz/FuzzSkottieJSON.cpp
 FILE: ../../../third_party/skia/fuzz/oss_fuzz/FuzzTextBlobDeserialize.cpp
 FILE: ../../../third_party/skia/fuzz/oss_fuzz/FuzzWEBPEncoder.cpp
 ----------------------------------------------------------------------------------------------------
