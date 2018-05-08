@@ -132,7 +132,6 @@ void main() {
 
           final AndroidSdk sdk = AndroidSdk.locateAndroidSdk();
           expect(sdk.directory, realSdkDir);
-          print(AndroidNdk.explainMissingNdk(sdk.directory));
           expect(sdk.ndk, isNotNull);
           expect(sdk.ndk.directory, realNdkDir);
           expect(sdk.ndk.compiler, realNdkCompiler);
