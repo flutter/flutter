@@ -215,6 +215,7 @@ Engine::Engine(Delegate& delegate,
 }
 
 Engine::~Engine() {
+  shell_.reset();
   for (const auto& thread : host_threads_) {
     thread.TaskRunner()->PostTask(
         []() { fsl::MessageLoop::GetCurrent()->PostQuitTask(); });
