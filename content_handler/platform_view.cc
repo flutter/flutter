@@ -507,10 +507,12 @@ void PlatformView::HandleFlutterTextInputChannelPlatformMessage(
     // TODO(abarth): Read the keyboard type from the configuration.
     current_text_input_client_ = args->value[0].GetInt();
 
+    auto initial_text_input_state = input::TextInputState{};
+    initial_text_input_state.text = "";
     input_connection_->GetInputMethodEditor(
         input::KeyboardType::TEXT,       // keyboard type
         input::InputMethodAction::DONE,  // input method action
-        input::TextInputState{},         // initial state
+        initial_text_input_state,        // initial state
         ime_client_.NewBinding(),        // client
         ime_.NewRequest()                // editor
     );
@@ -522,6 +524,7 @@ void PlatformView::HandleFlutterTextInputChannelPlatformMessage(
       }
       const auto& args = args_it->value;
       input::TextInputState state;
+      state.text = "";
       // TODO(abarth): Deserialize state.
       auto text = args.FindMember("text");
       if (text != args.MemberEnd() && text->value.IsString())
