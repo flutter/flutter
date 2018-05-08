@@ -41,9 +41,21 @@ class Shell final : public PlatformView::Delegate,
  public:
   template <class T>
   using CreateCallback = std::function<std::unique_ptr<T>(Shell&)>;
+
+  // Create a shell with the given task runners and settings. The isolate
+  // snapshot will be shared with the snapshot of the service isolate.
   static std::unique_ptr<Shell> Create(
       blink::TaskRunners task_runners,
       blink::Settings settings,
+      CreateCallback<PlatformView> on_create_platform_view,
+      CreateCallback<Rasterizer> on_create_rasterizer);
+
+  // Creates a shell with the given task runners and settings. The isolate
+  // snapshot is specified upfront.
+  static std::unique_ptr<Shell> Create(
+      blink::TaskRunners task_runners,
+      blink::Settings settings,
+      fxl::RefPtr<blink::DartSnapshot> isolate_snapshot,
       CreateCallback<PlatformView> on_create_platform_view,
       CreateCallback<Rasterizer> on_create_rasterizer);
 
@@ -92,6 +104,7 @@ class Shell final : public PlatformView::Delegate,
   static std::unique_ptr<Shell> CreateShellOnPlatformThread(
       blink::TaskRunners task_runners,
       blink::Settings settings,
+      fxl::RefPtr<blink::DartSnapshot> isolate_snapshot,
       Shell::CreateCallback<PlatformView> on_create_platform_view,
       Shell::CreateCallback<Rasterizer> on_create_rasterizer);
 
