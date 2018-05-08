@@ -48,11 +48,13 @@ namespace {
 class GlyphTypeface {
  public:
   GlyphTypeface(sk_sp<SkTypeface> typeface, minikin::FontFakery fakery)
-      : typeface_(std::move(typeface)), fake_bold_(fakery.isFakeBold()) {}
+      : typeface_(std::move(typeface)),
+        fake_bold_(fakery.isFakeBold()),
+        fake_italic_(fakery.isFakeItalic()) {}
 
   bool operator==(GlyphTypeface& other) {
     return other.typeface_.get() == typeface_.get() &&
-           other.fake_bold_ == fake_bold_;
+           other.fake_bold_ == fake_bold_ && other.fake_italic_ == fake_italic_;
   }
 
   bool operator!=(GlyphTypeface& other) { return !(*this == other); }
@@ -60,11 +62,13 @@ class GlyphTypeface {
   void apply(SkPaint& paint) {
     paint.setTypeface(typeface_);
     paint.setFakeBoldText(fake_bold_);
+    paint.setTextSkewX(fake_italic_ ? -SK_Scalar1 / 4 : 0);
   }
 
  private:
   sk_sp<SkTypeface> typeface_;
   bool fake_bold_;
+  bool fake_italic_;
 };
 
 GlyphTypeface GetGlyphTypeface(const minikin::Layout& layout, size_t index) {
