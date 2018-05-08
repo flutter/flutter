@@ -187,9 +187,14 @@ class Paragraph {
   mutable std::unique_ptr<icu::BreakIterator> word_breaker_;
 
   struct LineRange {
-    LineRange(size_t s, size_t e, size_t ewn, bool h)
-        : start(s), end(e), end_including_newline(ewn), hard_break(h) {}
+    LineRange(size_t s, size_t e, size_t eew, size_t ein, bool h)
+        : start(s),
+          end(e),
+          end_excluding_whitespace(eew),
+          end_including_newline(ein),
+          hard_break(h) {}
     size_t start, end;
+    size_t end_excluding_whitespace;
     size_t end_including_newline;
     bool hard_break;
   };
@@ -300,7 +305,7 @@ class Paragraph {
 
   // Calculate the starting X offset of a line based on the line's width and
   // alignment.
-  double GetLineXOffset(size_t line_number, double line_total_advance);
+  double GetLineXOffset(double line_total_advance);
 
   // Creates and draws the decorations onto the canvas.
   void PaintDecorations(SkCanvas* canvas, const PaintRecord& record);
