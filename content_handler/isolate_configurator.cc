@@ -28,7 +28,8 @@ IsolateConfigurator::IsolateConfigurator(
 
 IsolateConfigurator::~IsolateConfigurator() = default;
 
-bool IsolateConfigurator::ConfigureCurrentIsolate() {
+bool IsolateConfigurator::ConfigureCurrentIsolate(
+    mozart::NativesDelegate* natives_delegate) {
   if (used_) {
     return false;
   }
@@ -37,22 +38,13 @@ bool IsolateConfigurator::ConfigureCurrentIsolate() {
   BindFuchsia();
   BindZircon();
   BindDartIO();
-  BindScenic();
+  BindScenic(natives_delegate);
 
   // This is now owned by the Dart bindings. So relinquish our ownership of the
   // handle.
   (void)fdio_ns_.release();
 
   return true;
-}
-
-// |mozart::NativesDelegate|
-void IsolateConfigurator::OfferServiceProvider(
-    fidl::InterfaceHandle<component::ServiceProvider>,
-    fidl::VectorPtr<fidl::StringPtr> services) {
-  // TODO(chinmaygarde): Get the mozart view and forward this call to it on the
-  // right thread. This is currently used for the soft keyboard.
-  FXL_LOG(ERROR) << "IsolateConfigurator::OfferServiceProvider unimplemented.";
 }
 
 void IsolateConfigurator::BindFuchsia() {
@@ -98,7 +90,8 @@ void IsolateConfigurator::BindDartIO() {
                                1, namespace_args));
 }
 
-void IsolateConfigurator::BindScenic() {
+void IsolateConfigurator::BindScenic(
+    mozart::NativesDelegate* natives_delegate) {
   Dart_Handle mozart_internal =
       Dart_LookupLibrary(tonic::ToDart("dart:mozart.internal"));
   DART_CHECK_VALID(mozart_internal);
@@ -110,7 +103,7 @@ void IsolateConfigurator::BindScenic() {
       mozart_internal,            //
       tonic::ToDart("_context"),  //
       tonic::DartConverter<uint64_t>::ToDart(reinterpret_cast<intptr_t>(
-          static_cast<mozart::NativesDelegate*>(this)))));
+          static_cast<mozart::NativesDelegate*>(natives_delegate)))));
   DART_CHECK_VALID(
       Dart_SetField(mozart_internal,                  //
                     tonic::ToDart("_viewContainer"),  //

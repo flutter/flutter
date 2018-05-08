@@ -241,7 +241,7 @@ std::pair<bool, uint32_t> Engine::GetEngineReturnCode() const {
 
 void Engine::OnMainIsolateStart() {
   if (!isolate_configurator_ ||
-      !isolate_configurator_->ConfigureCurrentIsolate()) {
+      !isolate_configurator_->ConfigureCurrentIsolate(this)) {
     FXL_LOG(ERROR) << "Could not configure some native embedder bindings for a "
                       "new root isolate.";
   }
@@ -273,6 +273,27 @@ void Engine::OnSessionMetricsDidChange(double device_pixel_ratio) {
               ->UpdateViewportMetrics(device_pixel_ratio);
         }
       });
+}
+
+// |mozart::NativesDelegate|
+void Engine::OfferServiceProvider(
+    fidl::InterfaceHandle<component::ServiceProvider> service_provider,
+    fidl::VectorPtr<fidl::StringPtr> services) {
+  if (!shell_) {
+    return;
+  }
+
+  shell_->GetTaskRunners().GetPlatformTaskRunner()->PostTask(
+      fxl::MakeCopyable([platform_view = shell_->GetPlatformView(),       //
+                         service_provider = std::move(service_provider),  //
+                         services = std::move(services)                   //
+  ]() mutable {
+        if (platform_view) {
+          reinterpret_cast<flutter::PlatformView*>(platform_view.get())
+              ->OfferServiceProvider(std::move(service_provider),
+                                     std::move(services));
+        }
+      }));
 }
 
 }  // namespace flutter

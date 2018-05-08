@@ -89,6 +89,12 @@ PlatformView::PlatformView(
 
 PlatformView::~PlatformView() = default;
 
+void PlatformView::OfferServiceProvider(
+    fidl::InterfaceHandle<component::ServiceProvider> service_provider,
+    fidl::VectorPtr<fidl::StringPtr> services) {
+  view_->OfferServiceProvider(std::move(service_provider), std::move(services));
+}
+
 void PlatformView::RegisterPlatformMessageHandlers() {
   platform_message_handlers_[kFlutterPlatformChannel] =
       std::bind(&PlatformView::HandleFlutterPlatformChannelPlatformMessage,  //

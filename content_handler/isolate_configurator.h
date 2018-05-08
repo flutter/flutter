@@ -17,7 +17,7 @@ namespace flutter {
 // Contains all the information necessary to configure a new root isolate. This
 // is a single use item. The lifetime of this object must extend past that of
 // the root isolate.
-class IsolateConfigurator final : mozart::NativesDelegate {
+class IsolateConfigurator final {
  public:
   IsolateConfigurator(
       UniqueFDIONS fdio_ns,
@@ -31,7 +31,7 @@ class IsolateConfigurator final : mozart::NativesDelegate {
 
   // Can be used only once and only on the UI thread with the newly created
   // isolate already current.
-  bool ConfigureCurrentIsolate();
+  bool ConfigureCurrentIsolate(mozart::NativesDelegate* natives_delegate);
 
  private:
   bool used_ = false;
@@ -41,17 +41,13 @@ class IsolateConfigurator final : mozart::NativesDelegate {
       application_environment_;
   fidl::InterfaceRequest<component::ServiceProvider> outgoing_services_request_;
 
-  // |mozart::NativesDelegate|
-  void OfferServiceProvider(fidl::InterfaceHandle<component::ServiceProvider>,
-                            fidl::VectorPtr<fidl::StringPtr> services);
-
   void BindFuchsia();
 
   void BindZircon();
 
   void BindDartIO();
 
-  void BindScenic();
+  void BindScenic(mozart::NativesDelegate* natives_delegate);
 
   FXL_DISALLOW_COPY_AND_ASSIGN(IsolateConfigurator);
 };

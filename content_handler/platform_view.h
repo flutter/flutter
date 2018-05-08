@@ -45,6 +45,10 @@ class PlatformView final : public shell::PlatformView,
 
   fidl::InterfaceHandle<views_v1::ViewContainer> TakeViewContainer();
 
+  void OfferServiceProvider(
+      fidl::InterfaceHandle<component::ServiceProvider> service_provider,
+      fidl::VectorPtr<fidl::StringPtr> services);
+
  private:
   const std::string debug_label_;
   views_v1::ViewManagerPtr view_manager_;
