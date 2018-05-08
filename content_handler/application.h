@@ -63,6 +63,7 @@ class Application final : public Engine::Delegate,
   component::ServiceProviderBridge service_provider_bridge_;
   std::unique_ptr<component::ApplicationContext> application_context_;
   fidl::BindingSet<views_v1::ViewProvider> shells_bindings_;
+  fxl::RefPtr<blink::DartSnapshot> isolate_snapshot_;
   std::set<std::unique_ptr<Engine>> shell_holders_;
   std::vector<WaitCallback> wait_callbacks_;
   std::pair<bool, uint32_t> last_return_code_;
@@ -93,8 +94,7 @@ class Application final : public Engine::Delegate,
   void CreateShellForView(
       fidl::InterfaceRequest<views_v1::ViewProvider> view_provider_request);
 
-  void AttemptVMLaunchWithCurrentSettings(
-      const blink::Settings& settings) const;
+  void AttemptVMLaunchWithCurrentSettings(const blink::Settings& settings);
 
   FXL_DISALLOW_COPY_AND_ASSIGN(Application);
 };

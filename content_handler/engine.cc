@@ -38,6 +38,7 @@ Engine::Engine(Delegate& delegate,
                std::string thread_label,
                component::ApplicationContext& application_context,
                blink::Settings settings,
+               fxl::RefPtr<blink::DartSnapshot> isolate_snapshot,
                fidl::InterfaceRequest<views_v1_token::ViewOwner> view_owner,
                UniqueFDIONS fdio_ns,
                fidl::InterfaceRequest<component::ServiceProvider>
@@ -157,11 +158,17 @@ Engine::Engine(Delegate& delegate,
         });
       });
 
+  if (!isolate_snapshot) {
+    isolate_snapshot =
+        blink::DartVM::ForProcess(settings_)->GetIsolateSnapshot();
+  }
+
   shell_ = shell::Shell::Create(
-      task_runners,             // host task runners
-      settings_,                // shell launch settings
-      on_create_platform_view,  // platform view create callback
-      on_create_rasterizer      // rasterizer create callback
+      task_runners,                 // host task runners
+      settings_,                    // shell launch settings
+      std::move(isolate_snapshot),  // isolate snapshot
+      on_create_platform_view,      // platform view create callback
+      on_create_rasterizer          // rasterizer create callback
   );
 
   if (!shell_) {

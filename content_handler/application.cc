@@ -168,11 +168,7 @@ const std::string& Application::GetDebugLabel() const {
 }
 
 void Application::AttemptVMLaunchWithCurrentSettings(
-    const blink::Settings& settings) const {
-  if (blink::DartVM::ForProcessIfInitialized()) {
-    return;
-  }
-
+    const blink::Settings& settings) {
   if (!blink::DartVM::IsRunningPrecompiledCode()) {
     // We will be initializing the VM lazily in this case.
     return;
@@ -213,17 +209,16 @@ void Application::AttemptVMLaunchWithCurrentSettings(
           blink::DartSnapshotBuffer::CreateWithSymbolInLibrary(
               lib, symbol(blink::DartSnapshot::kVMInstructionsSymbol).c_str()));
 
-  fxl::RefPtr<blink::DartSnapshot> isolate_snapshot =
-      fxl::MakeRefCounted<blink::DartSnapshot>(
-          blink::DartSnapshotBuffer::CreateWithSymbolInLibrary(
-              lib, symbol(blink::DartSnapshot::kIsolateDataSymbol).c_str()),
-          blink::DartSnapshotBuffer::CreateWithSymbolInLibrary(
-              lib,
-              symbol(blink::DartSnapshot::kIsolateInstructionsSymbol).c_str()));
+  isolate_snapshot_ = fxl::MakeRefCounted<blink::DartSnapshot>(
+      blink::DartSnapshotBuffer::CreateWithSymbolInLibrary(
+          lib, symbol(blink::DartSnapshot::kIsolateDataSymbol).c_str()),
+      blink::DartSnapshotBuffer::CreateWithSymbolInLibrary(
+          lib,
+          symbol(blink::DartSnapshot::kIsolateInstructionsSymbol).c_str()));
 
-  blink::DartVM::ForProcess(settings_,                   //
-                            std::move(vm_snapshot),      //
-                            std::move(isolate_snapshot)  //
+  blink::DartVM::ForProcess(settings_,               //
+                            std::move(vm_snapshot),  //
+                            isolate_snapshot_        //
   );
   if (blink::DartVM::ForProcessIfInitialized()) {
     FXL_DLOG(INFO) << "VM successfully initialized for AOT mode.";
@@ -299,15 +294,12 @@ void Application::CreateView(
     return;
   }
 
-  // This method may be called multiple times. Care must be taken to ensure that
-  // all arguments can be accessed or synthesized multiple times.
-  // TODO(chinmaygarde): Figure out how to re-create the outgoing service
-  // request handle and the FDIO namespace.
   shell_holders_.emplace(std::make_unique<Engine>(
       *this,                                 // delegate
       debug_label_,                          // thread label
       *application_context_,                 // application context
       settings_,                             // settings
+      std::move(isolate_snapshot_),          // isolate snapshot
       std::move(view_owner),                 // view owner
       std::move(fdio_ns_),                   // FDIO namespace
       std::move(outgoing_services_request_)  // outgoing request

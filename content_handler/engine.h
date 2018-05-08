@@ -29,6 +29,7 @@ class Engine final {
          std::string thread_label,
          component::ApplicationContext& application_context,
          blink::Settings settings,
+         fxl::RefPtr<blink::DartSnapshot> isolate_snapshot,
          fidl::InterfaceRequest<views_v1_token::ViewOwner> view_owner,
          UniqueFDIONS fdio_ns,
          fidl::InterfaceRequest<component::ServiceProvider>
