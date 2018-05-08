@@ -21,11 +21,13 @@ namespace blink {
 RuntimeController::RuntimeController(
     RuntimeDelegate& p_client,
     const DartVM* p_vm,
+    fxl::RefPtr<DartSnapshot> p_isolate_snapshot,
     TaskRunners p_task_runners,
     fml::WeakPtr<GrContext> p_resource_context,
     fxl::RefPtr<flow::SkiaUnrefQueue> p_unref_queue)
     : RuntimeController(p_client,
                         p_vm,
+                        std::move(p_isolate_snapshot),
                         std::move(p_task_runners),
                         std::move(p_resource_context),
                         std::move(p_unref_queue),
@@ -34,19 +36,21 @@ RuntimeController::RuntimeController(
 RuntimeController::RuntimeController(
     RuntimeDelegate& p_client,
     const DartVM* p_vm,
+    fxl::RefPtr<DartSnapshot> p_isolate_snapshot,
     TaskRunners p_task_runners,
     fml::WeakPtr<GrContext> p_resource_context,
     fxl::RefPtr<flow::SkiaUnrefQueue> p_unref_queue,
     WindowData p_window_data)
     : client_(p_client),
       vm_(p_vm),
+      isolate_snapshot_(std::move(p_isolate_snapshot)),
       task_runners_(p_task_runners),
       resource_context_(p_resource_context),
       unref_queue_(p_unref_queue),
       window_data_(std::move(p_window_data)),
       root_isolate_(
           DartIsolate::CreateRootIsolate(vm_,
-                                         vm_->GetIsolateSnapshot(),
+                                         isolate_snapshot_,
                                          task_runners_,
                                          std::make_unique<Window>(this),
                                          resource_context_,
@@ -89,6 +93,7 @@ std::unique_ptr<RuntimeController> RuntimeController::Clone() const {
   return std::unique_ptr<RuntimeController>(new RuntimeController(
       client_,            //
       vm_,                //
+      isolate_snapshot_,  //
       task_runners_,      //
       resource_context_,  //
       unref_queue_,       //

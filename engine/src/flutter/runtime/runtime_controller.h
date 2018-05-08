@@ -25,6 +25,7 @@ class RuntimeController final : public WindowClient {
  public:
   RuntimeController(RuntimeDelegate& client,
                     const DartVM* vm,
+                    fxl::RefPtr<DartSnapshot> isolate_snapshot,
                     TaskRunners task_runners,
                     fml::WeakPtr<GrContext> resource_context,
                     fxl::RefPtr<flow::SkiaUnrefQueue> unref_queue);
@@ -79,6 +80,7 @@ class RuntimeController final : public WindowClient {
 
   RuntimeDelegate& client_;
   const DartVM* vm_;
+  fxl::RefPtr<DartSnapshot> isolate_snapshot_;
   TaskRunners task_runners_;
   fml::WeakPtr<GrContext> resource_context_;
   fxl::RefPtr<flow::SkiaUnrefQueue> unref_queue_;
@@ -88,6 +90,7 @@ class RuntimeController final : public WindowClient {
 
   RuntimeController(RuntimeDelegate& client,
                     const DartVM* vm,
+                    fxl::RefPtr<DartSnapshot> isolate_snapshot,
                     TaskRunners task_runners,
                     fml::WeakPtr<GrContext> resource_context,
                     fxl::RefPtr<flow::SkiaUnrefQueue> unref_queue,

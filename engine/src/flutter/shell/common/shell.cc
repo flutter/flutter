@@ -38,6 +38,7 @@ namespace shell {
 std::unique_ptr<Shell> Shell::CreateShellOnPlatformThread(
     blink::TaskRunners task_runners,
     blink::Settings settings,
+    fxl::RefPtr<blink::DartSnapshot> isolate_snapshot,
     Shell::CreateCallback<PlatformView> on_create_platform_view,
     Shell::CreateCallback<Rasterizer> on_create_rasterizer) {
   if (!task_runners.IsValid()) {
@@ -108,6 +109,7 @@ std::unique_ptr<Shell> Shell::CreateShellOnPlatformThread(
       fxl::MakeCopyable([&ui_latch,                                       //
                          &engine,                                         //
                          shell = shell.get(),                             //
+                         isolate_snapshot = std::move(isolate_snapshot),  //
                          vsync_waiter = std::move(vsync_waiter),          //
                          resource_context = std::move(resource_context),  //
                          unref_queue = std::move(unref_queue)             //
@@ -121,6 +123,7 @@ std::unique_ptr<Shell> Shell::CreateShellOnPlatformThread(
 
         engine = std::make_unique<Engine>(*shell,                       //
                                           shell->GetDartVM(),           //
+                                          std::move(isolate_snapshot),  //
                                           task_runners,                 //
                                           shell->GetSettings(),         //
                                           std::move(animator),          //
@@ -157,6 +160,22 @@ std::unique_ptr<Shell> Shell::Create(
     blink::Settings settings,
     Shell::CreateCallback<PlatformView> on_create_platform_view,
     Shell::CreateCallback<Rasterizer> on_create_rasterizer) {
+  auto vm = blink::DartVM::ForProcess(settings);
+  FXL_CHECK(vm) << "Must be able to initialize the VM.";
+  return Shell::Create(std::move(task_runners),             //
+                       std::move(settings),                 //
+                       vm->GetIsolateSnapshot(),            //
+                       std::move(on_create_platform_view),  //
+                       std::move(on_create_rasterizer)      //
+  );
+}
+
+std::unique_ptr<Shell> Shell::Create(
+    blink::TaskRunners task_runners,
+    blink::Settings settings,
+    fxl::RefPtr<blink::DartSnapshot> isolate_snapshot,
+    Shell::CreateCallback<PlatformView> on_create_platform_view,
+    Shell::CreateCallback<Rasterizer> on_create_rasterizer) {
   RecordStartupTimestamp();
 
   fxl::LogSettings log_settings;
@@ -173,11 +192,20 @@ std::unique_ptr<Shell> Shell::Create(
   std::unique_ptr<Shell> shell;
   fml::TaskRunner::RunNowOrPostTask(
       task_runners.GetPlatformTaskRunner(),
-      [&latch, &shell, task_runners = std::move(task_runners), settings,
-       on_create_platform_view, on_create_rasterizer]() {
-        shell = CreateShellOnPlatformThread(std::move(task_runners), settings,
-                                            on_create_platform_view,
-                                            on_create_rasterizer);
+      [&latch,                                          //
+       &shell,                                          //
+       task_runners = std::move(task_runners),          //
+       settings,                                        //
+       isolate_snapshot = std::move(isolate_snapshot),  //
+       on_create_platform_view,                         //
+       on_create_rasterizer                             //
+  ]() {
+        shell = CreateShellOnPlatformThread(std::move(task_runners),      //
+                                            settings,                     //
+                                            std::move(isolate_snapshot),  //
+                                            on_create_platform_view,      //
+                                            on_create_rasterizer          //
+        );
         latch.Signal();
       });
   latch.Wait();
