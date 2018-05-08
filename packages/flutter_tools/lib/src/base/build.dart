@@ -378,7 +378,7 @@ class AOTSnapshotter {
   }
 
   bool _isValidAotPlatform(TargetPlatform platform, BuildMode buildMode) {
-    if (platform == TargetPlatform.ios && buildMode == BuildMode.debug)
+    if (buildMode == BuildMode.debug)
       return false;
     return const <TargetPlatform>[
       TargetPlatform.android_arm,
