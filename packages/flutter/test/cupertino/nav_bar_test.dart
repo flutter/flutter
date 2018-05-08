@@ -81,7 +81,7 @@ void main() {
             builder: (BuildContext context) {
               return const CupertinoNavigationBar(
                 leading: const _ExpectStyles(color: const Color(0xFF001122), index: 0x000001),
-                middle: const _ExpectStyles(color: const Color(0xFF000000), letterSpacing: -0.72, index: 0x000100),
+                middle: const _ExpectStyles(color: const Color(0xFF000000), letterSpacing: -0.08, index: 0x000100),
                 trailing: const _ExpectStyles(color: const Color(0xFF001122), index: 0x010000),
                 actionsForegroundColor: const Color(0xFF001122),
               );
