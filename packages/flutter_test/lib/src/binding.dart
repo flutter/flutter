@@ -634,7 +634,21 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
       );
     }());
 
-    return Zone.root.run(() {
+    final Zone realAsyncZone = Zone.current.fork(
+      specification: new ZoneSpecification(
+        scheduleMicrotask: (Zone self, ZoneDelegate parent, Zone zone, void f()) {
+          Zone.root.scheduleMicrotask(f);
+        },
+        createTimer: (Zone self, ZoneDelegate parent, Zone zone, Duration duration, void f()) {
+          return Zone.root.createTimer(duration, f);
+        },
+        createPeriodicTimer: (Zone self, ZoneDelegate parent, Zone zone, Duration period, void f(Timer timer)) {
+          return Zone.root.createPeriodicTimer(period, f);
+        },
+      ),
+    );
+
+    return realAsyncZone.run(() {
       _pendingAsyncTasks = new Completer<void>();
       return callback().catchError((dynamic exception, StackTrace stack) {
         FlutterError.reportError(new FlutterErrorDetails(

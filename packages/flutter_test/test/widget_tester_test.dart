@@ -481,6 +481,18 @@ void main() {
       expect(() => tester.runAsync(() async {}), throwsA(const isInstanceOf<TestFailure>()));
       completer.complete();
     });
+
+    testWidgets('maintains existing zone values', (WidgetTester tester) async {
+      final Object key = new Object();
+      await runZoned(() {
+        expect(Zone.current[key], 'abczed');
+        return tester.runAsync<String>(() async {
+          expect(Zone.current[key], 'abczed');
+        });
+      }, zoneValues: <dynamic, dynamic>{
+        key: 'abczed',
+      });
+    });
   });
 }
 
