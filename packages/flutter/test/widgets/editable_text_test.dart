@@ -783,6 +783,31 @@ void main() {
     expect(render.text.style.fontStyle, FontStyle.italic);
   });
 
+  testWidgets('autofocus sets cursor to the end of text', (WidgetTester tester) async {
+    const String text = 'hello world';
+    final FocusScopeNode focusScopeNode = new FocusScopeNode();
+    final FocusNode focusNode = new FocusNode();
+
+    controller.text = text;
+    await tester.pumpWidget(new Directionality(
+      textDirection: TextDirection.ltr,
+      child: new FocusScope(
+        node: focusScopeNode,
+        autofocus: true,
+        child: new EditableText(
+          controller: controller,
+          focusNode: focusNode,
+          autofocus: true,
+          style: textStyle,
+          cursorColor: cursorColor,
+        ),
+      ),
+    ));
+
+    expect(focusNode.hasFocus, true);
+    expect(controller.selection.isCollapsed, true);
+    expect(controller.selection.baseOffset, text.length);
+  });
 }
 
 class MockTextSelectionControls extends Mock implements TextSelectionControls {}
