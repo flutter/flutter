@@ -699,7 +699,7 @@ class RadialGradient extends Gradient {
 ///       stops: const <double>[0.0, 0.25, 0.5, 0.75, 1.0],
 ///      ),
 ///   ),
-///  );
+///  )
 /// ```
 ///
 /// See also:
