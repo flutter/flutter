@@ -73,7 +73,7 @@ class _CupertinoDialogDemoState extends State<CupertinoDialogDemo> {
               showDemoDialog<String>(
                 context: context,
                 child: new CupertinoAlertDialog(
-                  title: const Text('Allow "Maps" to access your location while you use the app?'),
+                  title: const Text('Allow "Maps" to access your location while you are using the app?'),
                   content: const Text(
                     'Your current location will be displayed on the map and used for directions, '
                     'nearby search results, and estimated travel times.'
