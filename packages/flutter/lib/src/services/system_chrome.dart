@@ -193,9 +193,14 @@ class SystemChrome {
     scheduleMicrotask(() {
       assert(_pendingStyle != null);
       if (_pendingStyle != _latestStyle) {
+        // TODO(jonahwilliams): remove when rolling chrome change.
         SystemChannels.platform.invokeMethod(
           'SystemChrome.setSystemUIOverlayStyle',
-          _pendingStyle.toString(),
+          <String, dynamic>{
+            'statusBarBrightness': _pendingStyle == SystemUiOverlayStyle.light 
+              ? 'Brightness.light'
+              : 'Brightness.dark',
+          }
         );
         _latestStyle = _pendingStyle;
       }
