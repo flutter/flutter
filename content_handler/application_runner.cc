@@ -12,37 +12,26 @@
 #include "flutter/lib/ui/text/font_collection.h"
 #include "fuchsia_font_manager.h"
 #include "lib/icu_data/cpp/icu_data.h"
+#include "third_party/flutter/runtime/dart_vm.h"
 #include "third_party/skia/include/core/SkGraphics.h"
 
 namespace flutter {
 
-static void SetProcessName(const std::string& process_name) {
-  zx::process::self().set_property(ZX_PROP_NAME, process_name.c_str(),
-                                   process_name.size());
+static void SetProcessName() {
+  std::stringstream stream;
+  stream << "io.flutter.runner.";
+  if (blink::DartVM::IsRunningPrecompiledCode()) {
+    stream << "aot";
+  } else {
+    stream << "jit";
+  }
+  const auto name = stream.str();
+  zx::process::self().set_property(ZX_PROP_NAME, name.c_str(), name.size());
 }
 
 static void SetThreadName(const std::string& thread_name) {
   zx::thread::self().set_property(ZX_PROP_NAME, thread_name.c_str(),
                                   thread_name.size());
-}
-
-static void SetProcessName(const std::string& label, size_t app_count) {
-  // Format: "flutter.<label_truncated_to_fit>+<app_count>"
-  //         "flutter" in case of error.
-
-  const std::string prefix = "flutter.";
-  const std::string suffix =
-      app_count == 0 ? "" : "+" + std::to_string(app_count);
-
-  if ((prefix.size() + suffix.size()) > ZX_MAX_NAME_LEN) {
-    SetProcessName("flutter");
-    return;
-  }
-
-  auto truncated_label =
-      label.substr(0, ZX_MAX_NAME_LEN - 1 - (prefix.size() + suffix.size()));
-
-  SetProcessName(prefix + truncated_label + suffix);
 }
 
 ApplicationRunner::ApplicationRunner(fxl::Closure on_termination_callback)
@@ -54,9 +43,9 @@ ApplicationRunner::ApplicationRunner(fxl::Closure on_termination_callback)
 
   SetupGlobalFonts();
 
-  SetProcessName("application_runner", 0);
+  SetProcessName();
 
-  SetThreadName("io.flutter.application_runner");
+  SetThreadName("io.flutter.runner.main");
 
   host_context_->outgoing_services()->AddService<component::ApplicationRunner>(
       std::bind(&ApplicationRunner::RegisterApplication, this,
@@ -86,11 +75,6 @@ void ApplicationRunner::StartApplication(
                           std::move(startup_info),  // startup info
                           std::move(controller)     // controller request
       );
-
-  // Update the process label so that "ps" will will list the last appication
-  // started by the runner plus the count of applications hosted by this runner.
-  SetProcessName(thread_application_pair.second->GetDebugLabel(),
-                 active_applications_.size());
 
   active_applications_[thread_application_pair.second.get()] =
       std::move(thread_application_pair);
