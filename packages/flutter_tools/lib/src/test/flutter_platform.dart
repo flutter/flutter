@@ -803,6 +803,8 @@ class _FlutterPlatform extends PlatformPlugin {
     }
     command.add('--enable-checked-mode');
     command.addAll(<String>[
+      '--enable-software-rendering',
+      '--skia-deterministic-rendering',
       '--enable-dart-profiling',
       '--non-interactive',
       '--use-test-fonts',
