@@ -481,6 +481,68 @@ void main() {
     final BoxDecoration decoration = decoratedBox.decoration;
     expect(decoration.border, isNull);
   });
+
+  testWidgets('Standard title golden', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      new WidgetsApp(
+        color: const Color(0xFFFFFFFF),
+        onGenerateRoute: (RouteSettings settings) {
+          return new CupertinoPageRoute<void>(
+            settings: settings,
+            builder: (BuildContext context) {
+              return const RepaintBoundary(
+                child: const CupertinoPageScaffold(
+                  navigationBar: const CupertinoNavigationBar(
+                    middle: const Text('Bling bling'),
+                  ),
+                  child: const Center(),
+                ),
+              );
+            },
+          );
+        },
+      ),
+    );
+
+    await expectLater(
+      find.byType(RepaintBoundary).last,
+      matchesGoldenFile('nav_bar_test.standard_title.1.png'),
+    );
+  });
+
+  testWidgets('Large title golden', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      new WidgetsApp(
+        color: const Color(0xFFFFFFFF),
+        onGenerateRoute: (RouteSettings settings) {
+          return new CupertinoPageRoute<void>(
+            settings: settings,
+            builder: (BuildContext context) {
+              return new CupertinoPageScaffold(
+                child: new CustomScrollView(
+                  slivers: <Widget>[
+                    const CupertinoSliverNavigationBar(
+                      largeTitle: const Text('Bling bling'),
+                    ),
+                    new SliverToBoxAdapter(
+                      child: new Container(
+                        height: 1200.0,
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            },
+          );
+        },
+      ),
+    );
+
+    await expectLater(
+      find.byType(RepaintBoundary).last,
+      matchesGoldenFile('nav_bar_test.large_title.1.png'),
+    );
+  });
 }
 
 class _ExpectStyles extends StatelessWidget {
