@@ -25,6 +25,9 @@ class EmulatorsCommand extends FlutterCommand {
   final String description = 'List and launch available emulators.';
 
   @override
+  final List<String> aliases = <String>['emulator'];
+
+  @override
   Future<Null> runCommand() async {
     if (doctor.workflows.every((Workflow w) => !w.canListEmulators)) {
       throwToolExit(
