@@ -766,6 +766,50 @@ void main() {
     });
   });
 
+  testWidgets('allows customizing text style in subclasses', (WidgetTester tester) async {
+    controller.text = 'Hello World';
+
+    await tester.pumpWidget(new MaterialApp(
+      home: new CustomStyleEditableText(
+        controller: controller,
+        focusNode: focusNode,
+        style: textStyle,
+        cursorColor: cursorColor,
+      ),
+    ));
+
+    // Simulate selection change via tap to show handles.
+    final RenderEditable render = tester.allRenderObjects.firstWhere((RenderObject o) => o.runtimeType == RenderEditable);
+    expect(render.text.style.fontStyle, FontStyle.italic);
+  });
+
 }
 
 class MockTextSelectionControls extends Mock implements TextSelectionControls {}
+
+class CustomStyleEditableText extends EditableText {
+  CustomStyleEditableText({
+    TextEditingController controller,
+    Color cursorColor,
+    FocusNode focusNode,
+    TextStyle style,
+  }): super(
+      controller:controller,
+      cursorColor: cursorColor,
+      focusNode: focusNode,
+      style: style,
+  );
+  @override
+  CustomStyleEditableTextState createState() =>
+      new CustomStyleEditableTextState();
+}
+
+class CustomStyleEditableTextState extends EditableTextState {
+  @override
+  TextSpan buildTextSpan() {
+    return new TextSpan(
+        style: const TextStyle(fontStyle: FontStyle.italic),
+        text: widget.controller.value.text,
+    );
+  }
+}
