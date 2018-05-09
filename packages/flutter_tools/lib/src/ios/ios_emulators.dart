@@ -9,6 +9,7 @@ import '../base/platform.dart';
 import '../base/process.dart';
 import '../emulator.dart';
 import '../globals.dart';
+import '../ios/mac.dart';
 import 'ios_workflow.dart';
 
 class IOSEmulators extends EmulatorDiscovery {
@@ -56,8 +57,7 @@ List<IOSEmulator> getEmulators() {
 
 String getSimulatorPath() {
   final List<String> searchPaths = <String>[
-    // TODO(dantup): Could this be anywhere else?
-    '/Applications/Xcode.app/Contents/Developer/Applications/Simulator.app',
+    fs.path.join(xcode.xcodeSelectPath, 'Applications', 'Simulator.app'),
   ];
   return searchPaths.where((String p) => p != null).firstWhere(
         (String p) => fs.directory(p).existsSync(),
