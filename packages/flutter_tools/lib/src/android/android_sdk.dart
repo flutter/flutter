@@ -133,6 +133,7 @@ class AndroidSdk {
 
     String findNdk(String androidHomeDir) {
       final String ndkDirectory = fs.path.join(androidHomeDir, 'ndk-bundle');
+      print('');
       if (fs.isDirectorySync(ndkDirectory)) {
         return ndkDirectory;
       }
@@ -150,20 +151,53 @@ class AndroidSdk {
         final String ndkCompiler = fs.path.join(ndkDirectory,
             'toolchains', 'arm-linux-androideabi-4.9', 'prebuilt', directory,
             'bin', 'arm-linux-androideabi-gcc');
+        print('looking for NDK compiler in ${ndkCompiler}');
         if (fs.isFileSync(ndkCompiler)) {
           return ndkCompiler;
         }
+        print(' ... not found');
       }
       return null;
     }
 
     List<String> computeNdkCompilerArgs(String ndkDirectory) {
-      final String armPlatform = fs.path.join(ndkDirectory, 'platforms',
-          'android-9', 'arch-arm');
-      if (fs.isDirectorySync(armPlatform)) {
-        return <String>['--sysroot', armPlatform];
+      // If entity represents directory with name android-<version> that
+      // contains arch-arm subdirectory then returns version, otherwise
+      // returns null.
+      int toPlatformVersion(FileSystemEntity entry) {
+        if (entry is! Directory) {
+          return null;
+        }
+
+        if (!fs.isDirectorySync(fs.path.join(entry.path, 'arch-arm'))) {
+          return null;
+        }
+
+        final String name = fs.path.basename(entry.path);
+
+        const String platformPrefix = 'android-';
+        if (!name.startsWith(platformPrefix)) {
+          return null;
+        }
+
+        return int.tryParse(name.substring(platformPrefix.length));
       }
-      return null;
+
+      final List<int> versions = fs.directory(
+          fs.path.join(ndkDirectory, 'platforms')).listSync()
+          .map(toPlatformVersion)
+          .where((int version) => version != null)
+          .toList(growable: false);
+      versions.sort();
+
+      final int suitableVersion = versions.firstWhere((int version) => version >= 9, orElse: () => null);
+      if (suitableVersion == null) {
+        return null;
+      }
+
+      final String armPlatform = fs.path.join(ndkDirectory, 'platforms',
+          'android-${suitableVersion}', 'arch-arm');
+      return <String>['--sysroot', armPlatform];
     }
 
     final String androidHomeDir = findAndroidHomeDir();
