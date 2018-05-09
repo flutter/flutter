@@ -430,15 +430,18 @@ void main() {
     expect(MediaQuery.of(popupContext).padding, EdgeInsets.zero);
   });
 
-  testWidgets('PopupMenu includes route semantics', (WidgetTester tester) async {
+  testWidgets('open PopupMenu has correct semantics', (WidgetTester tester) async {
     final SemanticsTester semantics = new SemanticsTester(tester);
     await tester.pumpWidget(new MaterialApp(
       home: new Material(
         child: new PopupMenuButton<int>(
           itemBuilder: (BuildContext context) {
             return <PopupMenuItem<int>>[
+              const PopupMenuItem<int>(value: 1, child: const Text('1')),
               const PopupMenuItem<int>(value: 2, child: const Text('2')),
               const PopupMenuItem<int>(value: 3, child: const Text('3')),
+              const PopupMenuItem<int>(value: 4, child: const Text('4')),
+              const PopupMenuItem<int>(value: 5, child: const Text('5')),
             ];
           },
           child: const SizedBox(
@@ -452,12 +455,56 @@ void main() {
     await tester.tap(find.text('XXX'));
     await tester.pumpAndSettle();
 
-    expect(semantics, includesNodeWith(
-      label: 'Popup menu',
-      flags: <SemanticsFlag>[
-        SemanticsFlag.namesRoute,
-        SemanticsFlag.scopesRoute,
-      ],
+    expect(semantics, hasSemantics(
+      new TestSemantics.root(
+        children: <TestSemantics>[
+          new TestSemantics(
+            textDirection: TextDirection.ltr,
+            children: <TestSemantics>[
+              new TestSemantics(
+                flags: <SemanticsFlag>[
+                  SemanticsFlag.scopesRoute,
+                  SemanticsFlag.namesRoute,
+                ],
+                label: 'Popup menu',
+                textDirection: TextDirection.ltr,
+                children: <TestSemantics>[
+                  new TestSemantics(
+                    children: <TestSemantics>[
+                      new TestSemantics(
+                        actions: <SemanticsAction>[SemanticsAction.tap],
+                        label: '1',
+                        textDirection: TextDirection.ltr,
+                      ),
+                      new TestSemantics(
+                        actions: <SemanticsAction>[SemanticsAction.tap],
+                        label: '2',
+                        textDirection: TextDirection.ltr,
+                      ),
+                      new TestSemantics(
+                        actions: <SemanticsAction>[SemanticsAction.tap],
+                        label: '3',
+                        textDirection: TextDirection.ltr,
+                      ),
+                      new TestSemantics(
+                        actions: <SemanticsAction>[SemanticsAction.tap],
+                        label: '4',
+                        textDirection: TextDirection.ltr,
+                      ),
+                      new TestSemantics(
+                        actions: <SemanticsAction>[SemanticsAction.tap],
+                        label: '5',
+                        textDirection: TextDirection.ltr,
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ],
+      ),
+      ignoreId: true, ignoreTransform: true, ignoreRect: true,
     ));
 
     semantics.dispose();
