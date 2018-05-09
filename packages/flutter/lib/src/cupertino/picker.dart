@@ -47,10 +47,10 @@ class CupertinoPicker extends StatefulWidget {
     @required this.onSelectedItemChanged,
     @required this.children,
   }) : assert(diameterRatio != null),
-       assert(diameterRatio > 0.0, RenderListWheelViewport.diameterRatioZeroMessage),
-       assert(itemExtent != null),
-       assert(itemExtent > 0),
-       super(key: key);
+  assert(diameterRatio > 0.0, RenderListWheelViewport.diameterRatioZeroMessage),
+  assert(itemExtent != null),
+  assert(itemExtent > 0),
+  super(key: key);
 
   /// Relative ratio between this picker's height and the simulated cylinder's diameter.
   ///
