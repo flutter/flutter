@@ -76,6 +76,11 @@ class MediaQueryData {
   ///
   /// For example, if the text scale factor is 1.5, text will be 50% larger than
   /// the specified font size.
+  ///
+  /// See also:
+  ///
+  ///  * [MediaQuery.textScaleFactorOf], a convenience method which returns the
+  ///    textScaleFactor defined for a [BuildContext].
   final double textScaleFactor;
 
   /// The number of physical pixels on each side of the display rectangle into
@@ -400,6 +405,12 @@ class MediaQuery extends InheritedWidget {
       'The context used was:\n'
       '  $context'
     );
+  }
+
+  /// Returns textScaleFactor for the nearest MediaQuery ancestor or 1.0, if
+  /// no such ancestor exists.
+  static double textScaleFactorOf(BuildContext context) {
+    return MediaQuery.of(context, nullOk: true)?.textScaleFactor ?? 1.0;
   }
 
   @override
