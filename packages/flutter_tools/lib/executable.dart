@@ -15,6 +15,7 @@ import 'src/commands/daemon.dart';
 import 'src/commands/devices.dart';
 import 'src/commands/doctor.dart';
 import 'src/commands/drive.dart';
+import 'src/commands/emulators.dart';
 import 'src/commands/format.dart';
 import 'src/commands/fuchsia_reload.dart';
 import 'src/commands/ide_config.dart';
@@ -57,6 +58,7 @@ Future<Null> main(List<String> args) async {
     new DevicesCommand(),
     new DoctorCommand(verbose: verbose),
     new DriveCommand(),
+    new EmulatorsCommand(),
     new FormatCommand(),
     new FuchsiaReloadCommand(),
     new IdeConfigCommand(hidden: !verboseHelp),
