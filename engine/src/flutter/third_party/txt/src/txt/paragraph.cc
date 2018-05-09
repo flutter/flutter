@@ -1072,8 +1072,7 @@ std::vector<Paragraph::TextBox> Paragraph::GetRectsForRange(size_t start,
         SkRect::MakeLTRB(left, top, right, bottom), run.direction);
   }
 
-  // Add empty rectangles representing any line within the range that did not
-  // render any glyphs.
+  // Add empty rectangles representing any newline characters within the range.
   for (size_t line_number = 0; line_number < line_ranges_.size(); ++line_number) {
     const LineRange& line = line_ranges_[line_number];
     if (line.start >= end)
@@ -1081,14 +1080,14 @@ std::vector<Paragraph::TextBox> Paragraph::GetRectsForRange(size_t start,
     if (line.end_including_newline <= start)
       continue;
     if (line_boxes.find(line_number) == line_boxes.end()) {
-      // If the range starts after the beginning of this line, then place the
-      // rectangle at the end of the line's width.  This is intended to
-      // handle ranges encompassing the newline character at the end of a line.
-      SkScalar x = (start > line.start) ? line_widths_[line_number] : 0;
-      SkScalar top = (line_number > 0) ? line_heights_[line_number - 1] : 0;
-      SkScalar bottom = line_heights_[line_number];
-      line_boxes[line_number].emplace_back(
-          SkRect::MakeLTRB(x, top, x, bottom), TextDirection::ltr);
+      if (line.end != line.end_including_newline &&
+          line.end >= start && line.end_including_newline <= end) {
+        SkScalar x = line_widths_[line_number];
+        SkScalar top = (line_number > 0) ? line_heights_[line_number - 1] : 0;
+        SkScalar bottom = line_heights_[line_number];
+        line_boxes[line_number].emplace_back(
+            SkRect::MakeLTRB(x, top, x, bottom), TextDirection::ltr);
+      }
     }
   }
 
