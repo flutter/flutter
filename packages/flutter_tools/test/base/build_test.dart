@@ -6,6 +6,7 @@ import 'dart:async';
 import 'dart:convert' show json;
 
 import 'package:file/memory.dart';
+import 'package:flutter_tools/src/android/android_sdk.dart';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/base/build.dart';
@@ -21,6 +22,7 @@ import 'package:test/test.dart';
 import '../src/context.dart';
 
 class MockFlutterVersion extends Mock implements FlutterVersion {}
+class MockAndroidSdk extends Mock implements AndroidSdk {}
 class MockArtifacts extends Mock implements Artifacts {}
 class MockXcode extends Mock implements Xcode {}
 
@@ -287,6 +289,7 @@ void main() {
     _FakeGenSnapshot genSnapshot;
     MemoryFileSystem fs;
     AOTSnapshotter snapshotter;
+    MockAndroidSdk mockAndroidSdk;
     MockArtifacts mockArtifacts;
     MockXcode mockXcode;
 
@@ -308,6 +311,7 @@ void main() {
 
       genSnapshot = new _FakeGenSnapshot();
       snapshotter = new AOTSnapshotter();
+      mockAndroidSdk = new MockAndroidSdk();
       mockArtifacts = new MockArtifacts();
       mockXcode = new MockXcode();
       for (BuildMode mode in BuildMode.values) {
@@ -320,6 +324,7 @@ void main() {
     });
 
     final Map<Type, Generator> contextOverrides = <Type, Generator>{
+      AndroidSdk: () => mockAndroidSdk,
       Artifacts: () => mockArtifacts,
       FileSystem: () => fs,
       GenSnapshot: () => genSnapshot,
@@ -334,7 +339,7 @@ void main() {
         mainPath: 'main.dill',
         packagesPath: '.packages',
         outputPath: outputPath,
-        preferSharedLibrary: false,
+        buildSharedLibrary: false,
         previewDart2: true,
       ), isNot(equals(0)));
     }, overrides: contextOverrides);
@@ -347,7 +352,7 @@ void main() {
         mainPath: 'main.dill',
         packagesPath: '.packages',
         outputPath: outputPath,
-        preferSharedLibrary: false,
+        buildSharedLibrary: false,
         previewDart2: true,
       ), isNot(0));
     }, overrides: contextOverrides);
@@ -373,7 +378,7 @@ void main() {
         mainPath: 'main.dill',
         packagesPath: '.packages',
         outputPath: outputPath,
-        preferSharedLibrary: false,
+        buildSharedLibrary: false,
         previewDart2: true,
         iosArch: IOSArch.arm64,
       );
@@ -420,7 +425,7 @@ void main() {
         mainPath: 'main.dill',
         packagesPath: '.packages',
         outputPath: outputPath,
-        preferSharedLibrary: false,
+        buildSharedLibrary: false,
         previewDart2: true,
         iosArch: IOSArch.arm64,
       );
@@ -442,6 +447,25 @@ void main() {
         '--assembly=${fs.path.join(outputPath, 'snapshot_assembly.S')}',
         'main.dill',
       ]);
+    }, overrides: contextOverrides);
+
+    testUsingContext('returns failure if buildSharedLibrary is true but no NDK is found', () async {
+      final String outputPath = fs.path.join('build', 'foo');
+
+      when(mockAndroidSdk.ndkCompiler).thenReturn(null);
+
+      final int genSnapshotExitCode = await snapshotter.build(
+        platform: TargetPlatform.android_arm,
+        buildMode: BuildMode.release,
+        mainPath: 'main.dill',
+        packagesPath: '.packages',
+        outputPath: outputPath,
+        buildSharedLibrary: true,
+        previewDart2: true,
+      );
+
+      expect(genSnapshotExitCode, isNot(0));
+      expect(genSnapshot.callCount, 0);
     }, overrides: contextOverrides);
   });
 }
