@@ -862,6 +862,7 @@ void Paragraph::Paint(SkCanvas* canvas, double x, double y) {
   for (const PaintRecord& record : records_) {
     paint.setColor(record.style().color);
     SkPoint offset = record.offset();
+    PaintBackground(canvas, record);
     canvas->drawTextBlob(record.text(), offset.x(), offset.y(), paint);
     PaintDecorations(canvas, record);
   }
@@ -1024,6 +1025,17 @@ void Paragraph::PaintDecorations(SkCanvas* canvas, const PaintRecord& record) {
       y_offset = y_offset_original;
     }
   }
+}
+
+void Paragraph::PaintBackground(SkCanvas* canvas, const PaintRecord& record) {
+  if (!record.style().has_background)
+    return;
+
+  const SkPaint::FontMetrics& metrics = record.metrics();
+  SkRect rect(SkRect::MakeLTRB(0, metrics.fAscent,
+                               record.GetRunWidth(), metrics.fDescent));
+  rect.offset(record.offset());
+  canvas->drawRect(rect, record.style().background);
 }
 
 std::vector<Paragraph::TextBox> Paragraph::GetRectsForRange(size_t start,
