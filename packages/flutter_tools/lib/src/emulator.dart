@@ -126,7 +126,7 @@ abstract class Emulator {
     return table.map((List<String> row) {
       return indices
         .map((int i) => row[i].padRight(widths[i]))
-        .join(' • ') + ' • ${row.last}';
+        .join(' • ') + (row.last != '' ? ' • ${row.last}' : '');
     }).toList();
   }
 
