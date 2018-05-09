@@ -123,11 +123,14 @@ abstract class Emulator {
     }
 
     // Join columns into lines of text
+    final RegExp whiteSpaceAndDots = new RegExp(r'[•\s]+$');
     return table.map((List<String> row) {
       return indices
         .map((int i) => row[i].padRight(widths[i]))
-        .join(' • ') + (row.last != '' ? ' • ${row.last}' : '');
-    }).toList();
+        .join(' • ') + ' • ${row.last}';
+    })
+        .map((String line) => line.replaceAll(whiteSpaceAndDots, ''))
+        .toList();
   }
 
   static void printEmulators(List<Emulator> emulators) {
