@@ -310,6 +310,9 @@ class Paragraph {
   // Creates and draws the decorations onto the canvas.
   void PaintDecorations(SkCanvas* canvas, const PaintRecord& record);
 
+  // Draws the background onto the canvas.
+  void PaintBackground(SkCanvas* canvas, const PaintRecord& record);
+
   FXL_DISALLOW_COPY_AND_ASSIGN(Paragraph);
 };
 

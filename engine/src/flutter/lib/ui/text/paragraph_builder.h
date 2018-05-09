@@ -6,6 +6,7 @@
 #define FLUTTER_LIB_UI_TEXT_PARAGRAPH_BUILDER_H_
 
 #include <memory>
+#include "flutter/lib/ui/painting/paint.h"
 #include "flutter/lib/ui/text/paragraph.h"
 #include "flutter/sky/engine/core/rendering/RenderObject.h"
 #include "flutter/sky/engine/wtf/OwnPtr.h"
@@ -43,7 +44,9 @@ class ParagraphBuilder : public fxl::RefCountedThreadSafe<ParagraphBuilder>,
                  double letterSpacing,
                  double wordSpacing,
                  double height,
-                 const std::string& locale);
+                 const std::string& locale,
+                 Dart_Handle background_objects,
+                 Dart_Handle background_data);
 
   void pop();
 

@@ -24,6 +24,7 @@
 #include "text_baseline.h"
 #include "text_decoration.h"
 #include "third_party/skia/include/core/SkColor.h"
+#include "third_party/skia/include/core/SkPaint.h"
 
 namespace txt {
 
@@ -46,6 +47,8 @@ class TextStyle {
   double word_spacing = 0.0;
   double height = 1.0;
   std::string locale;
+  bool has_background = false;
+  SkPaint background;
 
   TextStyle();
 
