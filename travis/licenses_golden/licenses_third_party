@@ -1,4 +1,4 @@
-Signature: 0cb4c7cf78c21058a65189b52424a6c3
+Signature: c1893321e39f99d7d6dcae1ab6433a4f
 
 UNUSED LICENSES:
 
@@ -17251,8 +17251,14 @@ FILE: ../../../third_party/skia/src/gpu/GrResourceProviderPriv.h
 FILE: ../../../third_party/skia/src/gpu/GrSurfaceProxyRef.cpp
 FILE: ../../../third_party/skia/src/gpu/GrUninstantiateProxyTracker.cpp
 FILE: ../../../third_party/skia/src/gpu/GrUninstantiateProxyTracker.h
+FILE: ../../../third_party/skia/src/gpu/ccpr/GrCCClipPath.cpp
+FILE: ../../../third_party/skia/src/gpu/ccpr/GrCCClipPath.h
 FILE: ../../../third_party/skia/src/gpu/ccpr/GrCCConicShader.cpp
 FILE: ../../../third_party/skia/src/gpu/ccpr/GrCCConicShader.h
+FILE: ../../../third_party/skia/src/gpu/ccpr/GrCCDrawPathsOp.cpp
+FILE: ../../../third_party/skia/src/gpu/ccpr/GrCCDrawPathsOp.h
+FILE: ../../../third_party/skia/src/gpu/ccpr/GrCCPerFlushResources.cpp
+FILE: ../../../third_party/skia/src/gpu/ccpr/GrCCPerFlushResources.h
 FILE: ../../../third_party/skia/src/gpu/effects/GrAARectEffect.cpp
 FILE: ../../../third_party/skia/src/gpu/effects/GrAARectEffect.fp
 FILE: ../../../third_party/skia/src/gpu/effects/GrAARectEffect.h
