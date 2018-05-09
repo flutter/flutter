@@ -62,6 +62,7 @@ String getAdbPath([AndroidSdk existingSdk]) {
 class AndroidNdkSearchError {
   AndroidNdkSearchError(this.reason);
 
+  /// The message explaining why NDK was not found.
   final String reason;
 }
 
@@ -77,6 +78,7 @@ class AndroidNdk {
   /// The mandatory arguments to the NDK compiler.
   final List<String> compilerArgs;
 
+  /// Locate NDK within the given SDK or throw [AndroidNdkSearchError].
   static AndroidNdk locateNdk(String androidHomeDir) {
     if (androidHomeDir == null) {
       throw new AndroidNdkSearchError('Can not locate NDK because no SDK is found');
@@ -159,6 +161,8 @@ class AndroidNdk {
     return new AndroidNdk._(ndkDir, ndkCompiler, ndkCompilerArgs);
   }
 
+  /// Returns a descriptive message explaining why NDK can not be found within
+  /// the given SDK.
   static String explainMissingNdk(String androidHomeDir) {
     try {
       locateNdk(androidHomeDir);
