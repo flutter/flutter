@@ -21,9 +21,18 @@ executable("testing") {
     "//garnet/public/lib/fxl",
     "//third_party/dart/runtime:libdart_jit",
     "//third_party/dart/runtime/bin:embedded_dart_io",
+    "//third_party/dart/runtime/bin:libdart_builtin",
+    "//third_party/dart/runtime/platform:libdart_platform",
     "//third_party/skia",
     "//topaz/lib/tonic",
   ]
+
+  if (is_fuchsia) {
+    deps += [
+      "//garnet/public/lib/ui/scenic:client",
+      "//zircon/public/lib/trace-provider",
+    ]
+  }
 
   if (is_linux) {
     ldflags = [ "-rdynamic" ]
