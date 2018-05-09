@@ -59,6 +59,51 @@ String getAdbPath([AndroidSdk existingSdk]) {
   }
 }
 
+/// Locate 'emulator'. Prefer to use one from an Android SDK, if we can locate that.
+/// This should be used over accessing androidSdk.emulatorPath directly because it
+/// will work for those users who have Android Tools installed but
+/// not the full SDK.
+String getEmulatorPath([AndroidSdk existingSdk]) {
+  if (existingSdk?.emulatorPath != null)
+    return existingSdk.emulatorPath;
+
+  final AndroidSdk sdk = AndroidSdk.locateAndroidSdk();
+
+  if (sdk?.latestVersion == null) {
+    return os.which('emulator')?.path;
+  } else {
+    return sdk.emulatorPath;
+  }
+}
+
+/// Locate the path for storing AVD emulator images. Returns null if none found.
+String getAvdPath() {
+  
+  final List<String> searchPaths = <String>[
+    platform.environment['ANDROID_AVD_HOME']
+  ];
+
+  if (platform.environment['HOME'] != null)
+    searchPaths.add(fs.path.join(platform.environment['HOME'], '.android', 'avd'));
+
+  if (platform.isWindows) {
+    final String homeDrive = platform.environment['HOMEDRIVE'];
+    final String homePath = platform.environment['HOMEPATH'];
+
+    if (homeDrive != null && homePath != null) {
+      // Can't use path.join for HOMEDRIVE/HOMEPATH
+      // https://github.com/dart-lang/path/issues/37
+      final String home = homeDrive + homePath;
+      searchPaths.add(fs.path.join(home, '.android', 'avd'));
+    }
+  }
+
+  return searchPaths.where((String p) => p != null).firstWhere(
+    (String p) => fs.directory(p).existsSync(),
+    orElse: () => null,
+  );
+}
+
 class AndroidNdkSearchError {
   AndroidNdkSearchError(this.reason);
 
@@ -267,6 +312,8 @@ class AndroidSdk {
 
   String get adbPath => getPlatformToolsPath('adb');
 
+  String get emulatorPath => getEmulatorPath();
+
   /// Validate the Android SDK. This returns an empty list if there are no
   /// issues; otherwise, it returns a list of issues found.
   List<String> validateSdkWellFormed() {
@@ -281,6 +328,19 @@ class AndroidSdk {
 
   String getPlatformToolsPath(String binaryName) {
     return fs.path.join(directory, 'platform-tools', binaryName);
+  }
+
+  String getEmulatorPath() {
+    final String binaryName = platform.isWindows ? 'emulator.exe' : 'emulator';
+    // Emulator now lives inside "emulator" but used to live inside "tools" so
+    // try both.
+    final List<String> searchFolders = <String>['emulator', 'tools'];
+    for (final String folder in searchFolders) {
+      final String path = fs.path.join(directory, folder, binaryName);
+      if (fs.file(path).existsSync())
+        return path;
+    }
+    return null;
   }
 
   void _init() {
