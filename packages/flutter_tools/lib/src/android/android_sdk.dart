@@ -87,7 +87,7 @@ class AndroidNdk {
     String findBundle(String androidHomeDir) {
       final String ndkDirectory = fs.path.join(androidHomeDir, 'ndk-bundle');
       if (!fs.isDirectorySync(ndkDirectory)) {
-        throw new AndroidNdkSearchError('Can not locate ndk-bundle, tried: ${ndkDirectory}');
+        throw new AndroidNdkSearchError('Can not locate ndk-bundle, tried: $ndkDirectory');
       }
       return ndkDirectory;
     }
@@ -106,7 +106,7 @@ class AndroidNdk {
           'toolchains', 'arm-linux-androideabi-4.9', 'prebuilt', directory,
           'bin', 'arm-linux-androideabi-gcc');
       if (!fs.isFileSync(ndkCompiler)) {
-        throw new AndroidNdkSearchError('Can not locate GCC binary, tried ${ndkCompiler}');
+        throw new AndroidNdkSearchError('Can not locate GCC binary, tried $ndkCompiler');
       }
 
       return ndkCompiler;
@@ -147,11 +147,11 @@ class AndroidNdk {
       final int suitableVersion = versions
           .firstWhere((int version) => version >= 9, orElse: () => null);
       if (suitableVersion == null) {
-        throw new AndroidNdkSearchError('Can not locate a suitable platform ARM sysroot (need android-9 or newer), tried to look in ${platformsDir}');
+        throw new AndroidNdkSearchError('Can not locate a suitable platform ARM sysroot (need android-9 or newer), tried to look in $platformsDir');
       }
 
       final String armPlatform = fs.path.join(ndkDirectory, 'platforms',
-          'android-${suitableVersion}', 'arch-arm');
+          'android-$suitableVersion', 'arch-arm');
       return <String>['--sysroot', armPlatform];
     }
 
@@ -249,7 +249,7 @@ class AndroidSdk {
     AndroidNdk ndk;
     try {
       ndk = AndroidNdk.locateNdk(androidHomeDir);
-    } on AndroidNdkSearchError catch (e) {
+    } on AndroidNdkSearchError {
       // Ignore AndroidNdkSearchError's but don't ignore any other
       // exceptions.
     }

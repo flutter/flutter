@@ -157,7 +157,7 @@ class AOTSnapshotter {
       printError(
         'Could not find NDK in Android SDK at ${androidSdk.directory}:\n'
         '\n'
-        '  ${explanation}\n'
+        '  $explanation\n'
         '\n'
         'Unable to build with --build-shared-library\n'
         'To install the NDK, see instructions at https://developer.android.com/ndk/guides/'
