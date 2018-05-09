@@ -137,27 +137,35 @@ class AOTSnapshotter {
     @required String packagesPath,
     @required String outputPath,
     @required bool previewDart2,
-    @required bool preferSharedLibrary,
+    @required bool buildSharedLibrary,
     IOSArch iosArch,
     List<String> extraGenSnapshotOptions: const <String>[],
   }) async {
     if (!_isValidAotPlatform(platform, buildMode)) {
       printError('${getNameForTargetPlatform(platform)} does not support AOT compilation.');
-      return -1;
+      return 1;
     }
     // TODO(cbracken): replace IOSArch with TargetPlatform.ios_{armv7,arm64}.
     assert(platform != TargetPlatform.ios || iosArch != null);
 
-    final bool compileToSharedLibrary = preferSharedLibrary && androidSdk.ndkCompiler != null;
-    if (preferSharedLibrary && !compileToSharedLibrary) {
-      printStatus('Could not find NDK compiler. Not building in shared library mode.');
+    // buildSharedLibrary is ignored for iOS builds.
+    if (platform == TargetPlatform.ios)
+      buildSharedLibrary = false;
+
+    if (buildSharedLibrary && androidSdk.ndkCompiler == null) {
+      printError(
+        'Could not find NDK in Android SDK at ${androidSdk.directory}.\n'
+        'Unable to build with --build-shared-library\n'
+        'To install the NDK, see instructions at https://developer.android.com/ndk/guides/'
+      );
+      return 1;
     }
 
     final PackageMap packageMap = new PackageMap(packagesPath);
     final String packageMapError = packageMap.checkValid();
     if (packageMapError != null) {
       printError(packageMapError);
-      return -2;
+      return 1;
     }
 
     final Directory outputDir = fs.directory(outputPath);
@@ -198,7 +206,7 @@ class AOTSnapshotter {
     }
 
     final String assembly = fs.path.join(outputDir.path, 'snapshot_assembly.S');
-    if (compileToSharedLibrary || platform == TargetPlatform.ios) {
+    if (buildSharedLibrary || platform == TargetPlatform.ios) {
       // Assembly AOT snapshot.
       outputPaths.add(assembly);
       genSnapshotArgs.add('--snapshot_kind=app-aot-assembly');
@@ -230,7 +238,7 @@ class AOTSnapshotter {
     final Iterable<String> missingInputs = inputPaths.where((String p) => !fs.isFileSync(p));
     if (missingInputs.isNotEmpty) {
       printError('Missing input files: $missingInputs from $inputPaths');
-      return -3;
+      return 1;
     }
 
     // If inputs and outputs have not changed since last run, skip the build.
@@ -242,7 +250,7 @@ class AOTSnapshotter {
         'targetPlatform': platform.toString(),
         'entryPoint': mainPath,
         'dart2': previewDart2.toString(),
-        'sharedLib': compileToSharedLibrary.toString(),
+        'sharedLib': buildSharedLibrary.toString(),
         'extraGenSnapshotOptions': extraGenSnapshotOptions.join(' '),
       },
       depfilePaths: <String>[depfilePath],
@@ -261,7 +269,7 @@ class AOTSnapshotter {
     );
     if (genSnapshotExitCode != 0) {
       printError('Dart snapshot generator failed with exit code $genSnapshotExitCode');
-      return -4;
+      return genSnapshotExitCode;
     }
 
     // Write path to gen_snapshot, since snapshots have to be re-generated when we roll
@@ -274,10 +282,12 @@ class AOTSnapshotter {
       final RunResult result = await _buildIosFramework(iosArch: iosArch, assemblyPath: assembly, outputPath: outputDir.path);
       if (result.exitCode != 0)
         return result.exitCode;
-    } else if (compileToSharedLibrary) {
+    } else if (buildSharedLibrary) {
       final RunResult result = await _buildAndroidSharedLibrary(assemblyPath: assembly, outputPath: outputDir.path);
-      if (result.exitCode != 0)
+      if (result.exitCode != 0) {
+        printError('Failed to build AOT snapshot. Compiler terminated with exit code ${result.exitCode}');
         return result.exitCode;
+      }
     }
 
     // Compute and record build fingerprint.
@@ -298,8 +308,10 @@ class AOTSnapshotter {
 
     final String assemblyO = fs.path.join(outputPath, 'snapshot_assembly.o');
     final RunResult compileResult = await xcode.cc(commonBuildOptions.toList()..addAll(<String>['-c', assemblyPath, '-o', assemblyO]));
-    if (compileResult.exitCode != 0)
+    if (compileResult.exitCode != 0) {
+      printError('Failed to compile AOT snapshot. Compiler terminated with exit code ${compileResult.exitCode}');
       return compileResult;
+    }
 
     final String frameworkDir = fs.path.join(outputPath, 'App.framework');
     fs.directory(frameworkDir).createSync(recursive: true);
@@ -313,6 +325,9 @@ class AOTSnapshotter {
         assemblyO,
     ]);
     final RunResult linkResult = await xcode.clang(linkArgs);
+    if (linkResult.exitCode != 0) {
+      printError('Failed to link AOT snapshot. Linker terminated with exit code ${compileResult.exitCode}');
+    }
     return linkResult;
   }
 
