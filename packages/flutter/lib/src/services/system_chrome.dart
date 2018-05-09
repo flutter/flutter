@@ -105,7 +105,7 @@ class SystemUiOverlayStyle {
     statusBarColor: null,
     systemNavigationBarIconBrightness: Brightness.dark,
     statusBarIconBrightness: Brightness.dark,
-    statusBarBrightness:  Brightness.dark,
+    statusBarBrightness: Brightness.dark,
   );
 
   /// System overlays should be drawn with a dark color. Intended for
@@ -123,10 +123,10 @@ class SystemUiOverlayStyle {
   const SystemUiOverlayStyle({
     this.systemNavigationBarColor,
     this.systemNavigationBarDividerColor,
+    this.systemNavigationBarIconBrightness,
     this.statusBarColor,
     this.statusBarBrightness,
     this.statusBarIconBrightness,
-    this.systemNavigationBarIconBrightness,
   });
 
   /// The color of the system bottom navigation bar.
@@ -138,6 +138,11 @@ class SystemUiOverlayStyle {
   /// 
   /// Only honored in Android versions P and greater.
   final Color systemNavigationBarDividerColor;
+
+  /// The brightness of the system navigation bar icons.
+  /// 
+  /// Only honored in Android versions O and greater.
+  final Brightness systemNavigationBarIconBrightness;
 
   /// The color of top status bar.
   /// 
@@ -154,13 +159,8 @@ class SystemUiOverlayStyle {
   /// Only honored in Android version M and greater.
   final Brightness statusBarIconBrightness;
 
-  /// The brightness of the system navigation bar icons.
-  /// 
-  /// Only honored in Android versions O and greater.
-  final Brightness systemNavigationBarIconBrightness;
-
   /// Convert this event to a map for serialization.
-  Map<String, dynamic> toMap() {
+  Map<String, dynamic> _toMap() {
     return <String, dynamic>{
       'systemNavigationBarColor': systemNavigationBarColor?.value,
       'systemNavigationBarDividerColor': systemNavigationBarDividerColor?.value,
@@ -191,8 +191,8 @@ class SystemUiOverlayStyle {
   }
 
   @override
-  int get hashCode => 
-    hashValues(
+  int get hashCode {
+    return hashValues(
       systemNavigationBarColor,
       systemNavigationBarDividerColor,
       statusBarColor,
@@ -200,6 +200,7 @@ class SystemUiOverlayStyle {
       statusBarIconBrightness,
       systemNavigationBarIconBrightness,
     );
+  }
 
   @override
   bool operator ==(dynamic other) {
@@ -320,7 +321,7 @@ class SystemChrome {
       if (_pendingStyle != _latestStyle) {
         SystemChannels.platform.invokeMethod(
           'SystemChrome.setSystemUIOverlayStyle',
-          _pendingStyle.toMap(),
+          _pendingStyle._toMap(),
         );
         _latestStyle = _pendingStyle;
       }
