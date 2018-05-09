@@ -184,15 +184,15 @@ class _Heading extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
-    return new Semantics(
-      header: true,
-      child: new _OptionsItem(
-        child: new DefaultTextStyle(
-          style: theme.textTheme.body1.copyWith(
-            fontFamily: 'GoogleSans',
-            color: theme.accentColor,
-          ),
+    return new _OptionsItem(
+      child: new DefaultTextStyle(
+        style: theme.textTheme.body1.copyWith(
+          fontFamily: 'GoogleSans',
+          color: theme.accentColor,
+        ),
+        child: new Semantics(
           child: new Text(text),
+          header: true,
         ),
       ),
     );
