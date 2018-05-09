@@ -55,8 +55,10 @@ class EmulatorsCommand extends FlutterCommand {
     if (emulators.isEmpty) {
       printStatus("No emulator found that matches '$id'.");
     } else if (emulators.length > 1) {
-      printStatus("More than one emulator matches '$id':\n");
-      Emulator.printEmulators(emulators);
+      _printEmulatorList(
+        emulators,
+        "More than one emulator matches '$id':",
+      );
     } else {
       await emulators.first.launch();
     }
@@ -75,9 +77,17 @@ class EmulatorsCommand extends FlutterCommand {
           'You may need to create one using Android Studio '
           'or visit https://flutter.io/setup/ for troubleshooting tips.');
     } else {
-      printStatus(
-          '${emulators.length} available ${pluralize('emulator', emulators.length)}:\n');
-      Emulator.printEmulators(emulators);
+      _printEmulatorList(
+        emulators,
+        '${emulators.length} available ${pluralize('emulator', emulators.length)}:',
+      );
     }
+  }
+
+  void _printEmulatorList(List<Emulator> emulators, String message) {
+    printStatus('$message\n');
+    Emulator.printEmulators(emulators);
+    printStatus(
+        "\nTo run an emulator, run 'flutter emulators --launch <emulator id>'.");
   }
 }
