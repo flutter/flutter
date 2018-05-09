@@ -99,7 +99,7 @@ class AndroidNdk {
       } else if (platform.isMacOS) {
         directory = 'darwin-x86_64';
       } else {
-        throw new AndroidNdkSearchError('Only Linux and Mac OS are supported');
+        throw new AndroidNdkSearchError('Only Linux and macOS are supported');
       }
 
       final String ndkCompiler = fs.path.join(ndkDirectory,
