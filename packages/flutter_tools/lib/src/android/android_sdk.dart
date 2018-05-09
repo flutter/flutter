@@ -59,9 +59,118 @@ String getAdbPath([AndroidSdk existingSdk]) {
   }
 }
 
+class AndroidNdkSearchError {
+  AndroidNdkSearchError(this.reason);
+
+  final String reason;
+}
+
+class AndroidNdk {
+  AndroidNdk._(this.directory, this.compiler, this.compilerArgs);
+
+  /// The path to the NDK.
+  final String directory;
+
+  /// The path to the NDK compiler.
+  final String compiler;
+
+  /// The mandatory arguments to the NDK compiler.
+  final List<String> compilerArgs;
+
+  static AndroidNdk locateNdk(String androidHomeDir) {
+    if (androidHomeDir == null) {
+      throw new AndroidNdkSearchError('Can not locate NDK because no SDK is found');
+    }
+
+    String findBundle(String androidHomeDir) {
+      final String ndkDirectory = fs.path.join(androidHomeDir, 'ndk-bundle');
+      if (!fs.isDirectorySync(ndkDirectory)) {
+        throw new AndroidNdkSearchError('Can not locate ndk-bundle, tried: ${ndkDirectory}');
+      }
+      return ndkDirectory;
+    }
+
+    String findCompiler(String ndkDirectory) {
+      String directory;
+      if (platform.isLinux) {
+        directory = 'linux-x86_64';
+      } else if (platform.isMacOS) {
+        directory = 'darwin-x86_64';
+      } else {
+        throw new AndroidNdkSearchError('Only Linux and Mac OS are supported');
+      }
+
+      final String ndkCompiler = fs.path.join(ndkDirectory,
+          'toolchains', 'arm-linux-androideabi-4.9', 'prebuilt', directory,
+          'bin', 'arm-linux-androideabi-gcc');
+      if (!fs.isFileSync(ndkCompiler)) {
+        throw new AndroidNdkSearchError('Can not locate GCC binary, tried ${ndkCompiler}');
+      }
+
+      return ndkCompiler;
+    }
+
+    List<String> findSysroot(String ndkDirectory) {
+      // If entity represents directory with name android-<version> that
+      // contains arch-arm subdirectory then returns version, otherwise
+      // returns null.
+      int toPlatformVersion(FileSystemEntity entry) {
+        if (entry is! Directory) {
+          return null;
+        }
+
+        if (!fs.isDirectorySync(fs.path.join(entry.path, 'arch-arm'))) {
+          return null;
+        }
+
+        final String name = fs.path.basename(entry.path);
+
+        const String platformPrefix = 'android-';
+        if (!name.startsWith(platformPrefix)) {
+          return null;
+        }
+
+        return int.tryParse(name.substring(platformPrefix.length));
+      }
+
+      final String platformsDir = fs.path.join(ndkDirectory, 'platforms');
+      final List<int> versions = fs
+          .directory(platformsDir)
+          .listSync()
+          .map(toPlatformVersion)
+          .where((int version) => version != null)
+          .toList(growable: false);
+      versions.sort();
+
+      final int suitableVersion = versions
+          .firstWhere((int version) => version >= 9, orElse: () => null);
+      if (suitableVersion == null) {
+        throw new AndroidNdkSearchError('Can not locate a suitable platform ARM sysroot (need android-9 or newer), tried to look in ${platformsDir}');
+      }
+
+      final String armPlatform = fs.path.join(ndkDirectory, 'platforms',
+          'android-${suitableVersion}', 'arch-arm');
+      return <String>['--sysroot', armPlatform];
+    }
+
+    final String ndkDir = findBundle(androidHomeDir);
+    final String ndkCompiler = findCompiler(ndkDir);
+    final List<String> ndkCompilerArgs = findSysroot(ndkDir);
+    return new AndroidNdk._(ndkDir, ndkCompiler, ndkCompilerArgs);
+  }
+
+  static String explainMissingNdk(String androidHomeDir) {
+    try {
+      locateNdk(androidHomeDir);
+      return 'Unexpected error: found NDK on the second try';
+    } on AndroidNdkSearchError catch (e) {
+      return e.reason;
+    }
+  }
+}
+
 class AndroidSdk {
-  AndroidSdk(this.directory, [this.ndkDirectory, this.ndkCompiler,
-      this.ndkCompilerArgs]) {
+  AndroidSdk(this.directory, [this.ndk]) {
     _init();
   }
 
@@ -71,14 +180,8 @@ class AndroidSdk {
   /// The path to the Android SDK.
   final String directory;
 
-  /// The path to the NDK (can be `null`).
-  final String ndkDirectory;
-
-  /// The path to the NDK compiler (can be `null`).
-  final String ndkCompiler;
-
-  /// The mandatory arguments to the NDK compiler (can be `null`).
-  final List<String> ndkCompilerArgs;
+  /// Android NDK (can be `null`).
+  final AndroidNdk ndk;
 
   List<AndroidSdkVersion> _sdkVersions;
   AndroidSdkVersion _latestVersion;
@@ -131,75 +234,6 @@ class AndroidSdk {
       return null;
     }
 
-    String findNdk(String androidHomeDir) {
-      final String ndkDirectory = fs.path.join(androidHomeDir, 'ndk-bundle');
-      print('');
-      if (fs.isDirectorySync(ndkDirectory)) {
-        return ndkDirectory;
-      }
-      return null;
-    }
-
-    String findNdkCompiler(String ndkDirectory) {
-      String directory;
-      if (platform.isLinux) {
-        directory = 'linux-x86_64';
-      } else if (platform.isMacOS) {
-        directory = 'darwin-x86_64';
-      }
-      if (directory != null) {
-        final String ndkCompiler = fs.path.join(ndkDirectory,
-            'toolchains', 'arm-linux-androideabi-4.9', 'prebuilt', directory,
-            'bin', 'arm-linux-androideabi-gcc');
-        print('looking for NDK compiler in ${ndkCompiler}');
-        if (fs.isFileSync(ndkCompiler)) {
-          return ndkCompiler;
-        }
-        print(' ... not found');
-      }
-      return null;
-    }
-
-    List<String> computeNdkCompilerArgs(String ndkDirectory) {
-      // If entity represents directory with name android-<version> that
-      // contains arch-arm subdirectory then returns version, otherwise
-      // returns null.
-      int toPlatformVersion(FileSystemEntity entry) {
-        if (entry is! Directory) {
-          return null;
-        }
-
-        if (!fs.isDirectorySync(fs.path.join(entry.path, 'arch-arm'))) {
-          return null;
-        }
-
-        final String name = fs.path.basename(entry.path);
-
-        const String platformPrefix = 'android-';
-        if (!name.startsWith(platformPrefix)) {
-          return null;
-        }
-
-        return int.tryParse(name.substring(platformPrefix.length));
-      }
-
-      final List<int> versions = fs.directory(
-          fs.path.join(ndkDirectory, 'platforms')).listSync()
-          .map(toPlatformVersion)
-          .where((int version) => version != null)
-          .toList(growable: false);
-      versions.sort();
-
-      final int suitableVersion = versions.firstWhere((int version) => version >= 9, orElse: () => null);
-      if (suitableVersion == null) {
-        return null;
-      }
-
-      final String armPlatform = fs.path.join(ndkDirectory, 'platforms',
-          'android-${suitableVersion}', 'arch-arm');
-      return <String>['--sysroot', armPlatform];
-    }
-
     final String androidHomeDir = findAndroidHomeDir();
     if (androidHomeDir == null) {
       // No dice.
@@ -208,20 +242,15 @@ class AndroidSdk {
     }
 
     // Try to find the NDK compiler. If we can't find it, it's also ok.
-    final String ndkDir = findNdk(androidHomeDir);
-    String ndkCompiler;
-    List<String> ndkCompilerArgs;
-    if (ndkDir != null) {
-      ndkCompiler = findNdkCompiler(ndkDir);
-      if (ndkCompiler != null) {
-        ndkCompilerArgs = computeNdkCompilerArgs(ndkDir);
-        if (ndkCompilerArgs == null) {
-          ndkCompiler = null;
-        }
-      }
+    AndroidNdk ndk;
+    try {
+      ndk = AndroidNdk.locateNdk(androidHomeDir);
+    } on AndroidNdkSearchError catch (e) {
+      // Ignore AndroidNdkSearchError's but don't ignore any other
+      // exceptions.
     }
 
-    return new AndroidSdk(androidHomeDir, ndkDir, ndkCompiler, ndkCompilerArgs);
+    return new AndroidSdk(androidHomeDir, ndk);
   }
 
   static bool validSdkDirectory(String dir) {
