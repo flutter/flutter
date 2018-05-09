@@ -174,6 +174,7 @@ class GoldensClient {
       <String>[
         'git init',
         'git remote add upstream https://github.com/flutter/goldens.git',
+        'git remote set-url --push upstream git@github.com:flutter/goldens.git',
       ],
       workingDirectory: repositoryRoot,
     );
