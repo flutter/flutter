@@ -14,6 +14,10 @@ import 'package:meta/meta.dart';
 import 'package:platform/platform.dart';
 import 'package:process/process.dart';
 
+// If you are here trying to figure out how to use golden files in the Flutter
+// repo itself, consider reading this wiki page:
+// https://github.com/flutter/flutter/wiki/Writing-a-golden-file-test-for-package%3Aflutter
+
 const String _kFlutterRootKey = 'FLUTTER_ROOT';
 
 /// Main method that can be used in a `flutter_test_config.dart` file to set
@@ -35,15 +39,21 @@ Future<void> main(FutureOr<void> testMain()) async {
 /// the `$FLUTTER_ROOT/bin/cache/pkg/goldens` folder, then perform the comparison against
 /// the files therein.
 class FlutterGoldenFileComparator implements GoldenFileComparator {
+  /// Creates a [FlutterGoldenFileComparator] that will resolve golden file
+  /// URIs relative to the specified [basedir].
+  ///
+  /// The [fs] parameter exists for testing purposes only.
   @visibleForTesting
   FlutterGoldenFileComparator(
-    this.goldens,
     this.basedir, {
     this.fs: const LocalFileSystem(),
   });
 
-  final GoldensClient goldens;
+  /// The directory to which golden file URIs will be resolved in [compare] and [update].
   final Uri basedir;
+
+  /// The file system used to perform file access.
+  @visibleForTesting
   final FileSystem fs;
 
   /// Creates a new [FlutterGoldenFileComparator] that mirrors the relative
@@ -51,11 +61,24 @@ class FlutterGoldenFileComparator implements GoldenFileComparator {
   ///
   /// By the time the future completes, the clone of the `flutter/goldens`
   /// repository is guaranteed to be ready use.
-  static Future<FlutterGoldenFileComparator> fromDefaultComparator() async {
-    final LocalFileComparator defaultComparator = goldenFileComparator;
-    final GoldensClient goldens = new GoldensClient();
+  ///
+  /// The [goldens] and [defaultComparator] parameters are visible for testing
+  /// purposes only.
+  static Future<FlutterGoldenFileComparator> fromDefaultComparator({
+    GoldensClient goldens,
+    LocalFileComparator defaultComparator,
+  }) async {
+    defaultComparator ??= goldenFileComparator;
+
+    // Prepare the goldens repo.
+    goldens ??= new GoldensClient();
     await goldens.prepare();
-    return new FlutterGoldenFileComparator(goldens, defaultComparator.basedir);
+
+    // Calculate the appropriate basedir for the current test context.
+    final FileSystem fs = goldens.fs;
+    final Directory testDirectory = fs.directory(defaultComparator.basedir);
+    final String testDirectoryRelativePath = fs.path.relative(testDirectory.path, from: goldens.flutterRoot.path);
+    return new FlutterGoldenFileComparator(goldens.repositoryRoot.childDirectory(testDirectoryRelativePath).uri);
   }
 
   @override
@@ -77,10 +100,7 @@ class FlutterGoldenFileComparator implements GoldenFileComparator {
   }
 
   File _getGoldenFile(Uri uri) {
-    final File relativeFile = fs.file(uri);
-    final Directory testDirectory = fs.directory(basedir);
-    final String relativeBase = fs.path.relative(testDirectory.path, from: goldens.flutterRoot.path);
-    return goldens.repositoryRoot.childDirectory(relativeBase).childFile(relativeFile.path);
+    return fs.directory(basedir).childFile(fs.file(uri).path);
   }
 }
 
@@ -89,20 +109,42 @@ class FlutterGoldenFileComparator implements GoldenFileComparator {
 /// repository.
 @visibleForTesting
 class GoldensClient {
+  /// Create a handle to a local clone of the goldens repository.
   GoldensClient({
     this.fs: const LocalFileSystem(),
     this.platform: const LocalPlatform(),
     this.process: const LocalProcessManager(),
   });
 
+  /// The file system to use for storing the local clone of the repository.
+  ///
+  /// This is useful in tests, where a local file system (the default) can
+  /// be replaced by a memory file system.
   final FileSystem fs;
+
+  /// A wrapper for the [dart:io.Platform] API.
+  ///
+  /// This is useful in tests, where the system platform (the default) can
+  /// be replaced by a mock platform instance.
   final Platform platform;
+
+  /// A controller for launching subprocesses.
+  ///
+  /// This is useful in tests, where the real process manager (the default)
+  /// can be replaced by a mock process manager that doesn't really create
+  /// subprocesses.
   final ProcessManager process;
 
   RandomAccessFile _lock;
 
+  /// The local [Directory] where the Flutter repository is hosted.
+  ///
+  /// Uses the [fs] file system.
   Directory get flutterRoot => fs.directory(platform.environment[_kFlutterRootKey]);
 
+  /// The local [Directory] where the goldens repository is hosted.
+  ///
+  /// Uses the [fs] file system.
   Directory get repositoryRoot => flutterRoot.childDirectory(fs.path.join('bin', 'cache', 'pkg', 'goldens'));
 
   /// Prepares the local clone of the `flutter/goldens` repository for golden
@@ -158,6 +200,7 @@ class GoldensClient {
       <String>[
         'git init',
         'git remote add upstream https://github.com/flutter/goldens.git',
+        'git remote set-url --push upstream git@github.com:flutter/goldens.git',
       ],
       workingDirectory: repositoryRoot,
     );
@@ -193,8 +236,8 @@ class GoldensClient {
   Future<void> _obtainLock() async {
     final File lockFile = flutterRoot.childFile(fs.path.join('bin', 'cache', 'goldens.lockfile'));
     await lockFile.create(recursive: true);
-    _lock = await lockFile.open(mode: io.FileMode.WRITE);
-    await _lock.lock(io.FileLock.BLOCKING_EXCLUSIVE);
+    _lock = await lockFile.open(mode: io.FileMode.WRITE); // ignore: deprecated_member_use
+    await _lock.lock(io.FileLock.BLOCKING_EXCLUSIVE); // ignore: deprecated_member_use
   }
 
   Future<void> _releaseLock() async {
@@ -205,9 +248,17 @@ class GoldensClient {
 
 /// Exception that signals a process' exit with a non-zero exit code.
 class NonZeroExitCode implements Exception {
+  /// Create an exception that represents a non-zero exit code.
+  ///
+  /// The first argument must be non-zero.
   const NonZeroExitCode(this.exitCode, this.stderr) : assert(exitCode != 0);
 
+  /// The code that the process will signal to th eoperating system.
+  ///
+  /// By definiton, this is not zero.
   final int exitCode;
+
+  /// The message to show on standard error.
   final String stderr;
 
   @override

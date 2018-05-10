@@ -52,7 +52,7 @@ Future<Null> _patchXcconfigFilesIfNotPatched(String flutterProjectPath) async {
       final String contents = await file.readAsString();
       final bool alreadyPatched = contents.contains(include);
       if (!alreadyPatched) {
-        final IOSink patchOut = file.openWrite(mode: FileMode.APPEND);
+        final IOSink patchOut = file.openWrite(mode: FileMode.APPEND); // ignore: deprecated_member_use
         patchOut.writeln(); // in case EOF is not preceded by line break
         patchOut.writeln(include);
         await patchOut.close();

@@ -31,8 +31,8 @@ void main() {
     await tester.tap(showOptionsPageButton);
     await tester.pumpAndSettle();
 
-    // Show the vignettes
-    await tester.tap(find.text('Vignettes'));
+    // Show the studies (aka "vignettes", aka "demos")
+    await tester.tap(find.text('Studies'));
     await tester.pumpAndSettle();
 
     // Show the Contact profile demo and scroll it upwards

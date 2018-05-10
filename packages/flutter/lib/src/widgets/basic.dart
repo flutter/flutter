@@ -52,6 +52,7 @@ export 'package:flutter/rendering.dart' show
   RelativeRect,
   SemanticsBuilderCallback,
   ShaderCallback,
+  ShapeBorderClipper,
   SingleChildLayoutDelegate,
   StackFit,
   TextOverflow,
@@ -731,6 +732,11 @@ class PhysicalModel extends SingleChildRenderObjectWidget {
 ///
 /// [PhysicalModel] does the same but only supports shapes that can be expressed
 /// as rectangles with rounded corners.
+///
+/// See also:
+///
+///  * [ShapeBorderClipper], which converts a [ShapeBorder] to a [CustomerClipper], as
+///    needed by this widget.
 class PhysicalShape extends SingleChildRenderObjectWidget {
   /// Creates a physical model with an arbitrary shape clip.
   ///
@@ -751,6 +757,10 @@ class PhysicalShape extends SingleChildRenderObjectWidget {
        super(key: key, child: child);
 
   /// Determines which clip to use.
+  ///
+  /// If the path in question is expressed as a [ShapeBorder] subclass,
+  /// consider using the [ShapeBorderClipper] delegate class to adapt the
+  /// shape for use with this widget.
   final CustomClipper<Path> clipper;
 
   /// The z-coordinate at which to place this physical object.

@@ -26,6 +26,7 @@ import 'compile.dart';
 import 'devfs.dart';
 import 'device.dart';
 import 'doctor.dart';
+import 'emulator.dart';
 import 'ios/cocoapods.dart';
 import 'ios/ios_workflow.dart';
 import 'ios/mac.dart';
@@ -52,12 +53,13 @@ Future<T> runInContext<T>(
       BotDetector: () => const BotDetector(),
       Cache: () => new Cache(),
       Clock: () => const Clock(),
-      CocoaPods: () => const CocoaPods(),
+      CocoaPods: () => new CocoaPods(),
       Config: () => new Config(),
       DevFSConfig: () => new DevFSConfig(),
       DeviceManager: () => new DeviceManager(),
       Doctor: () => const Doctor(),
       DoctorValidatorsProvider: () => DoctorValidatorsProvider.defaultInstance,
+      EmulatorManager: () => new EmulatorManager(),
       Flags: () => const EmptyFlags(),
       FlutterVersion: () => new FlutterVersion(const Clock()),
       GenSnapshot: () => const GenSnapshot(),

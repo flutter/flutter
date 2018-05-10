@@ -325,6 +325,10 @@ abstract class PaintPattern {
   /// are compared to the actual [Canvas.drawShadow] call's `paint` argument,
   /// and any mismatches result in failure.
   ///
+  /// In tests, shadows from framework features such as [BoxShadow] or
+  /// [Material] are disabled by default, and thus this predicate would not
+  /// match. The [debugDisableShadows] flag controls this.
+  ///
   /// To introspect the Path object (as it stands after the painting has
   /// completed), the `includes` and `excludes` arguments can be provided to
   /// specify points that should be considered inside or outside the path

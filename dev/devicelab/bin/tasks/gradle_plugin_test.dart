@@ -131,6 +131,7 @@ class FlutterProject {
     final File buildScript = new File(
       path.join(androidPath, 'app', 'build.gradle'),
     );
+    // ignore: deprecated_member_use
     buildScript.openWrite(mode: FileMode.APPEND).write('''
 
 android {
@@ -147,6 +148,7 @@ android {
     final File buildScript = new File(
       path.join(androidPath, 'app', 'build.gradle'),
     );
+    // ignore: deprecated_member_use
     buildScript.openWrite(mode: FileMode.APPEND).write('''
 
 android {
