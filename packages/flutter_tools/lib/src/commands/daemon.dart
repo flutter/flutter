@@ -848,7 +848,6 @@ class EmulatorDomain extends Domain {
     return list.map(_emulatorToMap).toList();
   }
 
-  /// Enable device events.
   Future<Null> launch(Map<String, dynamic> args) async {
     final String emulatorId = _getStringArg(args, 'emulatorId', required: true);
     final List<Emulator> matches =
