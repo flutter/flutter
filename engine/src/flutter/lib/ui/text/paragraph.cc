@@ -6,14 +6,6 @@
 
 #include "flutter/common/settings.h"
 #include "flutter/common/task_runners.h"
-#include "flutter/sky/engine/core/rendering/PaintInfo.h"
-#include "flutter/sky/engine/core/rendering/RenderParagraph.h"
-#include "flutter/sky/engine/core/rendering/RenderText.h"
-#include "flutter/sky/engine/core/rendering/style/RenderStyle.h"
-#include "flutter/sky/engine/platform/fonts/FontCache.h"
-#include "flutter/sky/engine/platform/graphics/GraphicsContext.h"
-#include "flutter/sky/engine/platform/text/TextBoundaries.h"
-#include "flutter/sky/engine/wtf/PassOwnPtr.h"
 #include "lib/fxl/logging.h"
 #include "lib/fxl/tasks/task_runner.h"
 #include "lib/tonic/converter/dart_converter.h"
@@ -43,20 +35,11 @@ IMPLEMENT_WRAPPERTYPEINFO(ui, Paragraph);
 
 DART_BIND_ALL(Paragraph, FOR_EACH_BINDING)
 
-Paragraph::Paragraph(PassOwnPtr<RenderView> renderView)
-    : m_paragraphImpl(std::make_unique<ParagraphImplBlink>(renderView)) {}
-
 Paragraph::Paragraph(std::unique_ptr<txt::Paragraph> paragraph)
     : m_paragraphImpl(
           std::make_unique<ParagraphImplTxt>(std::move(paragraph))) {}
 
-Paragraph::~Paragraph() {
-  if (m_renderView) {
-    RenderView* renderView = m_renderView.leakPtr();
-    destruction_task_runner_->PostTask(
-        [renderView]() { renderView->destroy(); });
-  }
-}
+Paragraph::~Paragraph() = default;
 
 size_t Paragraph::GetAllocationSize() {
   // We don't have an accurate accounting of the paragraph's memory consumption,

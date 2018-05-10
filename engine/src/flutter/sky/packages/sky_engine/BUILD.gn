@@ -16,7 +16,6 @@ import("//third_party/dart/sdk/lib/typed_data/typed_data_sources.gni")
 
 import("$flutter_root/build/dart/rules.gni")
 import("$flutter_root/lib/ui/dart_ui.gni")
-import("$flutter_root/sky/engine/core/core.gni")
 
 if (!is_fuchsia) {
   copy("copy_sky_engine_authors") {

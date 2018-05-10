@@ -39,7 +39,6 @@ std::string Settings::ToString() const {
   stream << "use_test_fonts: " << use_test_fonts << std::endl;
   stream << "enable_software_rendering: " << enable_software_rendering
          << std::endl;
-  stream << "using_blink: " << using_blink << std::endl;
   stream << "log_tag: " << log_tag << std::endl;
   stream << "icu_data_path: " << icu_data_path << std::endl;
   stream << "assets_dir: " << assets_dir << std::endl;

@@ -61,8 +61,6 @@ source_set("test_font") {
 
 source_set("runtime") {
   sources = [
-    "asset_font_selector.cc",
-    "asset_font_selector.h",
     "dart_isolate.cc",
     "dart_isolate.h",
     "dart_service_isolate.cc",
@@ -75,8 +73,6 @@ source_set("runtime") {
     "dart_vm.h",
     "embedder_resources.cc",
     "embedder_resources.h",
-    "platform_impl.cc",
-    "platform_impl.h",
     "runtime_controller.cc",
     "runtime_controller.h",
     "runtime_delegate.cc",
@@ -85,8 +81,6 @@ source_set("runtime") {
     "service_protocol.h",
     "start_up.cc",
     "start_up.h",
-    "test_font_selector.cc",
-    "test_font_selector.h",
   ]
 
   deps = [
@@ -99,7 +93,6 @@ source_set("runtime") {
     "$flutter_root/glue",
     "$flutter_root/lib/io",
     "$flutter_root/lib/ui",
-    "$flutter_root/sky/engine/platform",
     "$flutter_root/third_party/txt",
     "//garnet/public/lib/fxl",
     "//third_party/dart/runtime:dart_api",
@@ -117,6 +110,12 @@ source_set("runtime") {
   # In Fuchsia, we load from a file instead of linking.
   if (!flutter_aot && !is_fuchsia) {
     deps += [ "$flutter_root/lib/snapshot" ]
+  }
+
+  if (flutter_runtime_mode != "release" && !is_fuchsia) {
+    # Only link in Observatory in non-release modes on non-Fuchsia. Fuchsia
+    # instead puts Observatory into the runner's package.
+    deps += [ "//third_party/dart/runtime/observatory:embedded_observatory_archive" ]
   }
 }
 

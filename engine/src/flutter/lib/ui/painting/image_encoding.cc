@@ -82,7 +82,7 @@ sk_sp<SkData> EncodeImage(sk_sp<SkImage> image, ImageByteFormat format) {
     return SkData::MakeWithCopy(pixmap.addr(), pixmap.computeByteSize());
   }
 
-  ASSERT(format == kRawRGBA);
+  FXL_CHECK(format == kRawRGBA);
   if (pixmap.colorType() != kRGBA_8888_SkColorType) {
     TRACE_EVENT0("flutter", "ConvertToRGBA");
 

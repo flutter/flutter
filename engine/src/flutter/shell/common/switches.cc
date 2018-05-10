@@ -144,9 +144,6 @@ blink::Settings SettingsFromCommandLine(const fxl::CommandLine& command_line) {
   settings.enable_software_rendering =
       command_line.HasOption(FlagForSwitch(Switch::EnableSoftwareRendering));
 
-  settings.using_blink =
-      command_line.HasOption(FlagForSwitch(Switch::EnableBlink));
-
   settings.endless_trace_buffer =
       command_line.HasOption(FlagForSwitch(Switch::EndlessTraceBuffer));
 

@@ -85,7 +85,6 @@ fml::WeakPtr<DartIsolate> DartIsolate::CreateRootIsolate(
   if (embedder_isolate) {
     // Only root isolates can interact with windows.
     embedder_isolate->SetWindow(std::move(window));
-    embedder_isolate->set_use_blink(vm->GetSettings().using_blink);
   }
 
   root_embedder_data.release();

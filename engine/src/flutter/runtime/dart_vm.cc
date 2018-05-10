@@ -39,7 +39,7 @@
 namespace dart {
 namespace observatory {
 
-#if !OS(FUCHSIA) && (FLUTTER_RUNTIME_MODE != FLUTTER_RUNTIME_MODE_RELEASE)
+#if !OS_FUCHSIA && (FLUTTER_RUNTIME_MODE != FLUTTER_RUNTIME_MODE_RELEASE)
 
 // These two symbols are defined in |observatory_archive.cc| which is generated
 // by the |//third_party/dart/runtime/observatory:archive_observatory| rule.
@@ -48,7 +48,7 @@ namespace observatory {
 extern unsigned int observatory_assets_archive_len;
 extern const uint8_t* observatory_assets_archive;
 
-#endif  // !OS(FUCHSIA) && (FLUTTER_RUNTIME_MODE !=
+#endif  // !OS_FUCHSIA && (FLUTTER_RUNTIME_MODE !=
         // FLUTTER_RUNTIME_MODE_RELEASE)
 
 }  // namespace observatory
@@ -148,7 +148,7 @@ void ThreadExitCallback() {}
 Dart_Handle GetVMServiceAssetsArchiveCallback() {
 #if (FLUTTER_RUNTIME_MODE == FLUTTER_RUNTIME_MODE_RELEASE)
   return nullptr;
-#elif OS(FUCHSIA)
+#elif OS_FUCHSIA
   std::vector<uint8_t> observatory_assets_archive;
   if (!files::ReadFileToVector("pkg/data/observatory.tar",
                                &observatory_assets_archive)) {
@@ -323,11 +323,11 @@ DartVM::DartVM(const Settings& settings,
   // precompiled code only in the debug product mode.
   bool use_checked_mode = !settings.dart_non_checked_mode;
 
-#if !OS(FUCHSIA)
+#if !OS_FUCHSIA
   if (IsRunningPrecompiledCode()) {
     use_checked_mode = false;
   }
-#endif  // !OS(FUCHSIA)
+#endif  // !OS_FUCHSIA
 
 #if FLUTTER_RUNTIME_MODE == FLUTTER_RUNTIME_MODE_DEBUG
   // Debug mode uses the JIT, disable code page write protection to avoid

@@ -115,8 +115,6 @@ static std::string CreateThreadLabel() {
         [[NSBundle mainBundle] pathForResource:@"icudtl.dat" ofType:@""].UTF8String;
   }
 
-  settings.using_blink = false;
-
   settings.task_observer_add = [](intptr_t key, fxl::Closure callback) {
     fml::MessageLoop::GetCurrent().AddTaskObserver(key, std::move(callback));
   };
