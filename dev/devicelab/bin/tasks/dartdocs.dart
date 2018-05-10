@@ -21,21 +21,24 @@ Future<Null> main() async {
     int publicMembers = 0;
     int otherErrors = 0;
     int otherLines = 0;
-    await for (String entry in analysis.stderr.transform(utf8.decoder).transform(const LineSplitter())) {
-      print('analyzer stderr: $entry');
-      if (entry.startsWith('[lint] Document all public members')) {
-        publicMembers += 1;
-      } else if (entry.startsWith('[')) {
-        otherErrors += 1;
-      } else if (entry.startsWith('(Ran in ')) {
+    await for (String entry in analysis.stdout.transform(utf8.decoder).transform(const LineSplitter())) {
+      entry = entry.trim();
+      print('analyzer stdout: $entry');
+      if (entry == 'Building flutter tool...') {
         // ignore this line
-      } else {
+      } else if (entry.startsWith('info • Document all public members •')) {
+        publicMembers += 1;
+      } else if (entry.startsWith('info •') || entry.startsWith('warning •') || entry.startsWith('error •')) {
+        otherErrors += 1;
+      } else if (entry.contains(' (ran in ')) {
+        // ignore this line
+      } else if (entry.isNotEmpty) {
         otherLines += 1;
       }
     }
-    await for (String entry in analysis.stdout.transform(utf8.decoder).transform(const LineSplitter())) {
-      print('analyzer stdout: $entry');
-      if (entry == 'Building flutter tool...') {
+    await for (String entry in analysis.stderr.transform(utf8.decoder).transform(const LineSplitter())) {
+      print('analyzer stderr: $entry');
+      if (entry.startsWith('[lint] ')) {
         // ignore this line
       } else {
         otherLines += 1;

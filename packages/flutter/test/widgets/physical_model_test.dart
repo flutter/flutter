@@ -5,6 +5,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   testWidgets('PhysicalModel - creates a physical model layer when it needs compositing', (WidgetTester tester) async {
+    debugDisableShadows = false;
     await tester.pumpWidget(new Directionality(
         textDirection: TextDirection.ltr,
         child: new PhysicalModel(
@@ -25,5 +26,6 @@ void main() {
     expect(physicalModelLayer.shadowColor, Colors.red);
     expect(physicalModelLayer.color, Colors.grey);
     expect(physicalModelLayer.elevation, 1.0);
+    debugDisableShadows = true;
   });
 }

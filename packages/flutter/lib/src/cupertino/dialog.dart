@@ -270,7 +270,7 @@ class CupertinoDialogAction extends StatelessWidget {
       style = style.copyWith(color: style.color.withOpacity(0.5));
     }
 
-    final double textScaleFactor = MediaQuery.of(context, nullOk: true)?.textScaleFactor ?? 1.0;
+    final double textScaleFactor = MediaQuery.textScaleFactorOf(context);
     return new GestureDetector(
       onTap: onPressed,
       behavior: HitTestBehavior.opaque,
