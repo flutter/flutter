@@ -394,6 +394,12 @@ config("compiler") {
   # Android-specific flags setup.
   # -----------------------------
   if (is_android) {
+    # Use stdinc++ from the NDK.
+    cflags += [
+      "-nostdinc++"
+    ]
+
+    # Common Android flags
     cflags += [
       "-ffunction-sections",
       "-funwind-tables",
