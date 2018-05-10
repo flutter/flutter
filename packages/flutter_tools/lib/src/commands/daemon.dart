@@ -17,6 +17,7 @@ import '../base/utils.dart';
 import '../build_info.dart';
 import '../cache.dart';
 import '../device.dart';
+import '../emulator.dart';
 import '../globals.dart';
 import '../ios/devices.dart';
 import '../ios/simulators.dart';
@@ -88,6 +89,7 @@ class Daemon {
     _registerDomain(daemonDomain = new DaemonDomain(this));
     _registerDomain(appDomain = new AppDomain(this));
     _registerDomain(deviceDomain = new DeviceDomain(this));
+    _registerDomain(emulatorDomain = new EmulatorDomain(this));
 
     // Start listening.
     _commandSubscription = commandStream.listen(
@@ -102,6 +104,7 @@ class Daemon {
   DaemonDomain daemonDomain;
   AppDomain appDomain;
   DeviceDomain deviceDomain;
+  EmulatorDomain emulatorDomain;
   StreamSubscription<Map<String, dynamic>> _commandSubscription;
 
   final DispatchCommand sendCommand;
@@ -729,6 +732,13 @@ Future<Map<String, dynamic>> _deviceToMap(Device device) async {
   };
 }
 
+Map<String, dynamic> _emulatorToMap(Emulator emulator) {
+  return <String, dynamic>{
+    'id': emulator.id,
+    'name': emulator.name,
+  };
+}
+
 Map<String, dynamic> _operationResultToMap(OperationResult result) {
   final Map<String, dynamic> map = <String, dynamic>{
     'code': result.code,
@@ -821,6 +831,35 @@ class AppInstance {
         Logger: () => _logger,
       },
     );
+  }
+}
+
+/// This domain responds to methods like [getEmulators] and [launch].
+class EmulatorDomain extends Domain {
+  EmulatorManager emulators = new EmulatorManager();
+
+  EmulatorDomain(Daemon daemon) : super(daemon, 'emulator') {
+    registerHandler('getEmulators', getEmulators);
+    registerHandler('launch', launch);
+  }
+
+  Future<List<Map<String, dynamic>>> getEmulators([Map<String, dynamic> args]) async {
+    final List<Emulator> list = await emulators.getAllAvailableEmulators();
+    return list.map(_emulatorToMap).toList();
+  }
+
+  /// Enable device events.
+  Future<Null> launch(Map<String, dynamic> args) async {
+    final String emulatorId = _getStringArg(args, 'emulatorId', required: true);
+    final List<Emulator> matches =
+        await emulators.getEmulatorsMatching(emulatorId);
+    if (matches.isEmpty) {
+      throw "emulator '$emulatorId' not found";
+    } else if (matches.length > 1) {
+      throw "multiple emulators match '$emulatorId'";
+    } else {
+      await matches.first.launch();
+    }
   }
 }
 
