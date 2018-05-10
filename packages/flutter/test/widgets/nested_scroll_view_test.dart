@@ -344,6 +344,7 @@ void main() {
   });
 
   testWidgets('NestedScrollView and internal scrolling', (WidgetTester tester) async {
+    debugDisableShadows = false;
     const List<String> _tabs = const <String>['Hello', 'World'];
     int buildCount = 0;
     await tester.pumpWidget(
@@ -565,6 +566,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(buildCount, expectedBuildCount);
     expect(find.byType(NestedScrollView), isNot(paints..shadow()));
+    debugDisableShadows = true;
   });
 
   testWidgets('NestedScrollView and iOS bouncing', (WidgetTester tester) async {
