@@ -23,6 +23,29 @@ void main() {
     }
   });
 
+  test('TextTheme merges properly in the presence of null fields.', () {
+    const TextTheme partialTheme = const TextTheme(title: const TextStyle(color: const Color(0xcafefeed)));
+    final TextTheme fullTheme = ThemeData.fallback().textTheme.merge(partialTheme);
+    expect(fullTheme.title.color, equals(partialTheme.title.color));
+
+    const TextTheme onlyHeadlineAndTitle = const TextTheme(
+      headline: const TextStyle(color: const Color(0xcafefeed)),
+      title: const TextStyle(color: const Color(0xbeefcafe)),
+    );
+    const TextTheme onlyBody1AndTitle = const TextTheme(
+      body1: const TextStyle(color: const Color(0xfeedfeed)),
+      title: const TextStyle(color: const Color(0xdeadcafe)),
+    );
+    TextTheme merged = onlyHeadlineAndTitle.merge(onlyBody1AndTitle);
+    expect(merged.body2, isNull);
+    expect(merged.body1.color, equals(onlyBody1AndTitle.body1.color));
+    expect(merged.headline.color, equals(onlyHeadlineAndTitle.headline.color));
+    expect(merged.title.color, equals(onlyBody1AndTitle.title.color));
+
+    merged = onlyHeadlineAndTitle.merge(null);
+    expect(merged, equals(onlyHeadlineAndTitle));
+  });
+
   test('Typography on Android, Fuchsia defaults to Roboto', () {
     expect(new Typography(platform: TargetPlatform.android).black.title.fontFamily, 'Roboto');
     expect(new Typography(platform: TargetPlatform.fuchsia).black.title.fontFamily, 'Roboto');
