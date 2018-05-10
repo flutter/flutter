@@ -176,7 +176,7 @@ static sk_sp<SkData> ScreenshotLayerTreeAsImage(
   auto canvas = snapshot_surface->getCanvas();
   auto frame = compositor_context.AcquireFrame(surface_context, canvas, false);
   canvas->clear(SK_ColorBLACK);
-  frame->Raster(*tree, false);
+  frame->Raster(*tree, true);
   canvas->flush();
 
   // Prepare an image from the surface, this image may potentially be on th GPU.
