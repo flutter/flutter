@@ -60,7 +60,7 @@ void main() {
         arguments: <String>['analyze'],
         statusTextContains: <String>['No issues found!'],
       );
-    });
+    }, timeout: const Timeout.factor(2.0));
 
     // Analyze a specific file outside the current directory
     testUsingContext('passing one file throws', () async {
@@ -102,7 +102,7 @@ void main() {
         ],
         toolExit: true,
       );
-    });
+    }, timeout: const Timeout.factor(2.0));
 
     // Analyze in the current directory - no arguments
     testUsingContext('working directory with local options', () async {
@@ -129,7 +129,7 @@ void main() {
         ],
         toolExit: true,
       );
-    });
+    }, timeout: const Timeout.factor(2.0));
 
     testUsingContext('no duplicate issues', () async {
       final Directory tempDir = fs.systemTempDirectory.createTempSync('analyze_once_test_').absolute;
