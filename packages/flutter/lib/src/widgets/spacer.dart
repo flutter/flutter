@@ -2,15 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/rendering.dart';
+
 import 'basic.dart';
 import 'framework.dart';
 
 /// Spacer creates an adjustable, empty spacer that can be used to tune the
 /// spacing between widgets in a [Flex] container, like [Row] or [Column].
-///
-/// In an situation where the container is shrink-wrapped (e.g. a [Column] with
-/// [Column.mainAxisSize] set to [MainAxisSize.min]), Spacer will shrink to be
-/// zero-sized, rather than expand.
 ///
 /// The [Spacer] widget will take up any available space, so setting the
 /// [Flex.mainAxisAlignment] on a flex container that contains a [Spacer] to
@@ -25,7 +23,7 @@ import 'framework.dart';
 /// new Row(
 ///   children: <Widget>[
 ///     new Text('Begin'),
-///     new Spacer(),
+///     new Spacer(), // Defaults to a flex of one.
 ///     new Text('Middle'),
 ///     // Gives twice the space between Middle and End than Begin and Middle.
 ///     new Spacer(flex: 2),
@@ -42,33 +40,27 @@ import 'framework.dart';
 class Spacer extends StatelessWidget {
   /// Creates a flexible space to insert into a [Flexible] widget.
   ///
-  /// The [flex] parameter may not be negative, but may be null. A null [flex]
-  /// is the same as a [flex] of zero.
+  /// The [flex] parameter may not be null or less than one.
   const Spacer({Key key, this.flex: 1})
-      : assert(flex == null || flex >= 0),
+      : assert(flex != null),
+        assert(flex > 0),
         super(key: key);
 
   /// The flex factor to use in determining how much space to take up.
   ///
-  /// If null or zero, the [Spacer] will take up no space. If set to a value
-  /// greater than zero, the amount of space the [Spacer] can occupy in the main
-  /// axis is determined by dividing the free space proportionately, after
-  /// placing the inflexible children, according to the flex factors of the
-  /// flexible children.
+  /// The amount of space the [Spacer] can occupy in the main axis is determined
+  /// by dividing the free space proportionately, after placing the inflexible
+  /// children, according to the flex factors of the flexible children.
   ///
   /// Defaults to one.
   final int flex;
 
   @override
   Widget build(BuildContext context) {
-    return new Flexible(
+    return new Expanded(
       flex: flex,
-      child: new LimitedBox(
-        maxWidth: 0.0,
-        maxHeight: 0.0,
-        child: new ConstrainedBox(
-          constraints: const BoxConstraints.expand(),
-        ),
+      child: new ConstrainedBox(
+        constraints: const BoxConstraints.expand(),
       ),
     );
   }
