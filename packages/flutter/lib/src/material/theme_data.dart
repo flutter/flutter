@@ -144,9 +144,12 @@ class ThemeData extends Diagnosticable {
     accentIconTheme ??= accentIsDark ? const IconThemeData(color: Colors.white) : const IconThemeData(color: Colors.black);
     platform ??= defaultTargetPlatform;
     final Typography typography = new Typography(platform: platform);
-    textTheme ??= isDark ? typography.white : typography.black;
-    primaryTextTheme ??= primaryIsDark ? typography.white : typography.black;
-    accentTextTheme ??= accentIsDark ? typography.white : typography.black;
+    final TextTheme defaultTextTheme = isDark ? typography.white : typography.black;
+    textTheme = defaultTextTheme.merge(textTheme);
+    final TextTheme defaultPrimaryTextTheme = primaryIsDark ? typography.white : typography.black;
+    primaryTextTheme = defaultPrimaryTextTheme.merge(primaryTextTheme);
+    final TextTheme defaultAccentTextTheme = accentIsDark ? typography.white : typography.black;
+    accentTextTheme = defaultAccentTextTheme.merge(accentTextTheme);
     if (fontFamily != null) {
       textTheme = textTheme.apply(fontFamily: fontFamily);
       primaryTextTheme = primaryTextTheme.apply(fontFamily: fontFamily);
