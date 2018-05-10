@@ -81,6 +81,7 @@ shared_library("create_flutter_framework_dylib") {
   sources += _flutter_framework_headers
 
   deps = [
+    "$flutter_root/common",
     "$flutter_root/flow",
     "$flutter_root/fml",
     "$flutter_root/glue",
@@ -89,10 +90,9 @@ shared_library("create_flutter_framework_dylib") {
     "$flutter_root/shell/common",
     "$flutter_root/shell/gpu",
     "$flutter_root/shell/platform/darwin/common",
-    "$flutter_root/sky/engine/platform",
-    "$flutter_root/sky/engine/wtf",
     "//garnet/public/lib/fxl",
     "//third_party/skia",
+    "//third_party/skia:gpu",
   ]
   if (flutter_runtime_mode == "debug") {
     deps += [

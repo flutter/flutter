@@ -134,8 +134,6 @@ Application::Application(
 
   settings_.icu_data_path = "";
 
-  settings_.using_blink = false;
-
   settings_.assets_dir = application_assets_directory_.get();
 
   settings_.script_snapshot_path = "snapshot_blob.bin";

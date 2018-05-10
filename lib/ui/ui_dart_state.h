@@ -13,7 +13,6 @@
 #include "flutter/common/task_runners.h"
 #include "flutter/flow/skia_gpu_object.h"
 #include "flutter/fml/memory/weak_ptr.h"
-#include "flutter/sky/engine/wtf/RefPtr.h"
 #include "lib/fxl/build_config.h"
 #include "lib/tonic/dart_microtask_queue.h"
 #include "lib/tonic/dart_persistent_value.h"
@@ -36,12 +35,6 @@ class UIDartState : public tonic::DartState {
   const std::string& logger_prefix() const { return logger_prefix_; }
 
   Window* window() const { return window_.get(); }
-
-  void set_font_selector(PassRefPtr<FontSelector> selector);
-
-  PassRefPtr<FontSelector> font_selector();
-
-  bool use_blink() const { return use_blink_; }
 
   const TaskRunners& GetTaskRunners() const;
 
@@ -78,8 +71,6 @@ class UIDartState : public tonic::DartState {
 
   void SetWindow(std::unique_ptr<Window> window);
 
-  void set_use_blink(bool use_blink) { use_blink_ = use_blink; }
-
   const std::string& GetAdvisoryScriptURI() const;
 
   const std::string& GetAdvisoryScriptEntrypoint() const;
@@ -97,13 +88,10 @@ class UIDartState : public tonic::DartState {
   Dart_Port main_port_ = ILLEGAL_PORT;
   std::string debug_name_;
   std::unique_ptr<Window> window_;
-  RefPtr<FontSelector> font_selector_;
   fxl::RefPtr<flow::SkiaUnrefQueue> skia_unref_queue_;
   tonic::DartMicrotaskQueue microtask_queue_;
 
   void AddOrRemoveTaskObserver(bool add);
-
-  bool use_blink_ = false;
 };
 
 }  // namespace blink

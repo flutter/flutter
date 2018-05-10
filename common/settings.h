@@ -68,7 +68,6 @@ struct Settings {
   // call is made.
   fxl::Closure root_isolate_shutdown_callback;
   bool enable_software_rendering = false;
-  bool using_blink = false;
   bool skia_deterministic_rendering_on_cpu = false;
   bool verbose_logging = false;
   std::string log_tag = "flutter";

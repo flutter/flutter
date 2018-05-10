@@ -8,11 +8,8 @@
 #include "flutter/fml/message_loop.h"
 #include "flutter/lib/ui/painting/canvas.h"
 #include "flutter/lib/ui/text/paragraph_impl.h"
-#include "flutter/lib/ui/text/paragraph_impl_blink.h"
 #include "flutter/lib/ui/text/paragraph_impl_txt.h"
 #include "flutter/lib/ui/text/text_box.h"
-#include "flutter/sky/engine/core/rendering/RenderView.h"
-#include "flutter/sky/engine/wtf/PassOwnPtr.h"
 #include "flutter/third_party/txt/src/txt/paragraph.h"
 #include "lib/tonic/dart_wrappable.h"
 
@@ -28,10 +25,6 @@ class Paragraph : public fxl::RefCountedThreadSafe<Paragraph>,
   FRIEND_MAKE_REF_COUNTED(Paragraph);
 
  public:
-  static fxl::RefPtr<Paragraph> Create(PassOwnPtr<RenderView> renderView) {
-    return fxl::MakeRefCounted<Paragraph>(renderView);
-  }
-
   static fxl::RefPtr<Paragraph> Create(
       std::unique_ptr<txt::Paragraph> paragraph) {
     return fxl::MakeRefCounted<Paragraph>(std::move(paragraph));
@@ -54,8 +47,6 @@ class Paragraph : public fxl::RefCountedThreadSafe<Paragraph>,
   Dart_Handle getPositionForOffset(double dx, double dy);
   Dart_Handle getWordBoundary(unsigned offset);
 
-  RenderView* renderView() const { return m_renderView.get(); }
-
   virtual size_t GetAllocationSize() override;
 
   static void RegisterNatives(tonic::DartLibraryNatives* natives);
@@ -63,15 +54,7 @@ class Paragraph : public fxl::RefCountedThreadSafe<Paragraph>,
  private:
   std::unique_ptr<ParagraphImpl> m_paragraphImpl;
 
-  explicit Paragraph(PassOwnPtr<RenderView> renderView);
-
   explicit Paragraph(std::unique_ptr<txt::Paragraph> paragraph);
-
-  // TODO: This can be removed when the render view association for the legacy
-  // runtime is removed.
-  fxl::RefPtr<fxl::TaskRunner> destruction_task_runner_ =
-      UIDartState::Current()->GetTaskRunners().GetUITaskRunner();
-  OwnPtr<RenderView> m_renderView;
 };
 
 }  // namespace blink
