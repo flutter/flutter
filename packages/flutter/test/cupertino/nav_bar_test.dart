@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:io';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart' hide TypeMatcher;
@@ -482,67 +484,79 @@ void main() {
     expect(decoration.border, isNull);
   });
 
-  testWidgets('Standard title golden', (WidgetTester tester) async {
-    await tester.pumpWidget(
-      new WidgetsApp(
-        color: const Color(0xFFFFFFFF),
-        onGenerateRoute: (RouteSettings settings) {
-          return new CupertinoPageRoute<void>(
-            settings: settings,
-            builder: (BuildContext context) {
-              return const RepaintBoundary(
-                child: const CupertinoPageScaffold(
-                  navigationBar: const CupertinoNavigationBar(
-                    middle: const Text('Bling bling'),
+  testWidgets(
+    'Standard title golden',
+    (WidgetTester tester) async {
+      await tester.pumpWidget(
+        new WidgetsApp(
+          color: const Color(0xFFFFFFFF),
+          onGenerateRoute: (RouteSettings settings) {
+            return new CupertinoPageRoute<void>(
+              settings: settings,
+              builder: (BuildContext context) {
+                return const RepaintBoundary(
+                  child: const CupertinoPageScaffold(
+                    navigationBar: const CupertinoNavigationBar(
+                      middle: const Text('Bling bling'),
+                    ),
+                    child: const Center(),
                   ),
-                  child: const Center(),
-                ),
-              );
-            },
-          );
-        },
-      ),
-    );
+                );
+              },
+            );
+          },
+        ),
+      );
 
-    await expectLater(
-      find.byType(RepaintBoundary).last,
-      matchesGoldenFile('nav_bar_test.standard_title.1.png'),
-    );
-  });
+      await expectLater(
+        find.byType(RepaintBoundary).last,
+        matchesGoldenFile('nav_bar_test.standard_title.1.png'),
+      );
+    },
+    // TODO(xster): remove once https://github.com/flutter/flutter/issues/17483
+    // is fixed.
+    skip: !Platform.isLinux,
+  );
 
-  testWidgets('Large title golden', (WidgetTester tester) async {
-    await tester.pumpWidget(
-      new WidgetsApp(
-        color: const Color(0xFFFFFFFF),
-        onGenerateRoute: (RouteSettings settings) {
-          return new CupertinoPageRoute<void>(
-            settings: settings,
-            builder: (BuildContext context) {
-              return new CupertinoPageScaffold(
-                child: new CustomScrollView(
-                  slivers: <Widget>[
-                    const CupertinoSliverNavigationBar(
-                      largeTitle: const Text('Bling bling'),
-                    ),
-                    new SliverToBoxAdapter(
-                      child: new Container(
-                        height: 1200.0,
+  testWidgets(
+    'Large title golden',
+    (WidgetTester tester) async {
+      await tester.pumpWidget(
+        new WidgetsApp(
+          color: const Color(0xFFFFFFFF),
+          onGenerateRoute: (RouteSettings settings) {
+            return new CupertinoPageRoute<void>(
+              settings: settings,
+              builder: (BuildContext context) {
+                return new CupertinoPageScaffold(
+                  child: new CustomScrollView(
+                    slivers: <Widget>[
+                      const CupertinoSliverNavigationBar(
+                        largeTitle: const Text('Bling bling'),
                       ),
-                    ),
-                  ],
-                ),
-              );
-            },
-          );
-        },
-      ),
-    );
+                      new SliverToBoxAdapter(
+                        child: new Container(
+                          height: 1200.0,
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              },
+            );
+          },
+        ),
+      );
 
-    await expectLater(
-      find.byType(RepaintBoundary).last,
-      matchesGoldenFile('nav_bar_test.large_title.1.png'),
-    );
-  });
+      await expectLater(
+        find.byType(RepaintBoundary).last,
+        matchesGoldenFile('nav_bar_test.large_title.1.png'),
+      );
+    },
+    // TODO(xster): remove once https://github.com/flutter/flutter/issues/17483
+    // is fixed.
+    skip: !Platform.isLinux,
+   );
 }
 
 class _ExpectStyles extends StatelessWidget {
