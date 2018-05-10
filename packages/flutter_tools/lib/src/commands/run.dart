@@ -151,7 +151,7 @@ class RunCommand extends RunCommandBase {
       ..addOption('pid-file',
         help: 'Specify a file to write the process id to.\n'
               'You can send SIGUSR1 to trigger a hot reload\n'
-              'and SIGUSR2 to trigger a full restart.',
+              'and SIGUSR2 to trigger a hot restart.',
       )
       ..addFlag('resident',
         negatable: true,
