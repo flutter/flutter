@@ -315,7 +315,12 @@ class _BackdropDemoState extends State<BackdropDemo> with SingleTickerProviderSt
     final double panelTop = panelSize.height - panelTitleHeight;
 
     final Animation<RelativeRect> panelAnimation = new RelativeRectTween(
-      begin: new RelativeRect.fromLTRB(0.0, panelTop, 0.0, panelTop - panelSize.height),
+      begin: new RelativeRect.fromLTRB(
+        0.0,
+        panelTop - MediaQuery.of(context).padding.bottom,
+        0.0,
+        panelTop - panelSize.height,
+      ),
       end: const RelativeRect.fromLTRB(0.0, 0.0, 0.0, 0.0),
     ).animate(
       new CurvedAnimation(
