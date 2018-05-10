@@ -684,7 +684,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
               hasFocus: _hasFocus,
               maxLines: widget.maxLines,
               selectionColor: widget.selectionColor,
-              textScaleFactor: widget.textScaleFactor ?? MediaQuery.of(context, nullOk: true)?.textScaleFactor ?? 1.0,
+              textScaleFactor: widget.textScaleFactor ?? MediaQuery.textScaleFactorOf(context),
               textAlign: widget.textAlign,
               textDirection: _textDirection,
               obscureText: widget.obscureText,
