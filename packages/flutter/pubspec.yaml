@@ -6,7 +6,7 @@ homepage: http://flutter.io
 dependencies:
   # To update these, use "flutter update-packages --force-upgrade".
   collection: 1.14.6
-  meta: 1.1.2
+  meta: 1.1.5
   typed_data: 1.1.5
   vector_math: 2.0.6
 
@@ -73,4 +73,4 @@ dev_dependencies:
 environment:
   sdk: '>=1.19.0 <2.0.0'
 
-# PUBSPEC CHECKSUM: e57e
+# PUBSPEC CHECKSUM: a681
