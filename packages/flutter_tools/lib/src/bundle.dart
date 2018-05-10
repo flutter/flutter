@@ -41,6 +41,7 @@ Future<void> build({
   bool precompiledSnapshot: false,
   bool reportLicensedPackages: false,
   bool trackWidgetCreation: false,
+  List<String> extraFrontEndOptions: const <String>[],
   List<String> fileSystemRoots,
   String fileSystemScheme,
 }) async {
@@ -70,6 +71,8 @@ Future<void> build({
 
   DevFSContent kernelContent;
   if (!precompiledSnapshot && previewDart2) {
+    if ((extraFrontEndOptions != null) && extraFrontEndOptions.isNotEmpty)
+      printTrace('Extra front-end options: $extraFrontEndOptions');
     ensureDirectoryExists(applicationKernelFilePath);
     final CompilerOutput compilerOutput = await kernelCompiler.compile(
       sdkRoot: artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath),
@@ -78,6 +81,7 @@ Future<void> build({
       outputFilePath: applicationKernelFilePath,
       depFilePath: depfilePath,
       trackWidgetCreation: trackWidgetCreation,
+      extraFrontEndOptions: extraFrontEndOptions,
       fileSystemRoots: fileSystemRoots,
       fileSystemScheme: fileSystemScheme,
       packagesPath: packagesPath,
