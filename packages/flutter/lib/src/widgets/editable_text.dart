@@ -620,6 +620,9 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     if (!_hasFocus) {
       // Clear the selection and composition state if this widget lost focus.
       _value = new TextEditingValue(text: _value.text);
+    } else if (!_value.selection.isValid) {
+      // Place cursor at the end if the selection is invalid when we receive focus.
+      widget.controller.selection = new TextSelection.collapsed(offset: _value.text.length);
     }
     updateKeepAlive();
   }
@@ -681,7 +684,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
               hasFocus: _hasFocus,
               maxLines: widget.maxLines,
               selectionColor: widget.selectionColor,
-              textScaleFactor: widget.textScaleFactor ?? MediaQuery.of(context, nullOk: true)?.textScaleFactor ?? 1.0,
+              textScaleFactor: widget.textScaleFactor ?? MediaQuery.textScaleFactorOf(context),
               textAlign: widget.textAlign,
               textDirection: _textDirection,
               obscureText: widget.obscureText,

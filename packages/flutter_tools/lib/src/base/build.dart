@@ -194,12 +194,6 @@ class AOTSnapshotter {
         '--strong',
       ]);
     }
-    if (buildMode != BuildMode.release) {
-      genSnapshotArgs.addAll(<String>[
-        '--no-checked',
-        '--conditional_directives',
-      ]);
-    }
     if (extraGenSnapshotOptions != null && extraGenSnapshotOptions.isNotEmpty) {
       printTrace('Extra gen_snapshot options: $extraGenSnapshotOptions');
       genSnapshotArgs.addAll(extraGenSnapshotOptions);

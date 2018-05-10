@@ -435,7 +435,7 @@ class HotRunner extends ResidentRunner {
   Future<OperationResult> restart({ bool fullRestart: false, bool pauseAfterRestart: false }) async {
     if (fullRestart) {
       final Status status = logger.startProgress(
-        'Performing full restart...',
+        'Performing hot restart...',
         progressId: 'hot.restart'
       );
       try {

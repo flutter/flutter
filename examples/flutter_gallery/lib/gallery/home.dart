@@ -174,7 +174,7 @@ class _DemoItem extends StatelessWidget {
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
     final bool isDark = theme.brightness == Brightness.dark;
-    final double textScaleFactor = MediaQuery.of(context)?.textScaleFactor ?? 1.0;
+    final double textScaleFactor = MediaQuery.textScaleFactorOf(context);
 
     final List<Widget> titleChildren = <Widget>[
       new Text(

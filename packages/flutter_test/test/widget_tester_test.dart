@@ -32,6 +32,18 @@ void main() {
       await tester.pump();
       test_package.expect(value, '123');
     });
+
+    testWidgets('respects the skip flag', (WidgetTester tester) async {
+      final Completer<void> completer = new Completer<void>();
+      final Future<void> future = expectLater(null, new FakeMatcher(completer), skip: 'testing skip');
+      bool completed = false;
+      future.then((void _) {
+        completed = true;
+      });
+      test_package.expect(completed, isFalse);
+      await future;
+      test_package.expect(completed, isTrue);
+    }, skip: true /* Enable once https://github.com/dart-lang/test/pull/831 lands */);
   });
 
   group('findsOneWidget', () {
