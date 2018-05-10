@@ -198,6 +198,7 @@ void main() {
   });
 
   testWidgets('MergeableMaterial paints shadows', (WidgetTester tester) async {
+    debugDisableShadows = false;
     await tester.pumpWidget(
       new MaterialApp(
         home: new Scaffold(
@@ -226,6 +227,7 @@ void main() {
       find.byType(MergeableMaterial),
       paints..rrect(rrect: rrect, color: boxShadow.color, hasMaskFilter: true),
     );
+    debugDisableShadows = true;
   });
 
   testWidgets('MergeableMaterial merge gap', (WidgetTester tester) async {

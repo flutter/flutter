@@ -96,6 +96,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   /// [debugPrintOverride], which can be overridden by subclasses.
   TestWidgetsFlutterBinding() {
     debugPrint = debugPrintOverride;
+    debugDisableShadows = disableShadows;
     debugCheckIntrinsicSizes = checkIntrinsicSizes;
   }
 
@@ -107,6 +108,15 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   /// synchronous, disabling its normal throttling behavior.
   @protected
   DebugPrintCallback get debugPrintOverride => debugPrint;
+
+  /// The value to set [debugDisableShadows] to while tests are running.
+  ///
+  /// This can be used to reduce the likelihood of golden file tests being
+  /// flaky, because shadow rendering is not always deterministic. The
+  /// [AutomatedTestWidgetsFlutterBinding] sets this to true, so that all tests
+  /// always run with shadows disabled.
+  @protected
+  bool get disableShadows => false;
 
   /// The value to set [debugCheckIntrinsicSizes] to while tests are running.
   ///
@@ -525,6 +535,10 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
     assert(debugAssertAllGesturesVarsUnset(
       'The value of a gestures debug variable was changed by the test.',
     ));
+    assert(debugAssertAllPaintingVarsUnset(
+      'The value of a painting debug variable was changed by the test.',
+      debugDisableShadowsOverride: disableShadows,
+    ));
     assert(debugAssertAllRenderVarsUnset(
       'The value of a rendering debug variable was changed by the test.',
       debugCheckIntrinsicSizesOverride: checkIntrinsicSizes,
@@ -587,6 +601,9 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
 
   @override
   DebugPrintCallback get debugPrintOverride => debugPrintSynchronously;
+
+  @override
+  bool get disableShadows => true;
 
   @override
   bool get checkIntrinsicSizes => true;

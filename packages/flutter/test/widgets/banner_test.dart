@@ -248,6 +248,7 @@ void main() {
   });
 
   testWidgets('Banner widget', (WidgetTester tester) async {
+    debugDisableShadows = false;
     await tester.pumpWidget(
       const Directionality(
         textDirection: TextDirection.ltr,
@@ -263,9 +264,11 @@ void main() {
       ..paragraph(offset: const Offset(-40.0, 29.0))
       ..restore()
     );
+    debugDisableShadows = true;
   });
 
   testWidgets('Banner widget in MaterialApp', (WidgetTester tester) async {
+    debugDisableShadows = false;
     await tester.pumpWidget(new MaterialApp(home: const Placeholder()));
     expect(find.byType(CheckedModeBanner), paints
       ..save()
@@ -276,5 +279,6 @@ void main() {
       ..paragraph(offset: const Offset(-40.0, 29.0))
       ..restore()
     );
+    debugDisableShadows = true;
   });
 }
