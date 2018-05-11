@@ -153,7 +153,7 @@ void main() {
     expect(tester.getSize(find.byType(DecoratedBox).at(1)), equals(const Size(270.0, 560.0)));
 
     // Check sizes/locations of the text.
-    expect(tester.getSize(find.text('The Title')), equals(const Size(230.0, 198.0)));
+    expect(tester.getSize(find.text('The Title')), equals(const Size(230.0, 171.0)));
     expect(tester.getSize(find.text('Cancel')), equals(const Size(75.0, 300.0)));
     expect(tester.getSize(find.text('OK')), equals(const Size(75.0, 100.0)));
     expect(tester.getTopLeft(find.text('The Title')), equals(const Offset(285.0, 40.0)));
