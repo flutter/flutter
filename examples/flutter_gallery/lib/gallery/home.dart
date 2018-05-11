@@ -109,47 +109,53 @@ class _CategoriesPage extends StatelessWidget {
     final List<GalleryDemoCategory> categoriesList = categories.toList();
     final int columnCount = (MediaQuery.of(context).orientation == Orientation.portrait) ? 2 : 3;
 
-    return new SingleChildScrollView(
-      key: const PageStorageKey<String>('categories'),
-      child: new LayoutBuilder(
-        builder: (BuildContext context, BoxConstraints constraints) {
-          final double columnWidth = constraints.biggest.width / columnCount.toDouble();
-          final double rowHeight = columnWidth * aspectRatio;
-          final int rowCount = (categories.length + columnCount - 1) ~/ columnCount;
+    return new Semantics(
+      scopesRoute: true,
+      namesRoute: true,
+      label: 'categories',
+      explicitChildNodes: true,
+      child: new SingleChildScrollView(
+        key: const PageStorageKey<String>('categories'),
+        child: new LayoutBuilder(
+          builder: (BuildContext context, BoxConstraints constraints) {
+            final double columnWidth = constraints.biggest.width / columnCount.toDouble();
+            final double rowHeight = columnWidth * aspectRatio;
+            final int rowCount = (categories.length + columnCount - 1) ~/ columnCount;
 
-          // This repaint boundary prevents the inner contents of the front layer
-          // from repainting when the backdrop toggle triggers a repaint on the
-          // LayoutBuilder.
-          return new RepaintBoundary(
-            child: new Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: new List<Widget>.generate(rowCount, (int rowIndex) {
-                final int columnCountForRow = rowIndex == rowCount - 1
-                  ? categories.length - columnCount * math.max(0, rowCount - 1)
-                  : columnCount;
+            // This repaint boundary prevents the inner contents of the front layer
+            // from repainting when the backdrop toggle triggers a repaint on the
+            // LayoutBuilder.
+            return new RepaintBoundary(
+              child: new Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: new List<Widget>.generate(rowCount, (int rowIndex) {
+                  final int columnCountForRow = rowIndex == rowCount - 1
+                    ? categories.length - columnCount * math.max(0, rowCount - 1)
+                    : columnCount;
 
-                return new Row(
-                  children: new List<Widget>.generate(columnCountForRow, (int columnIndex) {
-                    final int index = rowIndex * columnCount + columnIndex;
-                    final GalleryDemoCategory category = categoriesList[index];
+                  return new Row(
+                    children: new List<Widget>.generate(columnCountForRow, (int columnIndex) {
+                      final int index = rowIndex * columnCount + columnIndex;
+                      final GalleryDemoCategory category = categoriesList[index];
 
-                    return new SizedBox(
-                      width: columnWidth,
-                      height: rowHeight,
-                      child: new _CategoryItem(
-                        category: category,
-                        onTap: () {
-                          onCategoryTap(category);
-                        },
-                      ),
-                    );
-                  }),
-                );
-              }),
-            ),
-          );
-        },
+                      return new SizedBox(
+                        width: columnWidth,
+                        height: rowHeight,
+                        child: new _CategoryItem(
+                          category: category,
+                          onTap: () {
+                            onCategoryTap(category);
+                          },
+                        ),
+                      );
+                    }),
+                  );
+                }),
+              ),
+            );
+          },
+        ),
       ),
     );
   }
@@ -240,12 +246,18 @@ class _DemosPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return new KeyedSubtree(
       key: const ValueKey<String>('GalleryDemoList'), // So the tests can find this ListView
-      child: new ListView(
-        key: new PageStorageKey<String>(category.name),
-        padding: const EdgeInsets.only(top: 8.0),
-        children: kGalleryCategoryToDemos[category].map<Widget>((GalleryDemo demo) {
-          return new _DemoItem(demo: demo);
-        }).toList(),
+      child: new Semantics(
+        scopesRoute: true,
+        namesRoute: true,
+        label: category.name,
+        explicitChildNodes: true,
+        child: new ListView(
+          key: new PageStorageKey<String>(category.name),
+          padding: const EdgeInsets.only(top: 8.0),
+          children: kGalleryCategoryToDemos[category].map<Widget>((GalleryDemo demo) {
+            return new _DemoItem(demo: demo);
+          }).toList(),
+        ),
       ),
     );
   }
