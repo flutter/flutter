@@ -56,17 +56,10 @@ const String _kAssetManifestFileName = 'AssetManifest.json';
 /// icons/1.5x/heart.png
 /// icons/2.0x/heart.png
 /// ```
-/// The variant asset must be directly under a folder with the ratio identifier,
-/// which means that
-/// ```
-/// assets/3.0x/icons/heart.png
-/// ```
 ///
-/// is not a valid variant for
+/// assets/icons/3.0x/heart.png would be a valid variant of
+/// assets/icons/heart.png.
 ///
-/// ```
-/// assets/icons/heart.png
-/// ```
 ///
 /// ## Fetching assets
 ///
@@ -178,6 +171,7 @@ class AssetImage extends AssetBundleImageProvider {
     final AssetBundle chosenBundle = bundle ?? configuration.bundle ?? rootBundle;
     Completer<AssetBundleImageKey> completer;
     Future<AssetBundleImageKey> result;
+
     chosenBundle.loadStructuredData<Map<String, List<String>>>(_kAssetManifestFileName, _manifestParser).then<void>(
       (Map<String, List<String>> manifest) {
         final String chosenName = _chooseVariant(
@@ -185,7 +179,7 @@ class AssetImage extends AssetBundleImageProvider {
           configuration,
           manifest == null ? null : manifest[keyName]
         );
-        final double chosenScale = parseScale(chosenName);
+        final double chosenScale = _parseScale(chosenName);
         final AssetBundleImageKey key = new AssetBundleImageKey(
           bundle: chosenBundle,
           name: chosenName,
@@ -241,7 +235,7 @@ class AssetImage extends AssetBundleImageProvider {
     // TODO(ianh): Consider moving this parsing logic into _manifestParser.
     final SplayTreeMap<double, String> mapping = new SplayTreeMap<double, String>();
     for (String candidate in candidates)
-      mapping[parseScale(candidate)] = candidate;
+      mapping[_parseScale(candidate)] = candidate;
     // TODO(ianh): implement support for config.locale, config.textDirection,
     // config.size, config.platform (then document this over in the Image.asset
     // docs)
@@ -266,8 +260,7 @@ class AssetImage extends AssetBundleImageProvider {
 
   static final RegExp _extractRatioRegExp = new RegExp(r'/?(\d+(\.\d*)?)x$');
 
-  @visibleForTesting
-  double parseScale(String key) {
+  double _parseScale(String key) {
 
     if ( key == assetName){
       return _naturalResolution;
