@@ -21,24 +21,16 @@ class CustomRoundedRectangleBorder extends ShapeBorder {
   ///
   /// The arguments must not be null.
   const CustomRoundedRectangleBorder({
-    this.leftSide = BorderSide.none,
-    this.rightSide = BorderSide.none,
-    this.topSide = BorderSide.none,
-    this.bottomSide = BorderSide.none,
-    this.topLeftCornerSide = BorderSide.none,
-    this.topRightCornerSide = BorderSide.none,
-    this.bottomLeftCornerSide = BorderSide.none,
-    this.bottomRightCornerSide = BorderSide.none,
+    this.leftSide,
+    this.rightSide,
+    this.topSide,
+    this.bottomSide,
+    this.topLeftCornerSide,
+    this.topRightCornerSide,
+    this.bottomLeftCornerSide,
+    this.bottomRightCornerSide,
     this.borderRadius: BorderRadius.zero,
-  })  : assert(borderRadius != null),
-        assert(leftSide != null),
-        assert(rightSide != null),
-        assert(topSide != null),
-        assert(bottomSide != null),
-        assert(topLeftCornerSide != null),
-        assert(topRightCornerSide != null),
-        assert(bottomLeftCornerSide != null),
-        assert(bottomRightCornerSide != null);
+  })  : assert(borderRadius != null);
 
 
   /// The style for the left side border.
@@ -63,13 +55,13 @@ class CustomRoundedRectangleBorder extends ShapeBorder {
           max(
               max(
                   max(
-                      max(max(topSide.width, rightSide.width),
-                          bottomSide.width),
-                      leftSide.width),
-                  bottomRightCornerSide.width),
-              bottomLeftCornerSide.width),
-          topRightCornerSide.width),
-      topLeftCornerSide.width);
+                      max(max(topSide?.width ?? 0.0, rightSide?.width ?? 0.0),
+                          bottomSide?.width ?? 0.0),
+                      leftSide?.width ?? 0.0),
+                  bottomRightCornerSide?.width ?? 0.0),
+              bottomLeftCornerSide?.width ?? 0.0),
+          topRightCornerSide?.width ?? 0.0),
+      topLeftCornerSide?.width ?? 0.0);
 
   /// The radii for each corner.
   final BorderRadius borderRadius;
@@ -82,14 +74,14 @@ class CustomRoundedRectangleBorder extends ShapeBorder {
   @override
   ShapeBorder scale(double t) {
     return new CustomRoundedRectangleBorder(
-      topSide: topSide.scale(t),
-      leftSide: leftSide.scale(t),
-      bottomSide: bottomSide.scale(t),
-      rightSide: bottomSide.scale(t),
-      topLeftCornerSide: topLeftCornerSide.scale(t),
-      topRightCornerSide: topRightCornerSide.scale(t),
-      bottomLeftCornerSide: bottomLeftCornerSide.scale(t),
-      bottomRightCornerSide: bottomRightCornerSide.scale(t),
+      topSide: topSide?.scale(t) ,
+      leftSide: leftSide?.scale(t),
+      bottomSide: bottomSide?.scale(t),
+      rightSide: bottomSide?.scale(t),
+      topLeftCornerSide: topLeftCornerSide?.scale(t),
+      topRightCornerSide: topRightCornerSide?.scale(t),
+      bottomLeftCornerSide: bottomLeftCornerSide?.scale(t),
+      bottomRightCornerSide: bottomRightCornerSide?.scale(t),
       borderRadius: borderRadius * t,
     );
   }
@@ -99,15 +91,14 @@ class CustomRoundedRectangleBorder extends ShapeBorder {
     assert(t != null);
     if (a is CustomRoundedRectangleBorder) {
       return new CustomRoundedRectangleBorder(
-        topSide: BorderSide.lerp(a.topSide, topSide, t),
-        leftSide: BorderSide.lerp(a.leftSide, leftSide, t),
-        bottomSide: BorderSide.lerp(a.bottomSide, bottomSide, t),
-        rightSide: BorderSide.lerp(a.rightSide, rightSide, t),
-        topLeftCornerSide: BorderSide.lerp(a.topLeftCornerSide, topLeftCornerSide, t),
-        topRightCornerSide: BorderSide.lerp(a.topRightCornerSide, topRightCornerSide, t),
-        bottomLeftCornerSide: BorderSide.lerp(a.bottomLeftCornerSide, bottomLeftCornerSide, t),
-        bottomRightCornerSide:
-            BorderSide.lerp(a.bottomRightCornerSide, bottomRightCornerSide, t),
+        topSide: topSide == null ? null : BorderSide.lerp(a.topSide, topSide, t),
+        leftSide: leftSide == null ? null : BorderSide.lerp(a.leftSide, leftSide, t),
+        bottomSide: bottomSide == null ? null : BorderSide.lerp(a.bottomSide, bottomSide, t),
+        rightSide: rightSide == null ? null : BorderSide.lerp(a.rightSide, rightSide, t),
+        topLeftCornerSide: topLeftCornerSide == null ? null : BorderSide.lerp(a.topLeftCornerSide, topLeftCornerSide, t),
+        topRightCornerSide: topRightCornerSide == null ? null : BorderSide.lerp(a.topRightCornerSide, topRightCornerSide, t),
+        bottomLeftCornerSide: bottomLeftCornerSide == null ? null : BorderSide.lerp(a.bottomLeftCornerSide, bottomLeftCornerSide, t),
+        bottomRightCornerSide: bottomRightCornerSide == null ? null : BorderSide.lerp(a.bottomRightCornerSide, bottomRightCornerSide, t),
         borderRadius: BorderRadius.lerp(a.borderRadius, borderRadius, t),
       );
     }
@@ -119,15 +110,14 @@ class CustomRoundedRectangleBorder extends ShapeBorder {
     assert(t != null);
     if (b is CustomRoundedRectangleBorder) {
       return new CustomRoundedRectangleBorder(
-        topSide: BorderSide.lerp(topSide, b.topSide, t),
-        leftSide: BorderSide.lerp(leftSide, b.leftSide, t),
-        bottomSide: BorderSide.lerp(bottomSide, b.bottomSide, t),
-        rightSide: BorderSide.lerp(rightSide, b.rightSide, t),
-        topLeftCornerSide: BorderSide.lerp(topLeftCornerSide, b.topLeftCornerSide, t),
-        topRightCornerSide: BorderSide.lerp(topRightCornerSide, b.topRightCornerSide, t),
-        bottomLeftCornerSide: BorderSide.lerp(bottomLeftCornerSide, b.bottomLeftCornerSide, t),
-        bottomRightCornerSide:
-            BorderSide.lerp(bottomRightCornerSide, b.bottomRightCornerSide, t),
+        topSide: topSide == null ? null : BorderSide.lerp(topSide, b.topSide, t),
+        leftSide: leftSide == null ? null : BorderSide.lerp(leftSide, b.leftSide, t),
+        bottomSide: bottomSide == null ? null : BorderSide.lerp(bottomSide, b.bottomSide, t),
+        rightSide: rightSide == null ? null : BorderSide.lerp(rightSide, b.rightSide, t),
+        topLeftCornerSide: topLeftCornerSide == null ? null : BorderSide.lerp(topLeftCornerSide, b.topLeftCornerSide, t),
+        topRightCornerSide: topRightCornerSide == null ? null : BorderSide.lerp(topRightCornerSide, b.topRightCornerSide, t),
+        bottomLeftCornerSide: bottomLeftCornerSide == null ? null : BorderSide.lerp(bottomLeftCornerSide, b.bottomLeftCornerSide, t),
+        bottomRightCornerSide: bottomRightCornerSide == null ? null : BorderSide.lerp(bottomRightCornerSide, b.bottomRightCornerSide, t),
         borderRadius: BorderRadius.lerp(borderRadius, b.borderRadius, t),
       );
     }
@@ -151,10 +141,10 @@ class CustomRoundedRectangleBorder extends ShapeBorder {
     Paint paint;
 
     paint = createPaintForBorder(topLeftCornerSide);
-    if (borderRadius.topLeft.x != 0.0) {
+    if (borderRadius.topLeft.x != 0.0 && paint != null) {
       canvas.drawArc(
         rectForCorner(
-            topLeftCornerSide.width, rect.topLeft, borderRadius.topLeft, 1, 1),
+            topLeftCornerSide?.width, rect.topLeft, borderRadius.topLeft, 1, 1),
         pi / 2 * 2,
         pi / 2,
         false,
@@ -163,19 +153,21 @@ class CustomRoundedRectangleBorder extends ShapeBorder {
     }
 
     paint = createPaintForBorder(topSide);
-    canvas.drawLine(
-        rect.topLeft +
-            new Offset(
-                borderRadius.topLeft.x +
-                    (borderRadius.topLeft.x == 0 ? leftSide.width : 0.0),
-                topSide.width / 2),
-        rect.topRight + new Offset(-borderRadius.topRight.x, topSide.width / 2),
-        paint);
+    if (paint != null) {
+      canvas.drawLine(
+          rect.topLeft +
+              new Offset(
+                  borderRadius.topLeft.x +
+                      (borderRadius.topLeft.x == 0 ? (leftSide?.width ?? 0.0) : 0.0),
+                  (topSide?.width ?? 0.0) / 2),
+          rect.topRight + new Offset(-borderRadius.topRight.x, (topSide?.width ?? 0.0) / 2),
+          paint);
+    }
 
     paint = createPaintForBorder(topRightCornerSide);
-    if (borderRadius.topRight.x != 0.0) {
+    if (borderRadius.topRight.x != 0.0 && paint != null) {
       canvas.drawArc(
-        rectForCorner(topRightCornerSide.width, rect.topRight,
+        rectForCorner(topRightCornerSide?.width, rect.topRight,
             borderRadius.topRight, -1, 1),
         pi / 2 * 3,
         pi / 2,
@@ -185,20 +177,22 @@ class CustomRoundedRectangleBorder extends ShapeBorder {
     }
 
     paint = createPaintForBorder(rightSide);
-    canvas.drawLine(
-        rect.topRight +
-            new Offset(
-                -1 * rightSide.width / 2,
-                borderRadius.topRight.y +
-                    (borderRadius.topRight.x == 0 ? topSide.width : 0.0)),
-        rect.bottomRight +
-            new Offset(-1 * rightSide.width / 2, -borderRadius.bottomRight.y),
-        paint);
+    if (paint != null) {
+      canvas.drawLine(
+          rect.topRight +
+              new Offset(
+                  -1 * (rightSide?.width ?? 0.0) / 2,
+                  borderRadius.topRight.y +
+                      (borderRadius.topRight.x == 0 ? (topSide?.width ?? 0.0) : 0.0)),
+          rect.bottomRight +
+              new Offset(-1 * (rightSide?.width ?? 0.0) / 2, -borderRadius.bottomRight.y),
+          paint);
+    }
 
     paint = createPaintForBorder(bottomRightCornerSide);
-    if (borderRadius.bottomRight.x != 0.0) {
+    if (borderRadius.bottomRight.x != 0.0 && paint != null) {
       canvas.drawArc(
-        rectForCorner(bottomRightCornerSide.width, rect.bottomRight,
+        rectForCorner(bottomRightCornerSide?.width, rect.bottomRight,
             borderRadius.bottomRight, -1, -1),
         pi / 2 * 0,
         pi / 2,
@@ -208,20 +202,22 @@ class CustomRoundedRectangleBorder extends ShapeBorder {
     }
 
     paint = createPaintForBorder(bottomSide);
-    canvas.drawLine(
-        rect.bottomRight +
-            new Offset(
-                -borderRadius.bottomRight.x -
-                    (borderRadius.bottomRight.x == 0 ? rightSide.width : 0.0),
-                -1 * bottomSide.width / 2),
-        rect.bottomLeft +
-            new Offset(borderRadius.bottomLeft.x, -1 * bottomSide.width / 2),
-        paint);
+    if (paint != null) {
+      canvas.drawLine(
+          rect.bottomRight +
+              new Offset(
+                  -borderRadius.bottomRight.x -
+                      (borderRadius.bottomRight.x == 0 ? (rightSide?.width ?? 0.0) : 0.0),
+                  -1 * (bottomSide?.width ?? 0.0) / 2),
+          rect.bottomLeft +
+              new Offset(borderRadius.bottomLeft.x, -1 * (bottomSide?.width ?? 0.0) / 2),
+          paint);
+    }
 
     paint = createPaintForBorder(bottomLeftCornerSide);
-    if (borderRadius.bottomLeft.x != 0.0) {
+    if (borderRadius.bottomLeft.x != 0.0 && paint != null) {
       canvas.drawArc(
-        rectForCorner(bottomLeftCornerSide.width, rect.bottomLeft,
+        rectForCorner(bottomLeftCornerSide?.width, rect.bottomLeft,
             borderRadius.bottomLeft, 1, -1),
         pi / 2 * 1,
         pi / 2,
@@ -231,18 +227,22 @@ class CustomRoundedRectangleBorder extends ShapeBorder {
     }
 
     paint = createPaintForBorder(leftSide);
-    canvas.drawLine(
-        rect.bottomLeft +
-            new Offset(
-                leftSide.width / 2,
-                -borderRadius.bottomLeft.y -
-                    (borderRadius.bottomLeft.x == 0 ? bottomSide.width : 0.0)),
-        rect.topLeft + new Offset(leftSide.width / 2, borderRadius.topLeft.y),
-        paint);
+    if (paint != null) {
+      canvas.drawLine(
+          rect.bottomLeft +
+              new Offset(
+                  leftSide?.width ?? 0.0 / 2,
+                  -borderRadius.bottomLeft.y -
+                      (borderRadius.bottomLeft.x == 0 ? bottomSide?.width ?? 0.0 : 0.0)),
+          rect.topLeft + new Offset(leftSide?.width ?? 0.0 / 2, borderRadius.topLeft.y),
+          paint);
+    }
   }
 
   Rect rectForCorner(
       double sideWidth, Offset offset, Radius radius, num signX, num signY) {
+    if (sideWidth == null)
+      sideWidth = 0.0;
     double d = sideWidth / 2;
     double borderRadiusX = radius.x - d;
     double borderRadiusY = radius.y - d;
@@ -257,6 +257,9 @@ class CustomRoundedRectangleBorder extends ShapeBorder {
   }
 
   Paint createPaintForBorder(BorderSide side) {
+    if (side == null)
+      return null;
+
     return new Paint()
       ..style = PaintingStyle.stroke
       ..color = side.color
