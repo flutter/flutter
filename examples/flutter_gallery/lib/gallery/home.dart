@@ -291,7 +291,7 @@ class _GalleryHomeState extends State<GalleryHome> with SingleTickerProviderStat
   static Widget _animatedSwitcherLayoutBuilder(List<Widget> children) {
     return new Stack(
       children: children,
-      alignment: Alignment.topLeft,
+      alignment: Alignment.center,
     );
   }
 
