@@ -50,7 +50,9 @@ if [ -n "$TRAVIS" ]; then
 
   if [ "$TRAVIS_OS_NAME" = "linux" ] && [ "$SHARD" = "emulator_tests" ]; then
     android list targets
-    echo no | android create avd --force -n test -t android-23 --abi x86
+    target_id="$(android list targets | grep -E '^id: ' | sed -E 's/id: ([^ ]+).*$/\1/')"
+    echo "Found android target with id: $target_id"
+    android create avd --force -n test -t $target_id --abi x86
     emulator -avd test -no-skin -no-audio -no-window &
     android-wait-for-emulator
   fi
