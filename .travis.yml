@@ -10,20 +10,6 @@ env:
   - SHARD=docs
   - SHARD=build_and_deploy_gallery
 matrix:
-  include:
-    - language: android
-      os: linux
-      android:
-        components:
-          - tools
-          - platform-tools
-          - build-tools-25.0.1
-          - android-23
-          - extra-android-m2repository
-          - extra-google-m2repository
-          - sys-img-x86-android-23
-        licenses:
-          - android-sdk-license-5be876d5
   exclude:
     - os: osx
       env: SHARD=analyze
@@ -46,6 +32,18 @@ addons:
 language: node_js
 node_js:
   - "6"
+language: android
+android:
+  components:
+    - tools
+    - platform-tools
+    - build-tools-25.0.1
+    - android-23
+    - extra-android-m2repository
+    - extra-google-m2repository
+    - sys-img-x86-android-23
+  licenses:
+    - android-sdk-license-5be876d5
 git:
   # We rely on git tags for determining the version.
   depth: false
