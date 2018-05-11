@@ -4,6 +4,7 @@
 
 #include "flutter/lib/ui/painting/path.h"
 
+#define _USE_MATH_DEFINES
 #include <math.h>
 
 #include "flutter/lib/ui/painting/matrix.h"
@@ -215,7 +216,7 @@ void CanvasPath::addPath(CanvasPath* path, double dx, double dy) {
 void CanvasPath::addPathWithMatrix(CanvasPath* path, double dx, double dy, tonic::Float64List& matrix4) {
   if (!path)
     Dart_ThrowException(ToDart("Path.addPathWithMatrix called with non-genuine Path."));
-  
+
   SkMatrix matrix = ToSkMatrix(matrix4);
   matrix.setTranslateX(matrix.getTranslateX() + dx);
   matrix.setTranslateY(matrix.getTranslateY() + dy);
@@ -233,7 +234,7 @@ void CanvasPath::extendWithPath(CanvasPath* path, double dx, double dy) {
 void CanvasPath::extendWithPathAndMatrix(CanvasPath* path, double dx, double dy, tonic::Float64List& matrix4) {
   if (!path)
     Dart_ThrowException(ToDart("Path.addPathWithMatrix called with non-genuine Path."));
-  
+
   SkMatrix matrix = ToSkMatrix(matrix4);
   matrix.setTranslateX(matrix.getTranslateX() + dx);
   matrix.setTranslateY(matrix.getTranslateY() + dy);
