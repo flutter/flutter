@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#define _USE_MATH_DEFINES
+
 #include "flutter/lib/ui/painting/gradient.h"
 
 #include "lib/tonic/converter/dart_converter.h"
