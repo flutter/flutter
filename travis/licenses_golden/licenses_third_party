@@ -1,4 +1,4 @@
-Signature: f59cb1bfa5d91c5f8d634a2628f29b32
+Signature: ff5efbc65d16e7ec00644d9deb2401d4
 
 UNUSED LICENSES:
 
@@ -18573,7 +18573,6 @@ FILE: ../../../third_party/skia/include/core/SkImage.h
 FILE: ../../../third_party/skia/include/core/SkRRect.h
 FILE: ../../../third_party/skia/include/core/SkStrokeRec.h
 FILE: ../../../third_party/skia/include/core/SkSurface.h
-FILE: ../../../third_party/skia/include/gpu/GrShaderCaps.h
 FILE: ../../../third_party/skia/include/gpu/GrSurface.h
 FILE: ../../../third_party/skia/include/gpu/gl/GrGLFunctions.h
 FILE: ../../../third_party/skia/include/pathops/SkPathOps.h
@@ -18619,6 +18618,7 @@ FILE: ../../../third_party/skia/src/gpu/GrProcessorUnitTest.h
 FILE: ../../../third_party/skia/src/gpu/GrSWMaskHelper.cpp
 FILE: ../../../third_party/skia/src/gpu/GrSWMaskHelper.h
 FILE: ../../../third_party/skia/src/gpu/GrShaderCaps.cpp
+FILE: ../../../third_party/skia/src/gpu/GrShaderCaps.h
 FILE: ../../../third_party/skia/src/gpu/GrSoftwarePathRenderer.cpp
 FILE: ../../../third_party/skia/src/gpu/GrSoftwarePathRenderer.h
 FILE: ../../../third_party/skia/src/gpu/GrSurface.cpp
@@ -19294,7 +19294,6 @@ FILE: ../../../third_party/skia/include/effects/SkLumaColorFilter.h
 FILE: ../../../third_party/skia/include/effects/SkPerlinNoiseShader.h
 FILE: ../../../third_party/skia/include/effects/SkTileImageFilter.h
 FILE: ../../../third_party/skia/include/gpu/GrBlend.h
-FILE: ../../../third_party/skia/include/gpu/GrCaps.h
 FILE: ../../../third_party/skia/include/gpu/gl/GrGLExtensions.h
 FILE: ../../../third_party/skia/include/ports/SkFontConfigInterface.h
 FILE: ../../../third_party/skia/include/ports/SkFontMgr.h
@@ -19347,6 +19346,7 @@ FILE: ../../../third_party/skia/src/effects/SkDisplacementMapEffect.cpp
 FILE: ../../../third_party/skia/src/effects/SkDropShadowImageFilter.cpp
 FILE: ../../../third_party/skia/src/effects/SkLumaColorFilter.cpp
 FILE: ../../../third_party/skia/src/effects/SkTileImageFilter.cpp
+FILE: ../../../third_party/skia/src/gpu/GrCaps.h
 FILE: ../../../third_party/skia/src/gpu/GrCoordTransform.h
 FILE: ../../../third_party/skia/src/gpu/GrGeometryProcessor.h
 FILE: ../../../third_party/skia/src/gpu/GrPaint.cpp
