@@ -107,7 +107,7 @@ void LineBreaker::setIndents(const std::vector<float>& indents) {
 // end of line. It is the Unicode set:
 // [[:General_Category=Space_Separator:]-[:Line_Break=Glue:]], plus '\n'. Note:
 // all such characters are in the BMP, so it's ok to use code units for this.
-static bool isLineEndSpace(uint16_t c) {
+bool isLineEndSpace(uint16_t c) {
   return c == '\n' || c == ' ' || c == 0x1680 ||
          (0x2000 <= c && c <= 0x200A && c != 0x2007) || c == 0x205F ||
          c == 0x3000;
