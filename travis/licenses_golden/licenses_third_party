@@ -1,4 +1,4 @@
-Signature: ff5efbc65d16e7ec00644d9deb2401d4
+Signature: 40e29d5714ab910ce1c72bc57de45dd1
 
 UNUSED LICENSES:
 
@@ -4309,7 +4309,6 @@ FILE: ../../../third_party/dart/runtime/vm/unibrow.h
 FILE: ../../../third_party/dart/runtime/vm/verified_memory_test.cc
 FILE: ../../../third_party/dart/runtime/vm/weak_code.cc
 FILE: ../../../third_party/dart/runtime/vm/weak_code.h
-FILE: ../../../third_party/dart/sdk/lib/_internal/js_runtime/lib/isolate_serialization.dart
 FILE: ../../../third_party/dart/sdk/lib/_internal/js_runtime/lib/linked_hash_map.dart
 FILE: ../../../third_party/dart/sdk/lib/_internal/js_runtime/lib/shared/embedded_names.dart
 FILE: ../../../third_party/dart/sdk/lib/collection/set.dart
@@ -6027,15 +6026,21 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ====================================================================================================
 LIBRARY: dart
-ORIGIN: ../../../third_party/dart/runtime/vm/compiler/backend/code_statistics.cc + ../../../third_party/dart/LICENSE
+ORIGIN: ../../../third_party/dart/runtime/vm/compiler/assembler/disassembler_kbc.cc + ../../../third_party/dart/LICENSE
 TYPE: LicenseType.bsd
+FILE: ../../../third_party/dart/runtime/vm/compiler/assembler/disassembler_kbc.cc
+FILE: ../../../third_party/dart/runtime/vm/compiler/assembler/disassembler_kbc.h
 FILE: ../../../third_party/dart/runtime/vm/compiler/backend/code_statistics.cc
 FILE: ../../../third_party/dart/runtime/vm/compiler/backend/code_statistics.h
 FILE: ../../../third_party/dart/runtime/vm/compiler/compiler_pass.cc
 FILE: ../../../third_party/dart/runtime/vm/compiler/compiler_pass.h
+FILE: ../../../third_party/dart/runtime/vm/constants_kbc.h
 FILE: ../../../third_party/dart/runtime/vm/datastream.cc
 FILE: ../../../third_party/dart/runtime/vm/finalizable_data.h
 FILE: ../../../third_party/dart/runtime/vm/hash.h
+FILE: ../../../third_party/dart/runtime/vm/interpreter.cc
+FILE: ../../../third_party/dart/runtime/vm/interpreter.h
+FILE: ../../../third_party/dart/runtime/vm/stack_frame_kbc.h
 FILE: ../../../third_party/dart/runtime/vm/type_testing_stubs.cc
 FILE: ../../../third_party/dart/runtime/vm/type_testing_stubs.h
 FILE: ../../../third_party/dart/sdk/lib/js/_js.dart
