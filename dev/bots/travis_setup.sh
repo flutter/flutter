@@ -49,7 +49,7 @@ if [ -n "$TRAVIS" ]; then
   fi
 
   if [ "$TRAVIS_OS_NAME" = "linux" ] && [ "$SHARD" = "emulator_tests" ]; then
-    android create avd --force -n test -t android-23 --abi x86 -no-accel
+    android create avd --force -n test -t android-23 --abi x86
     emulator -avd test -no-skin -no-audio -no-window &
     android-wait-for-emulator
   fi
