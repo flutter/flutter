@@ -6,7 +6,7 @@ author: Flutter Authors <flutter-dev@googlegroups.com>
 dependencies:
   json_rpc_2: 2.0.7
   process: 3.0.1
-  meta: 1.1.2
+  meta: 1.1.5
   web_socket_channel: 1.0.7
   flutter_test:
     sdk: flutter
@@ -68,4 +68,4 @@ dev_dependencies:
   mockito: 3.0.0-alpha+5
   test: 0.12.37
 
-# PUBSPEC CHECKSUM: 1a79
+# PUBSPEC CHECKSUM: a97a

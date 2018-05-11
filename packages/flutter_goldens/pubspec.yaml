@@ -6,7 +6,7 @@ dependencies:
     sdk: flutter
   collection: 1.14.6
   file: 5.0.0
-  meta: 1.1.2
+  meta: 1.1.5
   platform: 2.1.2
   process: 3.0.1
 
@@ -65,4 +65,4 @@ dev_dependencies:
 environment:
   sdk: '>=1.19.0 <2.0.0'
 
-# PUBSPEC CHECKSUM: df29
+# PUBSPEC CHECKSUM: 3f2a

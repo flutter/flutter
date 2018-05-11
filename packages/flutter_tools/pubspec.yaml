@@ -20,7 +20,7 @@ dependencies:
   json_rpc_2: 2.0.7
   json_schema: 1.0.8
   linter: 0.1.50
-  meta: 1.1.2
+  meta: 1.1.5
   mustache: 1.0.0
   package_config: 1.0.3
   platform: 2.1.2
@@ -85,4 +85,4 @@ dartdoc:
   # Exclude this package from the hosted API docs.
   nodoc: true
 
-# PUBSPEC CHECKSUM: 7874
+# PUBSPEC CHECKSUM: 4675

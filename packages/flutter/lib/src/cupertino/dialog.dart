@@ -13,20 +13,21 @@ import 'scrollbar.dart';
 const TextStyle _kCupertinoDialogTitleStyle = const TextStyle(
   fontFamily: '.SF UI Display',
   inherit: false,
-  fontSize: 17.5,
-  fontWeight: FontWeight.w600,
+  fontSize: 18.0,
+  fontWeight: FontWeight.w500,
   color: CupertinoColors.black,
-  height: 1.25,
+  height: 1.06,
+  letterSpacing: 0.48,
   textBaseline: TextBaseline.alphabetic,
 );
 
 const TextStyle _kCupertinoDialogContentStyle = const TextStyle(
   fontFamily: '.SF UI Text',
   inherit: false,
-  fontSize: 12.4,
-  fontWeight: FontWeight.w500,
+  fontSize: 13.4,
+  fontWeight: FontWeight.w300,
   color: CupertinoColors.black,
-  height: 1.35,
+  height: 1.036,
   textBaseline: TextBaseline.alphabetic,
 );
 

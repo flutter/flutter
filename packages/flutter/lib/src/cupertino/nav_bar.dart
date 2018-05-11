@@ -49,7 +49,7 @@ const TextStyle _kLargeTitleTextStyle = const TextStyle(
   fontFamily: '.SF UI Text',
   fontSize: 34.0,
   fontWeight: FontWeight.w700,
-  letterSpacing: -1.4,
+  letterSpacing: -0.26,
   color: CupertinoColors.black,
 );
 
@@ -375,7 +375,7 @@ class _CupertinoPersistentNavigationBar extends StatelessWidget implements Prefe
     final Widget styledMiddle = middle == null ? null : new DefaultTextStyle(
       style: actionsStyle.copyWith(
         fontWeight: FontWeight.w600,
-        letterSpacing: -0.72,
+        letterSpacing: -0.08,
         color: CupertinoColors.black,
       ),
       child: middle,

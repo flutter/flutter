@@ -9,7 +9,7 @@ environment:
 dependencies:
   file: 5.0.0
   json_rpc_2: 2.0.7
-  meta: 1.1.2
+  meta: 1.1.5
   path: 1.5.1
   web_socket_channel: 1.0.7
   vm_service_client: 0.2.4+1
@@ -69,4 +69,4 @@ dev_dependencies:
   mockito: 3.0.0-alpha+5
   quiver: 0.29.0+1
 
-# PUBSPEC CHECKSUM: 222c
+# PUBSPEC CHECKSUM: 7f2d
