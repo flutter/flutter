@@ -1,3 +1,7 @@
+import 'dart:math';
+
+import 'package:flutter/painting.dart';
+
 /// A rectangular border with rounded corners.
 ///
 /// Typically used with [ShapeDecoration] to draw a box with a rounded
