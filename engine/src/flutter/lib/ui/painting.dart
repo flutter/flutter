@@ -2680,11 +2680,11 @@ class Canvas extends NativeFieldWrapperClass2 {
   ///  * [BlendMode], which discusses the use of [Paint.blendMode] with
   ///    [saveLayer].
   void saveLayer(Rect bounds, Paint paint) {
-    assert(_rectIsValid(bounds));
     assert(paint != null);
     if (bounds == null) {
       _saveLayerWithoutBounds(paint._objects, paint._data);
     } else {
+      assert(_rectIsValid(bounds));
       _saveLayer(bounds.left, bounds.top, bounds.right, bounds.bottom,
                  paint._objects, paint._data);
     }
