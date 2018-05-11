@@ -6,12 +6,14 @@ osx_image: xcode9.2
 env:
   - SHARD=analyze
   - SHARD=tests
+  - SHARD=emulator_tests
   - SHARD=docs
   - SHARD=build_and_deploy_gallery
 matrix:
   exclude:
   - os: osx
     env: SHARD=analyze
+    env: SHARD=emulator_tests
   - os: osx
     env: SHARD=docs
 sudo: false
@@ -30,6 +32,18 @@ addons:
 language: node_js
 node_js:
   - "6"
+language: android
+android:
+  components:
+    - tools
+    - platform-tools
+    - build-tools-25.0.1
+    - android-23
+    - extra-android-m2repository
+    - extra-google-m2repository
+    - sys-img-x86-android-23
+  licenses:
+    - android-sdk-license-5be876d5
 git:
   # We rely on git tags for determining the version.
   depth: false

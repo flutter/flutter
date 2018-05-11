@@ -47,6 +47,12 @@ if [ -n "$TRAVIS" ]; then
     gradle -v
     ./bin/flutter doctor
   fi
+
+  if [ "$TRAVIS_OS_NAME" = "linux" ] && [ "$SHARD" = "emulator_tests" ]; then
+    android create avd --force -n test -t android-23 --abi x86 -no-accel
+    emulator -avd test -no-skin -no-audio -no-window &
+    android-wait-for-emulator
+  fi
 fi
 
 # rename the SDK directory to include a space
