@@ -49,8 +49,6 @@ enum HyphenationFrequency {
   kHyphenationFrequency_Full = 2
 };
 
-bool isLineEndSpace(uint16_t c);
-
 // TODO: want to generalize to be able to handle array of line widths
 class LineWidths {
  public:
