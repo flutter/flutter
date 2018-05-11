@@ -34,11 +34,12 @@ AndroidShellHolder::AndroidShellHolder(
   thread_host_ = {thread_label, ThreadHost::Type::UI | ThreadHost::Type::GPU |
                                     ThreadHost::Type::IO};
 
-  // Detach from JNI when the UI thread exits.
-  thread_host_.ui_thread->GetTaskRunner()->PostTask(
-      [key = thread_destruct_key_]() {
-        FXL_CHECK(pthread_setspecific(key, reinterpret_cast<void*>(1)) == 0);
-      });
+  // Detach from JNI when the UI and GPU threads exit.
+  auto jni_exit_task([key = thread_destruct_key_]() {
+    FXL_CHECK(pthread_setspecific(key, reinterpret_cast<void*>(1)) == 0);
+  });
+  thread_host_.ui_thread->GetTaskRunner()->PostTask(jni_exit_task);
+  thread_host_.gpu_thread->GetTaskRunner()->PostTask(jni_exit_task);
 
   fml::WeakPtr<PlatformViewAndroid> weak_platform_view;
   Shell::CreateCallback<PlatformView> on_create_platform_view =
