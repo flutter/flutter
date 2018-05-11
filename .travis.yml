@@ -11,8 +11,8 @@ env:
   - SHARD=build_and_deploy_gallery
 matrix:
   include:
-    - os: linux
-      language: android
+    - language: android
+      os: linux
       android:
         components:
           - tools
