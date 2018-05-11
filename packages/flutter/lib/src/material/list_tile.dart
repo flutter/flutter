@@ -97,8 +97,10 @@ class ListTileTheme extends InheritedWidget {
   /// If specified, the text color used for enabled [ListTile]s that are not selected.
   final Color textColor;
 
-  /// The padding surrounding the [ListTile]'s titles and its leading and trailing
-  /// widgets.
+  /// The tile's internal padding.
+  ///
+  /// Insets a [ListTile]'s contents: its [leading], [title], [subtitle],
+  /// and [trailing] widgets.
   final EdgeInsetsGeometry contentPadding;
 
   /// The closest instance of this class that encloses the given context.
@@ -264,8 +266,10 @@ class ListTile extends StatelessWidget {
   /// If this property is null then its value is based on [ListTileTheme.dense].
   final bool dense;
 
-  /// The padding surrounding the [title], [subtitle], [leading] and [trailing]
-  /// widgets.
+  /// The tile's internal padding.
+  ///
+  /// Insets a [ListTile]'s contents: its [leading], [title], [subtitle],
+  /// and [trailing] widgets.
   ///
   /// If null, `EdgeInsets.symmetric(horizontal: 16.0)` is used.
   final EdgeInsetsGeometry contentPadding;
@@ -439,10 +443,11 @@ class ListTile extends StatelessWidget {
       );
     }
 
+    const EdgeInsets _kDefaultContentPadding = const EdgeInsets.symmetric(horizontal: 16.0);
     final TextDirection textDirection = Directionality.of(context);
     final EdgeInsets resolvedContentPadding = contentPadding?.resolve(textDirection)
       ?? tileTheme?.contentPadding?.resolve(textDirection)
-      ?? const EdgeInsets.symmetric(horizontal: 16.0);
+      ?? _kDefaultContentPadding;
 
     return new InkWell(
       onTap: enabled ? onTap : null,
@@ -525,6 +530,9 @@ class _RenderListTile extends RenderBox {
   }) : _isDense = isDense,
        _isThreeLine = isThreeLine,
        _textDirection = textDirection;
+
+  static const double _kMinLeadingWidth = 40.0;
+  static const double _kLeadingTitleGap = 16.0;
 
   final Map<_ListTileSlot, RenderBox> slotToChild = <_ListTileSlot, RenderBox>{};
   final Map<RenderBox, _ListTileSlot> childToSlot = <RenderBox, _ListTileSlot>{};
@@ -657,16 +665,20 @@ class _RenderListTile extends RenderBox {
 
   @override
   double computeMinIntrinsicWidth(double height) {
-    final double leadingWidth = _minWidth(leading, height);
-    return (leadingWidth <= 40.0 ? 56.0 : leadingWidth + 16.0)
+    final double leadingWidth = leading != null
+      ? math.max(leading.getMinIntrinsicWidth(height), _kMinLeadingWidth) + _kLeadingTitleGap
+      : 0.0;
+    return leadingWidth
       + math.max(_minWidth(title, height), _minWidth(subtitle, height))
-      + _minWidth(trailing, height);
+      + _maxWidth(trailing, height);
   }
 
   @override
   double computeMaxIntrinsicWidth(double height) {
-    final double leadingWidth = _maxWidth(leading, height);
-    return (leadingWidth <= 40.0 ? 56.0 : leadingWidth + 16.0)
+    final double leadingWidth = leading != null
+      ? math.max(leading.getMaxIntrinsicWidth(height), _kMinLeadingWidth) + _kLeadingTitleGap
+      : 0.0;
+    return leadingWidth
       + math.max(_maxWidth(title, height), _maxWidth(subtitle, height))
       + _maxWidth(trailing, height);
   }
@@ -720,6 +732,8 @@ class _RenderListTile extends RenderBox {
     parentData.offset = offset;
   }
 
+  // All of the dimensions below were taken from the Material Design spec:
+  // https://material.io/design/components/lists.html#specs
   @override
   void performLayout() {
     final bool hasLeading = leading != null;
