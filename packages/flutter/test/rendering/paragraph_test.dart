@@ -91,17 +91,20 @@ void main() {
   });
 
   test('overflow test', () {
-    final RenderParagraph paragraph = new RenderParagraph(
-      const TextSpan(
-        text: 'This\n' // 4 characters * 10px font size = 40px width on the first line
-              'is a wrapping test. It should wrap at manual newlines, and if softWrap is true, also at spaces.',
-        style: const TextStyle(fontFamily: 'Ahem', fontSize: 10.0),
-      ),
-      textDirection: TextDirection.ltr,
-      maxLines: 1,
-      softWrap: true,
-    );
-
+    const String testText = 'This\n' // 4 characters * 10px font size = 40px width on the first line
+        'is a wrapping test. It should wrap at manual newlines, and if softWrap is true, also at spaces.';
+    RenderParagraph createParagraph({TextDirection textDirection: TextDirection.ltr}) {
+      return new RenderParagraph(
+        const TextSpan(
+          text: testText,
+          style: const TextStyle(fontFamily: 'Ahem', fontSize: 10.0),
+        ),
+        textDirection: textDirection,
+        maxLines: 1,
+        softWrap: true,
+      );
+    }
+    RenderParagraph paragraph = createParagraph();
     void relayoutWith({ int maxLines, bool softWrap, TextOverflow overflow }) {
       paragraph
         ..maxLines = maxLines
@@ -164,6 +167,16 @@ void main() {
 
     relayoutWith(maxLines: 100, softWrap: true, overflow: TextOverflow.fade);
     expect(paragraph.debugHasOverflowShader, isFalse);
+
+    relayoutWith(maxLines: 1, softWrap:false, overflow: TextOverflow.clip);
+    pumpFrame(phase: EnginePhase.paint);
+    expect(paragraph.debugOverflowOffset, equals(Offset.zero));
+
+    paragraph = createParagraph(textDirection: TextDirection.rtl);
+    layout(paragraph, constraints: const BoxConstraints(maxWidth: 50.0));
+    relayoutWith(maxLines: 1, softWrap:false, overflow: TextOverflow.clip);
+    pumpFrame(phase: EnginePhase.paint);
+    expect(paragraph.debugOverflowOffset, equals(const Offset(-900.0, 0.0)));
   });
 
   test('maxLines', () {

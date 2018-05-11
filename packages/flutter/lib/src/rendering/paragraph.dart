@@ -344,7 +344,20 @@ class RenderParagraph extends RenderBox {
       }
       canvas.clipRect(bounds);
     }
-    _textPainter.paint(canvas, offset);
+    Offset overflowOffset;
+    switch (textDirection) {
+      case TextDirection.rtl:
+        overflowOffset = new Offset(size.width - _textPainter.width, 0.0);
+        break;
+      case TextDirection.ltr:
+        overflowOffset = Offset.zero;
+        break;
+    }
+    assert(() {
+      debugOverflowOffset = overflowOffset;
+      return true;
+    }());
+    _textPainter.paint(canvas, offset + overflowOffset);
     if (_hasVisualOverflow) {
       if (_overflowShader != null) {
         canvas.translate(offset.dx, offset.dy);
@@ -356,6 +369,17 @@ class RenderParagraph extends RenderBox {
       canvas.restore();
     }
   }
+
+
+  /// We may have to move the string over when we have overflow so that the
+  /// correct part of the string is truncated.  This is the amount that the
+  /// paragraph is shifted when that occurs.
+  ///
+  /// This member is visible only because it is useful in testing this object:
+  /// it's not in production use, and is only set in debug builds. Only
+  /// set after a paint has occurred.
+  @visibleForTesting
+  Offset debugOverflowOffset;
 
   /// Returns the offset at which to paint the caret.
   ///
