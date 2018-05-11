@@ -455,19 +455,17 @@ class ListTile extends StatelessWidget {
       child: new Semantics(
         selected: selected,
         enabled: enabled,
-        child: new Padding(
-          padding: resolvedContentPadding,
-          child: new SafeArea(
-            top: false,
-            bottom: false,
-            child: new _ListTile(
-              leading: leadingIcon,
-              title: titleText,
-              subtitle: subtitleText,
-              trailing: trailingIcon,
-              isDense: _isDenseLayout(tileTheme),
-              isThreeLine: isThreeLine,
-            ),
+        child: new SafeArea(
+          top: false,
+          bottom: false,
+          minimum: resolvedContentPadding,
+          child: new _ListTile(
+            leading: leadingIcon,
+            title: titleText,
+            subtitle: subtitleText,
+            trailing: trailingIcon,
+            isDense: _isDenseLayout(tileTheme),
+            isThreeLine: isThreeLine,
           ),
         ),
       ),

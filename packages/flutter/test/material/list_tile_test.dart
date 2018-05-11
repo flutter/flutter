@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -95,16 +97,16 @@ void main() {
     double widthKey(Key key) => tester.getSize(find.byKey(key)).width;
     double heightKey(Key key) => tester.getSize(find.byKey(key)).height;
 
-
-    // 16.0 padding to the left and right of the leading and trailing widgets
-    // plus the media padding.
+    // ListTiles are contained by a SafeArea defined like this:
+    // SafeArea(top: false, bottom: false, minimim: contentPadding)
+    // The default contentPadding is 16.0 on the left and right.
     void testHorizontalGeometry() {
-      expect(leftKey(leadingKey), 16.0 + leftPadding);
-      expect(left('title'), 72.0 + leftPadding);
+      expect(leftKey(leadingKey), math.max(16.0, leftPadding));
+      expect(left('title'), 56.0 + math.max(16.0, leftPadding));
       if (hasSubtitle)
-        expect(left('subtitle'), 72.0 + leftPadding);
+        expect(left('subtitle'), 56.0 + math.max(16.0, leftPadding));
       expect(left('title'), rightKey(leadingKey) + 32.0);
-      expect(rightKey(trailingKey), 800.0 - 16.0 - rightPadding);
+      expect(rightKey(trailingKey), 800.0 - math.max(16.0, rightPadding));
       expect(widthKey(trailingKey), 24.0);
     }
 
@@ -202,9 +204,9 @@ void main() {
     double right(String text) => tester.getTopRight(find.text(text)).dx;
 
     void testHorizontalGeometry() {
-      expect(right('L'), 800.0 - 16.0 - rightPadding);
-      expect(right('title'), 800.0 - 56.0 - 16.0 - rightPadding);
-      expect(left('T'), 16.0 + leftPadding);
+      expect(right('L'), 800.0 - math.max(16.0, rightPadding));
+      expect(right('title'), 800.0 - 56.0 - math.max(16.0, rightPadding));
+      expect(left('T'), math.max(16.0, leftPadding));
     }
 
     testHorizontalGeometry();
