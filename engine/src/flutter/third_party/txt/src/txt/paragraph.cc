@@ -258,7 +258,8 @@ bool Paragraph::ComputeLineBreaks() {
     size_t block_size = block_end - block_start;
 
     if (block_size == 0) {
-      line_ranges_.emplace_back(block_start, block_end, block_end + 1, true);
+      line_ranges_.emplace_back(block_start, block_end, block_end,
+                                block_end + 1, true);
       line_widths_.push_back(0);
       continue;
     }
@@ -311,7 +312,14 @@ bool Paragraph::ComputeLineBreaks() {
       bool hard_break = i == breaks_count - 1;
       size_t line_end_including_newline =
           (hard_break && line_end < text_.size()) ? line_end + 1 : line_end;
+      size_t line_end_excluding_whitespace = line_end;
+      while (
+          line_end_excluding_whitespace > 0 &&
+          minikin::isLineEndSpace(text_[line_end_excluding_whitespace - 1])) {
+        line_end_excluding_whitespace--;
+      }
       line_ranges_.emplace_back(line_start, line_end,
+                                line_end_excluding_whitespace,
                                 line_end_including_newline, hard_break);
       line_widths_.push_back(breaker_.getWidths()[i]);
     }
@@ -462,13 +470,21 @@ void Paragraph::Layout(double width, bool force) {
       }
     }
 
+    // Exclude trailing whitespace from right-justified lines so the last
+    // visible character in the line will be flush with the right margin.
+    size_t line_end_index =
+        (paragraph_style_.effective_align() == TextAlign::right ||
+         paragraph_style_.effective_align() == TextAlign::center)
+            ? line_range.end_excluding_whitespace
+            : line_range.end;
+
     // Find the runs comprising this line.
     std::vector<BidiRun> line_runs;
     for (const BidiRun& bidi_run : bidi_runs) {
-      if (bidi_run.start() < line_range.end &&
+      if (bidi_run.start() < line_end_index &&
           bidi_run.end() > line_range.start) {
         line_runs.emplace_back(std::max(bidi_run.start(), line_range.start),
-                               std::min(bidi_run.end(), line_range.end),
+                               std::min(bidi_run.end(), line_end_index),
                                bidi_run.direction(), bidi_run.style());
       }
     }
@@ -687,7 +703,7 @@ void Paragraph::Layout(double width, bool force) {
     }
 
     // Adjust the glyph positions based on the alignment of the line.
-    double line_x_offset = GetLineXOffset(line_number, run_x_offset);
+    double line_x_offset = GetLineXOffset(run_x_offset);
     if (line_x_offset) {
       for (CodeUnitRun& code_unit_run : line_code_unit_runs) {
         for (GlyphPosition& position : code_unit_run.positions) {
@@ -780,25 +796,16 @@ void Paragraph::Layout(double width, bool force) {
             });
 }
 
-double Paragraph::GetLineXOffset(size_t line_number,
-                                 double line_total_advance) {
-  if (line_number >= line_widths_.size() || isinf(width_))
+double Paragraph::GetLineXOffset(double line_total_advance) {
+  if (isinf(width_))
     return 0;
 
-  TextAlign align = paragraph_style_.text_align;
-  TextDirection direction = paragraph_style_.text_direction;
+  TextAlign align = paragraph_style_.effective_align();
 
-  if (align == TextAlign::right ||
-      (align == TextAlign::start && direction == TextDirection::rtl) ||
-      (align == TextAlign::end && direction == TextDirection::ltr)) {
-    // If this line has a soft break, then use the line width calculated by the
-    // line breaker because that width excludes the soft break's whitespace.
-    double text_width = line_ranges_[line_number].hard_break
-                            ? line_total_advance
-                            : line_widths_[line_number];
-    return width_ - text_width;
-  } else if (paragraph_style_.text_align == TextAlign::center) {
-    return (width_ - line_widths_[line_number]) / 2;
+  if (align == TextAlign::right) {
+    return width_ - line_total_advance;
+  } else if (align == TextAlign::center) {
+    return (width_ - line_total_advance) / 2;
   } else {
     return 0;
   }

@@ -66,6 +66,9 @@ class ParagraphStyle {
 
   bool unlimited_lines() const;
   bool ellipsized() const;
+
+  // Return a text alignment value that is not dependent on the text direction.
+  TextAlign effective_align() const;
 };
 
 }  // namespace txt
