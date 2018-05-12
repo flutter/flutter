@@ -77,7 +77,17 @@ Engine::Engine(Delegate& delegate,
   OnMetricsUpdate on_session_metrics_change_callback = std::bind(
       &Engine::OnSessionMetricsDidChange, this, std::placeholders::_1);
 
-  fxl::Closure on_session_error_callback = std::bind(&Engine::Terminate, this);
+  // Session errors may occur on the GPU thread, but we must terminate ourselves
+  // on the platform thread.
+  fxl::Closure on_session_error_callback =
+      [runner = fsl::MessageLoop::GetCurrent()->task_runner(),
+       weak = weak_factory_.GetWeakPtr()]() {
+        runner->PostTask([weak]() {
+          if (weak) {
+            weak->Terminate();
+          }
+        });
+      };
 
   // Grab the accessibilty context writer that can understand the semtics tree
   // on the platform view.
