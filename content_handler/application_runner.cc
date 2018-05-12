@@ -72,8 +72,9 @@ void ApplicationRunner::StartApplication(
                           std::move(controller)     // controller request
       );
 
-  active_applications_[thread_application_pair.second.get()] =
-      std::move(thread_application_pair);
+  auto key = thread_application_pair.second.get();
+
+  active_applications_[key] = std::move(thread_application_pair);
 }
 
 void ApplicationRunner::OnApplicationTerminate(const Application* application) {
