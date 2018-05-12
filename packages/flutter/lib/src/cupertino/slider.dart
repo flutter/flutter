@@ -105,7 +105,7 @@ class CupertinoSlider extends StatefulWidget {
   ///
   /// This callback shouldn't be used to update the slider [value] (use
   /// [onChanged] for that), but rather to be notified when the user has started
-  /// selecting a new value by starting a drag or with a tap.
+  /// selecting a new value by starting a drag.
   ///
   /// The value passed will be the last [value] that the slider had before the
   /// change began.
@@ -139,7 +139,7 @@ class CupertinoSlider extends StatefulWidget {
   ///
   /// This callback shouldn't be used to update the slider [value] (use
   /// [onChanged] for that), but rather to know when the user has completed
-  /// selecting a new [value] by ending a drag or a click.
+  /// selecting a new [value] by ending a drag.
   ///
   /// ## Sample code
   ///
