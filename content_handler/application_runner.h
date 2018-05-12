@@ -23,7 +23,7 @@ namespace flutter {
 class ApplicationRunner final : public Application::Delegate,
                                 public component::ApplicationRunner {
  public:
-  ApplicationRunner(fxl::Closure on_termination_callback);
+  ApplicationRunner();
 
   ~ApplicationRunner();
 
@@ -48,7 +48,6 @@ class ApplicationRunner final : public Application::Delegate,
     }
   };
 
-  fxl::Closure on_termination_callback_;
   std::unique_ptr<component::ApplicationContext> host_context_;
   fidl::BindingSet<component::ApplicationRunner> active_applications_bindings_;
   std::unordered_map<const Application*, ActiveApplication>
@@ -71,8 +70,6 @@ class ApplicationRunner final : public Application::Delegate,
   void SetupICU();
 
   void SetupGlobalFonts();
-
-  void FireTerminationCallbackIfNecessary();
 
   FXL_DISALLOW_COPY_AND_ASSIGN(ApplicationRunner);
 };

@@ -15,12 +15,12 @@ int main(int argc, char const* argv[]) {
   FXL_DCHECK(provider.is_valid()) << "Trace provider must be valid.";
 
   FXL_DLOG(INFO) << "Flutter application services initialized.";
-  flutter::ApplicationRunner runner([&loop]() {
-    loop.PostQuitTask();
-    FXL_DLOG(INFO) << "Flutter application services terminated. Good bye...";
-  });
+
+  flutter::ApplicationRunner runner;
 
   loop.Run();
+
+  FXL_DLOG(INFO) << "Flutter application services terminated.";
 
   return EXIT_SUCCESS;
 }

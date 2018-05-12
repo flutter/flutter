@@ -34,9 +34,8 @@ static void SetThreadName(const std::string& thread_name) {
                                   thread_name.size());
 }
 
-ApplicationRunner::ApplicationRunner(fxl::Closure on_termination_callback)
-    : on_termination_callback_(std::move(on_termination_callback)),
-      host_context_(component::ApplicationContext::CreateFromStartupInfo()) {
+ApplicationRunner::ApplicationRunner()
+    : host_context_(component::ApplicationContext::CreateFromStartupInfo()) {
   SkGraphics::Init();
 
   SetupICU();
@@ -50,9 +49,6 @@ ApplicationRunner::ApplicationRunner(fxl::Closure on_termination_callback)
   host_context_->outgoing_services()->AddService<component::ApplicationRunner>(
       std::bind(&ApplicationRunner::RegisterApplication, this,
                 std::placeholders::_1));
-
-  active_applications_bindings_.set_empty_set_handler(
-      [this]() { FireTerminationCallbackIfNecessary(); });
 }
 
 ApplicationRunner::~ApplicationRunner() {
@@ -82,7 +78,6 @@ void ApplicationRunner::StartApplication(
 
 void ApplicationRunner::OnApplicationTerminate(const Application* application) {
   active_applications_.erase(application);
-  FireTerminationCallbackIfNecessary();
 }
 
 void ApplicationRunner::SetupICU() {
@@ -104,16 +99,6 @@ void ApplicationRunner::SetupGlobalFonts() {
   // Set the default font manager.
   process_font_collection->SetDefaultFontManager(
       sk_make_sp<txt::FuchsiaFontManager>(std::move(sync_font_provider)));
-}
-
-void ApplicationRunner::FireTerminationCallbackIfNecessary() {
-  // We have no reason to exist if:
-  // 1: No previously launched applications are running.
-  // 2: No bindings exist that may require launching more applications.
-  if (on_termination_callback_ && active_applications_.size() == 0 &&
-      active_applications_bindings_.size() == 0) {
-    on_termination_callback_();
-  }
 }
 
 }  // namespace flutter
