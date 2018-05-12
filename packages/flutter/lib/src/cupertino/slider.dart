@@ -101,7 +101,7 @@ class CupertinoSlider extends StatefulWidget {
   ///    changing the value.
   final ValueChanged<double> onChanged;
 
-    /// Called when the user starts selecting a new value for the slider.
+  /// Called when the user starts selecting a new value for the slider.
   ///
   /// This callback shouldn't be used to update the slider [value] (use
   /// [onChanged] for that), but rather to be notified when the user has started
@@ -136,7 +136,7 @@ class CupertinoSlider extends StatefulWidget {
   ///    complete.
   final ValueChanged<double> onChangeStart;
 
-    /// Called when the user is done selecting a new value for the slider.
+  /// Called when the user is done selecting a new value for the slider.
   ///
   /// This callback shouldn't be used to update the slider [value] (use
   /// [onChanged] for that), but rather to know when the user has completed
