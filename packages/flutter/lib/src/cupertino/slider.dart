@@ -201,7 +201,28 @@ class CupertinoSlider extends StatefulWidget {
 class _CupertinoSliderState extends State<CupertinoSlider> with TickerProviderStateMixin {
   void _handleChanged(double value) {
     assert(widget.onChanged != null);
-    widget.onChanged(value * (widget.max - widget.min) + widget.min);
+    final double lerpValue = _lerp(value);
+    if (lerpValue != widget.value) {
+      widget.onChanged(lerpValue);
+    }
+  }
+
+  void _handleDragStart(double value) {
+    assert(widget.onChangeStart != null);
+    widget.onChangeStart(_lerp(value));
+  }
+
+  void _handleDragEnd(double value) {
+    assert(widget.onChangeEnd != null);
+    widget.onChangeEnd(_lerp(value));
+  }
+
+    // Returns a number between min and max, proportional to value, which must
+  // be between 0.0 and 1.0.
+  double _lerp(double value) {
+    assert(value >= 0.0);
+    assert(value <= 1.0);
+    return value * (widget.max - widget.min) + widget.min;
   }
 
   @override
@@ -406,9 +427,7 @@ class _RenderCupertinoSlider extends RenderConstrainedBox {
     }
   }
 
-  void _handleDragEnd(DragEndDetails details) {
-    _currentDragValue = 0.0;
-  }
+  void _handleDragEnd(DragEndDetails details) => _endInteraction();
 
   void _startInteraction(Offset globalPosition) {
     if (isInteractive) {
@@ -421,10 +440,10 @@ class _RenderCupertinoSlider extends RenderConstrainedBox {
   }
 
   void _endInteraction() {
-    _currentDragValue = 0.0;
     if (onChangeEnd != null) {
       onChangeEnd(_discretizedCurrentDragValue);
     }
+    _currentDragValue = 0.0;
   }
 
   @override

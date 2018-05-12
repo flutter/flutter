@@ -135,7 +135,7 @@ void main() {
     double value = 0.0;
     double startValue;
     double endValue;
-
+    
     await tester.pumpWidget(new Directionality(
       textDirection: TextDirection.rtl,
       child: new StatefulBuilder(
@@ -151,10 +151,14 @@ void main() {
                   });
                 },
                 onChangeStart: (double value) {
-                  startValue = value;
+                  setState(() {
+                    startValue = value;
+                  });
                 },
                 onChangeEnd: (double value) {
-                  endValue = value;
+                  setState(() {
+                    endValue = value;
+                  });
                 }
               ),
             ),
