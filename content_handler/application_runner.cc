@@ -65,8 +65,24 @@ void ApplicationRunner::StartApplication(
     component::ApplicationPackage package,
     component::ApplicationStartupInfo startup_info,
     fidl::InterfaceRequest<component::ApplicationController> controller) {
+  // Notes on application termination: Application typically terminate on the
+  // thread on which they were created. This usually means the thread was
+  // specifically created to host the application. But we want to ensure that
+  // access to the active applications collection is made on the same thread. So
+  // we capture the runner in the termination callback. There is no risk of
+  // there being multiple application runner instance in the process at the same
+  // time. So it is safe to use the raw pointer.
+  Application::TerminationCallback termination_callback =
+      [task_runner = fsl::MessageLoop::GetCurrent()->task_runner(),  //
+       application_runner = this                                     //
+  ](const Application* application) {
+        task_runner->PostTask([application_runner, application]() {
+          application_runner->OnApplicationTerminate(application);
+        });
+      };
+
   auto thread_application_pair =
-      Application::Create(*this,                    // delegate
+      Application::Create(termination_callback,     // termination callback
                           std::move(package),       // application pacakge
                           std::move(startup_info),  // startup info
                           std::move(controller)     // controller request

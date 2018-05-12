@@ -31,16 +31,13 @@ class Application final : public Engine::Delegate,
                           public component::ApplicationController,
                           public views_v1::ViewProvider {
  public:
-  class Delegate {
-   public:
-    virtual void OnApplicationTerminate(const Application* application) = 0;
-  };
+  using TerminationCallback = std::function<void(const Application*)>;
 
   // Creates a dedicated thread to run the application and constructions the
   // application on it. The application can be accessed only on this thread.
   // This is a synchronous operation.
   static std::pair<std::unique_ptr<fsl::Thread>, std::unique_ptr<Application>>
-  Create(Application::Delegate& delegate,
+  Create(TerminationCallback termination_callback,
          component::ApplicationPackage package,
          component::ApplicationStartupInfo startup_info,
          fidl::InterfaceRequest<component::ApplicationController> controller);
@@ -53,7 +50,7 @@ class Application final : public Engine::Delegate,
 
  private:
   blink::Settings settings_;
-  Delegate& delegate_;
+  TerminationCallback termination_callback_;
   const std::string debug_label_;
   UniqueFDIONS fdio_ns_ = UniqueFDIONSCreate();
   fxl::UniqueFD application_directory_;
@@ -69,7 +66,7 @@ class Application final : public Engine::Delegate,
   std::pair<bool, uint32_t> last_return_code_;
 
   Application(
-      Application::Delegate& delegate,
+      TerminationCallback termination_callback,
       component::ApplicationPackage package,
       component::ApplicationStartupInfo startup_info,
       fidl::InterfaceRequest<component::ApplicationController> controller);

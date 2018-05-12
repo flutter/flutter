@@ -20,8 +20,7 @@ namespace flutter {
 
 // Publishes the |component::ApplicationRunner| service and runs applications on
 // their own threads.
-class ApplicationRunner final : public Application::Delegate,
-                                public component::ApplicationRunner {
+class ApplicationRunner final : public component::ApplicationRunner {
  public:
   ApplicationRunner();
 
@@ -64,8 +63,7 @@ class ApplicationRunner final : public Application::Delegate,
 
   void UnregisterApplication(const Application* application);
 
-  // |Application::Delegate|
-  void OnApplicationTerminate(const Application* application) override;
+  void OnApplicationTerminate(const Application* application);
 
   void SetupICU();
 

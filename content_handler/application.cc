@@ -20,7 +20,7 @@ namespace flutter {
 
 std::pair<std::unique_ptr<fsl::Thread>, std::unique_ptr<Application>>
 Application::Create(
-    Application::Delegate& delegate,
+    TerminationCallback termination_callback,
     component::ApplicationPackage package,
     component::ApplicationStartupInfo startup_info,
     fidl::InterfaceRequest<component::ApplicationController> controller) {
@@ -29,7 +29,7 @@ Application::Create(
 
   fxl::AutoResetWaitableEvent latch;
   thread->TaskRunner()->PostTask([&]() mutable {
-    application.reset(new Application(delegate,                 //
+    application.reset(new Application(termination_callback,     //
                                       std::move(package),       //
                                       std::move(startup_info),  //
                                       std::move(controller)     //
@@ -51,12 +51,12 @@ static std::string DebugLabelForURL(const std::string& url) {
 }
 
 Application::Application(
-    Application::Delegate& delegate,
+    TerminationCallback termination_callback,
     component::ApplicationPackage,
     component::ApplicationStartupInfo startup_info,
     fidl::InterfaceRequest<component::ApplicationController>
         application_controller_request)
-    : delegate_(delegate),
+    : termination_callback_(termination_callback),
       debug_label_(DebugLabelForURL(startup_info.launch_info.url)),
       application_controller_(this) {
   application_controller_.set_error_handler([this]() { Kill(); });
@@ -234,7 +234,7 @@ void Application::Kill() {
   }
   wait_callbacks_.clear();
 
-  delegate_.OnApplicationTerminate(this);
+  termination_callback_(this);
   // WARNING: Don't do anything past this point as this instance may have been
   // collected.
 }
