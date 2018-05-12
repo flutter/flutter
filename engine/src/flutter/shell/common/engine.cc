@@ -109,6 +109,7 @@ bool Engine::Run(RunConfiguration configuration) {
   }
 
   if (!PrepareAndLaunchIsolate(std::move(configuration))) {
+    FXL_LOG(ERROR) << "Engine not prepare and launch isolate.";
     return false;
   }
 
@@ -143,12 +144,12 @@ bool Engine::PrepareAndLaunchIsolate(RunConfiguration configuration) {
   auto isolate = runtime_controller_->GetRootIsolate();
 
   if (!isolate_configuration->PrepareIsolate(isolate)) {
-    FXL_DLOG(ERROR) << "Could not prepare to run the isolate.";
+    FXL_LOG(ERROR) << "Could not prepare to run the isolate.";
     return false;
   }
 
   if (!isolate->Run(configuration.GetEntrypoint())) {
-    FXL_DLOG(ERROR) << "Could not run the isolate.";
+    FXL_LOG(ERROR) << "Could not run the isolate.";
     return false;
   }
 
