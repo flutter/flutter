@@ -83,6 +83,8 @@ void main() {
   testWidgets('Slider moves when dragged (LTR)', (WidgetTester tester) async {
     final Key sliderKey = new UniqueKey();
     double value = 0.0;
+    double startValue;
+    double endValue;
 
     await tester.pumpWidget(new Directionality(
       textDirection: TextDirection.ltr,
@@ -98,6 +100,12 @@ void main() {
                     value = newValue;
                   });
                 },
+                onChangeStart: (double value) {
+                  startValue = value;
+                },
+                onChangeEnd: (double value) {
+                  endValue = value;
+                }
               ),
             ),
           );
@@ -111,7 +119,11 @@ void main() {
     const double delta = 3.0 * unit;
     await tester.dragFrom(topLeft + const Offset(unit, unit), const Offset(delta, 0.0));
     final Size size = tester.getSize(find.byKey(sliderKey));
-    expect(value, equals(delta / (size.width - 2.0 * (8.0 + CupertinoThumbPainter.radius))));
+    final double finalValue = delta / (size.width - 2.0 * (8.0 + CupertinoThumbPainter.radius));
+    expect(startValue, equals(0.0));
+    expect(value, equals(finalValue));
+    expect(endValue, equals(finalValue));
+    
     await tester.pump(); // No animation should start.
     // Check the transientCallbackCount before tearing down the widget to ensure
     // that no animation is running.
@@ -121,6 +133,8 @@ void main() {
   testWidgets('Slider moves when dragged (RTL)', (WidgetTester tester) async {
     final Key sliderKey = new UniqueKey();
     double value = 0.0;
+    double startValue;
+    double endValue;
 
     await tester.pumpWidget(new Directionality(
       textDirection: TextDirection.rtl,
@@ -136,6 +150,12 @@ void main() {
                     value = newValue;
                   });
                 },
+                onChangeStart: (double value) {
+                  startValue = value;
+                },
+                onChangeEnd: (double value) {
+                  endValue = value;
+                }
               ),
             ),
           );
@@ -149,7 +169,10 @@ void main() {
     const double delta = 3.0 * unit;
     await tester.dragFrom(bottomRight - const Offset(unit, unit), const Offset(-delta, 0.0));
     final Size size = tester.getSize(find.byKey(sliderKey));
-    expect(value, equals(delta / (size.width - 2.0 * (8.0 + CupertinoThumbPainter.radius))));
+    final double finalValue = delta / (size.width - 2.0 * (8.0 + CupertinoThumbPainter.radius));
+    expect(startValue, equals(0.0));
+    expect(value, equals(finalValue));
+    expect(endValue, equals(finalValue));
     await tester.pump(); // No animation should start.
     // Check the transientCallbackCount before tearing down the widget to ensure
     // that no animation is running.
