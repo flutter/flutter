@@ -113,12 +113,11 @@ class CupertinoSlider extends StatefulWidget {
   /// ## Sample code
   ///
   /// ```dart
-  /// new Slider(
+  /// new CupertinoSlider(
   ///   value: _duelCommandment.toDouble(),
   ///   min: 1.0,
   ///   max: 10.0,
   ///   divisions: 10,
-  ///   label: '$_duelCommandment',
   ///   onChanged: (double newValue) {
   ///     setState(() {
   ///       _duelCommandment = newValue.round();
@@ -145,12 +144,11 @@ class CupertinoSlider extends StatefulWidget {
   /// ## Sample code
   ///
   /// ```dart
-  /// new Slider(
+  /// new CupertinoSlider(
   ///   value: _duelCommandment.toDouble(),
   ///   min: 1.0,
   ///   max: 10.0,
   ///   divisions: 10,
-  ///   label: '$_duelCommandment',
   ///   onChanged: (double newValue) {
   ///     setState(() {
   ///       _duelCommandment = newValue.round();
