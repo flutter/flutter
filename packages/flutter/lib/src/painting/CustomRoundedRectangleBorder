@@ -231,10 +231,10 @@ class CustomRoundedRectangleBorder extends ShapeBorder {
       canvas.drawLine(
           rect.bottomLeft +
               new Offset(
-                  leftSide?.width ?? 0.0 / 2,
+                  (leftSide?.width ?? 0.0) / 2,
                   -borderRadius.bottomLeft.y -
-                      (borderRadius.bottomLeft.x == 0 ? bottomSide?.width ?? 0.0 : 0.0)),
-          rect.topLeft + new Offset(leftSide?.width ?? 0.0 / 2, borderRadius.topLeft.y),
+                      (borderRadius.bottomLeft.x == 0 ? (bottomSide?.width ?? 0.0) : 0.0)),
+          rect.topLeft + new Offset((leftSide?.width ?? 0.0) / 2, borderRadius.topLeft.y),
           paint);
     }
   }
