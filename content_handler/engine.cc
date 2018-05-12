@@ -204,12 +204,27 @@ Engine::Engine(Delegate& delegate,
   auto run_configuration =
       shell::RunConfiguration::InferFromSettings(settings_);
 
+  auto on_run_failure = [weak = weak_factory_.GetWeakPtr(),  //
+                         runner =
+                             fsl::MessageLoop::GetCurrent()->task_runner()  //
+  ]() {
+    // The engine could have been killed by the caller right after the
+    // constructor was called but before it could run on the UI thread.
+    if (weak) {
+      weak->Terminate();
+    }
+  };
+
   shell_->GetTaskRunners().GetUITaskRunner()->PostTask(
-      fxl::MakeCopyable([engine = shell_->GetEngine(),                     //
-                         run_configuration = std::move(run_configuration)  //
+      fxl::MakeCopyable([engine = shell_->GetEngine(),                      //
+                         run_configuration = std::move(run_configuration),  //
+                         on_run_failure                                     //
   ]() mutable {
-        if (!engine || !engine->Run(std::move(run_configuration))) {
-          FXL_LOG(ERROR) << "Could not (re)launch the engine in configuration";
+        if (!engine) {
+          return;
+        }
+        if (!engine->Run(std::move(run_configuration))) {
+          on_run_failure();
         }
       }));
 }
