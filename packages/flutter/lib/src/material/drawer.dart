@@ -25,6 +25,19 @@ enum DrawerAlignment {
   end,
 }
 
+/// Listener so Page's can react to the opening or closing of a [Drawer].
+abstract class DrawerListener {
+  void drawerWasOpened();
+  void drawerWasClosed();
+}
+
+class NullDrawerListener implements DrawerListener {
+  const NullDrawerListener();
+  void drawerWasOpened() {}
+  void drawerWasClosed() {}
+}
+
+
 // TODO(eseidel): Draw width should vary based on device size:
 // http://material.google.com/layout/structure.html#structure-side-nav
 
@@ -165,6 +178,7 @@ class DrawerController extends StatefulWidget {
     GlobalKey key,
     @required this.child,
     @required this.alignment,
+    this.drawerListener,
   }) : assert(child != null),
        assert(alignment != null),
        super(key: key);
@@ -180,14 +194,22 @@ class DrawerController extends StatefulWidget {
   /// close the drawer.
   final DrawerAlignment alignment;
 
+  final DrawerListener drawerListener;
+
   @override
-  DrawerControllerState createState() => new DrawerControllerState();
+  DrawerControllerState createState() => new DrawerControllerState(drawerListener);
 }
 
 /// State for a [DrawerController].
 ///
 /// Typically used by a [Scaffold] to [open] and [close] the drawer.
 class DrawerControllerState extends State<DrawerController> with SingleTickerProviderStateMixin {
+  final DrawerListener drawerListener;
+
+  bool _isOpen = false;
+
+  DrawerControllerState(this.drawerListener);
+
   @override
   void initState() {
     super.initState();
@@ -270,7 +292,12 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
     return _kWidth; // drawer not being shown currently
   }
 
+
   void _move(DragUpdateDetails details) {
+    if(!_isOpen) {
+      _isOpen = true;
+      drawerListener.drawerWasOpened();
+    }
     double delta = details.primaryDelta / _width;
     switch (widget.alignment) {
       case DrawerAlignment.start:
@@ -321,11 +348,17 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
   /// Typically called by [ScaffoldState.openDrawer].
   void open() {
     _controller.fling(velocity: 1.0);
+    if(!_isOpen) {
+      _isOpen = true;
+      drawerListener.drawerWasOpened();
+    }
   }
 
   /// Starts an animation to close the drawer.
   void close() {
     _controller.fling(velocity: -1.0);
+    drawerListener.drawerWasClosed();
+    _isOpen = false;
   }
 
   final ColorTween _color = new ColorTween(begin: Colors.transparent, end: Colors.black54);

@@ -766,6 +766,7 @@ class Scaffold extends StatefulWidget {
     this.backgroundColor,
     this.resizeToAvoidBottomPadding: true,
     this.primary: true,
+    this.drawerListener: const NullDrawerListener(),
   }) : assert(primary != null), super(key: key);
 
   /// An app bar to display at the top of the scaffold.
@@ -828,6 +829,9 @@ class Scaffold extends StatefulWidget {
   ///
   /// Typically a [Drawer].
   final Widget drawer;
+
+  /// A listener for [Drawer] events
+  final DrawerListener drawerListener;
 
   /// A panel displayed to the side of the [body], often hidden on mobile
   /// devices. Swipes in from right-to-left ([TextDirection.ltr]) or
@@ -1055,7 +1059,7 @@ class Scaffold extends StatefulWidget {
   }
 
   @override
-  ScaffoldState createState() => new ScaffoldState();
+  ScaffoldState createState() => new ScaffoldState(drawerListener);
 }
 
 /// State for a [Scaffold].
@@ -1063,6 +1067,11 @@ class Scaffold extends StatefulWidget {
 /// Can display [SnackBar]s and [BottomSheet]s. Retrieve a [ScaffoldState] from
 /// the current [BuildContext] using [Scaffold.of].
 class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
+
+  ScaffoldState(this.drawerListener);
+
+  // listener for [Drawer] events
+  final DrawerListener drawerListener;
 
   // DRAWER API
 
@@ -1577,6 +1586,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
           key: _drawerKey,
           alignment: DrawerAlignment.start,
           child: widget.drawer,
+          drawerListener: drawerListener,
         ),
         _ScaffoldSlot.drawer,
         // remove the side padding from the side we're not touching
