@@ -153,16 +153,16 @@ class FontAsset {
 }
 
 @visibleForTesting
-String buildSchemaDir(FileSystem fs){
+String buildSchemaDir(FileSystem fs) {
   return fs.path.join(
     fs.path.absolute(Cache.flutterRoot), 'packages', 'flutter_tools', 'schema',
   );
 }
 
 @visibleForTesting
-String buildSchemaPath(FileSystem fs){
+String buildSchemaPath(FileSystem fs) {
   return fs.path.join(
-    fs.path.absolute(buildSchemaDir(fs)),
+    buildSchemaDir(fs),
     'pubspec_yaml.json',
   );
 }

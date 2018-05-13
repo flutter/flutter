@@ -366,14 +366,17 @@ Future<DevFSContent> _obtainLicenses(
   return new DevFSStringContent(combinedLicenses);
 }
 
+int _byBasename(_Asset a, _Asset b) {
+  return a.assetFile.basename.compareTo(b.assetFile.basename);
+}
+
 DevFSContent _createAssetManifest(Map<_Asset, List<_Asset>> assetVariants) {
   final Map<String, List<String>> jsonObject = <String, List<String>>{};
 
   // necessary for making unit tests deterministic
   final List<_Asset> sortedKeys = assetVariants
       .keys.toList()
-    ..sort((_Asset a, _Asset b) =>
-        a.assetFile.basename.compareTo(b.assetFile.basename));
+    ..sort(_byBasename);
 
   for (_Asset main in sortedKeys) {
     final List<String> variants = <String>[];
@@ -468,8 +471,7 @@ class _AssetDirectoryCache {
 
     if (_cache[directory] == null) {
       final List<String> paths = <String>[];
-      for (FileSystemEntity entity in fs.directory(directory).listSync(
-          recursive: true)) {
+      for (FileSystemEntity entity in fs.directory(directory).listSync(recursive: true)) {
         final String path = entity.path;
         if (fs.isFileSync(path) && !_excluded.any((String exclude) => path.startsWith(exclude)))
           paths.add(path);
@@ -503,10 +505,16 @@ class _AssetDirectoryCache {
 /// assets/bar
 ///
 /// returns
-/// {asset: packages/test_package/assets/foo:
-///     [asset: packages/test_package/assets/foo,
-///     packages/test_package/assets/var1/foo, packages/test_package/assets/var2/foo],
-/// asset: packages/test_package/assets/bar: [asset: packages/test_package/assets/bar]}
+/// {
+///   asset: packages/test_package/assets/foo: [
+///     asset: packages/test_package/assets/foo,
+///     asset: packages/test_package/assets/var1/foo,
+///     asset: packages/test_package/assets/var2/foo,
+///   ],
+///   asset: packages/test_package/assets/bar: [
+///     asset: packages/test_package/assets/bar,
+///   ],
+/// }
 ///
 
 Map<_Asset, List<_Asset>> _parseAssets(
@@ -520,7 +528,7 @@ Map<_Asset, List<_Asset>> _parseAssets(
 
   final _AssetDirectoryCache cache = new _AssetDirectoryCache(excludeDirs);
   for (Uri assetUri in flutterManifest.assets) {
-    if ( assetUri.toString().endsWith('/')){
+    if (assetUri.toString().endsWith('/')) {
       _parseAssetsFromFolder(packageMap, flutterManifest, assetBase,
           cache, result, assetUri,
           excludeDirs: excludeDirs, packageName: packageName);
@@ -553,28 +561,29 @@ Map<_Asset, List<_Asset>> _parseAssets(
 }
 
 void _parseAssetsFromFolder(PackageMap packageMap,
-    FlutterManifest flutterManifest,
-    String assetBase,
-    _AssetDirectoryCache cache,
-    Map<_Asset, List<_Asset>> result,
-    Uri assetUri,
-    { List<String> excludeDirs: const <String>[],
-      String packageName}) {
+  FlutterManifest flutterManifest,
+  String assetBase,
+  _AssetDirectoryCache cache,
+  Map<_Asset, List<_Asset>> result,
+  Uri assetUri, {
+  List<String> excludeDirs: const <String>[],
+  String packageName
+}) {
   final String directoryPath = fs.path.join(
       assetBase, assetUri.toFilePath(windows: platform.isWindows));
 
   if (!fs.directory(directoryPath).existsSync()) {
     printError('Error: unable to find directory entry in pubspec.yaml: $directoryPath');
+    return;
   }
 
-  final List<FileSystemEntity> lister = fs.directory(directoryPath)
-      .listSync(recursive: false);
+  final List<FileSystemEntity> lister = fs.directory(directoryPath).listSync();
 
   for (FileSystemEntity entity in lister) {
     if (entity is File) {
-      final String relPath = fs.path.relative(entity.path, from: assetBase);
+      final String relativePath = fs.path.relative(entity.path, from: assetBase);
 
-      final Uri uri = new Uri.file(relPath, windows: platform.isWindows);
+      final Uri uri = new Uri.file(relativePath, windows: platform.isWindows);
 
       _parseAssetFromFile(packageMap, flutterManifest, assetBase, cache, result,
           uri, packageName: packageName);
@@ -583,13 +592,14 @@ void _parseAssetsFromFolder(PackageMap packageMap,
 }
 
 void _parseAssetFromFile(PackageMap packageMap,
-    FlutterManifest flutterManifest,
-    String assetBase,
-    _AssetDirectoryCache cache,
-    Map<_Asset, List<_Asset>> result,
-    Uri assetUri,
-    { List<String> excludeDirs: const <String>[],
-      String packageName}) {
+  FlutterManifest flutterManifest,
+  String assetBase,
+  _AssetDirectoryCache cache,
+  Map<_Asset, List<_Asset>> result,
+  Uri assetUri, {
+  List<String> excludeDirs: const <String>[],
+  String packageName
+}) {
   final _Asset asset = _resolveAsset(
     packageMap,
     assetBase,
@@ -605,16 +615,15 @@ void _parseAssetFromFile(PackageMap packageMap,
         : asset.symbolicPrefixUri.resolveUri(relativeUri);
 
     variants.add(
-        new _Asset(
-          baseDir: asset.baseDir,
-          entryUri: entryUri,
-          relativeUri: relativeUri,
+      new _Asset(
+        baseDir: asset.baseDir,
+        entryUri: entryUri,
+        relativeUri: relativeUri,
         )
     );
   }
 
   result[asset] = variants;
-
 }
 
 _Asset _resolveAsset(

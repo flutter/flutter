@@ -55,9 +55,7 @@ $assetsSection
   }
 
   void writePackagesFile(String packages) {
-    final Uri uri = new Uri.file('.packages', windows: platform.isWindows);
-
-    fs.file(uri)
+    fs.file('.packages')
       ..createSync()
       ..writeAsStringSync(packages);
   }
@@ -551,14 +549,13 @@ $assetsSection
       final String schemaPath = buildSchemaPath(filesystem);
       final File schemaFile = filesystem.file(schemaPath);
 
-
       final Directory schemaDir = filesystem.directory(
           buildSchemaDir(filesystem));
 
       schemaDir.createSync(recursive: true);
       schemaFile.writeAsStringSync(schema);
     }
-    //////////////////////////////////////
+
     void testUsingContextAndFs(String description, dynamic testMethod(),) {
       final FileSystem windowsFs = new MemoryFileSystem(
           style: FileSystemStyle.windows);
@@ -575,38 +572,31 @@ $assetsSection
         establishFlutterRoot();
         writeSchema(schema, windowsFs);
         await testMethod();
-      },
-          overrides: <Type, Generator>{
-            FileSystem: () => windowsFs,
-            Platform: () =>
-            new FakePlatform(environment: <String, String>{
-              'FLUTTER_ROOT': _kFlutterRoot,
-            },
-                operatingSystem: 'windows')
-          });
+      }, overrides: <Type, Generator>{
+        FileSystem: () => windowsFs,
+        Platform: () =>
+        new FakePlatform(
+            environment: <String, String>{'FLUTTER_ROOT': _kFlutterRoot,},
+            operatingSystem: 'windows')
+      });
 
       testUsingContext('$description - on posix FS', () async {
         establishFlutterRoot();
         writeSchema(schema, posixFs);
         await testMethod();
-      },
-          overrides: <Type, Generator>{
-            FileSystem: () => posixFs,
-            Platform: () =>
-            new FakePlatform(environment: <String, String>{
-              'FLUTTER_ROOT': _kFlutterRoot,
-            },
-                operatingSystem: 'linux')
-
-          });
-
+      }, overrides: <Type, Generator>{
+        FileSystem: () => posixFs,
+        Platform: () =>
+        new FakePlatform(
+            environment: <String, String>{ 'FLUTTER_ROOT': _kFlutterRoot,},
+            operatingSystem: 'linux')
+      });
 
       testUsingContext('$description - on original FS', () async {
         establishFlutterRoot();
         await testMethod();
       });
     }
-
 
     testUsingContextAndFs(
         'One asset is bundled with variant, scanning directory', () async {
@@ -639,7 +629,6 @@ $assetsSection
         'No asset is bundled with variant, no assets or directories are listed', () async {
       establishFlutterRoot();
 
-
       writePubspecFile('pubspec.yaml', 'test');
       writePackagesFile('test_package:p/p/lib/');
 
@@ -653,8 +642,7 @@ $assetsSection
       );
 
       writeAssets('p/p/', assetsOnDisk);
-      const String expectedAssetManifest =
-          '{}';
+      const String expectedAssetManifest = '{}';
 
       await buildAndVerifyAssets(
         assetOnManifest,
@@ -667,7 +655,6 @@ $assetsSection
         'Expect error generating manifest, wrong non-existing directory is listed', () async {
       establishFlutterRoot();
 
-
       writePubspecFile('pubspec.yaml', 'test');
       writePackagesFile('test_package:p/p/lib/');
 
@@ -678,7 +665,6 @@ $assetsSection
         'test_package',
         assets: assetOnManifest,
       );
-
 
       try {
         await buildAndVerifyAssets(
