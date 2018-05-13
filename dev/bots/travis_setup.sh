@@ -41,8 +41,8 @@ if [ -n "$TRAVIS" ]; then
     echo y | sdkmanager "patcher;v4" >/dev/null
     sdkmanager --list
     wget https://services.gradle.org/distributions/gradle-4.7-bin.zip
-    unzip -qq gradle-4.1-bin.zip
-    export GRADLE_HOME=$PWD/gradle-4.1
+    unzip -qq gradle-4.7-bin.zip
+    export GRADLE_HOME=$PWD/gradle-4.7
     export PATH=$GRADLE_HOME/bin:$PATH
     gradle -v
     ./bin/flutter doctor
