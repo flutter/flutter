@@ -33,7 +33,9 @@ abstract class DrawerListener {
 
 class NullDrawerListener implements DrawerListener {
   const NullDrawerListener();
+  @override
   void drawerWasOpened() {}
+  @override
   void drawerWasClosed() {}
 }
 
