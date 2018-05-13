@@ -1,7 +1,7 @@
 // Copyright 2015 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
-
+import 'dart:math' as math;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/gestures.dart';
 
@@ -77,7 +77,7 @@ void main() {
 
     // Two-finger scaling
     final TestPointer pointer2 = new TestPointer(2);
-    final PointerDownEvent down2 = pointer2.down(const Offset(10.0, 20.0));
+    final PointerDownEvent down2 = pointer2.down(const Offset(30.0, 40.0));
     scale.addPointer(down2);
     tap.addPointer(down2);
     tester.closeArena(2);
@@ -87,17 +87,31 @@ void main() {
     didEndScale = false;
     expect(updatedScale, isNull);
     expect(updatedFocalPoint, isNull);
+    expect(updatedRotation, isNull);
     expect(didStartScale, isFalse);
 
 
     // Zoom in
-    tester.route(pointer2.move(const Offset(0.0, 10.0)));
+    tester.route(pointer2.move(const Offset(40.0, 50.0)));
     expect(didStartScale, isTrue);
     didStartScale = false;
+    expect(updatedFocalPoint, const Offset(30.0, 40.0));
+    updatedFocalPoint = null;
+    expect(updatedScale, 2.0);
+    updatedScale = null;
+    expect(updatedRotation, 0.0);
+    updatedRotation = null;
+    expect(didEndScale, isFalse);
+    expect(didTap, isFalse);
+
+    // Rotation
+    tester.route(pointer2.move(const Offset(0.0, 10.0)));
     expect(updatedFocalPoint, const Offset(10.0, 20.0));
     updatedFocalPoint = null;
     expect(updatedScale, 2.0);
     updatedScale = null;
+    expect(updatedRotation, math.pi);
+    updatedRotation = null;
     expect(didEndScale, isFalse);
     expect(didTap, isFalse);
 
@@ -107,6 +121,8 @@ void main() {
     updatedFocalPoint = null;
     expect(updatedScale, 0.5);
     updatedScale = null;
+    expect(updatedRotation, math.pi);
+    updatedRotation = null;
     expect(didTap, isFalse);
 
     // Three-finger scaling
@@ -121,6 +137,7 @@ void main() {
     didEndScale = false;
     expect(updatedScale, isNull);
     expect(updatedFocalPoint, isNull);
+    expect(updatedRotation, isNull);
     expect(didStartScale, isFalse);
 
     // Zoom in
@@ -131,6 +148,8 @@ void main() {
     updatedFocalPoint = null;
     expect(updatedScale, 5.0);
     updatedScale = null;
+    expect(updatedRotation, 0.0);
+    updatedRotation = null;
     expect(didEndScale, isFalse);
     expect(didTap, isFalse);
 
@@ -143,6 +162,8 @@ void main() {
     updatedFocalPoint = null;
     expect(updatedScale, 1.0);
     updatedScale = null;
+    expect(updatedRotation, 0.0);
+    updatedRotation = null;
     expect(didEndScale, isFalse);
     expect(didTap, isFalse);
 
@@ -162,11 +183,30 @@ void main() {
     updatedFocalPoint = null;
     expect(updatedScale, 2.0);
     updatedScale = null;
+    expect(updatedRotation, 0.0);
+    updatedRotation = null;
+
+    // Continue rotating with two fingers
+    tester.route(pointer3.move(const Offset(30.0, 40.0)));
+    expect(updatedFocalPoint, const Offset(25.0, 35.0));
+    updatedFocalPoint = null;
+    expect(updatedScale, 2.0);
+    updatedScale = null;
+    expect(updatedRotation, - math.pi);
+    updatedRotation = null;
+    tester.route(pointer3.move(const Offset(10.0, 20.0)));
+    expect(updatedFocalPoint, const Offset(15.0, 25.0));
+    updatedFocalPoint = null;
+    expect(updatedScale, 2.0);
+    updatedScale = null;
+    expect(updatedRotation, 0.0);
+    updatedRotation = null;
 
     tester.route(pointer2.up());
     expect(didStartScale, isFalse);
     expect(updatedFocalPoint, isNull);
     expect(updatedScale, isNull);
+    expect(updatedRotation, isNull);
     expect(didEndScale, isTrue);
     didEndScale = false;
     expect(didTap, isFalse);
@@ -179,12 +219,15 @@ void main() {
     updatedFocalPoint = null;
     expect(updatedScale, 1.0);
     updatedScale = null;
+    expect(updatedRotation, 0.0);
+    updatedRotation = null;
 
     // We are done
     tester.route(pointer3.up());
     expect(didStartScale, isFalse);
     expect(updatedFocalPoint, isNull);
     expect(updatedScale, isNull);
+    expect(updatedRotation, isNull);
     expect(didEndScale, isTrue);
     didEndScale = false;
     expect(didTap, isFalse);
