@@ -379,7 +379,7 @@ Future<Null> _buildGradleProjectV2(String gradle, BuildInfo buildInfo, String ta
     if (buildInfo.fileSystemScheme != null)
       command.add('-Pfilesystem-scheme=${buildInfo.fileSystemScheme}');
   }
-  if (buildInfo.preferSharedLibrary && androidSdk.ndkCompiler != null) {
+  if (buildInfo.preferSharedLibrary && androidSdk.ndk != null) {
     command.add('-Pprefer-shared-library=true');
   }
   if (buildInfo.targetPlatform == TargetPlatform.android_arm64)

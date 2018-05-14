@@ -100,9 +100,9 @@ class AndroidWorkflow extends DoctorValidator implements Workflow {
 
     messages.add(new ValidationMessage('Android SDK at ${androidSdk.directory}'));
 
-    messages.add(new ValidationMessage(androidSdk.ndkDirectory == null
+    messages.add(new ValidationMessage(androidSdk.ndk == null
           ? 'Android NDK location not configured (optional; useful for native profiling support)'
-          : 'Android NDK at ${androidSdk.ndkDirectory}'));
+          : 'Android NDK at ${androidSdk.ndk.directory}'));
 
     String sdkVersionText;
     if (androidSdk.latestVersion != null) {
