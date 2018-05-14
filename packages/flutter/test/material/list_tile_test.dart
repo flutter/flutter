@@ -56,8 +56,9 @@ void main() {
 
     const double leftPadding = 10.0;
     const double rightPadding = 20.0;
-    Widget buildFrame({ bool dense: false, bool isTwoLine: false, bool isThreeLine: false, double textScaleFactor: 1.0 }) {
+    Widget buildFrame({ bool dense: false, bool isTwoLine: false, bool isThreeLine: false, double textScaleFactor: 1.0, double subtitleScaleFactor }) {
       hasSubtitle = isTwoLine || isThreeLine;
+      subtitleScaleFactor ??= textScaleFactor;
       return new MaterialApp(
         home: new MediaQuery(
           data: new MediaQueryData(
@@ -69,7 +70,7 @@ void main() {
               child: new ListTile(
                 leading: new Container(key: leadingKey, width: 24.0, height: 24.0),
                 title: const Text('title'),
-                subtitle: hasSubtitle ? const Text('subtitle') : null,
+                subtitle: hasSubtitle ? new Text('subtitle', textScaleFactor: subtitleScaleFactor) : null,
                 trailing: new Container(key: trailingKey, width: 24.0, height: 24.0),
                 dense: dense,
                 isThreeLine: isThreeLine,
@@ -91,6 +92,7 @@ void main() {
     double left(String text) => tester.getTopLeft(find.text(text)).dx;
     double top(String text) => tester.getTopLeft(find.text(text)).dy;
     double bottom(String text) => tester.getBottomLeft(find.text(text)).dy;
+    double height(String text) => tester.getRect(find.text(text)).height;
 
     double leftKey(Key key) => tester.getTopLeft(find.byKey(key)).dx;
     double rightKey(Key key) => tester.getTopRight(find.byKey(key)).dx;
@@ -98,7 +100,7 @@ void main() {
     double heightKey(Key key) => tester.getSize(find.byKey(key)).height;
 
     // ListTiles are contained by a SafeArea defined like this:
-    // SafeArea(top: false, bottom: false, minimim: contentPadding)
+    // SafeArea(top: false, bottom: false, minimum: contentPadding)
     // The default contentPadding is 16.0 on the left and right.
     void testHorizontalGeometry() {
       expect(leftKey(leadingKey), math.max(16.0, leftPadding));
@@ -111,9 +113,15 @@ void main() {
     }
 
     void testVerticalGeometry(double expectedHeight) {
-      expect(tester.getSize(find.byType(ListTile)), new Size(800.0, expectedHeight));
-      if (hasSubtitle)
+      final Rect tileRect = tester.getRect(find.byType(ListTile));
+      expect(tileRect.size, new Size(800.0, expectedHeight));
+      expect(top('title'), greaterThanOrEqualTo(tileRect.top));
+      if (hasSubtitle) {
         expect(top('subtitle'), greaterThanOrEqualTo(bottom('title')));
+        expect(bottom('subtitle'), lessThan(tileRect.bottom));
+      } else {
+        expect(top('title'), equals(tileRect.top + (tileRect.height - height('title')) / 2.0));
+      }
       expect(heightKey(trailingKey), 24.0);
     }
 
@@ -150,34 +158,39 @@ void main() {
     await tester.pumpWidget(buildFrame(textScaleFactor: 4.0));
     testChildren();
     testHorizontalGeometry();
-    testVerticalGeometry(64.0);
+    testVerticalGeometry(72.0);
 
     await tester.pumpWidget(buildFrame(dense: true, textScaleFactor: 4.0));
     testChildren();
     testHorizontalGeometry();
-    testVerticalGeometry(64.0);
+    testVerticalGeometry(72.0);
 
     await tester.pumpWidget(buildFrame(isTwoLine: true, textScaleFactor: 4.0));
     testChildren();
     testHorizontalGeometry();
-    testVerticalGeometry(120.0);
+    testVerticalGeometry(128.0);
+
+    // Make sure that the height of a large subtitle is taken into account.
+    await tester.pumpWidget(buildFrame(isTwoLine: true, textScaleFactor: 0.5, subtitleScaleFactor: 4.0));
+    testChildren();
+    testHorizontalGeometry();
+    testVerticalGeometry(72.0);
 
     await tester.pumpWidget(buildFrame(isTwoLine: true, dense: true, textScaleFactor: 4.0));
     testChildren();
     testHorizontalGeometry();
-    testVerticalGeometry(120.0);
+    testVerticalGeometry(128.0);
 
     await tester.pumpWidget(buildFrame(isThreeLine: true, textScaleFactor: 4.0));
     testChildren();
     testHorizontalGeometry();
-    testVerticalGeometry(120.0);
+    testVerticalGeometry(128.0);
 
     await tester.pumpWidget(buildFrame(isThreeLine: true, dense: true, textScaleFactor: 4.0));
     testChildren();
     testHorizontalGeometry();
-    testVerticalGeometry(120.0);
+    testVerticalGeometry(128.0);
   });
-
 
   testWidgets('ListTile geometry (RTL)', (WidgetTester tester) async {
     const double leftPadding = 10.0;
@@ -477,7 +490,6 @@ void main() {
     expect(right('L'), 790.0); // 800 - contentPadding.start
   });
 
-
   testWidgets('ListTileTheme wide leading Widget', (WidgetTester tester) async {
     const Key leadingKey = const ValueKey<String>('L');
 
@@ -544,7 +556,5 @@ void main() {
     expect(tester.getBottomLeft(find.byKey(leadingKey)), const Offset(800.0 - 56.0, 52.0));
     expect(right('title'), 800.0 - 72.0);
     expect(right('subtitle'), 800.0 - 72.0);
-
   });
-
 }
