@@ -152,9 +152,13 @@ class AOTSnapshotter {
     if (platform == TargetPlatform.ios)
       buildSharedLibrary = false;
 
-    if (buildSharedLibrary && androidSdk.ndkCompiler == null) {
+    if (buildSharedLibrary && androidSdk.ndk == null) {
+      final String explanation = AndroidNdk.explainMissingNdk(androidSdk.directory);
       printError(
-        'Could not find NDK in Android SDK at ${androidSdk.directory}.\n'
+        'Could not find NDK in Android SDK at ${androidSdk.directory}:\n'
+        '\n'
+        '  $explanation\n'
+        '\n'
         'Unable to build with --build-shared-library\n'
         'To install the NDK, see instructions at https://developer.android.com/ndk/guides/'
       );
@@ -344,8 +348,8 @@ class AOTSnapshotter {
     // (which causes it to not look into the other section and therefore not
     // find the correct unwinding information).
     final String assemblySo = fs.path.join(outputPath, 'app.so');
-    return await runCheckedAsync(<String>[androidSdk.ndkCompiler]
-        ..addAll(androidSdk.ndkCompilerArgs)
+    return await runCheckedAsync(<String>[androidSdk.ndk.compiler]
+        ..addAll(androidSdk.ndk.compilerArgs)
         ..addAll(<String>[ '-shared', '-nostdlib', '-o', assemblySo, assemblyPath ]));
   }
 
