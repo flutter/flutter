@@ -2073,6 +2073,15 @@ class RenderTransform extends RenderProxyBox {
   }
 
   @override
+  bool hitTest(HitTestResult result, { Offset position }) {
+    // RenderTransform objects don't check if they are
+    // themselves hit, because it's confusing to think about
+    // how the untransformed size and the child's transformed
+    // position interact.
+    return hitTestChildren(result, position: position);
+  }
+
+  @override
   bool hitTestChildren(HitTestResult result, { Offset position }) {
     if (transformHitTests) {
       final Matrix4 inverse = Matrix4.tryInvert(_effectiveTransform);
@@ -4170,6 +4179,15 @@ class RenderFollowerLayer extends RenderProxyBox {
   /// [new Matrix4.identity].
   Matrix4 getCurrentTransform() {
     return _layer?.getLastTransform() ?? new Matrix4.identity();
+  }
+
+  @override
+  bool hitTest(HitTestResult result, { Offset position }) {
+    // RenderFollowerLayer objects don't check if they are
+    // themselves hit, because it's confusing to think about
+    // how the untransformed size and the child's transformed
+    // position interact.
+    return hitTestChildren(result, position: position);
   }
 
   @override
