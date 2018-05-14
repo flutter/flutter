@@ -5,7 +5,7 @@
 import 'dart:async';
 import 'dart:convert';
 
-import 'package:flutter_tools/src/base/io.dart';
+import 'dart:io';
 
 Process daemon;
 
