@@ -943,9 +943,9 @@ class PubspecDependency extends PubspecLine {
   bool get lockIsOverride => _lockIsOverride;
   bool _lockIsOverride;
 
-  static const String _kPathPrefix = '    path: ';
-  static const String _kSdkPrefix = '    sdk: ';
-  static const String _kGitPrefix = '    git:';
+  static const String _pathPrefix = '    path: ';
+  static const String _sdkPrefix = '    sdk: ';
+  static const String _gitPrefix = '    git:';
 
   /// Whether the dependency points to a package in the Flutter SDK.
   ///
@@ -973,15 +973,15 @@ class PubspecDependency extends PubspecLine {
   bool parseLock(String line, String pubspecPath, { @required bool lockIsOverride }) {
     assert(lockIsOverride != null);
     assert(kind == DependencyKind.unknown);
-    if (line.startsWith(_kPathPrefix)) {
+    if (line.startsWith(_pathPrefix)) {
       // We're a path dependency; remember the (absolute) path.
-      _lockTarget = fs.path.absolute(fs.path.dirname(pubspecPath), line.substring(_kPathPrefix.length, line.length));
+      _lockTarget = fs.path.absolute(fs.path.dirname(pubspecPath), line.substring(_pathPrefix.length, line.length));
       _kind = DependencyKind.path;
-    } else if (line.startsWith(_kSdkPrefix)) {
+    } else if (line.startsWith(_sdkPrefix)) {
       // We're an SDK dependency.
-      _lockTarget = line.substring(_kSdkPrefix.length, line.length);
+      _lockTarget = line.substring(_sdkPrefix.length, line.length);
       _kind = DependencyKind.sdk;
-    } else if (line.startsWith(_kGitPrefix)) {
+    } else if (line.startsWith(_gitPrefix)) {
       // We're a git: dependency. Return false so we'll be forgotten.
       return false;
     } else {
