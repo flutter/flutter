@@ -20,7 +20,8 @@ class CompositorContext final : public flow::CompositorContext {
                     std::string debug_label,
                     zx::eventpair import_token,
                     OnMetricsUpdate session_metrics_did_change_callback,
-                    fxl::Closure session_error_callback);
+                    fxl::Closure session_error_callback,
+                    zx_handle_t vsync_event_handle);
 
   ~CompositorContext() override;
 

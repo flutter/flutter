@@ -47,6 +47,11 @@ Engine::Engine(Delegate& delegate,
       thread_label_(std::move(thread_label)),
       settings_(std::move(settings)),
       weak_factory_(this) {
+  if (zx::event::create(0, &vsync_event_) != ZX_OK) {
+    FXL_DLOG(ERROR) << "Could not create the vsync event.";
+    return;
+  }
+
   // Launch the threads that will be used to run the shell. These threads will
   // be joined in the destructor.
   for (auto& thread : host_threads_) {
@@ -103,7 +108,8 @@ Engine::Engine(Delegate& delegate,
           thread_label_,                       // debug label
           std::move(import_token),             // import token
           on_session_metrics_change_callback,  // session metrics did change
-          on_session_error_callback            // session did encounter error
+          on_session_error_callback,           // session did encounter error
+          vsync_event_.get()                   // vsync event handle
       );
 
   // Setup the callback that will instantiate the platform view.
@@ -115,7 +121,8 @@ Engine::Engine(Delegate& delegate,
                          view_owner = std::move(view_owner),                  //
                          accessibility_context_writer =
                              std::move(accessibility_context_writer),  //
-                         export_token = std::move(export_token)        //
+                         export_token = std::move(export_token),       //
+                         vsync_handle = vsync_event_.get()             //
 
   ](shell::Shell& shell) mutable {
         return std::make_unique<flutter::PlatformView>(
@@ -127,7 +134,8 @@ Engine::Engine(Delegate& delegate,
             std::move(view_owner),                           // view owner
             std::move(export_token),                         // export token
             std::move(
-                accessibility_context_writer)  // accessibility context writer
+                accessibility_context_writer),  // accessibility context writer
+            vsync_handle                        // vsync handle
         );
       });
 

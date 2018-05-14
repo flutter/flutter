@@ -42,6 +42,8 @@ template("flutter_content_handler") {
       "task_observers.cc",
       "task_observers.h",
       "unique_fdio_ns.h",
+      "vsync_waiter.cc",
+      "vsync_waiter.h",
       "vulkan_surface.cc",
       "vulkan_surface.h",
       "vulkan_surface_pool.cc",

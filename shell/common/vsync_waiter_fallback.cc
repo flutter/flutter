@@ -29,6 +29,7 @@ VsyncWaiterFallback::~VsyncWaiterFallback() = default;
 
 constexpr fxl::TimeDelta interval = fxl::TimeDelta::FromSecondsF(1.0 / 60.0);
 
+// |shell::VsyncWaiter|
 void VsyncWaiterFallback::AwaitVSync() {
   fxl::TimePoint now = fxl::TimePoint::Now();
   fxl::TimePoint next = SnapToNextTick(now, phase_, interval);

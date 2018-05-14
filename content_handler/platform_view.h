@@ -37,7 +37,8 @@ class PlatformView final : public shell::PlatformView,
                fidl::InterfaceRequest<views_v1_token::ViewOwner> view_owner,
                zx::eventpair export_token,
                fidl::InterfaceHandle<modular::ContextWriter>
-                   accessibility_context_writer);
+                   accessibility_context_writer,
+               zx_handle_t vsync_event_handle);
 
   ~PlatformView();
 
@@ -72,6 +73,7 @@ class PlatformView final : public shell::PlatformView,
       std::function<void(
           fxl::RefPtr<blink::PlatformMessage> /* message */)> /* handler */>
       platform_message_handlers_;
+  zx_handle_t vsync_event_handle_ = 0;
 
   void RegisterPlatformMessageHandlers();
 
@@ -98,6 +100,9 @@ class PlatformView final : public shell::PlatformView,
   bool OnHandleKeyboardEvent(const input::KeyboardEvent& keyboard);
 
   bool OnHandleFocusEvent(const input::FocusEvent& focus);
+
+  // |shell::PlatformView|
+  std::unique_ptr<shell::VsyncWaiter> CreateVSyncWaiter() override;
 
   // |shell::PlatformView|
   std::unique_ptr<shell::Surface> CreateRenderingSurface() override;

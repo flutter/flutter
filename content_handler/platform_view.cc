@@ -13,6 +13,7 @@
 #include "third_party/rapidjson/rapidjson/document.h"
 #include "third_party/rapidjson/rapidjson/stringbuffer.h"
 #include "third_party/rapidjson/rapidjson/writer.h"
+#include "vsync_waiter.h"
 
 namespace flutter {
 
@@ -36,7 +37,8 @@ PlatformView::PlatformView(
     fidl::InterfaceHandle<views_v1::ViewManager> view_manager_handle,
     fidl::InterfaceRequest<views_v1_token::ViewOwner> view_owner,
     zx::eventpair export_token,
-    fidl::InterfaceHandle<modular::ContextWriter> accessibility_context_writer)
+    fidl::InterfaceHandle<modular::ContextWriter> accessibility_context_writer,
+    zx_handle_t vsync_event_handle)
     : shell::PlatformView(delegate, std::move(task_runners)),
       debug_label_(std::move(debug_label)),
       view_manager_(view_manager_handle.Bind()),
@@ -44,7 +46,8 @@ PlatformView::PlatformView(
       input_listener_(this),
       ime_client_(this),
       accessibility_bridge_(std::move(accessibility_context_writer)),
-      surface_(std::make_unique<Surface>(debug_label_)) {
+      surface_(std::make_unique<Surface>(debug_label_)),
+      vsync_event_handle_(vsync_event_handle) {
   // Register all error handlers.
   SetInterfaceErrorHandler(view_manager_, "View Manager");
   SetInterfaceErrorHandler(view_, "View");
@@ -393,6 +396,12 @@ bool PlatformView::OnHandleFocusEvent(const input::FocusEvent& focus) {
     return true;
   }
   return false;
+}
+
+// |shell::PlatformView|
+std::unique_ptr<shell::VsyncWaiter> PlatformView::CreateVSyncWaiter() {
+  return std::make_unique<flutter::VsyncWaiter>(
+      debug_label_, vsync_event_handle_, task_runners_);
 }
 
 // |shell::PlatformView|

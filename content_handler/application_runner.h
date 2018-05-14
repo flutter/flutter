@@ -13,7 +13,6 @@
 #include "lib/app/cpp/application_context.h"
 #include "lib/fidl/cpp/binding_set.h"
 #include "lib/fsl/tasks/message_loop.h"
-#include "lib/fxl/functional/make_copyable.h"
 #include "lib/fxl/macros.h"
 
 namespace flutter {
@@ -35,16 +34,7 @@ class ApplicationRunner final : public component::ApplicationRunner {
                                 std::unique_ptr<Application>> pair)
         : thread(std::move(pair.first)), application(std::move(pair.second)) {}
 
-    ActiveApplication() {
-      if (thread && application) {
-        thread->TaskRunner()->PostTask(
-            fxl::MakeCopyable([application = std::move(application)]() mutable {
-              application.reset();
-              fsl::MessageLoop::GetCurrent()->PostQuitTask();
-            }));
-        thread.reset();  // join
-      }
-    }
+    ActiveApplication() = default;
   };
 
   std::unique_ptr<component::ApplicationContext> host_context_;

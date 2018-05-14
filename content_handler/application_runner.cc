@@ -11,6 +11,7 @@
 
 #include "flutter/lib/ui/text/font_collection.h"
 #include "fuchsia_font_manager.h"
+#include "lib/fxl/functional/make_copyable.h"
 #include "lib/icu_data/cpp/icu_data.h"
 #include "third_party/flutter/runtime/dart_vm.h"
 #include "third_party/skia/include/core/SkGraphics.h"
@@ -94,7 +95,27 @@ void ApplicationRunner::StartApplication(
 }
 
 void ApplicationRunner::OnApplicationTerminate(const Application* application) {
+  auto& active_application = active_applications_.at(application);
+
+  // Grab the items out of the entry because we will have to rethread the
+  // destruction.
+  auto application_to_destroy = std::move(active_application.application);
+  auto application_destruction_thread = std::move(active_application.thread);
+
+  // Delegate the entry.
   active_applications_.erase(application);
+
+  // Post the task to destroy the application and quit its message loop.
+  auto runner = application_destruction_thread->TaskRunner();
+  runner->PostTask(fxl::MakeCopyable(
+      [instance = std::move(application_to_destroy)]() mutable {
+        instance.reset();
+
+        fsl::MessageLoop::GetCurrent()->PostQuitTask();
+      }));
+
+  // This works because just posted the quit task on the hosted thread.
+  application_destruction_thread->Join();
 }
 
 void ApplicationRunner::SetupICU() {

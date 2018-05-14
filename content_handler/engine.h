@@ -6,6 +6,7 @@
 
 #include <fuchsia/cpp/views_v1.h>
 #include <fuchsia/cpp/views_v1_token.h>
+#include <zx/event.h>
 
 #include "flutter/shell/common/shell.h"
 #include "isolate_configurator.h"
@@ -49,6 +50,7 @@ class Engine final : public mozart::NativesDelegate {
   std::array<fsl::Thread, 3> host_threads_;
   std::unique_ptr<IsolateConfigurator> isolate_configurator_;
   std::unique_ptr<shell::Shell> shell_;
+  zx::event vsync_event_;
   fxl::WeakPtrFactory<Engine> weak_factory_;
 
   void OnMainIsolateStart();

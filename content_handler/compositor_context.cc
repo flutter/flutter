@@ -60,13 +60,15 @@ CompositorContext::CompositorContext(
     std::string debug_label,
     zx::eventpair import_token,
     OnMetricsUpdate session_metrics_did_change_callback,
-    fxl::Closure session_error_callback)
+    fxl::Closure session_error_callback,
+    zx_handle_t vsync_event_handle)
     : debug_label_(std::move(debug_label)),
       session_connection_(std::move(scenic),
                           debug_label_,
                           std::move(import_token),
                           std::move(session_metrics_did_change_callback),
-                          std::move(session_error_callback)) {}
+                          std::move(session_error_callback),
+                          vsync_event_handle) {}
 
 CompositorContext::~CompositorContext() = default;
 

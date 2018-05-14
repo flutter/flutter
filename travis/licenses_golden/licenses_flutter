@@ -800,6 +800,8 @@ FILE: ../../../flutter/content_handler/surface.h
 FILE: ../../../flutter/content_handler/task_observers.cc
 FILE: ../../../flutter/content_handler/task_observers.h
 FILE: ../../../flutter/content_handler/unique_fdio_ns.h
+FILE: ../../../flutter/content_handler/vsync_waiter.cc
+FILE: ../../../flutter/content_handler/vsync_waiter.h
 ----------------------------------------------------------------------------------------------------
 Copyright 2018 The Fuchsia Authors. All rights reserved.
 

@@ -27,7 +27,8 @@ class SessionConnection final {
                     std::string debug_label,
                     zx::eventpair import_token,
                     OnMetricsUpdate session_metrics_did_change_callback,
-                    fxl::Closure session_error_callback);
+                    fxl::Closure session_error_callback,
+                    zx_handle_t vsync_event_handle);
 
   ~SessionConnection();
 
@@ -53,10 +54,15 @@ class SessionConnection final {
   std::unique_ptr<VulkanSurfaceProducer> surface_producer_;
   flow::SceneUpdateContext scene_update_context_;
   OnMetricsUpdate metrics_changed_callback_;
+  zx_handle_t vsync_event_handle_;
 
   void OnSessionEvents(fidl::VectorPtr<ui::Event> events);
 
   void EnqueueClearOps();
+
+  void PresentSession();
+
+  static void ToggleSignal(zx_handle_t handle, bool raise);
 
   FXL_DISALLOW_COPY_AND_ASSIGN(SessionConnection);
 };
