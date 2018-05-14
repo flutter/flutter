@@ -73,9 +73,7 @@ class BoxShadow {
     assert(() {
       if (debugDisableShadows) {
         result
-          ..maskFilter = null
-          ..style = PaintingStyle.stroke
-          ..strokeWidth = blurRadius * 2.0;
+          ..maskFilter = null;
       }
       return true;
     }());
