@@ -71,8 +71,12 @@ class BoxShadow {
       ..color = color
       ..maskFilter = new MaskFilter.blur(BlurStyle.normal, blurSigma);
     assert(() {
-      if (debugDisableShadows)
-        result.maskFilter = null;
+      if (debugDisableShadows) {
+        result
+          ..maskFilter = null
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = blurRadius * 2.0;
+      }
       return true;
     }());
     return result;

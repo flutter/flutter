@@ -6,8 +6,6 @@ import 'package:flutter/painting.dart';
 
 import 'colors.dart';
 
-final MaskFilter _kShadowMaskFilter = new MaskFilter.blur(BlurStyle.normal, BoxShadow.convertRadiusToSigma(1.0));
-
 /// Paints an iOS-style slider thumb.
 ///
 /// Used by [CupertinoSwitch] and [CupertinoSlider].
@@ -35,17 +33,17 @@ class CupertinoThumbPainter {
   /// Consider using [radius] and [extension] when deciding how large a
   /// rectangle to use for the thumb.
   void paint(Canvas canvas, Rect rect) {
-    final RRect rrect = new RRect.fromRectAndRadius(rect, new Radius.circular(rect.shortestSide / 2.0));
+    final RRect rrect = new RRect.fromRectAndRadius(
+      rect,
+      new Radius.circular(rect.shortestSide / 2.0),
+    );
 
-    final Paint paint = new Paint()
-      ..color = shadowColor
-      ..maskFilter = _kShadowMaskFilter;
-    canvas.drawRRect(rrect, paint);
-    canvas.drawRRect(rrect.shift(const Offset(0.0, 3.0)), paint);
-
-    paint
-      ..color = color
-      ..maskFilter = null;
-    canvas.drawRRect(rrect, paint);
+    final Paint shadowPaint = new BoxShadow(
+      color: shadowColor,
+      blurRadius: 1.0,
+    ).toPaint();
+    canvas.drawRRect(rrect, shadowPaint);
+    canvas.drawRRect(rrect.shift(const Offset(0.0, 3.0)), shadowPaint);
+    canvas.drawRRect(rrect, new Paint()..color = color);
   }
 }
