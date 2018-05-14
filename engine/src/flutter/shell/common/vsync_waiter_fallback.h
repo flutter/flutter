@@ -22,6 +22,7 @@ class VsyncWaiterFallback final : public VsyncWaiter {
   fxl::TimePoint phase_;
   fxl::WeakPtrFactory<VsyncWaiterFallback> weak_factory_;
 
+  // |shell::VsyncWaiter|
   void AwaitVSync() override;
 
   FXL_DISALLOW_COPY_AND_ASSIGN(VsyncWaiterFallback);
