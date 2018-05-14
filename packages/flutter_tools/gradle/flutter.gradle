@@ -458,6 +458,9 @@ abstract class BaseFlutterTask extends DefaultTask {
             if (trackWidgetCreation) {
                 args "--track-widget-creation"
             }
+            if (extraFrontEndOptions != null) {
+                args "--extra-front-end-options", "${extraFrontEndOptions}"
+            }
             if (buildMode != "debug") {
                 args "--precompiled"
             } else {
