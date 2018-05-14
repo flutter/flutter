@@ -427,3 +427,11 @@ tasks:
       Measures the speed of Dart analyzer.
     stage: devicelab
     required_agent_capabilities: ["linux/android"]
+
+  flutter_gallery_ios32__transition_perf:
+    description: >
+      Measures the performance of screen transitions in Flutter Gallery on
+      32-bit iOS.
+    stage: devicelab_ios
+    required_agent_capabilities: ["mac/ios32"]
+    flaky: true
