@@ -3,6 +3,8 @@
 # found in the LICENSE file.
 
 group("linux") {
+  testonly = true
+
   deps = [
     "$flutter_root/shell/testing",
   ]
