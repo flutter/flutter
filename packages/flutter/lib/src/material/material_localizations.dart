@@ -160,6 +160,10 @@ abstract class MaterialLocalizations {
   /// alert dialog widget is opened.
   String get alertDialogLabel;
 
+  /// Label indicating that a text field is a search field. This will be used
+  /// as a hint text in the text field.
+  String get searchFieldLabel;
+
   /// The format used to lay out the time picker.
   ///
   /// The documentation for [TimeOfDayFormat] enum values provides details on
@@ -536,6 +540,9 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
 
   @override
   String get alertDialogLabel => 'Alert';
+
+  @override
+  String get searchFieldLabel => 'Search';
 
   @override
   String aboutListTileTitle(String applicationName) => 'About $applicationName';

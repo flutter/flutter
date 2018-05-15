@@ -38,5 +38,6 @@
   "drawerLabel": "ナビゲーション メニュー",
   "popupMenuLabel": "ポップアップ メニュー",
   "dialogLabel": "ダイアログ",
-  "alertDialogLabel": "アラート"
+  "alertDialogLabel": "アラート",
+  "searchFieldLabel": "サーチ"
 }
