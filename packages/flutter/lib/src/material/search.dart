@@ -10,6 +10,7 @@ import 'app_bar.dart';
 import 'colors.dart';
 import 'input_border.dart';
 import 'input_decorator.dart';
+import 'material_localizations.dart';
 import 'scaffold.dart';
 import 'text_field.dart';
 import 'theme.dart';
@@ -402,9 +403,9 @@ class _SearchPageState<T> extends State<_SearchPage<T>> {
           onSubmitted: (String _) {
             widget.delegate.showResultsPage(context);
           },
-          decoration: const InputDecoration(
+          decoration: new InputDecoration(
             border: InputBorder.none,
-            hintText: 'Search', // TODO(goderbauer): I18N
+            hintText: MaterialLocalizations.of(context).searchFieldLabel
           ),
         ),
         actions: widget.delegate.buildActions(context),
