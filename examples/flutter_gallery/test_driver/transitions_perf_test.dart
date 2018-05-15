@@ -51,15 +51,9 @@ const List<String> kSkippedDemos = const <String>[
 
 // All of the gallery demos, identified as "title@category".
 //
-// These names are reported by the test app. See _handleMessages() in
-// transitions_perf.dart.
+// These names are reported by the test app, see _handleMessages()
+// in transitions_perf.dart.
 List<String> _allDemos = <String>[];
-
-// The height of the screen, in logical pixels.
-//
-// This is reported by the test app. See _handleMessages() in
-// transition_perf.dart.
-double _mediaHeight = 0.0;
 
 /// Extracts event data from [events] recorded by timeline, validates it, turns
 /// it into a histogram, and saves to a JSON file.
@@ -152,8 +146,7 @@ Future<Null> runDemos(List<String> demos, FlutterDriver driver) async {
     currentDemoCategory = demoCategory;
 
     final SerializableFinder demoItem = find.text(demoName);
-    final double scrollDistance = _mediaHeight / 4.0;
-    await driver.scrollUntilVisible(demoList, demoItem, dyScroll: -scrollDistance,  alignment: 0.5);
+    await driver.scrollUntilVisible(demoList, demoItem, dyScroll: -48.0,  alignment: 0.5);
 
     for (int i = 0; i < 2; i += 1) {
       await driver.tap(demoItem); // Launch the demo
@@ -189,10 +182,6 @@ void main([List<String> args = const <String>[]]) {
       _allDemos = const JsonDecoder().convert(await driver.requestData('demoNames'));
       if (_allDemos.isEmpty)
         throw 'no demo names found';
-
-      _mediaHeight = const JsonDecoder().convert(await driver.requestData('mediaSize'))['height'];
-      if (_mediaHeight <= 0.0)
-        throw 'unable to determine media height';
     });
 
     tearDownAll(() async {
