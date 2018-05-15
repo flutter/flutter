@@ -190,7 +190,9 @@ void main() {
     final List<Widget> foundChildren = <Widget>[];
     Widget newLayoutBuilder(Widget currentChild, List<Widget> previousChildren) {
       foundChildren.clear();
-      if (currentChild != null) foundChildren.add(currentChild);
+      if (currentChild != null) {
+        foundChildren.add(currentChild);
+      }
       foundChildren.addAll(previousChildren);
       return new Column(
         children: previousChildren,

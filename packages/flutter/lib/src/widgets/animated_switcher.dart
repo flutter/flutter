@@ -217,8 +217,11 @@ class AnimatedSwitcher extends StatefulWidget {
   ///
   /// This is an [AnimatedSwitcherLayoutBuilder] function.
   static Widget defaultLayoutBuilder(Widget currentChild, List<Widget> previousChildren) {
+    List<Widget> children = previousChildren;
+    if (currentChild != null)
+      children = children.toList()..add(currentChild);
     return new Stack(
-      children: currentChild == null ? previousChildren : previousChildren + <Widget>[currentChild],
+      children: children,
       alignment: Alignment.center,
     );
   }
@@ -227,7 +230,7 @@ class AnimatedSwitcher extends StatefulWidget {
 class _AnimatedSwitcherState extends State<AnimatedSwitcher> with TickerProviderStateMixin {
   final Set<_AnimatedSwitcherChildEntry> _previousChildren = new Set<_AnimatedSwitcherChildEntry>();
   _AnimatedSwitcherChildEntry _currentChild;
-  List<Widget> _previousChildWidgetCache = new List<Widget>.unmodifiable(<Widget>[]);
+  List<Widget> _previousChildWidgetCache = const <Widget>[];
   int serialNumber = 0;
 
   @override
@@ -340,9 +343,10 @@ class _AnimatedSwitcherState extends State<AnimatedSwitcher> with TickerProvider
         hasNewChild && !Widget.canUpdate(widget.child, _currentChild.widgetChild)) {
       _addEntry(animate: true);
     } else {
-      // Make sure we update the child widget in _currentChild even if we're not
-      // going to start a new animation, but keep the key from the previous
-      // transition, since otherwise there is a huge performance penalty.
+      // Make sure we update the child widget and transition in _currentChild
+      // even if we're not going to start a new animation, but keep the key from
+      // the previous transition so that we update the transition instead of
+      // replacing it.
       if (_currentChild != null) {
         _currentChild.widgetChild = widget.child;
         _currentChild.transition = new KeyedSubtree(
