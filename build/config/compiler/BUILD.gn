@@ -394,12 +394,6 @@ config("compiler") {
   # Android-specific flags setup.
   # -----------------------------
   if (is_android) {
-    # Use stdinc++ from the NDK.
-    cflags += [
-      "-nostdinc++"
-    ]
-
-    # Common Android flags
     cflags += [
       "-ffunction-sections",
       "-funwind-tables",
@@ -583,6 +577,7 @@ config("runtime_library") {
       # Remove one the toolchain distribution is fixed
       # https://github.com/flutter/flutter/issues/6145
       "-Wl,-Bstatic",
+      "-lc++abi",
       "-Wl,-Bdynamic",
       "-fuse-ld=lld",
     ]
