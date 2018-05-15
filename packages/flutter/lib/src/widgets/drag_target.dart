@@ -178,7 +178,6 @@ class Draggable<T> extends StatefulWidget {
   /// affinity, pointer motion in any direction will result in a drag rather
   /// than in a scroll because the draggable widget, being the more specific
   /// widget, will out-compete the [Scrollable] for vertical gestures.
-  /// 
   ///
   /// For the directions this widget can be dragged in after the drag event
   /// starts, see [Draggable.axis].
@@ -630,16 +629,17 @@ class _DragAvatar<T> extends Drag {
       return velocity;
     }
     return new Velocity(
-        pixelsPerSecond: _restrictAxis(velocity.pixelsPerSecond));
+      pixelsPerSecond: _restrictAxis(velocity.pixelsPerSecond),
+    );
   }
 
   Offset _restrictAxis(Offset offset) {
     if (axis == null) {
       return offset;
-    } else if (axis == Axis.horizontal) {
+    } 
+    if (axis == Axis.horizontal) {
       return new Offset(offset.dx, 0.0);
-    } else {
-      return new Offset(0.0, offset.dy);
     }
+    return new Offset(0.0, offset.dy);
   }
 }
