@@ -3,12 +3,31 @@
 // found in the LICENSE file.
 
 import 'package:flutter_tools/src/android/gradle.dart';
+import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:test/test.dart';
 
 void main() {
   group('gradle build', () {
+    test('do not crash if there is no Android SDK', () async {
+      Exception shouldBeToolExit;
+      try {
+        // We'd like to always set androidSdk to null and test updateLocalProperties. But that's
+        // currently impossible as the test is not hermetic. Luckily, our bots don't have Android
+        // SDKs yet so androidSdk should be null by default.
+        //
+        // This test is written to fail if our bots get Android SDKs in the future: shouldBeToolExit
+        // will be null and our expectation would fail. That would remind us to make these tests
+        // hermetic before adding Android SDKs to the bots.
+        updateLocalProperties();
+      } on Exception catch (e) {
+        shouldBeToolExit = e;
+      }
+      // Ensure that we throw a meaningful ToolExit instead of a general crash.
+      expect(shouldBeToolExit is ToolExit, isTrue);
+    });
+
     test('regexp should only match lines without the error message', () {
       final List<String> nonMatchingLines = <String>[
         'NDK is missing a "platforms" directory.',
