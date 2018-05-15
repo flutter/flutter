@@ -190,8 +190,7 @@ void main() {
     final List<Widget> foundChildren = <Widget>[];
     Widget newLayoutBuilder(Widget currentChild, List<Widget> previousChildren) {
       foundChildren.clear();
-      if (currentChild != null)
-        foundChildren.add(currentChild);
+      if (currentChild != null) foundChildren.add(currentChild);
       foundChildren.addAll(previousChildren);
       return new Column(
         children: previousChildren,
@@ -301,6 +300,35 @@ void main() {
     expect(transition.opacity.value, closeTo(0.1, 0.01));
     await tester.pumpAndSettle();
     expect(StatefulTestState.generation, equals(3));
+  });
+
+  testWidgets('AnimatedSwitcher updates widgets without animating if they are isomorphic.', (WidgetTester tester) async {
+    Future<Null> pumpChild(Widget child) async {
+      return tester.pumpWidget(
+        new Directionality(
+          textDirection: TextDirection.rtl,
+          child: new AnimatedSwitcher(
+            duration: const Duration(milliseconds: 100),
+            child: child,
+            switchInCurve: Curves.linear,
+            switchOutCurve: Curves.linear,
+          ),
+        ),
+      );
+    }
+
+    await pumpChild(const Text('1'));
+    await tester.pump(const Duration(milliseconds: 10));
+    FadeTransition transition = tester.widget(find.byType(FadeTransition).first);
+    expect(transition.opacity.value, equals(1.0));
+    expect(find.text('1'), findsOneWidget);
+    expect(find.text('2'), findsNothing);
+    await pumpChild(const Text('2'));
+    transition = tester.widget(find.byType(FadeTransition).first);
+    await tester.pump(const Duration(milliseconds: 20));
+    expect(transition.opacity.value, equals(1.0));
+    expect(find.text('1'), findsNothing);
+    expect(find.text('2'), findsOneWidget);
   });
 }
 
