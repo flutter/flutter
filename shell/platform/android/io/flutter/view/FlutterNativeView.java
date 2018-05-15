@@ -26,6 +26,7 @@ public class FlutterNativeView implements BinaryMessenger {
     private long mNativePlatformView;
     private FlutterView mFlutterView;
     private final Context mContext;
+    private boolean applicationIsRunning;
 
     public FlutterNativeView(Context context) {
         mContext = context;
@@ -45,6 +46,7 @@ public class FlutterNativeView implements BinaryMessenger {
         mFlutterView = null;
         nativeDestroy(mNativePlatformView);
         mNativePlatformView = 0;
+        applicationIsRunning = false;
     }
 
     public FlutterPluginRegistry getPluginRegistry() {
@@ -71,12 +73,26 @@ public class FlutterNativeView implements BinaryMessenger {
 
     public void runFromBundle(String bundlePath, String snapshotOverride, String entrypoint, boolean reuseRuntimeController) {
         assertAttached();
+        if (applicationIsRunning)
+            throw new AssertionError("This Flutter engine instance is already running an application");
+
         nativeRunBundleAndSnapshot(mNativePlatformView, bundlePath, snapshotOverride, entrypoint, reuseRuntimeController, mContext.getResources().getAssets());
+
+        applicationIsRunning = true;
     }
 
     public void runFromSource(final String assetsDirectory, final String main, final String packages) {
         assertAttached();
+        if (applicationIsRunning)
+            throw new AssertionError("This Flutter engine instance is already running an application");
+
         nativeRunBundleAndSource(mNativePlatformView, assetsDirectory, main, packages);
+
+        applicationIsRunning = true;
+    }
+
+    public boolean isApplicationRunning() {
+      return applicationIsRunning;
     }
 
     public void setAssetBundlePathOnUI(final String assetsDirectory) {

@@ -65,6 +65,11 @@ public class FlutterFragmentActivity
     }
 
     @Override
+    public boolean retainFlutterNativeView() {
+        return false;
+    }
+
+    @Override
     public final boolean hasPlugin(String key) {
         return pluginRegistry.hasPlugin(key);
     }
