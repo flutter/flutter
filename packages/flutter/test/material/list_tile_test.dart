@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:math' as math;
-
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -97,23 +95,23 @@ void main() {
     double widthKey(Key key) => tester.getSize(find.byKey(key)).width;
     double heightKey(Key key) => tester.getSize(find.byKey(key)).height;
 
-    // ListTiles are contained by a SafeArea defined like this:
-    // SafeArea(top: false, bottom: false, minimim: contentPadding)
-    // The default contentPadding is 16.0 on the left and right.
+
+    // 16.0 padding to the left and right of the leading and trailing widgets
+    // plus the media padding.
     void testHorizontalGeometry() {
-      expect(leftKey(leadingKey), math.max(16.0, leftPadding));
-      expect(left('title'), 56.0 + math.max(16.0, leftPadding));
+      expect(leftKey(leadingKey), 16.0 + leftPadding);
+      expect(left('title'), 72.0 + leftPadding);
       if (hasSubtitle)
-        expect(left('subtitle'), 56.0 + math.max(16.0, leftPadding));
+        expect(left('subtitle'), 72.0 + leftPadding);
       expect(left('title'), rightKey(leadingKey) + 32.0);
-      expect(rightKey(trailingKey), 800.0 - math.max(16.0, rightPadding));
+      expect(rightKey(trailingKey), 800.0 - 16.0 - rightPadding);
       expect(widthKey(trailingKey), 24.0);
     }
 
     void testVerticalGeometry(double expectedHeight) {
       expect(tester.getSize(find.byType(ListTile)), new Size(800.0, expectedHeight));
       if (hasSubtitle)
-        expect(top('subtitle'), greaterThanOrEqualTo(bottom('title')));
+        expect(top('subtitle'), bottom('title'));
       expect(heightKey(trailingKey), 24.0);
     }
 
@@ -135,7 +133,7 @@ void main() {
     await tester.pumpWidget(buildFrame(isTwoLine: true, dense: true));
     testChildren();
     testHorizontalGeometry();
-    testVerticalGeometry(64.0);
+    testVerticalGeometry(60.0);
 
     await tester.pumpWidget(buildFrame(isThreeLine: true));
     testChildren();
@@ -191,9 +189,9 @@ void main() {
         child: const Material(
           child: const Center(
             child: const ListTile(
-              leading: const Text('L'),
+              leading: const Text('leading'),
               title: const Text('title'),
-              trailing: const Text('T'),
+              trailing: const Text('trailing'),
             ),
           ),
         ),
@@ -204,9 +202,10 @@ void main() {
     double right(String text) => tester.getTopRight(find.text(text)).dx;
 
     void testHorizontalGeometry() {
-      expect(right('L'), 800.0 - math.max(16.0, rightPadding));
-      expect(right('title'), 800.0 - 56.0 - math.max(16.0, rightPadding));
-      expect(left('T'), math.max(16.0, leftPadding));
+      expect(right('leading'), 800.0 - 16.0 - rightPadding);
+      expect(right('title'), 800.0 - 72.0 - rightPadding);
+      expect(left('leading') - right('title'), 16.0);
+      expect(left('trailing'), 16.0 + leftPadding);
     }
 
     testHorizontalGeometry();
@@ -386,165 +385,4 @@ void main() {
 
     semantics.dispose();
   });
-
-  testWidgets('ListTile contentPadding', (WidgetTester tester) async {
-    Widget buildFrame(TextDirection textDirection) {
-      return new MediaQuery(
-        data: const MediaQueryData(
-          padding: EdgeInsets.zero,
-          textScaleFactor: 1.0
-        ),
-        child: new Directionality(
-          textDirection: textDirection,
-          child: new Material(
-            child: new Container(
-              alignment: Alignment.topLeft,
-              child: const ListTile(
-                contentPadding: const EdgeInsetsDirectional.only(
-                  start: 10.0,
-                  end: 20.0,
-                  top: 30.0,
-                  bottom: 40.0,
-                ),
-                leading: const Text('L'),
-                title: const Text('title'),
-                trailing: const Text('T'),
-              ),
-            ),
-          ),
-        ),
-      );
-    }
-
-    double left(String text) => tester.getTopLeft(find.text(text)).dx;
-    double right(String text) => tester.getTopRight(find.text(text)).dx;
-
-    await tester.pumpWidget(buildFrame(TextDirection.ltr));
-
-    expect(tester.getSize(find.byType(ListTile)), const Size(800.0, 126.0)); // 126 = 56 + 30 + 40
-    expect(left('L'), 10.0); // contentPadding.start = 10
-    expect(right('T'), 780.0); // 800 - contentPadding.end
-
-    await tester.pumpWidget(buildFrame(TextDirection.rtl));
-
-    expect(tester.getSize(find.byType(ListTile)), const Size(800.0, 126.0)); // 126 = 56 + 30 + 40
-    expect(left('T'), 20.0); // contentPadding.end = 20
-    expect(right('L'), 790.0); // 800 - contentPadding.start
-  });
-
-  testWidgets('ListTile contentPadding', (WidgetTester tester) async {
-    Widget buildFrame(TextDirection textDirection) {
-      return new MediaQuery(
-        data: const MediaQueryData(
-          padding: EdgeInsets.zero,
-          textScaleFactor: 1.0
-        ),
-        child: new Directionality(
-          textDirection: textDirection,
-          child: new Material(
-            child: new Container(
-              alignment: Alignment.topLeft,
-              child: const ListTile(
-                contentPadding: const EdgeInsetsDirectional.only(
-                  start: 10.0,
-                  end: 20.0,
-                  top: 30.0,
-                  bottom: 40.0,
-                ),
-                leading: const Text('L'),
-                title: const Text('title'),
-                trailing: const Text('T'),
-              ),
-            ),
-          ),
-        ),
-      );
-    }
-
-    double left(String text) => tester.getTopLeft(find.text(text)).dx;
-    double right(String text) => tester.getTopRight(find.text(text)).dx;
-
-    await tester.pumpWidget(buildFrame(TextDirection.ltr));
-
-    expect(tester.getSize(find.byType(ListTile)), const Size(800.0, 126.0)); // 126 = 56 + 30 + 40
-    expect(left('L'), 10.0); // contentPadding.start = 10
-    expect(right('T'), 780.0); // 800 - contentPadding.end
-
-    await tester.pumpWidget(buildFrame(TextDirection.rtl));
-
-    expect(tester.getSize(find.byType(ListTile)), const Size(800.0, 126.0)); // 126 = 56 + 30 + 40
-    expect(left('T'), 20.0); // contentPadding.end = 20
-    expect(right('L'), 790.0); // 800 - contentPadding.start
-  });
-
-
-  testWidgets('ListTileTheme wide leading Widget', (WidgetTester tester) async {
-    const Key leadingKey = const ValueKey<String>('L');
-
-    Widget buildFrame(double leadingWidth, TextDirection textDirection) {
-      return new MediaQuery(
-        data: const MediaQueryData(
-          padding: EdgeInsets.zero,
-          textScaleFactor: 1.0
-        ),
-        child: new Directionality(
-          textDirection: textDirection,
-          child: new Material(
-            child: new Container(
-              alignment: Alignment.topLeft,
-              child: new ListTile(
-                contentPadding: EdgeInsets.zero,
-                leading: new SizedBox(key: leadingKey, width: leadingWidth, height: 32.0),
-                title: const Text('title'),
-                subtitle: const Text('subtitle'),
-              ),
-            ),
-          ),
-        ),
-      );
-    }
-
-    double left(String text) => tester.getTopLeft(find.text(text)).dx;
-    double right(String text) => tester.getTopRight(find.text(text)).dx;
-
-    // textDirection = LTR
-
-    // Two-line tile's height = 72, leading 24x32 widget is vertically centered
-    await tester.pumpWidget(buildFrame(24.0, TextDirection.ltr));
-    expect(tester.getSize(find.byType(ListTile)), const Size(800.0, 72.0));
-    expect(tester.getTopLeft(find.byKey(leadingKey)), const Offset(0.0, 20.0));
-    expect(tester.getBottomRight(find.byKey(leadingKey)), const Offset(24.0, 52.0));
-
-    // Leading widget's width is 20, so default layout: the left edges of the
-    // title and subtitle are at 56dps (contentPadding is zero).
-    expect(left('title'), 56.0);
-    expect(left('subtitle'), 56.0);
-
-    // If the leading widget is wider than 40 it is separated from the
-    // title and subtitle by 16.
-    await tester.pumpWidget(buildFrame(56.0, TextDirection.ltr));
-    expect(tester.getSize(find.byType(ListTile)), const Size(800.0, 72.0));
-    expect(tester.getTopLeft(find.byKey(leadingKey)), const Offset(0.0, 20.0));
-    expect(tester.getBottomRight(find.byKey(leadingKey)), const Offset(56.0, 52.0));
-    expect(left('title'), 72.0);
-    expect(left('subtitle'), 72.0);
-
-    // Same tests, textDirection = RTL
-
-    await tester.pumpWidget(buildFrame(24.0, TextDirection.rtl));
-    expect(tester.getSize(find.byType(ListTile)), const Size(800.0, 72.0));
-    expect(tester.getTopRight(find.byKey(leadingKey)), const Offset(800.0, 20.0));
-    expect(tester.getBottomLeft(find.byKey(leadingKey)), const Offset(800.0 - 24.0, 52.0));
-    expect(right('title'), 800.0 - 56.0);
-    expect(right('subtitle'), 800.0 - 56.0);
-
-    await tester.pumpWidget(buildFrame(56.0, TextDirection.rtl));
-    expect(tester.getSize(find.byType(ListTile)), const Size(800.0, 72.0));
-    expect(tester.getTopRight(find.byKey(leadingKey)), const Offset(800.0, 20.0));
-    expect(tester.getBottomLeft(find.byKey(leadingKey)), const Offset(800.0 - 56.0, 52.0));
-    expect(right('title'), 800.0 - 72.0);
-    expect(right('subtitle'), 800.0 - 72.0);
-
-  });
-
 }
