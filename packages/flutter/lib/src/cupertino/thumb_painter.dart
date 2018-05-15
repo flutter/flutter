@@ -14,12 +14,10 @@ class CupertinoThumbPainter {
   CupertinoThumbPainter({
     this.color: CupertinoColors.white,
     this.shadowColor: const Color(0x2C000000),
-  }) {
-    _shadowPaint = new BoxShadow(
-      color: shadowColor,
-      blurRadius: 1.0,
-    ).toPaint();
-  }
+  }) : _shadowPaint = new BoxShadow(
+         color: shadowColor,
+         blurRadius: 1.0,
+       ).toPaint();
 
   /// The color of the interior of the thumb.
   final Color color;
@@ -28,7 +26,7 @@ class CupertinoThumbPainter {
   final Color shadowColor;
 
   /// The paint used to draw the shadow case by the thumb.
-  Paint _shadowPaint;
+  final Paint _shadowPaint;
 
   /// Half the default diameter of the thumb.
   static const double radius = 14.0;
