@@ -25,8 +25,6 @@ namespace blink {
 
 class DartVM : public fxl::RefCountedThreadSafe<DartVM> {
  public:
-  class PlatformKernel;
-
   static fxl::RefPtr<DartVM> ForProcess(Settings settings);
 
   static fxl::RefPtr<DartVM> ForProcess(
@@ -40,7 +38,7 @@ class DartVM : public fxl::RefCountedThreadSafe<DartVM> {
 
   const Settings& GetSettings() const;
 
-  PlatformKernel* GetPlatformKernel() const;
+  const fml::Mapping& GetPlatformKernel() const;
 
   const DartSnapshot& GetVMSnapshot() const;
 
@@ -55,7 +53,6 @@ class DartVM : public fxl::RefCountedThreadSafe<DartVM> {
   const fxl::RefPtr<DartSnapshot> vm_snapshot_;
   const fxl::RefPtr<DartSnapshot> isolate_snapshot_;
   std::unique_ptr<fml::Mapping> platform_kernel_mapping_;
-  PlatformKernel* platform_kernel_ = nullptr;
   ServiceProtocol service_protocol_;
   fxl::WeakPtrFactory<DartVM> weak_factory_;
 

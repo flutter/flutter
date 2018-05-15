@@ -278,18 +278,6 @@ DartVM::DartVM(const Settings& settings,
   FXL_DCHECK(isolate_snapshot_ && isolate_snapshot_->IsValid())
       << "Isolate snapshot must be valid.";
 
-  if (platform_kernel_mapping_->GetSize() > 0) {
-    // The platform kernel mapping lifetime is managed by this instance of the
-    // DartVM and hence will exceed that of the PlatformKernel. So provide an
-    // empty release callback.
-    Dart_ReleaseBufferCallback empty = [](auto arg) {};
-    platform_kernel_ = reinterpret_cast<PlatformKernel*>(Dart_ReadKernelBinary(
-        platform_kernel_mapping_->GetMapping(),  // buffer
-        platform_kernel_mapping_->GetSize(),     // buffer size
-        empty                                    // buffer deleter
-        ));
-  }
-
   {
     TRACE_EVENT0("flutter", "dart::bin::BootstrapDartIo");
     dart::bin::BootstrapDartIo();
@@ -340,11 +328,11 @@ DartVM::DartVM(const Settings& settings,
       Dart_IsDart2Snapshot(isolate_snapshot_->GetData()->GetSnapshotPointer());
 
   const bool is_preview_dart2 =
-      platform_kernel_ != nullptr || isolate_snapshot_is_dart_2;
+      (platform_kernel_mapping_->GetSize() > 0) || isolate_snapshot_is_dart_2;
 
   FXL_DLOG(INFO) << "Dart 2 " << (is_preview_dart2 ? "is" : "is NOT")
                  << " enabled. Platform kernel: "
-                 << static_cast<bool>(platform_kernel_)
+                 << static_cast<bool>(platform_kernel_mapping_->GetSize() > 0)
                  << " Isolate Snapshot is Dart 2: "
                  << isolate_snapshot_is_dart_2;
 
@@ -453,8 +441,8 @@ const Settings& DartVM::GetSettings() const {
   return settings_;
 }
 
-DartVM::PlatformKernel* DartVM::GetPlatformKernel() const {
-  return platform_kernel_;
+const fml::Mapping& DartVM::GetPlatformKernel() const {
+  return *platform_kernel_mapping_.get();
 }
 
 const DartSnapshot& DartVM::GetVMSnapshot() const {
