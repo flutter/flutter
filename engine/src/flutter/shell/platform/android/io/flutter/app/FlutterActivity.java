@@ -61,6 +61,11 @@ public class FlutterActivity extends Activity implements FlutterView.Provider, P
     }
 
     @Override
+    public boolean retainFlutterNativeView() {
+        return false;
+    }
+
+    @Override
     public final boolean hasPlugin(String key) {
         return pluginRegistry.hasPlugin(key);
     }
