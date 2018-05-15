@@ -209,6 +209,9 @@ void updateLocalProperties({String projectPath, BuildInfo buildInfo}) {
     settings = new SettingsFile.parseFromFile(localProperties);
   } else {
     settings = new SettingsFile();
+    if (androidSdk == null) {
+      throwToolExit('Unable to locate Android SDK. Please run `flutter doctor` for more details.');
+    }
     settings.values['sdk.dir'] = escapePath(androidSdk.directory);
     changed = true;
   }
