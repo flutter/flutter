@@ -478,21 +478,16 @@ class FlutterDriver {
     assert(dxScroll != 0.0 || dyScroll != 0.0);
     assert(timeout != null);
 
-    // If the item is already visible then we're done.
+    // Kick off an (unawaited) waitFor that will complete when the item we're
+    // looking for finally scrolls onscreen. We add an initial pause to give it
+    // the chance to complete if the item is already onscreen; if not, scroll
+    // repeatedly until we either find the item or time out.
     bool isVisible = false;
-    try {
-      await waitFor(item, timeout: const Duration(milliseconds: 100));
-      isVisible = true;
-    } on DriverError {
-      // Assume that that waitFor timed out because the item isn't visible.
-    }
-
-    if (!isVisible) {
-      waitFor(item, timeout: timeout).then((Null _) { isVisible = true; });
-      while (!isVisible) {
-        await scroll(scrollable, dxScroll, dyScroll, const Duration(milliseconds: 100));
-        await new Future<Null>.delayed(const Duration(milliseconds: 500));
-      }
+    waitFor(item, timeout: timeout).then((Null _) { isVisible = true; });
+    await new Future<Null>.delayed(const Duration(milliseconds: 500));
+    while (!isVisible) {
+      await scroll(scrollable, dxScroll, dyScroll, const Duration(milliseconds: 100));
+      await new Future<Null>.delayed(const Duration(milliseconds: 500));
     }
 
     return scrollIntoView(item, alignment: alignment);
