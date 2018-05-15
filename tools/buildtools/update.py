@@ -11,6 +11,7 @@ import sys
 
 SRC_ROOT = (os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 BUILDTOOLS = os.path.join(SRC_ROOT, 'buildtools')
+TOOLS_BUILDTOOLS = os.path.join(SRC_ROOT, 'tools', 'buildtools')
 
 sys.path.insert(0, os.path.join(SRC_ROOT, 'tools'))
 import find_depot_tools
@@ -25,7 +26,8 @@ def Update():
 
 
 def UpdateOnWindows():
-    sha1_file = os.path.join(BUILDTOOLS, 'win', 'gn.exe.sha1')
+    sha1_file = os.path.join(TOOLS_BUILDTOOLS, 'win', 'gn.exe.sha1')
+    output_dir = os.path.join(BUILDTOOLS, 'win', 'gn.exe')
     downloader_script = os.path.join(DEPOT_PATH, 'download_from_google_storage.py')
     download_cmd = [
       'python',
@@ -37,7 +39,9 @@ def UpdateOnWindows():
       '--bucket',
       'chromium-gn',
       '-s',
-      sha1_file
+      sha1_file,
+      '-o',
+      output_dir
     ]
     return subprocess.call(download_cmd)
 
