@@ -93,6 +93,7 @@ class ThemeData extends Diagnosticable {
     Color indicatorColor,
     Color hintColor,
     Color errorColor,
+    Color toggleableActiveColor,
     String fontFamily,
     TextTheme textTheme,
     TextTheme primaryTextTheme,
@@ -114,6 +115,7 @@ class ThemeData extends Diagnosticable {
     primaryColorDark ??= isDark ? Colors.black : primarySwatch[700];
     final bool primaryIsDark = primaryColorBrightness == Brightness.dark;
     accentColor ??= isDark ? Colors.tealAccent[200] : primarySwatch[500];
+    toggleableActiveColor ??= isDark ? Colors.tealAccent[200] : primarySwatch[600];
     accentColorBrightness ??= estimateBrightnessForColor(accentColor);
     final bool accentIsDark = accentColorBrightness == Brightness.dark;
     canvasColor ??= isDark ? Colors.grey[850] : Colors.grey[50];
@@ -186,6 +188,7 @@ class ThemeData extends Diagnosticable {
       unselectedWidgetColor: unselectedWidgetColor,
       disabledColor: disabledColor,
       buttonColor: buttonColor,
+      toggleableActiveColor: toggleableActiveColor,
       buttonTheme: buttonTheme,
       secondaryHeaderColor: secondaryHeaderColor,
       textSelectionColor: textSelectionColor,
@@ -243,6 +246,7 @@ class ThemeData extends Diagnosticable {
     @required this.indicatorColor,
     @required this.hintColor,
     @required this.errorColor,
+    @required this.toggleableActiveColor,
     @required this.textTheme,
     @required this.primaryTextTheme,
     @required this.accentTextTheme,
@@ -271,6 +275,7 @@ class ThemeData extends Diagnosticable {
        assert(selectedRowColor != null),
        assert(unselectedWidgetColor != null),
        assert(disabledColor != null),
+       assert(toggleableActiveColor != null),
        assert(buttonTheme != null),
        assert(secondaryHeaderColor != null),
        assert(textSelectionColor != null),
@@ -402,6 +407,10 @@ class ThemeData extends Diagnosticable {
   /// The default fill color of the [Material] used in [RaisedButton]s.
   final Color buttonColor;
 
+  /// The color used to highlight the active states of toggleable widgets like
+  /// [Switch], [RadioButton], and [Checkbox].
+  final Color toggleableActiveColor;
+
   /// Defines the default configuration of button widgets, like [RaisedButton]
   /// and [FlatButton].
   final ButtonThemeData buttonTheme;
@@ -504,6 +513,7 @@ class ThemeData extends Diagnosticable {
     Color indicatorColor,
     Color hintColor,
     Color errorColor,
+    Color toggleableActiveColor,
     TextTheme textTheme,
     TextTheme primaryTextTheme,
     TextTheme accentTextTheme,
@@ -544,6 +554,7 @@ class ThemeData extends Diagnosticable {
       indicatorColor: indicatorColor ?? this.indicatorColor,
       hintColor: hintColor ?? this.hintColor,
       errorColor: errorColor ?? this.errorColor,
+      toggleableActiveColor: toggleableActiveColor ?? this.toggleableActiveColor,
       textTheme: textTheme ?? this.textTheme,
       primaryTextTheme: primaryTextTheme ?? this.primaryTextTheme,
       accentTextTheme: accentTextTheme ?? this.accentTextTheme,
@@ -670,6 +681,7 @@ class ThemeData extends Diagnosticable {
       indicatorColor: Color.lerp(a.indicatorColor, b.indicatorColor, t),
       hintColor: Color.lerp(a.hintColor, b.hintColor, t),
       errorColor: Color.lerp(a.errorColor, b.errorColor, t),
+      toggleableActiveColor: Color.lerp(a.toggleableActiveColor, b.toggleableActiveColor, t),
       textTheme: TextTheme.lerp(a.textTheme, b.textTheme, t),
       primaryTextTheme: TextTheme.lerp(a.primaryTextTheme, b.primaryTextTheme, t),
       accentTextTheme: TextTheme.lerp(a.accentTextTheme, b.accentTextTheme, t),
@@ -703,6 +715,7 @@ class ThemeData extends Diagnosticable {
            (otherData.unselectedWidgetColor == unselectedWidgetColor) &&
            (otherData.disabledColor == disabledColor) &&
            (otherData.buttonColor == buttonColor) &&
+           (otherData.toggleableActiveColor == toggleableActiveColor) &&
            (otherData.buttonTheme == buttonTheme) &&
            (otherData.secondaryHeaderColor == secondaryHeaderColor) &&
            (otherData.textSelectionColor == textSelectionColor) &&
@@ -749,6 +762,7 @@ class ThemeData extends Diagnosticable {
       textSelectionColor,
       textSelectionHandleColor,
       hashValues(  // Too many values.
+        toggleableActiveColor,
         backgroundColor,
         accentColor,
         accentColorBrightness,
@@ -799,6 +813,7 @@ class ThemeData extends Diagnosticable {
     properties.add(new DiagnosticsProperty<Color>('indicatorColor', indicatorColor, defaultValue: defaultData.indicatorColor));
     properties.add(new DiagnosticsProperty<Color>('hintColor', hintColor, defaultValue: defaultData.hintColor));
     properties.add(new DiagnosticsProperty<Color>('errorColor', errorColor, defaultValue: defaultData.errorColor));
+    properties.add(new DiagnosticsProperty<Color>('toggleableActiveColor', toggleableActiveColor, defaultValue: defaultData.toggleableActiveColor));
     properties.add(new DiagnosticsProperty<ButtonThemeData>('buttonTheme', buttonTheme));
     properties.add(new DiagnosticsProperty<TextTheme>('textTheme', textTheme));
     properties.add(new DiagnosticsProperty<TextTheme>('primaryTextTheme', primaryTextTheme));
