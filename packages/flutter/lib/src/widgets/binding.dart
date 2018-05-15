@@ -460,6 +460,7 @@ abstract class WidgetsBinding extends BindingBase with SchedulerBinding, Gesture
   /// This method exposes the `memoryPressure` notification from
   /// [SystemChannels.system].
   void handleMemoryPressure() {
+    imageCache.clear();
     for (WidgetsBindingObserver observer in _observers)
       observer.didHaveMemoryPressure();
   }

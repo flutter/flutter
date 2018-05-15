@@ -3,7 +3,8 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:ui' as ui show Image;
+import 'dart:typed_data';
+import 'dart:ui' as ui show Image, ImageByteFormat;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
@@ -53,4 +54,23 @@ Future<ImageInfo> extractOneFrame(ImageStream stream) {
   }
   stream.addListener(listener);
   return completer.future;
+}
+
+class FakeImage implements ui.Image {
+  const FakeImage(this.width, this.height);
+
+  @override
+  final int width;
+
+  @override
+  final int height;
+
+  @override
+  void dispose() {}
+
+  @override
+  Future<ByteData> toByteData({ui.ImageByteFormat format: ui.ImageByteFormat.rawRgba}) {
+    return new Future<ByteData>.error(
+      new UnsupportedError('Not supported in FakeImage'));
+  }  
 }
