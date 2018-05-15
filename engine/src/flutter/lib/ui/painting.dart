@@ -109,8 +109,8 @@ class Color {
   /// * `a` is the alpha value, with 0 being transparent and 255 being fully
   ///   opaque.
   /// * `r` is [red], from 0 to 255.
-  /// * `g` is [red], from 0 to 255.
-  /// * `b` is [red], from 0 to 255.
+  /// * `g` is [green], from 0 to 255.
+  /// * `b` is [blue], from 0 to 255.
   ///
   /// Out of range values are brought into range using modulo 255.
   ///
@@ -125,8 +125,8 @@ class Color {
   /// Create a color from red, green, blue, and opacity, similar to `rgba()` in CSS.
   ///
   /// * `r` is [red], from 0 to 255.
-  /// * `g` is [red], from 0 to 255.
-  /// * `b` is [red], from 0 to 255.
+  /// * `g` is [green], from 0 to 255.
+  /// * `b` is [blue], from 0 to 255.
   /// * `opacity` is alpha channel of this color as a double, with 0.0 being
   ///   transparent and 1.0 being fully opaque.
   ///
