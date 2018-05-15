@@ -88,7 +88,7 @@ class Switch extends StatefulWidget {
 
   /// The color to use when this switch is on.
   ///
-  /// Defaults to [Theme.toggleableActiveColor].
+  /// Defaults to [ThemeData.toggleableActiveColor].
   final Color activeColor;
 
   /// The color to use on the track when this switch is on.
