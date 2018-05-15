@@ -303,7 +303,7 @@ class _DraggableListItemState<T> extends State<_DraggableListItem<T>> with Ticke
     final Widget child = widget.child ?? _buildEmptyTile(context);
     Widget draggableWidget;
     if (widget.isDraggable) {
-      draggableWidget = new ListDraggable<int>(
+      draggableWidget = new LongPressDraggable<int>(
         data: widget.index,
         axis: Axis.vertical,
         feedback: new Material(
@@ -374,115 +374,5 @@ class _DraggableListItemState<T> extends State<_DraggableListItem<T>> with Ticke
     final int newIndex = widget.index > oldIndex ? widget.index - 1 : widget.index;
     animatedList.insertItem(newIndex, duration: const Duration(milliseconds: 0));
     widget.onSwap(oldIndex, newIndex);
-  }
-}
-
-/// [LongPressDraggable] that restricts drag to a single axis.
-class ListDraggable<T> extends LongPressDraggable<T> {
-  /// Creates a widget that can be dragged starting from long press.
-  ///
-  /// The [child] and [feedback] arguments must not be null. If
-  /// [maxSimultaneousDrags] is non-null, it must be non-negative.
-  const ListDraggable({
-    Key key,
-    @required this.axis,
-    @required Widget child,
-    @required Widget feedback,
-    T data,
-    Widget childWhenDragging,
-    Offset feedbackOffset: Offset.zero,
-    DragAnchor dragAnchor: DragAnchor.child,
-    int maxSimultaneousDrags,
-    VoidCallback onDragStarted,
-    DraggableCanceledCallback onDraggableCanceled,
-    VoidCallback onDragCompleted
-  }) : assert(axis != null), 
-       super(
-        key: key,
-        child: child,
-        feedback: feedback,
-        data: data,
-        childWhenDragging: childWhenDragging,
-        feedbackOffset: feedbackOffset,
-        dragAnchor: dragAnchor,
-        maxSimultaneousDrags: maxSimultaneousDrags,
-        onDragStarted: onDragStarted,
-        onDraggableCanceled: onDraggableCanceled,
-        onDragCompleted: onDragCompleted
-      );
-
-
-  /// The [Axis] to retrict drag to.
-  /// 
-  /// An [Axis.vertical] will only drag vertically,
-  /// and an [Axis.horizontal] will only drag horizontally.
-  final Axis axis;
-   
-  @override
-  DelayedMultiDragGestureRecognizer createRecognizer(GestureMultiDragStartCallback onStart) {
-    final DelayedMultiDragGestureRecognizer superRecognizer = super.createRecognizer(onStart);
-    return new DelayedMultiDragGestureRecognizer()
-      ..onStart = (Offset position) {
-        final Drag result = new _SingleAxisDrag(
-          axis: axis,
-          delegate: superRecognizer.onStart(position),
-        );
-        return result;
-      };
-  }
-}
-
-// Wraps a [Drag], but restricting its motion delta to only one axis.
-class _SingleAxisDrag implements Drag {
-  // Creates a [SingleAxisDrag].
-  _SingleAxisDrag({@required this.axis, @required this.delegate}) : 
-      assert(axis != null), 
-      assert(delegate != null);
-
-  /// The [Axis] to retrict this [Drag] to.
-  /// 
-  /// An [Axis.vertical] will only drag vertically,
-  /// and an [Axis.horizontal] will only drag horizontally.
-  final Axis axis;
-
-  /// The [Drag] object that actually handles the underlying motion events.
-  final Drag delegate;
-
-  @override
-  void cancel() {
-    delegate.cancel();
-  }
-
-  @override
-  void end(DragEndDetails details) {
-    final DragEndDetails restrictedDetails = new DragEndDetails(
-      velocity: _restrictVelocityAxis(details.velocity),
-      primaryVelocity: details.primaryVelocity,
-    );
-    return delegate.end(restrictedDetails);
-  }
-
-  @override
-  void update(DragUpdateDetails details) {
-    final DragUpdateDetails restrictedDetails = new DragUpdateDetails(
-      delta: _restrictAxis(details.delta),
-      globalPosition: details.globalPosition,
-      primaryDelta: details.primaryDelta,
-    );
-    return delegate.update(restrictedDetails);
-  }
-
-  Velocity _restrictVelocityAxis(Velocity velocity) {
-    return new Velocity(pixelsPerSecond: _restrictAxis(velocity.pixelsPerSecond));
-  }
-
-  Offset _restrictAxis(Offset offset) {
-    Offset restrictedOffset;
-    if (axis == Axis.horizontal) {
-      restrictedOffset = new Offset(offset.dx, 0.0);
-    } else {
-      restrictedOffset = new Offset(0.0, offset.dy);
-    }
-    return restrictedOffset;
   }
 }
