@@ -443,11 +443,11 @@ class ListTile extends StatelessWidget {
       );
     }
 
-    const EdgeInsets _defaultContentPadding = const EdgeInsets.symmetric(horizontal: 16.0);
+    const EdgeInsets _kDefaultContentPadding = const EdgeInsets.symmetric(horizontal: 16.0);
     final TextDirection textDirection = Directionality.of(context);
     final EdgeInsets resolvedContentPadding = contentPadding?.resolve(textDirection)
       ?? tileTheme?.contentPadding?.resolve(textDirection)
-      ?? _defaultContentPadding;
+      ?? _kDefaultContentPadding;
 
     return new InkWell(
       onTap: enabled ? onTap : null,
@@ -529,11 +529,8 @@ class _RenderListTile extends RenderBox {
        _isThreeLine = isThreeLine,
        _textDirection = textDirection;
 
-  static const double _minLeadingWidth = 40.0;
-  // The horizontal gap between the titles and the leading/trailing widgets
-  static const double _horizontalTitleGap = 16.0;
-  // The minimum padding on the top and bottom of the title and subtitle widgets.
-  static const double _minVerticalPadding = 4.0;
+  static const double _kMinLeadingWidth = 40.0;
+  static const double _kTitleGap = 16.0; // between the titles and the leading/trailing widgets
 
   final Map<_ListTileSlot, RenderBox> slotToChild = <_ListTileSlot, RenderBox>{};
   final Map<RenderBox, _ListTileSlot> childToSlot = <RenderBox, _ListTileSlot>{};
@@ -667,7 +664,7 @@ class _RenderListTile extends RenderBox {
   @override
   double computeMinIntrinsicWidth(double height) {
     final double leadingWidth = leading != null
-      ? math.max(leading.getMinIntrinsicWidth(height), _minLeadingWidth) + _horizontalTitleGap
+      ? math.max(leading.getMinIntrinsicWidth(height), _kMinLeadingWidth) + _kTitleGap
       : 0.0;
     return leadingWidth
       + math.max(_minWidth(title, height), _minWidth(subtitle, height))
@@ -677,7 +674,7 @@ class _RenderListTile extends RenderBox {
   @override
   double computeMaxIntrinsicWidth(double height) {
     final double leadingWidth = leading != null
-      ? math.max(leading.getMaxIntrinsicWidth(height), _minLeadingWidth) + _horizontalTitleGap
+      ? math.max(leading.getMaxIntrinsicWidth(height), _kMinLeadingWidth) + _kTitleGap
       : 0.0;
     return leadingWidth
       + math.max(_maxWidth(title, height), _maxWidth(subtitle, height))
@@ -749,10 +746,10 @@ class _RenderListTile extends RenderBox {
     final Size trailingSize = _layoutBox(trailing, looseConstraints);
 
     final double titleStart = hasLeading
-      ? math.max(_minLeadingWidth, leadingSize.width) + _horizontalTitleGap
+      ? math.max(_kMinLeadingWidth, leadingSize.width) + _kTitleGap
       : 0.0;
     final BoxConstraints textConstraints = looseConstraints.tighten(
-      width: tileWidth - titleStart - (hasTrailing ? trailingSize.width + _horizontalTitleGap : 0.0),
+      width: tileWidth - titleStart - (hasTrailing ? trailingSize.width + _kTitleGap : 0.0),
     );
     final Size titleSize = _layoutBox(title, textConstraints);
     final Size subtitleSize = _layoutBox(subtitle, textConstraints);
@@ -773,7 +770,7 @@ class _RenderListTile extends RenderBox {
     double titleY;
     double subtitleY;
     if (!hasSubtitle) {
-      tileHeight = math.max(_defaultTileHeight, titleSize.height + 2.0 * _minVerticalPadding);
+      tileHeight = math.max(_defaultTileHeight, titleSize.height);
       titleY = (tileHeight - titleSize.height) / 2.0;
     } else {
       titleY = titleBaseline - _boxBaseline(title);
@@ -790,13 +787,11 @@ class _RenderListTile extends RenderBox {
       }
 
       // If the title or subtitle overflow tileHeight then punt: title
-      // and subtitle are arranged in a column, tileHeight = column height plus
-      // _minVerticalPadding on top and bottom.
-      if (titleY < _minVerticalPadding ||
-          (subtitleY + subtitleSize.height + _minVerticalPadding) > tileHeight) {
-        tileHeight = titleSize.height + subtitleSize.height + 2.0 * _minVerticalPadding;
-        titleY = _minVerticalPadding;
-        subtitleY = titleSize.height + _minVerticalPadding;
+      // and subtitle are arranged in a column, tileHeight = column height.
+      if (titleY < 0.0 || subtitleY > tileHeight) {
+        tileHeight = titleSize.height + subtitleSize.height;
+        titleY = 0.0;
+        subtitleY = titleSize.height;
       }
     }
 
@@ -807,7 +802,7 @@ class _RenderListTile extends RenderBox {
       case TextDirection.rtl: {
         if (hasLeading)
           _positionBox(leading, new Offset(tileWidth - leadingSize.width, leadingY));
-        final double titleX = hasTrailing ? trailingSize.width + _horizontalTitleGap : 0.0;
+        final double titleX = hasTrailing ? trailingSize.width + _kTitleGap : 0.0;
         _positionBox(title, new Offset(titleX, titleY));
         if (hasSubtitle)
           _positionBox(subtitle, new Offset(titleX, subtitleY));
