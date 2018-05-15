@@ -93,7 +93,7 @@ class Switch extends StatefulWidget {
 
   /// The color to use on the track when this switch is on.
   ///
-  /// Defaults to [Theme.toggleableActiveColor] with the opacity set at 50%.
+  /// Defaults to [ThemeData.toggleableActiveColor] with the opacity set at 50%.
   final Color activeTrackColor;
 
   /// The color to use on the thumb when this switch is off.

@@ -93,7 +93,7 @@ class Radio<T> extends StatefulWidget {
 
   /// The color to use when this radio button is selected.
   ///
-  /// Defaults to [Theme.toggleableActiveColor].
+  /// Defaults to [ThemeData.toggleableActiveColor].
   final Color activeColor;
 
   @override

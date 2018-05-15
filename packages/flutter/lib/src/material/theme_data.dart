@@ -408,7 +408,7 @@ class ThemeData extends Diagnosticable {
   final Color buttonColor;
 
   /// The color used to highlight the active states of toggleable widgets like
-  /// [Switch], [RadioButton], and [Checkbox].
+  /// [Switch], [Radio], and [Checkbox].
   final Color toggleableActiveColor;
 
   /// Defines the default configuration of button widgets, like [RaisedButton]
