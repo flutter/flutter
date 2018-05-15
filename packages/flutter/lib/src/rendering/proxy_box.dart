@@ -1600,13 +1600,15 @@ class RenderPhysicalModel extends _RenderPhysicalModelBase<RRect> {
       bool paintShadows = true;
       assert(() {
         if (debugDisableShadows) {
-          context.canvas.drawRRect(
-            offsetRRect,
-            new Paint()
-              ..color = shadowColor
-              ..style = PaintingStyle.stroke
-              ..strokeWidth = elevation * 2.0,
-          );
+          if (elevation > 0.0) {
+            context.canvas.drawRRect(
+              offsetRRect,
+              new Paint()
+                ..color = shadowColor
+                ..style = PaintingStyle.stroke
+                ..strokeWidth = elevation * 2.0,
+            );
+          }
           paintShadows = false;
         }
         return true;
@@ -1721,13 +1723,15 @@ class RenderPhysicalShape extends _RenderPhysicalModelBase<Path> {
       bool paintShadows = true;
       assert(() {
         if (debugDisableShadows) {
-          context.canvas.drawPath(
-            offsetPath,
-            new Paint()
-              ..color = shadowColor
-              ..style = PaintingStyle.stroke
-              ..strokeWidth = elevation * 2.0,
-          );
+          if (elevation > 0.0) {
+            context.canvas.drawPath(
+              offsetPath,
+              new Paint()
+                ..color = shadowColor
+                ..style = PaintingStyle.stroke
+                ..strokeWidth = elevation * 2.0,
+            );
+          }
           paintShadows = false;
         }
         return true;
