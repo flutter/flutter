@@ -199,7 +199,6 @@ distributionUrl=https\\://services.gradle.org/distributions/gradle-$gradleVersio
 
 /// Create android/local.properties if needed, and update Flutter settings.
 void updateLocalProperties({String projectPath, BuildInfo buildInfo}) {
-  return; // TODO TEST
   final File localProperties = (projectPath == null)
       ? fs.file(fs.path.join('android', 'local.properties'))
       : fs.file(fs.path.join(projectPath, 'android', 'local.properties'));
