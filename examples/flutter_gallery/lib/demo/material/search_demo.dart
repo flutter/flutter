@@ -1,0 +1,236 @@
+// Copyright 2018 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+import 'package:flutter/material.dart';
+
+class SearchDemo extends StatefulWidget {
+  static const String routeName = '/material/search';
+
+  @override
+  SearchDemoState createState() => new SearchDemoState();
+}
+
+class SearchDemoState extends State<SearchDemo> {
+  final SearchDemoSearchDelegate _delegate = new SearchDemoSearchDelegate();
+  final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
+
+  @override
+  Widget build(BuildContext context) {
+    return new Scaffold(
+      key: _scaffoldKey,
+      appBar: new AppBar(
+        leading: new IconButton(
+          tooltip: 'Navigation menu',
+          icon: new AnimatedIcon(
+            icon: AnimatedIcons.menu_arrow,
+            color: Colors.white,
+            progress: _delegate.transitionAnimation,
+          ),
+          onPressed: () {
+            _scaffoldKey.currentState.openDrawer();
+          },
+        ),
+        title: const Text('Numbers'),
+        actions: <Widget>[
+          new IconButton(
+            tooltip: 'Search',
+            icon: const Icon(Icons.search),
+            onPressed: () async {
+              showSearchOverlay(
+                context: context,
+                delegate: _delegate,
+              );
+            },
+          ),
+          new IconButton(
+            tooltip: 'More (not implemented)',
+            icon: const Icon(Icons.more_vert),
+            onPressed: () {},
+          ),
+        ],
+      ),
+      body: new Center(
+        child: new MergeSemantics(
+          child: new Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              new Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: const <Widget>[
+                  const Text('Press the '),
+                  const Tooltip(
+                    message: 'search',
+                    child: const Icon(
+                      Icons.search,
+                      size: 18.0,
+                    ),
+                  ),
+                  const Text(' icon in the AppBar'),
+                ],
+              ),
+              const Text('and search for an integer between 0 and 100,000.'),
+            ],
+          ),
+        ),
+      ),
+      floatingActionButton: new FloatingActionButton.extended(
+        tooltip: 'Back',
+        onPressed: () {
+          Navigator.of(context).pop();
+        },
+        label: const Text('Close demo'),
+        icon: const Icon(Icons.close),
+      ),
+      drawer: new Drawer(
+        child: new Column(
+          children: <Widget>[
+            const UserAccountsDrawerHeader(
+              accountName: const Text('Zach Widget'),
+              accountEmail: const Text('zach.widget@example.com'),
+              currentAccountPicture: const CircleAvatar(
+                backgroundImage: const AssetImage(
+                  'shrine/vendors/zach.jpg',
+                  package: 'flutter_gallery_assets',
+                ),
+              ),
+              margin: EdgeInsets.zero,
+            ),
+            new MediaQuery.removePadding(
+              context: context,
+              // DrawerHeader consumes top MediaQuery padding.
+              removeTop: true,
+              child: const ListTile(
+                leading: const Icon(Icons.payment),
+                title: const Text('Placeholder'),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class SearchDemoSearchDelegate extends SearchDelegate<void> {
+  final List<int> _data = new List<int>.generate(100001, (int i) => i).reversed.toList();
+  final List<int> _history = <int>[42607, 85604, 66374, 44, 174];
+
+  @override
+  Widget buildLeading(BuildContext context) {
+    return new IconButton(
+      tooltip: 'Back',
+      icon: new AnimatedIcon(
+        icon: AnimatedIcons.menu_arrow,
+        progress: transitionAnimation,
+      ),
+      onPressed: () {
+        close(context, null);
+      },
+    );
+  }
+
+  @override
+  Widget buildSuggestions(BuildContext context) {
+    final ThemeData theme = Theme.of(context);
+
+    final Iterable<int> suggestions = query.isEmpty
+        ? _history
+        : _data.where((int i) => '$i'.startsWith(query));
+
+    return new ListView(
+      children: suggestions.map((int i) {
+        final String suggestion = '$i';
+        return new ListTile(
+          leading: query.isEmpty ? const Icon(Icons.history) : new Container(),
+          title: new RichText(
+            text: new TextSpan(
+              text: suggestion.substring(0, query.length),
+              style:
+                  theme.textTheme.subhead.copyWith(fontWeight: FontWeight.bold),
+              children: <TextSpan>[
+                new TextSpan(
+                  text: suggestion.substring(query.length),
+                  style: theme.textTheme.subhead,
+                ),
+              ],
+            ),
+          ),
+          onTap: () {
+            query = '$i';
+            showResultsPage(context);
+          },
+        );
+      }).toList(),
+    );
+  }
+
+  @override
+  Widget buildResults(BuildContext context) {
+    final int searched = int.tryParse(query);
+    if (searched == null || !_data.contains(searched)) {
+      return new Center(
+        child: new Text(
+          '"$query"\n is not a valid integer between 0 and 100,000.\nTry again.',
+          textAlign: TextAlign.center,
+        ),
+      );
+    }
+
+    final ThemeData theme = Theme.of(context);
+    return new ListView(
+      children: <Widget>[
+        _buildCard('This integer', searched, theme),
+        _buildCard('Next integer', searched + 1, theme),
+        _buildCard('Previous integer', searched - 1, theme),
+      ],
+    );
+  }
+
+  Widget _buildCard(
+    String title,
+    int i,
+    ThemeData theme,
+  ) {
+    return new GestureDetector(
+      child: new Card(
+        child: new Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: new Column(
+            children: <Widget>[
+              new Text(title),
+              new Text(
+                '$i',
+                style: theme.textTheme.headline.copyWith(fontSize: 72.0),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  @override
+  List<Widget> buildActions(BuildContext context) {
+    return <Widget>[
+      query.isEmpty
+          ? new IconButton(
+              tooltip: 'Voice Search',
+              icon: const Icon(Icons.mic),
+              onPressed: () {
+                query = 'TODO: implement voice input';
+              },
+            )
+          : new IconButton(
+              tooltip: 'Clear',
+              icon: const Icon(Icons.clear),
+              onPressed: () {
+                query = '';
+                if (isShowingResultsPage(context)) {
+                  showSearchPage(context);
+                }
+              },
+            )
+    ];
+  }
+}
