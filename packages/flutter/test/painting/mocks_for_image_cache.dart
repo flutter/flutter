@@ -35,7 +35,7 @@ class TestImageProvider extends ImageProvider<int> {
   }
 
   @override
-  ImageStreamCompleter load(int key) {
+  ImageStreamCompleter load(int key, _) {
     return new OneFrameImageStreamCompleter(
       new SynchronousFuture<ImageInfo>(new TestImageInfo(imageValue, image: image))
     );
