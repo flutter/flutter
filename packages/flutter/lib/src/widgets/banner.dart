@@ -110,7 +110,7 @@ class BannerPainter extends CustomPainter {
 
   static const BoxShadow _shadow = const BoxShadow(
     color: const Color(0x7F000000),
-    blurRadius: 4.0,
+    blurRadius: 6.0,
   );
 
   bool _prepared = false;
