@@ -31,7 +31,7 @@ vars = {
   # Dart is: https://github.com/dart-lang/sdk/blob/master/DEPS.
   # You can use //tools/dart/create_updated_flutter_deps.py to produce
   # updated revision list of existing dependencies.
-  'dart_revision': 'a5c11d7d0329432ca37e35bb249b20f60aa0aa31',
+  'dart_revision': '46ab040e589adc5200370dec7952ce5150850822',
 
   'dart_args_tag': '1.4.1',
   'dart_async_tag': '2.0.6',
@@ -126,7 +126,7 @@ deps = {
    Var('fuchsia_git') + '/garnet' + '@' + 'b7492b5f34e32248b164eb48ae8e67995aebda67',
 
   'src/topaz':
-   Var('fuchsia_git') + '/topaz' + '@' + '5fa651cf9cc5f338379e34964ff5dd70052f6237',
+   Var('fuchsia_git') + '/topaz' + '@' + 'e331f910c1003d154a4de6e1b5356f8d785fd6ec',
 
   'src/third_party/benchmark':
    Var('fuchsia_git') + '/third_party/benchmark' + '@' + '296537bc48d380adf21567c5d736ab79f5363d22',

@@ -70,6 +70,7 @@ template("flutter_content_handler") {
 
     deps = [
              "//third_party/dart/runtime/bin:libdart_builtin",
+             "//third_party/dart/runtime/platform:libdart_platform",
              "//garnet/public/lib/app/cpp",
              "//garnet/public/lib/fonts/fidl",
              "//garnet/public/lib/fsl",
@@ -107,16 +108,10 @@ template("flutter_content_handler") {
 
 flutter_content_handler("aot") {
   output_name = "flutter_aot_runner"
-  extra_deps = [
-    "//third_party/dart/runtime:libdart_precompiled_runtime",
-    "//third_party/dart/runtime/platform:libdart_platform_precompiled_runtime",
-  ]
+  extra_deps = [ "//third_party/dart/runtime:libdart_precompiled_runtime" ]
 }
 
 flutter_content_handler("jit") {
   output_name = "flutter_jit_runner"
-  extra_deps = [
-    "//third_party/dart/runtime:libdart_jit",
-    "//third_party/dart/runtime/platform:libdart_platform_jit",
-  ]
+  extra_deps = [ "//third_party/dart/runtime:libdart_jit" ]
 }
