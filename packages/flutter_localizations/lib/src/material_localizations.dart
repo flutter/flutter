@@ -269,6 +269,9 @@ class GlobalMaterialLocalizations implements MaterialLocalizations {
   String get alertDialogLabel => _translationBundle.alertDialogLabel;
 
   @override
+  String get searchFieldLabel => _translationBundle.searchFieldLabel;
+
+  @override
   String aboutListTileTitle(String applicationName) {
     final String text = _translationBundle.aboutListTileTitle;
     return text.replaceFirst(r'$applicationName', applicationName);
