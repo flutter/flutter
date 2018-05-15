@@ -10,7 +10,7 @@ import 'package:test/test.dart';
 
 void main() {
   group('gradle build', () {
-    test('do not crash if there is no Android SDK', () async {
+    test('do not crash if there is no Android SDK', () {
       Exception shouldBeToolExit;
       try {
         // We'd like to always set androidSdk to null and test updateLocalProperties. But that's
