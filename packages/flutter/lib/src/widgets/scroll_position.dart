@@ -252,11 +252,13 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
   /// see the discussion there for why that might still be a bad idea.)
   void correctPixels(double value) {
     _pixels = value;
+    _didChangeViewportDimensionOrPixels = true;
   }
 
   @override
   void correctBy(double correction) {
     _pixels += correction;
+    _didChangeViewportDimensionOrPixels = true;
   }
 
   /// Change the value of [pixels] to the new value, and notify any customers,
@@ -360,13 +362,13 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
     return result;
   }
 
-  bool _didChangeViewportDimension = true;
+  bool _didChangeViewportDimensionOrPixels = true;
 
   @override
   bool applyViewportDimension(double viewportDimension) {
     if (_viewportDimension != viewportDimension) {
       _viewportDimension = viewportDimension;
-      _didChangeViewportDimension = true;
+      _didChangeViewportDimensionOrPixels = true;
       // If this is called, you can rely on applyContentDimensions being called
       // soon afterwards in the same layout phase. So we put all the logic that
       // relies on both values being computed into applyContentDimensions.
@@ -419,12 +421,12 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
   bool applyContentDimensions(double minScrollExtent, double maxScrollExtent) {
     if (!nearEqual(_minScrollExtent, minScrollExtent, Tolerance.defaultTolerance.distance) ||
         !nearEqual(_maxScrollExtent, maxScrollExtent, Tolerance.defaultTolerance.distance) ||
-        _didChangeViewportDimension) {
+        _didChangeViewportDimensionOrPixels) {
       _minScrollExtent = minScrollExtent;
       _maxScrollExtent = maxScrollExtent;
       _haveDimensions = true;
       applyNewDimensions();
-      _didChangeViewportDimension = false;
+      _didChangeViewportDimensionOrPixels = false;
     }
     return true;
   }
