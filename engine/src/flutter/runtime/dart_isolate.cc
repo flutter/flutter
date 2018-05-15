@@ -541,10 +541,10 @@ Dart_Isolate DartIsolate::DartCreateAndStartServiceIsolate(
   // thread.
   service_isolate->ResetWeakPtrFactory();
 
-  const bool isolate_snapshot_is_dart_2 =
-      Dart_IsDart2Snapshot(vm->GetIsolateSnapshot()->GetData()->GetSnapshotPointer());
+  const bool isolate_snapshot_is_dart_2 = Dart_IsDart2Snapshot(
+      vm->GetIsolateSnapshot()->GetData()->GetSnapshotPointer());
   const bool is_preview_dart2 =
-      vm->GetPlatformKernel() != nullptr || isolate_snapshot_is_dart_2;
+      (vm->GetPlatformKernel().GetSize() > 0) || isolate_snapshot_is_dart_2;
   const bool running_from_sources =
       !DartVM::IsRunningPrecompiledCode() && !is_preview_dart2;
 
@@ -648,14 +648,16 @@ DartIsolate::CreateDartVMAndEmbedderObjectPair(
 
   // Create the Dart VM isolate and give it the embedder object as the baton.
   Dart_Isolate isolate =
-      vm->GetPlatformKernel() != nullptr
-          ? Dart_CreateIsolateFromKernel(advisory_script_uri,         //
-                                         advisory_script_entrypoint,  //
-                                         vm->GetPlatformKernel(),     //
-                                         flags,                       //
-                                         embedder_isolate.get(),      //
-                                         error                        //
-                                         )
+      (vm->GetPlatformKernel().GetSize() > 0)
+          ? Dart_CreateIsolateFromKernel(
+                advisory_script_uri,                   //
+                advisory_script_entrypoint,            //
+                vm->GetPlatformKernel().GetMapping(),  //
+                vm->GetPlatformKernel().GetSize(),     //
+                flags,                                 //
+                embedder_isolate.get(),                //
+                error                                  //
+                )
           : Dart_CreateIsolate(advisory_script_uri,         //
                                advisory_script_entrypoint,  //
                                embedder_isolate->GetIsolateSnapshot()

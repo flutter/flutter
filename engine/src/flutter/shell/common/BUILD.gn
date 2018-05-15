@@ -103,7 +103,6 @@ source_set("common") {
     "$flutter_root/third_party/txt",
     "//garnet/public/lib/fxl",
     "//third_party/dart/runtime:dart_api",
-    "//third_party/dart/runtime/platform:libdart_platform",
     "//third_party/rapidjson",
     "//third_party/skia",
     "//third_party/skia:gpu",
