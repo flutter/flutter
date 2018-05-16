@@ -8,11 +8,11 @@ class SearchDemo extends StatefulWidget {
   static const String routeName = '/material/search';
 
   @override
-  SearchDemoState createState() => new SearchDemoState();
+  _SearchDemoState createState() => new _SearchDemoState();
 }
 
-class SearchDemoState extends State<SearchDemo> {
-  final SearchDemoSearchDelegate _delegate = new SearchDemoSearchDelegate();
+class _SearchDemoState extends State<SearchDemo> {
+  final _SearchDemoSearchDelegate _delegate = new _SearchDemoSearchDelegate();
   final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
 
   int _lastIntegerSelected;
@@ -39,7 +39,7 @@ class SearchDemoState extends State<SearchDemo> {
             tooltip: 'Search',
             icon: const Icon(Icons.search),
             onPressed: () async {
-              final int selected = await showSearchOverlay<int>(
+              final int selected = await showSearch<int>(
                 context: context,
                 delegate: _delegate,
               );
@@ -91,7 +91,7 @@ class SearchDemoState extends State<SearchDemo> {
         ),
       ),
       floatingActionButton: new FloatingActionButton.extended(
-        tooltip: 'Back',
+        tooltip: 'Back', // Tests depend on this label to exit the demo.
         onPressed: () {
           Navigator.of(context).pop();
         },
@@ -128,7 +128,7 @@ class SearchDemoState extends State<SearchDemo> {
   }
 }
 
-class SearchDemoSearchDelegate extends SearchDelegate<int> {
+class _SearchDemoSearchDelegate extends SearchDelegate<int> {
   final List<int> _data = new List<int>.generate(100001, (int i) => i).reversed.toList();
   final List<int> _history = <int>[42607, 85604, 66374, 44, 174];
 
@@ -162,8 +162,7 @@ class SearchDemoSearchDelegate extends SearchDelegate<int> {
           title: new RichText(
             text: new TextSpan(
               text: suggestion.substring(0, query.length),
-              style:
-                  theme.textTheme.subhead.copyWith(fontWeight: FontWeight.bold),
+              style: theme.textTheme.subhead.copyWith(fontWeight: FontWeight.bold),
               children: <TextSpan>[
                 new TextSpan(
                   text: suggestion.substring(query.length),
@@ -193,40 +192,24 @@ class SearchDemoSearchDelegate extends SearchDelegate<int> {
       );
     }
 
-    final ThemeData theme = Theme.of(context);
     return new ListView(
       children: <Widget>[
-        _buildCard('This integer', searched, theme, context),
-        _buildCard('Next integer', searched + 1, theme, context),
-        _buildCard('Previous integer', searched - 1, theme, context),
-      ],
-    );
-  }
-
-  Widget _buildCard(
-    String title,
-    int i,
-    ThemeData theme,
-    BuildContext context,
-  ) {
-    return new GestureDetector(
-      onTap: () {
-        close(context, i);
-      },
-      child: new Card(
-        child: new Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: new Column(
-            children: <Widget>[
-              new Text(title),
-              new Text(
-                '$i',
-                style: theme.textTheme.headline.copyWith(fontSize: 72.0),
-              ),
-            ],
-          ),
+        new _ResultCard(
+          title: 'This integer',
+          integer: searched,
+          searchDelegate: this,
         ),
-      ),
+        new _ResultCard(
+          title: 'Next integer',
+          integer: searched + 1,
+          searchDelegate: this,
+        ),
+        new _ResultCard(
+          title: 'Previous integer',
+          integer: searched - 1,
+          searchDelegate: this,
+        ),
+      ],
     );
   }
 
@@ -253,4 +236,39 @@ class SearchDemoSearchDelegate extends SearchDelegate<int> {
             )
     ];
   }
+}
+
+class _ResultCard extends StatelessWidget {
+
+  _ResultCard({this.integer, this.title, this.searchDelegate});
+
+  final int integer;
+  final String title;
+  final SearchDelegate searchDelegate;
+
+
+  @override
+  Widget build(BuildContext context) {
+    final ThemeData theme = Theme.of(context);
+    return new GestureDetector(
+      onTap: () {
+        searchDelegate.close(context, integer);
+      },
+      child: new Card(
+        child: new Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: new Column(
+            children: <Widget>[
+              new Text(title),
+              new Text(
+                '$integer',
+                style: theme.textTheme.headline.copyWith(fontSize: 72.0),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
 }

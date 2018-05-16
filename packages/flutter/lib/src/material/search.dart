@@ -15,30 +15,31 @@ import 'scaffold.dart';
 import 'text_field.dart';
 import 'theme.dart';
 
-/// Shows a full screen search overlay.
+/// Shows a full screen search experience.
 ///
 /// The overlay consists of an app bar with a search field and a body which can
 /// either show suggested search queries (the search page) or the search
 /// results (the results page).
 ///
-/// The appearance of the search overlay is determined by the provided
+/// The appearance of the search experience is determined by the provided
 /// `delegate`. The initial query string is given by `query`, which defaults
 /// to the empty string. When `query` is set to null, `delegate.query` will
 /// be used as the initial query.
 ///
-/// The transition to the search overlay triggered by this method looks best
-/// if the screen triggering the transition contains an [AppBar] at the top
-/// and the transition is triggered from an [IconButton.onPressed] within
-/// [AppBar.actions]. The animation provided by [SearchDelegate.animation] can
-/// be used to trigger additional animations in the underlying screen while
-/// the search overlay fades in or out. This is commonly used to animate
-/// an [AnimatedIcon] in the [AppBar.leading] position e.g. from the hamburger
-/// menu to the back arrow used to exit the search overlay.
+/// The transition to the search triggered by this method looks best if the
+/// screen triggering the transition contains an [AppBar] at the top and the
+/// transition is triggered from an [IconButton.onPressed] within
+/// [AppBar.actions]. The animation provided by
+/// [SearchDelegate.transitionAnimation] can be used to trigger additional
+/// animations in the underlying screen while the search fades in or out. This
+/// is commonly used to animate an [AnimatedIcon] in the [AppBar.leading]
+/// position e.g. from the hamburger menu to the back arrow used to exit the
+/// search overlay.
 ///
 /// See also:
 ///
-///  * [SearchDelegate] for ways to customize the search overlay.
-Future<T> showSearchOverlay<T>({
+///  * [SearchDelegate] to define the content of the search experience.
+Future<T> showSearch<T>({
   @required BuildContext context,
   @required SearchDelegate<T> delegate,
   String query: '',
@@ -54,23 +55,27 @@ Future<T> showSearchOverlay<T>({
   return delegate._result.future;
 }
 
-/// Delegate for [showSearchOverlay] to customize the search experience.
+/// Delegate for [showSearch] to define the search experience.
 ///
 /// The search experience consists of two pages:
 ///
 /// 1) A search page showing a search field in an [AppBar] and suggestions
 ///    shown below in the body of the page. Which suggestions are shown is
-///    determined by [SearchDelegate.buildSuggestions].
+///    determined by [SearchDelegate.buildSuggestions] based on the current
+///    user query found in [SearchDelegate.query].
 /// 2) A results page with an [AppBar] showing the current search string and
 ///    the search results in the body. The search results are provided by
-///    [SearchDelegate.buildResults].
+///    [SearchDelegate.buildResults] and can be brought on screen by calling
+///    [SearchDelegate.showResultsPage]. Once the user selected a result,
+///    [SearchDelegate.close] should be called to notify the caller of
+///    [showSearch] about the search result.
 ///
 /// Additionally, the [SearchDelegate] also allows customizing the buttons
 /// shown alongside the [AppBar] on both screens via [leading] and [actions].
 abstract class SearchDelegate<T> {
 
-  /// Suggestions shown in the body of the search overlay while the user types a
-  /// query into the search field.
+  /// Suggestions shown in the body of the search experience while the user
+  /// types a query into the search field.
   ///
   /// The delegate method is called whenever the content of [query] changes and
   /// the value of [query] can be used to determine which suggestions should
@@ -88,12 +93,11 @@ abstract class SearchDelegate<T> {
   /// for.
   Widget buildResults(BuildContext context);
 
-  /// A widget to display before the current query in the [AppBar] of the search
-  /// overlay.
+  /// A widget to display before the current query in the [AppBar].
   ///
-  /// Typically an [IconButton] as a back button to exit the search overlay. It
-  /// is suggested to show an [AnimatedIcon] driven by [transitionAnimation],
-  /// which animated from e.g. a hamburger menu to the back button as the search
+  /// Typically an [IconButton] as a back button to exit the search. It is
+  /// suggested to show an [AnimatedIcon] driven by [transitionAnimation], which
+  /// animated from e.g. a hamburger menu to the back button as the search
   /// overlay fades in.
   ///
   /// See also:
@@ -101,8 +105,7 @@ abstract class SearchDelegate<T> {
   ///  * [AppBar.leading], the intended use for the return value of this method.
   Widget buildLeading(BuildContext context);
 
-  /// Widgets to display after the search query in the [AppBar] of the search
-  /// overlay.
+  /// Widgets to display after the search query in the [AppBar].
   ///
   /// If the [query] is not empty, this should typically contain a button to
   /// clear the query and go back to the search page if the results page is
@@ -113,7 +116,7 @@ abstract class SearchDelegate<T> {
   ///  * [AppBar.actions], the intended use for the return value of this method.
   List<Widget> buildActions(BuildContext context);
 
-  /// The theme used to style the [AppBar] of the search overlay.
+  /// The theme used to style the [AppBar].
   ///
   /// By default, a white theme is used.
   ///
@@ -151,16 +154,14 @@ abstract class SearchDelegate<T> {
   /// Transition to the results page.
   ///
   /// If the user taps on a suggestion provided by [buildSuggestions] the
-  /// search overlay should typically transition to the page showing the search
+  /// screen should typically transition to the page showing the search
   /// results for the suggested query. This transition can be triggered
   /// by calling this method.
   ///
   /// See also:
   ///
-  ///  * [isShowingResultsPage] to check if the search overlay is currently
-  ///    showing the results page.
-  ///  * [isShowingSearchPage] to check if the search overlay is currently
-  ///     showing the search page.
+  ///  * [isShowingResultsPage] to check if the results page is currently shown.
+  ///  * [isShowingSearchPage] to check if the search page is currently shown.
   ///  * [showSearchPage] to transition to the search page.
   @protected
   void showResultsPage(BuildContext context) {
@@ -173,19 +174,17 @@ abstract class SearchDelegate<T> {
 
   /// Transition to the search page.
   ///
-  /// If the search overlay is currently showing the results page this method
+  /// If the search screen is currently showing the results page this method
   /// can be used to trigger a transition back to the search page.
   ///
-  /// This can only be called if the search overlay is currently showing the
-  /// results page. To show the search overlay on top of another route call
-  /// [showSearchOverlay] instead of this method.
+  /// This can only be called if the results page is currently shown. To show
+  /// the search experience on top of another route call [showSearch] instead of
+  /// this method.
   ///
   /// See also:
   ///
-  ///  * [isShowingResultsPage] to check if the search overlay is currently
-  ///    showing the results page.
-  ///  * [isShowingSearchPage] to check if the search overlay is currently
-  ///     showing the search page.
+  ///  * [isShowingResultsPage] to check if the results page is currently shown.
+  ///  * [isShowingSearchPage] to check if the search page is currently shown.
   ///  * [showResultsPage] to transition to the results page.
   @protected
   void showSearchPage(BuildContext context) {
@@ -196,11 +195,10 @@ abstract class SearchDelegate<T> {
     ));
   }
 
-  /// Closes the search overlay and return to the underlying route.
+  /// Closes the search experience and return to the underlying route.
   ///
   /// The value provided for `result` is used as the return value of the call
-  /// to [showSearchOverlay] that launched the search initially.
-  @protected
+  /// to [showSearch] that launched the search initially.
   void close(BuildContext context, T result) {
     assert(isShowingResultsPage(context) || isShowingSearchPage(context));
     focusNode.unfocus();
@@ -208,37 +206,35 @@ abstract class SearchDelegate<T> {
     Navigator.of(context).pop(result);
   }
 
-  /// Whether the search overlay is currently showing the search page.
+  /// Whether the search experience is currently showing the search page.
   ///
   /// On the search page the user can enter a search query in the app bar
   /// and sees suggested queries (from [buildSuggestions]) in the body.
   ///
   /// See also:
   ///
-  ///  * [isShowingResultsPage] to check if the search overlay is currently
-  ///    showing the results page.
+  ///  * [isShowingResultsPage] to check if the results page is currently shown.
   ///  * [showSearchPage] to transition to the search page.
   ///  * [showResultsPage] to transition to the results page.
   bool isShowingSearchPage(BuildContext context) => ModalRoute.of(context) is _SearchPageRoute;
 
-  /// Whether the search overlay is currently showing the results page.
+  /// Whether the search experience is currently showing the results page.
   ///
   /// On the results page the user should see hits for the provided [query],
   /// which are obtained from [buildResults].
   ///
   /// See also:
   ///
-  ///  * [isShowingResultsPage] to check if the search overlay is currently
-  ///    showing the results page.
+  ///  * [isShowingSearchPage] to check if the search page is currently shown.
   ///  * [showSearchPage] to transition to the search page.
   ///  * [showResultsPage] to transition to the results page.
   bool isShowingResultsPage(BuildContext context) => ModalRoute.of(context) is _ResultsPageRoute;
 
-  /// [Animation] triggered while the search overlay fades in or out.
+  /// [Animation] triggered while the search experience fades in or out.
   ///
   /// This animation is commonly used to animate [AnimatedIcon]s of
   /// [IconButton]s return by [buildLeading] or contained within the route
-  /// below the search overlay.
+  /// below the search experience.
   Animation<double> get transitionAnimation => _proxyAnimation;
 
   /// [FocusNode] used by the text field showing the current search query.
@@ -254,7 +250,7 @@ abstract class SearchDelegate<T> {
   Completer<T> _result;
 }
 
-/// Base class for routes within the search overlay.
+/// Base class for routes within the search experience.
 ///
 /// [_SearchOverlayPageRoute] are cross-faded in and can trigger animations
 /// during the route transition in the new and old route by setting
@@ -267,8 +263,7 @@ abstract class _SearchOverlayPageRoute<T> extends PageRoute<void> {
     this.triggerAnimationsInRoutesOnEntry: true,
   }) : assert(delegate != null), assert(triggerAnimationsInRoutesOnEntry != null);
 
-  /// The [SearchDelegate] determining the appearance of the search overlay
-  /// owning this route.
+  /// The [SearchDelegate] defining the search experience owning this route.
   final SearchDelegate<T> delegate;
 
   /// Whether [delegate.animation] should be triggered while this route fades
@@ -327,7 +322,7 @@ abstract class _SearchOverlayPageRoute<T> extends PageRoute<void> {
 
 // SEARCH PAGE
 
-/// Route to switch to the search page of the search overlay.
+/// Route to switch to the search page of the search experience.
 class _SearchPageRoute<T> extends _SearchOverlayPageRoute<T> {
   _SearchPageRoute({
     bool useProxyAnimationOnEntry: true,
@@ -426,7 +421,7 @@ class _SearchPageState<T> extends State<_SearchPage<T>> {
 
 // RESULTS PAGE
 
-/// Route to switch to the results page of the search overlay.
+/// Route to switch to the results page of the search experience.
 class _ResultsPageRoute<T> extends _SearchOverlayPageRoute<T> {
   _ResultsPageRoute({
     SearchDelegate<T> delegate,
