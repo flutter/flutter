@@ -89,6 +89,11 @@ abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
     assert(!attached);
   }
 
+  /// Find the first region which contains [offset] with [type].
+  Object findRegion(Offset offset, Type type) {
+    return null;
+  }
+
   /// Override this method to upload this layer to the engine.
   ///
   /// The `layerOffset` is the accumulated offset of this layer's parent from the
@@ -314,6 +319,19 @@ class ContainerLayer extends Layer {
       assert(child.attached == attached);
     }
     return child == equals;
+  }
+
+  @override
+  Object findRegion(Offset offset, Type type) {
+    Layer current = lastChild;
+    while (current != null) {
+      final Object value = current.findRegion(offset, type);
+      if (value != null) {
+        return value;
+      }
+      current = current.previousSibling;
+    }
+    return null;
   }
 
   @override
@@ -1197,5 +1215,29 @@ class FollowerLayer extends ContainerLayer {
     super.debugFillProperties(properties);
     properties.add(new DiagnosticsProperty<LayerLink>('link', link));
     properties.add(new TransformProperty('transform', getLastTransform(), defaultValue: null));
+  }
+}
+
+/// A composited layer which annotates it's children with a value.
+class AnnotatedRegionLayer<T> extends ContainerLayer {
+
+  /// Creates a new annotated layer.
+  AnnotatedRegionLayer(this.value);
+
+  /// The value which annotates the children.
+  final T value;
+
+  @override
+  Object findRegion(Offset offset, Type type) {
+    if (T == type) {
+      return value;
+    }
+    return null;
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(new DiagnosticsProperty<Object>('value', value));
   }
 }

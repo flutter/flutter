@@ -7,6 +7,7 @@ import 'dart:math' as math;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/src/widgets/annotated_region.dart';
 import 'package:flutter/widgets.dart';
 
 import 'back_button.dart';
@@ -345,19 +346,6 @@ class _AppBarState extends State<AppBar> {
     TextStyle centerStyle = widget.textTheme?.title ?? themeData.primaryTextTheme.title;
     TextStyle sideStyle = widget.textTheme?.body1 ?? themeData.primaryTextTheme.body1;
 
-    final Brightness brightness = widget.brightness ?? themeData.primaryColorBrightness;
-    // TODO(jonahwilliams): remove once we have platform themes.
-    switch (defaultTargetPlatform) {
-      case TargetPlatform.iOS:
-        SystemChrome.setSystemUIOverlayStyle(brightness == Brightness.dark
-          ? SystemUiOverlayStyle.light
-          : SystemUiOverlayStyle.dark);
-        break;
-      case TargetPlatform.android:
-      case TargetPlatform.fuchsia:
-        SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle.dark);
-    }
-
     if (widget.toolbarOpacity != 1.0) {
       final double opacity = const Interval(0.25, 1.0, curve: Curves.fastOutSlowIn).transform(widget.toolbarOpacity);
       if (centerStyle?.color != null)
@@ -490,13 +478,20 @@ class _AppBarState extends State<AppBar> {
       );
     }
 
-    return new Semantics(
-      container: true,
-      explicitChildNodes: true,
-      child: new Material(
-        color: widget.backgroundColor ?? themeData.primaryColor,
-        elevation: widget.elevation,
-        child: appBar,
+    final Brightness brightness = widget.brightness ?? themeData.primaryColorBrightness;
+    
+    return new AnnotatedRegion<SystemUiOverlayStyle>(
+      value: brightness == Brightness.dark
+          ? SystemUiOverlayStyle.dark
+          : SystemUiOverlayStyle.light,
+      child: new Semantics(
+        container: true,
+        explicitChildNodes: true,
+        child: new Material(
+          color: widget.backgroundColor ?? themeData.primaryColor,
+          elevation: widget.elevation,
+          child: appBar,
+        ),
       ),
     );
   }

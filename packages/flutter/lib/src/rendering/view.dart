@@ -7,6 +7,7 @@ import 'dart:io' show Platform;
 import 'dart:ui' as ui show Scene, SceneBuilder, window;
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
 import 'package:vector_math/vector_math_64.dart';
 
 import 'binding.dart';
@@ -172,6 +173,8 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
       final ui.SceneBuilder builder = new ui.SceneBuilder();
       layer.addToScene(builder, Offset.zero);
       final ui.Scene scene = builder.build();
+      final SystemUiOverlayStyle overlayStyle = layer.findRegion(Offset.zero, SystemUiOverlayStyle);
+      SystemChrome.setSystemUIOverlayStyle(overlayStyle);
       ui.window.render(scene);
       scene.dispose();
       assert(() {

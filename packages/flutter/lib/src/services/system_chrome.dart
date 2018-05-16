@@ -301,14 +301,6 @@ class SystemChrome {
   /// }
   /// ```
   static void setSystemUIOverlayStyle(SystemUiOverlayStyle style) {
-    assert(style != null);
-
-    if (_pendingStyle != null) {
-      // The microtask has already been queued; just update the pending value.
-      _pendingStyle = style;
-      return;
-    }
-
     if (style == _latestStyle) {
       // Trivial success: no microtask has been queued and the given style is
       // already in effect, so no need to queue a microtask.
