@@ -6,7 +6,7 @@
 
 #include <map>
 
-#include <fuchsia/cpp/modular.h>
+#include <modular/cpp/fidl.h>
 
 #include "flutter/lib/ui/semantics/semantics_node.h"
 #include "lib/fxl/macros.h"

@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include <fuchsia/cpp/ui.h>
+#include <ui/cpp/fidl.h>
 
 #include "flutter/flow/compositor_context.h"
 #include "lib/fxl/macros.h"

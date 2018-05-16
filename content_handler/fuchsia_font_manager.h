@@ -17,7 +17,7 @@
 #ifndef TXT_FUCHSIA_FONT_MANAGER_H_
 #define TXT_FUCHSIA_FONT_MANAGER_H_
 
-#include <fuchsia/cpp/fonts.h>
+#include <fonts/cpp/fidl.h>
 #include <memory>
 #include "lib/fxl/macros.h"
 #include "third_party/skia/include/core/SkStream.h"

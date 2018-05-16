@@ -7,10 +7,10 @@
 #include <map>
 #include <set>
 
-#include <fuchsia/cpp/input.h>
-#include <fuchsia/cpp/modular.h>
-#include <fuchsia/cpp/views_v1.h>
-#include <fuchsia/cpp/views_v1_token.h>
+#include <input/cpp/fidl.h>
+#include <modular/cpp/fidl.h>
+#include <views_v1/cpp/fidl.h>
+#include <views_v1_token/cpp/fidl.h>
 
 #include "accessibility_bridge.h"
 #include "flutter/lib/ui/window/viewport_metrics.h"

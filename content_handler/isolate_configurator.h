@@ -4,9 +4,9 @@
 
 #pragma once
 
-#include <fuchsia/cpp/component.h>
-#include <fuchsia/cpp/ui.h>
-#include <fuchsia/cpp/views_v1.h>
+#include <component/cpp/fidl.h>
+#include <ui/cpp/fidl.h>
+#include <views_v1/cpp/fidl.h>
 
 #include "lib/fxl/macros.h"
 #include "lib/ui/flutter/sdk_ext/src/natives.h"

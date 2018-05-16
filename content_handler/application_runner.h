@@ -7,7 +7,7 @@
 #include <memory>
 #include <unordered_map>
 
-#include <fuchsia/cpp/component.h>
+#include <component/cpp/fidl.h>
 
 #include "application.h"
 #include "lib/app/cpp/application_context.h"

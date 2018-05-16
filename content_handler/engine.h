@@ -4,8 +4,8 @@
 
 #pragma once
 
-#include <fuchsia/cpp/views_v1.h>
-#include <fuchsia/cpp/views_v1_token.h>
+#include <views_v1/cpp/fidl.h>
+#include <views_v1_token/cpp/fidl.h>
 #include <zx/event.h>
 
 #include "flutter/shell/common/shell.h"
