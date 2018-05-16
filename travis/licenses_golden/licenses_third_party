@@ -1,4 +1,4 @@
-Signature: 3f9475673095e96aa089b6804b6d6dff
+Signature: 6b402c42e1de2d029b9bf59b9d6600ce
 
 UNUSED LICENSES:
 
@@ -17328,6 +17328,8 @@ FILE: ../../../third_party/skia/src/sksl/ir/SkSLAppendStage.h
 FILE: ../../../third_party/skia/src/sksl/ir/SkSLVariableReference.cpp
 FILE: ../../../third_party/skia/third_party/skcms/skcms.c
 FILE: ../../../third_party/skia/third_party/skcms/skcms.h
+FILE: ../../../third_party/skia/third_party/skcms/src/Curve.c
+FILE: ../../../third_party/skia/third_party/skcms/src/Curve.h
 FILE: ../../../third_party/skia/third_party/skcms/src/GaussNewton.c
 FILE: ../../../third_party/skia/third_party/skcms/src/GaussNewton.h
 FILE: ../../../third_party/skia/third_party/skcms/src/ICCProfile.c
