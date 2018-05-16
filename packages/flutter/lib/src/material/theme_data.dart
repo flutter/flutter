@@ -15,6 +15,7 @@ import 'ink_splash.dart';
 import 'ink_well.dart' show InteractiveInkFeatureFactory;
 import 'input_decorator.dart';
 import 'slider_theme.dart';
+import 'switch.dart';
 import 'typography.dart';
 
 export 'package:flutter/services.dart' show Brightness;
@@ -105,6 +106,7 @@ class ThemeData extends Diagnosticable {
     SliderThemeData sliderTheme,
     ChipThemeData chipTheme,
     TargetPlatform platform,
+    AdaptiveWidgetThemeData adaptiveWidgetTheme,
   }) {
     brightness ??= Brightness.light;
     final bool isDark = brightness == Brightness.dark;
@@ -168,6 +170,8 @@ class ThemeData extends Diagnosticable {
       brightness: brightness,
       labelStyle: textTheme.body2,
     );
+    adaptiveWidgetTheme ??= AdaptiveWidgetThemeData.none;
+
     return new ThemeData.raw(
       brightness: brightness,
       primaryColor: primaryColor,
@@ -208,6 +212,7 @@ class ThemeData extends Diagnosticable {
       sliderTheme: sliderTheme,
       chipTheme: chipTheme,
       platform: platform,
+      adaptiveWidgetTheme: adaptiveWidgetTheme,
     );
   }
 
@@ -257,6 +262,7 @@ class ThemeData extends Diagnosticable {
     @required this.sliderTheme,
     @required this.chipTheme,
     @required this.platform,
+    @required this.adaptiveWidgetTheme,
   }) : assert(brightness != null),
        assert(primaryColor != null),
        assert(primaryColorBrightness != null),
@@ -294,7 +300,8 @@ class ThemeData extends Diagnosticable {
        assert(accentIconTheme != null),
        assert(sliderTheme != null),
        assert(chipTheme != null),
-       assert(platform != null);
+       assert(platform != null),
+       assert(adaptiveWidgetTheme != null);
 
   /// A default light blue theme.
   ///
@@ -483,6 +490,8 @@ class ThemeData extends Diagnosticable {
   /// Defaults to the current platform.
   final TargetPlatform platform;
 
+  final AdaptiveWidgetThemeData adaptiveWidgetTheme;
+
   /// Creates a copy of this theme but with the given fields replaced with the new values.
   ThemeData copyWith({
     Brightness brightness,
@@ -524,6 +533,7 @@ class ThemeData extends Diagnosticable {
     SliderThemeData sliderTheme,
     ChipThemeData chipTheme,
     TargetPlatform platform,
+    AdaptiveWidgetThemeData adaptiveWidgetTheme,
   }) {
     return new ThemeData.raw(
       brightness: brightness ?? this.brightness,
@@ -565,6 +575,7 @@ class ThemeData extends Diagnosticable {
       sliderTheme: sliderTheme ?? this.sliderTheme,
       chipTheme: chipTheme ?? this.chipTheme,
       platform: platform ?? this.platform,
+      adaptiveWidgetTheme: adaptiveWidgetTheme ?? this.adaptiveWidgetTheme,
     );
   }
 
@@ -692,6 +703,7 @@ class ThemeData extends Diagnosticable {
       sliderTheme: SliderThemeData.lerp(a.sliderTheme, b.sliderTheme, t),
       chipTheme: ChipThemeData.lerp(a.chipTheme, b.chipTheme, t),
       platform: t < 0.5 ? a.platform : b.platform,
+      adaptiveWidgetTheme: t < 0.5 ? a.adaptiveWidgetTheme : b.adaptiveWidgetTheme,
     );
   }
 
@@ -736,7 +748,8 @@ class ThemeData extends Diagnosticable {
            (otherData.accentIconTheme == accentIconTheme) &&
            (otherData.sliderTheme == sliderTheme) &&
            (otherData.chipTheme == chipTheme) &&
-           (otherData.platform == platform);
+           (otherData.platform == platform) &&
+           (otherData.adaptiveWidgetTheme == adaptiveWidgetTheme);
   }
 
   @override
@@ -780,6 +793,7 @@ class ThemeData extends Diagnosticable {
         sliderTheme,
         chipTheme,
         platform,
+        adaptiveWidgetTheme,
       ),
     );
   }
@@ -825,6 +839,27 @@ class ThemeData extends Diagnosticable {
     properties.add(new DiagnosticsProperty<SliderThemeData>('sliderTheme', sliderTheme));
     properties.add(new DiagnosticsProperty<ChipThemeData>('chipTheme', chipTheme));
   }
+}
+
+/// Describes whether descendent Material Design widgets of various types
+/// should automatically adapt to use Cupertino widgets when running on iOS.
+@immutable
+class AdaptiveWidgetThemeData {
+  const AdaptiveWidgetThemeData(this._adaptivenessOptions);
+
+  static const AdaptiveWidgetThemeData none =
+      const AdaptiveWidgetThemeData(const <Type, bool>{
+        Switch: false,
+      });
+
+  static const AdaptiveWidgetThemeData all =
+      const AdaptiveWidgetThemeData(const <Type, bool>{
+        Switch: true,
+      });
+
+  final Map<Type, bool> _adaptivenessOptions;
+
+  bool isWidgetAdaptive(Type widgetType) => _adaptivenessOptions[widgetType] == true;
 }
 
 class _IdentityThemeDataCacheKey {
