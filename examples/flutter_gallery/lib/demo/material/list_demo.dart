@@ -227,7 +227,7 @@ class _ListDemoState extends State<ListDemo> {
     void onSwap(int oldIndex, int newIndex) {
       setState(() {
         if (newIndex > oldIndex) {
-          newIndex += 1;
+          newIndex -= 1;
         }
         final String item = items.removeAt(oldIndex);
         items.insert(newIndex, item);
@@ -337,7 +337,7 @@ class DraggableListState extends State<DraggableList> with TickerProviderStateMi
   Widget _wrap(Widget toWrap, int index) {
     assert(toWrap.key != null);
     Widget _buildDragTarget(BuildContext context, List<Key> acceptedCandidates, List<dynamic> rejectedCandidates) {
-      return new LongPressDraggable<Key>(
+      final Widget draggable = new LongPressDraggable<Key>(
         maxSimultaneousDrags: 1,
         axis: widget.axis,
         data: toWrap.key,
@@ -371,13 +371,32 @@ class DraggableListState extends State<DraggableList> with TickerProviderStateMi
         onDragCompleted: () {
           print('Swapping: $index, $ghostIndex, ${widget.children.map((w) => w.key)}');
           setState(() {
-            widget.onSwap(ghostIndex, index);
-            ghostController.reverse();
-            entranceController.reverse();
+            widget.onSwap(dragStartIndex, currentIndex);
+            ghostController.reverse(from: 0.1);
+            entranceController.reverse(from: 0.1);
             dragging = null;
           });
         },
       );
+      if (currentIndex == index) {
+        return new Column(children: <Widget>[
+          new SizeTransition(
+            sizeFactor: entranceController, 
+            child: const SizedBox(height: whenDragHeight),
+          ),
+          draggable,
+        ]);
+      }
+      if (ghostIndex == index) {
+        return new Column(children: <Widget>[
+          new SizeTransition(
+            sizeFactor: ghostController, 
+            child: const SizedBox(height: whenDragHeight),
+          ),
+          draggable,
+        ]);
+      }
+      return draggable;
     }
 
     return new Builder(builder: (BuildContext context) {
@@ -397,16 +416,16 @@ class DraggableListState extends State<DraggableList> with TickerProviderStateMi
             }
           });
           if (dragging == toAccept && toAccept != toWrap.key) {
-            // if (!scrolling) {
-            //   setState(() {
-            //     scrolling = true;
-            //     Scrollable.ensureVisible(context, duration: const Duration(milliseconds: 100), alignment: 0.5).then((_) {
-            //       setState(() {
-            //         scrolling = false;
-            //       });
-            //     });
-            //   });
-            // }
+            if (!scrolling) {
+              setState(() {
+                scrolling = true;
+                Scrollable.ensureVisible(context, duration: const Duration(milliseconds: 100), alignment: 0.5).then((_) {
+                  setState(() {
+                    scrolling = false;
+                  });
+                });
+              });
+            }
             print('Will accept');
             return true;
           }
@@ -429,19 +448,6 @@ class DraggableListState extends State<DraggableList> with TickerProviderStateMi
     assert(widget.children.every((w) => w.key != null), 'All children of this widget must have a key.');
     for (int i=0; i<widget.children.length; i++) {
       wrappedChildren.add(_wrap(widget.children[i], i));
-    }
-
-    wrappedChildren.insert(currentIndex, new SizeTransition(
-      sizeFactor: entranceController, 
-      child: const SizedBox(height: whenDragHeight),
-    ));
-
-    final int adjustedGhostIndex = (currentIndex > ghostIndex) ? ghostIndex : ghostIndex + 1;
-    if (ghostIndex != currentIndex) {
-      wrappedChildren.insert(adjustedGhostIndex, new SizeTransition(
-        sizeFactor: ghostController, 
-        child: const SizedBox(height: whenDragHeight),
-      ));
     }
 
     return new ListView(children: wrappedChildren, padding: widget.padding);
