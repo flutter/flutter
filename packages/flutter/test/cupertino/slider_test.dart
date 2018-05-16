@@ -11,6 +11,14 @@ import 'package:flutter_test/flutter_test.dart';
 import '../widgets/semantics_tester.dart';
 
 void main() {
+
+  Future<Null> _dragSlider(WidgetTester tester, Key sliderKey) {
+    final Offset topLeft = tester.getTopLeft(find.byKey(sliderKey));
+    const double unit = CupertinoThumbPainter.radius;
+    const double delta = 3.0 * unit;
+    return tester.dragFrom(topLeft + const Offset(unit, unit), const Offset(delta, 0.0));
+  }
+
   testWidgets('Slider does not move when tapped (LTR)', (WidgetTester tester) async {
     final Key sliderKey = new UniqueKey();
     double value = 0.0;
@@ -108,10 +116,7 @@ void main() {
       ),
     ));
 
-    final Offset topLeft = tester.getTopLeft(find.byKey(sliderKey));
-    const double unit = CupertinoThumbPainter.radius;
-    const double delta = 3.0 * unit;
-    await tester.dragFrom(topLeft + const Offset(unit, unit), const Offset(delta, 0.0));
+    await _dragSlider(tester, sliderKey);
     
     expect(numberOfTimesOnChangeStartIsCalled, equals(1));
 
@@ -149,11 +154,8 @@ void main() {
         },
       ),
     ));
-
-    final Offset topLeft = tester.getTopLeft(find.byKey(sliderKey));
-    const double unit = CupertinoThumbPainter.radius;
-    const double delta = 3.0 * unit;
-    await tester.dragFrom(topLeft + const Offset(unit, unit), const Offset(delta, 0.0));
+    
+    await _dragSlider(tester, sliderKey);
     
     expect(numberOfTimesOnChangeEndIsCalled, equals(1));
 
