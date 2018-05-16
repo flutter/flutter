@@ -363,8 +363,8 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
       // get the same effect here by calling that error handler directly or indeed just throwing.
       // However, we call registerException because that's the semantically correct thing...
       test_package.registerException(
-        _pendingExceptionDetails.exception,
-        _pendingExceptionDetails.stack,
+        _pendingExceptionDetails.toString(),
+        _emptyStackTrace,
       );
       _pendingExceptionDetails = null;
     }
@@ -1298,6 +1298,8 @@ class _LiveTestRenderView extends RenderView {
     _label?.paint(context.canvas, offset - const Offset(0.0, 10.0));
   }
 }
+
+final StackTrace _emptyStackTrace = new stack_trace.Chain(const <stack_trace.Trace>[]);
 
 StackTrace _unmangle(StackTrace stack) {
   if (stack is stack_trace.Trace)
