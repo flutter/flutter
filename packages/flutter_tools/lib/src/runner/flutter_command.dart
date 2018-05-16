@@ -222,8 +222,8 @@ abstract class FlutterCommand extends Command<Null> {
       extraGenSnapshotOptions: argParser.options.containsKey(FlutterOptions.kExtraGenSnapshotOptions)
           ? argResults[FlutterOptions.kExtraGenSnapshotOptions]
           : null,
-      preferSharedLibrary: argParser.options.containsKey('prefer-shared-library')
-        ? argResults['prefer-shared-library']
+      preferSharedLibrary: argParser.options.containsKey('build-shared-library')
+        ? argResults['build-shared-library']
         : false,
       targetPlatform: targetPlatform,
       fileSystemRoots: argParser.options.containsKey(FlutterOptions.kFileSystemRoot)

@@ -23,7 +23,7 @@ class BuildApkCommand extends BuildSubCommand {
         help: 'Preview Dart 2.0 functionality.',
       )
       ..addFlag('track-widget-creation', negatable: false, hide: !verboseHelp)
-      ..addFlag('prefer-shared-library',
+      ..addFlag('build-shared-library',
         negatable: false,
         help: 'Whether to prefer compiling to a *.so file (android only).',
       )

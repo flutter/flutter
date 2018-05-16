@@ -282,8 +282,8 @@ class FlutterPlugin implements Plugin<Project> {
             extraGenSnapshotOptionsValue = project.property('extra-gen-snapshot-options')
         }
         Boolean preferSharedLibraryValue = false
-        if (project.hasProperty('prefer-shared-library')) {
-            preferSharedLibraryValue = project.property('prefer-shared-library').toBoolean()
+        if (project.hasProperty('build-shared-library')) {
+            preferSharedLibraryValue = project.property('build-shared-library').toBoolean()
         }
         String targetPlatformValue = null
         if (project.hasProperty('target-platform')) {
@@ -423,7 +423,7 @@ abstract class BaseFlutterTask extends DefaultTask {
                     args "--extra-gen-snapshot-options", "${extraGenSnapshotOptions}"
                 }
                 if (preferSharedLibrary) {
-                    args "--prefer-shared-library"
+                    args "--build-shared-library"
                 }
                 if (targetPlatform != null) {
                     args "--target-platform", "${targetPlatform}"
