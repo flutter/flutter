@@ -270,10 +270,12 @@ class GalleryHome extends StatefulWidget {
 
   const GalleryHome({
     Key key,
+    this.testMode: false,
     this.optionsPage,
   }) : super(key: key);
 
   final Widget optionsPage;
+  final bool testMode;
 
   @override
   _GalleryHomeState createState() => new _GalleryHomeState();
@@ -345,13 +347,13 @@ class _GalleryHomeState extends State<GalleryHome> with SingleTickerProviderStat
                   onPressed: () => setState(() => _category = null),
                 ),
             ),
-            frontTitle:  new AnimatedSwitcher(
+            frontTitle: new AnimatedSwitcher(
               duration: _kFrontLayerSwitchDuration,
               child: _category == null
                 ? const Text('Flutter gallery')
                 : new Text(_category.name),
             ),
-            frontHeading: new Container(height: 24.0),
+            frontHeading: widget.testMode ? null: new Container(height: 24.0),
             frontLayer: new AnimatedSwitcher(
               duration: _kFrontLayerSwitchDuration,
               switchOutCurve: switchOutCurve,
