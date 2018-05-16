@@ -304,7 +304,7 @@ class SystemChrome {
   /// }
   /// ```
   static void setSystemUIOverlayStyle(SystemUiOverlayStyle style) {
-    if (style == _latestStyle) {
+    if (style == _latestStyle || style == null) {
       return;
     }
     _latestStyle = style;
