@@ -273,7 +273,9 @@ bool DartIsolate::PrepareForRunningFromPrecompiledCode() {
   return true;
 }
 
-static bool LoadScriptSnapshot(std::shared_ptr<const fml::Mapping> mapping) {
+static bool LoadScriptSnapshot(std::shared_ptr<const fml::Mapping> mapping,
+                               bool last_piece) {
+  FXL_CHECK(last_piece) << "Script snapshots cannot be divided";
   if (tonic::LogIfError(Dart_LoadScriptFromSnapshot(mapping->GetMapping(),
                                                     mapping->GetSize()))) {
     return false;
@@ -281,27 +283,40 @@ static bool LoadScriptSnapshot(std::shared_ptr<const fml::Mapping> mapping) {
   return true;
 }
 
-static bool LoadKernelSnapshot(std::shared_ptr<const fml::Mapping> mapping) {
-  if (tonic::LogIfError(Dart_LoadScriptFromKernel(mapping->GetMapping(),
-                                                  mapping->GetSize()))) {
+static bool LoadKernelSnapshot(std::shared_ptr<const fml::Mapping> mapping,
+                               bool last_piece) {
+  Dart_Handle library = Dart_LoadLibraryFromKernel(mapping->GetMapping(),
+                                                   mapping->GetSize());
+  if (tonic::LogIfError(library)) {
     return false;
   }
 
+  if (!last_piece) {
+    // More to come.
+    return true;
+  }
+
+  Dart_SetRootLibrary(library);
+  if (tonic::LogIfError(Dart_FinalizeLoading(false))) {
+    return false;
+  }
   return true;
 }
 
-static bool LoadSnapshot(std::shared_ptr<const fml::Mapping> mapping) {
+static bool LoadSnapshot(std::shared_ptr<const fml::Mapping> mapping,
+                         bool last_piece) {
   if (Dart_IsKernel(mapping->GetMapping(), mapping->GetSize())) {
-    return LoadKernelSnapshot(std::move(mapping));
+    return LoadKernelSnapshot(std::move(mapping), last_piece);
   } else {
-    return LoadScriptSnapshot(std::move(mapping));
+    return LoadScriptSnapshot(std::move(mapping), last_piece);
   }
   return false;
 }
 
 FXL_WARN_UNUSED_RESULT
 bool DartIsolate::PrepareForRunningFromSnapshot(
-    std::shared_ptr<const fml::Mapping> mapping) {
+    std::shared_ptr<const fml::Mapping> mapping,
+    bool last_piece) {
   TRACE_EVENT0("flutter", "DartIsolate::PrepareForRunningFromSnapshot");
   if (phase_ != Phase::LibrariesSetup) {
     return false;
@@ -321,8 +336,13 @@ bool DartIsolate::PrepareForRunningFromSnapshot(
     return false;
   }
 
-  if (!LoadSnapshot(mapping)) {
+  if (!LoadSnapshot(mapping, last_piece)) {
     return false;
+  }
+
+  if (!last_piece) {
+    // More to come.
+    return true;
   }
 
   if (Dart_IsNull(Dart_RootLibrary())) {

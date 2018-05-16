@@ -67,7 +67,8 @@ class DartIsolate : public UIDartState {
 
   FXL_WARN_UNUSED_RESULT
   bool PrepareForRunningFromSnapshot(
-      std::shared_ptr<const fml::Mapping> snapshot);
+      std::shared_ptr<const fml::Mapping> snapshot,
+      bool last_piece = true);
 
   FXL_WARN_UNUSED_RESULT
   bool PrepareForRunningFromSource(const std::string& main_source_file,

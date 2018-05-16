@@ -33,6 +33,9 @@ class IsolateConfiguration {
       std::string main_path,
       std::string packages_path);
 
+  static std::unique_ptr<IsolateConfiguration> CreateForKernelList(
+      std::vector<std::unique_ptr<fml::Mapping>> kernel_pieces);
+
   IsolateConfiguration();
 
   virtual ~IsolateConfiguration();

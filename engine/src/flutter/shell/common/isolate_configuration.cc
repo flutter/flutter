@@ -88,6 +88,35 @@ class SourceIsolateConfiguration final : public IsolateConfiguration {
   FXL_DISALLOW_COPY_AND_ASSIGN(SourceIsolateConfiguration);
 };
 
+class KernelListIsolateConfiguration final : public IsolateConfiguration {
+ public:
+  KernelListIsolateConfiguration(
+      std::vector<std::unique_ptr<fml::Mapping>> kernel_pieces)
+    : kernel_pieces_(std::move(kernel_pieces)) {}
+
+  // |shell::IsolateConfiguration|
+  bool DoPrepareIsolate(blink::DartIsolate& isolate) override {
+    if (blink::DartVM::IsRunningPrecompiledCode()) {
+      return false;
+    }
+
+    for (size_t i = 0; i < kernel_pieces_.size(); i++) {
+      bool last_piece = i + 1 == kernel_pieces_.size();
+      if (!isolate.PrepareForRunningFromSnapshot(std::move(kernel_pieces_[i]),
+                                                 last_piece)) {
+        return false;
+      }
+    }
+
+    return true;
+  }
+
+ private:
+  std::vector<std::unique_ptr<fml::Mapping>> kernel_pieces_;
+
+  FXL_DISALLOW_COPY_AND_ASSIGN(KernelListIsolateConfiguration);
+};
+
 std::unique_ptr<IsolateConfiguration> IsolateConfiguration::InferFromSettings(
     const blink::Settings& settings,
     fxl::RefPtr<blink::AssetManager> asset_manager) {
@@ -107,6 +136,7 @@ std::unique_ptr<IsolateConfiguration> IsolateConfiguration::InferFromSettings(
 
   // Running from kernel snapshot.
   {
+    // TODO(engine): Add AssetManager::GetAsMapping or such to avoid the copy.
     std::vector<uint8_t> kernel;
     if (asset_manager && asset_manager->GetAsBuffer(
                              settings.application_kernel_asset, &kernel)) {
@@ -117,11 +147,48 @@ std::unique_ptr<IsolateConfiguration> IsolateConfiguration::InferFromSettings(
 
   // Running from script snapshot.
   {
+    // TODO(engine): Add AssetManager::GetAsMapping or such to avoid the copy.
     std::vector<uint8_t> script_snapshot;
     if (asset_manager && asset_manager->GetAsBuffer(
                              settings.script_snapshot_path, &script_snapshot)) {
       return CreateForSnapshot(
           std::make_unique<fml::DataMapping>(std::move(script_snapshot)));
+    }
+  }
+
+  // Running from kernel divided into several pieces (for sharing).
+  {
+    // TODO(fuchsia): Add AssetManager::GetAsMapping or such to avoid the copy.
+    // TODO(fuchsia): Use async blobfs API once it becomes available.
+    std::vector<uint8_t> kernel_list;
+    if (asset_manager &&
+        asset_manager->GetAsBuffer(settings.application_kernel_list_asset,
+                                   &kernel_list)) {
+      std::vector<std::unique_ptr<fml::Mapping>> kernel_pieces;
+
+      size_t piece_path_start = 0;
+      while (piece_path_start < kernel_list.size()) {
+        size_t piece_path_end = piece_path_start;
+        while ((piece_path_end < kernel_list.size()) &&
+               (kernel_list[piece_path_end] != '\n')) {
+          piece_path_end++;
+        }
+
+        std::string piece_path(reinterpret_cast<const char*>(&kernel_list[piece_path_start]),
+                               piece_path_end - piece_path_start);
+        std::vector<uint8_t> piece;
+        if (!asset_manager->GetAsBuffer(piece_path, &piece)) {
+          FXL_LOG(ERROR) << "Failed to load: " << piece_path;
+          return nullptr;
+        }
+
+        kernel_pieces.emplace_back(
+            std::make_unique<fml::DataMapping>(std::move(piece)));
+
+        piece_path_start = piece_path_end + 1;
+      }
+
+      return CreateForKernelList(std::move(kernel_pieces));
     }
   }
 
@@ -143,6 +210,12 @@ std::unique_ptr<IsolateConfiguration> IsolateConfiguration::CreateForSource(
     std::string packages_path) {
   return std::make_unique<SourceIsolateConfiguration>(std::move(main_path),
                                                       std::move(packages_path));
+}
+
+std::unique_ptr<IsolateConfiguration> IsolateConfiguration::CreateForKernelList(
+    std::vector<std::unique_ptr<fml::Mapping>> kernel_pieces) {
+  return std::make_unique<KernelListIsolateConfiguration>(
+      std::move(kernel_pieces));
 }
 
 }  // namespace shell
