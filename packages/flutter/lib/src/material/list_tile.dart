@@ -691,10 +691,9 @@ class _RenderListTile extends RenderBox {
 
     if (isOneLine)
       return isDense ? 48.0 : 56.0;
-    else if (isTwoLine)
+    if (isTwoLine)
       return isDense ? 64.0 : 72.0;
-    else
-      return isDense ? 76.0 : 88.0;
+    return isDense ? 76.0 : 88.0;
   }
 
   @override
