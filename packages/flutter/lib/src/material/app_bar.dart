@@ -345,7 +345,7 @@ class _AppBarState extends State<AppBar> {
     IconThemeData appBarIconTheme = widget.iconTheme ?? themeData.primaryIconTheme;
     TextStyle centerStyle = widget.textTheme?.title ?? themeData.primaryTextTheme.title;
     TextStyle sideStyle = widget.textTheme?.body1 ?? themeData.primaryTextTheme.body1;
-
+    
     if (widget.toolbarOpacity != 1.0) {
       final double opacity = const Interval(0.25, 1.0, curve: Curves.fastOutSlowIn).transform(widget.toolbarOpacity);
       if (centerStyle?.color != null)

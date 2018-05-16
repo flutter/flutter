@@ -66,6 +66,7 @@ unlinked_spec.ds
 **/ios/**/DerivedData/
 **/ios/**/Icon?
 **/ios/**/Pods/
+**/ios/**/.symlinks/
 **/ios/**/profile
 **/ios/**/xcuserdata
 **/ios/.generated/
