@@ -1,3 +1,5 @@
+import 'dart:collection';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 // Copyright 2016 The Chromium Authors. All rights reserved.
@@ -174,15 +176,9 @@ class _ListDemoState extends State<ListDemo> {
   Map<String, bool> valueToCheckboxState = <String, bool>{};
 
   Widget buildListTile(BuildContext context, int index) {
-    void onSwap(int oldIndex, int newIndex) {
-      setState(() {
-        final String item = items.removeAt(oldIndex);
-        items.insert(newIndex, item);
-      });
-    }
-    if (index >= items.length) {
-      return new _DraggableListItem<int>(index: index, child: null, onSwap: onSwap, isDraggable: false);
-    }
+    // if (index >= items.length) {
+    //   return new MergeSemantics(child: new _DraggableListItem<int>(index: index, child: null, onSwap: onSwap, ensureVisible: scrollTo, isDraggable: false));
+    // }
     final String item = items[index];
     Widget secondary;
     if (_itemType == _MaterialListType.twoLine) {
@@ -201,12 +197,42 @@ class _ListDemoState extends State<ListDemo> {
       leading: const Icon(Icons.drag_handle),
     );
     return new MergeSemantics(
-      child: new _DraggableListItem<int>(key: new Key(item), index: index, child: listTile, onSwap: onSwap),
+      key: new Key(item),
+      child: listTile,
     );
+  }
+
+  bool scrolling = false;
+
+  void scrollTo(BuildContext context) {
+    if (scrolling)
+      return;
+    // We can't use scrollable.ensureVisible because in a built list, one of the items may go out of context.
+    scrolling = true;
+    final ScrollController controller = Scrollable.of(context).widget.controller;
+    
+    const Duration scrollDuration = const Duration(milliseconds: 100);
+    final MediaQueryData mediaQuery = MediaQuery.of(context);
+    
+
+    Scrollable.ensureVisible(context, alignment: 0.5, duration: scrollDuration).then((_) {
+      setState(() {
+        scrolling = false;
+      });
+    });
   }
 
   @override
   Widget build(BuildContext context) {
+    void onSwap(int oldIndex, int newIndex) {
+      setState(() {
+        if (newIndex > oldIndex) {
+          newIndex += 1;
+        }
+        final String item = items.removeAt(oldIndex);
+        items.insert(newIndex, item);
+      });
+    }
     final String layoutText = _dense ? ' \u2013 Dense' : '';
     String itemTypeText;
     switch (_itemType) {
@@ -222,7 +248,12 @@ class _ListDemoState extends State<ListDemo> {
         break;
     }
 
-    // Iterable<Widget> listTiles = items.map((String item) => buildListTile(context, item));
+    final List<MergeSemantics> listTiles = <MergeSemantics>[];
+    for (int i = 0; i < items.length; i++) {
+      listTiles.add(buildListTile(context, i));
+    }
+    // listTiles.add(buildListTile(context, items.length));
+    // print('$items, ${listTiles.map((MergeSemantics w) => ((w.child) as _DraggableListItem).index)}, ${listTiles.length}, ${items.length}');
     // if (_showDividers)
     //   listTiles = ListTile.divideTiles(context: context, tiles: listTiles);
 
@@ -249,11 +280,10 @@ class _ListDemoState extends State<ListDemo> {
         ],
       ),
       body: new Scrollbar(
-        child: new AnimatedList(
-          itemBuilder: (BuildContext context, int index, Animation<double> animation) {
-            return new SizeTransition(sizeFactor: animation, child: buildListTile(context, index));
-          },
-          initialItemCount: items.length + 1,
+        child: new DraggableList(
+          onSwap: onSwap,
+          axis: Axis.vertical,
+          children: listTiles,
           padding: new EdgeInsets.symmetric(vertical: _dense ? 4.0 : 8.0),
         ),
       ),
@@ -261,11 +291,169 @@ class _ListDemoState extends State<ListDemo> {
   }
 }
 
+class DraggableList extends StatefulWidget {
+  const DraggableList({this.children, this.onSwap, this.axis : Axis.vertical, this.padding});
+  final List<Widget> children;
+  final Axis axis;
+  final EdgeInsets padding;
+  final void Function(int, int) onSwap;
+
+  @override
+  State<StatefulWidget> createState() {
+    return new DraggableListState();
+  }
+}
+
+class DraggableListState extends State<DraggableList> with TickerProviderStateMixin {
+  // This controls the entrance of the dragging widget into a new place.
+  AnimationController entranceController;
+  // This controls the 'ghost' of the dragging widget, which is left behind where the widget used to be.
+  AnimationController ghostController;
+
+  static const double whenDragHeight = 100.0;
+
+  Key dragging;
+  // The location that the dragging widget last occupied.
+  int dragStartIndex = 0;
+  int ghostIndex = 0;
+  int currentIndex = 0;
+
+  bool scrolling = false;
+
+  @override 
+  void initState() {
+    super.initState();
+    entranceController = new AnimationController(vsync: this, value: 0.0, duration: const Duration(milliseconds: 200));
+    ghostController = new AnimationController(vsync: this, value: 0.0, duration: const Duration(milliseconds: 200));
+  }
+
+  @override
+  void dispose() {
+    entranceController.dispose();
+    ghostController.dispose();
+    super.dispose();
+  }
+
+  Widget _wrap(Widget toWrap, int index) {
+    assert(toWrap.key != null);
+    Widget _buildDragTarget(BuildContext context, List<Key> acceptedCandidates, List<dynamic> rejectedCandidates) {
+      return new LongPressDraggable<Key>(
+        maxSimultaneousDrags: 1,
+        axis: widget.axis,
+        data: toWrap.key,
+        feedback: new Material(
+          elevation: 6.0,
+          child: new SizedBox(
+            width: MediaQuery.of(context).size.width,
+            child: toWrap,
+          ),
+        ),
+        child: dragging == toWrap.key ? const SizedBox() : toWrap,
+        // The list will take care of inserting dummy space in the correct place.
+        childWhenDragging: const SizedBox(),
+        onDragStarted: () {
+          setState(() {
+            dragging = toWrap.key;
+            dragStartIndex = index;
+            ghostIndex = index;
+            currentIndex = index;
+            entranceController.forward(from: 1.0);
+          });
+        },
+        onDraggableCanceled: (_, __) {
+          print('Cancelling: $index, $ghostIndex, ${widget.children.map((w) => w.key)}');
+          setState(() {
+            ghostController.reverse();
+            entranceController.reverse();
+            dragging = null;
+          });
+        },
+        onDragCompleted: () {
+          print('Swapping: $index, $ghostIndex, ${widget.children.map((w) => w.key)}');
+          setState(() {
+            widget.onSwap(ghostIndex, index);
+            ghostController.reverse();
+            entranceController.reverse();
+            dragging = null;
+          });
+        },
+      );
+    }
+
+    return new Builder(builder: (BuildContext context) {
+      return new DragTarget<Key>(
+        builder: _buildDragTarget,
+        onWillAccept: (Key toAccept) {
+          setState(() {
+            print('$index, $ghostIndex, $dragging, ${toWrap.key}, ${widget.children.map((w) => w.key)} ${entranceController.value} ${ghostController.value}');
+            if (ghostController.isDismissed) {
+              currentIndex = index;
+              ghostController.reverse(from: 1.0).whenCompleteOrCancel(() {
+                // The swap is completed when the ghost controller finishes.
+                print('done: $index, $ghostIndex, ${widget.children.map((w) => w.key)}');
+                ghostIndex = index;
+              });
+              entranceController.forward(from: 0.0);
+            }
+          });
+          if (dragging == toAccept && toAccept != toWrap.key) {
+            // if (!scrolling) {
+            //   setState(() {
+            //     scrolling = true;
+            //     Scrollable.ensureVisible(context, duration: const Duration(milliseconds: 100), alignment: 0.5).then((_) {
+            //       setState(() {
+            //         scrolling = false;
+            //       });
+            //     });
+            //   });
+            // }
+            print('Will accept');
+            return true;
+          }
+          print('Wont accept');
+          return false;
+        },
+        onAccept: (Key accepted) {
+          print('Accepted');
+        },
+        onLeave: (Key leaving) {
+          print('Left');
+        },
+      );
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final List<Widget> wrappedChildren = <Widget>[];
+    assert(widget.children.every((w) => w.key != null), 'All children of this widget must have a key.');
+    for (int i=0; i<widget.children.length; i++) {
+      wrappedChildren.add(_wrap(widget.children[i], i));
+    }
+
+    wrappedChildren.insert(currentIndex, new SizeTransition(
+      sizeFactor: entranceController, 
+      child: const SizedBox(height: whenDragHeight),
+    ));
+
+    final int adjustedGhostIndex = (currentIndex > ghostIndex) ? ghostIndex : ghostIndex + 1;
+    if (ghostIndex != currentIndex) {
+      wrappedChildren.insert(adjustedGhostIndex, new SizeTransition(
+        sizeFactor: ghostController, 
+        child: const SizedBox(height: whenDragHeight),
+      ));
+    }
+
+    return new ListView(children: wrappedChildren, padding: widget.padding);
+  }
+}
+
 class _DraggableListItem<T> extends StatefulWidget {
-  const _DraggableListItem({Key key, @required this.child, @required this.index, @required this.onSwap, this.isDraggable: true}) : super(key: key);
+  const _DraggableListItem({Key key, @required this.child, @required this.index, @required this.onSwap, this.ensureVisible, this.isDraggable: true}) : super(key: key);
 
   final Widget child;
   final int index;
+  final void Function(BuildContext) ensureVisible;
   final void Function(int, int) onSwap;
   final bool isDraggable;
 
@@ -285,6 +473,15 @@ class _DraggableListItemState<T> extends State<_DraggableListItem<T>> with Ticke
   }
 
   @override
+  void didUpdateWidget(_DraggableListItem<T> oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.key != widget.key || oldWidget.index != widget.index) {
+      // print('Widget key: ${oldWidget.key}, ${widget.key}, ${oldWidget.index}, ${widget.index} ${_tileAnimation.value}');
+      _tileAnimation.forward();
+    }
+  }
+
+  @override
   void dispose() {
     _targetAnimation.dispose();
     _tileAnimation.dispose();
@@ -299,12 +496,16 @@ class _DraggableListItemState<T> extends State<_DraggableListItem<T>> with Ticke
     return new ListTile(isThreeLine: (widget?.child as ListTile)?.isThreeLine ?? false, subtitle: const SizedBox(),);
   }
 
-  Widget _buildDragTarget(BuildContext context, List<int> acceptedCandidates, List<dynamic> rejectedCandidates) {
+  bool dragging = false;
+
+  Widget _buildDragTarget(BuildContext context, List<int Function()> acceptedCandidates, List<dynamic> rejectedCandidates) {
     final Widget child = widget.child ?? _buildEmptyTile(context);
     Widget draggableWidget;
     if (widget.isDraggable) {
-      draggableWidget = new LongPressDraggable<int>(
-        data: widget.index,
+      draggableWidget = new LongPressDraggable<int Function()>(
+        maxSimultaneousDrags: 1,
+        key: widget.key,
+        data: () => widget.index,
         axis: Axis.vertical,
         feedback: new Material(
           elevation: 6.0,
@@ -314,22 +515,31 @@ class _DraggableListItemState<T> extends State<_DraggableListItem<T>> with Ticke
           ),
         ),
         child: child,
-        childWhenDragging: new SizeTransition(
-          sizeFactor: _tileAnimation.view,
-          child: _buildEmptyTile(context),
-        ),
+        childWhenDragging: new SizeTransition(sizeFactor: _targetAnimation, child: _buildEmptyTile(context)),
         dragAnchor: DragAnchor.child,
-        onDragStarted: _tileAnimation.reverse,
-        onDraggableCanceled: (_, __) => _tileAnimation.forward(),
+        onDragStarted: () {
+          dragging = true;
+          _tileAnimation.reverse(from: 1.0);
+        },
+        onDraggableCanceled: (_, __) {
+          dragging = false;
+          if (mounted) {
+            _tileAnimation.forward(from: 0.0);
+          }
+        },
         onDragCompleted: () {
-          _targetAnimation.reverse();
-          _tileAnimation.forward(from: 0.0);
+          dragging = false;
+          if (mounted) {
+            print('Placing ${widget.key}, ${widget.index}');
+            _targetAnimation.reverse();
+            _tileAnimation.forward(from: 0.0);
+          }
         },
       );
     } else {
       draggableWidget = child;
     }
-      
+
     return new Column(children: <Widget>[
       new SizeTransition(
         sizeFactor: _targetAnimation.view,
@@ -342,37 +552,43 @@ class _DraggableListItemState<T> extends State<_DraggableListItem<T>> with Ticke
   @override
   Widget build(BuildContext context) {
     return 
-      new DragTarget<int>(
+      new DragTarget<int Function()>(
+        key: widget.key,
         builder: _buildDragTarget,
-        onWillAccept: (int oldIndex) {
+        onWillAccept: (int Function() oldIndex) {
+          if (widget.ensureVisible != null)
+            widget.ensureVisible(context);
           _targetAnimation.forward();
+          if (oldIndex == widget.index)
+            return true;
+          _accept(oldIndex());
           return true;
         },
-        onLeave: (int oldIndex) {
+        onLeave: (int Function() oldIndex) {
           _targetAnimation.reverse();
         },
-        onAccept: (int oldIndex) {
+        onAccept: (int Function() oldIndex) {
           _targetAnimation.reverse();
           if (oldIndex == widget.index) {
             return;
           }
-          _accept(oldIndex);
         },
       );
   }
           
   void _accept(int oldIndex) {
-    final AnimatedListState animatedList = AnimatedList.of(context);
-    if (oldIndex + 1 == widget.index) {
+    print('Swapping ${oldIndex} and ${widget.index} ');
+    // final AnimatedListState animatedList = AnimatedList.of(context);
+    if (oldIndex == widget.index) {
       return;
     }
-    animatedList.removeItem(
-      oldIndex, 
-      (BuildContext context, Animation<double> animation) => const SizedBox(),
-      duration: const Duration(milliseconds: 0),
-    );
+    // animatedList.removeItem(
+    //   oldIndex, 
+    //   (BuildContext context, Animation<double> animation) => const SizedBox(),
+    //   duration: const Duration(milliseconds: 500),
+    // );
     final int newIndex = widget.index > oldIndex ? widget.index - 1 : widget.index;
-    animatedList.insertItem(newIndex, duration: const Duration(milliseconds: 0));
+    // animatedList.insertItem(newIndex, duration: const Duration(milliseconds: 500));
     widget.onSwap(oldIndex, newIndex);
   }
 }
