@@ -77,6 +77,13 @@ TaskFunction createFlutterViewStartupTest() {
   ).run;
 }
 
+TaskFunction createPlatformViewStartupTest() {
+  return new StartupTest(
+    '${flutterDirectory.path}/examples/platform_view',
+    reportMetrics: false,
+  ).run;
+}
+
 TaskFunction createBasicMaterialCompileTest() {
   return () async {
     const String sampleAppName = 'sample_flutter_app';
