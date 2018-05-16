@@ -250,15 +250,31 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
   /// To force the [pixels] to a particular value without honoring the normal
   /// conventions for changing the scroll offset, consider [forcePixels]. (But
   /// see the discussion there for why that might still be a bad idea.)
+  ///
+  /// See also:
+  ///
+  ///  * The method [correctBy], which is a method of [ViewportOffset] be used
+  ///    by viewport render objects to also correct the offset during layout
+  ///    without notifying its listeners.
+  ///  * The method [jumpTo], for making changes to position while not in the
+  ///    middle of layout and applying the new position immediately.
+  ///  * The method [animateTo], which is like [jumpTo] but animating to the
+  ///    distination offset.
   void correctPixels(double value) {
     _pixels = value;
-    _didChangeViewportDimensionOrPixels = true;
   }
 
+  // See also [correctPixels] which is used by the [ScrollPosition] itself to
+  // set the offset initially during construction or after
+  // [applyViewportDimension] or [applyContentDimensions] is called.
   @override
   void correctBy(double correction) {
+    assert(
+      _pixels != null,
+      'An initial pixels value must exist by caling correctPixels on the ScrollPosition',
+    );
     _pixels += correction;
-    _didChangeViewportDimensionOrPixels = true;
+    _didChangeViewportDimensionOrReceiveCorrection = true;
   }
 
   /// Change the value of [pixels] to the new value, and notify any customers,
@@ -362,13 +378,13 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
     return result;
   }
 
-  bool _didChangeViewportDimensionOrPixels = true;
+  bool _didChangeViewportDimensionOrReceiveCorrection = true;
 
   @override
   bool applyViewportDimension(double viewportDimension) {
     if (_viewportDimension != viewportDimension) {
       _viewportDimension = viewportDimension;
-      _didChangeViewportDimensionOrPixels = true;
+      _didChangeViewportDimensionOrReceiveCorrection = true;
       // If this is called, you can rely on applyContentDimensions being called
       // soon afterwards in the same layout phase. So we put all the logic that
       // relies on both values being computed into applyContentDimensions.
@@ -421,12 +437,12 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
   bool applyContentDimensions(double minScrollExtent, double maxScrollExtent) {
     if (!nearEqual(_minScrollExtent, minScrollExtent, Tolerance.defaultTolerance.distance) ||
         !nearEqual(_maxScrollExtent, maxScrollExtent, Tolerance.defaultTolerance.distance) ||
-        _didChangeViewportDimensionOrPixels) {
+        _didChangeViewportDimensionOrReceiveCorrection) {
       _minScrollExtent = minScrollExtent;
       _maxScrollExtent = maxScrollExtent;
       _haveDimensions = true;
       applyNewDimensions();
-      _didChangeViewportDimensionOrPixels = false;
+      _didChangeViewportDimensionOrReceiveCorrection = false;
     }
     return true;
   }

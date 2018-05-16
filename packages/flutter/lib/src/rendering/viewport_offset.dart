@@ -150,10 +150,21 @@ abstract class ViewportOffset extends ChangeNotifier {
   /// [RenderViewport], before [applyContentDimensions]. After this method is
   /// called, the layout will be recomputed and that may result in this method
   /// being called again, though this should be very rare.
+  ///
+  /// See also:
+  ///
+  ///  * [jumpTo], for also changing the scroll position but applying the
+  ///    change immediately and notifying its listeners.
   void correctBy(double correction);
 
   /// Jumps the scroll position from its current value to the given value,
   /// without animation, and without checking if the new value is in range.
+  ///
+  /// See also:
+  ///
+  ///  * [correctBy], a more specialized way of changing the current offset
+  ///    in the middle of layout that defers the notification of its listeners
+  ///    until after layout.
   void jumpTo(double pixels);
 
   /// The direction in which the user is trying to change [pixels], relative to
