@@ -240,11 +240,11 @@ class _SearchDemoSearchDelegate extends SearchDelegate<int> {
 
 class _ResultCard extends StatelessWidget {
 
-  _ResultCard({this.integer, this.title, this.searchDelegate});
+  const _ResultCard({this.integer, this.title, this.searchDelegate});
 
   final int integer;
   final String title;
-  final SearchDelegate searchDelegate;
+  final SearchDelegate<int> searchDelegate;
 
 
   @override
