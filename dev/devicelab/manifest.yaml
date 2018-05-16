@@ -445,7 +445,6 @@ tasks:
       Measures the startup time of the Flutter Gallery app on 32-bit iOS.
     stage: devicelab_ios
     required_agent_capabilities: ["mac/ios32"]
-    flaky: true
 
   flutter_gallery_ios32__transition_perf:
     description: >
