@@ -15,6 +15,8 @@ class SearchDemoState extends State<SearchDemo> {
   final SearchDemoSearchDelegate _delegate = new SearchDemoSearchDelegate();
   final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
 
+  int _lastIntegerSelected;
+
   @override
   Widget build(BuildContext context) {
     return new Scaffold(
@@ -37,10 +39,15 @@ class SearchDemoState extends State<SearchDemo> {
             tooltip: 'Search',
             icon: const Icon(Icons.search),
             onPressed: () async {
-              showSearchOverlay(
+              final int selected = await showSearchOverlay<int>(
                 context: context,
                 delegate: _delegate,
               );
+              if (selected != null && selected != _lastIntegerSelected) {
+                setState(() {
+                  _lastIntegerSelected = selected;
+                });
+              }
             },
           ),
           new IconButton(
@@ -51,27 +58,36 @@ class SearchDemoState extends State<SearchDemo> {
         ],
       ),
       body: new Center(
-        child: new MergeSemantics(
-          child: new Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              new Row(
+        child: new Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            new MergeSemantics(
+              child: new Column(
                 mainAxisAlignment: MainAxisAlignment.center,
-                children: const <Widget>[
-                  const Text('Press the '),
-                  const Tooltip(
-                    message: 'search',
-                    child: const Icon(
-                      Icons.search,
-                      size: 18.0,
-                    ),
+                children: <Widget>[
+                  new Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: const <Widget>[
+                      const Text('Press the '),
+                      const Tooltip(
+                        message: 'search',
+                        child: const Icon(
+                          Icons.search,
+                          size: 18.0,
+                        ),
+                      ),
+                      const Text(' icon in the AppBar'),
+                    ],
                   ),
-                  const Text(' icon in the AppBar'),
+                  const Text('and search for an integer between 0 and 100,000.'),
                 ],
               ),
-              const Text('and search for an integer between 0 and 100,000.'),
-            ],
-          ),
+            ),
+            const Padding(
+              padding: const EdgeInsets.symmetric(vertical: 64.0),
+            ),
+            new Text('Last selected integer: ${_lastIntegerSelected ?? 'NONE' }.')
+          ],
         ),
       ),
       floatingActionButton: new FloatingActionButton.extended(
@@ -112,7 +128,7 @@ class SearchDemoState extends State<SearchDemo> {
   }
 }
 
-class SearchDemoSearchDelegate extends SearchDelegate<void> {
+class SearchDemoSearchDelegate extends SearchDelegate<int> {
   final List<int> _data = new List<int>.generate(100001, (int i) => i).reversed.toList();
   final List<int> _history = <int>[42607, 85604, 66374, 44, 174];
 
@@ -180,9 +196,9 @@ class SearchDemoSearchDelegate extends SearchDelegate<void> {
     final ThemeData theme = Theme.of(context);
     return new ListView(
       children: <Widget>[
-        _buildCard('This integer', searched, theme),
-        _buildCard('Next integer', searched + 1, theme),
-        _buildCard('Previous integer', searched - 1, theme),
+        _buildCard('This integer', searched, theme, context),
+        _buildCard('Next integer', searched + 1, theme, context),
+        _buildCard('Previous integer', searched - 1, theme, context),
       ],
     );
   }
@@ -191,8 +207,12 @@ class SearchDemoSearchDelegate extends SearchDelegate<void> {
     String title,
     int i,
     ThemeData theme,
+    BuildContext context,
   ) {
     return new GestureDetector(
+      onTap: () {
+        close(context, i);
+      },
       child: new Card(
         child: new Padding(
           padding: const EdgeInsets.all(8.0),

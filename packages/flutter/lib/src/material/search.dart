@@ -45,10 +45,13 @@ Future<T> showSearchOverlay<T>({
 }) {
   assert(delegate != null);
   assert(context != null);
+  assert(delegate._result == null || delegate._result.isCompleted);
+  delegate._result = new Completer<T>();
   delegate.query = query ?? delegate.query;
-  return Navigator.of(context).push(new _SearchPageRoute<T>(
+  Navigator.of(context).push(new _SearchPageRoute<T>(
     delegate: delegate,
   ));
+  return delegate._result.future;
 }
 
 /// Delegate for [showSearchOverlay] to customize the search experience.
@@ -160,10 +163,10 @@ abstract class SearchDelegate<T> {
   ///     showing the search page.
   ///  * [showSearchPage] to transition to the search page.
   @protected
-  Future<T> showResultsPage(BuildContext context) {
+  void showResultsPage(BuildContext context) {
     assert(isShowingSearchPage(context));
     focusNode.unfocus();
-    return Navigator.of(context).pushReplacement(new _ResultsPageRoute<T>(
+    Navigator.of(context).pushReplacement(new _ResultsPageRoute<T>(
       delegate: this,
     ));
   }
@@ -185,9 +188,9 @@ abstract class SearchDelegate<T> {
   ///     showing the search page.
   ///  * [showResultsPage] to transition to the results page.
   @protected
-  Future<T> showSearchPage(BuildContext context) {
+  void showSearchPage(BuildContext context) {
     assert(isShowingResultsPage(context));
-    return Navigator.of(context).pushReplacement(new _SearchPageRoute<T>(
+    Navigator.of(context).pushReplacement(new _SearchPageRoute<T>(
       delegate: this,
       useProxyAnimationOnEntry: false,
     ));
@@ -200,6 +203,7 @@ abstract class SearchDelegate<T> {
   void close(BuildContext context, T result) {
     assert(isShowingResultsPage(context) || isShowingSearchPage(context));
     focusNode.unfocus();
+    _result.complete(result);
     Navigator.of(context).pop(result);
   }
 
@@ -245,6 +249,8 @@ abstract class SearchDelegate<T> {
   final TextEditingController _textEditingController = new TextEditingController();
 
   final ProxyAnimation _proxyAnimation = new ProxyAnimation(kAlwaysDismissedAnimation);
+
+  Completer<T> _result;
 }
 
 /// Base class for routes within the search overlay.
@@ -254,7 +260,7 @@ abstract class SearchDelegate<T> {
 /// [SearchDelegate.transitionAnimation]. The latter is for example used to
 /// animate the hamburger menu icon of an [AppBar] into a back arrow while the
 /// search overlay fades in.
-abstract class _SearchOverlayPageRoute<T> extends PageRoute<T> {
+abstract class _SearchOverlayPageRoute<T> extends PageRoute<void> {
   _SearchOverlayPageRoute({
     @required this.delegate,
     this.triggerAnimationsInRoutesOnEntry: true,
