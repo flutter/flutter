@@ -345,17 +345,19 @@ class _AppBarState extends State<AppBar> {
     TextStyle centerStyle = widget.textTheme?.title ?? themeData.primaryTextTheme.title;
     TextStyle sideStyle = widget.textTheme?.body1 ?? themeData.primaryTextTheme.body1;
 
-    final Brightness brightness = widget.brightness ?? themeData.primaryColorBrightness;
-    // TODO(jonahwilliams): remove once we have platform themes.
-    switch (defaultTargetPlatform) {
-      case TargetPlatform.iOS:
-        SystemChrome.setSystemUIOverlayStyle(brightness == Brightness.dark
-          ? SystemUiOverlayStyle.light
-          : SystemUiOverlayStyle.dark);
-        break;
-      case TargetPlatform.android:
-      case TargetPlatform.fuchsia:
-        SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle.dark);
+    if (parentRoute?.isCurrent ?? true) {
+      final Brightness brightness = widget.brightness ?? themeData.primaryColorBrightness;
+      // TODO(jonahwilliams): remove once we have platform themes.
+      switch (defaultTargetPlatform) {
+        case TargetPlatform.iOS:
+          SystemChrome.setSystemUIOverlayStyle(brightness == Brightness.dark
+              ? SystemUiOverlayStyle.light
+              : SystemUiOverlayStyle.dark);
+          break;
+        case TargetPlatform.android:
+        case TargetPlatform.fuchsia:
+          SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle.dark);
+      }
     }
 
     if (widget.toolbarOpacity != 1.0) {
