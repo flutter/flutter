@@ -63,7 +63,7 @@ void ServiceProtocol::RemoveHandler(Handler* handler) {
 
 void ServiceProtocol::ToggleHooks(bool set) {
   for (const auto& endpoint : endpoints_) {
-    Dart_RegisterRootServiceRequestCallback(
+    Dart_RegisterIsolateServiceRequestCallback(
         endpoint.data(),                  // method
         &ServiceProtocol::HandleMessage,  // callback
         set ? this : nullptr              // user data
