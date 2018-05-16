@@ -196,9 +196,10 @@ abstract class SearchDelegate<T> {
     ));
   }
 
-  /// Close the search overlay and return to the underlying route.
+  /// Closes the search overlay and return to the underlying route.
   ///
-  /// This method returns to the side that called [showSearchOverlay] initially.
+  /// The value provided for `result` is used as the return value of the call
+  /// to [showSearchOverlay] that launched the search initially.
   @protected
   void close(BuildContext context, T result) {
     assert(isShowingResultsPage(context) || isShowingSearchPage(context));
