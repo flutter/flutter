@@ -438,13 +438,23 @@ void Shell::OnPlatformViewDestroyed(const PlatformView& view) {
 
   fxl::AutoResetWaitableEvent latch;
 
-  auto gpu_task = [rasterizer = rasterizer_->GetWeakPtr(), &latch]() {
+  auto io_task = [io_manager = io_manager_.get(), &latch]() {
+    // Execute any pending Skia object deletions while GPU access is still
+    // allowed.
+    io_manager->GetSkiaUnrefQueue()->Drain();
+    // Step 3: All done. Signal the latch that the platform thread is waiting
+    // on.
+    latch.Signal();
+  };
+
+  auto gpu_task = [rasterizer = rasterizer_->GetWeakPtr(),
+                   io_task_runner = task_runners_.GetIOTaskRunner(),
+                   io_task]() {
     if (rasterizer) {
       rasterizer->Teardown();
     }
-    // Step 2: All done. Signal the latch that the platform thread is waiting
-    // on.
-    latch.Signal();
+    // Step 2: Next, tell the IO thread to complete its remaining work.
+    fml::TaskRunner::RunNowOrPostTask(io_task_runner, io_task);
   };
 
   auto ui_task = [engine = engine_->GetWeakPtr(),
