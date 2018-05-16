@@ -19,7 +19,7 @@ void main() {
         child: const SizedBox(
           width: 450.0,
           height: 800.0,
-          child: const GalleryApp()
+          child: const GalleryApp(testMode: true)
         )
       )
     );
@@ -43,7 +43,7 @@ void main() {
   });
 
   testWidgets('Pesto can be scrolled all the way down', (WidgetTester tester) async {
-    await tester.pumpWidget(const GalleryApp());
+    await tester.pumpWidget(const GalleryApp(testMode: true));
     await tester.pump(); // see https://github.com/flutter/flutter/issues/1865
     await tester.pump(); // triggers a frame
 

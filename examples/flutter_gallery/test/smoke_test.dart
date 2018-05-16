@@ -139,6 +139,7 @@ Future<Null> smokeGallery(WidgetTester tester) async {
 
   await tester.pumpWidget(
     new GalleryApp(
+      testMode: true,
       onSendFeedback: () {
         sendFeedbackButtonPressed = true; // see smokeOptionsPage()
       },
