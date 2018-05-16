@@ -6,6 +6,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart';
 import 'package:meta/meta.dart';
 
 import 'shrine_data.dart';
@@ -388,7 +389,10 @@ class _ShrineHomeState extends State<ShrineHome> {
       shoppingCart: _shoppingCart,
       body: new CustomScrollView(
         slivers: <Widget>[
-          new SliverToBoxAdapter(child: new _Heading(product: featured)),
+          new SliverToBoxAdapter(child: new AnnotatedRegion<SystemUiOverlayStyle>(
+            child: new _Heading(product: featured),
+            value: SystemUiOverlayStyle.light,
+          )),
           new SliverSafeArea(
             top: false,
             minimum: const EdgeInsets.all(16.0),

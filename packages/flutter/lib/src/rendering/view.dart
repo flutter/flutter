@@ -173,8 +173,7 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
       final ui.SceneBuilder builder = new ui.SceneBuilder();
       layer.addToScene(builder, Offset.zero);
       final ui.Scene scene = builder.build();
-      final SystemUiOverlayStyle overlayStyle = layer.findRegion(Offset.zero, SystemUiOverlayStyle);
-      SystemChrome.setSystemUIOverlayStyle(overlayStyle);
+      _updateSystemChrome();
       ui.window.render(scene);
       scene.dispose();
       assert(() {
@@ -185,6 +184,14 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
     } finally {
       Timeline.finishSync();
     }
+  }
+
+  void _updateSystemChrome() {
+    final SystemUiOverlayStyle overlayStyle = layer.findRegion(
+      Offset.zero,
+      SystemUiOverlayStyle,
+    );
+    SystemChrome.setSystemUIOverlayStyle(overlayStyle);
   }
 
   @override

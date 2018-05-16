@@ -31,14 +31,8 @@ class AnnotatedRegion<T> extends SingleChildRenderObjectWidget {
 
 // Render object for the [AnnotatedRegion].
 class _AnnotatedRegionRenderObject<T> extends RenderProxyBox {
-  T _value;
-  /// The value to be inserted into the layer tree.
-  T get value => _value;
-  set value(T newValue) {
-    if (_value == newValue)
-      return;
-    _value = value;
-  }
+  /// The value to annotated in the layer tree.
+  T value;
 
   @override
   final bool alwaysNeedsCompositing = true;

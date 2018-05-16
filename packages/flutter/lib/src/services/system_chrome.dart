@@ -171,6 +171,9 @@ class SystemUiOverlayStyle {
     };
   }
 
+  @override
+  String toString() => _toMap().toString();
+
   /// Creates a copy of this theme with the given fields replaced with new values.
   SystemUiOverlayStyle copyWith({
     Color systemNavigationBarColor,
@@ -302,25 +305,15 @@ class SystemChrome {
   /// ```
   static void setSystemUIOverlayStyle(SystemUiOverlayStyle style) {
     if (style == _latestStyle) {
-      // Trivial success: no microtask has been queued and the given style is
-      // already in effect, so no need to queue a microtask.
       return;
     }
+    _latestStyle = style;
 
-    _pendingStyle = style;
-    scheduleMicrotask(() {
-      assert(_pendingStyle != null);
-      if (_pendingStyle != _latestStyle) {
-        SystemChannels.platform.invokeMethod(
-          'SystemChrome.setSystemUIOverlayStyle',
-          _pendingStyle._toMap(),
-        );
-        _latestStyle = _pendingStyle;
-      }
-      _pendingStyle = null;
-    });
+    SystemChannels.platform.invokeMethod(
+      'SystemChrome.setSystemUIOverlayStyle',
+      style._toMap(),
+    );
   }
 
-  static SystemUiOverlayStyle _pendingStyle;
   static SystemUiOverlayStyle _latestStyle;
 }

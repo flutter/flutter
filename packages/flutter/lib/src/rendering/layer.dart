@@ -89,10 +89,11 @@ abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
     assert(!attached);
   }
 
-  /// Find the first region which contains [offset] with [type].
-  Object findRegion(Offset offset, Type type) {
-    return null;
-  }
+  /// Find the last [AnnotatedRegionLayer] which contains [offset] with a value
+  /// of Type [type].
+  ///
+  /// Returns null otherwise.
+  Object findRegion(Offset offset, Type type);
 
   /// Override this method to upload this layer to the engine.
   ///
@@ -171,6 +172,9 @@ class PictureLayer extends Layer {
     super.debugFillProperties(properties);
     properties.add(new DiagnosticsProperty<Rect>('paint bounds', canvasBounds));
   }
+
+  @override
+  Object findRegion(Offset offset, Type type) => null;
 }
 
 /// A composited layer that maps a backend texture to a rectangle.
@@ -223,6 +227,9 @@ class TextureLayer extends Layer {
       height: shiftedRect.height,
     );
   }
+
+  @override
+  Object findRegion(Offset offset, Type type) => null;
 }
 
 /// A layer that indicates to the compositor that it should display
@@ -285,6 +292,9 @@ class PerformanceOverlayLayer extends Layer {
     builder.setCheckerboardRasterCacheImages(checkerboardRasterCacheImages);
     builder.setCheckerboardOffscreenLayers(checkerboardOffscreenLayers);
   }
+
+  @override
+  Object findRegion(Offset offset, Type type) => null;
 }
 
 /// A composited layer that has a list of children.
@@ -592,6 +602,13 @@ class ClipRectLayer extends ContainerLayer {
   Rect clipRect;
 
   @override
+  Object findRegion(Offset offset, Type type) {
+    if (!clipRect.contains(offset))
+      return null;
+    return super.findRegion(offset, type);
+  }
+
+  @override
   void addToScene(ui.SceneBuilder builder, Offset layerOffset) {
     bool enabled = true;
     assert(() {
@@ -631,6 +648,13 @@ class ClipRRectLayer extends ContainerLayer {
   RRect clipRRect;
 
   @override
+  Object findRegion(Offset offset, Type type) {
+    if (!clipRRect.contains(offset))
+      return null;
+    return super.findRegion(offset, type);
+  }
+
+  @override
   void addToScene(ui.SceneBuilder builder, Offset layerOffset) {
     bool enabled = true;
     assert(() {
@@ -668,6 +692,13 @@ class ClipPathLayer extends ContainerLayer {
   /// The scene must be explicitly recomposited after this property is changed
   /// (as described at [Layer]).
   Path clipPath;
+
+  @override
+  Object findRegion(Offset offset, Type type) {
+    if (!clipPath.contains(offset))
+      return null;
+    return super.findRegion(offset, type);
+  }
 
   @override
   void addToScene(ui.SceneBuilder builder, Offset layerOffset) {
@@ -892,6 +923,13 @@ class PhysicalModelLayer extends ContainerLayer {
 
   /// The shadow color.
   Color shadowColor;
+
+  @override
+  Object findRegion(Offset offset, Type type) {
+    if (!clipPath.contains(offset))
+      return null;
+    return super.findRegion(offset, type);
+  }
 
   @override
   void addToScene(ui.SceneBuilder builder, Offset layerOffset) {
@@ -1229,9 +1267,11 @@ class AnnotatedRegionLayer<T> extends ContainerLayer {
 
   @override
   Object findRegion(Offset offset, Type type) {
-    if (T == type) {
+    final Object result = super.findRegion(offset, type);
+    if (result != null)
+      return result;
+    if (T == type)
       return value;
-    }
     return null;
   }
 
