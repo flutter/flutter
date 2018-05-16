@@ -136,6 +136,12 @@ tasks:
     stage: devicelab
     required_agent_capabilities: ["mac/android"]
 
+  platform_view__start_up:
+    description: >
+      Verifies that Platform View can be used from an Android project.
+    stage: devicelab
+    required_agent_capabilities: ["mac/android"]
+
   complex_layout__start_up:
     description: >
       Measures the startup time of the Complex Layout sample app on Android.
@@ -286,6 +292,12 @@ tasks:
   platform_channel_sample_test_ios:
     description: >
       Runs a driver test on the Platform Channel sample app on iOS.
+    stage: devicelab_ios
+    required_agent_capabilities: ["mac/ios"]
+
+  platform_view_ios__start_up:
+    description: >
+      Verifies that Platform View can be used from an iOS project.
     stage: devicelab_ios
     required_agent_capabilities: ["mac/ios"]
 
