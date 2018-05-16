@@ -2,11 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
+import 'adaptive.dart';
 import 'colors.dart';
 import 'constants.dart';
 import 'debug.dart';
@@ -33,7 +35,7 @@ import 'toggleable.dart';
 ///  * [Radio], for selecting among a set of explicit values.
 ///  * [Slider], for selecting a value in a range.
 ///  * <https://material.google.com/components/selection-controls.html#selection-controls-switch>
-class Switch extends StatefulWidget {
+class Switch extends AdaptiveWidget {
   /// Creates a material design switch.
   ///
   /// The switch itself does not maintain any state. Instead, when the state of
@@ -54,8 +56,9 @@ class Switch extends StatefulWidget {
     this.inactiveThumbColor,
     this.inactiveTrackColor,
     this.activeThumbImage,
-    this.inactiveThumbImage
-  }) : super(key: key);
+    this.inactiveThumbImage,
+    AdaptiveMode adaptiveMode,
+  }) : super(key: key, adaptiveMode: adaptiveMode);
 
   /// Whether this switch is on or off.
   ///
@@ -113,7 +116,53 @@ class Switch extends StatefulWidget {
   final ImageProvider inactiveThumbImage;
 
   @override
-  _SwitchState createState() => new _SwitchState();
+  Widget buildCupertinoWidget(BuildContext context) {
+    return new CupertinoSwitch(
+      value: value,
+      onChanged: onChanged,
+      activeColor: activeColor,
+    );
+  }
+
+  @override
+  Widget buildMaterialWidget(BuildContext context) {
+    return new _MountainViewSwitch(
+      value: value,
+      onChanged: onChanged,
+      activeColor: activeColor,
+      activeTrackColor: activeTrackColor,
+      inactiveThumbColor: inactiveThumbColor,
+      inactiveTrackColor: inactiveTrackColor,
+      activeThumbImage: activeThumbImage,
+      inactiveThumbImage: inactiveThumbImage,
+    );
+  }
+}
+
+class _MountainViewSwitch extends StatefulWidget{
+  const _MountainViewSwitch({
+    Key key,
+    @required this.value,
+    @required this.onChanged,
+    this.activeColor,
+    this.activeTrackColor,
+    this.inactiveThumbColor,
+    this.inactiveTrackColor,
+    this.activeThumbImage,
+    this.inactiveThumbImage
+  }) : super(key: key);
+
+  final bool value;
+  final ValueChanged<bool> onChanged;
+  final Color activeColor;
+  final Color activeTrackColor;
+  final Color inactiveThumbColor;
+  final Color inactiveTrackColor;
+  final ImageProvider activeThumbImage;
+  final ImageProvider inactiveThumbImage;
+
+  @override
+  _MountainViewSwitchState createState() => new _MountainViewSwitchState();
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
@@ -123,7 +172,7 @@ class Switch extends StatefulWidget {
   }
 }
 
-class _SwitchState extends State<Switch> with TickerProviderStateMixin {
+class _MountainViewSwitchState extends State<_MountainViewSwitch> with TickerProviderStateMixin {
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterial(context));
