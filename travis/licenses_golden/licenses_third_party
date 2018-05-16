@@ -1,4 +1,4 @@
-Signature: 6b402c42e1de2d029b9bf59b9d6600ce
+Signature: 09721866f40c1cfe2dd93f06b836ecf4
 
 UNUSED LICENSES:
 
@@ -4781,13 +4781,11 @@ FILE: ../../../third_party/dart/sdk/lib/_internal/js_runtime/lib/constant_map.da
 FILE: ../../../third_party/dart/sdk/lib/_internal/js_runtime/lib/core_patch.dart
 FILE: ../../../third_party/dart/sdk/lib/_internal/js_runtime/lib/foreign_helper.dart
 FILE: ../../../third_party/dart/sdk/lib/_internal/js_runtime/lib/interceptors.dart
-FILE: ../../../third_party/dart/sdk/lib/_internal/js_runtime/lib/isolate_helper.dart
 FILE: ../../../third_party/dart/sdk/lib/_internal/js_runtime/lib/isolate_patch.dart
 FILE: ../../../third_party/dart/sdk/lib/_internal/js_runtime/lib/js_array.dart
 FILE: ../../../third_party/dart/sdk/lib/_internal/js_runtime/lib/js_number.dart
 FILE: ../../../third_party/dart/sdk/lib/_internal/js_runtime/lib/js_string.dart
 FILE: ../../../third_party/dart/sdk/lib/_internal/js_runtime/lib/math_patch.dart
-FILE: ../../../third_party/dart/sdk/lib/_internal/js_runtime/lib/mirrors_patch.dart
 FILE: ../../../third_party/dart/sdk/lib/_internal/js_runtime/lib/mirrors_patch_cfe.dart
 FILE: ../../../third_party/dart/sdk/lib/_internal/js_runtime/lib/native_helper.dart
 FILE: ../../../third_party/dart/sdk/lib/_internal/js_runtime/lib/regexp_helper.dart
@@ -5858,7 +5856,6 @@ FILE: ../../../third_party/dart/sdk/lib/_internal/js_runtime/lib/convert_patch.d
 FILE: ../../../third_party/dart/sdk/lib/_internal/js_runtime/lib/internal_patch.dart
 FILE: ../../../third_party/dart/sdk/lib/_internal/js_runtime/lib/io_patch.dart
 FILE: ../../../third_party/dart/sdk/lib/_internal/js_runtime/lib/js_helper.dart
-FILE: ../../../third_party/dart/sdk/lib/_internal/js_runtime/lib/js_mirrors.dart
 FILE: ../../../third_party/dart/sdk/lib/_internal/js_runtime/lib/js_names.dart
 FILE: ../../../third_party/dart/sdk/lib/_internal/js_runtime/lib/js_primitives.dart
 FILE: ../../../third_party/dart/sdk/lib/_internal/js_runtime/lib/js_rti.dart
