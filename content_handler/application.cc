@@ -138,6 +138,7 @@ Application::Application(
 
   settings_.script_snapshot_path = "snapshot_blob.bin";
   settings_.application_kernel_asset = "kernel_blob.dill";
+  settings_.application_kernel_list_asset = "app.dilplist";
 
   settings_.log_tag = debug_label_ + std::string{"(flutter)"};
 
