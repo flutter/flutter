@@ -679,7 +679,7 @@ class AccessibilityBridge extends AccessibilityNodeProvider implements BasicMess
             case "tooltip": {
                 AccessibilityEvent e = obtainAccessibilityEvent(ROOT_NODE_ID, AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED);
                 e.getText().add((String) data.get("message"));
-                mOwner.getParent().requestSendAccessibilityEvent(mOwner, e);
+                sendAccessibilityEvent(e);
             }
             default:
                 assert false;
@@ -690,7 +690,7 @@ class AccessibilityBridge extends AccessibilityNodeProvider implements BasicMess
         AccessibilityEvent e = obtainAccessibilityEvent(route.id, AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED);
         String routeName = route.getRouteName();
         e.getText().add(routeName);
-        mOwner.getParent().requestSendAccessibilityEvent(mOwner, e);
+        sendAccessibilityEvent(e);
     }
 
     private void willRemoveSemanticsObject(SemanticsObject object) {
