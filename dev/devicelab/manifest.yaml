@@ -452,4 +452,3 @@ tasks:
       32-bit iOS.
     stage: devicelab_ios
     required_agent_capabilities: ["mac/ios32"]
-    flaky: true
