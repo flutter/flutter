@@ -156,7 +156,7 @@ class _SearchDemoSearchDelegate extends SearchDelegate<int> {
       suggestions: suggestions.map((int i) => '$i'),
       onSelected: (String suggestion) {
         query = suggestion;
-        showResultsPage(context);
+        showResults(context);
       },
     );
   }
@@ -210,8 +210,8 @@ class _SearchDemoSearchDelegate extends SearchDelegate<int> {
               icon: const Icon(Icons.clear),
               onPressed: () {
                 query = '';
-                if (isShowingResultsPage(context)) {
-                  showSearchPage(context);
+                if (isShowingResults(context)) {
+                  showSuggestions(context);
                 }
               },
             )

@@ -15,13 +15,12 @@ import 'scaffold.dart';
 import 'text_field.dart';
 import 'theme.dart';
 
-/// Shows a full screen search experience.
+/// Shows a full screen search page.
 ///
-/// The overlay consists of an app bar with a search field and a body which can
-/// either show suggested search queries (the search page) or the search
-/// results (the results page).
+/// The search page consists of an app bar with a search field and a body which
+/// can either show suggested search queries or the search results.
 ///
-/// The appearance of the search experience is determined by the provided
+/// The appearance of the search page is determined by the provided
 /// `delegate`. The initial query string is given by `query`, which defaults
 /// to the empty string. When `query` is set to null, `delegate.query` will
 /// be used as the initial query.
@@ -33,14 +32,14 @@ import 'theme.dart';
 /// screen triggering the transition contains an [AppBar] at the top and the
 /// transition is called from an [IconButton] that's part of [AppBar.actions].
 /// The animation provided by [SearchDelegate.transitionAnimation] can be used
-/// to trigger additional in the underlying page while the search page fades in
-/// or out. This is commonly used to animate an [AnimatedIcon] in the
-/// [AppBar.leading] position e.g. from the hamburger menu to the back arrow
-/// used to exit the search overlay.
+/// to trigger additional animations in the underlying page while the search
+/// page fades in or out. This is commonly used to animate an [AnimatedIcon] in
+/// the [AppBar.leading] position e.g. from the hamburger menu to the back arrow
+/// used to exit the search page.
 ///
 /// See also:
 ///
-///  * [SearchDelegate] to define the content of the search experience.
+///  * [SearchDelegate] to define the content of the search page.
 Future<T> showSearch<T>({
   @required BuildContext context,
   @required SearchDelegate<T> delegate,
@@ -57,27 +56,31 @@ Future<T> showSearch<T>({
   return delegate._result.future;
 }
 
-/// Delegate for [showSearch] to define the search experience.
+/// Delegate for [showSearch] to define the content of the search page.
 ///
-/// The search experience consists of two pages:
+/// The search page always shows an [AppBar] at the top where users can
+/// enter their search queries. The buttons shown before and after the search
+/// query text field can be customized via [SearchDelegate.leading] and
+/// [SearchDelegate.actions].
 ///
-/// 1) A search page showing a search field in an [AppBar] and suggestions
-///    shown below in the body of the page. Which suggestions are shown is
-///    determined by [SearchDelegate.buildSuggestions] based on the current
-///    user query found in [SearchDelegate.query].
-/// 2) A results page with an [AppBar] showing the current search string and
-///    the search results in the body. The search results are provided by
-///    [SearchDelegate.buildResults] and can be brought on screen by calling
-///    [SearchDelegate.showResultsPage]. Once the user selected a result,
-///    [SearchDelegate.close] should be called to notify the caller of
-///    [showSearch] about the search result.
+/// The body below the [AppBar] can either show suggested queries (returned by
+/// [SearchDelegate.buildSuggestions]) or - once the user submits a search  - the
+/// results of the search as returned by [SearchDelegate.buildResults].
 ///
-/// Additionally, the [SearchDelegate] also allows customizing the buttons
-/// shown alongside the [AppBar] on both screens via [leading] and [actions].
+/// [SearchDelegate.query] always contains the current query entered by the user
+/// and should be used to build the suggestions and results.
+///
+/// The results can be brought on screen by calling [SearchDelegate.showResults]
+/// and you can go back to showing the suggestions by calling
+/// [SearchDelegate.showSuggestions].
+///
+/// Once the user has selected a search result, [SearchDelegate.close] should be
+/// called to remove the search page from the top of the navigation stack and
+/// to notify the caller of [showSearch] about the selected search result.
 abstract class SearchDelegate<T> {
 
-  /// Suggestions shown in the body of the search experience while the user
-  /// types a query into the search field.
+  /// Suggestions shown in the body of the search page while the user types a
+  /// query into the search field.
   ///
   /// The delegate method is called whenever the content of [query] changes and
   /// the value of [query] can be used to determine which suggestions should
@@ -85,14 +88,16 @@ abstract class SearchDelegate<T> {
   ///
   /// Usually, this method will return a [ListView] with one [ListTile] per
   /// suggestion. When [ListTile.onTap] is called, [query] should be updated
-  /// with the corresponding [suggestion] and the results page should be shown
-  /// by calling [showResultsPage].
+  /// with the corresponding suggestion and the results page should be shown
+  /// by calling [showResults].
   Widget buildSuggestions(BuildContext context);
 
   /// The results shown after the user submits a search from the search page.
   ///
   /// The content of [query] can be used to determine what the users searched
   /// for.
+  ///
+  /// Typically, this method returns a [ListView] with the search results.
   Widget buildResults(BuildContext context);
 
   /// A widget to display before the current query in the [AppBar].
@@ -102,6 +107,8 @@ abstract class SearchDelegate<T> {
   /// animated from e.g. a hamburger menu to the back button as the search
   /// overlay fades in.
   ///
+  /// Returns null if no widget should be shown.
+  ///
   /// See also:
   ///
   ///  * [AppBar.leading], the intended use for the return value of this method.
@@ -110,8 +117,10 @@ abstract class SearchDelegate<T> {
   /// Widgets to display after the search query in the [AppBar].
   ///
   /// If the [query] is not empty, this should typically contain a button to
-  /// clear the query and go back to the search page if the results page is
-  /// currently shown.
+  /// clear the query and show the suggestions again (via [showSuggestions]) if
+  /// the results are currently shown.
+  ///
+  /// Returns null if no widget should be shown
   ///
   /// See also:
   ///
@@ -140,7 +149,7 @@ abstract class SearchDelegate<T> {
     );
   }
 
-  /// The current query string shown in the app bar.
+  /// The current query string shown in the [Appbar].
   ///
   /// The user manipulates this string via the keyboard.
   ///
@@ -153,7 +162,7 @@ abstract class SearchDelegate<T> {
   }
 
 
-  /// Transition to the results page.
+  /// Transition to show search results.
   ///
   /// If the user taps on a suggestion provided by [buildSuggestions] the
   /// screen should typically transition to the page showing the search
@@ -162,81 +171,75 @@ abstract class SearchDelegate<T> {
   ///
   /// See also:
   ///
-  ///  * [isShowingResultsPage] to check if the results page is currently shown.
-  ///  * [isShowingSearchPage] to check if the search page is currently shown.
-  ///  * [showSearchPage] to transition to the search page.
-  @protected
-  void showResultsPage(BuildContext context) {
-    assert(isShowingSearchPage(context));
+  ///  * [isShowingSuggestions] to check if the search suggestions are currently
+  ///    shown.
+  ///  * [isShowingResults] to check if the search results are currently shown.
+  ///  * [showSuggestions] to show the search suggestions again.
+  void showResults(BuildContext context) {
+    assert(isShowingSuggestions(context));
     focusNode.unfocus();
     Navigator.of(context).pushReplacement(new _ResultsPageRoute<T>(
       delegate: this,
     ));
   }
 
-  /// Transition to the search page.
+  /// Transition to show the search suggestions and places the input focus
+  /// back into the search text field.
   ///
-  /// If the search screen is currently showing the results page this method
-  /// can be used to trigger a transition back to the search page.
-  ///
-  /// This can only be called if the results page is currently shown. To show
-  /// the search experience on top of another route call [showSearch] instead of
-  /// this method.
+  /// If the results are currently shown this method can be used to go back
+  /// to showing the search suggestions.
   ///
   /// See also:
   ///
-  ///  * [isShowingResultsPage] to check if the results page is currently shown.
-  ///  * [isShowingSearchPage] to check if the search page is currently shown.
-  ///  * [showResultsPage] to transition to the results page.
-  @protected
-  void showSearchPage(BuildContext context) {
-    assert(isShowingResultsPage(context));
+  ///  * [isShowingSuggestions] to check if the search suggestions are currently
+  ///    shown.
+  ///  * [isShowingResults] to check if the search results are currently shown.
+  ///  * [showResults] to show the search results.
+  void showSuggestions(BuildContext context) {
+    assert(isShowingResults(context));
     Navigator.of(context).pushReplacement(new _SearchPageRoute<T>(
       delegate: this,
       useProxyAnimationOnEntry: false,
     ));
   }
 
-  /// Closes the search experience and return to the underlying route.
+  /// Closes the search page and returns to the underlying route.
   ///
   /// The value provided for `result` is used as the return value of the call
   /// to [showSearch] that launched the search initially.
   void close(BuildContext context, T result) {
-    assert(isShowingResultsPage(context) || isShowingSearchPage(context));
+    assert(isShowingResults(context) || isShowingSuggestions(context));
     focusNode.unfocus();
     _result.complete(result);
     Navigator.of(context).pop(result);
   }
 
-  /// Whether the search experience is currently showing the search page.
-  ///
-  /// On the search page the user can enter a search query in the app bar
-  /// and sees suggested queries (from [buildSuggestions]) in the body.
+  /// Whether the search page is currently showing the suggestions (from
+  /// [buildSuggestions]) in the body below the [Appbar].
   ///
   /// See also:
   ///
-  ///  * [isShowingResultsPage] to check if the results page is currently shown.
-  ///  * [showSearchPage] to transition to the search page.
-  ///  * [showResultsPage] to transition to the results page.
-  bool isShowingSearchPage(BuildContext context) => ModalRoute.of(context) is _SearchPageRoute;
+  ///  * [isShowingResults] to check if the search results are currently shown.
+  ///  * [showSuggestions] to show the search suggestions again.
+  ///  * [showResults] to show the search results.
+  bool isShowingSuggestions(BuildContext context) => ModalRoute.of(context) is _SearchPageRoute;
 
-  /// Whether the search experience is currently showing the results page.
-  ///
-  /// On the results page the user should see hits for the provided [query],
-  /// which are obtained from [buildResults].
+  /// Whether the search search page is currently showig the search results
+  /// (from [buildResults]) in the body below the [Appbar].
   ///
   /// See also:
   ///
-  ///  * [isShowingSearchPage] to check if the search page is currently shown.
-  ///  * [showSearchPage] to transition to the search page.
-  ///  * [showResultsPage] to transition to the results page.
-  bool isShowingResultsPage(BuildContext context) => ModalRoute.of(context) is _ResultsPageRoute;
+  ///  * [isShowingSuggestions] to check if the search suggestions are currently
+  ///    shown.
+  ///  * [showSuggestions] to show the search suggestions again.
+  ///  * [showResults] to show the search results.
+  bool isShowingResults(BuildContext context) => ModalRoute.of(context) is _ResultsPageRoute;
 
-  /// [Animation] triggered while the search experience fades in or out.
+  /// [Animation] triggered while the search pages fades in or out.
   ///
   /// This animation is commonly used to animate [AnimatedIcon]s of
   /// [IconButton]s return by [buildLeading] or contained within the route
-  /// below the search experience.
+  /// below the search page.
   Animation<double> get transitionAnimation => _proxyAnimation;
 
   /// [FocusNode] used by the text field showing the current search query.
@@ -405,7 +408,7 @@ class _SearchPageState<T> extends State<_SearchPage<T>> {
           focusNode: widget.delegate.focusNode,
           style: theme.textTheme.title,
           onSubmitted: (String _) {
-            widget.delegate.showResultsPage(context);
+            widget.delegate.showResults(context);
           },
           decoration: new InputDecoration(
             border: InputBorder.none,
@@ -469,7 +472,7 @@ class _ResultsPage<T> extends StatelessWidget {
             ],
           ),
           onTap: () {
-            delegate.showSearchPage(context);
+            delegate.showSuggestions(context);
           },
         ),
         actions: delegate.buildActions(context),
