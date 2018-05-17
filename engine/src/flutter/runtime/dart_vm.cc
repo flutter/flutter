@@ -60,6 +60,7 @@ namespace blink {
 static const char* kDartLanguageArgs[] = {
     "--enable_mirrors=false", "--background_compilation", "--await_is_keyword",
     "--causal_async_stacks",  "--limit-ints-to-64-bits",
+    "--enable_kernel_expression_compilation=false" // TODO(dartbug.com/33087)
 };
 
 static const char* kDartPrecompilationArgs[] = {
