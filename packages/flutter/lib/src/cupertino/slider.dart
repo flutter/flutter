@@ -13,7 +13,7 @@ import 'colors.dart';
 import 'thumb_painter.dart';
 
 // Examples can assume:
-// int _duelCommandment = 1;
+// int _cupertinoSliderValue = 1;
 
 /// An iOS-style slider.
 ///
@@ -84,13 +84,13 @@ class CupertinoSlider extends StatefulWidget {
   ///
   /// ```dart
   /// new CupertinoSlider(
-  ///   value: _duelCommandment.toDouble(),
+  ///   value: _cupertinoSliderValue.toDouble(),
   ///   min: 1.0,
   ///   max: 10.0,
   ///   divisions: 10,
   ///   onChanged: (double newValue) {
   ///     setState(() {
-  ///       _duelCommandment = newValue.round();
+  ///       _cupertinoSliderValue = newValue.round();
   ///     });
   ///   },
   /// )
@@ -117,13 +117,13 @@ class CupertinoSlider extends StatefulWidget {
   ///
   /// ```dart
   /// new CupertinoSlider(
-  ///   value: _duelCommandment.toDouble(),
+  ///   value: _cupertinoSliderValue.toDouble(),
   ///   min: 1.0,
   ///   max: 10.0,
   ///   divisions: 10,
   ///   onChanged: (double newValue) {
   ///     setState(() {
-  ///       _duelCommandment = newValue.round();
+  ///       _cupertinoSliderValue = newValue.round();
   ///     });
   ///   },
   ///   onChangeStart: (double startValue) {
@@ -148,13 +148,13 @@ class CupertinoSlider extends StatefulWidget {
   ///
   /// ```dart
   /// new CupertinoSlider(
-  ///   value: _duelCommandment.toDouble(),
+  ///   value: _cupertinoSliderValue.toDouble(),
   ///   min: 1.0,
   ///   max: 10.0,
   ///   divisions: 10,
   ///   onChanged: (double newValue) {
   ///     setState(() {
-  ///       _duelCommandment = newValue.round();
+  ///       _cupertinoSliderValue = newValue.round();
   ///     });
   ///   },
   ///   onChangeEnd: (double newValue) {
