@@ -19,18 +19,18 @@ class AnnotatedRegion<T> extends SingleChildRenderObjectWidget {
 
   @override
   RenderObject createRenderObject(BuildContext context) {
-    return new _AnnotatedRegionRenderObject<T>()
+    return new AnnotatedRegionRenderObject<T>()
       ..value = value;
   }
 
   @override
-  void updateRenderObject(BuildContext context, _AnnotatedRegionRenderObject<T> renderObject) {
+  void updateRenderObject(BuildContext context, AnnotatedRegionRenderObject<T> renderObject) {
     renderObject.value = value;
   }
 }
 
-// Render object for the [AnnotatedRegion].
-class _AnnotatedRegionRenderObject<T> extends RenderProxyBox {
+/// Render object for the [AnnotatedRegion].
+class AnnotatedRegionRenderObject<T> extends RenderProxyBox {
   /// The value to annotated in the layer tree.
   T value;
 
