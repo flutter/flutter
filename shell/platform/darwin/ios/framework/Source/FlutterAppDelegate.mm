@@ -3,28 +3,46 @@
 // found in the LICENSE file.
 
 #include "flutter/shell/platform/darwin/ios/framework/Headers/FlutterAppDelegate.h"
-#include "flutter/shell/platform/darwin/ios/framework/Headers/FlutterPluginAppLifeCycleDelegate.h"
 #include "flutter/shell/platform/darwin/ios/framework/Headers/FlutterViewController.h"
+#include "lib/fxl/logging.h"
+
+@interface FlutterAppDelegate ()
+@property(readonly, nonatomic) NSMutableArray* pluginDelegates;
+@property(readonly, nonatomic) NSMutableDictionary* pluginPublications;
+@end
+
+@interface FlutterAppDelegateRegistrar : NSObject <FlutterPluginRegistrar>
+- (instancetype)initWithPlugin:(NSString*)pluginKey appDelegate:(FlutterAppDelegate*)delegate;
+@end
 
 @implementation FlutterAppDelegate {
-  FlutterPluginAppLifeCycleDelegate* _lifeCycleDelegate;
+  UIBackgroundTaskIdentifier _debugBackgroundTask;
 }
 
 - (instancetype)init {
   if (self = [super init]) {
-    _lifeCycleDelegate = [[FlutterPluginAppLifeCycleDelegate alloc] init];
+    _pluginDelegates = [NSMutableArray new];
+    _pluginPublications = [NSMutableDictionary new];
   }
   return self;
 }
 
 - (void)dealloc {
-  [_lifeCycleDelegate release];
+  [_pluginDelegates release];
+  [_pluginPublications release];
   [super dealloc];
 }
 
 - (BOOL)application:(UIApplication*)application
     didFinishLaunchingWithOptions:(NSDictionary*)launchOptions {
-  return [_lifeCycleDelegate application:application didFinishLaunchingWithOptions:launchOptions];
+  for (id<FlutterPlugin> plugin in _pluginDelegates) {
+    if ([plugin respondsToSelector:_cmd]) {
+      if (![plugin application:application didFinishLaunchingWithOptions:launchOptions]) {
+        return NO;
+      }
+    }
+  }
+  return YES;
 }
 
 // Returns the key window's rootViewController, if it's a FlutterViewController.
@@ -47,118 +65,257 @@
 }
 
 - (void)applicationDidEnterBackground:(UIApplication*)application {
-  [_lifeCycleDelegate applicationDidEnterBackground:application];
+#if FLUTTER_RUNTIME_MODE == FLUTTER_RUNTIME_MODE_DEBUG
+  // The following keeps the Flutter session alive when the device screen locks
+  // in debug mode. It allows continued use of features like hot reload and
+  // taking screenshots once the device unlocks again.
+  //
+  // Note the name is not an identifier and multiple instances can exist.
+  _debugBackgroundTask = [application
+      beginBackgroundTaskWithName:@"Flutter debug task"
+                expirationHandler:^{
+                  FXL_LOG(WARNING)
+                      << "\nThe OS has terminated the Flutter debug connection for being "
+                         "inactive in the background for too long.\n\n"
+                         "There are no errors with your Flutter application.\n\n"
+                         "To reconnect, launch your application again via 'flutter run'";
+                }];
+#endif  // FLUTTER_RUNTIME_MODE == FLUTTER_RUNTIME_MODE_DEBUG
+  for (id<FlutterPlugin> plugin in _pluginDelegates) {
+    if ([plugin respondsToSelector:_cmd]) {
+      [plugin applicationDidEnterBackground:application];
+    }
+  }
 }
 
 - (void)applicationWillEnterForeground:(UIApplication*)application {
-  [_lifeCycleDelegate applicationWillEnterForeground:application];
+#if FLUTTER_RUNTIME_MODE == FLUTTER_RUNTIME_MODE_DEBUG
+  [application endBackgroundTask:_debugBackgroundTask];
+#endif  // FLUTTER_RUNTIME_MODE == FLUTTER_RUNTIME_MODE_DEBUG
+  for (id<FlutterPlugin> plugin in _pluginDelegates) {
+    if ([plugin respondsToSelector:_cmd]) {
+      [plugin applicationWillEnterForeground:application];
+    }
+  }
 }
 
 - (void)applicationWillResignActive:(UIApplication*)application {
-  [_lifeCycleDelegate applicationWillResignActive:application];
+  for (id<FlutterPlugin> plugin in _pluginDelegates) {
+    if ([plugin respondsToSelector:_cmd]) {
+      [plugin applicationWillResignActive:application];
+    }
+  }
 }
 
 - (void)applicationDidBecomeActive:(UIApplication*)application {
-  [_lifeCycleDelegate applicationDidBecomeActive:application];
+  for (id<FlutterPlugin> plugin in _pluginDelegates) {
+    if ([plugin respondsToSelector:_cmd]) {
+      [plugin applicationDidBecomeActive:application];
+    }
+  }
 }
 
 - (void)applicationWillTerminate:(UIApplication*)application {
-  [_lifeCycleDelegate applicationWillTerminate:application];
+  for (id<FlutterPlugin> plugin in _pluginDelegates) {
+    if ([plugin respondsToSelector:_cmd]) {
+      [plugin applicationWillTerminate:application];
+    }
+  }
 }
 
 - (void)application:(UIApplication*)application
     didRegisterUserNotificationSettings:(UIUserNotificationSettings*)notificationSettings {
-  [_lifeCycleDelegate application:application
-      didRegisterUserNotificationSettings:notificationSettings];
+  for (id<FlutterPlugin> plugin in _pluginDelegates) {
+    if ([plugin respondsToSelector:_cmd]) {
+      [plugin application:application didRegisterUserNotificationSettings:notificationSettings];
+    }
+  }
 }
 
 - (void)application:(UIApplication*)application
     didRegisterForRemoteNotificationsWithDeviceToken:(NSData*)deviceToken {
-  [_lifeCycleDelegate application:application
-      didRegisterForRemoteNotificationsWithDeviceToken:deviceToken];
+  for (id<FlutterPlugin> plugin in _pluginDelegates) {
+    if ([plugin respondsToSelector:_cmd]) {
+      [plugin application:application didRegisterForRemoteNotificationsWithDeviceToken:deviceToken];
+    }
+  }
 }
 
 - (void)application:(UIApplication*)application
     didReceiveRemoteNotification:(NSDictionary*)userInfo
           fetchCompletionHandler:(void (^)(UIBackgroundFetchResult result))completionHandler {
-  [_lifeCycleDelegate application:application
-      didReceiveRemoteNotification:userInfo
-            fetchCompletionHandler:completionHandler];
+  for (id<FlutterPlugin> plugin in _pluginDelegates) {
+    if ([plugin respondsToSelector:_cmd]) {
+      if ([plugin application:application
+              didReceiveRemoteNotification:userInfo
+                    fetchCompletionHandler:completionHandler]) {
+        return;
+      }
+    }
+  }
 }
 
 - (BOOL)application:(UIApplication*)application
             openURL:(NSURL*)url
             options:(NSDictionary<UIApplicationOpenURLOptionsKey, id>*)options {
-  return [_lifeCycleDelegate application:application openURL:url options:options];
+  for (id<FlutterPlugin> plugin in _pluginDelegates) {
+    if ([plugin respondsToSelector:_cmd]) {
+      if ([plugin application:application openURL:url options:options]) {
+        return YES;
+      }
+    }
+  }
+  return NO;
 }
 
 - (BOOL)application:(UIApplication*)application handleOpenURL:(NSURL*)url {
-  return [_lifeCycleDelegate application:application handleOpenURL:url];
+  for (id<FlutterPlugin> plugin in _pluginDelegates) {
+    if ([plugin respondsToSelector:_cmd]) {
+      if ([plugin application:application handleOpenURL:url]) {
+        return YES;
+      }
+    }
+  }
+  return NO;
 }
 
 - (BOOL)application:(UIApplication*)application
               openURL:(NSURL*)url
     sourceApplication:(NSString*)sourceApplication
            annotation:(id)annotation {
-  return [_lifeCycleDelegate application:application
-                                 openURL:url
-                       sourceApplication:sourceApplication
-                              annotation:annotation];
+  for (id<FlutterPlugin> plugin in _pluginDelegates) {
+    if ([plugin respondsToSelector:_cmd]) {
+      if ([plugin application:application
+                        openURL:url
+              sourceApplication:sourceApplication
+                     annotation:annotation]) {
+        return YES;
+      }
+    }
+  }
+  return NO;
 }
 
 - (void)application:(UIApplication*)application
     performActionForShortcutItem:(UIApplicationShortcutItem*)shortcutItem
                completionHandler:(void (^)(BOOL succeeded))completionHandler NS_AVAILABLE_IOS(9_0) {
-  [_lifeCycleDelegate application:application
-      performActionForShortcutItem:shortcutItem
-                 completionHandler:completionHandler];
+  for (id<FlutterPlugin> plugin in _pluginDelegates) {
+    if ([plugin respondsToSelector:_cmd]) {
+      if ([plugin application:application
+              performActionForShortcutItem:shortcutItem
+                         completionHandler:completionHandler]) {
+        return;
+      }
+    }
+  }
 }
 
 - (void)application:(UIApplication*)application
     handleEventsForBackgroundURLSession:(nonnull NSString*)identifier
                       completionHandler:(nonnull void (^)())completionHandler {
-  [_lifeCycleDelegate application:application
-      handleEventsForBackgroundURLSession:identifier
-                        completionHandler:completionHandler];
+  for (id<FlutterPlugin> plugin in _pluginDelegates) {
+    if ([plugin respondsToSelector:_cmd]) {
+      if ([plugin application:application
+              handleEventsForBackgroundURLSession:identifier
+                                completionHandler:completionHandler]) {
+        return;
+      }
+    }
+  }
 }
 
 - (void)application:(UIApplication*)application
     performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))completionHandler {
-  [_lifeCycleDelegate application:application performFetchWithCompletionHandler:completionHandler];
+  for (id<FlutterPlugin> plugin in _pluginDelegates) {
+    if ([plugin respondsToSelector:_cmd]) {
+      if ([plugin application:application performFetchWithCompletionHandler:completionHandler]) {
+        return;
+      }
+    }
+  }
 }
 
-#pragma mark - FlutterPluginRegistry methods. All delegating to the rootViewController
-
-- (NSObject<FlutterPluginRegistrar>*)registrarForPlugin:(NSString*)pluginKey {
+// TODO(xster): move when doing https://github.com/flutter/flutter/issues/3671.
+- (NSObject<FlutterBinaryMessenger>*)binaryMessenger {
   UIViewController* rootViewController = _window.rootViewController;
-  if ([rootViewController isKindOfClass:[FlutterViewController class]]) {
-    return
-        [[(FlutterViewController*)rootViewController pluginRegistry] registrarForPlugin:pluginKey];
+  if ([rootViewController conformsToProtocol:@protocol(FlutterBinaryMessenger)]) {
+    return (NSObject<FlutterBinaryMessenger>*)rootViewController;
   }
   return nil;
+}
+
+- (NSObject<FlutterTextureRegistry>*)textures {
+  UIViewController* rootViewController = _window.rootViewController;
+  if ([rootViewController conformsToProtocol:@protocol(FlutterTextureRegistry)]) {
+    return (NSObject<FlutterTextureRegistry>*)rootViewController;
+  }
+  return nil;
+}
+
+- (NSObject<FlutterPluginRegistrar>*)registrarForPlugin:(NSString*)pluginKey {
+  NSAssert(self.pluginPublications[pluginKey] == nil, @"Duplicate plugin key: %@", pluginKey);
+  self.pluginPublications[pluginKey] = [NSNull null];
+  return
+      [[[FlutterAppDelegateRegistrar alloc] initWithPlugin:pluginKey appDelegate:self] autorelease];
 }
 
 - (BOOL)hasPlugin:(NSString*)pluginKey {
-  UIViewController* rootViewController = _window.rootViewController;
-  if ([rootViewController isKindOfClass:[FlutterViewController class]]) {
-    return [[(FlutterViewController*)rootViewController pluginRegistry] hasPlugin:pluginKey];
-  }
-  return nil;
+  return _pluginPublications[pluginKey] != nil;
 }
 
 - (NSObject*)valuePublishedByPlugin:(NSString*)pluginKey {
-  UIViewController* rootViewController = _window.rootViewController;
-  if ([rootViewController isKindOfClass:[FlutterViewController class]]) {
-    return [[(FlutterViewController*)rootViewController pluginRegistry]
-        valuePublishedByPlugin:pluginKey];
-  }
-  return nil;
+  return _pluginPublications[pluginKey];
+}
+@end
+
+@implementation FlutterAppDelegateRegistrar {
+  NSString* _pluginKey;
+  FlutterAppDelegate* _appDelegate;
 }
 
-#pragma mark - FlutterAppLifeCycleProvider methods
+- (instancetype)initWithPlugin:(NSString*)pluginKey appDelegate:(FlutterAppDelegate*)appDelegate {
+  self = [super init];
+  NSAssert(self, @"Super init cannot be nil");
+  _pluginKey = [pluginKey retain];
+  _appDelegate = [appDelegate retain];
+  return self;
+}
 
-- (void)addApplicationLifeCycleDelegate:(NSObject<FlutterPlugin>*)delegate {
-  [_lifeCycleDelegate addDelegate:delegate];
+- (void)dealloc {
+  [_pluginKey release];
+  [_appDelegate release];
+  [super dealloc];
+}
+
+- (NSObject<FlutterBinaryMessenger>*)messenger {
+  return [_appDelegate binaryMessenger];
+}
+
+- (NSObject<FlutterTextureRegistry>*)textures {
+  return [_appDelegate textures];
+}
+
+- (void)publish:(NSObject*)value {
+  _appDelegate.pluginPublications[_pluginKey] = value;
+}
+
+- (void)addMethodCallDelegate:(NSObject<FlutterPlugin>*)delegate
+                      channel:(FlutterMethodChannel*)channel {
+  [channel setMethodCallHandler:^(FlutterMethodCall* call, FlutterResult result) {
+    [delegate handleMethodCall:call result:result];
+  }];
+}
+
+- (void)addApplicationDelegate:(NSObject<FlutterPlugin>*)delegate {
+  [_appDelegate.pluginDelegates addObject:delegate];
+}
+
+- (NSString*)lookupKeyForAsset:(NSString*)asset {
+  return [FlutterDartProject lookupKeyForAsset:asset];
+}
+
+- (NSString*)lookupKeyForAsset:(NSString*)asset fromPackage:(NSString*)package {
+  return [FlutterDartProject lookupKeyForAsset:asset fromPackage:package];
 }
 
 @end
