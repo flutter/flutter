@@ -905,11 +905,7 @@ class VM extends ServiceObjectOwner {
     if (!isFlutterEngine)
       return;
     _viewCache.clear();
-    for (Isolate isolate in isolates) {
-      await vmService.vm.invokeRpc('_flutter.listViews',
-          timeout: kLongRequestTimeout,
-          params: <String, dynamic> {'isolateId': isolate.id});
-    }
+    await vmService.vm.invokeRpc('_flutter.listViews', timeout: kLongRequestTimeout);
   }
 
   Iterable<FlutterView> get views => _viewCache.values;
@@ -1397,7 +1393,6 @@ class FlutterView extends ServiceObject {
     assert(assetsDirectory != null);
     await owner.vmService.vm.invokeRpc('_flutter.setAssetBundlePath',
         params: <String, dynamic>{
-          'isolateId': _uiIsolate.id,
           'viewId': id,
           'assetDirectory': assetsDirectory.toFilePath(windows: false)
         });
@@ -1406,8 +1401,7 @@ class FlutterView extends ServiceObject {
   bool get hasIsolate => _uiIsolate != null;
 
   Future<Null> flushUIThreadTasks() async {
-    await owner.vm.invokeRpcRaw('_flutter.flushUIThreadTasks',
-      params: <String, dynamic>{'isolateId': _uiIsolate.id});
+    await owner.vm.invokeRpcRaw('_flutter.flushUIThreadTasks');
   }
 
   @override
