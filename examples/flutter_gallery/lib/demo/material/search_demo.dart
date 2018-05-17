@@ -264,7 +264,7 @@ class _SuggestionList extends StatelessWidget {
       itemBuilder: (BuildContext context, int i) {
         final String suggestion = suggestions[i];
         return new ListTile(
-          leading: query.isEmpty ? const Icon(Icons.history) : new Container(),
+          leading: query.isEmpty ? const Icon(Icons.history) : const Icon(null),
           title: new RichText(
             text: new TextSpan(
               text: suggestion.substring(0, query.length),
