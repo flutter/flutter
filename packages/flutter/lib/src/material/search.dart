@@ -50,6 +50,7 @@ Future<T> showSearch<T>({
   assert(delegate._result == null || delegate._result.isCompleted);
   delegate._result = new Completer<T>();
   delegate.query = query ?? delegate.query;
+  delegate._currentBody.value = SearchBody.suggestions;
   Navigator.of(context).push(new _SearchPageRoute<T>(
     delegate: delegate,
   ));
@@ -161,7 +162,6 @@ abstract class SearchDelegate<T> {
     _textEditingController.text = value;
   }
 
-
   /// Transition to show search results.
   ///
   /// If the user taps on a suggestion provided by [buildSuggestions] the
@@ -171,16 +171,12 @@ abstract class SearchDelegate<T> {
   ///
   /// See also:
   ///
-  ///  * [isShowingSuggestions] to check if the search suggestions are currently
-  ///    shown.
-  ///  * [isShowingResults] to check if the search results are currently shown.
   ///  * [showSuggestions] to show the search suggestions again.
+  ///  * [currentBody] to learn whether the results or the suggestions are
+  ///    currently shown.
   void showResults(BuildContext context) {
-    assert(isShowingSuggestions(context));
     focusNode.unfocus();
-    Navigator.of(context).pushReplacement(new _ResultsPageRoute<T>(
-      delegate: this,
-    ));
+    _currentBody.value = SearchBody.results;
   }
 
   /// Transition to show the search suggestions and places the input focus
@@ -191,49 +187,34 @@ abstract class SearchDelegate<T> {
   ///
   /// See also:
   ///
-  ///  * [isShowingSuggestions] to check if the search suggestions are currently
-  ///    shown.
-  ///  * [isShowingResults] to check if the search results are currently shown.
   ///  * [showResults] to show the search results.
+  ///  * [currentBody] to learn whether the results or the suggestions are
+  ///    currently shown.
   void showSuggestions(BuildContext context) {
-    assert(isShowingResults(context));
-    Navigator.of(context).pushReplacement(new _SearchPageRoute<T>(
-      delegate: this,
-      useProxyAnimationOnEntry: false,
-    ));
+    FocusScope.of(context).requestFocus(focusNode);
+    _currentBody.value = SearchBody.suggestions;
   }
+
+  /// The body that is currently shown under the [AppBar] in the search page.
+  ///
+  /// Will be null if the search page is currently not shown.
+  ///
+  /// See also:
+  ///
+  ///  * [showResults] to show the search results.
+  ///  * [showSuggestions] to show the search suggestions.
+  SearchBody get currentBody => _currentBody.value;
 
   /// Closes the search page and returns to the underlying route.
   ///
   /// The value provided for `result` is used as the return value of the call
   /// to [showSearch] that launched the search initially.
   void close(BuildContext context, T result) {
-    assert(isShowingResults(context) || isShowingSuggestions(context));
+    _currentBody.value = null;
     focusNode.unfocus();
     _result.complete(result);
     Navigator.of(context).pop(result);
   }
-
-  /// Whether the search page is currently showing the suggestions (from
-  /// [buildSuggestions]) in the body below the [Appbar].
-  ///
-  /// See also:
-  ///
-  ///  * [isShowingResults] to check if the search results are currently shown.
-  ///  * [showSuggestions] to show the search suggestions again.
-  ///  * [showResults] to show the search results.
-  bool isShowingSuggestions(BuildContext context) => ModalRoute.of(context) is _SearchPageRoute;
-
-  /// Whether the search search page is currently showig the search results
-  /// (from [buildResults]) in the body below the [Appbar].
-  ///
-  /// See also:
-  ///
-  ///  * [isShowingSuggestions] to check if the search suggestions are currently
-  ///    shown.
-  ///  * [showSuggestions] to show the search suggestions again.
-  ///  * [showResults] to show the search results.
-  bool isShowingResults(BuildContext context) => ModalRoute.of(context) is _ResultsPageRoute;
 
   /// [Animation] triggered while the search pages fades in or out.
   ///
@@ -243,37 +224,39 @@ abstract class SearchDelegate<T> {
   Animation<double> get transitionAnimation => _proxyAnimation;
 
   /// [FocusNode] used by the text field showing the current search query.
-  ///
-  /// It can be used to unfocus the text field before transitioning to the
-  /// results page.
   final FocusNode focusNode = new FocusNode();
 
   final TextEditingController _textEditingController = new TextEditingController();
 
   final ProxyAnimation _proxyAnimation = new ProxyAnimation(kAlwaysDismissedAnimation);
 
+  final ValueNotifier<SearchBody> _currentBody = new ValueNotifier<SearchBody>(null);
+
   Completer<T> _result;
+
 }
 
-/// Base class for routes within the search experience.
-///
-/// [_SearchOverlayPageRoute] are cross-faded in and can trigger animations
-/// during the route transition in the new and old route by setting
-/// [SearchDelegate.transitionAnimation]. The latter is for example used to
-/// animate the hamburger menu icon of an [AppBar] into a back arrow while the
-/// search overlay fades in.
-abstract class _SearchOverlayPageRoute<T> extends PageRoute<void> {
-  _SearchOverlayPageRoute({
+/// Describes the body that is currently shown under the [AppBar] in the
+/// search page.
+enum SearchBody {
+  /// Suggested queries are shown in the body.
+  ///
+  /// The suggested queries are generated by [SearchDelegate.buildSuggestions].
+  suggestions,
+
+  /// Search results are currently shown in the body.
+  ///
+  /// The search results are generated by [SearchDelegate.buildResults].
+  results,
+}
+
+
+class _SearchPageRoute<T> extends PageRoute<void> {
+  _SearchPageRoute({
     @required this.delegate,
-    this.triggerAnimationsInRoutesOnEntry: true,
-  }) : assert(delegate != null), assert(triggerAnimationsInRoutesOnEntry != null);
+  }) : assert(delegate != null);
 
-  /// The [SearchDelegate] defining the search experience owning this route.
   final SearchDelegate<T> delegate;
-
-  /// Whether [delegate.animation] should be triggered while this route fades
-  /// in.
-  final bool triggerAnimationsInRoutesOnEntry;
 
   @override
   Color get barrierColor => null;
@@ -303,46 +286,16 @@ abstract class _SearchOverlayPageRoute<T> extends PageRoute<void> {
   @override
   Animation<double> createAnimation() {
     final Animation<double> animation = super.createAnimation();
-    if (triggerAnimationsInRoutesOnEntry) {
-      delegate._proxyAnimation.parent = animation;
-    } else {
-      Function listener;
-      listener = (AnimationStatus status) {
-        switch (status) {
-          case AnimationStatus.dismissed:
-          case AnimationStatus.forward:
-            break;
-          case AnimationStatus.reverse:
-          case AnimationStatus.completed:
-            animation.removeStatusListener(listener);
-            delegate._proxyAnimation.parent = animation;
-            break;
-        }
-      };
-      animation.addStatusListener(listener);
-    }
+    delegate._proxyAnimation.parent = animation;
     return animation;
   }
-}
-
-// SEARCH PAGE
-
-/// Route to switch to the search page of the search experience.
-class _SearchPageRoute<T> extends _SearchOverlayPageRoute<T> {
-  _SearchPageRoute({
-    bool useProxyAnimationOnEntry: true,
-    SearchDelegate<T> delegate,
-  }) : super(
-          triggerAnimationsInRoutesOnEntry: useProxyAnimationOnEntry,
-          delegate: delegate,
-        );
 
   @override
   Widget buildPage(
-    BuildContext context,
-    Animation<double> animation,
-    Animation<double> secondaryAnimation,
-  ) {
+      BuildContext context,
+      Animation<double> animation,
+      Animation<double> secondaryAnimation,
+      ) {
     return new _SearchPage<T>(
       delegate: delegate,
       animation: animation,
@@ -369,6 +322,8 @@ class _SearchPageState<T> extends State<_SearchPage<T>> {
     super.initState();
     _controller.addListener(_onQueryChanged);
     widget.animation.addStatusListener(_onAnimationStatusChanged);
+    widget.delegate._currentBody.addListener(_onSearchBodyChanged);
+    widget.delegate.focusNode.addListener(_onFocusChanged);
   }
 
   @override
@@ -376,6 +331,8 @@ class _SearchPageState<T> extends State<_SearchPage<T>> {
     super.dispose();
     _controller.removeListener(_onQueryChanged);
     widget.animation.removeStatusListener(_onAnimationStatusChanged);
+    widget.delegate._currentBody.removeListener(_onSearchBodyChanged);
+    widget.delegate.focusNode.removeListener(_onFocusChanged);
   }
 
   void _onAnimationStatusChanged(AnimationStatus status) {
@@ -383,7 +340,15 @@ class _SearchPageState<T> extends State<_SearchPage<T>> {
       return;
     }
     widget.animation.removeStatusListener(_onAnimationStatusChanged);
-    FocusScope.of(context).requestFocus(widget.delegate.focusNode);
+    if (widget.delegate.currentBody == SearchBody.suggestions) {
+      FocusScope.of(context).requestFocus(widget.delegate.focusNode);
+    }
+  }
+
+  void _onFocusChanged() {
+    if (widget.delegate.focusNode.hasFocus && widget.delegate.currentBody != SearchBody.suggestions) {
+      widget.delegate.showSuggestions(context);
+    }
   }
 
   void _onQueryChanged() {
@@ -392,9 +357,32 @@ class _SearchPageState<T> extends State<_SearchPage<T>> {
     });
   }
 
+  void _onSearchBodyChanged() {
+    setState(() {
+      // rebuild ourselves because search body changed.
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = widget.delegate.appBarTheme(context);
+    Widget body;
+    switch(widget.delegate.currentBody) {
+      case SearchBody.suggestions:
+        body = new Container(
+          key: const ValueKey<SearchBody>(SearchBody.suggestions),
+          child: widget.delegate.buildSuggestions(context),
+        );
+        break;
+      case SearchBody.results:
+        body = new Container(
+          key: const ValueKey<SearchBody>(SearchBody.results),
+          child: widget.delegate.buildResults(context),
+        );
+        break;
+    }
+
+
     return new Scaffold(
       appBar: new AppBar(
         backgroundColor: theme.primaryColor,
@@ -417,67 +405,12 @@ class _SearchPageState<T> extends State<_SearchPage<T>> {
         ),
         actions: widget.delegate.buildActions(context),
       ),
-      body: widget.delegate.buildSuggestions(context),
+      body: new AnimatedSwitcher(
+        duration: const Duration(milliseconds: 300),
+        child: body,
+      ),
     );
   }
 
   TextEditingController get _controller => widget.delegate._textEditingController;
-}
-
-// RESULTS PAGE
-
-/// Route to switch to the results page of the search experience.
-class _ResultsPageRoute<T> extends _SearchOverlayPageRoute<T> {
-  _ResultsPageRoute({
-    SearchDelegate<T> delegate,
-  }) : super(delegate: delegate, triggerAnimationsInRoutesOnEntry: false);
-
-  @override
-  Widget buildPage(
-    BuildContext context,
-    Animation<double> animation,
-    Animation<double> secondaryAnimation,
-  ) {
-    return new _ResultsPage<T>(
-      delegate: delegate,
-    );
-  }
-}
-
-class _ResultsPage<T> extends StatelessWidget {
-  const _ResultsPage({
-    this.delegate,
-  });
-
-  final SearchDelegate<T> delegate;
-
-  @override
-  Widget build(BuildContext context) {
-    final ThemeData theme = delegate.appBarTheme(context);
-    return new Scaffold(
-      appBar: new AppBar(
-        backgroundColor: theme.primaryColor,
-        iconTheme: theme.primaryIconTheme,
-        textTheme: theme.primaryTextTheme,
-        brightness: theme.primaryColorBrightness,
-        leading: delegate.buildLeading(context),
-        centerTitle: false,
-        title: new GestureDetector(
-          // TODO(goderbauer): find a better way then Row-Expanded to make the GestureDetector as wide as the appbar allows.
-          child: new Row(
-            children: <Widget>[
-              new Expanded(
-                child: new Text(delegate.query),
-              ),
-            ],
-          ),
-          onTap: () {
-            delegate.showSuggestions(context);
-          },
-        ),
-        actions: delegate.buildActions(context),
-      ),
-      body: delegate.buildResults(context),
-    );
-  }
 }

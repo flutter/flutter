@@ -153,7 +153,7 @@ class _SearchDemoSearchDelegate extends SearchDelegate<int> {
 
     return new _SuggestionList(
       query: query,
-      suggestions: suggestions.map((int i) => '$i'),
+      suggestions: suggestions.map((int i) => '$i').toList(),
       onSelected: (String suggestion) {
         query = suggestion;
         showResults(context);
@@ -210,9 +210,7 @@ class _SearchDemoSearchDelegate extends SearchDelegate<int> {
               icon: const Icon(Icons.clear),
               onPressed: () {
                 query = '';
-                if (isShowingResults(context)) {
-                  showSuggestions(context);
-                }
+                showSuggestions(context);
               },
             )
     ];
@@ -254,15 +252,17 @@ class _ResultCard extends StatelessWidget {
 class _SuggestionList extends StatelessWidget {
   const _SuggestionList({this.suggestions, this.query, this.onSelected});
 
-  final Iterable<String> suggestions;
+  final List<String> suggestions;
   final String query;
   final ValueChanged<String> onSelected;
 
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
-    return new ListView(
-      children: suggestions.map((String suggestion) {
+    return new ListView.builder(
+      itemCount: suggestions.length,
+      itemBuilder: (BuildContext context, int i) {
+        final String suggestion = suggestions[i];
         return new ListTile(
           leading: query.isEmpty ? const Icon(Icons.history) : new Container(),
           title: new RichText(
@@ -281,7 +281,7 @@ class _SuggestionList extends StatelessWidget {
             onSelected(suggestion);
           },
         );
-      }).toList(),
+      },
     );
   }
 }
