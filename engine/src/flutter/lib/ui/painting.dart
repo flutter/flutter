@@ -1792,6 +1792,20 @@ class Path extends NativeFieldWrapperClass2 {
   Path _transform(Float64List matrix4) native 'Path_transform';
 
   /// Computes the bounding rectangle for this path.
+  /// 
+  /// A path containing only axis-aligned points on the same straight line will
+  /// have no area, and therefore `Rect.isEmpty` will return true for such a
+  /// path. Consider checking `rect.width + rect.height > 0.0` instead, or
+  /// using the [computeMetrics] API to check the path length.
+  /// 
+  /// For many more elaborate paths, the bounds may be inaccurate.  For example,
+  /// when a path contains a circle, the points used to compute the bounds are
+  /// the circle's implied control points, which form a square around the circle;
+  /// if the circle has a transformation applied using [transform] then that 
+  /// square is rotated, and the (axis-aligned, non-rotated) bounding box
+  /// therefore ends up grossly overestimating the actual area covered by the
+  /// circle.
+  // see https://skia.org/user/api/SkPath_Reference#SkPath_getBounds
   Rect getBounds() {
     final Float32List rect = _getBounds();
     return new Rect.fromLTRB(rect[0], rect[1], rect[2], rect[3]);
