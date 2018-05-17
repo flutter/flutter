@@ -22,9 +22,9 @@ class ColorDemoHome extends StatelessWidget {
       body: new ListView(
         padding: const EdgeInsets.all(5.0),
         children: <Widget>[
-          new Image.network('https://flutter.github.io/assets-for-api-docs/tests/colors/gbr.png'),
-          new Image.network('https://flutter.github.io/assets-for-api-docs/tests/colors/tf.png'),
-          new Image.network('https://flutter.github.io/assets-for-api-docs/tests/colors/wide-gamut.png'),
+          new Image.network('https://flutter.github.io/assets-for-api-docs/assets/tests/colors/gbr.png'),
+          new Image.network('https://flutter.github.io/assets-for-api-docs/assets/tests/colors/tf.png'),
+          new Image.network('https://flutter.github.io/assets-for-api-docs/assets/tests/colors/wide-gamut.png'),
           const GradientRow(leftColor: const Color(0xFFFF0000), rightColor: const Color(0xFF00FF00)),
           const GradientRow(leftColor: const Color(0xFF0000FF), rightColor: const Color(0xFFFFFF00)),
           const GradientRow(leftColor: const Color(0xFFFF0000), rightColor: const Color(0xFF0000FF)),

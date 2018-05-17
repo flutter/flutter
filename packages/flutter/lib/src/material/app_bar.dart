@@ -79,7 +79,7 @@ class _ToolbarContainerLayout extends SingleChildLayoutDelegate {
 ///
 /// ![The leading widget is in the top left, the actions are in the top right,
 /// the title is between them. The bottom is, naturally, at the bottom, and the
-/// flexibleSpace is behind all of them.](https://flutter.github.io/assets-for-api-docs/material/app_bar.png)
+/// flexibleSpace is behind all of them.](https://flutter.github.io/assets-for-api-docs/assets/material/app_bar.png)
 ///
 /// If the [leading] widget is omitted, but the [AppBar] is in a [Scaffold] with
 /// a [Drawer], then a button will be inserted to open the drawer. Otherwise, if
@@ -345,17 +345,19 @@ class _AppBarState extends State<AppBar> {
     TextStyle centerStyle = widget.textTheme?.title ?? themeData.primaryTextTheme.title;
     TextStyle sideStyle = widget.textTheme?.body1 ?? themeData.primaryTextTheme.body1;
 
-    final Brightness brightness = widget.brightness ?? themeData.primaryColorBrightness;
-    // TODO(jonahwilliams): remove once we have platform themes.
-    switch (defaultTargetPlatform) {
-      case TargetPlatform.iOS:
-        SystemChrome.setSystemUIOverlayStyle(brightness == Brightness.dark
-          ? SystemUiOverlayStyle.light
-          : SystemUiOverlayStyle.dark);
-        break;
-      case TargetPlatform.android:
-      case TargetPlatform.fuchsia:
-        SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle.dark);
+    if (parentRoute?.isCurrent ?? true) {
+      final Brightness brightness = widget.brightness ?? themeData.primaryColorBrightness;
+      // TODO(jonahwilliams): remove once we have platform themes.
+      switch (defaultTargetPlatform) {
+        case TargetPlatform.iOS:
+          SystemChrome.setSystemUIOverlayStyle(brightness == Brightness.dark
+              ? SystemUiOverlayStyle.light
+              : SystemUiOverlayStyle.dark);
+          break;
+        case TargetPlatform.android:
+        case TargetPlatform.fuchsia:
+          SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle.dark);
+      }
     }
 
     if (widget.toolbarOpacity != 1.0) {

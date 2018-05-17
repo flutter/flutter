@@ -659,7 +659,7 @@ void main() {
     testUsingContext('returns failure if buildSharedLibrary is true but no NDK is found', () async {
       final String outputPath = fs.path.join('build', 'foo');
 
-      when(mockAndroidSdk.ndkCompiler).thenReturn(null);
+      when(mockAndroidSdk.ndk).thenReturn(null);
 
       final int genSnapshotExitCode = await snapshotter.build(
         platform: TargetPlatform.android_arm,

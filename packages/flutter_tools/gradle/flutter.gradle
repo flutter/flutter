@@ -256,7 +256,7 @@ class FlutterPlugin implements Plugin<Project> {
             target = project.property('target')
         }
 
-        Boolean previewDart2Value = false
+        Boolean previewDart2Value = true
         if (project.hasProperty('preview-dart-2')) {
             previewDart2Value = project.property('preview-dart-2').toBoolean()
         }
@@ -457,6 +457,9 @@ abstract class BaseFlutterTask extends DefaultTask {
             }
             if (trackWidgetCreation) {
                 args "--track-widget-creation"
+            }
+            if (extraFrontEndOptions != null) {
+                args "--extra-front-end-options", "${extraFrontEndOptions}"
             }
             if (buildMode != "debug") {
                 args "--precompiled"

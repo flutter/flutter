@@ -206,7 +206,7 @@ void main() {
       verifyNever(mockProcessManager.run(
         argThat(containsAllInOrder(<String>['pod', 'install'])),
         workingDirectory: any,
-        environment: typed<Map<String, String>>(any, named: 'environment'),
+        environment: anyNamed('environment'),
       ));
       expect(testLogger.errorText, contains('not installed'));
       expect(testLogger.errorText, contains('Skipping pod install'));
@@ -228,7 +228,7 @@ void main() {
         verifyNever(mockProcessManager.run(
           argThat(containsAllInOrder(<String>['pod', 'install'])),
           workingDirectory: any,
-          environment: typed<Map<String, String>>(any, named: 'environment'),
+          environment: anyNamed('environment'),
         ));
       }
     }, overrides: <Type, Generator>{
@@ -439,7 +439,7 @@ Note: as of CocoaPods 1.0, `pod repo update` does not happen on `pod install` by
       verifyNever(mockProcessManager.run(
         argThat(containsAllInOrder(<String>['pod', 'install'])),
         workingDirectory: any,
-        environment: typed<Map<String, String>>(any, named: 'environment'),
+        environment: anyNamed('environment'),
       ));
     }, overrides: <Type, Generator>{
       FileSystem: () => fs,

@@ -4,7 +4,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:flutter_gallery/main.dart' as flutter_gallery_main;
+import 'package:flutter_gallery/gallery/app.dart' show GalleryApp;
 
 void main() {
   final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized();
@@ -12,7 +12,9 @@ void main() {
     binding.framePolicy = LiveTestWidgetsFlutterBindingFramePolicy.fullyLive;
 
   testWidgets('Flutter Gallery app simple smoke test', (WidgetTester tester) async {
-    flutter_gallery_main.main(); // builds the app and schedules a frame but doesn't trigger one
+    await tester.pumpWidget(
+      const GalleryApp(testMode: true) // builds the app and schedules a frame but doesn't trigger one
+    );
     await tester.pump(); // see https://github.com/flutter/flutter/issues/1865
     await tester.pump(); // triggers a frame
 
