@@ -109,22 +109,18 @@ BuildApp() {
     preview_dart_2_flag="--no-preview-dart-2"
   fi
 
-  if [[ "$CURRENT_ARCH" != "x86_64" ]]; then
-    local aot_flags=""
-    if [[ "$build_mode" == "debug" ]]; then
-      aot_flags="--interpreter --debug"
-    else
-      aot_flags="--${build_mode}"
-    fi
-
+  if [[ "${build_mode}" != "debug" ]]; then
     StreamOutput " ├─Building Dart code..."
+    # Transform ARCHS to comma-separated list of target architectures.
+    local archs="${ARCHS// /,}"
     RunCommand "${FLUTTER_ROOT}/bin/flutter" --suppress-analytics           \
       ${verbose_flag}                                                       \
       build aot                                                             \
       --output-dir="${build_dir}/aot"                                       \
       --target-platform=ios                                                 \
       --target="${target_path}"                                             \
-      ${aot_flags}                                                          \
+      --${build_mode}                                                       \
+      --ios-arch="${archs}"                                                 \
       ${local_engine_flag}                                                  \
       ${preview_dart_2_flag}
 
@@ -137,7 +133,16 @@ BuildApp() {
     RunCommand cp -r -- "${build_dir}/aot/App.framework" "${derived_dir}"
   else
     RunCommand mkdir -p -- "${derived_dir}/App.framework"
+
+    # Build stub for all requested architectures.
+    local arch_flags=""
+    read -r -a archs <<< "$ARCHS"
+    for arch in "${archs[@]}"; do
+      arch_flags="${arch_flags}-arch $arch "
+    done
+
     RunCommand eval "$(echo "static const int Moo = 88;" | xcrun clang -x c \
+        ${arch_flags} \
         -dynamiclib \
         -Xlinker -rpath -Xlinker '@executable_path/Frameworks' \
         -Xlinker -rpath -Xlinker '@loader_path/Frameworks' \
@@ -190,7 +195,8 @@ GetFrameworkExecutablePath() {
 LipoExecutable() {
   local executable="$1"
   shift
-  local archs=("$@")
+  # Split $@ into an array.
+  read -r -a archs <<< "$@"
 
   # Extract architecture-specific framework executables.
   local all_executables=()
@@ -231,11 +237,10 @@ LipoExecutable() {
 ThinFramework() {
   local framework_dir="$1"
   shift
-  local archs=("$@")
 
   local plist_path="${framework_dir}/Info.plist"
   local executable="$(GetFrameworkExecutablePath "${framework_dir}")"
-  LipoExecutable "${executable}" "${archs[@]}"
+  LipoExecutable "${executable}" "$@"
 }
 
 ThinAppFrameworks() {

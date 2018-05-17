@@ -34,5 +34,9 @@
   "modalBarrierDismissLabel": "Avvis",
   "signedInLabel": "Pålogget",
   "hideAccountsLabel": "Skjul kontoer",
-  "showAccountsLabel": "Vis kontoer"
+  "showAccountsLabel": "Vis kontoer",
+  "drawerLabel": "Navigasjonsmeny",
+  "popupMenuLabel": "Forgrunnsmeny",
+  "dialogLabel": "Dialogboks",
+  "alertDialogLabel": "Varsling"
 }

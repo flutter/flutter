@@ -4,7 +4,6 @@
 
 import 'dart:ui' show ImageFilter;
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
 import 'colors.dart';
@@ -123,8 +122,8 @@ class CupertinoTabBar extends StatelessWidget implements PreferredSizeWidget {
             style: new TextStyle(
               fontFamily: '.SF UI Text',
               fontSize: 10.0,
-              letterSpacing: -0.24,
-              fontWeight: FontWeight.w500,
+              letterSpacing: 0.1,
+              fontWeight: FontWeight.w400,
               color: inactiveColor,
             ),
             child: new Padding(

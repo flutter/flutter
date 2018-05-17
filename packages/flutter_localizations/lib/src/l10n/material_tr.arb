@@ -34,5 +34,9 @@
   "signedInLabel": "Oturum açıldı",
   "hideAccountsLabel": "Hesapları gizle",
   "showAccountsLabel": "Hesapları göster",
-  "modalBarrierDismissLabel": "Kapat"
+  "modalBarrierDismissLabel": "Kapat",
+  "drawerLabel": "Gezinme menüsü",
+  "popupMenuLabel": "Popup menü",
+  "dialogLabel": "İletişim kutusu",
+  "alertDialogLabel": "Alarm"
 }

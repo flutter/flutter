@@ -5,7 +5,6 @@
 import 'dart:async';
 import 'dart:math' as math;
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
@@ -641,30 +640,39 @@ class _MonthPickerState extends State<MonthPicker> {
       height: _kMaxDayPickerHeight,
       child: new Stack(
         children: <Widget>[
-          new PageView.builder(
-            key: new ValueKey<DateTime>(widget.selectedDate),
-            controller: _dayPickerController,
-            scrollDirection: Axis.horizontal,
-            itemCount: _monthDelta(widget.firstDate, widget.lastDate) + 1,
-            itemBuilder: _buildItems,
-            onPageChanged: _handleMonthPageChanged,
+          new Semantics(
+            sortKey: _MonthPickerSortKey.calendar,
+            child: new PageView.builder(
+              key: new ValueKey<DateTime>(widget.selectedDate),
+              controller: _dayPickerController,
+              scrollDirection: Axis.horizontal,
+              itemCount: _monthDelta(widget.firstDate, widget.lastDate) + 1,
+              itemBuilder: _buildItems,
+              onPageChanged: _handleMonthPageChanged,
+            ),
           ),
           new PositionedDirectional(
             top: 0.0,
             start: 8.0,
-            child: new IconButton(
-              icon: const Icon(Icons.chevron_left),
-              tooltip: _isDisplayingFirstMonth ? null : '${localizations.previousMonthTooltip} ${localizations.formatMonthYear(_previousMonthDate)}',
-              onPressed: _isDisplayingFirstMonth ? null : _handlePreviousMonth,
+            child: new Semantics(
+              sortKey: _MonthPickerSortKey.previousMonth,
+              child: new IconButton(
+                icon: const Icon(Icons.chevron_left),
+                tooltip: _isDisplayingFirstMonth ? null : '${localizations.previousMonthTooltip} ${localizations.formatMonthYear(_previousMonthDate)}',
+                onPressed: _isDisplayingFirstMonth ? null : _handlePreviousMonth,
+              ),
             ),
           ),
           new PositionedDirectional(
             top: 0.0,
             end: 8.0,
-            child: new IconButton(
-              icon: const Icon(Icons.chevron_right),
-              tooltip: _isDisplayingLastMonth ? null : '${localizations.nextMonthTooltip} ${localizations.formatMonthYear(_nextMonthDate)}',
-              onPressed: _isDisplayingLastMonth ? null : _handleNextMonth,
+            child: new Semantics(
+              sortKey: _MonthPickerSortKey.nextMonth,
+              child: new IconButton(
+                icon: const Icon(Icons.chevron_right),
+                tooltip: _isDisplayingLastMonth ? null : '${localizations.nextMonthTooltip} ${localizations.formatMonthYear(_nextMonthDate)}',
+                onPressed: _isDisplayingLastMonth ? null : _handleNextMonth,
+              ),
             ),
           ),
         ],
@@ -678,6 +686,16 @@ class _MonthPickerState extends State<MonthPicker> {
     _dayPickerController?.dispose();
     super.dispose();
   }
+}
+
+// Defines semantic traversal order of the top-level widgets inside the month
+// picker.
+class _MonthPickerSortKey extends OrdinalSortKey {
+  static const _MonthPickerSortKey previousMonth = const _MonthPickerSortKey(1.0);
+  static const _MonthPickerSortKey nextMonth = const _MonthPickerSortKey(2.0);
+  static const _MonthPickerSortKey calendar = const _MonthPickerSortKey(3.0);
+
+  const _MonthPickerSortKey(double order) : super(order);
 }
 
 /// A scrollable list of years to allow picking a year.

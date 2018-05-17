@@ -28,17 +28,19 @@ String _generatedXcodePropertiesPath(String projectPath) {
   return fs.path.join(projectPath, 'ios', 'Flutter', 'Generated.xcconfig');
 }
 
-/// Writes default Xcode properties files in the Flutter project at
-/// [projectPath], if such files do not already exist.
+/// Writes default Xcode properties files in the Flutter project at [projectPath],
+/// if project is an iOS project and such files do not already exist.
 void generateXcodeProperties(String projectPath) {
-  if (fs.file(_generatedXcodePropertiesPath(projectPath)).existsSync())
-    return;
-  updateGeneratedXcodeProperties(
+  if (fs.isDirectorySync(fs.path.join(projectPath, 'ios'))) {
+    if (fs.file(_generatedXcodePropertiesPath(projectPath)).existsSync())
+      return;
+    updateGeneratedXcodeProperties(
       projectPath: projectPath,
       buildInfo: BuildInfo.debug,
       target: bundle.defaultMainPath,
       previewDart2: false,
-  );
+    );
+  }
 }
 
 /// Writes or rewrites Xcode property files with the specified information.

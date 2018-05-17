@@ -96,7 +96,7 @@ class _RecipeGridPageState extends State<RecipeGridPage> {
             _buildBody(context, statusBarHeight),
           ],
         ),
-      )
+      ),
     );
   }
 
@@ -215,30 +215,33 @@ class _PestoLogoState extends State<PestoLogo> {
 
   @override
   Widget build(BuildContext context) {
-    return new Transform(
-      transform: new Matrix4.identity()..scale(widget.height / kLogoHeight),
-      alignment: Alignment.topCenter,
-      child: new SizedBox(
-        width: kLogoWidth,
-        child: new Stack(
-          overflow: Overflow.visible,
-          children: <Widget>[
-            new Positioned.fromRect(
-              rect: _imageRectTween.lerp(widget.t),
-              child: new Image.asset(
-                _kSmallLogoImage,
-                package: _kGalleryAssetsPackage,
-                fit: BoxFit.contain,
+    return new Semantics(
+      namesRoute: true,
+      child: new Transform(
+        transform: new Matrix4.identity()..scale(widget.height / kLogoHeight),
+        alignment: Alignment.topCenter,
+        child: new SizedBox(
+          width: kLogoWidth,
+          child: new Stack(
+            overflow: Overflow.visible,
+            children: <Widget>[
+              new Positioned.fromRect(
+                rect: _imageRectTween.lerp(widget.t),
+                child: new Image.asset(
+                  _kSmallLogoImage,
+                  package: _kGalleryAssetsPackage,
+                  fit: BoxFit.contain,
+                ),
               ),
-            ),
-            new Positioned.fromRect(
-              rect: _textRectTween.lerp(widget.t),
-              child: new Opacity(
-                opacity: _textOpacity.transform(widget.t),
-                child: new Text('PESTO', style: titleStyle, textAlign: TextAlign.center),
+              new Positioned.fromRect(
+                rect: _textRectTween.lerp(widget.t),
+                child: new Opacity(
+                  opacity: _textOpacity.transform(widget.t),
+                  child: new Text('PESTO', style: titleStyle, textAlign: TextAlign.center),
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

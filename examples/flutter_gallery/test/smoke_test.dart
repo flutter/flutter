@@ -2,31 +2,21 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:collection' show LinkedHashSet;
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:flutter_gallery/gallery/item.dart' show GalleryItem, kAllGalleryItems;
+import 'package:flutter_gallery/gallery/demos.dart';
 import 'package:flutter_gallery/gallery/app.dart' show GalleryApp;
 
-const String kCaption = 'Flutter Gallery';
+// This title is visible on the home and demo category pages. It's
+// not visible when the demos are running.
+const String kGalleryTitle = 'Flutter gallery';
 
-final List<String> demoCategories = new LinkedHashSet<String>.from(
-  kAllGalleryItems.map<String>((GalleryItem item) => item.category)
-).toList();
-
-final List<String> routeNames =
-  kAllGalleryItems.map((GalleryItem item) => item.routeName).toList();
-
-Finder findGalleryItemByRouteName(WidgetTester tester, String routeName) {
-  return find.byWidgetPredicate((Widget widget) {
-    return widget is GalleryItem && widget.routeName == routeName;
-  });
-}
-
-int errors = 0;
+// All of the classes printed by debugDump etc, must have toString()
+// values approved by verityToStringOutput().
+int toStringErrors = 0;
 
 void reportToStringError(String name, String route, int lineNumber, List<String> lines, String message) {
   // If you're on line 12, then it has index 11.
@@ -36,7 +26,7 @@ void reportToStringError(String name, String route, int lineNumber, List<String>
   final int firstLine = math.max(0, lineNumber - margin);
   final int lastLine = math.min(lines.length, lineNumber + margin);
   print('$name : $route : line $lineNumber of ${lines.length} : $message; nearby lines were:\n  ${lines.sublist(firstLine, lastLine).join("\n  ")}');
-  errors += 1;
+  toStringErrors += 1;
 }
 
 void verifyToStringOutput(String name, String route, String testString) {
@@ -56,22 +46,16 @@ void verifyToStringOutput(String name, String route, String testString) {
   }
 }
 
-// Start a gallery demo and then go back. This function assumes that the
-// we're starting on the home route and that the submenu that contains
-// the item for a demo that pushes route 'routeName' is already open.
-Future<Null> smokeDemo(WidgetTester tester, String routeName) async {
-  // Ensure that we're (likely to be) on the home page
-  final Finder menuItem = findGalleryItemByRouteName(tester, routeName);
-  expect(menuItem, findsOneWidget);
-
+Future<Null> smokeDemo(WidgetTester tester, GalleryDemo demo) async {
+  print(demo);
   // Don't use pumpUntilNoTransientCallbacks in this function, because some of
   // the smoketests have infinitely-running animations (e.g. the progress
   // indicators demo).
 
-  await tester.tap(menuItem);
+  await tester.tap(find.text(demo.title));
   await tester.pump(); // Launch the demo.
   await tester.pump(const Duration(milliseconds: 400)); // Wait until the demo has opened.
-  expect(find.text(kCaption), findsNothing);
+  expect(find.text(kGalleryTitle), findsNothing);
 
   // Leave the demo on the screen briefly for manual testing.
   await tester.pump(const Duration(milliseconds: 400));
@@ -85,6 +69,7 @@ Future<Null> smokeDemo(WidgetTester tester, String routeName) async {
   await tester.pump(const Duration(milliseconds: 400));
 
   // Verify that the dumps are pretty.
+  final String routeName = demo.routeName;
   verifyToStringOutput('debugDumpApp', routeName, WidgetsBinding.instance.renderViewElement.toStringDeep());
   verifyToStringOutput('debugDumpRenderTree', routeName, RendererBinding.instance?.renderView?.toStringDeep());
   verifyToStringOutput('debugDumpLayerTree', routeName, RendererBinding.instance?.renderView?.debugLayer?.toStringDeep());
@@ -102,86 +87,93 @@ Future<Null> smokeDemo(WidgetTester tester, String routeName) async {
   await tester.pump();
   await tester.pump(const Duration(milliseconds: 400));
 
-  // This demo's back button isn't initially visible.
-  if (routeName == '/material/backdrop') {
-    await tester.tap(find.byTooltip('Tap to dismiss'));
-    await tester.pumpAndSettle();
-  }
-
   // Go back
   await tester.pageBack();
   await tester.pumpAndSettle();
   await tester.pump(); // Start the pop "back" operation.
   await tester.pump(); // Complete the willPop() Future.
   await tester.pump(const Duration(milliseconds: 400)); // Wait until it has finished.
-
-  return null;
 }
 
-Future<Null> runSmokeTest(WidgetTester tester) async {
-  bool hasFeedback = false;
-  void mockOnSendFeedback() {
-    hasFeedback = true;
-  }
+Future<Null> smokeOptionsPage(WidgetTester tester) async {
+  final Finder showOptionsPageButton = find.byTooltip('Toggle options page');
 
-  await tester.pumpWidget(new GalleryApp(onSendFeedback: mockOnSendFeedback));
+  // Show the options page
+  await tester.tap(showOptionsPageButton);
+  await tester.pumpAndSettle();
+
+  // Switch to the dark theme: first switch control
+  await tester.tap(find.byType(Switch).first);
+  await tester.pumpAndSettle();
+
+  // Switch back to the light theme: first switch control again
+  await tester.tap(find.byType(Switch).first);
+  await tester.pumpAndSettle();
+
+  // Popup the text size menu: first menu button, choose 'Small'
+  await tester.tap(find.byIcon(Icons.arrow_drop_down).first);
+  await tester.pumpAndSettle();
+  await tester.tap(find.text('Small'));
+  await tester.pumpAndSettle();
+
+  // Popup the text size menu: first menu button, choose 'Normal'
+  await tester.tap(find.byIcon(Icons.arrow_drop_down).first);
+  await tester.pumpAndSettle();
+  await tester.tap(find.text('Normal'));
+  await tester.pumpAndSettle();
+
+  // Scroll the 'Send feedback' item into view
+  await tester.drag(find.text('Normal'), const Offset(0.0, -1000.0));
+  await tester.pumpAndSettle();
+  await tester.tap(find.text('Send feedback'));
+  await tester.pumpAndSettle();
+
+  // Close the options page
+  expect(showOptionsPageButton, findsOneWidget);
+  await tester.tap(showOptionsPageButton);
+  await tester.pumpAndSettle();
+}
+
+Future<Null> smokeGallery(WidgetTester tester) async {
+  bool sendFeedbackButtonPressed = false;
+
+  await tester.pumpWidget(
+    new GalleryApp(
+      testMode: true,
+      onSendFeedback: () {
+        sendFeedbackButtonPressed = true; // see smokeOptionsPage()
+      },
+    ),
+  );
   await tester.pump(); // see https://github.com/flutter/flutter/issues/1865
   await tester.pump(); // triggers a frame
 
-  expect(find.text(kCaption), findsOneWidget);
+  expect(find.text(kGalleryTitle), findsOneWidget);
 
-  for (String routeName in routeNames) {
-    final Finder finder = findGalleryItemByRouteName(tester, routeName);
-    Scrollable.ensureVisible(tester.element(finder), alignment: 0.5);
+  for (GalleryDemoCategory category in kAllGalleryDemoCategories) {
+    await Scrollable.ensureVisible(tester.element(find.text(category.name)), alignment: 0.5);
+    await tester.tap(find.text(category.name));
     await tester.pumpAndSettle();
-    await smokeDemo(tester, routeName);
-    tester.binding.debugAssertNoTransientCallbacks('A transient callback was still active after leaving route $routeName');
+    for (GalleryDemo demo in kGalleryCategoryToDemos[category]) {
+      await Scrollable.ensureVisible(tester.element(find.text(demo.title)), alignment: 0.0);
+      await smokeDemo(tester, demo);
+      tester.binding.debugAssertNoTransientCallbacks('A transient callback was still active after running $demo');
+    }
+    await tester.pageBack();
+    await tester.pumpAndSettle();
   }
-  expect(errors, 0);
+  expect(toStringErrors, 0);
 
-  final Finder navigationMenuButton = find.byTooltip('Open navigation menu');
-  expect(navigationMenuButton, findsOneWidget);
-  await tester.tap(navigationMenuButton);
-  await tester.pump(); // Start opening drawer.
-  await tester.pump(const Duration(seconds: 1)); // Wait until it's really opened.
-
-  // Switch theme.
-  await tester.tap(find.text('Dark'));
-  await tester.pump();
-  await tester.pump(const Duration(seconds: 1)); // Wait until it's changed.
-
-  // Switch theme.
-  await tester.tap(find.text('Light'));
-  await tester.pump();
-  await tester.pump(const Duration(seconds: 1)); // Wait until it's changed.
-
-  // Switch font scale.
-  await tester.tap(find.text('Small'));
-  await tester.pump();
-  await tester.pump(const Duration(seconds: 1)); // Wait until it's changed.
-  // Switch font scale back to default.
-  await tester.tap(find.text('System Default'));
-  await tester.pump();
-  await tester.pump(const Duration(seconds: 1)); // Wait until it's changed.
-
-  // Scroll the 'Send feedback' item into view.
-  await tester.drag(find.text('Small'), const Offset(0.0, -1000.0));
-  await tester.pump();
-  await tester.pump(const Duration(seconds: 1)); // Wait until it's changed.
-
-  // Send feedback.
-  expect(hasFeedback, false);
-  await tester.tap(find.text('Send feedback'));
-  await tester.pump();
-  expect(hasFeedback, true);
+  await smokeOptionsPage(tester);
+  expect(sendFeedbackButtonPressed, true);
 }
 
 void main() {
-  testWidgets('Flutter Gallery app smoke test', runSmokeTest);
+  testWidgets('Flutter Gallery app smoke test', smokeGallery);
 
   testWidgets('Flutter Gallery app smoke test with semantics', (WidgetTester tester) async {
     RendererBinding.instance.setSemanticsEnabled(true);
-    await runSmokeTest(tester);
+    await smokeGallery(tester);
     RendererBinding.instance.setSemanticsEnabled(false);
   });
 }

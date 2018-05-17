@@ -4,7 +4,6 @@
 
 import 'dart:math' as math;
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter/rendering.dart';
@@ -1399,12 +1398,12 @@ class _RawChipState extends State<RawChip> with TickerProviderStateMixin<RawChip
                     style: widget.labelStyle ?? chipTheme.labelStyle,
                     child: widget.label,
                   ),
-                  avatar: new AnimatedChildSwitcher(
+                  avatar: new AnimatedSwitcher(
                     child: widget.avatar,
                     duration: _kDrawerDuration,
                     switchInCurve: Curves.fastOutSlowIn,
                   ),
-                  deleteIcon: new AnimatedChildSwitcher(
+                  deleteIcon: new AnimatedSwitcher(
                     child: _buildDeleteIcon(context, theme, chipTheme),
                     duration: _kDrawerDuration,
                     switchInCurve: Curves.fastOutSlowIn,

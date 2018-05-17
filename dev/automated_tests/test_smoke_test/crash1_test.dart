@@ -11,7 +11,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   test('test smoke test -- this test should fail', () async {
-    if (system.Process.killPid(system.pid, system.ProcessSignal.SIGSEGV)) {
+    if (system.Process.killPid(system.pid, system.ProcessSignal.SIGSEGV)) { // ignore: deprecated_member_use
       print('system.Process.killPid returned before the process ended!');
       print('Sleeping for a few seconds just in case signal delivery is delayed or our signal handler is being slow...');
       system.sleep(const Duration(seconds: 10)); // don't sleep too much, we must not time out

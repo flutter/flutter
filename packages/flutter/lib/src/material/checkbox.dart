@@ -4,7 +4,6 @@
 
 import 'dart:math' as math;
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
@@ -99,7 +98,7 @@ class Checkbox extends StatefulWidget {
 
   /// The color to use when this checkbox is checked.
   ///
-  /// Defaults to accent color of the current [Theme].
+  /// Defaults to [ThemeData.toggleableActiveColor].
   final Color activeColor;
 
   /// If true the checkbox's [value] can be true, false, or null.
@@ -129,7 +128,7 @@ class _CheckboxState extends State<Checkbox> with TickerProviderStateMixin {
     return new _CheckboxRenderObjectWidget(
       value: widget.value,
       tristate: widget.tristate,
-      activeColor: widget.activeColor ?? themeData.accentColor,
+      activeColor: widget.activeColor ?? themeData.toggleableActiveColor,
       inactiveColor: widget.onChanged != null ? themeData.unselectedWidgetColor : themeData.disabledColor,
       onChanged: widget.onChanged,
       vsync: this,

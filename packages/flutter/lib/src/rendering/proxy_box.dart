@@ -2,7 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' as ui show ImageFilter, Gradient;
+import 'dart:async';
+
+import 'dart:ui' as ui show ImageFilter, Gradient, Image;
 
 import 'package:flutter/animation.dart';
 import 'package:flutter/foundation.dart';
@@ -1447,6 +1449,9 @@ abstract class _RenderPhysicalModelBase<T> extends _RenderCustomClip<T> {
        super(child: child, clipper: clipper);
 
   /// The z-coordinate at which to place this material.
+  ///
+  /// If [debugDisableShadows] is set, this value is ignored and no shadow is
+  /// drawn (an outline is rendered instead).
   double get elevation => _elevation;
   double _elevation;
   set elevation(double value) {
@@ -1589,20 +1594,36 @@ class RenderPhysicalModel extends _RenderPhysicalModelBase<RRect> {
   void paint(PaintingContext context, Offset offset) {
     if (child != null) {
       _updateClip();
-      final RRect offsetClipRRect = _clip.shift(offset);
-      final Rect offsetBounds = offsetClipRRect.outerRect;
-      final Path offsetClipPath = new Path()..addRRect(offsetClipRRect);
+      final RRect offsetRRect = _clip.shift(offset);
+      final Rect offsetBounds = offsetRRect.outerRect;
+      final Path offsetRRectAsPath = new Path()..addRRect(offsetRRect);
+      bool paintShadows = true;
+      assert(() {
+        if (debugDisableShadows) {
+          if (elevation > 0.0) {
+            context.canvas.drawRRect(
+              offsetRRect,
+              new Paint()
+                ..color = shadowColor
+                ..style = PaintingStyle.stroke
+                ..strokeWidth = elevation * 2.0,
+            );
+          }
+          paintShadows = false;
+        }
+        return true;
+      }());
       if (needsCompositing) {
         final PhysicalModelLayer physicalModel = new PhysicalModelLayer(
-          clipPath: offsetClipPath,
-          elevation: elevation,
+          clipPath: offsetRRectAsPath,
+          elevation: paintShadows ? elevation : 0.0,
           color: color,
           shadowColor: shadowColor,
         );
         context.pushLayer(physicalModel, super.paint, offset, childPaintBounds: offsetBounds);
       } else {
         final Canvas canvas = context.canvas;
-        if (elevation != 0.0) {
+        if (elevation != 0.0 && paintShadows) {
           // The drawShadow call doesn't add the region of the shadow to the
           // picture's bounds, so we draw a hardcoded amount of extra space to
           // account for the maximum potential area of the shadow.
@@ -1612,25 +1633,25 @@ class RenderPhysicalModel extends _RenderPhysicalModelBase<RRect> {
             _RenderPhysicalModelBase._transparentPaint,
           );
           canvas.drawShadow(
-            offsetClipPath,
+            offsetRRectAsPath,
             shadowColor,
             elevation,
             color.alpha != 0xFF,
           );
         }
-        canvas.drawRRect(offsetClipRRect, new Paint()..color = color);
+        canvas.drawRRect(offsetRRect, new Paint()..color = color);
         canvas.save();
-        canvas.clipRRect(offsetClipRRect);
+        canvas.clipRRect(offsetRRect);
         // We only use a new layer for non-rectangular clips, on the basis that
         // rectangular clips won't need antialiasing. This is not really
         // correct, because if we're e.g. rotated, rectangles will also be
         // aliased. Unfortunately, it's too much of a performance win to err on
         // the side of correctness here.
         // TODO(ianh): Find a better solution.
-        if (!offsetClipRRect.isRect)
+        if (!offsetRRect.isRect)
           canvas.saveLayer(offsetBounds, _RenderPhysicalModelBase._defaultPaint);
         super.paint(context, offset);
-        if (!offsetClipRRect.isRect)
+        if (!offsetRRect.isRect)
           canvas.restore();
         canvas.restore();
         assert(context.canvas == canvas, 'canvas changed even though needsCompositing was false');
@@ -1699,17 +1720,33 @@ class RenderPhysicalShape extends _RenderPhysicalModelBase<Path> {
       _updateClip();
       final Rect offsetBounds = offset & size;
       final Path offsetPath = _clip.shift(offset);
+      bool paintShadows = true;
+      assert(() {
+        if (debugDisableShadows) {
+          if (elevation > 0.0) {
+            context.canvas.drawPath(
+              offsetPath,
+              new Paint()
+                ..color = shadowColor
+                ..style = PaintingStyle.stroke
+                ..strokeWidth = elevation * 2.0,
+            );
+          }
+          paintShadows = false;
+        }
+        return true;
+      }());
       if (needsCompositing) {
         final PhysicalModelLayer physicalModel = new PhysicalModelLayer(
           clipPath: offsetPath,
-          elevation: elevation,
+          elevation: paintShadows ? elevation : 0.0,
           color: color,
           shadowColor: shadowColor,
         );
         context.pushLayer(physicalModel, super.paint, offset, childPaintBounds: offsetBounds);
       } else {
         final Canvas canvas = context.canvas;
-        if (elevation != 0.0) {
+        if (elevation != 0.0 && paintShadows) {
           // The drawShadow call doesn't add the region of the shadow to the
           // picture's bounds, so we draw a hardcoded amount of extra space to
           // account for the maximum potential area of the shadow.
@@ -2453,6 +2490,70 @@ class RenderRepaintBoundary extends RenderProxyBox {
   @override
   bool get isRepaintBoundary => true;
 
+  /// Capture an image of the current state of this render object and its
+  /// children.
+  ///
+  /// The returned [ui.Image] has uncompressed raw RGBA bytes in the dimensions
+  /// of the render object, multiplied by the [pixelRatio].
+  ///
+  /// To use [toImage], the render object must have gone through the paint phase
+  /// (i.e. [debugNeedsPaint] must be false).
+  ///
+  /// The [pixelRatio] describes the scale between the logical pixels and the
+  /// size of the output image. It is independent of the
+  /// [window.devicePixelRatio] for the device, so specifying 1.0 (the default)
+  /// will give you a 1:1 mapping between logical pixels and the output pixels
+  /// in the image.
+  ///
+  /// ## Sample code
+  ///
+  /// The following is an example of how to go from a `GlobalKey` on a
+  /// `RepaintBoundary` to a PNG:
+  ///
+  /// ```dart
+  /// class PngHome extends StatefulWidget {
+  ///   PngHome({Key key}) : super(key: key);
+  ///
+  ///   @override
+  ///   _PngHomeState createState() => new _PngHomeState();
+  /// }
+  ///
+  /// class _PngHomeState extends State<PngHome> {
+  ///   GlobalKey globalKey = new GlobalKey();
+  ///
+  ///   Future<void> _capturePng() async {
+  ///     RenderRepaintBoundary boundary = globalKey.currentContext.findRenderObject();
+  ///     ui.Image image = await boundary.toImage();
+  ///     ByteData byteData = await image.toByteData(format: ui.ImageByteFormat.png);
+  ///     Uint8List pngBytes = byteData.buffer.asUint8List();
+  ///     print(pngBytes);
+  ///   }
+  ///
+  ///   @override
+  ///   Widget build(BuildContext context) {
+  ///     return RepaintBoundary(
+  ///       key: globalKey,
+  ///       child: Center(
+  ///         child: FlatButton(
+  ///           child: Text('Hello World', textDirection: TextDirection.ltr),
+  ///           onPressed: _capturePng,
+  ///         ),
+  ///       ),
+  ///     );
+  ///   }
+  /// }
+  /// ```
+  ///
+  /// See also:
+  ///
+  ///  * [OffsetLayer.toImage] for a similar API at the layer level.
+  ///  * [dart:ui.Scene.toImage] for more information about the image returned.
+  Future<ui.Image> toImage({double pixelRatio: 1.0}) {
+    assert(!debugNeedsPaint);
+    return layer.toImage(Offset.zero & size, pixelRatio: pixelRatio);
+  }
+
+
   /// The number of times that this render object repainted at the same time as
   /// its parent. Repaint boundaries are only useful when the parent and child
   /// paint at different times. When both paint at the same time, the repaint
@@ -2782,7 +2883,9 @@ class RenderAbsorbPointer extends RenderProxyBox {
 
   @override
   bool hitTest(HitTestResult result, { Offset position }) {
-    return absorbing ? true : super.hitTest(result, position: position);
+    return absorbing
+        ? size.contains(position)
+        : super.hitTest(result, position: position);
   }
 
   @override
@@ -3019,6 +3122,9 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     bool focused,
     bool inMutuallyExclusiveGroup,
     bool obscured,
+    bool scopesRoute,
+    bool namesRoute,
+    bool hidden,
     String label,
     String value,
     String increasedValue,
@@ -3054,6 +3160,9 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
        _focused = focused,
        _inMutuallyExclusiveGroup = inMutuallyExclusiveGroup,
        _obscured = obscured,
+       _scopesRoute = scopesRoute,
+       _namesRoute = namesRoute,
+       _hidden = hidden,
        _label = label,
        _value = value,
        _increasedValue = increasedValue,
@@ -3210,6 +3319,37 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     if (obscured == value)
       return;
     _obscured = value;
+    markNeedsSemanticsUpdate();
+  }
+
+  /// If non-null, sets the [SemanticsNode.scopesRoute] semantic to the give value.
+  bool get scopesRoute => _scopesRoute;
+  bool _scopesRoute;
+  set scopesRoute(bool value) {
+    if (scopesRoute == value)
+      return;
+    _scopesRoute = value;
+    markNeedsSemanticsUpdate();
+  }
+
+  /// If non-null, sets the [SemanticsNode.namesRoute] semantic to the give value.
+  bool get namesRoute => _namesRoute;
+  bool _namesRoute;
+  set namesRoute(bool value) {
+    if (_namesRoute == value)
+      return;
+    _namesRoute = value;
+    markNeedsSemanticsUpdate();
+  }
+
+  /// If non-null, sets the [SemanticsNode.isHidden] semantic to the given
+  /// value.
+  bool get hidden => _hidden;
+  bool _hidden;
+  set hidden(bool value) {
+    if (hidden == value)
+      return;
+    _hidden = value;
     markNeedsSemanticsUpdate();
   }
 
@@ -3633,6 +3773,8 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     super.describeSemanticsConfiguration(config);
     config.isSemanticBoundary = container;
     config.explicitChildNodes = explicitChildNodes;
+    assert((scopesRoute == true && explicitChildNodes == true) || scopesRoute != true,
+      'explicitChildNodes must be set to true if scopes route is true');
 
     if (enabled != null)
       config.isEnabled = enabled;
@@ -3652,6 +3794,8 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
       config.isInMutuallyExclusiveGroup = inMutuallyExclusiveGroup;
     if (obscured != null)
       config.isObscured = obscured;
+    if (hidden != null)
+      config.isHidden = hidden;
     if (label != null)
       config.label = label;
     if (value != null)
@@ -3662,6 +3806,10 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
       config.decreasedValue = decreasedValue;
     if (hint != null)
       config.hint = hint;
+    if (scopesRoute != null)
+      config.scopesRoute = scopesRoute;
+    if (namesRoute != null)
+      config.namesRoute = namesRoute;
     if (textDirection != null)
       config.textDirection = textDirection;
     if (sortKey != null)

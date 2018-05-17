@@ -231,17 +231,14 @@ class InjectPluginsResult{
 /// Injects plugins found in `pubspec.yaml` into the platform-specific projects.
 void injectPlugins({String directory}) {
   directory ??= fs.currentDirectory.path;
-  if (fs.file(fs.path.join(directory, 'example', 'pubspec.yaml')).existsSync()) {
-    // Switch to example app if in plugin project template.
-    directory = fs.path.join(directory, 'example');
-  }
   final List<Plugin> plugins = _findPlugins(directory);
   final bool changed = _writeFlutterPluginsList(directory, plugins);
+
   if (fs.isDirectorySync(fs.path.join(directory, 'android')))
     _writeAndroidPluginRegistrant(directory, plugins);
   if (fs.isDirectorySync(fs.path.join(directory, 'ios'))) {
     _writeIOSPluginRegistrant(directory, plugins);
-    const CocoaPods cocoaPods = const CocoaPods();
+    final CocoaPods cocoaPods = new CocoaPods();
     if (plugins.isNotEmpty)
       cocoaPods.setupPodfile(directory);
     if (changed)

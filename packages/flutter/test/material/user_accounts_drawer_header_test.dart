@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' show SemanticsFlag;
-
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -335,26 +333,35 @@ void main() {
         new TestSemantics(
           children: <TestSemantics>[
             new TestSemantics(
-              label: 'Signed in\nname\nemail',
-              textDirection: TextDirection.ltr,
               children: <TestSemantics>[
                 new TestSemantics(
-                  label: r'B',
-                  textDirection: TextDirection.ltr,
-                ),
-                new TestSemantics(
-                  label: r'C',
-                  textDirection: TextDirection.ltr,
-                ),
-                new TestSemantics(
-                  label: r'D',
-                  textDirection: TextDirection.ltr,
-                ),
-                new TestSemantics(
-                  flags: <SemanticsFlag>[SemanticsFlag.isButton],
-                  actions: <SemanticsAction>[SemanticsAction.tap],
-                  label: r'Show accounts',
-                  textDirection: TextDirection.ltr,
+                  flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
+                  children: <TestSemantics>[
+                    new TestSemantics(
+                      label: 'Signed in\nname\nemail',
+                      textDirection: TextDirection.ltr,
+                      children: <TestSemantics>[
+                        new TestSemantics(
+                          label: r'B',
+                          textDirection: TextDirection.ltr,
+                        ),
+                        new TestSemantics(
+                          label: r'C',
+                          textDirection: TextDirection.ltr,
+                        ),
+                        new TestSemantics(
+                          label: r'D',
+                          textDirection: TextDirection.ltr,
+                        ),
+                        new TestSemantics(
+                          flags: <SemanticsFlag>[SemanticsFlag.isButton],
+                          actions: <SemanticsAction>[SemanticsAction.tap],
+                          label: r'Show accounts',
+                          textDirection: TextDirection.ltr,
+                        ),
+                      ],
+                    ),
+                  ],
                 ),
               ],
             ),
@@ -382,20 +389,29 @@ void main() {
         new TestSemantics(
           children: <TestSemantics>[
             new TestSemantics(
-              label: 'Signed in',
-              textDirection: TextDirection.ltr,
               children: <TestSemantics>[
                 new TestSemantics(
-                  label: r'B',
-                  textDirection: TextDirection.ltr,
-                ),
-                new TestSemantics(
-                  label: r'C',
-                  textDirection: TextDirection.ltr,
-                ),
-                new TestSemantics(
-                  label: r'D',
-                  textDirection: TextDirection.ltr,
+                  flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
+                  children: <TestSemantics>[
+                    new TestSemantics(
+                      label: 'Signed in',
+                      textDirection: TextDirection.ltr,
+                      children: <TestSemantics>[
+                        new TestSemantics(
+                          label: r'B',
+                          textDirection: TextDirection.ltr,
+                        ),
+                        new TestSemantics(
+                          label: r'C',
+                          textDirection: TextDirection.ltr,
+                        ),
+                        new TestSemantics(
+                          label: r'D',
+                          textDirection: TextDirection.ltr,
+                        ),
+                      ],
+                    ),
+                  ],
                 ),
               ],
             ),

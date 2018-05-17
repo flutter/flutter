@@ -513,11 +513,11 @@ class RenderSliverGrid extends RenderSliverMultiBoxAdaptor {
     childManager.didStartLayout();
     childManager.setDidUnderflow(false);
 
-    final double scrollOffset = constraints.scrollOffset;
+    final double scrollOffset = constraints.scrollOffset + constraints.cacheOrigin;
     assert(scrollOffset >= 0.0);
-    final double remainingPaintExtent = constraints.remainingPaintExtent;
-    assert(remainingPaintExtent >= 0.0);
-    final double targetEndScrollOffset = scrollOffset + remainingPaintExtent;
+    final double remainingExtent = constraints.remainingCacheExtent;
+    assert(remainingExtent >= 0.0);
+    final double targetEndScrollOffset = scrollOffset + remainingExtent;
 
     final SliverGridLayout layout = _gridDelegate.getLayout(constraints);
 
@@ -617,11 +617,17 @@ class RenderSliverGrid extends RenderSliverMultiBoxAdaptor {
       from: leadingScrollOffset,
       to: trailingScrollOffset,
     );
+    final double cacheExtent = calculateCacheOffset(
+      constraints,
+      from: leadingScrollOffset,
+      to: trailingScrollOffset,
+    );
 
     geometry = new SliverGeometry(
       scrollExtent: estimatedTotalExtent,
       paintExtent: paintExtent,
       maxPaintExtent: estimatedTotalExtent,
+      cacheExtent: cacheExtent,
       // Conservative to avoid complexity.
       hasVisualOverflow: true,
     );

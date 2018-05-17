@@ -135,6 +135,7 @@ void main() {
 
   test('UnconstrainedBox expands to fit children', () {
     final RenderUnconstrainedBox unconstrained = new RenderUnconstrainedBox(
+      constrainedAxis: Axis.horizontal, // This is reset to null below.
       textDirection: TextDirection.ltr,
       child: new RenderConstrainedBox(
         additionalConstraints: const BoxConstraints.tightFor(width: 200.0, height: 200.0),
@@ -150,6 +151,9 @@ void main() {
         maxHeight: 200.0,
       ),
     );
+    // Check that we can update the constrained axis to null.
+    unconstrained.constrainedAxis = null;
+    renderer.reassembleApplication();
 
     expect(unconstrained.size.width, equals(200.0), reason: 'unconstrained width');
     expect(unconstrained.size.height, equals(200.0), reason: 'unconstrained height');
@@ -207,7 +211,7 @@ void main() {
     );
   });
 
-  test('honors constrainedAxis=Axis.horizontal', () {
+  test('UnconstrainedBox honors constrainedAxis=Axis.horizontal', () {
     final RenderConstrainedBox flexible =
         new RenderConstrainedBox(additionalConstraints: const BoxConstraints.expand(height: 200.0));
     final RenderUnconstrainedBox unconstrained = new RenderUnconstrainedBox(
@@ -231,7 +235,7 @@ void main() {
     expect(unconstrained.size.height, equals(200.0), reason: 'unconstrained height');
   });
 
-  test('honors constrainedAxis=Axis.vertical', () {
+  test('UnconstrainedBox honors constrainedAxis=Axis.vertical', () {
     final RenderConstrainedBox flexible =
     new RenderConstrainedBox(additionalConstraints: const BoxConstraints.expand(width: 200.0));
     final RenderUnconstrainedBox unconstrained = new RenderUnconstrainedBox(

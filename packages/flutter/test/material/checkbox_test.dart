@@ -15,6 +15,21 @@ void main() {
     debugResetSemanticsIdCounter();
   });
 
+  testWidgets('Checkbox size is 40x40', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      new Material(
+        child: new Center(
+          child: new Checkbox(
+            value: false,
+            onChanged: (bool newValue) { },
+          ),
+        ),
+      ),
+    );
+
+    expect(tester.getSize(find.byType(Checkbox)), const Size(40.0, 40.0));
+  });
+
   testWidgets('CheckBox semantics', (WidgetTester tester) async {
     final SemanticsTester semantics = new SemanticsTester(tester);
 

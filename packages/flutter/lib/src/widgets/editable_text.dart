@@ -4,7 +4,6 @@
 
 import 'dart:async';
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 
@@ -621,6 +620,9 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     if (!_hasFocus) {
       // Clear the selection and composition state if this widget lost focus.
       _value = new TextEditingValue(text: _value.text);
+    } else if (!_value.selection.isValid) {
+      // Place cursor at the end if the selection is invalid when we receive focus.
+      widget.controller.selection = new TextSelection.collapsed(offset: _value.text.length);
     }
     updateKeepAlive();
   }
@@ -675,18 +677,17 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
             onPaste: _hasFocus && controls?.canPaste(this) == true ? () => controls.handlePaste(this) : null,
             child: new _Editable(
               key: _editableKey,
+              textSpan: buildTextSpan(),
               value: _value,
-              style: widget.style,
               cursorColor: widget.cursorColor,
               showCursor: _showCursor,
               hasFocus: _hasFocus,
               maxLines: widget.maxLines,
               selectionColor: widget.selectionColor,
-              textScaleFactor: widget.textScaleFactor ?? MediaQuery.of(context, nullOk: true)?.textScaleFactor ?? 1.0,
+              textScaleFactor: widget.textScaleFactor ?? MediaQuery.textScaleFactorOf(context),
               textAlign: widget.textAlign,
               textDirection: _textDirection,
               obscureText: widget.obscureText,
-              obscureShowCharacterAtIndex: _obscureShowCharTicksPending > 0 ? _obscureLatestCharIndex : null,
               autocorrect: widget.autocorrect,
               offset: offset,
               onSelectionChanged: _handleSelectionChanged,
@@ -698,13 +699,46 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       },
     );
   }
+
+  /// Builds [TextSpan] from current editing value.
+  ///
+  /// By default makes text in composing range appear as underlined.
+  /// Descendants can override this method to customize appearance of text.
+  TextSpan buildTextSpan() {
+    if (!widget.obscureText && _value.composing.isValid) {
+      final TextStyle composingStyle = widget.style.merge(
+        const TextStyle(decoration: TextDecoration.underline),
+      );
+
+      return new TextSpan(
+        style: widget.style,
+        children: <TextSpan>[
+          new TextSpan(text: _value.composing.textBefore(_value.text)),
+          new TextSpan(
+            style: composingStyle,
+            text: _value.composing.textInside(_value.text),
+          ),
+          new TextSpan(text: _value.composing.textAfter(_value.text)),
+      ]);
+    }
+
+    String text = _value.text;
+    if (widget.obscureText) {
+      text = RenderEditable.obscuringCharacter * text.length;
+      final int o =
+        _obscureShowCharTicksPending > 0 ? _obscureLatestCharIndex : null;
+      if (o != null && o >= 0 && o < text.length)
+        text = text.replaceRange(o, o + 1, _value.text.substring(o, o + 1));
+    }
+    return new TextSpan(style: widget.style, text: text);
+  }
 }
 
 class _Editable extends LeafRenderObjectWidget {
   const _Editable({
     Key key,
+    this.textSpan,
     this.value,
-    this.style,
     this.cursorColor,
     this.showCursor,
     this.hasFocus,
@@ -714,7 +748,6 @@ class _Editable extends LeafRenderObjectWidget {
     this.textAlign,
     @required this.textDirection,
     this.obscureText,
-    this.obscureShowCharacterAtIndex,
     this.autocorrect,
     this.offset,
     this.onSelectionChanged,
@@ -724,8 +757,8 @@ class _Editable extends LeafRenderObjectWidget {
        assert(rendererIgnoresPointer != null),
        super(key: key);
 
+  final TextSpan textSpan;
   final TextEditingValue value;
-  final TextStyle style;
   final Color cursorColor;
   final ValueNotifier<bool> showCursor;
   final bool hasFocus;
@@ -735,7 +768,6 @@ class _Editable extends LeafRenderObjectWidget {
   final TextAlign textAlign;
   final TextDirection textDirection;
   final bool obscureText;
-  final int obscureShowCharacterAtIndex;
   final bool autocorrect;
   final ViewportOffset offset;
   final SelectionChangedHandler onSelectionChanged;
@@ -745,7 +777,7 @@ class _Editable extends LeafRenderObjectWidget {
   @override
   RenderEditable createRenderObject(BuildContext context) {
     return new RenderEditable(
-      text: _styledTextSpan,
+      text: textSpan,
       cursorColor: cursorColor,
       showCursor: showCursor,
       hasFocus: hasFocus,
@@ -766,7 +798,7 @@ class _Editable extends LeafRenderObjectWidget {
   @override
   void updateRenderObject(BuildContext context, RenderEditable renderObject) {
     renderObject
-      ..text = _styledTextSpan
+      ..text = textSpan
       ..cursorColor = cursorColor
       ..showCursor = showCursor
       ..hasFocus = hasFocus
@@ -781,33 +813,5 @@ class _Editable extends LeafRenderObjectWidget {
       ..onCaretChanged = onCaretChanged
       ..ignorePointer = rendererIgnoresPointer
       ..obscureText = obscureText;
-  }
-
-  TextSpan get _styledTextSpan {
-    if (!obscureText && value.composing.isValid) {
-      final TextStyle composingStyle = style.merge(
-        const TextStyle(decoration: TextDecoration.underline)
-      );
-
-      return new TextSpan(
-        style: style,
-        children: <TextSpan>[
-          new TextSpan(text: value.composing.textBefore(value.text)),
-          new TextSpan(
-            style: composingStyle,
-            text: value.composing.textInside(value.text)
-          ),
-          new TextSpan(text: value.composing.textAfter(value.text))
-      ]);
-    }
-
-    String text = value.text;
-    if (obscureText) {
-      text = RenderEditable.obscuringCharacter * text.length;
-      final int o = obscureShowCharacterAtIndex;
-      if (o != null && o >= 0 && o < text.length)
-        text = text.replaceRange(o, o + 1, value.text.substring(o, o + 1));
-    }
-    return new TextSpan(style: style, text: text);
   }
 }

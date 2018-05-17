@@ -4,7 +4,6 @@
 
 import 'dart:math' as math;
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter/rendering.dart';
 
@@ -31,7 +30,7 @@ import 'theme.dart';
 /// See also:
 ///
 ///  * [DataTable], which is not paginated.
-///  * <https://material.io/guidelines/components/data-tables.html#data-tables-tables-within-cards>
+///  * <https://material.io/go/design-data-tables#data-tables-tables-within-cards>
 class PaginatedDataTable extends StatefulWidget {
   /// Creates a widget describing a paginated [DataTable] on a [Card].
   ///

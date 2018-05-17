@@ -38,7 +38,10 @@ void main() {
 
     final FlipWidgetState testWidget = tester.state(find.byType(FlipWidget));
 
-    expect(callbackTracker, equals(<int>[0, 1, 2, 3, 4, 5]));
+    expect(callbackTracker, equals(<int>[
+      0, 1, 2, 3, 4, 5, // visible
+      6, 7, 8 // in cached area
+    ]));
 
     callbackTracker.clear();
     testWidget.flip();
@@ -50,7 +53,10 @@ void main() {
     testWidget.flip();
     await tester.pump();
 
-    expect(callbackTracker, equals(<int>[0, 1, 2, 3, 4, 5]));
+    expect(callbackTracker, equals(<int>[
+      0, 1, 2, 3, 4, 5, // visible
+      6, 7, 8, // in cached area
+    ]));
   });
 
   testWidgets('ListView vertical', (WidgetTester tester) async {
@@ -86,22 +92,34 @@ void main() {
     await tester.pumpWidget(builder());
 
     // 0 is built to find its height
-    expect(callbackTracker, equals(<int>[0, 1, 2, 3, 4]));
+    expect(callbackTracker, equals(<int>[
+      0, 1, 2, 3, 4,
+      5, // in cached area
+    ]));
     callbackTracker.clear();
 
     final ScrollableState scrollable = tester.state(find.byType(Scrollable));
-    scrollable.position.jumpTo(400.0); // now only 3 should fit, numbered 2-4.
+    scrollable.position.jumpTo(600.0); // now only 3 should fit, numbered 3-5.
 
     await tester.pumpWidget(builder());
 
     // We build the visible children to find their new size.
-    expect(callbackTracker, equals(<int>[1, 2, 3, 4]));
+    expect(callbackTracker, equals(<int>[
+      0, 1, 2,
+      3, 4, 5, //visible
+      6, 7
+    ]));
     callbackTracker.clear();
 
     await tester.pumpWidget(builder());
 
     // 0 isn't built because they're not visible.
-    expect(callbackTracker, equals(<int>[1, 2, 3, 4]));
+    expect(callbackTracker, equals(<int>[
+      1, 2,
+      3, 4, 5, // visible
+      6, 7,
+    ]
+    ));
     callbackTracker.clear();
   });
 
@@ -128,7 +146,7 @@ void main() {
         child: new FlipWidget(
           left: new ListView.builder(
             scrollDirection: Axis.horizontal,
-            controller: new ScrollController(initialScrollOffset: 300.0),
+            controller: new ScrollController(initialScrollOffset: 500.0),
             itemBuilder: itemBuilder,
           ),
           right: const Text('Not Today'),
@@ -139,23 +157,23 @@ void main() {
     await tester.pumpWidget(builder());
 
     // 0 is built to find its width
-    expect(callbackTracker, equals(<int>[0, 1, 2, 3, 4, 5]));
+    expect(callbackTracker, equals(<int>[0, 1, 2, 3, 4, 5, 6, 7]));
 
     callbackTracker.clear();
 
     final ScrollableState scrollable = tester.state(find.byType(Scrollable));
-    scrollable.position.jumpTo(400.0); // now only 4 should fit, numbered 2-5.
+    scrollable.position.jumpTo(600.0); // now only 4 should fit, numbered 2-5.
 
     await tester.pumpWidget(builder());
 
     // We build the visible children to find their new size.
-    expect(callbackTracker, equals(<int>[1, 2, 3, 4, 5]));
+    expect(callbackTracker, equals(<int>[1, 2, 3, 4, 5, 6, 7, 8]));
     callbackTracker.clear();
 
     await tester.pumpWidget(builder());
 
     // 0 isn't built because they're not visible.
-    expect(callbackTracker, equals(<int>[1, 2, 3, 4, 5]));
+    expect(callbackTracker, equals(<int>[1, 2, 3, 4, 5, 6, 7, 8]));
     callbackTracker.clear();
   });
 
@@ -189,18 +207,24 @@ void main() {
 
     await tester.pumpWidget(builder());
 
-    expect(callbackTracker, equals(<int>[0, 1, 2]));
+    expect(callbackTracker, equals(<int>[
+      0, 1, 2,
+      3, // in cached area
+    ]));
     callbackTracker.clear();
     tester.allWidgets.forEach(collectText);
-    expect(text, equals(<String>['0', '1', '2']));
+    expect(text, equals(<String>['0', '1', '2', '3']));
     text.clear();
 
     await tester.pumpWidget(builder());
 
-    expect(callbackTracker, equals(<int>[0, 1, 2]));
+    expect(callbackTracker, equals(<int>[
+      0, 1, 2,
+      3, // in cached area
+    ]));
     callbackTracker.clear();
     tester.allWidgets.forEach(collectText);
-    expect(text, equals(<String>['0', '1', '2']));
+    expect(text, equals(<String>['0', '1', '2', '3']));
     text.clear();
   });
 
@@ -308,9 +332,10 @@ void main() {
         ' │   GrowthDirection.forward, ScrollDirection.idle, scrollOffset:\n'
         ' │   0.0, remainingPaintExtent: 600.0, crossAxisExtent: 800.0,\n'
         ' │   crossAxisDirection: AxisDirection.right,\n'
-        ' │   viewportMainAxisExtent: 600.0)\n'
+        ' │   viewportMainAxisExtent: 600.0, remainingCacheExtent: 850.0\n'
+        ' │   cacheOrigin: 0.0 )\n'
         ' │ geometry: SliverGeometry(scrollExtent: 300.0, paintExtent: 300.0,\n'
-        ' │   maxPaintExtent: 300.0)\n'
+        ' │   maxPaintExtent: 300.0, cacheExtent: 300.0)\n'
         ' │ currently live children: 0 to 2\n'
         ' │\n'
         ' ├─child with index 0: RenderRepaintBoundary#00000 relayoutBoundary=up2\n'

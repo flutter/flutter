@@ -2,8 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:ui';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/widgets.dart';
+
+import 'semantics_tester.dart';
 
 class TestScrollPosition extends ScrollPositionWithSingleContext {
   TestScrollPosition({
@@ -169,5 +173,172 @@ void main() {
       ),
     );
     expect(innerScrollable.controller, isNull);
+  });
+
+  testWidgets('SingleChildScrollView semantics', (WidgetTester tester) async {
+    final SemanticsTester semantics = new SemanticsTester(tester);
+    final ScrollController controller = new ScrollController();
+
+    await tester.pumpWidget(
+      new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new SingleChildScrollView(
+          controller: controller,
+          child: new Column(
+            children: new List<Widget>.generate(30, (int i) {
+              return new Container(
+                height: 200.0,
+                child: new Text('Tile $i'),
+              );
+            }),
+          ),
+        ),
+      ),
+    );
+
+    expect(semantics, hasSemantics(
+      new TestSemantics(
+        children: <TestSemantics>[
+          new TestSemantics(
+            actions: <SemanticsAction>[
+              SemanticsAction.scrollUp,
+            ],
+            children: <TestSemantics>[
+              new TestSemantics(
+                label: r'Tile 0',
+                textDirection: TextDirection.ltr,
+              ),
+              new TestSemantics(
+                label: r'Tile 1',
+                textDirection: TextDirection.ltr,
+              ),
+              new TestSemantics(
+                label: r'Tile 2',
+                textDirection: TextDirection.ltr,
+              ),
+              new TestSemantics(
+                flags: <SemanticsFlag>[
+                  SemanticsFlag.isHidden,
+                ],
+                label: r'Tile 3',
+                textDirection: TextDirection.ltr,
+              ),
+              new TestSemantics(
+                flags: <SemanticsFlag>[
+                  SemanticsFlag.isHidden,],
+                label: r'Tile 4',
+                textDirection: TextDirection.ltr,
+              ),
+            ],
+          ),
+        ],
+      ),
+      ignoreRect: true, ignoreTransform: true, ignoreId: true,
+    ));
+
+    controller.jumpTo(3000.0);
+    await tester.pumpAndSettle();
+
+    expect(semantics, hasSemantics(
+      new TestSemantics(
+        children: <TestSemantics>[
+          new TestSemantics(
+            actions: <SemanticsAction>[
+              SemanticsAction.scrollUp,
+              SemanticsAction.scrollDown,
+            ],
+            children: <TestSemantics>[
+              new TestSemantics(
+                flags: <SemanticsFlag>[
+                  SemanticsFlag.isHidden,
+                ],
+                label: r'Tile 13',
+                textDirection: TextDirection.ltr,
+              ),
+              new TestSemantics(
+                flags: <SemanticsFlag>[
+                  SemanticsFlag.isHidden,
+                ],
+                label: r'Tile 14',
+                textDirection: TextDirection.ltr,
+              ),
+              new TestSemantics(
+                label: r'Tile 15',
+                textDirection: TextDirection.ltr,
+              ),
+              new TestSemantics(
+                label: r'Tile 16',
+                textDirection: TextDirection.ltr,
+              ),
+              new TestSemantics(
+                label: r'Tile 17',
+                textDirection: TextDirection.ltr,
+              ),
+              new TestSemantics(
+                flags: <SemanticsFlag>[
+                  SemanticsFlag.isHidden,
+                ],
+                label: r'Tile 18',
+                textDirection: TextDirection.ltr,
+              ),
+              new TestSemantics(
+                flags: <SemanticsFlag>[
+                  SemanticsFlag.isHidden,
+                ],
+                label: r'Tile 19',
+                textDirection: TextDirection.ltr,
+              ),
+            ],
+          ),
+        ],
+      ),
+      ignoreRect: true, ignoreTransform: true, ignoreId: true,
+    ));
+
+    controller.jumpTo(6000.0);
+    await tester.pumpAndSettle();
+
+    expect(semantics, hasSemantics(
+      new TestSemantics(
+        children: <TestSemantics>[
+          new TestSemantics(
+            actions: <SemanticsAction>[
+              SemanticsAction.scrollDown,
+            ],
+            children: <TestSemantics>[
+              new TestSemantics(
+                flags: <SemanticsFlag>[
+                  SemanticsFlag.isHidden,
+                ],
+                label: r'Tile 25',
+                textDirection: TextDirection.ltr,
+              ),
+              new TestSemantics(
+                flags: <SemanticsFlag>[
+                  SemanticsFlag.isHidden,
+                ],
+                label: r'Tile 26',
+                textDirection: TextDirection.ltr,
+              ),
+              new TestSemantics(
+                label: r'Tile 27',
+                textDirection: TextDirection.ltr,
+              ),
+              new TestSemantics(
+                label: r'Tile 28',
+                textDirection: TextDirection.ltr,
+              ),
+              new TestSemantics(
+                label: r'Tile 29',
+                textDirection: TextDirection.ltr,
+              ),
+            ],
+          ),
+        ],
+      ),
+      ignoreRect: true, ignoreTransform: true, ignoreId: true,
+    ));
+
+    semantics.dispose();
   });
 }

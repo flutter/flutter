@@ -30,6 +30,10 @@ void main() {
     expect(localizations.selectAllButtonLabel, isNotNull);
     expect(localizations.viewLicensesButtonLabel, isNotNull);
     expect(localizations.modalBarrierDismissLabel, isNotNull);
+    expect(localizations.drawerLabel, isNotNull);
+    expect(localizations.popupMenuLabel, isNotNull);
+    expect(localizations.dialogLabel, isNotNull);
+    expect(localizations.alertDialogLabel, isNotNull);
 
     expect(localizations.aboutListTileTitle('FOO'), isNotNull);
     expect(localizations.aboutListTileTitle('FOO'), contains('FOO'));

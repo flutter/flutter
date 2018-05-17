@@ -151,7 +151,7 @@ class RunCommand extends RunCommandBase {
       ..addOption('pid-file',
         help: 'Specify a file to write the process id to.\n'
               'You can send SIGUSR1 to trigger a hot reload\n'
-              'and SIGUSR2 to trigger a full restart.',
+              'and SIGUSR2 to trigger a hot restart.',
       )
       ..addFlag('resident',
         negatable: true,
@@ -190,13 +190,11 @@ class RunCommand extends RunCommandBase {
 
   @override
   Future<String> get usagePath async {
-    final String command = shouldUseHotMode() ? 'hotrun' : name;
+    final String command = await super.usagePath;
 
     if (devices == null)
       return command;
-
-    // Return 'run/ios'.
-    if (devices.length > 1)
+    else if (devices.length > 1)
       return '$command/all';
     else
       return '$command/${getNameForTargetPlatform(await devices[0].targetPlatform)}';
@@ -218,7 +216,7 @@ class RunCommand extends RunCommandBase {
     if (getCurrentHostPlatform() == HostPlatform.darwin_x64 &&
         xcode.isInstalledAndMeetsVersionCheck) {
       printStatus('');
-      printStatus('To run on a simulator, launch it first: open -a Simulator.app');
+      printStatus("Run 'flutter emulators' to list and start any available device emulators.");
       printStatus('');
       printStatus('If you expected your device to be detected, please run "flutter doctor" to diagnose');
       printStatus('potential issues, or visit https://flutter.io/setup/ for troubleshooting tips.');

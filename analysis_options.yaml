@@ -9,22 +9,18 @@
 #
 # There are four similar analysis options files in the flutter repos:
 #   - analysis_options.yaml (this file)
-#   - analysis_options_repo.yaml
 #   - packages/flutter/lib/analysis_options_user.yaml
 #   - https://github.com/flutter/plugins/blob/master/analysis_options.yaml
+#   - https://github.com/flutter/engine/blob/master/analysis_options.yaml
 #
 # This file contains the analysis options used by Flutter tools, such as IntelliJ,
 # Android Studio, and the `flutter analyze` command.
-# It is very similar to the analysis_options_repo.yaml file in this same directory;
-# the only difference (currently) is the public_member_api_docs option,
-# which triggers too many messages to be used in editors.
 #
 # The flutter/plugins repo contains a copy of this file, which should be kept
 # in sync with this file.
 
 analyzer:
   language:
-    enableStrictCallChecks: true
     enableSuperMixins: true
   strong-mode:
     implicit-dynamic: false
@@ -64,7 +60,7 @@ linter:
     - avoid_init_to_null
     - avoid_null_checks_in_equality_operators
     # - avoid_positional_boolean_parameters # not yet tested
-    # - avoid_private_typedef_functions # not yet tested
+    # - avoid_private_typedef_functions # we prefer having typedef (discussion in https://github.com/flutter/flutter/pull/16356)
     - avoid_relative_lib_imports
     - avoid_renaming_method_parameters
     - avoid_return_types_on_setters
@@ -131,7 +127,6 @@ linter:
     - prefer_is_not_empty
     - prefer_single_quotes
     - prefer_typing_uninitialized_variables
-    # - public_member_api_docs # this is the only difference from analysis_options_repo.yaml
     - recursive_getters
     - slash_for_doc_comments
     - sort_constructors_first

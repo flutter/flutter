@@ -97,7 +97,7 @@ class ProtocolDiscovery {
 
     assert(new InternetAddress(hostUri.host).isLoopback);
     if (ipv6) {
-      hostUri = hostUri.replace(host: InternetAddress.LOOPBACK_IP_V6.host);
+      hostUri = hostUri.replace(host: InternetAddress.LOOPBACK_IP_V6.host); // ignore: deprecated_member_use
     }
 
     return hostUri;

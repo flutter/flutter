@@ -34,5 +34,9 @@
   "signedInLabel": "로그인됨",
   "hideAccountsLabel": "계정 숨기기",
   "showAccountsLabel": "계정 표시",
-  "modalBarrierDismissLabel": "닫기"
+  "modalBarrierDismissLabel": "닫기",
+  "drawerLabel": "탐색 메뉴",
+  "popupMenuLabel": "팝업 메뉴",
+  "dialogLabel": "대화상자",
+  "alertDialogLabel": "경보"
 }

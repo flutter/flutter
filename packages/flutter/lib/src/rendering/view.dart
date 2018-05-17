@@ -185,7 +185,7 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
   }
 
   @override
-  Rect get paintBounds => Offset.zero & size;
+  Rect get paintBounds => Offset.zero & (size * configuration.devicePixelRatio);
 
   @override
   Rect get semanticBounds {

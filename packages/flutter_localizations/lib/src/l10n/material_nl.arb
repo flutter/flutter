@@ -34,5 +34,9 @@
   "signedInLabel": "Ingelogd",
   "hideAccountsLabel": "Accounts verbergen",
   "showAccountsLabel": "Accounts weergeven",
-  "modalBarrierDismissLabel": "Sluiten"
+  "modalBarrierDismissLabel": "Sluiten",
+  "drawerLabel": "Navigatiemenu",
+  "popupMenuLabel": "Pop-upmenu",
+  "dialogLabel": "Dialoogvenster",
+  "alertDialogLabel": "Alarm"
 }

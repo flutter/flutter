@@ -4,8 +4,8 @@
   "postMeridiemAbbreviation": "Tarde/noite",
   "scriptCategory": "English-like",
   "timeOfDayFormat": "HH:mm",
-  "@anteMeridiemAbbreviation": {"notUsed":"Pashto time format does not use a.m. indicator"},
-  "@postMeridiemAbbreviation": {"notUsed":"Pashto time format does not use p.m. indicator"},
+  "@anteMeridiemAbbreviation": {"notUsed":"portuguese time format does not use a.m. indicator"},
+  "@postMeridiemAbbreviation": {"notUsed":"portuguese time format does not use p.m. indicator"},
   "openAppDrawerTooltip": "Abrir menu de navegação",
   "backButtonTooltip": "Voltar",
   "closeButtonTooltip": "Fechar",
@@ -36,5 +36,9 @@
   "signedInLabel": "Conectado a",
   "hideAccountsLabel": "Ocultar contas",
   "showAccountsLabel": "Mostrar contas",
-  "modalBarrierDismissLabel": "Dispensar"
+  "modalBarrierDismissLabel": "Dispensar",
+  "drawerLabel": "Menu de navegação",
+  "popupMenuLabel": "Menu pop-up",
+  "dialogLabel": "Caixa de diálogo",
+  "alertDialogLabel": "Alerta"
 }

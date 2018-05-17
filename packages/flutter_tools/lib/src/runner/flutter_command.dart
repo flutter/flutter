@@ -243,7 +243,16 @@ abstract class FlutterCommand extends Command<Null> {
 
   /// The path to send to Google Analytics. Return null here to disable
   /// tracking of the command.
-  Future<String> get usagePath async => name;
+  Future<String> get usagePath async {
+    if (parent is FlutterCommand) {
+      final FlutterCommand commandParent = parent;
+      final String path = await commandParent.usagePath;
+      // Don't report for parents that return null for usagePath.
+      return path == null ? null : '$path/$name';
+    } else {
+      return name;
+    }
+  }
 
   /// Additional usage values to be sent with the usage ping.
   Future<Map<String, String>> get usageValues async => const <String, String>{};
@@ -274,6 +283,8 @@ abstract class FlutterCommand extends Command<Null> {
         } finally {
           final DateTime endTime = clock.now();
           printTrace('"flutter $name" took ${getElapsedAsMilliseconds(endTime.difference(startTime))}.');
+          // Note that this is checking the result of the call to 'usagePath'
+          // (a Future<String>), and not the result of evaluating the Future.
           if (usagePath != null) {
             final List<String> labels = <String>[];
             if (commandResult?.exitStatus != null)

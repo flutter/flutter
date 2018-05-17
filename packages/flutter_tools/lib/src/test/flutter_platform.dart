@@ -41,11 +41,19 @@ const Duration _kTestProcessTimeout = const Duration(minutes: 5);
 /// hold that against the test.
 const String _kStartTimeoutTimerMessage = 'sky_shell test process has entered main method';
 
+/// The name of the test configuration file that will be discovered by the
+/// test harness if it exists in the project directory hierarchy.
+const String _kTestConfigFileName = 'flutter_test_config.dart';
+
+/// The name of the file that signals the root of the project and that will
+/// cause the test harness to stop scanning for configuration files.
+const String _kProjectRootSentinel = 'pubspec.yaml';
+
 /// The address at which our WebSocket server resides and at which the sky_shell
 /// processes will host the Observatory server.
 final Map<InternetAddressType, InternetAddress> _kHosts = <InternetAddressType, InternetAddress>{
-  InternetAddressType.IP_V4: InternetAddress.LOOPBACK_IP_V4,
-  InternetAddressType.IP_V6: InternetAddress.LOOPBACK_IP_V6,
+  InternetAddressType.IP_V4: InternetAddress.LOOPBACK_IP_V4, // ignore: deprecated_member_use
+  InternetAddressType.IP_V6: InternetAddress.LOOPBACK_IP_V6, // ignore: deprecated_member_use
 };
 
 /// Configure the `test` package to work with Flutter.
@@ -63,8 +71,9 @@ void installHook({
   int port: 0,
   String precompiledDillPath,
   bool trackWidgetCreation: false,
+  bool updateGoldens: false,
   int observatoryPort,
-  InternetAddressType serverType: InternetAddressType.IP_V4,
+  InternetAddressType serverType: InternetAddressType.IP_V4, // ignore: deprecated_member_use
 }) {
   assert(!enableObservatory || (!startPaused && observatoryPort == null));
   hack.registerPlatformPlugin(
@@ -81,8 +90,98 @@ void installHook({
       port: port,
       precompiledDillPath: precompiledDillPath,
       trackWidgetCreation: trackWidgetCreation,
+      updateGoldens: updateGoldens,
     ),
   );
+}
+
+/// Generates the bootstrap entry point script that will be used to launch an
+/// individual test file.
+///
+/// The [testUrl] argument specifies the path to the test file that is being
+/// launched.
+///
+/// The [host] argument specifies the address at which the test harness is
+/// running.
+///
+/// If [testConfigFile] is specified, it must follow the conventions of test
+/// configuration files as outlined in the [flutter_test] library. By default,
+/// the test file will be launched directly.
+///
+/// The [updateGoldens] argument will set the [autoUpdateGoldens] global
+/// variable in the [flutter_test] package before invoking the test.
+String generateTestBootstrap({
+  @required Uri testUrl,
+  @required InternetAddress host,
+  File testConfigFile,
+  bool updateGoldens: false,
+}) {
+  assert(testUrl != null);
+  assert(host != null);
+  assert(updateGoldens != null);
+
+  final String websocketUrl = host.type == InternetAddressType.IP_V4 // ignore: deprecated_member_use
+      ? 'ws://${host.address}'
+      : 'ws://[${host.address}]';
+  final String encodedWebsocketUrl = Uri.encodeComponent(websocketUrl);
+
+  final StringBuffer buffer = new StringBuffer();
+  buffer.write('''
+import 'dart:convert';
+import 'dart:io';  // ignore: dart_io_import
+
+// We import this library first in order to trigger an import error for
+// package:test (rather than package:stream_channel) when the developer forgets
+// to add a dependency on package:test.
+import 'package:test/src/runner/plugin/remote_platform_helpers.dart';
+
+import 'package:flutter_test/flutter_test.dart';
+import 'package:stream_channel/stream_channel.dart';
+import 'package:test/src/runner/vm/catch_isolate_errors.dart';
+
+import '$testUrl' as test;
+'''
+  );
+  if (testConfigFile != null) {
+    buffer.write('''
+import '${new Uri.file(testConfigFile.path)}' as test_config;
+'''
+    );
+  }
+  buffer.write('''
+
+void main() {
+  print('$_kStartTimeoutTimerMessage');
+  String serverPort = Platform.environment['SERVER_PORT'];
+  String server = Uri.decodeComponent('$encodedWebsocketUrl:\$serverPort');
+  StreamChannel channel = serializeSuite(() {
+    catchIsolateErrors();
+    goldenFileComparator = new LocalFileComparator(Uri.parse('$testUrl'));
+    autoUpdateGoldenFiles = $updateGoldens;
+'''
+  );
+  if (testConfigFile != null) {
+    buffer.write('''
+    return () => test_config.main(test.main);
+''');
+  } else {
+    buffer.write('''
+    return test.main;
+''');
+  }
+  buffer.write('''
+  });
+  WebSocket.connect(server).then((WebSocket socket) {
+    socket.map((dynamic x) {
+      assert(x is String);
+      return json.decode(x);
+    }).pipe(channel.sink);
+    socket.addStream(channel.stream.map(json.encode));
+  });
+}
+'''
+  );
+  return buffer.toString();
 }
 
 enum _InitialResult { crashed, timedOut, connected }
@@ -151,11 +250,11 @@ class _Compiler {
               request.path);
           final String outputPath = compilerOutput?.outputFilename;
 
-          // Check if the compiler produced the output. If it failed then
-          // outputPath would be null. In this case pass null upwards to the
-          // consumer and shutdown the compiler to avoid reusing compiler
-          // that might have gotten into a weird state.
-          if (outputPath == null) {
+          // In case compiler didn't produce output or reported compilation
+          // errors, pass [null] upwards to the consumer and shutdown the
+          // compiler to avoid reusing compiler that might have gotten into
+          // a weird state.
+          if (outputPath == null || compilerOutput.errorCount > 0) {
             request.result.complete(null);
             await shutdown();
           } else {
@@ -211,6 +310,7 @@ class _FlutterPlatform extends PlatformPlugin {
     this.port,
     this.precompiledDillPath,
     this.trackWidgetCreation,
+    this.updateGoldens,
   }) : assert(shellPath != null);
 
   final String shellPath;
@@ -224,6 +324,7 @@ class _FlutterPlatform extends PlatformPlugin {
   final int port;
   final String precompiledDillPath;
   final bool trackWidgetCreation;
+  final bool updateGoldens;
 
   _Compiler compiler;
 
@@ -275,7 +376,7 @@ class _FlutterPlatform extends PlatformPlugin {
 
     dynamic outOfBandError; // error that we couldn't send to the harness that we need to send via our future
 
-    final List<_Finalizer> finalizers = <_Finalizer>[];
+    final List<_Finalizer> finalizers = <_Finalizer>[]; // Will be run in reverse order.
     bool subprocessActive = false;
     bool controllerSinkClosed = false;
     try {
@@ -497,21 +598,34 @@ class _FlutterPlatform extends PlatformPlugin {
           break;
       }
 
-      if (subprocessActive && watcher != null) {
-        await watcher.onFinishedTests(
-            new ProcessEvent(ourTestCount, process, processObservatoryUri));
+      if (watcher != null) {
+        switch (initialResult) {
+          case _InitialResult.crashed:
+            await watcher.onTestCrashed(new ProcessEvent(ourTestCount, process));
+            break;
+          case _InitialResult.timedOut:
+            await watcher.onTestTimedOut(new ProcessEvent(ourTestCount, process));
+            break;
+          case _InitialResult.connected:
+            if (subprocessActive) {
+              await watcher.onFinishedTest(
+                  new ProcessEvent(ourTestCount, process, processObservatoryUri));
+            }
+            break;
+        }
       }
     } catch (error, stack) {
       printTrace('test $ourTestCount: error caught during test; ${controllerSinkClosed ? "reporting to console" : "sending to test framework"}');
       if (!controllerSinkClosed) {
         controller.sink.addError(error, stack);
       } else {
-        printError('unhandled error during test:\n$testPath\n$error');
+        printError('unhandled error during test:\n$testPath\n$error\n$stack');
         outOfBandError ??= error;
       }
     } finally {
       printTrace('test $ourTestCount: cleaning up...');
-      for (_Finalizer finalizer in finalizers) {
+      // Finalizers are treated like a stack; run them in reverse order.
+      for (_Finalizer finalizer in finalizers.reversed) {
         try {
           await finalizer();
         } catch (error, stack) {
@@ -519,7 +633,7 @@ class _FlutterPlatform extends PlatformPlugin {
           if (!controllerSinkClosed) {
             controller.sink.addError(error, stack);
           } else {
-            printError('unhandled error during finalization of test:\n$testPath\n$error');
+            printError('unhandled error during finalization of test:\n$testPath\n$error\n$stack');
             outOfBandError ??= error;
           }
         }
@@ -555,8 +669,7 @@ class _FlutterPlatform extends PlatformPlugin {
     final File listenerFile = fs.file('${temporaryDirectory.path}/listener.dart');
     listenerFile.createSync();
     listenerFile.writeAsStringSync(_generateTestMain(
-      testUrl: fs.path.toUri(fs.path.absolute(testPath)).toString(),
-      encodedWebsocketUrl: Uri.encodeComponent(_getWebSocketUrl()),
+      testUrl: fs.path.toUri(fs.path.absolute(testPath)),
     ));
     return listenerFile.path;
   }
@@ -583,6 +696,7 @@ class _FlutterPlatform extends PlatformPlugin {
     final File vmPlatformStrongDill = fs.file(
       artifacts.getArtifactPath(Artifact.platformKernelDill),
     );
+    printTrace('Copying platform.dill file from ${vmPlatformStrongDill.path}');
     final File platformDill = vmPlatformStrongDill.copySync(
       tempBundleDirectory
           .childFile('platform.dill')
@@ -595,47 +709,32 @@ class _FlutterPlatform extends PlatformPlugin {
     return tempBundleDirectory.path;
   }
 
-  String _getWebSocketUrl() {
-    return host.type == InternetAddressType.IP_V4
-        ? 'ws://${host.address}'
-        : 'ws://[${host.address}]';
-  }
-
   String _generateTestMain({
-    String testUrl,
-    String encodedWebsocketUrl,
+    Uri testUrl,
   }) {
-    return '''
-import 'dart:convert';
-import 'dart:io';  // ignore: dart_io_import
-
-// We import this library first in order to trigger an import error for
-// package:test (rather than package:stream_channel) when the developer forgets
-// to add a dependency on package:test.
-import 'package:test/src/runner/plugin/remote_platform_helpers.dart';
-
-import 'package:stream_channel/stream_channel.dart';
-import 'package:test/src/runner/vm/catch_isolate_errors.dart';
-
-import '$testUrl' as test;
-
-void main() {
-  print('$_kStartTimeoutTimerMessage');
-  String serverPort = Platform.environment['SERVER_PORT'];
-  String server = Uri.decodeComponent('$encodedWebsocketUrl:\$serverPort');
-  StreamChannel channel = serializeSuite(() {
-    catchIsolateErrors();
-    return test.main;
-  });
-  WebSocket.connect(server).then((WebSocket socket) {
-    socket.map((dynamic x) {
-      assert(x is String);
-      return json.decode(x);
-    }).pipe(channel.sink);
-    socket.addStream(channel.stream.map(json.encode));
-  });
-}
-''';
+    assert(testUrl.scheme == 'file');
+    File testConfigFile;
+    Directory directory = fs.file(testUrl).parent;
+    while (directory.path != directory.parent.path) {
+      final File configFile = directory.childFile(_kTestConfigFileName);
+      if (configFile.existsSync()) {
+        printTrace('Discovered $_kTestConfigFileName in ${directory.path}');
+        testConfigFile = configFile;
+        break;
+      }
+      if (directory.childFile(_kProjectRootSentinel).existsSync()) {
+        printTrace('Stopping scan for $_kTestConfigFileName; '
+                   'found project root at ${directory.path}');
+        break;
+      }
+      directory = directory.parent;
+    }
+    return generateTestBootstrap(
+      testUrl: testUrl,
+      testConfigFile: testConfigFile,
+      host: host,
+      updateGoldens: updateGoldens,
+    );
   }
 
   File _cachedFontConfig;
@@ -697,13 +796,15 @@ void main() {
     } else {
       command.add('--disable-observatory');
     }
-    if (host.type == InternetAddressType.IP_V6)
+    if (host.type == InternetAddressType.IP_V6) // ignore: deprecated_member_use
       command.add('--ipv6');
     if (bundlePath != null) {
       command.add('--flutter-assets-dir=$bundlePath');
     }
     command.add('--enable-checked-mode');
     command.addAll(<String>[
+      '--enable-software-rendering',
+      '--skia-deterministic-rendering',
       '--enable-dart-profiling',
       '--non-interactive',
       '--use-test-fonts',

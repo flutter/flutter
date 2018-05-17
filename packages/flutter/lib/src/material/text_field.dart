@@ -5,7 +5,6 @@
 import 'dart:collection';
 
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
@@ -364,7 +363,8 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
 
   InteractiveInkFeature _createInkFeature(TapDownDetails details) {
     final MaterialInkController inkController = Material.of(context);
-    final RenderBox referenceBox = InputDecorator.containerOf(_editableTextKey.currentContext);
+    final BuildContext editableContext = _editableTextKey.currentContext;
+    final RenderBox referenceBox = InputDecorator.containerOf(editableContext) ?? editableContext.findRenderObject();
     final Offset position = referenceBox.globalToLocal(details.globalPosition);
     final Color color = Theme.of(context).splashColor;
 

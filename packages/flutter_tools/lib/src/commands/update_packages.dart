@@ -27,7 +27,7 @@ import '../runner/flutter_command.dart';
 /// ```
 const Map<String, String> _kManuallyPinnedDependencies = const <String, String>{
   // Add pinned packages here.
-  'mockito': '3.0.0-alpha+3', // TODO(aam): https://github.com/dart-lang/mockito/issues/110
+  'mockito': '3.0.0-alpha+5', // TODO(aam): https://github.com/dart-lang/mockito/issues/110
 };
 
 class UpdatePackagesCommand extends FlutterCommand {
@@ -656,12 +656,10 @@ class PubspecYaml {
       }
     }
 
-    // By this point we should know where to put our transitive dependencies.
-    // Only if there were no dependencies or dev_dependencies sections could
-    // we get here with these still null, and we should not have any such files
-    // in our repo.
-    assert(endOfDirectDependencies != null);
-    assert(endOfDevDependencies != null);
+    // If there are no dependencies or dev_dependencies sections, these will be
+    // null. We have such files in our tests, so account for them here.
+    endOfDirectDependencies ??= output.length;
+    endOfDevDependencies ??= output.length;
 
     // Now include all the transitive dependencies and transitive dev dependencies.
     // The blocks of text to insert for each dependency section.
@@ -721,7 +719,7 @@ class PubspecYaml {
       ..add('');
 
     // Compute a new checksum from all sorted dependencies and their version and convert to a hex string.
-    final String checksumString = _computeChecksum(sortedChecksumDependencies).toRadixString(16);
+    final String checksumString = _computeChecksum(sortedChecksumDependencies).toRadixString(16).padLeft(4, '0');
 
     // Insert the block of transitive dependency declarations into the output after [endOfDirectDependencies],
     // and the blocks of transitive dev dependency declarations into the output after [lastPossiblePlace]. Finally,

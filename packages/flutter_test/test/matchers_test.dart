@@ -2,8 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:typed_data';
 import 'dart:ui';
 
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 /// Class that makes it easy to mock common toStringDeep behavior.
@@ -288,4 +290,138 @@ void main() {
       );
     });
   });
+
+  group('matchesGoldenFile', () {
+    _FakeComparator comparator;
+
+    Widget boilerplate(Widget child) {
+      return new Directionality(
+        textDirection: TextDirection.ltr,
+        child: child,
+      );
+    }
+
+    setUp(() {
+      comparator = new _FakeComparator();
+      goldenFileComparator = comparator;
+    });
+
+    group('matches', () {
+      testWidgets('if comparator succeeds', (WidgetTester tester) async {
+        await tester.pumpWidget(boilerplate(const Text('hello')));
+        final Finder finder = find.byType(Text);
+        await expectLater(finder, matchesGoldenFile('foo.png'));
+        expect(comparator.invocation, _ComparatorInvocation.compare);
+        expect(comparator.imageBytes, hasLength(greaterThan(0)));
+        expect(comparator.golden, Uri.parse('foo.png'));
+      });
+    });
+
+    group('does not match', () {
+      testWidgets('if comparator returns false', (WidgetTester tester) async {
+        comparator.behavior = _ComparatorBehavior.returnFalse;
+        await tester.pumpWidget(boilerplate(const Text('hello')));
+        final Finder finder = find.byType(Text);
+        try {
+          await expectLater(finder, matchesGoldenFile('foo.png'));
+          fail('TestFailure expected but not thrown');
+        } on TestFailure catch (error) {
+          expect(comparator.invocation, _ComparatorInvocation.compare);
+          expect(error.message, contains('does not match'));
+        }
+      });
+
+      testWidgets('if comparator throws', (WidgetTester tester) async {
+        comparator.behavior = _ComparatorBehavior.throwTestFailure;
+        await tester.pumpWidget(boilerplate(const Text('hello')));
+        final Finder finder = find.byType(Text);
+        try {
+          await expectLater(finder, matchesGoldenFile('foo.png'));
+          fail('TestFailure expected but not thrown');
+        } on TestFailure catch (error) {
+          expect(comparator.invocation, _ComparatorInvocation.compare);
+          expect(error.message, contains('fake message'));
+        }
+      });
+
+      testWidgets('if finder finds no widgets', (WidgetTester tester) async {
+        await tester.pumpWidget(boilerplate(new Container()));
+        final Finder finder = find.byType(Text);
+        try {
+          await expectLater(finder, matchesGoldenFile('foo.png'));
+          fail('TestFailure expected but not thrown');
+        } on TestFailure catch (error) {
+          expect(comparator.invocation, isNull);
+          expect(error.message, contains('no widget was found'));
+        }
+      });
+
+      testWidgets('if finder finds multiple widgets', (WidgetTester tester) async {
+        await tester.pumpWidget(boilerplate(new Column(
+          children: const <Widget>[const Text('hello'), const Text('world')],
+        )));
+        final Finder finder = find.byType(Text);
+        try {
+          await expectLater(finder, matchesGoldenFile('foo.png'));
+          fail('TestFailure expected but not thrown');
+        } on TestFailure catch (error) {
+          expect(comparator.invocation, isNull);
+          expect(error.message, contains('too many widgets'));
+        }
+      });
+    });
+
+    testWidgets('calls update on comparator if autoUpdateGoldenFiles is true', (WidgetTester tester) async {
+      autoUpdateGoldenFiles = true;
+      await tester.pumpWidget(boilerplate(const Text('hello')));
+      final Finder finder = find.byType(Text);
+      await expectLater(finder, matchesGoldenFile('foo.png'));
+      expect(comparator.invocation, _ComparatorInvocation.update);
+      expect(comparator.imageBytes, hasLength(greaterThan(0)));
+      expect(comparator.golden, Uri.parse('foo.png'));
+      autoUpdateGoldenFiles = false;
+    });
+  });
+}
+
+enum _ComparatorBehavior {
+  returnTrue,
+  returnFalse,
+  throwTestFailure,
+}
+
+enum _ComparatorInvocation {
+  compare,
+  update,
+}
+
+class _FakeComparator implements GoldenFileComparator {
+  _ComparatorBehavior behavior = _ComparatorBehavior.returnTrue;
+  _ComparatorInvocation invocation;
+  Uint8List imageBytes;
+  Uri golden;
+
+  @override
+  Future<bool> compare(Uint8List imageBytes, Uri golden) {
+    invocation = _ComparatorInvocation.compare;
+    this.imageBytes = imageBytes;
+    this.golden = golden;
+    switch (behavior) {
+      case _ComparatorBehavior.returnTrue:
+        return new Future<bool>.value(true);
+      case _ComparatorBehavior.returnFalse:
+        return new Future<bool>.value(false);
+      case _ComparatorBehavior.throwTestFailure:
+        throw new TestFailure('fake message');
+    }
+    return new Future<bool>.value(false);
+  }
+
+  @override
+  Future<void> update(Uri golden, Uint8List imageBytes) {
+    invocation = _ComparatorInvocation.update;
+    this.golden = golden;
+    this.imageBytes = imageBytes;
+    return new Future<void>.value();
+  }
 }

@@ -1,7 +1,7 @@
 {
   "scriptCategory": "English-like",
   "@scriptCategory": {
-    "description": "The name of the language's script category (see https://material.io/guidelines/style/typography.html#typography-language-categories-reference)."
+    "description": "The name of the language's script category (see https://material.io/go/design-typography#typography-language-categories-reference)."
   },
 
   "timeOfDayFormat": "h:mm a",
@@ -179,5 +179,25 @@
   "showAccountsLabel": "Show accounts",
   "@showAccountsLabel": {
     "description": "The accessibility label used for the button on a UserAccountsDrawerHeader that shows the list of accounts."
+  },
+
+  "drawerLabel": "Navigation menu",
+  "@drawerLabel": {
+    "description": "The audio announcement made when the Drawer is opened."
+  },
+
+  "popupMenuLabel": "Popup menu",
+  "@popupMenuLabel": {
+    "description": "The audio announcement made when a PopupMenu is opened."
+  },
+
+  "dialogLabel": "Dialog",
+  "@dialogLabel": {
+    "description": "The audio announcement made when a Dialog is opened."
+  },
+
+  "alertDialogLabel": "Alert",
+  "@dialogLabel": {
+    "description": "The audio announcement made when an AlertDialog is opened."
   }
 }

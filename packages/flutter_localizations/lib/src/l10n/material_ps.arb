@@ -33,5 +33,9 @@
   "signedInLabel": "ننوتل",
   "hideAccountsLabel": "حسابونه پټ کړئ",
   "showAccountsLabel": "حسابونه ښکاره کړئ",
-  "modalBarrierDismissLabel": "رد کړه"
+  "modalBarrierDismissLabel": "رد کړه",
+  "drawerLabel": "د نیویگیشن مینو",
+  "popupMenuLabel": "د پاپ اپ مینو",
+  "dialogLabel": "خبرې اترې",
+  "alertDialogLabel": "خبرتیا"
 }

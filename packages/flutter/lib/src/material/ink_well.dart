@@ -129,11 +129,11 @@ abstract class InteractiveInkFeatureFactory {
 /// The first diagram shows how it looks if the [InkResponse] is relatively
 /// large:
 ///
-/// ![The highlight is a disc centered in the box, smaller than the child widget.](https://flutter.github.io/assets-for-api-docs/material/ink_response_large.png)
+/// ![The highlight is a disc centered in the box, smaller than the child widget.](https://flutter.github.io/assets-for-api-docs/assets/material/ink_response_large.png)
 ///
 /// The second diagram shows how it looks if the [InkResponse] is small:
 ///
-/// ![The highlight is a disc overflowing the box, centered on the child.](https://flutter.github.io/assets-for-api-docs/material/ink_response_small.png)
+/// ![The highlight is a disc overflowing the box, centered on the child.](https://flutter.github.io/assets-for-api-docs/assets/material/ink_response_small.png)
 ///
 /// The main thing to notice from these diagrams is that the splashes happily
 /// exceed the bounds of the widget (because [containedInkWell] is false).
@@ -142,7 +142,7 @@ abstract class InteractiveInkFeatureFactory {
 /// [highlightShape] of [BoxShape.rectangle] with [containedInkWell] set to
 /// true. These are the values used by [InkWell].
 ///
-/// ![The highlight is a rectangle the size of the box.](https://flutter.github.io/assets-for-api-docs/material/ink_well.png)
+/// ![The highlight is a rectangle the size of the box.](https://flutter.github.io/assets-for-api-docs/assets/material/ink_well.png)
 ///
 /// The [InkResponse] widget must have a [Material] widget as an ancestor. The
 /// [Material] widget is where the ink reactions are actually painted. This
@@ -382,6 +382,10 @@ class InkResponse extends StatefulWidget {
       gestures.add('double tap');
     if (onLongPress != null)
       gestures.add('long press');
+    if (onTapDown != null)
+      gestures.add('tap down');
+    if (onTapCancel != null)
+      gestures.add('tap cancel');
     properties.add(new IterableProperty<String>('gestures', gestures, ifEmpty: '<none>'));
     properties.add(new DiagnosticsProperty<bool>('containedInkWell', containedInkWell, level: DiagnosticLevel.fine));
     properties.add(new DiagnosticsProperty<BoxShape>(
@@ -561,7 +565,7 @@ class _InkResponseState<T extends InkResponse> extends State<T> with AutomaticKe
 /// The following diagram shows how an [InkWell] looks when tapped, when using
 /// default values.
 ///
-/// ![The highlight is a rectangle the size of the box.](https://flutter.github.io/assets-for-api-docs/material/ink_well.png)
+/// ![The highlight is a rectangle the size of the box.](https://flutter.github.io/assets-for-api-docs/assets/material/ink_well.png)
 ///
 /// The [InkWell] widget must have a [Material] widget as an ancestor. The
 /// [Material] widget is where the ink reactions are actually painted. This

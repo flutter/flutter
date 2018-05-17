@@ -124,7 +124,7 @@ class ContactsDemoState extends State<ContactsDemo> {
                   tooltip: 'Edit',
                   onPressed: () {
                     _scaffoldKey.currentState.showSnackBar(const SnackBar(
-                      content: const Text('This is actually just a demo. Editing isn\'t supported.')
+                      content: const Text("Editing isn't supported in this screen.")
                     ));
                   },
                 ),
@@ -203,7 +203,7 @@ class ContactsDemoState extends State<ContactsDemo> {
                       tooltip: 'Send message',
                       onPressed: () {
                         _scaffoldKey.currentState.showSnackBar(const SnackBar(
-                          content: const Text('In this demo, this button doesn\'t do anything.')
+                          content: const Text('A messaging app appears.')
                         ));
                       },
                       lines: const <String>[
@@ -247,7 +247,7 @@ class ContactsDemoState extends State<ContactsDemo> {
                       tooltip: 'Send work e-mail',
                       onPressed: () {
                         _scaffoldKey.currentState.showSnackBar(const SnackBar(
-                          content: const Text('This is a demo, so this button does not actually work.')
+                          content: const Text('Summon your favorite e-mail application here.')
                         ));
                       },
                       lines: const <String>[

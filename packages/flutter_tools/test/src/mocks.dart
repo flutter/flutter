@@ -122,7 +122,7 @@ class MockProcessManager implements ProcessManager {
     Map<String, String> environment,
     bool includeParentEnvironment: true,
     bool runInShell: false,
-    ProcessStartMode mode: ProcessStartMode.NORMAL,
+    ProcessStartMode mode: ProcessStartMode.NORMAL, // ignore: deprecated_member_use
   }) {
     if (!succeed) {
       final String executable = command[0];

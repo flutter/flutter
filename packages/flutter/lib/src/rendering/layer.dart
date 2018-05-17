@@ -2,8 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
 import 'dart:collection';
-import 'dart:ui' as ui show ImageFilter, Picture, SceneBuilder;
+import 'dart:ui' as ui show Image, ImageFilter, Picture, Scene, SceneBuilder;
 import 'dart:ui' show Offset;
 
 import 'package:flutter/foundation.dart';
@@ -515,9 +516,50 @@ class OffsetLayer extends ContainerLayer {
     super.debugFillProperties(properties);
     properties.add(new DiagnosticsProperty<Offset>('offset', offset));
   }
+
+  /// Capture an image of the current state of this layer and its children.
+  ///
+  /// The returned [ui.Image] has uncompressed raw RGBA bytes, will be offset
+  /// by the top-left corner of [bounds], and have dimensions equal to the size
+  /// of [bounds] multiplied by [pixelRatio].
+  ///
+  /// The [pixelRatio] describes the scale between the logical pixels and the
+  /// size of the output image. It is independent of the
+  /// [window.devicePixelRatio] for the device, so specifying 1.0 (the default)
+  /// will give you a 1:1 mapping between logical pixels and the output pixels
+  /// in the image.
+  ///
+  /// See also:
+  ///
+  ///  * [RenderRepaintBoundary.toImage] for a similar API at the render object level.
+  ///  * [dart:ui.Scene.toImage] for more information about the image returned.
+  Future<ui.Image> toImage(Rect bounds, {double pixelRatio: 1.0}) async {
+    assert(bounds != null);
+    assert(pixelRatio != null);
+    final ui.SceneBuilder builder = new ui.SceneBuilder();
+    final Matrix4 transform = new Matrix4.translationValues(bounds.left - offset.dx, bounds.top - offset.dy, 0.0);
+    transform.scale(pixelRatio, pixelRatio);
+    builder.pushTransform(transform.storage);
+    addToScene(builder, Offset.zero);
+    final ui.Scene scene = builder.build();
+    try {
+      // Size is rounded up to the next pixel to make sure we don't clip off
+      // anything.
+      return await scene.toImage(
+        (pixelRatio * bounds.width).ceil(),
+        (pixelRatio * bounds.height).ceil(),
+      );
+    } finally {
+      scene.dispose();
+    }
+  }
 }
 
 /// A composite layer that clips its children using a rectangle.
+///
+/// When debugging, setting [debugDisableClipLayers] to true will cause this
+/// layer to be skipped (directly replaced by its children). This can be helpful
+/// to track down the cause of performance problems.
 class ClipRectLayer extends ContainerLayer {
   /// Creates a layer with a rectangular clip.
   ///
@@ -533,10 +575,15 @@ class ClipRectLayer extends ContainerLayer {
 
   @override
   void addToScene(ui.SceneBuilder builder, Offset layerOffset) {
-    if (!debugDisableClipLayers)
+    bool enabled = true;
+    assert(() {
+      enabled = !debugDisableClipLayers;
+      return true;
+    }());
+    if (enabled)
       builder.pushClipRect(clipRect.shift(layerOffset));
     addChildrenToScene(builder, layerOffset);
-    if (!debugDisableClipLayers)
+    if (enabled)
       builder.pop();
   }
 
@@ -548,6 +595,10 @@ class ClipRectLayer extends ContainerLayer {
 }
 
 /// A composite layer that clips its children using a rounded rectangle.
+///
+/// When debugging, setting [debugDisableClipLayers] to true will cause this
+/// layer to be skipped (directly replaced by its children). This can be helpful
+/// to track down the cause of performance problems.
 class ClipRRectLayer extends ContainerLayer {
   /// Creates a layer with a rounded-rectangular clip.
   ///
@@ -563,10 +614,15 @@ class ClipRRectLayer extends ContainerLayer {
 
   @override
   void addToScene(ui.SceneBuilder builder, Offset layerOffset) {
-    if (!debugDisableClipLayers)
+    bool enabled = true;
+    assert(() {
+      enabled = !debugDisableClipLayers;
+      return true;
+    }());
+    if (enabled)
       builder.pushClipRRect(clipRRect.shift(layerOffset));
     addChildrenToScene(builder, layerOffset);
-    if (!debugDisableClipLayers)
+    if (enabled)
       builder.pop();
   }
 
@@ -578,6 +634,10 @@ class ClipRRectLayer extends ContainerLayer {
 }
 
 /// A composite layer that clips its children using a path.
+///
+/// When debugging, setting [debugDisableClipLayers] to true will cause this
+/// layer to be skipped (directly replaced by its children). This can be helpful
+/// to track down the cause of performance problems.
 class ClipPathLayer extends ContainerLayer {
   /// Creates a layer with a path-based clip.
   ///
@@ -593,10 +653,15 @@ class ClipPathLayer extends ContainerLayer {
 
   @override
   void addToScene(ui.SceneBuilder builder, Offset layerOffset) {
-    if (!debugDisableClipLayers)
+    bool enabled = true;
+    assert(() {
+      enabled = !debugDisableClipLayers;
+      return true;
+    }());
+    if (enabled)
       builder.pushClipPath(clipPath.shift(layerOffset));
     addChildrenToScene(builder, layerOffset);
-    if (!debugDisableClipLayers)
+    if (enabled)
       builder.pop();
   }
 }
@@ -654,6 +719,10 @@ class TransformLayer extends OffsetLayer {
 }
 
 /// A composited layer that makes its children partially transparent.
+///
+/// When debugging, setting [debugDisableOpacityLayers] to true will cause this
+/// layer to be skipped (directly replaced by its children). This can be helpful
+/// to track down the cause of performance problems.
 class OpacityLayer extends ContainerLayer {
   /// Creates an opacity layer.
   ///
@@ -672,10 +741,15 @@ class OpacityLayer extends ContainerLayer {
 
   @override
   void addToScene(ui.SceneBuilder builder, Offset layerOffset) {
-    if (!debugDisableOpacityLayers)
+    bool enabled = true;
+    assert(() {
+      enabled = !debugDisableOpacityLayers;
+      return true;
+    }());
+    if (enabled)
       builder.pushOpacity(alpha);
     addChildrenToScene(builder, layerOffset);
-    if (!debugDisableOpacityLayers)
+    if (enabled)
       builder.pop();
   }
 
@@ -755,6 +829,10 @@ class BackdropFilterLayer extends ContainerLayer {
 /// For example, the layer casts a shadow according to its geometry and the
 /// relative position of lights and other physically modelled objects in the
 /// scene.
+///
+/// When debugging, setting [debugDisablePhysicalShapeLayers] to true will cause this
+/// layer to be skipped (directly replaced by its children). This can be helpful
+/// to track down the cause of performance problems.
 class PhysicalModelLayer extends ContainerLayer {
   /// Creates a composited layer that uses a physical model to producing
   /// lighting effects.
@@ -780,6 +858,12 @@ class PhysicalModelLayer extends ContainerLayer {
   ///
   /// The scene must be explicitly recomposited after this property is changed
   /// (as described at [Layer]).
+  ///
+  /// In tests, the [debugDisableShadows] flag is set to true by default.
+  /// Several widgets and render objects force all elevations to zero when this
+  /// flag is set. For this reason, this property will often be set to zero in
+  /// tests even if the layer should be raised. To verify the actual value,
+  /// consider setting [debugDisableShadows] to false in your test.
   double elevation;
 
   /// The background color.
@@ -793,15 +877,21 @@ class PhysicalModelLayer extends ContainerLayer {
 
   @override
   void addToScene(ui.SceneBuilder builder, Offset layerOffset) {
-    if (!debugDisablePhysicalShapeLayers)
+    bool enabled = true;
+    assert(() {
+      enabled = !debugDisablePhysicalShapeLayers;
+      return true;
+    }());
+    if (enabled) {
       builder.pushPhysicalShape(
         path: clipPath.shift(layerOffset),
         elevation: elevation,
         color: color,
         shadowColor: shadowColor,
       );
+    }
     addChildrenToScene(builder, layerOffset);
-    if (!debugDisablePhysicalShapeLayers)
+    if (enabled)
       builder.pop();
   }
 

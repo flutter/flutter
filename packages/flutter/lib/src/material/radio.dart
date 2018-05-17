@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
@@ -94,7 +93,7 @@ class Radio<T> extends StatefulWidget {
 
   /// The color to use when this radio button is selected.
   ///
-  /// Defaults to accent color of the current [Theme].
+  /// Defaults to [ThemeData.toggleableActiveColor].
   final Color activeColor;
 
   @override
@@ -119,7 +118,7 @@ class _RadioState<T> extends State<Radio<T>> with TickerProviderStateMixin {
     final ThemeData themeData = Theme.of(context);
     return new _RadioRenderObjectWidget(
       selected: widget.value == widget.groupValue,
-      activeColor: widget.activeColor ?? themeData.accentColor,
+      activeColor: widget.activeColor ?? themeData.toggleableActiveColor,
       inactiveColor: _getInactiveColor(themeData),
       onChanged: _enabled ? _handleChanged : null,
       vsync: this,

@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
 
@@ -77,17 +78,142 @@ enum SystemUiOverlay {
   bottom,
 }
 
+/// Describes the contrast needs of a color.
+enum Brightness {
+  /// The color is dark and will require a light text color to achieve readable
+  /// contrast.
+  ///
+  /// For example, the color might be dark grey, requiring white text.
+  dark,
+
+  /// The color is light and will require a dark text color to achieve readable
+  /// contrast.
+  ///
+  /// For example, the color might be bright white, requiring black text.
+  light,
+}
+
 /// Specifies a preference for the style of the system overlays.
 ///
 /// Used by [SystemChrome.setSystemUIOverlayStyle].
-enum SystemUiOverlayStyle {
+class SystemUiOverlayStyle {
   /// System overlays should be drawn with a light color. Intended for
   /// applications with a dark background.
-  light,
+  static const SystemUiOverlayStyle light = const SystemUiOverlayStyle(
+    systemNavigationBarColor: const Color(0xFFFFFFFF),
+    systemNavigationBarDividerColor: null,
+    statusBarColor: null,
+    systemNavigationBarIconBrightness: Brightness.dark,
+    statusBarIconBrightness: Brightness.dark,
+    statusBarBrightness: Brightness.dark,
+  );
 
   /// System overlays should be drawn with a dark color. Intended for
   /// applications with a light background.
-  dark,
+  static const SystemUiOverlayStyle dark = const SystemUiOverlayStyle(
+    systemNavigationBarColor: const Color(0xFF000000),
+    systemNavigationBarDividerColor: null,
+    statusBarColor: null,
+    systemNavigationBarIconBrightness: Brightness.light,
+    statusBarIconBrightness: Brightness.light,
+    statusBarBrightness: Brightness.light,
+  );
+
+  /// Creates a new [SystemUiOverlayStyle].
+  const SystemUiOverlayStyle({
+    this.systemNavigationBarColor,
+    this.systemNavigationBarDividerColor,
+    this.systemNavigationBarIconBrightness,
+    this.statusBarColor,
+    this.statusBarBrightness,
+    this.statusBarIconBrightness,
+  });
+
+  /// The color of the system bottom navigation bar.
+  /// 
+  /// Only honored in Android versions O and greater.
+  final Color systemNavigationBarColor;
+
+  /// The color of the divider between the system's bottom navigation bar and the app's content.
+  /// 
+  /// Only honored in Android versions P and greater.
+  final Color systemNavigationBarDividerColor;
+
+  /// The brightness of the system navigation bar icons.
+  /// 
+  /// Only honored in Android versions O and greater.
+  final Brightness systemNavigationBarIconBrightness;
+
+  /// The color of top status bar.
+  /// 
+  /// Only honored in Android version M and greater.
+  final Color statusBarColor;
+
+  /// The brightness of top status bar.
+  /// 
+  /// Only honored in iOS .
+  final Brightness statusBarBrightness;
+
+  /// The brightness of the top status bar icons.
+  /// 
+  /// Only honored in Android version M and greater.
+  final Brightness statusBarIconBrightness;
+
+  /// Convert this event to a map for serialization.
+  Map<String, dynamic> _toMap() {
+    return <String, dynamic>{
+      'systemNavigationBarColor': systemNavigationBarColor?.value,
+      'systemNavigationBarDividerColor': systemNavigationBarDividerColor?.value,
+      'statusBarColor': statusBarColor?.value,
+      'statusBarBrightness': statusBarBrightness?.toString(),
+      'statusBarIconBrightness': statusBarIconBrightness?.toString(),
+      'systemNavigationBarIconBrightness': systemNavigationBarIconBrightness?.toString(),
+    };
+  }
+
+  /// Creates a copy of this theme with the given fields replaced with new values.
+  SystemUiOverlayStyle copyWith({
+    Color systemNavigationBarColor,
+    Color systemNavigationBarDividerColor,
+    Color statusBarColor,
+    Brightness statusBarBrightness,
+    Brightness statusBarIconBrightness,
+    Brightness systemNavigationBarIconBrightness,
+  }) {
+    return new SystemUiOverlayStyle(
+      systemNavigationBarColor: systemNavigationBarColor ?? this.systemNavigationBarColor,
+      systemNavigationBarDividerColor: systemNavigationBarDividerColor ?? this.systemNavigationBarDividerColor,
+      statusBarColor: statusBarColor ?? this.statusBarColor,
+      statusBarIconBrightness: statusBarIconBrightness ?? this.statusBarIconBrightness,
+      statusBarBrightness: statusBarBrightness ?? this.statusBarBrightness,
+      systemNavigationBarIconBrightness: systemNavigationBarIconBrightness ?? this.systemNavigationBarIconBrightness,
+    );
+  }
+
+  @override
+  int get hashCode {
+    return hashValues(
+      systemNavigationBarColor,
+      systemNavigationBarDividerColor,
+      statusBarColor,
+      statusBarBrightness,
+      statusBarIconBrightness,
+      systemNavigationBarIconBrightness,
+    );
+  }
+
+  @override
+  bool operator ==(dynamic other) {
+    if (other.runtimeType != runtimeType)
+      return false;
+    final SystemUiOverlayStyle typedOther = other;
+    return typedOther.systemNavigationBarColor == systemNavigationBarColor
+      && typedOther.systemNavigationBarDividerColor == systemNavigationBarDividerColor
+      && typedOther.statusBarColor == statusBarColor
+      && typedOther.statusBarIconBrightness == statusBarIconBrightness
+      && typedOther.statusBarBrightness == statusBarBrightness
+      && typedOther.systemNavigationBarIconBrightness == systemNavigationBarIconBrightness;
+  }
 }
 
 List<String> _stringify(List<dynamic> list) {
@@ -195,7 +321,7 @@ class SystemChrome {
       if (_pendingStyle != _latestStyle) {
         SystemChannels.platform.invokeMethod(
           'SystemChrome.setSystemUIOverlayStyle',
-          _pendingStyle.toString(),
+          _pendingStyle._toMap(),
         );
         _latestStyle = _pendingStyle;
       }

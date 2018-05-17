@@ -146,7 +146,7 @@ class CircleAvatar extends StatelessWidget {
   Widget build(BuildContext context) {
     assert(debugCheckHasMediaQuery(context));
     final ThemeData theme = Theme.of(context);
-    TextStyle textStyle = theme.primaryTextTheme.title.copyWith(color: foregroundColor);
+    TextStyle textStyle = theme.primaryTextTheme.subhead.copyWith(color: foregroundColor);
     Color effectiveBackgroundColor = backgroundColor;
     if (effectiveBackgroundColor == null) {
       switch (ThemeData.estimateBrightnessForColor(textStyle.color)) {
@@ -179,7 +179,9 @@ class CircleAvatar extends StatelessWidget {
       duration: kThemeChangeDuration,
       decoration: new BoxDecoration(
         color: effectiveBackgroundColor,
-        image: backgroundImage != null ? new DecorationImage(image: backgroundImage) : null,
+        image: backgroundImage != null
+          ? new DecorationImage(image: backgroundImage, fit: BoxFit.cover)
+          : null,
         shape: BoxShape.circle,
       ),
       child: child == null

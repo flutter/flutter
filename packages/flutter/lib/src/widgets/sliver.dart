@@ -739,6 +739,20 @@ class SliverMultiBoxAdaptorElement extends RenderObjectElement implements Render
   }
 
   @override
+  Element updateChild(Element child, Widget newWidget, dynamic newSlot) {
+    final SliverMultiBoxAdaptorParentData oldParentData = child?.renderObject?.parentData;
+    final Element newChild = super.updateChild(child, newWidget, newSlot);
+    final SliverMultiBoxAdaptorParentData newParentData = newChild?.renderObject?.parentData;
+
+    // Preserve the old layoutOffset if the renderObject was swapped out.
+    if (oldParentData != newParentData && oldParentData != null && newParentData != null) {
+      newParentData.layoutOffset = oldParentData.layoutOffset;
+    }
+
+    return newChild;
+  }
+
+  @override
   void forgetChild(Element child) {
     assert(child != null);
     assert(child.slot != null);
@@ -873,6 +887,25 @@ class SliverMultiBoxAdaptorElement extends RenderObjectElement implements Render
    // the visitor:
    assert(!_childElements.values.any((Element child) => child == null));
     _childElements.values.toList().forEach(visitor);
+  }
+
+  @override
+  void debugVisitOnstageChildren(ElementVisitor visitor) {
+    _childElements.values.where((Element child) {
+      final SliverMultiBoxAdaptorParentData parentData = child.renderObject.parentData;
+      double itemExtent;
+      switch (renderObject.constraints.axis) {
+        case Axis.horizontal:
+          itemExtent = child.renderObject.paintBounds.width;
+          break;
+        case Axis.vertical:
+          itemExtent = child.renderObject.paintBounds.height;
+          break;
+      }
+
+      return parentData.layoutOffset < renderObject.constraints.scrollOffset + renderObject.constraints.remainingPaintExtent &&
+          parentData.layoutOffset + itemExtent > renderObject.constraints.scrollOffset;
+    }).forEach(visitor);
   }
 }
 

@@ -47,16 +47,16 @@ class FlutterProject {
   /// The Android sub project of this project.
   AndroidProject get android => new AndroidProject(directory.childDirectory('android'));
 
-  /// Returns true if this project is a plugin project.
-  bool get isPluginProject => directory.childDirectory('example').childFile('pubspec.yaml').existsSync();
+  /// Returns true if this project has an example application
+  bool get hasExampleApp => directory.childDirectory('example').childFile('pubspec.yaml').existsSync();
 
-  /// The example sub project of this (plugin) project.
+  /// The example sub project of this (package or plugin) project.
   FlutterProject get example => new FlutterProject(directory.childDirectory('example'));
 
   /// Generates project files necessary to make Gradle builds work on Android
-  /// and CocoaPods+Xcode work on iOS.
+  /// and CocoaPods+Xcode work on iOS, for app projects only
   void ensureReadyForPlatformSpecificTooling() {
-    if (!directory.existsSync() || isPluginProject) {
+    if (!directory.existsSync() || hasExampleApp) {
       return;
     }
     injectPlugins(directory: directory.path);

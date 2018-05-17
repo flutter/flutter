@@ -5,7 +5,6 @@
 import 'dart:async';
 import 'dart:ui' show lerpDouble;
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
@@ -152,12 +151,12 @@ class _TabStyle extends AnimatedWidget {
     final ThemeData themeData = Theme.of(context);
     final TextStyle defaultStyle = labelStyle ?? themeData.primaryTextTheme.body2;
     final TextStyle defaultUnselectedStyle = unselectedLabelStyle ?? labelStyle ?? themeData.primaryTextTheme.body2;
+    final Animation<double> animation = listenable;
     final TextStyle textStyle = selected
-      ? defaultStyle
-      : defaultUnselectedStyle;
+      ? TextStyle.lerp(defaultStyle, defaultUnselectedStyle, animation.value)
+      : TextStyle.lerp(defaultUnselectedStyle, defaultStyle, animation.value);
     final Color selectedColor = labelColor ?? themeData.primaryTextTheme.body2.color;
     final Color unselectedColor = unselectedLabelColor ?? selectedColor.withAlpha(0xB2); // 70% alpha
-    final Animation<double> animation = listenable;
     final Color color = selected
       ? Color.lerp(selectedColor, unselectedColor, animation.value)
       : Color.lerp(unselectedColor, selectedColor, animation.value);
@@ -920,13 +919,13 @@ class _TabBarState extends State<TabBar> {
         wrappedTabs[tabIndex] = _buildStyledTab(wrappedTabs[tabIndex], true, centerAnimation);
         if (_currentIndex > 0) {
           final int tabIndex = _currentIndex - 1;
-          final Animation<double> previousAnimation = new _DragAnimation(_controller, tabIndex);
-          wrappedTabs[tabIndex] = _buildStyledTab(wrappedTabs[tabIndex], true, previousAnimation);
+          final Animation<double> previousAnimation = new ReverseAnimation(new _DragAnimation(_controller, tabIndex));
+          wrappedTabs[tabIndex] = _buildStyledTab(wrappedTabs[tabIndex], false, previousAnimation);
         }
         if (_currentIndex < widget.tabs.length - 1) {
           final int tabIndex = _currentIndex + 1;
-          final Animation<double> nextAnimation = new _DragAnimation(_controller, tabIndex);
-          wrappedTabs[tabIndex] = _buildStyledTab(wrappedTabs[tabIndex], true, nextAnimation);
+          final Animation<double> nextAnimation = new ReverseAnimation(new _DragAnimation(_controller, tabIndex));
+          wrappedTabs[tabIndex] = _buildStyledTab(wrappedTabs[tabIndex], false, nextAnimation);
         }
       }
     }

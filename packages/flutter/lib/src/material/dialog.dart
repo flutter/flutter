@@ -166,6 +166,7 @@ class AlertDialog extends StatelessWidget {
     this.content,
     this.contentPadding: const EdgeInsets.fromLTRB(24.0, 20.0, 24.0, 24.0),
     this.actions,
+    this.semanticLabel,
   }) : assert(contentPadding != null),
        super(key: key);
 
@@ -216,18 +217,41 @@ class AlertDialog extends StatelessWidget {
   /// from the [actions].
   final List<Widget> actions;
 
+  /// The semantic label of the dialog used by accessibility frameworks to 
+  /// announce screen transitions when the dialog is opened and closed.
+  /// 
+  /// If this label is not provided, a semantic label will be infered from the
+  /// [title] if it is not null.  If there is no title, the label will be taken
+  /// from [MaterialLocalizations.alertDialogLabel].
+  /// 
+  /// See also:
+  /// 
+  ///  * [SemanticsConfiguration.isRouteName], for a description of how this
+  ///    value is used.
+  final String semanticLabel;
+
   @override
   Widget build(BuildContext context) {
     final List<Widget> children = <Widget>[];
+    String label = semanticLabel;
 
     if (title != null) {
       children.add(new Padding(
         padding: titlePadding ?? new EdgeInsets.fromLTRB(24.0, 24.0, 24.0, content == null ? 20.0 : 0.0),
         child: new DefaultTextStyle(
           style: Theme.of(context).textTheme.title,
-          child: title,
+          child: new Semantics(child: title, namesRoute: true),
         ),
       ));
+    } else {
+      switch (defaultTargetPlatform) {
+        case TargetPlatform.iOS:
+          label = semanticLabel;
+          break;
+        case TargetPlatform.android:
+        case TargetPlatform.fuchsia:
+          label = semanticLabel ?? MaterialLocalizations.of(context)?.alertDialogLabel;
+      }
     }
 
     if (content != null) {
@@ -250,15 +274,22 @@ class AlertDialog extends StatelessWidget {
       ));
     }
 
-    return new Dialog(
-      child: new IntrinsicWidth(
-        child: new Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: children,
-        ),
+    Widget dialogChild = new IntrinsicWidth(
+      child: new Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: children,
       ),
     );
+
+    if (label != null)
+      dialogChild = new Semantics(
+        namesRoute: true,
+        label: label,
+        child: dialogChild
+      );
+
+    return new Dialog(child: dialogChild);
   }
 }
 
@@ -402,6 +433,7 @@ class SimpleDialog extends StatelessWidget {
     this.titlePadding: const EdgeInsets.fromLTRB(24.0, 24.0, 24.0, 0.0),
     this.children,
     this.contentPadding: const EdgeInsets.fromLTRB(0.0, 12.0, 0.0, 16.0),
+    this.semanticLabel,
   }) : assert(titlePadding != null),
        assert(contentPadding != null),
        super(key: key);
@@ -443,18 +475,41 @@ class SimpleDialog extends StatelessWidget {
   /// the top padding ends up being 24 pixels.
   final EdgeInsetsGeometry contentPadding;
 
+  /// The semantic label of the dialog used by accessibility frameworks to 
+  /// announce screen transitions when the dialog is opened and closed.
+  /// 
+  /// If this label is not provided, a semantic label will be infered from the
+  /// [title] if it is not null.  If there is no title, the label will be taken
+  /// from [MaterialLocalizations.dialogLabel].
+  /// 
+  /// See also:
+  /// 
+  ///  * [SemanticsConfiguration.isRouteName], for a description of how this
+  ///    value is used.
+  final String semanticLabel;
+
   @override
   Widget build(BuildContext context) {
     final List<Widget> body = <Widget>[];
+    String label = semanticLabel;
 
     if (title != null) {
       body.add(new Padding(
         padding: titlePadding,
         child: new DefaultTextStyle(
           style: Theme.of(context).textTheme.title,
-          child: title,
+          child: new Semantics(namesRoute: true, child: title),
         )
       ));
+    } else {
+      switch (defaultTargetPlatform) {
+        case TargetPlatform.iOS:
+          label = semanticLabel;
+          break;
+        case TargetPlatform.android:
+        case TargetPlatform.fuchsia:
+          label = semanticLabel ?? MaterialLocalizations.of(context)?.dialogLabel;
+      }
     }
 
     if (children != null) {
@@ -466,19 +521,25 @@ class SimpleDialog extends StatelessWidget {
       ));
     }
 
-    return new Dialog(
-      child: new IntrinsicWidth(
-        stepWidth: 56.0,
-        child: new ConstrainedBox(
-          constraints: const BoxConstraints(minWidth: 280.0),
-          child: new Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: body,
-          )
-        )
-      )
+    Widget dialogChild = new IntrinsicWidth(
+      stepWidth: 56.0,
+      child: new ConstrainedBox(
+        constraints: const BoxConstraints(minWidth: 280.0),
+        child: new Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: body,
+        ),
+      ),
     );
+
+    if (label != null)
+      dialogChild = new Semantics(
+        namesRoute: true,
+        label: label,
+        child: dialogChild,
+      );
+    return new Dialog(child: dialogChild);
   }
 }
 
@@ -514,7 +575,14 @@ class _DialogRoute<T> extends PopupRoute<T> {
     return new SafeArea(
       child: new Builder(
         builder: (BuildContext context) {
-          return theme != null ? new Theme(data: theme, child: child) : child;
+          final Widget annotatedChild = new Semantics(
+            child: child,
+            scopesRoute: true,
+            explicitChildNodes: true,
+          );
+          return theme != null
+            ? new Theme(data: theme, child: annotatedChild)
+            : annotatedChild;
         }
       ),
     );
@@ -570,9 +638,9 @@ Future<T> showDialog<T>({
   ) Widget child,
   WidgetBuilder builder,
 }) {
-  assert(child == null || builder == null); // ignore: deprecated_member_use
+  assert(child == null || builder == null);
   return Navigator.of(context, rootNavigator: true).push(new _DialogRoute<T>(
-    child: child ?? new Builder(builder: builder), // ignore: deprecated_member_use
+    child: child ?? new Builder(builder: builder),
     theme: Theme.of(context, shadowThemeOnly: true),
     barrierDismissible: barrierDismissible,
     barrierLabel: MaterialLocalizations.of(context).modalBarrierDismissLabel,

@@ -38,10 +38,10 @@ class CupertinoIcons {
   // Manually maintained list.
 
   /// A thin left chevron.
-  static const IconData left_chevron = const IconData(0xf3f0, fontFamily: iconFont, fontPackage: iconFontPackage, matchTextDirection: true);
+  static const IconData left_chevron = const IconData(0xf3d2, fontFamily: iconFont, fontPackage: iconFontPackage, matchTextDirection: true);
 
   /// A thin right chevron.
-  static const IconData right_chevron = const IconData(0xf3f2, fontFamily: iconFont, fontPackage: iconFontPackage, matchTextDirection: true);
+  static const IconData right_chevron = const IconData(0xf3d3, fontFamily: iconFont, fontPackage: iconFontPackage, matchTextDirection: true);
 
   /// iOS style share icon with an arrow pointing up from a box.
   ///

@@ -34,5 +34,9 @@
   "signedInLabel": "سائن ان کردہ ہے",
   "hideAccountsLabel": "اکاؤنٹس چھپائیں",
   "showAccountsLabel": "اکاؤنٹس دکھائیں",
-  "modalBarrierDismissLabel": "برخاست کریں"
+  "modalBarrierDismissLabel": "برخاست کریں",
+  "drawerLabel": "نیویگیشن مینو",
+  "popupMenuLabel": "پاپ اپ مینو",
+  "dialogLabel": "ڈائیلاگ",
+  "alertDialogLabel": "انتباہ"
 }

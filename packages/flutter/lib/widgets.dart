@@ -14,10 +14,10 @@ library widgets;
 
 export 'package:vector_math/vector_math_64.dart' show Matrix4;
 
-export 'src/widgets/animated_child_switcher.dart';
 export 'src/widgets/animated_cross_fade.dart';
 export 'src/widgets/animated_list.dart';
 export 'src/widgets/animated_size.dart';
+export 'src/widgets/animated_switcher.dart';
 export 'src/widgets/app.dart';
 export 'src/widgets/async.dart';
 export 'src/widgets/automatic_keep_alive.dart';
@@ -86,6 +86,7 @@ export 'src/widgets/size_changed_layout_notifier.dart';
 export 'src/widgets/sliver.dart';
 export 'src/widgets/sliver_persistent_header.dart';
 export 'src/widgets/sliver_prototype_extent_list.dart';
+export 'src/widgets/spacer.dart';
 export 'src/widgets/status_transitions.dart';
 export 'src/widgets/table.dart';
 export 'src/widgets/text.dart';

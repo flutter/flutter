@@ -388,11 +388,11 @@ class MockVMService extends BasicMock implements VMService {
 
   Future<Null> setUp() async {
     try {
-      _server = await HttpServer.bind(InternetAddress.LOOPBACK_IP_V6, 0);
+      _server = await HttpServer.bind(InternetAddress.LOOPBACK_IP_V6, 0); // ignore: deprecated_member_use
       _httpAddress = Uri.parse('http://[::1]:${_server.port}');
     } on SocketException {
       // Fall back to IPv4 if the host doesn't support binding to IPv6 localhost
-      _server = await HttpServer.bind(InternetAddress.LOOPBACK_IP_V4, 0);
+      _server = await HttpServer.bind(InternetAddress.LOOPBACK_IP_V4, 0); // ignore: deprecated_member_use
       _httpAddress = Uri.parse('http://127.0.0.1:${_server.port}');
     }
     _server.listen((HttpRequest request) {

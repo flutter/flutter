@@ -124,11 +124,15 @@ $assetsSection
 
       final AssetBundle bundle = AssetBundleFactory.instance.createBundle();
       await bundle.build(manifestPath: 'pubspec.yaml');
-      expect(bundle.entries.length, 2); // LICENSE, AssetManifest
+      expect(bundle.entries.length, 3); // LICENSE, AssetManifest, FontManifest
       const String expectedAssetManifest = '{}';
       expect(
         utf8.decode(await bundle.entries['AssetManifest.json'].contentsAsBytes()),
         expectedAssetManifest,
+      );
+      expect(
+        utf8.decode(await bundle.entries['FontManifest.json'].contentsAsBytes()),
+        '[]',
       );
     });
 
@@ -144,13 +148,16 @@ $assetsSection
 
       final AssetBundle bundle = AssetBundleFactory.instance.createBundle();
       await bundle.build(manifestPath: 'pubspec.yaml');
-      expect(bundle.entries.length, 2); // LICENSE, AssetManifest
+      expect(bundle.entries.length, 3); // LICENSE, AssetManifest, FontManifest
       const String expectedAssetManifest = '{}';
       expect(
         utf8.decode(await bundle.entries['AssetManifest.json'].contentsAsBytes()),
         expectedAssetManifest,
       );
-
+      expect(
+        utf8.decode(await bundle.entries['FontManifest.json'].contentsAsBytes()),
+        '[]',
+      );
     });
 
     testUsingContext('One asset is bundled when the package has and lists one asset its pubspec', () async {

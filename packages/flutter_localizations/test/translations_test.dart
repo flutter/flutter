@@ -21,6 +21,7 @@ void main() {
     'it', // Italian
     'ja', // Japanese
     'ko', // Korean
+    'ms', // Malay
     'nl', // Dutch
     'no', // Norwegian
     'pl', // Polish
@@ -31,6 +32,7 @@ void main() {
     'th', // Thai
     'tr', // Turkish
     'ur', // Urdu
+    'vi', // Vietnamese
     'zh', // Chinese (simplified)
   ];
 
@@ -61,6 +63,10 @@ void main() {
       expect(localizations.pasteButtonLabel, isNotNull);
       expect(localizations.selectAllButtonLabel, isNotNull);
       expect(localizations.viewLicensesButtonLabel, isNotNull);
+      expect(localizations.drawerLabel, isNotNull);
+      expect(localizations.popupMenuLabel, isNotNull);
+      expect(localizations.dialogLabel, isNotNull);
+      expect(localizations.alertDialogLabel, isNotNull);
 
       expect(localizations.aboutListTileTitle('FOO'), isNotNull);
       expect(localizations.aboutListTileTitle('FOO'), contains('FOO'));

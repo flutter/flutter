@@ -257,7 +257,7 @@ void main() {
       ),
     ));
 
-    expect(find.text('Alabama'), findsOneWidget);
+    expect(find.text('Alabama', skipOffstage: false), findsOneWidget);
 
     await tester.pumpWidget(new Directionality(
       textDirection: TextDirection.ltr,

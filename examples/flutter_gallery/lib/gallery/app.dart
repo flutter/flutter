@@ -8,53 +8,61 @@ import 'package:flutter/foundation.dart' show defaultTargetPlatform;
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart' show timeDilation;
 
+import 'package:url_launcher/url_launcher.dart';
+
+import 'demos.dart';
 import 'home.dart';
-import 'item.dart';
-import 'theme.dart';
-import 'updates.dart';
+import 'options.dart';
+import 'scales.dart';
+import 'themes.dart';
+import 'updater.dart';
 
 class GalleryApp extends StatefulWidget {
   const GalleryApp({
+    Key key,
     this.updateUrlFetcher,
     this.enablePerformanceOverlay: true,
-    this.checkerboardRasterCacheImages: true,
-    this.checkerboardOffscreenLayers: true,
+    this.enableRasterCacheImagesCheckerboard: true,
+    this.enableOffscreenLayersCheckerboard: true,
     this.onSendFeedback,
-    Key key}
-  ) : super(key: key);
+    this.testMode: false,
+  }) : super(key: key);
 
   final UpdateUrlFetcher updateUrlFetcher;
-
   final bool enablePerformanceOverlay;
-
-  final bool checkerboardRasterCacheImages;
-
-  final bool checkerboardOffscreenLayers;
-
+  final bool enableRasterCacheImagesCheckerboard;
+  final bool enableOffscreenLayersCheckerboard;
   final VoidCallback onSendFeedback;
+  final bool testMode;
 
   @override
-  GalleryAppState createState() => new GalleryAppState();
+  _GalleryAppState createState() => new _GalleryAppState();
 }
 
-class GalleryAppState extends State<GalleryApp> {
-  GalleryTheme _galleryTheme = kAllGalleryThemes[0];
-  bool _showPerformanceOverlay = false;
-  bool _checkerboardRasterCacheImages = false;
-  bool _checkerboardOffscreenLayers = false;
-  TextDirection _overrideDirection = TextDirection.ltr;
-  double _timeDilation = 1.0;
-  TargetPlatform _platform;
-
-  // A null value indicates "use system default".
-  double _textScaleFactor;
-
+class _GalleryAppState extends State<GalleryApp> {
+  GalleryOptions _options;
   Timer _timeDilationTimer;
+
+  Map<String, WidgetBuilder> _buildRoutes() {
+    // For a different example of how to set up an application routing table
+    // using named routes, consider the example in the Navigator class documentation:
+    // https://docs.flutter.io/flutter/widgets/Navigator-class.html
+    return new Map<String, WidgetBuilder>.fromIterable(
+      kAllGalleryDemos,
+      key: (dynamic demo) => '${demo.routeName}',
+      value: (dynamic demo) => demo.buildRoute,
+    );
+  }
 
   @override
   void initState() {
-    _timeDilation = timeDilation;
     super.initState();
+    _options = new GalleryOptions(
+      theme: kLightGalleryTheme,
+      textScaleFactor: kAllGalleryTextScaleValues[0],
+      timeDilation: timeDilation,
+      platform: defaultTargetPlatform,
+    );
   }
 
   @override
@@ -64,80 +72,51 @@ class GalleryAppState extends State<GalleryApp> {
     super.dispose();
   }
 
-  Widget _applyScaleFactor(Widget child) {
+  void _handleOptionsChanged(GalleryOptions newOptions) {
+    setState(() {
+      if (_options.timeDilation != newOptions.timeDilation) {
+        _timeDilationTimer?.cancel();
+        _timeDilationTimer = null;
+        if (newOptions.timeDilation > 1.0) {
+          // We delay the time dilation change long enough that the user can see
+          // that UI has started reacting and then we slam on the brakes so that
+          // they see that the time is in fact now dilated.
+          _timeDilationTimer = new Timer(const Duration(milliseconds: 150), () {
+            timeDilation = newOptions.timeDilation;
+          });
+        } else {
+          timeDilation = newOptions.timeDilation;
+        }
+      }
+
+      _options = newOptions;
+    });
+  }
+
+  Widget _applyTextScaleFactor(Widget child) {
     return new Builder(
-      builder: (BuildContext context) => new MediaQuery(
-        data: MediaQuery.of(context).copyWith(
-          textScaleFactor: _textScaleFactor,
-        ),
-        child: child,
-      ),
+      builder: (BuildContext context) {
+        return new MediaQuery(
+          data: MediaQuery.of(context).copyWith(
+            textScaleFactor: _options.textScaleFactor.scale,
+          ),
+          child: child,
+        );
+      },
     );
   }
 
   @override
   Widget build(BuildContext context) {
     Widget home = new GalleryHome(
-      galleryTheme: _galleryTheme,
-      onThemeChanged: (GalleryTheme value) {
-        setState(() {
-          _galleryTheme = value;
-        });
-      },
-      showPerformanceOverlay: _showPerformanceOverlay,
-      onShowPerformanceOverlayChanged: widget.enablePerformanceOverlay ? (bool value) {
-        setState(() {
-          _showPerformanceOverlay = value;
-        });
-      } : null,
-      checkerboardRasterCacheImages: _checkerboardRasterCacheImages,
-      onCheckerboardRasterCacheImagesChanged: widget.checkerboardRasterCacheImages ? (bool value) {
-        setState(() {
-          _checkerboardRasterCacheImages = value;
-        });
-      } : null,
-      checkerboardOffscreenLayers: _checkerboardOffscreenLayers,
-      onCheckerboardOffscreenLayersChanged: widget.checkerboardOffscreenLayers ? (bool value) {
-        setState(() {
-          _checkerboardOffscreenLayers = value;
-        });
-      } : null,
-      onPlatformChanged: (TargetPlatform value) {
-        setState(() {
-          _platform = value == defaultTargetPlatform ? null : value;
-        });
-      },
-      timeDilation: _timeDilation,
-      onTimeDilationChanged: (double value) {
-        setState(() {
-          _timeDilationTimer?.cancel();
-          _timeDilationTimer = null;
-          _timeDilation = value;
-          if (_timeDilation > 1.0) {
-            // We delay the time dilation change long enough that the user can see
-            // that the checkbox in the drawer has started reacting, then we slam
-            // on the brakes so that they see that the time is in fact now dilated.
-            _timeDilationTimer = new Timer(const Duration(milliseconds: 150), () {
-              timeDilation = _timeDilation;
-            });
-          } else {
-            timeDilation = _timeDilation;
-          }
-        });
-      },
-      textScaleFactor: _textScaleFactor,
-      onTextScaleFactorChanged: (double value) {
-        setState(() {
-          _textScaleFactor = value;
-         });
-      },
-      overrideDirection: _overrideDirection,
-      onOverrideDirectionChanged: (TextDirection value) {
-        setState(() {
-          _overrideDirection = value;
-        });
-      },
-      onSendFeedback: widget.onSendFeedback,
+      testMode: widget.testMode,
+      optionsPage: new GalleryOptionsPage(
+        options: _options,
+        onOptionsChanged: _handleOptionsChanged,
+        onSendFeedback: widget.onSendFeedback ?? () {
+          launch('https://github.com/flutter/flutter/issues/new', forceSafariVC: false);
+        },
+      ),
     );
 
     if (widget.updateUrlFetcher != null) {
@@ -147,31 +126,21 @@ class GalleryAppState extends State<GalleryApp> {
       );
     }
 
-    final Map<String, WidgetBuilder> _kRoutes = <String, WidgetBuilder>{};
-    for (GalleryItem item in kAllGalleryItems) {
-      // For a different example of how to set up an application routing table
-      // using named routes, consider the example in the Navigator class documentation:
-      // https://docs.flutter.io/flutter/widgets/Navigator-class.html
-      _kRoutes[item.routeName] = (BuildContext context) {
-        return item.buildRoute(context);
-      };
-    }
-
     return new MaterialApp(
+      theme: _options.theme.data.copyWith(platform: _options.platform),
       title: 'Flutter Gallery',
       color: Colors.grey,
-      theme: _galleryTheme.theme.copyWith(platform: _platform ?? defaultTargetPlatform),
-      showPerformanceOverlay: _showPerformanceOverlay,
-      checkerboardRasterCacheImages: _checkerboardRasterCacheImages,
-      checkerboardOffscreenLayers: _checkerboardOffscreenLayers,
-      routes: _kRoutes,
-      home: home,
+      showPerformanceOverlay: _options.showPerformanceOverlay,
+      checkerboardOffscreenLayers: _options.showOffscreenLayersCheckerboard,
+      checkerboardRasterCacheImages: _options.showRasterCacheImagesCheckerboard,
+      routes: _buildRoutes(),
       builder: (BuildContext context, Widget child) {
         return new Directionality(
-          textDirection: _overrideDirection,
-          child: _applyScaleFactor(child),
+          textDirection: _options.textDirection,
+          child: _applyTextScaleFactor(child),
         );
       },
+      home: home,
     );
   }
 }

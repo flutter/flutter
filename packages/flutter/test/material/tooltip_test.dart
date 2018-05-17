@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 // Copyright 2015 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
@@ -486,12 +488,13 @@ void main() {
     );
 
     final TestSemantics expected = new TestSemantics.root(
-        children: <TestSemantics>[
-          new TestSemantics.rootChild(
-            id: 1,
-            label: tooltipText,
-          ),
-        ]
+      children: <TestSemantics>[
+        new TestSemantics.rootChild(
+          id: 1,
+          label: 'TIP',
+          textDirection: TextDirection.ltr,
+        ),
+      ]
     );
 
     expect(semantics, hasSemantics(expected, ignoreTransform: true, ignoreRect: true));
@@ -619,8 +622,17 @@ void main() {
     expect(semantics, hasSemantics(new TestSemantics.root(
       children: <TestSemantics>[
         new TestSemantics.rootChild(
-          label: 'Foo\nBar',
-          textDirection: TextDirection.ltr,
+          children: <TestSemantics>[
+            new TestSemantics(
+              flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
+              children: <TestSemantics>[
+                new TestSemantics(
+                  label: 'Foo\nBar',
+                  textDirection: TextDirection.ltr,
+                )
+              ],
+            ),
+          ],
         ),
       ],
     ), ignoreRect: true, ignoreId: true, ignoreTransform: true));
@@ -646,8 +658,17 @@ void main() {
     expect(semantics, hasSemantics(new TestSemantics.root(
       children: <TestSemantics>[
         new TestSemantics.rootChild(
-          label: 'Bar',
-          textDirection: TextDirection.ltr,
+          children: <TestSemantics>[
+            new TestSemantics(
+              flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
+              children: <TestSemantics>[
+                new TestSemantics(
+                  label: 'Bar',
+                  textDirection: TextDirection.ltr,
+                )
+              ],
+            ),
+          ],
         ),
       ],
     ), ignoreRect: true, ignoreId: true, ignoreTransform: true));

@@ -78,7 +78,7 @@ class _ManifestAssetBundle implements AssetBundle {
       return true;
 
     final FileStat stat = fs.file(manifestPath).statSync();
-    if (stat.type == FileSystemEntityType.NOT_FOUND)
+    if (stat.type == FileSystemEntityType.NOT_FOUND) // ignore: deprecated_member_use
       return true;
 
     return stat.modified.isAfter(_lastBuildTimestamp);
@@ -204,9 +204,7 @@ class _ManifestAssetBundle implements AssetBundle {
 
     entries[_kAssetManifestJson] = _createAssetManifest(assetVariants);
 
-
-    if (fonts.isNotEmpty)
-      entries[_kFontManifestJson] = new DevFSStringContent(json.encode(fonts));
+    entries[_kFontManifestJson] = new DevFSStringContent(json.encode(fonts));
 
     // TODO(ianh): Only do the following line if we've changed packages or if our LICENSE file changed
     entries[_kLICENSE] = await _obtainLicenses(packageMap, assetBasePath, reportPackages: reportLicensedPackages);

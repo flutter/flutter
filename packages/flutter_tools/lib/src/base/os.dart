@@ -91,7 +91,8 @@ class _PosixUtils extends OperatingSystemUtils {
     final ProcessResult result = processManager.runSync(command);
     if (result.exitCode != 0)
       return const <File>[];
-    return result.stdout.trim().split('\n').map((String path) => fs.file(path.trim())).toList();
+    final String stdout = result.stdout;
+    return stdout.trim().split('\n').map((String path) => fs.file(path.trim())).toList();
   }
 
   @override

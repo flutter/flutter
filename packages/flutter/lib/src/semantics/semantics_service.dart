@@ -7,7 +7,7 @@ import 'dart:ui' show TextDirection;
 
 import 'package:flutter/services.dart' show SystemChannels;
 
-import 'semantics_event.dart' show AnnounceSemanticsEvent;
+import 'semantics_event.dart' show AnnounceSemanticsEvent, TooltipSemanticsEvent;
 
 
 /// Allows access to the platform's accessibility services.
@@ -29,6 +29,14 @@ class SemanticsService {
   /// announcements regarding objects in the viewfinder.
   static Future<Null> announce(String message, TextDirection textDirection) async {
     final AnnounceSemanticsEvent event = new AnnounceSemanticsEvent(message, textDirection);
+    await SystemChannels.accessibility.send(event.toMap());
+  }
+
+  /// Sends a semantic announcement of a tooltip.
+  /// 
+  /// This is only used by Android.
+  static Future<Null> tooltip(String message) async {
+    final TooltipSemanticsEvent event = new TooltipSemanticsEvent(message);
     await SystemChannels.accessibility.send(event.toMap());
   }
 }

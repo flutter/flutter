@@ -14,6 +14,14 @@ import 'focus_manager.dart';
 
 export 'dart:ui' show hashValues, hashList;
 
+export 'package:flutter/foundation.dart' show
+  immutable,
+  mustCallSuper,
+  optionalTypeArgs,
+  protected,
+  required,
+  visibleForTesting;
+
 export 'package:flutter/foundation.dart' show FlutterError, debugPrint, debugPrintStack;
 export 'package:flutter/foundation.dart' show VoidCallback, ValueChanged, ValueGetter, ValueSetter;
 export 'package:flutter/foundation.dart' show DiagnosticLevel;
@@ -1101,6 +1109,15 @@ abstract class State<T extends StatefulWidget> extends Diagnosticable {
           'because another object is retaining a reference to this State object '
           'after it has been removed from the tree. To avoid memory leaks, '
           'consider breaking the reference to this object during dispose().'
+        );
+      }
+      if (_debugLifecycleState == _StateLifecycle.created && !mounted) {
+        throw new FlutterError(
+          'setState() called in constructor: $this\n'
+          'This happens when you call setState() on a State object for a widget that '
+          'hasn\'t been inserted into the widget tree yet. It is not necessary to call '
+          'setState() in the constructor, since the state is already assumed to be dirty '
+          'when it is initially created.'
         );
       }
       return true;

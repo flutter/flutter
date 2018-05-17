@@ -34,5 +34,9 @@
   "viewLicensesButtonLabel": "LIZENZEN ANZEIGEN",
   "anteMeridiemAbbreviation": "VORM.",
   "postMeridiemAbbreviation": "NACHM.",
-  "modalBarrierDismissLabel": "Schliessen"
+  "modalBarrierDismissLabel": "Schliessen",
+  "drawerLabel": "Navigationsmenü",
+  "popupMenuLabel": "Pop-up-Menü",
+  "dialogLabel": "Dialogfeld",
+  "alertDialogLabel": "Aufmerksam"
 }

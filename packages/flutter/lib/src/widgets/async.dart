@@ -8,8 +8,6 @@
 
 import 'dart:async' show Future, Stream, StreamSubscription;
 
-import 'package:flutter/foundation.dart';
-
 import 'framework.dart';
 
 // Examples can assume:

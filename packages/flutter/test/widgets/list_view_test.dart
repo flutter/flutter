@@ -96,7 +96,7 @@ void main() {
       ),
     );
 
-    expect(log, equals(<int>[0, 1, 2]));
+    expect(log, equals(<int>[0, 1, 2, 3, 4]));
     log.clear();
 
     final ScrollableState state = tester.state(find.byType(Scrollable));
@@ -106,7 +106,7 @@ void main() {
     expect(log, isEmpty);
     await tester.pump();
 
-    expect(log, equals(<int>[10, 11, 12, 13]));
+    expect(log, equals(<int>[8, 9, 10, 11, 12, 13, 14]));
     log.clear();
 
     position.jumpTo(975.0);
@@ -114,7 +114,7 @@ void main() {
     expect(log, isEmpty);
     await tester.pump();
 
-    expect(log, equals(<int>[4, 5, 6, 7]));
+    expect(log, equals(<int>[7, 6, 5, 4, 3]));
     log.clear();
   });
 
@@ -196,7 +196,7 @@ void main() {
         ),
       ),
     );
-    expect(find.text('padded'), findsOneWidget);
+    expect(find.text('padded', skipOffstage: false), findsOneWidget);
   });
 
   testWidgets('ListView with itemExtent in unbounded context', (WidgetTester tester) async {
@@ -240,7 +240,7 @@ void main() {
       ),
     );
 
-    expect(delegate.log, equals(<String>['didFinishLayout firstIndex=0 lastIndex=5']));
+    expect(delegate.log, equals(<String>['didFinishLayout firstIndex=0 lastIndex=7']));
     delegate.log.clear();
 
     await tester.pumpWidget(
@@ -253,7 +253,7 @@ void main() {
       ),
     );
 
-    expect(delegate.log, equals(<String>['didFinishLayout firstIndex=0 lastIndex=2']));
+    expect(delegate.log, equals(<String>['didFinishLayout firstIndex=0 lastIndex=4']));
     delegate.log.clear();
 
     await tester.drag(find.byType(ListView), const Offset(0.0, -600.0));
@@ -262,7 +262,7 @@ void main() {
 
     await tester.pump();
 
-    expect(delegate.log, equals(<String>['didFinishLayout firstIndex=2 lastIndex=5']));
+    expect(delegate.log, equals(<String>['didFinishLayout firstIndex=1 lastIndex=6']));
     delegate.log.clear();
   });
 

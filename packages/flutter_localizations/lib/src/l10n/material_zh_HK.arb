@@ -34,5 +34,9 @@
   "anteMeridiemAbbreviation": "上午",
   "postMeridiemAbbreviation": "下午",
   "timePickerHourModeAnnouncement": "選取小時數",
-  "timePickerMinuteModeAnnouncement": "選取分鐘數"
+  "timePickerMinuteModeAnnouncement": "選取分鐘數",
+  "drawerLabel": "導覽選單",
+  "popupMenuLabel": "彈出式選單",
+  "dialogLabel": "對話方塊",
+  "alertDialogLabel": "警报"
 }

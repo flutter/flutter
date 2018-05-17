@@ -23,7 +23,7 @@ class TestImage implements ui.Image {
   void dispose() { }
 
   @override
-  Future<ByteData> toByteData({ui.EncodingFormat format}) async {
+  Future<ByteData> toByteData({ui.ImageByteFormat format}) async {
     throw new UnsupportedError('Cannot encode test image');
   }
 }

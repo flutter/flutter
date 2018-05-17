@@ -48,6 +48,9 @@ Future<List<int>> _attempt(Uri url) async {
       'URL: $url',
       exitCode: kNetworkProblemExitCode,
     );
+  } on SocketException catch (error) {
+    printTrace('Download error: $error');
+    return null;
   }
   final HttpClientResponse response = await request.close();
   if (response.statusCode != 200) {

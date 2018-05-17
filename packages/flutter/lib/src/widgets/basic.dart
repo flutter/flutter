@@ -52,6 +52,7 @@ export 'package:flutter/rendering.dart' show
   RelativeRect,
   SemanticsBuilderCallback,
   ShaderCallback,
+  ShapeBorderClipper,
   SingleChildLayoutDelegate,
   StackFit,
   TextOverflow,
@@ -731,6 +732,11 @@ class PhysicalModel extends SingleChildRenderObjectWidget {
 ///
 /// [PhysicalModel] does the same but only supports shapes that can be expressed
 /// as rectangles with rounded corners.
+///
+/// See also:
+///
+///  * [ShapeBorderClipper], which converts a [ShapeBorder] to a [CustomerClipper], as
+///    needed by this widget.
 class PhysicalShape extends SingleChildRenderObjectWidget {
   /// Creates a physical model with an arbitrary shape clip.
   ///
@@ -751,6 +757,10 @@ class PhysicalShape extends SingleChildRenderObjectWidget {
        super(key: key, child: child);
 
   /// Determines which clip to use.
+  ///
+  /// If the path in question is expressed as a [ShapeBorder] subclass,
+  /// consider using the [ShapeBorderClipper] delegate class to adapt the
+  /// shape for use with this widget.
   final CustomClipper<Path> clipper;
 
   /// The z-coordinate at which to place this physical object.
@@ -819,6 +829,8 @@ class PhysicalShape extends SingleChildRenderObjectWidget {
 ///
 ///  * [RotatedBox], which rotates the child widget during layout, not just
 ///    during painting.
+///  * [FractionalTranslation], which applies a translation to the child
+///    that is relative to the child's size.
 ///  * [FittedBox], which sizes and positions its child widget to fit the parent
 ///    according to a given [BoxFit] discipline.
 class Transform extends SingleChildRenderObjectWidget {
@@ -864,6 +876,67 @@ class Transform extends SingleChildRenderObjectWidget {
     this.transformHitTests: true,
     Widget child,
   }) : transform = new Matrix4.rotationZ(angle),
+       super(key: key, child: child);
+
+  /// Creates a widget that transforms its child using a translation.
+  ///
+  /// The `offset` argument must not be null. It specifies the translation.
+  ///
+  /// ## Sample code
+  ///
+  /// This example shifts the silver-colored child down by fifteen pixels.
+  ///
+  /// ```dart
+  /// new Transform.translate(
+  ///   offset: const Offset(0.0, 15.0),
+  ///   child: new Container(
+  ///     padding: const EdgeInsets.all(8.0),
+  ///     color: const Color(0xFF7F7F7F),
+  ///     child: const Text('Quarter'),
+  ///   ),
+  /// )
+  /// ```
+  Transform.translate({
+    Key key,
+    @required Offset offset,
+    this.transformHitTests: true,
+    Widget child,
+  }) : transform = new Matrix4.translationValues(offset.dx, offset.dy, 0.0),
+       origin = null,
+       alignment = null,
+       super(key: key, child: child);
+
+  /// Creates a widget that scales its child uniformly.
+  ///
+  /// The `scale` argument must not be null. It gives the scalar by which
+  /// to multiply the `x` and `y` axes.
+  ///
+  /// The [alignment] controls the origin of the scale; by default, this is
+  /// the center of the box.
+  ///
+  /// ## Sample code
+  ///
+  /// This example shrinks an orange box containing text such that each dimension
+  /// is half the size it would otherwise be.
+  ///
+  /// ```dart
+  /// new Transform.scale(
+  ///   scale: 0.5,
+  ///   child: new Container(
+  ///     padding: const EdgeInsets.all(8.0),
+  ///     color: const Color(0xFFE8581C),
+  ///     child: const Text('Bad Ideas'),
+  ///   ),
+  /// )
+  /// ```
+  Transform.scale({
+    Key key,
+    @required double scale,
+    this.origin,
+    this.alignment: Alignment.center,
+    this.transformHitTests: true,
+    Widget child,
+  }) : transform = new Matrix4.diagonal3Values(scale, scale, 1.0),
        super(key: key, child: child);
 
   /// The matrix to transform the child by during painting.
@@ -1124,6 +1197,10 @@ class FittedBox extends SingleChildRenderObjectWidget {
 ///
 /// See also:
 ///
+///  * [Transform], which applies an arbitrary transform to its child widget at
+///    paint time.
+///  * [new Transform.translate], which applies an absolute offset translation
+///    transformation instead of an offset scaled to the child.
 ///  * The [catalog of layout widgets](https://flutter.io/widgets/layout/).
 class FractionalTranslation extends SingleChildRenderObjectWidget {
   /// Creates a widget that translates its child's painting.
@@ -1133,7 +1210,7 @@ class FractionalTranslation extends SingleChildRenderObjectWidget {
     Key key,
     @required this.translation,
     this.transformHitTests: true,
-    Widget child
+    Widget child,
   }) : assert(translation != null),
        super(key: key, child: child);
 
@@ -1184,6 +1261,7 @@ class FractionalTranslation extends SingleChildRenderObjectWidget {
 ///
 ///  * [Transform], which is a paint effect that allows you to apply an
 ///    arbitrary transform to a child.
+///  * [new Transform.rotate], which applies a rotation paint effect.
 ///  * The [catalog of layout widgets](https://flutter.io/widgets/layout/).
 class RotatedBox extends SingleChildRenderObjectWidget {
   /// A widget that rotates its child.
@@ -1707,10 +1785,11 @@ class ConstrainedBox extends SingleChildRenderObjectWidget {
 /// at its "natural" size.
 ///
 /// This allows a child to render at the size it would render if it were alone
-/// on an infinite canvas with no constraints. This container will then expand
-/// as much as it can within its own constraints and align the child based on
-/// [alignment]. If the container cannot expand enough to accommodate the
-/// entire child, the child will be clipped.
+/// on an infinite canvas with no constraints. This container will then attempt
+/// to adopt the same size, within the limits of its own constraints. If it ends
+/// up with a different size, it will align the child based on [alignment].
+/// If the box cannot expand enough to accommodate the entire child, the
+/// child will be clipped.
 ///
 /// In debug mode, if the child overflows the container, a warning will be
 /// printed on the console, and black and yellow striped areas will appear where
@@ -1718,7 +1797,9 @@ class ConstrainedBox extends SingleChildRenderObjectWidget {
 ///
 /// See also:
 ///
-///  * [ConstrainedBox] for a box which imposes constraints on its child.
+///  * [ConstrainedBox], for a box which imposes constraints on its child.
+///  * [Align], which loosens the constraints given to the child rather than
+///    removing them entirely.
 ///  * [Container], a convenience widget that combines common painting,
 ///    positioning, and sizing widgets.
 ///  * [OverflowBox], a widget that imposes different constraints on its child
@@ -3152,6 +3233,7 @@ class PositionedDirectional extends StatelessWidget {
 ///  * [Column], for a version of this widget that is always vertical.
 ///  * [Expanded], to indicate children that should take all the remaining room.
 ///  * [Flexible], to indicate children that should share the remaining room but
+///  * [Spacer], a widget that takes up space proportional to it's flex value.
 ///    that may be sized smaller (leaving some remaining room unused).
 ///  * The [catalog of layout widgets](https://flutter.io/widgets/layout/).
 class Flex extends MultiChildRenderObjectWidget {
@@ -3484,6 +3566,7 @@ class Flex extends MultiChildRenderObjectWidget {
 ///  * [Expanded], to indicate children that should take all the remaining room.
 ///  * [Flexible], to indicate children that should share the remaining room but
 ///    that may by sized smaller (leaving some remaining room unused).
+///  * [Spacer], a widget that takes up space proportional to it's flex value.
 ///  * The [catalog of layout widgets](https://flutter.io/widgets/layout/).
 class Row extends Flex {
   /// Creates a horizontal array of children.
@@ -3676,6 +3759,9 @@ class Row extends Flex {
 ///  * [Expanded], to indicate children that should take all the remaining room.
 ///  * [Flexible], to indicate children that should share the remaining room but
 ///    that may size smaller (leaving some remaining room unused).
+///  * [SingleChildScrollView], whose documentation discusses some ways to
+///    use a [Column] inside a scrolling container.
+///  * [Spacer], a widget that takes up space proportional to it's flex value.
 ///  * The [catalog of layout widgets](https://flutter.io/widgets/layout/).
 class Column extends Flex {
   /// Creates a vertical array of children.
@@ -3727,6 +3813,7 @@ class Column extends Flex {
 /// See also:
 ///
 ///  * [Expanded], which forces the child to expand to fill the available space.
+///  * [Spacer], a widget that takes up space proportional to it's flex value.
 ///  * The [catalog of layout widgets](https://flutter.io/widgets/layout/).
 class Flexible extends ParentDataWidget<Flex> {
   /// Creates a widget that controls how a child of a [Row], [Column], or [Flex]
@@ -3800,6 +3887,7 @@ class Flexible extends ParentDataWidget<Flex> {
 /// See also:
 ///
 ///  * [Flexible], which does not force the child to fill the available space.
+///  * [Spacer], a widget that takes up space proportional to it's flex value.
 ///  * The [catalog of layout widgets](https://flutter.io/widgets/layout/).
 class Expanded extends Flexible {
   /// Creates a widget that expands a child of a [Row], [Column], or [Flex]
@@ -4896,6 +4984,9 @@ class Semantics extends SingleChildRenderObjectWidget {
     bool focused,
     bool inMutuallyExclusiveGroup,
     bool obscured,
+    bool scopesRoute,
+    bool namesRoute,
+    bool hidden,
     String label,
     String value,
     String increasedValue,
@@ -4934,6 +5025,9 @@ class Semantics extends SingleChildRenderObjectWidget {
       focused: focused,
       inMutuallyExclusiveGroup: inMutuallyExclusiveGroup,
       obscured: obscured,
+      scopesRoute: scopesRoute,
+      namesRoute: namesRoute,
+      hidden: hidden,
       label: label,
       value: value,
       increasedValue: increasedValue,
@@ -4995,6 +5089,10 @@ class Semantics extends SingleChildRenderObjectWidget {
   /// information to the semantic tree is to introduce new explicit
   /// [SemanticNode]s to the tree.
   ///
+  /// If the semantics properties of this node include
+  /// [SemanticsProperties.scopesRoute] set to true, then [explicitChildNodes]
+  /// must be true also.
+  ///
   /// This setting is often used in combination with [SemanticsConfiguration.isSemanticBoundary]
   /// to create semantic boundaries that are either writable or not for children.
   final bool explicitChildNodes;
@@ -5013,6 +5111,9 @@ class Semantics extends SingleChildRenderObjectWidget {
       focused: properties.focused,
       inMutuallyExclusiveGroup: properties.inMutuallyExclusiveGroup,
       obscured: properties.obscured,
+      scopesRoute: properties.scopesRoute,
+      namesRoute: properties.namesRoute,
+      hidden: properties.hidden,
       label: properties.label,
       value: properties.value,
       increasedValue: properties.increasedValue,
@@ -5055,15 +5156,24 @@ class Semantics extends SingleChildRenderObjectWidget {
   void updateRenderObject(BuildContext context, RenderSemanticsAnnotations renderObject) {
     renderObject
       ..container = container
+      ..scopesRoute = properties.scopesRoute
       ..explicitChildNodes = explicitChildNodes
       ..enabled = properties.enabled
       ..checked = properties.checked
       ..selected = properties.selected
+      ..button = properties.button
+      ..header = properties.header
+      ..textField = properties.textField
+      ..focused = properties.focused
+      ..inMutuallyExclusiveGroup = properties.inMutuallyExclusiveGroup
+      ..obscured = properties.obscured
+      ..hidden = properties.hidden
       ..label = properties.label
       ..value = properties.value
       ..increasedValue = properties.increasedValue
       ..decreasedValue = properties.decreasedValue
       ..hint = properties.hint
+      ..namesRoute = properties.namesRoute
       ..textDirection = _getTextDirection(context)
       ..sortKey = properties.sortKey
       ..onTap = properties.onTap

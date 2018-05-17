@@ -12,6 +12,9 @@ import 'framework.dart';
 import 'image.dart';
 import 'ticker_provider.dart';
 
+// Examples can assume:
+// Uint8List bytes;
+
 /// An image that shows a [placeholder] image while the target [image] is
 /// loading, then fades in the new image when it loads.
 ///
@@ -46,14 +49,14 @@ import 'ticker_provider.dart';
 /// different image. This is known as "gapless playback" (see also
 /// [Image.gaplessPlayback]).
 ///
-/// ## Sample code:
+/// ## Sample code
 ///
 /// ```dart
-/// return new FadeInImage(
+/// new FadeInImage(
 ///   // here `bytes` is a Uint8List containing the bytes for the in-memory image
 ///   placeholder: new MemoryImage(bytes),
 ///   image: new NetworkImage('https://backend.example.com/image.png'),
-/// );
+/// )
 /// ```
 class FadeInImage extends StatefulWidget {
   /// Creates a widget that displays a [placeholder] while an [image] is loading

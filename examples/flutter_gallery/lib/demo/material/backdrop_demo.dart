@@ -315,7 +315,12 @@ class _BackdropDemoState extends State<BackdropDemo> with SingleTickerProviderSt
     final double panelTop = panelSize.height - panelTitleHeight;
 
     final Animation<RelativeRect> panelAnimation = new RelativeRectTween(
-      begin: new RelativeRect.fromLTRB(0.0, panelTop, 0.0, panelTop - panelSize.height),
+      begin: new RelativeRect.fromLTRB(
+        0.0,
+        panelTop - MediaQuery.of(context).padding.bottom,
+        0.0,
+        panelTop - panelSize.height,
+      ),
       end: const RelativeRect.fromLTRB(0.0, 0.0, 0.0, 0.0),
     ).animate(
       new CurvedAnimation(
@@ -342,14 +347,7 @@ class _BackdropDemoState extends State<BackdropDemo> with SingleTickerProviderSt
           },
         ),
       );
-    }).toList()
-    ..add(const SizedBox(height: 8.0))
-    ..add(
-      new Align(
-        alignment: AlignmentDirectional.centerStart,
-        child: new BackButton(color: Colors.white.withOpacity(0.5))
-      ),
-    );
+    }).toList();
 
     return new Container(
       key: _backdropKey,
@@ -388,16 +386,18 @@ class _BackdropDemoState extends State<BackdropDemo> with SingleTickerProviderSt
     return new Scaffold(
       appBar: new AppBar(
         elevation: 0.0,
-        leading: new IconButton(
-          onPressed: _toggleBackdropPanelVisibility,
-          icon: new AnimatedIcon(
-            icon: AnimatedIcons.close_menu,
-            progress: _controller.view,
-          ),
-        ),
         title: new BackdropTitle(
           listenable: _controller.view,
         ),
+        actions: <Widget>[
+          new IconButton(
+            onPressed: _toggleBackdropPanelVisibility,
+            icon: new AnimatedIcon(
+              icon: AnimatedIcons.close_menu,
+              progress: _controller.view,
+            ),
+          ),
+        ],
       ),
       body: new LayoutBuilder(
         builder: _buildStack,

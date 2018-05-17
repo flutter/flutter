@@ -1,0 +1,50 @@
+container:
+  image: cirrusci/flutter:base
+
+task:
+  env:
+    CIRRUS_WORKING_DIR: "/tmp/flutter sdk"
+    PATH: "$CIRRUS_WORKING_DIR/bin:$CIRRUS_WORKING_DIR/bin/cache/dart-sdk/bin:$PATH"
+
+  git_fetch_script: git fetch origin
+  setup_script: |
+    echo "SDK directory is: $PWD"
+    ./bin/flutter --version
+
+    # disable analytics on the bots and download Flutter dependencies
+    ./bin/flutter config --no-analytics
+
+    # run pub get in all the repo packages
+    ./bin/flutter update-packages
+
+  matrix:
+    - name: docs
+      env:
+        SHARD: docs
+      docs_script: ./dev/bots/docs.sh
+    - name: analyze
+      env:
+        SHARD: analyze
+      test_script: dart ./dev/bots/test.dart
+    - name: tests-linux
+      env:
+        SHARD: tests
+      test_script: dart ./dev/bots/test.dart
+      container:
+        cpu: 4
+        memory: 8G
+
+task:
+  name: tests-windows
+  env:
+    SHARD: tests
+  windows_container:
+    dockerfile: dev/bots/docker/Dockerfile.windows
+  env:
+    CIRRUS_WORKING_DIR: "C:\\Windows\\Temp\\flutter sdk"
+  git_fetch_script: git fetch origin
+  setup_script:
+    - bin\flutter.bat config --no-analytics
+    - bin\flutter.bat update-packages
+  test_all_script:
+    - bin\cache\dart-sdk\bin\dart.exe -c dev\bots\test.dart

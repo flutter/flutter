@@ -60,6 +60,10 @@ class TranslationBundle {
   String get hideAccountsLabel => parent?.hideAccountsLabel;
   String get showAccountsLabel => parent?.showAccountsLabel;
   String get modalBarrierDismissLabel => parent?.modalBarrierDismissLabel;
+  String get drawerLabel => parent?.drawerLabel;
+  String get popupMenuLabel => parent?.popupMenuLabel;
+  String get dialogLabel => parent?.dialogLabel;
+  String get alertDialogLabel => parent?.alertDialogLabel;
 }
 
 // ignore: camel_case_types
@@ -105,6 +109,10 @@ class _Bundle_ar extends TranslationBundle {
   @override String get hideAccountsLabel => r'إخفاء الحسابات';
   @override String get showAccountsLabel => r'إظهار الحسابات';
   @override String get modalBarrierDismissLabel => r'رفض';
+  @override String get drawerLabel => r'قائمة تنقل';
+  @override String get popupMenuLabel => r'قائمة منبثقة';
+  @override String get dialogLabel => r'مربع حوار';
+  @override String get alertDialogLabel => r'مربع حوار التنبيه';
 }
 
 // ignore: camel_case_types
@@ -147,6 +155,10 @@ class _Bundle_de extends TranslationBundle {
   @override String get hideAccountsLabel => r'Konten ausblenden';
   @override String get showAccountsLabel => r'Konten anzeigen';
   @override String get modalBarrierDismissLabel => r'Schließen';
+  @override String get drawerLabel => r'Navigationsmenü';
+  @override String get popupMenuLabel => r'Pop-up-Menü';
+  @override String get dialogLabel => r'Dialogfeld';
+  @override String get alertDialogLabel => r'Aufmerksam';
 }
 
 // ignore: camel_case_types
@@ -189,6 +201,10 @@ class _Bundle_en extends TranslationBundle {
   @override String get signedInLabel => r'Signed in';
   @override String get hideAccountsLabel => r'Hide accounts';
   @override String get showAccountsLabel => r'Show accounts';
+  @override String get drawerLabel => r'Navigation menu';
+  @override String get popupMenuLabel => r'Popup menu';
+  @override String get dialogLabel => r'Dialog';
+  @override String get alertDialogLabel => r'Alert';
 }
 
 // ignore: camel_case_types
@@ -231,6 +247,10 @@ class _Bundle_es extends TranslationBundle {
   @override String get hideAccountsLabel => r'Ocultar cuentas';
   @override String get showAccountsLabel => r'Mostrar cuentas';
   @override String get modalBarrierDismissLabel => r'Ignorar';
+  @override String get drawerLabel => r'Menú de navegación';
+  @override String get popupMenuLabel => r'Menú emergente';
+  @override String get dialogLabel => r'Cuadro de diálogo';
+  @override String get alertDialogLabel => r'Alerta';
 }
 
 // ignore: camel_case_types
@@ -272,6 +292,10 @@ class _Bundle_fa extends TranslationBundle {
   @override String get hideAccountsLabel => r'پنهان کردن حساب‌ها';
   @override String get showAccountsLabel => r'نشان دادن حساب‌ها';
   @override String get modalBarrierDismissLabel => r'نپذیرفتن';
+  @override String get drawerLabel => r'منوی پیمایش';
+  @override String get popupMenuLabel => r'منوی بازشو';
+  @override String get dialogLabel => r'کادر گفتگو';
+  @override String get alertDialogLabel => r'هشدار';
 }
 
 // ignore: camel_case_types
@@ -314,6 +338,10 @@ class _Bundle_fr extends TranslationBundle {
   @override String get hideAccountsLabel => r'Masquer les comptes';
   @override String get showAccountsLabel => r'Afficher les comptes';
   @override String get modalBarrierDismissLabel => r'Ignorer';
+  @override String get drawerLabel => r'Menu de navigation';
+  @override String get popupMenuLabel => r'Menu contextuel';
+  @override String get dialogLabel => r'Boîte de dialogue';
+  @override String get alertDialogLabel => r'Alerte';
 }
 
 // ignore: camel_case_types
@@ -355,6 +383,10 @@ class _Bundle_gsw extends TranslationBundle {
   @override String get anteMeridiemAbbreviation => r'VORM.';
   @override String get postMeridiemAbbreviation => r'NACHM.';
   @override String get modalBarrierDismissLabel => r'Schließen';
+  @override String get drawerLabel => r'Navigationsmenü';
+  @override String get popupMenuLabel => r'Pop-up-Menü';
+  @override String get dialogLabel => r'Dialogfeld';
+  @override String get alertDialogLabel => r'Aufmerksam';
 }
 
 // ignore: camel_case_types
@@ -398,6 +430,10 @@ class _Bundle_he extends TranslationBundle {
   @override String get hideAccountsLabel => r'הסתרת החשבונות';
   @override String get showAccountsLabel => r'הצגת החשבונות';
   @override String get modalBarrierDismissLabel => r'סגירה';
+  @override String get drawerLabel => r'תפריט ניווט';
+  @override String get popupMenuLabel => r'תפריט קופץ';
+  @override String get dialogLabel => r'תיבת דו-שיח';
+  @override String get alertDialogLabel => r'עֵרָנִי';
 }
 
 // ignore: camel_case_types
@@ -439,6 +475,10 @@ class _Bundle_id extends TranslationBundle {
   @override String get signedInLabel => r'Telah login';
   @override String get hideAccountsLabel => r'Sembunyikan akun';
   @override String get showAccountsLabel => r'Tampilkan akun';
+  @override String get drawerLabel => r'Menu navigasi';
+  @override String get popupMenuLabel => r'Menu pop-up';
+  @override String get dialogLabel => r'Dialog';
+  @override String get alertDialogLabel => r'Waspada';
 }
 
 // ignore: camel_case_types
@@ -480,6 +520,10 @@ class _Bundle_it extends TranslationBundle {
   @override String get hideAccountsLabel => r'Nascondi account';
   @override String get showAccountsLabel => r'Mostra account';
   @override String get modalBarrierDismissLabel => r'Ignora';
+  @override String get drawerLabel => r'Menu di navigazione';
+  @override String get popupMenuLabel => r'Menu popup';
+  @override String get dialogLabel => r'Finestra di dialogo';
+  @override String get alertDialogLabel => r'Mettere in guardia';
 }
 
 // ignore: camel_case_types
@@ -521,6 +565,10 @@ class _Bundle_ja extends TranslationBundle {
   @override String get hideAccountsLabel => r'アカウントを非表示';
   @override String get showAccountsLabel => r'アカウントを表示';
   @override String get modalBarrierDismissLabel => r'閉じる';
+  @override String get drawerLabel => r'ナビゲーション メニュー';
+  @override String get popupMenuLabel => r'ポップアップ メニュー';
+  @override String get dialogLabel => r'ダイアログ';
+  @override String get alertDialogLabel => r'アラート';
 }
 
 // ignore: camel_case_types
@@ -562,6 +610,56 @@ class _Bundle_ko extends TranslationBundle {
   @override String get hideAccountsLabel => r'계정 숨기기';
   @override String get showAccountsLabel => r'계정 표시';
   @override String get modalBarrierDismissLabel => r'닫기';
+  @override String get drawerLabel => r'탐색 메뉴';
+  @override String get popupMenuLabel => r'팝업 메뉴';
+  @override String get dialogLabel => r'대화상자';
+  @override String get alertDialogLabel => r'경보';
+}
+
+// ignore: camel_case_types
+class _Bundle_ms extends TranslationBundle {
+  const _Bundle_ms() : super(null);
+  @override String get scriptCategory => r'English-like';
+  @override String get timeOfDayFormat => r'h:mm a';
+  @override String get openAppDrawerTooltip => r'Buka menu navigasi';
+  @override String get backButtonTooltip => r'Kembali';
+  @override String get closeButtonTooltip => r'Tutup';
+  @override String get deleteButtonTooltip => r'Buang';
+  @override String get nextMonthTooltip => r'Bulan seterusnya';
+  @override String get previousMonthTooltip => r'Bulan sebelumnya';
+  @override String get nextPageTooltip => r'Halaman seterusnya';
+  @override String get previousPageTooltip => r'Halaman sebelumnya';
+  @override String get showMenuTooltip => r'Tunjuk menu';
+  @override String get aboutListTileTitle => r'Tentang $applicationName';
+  @override String get licensesPageTitle => r'Lesen';
+  @override String get pageRowsInfoTitle => r'$firstRow–$lastRow dari $rowCount';
+  @override String get pageRowsInfoTitleApproximate => r'$firstRow–$lastRow dari lebih kurang $rowCount';
+  @override String get rowsPerPageTitle => r'Baris setiap halaman:';
+  @override String get tabLabel => r'Tab $tabIndex dari $tabCount';
+  @override String get selectedRowCountTitleZero => r'Tiada item dipilih';
+  @override String get selectedRowCountTitleOne => r'1 item dipilih';
+  @override String get selectedRowCountTitleOther => r'$selectedRowCount item dipilih';
+  @override String get cancelButtonLabel => r'BATAL';
+  @override String get closeButtonLabel => r'TUTUP';
+  @override String get continueButtonLabel => r'TERUSKAN';
+  @override String get copyButtonLabel => r'SALIN';
+  @override String get cutButtonLabel => r'POTONG';
+  @override String get okButtonLabel => r'OK';
+  @override String get pasteButtonLabel => r'TAMPAL';
+  @override String get selectAllButtonLabel => r'PILIH SEMUA';
+  @override String get viewLicensesButtonLabel => r'LIHAT LESEN';
+  @override String get anteMeridiemAbbreviation => r'PG';
+  @override String get postMeridiemAbbreviation => r'PTG';
+  @override String get timePickerHourModeAnnouncement => r'Pilih jam';
+  @override String get timePickerMinuteModeAnnouncement => r'Pilih minit';
+  @override String get modalBarrierDismissLabel => r'Abai';
+  @override String get signedInLabel => r'Telah daftar masuk';
+  @override String get hideAccountsLabel => r'Sembunyi akaun';
+  @override String get showAccountsLabel => r'Tunjuk akaun';
+  @override String get drawerLabel => r'Menu navigasi';
+  @override String get popupMenuLabel => r'Menu pop timbul';
+  @override String get dialogLabel => r'Dialog';
+  @override String get alertDialogLabel => r'Amaran';
 }
 
 // ignore: camel_case_types
@@ -603,6 +701,10 @@ class _Bundle_nl extends TranslationBundle {
   @override String get hideAccountsLabel => r'Accounts verbergen';
   @override String get showAccountsLabel => r'Accounts weergeven';
   @override String get modalBarrierDismissLabel => r'Sluiten';
+  @override String get drawerLabel => r'Navigatiemenu';
+  @override String get popupMenuLabel => r'Pop-upmenu';
+  @override String get dialogLabel => r'Dialoogvenster';
+  @override String get alertDialogLabel => r'Alarm';
 }
 
 // ignore: camel_case_types
@@ -644,6 +746,10 @@ class _Bundle_no extends TranslationBundle {
   @override String get signedInLabel => r'Pålogget';
   @override String get hideAccountsLabel => r'Skjul kontoer';
   @override String get showAccountsLabel => r'Vis kontoer';
+  @override String get drawerLabel => r'Navigasjonsmeny';
+  @override String get popupMenuLabel => r'Forgrunnsmeny';
+  @override String get dialogLabel => r'Dialogboks';
+  @override String get alertDialogLabel => r'Varsling';
 }
 
 // ignore: camel_case_types
@@ -687,6 +793,10 @@ class _Bundle_pl extends TranslationBundle {
   @override String get hideAccountsLabel => r'Ukryj konta';
   @override String get showAccountsLabel => r'Pokaż konta';
   @override String get modalBarrierDismissLabel => r'Zamknij';
+  @override String get drawerLabel => r'Menu nawigacyjne';
+  @override String get popupMenuLabel => r'Wyskakujące menu';
+  @override String get dialogLabel => r'Okno dialogowe';
+  @override String get alertDialogLabel => r'Alarm';
 }
 
 // ignore: camel_case_types
@@ -725,6 +835,10 @@ class _Bundle_ps extends TranslationBundle {
   @override String get hideAccountsLabel => r'حسابونه پټ کړئ';
   @override String get showAccountsLabel => r'حسابونه ښکاره کړئ';
   @override String get modalBarrierDismissLabel => r'رد کړه';
+  @override String get drawerLabel => r'د نیویگیشن مینو';
+  @override String get popupMenuLabel => r'د پاپ اپ مینو';
+  @override String get dialogLabel => r'خبرې اترې';
+  @override String get alertDialogLabel => r'خبرتیا';
 }
 
 // ignore: camel_case_types
@@ -766,6 +880,10 @@ class _Bundle_pt extends TranslationBundle {
   @override String get hideAccountsLabel => r'Ocultar contas';
   @override String get showAccountsLabel => r'Mostrar contas';
   @override String get modalBarrierDismissLabel => r'Dispensar';
+  @override String get drawerLabel => r'Menu de navegação';
+  @override String get popupMenuLabel => r'Menu pop-up';
+  @override String get dialogLabel => r'Caixa de diálogo';
+  @override String get alertDialogLabel => r'Alerta';
 }
 
 // ignore: camel_case_types
@@ -809,6 +927,10 @@ class _Bundle_ro extends TranslationBundle {
   @override String get hideAccountsLabel => r'Ascundeți conturile';
   @override String get showAccountsLabel => r'Afișați conturile';
   @override String get modalBarrierDismissLabel => r'Închideți';
+  @override String get drawerLabel => r'Meniu de navigare';
+  @override String get popupMenuLabel => r'Meniu pop-up';
+  @override String get dialogLabel => r'Casetă de dialog';
+  @override String get alertDialogLabel => r'Alerta';
 }
 
 // ignore: camel_case_types
@@ -853,6 +975,10 @@ class _Bundle_ru extends TranslationBundle {
   @override String get hideAccountsLabel => r'Скрыть аккаунты';
   @override String get showAccountsLabel => r'Показать аккаунты';
   @override String get modalBarrierDismissLabel => r'Закрыть';
+  @override String get drawerLabel => r'Меню навигации';
+  @override String get popupMenuLabel => r'Всплывающее меню';
+  @override String get dialogLabel => r'Диалоговое окно';
+  @override String get alertDialogLabel => r'бдительный';
 }
 
 // ignore: camel_case_types
@@ -894,6 +1020,10 @@ class _Bundle_th extends TranslationBundle {
   @override String get hideAccountsLabel => r'ซ่อนบัญชี';
   @override String get showAccountsLabel => r'แสดงบัญชี';
   @override String get modalBarrierDismissLabel => r'ปิด';
+  @override String get drawerLabel => r'เมนูการนำทาง';
+  @override String get popupMenuLabel => r'เมนูป๊อปอัป';
+  @override String get dialogLabel => r'กล่องโต้ตอบ';
+  @override String get alertDialogLabel => r'เตือนภัย';
 }
 
 // ignore: camel_case_types
@@ -935,6 +1065,10 @@ class _Bundle_tr extends TranslationBundle {
   @override String get hideAccountsLabel => r'Hesapları gizle';
   @override String get showAccountsLabel => r'Hesapları göster';
   @override String get modalBarrierDismissLabel => r'Kapat';
+  @override String get drawerLabel => r'Gezinme menüsü';
+  @override String get popupMenuLabel => r'Popup menü';
+  @override String get dialogLabel => r'İletişim kutusu';
+  @override String get alertDialogLabel => r'Alarm';
 }
 
 // ignore: camel_case_types
@@ -976,6 +1110,55 @@ class _Bundle_ur extends TranslationBundle {
   @override String get hideAccountsLabel => r'اکاؤنٹس چھپائیں';
   @override String get showAccountsLabel => r'اکاؤنٹس دکھائیں';
   @override String get modalBarrierDismissLabel => r'برخاست کریں';
+  @override String get drawerLabel => r'نیویگیشن مینو';
+  @override String get popupMenuLabel => r'پاپ اپ مینو';
+  @override String get dialogLabel => r'ڈائیلاگ';
+  @override String get alertDialogLabel => r'انتباہ';
+}
+
+// ignore: camel_case_types
+class _Bundle_vi extends TranslationBundle {
+  const _Bundle_vi() : super(null);
+  @override String get scriptCategory => r'English-like';
+  @override String get timeOfDayFormat => r'HH:mm';
+  @override String get openAppDrawerTooltip => r'Mở menu di chuyển';
+  @override String get backButtonTooltip => r'Quay lại';
+  @override String get closeButtonTooltip => r'Đóng';
+  @override String get deleteButtonTooltip => r'Xóa';
+  @override String get nextMonthTooltip => r'Tháng sau';
+  @override String get previousMonthTooltip => r'Tháng trước';
+  @override String get nextPageTooltip => r'Trang tiếp theo';
+  @override String get previousPageTooltip => r'Trang trước';
+  @override String get showMenuTooltip => r'Hiển thị menu';
+  @override String get aboutListTileTitle => r'Giới thiệu về $applicationName';
+  @override String get licensesPageTitle => r'Giấy phép';
+  @override String get pageRowsInfoTitle => r'$firstRow–$lastRow trong tổng số $rowCount';
+  @override String get pageRowsInfoTitleApproximate => r'$firstRow–$lastRow trong tổng số khoảng $rowCount';
+  @override String get rowsPerPageTitle => r'Số hàng mỗi trang:';
+  @override String get tabLabel => r'Tab $tabIndex trong tổng số $tabCount';
+  @override String get selectedRowCountTitleOne => r'Đã chọn 1 mục';
+  @override String get selectedRowCountTitleOther => r'Đã chọn $selectedRowCount mục';
+  @override String get cancelButtonLabel => r'HỦY';
+  @override String get closeButtonLabel => r'ĐÓNG';
+  @override String get continueButtonLabel => r'TIẾP TỤC';
+  @override String get copyButtonLabel => r'SAO CHÉP';
+  @override String get cutButtonLabel => r'CẮT';
+  @override String get okButtonLabel => r'OK';
+  @override String get pasteButtonLabel => r'DÁN';
+  @override String get selectAllButtonLabel => r'CHỌN TẤT CẢ';
+  @override String get viewLicensesButtonLabel => r'XEM GIẤY PHÉP';
+  @override String get anteMeridiemAbbreviation => r'SÁNG';
+  @override String get postMeridiemAbbreviation => r'CHIỀU';
+  @override String get timePickerHourModeAnnouncement => r'Chọn giờ';
+  @override String get timePickerMinuteModeAnnouncement => r'Chọn phút';
+  @override String get modalBarrierDismissLabel => r'Bỏ qua';
+  @override String get signedInLabel => r'Đã đăng nhập';
+  @override String get hideAccountsLabel => r'Ẩn tài khoản';
+  @override String get showAccountsLabel => r'Hiển thị tài khoản';
+  @override String get drawerLabel => r'Menu di chuyển';
+  @override String get popupMenuLabel => r'Menu bật lên';
+  @override String get dialogLabel => r'Hộp thoại';
+  @override String get alertDialogLabel => r'Hộp thoại';
 }
 
 // ignore: camel_case_types
@@ -1017,6 +1200,10 @@ class _Bundle_zh extends TranslationBundle {
   @override String get hideAccountsLabel => r'隐藏帐号';
   @override String get showAccountsLabel => r'显示帐号';
   @override String get modalBarrierDismissLabel => r'关闭';
+  @override String get drawerLabel => r'导航菜单';
+  @override String get popupMenuLabel => r'弹出菜单';
+  @override String get dialogLabel => r'对话框';
+  @override String get alertDialogLabel => r'警报';
 }
 
 // ignore: camel_case_types
@@ -1031,6 +1218,8 @@ class _Bundle_en_AU extends TranslationBundle {
   const _Bundle_en_AU() : super(const _Bundle_en());
   @override String get licensesPageTitle => r'Licences';
   @override String get viewLicensesButtonLabel => r'VIEW LICENCES';
+  @override String get popupMenuLabel => r'Pop-up menu';
+  @override String get dialogLabel => r'Dialogue';
 }
 
 // ignore: camel_case_types
@@ -1038,6 +1227,8 @@ class _Bundle_en_CA extends TranslationBundle {
   const _Bundle_en_CA() : super(const _Bundle_en());
   @override String get licensesPageTitle => r'Licences';
   @override String get viewLicensesButtonLabel => r'VIEW LICENCES';
+  @override String get popupMenuLabel => r'Pop-up menu';
+  @override String get dialogLabel => r'Dialogue';
 }
 
 // ignore: camel_case_types
@@ -1046,6 +1237,8 @@ class _Bundle_en_GB extends TranslationBundle {
   @override String get timeOfDayFormat => r'HH:mm';
   @override String get viewLicensesButtonLabel => r'VIEW LICENCES';
   @override String get licensesPageTitle => r'Licences';
+  @override String get popupMenuLabel => r'Pop-up menu';
+  @override String get dialogLabel => r'Dialogue';
 }
 
 // ignore: camel_case_types
@@ -1054,6 +1247,8 @@ class _Bundle_en_IE extends TranslationBundle {
   @override String get timeOfDayFormat => r'HH:mm';
   @override String get viewLicensesButtonLabel => r'VIEW LICENCES';
   @override String get licensesPageTitle => r'Licences';
+  @override String get popupMenuLabel => r'Pop-up menu';
+  @override String get dialogLabel => r'Dialogue';
 }
 
 // ignore: camel_case_types
@@ -1061,6 +1256,8 @@ class _Bundle_en_IN extends TranslationBundle {
   const _Bundle_en_IN() : super(const _Bundle_en());
   @override String get licensesPageTitle => r'Licences';
   @override String get viewLicensesButtonLabel => r'VIEW LICENCES';
+  @override String get popupMenuLabel => r'Pop-up menu';
+  @override String get dialogLabel => r'Dialogue';
 }
 
 // ignore: camel_case_types
@@ -1068,6 +1265,8 @@ class _Bundle_en_SG extends TranslationBundle {
   const _Bundle_en_SG() : super(const _Bundle_en());
   @override String get licensesPageTitle => r'Licences';
   @override String get viewLicensesButtonLabel => r'VIEW LICENCES';
+  @override String get popupMenuLabel => r'Pop-up menu';
+  @override String get dialogLabel => r'Dialogue';
 }
 
 // ignore: camel_case_types
@@ -1076,6 +1275,8 @@ class _Bundle_en_ZA extends TranslationBundle {
   @override String get timeOfDayFormat => r'HH:mm';
   @override String get viewLicensesButtonLabel => r'VIEW LICENCES';
   @override String get licensesPageTitle => r'Licences';
+  @override String get popupMenuLabel => r'Pop-up menu';
+  @override String get dialogLabel => r'Dialogue';
 }
 
 // ignore: camel_case_types
@@ -1094,6 +1295,7 @@ class _Bundle_es_419 extends TranslationBundle {
   @override String get selectedRowCountTitleOther => r'Se seleccionaron $selectedRowCount elementos';
   @override String get anteMeridiemAbbreviation => r'a.m.';
   @override String get postMeridiemAbbreviation => r'p.m.';
+  @override String get dialogLabel => r'Diálogo';
 }
 
 // ignore: camel_case_types
@@ -1112,6 +1314,7 @@ class _Bundle_es_AR extends TranslationBundle {
   @override String get selectedRowCountTitleOther => r'Se seleccionaron $selectedRowCount elementos';
   @override String get anteMeridiemAbbreviation => r'a.m.';
   @override String get postMeridiemAbbreviation => r'p.m.';
+  @override String get dialogLabel => r'Diálogo';
 }
 
 // ignore: camel_case_types
@@ -1130,6 +1333,7 @@ class _Bundle_es_BO extends TranslationBundle {
   @override String get selectedRowCountTitleOther => r'Se seleccionaron $selectedRowCount elementos';
   @override String get anteMeridiemAbbreviation => r'a.m.';
   @override String get postMeridiemAbbreviation => r'p.m.';
+  @override String get dialogLabel => r'Diálogo';
 }
 
 // ignore: camel_case_types
@@ -1148,6 +1352,7 @@ class _Bundle_es_CL extends TranslationBundle {
   @override String get selectedRowCountTitleOther => r'Se seleccionaron $selectedRowCount elementos';
   @override String get anteMeridiemAbbreviation => r'a.m.';
   @override String get postMeridiemAbbreviation => r'p.m.';
+  @override String get dialogLabel => r'Diálogo';
 }
 
 // ignore: camel_case_types
@@ -1166,6 +1371,7 @@ class _Bundle_es_CO extends TranslationBundle {
   @override String get selectedRowCountTitleOther => r'Se seleccionaron $selectedRowCount elementos';
   @override String get anteMeridiemAbbreviation => r'a.m.';
   @override String get postMeridiemAbbreviation => r'p.m.';
+  @override String get dialogLabel => r'Diálogo';
 }
 
 // ignore: camel_case_types
@@ -1184,6 +1390,7 @@ class _Bundle_es_CR extends TranslationBundle {
   @override String get selectedRowCountTitleOther => r'Se seleccionaron $selectedRowCount elementos';
   @override String get anteMeridiemAbbreviation => r'a.m.';
   @override String get postMeridiemAbbreviation => r'p.m.';
+  @override String get dialogLabel => r'Diálogo';
 }
 
 // ignore: camel_case_types
@@ -1202,6 +1409,7 @@ class _Bundle_es_DO extends TranslationBundle {
   @override String get selectedRowCountTitleOther => r'Se seleccionaron $selectedRowCount elementos';
   @override String get anteMeridiemAbbreviation => r'a.m.';
   @override String get postMeridiemAbbreviation => r'p.m.';
+  @override String get dialogLabel => r'Diálogo';
 }
 
 // ignore: camel_case_types
@@ -1220,6 +1428,7 @@ class _Bundle_es_EC extends TranslationBundle {
   @override String get selectedRowCountTitleOther => r'Se seleccionaron $selectedRowCount elementos';
   @override String get anteMeridiemAbbreviation => r'a.m.';
   @override String get postMeridiemAbbreviation => r'p.m.';
+  @override String get dialogLabel => r'Diálogo';
 }
 
 // ignore: camel_case_types
@@ -1238,6 +1447,7 @@ class _Bundle_es_GT extends TranslationBundle {
   @override String get selectedRowCountTitleOther => r'Se seleccionaron $selectedRowCount elementos';
   @override String get anteMeridiemAbbreviation => r'a.m.';
   @override String get postMeridiemAbbreviation => r'p.m.';
+  @override String get dialogLabel => r'Diálogo';
 }
 
 // ignore: camel_case_types
@@ -1256,6 +1466,7 @@ class _Bundle_es_HN extends TranslationBundle {
   @override String get selectedRowCountTitleOther => r'Se seleccionaron $selectedRowCount elementos';
   @override String get anteMeridiemAbbreviation => r'a.m.';
   @override String get postMeridiemAbbreviation => r'p.m.';
+  @override String get dialogLabel => r'Diálogo';
 }
 
 // ignore: camel_case_types
@@ -1274,6 +1485,7 @@ class _Bundle_es_MX extends TranslationBundle {
   @override String get selectedRowCountTitleOther => r'Se seleccionaron $selectedRowCount elementos';
   @override String get anteMeridiemAbbreviation => r'a.m.';
   @override String get postMeridiemAbbreviation => r'p.m.';
+  @override String get dialogLabel => r'Diálogo';
 }
 
 // ignore: camel_case_types
@@ -1292,6 +1504,7 @@ class _Bundle_es_NI extends TranslationBundle {
   @override String get selectedRowCountTitleOther => r'Se seleccionaron $selectedRowCount elementos';
   @override String get anteMeridiemAbbreviation => r'a.m.';
   @override String get postMeridiemAbbreviation => r'p.m.';
+  @override String get dialogLabel => r'Diálogo';
 }
 
 // ignore: camel_case_types
@@ -1310,6 +1523,7 @@ class _Bundle_es_PA extends TranslationBundle {
   @override String get selectedRowCountTitleOther => r'Se seleccionaron $selectedRowCount elementos';
   @override String get anteMeridiemAbbreviation => r'a.m.';
   @override String get postMeridiemAbbreviation => r'p.m.';
+  @override String get dialogLabel => r'Diálogo';
 }
 
 // ignore: camel_case_types
@@ -1328,6 +1542,7 @@ class _Bundle_es_PE extends TranslationBundle {
   @override String get selectedRowCountTitleOther => r'Se seleccionaron $selectedRowCount elementos';
   @override String get anteMeridiemAbbreviation => r'a.m.';
   @override String get postMeridiemAbbreviation => r'p.m.';
+  @override String get dialogLabel => r'Diálogo';
 }
 
 // ignore: camel_case_types
@@ -1346,6 +1561,7 @@ class _Bundle_es_PR extends TranslationBundle {
   @override String get selectedRowCountTitleOther => r'Se seleccionaron $selectedRowCount elementos';
   @override String get anteMeridiemAbbreviation => r'a.m.';
   @override String get postMeridiemAbbreviation => r'p.m.';
+  @override String get dialogLabel => r'Diálogo';
 }
 
 // ignore: camel_case_types
@@ -1364,6 +1580,7 @@ class _Bundle_es_PY extends TranslationBundle {
   @override String get selectedRowCountTitleOther => r'Se seleccionaron $selectedRowCount elementos';
   @override String get anteMeridiemAbbreviation => r'a.m.';
   @override String get postMeridiemAbbreviation => r'p.m.';
+  @override String get dialogLabel => r'Diálogo';
 }
 
 // ignore: camel_case_types
@@ -1382,6 +1599,7 @@ class _Bundle_es_SV extends TranslationBundle {
   @override String get selectedRowCountTitleOther => r'Se seleccionaron $selectedRowCount elementos';
   @override String get anteMeridiemAbbreviation => r'a.m.';
   @override String get postMeridiemAbbreviation => r'p.m.';
+  @override String get dialogLabel => r'Diálogo';
 }
 
 // ignore: camel_case_types
@@ -1401,6 +1619,7 @@ class _Bundle_es_US extends TranslationBundle {
   @override String get timeOfDayFormat => r'h:mm a';
   @override String get anteMeridiemAbbreviation => r'a.m.';
   @override String get postMeridiemAbbreviation => r'p.m.';
+  @override String get dialogLabel => r'Diálogo';
 }
 
 // ignore: camel_case_types
@@ -1419,6 +1638,7 @@ class _Bundle_es_UY extends TranslationBundle {
   @override String get selectedRowCountTitleOther => r'Se seleccionaron $selectedRowCount elementos';
   @override String get anteMeridiemAbbreviation => r'a.m.';
   @override String get postMeridiemAbbreviation => r'p.m.';
+  @override String get dialogLabel => r'Diálogo';
 }
 
 // ignore: camel_case_types
@@ -1437,6 +1657,7 @@ class _Bundle_es_VE extends TranslationBundle {
   @override String get selectedRowCountTitleOther => r'Se seleccionaron $selectedRowCount elementos';
   @override String get anteMeridiemAbbreviation => r'a.m.';
   @override String get postMeridiemAbbreviation => r'p.m.';
+  @override String get dialogLabel => r'Diálogo';
 }
 
 // ignore: camel_case_types
@@ -1498,6 +1719,9 @@ class _Bundle_zh_HK extends TranslationBundle {
   @override String get viewLicensesButtonLabel => r'查看授權';
   @override String get timePickerHourModeAnnouncement => r'選取小時數';
   @override String get timePickerMinuteModeAnnouncement => r'選取分鐘數';
+  @override String get drawerLabel => r'導覽選單';
+  @override String get popupMenuLabel => r'彈出式選單';
+  @override String get dialogLabel => r'對話方塊';
 }
 
 // ignore: camel_case_types
@@ -1533,6 +1757,9 @@ class _Bundle_zh_TW extends TranslationBundle {
   @override String get viewLicensesButtonLabel => r'查看授權';
   @override String get timePickerHourModeAnnouncement => r'選取小時數';
   @override String get timePickerMinuteModeAnnouncement => r'選取分鐘數';
+  @override String get drawerLabel => r'導覽選單';
+  @override String get popupMenuLabel => r'彈出式選單';
+  @override String get dialogLabel => r'對話方塊';
 }
 
 TranslationBundle translationBundleForLocale(Locale locale) {
@@ -1631,6 +1858,8 @@ TranslationBundle translationBundleForLocale(Locale locale) {
       return const _Bundle_ja();
     case 'ko':
       return const _Bundle_ko();
+    case 'ms':
+      return const _Bundle_ms();
     case 'nl':
       return const _Bundle_nl();
     case 'no':
@@ -1656,6 +1885,8 @@ TranslationBundle translationBundleForLocale(Locale locale) {
       return const _Bundle_tr();
     case 'ur':
       return const _Bundle_ur();
+    case 'vi':
+      return const _Bundle_vi();
     case 'zh': {
       switch (locale.toString()) {
         case 'zh_HK':

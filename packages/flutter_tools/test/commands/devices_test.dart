@@ -48,8 +48,8 @@ class MockProcessManager extends Mock implements ProcessManager {
         Map<String, String> environment,
         bool includeParentEnvironment: true,
         bool runInShell: false,
-        Encoding stdoutEncoding: SYSTEM_ENCODING,
-        Encoding stderrEncoding: SYSTEM_ENCODING,
+        Encoding stdoutEncoding: SYSTEM_ENCODING, // ignore: deprecated_member_use
+        Encoding stderrEncoding: SYSTEM_ENCODING, // ignore: deprecated_member_use
       }) async {
     return new ProcessResult(0, 0, '', '');
   }
@@ -61,8 +61,8 @@ class MockProcessManager extends Mock implements ProcessManager {
         Map<String, String> environment,
         bool includeParentEnvironment: true,
         bool runInShell: false,
-        Encoding stdoutEncoding: SYSTEM_ENCODING,
-        Encoding stderrEncoding: SYSTEM_ENCODING,
+        Encoding stdoutEncoding: SYSTEM_ENCODING, // ignore: deprecated_member_use
+        Encoding stderrEncoding: SYSTEM_ENCODING, // ignore: deprecated_member_use
       }) {
     return new ProcessResult(0, 0, '', '');
   }

@@ -22,9 +22,11 @@ import 'base/platform.dart';
 import 'base/port_scanner.dart';
 import 'base/utils.dart';
 import 'cache.dart';
+import 'compile.dart';
 import 'devfs.dart';
 import 'device.dart';
 import 'doctor.dart';
+import 'emulator.dart';
 import 'ios/cocoapods.dart';
 import 'ios/ios_workflow.dart';
 import 'ios/mac.dart';
@@ -51,11 +53,13 @@ Future<T> runInContext<T>(
       BotDetector: () => const BotDetector(),
       Cache: () => new Cache(),
       Clock: () => const Clock(),
-      CocoaPods: () => const CocoaPods(),
+      CocoaPods: () => new CocoaPods(),
       Config: () => new Config(),
       DevFSConfig: () => new DevFSConfig(),
       DeviceManager: () => new DeviceManager(),
-      Doctor: () => new Doctor(),
+      Doctor: () => const Doctor(),
+      DoctorValidatorsProvider: () => DoctorValidatorsProvider.defaultInstance,
+      EmulatorManager: () => new EmulatorManager(),
       Flags: () => const EmptyFlags(),
       FlutterVersion: () => new FlutterVersion(const Clock()),
       GenSnapshot: () => const GenSnapshot(),
@@ -63,6 +67,7 @@ Future<T> runInContext<T>(
       IMobileDevice: () => const IMobileDevice(),
       IOSSimulatorUtils: () => new IOSSimulatorUtils(),
       IOSWorkflow: () => const IOSWorkflow(),
+      KernelCompiler: () => const KernelCompiler(),
       Logger: () => platform.isWindows ? new WindowsStdoutLogger() : new StdoutLogger(),
       OperatingSystemUtils: () => new OperatingSystemUtils(),
       PortScanner: () => const HostPortScanner(),

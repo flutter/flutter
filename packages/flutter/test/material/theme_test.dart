@@ -299,43 +299,30 @@ void main() {
       testBuildCalled = 0;
       ThemeData themeData = new ThemeData(primaryColor: const Color(0xFF000000));
 
-      await tester.pumpWidget(
-        new Theme(
+      Widget buildTheme() {
+        return new Theme(
           data: themeData,
           child: const Test(),
-        ),
-      );
+        );
+      }
+
+      await tester.pumpWidget(buildTheme());
       expect(testBuildCalled, 1);
 
       // Pump the same widgets again.
-      await tester.pumpWidget(
-        new Theme(
-          data: themeData,
-          child: const Test(),
-        ),
-      );
+      await tester.pumpWidget(buildTheme());
       // No repeated build calls to the child since it's the same theme data.
       expect(testBuildCalled, 1);
 
       // New instance of theme data but still the same content.
       themeData = new ThemeData(primaryColor: const Color(0xFF000000));
-      await tester.pumpWidget(
-        new Theme(
-          data: themeData,
-          child: const Test(),
-        ),
-      );
+      await tester.pumpWidget(buildTheme());
       // Still no repeated calls.
       expect(testBuildCalled, 1);
 
       // Different now.
       themeData = new ThemeData(primaryColor: const Color(0xFF222222));
-      await tester.pumpWidget(
-        new Theme(
-          data: themeData,
-          child: const Test(),
-        ),
-      );
+      await tester.pumpWidget(buildTheme());
       // Should call build again.
       expect(testBuildCalled, 2);
     },
@@ -416,6 +403,8 @@ void main() {
         expect(style.decorationColor, null);
         expect(style.decorationStyle, null);
         expect(style.debugLabel, isNotNull);
+        expect(style.locale, null);
+        expect(style.background, null);
       }
     }
 
@@ -463,6 +452,7 @@ class _TextStyleProxy implements TextStyle {
   @override FontWeight get fontWeight => _delegate.fontWeight;
   @override double get height => _delegate.height;
   @override ui.Locale get locale => _delegate.locale;
+  @override ui.Paint get background => _delegate.background;
   @override bool get inherit => _delegate.inherit;
   @override double get letterSpacing => _delegate.letterSpacing;
   @override TextBaseline get textBaseline => _delegate.textBaseline;
@@ -489,7 +479,7 @@ class _TextStyleProxy implements TextStyle {
   }
 
   @override
-  TextStyle copyWith({Color color, String fontFamily, double fontSize, FontWeight fontWeight, FontStyle fontStyle, double letterSpacing, double wordSpacing, TextBaseline textBaseline, double height, ui.Locale locale, TextDecoration decoration, Color decorationColor, TextDecorationStyle decorationStyle, String debugLabel}) {
+  TextStyle copyWith({Color color, String fontFamily, double fontSize, FontWeight fontWeight, FontStyle fontStyle, double letterSpacing, double wordSpacing, TextBaseline textBaseline, double height, ui.Locale locale, ui.Paint background, TextDecoration decoration, Color decorationColor, TextDecorationStyle decorationStyle, String debugLabel}) {
     throw new UnimplementedError();
   }
 

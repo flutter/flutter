@@ -38,7 +38,11 @@ void main() {
 
     final FlipWidgetState testWidget = tester.state(find.byType(FlipWidget));
 
-    expect(callbackTracker, equals(<int>[0, 1, 2, 3, 4, 5]));
+    expect(callbackTracker, equals(<int>[
+      0, 1, 2, 3, 4, 5, // visible in viewport
+      6, 7, 8, // in caching area
+    ]));
+    check(visible: <int>[0, 1, 2, 3, 4, 5], hidden: <int>[ 6, 7, 8]);
 
     callbackTracker.clear();
     testWidget.flip();
@@ -50,7 +54,11 @@ void main() {
     testWidget.flip();
     await tester.pump();
 
-    expect(callbackTracker, equals(<int>[0, 1, 2, 3, 4, 5]));
+    expect(callbackTracker, equals(<int>[
+      0, 1, 2, 3, 4, 5,
+      6, 7, 8, // in caching area
+    ]));
+    check(visible: <int>[0, 1, 2, 3, 4, 5], hidden: <int>[ 6, 7, 8]);
   });
 
   testWidgets('ListView.builder vertical', (WidgetTester tester) async {
@@ -91,7 +99,12 @@ void main() {
 
     await tester.pumpWidget(buildWidget());
 
-    expect(callbackTracker, equals(<int>[1, 2, 3, 4]));
+    expect(callbackTracker, equals(<int>[
+      0, // in caching area
+      1, 2, 3, 4,
+      5, // in caching area
+    ]));
+    check(visible: <int>[1, 2, 3, 4], hidden: <int>[0, 5]);
     callbackTracker.clear();
 
     jumpTo(400.0);
@@ -99,12 +112,12 @@ void main() {
 
     await tester.pumpWidget(buildWidget());
 
-    expect(callbackTracker, equals(<int>[1, 2, 3, 4]));
-    callbackTracker.clear();
-
-    await tester.pumpWidget(buildWidget());
-
-    expect(callbackTracker, equals(<int>[2, 3, 4]));
+    expect(callbackTracker, equals(<int>[
+      0, 1, // in caching area
+      2, 3, 4,
+      5, 6, // in caching area
+    ]));
+    check(visible: <int>[2, 3, 4], hidden: <int>[0, 1, 5, 6]);
     callbackTracker.clear();
 
     jumpTo(500.0);
@@ -112,7 +125,12 @@ void main() {
 
     await tester.pumpWidget(buildWidget());
 
-    expect(callbackTracker, equals(<int>[2, 3, 4, 5]));
+    expect(callbackTracker, equals(<int>[
+      0, 1, // in caching area
+      2, 3, 4, 5,
+      6, // in caching area
+    ]));
+    check(visible: <int>[2, 3, 4, 5], hidden: <int>[0, 1, 6]);
     callbackTracker.clear();
   });
 
@@ -155,8 +173,12 @@ void main() {
 
     await tester.pumpWidget(buildWidget());
 
-    expect(callbackTracker, equals(<int>[1, 2, 3, 4, 5]));
-
+    expect(callbackTracker, equals(<int>[
+      0, // in caching area
+      1, 2, 3, 4, 5,
+      6, // in caching area
+    ]));
+    check(visible: <int>[1, 2, 3, 4, 5], hidden: <int>[0, 6]);
     callbackTracker.clear();
 
     jumpTo(400.0);
@@ -164,12 +186,12 @@ void main() {
 
     await tester.pumpWidget(buildWidget());
 
-    expect(callbackTracker, equals(<int>[1, 2, 3, 4, 5]));
-    callbackTracker.clear();
-
-    await tester.pumpWidget(buildWidget());
-
-    expect(callbackTracker, equals(<int>[2, 3, 4, 5]));
+    expect(callbackTracker, equals(<int>[
+      0, 1, // in caching area
+      2, 3, 4, 5,
+      6, 7, // in caching area
+    ]));
+    check(visible: <int>[2, 3, 4, 5], hidden: <int>[0, 1, 6, 7]);
     callbackTracker.clear();
 
     jumpTo(500.0);
@@ -177,7 +199,12 @@ void main() {
 
     await tester.pumpWidget(buildWidget());
 
-    expect(callbackTracker, equals(<int>[2, 3, 4, 5, 6]));
+    expect(callbackTracker, equals(<int>[
+      0, 1, // in caching area
+      2, 3, 4, 5, 6,
+      7, // in caching area
+    ]));
+    check(visible: <int>[2, 3, 4, 5, 6], hidden: <int>[0, 1, 7]);
     callbackTracker.clear();
   });
 
@@ -208,26 +235,39 @@ void main() {
     }
 
     await tester.pumpWidget(testWidget);
-    expect(callbackTracker, equals(<int>[0, 1]));
+    expect(callbackTracker, equals(<int>[0, 1, 2]));
+    check(visible: <int>[0, 1], hidden: <int>[2]);
     callbackTracker.clear();
 
     jumpTo(150.0);
     await tester.pump();
 
-    expect(callbackTracker, equals(<int>[2]));
+    expect(callbackTracker, equals(<int>[3]));
+    check(visible: <int>[0, 1, 2], hidden: <int>[3]);
     callbackTracker.clear();
 
     jumpTo(600.0);
     await tester.pump();
 
-    expect(callbackTracker, equals(<int>[3]));
+    expect(callbackTracker, equals(<int>[4]));
+    check(visible: <int>[2, 3], hidden: <int>[0, 1, 4]);
     callbackTracker.clear();
 
     jumpTo(750.0);
     await tester.pump();
 
-    expect(callbackTracker, equals(<int>[4]));
+    expect(callbackTracker, equals(<int>[5]));
+    check(visible: <int>[2, 3, 4], hidden: <int>[0, 1, 5]);
     callbackTracker.clear();
   });
 
+}
+
+void check({List<int> visible: const <int>[], List<int> hidden: const <int>[]}) {
+  for (int i in visible) {
+    expect(find.text('$i'), findsOneWidget);
+  }
+  for (int i in hidden) {
+    expect(find.text('$i'), findsNothing);
+  }
 }

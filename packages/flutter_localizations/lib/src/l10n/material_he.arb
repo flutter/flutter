@@ -36,5 +36,9 @@
   "signedInLabel": "מחובר",
   "hideAccountsLabel": "הסתרת החשבונות",
   "showAccountsLabel": "הצגת החשבונות",
-  "modalBarrierDismissLabel": "סגירה"
+  "modalBarrierDismissLabel": "סגירה",
+  "drawerLabel": "תפריט ניווט",
+  "popupMenuLabel": "תפריט קופץ",
+  "dialogLabel": "תיבת דו-שיח",
+  "alertDialogLabel": "עֵרָנִי"
 }

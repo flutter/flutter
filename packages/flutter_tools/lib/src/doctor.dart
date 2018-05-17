@@ -21,20 +21,25 @@ import 'globals.dart';
 import 'intellij/intellij.dart';
 import 'ios/ios_workflow.dart';
 import 'ios/plist_utils.dart';
+import 'tester/flutter_tester.dart';
 import 'version.dart';
 import 'vscode/vscode_validator.dart';
 
 Doctor get doctor => context[Doctor];
 
-class ValidatorTask {
-  ValidatorTask(this.validator, this.result);
-  final DoctorValidator validator;
-  final Future<ValidationResult> result;
+abstract class DoctorValidatorsProvider {
+  /// The singleton instance, pulled from the [AppContext].
+  static DoctorValidatorsProvider get instance => context[DoctorValidatorsProvider];
+
+  static final DoctorValidatorsProvider defaultInstance = new _DefaultDoctorValidatorsProvider();
+
+  List<DoctorValidator> get validators;
 }
 
-class Doctor {
+class _DefaultDoctorValidatorsProvider implements DoctorValidatorsProvider {
   List<DoctorValidator> _validators;
 
+  @override
   List<DoctorValidator> get validators {
     if (_validators == null) {
       _validators = <DoctorValidator>[];
@@ -59,6 +64,20 @@ class Doctor {
         _validators.add(new DeviceValidator());
     }
     return _validators;
+  }
+}
+
+class ValidatorTask {
+  ValidatorTask(this.validator, this.result);
+  final DoctorValidator validator;
+  final Future<ValidationResult> result;
+}
+
+class Doctor {
+  const Doctor();
+
+  List<DoctorValidator> get validators {
+    return DoctorValidatorsProvider.instance.validators;
   }
 
   /// Return a list of [ValidatorTask] objects and starts validation on all
@@ -173,7 +192,11 @@ class Doctor {
 
   bool get canListAnything => workflows.any((Workflow workflow) => workflow.canListDevices);
 
-  bool get canLaunchAnything => workflows.any((Workflow workflow) => workflow.canLaunchDevices);
+  bool get canLaunchAnything {
+    if (FlutterTesterDevices.showFlutterTesterDevice)
+      return true;
+    return workflows.any((Workflow workflow) => workflow.canLaunchDevices);
+  }
 }
 
 /// A series of tools and required install steps for a target platform (iOS or Android).
@@ -186,6 +209,9 @@ abstract class Workflow {
 
   /// Could this thing launch *something*? It may still have minor issues.
   bool get canLaunchDevices;
+
+  /// Are we functional enough to list emulators?
+  bool get canListEmulators;
 }
 
 enum ValidationType {

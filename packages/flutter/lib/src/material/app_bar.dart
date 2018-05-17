@@ -79,7 +79,7 @@ class _ToolbarContainerLayout extends SingleChildLayoutDelegate {
 ///
 /// ![The leading widget is in the top left, the actions are in the top right,
 /// the title is between them. The bottom is, naturally, at the bottom, and the
-/// flexibleSpace is behind all of them.](https://flutter.github.io/assets-for-api-docs/material/app_bar.png)
+/// flexibleSpace is behind all of them.](https://flutter.github.io/assets-for-api-docs/assets/material/app_bar.png)
 ///
 /// If the [leading] widget is omitted, but the [AppBar] is in a [Scaffold] with
 /// a [Drawer], then a button will be inserted to open the drawer. Otherwise, if
@@ -188,22 +188,23 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
   /// For less common operations, consider using a [PopupMenuButton] as the
   /// last action.
   ///
-  /// For example:
+  /// ## Sample code
   ///
   /// ```dart
-  /// return new Scaffold(
+  /// new Scaffold(
   ///   appBar: new AppBar(
   ///     title: new Text('Hello World'),
   ///     actions: <Widget>[
   ///       new IconButton(
   ///         icon: new Icon(Icons.shopping_cart),
   ///         tooltip: 'Open shopping cart',
-  ///         onPressed: _openCart,
+  ///         onPressed: () {
+  ///           // ...
+  ///         },
   ///       ),
   ///     ],
   ///   ),
-  ///   body: _buildBody(),
-  /// );
+  /// )
   /// ```
   final List<Widget> actions;
 
@@ -344,10 +345,20 @@ class _AppBarState extends State<AppBar> {
     TextStyle centerStyle = widget.textTheme?.title ?? themeData.primaryTextTheme.title;
     TextStyle sideStyle = widget.textTheme?.body1 ?? themeData.primaryTextTheme.body1;
 
-    final Brightness brightness = widget.brightness ?? themeData.primaryColorBrightness;
-    SystemChrome.setSystemUIOverlayStyle(brightness == Brightness.dark
-      ? SystemUiOverlayStyle.light
-      : SystemUiOverlayStyle.dark);
+    if (parentRoute?.isCurrent ?? true) {
+      final Brightness brightness = widget.brightness ?? themeData.primaryColorBrightness;
+      // TODO(jonahwilliams): remove once we have platform themes.
+      switch (defaultTargetPlatform) {
+        case TargetPlatform.iOS:
+          SystemChrome.setSystemUIOverlayStyle(brightness == Brightness.dark
+              ? SystemUiOverlayStyle.light
+              : SystemUiOverlayStyle.dark);
+          break;
+        case TargetPlatform.android:
+        case TargetPlatform.fuchsia:
+          SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle.dark);
+      }
+    }
 
     if (widget.toolbarOpacity != 1.0) {
       final double opacity = const Interval(0.25, 1.0, curve: Curves.fastOutSlowIn).transform(widget.toolbarOpacity);
@@ -382,6 +393,15 @@ class _AppBarState extends State<AppBar> {
 
     Widget title = widget.title;
     if (title != null) {
+      switch (defaultTargetPlatform) {
+        case TargetPlatform.android:
+        case TargetPlatform.fuchsia:
+           title = new Semantics(namesRoute: true, child: title);
+           break;
+        case TargetPlatform.iOS:
+          break;
+      }
+
       title = new DefaultTextStyle(
         style: centerStyle,
         softWrap: false,
@@ -472,10 +492,14 @@ class _AppBarState extends State<AppBar> {
       );
     }
 
-    return new Material(
-      color: widget.backgroundColor ?? themeData.primaryColor,
-      elevation: widget.elevation,
-      child: appBar,
+    return new Semantics(
+      container: true,
+      explicitChildNodes: true,
+      child: new Material(
+        color: widget.backgroundColor ?? themeData.primaryColor,
+        elevation: widget.elevation,
+        child: appBar,
+      ),
     );
   }
 }
@@ -767,11 +791,11 @@ class SliverAppBar extends StatefulWidget {
   /// For less common operations, consider using a [PopupMenuButton] as the
   /// last action.
   ///
-  /// For example:
+  /// ## Sample code
   ///
   /// ```dart
-  /// return new Scaffold(
-  ///   body: new CustomView(
+  /// new Scaffold(
+  ///   body: new CustomScrollView(
   ///     primary: true,
   ///     slivers: <Widget>[
   ///       new SliverAppBar(
@@ -789,7 +813,7 @@ class SliverAppBar extends StatefulWidget {
   ///       // ...rest of body...
   ///     ],
   ///   ),
-  /// );
+  /// )
   /// ```
   final List<Widget> actions;
 

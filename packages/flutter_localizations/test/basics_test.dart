@@ -21,9 +21,9 @@ void main() {
       ),
     ));
 
-    final LocalizationTrackerState outerTracker = tester.state(find.byKey(const ValueKey<String>('outer')));
+    final LocalizationTrackerState outerTracker = tester.state(find.byKey(const ValueKey<String>('outer'), skipOffstage: false));
     expect(outerTracker.captionFontSize, 12.0);
-    final LocalizationTrackerState innerTracker = tester.state(find.byKey(const ValueKey<String>('inner')));
+    final LocalizationTrackerState innerTracker = tester.state(find.byKey(const ValueKey<String>('inner'), skipOffstage: false));
     expect(innerTracker.captionFontSize, 13.0);
   });
 
@@ -46,6 +46,28 @@ void main() {
     await tester.binding.setLocale('es', 'US');
     await tester.pump();
     await tester.pumpWidget(new Container());
+  });
+
+  testWidgets('Locale without coutryCode', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/pull/16782
+    await tester.pumpWidget(
+      new MaterialApp(
+        localizationsDelegates: const <LocalizationsDelegate<dynamic>>[
+          GlobalMaterialLocalizations.delegate,
+        ],
+        supportedLocales: const <Locale>[
+          const Locale('es', 'ES'),
+          const Locale('zh'),
+        ],
+        home: new Container(),
+      )
+    );
+
+    await tester.binding.setLocale('zh', null);
+    await tester.pump();
+    await tester.binding.setLocale('es', 'US');
+    await tester.pump();
+
   });
 }
 

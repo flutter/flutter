@@ -62,6 +62,9 @@ const List<TimelineStream> _defaultStreams = const <TimelineStream>[TimelineStre
 /// Default timeout for short-running RPCs.
 const Duration _kShortTimeout = const Duration(seconds: 5);
 
+/// Default timeout for awaiting an Isolate to become runnable.
+const Duration _kIsolateLoadRunnableTimeout = const Duration(minutes: 1);
+
 /// Default timeout for long-running RPCs.
 final Duration _kLongTimeout = _kShortTimeout * 6;
 
@@ -145,26 +148,47 @@ class FlutterDriver {
   ///
   /// [logCommunicationToFile] determines whether the command communication
   /// between the test and the app should be logged to `flutter_driver_commands.log`.
-  static Future<FlutterDriver> connect({ String dartVmServiceUrl,
-                                         bool printCommunication: false,
-                                         bool logCommunicationToFile: true }) async {
+  ///
+  /// [isolateNumber] (optional) determines the specific isolate to connect to.
+  /// If this is left as `null`, will connect to the first isolate found
+  /// running on [dartVmServiceUrl].
+  ///
+  /// [isolateReadyTimeout] determines how long after we connect to the VM
+  /// service we will wait for the first isolate to become runnable.
+  static Future<FlutterDriver> connect({
+    String dartVmServiceUrl,
+    bool printCommunication: false,
+    bool logCommunicationToFile: true,
+    int isolateNumber,
+    Duration isolateReadyTimeout: _kIsolateLoadRunnableTimeout,
+  }) async {
     dartVmServiceUrl ??= Platform.environment['VM_SERVICE_URL'];
 
     if (dartVmServiceUrl == null) {
       throw new DriverError(
-        'Could not determine URL to connect to application.\n'
-        'Either the VM_SERVICE_URL environment variable should be set, or an explicit\n'
-        'URL should be provided to the FlutterDriver.connect() method.'
-      );
+          'Could not determine URL to connect to application.\n'
+          'Either the VM_SERVICE_URL environment variable should be set, or an explicit\n'
+          'URL should be provided to the FlutterDriver.connect() method.');
     }
 
     // Connect to Dart VM services
     _log.info('Connecting to Flutter application at $dartVmServiceUrl');
-    final VMServiceClientConnection connection = await vmServiceConnectFunction(dartVmServiceUrl);
+    final VMServiceClientConnection connection =
+        await vmServiceConnectFunction(dartVmServiceUrl);
     final VMServiceClient client = connection.client;
     final VM vm = await client.getVM();
-    _log.trace('Looking for the isolate');
-    VMIsolate isolate = await vm.isolates.first.loadRunnable();
+    final VMIsolateRef isolateRef = isolateNumber ==
+        null ? vm.isolates.first :
+               vm.isolates.firstWhere(
+                   (VMIsolateRef isolate) => isolate.number == isolateNumber);
+    _log.trace('Isolate found with number: ${isolateRef.number}');
+
+    VMIsolate isolate = await isolateRef
+        .loadRunnable()
+        .timeout(isolateReadyTimeout, onTimeout: () {
+      throw new TimeoutException(
+          'Timeout while waiting for the isolate to become runnable');
+    });
 
     // TODO(yjbanov): vm_service_client does not support "None" pause event yet.
     // It is currently reported as null, but we cannot rely on it because
@@ -180,7 +204,7 @@ class FlutterDriver {
         isolate.pauseEvent is! VMPauseInterruptedEvent &&
         isolate.pauseEvent is! VMResumeEvent) {
       await new Future<Null>.delayed(_kShortTimeout ~/ 10);
-      isolate = await vm.isolates.first.loadRunnable();
+      isolate = await isolateRef.loadRunnable();
     }
 
     final FlutterDriver driver = new FlutterDriver.connectedTo(
@@ -310,7 +334,7 @@ class FlutterDriver {
   /// JSON-RPC client useful for sending raw JSON requests.
   final rpc.Peer _peer;
   /// The main isolate hosting the Flutter application
-  final VMIsolateRef _appIsolate;
+  final VMIsolate _appIsolate;
   /// Whether to print communication between host and app to `stdout`.
   final bool _printCommunication;
   /// Whether to log communication between host and app to `flutter_driver_commands.log`.
@@ -349,7 +373,7 @@ class FlutterDriver {
     if (_logCommunicationToFile) {
       final f.File file = fs.file(p.join(testOutputsDirectory, 'flutter_driver_commands_$_driverId.log'));
       file.createSync(recursive: true); // no-op if file exists
-      file.writeAsStringSync('${new DateTime.now()} $message\n', mode: f.FileMode.APPEND, flush: true);
+      file.writeAsStringSync('${new DateTime.now()} $message\n', mode: f.FileMode.APPEND, flush: true); // ignore: deprecated_member_use
     }
   }
 
@@ -454,21 +478,16 @@ class FlutterDriver {
     assert(dxScroll != 0.0 || dyScroll != 0.0);
     assert(timeout != null);
 
-    // If the item is already visible then we're done.
+    // Kick off an (unawaited) waitFor that will complete when the item we're
+    // looking for finally scrolls onscreen. We add an initial pause to give it
+    // the chance to complete if the item is already onscreen; if not, scroll
+    // repeatedly until we either find the item or time out.
     bool isVisible = false;
-    try {
-      await waitFor(item, timeout: const Duration(milliseconds: 100));
-      isVisible = true;
-    } on DriverError {
-      // Assume that that waitFor timed out because the item isn't visible.
-    }
-
-    if (!isVisible) {
-      waitFor(item, timeout: timeout).then((Null _) { isVisible = true; });
-      while (!isVisible) {
-        await scroll(scrollable, dxScroll, dyScroll, const Duration(milliseconds: 100));
-        await new Future<Null>.delayed(const Duration(milliseconds: 500));
-      }
+    waitFor(item, timeout: timeout).then((Null _) { isVisible = true; });
+    await new Future<Null>.delayed(const Duration(milliseconds: 500));
+    while (!isVisible) {
+      await scroll(scrollable, dxScroll, dyScroll, const Duration(milliseconds: 100));
+      await new Future<Null>.delayed(const Duration(milliseconds: 500));
     }
 
     return scrollIntoView(item, alignment: alignment);
@@ -778,8 +797,8 @@ Future<VMServiceClientConnection> _waitAndConnect(String url) async {
     WebSocket ws1;
     WebSocket ws2;
     try {
-      ws1 = await WebSocket.connect(uri.toString());
-      ws2 = await WebSocket.connect(uri.toString());
+      ws1 = await WebSocket.connect(uri.toString()).timeout(_kShortTimeout);
+      ws2 = await WebSocket.connect(uri.toString()).timeout(_kShortTimeout);
       return new VMServiceClientConnection(
         new VMServiceClient(new IOWebSocketChannel(ws1).cast()),
         new rpc.Peer(new IOWebSocketChannel(ws2).cast())..listen()

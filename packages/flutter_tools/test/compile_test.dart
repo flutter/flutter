@@ -46,7 +46,7 @@ void main() {
               'result abc\nline1\nline2\nabc /path/to/main.dart.dill 0'
             ))
           ));
-      final CompilerOutput output = await compile(sdkRoot: '/path/to/sdkroot',
+      final CompilerOutput output = await kernelCompiler.compile(sdkRoot: '/path/to/sdkroot',
         mainPath: '/path/to/main.dart'
       );
       expect(mockFrontendServerStdIn.getAndClear(), isEmpty);
@@ -66,7 +66,7 @@ void main() {
             ))
           ));
 
-      final CompilerOutput output = await compile(sdkRoot: '/path/to/sdkroot',
+      final CompilerOutput output = await kernelCompiler.compile(sdkRoot: '/path/to/sdkroot',
         mainPath: '/path/to/main.dart'
       );
       expect(mockFrontendServerStdIn.getAndClear(), isEmpty);
@@ -88,7 +88,7 @@ void main() {
           ))
       ));
 
-      final CompilerOutput output = await compile(sdkRoot: '/path/to/sdkroot',
+      final CompilerOutput output = await kernelCompiler.compile(sdkRoot: '/path/to/sdkroot',
           mainPath: '/path/to/main.dart'
       );
       expect(mockFrontendServerStdIn.getAndClear(), isEmpty);

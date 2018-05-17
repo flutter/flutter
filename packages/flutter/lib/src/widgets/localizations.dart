@@ -544,14 +544,17 @@ class _LocalizationsState extends State<Localizations> {
   Widget build(BuildContext context) {
     if (_locale == null)
       return new Container();
-    return new _LocalizationsScope(
-      key: _localizedResourcesScopeKey,
-      locale: _locale,
-      localizationsState: this,
-      typeToResources: _typeToResources,
-      child: new Directionality(
-        textDirection: _textDirection,
-        child: widget.child,
+    return new Semantics(
+      textDirection: _textDirection,
+      child: new _LocalizationsScope(
+        key: _localizedResourcesScopeKey,
+        locale: _locale,
+        localizationsState: this,
+        typeToResources: _typeToResources,
+        child: new Directionality(
+          textDirection: _textDirection,
+          child: widget.child,
+        ),
       ),
     );
   }
