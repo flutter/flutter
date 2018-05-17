@@ -202,7 +202,7 @@ class CupertinoSlider extends StatefulWidget {
 class _CupertinoSliderState extends State<CupertinoSlider> with TickerProviderStateMixin {
   void _handleChanged(double value) {
     assert(widget.onChanged != null);
-    final double lerpValue = _lerp(value);
+    final double lerpValue = lerpDouble(widget.min, widget.max, value);
     if (lerpValue != widget.value) {
       widget.onChanged(lerpValue);
     }
@@ -210,20 +210,12 @@ class _CupertinoSliderState extends State<CupertinoSlider> with TickerProviderSt
 
   void _handleDragStart(double value) {
     assert(widget.onChangeStart != null);
-    widget.onChangeStart(_lerp(value));
+    widget.onChangeStart(lerpDouble(widget.min, widget.max, value));
   }
 
   void _handleDragEnd(double value) {
     assert(widget.onChangeEnd != null);
-    widget.onChangeEnd(_lerp(value));
-  }
-
-  // Returns a number between min and max, proportional to value, which must
-  // be between 0.0 and 1.0.
-  double _lerp(double value) {
-    assert(value >= 0.0);
-    assert(value <= 1.0);
-    return value * (widget.max - widget.min) + widget.min;
+    widget.onChangeEnd(lerpDouble(widget.min, widget.max, value));
   }
 
   @override
