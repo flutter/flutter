@@ -12,6 +12,9 @@ import 'package:flutter/widgets.dart';
 import 'colors.dart';
 import 'thumb_painter.dart';
 
+// Examples can assume:
+// int _duelCommandment = 1;
+
 /// An iOS-style slider.
 ///
 /// Used to select from a range of values.
