@@ -11,10 +11,11 @@
 #include "FlutterBinaryMessenger.h"
 #include "FlutterDartProject.h"
 #include "FlutterMacros.h"
+#include "FlutterPlugin.h"
 #include "FlutterTexture.h"
 
 FLUTTER_EXPORT
-@interface FlutterViewController : UIViewController<FlutterBinaryMessenger, FlutterTextureRegistry>
+@interface FlutterViewController : UIViewController<FlutterBinaryMessenger, FlutterTextureRegistry, FlutterPluginRegistry>
 
 - (instancetype)initWithProject:(FlutterDartProject*)project
                         nibName:(NSString*)nibNameOrNil
@@ -48,6 +49,8 @@ FLUTTER_EXPORT
  - Parameter route: The name of the first route to show.
  */
 - (void)setInitialRoute:(NSString*)route;
+
+- (id<FlutterPluginRegistry>)pluginRegistry;
 
 @end
 

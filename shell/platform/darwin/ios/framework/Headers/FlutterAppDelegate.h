@@ -24,21 +24,9 @@
  * code as necessary from FlutterAppDelegate.mm.
  */
 FLUTTER_EXPORT
-@interface FlutterAppDelegate : UIResponder<UIApplicationDelegate, FlutterPluginRegistry>
+@interface FlutterAppDelegate : UIResponder<UIApplicationDelegate, FlutterPluginRegistry, FlutterAppLifeCycleProvider>
 
 @property(strong, nonatomic) UIWindow* window;
-
-// Can be overriden by subclasses to provide a custom FlutterBinaryMessenger,
-// typically a FlutterViewController, for plugin interop.
-//
-// Defaults to window's rootViewController.
-- (NSObject<FlutterBinaryMessenger>*)binaryMessenger;
-
-// Can be overriden by subclasses to provide a custom FlutterTextureRegistry,
-// typically a FlutterViewController, for plugin interop.
-//
-// Defaults to window's rootViewController.
-- (NSObject<FlutterTextureRegistry>*)textures;
 
 @end
 
