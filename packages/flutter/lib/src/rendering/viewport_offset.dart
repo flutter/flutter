@@ -153,8 +153,8 @@ abstract class ViewportOffset extends ChangeNotifier {
   ///
   /// See also:
   ///
-  ///  * [jumpTo], for also changing the scroll position but applying the
-  ///    change immediately and notifying its listeners.
+  ///  * [jumpTo], for also changing the scroll position when not in layout.
+  ///    [jumpTo] applies the change immediately and notifies its listeners.
   void correctBy(double correction);
 
   /// Jumps the scroll position from its current value to the given value,
@@ -162,9 +162,8 @@ abstract class ViewportOffset extends ChangeNotifier {
   ///
   /// See also:
   ///
-  ///  * [correctBy], a more specialized way of changing the current offset
-  ///    in the middle of layout that defers the notification of its listeners
-  ///    until after layout.
+  ///  * [correctBy], for changing the current offset in the middle of layout
+  ///    and that defers the notification of its listeners until after layout.
   void jumpTo(double pixels);
 
   /// The direction in which the user is trying to change [pixels], relative to
