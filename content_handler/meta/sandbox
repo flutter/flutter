@@ -1,7 +1,0 @@
-{
-    "features": [
-        "root-ssl-certificates",
-        "system-temp",
-        "vulkan"
-    ]
-}
