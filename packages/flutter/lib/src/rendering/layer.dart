@@ -92,7 +92,7 @@ abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
   /// Find the last [AnnotatedRegionLayer] which contains [offset] with a value
   /// of Type [type].
   ///
-  /// Returns null otherwise.
+  /// Returns null if no matching region is found.
   Object findRegion(Offset offset, Type type);
 
   /// Override this method to upload this layer to the engine.
@@ -602,13 +602,6 @@ class ClipRectLayer extends ContainerLayer {
   Rect clipRect;
 
   @override
-  Object findRegion(Offset offset, Type type) {
-    if (!clipRect.contains(offset))
-      return null;
-    return super.findRegion(offset, type);
-  }
-
-  @override
   void addToScene(ui.SceneBuilder builder, Offset layerOffset) {
     bool enabled = true;
     assert(() {
@@ -648,13 +641,6 @@ class ClipRRectLayer extends ContainerLayer {
   RRect clipRRect;
 
   @override
-  Object findRegion(Offset offset, Type type) {
-    if (!clipRRect.contains(offset))
-      return null;
-    return super.findRegion(offset, type);
-  }
-
-  @override
   void addToScene(ui.SceneBuilder builder, Offset layerOffset) {
     bool enabled = true;
     assert(() {
@@ -692,13 +678,6 @@ class ClipPathLayer extends ContainerLayer {
   /// The scene must be explicitly recomposited after this property is changed
   /// (as described at [Layer]).
   Path clipPath;
-
-  @override
-  Object findRegion(Offset offset, Type type) {
-    if (!clipPath.contains(offset))
-      return null;
-    return super.findRegion(offset, type);
-  }
 
   @override
   void addToScene(ui.SceneBuilder builder, Offset layerOffset) {
@@ -923,13 +902,6 @@ class PhysicalModelLayer extends ContainerLayer {
 
   /// The shadow color.
   Color shadowColor;
-
-  @override
-  Object findRegion(Offset offset, Type type) {
-    if (!clipPath.contains(offset))
-      return null;
-    return super.findRegion(offset, type);
-  }
 
   @override
   void addToScene(ui.SceneBuilder builder, Offset layerOffset) {
@@ -1278,6 +1250,6 @@ class AnnotatedRegionLayer<T> extends ContainerLayer {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(new DiagnosticsProperty<Object>('value', value));
+    properties.add(new DiagnosticsProperty<T>('value', value));
   }
 }

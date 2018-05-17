@@ -7,7 +7,6 @@ import 'dart:async';
 import 'package:flutter/foundation.dart' show defaultTargetPlatform;
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart' show timeDilation;
-import 'package:flutter/services.dart';
 
 import 'package:url_launcher/url_launcher.dart';
 
@@ -127,24 +126,21 @@ class _GalleryAppState extends State<GalleryApp> {
       );
     }
 
-    return new AnnotatedRegion<SystemUiOverlayStyle>(
-      value: SystemUiOverlayStyle.dark,
-      child: new MaterialApp(
-        theme: _options.theme.data.copyWith(platform: _options.platform),
-        title: 'Flutter Gallery',
-        color: Colors.grey,
-        showPerformanceOverlay: _options.showPerformanceOverlay,
-        checkerboardOffscreenLayers: _options.showOffscreenLayersCheckerboard,
-        checkerboardRasterCacheImages: _options.showRasterCacheImagesCheckerboard,
-        routes: _buildRoutes(),
-        builder: (BuildContext context, Widget child) {
-          return new Directionality(
-            textDirection: _options.textDirection,
-            child: _applyTextScaleFactor(child),
-          );
-        },
-        home: home,
-      ),
+    return new MaterialApp(
+      theme: _options.theme.data.copyWith(platform: _options.platform),
+      title: 'Flutter Gallery',
+      color: Colors.grey,
+      showPerformanceOverlay: _options.showPerformanceOverlay,
+      checkerboardOffscreenLayers: _options.showOffscreenLayersCheckerboard,
+      checkerboardRasterCacheImages: _options.showRasterCacheImagesCheckerboard,
+      routes: _buildRoutes(),
+      builder: (BuildContext context, Widget child) {
+        return new Directionality(
+          textDirection: _options.textDirection,
+          child: _applyTextScaleFactor(child),
+        );
+      },
+      home: home,
     );
   }
 }
