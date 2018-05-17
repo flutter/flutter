@@ -26,15 +26,17 @@ import 'theme.dart';
 /// to the empty string. When `query` is set to null, `delegate.query` will
 /// be used as the initial query.
 ///
-/// The transition to the search triggered by this method looks best if the
+/// The method returns the selected search result, which can be set in the
+/// [SearchDelegate.close] call.
+///
+/// The transition to the search page triggered by this method looks best if the
 /// screen triggering the transition contains an [AppBar] at the top and the
-/// transition is triggered from an [IconButton.onPressed] within
-/// [AppBar.actions]. The animation provided by
-/// [SearchDelegate.transitionAnimation] can be used to trigger additional
-/// animations in the underlying screen while the search fades in or out. This
-/// is commonly used to animate an [AnimatedIcon] in the [AppBar.leading]
-/// position e.g. from the hamburger menu to the back arrow used to exit the
-/// search overlay.
+/// transition is called from an [IconButton] that's part of [AppBar.actions].
+/// The animation provided by [SearchDelegate.transitionAnimation] can be used
+/// to trigger additional in the underlying page while the search page fades in
+/// or out. This is commonly used to animate an [AnimatedIcon] in the
+/// [AppBar.leading] position e.g. from the hamburger menu to the back arrow
+/// used to exit the search overlay.
 ///
 /// See also:
 ///

@@ -83,9 +83,7 @@ class _SearchDemoState extends State<SearchDemo> {
                 ],
               ),
             ),
-            const Padding(
-              padding: const EdgeInsets.symmetric(vertical: 64.0),
-            ),
+            const SizedBox(height: 64.0),
             new Text('Last selected integer: ${_lastIntegerSelected ?? 'NONE' }.')
           ],
         ),
@@ -148,35 +146,18 @@ class _SearchDemoSearchDelegate extends SearchDelegate<int> {
 
   @override
   Widget buildSuggestions(BuildContext context) {
-    final ThemeData theme = Theme.of(context);
 
     final Iterable<int> suggestions = query.isEmpty
         ? _history
         : _data.where((int i) => '$i'.startsWith(query));
 
-    return new ListView(
-      children: suggestions.map((int i) {
-        final String suggestion = '$i';
-        return new ListTile(
-          leading: query.isEmpty ? const Icon(Icons.history) : new Container(),
-          title: new RichText(
-            text: new TextSpan(
-              text: suggestion.substring(0, query.length),
-              style: theme.textTheme.subhead.copyWith(fontWeight: FontWeight.bold),
-              children: <TextSpan>[
-                new TextSpan(
-                  text: suggestion.substring(query.length),
-                  style: theme.textTheme.subhead,
-                ),
-              ],
-            ),
-          ),
-          onTap: () {
-            query = '$i';
-            showResultsPage(context);
-          },
-        );
-      }).toList(),
+    return new _SuggestionList(
+      query: query,
+      suggestions: suggestions.map((int i) => '$i'),
+      onSelected: (String suggestion) {
+        query = suggestion;
+        showResultsPage(context);
+      },
     );
   }
 
@@ -239,13 +220,11 @@ class _SearchDemoSearchDelegate extends SearchDelegate<int> {
 }
 
 class _ResultCard extends StatelessWidget {
-
   const _ResultCard({this.integer, this.title, this.searchDelegate});
 
   final int integer;
   final String title;
   final SearchDelegate<int> searchDelegate;
-
 
   @override
   Widget build(BuildContext context) {
@@ -270,5 +249,39 @@ class _ResultCard extends StatelessWidget {
       ),
     );
   }
+}
 
+class _SuggestionList extends StatelessWidget {
+  const _SuggestionList({this.suggestions, this.query, this.onSelected});
+
+  final List<String> suggestions;
+  final String query;
+  final ValueChanged<String> onSelected;
+
+  @override
+  Widget build(BuildContext context) {
+    final ThemeData theme = Theme.of(context);
+    return new ListView(
+      children: suggestions.map((String suggestion) {
+        return new ListTile(
+          leading: query.isEmpty ? const Icon(Icons.history) : new Container(),
+          title: new RichText(
+            text: new TextSpan(
+              text: suggestion.substring(0, query.length),
+              style: theme.textTheme.subhead.copyWith(fontWeight: FontWeight.bold),
+              children: <TextSpan>[
+                new TextSpan(
+                  text: suggestion.substring(query.length),
+                  style: theme.textTheme.subhead,
+                ),
+              ],
+            ),
+          ),
+          onTap: () {
+            onSelected(suggestion);
+          },
+        );
+      }).toList(),
+    );
+  }
 }
