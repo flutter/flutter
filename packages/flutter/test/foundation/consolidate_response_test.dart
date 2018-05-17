@@ -24,21 +24,40 @@ void main() {
         final void Function() onDone = invocation.namedArguments[#onDone];
         final bool cancelOnError = invocation.namedArguments[#cancelOnError];
 
-        return new Stream<List<int>>.fromIterable(<List<int>>[chunkOne, chunkTwo])
-          .listen(onData, onDone: onDone, onError: onError, cancelOnError: cancelOnError);
+        return new Stream<List<int>>.fromIterable(
+            <List<int>>[chunkOne, chunkTwo]).listen(
+          onData,
+          onDone: onDone,
+          onError: onError,
+          cancelOnError: cancelOnError,
+        );
       });
     });
 
-    test('Converts an HttpClientResponse with contentLength to bytes', () async {
-      when(response.contentLength).thenReturn(chunkOne.length + chunkTwo.length);
-      final List<int> bytes = await consolidateHttpClientResponseBytes(response);
+    test('Converts an HttpClientResponse with contentLength to bytes',
+        () async {
+      when(response.contentLength)
+          .thenReturn(chunkOne.length + chunkTwo.length);
+      final List<int> bytes =
+          await consolidateHttpClientResponseBytes(response);
 
       expect(bytes, <int>[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
     });
 
-    test('Converts an HttpClientResponse without contentLength to bytes', () async {
+    test('Converts a compressed HttpClientResponse with contentLength to bytes',
+        () async {
+      when(response.contentLength).thenReturn(chunkOne.length);
+      final List<int> bytes =
+          await consolidateHttpClientResponseBytes(response);
+
+      expect(bytes, <int>[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
+    });
+
+    test('Converts an HttpClientResponse without contentLength to bytes',
+        () async {
       when(response.contentLength).thenReturn(-1);
-      final List<int> bytes = await consolidateHttpClientResponseBytes(response);
+      final List<int> bytes =
+          await consolidateHttpClientResponseBytes(response);
 
       expect(bytes, <int>[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
     });
@@ -55,12 +74,19 @@ void main() {
         final void Function() onDone = invocation.namedArguments[#onDone];
         final bool cancelOnError = invocation.namedArguments[#cancelOnError];
 
-        return new Stream<List<int>>.fromFuture(new Future<List<int>>.error(new Exception('Test Error')))
-          .listen(onData, onDone: onDone, onError: onError, cancelOnError: cancelOnError);
+        return new Stream<List<int>>.fromFuture(
+                new Future<List<int>>.error(new Exception('Test Error')))
+            .listen(
+          onData,
+          onDone: onDone,
+          onError: onError,
+          cancelOnError: cancelOnError,
+        );
       });
       when(response.contentLength).thenReturn(-1);
 
-      expect(consolidateHttpClientResponseBytes(response), throwsA(const isInstanceOf<Exception>()));
+      expect(consolidateHttpClientResponseBytes(response),
+          throwsA(const isInstanceOf<Exception>()));
     });
   });
 }
