@@ -147,32 +147,42 @@ abstract class IOSApp extends ApplicationPackage {
 
   /// Creates a new IOSApp from an existing app bundle or IPA.
   factory IOSApp.fromPrebuiltApp(String applicationBinary) {
+    final FileSystemEntityType entityType = fs.typeSync(applicationBinary);
+    if (entityType == FileSystemEntityType.notFound) {
+      printError(
+          '$applicationBinary does not exist. Use an app bundle or an ipa.');
+      return null;
+    }
     Directory bundleDir;
-    if (fs.isDirectorySync(applicationBinary)) {
-      // Looks like an app bundle.
+    if (entityType == FileSystemEntityType.directory &&
+        _isBundleDirectory(fs.directory(applicationBinary))) {
       bundleDir = fs.directory(applicationBinary);
     } else {
-      // Looks like an ipa.
-      try {
-        final Directory tempDir = fs.systemTempDirectory.createTempSync(
-            'flutter_app_');
-        addShutdownHook(() async {
-          await tempDir.delete(recursive: true);
-        }, ShutdownStage.STILL_RECORDING);
-        os.unzip(fs.file(applicationBinary), tempDir);
-        final Directory payloadDir = fs.directory(
-            fs.path.join(tempDir.path, 'Payload'));
-        bundleDir = payloadDir.listSync().singleWhere(_isBundleDirectory);
-      } on StateError catch (e, stackTrace) {
-        printError('Invalid prebuilt iOS binary: ${e.toString()}',
-            stackTrace: stackTrace);
+      // Try to unpack as an ipa.
+      final Directory tempDir = fs.systemTempDirectory.createTempSync(
+          'flutter_app_');
+      addShutdownHook(() async {
+        await tempDir.delete(recursive: true);
+      }, ShutdownStage.STILL_RECORDING);
+      os.unzip(fs.file(applicationBinary), tempDir);
+      final Directory payloadDir = fs.directory(
+          fs.path.join(tempDir.path, 'Payload'));
+      bundleDir = payloadDir.listSync()
+          .singleWhere(_isBundleDirectory, orElse: () {
+        printError(
+            'Invalid prebuilt iOS ipa. Does not contain a single app bundle.');
+        return null;
+      });
+      if (bundleDir == null) {
         return null;
       }
     }
     final String plistPath = fs.path.join(bundleDir.path, 'Info.plist');
     final String id = plist.getValueFromFile(plistPath, plist.kCFBundleIdentifierKey);
-    if (id == null)
+    if (id == null) {
+      printError('Invalid prebuilt iOS app. Info.plist does not contain bundle identifier');
       return null;
+    }
 
     return new PrebuiltIOSApp(
       bundleDir: bundleDir,
