@@ -16,6 +16,7 @@ class AnnotatedRegion<T> extends SingleChildRenderObjectWidget {
     @required Widget child,
     @required this.value,
   }) : assert(value != null),
+       assert(child != null),
        super(key: key, child: child);
 
   /// The value inserted into the layer tree.
@@ -35,7 +36,7 @@ class AnnotatedRegion<T> extends SingleChildRenderObjectWidget {
 
 /// Render object for the [AnnotatedRegion].
 class AnnotatedRegionRenderObject<T> extends RenderProxyBox {
-  /// The value to annotated in the layer tree.
+  /// The value to be annotated in the layer tree.
   T value;
 
   @override

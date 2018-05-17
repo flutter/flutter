@@ -482,8 +482,8 @@ class _AppBarState extends State<AppBar> {
     
     return new AnnotatedRegion<SystemUiOverlayStyle>(
       value: brightness == Brightness.dark
-          ? SystemUiOverlayStyle.dark
-          : SystemUiOverlayStyle.light,
+          ? SystemUiOverlayStyle.light
+          : SystemUiOverlayStyle.dark,
       child: new Semantics(
         container: true,
         explicitChildNodes: true,

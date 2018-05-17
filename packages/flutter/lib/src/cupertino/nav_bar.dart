@@ -293,8 +293,8 @@ Widget _wrapWithBackground({
     ),
     child: new AnnotatedRegion<SystemUiOverlayStyle>(
       value: darkBackground
-          ? SystemUiOverlayStyle.dark
-          : SystemUiOverlayStyle.light,
+          ? SystemUiOverlayStyle.light
+          : SystemUiOverlayStyle.dark,
       child: child,
     ),
   );
