@@ -10,6 +10,7 @@ import 'package:flutter_devicelab/framework/framework.dart';
 import 'package:flutter_devicelab/framework/utils.dart';
 
 String javaHome;
+String errorMessage;
 
 void main() async {
   await task(() async {
@@ -33,7 +34,7 @@ void main() async {
 
       section('gradlew assembleDebug no-preview-dart-2')
       await project.runGradleTask('assembleDebug', options: <String>['-Ppreview-dart-2=false']);
-      String errorMessage = _validateSnapshotDependency(project,
+      errorMessage = _validateSnapshotDependency(project,
           '${project.rootPath}/build/app/intermediates/flutter/debug/snapshot_blob.bin');
       if (errorMessage != null) {
         return new TaskResult.failure(errorMessage);
