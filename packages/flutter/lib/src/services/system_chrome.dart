@@ -105,7 +105,7 @@ class SystemUiOverlayStyle {
     statusBarColor: null,
     systemNavigationBarIconBrightness: Brightness.light,
     statusBarIconBrightness: Brightness.light,
-    statusBarBrightness: Brightness.dark,
+    statusBarBrightness: Brightness.light,
   );
 
   /// System overlays should be drawn with a dark color. Intended for
@@ -116,7 +116,7 @@ class SystemUiOverlayStyle {
     statusBarColor: null,
     systemNavigationBarIconBrightness: Brightness.light,
     statusBarIconBrightness: Brightness.dark,
-    statusBarBrightness: Brightness.light,
+    statusBarBrightness: Brightness.dark,
   );
 
   /// Creates a new [SystemUiOverlayStyle].
