@@ -25,8 +25,7 @@ IMPLEMENT_WRAPPERTYPEINFO(ui, Gradient);
 #define FOR_EACH_BINDING(V) \
   V(Gradient, initLinear)   \
   V(Gradient, initRadial)   \
-  V(Gradient, initSweep)    \
-  V(Gradient, initTwoPointConical)
+  V(Gradient, initSweep)
 
 FOR_EACH_BINDING(DART_NATIVE_CALLBACK)
 
@@ -108,35 +107,6 @@ void CanvasGradient::initSweep(double center_x,
       color_stops.data(), colors.num_elements(), tile_mode,
       start_angle * 180.0 / M_PI, end_angle * 180.0 / M_PI, 0,
       has_matrix ? &sk_matrix : nullptr)));
-}
-
-void CanvasGradient::initTwoPointConical(double start_x,
-                                         double start_y,
-                                         double start_radius,
-                                         double end_x,
-                                         double end_y,
-                                         double end_radius,
-                                         const tonic::Int32List& colors,
-                                         const tonic::Float32List& color_stops,
-                                         SkShader::TileMode tile_mode,
-                                         const tonic::Float64List& matrix4) {
-  FXL_DCHECK(colors.num_elements() == color_stops.num_elements() ||
-             color_stops.data() == nullptr);
-
-  static_assert(sizeof(SkColor) == sizeof(int32_t),
-                "SkColor doesn't use int32_t.");
-
-  SkMatrix sk_matrix;
-  bool has_matrix = matrix4.data() != nullptr;
-  if (has_matrix) {
-    sk_matrix = ToSkMatrix(matrix4);
-  }
-
-  set_shader(UIDartState::CreateGPUObject(SkGradientShader::MakeTwoPointConical(
-      SkPoint::Make(start_x, start_y), start_radius,
-      SkPoint::Make(end_x, end_y), end_radius,
-      reinterpret_cast<const SkColor*>(colors.data()), color_stops.data(),
-      colors.num_elements(), tile_mode, 0, has_matrix ? &sk_matrix : nullptr)));
 }
 
 CanvasGradient::CanvasGradient() = default;
