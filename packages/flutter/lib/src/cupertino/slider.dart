@@ -218,7 +218,7 @@ class _CupertinoSliderState extends State<CupertinoSlider> with TickerProviderSt
     widget.onChangeEnd(_lerp(value));
   }
 
-    // Returns a number between min and max, proportional to value, which must
+  // Returns a number between min and max, proportional to value, which must
   // be between 0.0 and 1.0.
   double _lerp(double value) {
     assert(value >= 0.0);
