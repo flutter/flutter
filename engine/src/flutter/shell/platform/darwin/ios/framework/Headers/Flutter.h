@@ -43,7 +43,6 @@
 #include "FlutterMacros.h"
 #include "FlutterNavigationController.h"
 #include "FlutterPlugin.h"
-#include "FlutterPluginAppLifeCycleDelegate.h"
 #include "FlutterTexture.h"
 #include "FlutterViewController.h"
 

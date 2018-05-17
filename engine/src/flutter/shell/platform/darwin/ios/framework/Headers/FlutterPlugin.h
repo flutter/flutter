@@ -253,14 +253,6 @@ NS_ASSUME_NONNULL_BEGIN
 - (NSObject*)valuePublishedByPlugin:(NSString*)pluginKey;
 @end
 
-/**
- Implement this in the `UIAppDelegate` of your app to enable Flutter plugins to register themselves to the application
- life cycle events.
-*/
-@protocol FlutterAppLifeCycleProvider
-- (void)addApplicationLifeCycleDelegate:(NSObject<FlutterPlugin>*)delegate;
-@end
-
 NS_ASSUME_NONNULL_END;
 
 #endif  // FLUTTER_FLUTTERPLUGIN_H_
