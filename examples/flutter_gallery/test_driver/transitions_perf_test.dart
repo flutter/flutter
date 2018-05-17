@@ -24,9 +24,9 @@ const FileSystem _fs = const LocalFileSystem();
 // These names must match GalleryItem titles from kAllGalleryDemos
 // in examples/flutter_gallery/lib/gallery/demos.dart
 const List<String> kProfiledDemos = const <String>[
-  'Shrine@Vignettes',
-  'Contact profile@Vignettes',
-  'Animation@Vignettes',
+  'Shrine@Studies',
+  'Contact profile@Studies',
+  'Animation@Studies',
   'Bottom navigation@Material',
   'Buttons@Material',
   'Cards@Material',
@@ -146,7 +146,11 @@ Future<Null> runDemos(List<String> demos, FlutterDriver driver) async {
     currentDemoCategory = demoCategory;
 
     final SerializableFinder demoItem = find.text(demoName);
-    await driver.scrollUntilVisible(demoList, demoItem, dyScroll: -48.0,  alignment: 0.5);
+    await driver.scrollUntilVisible(demoList, demoItem,
+      dyScroll: -48.0,
+      alignment: 0.5,
+      timeout: const Duration(seconds: 30),
+    );
 
     for (int i = 0; i < 2; i += 1) {
       await driver.tap(demoItem); // Launch the demo

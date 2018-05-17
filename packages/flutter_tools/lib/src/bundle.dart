@@ -9,7 +9,6 @@ import 'asset.dart';
 import 'base/build.dart';
 import 'base/common.dart';
 import 'base/file_system.dart';
-import 'base/fingerprint.dart';
 import 'build_info.dart';
 import 'compile.dart';
 import 'dart/package_map.dart';
@@ -42,6 +41,7 @@ Future<void> build({
   bool precompiledSnapshot: false,
   bool reportLicensedPackages: false,
   bool trackWidgetCreation: false,
+  List<String> extraFrontEndOptions: const <String>[],
   List<String> fileSystemRoots,
   String fileSystemScheme,
 }) async {
@@ -71,46 +71,25 @@ Future<void> build({
 
   DevFSContent kernelContent;
   if (!precompiledSnapshot && previewDart2) {
-    bool needBuild = true;
-    final Fingerprinter fingerprinter = new Fingerprinter(
-      fingerprintPath: '$depfilePath.fingerprint',
-      paths: <String>[mainPath],
-      properties: <String, String>{
-        'entryPoint': mainPath,
-        'trackWidgetCreation': trackWidgetCreation.toString(),
-      },
-      depfilePaths: <String>[depfilePath],
+    if ((extraFrontEndOptions != null) && extraFrontEndOptions.isNotEmpty)
+      printTrace('Extra front-end options: $extraFrontEndOptions');
+    ensureDirectoryExists(applicationKernelFilePath);
+    final CompilerOutput compilerOutput = await kernelCompiler.compile(
+      sdkRoot: artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath),
+      incrementalCompilerByteStorePath: fs.path.absolute(getIncrementalCompilerByteStoreDirectory()),
+      mainPath: fs.file(mainPath).absolute.path,
+      outputFilePath: applicationKernelFilePath,
+      depFilePath: depfilePath,
+      trackWidgetCreation: trackWidgetCreation,
+      extraFrontEndOptions: extraFrontEndOptions,
+      fileSystemRoots: fileSystemRoots,
+      fileSystemScheme: fileSystemScheme,
+      packagesPath: packagesPath,
     );
-
-    if (await fingerprinter.doesFingerprintMatch()) {
-      needBuild = false;
-      printStatus('Skipping compilation. Fingerprint match.');
+    if (compilerOutput?.outputFilename == null) {
+      throwToolExit('Compiler failed on $mainPath');
     }
-
-    String kernelBinaryFilename;
-    if (needBuild) {
-      ensureDirectoryExists(applicationKernelFilePath);
-      final CompilerOutput compilerOutput = await kernelCompiler.compile(
-        sdkRoot: artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath),
-        incrementalCompilerByteStorePath: fs.path.absolute(getIncrementalCompilerByteStoreDirectory()),
-        mainPath: fs.file(mainPath).absolute.path,
-        outputFilePath: applicationKernelFilePath,
-        depFilePath: depfilePath,
-        trackWidgetCreation: trackWidgetCreation,
-        fileSystemRoots: fileSystemRoots,
-        fileSystemScheme: fileSystemScheme,
-        packagesPath: packagesPath,
-      );
-      kernelBinaryFilename = compilerOutput?.outputFilename;
-      if (kernelBinaryFilename == null) {
-        throwToolExit('Compiler failed on $mainPath');
-      }
-      // Compute and record build fingerprint.
-      await fingerprinter.writeFingerprint();
-    } else {
-      kernelBinaryFilename = applicationKernelFilePath;
-    }
-    kernelContent = new DevFSFileContent(fs.file(kernelBinaryFilename));
+    kernelContent = new DevFSFileContent(fs.file(compilerOutput.outputFilename));
 
     await fs.directory(getBuildDirectory()).childFile('frontend_server.d')
         .writeAsString('frontend_server.d: ${artifacts.getArtifactPath(Artifact.frontendServerSnapshotForEngineDartSdk)}\n');

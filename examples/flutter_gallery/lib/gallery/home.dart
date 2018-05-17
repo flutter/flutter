@@ -109,48 +109,53 @@ class _CategoriesPage extends StatelessWidget {
     final List<GalleryDemoCategory> categoriesList = categories.toList();
     final int columnCount = (MediaQuery.of(context).orientation == Orientation.portrait) ? 2 : 3;
 
-    return new SingleChildScrollView(
-      key: const PageStorageKey<String>('categories'),
-      child: new LayoutBuilder(
-        builder: (BuildContext context, BoxConstraints constraints) {
-          final double columnWidth = constraints.biggest.width / columnCount.toDouble();
-          final double rowHeight = columnWidth * aspectRatio;
-          final int rowCount = (categories.length + columnCount - 1) ~/ columnCount;
+    return new Semantics(
+      scopesRoute: true,
+      namesRoute: true,
+      label: 'categories',
+      explicitChildNodes: true,
+      child: new SingleChildScrollView(
+        key: const PageStorageKey<String>('categories'),
+        child: new LayoutBuilder(
+          builder: (BuildContext context, BoxConstraints constraints) {
+            final double columnWidth = constraints.biggest.width / columnCount.toDouble();
+            final double rowHeight = columnWidth * aspectRatio;
+            final int rowCount = (categories.length + columnCount - 1) ~/ columnCount;
 
-          // This repaint boundary prevents the inner contents of the front layer
-          // from repainting when the backdrop toggle triggers a repaint on the
-          // LayoutBuilder.
-          return new RepaintBoundary(
-            child: new Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: new List<Widget>.generate(rowCount, (int rowIndex) {
-                final int columnCountForRow = rowIndex == rowCount - 1
-                  ? categories.length - columnCount * math.max(0, rowCount - 1)
-                  : columnCount;
+            // This repaint boundary prevents the inner contents of the front layer
+            // from repainting when the backdrop toggle triggers a repaint on the
+            // LayoutBuilder.
+            return new RepaintBoundary(
+              child: new Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: new List<Widget>.generate(rowCount, (int rowIndex) {
+                  final int columnCountForRow = rowIndex == rowCount - 1
+                    ? categories.length - columnCount * math.max(0, rowCount - 1)
+                    : columnCount;
 
-                return new Row(
-                  children: new List<Widget>.generate(columnCountForRow, (int columnIndex) {
-                    final int index = rowIndex * columnCount + columnIndex;
-                    final GalleryDemoCategory category = categoriesList[index];
+                  return new Row(
+                    children: new List<Widget>.generate(columnCountForRow, (int columnIndex) {
+                      final int index = rowIndex * columnCount + columnIndex;
+                      final GalleryDemoCategory category = categoriesList[index];
 
-                    return new SizedBox(
-                      width: columnWidth,
-                      height: rowHeight,
-                      child: new _CategoryItem(
-                        category: category,
-                        onTap: () {
-                          onCategoryTap(category);
-                        },
-                      ),
-                    );
-                  }),
-                );
-              }),
-            ),
-          );
-        },
+                      return new SizedBox(
+                        width: columnWidth,
+                        height: rowHeight,
+                        child: new _CategoryItem(
+                          category: category,
+                          onTap: () {
+                            onCategoryTap(category);
+                          },
+                        ),
+                      );
+                    }),
+                  );
+                }),
+              ),
+            );
+          },
+        ),
       ),
     );
   }
@@ -175,7 +180,7 @@ class _DemoItem extends StatelessWidget {
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
     final bool isDark = theme.brightness == Brightness.dark;
-    final double textScaleFactor = MediaQuery.of(context)?.textScaleFactor ?? 1.0;
+    final double textScaleFactor = MediaQuery.textScaleFactorOf(context);
 
     final List<Widget> titleChildren = <Widget>[
       new Text(
@@ -241,12 +246,18 @@ class _DemosPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return new KeyedSubtree(
       key: const ValueKey<String>('GalleryDemoList'), // So the tests can find this ListView
-      child: new ListView(
-        key: new PageStorageKey<String>(category.name),
-        padding: const EdgeInsets.only(top: 8.0),
-        children: kGalleryCategoryToDemos[category].map<Widget>((GalleryDemo demo) {
-          return new _DemoItem(demo: demo);
-        }).toList(),
+      child: new Semantics(
+        scopesRoute: true,
+        namesRoute: true,
+        label: category.name,
+        explicitChildNodes: true,
+        child: new ListView(
+          key: new PageStorageKey<String>(category.name),
+          padding: const EdgeInsets.only(top: 8.0),
+          children: kGalleryCategoryToDemos[category].map<Widget>((GalleryDemo demo) {
+            return new _DemoItem(demo: demo);
+          }).toList(),
+        ),
       ),
     );
   }
@@ -259,10 +270,12 @@ class GalleryHome extends StatefulWidget {
 
   const GalleryHome({
     Key key,
+    this.testMode: false,
     this.optionsPage,
   }) : super(key: key);
 
   final Widget optionsPage;
+  final bool testMode;
 
   @override
   _GalleryHomeState createState() => new _GalleryHomeState();
@@ -289,10 +302,20 @@ class _GalleryHomeState extends State<GalleryHome> with SingleTickerProviderStat
     super.dispose();
   }
 
+  static Widget _animatedSwitcherLayoutBuilder(List<Widget> children) {
+    return new Stack(
+      children: children,
+      alignment: Alignment.center,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
     final bool isDark = theme.brightness == Brightness.dark;
+
+    const Curve switchOutCurve = const Interval(0.4, 1.0, curve: Curves.fastOutSlowIn);
+    const Curve switchInCurve = const Interval(0.4, 1.0, curve: Curves.fastOutSlowIn);
 
     Widget home = new Scaffold(
       key: _scaffoldKey,
@@ -313,6 +336,9 @@ class _GalleryHomeState extends State<GalleryHome> with SingleTickerProviderStat
             backLayer: widget.optionsPage,
             frontAction: new AnimatedSwitcher(
               duration: _kFrontLayerSwitchDuration,
+              switchOutCurve: switchOutCurve,
+              switchInCurve: switchInCurve,
+              layoutBuilder: _animatedSwitcherLayoutBuilder,
               child: _category == null
                 ? const _FlutterLogo()
                 : new IconButton(
@@ -321,15 +347,18 @@ class _GalleryHomeState extends State<GalleryHome> with SingleTickerProviderStat
                   onPressed: () => setState(() => _category = null),
                 ),
             ),
-            frontTitle:  new AnimatedSwitcher(
+            frontTitle: new AnimatedSwitcher(
               duration: _kFrontLayerSwitchDuration,
               child: _category == null
                 ? const Text('Flutter gallery')
                 : new Text(_category.name),
             ),
-            frontHeading: new Container(height: 24.0),
+            frontHeading: widget.testMode ? null: new Container(height: 24.0),
             frontLayer: new AnimatedSwitcher(
               duration: _kFrontLayerSwitchDuration,
+              switchOutCurve: switchOutCurve,
+              switchInCurve: switchInCurve,
+              layoutBuilder: _animatedSwitcherLayoutBuilder,
               child: _category != null
                 ? new _DemosPage(_category)
                 : new _CategoriesPage(

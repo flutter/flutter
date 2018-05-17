@@ -136,6 +136,12 @@ tasks:
     stage: devicelab
     required_agent_capabilities: ["mac/android"]
 
+  platform_view__start_up:
+    description: >
+      Verifies that Platform View can be used from an Android project.
+    stage: devicelab
+    required_agent_capabilities: ["mac/android"]
+
   complex_layout__start_up:
     description: >
       Measures the startup time of the Complex Layout sample app on Android.
@@ -193,6 +199,7 @@ tasks:
       Runs end-to-end Flutter tests on Android.
     stage: devicelab
     required_agent_capabilities: ["mac/android"]
+    flaky: true
 
   commands_test:
     description: >
@@ -285,6 +292,12 @@ tasks:
   platform_channel_sample_test_ios:
     description: >
       Runs a driver test on the Platform Channel sample app on iOS.
+    stage: devicelab_ios
+    required_agent_capabilities: ["mac/ios"]
+
+  platform_view_ios__start_up:
+    description: >
+      Verifies that Platform View can be used from an iOS project.
     stage: devicelab_ios
     required_agent_capabilities: ["mac/ios"]
 
@@ -407,6 +420,7 @@ tasks:
       with semantics enabled.
     stage: devicelab
     required_agent_capabilities: ["linux/android"]
+    flaky: true
 
   flutter_gallery__memory_nav:
     description: >
@@ -425,3 +439,16 @@ tasks:
       Measures the speed of Dart analyzer.
     stage: devicelab
     required_agent_capabilities: ["linux/android"]
+
+  flutter_gallery_ios32__start_up:
+    description: >
+      Measures the startup time of the Flutter Gallery app on 32-bit iOS.
+    stage: devicelab_ios
+    required_agent_capabilities: ["mac/ios32"]
+
+  flutter_gallery_ios32__transition_perf:
+    description: >
+      Measures the performance of screen transitions in Flutter Gallery on
+      32-bit iOS.
+    stage: devicelab_ios
+    required_agent_capabilities: ["mac/ios32"]

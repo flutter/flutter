@@ -1449,6 +1449,9 @@ abstract class _RenderPhysicalModelBase<T> extends _RenderCustomClip<T> {
        super(child: child, clipper: clipper);
 
   /// The z-coordinate at which to place this material.
+  ///
+  /// If [debugDisableShadows] is set, this value is ignored and no shadow is
+  /// drawn (an outline is rendered instead).
   double get elevation => _elevation;
   double _elevation;
   set elevation(double value) {
@@ -1591,20 +1594,36 @@ class RenderPhysicalModel extends _RenderPhysicalModelBase<RRect> {
   void paint(PaintingContext context, Offset offset) {
     if (child != null) {
       _updateClip();
-      final RRect offsetClipRRect = _clip.shift(offset);
-      final Rect offsetBounds = offsetClipRRect.outerRect;
-      final Path offsetClipPath = new Path()..addRRect(offsetClipRRect);
+      final RRect offsetRRect = _clip.shift(offset);
+      final Rect offsetBounds = offsetRRect.outerRect;
+      final Path offsetRRectAsPath = new Path()..addRRect(offsetRRect);
+      bool paintShadows = true;
+      assert(() {
+        if (debugDisableShadows) {
+          if (elevation > 0.0) {
+            context.canvas.drawRRect(
+              offsetRRect,
+              new Paint()
+                ..color = shadowColor
+                ..style = PaintingStyle.stroke
+                ..strokeWidth = elevation * 2.0,
+            );
+          }
+          paintShadows = false;
+        }
+        return true;
+      }());
       if (needsCompositing) {
         final PhysicalModelLayer physicalModel = new PhysicalModelLayer(
-          clipPath: offsetClipPath,
-          elevation: elevation,
+          clipPath: offsetRRectAsPath,
+          elevation: paintShadows ? elevation : 0.0,
           color: color,
           shadowColor: shadowColor,
         );
         context.pushLayer(physicalModel, super.paint, offset, childPaintBounds: offsetBounds);
       } else {
         final Canvas canvas = context.canvas;
-        if (elevation != 0.0) {
+        if (elevation != 0.0 && paintShadows) {
           // The drawShadow call doesn't add the region of the shadow to the
           // picture's bounds, so we draw a hardcoded amount of extra space to
           // account for the maximum potential area of the shadow.
@@ -1614,25 +1633,25 @@ class RenderPhysicalModel extends _RenderPhysicalModelBase<RRect> {
             _RenderPhysicalModelBase._transparentPaint,
           );
           canvas.drawShadow(
-            offsetClipPath,
+            offsetRRectAsPath,
             shadowColor,
             elevation,
             color.alpha != 0xFF,
           );
         }
-        canvas.drawRRect(offsetClipRRect, new Paint()..color = color);
+        canvas.drawRRect(offsetRRect, new Paint()..color = color);
         canvas.save();
-        canvas.clipRRect(offsetClipRRect);
+        canvas.clipRRect(offsetRRect);
         // We only use a new layer for non-rectangular clips, on the basis that
         // rectangular clips won't need antialiasing. This is not really
         // correct, because if we're e.g. rotated, rectangles will also be
         // aliased. Unfortunately, it's too much of a performance win to err on
         // the side of correctness here.
         // TODO(ianh): Find a better solution.
-        if (!offsetClipRRect.isRect)
+        if (!offsetRRect.isRect)
           canvas.saveLayer(offsetBounds, _RenderPhysicalModelBase._defaultPaint);
         super.paint(context, offset);
-        if (!offsetClipRRect.isRect)
+        if (!offsetRRect.isRect)
           canvas.restore();
         canvas.restore();
         assert(context.canvas == canvas, 'canvas changed even though needsCompositing was false');
@@ -1701,17 +1720,33 @@ class RenderPhysicalShape extends _RenderPhysicalModelBase<Path> {
       _updateClip();
       final Rect offsetBounds = offset & size;
       final Path offsetPath = _clip.shift(offset);
+      bool paintShadows = true;
+      assert(() {
+        if (debugDisableShadows) {
+          if (elevation > 0.0) {
+            context.canvas.drawPath(
+              offsetPath,
+              new Paint()
+                ..color = shadowColor
+                ..style = PaintingStyle.stroke
+                ..strokeWidth = elevation * 2.0,
+            );
+          }
+          paintShadows = false;
+        }
+        return true;
+      }());
       if (needsCompositing) {
         final PhysicalModelLayer physicalModel = new PhysicalModelLayer(
           clipPath: offsetPath,
-          elevation: elevation,
+          elevation: paintShadows ? elevation : 0.0,
           color: color,
           shadowColor: shadowColor,
         );
         context.pushLayer(physicalModel, super.paint, offset, childPaintBounds: offsetBounds);
       } else {
         final Canvas canvas = context.canvas;
-        if (elevation != 0.0) {
+        if (elevation != 0.0 && paintShadows) {
           // The drawShadow call doesn't add the region of the shadow to the
           // picture's bounds, so we draw a hardcoded amount of extra space to
           // account for the maximum potential area of the shadow.

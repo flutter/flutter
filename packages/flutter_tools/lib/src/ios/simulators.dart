@@ -247,36 +247,13 @@ class IOSSimulator extends Device {
       return false;
     }
 
-    // Step 1: Check if the device is part of a blacklisted category.
-    //         We do not support WatchOS or tvOS devices.
-
+    // Check if the device is part of a blacklisted category.
+    // We do not yet support WatchOS or tvOS devices.
     final RegExp blacklist = new RegExp(r'Apple (TV|Watch)', caseSensitive: false);
     if (blacklist.hasMatch(name)) {
-      _supportMessage = 'Flutter does not support Apple TV or Apple Watch. Select an iPhone 5s or above.';
+      _supportMessage = 'Flutter does not support Apple TV or Apple Watch.';
       return false;
     }
-
-    // Step 2: Check if the device must be rejected because of its version.
-    //         There is an artificial check on older simulators where arm64
-    //         targeted applications cannot be run (even though the Flutter
-    //         runner on the simulator is completely different).
-
-    // Check for unsupported iPads.
-    final Match iPadMatch = new RegExp(r'iPad (2|Retina)', caseSensitive: false).firstMatch(name);
-    if (iPadMatch != null) {
-      _supportMessage = 'Flutter does not yet support iPad 2 or iPad Retina. Select an iPad Air or above.';
-      return false;
-    }
-
-    // Check for unsupported iPhones.
-    final Match iPhoneMatch = new RegExp(r'iPhone [0-5]').firstMatch(name);
-    if (iPhoneMatch != null) {
-      if (name == 'iPhone 5s')
-        return true;
-      _supportMessage = 'Flutter does not yet support iPhone 5 or earlier. Select an iPhone 5s or above.';
-      return false;
-    }
-
     return true;
   }
 

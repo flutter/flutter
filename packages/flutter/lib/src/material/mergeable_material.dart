@@ -686,9 +686,7 @@ class _RenderMergeableMaterialListBody extends RenderListBody {
 
   void _paintShadows(Canvas canvas, Rect rect) {
     for (BoxShadow boxShadow in boxShadows) {
-      final Paint paint = new Paint()
-        ..color = boxShadow.color
-        ..maskFilter = new MaskFilter.blur(BlurStyle.normal, boxShadow.blurSigma);
+      final Paint paint = boxShadow.toPaint();
       // TODO(dragostis): Right now, we are only interpolating the border radii
       // of the visible Material slices, not the shadows; they are not getting
       // interpolated and always have the same rounded radii. Once shadow

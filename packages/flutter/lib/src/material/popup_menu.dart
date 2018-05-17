@@ -262,12 +262,10 @@ class PopupMenuItemState<T, W extends PopupMenuItem<T>> extends State<W> {
 
     return new InkWell(
       onTap: widget.enabled ? handleTap : null,
-      child: new MergeSemantics(
-        child: new Container(
-          height: widget.height,
-          padding: const EdgeInsets.symmetric(horizontal: _kMenuHorizontalPadding),
-          child: item,
-        ),
+      child: new Container(
+        height: widget.height,
+        padding: const EdgeInsets.symmetric(horizontal: _kMenuHorizontalPadding),
+        child: item,
       ),
     );
   }

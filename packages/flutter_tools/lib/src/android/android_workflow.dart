@@ -42,6 +42,9 @@ class AndroidWorkflow extends DoctorValidator implements Workflow {
   @override
   bool get canLaunchDevices => androidSdk != null && androidSdk.validateSdkWellFormed().isEmpty;
 
+  @override
+  bool get canListEmulators => getEmulatorPath(androidSdk) != null && getAvdPath() != null;
+
   static const String _kJdkDownload = 'https://www.oracle.com/technetwork/java/javase/downloads/';
 
   /// Returns false if we cannot determine the Java version or if the version
@@ -97,9 +100,9 @@ class AndroidWorkflow extends DoctorValidator implements Workflow {
 
     messages.add(new ValidationMessage('Android SDK at ${androidSdk.directory}'));
 
-    messages.add(new ValidationMessage(androidSdk.ndkDirectory == null
+    messages.add(new ValidationMessage(androidSdk.ndk == null
           ? 'Android NDK location not configured (optional; useful for native profiling support)'
-          : 'Android NDK at ${androidSdk.ndkDirectory}'));
+          : 'Android NDK at ${androidSdk.ndk.directory}'));
 
     String sdkVersionText;
     if (androidSdk.latestVersion != null) {

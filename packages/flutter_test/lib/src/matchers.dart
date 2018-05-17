@@ -251,9 +251,17 @@ Matcher coversSameAreaAs(Path expectedPath, {@required Rect areaToCompare, int s
 /// [expectLater] when using this matcher and await the future returned by
 /// [expectLater].
 ///
+/// ## Sample code
+///
+/// ```dart
+/// await expectLater(find.text('Save'), matchesGoldenFile('save.png'));
+/// ```
+///
 /// See also:
 ///
 ///  * [goldenFileComparator], which acts as the backend for this matcher.
+///  * [flutter_test] for a discussion of test configurations, whereby callers
+///    may swap out the backend for this matcher.
 Matcher matchesGoldenFile(dynamic key) {
   if (key is Uri) {
     return new _MatchesGoldenFile(key);

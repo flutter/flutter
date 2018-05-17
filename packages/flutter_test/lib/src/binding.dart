@@ -19,6 +19,7 @@ import 'package:test/test.dart' as test_package;
 import 'package:stack_trace/stack_trace.dart' as stack_trace;
 import 'package:vector_math/vector_math_64.dart';
 
+import 'goldens.dart';
 import 'stack_manipulation.dart';
 import 'test_async_utils.dart';
 import 'test_text_input.dart';
@@ -95,6 +96,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   /// [debugPrintOverride], which can be overridden by subclasses.
   TestWidgetsFlutterBinding() {
     debugPrint = debugPrintOverride;
+    debugDisableShadows = disableShadows;
     debugCheckIntrinsicSizes = checkIntrinsicSizes;
   }
 
@@ -106,6 +108,15 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   /// synchronous, disabling its normal throttling behavior.
   @protected
   DebugPrintCallback get debugPrintOverride => debugPrint;
+
+  /// The value to set [debugDisableShadows] to while tests are running.
+  ///
+  /// This can be used to reduce the likelihood of golden file tests being
+  /// flaky, because shadow rendering is not always deterministic. The
+  /// [AutomatedTestWidgetsFlutterBinding] sets this to true, so that all tests
+  /// always run with shadows disabled.
+  @protected
+  bool get disableShadows => false;
 
   /// The value to set [debugCheckIntrinsicSizes] to while tests are running.
   ///
@@ -492,6 +503,8 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
     runApp(new Container(key: new UniqueKey(), child: _kPreTestMessage)); // Reset the tree to a known state.
     await pump();
 
+    final bool autoUpdateGoldensBeforeTest = autoUpdateGoldenFiles;
+
     // run the test
     await testBody();
     asyncBarrier(); // drains the microtasks in `flutter test` mode (when using AutomatedTestWidgetsFlutterBinding)
@@ -503,6 +516,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
       runApp(new Container(key: new UniqueKey(), child: _kPostTestMessage)); // Unmount any remaining widgets.
       await pump();
       invariantTester();
+      _verifyAutoUpdateGoldensUnset(autoUpdateGoldensBeforeTest);
       _verifyInvariants();
     }
 
@@ -521,6 +535,10 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
     assert(debugAssertAllGesturesVarsUnset(
       'The value of a gestures debug variable was changed by the test.',
     ));
+    assert(debugAssertAllPaintingVarsUnset(
+      'The value of a painting debug variable was changed by the test.',
+      debugDisableShadowsOverride: disableShadows,
+    ));
     assert(debugAssertAllRenderVarsUnset(
       'The value of a rendering debug variable was changed by the test.',
       debugCheckIntrinsicSizesOverride: checkIntrinsicSizes,
@@ -531,6 +549,21 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
     assert(debugAssertAllSchedulerVarsUnset(
       'The value of a scheduler debug variable was changed by the test.',
     ));
+  }
+
+  void _verifyAutoUpdateGoldensUnset(bool valueBeforeTest) {
+    assert(() {
+      if (autoUpdateGoldenFiles != valueBeforeTest) {
+        FlutterError.reportError(new FlutterErrorDetails(
+          exception: new FlutterError(
+              'The value of autoUpdateGoldenFiles was changed by the test.',
+          ),
+          stack: StackTrace.current,
+          library: 'Flutter test framework',
+        ));
+      }
+      return true;
+    }());
   }
 
   /// Called by the [testWidgets] function after a test is executed.
@@ -568,6 +601,9 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
 
   @override
   DebugPrintCallback get debugPrintOverride => debugPrintSynchronously;
+
+  @override
+  bool get disableShadows => true;
 
   @override
   bool get checkIntrinsicSizes => true;
@@ -615,7 +651,21 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
       );
     }());
 
-    return Zone.root.run(() {
+    final Zone realAsyncZone = Zone.current.fork(
+      specification: new ZoneSpecification(
+        scheduleMicrotask: (Zone self, ZoneDelegate parent, Zone zone, void f()) {
+          Zone.root.scheduleMicrotask(f);
+        },
+        createTimer: (Zone self, ZoneDelegate parent, Zone zone, Duration duration, void f()) {
+          return Zone.root.createTimer(duration, f);
+        },
+        createPeriodicTimer: (Zone self, ZoneDelegate parent, Zone zone, Duration period, void f(Timer timer)) {
+          return Zone.root.createPeriodicTimer(period, f);
+        },
+      ),
+    );
+
+    return realAsyncZone.run(() {
       _pendingAsyncTasks = new Completer<void>();
       return callback().catchError((dynamic exception, StackTrace stack) {
         FlutterError.reportError(new FlutterErrorDetails(
@@ -823,6 +873,12 @@ enum LiveTestWidgetsFlutterBindingFramePolicy {
 /// doesn't trigger a paint, since then you could not see anything
 /// anyway.)
 class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
+  @override
+  void initInstances() {
+    super.initInstances();
+    assert(!autoUpdateGoldenFiles);
+  }
+
   @override
   bool get inTest => _inTest;
   bool _inTest = false;

@@ -17,7 +17,12 @@ void main() {
 
   // Regression test for https://github.com/flutter/flutter/pull/5168
   testWidgets('update dialog', (WidgetTester tester) async {
-    await tester.pumpWidget(const GalleryApp(updateUrlFetcher: mockUpdateUrlFetcher));
+    await tester.pumpWidget(
+      const GalleryApp(
+        testMode: true,
+        updateUrlFetcher: mockUpdateUrlFetcher
+      )
+    );
     await tester.pump(); // see https://github.com/flutter/flutter/issues/1865
     await tester.pump(); // triggers a frame
 
@@ -26,7 +31,7 @@ void main() {
     await tester.tap(find.text('NO THANKS'));
     await tester.pump();
 
-    await tester.tap(find.text('Vignettes'));
+    await tester.tap(find.text('Studies'));
     await tester.pump(); // Launch
     await tester.pump(const Duration(seconds: 1)); // transition is complete
 

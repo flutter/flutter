@@ -13,18 +13,14 @@ void main() {
 
     setUp(() {
       response = new MockHttpClientResponse();
-      when(
-        response.listen(
-          typed(any),
-          onDone: typed(any, named: 'onDone'),
-          onError: typed(any, named: 'onError'),
-          cancelOnError: typed(any, named: 'cancelOnError'),
-        ),
-      ).thenAnswer((Invocation invocation) {
-        final void Function(List<int>) onData =
-            invocation.positionalArguments[0];
-        final void Function(Object) onError =
-            invocation.namedArguments[#onError];
+       when(response.listen(
+         typed(any),
+         onDone: anyNamed('onDone'),
+         onError: anyNamed('onError'),
+         cancelOnError: anyNamed('cancelOnError')
+      )).thenAnswer((Invocation invocation) {
+        final void Function(List<int>) onData = invocation.positionalArguments[0];
+        final void Function(Object) onError = invocation.namedArguments[#onError];
         final void Function() onDone = invocation.namedArguments[#onDone];
         final bool cancelOnError = invocation.namedArguments[#cancelOnError];
 
@@ -67,18 +63,14 @@ void main() {
     });
 
     test('forwards errors from HttpClientResponse', () async {
-      when(
-        response.listen(
-          typed(any),
-          onDone: typed(any, named: 'onDone'),
-          onError: typed(any, named: 'onError'),
-          cancelOnError: typed(any, named: 'cancelOnError'),
-        ),
-      ).thenAnswer((Invocation invocation) {
-        final void Function(List<int>) onData =
-            invocation.positionalArguments[0];
-        final void Function(Object) onError =
-            invocation.namedArguments[#onError];
+      when(response.listen(
+        typed(any),
+        onDone: anyNamed('onDone'),
+        onError: anyNamed('onError'),
+        cancelOnError: anyNamed('cancelOnError')
+      )).thenAnswer((Invocation invocation) {
+        final void Function(List<int>) onData = invocation.positionalArguments[0];
+        final void Function(Object) onError = invocation.namedArguments[#onError];
         final void Function() onDone = invocation.namedArguments[#onDone];
         final bool cancelOnError = invocation.namedArguments[#cancelOnError];
 

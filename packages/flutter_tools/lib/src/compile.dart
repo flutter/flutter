@@ -10,6 +10,7 @@ import 'package:usage/uuid/uuid.dart';
 import 'artifacts.dart';
 import 'base/common.dart';
 import 'base/context.dart';
+import 'base/fingerprint.dart';
 import 'base/io.dart';
 import 'base/process_manager.dart';
 import 'globals.dart';
@@ -84,6 +85,28 @@ class KernelCompiler {
       Artifact.frontendServerSnapshotForEngineDartSdk
     );
 
+    // TODO(cbracken) eliminate pathFilter.
+    // Currently the compiler emits buildbot paths for the core libs in the
+    // depfile. None of these are available on the local host.
+    Fingerprinter fingerprinter;
+    if (depFilePath != null) {
+      fingerprinter = new Fingerprinter(
+        fingerprintPath: '$depFilePath.fingerprint',
+        paths: <String>[mainPath],
+        properties: <String, String>{
+          'entryPoint': mainPath,
+          'trackWidgetCreation': trackWidgetCreation.toString(),
+        },
+        depfilePaths: <String>[depFilePath],
+        pathFilter: (String path) => !path.startsWith('/b/build/slave/'),
+      );
+
+      if (await fingerprinter.doesFingerprintMatch()) {
+        printTrace('Skipping kernel compilation. Fingerprint match.');
+        return new CompilerOutput(outputFilePath, 0);
+      }
+    }
+
     // This is a URI, not a file path, so the forward slash is correct even on Windows.
     if (!sdkRoot.endsWith('/'))
       sdkRoot = '$sdkRoot/';
@@ -153,7 +176,13 @@ class KernelCompiler {
       .transform(const LineSplitter())
       .listen(stdoutHandler.handler);
     final int exitCode = await server.exitCode;
-    return exitCode == 0 ? stdoutHandler.compilerOutput.future : null;
+    if (exitCode == 0) {
+      if (fingerprinter != null) {
+        await fingerprinter.writeFingerprint();
+      }
+      return stdoutHandler.compilerOutput.future;
+    }
+    return null;
   }
 }
 

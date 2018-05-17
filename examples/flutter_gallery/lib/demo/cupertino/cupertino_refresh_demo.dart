@@ -183,7 +183,7 @@ class _ListItem extends StatelessWidget {
                           overflow: TextOverflow.ellipsis,
                           style: const TextStyle(
                             fontWeight: FontWeight.w600,
-                            letterSpacing: -0.41,
+                            letterSpacing: -0.18,
                           ),
                         ),
                         new Text(

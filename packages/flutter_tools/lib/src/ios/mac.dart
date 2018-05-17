@@ -325,7 +325,6 @@ Future<XcodeBuildResult> buildXcodeProject({
     'xcrun',
     'xcodebuild',
     '-configuration', configuration,
-    'ONLY_ACTIVE_ARCH=YES',
   ];
 
   if (logger.isVerbose) {
@@ -358,7 +357,7 @@ Future<XcodeBuildResult> buildXcodeProject({
   }
 
   if (buildForDevice) {
-    buildCommands.addAll(<String>['-sdk', 'iphoneos', '-arch', 'arm64']);
+    buildCommands.addAll(<String>['-sdk', 'iphoneos']);
   } else {
     buildCommands.addAll(<String>['-sdk', 'iphonesimulator', '-arch', 'x86_64']);
   }

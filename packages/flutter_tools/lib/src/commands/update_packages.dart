@@ -27,7 +27,7 @@ import '../runner/flutter_command.dart';
 /// ```
 const Map<String, String> _kManuallyPinnedDependencies = const <String, String>{
   // Add pinned packages here.
-  'mockito': '3.0.0-alpha+3', // TODO(aam): https://github.com/dart-lang/mockito/issues/110
+  'mockito': '3.0.0-alpha+5', // TODO(aam): https://github.com/dart-lang/mockito/issues/110
 };
 
 class UpdatePackagesCommand extends FlutterCommand {
@@ -719,7 +719,7 @@ class PubspecYaml {
       ..add('');
 
     // Compute a new checksum from all sorted dependencies and their version and convert to a hex string.
-    final String checksumString = _computeChecksum(sortedChecksumDependencies).toRadixString(16);
+    final String checksumString = _computeChecksum(sortedChecksumDependencies).toRadixString(16).padLeft(4, '0');
 
     // Insert the block of transitive dependency declarations into the output after [endOfDirectDependencies],
     // and the blocks of transitive dev dependency declarations into the output after [lastPossiblePlace]. Finally,
