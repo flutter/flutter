@@ -254,7 +254,7 @@ class _ResultCard extends StatelessWidget {
 class _SuggestionList extends StatelessWidget {
   const _SuggestionList({this.suggestions, this.query, this.onSelected});
 
-  final List<String> suggestions;
+  final Iterable<String> suggestions;
   final String query;
   final ValueChanged<String> onSelected;
 
