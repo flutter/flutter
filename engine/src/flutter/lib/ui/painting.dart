@@ -2310,25 +2310,45 @@ class Gradient extends Shader {
   /// If `matrix4` is provided, the gradient fill will be transformed by the
   /// specified 4x4 matrix relative to the local coordinate system. `matrix4` must
   /// be a column-major matrix packed into a list of 16 values.
+  /// 
+  /// If `focal` is provided and not equal to `center` and `focalRadius` is 
+  /// provided and not equal to 0.0, the generated shader will be a two point
+  /// conical radial gradient, with `focal` being the center of the focal 
+  /// circle and `focalRadius` being the radius of that circle. If `focal` is
+  /// provided and not equal to `center`, at least one of the two offsets must
+  /// not be equal to [Offset.zero].
   Gradient.radial(
     Offset center,
     double radius,
     List<Color> colors, [
     List<double> colorStops,
     TileMode tileMode = TileMode.clamp,
-    Float64List matrix4
+    Float64List matrix4,
+    Offset focal,
+    double focalRadius = 0.0
   ]) : assert(_offsetIsValid(center)),
        assert(colors != null),
        assert(tileMode != null),
        assert(matrix4 == null || _matrix4IsValid(matrix4)),
        super._() {
+    focalRadius ??= 0.0;
     _validateColorStops(colors, colorStops);
     final Int32List colorsBuffer = _encodeColorList(colors);
     final Float32List colorStopsBuffer = colorStops == null ? null : new Float32List.fromList(colorStops);
-    _constructor();
-    _initRadial(center.dx, center.dy, radius, colorsBuffer, colorStopsBuffer, tileMode.index, matrix4);
+
+    // If focal is null or focal radius is null, this should be treated as a regular radial gradient
+    // If focal == center and the focal radius is 0.0, it's still a regular radial gradient
+    if (focal == null || (focal == center && focalRadius == 0.0)) {
+      _constructor();
+      _initRadial(center.dx, center.dy, radius, colorsBuffer, colorStopsBuffer, tileMode.index, matrix4);
+    } else {
+      assert(center != Offset.zero || focal != Offset.zero); // will result in exception(s) in Skia side
+      _constructor();
+      _initConical(focal.dx, focal.dy, focalRadius, center.dx, center.dy, radius, colorsBuffer, colorStopsBuffer, tileMode.index, matrix4);
+    }
   }
   void _initRadial(double centerX, double centerY, double radius, Int32List colors, Float32List colorStops, int tileMode, Float64List matrix4) native 'Gradient_initRadial';
+  void _initConical(double startX, double startY, double startRadius, double endX, double endY, double endRadius, Int32List colors, Float32List colorStops, int tileMode, Float64List matrix4) native 'Gradient_initTwoPointConical';
 
   /// Creates a sweep gradient centered at `center` that starts at `startAngle`
   /// and ends at `endAngle`.
