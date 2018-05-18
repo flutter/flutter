@@ -22,6 +22,7 @@ import 'package:vector_math/vector_math_64.dart';
 import 'goldens.dart';
 import 'stack_manipulation.dart';
 import 'test_async_utils.dart';
+import 'test_exception_reporter.dart';
 import 'test_text_input.dart';
 
 /// Phases that can be reached by [WidgetTester.pumpWidget] and
@@ -358,16 +359,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
     assert(_currentTestCompleter != null);
     if (_pendingExceptionDetails != null) {
       debugPrint = debugPrintOverride; // just in case the test overrides it -- otherwise we won't see the error!
-      FlutterError.dumpErrorToConsole(_pendingExceptionDetails, forceReport: true);
-      // test_package.registerException actually just calls the current zone's error handler (that
-      // is to say, _parentZone's handleUncaughtError function). FakeAsync doesn't add one of those,
-      // but the test package does, that's how the test package tracks errors. So really we could
-      // get the same effect here by calling that error handler directly or indeed just throwing.
-      // However, we call registerException because that's the semantically correct thing...
-      String additional = '';
-      if (_currentTestDescription != '')
-        additional = '\nThe test description was: $_currentTestDescription';
-      test_package.registerException('Test failed. See exception logs above.$additional', _emptyStackTrace);
+      reportTestException(_pendingExceptionDetails, _currentTestDescription);
       _pendingExceptionDetails = null;
     }
     _currentTestDescription = null;
@@ -504,6 +496,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
     await pump();
 
     final bool autoUpdateGoldensBeforeTest = autoUpdateGoldenFiles;
+    final TestExceptionReporter reportTestExceptionBeforeTest = reportTestException;
 
     // run the test
     await testBody();
@@ -517,6 +510,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
       await pump();
       invariantTester();
       _verifyAutoUpdateGoldensUnset(autoUpdateGoldensBeforeTest);
+      _verifyReportTestExceptionUnset(reportTestExceptionBeforeTest);
       _verifyInvariants();
     }
 
@@ -557,6 +551,21 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
         FlutterError.reportError(new FlutterErrorDetails(
           exception: new FlutterError(
               'The value of autoUpdateGoldenFiles was changed by the test.',
+          ),
+          stack: StackTrace.current,
+          library: 'Flutter test framework',
+        ));
+      }
+      return true;
+    }());
+  }
+
+  void _verifyReportTestExceptionUnset(TestExceptionReporter valueBeforeTest) {
+    assert(() {
+      if (reportTestException != valueBeforeTest) {
+        FlutterError.reportError(new FlutterErrorDetails(
+          exception: new FlutterError(
+            'The value of reportTestException was changed by the test.',
           ),
           stack: StackTrace.current,
           library: 'Flutter test framework',
@@ -1300,8 +1309,6 @@ class _LiveTestRenderView extends RenderView {
     _label?.paint(context.canvas, offset - const Offset(0.0, 10.0));
   }
 }
-
-final StackTrace _emptyStackTrace = new stack_trace.Chain(const <stack_trace.Trace>[]);
 
 StackTrace _unmangle(StackTrace stack) {
   if (stack is stack_trace.Trace)
