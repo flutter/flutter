@@ -381,6 +381,8 @@ Future<Null> _buildGradleProjectV2(String gradle, BuildInfo buildInfo, String ta
       command.add('-Pfilesystem-roots=${buildInfo.fileSystemRoots.join('|')}');
     if (buildInfo.fileSystemScheme != null)
       command.add('-Pfilesystem-scheme=${buildInfo.fileSystemScheme}');
+  } else {
+    command.add('-Ppreview-dart-2=false');
   }
   if (buildInfo.preferSharedLibrary && androidSdk.ndk != null) {
     command.add('-Pprefer-shared-library=true');
