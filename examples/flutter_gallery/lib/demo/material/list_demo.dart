@@ -1,4 +1,5 @@
 import 'dart:collection';
+import 'dart:math';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -7,6 +8,7 @@ import 'package:flutter/gestures.dart';
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 
 enum _MaterialListType {
   /// A list tile that contains a single line of text.
@@ -305,12 +307,13 @@ class DraggableList extends StatefulWidget {
 }
 
 class DraggableListState extends State<DraggableList> with TickerProviderStateMixin {
+  ScrollController scrollController = new ScrollController();
   // This controls the entrance of the dragging widget into a new place.
   AnimationController entranceController;
   // This controls the 'ghost' of the dragging widget, which is left behind where the widget used to be.
   AnimationController ghostController;
 
-  static const double whenDragHeight = 100.0;
+  static const double approximateItemHeight = 100.0;
 
   Key dragging;
   // The location that the dragging widget last occupied.
@@ -361,7 +364,6 @@ class DraggableListState extends State<DraggableList> with TickerProviderStateMi
           });
         },
         onDraggableCanceled: (_, __) {
-          print('Cancelling: $index, $ghostIndex, ${widget.children.map((w) => w.key)}');
           setState(() {
             ghostController.reverse();
             entranceController.reverse();
@@ -369,7 +371,6 @@ class DraggableListState extends State<DraggableList> with TickerProviderStateMi
           });
         },
         onDragCompleted: () {
-          print('Swapping: $index, $ghostIndex, ${widget.children.map((w) => w.key)}');
           setState(() {
             widget.onSwap(dragStartIndex, currentIndex);
             ghostController.reverse(from: 0.1);
@@ -382,7 +383,7 @@ class DraggableListState extends State<DraggableList> with TickerProviderStateMi
         return new Column(children: <Widget>[
           new SizeTransition(
             sizeFactor: entranceController, 
-            child: const SizedBox(height: whenDragHeight),
+            child: const SizedBox(height: approximateItemHeight),
           ),
           draggable,
         ]);
@@ -391,7 +392,7 @@ class DraggableListState extends State<DraggableList> with TickerProviderStateMi
         return new Column(children: <Widget>[
           new SizeTransition(
             sizeFactor: ghostController, 
-            child: const SizedBox(height: whenDragHeight),
+            child: const SizedBox(height: approximateItemHeight),
           ),
           draggable,
         ]);
@@ -409,7 +410,6 @@ class DraggableListState extends State<DraggableList> with TickerProviderStateMi
               currentIndex = index;
               ghostController.reverse(from: 1.0).whenCompleteOrCancel(() {
                 // The swap is completed when the ghost controller finishes.
-                print('done: $index, $ghostIndex, ${widget.children.map((w) => w.key)}');
                 ghostIndex = index;
               });
               entranceController.forward(from: 0.0);
@@ -417,26 +417,43 @@ class DraggableListState extends State<DraggableList> with TickerProviderStateMi
           });
           if (dragging == toAccept && toAccept != toWrap.key) {
             if (!scrolling) {
-              setState(() {
+              final RenderObject contextObject = context.findRenderObject();
+              final RenderAbstractViewport viewport = RenderAbstractViewport.of(contextObject);
+              assert(viewport != null);
+              const double margin = 25.0;
+              final double scrollOffset = scrollController.offset + margin;
+              final double topOffset = viewport.getOffsetToReveal(contextObject, 0.0) - margin;
+              final double bottomOffset = viewport.getOffsetToReveal(contextObject, 1.0) + margin;
+              final double viewHeight = (bottomOffset - topOffset).abs() - 2 * margin;
+              final bool onScreen = max((topOffset - scrollOffset).abs(), (bottomOffset - scrollOffset).abs()) <= viewHeight;
+              final double offsetToReveal = (topOffset - scrollOffset).abs() > (bottomOffset - scrollOffset).abs() ? bottomOffset : topOffset;
+              print('$dragging ${toWrap.key} OnScreen: $onScreen, ${topOffset} ${bottomOffset} ${offsetToReveal} ${scrollOffset} ${viewHeight}');
+              if (!onScreen) {
+                print('Scrolling from ${scrollOffset} to ${offsetToReveal}');
                 scrolling = true;
-                Scrollable.ensureVisible(context, duration: const Duration(milliseconds: 100), alignment: 0.5).then((_) {
+                scrollController.animateTo(offsetToReveal, duration: const Duration(milliseconds: 200), curve: Curves.ease).then((_) {
                   setState(() {
                     scrolling = false;
                   });
                 });
-              });
+              }
+            //   setState(() {
+            //     scrolling = true;
+            //     double targetOffset = scrollController.offset - approximateItemHeight;
+            //     if (currentIndex > ghostIndex) {
+            //       targetOffset = scrollController.offset + approximateItemHeight;
+            //     }
+            //     print('Scrolling from ${scrollController.offset} to ${targetOffset}');
+
+            //   });
             }
-            print('Will accept');
             return true;
           }
-          print('Wont accept');
           return false;
         },
         onAccept: (Key accepted) {
-          print('Accepted');
         },
         onLeave: (Key leaving) {
-          print('Left');
         },
       );
     });
@@ -450,9 +467,11 @@ class DraggableListState extends State<DraggableList> with TickerProviderStateMi
       wrappedChildren.add(_wrap(widget.children[i], i));
     }
 
-    return new ListView(children: wrappedChildren, padding: widget.padding);
+    return new ListView(children: wrappedChildren, padding: widget.padding, controller: scrollController,);
   }
 }
+
+// ---- These  are not used ---- //
 
 class _DraggableListItem<T> extends StatefulWidget {
   const _DraggableListItem({Key key, @required this.child, @required this.index, @required this.onSwap, this.ensureVisible, this.isDraggable: true}) : super(key: key);
