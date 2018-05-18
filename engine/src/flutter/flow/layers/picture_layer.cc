@@ -19,6 +19,8 @@ void PictureLayer::Preroll(PrerollContext* context, const SkMatrix& matrix) {
     raster_cache_result_ = cache->GetPrerolledImage(
         context->gr_context, sk_picture, matrix, context->dst_color_space,
         is_complex_, will_change_);
+  } else {
+    raster_cache_result_ = RasterCacheResult();
   }
 
   SkRect bounds = sk_picture->cullRect().makeOffset(offset_.x(), offset_.y());
