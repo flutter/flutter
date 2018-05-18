@@ -266,8 +266,8 @@ class CupertinoRefreshControl extends StatefulWidget {
   ///
   /// [onRefresh] will be called when pulled far enough to trigger a refresh.
   const CupertinoRefreshControl({
-    this.refreshTriggerPullDistance: _kDefaultRefreshTriggerPullDistance,
-    this.refreshIndicatorExtent: _kDefaultRefreshIndicatorExtent,
+    this.refreshTriggerPullDistance: _defaultRefreshTriggerPullDistance,
+    this.refreshIndicatorExtent: _defaultRefreshIndicatorExtent,
     this.builder: buildSimpleRefreshIndicator,
     this.onRefresh,
   }) : assert(refreshTriggerPullDistance != null),
@@ -321,8 +321,8 @@ class CupertinoRefreshControl extends StatefulWidget {
   /// where the sliver will start retracting.
   final RefreshCallback onRefresh;
 
-  static const double _kDefaultRefreshTriggerPullDistance = 100.0;
-  static const double _kDefaultRefreshIndicatorExtent = 60.0;
+  static const double _defaultRefreshTriggerPullDistance = 100.0;
+  static const double _defaultRefreshIndicatorExtent = 60.0;
 
   /// Retrieve the current state of the CupertinoRefreshControl. The same as the
   /// state that gets passed into the [builder] function. Used for testing.
@@ -376,7 +376,7 @@ class CupertinoRefreshControl extends StatefulWidget {
 class _CupertinoRefreshControlState extends State<CupertinoRefreshControl> {
   /// Reset the state from done to inactive when only this fraction of the
   /// original `refreshTriggerPullDistance` is left.
-  static const double _kInactiveResetOverscrollFraction = 0.1;
+  static const double _inactiveResetOverscrollFraction = 0.1;
 
   RefreshIndicatorMode refreshState;
   // [Future] returned by the widget's `onRefresh`.
@@ -482,7 +482,7 @@ class _CupertinoRefreshControlState extends State<CupertinoRefreshControl> {
         // can feel sluggish if not going all the way back to 0.0 prevented
         // a subsequent pull-to-refresh from starting.
         if (lastIndicatorExtent >
-            widget.refreshTriggerPullDistance * _kInactiveResetOverscrollFraction) {
+            widget.refreshTriggerPullDistance * _inactiveResetOverscrollFraction) {
           return RefreshIndicatorMode.done;
         } else {
           nextState = RefreshIndicatorMode.inactive;
