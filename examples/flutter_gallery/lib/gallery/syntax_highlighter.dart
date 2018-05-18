@@ -65,7 +65,7 @@ class DartSyntaxHighlighter extends SyntaxHighlighter {
 
   SyntaxHighlighterStyle _style;
 
-  static const List<String> _kKeywords = const <String>[
+  static const List<String> _keywords = const <String>[
     'abstract', 'as', 'assert', 'async', 'await', 'break', 'case', 'catch',
     'class', 'const', 'continue', 'default', 'deferred', 'do', 'dynamic', 'else',
     'enum', 'export', 'external', 'extends', 'factory', 'false', 'final',
@@ -75,7 +75,7 @@ class DartSyntaxHighlighter extends SyntaxHighlighter {
     'void', 'while', 'with', 'yield'
   ];
 
-  static const List<String> _kBuiltInTypes = const <String>[
+  static const List<String> _builtInTypes = const <String>[
     'int', 'double', 'num', 'bool'
   ];
 
@@ -263,9 +263,9 @@ class DartSyntaxHighlighter extends SyntaxHighlighter {
         if (word.startsWith('_'))
           word = word.substring(1);
 
-        if (_kKeywords.contains(word))
+        if (_keywords.contains(word))
           type = _HighlightType.keyword;
-        else if (_kBuiltInTypes.contains(word))
+        else if (_builtInTypes.contains(word))
           type = _HighlightType.keyword;
         else if (_firstLetterIsUpperCase(word))
           type = _HighlightType.klass;

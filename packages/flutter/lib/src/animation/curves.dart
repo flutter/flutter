@@ -214,7 +214,7 @@ class Cubic extends Curve {
   /// to the curve at the point (1, 1).
   final double d;
 
-  static const double _kCubicErrorBound = 0.001;
+  static const double _cubicErrorBound = 0.001;
 
   double _evaluateCubic(double a, double b, double m) {
     return 3 * a * (1 - m) * (1 - m) * m +
@@ -230,7 +230,7 @@ class Cubic extends Curve {
     while (true) {
       final double midpoint = (start + end) / 2;
       final double estimate = _evaluateCubic(a, c, midpoint);
-      if ((t - estimate).abs() < _kCubicErrorBound)
+      if ((t - estimate).abs() < _cubicErrorBound)
         return _evaluateCubic(b, d, midpoint);
       if (estimate < t)
         start = midpoint;
