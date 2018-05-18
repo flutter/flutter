@@ -12,6 +12,9 @@ import 'package:flutter/widgets.dart';
 import 'colors.dart';
 import 'thumb_painter.dart';
 
+// Examples can assume:
+// int _cupertinoSliderValue = 1;
+
 /// An iOS-style slider.
 ///
 /// Used to select from a range of values.
@@ -41,10 +44,16 @@ class CupertinoSlider extends StatefulWidget {
   ///
   /// * [value] determines currently selected value for this slider.
   /// * [onChanged] is called when the user selects a new value for the slider.
+  /// * [onChangeStart] is called when the user starts to select a new value for
+  ///   the slider.
+  /// * [onChangeEnd] is called when the user is done selecting a new value for
+  ///   the slider.
   const CupertinoSlider({
     Key key,
     @required this.value,
     @required this.onChanged,
+    this.onChangeStart,
+    this.onChangeEnd,
     this.min: 0.0,
     this.max: 1.0,
     this.divisions,
@@ -75,18 +84,90 @@ class CupertinoSlider extends StatefulWidget {
   ///
   /// ```dart
   /// new CupertinoSlider(
-  ///   value: _duelCommandment.toDouble(),
+  ///   value: _cupertinoSliderValue.toDouble(),
   ///   min: 1.0,
   ///   max: 10.0,
   ///   divisions: 10,
   ///   onChanged: (double newValue) {
   ///     setState(() {
-  ///       _duelCommandment = newValue.round();
+  ///       _cupertinoSliderValue = newValue.round();
   ///     });
   ///   },
   /// )
   /// ```
+  /// 
+  /// See also:
+  ///
+  ///  * [onChangeStart] for a callback that is called when the user starts
+  ///    changing the value.
+  ///  * [onChangeEnd] for a callback that is called when the user stops
+  ///    changing the value.
   final ValueChanged<double> onChanged;
+
+  /// Called when the user starts selecting a new value for the slider.
+  ///
+  /// This callback shouldn't be used to update the slider [value] (use
+  /// [onChanged] for that), but rather to be notified when the user has started
+  /// selecting a new value by starting a drag.
+  ///
+  /// The value passed will be the last [value] that the slider had before the
+  /// change began.
+  ///
+  /// ## Sample code
+  ///
+  /// ```dart
+  /// new CupertinoSlider(
+  ///   value: _cupertinoSliderValue.toDouble(),
+  ///   min: 1.0,
+  ///   max: 10.0,
+  ///   divisions: 10,
+  ///   onChanged: (double newValue) {
+  ///     setState(() {
+  ///       _cupertinoSliderValue = newValue.round();
+  ///     });
+  ///   },
+  ///   onChangeStart: (double startValue) {
+  ///     print('Started change at $startValue');
+  ///   },
+  /// )
+  /// ```
+  ///
+  /// See also:
+  ///
+  ///  * [onChangeEnd] for a callback that is called when the value change is
+  ///    complete.
+  final ValueChanged<double> onChangeStart;
+
+  /// Called when the user is done selecting a new value for the slider.
+  ///
+  /// This callback shouldn't be used to update the slider [value] (use
+  /// [onChanged] for that), but rather to know when the user has completed
+  /// selecting a new [value] by ending a drag.
+  ///
+  /// ## Sample code
+  ///
+  /// ```dart
+  /// new CupertinoSlider(
+  ///   value: _cupertinoSliderValue.toDouble(),
+  ///   min: 1.0,
+  ///   max: 10.0,
+  ///   divisions: 10,
+  ///   onChanged: (double newValue) {
+  ///     setState(() {
+  ///       _cupertinoSliderValue = newValue.round();
+  ///     });
+  ///   },
+  ///   onChangeEnd: (double newValue) {
+  ///     print('Ended change on $newValue');
+  ///   },
+  /// )
+  /// ```
+  ///
+  /// See also:
+  ///
+  ///  * [onChangeStart] for a callback that is called when a value change
+  ///    begins.
+  final ValueChanged<double> onChangeEnd;
 
   /// The minimum value the user can select.
   ///
@@ -121,7 +202,20 @@ class CupertinoSlider extends StatefulWidget {
 class _CupertinoSliderState extends State<CupertinoSlider> with TickerProviderStateMixin {
   void _handleChanged(double value) {
     assert(widget.onChanged != null);
-    widget.onChanged(value * (widget.max - widget.min) + widget.min);
+    final double lerpValue = lerpDouble(widget.min, widget.max, value);
+    if (lerpValue != widget.value) {
+      widget.onChanged(lerpValue);
+    }
+  }
+
+  void _handleDragStart(double value) {
+    assert(widget.onChangeStart != null);
+    widget.onChangeStart(lerpDouble(widget.min, widget.max, value));
+  }
+
+  void _handleDragEnd(double value) {
+    assert(widget.onChangeEnd != null);
+    widget.onChangeEnd(lerpDouble(widget.min, widget.max, value));
   }
 
   @override
@@ -131,6 +225,8 @@ class _CupertinoSliderState extends State<CupertinoSlider> with TickerProviderSt
       divisions: widget.divisions,
       activeColor: widget.activeColor,
       onChanged: widget.onChanged != null ? _handleChanged : null,
+      onChangeStart: widget.onChangeStart != null ? _handleDragStart : null,
+      onChangeEnd: widget.onChangeEnd != null ? _handleDragEnd : null,
       vsync: this,
     );
   }
@@ -143,6 +239,8 @@ class _CupertinoSliderRenderObjectWidget extends LeafRenderObjectWidget {
     this.divisions,
     this.activeColor,
     this.onChanged,
+    this.onChangeStart,
+    this.onChangeEnd,
     this.vsync,
   }) : super(key: key);
 
@@ -150,6 +248,8 @@ class _CupertinoSliderRenderObjectWidget extends LeafRenderObjectWidget {
   final int divisions;
   final Color activeColor;
   final ValueChanged<double> onChanged;
+  final ValueChanged<double> onChangeStart;
+  final ValueChanged<double> onChangeEnd;
   final TickerProvider vsync;
 
   @override
@@ -159,6 +259,8 @@ class _CupertinoSliderRenderObjectWidget extends LeafRenderObjectWidget {
       divisions: divisions,
       activeColor: activeColor,
       onChanged: onChanged,
+      onChangeStart: onChangeStart,
+      onChangeEnd: onChangeEnd,
       vsync: vsync,
       textDirection: Directionality.of(context),
     );
@@ -171,6 +273,8 @@ class _CupertinoSliderRenderObjectWidget extends LeafRenderObjectWidget {
       ..divisions = divisions
       ..activeColor = activeColor
       ..onChanged = onChanged
+      ..onChangeStart = onChangeStart
+      ..onChangeEnd = onChangeEnd
       ..textDirection = Directionality.of(context);
     // Ticker provider cannot change since there's a 1:1 relationship between
     // the _SliderRenderObjectWidget object and the _SliderState object.
@@ -191,6 +295,8 @@ class _RenderCupertinoSlider extends RenderConstrainedBox {
     int divisions,
     Color activeColor,
     ValueChanged<double> onChanged,
+    this.onChangeStart,
+    this.onChangeEnd,
     TickerProvider vsync,
     @required TextDirection textDirection,
   }) : assert(value != null && value >= 0.0 && value <= 1.0),
@@ -254,6 +360,9 @@ class _RenderCupertinoSlider extends RenderConstrainedBox {
       markNeedsSemanticsUpdate();
   }
 
+  ValueChanged<double> onChangeStart;
+  ValueChanged<double> onChangeEnd;
+
   TextDirection get textDirection => _textDirection;
   TextDirection _textDirection;
   set textDirection(TextDirection value) {
@@ -293,12 +402,7 @@ class _RenderCupertinoSlider extends RenderConstrainedBox {
 
   bool get isInteractive => onChanged != null;
 
-  void _handleDragStart(DragStartDetails details) {
-    if (isInteractive) {
-      _currentDragValue = _value;
-      onChanged(_discretizedCurrentDragValue);
-    }
-  }
+  void _handleDragStart(DragStartDetails details) => _startInteraction(details.globalPosition);
 
   void _handleDragUpdate(DragUpdateDetails details) {
     if (isInteractive) {
@@ -316,7 +420,22 @@ class _RenderCupertinoSlider extends RenderConstrainedBox {
     }
   }
 
-  void _handleDragEnd(DragEndDetails details) {
+  void _handleDragEnd(DragEndDetails details) => _endInteraction();
+
+  void _startInteraction(Offset globalPosition) {
+    if (isInteractive) {
+      if (onChangeStart != null) {
+        onChangeStart(_discretizedCurrentDragValue);
+      }
+      _currentDragValue = _value;
+      onChanged(_discretizedCurrentDragValue);
+    }
+  }
+
+  void _endInteraction() {
+    if (onChangeEnd != null) {
+      onChangeEnd(_discretizedCurrentDragValue);
+    }
     _currentDragValue = 0.0;
   }
 
