@@ -60,12 +60,23 @@ void Vertices::init(SkVertices::VertexMode vertex_mode,
 
   SkVertices::Builder builder(vertex_mode, positions.num_elements() / 2,
                               indices.num_elements(), builderFlags);
+
+  // positions are required for SkVertices::Builder
+  FXL_DCHECK(positions.data());
   if (positions.data())
     DecodePoints(positions, builder.positions());
-  if (texture_coordinates.data())
+
+  if (texture_coordinates.data()) {
+    // SkVertices::Builder assumes equal numbers of elements
+    FXL_DCHECK(positions.num_elements() == texture_coordinates.num_elements());
     DecodePoints(texture_coordinates, builder.texCoords());
-  if (colors.data())
+  }
+  if (colors.data()) {
+    // SkVertices::Builder assumes equal numbers of elements
+    FXL_DCHECK(positions.num_elements() == colors.num_elements());
     DecodeInts<SkColor>(colors, builder.colors());
+  }
+
   if (indices.data())
     DecodeInts<uint16_t>(indices, builder.indices());
 
