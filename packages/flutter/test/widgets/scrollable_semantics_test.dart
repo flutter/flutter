@@ -137,12 +137,6 @@ void main() {
     await tester.pump(const Duration(seconds: 5));
     expect(tester.getTopLeft(find.byWidget(containers.first)).dy, kExpandedAppBarHeight);
 
-    final int secondContainerId = tester.renderObject(find.byWidget(containers[1])).debugSemantics.id;
-    tester.binding.pipelineOwner.semanticsOwner.performAction(secondContainerId, SemanticsAction.showOnScreen);
-    await tester.pump();
-    await tester.pump(const Duration(seconds: 5));
-    expect(tester.getTopLeft(find.byWidget(containers[1])).dy, kExpandedAppBarHeight);
-
     semantics.dispose();
   });
 
@@ -168,7 +162,7 @@ void main() {
     });
 
     final ScrollController scrollController = new ScrollController(
-      initialScrollOffset: kItemHeight / 2,
+      initialScrollOffset: 2.5 * kItemHeight,
     );
 
     await tester.pumpWidget(new Directionality(
@@ -195,19 +189,13 @@ void main() {
       ),
     ));
 
-    expect(scrollController.offset, kItemHeight / 2);
+    expect(scrollController.offset, 2.5 * kItemHeight);
 
     final int id0 = tester.renderObject(find.byWidget(children[0])).debugSemantics.id;
     tester.binding.pipelineOwner.semanticsOwner.performAction(id0, SemanticsAction.showOnScreen);
     await tester.pump();
     await tester.pump(const Duration(seconds: 5));
     expect(tester.getTopLeft(find.byWidget(children[0])).dy, kToolbarHeight);
-
-    final int id1 = tester.renderObject(find.byWidget(children[1])).debugSemantics.id;
-    tester.binding.pipelineOwner.semanticsOwner.performAction(id1, SemanticsAction.showOnScreen);
-    await tester.pump();
-    await tester.pump(const Duration(seconds: 5));
-    expect(tester.getTopLeft(find.byWidget(children[1])).dy, kToolbarHeight);
 
     semantics.dispose();
   });
@@ -396,6 +384,135 @@ void main() {
     await tester.pumpAndSettle();
     expect(tester.binding.pipelineOwner.semanticsOwner, isNotNull);
     expect(semantics, hasSemantics(expectedSemantics, ignoreId: true, ignoreRect: true, ignoreTransform: true));
+
+    semantics.dispose();
+  });
+
+  testWidgets('showOnScreen brings item above leading edge to leading edge', (WidgetTester tester) async {
+    semantics = new SemanticsTester(tester); // enables semantics tree generation
+
+    const double kItemHeight = 100.0;
+    final List<Widget> children = new List<Widget>.generate(10, (int i) {
+      return new MergeSemantics(
+        child: new Container(
+          height: kItemHeight,
+          child: new Text('container $i'),
+        ),
+      );
+    });
+
+    final ScrollController scrollController = new ScrollController(
+      initialScrollOffset: kItemHeight / 2,
+    );
+
+    await tester.pumpWidget(
+      new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new Center(
+          child: new Container(
+            height: 2 * kItemHeight,
+            child: new ListView(
+              controller: scrollController,
+              children: children,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(scrollController.offset, kItemHeight / 2);
+
+    final int firstContainerId = tester.renderObject(find.byWidget(children.first)).debugSemantics.id;
+    tester.binding.pipelineOwner.semanticsOwner.performAction(firstContainerId, SemanticsAction.showOnScreen);
+    await tester.pumpAndSettle();
+
+    expect(scrollController.offset, 0.0);
+
+    semantics.dispose();
+  });
+
+  testWidgets('showOnScreen brings item below trailing edge to trailing edge', (WidgetTester tester) async {
+    semantics = new SemanticsTester(tester); // enables semantics tree generation
+
+    const double kItemHeight = 100.0;
+    final List<Widget> children = new List<Widget>.generate(10, (int i) {
+      return new MergeSemantics(
+        child: new Container(
+          height: kItemHeight,
+          child: new Text('container $i'),
+        ),
+      );
+    });
+
+    final ScrollController scrollController = new ScrollController(
+      initialScrollOffset: kItemHeight / 2,
+    );
+
+    await tester.pumpWidget(
+      new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new Center(
+          child: new Container(
+            height: 2 * kItemHeight,
+            child: new ListView(
+              controller: scrollController,
+              children: children,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(scrollController.offset, kItemHeight / 2);
+
+    final int firstContainerId = tester.renderObject(find.byWidget(children[2])).debugSemantics.id;
+    tester.binding.pipelineOwner.semanticsOwner.performAction(firstContainerId, SemanticsAction.showOnScreen);
+    await tester.pumpAndSettle();
+
+    expect(scrollController.offset, kItemHeight);
+
+    semantics.dispose();
+  });
+
+  testWidgets('showOnScreen does not change position of items already fully on-screen', (WidgetTester tester) async {
+    semantics = new SemanticsTester(tester); // enables semantics tree generation
+
+    const double kItemHeight = 100.0;
+    final List<Widget> children = new List<Widget>.generate(10, (int i) {
+      return new MergeSemantics(
+        child: new Container(
+          height: kItemHeight,
+          child: new Text('container $i'),
+        ),
+      );
+    });
+
+    final ScrollController scrollController = new ScrollController(
+      initialScrollOffset: kItemHeight / 2,
+    );
+
+    await tester.pumpWidget(
+      new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new Center(
+          child: new Container(
+            height: 2 * kItemHeight,
+            child: new ListView(
+              controller: scrollController,
+              children: children,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(scrollController.offset, kItemHeight / 2);
+
+    final int firstContainerId = tester.renderObject(find.byWidget(children[1])).debugSemantics.id;
+    tester.binding.pipelineOwner.semanticsOwner.performAction(firstContainerId, SemanticsAction.showOnScreen);
+    await tester.pumpAndSettle();
+
+    expect(scrollController.offset, kItemHeight / 2);
 
     semantics.dispose();
   });

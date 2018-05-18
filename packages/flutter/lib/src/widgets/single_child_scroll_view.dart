@@ -588,13 +588,13 @@ class _RenderSingleChildViewport extends RenderBox with RenderObjectWithChildMix
   void showOnScreen([RenderObject child]) {
     // Logic duplicated in [RenderViewportBase.showOnScreen].
     if (child != null) {
-      // Move viewport the smallest distance to bring [child] on screen.
       final double leadingEdgeOffset = getOffsetToReveal(child, 0.0);
       final double trailingEdgeOffset = getOffsetToReveal(child, 1.0);
       final double currentOffset = offset.pixels;
-      if ((currentOffset - leadingEdgeOffset).abs() < (currentOffset - trailingEdgeOffset).abs()) {
+
+      if (currentOffset > leadingEdgeOffset && currentOffset > trailingEdgeOffset) {
         offset.jumpTo(leadingEdgeOffset);
-      } else {
+      } else if (currentOffset < leadingEdgeOffset && currentOffset < trailingEdgeOffset ) {
         offset.jumpTo(trailingEdgeOffset);
       }
     }

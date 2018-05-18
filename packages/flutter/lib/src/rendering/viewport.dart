@@ -786,19 +786,17 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
   void showOnScreen([RenderObject child]) {
     // Logic duplicated in [_RenderSingleChildViewport.showOnScreen].
     if (child != null) {
-      // TODO(goderbauer): Don't scroll if it is already visible.
-      // TODO(goderbauer): Don't guess if we need to align at leading or trailing edge.
-      // Move viewport the smallest distance to bring [child] on screen.
       final double leadingEdgeOffset = getOffsetToReveal(child, 0.0);
       final double trailingEdgeOffset = getOffsetToReveal(child, 1.0);
       final double currentOffset = offset.pixels;
-      // TODO(goderbauer): Don't scroll if that puts us outside of viewport's bounds.
-      if ((currentOffset - leadingEdgeOffset).abs() < (currentOffset - trailingEdgeOffset).abs()) {
+
+      if (currentOffset > leadingEdgeOffset && currentOffset > trailingEdgeOffset) {
         offset.jumpTo(leadingEdgeOffset);
-      } else {
+      } else if (currentOffset < leadingEdgeOffset && currentOffset < trailingEdgeOffset ) {
         offset.jumpTo(trailingEdgeOffset);
       }
     }
+
     // Make sure the viewport itself is on screen.
     super.showOnScreen();
   }
