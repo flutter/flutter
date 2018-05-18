@@ -660,6 +660,8 @@ LIBRARY: engine
 ORIGIN: ../../../garnet/LICENSE
 TYPE: LicenseType.bsd
 FILE: ../../../flutter/fml/export.h
+FILE: ../../../flutter/fml/time/time_delta_unittest.cc
+FILE: ../../../flutter/fml/time/time_point_unittest.cc
 ----------------------------------------------------------------------------------------------------
 Copyright 2017 The Fuchsia Authors. All rights reserved.
 
@@ -868,6 +870,10 @@ FILE: ../../../flutter/fml/memory/weak_ptr.h
 FILE: ../../../flutter/fml/memory/weak_ptr_internal.cc
 FILE: ../../../flutter/fml/memory/weak_ptr_internal.h
 FILE: ../../../flutter/fml/memory/weak_ptr_unittest.cc
+FILE: ../../../flutter/fml/time/time_delta.h
+FILE: ../../../flutter/fml/time/time_point.cc
+FILE: ../../../flutter/fml/time/time_point.h
+FILE: ../../../flutter/fml/time/time_unittest.cc
 ----------------------------------------------------------------------------------------------------
 Copyright 2016 The Fuchsia Authors. All rights reserved.
 

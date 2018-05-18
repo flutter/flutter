@@ -39,6 +39,9 @@ source_set("fml") {
     "thread.cc",
     "thread.h",
     "thread_local.h",
+    "time/time_delta.h",
+    "time/time_point.cc",
+    "time/time_point.h",
     "trace_event.cc",
     "trace_event.h",
     "unique_fd.cc",
@@ -148,6 +151,9 @@ executable("fml_unittests") {
     "message_loop_unittests.cc",
     "thread_local_unittests.cc",
     "thread_unittests.cc",
+    "time/time_delta_unittest.cc",
+    "time/time_point_unittest.cc",
+    "time/time_unittest.cc",
   ]
 
   deps = [
