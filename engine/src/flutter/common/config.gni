@@ -11,9 +11,6 @@ if (target_cpu == "arm" || target_cpu == "arm64") {
 }
 
 declare_args() {
-  # Enable asserts, even in release builds.
-  flutter_asserts_always_on = false
-
   # Enable ahead-of-time compilation on platforms where AOT is optional.
   flutter_aot = false
 
@@ -37,21 +34,6 @@ if (flutter_runtime_mode == "debug") {
   feature_defines_list += [ "FLUTTER_RUNTIME_MODE=3" ]
 } else {
   feature_defines_list += [ "FLUTTER_RUNTIME_MODE=0" ]
-}
-
-if (is_debug) {
-  # TODO(GYP) this should also be set when release_valgrind_build is set,
-  # but we don't have that flag in the GN build yet.
-  feature_defines_list += [ "WTF_USE_DYNAMIC_ANNOTATIONS=1" ]
-}
-
-if (!is_mac) {
-  # Mac OS X has not implemented support for ENABLE(OPENTYPE_VERTICAL) yet.
-  feature_defines_list += [ "ENABLE_OPENTYPE_VERTICAL=1" ]
-}
-
-if (flutter_asserts_always_on) {
-  feature_defines_list += [ "ENABLE_ASSERT=1" ]
 }
 
 if (flutter_aot) {
