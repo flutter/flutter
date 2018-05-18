@@ -5,6 +5,7 @@
 source_set("fml") {
   sources = [
     "build_config.h",
+    "closure.h",
     "compiler_specific.h",
     "eintr_wrapper.h",
     "export.h",
@@ -34,6 +35,10 @@ source_set("fml") {
     "native_library.h",
     "paths.cc",
     "paths.h",
+    "synchronization/thread_annotations.h",
+    "synchronization/thread_checker.h",
+    "synchronization/waitable_event.cc",
+    "synchronization/waitable_event.h",
     "task_runner.cc",
     "task_runner.h",
     "thread.cc",
@@ -149,6 +154,9 @@ executable("fml_unittests") {
     "memory/ref_counted_unittest.cc",
     "memory/weak_ptr_unittest.cc",
     "message_loop_unittests.cc",
+    "synchronization/thread_annotations_unittest.cc",
+    "synchronization/thread_checker_unittest.cc",
+    "synchronization/waitable_event_unittest.cc",
     "thread_local_unittests.cc",
     "thread_unittests.cc",
     "time/time_delta_unittest.cc",
