@@ -4,6 +4,8 @@
 
 #include "flutter/fml/platform/win/message_loop_win.h"
 
+#include "flutter/fml/logging.h"
+
 namespace fml {
 
 MessageLoopWin::MessageLoopWin()
