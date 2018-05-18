@@ -302,13 +302,6 @@ class _GalleryHomeState extends State<GalleryHome> with SingleTickerProviderStat
     super.dispose();
   }
 
-  static Widget _animatedSwitcherLayoutBuilder(List<Widget> children) {
-    return new Stack(
-      children: children,
-      alignment: Alignment.center,
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
@@ -338,7 +331,6 @@ class _GalleryHomeState extends State<GalleryHome> with SingleTickerProviderStat
               duration: _kFrontLayerSwitchDuration,
               switchOutCurve: switchOutCurve,
               switchInCurve: switchInCurve,
-              layoutBuilder: _animatedSwitcherLayoutBuilder,
               child: _category == null
                 ? const _FlutterLogo()
                 : new IconButton(
@@ -358,7 +350,6 @@ class _GalleryHomeState extends State<GalleryHome> with SingleTickerProviderStat
               duration: _kFrontLayerSwitchDuration,
               switchOutCurve: switchOutCurve,
               switchInCurve: switchInCurve,
-              layoutBuilder: _animatedSwitcherLayoutBuilder,
               child: _category != null
                 ? new _DemosPage(_category)
                 : new _CategoriesPage(
