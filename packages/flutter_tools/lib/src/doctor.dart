@@ -507,7 +507,10 @@ class IntelliJValidatorOnMac extends IntelliJValidator {
   String get version {
     if (_version == null) {
       final String plistFile = fs.path.join(installPath, 'Contents', 'Info.plist');
-      _version = iosWorkflow.getPlistValueFromFile(plistFile, kCFBundleShortVersionStringKey) ?? 'unknown';
+      _version = iosWorkflow.getPlistValueFromFile(
+        plistFile,
+        kCFBundleShortVersionStringKey,
+      ) ?? 'unknown';
     }
     return _version;
   }

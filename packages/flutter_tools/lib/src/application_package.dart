@@ -187,7 +187,10 @@ abstract class IOSApp extends ApplicationPackage {
       }
     }
     final String plistPath = fs.path.join(bundleDir.path, 'Info.plist');
-    final String id = iosWorkflow.getPlistValueFromFile(plistPath, plist.kCFBundleIdentifierKey);
+    final String id = iosWorkflow.getPlistValueFromFile(
+      plistPath,
+      plist.kCFBundleIdentifierKey,
+    );
     if (id == null) {
       printError('Invalid prebuilt iOS app. Info.plist does not contain bundle identifier');
       return null;
@@ -205,7 +208,10 @@ abstract class IOSApp extends ApplicationPackage {
       return null;
 
     final String plistPath = fs.path.join('ios', 'Runner', 'Info.plist');
-    String id = iosWorkflow.getPlistValueFromFile(plistPath, plist.kCFBundleIdentifierKey);
+    String id = iosWorkflow.getPlistValueFromFile(
+      plistPath,
+      plist.kCFBundleIdentifierKey,
+    );
     if (id == null || !xcodeProjectInterpreter.isInstalled)
       return null;
     final String projectPath = fs.path.join('ios', 'Runner.xcodeproj');

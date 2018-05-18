@@ -48,7 +48,10 @@ void main() {
           new IOSApp.fromPrebuiltApp('not_existing.ipa');
       expect(iosApp, isNull);
       final BufferLogger logger = context[Logger];
-      expect(logger.errorText, 'File "not_existing.ipa" does not exist. Use an app bundle or an ipa.\n');
+      expect(
+        logger.errorText,
+        'File "not_existing.ipa" does not exist. Use an app bundle or an ipa.\n',
+      );
     }, overrides: overrides);
     testUsingContext('Error on non-app-bundle folder', () {
       fs.directory('regular_folder').createSync();
@@ -65,7 +68,10 @@ void main() {
       final PrebuiltIOSApp iosApp = new IOSApp.fromPrebuiltApp('bundle.app');
       expect(iosApp, isNull);
       final BufferLogger logger = context[Logger];
-      expect(logger.errorText, 'Invalid prebuilt iOS app. Info.plist does not contain bundle identifier\n');
+      expect(
+        logger.errorText,
+        'Invalid prebuilt iOS app. Info.plist does not contain bundle identifier\n',
+      );
     }, overrides: overrides);
     testUsingContext('Error on bad info.plist', () {
       fs.directory('bundle.app').createSync();
@@ -74,9 +80,9 @@ void main() {
       expect(iosApp, isNull);
       final BufferLogger logger = context[Logger];
       expect(
-          logger.errorText,
-          contains(
-              'Invalid prebuilt iOS app. Info.plist does not contain bundle identifier\n'));
+        logger.errorText,
+        contains('Invalid prebuilt iOS app. Info.plist does not contain bundle identifier\n'),
+      );
     }, overrides: overrides);
     testUsingContext('Success with app bundle', () {
       fs.directory('bundle.app').createSync();
@@ -94,8 +100,10 @@ void main() {
       final PrebuiltIOSApp iosApp = new IOSApp.fromPrebuiltApp('app.ipa');
       expect(iosApp, isNull);
       final BufferLogger logger = context[Logger];
-      expect(logger.errorText,
-          'Invalid prebuilt iOS ipa. Does not contain a "Payload" directory.\n');
+      expect(
+        logger.errorText,
+        'Invalid prebuilt iOS ipa. Does not contain a "Payload" directory.\n',
+      );
     }, overrides: overrides);
     testUsingContext('Bad ipa zip-file, two app bundles', () {
       fs.file('app.ipa').createSync();
@@ -194,7 +202,7 @@ class MockIosWorkFlow extends Mock implements IOSWorkflow {
   }
 }
 
-// Contains no bundleIdentifier.
+// Contains no bundle identifier.
 const String badPlistData = '''
 {}
 ''';

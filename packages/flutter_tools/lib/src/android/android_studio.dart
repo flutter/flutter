@@ -1,4 +1,3 @@
-
 // Copyright 2017 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
@@ -48,7 +47,10 @@ class AndroidStudio implements Comparable<AndroidStudio> {
   factory AndroidStudio.fromMacOSBundle(String bundlePath) {
     final String studioPath = fs.path.join(bundlePath, 'Contents');
     final String plistFile = fs.path.join(studioPath, 'Info.plist');
-    final String versionString = iosWorkflow.getPlistValueFromFile(plistFile, plist.kCFBundleShortVersionStringKey);
+    final String versionString = iosWorkflow.getPlistValueFromFile(
+      plistFile,
+      plist.kCFBundleShortVersionStringKey,
+    );
 
     Version version;
     if (versionString != null)
