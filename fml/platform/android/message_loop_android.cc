@@ -32,8 +32,8 @@ MessageLoopAndroid::MessageLoopAndroid()
     : looper_(AcquireLooperForThread()),
       timer_fd_(::timerfd_create(kClockType, TFD_NONBLOCK | TFD_CLOEXEC)),
       running_(false) {
-  FXL_CHECK(looper_.is_valid());
-  FXL_CHECK(timer_fd_.is_valid());
+  FML_CHECK(looper_.is_valid());
+  FML_CHECK(timer_fd_.is_valid());
 
   static const int kWakeEvents = ALOOPER_EVENT_INPUT;
 
@@ -51,16 +51,16 @@ MessageLoopAndroid::MessageLoopAndroid()
                                    read_event_fd,          // callback
                                    this                    // baton
   );
-  FXL_CHECK(add_result == 1);
+  FML_CHECK(add_result == 1);
 }
 
 MessageLoopAndroid::~MessageLoopAndroid() {
   int remove_result = ::ALooper_removeFd(looper_.get(), timer_fd_.get());
-  FXL_CHECK(remove_result == 1);
+  FML_CHECK(remove_result == 1);
 }
 
 void MessageLoopAndroid::Run() {
-  FXL_DCHECK(looper_.get() == ALooper_forThread());
+  FML_DCHECK(looper_.get() == ALooper_forThread());
 
   running_ = true;
 
@@ -84,7 +84,7 @@ void MessageLoopAndroid::Terminate() {
 
 void MessageLoopAndroid::WakeUp(fxl::TimePoint time_point) {
   bool result = TimerRearm(timer_fd_.get(), time_point);
-  FXL_DCHECK(result);
+  FML_DCHECK(result);
 }
 
 void MessageLoopAndroid::OnEventFired() {

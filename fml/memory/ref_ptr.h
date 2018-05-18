@@ -12,9 +12,9 @@
 #include <functional>
 #include <utility>
 
+#include "flutter/fml/logging.h"
 #include "flutter/fml/macros.h"
 #include "flutter/fml/memory/ref_ptr_internal.h"
-#include "lib/fxl/logging.h"
 
 namespace fml {
 
@@ -107,12 +107,12 @@ class RefPtr final {
   T* get() const { return ptr_; }
 
   T& operator*() const {
-    FXL_DCHECK(ptr_);
+    FML_DCHECK(ptr_);
     return *ptr_;
   }
 
   T* operator->() const {
-    FXL_DCHECK(ptr_);
+    FML_DCHECK(ptr_);
     return ptr_;
   }
 
@@ -189,7 +189,7 @@ class RefPtr final {
   friend RefPtr<T> AdoptRef<T>(T*);
 
   enum AdoptTag { ADOPT };
-  RefPtr(T* ptr, AdoptTag) : ptr_(ptr) { FXL_DCHECK(ptr_); }
+  RefPtr(T* ptr, AdoptTag) : ptr_(ptr) { FML_DCHECK(ptr_); }
 
   T* ptr_;
 };

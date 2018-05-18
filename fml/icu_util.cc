@@ -8,9 +8,9 @@
 #include <mutex>
 
 #include "flutter/fml/build_config.h"
+#include "flutter/fml/logging.h"
 #include "flutter/fml/mapping.h"
 #include "flutter/fml/paths.h"
-#include "lib/fxl/logging.h"
 #include "third_party/icu/source/common/unicode/udata.h"
 
 namespace fml {
@@ -92,7 +92,7 @@ class ICUContext {
 
 void InitializeICUOnce(const std::string& icu_data_path) {
   static ICUContext* context = new ICUContext(icu_data_path);
-  FXL_CHECK(context->IsValid())
+  FML_CHECK(context->IsValid())
       << "Must be able to initialize the ICU context. Tried: " << icu_data_path;
 }
 

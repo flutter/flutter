@@ -19,7 +19,7 @@ namespace internal {
 // This class in not thread-safe, though references may be released on any
 // thread (allowing weak pointers to be destroyed/reset/reassigned on any
 // thread).
-class FXL_EXPORT WeakPtrFlag : public fml::RefCountedThreadSafe<WeakPtrFlag> {
+class WeakPtrFlag : public fml::RefCountedThreadSafe<WeakPtrFlag> {
  public:
   WeakPtrFlag();
 

@@ -9,8 +9,8 @@
 
 #include <atomic>
 
+#include "flutter/fml/logging.h"
 #include "flutter/fml/macros.h"
-#include "lib/fxl/logging.h"
 
 namespace fml {
 namespace internal {
@@ -20,8 +20,8 @@ class RefCountedThreadSafeBase {
  public:
   void AddRef() const {
 #ifndef NDEBUG
-    FXL_DCHECK(!adoption_required_);
-    FXL_DCHECK(!destruction_started_);
+    FML_DCHECK(!adoption_required_);
+    FML_DCHECK(!destruction_started_);
 #endif
     ref_count_.fetch_add(1u, std::memory_order_relaxed);
   }
@@ -30,7 +30,7 @@ class RefCountedThreadSafeBase {
     return ref_count_.load(std::memory_order_acquire) == 1u;
   }
 
-  void AssertHasOneRef() const { FXL_DCHECK(HasOneRef()); }
+  void AssertHasOneRef() const { FML_DCHECK(HasOneRef()); }
 
  protected:
   RefCountedThreadSafeBase();
@@ -39,10 +39,10 @@ class RefCountedThreadSafeBase {
   // Returns true if the object should self-delete.
   bool Release() const {
 #ifndef NDEBUG
-    FXL_DCHECK(!adoption_required_);
-    FXL_DCHECK(!destruction_started_);
+    FML_DCHECK(!adoption_required_);
+    FML_DCHECK(!destruction_started_);
 #endif
-    FXL_DCHECK(ref_count_.load(std::memory_order_acquire) != 0u);
+    FML_DCHECK(ref_count_.load(std::memory_order_acquire) != 0u);
     // TODO(vtl): We could add the following:
     //     if (ref_count_.load(std::memory_order_relaxed) == 1u) {
     // #ifndef NDEBUG
@@ -67,7 +67,7 @@ class RefCountedThreadSafeBase {
 
 #ifndef NDEBUG
   void Adopt() {
-    FXL_DCHECK(adoption_required_);
+    FML_DCHECK(adoption_required_);
     adoption_required_ = false;
   }
 #endif
@@ -95,9 +95,9 @@ inline RefCountedThreadSafeBase::RefCountedThreadSafeBase()
 
 inline RefCountedThreadSafeBase::~RefCountedThreadSafeBase() {
 #ifndef NDEBUG
-  FXL_DCHECK(!adoption_required_);
+  FML_DCHECK(!adoption_required_);
   // Should only be destroyed as a result of |Release()|.
-  FXL_DCHECK(destruction_started_);
+  FML_DCHECK(destruction_started_);
 #endif
 }
 

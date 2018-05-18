@@ -16,8 +16,8 @@
 #include <pthread.h>
 #endif
 
+#include "flutter/fml/logging.h"
 #include "flutter/fml/macros.h"
-#include "lib/fxl/logging.h"
 
 namespace fml {
 
@@ -58,7 +58,7 @@ class ThreadChecker final {
 #ifndef NDEBUG
 #define FML_DECLARE_THREAD_CHECKER(c) fml::ThreadChecker c
 #define FML_DCHECK_CREATION_THREAD_IS_CURRENT(c) \
-  FXL_DCHECK((c).IsCreationThreadCurrent())
+  FML_DCHECK((c).IsCreationThreadCurrent())
 #else
 #define FML_DECLARE_THREAD_CHECKER(c)
 #define FML_DCHECK_CREATION_THREAD_IS_CURRENT(c) ((void)0)

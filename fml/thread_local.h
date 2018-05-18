@@ -8,8 +8,8 @@
 #include <functional>
 
 #include "flutter/fml/build_config.h"
+#include "flutter/fml/logging.h"
 #include "flutter/fml/macros.h"
-#include "lib/fxl/logging.h"
 
 #define FML_THREAD_LOCAL_PTHREADS OS_MACOSX || OS_LINUX || OS_ANDROID
 
@@ -59,7 +59,7 @@ class ThreadLocal {
   };
 
   static inline void ThreadLocalDestroy(void* value) {
-    FXL_CHECK(value != nullptr);
+    FML_CHECK(value != nullptr);
     auto box = reinterpret_cast<Box*>(value);
     box->DestroyValue();
     delete box;
@@ -71,14 +71,14 @@ class ThreadLocal {
   ThreadLocal(ThreadLocalDestroyCallback destroy) : destroy_(destroy) {
     auto callback =
         reinterpret_cast<void (*)(void*)>(&ThreadLocal::ThreadLocalDestroy);
-    FXL_CHECK(pthread_key_create(&_key, callback) == 0);
+    FML_CHECK(pthread_key_create(&_key, callback) == 0);
   }
 
   void Set(intptr_t value) {
     auto box = reinterpret_cast<Box*>(pthread_getspecific(_key));
     if (box == nullptr) {
       box = new Box(destroy_, value);
-      FXL_CHECK(pthread_setspecific(_key, box) == 0);
+      FML_CHECK(pthread_setspecific(_key, box) == 0);
     } else {
       box->SetValue(value);
     }
@@ -99,7 +99,7 @@ class ThreadLocal {
     delete reinterpret_cast<Box*>(pthread_getspecific(_key));
 
     // Finally, collect the key
-    FXL_CHECK(pthread_key_delete(_key) == 0);
+    FML_CHECK(pthread_key_delete(_key) == 0);
   }
 
  private:

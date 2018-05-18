@@ -18,15 +18,15 @@ MessageLoopLinux::MessageLoopLinux()
     : epoll_fd_(FML_HANDLE_EINTR(::epoll_create(1 /* unused */))),
       timer_fd_(::timerfd_create(kClockType, TFD_NONBLOCK | TFD_CLOEXEC)),
       running_(false) {
-  FXL_CHECK(epoll_fd_.is_valid());
-  FXL_CHECK(timer_fd_.is_valid());
+  FML_CHECK(epoll_fd_.is_valid());
+  FML_CHECK(timer_fd_.is_valid());
   bool added_source = AddOrRemoveTimerSource(true);
-  FXL_CHECK(added_source);
+  FML_CHECK(added_source);
 }
 
 MessageLoopLinux::~MessageLoopLinux() {
   bool removed_source = AddOrRemoveTimerSource(false);
-  FXL_CHECK(removed_source);
+  FML_CHECK(removed_source);
 }
 
 bool MessageLoopLinux::AddOrRemoveTimerSource(bool add) {
@@ -78,7 +78,7 @@ void MessageLoopLinux::Terminate() {
 
 void MessageLoopLinux::WakeUp(fxl::TimePoint time_point) {
   bool result = TimerRearm(timer_fd_.get(), time_point);
-  FXL_DCHECK(result);
+  FML_DCHECK(result);
 }
 
 void MessageLoopLinux::OnEventFired() {
