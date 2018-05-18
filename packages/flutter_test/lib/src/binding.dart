@@ -357,17 +357,15 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
     assert(Zone.current == _parentZone);
     assert(_currentTestCompleter != null);
     if (_pendingExceptionDetails != null) {
-      debugPrint = debugPrintOverride; // just in case the test overrides it -- otherwise we won't see the error!
-      FlutterError.dumpErrorToConsole(_pendingExceptionDetails, forceReport: true);
       // test_package.registerException actually just calls the current zone's error handler (that
       // is to say, _parentZone's handleUncaughtError function). FakeAsync doesn't add one of those,
       // but the test package does, that's how the test package tracks errors. So really we could
       // get the same effect here by calling that error handler directly or indeed just throwing.
       // However, we call registerException because that's the semantically correct thing...
-      String additional = '';
-      if (_currentTestDescription != '')
-        additional = '\nThe test description was: $_currentTestDescription';
-      test_package.registerException('Test failed. See exception logs above.$additional', _emptyStackTrace);
+      test_package.registerException(
+        _pendingExceptionDetails.toString(),
+        _emptyStackTrace,
+      );
       _pendingExceptionDetails = null;
     }
     _currentTestDescription = null;
