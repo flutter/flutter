@@ -171,7 +171,8 @@ abstract class IOSApp extends ApplicationPackage {
       }, ShutdownStage.STILL_RECORDING);
       os.unzip(fs.file(applicationBinary), tempDir);
       final Directory payloadDir = fs.directory(
-          fs.path.join(tempDir.path, 'Payload'));
+        fs.path.join(tempDir.path, 'Payload'),
+      );
       if (!payloadDir.existsSync()) {
         printError(
             'Invalid prebuilt iOS ipa. Does not contain a "Payload" directory.');
