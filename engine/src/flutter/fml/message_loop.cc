@@ -20,7 +20,7 @@ FML_THREAD_LOCAL ThreadLocal tls_message_loop([](intptr_t value) {
 
 MessageLoop& MessageLoop::GetCurrent() {
   auto loop = reinterpret_cast<MessageLoop*>(tls_message_loop.Get());
-  FXL_CHECK(loop != nullptr)
+  FML_CHECK(loop != nullptr)
       << "MessageLoop::EnsureInitializedForCurrentThread was not called on "
          "this thread prior to message loop use.";
   return *loop;
@@ -41,8 +41,8 @@ bool MessageLoop::IsInitializedForCurrentThread() {
 MessageLoop::MessageLoop()
     : loop_(MessageLoopImpl::Create()),
       task_runner_(fxl::MakeRefCounted<fml::TaskRunner>(loop_)) {
-  FXL_CHECK(loop_);
-  FXL_CHECK(task_runner_);
+  FML_CHECK(loop_);
+  FML_CHECK(task_runner_);
 }
 
 MessageLoop::~MessageLoop() = default;

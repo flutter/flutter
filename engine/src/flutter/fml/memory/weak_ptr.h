@@ -10,10 +10,10 @@
 
 #include <utility>
 
+#include "flutter/fml/logging.h"
 #include "flutter/fml/memory/ref_counted.h"
 #include "flutter/fml/memory/thread_checker.h"
 #include "flutter/fml/memory/weak_ptr_internal.h"
-#include "lib/fxl/logging.h"
 
 namespace fml {
 
@@ -86,13 +86,13 @@ class WeakPtr {
 
   T& operator*() const {
     FML_DCHECK_CREATION_THREAD_IS_CURRENT(checker_.checker);
-    FXL_DCHECK(*this);
+    FML_DCHECK(*this);
     return *get();
   }
 
   T* operator->() const {
     FML_DCHECK_CREATION_THREAD_IS_CURRENT(checker_.checker);
-    FXL_DCHECK(*this);
+    FML_DCHECK(*this);
     return get();
   }
 
@@ -161,7 +161,7 @@ class WeakPtrFactory {
  public:
   explicit WeakPtrFactory(T* ptr)
       : ptr_(ptr), flag_(fml::MakeRefCounted<fml::internal::WeakPtrFlag>()) {
-    FXL_DCHECK(ptr_);
+    FML_DCHECK(ptr_);
   }
 
   ~WeakPtrFactory() {

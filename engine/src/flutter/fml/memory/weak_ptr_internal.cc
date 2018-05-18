@@ -4,7 +4,7 @@
 
 #include "flutter/fml/memory/weak_ptr_internal.h"
 
-#include "lib/fxl/logging.h"
+#include "flutter/fml/logging.h"
 
 namespace fml {
 namespace internal {
@@ -13,12 +13,12 @@ WeakPtrFlag::WeakPtrFlag() : is_valid_(true) {}
 
 WeakPtrFlag::~WeakPtrFlag() {
   // Should be invalidated before destruction.
-  FXL_DCHECK(!is_valid_);
+  FML_DCHECK(!is_valid_);
 }
 
 void WeakPtrFlag::Invalidate() {
   // Invalidation should happen exactly once.
-  FXL_DCHECK(is_valid_);
+  FML_DCHECK(is_valid_);
   is_valid_ = false;
 }
 
