@@ -5,7 +5,6 @@
 #include "flutter/assets/asset_manager.h"
 
 #include "flutter/assets/directory_asset_bundle.h"
-#include "flutter/assets/zip_asset_store.h"
 #include "flutter/glue/trace_event.h"
 #include "lib/fxl/files/path.h"
 
