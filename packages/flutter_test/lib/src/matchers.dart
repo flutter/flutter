@@ -154,7 +154,7 @@ const Matcher hasAGoodToStringDeep = const _HasGoodToStringDeep();
 ///  * [throwsAssertionError], to test if a function throws any [AssertionError].
 ///  * [throwsArgumentError], to test if a functions throws an [ArgumentError].
 ///  * [isFlutterError], to test if any object is a [FlutterError].
-Matcher throwsFlutterError = throwsA(isFlutterError);
+final Matcher throwsFlutterError = throwsA(isFlutterError);
 
 /// A matcher for functions that throw [AssertionError].
 ///
@@ -165,7 +165,7 @@ Matcher throwsFlutterError = throwsA(isFlutterError);
 ///  * [throwsFlutterError], to test if a function throws a [FlutterError].
 ///  * [throwsArgumentError], to test if a functions throws an [ArgumentError].
 ///  * [isAssertionError], to test if any object is any kind of [AssertionError].
-Matcher throwsAssertionError = throwsA(isAssertionError);
+final Matcher throwsAssertionError = throwsA(isAssertionError);
 
 /// A matcher for [FlutterError].
 ///
