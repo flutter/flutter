@@ -7,6 +7,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   testWidgets('tests must restore the value of reportTestException', (WidgetTester tester) async {
+    // This test is expected to fail.
     reportTestException = (FlutterErrorDetails details, String testDescription) {};
   });
 }
