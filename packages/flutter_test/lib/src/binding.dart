@@ -297,23 +297,23 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   FlutterExceptionHandler _oldExceptionHandler;
   FlutterErrorDetails _pendingExceptionDetails;
 
-  static const TextStyle _kMessageStyle = const TextStyle(
+  static const TextStyle _messageStyle = const TextStyle(
     color: const Color(0xFF917FFF),
     fontSize: 40.0,
   );
 
-  static const Widget _kPreTestMessage = const Center(
+  static const Widget _preTestMessage = const Center(
     child: const Text(
       'Test starting...',
-      style: _kMessageStyle,
+      style: _messageStyle,
       textDirection: TextDirection.ltr,
     )
   );
 
-  static const Widget _kPostTestMessage = const Center(
+  static const Widget _postTestMessage = const Center(
     child: const Text(
       'Test finished.',
-      style: _kMessageStyle,
+      style: _messageStyle,
       textDirection: TextDirection.ltr,
     )
   );
@@ -500,7 +500,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   Future<Null> _runTestBody(Future<Null> testBody(), VoidCallback invariantTester) async {
     assert(inTest);
 
-    runApp(new Container(key: new UniqueKey(), child: _kPreTestMessage)); // Reset the tree to a known state.
+    runApp(new Container(key: new UniqueKey(), child: _preTestMessage)); // Reset the tree to a known state.
     await pump();
 
     final bool autoUpdateGoldensBeforeTest = autoUpdateGoldenFiles;
@@ -513,7 +513,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
       // We only try to clean up and verify invariants if we didn't already
       // fail. If we got an exception already, then we instead leave everything
       // alone so that we don't cause more spurious errors.
-      runApp(new Container(key: new UniqueKey(), child: _kPostTestMessage)); // Unmount any remaining widgets.
+      runApp(new Container(key: new UniqueKey(), child: _postTestMessage)); // Unmount any remaining widgets.
       await pump();
       invariantTester();
       _verifyAutoUpdateGoldensUnset(autoUpdateGoldensBeforeTest);

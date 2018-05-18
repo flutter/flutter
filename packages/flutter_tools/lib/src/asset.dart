@@ -58,10 +58,10 @@ class _ManifestAssetBundle implements AssetBundle {
   final Map<String, DevFSContent> entries = <String, DevFSContent>{};
 
   static const String defaultManifestPath = 'pubspec.yaml';
-  static const String _kAssetManifestJson = 'AssetManifest.json';
-  static const String _kFontManifestJson = 'FontManifest.json';
-  static const String _kFontSetMaterial = 'material';
-  static const String _kLICENSE = 'LICENSE';
+  static const String _assetManifestJson = 'AssetManifest.json';
+  static const String _fontManifestJson = 'FontManifest.json';
+  static const String _fontSetMaterial = 'material';
+  static const String _license = 'LICENSE';
 
   DateTime _lastBuildTimestamp;
 
@@ -106,7 +106,7 @@ class _ManifestAssetBundle implements AssetBundle {
       return 1;
 
     if (flutterManifest.isEmpty) {
-      entries[_kAssetManifestJson] = new DevFSStringContent('{}');
+      entries[_assetManifestJson] = new DevFSStringContent('{}');
       return 0;
     }
 
@@ -195,19 +195,19 @@ class _ManifestAssetBundle implements AssetBundle {
 
     final List<_Asset> materialAssets = <_Asset>[];
     if (flutterManifest.usesMaterialDesign && includeDefaultFonts) {
-      materialAssets.addAll(_getMaterialAssets(_kFontSetMaterial));
+      materialAssets.addAll(_getMaterialAssets(_fontSetMaterial));
     }
     for (_Asset asset in materialAssets) {
       assert(asset.assetFileExists);
       entries[asset.entryUri.path] = new DevFSFileContent(asset.assetFile);
     }
 
-    entries[_kAssetManifestJson] = _createAssetManifest(assetVariants);
+    entries[_assetManifestJson] = _createAssetManifest(assetVariants);
 
-    entries[_kFontManifestJson] = new DevFSStringContent(json.encode(fonts));
+    entries[_fontManifestJson] = new DevFSStringContent(json.encode(fonts));
 
     // TODO(ianh): Only do the following line if we've changed packages or if our LICENSE file changed
-    entries[_kLICENSE] = await _obtainLicenses(packageMap, assetBasePath, reportPackages: reportLicensedPackages);
+    entries[_license] = await _obtainLicenses(packageMap, assetBasePath, reportPackages: reportLicensedPackages);
 
     return 0;
   }
@@ -384,7 +384,7 @@ List<Map<String, dynamic>> _parseFonts(
 }) {
   final List<Map<String, dynamic>> fonts = <Map<String, dynamic>>[];
   if (manifest.usesMaterialDesign && includeDefaultFonts) {
-    fonts.addAll(_getMaterialFonts(_ManifestAssetBundle._kFontSetMaterial));
+    fonts.addAll(_getMaterialFonts(_ManifestAssetBundle._fontSetMaterial));
   }
   if (packageName == null) {
     fonts.addAll(manifest.fontsDescriptor);

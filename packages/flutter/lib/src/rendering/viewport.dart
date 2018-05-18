@@ -1008,7 +1008,7 @@ class RenderViewport extends RenderViewportBase<SliverPhysicalContainerParentDat
     }
   }
 
-  static const int _kMaxLayoutCycles = 10;
+  static const int _maxLayoutCycles = 10;
 
   // Out-of-band data computed during layout.
   double _minScrollExtent;
@@ -1057,9 +1057,9 @@ class RenderViewport extends RenderViewportBase<SliverPhysicalContainerParentDat
           break;
       }
       count += 1;
-    } while (count < _kMaxLayoutCycles);
+    } while (count < _maxLayoutCycles);
     assert(() {
-      if (count >= _kMaxLayoutCycles) {
+      if (count >= _maxLayoutCycles) {
         assert(count != 1);
         throw new FlutterError(
           'A RenderViewport exceeded its maximum number of layout cycles.\n'
