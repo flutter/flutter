@@ -4,12 +4,14 @@
 
 #include "flutter/fml/paths.h"
 
+#include <sstream>
+
 #include "flutter/fml/build_config.h"
 
 namespace fml {
 namespace paths {
 
-std::string JoinPaths(std::initializer_list<fxl::StringView> components) {
+std::string JoinPaths(std::initializer_list<std::string> components) {
   std::stringstream stream;
   size_t i = 0;
   const size_t size = components.size();
