@@ -7,7 +7,6 @@
 #include <sstream>
 
 #include "flutter/assets/directory_asset_bundle.h"
-#include "flutter/assets/zip_asset_store.h"
 #include "flutter/fml/file.h"
 #include "flutter/runtime/dart_vm.h"
 
@@ -23,9 +22,6 @@ RunConfiguration RunConfiguration::InferFromSettings(
   asset_manager->PushBack(
       std::make_unique<blink::DirectoryAssetBundle>(fml::OpenFile(
           settings.assets_path.c_str(), fml::OpenPermission::kRead, true)));
-
-  asset_manager->PushBack(
-      std::make_unique<blink::ZipAssetStore>(settings.flx_path));
 
   return {IsolateConfiguration::InferFromSettings(settings, asset_manager),
           asset_manager};
