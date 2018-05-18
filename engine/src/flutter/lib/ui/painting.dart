@@ -380,7 +380,7 @@ enum BlendMode {
   ///
   /// This corresponds to the "clear" Porter-Duff operator.
   ///
-  /// ![](https://flutter.github.io/assets-for-api-docs/dart-ui/blend_mode_clear.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/dart-ui/blend_mode_clear.png)
   clear,
 
   /// Drop the destination image, only paint the source image.
@@ -390,7 +390,7 @@ enum BlendMode {
   ///
   /// This corresponds to the "Copy" Porter-Duff operator.
   ///
-  /// ![](https://flutter.github.io/assets-for-api-docs/dart-ui/blend_mode_src.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/dart-ui/blend_mode_src.png)
   src,
 
   /// Drop the source image, only paint the destination image.
@@ -400,7 +400,7 @@ enum BlendMode {
   ///
   /// This corresponds to the "Destination" Porter-Duff operator.
   ///
-  /// ![](https://flutter.github.io/assets-for-api-docs/dart-ui/blend_mode_dst.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/dart-ui/blend_mode_dst.png)
   dst,
 
   /// Composite the source image over the destination image.
@@ -412,7 +412,7 @@ enum BlendMode {
   /// This corresponds to the "Source over Destination" Porter-Duff operator,
   /// also known as the Painter's Algorithm.
   ///
-  /// ![](https://flutter.github.io/assets-for-api-docs/dart-ui/blend_mode_srcOver.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/dart-ui/blend_mode_srcOver.png)
   srcOver,
 
   /// Composite the source image under the destination image.
@@ -421,7 +421,7 @@ enum BlendMode {
   ///
   /// This corresponds to the "Destination over Source" Porter-Duff operator.
   ///
-  /// ![](https://flutter.github.io/assets-for-api-docs/dart-ui/blend_mode_dstOver.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/dart-ui/blend_mode_dstOver.png)
   ///
   /// This is useful when the source image should have been painted before the
   /// destination image, but could not be.
@@ -440,7 +440,7 @@ enum BlendMode {
   ///
   /// This corresponds to the "Source in Destination" Porter-Duff operator.
   ///
-  /// ![](https://flutter.github.io/assets-for-api-docs/dart-ui/blend_mode_srcIn.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/dart-ui/blend_mode_srcIn.png)
   srcIn,
 
   /// Show the destination image, but only where the two images overlap. The
@@ -454,7 +454,7 @@ enum BlendMode {
   ///
   /// This corresponds to the "Destination in Source" Porter-Duff operator.
   ///
-  /// ![](https://flutter.github.io/assets-for-api-docs/dart-ui/blend_mode_dstIn.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/dart-ui/blend_mode_dstIn.png)
   dstIn,
 
   /// Show the source image, but only where the two images do not overlap. The
@@ -468,7 +468,7 @@ enum BlendMode {
   ///
   /// This corresponds to the "Source out Destination" Porter-Duff operator.
   ///
-  /// ![](https://flutter.github.io/assets-for-api-docs/dart-ui/blend_mode_srcOut.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/dart-ui/blend_mode_srcOut.png)
   srcOut,
 
   /// Show the destination image, but only where the two images do not overlap. The
@@ -482,7 +482,7 @@ enum BlendMode {
   ///
   /// This corresponds to the "Destination out Source" Porter-Duff operator.
   ///
-  /// ![](https://flutter.github.io/assets-for-api-docs/dart-ui/blend_mode_dstOut.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/dart-ui/blend_mode_dstOut.png)
   dstOut,
 
   /// Composite the source image over the destination image, but only where it
@@ -497,7 +497,7 @@ enum BlendMode {
   /// For a variant with the destination on top instead of the source, see
   /// [dstATop].
   ///
-  /// ![](https://flutter.github.io/assets-for-api-docs/dart-ui/blend_mode_srcATop.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/dart-ui/blend_mode_srcATop.png)
   srcATop,
 
   /// Composite the destination image over the source image, but only where it
@@ -512,7 +512,7 @@ enum BlendMode {
   /// For a variant with the source on top instead of the destination, see
   /// [srcATop].
   ///
-  /// ![](https://flutter.github.io/assets-for-api-docs/dart-ui/blend_mode_dstATop.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/dart-ui/blend_mode_dstATop.png)
   dstATop,
 
   /// Apply a bitwise `xor` operator to the source and destination images. This
@@ -520,7 +520,7 @@ enum BlendMode {
   ///
   /// This corresponds to the "Source xor Destination" Porter-Duff operator.
   ///
-  /// ![](https://flutter.github.io/assets-for-api-docs/dart-ui/blend_mode_xor.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/dart-ui/blend_mode_xor.png)
   xor,
 
   /// Sum the components of the source and destination images.
@@ -531,7 +531,7 @@ enum BlendMode {
   ///
   /// This corresponds to the "Source plus Destination" Porter-Duff operator.
   ///
-  /// ![](https://flutter.github.io/assets-for-api-docs/dart-ui/blend_mode_plus.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/dart-ui/blend_mode_plus.png)
   plus,
 
   /// Multiply the color components of the source and destination images.
@@ -544,7 +544,7 @@ enum BlendMode {
   ///
   /// For a variant that also multiplies the alpha channel, consider [multiply].
   ///
-  /// ![](https://flutter.github.io/assets-for-api-docs/dart-ui/blend_mode_modulate.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/dart-ui/blend_mode_modulate.png)
   ///
   /// See also:
   ///
@@ -575,7 +575,7 @@ enum BlendMode {
   /// This has similar effect to two projectors displaying their images on the
   /// same screen simultaneously.
   ///
-  /// ![](https://flutter.github.io/assets-for-api-docs/dart-ui/blend_mode_screen.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/dart-ui/blend_mode_screen.png)
   ///
   /// See also:
   ///
@@ -599,7 +599,7 @@ enum BlendMode {
   /// white) is treated as the value 0.0, and values normally treated as 0.0
   /// (black, transparent) are treated as 1.0.
   ///
-  /// ![](https://flutter.github.io/assets-for-api-docs/dart-ui/blend_mode_overlay.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/dart-ui/blend_mode_overlay.png)
   ///
   /// See also:
   ///
@@ -615,7 +615,7 @@ enum BlendMode {
   /// The opacity of the output image is computed in the same way as for
   /// [srcOver].
   ///
-  /// ![](https://flutter.github.io/assets-for-api-docs/dart-ui/blend_mode_darken.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/dart-ui/blend_mode_darken.png)
   darken,
 
   /// Composite the source and destination image by choosing the highest value
@@ -624,7 +624,7 @@ enum BlendMode {
   /// The opacity of the output image is computed in the same way as for
   /// [srcOver].
   ///
-  /// ![](https://flutter.github.io/assets-for-api-docs/dart-ui/blend_mode_lighten.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/dart-ui/blend_mode_lighten.png)
   lighten,
 
   /// Divide the destination by the inverse of the source.
@@ -633,7 +633,7 @@ enum BlendMode {
   /// white) is treated as the value 0.0, and values normally treated as 0.0
   /// (black, transparent) are treated as 1.0.
   ///
-  /// ![](https://flutter.github.io/assets-for-api-docs/dart-ui/blend_mode_colorDodge.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/dart-ui/blend_mode_colorDodge.png)
   colorDodge,
 
   /// Divide the inverse of the destination by the the source, and inverse the result.
@@ -642,7 +642,7 @@ enum BlendMode {
   /// white) is treated as the value 0.0, and values normally treated as 0.0
   /// (black, transparent) are treated as 1.0.
   ///
-  /// ![](https://flutter.github.io/assets-for-api-docs/dart-ui/blend_mode_colorBurn.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/dart-ui/blend_mode_colorBurn.png)
   colorBurn,
 
   /// Multiply the components of the source and destination images after
@@ -657,7 +657,7 @@ enum BlendMode {
   /// white) is treated as the value 0.0, and values normally treated as 0.0
   /// (black, transparent) are treated as 1.0.
   ///
-  /// ![](https://flutter.github.io/assets-for-api-docs/dart-ui/blend_mode_hardLight.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/dart-ui/blend_mode_hardLight.png)
   ///
   /// See also:
   ///
@@ -672,7 +672,7 @@ enum BlendMode {
   ///
   /// This results in a similar but softer effect than [overlay].
   ///
-  /// ![](https://flutter.github.io/assets-for-api-docs/dart-ui/blend_mode_softLight.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/dart-ui/blend_mode_softLight.png)
   ///
   /// See also:
   ///
@@ -689,7 +689,7 @@ enum BlendMode {
   ///
   /// The effect is similar to [exclusion] but harsher.
   ///
-  /// ![](https://flutter.github.io/assets-for-api-docs/dart-ui/blend_mode_difference.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/dart-ui/blend_mode_difference.png)
   difference,
 
   /// Subtract double the product of the two images from the sum of the two
@@ -703,7 +703,7 @@ enum BlendMode {
   ///
   /// The effect is similar to [difference] but softer.
   ///
-  /// ![](https://flutter.github.io/assets-for-api-docs/dart-ui/blend_mode_exclusion.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/dart-ui/blend_mode_exclusion.png)
   exclusion,
 
   /// Multiply the components of the source and destination images, including
@@ -719,7 +719,7 @@ enum BlendMode {
   /// For a variant that multiplies the colors but does not multiply the alpha
   /// channel, consider [modulate].
   ///
-  /// ![](https://flutter.github.io/assets-for-api-docs/dart-ui/blend_mode_multiply.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/dart-ui/blend_mode_multiply.png)
   multiply,  // The last separable mode.
 
   /// Take the hue of the source image, and the saturation and luminosity of the
@@ -731,7 +731,7 @@ enum BlendMode {
   /// [srcOver]. Regions that are entirely transparent in the source image take
   /// their hue from the destination.
   ///
-  /// ![](https://flutter.github.io/assets-for-api-docs/dart-ui/blend_mode_hue.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/dart-ui/blend_mode_hue.png)
   ///
   /// See also:
   ///
@@ -748,7 +748,7 @@ enum BlendMode {
   /// [srcOver]. Regions that are entirely transparent in the source image take
   /// their saturation from the destination.
   ///
-  /// ![](https://flutter.github.io/assets-for-api-docs/dart-ui/blend_mode_hue.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/dart-ui/blend_mode_hue.png)
   ///
   /// See also:
   ///
@@ -766,7 +766,7 @@ enum BlendMode {
   /// [srcOver]. Regions that are entirely transparent in the source image take
   /// their hue and saturation from the destination.
   ///
-  /// ![](https://flutter.github.io/assets-for-api-docs/dart-ui/blend_mode_color.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/dart-ui/blend_mode_color.png)
   ///
   /// See also:
   ///
@@ -782,7 +782,7 @@ enum BlendMode {
   /// [srcOver]. Regions that are entirely transparent in the source image take
   /// their luminosity from the destination.
   ///
-  /// ![](https://flutter.github.io/assets-for-api-docs/dart-ui/blend_mode_luminosity.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/dart-ui/blend_mode_luminosity.png)
   ///
   /// See also:
   ///
@@ -2184,7 +2184,7 @@ enum TileMode {
   /// The gradient will paint the all the regions outside the inner area with
   /// the color of the point closest to that region.
   ///
-  /// ![](https://flutter.github.io/assets-for-api-docs/dart-ui/tile_mode_clamp_radial.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/dart-ui/tile_mode_clamp_radial.png)
   clamp,
 
   /// Edge is repeated from first color to last.
@@ -2193,8 +2193,8 @@ enum TileMode {
   /// to 2.0, 2.0 to 3.0, and so forth (and for linear gradients, similarly from
   /// -1.0 to 0.0, -2.0 to -1.0, etc).
   ///
-  /// ![](https://flutter.github.io/assets-for-api-docs/dart-ui/tile_mode_repeated_linear.png)
-  /// ![](https://flutter.github.io/assets-for-api-docs/dart-ui/tile_mode_repeated_radial.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/dart-ui/tile_mode_repeated_linear.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/dart-ui/tile_mode_repeated_radial.png)
   repeated,
 
   /// Edge is mirrored from last color to first.
@@ -2204,8 +2204,8 @@ enum TileMode {
   /// 4.0 to 3.0, and so forth (and for linear gradients, similarly from in the
   /// negative direction).
   ///
-  /// ![](https://flutter.github.io/assets-for-api-docs/dart-ui/tile_mode_mirror_linear.png)
-  /// ![](https://flutter.github.io/assets-for-api-docs/dart-ui/tile_mode_mirror_radial.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/dart-ui/tile_mode_mirror_linear.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/dart-ui/tile_mode_mirror_radial.png)
   mirror,
 }
 
@@ -2261,9 +2261,9 @@ class Gradient extends Shader {
   /// The behavior before `from` and after `to` is described by the `tileMode`
   /// argument. For details, see the [TileMode] enum.
   ///
-  /// ![](https://flutter.github.io/assets-for-api-docs/dart-ui/tile_mode_clamp_linear.png)
-  /// ![](https://flutter.github.io/assets-for-api-docs/dart-ui/tile_mode_mirror_linear.png)
-  /// ![](https://flutter.github.io/assets-for-api-docs/dart-ui/tile_mode_repeated_linear.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/dart-ui/tile_mode_clamp_linear.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/dart-ui/tile_mode_mirror_linear.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/dart-ui/tile_mode_repeated_linear.png)
   ///
   /// If `from`, `to`, `colors`, or `tileMode` are null, or if `colors` or
   /// `colorStops` contain null values, this constructor will throw a
@@ -2299,9 +2299,9 @@ class Gradient extends Shader {
   /// The behavior before and after the radius is described by the `tileMode`
   /// argument. For details, see the [TileMode] enum.
   ///
-  /// ![](https://flutter.github.io/assets-for-api-docs/dart-ui/tile_mode_clamp_radial.png)
-  /// ![](https://flutter.github.io/assets-for-api-docs/dart-ui/tile_mode_mirror_radial.png)
-  /// ![](https://flutter.github.io/assets-for-api-docs/dart-ui/tile_mode_repeated_radial.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/dart-ui/tile_mode_clamp_radial.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/dart-ui/tile_mode_mirror_radial.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/dart-ui/tile_mode_repeated_radial.png)
   ///
   /// If `center`, `radius`, `colors`, or `tileMode` are null, or if `colors` or
   /// `colorStops` contain null values, this constructor will throw a
@@ -2365,9 +2365,9 @@ class Gradient extends Shader {
   /// The behavior before `startAngle` and after `endAngle` is described by the
   /// `tileMode` argument. For details, see the [TileMode] enum.
   ///
-  /// ![](https://flutter.github.io/assets-for-api-docs/dart-ui/tile_mode_clamp_sweep.png)
-  /// ![](https://flutter.github.io/assets-for-api-docs/dart-ui/tile_mode_mirror_sweep.png)
-  /// ![](https://flutter.github.io/assets-for-api-docs/dart-ui/tile_mode_repeated_sweep.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/dart-ui/tile_mode_clamp_sweep.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/dart-ui/tile_mode_mirror_sweep.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/dart-ui/tile_mode_repeated_sweep.png)
   ///
   /// If `center`, `colors`, `tileMode`, `startAngle`, or `endAngle` are null,
   /// or if `colors` or `colorStops` contain null values, this constructor will
