@@ -514,7 +514,13 @@ class Chip extends StatelessWidget implements ChipAttributes, DeletableChipAttri
 ///  * [Wrap], A widget that displays its children in multiple horizontal or
 ///    vertical runs.
 ///  * <https://material.google.com/components/chips.html>
-class InputChip extends StatelessWidget implements ChipAttributes, DeletableChipAttributes, SelectableChipAttributes, DisabledChipAttributes, TappableChipAttributes {
+class InputChip extends StatelessWidget
+    implements
+        ChipAttributes,
+        DeletableChipAttributes,
+        SelectableChipAttributes,
+        DisabledChipAttributes,
+        TappableChipAttributes {
   /// Creates an [InputChip].
   ///
   /// The [onPressed] and [onSelected] callbacks must not both be specified at
@@ -661,7 +667,11 @@ class InputChip extends StatelessWidget implements ChipAttributes, DeletableChip
 ///  * [Wrap], A widget that displays its children in multiple horizontal or
 ///    vertical runs.
 ///  * <https://material.google.com/components/chips.html>
-class ChoiceChip extends StatelessWidget implements ChipAttributes, SelectableChipAttributes, DisabledChipAttributes {
+class ChoiceChip extends StatelessWidget
+    implements
+        ChipAttributes,
+        SelectableChipAttributes,
+        DisabledChipAttributes {
   /// Create a chip that acts like a radio button.
   ///
   /// The [label] and [selected] attributes must not be null.
@@ -820,7 +830,11 @@ class ChoiceChip extends StatelessWidget implements ChipAttributes, SelectableCh
 ///  * [Wrap], A widget that displays its children in multiple horizontal or
 ///    vertical runs.
 ///  * <https://material.google.com/components/chips.html>
-class FilterChip extends StatelessWidget implements ChipAttributes, SelectableChipAttributes, DisabledChipAttributes {
+class FilterChip extends StatelessWidget
+    implements
+        ChipAttributes,
+        SelectableChipAttributes,
+        DisabledChipAttributes {
   /// Create a chip that acts like a checkbox.
   ///
   /// The [selected] and [label] attributes must not be null.
@@ -954,9 +968,10 @@ class ActionChip extends StatelessWidget implements ChipAttributes, TappableChip
     this.padding,
   })  : assert(label != null),
         assert(
-            onPressed != null,
-            'Rather than disabling an ActionChip by setting onPressed to null, '
-            'remove it from the interface entirely.',),
+          onPressed != null,
+          'Rather than disabling an ActionChip by setting onPressed to null, '
+          'remove it from the interface entirely.',
+        ),
         super(key: key);
 
   @override
@@ -1026,7 +1041,13 @@ class ActionChip extends StatelessWidget implements ChipAttributes, TappableChip
 ///  * [Wrap], A widget that displays its children in multiple horizontal or
 ///    vertical runs.
 ///  * <https://material.google.com/components/chips.html>
-class RawChip extends StatefulWidget implements ChipAttributes, DeletableChipAttributes, SelectableChipAttributes, DisabledChipAttributes, TappableChipAttributes {
+class RawChip extends StatefulWidget
+    implements
+        ChipAttributes,
+        DeletableChipAttributes,
+        SelectableChipAttributes,
+        DisabledChipAttributes,
+        TappableChipAttributes {
   /// Creates a RawChip
   ///
   /// The [onPressed] and [onSelected] callbacks must not both be specified at
@@ -1140,7 +1161,9 @@ class _RawChipState extends State<RawChip> with TickerProviderStateMixin<RawChip
   bool get hasAvatar => widget.avatar != null;
 
   bool get canTap {
-    return widget.isEnabled && widget.tapEnabled && (widget.onPressed != null || widget.onSelected != null);
+    return widget.isEnabled
+        && widget.tapEnabled
+        && (widget.onPressed != null || widget.onSelected != null);
   }
 
   bool _isTapping = false;
@@ -1177,9 +1200,12 @@ class _RawChipState extends State<RawChip> with TickerProviderStateMixin<RawChip
 
     // These will delay the start of some animations, and/or reduce their
     // length compared to the overall select animation, using Intervals.
-    final double checkmarkPercentage = _kCheckmarkDuration.inMilliseconds / _kSelectDuration.inMilliseconds;
-    final double checkmarkReversePercentage = _kCheckmarkReverseDuration.inMilliseconds / _kSelectDuration.inMilliseconds;
-    final double avatarDrawerReversePercentage = _kReverseDrawerDuration.inMilliseconds / _kSelectDuration.inMilliseconds;
+    final double checkmarkPercentage = _kCheckmarkDuration.inMilliseconds /
+        _kSelectDuration.inMilliseconds;
+    final double checkmarkReversePercentage = _kCheckmarkReverseDuration.inMilliseconds /
+        _kSelectDuration.inMilliseconds;
+    final double avatarDrawerReversePercentage = _kReverseDrawerDuration.inMilliseconds /
+        _kSelectDuration.inMilliseconds;
     checkmarkAnimation = new CurvedAnimation(
       parent: selectController,
       curve: new Interval(1.0 - checkmarkPercentage, 1.0, curve: Curves.fastOutSlowIn),
@@ -1302,7 +1328,7 @@ class _RawChipState extends State<RawChip> with TickerProviderStateMixin<RawChip
     }
   }
 
-  Widget _wrapWithTooltip(Widget child, String tooltip, VoidCallback callback) {
+  Widget _wrapWithTooltip(String tooltip, VoidCallback callback, Widget child) {
     if (child == null || callback == null || tooltip == null) {
       return child;
     }
@@ -1316,19 +1342,18 @@ class _RawChipState extends State<RawChip> with TickerProviderStateMixin<RawChip
     if (!hasDeleteButton) {
       return null;
     }
-    final IconThemeData iconThemeData = theme.iconTheme.copyWith(
-      color: widget.deleteIconColor ?? chipTheme.deleteIconColor,
-    );
     return _wrapWithTooltip(
+      widget.deleteButtonTooltipMessage ?? MaterialLocalizations.of(context)?.deleteButtonTooltip,
+      widget.onDeleted,
       new InkResponse(
         onTap: widget.isEnabled ? widget.onDeleted : null,
         child: new IconTheme(
-          data: iconThemeData,
+          data: theme.iconTheme.copyWith(
+            color: widget.deleteIconColor ?? chipTheme.deleteIconColor,
+          ),
           child: widget.deleteIcon,
         ),
       ),
-      widget.deleteButtonTooltipMessage ?? MaterialLocalizations.of(context)?.deleteButtonTooltip,
-      widget.onDeleted,
     );
   }
 
@@ -1363,42 +1388,43 @@ class _RawChipState extends State<RawChip> with TickerProviderStateMixin<RawChip
             );
           },
           child: _wrapWithTooltip(
-              new _ChipRenderWidget(
-                theme: new _ChipRenderTheme(
-                  label: new DefaultTextStyle(
-                    overflow: TextOverflow.fade,
-                    textAlign: TextAlign.start,
-                    maxLines: 1,
-                    softWrap: false,
-                    style: widget.labelStyle ?? chipTheme.labelStyle,
-                    child: widget.label,
-                  ),
-                  avatar: new AnimatedSwitcher(
-                    child: widget.avatar,
-                    duration: _kDrawerDuration,
-                    switchInCurve: Curves.fastOutSlowIn,
-                  ),
-                  deleteIcon: new AnimatedSwitcher(
-                    child: _buildDeleteIcon(context, theme, chipTheme),
-                    duration: _kDrawerDuration,
-                    switchInCurve: Curves.fastOutSlowIn,
-                  ),
-                  brightness: chipTheme.brightness,
-                  padding: (widget.padding ?? chipTheme.padding).resolve(textDirection),
-                  labelPadding: (widget.labelPadding ?? chipTheme.labelPadding).resolve(textDirection),
-                  showAvatar: hasAvatar,
-                  showCheckmark: widget.showCheckmark,
-                  canTapBody: canTap,
+            widget.tooltip,
+            widget.onPressed,
+            new _ChipRenderWidget(
+              theme: new _ChipRenderTheme(
+                label: new DefaultTextStyle(
+                  overflow: TextOverflow.fade,
+                  textAlign: TextAlign.start,
+                  maxLines: 1,
+                  softWrap: false,
+                  style: widget.labelStyle ?? chipTheme.labelStyle,
+                  child: widget.label,
                 ),
-                value: widget.selected,
-                checkmarkAnimation: checkmarkAnimation,
-                enableAnimation: enableAnimation,
-                avatarDrawerAnimation: avatarDrawerAnimation,
-                deleteDrawerAnimation: deleteDrawerAnimation,
-                isEnabled: widget.isEnabled,
+                avatar: new AnimatedSwitcher(
+                  child: widget.avatar,
+                  duration: _kDrawerDuration,
+                  switchInCurve: Curves.fastOutSlowIn,
+                ),
+                deleteIcon: new AnimatedSwitcher(
+                  child: _buildDeleteIcon(context, theme, chipTheme),
+                  duration: _kDrawerDuration,
+                  switchInCurve: Curves.fastOutSlowIn,
+                ),
+                brightness: chipTheme.brightness,
+                padding: (widget.padding ?? chipTheme.padding).resolve(textDirection),
+                labelPadding: (widget.labelPadding ?? chipTheme.labelPadding).resolve(textDirection),
+                showAvatar: hasAvatar,
+                showCheckmark: widget.showCheckmark,
+                canTapBody: canTap,
               ),
-              widget.tooltip,
-              widget.onPressed),
+              value: widget.selected,
+              checkmarkAnimation: checkmarkAnimation,
+              enableAnimation: enableAnimation,
+              avatarDrawerAnimation: avatarDrawerAnimation,
+              deleteDrawerAnimation: deleteDrawerAnimation,
+              isEnabled: widget.isEnabled,
+            ),
+          ),
         ),
       ),
     );
@@ -1603,15 +1629,15 @@ class _ChipRenderTheme {
       return false;
     }
     final _ChipRenderTheme typedOther = other;
-    return typedOther.avatar == avatar &&
-        typedOther.label == label &&
-        typedOther.deleteIcon == deleteIcon &&
-        typedOther.brightness == brightness &&
-        typedOther.padding == padding &&
-        typedOther.labelPadding == labelPadding &&
-        typedOther.showAvatar == showAvatar &&
-        typedOther.showCheckmark == showCheckmark &&
-        typedOther.canTapBody == canTapBody;
+    return typedOther.avatar == avatar
+        && typedOther.label == label
+        && typedOther.deleteIcon == deleteIcon
+        && typedOther.brightness == brightness
+        && typedOther.padding == padding
+        && typedOther.labelPadding == labelPadding
+        && typedOther.showAvatar == showAvatar
+        && typedOther.showCheckmark == showCheckmark
+        && typedOther.canTapBody == canTapBody;
   }
 
   @override
@@ -1797,14 +1823,22 @@ class _RenderChip extends RenderBox {
     // The overall padding isn't affected by missing avatar or delete icon
     // because we add the padding regardless to give extra padding for the label
     // when they're missing.
-    final double overallPadding = theme.padding.horizontal + theme.labelPadding.horizontal;
-    return overallPadding + _minWidth(avatar, height) + _minWidth(label, height) + _minWidth(deleteIcon, height);
+    final double overallPadding = theme.padding.horizontal +
+        theme.labelPadding.horizontal;
+    return overallPadding +
+        _minWidth(avatar, height) +
+        _minWidth(label, height) +
+        _minWidth(deleteIcon, height);
   }
 
   @override
   double computeMaxIntrinsicWidth(double height) {
-    final double overallPadding = theme.padding.vertical + theme.labelPadding.horizontal;
-    return overallPadding + _maxWidth(avatar, height) + _maxWidth(label, height) + _maxWidth(deleteIcon, height);
+    final double overallPadding = theme.padding.vertical +
+        theme.labelPadding.horizontal;
+    return overallPadding +
+        _maxWidth(avatar, height) +
+        _maxWidth(label, height) +
+        _maxWidth(deleteIcon, height);
   }
 
   @override
@@ -1988,7 +2022,9 @@ class _RenderChip extends RenderBox {
           pressRect = new Rect.fromLTWH(
             0.0,
             0.0,
-            deleteIconShowing ? start + theme.padding.left : overallSize.width + theme.padding.horizontal,
+            deleteIconShowing
+                ? start + theme.padding.left
+                : overallSize.width + theme.padding.horizontal,
             overallSize.height + theme.padding.vertical,
           );
         } else {
@@ -2072,13 +2108,17 @@ class _RenderChip extends RenderBox {
 
     final ColorTween fadeTween = new ColorTween(begin: Colors.transparent, end: paintColor);
 
-    paintColor = checkmarkAnimation.status == AnimationStatus.reverse ? fadeTween.evaluate(checkmarkAnimation) : paintColor;
+    paintColor = checkmarkAnimation.status == AnimationStatus.reverse
+        ? fadeTween.evaluate(checkmarkAnimation)
+        : paintColor;
 
     final Paint paint = new Paint()
       ..color = paintColor
       ..style = PaintingStyle.stroke
       ..strokeWidth = _kCheckmarkStrokeWidth * (avatar != null ? avatar.size.height / 24.0 : 1.0);
-    final double t = checkmarkAnimation.status == AnimationStatus.reverse ? 1.0 : checkmarkAnimation.value;
+    final double t = checkmarkAnimation.status == AnimationStatus.reverse
+        ? 1.0
+        : checkmarkAnimation.value;
     if (t == 0.0) {
       // Nothing to draw.
       return;
@@ -2116,7 +2156,8 @@ class _RenderChip extends RenderBox {
       }
       // Need to make the check mark be a little smaller than the avatar.
       final double checkSize = avatar.size.height * 0.75;
-      final Offset checkOffset = _boxParentData(avatar).offset + new Offset(avatar.size.height * 0.125, avatar.size.height * 0.125);
+      final Offset checkOffset = _boxParentData(avatar).offset +
+          new Offset(avatar.size.height * 0.125, avatar.size.height * 0.125);
       _paintCheck(context.canvas, offset + checkOffset, checkSize);
     }
   }

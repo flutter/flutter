@@ -195,7 +195,7 @@ void main() {
       }
       foundChildren.addAll(previousChildren);
       return new Column(
-        children: previousChildren,
+        children: foundChildren,
       );
     }
 
@@ -331,6 +331,100 @@ void main() {
     expect(transition.opacity.value, equals(1.0));
     expect(find.text('1'), findsNothing);
     expect(find.text('2'), findsOneWidget);
+  });
+
+  testWidgets('AnimatedSwitcher updates previous child transitions if the transitionBuilder changes.', (WidgetTester tester) async {
+    final UniqueKey containerOne = new UniqueKey();
+    final UniqueKey containerTwo = new UniqueKey();
+    final UniqueKey containerThree = new UniqueKey();
+
+    final List<Widget> foundChildren = <Widget>[];
+    Widget newLayoutBuilder(Widget currentChild, List<Widget> previousChildren) {
+      foundChildren.clear();
+      if (currentChild != null) {
+        foundChildren.add(currentChild);
+      }
+      foundChildren.addAll(previousChildren);
+      return new Column(
+        children: foundChildren,
+      );
+    }
+
+    // Insert three unique children so that we have some previous children.
+    await tester.pumpWidget(
+      new AnimatedSwitcher(
+        duration: const Duration(milliseconds: 100),
+        child: new Container(key: containerOne, color: const Color(0xFFFF0000)),
+        switchInCurve: Curves.linear,
+        switchOutCurve: Curves.linear,
+        layoutBuilder: newLayoutBuilder,
+      ),
+    );
+
+    await tester.pump(const Duration(milliseconds: 10));
+
+    await tester.pumpWidget(
+      new AnimatedSwitcher(
+        duration: const Duration(milliseconds: 100),
+        child: new Container(key: containerTwo, color: const Color(0xFF00FF00)),
+        switchInCurve: Curves.linear,
+        switchOutCurve: Curves.linear,
+        layoutBuilder: newLayoutBuilder,
+      ),
+    );
+
+    await tester.pump(const Duration(milliseconds: 10));
+
+    await tester.pumpWidget(
+      new AnimatedSwitcher(
+        duration: const Duration(milliseconds: 100),
+        child: new Container(key: containerThree, color: const Color(0xFF0000FF)),
+        switchInCurve: Curves.linear,
+        switchOutCurve: Curves.linear,
+        layoutBuilder: newLayoutBuilder,
+      ),
+    );
+
+    await tester.pump(const Duration(milliseconds: 10));
+
+    expect(foundChildren.length, equals(3));
+    for (Widget child in foundChildren) {
+      expect(child, const isInstanceOf<KeyedSubtree>());
+      expect(
+        find.descendant(of: find.byWidget(child), matching: find.byType(FadeTransition)),
+        findsOneWidget,
+      );
+    }
+
+    Widget newTransitionBuilder(Widget child, Animation<double> animation) {
+      return new ScaleTransition(
+        scale: animation,
+        child: child,
+      );
+    }
+
+    // Now set a new transition builder and make sure all the previous
+    // transitions are replaced.
+    await tester.pumpWidget(
+      new AnimatedSwitcher(
+        duration: const Duration(milliseconds: 100),
+        child: new Container(color: const Color(0x00000000)),
+        switchInCurve: Curves.linear,
+        layoutBuilder: newLayoutBuilder,
+        transitionBuilder: newTransitionBuilder,
+      ),
+    );
+
+    await tester.pump(const Duration(milliseconds: 10));
+
+    expect(foundChildren.length, equals(3));
+    for (Widget child in foundChildren) {
+      expect(child, const isInstanceOf<KeyedSubtree>());
+      expect(
+        find.descendant(of: find.byWidget(child), matching: find.byType(ScaleTransition)),
+        findsOneWidget,
+      );
+    }
   });
 }
 
