@@ -563,6 +563,11 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   void _verifyReportTestExceptionUnset(TestExceptionReporter valueBeforeTest) {
     assert(() {
       if (reportTestException != valueBeforeTest) {
+        // We can't report this error to their modified reporter because we
+        // can't be guaranteed that their reporter will cause the test to fail.
+        // So we reset the error reporter to its initial value and then report
+        // this error.
+        reportTestException = valueBeforeTest;
         FlutterError.reportError(new FlutterErrorDetails(
           exception: new FlutterError(
             'The value of reportTestException was changed by the test.',

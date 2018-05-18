@@ -17,12 +17,11 @@ typedef void TestExceptionReporter(FlutterErrorDetails details, String testDescr
 ///
 /// This function is pluggable to handle the cases where tests are run in
 /// contexts _other_ than via `flutter test`.
-TestExceptionReporter get reportTestException {
-  return _reportTestException == _defaultTestExceptionReporter ? null : _reportTestException;
-}
+TestExceptionReporter get reportTestException => _reportTestException;
 TestExceptionReporter _reportTestException = _defaultTestExceptionReporter;
 set reportTestException(TestExceptionReporter handler) {
-  _reportTestException = handler ?? _defaultTestExceptionReporter;
+  assert(handler != null);
+  _reportTestException = handler;
 }
 
 void _defaultTestExceptionReporter(FlutterErrorDetails errorDetails, String testDescription) {
