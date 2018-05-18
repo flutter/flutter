@@ -189,7 +189,7 @@ class Xcode {
 Future<XcodeBuildResult> buildXcodeProject({
   BuildableIOSApp app,
   BuildInfo buildInfo,
-  String target: bundle.defaultMainPath,
+  String target,
   bool buildForDevice,
   bool codesign: true,
   bool usesTerminalUi: true,
