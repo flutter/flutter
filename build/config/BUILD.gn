@@ -81,11 +81,7 @@ config("feature_flags") {
 # Debug/release ----------------------------------------------------------------
 
 config("debug") {
-  defines = [
-    "_DEBUG",
-    "DYNAMIC_ANNOTATIONS_ENABLED=1",
-    "WTF_USE_DYNAMIC_ANNOTATIONS=1",
-  ]
+  defines = [ "_DEBUG" ]
 
   if (is_win) {
     if (disable_iterator_debugging) {
