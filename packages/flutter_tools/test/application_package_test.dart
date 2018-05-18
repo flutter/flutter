@@ -39,22 +39,25 @@ void main() {
   });
 
   group('PrebuiltIOSApp', () {
-    Map<Type, Generator> overrides = <Type, Generator>{
+    final Map<Type, Generator> overrides = <Type, Generator>{
       FileSystem: () => new MemoryFileSystem(),
       IOSWorkflow: () => new MockIosWorkFlow()
     };
     testUsingContext('Error on non-existing file', () {
-      final PrebuiltIOSApp iosApp = new IOSApp.fromPrebuiltApp('not_existing.ipa');
+      final PrebuiltIOSApp iosApp =
+          new IOSApp.fromPrebuiltApp('not_existing.ipa');
       expect(iosApp, isNull);
       final BufferLogger logger = context[Logger];
       expect(logger.errorText, 'File "not_existing.ipa" does not exist. Use an app bundle or an ipa.\n');
     }, overrides: overrides);
     testUsingContext('Error on non-app-bundle folder', () {
       fs.directory('regular_folder').createSync();
-      final PrebuiltIOSApp iosApp = new IOSApp.fromPrebuiltApp('regular_folder');
+      final PrebuiltIOSApp iosApp =
+          new IOSApp.fromPrebuiltApp('regular_folder');
       expect(iosApp, isNull);
       final BufferLogger logger = context[Logger];
-      expect(logger.errorText, 'Folder "regular_folder" is not an app bundle.\n');
+      expect(
+          logger.errorText, 'Folder "regular_folder" is not an app bundle.\n');
     }, overrides: overrides);
 
     testUsingContext('Error on no info.plist', () {
@@ -70,10 +73,12 @@ void main() {
       final PrebuiltIOSApp iosApp = new IOSApp.fromPrebuiltApp('bundle.app');
       expect(iosApp, isNull);
       final BufferLogger logger = context[Logger];
-      expect(logger.errorText, contains('Invalid prebuilt iOS app. Info.plist does not contain bundle identifier\n'));
+      expect(
+          logger.errorText,
+          contains(
+              'Invalid prebuilt iOS app. Info.plist does not contain bundle identifier\n'));
     }, overrides: overrides);
     testUsingContext('Success with app bundle', () {
-
       fs.directory('bundle.app').createSync();
       fs.file('bundle.app/Info.plist').writeAsStringSync(plistData);
       final PrebuiltIOSApp iosApp = new IOSApp.fromPrebuiltApp('bundle.app');
@@ -85,12 +90,12 @@ void main() {
     }, overrides: overrides);
     testUsingContext('Bad ipa zip-file, no payload dir', () {
       fs.file('app.ipa').createSync();
-      when(os.unzip(fs.file('app.ipa'), any))
-          .thenAnswer((Invocation _) {});
+      when(os.unzip(fs.file('app.ipa'), any)).thenAnswer((Invocation _) {});
       final PrebuiltIOSApp iosApp = new IOSApp.fromPrebuiltApp('app.ipa');
       expect(iosApp, isNull);
       final BufferLogger logger = context[Logger];
-      expect(logger.errorText, 'Invalid prebuilt iOS ipa. Does not contain a "Payload" directory.\n');
+      expect(logger.errorText,
+          'Invalid prebuilt iOS ipa. Does not contain a "Payload" directory.\n');
     }, overrides: overrides);
     testUsingContext('Bad ipa zip-file, two app bundles', () {
       fs.file('app.ipa').createSync();
@@ -101,13 +106,18 @@ void main() {
         }
         final Directory targetDirectory = invocation.positionalArguments[1];
         print(targetDirectory.path);
-        fs.directory(fs.path.join(targetDirectory.path, 'Payload', 'bundle1.app')).createSync(recursive: true);
-        fs.directory(fs.path.join(targetDirectory.path, 'Payload', 'bundle2.app')).createSync(recursive: true);
+        final String bundlePath1 =
+            fs.path.join(targetDirectory.path, 'Payload', 'bundle1.app');
+        final String bundlePath2 =
+            fs.path.join(targetDirectory.path, 'Payload', 'bundle2.app');
+        fs.directory(bundlePath1).createSync(recursive: true);
+        fs.directory(bundlePath2).createSync(recursive: true);
       });
       final PrebuiltIOSApp iosApp = new IOSApp.fromPrebuiltApp('app.ipa');
       expect(iosApp, isNull);
       final BufferLogger logger = context[Logger];
-      expect(logger.errorText, 'Invalid prebuilt iOS ipa. Does not contain a single app bundle.\n');
+      expect(logger.errorText,
+          'Invalid prebuilt iOS ipa. Does not contain a single app bundle.\n');
     }, overrides: overrides);
     testUsingContext('Success with ipa', () {
       fs.file('app.ipa').createSync();
@@ -117,9 +127,12 @@ void main() {
           return null;
         }
         final Directory targetDirectory = invocation.positionalArguments[1];
-        final Directory bundleAppDir = fs.directory(fs.path.join(targetDirectory.path, 'Payload', 'bundle.app'));
+        final Directory bundleAppDir = fs.directory(
+            fs.path.join(targetDirectory.path, 'Payload', 'bundle.app'));
         bundleAppDir.createSync(recursive: true);
-        fs.file(fs.path.join(bundleAppDir.path, 'Info.plist')).writeAsStringSync(plistData);
+        fs
+            .file(fs.path.join(bundleAppDir.path, 'Info.plist'))
+            .writeAsStringSync(plistData);
       });
       final PrebuiltIOSApp iosApp = new IOSApp.fromPrebuiltApp('app.ipa');
       final BufferLogger logger = context[Logger];
@@ -174,7 +187,7 @@ final Map<String, String> _swiftBuildSettings = <String, String>{
 class MockIosWorkFlow extends Mock implements IOSWorkflow {
   @override
   String getPlistValueFromFile(String path, String key) {
-    File file = fs.file(path);
+    final File file = fs.file(path);
     if (!file.existsSync()) {
       return null;
     }
@@ -183,10 +196,10 @@ class MockIosWorkFlow extends Mock implements IOSWorkflow {
 }
 
 // Contains no bundleIdentifier.
-final String badPlistData = '''
+const String badPlistData = '''
 {}
 ''';
 
-final String plistData = '''
+const String plistData = '''
 {"CFBundleIdentifier": "fooBundleId"}
 ''';

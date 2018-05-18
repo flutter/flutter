@@ -11,8 +11,8 @@ import '../base/platform.dart';
 import '../base/process_manager.dart';
 import '../base/version.dart';
 import '../globals.dart';
-import '../ios/plist_utils.dart' as plist;
 import '../ios/ios_workflow.dart';
+import '../ios/plist_utils.dart' as plist;
 
 AndroidStudio get androidStudio => context[AndroidStudio];
 
