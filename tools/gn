@@ -69,7 +69,9 @@ def to_gn_args(args):
     # Skia GN args.
     gn_args['skia_enable_flutter_defines'] = True # Enable Flutter API guards in Skia.
     gn_args['skia_use_dng_sdk'] = False    # RAW image handling.
-    gn_args['skia_use_sfntly'] = False     # PDF handling.
+    gn_args['skia_use_sfntly'] = False     # PDF handling depedency.
+    gn_args['skia_enable_pdf'] = False     # PDF handling.
+    gn_args['skia_use_expat'] = False      # XML handling (for SVG and friends).
     gn_args['skia_use_fontconfig'] = False # Use the custom font manager instead.
     gn_args['is_official_build'] = True    # Disable Skia test utilities.
 
