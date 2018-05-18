@@ -105,7 +105,6 @@ void main() {
           return null;
         }
         final Directory targetDirectory = invocation.positionalArguments[1];
-        print(targetDirectory.path);
         final String bundlePath1 =
             fs.path.join(targetDirectory.path, 'Payload', 'bundle1.app');
         final String bundlePath2 =
