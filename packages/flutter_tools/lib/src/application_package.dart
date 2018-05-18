@@ -15,6 +15,7 @@ import 'base/os.dart' show os;
 import 'base/process.dart';
 import 'build_info.dart';
 import 'globals.dart';
+import 'ios/ios_workflow.dart';
 import 'ios/plist_utils.dart' as plist;
 import 'ios/xcodeproj.dart';
 import 'tester/flutter_tester.dart';
@@ -150,12 +151,16 @@ abstract class IOSApp extends ApplicationPackage {
     final FileSystemEntityType entityType = fs.typeSync(applicationBinary);
     if (entityType == FileSystemEntityType.notFound) {
       printError(
-          '$applicationBinary does not exist. Use an app bundle or an ipa.');
+          'File "$applicationBinary" does not exist. Use an app bundle or an ipa.');
       return null;
     }
     Directory bundleDir;
-    if (entityType == FileSystemEntityType.directory &&
-        _isBundleDirectory(fs.directory(applicationBinary))) {
+    if (entityType == FileSystemEntityType.directory) {
+      final Directory directory = fs.directory(applicationBinary);
+      if (!_isBundleDirectory(directory)) {
+        printError('Folder "$applicationBinary" is not an app bundle.');
+        return null;
+      }
       bundleDir = fs.directory(applicationBinary);
     } else {
       // Try to unpack as an ipa.
@@ -167,18 +172,22 @@ abstract class IOSApp extends ApplicationPackage {
       os.unzip(fs.file(applicationBinary), tempDir);
       final Directory payloadDir = fs.directory(
           fs.path.join(tempDir.path, 'Payload'));
+      if (!payloadDir.existsSync()) {
+        printError(
+            'Invalid prebuilt iOS ipa. Does not contain a "Payload" directory.');
+        return null;
+      }
+      try {
       bundleDir = payloadDir.listSync()
-          .singleWhere(_isBundleDirectory, orElse: () {
+          .singleWhere(_isBundleDirectory);
+      } on StateError {
         printError(
             'Invalid prebuilt iOS ipa. Does not contain a single app bundle.');
-        return null;
-      });
-      if (bundleDir == null) {
         return null;
       }
     }
     final String plistPath = fs.path.join(bundleDir.path, 'Info.plist');
-    final String id = plist.getValueFromFile(plistPath, plist.kCFBundleIdentifierKey);
+    final String id = iosWorkflow.getPlistValueFromFile(plistPath, plist.kCFBundleIdentifierKey);
     if (id == null) {
       printError('Invalid prebuilt iOS app. Info.plist does not contain bundle identifier');
       return null;
@@ -196,7 +205,7 @@ abstract class IOSApp extends ApplicationPackage {
       return null;
 
     final String plistPath = fs.path.join('ios', 'Runner', 'Info.plist');
-    String id = plist.getValueFromFile(plistPath, plist.kCFBundleIdentifierKey);
+    String id = iosWorkflow.getPlistValueFromFile(plistPath, plist.kCFBundleIdentifierKey);
     if (id == null || !xcodeProjectInterpreter.isInstalled)
       return null;
     final String projectPath = fs.path.join('ios', 'Runner.xcodeproj');
