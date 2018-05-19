@@ -370,7 +370,7 @@ class IOSSimulator extends Device {
     final XcodeBuildResult buildResult = await buildXcodeProject(
       app: app,
       buildInfo: debugBuildInfo,
-      target: mainPath,
+      targetOverride: mainPath,
       buildForDevice: false,
       usesTerminalUi: usesTerminalUi,
     );

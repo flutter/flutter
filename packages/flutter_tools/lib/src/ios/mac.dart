@@ -188,7 +188,7 @@ class Xcode {
 Future<XcodeBuildResult> buildXcodeProject({
   BuildableIOSApp app,
   BuildInfo buildInfo,
-  String target,
+  String targetOverride,
   bool buildForDevice,
   bool codesign: true,
   bool usesTerminalUi: true,
@@ -245,7 +245,7 @@ Future<XcodeBuildResult> buildXcodeProject({
   updateGeneratedXcodeProperties(
     projectPath: fs.currentDirectory.path,
     buildInfo: buildInfo,
-    target: target,
+    targetOverride: targetOverride,
     previewDart2: buildInfo.previewDart2,
   );
 

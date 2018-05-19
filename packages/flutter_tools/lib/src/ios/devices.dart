@@ -167,7 +167,7 @@ class IOSDevice extends Device {
       final XcodeBuildResult buildResult = await buildXcodeProject(
           app: package,
           buildInfo: debuggingOptions.buildInfo,
-          target: mainPath,
+          targetOverride: mainPath,
           buildForDevice: true,
           usesTerminalUi: usesTerminalUi,
       );
