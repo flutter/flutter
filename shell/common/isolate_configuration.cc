@@ -92,7 +92,7 @@ class KernelListIsolateConfiguration final : public IsolateConfiguration {
  public:
   KernelListIsolateConfiguration(
       std::vector<std::unique_ptr<fml::Mapping>> kernel_pieces)
-    : kernel_pieces_(std::move(kernel_pieces)) {}
+      : kernel_pieces_(std::move(kernel_pieces)) {}
 
   // |shell::IsolateConfiguration|
   bool DoPrepareIsolate(blink::DartIsolate& isolate) override {
@@ -119,7 +119,7 @@ class KernelListIsolateConfiguration final : public IsolateConfiguration {
 
 std::unique_ptr<IsolateConfiguration> IsolateConfiguration::InferFromSettings(
     const blink::Settings& settings,
-    fxl::RefPtr<blink::AssetManager> asset_manager) {
+    fml::RefPtr<blink::AssetManager> asset_manager) {
   // Running in AOT mode.
   if (blink::DartVM::IsRunningPrecompiledCode()) {
     return CreateForPrecompiledCode();
@@ -174,8 +174,9 @@ std::unique_ptr<IsolateConfiguration> IsolateConfiguration::InferFromSettings(
           piece_path_end++;
         }
 
-        std::string piece_path(reinterpret_cast<const char*>(&kernel_list[piece_path_start]),
-                               piece_path_end - piece_path_start);
+        std::string piece_path(
+            reinterpret_cast<const char*>(&kernel_list[piece_path_start]),
+            piece_path_end - piece_path_start);
         std::vector<uint8_t> piece;
         if (!asset_manager->GetAsBuffer(piece_path, &piece)) {
           FXL_LOG(ERROR) << "Failed to load: " << piece_path;

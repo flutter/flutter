@@ -156,7 +156,7 @@ int RunTester(const blink::Settings& settings, bool run_forever) {
     return EXIT_FAILURE;
   }
 
-  auto asset_manager = fxl::MakeRefCounted<blink::AssetManager>();
+  auto asset_manager = fml::MakeRefCounted<blink::AssetManager>();
   asset_manager->PushBack(std::make_unique<blink::DirectoryAssetBundle>(
       fml::Duplicate(settings.assets_dir)));
   asset_manager->PushBack(

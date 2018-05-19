@@ -61,7 +61,7 @@ class Engine final : public blink::RuntimeDelegate {
   FXL_WARN_UNUSED_RESULT
   bool Restart(RunConfiguration configuration);
 
-  bool UpdateAssetManager(fxl::RefPtr<blink::AssetManager> asset_manager);
+  bool UpdateAssetManager(fml::RefPtr<blink::AssetManager> asset_manager);
 
   void BeginFrame(fxl::TimePoint frame_time);
 
@@ -105,7 +105,7 @@ class Engine final : public blink::RuntimeDelegate {
   tonic::DartErrorHandleType load_script_error_;
   std::string initial_route_;
   blink::ViewportMetrics viewport_metrics_;
-  fxl::RefPtr<blink::AssetManager> asset_manager_;
+  fml::RefPtr<blink::AssetManager> asset_manager_;
   bool activity_running_;
   bool have_surface_;
   fml::WeakPtrFactory<Engine> weak_factory_;

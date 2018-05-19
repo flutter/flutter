@@ -13,6 +13,8 @@
 #include "flutter/assets/directory_asset_bundle.h"
 #include "flutter/fml/file.h"
 #include "flutter/fml/icu_util.h"
+#include "flutter/fml/log_settings.h"
+#include "flutter/fml/logging.h"
 #include "flutter/fml/message_loop.h"
 #include "flutter/glue/trace_event.h"
 #include "flutter/runtime/dart_vm.h"
@@ -166,10 +168,21 @@ static void PerformInitializationTasks(const blink::Settings& settings) {
   std::call_once(gShellSettingsInitialization, [&settings] {
     RecordStartupTimestamp();
 
-    fxl::LogSettings log_settings;
-    log_settings.min_log_level =
-        settings.verbose_logging ? fxl::LOG_INFO : fxl::LOG_ERROR;
-    fxl::SetLogSettings(log_settings);
+    //  TODO(chinmaygarde): There are currently two loggers till the transition
+    //  away from FXL is ongoing. Remove FXL when done.
+    {
+      fxl::LogSettings log_settings;
+      log_settings.min_log_level =
+          settings.verbose_logging ? fxl::LOG_INFO : fxl::LOG_ERROR;
+      fxl::SetLogSettings(log_settings);
+    }
+
+    {
+      fml::LogSettings log_settings;
+      log_settings.min_log_level =
+          settings.verbose_logging ? fml::LOG_INFO : fml::LOG_ERROR;
+      fml::SetLogSettings(log_settings);
+    }
 
     if (settings.trace_skia) {
       InitSkiaEventTracer(settings.trace_skia);
@@ -909,7 +922,7 @@ bool Shell::OnServiceProtocolSetAssetBundlePath(
   auto& allocator = response.GetAllocator();
   response.SetObject();
 
-  auto asset_manager = fxl::MakeRefCounted<blink::AssetManager>();
+  auto asset_manager = fml::MakeRefCounted<blink::AssetManager>();
 
   asset_manager->PushFront(std::make_unique<blink::DirectoryAssetBundle>(
       fml::OpenFile(params.at("assetDirectory").ToString().c_str(),

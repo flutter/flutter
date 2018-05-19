@@ -6,9 +6,9 @@
 
 #include <utility>
 
+#include "flutter/fml/eintr_wrapper.h"
 #include "flutter/fml/file.h"
 #include "flutter/fml/mapping.h"
-#include "lib/fxl/files/eintr_wrapper.h"
 
 namespace blink {
 
@@ -35,7 +35,7 @@ bool DirectoryAssetBundle::GetAsBuffer(const std::string& asset_name,
   }
 
   if (!is_valid_) {
-    FXL_DLOG(WARNING) << "Asset bundle was not valid.";
+    FML_DLOG(WARNING) << "Asset bundle was not valid.";
     return false;
   }
 

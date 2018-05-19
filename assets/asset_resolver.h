@@ -8,7 +8,7 @@
 #include <string>
 #include <vector>
 
-#include "lib/fxl/macros.h"
+#include "flutter/fml/macros.h"
 
 namespace blink {
 
@@ -24,7 +24,7 @@ class AssetResolver {
                            std::vector<uint8_t>* data) const = 0;
 
  private:
-  FXL_DISALLOW_COPY_AND_ASSIGN(AssetResolver);
+  FML_DISALLOW_COPY_AND_ASSIGN(AssetResolver);
 };
 
 }  // namespace blink
