@@ -22,7 +22,7 @@ class IsolateConfiguration {
  public:
   static std::unique_ptr<IsolateConfiguration> InferFromSettings(
       const blink::Settings& settings,
-      fxl::RefPtr<blink::AssetManager> asset_manager);
+      fml::RefPtr<blink::AssetManager> asset_manager);
 
   static std::unique_ptr<IsolateConfiguration> CreateForPrecompiledCode();
 

@@ -41,7 +41,7 @@ class AndroidShellHolder {
   Rasterizer::Screenshot Screenshot(Rasterizer::ScreenshotType type,
                                     bool base64_encode);
 
-  void UpdateAssetManager(fxl::RefPtr<blink::AssetManager> asset_manager);
+  void UpdateAssetManager(fml::RefPtr<blink::AssetManager> asset_manager);
 
  private:
   const blink::Settings settings_;

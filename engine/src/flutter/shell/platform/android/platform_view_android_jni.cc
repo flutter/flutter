@@ -201,7 +201,7 @@ static void RunBundleAndSnapshot(
     jstring jEntrypoint,
     jboolean /* reuse runtime controller (unused) */,
     jobject jAssetManager) {
-  auto asset_manager = fxl::MakeRefCounted<blink::AssetManager>();
+  auto asset_manager = fml::MakeRefCounted<blink::AssetManager>();
 
   const auto bundlepath = fml::jni::JavaStringToString(env, jbundlepath);
 
@@ -253,7 +253,7 @@ static void RunBundleAndSource(JNIEnv* env,
                                jstring jBundlePath,
                                jstring main,
                                jstring packages) {
-  auto asset_manager = fxl::MakeRefCounted<blink::AssetManager>();
+  auto asset_manager = fml::MakeRefCounted<blink::AssetManager>();
 
   const auto bundlepath = fml::jni::JavaStringToString(env, jBundlePath);
 
@@ -304,7 +304,7 @@ void SetAssetBundlePathOnUI(JNIEnv* env,
     return;
   }
 
-  auto asset_manager = fxl::MakeRefCounted<blink::AssetManager>();
+  auto asset_manager = fml::MakeRefCounted<blink::AssetManager>();
   asset_manager->PushBack(std::move(directory_asset_bundle));
 
   ANDROID_SHELL_HOLDER->UpdateAssetManager(std::move(asset_manager));

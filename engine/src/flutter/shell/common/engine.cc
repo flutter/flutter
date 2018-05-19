@@ -70,7 +70,7 @@ fml::WeakPtr<Engine> Engine::GetWeakPtr() const {
 }
 
 bool Engine::UpdateAssetManager(
-    fxl::RefPtr<blink::AssetManager> new_asset_manager) {
+    fml::RefPtr<blink::AssetManager> new_asset_manager) {
   if (asset_manager_ == new_asset_manager) {
     return false;
   }

@@ -6,9 +6,9 @@
 #define FLUTTER_ASSETS_DIRECTORY_ASSET_BUNDLE_H_
 
 #include "flutter/assets/asset_resolver.h"
+#include "flutter/fml/macros.h"
+#include "flutter/fml/memory/ref_counted.h"
 #include "flutter/fml/unique_fd.h"
-#include "lib/fxl/macros.h"
-#include "lib/fxl/memory/ref_counted.h"
 
 namespace blink {
 
@@ -31,7 +31,7 @@ class DirectoryAssetBundle : public AssetResolver {
   bool GetAsBuffer(const std::string& asset_name,
                    std::vector<uint8_t>* data) const override;
 
-  FXL_DISALLOW_COPY_AND_ASSIGN(DirectoryAssetBundle);
+  FML_DISALLOW_COPY_AND_ASSIGN(DirectoryAssetBundle);
 };
 
 }  // namespace blink
