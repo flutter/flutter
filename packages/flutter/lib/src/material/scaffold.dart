@@ -834,7 +834,7 @@ class Scaffold extends StatefulWidget {
   /// left-to-right ([TextDirection.rtl])
   ///
   /// In the uncommon case that you wish to open the drawer manually, use the
-  /// [ScaffoldState.openDrawer] function.
+  /// [ScaffoldState.openEndDrawer] function.
   ///
   /// Typically a [Drawer].
   final Widget endDrawer;
