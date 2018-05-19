@@ -784,21 +784,37 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
 
   @override
   void showOnScreen([RenderObject child]) {
-    // Logic duplicated in [_RenderSingleChildViewport.showOnScreen].
-    if (child != null) {
-      final double leadingEdgeOffset = getOffsetToReveal(child, 0.0);
-      final double trailingEdgeOffset = getOffsetToReveal(child, 1.0);
-      final double currentOffset = offset.pixels;
-
-      if (currentOffset > leadingEdgeOffset && currentOffset > trailingEdgeOffset) {
-        offset.jumpTo(leadingEdgeOffset);
-      } else if (currentOffset < leadingEdgeOffset && currentOffset < trailingEdgeOffset ) {
-        offset.jumpTo(trailingEdgeOffset);
-      }
-    }
-
+    RenderViewportBase.showInViewport(child: child, viewport: this, offset: offset);
     // Make sure the viewport itself is on screen.
     super.showOnScreen();
+  }
+
+  /// Make the given `child` of the given `viewport` fully visible in the
+  /// `viewport` by manipulating the provided [ViewportOffset] `offset`.
+  ///
+  /// The parameters `viewport` and `offset` are required and cannot be null.
+  /// If `child` is null this is a no-op.
+  static void showInViewport({
+    RenderObject child,
+    @required RenderAbstractViewport viewport,
+    @required ViewportOffset offset,
+  }) {
+    assert(viewport != null);
+    assert(offset != null);
+    if (child == null) {
+      return;
+    }
+    final double leadingEdgeOffset = viewport.getOffsetToReveal(child, 0.0);
+    final double trailingEdgeOffset = viewport.getOffsetToReveal(child, 1.0);
+    final double currentOffset = offset.pixels;
+
+    assert(leadingEdgeOffset >= trailingEdgeOffset);
+
+    if (currentOffset > leadingEdgeOffset) {
+      offset.jumpTo(leadingEdgeOffset);
+    } else if (currentOffset < trailingEdgeOffset ) {
+      offset.jumpTo(trailingEdgeOffset);
+    }
   }
 }
 
