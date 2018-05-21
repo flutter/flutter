@@ -818,7 +818,7 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
     //                      |         |  | with `child` at
     //                      |         | _| leading edge
     //                      |         |
-    //                  900 +---------+
+    //                  800 +---------+
     //
     // `trailingEdgeOffset`: Distance from scrollOffset 0 to the start of the
     //                       viewport on the left in image above.
