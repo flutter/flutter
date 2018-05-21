@@ -1408,4 +1408,24 @@ void main() {
       ],
     ));
   });
+
+  testWidgets('InputDecorator constrained to 0x0', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/17710
+    await tester.pumpWidget(
+      new Material(
+        child: new Directionality(
+          textDirection: TextDirection.ltr,
+          child: new UnconstrainedBox(child: new ConstrainedBox(
+            constraints: new BoxConstraints.tight(Size.zero),
+            child: new InputDecorator(
+              decoration: const InputDecoration(
+                labelText: 'XP',
+                border: const OutlineInputBorder(),
+              ),
+            ),
+          )),
+        ),
+      ),
+    );
+  });
 }
