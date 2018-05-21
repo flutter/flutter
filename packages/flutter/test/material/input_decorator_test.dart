@@ -1417,7 +1417,7 @@ void main() {
           textDirection: TextDirection.ltr,
           child: new UnconstrainedBox(child: new ConstrainedBox(
             constraints: new BoxConstraints.tight(Size.zero),
-            child: new InputDecorator(
+            child: const InputDecorator(
               decoration: const InputDecoration(
                 labelText: 'XP',
                 border: const OutlineInputBorder(),
