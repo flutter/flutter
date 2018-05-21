@@ -20,7 +20,6 @@ import '../base/process.dart';
 import '../base/process_manager.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
-import '../bundle.dart' as bundle;
 import '../globals.dart';
 import '../plugins.dart';
 import '../services.dart';
@@ -189,7 +188,7 @@ class Xcode {
 Future<XcodeBuildResult> buildXcodeProject({
   BuildableIOSApp app,
   BuildInfo buildInfo,
-  String target: bundle.defaultMainPath,
+  String targetOverride,
   bool buildForDevice,
   bool codesign: true,
   bool usesTerminalUi: true,
@@ -246,7 +245,7 @@ Future<XcodeBuildResult> buildXcodeProject({
   updateGeneratedXcodeProperties(
     projectPath: fs.currentDirectory.path,
     buildInfo: buildInfo,
-    target: target,
+    targetOverride: targetOverride,
     previewDart2: buildInfo.previewDart2,
   );
 

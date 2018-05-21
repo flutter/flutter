@@ -94,17 +94,17 @@ class _ShrineGridLayout extends SliverGridLayout {
 }
 
 class _ShrineGridDelegate extends SliverGridDelegate {
-  static const double _kSpacing = 8.0;
+  static const double _spacing = 8.0;
 
   @override
   SliverGridLayout getLayout(SliverConstraints constraints) {
-    final double tileWidth = (constraints.crossAxisExtent - _kSpacing) / 2.0;
+    final double tileWidth = (constraints.crossAxisExtent - _spacing) / 2.0;
     const double tileHeight = 40.0 + 144.0 + 40.0;
     return new _ShrineGridLayout(
       tileWidth: tileWidth,
       tileHeight: tileHeight,
-      rowStride: tileHeight + _kSpacing,
-      columnStride: tileWidth + _kSpacing,
+      rowStride: tileHeight + _spacing,
+      columnStride: tileWidth + _spacing,
     );
   }
 

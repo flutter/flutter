@@ -893,7 +893,7 @@ class _DialPainter extends CustomPainter {
     canvas.restore();
   }
 
-  static const double _kSemanticNodeSizeScale = 1.5;
+  static const double _semanticNodeSizeScale = 1.5;
 
   @override
   SemanticsBuilderCallback get semanticsBuilder => _buildSemantics;
@@ -901,7 +901,7 @@ class _DialPainter extends CustomPainter {
   /// Creates semantics nodes for the hour/minute labels painted on the dial.
   ///
   /// The nodes are positioned on top of the text and their size is
-  /// [_kSemanticNodeSizeScale] bigger than those of the text boxes to provide
+  /// [_semanticNodeSizeScale] bigger than those of the text boxes to provide
   /// bigger tap area.
   List<CustomPainterSemantics> _buildSemantics(Size size) {
     final double radius = size.shortestSide / 2.0;
@@ -934,8 +934,8 @@ class _DialPainter extends CustomPainter {
 
       for (_TappableLabel label in labels) {
         final TextPainter labelPainter = label.painter;
-        final double width = labelPainter.width * _kSemanticNodeSizeScale;
-        final double height = labelPainter.height * _kSemanticNodeSizeScale;
+        final double width = labelPainter.width * _semanticNodeSizeScale;
+        final double height = labelPainter.height * _semanticNodeSizeScale;
         final Offset nodeOffset = getOffsetForTheta(labelTheta, ring) + new Offset(-width / 2.0, -height / 2.0);
         final CustomPainterSemantics node = new CustomPainterSemantics(
           rect: new Rect.fromLTRB(

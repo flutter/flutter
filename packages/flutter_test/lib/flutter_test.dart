@@ -27,7 +27,7 @@
 /// with the following signature:
 ///
 /// ```dart
-/// void main(FutureOr<void> testMain());
+/// Future<void> main(FutureOr<void> testMain());
 /// ```
 ///
 /// The test framework will execute that method and pass it the `main()` method
@@ -56,6 +56,7 @@ export 'src/nonconst.dart';
 export 'src/platform.dart';
 export 'src/stack_manipulation.dart';
 export 'src/test_async_utils.dart';
+export 'src/test_exception_reporter.dart';
 export 'src/test_pointer.dart';
 export 'src/test_text_input.dart';
 export 'src/test_vsync.dart';

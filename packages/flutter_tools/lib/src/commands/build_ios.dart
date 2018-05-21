@@ -82,7 +82,7 @@ class BuildIOSCommand extends BuildSubCommand {
     final XcodeBuildResult result = await buildXcodeProject(
       app: app,
       buildInfo: buildInfo,
-      target: targetFile,
+      targetOverride: targetFile,
       buildForDevice: !forSimulator,
       codesign: shouldCodesign,
     );
