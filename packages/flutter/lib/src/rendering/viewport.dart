@@ -820,9 +820,9 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
     //                      |         |
     //                  900 +---------+
     //
-    // `trailingEdgeOffset`: Distance from scollOffset 0 to the start of the
+    // `trailingEdgeOffset`: Distance from scrollOffset 0 to the start of the
     //                       viewport on the left in image above.
-    // `leadingEdgeOffset`: Distance from scollOffset 0 to the start of the
+    // `leadingEdgeOffset`: Distance from scrollOffset 0 to the start of the
     //                      viewport on the right in image above.
     //
     // The viewport position on the left is achieved by setting `offset.pixels`
