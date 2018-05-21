@@ -83,10 +83,6 @@ class RunCommand extends RunCommandBase {
     requiresPubspecYaml();
 
     argParser
-      ..addFlag('full-restart',
-        defaultsTo: true,
-        help: 'Stop any currently running application process before running the app.',
-      )
       ..addFlag('start-paused',
         negatable: false,
         help: 'Start in a paused mode and wait for a debugger to connect.',
