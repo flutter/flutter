@@ -45,6 +45,10 @@ GPUSurfaceGL::GPUSurfaceGL(GPUSurfaceGLDelegate* delegate)
   GrContextOptions options;
   options.fAvoidStencilBuffers = true;
 
+  // To get video playback on the widest range of devices, we limit Skia to
+  // ES2 shading language when the ES3 external image extension is missing.
+  options.fPreferExternalImagesOverES3 = true;
+
   auto context = GrContext::MakeGL(GrGLMakeNativeInterface(), options);
 
   if (context == nullptr) {
