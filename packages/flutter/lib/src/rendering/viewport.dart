@@ -808,13 +808,40 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
     final double trailingEdgeOffset = viewport.getOffsetToReveal(child, 1.0);
     final double currentOffset = offset.pixels;
 
+    //        scrollOffset
+    //                    0 +---------+
+    //                      |         |
+    //                    _ |         |
+    // viewport position |  |         |
+    //   with `child` at |  |         | _
+    //     trailing edge |_ | xxxxxxx |  | viewport position
+    //                      |         |  | with `child` at
+    //                      |         | _| leading edge
+    //                      |         |
+    //                  900 +---------+
+    //
+    // `trailingEdgeOffset`: Distance from scollOffset 0 to the start of the
+    //                       viewport on the left in image above.
+    // `leadingEdgeOffset`: Distance from scollOffset 0 to the start of the
+    //                      viewport on the right in image above.
+    //
+    // The viewport position on the left is achieved by setting `offset.pixels`
+    // to `trailingEdgeOffset`, the one on the right by setting it to
+    // `leadingEdgeOffset`.
+
     assert(leadingEdgeOffset >= trailingEdgeOffset);
 
     if (currentOffset > leadingEdgeOffset) {
+      // `child` currently starts above the leading edge and can be shown fully
+      // on screen by scrolling down (which means: moving viewport up).
       offset.jumpTo(leadingEdgeOffset);
     } else if (currentOffset < trailingEdgeOffset ) {
+      // `child currently ends below the trailing edge and can be shown fully
+      // on screen by scrolling up (which means: moving viewport down)
       offset.jumpTo(trailingEdgeOffset);
     }
+    // else: `child` is between leading and trailing edge and hence already
+    //     fully shown on screen. No action necessary.
   }
 }
 
