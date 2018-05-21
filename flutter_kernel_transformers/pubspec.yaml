@@ -50,8 +50,6 @@ dependency_overrides:
 
   analyzer:
     path: ../../third_party/dart/pkg/analyzer
-  barback:
-    path: ../../third_party/dart/third_party/pkg/barback
   boolean_selector:
     path: ../../third_party/dart/third_party/pkg/boolean_selector
   cli_util:
