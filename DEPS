@@ -31,11 +31,10 @@ vars = {
   # Dart is: https://github.com/dart-lang/sdk/blob/master/DEPS.
   # You can use //tools/dart/create_updated_flutter_deps.py to produce
   # updated revision list of existing dependencies.
-  'dart_revision': '43635d3372253262cbf51e55b2ccfceae4f94682',
+  'dart_revision': '97b6c2e09d6532eeb622d85f23109f3f3b6d2b61',
 
   'dart_args_tag': '1.4.1',
   'dart_async_tag': '2.0.6',
-  'dart_barback_tag': '0.15.2+14',
   'dart_bazel_worker_tag': 'v0.1.9',
   'dart_boolean_selector_tag': '1.0.3',
   'dart_boringssl_gen_rev': '344f455fd13d46f054726638e76026156ea73aa9',
@@ -47,7 +46,7 @@ vars = {
   'dart_crypto_tag': '2.0.2+1',
   'dart_csslib_tag': '0.14.1',
   'dart_dart2js_info_tag': '0.5.6+2',
-  'dart_dart_style_tag': '1.0.12',
+  'dart_dart_style_tag': '1.0.14',
   'dart_dartdoc_tag': 'v0.19.0',
   'dart_fixnum_tag': '0.10.5',
   'dart_glob_tag': '1.1.5',
@@ -89,7 +88,7 @@ vars = {
   'dart_stack_trace_tag': '1.9.2',
   'dart_stream_channel_tag': '1.6.4',
   'dart_string_scanner_tag': '1.0.2',
-  'dart_test_tag': '0.12.30+1',
+  'dart_test_tag': '0.12.38',
   'dart_tuple_tag': 'v1.0.1',
   'dart_typed_data_tag': '1.1.3',
   'dart_usage_tag': '3.3.0',
@@ -114,7 +113,7 @@ allowed_hosts = [
 ]
 
 deps = {
-  'src': 'https://github.com/flutter/buildroot.git' + '@' + 'e2b647d54ab988569411517fac2e1aa28eeb4f46',
+  'src': 'https://github.com/flutter/buildroot.git' + '@' + '1e4fc3e8333b715dd091c1853578704471372cee',
 
    # Fuchsia compatibility
    #
@@ -174,9 +173,6 @@ deps = {
 
   'src/third_party/dart/third_party/pkg/async':
    Var('dart_git') + '/async.git' + '@' +   Var('dart_async_tag'),
-
-  'src/third_party/dart/third_party/pkg/barback':
-   Var('dart_git') + '/barback.git' + '@' +   Var('dart_barback_tag'),
 
   'src/third_party/dart/third_party/pkg/bazel_worker':
    Var('dart_git') + '/bazel_worker.git' + '@' +   Var('dart_bazel_worker_tag'),
