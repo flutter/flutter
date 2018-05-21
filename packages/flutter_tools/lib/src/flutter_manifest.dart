@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:convert' as convert;
 
 import 'package:json_schema/json_schema.dart';
 import 'package:meta/meta.dart';
@@ -151,13 +152,27 @@ class FontAsset {
   String toString() => '$runtimeType(asset: ${assetUri.path}, weight; $weight, style: $style)';
 }
 
-Future<bool> _validate(Object manifest) async {
-  final String schemaPath = fs.path.join(
+@visibleForTesting
+String buildSchemaDir(FileSystem fs) {
+  return fs.path.join(
     fs.path.absolute(Cache.flutterRoot), 'packages', 'flutter_tools', 'schema',
+  );
+}
+
+@visibleForTesting
+String buildSchemaPath(FileSystem fs) {
+  return fs.path.join(
+    buildSchemaDir(fs),
     'pubspec_yaml.json',
   );
-  final Schema schema = await Schema.createSchemaFromUrl(fs.path.toUri(schemaPath).toString());
+}
 
+Future<bool> _validate(Object manifest) async {
+  final String schemaPath = buildSchemaPath(fs);
+
+  final String schemaData = fs.file(schemaPath).readAsStringSync();
+  final Schema schema = await Schema.createSchema(
+      convert.json.decode(schemaData));
   final Validator validator = new Validator(schema);
   if (validator.validate(manifest)) {
     return true;
