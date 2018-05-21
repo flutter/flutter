@@ -23,6 +23,10 @@ sk_sp<GrContext> IOManager::CreateCompatibleResourceLoadingContext(
   // that feature, which will cause texture uploads to do CPU YUV conversion.
   options.fDisableGpuYUVConversion = true;
 
+  // To get video playback on the widest range of devices, we limit Skia to
+  // ES2 shading language when the ES3 external image extension is missing.
+  options.fPreferExternalImagesOverES3 = true;
+
   if (auto context = GrContext::MakeGL(GrGLMakeNativeInterface(), options)) {
     // Do not cache textures created by the image decoder.  These textures
     // should be deleted when they are no longer referenced by an SkImage.
