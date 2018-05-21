@@ -586,19 +586,7 @@ class _RenderSingleChildViewport extends RenderBox with RenderObjectWithChildMix
 
   @override
   void showOnScreen([RenderObject child]) {
-    // Logic duplicated in [RenderViewportBase.showOnScreen].
-    if (child != null) {
-      // Move viewport the smallest distance to bring [child] on screen.
-      final double leadingEdgeOffset = getOffsetToReveal(child, 0.0);
-      final double trailingEdgeOffset = getOffsetToReveal(child, 1.0);
-      final double currentOffset = offset.pixels;
-      if ((currentOffset - leadingEdgeOffset).abs() < (currentOffset - trailingEdgeOffset).abs()) {
-        offset.jumpTo(leadingEdgeOffset);
-      } else {
-        offset.jumpTo(trailingEdgeOffset);
-      }
-    }
-
+    RenderViewportBase.showInViewport(child: child, viewport: this, offset: offset);
     // Make sure the viewport itself is on screen.
     super.showOnScreen();
   }
