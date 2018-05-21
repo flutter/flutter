@@ -278,7 +278,17 @@ class AccessibilityBridge extends AccessibilityNodeProvider implements BasicMess
         }
         switch (action) {
             case AccessibilityNodeInfo.ACTION_CLICK: {
+                // Note: TalkBack prior to Oreo doesn't use this handler and instead simulates a
+                //     click event at the center of the SemanticsNode. Other a11y services might go
+                //     through this handler though.
                 mOwner.dispatchSemanticsAction(virtualViewId, Action.TAP);
+                return true;
+            }
+            case AccessibilityNodeInfo.ACTION_LONG_CLICK: {
+                // Note: TalkBack doesn't use this handler and instead simulates a long click event
+                //     at the center of the SemanticsNode. Other a11y services might go through this
+                //     handler though.
+                mOwner.dispatchSemanticsAction(virtualViewId, Action.LONG_PRESS);
                 return true;
             }
             case AccessibilityNodeInfo.ACTION_SCROLL_FORWARD: {
