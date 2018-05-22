@@ -66,7 +66,7 @@ Future<Null> main() async {
       _send(<String, dynamic>{'method': 'device.getDevices'});
     } else if (line == 'emulators') {
       _send(<String, dynamic>{'method': 'emulator.getEmulators'});
-    } else if (words.first == 'launch') {
+    } else if (words.first == 'emulator-launch') {
       _send(<String, dynamic>{
         'method': 'emulator.launch',
         'params': <String, dynamic>{
