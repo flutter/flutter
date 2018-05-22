@@ -496,13 +496,9 @@ class SemanticsUpdateBuilder extends NativeFieldWrapperClass2 {
     String decreasedValue,
     TextDirection textDirection,
     Float64List transform,
-    // TODO(yjbanov): remove after moving the framework to the new param names.
-    Int32List children,
     Int32List childrenInTraversalOrder,
     Int32List childrenInHitTestOrder,
   }) {
-    childrenInTraversalOrder ??= children;
-    childrenInHitTestOrder ??= children;
     if (transform.length != 16)
       throw new ArgumentError('transform argument must have 16 entries.');
     _updateNode(
