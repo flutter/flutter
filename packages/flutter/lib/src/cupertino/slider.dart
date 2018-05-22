@@ -57,7 +57,7 @@ class CupertinoSlider extends StatefulWidget {
     this.min: 0.0,
     this.max: 1.0,
     this.divisions,
-    this.activeColor: CupertinoColors.activeBlue,
+    this.activeColor,
   }) : assert(value != null),
        assert(min != null),
        assert(max != null),
@@ -95,7 +95,7 @@ class CupertinoSlider extends StatefulWidget {
   ///   },
   /// )
   /// ```
-  /// 
+  ///
   /// See also:
   ///
   ///  * [onChangeStart] for a callback that is called when the user starts
@@ -223,7 +223,7 @@ class _CupertinoSliderState extends State<CupertinoSlider> with TickerProviderSt
     return new _CupertinoSliderRenderObjectWidget(
       value: (widget.value - widget.min) / (widget.max - widget.min),
       divisions: widget.divisions,
-      activeColor: widget.activeColor,
+      activeColor: widget.activeColor ?? CupertinoColors.activeBlue,
       onChanged: widget.onChanged != null ? _handleChanged : null,
       onChangeStart: widget.onChangeStart != null ? _handleDragStart : null,
       onChangeEnd: widget.onChangeEnd != null ? _handleDragEnd : null,

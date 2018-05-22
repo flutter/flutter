@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
@@ -9,6 +10,7 @@ import 'button.dart';
 import 'button_theme.dart';
 import 'colors.dart';
 import 'constants.dart';
+import 'platform_builder.dart';
 import 'theme.dart';
 
 /// A material design "raised button".
@@ -360,27 +362,40 @@ class RaisedButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final ThemeData theme = Theme.of(context);
-    final ButtonThemeData buttonTheme = ButtonTheme.of(context);
-    final Color fillColor = _getFillColor(theme, buttonTheme);
-    final Color textColor = _getTextColor(theme, buttonTheme, fillColor);
+    return new PlatformBuilder(
+      materialWidgetBuilder: (BuildContext context) {
+        final ThemeData theme = Theme.of(context);
+        final ButtonThemeData buttonTheme = ButtonTheme.of(context);
+        final Color fillColor = _getFillColor(theme, buttonTheme);
+        final Color textColor = _getTextColor(theme, buttonTheme, fillColor);
 
-    return new RawMaterialButton(
-      onPressed: onPressed,
-      onHighlightChanged: onHighlightChanged,
-      fillColor: fillColor,
-      textStyle: theme.textTheme.button.copyWith(color: textColor),
-      highlightColor: _getHighlightColor(theme, buttonTheme),
-      splashColor: splashColor ?? theme.splashColor,
-      elevation: elevation,
-      highlightElevation: highlightElevation,
-      disabledElevation: disabledElevation,
-      padding: padding ?? buttonTheme.padding,
-      constraints: buttonTheme.constraints,
-      shape: shape ?? buttonTheme.shape,
-      animationDuration: animationDuration,
-      child: child,
+        return new RawMaterialButton(
+          onPressed: onPressed,
+          onHighlightChanged: onHighlightChanged,
+          fillColor: fillColor,
+          textStyle: theme.textTheme.button.copyWith(color: textColor),
+          highlightColor: _getHighlightColor(theme, buttonTheme),
+          splashColor: splashColor ?? theme.splashColor,
+          elevation: elevation,
+          highlightElevation: highlightElevation,
+          disabledElevation: disabledElevation,
+          padding: padding ?? buttonTheme.padding,
+          constraints: buttonTheme.constraints,
+          shape: shape ?? buttonTheme.shape,
+          animationDuration: animationDuration,
+          child: child,
+        );
+      },
+      cupertinoWidgetBuilder: (BuildContext context) {
+        return new CupertinoButton(
+          child: child,
+          padding: padding,
+          color: color ?? CupertinoColors.activeBlue,
+          onPressed: onPressed,
+        );
+      },
     );
+
   }
 
   @override

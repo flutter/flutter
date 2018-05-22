@@ -2,12 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/cupertino.dart' show CupertinoButton;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
 import 'button.dart';
 import 'button_theme.dart';
 import 'colors.dart';
+import 'platform_builder.dart';
 import 'theme.dart';
 
 /// A material design "flat button".
@@ -276,24 +278,35 @@ class FlatButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final ThemeData theme = Theme.of(context);
-    final ButtonThemeData buttonTheme = ButtonTheme.of(context);
-    final Color fillColor = enabled ? color : disabledColor;
-    final Color textColor = _getTextColor(theme, buttonTheme, fillColor);
+    return PlatformBuilder(
+      materialWidgetBuilder: (BuildContext context) {
+        final ThemeData theme = Theme.of(context);
+        final ButtonThemeData buttonTheme = ButtonTheme.of(context);
+        final Color fillColor = enabled ? color : disabledColor;
+        final Color textColor = _getTextColor(theme, buttonTheme, fillColor);
 
-    return new RawMaterialButton(
-      onPressed: onPressed,
-      onHighlightChanged: onHighlightChanged,
-      fillColor: fillColor,
-      textStyle: theme.textTheme.button.copyWith(color: textColor),
-      highlightColor: _getHighlightColor(theme, buttonTheme),
-      splashColor: _getSplashColor(theme, buttonTheme),
-      elevation: 0.0,
-      highlightElevation: 0.0,
-      padding: padding ?? buttonTheme.padding,
-      constraints: buttonTheme.constraints,
-      shape: shape ?? buttonTheme.shape,
-      child: child,
+        return new RawMaterialButton(
+          onPressed: onPressed,
+          onHighlightChanged: onHighlightChanged,
+          fillColor: fillColor,
+          textStyle: theme.textTheme.button.copyWith(color: textColor),
+          highlightColor: _getHighlightColor(theme, buttonTheme),
+          splashColor: _getSplashColor(theme, buttonTheme),
+          elevation: 0.0,
+          highlightElevation: 0.0,
+          padding: padding ?? buttonTheme.padding,
+          constraints: buttonTheme.constraints,
+          shape: shape ?? buttonTheme.shape,
+          child: child,
+        );
+      },
+      cupertinoWidgetBuilder: (BuildContext context) {
+        return new CupertinoButton(
+          child: child,
+          padding: padding,
+          onPressed: onPressed,
+        );
+      },
     );
   }
 

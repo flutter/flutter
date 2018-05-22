@@ -5,6 +5,7 @@
 import 'dart:async';
 import 'dart:math' as math;
 
+import 'package:flutter/cupertino.dart' show CupertinoSlider;
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart' show timeDilation;
@@ -13,6 +14,7 @@ import 'package:flutter/widgets.dart';
 import 'constants.dart';
 import 'debug.dart';
 import 'material.dart';
+import 'platform_builder.dart';
 import 'slider_theme.dart';
 import 'theme.dart';
 
@@ -77,7 +79,7 @@ import 'theme.dart';
 ///  * [Checkbox] and [Switch], for toggling a particular value on or off.
 ///  * <https://material.google.com/components/sliders.html>
 ///  * [MediaQuery], from which the text scale factor is obtained.
-class Slider extends StatefulWidget {
+class Slider extends StatelessWidget {
   /// Creates a material design slider.
   ///
   /// The slider itself does not maintain any state. Instead, when the state of
@@ -288,7 +290,72 @@ class Slider extends StatefulWidget {
   final Color inactiveColor;
 
   @override
-  _SliderState createState() => new _SliderState();
+  Widget build(BuildContext context) {
+    return new PlatformBuilder(
+      materialWidgetBuilder: (BuildContext context) {
+        return _MountainViewSlider(
+          value: value,
+          onChanged: onChanged,
+          onChangeStart: onChangeStart,
+          onChangeEnd: onChangeEnd,
+          min: min,
+          max: max,
+          divisions: divisions,
+          label: label,
+          activeColor: activeColor,
+          inactiveColor: inactiveColor,
+        );
+      },
+      cupertinoWidgetBuilder: (BuildContext context) {
+        return new CupertinoSlider(
+          value: value,
+          onChanged: onChanged,
+          onChangeStart: onChangeStart,
+          onChangeEnd: onChangeEnd,
+          min: min,
+          max: max,
+          divisions: divisions,
+          activeColor: activeColor,
+        );
+      },
+    );
+  }
+}
+
+class _MountainViewSlider extends StatefulWidget {
+  const _MountainViewSlider({
+    Key key,
+    @required this.value,
+    @required this.onChanged,
+    this.onChangeStart,
+    this.onChangeEnd,
+    this.min: 0.0,
+    this.max: 1.0,
+    this.divisions,
+    this.label,
+    this.activeColor,
+    this.inactiveColor,
+  }) : assert(value != null),
+       assert(min != null),
+       assert(max != null),
+       assert(min <= max),
+       assert(value >= min && value <= max),
+       assert(divisions == null || divisions > 0),
+       super(key: key);
+
+  final double value;
+  final ValueChanged<double> onChanged;
+  final ValueChanged<double> onChangeStart;
+  final ValueChanged<double> onChangeEnd;
+  final double min;
+  final double max;
+  final int divisions;
+  final String label;
+  final Color activeColor;
+  final Color inactiveColor;
+
+  @override
+  _MountainViewSliderState createState() => new _MountainViewSliderState();
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
@@ -299,7 +366,7 @@ class Slider extends StatefulWidget {
   }
 }
 
-class _SliderState extends State<Slider> with TickerProviderStateMixin {
+class _MountainViewSliderState extends State<_MountainViewSlider> with TickerProviderStateMixin {
   static const Duration enableAnimationDuration = const Duration(milliseconds: 75);
   static const Duration valueIndicatorAnimationDuration = const Duration(milliseconds: 100);
 
@@ -440,7 +507,7 @@ class _SliderRenderObjectWidget extends LeafRenderObjectWidget {
   final ValueChanged<double> onChanged;
   final ValueChanged<double> onChangeStart;
   final ValueChanged<double> onChangeEnd;
-  final _SliderState state;
+  final _MountainViewSliderState state;
 
   @override
   _RenderSlider createRenderObject(BuildContext context) {
@@ -488,7 +555,7 @@ class _RenderSlider extends RenderBox {
     ValueChanged<double> onChanged,
     this.onChangeStart,
     this.onChangeEnd,
-    @required _SliderState state,
+    @required _MountainViewSliderState state,
     @required TextDirection textDirection,
   }) : assert(value != null && value >= 0.0 && value <= 1.0),
        assert(state != null),
@@ -539,7 +606,7 @@ class _RenderSlider extends RenderBox {
   static const double _adjustmentUnit = 0.1; // Matches iOS implementation of material slider.
   static final Tween<double> _overlayRadiusTween = new Tween<double>(begin: 0.0, end: _overlayRadius);
 
-  _SliderState _state;
+  _MountainViewSliderState _state;
   Animation<double> _overlayAnimation;
   Animation<double> _valueIndicatorAnimation;
   Animation<double> _enableAnimation;

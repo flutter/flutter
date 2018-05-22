@@ -11,9 +11,11 @@ import 'package:flutter/widgets.dart';
 import 'button_theme.dart';
 import 'chip_theme.dart';
 import 'colors.dart';
+import 'flat_button.dart';
 import 'ink_splash.dart';
 import 'ink_well.dart' show InteractiveInkFeatureFactory;
 import 'input_decorator.dart';
+import 'slider.dart';
 import 'slider_theme.dart';
 import 'switch.dart';
 import 'typography.dart';
@@ -848,12 +850,12 @@ class AdaptiveWidgetThemeData {
   const AdaptiveWidgetThemeData(this._adaptivenessOptions);
 
   static const AdaptiveWidgetThemeData none =
-      const AdaptiveWidgetThemeData(const <Type, bool>{
-        Switch: false,
-      });
+      const AdaptiveWidgetThemeData(const <Type, bool>{});
 
   static const AdaptiveWidgetThemeData bundled =
       const AdaptiveWidgetThemeData(const <Type, bool>{
+        FlatButton: true,
+        Slider: true,
         Switch: true,
       });
 
