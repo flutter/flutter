@@ -2756,7 +2756,12 @@ class Canvas extends NativeFieldWrapperClass2 {
   /// Add an axis-aligned scale to the current transform, scaling by the first
   /// argument in the horizontal direction and the second in the vertical
   /// direction.
-  void scale(double sx, double sy) native 'Canvas_scale';
+  ///
+  /// If [sy] is unspecified, [sx] will be used for the scale in both
+  /// directions.
+  void scale(double sx, [double sy]) => _scale(sx, sy ?? sx);
+
+  void _scale(double sx, double sy) native 'Canvas_scale';
 
   /// Add a rotation to the current transform. The argument is in radians clockwise.
   void rotate(double radians) native 'Canvas_rotate';
