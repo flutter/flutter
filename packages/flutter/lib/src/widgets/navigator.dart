@@ -1717,8 +1717,12 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
   /// }
   /// ```
   void popUntil(RoutePredicate predicate) {
-    while (!predicate(_history.last))
+    if (!predicate(_history.last)) {
       pop();
+      new Timer(new Duration(milliseconds: 0), () {
+        popUntil(predicate);
+      });
+    }
   }
 
   /// Immediately remove `route` from the navigator, and [Route.dispose] it.
