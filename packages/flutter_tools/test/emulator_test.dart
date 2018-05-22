@@ -62,7 +62,7 @@ class _MockEmulator extends Emulator {
   final String label;
 
   @override
-  Future<void> launch() {
+  Future<bool> launch() {
     throw new UnimplementedError('Not implemented in Mock');
   }
 }
