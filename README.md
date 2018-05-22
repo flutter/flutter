@@ -10,7 +10,7 @@ The Flutter Engine is a portable runtime for hosting
 [Flutter](https://flutter.io) applications.  It implements Flutter's core
 libraries, including animation and graphics, file and network I/O,
 accessibility support, plugin architecture, and a Dart runtime and compile
-toolchain. Most developers wil interact with Flutter via the [Flutter
+toolchain. Most developers will interact with Flutter via the [Flutter
 Framework](https://github.com/flutter/flutter), which provides a modern,
 reactive framework, and a rich set of platform, layout and foundation widgets.
 
