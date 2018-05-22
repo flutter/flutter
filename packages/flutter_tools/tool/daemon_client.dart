@@ -5,7 +5,7 @@
 import 'dart:async';
 import 'dart:convert';
 
-import 'package:flutter_tools/src/base/io.dart';
+import 'dart:io';
 
 Process daemon;
 
@@ -15,6 +15,8 @@ Process daemon;
 //   start: start an app
 //   stop: stop a running app
 //   devices: list devices
+//   emulators: list emulators
+//   launch: launch an emulator
 
 Future<Null> main() async {
   daemon = await Process.start('dart', <String>['bin/flutter_tools.dart', 'daemon']);
@@ -62,6 +64,15 @@ Future<Null> main() async {
       }
     } else if (line == 'devices') {
       _send(<String, dynamic>{'method': 'device.getDevices'});
+    } else if (line == 'emulators') {
+      _send(<String, dynamic>{'method': 'emulator.getEmulators'});
+    } else if (words.first == 'emulator-launch') {
+      _send(<String, dynamic>{
+        'method': 'emulator.launch',
+        'params': <String, dynamic>{
+          'emulatorId': words[1]
+        }
+      });
     } else if (line == 'enable') {
       _send(<String, dynamic>{'method': 'device.enable'});
     } else {
