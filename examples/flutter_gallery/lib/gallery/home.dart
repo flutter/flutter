@@ -119,7 +119,7 @@ class _CategoriesPage extends StatelessWidget {
         child: new LayoutBuilder(
           builder: (BuildContext context, BoxConstraints constraints) {
             final double columnWidth = constraints.biggest.width / columnCount.toDouble();
-            final double rowHeight = columnWidth * aspectRatio;
+            final double rowHeight = math.min(225.0, columnWidth * aspectRatio);
             final int rowCount = (categories.length + columnCount - 1) ~/ columnCount;
 
             // This repaint boundary prevents the inner contents of the front layer
@@ -286,6 +286,18 @@ class _GalleryHomeState extends State<GalleryHome> with SingleTickerProviderStat
   AnimationController _controller;
   GalleryDemoCategory _category;
 
+  static Widget _topHomeLayout(Widget currentChild, List<Widget> previousChildren) {
+    List<Widget> children = previousChildren;
+    if (currentChild != null)
+      children = children.toList()..add(currentChild);
+    return new Stack(
+      children: children,
+      alignment: Alignment.topCenter,
+    );
+  }
+
+  static const AnimatedSwitcherLayoutBuilder _centerHomeLayout = AnimatedSwitcher.defaultLayoutBuilder;
+
   @override
   void initState() {
     super.initState();
@@ -306,6 +318,8 @@ class _GalleryHomeState extends State<GalleryHome> with SingleTickerProviderStat
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
     final bool isDark = theme.brightness == Brightness.dark;
+    final MediaQueryData media = MediaQuery.of(context);
+    final bool centerHome = media.orientation == Orientation.portrait && media.size.height < 800.0;
 
     const Curve switchOutCurve = const Interval(0.4, 1.0, curve: Curves.fastOutSlowIn);
     const Curve switchInCurve = const Interval(0.4, 1.0, curve: Curves.fastOutSlowIn);
@@ -350,6 +364,7 @@ class _GalleryHomeState extends State<GalleryHome> with SingleTickerProviderStat
               duration: _kFrontLayerSwitchDuration,
               switchOutCurve: switchOutCurve,
               switchInCurve: switchInCurve,
+              layoutBuilder: centerHome ? _centerHomeLayout : _topHomeLayout,
               child: _category != null
                 ? new _DemosPage(_category)
                 : new _CategoriesPage(
