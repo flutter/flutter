@@ -434,11 +434,18 @@ class SemanticsUpdateBuilder extends NativeFieldWrapperClass2 {
   /// Update the information associated with the node with the given `id`.
   ///
   /// The semantics nodes form a tree, with the root of the tree always having
-  /// an id of zero. The `children` are the ids of the nodes that are immediate
-  /// children of this node. The system retains the nodes that are currently
-  /// reachable from the root. A given update need not contain information for
-  /// nodes that do not change in the update. If a node is not reachable from
-  /// the root after an update, the node will be discarded from the tree.
+  /// an id of zero. The `childrenInTraversalOrder` and `childrenInHitTestOrder`
+  /// are the ids of the nodes that are immediate children of this node. The
+  /// former enumerates children in traversal order, and the latter enumerates
+  /// the same children in the hit test order. The two lists must have the same
+  /// length and contain the same ids. They may only differ in the order the
+  /// ids are listed in. For more information about different child orders, see
+  /// [DebugSemanticsDumpOrder].
+  /// 
+  /// The system retains the nodes that are currently reachable from the root.
+  /// A given update need not contain information for nodes that do not change
+  /// in the update. If a node is not reachable from the root after an update,
+  /// the node will be discarded from the tree.
   ///
   /// The `flags` are a bit field of [SemanticsFlag]s that apply to this node.
   ///
@@ -488,33 +495,39 @@ class SemanticsUpdateBuilder extends NativeFieldWrapperClass2 {
     String increasedValue,
     String decreasedValue,
     TextDirection textDirection,
-    int hitTestPosition,
     Float64List transform,
+    // TODO(yjbanov): remove after moving the framework to the new param names.
     Int32List children,
+    Int32List childrenInTraversalOrder,
+    Int32List childrenInHitTestOrder,
   }) {
+    childrenInTraversalOrder ??= children;
+    childrenInHitTestOrder ??= children;
     if (transform.length != 16)
       throw new ArgumentError('transform argument must have 16 entries.');
-    _updateNode(id,
-                flags,
-                actions,
-                textSelectionBase,
-                textSelectionExtent,
-                scrollPosition,
-                scrollExtentMax,
-                scrollExtentMin,
-                rect.left,
-                rect.top,
-                rect.right,
-                rect.bottom,
-                label,
-                hint,
-                value,
-                increasedValue,
-                decreasedValue,
-                textDirection != null ? textDirection.index + 1 : 0,
-                hitTestPosition,
-                transform,
-                children,);
+    _updateNode(
+      id,
+      flags,
+      actions,
+      textSelectionBase,
+      textSelectionExtent,
+      scrollPosition,
+      scrollExtentMax,
+      scrollExtentMin,
+      rect.left,
+      rect.top,
+      rect.right,
+      rect.bottom,
+      label,
+      hint,
+      value,
+      increasedValue,
+      decreasedValue,
+      textDirection != null ? textDirection.index + 1 : 0,
+      transform,
+      childrenInTraversalOrder,
+      childrenInHitTestOrder,
+    );
   }
   void _updateNode(
     int id,
@@ -535,9 +548,9 @@ class SemanticsUpdateBuilder extends NativeFieldWrapperClass2 {
     String increasedValue,
     String decreasedValue,
     int textDirection,
-    int hitTestPosition,
     Float64List transform,
-    Int32List children,
+    Int32List childrenInTraversalOrder,
+    Int32List childrenInHitTestOrder,
   ) native 'SemanticsUpdateBuilder_updateNode';
 
   /// Creates a [SemanticsUpdate] object that encapsulates the updates recorded

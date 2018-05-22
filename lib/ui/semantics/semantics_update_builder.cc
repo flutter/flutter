@@ -52,9 +52,9 @@ void SemanticsUpdateBuilder::updateNode(int id,
                                         std::string increasedValue,
                                         std::string decreasedValue,
                                         int textDirection,
-                                        int hitTestPosition,
                                         const tonic::Float64List& transform,
-                                        const tonic::Int32List& children) {
+                                        const tonic::Int32List& childrenInTraversalOrder,
+                                        const tonic::Int32List& childrenInHitTestOrder) {
   SemanticsNode node;
   node.id = id;
   node.flags = flags;
@@ -71,10 +71,11 @@ void SemanticsUpdateBuilder::updateNode(int id,
   node.increasedValue = increasedValue;
   node.decreasedValue = decreasedValue;
   node.textDirection = textDirection;
-  node.hitTestPosition = hitTestPosition;
   node.transform.setColMajord(transform.data());
-  node.children = std::vector<int32_t>(
-      children.data(), children.data() + children.num_elements());
+  node.childrenInTraversalOrder = std::vector<int32_t>(
+      childrenInTraversalOrder.data(), childrenInTraversalOrder.data() + childrenInTraversalOrder.num_elements());
+  node.childrenInHitTestOrder = std::vector<int32_t>(
+      childrenInHitTestOrder.data(), childrenInHitTestOrder.data() + childrenInHitTestOrder.num_elements());
   nodes_[id] = node;
 }
 

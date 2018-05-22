@@ -490,11 +490,11 @@ void AccessibilityBridge::UpdateSemantics(blink::SemanticsNodeUpdates nodes) {
     layoutChanged = layoutChanged || [object nodeWillCauseLayoutChange:&node];
     scrollOccured = scrollOccured || [object nodeWillCauseScroll:&node];
     [object setSemanticsNode:&node];
-    const NSUInteger newChildCount = node.children.size();
+    const NSUInteger newChildCount = node.childrenInTraversalOrder.size();
     NSMutableArray* newChildren =
         [[[NSMutableArray alloc] initWithCapacity:newChildCount] autorelease];
     for (NSUInteger i = 0; i < newChildCount; ++i) {
-      SemanticsObject* child = GetOrCreateObject(node.children[i], nodes);
+      SemanticsObject* child = GetOrCreateObject(node.childrenInTraversalOrder[i], nodes);
       child.parent = object;
       [newChildren addObject:child];
     }

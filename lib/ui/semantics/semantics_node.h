@@ -82,11 +82,11 @@ struct SemanticsNode {
   std::string increasedValue;
   std::string decreasedValue;
   int32_t textDirection = 0;  // 0=unknown, 1=rtl, 2=ltr
-  int32_t hitTestPosition = -1;
 
   SkRect rect = SkRect::MakeEmpty();
   SkMatrix44 transform = SkMatrix44(SkMatrix44::kIdentity_Constructor);
-  std::vector<int32_t> children;
+  std::vector<int32_t> childrenInTraversalOrder;
+  std::vector<int32_t> childrenInHitTestOrder;
 };
 
 // Contains semantic nodes that need to be updated.

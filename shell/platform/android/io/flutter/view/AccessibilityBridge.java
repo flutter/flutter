@@ -259,8 +259,8 @@ class AccessibilityBridge extends AccessibilityNodeProvider implements BasicMess
             result.addAction(AccessibilityNodeInfo.ACTION_ACCESSIBILITY_FOCUS);
         }
 
-        if (object.children != null) {
-            for (SemanticsObject child : object.children) {
+        if (object.childrenInTraversalOrder != null) {
+            for (SemanticsObject child : object.childrenInTraversalOrder) {
                 if (!child.hasFlag(Flag.IS_HIDDEN)) {
                     result.addChild(mOwner, child.id);
                 }
@@ -760,7 +760,6 @@ class AccessibilityBridge extends AccessibilityNodeProvider implements BasicMess
         String decreasedValue;
         String hint;
         TextDirection textDirection;
-        int hitTestPosition;
 
         boolean hadPreviousConfig = false;
         int previousFlags;
@@ -779,7 +778,8 @@ class AccessibilityBridge extends AccessibilityNodeProvider implements BasicMess
         private float[] transform;
 
         SemanticsObject parent;
-        List<SemanticsObject> children;  // In inverse hit test order (i.e. paint order).
+        List<SemanticsObject> childrenInTraversalOrder;
+        List<SemanticsObject> childrenInHitTestOrder;
 
         private boolean inverseTransformDirty = true;
         private float[] inverseTransform;
@@ -813,12 +813,11 @@ class AccessibilityBridge extends AccessibilityNodeProvider implements BasicMess
         void log(String indent, boolean recursive) {
           Log.i(TAG, indent + "SemanticsObject id=" + id + " label=" + label + " actions=" +  actions + " flags=" + flags + "\n" +
                      indent + "  +-- textDirection=" + textDirection  + "\n"+
-                     indent + "  +-- hitTestPosition=" + hitTestPosition  + "\n"+
                      indent + "  +-- rect.ltrb=(" + left + ", " + top + ", " + right + ", " + bottom + ")\n" +
                      indent + "  +-- transform=" + Arrays.toString(transform) + "\n");
-          if (children != null && recursive) {
+          if (childrenInTraversalOrder != null && recursive) {
               String childIndent = indent + "  ";
-              for (SemanticsObject child : children) {
+              for (SemanticsObject child : childrenInTraversalOrder) {
                   child.log(childIndent, recursive);
               }
           }
@@ -860,8 +859,6 @@ class AccessibilityBridge extends AccessibilityNodeProvider implements BasicMess
 
             textDirection = TextDirection.fromInt(buffer.getInt());
 
-            hitTestPosition = buffer.getInt();
-
             left = buffer.getFloat();
             top = buffer.getFloat();
             right = buffer.getFloat();
@@ -876,17 +873,29 @@ class AccessibilityBridge extends AccessibilityNodeProvider implements BasicMess
 
             final int childCount = buffer.getInt();
             if (childCount == 0) {
-                children = null;
+                childrenInTraversalOrder = null;
+                childrenInHitTestOrder = null;
             } else {
-                if (children == null)
-                    children = new ArrayList<SemanticsObject>(childCount);
+                if (childrenInTraversalOrder == null)
+                    childrenInTraversalOrder = new ArrayList<SemanticsObject>(childCount);
                 else
-                    children.clear();
+                    childrenInTraversalOrder.clear();
 
                 for (int i = 0; i < childCount; ++i) {
                     SemanticsObject child = getOrCreateObject(buffer.getInt());
                     child.parent = this;
-                    children.add(child);
+                    childrenInTraversalOrder.add(child);
+                }
+
+                if (childrenInHitTestOrder == null)
+                    childrenInHitTestOrder = new ArrayList<SemanticsObject>(childCount);
+                else
+                    childrenInHitTestOrder.clear();
+
+                for (int i = 0; i < childCount; ++i) {
+                    SemanticsObject child = getOrCreateObject(buffer.getInt());
+                    child.parent = this;
+                    childrenInHitTestOrder.add(child);
                 }
             }
         }
@@ -912,10 +921,10 @@ class AccessibilityBridge extends AccessibilityNodeProvider implements BasicMess
             final float y = point[1] / w;
             if (x < left || x >= right || y < top || y >= bottom)
                 return null;
-            if (children != null) {
+            if (childrenInHitTestOrder != null) {
                 final float[] transformedPoint = new float[4];
-                for (int i = children.size() - 1; i >= 0; i -= 1) {
-                    final SemanticsObject child = children.get(i);
+                for (int i = 0; i < childrenInHitTestOrder.size(); i += 1) {
+                    final SemanticsObject child = childrenInHitTestOrder.get(i);
                     if (child.hasFlag(Flag.IS_HIDDEN)) {
                         continue;
                     }
@@ -951,9 +960,9 @@ class AccessibilityBridge extends AccessibilityNodeProvider implements BasicMess
             if (hasFlag(Flag.SCOPES_ROUTE)) {
                 edges.add(this);
             }
-            if (children != null) {
-                for (int i = 0; i < children.size(); ++i) {
-                    children.get(i).collectRoutes(edges);
+            if (childrenInTraversalOrder != null) {
+                for (int i = 0; i < childrenInTraversalOrder.size(); ++i) {
+                    childrenInTraversalOrder.get(i).collectRoutes(edges);
                 }
             }
         }
@@ -966,9 +975,9 @@ class AccessibilityBridge extends AccessibilityNodeProvider implements BasicMess
                     return label;
                 }
             }
-            if (children != null) {
-                for (int i = 0; i < children.size(); ++i) {
-                    String newName = children.get(i).getRouteName();
+            if (childrenInTraversalOrder != null) {
+                for (int i = 0; i < childrenInTraversalOrder.size(); ++i) {
+                    String newName = childrenInTraversalOrder.get(i).getRouteName();
                     if (newName != null && !newName.isEmpty()) {
                         return newName;
                     }
@@ -1029,9 +1038,9 @@ class AccessibilityBridge extends AccessibilityNodeProvider implements BasicMess
             assert globalTransform != null;
             assert globalRect != null;
 
-            if (children != null) {
-                for (int i = 0; i < children.size(); ++i) {
-                    children.get(i).updateRecursively(globalTransform, visitedObjects, forceUpdate);
+            if (childrenInTraversalOrder != null) {
+                for (int i = 0; i < childrenInTraversalOrder.size(); ++i) {
+                    childrenInTraversalOrder.get(i).updateRecursively(globalTransform, visitedObjects, forceUpdate);
                 }
             }
         }
