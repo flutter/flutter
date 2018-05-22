@@ -52,7 +52,7 @@ import 'widgets_localizations.dart';
 ///   * ko - Korean
 ///   * ms - Malay
 ///   * nl - Dutch
-///   * no - Norwegian
+///   * nb - Norwegian
 ///   * pl - Polish
 ///   * ps - Pashto
 ///   * pt - Portuguese
@@ -528,7 +528,7 @@ class _MaterialLocalizationsDelegate extends LocalizationsDelegate<MaterialLocal
     'ko', // Korean
     'ms', // Malay
     'nl', // Dutch
-    'no', // Norwegian
+    'nb', // Norwegian
     'pl', // Polish
     'ps', // Pashto
     'pt', // Portugese
