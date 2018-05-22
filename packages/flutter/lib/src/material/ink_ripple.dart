@@ -198,15 +198,20 @@ class InkRipple extends InteractiveInkFeature {
   @override
   void cancel() {
     _fadeInController.stop();
-    // Watch out: setting _fadeOutController's value to 1.0 would
-    // trigger a call to _handleAlphaStatusChanged() which would
+    // Watch out: setting _fadeOutController's value to 1.0 will
+    // trigger a call to _handleAlphaStatusChanged() which will
     // dispose _fadeOutController.
-    final double _fadeOutValue = 1.0 - _fadeInController.value;
-    if (_fadeOutValue < 1.0) {
+    final double fadeOutValue = 1.0 - _fadeInController.value;
+    _fadeOutController.value = fadeOutValue;
+    if (fadeOutValue < 1.0)
+      _fadeOutController.animateTo(1.0, duration: _kCancelDuration);
+    /*
+    if (fadeOutValue < 1.0) {
       _fadeOutController
-        ..value = _fadeOutValue
+        ..value = fadeOutValue
         ..animateTo(1.0, duration: _kCancelDuration);
     }
+    */
   }
 
   void _handleAlphaStatusChanged(AnimationStatus status) {
