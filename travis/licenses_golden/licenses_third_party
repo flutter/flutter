@@ -1,4 +1,4 @@
-Signature: 01ce57e5c543b4beabf9ef6c17f1453a
+Signature: 13e8091faffd7972b258cb9a53e3af61
 
 UNUSED LICENSES:
 
@@ -17202,6 +17202,7 @@ FILE: ../../../third_party/skia/gm/makeRasterImage.cpp
 FILE: ../../../third_party/skia/gm/mandoline.cpp
 FILE: ../../../third_party/skia/gm/orientation.cpp
 FILE: ../../../third_party/skia/gm/pathmeasure.cpp
+FILE: ../../../third_party/skia/gm/perspimages.cpp
 FILE: ../../../third_party/skia/gm/polygonoffset.cpp
 FILE: ../../../third_party/skia/gm/scaledemoji.cpp
 FILE: ../../../third_party/skia/gm/shadermaskfilter.cpp
@@ -17263,6 +17264,7 @@ FILE: ../../../third_party/skia/src/gpu/ccpr/GrCCDrawPathsOp.cpp
 FILE: ../../../third_party/skia/src/gpu/ccpr/GrCCDrawPathsOp.h
 FILE: ../../../third_party/skia/src/gpu/ccpr/GrCCPerFlushResources.cpp
 FILE: ../../../third_party/skia/src/gpu/ccpr/GrCCPerFlushResources.h
+FILE: ../../../third_party/skia/src/gpu/ccpr/GrCCSTLList.h
 FILE: ../../../third_party/skia/src/gpu/effects/GrAARectEffect.cpp
 FILE: ../../../third_party/skia/src/gpu/effects/GrAARectEffect.fp
 FILE: ../../../third_party/skia/src/gpu/effects/GrAARectEffect.h
@@ -18228,7 +18230,6 @@ FILE: ../../../third_party/skia/gm/drrect.cpp
 FILE: ../../../third_party/skia/gm/emboss.cpp
 FILE: ../../../third_party/skia/gm/filterfastbounds.cpp
 FILE: ../../../third_party/skia/gm/glyph_pos.cpp
-FILE: ../../../third_party/skia/gm/glyph_pos_align.cpp
 FILE: ../../../third_party/skia/gm/gradients_2pt_conical.cpp
 FILE: ../../../third_party/skia/gm/grayscalejpg.cpp
 FILE: ../../../third_party/skia/gm/imageblurtiled.cpp
