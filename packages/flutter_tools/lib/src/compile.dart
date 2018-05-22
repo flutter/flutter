@@ -319,11 +319,6 @@ class ResidentCompiler {
     _server.stdin.writeln(klass ?? '');
     _server.stdin.writeln(isStatic ?? false);
 
-    _server.stderr
-        .transform(utf8.decoder)
-        .transform(const LineSplitter())
-        .listen((String s) { printError('compiler message: $s'); });
-
     return stdoutHandler.compilerOutput.future;
   }
 
