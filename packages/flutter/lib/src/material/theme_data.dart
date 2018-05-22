@@ -852,14 +852,24 @@ class AdaptiveWidgetThemeData {
         Switch: false,
       });
 
-  static const AdaptiveWidgetThemeData all =
+  static const AdaptiveWidgetThemeData bundled =
       const AdaptiveWidgetThemeData(const <Type, bool>{
         Switch: true,
       });
 
+  static const AdaptiveWidgetThemeData all =
+      const _AlwaysAdaptiveWidgetThemeData();
+
   final Map<Type, bool> _adaptivenessOptions;
 
   bool isWidgetAdaptive(Type widgetType) => _adaptivenessOptions[widgetType] == true;
+}
+
+class _AlwaysAdaptiveWidgetThemeData extends AdaptiveWidgetThemeData {
+  const _AlwaysAdaptiveWidgetThemeData() : super(null);
+
+  @override
+  bool isWidgetAdaptive(Type widgetType) => true;
 }
 
 class _IdentityThemeDataCacheKey {

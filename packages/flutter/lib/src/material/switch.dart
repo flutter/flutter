@@ -35,7 +35,7 @@ import 'toggleable.dart';
 ///  * [Radio], for selecting among a set of explicit values.
 ///  * [Slider], for selecting a value in a range.
 ///  * <https://material.google.com/components/selection-controls.html#selection-controls-switch>
-class Switch extends AdaptiveWidget {
+class Switch extends StatelessWidget {
   /// Creates a material design switch.
   ///
   /// The switch itself does not maintain any state. Instead, when the state of
@@ -57,8 +57,7 @@ class Switch extends AdaptiveWidget {
     this.inactiveTrackColor,
     this.activeThumbImage,
     this.inactiveThumbImage,
-    AdaptiveMode adaptiveMode,
-  }) : super(key: key, adaptiveMode: adaptiveMode);
+  }) : super(key: key);
 
   /// Whether this switch is on or off.
   ///
@@ -116,25 +115,27 @@ class Switch extends AdaptiveWidget {
   final ImageProvider inactiveThumbImage;
 
   @override
-  Widget buildCupertinoWidget(BuildContext context) {
-    return new CupertinoSwitch(
-      value: value,
-      onChanged: onChanged,
-      activeColor: activeColor,
-    );
-  }
-
-  @override
-  Widget buildMaterialWidget(BuildContext context) {
-    return new _MountainViewSwitch(
-      value: value,
-      onChanged: onChanged,
-      activeColor: activeColor,
-      activeTrackColor: activeTrackColor,
-      inactiveThumbColor: inactiveThumbColor,
-      inactiveTrackColor: inactiveTrackColor,
-      activeThumbImage: activeThumbImage,
-      inactiveThumbImage: inactiveThumbImage,
+  Widget build(BuildContext context) {
+    return new PlatformBuilder(
+      materialWidgetBuilder: (BuildContext context) {
+        return new _MountainViewSwitch(
+          value: value,
+          onChanged: onChanged,
+          activeColor: activeColor,
+          activeTrackColor: activeTrackColor,
+          inactiveThumbColor: inactiveThumbColor,
+          inactiveTrackColor: inactiveTrackColor,
+          activeThumbImage: activeThumbImage,
+          inactiveThumbImage: inactiveThumbImage,
+        );
+      },
+      cupertinoWidgetBuilder: (BuildContext context) {
+        return new CupertinoSwitch(
+          value: value,
+          onChanged: onChanged,
+          activeColor: activeColor,
+        );
+      },
     );
   }
 }

@@ -6,51 +6,38 @@ import 'package:flutter/widgets.dart';
 
 import 'theme.dart';
 
-/// Options for the adaptive behavior of [AdaptiveWidget].
-enum AdaptiveMode {
-  /// Always adapt the widget to the current [TargetPlatform].
-  adaptive,
-  /// Never adapt the widget to the current [TargetPlatform]. Always return
-  /// the Material Design widget.
-  static,
-  /// Adapt the widget to the current [TargetPlatform] if the widget type is
-  /// enabled in [ThemeData.adaptiveWidgetTheme].
-  theme,
-}
-
 /// A [StatelessWidget] that can build different widgets according to the
 /// current platform environment depending on the [adaptiveMode].
-abstract class AdaptiveWidget extends StatelessWidget {
-  const AdaptiveWidget({
+class PlatformBuilder extends StatelessWidget {
+  const PlatformBuilder({
     Key key,
-    this.adaptiveMode: AdaptiveMode.theme,
+    @required this.materialWidgetBuilder,
+    @required this.cupertinoWidgetBuilder,
+    this.themeAdaptiveType,
   }) : super(key: key);
 
-  final AdaptiveMode adaptiveMode;
+  final WidgetBuilder materialWidgetBuilder;
 
-  Widget buildMaterialWidget(BuildContext context);
+  final WidgetBuilder cupertinoWidgetBuilder;
 
-  Widget buildCupertinoWidget(BuildContext context);
+  final Type themeAdaptiveType;
 
   @override
   Widget build(BuildContext context) {
-    if (adaptiveMode == AdaptiveMode.static) {
-      return buildMaterialWidget(context);
-    }
-
     final ThemeData theme = Theme.of(context);
 
-    if (!theme.adaptiveWidgetTheme.isWidgetAdaptive(runtimeType)) {
-      return buildMaterialWidget(context);
+    if (themeAdaptiveType != null
+        && !theme.adaptiveWidgetTheme.isWidgetAdaptive(themeAdaptiveType)) {
+      return materialWidgetBuilder(context);
     }
 
     switch (theme.platform) {
       case TargetPlatform.android:
-        return buildMaterialWidget(context);
+        return materialWidgetBuilder(context);
       case TargetPlatform.iOS:
-        return buildCupertinoWidget(context);
+        return cupertinoWidgetBuilder(context);
       case TargetPlatform.fuchsia:
-        return buildMaterialWidget(context);
+        return materialWidgetBuilder(context);
     }
     assert(false);
     return null;
