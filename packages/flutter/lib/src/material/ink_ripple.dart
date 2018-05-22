@@ -205,13 +205,6 @@ class InkRipple extends InteractiveInkFeature {
     _fadeOutController.value = fadeOutValue;
     if (fadeOutValue < 1.0)
       _fadeOutController.animateTo(1.0, duration: _kCancelDuration);
-    /*
-    if (fadeOutValue < 1.0) {
-      _fadeOutController
-        ..value = fadeOutValue
-        ..animateTo(1.0, duration: _kCancelDuration);
-    }
-    */
   }
 
   void _handleAlphaStatusChanged(AnimationStatus status) {
