@@ -1358,6 +1358,8 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
       for (int i = 0; i < childCount; i += 1) {
         childrenInTraversalOrder[i] = sortedChildren[i].id;
       }
+      // _children is sorted in paint order, so we invert it to get the hit test
+      // order.
       childrenInHitTestOrder = new Int32List(childCount);
       for (int i = childCount - 1; i >= 0; i -= 1) {
         childrenInHitTestOrder[i] = _children[i].id;
