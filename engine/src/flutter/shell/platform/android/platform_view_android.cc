@@ -178,7 +178,7 @@ void PlatformViewAndroid::DispatchSemanticsAction(JNIEnv* env,
 
 // |shell::PlatformView|
 void PlatformViewAndroid::UpdateSemantics(blink::SemanticsNodeUpdates update) {
-  constexpr size_t kBytesPerNode = 36 * sizeof(int32_t);
+  constexpr size_t kBytesPerNode = 35 * sizeof(int32_t);
   constexpr size_t kBytesPerChild = sizeof(int32_t);
 
   JNIEnv* env = fml::jni::AttachCurrentThread();
@@ -190,7 +190,8 @@ void PlatformViewAndroid::UpdateSemantics(blink::SemanticsNodeUpdates update) {
     size_t num_bytes = 0;
     for (const auto& value : update) {
       num_bytes += kBytesPerNode;
-      num_bytes += value.second.children.size() * kBytesPerChild;
+      num_bytes += value.second.childrenInTraversalOrder.size() * kBytesPerChild;
+      num_bytes += value.second.childrenInHitTestOrder.size() * kBytesPerChild;
     }
 
     std::vector<uint8_t> buffer(num_bytes);
@@ -243,15 +244,18 @@ void PlatformViewAndroid::UpdateSemantics(blink::SemanticsNodeUpdates update) {
         strings.push_back(node.hint);
       }
       buffer_int32[position++] = node.textDirection;
-      buffer_int32[position++] = node.hitTestPosition;
       buffer_float32[position++] = node.rect.left();
       buffer_float32[position++] = node.rect.top();
       buffer_float32[position++] = node.rect.right();
       buffer_float32[position++] = node.rect.bottom();
       node.transform.asColMajorf(&buffer_float32[position]);
       position += 16;
-      buffer_int32[position++] = node.children.size();
-      for (int32_t child : node.children)
+
+      buffer_int32[position++] = node.childrenInTraversalOrder.size();
+      for (int32_t child : node.childrenInTraversalOrder)
+        buffer_int32[position++] = child;
+
+      for (int32_t child : node.childrenInHitTestOrder)
         buffer_int32[position++] = child;
     }
 
