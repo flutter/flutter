@@ -95,7 +95,7 @@ abstract class Emulator {
     return id == other.id;
   }
 
-  Future<void> launch();
+  Future<bool> launch();
 
   @override
   String toString() => name;
