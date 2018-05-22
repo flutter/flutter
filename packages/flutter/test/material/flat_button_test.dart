@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/rendering.dart';
@@ -28,5 +29,33 @@ void main() {
       'highlightColor: Color(0xff1565c0)',
       'splashColor: Color(0xff9e9e9e)',
     ]);
+  });
+
+  testWidgets('FlatButton adapts to CupertinoButton on iOS', (WidgetTester tester) async {
+    bool tapped = false;
+    await tester.pumpWidget(
+      new Material(
+        child: new Directionality(
+          textDirection: TextDirection.ltr,
+          child: new Theme(
+            data: new ThemeData(
+              adaptiveWidgetTheme: AdaptiveWidgetThemeData.bundled,
+              platform: TargetPlatform.iOS,
+            ),
+            child: new FlatButton(
+              onPressed: () => tapped = true,
+              child: const Text('an apple'),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(find.widgetWithText(CupertinoButton, 'an apple'), findsOneWidget);
+    expect(tapped, false);
+
+    await tester.tap(find.text('an apple'));
+
+    expect(tapped, true);
   });
 }

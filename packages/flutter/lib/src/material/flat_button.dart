@@ -12,7 +12,7 @@ import 'colors.dart';
 import 'platform_builder.dart';
 import 'theme.dart';
 
-/// A material design "flat button".
+/// A Material Design "flat button".
 ///
 /// A flat button is a text label displayed on a (zero elevation) [Material]
 /// widget that reacts to touches by filling with color.
@@ -39,6 +39,10 @@ import 'theme.dart';
 /// Flat buttons have a minimum size of 88.0 by 36.0 which can be overidden
 /// with [ButtonTheme].
 ///
+/// When descending from a [Theme] with a [AdaptiveWidgetThemeData] that
+/// includes the [FlatButton] type in [AdaptiveWidgetThemeData.isWidgetAdaptive],
+/// a flat style [CupertinoButton] will be added instead when running on iOS.
+///
 /// See also:
 ///
 ///  * [RaisedButton], a filled button whose material elevates when pressed.
@@ -46,7 +50,10 @@ import 'theme.dart';
 ///  * [SimpleDialogOption], which is used in [SimpleDialog]s.
 ///  * [IconButton], to create buttons that just contain icons.
 ///  * [InkWell], which implements the ink splash part of a flat button.
-///  * [RawMaterialButton], the widget this widget is based on.
+///  * [RawMaterialButton], the widget this widget is based on when not
+///    adapting for iOS.
+///  * [CupertinoButton], the widget that's used instead when adaping for iOS
+///    based on [ThemeData.adaptiveWidgetTheme].
 ///  * <https://material.google.com/components/buttons.html>
 class FlatButton extends StatelessWidget {
   /// Create a simple text button.
@@ -109,12 +116,16 @@ class FlatButton extends StatelessWidget {
 
   /// Called by the underlying [InkWell] widget's [InkWell.onHighlightChanged]
   /// callback.
+  ///
+  /// This argument is ignored when adapting for iOS.
   final ValueChanged<bool> onHighlightChanged;
 
   /// Defines the button's base colors, and the defaults for the button's minimum
   /// size, internal padding, and shape.
   ///
   /// Defaults to `ButtonTheme.of(context).textTheme`.
+  ///
+  /// This argument is ignored when adapting for iOS.
   final ButtonTextTheme textTheme;
 
   /// The color to use for this button's text.
@@ -138,6 +149,8 @@ class FlatButton extends StatelessWidget {
   /// The default value is the theme's disabled color,
   /// [ThemeData.disabledColor].
   ///
+  /// This argument is ignored when adapting for iOS.
+  ///
   /// See also:
   ///  * [textColor] - The color to use for this button's text when the button is [enabled].
   final Color disabledTextColor;
@@ -147,12 +160,18 @@ class FlatButton extends StatelessWidget {
   ///
   /// Typically not specified for [FlatButton]s.
   ///
+  /// This argument is ignored when adapting for iOS. [RaisedButton] adapts to
+  /// [CupertinoButton] that has a fill color.
+  ///
   /// The default is null.
   final Color color;
 
   /// The fill color of the button when the button is disabled.
   ///
   /// Typically not specified for [FlatButton]s.
+  ///
+  /// This argument is ignored when adapting for iOS. [RaisedButton] adapts to
+  /// [CupertinoButton] that has a fill color.
   ///
   /// The default is null.
   final Color disabledColor;
@@ -169,6 +188,9 @@ class FlatButton extends StatelessWidget {
   ///
   /// The appearance of the splash can be configured with the theme's splash
   /// factory, [ThemeData.splashFactory].
+  ///
+  /// This argument is ignored when adapting for iOS since [CupertinoButton] has
+  /// no splash.
   final Color splashColor;
 
   /// The highlight color of the button's [InkWell].
@@ -180,11 +202,17 @@ class FlatButton extends StatelessWidget {
   /// If [textTheme] is [ButtonTextTheme.primary], the default highlight color is
   /// transparent (in other words the highlight doesn't appear). Otherwise it's
   /// the current theme's highlight color, [ThemeData.highlightColor].
+  ///
+  /// This argument is ignored when adapting for iOS since [CupertinoButton] has
+  /// no highlight.
   final Color highlightColor;
 
   /// The theme brightness to use for this button.
   ///
   /// Defaults to the theme's brightness, [ThemeData.brightness].
+  ///
+  /// This argument is ignored when adapting for iOS since [CupertinoButton] has
+  /// brightness theme.
   final Brightness colorBrightness;
 
   /// The widget below this widget in the tree.
@@ -201,7 +229,8 @@ class FlatButton extends StatelessWidget {
   /// The internal padding for the button's [child].
   ///
   /// Defaults to the value from the current [ButtonTheme],
-  /// [ButtonThemeData.padding].
+  /// [ButtonThemeData.padding]. When adapting for iOS, it uses default padding
+  /// from [CupertinoButton.padding].
   final EdgeInsetsGeometry padding;
 
   /// The shape of the button's [Material].
@@ -209,6 +238,8 @@ class FlatButton extends StatelessWidget {
   /// The button's highlight and splash are clipped to this shape. If the
   /// button has an elevation, then its drop shadow is defined by this
   /// shape as well.
+  ///
+  /// This argument is ignored when adapting for iOS.
   final ShapeBorder shape;
 
   Brightness _getBrightness(ThemeData theme) {
