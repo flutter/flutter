@@ -425,15 +425,12 @@ class _AppBarState extends State<AppBar> {
       );
     }
 
-    final Widget toolbar = new Padding(
-      padding: const EdgeInsetsDirectional.only(end: 4.0),
-      child: new NavigationToolbar(
-        leading: leading,
-        middle: title,
-        trailing: actions,
-        centerMiddle: widget._getEffectiveCenterTitle(themeData),
-        middleSpacing: widget.titleSpacing,
-      ),
+    final Widget toolbar = new NavigationToolbar(
+      leading: leading,
+      middle: title,
+      trailing: actions,
+      centerMiddle: widget._getEffectiveCenterTitle(themeData),
+      middleSpacing: widget.titleSpacing,
     );
 
     // If the toolbar is allocated less than kToolbarHeight make it
