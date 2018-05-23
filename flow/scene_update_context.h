@@ -119,10 +119,10 @@ class SceneUpdateContext {
   scenic_lib::Session* session() { return session_; }
 
   bool has_metrics() const { return !!metrics_; }
-  void set_metrics(fuchsia::gfx::MetricsPtr metrics) {
+  void set_metrics(fuchsia::ui::gfx::MetricsPtr metrics) {
     metrics_ = std::move(metrics);
   }
-  const fuchsia::gfx::MetricsPtr& metrics() const { return metrics_; }
+  const fuchsia::ui::gfx::MetricsPtr& metrics() const { return metrics_; }
 
   void AddChildScene(ExportNode* export_node,
                      SkPoint offset,
@@ -182,7 +182,7 @@ class SceneUpdateContext {
   scenic_lib::Session* const session_;
   SurfaceProducer* const surface_producer_;
 
-  fuchsia::gfx::MetricsPtr metrics_;
+  fuchsia::ui::gfx::MetricsPtr metrics_;
 
   std::vector<PaintTask> paint_tasks_;
 
