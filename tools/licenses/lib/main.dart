@@ -882,7 +882,8 @@ class RepositoryDirectory extends RepositoryEntry implements LicenseSource {
   }
 
   bool shouldRecurse(fs.IoNode entry) {
-    return entry.name != '.git' &&
+    return entry.name != '.cipd' &&
+           entry.name != '.git' &&
            entry.name != '.github' &&
            entry.name != '.gitignore' &&
            entry.name != 'test' &&

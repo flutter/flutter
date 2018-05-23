@@ -19,6 +19,7 @@ LicenseType convertLicenseNameToType(String name) {
   switch (name) {
     case 'Apache':
     case 'apache-license-2.0':
+    case 'LICENSE-APACHE-2.0.txt':
       return LicenseType.apache;
     case 'BSD':
     case 'BSD.txt':
@@ -38,6 +39,8 @@ LicenseType convertLicenseNameToType(String name) {
       return LicenseType.apsl;
     case 'OpenSSL':
       return LicenseType.openssl;
+    case 'LICENSE.MPLv2':
+      return LicenseType.mpl;
     // common file names that don't say what the type is
     case 'COPYING':
     case 'COPYING.txt':
