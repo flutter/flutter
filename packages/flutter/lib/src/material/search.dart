@@ -50,7 +50,7 @@ Future<T> showSearch<T>({
   assert(delegate._result == null || delegate._result.isCompleted);
   delegate._result = new Completer<T>();
   delegate.query = query ?? delegate.query;
-  delegate._currentBody.value = SearchBody.suggestions;
+  delegate._currentBody = _SearchBody.suggestions;
   Navigator.of(context).push(new _SearchPageRoute<T>(
     delegate: delegate,
   ));
@@ -83,9 +83,10 @@ abstract class SearchDelegate<T> {
   /// Suggestions shown in the body of the search page while the user types a
   /// query into the search field.
   ///
-  /// The delegate method is called whenever the content of [query] changes and
-  /// the value of [query] can be used to determine which suggestions should
-  /// be shown.
+  /// The delegate method is called whenever the content of [query] changes.
+  /// The suggestions should be based on the current [query] string. If the query
+  /// string is empty, it is good practice to show suggested queries based on
+  /// past queries or the current context.
   ///
   /// Usually, this method will return a [ListView] with one [ListTile] per
   /// suggestion. When [ListTile.onTap] is called, [query] should be updated
@@ -95,18 +96,18 @@ abstract class SearchDelegate<T> {
 
   /// The results shown after the user submits a search from the search page.
   ///
-  /// The content of [query] can be used to determine what the users searched
-  /// for.
+  /// The current value of [query] can be used to determine what the users
+  /// searched for.
   ///
   /// Typically, this method returns a [ListView] with the search results.
   Widget buildResults(BuildContext context);
 
   /// A widget to display before the current query in the [AppBar].
   ///
-  /// Typically an [IconButton] as a back button to exit the search. It is
-  /// suggested to show an [AnimatedIcon] driven by [transitionAnimation], which
-  /// animated from e.g. a hamburger menu to the back button as the search
-  /// overlay fades in.
+  /// Typically an [IconButton] configured with a [BackButtonIcon] that exits
+  /// the search with [close]. One can also use an [AnimatedIcon] driven by
+  /// [transitionAnimation], which animated from e.g. a hamburger menu to the
+  /// back button as the search overlay fades in.
   ///
   /// Returns null if no widget should be shown.
   ///
@@ -172,11 +173,9 @@ abstract class SearchDelegate<T> {
   /// See also:
   ///
   ///  * [showSuggestions] to show the search suggestions again.
-  ///  * [currentBody] to learn whether the results or the suggestions are
-  ///    currently shown.
   void showResults(BuildContext context) {
-    focusNode.unfocus();
-    _currentBody.value = SearchBody.results;
+    _focusNode.unfocus();
+    _currentBody = _SearchBody.results;
   }
 
   /// Transition to show the search suggestions and places the input focus
@@ -188,49 +187,41 @@ abstract class SearchDelegate<T> {
   /// See also:
   ///
   ///  * [showResults] to show the search results.
-  ///  * [currentBody] to learn whether the results or the suggestions are
-  ///    currently shown.
   void showSuggestions(BuildContext context) {
-    FocusScope.of(context).requestFocus(focusNode);
-    _currentBody.value = SearchBody.suggestions;
+    FocusScope.of(context).requestFocus(_focusNode);
+    _currentBody = _SearchBody.suggestions;
   }
-
-  /// The body that is currently shown under the [AppBar] in the search page.
-  ///
-  /// Will be null if the search page is currently not shown.
-  ///
-  /// See also:
-  ///
-  ///  * [showResults] to show the search results.
-  ///  * [showSuggestions] to show the search suggestions.
-  SearchBody get currentBody => _currentBody.value;
 
   /// Closes the search page and returns to the underlying route.
   ///
   /// The value provided for `result` is used as the return value of the call
   /// to [showSearch] that launched the search initially.
   void close(BuildContext context, T result) {
-    _currentBody.value = null;
-    focusNode.unfocus();
+    _currentBody = null;
+    _focusNode.unfocus();
     _result.complete(result);
     Navigator.of(context).pop(result);
   }
 
-  /// [Animation] triggered while the search pages fades in or out.
+  /// [Animation] triggered when the search pages fades in or out.
   ///
   /// This animation is commonly used to animate [AnimatedIcon]s of
-  /// [IconButton]s return by [buildLeading] or contained within the route
+  /// [IconButton]s returned by [buildLeading] or contained within the route
   /// below the search page.
   Animation<double> get transitionAnimation => _proxyAnimation;
 
-  /// [FocusNode] used by the text field showing the current search query.
-  final FocusNode focusNode = new FocusNode();
+  final FocusNode _focusNode = new FocusNode();
 
   final TextEditingController _textEditingController = new TextEditingController();
 
   final ProxyAnimation _proxyAnimation = new ProxyAnimation(kAlwaysDismissedAnimation);
 
-  final ValueNotifier<SearchBody> _currentBody = new ValueNotifier<SearchBody>(null);
+  final ValueNotifier<_SearchBody> _currentBodyNotifier = new ValueNotifier<_SearchBody>(null);
+
+  _SearchBody get _currentBody => _currentBodyNotifier.value;
+  set _currentBody(_SearchBody value) {
+    _currentBodyNotifier.value = value;
+  }
 
   Completer<T> _result;
 
@@ -238,7 +229,7 @@ abstract class SearchDelegate<T> {
 
 /// Describes the body that is currently shown under the [AppBar] in the
 /// search page.
-enum SearchBody {
+enum _SearchBody {
   /// Suggested queries are shown in the body.
   ///
   /// The suggested queries are generated by [SearchDelegate.buildSuggestions].
@@ -322,8 +313,8 @@ class _SearchPageState<T> extends State<_SearchPage<T>> {
     super.initState();
     _controller.addListener(_onQueryChanged);
     widget.animation.addStatusListener(_onAnimationStatusChanged);
-    widget.delegate._currentBody.addListener(_onSearchBodyChanged);
-    widget.delegate.focusNode.addListener(_onFocusChanged);
+    widget.delegate._currentBodyNotifier.addListener(_onSearchBodyChanged);
+    widget.delegate._focusNode.addListener(_onFocusChanged);
   }
 
   @override
@@ -331,8 +322,8 @@ class _SearchPageState<T> extends State<_SearchPage<T>> {
     super.dispose();
     _controller.removeListener(_onQueryChanged);
     widget.animation.removeStatusListener(_onAnimationStatusChanged);
-    widget.delegate._currentBody.removeListener(_onSearchBodyChanged);
-    widget.delegate.focusNode.removeListener(_onFocusChanged);
+    widget.delegate._currentBodyNotifier.removeListener(_onSearchBodyChanged);
+    widget.delegate._focusNode.removeListener(_onFocusChanged);
   }
 
   void _onAnimationStatusChanged(AnimationStatus status) {
@@ -340,13 +331,13 @@ class _SearchPageState<T> extends State<_SearchPage<T>> {
       return;
     }
     widget.animation.removeStatusListener(_onAnimationStatusChanged);
-    if (widget.delegate.currentBody == SearchBody.suggestions) {
-      FocusScope.of(context).requestFocus(widget.delegate.focusNode);
+    if (widget.delegate._currentBody == _SearchBody.suggestions) {
+      FocusScope.of(context).requestFocus(widget.delegate._focusNode);
     }
   }
 
   void _onFocusChanged() {
-    if (widget.delegate.focusNode.hasFocus && widget.delegate.currentBody != SearchBody.suggestions) {
+    if (widget.delegate._focusNode.hasFocus && widget.delegate._currentBody != _SearchBody.suggestions) {
       widget.delegate.showSuggestions(context);
     }
   }
@@ -367,16 +358,16 @@ class _SearchPageState<T> extends State<_SearchPage<T>> {
   Widget build(BuildContext context) {
     final ThemeData theme = widget.delegate.appBarTheme(context);
     Widget body;
-    switch(widget.delegate.currentBody) {
-      case SearchBody.suggestions:
+    switch(widget.delegate._currentBody) {
+      case _SearchBody.suggestions:
         body = new Container(
-          key: const ValueKey<SearchBody>(SearchBody.suggestions),
+          key: const ValueKey<_SearchBody>(_SearchBody.suggestions),
           child: widget.delegate.buildSuggestions(context),
         );
         break;
-      case SearchBody.results:
+      case _SearchBody.results:
         body = new Container(
-          key: const ValueKey<SearchBody>(SearchBody.results),
+          key: const ValueKey<_SearchBody>(_SearchBody.results),
           child: widget.delegate.buildResults(context),
         );
         break;
@@ -393,7 +384,7 @@ class _SearchPageState<T> extends State<_SearchPage<T>> {
         // TODO(goderbauer): Show the search key (instead of enter) on keyboard, https://github.com/flutter/flutter/issues/17525
         title: new TextField(
           controller: _controller,
-          focusNode: widget.delegate.focusNode,
+          focusNode: widget.delegate._focusNode,
           style: theme.textTheme.title,
           onSubmitted: (String _) {
             widget.delegate.showResults(context);
