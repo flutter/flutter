@@ -192,7 +192,6 @@ void main() {
     // Regression test for https://github.com/flutter/flutter/issues/17773
 
     bool value = false;
-
     await tester.pumpWidget(
       new Directionality(
         textDirection: TextDirection.ltr,
@@ -225,6 +224,7 @@ void main() {
     await gesture.up();
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 200));
+
     expect(value, isTrue);
     expect(tester.hasRunningAnimations, false);
   });
