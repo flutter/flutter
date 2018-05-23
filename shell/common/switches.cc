@@ -170,6 +170,10 @@ blink::Settings SettingsFromCommandLine(const fxl::CommandLine& command_line) {
   command_line.GetOptionValue(FlagForSwitch(Switch::Packages),
                               &settings.packages_file_path);
 
+  std::string aot_shared_library_path;
+  command_line.GetOptionValue(FlagForSwitch(Switch::AotSharedLibraryPath),
+                              &aot_shared_library_path);
+
   std::string aot_snapshot_path;
   command_line.GetOptionValue(FlagForSwitch(Switch::AotSnapshotPath),
                               &aot_snapshot_path);
@@ -191,7 +195,9 @@ blink::Settings SettingsFromCommandLine(const fxl::CommandLine& command_line) {
       FlagForSwitch(Switch::AotIsolateSnapshotInstructions),
       &aot_isolate_snapshot_instr_filename);
 
-  if (aot_snapshot_path.size() > 0) {
+  if (aot_shared_library_path.size() > 0) {
+    settings.application_library_path = aot_shared_library_path;
+  } else if (aot_snapshot_path.size() > 0) {
     settings.vm_snapshot_data_path = fml::paths::JoinPaths(
         {aot_snapshot_path, aot_vm_snapshot_data_filename});
     settings.vm_snapshot_instr_path = fml::paths::JoinPaths(
