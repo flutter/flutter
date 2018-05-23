@@ -338,6 +338,7 @@ class FlatButton extends StatelessWidget {
           onPressed: onPressed,
         );
       },
+      themeAdaptiveType: FlatButton,
     );
   }
 

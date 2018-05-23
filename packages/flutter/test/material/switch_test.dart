@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -213,7 +214,6 @@ void main() {
         ),
       ),
     );
-
     expect(value, isFalse);
 
     final Rect switchRect = tester.getRect(find.byType(Switch));
@@ -227,5 +227,38 @@ void main() {
 
     expect(value, isTrue);
     expect(tester.hasRunningAnimations, false);
+  });
+
+  testWidgets('Slider adapts to CupertinoSwitch on iOS', (WidgetTester tester) async {
+    bool switchValue = true;
+
+    await tester.pumpWidget(
+      new Material(
+        child: new Directionality(
+          textDirection: TextDirection.ltr,
+          child: new Theme(
+            data: new ThemeData(
+              adaptiveWidgetTheme: AdaptiveWidgetThemeData.bundled,
+              platform: TargetPlatform.iOS,
+            ),
+            child: new Switch(
+              value: switchValue,
+              onChanged: (bool value) => switchValue = value,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(
+      tester.widget<CupertinoSwitch>(
+        find.byType(CupertinoSwitch),
+      ).value,
+      true,
+    );
+
+    await tester.tap(find.byType(Switch));
+
+    expect(switchValue, false);
   });
 }

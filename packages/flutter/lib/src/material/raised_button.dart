@@ -434,6 +434,7 @@ class RaisedButton extends StatelessWidget {
           onPressed: onPressed,
         );
       },
+      themeAdaptiveType: RaisedButton,
     );
 
   }

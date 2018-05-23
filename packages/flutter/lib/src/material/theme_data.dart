@@ -15,6 +15,7 @@ import 'flat_button.dart';
 import 'ink_splash.dart';
 import 'ink_well.dart' show InteractiveInkFeatureFactory;
 import 'input_decorator.dart';
+import 'raised_button.dart';
 import 'slider.dart';
 import 'slider_theme.dart';
 import 'switch.dart';
@@ -492,6 +493,13 @@ class ThemeData extends Diagnosticable {
   /// Defaults to the current platform.
   final TargetPlatform platform;
 
+  /// An adaptiveness theme that describes which Material widget use a
+  /// Cupertino equivalent widget on iOS when supported.
+  ///
+  /// Defaults to do no automatic widget adaptations on any widget.
+  ///
+  /// See [AdaptiveWidgetThemeData.bundled] for a list of Material widgets
+  /// that supports platform adaptation.
   final AdaptiveWidgetThemeData adaptiveWidgetTheme;
 
   /// Creates a copy of this theme but with the given fields replaced with the new values.
@@ -840,38 +848,111 @@ class ThemeData extends Diagnosticable {
     properties.add(new DiagnosticsProperty<IconThemeData>('accentIconTheme', accentIconTheme));
     properties.add(new DiagnosticsProperty<SliderThemeData>('sliderTheme', sliderTheme));
     properties.add(new DiagnosticsProperty<ChipThemeData>('chipTheme', chipTheme));
+    properties.add(new DiagnosticsProperty<AdaptiveWidgetThemeData>('adaptiveWidgetTheme', adaptiveWidgetTheme));
   }
 }
 
-/// Describes whether descendent Material Design widgets of various types
-/// should automatically adapt to use Cupertino widgets when running on iOS.
+/// Describes whether descendent Material Design widgets of should automatically
+/// adapt to use Cupertino widgets when running on iOS.
+///
+/// A [Map] from Material widget types to a boolean describes whether the
+/// adaptation should be made for widgets that is wrapped with [PlatformBuilder]
+/// descendant to this [Theme] and whose [PlatformBuilder.themeAdaptiveType]
+/// matches the type in the [adaptiveWidgets] [Map].
+///
+/// When a widget type is not explicitly specified in [adaptiveWidgets], the
+/// [defaultAdaptiveness] value is used.
+///
+/// The singleton [none] instance can be used to signal no adaptation on any
+/// descendent widgets.
+///
+/// The singleton [bundled] instance can be used to signal adaptation on all
+/// Material widgets.
+///
+/// The singleton [all] instance can be used to signal adaptation on all widgets
+/// including user-custom usages of [PlatformBuilder].
+///
+/// Individual [PlatformBuilder] descendents can still override this [Theme]
+/// by specifying null for [PlatformBuilder.themeAdaptiveType].
 @immutable
 class AdaptiveWidgetThemeData {
-  const AdaptiveWidgetThemeData(this._adaptivenessOptions);
+  /// Create a [AdaptiveWidgetThemeData] for a [Theme] that instructs whether
+  /// descendent widgets should adapt to the platform.
+  ///
+  /// The parameters [adaptiveWidgets] and [defaultAdaptiveness] cannot be null.
+  const AdaptiveWidgetThemeData(
+    this.adaptiveWidgets, {
+    this.defaultAdaptiveness,
+  }) : assert(adaptiveWidgets != null);
 
+  /// A [AdaptiveWidgetThemeData] where none of the descendents dynamically
+  /// adapt to the platform unless overridden in [PlatformBuilder].
   static const AdaptiveWidgetThemeData none =
       const AdaptiveWidgetThemeData(const <Type, bool>{});
 
+  /// A [AdaptiveWidgetThemeData] where all bundled Material Design widgets
+  /// that support platform adaptations will adapt when running on iOS.
   static const AdaptiveWidgetThemeData bundled =
       const AdaptiveWidgetThemeData(const <Type, bool>{
         FlatButton: true,
+        RaisedButton: true,
         Slider: true,
         Switch: true,
       });
 
+  /// A [AdaptiveWidgetThemeData] where all of the descendents dynamically
+  /// adapt to the platform if supported unless overridden in [PlatformBuilder].
   static const AdaptiveWidgetThemeData all =
-      const _AlwaysAdaptiveWidgetThemeData();
+      const AdaptiveWidgetThemeData(const <Type, bool>{}, defaultAdaptiveness: true);
 
-  final Map<Type, bool> _adaptivenessOptions;
+  /// A [Map] from widget type to whether descendents of that widget type should
+  /// dynamically adapt to the platform.
+  ///
+  /// If the widget type is not in the map, or if the corresponding value is
+  /// null, the value of [defaultAdaptiveness] will be used.
+  ///
+  /// The map itself cannot be null.
+  final Map<Type, bool> adaptiveWidgets;
 
-  bool isWidgetAdaptive(Type widgetType) => _adaptivenessOptions[widgetType] == true;
-}
+  /// A boolean indicating the default adaptiveness of a widget type if it's
+  /// not explicitly specified in [adaptiveWidgets].
+  ///
+  /// It can be used to turn on or off the adaptiveness of all widget types
+  /// without specifying them individually in [adaptiveWidgets].
+  ///
+  /// The value defaults to [false].
+  final bool defaultAdaptiveness;
 
-class _AlwaysAdaptiveWidgetThemeData extends AdaptiveWidgetThemeData {
-  const _AlwaysAdaptiveWidgetThemeData() : super(null);
+  /// Whether a descendent of a widget type should dynamically adapt to the
+  /// platform based on the [adaptiveWidgets] map. If the type is not specified
+  /// in [adaptiveWidgets], the value from [defaultAdaptiveness] is used instead.
+  /// If [defaultAdaptiveness] is not specified, [false] is returned.
+  bool isWidgetAdaptive(Type widgetType) {
+    return adaptiveWidgets[widgetType] ?? defaultAdaptiveness ?? false;
+  }
 
-  @override
-  bool isWidgetAdaptive(Type widgetType) => true;
+  /// Merge an existing [AdaptiveWidgetThemeData] with a new.
+  ///
+  /// Can be used to override adaptiveness of specific widget types in a subtree
+  /// without affecting all other widget types.
+  ///
+  /// When the existing and the new [adaptiveWidgets] both have a non-null
+  /// value for a type key, the new value overrides the old.
+  ///
+  /// When only the new [adaptiveWidgets] has a non-null value for a type key,
+  /// the new value is used.
+  ///
+  /// When only the existing [adaptiveWidgets] has a non-null value for a type
+  /// key, the old value is kept.
+  ///
+  /// The new [defaultAdaptiveness] value overrides the old value if not null.
+  AdaptiveWidgetThemeData merge(AdaptiveWidgetThemeData other) {
+    return new AdaptiveWidgetThemeData(
+      new Map<Type, bool>.from(adaptiveWidgets)
+          ..addAll(other.adaptiveWidgets),
+      defaultAdaptiveness: other.defaultAdaptiveness ?? defaultAdaptiveness,
+    );
+  }
 }
 
 class _IdentityThemeDataCacheKey {

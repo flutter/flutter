@@ -16,7 +16,7 @@ import 'shadows.dart';
 import 'theme.dart';
 import 'toggleable.dart';
 
-/// A material design switch.
+/// A Material Design switch.
 ///
 /// Used to toggle the on/off state of a single setting.
 ///
@@ -27,6 +27,10 @@ import 'toggleable.dart';
 ///
 /// Requires one of its ancestors to be a [Material] widget.
 ///
+/// When descending from a [Theme] with a [AdaptiveWidgetThemeData] that
+/// includes the [Switch] type in [AdaptiveWidgetThemeData.isWidgetAdaptive],
+/// a [CupertinoSwitch] will be used instead when running on iOS.
+///
 /// See also:
 ///
 ///  * [SwitchListTile], which combines this widget with a [ListTile] so that
@@ -34,6 +38,8 @@ import 'toggleable.dart';
 ///  * [Checkbox], another widget with similar semantics.
 ///  * [Radio], for selecting among a set of explicit values.
 ///  * [Slider], for selecting a value in a range.
+///  * [CupertinoSwitch], the widget that's used instead when adaping for iOS
+///    based on [ThemeData.adaptiveWidgetTheme].
 ///  * <https://material.google.com/components/selection-controls.html#selection-controls-switch>
 class Switch extends StatelessWidget {
   /// Creates a material design switch.
@@ -96,22 +102,32 @@ class Switch extends StatelessWidget {
   /// The color to use on the track when this switch is on.
   ///
   /// Defaults to [ThemeData.toggleableActiveColor] with the opacity set at 50%.
+  ///
+  /// This argument is ignored when adapting for iOS.
   final Color activeTrackColor;
 
   /// The color to use on the thumb when this switch is off.
   ///
   /// Defaults to the colors described in the Material design specification.
+  ///
+  /// This argument is ignored when adapting for iOS.
   final Color inactiveThumbColor;
 
   /// The color to use on the track when this switch is off.
   ///
   /// Defaults to the colors described in the Material design specification.
+  ///
+  /// This argument is ignored when adapting for iOS.
   final Color inactiveTrackColor;
 
   /// An image to use on the thumb of this switch when the switch is on.
+  ///
+  /// This argument is ignored when adapting for iOS.
   final ImageProvider activeThumbImage;
 
   /// An image to use on the thumb of this switch when the switch is off.
+  ///
+  /// This argument is ignored when adapting for iOS.
   final ImageProvider inactiveThumbImage;
 
   @override
@@ -136,6 +152,7 @@ class Switch extends StatelessWidget {
           activeColor: activeColor,
         );
       },
+      themeAdaptiveType: Switch,
     );
   }
 }
