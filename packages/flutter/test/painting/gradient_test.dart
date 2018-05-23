@@ -164,6 +164,7 @@ void main() {
       },
       throwsAssertionError,
     );
+
     expect(
       () {
         return const RadialGradient(
@@ -263,6 +264,41 @@ void main() {
     ));
   });
 
+  test('RadialGradient lerp test with focal', () {
+    const RadialGradient testGradient1 = const RadialGradient(
+      center: Alignment.topLeft,
+      focal: Alignment.centerLeft,
+      radius: 20.0,
+      focalRadius: 10.0,
+      colors: const <Color>[
+        const Color(0x33333333),
+        const Color(0x66666666),
+      ],
+    );
+    const RadialGradient testGradient2 = const RadialGradient(
+      center: Alignment.topRight,
+      focal: Alignment.centerRight,
+      radius: 10.0,
+      focalRadius: 5.0,
+      colors: const <Color>[
+        const Color(0x44444444),
+        const Color(0x88888888),
+      ],
+    );
+
+    final RadialGradient actual = RadialGradient.lerp(testGradient1, testGradient2, 0.5);
+    expect(actual, const RadialGradient(
+      center: const Alignment(0.0, -1.0),
+      focal: const Alignment(0.0, 0.0),
+      radius: 15.0,
+      focalRadius: 7.5,
+      colors: const <Color>[
+        const Color(0x3B3B3B3B),
+        const Color(0x77777777),
+      ],
+    ));
+  });
+  
   test('Gradient lerp test (with RadialGradient)', () {
     const RadialGradient testGradient1 = const RadialGradient(
       center: Alignment.topLeft,
