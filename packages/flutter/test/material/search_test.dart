@@ -127,7 +127,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(delegate.query, 'Wow');
-    expect(delegate.querysForSuggestions, ['Wow']);
+    expect(delegate.querysForSuggestions, <String>['Wow']);
     expect(delegate.querysForResults, hasLength(0));
 
     await tester.tap(find.text('Suggestions'));
@@ -138,8 +138,8 @@ void main() {
     expect(find.text('Results'), findsOneWidget);
 
     expect(delegate.query, 'Wow');
-    expect(delegate.querysForSuggestions, ['Wow']);
-    expect(delegate.querysForResults, ['Wow']);
+    expect(delegate.querysForSuggestions, <String>['Wow']);
+    expect(delegate.querysForResults, <String>['Wow']);
 
     TextField textField = tester.widget(find.byType(TextField));
     expect(textField.focusNode.hasFocus, isFalse);
@@ -153,15 +153,15 @@ void main() {
 
     expect(find.text('Suggestions'), findsOneWidget);
     expect(find.text('Results'), findsNothing);
-    expect(delegate.querysForSuggestions, ['Wow', 'Wow']);
-    expect(delegate.querysForResults, ['Wow']);
+    expect(delegate.querysForSuggestions, <String>['Wow', 'Wow']);
+    expect(delegate.querysForResults, <String>['Wow']);
 
     await tester.enterText(find.byType(TextField), 'Foo');
     await tester.pumpAndSettle();
 
     expect(delegate.query, 'Foo');
-    expect(delegate.querysForSuggestions, ['Wow', 'Wow', 'Foo']);
-    expect(delegate.querysForResults, ['Wow']);
+    expect(delegate.querysForSuggestions, <String>['Wow', 'Wow', 'Foo']);
+    expect(delegate.querysForResults, <String>['Wow']);
 
     // Go to results again
     await tester.tap(find.text('Suggestions'));
@@ -171,8 +171,8 @@ void main() {
     expect(find.text('Results'), findsOneWidget);
 
     expect(delegate.query, 'Foo');
-    expect(delegate.querysForSuggestions, ['Wow', 'Wow', 'Foo']);
-    expect(delegate.querysForResults, ['Wow', 'Foo']);
+    expect(delegate.querysForSuggestions, <String>['Wow', 'Wow', 'Foo']);
+    expect(delegate.querysForResults, <String>['Wow', 'Foo']);
 
     textField = tester.widget(find.byType(TextField));
     expect(textField.focusNode.hasFocus, isFalse);
@@ -251,6 +251,35 @@ void main() {
 
     expect(find.text('Foo'), findsNothing);
     expect(find.text('Bar'), findsOneWidget);
+  });
+
+  testWidgets('transitionAnimation runs while search fades in/out', (WidgetTester tester) async {
+    final _TestSearchDelegate delegate = new _TestSearchDelegate();
+
+    await tester.pumpWidget(new TestHomePage(
+      delegate: delegate,
+      passInInitialQuery: true,
+      initialQuery: null,
+    ));
+
+    // runs while search fades in
+    expect(delegate.transitionAnimation.status, AnimationStatus.dismissed);
+    await tester.tap(find.byTooltip('Search'));
+    expect(delegate.transitionAnimation.status, AnimationStatus.forward);
+    await tester.pumpAndSettle();
+    expect(delegate.transitionAnimation.status, AnimationStatus.completed);
+
+    // does not run while switching to results
+    await tester.tap(find.text('Suggestions'));
+    expect(delegate.transitionAnimation.status, AnimationStatus.completed);
+    await tester.pumpAndSettle();
+    expect(delegate.transitionAnimation.status, AnimationStatus.completed);
+
+    // runs while search fades out
+    await tester.tap(find.byTooltip('Back'));
+    expect(delegate.transitionAnimation.status, AnimationStatus.reverse);
+    await tester.pumpAndSettle();
+    expect(delegate.transitionAnimation.status, AnimationStatus.dismissed);
   });
 }
 
