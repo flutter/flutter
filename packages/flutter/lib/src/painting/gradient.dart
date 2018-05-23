@@ -580,7 +580,7 @@ class RadialGradient extends Gradient {
       radius * rect.shortestSide,
       colors, _impliedStops(), tileMode,
       null, // transform
-      focal?.resolve(textDirection)?.withinRect(rect),
+      focal == null  ? null : focal.resolve(textDirection).withinRect(rect),
       focalRadius * rect.shortestSide,
     );
   }
