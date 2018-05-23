@@ -39,7 +39,7 @@ import 'theme.dart';
 /// Flat buttons have a minimum size of 88.0 by 36.0 which can be overidden
 /// with [ButtonTheme].
 ///
-/// When descending from a [Theme] with a [AdaptiveWidgetThemeData] that
+/// When descending from a [Theme] with an [AdaptiveWidgetThemeData] that
 /// includes the [FlatButton] type in [AdaptiveWidgetThemeData.isWidgetAdaptive],
 /// a flat style [CupertinoButton] will be added instead when running on iOS.
 ///
@@ -160,8 +160,8 @@ class FlatButton extends StatelessWidget {
   ///
   /// Typically not specified for [FlatButton]s.
   ///
-  /// This argument is ignored when adapting for iOS. [RaisedButton] adapts to
-  /// [CupertinoButton] that has a fill color.
+  /// This argument is ignored when adapting for iOS. Use a [RaisedButton]
+  /// instead for a widget that adapts to [CupertinoButton] with a fill color.
   ///
   /// The default is null.
   final Color color;
@@ -170,8 +170,8 @@ class FlatButton extends StatelessWidget {
   ///
   /// Typically not specified for [FlatButton]s.
   ///
-  /// This argument is ignored when adapting for iOS. [RaisedButton] adapts to
-  /// [CupertinoButton] that has a fill color.
+  /// This argument is ignored when adapting for iOS. Use a [RaisedButton]
+  /// instead for a widget that adapts to [CupertinoButton] with a fill color.
   ///
   /// The default is null.
   final Color disabledColor;

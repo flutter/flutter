@@ -58,11 +58,10 @@ class PlatformBuilder extends StatelessWidget {
 
     switch (theme.platform) {
       case TargetPlatform.android:
+      case TargetPlatform.fuchsia:
         return materialWidgetBuilder(context);
       case TargetPlatform.iOS:
         return cupertinoWidgetBuilder(context);
-      case TargetPlatform.fuchsia:
-        return materialWidgetBuilder(context);
     }
     assert(false);
     return null;

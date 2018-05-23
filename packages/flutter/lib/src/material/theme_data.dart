@@ -852,22 +852,23 @@ class ThemeData extends Diagnosticable {
   }
 }
 
-/// Describes whether descendent Material Design widgets of should automatically
+/// Describes whether descendant Material Design widgets should automatically
 /// adapt to use Cupertino widgets when running on iOS.
 ///
-/// A [Map] from Material widget types to a boolean describes whether the
-/// adaptation should be made for widgets that is wrapped with [PlatformBuilder]
-/// descendant to this [Theme] and whose [PlatformBuilder.themeAdaptiveType]
-/// matches the type in the [adaptiveWidgets] [Map].
+/// A [Map] from Material widget types to booleans describes whether platform
+/// adaptation should be made for [PlatformBuilder] widgets. Specifically
+/// [PlatformBuilder]s that are descendants to this [Theme] and whose
+/// [PlatformBuilder.themeAdaptiveType] matches the type in the
+/// [adaptiveWidgets] [Map].
 ///
 /// When a widget type is not explicitly specified in [adaptiveWidgets], the
 /// [defaultAdaptiveness] value is used.
 ///
 /// The singleton [none] instance can be used to signal no adaptation on any
-/// descendent widgets.
+/// descendant widgets.
 ///
 /// The singleton [bundled] instance can be used to signal adaptation on all
-/// Material widgets.
+/// Material widgets that should support platform adaptations.
 ///
 /// The singleton [all] instance can be used to signal adaptation on all widgets
 /// including user-custom usages of [PlatformBuilder].
@@ -877,7 +878,7 @@ class ThemeData extends Diagnosticable {
 @immutable
 class AdaptiveWidgetThemeData extends Diagnosticable{
   /// Create a [AdaptiveWidgetThemeData] for a [Theme] that instructs whether
-  /// descendent widgets should adapt to the platform.
+  /// descendant widgets should adapt to the platform.
   ///
   /// The parameters [adaptiveWidgets] and [defaultAdaptiveness] cannot be null.
   const AdaptiveWidgetThemeData(
@@ -923,7 +924,7 @@ class AdaptiveWidgetThemeData extends Diagnosticable{
   /// The value defaults to [false].
   final bool defaultAdaptiveness;
 
-  /// Whether a descendent of a widget type should dynamically adapt to the
+  /// Whether a descendant of a widget type should dynamically adapt to the
   /// platform based on the [adaptiveWidgets] map. If the type is not specified
   /// in [adaptiveWidgets], the value from [defaultAdaptiveness] is used instead.
   /// If [defaultAdaptiveness] is not specified, [false] is returned.

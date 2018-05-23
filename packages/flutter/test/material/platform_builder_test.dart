@@ -232,6 +232,41 @@ void main() {
     expect(materialBuilderCalled, 1);
     expect(cupertinoBuilderCalled, 3);
   });
+
+  testWidgets('never adapt on Android even with AdaptiveWidgetThemeData.all', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      new Theme(
+        data: new ThemeData(
+          adaptiveWidgetTheme: AdaptiveWidgetThemeData.all,
+          platform: TargetPlatform.android,
+        ),
+        child: new PlatformBuilder(
+          materialWidgetBuilder: materialBuilder,
+          cupertinoWidgetBuilder: cupertinoBuilder,
+          themeAdaptiveType: A,
+        ),
+      )
+    );
+
+    expect(materialBuilderCalled, 1);
+
+    await tester.pumpWidget(
+      new Theme(
+        data: new ThemeData(
+          adaptiveWidgetTheme: AdaptiveWidgetThemeData.all,
+          platform: TargetPlatform.android,
+        ),
+        child: new PlatformBuilder(
+          materialWidgetBuilder: materialBuilder,
+          cupertinoWidgetBuilder: cupertinoBuilder,
+          // Force adaptation.
+          themeAdaptiveType: null,
+        ),
+      )
+    );
+
+    expect(materialBuilderCalled, 2);
+  });
 }
 
 class A {}
