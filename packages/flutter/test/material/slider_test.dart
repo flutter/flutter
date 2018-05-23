@@ -1314,4 +1314,29 @@ void main() {
     await gesture.moveBy(const Offset(-100.0, 0.0));
     expect(sliderValue, moreOrLessEquals(0.36772486772486773));
   });
+
+  testWidgets('do not adapt on Android', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      new MediaQuery(
+        data: new MediaQueryData.fromWindow(window),
+        child: new Material(
+          child: new Directionality(
+            textDirection: TextDirection.ltr,
+            child: new Theme(
+              data: new ThemeData(
+                adaptiveWidgetTheme: AdaptiveWidgetThemeData.bundled,
+                platform: TargetPlatform.android,
+              ),
+              child: new Slider(
+                value: 0.5,
+                onChanged: (double value) {},
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(find.byType(CupertinoSlider), findsNothing);
+  });
 }

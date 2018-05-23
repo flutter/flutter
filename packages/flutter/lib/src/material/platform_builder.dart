@@ -43,8 +43,8 @@ class PlatformBuilder extends StatelessWidget {
   /// that [Type] is specified in an ancestor [Theme] via
   /// [ThemeData.adaptiveWidgetTheme].
   ///
-  /// When null, ancestor [Theme]'s [ThemeData.adaptiveWidgetTheme] is ignored
-  /// and this widget will always be adaptive.
+  /// When null, the ancestor [Theme]'s [ThemeData.adaptiveWidgetTheme] is
+  /// ignored and this widget will always be adaptive.
   final Type themeAdaptiveType;
 
   @override
@@ -56,6 +56,7 @@ class PlatformBuilder extends StatelessWidget {
       return materialWidgetBuilder(context);
     }
 
+    assert(theme.platform != null);
     switch (theme.platform) {
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
@@ -63,7 +64,6 @@ class PlatformBuilder extends StatelessWidget {
       case TargetPlatform.iOS:
         return cupertinoWidgetBuilder(context);
     }
-    assert(false);
     return null;
   }
 }

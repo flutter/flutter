@@ -388,4 +388,26 @@ void main() {
 
     expect(tapped, true);
   });
+
+  testWidgets('do not adapt on Android', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      new Material(
+        child: new Directionality(
+          textDirection: TextDirection.ltr,
+          child: new Theme(
+            data: new ThemeData(
+              adaptiveWidgetTheme: AdaptiveWidgetThemeData.bundled,
+              platform: TargetPlatform.android,
+            ),
+            child: new RaisedButton(
+              onPressed: () {},
+              child: const Text('not an apple'),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(find.byType(CupertinoButton), findsNothing);
+  });
 }

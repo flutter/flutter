@@ -261,4 +261,26 @@ void main() {
 
     expect(switchValue, false);
   });
+
+  testWidgets('do not adapt on Android', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      new Material(
+        child: new Directionality(
+          textDirection: TextDirection.ltr,
+          child: new Theme(
+            data: new ThemeData(
+              adaptiveWidgetTheme: AdaptiveWidgetThemeData.bundled,
+              platform: TargetPlatform.android,
+            ),
+            child: new Switch(
+              value: false,
+              onChanged: (bool value) {},
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(find.byType(CupertinoSwitch), findsNothing);
+  });
 }
