@@ -16,8 +16,13 @@ void PictureLayer::Preroll(PrerollContext* context, const SkMatrix& matrix) {
   SkPicture* sk_picture = picture();
 
   if (auto cache = context->raster_cache) {
+    SkMatrix ctm = matrix;
+    ctm.postTranslate(offset_.x(), offset_.y());
+#ifndef SUPPORT_FRACTIONAL_TRANSLATION
+    ctm = RasterCache::GetIntegralTransCTM(ctm);
+#endif
     raster_cache_result_ = cache->GetPrerolledImage(
-        context->gr_context, sk_picture, matrix, context->dst_color_space,
+        context->gr_context, sk_picture, ctm, context->dst_color_space,
         is_complex_, will_change_);
   } else {
     raster_cache_result_ = RasterCacheResult();
@@ -34,17 +39,13 @@ void PictureLayer::Paint(PaintContext& context) const {
 
   SkAutoCanvasRestore save(&context.canvas, true);
   context.canvas.translate(offset_.x(), offset_.y());
+#ifndef SUPPORT_FRACTIONAL_TRANSLATION
+  context.canvas.setMatrix(
+      RasterCache::GetIntegralTransCTM(context.canvas.getTotalMatrix()));
+#endif
 
   if (raster_cache_result_.is_valid()) {
-    SkPaint paint;
-    paint.setFilterQuality(kLow_SkFilterQuality);
-    context.canvas.drawImageRect(
-        raster_cache_result_.image(),             // image
-        raster_cache_result_.source_rect(),       // source
-        raster_cache_result_.destination_rect(),  // destination
-        &paint,                                   // paint
-        SkCanvas::kStrict_SrcRectConstraint       // source constraint
-    );
+    raster_cache_result_.draw(context.canvas);
   } else {
     context.canvas.drawPicture(picture());
   }
