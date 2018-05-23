@@ -614,8 +614,6 @@ void AccessibilityBridge::HandleEvent(NSDictionary<NSString*, id>* annotatedEven
   if ([type isEqualToString:@"announce"]) {
     NSString* message = annotatedEvent[@"data"][@"message"];
     UIAccessibilityPostNotification(UIAccessibilityAnnouncementNotification, message);
-  } else {
-    NSCAssert(NO, @"Invalid event type %@", type);
   }
 }
 
