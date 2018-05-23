@@ -4,6 +4,7 @@
 
 import 'dart:ui';
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
@@ -1278,5 +1279,39 @@ void main() {
     await tester.pumpWidget(new Container());
     expect(await tester.pumpAndSettle(const Duration(milliseconds: 100)), equals(1));
     await gesture.up();
+  });
+
+  testWidgets('Slider adapts to CupertinoSlider on iOS', (WidgetTester tester) async {
+    double sliderValue = 0.5;
+
+    await tester.pumpWidget(
+      new Material(
+        child: new Directionality(
+          textDirection: TextDirection.ltr,
+          child: new Theme(
+            data: new ThemeData(
+              adaptiveWidgetTheme: AdaptiveWidgetThemeData.bundled,
+              platform: TargetPlatform.iOS,
+            ),
+            child: new Slider(
+              value: sliderValue,
+              onChanged: (double value) => sliderValue = value,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(
+      tester.widget<CupertinoSlider>(
+        find.byType(CupertinoSlider)
+      ).value,
+      0.5,
+    );
+
+    final TestGesture gesture =
+        await tester.startGesture(tester.getCenter(find.byType(CupertinoSlider)));
+    await gesture.moveBy(const Offset(-100.0, 0.0));
+    expect(sliderValue, moreOrLessEquals(0.36772486772486773));
   });
 }

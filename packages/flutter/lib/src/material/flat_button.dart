@@ -212,7 +212,7 @@ class FlatButton extends StatelessWidget {
   /// Defaults to the theme's brightness, [ThemeData.brightness].
   ///
   /// This argument is ignored when adapting for iOS since [CupertinoButton] has
-  /// brightness theme.
+  /// no brightness theme.
   final Brightness colorBrightness;
 
   /// The widget below this widget in the tree.

@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
@@ -353,5 +354,38 @@ void main() {
 
 
     semantics.dispose();
+  });
+
+  testWidgets('RaisedButton adapts to CupertinoButton on iOS', (WidgetTester tester) async {
+    bool tapped = false;
+    await tester.pumpWidget(
+      new Material(
+        child: new Directionality(
+          textDirection: TextDirection.ltr,
+          child: new Theme(
+            data: new ThemeData(
+              adaptiveWidgetTheme: AdaptiveWidgetThemeData.bundled,
+              platform: TargetPlatform.iOS,
+            ),
+            child: new RaisedButton(
+              onPressed: () => tapped = true,
+              child: const Text('an apple'),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(
+      tester.widget<CupertinoButton>(
+        find.widgetWithText(CupertinoButton, 'an apple')
+      ).color,
+      CupertinoColors.activeBlue,
+    );
+    expect(tapped, false);
+
+    await tester.tap(find.text('an apple'));
+
+    expect(tapped, true);
   });
 }
