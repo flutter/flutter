@@ -229,7 +229,10 @@ void main() {
       )
     );
 
+    // B in the inner Theme is now overriden to not adapt anymore.
     expect(materialBuilderCalled, 1);
+    // A (which is not specified in the inner Theme) should not be affected
+    // and should inherit the outer Theme's behavior (of continuing to adapt).
     expect(cupertinoBuilderCalled, 3);
   });
 
