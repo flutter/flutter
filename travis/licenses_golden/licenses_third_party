@@ -1,4 +1,4 @@
-Signature: db18e92cd54a0415325976551fa6bff4
+Signature: 84bda68def0d54dc1e31a3f20cee36ed
 
 UNUSED LICENSES:
 
@@ -13973,8 +13973,6 @@ TYPE: LicenseType.bsd
 FILE: ../../../third_party/skia/bench/AndroidCodecBench.cpp
 FILE: ../../../third_party/skia/bench/AndroidCodecBench.h
 FILE: ../../../third_party/skia/bench/BlurOccludedRRectBench.cpp
-FILE: ../../../third_party/skia/bench/ColorCodecBench.cpp
-FILE: ../../../third_party/skia/bench/ColorCodecBench.h
 FILE: ../../../third_party/skia/bench/DrawLatticeBench.cpp
 FILE: ../../../third_party/skia/bench/EncoderBench.cpp
 FILE: ../../../third_party/skia/bench/GrMipMapBench.cpp
@@ -17328,6 +17326,7 @@ FILE: ../../../third_party/skia/third_party/skcms/skcms.h
 FILE: ../../../third_party/skia/third_party/skcms/src/Curve.c
 FILE: ../../../third_party/skia/third_party/skcms/src/Curve.h
 FILE: ../../../third_party/skia/third_party/skcms/src/ICCProfile.c
+FILE: ../../../third_party/skia/third_party/skcms/src/ICCProfile.h
 FILE: ../../../third_party/skia/third_party/skcms/src/LinearAlgebra.c
 FILE: ../../../third_party/skia/third_party/skcms/src/LinearAlgebra.h
 FILE: ../../../third_party/skia/third_party/skcms/src/Macros.h
@@ -17668,6 +17667,7 @@ FILE: ../../../third_party/skia/infra/bots/recipes/recreate_skps.expected/failed
 FILE: ../../../third_party/skia/infra/bots/recipes/skpbench.expected/Perf-Android-Clang-Pixel-GPU-Adreno530-arm64-Release-All-Android_CCPR_Skpbench.json
 FILE: ../../../third_party/skia/infra/bots/recipes/skpbench.expected/Perf-Android-Clang-PixelC-GPU-TegraX1-arm64-Release-All-Android_Skpbench.json
 FILE: ../../../third_party/skia/infra/bots/recipes/skpbench.expected/Perf-Android-Clang-PixelC-GPU-TegraX1-arm64-Release-All-Android_Vulkan_Skpbench.json
+FILE: ../../../third_party/skia/infra/bots/recipes/skpbench.expected/Perf-Win10-Clang-Golo-GPU-QuadroP400-x86_64-Release-All-Vulkan_Skpbench.json
 FILE: ../../../third_party/skia/infra/bots/recipes/skpbench.expected/trybot.json
 FILE: ../../../third_party/skia/infra/bots/recipes/skqp_test.expected/Test-Debian9-Clang-GCE-CPU-AVX2-universal-devrel-All-Android_SKQP.json
 FILE: ../../../third_party/skia/infra/bots/recipes/test.expected/Test-Android-Clang-AndroidOne-GPU-Mali400MP2-arm-Release-All-Android.json
