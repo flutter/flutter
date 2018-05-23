@@ -448,12 +448,13 @@ class LinearGradient extends Gradient {
 /// It is also possible to create a two-point (or focal pointed) radial gradient
 /// (which is sometimes referred to as a two point conic gradient, but is not the
 /// same as a CSS conic gradient which corresponds to a [SweepGradient]). A [focal]
-/// point and [focalRadius] can be specified similar to [center] and [radius],
+/// point and [focalRadius] can be specified similarly to [center] and [radius],
 /// which will make the rendered gradient appear to be pointed or directed in the
 /// direction of the [focal] point. This is only important if [focal] and [center]
-/// are not equal or [focalRadius] > 0.0.  One important case to avoid is where
-/// [focal] and [center] would both resolve to [Offset.zero] and [focalRadius] > 0.0.
-/// In such a case, a valid shader cannot be created.
+/// are not equal or [focalRadius] > 0.0 (as this case is visually identical to a
+/// normal radial gradient).  One important case to avoid is having [focal] and 
+/// [center] both resolve to [Offset.zero] when [focalRadius] > 0.0. In such a case,
+/// a valid shader cannot be created by the framework.
 ///
 /// The [colors] are described by a list of [Color] objects. There must be at
 /// least two colors. The [stops] list, if specified, must have the same length
@@ -568,7 +569,7 @@ class RadialGradient extends Gradient {
   /// will place the 1.0 stop at 100.0 pixels from the [focus].
   /// 
   /// If this value is specified and is greater than 0.0, either [focal] or
-  /// [center] must not resolve to [Offset.zero], which would fail to return
+  /// [center] must not resolve to [Offset.zero], which would fail to create
   /// a valid gradient.
   final double focalRadius;
 
