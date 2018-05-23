@@ -133,7 +133,7 @@ abstract class RenderToggleable extends RenderConstrainedBox {
     markNeedsSemanticsUpdate();
     _position
       ..curve = Curves.easeIn
-    ..reverseCurve = Curves.easeOut;
+      ..reverseCurve = Curves.easeOut;
     if (tristate) {
       switch (_positionController.status) {
         case AnimationStatus.forward:
