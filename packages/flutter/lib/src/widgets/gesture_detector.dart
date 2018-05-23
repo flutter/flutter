@@ -128,7 +128,7 @@ class GestureRecognizerFactoryWithHandlers<T extends GestureRecognizer> extends 
 /// ## Debugging
 ///
 /// To see how large the hit test box of a [GestureDetector] is for debugging
-/// purposes, set [debugPaintPointersEnabled] temporarily to true.
+/// purposes, set [debugPaintPointersEnabled] to true.
 class GestureDetector extends StatelessWidget {
   /// Creates a widget that detects gestures.
   ///
