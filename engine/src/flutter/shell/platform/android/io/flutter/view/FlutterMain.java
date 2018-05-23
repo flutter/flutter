@@ -94,7 +94,7 @@ public class FlutterMain {
 
     private static boolean sInitialized = false;
     private static ResourceExtractor sResourceExtractor;
-    private static boolean sIsPrecompiled;
+    private static boolean sIsPrecompiledAsBlobs;
     private static boolean sIsPrecompiledAsSharedLibrary;
     private static Settings sSettings;
 
@@ -201,19 +201,24 @@ public class FlutterMain {
             if (args != null) {
                 Collections.addAll(shellArgs, args);
             }
-            if (sIsPrecompiled) {
-                shellArgs.add("--" + AOT_SNAPSHOT_PATH_KEY + "=" +
-                    PathUtils.getDataDirectory(applicationContext));
+            if (sIsPrecompiledAsSharedLibrary) {
+                shellArgs.add("--" + AOT_SHARED_LIBRARY_PATH + "=" +
+                    new File(PathUtils.getDataDirectory(applicationContext), sAotSharedLibraryPath));
+            } else {
+                if (sIsPrecompiledAsBlobs) {
+                    shellArgs.add("--" + AOT_SNAPSHOT_PATH_KEY + "=" +
+                        PathUtils.getDataDirectory(applicationContext));
+                } else {
+                    shellArgs.add("--cache-dir-path=" +
+                        PathUtils.getCacheDirectory(applicationContext));
+
+                    shellArgs.add("--" + AOT_SNAPSHOT_PATH_KEY + "=" +
+                        PathUtils.getDataDirectory(applicationContext) + "/" + sFlutterAssetsDir);
+                }
                 shellArgs.add("--" + AOT_VM_SNAPSHOT_DATA_KEY + "=" + sAotVmSnapshotData);
                 shellArgs.add("--" + AOT_VM_SNAPSHOT_INSTR_KEY + "=" + sAotVmSnapshotInstr);
                 shellArgs.add("--" + AOT_ISOLATE_SNAPSHOT_DATA_KEY + "=" + sAotIsolateSnapshotData);
                 shellArgs.add("--" + AOT_ISOLATE_SNAPSHOT_INSTR_KEY + "=" + sAotIsolateSnapshotInstr);
-            } else if (sIsPrecompiledAsSharedLibrary) {
-                shellArgs.add("--" + AOT_SHARED_LIBRARY_PATH + "=" +
-                    new File(PathUtils.getDataDirectory(applicationContext), sAotSharedLibraryPath));
-            } else {
-                shellArgs.add("--cache-dir-path=" +
-                    PathUtils.getCacheDirectory(applicationContext));
             }
 
             if (sSettings.getLogTag() != null) {
@@ -264,6 +269,10 @@ public class FlutterMain {
             .addResources(SKY_RESOURCES)
             .addResource(fromFlutterAssets(sFlx))
             .addResource(fromFlutterAssets(sSnapshotBlob))
+            .addResource(fromFlutterAssets(sAotVmSnapshotData))
+            .addResource(fromFlutterAssets(sAotVmSnapshotInstr))
+            .addResource(fromFlutterAssets(sAotIsolateSnapshotData))
+            .addResource(fromFlutterAssets(sAotIsolateSnapshotInstr))
             .addResource(fromFlutterAssets(DEFAULT_KERNEL_BLOB))
             .addResource(fromFlutterAssets(DEFAULT_PLATFORM_DILL));
         if (sIsPrecompiledAsSharedLibrary) {
@@ -298,21 +307,21 @@ public class FlutterMain {
 
     private static void initAot(Context applicationContext) {
         Set<String> assets = listRootAssets(applicationContext);
-        sIsPrecompiled = assets.containsAll(Arrays.asList(
+        sIsPrecompiledAsBlobs = assets.containsAll(Arrays.asList(
             sAotVmSnapshotData,
             sAotVmSnapshotInstr,
             sAotIsolateSnapshotData,
             sAotIsolateSnapshotInstr
         ));
         sIsPrecompiledAsSharedLibrary = assets.contains(sAotSharedLibraryPath);
-        if (sIsPrecompiled && sIsPrecompiledAsSharedLibrary) {
+        if (sIsPrecompiledAsBlobs && sIsPrecompiledAsSharedLibrary) {
           throw new RuntimeException(
               "Found precompiled app as shared library and as Dart VM snapshots.");
         }
     }
 
     public static boolean isRunningPrecompiledCode() {
-        return sIsPrecompiled || sIsPrecompiledAsSharedLibrary;
+        return sIsPrecompiledAsBlobs || sIsPrecompiledAsSharedLibrary;
     }
 
     public static String findAppBundlePath(Context applicationContext) {
