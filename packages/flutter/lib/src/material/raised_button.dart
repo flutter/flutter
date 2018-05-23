@@ -189,6 +189,9 @@ class RaisedButton extends StatelessWidget {
   ///  ),
   /// ```
   ///
+  /// When adapting for iOS, [CupertinoColors.activeBlue] will be default
+  /// when null.
+  ///
   /// See also:
   ///   * [disabledColor] - the fill color of the button when the button is disabled.
   final Color color;

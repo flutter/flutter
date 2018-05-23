@@ -875,7 +875,7 @@ class ThemeData extends Diagnosticable {
 /// Individual [PlatformBuilder] descendents can still override this [Theme]
 /// by specifying null for [PlatformBuilder.themeAdaptiveType].
 @immutable
-class AdaptiveWidgetThemeData {
+class AdaptiveWidgetThemeData extends Diagnosticable{
   /// Create a [AdaptiveWidgetThemeData] for a [Theme] that instructs whether
   /// descendent widgets should adapt to the platform.
   ///
@@ -952,6 +952,13 @@ class AdaptiveWidgetThemeData {
           ..addAll(other.adaptiveWidgets),
       defaultAdaptiveness: other.defaultAdaptiveness ?? defaultAdaptiveness,
     );
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(new DiagnosticsProperty<Map<Type, bool>>('adaptiveWidgets', adaptiveWidgets, defaultValue: AdaptiveWidgetThemeData.none.adaptiveWidgets));
+    properties.add(new DiagnosticsProperty<bool>('defaultAdaptiveness', defaultAdaptiveness, defaultValue: false));
   }
 }
 

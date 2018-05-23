@@ -280,7 +280,8 @@ class Slider extends StatelessWidget {
   /// The "active" side of the slider is the side between the thumb and the
   /// minimum value.
   ///
-  /// Defaults to [SliderTheme.activeTrackColor] of the current [SliderTheme].
+  /// Defaults to [SliderTheme.activeTrackColor] of the current [SliderTheme]
+  /// or [CupertinoColors.activeBlue] when adapting for iOS.
   ///
   /// Using a [SliderTheme] gives much more fine-grained control over the
   /// appearance of various components of the slider.

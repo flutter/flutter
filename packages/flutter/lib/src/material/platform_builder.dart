@@ -42,6 +42,9 @@ class PlatformBuilder extends StatelessWidget {
   /// A [Type] that can be used to let this [PlatformBuilder] only adapt when
   /// that [Type] is specified in an ancestor [Theme] via
   /// [ThemeData.adaptiveWidgetTheme].
+  ///
+  /// When null, ancestor [Theme]'s [ThemeData.adaptiveWidgetTheme] is ignored
+  /// and this widget will always be adaptive.
   final Type themeAdaptiveType;
 
   @override

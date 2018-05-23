@@ -96,7 +96,8 @@ class Switch extends StatelessWidget {
 
   /// The color to use when this switch is on.
   ///
-  /// Defaults to [ThemeData.toggleableActiveColor].
+  /// Defaults to [ThemeData.toggleableActiveColor] or
+  /// [CupertinoColors.activeGreen] when adapting for iOS.
   final Color activeColor;
 
   /// The color to use on the track when this switch is on.
