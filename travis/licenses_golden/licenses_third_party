@@ -1,4 +1,4 @@
-Signature: fff13722614e422dfce4b2ca239d3ecb
+Signature: db18e92cd54a0415325976551fa6bff4
 
 UNUSED LICENSES:
 
@@ -14146,9 +14146,6 @@ FILE: ../../../third_party/skia/src/core/SkColorSpace.cpp
 FILE: ../../../third_party/skia/src/core/SkColorSpacePriv.h
 FILE: ../../../third_party/skia/src/core/SkColorSpaceXform.cpp
 FILE: ../../../third_party/skia/src/core/SkColorSpaceXformPriv.h
-FILE: ../../../third_party/skia/src/core/SkColorSpaceXform_A2B.cpp
-FILE: ../../../third_party/skia/src/core/SkColorSpaceXform_A2B.h
-FILE: ../../../third_party/skia/src/core/SkColorSpaceXform_Base.h
 FILE: ../../../third_party/skia/src/core/SkColorSpace_A2B.cpp
 FILE: ../../../third_party/skia/src/core/SkColorSpace_A2B.h
 FILE: ../../../third_party/skia/src/core/SkColorSpace_ICC.cpp
