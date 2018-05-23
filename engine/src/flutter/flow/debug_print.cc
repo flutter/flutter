@@ -73,13 +73,9 @@ std::ostream& operator<<(std::ostream& os, const SkPoint& r) {
 }
 
 std::ostream& operator<<(std::ostream& os, const flow::RasterCacheKey& k) {
-  os << "Picture: " << k.picture_id() << " Scale: " << k.scale_key().width()
-     << ", " << k.scale_key().height()
-#if defined(OS_FUCHSIA)
-     << " Metrics scale: (" << k.metrics_scale_x() << ", "
-     << k.metrics_scale_y() << ")"
-#endif
-      ;
+  SkString matrix_string;
+  k.matrix().toString(&matrix_string);
+  os << "Picture: " << k.picture_id() << " matrix: " << matrix_string.c_str();
   return os;
 }
 
