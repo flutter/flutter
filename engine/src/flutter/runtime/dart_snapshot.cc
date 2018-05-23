@@ -21,10 +21,34 @@ const char* DartSnapshot::kIsolateDataSymbol = "kDartIsolateSnapshotData";
 const char* DartSnapshot::kIsolateInstructionsSymbol =
     "kDartIsolateSnapshotInstructions";
 
+#if defined(OS_ANDROID)
+// When assembling the .S file of the application, dart_bootstrap will prefix
+// symbols via an `_` to ensure Mac's `dlsym()` can find it (Mac ABI prefixes C
+// symbols with underscores).
+// But Linux ABI does not prefix C symbols with underscores, so we have to
+// explicitly look up the prefixed version.
+#define SYMBOL_PREFIX "_"
+#else
+#define SYMBOL_PREFIX ""
+#endif
+
+static const char* kVMDataSymbolSo = SYMBOL_PREFIX "kDartVmSnapshotData";
+static const char* kVMInstructionsSymbolSo = SYMBOL_PREFIX "kDartVmSnapshotInstructions";
+static const char* kIsolateDataSymbolSo = SYMBOL_PREFIX "kDartIsolateSnapshotData";
+static const char* kIsolateInstructionsSymbolSo = SYMBOL_PREFIX "kDartIsolateSnapshotInstructions";
+
 std::unique_ptr<DartSnapshotBuffer> ResolveVMData(const Settings& settings) {
   if (settings.vm_snapshot_data_path.size() > 0) {
     if (auto source = DartSnapshotBuffer::CreateWithContentsOfFile(
             settings.vm_snapshot_data_path.c_str(), false /* executable */)) {
+      return source;
+    }
+  }
+
+  if (settings.application_library_path.size() > 0) {
+    auto shared_library = fml::NativeLibrary::Create(settings.application_library_path.c_str());
+    if (auto source = DartSnapshotBuffer::CreateWithSymbolInLibrary(
+        shared_library, kVMDataSymbolSo)) {
       return source;
     }
   }
@@ -47,7 +71,7 @@ std::unique_ptr<DartSnapshotBuffer> ResolveVMInstructions(
     auto library =
         fml::NativeLibrary::Create(settings.application_library_path.c_str());
     if (auto source = DartSnapshotBuffer::CreateWithSymbolInLibrary(
-            library, DartSnapshot::kVMInstructionsSymbol)) {
+            library, kVMInstructionsSymbolSo)) {
       return source;
     }
   }
@@ -63,6 +87,15 @@ std::unique_ptr<DartSnapshotBuffer> ResolveIsolateData(
     if (auto source = DartSnapshotBuffer::CreateWithContentsOfFile(
             settings.isolate_snapshot_data_path.c_str(),
             false /* executable */)) {
+      return source;
+    }
+  }
+
+  if (settings.application_library_path.size() > 0) {
+    auto library =
+        fml::NativeLibrary::Create(settings.application_library_path.c_str());
+    if (auto source = DartSnapshotBuffer::CreateWithSymbolInLibrary(
+            library, kIsolateDataSymbolSo)) {
       return source;
     }
   }
@@ -86,7 +119,7 @@ std::unique_ptr<DartSnapshotBuffer> ResolveIsolateInstructions(
     auto library =
         fml::NativeLibrary::Create(settings.application_library_path.c_str());
     if (auto source = DartSnapshotBuffer::CreateWithSymbolInLibrary(
-            library, DartSnapshot::kIsolateInstructionsSymbol)) {
+            library, kIsolateInstructionsSymbolSo)) {
       return source;
     }
   }
