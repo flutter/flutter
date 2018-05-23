@@ -691,8 +691,6 @@ class AccessibilityBridge extends AccessibilityNodeProvider implements BasicMess
                 e.getText().add((String) data.get("message"));
                 sendAccessibilityEvent(e);
             }
-            default:
-                assert false;
         }
     }
 
