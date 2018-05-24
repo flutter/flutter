@@ -64,6 +64,7 @@ class TranslationBundle {
   String get popupMenuLabel => parent?.popupMenuLabel;
   String get dialogLabel => parent?.dialogLabel;
   String get alertDialogLabel => parent?.alertDialogLabel;
+  String get searchFieldLabel => parent?.searchFieldLabel;
 }
 
 // ignore: camel_case_types
@@ -113,6 +114,7 @@ class _Bundle_ar extends TranslationBundle {
   @override String get popupMenuLabel => r'قائمة منبثقة';
   @override String get dialogLabel => r'مربع حوار';
   @override String get alertDialogLabel => r'مربع حوار التنبيه';
+  @override String get searchFieldLabel => r'بحث';
 }
 
 // ignore: camel_case_types
@@ -159,6 +161,7 @@ class _Bundle_de extends TranslationBundle {
   @override String get popupMenuLabel => r'Pop-up-Menü';
   @override String get dialogLabel => r'Dialogfeld';
   @override String get alertDialogLabel => r'Aufmerksam';
+  @override String get searchFieldLabel => r'Suchen';
 }
 
 // ignore: camel_case_types
@@ -205,6 +208,7 @@ class _Bundle_en extends TranslationBundle {
   @override String get popupMenuLabel => r'Popup menu';
   @override String get dialogLabel => r'Dialog';
   @override String get alertDialogLabel => r'Alert';
+  @override String get searchFieldLabel => r'Search';
 }
 
 // ignore: camel_case_types
@@ -251,6 +255,7 @@ class _Bundle_es extends TranslationBundle {
   @override String get popupMenuLabel => r'Menú emergente';
   @override String get dialogLabel => r'Cuadro de diálogo';
   @override String get alertDialogLabel => r'Alerta';
+  @override String get searchFieldLabel => r'Buscar';
 }
 
 // ignore: camel_case_types
@@ -296,6 +301,7 @@ class _Bundle_fa extends TranslationBundle {
   @override String get popupMenuLabel => r'منوی بازشو';
   @override String get dialogLabel => r'کادر گفتگو';
   @override String get alertDialogLabel => r'هشدار';
+  @override String get searchFieldLabel => r'جستجو کردن';
 }
 
 // ignore: camel_case_types
@@ -342,6 +348,7 @@ class _Bundle_fr extends TranslationBundle {
   @override String get popupMenuLabel => r'Menu contextuel';
   @override String get dialogLabel => r'Boîte de dialogue';
   @override String get alertDialogLabel => r'Alerte';
+  @override String get searchFieldLabel => r'Chercher';
 }
 
 // ignore: camel_case_types
@@ -387,6 +394,7 @@ class _Bundle_gsw extends TranslationBundle {
   @override String get popupMenuLabel => r'Pop-up-Menü';
   @override String get dialogLabel => r'Dialogfeld';
   @override String get alertDialogLabel => r'Aufmerksam';
+  @override String get searchFieldLabel => r'Suchen';
 }
 
 // ignore: camel_case_types
@@ -434,6 +442,7 @@ class _Bundle_he extends TranslationBundle {
   @override String get popupMenuLabel => r'תפריט קופץ';
   @override String get dialogLabel => r'תיבת דו-שיח';
   @override String get alertDialogLabel => r'עֵרָנִי';
+  @override String get searchFieldLabel => r'לחפש';
 }
 
 // ignore: camel_case_types
@@ -479,6 +488,7 @@ class _Bundle_id extends TranslationBundle {
   @override String get popupMenuLabel => r'Menu pop-up';
   @override String get dialogLabel => r'Dialog';
   @override String get alertDialogLabel => r'Waspada';
+  @override String get searchFieldLabel => r'Pencarian';
 }
 
 // ignore: camel_case_types
@@ -524,6 +534,7 @@ class _Bundle_it extends TranslationBundle {
   @override String get popupMenuLabel => r'Menu popup';
   @override String get dialogLabel => r'Finestra di dialogo';
   @override String get alertDialogLabel => r'Mettere in guardia';
+  @override String get searchFieldLabel => r'Ricerca';
 }
 
 // ignore: camel_case_types
@@ -569,6 +580,7 @@ class _Bundle_ja extends TranslationBundle {
   @override String get popupMenuLabel => r'ポップアップ メニュー';
   @override String get dialogLabel => r'ダイアログ';
   @override String get alertDialogLabel => r'アラート';
+  @override String get searchFieldLabel => r'サーチ';
 }
 
 // ignore: camel_case_types
@@ -614,6 +626,7 @@ class _Bundle_ko extends TranslationBundle {
   @override String get popupMenuLabel => r'팝업 메뉴';
   @override String get dialogLabel => r'대화상자';
   @override String get alertDialogLabel => r'경보';
+  @override String get searchFieldLabel => r'수색';
 }
 
 // ignore: camel_case_types
@@ -660,6 +673,7 @@ class _Bundle_ms extends TranslationBundle {
   @override String get popupMenuLabel => r'Menu pop timbul';
   @override String get dialogLabel => r'Dialog';
   @override String get alertDialogLabel => r'Amaran';
+  @override String get searchFieldLabel => r'Carian';
 }
 
 // ignore: camel_case_types
@@ -705,6 +719,7 @@ class _Bundle_nb extends TranslationBundle {
   @override String get popupMenuLabel => r'Forgrunnsmeny';
   @override String get dialogLabel => r'Dialogboks';
   @override String get alertDialogLabel => r'Varsling';
+  @override String get searchFieldLabel => r'Søke';
 }
 
 // ignore: camel_case_types
@@ -750,6 +765,7 @@ class _Bundle_nl extends TranslationBundle {
   @override String get popupMenuLabel => r'Pop-upmenu';
   @override String get dialogLabel => r'Dialoogvenster';
   @override String get alertDialogLabel => r'Alarm';
+  @override String get searchFieldLabel => r'Zoeken';
 }
 
 // ignore: camel_case_types
@@ -797,6 +813,7 @@ class _Bundle_pl extends TranslationBundle {
   @override String get popupMenuLabel => r'Wyskakujące menu';
   @override String get dialogLabel => r'Okno dialogowe';
   @override String get alertDialogLabel => r'Alarm';
+  @override String get searchFieldLabel => r'Szukaj';
 }
 
 // ignore: camel_case_types
@@ -839,6 +856,7 @@ class _Bundle_ps extends TranslationBundle {
   @override String get popupMenuLabel => r'د پاپ اپ مینو';
   @override String get dialogLabel => r'خبرې اترې';
   @override String get alertDialogLabel => r'خبرتیا';
+  @override String get searchFieldLabel => r'لټون';
 }
 
 // ignore: camel_case_types
@@ -884,6 +902,7 @@ class _Bundle_pt extends TranslationBundle {
   @override String get popupMenuLabel => r'Menu pop-up';
   @override String get dialogLabel => r'Caixa de diálogo';
   @override String get alertDialogLabel => r'Alerta';
+  @override String get searchFieldLabel => r'Pesquisa';
 }
 
 // ignore: camel_case_types
@@ -931,6 +950,7 @@ class _Bundle_ro extends TranslationBundle {
   @override String get popupMenuLabel => r'Meniu pop-up';
   @override String get dialogLabel => r'Casetă de dialog';
   @override String get alertDialogLabel => r'Alerta';
+  @override String get searchFieldLabel => r'Căutare';
 }
 
 // ignore: camel_case_types
@@ -979,6 +999,7 @@ class _Bundle_ru extends TranslationBundle {
   @override String get popupMenuLabel => r'Всплывающее меню';
   @override String get dialogLabel => r'Диалоговое окно';
   @override String get alertDialogLabel => r'бдительный';
+  @override String get searchFieldLabel => r'Поиск';
 }
 
 // ignore: camel_case_types
@@ -1024,6 +1045,7 @@ class _Bundle_th extends TranslationBundle {
   @override String get popupMenuLabel => r'เมนูป๊อปอัป';
   @override String get dialogLabel => r'กล่องโต้ตอบ';
   @override String get alertDialogLabel => r'เตือนภัย';
+  @override String get searchFieldLabel => r'ค้นหา';
 }
 
 // ignore: camel_case_types
@@ -1069,6 +1091,7 @@ class _Bundle_tr extends TranslationBundle {
   @override String get popupMenuLabel => r'Popup menü';
   @override String get dialogLabel => r'İletişim kutusu';
   @override String get alertDialogLabel => r'Alarm';
+  @override String get searchFieldLabel => r'Arama';
 }
 
 // ignore: camel_case_types
@@ -1114,6 +1137,7 @@ class _Bundle_ur extends TranslationBundle {
   @override String get popupMenuLabel => r'پاپ اپ مینو';
   @override String get dialogLabel => r'ڈائیلاگ';
   @override String get alertDialogLabel => r'انتباہ';
+  @override String get searchFieldLabel => r'تلاش کریں';
 }
 
 // ignore: camel_case_types
@@ -1159,6 +1183,7 @@ class _Bundle_vi extends TranslationBundle {
   @override String get popupMenuLabel => r'Menu bật lên';
   @override String get dialogLabel => r'Hộp thoại';
   @override String get alertDialogLabel => r'Hộp thoại';
+  @override String get searchFieldLabel => r'Tìm kiếm';
 }
 
 // ignore: camel_case_types
@@ -1204,6 +1229,7 @@ class _Bundle_zh extends TranslationBundle {
   @override String get popupMenuLabel => r'弹出菜单';
   @override String get dialogLabel => r'对话框';
   @override String get alertDialogLabel => r'警报';
+  @override String get searchFieldLabel => r'搜索';
 }
 
 // ignore: camel_case_types
