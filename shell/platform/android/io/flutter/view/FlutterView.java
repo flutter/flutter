@@ -22,6 +22,7 @@ import android.text.format.DateFormat;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.util.TypedValue;
+import android.view.KeyCharacterMap;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.Surface;
@@ -33,6 +34,7 @@ import android.view.accessibility.AccessibilityManager;
 import android.view.accessibility.AccessibilityNodeProvider;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputConnection;
+import android.view.inputmethod.InputMethodManager;
 import io.flutter.app.FlutterActivity;
 import io.flutter.app.FlutterPluginRegistry;
 import io.flutter.plugin.common.*;
@@ -98,6 +100,7 @@ public class FlutterView extends SurfaceView
         int physicalViewInsetLeft = 0;
     }
 
+    private final InputMethodManager mImm;
     private final TextInputPlugin mTextInputPlugin;
     private final SurfaceHolder.Callback mSurfaceCallback;
     private final ViewportMetrics mMetrics;
@@ -114,6 +117,7 @@ public class FlutterView extends SurfaceView
     private final AtomicLong nextTextureId = new AtomicLong(0L);
     private FlutterNativeView mNativeView;
     private boolean mIsSoftwareRenderingEnabled = false; // using the software renderer or not
+    private InputConnection mLastInputConnection;
 
     public FlutterView(Context context) {
         this(context, null);
@@ -197,6 +201,7 @@ public class FlutterView extends SurfaceView
             "flutter/platform", JSONMethodCodec.INSTANCE);
         flutterPlatformChannel.setMethodCallHandler(platformPlugin);
         addActivityLifecycleListener(platformPlugin);
+        mImm = (InputMethodManager) getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
         mTextInputPlugin = new TextInputPlugin(this);
 
         setLocale(getResources().getConfiguration().locale);
@@ -236,6 +241,12 @@ public class FlutterView extends SurfaceView
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         if (!isAttached()) {
             return super.onKeyDown(keyCode, event);
+        }
+
+        if (event.getDeviceId() != KeyCharacterMap.VIRTUAL_KEYBOARD) {
+            if (mLastInputConnection != null && mImm.isAcceptingText()) {
+                mLastInputConnection.sendKeyEvent(event);
+            }
         }
 
         Map<String, Object> message = new HashMap<>();
@@ -372,7 +383,8 @@ public class FlutterView extends SurfaceView
     @Override
     public InputConnection onCreateInputConnection(EditorInfo outAttrs) {
         try {
-            return mTextInputPlugin.createInputConnection(this, outAttrs);
+            mLastInputConnection = mTextInputPlugin.createInputConnection(this, outAttrs);
+            return mLastInputConnection;
         } catch (JSONException e) {
             Log.e(TAG, "Failed to create input connection", e);
             return null;
