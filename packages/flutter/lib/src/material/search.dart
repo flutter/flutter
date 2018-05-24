@@ -29,6 +29,10 @@ import 'theme.dart';
 /// The method returns the selected search result, which can be set in the
 /// [SearchDelegate.close] call.
 ///
+/// A given [SearchDelegate] can only be associated with one active [showSearch]
+/// call. Call [SearchDelegate.close] before re-using the same delegate instance
+/// for another [showSearch] call.
+///
 /// The transition to the search page triggered by this method looks best if the
 /// screen triggering the transition contains an [AppBar] at the top and the
 /// transition is called from an [IconButton] that's part of [AppBar.actions].
@@ -79,6 +83,10 @@ Future<T> showSearch<T>({
 /// Once the user has selected a search result, [SearchDelegate.close] should be
 /// called to remove the search page from the top of the navigation stack and
 /// to notify the caller of [showSearch] about the selected search result.
+///
+/// A given [SearchDelegate] can only be associated with one active [showSearch]
+/// call. Call [SearchDelegate.close] before re-using the same delegate instance
+/// for another [showSearch] call.
 abstract class SearchDelegate<T> {
 
   /// Suggestions shown in the body of the search page while the user types a
