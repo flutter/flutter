@@ -128,36 +128,47 @@ class InputConnectionAdaptor extends BaseInputConnection {
 
     @Override
     public boolean sendKeyEvent(KeyEvent event) {
-        final boolean result = super.sendKeyEvent(event);
-        if (event.getAction() == KeyEvent.ACTION_UP) {
+        if (event.getAction() == KeyEvent.ACTION_DOWN) {
             if (event.getKeyCode() == KeyEvent.KEYCODE_DEL) {
                 int selStart = Selection.getSelectionStart(mEditable);
                 int selEnd = Selection.getSelectionEnd(mEditable);
                 if (selEnd > selStart) {
                     // Delete the selection.
                     Selection.setSelection(mEditable, selStart);
-                    deleteSurroundingText(0, selEnd - selStart);
+                    mEditable.delete(selStart, selEnd);
+                    updateEditingState();
+                    return true;
                 } else if (selStart > 0) {
                     // Delete to the left of the cursor.
-                    Selection.setSelection(mEditable, selStart - 1);
-                    deleteSurroundingText(0, 1);
+                    int newSel = Math.max(selStart - 1, 0);
+                    Selection.setSelection(mEditable, newSel);
+                    mEditable.delete(newSel, selStart);
+                    updateEditingState();
+                    return true;
                 }
             } else if (event.getKeyCode() == KeyEvent.KEYCODE_DPAD_LEFT) {
                 int selStart = Selection.getSelectionStart(mEditable);
                 int newSel = Math.max(selStart - 1, 0);
                 setSelection(newSel, newSel);
+                return true;
             } else if (event.getKeyCode() == KeyEvent.KEYCODE_DPAD_RIGHT) {
                 int selStart = Selection.getSelectionStart(mEditable);
                 int newSel = Math.min(selStart + 1, mEditable.length());
                 setSelection(newSel, newSel);
+                return true;
             } else {
                 // Enter a character.
                 int character = event.getUnicodeChar();
-                if (character != 0)
-                    commitText(String.valueOf((char) character), 1);
+                if (character != 0) {
+                    int selStart = Math.max(0, Selection.getSelectionStart(mEditable));
+                    mEditable.insert(selStart, String.valueOf((char) character));
+                    setSelection(selStart + 1, selStart + 1);
+                    updateEditingState();
+                }
+                return true;
             }
         }
-        return result;
+        return false;
     }
 
     @Override
