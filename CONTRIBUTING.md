@@ -126,7 +126,7 @@ Adding a test
 
 To add a test to the Flutter package, create a file whose name
 ends with `_test.dart` in the `packages/flutter/test` directory. The
-test should have a `main` function and use the `test` package.
+test should have a `main` function and use the `flutter_test` package.
 
 Working with flutter tools
 --------------------------
