@@ -281,14 +281,151 @@ void main() {
     await tester.pumpAndSettle();
     expect(delegate.transitionAnimation.status, AnimationStatus.dismissed);
   });
+
+  testWidgets('Closing nested search returns to search', (WidgetTester tester) async {
+    final List<String> nestedSearchResults = <String>[];
+    final _TestSearchDelegate nestedSearchDelegate = new _TestSearchDelegate(
+      suggestions: 'Nested Suggestions',
+      result: 'Nested Result',
+    );
+
+    final List<String> selectedResults = <String>[];
+    final _TestSearchDelegate delegate = new _TestSearchDelegate(
+      actions: <Widget>[
+        new Builder(
+          builder: (BuildContext context) {
+            return new IconButton(
+              tooltip: 'Nested Search',
+              icon: const Icon(Icons.search),
+              onPressed: () async {
+                final String result = await showSearch(
+                  context: context,
+                  delegate: nestedSearchDelegate,
+                );
+                nestedSearchResults.add(result);
+              },
+            );
+          },
+        )
+      ],
+    );
+
+    await tester.pumpWidget(new TestHomePage(
+      delegate: delegate,
+      results: selectedResults,
+    ));
+    expect(find.text('HomeBody'), findsOneWidget);
+    await tester.tap(find.byTooltip('Search'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('HomeBody'), findsNothing);
+    expect(find.text('Suggestions'), findsOneWidget);
+    expect(find.text('Nested Suggestions'), findsNothing);
+
+    await tester.tap(find.byTooltip('Nested Search'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('HomeBody'), findsNothing);
+    expect(find.text('Suggestions'), findsNothing);
+    expect(find.text('Nested Suggestions'), findsOneWidget);
+
+    await tester.tap(find.byTooltip('Back'));
+    await tester.pumpAndSettle();
+    expect(nestedSearchResults, <String>['Nested Result']);
+
+    expect(find.text('HomeBody'), findsNothing);
+    expect(find.text('Suggestions'), findsOneWidget);
+    expect(find.text('Nested Suggestions'), findsNothing);
+
+    await tester.tap(find.byTooltip('Back'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('HomeBody'), findsOneWidget);
+    expect(find.text('Suggestions'), findsNothing);
+    expect(find.text('Nested Suggestions'), findsNothing);
+    expect(selectedResults, <String>['Result']);
+  });
+
+  testWidgets('Closing search with nested search shown goes back to underlying route', (WidgetTester tester) async {
+    _TestSearchDelegate delegate;
+    final List<String> nestedSearchResults = <String>[];
+    final _TestSearchDelegate nestedSearchDelegate = new _TestSearchDelegate(
+      suggestions: 'Nested Suggestions',
+      result: 'Nested Result',
+      actions: <Widget>[
+        new Builder(
+          builder: (BuildContext context) {
+            return new IconButton(
+              tooltip: 'Close Search',
+              icon: const Icon(Icons.close),
+              onPressed: () async {
+                delegate.close(context, 'Result Foo');
+              },
+            );
+          },
+        )
+      ],
+    );
+
+    final List<String> selectedResults = <String>[];
+    delegate = new _TestSearchDelegate(
+      actions: <Widget>[
+        new Builder(
+          builder: (BuildContext context) {
+            return new IconButton(
+              tooltip: 'Nested Search',
+              icon: const Icon(Icons.search),
+              onPressed: () async {
+                final String result = await showSearch(
+                  context: context,
+                  delegate: nestedSearchDelegate,
+                );
+                nestedSearchResults.add(result);
+              },
+            );
+          },
+        )
+      ],
+    );
+
+    await tester.pumpWidget(new TestHomePage(
+      delegate: delegate,
+      results: selectedResults,
+    ));
+
+    expect(find.text('HomeBody'), findsOneWidget);
+    await tester.tap(find.byTooltip('Search'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('HomeBody'), findsNothing);
+    expect(find.text('Suggestions'), findsOneWidget);
+    expect(find.text('Nested Suggestions'), findsNothing);
+
+    await tester.tap(find.byTooltip('Nested Search'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('HomeBody'), findsNothing);
+    expect(find.text('Suggestions'), findsNothing);
+    expect(find.text('Nested Suggestions'), findsOneWidget);
+
+    await tester.tap(find.byTooltip('Close Search'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('HomeBody'), findsOneWidget);
+    expect(find.text('Suggestions'), findsNothing);
+    expect(find.text('Nested Suggestions'), findsNothing);
+    expect(nestedSearchResults, hasLength(0));
+    expect(selectedResults, <String>['Result Foo']);
+  });
 }
 
 class TestHomePage extends StatelessWidget {
-  const TestHomePage(
-      {this.results,
-      this.delegate,
-      this.passInInitialQuery: false,
-      this.initialQuery});
+  const TestHomePage({
+    this.results,
+    this.delegate,
+    this.passInInitialQuery: false,
+    this.initialQuery,
+  });
 
   final List<String> results;
   final SearchDelegate<String> delegate;
@@ -333,13 +470,24 @@ class TestHomePage extends StatelessWidget {
 }
 
 class _TestSearchDelegate extends SearchDelegate<String> {
+
+  _TestSearchDelegate({
+    this.suggestions: 'Suggestions',
+    this.result: 'Result',
+    this.actions: const <Widget>[],
+  });
+
+  final String suggestions;
+  final String result;
+  final List<Widget> actions;
+
   @override
   Widget buildLeading(BuildContext context) {
     return new IconButton(
       tooltip: 'Back',
       icon: const Icon(Icons.arrow_back),
       onPressed: () {
-        close(context, 'Result');
+        close(context, result);
       },
     );
   }
@@ -354,7 +502,7 @@ class _TestSearchDelegate extends SearchDelegate<String> {
       onPressed: () {
         showResults(context);
       },
-      child: const Text('Suggestions'),
+      child: new Text(suggestions),
     );
   }
 
@@ -366,12 +514,6 @@ class _TestSearchDelegate extends SearchDelegate<String> {
 
   @override
   List<Widget> buildActions(BuildContext context) {
-    return <Widget>[
-      new IconButton(
-        tooltip: 'Clear',
-        icon: const Icon(Icons.clear),
-        onPressed: () {},
-      )
-    ];
+    return actions;
   }
 }
