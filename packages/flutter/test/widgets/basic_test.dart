@@ -55,7 +55,7 @@ void main() {
   });
 
   group('FractionalTranslation', () {
-    testWidgets('hit test - inside bounding box', (WidgetTester tester) async {
+    testWidgets('hit test - entirely inside the bounding box', (WidgetTester tester) async {
       final GlobalKey key1 = new GlobalKey();
       bool _pointerDown = false;
 
@@ -85,7 +85,37 @@ void main() {
       expect(_pointerDown, isTrue);
     });
 
-    testWidgets('hit test - outside bounding box', (WidgetTester tester) async {
+    testWidgets('hit test - partially inside the bounding box', (WidgetTester tester) async {
+      final GlobalKey key1 = new GlobalKey();
+      bool _pointerDown = false;
+
+      await tester.pumpWidget(
+        new Center(
+          child: new FractionalTranslation(
+            translation: const Offset(0.5, 0.5),
+            transformHitTests: true,
+            child: new Listener(
+              onPointerDown: (PointerDownEvent event) {
+                _pointerDown = true;
+              },
+              child: new SizedBox(
+                key: key1,
+                width: 100.0,
+                height: 100.0,
+                child: new Container(
+                  color: const Color(0xFF0000FF)
+                ),
+              ),
+            )
+          )
+        )
+      );
+      expect(_pointerDown, isFalse);
+      await tester.tap(find.byKey(key1));
+      expect(_pointerDown, isTrue);
+    });
+
+    testWidgets('hit test - completely outside the bounding box', (WidgetTester tester) async {
       final GlobalKey key1 = new GlobalKey();
       bool _pointerDown = false;
 
