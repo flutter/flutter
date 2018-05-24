@@ -20,7 +20,6 @@ if [ -n "$RESULTS" ]; then
 fi
 
 echo "Analyzing frontend_server..."
-pushd flutter/frontend_server/; pub get; popd
 RESULTS=`dartanalyzer                                                          \
   --packages=flutter/frontend_server/.packages                                 \
   --options flutter/analysis_options.yaml                                      \

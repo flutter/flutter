@@ -88,6 +88,7 @@ vars = {
   'dart_stack_trace_tag': '1.9.2',
   'dart_stream_channel_tag': '1.6.4',
   'dart_string_scanner_tag': '1.0.2',
+  'dart_term_glyph_tag': '1.0.0',
   'dart_test_tag': '0.12.38',
   'dart_tuple_tag': 'v1.0.1',
   'dart_typed_data_tag': '1.1.3',
@@ -321,6 +322,9 @@ deps = {
   'src/third_party/dart/third_party/pkg/typed_data':
    Var('dart_git') + '/typed_data.git' + '@' + Var('dart_typed_data_tag'),
 
+  'src/third_party/dart/third_party/pkg/term_glyph':
+   Var('dart_git') + '/term_glyph.git' + '@' + Var('dart_term_glyph_tag'),
+
   'src/third_party/dart/third_party/pkg/test':
    Var('dart_git') + '/test.git' + '@' + Var('dart_test_tag'),
 
@@ -418,29 +422,8 @@ hooks = [
   {
     'name': 'frontend_server_packages',
     'pattern': '.',
-    'condition': 'host_os == "linux"',
     'cwd': 'src/flutter/frontend_server/',
-    'action': [
-      '../../../src/third_party/dart/tools/sdks/linux/dart-sdk/bin/pub', 'get',
-    ],
-  },
-  {
-    'name': 'frontend_server_packages',
-    'pattern': '.',
-    'condition': 'host_os == "mac"',
-    'cwd': 'src/flutter/frontend_server/',
-    'action': [
-      '../../../src/third_party/dart/tools/sdks/mac/dart-sdk/bin/pub', 'get',
-    ],
-  },
-  {
-    'name': 'frontend_server_packages',
-    'pattern': '.',
-    'condition': 'host_os == "win"',
-    'cwd': 'src/flutter/frontend_server/',
-    'action': [
-      '..\\..\\..\\src\\third_party\\dart\\tools\\sdks\\win\\dart-sdk\\bin\\pub.bat', 'get',
-    ],
+    'action': ['python', '../tools/frontend_server_packages.py'],
   },
   {
     # Ensure that we don't accidentally reference any .pyc files whose
