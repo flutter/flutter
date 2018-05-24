@@ -1,4 +1,4 @@
-Signature: 1935a220c7d576d51102c023b725675b
+Signature: c7da42c7a02693e3ce534e6053cae94a
 
 UNUSED LICENSES:
 
@@ -17499,6 +17499,7 @@ FILE: ../../../third_party/skia/infra/bots/isolate_gcloud_linux.isolate
 FILE: ../../../third_party/skia/infra/bots/isolate_go.isolate
 FILE: ../../../third_party/skia/infra/bots/jobs.json
 FILE: ../../../third_party/skia/infra/bots/perf_skia_bundled.isolate
+FILE: ../../../third_party/skia/infra/bots/recipe_modules/binary_size/examples/full.expected/binary_size.json
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/build/examples/full.expected/Build-Debian9-Clang-arm-Release-Android_API26.json
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/build/examples/full.expected/Build-Debian9-Clang-arm-Release-Android_ASAN.json
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/build/examples/full.expected/Build-Debian9-Clang-arm-Release-Chromebook_GLES.json
@@ -17534,16 +17535,17 @@ FILE: ../../../third_party/skia/infra/bots/recipe_modules/build/examples/full.ex
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/build/examples/full.expected/Test-Ubuntu14-Clang-GCE-CPU-AVX2-x86_64-Debug-All-CT_DM_10k_SKPs.json
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/builder_name_schema/builder_name_schema.json
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/builder_name_schema/examples/full.expected/test.json
-FILE: ../../../third_party/skia/infra/bots/recipe_modules/core/examples/full.expected/Build-Debian9-Clang-x86_64-Release-NoDEPS.json
-FILE: ../../../third_party/skia/infra/bots/recipe_modules/core/examples/full.expected/Build-Mac-Clang-x86_64-Debug-CommandBuffer.json
-FILE: ../../../third_party/skia/infra/bots/recipe_modules/core/examples/full.expected/Build-Win-Clang-x86_64-Release-ParentRevision.json
-FILE: ../../../third_party/skia/infra/bots/recipe_modules/core/examples/full.expected/Housekeeper-Weekly-RecreateSKPs.json
-FILE: ../../../third_party/skia/infra/bots/recipe_modules/core/examples/full.expected/cross_repo_trybot.json
-FILE: ../../../third_party/skia/infra/bots/recipe_modules/core/examples/full.expected/flutter_trybot.json
-FILE: ../../../third_party/skia/infra/bots/recipe_modules/core/examples/full.expected/parent_revision_trybot.json
-FILE: ../../../third_party/skia/infra/bots/recipe_modules/core/examples/full.expected/test.json
+FILE: ../../../third_party/skia/infra/bots/recipe_modules/checkout/examples/full.expected/Build-Debian9-Clang-x86_64-Release-NoDEPS.json
+FILE: ../../../third_party/skia/infra/bots/recipe_modules/checkout/examples/full.expected/Build-Mac-Clang-x86_64-Debug-CommandBuffer.json
+FILE: ../../../third_party/skia/infra/bots/recipe_modules/checkout/examples/full.expected/Build-Win-Clang-x86_64-Release-ParentRevision.json
+FILE: ../../../third_party/skia/infra/bots/recipe_modules/checkout/examples/full.expected/Housekeeper-Weekly-RecreateSKPs.json
+FILE: ../../../third_party/skia/infra/bots/recipe_modules/checkout/examples/full.expected/cross_repo_trybot.json
+FILE: ../../../third_party/skia/infra/bots/recipe_modules/checkout/examples/full.expected/flutter_trybot.json
+FILE: ../../../third_party/skia/infra/bots/recipe_modules/checkout/examples/full.expected/parent_revision_trybot.json
+FILE: ../../../third_party/skia/infra/bots/recipe_modules/checkout/examples/full.expected/test.json
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/ct/examples/full.expected/failed_gsutil.json
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/ct/examples/full.expected/test.json
+FILE: ../../../third_party/skia/infra/bots/recipe_modules/doxygen/examples/full.expected/doxygen.json
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/env/examples/full.expected/test.json
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/flavor/examples/full.expected/Perf-Android-Clang-GalaxyS7_G930FD-GPU-MaliT880-arm64-Debug-All-Android.json
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/flavor/examples/full.expected/Perf-Android-Clang-Nexus5x-GPU-Adreno418-arm64-Debug-All-Android.json
