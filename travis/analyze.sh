@@ -34,7 +34,6 @@ if [ -n "$RESULTS" ]; then
 fi
 
 echo "Analyzing flutter_kernel_transformers..."
-pushd flutter/flutter_kernel_transformers/; pub get; popd
 RESULTS=`dartanalyzer                                                          \
   --packages=flutter/flutter_kernel_transformers/.packages                     \
   --options flutter/analysis_options.yaml                                      \
