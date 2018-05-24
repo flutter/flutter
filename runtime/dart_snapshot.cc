@@ -170,6 +170,10 @@ fxl::RefPtr<DartSnapshot> DartSnapshot::IsolateSnapshotFromSettings(
 #endif
 }
 
+fxl::RefPtr<DartSnapshot> DartSnapshot::Empty() {
+  return fxl::MakeRefCounted<DartSnapshot>(nullptr, nullptr);
+}
+
 DartSnapshot::DartSnapshot(std::unique_ptr<DartSnapshotBuffer> data,
                            std::unique_ptr<DartSnapshotBuffer> instructions)
     : data_(std::move(data)), instructions_(std::move(instructions)) {}
@@ -190,6 +194,10 @@ const DartSnapshotBuffer* DartSnapshot::GetData() const {
 
 const DartSnapshotBuffer* DartSnapshot::GetInstructions() const {
   return instructions_.get();
+}
+
+const uint8_t* DartSnapshot::GetDataIfPresent() const {
+  return data_ ? data_->GetSnapshotPointer() : nullptr;
 }
 
 const uint8_t* DartSnapshot::GetInstructionsIfPresent() const {

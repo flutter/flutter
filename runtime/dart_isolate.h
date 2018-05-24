@@ -41,6 +41,7 @@ class DartIsolate : public UIDartState {
   static fml::WeakPtr<DartIsolate> CreateRootIsolate(
       const DartVM* vm,
       fxl::RefPtr<DartSnapshot> isolate_snapshot,
+      fxl::RefPtr<DartSnapshot> shared_snapshot,
       TaskRunners task_runners,
       std::unique_ptr<Window> window,
       fml::WeakPtr<GrContext> resource_context,
@@ -51,6 +52,7 @@ class DartIsolate : public UIDartState {
 
   DartIsolate(const DartVM* vm,
               fxl::RefPtr<DartSnapshot> isolate_snapshot,
+              fxl::RefPtr<DartSnapshot> shared_snapshot,
               TaskRunners task_runners,
               fml::WeakPtr<GrContext> resource_context,
               fxl::RefPtr<flow::SkiaUnrefQueue> unref_queue,
@@ -85,6 +87,7 @@ class DartIsolate : public UIDartState {
   const DartVM* GetDartVM() const;
 
   fxl::RefPtr<DartSnapshot> GetIsolateSnapshot() const;
+  fxl::RefPtr<DartSnapshot> GetSharedSnapshot() const;
 
   fml::WeakPtr<DartIsolate> GetWeakIsolatePtr() const;
 
@@ -107,6 +110,7 @@ class DartIsolate : public UIDartState {
   const DartVM* vm_ = nullptr;
   Phase phase_ = Phase::Unknown;
   const fxl::RefPtr<DartSnapshot> isolate_snapshot_;
+  const fxl::RefPtr<DartSnapshot> shared_snapshot_;
   std::vector<std::unique_ptr<AutoFireClosure>> shutdown_callbacks_;
   ChildIsolatePreparer child_isolate_preparer_;
   std::unique_ptr<fml::WeakPtrFactory<DartIsolate>> weak_factory_;
