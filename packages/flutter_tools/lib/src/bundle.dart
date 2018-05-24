@@ -25,6 +25,8 @@ const String defaultPrivateKeyPath = 'privatekey.der';
 
 const String _kKernelKey = 'kernel_blob.bin';
 const String _kSnapshotKey = 'snapshot_blob.bin';
+const String _kVMSnapshotData = 'vm_snapshot_data';
+const String _kIsolateSnapshotData = 'isolate_snapshot_data';
 const String _kDylibKey = 'libapp.so';
 const String _kPlatformKernelKey = 'platform.dill';
 
@@ -150,14 +152,21 @@ Future<void> assemble({
   printTrace('Building bundle');
 
   final Map<String, DevFSContent> assetEntries = new Map<String, DevFSContent>.from(assetBundle.entries);
+  final String vmSnapshotData = artifacts.getArtifactPath(Artifact.vmSnapshotData);
+  final String isolateSnapshotData = artifacts.getArtifactPath(Artifact.isolateSnapshotData);
 
   if (kernelContent != null) {
     final String platformKernelDill = artifacts.getArtifactPath(Artifact.platformKernelDill);
     assetEntries[_kKernelKey] = kernelContent;
     assetEntries[_kPlatformKernelKey] = new DevFSFileContent(fs.file(platformKernelDill));
+    assetEntries[_kVMSnapshotData] = new DevFSFileContent(fs.file(vmSnapshotData));
+    assetEntries[_kIsolateSnapshotData] = new DevFSFileContent(fs.file(isolateSnapshotData));
   }
-  if (snapshotFile != null)
+  if (snapshotFile != null) {
     assetEntries[_kSnapshotKey] = new DevFSFileContent(snapshotFile);
+    assetEntries[_kVMSnapshotData] = new DevFSFileContent(fs.file(vmSnapshotData));
+    assetEntries[_kIsolateSnapshotData] = new DevFSFileContent(fs.file(isolateSnapshotData));
+  }
   if (dylibFile != null)
     assetEntries[_kDylibKey] = new DevFSFileContent(dylibFile);
 
