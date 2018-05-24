@@ -104,14 +104,6 @@ source_set("runtime") {
 
   public_configs = [ "$flutter_root:config" ]
 
-  # In AOT mode, precompiled snapshots contain the instruction buffer.
-  # Generation of the same requires all application specific script code to be
-  # specified up front. In such cases, there can be no generic snapshot.
-  # In Fuchsia, we load from a file instead of linking.
-  if (!flutter_aot && !is_fuchsia) {
-    deps += [ "$flutter_root/lib/snapshot" ]
-  }
-
   if (flutter_runtime_mode != "release" && !is_fuchsia) {
     # Only link in Observatory in non-release modes on non-Fuchsia. Fuchsia
     # instead puts Observatory into the runner's package.
