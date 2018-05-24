@@ -1719,7 +1719,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
   void popUntil(RoutePredicate predicate) {
     if (!predicate(_history.last)) {
       pop();
-      new Timer(new Duration(milliseconds: 10), () {
+      new Timer(new Duration(milliseconds: 50), () {
         popUntil(predicate);
       });
     }
