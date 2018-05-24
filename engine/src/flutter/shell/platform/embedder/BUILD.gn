@@ -48,6 +48,7 @@ executable("embedder_unittests") {
   deps = [
     ":embedder",
     ":fixtures",
+    "$flutter_root/lib/snapshot",
     "$flutter_root/testing",
   ]
 
