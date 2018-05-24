@@ -39,5 +39,6 @@
   "drawerLabel": "Menu de navigation",
   "popupMenuLabel": "Menu contextuel",
   "dialogLabel": "Boîte de dialogue",
-  "alertDialogLabel": "Alerte"
+  "alertDialogLabel": "Alerte",
+  "searchFieldLabel": "Chercher"
 }
