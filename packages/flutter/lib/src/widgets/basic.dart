@@ -10,6 +10,7 @@ import 'package:flutter/services.dart';
 
 import 'debug.dart';
 import 'framework.dart';
+import 'localizations.dart';
 
 export 'package:flutter/animation.dart';
 export 'package:flutter/foundation.dart' show
@@ -4341,6 +4342,7 @@ class RichText extends LeafRenderObjectWidget {
       overflow: overflow,
       textScaleFactor: textScaleFactor,
       maxLines: maxLines,
+      locale: Localizations.localeOf(context, nullOk: true),
     );
   }
 
@@ -4354,7 +4356,8 @@ class RichText extends LeafRenderObjectWidget {
       ..softWrap = softWrap
       ..overflow = overflow
       ..textScaleFactor = textScaleFactor
-      ..maxLines = maxLines;
+      ..maxLines = maxLines
+      ..locale = Localizations.localeOf(context, nullOk: true);
   }
 
   @override
