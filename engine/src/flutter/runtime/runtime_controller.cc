@@ -22,12 +22,14 @@ RuntimeController::RuntimeController(
     RuntimeDelegate& p_client,
     const DartVM* p_vm,
     fxl::RefPtr<DartSnapshot> p_isolate_snapshot,
+    fxl::RefPtr<DartSnapshot> p_shared_snapshot,
     TaskRunners p_task_runners,
     fml::WeakPtr<GrContext> p_resource_context,
     fxl::RefPtr<flow::SkiaUnrefQueue> p_unref_queue)
     : RuntimeController(p_client,
                         p_vm,
                         std::move(p_isolate_snapshot),
+                        std::move(p_shared_snapshot),
                         std::move(p_task_runners),
                         std::move(p_resource_context),
                         std::move(p_unref_queue),
@@ -37,6 +39,7 @@ RuntimeController::RuntimeController(
     RuntimeDelegate& p_client,
     const DartVM* p_vm,
     fxl::RefPtr<DartSnapshot> p_isolate_snapshot,
+    fxl::RefPtr<DartSnapshot> p_shared_snapshot,
     TaskRunners p_task_runners,
     fml::WeakPtr<GrContext> p_resource_context,
     fxl::RefPtr<flow::SkiaUnrefQueue> p_unref_queue,
@@ -44,6 +47,7 @@ RuntimeController::RuntimeController(
     : client_(p_client),
       vm_(p_vm),
       isolate_snapshot_(std::move(p_isolate_snapshot)),
+      shared_snapshot_(std::move(p_shared_snapshot)),
       task_runners_(p_task_runners),
       resource_context_(p_resource_context),
       unref_queue_(p_unref_queue),
@@ -51,6 +55,7 @@ RuntimeController::RuntimeController(
       root_isolate_(
           DartIsolate::CreateRootIsolate(vm_,
                                          isolate_snapshot_,
+                                         shared_snapshot_,
                                          task_runners_,
                                          std::make_unique<Window>(this),
                                          resource_context_,
@@ -94,6 +99,7 @@ std::unique_ptr<RuntimeController> RuntimeController::Clone() const {
       client_,            //
       vm_,                //
       isolate_snapshot_,  //
+      shared_snapshot_,   //
       task_runners_,      //
       resource_context_,  //
       unref_queue_,       //

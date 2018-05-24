@@ -32,6 +32,7 @@ TEST_F(DartIsolateTest, RootIsolateCreationAndShutdown) {
   auto root_isolate = DartIsolate::CreateRootIsolate(
       vm.get(),                  // vm
       vm->GetIsolateSnapshot(),  // isolate snapshot
+      vm->GetSharedSnapshot(),   // shared snapshot
       std::move(task_runners),   // task runners
       nullptr,                   // window
       {},                        // resource context
@@ -57,6 +58,7 @@ TEST_F(DartIsolateTest, IsolateCanAssociateSnapshot) {
   auto root_isolate = DartIsolate::CreateRootIsolate(
       vm.get(),                  // vm
       vm->GetIsolateSnapshot(),  // isolate snapshot
+      vm->GetSharedSnapshot(),   // shared snapshot
       std::move(task_runners),   // task runners
       nullptr,                   // window
       {},                        // resource context
@@ -85,6 +87,7 @@ TEST_F(DartIsolateTest, CanResolveAndInvokeMethod) {
   auto root_isolate = DartIsolate::CreateRootIsolate(
       vm.get(),                  // vm
       vm->GetIsolateSnapshot(),  // isolate snapshot
+      vm->GetSharedSnapshot(),   // shared snapshot
       std::move(task_runners),   // task runners
       nullptr,                   // window
       {},                        // resource context

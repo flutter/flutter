@@ -38,6 +38,7 @@ static constexpr char kSettingsChannel[] = "flutter/settings";
 Engine::Engine(Delegate& delegate,
                const blink::DartVM& vm,
                fxl::RefPtr<blink::DartSnapshot> isolate_snapshot,
+               fxl::RefPtr<blink::DartSnapshot> shared_snapshot,
                blink::TaskRunners task_runners,
                blink::Settings settings,
                std::unique_ptr<Animator> animator,
@@ -57,6 +58,7 @@ Engine::Engine(Delegate& delegate,
       *this,                        // runtime delegate
       &vm,                          // VM
       std::move(isolate_snapshot),  // isolate snapshot
+      std::move(shared_snapshot),   // shared snapshot
       std::move(task_runners),      // task runners
       std::move(resource_context),  // resource context
       std::move(unref_queue)        // skia unref queue

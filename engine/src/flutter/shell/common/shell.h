@@ -56,6 +56,7 @@ class Shell final : public PlatformView::Delegate,
       blink::TaskRunners task_runners,
       blink::Settings settings,
       fxl::RefPtr<blink::DartSnapshot> isolate_snapshot,
+      fxl::RefPtr<blink::DartSnapshot> shared_snapshot,
       CreateCallback<PlatformView> on_create_platform_view,
       CreateCallback<Rasterizer> on_create_rasterizer);
 
@@ -105,6 +106,7 @@ class Shell final : public PlatformView::Delegate,
       blink::TaskRunners task_runners,
       blink::Settings settings,
       fxl::RefPtr<blink::DartSnapshot> isolate_snapshot,
+      fxl::RefPtr<blink::DartSnapshot> shared_snapshot,
       Shell::CreateCallback<PlatformView> on_create_platform_view,
       Shell::CreateCallback<Rasterizer> on_create_rasterizer);
 

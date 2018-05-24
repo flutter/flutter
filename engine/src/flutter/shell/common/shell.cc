@@ -41,6 +41,7 @@ std::unique_ptr<Shell> Shell::CreateShellOnPlatformThread(
     blink::TaskRunners task_runners,
     blink::Settings settings,
     fxl::RefPtr<blink::DartSnapshot> isolate_snapshot,
+    fxl::RefPtr<blink::DartSnapshot> shared_snapshot,
     Shell::CreateCallback<PlatformView> on_create_platform_view,
     Shell::CreateCallback<Rasterizer> on_create_rasterizer) {
   if (!task_runners.IsValid()) {
@@ -112,6 +113,7 @@ std::unique_ptr<Shell> Shell::CreateShellOnPlatformThread(
                          &engine,                                         //
                          shell = shell.get(),                             //
                          isolate_snapshot = std::move(isolate_snapshot),  //
+                         shared_snapshot = std::move(shared_snapshot),    //
                          vsync_waiter = std::move(vsync_waiter),          //
                          resource_context = std::move(resource_context),  //
                          unref_queue = std::move(unref_queue)             //
@@ -126,6 +128,7 @@ std::unique_ptr<Shell> Shell::CreateShellOnPlatformThread(
         engine = std::make_unique<Engine>(*shell,                       //
                                           shell->GetDartVM(),           //
                                           std::move(isolate_snapshot),  //
+                                          std::move(shared_snapshot),   //
                                           task_runners,                 //
                                           shell->GetSettings(),         //
                                           std::move(animator),          //
@@ -202,7 +205,8 @@ static void PerformInitializationTasks(const blink::Settings& settings) {
   });
 }
 
-std::unique_ptr<Shell> Shell::Create(
+
+  std::unique_ptr<Shell> Shell::Create(
     blink::TaskRunners task_runners,
     blink::Settings settings,
     Shell::CreateCallback<PlatformView> on_create_platform_view,
@@ -214,6 +218,7 @@ std::unique_ptr<Shell> Shell::Create(
   return Shell::Create(std::move(task_runners),             //
                        std::move(settings),                 //
                        vm->GetIsolateSnapshot(),            //
+                       blink::DartSnapshot::Empty(),        //
                        std::move(on_create_platform_view),  //
                        std::move(on_create_rasterizer)      //
   );
@@ -223,6 +228,7 @@ std::unique_ptr<Shell> Shell::Create(
     blink::TaskRunners task_runners,
     blink::Settings settings,
     fxl::RefPtr<blink::DartSnapshot> isolate_snapshot,
+    fxl::RefPtr<blink::DartSnapshot> shared_snapshot,
     Shell::CreateCallback<PlatformView> on_create_platform_view,
     Shell::CreateCallback<Rasterizer> on_create_rasterizer) {
   PerformInitializationTasks(settings);
@@ -241,12 +247,14 @@ std::unique_ptr<Shell> Shell::Create(
        task_runners = std::move(task_runners),          //
        settings,                                        //
        isolate_snapshot = std::move(isolate_snapshot),  //
+       shared_snapshot = std::move(shared_snapshot),    //
        on_create_platform_view,                         //
        on_create_rasterizer                             //
   ]() {
         shell = CreateShellOnPlatformThread(std::move(task_runners),      //
                                             settings,                     //
                                             std::move(isolate_snapshot),  //
+                                            std::move(shared_snapshot),   //
                                             on_create_platform_view,      //
                                             on_create_rasterizer          //
         );
