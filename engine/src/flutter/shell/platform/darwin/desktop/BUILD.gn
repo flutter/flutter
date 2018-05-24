@@ -22,6 +22,7 @@ source_set("mac_desktop_platform") {
   deps = [
     "$flutter_root/common",
     "$flutter_root/fml",
+    "$flutter_root/lib/snapshot",
     "$flutter_root/shell/common",
     "$flutter_root/shell/gpu",
     "$flutter_root/shell/platform/darwin/common",

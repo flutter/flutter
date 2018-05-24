@@ -19,6 +19,7 @@ source_set("embedder") {
     "$flutter_root/assets",
     "$flutter_root/common",
     "$flutter_root/fml",
+    "$flutter_root/lib/snapshot",
     "$flutter_root/shell/common",
     "$flutter_root/shell/gpu",
     "//garnet/public/lib/fxl",
@@ -48,7 +49,6 @@ executable("embedder_unittests") {
   deps = [
     ":embedder",
     ":fixtures",
-    "$flutter_root/lib/snapshot",
     "$flutter_root/testing",
   ]
 
