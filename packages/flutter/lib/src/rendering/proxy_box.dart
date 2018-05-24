@@ -2331,6 +2331,15 @@ class RenderFractionalTranslation extends RenderProxyBox {
     markNeedsPaint();
   }
 
+  @override
+  bool hitTest(HitTestResult result, { Offset position }) {
+    // RenderFractionalTranslation objects don't check if they are
+    // themselves hit, because it's confusing to think about
+    // how the untransformed size and the child's transformed
+    // position interact.
+    return hitTestChildren(result, position: position);
+  }
+
   /// When set to true, hit tests are performed based on the position of the
   /// child as it is painted. When set to false, hit tests are performed
   /// ignoring the transformation.
