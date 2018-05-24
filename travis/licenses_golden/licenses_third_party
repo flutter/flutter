@@ -1,4 +1,4 @@
-Signature: c5ff57ee9491321a5677dc35fd295d3e
+Signature: 6aba9ea3cc7cb380ba5635d24cc5e067
 
 UNUSED LICENSES:
 
@@ -17217,6 +17217,8 @@ FILE: ../../../third_party/skia/samplecode/SampleFlutterAnimate.cpp
 FILE: ../../../third_party/skia/src/android/SkAnimatedImage.cpp
 FILE: ../../../third_party/skia/src/core/SkBlurPriv.h
 FILE: ../../../third_party/skia/src/core/SkCanvasPriv.cpp
+FILE: ../../../third_party/skia/src/core/SkColorSpaceXformSteps.cpp
+FILE: ../../../third_party/skia/src/core/SkColorSpaceXformSteps.h
 FILE: ../../../third_party/skia/src/core/SkColorSpaceXform_skcms.cpp
 FILE: ../../../third_party/skia/src/core/SkCoverageModePriv.h
 FILE: ../../../third_party/skia/src/core/SkCubicMap.cpp
@@ -18987,14 +18989,14 @@ FILE: ../../../third_party/skia/src/gpu/ops/GrTessellatingPathRenderer.cpp
 FILE: ../../../third_party/skia/src/gpu/ops/GrTessellatingPathRenderer.h
 FILE: ../../../third_party/skia/src/gpu/text/GrAtlasTextBlob.cpp
 FILE: ../../../third_party/skia/src/gpu/text/GrAtlasTextBlob.h
-FILE: ../../../third_party/skia/src/gpu/text/GrAtlasTextContext.cpp
-FILE: ../../../third_party/skia/src/gpu/text/GrAtlasTextContext.h
 FILE: ../../../third_party/skia/src/gpu/text/GrDistanceFieldAdjustTable.cpp
 FILE: ../../../third_party/skia/src/gpu/text/GrDistanceFieldAdjustTable.h
 FILE: ../../../third_party/skia/src/gpu/text/GrGlyphCache.cpp
 FILE: ../../../third_party/skia/src/gpu/text/GrGlyphCache.h
 FILE: ../../../third_party/skia/src/gpu/text/GrTextBlobCache.cpp
 FILE: ../../../third_party/skia/src/gpu/text/GrTextBlobCache.h
+FILE: ../../../third_party/skia/src/gpu/text/GrTextContext.cpp
+FILE: ../../../third_party/skia/src/gpu/text/GrTextContext.h
 FILE: ../../../third_party/skia/src/gpu/text/GrTextUtils.cpp
 FILE: ../../../third_party/skia/src/gpu/text/GrTextUtils.h
 FILE: ../../../third_party/skia/src/gpu/vk/GrVkBackendContext.cpp
