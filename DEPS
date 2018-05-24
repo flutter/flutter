@@ -420,10 +420,10 @@ hooks = [
     'action': ['python', 'src/tools/dart/update.py'],
   },
   {
-    'name': 'frontend_server_packages',
+    'name': 'generate_package_files',
     'pattern': '.',
-    'cwd': 'src/flutter/frontend_server/',
-    'action': ['python', '../tools/frontend_server_packages.py'],
+    'cwd': 'src/',
+    'action': ['python', 'flutter/tools/generate_package_files.py'],
   },
   {
     # Ensure that we don't accidentally reference any .pyc files whose
