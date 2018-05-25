@@ -95,10 +95,9 @@ static sk_sp<SkSurface> WrapOnscreenSurface(GrContext* context,
   GrGLenum format;
   const SkColorType color_type = FirstSupportedColorType(context, &format);
 
-  const GrGLFramebufferInfo framebuffer_info = {
-      .fFBOID = static_cast<GrGLuint>(fbo),
-      .fFormat = format,
-  };
+  GrGLFramebufferInfo framebuffer_info = {};
+  framebuffer_info.fFBOID = static_cast<GrGLuint>(fbo);
+  framebuffer_info.fFormat = format;
 
   GrBackendRenderTarget render_target(size.fWidth,      // width
                                       size.fHeight,     // height
