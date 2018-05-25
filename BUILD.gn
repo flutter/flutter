@@ -42,17 +42,12 @@ group("flutter") {
       "$flutter_root/fml:fml_unittests",
       "$flutter_root/runtime:runtime_unittests",
       "$flutter_root/shell/common:shell_unittests",
+      "$flutter_root/shell/platform/embedder:embedder_unittests",
+      "$flutter_root/shell/platform/embedder:flutter_engine",
       "$flutter_root/synchronization:synchronization_unittests",
       "$flutter_root/third_party/txt:txt_unittests",
       "//garnet/public/lib/fxl:fxl_unittests",
     ]
-
-    if (!is_win) {
-      public_deps += [
-        "$flutter_root/shell/platform/embedder:embedder_unittests",
-        "$flutter_root/shell/platform/embedder:flutter_engine",
-      ]
-    }
   }
 }
 
