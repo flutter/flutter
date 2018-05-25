@@ -58,4 +58,4 @@ packages:
     source: hosted
     version: "1.1.5"
 sdks:
-  dart: ">=1.21.0 <=2.0.0-dev.55.0"
+  dart: ">=1.21.0 <=2.0.0-edge.00a51975424ac4ff73fdf04888fe073601010307"
