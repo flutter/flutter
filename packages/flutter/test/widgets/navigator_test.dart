@@ -789,7 +789,10 @@ void main() {
     ));
     expect(semantics, includesNodeWith(
       label: 'Page 1',
-      flags: <SemanticsFlag>[SemanticsFlag.namesRoute],
+      flags: <SemanticsFlag>[
+        SemanticsFlag.namesRoute,
+        SemanticsFlag.isHeader,
+      ],
     ));
 
     await tester.tap(find.text('1')); // pushNamed('/A')
@@ -801,7 +804,10 @@ void main() {
     ));
     expect(semantics, includesNodeWith(
       label: 'Page 2',
-      flags: <SemanticsFlag>[SemanticsFlag.namesRoute],
+      flags: <SemanticsFlag>[
+        SemanticsFlag.namesRoute,
+        SemanticsFlag.isHeader,
+      ],
     ));
 
     await tester.tap(find.text('2')); // pushNamed('/B/C')
@@ -813,7 +819,10 @@ void main() {
     ));
     expect(semantics, includesNodeWith(
       label: 'Page 3',
-      flags: <SemanticsFlag>[SemanticsFlag.namesRoute],
+      flags: <SemanticsFlag>[
+        SemanticsFlag.namesRoute,
+        SemanticsFlag.isHeader,
+      ],
     ));
 
 
