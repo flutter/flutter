@@ -1,4 +1,4 @@
-Signature: 67bd8b8a2ec5aeee42d6a9fb3972e546
+Signature: 0d47f4028ac70f25c99d308ef1098aa5
 
 UNUSED LICENSES:
 
@@ -14113,13 +14113,13 @@ FILE: ../../../third_party/skia/include/private/SkEncodedInfo.h
 FILE: ../../../third_party/skia/include/private/SkLeanWindows.h
 FILE: ../../../third_party/skia/include/private/SkSafe_math.h
 FILE: ../../../third_party/skia/include/utils/SkNoDrawCanvas.h
+FILE: ../../../third_party/skia/modules/sksg/samples/SampleSVGPong.cpp
 FILE: ../../../third_party/skia/samplecode/DecodeFile.h
 FILE: ../../../third_party/skia/samplecode/SampleAndroidShadows.cpp
 FILE: ../../../third_party/skia/samplecode/SampleCode.cpp
 FILE: ../../../third_party/skia/samplecode/SampleMegaStroke.cpp
 FILE: ../../../third_party/skia/samplecode/SamplePathOverstroke.cpp
 FILE: ../../../third_party/skia/samplecode/SampleSVGFile.cpp
-FILE: ../../../third_party/skia/samplecode/SampleSVGPong.cpp
 FILE: ../../../third_party/skia/src/codec/SkCodecAnimationPriv.h
 FILE: ../../../third_party/skia/src/codec/SkRawAdapterCodec.cpp
 FILE: ../../../third_party/skia/src/codec/SkRawAdapterCodec.h
@@ -17165,26 +17165,6 @@ FILE: ../../../third_party/skia/experimental/skottie/SkottieAdapter.cpp
 FILE: ../../../third_party/skia/experimental/skottie/SkottieAdapter.h
 FILE: ../../../third_party/skia/experimental/skottie/SkottieJson.cpp
 FILE: ../../../third_party/skia/experimental/skottie/SkottieJson.h
-FILE: ../../../third_party/skia/experimental/sksg/SkSGImage.cpp
-FILE: ../../../third_party/skia/experimental/sksg/SkSGImage.h
-FILE: ../../../third_party/skia/experimental/sksg/SkSGScene.cpp
-FILE: ../../../third_party/skia/experimental/sksg/SkSGScene.h
-FILE: ../../../third_party/skia/experimental/sksg/effects/SkSGClipEffect.cpp
-FILE: ../../../third_party/skia/experimental/sksg/effects/SkSGClipEffect.h
-FILE: ../../../third_party/skia/experimental/sksg/effects/SkSGMaskEffect.cpp
-FILE: ../../../third_party/skia/experimental/sksg/effects/SkSGMaskEffect.h
-FILE: ../../../third_party/skia/experimental/sksg/effects/SkSGOpacityEffect.cpp
-FILE: ../../../third_party/skia/experimental/sksg/effects/SkSGOpacityEffect.h
-FILE: ../../../third_party/skia/experimental/sksg/geometry/SkSGGeometryTransform.cpp
-FILE: ../../../third_party/skia/experimental/sksg/geometry/SkSGGeometryTransform.h
-FILE: ../../../third_party/skia/experimental/sksg/geometry/SkSGPlane.cpp
-FILE: ../../../third_party/skia/experimental/sksg/geometry/SkSGPlane.h
-FILE: ../../../third_party/skia/experimental/sksg/geometry/SkSGRoundEffect.cpp
-FILE: ../../../third_party/skia/experimental/sksg/geometry/SkSGRoundEffect.h
-FILE: ../../../third_party/skia/experimental/sksg/geometry/SkSGText.cpp
-FILE: ../../../third_party/skia/experimental/sksg/geometry/SkSGText.h
-FILE: ../../../third_party/skia/experimental/sksg/paint/SkSGGradient.cpp
-FILE: ../../../third_party/skia/experimental/sksg/paint/SkSGGradient.h
 FILE: ../../../third_party/skia/fuzz/FuzzCommon.cpp
 FILE: ../../../third_party/skia/fuzz/FuzzPathMeasure.cpp
 FILE: ../../../third_party/skia/fuzz/FuzzRegionOp.cpp
@@ -17209,11 +17189,30 @@ FILE: ../../../third_party/skia/include/core/SkCoverageMode.h
 FILE: ../../../third_party/skia/include/effects/SkShaderMaskFilter.h
 FILE: ../../../third_party/skia/include/effects/SkTrimPathEffect.h
 FILE: ../../../third_party/skia/include/gpu/GrDriverBugWorkarounds.h
-FILE: ../../../third_party/skia/include/gpu/vk/GrVkMemoryAllocator.h
 FILE: ../../../third_party/skia/include/private/GrSurfaceProxyRef.h
 FILE: ../../../third_party/skia/include/private/GrVkTypesPriv.h
 FILE: ../../../third_party/skia/include/private/SkSafe32.h
 FILE: ../../../third_party/skia/infra/cts/run_testlab.go
+FILE: ../../../third_party/skia/modules/sksg/include/SkSGClipEffect.h
+FILE: ../../../third_party/skia/modules/sksg/include/SkSGGeometryTransform.h
+FILE: ../../../third_party/skia/modules/sksg/include/SkSGGradient.h
+FILE: ../../../third_party/skia/modules/sksg/include/SkSGImage.h
+FILE: ../../../third_party/skia/modules/sksg/include/SkSGMaskEffect.h
+FILE: ../../../third_party/skia/modules/sksg/include/SkSGOpacityEffect.h
+FILE: ../../../third_party/skia/modules/sksg/include/SkSGPlane.h
+FILE: ../../../third_party/skia/modules/sksg/include/SkSGRoundEffect.h
+FILE: ../../../third_party/skia/modules/sksg/include/SkSGScene.h
+FILE: ../../../third_party/skia/modules/sksg/include/SkSGText.h
+FILE: ../../../third_party/skia/modules/sksg/src/SkSGClipEffect.cpp
+FILE: ../../../third_party/skia/modules/sksg/src/SkSGGeometryTransform.cpp
+FILE: ../../../third_party/skia/modules/sksg/src/SkSGGradient.cpp
+FILE: ../../../third_party/skia/modules/sksg/src/SkSGImage.cpp
+FILE: ../../../third_party/skia/modules/sksg/src/SkSGMaskEffect.cpp
+FILE: ../../../third_party/skia/modules/sksg/src/SkSGOpacityEffect.cpp
+FILE: ../../../third_party/skia/modules/sksg/src/SkSGPlane.cpp
+FILE: ../../../third_party/skia/modules/sksg/src/SkSGRoundEffect.cpp
+FILE: ../../../third_party/skia/modules/sksg/src/SkSGScene.cpp
+FILE: ../../../third_party/skia/modules/sksg/src/SkSGText.cpp
 FILE: ../../../third_party/skia/samplecode/SampleAnimatedImage.cpp
 FILE: ../../../third_party/skia/samplecode/SampleFlutterAnimate.cpp
 FILE: ../../../third_party/skia/src/android/SkAnimatedImage.cpp
@@ -17313,8 +17312,6 @@ FILE: ../../../third_party/skia/src/gpu/text/GrAtlasManager.cpp
 FILE: ../../../third_party/skia/src/gpu/text/GrAtlasManager.h
 FILE: ../../../third_party/skia/src/gpu/text/GrSDFMaskFilter.cpp
 FILE: ../../../third_party/skia/src/gpu/text/GrSDFMaskFilter.h
-FILE: ../../../third_party/skia/src/gpu/vk/GrVkAMDMemoryAllocator.cpp
-FILE: ../../../third_party/skia/src/gpu/vk/GrVkAMDMemoryAllocator.h
 FILE: ../../../third_party/skia/src/gpu/vk/GrVkImageLayout.h
 FILE: ../../../third_party/skia/src/gpu/vk/GrVkTypesPriv.cpp
 FILE: ../../../third_party/skia/src/opts/SkOpts_hsw.cpp
@@ -17524,7 +17521,6 @@ FILE: ../../../third_party/skia/infra/bots/recipe_modules/build/examples/full.ex
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/build/examples/full.expected/Build-Debian9-EMCC-wasm-Release.json
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/build/examples/full.expected/Build-Debian9-GCC-arm-Release-Chromecast.json
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/build/examples/full.expected/Build-Debian9-GCC-loongson3a-Release.json
-FILE: ../../../third_party/skia/infra/bots/recipe_modules/build/examples/full.expected/Build-Debian9-GCC-x86_64-Debug-EmbededResouces.json
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/build/examples/full.expected/Build-Debian9-GCC-x86_64-Release-ANGLE.json
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/build/examples/full.expected/Build-Debian9-GCC-x86_64-Release-Flutter_Android.json
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/build/examples/full.expected/Build-Debian9-GCC-x86_64-Release-NoGPU.json
@@ -19376,34 +19372,6 @@ FILE: ../../../third_party/skia/experimental/skottie/SkottieAnimator.cpp
 FILE: ../../../third_party/skia/experimental/skottie/SkottieAnimator.h
 FILE: ../../../third_party/skia/experimental/skottie/SkottieValue.cpp
 FILE: ../../../third_party/skia/experimental/skottie/SkottieValue.h
-FILE: ../../../third_party/skia/experimental/sksg/SkSGDraw.cpp
-FILE: ../../../third_party/skia/experimental/sksg/SkSGDraw.h
-FILE: ../../../third_party/skia/experimental/sksg/SkSGEffectNode.cpp
-FILE: ../../../third_party/skia/experimental/sksg/SkSGEffectNode.h
-FILE: ../../../third_party/skia/experimental/sksg/SkSGGeometryNode.cpp
-FILE: ../../../third_party/skia/experimental/sksg/SkSGGeometryNode.h
-FILE: ../../../third_party/skia/experimental/sksg/SkSGGroup.cpp
-FILE: ../../../third_party/skia/experimental/sksg/SkSGGroup.h
-FILE: ../../../third_party/skia/experimental/sksg/SkSGInvalidationController.cpp
-FILE: ../../../third_party/skia/experimental/sksg/SkSGInvalidationController.h
-FILE: ../../../third_party/skia/experimental/sksg/SkSGNode.cpp
-FILE: ../../../third_party/skia/experimental/sksg/SkSGNode.h
-FILE: ../../../third_party/skia/experimental/sksg/SkSGPaintNode.cpp
-FILE: ../../../third_party/skia/experimental/sksg/SkSGPaintNode.h
-FILE: ../../../third_party/skia/experimental/sksg/SkSGRenderNode.cpp
-FILE: ../../../third_party/skia/experimental/sksg/SkSGRenderNode.h
-FILE: ../../../third_party/skia/experimental/sksg/effects/SkSGTransform.cpp
-FILE: ../../../third_party/skia/experimental/sksg/effects/SkSGTransform.h
-FILE: ../../../third_party/skia/experimental/sksg/geometry/SkSGMerge.cpp
-FILE: ../../../third_party/skia/experimental/sksg/geometry/SkSGMerge.h
-FILE: ../../../third_party/skia/experimental/sksg/geometry/SkSGPath.cpp
-FILE: ../../../third_party/skia/experimental/sksg/geometry/SkSGPath.h
-FILE: ../../../third_party/skia/experimental/sksg/geometry/SkSGRect.cpp
-FILE: ../../../third_party/skia/experimental/sksg/geometry/SkSGRect.h
-FILE: ../../../third_party/skia/experimental/sksg/geometry/SkSGTrimEffect.cpp
-FILE: ../../../third_party/skia/experimental/sksg/geometry/SkSGTrimEffect.h
-FILE: ../../../third_party/skia/experimental/sksg/paint/SkSGColor.cpp
-FILE: ../../../third_party/skia/experimental/sksg/paint/SkSGColor.h
 FILE: ../../../third_party/skia/experimental/svg/model/SkSVGGradient.cpp
 FILE: ../../../third_party/skia/experimental/svg/model/SkSVGGradient.h
 FILE: ../../../third_party/skia/experimental/svg/model/SkSVGPattern.cpp
@@ -19480,11 +19448,38 @@ FILE: ../../../third_party/skia/include/private/SkImageInfoPriv.h
 FILE: ../../../third_party/skia/include/private/SkMalloc.h
 FILE: ../../../third_party/skia/include/private/SkShadowFlags.h
 FILE: ../../../third_party/skia/include/utils/SkShadowUtils.h
+FILE: ../../../third_party/skia/modules/sksg/include/SkSGColor.h
+FILE: ../../../third_party/skia/modules/sksg/include/SkSGDraw.h
+FILE: ../../../third_party/skia/modules/sksg/include/SkSGEffectNode.h
+FILE: ../../../third_party/skia/modules/sksg/include/SkSGGeometryNode.h
+FILE: ../../../third_party/skia/modules/sksg/include/SkSGGroup.h
+FILE: ../../../third_party/skia/modules/sksg/include/SkSGInvalidationController.h
+FILE: ../../../third_party/skia/modules/sksg/include/SkSGMerge.h
+FILE: ../../../third_party/skia/modules/sksg/include/SkSGNode.h
+FILE: ../../../third_party/skia/modules/sksg/include/SkSGPaintNode.h
+FILE: ../../../third_party/skia/modules/sksg/include/SkSGPath.h
+FILE: ../../../third_party/skia/modules/sksg/include/SkSGRect.h
+FILE: ../../../third_party/skia/modules/sksg/include/SkSGRenderNode.h
+FILE: ../../../third_party/skia/modules/sksg/include/SkSGTransform.h
+FILE: ../../../third_party/skia/modules/sksg/include/SkSGTrimEffect.h
+FILE: ../../../third_party/skia/modules/sksg/src/SkSGColor.cpp
+FILE: ../../../third_party/skia/modules/sksg/src/SkSGDraw.cpp
+FILE: ../../../third_party/skia/modules/sksg/src/SkSGEffectNode.cpp
+FILE: ../../../third_party/skia/modules/sksg/src/SkSGGeometryNode.cpp
+FILE: ../../../third_party/skia/modules/sksg/src/SkSGGroup.cpp
+FILE: ../../../third_party/skia/modules/sksg/src/SkSGInvalidationController.cpp
+FILE: ../../../third_party/skia/modules/sksg/src/SkSGMerge.cpp
+FILE: ../../../third_party/skia/modules/sksg/src/SkSGNode.cpp
+FILE: ../../../third_party/skia/modules/sksg/src/SkSGPaintNode.cpp
+FILE: ../../../third_party/skia/modules/sksg/src/SkSGPath.cpp
+FILE: ../../../third_party/skia/modules/sksg/src/SkSGRect.cpp
+FILE: ../../../third_party/skia/modules/sksg/src/SkSGRenderNode.cpp
+FILE: ../../../third_party/skia/modules/sksg/src/SkSGTransform.cpp
+FILE: ../../../third_party/skia/modules/sksg/src/SkSGTrimEffect.cpp
 FILE: ../../../third_party/skia/samplecode/SampleCCPRGeometry.cpp
 FILE: ../../../third_party/skia/samplecode/SampleChineseFling.cpp
 FILE: ../../../third_party/skia/samplecode/SampleCowboy.cpp
 FILE: ../../../third_party/skia/samplecode/SamplePathText.cpp
-FILE: ../../../third_party/skia/samplecode/SampleSGInval.cpp
 FILE: ../../../third_party/skia/samplecode/SampleShadowColor.cpp
 FILE: ../../../third_party/skia/samplecode/SampleShadowReference.cpp
 FILE: ../../../third_party/skia/samplecode/SampleShadowUtils.cpp
@@ -21194,33 +21189,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ====================================================================================================
 
 ====================================================================================================
-LIBRARY: vulkanmemoryallocator
-ORIGIN: ../../../third_party/skia/third_party/vulkanmemoryallocator/include/LICENSE.txt
-TYPE: LicenseType.mit
-FILE: ../../../third_party/skia/third_party/vulkanmemoryallocator/include/vk_mem_alloc.h
-----------------------------------------------------------------------------------------------------
-Copyright (c) 2017-2018 Advanced Micro Devices, Inc. All rights reserved.
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in
-all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-THE SOFTWARE.
-====================================================================================================
-
-====================================================================================================
 LIBRARY: zlib
 ORIGIN: ../../../third_party/zlib/LICENSE
 TYPE: LicenseType.zlib
@@ -21955,4 +21923,4 @@ freely, subject to the following restrictions:
    misrepresented as being the original software.
 3. This notice may not be removed or altered from any source distribution.
 ====================================================================================================
-Total license count: 321
+Total license count: 320
