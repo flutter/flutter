@@ -4,11 +4,13 @@
 
 import 'dart:ui' show window;
 
+import 'package:flutter/semantics.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 
 import '../rendering/mock_canvas.dart';
+import '../widgets/semantics_tester.dart';
 import 'feedback_tester.dart';
 
 Finder findRenderChipElement() {
@@ -1144,5 +1146,74 @@ void main() {
     labelStyle = getLabelStyle(tester);
     expect(materialBox, paints..path(color: customTheme.disabledColor));
     expect(labelStyle.style.color, equals(Colors.black.withAlpha(0xde)));
+  });
+
+  testWidgets('Chip semantics', (WidgetTester tester) async {
+    final SemanticsTester semanticsTester = new SemanticsTester(tester);
+
+    await tester.pumpWidget(new MaterialApp(
+      home: const Material(
+        child: const Chip(
+          label: const Text('test'),
+        ),
+      ),
+    ));
+
+    expect(semanticsTester, hasSemantics(
+      new TestSemantics.root(
+        children: <TestSemantics>[
+          new TestSemantics(
+            textDirection: TextDirection.ltr,
+            children: <TestSemantics>[
+              new TestSemantics(
+                flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
+                children: <TestSemantics>[
+                  new TestSemantics(
+                    label: 'test',
+                    textDirection: TextDirection.ltr,
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ],
+      ), ignoreTransform: true, ignoreId: true, ignoreRect: true));
+
+    await tester.pumpWidget(new MaterialApp(
+      home: new Material(
+        child: new InputChip(
+          isEnabled: true,
+          label: const Text('test'),
+          onPressed: () {},
+        ),
+      ),
+    ));
+
+    expect(semanticsTester, hasSemantics(
+        new TestSemantics.root(
+          children: <TestSemantics>[
+            new TestSemantics(
+              textDirection: TextDirection.ltr,
+              children: <TestSemantics>[
+                new TestSemantics(
+                  flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
+                  children: <TestSemantics>[
+                    new TestSemantics(
+                      label: 'test',
+                      textDirection: TextDirection.ltr,
+                      flags: <SemanticsFlag>[
+                        SemanticsFlag.hasEnabledState,
+                        SemanticsFlag.isEnabled,
+                      ],
+                      actions: <SemanticsAction>[SemanticsAction.tap],
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ],
+        ), ignoreTransform: true, ignoreId: true, ignoreRect: true));
+
+    semanticsTester.dispose();
   });
 }
