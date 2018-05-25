@@ -50,6 +50,7 @@ class CupertinoButton extends StatefulWidget {
     @required this.child,
     this.padding,
     this.color,
+    this.disabledColor,
     this.minSize: 44.0,
     this.pressedOpacity: 0.1,
     this.borderRadius: const BorderRadius.all(const Radius.circular(8.0)),
@@ -70,6 +71,14 @@ class CupertinoButton extends StatefulWidget {
   ///
   /// Defaults to null which produces a button with no background or border.
   final Color color;
+
+  /// The color of the button's background when the button is disabled.
+  ///
+  /// Ignored if the [CupertinoButton] doesn't also have a [color].
+  ///
+  /// Defaults to a standard iOS disabled color when [color] is specified and
+  /// [disabledColor] is null.
+  final Color disabledColor;
 
   /// The callback that is called when the button is tapped or otherwise activated.
   ///
@@ -216,7 +225,7 @@ class _CupertinoButtonState extends State<CupertinoButton> with SingleTickerProv
               decoration: new BoxDecoration(
                 borderRadius: widget.borderRadius,
                 color: backgroundColor != null && !enabled
-                  ? _kDisabledBackground
+                  ? widget.disabledColor ?? _kDisabledBackground
                   : backgroundColor,
               ),
               child: new Padding(

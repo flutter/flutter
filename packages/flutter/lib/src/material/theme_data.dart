@@ -11,10 +11,14 @@ import 'package:flutter/widgets.dart';
 import 'button_theme.dart';
 import 'chip_theme.dart';
 import 'colors.dart';
+import 'flat_button.dart';
 import 'ink_splash.dart';
 import 'ink_well.dart' show InteractiveInkFeatureFactory;
 import 'input_decorator.dart';
+import 'raised_button.dart';
+import 'slider.dart';
 import 'slider_theme.dart';
+import 'switch.dart';
 import 'typography.dart';
 
 export 'package:flutter/services.dart' show Brightness;
@@ -105,6 +109,7 @@ class ThemeData extends Diagnosticable {
     SliderThemeData sliderTheme,
     ChipThemeData chipTheme,
     TargetPlatform platform,
+    AdaptiveWidgetThemeData adaptiveWidgetTheme,
   }) {
     brightness ??= Brightness.light;
     final bool isDark = brightness == Brightness.dark;
@@ -168,6 +173,8 @@ class ThemeData extends Diagnosticable {
       brightness: brightness,
       labelStyle: textTheme.body2,
     );
+    adaptiveWidgetTheme ??= AdaptiveWidgetThemeData.none;
+
     return new ThemeData.raw(
       brightness: brightness,
       primaryColor: primaryColor,
@@ -208,6 +215,7 @@ class ThemeData extends Diagnosticable {
       sliderTheme: sliderTheme,
       chipTheme: chipTheme,
       platform: platform,
+      adaptiveWidgetTheme: adaptiveWidgetTheme,
     );
   }
 
@@ -257,6 +265,7 @@ class ThemeData extends Diagnosticable {
     @required this.sliderTheme,
     @required this.chipTheme,
     @required this.platform,
+    @required this.adaptiveWidgetTheme,
   }) : assert(brightness != null),
        assert(primaryColor != null),
        assert(primaryColorBrightness != null),
@@ -294,7 +303,8 @@ class ThemeData extends Diagnosticable {
        assert(accentIconTheme != null),
        assert(sliderTheme != null),
        assert(chipTheme != null),
-       assert(platform != null);
+       assert(platform != null),
+       assert(adaptiveWidgetTheme != null);
 
   /// A default light blue theme.
   ///
@@ -483,6 +493,15 @@ class ThemeData extends Diagnosticable {
   /// Defaults to the current platform.
   final TargetPlatform platform;
 
+  /// An adaptiveness theme that describes which Material widget use a
+  /// Cupertino equivalent widget on iOS when supported.
+  ///
+  /// Defaults to do no automatic widget adaptations on any widget.
+  ///
+  /// See [AdaptiveWidgetThemeData.bundled] for a list of Material widgets
+  /// that supports platform adaptation.
+  final AdaptiveWidgetThemeData adaptiveWidgetTheme;
+
   /// Creates a copy of this theme but with the given fields replaced with the new values.
   ThemeData copyWith({
     Brightness brightness,
@@ -524,6 +543,7 @@ class ThemeData extends Diagnosticable {
     SliderThemeData sliderTheme,
     ChipThemeData chipTheme,
     TargetPlatform platform,
+    AdaptiveWidgetThemeData adaptiveWidgetTheme,
   }) {
     return new ThemeData.raw(
       brightness: brightness ?? this.brightness,
@@ -565,6 +585,7 @@ class ThemeData extends Diagnosticable {
       sliderTheme: sliderTheme ?? this.sliderTheme,
       chipTheme: chipTheme ?? this.chipTheme,
       platform: platform ?? this.platform,
+      adaptiveWidgetTheme: adaptiveWidgetTheme ?? this.adaptiveWidgetTheme,
     );
   }
 
@@ -692,6 +713,7 @@ class ThemeData extends Diagnosticable {
       sliderTheme: SliderThemeData.lerp(a.sliderTheme, b.sliderTheme, t),
       chipTheme: ChipThemeData.lerp(a.chipTheme, b.chipTheme, t),
       platform: t < 0.5 ? a.platform : b.platform,
+      adaptiveWidgetTheme: t < 0.5 ? a.adaptiveWidgetTheme : b.adaptiveWidgetTheme,
     );
   }
 
@@ -736,7 +758,8 @@ class ThemeData extends Diagnosticable {
            (otherData.accentIconTheme == accentIconTheme) &&
            (otherData.sliderTheme == sliderTheme) &&
            (otherData.chipTheme == chipTheme) &&
-           (otherData.platform == platform);
+           (otherData.platform == platform) &&
+           (otherData.adaptiveWidgetTheme == adaptiveWidgetTheme);
   }
 
   @override
@@ -780,6 +803,7 @@ class ThemeData extends Diagnosticable {
         sliderTheme,
         chipTheme,
         platform,
+        adaptiveWidgetTheme,
       ),
     );
   }
@@ -824,6 +848,118 @@ class ThemeData extends Diagnosticable {
     properties.add(new DiagnosticsProperty<IconThemeData>('accentIconTheme', accentIconTheme));
     properties.add(new DiagnosticsProperty<SliderThemeData>('sliderTheme', sliderTheme));
     properties.add(new DiagnosticsProperty<ChipThemeData>('chipTheme', chipTheme));
+    properties.add(new DiagnosticsProperty<AdaptiveWidgetThemeData>('adaptiveWidgetTheme', adaptiveWidgetTheme));
+  }
+}
+
+/// Describes whether descendant Material Design widgets should automatically
+/// adapt to use Cupertino widgets when running on iOS.
+///
+/// A [Map] from Material widget types to booleans describes whether platform
+/// adaptation should be made for [PlatformBuilder] widgets. Specifically
+/// [PlatformBuilder]s that are descendants to this [Theme] and whose
+/// [PlatformBuilder.themeAdaptiveType] matches the type in the
+/// [adaptiveWidgets] [Map].
+///
+/// When a widget type is not explicitly specified in [adaptiveWidgets], the
+/// [defaultAdaptiveness] value is used.
+///
+/// The singleton [none] instance can be used to signal no adaptation on any
+/// descendant widgets.
+///
+/// The singleton [bundled] instance can be used to signal adaptation on all
+/// Material widgets that should support platform adaptations.
+///
+/// The singleton [all] instance can be used to signal adaptation on all widgets
+/// including user-custom usages of [PlatformBuilder].
+///
+/// Individual [PlatformBuilder] descendents can still override this [Theme]
+/// by specifying null for [PlatformBuilder.themeAdaptiveType].
+@immutable
+class AdaptiveWidgetThemeData extends Diagnosticable{
+  /// Create a [AdaptiveWidgetThemeData] for a [Theme] that instructs whether
+  /// descendant widgets should adapt to the platform.
+  ///
+  /// The parameters [adaptiveWidgets] and [defaultAdaptiveness] cannot be null.
+  const AdaptiveWidgetThemeData(
+    this.adaptiveWidgets, {
+    this.defaultAdaptiveness,
+  }) : assert(adaptiveWidgets != null);
+
+  /// A [AdaptiveWidgetThemeData] where none of the descendents dynamically
+  /// adapt to the platform unless overridden in [PlatformBuilder].
+  static const AdaptiveWidgetThemeData none =
+      const AdaptiveWidgetThemeData(const <Type, bool>{});
+
+  /// A [AdaptiveWidgetThemeData] where all bundled Material Design widgets
+  /// that support platform adaptations will adapt when running on iOS.
+  static const AdaptiveWidgetThemeData bundled =
+      const AdaptiveWidgetThemeData(const <Type, bool>{
+        FlatButton: true,
+        RaisedButton: true,
+        Slider: true,
+        Switch: true,
+      });
+
+  /// A [AdaptiveWidgetThemeData] where all of the descendents dynamically
+  /// adapt to the platform if supported unless overridden in [PlatformBuilder].
+  static const AdaptiveWidgetThemeData all =
+      const AdaptiveWidgetThemeData(const <Type, bool>{}, defaultAdaptiveness: true);
+
+  /// A [Map] from widget type to whether descendents of that widget type should
+  /// dynamically adapt to the platform.
+  ///
+  /// If the widget type is not in the map, or if the corresponding value is
+  /// null, the value of [defaultAdaptiveness] will be used.
+  ///
+  /// The map itself cannot be null.
+  final Map<Type, bool> adaptiveWidgets;
+
+  /// A boolean indicating the default adaptiveness of a widget type if it's
+  /// not explicitly specified in [adaptiveWidgets].
+  ///
+  /// It can be used to turn on or off the adaptiveness of all widget types
+  /// without specifying them individually in [adaptiveWidgets].
+  ///
+  /// The value defaults to [false].
+  final bool defaultAdaptiveness;
+
+  /// Whether a descendant of a widget type should dynamically adapt to the
+  /// platform based on the [adaptiveWidgets] map. If the type is not specified
+  /// in [adaptiveWidgets], the value from [defaultAdaptiveness] is used instead.
+  /// If [defaultAdaptiveness] is not specified, [false] is returned.
+  bool isWidgetAdaptive(Type widgetType) {
+    return adaptiveWidgets[widgetType] ?? defaultAdaptiveness ?? false;
+  }
+
+  /// Merge an existing [AdaptiveWidgetThemeData] with a new.
+  ///
+  /// Can be used to override adaptiveness of specific widget types in a subtree
+  /// without affecting all other widget types.
+  ///
+  /// When the existing and the new [adaptiveWidgets] both have a non-null
+  /// value for a type key, the new value overrides the old.
+  ///
+  /// When only the new [adaptiveWidgets] has a non-null value for a type key,
+  /// the new value is used.
+  ///
+  /// When only the existing [adaptiveWidgets] has a non-null value for a type
+  /// key, the old value is kept.
+  ///
+  /// The new [defaultAdaptiveness] value overrides the old value if not null.
+  AdaptiveWidgetThemeData merge(AdaptiveWidgetThemeData other) {
+    return new AdaptiveWidgetThemeData(
+      new Map<Type, bool>.from(adaptiveWidgets)
+          ..addAll(other.adaptiveWidgets),
+      defaultAdaptiveness: other.defaultAdaptiveness ?? defaultAdaptiveness,
+    );
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(new DiagnosticsProperty<Map<Type, bool>>('adaptiveWidgets', adaptiveWidgets, defaultValue: AdaptiveWidgetThemeData.none.adaptiveWidgets));
+    properties.add(new DiagnosticsProperty<bool>('defaultAdaptiveness', defaultAdaptiveness, defaultValue: false));
   }
 }
 

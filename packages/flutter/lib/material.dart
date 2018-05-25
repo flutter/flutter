@@ -70,6 +70,7 @@ export 'src/material/mergeable_material.dart';
 export 'src/material/outline_button.dart';
 export 'src/material/page.dart';
 export 'src/material/paginated_data_table.dart';
+export 'src/material/platform_builder.dart';
 export 'src/material/popup_menu.dart';
 export 'src/material/progress_indicator.dart';
 export 'src/material/radio.dart';
