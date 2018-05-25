@@ -235,20 +235,6 @@
   }
 }
 
-- (void)application:(UIApplication*)application
-    continueUserActivity:(NSUserActivity*)userActivity
-      restorationHandler:(void (^)(NSArray*))restorationHandler {
-  for (id<FlutterPlugin> plugin in _pluginDelegates) {
-    if ([plugin respondsToSelector:_cmd]) {
-      if ([plugin application:application
-              continueUserActivity:userActivty
-                restorationHandler:restorationHandler]) {
-        return;
-      }
-    }
-  }
-}
-
 // TODO(xster): move when doing https://github.com/flutter/flutter/issues/3671.
 - (NSObject<FlutterBinaryMessenger>*)binaryMessenger {
   UIViewController* rootViewController = _window.rootViewController;
