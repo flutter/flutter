@@ -91,7 +91,8 @@ static const char* kDartStrongModeArgs[] = {
     "--strong",
     "--reify_generic_functions",
     "--limit_ints_to_64_bits",
-    "--sync_async",
+    // TODO(bkonyi): uncomment when sync-async is enabled in flutter/flutter.
+    // "--sync_async",
     // clang-format on
 };
 
