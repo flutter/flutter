@@ -114,8 +114,8 @@ class ThemeData extends Diagnosticable {
     primaryColorLight ??= isDark ? Colors.grey[500] : primarySwatch[100];
     primaryColorDark ??= isDark ? Colors.black : primarySwatch[700];
     final bool primaryIsDark = primaryColorBrightness == Brightness.dark;
+    toggleableActiveColor ??= isDark ? Colors.tealAccent[200] : (accentColor ?? primarySwatch[600]);
     accentColor ??= isDark ? Colors.tealAccent[200] : primarySwatch[500];
-    toggleableActiveColor ??= isDark ? Colors.tealAccent[200] : primarySwatch[600];
     accentColorBrightness ??= estimateBrightnessForColor(accentColor);
     final bool accentIsDark = accentColorBrightness == Brightness.dark;
     canvasColor ??= isDark ? Colors.grey[850] : Colors.grey[50];

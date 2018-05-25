@@ -124,6 +124,11 @@ class GestureRecognizerFactoryWithHandlers<T extends GestureRecognizer> extends 
 ///   ),
 /// )
 /// ```
+///
+/// ## Debugging
+///
+/// To see how large the hit test box of a [GestureDetector] is for debugging
+/// purposes, set [debugPaintPointersEnabled] to true.
 class GestureDetector extends StatelessWidget {
   /// Creates a widget that detects gestures.
   ///
@@ -286,6 +291,9 @@ class GestureDetector extends StatelessWidget {
   final GestureScaleEndCallback onScaleEnd;
 
   /// How this gesture detector should behave during hit testing.
+  ///
+  /// This defaults to [HitTestBehavior.deferToChild] if [child] is not null and
+  /// [HitTestBehavior.translucent] if child is null.
   final HitTestBehavior behavior;
 
   /// Whether to exclude these gestures from the semantics tree. For
@@ -477,6 +485,9 @@ class RawGestureDetector extends StatefulWidget {
   final Map<Type, GestureRecognizerFactory> gestures;
 
   /// How this gesture detector should behave during hit testing.
+  ///
+  /// This defaults to [HitTestBehavior.deferToChild] if [child] is not null and
+  /// [HitTestBehavior.translucent] if child is null.
   final HitTestBehavior behavior;
 
   /// Whether to exclude these gestures from the semantics tree. For

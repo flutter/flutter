@@ -40,5 +40,6 @@
   "drawerLabel": "תפריט ניווט",
   "popupMenuLabel": "תפריט קופץ",
   "dialogLabel": "תיבת דו-שיח",
-  "alertDialogLabel": "עֵרָנִי"
+  "alertDialogLabel": "עֵרָנִי",
+  "searchFieldLabel": "לחפש"
 }

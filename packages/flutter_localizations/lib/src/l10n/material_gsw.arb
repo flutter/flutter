@@ -38,5 +38,6 @@
   "drawerLabel": "Navigationsmenü",
   "popupMenuLabel": "Pop-up-Menü",
   "dialogLabel": "Dialogfeld",
-  "alertDialogLabel": "Aufmerksam"
+  "alertDialogLabel": "Aufmerksam",
+  "searchFieldLabel": "Suchen"
 }
