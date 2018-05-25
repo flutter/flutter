@@ -160,16 +160,21 @@ class VMService {
         if (expression is! String || expression.isEmpty)
           throw new rpc.RpcException.invalidParams(
               'Invalid \'expression\': $expression');
-        final List<String> definitions = params['definitions'].asListOr(null);
-        final List<String> typeDefinitions = params['typeDefinitions'].asListOr(null);
-        final String libraryUri = params['libraryUri'].asStringOr(null);
-        final String klass = params['klass'].asStringOr(null);
+        final List<String> definitions = params['definitions'].asList;
+        final List<String> typeDefinitions = params['typeDefinitions'].asList;
+        final String libraryUri = params['libraryUri'].asString;
+        final String klass = params['klass'] != null ? params['klass'].asString;
         final bool isStatic = params['isStatic'].asBoolOr(false);
 
         try {
-          final String kernel = await compileExpression(isolateId, expression,
-              definitions, typeDefinitions, libraryUri, klass, isStatic);
-          return <String, String>{'type': 'Success', 'kernelBase64': kernel};
+          final String kernelFilename = await compileExpression(isolateId,
+              expression, definitions, typeDefinitions, libraryUri, klass,
+              isStatic);
+          final List<int> kernel = fs.file(kernelFilename).readAsBytesSync();
+          return <String, dynamic>{'type': 'Success',
+            'result': {
+              'kernelBytes': base64.encode(kernel),
+              'kernelLength': kernel.length}};
         } on rpc.RpcException {
           rethrow;
         } catch (e, st) {
