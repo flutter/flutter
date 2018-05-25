@@ -6,6 +6,13 @@ import("$flutter_root/common/config.gni")
 import("$flutter_root/shell/config.gni")
 import("//build/config/android/config.gni")
 import("//build/config/android/rules.gni")
+import("$flutter_root/shell/gpu/gpu.gni")
+
+shell_gpu_configuration("android_gpu_configuration") {
+  enable_software = true
+  enable_vulkan = shell_enable_vulkan
+  enable_gl = true
+}
 
 shared_library("flutter_shell_native") {
   visibility = [ ":*" ]
@@ -45,6 +52,7 @@ shared_library("flutter_shell_native") {
   ]
 
   deps = [
+    ":android_gpu_configuration",
     "$flutter_root/assets",
     "$flutter_root/common",
     "$flutter_root/flow",
@@ -52,7 +60,6 @@ shared_library("flutter_shell_native") {
     "$flutter_root/lib/ui",
     "$flutter_root/runtime",
     "$flutter_root/shell/common",
-    "$flutter_root/shell/gpu",
     "//garnet/public/lib/fxl",
     "//third_party/skia",
     "//third_party/skia:gpu",

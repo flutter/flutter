@@ -6,8 +6,15 @@ assert(is_ios)
 
 import("$flutter_root/common/config.gni")
 import("//build/config/ios/ios_sdk.gni")
+import("$flutter_root/shell/gpu/gpu.gni")
 
 _flutter_framework_dir = "$root_out_dir/Flutter.framework"
+
+shell_gpu_configuration("ios_gpu_configuration") {
+  enable_software = true
+  enable_gl = true
+  enable_vulkan = false
+}
 
 # The headers that will be copied to the Flutter.framework and be accessed
 # from outside the Flutter engine source root.
@@ -81,6 +88,7 @@ shared_library("create_flutter_framework_dylib") {
   sources += _flutter_framework_headers
 
   deps = [
+    ":ios_gpu_configuration",
     "$flutter_root/common",
     "$flutter_root/flow",
     "$flutter_root/fml",
@@ -88,7 +96,6 @@ shared_library("create_flutter_framework_dylib") {
     "$flutter_root/lib/ui",
     "$flutter_root/runtime",
     "$flutter_root/shell/common",
-    "$flutter_root/shell/gpu",
     "$flutter_root/shell/platform/darwin/common",
     "//garnet/public/lib/fxl",
     "//third_party/skia",
