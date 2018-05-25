@@ -101,7 +101,7 @@ class Table extends RenderObjectWidget {
     this.textDirection,
     this.border,
     this.defaultVerticalAlignment: TableCellVerticalAlignment.top,
-    this.textBaseline
+    this.textBaseline,
   }) : assert(children != null),
        assert(defaultColumnWidth != null),
        assert(defaultVerticalAlignment != null),
@@ -213,7 +213,7 @@ class Table extends RenderObjectWidget {
       rowDecorations: _rowDecorations,
       configuration: createLocalImageConfiguration(context),
       defaultVerticalAlignment: defaultVerticalAlignment,
-      textBaseline: textBaseline
+      textBaseline: textBaseline,
     );
   }
 
