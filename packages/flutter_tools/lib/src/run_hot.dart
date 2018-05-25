@@ -718,7 +718,7 @@ class HotRunner extends ResidentRunner {
     const String reset = '\u001B[0m';
     printStatus(
       '$fire  To hot reload changes while running, press "r". To hot restart (and rebuild state), press "R".',
-      ansiAlternative: '$red$fire$bold  To hot reload changes while running, press "r",'
+      ansiAlternative: '$red$fire$bold  To hot reload changes while running, press "r". '
                        'To hot restart (and rebuild state), press "R".$reset'
     );
     for (FlutterDevice device in flutterDevices) {
