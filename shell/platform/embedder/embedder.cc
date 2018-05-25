@@ -31,16 +31,14 @@
 #include "lib/fxl/functional/make_copyable.h"
 
 #define SAFE_ACCESS(pointer, member, default_value)                      \
-  ({                                                                     \
-    auto _return_value =                                                 \
-        static_cast<__typeof__(pointer->member)>((default_value));       \
+  ([=]() {                                                               \
     if (offsetof(std::remove_pointer<decltype(pointer)>::type, member) + \
             sizeof(pointer->member) <=                                   \
         pointer->struct_size) {                                          \
-      _return_value = pointer->member;                                   \
+      return pointer->member;                                            \
     }                                                                    \
-    _return_value;                                                       \
-  })
+    return static_cast<decltype(pointer->member)>((default_value));      \
+  })()
 
 bool IsRendererValid(const FlutterRendererConfig* config) {
   if (config == nullptr || config->type != kOpenGL) {
@@ -112,11 +110,11 @@ FlutterResult FlutterEngineRun(size_t version,
          user_data](fxl::RefPtr<blink::PlatformMessage> message) {
           auto handle = new FlutterPlatformMessageResponseHandle();
           const FlutterPlatformMessage incoming_message = {
-              .struct_size = sizeof(FlutterPlatformMessage),
-              .channel = message->channel().c_str(),
-              .message = message->data().data(),
-              .message_size = message->data().size(),
-              .response_handle = handle,
+              sizeof(FlutterPlatformMessage),  // struct_size
+              message->channel().c_str(),      // channel
+              message->data().data(),          // message
+              message->data().size(),          // message_size
+              handle,                          // response_handle
           };
           handle->message = std::move(message);
           return ptr(&incoming_message, user_data);
@@ -188,12 +186,12 @@ FlutterResult FlutterEngineRun(size_t version,
   );
 
   shell::PlatformViewEmbedder::DispatchTable dispatch_table = {
-      .gl_make_current_callback = make_current,
-      .gl_clear_current_callback = clear_current,
-      .gl_present_callback = present,
-      .gl_fbo_callback = fbo_callback,
-      .platform_message_response_callback = platform_message_response_callback,
-      .gl_make_resource_current_callback = make_resource_current_callback,
+      make_current,                        // gl_make_current_callback
+      clear_current,                       // gl_clear_current_callback
+      present,                             // gl_present_callback
+      fbo_callback,                        // gl_fbo_callback
+      platform_message_response_callback,  // platform_message_response_callback
+      make_resource_current_callback,      // gl_make_resource_current_callback
   };
 
   shell::Shell::CreateCallback<shell::PlatformView> on_create_platform_view =
