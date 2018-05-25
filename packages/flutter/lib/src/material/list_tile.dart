@@ -713,7 +713,7 @@ class _RenderListTile extends RenderBox {
   double computeDistanceToActualBaseline(TextBaseline baseline) {
     assert(title != null);
     final BoxParentData parentData = title.parentData;
-    return parentData.offset.dy + title.getDistanceToBaseline(TextBaseline.alphabetic);
+    return parentData.offset.dy + title.getDistanceToActualBaseline(TextBaseline.alphabetic);
   }
 
   static double _boxBaseline(RenderBox box) {
