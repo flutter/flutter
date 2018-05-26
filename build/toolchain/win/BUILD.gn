@@ -82,7 +82,7 @@ template("msvc_toolchain") {
       depsformat = "msvc"
       description = "CC {{output}}"
       outputs = [
-        "{{target_out_dir}}/{{target_output_name}}/{{source_name_part}}.obj",
+        "{{source_out_dir}}/{{target_output_name}}.{{source_name_part}}.obj",
       ]
       rspfile_content = "{{defines}} {{include_dirs}} {{cflags}} {{cflags_c}}"
     }
@@ -99,7 +99,7 @@ template("msvc_toolchain") {
       depsformat = "msvc"
       description = "CXX {{output}}"
       outputs = [
-        "{{target_out_dir}}/{{target_output_name}}/{{source_name_part}}.obj",
+        "{{source_out_dir}}/{{target_output_name}}.{{source_name_part}}.obj",
       ]
       rspfile_content = "{{defines}} {{include_dirs}} {{cflags}} {{cflags_cc}}"
     }
@@ -107,7 +107,7 @@ template("msvc_toolchain") {
     tool("rc") {
       command = "$python_path gyp-win-tool rc-wrapper $env rc.exe {{defines}} {{include_dirs}} /fo{{output}} {{source}}"
       outputs = [
-        "{{target_out_dir}}/{{target_output_name}}/{{source_name_part}}.res",
+        "{{source_out_dir}}/{{target_output_name}}.{{source_name_part}}.res",
       ]
       description = "RC {{output}}"
     }
@@ -124,7 +124,7 @@ template("msvc_toolchain") {
       }
       command = "$python_path gyp-win-tool asm-wrapper $env $ml $x64 {{defines}} {{include_dirs}} {{asmflags}} /safeseh /c /Fo {{output}} {{source}}"
       outputs = [
-        "{{target_out_dir}}/{{target_output_name}}/{{source_name_part}}.obj",
+        "{{source_out_dir}}/{{target_output_name}}.{{source_name_part}}.obj",
       ]
     }
 
