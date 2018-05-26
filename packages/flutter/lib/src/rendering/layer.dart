@@ -536,7 +536,10 @@ class OffsetLayer extends ContainerLayer {
 
   @override
   Object findRegion(Offset offset, Type type) {
-    return super.findRegion(offset + this.offset, type);
+    if (offset <= this.offset) {
+      return null;
+    }
+    return super.findRegion(offset, type);
   }
 
   @override
@@ -744,12 +747,6 @@ class TransformLayer extends OffsetLayer {
   Matrix4 transform;
 
   Matrix4 _lastEffectiveTransform;
-
-  @override
-  Object findRegion(Offset offset, Type type) {
-    final Vector4 vector4 = transform.transform(new Vector4(offset.dx, offset.dy, 0.0, 1.0));
-    return super.findRegion(new Offset(vector4[0], vector4[1]), type);
-  }
 
   @override
   void addToScene(ui.SceneBuilder builder, Offset layerOffset) {
@@ -1047,7 +1044,8 @@ class LeaderLayer extends ContainerLayer {
 
   @override
   Object findRegion(Offset offset, Type type) {
-    return super.findRegion(offset + this.offset, type);
+    // TODO(jonahwilliams): implement findRegion.
+    return null;
   }
 
   @override
@@ -1161,11 +1159,8 @@ class FollowerLayer extends ContainerLayer {
 
   @override
   Object findRegion(Offset offset, Type type) {
-    final Vector4 vector4 = new Matrix4.translationValues(
-      -_lastOffset.dx,
-      -_lastOffset.dy, 0.0
-    ).transform(new Vector4(offset.dx, offset.dy, 0.0, 1.0));
-    return super.findRegion(new Offset(vector4[0], vector4[1]), type);
+    // TODO(jonahwilliams): implement findRegion.
+    return null;
   }
 
   /// The transform that was used during the last composition phase.
