@@ -36,17 +36,18 @@ node_js:
 language: android
 android:
   components:
+    # android-update-sdk --components=tools --accept-licenses='android-sdk-license'
     - tools
     - platform-tools
-    - build-tools-26.0.2
-    - android-26
+    - build-tools-23.0.3
+    - android-23
     - extra-google-google_play_services
     - extra-google-m2repository
     - extra-android-m2repository
-    - addon-google_apis-google-26
-    - sys-img-armeabi-v7a-android-26
+    - addon-google_apis-google-23
+    - sys-img-armeabi-v7a-google_apis-23
   licenses:
-    - android-sdk-license
+    - android-sdk-license-2742d1c5
 git:
   # We rely on git tags for determining the version.
   depth: false
