@@ -52,7 +52,7 @@ if [ -n "$TRAVIS" ]; then
     android list targets
     target_id="$(android list targets | grep -E '^id: ' | head -n1 | sed -E 's/id: ([^ ]+).*$/\1/')"
     echo "Found android target with id: $target_id"
-    android create avd --force --name test --target $target_id --abi armeabi-v7a
+    android create avd --force --name test --target $target_id --abi google_apis/armeabi-v7a
     emulator -avd test -no-skin -no-audio -no-window &
     android-wait-for-emulator
   fi
