@@ -46,7 +46,7 @@ android:
     - addon-google_apis-google-26
     - sys-img-armeabi-v7a-android-26
   licenses:
-    - android-sdk-license-5be876d5
+    - android-sdk-license
 git:
   # We rely on git tags for determining the version.
   depth: false
