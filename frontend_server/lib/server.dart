@@ -45,6 +45,23 @@ class _FlutterFrontendCompiler implements frontend.CompilerInterface{
   }
 
   @override
+  Future<Null> compileExpression(
+      String expression,
+      List<String> definitions,
+      List<String> typeDefinitions,
+      String libraryUri,
+      String klass,
+      bool isStatic) {
+    return _compiler.compileExpression(expression, definitions, typeDefinitions,
+        libraryUri, klass, isStatic);
+  }
+
+  @override
+  void reportError(String msg) {
+    _compiler.reportError(msg);
+  }
+
+  @override
   void resetIncrementalCompiler() {
     _compiler.resetIncrementalCompiler();
   }

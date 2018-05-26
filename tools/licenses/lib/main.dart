@@ -1978,9 +1978,19 @@ class RepositoryBoringSSLSourceDirectory extends RepositoryDirectory {
 ///
 /// This license includes 23 lines of informational header text that are not
 /// part of the copyright notices and can be skipped.
+/// It also has a trailer that mentions licenses that are used during build
+/// time of BoringSSL - those can be ignored as well since they don't apply
+/// to code that is distributed.
 class RepositoryOpenSSLLicenseFile extends RepositorySingleLicenseFile {
   RepositoryOpenSSLLicenseFile(RepositoryDirectory parent, fs.TextFile io)
-    : super(parent, io, new License.fromBodyAndType(LineSplitter.split(io.readString()).skip(23).join('\n'), LicenseType.openssl, origin: io.fullName)) {
+    : super(parent, io,
+        new License.fromBodyAndType(
+            LineSplitter.split(io.readString())
+                .skip(23)
+                .takeWhile((String s) => !s.startsWith('BoringSSL uses the Chromium test infrastructure to run a continuous build,'))
+                .join('\n'),
+            LicenseType.openssl,
+            origin: io.fullName)) {
     _verifyLicense(io);
   }
 
