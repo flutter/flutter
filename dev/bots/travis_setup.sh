@@ -59,7 +59,9 @@ if [ -n "$TRAVIS" ]; then
                       --name test \
                       --target $target_id \
                       --abi google_apis/armeabi-v7a
-    emulator -avd test -no-skin -no-audio -no-window &
+
+    export QEMU_AUDIO_DRV=none
+    emulator -avd test -no-window &
     android-wait-for-emulator
   fi
 fi
