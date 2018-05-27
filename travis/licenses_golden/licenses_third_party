@@ -1,4 +1,4 @@
-Signature: 276fe0f9e525d7d59359272c94922089
+Signature: 8c21e9221f7a33eff5ee71d6a5844990
 
 UNUSED LICENSES:
 
@@ -17148,10 +17148,6 @@ ORIGIN: ../../../third_party/skia/bench/GrCCGeometryBench.cpp + ../../../third_p
 TYPE: LicenseType.bsd
 FILE: ../../../third_party/skia/bench/GrCCGeometryBench.cpp
 FILE: ../../../third_party/skia/bench/ShaderMaskFilterBench.cpp
-FILE: ../../../third_party/skia/experimental/skottie/SkottieAdapter.cpp
-FILE: ../../../third_party/skia/experimental/skottie/SkottieAdapter.h
-FILE: ../../../third_party/skia/experimental/skottie/SkottieJson.cpp
-FILE: ../../../third_party/skia/experimental/skottie/SkottieJson.h
 FILE: ../../../third_party/skia/fuzz/FuzzCommon.cpp
 FILE: ../../../third_party/skia/fuzz/FuzzPathMeasure.cpp
 FILE: ../../../third_party/skia/fuzz/FuzzRegionOp.cpp
@@ -17180,6 +17176,10 @@ FILE: ../../../third_party/skia/include/private/GrSurfaceProxyRef.h
 FILE: ../../../third_party/skia/include/private/GrVkTypesPriv.h
 FILE: ../../../third_party/skia/include/private/SkSafe32.h
 FILE: ../../../third_party/skia/infra/cts/run_testlab.go
+FILE: ../../../third_party/skia/modules/skottie/src/SkottieAdapter.cpp
+FILE: ../../../third_party/skia/modules/skottie/src/SkottieAdapter.h
+FILE: ../../../third_party/skia/modules/skottie/src/SkottieJson.cpp
+FILE: ../../../third_party/skia/modules/skottie/src/SkottieJson.h
 FILE: ../../../third_party/skia/modules/sksg/include/SkSGClipEffect.h
 FILE: ../../../third_party/skia/modules/sksg/include/SkSGGeometryTransform.h
 FILE: ../../../third_party/skia/modules/sksg/include/SkSGGradient.h
@@ -19353,12 +19353,6 @@ FILE: ../../../third_party/skia/bench/ShadowBench.cpp
 FILE: ../../../third_party/skia/dm/DMGpuTestProcs.cpp
 FILE: ../../../third_party/skia/example/HelloWorld.cpp
 FILE: ../../../third_party/skia/example/HelloWorld.h
-FILE: ../../../third_party/skia/experimental/skottie/Skottie.cpp
-FILE: ../../../third_party/skia/experimental/skottie/Skottie.h
-FILE: ../../../third_party/skia/experimental/skottie/SkottieAnimator.cpp
-FILE: ../../../third_party/skia/experimental/skottie/SkottieAnimator.h
-FILE: ../../../third_party/skia/experimental/skottie/SkottieValue.cpp
-FILE: ../../../third_party/skia/experimental/skottie/SkottieValue.h
 FILE: ../../../third_party/skia/experimental/svg/model/SkSVGGradient.cpp
 FILE: ../../../third_party/skia/experimental/svg/model/SkSVGGradient.h
 FILE: ../../../third_party/skia/experimental/svg/model/SkSVGPattern.cpp
@@ -19435,6 +19429,12 @@ FILE: ../../../third_party/skia/include/private/SkImageInfoPriv.h
 FILE: ../../../third_party/skia/include/private/SkMalloc.h
 FILE: ../../../third_party/skia/include/private/SkShadowFlags.h
 FILE: ../../../third_party/skia/include/utils/SkShadowUtils.h
+FILE: ../../../third_party/skia/modules/skottie/include/Skottie.h
+FILE: ../../../third_party/skia/modules/skottie/src/Skottie.cpp
+FILE: ../../../third_party/skia/modules/skottie/src/SkottieAnimator.cpp
+FILE: ../../../third_party/skia/modules/skottie/src/SkottieAnimator.h
+FILE: ../../../third_party/skia/modules/skottie/src/SkottieValue.cpp
+FILE: ../../../third_party/skia/modules/skottie/src/SkottieValue.h
 FILE: ../../../third_party/skia/modules/sksg/include/SkSGColor.h
 FILE: ../../../third_party/skia/modules/sksg/include/SkSGDraw.h
 FILE: ../../../third_party/skia/modules/sksg/include/SkSGEffectNode.h
@@ -19855,9 +19855,9 @@ FILE: ../../../third_party/skia/fuzz/oss_fuzz/FuzzNullCanvas.cpp
 FILE: ../../../third_party/skia/fuzz/oss_fuzz/FuzzPNGEncoder.cpp
 FILE: ../../../third_party/skia/fuzz/oss_fuzz/FuzzPathMeasure.cpp
 FILE: ../../../third_party/skia/fuzz/oss_fuzz/FuzzRasterN32Canvas.cpp
-FILE: ../../../third_party/skia/fuzz/oss_fuzz/FuzzSkottieJSON.cpp
 FILE: ../../../third_party/skia/fuzz/oss_fuzz/FuzzTextBlobDeserialize.cpp
 FILE: ../../../third_party/skia/fuzz/oss_fuzz/FuzzWEBPEncoder.cpp
+FILE: ../../../third_party/skia/modules/skottie/fuzz/FuzzSkottieJSON.cpp
 ----------------------------------------------------------------------------------------------------
 Copyright 2018 Google, LLC
 
