@@ -1,4 +1,4 @@
-Signature: 6277ce5d5acee94451d3aca42f83fe8c
+Signature: 97f76f7dc34cc17626992a1ec00c79e6
 
 UNUSED LICENSES:
 
@@ -17412,7 +17412,7 @@ FILE: ../../../third_party/skia/animations/redcross#1.jpg
 FILE: ../../../third_party/skia/animations/text#1.xml
 FILE: ../../../third_party/skia/bench/microbench.json
 FILE: ../../../third_party/skia/bench/skpbench.json
-FILE: ../../../third_party/skia/docker/skiaserve/Dockerfile
+FILE: ../../../third_party/skia/docker/skia-release/Dockerfile
 FILE: ../../../third_party/skia/docs/SkAutoCanvasRestore_Reference.bmh
 FILE: ../../../third_party/skia/docs/SkBitmap_Reference.bmh
 FILE: ../../../third_party/skia/docs/SkCanvas_Reference.bmh
