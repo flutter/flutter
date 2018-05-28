@@ -147,17 +147,18 @@ class _CheckboxState extends State<Checkbox> with TickerProviderStateMixin {
 }
 
 class _CheckboxRenderObjectWidget extends LeafRenderObjectWidget {
-  const _CheckboxRenderObjectWidget(
-      {Key key,
-      @required this.value,
-      @required this.tristate,
-      @required this.activeColor,
-      @required this.onChanged,
-      @required this.vsync,
-      this.borderColor})
-      : assert(tristate != null),
+  const _CheckboxRenderObjectWidget({
+    Key key,
+    @required this.value,
+    @required this.tristate,
+    @required this.activeColor,
+    @required this.borderColor,
+    @required this.onChanged,
+    @required this.vsync,
+  })  : assert(tristate != null),
         assert(tristate || value != null),
         assert(activeColor != null),
+        assert(borderColor != null),
         assert(vsync != null),
         super(key: key);
 
@@ -184,7 +185,7 @@ class _CheckboxRenderObjectWidget extends LeafRenderObjectWidget {
       ..value = value
       ..tristate = tristate
       ..activeColor = activeColor
-      ..borderColor = borderColor
+      ..inactiveColor = borderColor
       ..onChanged = onChanged
       ..vsync = vsync;
   }
@@ -199,7 +200,7 @@ class _RenderCheckbox extends RenderToggleable {
     bool value,
     bool tristate,
     Color activeColor,
-    this.borderColor = const Color(0x8a000000),
+    Color borderColor,
     ValueChanged<bool> onChanged,
     @required TickerProvider vsync,
   })  : _oldValue = value,
@@ -213,17 +214,6 @@ class _RenderCheckbox extends RenderToggleable {
               const Size(2 * kRadialReactionRadius, 2 * kRadialReactionRadius),
           vsync: vsync,
         );
-
-  final Color borderColor;
-
-  set borderColor(Color value) {
-    assert(value != null);
-    if (value == borderColor) {
-      return;
-    }
-    borderColor = value;
-    markNeedsPaint();
-  }
 
   bool _oldValue;
 
@@ -253,10 +243,10 @@ class _RenderCheckbox extends RenderToggleable {
   Color _colorAt(double t) {
     // As t goes from 0.0 to 0.25, animate from the borderColor to activeColor.
     return onChanged == null
-        ? borderColor
+        ? inactiveColor
         : (t >= 0.25
             ? activeColor
-            : Color.lerp(borderColor, activeColor, t * 4.0));
+            : Color.lerp(inactiveColor, activeColor, t * 4.0));
   }
 
   // White stroke used to paint the check and dash.
