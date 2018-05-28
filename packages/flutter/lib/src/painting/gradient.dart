@@ -327,10 +327,10 @@ class LinearGradient extends Gradient {
     );
   }
 
-  /// Returns a new [LinearGradient] with its properties (in particular the
-  /// colors) scaled by the given factor.
+  /// Returns a new [LinearGradient] with its colors scaled by the given factor.
   ///
-  /// If the factor is 0.0 or less, then the gradient is fully transparent.
+  /// Since the alpha component of the Color is what is scaled, a factor
+  /// of 0.0 or less results in a gradient that is fully transparent.
   @override
   LinearGradient scale(double factor) {
     return new LinearGradient(
@@ -364,7 +364,7 @@ class LinearGradient extends Gradient {
   ///
   /// If neither gradient is null, they must have the same number of [colors].
   ///
-  /// The `t` argument represents position on the timeline, with 0.0 meaning
+  /// The `t` argument represents a position on the timeline, with 0.0 meaning
   /// that the interpolation has not started, returning `a` (or something
   /// equivalent to `a`), 1.0 meaning that the interpolation has finished,
   /// returning `b` (or something equivalent to `b`), and values in between
@@ -552,7 +552,8 @@ class RadialGradient extends Gradient {
 
   /// Returns a new [RadialGradient] with its colors scaled by the given factor.
   ///
-  /// If the factor is 0.0 or less, then the gradient is fully transparent.
+  /// Since the alpha component of the Color is what is scaled, a factor
+  /// of 0.0 or less results in a gradient that is fully transparent.
   @override
   RadialGradient scale(double factor) {
     return new RadialGradient(
@@ -586,7 +587,7 @@ class RadialGradient extends Gradient {
   ///
   /// If neither gradient is null, they must have the same number of [colors].
   ///
-  /// The `t` argument represents position on the timeline, with 0.0 meaning
+  /// The `t` argument represents a position on the timeline, with 0.0 meaning
   /// that the interpolation has not started, returning `a` (or something
   /// equivalent to `a`), 1.0 meaning that the interpolation has finished,
   /// returning `b` (or something equivalent to `b`), and values in between
@@ -774,10 +775,10 @@ class SweepGradient extends Gradient {
     );
   }
 
-  /// Returns a new [SweepGradient] with its properties (in particular the
-  /// colors) scaled by the given factor.
+  /// Returns a new [SweepGradient] with its colors scaled by the given factor.
   ///
-  /// If the factor is 0.0 or less, then the gradient is fully transparent.
+  /// Since the alpha component of the Color is what is scaled, a factor
+  /// of 0.0 or less results in a gradient that is fully transparent.
   @override
   SweepGradient scale(double factor) {
     return new SweepGradient(
@@ -806,14 +807,12 @@ class SweepGradient extends Gradient {
 
   /// Linearly interpolate between two [SweepGradient]s.
   ///
-  /// If either gradient is null, this function linearly interpolates from a
-  /// a gradient that matches the other gradient in [center], [startAngle],
-  /// [endAngle], [stops] and [tileMode] and with the same [colors] but
-  /// transparent (using [scale]).
+  /// If either gradient is null, then the non-null gradient is returned with
+  /// its color scaled in the same way as the [scale] function.
   ///
   /// If neither gradient is null, they must have the same number of [colors].
   ///
-  /// The `t` argument represents position on the timeline, with 0.0 meaning
+  /// The `t` argument represents a position on the timeline, with 0.0 meaning
   /// that the interpolation has not started, returning `a` (or something
   /// equivalent to `a`), 1.0 meaning that the interpolation has finished,
   /// returning `b` (or something equivalent to `b`), and values in between
