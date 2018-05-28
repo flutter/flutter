@@ -379,6 +379,30 @@ void main() {
     ));
   });
 
+  test('SweepGradient scale test)', () {
+    const SweepGradient testGradient = const SweepGradient(
+      center: Alignment.topLeft,
+      startAngle: 0.0,
+      endAngle: math.pi / 2,
+      colors: const <Color>[
+        const Color(0xff333333),
+        const Color(0xff666666),
+      ],
+    );
+    
+    final SweepGradient actual = testGradient.scale(0.5);
+    
+    expect(actual, const SweepGradient(
+      center: Alignment.topLeft,
+      startAngle: 0.0,
+      endAngle: math.pi / 2,
+      colors: const <Color>[
+        const Color(0x80333333),
+        const Color(0x80666666),
+      ],
+    ));
+  });
+
   test('Gradient lerp test (with RadialGradient)', () {
     const RadialGradient testGradient1 = const RadialGradient(
       center: Alignment.topLeft,
