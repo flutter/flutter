@@ -28,7 +28,7 @@ import '../runner/flutter_command.dart';
 import '../tester/flutter_tester.dart';
 import '../vmservice.dart';
 
-const String protocolVersion = '0.2.0';
+const String protocolVersion = '0.3.0';
 
 /// A server process command. This command will start up a long-lived server.
 /// It reads JSON-RPC based commands from stdin, executes them, and returns
@@ -241,6 +241,14 @@ class DaemonDomain extends Domain {
   DaemonDomain(Daemon daemon) : super(daemon, 'daemon') {
     registerHandler('version', version);
     registerHandler('shutdown', shutdown);
+
+    sendEvent(
+      'daemon.connected',
+      <String, dynamic>{
+        'version': protocolVersion,
+        'pid': pid,
+      },
+    );
 
     _subscription = daemon.notifyingLogger.onMessage.listen((LogMessage message) {
       if (daemon.logToStdout) {
