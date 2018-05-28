@@ -45,6 +45,7 @@ void main() {
 
 
   testWidgets('Outline shape and border overrides', (WidgetTester tester) async {
+    debugDisableShadows = false;
     const Color fillColor = const Color(0xFF00FF00);
     const Color borderColor = const Color(0xFFFF0000);
     const Color highlightedBorderColor = const Color(0xFF0000FF);
@@ -111,6 +112,7 @@ void main() {
         ..clipPath(pathMatcher: coversSameAreaAs(clipPath, areaToCompare: clipRect.inflate(10.0)))
         ..path(color: borderColor, strokeWidth: borderWidth)
     );
+    debugDisableShadows = true;
   });
 
 

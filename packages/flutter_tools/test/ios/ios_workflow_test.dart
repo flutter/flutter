@@ -33,10 +33,10 @@ void main() {
       cocoaPods = new MockCocoaPods();
       fs = new MemoryFileSystem();
 
-      when(cocoaPods.isCocoaPodsInstalledAndMeetsVersionCheck)
-          .thenAnswer((_) => new Future<bool>.value(true));
-      when(cocoaPods.isCocoaPodsInitialized)
-          .thenAnswer((_) => new Future<bool>.value(true));
+      when(cocoaPods.evaluateCocoaPodsInstallation)
+          .thenAnswer((_) async => CocoaPodsStatus.recommended);
+      when(cocoaPods.isCocoaPodsInitialized).thenAnswer((_) async => true);
+      when(cocoaPods.cocoaPodsVersionText).thenAnswer((_) async => '1.8.0');
     });
 
     testUsingContext('Emit missing status when nothing is installed', () async {
@@ -213,9 +213,8 @@ void main() {
           .thenReturn('Xcode 8.2.1\nBuild version 8C1002\n');
       when(xcode.isInstalledAndMeetsVersionCheck).thenReturn(true);
       when(xcode.eulaSigned).thenReturn(true);
-      when(cocoaPods.isCocoaPodsInstalledAndMeetsVersionCheck)
-          .thenAnswer((_) => new Future<bool>.value(false));
-      when(cocoaPods.hasCocoaPods).thenAnswer((_) => new Future<bool>.value(false));
+      when(cocoaPods.evaluateCocoaPodsInstallation)
+          .thenAnswer((_) async => CocoaPodsStatus.notInstalled);
       when(xcode.isSimctlInstalled).thenReturn(true);
       final IOSWorkflowTestTarget workflow = new IOSWorkflowTestTarget();
       final ValidationResult result = await workflow.validate();
@@ -232,11 +231,8 @@ void main() {
           .thenReturn('Xcode 8.2.1\nBuild version 8C1002\n');
       when(xcode.isInstalledAndMeetsVersionCheck).thenReturn(true);
       when(xcode.eulaSigned).thenReturn(true);
-      when(cocoaPods.isCocoaPodsInstalledAndMeetsVersionCheck)
-          .thenAnswer((_) => new Future<bool>.value(false));
-      when(cocoaPods.hasCocoaPods).thenAnswer((_) => new Future<bool>.value(true));
-      when(cocoaPods.cocoaPodsVersionText)
-          .thenAnswer((_) => new Future<String>.value('0.39.0'));
+      when(cocoaPods.evaluateCocoaPodsInstallation)
+          .thenAnswer((_) async => CocoaPodsStatus.belowRecommendedVersion);
       when(xcode.isSimctlInstalled).thenReturn(true);
       final IOSWorkflowTestTarget workflow = new IOSWorkflowTestTarget();
       final ValidationResult result = await workflow.validate();
@@ -253,8 +249,6 @@ void main() {
           .thenReturn('Xcode 8.2.1\nBuild version 8C1002\n');
       when(xcode.isInstalledAndMeetsVersionCheck).thenReturn(true);
       when(xcode.eulaSigned).thenReturn(true);
-      when(cocoaPods.isCocoaPodsInstalledAndMeetsVersionCheck).thenAnswer((_) async => false);
-      when(cocoaPods.hasCocoaPods).thenAnswer((_) async => true);
       when(cocoaPods.isCocoaPodsInitialized).thenAnswer((_) async => false);
       when(xcode.isSimctlInstalled).thenReturn(true);
 

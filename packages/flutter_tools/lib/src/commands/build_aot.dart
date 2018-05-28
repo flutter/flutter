@@ -33,11 +33,16 @@ class BuildAotCommand extends BuildSubCommand {
         hide: !verboseHelp,
         help: 'Preview Dart 2.0 functionality.',
       )
+      ..addFlag('build-shared-library',
+        negatable: false,
+        defaultsTo: false,
+        help: 'Compile to a *.so file (requires NDK when building for Android).'
+      )
       ..addMultiOption('ios-arch',
         splitCommas: true,
         defaultsTo: defaultIOSArchs.map(getNameForIOSArch),
         allowed: IOSArch.values.map(getNameForIOSArch),
-        help: 'iOS architectures to build',
+        help: 'iOS architectures to build.',
       )
       ..addMultiOption(FlutterOptions.kExtraFrontEndOptions,
         splitCommas: true,
@@ -46,10 +51,7 @@ class BuildAotCommand extends BuildSubCommand {
       ..addMultiOption(FlutterOptions.kExtraGenSnapshotOptions,
         splitCommas: true,
         hide: true,
-      )
-      ..addFlag('prefer-shared-library',
-        negatable: false,
-        help: 'Whether to prefer compiling to a *.so file (android only).');
+      );
   }
 
   @override
@@ -115,7 +117,7 @@ class BuildAotCommand extends BuildSubCommand {
             packagesPath: PackageMap.globalPackagesPath,
             outputPath: outputPath,
             previewDart2: previewDart2,
-            preferSharedLibrary: false,
+            buildSharedLibrary: false,
             extraGenSnapshotOptions: argResults[FlutterOptions.kExtraGenSnapshotOptions],
           ).then((int buildExitCode) {
             if (buildExitCode != 0)
@@ -142,16 +144,18 @@ class BuildAotCommand extends BuildSubCommand {
           packagesPath: PackageMap.globalPackagesPath,
           outputPath: outputPath,
           previewDart2: previewDart2,
-          preferSharedLibrary: argResults['prefer-shared-library'],
+          buildSharedLibrary: argResults['build-shared-library'],
           extraGenSnapshotOptions: argResults[FlutterOptions.kExtraGenSnapshotOptions],
         );
         if (snapshotExitCode != 0) {
           printError('Snapshotting exited with non-zero exit code: $snapshotExitCode');
+          return;
         }
       }
     } on String catch (error) {
       // Catch the String exceptions thrown from the `runCheckedSync` methods below.
       printError(error);
+      return;
     }
     status?.stop();
 

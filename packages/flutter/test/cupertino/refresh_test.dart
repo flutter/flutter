@@ -62,6 +62,7 @@ void main() {
     when(mockHelper.refreshTask()).thenAnswer((_) => refreshCompleter.future);
   });
 
+  int testListLength = 10;
   SliverList buildAListOfStuff() {
     return new SliverList(
       delegate: new SliverChildBuilderDelegate(
@@ -71,12 +72,12 @@ void main() {
             child: new Center(child: new Text(index.toString())),
           );
         },
-        childCount: 10,
+        childCount: testListLength,
       ),
     );
   }
 
-  group('UI tests', () {
+  final Function uiTestGroup = () {
     testWidgets("doesn't invoke anything without user interaction", (WidgetTester tester) async {
       debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
 
@@ -682,6 +683,11 @@ void main() {
     testWidgets(
       'sliver scrolled away when task completes properly removes itself',
       (WidgetTester tester) async {
+        if (testListLength < 4) {
+          // This test only makes sense when the list is long enough that
+          // the indicator can be scrolled away while refreshing.
+          return;
+        }
         debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
 
         refreshIndicator = const Center(child: const Text('-1'));
@@ -849,11 +855,9 @@ void main() {
         debugDefaultTargetPlatformOverride = null;
       }
     );
-  });
+  };
 
-  // Test the internal state machine directly to make sure the UI aren't just
-  // correct by coincidence.
-  group('state machine test', () {
+  final Function stateMachineTestGroup = () {
     testWidgets('starts in inactive state', (WidgetTester tester) async {
       debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
 
@@ -1228,7 +1232,22 @@ void main() {
         debugDefaultTargetPlatformOverride = null;
       }
     );
-  });
+  };
+
+  group('UI tests long list', uiTestGroup);
+
+  // Test the internal state machine directly to make sure the UI aren't just
+  // correct by coincidence.
+  group('state machine test long list', stateMachineTestGroup);
+
+  // Retest everything and make sure that it still works when the whole list
+  // is smaller than the viewport size.
+  testListLength = 2;
+  group('UI tests short list', uiTestGroup);
+
+  // Test the internal state machine directly to make sure the UI aren't just
+  // correct by coincidence.
+  group('state machine test short list', stateMachineTestGroup);
 }
 
 class MockHelper extends Mock {

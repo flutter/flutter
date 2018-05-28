@@ -328,12 +328,8 @@ class _ShapeDecorationPainter extends BoxPainter {
         _shadowCount = _decoration.shadows.length;
         _shadowPaths = new List<Path>(_shadowCount);
         _shadowPaints = new List<Paint>(_shadowCount);
-        for (int index = 0; index < _shadowCount; index += 1) {
-          final BoxShadow shadow = _decoration.shadows[index];
-          _shadowPaints[index] = new Paint()
-            ..color = shadow.color
-            ..maskFilter = new MaskFilter.blur(BlurStyle.normal, shadow.blurSigma);
-        }
+        for (int index = 0; index < _shadowCount; index += 1)
+          _shadowPaints[index] = _decoration.shadows[index].toPaint();
       }
       for (int index = 0; index < _shadowCount; index += 1) {
         final BoxShadow shadow = _decoration.shadows[index];

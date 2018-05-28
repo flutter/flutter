@@ -16,6 +16,9 @@ import 'material.dart';
 import 'slider_theme.dart';
 import 'theme.dart';
 
+// Examples can assume:
+// int _duelCommandment = 1;
+
 /// A Material Design slider.
 ///
 /// Used to select from a range of values.
@@ -46,7 +49,8 @@ import 'theme.dart';
 /// of the slider changes, the widget calls the [onChanged] callback. Most
 /// widgets that use a slider will listen for the [onChanged] callback and
 /// rebuild the slider with a new [value] to update the visual appearance of the
-/// slider.
+/// slider. To know when the value starts to change, or when it is done
+/// changing, set the optional callbacks [onChangeStart] and/or [onChangeEnd].
 ///
 /// By default, a slider will be as wide as possible, centered vertically. When
 /// given unbounded constraints, it will attempt to make the track 144 pixels
@@ -83,7 +87,12 @@ class Slider extends StatefulWidget {
   /// the slider.
   ///
   /// * [value] determines currently selected value for this slider.
-  /// * [onChanged] is called when the user selects a new value for the slider.
+  /// * [onChanged] is called while the user is selecting a new value for the
+  ///   slider.
+  /// * [onChangeStart] is called when the user starts to select a new value for
+  ///   the slider.
+  /// * [onChangeEnd] is called when the user is done selecting a new value for
+  ///   the slider.
   ///
   /// You can override some of the colors with the [activeColor] and
   /// [inactiveColor] properties, although more fine-grained control of the
@@ -92,6 +101,8 @@ class Slider extends StatefulWidget {
     Key key,
     @required this.value,
     @required this.onChanged,
+    this.onChangeStart,
+    this.onChangeEnd,
     this.min: 0.0,
     this.max: 1.0,
     this.divisions,
@@ -111,7 +122,8 @@ class Slider extends StatefulWidget {
   /// The slider's thumb is drawn at a position that corresponds to this value.
   final double value;
 
-  /// Called when the user selects a new value for the slider.
+  /// Called during a drag when the user is selecting a new value for the slider
+  /// by dragging.
   ///
   /// The slider passes the new value to the callback but does not actually
   /// change state until the parent widget rebuilds the slider with the new
@@ -122,6 +134,8 @@ class Slider extends StatefulWidget {
   /// The callback provided to onChanged should update the state of the parent
   /// [StatefulWidget] using the [State.setState] method, so that the parent
   /// gets rebuilt; for example:
+  ///
+  /// ## Sample code
   ///
   /// ```dart
   /// new Slider(
@@ -137,7 +151,81 @@ class Slider extends StatefulWidget {
   ///   },
   /// )
   /// ```
+  ///
+  /// See also:
+  ///
+  ///  * [onChangeStart] for a callback that is called when the user starts
+  ///    changing the value.
+  ///  * [onChangeEnd] for a callback that is called when the user stops
+  ///    changing the value.
   final ValueChanged<double> onChanged;
+
+  /// Called when the user starts selecting a new value for the slider.
+  ///
+  /// This callback shouldn't be used to update the slider [value] (use
+  /// [onChanged] for that), but rather to be notified when the user has started
+  /// selecting a new value by starting a drag or with a tap.
+  ///
+  /// The value passed will be the last [value] that the slider had before the
+  /// change began.
+  ///
+  /// ## Sample code
+  ///
+  /// ```dart
+  /// new Slider(
+  ///   value: _duelCommandment.toDouble(),
+  ///   min: 1.0,
+  ///   max: 10.0,
+  ///   divisions: 10,
+  ///   label: '$_duelCommandment',
+  ///   onChanged: (double newValue) {
+  ///     setState(() {
+  ///       _duelCommandment = newValue.round();
+  ///     });
+  ///   },
+  ///   onChangeStart: (double startValue) {
+  ///     print('Started change at $startValue');
+  ///   },
+  /// )
+  /// ```
+  ///
+  /// See also:
+  ///
+  ///  * [onChangeEnd] for a callback that is called when the value change is
+  ///    complete.
+  final ValueChanged<double> onChangeStart;
+
+  /// Called when the user is done selecting a new value for the slider.
+  ///
+  /// This callback shouldn't be used to update the slider [value] (use
+  /// [onChanged] for that), but rather to know when the user has completed
+  /// selecting a new [value] by ending a drag or a click.
+  ///
+  /// ## Sample code
+  ///
+  /// ```dart
+  /// new Slider(
+  ///   value: _duelCommandment.toDouble(),
+  ///   min: 1.0,
+  ///   max: 10.0,
+  ///   divisions: 10,
+  ///   label: '$_duelCommandment',
+  ///   onChanged: (double newValue) {
+  ///     setState(() {
+  ///       _duelCommandment = newValue.round();
+  ///     });
+  ///   },
+  ///   onChangeEnd: (double newValue) {
+  ///     print('Ended change on $newValue');
+  ///   },
+  /// )
+  /// ```
+  ///
+  /// See also:
+  ///
+  ///  * [onChangeStart] for a callback that is called when a value change
+  ///    begins.
+  final ValueChanged<double> onChangeEnd;
 
   /// The minimum value the user can select.
   ///
@@ -269,6 +357,16 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
     }
   }
 
+  void _handleDragStart(double value) {
+    assert(widget.onChangeStart != null);
+    widget.onChangeStart(_lerp(value));
+  }
+
+  void _handleDragEnd(double value) {
+    assert(widget.onChangeEnd != null);
+    widget.onChangeEnd(_lerp(value));
+  }
+
   // Returns a number between min and max, proportional to value, which must
   // be between 0.0 and 1.0.
   double _lerp(double value) {
@@ -313,6 +411,8 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
       sliderTheme: sliderTheme,
       mediaQueryData: MediaQuery.of(context),
       onChanged: (widget.onChanged != null) && (widget.max > widget.min) ? _handleChanged : null,
+      onChangeStart: widget.onChangeStart != null ? _handleDragStart : null,
+      onChangeEnd: widget.onChangeEnd != null ? _handleDragEnd : null,
       state: this,
     );
   }
@@ -327,6 +427,8 @@ class _SliderRenderObjectWidget extends LeafRenderObjectWidget {
     this.sliderTheme,
     this.mediaQueryData,
     this.onChanged,
+    this.onChangeStart,
+    this.onChangeEnd,
     this.state,
   }) : super(key: key);
 
@@ -336,6 +438,8 @@ class _SliderRenderObjectWidget extends LeafRenderObjectWidget {
   final SliderThemeData sliderTheme;
   final MediaQueryData mediaQueryData;
   final ValueChanged<double> onChanged;
+  final ValueChanged<double> onChangeStart;
+  final ValueChanged<double> onChangeEnd;
   final _SliderState state;
 
   @override
@@ -348,6 +452,8 @@ class _SliderRenderObjectWidget extends LeafRenderObjectWidget {
       theme: Theme.of(context),
       mediaQueryData: mediaQueryData,
       onChanged: onChanged,
+      onChangeStart: onChangeStart,
+      onChangeEnd: onChangeEnd,
       state: state,
       textDirection: Directionality.of(context),
     );
@@ -363,6 +469,8 @@ class _SliderRenderObjectWidget extends LeafRenderObjectWidget {
       ..theme = Theme.of(context)
       ..mediaQueryData = mediaQueryData
       ..onChanged = onChanged
+      ..onChangeStart = onChangeStart
+      ..onChangeEnd = onChangeEnd
       ..textDirection = Directionality.of(context);
     // Ticker provider cannot change since there's a 1:1 relationship between
     // the _SliderRenderObjectWidget object and the _SliderState object.
@@ -378,6 +486,8 @@ class _RenderSlider extends RenderBox {
     ThemeData theme,
     MediaQueryData mediaQueryData,
     ValueChanged<double> onChanged,
+    this.onChangeStart,
+    this.onChangeEnd,
     @required _SliderState state,
     @required TextDirection textDirection,
   }) : assert(value != null && value >= 0.0 && value <= 1.0),
@@ -540,6 +650,9 @@ class _RenderSlider extends RenderBox {
     }
   }
 
+  ValueChanged<double> onChangeStart;
+  ValueChanged<double> onChangeEnd;
+
   TextDirection get textDirection => _textDirection;
   TextDirection _textDirection;
   set textDirection(TextDirection value) {
@@ -633,6 +746,12 @@ class _RenderSlider extends RenderBox {
   void _startInteraction(Offset globalPosition) {
     if (isInteractive) {
       _active = true;
+      // We supply the *current* value as the start location, so that if we have
+      // a tap, it consists of a call to onChangeStart with the previous value and
+      // a call to onChangeEnd with the new value.
+      if (onChangeStart != null) {
+        onChangeStart(_discretize(value));
+      }
       _currentDragValue = _getValueFromGlobalPosition(globalPosition);
       onChanged(_discretize(_currentDragValue));
       _state.overlayController.forward();
@@ -652,6 +771,9 @@ class _RenderSlider extends RenderBox {
 
   void _endInteraction() {
     if (_active && _state.mounted) {
+      if (onChangeEnd != null) {
+        onChangeEnd(_discretize(_currentDragValue));
+      }
       _active = false;
       _currentDragValue = 0.0;
       _state.overlayController.reverse();

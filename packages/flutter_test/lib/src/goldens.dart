@@ -51,10 +51,18 @@ abstract class GoldenFileComparator {
 ///
 /// This comparator is used as the backend for [matchesGoldenFile].
 ///
-/// The default comparator, [LocalFileComparator], will treat the golden key as
+/// When using `flutter test`, a comparator implemented by [LocalFileComparator]
+/// is used if no other comparator is specified. It treats the golden key as
 /// a relative path from the test file's directory. It will then load the
 /// golden file's bytes from disk and perform a byte-for-byte comparison of the
 /// encoded PNGs, returning true only if there's an exact match.
+///
+/// When using `flutter test --update-goldens`, the [LocalFileComparator]
+/// updates the files on disk to match the rendering.
+///
+/// When using `flutter run`, the default comparator (null) is used. It prints
+/// a message to the console but otherwise does nothing. This allows tests to
+/// be developed visually on a real device.
 ///
 /// Callers may choose to override the default comparator by setting this to a
 /// custom comparator during test set-up (or using directory-level test
@@ -119,7 +127,7 @@ class _UninitializedComparator implements GoldenFileComparator {
   }
 }
 
-/// The default [GoldenFileComparator] implementation.
+/// The default [GoldenFileComparator] implementation for `flutter test`.
 ///
 /// This comparator loads golden files from the local file system, treating the
 /// golden key as a relative path from the test file's directory.
@@ -128,13 +136,16 @@ class _UninitializedComparator implements GoldenFileComparator {
 /// comparison of the encoded PNGs, returning true only if there's an exact
 /// match. This means it will fail the test if two PNGs represent the same
 /// pixels but are encoded differently.
+///
+/// When using `flutter test --update-goldens`, [LocalFileComparator]
+/// updates the files on disk to match the rendering.
 class LocalFileComparator implements GoldenFileComparator {
   /// Creates a new [LocalFileComparator] for the specified [testFile].
   ///
   /// Golden file keys will be interpreted as file paths relative to the
   /// directory in which [testFile] resides.
   ///
-  /// The [testFile] URI must represent a file.
+  /// The [testFile] URL must represent a file.
   LocalFileComparator(Uri testFile, {path.Style pathStyle})
       : basedir = _getBasedir(testFile, pathStyle),
         _path = _getPath(pathStyle);

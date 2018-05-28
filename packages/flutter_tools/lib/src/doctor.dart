@@ -209,6 +209,9 @@ abstract class Workflow {
 
   /// Could this thing launch *something*? It may still have minor issues.
   bool get canLaunchDevices;
+
+  /// Are we functional enough to list emulators?
+  bool get canListEmulators;
 }
 
 enum ValidationType {

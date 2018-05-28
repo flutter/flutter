@@ -209,6 +209,9 @@ void updateLocalProperties({String projectPath, BuildInfo buildInfo}) {
     settings = new SettingsFile.parseFromFile(localProperties);
   } else {
     settings = new SettingsFile();
+    if (androidSdk == null) {
+      throwToolExit('Unable to locate Android SDK. Please run `flutter doctor` for more details.');
+    }
     settings.values['sdk.dir'] = escapePath(androidSdk.directory);
     changed = true;
   }
@@ -378,8 +381,10 @@ Future<Null> _buildGradleProjectV2(String gradle, BuildInfo buildInfo, String ta
       command.add('-Pfilesystem-roots=${buildInfo.fileSystemRoots.join('|')}');
     if (buildInfo.fileSystemScheme != null)
       command.add('-Pfilesystem-scheme=${buildInfo.fileSystemScheme}');
+  } else {
+    command.add('-Ppreview-dart-2=false');
   }
-  if (buildInfo.preferSharedLibrary && androidSdk.ndkCompiler != null) {
+  if (buildInfo.preferSharedLibrary && androidSdk.ndk != null) {
     command.add('-Pprefer-shared-library=true');
   }
   if (buildInfo.targetPlatform == TargetPlatform.android_arm64)

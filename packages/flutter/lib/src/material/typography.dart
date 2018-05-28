@@ -7,6 +7,8 @@ import 'package:flutter/painting.dart';
 
 import 'colors.dart';
 
+
+
 /// Material design text theme.
 ///
 /// Definitions for the various typographical styles found in material design
@@ -103,6 +105,39 @@ class TextTheme extends Diagnosticable {
   /// Consider using [Typography.black] or [Typography.white], which implement
   /// the typography styles in the material design specification, as a starting
   /// point.
+  ///
+  /// ## Sample code
+  ///
+  /// ```dart
+  /// /// A Widget that sets the ambient theme's title text color for its
+  /// /// descendants, while leaving other ambient theme attributes alone.
+  /// class TitleColorThemeCopy extends StatelessWidget {
+  ///   TitleColorThemeCopy({Key key, this.child, this.titleColor}) : super(key: key);
+  /// 
+  ///   final Color titleColor;
+  ///   final Widget child;
+  /// 
+  ///   @override
+  ///   Widget build(BuildContext context) {
+  ///     final ThemeData theme = Theme.of(context);
+  ///     return new Theme(
+  ///       data: theme.copyWith(
+  ///         textTheme: theme.textTheme.copyWith(
+  ///           title: theme.textTheme.title.copyWith(
+  ///             color: titleColor,
+  ///           ),
+  ///         ),
+  ///       ),
+  ///       child: child,
+  ///     );
+  ///   }
+  /// }
+  /// ```
+  ///
+  /// See also:
+  ///
+  ///   * [merge] is used instead of [copyWith] when you want to merge all
+  ///     of the fields of a TextTheme instead of individual fields.
   TextTheme copyWith({
     TextStyle display4,
     TextStyle display3,
@@ -139,24 +174,63 @@ class TextTheme extends Diagnosticable {
   /// the value of [TextStyle.inherit] flag. For more details, see the
   /// documentation on [TextStyle.merge] and [TextStyle.inherit].
   ///
+  /// If this theme, or the `other` theme has members that are null, then the
+  /// non-null one (if any) is used. If the `other` theme is itself null, then
+  /// this [TextTheme] is returned unchanged. If values in both are set, then
+  /// the values are merged using [TextStyle.merge].
+  ///
   /// This is particularly useful if one [TextTheme] defines one set of
-  /// properties and another defines a different set, e.g. having colors defined
-  /// in one text theme and font sizes in another.
+  /// properties and another defines a different set, e.g. having colors
+  /// defined in one text theme and font sizes in another, or when one
+  /// [TextTheme] has only some fields defined, and you want to define the rest
+  /// by merging it with a default theme.
+  ///
+  /// ## Sample code
+  ///
+  /// ```dart
+  /// /// A Widget that sets the ambient theme's title text color for its
+  /// /// descendants, while leaving other ambient theme attributes alone.
+  /// class TitleColorTheme extends StatelessWidget {
+  ///   TitleColorTheme({Key key, this.child, this.titleColor}) : super(key: key);
+  /// 
+  ///   final Color titleColor;
+  ///   final Widget child;
+  /// 
+  ///   @override
+  ///   Widget build(BuildContext context) {
+  ///     ThemeData theme = Theme.of(context);
+  ///     // This partialTheme is incomplete: it only has the title style
+  ///     // defined. Just replacing theme.textTheme with partialTheme would
+  ///     // set the title, but everything else would be null. This isn't very
+  ///     // useful, so merge it with the existing theme to keep all of the
+  ///     // preexisting definitions for the other styles.
+  ///     TextTheme partialTheme = new TextTheme(title: new TextStyle(color: titleColor));
+  ///     theme = theme.copyWith(textTheme: theme.textTheme.merge(partialTheme));
+  ///     return new Theme(data: theme, child: child);
+  ///   }
+  /// }
+  /// ```
+  ///
+  /// See also:
+  ///
+  ///   * [copyWith] is used instead of [merge] when you wish to override
+  ///     individual fields in the [TextTheme] instead of merging all of the
+  ///     fields of two [TextTheme]s.
   TextTheme merge(TextTheme other) {
     if (other == null)
       return this;
     return copyWith(
-      display4: display4.merge(other.display4),
-      display3: display3.merge(other.display3),
-      display2: display2.merge(other.display2),
-      display1: display1.merge(other.display1),
-      headline: headline.merge(other.headline),
-      title: title.merge(other.title),
-      subhead: subhead.merge(other.subhead),
-      body2: body2.merge(other.body2),
-      body1: body1.merge(other.body1),
-      caption: caption.merge(other.caption),
-      button: button.merge(other.button),
+      display4: display4?.merge(other.display4) ?? other.display4,
+      display3: display3?.merge(other.display3) ?? other.display3,
+      display2: display2?.merge(other.display2) ?? other.display2,
+      display1: display1?.merge(other.display1) ?? other.display1,
+      headline: headline?.merge(other.headline) ?? other.headline,
+      title: title?.merge(other.title) ?? other.title,
+      subhead: subhead?.merge(other.subhead) ?? other.subhead,
+      body2: body2?.merge(other.body2) ?? other.body2,
+      body1: body1?.merge(other.body1) ?? other.body1,
+      caption: caption?.merge(other.caption) ?? other.caption,
+      button: button?.merge(other.button) ?? other.button,
     );
   }
 

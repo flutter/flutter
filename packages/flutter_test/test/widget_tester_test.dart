@@ -32,6 +32,18 @@ void main() {
       await tester.pump();
       test_package.expect(value, '123');
     });
+
+    testWidgets('respects the skip flag', (WidgetTester tester) async {
+      final Completer<void> completer = new Completer<void>();
+      final Future<void> future = expectLater(null, new FakeMatcher(completer), skip: 'testing skip');
+      bool completed = false;
+      future.then((void _) {
+        completed = true;
+      });
+      test_package.expect(completed, isFalse);
+      await future;
+      test_package.expect(completed, isTrue);
+    }, skip: true /* Enable once https://github.com/dart-lang/test/pull/831 lands */);
   });
 
   group('findsOneWidget', () {
@@ -480,6 +492,18 @@ void main() {
       tester.runAsync<void>(() => completer.future);
       expect(() => tester.runAsync(() async {}), throwsA(const isInstanceOf<TestFailure>()));
       completer.complete();
+    });
+
+    testWidgets('maintains existing zone values', (WidgetTester tester) async {
+      final Object key = new Object();
+      await runZoned(() {
+        expect(Zone.current[key], 'abczed');
+        return tester.runAsync<String>(() async {
+          expect(Zone.current[key], 'abczed');
+        });
+      }, zoneValues: <dynamic, dynamic>{
+        key: 'abczed',
+      });
     });
   });
 }

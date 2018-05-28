@@ -21,6 +21,7 @@ import 'package:flutter_tools/src/ios/simulators.dart';
 import 'package:flutter_tools/src/ios/xcodeproj.dart';
 import 'package:flutter_tools/src/usage.dart';
 import 'package:flutter_tools/src/version.dart';
+import 'package:meta/meta.dart';
 import 'package:mockito/mockito.dart';
 import 'package:quiver/time.dart';
 import 'package:test/test.dart';
@@ -37,6 +38,7 @@ MockDoctor get testDoctor => context[Doctor];
 
 typedef void ContextInitializer(AppContext testContext);
 
+@isTest
 void testUsingContext(String description, dynamic testMethod(), {
   Timeout timeout,
   Map<Type, Generator> overrides: const <Type, Generator>{},
