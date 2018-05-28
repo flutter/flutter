@@ -1085,8 +1085,10 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
   @override
   void handleBeginFrame(Duration rawTimeStamp) {
     // Don't run this function when `handleBeginFrame` was invoked
-    // immediately before.
-    // TODO(17963): Remove this line.
+    // immediately before without a call of `handleDrawFrame` in between.
+    // TODO(floitsch): Remove this line when the spurious calls from the
+    //                 framework don't happen anymore. See
+    //                 https://github.com/flutter/flutter/issues/17963
     if (_doDrawThisFrame != null) return;
     assert(_doDrawThisFrame == null);
     if (_expectingFrame ||
@@ -1104,7 +1106,9 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
   void handleDrawFrame() {
     // Don't run this function when `handleBeginFrame` wasn't invoked
     // immediately before.
-    // TODO(17963): Remove this line.
+    // TODO(floitsch): Remove this line when the spurious calls from the
+    //                 framework don't happen anymore. See
+    //                 https://github.com/flutter/flutter/issues/17963
     if (_doDrawThisFrame == null) return;
     assert(_doDrawThisFrame != null);
     if (_doDrawThisFrame)
