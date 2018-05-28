@@ -38,5 +38,6 @@
   "drawerLabel": "เมนูการนำทาง",
   "popupMenuLabel": "เมนูป๊อปอัป",
   "dialogLabel": "กล่องโต้ตอบ",
-  "alertDialogLabel": "เตือนภัย"
+  "alertDialogLabel": "เตือนภัย",
+  "searchFieldLabel": "ค้นหา"
 }

@@ -383,12 +383,19 @@ class FlutterCommandRunner extends CommandRunner<Null> {
     Cache.flutterRoot ??= _defaultFlutterRoot;
   }
 
-  /// Get all pub packages in the Flutter repo.
-  List<Directory> getRepoPackages() {
+  /// Get the root directories of the repo - the directories containing Dart packages.
+  List<String> getRepoRoots() {
     final String root = fs.path.absolute(Cache.flutterRoot);
     // not bin, and not the root
-    return <String>['dev', 'examples', 'packages']
-      .expand<String>((String path) => _gatherProjectPaths(fs.path.join(root, path)))
+    return <String>['dev', 'examples', 'packages'].map((String item) {
+      return fs.path.join(root, item);
+    }).toList();
+  }
+
+  /// Get all pub packages in the Flutter repo.
+  List<Directory> getRepoPackages() {
+    return getRepoRoots()
+      .expand<String>((String root) => _gatherProjectPaths(root))
       .map((String dir) => fs.directory(dir))
       .toList();
   }

@@ -435,7 +435,7 @@ class HotRunner extends ResidentRunner {
   Future<OperationResult> restart({ bool fullRestart: false, bool pauseAfterRestart: false }) async {
     if (fullRestart) {
       final Status status = logger.startProgress(
-        'Performing full restart...',
+        'Performing hot restart...',
         progressId: 'hot.restart'
       );
       try {
@@ -717,9 +717,9 @@ class HotRunner extends ResidentRunner {
     const String bold = '\u001B[0;1m';
     const String reset = '\u001B[0m';
     printStatus(
-      '$fire  To hot reload your app on the fly, press "r". To restart the app entirely, press "R".',
-      ansiAlternative: '$red$fire$bold  To hot reload your app on the fly, '
-                       'press "r". To restart the app entirely, press "R".$reset'
+      '$fire  To hot reload changes while running, press "r". To hot restart (and rebuild state), press "R".',
+      ansiAlternative: '$red$fire$bold  To hot reload changes while running, press "r". '
+                       'To hot restart (and rebuild state), press "R".$reset'
     );
     for (FlutterDevice device in flutterDevices) {
       final String dname = device.device.name;

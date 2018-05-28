@@ -52,10 +52,12 @@ void main() {
     testUsingContext('creates fingerprint with file checksums', () async {
       await fs.file('a.dart').create();
       await fs.file('b.dart').create();
+      await fs.file('depfile').writeAsString('depfile : b.dart');
 
       final Fingerprinter fingerprinter = new Fingerprinter(
         fingerprintPath: 'out.fingerprint',
-        paths: <String>['a.dart', 'b.dart'],
+        paths: <String>['a.dart'],
+        depfilePaths: <String>['depfile'],
         properties: <String, String>{
           'bar': 'baz',
           'wobble': 'womble',
@@ -122,6 +124,38 @@ void main() {
       );
       await fingerprinter.writeFingerprint();
       expect(await fingerprinter.doesFingerprintMatch(), isTrue);
+    }, overrides: contextOverrides);
+
+    testUsingContext('fails to write fingerprint if inputs are missing', () async {
+      final Fingerprinter fingerprinter = new Fingerprinter(
+        fingerprintPath: 'out.fingerprint',
+        paths: <String>['a.dart'],
+        properties: <String, String>{
+          'foo': 'bar',
+          'wibble': 'wobble',
+        },
+      );
+      await fingerprinter.writeFingerprint();
+      expect(fs.file('out.fingerprint').existsSync(), isFalse);
+    }, overrides: contextOverrides);
+
+    testUsingContext('applies path filter to inputs paths', () async {
+      await fs.file('a.dart').create();
+      await fs.file('ab.dart').create();
+      await fs.file('depfile').writeAsString('depfile : ab.dart c.dart');
+
+      final Fingerprinter fingerprinter = new Fingerprinter(
+        fingerprintPath: 'out.fingerprint',
+        paths: <String>['a.dart'],
+        depfilePaths: <String>['depfile'],
+        properties: <String, String>{
+          'foo': 'bar',
+          'wibble': 'wobble',
+        },
+        pathFilter: (String path) => path.startsWith('a'),
+      );
+      await fingerprinter.writeFingerprint();
+      expect(fs.file('out.fingerprint').existsSync(), isTrue);
     }, overrides: contextOverrides);
   });
 

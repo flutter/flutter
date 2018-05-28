@@ -6,6 +6,7 @@ import 'dart:async';
 
 import '../build_info.dart';
 import '../bundle.dart';
+import '../runner/flutter_command.dart' show FlutterOptions;
 import 'build.dart';
 
 class BuildBundleCommand extends BuildSubCommand {
@@ -29,6 +30,10 @@ class BuildBundleCommand extends BuildSubCommand {
       ..addFlag('track-widget-creation',
         hide: !verboseHelp,
         help: 'Track widget creation locations. Requires Dart 2.0 functionality.',
+      )
+      ..addMultiOption(FlutterOptions.kExtraFrontEndOptions,
+        splitCommas: true,
+        hide: true,
       )
       ..addOption('asset-dir', defaultsTo: getAssetBuildDirectory())
       ..addFlag('report-licensed-packages',
@@ -76,6 +81,7 @@ class BuildBundleCommand extends BuildSubCommand {
       precompiledSnapshot: argResults['precompiled'],
       reportLicensedPackages: argResults['report-licensed-packages'],
       trackWidgetCreation: argResults['track-widget-creation'],
+      extraFrontEndOptions: argResults[FlutterOptions.kExtraFrontEndOptions],
       fileSystemScheme: argResults['filesystem-scheme'],
       fileSystemRoots: argResults['filesystem-root'],
     );

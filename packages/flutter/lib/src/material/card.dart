@@ -49,7 +49,7 @@ import 'theme.dart';
 ///
 /// ![A card with a slight shadow, consisting of two rows, one with an icon and
 /// some text describing a musical, and the other with buttons for buying
-/// tickets or listening to the show.](https://flutter.github.io/assets-for-api-docs/material/card.png)
+/// tickets or listening to the show.](https://flutter.github.io/assets-for-api-docs/assets/material/card.png)
 ///
 /// See also:
 ///

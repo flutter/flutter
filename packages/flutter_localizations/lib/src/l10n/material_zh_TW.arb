@@ -38,5 +38,6 @@
   "drawerLabel": "導覽選單",
   "popupMenuLabel": "彈出式選單",
   "dialogLabel": "對話方塊",
-  "alertDialogLabel": "警报"
+  "alertDialogLabel": "警报",
+  "searchFieldLabel": "搜索"
 }

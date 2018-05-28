@@ -22,6 +22,7 @@ import 'package:vector_math/vector_math_64.dart';
 import 'goldens.dart';
 import 'stack_manipulation.dart';
 import 'test_async_utils.dart';
+import 'test_exception_reporter.dart';
 import 'test_text_input.dart';
 
 /// Phases that can be reached by [WidgetTester.pumpWidget] and
@@ -96,6 +97,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   /// [debugPrintOverride], which can be overridden by subclasses.
   TestWidgetsFlutterBinding() {
     debugPrint = debugPrintOverride;
+    debugDisableShadows = disableShadows;
     debugCheckIntrinsicSizes = checkIntrinsicSizes;
   }
 
@@ -107,6 +109,15 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   /// synchronous, disabling its normal throttling behavior.
   @protected
   DebugPrintCallback get debugPrintOverride => debugPrint;
+
+  /// The value to set [debugDisableShadows] to while tests are running.
+  ///
+  /// This can be used to reduce the likelihood of golden file tests being
+  /// flaky, because shadow rendering is not always deterministic. The
+  /// [AutomatedTestWidgetsFlutterBinding] sets this to true, so that all tests
+  /// always run with shadows disabled.
+  @protected
+  bool get disableShadows => false;
 
   /// The value to set [debugCheckIntrinsicSizes] to while tests are running.
   ///
@@ -287,23 +298,23 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   FlutterExceptionHandler _oldExceptionHandler;
   FlutterErrorDetails _pendingExceptionDetails;
 
-  static const TextStyle _kMessageStyle = const TextStyle(
+  static const TextStyle _messageStyle = const TextStyle(
     color: const Color(0xFF917FFF),
     fontSize: 40.0,
   );
 
-  static const Widget _kPreTestMessage = const Center(
+  static const Widget _preTestMessage = const Center(
     child: const Text(
       'Test starting...',
-      style: _kMessageStyle,
+      style: _messageStyle,
       textDirection: TextDirection.ltr,
     )
   );
 
-  static const Widget _kPostTestMessage = const Center(
+  static const Widget _postTestMessage = const Center(
     child: const Text(
       'Test finished.',
-      style: _kMessageStyle,
+      style: _messageStyle,
       textDirection: TextDirection.ltr,
     )
   );
@@ -348,16 +359,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
     assert(_currentTestCompleter != null);
     if (_pendingExceptionDetails != null) {
       debugPrint = debugPrintOverride; // just in case the test overrides it -- otherwise we won't see the error!
-      FlutterError.dumpErrorToConsole(_pendingExceptionDetails, forceReport: true);
-      // test_package.registerException actually just calls the current zone's error handler (that
-      // is to say, _parentZone's handleUncaughtError function). FakeAsync doesn't add one of those,
-      // but the test package does, that's how the test package tracks errors. So really we could
-      // get the same effect here by calling that error handler directly or indeed just throwing.
-      // However, we call registerException because that's the semantically correct thing...
-      String additional = '';
-      if (_currentTestDescription != '')
-        additional = '\nThe test description was: $_currentTestDescription';
-      test_package.registerException('Test failed. See exception logs above.$additional', _emptyStackTrace);
+      reportTestException(_pendingExceptionDetails, _currentTestDescription);
       _pendingExceptionDetails = null;
     }
     _currentTestDescription = null;
@@ -488,12 +490,19 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   }
 
   Future<Null> _runTestBody(Future<Null> testBody(), VoidCallback invariantTester) async {
+    // Delay this function by a microtask.
+    // Otherwise it will open a scope immediately, which is then open when
+    // the `asyncBarrier` is invoked. The `asyncBarrier` is immediately
+    // following the call to `testZone.runBinary(_runTestBody)`, so delaying
+    // by one microtask is enough to ensure that the timing is correct.
+    await new Future<Null>.microtask(() {});
     assert(inTest);
 
-    runApp(new Container(key: new UniqueKey(), child: _kPreTestMessage)); // Reset the tree to a known state.
+    runApp(new Container(key: new UniqueKey(), child: _preTestMessage)); // Reset the tree to a known state.
     await pump();
 
     final bool autoUpdateGoldensBeforeTest = autoUpdateGoldenFiles;
+    final TestExceptionReporter reportTestExceptionBeforeTest = reportTestException;
 
     // run the test
     await testBody();
@@ -503,10 +512,11 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
       // We only try to clean up and verify invariants if we didn't already
       // fail. If we got an exception already, then we instead leave everything
       // alone so that we don't cause more spurious errors.
-      runApp(new Container(key: new UniqueKey(), child: _kPostTestMessage)); // Unmount any remaining widgets.
+      runApp(new Container(key: new UniqueKey(), child: _postTestMessage)); // Unmount any remaining widgets.
       await pump();
       invariantTester();
       _verifyAutoUpdateGoldensUnset(autoUpdateGoldensBeforeTest);
+      _verifyReportTestExceptionUnset(reportTestExceptionBeforeTest);
       _verifyInvariants();
     }
 
@@ -524,6 +534,10 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
     ));
     assert(debugAssertAllGesturesVarsUnset(
       'The value of a gestures debug variable was changed by the test.',
+    ));
+    assert(debugAssertAllPaintingVarsUnset(
+      'The value of a painting debug variable was changed by the test.',
+      debugDisableShadowsOverride: disableShadows,
     ));
     assert(debugAssertAllRenderVarsUnset(
       'The value of a rendering debug variable was changed by the test.',
@@ -543,6 +557,26 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
         FlutterError.reportError(new FlutterErrorDetails(
           exception: new FlutterError(
               'The value of autoUpdateGoldenFiles was changed by the test.',
+          ),
+          stack: StackTrace.current,
+          library: 'Flutter test framework',
+        ));
+      }
+      return true;
+    }());
+  }
+
+  void _verifyReportTestExceptionUnset(TestExceptionReporter valueBeforeTest) {
+    assert(() {
+      if (reportTestException != valueBeforeTest) {
+        // We can't report this error to their modified reporter because we
+        // can't be guaranteed that their reporter will cause the test to fail.
+        // So we reset the error reporter to its initial value and then report
+        // this error.
+        reportTestException = valueBeforeTest;
+        FlutterError.reportError(new FlutterErrorDetails(
+          exception: new FlutterError(
+            'The value of reportTestException was changed by the test.',
           ),
           stack: StackTrace.current,
           library: 'Flutter test framework',
@@ -587,6 +621,9 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
 
   @override
   DebugPrintCallback get debugPrintOverride => debugPrintSynchronously;
+
+  @override
+  bool get disableShadows => true;
 
   @override
   bool get checkIntrinsicSizes => true;
@@ -634,7 +671,21 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
       );
     }());
 
-    return Zone.root.run(() {
+    final Zone realAsyncZone = Zone.current.fork(
+      specification: new ZoneSpecification(
+        scheduleMicrotask: (Zone self, ZoneDelegate parent, Zone zone, void f()) {
+          Zone.root.scheduleMicrotask(f);
+        },
+        createTimer: (Zone self, ZoneDelegate parent, Zone zone, Duration duration, void f()) {
+          return Zone.root.createTimer(duration, f);
+        },
+        createPeriodicTimer: (Zone self, ZoneDelegate parent, Zone zone, Duration period, void f(Timer timer)) {
+          return Zone.root.createPeriodicTimer(period, f);
+        },
+      ),
+    );
+
+    return realAsyncZone.run(() {
       _pendingAsyncTasks = new Completer<void>();
       return callback().catchError((dynamic exception, StackTrace stack) {
         FlutterError.reportError(new FlutterErrorDetails(
@@ -722,6 +773,12 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
     });
 
     return new Future<Null>.microtask(() async {
+      // Run all queued microtasks.
+      await new Future<Null>.microtask(() {});
+      // When the test had an exception, the test-framework already
+      // ran the teardown functions, removing the _fakeAsync function.
+      if (_fakeAsync == null)
+        return null;
       // Resolve interplay between fake async and real async calls.
       _fakeAsync.flushMicrotasks();
       while (_pendingAsyncTasks != null) {
@@ -938,6 +995,13 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
 
   @override
   void handleBeginFrame(Duration rawTimeStamp) {
+    // Don't run this function when `handleBeginFrame` was invoked
+    // immediately before without a call of `handleDrawFrame` in between.
+    // TODO(floitsch): Remove this line when the spurious calls from the
+    //                 framework don't happen anymore. See
+    //                 https://github.com/flutter/flutter/issues/17963
+    if (_doDrawThisFrame != null)
+      return;
     assert(_doDrawThisFrame == null);
     if (_expectingFrame ||
         (framePolicy == LiveTestWidgetsFlutterBindingFramePolicy.fullyLive) ||
@@ -952,6 +1016,13 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
 
   @override
   void handleDrawFrame() {
+    // Don't run this function when `handleBeginFrame` wasn't invoked
+    // immediately before.
+    // TODO(floitsch): Remove this line when the spurious calls from the
+    //                 framework don't happen anymore. See
+    //                 https://github.com/flutter/flutter/issues/17963
+    if (_doDrawThisFrame == null)
+      return;
     assert(_doDrawThisFrame != null);
     if (_doDrawThisFrame)
       super.handleDrawFrame();
@@ -1269,8 +1340,6 @@ class _LiveTestRenderView extends RenderView {
     _label?.paint(context.canvas, offset - const Offset(0.0, 10.0));
   }
 }
-
-final StackTrace _emptyStackTrace = new stack_trace.Chain(const <stack_trace.Trace>[]);
 
 StackTrace _unmangle(StackTrace stack) {
   if (stack is stack_trace.Trace)

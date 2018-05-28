@@ -726,7 +726,7 @@ class _RenderDecoration extends RenderBox {
   }
 
   static double _minHeight(RenderBox box, double width) {
-    return box == null ? 0.0 : box.getMinIntrinsicWidth(width);
+    return box == null ? 0.0 : box.getMinIntrinsicHeight(width);
   }
 
   static Size _boxSize(RenderBox box) => box == null ? Size.zero : box.size;
@@ -764,14 +764,14 @@ class _RenderDecoration extends RenderBox {
     if (suffixIcon != null)
       suffixIcon.layout(boxConstraints, parentUsesSize: true);
 
-    final double inputWidth = constraints.maxWidth - (
+    final double inputWidth = math.max(0.0, constraints.maxWidth - (
       _boxSize(icon).width
       + contentPadding.left
       + _boxSize(prefixIcon).width
       + _boxSize(prefix).width
       + _boxSize(suffix).width
       + _boxSize(suffixIcon).width
-      + contentPadding.right);
+      + contentPadding.right));
 
     boxConstraints = boxConstraints.copyWith(maxWidth: inputWidth);
     if (label != null) // The label is not baseline aligned.
@@ -811,10 +811,11 @@ class _RenderDecoration extends RenderBox {
       // The helper or error text can occupy the full width less the space
       // occupied by the icon and counter.
       boxConstraints = boxConstraints.copyWith(
-        maxWidth: boxConstraints.maxWidth
+        maxWidth: math.max(0.0, boxConstraints.maxWidth
           - _boxSize(icon).width
           - _boxSize(counter).width
           - contentPadding.horizontal,
+        ),
       );
       layoutLineBox(helperError);
 

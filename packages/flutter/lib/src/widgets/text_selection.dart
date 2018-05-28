@@ -248,8 +248,8 @@ class TextSelectionOverlay {
       _value = value {
     final OverlayState overlay = Overlay.of(context);
     assert(overlay != null);
-    _handleController = new AnimationController(duration: _kFadeDuration, vsync: overlay);
-    _toolbarController = new AnimationController(duration: _kFadeDuration, vsync: overlay);
+    _handleController = new AnimationController(duration: _fadeDuration, vsync: overlay);
+    _toolbarController = new AnimationController(duration: _fadeDuration, vsync: overlay);
   }
 
   /// The context in which the selection handles should appear.
@@ -278,7 +278,7 @@ class TextSelectionOverlay {
   final TextSelectionDelegate selectionDelegate;
 
   /// Controls the fade-in animations.
-  static const Duration _kFadeDuration = const Duration(milliseconds: 150);
+  static const Duration _fadeDuration = const Duration(milliseconds: 150);
   AnimationController _handleController;
   AnimationController _toolbarController;
   Animation<double> get _handleOpacity => _handleController.view;

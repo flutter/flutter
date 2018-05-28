@@ -66,7 +66,7 @@ class BoxDecoration extends Decoration {
   /// * If [image] is null, this decoration does not paint a background image.
   /// * If [border] is null, this decoration does not paint a border.
   /// * If [borderRadius] is null, this decoration uses more efficient background
-  ///   painting commands. The [borderRadius] argument must be be null if [shape] is
+  ///   painting commands. The [borderRadius] argument must be null if [shape] is
   ///   [BoxShape.circle].
   /// * If [boxShadow] is null, this decoration does not paint a shadow.
   /// * If [gradient] is null, this decoration does not paint gradients.
@@ -366,9 +366,7 @@ class _BoxDecorationPainter extends BoxPainter {
     if (_decoration.boxShadow == null)
       return;
     for (BoxShadow boxShadow in _decoration.boxShadow) {
-      final Paint paint = new Paint()
-        ..color = boxShadow.color
-        ..maskFilter = new MaskFilter.blur(BlurStyle.normal, boxShadow.blurSigma);
+      final Paint paint = boxShadow.toPaint();
       final Rect bounds = rect.shift(boxShadow.offset).inflate(boxShadow.spreadRadius);
       _paintBox(canvas, bounds, paint, textDirection);
     }

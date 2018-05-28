@@ -779,15 +779,13 @@ class SliverMultiBoxAdaptorElement extends RenderObjectElement implements Render
     });
   }
 
-  double _extrapolateMaxScrollOffset(
+  static double _extrapolateMaxScrollOffset(
     int firstIndex,
     int lastIndex,
     double leadingScrollOffset,
     double trailingScrollOffset,
+    int childCount,
   ) {
-    final int childCount = this.childCount;
-    if (childCount == null)
-      return double.infinity;
     if (lastIndex == childCount - 1)
       return trailingScrollOffset;
     final int reifiedCount = lastIndex - firstIndex + 1;
@@ -803,6 +801,9 @@ class SliverMultiBoxAdaptorElement extends RenderObjectElement implements Render
     double leadingScrollOffset,
     double trailingScrollOffset,
   }) {
+    final int childCount = this.childCount;
+    if (childCount == null)
+      return double.infinity;
     return widget.estimateMaxScrollOffset(
       constraints,
       firstIndex,
@@ -814,6 +815,7 @@ class SliverMultiBoxAdaptorElement extends RenderObjectElement implements Render
       lastIndex,
       leadingScrollOffset,
       trailingScrollOffset,
+      childCount,
     );
   }
 

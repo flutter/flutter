@@ -13,7 +13,7 @@ import 'theme.dart';
 // Examples can assume:
 // Widget bottomAppBarContents;
 
-/// A container that s typically ised with [Scaffold.bottomNavigationBar], and
+/// A container that is typically used with [Scaffold.bottomNavigationBar], and
 /// can have a notch along the top that makes room for an overlapping
 /// [FloatingActionButton].
 ///

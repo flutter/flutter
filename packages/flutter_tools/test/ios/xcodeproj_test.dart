@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:file/memory.dart';
+import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/build_info.dart';
@@ -252,11 +253,76 @@ Information about project "Runner":
       expect(info.buildConfigurationFor(const BuildInfo(BuildMode.release, 'Paid'), 'Paid'), null);
     });
   });
+
+  group('updateGeneratedXcodeProperties', () {
+    MockLocalEngineArtifacts mockArtifacts;
+    MockProcessManager mockProcessManager;
+    FakePlatform macOS;
+    FileSystem fs;
+
+    setUp(() {
+      fs = new MemoryFileSystem();
+      mockArtifacts = new MockLocalEngineArtifacts();
+      mockProcessManager = new MockProcessManager();
+      macOS = fakePlatform('macos');
+      fs.file(xcodebuild).createSync(recursive: true);
+    });
+
+    void testUsingOsxContext(String description, dynamic testMethod()) {
+      testUsingContext(description, testMethod, overrides: <Type, Generator>{
+        Artifacts: () => mockArtifacts,
+        ProcessManager: () => mockProcessManager,
+        Platform: () => macOS,
+        FileSystem: () => fs,
+      });
+    }
+
+    testUsingOsxContext('sets ARCHS=armv7 when armv7 local engine is set', () {
+      when(mockArtifacts.getArtifactPath(Artifact.flutterFramework, TargetPlatform.ios, any)).thenReturn('engine');
+      when(mockArtifacts.engineOutPath).thenReturn(fs.path.join('out', 'ios_profile_arm'));
+      const BuildInfo buildInfo = const BuildInfo(BuildMode.debug, null,
+        previewDart2: true,
+        targetPlatform: TargetPlatform.ios,
+      );
+      updateGeneratedXcodeProperties(
+        projectPath: 'path/to/project',
+        buildInfo: buildInfo,
+        previewDart2: true,
+      );
+
+      final File config = fs.file('path/to/project/ios/Flutter/Generated.xcconfig');
+      expect(config.existsSync(), isTrue);
+
+      final String contents = config.readAsStringSync();
+      expect(contents.contains('ARCHS=armv7'), isTrue);
+    });
+
+    testUsingOsxContext('sets ARCHS=armv7 when armv7 local engine is set', () {
+      when(mockArtifacts.getArtifactPath(Artifact.flutterFramework, TargetPlatform.ios, any)).thenReturn('engine');
+      when(mockArtifacts.engineOutPath).thenReturn(fs.path.join('out', 'ios_profile'));
+      const BuildInfo buildInfo = const BuildInfo(BuildMode.debug, null,
+        previewDart2: true,
+        targetPlatform: TargetPlatform.ios,
+      );
+      updateGeneratedXcodeProperties(
+        projectPath: 'path/to/project',
+        buildInfo: buildInfo,
+        previewDart2: true,
+      );
+
+      final File config = fs.file('path/to/project/ios/Flutter/Generated.xcconfig');
+      expect(config.existsSync(), isTrue);
+
+      final String contents = config.readAsStringSync();
+      expect(contents.contains('ARCHS=arm64'), isTrue);
+    });
+  });
 }
 
 Platform fakePlatform(String name) {
   return new FakePlatform.fromPlatform(const LocalPlatform())..operatingSystem = name;
 }
 
+class MockLocalEngineArtifacts extends Mock implements LocalEngineArtifacts {}
 class MockProcessManager extends Mock implements ProcessManager {}
 class MockXcodeProjectInterpreter extends Mock implements XcodeProjectInterpreter { }

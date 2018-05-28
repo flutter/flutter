@@ -38,5 +38,6 @@
   "drawerLabel": "Menu di chuyển",
   "popupMenuLabel": "Menu bật lên",
   "dialogLabel": "Hộp thoại",
-  "alertDialogLabel": "Hộp thoại"
+  "alertDialogLabel": "Hộp thoại",
+  "searchFieldLabel": "Tìm kiếm"
 }

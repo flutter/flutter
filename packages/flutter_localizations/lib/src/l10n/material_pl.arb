@@ -40,5 +40,6 @@
   "drawerLabel": "Menu nawigacyjne",
   "popupMenuLabel": "Wyskakujące menu",
   "dialogLabel": "Okno dialogowe",
-  "alertDialogLabel": "Alarm"
+  "alertDialogLabel": "Alarm",
+  "searchFieldLabel": "Szukaj"
 }

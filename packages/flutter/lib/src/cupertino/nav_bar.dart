@@ -49,7 +49,7 @@ const TextStyle _kLargeTitleTextStyle = const TextStyle(
   fontFamily: '.SF UI Text',
   fontSize: 34.0,
   fontWeight: FontWeight.w700,
-  letterSpacing: -1.4,
+  letterSpacing: -0.26,
   color: CupertinoColors.black,
 );
 
@@ -294,9 +294,18 @@ Widget _wrapWithBackground({
   );
 
   final bool darkBackground = backgroundColor.computeLuminance() < 0.179;
-  SystemChrome.setSystemUIOverlayStyle(
-    darkBackground ? SystemUiOverlayStyle.light : SystemUiOverlayStyle.dark
-  );
+  // TODO(jonahwilliams): remove once we have platform themes.
+  switch (defaultTargetPlatform) {
+    case TargetPlatform.iOS:
+      SystemChrome.setSystemUIOverlayStyle(
+        darkBackground ? SystemUiOverlayStyle.light : SystemUiOverlayStyle.dark
+      );
+      break;
+    case TargetPlatform.android:
+    case TargetPlatform.fuchsia:
+      SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle.dark);
+  }
+
 
   if (backgroundColor.alpha == 0xFF)
     return childWithBackground;
@@ -366,7 +375,7 @@ class _CupertinoPersistentNavigationBar extends StatelessWidget implements Prefe
     final Widget styledMiddle = middle == null ? null : new DefaultTextStyle(
       style: actionsStyle.copyWith(
         fontWeight: FontWeight.w600,
-        letterSpacing: -0.72,
+        letterSpacing: -0.08,
         color: CupertinoColors.black,
       ),
       child: middle,

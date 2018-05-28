@@ -79,7 +79,7 @@ analyzer. There are two main ways to run it. In either case you will
 want to run `flutter update-packages` first, or you will get bogus
 error messages about core classes like Offset from `dart:ui`.
 
-For a one-off, use `flutter analyze --flutter-repo`. This uses the `analysis_options_repo.yaml` file
+For a one-off, use `flutter analyze --flutter-repo`. This uses the `analysis_options.yaml` file
 at the root of the repository for its configuration.
 
 For continuous analysis, use `flutter analyze --flutter-repo --watch`. This uses normal
@@ -126,7 +126,7 @@ Adding a test
 
 To add a test to the Flutter package, create a file whose name
 ends with `_test.dart` in the `packages/flutter/test` directory. The
-test should have a `main` function and use the `test` package.
+test should have a `main` function and use the `flutter_test` package.
 
 Working with flutter tools
 --------------------------

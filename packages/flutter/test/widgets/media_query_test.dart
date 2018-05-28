@@ -74,50 +74,50 @@ void main() {
     expect(copied.alwaysUse24HourFormat, true);
   });
 
-  testWidgets('MediaQuery.removePadding removes specified padding', (WidgetTester tester) async {
-    const Size size = const Size(2.0, 4.0);
-    const double devicePixelRatio = 2.0;
-    const double textScaleFactor = 1.2;
-    const EdgeInsets padding = const EdgeInsets.only(top: 1.0, right: 2.0, left: 3.0, bottom: 4.0);
-    const EdgeInsets viewInsets = const EdgeInsets.only(top: 5.0, right: 6.0, left: 7.0, bottom: 8.0);
+ testWidgets('MediaQuery.removePadding removes specified padding', (WidgetTester tester) async {
+   const Size size = const Size(2.0, 4.0);
+   const double devicePixelRatio = 2.0;
+   const double textScaleFactor = 1.2;
+   const EdgeInsets padding = const EdgeInsets.only(top: 1.0, right: 2.0, left: 3.0, bottom: 4.0);
+   const EdgeInsets viewInsets = const EdgeInsets.only(top: 5.0, right: 6.0, left: 7.0, bottom: 8.0);
 
-    MediaQueryData unpadded;
-    await tester.pumpWidget(
-      new MediaQuery(
-        data: const MediaQueryData(
-          size: size,
-          devicePixelRatio: devicePixelRatio,
-          textScaleFactor: textScaleFactor,
-          padding: padding,
-          viewInsets: viewInsets,
-          alwaysUse24HourFormat: true,
-        ),
-        child: new Builder(
-          builder: (BuildContext context) {
-            return new MediaQuery.removePadding(
-              context: context,
-              removeLeft: true,
-              removeTop: true,
-              removeRight: true,
-              removeBottom: true,
-              child: new Builder(
-                builder: (BuildContext context) {
-                  unpadded = MediaQuery.of(context);
-                  return new Container();
-                }
-              ),
-            );
-          },
-        ),
-      )
-    );
+   MediaQueryData unpadded;
+   await tester.pumpWidget(
+     new MediaQuery(
+       data: const MediaQueryData(
+         size: size,
+         devicePixelRatio: devicePixelRatio,
+         textScaleFactor: textScaleFactor,
+         padding: padding,
+         viewInsets: viewInsets,
+         alwaysUse24HourFormat: true,
+       ),
+       child: new Builder(
+         builder: (BuildContext context) {
+           return new MediaQuery.removePadding(
+             context: context,
+             removeLeft: true,
+             removeTop: true,
+             removeRight: true,
+             removeBottom: true,
+             child: new Builder(
+               builder: (BuildContext context) {
+                 unpadded = MediaQuery.of(context);
+                 return new Container();
+               }
+             ),
+           );
+         },
+       ),
+     )
+   );
 
-    expect(unpadded.size, size);
-    expect(unpadded.devicePixelRatio, devicePixelRatio);
-    expect(unpadded.textScaleFactor, textScaleFactor);
-    expect(unpadded.padding, EdgeInsets.zero);
-    expect(unpadded.viewInsets, viewInsets);
-    expect(unpadded.alwaysUse24HourFormat, true);
+   expect(unpadded.size, size);
+   expect(unpadded.devicePixelRatio, devicePixelRatio);
+   expect(unpadded.textScaleFactor, textScaleFactor);
+   expect(unpadded.padding, EdgeInsets.zero);
+   expect(unpadded.viewInsets, viewInsets);
+   expect(unpadded.alwaysUse24HourFormat, true);
   });
 
   testWidgets('MediaQuery.removeViewInsets removes specified viewInsets', (WidgetTester tester) async {
@@ -165,4 +165,31 @@ void main() {
     expect(unpadded.viewInsets, EdgeInsets.zero);
     expect(unpadded.alwaysUse24HourFormat, true);
   });
+
+ testWidgets('MediaQuery.textScaleFactorOf', (WidgetTester tester) async {
+   double outsideTextScaleFactor;
+   double insideTextScaleFactor;
+
+   await tester.pumpWidget(
+     new Builder(
+       builder: (BuildContext context) {
+         outsideTextScaleFactor = MediaQuery.textScaleFactorOf(context);
+         return new MediaQuery(
+           data: const MediaQueryData(
+             textScaleFactor: 4.0,
+           ),
+           child: new Builder(
+             builder: (BuildContext context) {
+               insideTextScaleFactor = MediaQuery.textScaleFactorOf(context);
+               return new Container();
+             },
+           ),
+         );
+       },
+     ),
+   );
+
+   expect(outsideTextScaleFactor, 1.0);
+   expect(insideTextScaleFactor, 4.0);
+ });
 }
