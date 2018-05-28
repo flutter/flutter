@@ -6,14 +6,17 @@ osx_image: xcode9.2
 env:
   - SHARD=analyze
   - SHARD=tests
+  - SHARD=emulator_tests
   - SHARD=docs
   - SHARD=build_and_deploy_gallery
 matrix:
   exclude:
-  - os: osx
-    env: SHARD=analyze
-  - os: osx
-    env: SHARD=docs
+    - os: osx
+      env: SHARD=analyze
+    - os: osx
+      env: SHARD=docs
+    - os: osx
+      env: SHARD=emulator_tests
 sudo: false
 filter_secrets: false
 
@@ -30,6 +33,21 @@ addons:
 language: node_js
 node_js:
   - "6"
+language: android
+android:
+  components:
+    # android-update-sdk --components=tools --accept-licenses='android-sdk-license'
+    - tools
+    - platform-tools
+    - build-tools-23.0.3
+    - android-23
+    - extra-google-google_play_services
+    - extra-google-m2repository
+    - extra-android-m2repository
+    - addon-google_apis-google-23
+    - sys-img-armeabi-v7a-google_apis-23
+  licenses:
+    - android-sdk-license-2742d1c5
 git:
   # We rely on git tags for determining the version.
   depth: false

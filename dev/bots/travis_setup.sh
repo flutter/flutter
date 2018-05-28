@@ -47,6 +47,23 @@ if [ -n "$TRAVIS" ]; then
     gradle -v
     ./bin/flutter doctor
   fi
+
+  if [ "$TRAVIS_OS_NAME" = "linux" ] && [ "$SHARD" = "emulator_tests" ]; then
+    android list targets
+    target_id="$(android list targets | grep -E '^id: ' | head -n1 | sed -E 's/id: ([^ ]+).*$/\1/')"
+    echo "Found android target with id: $target_id"
+
+    # Answer no to "Do you wish to create a custom hardware profile"
+    echo no | android create avd \
+                      --force \
+                      --name test \
+                      --target $target_id \
+                      --abi google_apis/armeabi-v7a
+
+    export QEMU_AUDIO_DRV=none
+    emulator -avd test -no-window &
+    android-wait-for-emulator
+  fi
 fi
 
 # rename the SDK directory to include a space

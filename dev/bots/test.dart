@@ -29,6 +29,7 @@ const Map<String, ShardRunner> _kShards = const <String, ShardRunner>{
   'docs': _generateDocs,
   'analyze': _analyzeRepo,
   'tests': _runTests,
+  'emulator_tests': _runEmulatorTests,
   'coverage': _runCoverage,
 };
 
@@ -219,6 +220,12 @@ Future<Null> _runTests({List<String> options: const <String>[]}) async {
   await _runFlutterTest(path.join(flutterRoot, 'examples', 'catalog'), options: options);
 
   print('${bold}DONE: All tests successful.$reset');
+}
+
+Future<Null> _runEmulatorTests() async {
+  await _runCommand(flutter, <String>['doctor', '-v'],
+    workingDirectory: flutterRoot,
+  );
 }
 
 Future<Null> _runCoverage() async {
