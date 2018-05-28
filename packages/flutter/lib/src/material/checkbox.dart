@@ -195,15 +195,6 @@ const Radius _kEdgeRadius = const Radius.circular(1.0);
 const double _kStrokeWidth = 2.0;
 
 class _RenderCheckbox extends RenderToggleable {
-  final Color borderColor;
-
-  set borderColor(Color value) {
-    assert(value != null);
-    if (value == borderColor) return;
-    borderColor = value;
-    markNeedsPaint();
-  }
-
   _RenderCheckbox({
     bool value,
     bool tristate,
@@ -223,11 +214,24 @@ class _RenderCheckbox extends RenderToggleable {
           vsync: vsync,
         );
 
+  final Color borderColor;
+
+  set borderColor(Color value) {
+    assert(value != null);
+    if (value == borderColor) {
+      return;
+    }
+    borderColor = value;
+    markNeedsPaint();
+  }
+
   bool _oldValue;
 
   @override
   set value(bool newValue) {
-    if (newValue == value) return;
+    if (newValue == value) {
+      return;
+    }
     _oldValue = value;
     super.value = newValue;
   }
