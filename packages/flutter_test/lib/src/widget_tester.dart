@@ -57,20 +57,19 @@ void testWidgets(String description, WidgetTesterCallback callback, {
   final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized();
   final WidgetTester tester = new WidgetTester._(binding);
   timeout ??= binding.defaultTestTimeout;
-  test_package.group('-', () {
     test_package.test(
-      description,
-      () {
-        return binding.runTest(
-          () => callback(tester),
-          tester._endOfTestVerifications,
-          description: description ?? '',
-        );
-      },
-      skip: skip,
-    );
-    test_package.tearDown(binding.postTest);
-  }, timeout: timeout);
+    description,
+    () {
+      test_package.addTearDown(binding.postTest);
+      return binding.runTest(
+        () => callback(tester),
+        tester._endOfTestVerifications,
+        description: description ?? '',
+      );
+    },
+    skip: skip,
+    timeout: timeout
+  );
 }
 
 /// Runs the [callback] inside the Flutter benchmark environment.
