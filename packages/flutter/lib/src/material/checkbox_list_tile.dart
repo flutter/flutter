@@ -80,6 +80,7 @@ class CheckboxListTile extends StatelessWidget {
     @required this.value,
     @required this.onChanged,
     this.activeColor,
+    this.borderColor,
     this.title,
     this.subtitle,
     this.isThreeLine: false,
@@ -87,12 +88,12 @@ class CheckboxListTile extends StatelessWidget {
     this.secondary,
     this.selected: false,
     this.controlAffinity: ListTileControlAffinity.platform,
-  }) : assert(value != null),
-       assert(isThreeLine != null),
-       assert(!isThreeLine || subtitle != null),
-       assert(selected != null),
-       assert(controlAffinity != null),
-       super(key: key);
+  })  : assert(value != null),
+        assert(isThreeLine != null),
+        assert(!isThreeLine || subtitle != null),
+        assert(selected != null),
+        assert(controlAffinity != null),
+        super(key: key);
 
   /// Whether this checkbox is checked.
   ///
@@ -128,6 +129,12 @@ class CheckboxListTile extends StatelessWidget {
   ///
   /// Defaults to accent color of the current [Theme].
   final Color activeColor;
+
+  /// The color to use for the checkbox's border.
+  ///
+  /// Defaults to unselected accent color of current [Theme] if active or
+  /// disabled color of the current [Theme].
+  final Color borderColor;
 
   /// The primary content of the list tile.
   ///
@@ -173,6 +180,7 @@ class CheckboxListTile extends StatelessWidget {
       value: value,
       onChanged: onChanged,
       activeColor: activeColor,
+      borderColor: borderColor,
     );
     Widget leading, trailing;
     switch (controlAffinity) {
@@ -197,7 +205,11 @@ class CheckboxListTile extends StatelessWidget {
           isThreeLine: isThreeLine,
           dense: dense,
           enabled: onChanged != null,
-          onTap: onChanged != null ? () { onChanged(!value); } : null,
+          onTap: onChanged != null
+              ? () {
+                  onChanged(!value);
+                }
+              : null,
           selected: selected,
         ),
       ),
