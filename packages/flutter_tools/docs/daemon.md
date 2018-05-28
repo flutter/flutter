@@ -54,6 +54,13 @@ The `shutdown()` command will terminate the flutter daemon. It is not necessary 
 
 #### Events
 
+#### connected
+
+The `daemon.connected` event is sent when the daemon starts. The `params` field will be a map with the following fields:
+
+- `version`: The protocol version. This is the same version returned by the `version()` command.
+- `pid`: The `pid` of the daemon process.
+
 #### logMessage
 
 The `daemon.logMessage` event is sent whenever a log message is created - either a status level message or an error. The JSON message will contains an `event` field with the value `daemon.logMessage`, and an `params` field containing a map with `level`, `message`, and (optionally) `stackTrace` fields.
@@ -174,3 +181,7 @@ This is sent when a device is disconnected (and polling has been enabled via `en
 ## Source
 
 See the [source](https://github.com/flutter/flutter/blob/master/packages/flutter_tools/lib/src/commands/daemon.dart) for the daemon protocol and implementation.
+
+## Changelog
+
+- 0.3.0: Added `daemon.connected` event at startup
