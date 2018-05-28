@@ -490,6 +490,12 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   }
 
   Future<Null> _runTestBody(Future<Null> testBody(), VoidCallback invariantTester) async {
+    // Delay this function by a microtask.
+    // Otherwise it will open a scope immediately, which is then open when
+    // the `asyncBarrier` is invoked. The `asyncBarrier` is immediately
+    // following the call to `testZone.runBinary(_runTestBody)`, so delaying
+    // by one microtask is enough to ensure that the timing is correct.
+    await new Future<Null>.microtask(() {});
     assert(inTest);
 
     runApp(new Container(key: new UniqueKey(), child: _preTestMessage)); // Reset the tree to a known state.
@@ -767,6 +773,12 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
     });
 
     return new Future<Null>.microtask(() async {
+      // Run all queued microtasks.
+      await new Future<Null>.microtask(() {});
+      // When the test had an exception, the test-framework already
+      // ran the teardown functions, removing the _fakeAsync function.
+      if (_fakeAsync == null)
+        return null;
       // Resolve interplay between fake async and real async calls.
       _fakeAsync.flushMicrotasks();
       while (_pendingAsyncTasks != null) {
@@ -983,6 +995,13 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
 
   @override
   void handleBeginFrame(Duration rawTimeStamp) {
+    // Don't run this function when `handleBeginFrame` was invoked
+    // immediately before without a call of `handleDrawFrame` in between.
+    // TODO(floitsch): Remove this line when the spurious calls from the
+    //                 framework don't happen anymore. See
+    //                 https://github.com/flutter/flutter/issues/17963
+    if (_doDrawThisFrame != null)
+      return;
     assert(_doDrawThisFrame == null);
     if (_expectingFrame ||
         (framePolicy == LiveTestWidgetsFlutterBindingFramePolicy.fullyLive) ||
@@ -997,6 +1016,13 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
 
   @override
   void handleDrawFrame() {
+    // Don't run this function when `handleBeginFrame` wasn't invoked
+    // immediately before.
+    // TODO(floitsch): Remove this line when the spurious calls from the
+    //                 framework don't happen anymore. See
+    //                 https://github.com/flutter/flutter/issues/17963
+    if (_doDrawThisFrame == null)
+      return;
     assert(_doDrawThisFrame != null);
     if (_doDrawThisFrame)
       super.handleDrawFrame();
