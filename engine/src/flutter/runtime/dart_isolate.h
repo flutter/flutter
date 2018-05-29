@@ -46,8 +46,8 @@ class DartIsolate : public UIDartState {
       std::unique_ptr<Window> window,
       fml::WeakPtr<GrContext> resource_context,
       fxl::RefPtr<flow::SkiaUnrefQueue> unref_queue,
-      std::string advisory_script_uri = "main.dart",
-      std::string advisory_script_entrypoint = "main",
+      std::string advisory_script_uri,
+      std::string advisory_script_entrypoint,
       Dart_IsolateFlags* flags = nullptr);
 
   DartIsolate(const DartVM* vm,

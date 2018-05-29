@@ -25,7 +25,9 @@ RuntimeController::RuntimeController(
     fxl::RefPtr<DartSnapshot> p_shared_snapshot,
     TaskRunners p_task_runners,
     fml::WeakPtr<GrContext> p_resource_context,
-    fxl::RefPtr<flow::SkiaUnrefQueue> p_unref_queue)
+    fxl::RefPtr<flow::SkiaUnrefQueue> p_unref_queue,
+    std::string p_advisory_script_uri,
+    std::string p_advisory_script_entrypoint)
     : RuntimeController(p_client,
                         p_vm,
                         std::move(p_isolate_snapshot),
@@ -33,6 +35,8 @@ RuntimeController::RuntimeController(
                         std::move(p_task_runners),
                         std::move(p_resource_context),
                         std::move(p_unref_queue),
+                        std::move(p_advisory_script_uri),
+                        std::move(p_advisory_script_entrypoint),
                         WindowData{/* default window data */}) {}
 
 RuntimeController::RuntimeController(
@@ -43,6 +47,8 @@ RuntimeController::RuntimeController(
     TaskRunners p_task_runners,
     fml::WeakPtr<GrContext> p_resource_context,
     fxl::RefPtr<flow::SkiaUnrefQueue> p_unref_queue,
+    std::string p_advisory_script_uri,
+    std::string p_advisory_script_entrypoint,
     WindowData p_window_data)
     : client_(p_client),
       vm_(p_vm),
@@ -51,6 +57,8 @@ RuntimeController::RuntimeController(
       task_runners_(p_task_runners),
       resource_context_(p_resource_context),
       unref_queue_(p_unref_queue),
+      advisory_script_uri_(p_advisory_script_uri),
+      advisory_script_entrypoint_(p_advisory_script_entrypoint),
       window_data_(std::move(p_window_data)),
       root_isolate_(
           DartIsolate::CreateRootIsolate(vm_,
@@ -59,7 +67,9 @@ RuntimeController::RuntimeController(
                                          task_runners_,
                                          std::make_unique<Window>(this),
                                          resource_context_,
-                                         unref_queue_)) {
+                                         unref_queue_,
+                                         p_advisory_script_uri,
+                                         p_advisory_script_entrypoint)) {
   root_isolate_->SetReturnCodeCallback([this](uint32_t code) {
     root_isolate_return_code_ = {true, code};
   });
@@ -96,14 +106,16 @@ bool RuntimeController::IsRootIsolateRunning() const {
 
 std::unique_ptr<RuntimeController> RuntimeController::Clone() const {
   return std::unique_ptr<RuntimeController>(new RuntimeController(
-      client_,            //
-      vm_,                //
-      isolate_snapshot_,  //
-      shared_snapshot_,   //
-      task_runners_,      //
-      resource_context_,  //
-      unref_queue_,       //
-      window_data_        //
+      client_,                      //
+      vm_,                          //
+      isolate_snapshot_,            //
+      shared_snapshot_,             //
+      task_runners_,                //
+      resource_context_,            //
+      unref_queue_,                 //
+      advisory_script_uri_,         //
+      advisory_script_entrypoint_,  //
+      window_data_                  //
       ));
 }
 
