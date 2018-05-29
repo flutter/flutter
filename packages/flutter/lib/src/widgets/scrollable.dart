@@ -213,9 +213,14 @@ class Scrollable extends StatefulWidget {
       scrollable = Scrollable.of(context);
     }
 
-    if (futures.isEmpty || duration == Duration.zero)
+    if (futures.isEmpty || duration == Duration.zero) {
       return new Future<Null>.value();
-    if (futures.length == 1) return futures.single;
+    }
+      
+    if (futures.length == 1) {
+      return futures.single;
+    }
+
     return Future.wait<Null>(futures).then((List<Null> _) => null);
   }
 }
@@ -272,7 +277,9 @@ class ScrollableState extends State<Scrollable>
   void _updatePosition() {
     _configuration = ScrollConfiguration.of(context);
     _physics = _configuration.getScrollPhysics(context);
-    if (widget.physics != null) _physics = widget.physics.applyTo(_physics);
+    if (widget.physics != null) {
+      _physics = widget.physics.applyTo(_physics);
+    }
     final ScrollController controller = widget.controller;
     final ScrollPosition oldPosition = position;
     if (oldPosition != null) {
@@ -300,7 +307,9 @@ class ScrollableState extends State<Scrollable>
     ScrollPhysics newPhysics = widget.physics;
     ScrollPhysics oldPhysics = oldWidget.physics;
     do {
-      if (newPhysics?.runtimeType != oldPhysics?.runtimeType) return true;
+      if (newPhysics?.runtimeType != oldPhysics?.runtimeType) {
+        return true;
+      }
       newPhysics = newPhysics?.parent;
       oldPhysics = oldPhysics?.parent;
     } while (newPhysics != null || oldPhysics != null);
@@ -317,7 +326,9 @@ class ScrollableState extends State<Scrollable>
       widget.controller?.attach(position);
     }
 
-    if (_shouldUpdatePosition(oldWidget)) _updatePosition();
+    if (_shouldUpdatePosition(oldWidget)) {
+      _updatePosition();
+    }
   }
 
   @override
@@ -356,7 +367,9 @@ class ScrollableState extends State<Scrollable>
   @protected
   void setCanDrag(bool canDrag) {
     if (canDrag == _lastCanDrag &&
-        (!canDrag || widget.axis == _lastAxisDirection)) return;
+        (!canDrag || widget.axis == _lastAxisDirection)) {
+          return;
+        }
     if (!canDrag) {
       _gestureRecognizers = const <Type, GestureRecognizerFactory>{};
     } else {
@@ -405,9 +418,10 @@ class ScrollableState extends State<Scrollable>
     }
     _lastCanDrag = canDrag;
     _lastAxisDirection = widget.axis;
-    if (_gestureDetectorKey.currentState != null)
+    if (_gestureDetectorKey.currentState != null) {
       _gestureDetectorKey.currentState
           .replaceGestureRecognizers(_gestureRecognizers);
+    }
   }
 
   @override
@@ -416,7 +430,9 @@ class ScrollableState extends State<Scrollable>
   @override
   @protected
   void setIgnorePointer(bool value) {
-    if (_shouldIgnorePointer == value) return;
+    if (_shouldIgnorePointer == value) {
+      return;
+    }
     _shouldIgnorePointer = value;
     if (_ignorePointerKey.currentContext != null) {
       final RenderIgnorePointer renderBox =
@@ -579,7 +595,9 @@ class _RenderExcludableScrollSemantics extends RenderProxyBox {
   ScrollPosition _position;
   set position(ScrollPosition value) {
     assert(value != null);
-    if (value == _position) return;
+    if (value == _position) {
+      return;
+    }
     _position.removeListener(markNeedsSemanticsUpdate);
     _position = value;
     _position.addListener(markNeedsSemanticsUpdate);

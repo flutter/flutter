@@ -748,7 +748,9 @@ class ThemeData extends Diagnosticable {
 
   @override
   bool operator ==(Object other) {
-    if (other.runtimeType != runtimeType) return false;
+    if (other.runtimeType != runtimeType) {
+      return false;
+    }
     final ThemeData otherData = other;
     return (otherData.brightness == brightness) &&
         (otherData.primaryColor == primaryColor) &&
@@ -982,8 +984,12 @@ class _FifoCache<K, V> {
     assert(key != null);
     assert(loader != null);
     final V result = _cache[key];
-    if (result != null) return result;
-    if (_cache.length == _maximumSize) _cache.remove(_cache.keys.first);
+    if (result != null) {
+      return result;
+    }
+    if (_cache.length == _maximumSize) {
+       _cache.remove(_cache.keys.first);
+    }
     return _cache[key] = loader();
   }
 }
