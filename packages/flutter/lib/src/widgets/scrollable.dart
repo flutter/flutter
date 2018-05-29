@@ -1,6 +1,7 @@
 // Copyright 2015 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
+import '../material/theme.dart';
 
 import 'dart:async';
 
@@ -20,7 +21,6 @@ import 'scroll_position.dart';
 import 'scroll_position_with_single_context.dart';
 import 'ticker_provider.dart';
 import 'viewport.dart';
-import '../material/theme.dart';
 
 export 'package:flutter/physics.dart' show Tolerance;
 
