@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:developer' show Timeline;
 
 import 'assertions.dart';
 import 'platform.dart';
@@ -44,15 +43,19 @@ bool debugInstrumentationEnabled = false;
 /// run [action] without any instrumentation.
 ///
 /// Returns the result of running [action].
+///
+/// See also:
+///
+///   * [Timeline], which is used to record synchronous tracing events for
+///     visualization in Chrome's tracing format. This method does not
+///     implicitly add any timeline events.
 Future<T> debugInstrumentAction<T>(String description, Future<T> action()) {
   bool instrument = false;
-  assert(() {instrument = debugInstrumentationEnabled; return true; }());
+  assert(() { instrument = debugInstrumentationEnabled; return true; }());
   if (instrument) {
-    Timeline.startSync(description);
     final Stopwatch stopwatch = new Stopwatch()..start();
     return action().whenComplete(() {
       stopwatch.stop();
-      Timeline.finishSync();
       debugPrint('Action "$description" took ${stopwatch.elapsed}');
     });
   } else {
