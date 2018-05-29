@@ -1,4 +1,4 @@
-Signature: 8df45006ae83083c0e1a6ca3e52c6e15
+Signature: 7800acf839e69a9c38375b073b436ef4
 
 UNUSED LICENSES:
 
@@ -14513,7 +14513,7 @@ FILE: ../../../third_party/skia/src/gpu/ops/GrRegionOp.cpp
 FILE: ../../../third_party/skia/src/gpu/ops/GrRegionOp.h
 FILE: ../../../third_party/skia/src/gpu/ops/GrShadowRRectOp.cpp
 FILE: ../../../third_party/skia/src/gpu/ops/GrShadowRRectOp.h
-FILE: ../../../third_party/skia/src/gpu/text/GrAtlasTextBlobVertexRegenerator.cpp
+FILE: ../../../third_party/skia/src/gpu/text/GrTextBlobVertexRegenerator.cpp
 FILE: ../../../third_party/skia/src/gpu/vk/GrVkCopyManager.cpp
 FILE: ../../../third_party/skia/src/gpu/vk/GrVkCopyManager.h
 FILE: ../../../third_party/skia/src/gpu/vk/GrVkCopyPipeline.cpp
@@ -18974,12 +18974,12 @@ FILE: ../../../third_party/skia/src/gpu/ops/GrOp.h
 FILE: ../../../third_party/skia/src/gpu/ops/GrStencilPathOp.h
 FILE: ../../../third_party/skia/src/gpu/ops/GrTessellatingPathRenderer.cpp
 FILE: ../../../third_party/skia/src/gpu/ops/GrTessellatingPathRenderer.h
-FILE: ../../../third_party/skia/src/gpu/text/GrAtlasTextBlob.cpp
-FILE: ../../../third_party/skia/src/gpu/text/GrAtlasTextBlob.h
 FILE: ../../../third_party/skia/src/gpu/text/GrDistanceFieldAdjustTable.cpp
 FILE: ../../../third_party/skia/src/gpu/text/GrDistanceFieldAdjustTable.h
 FILE: ../../../third_party/skia/src/gpu/text/GrGlyphCache.cpp
 FILE: ../../../third_party/skia/src/gpu/text/GrGlyphCache.h
+FILE: ../../../third_party/skia/src/gpu/text/GrTextBlob.cpp
+FILE: ../../../third_party/skia/src/gpu/text/GrTextBlob.h
 FILE: ../../../third_party/skia/src/gpu/text/GrTextBlobCache.cpp
 FILE: ../../../third_party/skia/src/gpu/text/GrTextBlobCache.h
 FILE: ../../../third_party/skia/src/gpu/text/GrTextContext.cpp
