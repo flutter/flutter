@@ -146,6 +146,15 @@ NS_ASSUME_NONNULL_BEGIN
  */
 - (BOOL)application:(UIApplication*)application
     performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))completionHandler;
+
+/**
+ Called if this plugin has been registered for `UIApplicationDelegate` callbacks.
+
+ - Returns: `YES` if this plugin handles the request.
+ */
+- (BOOL)application:(UIApplication*)application
+    continueUserActivity:(NSUserActivity*)userActivity
+      restorationHandler:(void (^)(NSArray*))restorationHandler;
 @end
 
 /**
