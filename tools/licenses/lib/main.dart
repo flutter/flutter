@@ -357,37 +357,68 @@ class RepositoryBlankLicenseFile extends RepositorySingleLicenseFile {
   License licenseOfType(LicenseType type) => null;
 }
 
-class RepositoryOkHttpLicenseFile extends RepositorySingleLicenseFile {
-  RepositoryOkHttpLicenseFile(RepositoryDirectory parent, fs.TextFile io)
+class RepositoryCatapultApiClientLicenseFile extends RepositorySingleLicenseFile {
+  RepositoryCatapultApiClientLicenseFile(RepositoryDirectory parent, fs.TextFile io)
     : super(parent, io, _parseLicense(io));
 
   static final RegExp _pattern = new RegExp(
-    r'^((?:.|\n)*)\n'
-    r'Licensed under the Apache License, Version 2\.0 \(the "License"\);\n'
-    r'you may not use this file except in compliance with the License\.\n'
-    r'You may obtain a copy of the License at\n'
-    r'\n'
-    r'   (http://www\.apache\.org/licenses/LICENSE-2\.0)\n'
-    r'\n'
-    r'Unless required by applicable law or agreed to in writing, software\n'
-    r'distributed under the License is distributed on an "AS IS" BASIS,\n'
-    r'WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied\.\n'
-    r'See the License for the specific language governing permissions and\n'
-    r'limitations under the License\.\n*$',
-    caseSensitive: false
+    r' *Licensed under the Apache License, Version 2\.0 \(the "License"\);\n'
+    r' *you may not use this file except in compliance with the License\.\n'
+    r' *You may obtain a copy of the License at\n'
+    r' *\n'
+    r' *(http://www\.apache\.org/licenses/LICENSE-2\.0)\n'
+    r' *\n'
+    r' *Unless required by applicable law or agreed to in writing, software\n'
+    r' *distributed under the License is distributed on an "AS IS" BASIS,\n'
+    r' *WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied\.\n'
+    r' *See the License for the specific language governing permissions and\n'
+    r' *limitations under the License\.\n',
+    multiLine: true,
+    caseSensitive: false,
   );
 
   static License _parseLicense(fs.TextFile io) {
     final Match match = _pattern.firstMatch(io.readString());
-    if (match == null || match.groupCount != 2)
-      throw 'unexpected okhttp license file contents';
-    return new License.fromUrl(match.group(2), origin: io.fullName);
+    if (match == null || match.groupCount != 1)
+      throw 'unexpected apiclient license file contents';
+    return new License.fromUrl(match.group(1), origin: io.fullName);
   }
 
   @override
   License licenseOfType(LicenseType type) {
-    if (type == LicenseType.libpng)
-      return defaultLicense;
+    return null;
+  }
+}
+
+class RepositoryCatapultCoverageLicenseFile extends RepositorySingleLicenseFile {
+  RepositoryCatapultCoverageLicenseFile(RepositoryDirectory parent, fs.TextFile io)
+    : super(parent, io, _parseLicense(io));
+
+  static final RegExp _pattern = new RegExp(
+    r' *Except where noted otherwise, this software is licensed under the Apache\n'
+    r' *License, Version 2.0 \(the "License"\); you may not use this work except in\n'
+    r' *compliance with the License\.  You may obtain a copy of the License at\n'
+    r' *\n'
+    r' *(http://www\.apache\.org/licenses/LICENSE-2\.0)\n'
+    r' *\n'
+    r' *Unless required by applicable law or agreed to in writing, software\n'
+    r' *distributed under the License is distributed on an "AS IS" BASIS,\n'
+    r' *WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied\.\n'
+    r' *See the License for the specific language governing permissions and\n'
+    r' *limitations under the License\.\n',
+    multiLine: true,
+    caseSensitive: false,
+  );
+
+  static License _parseLicense(fs.TextFile io) {
+    final Match match = _pattern.firstMatch(io.readString());
+    if (match == null || match.groupCount != 1)
+      throw 'unexpected coverage license file contents';
+    return new License.fromUrl(match.group(1), origin: io.fullName);
+  }
+
+  @override
+  License licenseOfType(LicenseType type) {
     return null;
   }
 }
@@ -1774,17 +1805,6 @@ class RepositoryPkgWhenDirectory extends RepositoryDirectory {
   }
 }
 
-class RepositoryOkHttpDirectory extends RepositoryDirectory {
-  RepositoryOkHttpDirectory(RepositoryDirectory parent, fs.Directory io) : super(parent, io);
-
-  @override
-  RepositoryFile createFile(fs.IoNode entry) {
-    if (entry.name == 'LICENSE')
-      return new RepositoryOkHttpLicenseFile(this, entry);
-    return super.createFile(entry);
-  }
-}
-
 class RepositorySkiaLibWebPDirectory extends RepositoryDirectory {
   RepositorySkiaLibWebPDirectory(RepositoryDirectory parent, fs.Directory io) : super(parent, io);
 
@@ -1902,6 +1922,8 @@ class RepositoryRootThirdPartyDirectory extends RepositoryGenericThirdPartyDirec
       return new RepositoryAndroidPlatformDirectory(this, entry);
     if (entry.name == 'boringssl')
       return new RepositoryBoringSSLDirectory(this, entry);
+    if (entry.name == 'catapult')
+      return new RepositoryCatapultDirectory(this, entry);
     if (entry.name == 'dart')
       return new RepositoryDartDirectory(this, entry);
     if (entry.name == 'expat')
@@ -1922,8 +1944,6 @@ class RepositoryRootThirdPartyDirectory extends RepositoryGenericThirdPartyDirec
       return new RepositoryLibPngDirectory(this, entry);
     if (entry.name == 'libwebp')
       return new RepositoryLibWebpDirectory(this, entry);
-    if (entry.name == 'okhttp')
-      return new RepositoryOkHttpDirectory(this, entry);
     if (entry.name == 'pkg')
       return new RepositoryPkgDirectory(this, entry);
     if (entry.name == 'skia')
@@ -2022,6 +2042,52 @@ class RepositoryBoringSSLDirectory extends RepositoryDirectory {
   RepositoryDirectory createSubdirectory(fs.Directory entry) {
     if (entry.name == 'src')
       return new RepositoryBoringSSLSourceDirectory(this, entry);
+    return super.createSubdirectory(entry);
+  }
+}
+
+class RepositoryCatapultThirdPartyApiClientDirectory extends RepositoryDirectory {
+  RepositoryCatapultThirdPartyApiClientDirectory(RepositoryDirectory parent, fs.Directory io) : super(parent, io);
+
+  @override
+  RepositoryFile createFile(fs.IoNode entry) {
+    if (entry.name == 'LICENSE')
+      return new RepositoryCatapultApiClientLicenseFile(this, entry);
+    return super.createFile(entry);
+  }
+}
+
+class RepositoryCatapultThirdPartyCoverageDirectory extends RepositoryDirectory {
+  RepositoryCatapultThirdPartyCoverageDirectory(RepositoryDirectory parent, fs.Directory io) : super(parent, io);
+
+  @override
+  RepositoryFile createFile(fs.IoNode entry) {
+    if (entry.name == 'NOTICE.txt')
+      return new RepositoryCatapultCoverageLicenseFile(this, entry);
+    return super.createFile(entry);
+  }
+}
+
+class RepositoryCatapultThirdPartyDirectory extends RepositoryDirectory {
+  RepositoryCatapultThirdPartyDirectory(RepositoryDirectory parent, fs.Directory io) : super(parent, io);
+
+  @override
+  RepositoryDirectory createSubdirectory(fs.Directory entry) {
+    if (entry.name == 'apiclient')
+      return new RepositoryCatapultThirdPartyApiClientDirectory(this, entry);
+    if (entry.name == 'coverage')
+      return new RepositoryCatapultThirdPartyCoverageDirectory(this, entry);
+    return super.createSubdirectory(entry);
+  }
+}
+
+class RepositoryCatapultDirectory extends RepositoryDirectory {
+  RepositoryCatapultDirectory(RepositoryDirectory parent, fs.Directory io) : super(parent, io);
+
+  @override
+  RepositoryDirectory createSubdirectory(fs.Directory entry) {
+    if (entry.name == 'third_party')
+      return new RepositoryCatapultThirdPartyDirectory(this, entry);
     return super.createSubdirectory(entry);
   }
 }

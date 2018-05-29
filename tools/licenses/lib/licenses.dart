@@ -53,6 +53,7 @@ LicenseType convertLicenseNameToType(String name) {
     case 'license.html':
     case 'LICENSE.txt':
     case 'LICENSE.TXT':
+    case 'LICENSE.cssmin':
     case 'NOTICE':
     case 'NOTICE.txt':
     case 'Copyright':
@@ -68,6 +69,7 @@ LicenseType convertLicenseNameToType(String name) {
     case 'libyaml-license.txt':
     case 'license.patch':
     case 'license.rst':
+    case 'LICENSE.rst':
     case 'mh-bsd-gcc':
     case 'pivotal.labs.license.txt':
       return LicenseType.unknown;
