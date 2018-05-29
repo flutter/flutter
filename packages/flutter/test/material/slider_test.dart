@@ -4,6 +4,7 @@
 
 import 'dart:ui';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
@@ -1126,6 +1127,7 @@ void main() {
               value: '50%',
               increasedValue: '55%',
               decreasedValue: '45%',
+              textDirection: TextDirection.ltr,
               actions: SemanticsAction.decrease.index | SemanticsAction.increase.index,
             ),
           ]),
@@ -1155,6 +1157,43 @@ void main() {
           ignoreTransform: true,
         ));
 
+    semantics.dispose();
+  });
+
+  testWidgets('Slider Semantics - iOS', (WidgetTester tester) async {
+    debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
+    final SemanticsTester semantics = new SemanticsTester(tester);
+    await tester.pumpWidget(new Directionality(
+      textDirection: TextDirection.ltr,
+      child: new MediaQuery(
+        data: new MediaQueryData.fromWindow(window),
+        child: new Material(
+          child: new Slider(
+            value: 0.5,
+            onChanged: (double v) {},
+          ),
+        ),
+      ),
+    ));
+
+    expect(
+      semantics,
+      hasSemantics(
+        new TestSemantics.root(children: <TestSemantics>[
+          new TestSemantics.rootChild(
+            id: 2,
+            value: '50%',
+            increasedValue: '60%',
+            decreasedValue: '40%',
+            textDirection: TextDirection.ltr,
+            actions: SemanticsAction.decrease.index | SemanticsAction.increase.index,
+          ),
+        ]),
+        ignoreRect: true,
+        ignoreTransform: true,
+      ));
+
+    debugDefaultTargetPlatformOverride = null;
     semantics.dispose();
   });
 
