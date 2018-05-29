@@ -1371,7 +1371,7 @@ class _RawChipState extends State<RawChip> with TickerProviderStateMixin<RawChip
     return new Semantics(
       container: true,
       selected: widget.selected,
-      enabled: (widget.onPressed != null || widget.onSelected != null) ? widget.isEnabled : null,
+      enabled: canTap ? widget.isEnabled : null,
       child: new Material(
         elevation: isTapping ? _kPressElevation : 0.0,
         animationDuration: pressedAnimationDuration,
