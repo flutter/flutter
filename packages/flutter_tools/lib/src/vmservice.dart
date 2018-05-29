@@ -163,7 +163,7 @@ class VMService {
         final List<String> definitions = params['definitions'].asList;
         final List<String> typeDefinitions = params['typeDefinitions'].asList;
         final String libraryUri = params['libraryUri'].asString;
-        final String klass = params['klass'] != null ? params['klass'].asString;
+        final String klass = params['klass'] != null ? params['klass'].asString : null;
         final bool isStatic = params['isStatic'].asBoolOr(false);
 
         try {
