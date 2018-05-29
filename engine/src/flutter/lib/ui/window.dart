@@ -53,7 +53,7 @@ enum AppLifecycleState {
   /// in the foreground inactive state.  Apps transition to this state when
   /// another activity is focused, such as a split-screen app, a phone call,
   /// a picture-in-picture app, a system dialog, or another window.
-  /// 
+  ///
   /// Apps in this state should assume that they may be [paused] at any time.
   inactive,
 
@@ -79,7 +79,7 @@ enum AppLifecycleState {
 /// A representation of distances for each of the four edges of a rectangle,
 /// used to encode the view insets and padding that applications should place
 /// around their user interface, as exposed by [Window.viewInsets] and
-/// [Window.padding]. View insets and padding are preferrably read via
+/// [Window.padding]. View insets and padding are preferably read via
 /// [MediaQuery.of].
 ///
 /// For a generic class that represents distances around a rectangle, see the
@@ -109,6 +109,11 @@ class WindowPadding {
 
   /// A window padding that has zeros for each edge.
   static const WindowPadding zero = const WindowPadding._(left: 0.0, top: 0.0, right: 0.0, bottom: 0.0);
+
+  @override
+  String toString() {
+    return '$runtimeType(left: $left, top: $top, right: $right, bottom: $bottom)';
+  }
 }
 
 /// An identifier used to select a user's language and formatting preferences,
