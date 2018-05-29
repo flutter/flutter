@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:developer' show Timeline;
 
 import 'assertions.dart';
 import 'platform.dart';
@@ -42,38 +43,21 @@ bool debugInstrumentationEnabled = false;
 /// non-debug builds, or when [debugInstrumentationEnabled] is false, this will
 /// run [action] without any instrumentation.
 ///
-/// Returns the result of running [action], wrapped in a `Future` if the action
-/// was synchronous.
-Future<T> debugInstrumentAction<T>(String description, FutureOr<T> action()) {
-  if (!debugInstrumentationEnabled)
-    return new Future<T>.value(action());
-
-  Stopwatch stopwatch;
-  assert(() {
-    stopwatch = new Stopwatch()..start();
-    return true;
-  } ());
-  void stopStopwatchAndPrintElapsed() {
-    assert(() {
+/// Returns the result of running [action].
+Future<T> debugInstrumentAction<T>(String description, Future<T> action()) {
+  bool instrument = false;
+  assert(() {instrument = debugInstrumentationEnabled; return true; }());
+  if (instrument) {
+    Timeline.startSync(description);
+    final Stopwatch stopwatch = new Stopwatch()..start();
+    return action().whenComplete(() {
       stopwatch.stop();
+      Timeline.finishSync();
       debugPrint('Action "$description" took ${stopwatch.elapsed}');
-      return true;
-    }());
+    });
+  } else {
+    return action();
   }
-
-  Future<T> returnResult;
-  FutureOr<T> actionResult;
-  try {
-    actionResult = action();
-  } finally {
-    if (actionResult is Future<T>) {
-      returnResult = actionResult.whenComplete(stopStopwatchAndPrintElapsed);
-    } else {
-      stopStopwatchAndPrintElapsed();
-      returnResult = new Future<T>.value(actionResult);
-    }
-  }
-  return returnResult;
 }
 
 /// Arguments to whitelist [Timeline] events in order to be shown in the
