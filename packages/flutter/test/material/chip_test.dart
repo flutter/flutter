@@ -1148,12 +1148,176 @@ void main() {
     expect(labelStyle.style.color, equals(Colors.black.withAlpha(0xde)));
   });
 
-  testWidgets('Chip semantics', (WidgetTester tester) async {
+  testWidgets('Chip semantics - default', (WidgetTester tester) async {
     final SemanticsTester semanticsTester = new SemanticsTester(tester);
 
     await tester.pumpWidget(new MaterialApp(
       home: const Material(
-        child: const Chip(
+        child: const RawChip(
+          label: const Text('test'),
+        ),
+      ),
+    ));
+
+    expect(semanticsTester, hasSemantics(
+        new TestSemantics.root(
+          children: <TestSemantics>[
+            new TestSemantics(
+              textDirection: TextDirection.ltr,
+              children: <TestSemantics>[
+                new TestSemantics(
+                  flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
+                  children: <TestSemantics>[
+                    new TestSemantics(
+                      label: 'test',
+                      textDirection: TextDirection.ltr,
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ],
+        ), ignoreTransform: true, ignoreId: true, ignoreRect: true));
+    semanticsTester.dispose();
+  });
+
+  testWidgets('Chip semantics - InputChip', (WidgetTester tester) async {
+    final SemanticsTester semanticsTester = new SemanticsTester(tester);
+
+    await tester.pumpWidget(new MaterialApp(
+      home: new Material(
+        child: new RawChip(
+          isEnabled: true,
+          label: const Text('test'),
+          onPressed: () {},
+        ),
+      ),
+    ));
+
+    expect(semanticsTester, hasSemantics(
+      new TestSemantics.root(
+        children: <TestSemantics>[
+          new TestSemantics(
+            textDirection: TextDirection.ltr,
+            children: <TestSemantics>[
+              new TestSemantics(
+                flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
+                children: <TestSemantics>[
+                  new TestSemantics(
+                    label: 'test',
+                    textDirection: TextDirection.ltr,
+                    flags: <SemanticsFlag>[
+                      SemanticsFlag.hasEnabledState,
+                      SemanticsFlag.isEnabled,
+                    ],
+                    actions: <SemanticsAction>[SemanticsAction.tap],
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ],
+      ), ignoreTransform: true, ignoreId: true, ignoreRect: true));
+
+
+    semanticsTester.dispose();
+  });
+
+
+  testWidgets('Chip semantics - Selectable', (WidgetTester tester) async {
+    final SemanticsTester semanticsTester = new SemanticsTester(tester);
+    bool selected = false;
+
+    await tester.pumpWidget(new MaterialApp(
+      home: new Material(
+        child: new RawChip(
+          isEnabled: true,
+          label: const Text('test'),
+          selected: selected,
+          onSelected: (bool value) {
+            selected = value;
+          },
+        ),
+      ),
+    ));
+
+    expect(semanticsTester, hasSemantics(
+      new TestSemantics.root(
+        children: <TestSemantics>[
+          new TestSemantics(
+            textDirection: TextDirection.ltr,
+            children: <TestSemantics>[
+              new TestSemantics(
+                flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
+                children: <TestSemantics>[
+                  new TestSemantics(
+                    label: 'test',
+                    textDirection: TextDirection.ltr,
+                    flags: <SemanticsFlag>[
+                      SemanticsFlag.hasEnabledState,
+                      SemanticsFlag.isEnabled,
+                    ],
+                    actions: <SemanticsAction>[SemanticsAction.tap],
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ],
+      ), ignoreTransform: true, ignoreId: true, ignoreRect: true));
+
+    await tester.tap(find.byType(RawChip));
+    await tester.pumpWidget(new MaterialApp(
+      home: new Material(
+        child: new RawChip(
+          isEnabled: true,
+          label: const Text('test'),
+          selected: selected,
+          onSelected: (bool value) {
+            selected = value;
+          },
+        ),
+      ),
+    ));
+
+    expect(selected, true);
+    expect(semanticsTester, hasSemantics(
+      new TestSemantics.root(
+        children: <TestSemantics>[
+          new TestSemantics(
+            textDirection: TextDirection.ltr,
+            children: <TestSemantics>[
+              new TestSemantics(
+                flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
+                children: <TestSemantics>[
+                  new TestSemantics(
+                    label: 'test',
+                    textDirection: TextDirection.ltr,
+                    flags: <SemanticsFlag>[
+                      SemanticsFlag.isSelected,
+                      SemanticsFlag.hasEnabledState,
+                      SemanticsFlag.isEnabled,
+                    ],
+                    actions: <SemanticsAction>[SemanticsAction.tap],
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ],
+      ), ignoreTransform: true, ignoreId: true, ignoreRect: true));
+
+    semanticsTester.dispose();
+  });
+
+  testWidgets('Chip semantics - Enableable', (WidgetTester tester) async {
+    final SemanticsTester semanticsTester = new SemanticsTester(tester);
+
+    await tester.pumpWidget(new MaterialApp(
+      home: new Material(
+        child: new RawChip(
+          isEnabled: false,
+          onPressed: () {},
           label: const Text('test'),
         ),
       ),
@@ -1171,6 +1335,10 @@ void main() {
                   new TestSemantics(
                     label: 'test',
                     textDirection: TextDirection.ltr,
+                    flags: <SemanticsFlag>[
+                      SemanticsFlag.hasEnabledState,
+                    ],
+                    actions: <SemanticsAction>[],
                   ),
                 ],
               ),
@@ -1178,41 +1346,6 @@ void main() {
           ),
         ],
       ), ignoreTransform: true, ignoreId: true, ignoreRect: true));
-
-    await tester.pumpWidget(new MaterialApp(
-      home: new Material(
-        child: new InputChip(
-          isEnabled: true,
-          label: const Text('test'),
-          onPressed: () {},
-        ),
-      ),
-    ));
-
-    expect(semanticsTester, hasSemantics(
-        new TestSemantics.root(
-          children: <TestSemantics>[
-            new TestSemantics(
-              textDirection: TextDirection.ltr,
-              children: <TestSemantics>[
-                new TestSemantics(
-                  flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
-                  children: <TestSemantics>[
-                    new TestSemantics(
-                      label: 'test',
-                      textDirection: TextDirection.ltr,
-                      flags: <SemanticsFlag>[
-                        SemanticsFlag.hasEnabledState,
-                        SemanticsFlag.isEnabled,
-                      ],
-                      actions: <SemanticsAction>[SemanticsAction.tap],
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ],
-        ), ignoreTransform: true, ignoreId: true, ignoreRect: true));
 
     semanticsTester.dispose();
   });
