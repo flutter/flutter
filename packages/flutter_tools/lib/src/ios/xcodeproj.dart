@@ -80,6 +80,15 @@ void updateGeneratedXcodeProperties({
   if (artifacts is LocalEngineArtifacts) {
     final LocalEngineArtifacts localEngineArtifacts = artifacts;
     localsBuffer.writeln('LOCAL_ENGINE=${localEngineArtifacts.engineOutPath}');
+
+    // Tell Xcode not to build universal binaries for local engines, which are
+    // single-architecture.
+    //
+    // NOTE: this assumes that local engine binary paths are consistent with
+    // the conventions uses in the engine: 32-bit iOS engines are built to
+    // paths ending in _arm, 64-bit builds are not.
+    final String arch = localEngineArtifacts.engineOutPath.endsWith('_arm') ? 'armv7' : 'arm64';
+    localsBuffer.writeln('ARCHS=$arch');
   }
 
   if (previewDart2) {
