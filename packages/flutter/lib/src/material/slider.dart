@@ -5,6 +5,7 @@
 import 'dart:async';
 import 'dart:math' as math;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart' show timeDilation;
@@ -536,7 +537,18 @@ class _RenderSlider extends RenderBox {
   static const double _preferredTrackWidth = 144.0;
   static const double _preferredTotalWidth = _preferredTrackWidth + _overlayDiameter;
   static const Duration _minimumInteractionTime = const Duration(milliseconds: 500);
-  static const double _adjustmentUnit = 0.1; // Matches iOS implementation of material slider.
+  static double get _adjustmentUnit {
+    switch (defaultTargetPlatform) {
+      case TargetPlatform.iOS:
+        // Matches iOS implementation of material slider.
+        return 0.1;
+      case TargetPlatform.android:
+      case TargetPlatform.fuchsia:
+      default:
+        // Matches Android implementation of material slider.
+        return 0.05;
+    }
+  }
   static final Tween<double> _overlayRadiusTween = new Tween<double>(begin: 0.0, end: _overlayRadius);
 
   _SliderState _state;
@@ -577,6 +589,7 @@ class _RenderSlider extends RenderBox {
     } else {
       _state.positionController.value = convertedValue;
     }
+    markNeedsSemanticsUpdate();
   }
 
   int get divisions => _divisions;
@@ -1002,8 +1015,12 @@ class _RenderSlider extends RenderBox {
 
     config.isSemanticBoundary = isInteractive;
     if (isInteractive) {
+      config.textDirection = textDirection;
       config.onIncrease = _increaseAction;
       config.onDecrease = _decreaseAction;
+      config.value = '${(value * 100).round().clamp(0, 100)}%';
+      config.increasedValue = '${((value + _semanticActionUnit).clamp(0.0, 1.0) * 100).round()}%';
+      config.decreasedValue = '${((value - _semanticActionUnit).clamp(0.0, 1.0) * 100).round()}%';
     }
   }
 
