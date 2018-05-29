@@ -29,7 +29,9 @@ class RuntimeController final : public WindowClient {
                     fxl::RefPtr<DartSnapshot> shared_snapshot,
                     TaskRunners task_runners,
                     fml::WeakPtr<GrContext> resource_context,
-                    fxl::RefPtr<flow::SkiaUnrefQueue> unref_queue);
+                    fxl::RefPtr<flow::SkiaUnrefQueue> unref_queue,
+                    std::string advisory_script_uri,
+                    std::string advisory_script_entrypoint);
 
   ~RuntimeController();
 
@@ -86,6 +88,8 @@ class RuntimeController final : public WindowClient {
   TaskRunners task_runners_;
   fml::WeakPtr<GrContext> resource_context_;
   fxl::RefPtr<flow::SkiaUnrefQueue> unref_queue_;
+  std::string advisory_script_uri_;
+  std::string advisory_script_entrypoint_;
   WindowData window_data_;
   fml::WeakPtr<DartIsolate> root_isolate_;
   std::pair<bool, uint32_t> root_isolate_return_code_ = {false, 0};
@@ -97,6 +101,8 @@ class RuntimeController final : public WindowClient {
                     TaskRunners task_runners,
                     fml::WeakPtr<GrContext> resource_context,
                     fxl::RefPtr<flow::SkiaUnrefQueue> unref_queue,
+                    std::string advisory_script_uri,
+                    std::string advisory_script_entrypoint,
                     WindowData data);
 
   Window* GetWindowIfAvailable();

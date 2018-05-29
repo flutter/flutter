@@ -48,6 +48,12 @@ struct Settings {
   bool endless_trace_buffer = false;
   bool enable_dart_profiling = false;
   bool dart_non_checked_mode = false;
+  // Used as the script URI in debug messages. Does not affect how the Dart code
+  // is executed.
+  std::string advisory_script_uri = "main.dart";
+  // Used as the script entrypoint in debug messages. Does not affect how the
+  // Dart code is executed.
+  std::string advisory_script_entrypoint = "main";
 
   // Observatory settings
   bool enable_observatory = false;

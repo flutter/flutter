@@ -36,7 +36,9 @@ TEST_F(DartIsolateTest, RootIsolateCreationAndShutdown) {
       std::move(task_runners),   // task runners
       nullptr,                   // window
       {},                        // resource context
-      nullptr                    // unref qeueue
+      nullptr,                   // unref qeueue
+      "main.dart",               // advisory uri
+      "main"                     // advisory entrypoint
   );
   ASSERT_TRUE(root_isolate);
   ASSERT_EQ(root_isolate->GetPhase(), DartIsolate::Phase::LibrariesSetup);
@@ -62,7 +64,9 @@ TEST_F(DartIsolateTest, IsolateCanAssociateSnapshot) {
       std::move(task_runners),   // task runners
       nullptr,                   // window
       {},                        // resource context
-      nullptr                    // unref qeueue
+      nullptr,                   // unref qeueue
+      "main.dart",               // advisory uri
+      "main"                     // advisory entrypoint
   );
   ASSERT_TRUE(root_isolate);
   ASSERT_EQ(root_isolate->GetPhase(), DartIsolate::Phase::LibrariesSetup);
@@ -91,7 +95,9 @@ TEST_F(DartIsolateTest, CanResolveAndInvokeMethod) {
       std::move(task_runners),   // task runners
       nullptr,                   // window
       {},                        // resource context
-      nullptr                    // unref qeueue
+      nullptr,                   // unref qeueue
+      "main.dart",               // advisory uri
+      "main"                     // advisory entrypoint
   );
   ASSERT_TRUE(root_isolate);
   ASSERT_EQ(root_isolate->GetPhase(), DartIsolate::Phase::LibrariesSetup);
