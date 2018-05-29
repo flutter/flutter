@@ -19,7 +19,8 @@ import 'src/context.dart';
 void main() {
   group('ApkManifestData', () {
     testUsingContext('parse sdk', () {
-      final ApkManifestData data = ApkManifestData.parseFromAaptBadging(_aaptData);
+      final ApkManifestData data =
+          ApkManifestData.parseFromAaptBadging(_aaptData);
       expect(data, isNotNull);
       expect(data.packageName, 'io.flutter.gallery');
       expect(data.launchableActivityName, 'io.flutter.app.FlutterActivity');
@@ -62,7 +63,6 @@ void main() {
       expect(
           logger.errorText, 'Folder "regular_folder" is not an app bundle.\n');
     }, overrides: overrides);
-
     testUsingContext('Error on no info.plist', () {
       fs.directory('bundle.app').createSync();
       final PrebuiltIOSApp iosApp = new IOSApp.fromPrebuiltApp('bundle.app');
@@ -70,7 +70,7 @@ void main() {
       final BufferLogger logger = context[Logger];
       expect(
         logger.errorText,
-        'Invalid prebuilt iOS app. Info.plist does not contain bundle identifier\n',
+        'Invalid prebuilt iOS app. Does not contain Info.plist.\n',
       );
     }, overrides: overrides);
     testUsingContext('Error on bad info.plist', () {
@@ -81,7 +81,8 @@ void main() {
       final BufferLogger logger = context[Logger];
       expect(
         logger.errorText,
-        contains('Invalid prebuilt iOS app. Info.plist does not contain bundle identifier\n'),
+        contains(
+            'Invalid prebuilt iOS app. Info.plist does not contain bundle identifier\n'),
       );
     }, overrides: overrides);
     testUsingContext('Success with app bundle', () {

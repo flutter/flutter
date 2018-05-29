@@ -179,8 +179,7 @@ abstract class IOSApp extends ApplicationPackage {
         return null;
       }
       try {
-      bundleDir = payloadDir.listSync()
-          .singleWhere(_isBundleDirectory);
+        bundleDir = payloadDir.listSync().singleWhere(_isBundleDirectory);
       } on StateError {
         printError(
             'Invalid prebuilt iOS ipa. Does not contain a single app bundle.');
@@ -188,6 +187,10 @@ abstract class IOSApp extends ApplicationPackage {
       }
     }
     final String plistPath = fs.path.join(bundleDir.path, 'Info.plist');
+    if (!fs.file(plistPath).existsSync()) {
+      printError('Invalid prebuilt iOS app. Does not contain Info.plist.');
+      return null;
+    }
     final String id = iosWorkflow.getPlistValueFromFile(
       plistPath,
       plist.kCFBundleIdentifierKey,
