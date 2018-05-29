@@ -7,7 +7,6 @@ import 'dart:async';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
-import 'package:flutter/material.dart';
 
 import 'basic.dart';
 import 'framework.dart';
@@ -21,6 +20,7 @@ import 'scroll_position.dart';
 import 'scroll_position_with_single_context.dart';
 import 'ticker_provider.dart';
 import 'viewport.dart';
+import '../material/theme.dart';
 
 export 'package:flutter/physics.dart' show Tolerance;
 
