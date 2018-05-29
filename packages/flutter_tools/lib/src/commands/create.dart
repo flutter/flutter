@@ -166,18 +166,18 @@ class CreateCommand extends FlutterCommand {
     );
 
     printStatus('Creating project ${fs.path.relative(dirPath)}...');
-    int generatedFileCount;
+    int generatedFileCount = 0;
     String appPath = dirPath;
     switch (template) {
       case 'app':
-        generatedFileCount = await _generateApp(dirPath, templateContext);
+        generatedFileCount += await _generateApp(dirPath, templateContext);
         break;
       case 'package':
-        generatedFileCount = await _generatePackage(dirPath, templateContext);
+        generatedFileCount += await _generatePackage(dirPath, templateContext);
         break;
       case 'plugin':
         appPath = fs.path.join(dirPath, 'example');
-        generatedFileCount = await _generatePlugin(dirPath, appPath, templateContext);
+        generatedFileCount += await _generatePlugin(dirPath, appPath, templateContext);
         break;
     }
     printStatus('Wrote $generatedFileCount files.');
