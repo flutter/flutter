@@ -52,9 +52,9 @@ IF NOT EXIST "%cache_dir%" (
   ECHO Error: Unable to create cache directory at
   ECHO            %cache_dir%
   ECHO.
-  ECHO        This may because you do not have sufficient permissions to write to
-  ECHO        this folder and is often caused by installing Flutter into a
-  ECHO        folder like C:\Program Files and then running as a non-Admin.
+  ECHO        This may be because flutter doesn't have write permissions for
+  ECHO        this path. Try moving flutter to a writable folder, such as
+  ECHO        within your home directory.
   EXIT /B 1
 )
 
