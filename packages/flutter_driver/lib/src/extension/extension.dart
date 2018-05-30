@@ -33,7 +33,7 @@ const String _extensionMethod = 'ext.flutter.$_extensionMethodName';
 ///
 /// Messages are described in string form and should return a [Future] which
 /// eventually completes to a string response.
-typedef DataHandler = Future<String> Function(String message);
+typedef Future<String> DataHandler(String message);
 
 class _DriverBinding extends BindingBase with ServicesBinding, SchedulerBinding, GestureBinding, PaintingBinding, RendererBinding, WidgetsBinding {
   _DriverBinding(this._handler);
@@ -68,14 +68,14 @@ void enableFlutterDriverExtension({ DataHandler handler }) {
 }
 
 /// Signature for functions that handle a command and return a result.
-typedef CommandHandlerCallback = Future<Result> Function(Command c);
+typedef Future<Result> CommandHandlerCallback(Command c);
 
 /// Signature for functions that deserialize a JSON map to a command object.
-typedef CommandDeserializerCallback = Command Function(Map<String, String> params);
+typedef Command CommandDeserializerCallback(Map<String, String> params);
 
 /// Signature for functions that run the given finder and return the [Element]
 /// found, if any, or null otherwise.
-typedef FinderConstructor = Finder Function(SerializableFinder finder);
+typedef Finder FinderConstructor(SerializableFinder finder);
 
 /// The class that manages communication between a Flutter Driver test and the
 /// application being remote-controlled, on the application side.

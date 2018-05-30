@@ -233,9 +233,9 @@ class ShaderMask extends SingleChildRenderObjectWidget {
   /// The shader callback is called with the current size of the child so that
   /// it can customize the shader to the size and location of the child.
   ///
-  /// Typically this will use a [LinearGradient] or [RadialGradient] to create
-  /// the [dart:ui.Shader], though the [dart:ui.ImageShader] class could also be
-  /// used.
+  /// Typically this will use a [LinearGradient], [RadialGradient], or
+  /// [SweepGradient] to create the [dart:ui.Shader], though the 
+  /// [dart:ui.ImageShader] class could also be used.
   final ShaderCallback shaderCallback;
 
   /// The [BlendMode] to use when applying the shader to the child.
@@ -5380,7 +5380,7 @@ class Builder extends StatelessWidget {
 /// Signature for the builder callback used by [StatefulBuilder].
 ///
 /// Call [setState] to schedule the [StatefulBuilder] to rebuild.
-typedef StatefulWidgetBuilder = Widget Function(BuildContext context, StateSetter setState);
+typedef Widget StatefulWidgetBuilder(BuildContext context, StateSetter setState);
 
 /// A platonic widget that both has state and calls a closure to obtain its child widget.
 ///

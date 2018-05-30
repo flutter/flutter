@@ -183,17 +183,17 @@ class _FormScope extends InheritedWidget {
 /// Signature for validating a form field.
 ///
 /// Used by [FormField.validator].
-typedef FormFieldValidator<T> = String Function(T value);
+typedef String FormFieldValidator<T>(T value);
 
 /// Signature for being notified when a form field changes value.
 ///
 /// Used by [FormField.onSaved].
-typedef FormFieldSetter<T> = void Function(T newValue);
+typedef void FormFieldSetter<T>(T newValue);
 
 /// Signature for building the widget representing the form field.
 ///
 /// Used by [FormField.builder].
-typedef FormFieldBuilder<T> = Widget Function(FormFieldState<T> field);
+typedef Widget FormFieldBuilder<T>(FormFieldState<T> field);
 
 /// A single form field.
 ///

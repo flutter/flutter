@@ -182,7 +182,7 @@ class DriveCommand extends RunCommandBase {
 }
 
 /// Finds a device to test on. May launch a simulator, if necessary.
-typedef TargetDeviceFinder = Future<Device> Function();
+typedef Future<Device> TargetDeviceFinder();
 TargetDeviceFinder targetDeviceFinder = findTargetDevice;
 void restoreTargetDeviceFinder() {
   targetDeviceFinder = findTargetDevice;
@@ -216,7 +216,7 @@ Future<Device> findTargetDevice() async {
 }
 
 /// Starts the application on the device given command configuration.
-typedef AppStarter = Future<LaunchResult> Function(DriveCommand command);
+typedef Future<LaunchResult> AppStarter(DriveCommand command);
 
 AppStarter appStarter = _startApp; // (mutable for testing)
 void restoreAppStarter() {
@@ -275,7 +275,7 @@ Future<LaunchResult> _startApp(DriveCommand command) async {
 }
 
 /// Runs driver tests.
-typedef TestRunner = Future<Null> Function(List<String> testArgs, String observatoryUri, bool previewDart2);
+typedef Future<Null> TestRunner(List<String> testArgs, String observatoryUri, bool previewDart2);
 TestRunner testRunner = _runTests;
 void restoreTestRunner() {
   testRunner = _runTests;
@@ -305,7 +305,7 @@ Future<Null> _runTests(List<String> testArgs, String observatoryUri, bool previe
 
 
 /// Stops the application.
-typedef AppStopper = Future<bool> Function(DriveCommand command);
+typedef Future<bool> AppStopper(DriveCommand command);
 AppStopper appStopper = _stopApp;
 void restoreAppStopper() {
   appStopper = _stopApp;

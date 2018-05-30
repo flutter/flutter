@@ -109,6 +109,11 @@ BuildApp() {
     preview_dart_2_flag="--no-preview-dart-2"
   fi
 
+  local track_widget_creation_flag=""
+  if [[ -n "$TRACK_WIDGET_CREATION" ]]; then
+    track_widget_creation_flag="--track-widget-creation"
+  fi
+
   if [[ "${build_mode}" != "debug" ]]; then
     StreamOutput " ├─Building Dart code..."
     # Transform ARCHS to comma-separated list of target architectures.
@@ -122,7 +127,8 @@ BuildApp() {
       --${build_mode}                                                       \
       --ios-arch="${archs}"                                                 \
       ${local_engine_flag}                                                  \
-      ${preview_dart_2_flag}
+      ${preview_dart_2_flag}                                                \
+      ${track_widget_creation_flag}
 
     if [[ $? -ne 0 ]]; then
       EchoError "Failed to build ${project_path}."
@@ -166,7 +172,8 @@ BuildApp() {
     --asset-dir="${derived_dir}/flutter_assets"                             \
     ${precompilation_flag}                                                  \
     ${local_engine_flag}                                                    \
-    ${preview_dart_2_flag}
+    ${preview_dart_2_flag}                                                  \
+    ${track_widget_creation_flag}
 
   if [[ $? -ne 0 ]]; then
     EchoError "Failed to package ${project_path}."
