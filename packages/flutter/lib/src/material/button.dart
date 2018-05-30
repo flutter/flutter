@@ -187,12 +187,13 @@ class _RawMaterialButtonState extends State<RawMaterialButton> {
       ),
     );
 
-    if (widget.slopPadding != null) {
+    if (widget.outerPadding != null) {
       result = new GestureDetector(
         behavior: HitTestBehavior.translucent,
+        excludeFromSemantics: true,
         onTap: widget.onPressed,
         child: new Padding(
-          padding: widget.slopPadding,
+          padding: widget.outerPadding,
           child: result
         ),
       );
