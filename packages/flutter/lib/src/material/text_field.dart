@@ -529,9 +529,14 @@ class _TextFieldState extends State<TextField>
 
     return new Semantics(
       onTap: () {
+<<<<<<< HEAD
         if (!_controller.selection.isValid)
           _controller.selection =
               new TextSelection.collapsed(offset: _controller.text.length);
+=======
+        if (!_effectiveController.selection.isValid)
+          _effectiveController.selection = new TextSelection.collapsed(offset: _effectiveController.text.length);
+>>>>>>> a2d1d27f79674adb85773d6b836b2034dfa4bdc4
         _requestKeyboard();
       },
       child: new IgnorePointer(

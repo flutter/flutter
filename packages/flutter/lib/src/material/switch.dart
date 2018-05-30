@@ -88,12 +88,12 @@ class Switch extends StatefulWidget {
 
   /// The color to use when this switch is on.
   ///
-  /// Defaults to accent color of the current [Theme].
+  /// Defaults to [ThemeData.toggleableActiveColor].
   final Color activeColor;
 
   /// The color to use on the track when this switch is on.
   ///
-  /// Defaults to accent color of the current [Theme] with the opacity set at 50%.
+  /// Defaults to [ThemeData.toggleableActiveColor] with the opacity set at 50%.
   final Color activeTrackColor;
 
   /// The color to use on the thumb when this switch is off.
@@ -130,7 +130,7 @@ class _SwitchState extends State<Switch> with TickerProviderStateMixin {
     final ThemeData themeData = Theme.of(context);
     final bool isDark = themeData.brightness == Brightness.dark;
 
-    final Color activeThumbColor = widget.activeColor ?? themeData.accentColor;
+    final Color activeThumbColor = widget.activeColor ?? themeData.toggleableActiveColor;
     final Color activeTrackColor = widget.activeTrackColor ?? activeThumbColor.withAlpha(0x80);
 
     Color inactiveThumbColor;

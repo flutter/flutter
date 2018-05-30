@@ -52,6 +52,7 @@ export 'package:flutter/rendering.dart' show
   RelativeRect,
   SemanticsBuilderCallback,
   ShaderCallback,
+  ShapeBorderClipper,
   SingleChildLayoutDelegate,
   StackFit,
   TextOverflow,
@@ -731,6 +732,11 @@ class PhysicalModel extends SingleChildRenderObjectWidget {
 ///
 /// [PhysicalModel] does the same but only supports shapes that can be expressed
 /// as rectangles with rounded corners.
+///
+/// See also:
+///
+///  * [ShapeBorderClipper], which converts a [ShapeBorder] to a [CustomerClipper], as
+///    needed by this widget.
 class PhysicalShape extends SingleChildRenderObjectWidget {
   /// Creates a physical model with an arbitrary shape clip.
   ///
@@ -751,6 +757,10 @@ class PhysicalShape extends SingleChildRenderObjectWidget {
        super(key: key, child: child);
 
   /// Determines which clip to use.
+  ///
+  /// If the path in question is expressed as a [ShapeBorder] subclass,
+  /// consider using the [ShapeBorderClipper] delegate class to adapt the
+  /// shape for use with this widget.
   final CustomClipper<Path> clipper;
 
   /// The z-coordinate at which to place this physical object.
@@ -3223,6 +3233,7 @@ class PositionedDirectional extends StatelessWidget {
 ///  * [Column], for a version of this widget that is always vertical.
 ///  * [Expanded], to indicate children that should take all the remaining room.
 ///  * [Flexible], to indicate children that should share the remaining room but
+///  * [Spacer], a widget that takes up space proportional to it's flex value.
 ///    that may be sized smaller (leaving some remaining room unused).
 ///  * The [catalog of layout widgets](https://flutter.io/widgets/layout/).
 class Flex extends MultiChildRenderObjectWidget {
@@ -3555,6 +3566,7 @@ class Flex extends MultiChildRenderObjectWidget {
 ///  * [Expanded], to indicate children that should take all the remaining room.
 ///  * [Flexible], to indicate children that should share the remaining room but
 ///    that may by sized smaller (leaving some remaining room unused).
+///  * [Spacer], a widget that takes up space proportional to it's flex value.
 ///  * The [catalog of layout widgets](https://flutter.io/widgets/layout/).
 class Row extends Flex {
   /// Creates a horizontal array of children.
@@ -3749,6 +3761,7 @@ class Row extends Flex {
 ///    that may size smaller (leaving some remaining room unused).
 ///  * [SingleChildScrollView], whose documentation discusses some ways to
 ///    use a [Column] inside a scrolling container.
+///  * [Spacer], a widget that takes up space proportional to it's flex value.
 ///  * The [catalog of layout widgets](https://flutter.io/widgets/layout/).
 class Column extends Flex {
   /// Creates a vertical array of children.
@@ -3800,6 +3813,7 @@ class Column extends Flex {
 /// See also:
 ///
 ///  * [Expanded], which forces the child to expand to fill the available space.
+///  * [Spacer], a widget that takes up space proportional to it's flex value.
 ///  * The [catalog of layout widgets](https://flutter.io/widgets/layout/).
 class Flexible extends ParentDataWidget<Flex> {
   /// Creates a widget that controls how a child of a [Row], [Column], or [Flex]
@@ -3873,6 +3887,7 @@ class Flexible extends ParentDataWidget<Flex> {
 /// See also:
 ///
 ///  * [Flexible], which does not force the child to fill the available space.
+///  * [Spacer], a widget that takes up space proportional to it's flex value.
 ///  * The [catalog of layout widgets](https://flutter.io/widgets/layout/).
 class Expanded extends Flexible {
   /// Creates a widget that expands a child of a [Row], [Column], or [Flex]

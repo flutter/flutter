@@ -154,7 +154,7 @@ const Matcher hasAGoodToStringDeep = const _HasGoodToStringDeep();
 ///  * [throwsAssertionError], to test if a function throws any [AssertionError].
 ///  * [throwsArgumentError], to test if a functions throws an [ArgumentError].
 ///  * [isFlutterError], to test if any object is a [FlutterError].
-Matcher throwsFlutterError = throwsA(isFlutterError);
+final Matcher throwsFlutterError = throwsA(isFlutterError);
 
 /// A matcher for functions that throw [AssertionError].
 ///
@@ -165,7 +165,7 @@ Matcher throwsFlutterError = throwsA(isFlutterError);
 ///  * [throwsFlutterError], to test if a function throws a [FlutterError].
 ///  * [throwsArgumentError], to test if a functions throws an [ArgumentError].
 ///  * [isAssertionError], to test if any object is any kind of [AssertionError].
-Matcher throwsAssertionError = throwsA(isAssertionError);
+final Matcher throwsAssertionError = throwsA(isAssertionError);
 
 /// A matcher for [FlutterError].
 ///
@@ -251,9 +251,17 @@ Matcher coversSameAreaAs(Path expectedPath, {@required Rect areaToCompare, int s
 /// [expectLater] when using this matcher and await the future returned by
 /// [expectLater].
 ///
+/// ## Sample code
+///
+/// ```dart
+/// await expectLater(find.text('Save'), matchesGoldenFile('save.png'));
+/// ```
+///
 /// See also:
 ///
 ///  * [goldenFileComparator], which acts as the backend for this matcher.
+///  * [flutter_test] for a discussion of test configurations, whereby callers
+///    may swap out the backend for this matcher.
 Matcher matchesGoldenFile(dynamic key) {
   if (key is Uri) {
     return new _MatchesGoldenFile(key);

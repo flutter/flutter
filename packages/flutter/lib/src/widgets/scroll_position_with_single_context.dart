@@ -85,11 +85,6 @@ class ScrollPositionWithSingleContext extends ScrollPosition implements ScrollAc
   }
 
   @override
-  void correctBy(double correction) {
-    correctPixels(pixels + correction);
-  }
-
-  @override
   void absorb(ScrollPosition other) {
     super.absorb(other);
     if (other is! ScrollPositionWithSingleContext) {

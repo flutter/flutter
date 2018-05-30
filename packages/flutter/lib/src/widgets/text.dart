@@ -305,7 +305,7 @@ class Text extends StatelessWidget {
       textDirection: textDirection, // RichText uses Directionality.of to obtain a default if this is null.
       softWrap: softWrap ?? defaultTextStyle.softWrap,
       overflow: overflow ?? defaultTextStyle.overflow,
-      textScaleFactor: textScaleFactor ?? MediaQuery.of(context, nullOk: true)?.textScaleFactor ?? 1.0,
+      textScaleFactor: textScaleFactor ?? MediaQuery.textScaleFactorOf(context),
       maxLines: maxLines ?? defaultTextStyle.maxLines,
       text: new TextSpan(
         style: effectiveTextStyle,

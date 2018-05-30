@@ -37,5 +37,6 @@
   "drawerLabel": "د نیویگیشن مینو",
   "popupMenuLabel": "د پاپ اپ مینو",
   "dialogLabel": "خبرې اترې",
-  "alertDialogLabel": "خبرتیا"
+  "alertDialogLabel": "خبرتیا",
+  "searchFieldLabel": "لټون"
 }
