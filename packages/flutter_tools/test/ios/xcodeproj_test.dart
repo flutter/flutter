@@ -301,6 +301,47 @@ Information about project "Runner":
       expect(contents.contains('ARCHS=armv7'), isTrue);
     });
 
+    testUsingOsxContext('sets TRACK_WIDGET_CREATION=true when trackWidgetCreation is true', () async {
+      when(mockArtifacts.getArtifactPath(Artifact.flutterFramework, TargetPlatform.ios, any)).thenReturn('engine');
+      when(mockArtifacts.engineOutPath).thenReturn(fs.path.join('out', 'ios_profile_arm'));
+      const BuildInfo buildInfo = const BuildInfo(BuildMode.debug, null,
+        previewDart2: true,
+        trackWidgetCreation: true,
+        targetPlatform: TargetPlatform.ios,
+      );
+      await updateGeneratedXcodeProperties(
+        projectPath: 'path/to/project',
+        buildInfo: buildInfo,
+        previewDart2: true,
+      );
+
+      final File config = fs.file('path/to/project/ios/Flutter/Generated.xcconfig');
+      expect(config.existsSync(), isTrue);
+
+      final String contents = config.readAsStringSync();
+      expect(contents.contains('TRACK_WIDGET_CREATION=true'), isTrue);
+    });
+
+    testUsingOsxContext('does not set TRACK_WIDGET_CREATION when trackWidgetCreation is false', () async {
+      when(mockArtifacts.getArtifactPath(Artifact.flutterFramework, TargetPlatform.ios, any)).thenReturn('engine');
+      when(mockArtifacts.engineOutPath).thenReturn(fs.path.join('out', 'ios_profile_arm'));
+      const BuildInfo buildInfo = const BuildInfo(BuildMode.debug, null,
+        previewDart2: true,
+        targetPlatform: TargetPlatform.ios,
+      );
+      await updateGeneratedXcodeProperties(
+        projectPath: 'path/to/project',
+        buildInfo: buildInfo,
+        previewDart2: true,
+      );
+
+      final File config = fs.file('path/to/project/ios/Flutter/Generated.xcconfig');
+      expect(config.existsSync(), isTrue);
+
+      final String contents = config.readAsStringSync();
+      expect(contents.contains('TRACK_WIDGET_CREATION=true'), isFalse);
+    });
+
     testUsingOsxContext('sets ARCHS=armv7 when armv7 local engine is set', () async {
       when(mockArtifacts.getArtifactPath(Artifact.flutterFramework, TargetPlatform.ios, any)).thenReturn('engine');
       when(mockArtifacts.engineOutPath).thenReturn(fs.path.join('out', 'ios_profile'));
