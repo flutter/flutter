@@ -206,4 +206,30 @@ void main() {
     expect(find.byType(CircularProgressIndicator), paints..arc(strokeWidth: 16.0));
   });
 
+  testWidgets('Indeterminate RefreshProgressIndicator keeps spinning until end of time (approximate)', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/13782
+
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: const Center(
+          child: const SizedBox(
+            width: 200.0,
+            child: const RefreshProgressIndicator(),
+          ),
+        ),
+      ),
+    );
+    expect(tester.hasRunningAnimations, isTrue);
+
+    await tester.pump(const Duration(milliseconds: 6666));
+    expect(tester.hasRunningAnimations, isTrue);
+
+    await tester.pump(const Duration(milliseconds: 1));
+    expect(tester.hasRunningAnimations, isTrue);
+
+    await tester.pump(const Duration(days: 9999));
+    expect(tester.hasRunningAnimations, isTrue);
+  });
+
 }
