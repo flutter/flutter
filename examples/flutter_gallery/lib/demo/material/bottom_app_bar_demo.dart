@@ -259,28 +259,26 @@ class _ColorsItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return new ExcludeSemantics(
-      child: new Row(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-        children: colors.map((Color color) {
-          return new RawMaterialButton(
-            onPressed: () {
-              onChanged(color);
-            },
-            constraints: const BoxConstraints.tightFor(
-              width: 32.0,
-              height: 32.0,
+    return new Row(
+      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+      children: colors.map((Color color) {
+        return new RawMaterialButton(
+          onPressed: () {
+            onChanged(color);
+          },
+          constraints: const BoxConstraints.tightFor(
+            width: 32.0,
+            height: 32.0,
+          ),
+          fillColor: color,
+          shape: new CircleBorder(
+            side: new BorderSide(
+              color: color == selectedColor ? Colors.black : const Color(0xFFD5D7DA),
+              width: 2.0,
             ),
-            fillColor: color,
-            shape: new CircleBorder(
-              side: new BorderSide(
-                color: color == selectedColor ? Colors.black : const Color(0xFFD5D7DA),
-                width: 2.0,
-              ),
-            ),
-          );
-        }).toList(),
-      ),
+          ),
+        );
+      }).toList(),
     );
   }
 }
