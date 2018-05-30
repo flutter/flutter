@@ -167,9 +167,11 @@ class VMService {
         final bool isStatic = params['isStatic'].asBoolOr(false);
 
         try {
-          final String kernel = await compileExpression(isolateId, expression,
-              definitions, typeDefinitions, libraryUri, klass, isStatic);
-          return <String, String>{'type': 'Success', 'kernelBase64': kernel};
+          final String kernelBytesBase64 = await compileExpression(isolateId,
+              expression, definitions, typeDefinitions, libraryUri, klass,
+              isStatic);
+          return <String, dynamic>{'type': 'Success',
+            'result': {'kernelBytes': kernelBytesBase64}};
         } on rpc.RpcException {
           rethrow;
         } catch (e, st) {
