@@ -22,7 +22,7 @@ class _FlutterFrontendCompiler implements frontend.CompilerInterface{
 
   _FlutterFrontendCompiler(StringSink output, {bool trackWidgetCreation: false}):
       _compiler = new frontend.FrontendCompiler(output,
-          transformer: (trackWidgetCreation ? new WidgetCreatorTracker() : null));
+          transformer: trackWidgetCreation ? new WidgetCreatorTracker() : null);
 
   @override
   Future<Null> compile(String filename, ArgResults options, {IncrementalCompiler generator}) async {

@@ -5,25 +5,25 @@
 part of dart.ui;
 
 /// Signature of callbacks that have no arguments and return no data.
-typedef void VoidCallback();
+typedef VoidCallback = void Function();
 
 /// Signature for [Window.onBeginFrame].
-typedef void FrameCallback(Duration duration);
+typedef FrameCallback = void Function(Duration duration);
 
 /// Signature for [Window.onPointerDataPacket].
-typedef void PointerDataPacketCallback(PointerDataPacket packet);
+typedef PointerDataPacketCallback = void Function(PointerDataPacket packet);
 
 /// Signature for [Window.onSemanticsAction].
-typedef void SemanticsActionCallback(int id, SemanticsAction action, ByteData args);
+typedef SemanticsActionCallback = void Function(int id, SemanticsAction action, ByteData args);
 
 /// Signature for responses to platform messages.
 ///
 /// Used as a parameter to [Window.sendPlatformMessage] and
 /// [Window.onPlatformMessage].
-typedef void PlatformMessageResponseCallback(ByteData data);
+typedef PlatformMessageResponseCallback = void Function(ByteData data);
 
 /// Signature for [Window.onPlatformMessage].
-typedef void PlatformMessageCallback(String name, ByteData data, PlatformMessageResponseCallback callback);
+typedef PlatformMessageCallback = void Function(String name, ByteData data, PlatformMessageResponseCallback callback);
 
 /// States that an application can be in.
 ///

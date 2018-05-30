@@ -18,7 +18,7 @@ import 'package:vm/frontend_server.dart' show ProgramTransformer;
 //
 // The parameter name contains a randomly generate hex string to avoid collision
 // with user generated parameters.
-final String _creationLocationParameterName =
+const String _creationLocationParameterName =
     r'$creationLocationd_0dea112b090073317d4';
 
 /// Name of private field added to the Widget class and any other classes that
@@ -27,7 +27,7 @@ final String _creationLocationParameterName =
 /// Regardless of what library a class implementing Widget is defined in, the
 /// private field will always be defined in the context of the widget_inspector
 /// library ensuring no name conflicts with regular fields.
-final String _locationFieldName = r'_location';
+const String _locationFieldName = r'_location';
 
 bool _hasNamedParameter(FunctionNode function, String name) {
   return function.namedParameters

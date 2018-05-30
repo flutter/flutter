@@ -147,7 +147,7 @@ Future<Null> testStartPaused(Uri uri) async {
   Expect.equals(resumedResponse['pauseEvent']['kind'], 'Resume');
 }
 
-typedef Future<Null> TestFunction(Uri uri);
+typedef TestFunction = Future<Null> Function(Uri uri);
 
 final List<TestFunction> basicTests = <TestFunction>[
   testHttpProtocolRequest,

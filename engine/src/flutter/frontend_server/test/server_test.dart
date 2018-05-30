@@ -1,10 +1,9 @@
 import 'dart:async';
 
+import 'package:frontend_server/server.dart';
 import 'package:mockito/mockito.dart';
 import 'package:test/test.dart';
 import 'package:vm/frontend_server.dart' as frontend show CompilerInterface;
-
-import '../lib/server.dart';
 
 class _MockedCompiler extends Mock implements frontend.CompilerInterface {}
 
