@@ -214,9 +214,9 @@ abstract class Gradient {
 
 /// A 2D linear gradient.
 ///
-/// This class is used by [BoxDecoration] to represent gradients. This abstracts
-/// out the arguments to the [new ui.Gradient.linear] constructor from the
-/// `dart:ui` library.
+/// This class is used by [BoxDecoration] to represent linear gradients. This
+/// abstracts out the arguments to the [new ui.Gradient.linear] constructor from
+/// the `dart:ui` library.
 ///
 /// A gradient has two anchor points, [begin] and [end]. The [begin] point
 /// corresponds to 0.0, and the [end] point corresponds to 1.0. These points are
@@ -280,14 +280,14 @@ class LinearGradient extends Gradient {
 
   /// The offset at which stop 0.0 of the gradient is placed.
   ///
-  /// If this is a [Alignment], then it is expressed as a vector from
+  /// If this is an [Alignment], then it is expressed as a vector from
   /// coordinate (0.0, 0.0), in a coordinate space that maps the center of the
   /// paint box at (0.0, 0.0) and the bottom right at (1.0, 1.0).
   ///
   /// For example, a begin offset of (-1.0, 0.0) is half way down the
   /// left side of the box.
   ///
-  /// It can also be a [AlignmentDirectional], where the start is the
+  /// It can also be an [AlignmentDirectional], where the start is the
   /// left in left-to-right contexts and the right in right-to-left contexts. If
   /// a text-direction-dependent value is provided here, then the [createShader]
   /// method will need to be given a [TextDirection].
@@ -295,14 +295,14 @@ class LinearGradient extends Gradient {
 
   /// The offset at which stop 1.0 of the gradient is placed.
   ///
-  /// If this is a [Alignment], then it is expressed as a vector from
+  /// If this is an [Alignment], then it is expressed as a vector from
   /// coordinate (0.0, 0.0), in a coordinate space that maps the center of the
   /// paint box at (0.0, 0.0) and the bottom right at (1.0, 1.0).
   ///
   /// For example, a begin offset of (1.0, 0.0) is half way down the
   /// right side of the box.
   ///
-  /// It can also be a [AlignmentDirectional], where the start is the left in
+  /// It can also be an [AlignmentDirectional], where the start is the left in
   /// left-to-right contexts and the right in right-to-left contexts. If a
   /// text-direction-dependent value is provided here, then the [createShader]
   /// method will need to be given a [TextDirection].
@@ -436,9 +436,9 @@ class LinearGradient extends Gradient {
 
 /// A 2D radial gradient.
 ///
-/// This class is used by [BoxDecoration] to represent gradients. This abstracts
-/// out the arguments to the [new ui.Gradient.radial] constructor from the
-/// `dart:ui` library.
+/// This class is used by [BoxDecoration] to represent radial gradients. This
+/// abstracts out the arguments to the [new ui.Gradient.radial] constructor from
+/// the `dart:ui` library.
 ///
 /// A gradient has a [center] and a [radius]. The [center] point corresponds to
 /// 0.0, and the ring at [radius] from the center corresponds to 1.0. These
@@ -513,11 +513,11 @@ class RadialGradient extends Gradient {
   /// For example, an alignment of (0.0, 0.0) will place the radial
   /// gradient in the center of the box.
   ///
-  /// If this is a [Alignment], then it is expressed as a vector from
+  /// If this is an [Alignment], then it is expressed as a vector from
   /// coordinate (0.0, 0.0), in a coordinate space that maps the center of the
   /// paint box at (0.0, 0.0) and the bottom right at (1.0, 1.0).
   ///
-  /// It can also be a [AlignmentDirectional], where the start is the left in
+  /// It can also be an [AlignmentDirectional], where the start is the left in
   /// left-to-right contexts and the right in right-to-left contexts. If a
   /// text-direction-dependent value is provided here, then the [createShader]
   /// method will need to be given a [TextDirection].
@@ -659,9 +659,9 @@ class RadialGradient extends Gradient {
 
 /// A 2D sweep gradient.
 ///
-/// This class is used by [BoxDecoration] to represent gradients. This abstracts
-/// out the arguments to the [new ui.Gradient.sweep] constructor from the
-/// `dart:ui` library.
+/// This class is used by [BoxDecoration] to represent sweep gradients. This
+/// abstracts out the arguments to the [new ui.Gradient.sweep] constructor from
+/// the `dart:ui` library.
 ///
 /// A gradient has a [center], a [startAngle], and an [endAngle]. The [startAngle]
 /// corresponds to 0.0, and the [endAngle] corresponds to 1.0. These angles are
@@ -735,11 +735,11 @@ class SweepGradient extends Gradient {
   /// For example, an alignment of (0.0, 0.0) will place the sweep
   /// gradient in the center of the box.
   ///
-  /// If this is a [Alignment], then it is expressed as a vector from
+  /// If this is an [Alignment], then it is expressed as a vector from
   /// coordinate (0.0, 0.0), in a coordinate space that maps the center of the
   /// paint box at (0.0, 0.0) and the bottom right at (1.0, 1.0).
   ///
-  /// It can also be a [AlignmentDirectional], where the start is the left in
+  /// It can also be an [AlignmentDirectional], where the start is the left in
   /// left-to-right contexts and the right in right-to-left contexts. If a
   /// text-direction-dependent value is provided here, then the [createShader]
   /// method will need to be given a [TextDirection].
@@ -760,9 +760,9 @@ class SweepGradient extends Gradient {
   ///
   /// For details, see [TileMode].
   ///
-  /// ![](https://flutter.github.io/assets-for-api-docs/dart-ui/tile_mode_clamp_sweep.png)
-  /// ![](https://flutter.github.io/assets-for-api-docs/dart-ui/tile_mode_mirror_sweep.png)
-  /// ![](https://flutter.github.io/assets-for-api-docs/dart-ui/tile_mode_repeated_sweep.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/dart-ui/tile_mode_clamp_sweep.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/dart-ui/tile_mode_mirror_sweep.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/dart-ui/tile_mode_repeated_sweep.png)
   final TileMode tileMode;
 
   @override
