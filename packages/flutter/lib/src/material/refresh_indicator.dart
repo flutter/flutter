@@ -226,6 +226,9 @@ class RefreshIndicatorState extends State<RefreshIndicator> with TickerProviderS
           _checkDragOffset(notification.metrics.viewportDimension);
         }
       }
+      if (_mode == _RefreshIndicatorMode.armed && notification.dragDetails == null) {
+        _show();
+      }
     } else if (notification is OverscrollNotification) {
       if (_mode == _RefreshIndicatorMode.drag || _mode == _RefreshIndicatorMode.armed) {
         _dragOffset -= notification.overscroll / 2.0;
