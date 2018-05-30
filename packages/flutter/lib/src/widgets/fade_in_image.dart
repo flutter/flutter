@@ -311,7 +311,7 @@ enum FadeInImagePhase {
   completed,
 }
 
-typedef _ImageProviderResolverListener = void Function();
+typedef void _ImageProviderResolverListener();
 
 class _ImageProviderResolver {
   _ImageProviderResolver({

@@ -24,7 +24,7 @@ import 'test_text_input.dart';
 export 'package:test/test.dart' hide expect;
 
 /// Signature for callback to [testWidgets] and [benchmarkWidgets].
-typedef WidgetTesterCallback = Future<Null> Function(WidgetTester widgetTester);
+typedef Future<Null> WidgetTesterCallback(WidgetTester widgetTester);
 
 /// Runs the [callback] inside the Flutter test environment.
 ///
@@ -596,7 +596,7 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
   }
 }
 
-typedef _TickerDisposeCallback = void Function(_TestTicker ticker);
+typedef void _TickerDisposeCallback(_TestTicker ticker);
 
 class _TestTicker extends Ticker {
   _TestTicker(TickerCallback onTick, this._onDispose) : super(onTick);

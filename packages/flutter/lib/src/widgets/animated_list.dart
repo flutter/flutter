@@ -14,10 +14,10 @@ import 'scroll_view.dart';
 import 'ticker_provider.dart';
 
 /// Signature for the builder callback used by [AnimatedList].
-typedef AnimatedListItemBuilder = Widget Function(BuildContext context, int index, Animation<double> animation);
+typedef Widget AnimatedListItemBuilder(BuildContext context, int index, Animation<double> animation);
 
 /// Signature for the builder callback used by [AnimatedListState.removeItem].
-typedef AnimatedListRemovedItemBuilder = Widget Function(BuildContext context, Animation<double> animation);
+typedef Widget AnimatedListRemovedItemBuilder(BuildContext context, Animation<double> animation);
 
 // The default insert/remove animation duration.
 const Duration _kDuration = const Duration(milliseconds: 300);

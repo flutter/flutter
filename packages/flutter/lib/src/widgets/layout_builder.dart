@@ -9,7 +9,7 @@ import 'debug.dart';
 import 'framework.dart';
 
 /// The signature of the [LayoutBuilder] builder function.
-typedef LayoutWidgetBuilder = Widget Function(BuildContext context, BoxConstraints constraints);
+typedef Widget LayoutWidgetBuilder(BuildContext context, BoxConstraints constraints);
 
 /// Builds a widget tree that can depend on the parent widget's size.
 ///

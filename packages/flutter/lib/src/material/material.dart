@@ -12,7 +12,7 @@ import 'theme.dart';
 /// Signature for the callback used by ink effects to obtain the rectangle for the effect.
 ///
 /// Used by [InkHighlight] and [InkSplash], for example.
-typedef RectCallback = Rect Function();
+typedef Rect RectCallback();
 
 /// The various kinds of material in material design. Used to
 /// configure the default behavior of [Material] widgets.
