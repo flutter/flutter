@@ -32,7 +32,7 @@ const Duration _kIndicatorScaleDuration = const Duration(milliseconds: 200);
 /// finished.
 ///
 /// Used by [RefreshIndicator.onRefresh].
-typedef RefreshCallback = Future<Null> Function();
+typedef Future<Null> RefreshCallback();
 
 // The state machine moves through these modes only when the scrollable
 // identified by scrollableKey has been scrolled to its min or max limit.

@@ -34,7 +34,7 @@ import 'viewport.dart';
 /// [SliverAppBar.forceElevated] property to ensure that the app bar shows a
 /// shadow, since it would otherwise not necessarily be aware that it had
 /// content ostensibly below it.
-typedef NestedScrollViewHeaderSliversBuilder = List<Widget> Function(BuildContext context, bool innerBoxIsScrolled);
+typedef List<Widget> NestedScrollViewHeaderSliversBuilder(BuildContext context, bool innerBoxIsScrolled);
 
 /// A scrolling view inside of which can be nested other scrolling views, with
 /// their scroll positions being intrinsically linked.
@@ -454,7 +454,7 @@ class _NestedScrollMetrics extends FixedScrollMetrics {
   final double correctionOffset;
 }
 
-typedef _NestedScrollActivityGetter = ScrollActivity Function(_NestedScrollPosition position);
+typedef ScrollActivity _NestedScrollActivityGetter(_NestedScrollPosition position);
 
 class _NestedScrollCoordinator implements ScrollActivityDelegate, ScrollHoldController {
   _NestedScrollCoordinator(this._state, this._parent, this._onHasScrolledBodyChanged) {

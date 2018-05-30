@@ -22,7 +22,7 @@ const double _kCaretWidth = 1.0; // pixels
 /// (including the cursor location).
 ///
 /// Used by [RenderEditable.onSelectionChanged].
-typedef SelectionChangedHandler = void Function(TextSelection selection, RenderEditable renderObject, SelectionChangedCause cause);
+typedef void SelectionChangedHandler(TextSelection selection, RenderEditable renderObject, SelectionChangedCause cause);
 
 /// Indicates what triggered the change in selected text (including changes to
 /// the cursor location).
@@ -46,7 +46,7 @@ enum SelectionChangedCause {
 /// Signature for the callback that reports when the caret location changes.
 ///
 /// Used by [RenderEditable.onCaretChanged].
-typedef CaretChangedHandler = void Function(Rect caretRect);
+typedef void CaretChangedHandler(Rect caretRect);
 
 /// Represents the coordinates of the point in a selection, and the text
 /// direction at that point, relative to top left of the [RenderEditable] that

@@ -174,7 +174,7 @@ class _TabStyle extends AnimatedWidget {
   }
 }
 
-typedef _LayoutCallback = void Function(List<double> xOffsets, TextDirection textDirection, double width);
+typedef void _LayoutCallback(List<double> xOffsets, TextDirection textDirection, double width);
 
 class _TabLabelBarRenderer extends RenderFlex {
   _TabLabelBarRenderer({

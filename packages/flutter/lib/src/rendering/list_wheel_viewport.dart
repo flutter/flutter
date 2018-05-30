@@ -12,7 +12,7 @@ import 'object.dart';
 import 'viewport.dart';
 import 'viewport_offset.dart';
 
-typedef _ChildSizingFunction = double Function(RenderBox child);
+typedef double _ChildSizingFunction(RenderBox child);
 
 /// [ParentData] for use with [RenderListWheelViewport].
 class ListWheelParentData extends ContainerBoxParentData<RenderBox> { }

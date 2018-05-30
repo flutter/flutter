@@ -15,22 +15,22 @@ import 'tap.dart';
 
 /// Signature for callback when the user has tapped the screen at the same
 /// location twice in quick succession.
-typedef GestureDoubleTapCallback = void Function();
+typedef void GestureDoubleTapCallback();
 
 /// Signature used by [MultiTapGestureRecognizer] for when a pointer that might
 /// cause a tap has contacted the screen at a particular location.
-typedef GestureMultiTapDownCallback = void Function(int pointer, TapDownDetails details);
+typedef void GestureMultiTapDownCallback(int pointer, TapDownDetails details);
 
 /// Signature used by [MultiTapGestureRecognizer] for when a pointer that will
 /// trigger a tap has stopped contacting the screen at a particular location.
-typedef GestureMultiTapUpCallback = void Function(int pointer, TapUpDetails details);
+typedef void GestureMultiTapUpCallback(int pointer, TapUpDetails details);
 
 /// Signature used by [MultiTapGestureRecognizer] for when a tap has occurred.
-typedef GestureMultiTapCallback = void Function(int pointer);
+typedef void GestureMultiTapCallback(int pointer);
 
 /// Signature for when the pointer that previously triggered a
 /// [GestureMultiTapDownCallback] will not end up causing a tap.
-typedef GestureMultiTapCancelCallback = void Function(int pointer);
+typedef void GestureMultiTapCancelCallback(int pointer);
 
 /// TapTracker helps track individual tap sequences as part of a
 /// larger gesture.

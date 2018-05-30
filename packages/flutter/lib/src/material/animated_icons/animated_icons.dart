@@ -125,7 +125,7 @@ class AnimatedIcon extends StatelessWidget {
   }
 }
 
-typedef _UiPathFactory = ui.Path Function();
+typedef ui.Path _UiPathFactory();
 
 class _AnimatedIconPainter extends CustomPainter {
   _AnimatedIconPainter({
@@ -296,4 +296,4 @@ T _interpolate<T>(List<T> values, double progress, _Interpolator<T> interpolator
   return interpolator(values[lowIdx], values[highIdx], t);
 }
 
-typedef _Interpolator<T> = T Function(T a, T b, double progress);
+typedef T _Interpolator<T>(T a, T b, double progress);

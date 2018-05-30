@@ -66,7 +66,7 @@ class ImageInfo {
 /// frame is requested if the call was asynchronous (after the current frame)
 /// and no rendering frame is requested if the call was synchronous (within the
 /// same stack frame as the call to [ImageStream.addListener]).
-typedef ImageListener = void Function(ImageInfo image, bool synchronousCall);
+typedef void ImageListener(ImageInfo image, bool synchronousCall);
 
 /// A handle to an image resource.
 ///
