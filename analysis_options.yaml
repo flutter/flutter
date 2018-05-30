@@ -1,13 +1,13 @@
 # Specify analysis options.
 #
 # This file is a copy of analysis_options_repo.yaml from flutter repo
-# as of 2018-01-07, but with "sort_constructors_first" disabled
-# (because we have private fake constructors), with
-# "always_require_non_null_named_parameters" disabled (because we
-# can't import the meta package from the SDK), and with
-# "prefer_final_fields" disabled (because we do weird things with
-# private fields, especially on the Window object):
-# https://github.com/lfutter/flutter/blob/master/analysis_options_repo.yaml
+# as of 2018-05-30, but with:
+#  - "always_require_non_null_named_parameters" disabled (because we
+#    can't import the meta package from the SDK), and
+#  - "sort_constructors_first" disabled (because we have private fake
+#     constructors),
+#  - "prefer_final_fields" disabled (because we do weird things with
+#    private fields, especially on the Window object):
 
 analyzer:
   language:
@@ -22,6 +22,9 @@ analyzer:
     missing_return: warning
     # allow having TODOs in the code
     todo: ignore
+  # `flutter analyze` (without `--watch`) just ignores directories
+  # that contain a .dartignore file, and this file does not have any
+  # effect on what files are actually analyzed.
 
 linter:
   rules:
@@ -31,11 +34,12 @@ linter:
     - always_declare_return_types
     - always_put_control_body_on_new_line
     # - always_put_required_named_parameters_first # we prefer having parameters in the same order as fields https://github.com/flutter/flutter/issues/10219
-    # always_require_non_null_named_parameters
+    # always_require_non_null_named_parameters # DIFFERENT FROM FLUTTER/FLUTTER
     - always_specify_types
     - annotate_overrides
     # - avoid_annotating_with_dynamic # conflicts with always_specify_types
     - avoid_as
+    # - avoid_bool_literals_in_conditional_expressions # not yet tested
     # - avoid_catches_without_on_clauses # we do this commonly
     # - avoid_catching_errors # we do this commonly
     - avoid_classes_with_only_static_members
@@ -44,11 +48,16 @@ linter:
     - avoid_init_to_null
     - avoid_null_checks_in_equality_operators
     # - avoid_positional_boolean_parameters # not yet tested
+    # - avoid_private_typedef_functions # we prefer having typedef (discussion in https://github.com/flutter/flutter/pull/16356)
+    - avoid_relative_lib_imports
+    - avoid_renaming_method_parameters
     - avoid_return_types_on_setters
     # - avoid_returning_null # we do this commonly
     # - avoid_returning_this # https://github.com/dart-lang/linter/issues/842
     # - avoid_setters_without_getters # not yet tested
+    # - avoid_single_cascade_in_expression_statements # not yet tested
     - avoid_slow_async_io
+    # - avoid_types_as_parameter_names # https://github.com/dart-lang/linter/pull/954/files
     # - avoid_types_on_closure_parameters # conflicts with always_specify_types
     # - avoid_unused_constructor_parameters # https://github.com/dart-lang/linter/pull/847
     - await_only_futures
@@ -85,18 +94,22 @@ linter:
     # - parameter_assignments # we do this commonly
     - prefer_adjacent_string_concatenation
     - prefer_asserts_in_initializer_lists
-    # - prefer_bool_in_asserts # not yet tested
+    - prefer_bool_in_asserts
     - prefer_collection_literals
     - prefer_conditional_assignment
     - prefer_const_constructors
     - prefer_const_constructors_in_immutables
+    - prefer_const_declarations
+    - prefer_const_literals_to_create_immutables
     # - prefer_constructors_over_static_methods # not yet tested
     - prefer_contains
+    # - prefer_equal_for_default_values # not yet tested
     # - prefer_expression_function_bodies # conflicts with https://github.com/flutter/flutter/wiki/Style-guide-for-Flutter-repo#consider-using--for-short-functions-and-methods
-    # - prefer_final_fields
+    # - prefer_final_fields # DIFFERENT FROM FLUTTER/FLUTTER
     - prefer_final_locals
     - prefer_foreach
     # - prefer_function_declarations_over_variables # not yet tested
+    - prefer_generic_function_type_aliases
     - prefer_initializing_formals
     # - prefer_interpolation_to_compose_strings # not yet tested
     - prefer_is_empty
@@ -106,7 +119,7 @@ linter:
     - public_member_api_docs # this is the only difference from analysis_options.yaml
     - recursive_getters
     - slash_for_doc_comments
-    # - sort_constructors_first
+    # - sort_constructors_first # DIFFERENT FROM FLUTTER/FLUTTER
     - sort_unnamed_constructors_first
     - super_goes_last
     - test_types_in_equals
@@ -120,6 +133,7 @@ linter:
     - unnecessary_null_aware_assignments
     - unnecessary_null_in_if_null_operators
     - unnecessary_overrides
+    - unnecessary_parenthesis
     # - unnecessary_statements # not yet tested
     - unnecessary_this
     - unrelated_type_equality_checks

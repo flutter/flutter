@@ -150,7 +150,7 @@ class SemanticsAction {
   ///
   /// The map's key is the [index] of the action and the value is the action
   /// itself.
-  static final Map<int, SemanticsAction> values = const <int, SemanticsAction>{
+  static const Map<int, SemanticsAction> values = const <int, SemanticsAction>{
     _kTapIndex: tap,
     _kLongPressIndex: longPress,
     _kScrollLeftIndex: scrollLeft,
@@ -369,7 +369,7 @@ class SemanticsFlag {
   /// The possible semantics flags.
   ///
   /// The map's key is the [index] of the flag and the value is the flag itself.
-  static final Map<int, SemanticsFlag> values = const <int, SemanticsFlag>{
+  static const Map<int, SemanticsFlag> values = const <int, SemanticsFlag>{
     _kHasCheckedStateIndex: hasCheckedState,
     _kIsCheckedIndex: isChecked,
     _kIsSelectedIndex: isSelected,

@@ -1067,7 +1067,7 @@ class Paint {
   }
 
   // Must be kept in sync with the default in paint.cc.
-  static final double _kStrokeMiterLimitDefault = 4.0;
+  static const double _kStrokeMiterLimitDefault = 4.0;
 
   /// The limit for miters to be drawn on segments when the join is set to
   /// [StrokeJoin.miter] and the [style] is set to [PaintingStyle.stroke]. If
@@ -1315,7 +1315,7 @@ class Image extends NativeFieldWrapperClass2 {
 }
 
 /// Callback signature for [decodeImageFromList].
-typedef void ImageDecoderCallback(Image result);
+typedef ImageDecoderCallback = void Function(Image result);
 
 /// Information for a single frame of an animation.
 ///
@@ -3339,13 +3339,13 @@ class PictureRecorder extends NativeFieldWrapperClass2 {
 }
 
 /// Generic callback signature, used by [_futurize].
-typedef void _Callback<T>(T result);
+typedef _Callback<T> = void Function(T result);
 
 /// Signature for a method that receives a [_Callback].
 ///
 /// Return value should be null on success, and a string error message on
 /// failure.
-typedef String _Callbacker<T>(_Callback<T> callback);
+typedef _Callbacker<T> = String Function(_Callback<T> callback);
 
 /// Converts a method that receives a value-returning callback to a method that
 /// returns a Future.
@@ -3358,7 +3358,7 @@ typedef String _Callbacker<T>(_Callback<T> callback);
 /// Example usage:
 ///
 /// ```dart
-/// typedef void IntCallback(int result);
+/// typedef IntCallback = void Function(int result);
 ///
 /// String _doSomethingAndCallback(IntCallback callback) {
 ///   new Timer(new Duration(seconds: 1), () { callback(1); });

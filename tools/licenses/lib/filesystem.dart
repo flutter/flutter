@@ -23,7 +23,7 @@ enum FileType {
   metadata, // can be skipped entirely (e.g. Mac OS X ._foo files)
 }
 
-typedef List<int> Reader();
+typedef Reader = List<int> Function();
 
 class BytesOf extends Key { BytesOf(dynamic value) : super(value); }
 class UTF8Of extends Key { UTF8Of(dynamic value) : super(value); }
