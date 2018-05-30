@@ -227,6 +227,9 @@ class RefreshIndicatorState extends State<RefreshIndicator> with TickerProviderS
         }
       }
       if (_mode == _RefreshIndicatorMode.armed && notification.dragDetails == null) {
+        // On iOS start the refresh when the Scrollable bounces back from the
+        // overscroll (ScrollNotification indicating this don't have dragDetails
+        // because the scroll activity is not directly triggered by a drag).
         _show();
       }
     } else if (notification is OverscrollNotification) {
