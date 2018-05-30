@@ -260,9 +260,9 @@ void main() {
     testUsingContext('compile single expression', () async {
       final BufferLogger logger = context[Logger];
 
-      Completer<List<int>> compileResponseCompleter =
+      final Completer<List<int>> compileResponseCompleter =
           new Completer<List<int>>();
-      Completer<List<int>> compileExpressionResponseCompleter =
+      final Completer<List<int>> compileExpressionResponseCompleter =
           new Completer<List<int>>();
 
       when(mockFrontendServer.stdout)
