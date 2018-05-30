@@ -8,7 +8,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:test/test.dart';
 
-typedef HandleEventCallback = void Function(PointerEvent event);
+typedef void HandleEventCallback(PointerEvent event);
 
 class TestGestureFlutterBinding extends BindingBase with GestureBinding {
   HandleEventCallback callback;

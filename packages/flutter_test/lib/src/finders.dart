@@ -9,10 +9,10 @@ import 'package:meta/meta.dart';
 import 'all_elements.dart';
 
 /// Signature for [CommonFinders.byWidgetPredicate].
-typedef WidgetPredicate = bool Function(Widget widget);
+typedef bool WidgetPredicate(Widget widget);
 
 /// Signature for [CommonFinders.byElementPredicate].
-typedef ElementPredicate = bool Function(Element element);
+typedef bool ElementPredicate(Element element);
 
 /// Some frequently used widget [Finder]s.
 const CommonFinders find = const CommonFinders._();

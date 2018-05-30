@@ -288,7 +288,7 @@ class AsyncSnapshot<T> {
 /// itself based on a snapshot from interacting with a [Stream].
 /// * [FutureBuilder], which delegates to an [AsyncWidgetBuilder] to build
 /// itself based on a snapshot from interacting with a [Future].
-typedef AsyncWidgetBuilder<T> = Widget Function(BuildContext context, AsyncSnapshot<T> snapshot);
+typedef Widget AsyncWidgetBuilder<T>(BuildContext context, AsyncSnapshot<T> snapshot);
 
 /// Widget that builds itself based on the latest snapshot of interaction with
 /// a [Stream].

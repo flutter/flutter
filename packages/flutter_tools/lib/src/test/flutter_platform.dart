@@ -186,7 +186,7 @@ void main() {
 
 enum _InitialResult { crashed, timedOut, connected }
 enum _TestResult { crashed, harnessBailed, testBailed }
-typedef _Finalizer = Future<Null> Function();
+typedef Future<Null> _Finalizer();
 
 class _CompilationRequest {
   String path;
