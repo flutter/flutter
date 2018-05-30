@@ -53,8 +53,8 @@ IF NOT EXIST "%cache_dir%" (
   ECHO            %cache_dir%
   ECHO.
   ECHO        This may be because flutter doesn't have write permissions for
-  ECHO        this path. Try moving flutter to a writable folder, such as
-  ECHO        within your home directory.
+  ECHO        this path. Try moving the flutter directory to a writable location,
+  ECHO        such as within your home directory.
   EXIT /B 1
 )
 
