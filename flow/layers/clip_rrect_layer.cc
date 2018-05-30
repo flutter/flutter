@@ -46,7 +46,7 @@ void ClipRRectLayer::Paint(PaintContext& context) const {
   TRACE_EVENT0("flutter", "ClipRRectLayer::Paint");
   FXL_DCHECK(needs_painting());
 
-  Layer::AutoSaveLayer save(context, paint_bounds(), nullptr);
+  SkAutoCanvasRestore save(&context.canvas, true);
   context.canvas.clipRRect(clip_rrect_, true);
   PaintChildren(context);
 }

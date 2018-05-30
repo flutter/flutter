@@ -91,11 +91,7 @@ void PhysicalShapeLayer::Paint(PaintContext& context) const {
   context.canvas.drawPath(path_, paint);
 
   SkAutoCanvasRestore save(&context.canvas, false);
-  if (isRect_) {
-    context.canvas.save();
-  } else {
-    context.canvas.saveLayer(path_.getBounds(), nullptr);
-  }
+  context.canvas.save();
   context.canvas.clipPath(path_, true);
   PaintChildren(context);
   if (context.checkerboard_offscreen_layers && !isRect_)
