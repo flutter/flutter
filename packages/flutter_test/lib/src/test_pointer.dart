@@ -113,10 +113,10 @@ class TestPointer {
 
 /// Signature for a callback that can dispatch events and returns a future that
 /// completes when the event dispatch is complete.
-typedef Future<Null> EventDispatcher(PointerEvent event, HitTestResult result);
+typedef EventDispatcher = Future<Null> Function(PointerEvent event, HitTestResult result);
 
 /// Signature for callbacks that perform hit-testing at a given location.
-typedef HitTestResult HitTester(Offset location);
+typedef HitTester = HitTestResult Function(Offset location);
 
 /// A class for performing gestures in tests.
 ///

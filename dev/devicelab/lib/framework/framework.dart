@@ -20,7 +20,7 @@ const Duration _kDefaultTaskTimeout = const Duration(minutes: 15);
 
 /// Represents a unit of work performed in the CI environment that can
 /// succeed, fail and be retried independently of others.
-typedef Future<TaskResult> TaskFunction();
+typedef TaskFunction = Future<TaskResult> Function();
 
 bool _isTaskRegistered = false;
 
