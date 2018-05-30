@@ -1,4 +1,4 @@
-Signature: 7ac78318eb25ae1509304393f0205070
+Signature: a078f54fe324409623b193b1a5595944
 
 UNUSED LICENSES:
 
@@ -14364,6 +14364,9 @@ FILE: ../../../third_party/skia/include/private/SkLeanWindows.h
 FILE: ../../../third_party/skia/include/private/SkSafe_math.h
 FILE: ../../../third_party/skia/include/utils/SkNoDrawCanvas.h
 FILE: ../../../third_party/skia/modules/sksg/samples/SampleSVGPong.cpp
+FILE: ../../../third_party/skia/modules/skshaper/include/SkShaper.h
+FILE: ../../../third_party/skia/modules/skshaper/src/SkShaper_harfbuzz.cpp
+FILE: ../../../third_party/skia/modules/skshaper/src/SkShaper_primitive.cpp
 FILE: ../../../third_party/skia/samplecode/DecodeFile.h
 FILE: ../../../third_party/skia/samplecode/SampleAndroidShadows.cpp
 FILE: ../../../third_party/skia/samplecode/SampleCode.cpp
