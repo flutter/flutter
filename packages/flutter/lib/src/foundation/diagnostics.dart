@@ -17,7 +17,7 @@ enum DiagnosticLevel {
   ///
   /// If a user chooses to display [hidden] diagnostics, they should not expect
   /// the diagnostics to be formatted consistently with other diagnostics and
-  /// they should expect them to sometimes be be misleading. For example,
+  /// they should expect them to sometimes be misleading. For example,
   /// [FlagProperty] and [ObjectFlagProperty] have uglier formatting when the
   /// property `value` does does not match a value with a custom flag
   /// description. An example of a misleading diagnostic is a diagnostic for
@@ -2156,7 +2156,7 @@ abstract class Diagnosticable {
   ///    uninteresting. For example, specify a default value of null any time
   ///    a property being null does not indicate an error.
   ///  * Avoid specifying the `level` parameter unless the result you want
-  ///    cannot be be achieved by using the `defaultValue` parameter or using
+  ///    cannot be achieved by using the `defaultValue` parameter or using
   ///    the [ObjectFlagProperty] class to conditionally display the property
   ///    as a flag.
   ///  * Specify `showName` and `showSeparator` in rare cases where the string
