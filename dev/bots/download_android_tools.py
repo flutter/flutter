@@ -78,7 +78,7 @@ def UpdateTools(tools_name):
   # Download tools from GCS.
   archive_path = os.path.join(INSTALL_DIR, tools_name + '.tar.gz')
   download_cmd = ['python', GSUTIL_PATH, 'cp',
-                  'gs://mojo/android/tool/%s.tar.gz' % version,
+                  'gs://flutter_infra/android/tools/%s.tar.gz' % version,
                   archive_path]
   if not RunCommand(download_cmd):
     print ('WARNING: Failed to download Android tools.')
