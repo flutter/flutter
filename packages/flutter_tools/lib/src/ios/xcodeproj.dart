@@ -117,6 +117,10 @@ Future<void> updateGeneratedXcodeProperties({
     localsBuffer.writeln('PREVIEW_DART_2=true');
   }
 
+  if (buildInfo.trackWidgetCreation) {
+    localsBuffer.writeln('TRACK_WIDGET_CREATION=true');
+  }
+
   final File localsFile = fs.file(_generatedXcodePropertiesPath(projectPath));
   localsFile.createSync(recursive: true);
   localsFile.writeAsStringSync(localsBuffer.toString());
