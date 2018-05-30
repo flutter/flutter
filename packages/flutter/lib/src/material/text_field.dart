@@ -104,6 +104,7 @@ class TextField extends StatefulWidget {
     TextInputType keyboardType: TextInputType.text,
     this.style,
     this.textAlign: TextAlign.start,
+    this.textDirection: null,
     this.autofocus: false,
     this.obscureText: false,
     this.autocorrect: true,
@@ -162,6 +163,11 @@ class TextField extends StatefulWidget {
   ///
   /// Defaults to [TextAlign.start].
   final TextAlign textAlign;
+
+  /// Which direction the text being displayed.
+  ///
+  /// Defaults to parent's text direction.
+  final TextDirection textDirection;
 
   /// Whether this text field should focus itself if nothing else is already
   /// focused.
@@ -470,6 +476,7 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
         keyboardType: widget.keyboardType,
         style: style,
         textAlign: widget.textAlign,
+        textDirection: widget.textDirection,
         autofocus: widget.autofocus,
         obscureText: widget.obscureText,
         autocorrect: widget.autocorrect,
