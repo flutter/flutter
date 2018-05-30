@@ -47,7 +47,7 @@ class Checkbox extends StatefulWidget {
   /// The following arguments are required:
   ///
   /// * [value], which determines whether the checkbox is checked. The [value]
-  ///   can only be be null if [tristate] is true.
+  ///   can only be null if [tristate] is true.
   /// * [onChanged], which is called when the value of the checkbox should
   ///   change. It can be set to null to disable the checkbox.
   ///
