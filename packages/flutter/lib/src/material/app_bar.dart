@@ -425,15 +425,12 @@ class _AppBarState extends State<AppBar> {
       );
     }
 
-    final Widget toolbar = new Padding(
-      padding: const EdgeInsetsDirectional.only(end: 4.0),
-      child: new NavigationToolbar(
-        leading: leading,
-        middle: title,
-        trailing: actions,
-        centerMiddle: widget._getEffectiveCenterTitle(themeData),
-        middleSpacing: widget.titleSpacing,
-      ),
+    final Widget toolbar = new NavigationToolbar(
+      leading: leading,
+      middle: title,
+      trailing: actions,
+      centerMiddle: widget._getEffectiveCenterTitle(themeData),
+      middleSpacing: widget.titleSpacing,
     );
 
     // If the toolbar is allocated less than kToolbarHeight make it
@@ -920,7 +917,7 @@ class SliverAppBar extends StatefulWidget {
 
   /// Whether the app bar should remain visible at the start of the scroll view.
   ///
-  /// The app bar can still expand an contract as the user scrolls, but it will
+  /// The app bar can still expand and contract as the user scrolls, but it will
   /// remain visible rather than being scrolled out of view.
   final bool pinned;
 

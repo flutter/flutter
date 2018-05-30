@@ -40,5 +40,6 @@
   "drawerLabel": "Meniu de navigare",
   "popupMenuLabel": "Meniu pop-up",
   "dialogLabel": "Casetă de dialog",
-  "alertDialogLabel": "Alerta"
+  "alertDialogLabel": "Alerta",
+  "searchFieldLabel": "Căutare"
 }

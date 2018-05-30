@@ -506,8 +506,8 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
 
     return new Semantics(
       onTap: () {
-        if (!_controller.selection.isValid)
-          _controller.selection = new TextSelection.collapsed(offset: _controller.text.length);
+        if (!_effectiveController.selection.isValid)
+          _effectiveController.selection = new TextSelection.collapsed(offset: _effectiveController.text.length);
         _requestKeyboard();
       },
       child: new IgnorePointer(

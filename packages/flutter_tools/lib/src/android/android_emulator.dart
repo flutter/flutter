@@ -41,20 +41,22 @@ class AndroidEmulator extends Emulator {
   String get label => _properties['avd.ini.displayname'];
 
   @override
-  Future<void> launch() async {
-    final Future<void> launchResult =
+  Future<bool> launch() async {
+    final Future<bool> launchResult =
         runAsync(<String>[getEmulatorPath(), '-avd', id])
             .then((RunResult runResult) {
               if (runResult.exitCode != 0) {
                 printError('$runResult');
+                return false;
               }
+              return true;
             });
     // emulator continues running on a successful launch so if we
     // haven't quit within 3 seconds we assume that's a success and just
     // return.
-    await Future.any<void>(<Future<void>>[
+    return Future.any<bool>(<Future<bool>>[
       launchResult,
-      new Future<void>.delayed(const Duration(seconds: 3))
+      new Future<void>.delayed(const Duration(seconds: 3)).then((_) => true)
     ]);
   }
 }

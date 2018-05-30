@@ -5,6 +5,7 @@
 import 'dart:async';
 import 'dart:collection';
 import 'dart:convert';
+import 'dart:io';
 import 'dart:ui' show hashValues;
 
 import 'package:flutter/foundation.dart';
@@ -55,6 +56,10 @@ const String _kAssetManifestFileName = 'AssetManifest.json';
 /// icons/1.5x/heart.png
 /// icons/2.0x/heart.png
 /// ```
+///
+/// assets/icons/3.0x/heart.png would be a valid variant of
+/// assets/icons/heart.png.
+///
 ///
 /// ## Fetching assets
 ///
@@ -166,6 +171,7 @@ class AssetImage extends AssetBundleImageProvider {
     final AssetBundle chosenBundle = bundle ?? configuration.bundle ?? rootBundle;
     Completer<AssetBundleImageKey> completer;
     Future<AssetBundleImageKey> result;
+
     chosenBundle.loadStructuredData<Map<String, List<String>>>(_kAssetManifestFileName, _manifestParser).then<void>(
       (Map<String, List<String>> manifest) {
         final String chosenName = _chooseVariant(
@@ -252,10 +258,18 @@ class AssetImage extends AssetBundleImageProvider {
       return candidates[lower];
   }
 
-  static final RegExp _extractRatioRegExp = new RegExp(r'/?(\d+(\.\d*)?)x/');
+  static final RegExp _extractRatioRegExp = new RegExp(r'/?(\d+(\.\d*)?)x$');
 
   double _parseScale(String key) {
-    final Match match = _extractRatioRegExp.firstMatch(key);
+
+    if ( key == assetName){
+      return _naturalResolution;
+    }
+
+    final File assetPath = new File(key);
+    final Directory assetDir = assetPath.parent;
+
+    final Match match = _extractRatioRegExp.firstMatch(assetDir.path);
     if (match != null && match.groupCount > 0)
       return double.parse(match.group(1));
     return _naturalResolution; // i.e. default to 1.0x
