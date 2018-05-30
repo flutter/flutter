@@ -104,7 +104,7 @@ class TextField extends StatefulWidget {
     TextInputType keyboardType: TextInputType.text,
     this.style,
     this.textAlign: TextAlign.start,
-    this.textDirection,
+	this.textDirection: TextDirection.ltr,
     this.autofocus: false,
     this.obscureText: false,
     this.autocorrect: true,
@@ -115,16 +115,16 @@ class TextField extends StatefulWidget {
     this.onSubmitted,
     this.inputFormatters,
     this.enabled,
-  })  : assert(keyboardType != null),
-        assert(textAlign != null),
-        assert(autofocus != null),
-        assert(obscureText != null),
-        assert(autocorrect != null),
-        assert(maxLengthEnforced != null),
-        assert(maxLines == null || maxLines > 0),
-        assert(maxLength == null || maxLength > 0),
-        keyboardType = maxLines == 1 ? keyboardType : TextInputType.multiline,
-        super(key: key);
+  }) : assert(keyboardType != null),
+       assert(textAlign != null),
+       assert(autofocus != null),
+       assert(obscureText != null),
+       assert(autocorrect != null),
+       assert(maxLengthEnforced != null),
+       assert(maxLines == null || maxLines > 0),
+       assert(maxLength == null || maxLength > 0),
+       keyboardType = maxLines == 1 ? keyboardType : TextInputType.multiline,
+       super(key: key);
 
   /// Controls the text being edited.
   ///
@@ -164,6 +164,9 @@ class TextField extends StatefulWidget {
   /// Defaults to [TextAlign.start].
   final TextAlign textAlign;
 
+  /// The text direction for this TextField.
+  ///
+  /// Defaults to [TextDirection.ltr].
   final TextDirection textDirection;
 
   /// Whether this text field should focus itself if nothing else is already
@@ -280,70 +283,53 @@ class TextField extends StatefulWidget {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(new DiagnosticsProperty<TextEditingController>(
-        'controller', controller,
-        defaultValue: null));
-    properties.add(new DiagnosticsProperty<FocusNode>('focusNode', focusNode,
-        defaultValue: null));
-    properties.add(
-        new DiagnosticsProperty<InputDecoration>('decoration', decoration));
-    properties.add(new DiagnosticsProperty<TextInputType>(
-        'keyboardType', keyboardType,
-        defaultValue: TextInputType.text));
-    properties.add(
-        new DiagnosticsProperty<TextStyle>('style', style, defaultValue: null));
-    properties.add(new DiagnosticsProperty<bool>('autofocus', autofocus,
-        defaultValue: false));
-    properties.add(new DiagnosticsProperty<bool>('obscureText', obscureText,
-        defaultValue: false));
-    properties.add(new DiagnosticsProperty<bool>('autocorrect', autocorrect,
-        defaultValue: false));
+    properties.add(new DiagnosticsProperty<TextEditingController>('controller', controller, defaultValue: null));
+    properties.add(new DiagnosticsProperty<FocusNode>('focusNode', focusNode, defaultValue: null));
+    properties.add(new DiagnosticsProperty<InputDecoration>('decoration', decoration));
+    properties.add(new DiagnosticsProperty<TextInputType>('keyboardType', keyboardType, defaultValue: TextInputType.text));
+    properties.add(new DiagnosticsProperty<TextStyle>('style', style, defaultValue: null));
+    properties.add(new DiagnosticsProperty<bool>('autofocus', autofocus, defaultValue: false));
+    properties.add(new DiagnosticsProperty<bool>('obscureText', obscureText, defaultValue: false));
+    properties.add(new DiagnosticsProperty<bool>('autocorrect', autocorrect, defaultValue: false));
     properties.add(new IntProperty('maxLines', maxLines, defaultValue: 1));
     properties.add(new IntProperty('maxLength', maxLength, defaultValue: null));
-    properties.add(new FlagProperty('maxLengthEnforced',
-        value: maxLengthEnforced, ifTrue: 'max length enforced'));
+    properties.add(new FlagProperty('maxLengthEnforced', value: maxLengthEnforced, ifTrue: 'max length enforced'));
   }
 }
 
-class _TextFieldState extends State<TextField>
-    with AutomaticKeepAliveClientMixin {
-  final GlobalKey<EditableTextState> _editableTextKey =
-      new GlobalKey<EditableTextState>();
+class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixin {
+  final GlobalKey<EditableTextState> _editableTextKey = new GlobalKey<EditableTextState>();
 
   Set<InteractiveInkFeature> _splashes;
   InteractiveInkFeature _currentSplash;
 
   TextEditingController _controller;
-  TextEditingController get _effectiveController =>
-      widget.controller ?? _controller;
+  TextEditingController get _effectiveController => widget.controller ?? _controller;
 
   FocusNode _focusNode;
-  FocusNode get _effectiveFocusNode =>
-      widget.focusNode ?? (_focusNode ??= new FocusNode());
+  FocusNode get _effectiveFocusNode => widget.focusNode ?? (_focusNode ??= new FocusNode());
 
-  bool get needsCounter =>
-      widget.maxLength != null &&
-      widget.decoration != null &&
-      widget.decoration.counterText == null;
+  bool get needsCounter => widget.maxLength != null
+    && widget.decoration != null
+    && widget.decoration.counterText == null;
 
   InputDecoration _getEffectiveDecoration() {
-    final InputDecoration effectiveDecoration =
-        (widget.decoration ?? const InputDecoration())
-            .applyDefaults(Theme.of(context).inputDecorationTheme)
-            .copyWith(
-              enabled: widget.enabled,
-            );
+    final InputDecoration effectiveDecoration = (widget.decoration ?? const InputDecoration())
+      .applyDefaults(Theme.of(context).inputDecorationTheme)
+      .copyWith(
+        enabled: widget.enabled,
+      );
 
-    if (!needsCounter) return effectiveDecoration;
+    if (!needsCounter)
+      return effectiveDecoration;
 
-    final String counterText =
-        '${_effectiveController.value.text.runes.length} / ${widget.maxLength}';
+    final String counterText = '${_effectiveController.value.text.runes.length} / ${widget.maxLength}';
     if (_effectiveController.value.text.runes.length > widget.maxLength) {
       final ThemeData themeData = Theme.of(context);
       return effectiveDecoration.copyWith(
         errorText: effectiveDecoration.errorText ?? '',
-        counterStyle: effectiveDecoration.errorStyle ??
-            themeData.textTheme.caption.copyWith(color: themeData.errorColor),
+        counterStyle: effectiveDecoration.errorStyle
+          ?? themeData.textTheme.caption.copyWith(color: themeData.errorColor),
         counterText: counterText,
       );
     }
@@ -353,15 +339,15 @@ class _TextFieldState extends State<TextField>
   @override
   void initState() {
     super.initState();
-    if (widget.controller == null) _controller = new TextEditingController();
+    if (widget.controller == null)
+      _controller = new TextEditingController();
   }
 
   @override
   void didUpdateWidget(TextField oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget.controller == null && oldWidget.controller != null)
-      _controller =
-          new TextEditingController.fromValue(oldWidget.controller.value);
+      _controller = new TextEditingController.fromValue(oldWidget.controller.value);
     else if (widget.controller != null && oldWidget.controller == null)
       _controller = null;
   }
@@ -376,8 +362,7 @@ class _TextFieldState extends State<TextField>
     _editableTextKey.currentState?.requestKeyboard();
   }
 
-  void _handleSelectionChanged(
-      TextSelection selection, SelectionChangedCause cause) {
+  void _handleSelectionChanged(TextSelection selection, SelectionChangedCause cause) {
     if (cause == SelectionChangedCause.longPress)
       Feedback.forLongPress(context);
   }
@@ -385,9 +370,7 @@ class _TextFieldState extends State<TextField>
   InteractiveInkFeature _createInkFeature(TapDownDetails details) {
     final MaterialInkController inkController = Material.of(context);
     final BuildContext editableContext = _editableTextKey.currentContext;
-    final RenderBox referenceBox =
-        InputDecorator.containerOf(editableContext) ??
-            editableContext.findRenderObject();
+    final RenderBox referenceBox = InputDecorator.containerOf(editableContext) ?? editableContext.findRenderObject();
     final Offset position = referenceBox.globalToLocal(details.globalPosition);
     final Color color = Theme.of(context).splashColor;
 
@@ -396,27 +379,27 @@ class _TextFieldState extends State<TextField>
       if (_splashes != null) {
         assert(_splashes.contains(splash));
         _splashes.remove(splash);
-        if (_currentSplash == splash) _currentSplash = null;
+        if (_currentSplash == splash)
+          _currentSplash = null;
         updateKeepAlive();
       } // else we're probably in deactivate()
     }
 
     splash = Theme.of(context).splashFactory.create(
-          controller: inkController,
-          referenceBox: referenceBox,
-          position: position,
-          color: color,
-          containedInkWell: true,
-          // TODO(hansmuller): splash clip borderRadius should match the input decorator's border.
-          borderRadius: BorderRadius.zero,
-          onRemoved: handleRemoved,
-        );
+      controller: inkController,
+      referenceBox: referenceBox,
+      position: position,
+      color: color,
+      containedInkWell: true,
+      // TODO(hansmuller): splash clip borderRadius should match the input decorator's border.
+      borderRadius: BorderRadius.zero,
+      onRemoved: handleRemoved,
+    );
 
     return splash;
   }
 
-  RenderEditable get _renderEditable =>
-      _editableTextKey.currentState.renderEditable;
+  RenderEditable get _renderEditable => _editableTextKey.currentState.renderEditable;
 
   void _handleTapDown(TapDownDetails details) {
     _renderEditable.handleTapDown(details);
@@ -439,7 +422,8 @@ class _TextFieldState extends State<TextField>
   }
 
   void _startSplash(TapDownDetails details) {
-    if (_effectiveFocusNode.hasFocus) return;
+    if (_effectiveFocusNode.hasFocus)
+      return;
     final InteractiveInkFeature splash = _createInkFeature(details);
     _splashes ??= new HashSet<InteractiveInkFeature>();
     _splashes.add(splash);
@@ -464,7 +448,8 @@ class _TextFieldState extends State<TextField>
     if (_splashes != null) {
       final Set<InteractiveInkFeature> splashes = _splashes;
       _splashes = null;
-      for (InteractiveInkFeature splash in splashes) splash.dispose();
+      for (InteractiveInkFeature splash in splashes)
+        splash.dispose();
       _currentSplash = null;
     }
     assert(_currentSplash == null);
@@ -479,8 +464,7 @@ class _TextFieldState extends State<TextField>
     final TextStyle style = widget.style ?? themeData.textTheme.subhead;
     final TextEditingController controller = _effectiveController;
     final FocusNode focusNode = _effectiveFocusNode;
-    final List<TextInputFormatter> formatters =
-        widget.inputFormatters ?? <TextInputFormatter>[];
+    final List<TextInputFormatter> formatters = widget.inputFormatters ?? <TextInputFormatter>[];
     if (widget.maxLength != null && widget.maxLengthEnforced)
       formatters.add(new LengthLimitingTextInputFormatter(widget.maxLength));
 
@@ -492,7 +476,7 @@ class _TextFieldState extends State<TextField>
         keyboardType: widget.keyboardType,
         style: style,
         textAlign: widget.textAlign,
-        textDirection: widget.textDirection,
+		textDirection: widget.textDirection,
         autofocus: widget.autofocus,
         obscureText: widget.obscureText,
         autocorrect: widget.autocorrect,
@@ -512,7 +496,7 @@ class _TextFieldState extends State<TextField>
 
     if (widget.decoration != null) {
       child = new AnimatedBuilder(
-        animation: new Listenable.merge(<Listenable>[focusNode, controller]),
+        animation: new Listenable.merge(<Listenable>[ focusNode, controller ]),
         builder: (BuildContext context, Widget child) {
           return new InputDecorator(
             decoration: _getEffectiveDecoration(),
@@ -529,14 +513,8 @@ class _TextFieldState extends State<TextField>
 
     return new Semantics(
       onTap: () {
-<<<<<<< HEAD
-        if (!_controller.selection.isValid)
-          _controller.selection =
-              new TextSelection.collapsed(offset: _controller.text.length);
-=======
         if (!_effectiveController.selection.isValid)
           _effectiveController.selection = new TextSelection.collapsed(offset: _effectiveController.text.length);
->>>>>>> a2d1d27f79674adb85773d6b836b2034dfa4bdc4
         _requestKeyboard();
       },
       child: new IgnorePointer(

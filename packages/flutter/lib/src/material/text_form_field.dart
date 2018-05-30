@@ -57,7 +57,7 @@ class TextFormField extends FormField<String> {
     TextInputType keyboardType: TextInputType.text,
     TextStyle style,
     TextAlign textAlign: TextAlign.start,
-    TextDirection textDirection,
+	TextDirection textDirection : TextDirection.ltr,
     bool autofocus: false,
     bool obscureText: false,
     bool autocorrect: true,
@@ -70,50 +70,47 @@ class TextFormField extends FormField<String> {
     FormFieldValidator<String> validator,
     List<TextInputFormatter> inputFormatters,
     bool enabled,
-  })  : assert(initialValue == null || controller == null),
-        assert(keyboardType != null),
-        assert(textAlign != null),
-        assert(autofocus != null),
-        assert(obscureText != null),
-        assert(autocorrect != null),
-        assert(autovalidate != null),
-        assert(maxLengthEnforced != null),
-        assert(maxLines == null || maxLines > 0),
-        assert(maxLength == null || maxLength > 0),
-        super(
-          key: key,
-          initialValue:
-              controller != null ? controller.text : (initialValue ?? ''),
-          onSaved: onSaved,
-          validator: validator,
-          autovalidate: autovalidate,
-          builder: (FormFieldState<String> field) {
-            final _TextFormFieldState state = field;
-            final InputDecoration effectiveDecoration = (decoration ??
-                    const InputDecoration())
-                .applyDefaults(Theme.of(field.context).inputDecorationTheme);
-            return new TextField(
-              controller: state._effectiveController,
-              focusNode: focusNode,
-              decoration:
-                  effectiveDecoration.copyWith(errorText: field.errorText),
-              keyboardType: keyboardType,
-              style: style,
-              textAlign: textAlign,
-              textDirection: textDirection,
-              autofocus: autofocus,
-              obscureText: obscureText,
-              autocorrect: autocorrect,
-              maxLengthEnforced: maxLengthEnforced,
-              maxLines: maxLines,
-              maxLength: maxLength,
-              onChanged: field.didChange,
-              onSubmitted: onFieldSubmitted,
-              inputFormatters: inputFormatters,
-              enabled: enabled,
-            );
-          },
-        );
+  }) : assert(initialValue == null || controller == null),
+       assert(keyboardType != null),
+       assert(textAlign != null),
+       assert(autofocus != null),
+       assert(obscureText != null),
+       assert(autocorrect != null),
+       assert(autovalidate != null),
+       assert(maxLengthEnforced != null),
+       assert(maxLines == null || maxLines > 0),
+       assert(maxLength == null || maxLength > 0),
+       super(
+    key: key,
+    initialValue: controller != null ? controller.text : (initialValue ?? ''),
+    onSaved: onSaved,
+    validator: validator,
+    autovalidate: autovalidate,
+    builder: (FormFieldState<String> field) {
+      final _TextFormFieldState state = field;
+      final InputDecoration effectiveDecoration = (decoration ?? const InputDecoration())
+        .applyDefaults(Theme.of(field.context).inputDecorationTheme);
+      return new TextField(
+        controller: state._effectiveController,
+        focusNode: focusNode,
+        decoration: effectiveDecoration.copyWith(errorText: field.errorText),
+        keyboardType: keyboardType,
+        style: style,
+        textAlign: textAlign,
+		textDirection: textDirection,
+        autofocus: autofocus,
+        obscureText: obscureText,
+        autocorrect: autocorrect,
+        maxLengthEnforced: maxLengthEnforced,
+        maxLines: maxLines,
+        maxLength: maxLength,
+        onChanged: field.didChange,
+        onSubmitted: onFieldSubmitted,
+        inputFormatters: inputFormatters,
+        enabled: enabled,
+      );
+    },
+  );
 
   /// Controls the text being edited.
   ///
@@ -128,8 +125,7 @@ class TextFormField extends FormField<String> {
 class _TextFormFieldState extends FormFieldState<String> {
   TextEditingController _controller;
 
-  TextEditingController get _effectiveController =>
-      widget.controller ?? _controller;
+  TextEditingController get _effectiveController => widget.controller ?? _controller;
 
   @override
   TextFormField get widget => super.widget;
@@ -152,11 +148,11 @@ class _TextFormFieldState extends FormFieldState<String> {
       widget.controller?.addListener(_handleControllerChanged);
 
       if (oldWidget.controller != null && widget.controller == null)
-        _controller =
-            new TextEditingController.fromValue(oldWidget.controller.value);
+        _controller = new TextEditingController.fromValue(oldWidget.controller.value);
       if (widget.controller != null) {
         setValue(widget.controller.text);
-        if (oldWidget.controller == null) _controller = null;
+        if (oldWidget.controller == null)
+          _controller = null;
       }
     }
   }
