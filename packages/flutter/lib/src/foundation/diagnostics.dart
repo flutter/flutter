@@ -1661,7 +1661,7 @@ class ObjectFlagProperty<T> extends DiagnosticsProperty<T> {
 /// May throw exception if accessing the property would throw an exception
 /// and callers must handle that case gracefully. For example, accessing a
 /// property may trigger an assert that layout constraints were violated.
-typedef T ComputePropertyValueCallback<T>();
+typedef ComputePropertyValueCallback<T> = T Function();
 
 /// Property with a [value] of type [T].
 ///

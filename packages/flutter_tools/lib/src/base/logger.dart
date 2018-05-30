@@ -53,7 +53,7 @@ abstract class Logger {
   });
 }
 
-typedef void _FinishCallback();
+typedef _FinishCallback = void Function();
 
 class StdoutLogger extends Logger {
 

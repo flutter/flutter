@@ -10,7 +10,7 @@ enum GridDemoTileStyle {
   twoLine
 }
 
-typedef void BannerTapCallback(Photo photo);
+typedef BannerTapCallback = void Function(Photo photo);
 
 const double _kMinFlingVelocity = 800.0;
 const String _kGalleryAssetsPackage = 'flutter_gallery_assets';
