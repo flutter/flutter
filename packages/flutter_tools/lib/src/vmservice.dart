@@ -171,7 +171,7 @@ class VMService {
               expression, definitions, typeDefinitions, libraryUri, klass,
               isStatic);
           return <String, dynamic>{'type': 'Success',
-            'result': {'kernelBytes': kernelBytesBase64}};
+            'result': <String, dynamic> {'kernelBytes': kernelBytesBase64}};
         } on rpc.RpcException {
           rethrow;
         } catch (e, st) {
