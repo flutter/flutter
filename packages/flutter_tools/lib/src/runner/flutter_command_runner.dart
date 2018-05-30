@@ -71,10 +71,11 @@ class FlutterCommandRunner extends CommandRunner<Null> {
         negatable: true,
         hide: !verboseHelp,
         help: 'Whether to use terminal colors.');
-    argParser.addFlag('skip-version-check',
-        negatable: false,
+    argParser.addFlag('version-check',
+        negatable: true,
+        defaultsTo: true,
         hide: !verboseHelp,
-        help: 'Suppress version check when this command runs.');
+        help: 'Allow Flutter to check for updates when this command runs.');
     argParser.addFlag('suppress-analytics',
         negatable: false,
         hide: !verboseHelp,
@@ -284,7 +285,7 @@ class FlutterCommandRunner extends CommandRunner<Null> {
 
         _checkFlutterCopy();
         await FlutterVersion.instance.ensureVersionFile();
-        if (topLevelResults.command?.name != 'upgrade' && !topLevelResults['skip-version-check']) {
+        if (topLevelResults.command?.name != 'upgrade' && topLevelResults['version-check']) {
           await FlutterVersion.instance.checkFlutterVersionFreshness();
         }
 
