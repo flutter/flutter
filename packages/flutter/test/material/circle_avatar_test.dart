@@ -288,6 +288,65 @@ void main() {
     expect(border.left.width, equals(borderWidth));
   });
 
+  testWidgets('CircleAvatar renders border when hairline width is requested', (WidgetTester tester) async {
+    const Color backgroundColor = Colors.black;
+    const Color borderColor = Colors.white;
+    const double hairlineBorderWidth = 0.0; // hairline width
+    await tester.pumpWidget(
+      wrap(
+        child: const CircleAvatar(
+          backgroundColor: backgroundColor,
+          maxRadius: 50.0,
+          minRadius: 50.0,
+          child: const Text('Z'),
+          borderColor: borderColor,
+          borderWidth: hairlineBorderWidth,
+        ),
+      ),
+    );
+
+    final RenderConstrainedBox box = tester.renderObject(find.byType(CircleAvatar));
+    expect(box.size, equals(const Size(100.0, 100.0)));
+    final RenderDecoratedBox child = box.child;
+    final BoxDecoration decoration = child.decoration;
+
+    // Border check
+    expect(decoration.border is Border, isTrue);
+    final Border border = decoration.border;
+    expect(border.left.width, equals(hairlineBorderWidth));
+  });
+
+  testWidgets('CircleAvatar renders border when border width supplied and color is transparent', (WidgetTester tester) async {
+    const Color backgroundColor = Colors.black;
+    const Color borderColor = Colors.transparent;
+    const double borderWidth = 2.0;
+    await tester.pumpWidget(
+      wrap(
+        child: const CircleAvatar(
+          backgroundColor: backgroundColor,
+          maxRadius: 50.0,
+          minRadius: 50.0,
+          child: const Text('Z'),
+          borderColor: borderColor,
+          borderWidth: borderWidth,
+        ),
+      ),
+    );
+
+    final RenderConstrainedBox box = tester.renderObject(find.byType(CircleAvatar));
+    expect(box.size, equals(const Size(100.0, 100.0)));
+    final RenderDecoratedBox child = box.child;
+    final BoxDecoration decoration = child.decoration;
+
+    // Border check
+    expect(decoration.border is Border, isTrue);
+    final Border border = decoration.border;
+    expect(border.isUniform, isTrue);
+    // All sides are uniform so checking a single side is sufficient for all 4.
+    expect(border.left.color, equals(borderColor));
+    expect(border.left.width, equals(borderWidth));
+  });
+
   testWidgets('CircleAvatar has no border when border color supplied but border width is not', (WidgetTester tester) async {
     const Color backgroundColor = Colors.black;
     const Color borderColor = Colors.white;
@@ -299,30 +358,6 @@ void main() {
           minRadius: 50.0,
           child: const Text('Z'),
           borderColor: borderColor,
-        ),
-      ),
-    );
-
-    final RenderConstrainedBox box = tester.renderObject(find.byType(CircleAvatar));
-    expect(box.size, equals(const Size(100.0, 100.0)));
-    final RenderDecoratedBox child = box.child;
-    final BoxDecoration decoration = child.decoration;
-
-    // Border check
-    expect(decoration.border, isNull);
-  });
-
-  testWidgets('CircleAvatar has no border when border width supplied but border color is not', (WidgetTester tester) async {
-    const Color backgroundColor = Colors.black;
-    const double borderWidth = 2.0;
-    await tester.pumpWidget(
-      wrap(
-        child: const CircleAvatar(
-          backgroundColor: backgroundColor,
-          maxRadius: 50.0,
-          minRadius: 50.0,
-          child: const Text('Z'),
-          borderWidth: borderWidth,
         ),
       ),
     );

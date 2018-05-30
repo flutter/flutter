@@ -58,8 +58,8 @@ class CircleAvatar extends StatelessWidget {
     this.radius,
     this.minRadius,
     this.maxRadius,
-    this.borderColor = Colors.transparent,
-    this.borderWidth = 0.0,
+    this.borderColor: Colors.transparent,
+    this.borderWidth,
   })  : assert(radius == null || (minRadius == null && maxRadius == null)),
         super(key: key);
 
@@ -129,7 +129,7 @@ class CircleAvatar extends StatelessWidget {
 
   /// The border width of an optional border around the avatar.
   ///
-  /// Defaults to 0.0.
+  /// Defaults to null.
   final double borderWidth;
 
   // The default radius if nothing is specified.
@@ -156,7 +156,7 @@ class CircleAvatar extends StatelessWidget {
   }
 
   BoxBorder get _border {
-    if (borderColor == Colors.transparent || borderWidth == 0.0) {
+    if (borderWidth == null) {
       return null;
     }
     return new Border.all(
