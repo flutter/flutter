@@ -43,7 +43,7 @@ const FloatingActionButtonAnimator _kDefaultFloatingActionButtonAnimator = Float
 /// not end with a [Path.close]. The returned [Path] is built under the
 /// assumption it will be added to an existing path that is at the `start`
 /// coordinates using [Path.addPath].
-typedef Path ComputeNotch(Rect host, Rect guest, Offset start, Offset end);
+typedef ComputeNotch = Path Function(Rect host, Rect guest, Offset start, Offset end);
 
 enum _ScaffoldSlot {
   body,

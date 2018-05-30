@@ -223,10 +223,10 @@ abstract class ImplicitlyAnimatedWidget extends StatefulWidget {
 ///
 /// This is the type of one of the arguments of [TweenVisitor], the signature
 /// used by [AnimatedWidgetBaseState.forEachTween].
-typedef Tween<T> TweenConstructor<T>(T targetValue);
+typedef TweenConstructor<T> = Tween<T> Function(T targetValue);
 
 /// Signature for callbacks passed to [AnimatedWidgetBaseState.forEachTween].
-typedef Tween<T> TweenVisitor<T>(Tween<T> tween, T targetValue, TweenConstructor<T> constructor);
+typedef TweenVisitor<T> = Tween<T> Function(Tween<T> tween, T targetValue, TweenConstructor<T> constructor);
 
 /// A base class for widgets with implicit animations.
 ///

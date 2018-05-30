@@ -5380,7 +5380,7 @@ class Builder extends StatelessWidget {
 /// Signature for the builder callback used by [StatefulBuilder].
 ///
 /// Call [setState] to schedule the [StatefulBuilder] to rebuild.
-typedef Widget StatefulWidgetBuilder(BuildContext context, StateSetter setState);
+typedef StatefulWidgetBuilder = Widget Function(BuildContext context, StateSetter setState);
 
 /// A platonic widget that both has state and calls a closure to obtain its child widget.
 ///

@@ -41,7 +41,7 @@ class ParentData {
 /// of the [PaintingContext.canvas] to the coordinate system of the callee.
 ///
 /// Used by many of the methods of [PaintingContext].
-typedef void PaintingContextCallback(PaintingContext context, Offset offset);
+typedef PaintingContextCallback = void Function(PaintingContext context, Offset offset);
 
 /// A place to paint.
 ///
@@ -530,12 +530,12 @@ abstract class Constraints {
 /// Signature for a function that is called for each [RenderObject].
 ///
 /// Used by [RenderObject.visitChildren] and [RenderObject.visitChildrenForSemantics].
-typedef void RenderObjectVisitor(RenderObject child);
+typedef RenderObjectVisitor = void Function(RenderObject child);
 
 /// Signature for a function that is called during layout.
 ///
 /// Used by [RenderObject.invokeLayoutCallback].
-typedef void LayoutCallback<T extends Constraints>(T constraints);
+typedef LayoutCallback<T extends Constraints> = void Function(T constraints);
 
 /// A reference to the semantics tree.
 ///

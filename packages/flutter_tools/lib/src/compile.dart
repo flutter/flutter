@@ -17,7 +17,7 @@ import 'globals.dart';
 
 KernelCompiler get kernelCompiler => context[KernelCompiler];
 
-typedef void CompilerMessageConsumer(String message);
+typedef CompilerMessageConsumer = void Function(String message);
 
 class CompilerOutput {
   final String outputFilename;
