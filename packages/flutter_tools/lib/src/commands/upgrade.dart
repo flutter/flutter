@@ -80,7 +80,7 @@ class UpgradeCommand extends FlutterCommand {
     printStatus('Running flutter doctor...');
     code = await runCommandAndStreamOutput(
       <String>[
-        fs.path.join('bin', 'flutter'), 'doctor', '--no-version-check',
+        fs.path.join('bin', 'flutter'), '--no-version-check', 'doctor',
       ],
       workingDirectory: Cache.flutterRoot,
       allowReentrantFlutter: true,
