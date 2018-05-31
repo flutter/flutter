@@ -333,11 +333,16 @@ class GlobalObjectKey<T extends State<StatefulWidget>> extends GlobalKey<T> {
   }
 }
 
-/// This class is a work-around for the "is" operator not accepting a variable value as its right operand
+/// This class is a work-around for the "is" operator not accepting a variable
+/// value as its right operand, and for the fact that generics aren't valid type
+/// literals (e.g. "Type type = MyClass<int>;" is invalid).
 @optionalTypeArgs
 class TypeMatcher<T> {
   /// Creates a type matcher for the given type parameter.
   const TypeMatcher();
+
+  /// Returns the type object for the given type parameter.
+  Type get type => T;
 
   /// Returns true if the given object is of type `T`.
   bool check(dynamic object) => object is T;
