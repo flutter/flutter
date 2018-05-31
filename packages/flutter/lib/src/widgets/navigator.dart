@@ -551,6 +551,71 @@ class NavigatorObserver {
 /// because it doesn't depend on its animation parameters (elided with `_`
 /// and `__` in this example). The transition is built on every frame
 /// for its duration.
+///
+/// ### Embedding Navigators
+///
+/// An app can use more than one Navigator. Embedding one Navigator below
+/// another Navigator can result in an "inner journey" such as user
+/// registration, store checkout, or other independent journeys that represent
+/// a subsection of your overall application.
+///
+/// ```dart
+/// class MyApp extends StatelessWidget {
+///  @override
+///  Widget build(BuildContext context) {
+///    return new MaterialApp(
+///      //...some parameters omitted...//
+///      // MaterialApp contains our top-level Navigator
+///      initialRoute: '/',
+///      routes: {
+///        '/': (BuildContext context) => new HomePage(),
+///        '/signup': (BuildContext context) => new SignUpPage(),
+///      },
+///    );
+///  }
+/// }
+///
+/// class SignUpPage extends StatelessWidget {
+///  @override
+///  Widget build(BuildContext context) {
+///    // SignUpPage builds its own Navigator which ends up being an embedded
+///    // Navigator in our app.
+///    return new Navigator(
+///      initialRoute: 'signup/personal_info',
+///      onGenerateRoute: (RouteSettings settings) {
+///        WidgetBuilder builder;
+///        switch (settings.name) {
+///          case 'signup/personal_info':
+///            builder = (BuildContext _) => new CollectPersonalInfoPage();
+///            break;
+///          case 'signup/choose_credentials':
+///            builder = (BuildContext _) => new ChooseCredentialsPage(
+///              onSignupComplete: () {
+///                // Referencing Navigator.of(context) from here refers to the
+///                // top level Navigator because SignUpPage is above the
+///                // embedded Navigator that it created. Therefore, this pop()
+///                // will pop the entire "sign up" journey and return to the
+///                // "/" route, AKA HomePage.
+///                Navigator.of(context).pop();
+///              },
+///            );
+///            break;
+///          default:
+///            throw new Exception('Invalid route: ${settings.name}');
+///        }
+///        return new MaterialPageRoute(builder: builder, settings: settings);
+///      },
+///    );
+///  }
+/// }
+/// ```
+///
+/// Take care to call the correct `Navigator` in your hierarchy. `Navigator.of()`
+/// finds the nearest `Navigator` ancestor from the `context` that you provide.
+/// If you define embedded `Navigator`s in one large `build()` method then you
+/// are likely passing the wrong `context` and will therefore retrieve the
+/// `Navigator` above the one that you want. See [insert link] for more
+/// information about managing multiple `Context`s.
 class Navigator extends StatefulWidget {
   /// Creates a widget that maintains a stack-based history of child widgets.
   ///
