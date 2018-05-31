@@ -18,7 +18,7 @@
 namespace flow {
 
 void RasterCacheResult::draw(SkCanvas& canvas) const {
-  SkAutoCanvasRestore auto_restore(&canvas, false);
+  SkAutoCanvasRestore auto_restore(&canvas, true);
   SkIRect bounds =
       RasterCache::GetDeviceBounds(logical_rect_, canvas.getTotalMatrix());
   FXL_DCHECK(bounds.size() == image_->dimensions());
