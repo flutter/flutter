@@ -1124,7 +1124,7 @@ class RenderBaseline extends RenderShiftedBox {
   RenderBaseline({
     RenderBox child,
     @required double baseline,
-    @required TextBaseline baselineType
+    @required TextBaseline baselineType,
   }) : assert(baseline != null),
        assert(baselineType != null),
        _baseline = baseline,
