@@ -4755,13 +4755,10 @@ class Listener extends SingleChildRenderObjectWidget {
 /// the surrounding parts of the tree.
 ///
 /// This is useful since [RenderObject.paint] may be triggered even if its
-/// associated [Widget] instances' did not change or rebuild. A [RenderObject]
+/// associated [Widget] instances did not change or rebuild. A [RenderObject]
 /// will repaint whenever any [RenderObject] that shares the same [Layer] is
-/// marked as being dirty and needing paint (see [RenderObject.markNeedsPaint]).
-///
-/// such as when an
-/// ancestor scrolls or when an ancestor or descendent's widget is going through
-/// an animation.
+/// marked as being dirty and needing paint (see [RenderObject.markNeedsPaint]),
+/// such as when an ancestor scrolls or when an ancestor or descendant animates.
 ///
 /// Containing [RenderObject.paint] to parts of the render subtree that are
 /// actually visually changing using [RepaintBoundary] explicitly or implicitly
@@ -4770,11 +4767,11 @@ class Listener extends SingleChildRenderObjectWidget {
 /// [debugRepaintRainbowEnabled] or [debugProfilePaintsEnabled].
 ///
 /// When a [RenderObject] is flagged as needing to paint via
-/// [RenderObject.markNeedsPaint], the nearest ancestor [RenderObject] up to
-/// possibly the root of the application with [RenderObject.isRepaintBoundary]
-/// is alerted to repaint. That nearest ancestor's repaint process will cause
-/// _all_ of its descendent [RenderObject]s to repaint in the absence of any
-/// [RepaintBoundary].
+/// [RenderObject.markNeedsPaint], the nearest ancestor [RenderObject] with
+/// [RenderObject.isRepaintBoundary], up to possibly the root of the application,
+/// is requested to repaint. That nearest ancestor's [RenderObject.paint] method
+/// will cause _all_ of its descendant [RenderObject]s to repaint in the same
+/// layer.
 ///
 /// [RepaintBoundary] is therefore used both while propagating the
 /// `markNeedsPaint` flag up the render tree and while traversing down the
@@ -4784,15 +4781,6 @@ class Listener extends SingleChildRenderObjectWidget {
 /// has a [Layer], decoupling ancestor render objects from the descendant
 /// render objects.
 ///
-/// The upward propagation of the `markNeedsPaint` flag will stop when a
-/// [RepaintBoundary]'s render object is reached. The repainting children can
-/// re-record its display list without re-recording the display list for the
-/// surround tree.
-///
-/// While traversing down, the repainting ancestor can re-use the display list
-/// we recorded previously on descendents behind a [RepaintBoundary], stopping
-/// the repaint traversal beyond that subtree branch.
-///
 /// [RepaintBoundary] has the further side-effect of possibly hinting the engine
 /// to further optimize animation performance when the render subtree behind the
 /// [RepaintBoundary] is sufficiently complex and is static while the surrounding
@@ -4800,12 +4788,12 @@ class Listener extends SingleChildRenderObjectWidget {
 /// time cost of rasterizing and caching the pixel values of the subtree for
 /// faster future GPU re-rendering speed.
 ///
-/// The [RepaintBoundary] is also automatically inserted by the framework in
+/// The [RepaintBoundary] is automatically inserted by the framework in
 /// widgets that are likely to mark natural separation points in apps. For
-/// instance, contents in Material Design drawers typically don't change during
-/// the drawer toggle. So repaints are automatically contained inside the drawer
-/// or outside the drawer when using the [Drawer] widget during toggle
-/// transitions.
+/// instance, contents in Material Design drawers typically don't change while
+/// the drawer opens and closes. So repaints are automatically contained
+/// to regions inside or outside the drawer when using the [Drawer] widget
+/// during transitions.
 class RepaintBoundary extends SingleChildRenderObjectWidget {
   /// Creates a widget that isolates repaints.
   const RepaintBoundary({ Key key, Widget child }) : super(key: key, child: child);
