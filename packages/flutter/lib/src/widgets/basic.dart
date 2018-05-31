@@ -143,11 +143,25 @@ class Directionality extends InheritedWidget {
 /// This is more efficient than adding and removing the child widget from the
 /// tree on demand.
 ///
+/// ## Opacity Animation
+///
+/// `Opacity` animations should be built using [AnimatedOpacity] rather than
+/// manually updating the `Opacity` Widget.
+///
+/// The 'Opacity' Widget rebuilds its subtree every frame of an animation.
+/// [AnimatedOpacity] uses a [RenderAnimatedOpacity] internally which listens
+/// directly to an `Animation` so that the Widget tree below the
+/// `AnimatedOpacity` is not rebuilt every frame.
+///
 /// See also:
 ///
 ///  * [ShaderMask], which can apply more elaborate effects to its child.
 ///  * [Transform], which applies an arbitrary transform to its child widget at
 ///    paint time.
+///  * [AnimatedOpacity], which efficiently animates opacity at the Widget
+///    level.
+///  * [RenderAnimatedOpacity], which efficiently animates opacity at the render
+///    tree level.
 class Opacity extends SingleChildRenderObjectWidget {
   /// Creates a widget that makes its child partially transparent.
   ///
