@@ -528,8 +528,8 @@ class _RefreshProgressIndicatorState extends _CircularProgressIndicatorState {
   Widget build(BuildContext context) {
     if (widget.value != null)
       _controller.value = widget.value / 10.0;
-    else
-      _controller.forward();
+    else if (!_controller.isAnimating)
+      _controller.repeat();
     return _buildAnimation();
   }
 

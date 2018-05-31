@@ -16,6 +16,9 @@ import 'package:test/test.dart';
 import '../src/common.dart';
 import '../src/context.dart';
 
+/// Test case timeout for tests involving project analysis.
+const Timeout allowForSlowAnalyzeTests = const Timeout.factor(5.0);
+
 void main() {
   final String analyzerSeparator = platform.isWindows ? '-' : '•';
 
@@ -60,7 +63,7 @@ void main() {
         arguments: <String>['analyze'],
         statusTextContains: <String>['No issues found!'],
       );
-    }, timeout: const Timeout.factor(2.0));
+    }, timeout: allowForSlowAnalyzeTests);
 
     // Analyze a specific file outside the current directory
     testUsingContext('passing one file throws', () async {
@@ -102,7 +105,7 @@ void main() {
         ],
         toolExit: true,
       );
-    }, timeout: const Timeout.factor(2.0));
+    }, timeout: allowForSlowAnalyzeTests);
 
     // Analyze in the current directory - no arguments
     testUsingContext('working directory with local options', () async {
@@ -129,7 +132,7 @@ void main() {
         ],
         toolExit: true,
       );
-    }, timeout: const Timeout.factor(2.0));
+    }, timeout: allowForSlowAnalyzeTests);
 
     testUsingContext('no duplicate issues', () async {
       final Directory tempDir = fs.systemTempDirectory.createTempSync('analyze_once_test_').absolute;

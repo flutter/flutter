@@ -11,7 +11,9 @@ import 'package:meta/meta.dart';
 
 import 'assertions.dart';
 import 'basic_types.dart';
+import 'debug.dart';
 import 'platform.dart';
+import 'print.dart';
 
 /// Signature for service extensions.
 ///
@@ -363,6 +365,11 @@ abstract class BindingBase {
     final String methodName = 'ext.flutter.$name';
     developer.registerExtension(methodName, (String method, Map<String, String> parameters) async {
       assert(method == methodName);
+      assert(() {
+        if (debugInstrumentationEnabled)
+          debugPrint('service extension method received: $method($parameters)');
+        return true;
+      }());
 
       // VM service extensions are handled as "out of band" messages by the VM,
       // which means they are handled at various times, generally ASAP.
@@ -374,7 +381,9 @@ abstract class BindingBase {
       // the possibility that they're handled in the middle of a frame, which
       // breaks many assertions. As such, we ensure they we run the callbacks
       // on the outer event loop here.
-      await new Future<void>.delayed(Duration.zero);
+      await debugInstrumentAction<void>('Wait for outer event loop', () {
+        return new Future<void>.delayed(Duration.zero);
+      });
 
       dynamic caughtException;
       StackTrace caughtStack;

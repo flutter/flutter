@@ -209,7 +209,8 @@ void main() {
           notifyingLogger: notifyingLogger,
       );
 
-      final Map<String, dynamic> response = await responses.stream.first;
+      final Map<String, dynamic> response =
+        await responses.stream.skipWhile(_isConnectedEvent).first;
       expect(response['event'], 'daemon.showMessage');
       expect(response['params'], isMap);
       expect(response['params'], containsPair('level', 'warning'));
@@ -249,7 +250,7 @@ void main() {
       daemon.deviceDomain.addDeviceDiscoverer(discoverer);
       discoverer.addDevice(new MockAndroidDevice());
 
-      return responses.stream.first.then((Map<String, dynamic> response) {
+      return responses.stream.skipWhile(_isConnectedEvent).first.then((Map<String, dynamic> response) {
         expect(response['event'], 'device.added');
         expect(response['params'], isMap);
 
@@ -321,6 +322,8 @@ void main() {
 }
 
 bool _notEvent(Map<String, dynamic> map) => map['event'] == null;
+
+bool _isConnectedEvent(Map<String, dynamic> map) => map['event'] == 'daemon.connected';
 
 class MockAndroidWorkflow extends AndroidWorkflow {
   MockAndroidWorkflow({ this.canListDevices: true });

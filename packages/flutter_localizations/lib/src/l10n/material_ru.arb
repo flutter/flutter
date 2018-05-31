@@ -41,5 +41,6 @@
   "drawerLabel": "Меню навигации",
   "popupMenuLabel": "Всплывающее меню",
   "dialogLabel": "Диалоговое окно",
-  "alertDialogLabel": "бдительный"
+  "alertDialogLabel": "бдительный",
+  "searchFieldLabel": "Поиск"
 }

@@ -39,5 +39,6 @@
   "drawerLabel": "Menu navigasi",
   "popupMenuLabel": "Menu pop timbul",
   "dialogLabel": "Dialog",
-  "alertDialogLabel": "Amaran"
+  "alertDialogLabel": "Amaran",
+  "searchFieldLabel": "Carian"
 }

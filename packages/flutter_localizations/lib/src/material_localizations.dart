@@ -16,7 +16,7 @@ import 'widgets_localizations.dart';
 
 // Watch out: the supported locales list in the doc comment below must be kept
 // in sync with the list we test, see test/translations_test.dart, and of course
-// the acutal list of supported locales in _MaterialLocalizationsDelegate.
+// the actual list of supported locales in _MaterialLocalizationsDelegate.
 
 /// Localized strings for the material widgets.
 ///
@@ -267,6 +267,9 @@ class GlobalMaterialLocalizations implements MaterialLocalizations {
 
   @override
   String get alertDialogLabel => _translationBundle.alertDialogLabel;
+
+  @override
+  String get searchFieldLabel => _translationBundle.searchFieldLabel;
 
   @override
   String aboutListTileTitle(String applicationName) {
