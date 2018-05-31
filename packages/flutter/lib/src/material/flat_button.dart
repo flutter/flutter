@@ -290,7 +290,7 @@ class FlatButton extends StatelessWidget {
       splashColor: _getSplashColor(theme, buttonTheme),
       elevation: 0.0,
       highlightElevation: 0.0,
-      outerPadding: const EdgeInsets.only(top: 6.0, bottom: 6.0),
+      outerConstraints: const BoxConstraints(minHeight: 48.0),
       padding: padding ?? buttonTheme.padding,
       constraints: buttonTheme.constraints,
       shape: shape ?? buttonTheme.shape,

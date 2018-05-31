@@ -268,7 +268,7 @@ class _FloatingActionButtonState extends State<FloatingActionButton> {
       onHighlightChanged: _handleHighlightChanged,
       elevation: _highlight ? widget.highlightElevation : widget.elevation,
       constraints: widget._sizeConstraints,
-      outerPadding: widget.mini ? const EdgeInsets.all(4.0) : null,
+      outerConstraints: widget.mini ? const BoxConstraints(minHeight: 48.0, minWidth: 48.0) : null,
       fillColor: widget.backgroundColor ?? theme.accentColor,
       textStyle: theme.accentTextTheme.button.copyWith(
         color: foregroundColor,

@@ -38,7 +38,7 @@ class RawMaterialButton extends StatefulWidget {
     this.elevation: 2.0,
     this.highlightElevation: 8.0,
     this.disabledElevation: 0.0,
-    this.outerPadding,
+    this.outerConstraints,
     this.padding: EdgeInsets.zero,
     this.constraints: const BoxConstraints(minWidth: 88.0, minHeight: 36.0),
     this.shape: const RoundedRectangleBorder(),
@@ -60,7 +60,7 @@ class RawMaterialButton extends StatefulWidget {
 
   /// Padding to increase the size of the gesture detector which doesn't
   /// increase the visible material of the button.
-  final EdgeInsets outerPadding;
+  final BoxConstraints outerConstraints;
 
   /// Called by the underlying [InkWell] widget's [InkWell.onHighlightChanged]
   /// callback.
@@ -187,14 +187,18 @@ class _RawMaterialButtonState extends State<RawMaterialButton> {
       ),
     );
 
-    if (widget.outerPadding != null) {
-      result = new GestureDetector(
-        behavior: HitTestBehavior.translucent,
-        excludeFromSemantics: true,
-        onTap: widget.onPressed,
-        child: new Padding(
-          padding: widget.outerPadding,
-          child: result
+    if (widget.outerConstraints != null) {
+      result = new ConstrainedBox(
+        constraints: widget.outerConstraints,
+        child: new GestureDetector(
+          behavior: HitTestBehavior.translucent,
+          excludeFromSemantics: true,
+          onTap: widget.onPressed,
+          child: new Center(
+            child: result,
+            widthFactor: 1.0,
+            heightFactor: 1.0,
+          ),
         ),
       );
     }
