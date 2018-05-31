@@ -1,4 +1,4 @@
-Signature: fb0171540ffdf635ec6662dfebb0bff1
+Signature: 4f70d46ccf69a2097702f43b31412881
 
 UNUSED LICENSES:
 
@@ -14358,6 +14358,7 @@ FILE: ../../../third_party/skia/include/private/GrSingleOwner.h
 FILE: ../../../third_party/skia/include/private/GrSurfaceProxy.h
 FILE: ../../../third_party/skia/include/private/GrSwizzle.h
 FILE: ../../../third_party/skia/include/private/GrTextureProxy.h
+FILE: ../../../third_party/skia/include/private/SkArenaAlloc.h
 FILE: ../../../third_party/skia/include/private/SkBitmaskEnum.h
 FILE: ../../../third_party/skia/include/private/SkEncodedInfo.h
 FILE: ../../../third_party/skia/include/private/SkLeanWindows.h
@@ -14385,7 +14386,6 @@ FILE: ../../../third_party/skia/src/core/SkATrace.cpp
 FILE: ../../../third_party/skia/src/core/SkATrace.h
 FILE: ../../../third_party/skia/src/core/SkAnnotationKeys.h
 FILE: ../../../third_party/skia/src/core/SkArenaAlloc.cpp
-FILE: ../../../third_party/skia/src/core/SkArenaAlloc.h
 FILE: ../../../third_party/skia/src/core/SkAutoMalloc.h
 FILE: ../../../third_party/skia/src/core/SkAutoPixmapStorage.cpp
 FILE: ../../../third_party/skia/src/core/SkAutoPixmapStorage.h
@@ -17178,6 +17178,8 @@ FILE: ../../../third_party/skia/include/effects/SkShaderMaskFilter.h
 FILE: ../../../third_party/skia/include/effects/SkTrimPathEffect.h
 FILE: ../../../third_party/skia/include/gpu/GrDriverBugWorkarounds.h
 FILE: ../../../third_party/skia/include/gpu/vk/GrVkMemoryAllocator.h
+FILE: ../../../third_party/skia/include/private/GrCCClipPath.h
+FILE: ../../../third_party/skia/include/private/GrCCPerOpListPaths.h
 FILE: ../../../third_party/skia/include/private/GrSurfaceProxyRef.h
 FILE: ../../../third_party/skia/include/private/GrVkTypesPriv.h
 FILE: ../../../third_party/skia/include/private/SkSafe32.h
@@ -17249,7 +17251,6 @@ FILE: ../../../third_party/skia/src/gpu/GrSurfaceProxyRef.cpp
 FILE: ../../../third_party/skia/src/gpu/GrUninstantiateProxyTracker.cpp
 FILE: ../../../third_party/skia/src/gpu/GrUninstantiateProxyTracker.h
 FILE: ../../../third_party/skia/src/gpu/ccpr/GrCCClipPath.cpp
-FILE: ../../../third_party/skia/src/gpu/ccpr/GrCCClipPath.h
 FILE: ../../../third_party/skia/src/gpu/ccpr/GrCCConicShader.cpp
 FILE: ../../../third_party/skia/src/gpu/ccpr/GrCCConicShader.h
 FILE: ../../../third_party/skia/src/gpu/ccpr/GrCCDrawPathsOp.cpp
@@ -17673,6 +17674,7 @@ FILE: ../../../third_party/skia/infra/bots/recipes/skpbench.expected/Perf-Androi
 FILE: ../../../third_party/skia/infra/bots/recipes/skpbench.expected/Perf-Android-Clang-PixelC-GPU-TegraX1-arm64-Release-All-Android_Skpbench.json
 FILE: ../../../third_party/skia/infra/bots/recipes/skpbench.expected/Perf-Android-Clang-PixelC-GPU-TegraX1-arm64-Release-All-Android_Vulkan_Skpbench.json
 FILE: ../../../third_party/skia/infra/bots/recipes/skpbench.expected/Perf-Win10-Clang-Golo-GPU-QuadroP400-x86_64-Release-All-Vulkan_Skpbench.json
+FILE: ../../../third_party/skia/infra/bots/recipes/skpbench.expected/Perf-Win10-Clang-Golo-GPU-QuadroP400-x86_64-Release-All-Vulkan_Skpbench_DDLRecord_9x9.json
 FILE: ../../../third_party/skia/infra/bots/recipes/skpbench.expected/Perf-Win10-Clang-Golo-GPU-QuadroP400-x86_64-Release-All-Vulkan_Skpbench_DDLTotal_9x9.json
 FILE: ../../../third_party/skia/infra/bots/recipes/skpbench.expected/trybot.json
 FILE: ../../../third_party/skia/infra/bots/recipes/skqp_test.expected/Test-Debian9-Clang-GCE-CPU-AVX2-universal-devrel-All-Android_SKQP.json
@@ -18213,7 +18215,6 @@ FILE: ../../../third_party/skia/bench/RotatedRectBench.cpp
 FILE: ../../../third_party/skia/bench/SKPBench.cpp
 FILE: ../../../third_party/skia/bench/SKPBench.h
 FILE: ../../../third_party/skia/bench/nanobench.cpp
-FILE: ../../../third_party/skia/dm/DMGpuSupport.h
 FILE: ../../../third_party/skia/dm/DMJsonWriter.cpp
 FILE: ../../../third_party/skia/dm/DMJsonWriter.h
 FILE: ../../../third_party/skia/gm/aaa.cpp
@@ -18504,6 +18505,7 @@ FILE: ../../../third_party/skia/include/gpu/gl/GrGLFunctions.h
 FILE: ../../../third_party/skia/include/pathops/SkPathOps.h
 FILE: ../../../third_party/skia/include/private/SkChecksum.h
 FILE: ../../../third_party/skia/include/private/SkPathRef.h
+FILE: ../../../third_party/skia/include/private/SkTInternalLList.h
 FILE: ../../../third_party/skia/include/private/SkWeakRefCnt.h
 FILE: ../../../third_party/skia/include/utils/SkNullCanvas.h
 FILE: ../../../third_party/skia/samplecode/SampleAnimBlur.cpp
@@ -18528,7 +18530,6 @@ FILE: ../../../third_party/skia/src/core/SkRTree.cpp
 FILE: ../../../third_party/skia/src/core/SkRTree.h
 FILE: ../../../third_party/skia/src/core/SkReadBuffer.cpp
 FILE: ../../../third_party/skia/src/core/SkStrokeRec.cpp
-FILE: ../../../third_party/skia/src/core/SkTInternalLList.h
 FILE: ../../../third_party/skia/src/core/SkTLList.h
 FILE: ../../../third_party/skia/src/core/SkTLS.cpp
 FILE: ../../../third_party/skia/src/core/SkTLS.h
