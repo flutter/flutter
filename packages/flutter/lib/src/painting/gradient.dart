@@ -440,12 +440,23 @@ class LinearGradient extends Gradient {
 /// abstracts out the arguments to the [new ui.Gradient.radial] constructor from
 /// the `dart:ui` library.
 ///
-/// A gradient has a [center] and a [radius]. The [center] point corresponds to
-/// 0.0, and the ring at [radius] from the center corresponds to 1.0. These
-/// lengths are expressed in fractions, so that the same gradient can be reused
-/// with varying sized boxes without changing the parameters. (This contrasts
-/// with [new ui.Gradient.radial], whose arguments are expressed in logical
-/// pixels.)
+/// A normal radial gradient has a [center] and a [radius]. The [center] point
+/// corresponds to 0.0, and the ring at [radius] from the center corresponds
+/// to 1.0. These lengths are expressed in fractions, so that the same gradient
+/// can be reused with varying sized boxes without changing the parameters. 
+/// (This contrasts with [new ui.Gradient.radial], whose arguments are expressed
+/// in logical pixels.)
+/// 
+/// It is also possible to create a two-point (or focal pointed) radial gradient
+/// (which is sometimes referred to as a two point conic gradient, but is not the
+/// same as a CSS conic gradient which corresponds to a [SweepGradient]). A [focal]
+/// point and [focalRadius] can be specified similarly to [center] and [radius],
+/// which will make the rendered gradient appear to be pointed or directed in the
+/// direction of the [focal] point. This is only important if [focal] and [center]
+/// are not equal or [focalRadius] > 0.0 (as this case is visually identical to a
+/// normal radial gradient).  One important case to avoid is having [focal] and 
+/// [center] both resolve to [Offset.zero] when [focalRadius] > 0.0. In such a case,
+/// a valid shader cannot be created by the framework.
 ///
 /// The [colors] are described by a list of [Color] objects. There must be at
 /// least two colors. The [stops] list, if specified, must have the same length
@@ -502,9 +513,12 @@ class RadialGradient extends Gradient {
     @required List<Color> colors,
     List<double> stops,
     this.tileMode: TileMode.clamp,
+    this.focal,
+    this.focalRadius: 0.0
   }) : assert(center != null),
        assert(radius != null),
        assert(tileMode != null),
+       assert(focalRadius != null),
        super(colors: colors, stops: stops);
 
   /// The center of the gradient, as an offset into the (-1.0, -1.0) x (1.0, 1.0)
@@ -539,7 +553,33 @@ class RadialGradient extends Gradient {
   /// ![](https://flutter.github.io/assets-for-api-docs/assets/dart-ui/tile_mode_clamp_radial.png)
   /// ![](https://flutter.github.io/assets-for-api-docs/assets/dart-ui/tile_mode_mirror_radial.png)
   /// ![](https://flutter.github.io/assets-for-api-docs/assets/dart-ui/tile_mode_repeated_radial.png)
+  /// 
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/dart-ui/tile_mode_clamp_radialWithFocal.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/dart-ui/tile_mode_mirror_radialWithFocal.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/dart-ui/tile_mode_repeated_radialWithFocal.png)
   final TileMode tileMode;
+
+  /// The focal point of the gradient.  If specified, the gradient will appear
+  /// to be focused along the vector from [center] to focal. 
+  /// 
+  /// See [center] for a description of how the coordinates are mapped.
+  /// 
+  /// If this value is specified and [focalRadius] > 0.0, care should be taken
+  /// to ensure that either this value or [center] will not both resolve to
+  /// [Offset.zero], which would fail to create a valid gradient.
+  final AlignmentGeometry focal;
+
+  /// The radius of the focal point of gradient, as a fraction of the shortest
+  /// side of the paint box.
+  ///
+  /// For example, if a radial gradient is painted on a box that is
+  /// 100.0 pixels wide and 200.0 pixels tall, then a radius of 1.0
+  /// will place the 1.0 stop at 100.0 pixels from the [focus].
+  /// 
+  /// If this value is specified and is greater than 0.0, either [focal] or
+  /// [center] must not resolve to [Offset.zero], which would fail to create
+  /// a valid gradient.
+  final double focalRadius;
 
   @override
   Shader createShader(Rect rect, { TextDirection textDirection }) {
@@ -547,6 +587,9 @@ class RadialGradient extends Gradient {
       center.resolve(textDirection).withinRect(rect),
       radius * rect.shortestSide,
       colors, _impliedStops(), tileMode,
+      null, // transform
+      focal == null  ? null : focal.resolve(textDirection).withinRect(rect),
+      focalRadius * rect.shortestSide,
     );
   }
 
@@ -562,6 +605,8 @@ class RadialGradient extends Gradient {
       colors: colors.map<Color>((Color color) => Color.lerp(null, color, factor)).toList(),
       stops: stops,
       tileMode: tileMode,
+      focal: focal,
+      focalRadius: focalRadius
     );
   }
 
@@ -613,6 +658,8 @@ class RadialGradient extends Gradient {
       colors: interpolated.colors,
       stops: interpolated.stops,
       tileMode: t < 0.5 ? a.tileMode : b.tileMode, // TODO(ianh): interpolate tile mode
+      focal: AlignmentGeometry.lerp(a.focal, b.focal, t),
+      focalRadius: math.max(0.0, ui.lerpDouble(a.focalRadius, b.focalRadius, t)),
     );
   }
 
@@ -627,7 +674,9 @@ class RadialGradient extends Gradient {
         radius != typedOther.radius ||
         tileMode != typedOther.tileMode ||
         colors?.length != typedOther.colors?.length ||
-        stops?.length != typedOther.stops?.length)
+        stops?.length != typedOther.stops?.length ||
+        focal != typedOther.focal ||
+        focalRadius != typedOther.focalRadius)
       return false;
     if (colors != null) {
       assert(typedOther.colors != null);
@@ -649,11 +698,11 @@ class RadialGradient extends Gradient {
   }
 
   @override
-  int get hashCode => hashValues(center, radius, tileMode, hashList(colors), hashList(stops));
+  int get hashCode => hashValues(center, radius, tileMode, hashList(colors), hashList(stops), focal, focalRadius);
 
   @override
   String toString() {
-    return '$runtimeType($center, $radius, $colors, $stops, $tileMode)';
+    return '$runtimeType($center, $radius, $colors, $stops, $tileMode, $focal, $focalRadius)';
   }
 }
 
