@@ -552,10 +552,10 @@ class NavigatorObserver {
 /// and `__` in this example). The transition is built on every frame
 /// for its duration.
 ///
-/// ### Embedding Navigators
+/// ### Nesting Navigators
 ///
-/// An app can use more than one Navigator. Embedding one Navigator below
-/// another Navigator can result in an "inner journey" such as user
+/// An app can use more than one Navigator. Nesting one Navigator below
+/// another Navigator can be used to create an "inner journey" such as user
 /// registration, store checkout, or other independent journeys that represent
 /// a subsection of your overall application.
 ///
@@ -564,7 +564,7 @@ class NavigatorObserver {
 ///  @override
 ///  Widget build(BuildContext context) {
 ///    return new MaterialApp(
-///      //...some parameters omitted...//
+///      // ...some parameters omitted...
 ///      // MaterialApp contains our top-level Navigator
 ///      initialRoute: '/',
 ///      routes: {
@@ -578,7 +578,7 @@ class NavigatorObserver {
 /// class SignUpPage extends StatelessWidget {
 ///  @override
 ///  Widget build(BuildContext context) {
-///    // SignUpPage builds its own Navigator which ends up being an embedded
+///    // SignUpPage builds its own Navigator which ends up being a nested
 ///    // Navigator in our app.
 ///    return new Navigator(
 ///      initialRoute: 'signup/personal_info',
@@ -593,7 +593,7 @@ class NavigatorObserver {
 ///              onSignupComplete: () {
 ///                // Referencing Navigator.of(context) from here refers to the
 ///                // top level Navigator because SignUpPage is above the
-///                // embedded Navigator that it created. Therefore, this pop()
+///                // nested Navigator that it created. Therefore, this pop()
 ///                // will pop the entire "sign up" journey and return to the
 ///                // "/" route, AKA HomePage.
 ///                Navigator.of(context).pop();
@@ -612,9 +612,9 @@ class NavigatorObserver {
 ///
 /// Take care to call the correct `Navigator` in your hierarchy. `Navigator.of()`
 /// finds the nearest `Navigator` ancestor from the `context` that you provide.
-/// If you define embedded `Navigator`s in one large `build()` method then you
-/// are likely passing the wrong `context` and will therefore retrieve the
-/// `Navigator` above the one that you want. See [insert link] for more
+/// If you want to retrieve a nested `Navigator` then ensure that you are
+/// providing a `context` from the nested `Navigator`s subtree, otherwise you
+/// will retrieve the parent `Navigator`. See [insert link] for more
 /// information about managing multiple `Context`s.
 class Navigator extends StatefulWidget {
   /// Creates a widget that maintains a stack-based history of child widgets.
