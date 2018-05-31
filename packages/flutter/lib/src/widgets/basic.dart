@@ -2202,6 +2202,13 @@ class SizedOverflowBox extends SingleChildRenderObjectWidget {
 /// without making the child available for hit testing, and without taking any
 /// room in the parent.
 ///
+/// Animations continue to run in offstage children and may cause unintentional
+/// battery drain.
+///
+/// Offstage is usually used to measure the dimensions of a widget without
+/// bringing it on screen (yet). It should not be used to (temporarily)
+/// hide a widget.
+///
 /// See also:
 ///
 ///  * The [catalog of layout widgets](https://flutter.io/widgets/layout/).
