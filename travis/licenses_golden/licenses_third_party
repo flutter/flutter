@@ -1,4 +1,4 @@
-Signature: 03b0b20989d06168f098a5a3a9f46ef7
+Signature: fd66740edd10e5f34394128b5f8567d0
 
 UNUSED LICENSES:
 
@@ -17147,6 +17147,7 @@ Exhibit B - “Incompatible With Secondary Licenses” Notice
 ====================================================================================================
 LIBRARY: skcms
 LIBRARY: skia
+LIBRARY: vulkanmemoryallocator
 ORIGIN: ../../../third_party/skia/bench/GrCCGeometryBench.cpp + ../../../third_party/skia/LICENSE
 TYPE: LicenseType.bsd
 FILE: ../../../third_party/skia/bench/GrCCGeometryBench.cpp
@@ -17158,6 +17159,7 @@ FILE: ../../../third_party/skia/fuzz/oss_fuzz/FuzzImageFilterDeserialize.cpp
 FILE: ../../../third_party/skia/fuzz/oss_fuzz/FuzzPathDeserialize.cpp
 FILE: ../../../third_party/skia/fuzz/oss_fuzz/FuzzRegionDeserialize.cpp
 FILE: ../../../third_party/skia/fuzz/oss_fuzz/FuzzRegionSetPath.cpp
+FILE: ../../../third_party/skia/gm/3dgm.cpp
 FILE: ../../../third_party/skia/gm/hugepath.cpp
 FILE: ../../../third_party/skia/gm/localmatrixshader.cpp
 FILE: ../../../third_party/skia/gm/makeRasterImage.cpp
@@ -17207,6 +17209,7 @@ FILE: ../../../third_party/skia/modules/sksg/src/SkSGText.cpp
 FILE: ../../../third_party/skia/samplecode/SampleAnimatedImage.cpp
 FILE: ../../../third_party/skia/samplecode/SampleFlutterAnimate.cpp
 FILE: ../../../third_party/skia/src/android/SkAnimatedImage.cpp
+FILE: ../../../third_party/skia/src/codec/SkColorTable.cpp
 FILE: ../../../third_party/skia/src/core/SkBlurPriv.h
 FILE: ../../../third_party/skia/src/core/SkCanvasPriv.cpp
 FILE: ../../../third_party/skia/src/core/SkColorSpaceXformSteps.cpp
@@ -17317,6 +17320,8 @@ FILE: ../../../third_party/skia/src/sksl/SkSLJIT.cpp
 FILE: ../../../third_party/skia/src/sksl/SkSLJIT.h
 FILE: ../../../third_party/skia/src/sksl/ir/SkSLAppendStage.h
 FILE: ../../../third_party/skia/src/sksl/ir/SkSLVariableReference.cpp
+FILE: ../../../third_party/skia/src/utils/Sk3D.cpp
+FILE: ../../../third_party/skia/src/utils/Sk3D.h
 FILE: ../../../third_party/skia/third_party/skcms/skcms.c
 FILE: ../../../third_party/skia/third_party/skcms/skcms.h
 FILE: ../../../third_party/skia/third_party/skcms/src/Curve.c
@@ -17334,6 +17339,8 @@ FILE: ../../../third_party/skia/third_party/skcms/src/TransferFunction.h
 FILE: ../../../third_party/skia/third_party/skcms/src/Transform.c
 FILE: ../../../third_party/skia/third_party/skcms/src/Transform.h
 FILE: ../../../third_party/skia/third_party/skcms/src/Transform_inl.h
+FILE: ../../../third_party/skia/third_party/vulkanmemoryallocator/GrVulkanMemoryAllocator.cpp
+FILE: ../../../third_party/skia/third_party/vulkanmemoryallocator/GrVulkanMemoryAllocator.h
 ----------------------------------------------------------------------------------------------------
 Copyright 2018 Google Inc.
 
@@ -17620,6 +17627,7 @@ FILE: ../../../third_party/skia/infra/bots/recipes/compile.expected/Build-Debian
 FILE: ../../../third_party/skia/infra/bots/recipes/compile.expected/Build-Debian9-Clang-x86_64-Release-NoDEPS.json
 FILE: ../../../third_party/skia/infra/bots/recipes/compile.expected/Build-Debian9-Clang-x86_64-Release-ParentRevision.json
 FILE: ../../../third_party/skia/infra/bots/recipes/compile.expected/Build-Debian9-GCC-x86_64-Release-Flutter_Android.json
+FILE: ../../../third_party/skia/infra/bots/recipes/compile.expected/Build-Mac-Clang-x86_64-Debug-CommandBuffer.json
 FILE: ../../../third_party/skia/infra/bots/recipes/compile.expected/Build-Win-Clang-x86-Debug.json
 FILE: ../../../third_party/skia/infra/bots/recipes/ct_skps.expected/CT_10k_SKPs_UnknownBuilder.json
 FILE: ../../../third_party/skia/infra/bots/recipes/ct_skps.expected/CT_CPU_BENCH_10k_SKPs.json
