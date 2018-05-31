@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
@@ -359,6 +361,118 @@ flutter:
       final FlutterManifest flutterManifest = await FlutterManifest.createFromString(manifest);
       expect(flutterManifest.isEmpty, false);
     });
+
+    Future<void> checkManifestVersion({
+      String manifest,
+      String expectedAppVersion,
+      String expectedBuildName,
+      int expectedBuildNumber,
+    }) async {
+      final FlutterManifest flutterManifest = await FlutterManifest.createFromString(manifest);
+      expect(flutterManifest.appVersion, expectedAppVersion);
+      expect(flutterManifest.buildName, expectedBuildName);
+      expect(flutterManifest.buildNumber, expectedBuildNumber);
+    }
+
+    test('parses major.minor.patch+build version clause', () async {
+      const String manifest = '''
+name: test
+version: 1.0.0+2
+dependencies:
+  flutter:
+    sdk: flutter
+flutter:
+''';
+      await checkManifestVersion(
+        manifest: manifest,
+        expectedAppVersion: '1.0.0+2',
+        expectedBuildName: '1.0.0',
+        expectedBuildNumber: 2,
+      );
+    });
+
+    test('parses major.minor+build version clause', () async {
+      const String manifest = '''
+name: test
+version: 1.0+2
+dependencies:
+  flutter:
+    sdk: flutter
+flutter:
+''';
+      await checkManifestVersion(
+        manifest: manifest,
+        expectedAppVersion: '1.0+2',
+        expectedBuildName: '1.0',
+        expectedBuildNumber: 2,
+      );
+    });
+
+    test('parses major+build version clause', () async {
+      const String manifest = '''
+name: test
+version: 1+2
+dependencies:
+  flutter:
+    sdk: flutter
+flutter:
+''';
+      await checkManifestVersion(
+        manifest: manifest,
+        expectedAppVersion: '1+2',
+        expectedBuildName: '1',
+        expectedBuildNumber: 2,
+      );
+    });
+
+    test('parses major version clause', () async {
+      const String manifest = '''
+name: test
+version: 1
+dependencies:
+  flutter:
+    sdk: flutter
+flutter:
+''';
+      await checkManifestVersion(
+        manifest: manifest,
+        expectedAppVersion: '1',
+        expectedBuildName: '1',
+        expectedBuildNumber: null,
+      );
+    });
+
+    test('parses empty version clause', () async {
+      const String manifest = '''
+name: test
+version:
+dependencies:
+  flutter:
+    sdk: flutter
+flutter:
+''';
+      await checkManifestVersion(
+        manifest: manifest,
+        expectedAppVersion: null,
+        expectedBuildName: null,
+        expectedBuildNumber: null,
+      );
+    });
+    test('parses no version clause', () async {
+      const String manifest = '''
+name: test
+dependencies:
+  flutter:
+    sdk: flutter
+flutter:
+''';
+      await checkManifestVersion(
+        manifest: manifest,
+        expectedAppVersion: null,
+        expectedBuildName: null,
+        expectedBuildNumber: null,
+      );
+    });
   });
 
   group('FlutterManifest with MemoryFileSystem', () {
@@ -371,8 +485,7 @@ dependencies:
 flutter:
 ''';
 
-      final FlutterManifest flutterManifest = await FlutterManifest
-          .createFromString(manifest);
+      final FlutterManifest flutterManifest = await FlutterManifest.createFromString(manifest);
       expect(flutterManifest.isEmpty, false);
     }
 
