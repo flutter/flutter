@@ -159,8 +159,8 @@ class _MaterialTextSelectionControls extends TextSelectionControls {
       child: new CustomPaint(
         painter: new _TextSelectionHandlePainter(
           color: Theme.of(context).textSelectionHandleColor
-        )
-      )
+        ),
+      ),
     );
 
     // [handle] is a circle, with a rectangle in the top left quadrant of that

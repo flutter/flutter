@@ -545,18 +545,21 @@ class _TextSelectionHandleOverlayState extends State<_TextSelectionHandleOverlay
         onPanStart: _handleDragStart,
         onPanUpdate: _handleDragUpdate,
         onTap: _handleTap,
-        child: new Stack(
-          children: <Widget>[
-            new Positioned(
-              left: point.dx,
-              top: point.dy,
-              child: widget.selectionControls.buildHandle(
-                context,
-                type,
-                widget.renderObject.preferredLineHeight,
+        child: new Padding(
+          padding: const EdgeInsets.all(13.0),
+          child: new Stack(
+            children: <Widget>[
+              new Positioned(
+                left: point.dx - 13.0,
+                top: point.dy - 13.0,
+                child: widget.selectionControls.buildHandle(
+                  context,
+                  type,
+                  widget.renderObject.preferredLineHeight,
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
