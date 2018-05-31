@@ -73,9 +73,7 @@ std::ostream& operator<<(std::ostream& os, const SkPoint& r) {
 }
 
 std::ostream& operator<<(std::ostream& os, const flow::RasterCacheKey& k) {
-  SkString matrix_string;
-  k.matrix().toString(&matrix_string);
-  os << "Picture: " << k.picture_id() << " matrix: " << matrix_string.c_str();
+  os << "Picture: " << k.picture_id() << " matrix: " << k.matrix();
   return os;
 }
 
