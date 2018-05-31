@@ -58,8 +58,8 @@ class RawMaterialButton extends StatefulWidget {
   /// If this is set to null, the button will be disabled, see [enabled].
   final VoidCallback onPressed;
 
-  /// Padding to increase the size of the gesture detector which doesn't
-  /// increase the visible material of the button.
+  /// Constraints used to increase the gesture detector size without increasing
+  /// the visible material of the button.
   final BoxConstraints outerConstraints;
 
   /// Called by the underlying [InkWell] widget's [InkWell.onHighlightChanged]
