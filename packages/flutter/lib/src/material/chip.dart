@@ -45,7 +45,7 @@ const Icon _kDefaultDeleteIcon = const Icon(Icons.cancel, size: _kDeleteIconSize
 ///
 /// The defaults mentioned in the documentation for each attribute are what
 /// the implementing classes typically use for defaults (but this class doesn't
-/// provide or enforce them).
+/// provide or enforce them).f
 ///
 /// See also:
 ///
@@ -1368,70 +1368,94 @@ class _RawChipState extends State<RawChip> with TickerProviderStateMixin<RawChip
     final TextDirection textDirection = Directionality.of(context);
     final ShapeBorder shape = widget.shape ?? chipTheme.shape;
 
-    return new Semantics(
-      container: true,
-      selected: widget.selected,
-      enabled: canTap ? widget.isEnabled : null,
-      child: new Material(
-        elevation: isTapping ? _kPressElevation : 0.0,
-        animationDuration: pressedAnimationDuration,
-        shape: shape,
-        child: new InkResponse(
-          onTap: canTap ? _handleTap : null,
-          onTapDown: canTap ? _handleTapDown : null,
-          onTapCancel: canTap ? _handleTapCancel : null,
-          child: new AnimatedBuilder(
-            animation: new Listenable.merge(<Listenable>[selectController, enableController]),
-            builder: (BuildContext context, Widget child) {
-              return new Container(
-                decoration: new ShapeDecoration(
-                  shape: shape,
-                  color: getBackgroundColor(chipTheme),
-                ),
-                child: child,
-              );
-            },
-            child: _wrapWithTooltip(
-              widget.tooltip,
-              widget.onPressed,
-              new _ChipRenderWidget(
-                theme: new _ChipRenderTheme(
-                  label: new DefaultTextStyle(
-                    overflow: TextOverflow.fade,
-                    textAlign: TextAlign.start,
-                    maxLines: 1,
-                    softWrap: false,
-                    style: widget.labelStyle ?? chipTheme.labelStyle,
-                    child: widget.label,
-                  ),
-                  avatar: new AnimatedSwitcher(
-                    child: widget.avatar,
-                    duration: _kDrawerDuration,
-                    switchInCurve: Curves.fastOutSlowIn,
-                  ),
-                  deleteIcon: new AnimatedSwitcher(
-                    child: _buildDeleteIcon(context, theme, chipTheme),
-                    duration: _kDrawerDuration,
-                    switchInCurve: Curves.fastOutSlowIn,
-                  ),
-                  brightness: chipTheme.brightness,
-                  padding: (widget.padding ?? chipTheme.padding).resolve(textDirection),
-                  labelPadding: (widget.labelPadding ?? chipTheme.labelPadding).resolve(textDirection),
-                  showAvatar: hasAvatar,
-                  showCheckmark: widget.showCheckmark,
-                  canTapBody: canTap,
-                ),
-                value: widget.selected,
-                checkmarkAnimation: checkmarkAnimation,
-                enableAnimation: enableAnimation,
-                avatarDrawerAnimation: avatarDrawerAnimation,
-                deleteDrawerAnimation: deleteDrawerAnimation,
-                isEnabled: widget.isEnabled,
+    Widget result = new Material(
+      elevation: isTapping ? _kPressElevation : 0.0,
+      animationDuration: pressedAnimationDuration,
+      shape: shape,
+      child: new InkResponse(
+        onTap: canTap ? _handleTap : null,
+        onTapDown: canTap ? _handleTapDown : null,
+        onTapCancel: canTap ? _handleTapCancel : null,
+        child: new AnimatedBuilder(
+          animation: new Listenable.merge(
+              <Listenable>[selectController, enableController]),
+          builder: (BuildContext context, Widget child) {
+            return new Container(
+              decoration: new ShapeDecoration(
+                shape: shape,
+                color: getBackgroundColor(chipTheme),
               ),
+              child: child,
+            );
+          },
+          child: _wrapWithTooltip(
+            widget.tooltip,
+            widget.onPressed,
+            new _ChipRenderWidget(
+              theme: new _ChipRenderTheme(
+                label: new DefaultTextStyle(
+                  overflow: TextOverflow.fade,
+                  textAlign: TextAlign.start,
+                  maxLines: 1,
+                  softWrap: false,
+                  style: widget.labelStyle ?? chipTheme.labelStyle,
+                  child: widget.label,
+                ),
+                avatar: new AnimatedSwitcher(
+                  child: widget.avatar,
+                  duration: _kDrawerDuration,
+                  switchInCurve: Curves.fastOutSlowIn,
+                ),
+                deleteIcon: new AnimatedSwitcher(
+                  child: _buildDeleteIcon(context, theme, chipTheme),
+                  duration: _kDrawerDuration,
+                  switchInCurve: Curves.fastOutSlowIn,
+                ),
+                brightness: chipTheme.brightness,
+                padding: (widget.padding ?? chipTheme.padding).resolve(
+                    textDirection),
+                labelPadding: (widget.labelPadding ?? chipTheme.labelPadding)
+                    .resolve(textDirection),
+                showAvatar: hasAvatar,
+                showCheckmark: widget.showCheckmark,
+                canTapBody: canTap,
+              ),
+              value: widget.selected,
+              checkmarkAnimation: checkmarkAnimation,
+              enableAnimation: enableAnimation,
+              avatarDrawerAnimation: avatarDrawerAnimation,
+              deleteDrawerAnimation: deleteDrawerAnimation,
+              isEnabled: widget.isEnabled,
             ),
           ),
         ),
       ),
+    );
+    result = new ConstrainedBox(
+      constraints: const BoxConstraints(minWidth: 48.0, minHeight: 48.0),
+      child: new Center(
+        child: result,
+        widthFactor: 1.0,
+        heightFactor: 1.0,
+      ),
+    );
+
+    if (canTap) {
+      result = new GestureDetector(
+        behavior: HitTestBehavior.translucent,
+        onTap: _handleTap,
+        onTapDown: _handleTapDown,
+        onTapCancel: _handleTapCancel,
+        child: result,
+        excludeFromSemantics: true,
+      );
+    }
+
+    return new Semantics(
+      container: true,
+      selected: widget.selected,
+      enabled: canTap ? widget.isEnabled : null,
+      child: result,
     );
   }
 }
