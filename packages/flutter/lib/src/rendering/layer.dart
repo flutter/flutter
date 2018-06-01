@@ -89,11 +89,11 @@ abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
     assert(!attached);
   }
 
-  /// Find the last [AnnotatedRegionLayer] which contains [offset] with a value
-  /// of Type [type].
+  /// Find the last [AnnotatedRegionLayer] which contains [regionOffset] with a
+  /// value of Type [type].
   ///
   /// Returns null if no matching region is found.
-  Object findRegion(Offset offset, Type type);
+  Object findRegion(Offset regionOffset, Type type);
 
   /// Override this method to upload this layer to the engine.
   ///
@@ -174,7 +174,7 @@ class PictureLayer extends Layer {
   }
 
   @override
-  Object findRegion(Offset offset, Type type) => null;
+  Object findRegion(Offset regionOffset, Type type) => null;
 }
 
 /// A composited layer that maps a backend texture to a rectangle.
@@ -229,7 +229,7 @@ class TextureLayer extends Layer {
   }
 
   @override
-  Object findRegion(Offset offset, Type type) => null;
+  Object findRegion(Offset regionOffset, Type type) => null;
 }
 
 /// A layer that indicates to the compositor that it should display
@@ -294,7 +294,7 @@ class PerformanceOverlayLayer extends Layer {
   }
 
   @override
-  Object findRegion(Offset offset, Type type) => null;
+  Object findRegion(Offset regionOffset, Type type) => null;
 }
 
 /// A composited layer that has a list of children.
@@ -332,10 +332,10 @@ class ContainerLayer extends Layer {
   }
 
   @override
-  Object findRegion(Offset offset, Type type) {
+  Object findRegion(Offset regionOffset, Type type) {
     Layer current = lastChild;
     while (current != null) {
-      final Object value = current.findRegion(offset, type);
+      final Object value = current.findRegion(regionOffset, type);
       if (value != null) {
         return value;
       }
@@ -535,11 +535,11 @@ class OffsetLayer extends ContainerLayer {
   Offset offset;
 
   @override
-  Object findRegion(Offset offset, Type type) {
-    if (offset <= this.offset) {
+  Object findRegion(Offset regionOffset, Type type) {
+    if (regionOffset <= offset) {
       return null;
     }
-    return super.findRegion(offset, type);
+    return super.findRegion(regionOffset, type);
   }
 
   @override
@@ -610,10 +610,10 @@ class ClipRectLayer extends ContainerLayer {
   Rect clipRect;
 
   @override
-  Object findRegion(Offset offset, Type type) {
-    if (!clipRect.contains(offset))
+  Object findRegion(Offset regionOffset, Type type) {
+    if (!clipRect.contains(regionOffset))
       return null;
-    return super.findRegion(offset, type);
+    return super.findRegion(regionOffset, type);
   }
 
   @override
@@ -656,10 +656,10 @@ class ClipRRectLayer extends ContainerLayer {
   RRect clipRRect;
 
   @override
-  Object findRegion(Offset offset, Type type) {
-    if (!clipRRect.contains(offset))
+  Object findRegion(Offset regionOffset, Type type) {
+    if (!clipRRect.contains(regionOffset))
       return null;
-    return super.findRegion(offset, type);
+    return super.findRegion(regionOffset, type);
   }
 
   @override
@@ -702,10 +702,10 @@ class ClipPathLayer extends ContainerLayer {
   Path clipPath;
 
   @override
-  Object findRegion(Offset offset, Type type) {
-    if (!clipPath.contains(offset))
+  Object findRegion(Offset regionOffset, Type type) {
+    if (!clipPath.contains(regionOffset))
       return null;
-    return super.findRegion(offset, type);
+    return super.findRegion(regionOffset, type);
   }
 
   @override
@@ -933,10 +933,10 @@ class PhysicalModelLayer extends ContainerLayer {
   Color shadowColor;
 
   @override
-  Object findRegion(Offset offset, Type type) {
-    if (!clipPath.contains(offset))
+  Object findRegion(Offset regionOffset, Type type) {
+    if (!clipPath.contains(regionOffset))
       return null;
-    return super.findRegion(offset, type);
+    return super.findRegion(regionOffset, type);
   }
 
   @override
@@ -1043,7 +1043,7 @@ class LeaderLayer extends ContainerLayer {
   Offset _lastOffset;
 
   @override
-  Object findRegion(Offset offset, Type type) {
+  Object findRegion(Offset regionOffset, Type type) {
     // TODO(jonahwilliams): implement findRegion.
     return null;
   }
@@ -1158,7 +1158,7 @@ class FollowerLayer extends ContainerLayer {
   Matrix4 _lastTransform;
 
   @override
-  Object findRegion(Offset offset, Type type) {
+  Object findRegion(Offset regionOffset, Type type) {
     // TODO(jonahwilliams): implement findRegion.
     return null;
   }
@@ -1286,8 +1286,8 @@ class AnnotatedRegionLayer<T> extends ContainerLayer {
   final T value;
 
   @override
-  Object findRegion(Offset offset, Type type) {
-    final Object result = super.findRegion(offset, type);
+  Object findRegion(Offset regionOffset, Type type) {
+    final Object result = super.findRegion(regionOffset, type);
     if (result != null)
       return result;
     if (T == type)

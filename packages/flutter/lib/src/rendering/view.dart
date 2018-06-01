@@ -197,17 +197,17 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
       lowerOffset,
       SystemUiOverlayStyle,
     );
-    // If there are distinct upper and lower overlay styles, combine them such
-    // that the bottom system chrome features are derived from the lower style
-    // and likewise.
-    if (upperOverlayStyle != null && lowerOverlayStyle != null && !identical(upperOverlayStyle, lowerOverlayStyle)) {
-      SystemChrome.setSystemUIOverlayStyle(upperOverlayStyle.copyWith(
-        systemNavigationBarIconBrightness: lowerOverlayStyle.systemNavigationBarIconBrightness,
-        systemNavigationBarColor: lowerOverlayStyle.systemNavigationBarColor,
-        systemNavigationBarDividerColor: lowerOverlayStyle.systemNavigationBarDividerColor,
-      ));
-    } else if (upperOverlayStyle != null || lowerOverlayStyle != null) {
-      SystemChrome.setSystemUIOverlayStyle(upperOverlayStyle ?? lowerOverlayStyle);
+    // If there are no overlay styles in the UI don't bother updating.
+    if (upperOverlayStyle != null || lowerOverlayStyle != null) {
+      final SystemUiOverlayStyle overlayStyle = new SystemUiOverlayStyle(
+        statusBarBrightness: upperOverlayStyle?.statusBarBrightness,
+        statusBarIconBrightness: upperOverlayStyle?.statusBarIconBrightness,
+        statusBarColor: upperOverlayStyle?.statusBarColor,
+        systemNavigationBarColor: lowerOverlayStyle?.systemNavigationBarColor,
+        systemNavigationBarDividerColor: lowerOverlayStyle?.systemNavigationBarDividerColor,
+        systemNavigationBarIconBrightness: lowerOverlayStyle?.systemNavigationBarIconBrightness,
+      );
+      SystemChrome.setSystemUIOverlayStyle(overlayStyle);
     }
   }
 
