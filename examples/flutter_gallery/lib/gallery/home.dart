@@ -120,7 +120,7 @@ class _CategoriesPage extends StatelessWidget {
         child: new LayoutBuilder(
           builder: (BuildContext context, BoxConstraints constraints) {
             final double columnWidth = constraints.biggest.width / columnCount.toDouble();
-            final double rowHeight = columnWidth * aspectRatio;
+            final double rowHeight = math.min(225.0, columnWidth * aspectRatio);
             final int rowCount = (categories.length + columnCount - 1) ~/ columnCount;
 
             // This repaint boundary prevents the inner contents of the front layer
@@ -287,6 +287,18 @@ class _GalleryHomeState extends State<GalleryHome> with SingleTickerProviderStat
   AnimationController _controller;
   GalleryDemoCategory _category;
 
+  static Widget _topHomeLayout(Widget currentChild, List<Widget> previousChildren) {
+    List<Widget> children = previousChildren;
+    if (currentChild != null)
+      children = children.toList()..add(currentChild);
+    return new Stack(
+      children: children,
+      alignment: Alignment.topCenter,
+    );
+  }
+
+  static const AnimatedSwitcherLayoutBuilder _centerHomeLayout = AnimatedSwitcher.defaultLayoutBuilder;
+
   @override
   void initState() {
     super.initState();
@@ -303,17 +315,12 @@ class _GalleryHomeState extends State<GalleryHome> with SingleTickerProviderStat
     super.dispose();
   }
 
-  static Widget _animatedSwitcherLayoutBuilder(List<Widget> children) {
-    return new Stack(
-      children: children,
-      alignment: Alignment.center,
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
     final bool isDark = theme.brightness == Brightness.dark;
+    final MediaQueryData media = MediaQuery.of(context);
+    final bool centerHome = media.orientation == Orientation.portrait && media.size.height < 800.0;
 
     const Curve switchOutCurve = const Interval(0.4, 1.0, curve: Curves.fastOutSlowIn);
     const Curve switchInCurve = const Interval(0.4, 1.0, curve: Curves.fastOutSlowIn);
@@ -323,48 +330,45 @@ class _GalleryHomeState extends State<GalleryHome> with SingleTickerProviderStat
       backgroundColor: isDark ? _kFlutterBlue : theme.primaryColor,
       body: new SafeArea(
         bottom: false,
-        child: new AnnotatedRegion<SystemUiOverlayStyle>(
-          value: SystemUiOverlayStyle.light,
-          child: new WillPopScope(
-            onWillPop: () {
-              // Pop the category page if Android back button is pressed.
-              if (_category != null) {
-                setState(() => _category = null);
-                return new Future<bool>.value(false);
-              }
-              return new Future<bool>.value(true);
-            },
-            child: new Backdrop(
-              backTitle: const Text('Options'),
-              backLayer: widget.optionsPage,
-              frontAction: new AnimatedSwitcher(
-                duration: _kFrontLayerSwitchDuration,
-                switchOutCurve: switchOutCurve,
-                switchInCurve: switchInCurve,
-                layoutBuilder: _animatedSwitcherLayoutBuilder,
-                child: _category == null
-                    ? const _FlutterLogo()
-                    : new IconButton(
+        child: new WillPopScope(
+          onWillPop: () {
+            // Pop the category page if Android back button is pressed.
+            if (_category != null) {
+              setState(() => _category = null);
+              return new Future<bool>.value(false);
+            }
+            return new Future<bool>.value(true);
+          },
+          child: new Backdrop(
+            backTitle: const Text('Options'),
+            backLayer: widget.optionsPage,
+            frontAction: new AnimatedSwitcher(
+              duration: _kFrontLayerSwitchDuration,
+              switchOutCurve: switchOutCurve,
+              switchInCurve: switchInCurve,
+              child: _category == null
+                ? const _FlutterLogo()
+                : new IconButton(
                   icon: const BackButtonIcon(),
                   tooltip: 'Back',
                   onPressed: () => setState(() => _category = null),
                 ),
-              ),
-              frontTitle: new AnimatedSwitcher(
-                duration: _kFrontLayerSwitchDuration,
-                child: _category == null
-                    ? const Text('Flutter gallery')
-                    : new Text(_category.name),
-              ),
-              frontHeading: widget.testMode ? null: new Container(height: 24.0),
-              frontLayer: new AnimatedSwitcher(
-                duration: _kFrontLayerSwitchDuration,
-                switchOutCurve: switchOutCurve,
-                switchInCurve: switchInCurve,
-                layoutBuilder: _animatedSwitcherLayoutBuilder,
-                child: _category != null
-                    ? new _DemosPage(_category)
-                    : new _CategoriesPage(
+            ),
+            frontTitle: new AnimatedSwitcher(
+              duration: _kFrontLayerSwitchDuration,
+              child: _category == null
+                ? const Text('Flutter gallery')
+                : new Text(_category.name),
+            ),
+            frontHeading: widget.testMode ? null: new Container(height: 24.0),
+            frontLayer: new AnimatedSwitcher(
+              duration: _kFrontLayerSwitchDuration,
+              switchOutCurve: switchOutCurve,
+              switchInCurve: switchInCurve,
+              layoutBuilder: centerHome ? _centerHomeLayout : _topHomeLayout,
+              child: _category != null
+                ? new _DemosPage(_category)
+                : new _CategoriesPage(
                   categories: kAllGalleryDemoCategories,
                   onCategoryTap: (GalleryDemoCategory category) {
                     setState(() => _category = category);
@@ -374,8 +378,7 @@ class _GalleryHomeState extends State<GalleryHome> with SingleTickerProviderStat
             ),
           ),
         ),
-      ),
-    );
+      );
 
     assert(() {
       GalleryHome.showPreviewBanner = false;

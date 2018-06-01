@@ -84,10 +84,6 @@ flutter:
   assets:
     - lib/gallery/example_code.dart
     - packages/flutter_gallery_assets/white_logo/logo.png
-    - packages/flutter_gallery_assets/white_logo/1.5x/logo.png
-    - packages/flutter_gallery_assets/white_logo/2.5x/logo.png
-    - packages/flutter_gallery_assets/white_logo/3.0x/logo.png
-    - packages/flutter_gallery_assets/white_logo/4.0x/logo.png
     - packages/flutter_gallery_assets/videos/butterfly.mp4
     - packages/flutter_gallery_assets/animated_flutter_lgtm.gif
     - packages/flutter_gallery_assets/animated_flutter_stickers.webp

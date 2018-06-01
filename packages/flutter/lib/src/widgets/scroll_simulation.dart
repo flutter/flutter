@@ -145,10 +145,10 @@ class ClampingScrollSimulation extends Simulation {
     @required this.velocity,
     this.friction: 0.015,
     Tolerance tolerance: Tolerance.defaultTolerance,
-  }) : assert(_flingVelocityPenetration(0.0) == _kInitialVelocityPenetration),
+  }) : assert(_flingVelocityPenetration(0.0) == _initialVelocityPenetration),
        super(tolerance: tolerance) {
     _duration = _flingDuration(velocity);
-    _distance = (velocity * _duration / _kInitialVelocityPenetration).abs();
+    _distance = (velocity * _duration / _initialVelocityPenetration).abs();
   }
 
   /// The position of the particle at the beginning of the simulation.
@@ -200,14 +200,14 @@ class ClampingScrollSimulation extends Simulation {
   // Scale f(t) so that 0.0 <= f(t) <= 1.0
   // f(t) = (1165.03 t^3 - 3143.62 t^2 + 2945.87 t) / 961.0
   //      = 1.2 t^3 - 3.27 t^2 + 3.065 t
-  static const double _kInitialVelocityPenetration = 3.065;
+  static const double _initialVelocityPenetration = 3.065;
   static double _flingDistancePenetration(double t) {
-    return (1.2 * t * t * t) - (3.27 * t * t) + (_kInitialVelocityPenetration * t);
+    return (1.2 * t * t * t) - (3.27 * t * t) + (_initialVelocityPenetration * t);
   }
 
   // The derivative of the _flingDistancePenetration() function.
   static double _flingVelocityPenetration(double t) {
-    return (3.6 * t * t) - (6.54 * t) + _kInitialVelocityPenetration;
+    return (3.6 * t * t) - (6.54 * t) + _initialVelocityPenetration;
   }
 
   @override

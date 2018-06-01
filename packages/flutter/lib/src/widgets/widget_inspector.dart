@@ -1159,7 +1159,7 @@ class _WidgetInspectorState extends State<WidgetInspector>
 
   /// Distance from the edge of of the bounding box for an element to consider
   /// as selecting the edge of the bounding box.
-  static const double _kEdgeHitMargin = 2.0;
+  static const double _edgeHitMargin = 2.0;
 
   InspectorSelectionChangedCallback _selectionChangedCallback;
   @override
@@ -1224,7 +1224,7 @@ class _WidgetInspectorState extends State<WidgetInspector>
       // Hits that occur on the edge of the bounding box of an object are
       // given priority to provide a way to select objects that would
       // otherwise be hard to select.
-      if (!bounds.deflate(_kEdgeHitMargin).contains(localPosition))
+      if (!bounds.deflate(_edgeHitMargin).contains(localPosition))
         edgeHits.add(object);
     }
     if (hit)

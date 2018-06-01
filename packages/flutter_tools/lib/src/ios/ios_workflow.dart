@@ -12,6 +12,7 @@ import '../base/version.dart';
 import '../doctor.dart';
 import 'cocoapods.dart';
 import 'mac.dart';
+import 'plist_utils.dart' as plist;
 
 IOSWorkflow get iosWorkflow => context[IOSWorkflow];
 
@@ -32,6 +33,10 @@ class IOSWorkflow extends DoctorValidator implements Workflow {
 
   @override
   bool get canListEmulators => false;
+
+  String getPlistValueFromFile(String path, String key) {
+    return plist.getValueFromFile(path, key);
+  }
 
   Future<bool> get hasIDeviceInstaller => exitsHappyAsync(<String>['ideviceinstaller', '-h']);
 

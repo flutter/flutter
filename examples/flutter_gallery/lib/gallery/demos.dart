@@ -314,6 +314,14 @@ List<GalleryDemo> _buildGalleryDemos() {
       buildRoute: (BuildContext context) => const OverscrollDemo(),
     ),
     new GalleryDemo(
+      title: 'Search',
+      subtitle: 'Expandable search',
+      icon: Icons.search,
+      category: _kMaterialComponents,
+      routeName: SearchDemo.routeName,
+      buildRoute: (BuildContext context) => new SearchDemo(),
+    ),
+    new GalleryDemo(
       title: 'Selection controls',
       subtitle: 'Checkboxes, radio buttons, and switches',
       icon: GalleryIcons.check_box,

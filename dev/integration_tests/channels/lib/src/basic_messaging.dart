@@ -12,16 +12,16 @@ import 'test_step.dart';
 class ExtendedStandardMessageCodec extends StandardMessageCodec {
   const ExtendedStandardMessageCodec();
 
-  static const int _kDateTime = 128;
-  static const int _kPair = 129;
+  static const int _dateTime = 128;
+  static const int _pair = 129;
 
   @override
   void writeValue(WriteBuffer buffer, dynamic value) {
     if (value is DateTime) {
-      buffer.putUint8(_kDateTime);
+      buffer.putUint8(_dateTime);
       buffer.putInt64(value.millisecondsSinceEpoch);
     } else if (value is Pair) {
-      buffer.putUint8(_kPair);
+      buffer.putUint8(_pair);
       writeValue(buffer, value.left);
       writeValue(buffer, value.right);
     } else {
@@ -32,9 +32,9 @@ class ExtendedStandardMessageCodec extends StandardMessageCodec {
   @override
   dynamic readValueOfType(int type, ReadBuffer buffer) {
     switch (type) {
-    case _kDateTime:
+    case _dateTime:
       return new DateTime.fromMillisecondsSinceEpoch(buffer.getInt64());
-    case _kPair:
+    case _pair:
       return new Pair(readValue(buffer), readValue(buffer));
     default: return super.readValueOfType(type, buffer);
     }

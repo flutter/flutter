@@ -24,7 +24,7 @@ buildscript {
         }
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:3.0.1'
+        classpath 'com.android.tools.build:gradle:3.1.2'
     }
 }
 
@@ -256,7 +256,7 @@ class FlutterPlugin implements Plugin<Project> {
             target = project.property('target')
         }
 
-        Boolean previewDart2Value = false
+        Boolean previewDart2Value = true
         if (project.hasProperty('preview-dart-2')) {
             previewDart2Value = project.property('preview-dart-2').toBoolean()
         }

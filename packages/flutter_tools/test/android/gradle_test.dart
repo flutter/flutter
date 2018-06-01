@@ -2,16 +2,20 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:flutter_tools/src/android/gradle.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/build_info.dart';
+import 'package:flutter_tools/src/cache.dart';
 import 'package:test/test.dart';
 
 import '../src/common.dart';
+import '../src/context.dart';
 
 void main() {
   group('gradle build', () {
-    test('do not crash if there is no Android SDK', () {
+    test('do not crash if there is no Android SDK', () async {
       Exception shouldBeToolExit;
       try {
         // We'd like to always set androidSdk to null and test updateLocalProperties. But that's
@@ -21,7 +25,7 @@ void main() {
         // This test is written to fail if our bots get Android SDKs in the future: shouldBeToolExit
         // will be null and our expectation would fail. That would remind us to make these tests
         // hermetic before adding Android SDKs to the bots.
-        updateLocalProperties();
+        await updateLocalProperties();
       } on Exception catch (e) {
         shouldBeToolExit = e;
       }
@@ -124,6 +128,183 @@ someOtherProperty: someOtherValue
       expect(project.assembleTaskFor(const BuildInfo(BuildMode.debug, 'free')), 'assembleFreeDebug');
       expect(project.assembleTaskFor(const BuildInfo(BuildMode.release, 'paid')), 'assemblePaidRelease');
       expect(project.assembleTaskFor(const BuildInfo(BuildMode.release, 'unknown')), isNull);
+    });
+  });
+
+  group('Gradle local.properties', () {
+    Directory temp;
+
+    setUp(() {
+      Cache.disableLocking();
+      temp = fs.systemTempDirectory.createTempSync('flutter_tools');
+    });
+
+    tearDown(() {
+      temp.deleteSync(recursive: true);
+    });
+
+    Future<String> createMinimalProject(String manifest) async {
+      final Directory directory = temp.childDirectory('android_project');
+      final File manifestFile = directory.childFile('pubspec.yaml');
+      manifestFile.createSync(recursive: true);
+      manifestFile.writeAsStringSync(manifest);
+
+      return directory.path;
+    }
+
+    String propertyFor(String key, File file) {
+      return file
+          .readAsLinesSync()
+          .where((String line) => line.startsWith('$key='))
+          .map((String line) => line.split('=')[1])
+          .first;
+    }
+
+    Future<void> checkBuildVersion({
+      String manifest,
+      BuildInfo buildInfo,
+      String expectedBuildName,
+      String expectedBuildNumber,
+    }) async {
+      final String projectPath = await createMinimalProject(manifest);
+
+      try {
+        await updateLocalProperties(projectPath: projectPath, buildInfo: buildInfo);
+
+        final String propertiesPath = fs.path.join(projectPath, 'android', 'local.properties');
+        final File localPropertiesFile = fs.file(propertiesPath);
+
+        expect(propertyFor('flutter.versionName', localPropertiesFile), expectedBuildName);
+        expect(propertyFor('flutter.versionCode', localPropertiesFile), expectedBuildNumber);
+      } on Exception {
+        // Android SDK not found, skip test
+      }
+    }
+
+    testUsingContext('extract build name and number from pubspec.yaml', () async {
+      const String manifest = '''
+name: test
+version: 1.0.0+1
+dependencies:
+  flutter:
+    sdk: flutter
+flutter:
+''';
+
+      const BuildInfo buildInfo = const BuildInfo(BuildMode.release, null);
+      await checkBuildVersion(
+        manifest: manifest,
+        buildInfo: buildInfo,
+        expectedBuildName: '1.0.0',
+        expectedBuildNumber: '1',
+      );
+    });
+
+    testUsingContext('extract build name from pubspec.yaml', () async {
+      const String manifest = '''
+name: test
+version: 1.0.0
+dependencies:
+  flutter:
+    sdk: flutter
+flutter:
+''';
+      const BuildInfo buildInfo = const BuildInfo(BuildMode.release, null);
+      await checkBuildVersion(
+        manifest: manifest,
+        buildInfo: buildInfo,
+        expectedBuildName: '1.0.0',
+        expectedBuildNumber: null,
+      );
+    });
+
+    testUsingContext('allow build info to override build name', () async {
+      const String manifest = '''
+name: test
+version: 1.0.0+1
+dependencies:
+  flutter:
+    sdk: flutter
+flutter:
+''';
+      const BuildInfo buildInfo = const BuildInfo(BuildMode.release, null, buildName: '1.0.2');
+      await checkBuildVersion(
+        manifest: manifest,
+        buildInfo: buildInfo,
+        expectedBuildName: '1.0.2',
+        expectedBuildNumber: '1',
+      );
+    });
+
+    testUsingContext('allow build info to override build number', () async {
+      const String manifest = '''
+name: test
+version: 1.0.0+1
+dependencies:
+  flutter:
+    sdk: flutter
+flutter:
+''';
+      const BuildInfo buildInfo = const BuildInfo(BuildMode.release, null, buildNumber: 3);
+      await checkBuildVersion(
+        manifest: manifest,
+        buildInfo: buildInfo,
+        expectedBuildName: '1.0.0',
+        expectedBuildNumber: '3',
+      );
+    });
+
+    testUsingContext('allow build info to override build name and number', () async {
+      const String manifest = '''
+name: test
+version: 1.0.0+1
+dependencies:
+  flutter:
+    sdk: flutter
+flutter:
+''';
+      const BuildInfo buildInfo = const BuildInfo(BuildMode.release, null, buildName: '1.0.2', buildNumber: 3);
+      await checkBuildVersion(
+        manifest: manifest,
+        buildInfo: buildInfo,
+        expectedBuildName: '1.0.2',
+        expectedBuildNumber: '3',
+      );
+    });
+
+    testUsingContext('allow build info to override build name and set number', () async {
+      const String manifest = '''
+name: test
+version: 1.0.0
+dependencies:
+  flutter:
+    sdk: flutter
+flutter:
+''';
+      const BuildInfo buildInfo = const BuildInfo(BuildMode.release, null, buildName: '1.0.2', buildNumber: 3);
+      await checkBuildVersion(
+        manifest: manifest,
+        buildInfo: buildInfo,
+        expectedBuildName: '1.0.2',
+        expectedBuildNumber: '3',
+      );
+    });
+
+    testUsingContext('allow build info to set build name and number', () async {
+      const String manifest = '''
+name: test
+dependencies:
+  flutter:
+    sdk: flutter
+flutter:
+''';
+      const BuildInfo buildInfo = const BuildInfo(BuildMode.release, null, buildName: '1.0.2', buildNumber: 3);
+      await checkBuildVersion(
+        manifest: manifest,
+        buildInfo: buildInfo,
+        expectedBuildName: '1.0.2',
+        expectedBuildNumber: '3',
+      );
     });
   });
 }

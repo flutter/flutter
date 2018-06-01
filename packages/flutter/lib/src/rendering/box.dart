@@ -1599,9 +1599,12 @@ abstract class RenderBox extends RenderObject {
   /// Only call this function after calling [layout] on this box. You
   /// are only allowed to call this from the parent of this box during
   /// that parent's [performLayout] or [paint] functions.
+  ///
+  /// When implementing a [RenderBox] subclass, to override the baseline
+  /// computation, override [computeDistanceToActualBaseline].
   double getDistanceToBaseline(TextBaseline baseline, { bool onlyReal: false }) {
+    assert(!_debugDoingBaseline, 'Please see the documentation for computeDistanceToActualBaseline for the required calling conventions of this method.');
     assert(!debugNeedsLayout);
-    assert(!_debugDoingBaseline);
     assert(() {
       final RenderObject parent = this.parent;
       if (owner.debugDoingLayout)
@@ -1628,7 +1631,7 @@ abstract class RenderBox extends RenderObject {
   @protected
   @mustCallSuper
   double getDistanceToActualBaseline(TextBaseline baseline) {
-    assert(_debugDoingBaseline);
+    assert(_debugDoingBaseline, 'Please see the documentation for computeDistanceToActualBaseline for the required calling conventions of this method.');
     _cachedBaselines ??= <TextBaseline, double>{};
     _cachedBaselines.putIfAbsent(baseline, () => computeDistanceToActualBaseline(baseline));
     return _cachedBaselines[baseline];
@@ -1638,17 +1641,29 @@ abstract class RenderBox extends RenderObject {
   /// the y-coordinate of the first given baseline in the box's contents, if
   /// any, or null otherwise.
   ///
-  /// Do not call this function directly. Instead, call [getDistanceToBaseline]
-  /// if you need to know the baseline of a child from an invocation of
-  /// [performLayout] or [paint] and call [getDistanceToActualBaseline] if you
-  /// are implementing [computeDistanceToActualBaseline] and need to defer to a
-  /// child.
+  /// Do not call this function directly. If you need to know the baseline of a
+  /// child from an invocation of [performLayout] or [paint], call
+  /// [getDistanceToBaseline].
   ///
   /// Subclasses should override this method to supply the distances to their
-  /// baselines.
+  /// baselines. When implementing this method, there are generally three
+  /// strategies:
+  ///
+  ///  * For classes that use the [ContainerRenderObjectMixin] child model,
+  ///    consider mixing in the [RenderBoxContainerDefaultsMixin] class and
+  ///    using
+  ///    [RenderBoxContainerDefaultsMixin.defaultComputeDistanceToFirstActualBaseline].
+  ///
+  ///  * For classes that define a particular baseline themselves, return that
+  ///    value directly.
+  ///
+  ///  * For classes that have a child to which they wish to defer the
+  ///    computation, call [getDistanceToActualBaseline] on the child (not
+  ///    [computeDistanceToActualBaseline], the internal implementation, and not
+  ///    [getDistanceToBaseline], the public entry point for this API).
   @protected
   double computeDistanceToActualBaseline(TextBaseline baseline) {
-    assert(_debugDoingBaseline);
+    assert(_debugDoingBaseline, 'Please see the documentation for computeDistanceToActualBaseline for the required calling conventions of this method.');
     return null;
   }
 

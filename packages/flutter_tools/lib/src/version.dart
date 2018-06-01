@@ -135,7 +135,7 @@ class FlutterVersion {
   /// In the absence of bugs and crashes a Flutter developer should never see
   /// this remote appear in their `git remote` list, but also if it happens to
   /// persist we do the proper clean-up for extra robustness.
-  static const String _kVersionCheckRemote = '__flutter_version_check__';
+  static const String _versionCheckRemote = '__flutter_version_check__';
 
   /// The date of the latest framework commit in the remote repository.
   ///
@@ -148,11 +148,11 @@ class FlutterVersion {
         'git',
         'remote',
         'add',
-        _kVersionCheckRemote,
+        _versionCheckRemote,
         'https://github.com/flutter/flutter.git',
       ]);
-      await _run(<String>['git', 'fetch', _kVersionCheckRemote, branch]);
-      return _latestGitCommitDate('$_kVersionCheckRemote/$branch');
+      await _run(<String>['git', 'fetch', _versionCheckRemote, branch]);
+      return _latestGitCommitDate('$_versionCheckRemote/$branch');
     } finally {
       await _removeVersionCheckRemoteIfExists();
     }
@@ -163,8 +163,8 @@ class FlutterVersion {
         .split('\n')
         .map((String name) => name.trim()) // to account for OS-specific line-breaks
         .toList();
-    if (remotes.contains(_kVersionCheckRemote))
-      await _run(<String>['git', 'remote', 'remove', _kVersionCheckRemote]);
+    if (remotes.contains(_versionCheckRemote))
+      await _run(<String>['git', 'remote', 'remove', _versionCheckRemote]);
   }
 
   static FlutterVersion get instance => context[FlutterVersion];
@@ -296,7 +296,7 @@ class FlutterVersion {
 
     // Cache is empty or it's been a while since the last server ping. Ping the server.
     try {
-      final String branch = _channel == 'alpha' ? 'alpha' : 'master';
+      final String branch = officialChannels.contains(_channel) ? _channel : 'master';
       final DateTime remoteFrameworkCommitDate = DateTime.parse(await FlutterVersion.fetchRemoteFrameworkCommitDate(branch));
       await versionCheckStamp.store(
         newTimeVersionWasChecked: _clock.now(),

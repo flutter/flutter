@@ -223,8 +223,8 @@ class AndroidSdk {
     _init();
   }
 
-  static const String _kJavaHomeEnvironmentVariable = 'JAVA_HOME';
-  static const String _kJavaExecutable = 'java';
+  static const String _javaHomeEnvironmentVariable = 'JAVA_HOME';
+  static const String _javaExecutable = 'java';
 
   /// The path to the Android SDK.
   final String directory;
@@ -429,7 +429,7 @@ class AndroidSdk {
     if (android_studio.javaPath != null)
       return fs.path.join(android_studio.javaPath, 'bin', 'java');
 
-    final String javaHomeEnv = platform.environment[_kJavaHomeEnvironmentVariable];
+    final String javaHomeEnv = platform.environment[_javaHomeEnvironmentVariable];
     if (javaHomeEnv != null) {
       // Trust JAVA_HOME.
       return fs.path.join(javaHomeEnv, 'bin', 'java');
@@ -451,7 +451,7 @@ class AndroidSdk {
     }
 
     // Fallback to PATH based lookup.
-    return os.which(_kJavaExecutable)?.path;
+    return os.which(_javaExecutable)?.path;
   }
 
   Map<String, String> _sdkManagerEnv;

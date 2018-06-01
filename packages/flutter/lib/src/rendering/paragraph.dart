@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' as ui show Gradient, Shader, TextBox;
+import 'dart:ui' as ui show Gradient, Shader, TextBox, Locale;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -44,6 +44,7 @@ class RenderParagraph extends RenderBox {
     TextOverflow overflow: TextOverflow.clip,
     double textScaleFactor: 1.0,
     int maxLines,
+    ui.Locale locale,
   }) : assert(text != null),
        assert(text.debugAssertIsValid()),
        assert(textAlign != null),
@@ -61,6 +62,7 @@ class RenderParagraph extends RenderBox {
          textScaleFactor: textScaleFactor,
          maxLines: maxLines,
          ellipsis: overflow == TextOverflow.ellipsis ? _kEllipsis : null,
+         locale: locale,
        );
 
   final TextPainter _textPainter;
@@ -170,6 +172,15 @@ class RenderParagraph extends RenderBox {
     if (_textPainter.maxLines == value)
       return;
     _textPainter.maxLines = value;
+    _overflowShader = null;
+    markNeedsLayout();
+  }
+
+  ui.Locale get locale => _textPainter.locale;
+  set locale(ui.Locale value) {
+    if (_textPainter.locale == value)
+      return;
+    _textPainter.locale = locale;
     _overflowShader = null;
     markNeedsLayout();
   }

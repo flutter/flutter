@@ -179,6 +179,13 @@ Future<Null> _runTests({List<String> options: const <String>[]}) async {
     printOutput: false,
     timeout: _kShortTimeout,
   );
+  await _runFlutterTest(automatedTests,
+    script: path.join('test_smoke_test', 'disallow_error_reporter_modification_test.dart'),
+    options: options,
+    expectFailure: true,
+    printOutput: false,
+    timeout: _kShortTimeout,
+  );
   await _runCommand(flutter,
     <String>['drive', '--use-existing-app']
         ..addAll(options)

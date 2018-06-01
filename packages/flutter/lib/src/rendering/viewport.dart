@@ -784,23 +784,64 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
 
   @override
   void showOnScreen([RenderObject child]) {
-    // Logic duplicated in [_RenderSingleChildViewport.showOnScreen].
-    if (child != null) {
-      // TODO(goderbauer): Don't scroll if it is already visible.
-      // TODO(goderbauer): Don't guess if we need to align at leading or trailing edge.
-      // Move viewport the smallest distance to bring [child] on screen.
-      final double leadingEdgeOffset = getOffsetToReveal(child, 0.0);
-      final double trailingEdgeOffset = getOffsetToReveal(child, 1.0);
-      final double currentOffset = offset.pixels;
-      // TODO(goderbauer): Don't scroll if that puts us outside of viewport's bounds.
-      if ((currentOffset - leadingEdgeOffset).abs() < (currentOffset - trailingEdgeOffset).abs()) {
-        offset.jumpTo(leadingEdgeOffset);
-      } else {
-        offset.jumpTo(trailingEdgeOffset);
-      }
-    }
+    RenderViewportBase.showInViewport(child: child, viewport: this, offset: offset);
     // Make sure the viewport itself is on screen.
     super.showOnScreen();
+  }
+
+  /// Make the given `child` of the given `viewport` fully visible in the
+  /// `viewport` by manipulating the provided [ViewportOffset] `offset`.
+  ///
+  /// The parameters `viewport` and `offset` are required and cannot be null.
+  /// If `child` is null this is a no-op.
+  static void showInViewport({
+    RenderObject child,
+    @required RenderAbstractViewport viewport,
+    @required ViewportOffset offset,
+  }) {
+    assert(viewport != null);
+    assert(offset != null);
+    if (child == null) {
+      return;
+    }
+    final double leadingEdgeOffset = viewport.getOffsetToReveal(child, 0.0);
+    final double trailingEdgeOffset = viewport.getOffsetToReveal(child, 1.0);
+    final double currentOffset = offset.pixels;
+
+    //        scrollOffset
+    //                    0 +---------+
+    //                      |         |
+    //                    _ |         |
+    // viewport position |  |         |
+    //   with `child` at |  |         | _
+    //     trailing edge |_ | xxxxxxx |  | viewport position
+    //                      |         |  | with `child` at
+    //                      |         | _| leading edge
+    //                      |         |
+    //                  800 +---------+
+    //
+    // `trailingEdgeOffset`: Distance from scrollOffset 0 to the start of the
+    //                       viewport on the left in image above.
+    // `leadingEdgeOffset`: Distance from scrollOffset 0 to the start of the
+    //                      viewport on the right in image above.
+    //
+    // The viewport position on the left is achieved by setting `offset.pixels`
+    // to `trailingEdgeOffset`, the one on the right by setting it to
+    // `leadingEdgeOffset`.
+
+    assert(leadingEdgeOffset >= trailingEdgeOffset);
+
+    if (currentOffset > leadingEdgeOffset) {
+      // `child` currently starts above the leading edge and can be shown fully
+      // on screen by scrolling down (which means: moving viewport up).
+      offset.jumpTo(leadingEdgeOffset);
+    } else if (currentOffset < trailingEdgeOffset ) {
+      // `child currently ends below the trailing edge and can be shown fully
+      // on screen by scrolling up (which means: moving viewport down)
+      offset.jumpTo(trailingEdgeOffset);
+    }
+    // else: `child` is between leading and trailing edge and hence already
+    //     fully shown on screen. No action necessary.
   }
 }
 
@@ -1008,7 +1049,7 @@ class RenderViewport extends RenderViewportBase<SliverPhysicalContainerParentDat
     }
   }
 
-  static const int _kMaxLayoutCycles = 10;
+  static const int _maxLayoutCycles = 10;
 
   // Out-of-band data computed during layout.
   double _minScrollExtent;
@@ -1057,9 +1098,9 @@ class RenderViewport extends RenderViewportBase<SliverPhysicalContainerParentDat
           break;
       }
       count += 1;
-    } while (count < _kMaxLayoutCycles);
+    } while (count < _maxLayoutCycles);
     assert(() {
-      if (count >= _kMaxLayoutCycles) {
+      if (count >= _maxLayoutCycles) {
         assert(count != 1);
         throw new FlutterError(
           'A RenderViewport exceeded its maximum number of layout cycles.\n'

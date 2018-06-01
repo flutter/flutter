@@ -3,9 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:convert';
-
-import 'package:meta/meta.dart';
 
 import '../android/android_sdk.dart';
 import '../artifacts.dart';
@@ -17,7 +14,9 @@ import '../base/platform.dart';
 import '../base/process.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
+import '../bundle.dart' as bundle;
 import '../cache.dart';
+import '../flutter_manifest.dart';
 import '../globals.dart';
 import 'android_sdk.dart';
 import 'android_studio.dart';
@@ -95,7 +94,7 @@ Future<GradleProject> _gradleProject() async {
 // of calculating the app properties using Gradle. This may take minutes.
 Future<GradleProject> _readGradleProject() async {
   final String gradle = await _ensureGradle();
-  updateLocalProperties();
+  await updateLocalProperties();
   try {
     final Status status = logger.startProgress('Resolving dependencies...', expectSlowOperation: true);
     final RunResult runResult = await runCheckedAsync(
@@ -198,10 +197,13 @@ distributionUrl=https\\://services.gradle.org/distributions/gradle-$gradleVersio
 }
 
 /// Create android/local.properties if needed, and update Flutter settings.
-void updateLocalProperties({String projectPath, BuildInfo buildInfo}) {
+Future<void> updateLocalProperties({String projectPath, BuildInfo buildInfo}) async {
   final File localProperties = (projectPath == null)
       ? fs.file(fs.path.join('android', 'local.properties'))
       : fs.file(fs.path.join(projectPath, 'android', 'local.properties'));
+  final String flutterManifest = (projectPath == null)
+      ? fs.path.join(bundle.defaultManifestPath)
+      : fs.path.join(projectPath, bundle.defaultManifestPath);
   bool changed = false;
 
   SettingsFile settings;
@@ -225,85 +227,39 @@ void updateLocalProperties({String projectPath, BuildInfo buildInfo}) {
     changed = true;
   }
 
+  FlutterManifest manifest;
+  try {
+    manifest = await FlutterManifest.createFromPath(flutterManifest);
+  } catch (error) {
+    throwToolExit('Failed to load pubspec.yaml: $error');
+  }
+
+  final String buildName = buildInfo?.buildName ?? manifest.buildName;
+  if (buildName != null) {
+    settings.values['flutter.versionName'] = buildName;
+    changed = true;
+  }
+
+  final int buildNumber = buildInfo?.buildNumber ?? manifest.buildNumber;
+  if (buildNumber != null) {
+    settings.values['flutter.versionCode'] = '$buildNumber';
+    changed = true;
+  }
+
   if (changed)
     settings.writeContents(localProperties);
 }
 
-Future<Null> findAndReplaceVersionProperties({@required BuildInfo buildInfo}) {
-  assert(buildInfo != null, 'buildInfo can\'t be null');
-  final Completer<Null> completer = new Completer<Null>();
-
-  // early return, if nothing has to be changed
-  if (buildInfo.buildNumber == null && buildInfo.buildName == null) {
-    completer.complete();
-    return completer.future;
-  }
-
-  final File appGradle = fs.file(fs.path.join('android', 'app', 'build.gradle'));
-  final File appGradleTmp = fs.file(fs.path.join('android', 'app', 'build.gradle.tmp'));
-  appGradleTmp.createSync();
-
-  if (appGradle.existsSync() && appGradleTmp.existsSync()) {
-    final Stream<List<int>> inputStream = appGradle.openRead();
-    final IOSink sink = appGradleTmp.openWrite();
-
-    inputStream.transform(utf8.decoder)
-        .transform(const LineSplitter())
-        .map((String line) {
-
-          // find and replace build number
-          if (buildInfo.buildNumber != null) {
-            if (line.contains(new RegExp(r'^[ |\t]*(versionCode)[ =\t]*\d*'))) {
-              return line.splitMapJoin(new RegExp(r'(versionCode)[ =\t]*\d*'), onMatch: (Match m) {
-                return 'versionCode ${buildInfo.buildNumber}';
-              });
-            }
-          }
-
-          // find and replace build name
-          if (buildInfo.buildName != null) {
-            if (line.contains(new RegExp(r'^[ |\t]*(versionName)[ =\t]*\"[0-9.]*"'))) {
-              return line.splitMapJoin(new RegExp(r'(versionName)[ =\t]*\"[0-9.]*"'), onMatch: (Match m) {
-                return 'versionName "${buildInfo.buildName}"';
-              });
-            }
-          }
-          return line;
-        })
-        .listen((String line) {
-            sink.writeln(line);
-          },
-          onDone: () {
-            sink.close();
-            try {
-              final File gradleOld = appGradle.renameSync(fs.path.join('android', 'app', 'build.gradle.old'));
-              appGradleTmp.renameSync(fs.path.join('android', 'app', 'build.gradle'));
-              gradleOld.deleteSync();
-              completer.complete();
-            } catch (error) {
-              printError('Failed to change version properties. $error');
-              completer.completeError('Failed to change version properties. $error');
-            }
-          },
-          onError: (dynamic error, StackTrace stack) {
-            printError('Failed to change version properties. ${error.toString()}');
-            sink.close();
-            appGradleTmp.deleteSync();
-            completer.completeError('Failed to change version properties. ${error.toString()}', stack);
-          },
-    );
-  }
-
-  return completer.future;
-}
-
 Future<Null> buildGradleProject(BuildInfo buildInfo, String target) async {
-  // Update the local.properties file with the build mode.
+  // Update the local.properties file with the build mode, version name and code.
   // FlutterPlugin v1 reads local.properties to determine build mode. Plugin v2
   // uses the standard Android way to determine what to build, but we still
   // update local.properties, in case we want to use it in the future.
-  updateLocalProperties(buildInfo: buildInfo);
-  await findAndReplaceVersionProperties(buildInfo: buildInfo);
+  // Version name and number are provided by the pubspec.yaml file
+  // and can be overwritten with flutter build command.
+  // The default Gradle script reads the version name and number
+  // from the local.properties file.
+  await updateLocalProperties(buildInfo: buildInfo);
 
   final String gradle = await _ensureGradle();
 
@@ -381,6 +337,8 @@ Future<Null> _buildGradleProjectV2(String gradle, BuildInfo buildInfo, String ta
       command.add('-Pfilesystem-roots=${buildInfo.fileSystemRoots.join('|')}');
     if (buildInfo.fileSystemScheme != null)
       command.add('-Pfilesystem-scheme=${buildInfo.fileSystemScheme}');
+  } else {
+    command.add('-Ppreview-dart-2=false');
   }
   if (buildInfo.preferSharedLibrary && androidSdk.ndk != null) {
     command.add('-Pprefer-shared-library=true');

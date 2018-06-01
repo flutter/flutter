@@ -2,9 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:meta/meta.dart';
 
 import '../artifacts.dart';
+import '../base/common.dart';
 import '../base/context.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
@@ -15,6 +18,7 @@ import '../base/utils.dart';
 import '../build_info.dart';
 import '../bundle.dart' as bundle;
 import '../cache.dart';
+import '../flutter_manifest.dart';
 import '../globals.dart';
 
 final RegExp _settingExpr = new RegExp(r'(\w+)\s*=\s*(.*)$');
@@ -30,26 +34,29 @@ String _generatedXcodePropertiesPath(String projectPath) {
 
 /// Writes default Xcode properties files in the Flutter project at [projectPath],
 /// if project is an iOS project and such files do not already exist.
-void generateXcodeProperties(String projectPath) {
+Future<void> generateXcodeProperties(String projectPath) async {
   if (fs.isDirectorySync(fs.path.join(projectPath, 'ios'))) {
     if (fs.file(_generatedXcodePropertiesPath(projectPath)).existsSync())
       return;
-    updateGeneratedXcodeProperties(
+    await updateGeneratedXcodeProperties(
       projectPath: projectPath,
       buildInfo: BuildInfo.debug,
-      target: bundle.defaultMainPath,
+      targetOverride: bundle.defaultMainPath,
       previewDart2: false,
     );
   }
 }
 
 /// Writes or rewrites Xcode property files with the specified information.
-void updateGeneratedXcodeProperties({
+///
+/// targetOverride: Optional parameter, if null or unspecified the default value
+/// from xcode_backend.sh is used 'lib/main.dart'.
+Future<void> updateGeneratedXcodeProperties({
   @required String projectPath,
   @required BuildInfo buildInfo,
-  @required String target,
+  String targetOverride,
   @required bool previewDart2,
-}) {
+}) async {
   final StringBuffer localsBuffer = new StringBuffer();
 
   localsBuffer.writeln('// This is a generated file; do not edit or check into version control.');
@@ -61,7 +68,8 @@ void updateGeneratedXcodeProperties({
   localsBuffer.writeln('FLUTTER_APPLICATION_PATH=${fs.path.normalize(projectPath)}');
 
   // Relative to FLUTTER_APPLICATION_PATH, which is [Directory.current].
-  localsBuffer.writeln('FLUTTER_TARGET=$target');
+  if (targetOverride != null)
+    localsBuffer.writeln('FLUTTER_TARGET=$targetOverride');
 
   // The runtime mode for the current build.
   localsBuffer.writeln('FLUTTER_BUILD_MODE=${buildInfo.modeName}');
@@ -73,13 +81,44 @@ void updateGeneratedXcodeProperties({
 
   localsBuffer.writeln('FLUTTER_FRAMEWORK_DIR=${flutterFrameworkDir(buildInfo.mode)}');
 
+  final String flutterManifest = fs.path.join(projectPath, bundle.defaultManifestPath);
+  FlutterManifest manifest;
+  try {
+    manifest = await FlutterManifest.createFromPath(flutterManifest);
+  } catch (error) {
+    throwToolExit('Failed to load pubspec.yaml: $error');
+  }
+
+  final String buildName = buildInfo?.buildName ?? manifest.buildName;
+  if (buildName != null) {
+    localsBuffer.writeln('FLUTTER_BUILD_NAME=$buildName');
+  }
+
+  final int buildNumber = buildInfo?.buildNumber ?? manifest.buildNumber;
+  if (buildNumber != null) {
+    localsBuffer.writeln('FLUTTER_BUILD_NUMBER=$buildNumber');
+  }
+
   if (artifacts is LocalEngineArtifacts) {
     final LocalEngineArtifacts localEngineArtifacts = artifacts;
     localsBuffer.writeln('LOCAL_ENGINE=${localEngineArtifacts.engineOutPath}');
+
+    // Tell Xcode not to build universal binaries for local engines, which are
+    // single-architecture.
+    //
+    // NOTE: this assumes that local engine binary paths are consistent with
+    // the conventions uses in the engine: 32-bit iOS engines are built to
+    // paths ending in _arm, 64-bit builds are not.
+    final String arch = localEngineArtifacts.engineOutPath.endsWith('_arm') ? 'armv7' : 'arm64';
+    localsBuffer.writeln('ARCHS=$arch');
   }
 
   if (previewDart2) {
     localsBuffer.writeln('PREVIEW_DART_2=true');
+  }
+
+  if (buildInfo.trackWidgetCreation) {
+    localsBuffer.writeln('TRACK_WIDGET_CREATION=true');
   }
 
   final File localsFile = fs.file(_generatedXcodePropertiesPath(projectPath));

@@ -1004,10 +1004,10 @@ class RenderBackdropFilter extends RenderProxyBox {
 ///
 /// See also:
 ///
-///  * [ClipRect], which can be customized with a [CustomClipper].
-///  * [ClipRRect], which can be customized with a [CustomClipper].
-///  * [ClipOval], which can be customized with a [CustomClipper].
-///  * [ClipPath], which can be customized with a [CustomClipper].
+///  * [ClipRect], which can be customized with a [CustomClipper<Rect>].
+///  * [ClipRRect], which can be customized with a [CustomClipper<RRect>].
+///  * [ClipOval], which can be customized with a [CustomClipper<Rect>].
+///  * [ClipPath], which can be customized with a [CustomClipper<Path>].
 abstract class CustomClipper<T> {
   /// Creates a custom clipper.
   ///
@@ -2074,6 +2074,15 @@ class RenderTransform extends RenderProxyBox {
 
   @override
   bool hitTest(HitTestResult result, { Offset position }) {
+    // RenderTransform objects don't check if they are
+    // themselves hit, because it's confusing to think about
+    // how the untransformed size and the child's transformed
+    // position interact.
+    return hitTestChildren(result, position: position);
+  }
+
+  @override
+  bool hitTestChildren(HitTestResult result, { Offset position }) {
     if (transformHitTests) {
       final Matrix4 inverse = Matrix4.tryInvert(_effectiveTransform);
       if (inverse == null) {
@@ -2083,7 +2092,7 @@ class RenderTransform extends RenderProxyBox {
       }
       position = MatrixUtils.transformPoint(inverse, position);
     }
-    return super.hitTest(result, position: position);
+    return super.hitTestChildren(result, position: position);
   }
 
   @override
@@ -2254,7 +2263,7 @@ class RenderFittedBox extends RenderProxyBox {
   }
 
   @override
-  bool hitTest(HitTestResult result, { Offset position }) {
+  bool hitTestChildren(HitTestResult result, { Offset position }) {
     if (size.isEmpty)
       return false;
     _updatePaintData();
@@ -2265,7 +2274,7 @@ class RenderFittedBox extends RenderProxyBox {
       return false;
     }
     position = MatrixUtils.transformPoint(inverse, position);
-    return super.hitTest(result, position: position);
+    return super.hitTestChildren(result, position: position);
   }
 
   @override
@@ -2322,6 +2331,15 @@ class RenderFractionalTranslation extends RenderProxyBox {
     markNeedsPaint();
   }
 
+  @override
+  bool hitTest(HitTestResult result, { Offset position }) {
+    // RenderFractionalTranslation objects don't check if they are
+    // themselves hit, because it's confusing to think about
+    // how the untransformed size and the child's transformed
+    // position interact.
+    return hitTestChildren(result, position: position);
+  }
+
   /// When set to true, hit tests are performed based on the position of the
   /// child as it is painted. When set to false, hit tests are performed
   /// ignoring the transformation.
@@ -2331,7 +2349,7 @@ class RenderFractionalTranslation extends RenderProxyBox {
   bool transformHitTests;
 
   @override
-  bool hitTest(HitTestResult result, { Offset position }) {
+  bool hitTestChildren(HitTestResult result, { Offset position }) {
     assert(!debugNeedsLayout);
     if (transformHitTests) {
       position = new Offset(
@@ -2339,7 +2357,7 @@ class RenderFractionalTranslation extends RenderProxyBox {
         position.dy - translation.dy * size.height,
       );
     }
-    return super.hitTest(result, position: position);
+    return super.hitTestChildren(result, position: position);
   }
 
   @override
@@ -4174,6 +4192,15 @@ class RenderFollowerLayer extends RenderProxyBox {
 
   @override
   bool hitTest(HitTestResult result, { Offset position }) {
+    // RenderFollowerLayer objects don't check if they are
+    // themselves hit, because it's confusing to think about
+    // how the untransformed size and the child's transformed
+    // position interact.
+    return hitTestChildren(result, position: position);
+  }
+
+  @override
+  bool hitTestChildren(HitTestResult result, { Offset position }) {
     final Matrix4 inverse = Matrix4.tryInvert(getCurrentTransform());
     if (inverse == null) {
       // We cannot invert the effective transform. That means the child
@@ -4181,7 +4208,7 @@ class RenderFollowerLayer extends RenderProxyBox {
       return false;
     }
     position = MatrixUtils.transformPoint(inverse, position);
-    return super.hitTest(result, position: position);
+    return super.hitTestChildren(result, position: position);
   }
 
   @override
