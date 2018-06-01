@@ -1,13 +1,13 @@
 // Copyright 2015 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
-
 import 'dart:async';
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 
+import '../material/theme.dart';
 import 'basic.dart';
 import 'framework.dart';
 import 'gesture_detector.dart';
@@ -79,10 +79,10 @@ class Scrollable extends StatefulWidget {
     this.physics,
     @required this.viewportBuilder,
     this.excludeFromSemantics: false,
-  }) : assert(axisDirection != null),
-       assert(viewportBuilder != null),
-       assert(excludeFromSemantics != null),
-       super (key: key);
+  })  : assert(axisDirection != null),
+        assert(viewportBuilder != null),
+        assert(excludeFromSemantics != null),
+        super(key: key);
 
   /// The direction in which this widget scrolls.
   ///
@@ -172,7 +172,8 @@ class Scrollable extends StatefulWidget {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(new EnumProperty<AxisDirection>('axisDirection', axisDirection));
+    properties
+        .add(new EnumProperty<AxisDirection>('axisDirection', axisDirection));
     properties.add(new DiagnosticsProperty<ScrollPhysics>('physics', physics));
   }
 
@@ -184,13 +185,15 @@ class Scrollable extends StatefulWidget {
   /// ScrollableState scrollable = Scrollable.of(context);
   /// ```
   static ScrollableState of(BuildContext context) {
-    final _ScrollableScope widget = context.inheritFromWidgetOfExactType(_ScrollableScope);
+    final _ScrollableScope widget =
+        context.inheritFromWidgetOfExactType(_ScrollableScope);
     return widget?.scrollable;
   }
 
   /// Scrolls the scrollables that enclose the given context so as to make the
   /// given context visible.
-  static Future<Null> ensureVisible(BuildContext context, {
+  static Future<Null> ensureVisible(
+    BuildContext context, {
     double alignment: 0.0,
     Duration duration: Duration.zero,
     Curve curve: Curves.ease,
@@ -209,10 +212,14 @@ class Scrollable extends StatefulWidget {
       scrollable = Scrollable.of(context);
     }
 
-    if (futures.isEmpty || duration == Duration.zero)
+    if (futures.isEmpty || duration == Duration.zero) {
       return new Future<Null>.value();
-    if (futures.length == 1)
+    }
+      
+    if (futures.length == 1) {
       return futures.single;
+    }
+
     return Future.wait<Null>(futures).then((List<Null> _) => null);
   }
 }
@@ -220,14 +227,14 @@ class Scrollable extends StatefulWidget {
 // Enable Scrollable.of() to work as if ScrollableState was an inherited widget.
 // ScrollableState.build() always rebuilds its _ScrollableScope.
 class _ScrollableScope extends InheritedWidget {
-  const _ScrollableScope({
-    Key key,
-    @required this.scrollable,
-    @required this.position,
-    @required Widget child
-  }) : assert(scrollable != null),
-       assert(child != null),
-       super(key: key, child: child);
+  const _ScrollableScope(
+      {Key key,
+      @required this.scrollable,
+      @required this.position,
+      @required Widget child})
+      : assert(scrollable != null),
+        assert(child != null),
+        super(key: key, child: child);
 
   final ScrollableState scrollable;
   final ScrollPosition position;
@@ -248,7 +255,8 @@ class _ScrollableScope extends InheritedWidget {
 ///
 /// This class is not intended to be subclassed. To specialize the behavior of a
 /// [Scrollable], provide it with a [ScrollPhysics].
-class ScrollableState extends State<Scrollable> with TickerProviderStateMixin
+class ScrollableState extends State<Scrollable>
+    with TickerProviderStateMixin
     implements ScrollContext {
   /// The manager for this [Scrollable] widget's viewport position.
   ///
@@ -268,8 +276,9 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin
   void _updatePosition() {
     _configuration = ScrollConfiguration.of(context);
     _physics = _configuration.getScrollPhysics(context);
-    if (widget.physics != null)
+    if (widget.physics != null) {
       _physics = widget.physics.applyTo(_physics);
+    }
     final ScrollController controller = widget.controller;
     final ScrollPosition oldPosition = position;
     if (oldPosition != null) {
@@ -280,8 +289,9 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin
       scheduleMicrotask(oldPosition.dispose);
     }
 
-    _position = controller?.createScrollPosition(_physics, this, oldPosition)
-      ?? new ScrollPositionWithSingleContext(physics: _physics, context: this, oldPosition: oldPosition);
+    _position = controller?.createScrollPosition(_physics, this, oldPosition) ??
+        new ScrollPositionWithSingleContext(
+            physics: _physics, context: this, oldPosition: oldPosition);
     assert(position != null);
     controller?.attach(position);
   }
@@ -296,8 +306,9 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin
     ScrollPhysics newPhysics = widget.physics;
     ScrollPhysics oldPhysics = oldWidget.physics;
     do {
-      if (newPhysics?.runtimeType != oldPhysics?.runtimeType)
+      if (newPhysics?.runtimeType != oldPhysics?.runtimeType) {
         return true;
+      }
       newPhysics = newPhysics?.parent;
       oldPhysics = oldPhysics?.parent;
     } while (newPhysics != null || oldPhysics != null);
@@ -314,8 +325,9 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin
       widget.controller?.attach(position);
     }
 
-    if (_shouldUpdatePosition(oldWidget))
+    if (_shouldUpdatePosition(oldWidget)) {
       _updatePosition();
+    }
   }
 
   @override
@@ -324,7 +336,6 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin
     position.dispose();
     super.dispose();
   }
-
 
   // SEMANTICS
 
@@ -337,14 +348,15 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin
       _gestureDetectorKey.currentState.replaceSemanticsActions(actions);
   }
 
-
   // GESTURE RECOGNITION AND POINTER IGNORING
 
-  final GlobalKey<RawGestureDetectorState> _gestureDetectorKey = new GlobalKey<RawGestureDetectorState>();
+  final GlobalKey<RawGestureDetectorState> _gestureDetectorKey =
+      new GlobalKey<RawGestureDetectorState>();
   final GlobalKey _ignorePointerKey = new GlobalKey();
 
   // This field is set during layout, and then reused until the next time it is set.
-  Map<Type, GestureRecognizerFactory> _gestureRecognizers = const <Type, GestureRecognizerFactory>{};
+  Map<Type, GestureRecognizerFactory> _gestureRecognizers =
+      const <Type, GestureRecognizerFactory>{};
   bool _shouldIgnorePointer = false;
 
   bool _lastCanDrag;
@@ -353,15 +365,19 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin
   @override
   @protected
   void setCanDrag(bool canDrag) {
-    if (canDrag == _lastCanDrag && (!canDrag || widget.axis == _lastAxisDirection))
-      return;
+    if (canDrag == _lastCanDrag &&
+        (!canDrag || widget.axis == _lastAxisDirection)) {
+          return;
+        }
     if (!canDrag) {
       _gestureRecognizers = const <Type, GestureRecognizerFactory>{};
     } else {
       switch (widget.axis) {
         case Axis.vertical:
           _gestureRecognizers = <Type, GestureRecognizerFactory>{
-            VerticalDragGestureRecognizer: new GestureRecognizerFactoryWithHandlers<VerticalDragGestureRecognizer>(
+            VerticalDragGestureRecognizer:
+                new GestureRecognizerFactoryWithHandlers<
+                    VerticalDragGestureRecognizer>(
               () => new VerticalDragGestureRecognizer(),
               (VerticalDragGestureRecognizer instance) {
                 instance
@@ -379,7 +395,9 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin
           break;
         case Axis.horizontal:
           _gestureRecognizers = <Type, GestureRecognizerFactory>{
-            HorizontalDragGestureRecognizer: new GestureRecognizerFactoryWithHandlers<HorizontalDragGestureRecognizer>(
+            HorizontalDragGestureRecognizer:
+                new GestureRecognizerFactoryWithHandlers<
+                    HorizontalDragGestureRecognizer>(
               () => new HorizontalDragGestureRecognizer(),
               (HorizontalDragGestureRecognizer instance) {
                 instance
@@ -399,8 +417,10 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin
     }
     _lastCanDrag = canDrag;
     _lastAxisDirection = widget.axis;
-    if (_gestureDetectorKey.currentState != null)
-      _gestureDetectorKey.currentState.replaceGestureRecognizers(_gestureRecognizers);
+    if (_gestureDetectorKey.currentState != null) {
+      _gestureDetectorKey.currentState
+          .replaceGestureRecognizers(_gestureRecognizers);
+    }
   }
 
   @override
@@ -409,11 +429,13 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin
   @override
   @protected
   void setIgnorePointer(bool value) {
-    if (_shouldIgnorePointer == value)
+    if (_shouldIgnorePointer == value) {
       return;
+    }
     _shouldIgnorePointer = value;
     if (_ignorePointerKey.currentContext != null) {
-      final RenderIgnorePointer renderBox = _ignorePointerKey.currentContext.findRenderObject();
+      final RenderIgnorePointer renderBox =
+          _ignorePointerKey.currentContext.findRenderObject();
       renderBox.ignoring = _shouldIgnorePointer;
     }
   }
@@ -476,7 +498,6 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin
     _drag = null;
   }
 
-
   // DESCRIPTION
 
   @override
@@ -511,13 +532,17 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin
       );
     }
 
-    return _configuration.buildViewportChrome(context, result, widget.axisDirection);
+    return Theme.of(context).showGlow
+        ? _configuration.buildViewportChrome(
+            context, result, widget.axisDirection)
+        : result;
   }
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(new DiagnosticsProperty<ScrollPosition>('position', position));
+    properties
+        .add(new DiagnosticsProperty<ScrollPosition>('position', position));
   }
 }
 
@@ -536,19 +561,20 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin
 /// node, which is annotated with the scrolling actions, will house the
 /// scrollable children.
 class _ExcludableScrollSemantics extends SingleChildRenderObjectWidget {
-  const _ExcludableScrollSemantics({
-    Key key,
-    @required this.position,
-    Widget child
-  }) : assert(position != null), super(key: key, child: child);
+  const _ExcludableScrollSemantics(
+      {Key key, @required this.position, Widget child})
+      : assert(position != null),
+        super(key: key, child: child);
 
   final ScrollPosition position;
 
   @override
-  _RenderExcludableScrollSemantics createRenderObject(BuildContext context) => new _RenderExcludableScrollSemantics(position: position);
+  _RenderExcludableScrollSemantics createRenderObject(BuildContext context) =>
+      new _RenderExcludableScrollSemantics(position: position);
 
   @override
-  void updateRenderObject(BuildContext context, _RenderExcludableScrollSemantics renderObject) {
+  void updateRenderObject(
+      BuildContext context, _RenderExcludableScrollSemantics renderObject) {
     renderObject.position = position;
   }
 }
@@ -557,7 +583,9 @@ class _RenderExcludableScrollSemantics extends RenderProxyBox {
   _RenderExcludableScrollSemantics({
     @required ScrollPosition position,
     RenderBox child,
-  }) : _position = position, assert(position != null), super(child) {
+  })  : _position = position,
+        assert(position != null),
+        super(child) {
     position.addListener(markNeedsSemanticsUpdate);
   }
 
@@ -566,8 +594,9 @@ class _RenderExcludableScrollSemantics extends RenderProxyBox {
   ScrollPosition _position;
   set position(ScrollPosition value) {
     assert(value != null);
-    if (value == _position)
+    if (value == _position) {
       return;
+    }
     _position.removeListener(markNeedsSemanticsUpdate);
     _position = value;
     _position.addListener(markNeedsSemanticsUpdate);
@@ -580,17 +609,19 @@ class _RenderExcludableScrollSemantics extends RenderProxyBox {
     config.isSemanticBoundary = true;
     if (position.haveDimensions) {
       config
-          ..scrollPosition = _position.pixels
-          ..scrollExtentMax = _position.maxScrollExtent
-          ..scrollExtentMin = _position.minScrollExtent;
+        ..scrollPosition = _position.pixels
+        ..scrollExtentMax = _position.maxScrollExtent
+        ..scrollExtentMin = _position.minScrollExtent;
     }
   }
 
   SemanticsNode _innerNode;
 
   @override
-  void assembleSemanticsNode(SemanticsNode node, SemanticsConfiguration config, Iterable<SemanticsNode> children) {
-    if (children.isEmpty || !children.first.isTagged(RenderViewport.useTwoPaneSemantics)) {
+  void assembleSemanticsNode(SemanticsNode node, SemanticsConfiguration config,
+      Iterable<SemanticsNode> children) {
+    if (children.isEmpty ||
+        !children.first.isTagged(RenderViewport.useTwoPaneSemantics)) {
       super.assembleSemanticsNode(node, config, children);
       return;
     }
@@ -610,7 +641,8 @@ class _RenderExcludableScrollSemantics extends RenderProxyBox {
         included.add(child);
     }
     node.updateWith(config: null, childrenInInversePaintOrder: excluded);
-    _innerNode.updateWith(config: config, childrenInInversePaintOrder: included);
+    _innerNode.updateWith(
+        config: config, childrenInInversePaintOrder: included);
   }
 
   @override
