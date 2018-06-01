@@ -296,7 +296,7 @@ class FlutterVersion {
 
     // Cache is empty or it's been a while since the last server ping. Ping the server.
     try {
-      final String branch = _channel == 'alpha' ? 'alpha' : 'master';
+      final String branch = officialChannels.contains(_channel) ? _channel : 'master';
       final DateTime remoteFrameworkCommitDate = DateTime.parse(await FlutterVersion.fetchRemoteFrameworkCommitDate(branch));
       await versionCheckStamp.store(
         newTimeVersionWasChecked: _clock.now(),
