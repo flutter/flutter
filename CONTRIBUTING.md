@@ -3,8 +3,18 @@ Contributing to the Flutter engine
 
 [![Build Status](https://travis-ci.org/flutter/engine.svg)](https://travis-ci.org/flutter/engine)
 
+_See also: [Flutter's code of conduct](https://flutter.io/design-principles/#code-of-conduct)_
+
+Welcome
+-------
+
+This guide introduces you to building and contributing to the Flutter engine.
+For an introduction to contributing to the Flutter framework, see [the equivalent
+document in the framework's repository](https://github.com/flutter/flutter/blob/master/CONTRIBUTING.md).
+
+
 I built it before. Remind me, how do I do it again?
---------------------
+---------------------------------------------------
 
 If you have previously built the engine (i.e. your environment is already setup) and just want a refresher, then feel free to skip to one of the following sections:
 
