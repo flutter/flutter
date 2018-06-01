@@ -1161,20 +1161,27 @@ void main() {
   });
 
   testWidgets('Slider Semantics - iOS', (WidgetTester tester) async {
-    debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
     final SemanticsTester semantics = new SemanticsTester(tester);
-    await tester.pumpWidget(new Directionality(
-      textDirection: TextDirection.ltr,
-      child: new MediaQuery(
-        data: new MediaQueryData.fromWindow(window),
-        child: new Material(
-          child: new Slider(
-            value: 0.5,
-            onChanged: (double v) {},
+
+    await tester.pumpWidget(
+      new Theme(
+        data: ThemeData.light().copyWith(
+          platform: TargetPlatform.iOS,
+        ),
+        child: new Directionality(
+          textDirection: TextDirection.ltr,
+          child: new MediaQuery(
+            data: new MediaQueryData.fromWindow(window),
+            child: new Material(
+              child: new Slider(
+                value: 0.5,
+                onChanged: (double v) {},
+              ),
+            ),
           ),
         ),
       ),
-    ));
+    );
 
     expect(
       semantics,

@@ -457,6 +457,7 @@ class _SliderRenderObjectWidget extends LeafRenderObjectWidget {
       onChangeEnd: onChangeEnd,
       state: state,
       textDirection: Directionality.of(context),
+      platform: Theme.of(context).platform,
     );
   }
 
@@ -472,7 +473,8 @@ class _SliderRenderObjectWidget extends LeafRenderObjectWidget {
       ..onChanged = onChanged
       ..onChangeStart = onChangeStart
       ..onChangeEnd = onChangeEnd
-      ..textDirection = Directionality.of(context);
+      ..textDirection = Directionality.of(context)
+      ..platform = Theme.of(context).platform;
     // Ticker provider cannot change since there's a 1:1 relationship between
     // the _SliderRenderObjectWidget object and the _SliderState object.
   }
@@ -486,6 +488,7 @@ class _RenderSlider extends RenderBox {
     SliderThemeData sliderTheme,
     ThemeData theme,
     MediaQueryData mediaQueryData,
+    TargetPlatform platform,
     ValueChanged<double> onChanged,
     this.onChangeStart,
     this.onChangeEnd,
@@ -494,6 +497,7 @@ class _RenderSlider extends RenderBox {
   }) : assert(value != null && value >= 0.0 && value <= 1.0),
        assert(state != null),
        assert(textDirection != null),
+       _platform = platform,
        _label = label,
        _value = value,
        _divisions = divisions,
@@ -537,18 +541,6 @@ class _RenderSlider extends RenderBox {
   static const double _preferredTrackWidth = 144.0;
   static const double _preferredTotalWidth = _preferredTrackWidth + _overlayDiameter;
   static const Duration _minimumInteractionTime = const Duration(milliseconds: 500);
-  static double get _adjustmentUnit {
-    switch (defaultTargetPlatform) {
-      case TargetPlatform.iOS:
-        // Matches iOS implementation of material slider.
-        return 0.1;
-      case TargetPlatform.android:
-      case TargetPlatform.fuchsia:
-      default:
-        // Matches Android implementation of material slider.
-        return 0.05;
-    }
-  }
   static final Tween<double> _overlayRadiusTween = new Tween<double>(begin: 0.0, end: _overlayRadius);
 
   _SliderState _state;
@@ -589,6 +581,15 @@ class _RenderSlider extends RenderBox {
     } else {
       _state.positionController.value = convertedValue;
     }
+    markNeedsSemanticsUpdate();
+  }
+
+  TargetPlatform _platform;
+  TargetPlatform get platform => _platform;
+  set platform(TargetPlatform value) {
+    if (_platform == value)
+      return;
+    _platform = value;
     markNeedsSemanticsUpdate();
   }
 
@@ -694,6 +695,19 @@ class _RenderSlider extends RenderBox {
         break;
     }
     return showValueIndicator;
+  }
+
+  double get _adjustmentUnit {
+    switch (_platform) {
+      case TargetPlatform.iOS:
+      // Matches iOS implementation of material slider.
+        return 0.1;
+      case TargetPlatform.android:
+      case TargetPlatform.fuchsia:
+      default:
+      // Matches Android implementation of material slider.
+        return 0.05;
+    }
   }
 
   void _updateLabelPainter() {
