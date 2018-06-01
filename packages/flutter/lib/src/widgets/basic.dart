@@ -2203,9 +2203,18 @@ class SizedOverflowBox extends SingleChildRenderObjectWidget {
 /// without making the child available for hit testing, and without taking any
 /// room in the parent.
 ///
+/// Animations continue to run in offstage children, and therefore use battery
+/// and CPU time, regardless of whether the animations end up being visible.
+///
+/// [Offstage] can be used to measure the dimensions of a widget without
+/// bringing it on screen (yet). To hide a widget from view while it is not
+/// needed, prefer removing the widget from the tree entirely rather than
+/// keeping it alive in an [Offstage] subtree.
+///
 /// See also:
 ///
 ///  * The [catalog of layout widgets](https://flutter.io/widgets/layout/).
+///  * [TickerMode], which can be used to disable animations in a subtree.
 class Offstage extends SingleChildRenderObjectWidget {
   /// Creates a widget that visually hides its child.
   const Offstage({ Key key, this.offstage: true, Widget child })
