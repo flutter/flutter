@@ -247,7 +247,7 @@ class _AnimatedSwitcherState extends State<AnimatedSwitcher> with TickerProvider
   }) {
     final _AnimatedSwitcherChildEntry entry = new _AnimatedSwitcherChildEntry(
       widgetChild: widget.child,
-      transition: KeyedSubtree.wrap(
+      transition: new KeyedSubtree.wrap(
         widget.transitionBuilder(
           widget.child,
           animation,
