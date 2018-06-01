@@ -323,6 +323,16 @@ abstract class LocalHistoryRoute<T> extends Route<T> {
   ///
   /// The given local history entry must not already be part of another local
   /// history route.
+  ///
+  /// ```dart
+  /// ModalRoute.of(context).addLocalHistoryEntry(
+  ///   new LocalHistoryEntry(
+  ///     onRemove: () {
+  ///       // Do something when the route you added is popped.
+  ///     },
+  ///   ),
+  /// );
+  /// ```
   void addLocalHistoryEntry(LocalHistoryEntry entry) {
     assert(entry._owner == null);
     entry._owner = this;
