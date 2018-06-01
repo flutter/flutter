@@ -322,6 +322,8 @@ ORIGIN: ../../../flutter/assets/directory_asset_bundle.cc + ../../../LICENSE
 TYPE: LicenseType.bsd
 FILE: ../../../flutter/assets/directory_asset_bundle.cc
 FILE: ../../../flutter/assets/directory_asset_bundle.h
+FILE: ../../../flutter/assets/zip_asset_store.cc
+FILE: ../../../flutter/assets/zip_asset_store.h
 FILE: ../../../flutter/common/settings.cc
 FILE: ../../../flutter/common/settings.h
 FILE: ../../../flutter/flow/export_node.cc

@@ -9,6 +9,8 @@ source_set("assets") {
     "asset_resolver.h",
     "directory_asset_bundle.cc",
     "directory_asset_bundle.h",
+    "zip_asset_store.cc",
+    "zip_asset_store.h",
   ]
 
   deps = [
@@ -16,6 +18,11 @@ source_set("assets") {
     "$flutter_root/fml",
     "$flutter_root/glue",
     "//garnet/public/lib/fxl",
+    "//garnet/public/lib/zip",
+  ]
+
+  public_deps = [
+    "//third_party/zlib:minizip",
   ]
 
   public_configs = [ "$flutter_root:config" ]
