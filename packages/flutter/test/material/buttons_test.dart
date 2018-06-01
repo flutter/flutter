@@ -274,7 +274,7 @@ void main() {
     );
 
     await gesture.up();
-  });
+  }, skip: true);
 
   testWidgets('Disabled MaterialButton has same semantic size as enabled and exposes disabled semantics', (WidgetTester tester) async {
     final SemanticsTester semantics = new SemanticsTester(tester);
