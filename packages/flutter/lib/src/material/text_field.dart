@@ -344,6 +344,11 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
       _controller = new TextEditingController.fromValue(oldWidget.controller.value);
     else if (widget.controller != null && oldWidget.controller == null)
       _controller = null;
+    final bool isEnabled = widget.enabled ?? widget.decoration?.enabled ?? true;
+    final bool wasEnabled = oldWidget.enabled ?? oldWidget.decoration?.enabled ?? true;
+    if (wasEnabled && !isEnabled) {
+      _effectiveFocusNode.unfocus();
+    }
   }
 
   @override
