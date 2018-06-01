@@ -4,6 +4,7 @@
 
 import 'package:flutter/widgets.dart';
 
+import 'colors.dart';
 import 'constants.dart';
 import 'theme.dart';
 import 'theme_data.dart';
@@ -57,6 +58,8 @@ class CircleAvatar extends StatelessWidget {
     this.radius,
     this.minRadius,
     this.maxRadius,
+    this.borderColor: Colors.transparent,
+    this.borderWidth,
   })  : assert(radius == null || (minRadius == null && maxRadius == null)),
         super(key: key);
 
@@ -119,6 +122,16 @@ class CircleAvatar extends StatelessWidget {
   /// Defaults to [double.infinity].
   final double maxRadius;
 
+  /// The color of an optional border around the avatar.
+  ///
+  /// Defaults to [Colors.transparent].
+  final Color borderColor;
+
+  /// The border width of an optional border around the avatar.
+  ///
+  /// Defaults to null.
+  final double borderWidth;
+
   // The default radius if nothing is specified.
   static const double _defaultRadius = 20.0;
 
@@ -140,6 +153,17 @@ class CircleAvatar extends StatelessWidget {
       return _defaultRadius * 2.0;
     }
     return 2.0 * (radius ?? maxRadius ?? _defaultMaxRadius);
+  }
+
+  BoxBorder get _border {
+    if (borderWidth == null) {
+      return null;
+    }
+    return new Border.all(
+      color: borderColor,
+      width: borderWidth,
+      style: BorderStyle.solid,
+    );
   }
 
   @override
@@ -183,6 +207,7 @@ class CircleAvatar extends StatelessWidget {
           ? new DecorationImage(image: backgroundImage, fit: BoxFit.cover)
           : null,
         shape: BoxShape.circle,
+        border: _border,
       ),
       child: child == null
           ? null
