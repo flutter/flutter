@@ -1860,7 +1860,7 @@ class _RenderChip extends RenderBox {
   @override
   double computeDistanceToActualBaseline(TextBaseline baseline) {
     // The baseline of this widget is the baseline of the label.
-    return label.computeDistanceToActualBaseline(baseline);
+    return label.getDistanceToActualBaseline(baseline);
   }
 
   Size _layoutLabel(double iconSizes, Size size) {

@@ -67,18 +67,11 @@ Widget _wrapForChip({
   double textScaleFactor: 1.0,
 }) {
   return new MaterialApp(
-    home: new Localizations(
-      locale: const Locale('en', 'US'),
-      delegates: const <LocalizationsDelegate<dynamic>>[
-        DefaultWidgetsLocalizations.delegate,
-        DefaultMaterialLocalizations.delegate,
-      ],
-      child: new Directionality(
-        textDirection: textDirection,
-        child: new MediaQuery(
-          data: new MediaQueryData.fromWindow(window).copyWith(textScaleFactor: textScaleFactor),
-          child: new Material(child: child),
-        ),
+    home: new Directionality(
+      textDirection: textDirection,
+      child: new MediaQuery(
+        data: new MediaQueryData.fromWindow(window).copyWith(textScaleFactor: textScaleFactor),
+        child: new Material(child: child),
       ),
     ),
   );

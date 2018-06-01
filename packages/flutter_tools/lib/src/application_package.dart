@@ -15,6 +15,7 @@ import 'base/os.dart' show os;
 import 'base/process.dart';
 import 'build_info.dart';
 import 'globals.dart';
+import 'ios/ios_workflow.dart';
 import 'ios/plist_utils.dart' as plist;
 import 'ios/xcodeproj.dart';
 import 'tester/flutter_tester.dart';
@@ -145,29 +146,61 @@ bool _isBundleDirectory(FileSystemEntity entity) =>
 abstract class IOSApp extends ApplicationPackage {
   IOSApp({@required String projectBundleId}) : super(id: projectBundleId);
 
-  /// Creates a new IOSApp from an existing IPA.
-  factory IOSApp.fromIpa(String applicationBinary) {
+  /// Creates a new IOSApp from an existing app bundle or IPA.
+  factory IOSApp.fromPrebuiltApp(String applicationBinary) {
+    final FileSystemEntityType entityType = fs.typeSync(applicationBinary);
+    if (entityType == FileSystemEntityType.notFound) {
+      printError(
+          'File "$applicationBinary" does not exist. Use an app bundle or an ipa.');
+      return null;
+    }
     Directory bundleDir;
-    try {
-      final Directory tempDir = fs.systemTempDirectory.createTempSync('flutter_app_');
+    if (entityType == FileSystemEntityType.directory) {
+      final Directory directory = fs.directory(applicationBinary);
+      if (!_isBundleDirectory(directory)) {
+        printError('Folder "$applicationBinary" is not an app bundle.');
+        return null;
+      }
+      bundleDir = fs.directory(applicationBinary);
+    } else {
+      // Try to unpack as an ipa.
+      final Directory tempDir = fs.systemTempDirectory.createTempSync(
+          'flutter_app_');
       addShutdownHook(() async {
         await tempDir.delete(recursive: true);
       }, ShutdownStage.STILL_RECORDING);
       os.unzip(fs.file(applicationBinary), tempDir);
-      final Directory payloadDir = fs.directory(fs.path.join(tempDir.path, 'Payload'));
-      bundleDir = payloadDir.listSync().singleWhere(_isBundleDirectory);
-    } on StateError catch (e, stackTrace) {
-      printError('Invalid prebuilt iOS binary: ${e.toString()}', stackTrace: stackTrace);
+      final Directory payloadDir = fs.directory(
+        fs.path.join(tempDir.path, 'Payload'),
+      );
+      if (!payloadDir.existsSync()) {
+        printError(
+            'Invalid prebuilt iOS ipa. Does not contain a "Payload" directory.');
+        return null;
+      }
+      try {
+        bundleDir = payloadDir.listSync().singleWhere(_isBundleDirectory);
+      } on StateError {
+        printError(
+            'Invalid prebuilt iOS ipa. Does not contain a single app bundle.');
+        return null;
+      }
+    }
+    final String plistPath = fs.path.join(bundleDir.path, 'Info.plist');
+    if (!fs.file(plistPath).existsSync()) {
+      printError('Invalid prebuilt iOS app. Does not contain Info.plist.');
+      return null;
+    }
+    final String id = iosWorkflow.getPlistValueFromFile(
+      plistPath,
+      plist.kCFBundleIdentifierKey,
+    );
+    if (id == null) {
+      printError('Invalid prebuilt iOS app. Info.plist does not contain bundle identifier');
       return null;
     }
 
-    final String plistPath = fs.path.join(bundleDir.path, 'Info.plist');
-    final String id = plist.getValueFromFile(plistPath, plist.kCFBundleIdentifierKey);
-    if (id == null)
-      return null;
-
     return new PrebuiltIOSApp(
-      ipaPath: applicationBinary,
       bundleDir: bundleDir,
       bundleName: fs.path.basename(bundleDir.path),
       projectBundleId: id,
@@ -179,7 +212,10 @@ abstract class IOSApp extends ApplicationPackage {
       return null;
 
     final String plistPath = fs.path.join('ios', 'Runner', 'Info.plist');
-    String id = plist.getValueFromFile(plistPath, plist.kCFBundleIdentifierKey);
+    String id = iosWorkflow.getPlistValueFromFile(
+      plistPath,
+      plist.kCFBundleIdentifierKey,
+    );
     if (id == null || !xcodeProjectInterpreter.isInstalled)
       return null;
     final String projectPath = fs.path.join('ios', 'Runner.xcodeproj');
@@ -237,12 +273,10 @@ class BuildableIOSApp extends IOSApp {
 }
 
 class PrebuiltIOSApp extends IOSApp {
-  final String ipaPath;
   final Directory bundleDir;
   final String bundleName;
 
   PrebuiltIOSApp({
-    this.ipaPath,
     this.bundleDir,
     this.bundleName,
     @required String projectBundleId,
@@ -274,7 +308,7 @@ Future<ApplicationPackage> getApplicationPackageForPlatform(TargetPlatform platf
     case TargetPlatform.ios:
       return applicationBinary == null
           ? new IOSApp.fromCurrentDirectory()
-          : new IOSApp.fromIpa(applicationBinary);
+          : new IOSApp.fromPrebuiltApp(applicationBinary);
     case TargetPlatform.tester:
       return new FlutterTesterApp.fromCurrentDirectory();
     case TargetPlatform.darwin_x64:

@@ -60,9 +60,9 @@ abstract class GoldenFileComparator {
 /// When using `flutter test --update-goldens`, the [LocalFileComparator]
 /// updates the files on disk to match the rendering.
 ///
-/// When using `flutter run`, the default comparator (null) is used. It prints
-/// a message to the console but otherwise does nothing. This allows tests to
-/// be developed visually on a real device.
+/// When using `flutter run`, the default comparator ([TrivialComparator])
+/// is used. It prints a message to the console but otherwise does nothing. This
+/// allows tests to be developed visually on a real device.
 ///
 /// Callers may choose to override the default comparator by setting this to a
 /// custom comparator during test set-up (or using directory-level test
@@ -75,12 +75,11 @@ abstract class GoldenFileComparator {
 ///
 ///  * [flutter_test] for more information about how to configure tests at the
 ///    directory-level.
-GoldenFileComparator get goldenFileComparator {
-  return _goldenFileComparator == const _UninitializedComparator() ? null : _goldenFileComparator;
-}
-GoldenFileComparator _goldenFileComparator = const _UninitializedComparator();
-set goldenFileComparator(GoldenFileComparator comparator) {
-  _goldenFileComparator = comparator ?? const _UninitializedComparator();
+GoldenFileComparator get goldenFileComparator => _goldenFileComparator;
+GoldenFileComparator _goldenFileComparator = const TrivialComparator._();
+set goldenFileComparator(GoldenFileComparator value) {
+  assert(value != null);
+  _goldenFileComparator = value;
 }
 
 /// Whether golden files should be automatically updated during tests rather
@@ -111,8 +110,11 @@ bool autoUpdateGoldenFiles = false;
 /// via `flutter run`. In this case, the [compare] method will just print a
 /// message that it would have otherwise run a real comparison, and it will
 /// return trivial success.
-class _UninitializedComparator implements GoldenFileComparator {
-  const _UninitializedComparator();
+///
+/// This class can't be constructed. It represents the default value of
+/// [goldenFileComparator].
+class TrivialComparator implements GoldenFileComparator {
+  const TrivialComparator._();
 
   @override
   Future<bool> compare(Uint8List imageBytes, Uri golden) {

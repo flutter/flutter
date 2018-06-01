@@ -19,6 +19,14 @@ class TestStatefulWidgetState extends State<TestStatefulWidget> {
 }
 
 void main() {
+  testWidgets('Table widget - empty', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new Table(),
+      ),
+    );
+  });
   testWidgets('Table widget - control test', (WidgetTester tester) async {
     Future<Null> run(TextDirection textDirection) async {
       await tester.pumpWidget(

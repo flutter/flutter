@@ -12,7 +12,7 @@ import 'globals.dart';
 class BuildInfo {
   const BuildInfo(this.mode, this.flavor, {
     this.previewDart2: false,
-    this.trackWidgetCreation,
+    this.trackWidgetCreation: false,
     this.extraFrontEndOptions,
     this.extraGenSnapshotOptions,
     this.preferSharedLibrary,
