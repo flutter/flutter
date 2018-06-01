@@ -1199,8 +1199,45 @@ void main() {
         ignoreRect: true,
         ignoreTransform: true,
       ));
+    semantics.dispose();
+  });
 
-    debugDefaultTargetPlatformOverride = null;
+  testWidgets('Slider semantics with normalizeSemanticValue = false', (WidgetTester tester) async {
+    final SemanticsTester semantics = new SemanticsTester(tester);
+
+    await tester.pumpWidget(new Directionality(
+      textDirection: TextDirection.ltr,
+      child: new MediaQuery(
+        data: new MediaQueryData.fromWindow(window),
+        child: new Material(
+          child: new Slider(
+            value: 40.0,
+            min: 0.0,
+            max: 200.0,
+            divisions: 10,
+            normalizedSemanticsValue: false,
+            onChanged: (double v) {},
+          ),
+        ),
+      ),
+    ));
+
+    expect(
+        semantics,
+        hasSemantics(
+          new TestSemantics.root(children: <TestSemantics>[
+            new TestSemantics.rootChild(
+              id: 3,
+              value: '40',
+              increasedValue: '60',
+              decreasedValue: '20',
+              textDirection: TextDirection.ltr,
+              actions: SemanticsAction.decrease.index | SemanticsAction.increase.index,
+            ),
+          ]),
+          ignoreRect: true,
+          ignoreTransform: true,
+        ));
     semantics.dispose();
   });
 

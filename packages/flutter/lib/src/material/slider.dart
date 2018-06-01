@@ -110,6 +110,7 @@ class Slider extends StatefulWidget {
     this.label,
     this.activeColor,
     this.inactiveColor,
+    this.normalizedSemanticsValue = true,
   }) : assert(value != null),
        assert(min != null),
        assert(max != null),
@@ -288,6 +289,16 @@ class Slider extends StatefulWidget {
   /// appearance of various components of the slider.
   final Color inactiveColor;
 
+  /// Whether to normalize the semantic value of the slider to a percentage.
+  ///
+  /// This is used by accessibility frameworks like TalkBack on Android to
+  /// inform users what the currently selected value is. If false, the value
+  /// is communicated instead of the percentage rounded to the nearest whole
+  /// number.
+  ///
+  /// Defaults to true.
+  final bool normalizedSemanticsValue;
+
   @override
   _SliderState createState() => new _SliderState();
 
@@ -415,6 +426,7 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
       onChangeStart: widget.onChangeStart != null ? _handleDragStart : null,
       onChangeEnd: widget.onChangeEnd != null ? _handleDragEnd : null,
       state: this,
+      normalizedSemanticsValue: widget.normalizedSemanticsValue,
     );
   }
 }
@@ -431,6 +443,7 @@ class _SliderRenderObjectWidget extends LeafRenderObjectWidget {
     this.onChangeStart,
     this.onChangeEnd,
     this.state,
+    this.normalizedSemanticsValue,
   }) : super(key: key);
 
   final double value;
@@ -441,6 +454,7 @@ class _SliderRenderObjectWidget extends LeafRenderObjectWidget {
   final ValueChanged<double> onChanged;
   final ValueChanged<double> onChangeStart;
   final ValueChanged<double> onChangeEnd;
+  final bool normalizedSemanticsValue;
   final _SliderState state;
 
   @override
@@ -457,6 +471,7 @@ class _SliderRenderObjectWidget extends LeafRenderObjectWidget {
       onChangeEnd: onChangeEnd,
       state: state,
       textDirection: Directionality.of(context),
+      normalizedSemanticsValue: normalizedSemanticsValue,
       platform: Theme.of(context).platform,
     );
   }
@@ -474,6 +489,7 @@ class _SliderRenderObjectWidget extends LeafRenderObjectWidget {
       ..onChangeStart = onChangeStart
       ..onChangeEnd = onChangeEnd
       ..textDirection = Directionality.of(context)
+      ..normalizedSemanticsValue = normalizedSemanticsValue
       ..platform = Theme.of(context).platform;
     // Ticker provider cannot change since there's a 1:1 relationship between
     // the _SliderRenderObjectWidget object and the _SliderState object.
@@ -490,6 +506,7 @@ class _RenderSlider extends RenderBox {
     MediaQueryData mediaQueryData,
     TargetPlatform platform,
     ValueChanged<double> onChanged,
+    bool normalizedSemanticsValue,
     this.onChangeStart,
     this.onChangeEnd,
     @required _SliderState state,
@@ -498,6 +515,7 @@ class _RenderSlider extends RenderBox {
        assert(state != null),
        assert(textDirection != null),
        _platform = platform,
+       _normalizedSemanticsValue = normalizedSemanticsValue,
        _label = label,
        _value = value,
        _divisions = divisions,
@@ -590,6 +608,15 @@ class _RenderSlider extends RenderBox {
     if (_platform == value)
       return;
     _platform = value;
+    markNeedsSemanticsUpdate();
+  }
+
+  bool _normalizedSemanticsValue;
+  bool get normalizedSemanticsValue => _normalizedSemanticsValue;
+  set normalizedSemanticsValue(bool value) {
+    if (_normalizedSemanticsValue == value)
+      return;
+    _normalizedSemanticsValue = value;
     markNeedsSemanticsUpdate();
   }
 
@@ -1032,9 +1059,16 @@ class _RenderSlider extends RenderBox {
       config.textDirection = textDirection;
       config.onIncrease = _increaseAction;
       config.onDecrease = _decreaseAction;
-      config.value = '${(value * 100).round().clamp(0, 100)}%';
-      config.increasedValue = '${((value + _semanticActionUnit).clamp(0.0, 1.0) * 100).round()}%';
-      config.decreasedValue = '${((value - _semanticActionUnit).clamp(0.0, 1.0) * 100).round()}%';
+
+      if (normalizedSemanticsValue) {
+        config.value = '${(value * 100).round().clamp(0, 100)}%';
+        config.increasedValue = '${((value + _semanticActionUnit).clamp(0.0, 1.0) * 100).round()}%';
+        config.decreasedValue = '${((value - _semanticActionUnit).clamp(0.0, 1.0) * 100).round()}%' ;
+      } else {
+        config.value = '${_state._lerp(value).round()}';
+        config.increasedValue = '${_state._lerp((value + _semanticActionUnit).clamp(0.0, 1.0)).round()}';
+        config.decreasedValue = '${_state._lerp((value - _semanticActionUnit).clamp(0.0, 1.0)).round()}';
+      }
     }
   }
 
