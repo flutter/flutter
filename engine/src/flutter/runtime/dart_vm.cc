@@ -58,9 +58,13 @@ namespace blink {
 
 // Arguments passed to the Dart VM in all configurations.
 static const char* kDartLanguageArgs[] = {
-    "--enable_mirrors=false", "--background_compilation", "--await_is_keyword",
-    "--causal_async_stacks",  "--limit-ints-to-64-bits",
-    "--enable_kernel_expression_compilation=false" // TODO(dartbug.com/33087)
+    // clang-format off
+    "--enable_mirrors=false",
+    "--background_compilation",
+    "--await_is_keyword",
+    "--causal_async_stacks",
+    "--enable_kernel_expression_compilation=false", // TODO(dartbug.com/33087)
+    // clang-format on
 };
 
 static const char* kDartPrecompilationArgs[] = {
@@ -90,7 +94,6 @@ static const char* kDartStrongModeArgs[] = {
     // clang-format off
     "--strong",
     "--reify_generic_functions",
-    "--limit_ints_to_64_bits",
     // TODO(bkonyi): uncomment when sync-async is enabled in flutter/flutter.
     // "--sync_async",
     // clang-format on
@@ -240,10 +243,10 @@ fxl::RefPtr<DartVM> DartVM::ForProcess(
     fxl::RefPtr<DartSnapshot> vm_snapshot,
     fxl::RefPtr<DartSnapshot> isolate_snapshot,
     fxl::RefPtr<DartSnapshot> shared_snapshot) {
-  std::call_once(gVMInitialization, [settings,         //
-                                     vm_snapshot,      //
-                                     isolate_snapshot, //
-                                     shared_snapshot   //
+  std::call_once(gVMInitialization, [settings,          //
+                                     vm_snapshot,       //
+                                     isolate_snapshot,  //
+                                     shared_snapshot    //
   ]() mutable {
     if (!vm_snapshot) {
       vm_snapshot = DartSnapshot::VMSnapshotFromSettings(settings);
@@ -254,10 +257,10 @@ fxl::RefPtr<DartVM> DartVM::ForProcess(
     if (!shared_snapshot) {
       shared_snapshot = DartSnapshot::Empty();
     }
-    gVM = fxl::MakeRefCounted<DartVM>(settings,                    //
-                                      std::move(vm_snapshot),      //
-                                      std::move(isolate_snapshot), //
-                                      std::move(shared_snapshot)  //
+    gVM = fxl::MakeRefCounted<DartVM>(settings,                     //
+                                      std::move(vm_snapshot),       //
+                                      std::move(isolate_snapshot),  //
+                                      std::move(shared_snapshot)    //
     );
   });
   return gVM;
