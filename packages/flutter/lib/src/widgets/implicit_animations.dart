@@ -4,6 +4,7 @@
 
 import 'package:flutter/animation.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/rendering.dart';
 import 'package:vector_math/vector_math_64.dart';
 
 import 'basic.dart';
@@ -1008,7 +1009,10 @@ class _AnimatedOpacityState extends AnimatedWidgetBaseState<AnimatedOpacity> {
 
   @override
   void forEachTween(TweenVisitor<dynamic> visitor) {
-    _opacity = visitor(_opacity, widget.opacity, (dynamic value) => new Tween<double>(begin: value));
+    _opacity = visitor(_opacity, widget.opacity, (dynamic value) {
+      print('Current visitor value: $value, end value is: ${widget.opacity}');
+      return new Tween<double>(begin: value);
+    });
   }
 
   @override
@@ -1017,6 +1021,103 @@ class _AnimatedOpacityState extends AnimatedWidgetBaseState<AnimatedOpacity> {
       opacity: _opacity.evaluate(animation),
       child: widget.child
     );
+  }
+}
+
+class NewAnimatedOpacity extends StatefulWidget {
+
+  final double opacity;
+  final Duration duration;
+  final Widget child;
+
+  NewAnimatedOpacity({
+    this.opacity,
+    this.duration,
+    this.child,
+  });
+
+  @override
+  _NewAnimatedOpacityState createState() => new _NewAnimatedOpacityState();
+}
+
+class _NewAnimatedOpacityState extends State<NewAnimatedOpacity> with SingleTickerProviderStateMixin {
+
+  AnimationController _controller;
+  Tween<double> _opacity;
+
+  @override
+  void initState() {
+    super.initState();
+
+    _controller = new AnimationController(
+      duration: widget.duration,
+      vsync: this,
+    );
+
+    _opacity = new Tween<double>(begin: widget.opacity, end: widget.opacity);
+  }
+
+  @override
+  void didUpdateWidget(NewAnimatedOpacity oldWidget) {
+    super.didUpdateWidget(oldWidget);
+
+    if (widget.duration != _controller.duration) {
+      _controller.duration = widget.duration;
+    }
+
+    if (widget.opacity != oldWidget.opacity) {
+      _opacity = new Tween<double>(
+        begin: _opacity.evaluate(_controller),
+        end: widget.opacity,
+      );
+      _controller.forward(from: 0.0);
+    }
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return new _NewAnimatedOpacityRenderObject(
+      opacity: _opacity.animate(_controller),
+      child: widget.child,
+    );
+  }
+}
+
+class _NewAnimatedOpacityRenderObject extends SingleChildRenderObjectWidget {
+  /// Creates an opacity that automatically animates.
+  ///
+  /// The [opacity] argument must not be null.
+  const _NewAnimatedOpacityRenderObject({
+    Key key,
+    @required this.opacity,
+    Widget child,
+  }) : super(key: key, child: child);
+
+  final Animation<double> opacity;
+
+  @override
+  RenderAnimatedOpacity createRenderObject(BuildContext context) {
+    return new RenderAnimatedOpacity(
+      opacity: opacity,
+    );
+  }
+
+  @override
+  void updateRenderObject(BuildContext context, RenderAnimatedOpacity renderObject) {
+    renderObject
+      ..opacity = opacity;
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(new DiagnosticsProperty<Animation<double>>('opacity', opacity));
   }
 }
 
