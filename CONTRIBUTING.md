@@ -156,11 +156,15 @@ Contributing code
 
 We gladly accept contributions via GitHub pull requests.
 
-Please peruse our
-[style guides](https://github.com/flutter/flutter/wiki/Style-guide-for-Flutter-repo) and
-[design principles](https://flutter.io/design-principles/) before
-working on anything non-trivial. These guidelines are intended to
-keep the code consistent and avoid common pitfalls.
+Please become familiar with our
+[style guide](https://github.com/flutter/flutter/wiki/Style-guide-for-Flutter-repo) and
+[design philosophy](https://flutter.io/design-principles/). These guidelines are intended to
+keep the code consistent and avoid common pitfalls, and being familiar with them will
+make everything much easier for you. If you have questions about our processes or are looking
+for random tips and tricks, you may be interested in the [engine wiki](https://github.com/flutter/engine/wiki) and [framework wiki](https://github.com/flutter/flutter/wiki).
+
+If you have an itch, work on that. If you are just looking for something good to start with, consider
+[the issues marked "easy fix"](https://github.com/flutter/flutter/issues?q=is%3Aopen+is%3Aissue+label%3A%22easy+fix%22+sort%3Areactions-%2B1-desc) in our issues list.
 
 To start working on a patch:
 
