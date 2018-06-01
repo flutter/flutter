@@ -424,6 +424,7 @@ class AccessibilityBridge extends AccessibilityNodeProvider implements BasicMess
                 if (mInputFocusedObject != null)
                     return createAccessibilityNodeInfo(mInputFocusedObject.id);
             }
+            // Fall through to check FOCUS_ACCESSIBILITY
             case AccessibilityNodeInfo.FOCUS_ACCESSIBILITY: {
                 if (mA11yFocusedObject != null)
                     return createAccessibilityNodeInfo(mA11yFocusedObject.id);
