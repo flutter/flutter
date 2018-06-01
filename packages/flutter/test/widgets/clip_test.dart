@@ -247,4 +247,275 @@ void main() {
     );
     debugPaintSizeEnabled = false;
   });
+
+  testWidgets('ClipRect painting', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      new Center(
+        child: new RepaintBoundary(
+          child: new Container(
+            color: Colors.white,
+            child: new Padding(
+              padding: const EdgeInsets.all(100.0),
+              child: new SizedBox(
+                height: 100.0,
+                width: 100.0,
+                child: new Transform.rotate(
+                  angle: 1.0, // radians
+                  child: new ClipRect(
+                    child: new Container(
+                      color: Colors.red,
+                      child: new Container(
+                        color: Colors.white,
+                        child: new RepaintBoundary(
+                          child: new Center(
+                            child: new Container(
+                              color: Colors.black,
+                              height: 10.0,
+                              width: 10.0,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    await expectLater(
+      find.byType(RepaintBoundary).first,
+      matchesGoldenFile('clip.ClipRect.1.png'),
+    );
+  });
+
+  testWidgets('ClipRRect painting', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      new Center(
+        child: new RepaintBoundary(
+          child: new Container(
+            color: Colors.white,
+            child: new Padding(
+              padding: const EdgeInsets.all(100.0),
+              child: new SizedBox(
+                height: 100.0,
+                width: 100.0,
+                child: new Transform.rotate(
+                  angle: 1.0, // radians
+                  child: new ClipRRect(
+                    borderRadius: const BorderRadius.only(
+                      topLeft: const Radius.elliptical(10.0, 20.0),
+                      topRight: const Radius.elliptical(5.0, 30.0),
+                      bottomLeft: const Radius.elliptical(2.5, 12.0),
+                      bottomRight: const Radius.elliptical(15.0, 6.0),
+                    ),
+                    child: new Container(
+                      color: Colors.red,
+                      child: new Container(
+                        color: Colors.white,
+                        child: new RepaintBoundary(
+                          child: new Center(
+                            child: new Container(
+                              color: Colors.black,
+                              height: 10.0,
+                              width: 10.0,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    await expectLater(
+      find.byType(RepaintBoundary).first,
+      matchesGoldenFile('clip.ClipRRect.1.png'),
+    );
+  });
+
+  testWidgets('ClipOval painting', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      new Center(
+        child: new RepaintBoundary(
+          child: new Container(
+            color: Colors.white,
+            child: new Padding(
+              padding: const EdgeInsets.all(100.0),
+              child: new SizedBox(
+                height: 100.0,
+                width: 100.0,
+                child: new Transform.rotate(
+                  angle: 1.0, // radians
+                  child: new ClipOval(
+                    child: new Container(
+                      color: Colors.red,
+                      child: new Container(
+                        color: Colors.white,
+                        child: new RepaintBoundary(
+                          child: new Center(
+                            child: new Container(
+                              color: Colors.black,
+                              height: 10.0,
+                              width: 10.0,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    await expectLater(
+      find.byType(RepaintBoundary).first,
+      matchesGoldenFile('clip.ClipOval.1.png'),
+    );
+  });
+
+  testWidgets('ClipPath painting', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      new Center(
+        child: new RepaintBoundary(
+          child: new Container(
+            color: Colors.white,
+            child: new Padding(
+              padding: const EdgeInsets.all(100.0),
+              child: new SizedBox(
+                height: 100.0,
+                width: 100.0,
+                child: new Transform.rotate(
+                  angle: 1.0, // radians
+                  child: new ClipPath(
+                    clipper: new ShapeBorderClipper(
+                      shape: new BeveledRectangleBorder(
+                        borderRadius: new BorderRadius.circular(20.0),
+                      ),
+                    ),
+                    child: new Container(
+                      color: Colors.red,
+                      child: new Container(
+                        color: Colors.white,
+                        child: new RepaintBoundary(
+                          child: new Center(
+                            child: new Container(
+                              color: Colors.black,
+                              height: 10.0,
+                              width: 10.0,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    await expectLater(
+      find.byType(RepaintBoundary).first,
+      matchesGoldenFile('clip.ClipPath.1.png'),
+    );
+  });
+
+  testWidgets('PhysicalModel painting', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      new Center(
+        child: new RepaintBoundary(
+          child: new Container(
+            color: Colors.white,
+            child: new Padding(
+              padding: const EdgeInsets.all(100.0),
+              child: new SizedBox(
+                height: 100.0,
+                width: 100.0,
+                child: new Transform.rotate(
+                  angle: 1.0, // radians
+                  child: new PhysicalModel(
+                    borderRadius: new BorderRadius.circular(20.0),
+                    color: Colors.red,
+                    child: new Container(
+                      color: Colors.white,
+                      child: new RepaintBoundary(
+                        child: new Center(
+                          child: new Container(
+                            color: Colors.black,
+                            height: 10.0,
+                            width: 10.0,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    await expectLater(
+      find.byType(RepaintBoundary).first,
+      matchesGoldenFile('clip.PhysicalModel.1.png'),
+    );
+  });
+
+  testWidgets('PhysicalShape painting', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      new Center(
+        child: new RepaintBoundary(
+          child: new Container(
+            color: Colors.white,
+            child: new Padding(
+              padding: const EdgeInsets.all(100.0),
+              child: new SizedBox(
+                height: 100.0,
+                width: 100.0,
+                child: new Transform.rotate(
+                  angle: 1.0, // radians
+                  child: new PhysicalShape(
+                    clipper: new ShapeBorderClipper(
+                      shape: new BeveledRectangleBorder(
+                        borderRadius: new BorderRadius.circular(20.0),
+                      ),
+                    ),
+                    color: Colors.red,
+                    child: new Container(
+                      color: Colors.white,
+                      child: new RepaintBoundary(
+                        child: new Center(
+                          child: new Container(
+                            color: Colors.black,
+                            height: 10.0,
+                            width: 10.0,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    await expectLater(
+      find.byType(RepaintBoundary).first,
+      matchesGoldenFile('clip.PhysicalShape.1.png'),
+    );
+  });
 }

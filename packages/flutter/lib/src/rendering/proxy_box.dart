@@ -1004,10 +1004,10 @@ class RenderBackdropFilter extends RenderProxyBox {
 ///
 /// See also:
 ///
-///  * [ClipRect], which can be customized with a [CustomClipper].
-///  * [ClipRRect], which can be customized with a [CustomClipper].
-///  * [ClipOval], which can be customized with a [CustomClipper].
-///  * [ClipPath], which can be customized with a [CustomClipper].
+///  * [ClipRect], which can be customized with a [CustomClipper<Rect>].
+///  * [ClipRRect], which can be customized with a [CustomClipper<RRect>].
+///  * [ClipOval], which can be customized with a [CustomClipper<Rect>].
+///  * [ClipPath], which can be customized with a [CustomClipper<Path>].
 abstract class CustomClipper<T> {
   /// Creates a custom clipper.
   ///
