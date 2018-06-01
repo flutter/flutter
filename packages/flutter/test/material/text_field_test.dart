@@ -2138,4 +2138,30 @@ void main() {
     expect(exception.toString(), endsWith(':\n  $textField\nThe ancestors of this widget were:\n  [root]'));
   });
 
+  testWidgets('TextField loses focus when disabled', (WidgetTester tester) async {
+    final FocusNode focusNode = new FocusNode();
+
+    await tester.pumpWidget(
+      boilerplate(
+        child: new TextField(
+          focusNode: focusNode,
+          autofocus: true,
+          enabled: true,
+        ),
+      ),
+    );
+    expect(focusNode.hasFocus, isTrue);
+
+    await tester.pumpWidget(
+      boilerplate(
+        child: new TextField(
+          focusNode: focusNode,
+          autofocus: true,
+          enabled: false,
+        ),
+      ),
+    );
+    expect(focusNode.hasFocus, isFalse);
+  });
+
 }

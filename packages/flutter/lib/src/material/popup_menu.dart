@@ -248,7 +248,7 @@ class PopupMenuItemState<T, W extends PopupMenuItem<T>> extends State<W> {
       duration: kThemeChangeDuration,
       child: new Baseline(
         baseline: widget.height - _kBaselineOffsetFromBottom,
-        baselineType: TextBaseline.alphabetic,
+        baselineType: style.textBaseline,
         child: buildChild(),
       )
     );
