@@ -559,6 +559,11 @@ class NavigatorObserver {
 /// registration, store checkout, or other independent journeys that represent
 /// a subsection of your overall application.
 ///
+/// The following example demonstrates how a nested [Navigator] can be used to
+/// present a standalone user registration journey. Even though this example
+/// uses two [Navigator]s to demonstrate nested [Navigator]s, a similar result
+/// is possible using only a single [Navigator].
+///
 /// ```dart
 /// class MyApp extends StatelessWidget {
 ///  @override
@@ -586,9 +591,13 @@ class NavigatorObserver {
 ///        WidgetBuilder builder;
 ///        switch (settings.name) {
 ///          case 'signup/personal_info':
+///            // Assume CollectPersonalInfoPage collects personal info and then
+///            // navigates to 'signup/choose_credentials'.
 ///            builder = (BuildContext _) => new CollectPersonalInfoPage();
 ///            break;
 ///          case 'signup/choose_credentials':
+///            // Assume ChooseCredentialsPage collects new credentials and then
+///            // invokes 'onSignupComplete()'.
 ///            builder = (BuildContext _) => new ChooseCredentialsPage(
 ///              onSignupComplete: () {
 ///                // Referencing Navigator.of(context) from here refers to the
@@ -610,12 +619,11 @@ class NavigatorObserver {
 /// }
 /// ```
 ///
-/// Take care to call the correct `Navigator` in your hierarchy. `Navigator.of()`
-/// finds the nearest `Navigator` ancestor from the `context` that you provide.
-/// If you want to retrieve a nested `Navigator` then ensure that you are
-/// providing a `context` from the nested `Navigator`s subtree, otherwise you
-/// will retrieve the parent `Navigator`. See [insert link] for more
-/// information about managing multiple `Context`s.
+/// [Navigator.of] operates on the nearest ancestor [Navigator] from the given
+/// [BuildContext]. Be sure to provide a [BuildContext] below the intended
+/// [Navigator], especially in large [build] methods where nested [Navigator]s
+/// are created. The [Builder] widget can be used to access [BuildContext] at
+/// desired locations in the widget subtree.
 class Navigator extends StatefulWidget {
   /// Creates a widget that maintains a stack-based history of child widgets.
   ///
