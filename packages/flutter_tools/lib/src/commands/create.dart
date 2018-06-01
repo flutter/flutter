@@ -260,7 +260,7 @@ To edit platform code in an IDE see https://flutter.io/platform-plugins/#edit-co
       );
     }
     if (android_sdk.androidSdk != null)
-      gradle.updateLocalProperties(projectPath: dirPath);
+      await gradle.updateLocalProperties(projectPath: dirPath);
 
     final String projectName = templateContext['projectName'];
     final String organization = templateContext['organization'];
