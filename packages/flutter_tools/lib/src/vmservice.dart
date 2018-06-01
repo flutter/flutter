@@ -167,14 +167,11 @@ class VMService {
         final bool isStatic = params['isStatic'].asBoolOr(false);
 
         try {
-          final String kernelFilename = await compileExpression(isolateId,
+          final String kernelBytesBase64 = await compileExpression(isolateId,
               expression, definitions, typeDefinitions, libraryUri, klass,
               isStatic);
-          final List<int> kernel = fs.file(kernelFilename).readAsBytesSync();
           return <String, dynamic>{'type': 'Success',
-            'result': {
-              'kernelBytes': base64.encode(kernel),
-              'kernelLength': kernel.length}};
+            'result': {'kernelBytes': kernelBytesBase64}};
         } on rpc.RpcException {
           rethrow;
         } catch (e, st) {
