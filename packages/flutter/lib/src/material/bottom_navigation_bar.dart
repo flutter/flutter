@@ -189,7 +189,7 @@ class _BottomNavigationTile extends StatelessWidget {
             color: iconColor,
             size: iconSize,
           ),
-          child: item.icon,
+          child: selected ? item.icon : item.inactiveIcon,
         ),
       ),
     );
