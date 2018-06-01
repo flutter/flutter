@@ -137,7 +137,7 @@ class HotRunner extends ResidentRunner {
       return 3;
     }
     final Stopwatch initialUpdateDevFSsTimer = new Stopwatch()..start();
-    final bool devfsResult = await _updateDevFS();
+    final bool devfsResult = await _updateDevFS(fullRestart: true);
     _addBenchmarkData('hotReloadInitialDevFSSyncMilliseconds',
         initialUpdateDevFSsTimer.elapsed.inMilliseconds);
     if (!devfsResult)
@@ -515,7 +515,7 @@ class HotRunner extends ResidentRunner {
     final Stopwatch vmReloadTimer = new Stopwatch()..start();
     try {
       final String entryPath = fs.path.relative(
-        debuggingOptions.buildInfo.previewDart2 ? mainPath + '.dill' : mainPath,
+        debuggingOptions.buildInfo.previewDart2 ? mainPath + '.incremental.dill' : mainPath,
         from: projectRootPath,
       );
       final Completer<Map<String, dynamic>> retrieveFirstReloadReport = new Completer<Map<String, dynamic>>();

@@ -511,7 +511,7 @@ class DevFS {
             fs.path.relative(mainPath, from: projectRootPath):
             mainPath;
         dirtyEntries.putIfAbsent(
-          fs.path.toUri(entryUri + '.dill'),
+          fs.path.toUri(entryUri + (fullRestart ? '' : '.incremental') + '.dill'),
           () => new DevFSFileContent(fs.file(compiledBinary))
         );
       }
