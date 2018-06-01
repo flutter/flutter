@@ -40,9 +40,9 @@ if [ -n "$TRAVIS" ]; then
     echo y | sdkmanager "extras;google;m2repository" >/dev/null
     echo y | sdkmanager "patcher;v4" >/dev/null
     sdkmanager --list
-    wget http://services.gradle.org/distributions/gradle-4.1-bin.zip
-    unzip -qq gradle-4.1-bin.zip
-    export GRADLE_HOME=$PWD/gradle-4.1
+    wget https://services.gradle.org/distributions/gradle-4.7-bin.zip
+    unzip -qq gradle-4.7-bin.zip
+    export GRADLE_HOME=$PWD/gradle-4.7
     export PATH=$GRADLE_HOME/bin:$PATH
     gradle -v
     ./bin/flutter doctor
