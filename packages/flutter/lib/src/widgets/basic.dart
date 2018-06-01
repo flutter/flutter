@@ -10,6 +10,7 @@ import 'package:flutter/services.dart';
 
 import 'debug.dart';
 import 'framework.dart';
+import 'localizations.dart';
 
 export 'package:flutter/animation.dart';
 export 'package:flutter/foundation.dart' show
@@ -233,9 +234,9 @@ class ShaderMask extends SingleChildRenderObjectWidget {
   /// The shader callback is called with the current size of the child so that
   /// it can customize the shader to the size and location of the child.
   ///
-  /// Typically this will use a [LinearGradient] or [RadialGradient] to create
-  /// the [dart:ui.Shader], though the [dart:ui.ImageShader] class could also be
-  /// used.
+  /// Typically this will use a [LinearGradient], [RadialGradient], or
+  /// [SweepGradient] to create the [dart:ui.Shader], though the 
+  /// [dart:ui.ImageShader] class could also be used.
   final ShaderCallback shaderCallback;
 
   /// The [BlendMode] to use when applying the shader to the child.
@@ -4341,6 +4342,7 @@ class RichText extends LeafRenderObjectWidget {
       overflow: overflow,
       textScaleFactor: textScaleFactor,
       maxLines: maxLines,
+      locale: Localizations.localeOf(context, nullOk: true),
     );
   }
 
@@ -4354,7 +4356,8 @@ class RichText extends LeafRenderObjectWidget {
       ..softWrap = softWrap
       ..overflow = overflow
       ..textScaleFactor = textScaleFactor
-      ..maxLines = maxLines;
+      ..maxLines = maxLines
+      ..locale = Localizations.localeOf(context, nullOk: true);
   }
 
   @override

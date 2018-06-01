@@ -1119,8 +1119,10 @@ class RenderTable extends RenderBox {
   void paint(PaintingContext context, Offset offset) {
     assert(_children.length == rows * columns);
     if (rows * columns == 0) {
-      final Rect borderRect = new Rect.fromLTWH(offset.dx, offset.dy, size.width, 0.0);
-      border.paint(context.canvas, borderRect, rows: const <double>[], columns: const <double>[]);
+      if (border != null) {
+        final Rect borderRect = new Rect.fromLTWH(offset.dx, offset.dy, size.width, 0.0);
+        border.paint(context.canvas, borderRect, rows: const <double>[], columns: const <double>[]);
+      }
       return;
     }
     assert(_rowTops.length == rows + 1);
