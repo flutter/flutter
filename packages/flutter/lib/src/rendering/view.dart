@@ -187,11 +187,28 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
   }
 
   void _updateSystemChrome() {
-    final SystemUiOverlayStyle overlayStyle = layer.findRegion(
+    final Size windowSize = ui.window.physicalSize / ui.window.devicePixelRatio;
+    final Offset lowerOffset = new Offset(0.0, windowSize.height);
+    final SystemUiOverlayStyle upperOverlayStyle = layer.findRegion(
       Offset.zero,
       SystemUiOverlayStyle,
     );
-    SystemChrome.setSystemUIOverlayStyle(overlayStyle);
+    final SystemUiOverlayStyle lowerOverlayStyle = layer.findRegion(
+      lowerOffset,
+      SystemUiOverlayStyle,
+    );
+    // If there are distinct upper and lower overlay styles, combine them such
+    // that the bottom system chrome features are derived from the lower style
+    // and likewise.
+    if (upperOverlayStyle != null && lowerOverlayStyle != null && !identical(upperOverlayStyle, lowerOverlayStyle)) {
+      SystemChrome.setSystemUIOverlayStyle(upperOverlayStyle.copyWith(
+        systemNavigationBarIconBrightness: lowerOverlayStyle.systemNavigationBarIconBrightness,
+        systemNavigationBarColor: lowerOverlayStyle.systemNavigationBarColor,
+        systemNavigationBarDividerColor: lowerOverlayStyle.systemNavigationBarDividerColor,
+      ));
+    } else if (upperOverlayStyle != null || lowerOverlayStyle != null) {
+      SystemChrome.setSystemUIOverlayStyle(upperOverlayStyle ?? lowerOverlayStyle);
+    }
   }
 
   @override

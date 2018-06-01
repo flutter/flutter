@@ -304,16 +304,31 @@ class SystemChrome {
   /// }
   /// ```
   static void setSystemUIOverlayStyle(SystemUiOverlayStyle style) {
-    if (style == _latestStyle || style == null) {
+    assert(style != null);
+    if (_pendingStyle != null) {
+      // The microtask has already been queued; just update the pending value.
+      _pendingStyle = style;
       return;
     }
-    _latestStyle = style;
-
-    SystemChannels.platform.invokeMethod(
-      'SystemChrome.setSystemUIOverlayStyle',
-      style._toMap(),
-    );
+    if (style == _latestStyle) {
+      // Trivial success: no microtask has been queued and the given style is
+      // already in effect, so no need to queue a microtask.
+      return;
+    }
+    _pendingStyle = style;
+    scheduleMicrotask(() {
+      assert(_pendingStyle != null);
+      if (_pendingStyle != _latestStyle) {
+        SystemChannels.platform.invokeMethod(
+          'SystemChrome.setSystemUIOverlayStyle',
+          style._toMap(),
+        );
+        _latestStyle = _pendingStyle;
+      }
+      _pendingStyle = null;
+    });
   }
 
+  static SystemUiOverlayStyle _pendingStyle;
   static SystemUiOverlayStyle _latestStyle;
 }

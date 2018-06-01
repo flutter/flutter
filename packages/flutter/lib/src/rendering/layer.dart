@@ -535,6 +535,14 @@ class OffsetLayer extends ContainerLayer {
   Offset offset;
 
   @override
+  Object findRegion(Offset offset, Type type) {
+    if (offset <= this.offset) {
+      return null;
+    }
+    return super.findRegion(offset, type);
+  }
+
+  @override
   void addToScene(ui.SceneBuilder builder, Offset layerOffset) {
     addChildrenToScene(builder, offset + layerOffset);
   }
@@ -602,6 +610,13 @@ class ClipRectLayer extends ContainerLayer {
   Rect clipRect;
 
   @override
+  Object findRegion(Offset offset, Type type) {
+    if (!clipRect.contains(offset))
+      return null;
+    return super.findRegion(offset, type);
+  }
+
+  @override
   void addToScene(ui.SceneBuilder builder, Offset layerOffset) {
     bool enabled = true;
     assert(() {
@@ -641,6 +656,13 @@ class ClipRRectLayer extends ContainerLayer {
   RRect clipRRect;
 
   @override
+  Object findRegion(Offset offset, Type type) {
+    if (!clipRRect.contains(offset))
+      return null;
+    return super.findRegion(offset, type);
+  }
+
+  @override
   void addToScene(ui.SceneBuilder builder, Offset layerOffset) {
     bool enabled = true;
     assert(() {
@@ -678,6 +700,13 @@ class ClipPathLayer extends ContainerLayer {
   /// The scene must be explicitly recomposited after this property is changed
   /// (as described at [Layer]).
   Path clipPath;
+
+  @override
+  Object findRegion(Offset offset, Type type) {
+    if (!clipPath.contains(offset))
+      return null;
+    return super.findRegion(offset, type);
+  }
 
   @override
   void addToScene(ui.SceneBuilder builder, Offset layerOffset) {
@@ -904,6 +933,13 @@ class PhysicalModelLayer extends ContainerLayer {
   Color shadowColor;
 
   @override
+  Object findRegion(Offset offset, Type type) {
+    if (!clipPath.contains(offset))
+      return null;
+    return super.findRegion(offset, type);
+  }
+
+  @override
   void addToScene(ui.SceneBuilder builder, Offset layerOffset) {
     bool enabled = true;
     assert(() {
@@ -1005,6 +1041,12 @@ class LeaderLayer extends ContainerLayer {
   /// catch cases where the follower layer ends up before the leader layer, but
   /// not every case can be detected.
   Offset _lastOffset;
+
+  @override
+  Object findRegion(Offset offset, Type type) {
+    // TODO(jonahwilliams): implement findRegion.
+    return null;
+  }
 
   @override
   void addToScene(ui.SceneBuilder builder, Offset layerOffset) {
@@ -1114,6 +1156,12 @@ class FollowerLayer extends ContainerLayer {
 
   Offset _lastOffset;
   Matrix4 _lastTransform;
+
+  @override
+  Object findRegion(Offset offset, Type type) {
+    // TODO(jonahwilliams): implement findRegion.
+    return null;
+  }
 
   /// The transform that was used during the last composition phase.
   ///
