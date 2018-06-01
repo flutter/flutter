@@ -18,7 +18,7 @@ const double _kNavBarPersistentHeight = 44.0;
 
 /// Size increase from expanding the navigation bar into an iOS-11-style large title
 /// form in a [CustomScrollView].
-const double _kNavBarLargeTitleHeightExtension = 56.0;
+const double _kNavBarLargeTitleHeightExtension = 52.0;
 
 /// Number of logical pixels scrolled down before the title text is transferred
 /// from the normal navigation bar to a big title below the navigation bar.
@@ -46,10 +46,10 @@ const Border _kDefaultNavBarBorder = const Border(
 );
 
 const TextStyle _kLargeTitleTextStyle = const TextStyle(
-  fontFamily: '.SF UI Text',
-  fontSize: 34.0,
+  fontFamily: '.SF Pro Display',
+  fontSize: 33.5,
   fontWeight: FontWeight.w700,
-  letterSpacing: -0.26,
+  letterSpacing: 0.24,
   color: CupertinoColors.black,
 );
 
