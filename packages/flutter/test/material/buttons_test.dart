@@ -79,8 +79,8 @@ void main() {
               SemanticsAction.tap,
             ],
             label: 'ABC',
-            rect: new Rect.fromLTRB(0.0, 0.0, 88.0, 36.0),
-            transform: new Matrix4.translationValues(356.0, 282.0, 0.0),
+            rect: new Rect.fromLTRB(0.0, 0.0, 88.0, 48.0),
+            transform: new Matrix4.translationValues(356.0, 276.0, 0.0),
             flags: <SemanticsFlag>[
               SemanticsFlag.isButton,
               SemanticsFlag.hasEnabledState,
@@ -279,7 +279,7 @@ void main() {
   testWidgets('Disabled MaterialButton has same semantic size as enabled and exposes disabled semantics', (WidgetTester tester) async {
     final SemanticsTester semantics = new SemanticsTester(tester);
 
-    final Rect expectedButtonSize = new Rect.fromLTRB(0.0, 0.0, 116.0, 36.0);
+    final Rect expectedButtonSize = new Rect.fromLTRB(0.0, 0.0, 116.0, 48.0);
     // Button is in center of screen
     final Matrix4 expectedButtonTransform = new Matrix4.identity()
       ..translate(

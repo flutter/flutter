@@ -416,6 +416,7 @@ class MaterialButton extends StatelessWidget {
       ),
       shape: buttonTheme.shape,
       child: child,
+      outerConstraints: const BoxConstraints(minHeight: 48.0),
     );
   }
 
