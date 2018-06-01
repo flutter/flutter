@@ -6,14 +6,14 @@ import 'package:flutter/foundation.dart';
 
 import 'framework.dart';
 
-/// A widget to manage shared state for its descendants.
+/// An inherited widget to manage shared state for its descendants.
 ///
 /// This can be used for managing state when multiple widgets need their state
 /// to be kept in sync. It is most useful when the closest common widget to the
 /// widgets that need to share the state is several levels above the widgets
 /// that are using it. When the state is close to the widgets using them, it is
-/// often preferable to simply pass the needed state to the descendants that
-/// need it instead of using this widget.
+/// often preferable to pass the needed state to the descendants that need it
+/// directly instead of using this widget.
 ///
 /// For complex applications, it may be more appropriate to use a package that
 /// provides more features and a stream-oriented paradigm like Rx.
@@ -46,21 +46,21 @@ import 'framework.dart';
 /// }
 /// 
 /// class _FavoritePageState extends State<FavoritePage> {
-///   Thing favoriteThing;
+///   Thing _favoriteThing;
 /// 
 ///   @override
 ///   Widget build(BuildContext context) {
 ///     return new SharedState<Thing>(
-///       value: favoriteThing,
+///       value: _favoriteThing,
 ///       valueChanged: (Thing thing) {
-///         if (favoriteThing != thing) {
+///         if (_favoriteThing != thing) {
 ///           setState(() {
-///             favoriteThing = thing;
+///             _favoriteThing = thing;
 ///           });
 ///         }
 ///       },
 ///       // For this example, assume we don't wish to, or can't, pass
-///       // favoriteThing to FavoriteView.
+///       // _favoriteThing to FavoriteView.
 ///       child: const FavoriteView(),
 ///     );
 ///   }
@@ -86,13 +86,13 @@ import 'framework.dart';
 /// 
 ///   @override
 ///   Widget build(BuildContext context) {
-///     final Thing favoriteThing = SharedState.getSharedState<Thing>(context);
+///     final Thing favoriteThing = SharedState.get<Thing>(context);
 ///     final bool isSelected = favoriteThing == thing;
 ///     return ListTile(
 ///       leading: new IconButton(
 ///         icon: new Icon(isSelected ? Icons.favorite : Icons.favorite_border),
 ///         onPressed: () {
-///           SharedState.setSharedState<Thing>(context, isSelected ? null : thing);
+///           SharedState.set<Thing>(context, isSelected ? null : thing);
 ///         },
 ///       ),
 ///       title: new Text(describeEnum(thing)),
@@ -100,7 +100,7 @@ import 'framework.dart';
 ///   }
 /// }
 /// ```
-class SharedState<T> extends StatelessWidget {
+class SharedState<T> extends InheritedWidget {
   /// Creates a [SharedState].
   ///
   /// The `child` and `valueChanged` arguments are required and must not be null.
@@ -108,14 +108,10 @@ class SharedState<T> extends StatelessWidget {
     Key key,
     this.value,
     @required this.valueChanged,
-    @required this.child,
+    @required Widget child,
   })  : assert(valueChanged != null),
         assert(child != null),
-        super(key: key);
-
-  /// The child that contains the descendants of this shared state.  All
-  /// descendants of [child] will have access to the shared state.
-  final Widget child;
+        super(key: key, child: child);
 
   /// The value of the shared state.
   final T value;
@@ -124,46 +120,46 @@ class SharedState<T> extends StatelessWidget {
   /// changed.
   final ValueChanged<T> valueChanged;
 
-  static _SharedStateScope<T> _getScope<T>(BuildContext context) {
+  static SharedState<T> _getScope<T>(BuildContext context) {
     assert(context != null);
-    final _SharedStateScope<T> controllerScope = context.inheritFromWidgetOfExactType(
+    final SharedState<T> controllerScope = context.inheritFromWidgetOfExactType(
       // TODO(gspencer): Remove ignore when https://github.com/dart-lang/sdk/issues/33289 is fixed.
       // ignore: prefer_const_constructors
-      new TypeMatcher<_SharedStateScope<T>>().type,
+      new TypeMatcher<SharedState<T>>().type,
     );
     return controllerScope;
   }
 
   /// Get the shared state of the nearest enclosing [SharedState] widget of the
   /// same type in the widget tree.
-  static T getSharedState<T>(BuildContext context, {bool nullOk: false}) {
-    final _SharedStateScope<T> controllerScope = _getScope(context);
+  static U get<U>(BuildContext context, {bool nullOk: false}) {
+    final SharedState<U> controllerScope = _getScope(context);
     if (controllerScope != null) {
       return controllerScope.value;
     }
     if (nullOk) {
       return null;
     }
-    throw new FlutterError('SharedState<$T>.getSharedState() called with a context that does not '
+    throw new FlutterError('SharedState<$U>.get() called with a context that does not '
         'contain a SharedState of the right type.\n'
         'No SharedState ancestor could be found starting from the context that was passed '
-        'to SharedState<$T>.getSharedState(). This can happen if you have not inserted a '
+        'to SharedState<$U>.get(). This can happen if you have not inserted a '
         'SharedState widget, or if the context you use comes from a widget above the '
         'SharedState widget.\n'
         'The context used was:\n'
         '  $context');
   }
 
-  /// Sets the shared state, possibly scheduling a rebuild the descendants that depend
-  /// upon it.
-  static void setSharedState<T>(BuildContext context, T newValue) {
-    final _SharedStateScope<T> controllerScope = _getScope(context);
+  /// Sets the shared state, possibly scheduling a rebuild of the descendants
+  /// that depend upon it.
+  static void set<U>(BuildContext context, U newValue) {
+    final SharedState<U> controllerScope = _getScope(context);
     assert(() {
       if (controllerScope == null) {
-        throw new FlutterError('SharedState<$T>.setSharedState() called with a context that does '
+        throw new FlutterError('SharedState<$U>.set() called with a context that does '
             'not contain a SharedState of the right type.\n'
             'No SharedState ancestor could be found starting from the context that was passed '
-            'to SharedState<$T>.setSharedState(). This can happen if you have not inserted a '
+            'to SharedState<$U>.set(). This can happen if you have not inserted a '
             'SharedState widget, or if the context you use comes from a widget above the '
             'SharedState widget.\n'
             'The context used was:\n'
@@ -177,21 +173,9 @@ class SharedState<T> extends StatelessWidget {
   }
 
   @override
-  Widget build(BuildContext context) {
-    return new _SharedStateScope<T>(value: value, valueChanged: valueChanged, child: child);
-  }
-}
-
-class _SharedStateScope<T> extends InheritedWidget {
-  const _SharedStateScope({Key key, this.value, this.valueChanged, Widget child}) : super(key: key, child: child);
-
-  final T value;
-  final ValueChanged<T> valueChanged;
-
-  @override
   bool updateShouldNotify(InheritedWidget oldWidget) {
     assert(runtimeType == oldWidget.runtimeType);
-    final _SharedStateScope<T> oldScope = oldWidget;
-    return value != oldScope.value;
+    final SharedState<T> oldSharedState = oldWidget;
+    return value != oldSharedState.value;
   }
 }

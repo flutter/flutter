@@ -336,6 +336,9 @@ class GlobalObjectKey<T extends State<StatefulWidget>> extends GlobalKey<T> {
 /// This class is a work-around for the "is" operator not accepting a variable
 /// value as its right operand, and for the fact that generics aren't valid type
 /// literals (e.g. "Type type = MyClass<int>;" is invalid).
+// TODO(gspencer): Remove this class when the following issues are resolved:
+// https://github.com/dart-lang/sdk/issues/27680
+// https://github.com/dart-lang/sdk/issues/33297
 @optionalTypeArgs
 class TypeMatcher<T> {
   /// Creates a type matcher for the given type parameter.

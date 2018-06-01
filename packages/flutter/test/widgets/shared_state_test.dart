@@ -11,11 +11,11 @@ void main() {
     final List<int> log = <int>[];
 
     final Builder builder = new Builder(builder: (BuildContext context) {
-      final int current = SharedState.getSharedState<int>(context);
+      final int current = SharedState.get<int>(context);
       log.add(current);
       return new FlatButton(
         onPressed: () {
-          SharedState.setSharedState<int>(context, (current ?? 0) + 1);
+          SharedState.set<int>(context, (current ?? 0) + 1);
         },
         child: new Container(width: 20.0, height: 20.0),
       );
