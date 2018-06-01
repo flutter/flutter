@@ -237,7 +237,7 @@ class AndroidWorkflow extends DoctorValidator implements Workflow {
     );
 
     process.stdin.addStream(stdin);
-    await waitGroup<Null>(<Future<Null>>[
+    await waitGroup<void>(<Future<void>>[
       stdout.addStream(process.stdout),
       stderr.addStream(process.stderr),
     ]);

@@ -441,7 +441,8 @@ class DevFS {
     _entries.forEach((Uri deviceUri, DevFSContent content) {
       if (!content._exists) {
         final Future<Map<String, dynamic>> operation =
-            _operations.deleteFile(fsName, deviceUri);
+            _operations.deleteFile(fsName, deviceUri)
+            .then((dynamic v) => v?.cast<String,dynamic>());
         if (operation != null)
           _pendingOperations.add(operation);
         toRemove.add(deviceUri);
@@ -533,7 +534,8 @@ class DevFS {
         // Make service protocol requests for each.
         dirtyEntries.forEach((Uri deviceUri, DevFSContent content) {
           final Future<Map<String, dynamic>> operation =
-              _operations.writeFile(fsName, deviceUri, content);
+              _operations.writeFile(fsName, deviceUri, content)
+                  .then((dynamic v) => v?.cast<String, dynamic>());
           if (operation != null)
             _pendingOperations.add(operation);
         });
