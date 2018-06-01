@@ -205,7 +205,7 @@ public final class FlutterActivityDelegate
         Application app = (Application) activity.getApplicationContext();
         if (app instanceof FlutterApplication) {
             FlutterApplication flutterApp = (FlutterApplication) app;
-            if (this.equals(flutterApp.getCurrentActivity())) {
+            if (activity.equals(flutterApp.getCurrentActivity())) {
                 Log.i(TAG, "onPause setting current activity to null");
                 flutterApp.setCurrentActivity(null);
             }
@@ -251,7 +251,7 @@ public final class FlutterActivityDelegate
         Application app = (Application) activity.getApplicationContext();
         if (app instanceof FlutterApplication) {
             FlutterApplication flutterApp = (FlutterApplication) app;
-            if (this.equals(flutterApp.getCurrentActivity())) {
+            if (activity.equals(flutterApp.getCurrentActivity())) {
                 Log.i(TAG, "onDestroy setting current activity to null");
                 flutterApp.setCurrentActivity(null);
             }
