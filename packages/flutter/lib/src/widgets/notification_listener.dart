@@ -132,6 +132,34 @@ class NotificationListener<T extends Notification> extends StatelessWidget {
   Widget build(BuildContext context) => child;
 }
 
+typedef Widget NotificationChangedBuilder<T extends Notification>(BuildContext context, Widget child, T notification);
+
+class NotificationBuilder<T extends Notification> extends StatefulWidget {
+  NotificationBuilder({this.builder, this.intercepting: false, this.child});
+
+  final NotificationChangedBuilder<T> builder;
+  final bool intercepting;
+  final Widget child;
+
+  @override
+  State<StatefulWidget> createState() => NotificationBuilderState<T>();
+}
+
+class NotificationBuilderState<T extends Notification> extends State<NotificationBuilder<T>> {
+  T lastNotification;
+
+  @override
+  Widget build(BuildContext context) {
+    return NotificationListener<T>(
+      onNotification: (T notification) {
+        setState(() => lastNotification = notification);
+        return widget.intercepting;
+      },
+      child: widget.builder(context, widget.child, lastNotification),
+    );
+  }
+}
+
 /// Indicates that the layout of one of the descendants of the object receiving
 /// this notification has changed in some way, and that therefore any
 /// assumptions about that layout are no longer valid.
