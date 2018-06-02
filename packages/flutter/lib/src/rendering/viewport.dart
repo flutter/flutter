@@ -40,7 +40,12 @@ abstract class RenderAbstractViewport extends RenderObject {
     return null;
   }
 
-  /// Returns the offset that would be needed to reveal the target render object.
+  /// Returns the offset that would be needed to reveal the `target` render object.
+  ///
+  /// The optional `rect` parameter describes which area of the `target render
+  /// object should be revealed in the viewport. If `rect` is null, the entire
+  /// `target` render object will be revealed. If `rect` is provided it has to
+  /// be given in the coordinate system of the `target` render object.
   ///
   /// The `alignment` argument describes where the target should be positioned
   /// after applying the returned offset. If `alignment` is 0.0, the child must
@@ -52,7 +57,7 @@ abstract class RenderAbstractViewport extends RenderObject {
   /// The target might not be a direct child of this viewport but it must be a
   /// descendant of the viewport and there must not be any other
   /// [RenderAbstractViewport] objects between the target and this object.
-  double getOffsetToReveal(RenderObject target, double alignment);
+  RevealedOffset getOffsetToReveal(RenderObject target, double alignment, {Rect rect});
 
   /// The default value for the cache extent of the viewport.
   ///
@@ -61,6 +66,41 @@ abstract class RenderAbstractViewport extends RenderObject {
   ///  * [RenderViewportBase.cacheExtent] for a definition of the cache extent.
   @protected
   static const double defaultCacheExtent = 250.0;
+}
+
+/// Return value for [RenderAbstractViewport.getOffsetToReveal].
+///
+/// It indicates the scroll [offset] required to reveal an element in a
+/// viewport and the position that element would have in the viewport at that
+/// [offset].
+class RevealedOffset {
+
+  /// Instantiates a return value for [RenderAbstractViewport.getOffsetToReveal].
+  const RevealedOffset({
+    @required this.offset,
+    @required this.rect
+  }) : assert (offset != null), assert(rect != null);
+
+  /// Offset for the viewport to reveal a specific element in the viewport.
+  ///
+  /// See also:
+  ///  * [RenderAbstractViewport.getOffsetToReveal], which calculates this
+  ///    value fort a specific element.
+  final double offset;
+
+  /// The rect in the coordinate system of the viewport at which a specific
+  /// element would be located if the viewport's scroll offset is set to
+  /// [offset].
+  ///
+  /// See also:
+  ///  * [RenderAbstractViewport.getOffsetToReveal], which calculates this
+  ///    value fort a specific element.
+  final Rect rect;
+
+  @override
+  String toString() {
+    return '$runtimeType(offset: $offset, rect: $rect)';
+  }
 }
 
 /// A base class for render objects that are bigger on the inside.
@@ -512,7 +552,7 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
   }
 
   @override
-  double getOffsetToReveal(RenderObject target, double alignment) {
+  RevealedOffset getOffsetToReveal(RenderObject target, double alignment, {Rect rect}) {
     double leadingScrollOffset;
     double targetMainAxisExtent;
     RenderObject descendant;
@@ -580,7 +620,7 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
       targetMainAxisExtent = targetSliver.geometry.scrollExtent;
       descendant = targetSliver;
     } else {
-      return offset.pixels;
+      return null; //offset.pixels;
     }
 
     // The child will be the topmost object before we get to the viewport.
@@ -615,7 +655,7 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
         break;
     }
 
-    return leadingScrollOffset - (mainAxisExtent - targetMainAxisExtent) * alignment;
+    return null; //leadingScrollOffset - (mainAxisExtent - targetMainAxisExtent) * alignment;
   }
 
   /// The offset at which the given `child` should be painted.
@@ -783,8 +823,8 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
   Iterable<RenderSliver> get childrenInHitTestOrder;
 
   @override
-  void showOnScreen([RenderObject child]) {
-    RenderViewportBase.showInViewport(child: child, viewport: this, offset: offset);
+  void showOnScreen({RenderObject descendant, Rect rect}) {
+    RenderViewportBase.showInViewport(child: descendant, viewport: this, offset: offset);
     // Make sure the viewport itself is on screen.
     super.showOnScreen();
   }
@@ -794,19 +834,23 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
   ///
   /// The parameters `viewport` and `offset` are required and cannot be null.
   /// If `child` is null this is a no-op.
-  static void showInViewport({
+  static Rect showInViewport({
     RenderObject child,
+    Rect rect,
     @required RenderAbstractViewport viewport,
     @required ViewportOffset offset,
   }) {
     assert(viewport != null);
     assert(offset != null);
     if (child == null) {
-      return;
+      return rect;
     }
-    final double leadingEdgeOffset = viewport.getOffsetToReveal(child, 0.0);
-    final double trailingEdgeOffset = viewport.getOffsetToReveal(child, 1.0);
+    final RevealedOffset leadingEdgeOffset = viewport.getOffsetToReveal(child, 0.0, rect: rect);
+    final RevealedOffset trailingEdgeOffset = viewport.getOffsetToReveal(child, 1.0, rect: rect);
     final double currentOffset = offset.pixels;
+
+    print('leading: $leadingEdgeOffset');
+    print('trailing: $trailingEdgeOffset');
 
     //        scrollOffset
     //                    0 +---------+
@@ -829,19 +873,24 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
     // to `trailingEdgeOffset`, the one on the right by setting it to
     // `leadingEdgeOffset`.
 
-    assert(leadingEdgeOffset >= trailingEdgeOffset);
+    // TODO(goderbauer): this one is incorrect
+    assert(leadingEdgeOffset.offset >= trailingEdgeOffset.offset);
 
-    if (currentOffset > leadingEdgeOffset) {
+    if (currentOffset > leadingEdgeOffset.offset) {
       // `child` currently starts above the leading edge and can be shown fully
       // on screen by scrolling down (which means: moving viewport up).
-      offset.jumpTo(leadingEdgeOffset);
-    } else if (currentOffset < trailingEdgeOffset ) {
+      offset.jumpTo(leadingEdgeOffset.offset);
+      return leadingEdgeOffset.rect;
+    } else if (currentOffset < trailingEdgeOffset.offset) {
       // `child currently ends below the trailing edge and can be shown fully
       // on screen by scrolling up (which means: moving viewport down)
-      offset.jumpTo(trailingEdgeOffset);
+      offset.jumpTo(trailingEdgeOffset.offset);
+      return trailingEdgeOffset.rect;
     }
     // else: `child` is between leading and trailing edge and hence already
     //     fully shown on screen. No action necessary.
+    final Matrix4 transform = child.getTransformTo(viewport.parent);
+    return MatrixUtils.transformRect(transform, rect ?? child.paintBounds);
   }
 }
 

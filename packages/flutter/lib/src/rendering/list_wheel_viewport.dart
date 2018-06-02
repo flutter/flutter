@@ -614,24 +614,25 @@ class RenderListWheelViewport
   }
 
   @override
-  double getOffsetToReveal(RenderObject target, double alignment) {
-    final ListWheelParentData parentData = target.parentData;
-    final double centerPosition = parentData.offset.dy;
-
-    if (alignment < 0.5) {
-      return centerPosition + _topScrollMarginExtent * alignment * 2.0;
-    } else if (alignment > 0.5) {
-      return centerPosition - _topScrollMarginExtent * (alignment - 0.5) * 2.0;
-    } else {
-      return centerPosition;
-    }
+  RevealedOffset getOffsetToReveal(RenderObject target, double alignment, {Rect rect}) {
+//    final ListWheelParentData parentData = target.parentData;
+//    final double centerPosition = parentData.offset.dy;
+//
+//    if (alignment < 0.5) {
+//      return centerPosition + _topScrollMarginExtent * alignment * 2.0;
+//    } else if (alignment > 0.5) {
+//      return centerPosition - _topScrollMarginExtent * (alignment - 0.5) * 2.0;
+//    } else {
+//      return centerPosition;
+//    }
+    return null;
   }
 
   @override
-  void showOnScreen([RenderObject child]) {
-    if (child != null) {
+  void showOnScreen({RenderObject descendant, Rect rect}) {
+    if (descendant != null) {
       // Shows the child in the selected/center position.
-      offset.jumpTo(getOffsetToReveal(child, 0.5));
+      offset.jumpTo(getOffsetToReveal(descendant, 0.5).offset);
     }
 
     // Make sure the viewport itself is on screen.

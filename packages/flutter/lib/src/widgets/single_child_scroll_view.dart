@@ -544,13 +544,14 @@ class _RenderSingleChildViewport extends RenderBox with RenderObjectWithChildMix
   }
 
   @override
-  double getOffsetToReveal(RenderObject target, double alignment) {
+  RevealedOffset getOffsetToReveal(RenderObject target, double alignment, {Rect rect}) {
+    rect ??= target.paintBounds;
     if (target is! RenderBox)
-      return offset.pixels;
+      return new RevealedOffset(offset: offset.pixels, rect: rect);
 
     final RenderBox targetBox = target;
     final Matrix4 transform = targetBox.getTransformTo(this);
-    final Rect bounds = MatrixUtils.transformRect(transform, targetBox.paintBounds);
+    final Rect bounds = MatrixUtils.transformRect(transform, rect);
     final Size contentSize = child.size;
 
     double leadingScrollOffset;
@@ -580,15 +581,37 @@ class _RenderSingleChildViewport extends RenderBox with RenderObjectWithChildMix
         targetMainAxisExtent = bounds.width;
         break;
     }
+    final double targetOffset = leadingScrollOffset - (mainAxisExtent - targetMainAxisExtent) * alignment;
+    Rect targetRect;
 
-    return leadingScrollOffset - (mainAxisExtent - targetMainAxisExtent) * alignment;
+    switch (axisDirection) {
+      case AxisDirection.up:
+        targetRect = bounds.translate(0.0, -targetOffset);
+        break;
+      case AxisDirection.right:
+        targetRect = bounds.translate(-targetOffset, 0.0);
+        break;
+      case AxisDirection.down:
+        targetRect = bounds.translate(0.0, -targetOffset);
+        break;
+      case AxisDirection.left:
+        targetRect = bounds.translate(targetOffset, 0.0);
+        break;
+    }
+
+    return new RevealedOffset(offset: targetOffset, rect: targetRect);
   }
 
   @override
-  void showOnScreen([RenderObject child]) {
-    RenderViewportBase.showInViewport(child: child, viewport: this, offset: offset);
+  void showOnScreen({RenderObject descendant, Rect rect}) {
+    Rect newRect = RenderViewportBase.showInViewport(
+      child: descendant,
+      viewport: this,
+      offset: offset,
+      rect: rect,
+    );
     // Make sure the viewport itself is on screen.
-    super.showOnScreen();
+    super.showOnScreen(rect: newRect);
   }
 
   @override
