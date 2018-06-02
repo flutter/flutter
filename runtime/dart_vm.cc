@@ -251,8 +251,16 @@ fxl::RefPtr<DartVM> DartVM::ForProcess(
     if (!vm_snapshot) {
       vm_snapshot = DartSnapshot::VMSnapshotFromSettings(settings);
     }
+    if (!(vm_snapshot && vm_snapshot->IsValid())) {
+      FXL_LOG(ERROR) << "VM snapshot must be valid.";
+      return;
+    }
     if (!isolate_snapshot) {
       isolate_snapshot = DartSnapshot::IsolateSnapshotFromSettings(settings);
+    }
+    if (!(isolate_snapshot && isolate_snapshot->IsValid())) {
+      FXL_LOG(ERROR) << "Isolate snapshot must be valid.";
+      return;
     }
     if (!shared_snapshot) {
       shared_snapshot = DartSnapshot::Empty();
@@ -284,12 +292,6 @@ DartVM::DartVM(const Settings& settings,
   TRACE_EVENT0("flutter", "DartVMInitializer");
   FXL_DLOG(INFO) << "Attempting Dart VM launch for mode: "
                  << (IsRunningPrecompiledCode() ? "AOT" : "Interpreter");
-
-  FXL_DCHECK(vm_snapshot_ && vm_snapshot_->IsValid())
-      << "VM snapshot must be valid.";
-
-  FXL_DCHECK(isolate_snapshot_ && isolate_snapshot_->IsValid())
-      << "Isolate snapshot must be valid.";
 
   {
     TRACE_EVENT0("flutter", "dart::bin::BootstrapDartIo");
