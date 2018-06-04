@@ -281,9 +281,9 @@ class FlutterPlugin implements Plugin<Project> {
         if (project.hasProperty('extra-gen-snapshot-options')) {
             extraGenSnapshotOptionsValue = project.property('extra-gen-snapshot-options')
         }
-        Boolean preferSharedLibraryValue = false
-        if (project.hasProperty('prefer-shared-library')) {
-            preferSharedLibraryValue = project.property('prefer-shared-library').toBoolean()
+        Boolean buildSharedLibraryValue = false
+        if (project.hasProperty('build-shared-library')) {
+            buildSharedLibraryValue = project.property('build-shared-library').toBoolean()
         }
         String targetPlatformValue = null
         if (project.hasProperty('target-platform')) {
@@ -314,7 +314,7 @@ class FlutterPlugin implements Plugin<Project> {
                 fileSystemRoots fileSystemRootsValue
                 fileSystemScheme fileSystemSchemeValue
                 trackWidgetCreation trackWidgetCreationValue
-                preferSharedLibrary preferSharedLibraryValue
+                buildSharedLibrary buildSharedLibraryValue
                 targetPlatform targetPlatformValue
                 sourceDir project.file(project.flutter.source)
                 intermediateDir project.file("${project.buildDir}/${AndroidProject.FD_INTERMEDIATES}/flutter/${variant.name}")
@@ -361,7 +361,7 @@ abstract class BaseFlutterTask extends DefaultTask {
     @Optional @Input
     Boolean trackWidgetCreation
     @Optional @Input
-    Boolean preferSharedLibrary
+    Boolean buildSharedLibrary
     @Optional @Input
     String targetPlatform
     File sourceDir
@@ -422,8 +422,8 @@ abstract class BaseFlutterTask extends DefaultTask {
                 if (extraGenSnapshotOptions != null) {
                     args "--extra-gen-snapshot-options", "${extraGenSnapshotOptions}"
                 }
-                if (preferSharedLibrary) {
-                    args "--prefer-shared-library"
+                if (buildSharedLibrary) {
+                    args "--build-shared-library"
                 }
                 if (targetPlatform != null) {
                     args "--target-platform", "${targetPlatform}"
@@ -487,7 +487,7 @@ class FlutterTask extends BaseFlutterTask {
             include "flutter_assets/**" // the working dir and its files
 
             if (buildMode != 'debug') {
-                if (preferSharedLibrary) {
+                if (buildSharedLibrary) {
                     include "app.so"
                 } else {
                     include "vm_snapshot_data"
