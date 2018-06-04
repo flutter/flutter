@@ -53,7 +53,6 @@ class GenSnapshot {
       '--causal_async_stacks',
       '--packages=$packagesPath',
       '--dependencies=$depfilePath',
-      '--print_snapshot_sizes',
     ]..addAll(additionalArgs);
 
     final String snapshotterPath = getSnapshotterPath(snapshotType);
