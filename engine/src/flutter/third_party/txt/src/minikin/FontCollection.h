@@ -38,7 +38,8 @@ class FontCollection {
    public:
     virtual ~FallbackFontProvider() = default;
     virtual const std::shared_ptr<FontFamily>& matchFallbackFont(
-        uint32_t ch) = 0;
+        uint32_t ch,
+        std::string locale) = 0;
   };
 
   struct Run {

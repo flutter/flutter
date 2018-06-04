@@ -160,16 +160,6 @@ void GetFontAndMinikinPaint(const TextStyle& style,
   paint->paintFlags |= minikin::LinearTextFlag;
 }
 
-sk_sp<SkTypeface> GetDefaultSkiaTypeface(
-    const std::shared_ptr<txt::FontCollection>& font_collection,
-    const TextStyle& style) {
-  std::shared_ptr<minikin::FontCollection> collection =
-      font_collection->GetMinikinFontCollectionForFamily(style.font_family);
-  minikin::FakedFont faked_font =
-      collection->baseFontFaked(GetMinikinFontStyle(style));
-  return static_cast<FontSkia*>(faked_font.font)->GetSkTypeface();
-}
-
 void FindWords(const std::vector<uint16_t>& text,
                size_t start,
                size_t end,
@@ -286,8 +276,7 @@ bool Paragraph::ComputeLineBreaks() {
       minikin::MinikinPaint paint;
       GetFontAndMinikinPaint(run.style, &font, &paint);
       std::shared_ptr<minikin::FontCollection> collection =
-          font_collection_->GetMinikinFontCollectionForFamily(
-              run.style.font_family);
+          GetMinikinFontCollectionForStyle(run.style);
       if (collection == nullptr) {
         FXL_LOG(INFO) << "Could not find font collection for family \""
                       << run.style.font_family << "\".";
@@ -502,8 +491,7 @@ void Paragraph::Layout(double width, bool force) {
       paint.setTextSize(run.style().font_size);
 
       std::shared_ptr<minikin::FontCollection> minikin_font_collection =
-          font_collection_->GetMinikinFontCollectionForFamily(
-              run.style().font_family);
+          GetMinikinFontCollectionForStyle(run.style());
 
       // Lay out this run.
       uint16_t* text_ptr = text_.data();
@@ -753,7 +741,7 @@ void Paragraph::Layout(double width, bool force) {
     if (paint_records.empty()) {
       SkPaint::FontMetrics metrics;
       TextStyle style(paragraph_style_.GetTextStyle());
-      paint.setTypeface(GetDefaultSkiaTypeface(font_collection_, style));
+      paint.setTypeface(GetDefaultSkiaTypeface(style));
       paint.setTextSize(style.font_size);
       paint.getFontMetrics(&metrics);
       update_line_metrics(metrics, style);
@@ -853,6 +841,31 @@ void Paragraph::SetParagraphStyle(const ParagraphStyle& style) {
 void Paragraph::SetFontCollection(
     std::shared_ptr<FontCollection> font_collection) {
   font_collection_ = std::move(font_collection);
+}
+
+std::shared_ptr<minikin::FontCollection>
+Paragraph::GetMinikinFontCollectionForStyle(const TextStyle& style) {
+  std::string locale;
+  if (!style.locale.empty()) {
+    uint32_t language_list_id =
+        minikin::FontStyle::registerLanguageList(style.locale);
+    const minikin::FontLanguages& langs =
+        minikin::FontLanguageListCache::getById(language_list_id);
+    if (langs.size()) {
+      locale = langs[0].getString();
+    }
+  }
+
+  return font_collection_->GetMinikinFontCollectionForFamily(style.font_family,
+                                                             locale);
+}
+
+sk_sp<SkTypeface> Paragraph::GetDefaultSkiaTypeface(const TextStyle& style) {
+  std::shared_ptr<minikin::FontCollection> collection =
+      GetMinikinFontCollectionForStyle(style);
+  minikin::FakedFont faked_font =
+      collection->baseFontFaked(GetMinikinFontStyle(style));
+  return static_cast<FontSkia*>(faked_font.font)->GetSkTypeface();
 }
 
 // The x,y coordinates will be the very top left corner of the rendered
