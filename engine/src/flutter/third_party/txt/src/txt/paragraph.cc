@@ -303,7 +303,7 @@ bool Paragraph::ComputeLineBreaks() {
           (hard_break && line_end < text_.size()) ? line_end + 1 : line_end;
       size_t line_end_excluding_whitespace = line_end;
       while (
-          line_end_excluding_whitespace > 0 &&
+          line_end_excluding_whitespace > line_start &&
           minikin::isLineEndSpace(text_[line_end_excluding_whitespace - 1])) {
         line_end_excluding_whitespace--;
       }
