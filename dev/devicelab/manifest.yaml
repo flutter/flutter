@@ -124,13 +124,6 @@ tasks:
     stage: devicelab
     required_agent_capabilities: ["mac/android"]
 
-  run_release_test:
-    description: >
-      Checks that `flutter run --release` does not crash.
-    stage: devicelab
-    required_agent_capabilities: ["mac/android"]
-    flaky: true
-
   platform_interaction_test:
     description: >
       Checks platform interaction on Android.

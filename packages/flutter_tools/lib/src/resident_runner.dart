@@ -841,9 +841,8 @@ abstract class ResidentRunner {
       }
       printStatus('To display the performance overlay (WidgetsApp.showPerformanceOverlay), press "P".');
     }
-    if (flutterDevices.any((FlutterDevice d) => d.device.supportsScreenshot)) {
+    if (flutterDevices.any((FlutterDevice d) => d.device.supportsScreenshot))
       printStatus('To save a screenshot to flutter.png, press "s".');
-    }
   }
 
   /// Called when a signal has requested we exit.

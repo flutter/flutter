@@ -53,8 +53,7 @@ class FlutterCommandRunner extends CommandRunner<Null> {
     argParser.addFlag('verbose',
         abbr: 'v',
         negatable: false,
-        help: 'Noisy logging, including all shell commands executed.\n'
-              'If used with --help, shows hidden options.');
+        help: 'Noisy logging, including all shell commands executed.');
     argParser.addFlag('quiet',
         negatable: false,
         hide: !verboseHelp,
@@ -67,12 +66,11 @@ class FlutterCommandRunner extends CommandRunner<Null> {
         help: 'Reports the version of this tool.');
     argParser.addFlag('machine',
         negatable: false,
-        hide: !verboseHelp,
-        help: 'When used with the --version flag, outputs the information using JSON.');
+        hide: true);
     argParser.addFlag('color',
         negatable: true,
         hide: !verboseHelp,
-        help: 'Whether to use terminal colors (requires support for ANSI escape sequences).');
+        help: 'Whether to use terminal colors.');
     argParser.addFlag('version-check',
         negatable: true,
         defaultsTo: true,
@@ -80,67 +78,61 @@ class FlutterCommandRunner extends CommandRunner<Null> {
         help: 'Allow Flutter to check for updates when this command runs.');
     argParser.addFlag('suppress-analytics',
         negatable: false,
+        hide: !verboseHelp,
         help: 'Suppress analytics reporting when this command runs.');
     argParser.addFlag('bug-report',
         negatable: false,
-        help: 'Captures a bug report file to submit to the Flutter team.\n'
-              'Contains local paths, device identifiers, and log snippets.');
+        help:
+            'Captures a bug report file to submit to the Flutter team '
+            '(contains local paths, device\nidentifiers, and log snippets).');
+    argParser.addFlag('show-test-device',
+        negatable: false,
+        hide: !verboseHelp,
+        help: 'List the special \'flutter-tester\' device in device listings. '
+              'This headless device is used to\ntest Flutter tooling.');
 
     String packagesHelp;
-    bool showPackagesCommand;
-    if (fs.isFileSync(kPackagesFileName)) {
-      packagesHelp = '(defaults to "$kPackagesFileName")';
-      showPackagesCommand = verboseHelp;
-    } else {
-      packagesHelp = '(required, since the current directory does not contain a "$kPackagesFileName" file)';
-      showPackagesCommand = true;
-    }
+    if (fs.isFileSync(kPackagesFileName))
+      packagesHelp = '\n(defaults to "$kPackagesFileName")';
+    else
+      packagesHelp = '\n(required, since the current directory does not contain a "$kPackagesFileName" file)';
     argParser.addOption('packages',
-        hide: !showPackagesCommand,
-        help: 'Path to your ".packages" file.\n$packagesHelp');
-
-    argParser.addOption('flutter-root',
         hide: !verboseHelp,
-        help: 'The root directory of the Flutter repository.\n'
-              'Defaults to \$$kFlutterRootEnvironmentVariableName if set, otherwise uses the parent of the\n'
-              'directory that the "flutter" script itself is in.');
+        help: 'Path to your ".packages" file.$packagesHelp');
+    argParser.addOption('flutter-root',
+        help: 'The root directory of the Flutter repository (uses \$$kFlutterRootEnvironmentVariableName if set).');
 
     if (verboseHelp)
       argParser.addSeparator('Local build selection options (not normally required):');
 
     argParser.addOption('local-engine-src-path',
         hide: !verboseHelp,
-        help: 'Path to your engine src directory, if you are building Flutter locally.\n'
-              'Defaults to \$$kFlutterEngineEnvironmentVariableName if set, otherwise defaults to the path given in your pubspec.yaml\n'
-              'dependency_overrides for $kFlutterEnginePackageName, if any, or, failing that, tries to guess at the location\n'
-              'based on the value of the --flutter-root option.');
+        help:
+            'Path to your engine src directory, if you are building Flutter locally.\n'
+            'Defaults to \$$kFlutterEngineEnvironmentVariableName if set, otherwise defaults to the path given in your pubspec.yaml\n'
+            'dependency_overrides for $kFlutterEnginePackageName, if any, or, failing that, tries to guess at the location\n'
+            'based on the value of the --flutter-root option.');
 
     argParser.addOption('local-engine',
         hide: !verboseHelp,
-        help: 'Name of a build output within the engine out directory, if you are building Flutter locally.\n'
-              'Use this to select a specific version of the engine if you have built multiple engine targets.\n'
-              'This path is relative to --local-engine-src-path/out.');
-
-    if (verboseHelp)
-      argParser.addSeparator('Options for testing the "flutter" tool itself:');
-
+        help:
+            'Name of a build output within the engine out directory, if you are building Flutter locally.\n'
+            'Use this to select a specific version of the engine if you have built multiple engine targets.\n'
+            'This path is relative to --local-engine-src-path/out.');
     argParser.addOption('record-to',
-        hide: !verboseHelp,
-        help: 'Enables recording of process invocations (including stdout and stderr of all such invocations),\n'
-              'and file system access (reads and writes).\n'
-              'Serializes that recording to a directory with the path specified in this flag. If the\n'
-              'directory does not already exist, it will be created.');
+        hide: true,
+        help:
+            'Enables recording of process invocations (including stdout and stderr of all such invocations),\n'
+            'and file system access (reads and writes).\n'
+            'Serializes that recording to a directory with the path specified in this flag. If the\n'
+            'directory does not already exist, it will be created.');
     argParser.addOption('replay-from',
-        hide: !verboseHelp,
-        help: 'Enables mocking of process invocations by replaying their stdout, stderr, and exit code from\n'
-              'the specified recording (obtained via --record-to). The path specified in this flag must refer\n'
-              'to a directory that holds serialized process invocations structured according to the output of\n'
-              '--record-to.');
-    argParser.addFlag('show-test-device',
-        negatable: false,
-        hide: !verboseHelp,
-        help: 'List the special \'flutter-tester\' device in device listings. '
-              'This headless device is used to\ntest Flutter tooling.');
+        hide: true,
+        help:
+            'Enables mocking of process invocations by replaying their stdout, stderr, and exit code from\n'
+            'the specified recording (obtained via --record-to). The path specified in this flag must refer\n'
+            'to a directory that holds serialized process invocations structured according to the output of\n'
+            '--record-to.');
   }
 
   @override
