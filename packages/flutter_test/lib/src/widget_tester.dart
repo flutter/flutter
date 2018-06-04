@@ -525,8 +525,8 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
   }
 
   void _verifySemanticsHandlesWereDisposed() {
-    assert(_semanticsHandles != null);
-    if (binding.pipelineOwner.debugOutstandingSemanticsHandles > _semanticsHandles) {
+    assert(_lastRecordedSemanticsHandles != null);
+    if (binding.pipelineOwner.debugOutstandingSemanticsHandles > _lastRecordedSemanticsHandles) {
       throw new FlutterError(
         'A SemanticsHandle was active at the end of the test.\n'
         'All SemanticsHandle instances must be disposed by calling dispose() on '
@@ -535,13 +535,13 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
         'existing handle will leak into another test and alter its behavior.'
       );
     }
-    _semanticsHandles = null;
+    _lastRecordedSemanticsHandles = null;
   }
 
-  int _semanticsHandles;
+  int _lastRecordedSemanticsHandles;
 
   void _recordNumberOfSemanticsHandles() {
-    _semanticsHandles = binding.pipelineOwner.debugOutstandingSemanticsHandles;
+    _lastRecordedSemanticsHandles = binding.pipelineOwner.debugOutstandingSemanticsHandles;
   }
 
   /// Returns the TestTextInput singleton.
