@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:io' show Platform;
+
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -1426,6 +1428,50 @@ void main() {
           )),
         ),
       ),
+    );
+  });
+
+  testWidgets('InputDecorator OutlineBorder focused label with icon', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/18111
+
+    Widget buildFrame(TextDirection textDirection) {
+      return new MaterialApp(
+        home: new Scaffold(
+          body: new Container(
+            padding: const EdgeInsets.all(16.0),
+            alignment: Alignment.center,
+            child: new Directionality(
+              textDirection: textDirection,
+              child: new RepaintBoundary(
+                child: new InputDecorator(
+                  isFocused: true,
+                  isEmpty: true,
+                  decoration: new InputDecoration(
+                    icon: const Icon(Icons.insert_link),
+                    labelText: 'primaryLink',
+                    hintText: 'Primary link to story',
+                    border: const OutlineInputBorder(),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildFrame(TextDirection.ltr));
+    await expectLater(
+      find.byType(InputDecorator),
+      matchesGoldenFile('input_decorator.outline_icon_label.ltr.png'),
+      skip: !Platform.isLinux,
+    );
+
+    await tester.pumpWidget(buildFrame(TextDirection.rtl));
+    await expectLater(
+      find.byType(InputDecorator),
+      matchesGoldenFile('input_decorator.outline_icon_label.rtl.png'),
+      skip: !Platform.isLinux,
     );
   });
 }
