@@ -324,6 +324,16 @@ abstract class LocalHistoryRoute<T> extends Route<T> {
   /// The given local history entry must not already be part of another local
   /// history route.
   ///
+  /// ## Sample code
+  ///
+  /// The following example adds a local history entry to the nearest
+  /// [ModalRoute] ancestor. Adding this [LocalHistoryEntry] does not cause
+  /// anything to change visually, but when the user navigates back (such as
+  /// pressing the back button on Android), this [LocalHistoryEntry] will be
+  /// removed and its `onRemove` function will be executed. The execution of
+  /// `onRemove` gives you a chance to manually implement navigation, for
+  /// example: closing a navigation drawer.
+  ///
   /// ```dart
   /// ModalRoute.of(context).addLocalHistoryEntry(
   ///   new LocalHistoryEntry(
