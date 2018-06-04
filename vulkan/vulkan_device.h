@@ -35,8 +35,6 @@ class VulkanDevice {
 
   uint32_t GetGraphicsQueueIndex() const;
 
-  void ReleaseDeviceOwnership();
-
   FXL_WARN_UNUSED_RESULT
   bool GetSurfaceCapabilities(const VulkanSurface& surface,
                               VkSurfaceCapabilitiesKHR* capabilities) const;
