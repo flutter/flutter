@@ -163,7 +163,7 @@ class VsCode {
     final List<VsCode> results = <VsCode>[];
 
     for (_VsCodeInstallLocation searchLocation in searchLocations) {
-      if (fs.directory(searchLocation.installPath).existsSync()) {
+      if (fs.isDirectorySync(searchLocation.installPath)) {
         final String extensionDirectory =
             fs.path.join(homeDirPath, searchLocation.extensionsFolder, 'extensions');
         results.add(new VsCode.fromDirectory(searchLocation.installPath, extensionDirectory, edition: searchLocation.edition));
