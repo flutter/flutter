@@ -17,6 +17,7 @@
 #include "flutter/shell/common/switches.h"
 #include "flutter/shell/common/thread_host.h"
 #include "flutter/shell/platform/darwin/common/command_line.h"
+#include "flutter/shell/platform/darwin/ios/framework/Source/FlutterDartProject_Internal.h"
 #include "lib/fxl/functional/make_copyable.h"
 
 static std::unique_ptr<shell::PlatformView> CreateHeadlessPlatformView(shell::Shell& shell) {
@@ -72,10 +73,16 @@ static std::unique_ptr<shell::Rasterizer> CreateHeadlessRasterizer(shell::Shell&
     return;
   }
 
+  FlutterDartProject* project =
+      [[[FlutterDartProject alloc] initFromDefaultSourceForConfiguration] autorelease];
+
+  auto config = project.runConfiguration;
+
+  config.SetEntrypoint(entrypoint.UTF8String);
+
   // Override the default run configuration with the specified entrypoint.
   _shell->GetTaskRunners().GetUITaskRunner()->PostTask(
-      fxl::MakeCopyable([engine = _shell->GetEngine(),
-                         config = shell::RunConfiguration::InferFromSettings(settings)]() mutable {
+      fxl::MakeCopyable([engine = _shell->GetEngine(), config = std::move(config)]() mutable {
         if (!engine || !engine->Run(std::move(config))) {
           FXL_LOG(ERROR) << "Could not launch engine with configuration.";
         }
