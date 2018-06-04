@@ -313,6 +313,13 @@ class Paragraph {
   // Draws the background onto the canvas.
   void PaintBackground(SkCanvas* canvas, const PaintRecord& record);
 
+  // Obtain a Minikin font collection matching this text style.
+  std::shared_ptr<minikin::FontCollection> GetMinikinFontCollectionForStyle(
+      const TextStyle& style);
+
+  // Get a default SkTypeface for a text style.
+  sk_sp<SkTypeface> GetDefaultSkiaTypeface(const TextStyle& style);
+
   FXL_DISALLOW_COPY_AND_ASSIGN(Paragraph);
 };
 
