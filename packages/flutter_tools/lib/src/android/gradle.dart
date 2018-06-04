@@ -340,7 +340,7 @@ Future<Null> _buildGradleProjectV2(String gradle, BuildInfo buildInfo, String ta
   } else {
     command.add('-Ppreview-dart-2=false');
   }
-  if (buildInfo.preferSharedLibrary && androidSdk.ndk != null) {
+  if (buildInfo.buildSharedLibrary && androidSdk.ndk != null) {
     command.add('-Pbuild-shared-library=true');
   }
   if (buildInfo.targetPlatform == TargetPlatform.android_arm64)

@@ -15,7 +15,7 @@ class BuildInfo {
     this.trackWidgetCreation: false,
     this.extraFrontEndOptions,
     this.extraGenSnapshotOptions,
-    this.preferSharedLibrary,
+    this.buildSharedLibrary,
     this.targetPlatform,
     this.fileSystemRoots,
     this.fileSystemScheme,
@@ -49,7 +49,7 @@ class BuildInfo {
   final String extraGenSnapshotOptions;
 
   /// Whether to prefer AOT compiling to a *so file.
-  final bool preferSharedLibrary;
+  final bool buildSharedLibrary;
 
   /// Target platform for the build (e.g. android_arm versus android_arm64).
   final TargetPlatform targetPlatform;
@@ -97,7 +97,7 @@ class BuildInfo {
           trackWidgetCreation: trackWidgetCreation,
           extraFrontEndOptions: extraFrontEndOptions,
           extraGenSnapshotOptions: extraGenSnapshotOptions,
-          preferSharedLibrary: preferSharedLibrary,
+          buildSharedLibrary: buildSharedLibrary,
           targetPlatform: targetPlatform);
 }
 
