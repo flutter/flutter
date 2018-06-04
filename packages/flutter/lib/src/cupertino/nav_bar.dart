@@ -47,7 +47,7 @@ const Border _kDefaultNavBarBorder = const Border(
 
 const TextStyle _kLargeTitleTextStyle = const TextStyle(
   fontFamily: '.SF Pro Display',
-  fontSize: 33.5,
+  fontSize: 34.0,
   fontWeight: FontWeight.w700,
   letterSpacing: 0.24,
   color: CupertinoColors.black,
