@@ -374,17 +374,8 @@ class _OutlineButtonState extends State<OutlineButton>
   ///
   /// If [this.borderSize] is provided and the style is none, then that is used.
   ///
-  /// Else:
-  ///
-  /// The color resolves to one of the following prioritized options:
-  /// 1. provided [this.highlightedBorderColor]
-  /// 2. provided [this.borderSide.color]
-  /// 3. inherited material theme surfaceColor
-  /// 4. default material surfaceColor
-  ///
-  /// The width resolves to one of the following prioritized options:
-  /// 1. provided [this.borderSide.color]
-  /// 2. default material outlined button stroke width: 1dp
+  /// Else, the color and width resolve to the first available provided value,
+  /// then the first available theme value.
   BorderSide _getOutline(ThemeData theme, ButtonThemeData buttonTheme) {
     if (widget.borderSide?.style == BorderStyle.none) return widget.borderSide;
 
@@ -392,12 +383,11 @@ class _OutlineButtonState extends State<OutlineButton>
     Color defaultColor =
         theme.brightness == Brightness.dark ? Colors.white : Colors.black;
 
-    final Color color = widget.enabled
-        ? (_pressed
-            // TODO(hmuller): should be theme.surfaceColor
-            ? widget.highlightedBorderColor ?? theme.primaryColor
-            : (widget.borderSide?.color ?? defaultColor))
-        : (widget.disabledBorderColor ?? defaultColor);
+    final Color color = widget.highlightedBorderColor
+        ?? widget.borderSide?.color
+        ?? widget.disabledBorderColor
+        // TODO(hmuller): add case for theme.surfaceColor
+        ?? defaultColor;
 
     return new BorderSide(
       color: color,
