@@ -27,7 +27,8 @@ import 'theme.dart';
 /// be used as the initial query.
 ///
 /// The method returns the selected search result, which can be set in the
-/// [SearchDelegate.close] call.
+/// [SearchDelegate.close] call. If the search page is closed with the system
+/// back button it returns null.
 ///
 /// A given [SearchDelegate] can only be associated with one active [showSearch]
 /// call. Call [SearchDelegate.close] before re-using the same delegate instance
@@ -327,6 +328,12 @@ class _SearchPageRoute<T> extends PageRoute<void> {
     super.didComplete(result);
     assert(delegate._route == this);
     delegate._route = null;
+    // Ensure that [showSearch] future completes when the search route is
+    // removed by other means than calling [SearchDelegate.close].
+    if (!delegate._result.isCompleted) {
+      delegate._result.complete(null);
+      delegate._currentBody = null;
+    }
   }
 }
 
