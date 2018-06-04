@@ -555,14 +555,35 @@ class NavigatorObserver {
 /// ### Nesting Navigators
 ///
 /// An app can use more than one Navigator. Nesting one Navigator below
-/// another Navigator can be used to create an "inner journey" such as user
-/// registration, store checkout, or other independent journeys that represent
-/// a subsection of your overall application.
+/// another Navigator can be used to create an "inner journey" such as tabbed
+/// navigation, user registration, store checkout, or other independent journeys
+/// that represent a subsection of your overall application.
+///
+/// #### Real World Example
+///
+/// It is standard practice for iOS apps to use tabbed navigation where each
+/// tab maintains its own navigation history. Therefore, each tab has its own
+/// [Navigator], creating a kind of "parallel navigation."
+///
+/// In addition to the parallel navigation of the tabs, it is still possible to
+/// launch full-screen pages that completely cover the tabs. For example: an
+/// on-boarding flow, or an alert dialog. Therefore, there must exist a "root"
+/// [Navigator] that sits above the tab navigation. As a result, each of the
+/// tab's [Navigator]s are actually nested [Navigator]s sitting below a single
+/// root [Navigator].
+///
+/// The nested [Navigator]s for tabbed navigation sit in [WidgetApp] and
+/// [CupertinoTabView], so you don't need to worry about nested [Navigator]s
+/// in this situation, but it's a real world example where nested [Navigator]s
+/// are used.
+///
+/// #### Sample Code
 ///
 /// The following example demonstrates how a nested [Navigator] can be used to
-/// present a standalone user registration journey. Even though this example
-/// uses two [Navigator]s to demonstrate nested [Navigator]s, a similar result
-/// is possible using only a single [Navigator].
+/// present a standalone user registration journey.
+///
+/// Even though this example uses two [Navigator]s to demonstrate nested
+/// [Navigator]s, a similar result is possible using only a single [Navigator].
 ///
 /// ```dart
 /// class MyApp extends StatelessWidget {
@@ -622,8 +643,8 @@ class NavigatorObserver {
 /// [Navigator.of] operates on the nearest ancestor [Navigator] from the given
 /// [BuildContext]. Be sure to provide a [BuildContext] below the intended
 /// [Navigator], especially in large [build] methods where nested [Navigator]s
-/// are created. The [Builder] widget can be used to access [BuildContext] at
-/// desired locations in the widget subtree.
+/// are created. The [Builder] widget can be used to access a [BuildContext] at
+/// a desired location in the widget subtree.
 class Navigator extends StatefulWidget {
   /// Creates a widget that maintains a stack-based history of child widgets.
   ///
