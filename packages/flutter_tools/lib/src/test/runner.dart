@@ -43,16 +43,17 @@ Future<int> runTests(
 
   // Compute the command-line arguments for package:test.
   final List<String> testArgs = <String>[];
-  if (!terminal.supportsColor)
-    testArgs.addAll(<String>['--no-color', '-rexpanded']);
+  if (!terminal.supportsColor) {
+    testArgs.addAll(<String>['--no-color']);
+  }
 
   if (machine) {
     testArgs.addAll(<String>['-r', 'json']);
+  } else {
+    testArgs.addAll(<String>['-r', 'compact']);
   }
 
-  if (enableObservatory) {
-    // (In particular, for collecting code coverage.)
-
+  if (enableObservatory) { // (In particular, for collecting code coverage.)
     // Turn on concurrency, but just barely. This is a trade-off between running
     // too many tests such that they all time out, and too few tests such that
     // the tests overall take too much time. The current number is empirically
