@@ -38,8 +38,6 @@ class VulkanApplication {
 
   const VulkanHandle<VkInstance>& GetInstance() const;
 
-  void ReleaseInstanceOwnership();
-
   std::unique_ptr<VulkanDevice> AcquireFirstCompatibleLogicalDevice() const;
 
  private:

@@ -50,11 +50,6 @@ class VulkanHandle {
 
   operator Handle() const { return handle_; }
 
-  /// Relinquish responsibility of collecting the underlying handle when this
-  /// object is collected. It is the responsibility of the caller to ensure that
-  /// the lifetime of the handle extends past the lifetime of this object.
-  void ReleaseOwnership() { disposer_ = nullptr; }
-
   void Reset() { DisposeIfNecessary(); }
 
  private:
