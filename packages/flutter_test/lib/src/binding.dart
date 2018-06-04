@@ -349,22 +349,20 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   }
 
   Zone _parentZone;
-  Completer<Null> _currentTestCompleter;
-  String _currentTestDescription; // set from _runTest to _testCompletionHandler
 
-  void _testCompletionHandler() {
-    // This can get called twice, in the case of a Future without listeners failing, and then
-    // our main future completing.
-    assert(Zone.current == _parentZone);
-    assert(_currentTestCompleter != null);
-    if (_pendingExceptionDetails != null) {
-      debugPrint = debugPrintOverride; // just in case the test overrides it -- otherwise we won't see the error!
-      reportTestException(_pendingExceptionDetails, _currentTestDescription);
-      _pendingExceptionDetails = null;
-    }
-    _currentTestDescription = null;
-    if (!_currentTestCompleter.isCompleted)
-      _currentTestCompleter.complete(null);
+  VoidCallback _createTestCompletionHandler(String testDescription, Completer<Null> completer) {
+    return () {
+      // This can get called twice, in the case of a Future without listeners failing, and then
+      // our main future completing.
+      assert(Zone.current == _parentZone);
+      if (_pendingExceptionDetails != null) {
+        debugPrint = debugPrintOverride; // just in case the test overrides it -- otherwise we won't see the error!
+        reportTestException(_pendingExceptionDetails, testDescription);
+        _pendingExceptionDetails = null;
+      }
+      if (!completer.isCompleted)
+        completer.complete(null);
+    };
   }
 
   /// Called when the framework catches an exception, even if that exception is
@@ -381,8 +379,6 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
 
   Future<Null> _runTest(Future<Null> testBody(), VoidCallback invariantTester, String description) {
     assert(description != null);
-    assert(_currentTestDescription == null);
-    _currentTestDescription = description; // cleared by _testCompletionHandler
     assert(inTest);
     _oldExceptionHandler = FlutterError.onError;
     int _exceptionCount = 0; // number of un-taken exceptions
@@ -405,10 +401,11 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
         _pendingExceptionDetails = details;
       }
     };
-    _currentTestCompleter = new Completer<Null>();
+    final Completer<Null> testCompleter = new Completer<Null>();
+    final VoidCallback testCompletionHandler = _createTestCompletionHandler(description, testCompleter);
     final ZoneSpecification errorHandlingZoneSpecification = new ZoneSpecification(
       handleUncaughtError: (Zone self, ZoneDelegate parent, Zone zone, dynamic exception, StackTrace stack) {
-        if (_currentTestCompleter.isCompleted) {
+        if (testCompleter.isCompleted) {
           // Well this is not a good sign.
           // Ideally, once the test has failed we would stop getting errors from the test.
           // However, if someone tries hard enough they could get in a state where this happens.
@@ -432,6 +429,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
         // if the listener is in a different zone (which it would be for the
         // `whenComplete` handler below), or if the Future completes with an
         // error and the future has no listeners at all.
+        //
         // This handler further calls the onError handler above, which sets
         // _pendingExceptionDetails. Nothing gets printed as a result of that
         // call unless we already had an exception pending, because in general
@@ -440,11 +438,13 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
         // Now, if we actually get here, this isn't going to be one of those
         // cases. We only get here if the test has actually failed. So, once
         // we've carefully reported it, we then immediately end the test by
-        // calling the _testCompletionHandler in the _parentZone.
-        // We have to manually call _testCompletionHandler because if the Future
+        // calling the testCompletionHandler in the _parentZone.
+        //
+        // We have to manually call testCompletionHandler because if the Future
         // library calls us, it is maybe _instead_ of calling a registered
         // listener from a different zone. In our case, that would be instead of
         // calling the whenComplete() listener below.
+        //
         // We have to call it in the parent zone because if we called it in
         // _this_ zone, the test framework would find this zone was the current
         // zone and helpfully throw the error in this zone, causing us to be
@@ -478,15 +478,15 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
         ));
         assert(_parentZone != null);
         assert(_pendingExceptionDetails != null, 'A test overrode FlutterError.onError but either failed to return it to its original state, or had unexpected additional errors that it could not handle. Typically, this is caused by using expect() before restoring FlutterError.onError.');
-        _parentZone.run<void>(_testCompletionHandler);
+        _parentZone.run<void>(testCompletionHandler);
       }
     );
     _parentZone = Zone.current;
     final Zone testZone = _parentZone.fork(specification: errorHandlingZoneSpecification);
     testZone.runBinary(_runTestBody, testBody, invariantTester)
-      .whenComplete(_testCompletionHandler);
+      .whenComplete(testCompletionHandler);
     asyncBarrier(); // When using AutomatedTestWidgetsFlutterBinding, this flushes the microtasks.
-    return _currentTestCompleter.future;
+    return testCompleter.future;
   }
 
   Future<Null> _runTestBody(Future<Null> testBody(), VoidCallback invariantTester) async {
@@ -585,7 +585,6 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
     assert(inTest);
     FlutterError.onError = _oldExceptionHandler;
     _pendingExceptionDetails = null;
-    _currentTestCompleter = null;
     _parentZone = null;
   }
 }
@@ -606,7 +605,7 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
     ui.window.onDrawFrame = null;
   }
 
-  FakeAsync _fakeAsync;
+  FakeAsync _currentFakeAsync; // set from runTest to postTest
   Completer<void> _pendingAsyncTasks;
 
   @override
@@ -626,10 +625,10 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
   test_package.Timeout get defaultTestTimeout => const test_package.Timeout(const Duration(seconds: 5));
 
   @override
-  bool get inTest => _fakeAsync != null;
+  bool get inTest => _currentFakeAsync != null;
 
   @override
-  int get microtaskCount => _fakeAsync.microtaskCount;
+  int get microtaskCount => _currentFakeAsync.microtaskCount;
 
   @override
   Future<Null> pump([ Duration duration, EnginePhase newPhase = EnginePhase.sendSemanticsUpdate ]) {
@@ -637,17 +636,17 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
       assert(inTest);
       assert(_clock != null);
       if (duration != null)
-        _fakeAsync.elapse(duration);
+        _currentFakeAsync.elapse(duration);
       _phase = newPhase;
       if (hasScheduledFrame) {
-        _fakeAsync.flushMicrotasks();
+        _currentFakeAsync.flushMicrotasks();
         handleBeginFrame(new Duration(
           milliseconds: _clock.now().millisecondsSinceEpoch,
         ));
-        _fakeAsync.flushMicrotasks();
+        _currentFakeAsync.flushMicrotasks();
         handleDrawFrame();
       }
-      _fakeAsync.flushMicrotasks();
+      _currentFakeAsync.flushMicrotasks();
       return new Future<Null>.value();
     });
   }
@@ -706,15 +705,15 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
     // We override the default version of this so that the application-startup warm-up frame
     // does not schedule timers which we might never get around to running.
     handleBeginFrame(null);
-    _fakeAsync.flushMicrotasks();
+    _currentFakeAsync.flushMicrotasks();
     handleDrawFrame();
-    _fakeAsync.flushMicrotasks();
+    _currentFakeAsync.flushMicrotasks();
   }
 
   @override
   Future<Null> idle() {
     final Future<Null> result = super.idle();
-    _fakeAsync.elapse(const Duration());
+    _currentFakeAsync.elapse(const Duration());
     return result;
   }
 
@@ -755,24 +754,29 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
   Future<Null> runTest(Future<Null> testBody(), VoidCallback invariantTester, { String description: '' }) {
     assert(description != null);
     assert(!inTest);
-    assert(_fakeAsync == null);
+    assert(_currentFakeAsync == null);
     assert(_clock == null);
-    _fakeAsync = new FakeAsync();
-    _clock = _fakeAsync.getClock(new DateTime.utc(2015, 1, 1));
+    final FakeAsync fakeAsync = new FakeAsync();
+    _currentFakeAsync = fakeAsync; // reset in postTest
+    _clock = fakeAsync.getClock(new DateTime.utc(2015, 1, 1));
     Future<Null> testBodyResult;
-    _fakeAsync.run((FakeAsync fakeAsync) {
-      assert(fakeAsync == _fakeAsync);
+    fakeAsync.run((FakeAsync localFakeAsync) {
+      assert(fakeAsync == _currentFakeAsync);
+      assert(fakeAsync == localFakeAsync);
       testBodyResult = _runTest(testBody, invariantTester, description);
       assert(inTest);
     });
 
     return new Future<Null>.microtask(() async {
       // Resolve interplay between fake async and real async calls.
-      _fakeAsync.flushMicrotasks();
+      fakeAsync.flushMicrotasks();
       while (_pendingAsyncTasks != null) {
         await _pendingAsyncTasks.future;
-        _fakeAsync.flushMicrotasks();
+        fakeAsync.flushMicrotasks();
       }
+
+      // If we get here and fakeAsync != _currentFakeAsync, then the test
+      // probably timed out.
 
       // testBodyResult is a Future that was created in the Zone of the
       // fakeAsync. This means that if we await it here, it will register a
@@ -785,8 +789,8 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
 
   @override
   void asyncBarrier() {
-    assert(_fakeAsync != null);
-    _fakeAsync.flushMicrotasks();
+    assert(_currentFakeAsync != null);
+    _currentFakeAsync.flushMicrotasks();
     super.asyncBarrier();
   }
 
@@ -794,23 +798,23 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
   void _verifyInvariants() {
     super._verifyInvariants();
     assert(
-      _fakeAsync.periodicTimerCount == 0,
+      _currentFakeAsync.periodicTimerCount == 0,
       'A periodic Timer is still running even after the widget tree was disposed.'
     );
     assert(
-      _fakeAsync.nonPeriodicTimerCount == 0,
+      _currentFakeAsync.nonPeriodicTimerCount == 0,
       'A Timer is still pending even after the widget tree was disposed.'
     );
-    assert(_fakeAsync.microtaskCount == 0); // Shouldn't be possible.
+    assert(_currentFakeAsync.microtaskCount == 0); // Shouldn't be possible.
   }
 
   @override
   void postTest() {
     super.postTest();
-    assert(_fakeAsync != null);
+    assert(_currentFakeAsync != null);
     assert(_clock != null);
     _clock = null;
-    _fakeAsync = null;
+    _currentFakeAsync = null;
   }
 
 }
