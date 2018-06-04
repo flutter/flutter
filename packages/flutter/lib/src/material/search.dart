@@ -53,14 +53,11 @@ Future<T> showSearch<T>({
 }) {
   assert(delegate != null);
   assert(context != null);
-  assert(delegate._result == null || delegate._result.isCompleted);
-  delegate._result = new Completer<T>();
   delegate.query = query ?? delegate.query;
   delegate._currentBody = _SearchBody.suggestions;
-  Navigator.of(context).push(new _SearchPageRoute<T>(
+  return Navigator.of(context).push(new _SearchPageRoute<T>(
     delegate: delegate,
   ));
-  return delegate._result.future;
 }
 
 /// Delegate for [showSearch] to define the content of the search page.
@@ -216,7 +213,6 @@ abstract class SearchDelegate<T> {
   void close(BuildContext context, T result) {
     _currentBody = null;
     _focusNode.unfocus();
-    _result.complete(result);
     Navigator.of(context)
       ..popUntil((Route<dynamic> route) => route == _route)
       ..pop(result);
@@ -243,8 +239,6 @@ abstract class SearchDelegate<T> {
     _currentBodyNotifier.value = value;
   }
 
-  Completer<T> _result;
-
   _SearchPageRoute<T> _route;
 
 }
@@ -264,7 +258,7 @@ enum _SearchBody {
 }
 
 
-class _SearchPageRoute<T> extends PageRoute<void> {
+class _SearchPageRoute<T> extends PageRoute<T> {
   _SearchPageRoute({
     @required this.delegate,
   }) : assert(delegate != null) {
@@ -324,16 +318,11 @@ class _SearchPageRoute<T> extends PageRoute<void> {
   }
 
   @override
-  void didComplete(void result) {
+  void didComplete(T result) {
     super.didComplete(result);
     assert(delegate._route == this);
     delegate._route = null;
-    // Ensure that [showSearch] future completes when the search route is
-    // removed by means other than calling [SearchDelegate.close].
-    if (!delegate._result.isCompleted) {
-      delegate._result.complete(null);
-      delegate._currentBody = null;
-    }
+    delegate._currentBody = null;
   }
 }
 

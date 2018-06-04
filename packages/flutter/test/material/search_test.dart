@@ -460,7 +460,7 @@ void main() {
     expect(find.text('HomeBody'), findsOneWidget);
     expect(find.text('Suggestions'), findsNothing);
     expect(find.text('Nested Suggestions'), findsNothing);
-    expect(nestedSearchResults, hasLength(0));
+    expect(nestedSearchResults, <String>[null]);
     expect(selectedResults, <String>['Result Foo']);
   });
 }
