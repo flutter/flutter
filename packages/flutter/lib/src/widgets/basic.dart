@@ -4763,8 +4763,7 @@ class Listener extends SingleChildRenderObjectWidget {
 /// Containing [RenderObject.paint] to parts of the render subtree that are
 /// actually visually changing using [RepaintBoundary] explicitly or implicitly
 /// is therefore critical to minimizing redundant work and improving the app's
-/// performance. Render tree repaints can be monitored via debug flags such as
-/// [debugRepaintRainbowEnabled] or [debugProfilePaintsEnabled].
+/// performance.
 ///
 /// When a [RenderObject] is flagged as needing to paint via
 /// [RenderObject.markNeedsPaint], the nearest ancestor [RenderObject] with
@@ -4773,27 +4772,33 @@ class Listener extends SingleChildRenderObjectWidget {
 /// will cause _all_ of its descendant [RenderObject]s to repaint in the same
 /// layer.
 ///
-/// [RepaintBoundary] is therefore used both while propagating the
+/// [RepaintBoundary] is therefore used, both while propagating the
 /// `markNeedsPaint` flag up the render tree and while traversing down the
-/// render tree via [RenderObject.paintChild] to strategically contain repaints
+/// render tree via [RenderObject.paintChild], to strategically contain repaints
 /// to the render subtree that visually changed for performance. This is done
 /// because the [RepaintBoundary] widget creates a [RenderObject] that always
 /// has a [Layer], decoupling ancestor render objects from the descendant
 /// render objects.
 ///
-/// [RepaintBoundary] has the further side-effect of possibly hinting the engine
-/// to further optimize animation performance when the render subtree behind the
-/// [RepaintBoundary] is sufficiently complex and is static while the surrounding
-/// tree changes frequently. In those cases, the engine may choose to pay a one
-/// time cost of rasterizing and caching the pixel values of the subtree for
-/// faster future GPU re-rendering speed.
+/// [RepaintBoundary] has the further side-effect of possibly hinting to the
+/// engine that it should further optimize animation performance if the render
+/// subtree behind the [RepaintBoundary] is sufficiently complex and is static
+/// while the surrounding tree changes frequently. In those cases, the engine
+/// may choose to pay a one time cost of rasterizing and caching the pixel
+/// values of the subtree for faster future GPU re-rendering speed.
 ///
-/// The [RepaintBoundary] is automatically inserted by the framework in
-/// widgets that are likely to mark natural separation points in apps. For
-/// instance, contents in Material Design drawers typically don't change while
-/// the drawer opens and closes. So repaints are automatically contained
-/// to regions inside or outside the drawer when using the [Drawer] widget
-/// during transitions.
+/// Several framework widgets insert [RepaintBoundary] widgets to mark natural
+/// separation points in applications. For instance, contents in Material Design
+/// drawers typically don't change while the drawer opens and closes, so
+/// repaints are automatically contained to regions inside or outside the drawer
+/// when using the [Drawer] widget during transitions.
+///
+/// See also:
+///
+///  * [debugRepaintRainbowEnabled], a debugging flag to help visually monitor
+///    render tree repaints in a running app.
+///  * [debugProfilePaintsEnabled], a debugging flag to show render tree
+///    repaints in the observatory's timeline view.
 class RepaintBoundary extends SingleChildRenderObjectWidget {
   /// Creates a widget that isolates repaints.
   const RepaintBoundary({ Key key, Widget child }) : super(key: key, child: child);
