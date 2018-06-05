@@ -822,7 +822,12 @@ class PipelineOwner {
   SemanticsOwner get semanticsOwner => _semanticsOwner;
   SemanticsOwner _semanticsOwner;
 
-  int _outstandingSemanticsHandle = 0;
+  /// The number of clients registered to listen for semantics.
+  ///
+  /// The number is increased whenever [ensureSemantics] is called and decreased
+  /// when [SemanticsHandle.dispose] is called.
+  int get debugOutstandingSemanticsHandles => _outstandingSemanticsHandles;
+  int _outstandingSemanticsHandles = 0;
 
   /// Opens a [SemanticsHandle] and calls [listener] whenever the semantics tree
   /// updates.
@@ -837,8 +842,8 @@ class PipelineOwner {
   /// objects for a given [PipelineOwner] are closed, the [PipelineOwner] stops
   /// maintaining the semantics tree.
   SemanticsHandle ensureSemantics({ VoidCallback listener }) {
-    _outstandingSemanticsHandle += 1;
-    if (_outstandingSemanticsHandle == 1) {
+    _outstandingSemanticsHandles += 1;
+    if (_outstandingSemanticsHandles == 1) {
       assert(_semanticsOwner == null);
       _semanticsOwner = new SemanticsOwner();
       if (onSemanticsOwnerCreated != null)
@@ -849,8 +854,8 @@ class PipelineOwner {
 
   void _didDisposeSemanticsHandle() {
     assert(_semanticsOwner != null);
-    _outstandingSemanticsHandle -= 1;
-    if (_outstandingSemanticsHandle == 0) {
+    _outstandingSemanticsHandles -= 1;
+    if (_outstandingSemanticsHandles == 0) {
       _semanticsOwner.dispose();
       _semanticsOwner = null;
       if (onSemanticsOwnerDisposed != null)
