@@ -171,7 +171,7 @@ void main() {
     expect(tester.getTopRight(find.byKey(trailingKey)), const Offset(800.0 - 16.0 - 40.0, 10.0));
 
     // Top and left padding is applied to large title.
-    expect(tester.getTopLeft(find.byKey(titleKey)), const Offset(16.0 + 20.0, 58.0 + 10.0));
+    expect(tester.getTopLeft(find.byKey(titleKey)), const Offset(16.0 + 20.0, 54.0 + 10.0));
   });
 
   testWidgets('Large title nav bar scrolls', (WidgetTester tester) async {
@@ -229,7 +229,7 @@ void main() {
     ]);
 
     expect(tester.getTopLeft(find.widgetWithText(OverflowBox, 'Title')).dy, 44.0);
-    expect(tester.getSize(find.widgetWithText(OverflowBox, 'Title')).height, 56.0);
+    expect(tester.getSize(find.widgetWithText(OverflowBox, 'Title')).height, 52.0);
 
     scrollController.jumpTo(600.0);
     await tester.pump(); // Once to trigger the opacity animation.
@@ -313,7 +313,7 @@ void main() {
       isNull,
     );
 
-    expect(tester.getBottomLeft(find.text('Title')).dy, 44.0 + 56.0 - 8.0); // Static part + extension - padding.
+    expect(tester.getBottomLeft(find.text('Title')).dy, 44.0 + 52.0 - 8.0); // Static part + extension - padding.
 
     scrollController.jumpTo(600.0);
     await tester.pump(); // Once to trigger the opacity animation.
