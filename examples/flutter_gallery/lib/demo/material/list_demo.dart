@@ -336,7 +336,11 @@ class DraggableListState extends State<DraggableList> with TickerProviderStateMi
   Widget _wrap(Widget toWrap, int index) {
     assert(toWrap.key != null);
     Widget _buildDragTarget(BuildContext context, List<Key> acceptedCandidates, List<dynamic> rejectedCandidates) {
-      Widget draggable = new LongPressDraggable<Key>(
+      // The target for dropping at the end of the list doesn't need to be draggable or to expand.
+      if (index >= widget.children.length) {
+        return toWrap;
+      }
+      final Widget draggable = new LongPressDraggable<Key>(
         maxSimultaneousDrags: 1,
         axis: widget.axis,
         data: toWrap.key,
@@ -361,8 +365,8 @@ class DraggableListState extends State<DraggableList> with TickerProviderStateMi
         },
         onDraggableCanceled: (_, __) {
           setState(() {
-            ghostController.reverse();
-            entranceController.reverse();
+            ghostController.reverse(from: 0.1);
+            entranceController.reverse(from: 0.1);
             dragging = null;
           });
         },
@@ -375,9 +379,6 @@ class DraggableListState extends State<DraggableList> with TickerProviderStateMi
           });
         },
       );
-      if (index >= widget.children.length) {
-        draggable = toWrap;
-      }
       if (currentIndex == index) {
         return new Column(children: <Widget>[
           new SizeTransition(
@@ -474,7 +475,7 @@ class DraggableListState extends State<DraggableList> with TickerProviderStateMi
     }
     wrappedChildren.add(_wrap(
       new SizedBox(
-        height: 48.0, 
+        height: 72.0, 
         width: MediaQuery.of(context).size.width,
         key: const Key('DraggableList - End Widget'), 
       ),
