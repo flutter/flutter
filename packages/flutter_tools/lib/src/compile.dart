@@ -27,7 +27,7 @@ class CompilerOutput {
 }
 
 class _StdoutHandler {
-  _StdoutHandler({this.consumer: printError}) {
+  _StdoutHandler({this.consumer = printError}) {
     reset();
   }
 
@@ -71,10 +71,10 @@ class KernelCompiler {
     String mainPath,
     String outputFilePath,
     String depFilePath,
-    bool linkPlatformKernelIn: false,
-    bool aot: false,
+    bool linkPlatformKernelIn = false,
+    bool aot = false,
     List<String> entryPointsJsonFiles,
-    bool trackWidgetCreation: false,
+    bool trackWidgetCreation = false,
     List<String> extraFrontEndOptions,
     String incrementalCompilerByteStorePath,
     String packagesPath,
@@ -192,9 +192,9 @@ class KernelCompiler {
 /// The wrapper is intended to stay resident in memory as user changes, reloads,
 /// restarts the Flutter app.
 class ResidentCompiler {
-  ResidentCompiler(this._sdkRoot, {bool trackWidgetCreation: false,
+  ResidentCompiler(this._sdkRoot, {bool trackWidgetCreation = false,
       String packagesPath, List<String> fileSystemRoots, String fileSystemScheme ,
-      CompilerMessageConsumer compilerMessageConsumer: printError})
+      CompilerMessageConsumer compilerMessageConsumer = printError})
     : assert(_sdkRoot != null),
       _trackWidgetCreation = trackWidgetCreation,
       _packagesPath = packagesPath,

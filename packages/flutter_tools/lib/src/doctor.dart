@@ -132,7 +132,7 @@ class Doctor {
   }
 
   /// Print information about the state of installed tooling.
-  Future<bool> diagnose({ bool androidLicenses: false, bool verbose: true }) async {
+  Future<bool> diagnose({ bool androidLicenses = false, bool verbose = true }) async {
     if (androidLicenses)
       return AndroidWorkflow.runLicenseManager();
 
@@ -507,7 +507,10 @@ class IntelliJValidatorOnMac extends IntelliJValidator {
   String get version {
     if (_version == null) {
       final String plistFile = fs.path.join(installPath, 'Contents', 'Info.plist');
-      _version = getValueFromFile(plistFile, kCFBundleShortVersionStringKey) ?? 'unknown';
+      _version = iosWorkflow.getPlistValueFromFile(
+        plistFile,
+        kCFBundleShortVersionStringKey,
+      ) ?? 'unknown';
     }
     return _version;
   }

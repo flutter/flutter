@@ -1620,16 +1620,16 @@ void main() {
     await tester.pump();
 
     expect(textController.text, '0123456789101112');
-    expect(find.text('16 / 10'), findsOneWidget);
-    Text counterTextWidget = tester.widget(find.text('16 / 10'));
+    expect(find.text('16/10'), findsOneWidget);
+    Text counterTextWidget = tester.widget(find.text('16/10'));
     expect(counterTextWidget.style.color, equals(Colors.deepPurpleAccent));
 
     await tester.enterText(find.byType(TextField), '0123456789');
     await tester.pump();
 
     expect(textController.text, '0123456789');
-    expect(find.text('10 / 10'), findsOneWidget);
-    counterTextWidget = tester.widget(find.text('10 / 10'));
+    expect(find.text('10/10'), findsOneWidget);
+    counterTextWidget = tester.widget(find.text('10/10'));
     expect(counterTextWidget.style.color, isNot(equals(Colors.deepPurpleAccent)));
   });
 
@@ -1647,12 +1647,12 @@ void main() {
       ),
     ));
 
-    expect(find.text('0 / 10'), findsOneWidget);
+    expect(find.text('0/10'), findsOneWidget);
 
     await tester.enterText(find.byType(TextField), '01234');
     await tester.pump();
 
-    expect(find.text('5 / 10'), findsOneWidget);
+    expect(find.text('5/10'), findsOneWidget);
   });
 
   testWidgets('TextField identifies as text field in semantics', (WidgetTester tester) async {
@@ -2136,6 +2136,32 @@ void main() {
     expect(exception, isFlutterError);
     expect(exception.toString(), startsWith('No Material widget found.'));
     expect(exception.toString(), endsWith(':\n  $textField\nThe ancestors of this widget were:\n  [root]'));
+  });
+
+  testWidgets('TextField loses focus when disabled', (WidgetTester tester) async {
+    final FocusNode focusNode = new FocusNode();
+
+    await tester.pumpWidget(
+      boilerplate(
+        child: new TextField(
+          focusNode: focusNode,
+          autofocus: true,
+          enabled: true,
+        ),
+      ),
+    );
+    expect(focusNode.hasFocus, isTrue);
+
+    await tester.pumpWidget(
+      boilerplate(
+        child: new TextField(
+          focusNode: focusNode,
+          autofocus: true,
+          enabled: false,
+        ),
+      ),
+    );
+    expect(focusNode.hasFocus, isFalse);
   });
 
 }

@@ -93,8 +93,8 @@ class SliverPersistentHeader extends StatelessWidget {
   const SliverPersistentHeader({
     Key key,
     @required this.delegate,
-    this.pinned: false,
-    this.floating: false,
+    this.pinned = false,
+    this.floating = false,
   }) : assert(delegate != null),
        assert(pinned != null),
        assert(floating != null),

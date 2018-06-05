@@ -77,7 +77,7 @@ class DualHeaderWithHint extends StatelessWidget {
 
 class CollapsibleBody extends StatelessWidget {
   const CollapsibleBody({
-    this.margin: EdgeInsets.zero,
+    this.margin = EdgeInsets.zero,
     this.child,
     this.onSave,
     this.onCancel

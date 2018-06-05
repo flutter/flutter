@@ -79,7 +79,7 @@ class BoxDecoration extends Decoration {
     this.borderRadius,
     this.boxShadow,
     this.gradient,
-    this.shape: BoxShape.rectangle,
+    this.shape = BoxShape.rectangle,
   }) : assert(shape != null);
 
   @override

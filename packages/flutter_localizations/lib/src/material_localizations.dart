@@ -139,7 +139,7 @@ class GlobalMaterialLocalizations implements MaterialLocalizations {
   }
 
   @override
-  String formatHour(TimeOfDay timeOfDay, { bool alwaysUse24HourFormat: false }) {
+  String formatHour(TimeOfDay timeOfDay, { bool alwaysUse24HourFormat = false }) {
     switch (hourFormat(of: timeOfDayFormat(alwaysUse24HourFormat: alwaysUse24HourFormat))) {
       case HourFormat.HH:
         return _twoDigitZeroPaddedFormat.format(timeOfDay.hour);
@@ -191,7 +191,7 @@ class GlobalMaterialLocalizations implements MaterialLocalizations {
   }
 
   @override
-  String formatTimeOfDay(TimeOfDay timeOfDay, { bool alwaysUse24HourFormat: false }) {
+  String formatTimeOfDay(TimeOfDay timeOfDay, { bool alwaysUse24HourFormat = false }) {
     // Not using intl.DateFormat for two reasons:
     //
     // - DateFormat supports more formats than our material time picker does,
@@ -393,7 +393,7 @@ class GlobalMaterialLocalizations implements MaterialLocalizations {
   ///  * http://demo.icu-project.org/icu-bin/locexp?d_=en&_=en_US shows the
   ///    short time pattern used in locale en_US
   @override
-  TimeOfDayFormat timeOfDayFormat({ bool alwaysUse24HourFormat: false }) {
+  TimeOfDayFormat timeOfDayFormat({ bool alwaysUse24HourFormat = false }) {
     final String icuShortTimePattern = _translationBundle.timeOfDayFormat;
 
     assert(() {

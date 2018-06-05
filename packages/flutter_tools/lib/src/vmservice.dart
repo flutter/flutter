@@ -225,7 +225,7 @@ class VMService {
   /// See: https://github.com/dart-lang/sdk/commit/df8bf384eb815cf38450cb50a0f4b62230fba217
   static Future<VMService> connect(
     Uri httpUri, {
-    Duration requestTimeout: kDefaultRequestTimeout,
+    Duration requestTimeout = kDefaultRequestTimeout,
     ReloadSources reloadSources,
     CompileExpression compileExpression,
   }) async {
@@ -822,9 +822,9 @@ class VM extends ServiceObjectOwner {
   /// If `timeoutFatal` is false, then a timeout will result in a null return
   /// value. Otherwise, it results in an exception.
   Future<Map<String, dynamic>> invokeRpcRaw(String method, {
-    Map<String, dynamic> params: const <String, dynamic>{},
+    Map<String, dynamic> params = const <String, dynamic>{},
     Duration timeout,
-    bool timeoutFatal: true,
+    bool timeoutFatal = true,
   }) async {
     printTrace('$method: $params');
 
@@ -852,7 +852,7 @@ class VM extends ServiceObjectOwner {
 
   /// Invoke the RPC and return a [ServiceObject] response.
   Future<ServiceObject> invokeRpc(String method, {
-    Map<String, dynamic> params: const <String, dynamic>{},
+    Map<String, dynamic> params = const <String, dynamic>{},
     Duration timeout,
   }) async {
     final Map<String, dynamic> response = await invokeRpcRaw(
@@ -1091,7 +1091,7 @@ class Isolate extends ServiceObjectOwner {
   Future<Map<String, dynamic>> invokeRpcRaw(String method, {
     Map<String, dynamic> params,
     Duration timeout,
-    bool timeoutFatal: true,
+    bool timeoutFatal = true,
   }) {
     // Inject the 'isolateId' parameter.
     if (params == null) {
@@ -1135,7 +1135,7 @@ class Isolate extends ServiceObjectOwner {
   static const int kIsolateReloadBarred = 1005;
 
   Future<Map<String, dynamic>> reloadSources(
-      { bool pause: false,
+      { bool pause = false,
         Uri rootLibUri,
         Uri packagesUri}) async {
     try {
@@ -1226,7 +1226,7 @@ class Isolate extends ServiceObjectOwner {
     String method, {
       Map<String, dynamic> params,
       Duration timeout,
-      bool timeoutFatal: true,
+      bool timeoutFatal = true,
     }
   ) async {
     try {

@@ -8,7 +8,7 @@ import 'package:flutter/material.dart';
 const Color kSelectedColor = const Color(0xFF00FF00);
 const Color kUnselectedColor = Colors.transparent;
 
-Widget buildFrame(TabController tabController, { Color color, Color selectedColor, double indicatorSize: 12.0 }) {
+Widget buildFrame(TabController tabController, { Color color, Color selectedColor, double indicatorSize = 12.0 }) {
   return new Directionality(
     textDirection: TextDirection.ltr,
     child: new Theme(

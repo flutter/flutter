@@ -12,12 +12,12 @@ class GalleryOptions {
   GalleryOptions({
     this.theme,
     this.textScaleFactor,
-    this.textDirection: TextDirection.ltr,
-    this.timeDilation: 1.0,
+    this.textDirection = TextDirection.ltr,
+    this.timeDilation = 1.0,
     this.platform,
-    this.showOffscreenLayersCheckerboard: false,
-    this.showRasterCacheImagesCheckerboard: false,
-    this.showPerformanceOverlay: false,
+    this.showOffscreenLayersCheckerboard = false,
+    this.showRasterCacheImagesCheckerboard = false,
+    this.showPerformanceOverlay = false,
   });
 
   final GalleryTheme theme;

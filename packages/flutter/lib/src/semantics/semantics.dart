@@ -1520,10 +1520,10 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
   /// controlled by the [childOrder] parameter.
   @override
   String toStringDeep({
-    String prefixLineOne: '',
+    String prefixLineOne = '',
     String prefixOtherLines,
-    DiagnosticLevel minLevel: DiagnosticLevel.debug,
-    DebugSemanticsDumpOrder childOrder: DebugSemanticsDumpOrder.traversalOrder,
+    DiagnosticLevel minLevel = DiagnosticLevel.debug,
+    DebugSemanticsDumpOrder childOrder = DebugSemanticsDumpOrder.traversalOrder,
   }) {
     assert(childOrder != null);
     return toDiagnosticsNode(childOrder: childOrder).toStringDeep(prefixLineOne: prefixLineOne, prefixOtherLines: prefixOtherLines, minLevel: minLevel);
@@ -1532,8 +1532,8 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
   @override
   DiagnosticsNode toDiagnosticsNode({
     String name,
-    DiagnosticsTreeStyle style: DiagnosticsTreeStyle.sparse,
-    DebugSemanticsDumpOrder childOrder: DebugSemanticsDumpOrder.traversalOrder,
+    DiagnosticsTreeStyle style = DiagnosticsTreeStyle.sparse,
+    DebugSemanticsDumpOrder childOrder = DebugSemanticsDumpOrder.traversalOrder,
   }) {
     return new _SemanticsDiagnosticableNode(
       name: name,
@@ -1544,7 +1544,7 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
   }
 
   @override
-  List<DiagnosticsNode> debugDescribeChildren({ DebugSemanticsDumpOrder childOrder: DebugSemanticsDumpOrder.inverseHitTest }) {
+  List<DiagnosticsNode> debugDescribeChildren({ DebugSemanticsDumpOrder childOrder = DebugSemanticsDumpOrder.inverseHitTest }) {
     return debugListChildrenInOrder(childOrder)
       .map<DiagnosticsNode>((SemanticsNode node) => node.toDiagnosticsNode(childOrder: childOrder))
       .toList();

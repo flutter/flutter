@@ -10,7 +10,7 @@ class TestFocusable extends StatefulWidget {
     Key key,
     this.no,
     this.yes,
-    this.autofocus: true,
+    this.autofocus = true,
   }) : super(key: key);
 
   final String no;

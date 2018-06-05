@@ -45,8 +45,8 @@ class BottomAppBar extends StatefulWidget {
   const BottomAppBar({
     Key key,
     this.color,
-    this.elevation: 8.0,
-    this.hasNotch: true,
+    this.elevation = 8.0,
+    this.hasNotch = true,
     this.child,
   }) : assert(elevation != null),
        assert(elevation >= 0.0),

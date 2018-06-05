@@ -61,22 +61,15 @@ double getEnableProgress(WidgetTester tester) => getRenderChip(tester)?.enableAn
 /// Adds the basic requirements for a Chip.
 Widget _wrapForChip({
   Widget child,
-  TextDirection textDirection: TextDirection.ltr,
-  double textScaleFactor: 1.0,
+  TextDirection textDirection = TextDirection.ltr,
+  double textScaleFactor = 1.0,
 }) {
   return new MaterialApp(
-    home: new Localizations(
-      locale: const Locale('en', 'US'),
-      delegates: const <LocalizationsDelegate<dynamic>>[
-        DefaultWidgetsLocalizations.delegate,
-        DefaultMaterialLocalizations.delegate,
-      ],
-      child: new Directionality(
-        textDirection: textDirection,
-        child: new MediaQuery(
-          data: new MediaQueryData.fromWindow(window).copyWith(textScaleFactor: textScaleFactor),
-          child: new Material(child: child),
-        ),
+    home: new Directionality(
+      textDirection: textDirection,
+      child: new MediaQuery(
+        data: new MediaQueryData.fromWindow(window).copyWith(textScaleFactor: textScaleFactor),
+        child: new Material(child: child),
       ),
     ),
   );
@@ -664,7 +657,7 @@ void main() {
     final UniqueKey labelKey = new UniqueKey();
     final UniqueKey deleteButtonKey = new UniqueKey();
     bool wasDeleted = false;
-    Future<Null> pushChip({bool deletable: false}) async {
+    Future<Null> pushChip({bool deletable = false}) async {
       return tester.pumpWidget(
         _wrapForChip(
           child: new Wrap(
@@ -779,7 +772,7 @@ void main() {
   testWidgets('Selection with avatar works as expected on RawChip', (WidgetTester tester) async {
     bool selected = false;
     final UniqueKey labelKey = new UniqueKey();
-    Future<Null> pushChip({Widget avatar, bool selectable: false}) async {
+    Future<Null> pushChip({Widget avatar, bool selectable = false}) async {
       return tester.pumpWidget(
         _wrapForChip(
           child: new Wrap(
@@ -862,7 +855,7 @@ void main() {
   testWidgets('Selection without avatar works as expected on RawChip', (WidgetTester tester) async {
     bool selected = false;
     final UniqueKey labelKey = new UniqueKey();
-    Future<Null> pushChip({bool selectable: false}) async {
+    Future<Null> pushChip({bool selectable = false}) async {
       return tester.pumpWidget(
         _wrapForChip(
           child: new Wrap(
@@ -938,7 +931,7 @@ void main() {
   testWidgets('Activation works as expected on RawChip', (WidgetTester tester) async {
     bool selected = false;
     final UniqueKey labelKey = new UniqueKey();
-    Future<Null> pushChip({Widget avatar, bool selectable: false}) async {
+    Future<Null> pushChip({Widget avatar, bool selectable = false}) async {
       return tester.pumpWidget(
         _wrapForChip(
           child: new Wrap(
@@ -1035,10 +1028,10 @@ void main() {
       ChipThemeData chipTheme,
       Widget avatar,
       Widget deleteIcon,
-      bool isSelectable: true,
-      bool isPressable: false,
-      bool isDeletable: true,
-      bool showCheckmark: true,
+      bool isSelectable = true,
+      bool isPressable = false,
+      bool isDeletable = true,
+      bool showCheckmark = true,
     }) {
       chipTheme ??= defaultChipTheme;
       return _wrapForChip(

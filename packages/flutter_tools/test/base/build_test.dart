@@ -28,7 +28,7 @@ class MockXcode extends Mock implements Xcode {}
 
 class _FakeGenSnapshot implements GenSnapshot {
   _FakeGenSnapshot({
-    this.succeed: true,
+    this.succeed = true,
   });
 
   final bool succeed;
@@ -120,7 +120,7 @@ void main() {
       GenSnapshot: () => genSnapshot,
     };
 
-    Future<Null> writeFingerprint({ Map<String, String> files = const <String, String>{} }) {
+    Future<void> writeFingerprint({ Map<String, String> files = const <String, String>{} }) {
       return fs.file('output.snapshot.d.fingerprint').writeAsString(json.encode(<String, dynamic>{
         'version': kVersion,
         'properties': <String, String>{
@@ -136,7 +136,7 @@ void main() {
     }
 
     void expectFingerprintHas({
-      String entryPoint: 'main.dart',
+      String entryPoint = 'main.dart',
       Map<String, String> checksums = const <String, String>{},
     }) {
       final Map<String, dynamic> jsonObject = json.decode(fs.file('output.snapshot.d.fingerprint').readAsStringSync());

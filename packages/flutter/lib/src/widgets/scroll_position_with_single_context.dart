@@ -51,8 +51,8 @@ class ScrollPositionWithSingleContext extends ScrollPosition implements ScrollAc
   ScrollPositionWithSingleContext({
     @required ScrollPhysics physics,
     @required ScrollContext context,
-    double initialPixels: 0.0,
-    bool keepScrollOffset: true,
+    double initialPixels = 0.0,
+    bool keepScrollOffset = true,
     ScrollPosition oldPosition,
     String debugLabel,
   }) : super(

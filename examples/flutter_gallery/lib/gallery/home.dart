@@ -270,7 +270,7 @@ class GalleryHome extends StatefulWidget {
 
   const GalleryHome({
     Key key,
-    this.testMode: false,
+    this.testMode = false,
     this.optionsPage,
   }) : super(key: key);
 

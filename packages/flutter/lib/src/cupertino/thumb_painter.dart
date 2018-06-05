@@ -12,8 +12,8 @@ import 'colors.dart';
 class CupertinoThumbPainter {
   /// Creates an object that paints an iOS-style slider thumb.
   CupertinoThumbPainter({
-    this.color: CupertinoColors.white,
-    this.shadowColor: const Color(0x2C000000),
+    this.color = CupertinoColors.white,
+    this.shadowColor = const Color(0x2C000000),
   }) : _shadowPaint = new BoxShadow(
          color: shadowColor,
          blurRadius: 1.0,

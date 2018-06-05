@@ -2,9 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:meta/meta.dart';
 
 import '../artifacts.dart';
+import '../base/common.dart';
 import '../base/context.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
@@ -15,6 +18,7 @@ import '../base/utils.dart';
 import '../build_info.dart';
 import '../bundle.dart' as bundle;
 import '../cache.dart';
+import '../flutter_manifest.dart';
 import '../globals.dart';
 
 final RegExp _settingExpr = new RegExp(r'(\w+)\s*=\s*(.*)$');
@@ -30,11 +34,11 @@ String _generatedXcodePropertiesPath(String projectPath) {
 
 /// Writes default Xcode properties files in the Flutter project at [projectPath],
 /// if project is an iOS project and such files do not already exist.
-void generateXcodeProperties(String projectPath) {
+Future<void> generateXcodeProperties(String projectPath) async {
   if (fs.isDirectorySync(fs.path.join(projectPath, 'ios'))) {
     if (fs.file(_generatedXcodePropertiesPath(projectPath)).existsSync())
       return;
-    updateGeneratedXcodeProperties(
+    await updateGeneratedXcodeProperties(
       projectPath: projectPath,
       buildInfo: BuildInfo.debug,
       targetOverride: bundle.defaultMainPath,
@@ -47,12 +51,12 @@ void generateXcodeProperties(String projectPath) {
 ///
 /// targetOverride: Optional parameter, if null or unspecified the default value
 /// from xcode_backend.sh is used 'lib/main.dart'.
-void updateGeneratedXcodeProperties({
+Future<void> updateGeneratedXcodeProperties({
   @required String projectPath,
   @required BuildInfo buildInfo,
   String targetOverride,
   @required bool previewDart2,
-}) {
+}) async {
   final StringBuffer localsBuffer = new StringBuffer();
 
   localsBuffer.writeln('// This is a generated file; do not edit or check into version control.');
@@ -77,6 +81,24 @@ void updateGeneratedXcodeProperties({
 
   localsBuffer.writeln('FLUTTER_FRAMEWORK_DIR=${flutterFrameworkDir(buildInfo.mode)}');
 
+  final String flutterManifest = fs.path.join(projectPath, bundle.defaultManifestPath);
+  FlutterManifest manifest;
+  try {
+    manifest = await FlutterManifest.createFromPath(flutterManifest);
+  } catch (error) {
+    throwToolExit('Failed to load pubspec.yaml: $error');
+  }
+
+  final String buildName = buildInfo?.buildName ?? manifest.buildName;
+  if (buildName != null) {
+    localsBuffer.writeln('FLUTTER_BUILD_NAME=$buildName');
+  }
+
+  final int buildNumber = buildInfo?.buildNumber ?? manifest.buildNumber;
+  if (buildNumber != null) {
+    localsBuffer.writeln('FLUTTER_BUILD_NUMBER=$buildNumber');
+  }
+
   if (artifacts is LocalEngineArtifacts) {
     final LocalEngineArtifacts localEngineArtifacts = artifacts;
     localsBuffer.writeln('LOCAL_ENGINE=${localEngineArtifacts.engineOutPath}');
@@ -93,6 +115,10 @@ void updateGeneratedXcodeProperties({
 
   if (previewDart2) {
     localsBuffer.writeln('PREVIEW_DART_2=true');
+  }
+
+  if (buildInfo.trackWidgetCreation) {
+    localsBuffer.writeln('TRACK_WIDGET_CREATION=true');
   }
 
   final File localsFile = fs.file(_generatedXcodePropertiesPath(projectPath));

@@ -340,7 +340,7 @@ class CircularProgressIndicator extends ProgressIndicator {
     double value,
     Color backgroundColor,
     Animation<Color> valueColor,
-    this.strokeWidth: 4.0,
+    this.strokeWidth = 4.0,
   }) : super(key: key, value: value, backgroundColor: backgroundColor, valueColor: valueColor);
 
   /// The width of the line used to draw the circle.
@@ -504,7 +504,7 @@ class RefreshProgressIndicator extends CircularProgressIndicator {
     double value,
     Color backgroundColor,
     Animation<Color> valueColor,
-    double strokeWidth: 2.0, // Different default than CircularProgressIndicator.
+    double strokeWidth = 2.0, // Different default than CircularProgressIndicator.
   }) : super(
     key: key,
     value: value,
@@ -528,8 +528,8 @@ class _RefreshProgressIndicatorState extends _CircularProgressIndicatorState {
   Widget build(BuildContext context) {
     if (widget.value != null)
       _controller.value = widget.value / 10.0;
-    else
-      _controller.forward();
+    else if (!_controller.isAnimating)
+      _controller.repeat();
     return _buildAnimation();
   }
 

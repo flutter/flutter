@@ -34,28 +34,28 @@ void main() {
 
     when(mockProcessManager.runSync(
       <String>['git', 'rev-parse', '--abbrev-ref', '--symbolic', '@{u}'],
-      workingDirectory: any,
-      environment: any,
+      workingDirectory: anyNamed('workingDirectory'),
+      environment: anyNamed('environment'),
     )).thenReturn(new ProcessResult(101, 0, 'channel', ''));
     when(mockProcessManager.runSync(
       <String>['git', 'rev-parse', '--abbrev-ref', 'HEAD'],
-      workingDirectory: any,
-      environment: any,
+      workingDirectory: anyNamed('workingDirectory'),
+      environment: anyNamed('environment'),
     )).thenReturn(new ProcessResult(102, 0, 'branch', ''));
     when(mockProcessManager.runSync(
       <String>['git', 'log', '-n', '1', '--pretty=format:%H'],
-      workingDirectory: any,
-      environment: any,
+      workingDirectory: anyNamed('workingDirectory'),
+      environment: anyNamed('environment'),
     )).thenReturn(new ProcessResult(103, 0, '1234abcd', ''));
     when(mockProcessManager.runSync(
       <String>['git', 'log', '-n', '1', '--pretty=format:%ar'],
-      workingDirectory: any,
-      environment: any,
+      workingDirectory: anyNamed('workingDirectory'),
+      environment: anyNamed('environment'),
     )).thenReturn(new ProcessResult(104, 0, '1 second ago', ''));
     when(mockProcessManager.runSync(
       <String>['git', 'describe', '--match', 'v*.*.*', '--first-parent', '--long', '--tags'],
-      workingDirectory: any,
-      environment: any,
+      workingDirectory: anyNamed('workingDirectory'),
+      environment: anyNamed('environment'),
     )).thenReturn(new ProcessResult(105, 0, 'v0.1.2-3-1234abcd', ''));
   });
 
@@ -223,7 +223,7 @@ void main() {
     testUsingContext('versions comparison', () async {
       when(mockProcessManager.runSync(
         <String>['git', 'merge-base', '--is-ancestor', 'abcdef', '123456'],
-        workingDirectory: any,
+        workingDirectory: anyNamed('workingDirectory'),
       )).thenReturn(new ProcessResult(1, 0, '', ''));
 
       expect(
@@ -236,7 +236,7 @@ void main() {
 
       verify(mockProcessManager.runSync(
         <String>['git', 'merge-base', '--is-ancestor', 'abcdef', '123456'],
-        workingDirectory: any,
+        workingDirectory: anyNamed('workingDirectory'),
       ));
     },
     overrides: <Type, Generator>{
@@ -361,9 +361,9 @@ void fakeData(
   DateTime remoteCommitDate,
   VersionCheckStamp stamp,
   String stampJson,
-  bool errorOnFetch: false,
-  bool expectSetStamp: false,
-  bool expectServerPing: false,
+  bool errorOnFetch = false,
+  bool expectSetStamp = false,
+  bool expectServerPing = false,
 }) {
   ProcessResult success(String standardOutput) {
     return new ProcessResult(1, 0, standardOutput, '');
@@ -424,8 +424,8 @@ void fakeData(
     throw new StateError('Unexpected call to ProcessManager.run(${invocation.positionalArguments}, ${invocation.namedArguments})');
   };
 
-  when(pm.runSync(any, workingDirectory: any)).thenAnswer(syncAnswer);
-  when(pm.run(any, workingDirectory: any)).thenAnswer((Invocation invocation) async {
+  when(pm.runSync(any, workingDirectory: anyNamed('workingDirectory'))).thenAnswer(syncAnswer);
+  when(pm.run(any, workingDirectory: anyNamed('workingDirectory'))).thenAnswer((Invocation invocation) async {
     return syncAnswer(invocation);
   });
 }

@@ -417,6 +417,7 @@ tasks:
       with semantics enabled.
     stage: devicelab
     required_agent_capabilities: ["linux/android"]
+    flaky: true
 
   flutter_gallery__memory_nav:
     description: >

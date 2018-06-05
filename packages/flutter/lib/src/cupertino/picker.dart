@@ -40,8 +40,8 @@ class CupertinoPicker extends StatefulWidget {
   /// than using [Colors.transparent].
   const CupertinoPicker({
     Key key,
-    this.diameterRatio: _kDefaultDiameterRatio,
-    this.backgroundColor: _kDefaultBackground,
+    this.diameterRatio = _kDefaultDiameterRatio,
+    this.backgroundColor = _kDefaultBackground,
     this.scrollController,
     @required this.itemExtent,
     @required this.onSelectedItemChanged,

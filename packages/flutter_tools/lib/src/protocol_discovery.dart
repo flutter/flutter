@@ -30,7 +30,7 @@ class ProtocolDiscovery {
     DeviceLogReader logReader, {
     DevicePortForwarder portForwarder,
     int hostPort,
-    bool ipv6: false,
+    bool ipv6 = false,
   }) {
     const String kObservatoryService = 'Observatory';
     return new ProtocolDiscovery._(

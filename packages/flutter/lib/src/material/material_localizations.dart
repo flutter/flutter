@@ -168,7 +168,7 @@ abstract class MaterialLocalizations {
   ///
   /// The documentation for [TimeOfDayFormat] enum values provides details on
   /// each supported layout.
-  TimeOfDayFormat timeOfDayFormat({ bool alwaysUse24HourFormat: false });
+  TimeOfDayFormat timeOfDayFormat({ bool alwaysUse24HourFormat = false });
 
   /// Provides geometric text preferences for the current locale.
   ///
@@ -196,7 +196,7 @@ abstract class MaterialLocalizations {
   ///
   /// If [alwaysUse24HourFormat] is true, formats hour using [HourFormat.HH]
   /// rather than the default for the current locale.
-  String formatHour(TimeOfDay timeOfDay, { bool alwaysUse24HourFormat: false });
+  String formatHour(TimeOfDay timeOfDay, { bool alwaysUse24HourFormat = false });
 
   /// Formats [TimeOfDay.minute] in the given time of day according to the value
   /// of [timeOfDayFormat].
@@ -208,7 +208,7 @@ abstract class MaterialLocalizations {
   /// rather than the default for the current locale. This value is usually
   /// passed from [MediaQueryData.alwaysUse24HourFormat], which has platform-
   /// specific behavior.
-  String formatTimeOfDay(TimeOfDay timeOfDay, { bool alwaysUse24HourFormat: false });
+  String formatTimeOfDay(TimeOfDay timeOfDay, { bool alwaysUse24HourFormat = false });
 
   /// Full unabbreviated year format, e.g. 2017 rather than 17.
   String formatYear(DateTime date);
@@ -388,7 +388,7 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
   ];
 
   @override
-  String formatHour(TimeOfDay timeOfDay, { bool alwaysUse24HourFormat: false }) {
+  String formatHour(TimeOfDay timeOfDay, { bool alwaysUse24HourFormat = false }) {
     final TimeOfDayFormat format = timeOfDayFormat(alwaysUse24HourFormat: alwaysUse24HourFormat);
     switch (format) {
       case TimeOfDayFormat.h_colon_mm_space_a:
@@ -473,7 +473,7 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
   }
 
   @override
-  String formatTimeOfDay(TimeOfDay timeOfDay, { bool alwaysUse24HourFormat: false }) {
+  String formatTimeOfDay(TimeOfDay timeOfDay, { bool alwaysUse24HourFormat = false }) {
     // Not using intl.DateFormat for two reasons:
     //
     // - DateFormat supports more formats than our material time picker does,
@@ -622,7 +622,7 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
   String get modalBarrierDismissLabel => 'Dismiss';
 
   @override
-  TimeOfDayFormat timeOfDayFormat({ bool alwaysUse24HourFormat: false }) {
+  TimeOfDayFormat timeOfDayFormat({ bool alwaysUse24HourFormat = false }) {
     return alwaysUse24HourFormat
       ? TimeOfDayFormat.HH_colon_mm
       : TimeOfDayFormat.h_colon_mm_space_a;

@@ -185,8 +185,8 @@ class SingleChildScrollView extends StatelessWidget {
   /// Creates a box in which a single widget can be scrolled.
   SingleChildScrollView({
     Key key,
-    this.scrollDirection: Axis.vertical,
-    this.reverse: false,
+    this.scrollDirection = Axis.vertical,
+    this.reverse = false,
     this.padding,
     bool primary,
     this.physics,
@@ -293,7 +293,7 @@ class SingleChildScrollView extends StatelessWidget {
 class _SingleChildViewport extends SingleChildRenderObjectWidget {
   const _SingleChildViewport({
     Key key,
-    this.axisDirection: AxisDirection.down,
+    this.axisDirection = AxisDirection.down,
     this.offset,
     Widget child,
   }) : assert(axisDirection != null),
@@ -321,9 +321,9 @@ class _SingleChildViewport extends SingleChildRenderObjectWidget {
 
 class _RenderSingleChildViewport extends RenderBox with RenderObjectWithChildMixin<RenderBox> implements RenderAbstractViewport {
   _RenderSingleChildViewport({
-    AxisDirection axisDirection: AxisDirection.down,
+    AxisDirection axisDirection = AxisDirection.down,
     @required ViewportOffset offset,
-    double cacheExtent: RenderAbstractViewport.defaultCacheExtent,
+    double cacheExtent = RenderAbstractViewport.defaultCacheExtent,
     RenderBox child,
   }) : assert(axisDirection != null),
        assert(offset != null),

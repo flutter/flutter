@@ -14,8 +14,8 @@ import 'icons.dart';
 
 class _CupertinoRefreshSliver extends SingleChildRenderObjectWidget {
   const _CupertinoRefreshSliver({
-    this.refreshIndicatorLayoutExtent: 0.0,
-    this.hasLayoutExtent: false,
+    this.refreshIndicatorLayoutExtent = 0.0,
+    this.hasLayoutExtent = false,
     Widget child,
   }) : assert(refreshIndicatorLayoutExtent != null),
        assert(refreshIndicatorLayoutExtent >= 0.0),
@@ -266,9 +266,9 @@ class CupertinoRefreshControl extends StatefulWidget {
   ///
   /// [onRefresh] will be called when pulled far enough to trigger a refresh.
   const CupertinoRefreshControl({
-    this.refreshTriggerPullDistance: _defaultRefreshTriggerPullDistance,
-    this.refreshIndicatorExtent: _defaultRefreshIndicatorExtent,
-    this.builder: buildSimpleRefreshIndicator,
+    this.refreshTriggerPullDistance = _defaultRefreshTriggerPullDistance,
+    this.refreshIndicatorExtent = _defaultRefreshIndicatorExtent,
+    this.builder = buildSimpleRefreshIndicator,
     this.onRefresh,
   }) : assert(refreshTriggerPullDistance != null),
        assert(refreshTriggerPullDistance > 0.0),

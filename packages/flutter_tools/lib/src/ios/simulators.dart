@@ -274,10 +274,10 @@ class IOSSimulator extends Device {
     String route,
     DebuggingOptions debuggingOptions,
     Map<String, dynamic> platformArgs,
-    bool prebuiltApplication: false,
-    bool applicationNeedsRebuild: false,
-    bool usesTerminalUi: true,
-    bool ipv6: false,
+    bool prebuiltApplication = false,
+    bool applicationNeedsRebuild = false,
+    bool usesTerminalUi = true,
+    bool ipv6 = false,
   }) async {
     if (!prebuiltApplication) {
       printTrace('Building ${package.name} for $id.');
@@ -363,9 +363,10 @@ class IOSSimulator extends Device {
 
     final BuildInfo debugBuildInfo = new BuildInfo(BuildMode.debug, buildInfo.flavor,
         previewDart2: buildInfo.previewDart2,
+        trackWidgetCreation: buildInfo.trackWidgetCreation,
         extraFrontEndOptions: buildInfo.extraFrontEndOptions,
         extraGenSnapshotOptions: buildInfo.extraGenSnapshotOptions,
-        preferSharedLibrary: buildInfo.preferSharedLibrary);
+        buildSharedLibrary: buildInfo.buildSharedLibrary);
 
     final XcodeBuildResult buildResult = await buildXcodeProject(
       app: app,

@@ -20,23 +20,23 @@ void main() {
     group('ensure ready for platform-specific tooling', () {
       testInMemory('does nothing, if project is not created', () async {
         final FlutterProject project = someProject();
-        project.ensureReadyForPlatformSpecificTooling();
+        await project.ensureReadyForPlatformSpecificTooling();
         expect(project.directory.existsSync(), isFalse);
       });
       testInMemory('does nothing in plugin or package root project', () async {
         final FlutterProject project = aPluginProject();
-        project.ensureReadyForPlatformSpecificTooling();
+        await project.ensureReadyForPlatformSpecificTooling();
         expect(project.ios.directory.childFile('Runner/GeneratedPluginRegistrant.h').existsSync(), isFalse);
         expect(project.ios.directory.childFile('Flutter/Generated.xcconfig').existsSync(), isFalse);
       });
       testInMemory('injects plugins', () async {
         final FlutterProject project = aProjectWithIos();
-        project.ensureReadyForPlatformSpecificTooling();
+        await project.ensureReadyForPlatformSpecificTooling();
         expect(project.ios.directory.childFile('Runner/GeneratedPluginRegistrant.h').existsSync(), isTrue);
       });
       testInMemory('generates Xcode configuration', () async {
         final FlutterProject project = aProjectWithIos();
-        project.ensureReadyForPlatformSpecificTooling();
+        await project.ensureReadyForPlatformSpecificTooling();
         expect(project.ios.directory.childFile('Flutter/Generated.xcconfig').existsSync(), isTrue);
       });
     });
