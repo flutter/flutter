@@ -484,17 +484,19 @@ class _RenderSingleChildViewport extends RenderBox with RenderObjectWithChildMix
     offset.applyContentDimensions(_minScrollExtent, _maxScrollExtent);
   }
 
-  Offset get _paintOffset {
+  Offset get _paintOffset => _paintOffsetForPosition(offset.pixels);
+
+  Offset _paintOffsetForPosition(double position) {
     assert(axisDirection != null);
     switch (axisDirection) {
       case AxisDirection.up:
-        return new Offset(0.0, _offset.pixels - child.size.height + size.height);
+        return new Offset(0.0, position - child.size.height + size.height);
       case AxisDirection.down:
-        return new Offset(0.0, -_offset.pixels);
+        return new Offset(0.0, -position);
       case AxisDirection.left:
-        return new Offset(_offset.pixels - child.size.width + size.width, 0.0);
+        return new Offset(position - child.size.width + size.width, 0.0);
       case AxisDirection.right:
-        return new Offset(-_offset.pixels, 0.0);
+        return new Offset(-position, 0.0);
     }
     return null;
   }
@@ -581,24 +583,9 @@ class _RenderSingleChildViewport extends RenderBox with RenderObjectWithChildMix
         targetMainAxisExtent = bounds.width;
         break;
     }
+
     final double targetOffset = leadingScrollOffset - (mainAxisExtent - targetMainAxisExtent) * alignment;
-    Rect targetRect;
-
-    switch (axisDirection) {
-      case AxisDirection.up:
-        targetRect = bounds.translate(0.0, -targetOffset);
-        break;
-      case AxisDirection.right:
-        targetRect = bounds.translate(-targetOffset, 0.0);
-        break;
-      case AxisDirection.down:
-        targetRect = bounds.translate(0.0, -targetOffset);
-        break;
-      case AxisDirection.left:
-        targetRect = bounds.translate(targetOffset, 0.0);
-        break;
-    }
-
+    final Rect targetRect = bounds.shift(_paintOffsetForPosition(targetOffset));
     return new RevealedOffset(offset: targetOffset, rect: targetRect);
   }
 
