@@ -21,10 +21,11 @@ class GalleryApp extends StatefulWidget {
   const GalleryApp({
     Key key,
     this.updateUrlFetcher,
-    this.enablePerformanceOverlay: true,
-    this.enableRasterCacheImagesCheckerboard: true,
-    this.enableOffscreenLayersCheckerboard: true,
+    this.enablePerformanceOverlay = true,
+    this.enableRasterCacheImagesCheckerboard = true,
+    this.enableOffscreenLayersCheckerboard = true,
     this.onSendFeedback,
+    this.testMode = false,
   }) : super(key: key);
 
   final UpdateUrlFetcher updateUrlFetcher;
@@ -32,6 +33,7 @@ class GalleryApp extends StatefulWidget {
   final bool enableRasterCacheImagesCheckerboard;
   final bool enableOffscreenLayersCheckerboard;
   final VoidCallback onSendFeedback;
+  final bool testMode;
 
   @override
   _GalleryAppState createState() => new _GalleryAppState();
@@ -107,6 +109,7 @@ class _GalleryAppState extends State<GalleryApp> {
   @override
   Widget build(BuildContext context) {
     Widget home = new GalleryHome(
+      testMode: widget.testMode,
       optionsPage: new GalleryOptionsPage(
         options: _options,
         onOptionsChanged: _handleOptionsChanged,

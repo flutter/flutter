@@ -12,8 +12,8 @@ class TestTree extends Object with DiagnosticableTreeMixin {
   TestTree({
     this.name,
     this.style,
-    this.children: const <TestTree>[],
-    this.properties: const <DiagnosticsNode>[],
+    this.children = const <TestTree>[],
+    this.properties = const <DiagnosticsNode>[],
   });
 
   final String name;

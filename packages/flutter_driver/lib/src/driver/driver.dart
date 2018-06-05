@@ -122,16 +122,16 @@ class FlutterDriver {
     this._serviceClient,
     this._peer,
     this._appIsolate, {
-    bool printCommunication: false,
-    bool logCommunicationToFile: true,
+    bool printCommunication = false,
+    bool logCommunicationToFile = true,
   }) : _printCommunication = printCommunication,
        _logCommunicationToFile = logCommunicationToFile,
        _driverId = _nextDriverId++;
 
-  static const String _kFlutterExtensionMethod = 'ext.flutter.driver';
-  static const String _kSetVMTimelineFlagsMethod = '_setVMTimelineFlags';
-  static const String _kGetVMTimelineMethod = '_getVMTimeline';
-  static const String _kClearVMTimelineMethod = '_clearVMTimeline';
+  static const String _flutterExtensionMethodName = 'ext.flutter.driver';
+  static const String _setVMTimelineFlagsMethodName = '_setVMTimelineFlags';
+  static const String _getVMTimelineMethodName = '_getVMTimeline';
+  static const String _clearVMTimelineMethodName = '_clearVMTimeline';
 
   static int _nextDriverId = 0;
 
@@ -157,10 +157,10 @@ class FlutterDriver {
   /// service we will wait for the first isolate to become runnable.
   static Future<FlutterDriver> connect({
     String dartVmServiceUrl,
-    bool printCommunication: false,
-    bool logCommunicationToFile: true,
+    bool printCommunication = false,
+    bool logCommunicationToFile = true,
     int isolateNumber,
-    Duration isolateReadyTimeout: _kIsolateLoadRunnableTimeout,
+    Duration isolateReadyTimeout = _kIsolateLoadRunnableTimeout,
   }) async {
     dartVmServiceUrl ??= Platform.environment['VM_SERVICE_URL'];
 
@@ -235,10 +235,10 @@ class FlutterDriver {
     }
 
     /// Waits for a signal from the VM service that the extension is registered.
-    /// Returns [_kFlutterExtensionMethod]
+    /// Returns [_flutterExtensionMethodName]
     Future<String> waitForServiceExtension() {
       return isolate.onExtensionAdded.firstWhere((String extension) {
-        return extension == _kFlutterExtensionMethod;
+        return extension == _flutterExtensionMethodName;
       });
     }
 
@@ -346,7 +346,7 @@ class FlutterDriver {
       final Map<String, String> serialized = command.serialize();
       _logCommunication('>>> $serialized');
       response = await _appIsolate
-          .invokeExtension(_kFlutterExtensionMethod, serialized)
+          .invokeExtension(_flutterExtensionMethodName, serialized)
           .timeout(command.timeout + _kRpcGraceTime);
       _logCommunication('<<< $response');
     } on TimeoutException catch (error, stackTrace) {
@@ -427,7 +427,7 @@ class FlutterDriver {
   ///
   /// The move events are generated at a given [frequency] in Hz (or events per
   /// second). It defaults to 60Hz.
-  Future<Null> scroll(SerializableFinder finder, double dx, double dy, Duration duration, { int frequency: 60, Duration timeout }) async {
+  Future<Null> scroll(SerializableFinder finder, double dx, double dy, Duration duration, { int frequency = 60, Duration timeout }) async {
     return await _sendCommand(new Scroll(finder, dx, dy, duration, frequency, timeout: timeout)).then((Map<String, dynamic> _) => null);
   }
 
@@ -438,7 +438,7 @@ class FlutterDriver {
   /// that lazily creates its children, like [ListView] or [CustomScrollView],
   /// then this method may fail because [finder] doesn't actually exist.
   /// The [scrollUntilVisible] method can be used in this case.
-  Future<Null> scrollIntoView(SerializableFinder finder, { double alignment: 0.0, Duration timeout }) async {
+  Future<Null> scrollIntoView(SerializableFinder finder, { double alignment = 0.0, Duration timeout }) async {
     return await _sendCommand(new ScrollIntoView(finder, alignment: alignment, timeout: timeout)).then((Map<String, dynamic> _) => null);
   }
 
@@ -465,10 +465,10 @@ class FlutterDriver {
   /// The [timeout] value should be long enough to accommodate as many scrolls
   /// as needed to bring an item into view. The default is 10 seconds.
   Future<Null> scrollUntilVisible(SerializableFinder scrollable, SerializableFinder item, {
-    double alignment: 0.0,
-    double dxScroll: 0.0,
-    double dyScroll: 0.0,
-    Duration timeout: const Duration(seconds: 10),
+    double alignment = 0.0,
+    double dxScroll = 0.0,
+    double dyScroll = 0.0,
+    Duration timeout = const Duration(seconds: 10),
   }) async {
     assert(scrollable != null);
     assert(item != null);
@@ -478,21 +478,16 @@ class FlutterDriver {
     assert(dxScroll != 0.0 || dyScroll != 0.0);
     assert(timeout != null);
 
-    // If the item is already visible then we're done.
+    // Kick off an (unawaited) waitFor that will complete when the item we're
+    // looking for finally scrolls onscreen. We add an initial pause to give it
+    // the chance to complete if the item is already onscreen; if not, scroll
+    // repeatedly until we either find the item or time out.
     bool isVisible = false;
-    try {
-      await waitFor(item, timeout: const Duration(milliseconds: 100));
-      isVisible = true;
-    } on DriverError {
-      // Assume that that waitFor timed out because the item isn't visible.
-    }
-
-    if (!isVisible) {
-      waitFor(item, timeout: timeout).then((Null _) { isVisible = true; });
-      while (!isVisible) {
-        await scroll(scrollable, dxScroll, dyScroll, const Duration(milliseconds: 100));
-        await new Future<Null>.delayed(const Duration(milliseconds: 500));
-      }
+    waitFor(item, timeout: timeout).then((Null _) { isVisible = true; });
+    await new Future<Null>.delayed(const Duration(milliseconds: 500));
+    while (!isVisible) {
+      await scroll(scrollable, dxScroll, dyScroll, const Duration(milliseconds: 100));
+      await new Future<Null>.delayed(const Duration(milliseconds: 500));
     }
 
     return scrollIntoView(item, alignment: alignment);
@@ -570,7 +565,7 @@ class FlutterDriver {
   ///
   /// Returns true when the call actually changed the state from on to off or
   /// vice versa.
-  Future<bool> setSemantics(bool enabled, { Duration timeout: _kShortTimeout }) async {
+  Future<bool> setSemantics(bool enabled, { Duration timeout = _kShortTimeout }) async {
     final SetSemanticsResult result = SetSemanticsResult.fromJson(await _sendCommand(new SetSemantics(enabled, timeout: timeout)));
     return result.changedState;
   }
@@ -637,19 +632,19 @@ class FlutterDriver {
   ///     ]
   ///
   /// [getFlagList]: https://github.com/dart-lang/sdk/blob/master/runtime/vm/service/service.md#getflaglist
-  Future<List<Map<String, dynamic>>> getVmFlags({ Duration timeout: _kShortTimeout }) async {
+  Future<List<Map<String, dynamic>>> getVmFlags({ Duration timeout = _kShortTimeout }) async {
     final Map<String, dynamic> result = await _peer.sendRequest('getFlagList').timeout(timeout);
     return result['flags'];
   }
 
   /// Starts recording performance traces.
   Future<Null> startTracing({
-    List<TimelineStream> streams: _defaultStreams,
-    Duration timeout: _kShortTimeout,
+    List<TimelineStream> streams = _defaultStreams,
+    Duration timeout = _kShortTimeout,
   }) async {
     assert(streams != null && streams.isNotEmpty);
     try {
-      await _peer.sendRequest(_kSetVMTimelineFlagsMethod, <String, String>{
+      await _peer.sendRequest(_setVMTimelineFlagsMethodName, <String, String>{
         'recordedStreams': _timelineStreamsToString(streams)
       }).timeout(timeout);
       return null;
@@ -663,12 +658,12 @@ class FlutterDriver {
   }
 
   /// Stops recording performance traces and downloads the timeline.
-  Future<Timeline> stopTracingAndDownloadTimeline({ Duration timeout: _kShortTimeout }) async {
+  Future<Timeline> stopTracingAndDownloadTimeline({ Duration timeout = _kShortTimeout }) async {
     try {
       await _peer
-          .sendRequest(_kSetVMTimelineFlagsMethod, <String, String>{'recordedStreams': '[]'})
+          .sendRequest(_setVMTimelineFlagsMethodName, <String, String>{'recordedStreams': '[]'})
           .timeout(timeout);
-      return new Timeline.fromJson(await _peer.sendRequest(_kGetVMTimelineMethod));
+      return new Timeline.fromJson(await _peer.sendRequest(_getVMTimelineMethodName));
     } catch (error, stackTrace) {
       throw new DriverError(
         'Failed to stop tracing due to remote error',
@@ -694,8 +689,8 @@ class FlutterDriver {
   /// default, prior events are cleared.
   Future<Timeline> traceAction(
     Future<dynamic> action(), {
-    List<TimelineStream> streams: _defaultStreams,
-    bool retainPriorEvents: false,
+    List<TimelineStream> streams = _defaultStreams,
+    bool retainPriorEvents = false,
   }) async {
     if (!retainPriorEvents) {
       await clearTimeline();
@@ -706,10 +701,10 @@ class FlutterDriver {
   }
 
   /// Clears all timeline events recorded up until now.
-  Future<Null> clearTimeline({ Duration timeout: _kShortTimeout }) async {
+  Future<Null> clearTimeline({ Duration timeout = _kShortTimeout }) async {
     try {
       await _peer
-          .sendRequest(_kClearVMTimelineMethod, <String, String>{})
+          .sendRequest(_clearVMTimelineMethodName, <String, String>{})
           .timeout(timeout);
     } catch (error, stackTrace) {
       throw new DriverError(

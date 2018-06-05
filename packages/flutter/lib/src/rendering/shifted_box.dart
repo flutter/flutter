@@ -230,7 +230,7 @@ abstract class RenderAligningShiftedBox extends RenderShiftedBox {
   ///
   /// The [alignment] argument must not be null.
   RenderAligningShiftedBox({
-    AlignmentGeometry alignment: Alignment.center,
+    AlignmentGeometry alignment = Alignment.center,
     @required TextDirection textDirection,
     RenderBox child,
   }) : assert(alignment != null),
@@ -338,7 +338,7 @@ class RenderPositionedBox extends RenderAligningShiftedBox {
     RenderBox child,
     double widthFactor,
     double heightFactor,
-    AlignmentGeometry alignment: Alignment.center,
+    AlignmentGeometry alignment = Alignment.center,
     TextDirection textDirection,
   }) : assert(widthFactor == null || widthFactor >= 0.0),
        assert(heightFactor == null || heightFactor >= 0.0),
@@ -492,7 +492,7 @@ class RenderConstrainedOverflowBox extends RenderAligningShiftedBox {
     double maxWidth,
     double minHeight,
     double maxHeight,
-    AlignmentGeometry alignment: Alignment.center,
+    AlignmentGeometry alignment = Alignment.center,
     TextDirection textDirection,
   }) : _minWidth = minWidth,
        _maxWidth = maxWidth,
@@ -721,7 +721,7 @@ class RenderSizedOverflowBox extends RenderAligningShiftedBox {
   RenderSizedOverflowBox({
     RenderBox child,
     @required Size requestedSize,
-    Alignment alignment: Alignment.center,
+    Alignment alignment = Alignment.center,
     TextDirection textDirection,
   }) : assert(requestedSize != null),
        _requestedSize = requestedSize,
@@ -793,7 +793,7 @@ class RenderFractionallySizedOverflowBox extends RenderAligningShiftedBox {
     RenderBox child,
     double widthFactor,
     double heightFactor,
-    Alignment alignment: Alignment.center,
+    Alignment alignment = Alignment.center,
     TextDirection textDirection,
   }) : _widthFactor = widthFactor,
        _heightFactor = heightFactor,
@@ -1124,7 +1124,7 @@ class RenderBaseline extends RenderShiftedBox {
   RenderBaseline({
     RenderBox child,
     @required double baseline,
-    @required TextBaseline baselineType
+    @required TextBaseline baselineType,
   }) : assert(baseline != null),
        assert(baselineType != null),
        _baseline = baseline,

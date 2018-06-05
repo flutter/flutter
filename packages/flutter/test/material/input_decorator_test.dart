@@ -9,13 +9,13 @@ import 'package:flutter_test/flutter_test.dart';
 import '../rendering/mock_canvas.dart';
 
 Widget buildInputDecorator({
-  InputDecoration decoration: const InputDecoration(),
+  InputDecoration decoration = const InputDecoration(),
   InputDecorationTheme inputDecorationTheme,
-  TextDirection textDirection: TextDirection.ltr,
-  bool isEmpty: false,
-  bool isFocused: false,
+  TextDirection textDirection = TextDirection.ltr,
+  bool isEmpty = false,
+  bool isFocused = false,
   TextStyle baseStyle,
-  Widget child: const Text(
+  Widget child = const Text(
     'text',
     style: const TextStyle(fontFamily: 'Ahem', fontSize: 16.0),
   ),
@@ -1407,5 +1407,25 @@ void main() {
         const Offset(800 - 1.0, 56.0 - 6.0), // bottom right
       ],
     ));
+  });
+
+  testWidgets('InputDecorator constrained to 0x0', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/17710
+    await tester.pumpWidget(
+      new Material(
+        child: new Directionality(
+          textDirection: TextDirection.ltr,
+          child: new UnconstrainedBox(child: new ConstrainedBox(
+            constraints: new BoxConstraints.tight(Size.zero),
+            child: const InputDecorator(
+              decoration: const InputDecoration(
+                labelText: 'XP',
+                border: const OutlineInputBorder(),
+              ),
+            ),
+          )),
+        ),
+      ),
+    );
   });
 }

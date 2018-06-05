@@ -5,6 +5,25 @@ Contributing to Flutter
 
 _See also: [Flutter's code of conduct](https://flutter.io/design-principles/#code-of-conduct)_
 
+Welcome
+-------
+
+We gladly accept contributions via GitHub pull requests.
+
+Please become familiar with our
+[style guide](https://github.com/flutter/flutter/wiki/Style-guide-for-Flutter-repo) and
+[design philosophy](https://flutter.io/design-principles/). These guidelines are intended to
+keep the code consistent and avoid common pitfalls, and being familiar with them will
+make everything much easier for you. If you have questions about our processes or are looking
+for random tips and tricks, you may be interested in the [engine wiki](https://github.com/flutter/engine/wiki) and [framework wiki](https://github.com/flutter/flutter/wiki).
+
+This document will introduce you to the basic steps for developing for the Flutter framework (Dart).
+If you're interested in developing for the Flutter engine (C++, Java, Objective C), please
+switch to [the engine repo's `CONTRIBUTING.md` document](https://github.com/flutter/engine/blob/master/CONTRIBUTING.md).
+
+If you have an itch, work on that. If you are just looking for something good to start with, consider
+[the issues marked "easy fix"](https://github.com/flutter/flutter/issues?q=is%3Aopen+is%3Aissue+label%3A%22easy+fix%22+sort%3Areactions-%2B1-desc) in our issues list.
+
 Things you will need
 --------------------
 
@@ -126,7 +145,7 @@ Adding a test
 
 To add a test to the Flutter package, create a file whose name
 ends with `_test.dart` in the `packages/flutter/test` directory. The
-test should have a `main` function and use the `test` package.
+test should have a `main` function and use the `flutter_test` package.
 
 Working with flutter tools
 --------------------------
@@ -151,16 +170,8 @@ The pre-built flutter tool runs in release mode with the observatory off by defa
 To enable debugging mode and the observatory on the `flutter` tool, uncomment the
 `FLUTTER_TOOL_ARGS` line in the `bin/flutter` shell script.
 
-Contributing code
------------------
-
-We gladly accept contributions via GitHub pull requests.
-
-Please peruse our
-[style guides](https://github.com/flutter/flutter/wiki/Style-guide-for-Flutter-repo) and
-[design principles](https://flutter.io/design-principles/) before
-working on anything non-trivial. These guidelines are intended to
-keep the code consistent and avoid common pitfalls.
+Using git
+---------
 
 To start working on a patch:
 

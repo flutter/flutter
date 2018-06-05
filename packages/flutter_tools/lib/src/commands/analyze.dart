@@ -10,7 +10,7 @@ import 'analyze_continuously.dart';
 import 'analyze_once.dart';
 
 class AnalyzeCommand extends FlutterCommand {
-  AnalyzeCommand({bool verboseHelp: false, this.workingDirectory}) {
+  AnalyzeCommand({bool verboseHelp = false, this.workingDirectory}) {
     argParser.addFlag('flutter-repo',
         negatable: false,
         help: 'Include all the examples and tests from the Flutter repository.',

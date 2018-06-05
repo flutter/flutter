@@ -46,8 +46,8 @@ void main() {
       expect(message.message, 'VS Code at ${VsCodeValidatorTestTargets.validInstall}');
 
       message = result.messages
-          .firstWhere((ValidationMessage m) => m.message.startsWith('Dart Code '));
-      expect(message.message, 'Dart Code extension version 4.5.6');
+          .firstWhere((ValidationMessage m) => m.message.startsWith('Flutter '));
+      expect(message.message, 'Flutter extension version 4.5.6');
     });
 
     testUsingContext('vs code validator when 64bit installed', () async {
@@ -62,8 +62,8 @@ void main() {
       expect(message.message, 'VS Code at ${VsCodeValidatorTestTargets.validInstall}');
 
       message = result.messages
-          .firstWhere((ValidationMessage m) => m.message.startsWith('Dart Code '));
-      expect(message.message, 'Dart Code extension version 4.5.6');
+          .firstWhere((ValidationMessage m) => m.message.startsWith('Flutter '));
+      expect(message.message, 'Flutter extension version 4.5.6');
     });
 
     testUsingContext('vs code validator when extension missing', () async {
@@ -77,8 +77,8 @@ void main() {
       expect(message.message, 'VS Code at ${VsCodeValidatorTestTargets.validInstall}');
 
       message = result.messages
-          .firstWhere((ValidationMessage m) => m.message.startsWith('Dart Code '));
-      expect(message.message, startsWith('Dart Code extension not installed'));
+          .firstWhere((ValidationMessage m) => m.message.startsWith('Flutter '));
+      expect(message.message, startsWith('Flutter extension not installed'));
     });
   });
 

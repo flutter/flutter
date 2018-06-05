@@ -11,7 +11,7 @@ import 'package:device_info/device_info.dart';
 
 // TODO(sigurdm): This should not be stored here.
 const String beeUri =
-    'https://flutter.github.io/assets-for-api-docs/videos/bee.mp4';
+    'https://flutter.github.io/assets-for-api-docs/assets/videos/bee.mp4';
 
 class VideoCard extends StatelessWidget {
   final VideoPlayerController controller;
@@ -206,7 +206,7 @@ class FadeAnimation extends StatefulWidget {
 
   const FadeAnimation({
     this.child,
-    this.duration: const Duration(milliseconds: 500),
+    this.duration = const Duration(milliseconds: 500),
   });
 
   @override

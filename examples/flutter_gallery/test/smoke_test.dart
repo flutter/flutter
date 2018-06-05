@@ -47,7 +47,6 @@ void verifyToStringOutput(String name, String route, String testString) {
 }
 
 Future<Null> smokeDemo(WidgetTester tester, GalleryDemo demo) async {
-  print(demo);
   // Don't use pumpUntilNoTransientCallbacks in this function, because some of
   // the smoketests have infinitely-running animations (e.g. the progress
   // indicators demo).
@@ -139,6 +138,7 @@ Future<Null> smokeGallery(WidgetTester tester) async {
 
   await tester.pumpWidget(
     new GalleryApp(
+      testMode: true,
       onSendFeedback: () {
         sendFeedbackButtonPressed = true; // see smokeOptionsPage()
       },

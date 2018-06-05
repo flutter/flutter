@@ -60,8 +60,8 @@ void main() {
     fs.directory(fs.path.join(homeDirPath, '.cocoapods', 'repos', 'master')).createSync(recursive: true);
     when(mockProcessManager.run(
       <String>['pod', '--version'],
-      workingDirectory: any,
-      environment: any,
+      workingDirectory: anyNamed('workingDirectory'),
+      environment: anyNamed('environment'),
     )).thenAnswer((_) => resultOfPodVersion());
     when(mockProcessManager.run(
       <String>['pod', 'install', '--verbose'],
@@ -205,8 +205,8 @@ void main() {
       );
       verifyNever(mockProcessManager.run(
         argThat(containsAllInOrder(<String>['pod', 'install'])),
-        workingDirectory: any,
-        environment: typed<Map<String, String>>(any, named: 'environment'),
+        workingDirectory: anyNamed('workingDirectory'),
+        environment: anyNamed('environment'),
       ));
       expect(testLogger.errorText, contains('not installed'));
       expect(testLogger.errorText, contains('Skipping pod install'));
@@ -227,8 +227,8 @@ void main() {
         expect(e, const isInstanceOf<ToolExit>());
         verifyNever(mockProcessManager.run(
           argThat(containsAllInOrder(<String>['pod', 'install'])),
-          workingDirectory: any,
-          environment: typed<Map<String, String>>(any, named: 'environment'),
+          workingDirectory: anyNamed('workingDirectory'),
+          environment: anyNamed('environment'),
         ));
       }
     }, overrides: <Type, Generator>{
@@ -438,8 +438,8 @@ Note: as of CocoaPods 1.0, `pod repo update` does not happen on `pod install` by
       expect(didInstall, isFalse);
       verifyNever(mockProcessManager.run(
         argThat(containsAllInOrder(<String>['pod', 'install'])),
-        workingDirectory: any,
-        environment: typed<Map<String, String>>(any, named: 'environment'),
+        workingDirectory: anyNamed('workingDirectory'),
+        environment: anyNamed('environment'),
       ));
     }, overrides: <Type, Generator>{
       FileSystem: () => fs,

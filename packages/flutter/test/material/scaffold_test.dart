@@ -1149,9 +1149,9 @@ class _ComputeNotchSetterState extends State<_ComputeNotchSetter> {
 class _CustomPageRoute<T> extends PageRoute<T> {
   _CustomPageRoute({
     @required this.builder,
-    RouteSettings settings: const RouteSettings(),
-    this.maintainState: true,
-    bool fullscreenDialog: false,
+    RouteSettings settings = const RouteSettings(),
+    this.maintainState = true,
+    bool fullscreenDialog = false,
   }) : assert(builder != null),
        super(settings: settings, fullscreenDialog: fullscreenDialog);
 

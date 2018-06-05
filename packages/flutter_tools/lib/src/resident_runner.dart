@@ -137,7 +137,7 @@ class FlutterDevice {
 
   List<Future<Map<String, dynamic>>> reloadSources(
     String entryPath, {
-    bool pause: false
+    bool pause = false
   }) {
     final Uri deviceEntryUri = devFS.baseUri.resolveUri(fs.path.toUri(entryPath));
     final Uri devicePackagesUri = devFS.baseUri.resolve('.packages');
@@ -313,7 +313,7 @@ class FlutterDevice {
   Future<int> runCold({
     ColdRunner coldRunner,
     String route,
-    bool shouldBuild: true,
+    bool shouldBuild = true,
   }) async {
     final TargetPlatform targetPlatform = await device.targetPlatform;
     package = await getApplicationPackageForPlatform(
@@ -373,10 +373,10 @@ class FlutterDevice {
     String target,
     AssetBundle bundle,
     DateTime firstBuildTime,
-    bool bundleFirstUpload: false,
-    bool bundleDirty: false,
+    bool bundleFirstUpload = false,
+    bool bundleDirty = false,
     Set<String> fileFilter,
-    bool fullRestart: false,
+    bool fullRestart = false,
     String projectRootPath,
   }) async {
     final Status devFSStatus = logger.startProgress(
@@ -420,7 +420,7 @@ abstract class ResidentRunner {
   ResidentRunner(this.flutterDevices, {
     this.target,
     this.debuggingOptions,
-    this.usesTerminalUI: true,
+    this.usesTerminalUI = true,
     String projectRootPath,
     String packagesFilePath,
     this.stayResident,
@@ -460,12 +460,12 @@ abstract class ResidentRunner {
     Completer<DebugConnectionInfo> connectionInfoCompleter,
     Completer<Null> appStartedCompleter,
     String route,
-    bool shouldBuild: true
+    bool shouldBuild = true
   });
 
   bool get supportsRestart => false;
 
-  Future<OperationResult> restart({ bool fullRestart: false, bool pauseAfterRestart: false }) {
+  Future<OperationResult> restart({ bool fullRestart = false, bool pauseAfterRestart = false }) {
     throw 'unsupported';
   }
 

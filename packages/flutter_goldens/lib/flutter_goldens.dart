@@ -46,7 +46,7 @@ class FlutterGoldenFileComparator implements GoldenFileComparator {
   @visibleForTesting
   FlutterGoldenFileComparator(
     this.basedir, {
-    this.fs: const LocalFileSystem(),
+    this.fs = const LocalFileSystem(),
   });
 
   /// The directory to which golden file URIs will be resolved in [compare] and [update].
@@ -111,9 +111,9 @@ class FlutterGoldenFileComparator implements GoldenFileComparator {
 class GoldensClient {
   /// Create a handle to a local clone of the goldens repository.
   GoldensClient({
-    this.fs: const LocalFileSystem(),
-    this.platform: const LocalPlatform(),
-    this.process: const LocalProcessManager(),
+    this.fs = const LocalFileSystem(),
+    this.platform = const LocalPlatform(),
+    this.process = const LocalProcessManager(),
   });
 
   /// The file system to use for storing the local clone of the repository.

@@ -79,14 +79,10 @@ class RunCommand extends RunCommandBase {
   @override
   final String description = 'Run your Flutter app on an attached device.';
 
-  RunCommand({ bool verboseHelp: false }) {
+  RunCommand({ bool verboseHelp = false }) {
     requiresPubspecYaml();
 
     argParser
-      ..addFlag('full-restart',
-        defaultsTo: true,
-        help: 'Stop any currently running application process before running the app.',
-      )
       ..addFlag('start-paused',
         negatable: false,
         help: 'Start in a paused mode and wait for a debugger to connect.',

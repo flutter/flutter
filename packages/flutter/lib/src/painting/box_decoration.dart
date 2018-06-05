@@ -66,7 +66,7 @@ class BoxDecoration extends Decoration {
   /// * If [image] is null, this decoration does not paint a background image.
   /// * If [border] is null, this decoration does not paint a border.
   /// * If [borderRadius] is null, this decoration uses more efficient background
-  ///   painting commands. The [borderRadius] argument must be be null if [shape] is
+  ///   painting commands. The [borderRadius] argument must be null if [shape] is
   ///   [BoxShape.circle].
   /// * If [boxShadow] is null, this decoration does not paint a shadow.
   /// * If [gradient] is null, this decoration does not paint gradients.
@@ -79,7 +79,7 @@ class BoxDecoration extends Decoration {
     this.borderRadius,
     this.boxShadow,
     this.gradient,
-    this.shape: BoxShape.rectangle,
+    this.shape = BoxShape.rectangle,
   }) : assert(shape != null);
 
   @override

@@ -1,6 +1,7 @@
 // Copyright 2016 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
+import 'dart:math' as math;
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/painting.dart';
@@ -164,6 +165,7 @@ void main() {
       },
       throwsAssertionError,
     );
+
     expect(
       () {
         return const RadialGradient(
@@ -249,6 +251,9 @@ void main() {
     );
 
     final RadialGradient actual = RadialGradient.lerp(testGradient1, testGradient2, 0.5);
+    
+    expect(actual.focal, isNull);
+    
     expect(actual, const RadialGradient(
       center: const Alignment(0.0, -1.0),
       radius: 15.0,
@@ -259,6 +264,161 @@ void main() {
       stops: const <double>[
         0.25,
         0.75,
+      ],
+    ));
+  });
+
+  test('RadialGradient lerp test with focal', () {
+    const RadialGradient testGradient1 = const RadialGradient(
+      center: Alignment.topLeft,
+      focal: Alignment.centerLeft,
+      radius: 20.0,
+      focalRadius: 10.0,
+      colors: const <Color>[
+        const Color(0x33333333),
+        const Color(0x66666666),
+      ],
+    );
+    const RadialGradient testGradient2 = const RadialGradient(
+      center: Alignment.topRight,
+      focal: Alignment.centerRight,
+      radius: 10.0,
+      focalRadius: 5.0,
+      colors: const <Color>[
+        const Color(0x44444444),
+        const Color(0x88888888),
+      ],
+    );
+    const RadialGradient testGradient3 = const RadialGradient(
+      center: Alignment.topRight,
+      radius: 10.0,
+      colors: const <Color>[
+        const Color(0x44444444),
+        const Color(0x88888888),
+      ],
+    );
+
+    final RadialGradient actual = RadialGradient.lerp(testGradient1, testGradient2, 0.5);
+    expect(actual, const RadialGradient(
+      center: const Alignment(0.0, -1.0),
+      focal: const Alignment(0.0, 0.0),
+      radius: 15.0,
+      focalRadius: 7.5,
+      colors: const <Color>[
+        const Color(0x3B3B3B3B),
+        const Color(0x77777777),
+      ],
+    ));
+
+    final RadialGradient actual2 = RadialGradient.lerp(testGradient1, testGradient3, 0.5);
+    expect(actual2, const RadialGradient(
+      center: const Alignment(0.0, -1.0),
+      focal: const Alignment(-0.5, 0.0),
+      radius: 15.0,
+      focalRadius: 5.0,
+      colors: const <Color>[
+        const Color(0x3B3B3B3B),
+        const Color(0x77777777),
+      ],
+    ));
+  });
+  
+  test('SweepGradient lerp test', () {
+    const SweepGradient testGradient1 = const SweepGradient(
+      center: Alignment.topLeft,
+      startAngle: 0.0,
+      endAngle: math.pi / 2,
+      colors: const <Color>[
+        const Color(0x33333333),
+        const Color(0x66666666),
+      ],
+    );
+    const SweepGradient testGradient2 = const SweepGradient(
+      center: Alignment.topRight,
+      startAngle: math.pi / 2,
+      endAngle: math.pi,
+      colors: const <Color>[
+        const Color(0x44444444),
+        const Color(0x88888888),
+      ],
+    );
+
+    final SweepGradient actual = SweepGradient.lerp(testGradient1, testGradient2, 0.5);
+    expect(actual, const SweepGradient(
+      center: const Alignment(0.0, -1.0),
+      startAngle: math.pi / 4,
+      endAngle: math.pi * 3/4,
+      colors: const <Color>[
+        const Color(0x3B3B3B3B),
+        const Color(0x77777777),
+      ],
+    ));
+  });
+
+  test('SweepGradient lerp test with stops', () {
+    const SweepGradient testGradient1 = const SweepGradient(
+      center: Alignment.topLeft,
+      startAngle: 0.0,
+      endAngle: math.pi / 2,
+      colors: const <Color>[
+        const Color(0x33333333),
+        const Color(0x66666666),
+      ],
+      stops: const <double>[
+        0.0,
+        0.5,
+      ],
+    );
+    const SweepGradient testGradient2 = const SweepGradient(
+      center: Alignment.topRight,
+      startAngle: math.pi / 2,
+      endAngle:  math.pi,
+      colors: const <Color>[
+        const Color(0x44444444),
+        const Color(0x88888888),
+      ],
+      stops: const <double>[
+        0.5,
+        1.0,
+      ],
+    );
+
+    final SweepGradient actual = SweepGradient.lerp(testGradient1, testGradient2, 0.5);
+    expect(actual, const SweepGradient(
+      center: const Alignment(0.0, -1.0),
+      startAngle: math.pi / 4,
+      endAngle: math.pi * 3/4,
+      colors: const <Color>[
+        const Color(0x3B3B3B3B),
+        const Color(0x77777777),
+      ],
+      stops: const <double>[
+        0.25,
+        0.75,
+      ],
+    ));
+  });
+
+  test('SweepGradient scale test)', () {
+    const SweepGradient testGradient = const SweepGradient(
+      center: Alignment.topLeft,
+      startAngle: 0.0,
+      endAngle: math.pi / 2,
+      colors: const <Color>[
+        const Color(0xff333333),
+        const Color(0xff666666),
+      ],
+    );
+    
+    final SweepGradient actual = testGradient.scale(0.5);
+    
+    expect(actual, const SweepGradient(
+      center: Alignment.topLeft,
+      startAngle: 0.0,
+      endAngle: math.pi / 2,
+      colors: const <Color>[
+        const Color(0x80333333),
+        const Color(0x80666666),
       ],
     ));
   });

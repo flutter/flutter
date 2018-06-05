@@ -96,7 +96,7 @@ class PopupMenuDivider extends PopupMenuEntry<Null> {
   /// Creates a horizontal divider for a popup menu.
   ///
   /// By default, the divider has a height of 16 logical pixels.
-  const PopupMenuDivider({ Key key, this.height: _kMenuDividerHeight }) : super(key: key);
+  const PopupMenuDivider({ Key key, this.height = _kMenuDividerHeight }) : super(key: key);
 
   /// The height of the divider entry.
   ///
@@ -163,8 +163,8 @@ class PopupMenuItem<T> extends PopupMenuEntry<T> {
   const PopupMenuItem({
     Key key,
     this.value,
-    this.enabled: true,
-    this.height: _kMenuItemHeight,
+    this.enabled = true,
+    this.height = _kMenuItemHeight,
     @required this.child,
   }) : assert(enabled != null),
        assert(height != null),
@@ -248,7 +248,7 @@ class PopupMenuItemState<T, W extends PopupMenuItem<T>> extends State<W> {
       duration: kThemeChangeDuration,
       child: new Baseline(
         baseline: widget.height - _kBaselineOffsetFromBottom,
-        baselineType: TextBaseline.alphabetic,
+        baselineType: style.textBaseline,
         child: buildChild(),
       )
     );
@@ -341,8 +341,8 @@ class CheckedPopupMenuItem<T> extends PopupMenuItem<T> {
   const CheckedPopupMenuItem({
     Key key,
     T value,
-    this.checked: false,
-    bool enabled: true,
+    this.checked = false,
+    bool enabled = true,
     Widget child,
   }) : assert(checked != null),
        super(
@@ -377,14 +377,14 @@ class CheckedPopupMenuItem<T> extends PopupMenuItem<T> {
 }
 
 class _CheckedPopupMenuItemState<T> extends PopupMenuItemState<T, CheckedPopupMenuItem<T>> with SingleTickerProviderStateMixin {
-  static const Duration _kFadeDuration = const Duration(milliseconds: 150);
+  static const Duration _fadeDuration = const Duration(milliseconds: 150);
   AnimationController _controller;
   Animation<double> get _opacity => _controller.view;
 
   @override
   void initState() {
     super.initState();
-    _controller = new AnimationController(duration: _kFadeDuration, vsync: this)
+    _controller = new AnimationController(duration: _fadeDuration, vsync: this)
       ..value = widget.checked ? 1.0 : 0.0
       ..addListener(() => setState(() { /* animation changed */ }));
   }
@@ -708,7 +708,7 @@ Future<T> showMenu<T>({
   RelativeRect position,
   @required List<PopupMenuEntry<T>> items,
   T initialValue,
-  double elevation: 8.0,
+  double elevation = 8.0,
   String semanticLabel,
 }) {
   assert(context != null);
@@ -814,8 +814,8 @@ class PopupMenuButton<T> extends StatefulWidget {
     this.onSelected,
     this.onCanceled,
     this.tooltip,
-    this.elevation: 8.0,
-    this.padding: const EdgeInsets.all(8.0),
+    this.elevation = 8.0,
+    this.padding = const EdgeInsets.all(8.0),
     this.child,
     this.icon,
   }) : assert(itemBuilder != null),

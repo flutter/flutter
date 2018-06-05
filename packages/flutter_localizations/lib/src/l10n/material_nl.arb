@@ -38,5 +38,6 @@
   "drawerLabel": "Navigatiemenu",
   "popupMenuLabel": "Pop-upmenu",
   "dialogLabel": "Dialoogvenster",
-  "alertDialogLabel": "Alarm"
+  "alertDialogLabel": "Alarm",
+  "searchFieldLabel": "Zoeken"
 }

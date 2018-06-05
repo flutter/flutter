@@ -47,6 +47,18 @@ IF NOT EXIST "%flutter_root%\.git" (
 REM Ensure that bin/cache exists.
 IF NOT EXIST "%cache_dir%" MKDIR "%cache_dir%"
 
+REM If the cache still doesn't exist, fail with an error that we probably don't have permissions.
+IF NOT EXIST "%cache_dir%" (
+  ECHO Error: Unable to create cache directory at
+  ECHO            %cache_dir%
+  ECHO.
+  ECHO        This may be because flutter doesn't have write permissions for
+  ECHO        this path. Try moving the flutter directory to a writable location,
+  ECHO        such as within your home directory.
+  EXIT /B 1
+)
+
+
 REM To debug the tool, you can uncomment the following lines to enable checked mode and set an observatory port:
 REM SET FLUTTER_TOOL_ARGS="--checked %FLUTTER_TOOL_ARGS%"
 REM SET FLUTTER_TOOL_ARGS="%FLUTTER_TOOL_ARGS% --observe=65432"
@@ -91,7 +103,7 @@ GOTO :after_subroutine
     SET update_dart_bin=%FLUTTER_ROOT%/bin/internal/update_dart_sdk.ps1
     REM Escape apostrophes from the executable path
     SET "update_dart_bin=!update_dart_bin:'=''!"
-    CALL PowerShell.exe -ExecutionPolicy Bypass -Command "& '%update_dart_bin%'"
+    CALL PowerShell.exe -ExecutionPolicy Bypass -Command "Unblock-File -Path '%update_dart_bin%'; & '%update_dart_bin%'"
     IF "%ERRORLEVEL%" NEQ "0" (
       ECHO Error: Unable to update Dart SDK. Retrying...
       timeout /t 5 /nobreak

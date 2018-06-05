@@ -27,10 +27,10 @@ class BoxShadow {
   /// By default, the shadow is solid black with zero [offset], [blurRadius],
   /// and [spreadRadius].
   const BoxShadow({
-    this.color: const Color(0xFF000000),
-    this.offset: Offset.zero,
-    this.blurRadius: 0.0,
-    this.spreadRadius: 0.0
+    this.color = const Color(0xFF000000),
+    this.offset = Offset.zero,
+    this.blurRadius = 0.0,
+    this.spreadRadius = 0.0
   });
 
   /// The color of the shadow.

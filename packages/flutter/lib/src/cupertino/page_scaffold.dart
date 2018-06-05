@@ -21,7 +21,7 @@ class CupertinoPageScaffold extends StatelessWidget {
   const CupertinoPageScaffold({
     Key key,
     this.navigationBar,
-    this.backgroundColor: CupertinoColors.white,
+    this.backgroundColor = CupertinoColors.white,
     @required this.child,
   }) : assert(child != null),
        super(key: key);

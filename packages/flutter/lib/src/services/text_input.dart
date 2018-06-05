@@ -28,8 +28,8 @@ class TextInputType {
   /// Requests a numeric keyboard with additional settings.
   /// The [signed] and [decimal] parameters are optional.
   const TextInputType.numberWithOptions({
-    this.signed: false,
-    this.decimal: false,
+    this.signed = false,
+    this.decimal = false,
   }) : index = 2;
 
   /// Enum value index, corresponds to one of the [values].
@@ -155,11 +155,11 @@ class TextInputConfiguration {
   /// All arguments have default values, except [actionLabel]. Only
   /// [actionLabel] may be null.
   const TextInputConfiguration({
-    this.inputType: TextInputType.text,
-    this.obscureText: false,
-    this.autocorrect: true,
+    this.inputType = TextInputType.text,
+    this.obscureText = false,
+    this.autocorrect = true,
     this.actionLabel,
-    this.inputAction: TextInputAction.done,
+    this.inputAction = TextInputAction.done,
   }) : assert(inputType != null),
        assert(obscureText != null),
        assert(autocorrect != null),
@@ -216,9 +216,9 @@ class TextEditingValue {
   /// The [text], [selection], and [composing] arguments must not be null but
   /// each have default values.
   const TextEditingValue({
-    this.text: '',
-    this.selection: const TextSelection.collapsed(offset: -1),
-    this.composing: TextRange.empty
+    this.text = '',
+    this.selection = const TextSelection.collapsed(offset: -1),
+    this.composing = TextRange.empty
   }) : assert(text != null),
        assert(selection != null),
        assert(composing != null);

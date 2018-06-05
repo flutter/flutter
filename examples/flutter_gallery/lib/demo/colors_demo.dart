@@ -7,7 +7,7 @@ import 'package:flutter/material.dart';
 const double kColorItemHeight = 48.0;
 
 class Palette {
-  Palette({ this.name, this.primary, this.accent, this.threshold: 900});
+  Palette({ this.name, this.primary, this.accent, this.threshold = 900});
 
   final String name;
   final MaterialColor primary;
@@ -45,7 +45,7 @@ class ColorItem extends StatelessWidget {
     Key key,
     @required this.index,
     @required this.color,
-    this.prefix: '',
+    this.prefix = '',
   }) : assert(index != null),
        assert(color != null),
        assert(prefix != null),

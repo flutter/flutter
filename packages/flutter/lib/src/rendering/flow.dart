@@ -39,7 +39,7 @@ abstract class FlowPaintingContext {
   /// x increasing rightward and y increasing downward.
   ///
   /// The container will clip the children to its bounds.
-  void paintChild(int i, { Matrix4 transform, double opacity: 1.0 });
+  void paintChild(int i, { Matrix4 transform, double opacity = 1.0 });
 }
 
 /// A delegate that controls the appearance of a flow layout.
@@ -313,7 +313,7 @@ class RenderFlow extends RenderBox
   }
 
   @override
-  void paintChild(int i, { Matrix4 transform, double opacity: 1.0 }) {
+  void paintChild(int i, { Matrix4 transform, double opacity = 1.0 }) {
     transform ??= new Matrix4.identity();
     final RenderBox child = _randomAccessChildren[i];
     final FlowParentData childParentData = child.parentData;

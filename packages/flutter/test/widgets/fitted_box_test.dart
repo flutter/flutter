@@ -439,6 +439,39 @@ void main() {
       }
     }
   });
+
+  testWidgets('Big child into small fitted box - hit testing', (WidgetTester tester) async {
+    final GlobalKey key1 = new GlobalKey();
+    bool _pointerDown = false;
+    await tester.pumpWidget(
+      new Center(
+        child: new SizedBox(
+          width: 100.0,
+          height: 100.0,
+          child: new FittedBox(
+            fit: BoxFit.contain,
+            alignment: FractionalOffset.center,
+            child: new SizedBox(
+              width: 1000.0,
+              height: 1000.0,
+              child: new Listener(
+                onPointerDown: (PointerDownEvent event) {
+                  _pointerDown = true;
+                },
+                child: new Container(
+                  key: key1,
+                  color: const Color(0xFF000000),
+                )
+              )
+            )
+          )
+        )
+      )
+    );
+    expect(_pointerDown, isFalse);
+    await tester.tap(find.byKey(key1));
+    expect(_pointerDown, isTrue);
+  });
 }
 
 List<Type> getLayers() {

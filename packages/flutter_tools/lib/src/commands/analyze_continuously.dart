@@ -20,7 +20,7 @@ import 'analyze_base.dart';
 
 class AnalyzeContinuously extends AnalyzeBase {
   AnalyzeContinuously(ArgResults argResults, this.repoRoots, this.repoPackages, {
-    this.previewDart2: false,
+    this.previewDart2 = false,
   }) : super(argResults);
 
   final List<String> repoRoots;

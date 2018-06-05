@@ -99,7 +99,7 @@ class SectionTitle extends StatelessWidget {
 
 // Small horizontal bar that indicates the selected section.
 class SectionIndicator extends StatelessWidget {
-  const SectionIndicator({ Key key, this.opacity: 1.0 }) : super(key: key);
+  const SectionIndicator({ Key key, this.opacity = 1.0 }) : super(key: key);
 
   final double opacity;
 

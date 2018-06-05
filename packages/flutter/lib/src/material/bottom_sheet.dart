@@ -63,7 +63,7 @@ class BottomSheet extends StatefulWidget {
 
   /// Called when the bottom sheet begins to close.
   ///
-  /// A bottom sheet might be be prevented from closing (e.g., by user
+  /// A bottom sheet might be prevented from closing (e.g., by user
   /// interaction) even after this callback is called. For this reason, this
   /// callback might be call multiple times for a given bottom sheet.
   final VoidCallback onClosing;

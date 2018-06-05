@@ -275,7 +275,7 @@ class ScrollDragController implements Drag {
 
   /// The drag distance past which, a [motionStartDistanceThreshold] breaking
   /// drag is considered a deliberate fling.
-  static const double _kBigThresholdBreakDistance = 24.0;
+  static const double _bigThresholdBreakDistance = 24.0;
 
   bool get _reversed => axisDirectionIsReversed(delegate.axisDirection);
 
@@ -332,7 +332,7 @@ class ScrollDragController implements Drag {
         if (_offsetSinceLastStop.abs() > motionStartDistanceThreshold) {
           // Threshold broken.
           _offsetSinceLastStop = null;
-          if (offset.abs() > _kBigThresholdBreakDistance) {
+          if (offset.abs() > _bigThresholdBreakDistance) {
             // This is heuristically a very deliberate fling. Leave the motion
             // unaffected.
             return offset;

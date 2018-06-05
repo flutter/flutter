@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' as ui show Gradient, Shader, TextBox;
+import 'dart:ui' as ui show Gradient, Shader, TextBox, Locale;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -38,12 +38,13 @@ class RenderParagraph extends RenderBox {
   /// The [maxLines] property may be null (and indeed defaults to null), but if
   /// it is not null, it must be greater than zero.
   RenderParagraph(TextSpan text, {
-    TextAlign textAlign: TextAlign.start,
+    TextAlign textAlign = TextAlign.start,
     @required TextDirection textDirection,
-    bool softWrap: true,
-    TextOverflow overflow: TextOverflow.clip,
-    double textScaleFactor: 1.0,
+    bool softWrap = true,
+    TextOverflow overflow = TextOverflow.clip,
+    double textScaleFactor = 1.0,
     int maxLines,
+    ui.Locale locale,
   }) : assert(text != null),
        assert(text.debugAssertIsValid()),
        assert(textAlign != null),
@@ -61,6 +62,7 @@ class RenderParagraph extends RenderBox {
          textScaleFactor: textScaleFactor,
          maxLines: maxLines,
          ellipsis: overflow == TextOverflow.ellipsis ? _kEllipsis : null,
+         locale: locale,
        );
 
   final TextPainter _textPainter;
@@ -174,7 +176,16 @@ class RenderParagraph extends RenderBox {
     markNeedsLayout();
   }
 
-  void _layoutText({ double minWidth: 0.0, double maxWidth: double.infinity }) {
+  ui.Locale get locale => _textPainter.locale;
+  set locale(ui.Locale value) {
+    if (_textPainter.locale == value)
+      return;
+    _textPainter.locale = locale;
+    _overflowShader = null;
+    markNeedsLayout();
+  }
+
+  void _layoutText({ double minWidth = 0.0, double maxWidth = double.infinity }) {
     final bool widthMatters = softWrap || overflow == TextOverflow.ellipsis;
     _textPainter.layout(minWidth: minWidth, maxWidth: widthMatters ? maxWidth : double.infinity);
   }

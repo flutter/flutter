@@ -25,23 +25,25 @@ const String defaultPrivateKeyPath = 'privatekey.der';
 
 const String _kKernelKey = 'kernel_blob.bin';
 const String _kSnapshotKey = 'snapshot_blob.bin';
+const String _kVMSnapshotData = 'vm_snapshot_data';
+const String _kIsolateSnapshotData = 'isolate_snapshot_data';
 const String _kDylibKey = 'libapp.so';
 const String _kPlatformKernelKey = 'platform.dill';
 
 Future<void> build({
-  String mainPath: defaultMainPath,
-  String manifestPath: defaultManifestPath,
+  String mainPath = defaultMainPath,
+  String manifestPath = defaultManifestPath,
   String snapshotPath,
   String applicationKernelFilePath,
   String depfilePath,
-  String privateKeyPath: defaultPrivateKeyPath,
+  String privateKeyPath = defaultPrivateKeyPath,
   String assetDirPath,
   String packagesPath,
-  bool previewDart2 : false,
-  bool precompiledSnapshot: false,
-  bool reportLicensedPackages: false,
-  bool trackWidgetCreation: false,
-  List<String> extraFrontEndOptions: const <String>[],
+  bool previewDart2  = false,
+  bool precompiledSnapshot = false,
+  bool reportLicensedPackages = false,
+  bool trackWidgetCreation = false,
+  List<String> extraFrontEndOptions = const <String>[],
   List<String> fileSystemRoots,
   String fileSystemScheme,
 }) async {
@@ -117,8 +119,8 @@ Future<AssetBundle> buildAssets({
   String manifestPath,
   String assetDirPath,
   String packagesPath,
-  bool includeDefaultFonts: true,
-  bool reportLicensedPackages: false
+  bool includeDefaultFonts = true,
+  bool reportLicensedPackages = false
 }) async {
   assetDirPath ??= getAssetBuildDirectory();
   packagesPath ??= fs.path.absolute(PackageMap.globalPackagesPath);
@@ -143,21 +145,28 @@ Future<void> assemble({
   DevFSContent kernelContent,
   File snapshotFile,
   File dylibFile,
-  String privateKeyPath: defaultPrivateKeyPath,
+  String privateKeyPath = defaultPrivateKeyPath,
   String assetDirPath,
 }) async {
   assetDirPath ??= getAssetBuildDirectory();
   printTrace('Building bundle');
 
   final Map<String, DevFSContent> assetEntries = new Map<String, DevFSContent>.from(assetBundle.entries);
+  final String vmSnapshotData = artifacts.getArtifactPath(Artifact.vmSnapshotData);
+  final String isolateSnapshotData = artifacts.getArtifactPath(Artifact.isolateSnapshotData);
 
   if (kernelContent != null) {
     final String platformKernelDill = artifacts.getArtifactPath(Artifact.platformKernelDill);
     assetEntries[_kKernelKey] = kernelContent;
     assetEntries[_kPlatformKernelKey] = new DevFSFileContent(fs.file(platformKernelDill));
+    assetEntries[_kVMSnapshotData] = new DevFSFileContent(fs.file(vmSnapshotData));
+    assetEntries[_kIsolateSnapshotData] = new DevFSFileContent(fs.file(isolateSnapshotData));
   }
-  if (snapshotFile != null)
+  if (snapshotFile != null) {
     assetEntries[_kSnapshotKey] = new DevFSFileContent(snapshotFile);
+    assetEntries[_kVMSnapshotData] = new DevFSFileContent(fs.file(vmSnapshotData));
+    assetEntries[_kIsolateSnapshotData] = new DevFSFileContent(fs.file(isolateSnapshotData));
+  }
   if (dylibFile != null)
     assetEntries[_kDylibKey] = new DevFSFileContent(dylibFile);
 

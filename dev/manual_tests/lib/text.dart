@@ -1060,7 +1060,7 @@ class _PaintingState extends State<Painting> with SingleTickerProviderStateMixin
   }
 }
 
-String zalgo(math.Random random, int targetLength, { bool includeSpacingCombiningMarks: false, String base }) {
+String zalgo(math.Random random, int targetLength, { bool includeSpacingCombiningMarks = false, String base }) {
   // The following three tables are derived from UnicodeData.txt:
   //   http://unicode.org/Public/UNIDATA/UnicodeData.txt
   // There are three groups, character classes Mc, Me, and Mn.

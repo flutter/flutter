@@ -135,7 +135,7 @@ class FlutterVersion {
   /// In the absence of bugs and crashes a Flutter developer should never see
   /// this remote appear in their `git remote` list, but also if it happens to
   /// persist we do the proper clean-up for extra robustness.
-  static const String _kVersionCheckRemote = '__flutter_version_check__';
+  static const String _versionCheckRemote = '__flutter_version_check__';
 
   /// The date of the latest framework commit in the remote repository.
   ///
@@ -148,11 +148,11 @@ class FlutterVersion {
         'git',
         'remote',
         'add',
-        _kVersionCheckRemote,
+        _versionCheckRemote,
         'https://github.com/flutter/flutter.git',
       ]);
-      await _run(<String>['git', 'fetch', _kVersionCheckRemote, branch]);
-      return _latestGitCommitDate('$_kVersionCheckRemote/$branch');
+      await _run(<String>['git', 'fetch', _versionCheckRemote, branch]);
+      return _latestGitCommitDate('$_versionCheckRemote/$branch');
     } finally {
       await _removeVersionCheckRemoteIfExists();
     }
@@ -163,14 +163,14 @@ class FlutterVersion {
         .split('\n')
         .map((String name) => name.trim()) // to account for OS-specific line-breaks
         .toList();
-    if (remotes.contains(_kVersionCheckRemote))
-      await _run(<String>['git', 'remote', 'remove', _kVersionCheckRemote]);
+    if (remotes.contains(_versionCheckRemote))
+      await _run(<String>['git', 'remote', 'remove', _versionCheckRemote]);
   }
 
   static FlutterVersion get instance => context[FlutterVersion];
 
   /// Return a short string for the version (e.g. `master/0.0.59-pre.92`, `scroll_refactor/a76bc8e22b`).
-  String getVersionString({bool redactUnknownBranches: false}) {
+  String getVersionString({bool redactUnknownBranches = false}) {
     if (frameworkVersion != 'unknown')
       return '${getBranchName(redactUnknownBranches: redactUnknownBranches)}/$frameworkVersion';
     return '${getBranchName(redactUnknownBranches: redactUnknownBranches)}/$frameworkRevisionShort';
@@ -180,7 +180,7 @@ class FlutterVersion {
   ///
   /// If [redactUnknownBranches] is true and the branch is unknown,
   /// the branch name will be returned as `'[user-branch]'`.
-  String getBranchName({ bool redactUnknownBranches: false }) {
+  String getBranchName({ bool redactUnknownBranches = false }) {
     if (redactUnknownBranches || _branch.isEmpty) {
       // Only return the branch names we know about; arbitrary branch names might contain PII.
       if (!officialChannels.contains(_branch) && !obsoleteBranches.containsKey(_branch))
@@ -296,7 +296,7 @@ class FlutterVersion {
 
     // Cache is empty or it's been a while since the last server ping. Ping the server.
     try {
-      final String branch = _channel == 'alpha' ? 'alpha' : 'master';
+      final String branch = officialChannels.contains(_channel) ? _channel : 'master';
       final DateTime remoteFrameworkCommitDate = DateTime.parse(await FlutterVersion.fetchRemoteFrameworkCommitDate(branch));
       await versionCheckStamp.store(
         newTimeVersionWasChecked: _clock.now(),
@@ -429,7 +429,7 @@ class VersionCheckError implements Exception {
 ///
 /// If [lenient] is true and the command fails, returns an empty string.
 /// Otherwise, throws a [ToolExit] exception.
-String _runSync(List<String> command, {bool lenient: true}) {
+String _runSync(List<String> command, {bool lenient = true}) {
   final ProcessResult results = processManager.runSync(command, workingDirectory: Cache.flutterRoot);
 
   if (results.exitCode == 0)

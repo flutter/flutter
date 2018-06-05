@@ -38,5 +38,6 @@
   "drawerLabel": "منوی پیمایش",
   "popupMenuLabel": "منوی بازشو",
   "dialogLabel": "کادر گفتگو",
-  "alertDialogLabel": "هشدار"
+  "alertDialogLabel": "هشدار",
+  "searchFieldLabel": "جستجو کردن"
 }

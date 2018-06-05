@@ -38,7 +38,8 @@ Future<json_rpc.Peer> _waitAndConnect(Uri uri) async {
     WebSocket socket;
     json_rpc.Peer peer;
     try {
-      socket = await WebSocket.connect(uri.toString());
+      socket =
+          await WebSocket.connect(uri.toString()).timeout(_kConnectTimeout);
       peer = new json_rpc.Peer(new IOWebSocketChannel(socket).cast())..listen();
       return peer;
     } on HttpException catch (e) {
@@ -48,6 +49,7 @@ Future<json_rpc.Peer> _waitAndConnect(Uri uri) async {
       await socket?.close();
       rethrow;
     } catch (e) {
+      _log.fine('Dart VM connection failed $e: ${e.message}');
       // Other unknown errors will be handled with reconnects.
       await peer?.close();
       await socket?.close();
@@ -141,19 +143,15 @@ class DartVm {
     Map<String, dynamic> params,
     Duration timeout = _kRpcTimeout,
   }) async {
-    final Future<Map<String, dynamic>> future = _peer.sendRequest(
-      function,
-      params ?? <String, dynamic>{},
-    );
-    if (timeout == null) {
-      return future;
-    }
-    return future.timeout(timeout, onTimeout: () {
+    final Map<String, dynamic> result = await _peer
+        .sendRequest(function, params ?? <String, dynamic>{})
+        .timeout(timeout, onTimeout: () {
       throw new TimeoutException(
         'Peer connection timed out during RPC call',
         timeout,
       );
     });
+    return result;
   }
 
   /// Returns a list of [FlutterView] objects running across all Dart VM's.

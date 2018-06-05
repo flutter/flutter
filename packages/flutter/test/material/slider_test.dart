@@ -550,7 +550,7 @@ void main() {
       Color activeColor,
       Color inactiveColor,
       int divisions,
-      bool enabled: true,
+      bool enabled = true,
     }) {
       final ValueChanged<double> onChanged = !enabled
           ? null
@@ -883,8 +883,8 @@ void main() {
 
     Widget buildSlider({
       double textScaleFactor,
-      bool isDiscrete: true,
-      ShowValueIndicator show: ShowValueIndicator.onlyForDiscrete,
+      bool isDiscrete = true,
+      ShowValueIndicator show = ShowValueIndicator.onlyForDiscrete,
     }) {
       return new Directionality(
         textDirection: TextDirection.ltr,
@@ -1162,7 +1162,7 @@ void main() {
     );
     SliderThemeData theme = baseTheme.sliderTheme;
     double value = 0.45;
-    Widget buildApp({SliderThemeData sliderTheme, int divisions, bool enabled: true}) {
+    Widget buildApp({SliderThemeData sliderTheme, int divisions, bool enabled = true}) {
       final ValueChanged<double> onChanged = enabled ? (double d) => value = d : null;
       return new Directionality(
         textDirection: TextDirection.ltr,
@@ -1192,7 +1192,7 @@ void main() {
       bool isVisible,
       SliderThemeData theme,
       int divisions,
-      bool enabled: true,
+      bool enabled = true,
     }) async {
       // Discrete enabled widget.
       await tester.pumpWidget(buildApp(sliderTheme: theme, divisions: divisions, enabled: enabled));

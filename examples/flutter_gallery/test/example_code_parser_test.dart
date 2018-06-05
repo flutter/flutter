@@ -44,7 +44,7 @@ class TestAssetBundle extends AssetBundle {
   Future<ByteData> load(String key) => null;
 
   @override
-  Future<String> loadString(String key, { bool cache: true }) {
+  Future<String> loadString(String key, { bool cache = true }) {
     if (key == 'lib/gallery/example_code.dart')
       return new Future<String>.value(testCodeFile);
     return null;

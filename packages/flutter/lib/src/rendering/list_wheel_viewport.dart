@@ -97,11 +97,11 @@ class RenderListWheelViewport
   /// All arguments must not be null. Optional arguments have reasonable defaults.
   RenderListWheelViewport({
     @required ViewportOffset offset,
-    double diameterRatio: defaultDiameterRatio,
-    double perspective: defaultPerspective,
+    double diameterRatio = defaultDiameterRatio,
+    double perspective = defaultPerspective,
     @required double itemExtent,
-    bool clipToSize: true,
-    bool renderChildrenOutsideViewport: false,
+    bool clipToSize = true,
+    bool renderChildrenOutsideViewport = false,
     List<RenderBox> children,
   }) : assert(offset != null),
        assert(diameterRatio != null),

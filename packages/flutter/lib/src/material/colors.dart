@@ -123,59 +123,59 @@ class MaterialAccentColor extends ColorSwatch<int> {
 ///
 /// ## Color palettes
 ///
-/// ![](https://flutter.github.io/assets-for-api-docs/material/Colors.pink.png)
-/// ![](https://flutter.github.io/assets-for-api-docs/material/Colors.pinkAccent.png)
+/// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.pink.png)
+/// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.pinkAccent.png)
 ///
-/// ![](https://flutter.github.io/assets-for-api-docs/material/Colors.red.png)
-/// ![](https://flutter.github.io/assets-for-api-docs/material/Colors.redAccent.png)
+/// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.red.png)
+/// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.redAccent.png)
 ///
-/// ![](https://flutter.github.io/assets-for-api-docs/material/Colors.deepOrange.png)
-/// ![](https://flutter.github.io/assets-for-api-docs/material/Colors.deepOrangeAccent.png)
+/// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.deepOrange.png)
+/// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.deepOrangeAccent.png)
 ///
-/// ![](https://flutter.github.io/assets-for-api-docs/material/Colors.orange.png)
-/// ![](https://flutter.github.io/assets-for-api-docs/material/Colors.orangeAccent.png)
+/// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.orange.png)
+/// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.orangeAccent.png)
 ///
-/// ![](https://flutter.github.io/assets-for-api-docs/material/Colors.amber.png)
-/// ![](https://flutter.github.io/assets-for-api-docs/material/Colors.amberAccent.png)
+/// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.amber.png)
+/// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.amberAccent.png)
 ///
-/// ![](https://flutter.github.io/assets-for-api-docs/material/Colors.yellow.png)
-/// ![](https://flutter.github.io/assets-for-api-docs/material/Colors.yellowAccent.png)
+/// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.yellow.png)
+/// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.yellowAccent.png)
 ///
-/// ![](https://flutter.github.io/assets-for-api-docs/material/Colors.lime.png)
-/// ![](https://flutter.github.io/assets-for-api-docs/material/Colors.limeAccent.png)
+/// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.lime.png)
+/// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.limeAccent.png)
 ///
-/// ![](https://flutter.github.io/assets-for-api-docs/material/Colors.lightGreen.png)
-/// ![](https://flutter.github.io/assets-for-api-docs/material/Colors.lightGreenAccent.png)
+/// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.lightGreen.png)
+/// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.lightGreenAccent.png)
 ///
-/// ![](https://flutter.github.io/assets-for-api-docs/material/Colors.green.png)
-/// ![](https://flutter.github.io/assets-for-api-docs/material/Colors.greenAccent.png)
+/// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.green.png)
+/// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.greenAccent.png)
 ///
-/// ![](https://flutter.github.io/assets-for-api-docs/material/Colors.teal.png)
-/// ![](https://flutter.github.io/assets-for-api-docs/material/Colors.tealAccent.png)
+/// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.teal.png)
+/// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.tealAccent.png)
 ///
-/// ![](https://flutter.github.io/assets-for-api-docs/material/Colors.cyan.png)
-/// ![](https://flutter.github.io/assets-for-api-docs/material/Colors.cyanAccent.png)
+/// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.cyan.png)
+/// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.cyanAccent.png)
 ///
-/// ![](https://flutter.github.io/assets-for-api-docs/material/Colors.lightBlue.png)
-/// ![](https://flutter.github.io/assets-for-api-docs/material/Colors.lightBlueAccent.png)
+/// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.lightBlue.png)
+/// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.lightBlueAccent.png)
 ///
-/// ![](https://flutter.github.io/assets-for-api-docs/material/Colors.blue.png)
-/// ![](https://flutter.github.io/assets-for-api-docs/material/Colors.blueAccent.png)
+/// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.blue.png)
+/// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.blueAccent.png)
 ///
-/// ![](https://flutter.github.io/assets-for-api-docs/material/Colors.indigo.png)
-/// ![](https://flutter.github.io/assets-for-api-docs/material/Colors.indigoAccent.png)
+/// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.indigo.png)
+/// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.indigoAccent.png)
 ///
-/// ![](https://flutter.github.io/assets-for-api-docs/material/Colors.purple.png)
-/// ![](https://flutter.github.io/assets-for-api-docs/material/Colors.purpleAccent.png)
+/// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.purple.png)
+/// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.purpleAccent.png)
 ///
-/// ![](https://flutter.github.io/assets-for-api-docs/material/Colors.deepPurple.png)
-/// ![](https://flutter.github.io/assets-for-api-docs/material/Colors.deepPurpleAccent.png)
+/// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.deepPurple.png)
+/// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.deepPurpleAccent.png)
 ///
-/// ![](https://flutter.github.io/assets-for-api-docs/material/Colors.blueGrey.png)
+/// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.blueGrey.png)
 ///
-/// ![](https://flutter.github.io/assets-for-api-docs/material/Colors.brown.png)
+/// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.brown.png)
 ///
-/// ![](https://flutter.github.io/assets-for-api-docs/material/Colors.grey.png)
+/// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.grey.png)
 ///
 /// ## Blacks and whites
 ///
@@ -183,8 +183,8 @@ class MaterialAccentColor extends ColorSwatch<int> {
 /// levels (e.g. [Colors.white12] and [Colors.white10]) are very hard to see and
 /// should be avoided in general. They are intended for very subtle effects.
 ///
-/// ![](https://flutter.github.io/assets-for-api-docs/material/Colors.blacks.png)
-/// ![](https://flutter.github.io/assets-for-api-docs/material/Colors.whites.png)
+/// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.blacks.png)
+/// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.whites.png)
 ///
 /// The [Colors.transparent] color isn't shown here because it is entirely
 /// invisible!
@@ -196,7 +196,7 @@ class Colors {
 
   /// Completely opaque black.
   ///
-  /// ![](https://flutter.github.io/assets-for-api-docs/material/Colors.blacks.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.blacks.png)
   ///
   /// See also:
   ///
@@ -210,7 +210,7 @@ class Colors {
   ///
   /// This is a good contrasting color for text in light themes.
   ///
-  /// ![](https://flutter.github.io/assets-for-api-docs/material/Colors.blacks.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.blacks.png)
   ///
   /// See also:
   ///
@@ -226,7 +226,7 @@ class Colors {
   /// This is a color commonly used for headings in light themes. It's also used
   /// as the mask color behind dialogs.
   ///
-  /// ![](https://flutter.github.io/assets-for-api-docs/material/Colors.blacks.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.blacks.png)
   ///
   /// See also:
   ///
@@ -241,7 +241,7 @@ class Colors {
   ///
   /// Used for disabled icons.
   ///
-  /// ![](https://flutter.github.io/assets-for-api-docs/material/Colors.blacks.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.blacks.png)
   ///
   /// See also:
   ///
@@ -253,7 +253,7 @@ class Colors {
   ///
   /// Used for the placeholder text in data tables in light themes.
   ///
-  /// ![](https://flutter.github.io/assets-for-api-docs/material/Colors.blacks.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.blacks.png)
   ///
   /// See also:
   ///
@@ -265,7 +265,7 @@ class Colors {
   ///
   /// Used for disabled radio buttons and the text of disabled flat buttons in light themes.
   ///
-  /// ![](https://flutter.github.io/assets-for-api-docs/material/Colors.blacks.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.blacks.png)
   ///
   /// See also:
   ///
@@ -278,7 +278,7 @@ class Colors {
 
   /// Black with 12% opacity.
   ///
-  /// ![](https://flutter.github.io/assets-for-api-docs/material/Colors.blacks.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.blacks.png)
   ///
   /// Used for the background of disabled raised buttons in light themes.
   ///
@@ -293,7 +293,7 @@ class Colors {
   /// This is a good contrasting color for the [ThemeData.primaryColor] in the
   /// dark theme. See [ThemeData.brightness].
   ///
-  /// ![](https://flutter.github.io/assets-for-api-docs/material/Colors.whites.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.whites.png)
   ///
   /// See also:
   ///
@@ -310,7 +310,7 @@ class Colors {
   ///
   /// This is a color commonly used for headings in dark themes.
   ///
-  /// ![](https://flutter.github.io/assets-for-api-docs/material/Colors.whites.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.whites.png)
   ///
   /// See also:
   ///
@@ -325,7 +325,7 @@ class Colors {
   ///
   /// Used for disabled radio buttons and the text of disabled flat buttons in dark themes.
   ///
-  /// ![](https://flutter.github.io/assets-for-api-docs/material/Colors.whites.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.whites.png)
   ///
   /// See also:
   ///
@@ -338,7 +338,7 @@ class Colors {
 
   /// White with 24% opacity.
   ///
-  /// ![](https://flutter.github.io/assets-for-api-docs/material/Colors.whites.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.whites.png)
   ///
   /// Used for the splash color for filled buttons.
   ///
@@ -350,7 +350,7 @@ class Colors {
 
   /// White with 12% opacity.
   ///
-  /// ![](https://flutter.github.io/assets-for-api-docs/material/Colors.whites.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.whites.png)
   ///
   /// Used for the background of disabled raised buttons in dark themes.
   ///
@@ -362,7 +362,7 @@ class Colors {
 
   /// White with 10% opacity.
   ///
-  /// ![](https://flutter.github.io/assets-for-api-docs/material/Colors.whites.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.whites.png)
   ///
   /// See also:
   ///
@@ -373,14 +373,14 @@ class Colors {
 
   /// The red primary color and swatch.
   ///
-  /// ![](https://flutter.github.io/assets-for-api-docs/material/Colors.red.png)
-  /// ![](https://flutter.github.io/assets-for-api-docs/material/Colors.redAccent.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.red.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.redAccent.png)
   ///
-  /// ![](https://flutter.github.io/assets-for-api-docs/material/Colors.deepOrange.png)
-  /// ![](https://flutter.github.io/assets-for-api-docs/material/Colors.deepOrangeAccent.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.deepOrange.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.deepOrangeAccent.png)
   ///
-  /// ![](https://flutter.github.io/assets-for-api-docs/material/Colors.pink.png)
-  /// ![](https://flutter.github.io/assets-for-api-docs/material/Colors.pinkAccent.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.pink.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.pinkAccent.png)
   ///
   /// ## Sample code
   ///
@@ -416,14 +416,14 @@ class Colors {
 
   /// The red accent swatch.
   ///
-  /// ![](https://flutter.github.io/assets-for-api-docs/material/Colors.red.png)
-  /// ![](https://flutter.github.io/assets-for-api-docs/material/Colors.redAccent.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.red.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.redAccent.png)
   ///
-  /// ![](https://flutter.github.io/assets-for-api-docs/material/Colors.deepOrange.png)
-  /// ![](https://flutter.github.io/assets-for-api-docs/material/Colors.deepOrangeAccent.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.deepOrange.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.deepOrangeAccent.png)
   ///
-  /// ![](https://flutter.github.io/assets-for-api-docs/material/Colors.pink.png)
-  /// ![](https://flutter.github.io/assets-for-api-docs/material/Colors.pinkAccent.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.pink.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.pinkAccent.png)
   ///
   /// ## Sample code
   ///
@@ -453,14 +453,14 @@ class Colors {
 
   /// The pink primary color and swatch.
   ///
-  /// ![](https://flutter.github.io/assets-for-api-docs/material/Colors.pink.png)
-  /// ![](https://flutter.github.io/assets-for-api-docs/material/Colors.pinkAccent.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.pink.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.pinkAccent.png)
   ///
-  /// ![](https://flutter.github.io/assets-for-api-docs/material/Colors.red.png)
-  /// ![](https://flutter.github.io/assets-for-api-docs/material/Colors.redAccent.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.red.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.redAccent.png)
   ///
-  /// ![](https://flutter.github.io/assets-for-api-docs/material/Colors.purple.png)
-  /// ![](https://flutter.github.io/assets-for-api-docs/material/Colors.purpleAccent.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.purple.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.purpleAccent.png)
   ///
   /// ## Sample code
   ///
@@ -496,14 +496,14 @@ class Colors {
 
   /// The pink accent color swatch.
   ///
-  /// ![](https://flutter.github.io/assets-for-api-docs/material/Colors.pink.png)
-  /// ![](https://flutter.github.io/assets-for-api-docs/material/Colors.pinkAccent.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.pink.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.pinkAccent.png)
   ///
-  /// ![](https://flutter.github.io/assets-for-api-docs/material/Colors.red.png)
-  /// ![](https://flutter.github.io/assets-for-api-docs/material/Colors.redAccent.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.red.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.redAccent.png)
   ///
-  /// ![](https://flutter.github.io/assets-for-api-docs/material/Colors.purple.png)
-  /// ![](https://flutter.github.io/assets-for-api-docs/material/Colors.purpleAccent.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.purple.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.purpleAccent.png)
   ///
   /// ## Sample code
   ///
@@ -533,14 +533,14 @@ class Colors {
 
   /// The purple primary color and swatch.
   ///
-  /// ![](https://flutter.github.io/assets-for-api-docs/material/Colors.purple.png)
-  /// ![](https://flutter.github.io/assets-for-api-docs/material/Colors.purpleAccent.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.purple.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.purpleAccent.png)
   ///
-  /// ![](https://flutter.github.io/assets-for-api-docs/material/Colors.deepPurple.png)
-  /// ![](https://flutter.github.io/assets-for-api-docs/material/Colors.deepPurpleAccent.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.deepPurple.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.deepPurpleAccent.png)
   ///
-  /// ![](https://flutter.github.io/assets-for-api-docs/material/Colors.pink.png)
-  /// ![](https://flutter.github.io/assets-for-api-docs/material/Colors.pinkAccent.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.pink.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.pinkAccent.png)
   ///
   /// ## Sample code
   ///
@@ -576,14 +576,14 @@ class Colors {
 
   /// The purple accent color and swatch.
   ///
-  /// ![](https://flutter.github.io/assets-for-api-docs/material/Colors.purple.png)
-  /// ![](https://flutter.github.io/assets-for-api-docs/material/Colors.purpleAccent.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.purple.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.purpleAccent.png)
   ///
-  /// ![](https://flutter.github.io/assets-for-api-docs/material/Colors.deepPurple.png)
-  /// ![](https://flutter.github.io/assets-for-api-docs/material/Colors.deepPurpleAccent.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.deepPurple.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.deepPurpleAccent.png)
   ///
-  /// ![](https://flutter.github.io/assets-for-api-docs/material/Colors.pink.png)
-  /// ![](https://flutter.github.io/assets-for-api-docs/material/Colors.pinkAccent.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.pink.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.pinkAccent.png)
   ///
   /// ## Sample code
   ///
@@ -613,14 +613,14 @@ class Colors {
 
   /// The deep purple primary color and swatch.
   ///
-  /// ![](https://flutter.github.io/assets-for-api-docs/material/Colors.deepPurple.png)
-  /// ![](https://flutter.github.io/assets-for-api-docs/material/Colors.deepPurpleAccent.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.deepPurple.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.deepPurpleAccent.png)
   ///
-  /// ![](https://flutter.github.io/assets-for-api-docs/material/Colors.purple.png)
-  /// ![](https://flutter.github.io/assets-for-api-docs/material/Colors.purpleAccent.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.purple.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.purpleAccent.png)
   ///
-  /// ![](https://flutter.github.io/assets-for-api-docs/material/Colors.indigo.png)
-  /// ![](https://flutter.github.io/assets-for-api-docs/material/Colors.indigoAccent.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.indigo.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.indigoAccent.png)
   ///
   /// ## Sample code
   ///
@@ -656,14 +656,14 @@ class Colors {
 
   /// The deep purple accent color and swatch.
   ///
-  /// ![](https://flutter.github.io/assets-for-api-docs/material/Colors.deepPurple.png)
-  /// ![](https://flutter.github.io/assets-for-api-docs/material/Colors.deepPurpleAccent.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.deepPurple.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.deepPurpleAccent.png)
   ///
-  /// ![](https://flutter.github.io/assets-for-api-docs/material/Colors.purple.png)
-  /// ![](https://flutter.github.io/assets-for-api-docs/material/Colors.purpleAccent.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.purple.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.purpleAccent.png)
   ///
-  /// ![](https://flutter.github.io/assets-for-api-docs/material/Colors.indigo.png)
-  /// ![](https://flutter.github.io/assets-for-api-docs/material/Colors.indigoAccent.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.indigo.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.indigoAccent.png)
   ///
   /// ## Sample code
   ///
@@ -693,14 +693,14 @@ class Colors {
 
   /// The indigo primary color and swatch.
   ///
-  /// ![](https://flutter.github.io/assets-for-api-docs/material/Colors.indigo.png)
-  /// ![](https://flutter.github.io/assets-for-api-docs/material/Colors.indigoAccent.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.indigo.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.indigoAccent.png)
   ///
-  /// ![](https://flutter.github.io/assets-for-api-docs/material/Colors.blue.png)
-  /// ![](https://flutter.github.io/assets-for-api-docs/material/Colors.blueAccent.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.blue.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.blueAccent.png)
   ///
-  /// ![](https://flutter.github.io/assets-for-api-docs/material/Colors.deepPurple.png)
-  /// ![](https://flutter.github.io/assets-for-api-docs/material/Colors.deepPurpleAccent.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.deepPurple.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.deepPurpleAccent.png)
   ///
   /// ## Sample code
   ///
@@ -736,14 +736,14 @@ class Colors {
 
   /// The indigo accent color and swatch.
   ///
-  /// ![](https://flutter.github.io/assets-for-api-docs/material/Colors.indigo.png)
-  /// ![](https://flutter.github.io/assets-for-api-docs/material/Colors.indigoAccent.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.indigo.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.indigoAccent.png)
   ///
-  /// ![](https://flutter.github.io/assets-for-api-docs/material/Colors.blue.png)
-  /// ![](https://flutter.github.io/assets-for-api-docs/material/Colors.blueAccent.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.blue.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.blueAccent.png)
   ///
-  /// ![](https://flutter.github.io/assets-for-api-docs/material/Colors.deepPurple.png)
-  /// ![](https://flutter.github.io/assets-for-api-docs/material/Colors.deepPurpleAccent.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.deepPurple.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.deepPurpleAccent.png)
   ///
   /// ## Sample code
   ///
@@ -773,16 +773,16 @@ class Colors {
 
   /// The blue primary color and swatch.
   ///
-  /// ![](https://flutter.github.io/assets-for-api-docs/material/Colors.blue.png)
-  /// ![](https://flutter.github.io/assets-for-api-docs/material/Colors.blueAccent.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.blue.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.blueAccent.png)
   ///
-  /// ![](https://flutter.github.io/assets-for-api-docs/material/Colors.indigo.png)
-  /// ![](https://flutter.github.io/assets-for-api-docs/material/Colors.indigoAccent.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.indigo.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.indigoAccent.png)
   ///
-  /// ![](https://flutter.github.io/assets-for-api-docs/material/Colors.lightBlue.png)
-  /// ![](https://flutter.github.io/assets-for-api-docs/material/Colors.lightBlueAccent.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.lightBlue.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.lightBlueAccent.png)
   ///
-  /// ![](https://flutter.github.io/assets-for-api-docs/material/Colors.blueGrey.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.blueGrey.png)
   ///
   /// ## Sample code
   ///
@@ -818,14 +818,14 @@ class Colors {
 
   /// The blue accent color and swatch.
   ///
-  /// ![](https://flutter.github.io/assets-for-api-docs/material/Colors.blue.png)
-  /// ![](https://flutter.github.io/assets-for-api-docs/material/Colors.blueAccent.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.blue.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.blueAccent.png)
   ///
-  /// ![](https://flutter.github.io/assets-for-api-docs/material/Colors.indigo.png)
-  /// ![](https://flutter.github.io/assets-for-api-docs/material/Colors.indigoAccent.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.indigo.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.indigoAccent.png)
   ///
-  /// ![](https://flutter.github.io/assets-for-api-docs/material/Colors.lightBlue.png)
-  /// ![](https://flutter.github.io/assets-for-api-docs/material/Colors.lightBlueAccent.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.lightBlue.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.lightBlueAccent.png)
   ///
   /// ## Sample code
   ///
@@ -855,14 +855,14 @@ class Colors {
 
   /// The light blue primary color and swatch.
   ///
-  /// ![](https://flutter.github.io/assets-for-api-docs/material/Colors.lightBlue.png)
-  /// ![](https://flutter.github.io/assets-for-api-docs/material/Colors.lightBlueAccent.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.lightBlue.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.lightBlueAccent.png)
   ///
-  /// ![](https://flutter.github.io/assets-for-api-docs/material/Colors.blue.png)
-  /// ![](https://flutter.github.io/assets-for-api-docs/material/Colors.blueAccent.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.blue.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.blueAccent.png)
   ///
-  /// ![](https://flutter.github.io/assets-for-api-docs/material/Colors.cyan.png)
-  /// ![](https://flutter.github.io/assets-for-api-docs/material/Colors.cyanAccent.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.cyan.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.cyanAccent.png)
   ///
   /// ## Sample code
   ///
@@ -898,14 +898,14 @@ class Colors {
 
   /// The light blue accent swatch.
   ///
-  /// ![](https://flutter.github.io/assets-for-api-docs/material/Colors.lightBlue.png)
-  /// ![](https://flutter.github.io/assets-for-api-docs/material/Colors.lightBlueAccent.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.lightBlue.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.lightBlueAccent.png)
   ///
-  /// ![](https://flutter.github.io/assets-for-api-docs/material/Colors.blue.png)
-  /// ![](https://flutter.github.io/assets-for-api-docs/material/Colors.blueAccent.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.blue.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.blueAccent.png)
   ///
-  /// ![](https://flutter.github.io/assets-for-api-docs/material/Colors.cyan.png)
-  /// ![](https://flutter.github.io/assets-for-api-docs/material/Colors.cyanAccent.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.cyan.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.cyanAccent.png)
   ///
   /// ## Sample code
   ///
@@ -935,16 +935,16 @@ class Colors {
 
   /// The cyan primary color and swatch.
   ///
-  /// ![](https://flutter.github.io/assets-for-api-docs/material/Colors.cyan.png)
-  /// ![](https://flutter.github.io/assets-for-api-docs/material/Colors.cyanAccent.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.cyan.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.cyanAccent.png)
   ///
-  /// ![](https://flutter.github.io/assets-for-api-docs/material/Colors.lightBlue.png)
-  /// ![](https://flutter.github.io/assets-for-api-docs/material/Colors.lightBlueAccent.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.lightBlue.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.lightBlueAccent.png)
   ///
-  /// ![](https://flutter.github.io/assets-for-api-docs/material/Colors.teal.png)
-  /// ![](https://flutter.github.io/assets-for-api-docs/material/Colors.tealAccent.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.teal.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.tealAccent.png)
   ///
-  /// ![](https://flutter.github.io/assets-for-api-docs/material/Colors.blueGrey.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.blueGrey.png)
   ///
   /// ## Sample code
   ///
@@ -980,14 +980,14 @@ class Colors {
 
   /// The cyan accent color and swatch.
   ///
-  /// ![](https://flutter.github.io/assets-for-api-docs/material/Colors.cyan.png)
-  /// ![](https://flutter.github.io/assets-for-api-docs/material/Colors.cyanAccent.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.cyan.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.cyanAccent.png)
   ///
-  /// ![](https://flutter.github.io/assets-for-api-docs/material/Colors.lightBlue.png)
-  /// ![](https://flutter.github.io/assets-for-api-docs/material/Colors.lightBlueAccent.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.lightBlue.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.lightBlueAccent.png)
   ///
-  /// ![](https://flutter.github.io/assets-for-api-docs/material/Colors.teal.png)
-  /// ![](https://flutter.github.io/assets-for-api-docs/material/Colors.tealAccent.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.teal.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.tealAccent.png)
   ///
   /// ## Sample code
   ///
@@ -1017,14 +1017,14 @@ class Colors {
 
   /// The teal primary color and swatch.
   ///
-  /// ![](https://flutter.github.io/assets-for-api-docs/material/Colors.teal.png)
-  /// ![](https://flutter.github.io/assets-for-api-docs/material/Colors.tealAccent.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.teal.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.tealAccent.png)
   ///
-  /// ![](https://flutter.github.io/assets-for-api-docs/material/Colors.green.png)
-  /// ![](https://flutter.github.io/assets-for-api-docs/material/Colors.greenAccent.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.green.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.greenAccent.png)
   ///
-  /// ![](https://flutter.github.io/assets-for-api-docs/material/Colors.cyan.png)
-  /// ![](https://flutter.github.io/assets-for-api-docs/material/Colors.cyanAccent.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.cyan.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.cyanAccent.png)
   ///
   /// ## Sample code
   ///
@@ -1060,14 +1060,14 @@ class Colors {
 
   /// The teal accent color and swatch.
   ///
-  /// ![](https://flutter.github.io/assets-for-api-docs/material/Colors.teal.png)
-  /// ![](https://flutter.github.io/assets-for-api-docs/material/Colors.tealAccent.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.teal.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.tealAccent.png)
   ///
-  /// ![](https://flutter.github.io/assets-for-api-docs/material/Colors.green.png)
-  /// ![](https://flutter.github.io/assets-for-api-docs/material/Colors.greenAccent.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.green.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.greenAccent.png)
   ///
-  /// ![](https://flutter.github.io/assets-for-api-docs/material/Colors.cyan.png)
-  /// ![](https://flutter.github.io/assets-for-api-docs/material/Colors.cyanAccent.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.cyan.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.cyanAccent.png)
   ///
   /// ## Sample code
   ///
@@ -1097,17 +1097,17 @@ class Colors {
 
   /// The green primary color and swatch.
   ///
-  /// ![](https://flutter.github.io/assets-for-api-docs/material/Colors.green.png)
-  /// ![](https://flutter.github.io/assets-for-api-docs/material/Colors.greenAccent.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.green.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.greenAccent.png)
   ///
-  /// ![](https://flutter.github.io/assets-for-api-docs/material/Colors.teal.png)
-  /// ![](https://flutter.github.io/assets-for-api-docs/material/Colors.tealAccent.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.teal.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.tealAccent.png)
   ///
-  /// ![](https://flutter.github.io/assets-for-api-docs/material/Colors.lightGreen.png)
-  /// ![](https://flutter.github.io/assets-for-api-docs/material/Colors.lightGreenAccent.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.lightGreen.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.lightGreenAccent.png)
   ///
-  /// ![](https://flutter.github.io/assets-for-api-docs/material/Colors.lime.png)
-  /// ![](https://flutter.github.io/assets-for-api-docs/material/Colors.limeAccent.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.lime.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.limeAccent.png)
   ///
   /// ## Sample code
   ///
@@ -1143,17 +1143,17 @@ class Colors {
 
   /// The green accent color and swatch.
   ///
-  /// ![](https://flutter.github.io/assets-for-api-docs/material/Colors.green.png)
-  /// ![](https://flutter.github.io/assets-for-api-docs/material/Colors.greenAccent.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.green.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.greenAccent.png)
   ///
-  /// ![](https://flutter.github.io/assets-for-api-docs/material/Colors.teal.png)
-  /// ![](https://flutter.github.io/assets-for-api-docs/material/Colors.tealAccent.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.teal.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.tealAccent.png)
   ///
-  /// ![](https://flutter.github.io/assets-for-api-docs/material/Colors.lightGreen.png)
-  /// ![](https://flutter.github.io/assets-for-api-docs/material/Colors.lightGreenAccent.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.lightGreen.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.lightGreenAccent.png)
   ///
-  /// ![](https://flutter.github.io/assets-for-api-docs/material/Colors.lime.png)
-  /// ![](https://flutter.github.io/assets-for-api-docs/material/Colors.limeAccent.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.lime.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.limeAccent.png)
   ///
   /// ## Sample code
   ///
@@ -1183,14 +1183,14 @@ class Colors {
 
   /// The light green primary color and swatch.
   ///
-  /// ![](https://flutter.github.io/assets-for-api-docs/material/Colors.lightGreen.png)
-  /// ![](https://flutter.github.io/assets-for-api-docs/material/Colors.lightGreenAccent.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.lightGreen.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.lightGreenAccent.png)
   ///
-  /// ![](https://flutter.github.io/assets-for-api-docs/material/Colors.green.png)
-  /// ![](https://flutter.github.io/assets-for-api-docs/material/Colors.greenAccent.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.green.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.greenAccent.png)
   ///
-  /// ![](https://flutter.github.io/assets-for-api-docs/material/Colors.lime.png)
-  /// ![](https://flutter.github.io/assets-for-api-docs/material/Colors.limeAccent.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.lime.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.limeAccent.png)
   ///
   /// ## Sample code
   ///
@@ -1226,14 +1226,14 @@ class Colors {
 
   /// The light green accent color and swatch.
   ///
-  /// ![](https://flutter.github.io/assets-for-api-docs/material/Colors.lightGreen.png)
-  /// ![](https://flutter.github.io/assets-for-api-docs/material/Colors.lightGreenAccent.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.lightGreen.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.lightGreenAccent.png)
   ///
-  /// ![](https://flutter.github.io/assets-for-api-docs/material/Colors.green.png)
-  /// ![](https://flutter.github.io/assets-for-api-docs/material/Colors.greenAccent.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.green.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.greenAccent.png)
   ///
-  /// ![](https://flutter.github.io/assets-for-api-docs/material/Colors.lime.png)
-  /// ![](https://flutter.github.io/assets-for-api-docs/material/Colors.limeAccent.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.lime.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.limeAccent.png)
   ///
   /// ## Sample code
   ///
@@ -1263,14 +1263,14 @@ class Colors {
 
   /// The lime primary color and swatch.
   ///
-  /// ![](https://flutter.github.io/assets-for-api-docs/material/Colors.lime.png)
-  /// ![](https://flutter.github.io/assets-for-api-docs/material/Colors.limeAccent.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.lime.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.limeAccent.png)
   ///
-  /// ![](https://flutter.github.io/assets-for-api-docs/material/Colors.lightGreen.png)
-  /// ![](https://flutter.github.io/assets-for-api-docs/material/Colors.lightGreenAccent.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.lightGreen.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.lightGreenAccent.png)
   ///
-  /// ![](https://flutter.github.io/assets-for-api-docs/material/Colors.yellow.png)
-  /// ![](https://flutter.github.io/assets-for-api-docs/material/Colors.yellowAccent.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.yellow.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.yellowAccent.png)
   ///
   /// ## Sample code
   ///
@@ -1306,14 +1306,14 @@ class Colors {
 
   /// The lime accent primary color and swatch.
   ///
-  /// ![](https://flutter.github.io/assets-for-api-docs/material/Colors.lime.png)
-  /// ![](https://flutter.github.io/assets-for-api-docs/material/Colors.limeAccent.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.lime.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.limeAccent.png)
   ///
-  /// ![](https://flutter.github.io/assets-for-api-docs/material/Colors.lightGreen.png)
-  /// ![](https://flutter.github.io/assets-for-api-docs/material/Colors.lightGreenAccent.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.lightGreen.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.lightGreenAccent.png)
   ///
-  /// ![](https://flutter.github.io/assets-for-api-docs/material/Colors.yellow.png)
-  /// ![](https://flutter.github.io/assets-for-api-docs/material/Colors.yellowAccent.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.yellow.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.yellowAccent.png)
   ///
   /// ## Sample code
   ///
@@ -1343,14 +1343,14 @@ class Colors {
 
   /// The yellow primary color and swatch.
   ///
-  /// ![](https://flutter.github.io/assets-for-api-docs/material/Colors.yellow.png)
-  /// ![](https://flutter.github.io/assets-for-api-docs/material/Colors.yellowAccent.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.yellow.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.yellowAccent.png)
   ///
-  /// ![](https://flutter.github.io/assets-for-api-docs/material/Colors.lime.png)
-  /// ![](https://flutter.github.io/assets-for-api-docs/material/Colors.limeAccent.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.lime.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.limeAccent.png)
   ///
-  /// ![](https://flutter.github.io/assets-for-api-docs/material/Colors.amber.png)
-  /// ![](https://flutter.github.io/assets-for-api-docs/material/Colors.amberAccent.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.amber.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.amberAccent.png)
   ///
   /// ## Sample code
   ///
@@ -1386,14 +1386,14 @@ class Colors {
 
   /// The yellow accent color and swatch.
   ///
-  /// ![](https://flutter.github.io/assets-for-api-docs/material/Colors.yellow.png)
-  /// ![](https://flutter.github.io/assets-for-api-docs/material/Colors.yellowAccent.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.yellow.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.yellowAccent.png)
   ///
-  /// ![](https://flutter.github.io/assets-for-api-docs/material/Colors.lime.png)
-  /// ![](https://flutter.github.io/assets-for-api-docs/material/Colors.limeAccent.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.lime.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.limeAccent.png)
   ///
-  /// ![](https://flutter.github.io/assets-for-api-docs/material/Colors.amber.png)
-  /// ![](https://flutter.github.io/assets-for-api-docs/material/Colors.amberAccent.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.amber.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.amberAccent.png)
   ///
   /// ## Sample code
   ///
@@ -1423,14 +1423,14 @@ class Colors {
 
   /// The amber primary color and swatch.
   ///
-  /// ![](https://flutter.github.io/assets-for-api-docs/material/Colors.amber.png)
-  /// ![](https://flutter.github.io/assets-for-api-docs/material/Colors.amberAccent.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.amber.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.amberAccent.png)
   ///
-  /// ![](https://flutter.github.io/assets-for-api-docs/material/Colors.yellow.png)
-  /// ![](https://flutter.github.io/assets-for-api-docs/material/Colors.yellowAccent.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.yellow.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.yellowAccent.png)
   ///
-  /// ![](https://flutter.github.io/assets-for-api-docs/material/Colors.orange.png)
-  /// ![](https://flutter.github.io/assets-for-api-docs/material/Colors.orangeAccent.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.orange.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.orangeAccent.png)
   ///
   /// ## Sample code
   ///
@@ -1466,14 +1466,14 @@ class Colors {
 
   /// The amber accent color and swatch.
   ///
-  /// ![](https://flutter.github.io/assets-for-api-docs/material/Colors.amber.png)
-  /// ![](https://flutter.github.io/assets-for-api-docs/material/Colors.amberAccent.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.amber.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.amberAccent.png)
   ///
-  /// ![](https://flutter.github.io/assets-for-api-docs/material/Colors.yellow.png)
-  /// ![](https://flutter.github.io/assets-for-api-docs/material/Colors.yellowAccent.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.yellow.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.yellowAccent.png)
   ///
-  /// ![](https://flutter.github.io/assets-for-api-docs/material/Colors.orange.png)
-  /// ![](https://flutter.github.io/assets-for-api-docs/material/Colors.orangeAccent.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.orange.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.orangeAccent.png)
   ///
   /// ## Sample code
   ///
@@ -1503,16 +1503,16 @@ class Colors {
 
   /// The orange primary color and swatch.
   ///
-  /// ![](https://flutter.github.io/assets-for-api-docs/material/Colors.orange.png)
-  /// ![](https://flutter.github.io/assets-for-api-docs/material/Colors.orangeAccent.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.orange.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.orangeAccent.png)
   ///
-  /// ![](https://flutter.github.io/assets-for-api-docs/material/Colors.amber.png)
-  /// ![](https://flutter.github.io/assets-for-api-docs/material/Colors.amberAccent.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.amber.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.amberAccent.png)
   ///
-  /// ![](https://flutter.github.io/assets-for-api-docs/material/Colors.deepOrange.png)
-  /// ![](https://flutter.github.io/assets-for-api-docs/material/Colors.deepOrangeAccent.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.deepOrange.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.deepOrangeAccent.png)
   ///
-  /// ![](https://flutter.github.io/assets-for-api-docs/material/Colors.brown.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.brown.png)
   ///
   /// ## Sample code
   ///
@@ -1548,14 +1548,14 @@ class Colors {
 
   /// The orange accent color and swatch.
   ///
-  /// ![](https://flutter.github.io/assets-for-api-docs/material/Colors.orange.png)
-  /// ![](https://flutter.github.io/assets-for-api-docs/material/Colors.orangeAccent.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.orange.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.orangeAccent.png)
   ///
-  /// ![](https://flutter.github.io/assets-for-api-docs/material/Colors.amber.png)
-  /// ![](https://flutter.github.io/assets-for-api-docs/material/Colors.amberAccent.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.amber.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.amberAccent.png)
   ///
-  /// ![](https://flutter.github.io/assets-for-api-docs/material/Colors.deepOrange.png)
-  /// ![](https://flutter.github.io/assets-for-api-docs/material/Colors.deepOrangeAccent.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.deepOrange.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.deepOrangeAccent.png)
   ///
   /// ## Sample code
   ///
@@ -1585,16 +1585,16 @@ class Colors {
 
   /// The deep orange primary color and swatch.
   ///
-  /// ![](https://flutter.github.io/assets-for-api-docs/material/Colors.deepOrange.png)
-  /// ![](https://flutter.github.io/assets-for-api-docs/material/Colors.deepOrangeAccent.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.deepOrange.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.deepOrangeAccent.png)
   ///
-  /// ![](https://flutter.github.io/assets-for-api-docs/material/Colors.orange.png)
-  /// ![](https://flutter.github.io/assets-for-api-docs/material/Colors.orangeAccent.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.orange.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.orangeAccent.png)
   ///
-  /// ![](https://flutter.github.io/assets-for-api-docs/material/Colors.red.png)
-  /// ![](https://flutter.github.io/assets-for-api-docs/material/Colors.redAccent.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.red.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.redAccent.png)
   ///
-  /// ![](https://flutter.github.io/assets-for-api-docs/material/Colors.brown.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.brown.png)
   ///
   /// ## Sample code
   ///
@@ -1630,14 +1630,14 @@ class Colors {
 
   /// The deep orange accent color and swatch.
   ///
-  /// ![](https://flutter.github.io/assets-for-api-docs/material/Colors.deepOrange.png)
-  /// ![](https://flutter.github.io/assets-for-api-docs/material/Colors.deepOrangeAccent.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.deepOrange.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.deepOrangeAccent.png)
   ///
-  /// ![](https://flutter.github.io/assets-for-api-docs/material/Colors.orange.png)
-  /// ![](https://flutter.github.io/assets-for-api-docs/material/Colors.orangeAccent.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.orange.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.orangeAccent.png)
   ///
-  /// ![](https://flutter.github.io/assets-for-api-docs/material/Colors.red.png)
-  /// ![](https://flutter.github.io/assets-for-api-docs/material/Colors.redAccent.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.red.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.redAccent.png)
   ///
   /// ## Sample code
   ///
@@ -1667,11 +1667,11 @@ class Colors {
 
   /// The brown primary color and swatch.
   ///
-  /// ![](https://flutter.github.io/assets-for-api-docs/material/Colors.brown.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.brown.png)
   ///
-  /// ![](https://flutter.github.io/assets-for-api-docs/material/Colors.orange.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.orange.png)
   ///
-  /// ![](https://flutter.github.io/assets-for-api-docs/material/Colors.blueGrey.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.blueGrey.png)
   ///
   /// This swatch has no corresponding accent color and swatch.
   ///
@@ -1708,11 +1708,11 @@ class Colors {
 
   /// The grey primary color and swatch.
   ///
-  /// ![](https://flutter.github.io/assets-for-api-docs/material/Colors.grey.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.grey.png)
   ///
-  /// ![](https://flutter.github.io/assets-for-api-docs/material/Colors.blueGrey.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.blueGrey.png)
   ///
-  /// ![](https://flutter.github.io/assets-for-api-docs/material/Colors.brown.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.brown.png)
   ///
   /// This swatch has no corresponding accent swatch.
   ///
@@ -1758,13 +1758,13 @@ class Colors {
 
   /// The blue-grey primary color and swatch.
   ///
-  /// ![](https://flutter.github.io/assets-for-api-docs/material/Colors.blueGrey.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.blueGrey.png)
   ///
-  /// ![](https://flutter.github.io/assets-for-api-docs/material/Colors.grey.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.grey.png)
   ///
-  /// ![](https://flutter.github.io/assets-for-api-docs/material/Colors.cyan.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.cyan.png)
   ///
-  /// ![](https://flutter.github.io/assets-for-api-docs/material/Colors.blue.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.blue.png)
   ///
   /// This swatch has no corresponding accent swatch.
   ///

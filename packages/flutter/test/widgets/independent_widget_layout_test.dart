@@ -100,7 +100,7 @@ class TestFocusable extends StatefulWidget {
   const TestFocusable({
     Key key,
     this.focusNode,
-    this.autofocus: true,
+    this.autofocus = true,
   }) : super(key: key);
 
   final bool autofocus;

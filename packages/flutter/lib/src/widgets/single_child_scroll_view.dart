@@ -185,8 +185,8 @@ class SingleChildScrollView extends StatelessWidget {
   /// Creates a box in which a single widget can be scrolled.
   SingleChildScrollView({
     Key key,
-    this.scrollDirection: Axis.vertical,
-    this.reverse: false,
+    this.scrollDirection = Axis.vertical,
+    this.reverse = false,
     this.padding,
     bool primary,
     this.physics,
@@ -293,7 +293,7 @@ class SingleChildScrollView extends StatelessWidget {
 class _SingleChildViewport extends SingleChildRenderObjectWidget {
   const _SingleChildViewport({
     Key key,
-    this.axisDirection: AxisDirection.down,
+    this.axisDirection = AxisDirection.down,
     this.offset,
     Widget child,
   }) : assert(axisDirection != null),
@@ -321,9 +321,9 @@ class _SingleChildViewport extends SingleChildRenderObjectWidget {
 
 class _RenderSingleChildViewport extends RenderBox with RenderObjectWithChildMixin<RenderBox> implements RenderAbstractViewport {
   _RenderSingleChildViewport({
-    AxisDirection axisDirection: AxisDirection.down,
+    AxisDirection axisDirection = AxisDirection.down,
     @required ViewportOffset offset,
-    double cacheExtent: RenderAbstractViewport.defaultCacheExtent,
+    double cacheExtent = RenderAbstractViewport.defaultCacheExtent,
     RenderBox child,
   }) : assert(axisDirection != null),
        assert(offset != null),
@@ -586,19 +586,7 @@ class _RenderSingleChildViewport extends RenderBox with RenderObjectWithChildMix
 
   @override
   void showOnScreen([RenderObject child]) {
-    // Logic duplicated in [RenderViewportBase.showOnScreen].
-    if (child != null) {
-      // Move viewport the smallest distance to bring [child] on screen.
-      final double leadingEdgeOffset = getOffsetToReveal(child, 0.0);
-      final double trailingEdgeOffset = getOffsetToReveal(child, 1.0);
-      final double currentOffset = offset.pixels;
-      if ((currentOffset - leadingEdgeOffset).abs() < (currentOffset - trailingEdgeOffset).abs()) {
-        offset.jumpTo(leadingEdgeOffset);
-      } else {
-        offset.jumpTo(trailingEdgeOffset);
-      }
-    }
-
+    RenderViewportBase.showInViewport(child: child, viewport: this, offset: offset);
     // Make sure the viewport itself is on screen.
     super.showOnScreen();
   }
