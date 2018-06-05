@@ -195,6 +195,7 @@ class CupertinoSliverNavigationBar extends StatelessWidget {
     this.automaticallyImplyLeading = true,
     this.middle,
     this.trailing,
+    this.border = _kDefaultNavBarBorder,
     this.backgroundColor = _kDefaultNavBarBackgroundColor,
     this.actionsForegroundColor = CupertinoColors.activeBlue,
   }) : assert(largeTitle != null),
@@ -245,6 +246,11 @@ class CupertinoSliverNavigationBar extends StatelessWidget {
   /// This widget is visible in both collapsed and expanded states.
   final Widget trailing;
 
+  /// The border of the navigation bar. By default renders a single pixel bottom border side.
+  ///
+  /// If a border is null, the navigation bar will not display a border.
+  final Border border;
+
   /// The background color of the navigation bar. If it contains transparency, the
   /// tab bar will automatically produce a blurring effect to the content
   /// behind it.
@@ -271,6 +277,7 @@ class CupertinoSliverNavigationBar extends StatelessWidget {
         automaticallyImplyLeading: automaticallyImplyLeading,
         middle: middle,
         trailing: trailing,
+        border: border,
         backgroundColor: backgroundColor,
         actionsForegroundColor: actionsForegroundColor,
       ),
@@ -447,8 +454,8 @@ class _CupertinoLargeTitleNavigationBarSliverDelegate
     this.automaticallyImplyLeading,
     this.middle,
     this.trailing,
-    this.border = _kDefaultNavBarBorder,
-    this.backgroundColor = _kDefaultNavBarBackgroundColor,
+    this.border,
+    this.backgroundColor,
     this.actionsForegroundColor,
   }) : assert(persistentHeight != null);
 
@@ -552,6 +559,7 @@ class _CupertinoLargeTitleNavigationBarSliverDelegate
         || leading != oldDelegate.leading
         || middle != oldDelegate.middle
         || trailing != oldDelegate.trailing
+        || border != oldDelegate.border
         || backgroundColor != oldDelegate.backgroundColor
         || actionsForegroundColor != oldDelegate.actionsForegroundColor;
   }
