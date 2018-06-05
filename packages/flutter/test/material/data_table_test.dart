@@ -11,7 +11,7 @@ void main() {
   testWidgets('DataTable control test', (WidgetTester tester) async {
     final List<String> log = <String>[];
 
-    Widget buildTable({ int sortColumnIndex, bool sortAscending: true }) {
+    Widget buildTable({ int sortColumnIndex, bool sortAscending = true }) {
       return new DataTable(
         sortColumnIndex: sortColumnIndex,
         sortAscending: sortAscending,

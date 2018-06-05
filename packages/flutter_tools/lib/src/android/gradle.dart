@@ -141,7 +141,7 @@ void handleKnownGradleExceptions(String exceptionString) {
   }
 }
 
-String _locateProjectGradlew({ bool ensureExecutable: true }) {
+String _locateProjectGradlew({ bool ensureExecutable = true }) {
   final String path = fs.path.join(
     'android',
     platform.isWindows ? 'gradlew.bat' : 'gradlew',

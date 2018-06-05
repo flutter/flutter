@@ -31,7 +31,7 @@ const Map<String, String> _kManuallyPinnedDependencies = const <String, String>{
 };
 
 class UpdatePackagesCommand extends FlutterCommand {
-  UpdatePackagesCommand({ this.hidden: false }) {
+  UpdatePackagesCommand({ this.hidden = false }) {
     argParser
       ..addFlag(
         'force-upgrade',

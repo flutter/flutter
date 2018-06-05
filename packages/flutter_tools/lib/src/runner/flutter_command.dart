@@ -141,7 +141,7 @@ abstract class FlutterCommand extends Command<Null> {
         valueHelp: 'x.y.z');
   }
 
-  void addBuildModeFlags({bool defaultToRelease: true}) {
+  void addBuildModeFlags({bool defaultToRelease = true}) {
     defaultBuildMode = defaultToRelease ? BuildMode.release : BuildMode.debug;
 
     argParser.addFlag('debug',

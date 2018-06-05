@@ -48,8 +48,8 @@ class ScrollController extends ChangeNotifier {
   ///
   /// The values of `initialScrollOffset` and `keepScrollOffset` must not be null.
   ScrollController({
-    double initialScrollOffset: 0.0,
-    this.keepScrollOffset: true,
+    double initialScrollOffset = 0.0,
+    this.keepScrollOffset = true,
     this.debugLabel,
   }) : assert(initialScrollOffset != null),
        assert(keepScrollOffset != null),
@@ -315,8 +315,8 @@ class TrackingScrollController extends ScrollController {
   /// Creates a scroll controller that continually updates its
   /// [initialScrollOffset] to match the last scroll notification it received.
   TrackingScrollController({
-    double initialScrollOffset: 0.0,
-    bool keepScrollOffset: true,
+    double initialScrollOffset = 0.0,
+    bool keepScrollOffset = true,
     String debugLabel,
   }) : super(initialScrollOffset: initialScrollOffset,
              keepScrollOffset: keepScrollOffset,

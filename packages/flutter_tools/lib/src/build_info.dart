@@ -11,8 +11,8 @@ import 'globals.dart';
 /// Information about a build to be performed or used.
 class BuildInfo {
   const BuildInfo(this.mode, this.flavor, {
-    this.previewDart2: false,
-    this.trackWidgetCreation: false,
+    this.previewDart2 = false,
+    this.trackWidgetCreation = false,
     this.extraFrontEndOptions,
     this.extraGenSnapshotOptions,
     this.buildSharedLibrary,

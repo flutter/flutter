@@ -36,15 +36,15 @@ class HotRunner extends ResidentRunner {
     List<FlutterDevice> devices, {
     String target,
     DebuggingOptions debuggingOptions,
-    bool usesTerminalUI: true,
-    this.benchmarkMode: false,
+    bool usesTerminalUI = true,
+    this.benchmarkMode = false,
     this.applicationBinary,
-    this.hostIsIde: false,
+    this.hostIsIde = false,
     String projectRootPath,
     String packagesFilePath,
     this.dillOutputPath,
-    bool stayResident: true,
-    bool ipv6: false,
+    bool stayResident = true,
+    bool ipv6 = false,
   }) : super(devices,
              target: target,
              debuggingOptions: debuggingOptions,
@@ -94,7 +94,7 @@ class HotRunner extends ResidentRunner {
   }
 
   Future<Null> _reloadSourcesService(String isolateId,
-      { bool force: false, bool pause: false }) async {
+      { bool force = false, bool pause = false }) async {
     // TODO(cbernaschina): check that isolateId is the id of the UI isolate.
     final OperationResult result = await restart(pauseAfterRestart: pause);
     if (!result.isOk) {
@@ -194,7 +194,7 @@ class HotRunner extends ResidentRunner {
     Completer<DebugConnectionInfo> connectionInfoCompleter,
     Completer<Null> appStartedCompleter,
     String route,
-    bool shouldBuild: true
+    bool shouldBuild = true
   }) async {
     if (!fs.isFileSync(mainPath)) {
       String message = 'Tried to run $mainPath, but that file does not exist.';
@@ -256,7 +256,7 @@ class HotRunner extends ResidentRunner {
     return devFSUris;
   }
 
-  Future<bool> _updateDevFS({ bool fullRestart: false }) async {
+  Future<bool> _updateDevFS({ bool fullRestart = false }) async {
     if (!_refreshDartDependencies()) {
       // Did not update DevFS because of a Dart source error.
       return false;
@@ -411,7 +411,7 @@ class HotRunner extends ResidentRunner {
   /// Returns [true] if the reload was successful.
   /// Prints errors if [printErrors] is [true].
   static bool validateReloadReport(Map<String, dynamic> reloadReport,
-      { bool printErrors: true }) {
+      { bool printErrors = true }) {
     if (reloadReport == null) {
       if (printErrors)
         printError('Hot reload did not receive reload report.');
@@ -449,7 +449,7 @@ class HotRunner extends ResidentRunner {
   bool get supportsRestart => true;
 
   @override
-  Future<OperationResult> restart({ bool fullRestart: false, bool pauseAfterRestart: false }) async {
+  Future<OperationResult> restart({ bool fullRestart = false, bool pauseAfterRestart = false }) async {
     if (fullRestart) {
       final Status status = logger.startProgress(
         'Performing hot restart...',
@@ -498,7 +498,7 @@ class HotRunner extends ResidentRunner {
     return path;
   }
 
-  Future<OperationResult> _reloadSources({ bool pause: false }) async {
+  Future<OperationResult> _reloadSources({ bool pause = false }) async {
     for (FlutterDevice device in flutterDevices) {
       for (FlutterView view in device.views) {
         if (view.uiIsolate == null)

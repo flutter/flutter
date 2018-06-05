@@ -9,13 +9,13 @@ import 'package:flutter_test/flutter_test.dart';
 import '../rendering/mock_canvas.dart';
 
 Widget buildInputDecorator({
-  InputDecoration decoration: const InputDecoration(),
+  InputDecoration decoration = const InputDecoration(),
   InputDecorationTheme inputDecorationTheme,
-  TextDirection textDirection: TextDirection.ltr,
-  bool isEmpty: false,
-  bool isFocused: false,
+  TextDirection textDirection = TextDirection.ltr,
+  bool isEmpty = false,
+  bool isFocused = false,
   TextStyle baseStyle,
-  Widget child: const Text(
+  Widget child = const Text(
     'text',
     style: const TextStyle(fontFamily: 'Ahem', fontSize: 16.0),
   ),

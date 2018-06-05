@@ -23,15 +23,15 @@ import 'watcher.dart';
 Future<int> runTests(
     List<String> testFiles, {
     Directory workDir,
-    List<String> names: const <String>[],
-    List<String> plainNames: const <String>[],
-    bool enableObservatory: false,
-    bool startPaused: false,
-    bool ipv6: false,
-    bool machine: false,
-    bool previewDart2: false,
-    bool trackWidgetCreation: false,
-    bool updateGoldens: false,
+    List<String> names = const <String>[],
+    List<String> plainNames = const <String>[],
+    bool enableObservatory = false,
+    bool startPaused = false,
+    bool ipv6 = false,
+    bool machine = false,
+    bool previewDart2 = false,
+    bool trackWidgetCreation = false,
+    bool updateGoldens = false,
     TestWatcher watcher,
     }) async {
   if (trackWidgetCreation && !previewDart2) {

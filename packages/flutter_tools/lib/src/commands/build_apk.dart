@@ -8,7 +8,7 @@ import '../android/apk.dart';
 import 'build.dart';
 
 class BuildApkCommand extends BuildSubCommand {
-  BuildApkCommand({bool verboseHelp: false}) {
+  BuildApkCommand({bool verboseHelp = false}) {
     usesTargetOption();
     addBuildModeFlags();
     usesFlavorOption();

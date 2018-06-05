@@ -90,7 +90,7 @@ final RegExp _certificateOrganizationalUnitExtractionPattern = new RegExp(r'OU=(
 /// project has a development team set in the project's build settings.
 Future<Map<String, String>> getCodeSigningIdentityDevelopmentTeam({
   BuildableIOSApp iosApp,
-  bool usesTerminalUi: true
+  bool usesTerminalUi = true
 }) async{
   if (iosApp.buildSettings == null)
     return null;

@@ -43,11 +43,11 @@ class GlowingOverscrollIndicator extends StatefulWidget {
   /// [notificationPredicate] arguments must not be null.
   const GlowingOverscrollIndicator({
     Key key,
-    this.showLeading: true,
-    this.showTrailing: true,
+    this.showLeading = true,
+    this.showTrailing = true,
     @required this.axisDirection,
     @required this.color,
-    this.notificationPredicate: defaultScrollNotificationPredicate,
+    this.notificationPredicate = defaultScrollNotificationPredicate,
     this.child,
   }) : assert(showLeading != null),
        assert(showTrailing != null),
