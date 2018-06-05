@@ -1037,12 +1037,15 @@ class _RenderDecoration extends RenderBox {
     }
 
     if (label != null) {
+      final double labelX = _boxParentData(label).offset.dx;
       switch (textDirection) {
         case TextDirection.rtl:
-          decoration.borderGap.start = _boxParentData(label).offset.dx + label.size.width;
+          decoration.borderGap.start = labelX + label.size.width;
           break;
         case TextDirection.ltr:
-          decoration.borderGap.start = _boxParentData(label).offset.dx;
+          // The value of _InputBorderGap.start is relative to the origin of the
+          // _BorderContainer which is inset by the icon's width.
+          decoration.borderGap.start = labelX - _boxSize(icon).width;
           break;
       }
       decoration.borderGap.extent = label.size.width * 0.75;
