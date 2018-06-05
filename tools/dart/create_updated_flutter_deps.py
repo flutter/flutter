@@ -63,7 +63,7 @@ def Main(argv):
   new_deps = ParseDepsFile(args.dart_deps)
   old_deps = ParseDepsFile(args.flutter_deps)
   for (k,v) in sorted(old_deps.iteritems()):
-    if k != 'dart_revision' and k.startswith('dart_'):
+    if k not in ('dart_revision', 'dart_git') and k.startswith('dart_'):
       v = '???'
       dart_key = k[len('dart_'):]
       updated_revision = new_deps[dart_key].lstrip('@') if new_deps.has_key(dart_key) else v
