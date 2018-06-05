@@ -345,8 +345,6 @@ void main() {
 
   testWidgets('SingleChildScrollView getOffsetToReveal - down', (WidgetTester tester) async {
     List<Widget> children;
-    ScrollController controller;
-
     await tester.pumpWidget(
       new Directionality(
         textDirection: TextDirection.ltr,
@@ -355,7 +353,7 @@ void main() {
             height: 200.0,
             width: 300.0,
             child: new SingleChildScrollView(
-              controller: controller = new ScrollController(initialScrollOffset: 300.0),
+              controller: new ScrollController(initialScrollOffset: 300.0),
               child: new Column(
                 children: children = new List<Widget>.generate(20, (int i) {
                   return new Container(
@@ -392,7 +390,7 @@ void main() {
   });
 
   testWidgets('SingleChildScrollView getOffsetToReveal - up', (WidgetTester tester) async {
-    List<Widget> children = new List<Widget>.generate(20, (int i) {
+    final List<Widget> children = new List<Widget>.generate(20, (int i) {
       return new Container(
         height: 100.0,
         width: 300.0,
@@ -439,7 +437,7 @@ void main() {
   });
 
   testWidgets('SingleChildScrollView getOffsetToReveal - right', (WidgetTester tester) async {
-    List<Widget> children = new List<Widget>.generate(20, (int i) {
+    final List<Widget> children = new List<Widget>.generate(20, (int i) {
       return new Container(
         height: 300.0,
         width: 100.0,
@@ -489,7 +487,6 @@ void main() {
 
   testWidgets('SingleChildScrollView getOffsetToReveal - left', (WidgetTester tester) async {
     List<Widget> children;
-    SingleChildScrollView scrollview;
 
     await tester.pumpWidget(
       new Directionality(
@@ -498,7 +495,7 @@ void main() {
           child: Container(
             height: 300.0,
             width: 200.0,
-            child: scrollview = new SingleChildScrollView(
+            child: new SingleChildScrollView(
               scrollDirection: Axis.horizontal,
               reverse: true,
               controller: new ScrollController(initialScrollOffset: 300.0),
