@@ -299,6 +299,28 @@ class ResidentCompiler {
     return stdoutHandler.compilerOutput.future;
   }
 
+  Future<CompilerOutput> compileExpression(String expression, List<String> definitions,
+      List<String> typeDefinitions, String libraryUri, String klass, bool isStatic) {
+    stdoutHandler.reset();
+
+    // 'compile-expression' should be invoked after compiler has been started,
+    // program was compiled.
+    if (_server == null)
+      return null;
+
+    final String inputKey = new Uuid().generateV4();
+    _server.stdin.writeln('compile-expression $inputKey');
+    _server.stdin.writeln(expression);
+    definitions?.forEach(_server.stdin.writeln);
+    _server.stdin.writeln(inputKey);
+    typeDefinitions?.forEach(_server.stdin.writeln);
+    _server.stdin.writeln(inputKey);
+    _server.stdin.writeln(libraryUri ?? '');
+    _server.stdin.writeln(klass ?? '');
+    _server.stdin.writeln(isStatic ?? false);
+
+    return stdoutHandler.compilerOutput.future;
+  }
 
   /// Should be invoked when results of compilation are accepted by the client.
   ///
