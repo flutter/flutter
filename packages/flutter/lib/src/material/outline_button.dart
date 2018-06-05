@@ -358,20 +358,24 @@ class _OutlineButtonState extends State<OutlineButton> with SingleTickerProvider
   ///
   /// If [this.borderSize] is provided and the style is none, then that is used.
   ///
-  /// Otherwise, the color and width resolve to the most specific provided
-  /// value, or the first available theme value.
+  /// Otherwise, both the color and width will attempt to assign the most
+  /// specific provided value. If there is no provided value, then the theme
+  /// value is used. If te theme value is not provided, then the baseline
+  /// material value is used.
   BorderSide _getOutline(ThemeData theme, ButtonThemeData buttonTheme) {
     if (widget.borderSide?.style == BorderStyle.none)
       return widget.borderSide;
 
-    final Color defaultColor = theme.brightness == Brightness.dark
+    // TODO(antrob): Centralize this default once surfaceColor exists.
+    final Color baselineSurfaceColor = theme.brightness == Brightness.dark
         ? Colors.white : Colors.black;
+    // TODO(antrob): Replace primaryColor with surfaceColor.
+    final Color themeColor = baselineSurfaceColor ?? theme.primaryColor;
     final Color color = widget.enabled
       ? (_pressed
-         // TODO(antrob): repalce primaryColor with surfaceColor.
-         ? widget.highlightedBorderColor ?? theme.primaryColor
-         : (widget.borderSide?.color ?? defaultColor))
-      : (widget.disabledBorderColor ?? defaultColor);
+          ? widget.highlightedBorderColor ?? themeColor
+          : (widget.borderSide?.color ?? themeColor))
+      : (widget.disabledBorderColor ?? themeColor);
 
     return new BorderSide(
       color: color,
