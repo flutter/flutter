@@ -1,4 +1,4 @@
-Signature: cb51c3fb11b21564f078c78d7d5d5bc1
+Signature: 4d42ca1224a89af70ad1eddba8af03bc
 
 UNUSED LICENSES:
 
@@ -234,7 +234,6 @@ FILE: ../../../third_party/boringssl/src/util/fipstools/testdata/x86_64-LabelRew
 FILE: ../../../third_party/boringssl/src/util/fipstools/testdata/x86_64-LabelRewrite/out.s
 FILE: ../../../third_party/boringssl/src/util/fipstools/testdata/x86_64-Sections/in.s
 FILE: ../../../third_party/boringssl/src/util/fipstools/testdata/x86_64-Sections/out.s
-FILE: ../../../third_party/dart/runtime/lib/bigint.dart
 FILE: ../../../third_party/dart/runtime/lib/bigint_patch.dart
 ----------------------------------------------------------------------------------------------------
 OpenSSL License
@@ -4474,9 +4473,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ====================================================================================================
 LIBRARY: dart
 LIBRARY: observatory_pub_packages
-ORIGIN: ../../../third_party/dart/runtime/lib/bigint.dart + ../../../third_party/dart/LICENSE
+ORIGIN: ../../../third_party/dart/runtime/lib/class_id.cc + ../../../third_party/dart/LICENSE
 TYPE: LicenseType.bsd
-FILE: ../../../third_party/dart/runtime/lib/bigint.dart
 FILE: ../../../third_party/dart/runtime/lib/class_id.cc
 FILE: ../../../third_party/dart/runtime/lib/class_id.dart
 FILE: ../../../third_party/dart/runtime/lib/convert_patch.dart
@@ -4511,7 +4509,6 @@ FILE: ../../../third_party/dart/runtime/platform/safe_stack.h
 FILE: ../../../third_party/dart/runtime/tools/verbose_gc_to_bmu.dart
 FILE: ../../../third_party/dart/runtime/vm/ast_transformer.cc
 FILE: ../../../third_party/dart/runtime/vm/ast_transformer.h
-FILE: ../../../third_party/dart/runtime/vm/bigint_test.cc
 FILE: ../../../third_party/dart/runtime/vm/bit_set_test.cc
 FILE: ../../../third_party/dart/runtime/vm/code_patcher_arm64.cc
 FILE: ../../../third_party/dart/runtime/vm/code_patcher_arm64_test.cc
@@ -5774,6 +5771,9 @@ ORIGIN: ../../../third_party/dart/runtime/bin/typed_data_utils.cc + ../../../thi
 TYPE: LicenseType.bsd
 FILE: ../../../third_party/dart/runtime/bin/typed_data_utils.cc
 FILE: ../../../third_party/dart/runtime/bin/typed_data_utils.h
+FILE: ../../../third_party/dart/runtime/vm/base64.cc
+FILE: ../../../third_party/dart/runtime/vm/base64.h
+FILE: ../../../third_party/dart/runtime/vm/base64_test.cc
 FILE: ../../../third_party/dart/runtime/vm/compiler/assembler/disassembler_kbc.cc
 FILE: ../../../third_party/dart/runtime/vm/compiler/assembler/disassembler_kbc.h
 FILE: ../../../third_party/dart/runtime/vm/compiler/backend/code_statistics.cc
@@ -6277,9 +6277,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ====================================================================================================
 LIBRARY: dart
-ORIGIN: ../../../third_party/dart/runtime/lib/bigint.dart
+ORIGIN: ../../../third_party/dart/runtime/lib/bigint_patch.dart
 TYPE: LicenseType.mit
-FILE: ../../../third_party/dart/runtime/lib/bigint.dart
 FILE: ../../../third_party/dart/runtime/lib/bigint_patch.dart
 ----------------------------------------------------------------------------------------------------
 Copyright (c) 2003-2005  Tom Wu
@@ -6315,9 +6314,8 @@ and disclaimer.
 
 ====================================================================================================
 LIBRARY: dart
-ORIGIN: ../../../third_party/dart/runtime/lib/bigint.dart + ../../../third_party/boringssl/src/LICENSE
+ORIGIN: ../../../third_party/dart/runtime/lib/bigint_patch.dart + ../../../third_party/boringssl/src/LICENSE
 TYPE: LicenseType.unknown
-FILE: ../../../third_party/dart/runtime/lib/bigint.dart
 FILE: ../../../third_party/dart/runtime/lib/bigint_patch.dart
 ----------------------------------------------------------------------------------------------------
 Copyright 2009 The Go Authors. All rights reserved.
