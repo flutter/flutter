@@ -1446,7 +1446,7 @@ void main() {
                 child: new InputDecorator(
                   isFocused: true,
                   isEmpty: true,
-                  decoration: new InputDecoration(
+                  decoration: const InputDecoration(
                     icon: const Icon(Icons.insert_link),
                     labelText: 'primaryLink',
                     hintText: 'Primary link to story',
