@@ -69,8 +69,8 @@ class OutlineButton extends StatefulWidget {
     this.padding,
     this.shape,
     this.child,
-  })  : assert(highlightElevation != null && highlightElevation >= 0.0),
-        super(key: key);
+  }) : assert(highlightElevation != null && highlightElevation >= 0.0),
+       super(key: key);
 
   /// Create an outline button from a pair of widgets that serve as the button's
   /// [icon] and [label].
@@ -95,19 +95,19 @@ class OutlineButton extends StatefulWidget {
     this.shape,
     @required Widget icon,
     @required Widget label,
-  })  : assert(highlightElevation != null && highlightElevation >= 0.0),
-        assert(icon != null),
-        assert(label != null),
-        padding = const EdgeInsetsDirectional.only(start: 12.0, end: 16.0),
-        child = new Row(
-          mainAxisSize: MainAxisSize.min,
-          children: <Widget>[
-            icon,
-            const SizedBox(width: 8.0),
-            label,
-          ],
-        ),
-        super(key: key);
+  }) : assert(highlightElevation != null && highlightElevation >= 0.0),
+       assert(icon != null),
+       assert(label != null),
+       padding = const EdgeInsetsDirectional.only(start: 12.0, end: 16.0),
+       child = new Row(
+         mainAxisSize: MainAxisSize.min,
+         children: <Widget>[
+           icon,
+           const SizedBox(width: 8.0),
+           label,
+         ],
+       ),
+       super(key: key);
 
   /// Called when the button is tapped or otherwise activated.
   ///
@@ -237,47 +237,27 @@ class OutlineButton extends StatefulWidget {
   @override
   _OutlineButtonState createState() => new _OutlineButtonState();
 
+
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(new ObjectFlagProperty<VoidCallback>('onPressed', onPressed,
-        ifNull: 'disabled'));
-    properties.add(new DiagnosticsProperty<ButtonTextTheme>(
-        'textTheme', textTheme,
-        defaultValue: null));
-    properties.add(new DiagnosticsProperty<Color>('textColor', textColor,
-        defaultValue: null));
-    properties.add(new DiagnosticsProperty<Color>(
-        'disabledTextColor', disabledTextColor,
-        defaultValue: null));
-    properties.add(
-        new DiagnosticsProperty<Color>('color', color, defaultValue: null));
-    properties.add(new DiagnosticsProperty<Color>(
-        'highlightColor', highlightColor,
-        defaultValue: null));
-    properties.add(new DiagnosticsProperty<Color>('splashColor', splashColor,
-        defaultValue: null));
-    properties.add(new DiagnosticsProperty<double>(
-        'highlightElevation', highlightElevation,
-        defaultValue: 2.0));
-    properties.add(new DiagnosticsProperty<BorderSide>('borderSide', borderSide,
-        defaultValue: null));
-    properties.add(new DiagnosticsProperty<Color>(
-        'disabledBorderColor', disabledBorderColor,
-        defaultValue: null));
-    properties.add(new DiagnosticsProperty<Color>(
-        'highlightedBorderColor', highlightedBorderColor,
-        defaultValue: null));
-    properties.add(new DiagnosticsProperty<EdgeInsetsGeometry>(
-        'padding', padding,
-        defaultValue: null));
-    properties.add(new DiagnosticsProperty<ShapeBorder>('shape', shape,
-        defaultValue: null));
+    properties.add(new ObjectFlagProperty<VoidCallback>('onPressed', onPressed, ifNull: 'disabled'));
+    properties.add(new DiagnosticsProperty<ButtonTextTheme>('textTheme', textTheme, defaultValue: null));
+    properties.add(new DiagnosticsProperty<Color>('textColor', textColor, defaultValue: null));
+    properties.add(new DiagnosticsProperty<Color>('disabledTextColor', disabledTextColor, defaultValue: null));
+    properties.add(new DiagnosticsProperty<Color>('color', color, defaultValue: null));
+    properties.add(new DiagnosticsProperty<Color>('highlightColor', highlightColor, defaultValue: null));
+    properties.add(new DiagnosticsProperty<Color>('splashColor', splashColor, defaultValue: null));
+    properties.add(new DiagnosticsProperty<double>('highlightElevation', highlightElevation, defaultValue: 2.0));
+    properties.add(new DiagnosticsProperty<BorderSide>('borderSide', borderSide, defaultValue: null));
+    properties.add(new DiagnosticsProperty<Color>('disabledBorderColor', disabledBorderColor, defaultValue: null));
+    properties.add(new DiagnosticsProperty<Color>('highlightedBorderColor', highlightedBorderColor, defaultValue: null));
+    properties.add(new DiagnosticsProperty<EdgeInsetsGeometry>('padding', padding, defaultValue: null));
+    properties.add(new DiagnosticsProperty<ShapeBorder>('shape', shape, defaultValue: null));
   }
 }
 
-class _OutlineButtonState extends State<OutlineButton>
-    with SingleTickerProviderStateMixin {
+class _OutlineButtonState extends State<OutlineButton> with SingleTickerProviderStateMixin {
   AnimationController _controller;
   Animation<double> _fillAnimation;
   Animation<double> _elevationAnimation;
@@ -294,13 +274,13 @@ class _OutlineButtonState extends State<OutlineButton>
     // button's fill is translucent, because the shadow fills the interior
     // of the button.
 
-    _controller =
-        new AnimationController(duration: _kPressDuration, vsync: this);
+    _controller = new AnimationController(
+      duration: _kPressDuration,
+      vsync: this
+    );
     _fillAnimation = new CurvedAnimation(
       parent: _controller,
-      curve: const Interval(
-        0.0,
-        0.5,
+      curve: const Interval(0.0, 0.5,
         curve: Curves.fastOutSlowIn,
       ),
     );
@@ -323,30 +303,33 @@ class _OutlineButtonState extends State<OutlineButton>
 
   // TODO(hmuller): this method is the same as FlatButton
   Color _getTextColor(ThemeData theme, ButtonThemeData buttonTheme) {
-    final Color color =
-        widget.enabled ? widget.textColor : widget.disabledTextColor;
-    if (color != null) return color;
+    final Color color = widget.enabled ? widget.textColor : widget.disabledTextColor;
+    if (color != null)
+      return color;
 
     final bool themeIsDark = theme.brightness == Brightness.dark;
     switch (_getTextTheme(buttonTheme)) {
       case ButtonTextTheme.normal:
         return widget.enabled
-            ? (themeIsDark ? Colors.white : Colors.black87)
-            : theme.disabledColor;
+          ? (themeIsDark ? Colors.white : Colors.black87)
+          : theme.disabledColor;
       case ButtonTextTheme.accent:
-        return widget.enabled ? theme.accentColor : theme.disabledColor;
+        return widget.enabled
+          ? theme.accentColor
+          : theme.disabledColor;
       case ButtonTextTheme.primary:
         return widget.enabled
-            ? theme.buttonColor
-            : (themeIsDark ? Colors.white30 : Colors.black38);
+          ? theme.buttonColor
+          : (themeIsDark ? Colors.white30 : Colors.black38);
     }
     return null;
   }
 
   Color _getFillColor(ThemeData theme) {
     final bool themeIsDark = theme.brightness == Brightness.dark;
-    final Color color = widget.color ??
-        (themeIsDark ? const Color(0x00000000) : const Color(0x00FFFFFF));
+    final Color color = widget.color ?? (themeIsDark
+      ? const Color(0x00000000)
+      : const Color(0x00FFFFFF));
     final Tween<Color> colorTween = new ColorTween(
       begin: color.withAlpha(0x00),
       end: color.withAlpha(0xFF),
@@ -356,7 +339,8 @@ class _OutlineButtonState extends State<OutlineButton>
 
   // TODO(hmuller): this method is the same as FlatButton
   Color _getSplashColor(ThemeData theme, ButtonThemeData buttonTheme) {
-    if (widget.splashColor != null) return widget.splashColor;
+    if (widget.splashColor != null)
+      return widget.splashColor;
 
     switch (_getTextTheme(buttonTheme)) {
       case ButtonTextTheme.normal:
@@ -364,8 +348,8 @@ class _OutlineButtonState extends State<OutlineButton>
         return theme.splashColor;
       case ButtonTextTheme.primary:
         return theme.brightness == Brightness.dark
-            ? Colors.white12
-            : theme.primaryColor.withOpacity(0.12);
+          ? Colors.white12
+          : theme.primaryColor.withOpacity(0.12);
     }
     return Colors.transparent;
   }
@@ -374,24 +358,20 @@ class _OutlineButtonState extends State<OutlineButton>
   ///
   /// If [this.borderSize] is provided and the style is none, then that is used.
   ///
-  /// Else, the color and width resolve to the most specific provided value,
-  /// or the first available theme value.
+  /// Otherwise, the color and width resolve to the most specific provided
+  /// value, or the first available theme value.
   BorderSide _getOutline(ThemeData theme, ButtonThemeData buttonTheme) {
-    if (widget.borderSide?.style == BorderStyle.none) return widget.borderSide;
+    if (widget.borderSide?.style == BorderStyle.none)
+      return widget.borderSide;
 
-    Color color = widget.borderSide?.color;
-    if (_pressed) {
-      color = widget.highlightedBorderColor ?? color;
-    }
-    if (!widget.enabled) {
-      color = widget.disabledBorderColor ?? color;
-    }
-
-    // TODO(hmuller): should pull from a material theme default constant
-    final Color defaultColor =
-        theme.brightness == Brightness.dark ? Colors.white : Colors.black;
-    // TODO(hmuller): insert theme.surfaceColor ?? before defaultColor
-    color ??= defaultColor;
+    final Color defaultColor = theme.brightness == Brightness.dark
+        ? Colors.white : Colors.black;
+    final Color color = widget.enabled
+      ? (_pressed
+         // TODO(antrob): repalce primaryColor with surfaceColor.
+         ? widget.highlightedBorderColor ?? theme.primaryColor
+         : (widget.borderSide?.color ?? defaultColor))
+      : (widget.disabledBorderColor ?? defaultColor);
 
     return new BorderSide(
       color: color,
@@ -455,8 +435,8 @@ class _OutlineBorder extends ShapeBorder {
   const _OutlineBorder({
     @required this.shape,
     @required this.side,
-  })  : assert(shape != null),
-        assert(side != null);
+  }) : assert(shape != null),
+       assert(side != null);
 
   final ShapeBorder shape;
   final BorderSide side;
@@ -499,18 +479,17 @@ class _OutlineBorder extends ShapeBorder {
   }
 
   @override
-  Path getInnerPath(Rect rect, {TextDirection textDirection}) {
-    return shape.getInnerPath(rect.deflate(side.width),
-        textDirection: textDirection);
+  Path getInnerPath(Rect rect, { TextDirection textDirection }) {
+    return shape.getInnerPath(rect.deflate(side.width), textDirection: textDirection);
   }
 
   @override
-  Path getOuterPath(Rect rect, {TextDirection textDirection}) {
+  Path getOuterPath(Rect rect, { TextDirection textDirection }) {
     return shape.getOuterPath(rect, textDirection: textDirection);
   }
 
   @override
-  void paint(Canvas canvas, Rect rect, {TextDirection textDirection}) {
+  void paint(Canvas canvas, Rect rect, { TextDirection textDirection }) {
     switch (side.style) {
       case BorderStyle.none:
         break;
@@ -521,8 +500,10 @@ class _OutlineBorder extends ShapeBorder {
 
   @override
   bool operator ==(dynamic other) {
-    if (identical(this, other)) return true;
-    if (runtimeType != other.runtimeType) return false;
+    if (identical(this, other))
+      return true;
+    if (runtimeType != other.runtimeType)
+      return false;
     final _OutlineBorder typedOther = other;
     return side == typedOther.side && shape == typedOther.shape;
   }
