@@ -64,7 +64,9 @@ shared_library("flutter_shell_native") {
     "//third_party/skia",
     "//third_party/skia:gpu",
   ]
-  if (flutter_runtime_mode == "debug") {
+  if (flutter_runtime_mode == "debug" ||
+      flutter_runtime_mode == "dynamic_profile" ||
+      flutter_runtime_mode == "dynamic_release") {
     deps += [ "//third_party/dart/runtime:libdart_jit" ]
   } else {
     deps += [ "//third_party/dart/runtime:libdart_precompiled_runtime" ]

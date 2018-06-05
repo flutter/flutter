@@ -101,7 +101,9 @@ shared_library("create_flutter_framework_dylib") {
     "//third_party/skia",
     "//third_party/skia:gpu",
   ]
-  if (flutter_runtime_mode == "debug") {
+  if (flutter_runtime_mode == "debug" ||
+      flutter_runtime_mode == "dynamic_profile" ||
+      flutter_runtime_mode == "dynamic_release") {
     deps += [
       "$flutter_root/lib/snapshot",
       "//third_party/dart/runtime:libdart_jit",

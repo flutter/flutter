@@ -16,6 +16,9 @@ def get_out_dir(args):
     else:
         target_dir = ['host']
 
+    if args.dynamic:
+        target_dir.append('dynamic')
+
     target_dir.append(args.runtime_mode)
 
     if args.simulator:
@@ -23,6 +26,9 @@ def get_out_dir(args):
 
     if args.unoptimized:
         target_dir.append('unopt')
+
+    if args.target_os != 'ios' and args.interpreter:
+        target_dir.append('interpreter')
 
     if args.android_cpu != 'arm':
         target_dir.append(args.android_cpu)
@@ -64,6 +70,10 @@ def to_gn_args(args):
     if args.target_os != 'android' and args.enable_vulkan:
       raise Exception('--enable-vulkan is only supported on Android')
 
+    runtime_mode = args.runtime_mode
+    if args.dynamic and runtime_mode in ['profile', 'release']:
+      runtime_mode = 'dynamic_' + runtime_mode
+
     gn_args = {}
 
     # Skia GN args.
@@ -88,7 +98,7 @@ def to_gn_args(args):
       # The GN arg is not available in the windows toolchain.
       gn_args['enable_lto'] = enable_lto
 
-    aot = args.runtime_mode != 'debug'
+    aot = not runtime_mode in ['debug', 'dynamic_profile', 'dynamic_release']
     if args.target_os == 'android':
         gn_args['target_os'] = 'android'
     elif args.target_os == 'ios':
@@ -99,10 +109,14 @@ def to_gn_args(args):
     else:
       aot = False
 
-    if args.runtime_mode == 'debug':
+    if runtime_mode == 'debug':
         gn_args['dart_runtime_mode'] = 'develop'
+    elif runtime_mode == 'dynamic_profile':
+        gn_args['dart_runtime_mode'] = 'profile'
+    elif runtime_mode == 'dynamic_release':
+        gn_args['dart_runtime_mode'] = 'release'
     else:
-        gn_args['dart_runtime_mode'] = args.runtime_mode
+        gn_args['dart_runtime_mode'] = runtime_mode
 
     if args.target_os == 'android':
         gn_args['target_cpu'] = args.android_cpu
@@ -120,7 +134,13 @@ def to_gn_args(args):
     # On iOS Devices, use the Dart bytecode interpreter so we don't incur
     # snapshotting and linking costs of the precompiler during development.
     # We can still use the JIT on the simulator though.
-    use_dbc = args.target_os == 'ios' and not args.simulator and args.runtime_mode == 'debug'
+    can_use_dbc = runtime_mode in ['debug', 'dynamic_profile', 'dynamic_release']
+    use_dbc = args.target_os == 'ios' and not args.simulator and can_use_dbc
+    # Use dbc if it is requested on the command line and supported by the
+    # requested runtime mode.
+    if args.interpreter and not can_use_dbc:
+      raise Exception('--interpreter not supported with --runtime-mode=' + runtime_mode)
+    use_dbc = use_dbc or (args.interpreter and can_use_dbc)
     if use_dbc:
       gn_args['dart_target_arch'] = 'dbc'
     else:
@@ -145,7 +165,7 @@ def to_gn_args(args):
     if target_is_32_bit:
       gn_args["host_cpu"] = "x86"
 
-    gn_args['flutter_runtime_mode'] = args.runtime_mode
+    gn_args['flutter_runtime_mode'] = runtime_mode
     gn_args['flutter_aot'] = aot
 
     if args.target_sysroot:
@@ -186,6 +206,8 @@ def parse_args(args):
   parser.add_argument('--unoptimized', default=False, action='store_true')
 
   parser.add_argument('--runtime-mode', type=str, choices=['debug', 'profile', 'release'], default='debug')
+  parser.add_argument('--dynamic', default=False, action='store_true')
+  parser.add_argument('--interpreter', default=False, action='store_true')
 
   parser.add_argument('--target-os', type=str, choices=['android', 'ios', 'linux'])
   parser.add_argument('--android', dest='target_os', action='store_const', const='android')
