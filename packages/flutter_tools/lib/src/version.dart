@@ -240,30 +240,34 @@ class FlutterVersion {
     ///
     /// Returns null if the cached version is out-of-date or missing, and we are
     /// unable to reach the server to get the latest version.
-    Future<bool> newerFrameworkVersionAvailable() async {
+    Future<VersionCheckResult> newerFrameworkVersionAvailable() async {
       final DateTime latestFlutterCommitDate = await _getLatestAvailableFlutterVersion();
 
       if (latestFlutterCommitDate == null)
-        return null;
+        return VersionCheckResult.Unknown;
 
-      return latestFlutterCommitDate.isAfter(localFrameworkCommitDate);
+      return latestFlutterCommitDate.isAfter(localFrameworkCommitDate)
+          ? VersionCheckResult.NewVersionAvailable
+          : VersionCheckResult.VersionIsCurrent;
     }
 
     // Get whether there's a newer version on the remote. This only goes
     // to the server if we haven't checked recently so won't happen often.
     // Note: This must come before the stamp load below because it also reads/writes
     // the stamp and otherwise one will be stale.
-    final bool isNewRemoteVersion = await newerFrameworkVersionAvailable();
+    final VersionCheckResult remoteVersion = await newerFrameworkVersionAvailable();
     final VersionCheckStamp stamp = await VersionCheckStamp.load();
     final DateTime lastTimeWarningWasPrinted = stamp.lastTimeWarningWasPrinted ?? _clock.agoBy(kMaxTimeSinceLastWarning * 2);
     final bool beenAWhileSinceWarningWasPrinted = _clock.now().difference(lastTimeWarningWasPrinted) > kMaxTimeSinceLastWarning;
 
     // We show a warning if either we know there is a new remote version, or we couldn't tell but the local
     // version is outdated.
-    final bool canShowWarning = isNewRemoteVersion == true || isNewRemoteVersion == null && installationSeemsOutdated;
+    final bool canShowWarning =
+      remoteVersion == VersionCheckResult.NewVersionAvailable
+      || remoteVersion == VersionCheckResult.Unknown && installationSeemsOutdated;
     
     if (beenAWhileSinceWarningWasPrinted && canShowWarning) {
-      final String updateMessage = isNewRemoteVersion == true
+      final String updateMessage = remoteVersion == VersionCheckResult.NewVersionAvailable
           ? newVersionAvailableMessage()
           : versionOutOfDateMessage(frameworkAge);
       printStatus(updateMessage, emphasis: true);
@@ -539,4 +543,14 @@ class GitTagVersion {
       return '$x.$y.$z';
     return '$x.$y.${z + 1}-pre.$commits';
   }
+}
+
+enum VersionCheckResult {
+  /// Unable to check whether a new version is available, possibly due to
+  /// a connectivity issue.
+  Unknown,
+  /// The current version is up to date.
+  VersionIsCurrent,
+  /// A newer version is available.
+  NewVersionAvailable,
 }
