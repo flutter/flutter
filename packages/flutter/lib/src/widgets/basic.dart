@@ -235,7 +235,7 @@ class ShaderMask extends SingleChildRenderObjectWidget {
   /// it can customize the shader to the size and location of the child.
   ///
   /// Typically this will use a [LinearGradient], [RadialGradient], or
-  /// [SweepGradient] to create the [dart:ui.Shader], though the 
+  /// [SweepGradient] to create the [dart:ui.Shader], though the
   /// [dart:ui.ImageShader] class could also be used.
   final ShaderCallback shaderCallback;
 
@@ -4358,6 +4358,7 @@ class RichText extends LeafRenderObjectWidget {
   @override
   void updateRenderObject(BuildContext context, RenderParagraph renderObject) {
     assert(textDirection != null || debugCheckHasDirectionality(context));
+    print("updateRenderObject: ${Localizations.localeOf(context, nullOk: true)}");
     renderObject
       ..text = text
       ..textAlign = textAlign

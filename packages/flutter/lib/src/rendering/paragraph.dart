@@ -180,7 +180,7 @@ class RenderParagraph extends RenderBox {
   set locale(ui.Locale value) {
     if (_textPainter.locale == value)
       return;
-    _textPainter.locale = locale;
+    _textPainter.locale = value;
     _overflowShader = null;
     markNeedsLayout();
   }
@@ -286,6 +286,7 @@ class RenderParagraph extends RenderBox {
             text: new TextSpan(style: _textPainter.text.style, text: '\u2026'),
             textDirection: textDirection,
             textScaleFactor: textScaleFactor,
+            locale: locale,
           )..layout();
           if (didOverflowWidth) {
             double fadeEnd, fadeStart;
