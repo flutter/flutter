@@ -254,10 +254,6 @@ class _ListDemoState extends State<ListDemo> {
     for (int i = 0; i < items.length; i++) {
       listTiles.add(buildListTile(context, i));
     }
-    // listTiles.add(buildListTile(context, items.length));
-    // print('$items, ${listTiles.map((MergeSemantics w) => ((w.child) as _DraggableListItem).index)}, ${listTiles.length}, ${items.length}');
-    // if (_showDividers)
-    //   listTiles = ListTile.divideTiles(context: context, tiles: listTiles);
 
     return new Scaffold(
       key: scaffoldKey,
@@ -407,11 +403,8 @@ class DraggableListState extends State<DraggableList> with TickerProviderStateMi
       return new DragTarget<Key>(
         builder: _buildDragTarget,
         onWillAccept: (Key toAccept) {
-          if (index >= widget.children.length) {
-            print('Evaluating the end of the list');
-          }
           setState(() {
-            print('$index, $ghostIndex, $dragging, ${toWrap.key}, ${widget.children.map((w) => w.key)} ${entranceController.value} ${ghostController.value}');
+            // print('$index, $ghostIndex, $dragging, ${toWrap.key}, ${widget.children.map((w) => w.key)} ${entranceController.value} ${ghostController.value}');
             if (ghostController.isDismissed) {
               currentIndex = index;
               ghostController.reverse(from: 1.0).whenCompleteOrCancel(() {
@@ -422,22 +415,29 @@ class DraggableListState extends State<DraggableList> with TickerProviderStateMi
             }
           });
           if (dragging == toAccept && toAccept != toWrap.key) {
+            print('Checking to see if we should scroll');
             if (!scrolling) {
               final RenderObject contextObject = context.findRenderObject();
               final RenderAbstractViewport viewport = RenderAbstractViewport.of(contextObject);
               assert(viewport != null);
               const double margin = 48.0;
-              final double scrollOffset = scrollController.offset + margin;
+              final double scrollOffset = scrollController.offset;
               final double topOffset = viewport.getOffsetToReveal(contextObject, 0.0) - margin;
               final double bottomOffset = viewport.getOffsetToReveal(contextObject, 1.0) + margin;
-              final double viewHeight = (bottomOffset - topOffset).abs() - 2 * margin;
-              final bool onScreen = max((topOffset - scrollOffset).abs(), (bottomOffset - scrollOffset).abs()) <= viewHeight;
-              final double offsetToReveal = (topOffset - scrollOffset).abs() > (bottomOffset - scrollOffset).abs() ? bottomOffset : topOffset;
-              print('$dragging ${toWrap.key} OnScreen: $onScreen, ${topOffset} ${bottomOffset} ${offsetToReveal} ${scrollOffset} ${viewHeight}');
-              if (!onScreen) {
+              final double viewHeight = (bottomOffset - topOffset).abs();
+              final bool onScreen = scrollOffset <= topOffset && scrollOffset >= bottomOffset;
+              final double offsetToReveal = max(
+                min(
+                  scrollOffset < bottomOffset ? bottomOffset : topOffset,
+                  scrollController.position.maxScrollExtent,
+                ),
+                scrollController.position.minScrollExtent
+              );
+              print('$dragging toWrap: ${toWrap.key} OnScreen: $onScreen, ${topOffset} ${bottomOffset} ${offsetToReveal} ${scrollOffset} ${viewHeight}');
+              if (!onScreen && offsetToReveal != scrollOffset) {
                 print('Scrolling from ${scrollOffset} to ${offsetToReveal}');
                 scrolling = true;
-                scrollController.animateTo(offsetToReveal, duration: const Duration(milliseconds: 200), curve: Curves.ease).then((_) {
+                scrollController.animateTo(offsetToReveal, duration: const Duration(milliseconds: 200), curve: Curves.easeInOut).then((_) {
                   setState(() {
                     scrolling = false;
                   });
