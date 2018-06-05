@@ -274,7 +274,7 @@ class EvalResult {
 Future<EvalResult> _evalCommand(String executable, List<String> arguments, {
   String workingDirectory,
   Map<String, String> environment,
-  bool skip: false,
+  bool skip = false,
 }) async {
   final String commandDescription = '${path.relative(executable, from: workingDirectory)} ${arguments.join(' ')}';
   final String relativeWorkingDir = path.relative(workingDirectory);
@@ -315,10 +315,10 @@ Future<EvalResult> _evalCommand(String executable, List<String> arguments, {
 Future<Null> _runCommand(String executable, List<String> arguments, {
   String workingDirectory,
   Map<String, String> environment,
-  bool expectFailure: false,
-  bool printOutput: true,
-  bool skip: false,
-  Duration timeout: _kLongTimeout,
+  bool expectFailure = false,
+  bool printOutput = true,
+  bool skip = false,
+  Duration timeout = _kLongTimeout,
 }) async {
   final String commandDescription = '${path.relative(executable, from: workingDirectory)} ${arguments.join(' ')}';
   final String relativeWorkingDir = path.relative(workingDirectory);
@@ -364,11 +364,11 @@ Future<Null> _runCommand(String executable, List<String> arguments, {
 
 Future<Null> _runFlutterTest(String workingDirectory, {
   String script,
-  bool expectFailure: false,
-  bool printOutput: true,
-  List<String> options: const <String>[],
-  bool skip: false,
-  Duration timeout: _kLongTimeout,
+  bool expectFailure = false,
+  bool printOutput = true,
+  List<String> options = const <String>[],
+  bool skip = false,
+  Duration timeout = _kLongTimeout,
 }) {
   final List<String> args = <String>['test']..addAll(options);
   if (flutterTestArgs != null && flutterTestArgs.isNotEmpty)
@@ -385,7 +385,7 @@ Future<Null> _runFlutterTest(String workingDirectory, {
 }
 
 Future<Null> _runFlutterAnalyze(String workingDirectory, {
-  List<String> options: const <String>[]
+  List<String> options = const <String>[]
 }) {
   return _runCommand(flutter, <String>['analyze']..addAll(options),
     workingDirectory: workingDirectory,
@@ -464,7 +464,7 @@ bool _matches<T>(List<T> a, List<T> b) {
 final RegExp _importPattern = new RegExp(r"import 'package:flutter/([^.]+)\.dart'");
 final RegExp _importMetaPattern = new RegExp(r"import 'package:meta/meta.dart'");
 
-Set<String> _findDependencies(String srcPath, List<String> errors, { bool checkForMeta: false }) {
+Set<String> _findDependencies(String srcPath, List<String> errors, { bool checkForMeta = false }) {
   return new Directory(srcPath).listSync(recursive: true).where((FileSystemEntity entity) {
     return entity is File && path.extension(entity.path) == '.dart';
   }).map<Set<String>>((FileSystemEntity entity) {

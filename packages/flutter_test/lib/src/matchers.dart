@@ -201,7 +201,7 @@ const Matcher isAssertionError = const isInstanceOf<AssertionError>();
 ///    required and not named.
 ///  * [inInclusiveRange], which matches if the argument is in a specified
 ///    range.
-Matcher moreOrLessEquals(double value, { double epsilon: 1e-10 }) {
+Matcher moreOrLessEquals(double value, { double epsilon = 1e-10 }) {
   return new _MoreOrLessEquals(value, epsilon);
 }
 

@@ -87,7 +87,7 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
     implements RenderAbstractViewport {
   /// Initializes fields for subclasses.
   RenderViewportBase({
-    AxisDirection axisDirection: AxisDirection.down,
+    AxisDirection axisDirection = AxisDirection.down,
     @required AxisDirection crossAxisDirection,
     @required ViewportOffset offset,
     double cacheExtent,
@@ -885,10 +885,10 @@ class RenderViewport extends RenderViewportBase<SliverPhysicalContainerParentDat
   /// The [offset] must be specified. For testing purposes, consider passing a
   /// [new ViewportOffset.zero] or [new ViewportOffset.fixed].
   RenderViewport({
-    AxisDirection axisDirection: AxisDirection.down,
+    AxisDirection axisDirection = AxisDirection.down,
     @required AxisDirection crossAxisDirection,
     @required ViewportOffset offset,
-    double anchor: 0.0,
+    double anchor = 0.0,
     List<RenderSliver> children,
     RenderSliver center,
     double cacheExtent,
@@ -1384,7 +1384,7 @@ class RenderShrinkWrappingViewport extends RenderViewportBase<SliverLogicalConta
   /// The [offset] must be specified. For testing purposes, consider passing a
   /// [new ViewportOffset.zero] or [new ViewportOffset.fixed].
   RenderShrinkWrappingViewport({
-    AxisDirection axisDirection: AxisDirection.down,
+    AxisDirection axisDirection = AxisDirection.down,
     @required AxisDirection crossAxisDirection,
     @required ViewportOffset offset,
     List<RenderSliver> children,

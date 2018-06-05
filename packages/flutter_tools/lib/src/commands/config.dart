@@ -12,7 +12,7 @@ import '../runner/flutter_command.dart';
 import '../usage.dart';
 
 class ConfigCommand extends FlutterCommand {
-  ConfigCommand({ bool verboseHelp: false }) {
+  ConfigCommand({ bool verboseHelp = false }) {
     argParser.addFlag('analytics',
       negatable: true,
       help: 'Enable or disable reporting anonymously tool usage statistics and crash reports.');

@@ -67,7 +67,7 @@ class ExpansionPanel {
   ExpansionPanel({
     @required this.headerBuilder,
     @required this.body,
-    this.isExpanded: false
+    this.isExpanded = false
   }) : assert(headerBuilder != null),
        assert(body != null),
        assert(isExpanded != null);
@@ -98,9 +98,9 @@ class ExpansionPanelList extends StatelessWidget {
   /// triggered when an expansion panel expand/collapse button is pushed.
   const ExpansionPanelList({
     Key key,
-    this.children: const <ExpansionPanel>[],
+    this.children = const <ExpansionPanel>[],
     this.expansionCallback,
-    this.animationDuration: kThemeAnimationDuration
+    this.animationDuration = kThemeAnimationDuration
   }) : assert(children != null),
        assert(animationDuration != null),
        super(key: key);

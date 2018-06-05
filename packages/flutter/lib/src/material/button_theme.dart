@@ -59,12 +59,12 @@ class ButtonTheme extends InheritedWidget {
   /// The [textTheme], [minWidth], and [height] arguments must not be null.
   ButtonTheme({
     Key key,
-    ButtonTextTheme textTheme: ButtonTextTheme.normal,
-    double minWidth: 88.0,
-    double height: 36.0,
+    ButtonTextTheme textTheme = ButtonTextTheme.normal,
+    double minWidth = 88.0,
+    double height = 36.0,
     EdgeInsetsGeometry padding,
     ShapeBorder shape,
-    bool alignedDropdown: false,
+    bool alignedDropdown = false,
     Widget child,
   }) : assert(textTheme != null),
        assert(minWidth != null && minWidth >= 0.0),
@@ -106,12 +106,12 @@ class ButtonTheme extends InheritedWidget {
   /// button theme.
   ButtonTheme.bar({
     Key key,
-    ButtonTextTheme textTheme: ButtonTextTheme.accent,
-    double minWidth: 64.0,
-    double height: 36.0,
-    EdgeInsetsGeometry padding: const EdgeInsets.symmetric(horizontal: 8.0),
+    ButtonTextTheme textTheme = ButtonTextTheme.accent,
+    double minWidth = 64.0,
+    double height = 36.0,
+    EdgeInsetsGeometry padding = const EdgeInsets.symmetric(horizontal: 8.0),
     ShapeBorder shape,
-    bool alignedDropdown: false,
+    bool alignedDropdown = false,
     Widget child,
   }) : assert(textTheme != null),
        assert(minWidth != null && minWidth >= 0.0),
@@ -157,12 +157,12 @@ class ButtonThemeData extends Diagnosticable {
   ///
   /// The [textTheme], [minWidth], and [height] parameters must not be null.
   const ButtonThemeData({
-    this.textTheme: ButtonTextTheme.normal,
-    this.minWidth: 88.0,
-    this.height: 36.0,
+    this.textTheme = ButtonTextTheme.normal,
+    this.minWidth = 88.0,
+    this.height = 36.0,
     EdgeInsetsGeometry padding,
     ShapeBorder shape,
-    this.alignedDropdown: false,
+    this.alignedDropdown = false,
   }) : assert(textTheme != null),
        assert(minWidth != null && minWidth >= 0.0),
        assert(height != null && height >= 0.0),

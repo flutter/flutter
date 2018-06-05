@@ -41,9 +41,9 @@ class TextPainter {
   /// The [maxLines] property, if non-null, must be greater than zero.
   TextPainter({
     TextSpan text,
-    TextAlign textAlign: TextAlign.start,
+    TextAlign textAlign = TextAlign.start,
     TextDirection textDirection,
-    double textScaleFactor: 1.0,
+    double textScaleFactor = 1.0,
     int maxLines,
     String ellipsis,
     ui.Locale locale,
@@ -341,7 +341,7 @@ class TextPainter {
   ///
   /// The [text] and [textDirection] properties must be non-null before this is
   /// called.
-  void layout({ double minWidth: 0.0, double maxWidth: double.infinity }) {
+  void layout({ double minWidth = 0.0, double maxWidth = double.infinity }) {
     assert(text != null, 'TextPainter.text must be set to a non-null value before using the TextPainter.');
     assert(textDirection != null, 'TextPainter.textDirection must be set to a non-null value before using the TextPainter.');
     if (!_needsLayout && minWidth == _lastMinWidth && maxWidth == _lastMaxWidth)

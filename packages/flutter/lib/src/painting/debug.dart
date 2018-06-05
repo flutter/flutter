@@ -22,7 +22,7 @@ bool debugDisableShadows = false;
 /// The `debugDisableShadowsOverride` argument can be provided to override
 /// the expected value for [debugDisableShadows]. (This exists because the
 /// test framework itself overrides this value in some cases.)
-bool debugAssertAllPaintingVarsUnset(String reason, { bool debugDisableShadowsOverride: false }) {
+bool debugAssertAllPaintingVarsUnset(String reason, { bool debugDisableShadowsOverride = false }) {
   assert(() {
     if (debugDisableShadows != debugDisableShadowsOverride) {
       throw new FlutterError(reason);

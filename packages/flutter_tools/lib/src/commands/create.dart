@@ -305,8 +305,8 @@ To edit platform code in an IDE see https://flutter.io/platform-plugins/#edit-co
     String androidLanguage,
     String iosLanguage,
     String flutterRoot,
-    bool renderDriverTest: false,
-    bool withPluginHook: false,
+    bool renderDriverTest = false,
+    bool withPluginHook = false,
   }) {
     flutterRoot = fs.path.normalize(flutterRoot);
 

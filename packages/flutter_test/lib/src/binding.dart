@@ -255,7 +255,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
 
   @override
   void dispatchEvent(PointerEvent event, HitTestResult result, {
-    TestBindingEventSource source: TestBindingEventSource.device
+    TestBindingEventSource source = TestBindingEventSource.device
   }) {
     assert(source == TestBindingEventSource.test);
     super.dispatchEvent(event, result);
@@ -337,7 +337,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   /// The `description` is used by the [LiveTestWidgetsFlutterBinding] to
   /// show a label on the screen during the test. The description comes from
   /// the value passed to [testWidgets]. It must not be null.
-  Future<Null> runTest(Future<Null> testBody(), VoidCallback invariantTester, { String description: '' });
+  Future<Null> runTest(Future<Null> testBody(), VoidCallback invariantTester, { String description = '' });
 
   /// This is called during test execution before and after the body has been
   /// executed.
@@ -752,7 +752,7 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
   }
 
   @override
-  Future<Null> runTest(Future<Null> testBody(), VoidCallback invariantTester, { String description: '' }) {
+  Future<Null> runTest(Future<Null> testBody(), VoidCallback invariantTester, { String description = '' }) {
     assert(description != null);
     assert(!inTest);
     assert(_fakeAsync == null);
@@ -1042,7 +1042,7 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
 
   @override
   void dispatchEvent(PointerEvent event, HitTestResult result, {
-    TestBindingEventSource source: TestBindingEventSource.device
+    TestBindingEventSource source = TestBindingEventSource.device
   }) {
     switch (source) {
       case TestBindingEventSource.test:
@@ -1115,7 +1115,7 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
   }
 
   @override
-  Future<Null> runTest(Future<Null> testBody(), VoidCallback invariantTester, { String description: '' }) async {
+  Future<Null> runTest(Future<Null> testBody(), VoidCallback invariantTester, { String description = '' }) async {
     assert(description != null);
     assert(!inTest);
     _inTest = true;
@@ -1172,7 +1172,7 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
 /// size onto the actual display using the [BoxFit.contain] algorithm.
 class TestViewConfiguration extends ViewConfiguration {
   /// Creates a [TestViewConfiguration] with the given size. Defaults to 800x600.
-  TestViewConfiguration({ Size size: _kDefaultTestViewportSize })
+  TestViewConfiguration({ Size size = _kDefaultTestViewportSize })
     : _paintMatrix = _getMatrix(size, ui.window.devicePixelRatio),
       _hitTestMatrix = _getMatrix(size, 1.0),
       super(size: size);
@@ -1364,7 +1364,7 @@ class _MockHttpClient implements HttpClient {
   set badCertificateCallback(bool Function(X509Certificate cert, String host, int port) callback) {}
 
   @override
-  void close({bool force: false}) {}
+  void close({bool force = false}) {}
 
   @override
   Future<HttpClientRequest> delete(String host, int port, String path) {

@@ -316,7 +316,7 @@ class MultiTapGestureRecognizer extends GestureRecognizer {
   /// The [longTapDelay] defaults to [Duration.zero], which means
   /// [onLongTapDown] is called immediately after [onTapDown].
   MultiTapGestureRecognizer({
-    this.longTapDelay: Duration.zero,
+    this.longTapDelay = Duration.zero,
     Object debugOwner,
   }) : super(debugOwner: debugOwner);
 

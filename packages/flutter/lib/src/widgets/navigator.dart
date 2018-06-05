@@ -287,7 +287,7 @@ class RouteSettings {
   /// Creates data used to construct routes.
   const RouteSettings({
     this.name,
-    this.isInitialRoute: false,
+    this.isInitialRoute = false,
   });
 
   /// Creates a copy of this route settings object with the given fields
@@ -654,7 +654,7 @@ class Navigator extends StatefulWidget {
     this.initialRoute,
     @required this.onGenerateRoute,
     this.onUnknownRoute,
-    this.observers: const <NavigatorObserver>[]
+    this.observers = const <NavigatorObserver>[]
   }) : assert(onGenerateRoute != null),
        super(key: key);
 
@@ -1262,8 +1262,8 @@ class Navigator extends StatefulWidget {
   /// instances of [Navigator].
   static NavigatorState of(
     BuildContext context, {
-      bool rootNavigator: false,
-      bool nullOk: false,
+      bool rootNavigator = false,
+      bool nullOk = false,
     }) {
     final NavigatorState navigator = rootNavigator
         ? context.rootAncestorStateOfType(const TypeMatcher<NavigatorState>())
@@ -1398,7 +1398,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
 
   bool _debugLocked = false; // used to prevent re-entrant calls to push, pop, and friends
 
-  Route<T> _routeNamed<T>(String name, { bool allowNull: false }) {
+  Route<T> _routeNamed<T>(String name, { bool allowNull = false }) {
     assert(!_debugLocked);
     assert(name != null);
     final RouteSettings settings = new RouteSettings(

@@ -346,10 +346,10 @@ class EdgeInsets extends EdgeInsetsGeometry {
   /// const EdgeInsets.only(left: 40.0)
   /// ```
   const EdgeInsets.only({
-    this.left: 0.0,
-    this.top: 0.0,
-    this.right: 0.0,
-    this.bottom: 0.0
+    this.left = 0.0,
+    this.top = 0.0,
+    this.right = 0.0,
+    this.bottom = 0.0
   });
 
   /// Creates insets with symmetrical vertical and horizontal offsets.
@@ -361,8 +361,8 @@ class EdgeInsets extends EdgeInsetsGeometry {
   /// ```dart
   /// const EdgeInsets.symmetric(vertical: 8.0)
   /// ```
-  const EdgeInsets.symmetric({ double vertical: 0.0,
-                             double horizontal: 0.0 })
+  const EdgeInsets.symmetric({ double vertical = 0.0,
+                             double horizontal = 0.0 })
     : left = horizontal, top = vertical, right = horizontal, bottom = vertical;
 
   /// Creates insets that match the given window padding.
@@ -628,10 +628,10 @@ class EdgeInsetsDirectional extends EdgeInsetsGeometry {
   /// const EdgeInsetsDirectional.only(start: 40.0)
   /// ```
   const EdgeInsetsDirectional.only({
-    this.start: 0.0,
-    this.top: 0.0,
-    this.end: 0.0,
-    this.bottom: 0.0
+    this.start = 0.0,
+    this.top = 0.0,
+    this.end = 0.0,
+    this.bottom = 0.0
   });
 
   /// An [EdgeInsetsDirectional] with zero offsets in each direction.

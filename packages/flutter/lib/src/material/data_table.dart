@@ -36,7 +36,7 @@ class DataColumn {
   const DataColumn({
     @required this.label,
     this.tooltip,
-    this.numeric: false,
+    this.numeric = false,
     this.onSort,
   }) : assert(label != null);
 
@@ -87,7 +87,7 @@ class DataRow {
   /// The [cells] argument must not be null.
   const DataRow({
     this.key,
-    this.selected: false,
+    this.selected = false,
     this.onSelectChanged,
     @required this.cells,
   }) : assert(cells != null);
@@ -98,7 +98,7 @@ class DataRow {
   /// The [cells] argument must not be null.
   DataRow.byIndex({
     int index,
-    this.selected: false,
+    this.selected = false,
     this.onSelectChanged,
     @required this.cells,
   }) : assert(cells != null),
@@ -163,8 +163,8 @@ class DataCell {
   /// text should be provided instead, and then the [placeholder]
   /// argument should be set to true.
   const DataCell(this.child, {
-    this.placeholder: false,
-    this.showEditIcon: false,
+    this.placeholder = false,
+    this.showEditIcon = false,
     this.onTap,
   }) : assert(child != null);
 
@@ -259,7 +259,7 @@ class DataTable extends StatelessWidget {
     Key key,
     @required this.columns,
     this.sortColumnIndex,
-    this.sortAscending: true,
+    this.sortAscending = true,
     this.onSelectAll,
     @required this.rows,
   }) : assert(columns != null),

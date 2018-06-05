@@ -134,7 +134,7 @@ class CupertinoAlertDialog extends StatelessWidget {
     Key key,
     this.title,
     this.content,
-    this.actions: const <Widget>[],
+    this.actions = const <Widget>[],
     this.scrollController,
     this.actionScrollController,
   })  : assert(actions != null),
@@ -229,8 +229,8 @@ class CupertinoDialogAction extends StatelessWidget {
   /// Creates an action for an iOS-style dialog.
   const CupertinoDialogAction({
     this.onPressed,
-    this.isDefaultAction: false,
-    this.isDestructiveAction: false,
+    this.isDefaultAction = false,
+    this.isDestructiveAction = false,
     @required this.child,
   }) : assert(child != null);
 

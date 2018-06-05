@@ -50,9 +50,9 @@ class CupertinoButton extends StatefulWidget {
     @required this.child,
     this.padding,
     this.color,
-    this.minSize: 44.0,
-    this.pressedOpacity: 0.1,
-    this.borderRadius: const BorderRadius.all(const Radius.circular(8.0)),
+    this.minSize = 44.0,
+    this.pressedOpacity = 0.1,
+    this.borderRadius = const BorderRadius.all(const Radius.circular(8.0)),
     @required this.onPressed,
   }) : assert(pressedOpacity == null || (pressedOpacity >= 0.0 && pressedOpacity <= 1.0));
 

@@ -149,8 +149,8 @@ typedef Future<FlutterCommandResult> CommandFunction();
 class DummyFlutterCommand extends FlutterCommand {
 
   DummyFlutterCommand({
-    this.shouldUpdateCache : false,
-    this.noUsagePath : false,
+    this.shouldUpdateCache  = false,
+    this.noUsagePath  = false,
     this.commandFunction,
   });
 
