@@ -281,6 +281,7 @@ class HotRunner extends ResidentRunner {
         fileFilter: _dartDependencies,
         fullRestart: fullRestart,
         projectRootPath: projectRootPath,
+        pathToReload: getReloadPath(fullRestart: fullRestart),
       );
       if (!result)
         return false;
@@ -515,7 +516,7 @@ class HotRunner extends ResidentRunner {
     final Stopwatch vmReloadTimer = new Stopwatch()..start();
     try {
       final String entryPath = fs.path.relative(
-        debuggingOptions.buildInfo.previewDart2 ? mainPath + '.incremental.dill' : mainPath,
+        getReloadPath(fullRestart: false),
         from: projectRootPath,
       );
       final Completer<Map<String, dynamic>> retrieveFirstReloadReport = new Completer<Map<String, dynamic>>();
