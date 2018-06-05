@@ -63,7 +63,6 @@ static const char* kDartLanguageArgs[] = {
     "--background_compilation",
     "--await_is_keyword",
     "--causal_async_stacks",
-    "--enable_kernel_expression_compilation=false", // TODO(dartbug.com/33087)
     // clang-format on
 };
 
