@@ -337,112 +337,112 @@ abstract class LocalHistoryRoute<T> extends Route<T> {
   /// once again pops the latest route, which is the `SecondPage`, itself.
   /// Therefore, the second press navigates back to the `HomePage`.
   ///
-  ///```dart
-  ///void main() => runApp(new App());
+  /// ```dart
+  /// void main() => runApp(new App());
   ///
-  ///class App extends StatelessWidget {
-  ///  @override
-  ///  Widget build(BuildContext context) {
-  ///    return new MaterialApp(
-  ///      initialRoute: '/',
-  ///      routes: {
-  ///        '/': (BuildContext context) => new HomePage(),
-  ///        '/second_page': (BuildContext context) => new SecondPage(),
-  ///      },
-  ///    );
-  ///  }
-  ///}
+  /// class App extends StatelessWidget {
+  ///   @override
+  ///   Widget build(BuildContext context) {
+  ///     return new MaterialApp(
+  ///       initialRoute: '/',
+  ///       routes: {
+  ///         '/': (BuildContext context) => new HomePage(),
+  ///         '/second_page': (BuildContext context) => new SecondPage(),
+  ///       },
+  ///     );
+  ///   }
+  /// }
   ///
-  ///class HomePage extends StatefulWidget {
-  ///  HomePage();
+  /// class HomePage extends StatefulWidget {
+  ///   HomePage();
   ///
-  ///  @override
-  ///  _HomePageState createState() => new _HomePageState();
-  ///}
+  ///   @override
+  ///   _HomePageState createState() => new _HomePageState();
+  /// }
   ///
-  ///class _HomePageState extends State<HomePage> {
-  ///  @override
-  ///  Widget build(BuildContext context) {
-  ///    return new Scaffold(
-  ///      body: new Center(
-  ///        child: Column(
-  ///          mainAxisSize: MainAxisSize.min,
-  ///          children: <Widget>[
-  ///            new Text('HomePage'),
-  ///            // Press this button to open the SecondPage.
-  ///            new RaisedButton(
-  ///              child: new Text('Second Page >'),
-  ///              onPressed: () {
-  ///                Navigator.pushNamed(context, '/second_page');
-  ///              },
-  ///            ),
-  ///          ],
-  ///        ),
-  ///      ),
-  ///    );
-  ///  }
-  ///}
+  /// class _HomePageState extends State<HomePage> {
+  ///   @override
+  ///   Widget build(BuildContext context) {
+  ///     return new Scaffold(
+  ///       body: new Center(
+  ///         child: Column(
+  ///           mainAxisSize: MainAxisSize.min,
+  ///           children: <Widget>[
+  ///             new Text('HomePage'),
+  ///             // Press this button to open the SecondPage.
+  ///             new RaisedButton(
+  ///               child: new Text('Second Page >'),
+  ///               onPressed: () {
+  ///                 Navigator.pushNamed(context, '/second_page');
+  ///               },
+  ///             ),
+  ///           ],
+  ///         ),
+  ///       ),
+  ///     );
+  ///   }
+  /// }
   ///
-  ///class SecondPage extends StatefulWidget {
-  ///  @override
-  ///  _SecondPageState createState() => new _SecondPageState();
-  ///}
+  /// class SecondPage extends StatefulWidget {
+  ///   @override
+  ///   _SecondPageState createState() => new _SecondPageState();
+  /// }
   ///
-  ///class _SecondPageState extends State<SecondPage> {
+  /// class _SecondPageState extends State<SecondPage> {
   ///
-  ///  bool _showRectangle = false;
+  ///   bool _showRectangle = false;
   ///
-  ///  void _navigateLocallyToShowRectangle() async {
-  ///    // This local history entry essentially represents the display of the red
-  ///    // rectangle. When this local history entry is removed, we hide the red
-  ///    // rectangle.
-  ///    setState(() => _showRectangle = true);
-  ///    ModalRoute.of(context).addLocalHistoryEntry(
-  ///        new LocalHistoryEntry(
-  ///            onRemove: () {
-  ///              // Hide the red rectangle.
-  ///              setState(() => _showRectangle = false);
-  ///            }
-  ///        )
-  ///    );
-  ///  }
+  ///   void _navigateLocallyToShowRectangle() async {
+  ///     // This local history entry essentially represents the display of the red
+  ///     // rectangle. When this local history entry is removed, we hide the red
+  ///     // rectangle.
+  ///     setState(() => _showRectangle = true);
+  ///     ModalRoute.of(context).addLocalHistoryEntry(
+  ///         new LocalHistoryEntry(
+  ///             onRemove: () {
+  ///               // Hide the red rectangle.
+  ///               setState(() => _showRectangle = false);
+  ///             }
+  ///         )
+  ///     );
+  ///   }
   ///
-  ///  @override
-  ///  Widget build(BuildContext context) {
-  ///    final localNavContent = _showRectangle
-  ///      ? new Container(
-  ///          width: 100.0,
-  ///          height: 100.0,
-  ///          color: Colors.red,
-  ///        )
-  ///      : new RaisedButton(
-  ///          child: new Text('Show Rectangle'),
-  ///          onPressed: _navigateLocallyToShowRectangle,
-  ///        );
+  ///   @override
+  ///   Widget build(BuildContext context) {
+  ///     final localNavContent = _showRectangle
+  ///       ? new Container(
+  ///           width: 100.0,
+  ///           height: 100.0,
+  ///           color: Colors.red,
+  ///         )
+  ///       : new RaisedButton(
+  ///           child: new Text('Show Rectangle'),
+  ///           onPressed: _navigateLocallyToShowRectangle,
+  ///         );
   ///
-  ///    return new Scaffold(
-  ///      body: Center(
-  ///        child: new Column(
-  ///          mainAxisAlignment: MainAxisAlignment.center,
-  ///          children: <Widget>[
-  ///            localNavContent,
-  ///            new RaisedButton(
-  ///              child: new Text('< Back'),
-  ///              onPressed: () {
-  ///                // Pop a route. If this is pressed while the red rectangle is
-  ///                // visible then it will will pop our local history entry, which
-  ///                // will hide the red rectangle. Otherwise, the SecondPage will
-  ///                // navigate back to the HomePage.
-  ///                Navigator.of(context).pop();
-  ///              },
-  ///            ),
-  ///          ],
-  ///        ),
-  ///      ),
-  ///    );
-  ///  }
-  ///}
-  ///```
+  ///     return new Scaffold(
+  ///       body: Center(
+  ///         child: new Column(
+  ///           mainAxisAlignment: MainAxisAlignment.center,
+  ///           children: <Widget>[
+  ///             localNavContent,
+  ///             new RaisedButton(
+  ///               child: new Text('< Back'),
+  ///               onPressed: () {
+  ///                 // Pop a route. If this is pressed while the red rectangle is
+  ///                 // visible then it will will pop our local history entry, which
+  ///                 // will hide the red rectangle. Otherwise, the SecondPage will
+  ///                 // navigate back to the HomePage.
+  ///                 Navigator.of(context).pop();
+  ///               },
+  ///             ),
+  ///           ],
+  ///         ),
+  ///       ),
+  ///     );
+  ///   }
+  /// }
+  /// ```
   void addLocalHistoryEntry(LocalHistoryEntry entry) {
     assert(entry._owner == null);
     entry._owner = this;
