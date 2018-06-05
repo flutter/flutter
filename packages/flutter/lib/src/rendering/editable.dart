@@ -133,6 +133,7 @@ class RenderEditable extends RenderBox {
     this.onCaretChanged,
     this.ignorePointer = false,
     bool obscureText = false,
+    Locale locale,
   }) : assert(textAlign != null),
        assert(textDirection != null, 'RenderEditable created without a textDirection.'),
        assert(maxLines == null || maxLines > 0),
@@ -145,6 +146,7 @@ class RenderEditable extends RenderBox {
          textAlign: textAlign,
          textDirection: textDirection,
          textScaleFactor: textScaleFactor,
+         locale: locale,
        ),
        _cursorColor = cursorColor,
        _showCursor = showCursor ?? new ValueNotifier<bool>(false),
@@ -247,6 +249,22 @@ class RenderEditable extends RenderBox {
     _textPainter.textDirection = value;
     markNeedsTextLayout();
     markNeedsSemanticsUpdate();
+  }
+
+  /// Used by this renderer's internal [TextPainter] to select a locale-specific
+  /// font.
+  ///
+  /// In some cases the same Unicode character may be rendered differently depending
+  /// on the locale. For example the '骨' character is rendered differently in
+  /// the Chinese and Japanese locales. In these cases the [locale] may be used
+  /// to select a locale-specific font.
+  Locale get locale => _textPainter.locale;
+  /// The value may be null.
+  set locale(Locale value) {
+    if (_textPainter.locale == value)
+      return;
+    _textPainter.locale = value;
+    markNeedsTextLayout();
   }
 
   /// The color to use when painting the cursor.
@@ -749,6 +767,7 @@ class RenderEditable extends RenderBox {
     properties.add(new IntProperty('maxLines', maxLines));
     properties.add(new DiagnosticsProperty<Color>('selectionColor', selectionColor));
     properties.add(new DoubleProperty('textScaleFactor', textScaleFactor));
+    properties.add(new DiagnosticsProperty<Locale>('locale', locale, defaultValue: null));
     properties.add(new DiagnosticsProperty<TextSelection>('selection', selection));
     properties.add(new DiagnosticsProperty<ViewportOffset>('offset', offset));
   }

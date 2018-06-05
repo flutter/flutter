@@ -161,11 +161,11 @@ class TextSpan extends DiagnosticableTree {
   /// Rather than using this directly, it's simpler to use the
   /// [TextPainter] class to paint [TextSpan] objects onto [Canvas]
   /// objects.
-  void build(ui.ParagraphBuilder builder, { double textScaleFactor = 1.0 }) {
+  void build(ui.ParagraphBuilder builder, { double textScaleFactor = 1.0, Locale locale }) {
     assert(debugAssertIsValid());
     final bool hasStyle = style != null;
     if (hasStyle)
-      builder.pushStyle(style.getTextStyle(textScaleFactor: textScaleFactor));
+      builder.pushStyle(style.getTextStyle(textScaleFactor: textScaleFactor, locale: locale));
     if (text != null)
       builder.addText(text);
     if (children != null) {
