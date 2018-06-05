@@ -356,7 +356,7 @@ public final class FlutterActivityDelegate
                 flutterView.setInitialRoute(route);
             }
             if (!flutterView.getFlutterNativeView().isApplicationRunning()) {
-                flutterView.runFromBundle(appBundlePath, intent.getStringExtra("snapshot"), "main", reuseIsolate);
+                flutterView.runFromBundle(appBundlePath, null, "main", reuseIsolate);
             }
             return true;
         }
