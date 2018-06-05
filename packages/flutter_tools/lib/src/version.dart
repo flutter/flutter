@@ -236,20 +236,33 @@ class FlutterVersion {
     final Duration frameworkAge = _clock.now().difference(localFrameworkCommitDate);
     final bool installationSeemsOutdated = frameworkAge > kVersionAgeConsideredUpToDate;
 
+    /// Gets whether or not there is a new version of Flutter available on the remote.
+    ///
+    /// Returns null if the cached version is out-of-date or missing, and we are
+    /// unable to reach the server to get the latest version.
     Future<bool> newerFrameworkVersionAvailable() async {
       final DateTime latestFlutterCommitDate = await _getLatestAvailableFlutterVersion();
 
       if (latestFlutterCommitDate == null)
-        return false;
+        return null;
 
       return latestFlutterCommitDate.isAfter(localFrameworkCommitDate);
     }
 
+    // Get whether there's a newer version on the remote. This only goes
+    // to the server if we haven't checked recently so won't happen often.
+    // Note: This must come before the stamp load below because it also reads/writes
+    // the stamp and otherwise one will be stale.
+    final bool isNewRemoteVersion = await newerFrameworkVersionAvailable();
     final VersionCheckStamp stamp = await VersionCheckStamp.load();
     final DateTime lastTimeWarningWasPrinted = stamp.lastTimeWarningWasPrinted ?? _clock.agoBy(kMaxTimeSinceLastWarning * 2);
     final bool beenAWhileSinceWarningWasPrinted = _clock.now().difference(lastTimeWarningWasPrinted) > kMaxTimeSinceLastWarning;
 
-    if (beenAWhileSinceWarningWasPrinted && installationSeemsOutdated && await newerFrameworkVersionAvailable()) {
+    // We show a warning if either we know there is a new remote version, or we couldn't tell but the local
+    // version is outdated.
+    final bool canShowWarning = isNewRemoteVersion || isNewRemoteVersion == null && installationSeemsOutdated;
+    
+    if (beenAWhileSinceWarningWasPrinted && canShowWarning) {
       printStatus(versionOutOfDateMessage(frameworkAge), emphasis: true);
       await Future.wait<Null>(<Future<Null>>[
         stamp.store(

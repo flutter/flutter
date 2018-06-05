@@ -66,7 +66,14 @@ void main() {
     });
 
     testUsingContext('prints nothing when Flutter installation looks fresh', () async {
-      fakeData(mockProcessManager, mockCache, localCommitDate: _upToDateVersion);
+      fakeData(
+        mockProcessManager,
+        mockCache,
+        localCommitDate: _upToDateVersion,
+        // Server will be pinged because we haven't pinged within last x days
+        expectServerPing: true,
+        remoteCommitDate: _outOfDateVersion,
+        expectSetStamp: true);
       await FlutterVersion.instance.checkFlutterVersionFreshness();
       _expectVersionMessage('');
     }, overrides: <Type, Generator>{
@@ -201,7 +208,26 @@ void main() {
       Cache: () => mockCache,
     });
 
-    testUsingContext('ignores network issues', () async {
+    testUsingContext('does not print warning when unable to connect to server if not out of date', () async {
+      final FlutterVersion version = FlutterVersion.instance;
+
+      fakeData(
+        mockProcessManager,
+        mockCache,
+        localCommitDate: _upToDateVersion,
+        errorOnFetch: true,
+        expectServerPing: true,
+      );
+
+      await version.checkFlutterVersionFreshness();
+      _expectVersionMessage('');
+    }, overrides: <Type, Generator>{
+      FlutterVersion: () => new FlutterVersion(_testClock),
+      ProcessManager: () => mockProcessManager,
+      Cache: () => mockCache,
+    });
+
+    testUsingContext('prints warning when unable to connect to server if really out of date', () async {
       final FlutterVersion version = FlutterVersion.instance;
 
       fakeData(
@@ -210,10 +236,11 @@ void main() {
         localCommitDate: _outOfDateVersion,
         errorOnFetch: true,
         expectServerPing: true,
+        expectSetStamp: true
       );
 
       await version.checkFlutterVersionFreshness();
-      _expectVersionMessage('');
+      _expectVersionMessage(FlutterVersion.versionOutOfDateMessage(_testClock.now().difference(_outOfDateVersion)));
     }, overrides: <Type, Generator>{
       FlutterVersion: () => new FlutterVersion(_testClock),
       ProcessManager: () => mockProcessManager,
