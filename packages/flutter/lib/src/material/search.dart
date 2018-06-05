@@ -26,7 +26,7 @@ import 'theme.dart';
 /// to the empty string. When `query` is set to null, `delegate.query` will
 /// be used as the initial query.
 ///
-/// The method returns the selected search result, which can be set in the
+/// This method returns the selected search result, which can be set in the
 /// [SearchDelegate.close] call. If the search page is closed with the system
 /// back button, it returns null.
 ///
