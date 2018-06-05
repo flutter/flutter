@@ -4358,7 +4358,6 @@ class RichText extends LeafRenderObjectWidget {
   @override
   void updateRenderObject(BuildContext context, RenderParagraph renderObject) {
     assert(textDirection != null || debugCheckHasDirectionality(context));
-    print("updateRenderObject: ${Localizations.localeOf(context, nullOk: true)}");
     renderObject
       ..text = text
       ..textAlign = textAlign
