@@ -235,7 +235,7 @@ class ShaderMask extends SingleChildRenderObjectWidget {
   /// it can customize the shader to the size and location of the child.
   ///
   /// Typically this will use a [LinearGradient], [RadialGradient], or
-  /// [SweepGradient] to create the [dart:ui.Shader], though the 
+  /// [SweepGradient] to create the [dart:ui.Shader], though the
   /// [dart:ui.ImageShader] class could also be used.
   final ShaderCallback shaderCallback;
 
@@ -4289,6 +4289,7 @@ class RichText extends LeafRenderObjectWidget {
     this.overflow = TextOverflow.clip,
     this.textScaleFactor = 1.0,
     this.maxLines,
+    this.locale,
   }) : assert(text != null),
        assert(textAlign != null),
        assert(softWrap != null),
@@ -4341,6 +4342,15 @@ class RichText extends LeafRenderObjectWidget {
   /// edge of the box.
   final int maxLines;
 
+  /// Used to select a font when the same Unicode character can
+  /// be rendered differently, depending on the locale.
+  ///
+  /// It's rarely necessary to set this property. By default its value
+  /// is inherited from the enclosing app with `Localizations.localeOf(context)`.
+  ///
+  /// See [RenderParagraph.locale] for more information.
+  final Locale locale;
+
   @override
   RenderParagraph createRenderObject(BuildContext context) {
     assert(textDirection != null || debugCheckHasDirectionality(context));
@@ -4351,7 +4361,7 @@ class RichText extends LeafRenderObjectWidget {
       overflow: overflow,
       textScaleFactor: textScaleFactor,
       maxLines: maxLines,
-      locale: Localizations.localeOf(context, nullOk: true),
+      locale: locale ?? Localizations.localeOf(context, nullOk: true),
     );
   }
 
@@ -4366,7 +4376,7 @@ class RichText extends LeafRenderObjectWidget {
       ..overflow = overflow
       ..textScaleFactor = textScaleFactor
       ..maxLines = maxLines
-      ..locale = Localizations.localeOf(context, nullOk: true);
+      ..locale = locale ?? Localizations.localeOf(context, nullOk: true);
   }
 
   @override
