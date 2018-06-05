@@ -61,7 +61,7 @@ void main() {
       });
       expect(response['id'], isNull);
       expect(response['event'], 'daemon.logMessage');
-      final Map<String, String> logMessage = response['params'];
+      final Map<String, String> logMessage = response['params'].cast<String, String>();
       expect(logMessage['level'], 'error');
       expect(logMessage['message'], 'daemon.logMessage test');
       responses.close();
