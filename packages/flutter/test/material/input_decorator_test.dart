@@ -1431,47 +1431,51 @@ void main() {
     );
   });
 
-  testWidgets('InputDecorator OutlineBorder focused label with icon', (WidgetTester tester) async {
-    // Regression test for https://github.com/flutter/flutter/issues/18111
+  testWidgets(
+    'InputDecorator OutlineBorder focused label with icon',
+    (WidgetTester tester) async {
+      // Regression test for https://github.com/flutter/flutter/issues/18111
 
-    Widget buildFrame(TextDirection textDirection) {
-      return new MaterialApp(
-        home: new Scaffold(
-          body: new Container(
-            padding: const EdgeInsets.all(16.0),
-            alignment: Alignment.center,
-            child: new Directionality(
-              textDirection: textDirection,
-              child: const RepaintBoundary(
-                child: const InputDecorator(
-                  isFocused: true,
-                  isEmpty: true,
-                  decoration: const InputDecoration(
-                    icon: const Icon(Icons.insert_link),
-                    labelText: 'primaryLink',
-                    hintText: 'Primary link to story',
-                    border: const OutlineInputBorder(),
+      Widget buildFrame(TextDirection textDirection) {
+        return new MaterialApp(
+          home: new Scaffold(
+            body: new Container(
+              padding: const EdgeInsets.all(16.0),
+              alignment: Alignment.center,
+              child: new Directionality(
+                textDirection: textDirection,
+                child: const RepaintBoundary(
+                  child: const InputDecorator(
+                    isFocused: true,
+                    isEmpty: true,
+                    decoration: const InputDecoration(
+                      icon: const Icon(Icons.insert_link),
+                      labelText: 'primaryLink',
+                      hintText: 'Primary link to story',
+                      border: const OutlineInputBorder(),
+                    ),
                   ),
                 ),
               ),
             ),
           ),
-        ),
+        );
+      }
+
+      await tester.pumpWidget(buildFrame(TextDirection.ltr));
+      await expectLater(
+        find.byType(InputDecorator),
+        matchesGoldenFile('input_decorator.outline_icon_label.ltr.png'),
+        skip: !Platform.isLinux,
       );
-    }
 
-    await tester.pumpWidget(buildFrame(TextDirection.ltr));
-    await expectLater(
-      find.byType(InputDecorator),
-      matchesGoldenFile('input_decorator.outline_icon_label.ltr.png'),
-      skip: !Platform.isLinux,
-    );
-
-    await tester.pumpWidget(buildFrame(TextDirection.rtl));
-    await expectLater(
-      find.byType(InputDecorator),
-      matchesGoldenFile('input_decorator.outline_icon_label.rtl.png'),
-      skip: !Platform.isLinux,
-    );
-  });
+      await tester.pumpWidget(buildFrame(TextDirection.rtl));
+      await expectLater(
+        find.byType(InputDecorator),
+        matchesGoldenFile('input_decorator.outline_icon_label.rtl.png'),
+        skip: !Platform.isLinux,
+      );
+    },
+    skip: !Platform.isLinux,
+  );
 }
