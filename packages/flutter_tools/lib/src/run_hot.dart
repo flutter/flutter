@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:json_rpc_2/error_code.dart' as rpc_error_code;
 import 'package:json_rpc_2/json_rpc_2.dart' as rpc;
@@ -13,6 +14,7 @@ import 'base/file_system.dart';
 import 'base/logger.dart';
 import 'base/utils.dart';
 import 'build_info.dart';
+import 'compile.dart';
 import 'dart/dependencies.dart';
 import 'device.dart';
 import 'globals.dart';
@@ -105,6 +107,23 @@ class HotRunner extends ResidentRunner {
     }
   }
 
+  Future<String> _compileExpressionService(String isolateId, String expression,
+      List<String> definitions, List<String> typeDefinitions,
+      String libraryUri, String klass, bool isStatic,
+      ) async {
+    for (FlutterDevice device in flutterDevices) {
+      if (device.generator != null) {
+        final CompilerOutput compilerOutput =
+            await device.generator.compileExpression(expression, definitions,
+                typeDefinitions, libraryUri, klass, isStatic);
+        if (compilerOutput.outputFilename != null) {
+          return base64.encode(fs.file(compilerOutput.outputFilename).readAsBytesSync());
+        }
+      }
+    }
+    return null;
+  }
+
   Future<int> attach({
     Completer<DebugConnectionInfo> connectionInfoCompleter,
     Completer<Null> appStartedCompleter,
@@ -112,7 +131,8 @@ class HotRunner extends ResidentRunner {
   }) async {
     try {
       await connectToServiceProtocol(viewFilter: viewFilter,
-          reloadSources: _reloadSourcesService);
+          reloadSources: _reloadSourcesService,
+          compileExpression: _compileExpressionService);
     } catch (error) {
       printError('Error connecting to the service protocol: $error');
       return 2;
