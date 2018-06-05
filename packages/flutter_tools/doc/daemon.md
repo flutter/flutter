@@ -1,20 +1,20 @@
-# Flutter Daemon Modes
+# Flutter Daemon
 
 ## Overview
 
-The `flutter` command-line tool supports two daemon modes for use by IDEs and other tools. Both modes create a JSON-RPC server for communication.
+The `flutter` command-line tool supports a daemon server mode for use by IDEs and other tools.
 
-### flutter daemon
+```
+flutter daemon
+```
 
-This mode provides device addition and removal notifications, as well as being able to programmatically start and stop apps on those devices.
+It runs a persistent, JSON-RPC based server to communicate with devices. IDEs and other tools can start the flutter tool in this mode and get device addition and removal notifications, as well as being able to programmatically start and stop apps on those devices.
 
-### flutter run --machine
-
-This mode launches a Flutter application on a device just like `flutter run` but provides notifications in a machine-consumable JSON format and accepts JSON commands to programatically control the running application (for example hot reload).
+A subset of the `flutter daemon` commands/events are also exposed via `flutter run --machine` which allows IDEs and tools to launch flutter applications and interact to send commands like Hot Reload. Which commands/events are available in this mode is documented at the bottom of this document.
 
 ## Protocol
 
-The daemons speak [JSON-RPC](http://json-rpc.org/) to clients. They uses stdin and stdout as the protocol transport. To send a command to the server, create your command as a JSON-RPC message, encode it to json, surround the encoded text with square brackets, and write it as one line of text to the stdin of the process:
+The daemon speaks [JSON-RPC](http://json-rpc.org/) to clients. It uses stdin and stdout as the protocol transport. To send a command to the server, create your command as a JSON-RPC message, encode it to json, surround the encoded text with square brackets, and write it as one line of text to the stdin of the process:
 
 ```
 [{"method":"daemon.version","id":0}]
@@ -46,7 +46,7 @@ Any params for that command should be passed in through a `params` field. Here's
 
 ### daemon domain
 
-#### version (_`daemon`, `run`_)
+#### version
 
 The `version()` command responds with a String with the protocol version.
 
@@ -179,6 +179,37 @@ This is sent when a device is connected (and polling has been enabled via `enabl
 #### device.removed
 
 This is sent when a device is disconnected (and polling has been enabled via `enable()`). The `params` field will be a map with the fields `id`, `name`, `platform`, and `emulator`.
+
+## Flutter Run --machine
+
+When running `flutter run --machine` the following subset of the daemon is available:
+
+### daemon domain
+
+The following subset of the daemon domain is available in `flutter run --machine`. Refer to the documentation above for details.
+
+- Commands
+  - [`version`](#version)
+  - [`shutdown`](#shutdown)
+- Events
+  - [`connected`](#connected)
+  - [`logMessage`](#logMessage)
+
+### app domain
+
+The following subset of the app domain is available in `flutter run --machine`. Refer to the documentation above for details.
+
+- Commands
+  - [`restart`](#restart)
+  - [`callServiceExtension`](#callServiceExtension)
+  - [`stop`](#stop)
+- Events
+  - [`start`](#appstart)
+  - [`debugPort`](#appdebugPort)
+  - [`started`](#appstarted)
+  - [`log`](#applog)
+  - [`progress`](#appprogress)
+  - [`stop`](#appstop)
 
 ## Source
 
