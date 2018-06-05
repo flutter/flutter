@@ -1442,8 +1442,8 @@ void main() {
             alignment: Alignment.center,
             child: new Directionality(
               textDirection: textDirection,
-              child: new RepaintBoundary(
-                child: new InputDecorator(
+              child: const RepaintBoundary(
+                child: const InputDecorator(
                   isFocused: true,
                   isEmpty: true,
                   decoration: const InputDecoration(
