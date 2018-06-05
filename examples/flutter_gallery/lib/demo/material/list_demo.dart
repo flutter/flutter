@@ -340,7 +340,7 @@ class DraggableListState extends State<DraggableList> with TickerProviderStateMi
   Widget _wrap(Widget toWrap, int index) {
     assert(toWrap.key != null);
     Widget _buildDragTarget(BuildContext context, List<Key> acceptedCandidates, List<dynamic> rejectedCandidates) {
-      final Widget draggable = new LongPressDraggable<Key>(
+      Widget draggable = new LongPressDraggable<Key>(
         maxSimultaneousDrags: 1,
         axis: widget.axis,
         data: toWrap.key,
@@ -379,6 +379,9 @@ class DraggableListState extends State<DraggableList> with TickerProviderStateMi
           });
         },
       );
+      if (index >= widget.children.length) {
+        draggable = toWrap;
+      }
       if (currentIndex == index) {
         return new Column(children: <Widget>[
           new SizeTransition(
@@ -404,6 +407,9 @@ class DraggableListState extends State<DraggableList> with TickerProviderStateMi
       return new DragTarget<Key>(
         builder: _buildDragTarget,
         onWillAccept: (Key toAccept) {
+          if (index >= widget.children.length) {
+            print('Evaluating the end of the list');
+          }
           setState(() {
             print('$index, $ghostIndex, $dragging, ${toWrap.key}, ${widget.children.map((w) => w.key)} ${entranceController.value} ${ghostController.value}');
             if (ghostController.isDismissed) {
@@ -420,7 +426,7 @@ class DraggableListState extends State<DraggableList> with TickerProviderStateMi
               final RenderObject contextObject = context.findRenderObject();
               final RenderAbstractViewport viewport = RenderAbstractViewport.of(contextObject);
               assert(viewport != null);
-              const double margin = 25.0;
+              const double margin = 48.0;
               final double scrollOffset = scrollController.offset + margin;
               final double topOffset = viewport.getOffsetToReveal(contextObject, 0.0) - margin;
               final double bottomOffset = viewport.getOffsetToReveal(contextObject, 1.0) + margin;
@@ -466,7 +472,19 @@ class DraggableListState extends State<DraggableList> with TickerProviderStateMi
     for (int i=0; i<widget.children.length; i++) {
       wrappedChildren.add(_wrap(widget.children[i], i));
     }
+    wrappedChildren.add(_wrap(
+      new SizedBox(
+        height: 48.0, 
+        width: MediaQuery.of(context).size.width,
+        key: const Key('DraggableList - End Widget'), 
+      ),
+      widget.children.length),
+    );
 
-    return new ListView(children: wrappedChildren, padding: widget.padding, controller: scrollController,);
+    return new SingleChildScrollView(
+      child: new Column(children: wrappedChildren), 
+      padding: widget.padding, 
+      controller: scrollController,
+    );
   }
 }
