@@ -49,7 +49,7 @@ class ImageCache {
     _maximumSize = value;
     if (maximumSize == 0) {
       _cache.clear();
-      _sizeBytes = 0;
+      _currentSizeBytes = 0;
     } else {
       _checkCacheSize();
     }
@@ -63,7 +63,7 @@ class ImageCache {
   /// Once more than this amount of bytes have been cached, the
   /// least-recently-used entry is evicted until there are fewer than the
   /// maximum bytes.
-  int get maximumSizeBytes => _maximumSize;
+  int get maximumSizeBytes => _maximumSizeBytes;
   int _maximumSizeBytes = _kDefaultSizeBytes;
 
   /// Changes the maximum cache bytes.
@@ -80,15 +80,15 @@ class ImageCache {
     _maximumSizeBytes = value;
     if (_maximumSizeBytes == 0) {
       _cache.clear();
-      _sizeBytes = 0;
+      _currentSizeBytes = 0;
     } else {
       _checkCacheSize();
     }
   }
 
-  int _sizeBytes = 0;
   /// The current size of cached entries in bytes.
-  int get sizeBytes => _sizeBytes;
+  int get currentSizeBytes => _currentSizeBytes;
+  int _currentSizeBytes = 0;
 
   /// Evicts all entries from the cache.
   ///
@@ -96,20 +96,38 @@ class ImageCache {
   /// and therefore new images must be obtained.
   void clear() {
     _cache.clear();
+    _currentSizeBytes = 0;
   }
 
   /// Evicts a single entry from the cache, returning true if successful.
   ///
   /// [key] is usually an image's corresponding [ImageProvider]. For example,
-  /// to evict a network image like below:
+  /// if you have an image in you Flutter app like the following.
   ///
-  ///     new Image.network(url);
+  /// ```dart
+  ///     Widget build(BuildContext context) {
+  ///       return new Image.network(url);
+  ///     }
+  /// ```
   ///
-  /// You need to pass a [NetworkImage] object to this method to evict it:
+  /// To remove it from the cache, pass a [NetworkImage] object to the
+  /// evict method with matching url and scale.
   ///
-  ///     ImageCache.evict(new NetworkImage(url));
+  /// ```dart
+  ///   void evictImage() {
+  ///     final NetworkImage key = new NetworkImage(url);
+  ///     if (imageCache.evict(key))
+  ///       print('image removed!');
+  ///   }
+  /// ```
+  ///
   bool evict(Object key) {
-    return _cache.remove(key) != null;
+    final _CachedImage image = _cache.remove(key);
+    if (image != null) {
+      _currentSizeBytes -= image.sizeBytes;
+      return true;
+    }
+    return false;
   }
 
   /// Returns the previously cached [ImageStream] for the given key, if available;
@@ -120,40 +138,47 @@ class ImageCache {
   ImageStreamCompleter putIfAbsent(Object key, ImageStreamCompleter loader()) {
     assert(key != null);
     assert(loader != null);
-    final ImageStreamCompleter result = _pendingImages[key];
+    ImageStreamCompleter result = _pendingImages[key];
     // Nothing needs to be done because the image hasn't loaded yet.
     if (result != null)
       return result;
+    // Remove the provider from the list so that we can move it to the
+    // recently used position below.
     final _CachedImage image = _cache.remove(key);
     if (image != null) {
-      // Remove the provider from the list so that we can put it back in below
-      // and thus move it to the end of the list.
       _cache[key] = image;
       return image.completer;
-    } else {
-      final ImageStreamCompleter result = loader();
-      void listener(ImageInfo info, bool syncCall) {
-        final _CachedImage image = new _CachedImage(result, info.image == null ? 0 : info.image.height * info.image.width * 4);
-        _pendingImages.remove(key);
-        _cache[key] = image;
-        _checkCacheSize();
-        result.removeListener(listener);
-      }
-      if (maximumSize != 0 && maximumSizeBytes != 0)
-        result.addListener(listener);
-      return result;
     }
+    result = loader();
+    void listener(ImageInfo info, bool syncCall) {
+      // Images that fail to load don't contribute to cache size.
+      final int imageSize = info.image == null ? 0 : info.image.height * info.image.width * 4;
+      final _CachedImage image = new _CachedImage(result, imageSize);
+      _currentSizeBytes += imageSize;
+      _pendingImages.remove(key);
+      _cache[key] = image;
+      result.removeListener(listener);
+      _checkCacheSize();
+    }
+    if (maximumSize > 0 && maximumSizeBytes > 0) {
+      _pendingImages[key] = result;
+      result.addListener(listener);
+    }
+    return result;
   }
 
+  // Remove images from the cache until both the length and bytes are below
+  // maximum, or the cache is empty.
   void _checkCacheSize() {
-    while (_sizeBytes > _maximumSizeBytes || _cache.length >= _maximumSize) {
+    while (_currentSizeBytes > _maximumSizeBytes || _cache.length > _maximumSize) {
       final Object key = _cache.keys.first;
       final _CachedImage image = _cache[key];
-      _sizeBytes -= image.sizeBytes;
+      _currentSizeBytes -= image.sizeBytes;
       _cache.remove(key);
     }
+    assert(_currentSizeBytes >= 0);
     assert(_cache.length <= maximumSize);
-    assert(_sizeBytes <= maximumSizeBytes);
+    assert(_currentSizeBytes <= maximumSizeBytes);
   }
 }
 

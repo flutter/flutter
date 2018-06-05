@@ -360,7 +360,7 @@ void main() {
         child: image,
       ),
     );
-    expect(imageStreamCompleter.listeners.length, 2);
+    expect(imageStreamCompleter.listeners.length, 1);
   });
 
   testWidgets('Verify Image shows correct RenderImage when changing to an already completed provider', (WidgetTester tester) async {
