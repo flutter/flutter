@@ -65,7 +65,7 @@ class Card extends StatelessWidget {
     this.color,
     this.elevation,
     this.shape,
-    this.margin: const EdgeInsets.all(4.0),
+    this.margin = const EdgeInsets.all(4.0),
     this.child,
   }) : super(key: key);
 

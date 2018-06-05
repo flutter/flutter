@@ -117,7 +117,7 @@ abstract class RenderSliverPersistentHeader extends RenderSliver with RenderObje
   ///
   /// The `overlapsContent` argument is passed to [updateChild].
   @protected
-  void layoutChild(double scrollOffset, double maxExtent, { bool overlapsContent: false }) {
+  void layoutChild(double scrollOffset, double maxExtent, { bool overlapsContent = false }) {
     assert(maxExtent != null);
     final double shrinkOffset = math.min(scrollOffset, maxExtent);
     if (_needsUpdateChild || _lastShrinkOffset != shrinkOffset || _lastOverlapsContent != overlapsContent) {
@@ -324,8 +324,8 @@ class FloatingHeaderSnapConfiguration {
   /// (animated) into or out of view.
   FloatingHeaderSnapConfiguration({
     @required this.vsync,
-    this.curve: Curves.ease,
-    this.duration: const Duration(milliseconds: 300),
+    this.curve = Curves.ease,
+    this.duration = const Duration(milliseconds: 300),
   }) : assert(vsync != null),
        assert(curve != null),
        assert(duration != null);

@@ -42,7 +42,7 @@ abstract class InputBorder extends ShapeBorder {
   /// substitutes its own, using [copyWith], based on the current theme and
   /// [InputDecorator.isFocused].
   const InputBorder({
-    this.borderSide: BorderSide.none,
+    this.borderSide = BorderSide.none,
   }) : assert(borderSide != null);
 
   /// Defines the border line's color and weight.
@@ -73,8 +73,8 @@ abstract class InputBorder extends ShapeBorder {
   @override
   void paint(Canvas canvas, Rect rect, {
       double gapStart,
-      double gapExtent: 0.0,
-      double gapPercentage: 0.0,
+      double gapExtent = 0.0,
+      double gapPercentage = 0.0,
       TextDirection textDirection,
   });
 }
@@ -108,8 +108,8 @@ class _NoInputBorder extends InputBorder {
   @override
   void paint(Canvas canvas, Rect rect, {
       double gapStart,
-      double gapExtent: 0.0,
-      double gapPercentage: 0.0,
+      double gapExtent = 0.0,
+      double gapPercentage = 0.0,
       TextDirection textDirection,
   }) {
     // Do not paint.
@@ -139,8 +139,8 @@ class UnderlineInputBorder extends InputBorder {
   /// and right corners have a circular radius of 4.0. The [borderRadius]
   /// parameter must not be null.
   const UnderlineInputBorder({
-    BorderSide borderSide: BorderSide.none,
-    this.borderRadius: const BorderRadius.only(
+    BorderSide borderSide = BorderSide.none,
+    this.borderRadius = const BorderRadius.only(
       topLeft: const Radius.circular(4.0),
       topRight: const Radius.circular(4.0),
     ),
@@ -217,8 +217,8 @@ class UnderlineInputBorder extends InputBorder {
   @override
   void paint(Canvas canvas, Rect rect, {
       double gapStart,
-      double gapExtent: 0.0,
-      double gapPercentage: 0.0,
+      double gapExtent = 0.0,
+      double gapPercentage = 0.0,
       TextDirection textDirection,
   }) {
     if (borderRadius.bottomLeft != Radius.zero || borderRadius.bottomRight != Radius.zero)
@@ -266,9 +266,9 @@ class OutlineInputBorder extends InputBorder {
   /// must not be null and the corner radii must be circular, i.e. their
   /// [Radius.x] and [Radius.y] values must be the same.
   const OutlineInputBorder({
-    BorderSide borderSide: BorderSide.none,
-    this.borderRadius: const BorderRadius.all(const Radius.circular(4.0)),
-    this.gapPadding: 4.0,
+    BorderSide borderSide = BorderSide.none,
+    this.borderRadius = const BorderRadius.all(const Radius.circular(4.0)),
+    this.gapPadding = 4.0,
   }) : assert(borderRadius != null),
        assert(gapPadding != null && gapPadding >= 0.0),
        super(borderSide: borderSide);
@@ -437,8 +437,8 @@ class OutlineInputBorder extends InputBorder {
   @override
   void paint(Canvas canvas, Rect rect, {
       double gapStart,
-      double gapExtent: 0.0,
-      double gapPercentage: 0.0,
+      double gapExtent = 0.0,
+      double gapPercentage = 0.0,
       TextDirection textDirection,
   }) {
     assert(gapExtent != null);

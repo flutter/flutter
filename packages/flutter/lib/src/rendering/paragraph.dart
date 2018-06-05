@@ -38,11 +38,11 @@ class RenderParagraph extends RenderBox {
   /// The [maxLines] property may be null (and indeed defaults to null), but if
   /// it is not null, it must be greater than zero.
   RenderParagraph(TextSpan text, {
-    TextAlign textAlign: TextAlign.start,
+    TextAlign textAlign = TextAlign.start,
     @required TextDirection textDirection,
-    bool softWrap: true,
-    TextOverflow overflow: TextOverflow.clip,
-    double textScaleFactor: 1.0,
+    bool softWrap = true,
+    TextOverflow overflow = TextOverflow.clip,
+    double textScaleFactor = 1.0,
     int maxLines,
     ui.Locale locale,
   }) : assert(text != null),
@@ -185,7 +185,7 @@ class RenderParagraph extends RenderBox {
     markNeedsLayout();
   }
 
-  void _layoutText({ double minWidth: 0.0, double maxWidth: double.infinity }) {
+  void _layoutText({ double minWidth = 0.0, double maxWidth = double.infinity }) {
     final bool widthMatters = softWrap || overflow == TextOverflow.ellipsis;
     _textPainter.layout(minWidth: minWidth, maxWidth: widthMatters ? maxWidth : double.infinity);
   }

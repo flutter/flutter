@@ -48,7 +48,7 @@ import 'theme.dart';
 Future<T> showSearch<T>({
   @required BuildContext context,
   @required SearchDelegate<T> delegate,
-  String query: '',
+  String query = '',
 }) {
   assert(delegate != null);
   assert(context != null);

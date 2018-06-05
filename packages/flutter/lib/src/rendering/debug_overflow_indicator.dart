@@ -23,9 +23,9 @@ enum _OverflowSide {
 class _OverflowRegionData {
   const _OverflowRegionData({
     this.rect,
-    this.label: '',
-    this.labelOffset: Offset.zero,
-    this.rotation: 0.0,
+    this.label = '',
+    this.labelOffset = Offset.zero,
+    this.rotation = 0.0,
     this.side,
   });
 

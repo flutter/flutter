@@ -1641,7 +1641,7 @@ void main() {
   });
 }
 
-Future<Null> _testChildAnchorFeedbackPosition({WidgetTester tester, double top: 0.0, double left: 0.0}) async {
+Future<Null> _testChildAnchorFeedbackPosition({WidgetTester tester, double top = 0.0, double left = 0.0}) async {
   final List<int> accepted = <int>[];
   int dragStartedCount = 0;
 

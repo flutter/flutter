@@ -41,7 +41,7 @@ class GenSnapshot {
     @required String packagesPath,
     @required String depfilePath,
     IOSArch iosArch,
-    Iterable<String> additionalArgs: const <String>[],
+    Iterable<String> additionalArgs = const <String>[],
   }) {
     final List<String> args = <String>[
       '--await_is_keyword',
@@ -139,7 +139,7 @@ class AOTSnapshotter {
     @required bool previewDart2,
     @required bool buildSharedLibrary,
     IOSArch iosArch,
-    List<String> extraGenSnapshotOptions: const <String>[],
+    List<String> extraGenSnapshotOptions = const <String>[],
   }) async {
     if (!_isValidAotPlatform(platform, buildMode)) {
       printError('${getNameForTargetPlatform(platform)} does not support AOT compilation.');
@@ -361,7 +361,7 @@ class AOTSnapshotter {
     @required BuildMode buildMode,
     @required String mainPath,
     @required String outputPath,
-    List<String> extraFrontEndOptions: const <String>[],
+    List<String> extraFrontEndOptions = const <String>[],
   }) async {
     final Directory outputDir = fs.directory(outputPath);
     outputDir.createSync(recursive: true);

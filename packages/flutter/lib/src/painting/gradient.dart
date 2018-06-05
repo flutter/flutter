@@ -268,11 +268,11 @@ class LinearGradient extends Gradient {
   /// The [colors] argument must not be null. If [stops] is non-null, it must
   /// have the same length as [colors].
   const LinearGradient({
-    this.begin: Alignment.centerLeft,
-    this.end: Alignment.centerRight,
+    this.begin = Alignment.centerLeft,
+    this.end = Alignment.centerRight,
     @required List<Color> colors,
     List<double> stops,
-    this.tileMode: TileMode.clamp,
+    this.tileMode = TileMode.clamp,
   }) : assert(begin != null),
        assert(end != null),
        assert(tileMode != null),
@@ -508,13 +508,13 @@ class RadialGradient extends Gradient {
   /// The [colors] argument must not be null. If [stops] is non-null, it must
   /// have the same length as [colors].
   const RadialGradient({
-    this.center: Alignment.center,
-    this.radius: 0.5,
+    this.center = Alignment.center,
+    this.radius = 0.5,
     @required List<Color> colors,
     List<double> stops,
-    this.tileMode: TileMode.clamp,
+    this.tileMode = TileMode.clamp,
     this.focal,
-    this.focalRadius: 0.0
+    this.focalRadius = 0.0
   }) : assert(center != null),
        assert(radius != null),
        assert(tileMode != null),
@@ -766,12 +766,12 @@ class SweepGradient extends Gradient {
   /// The [colors] argument must not be null. If [stops] is non-null, it must
   /// have the same length as [colors].
   const SweepGradient({
-    this.center: Alignment.center,
-    this.startAngle: 0.0,
-    this.endAngle: math.pi * 2,
+    this.center = Alignment.center,
+    this.startAngle = 0.0,
+    this.endAngle = math.pi * 2,
     @required List<Color> colors,
     List<double> stops,
-    this.tileMode: TileMode.clamp,
+    this.tileMode = TileMode.clamp,
   }) : assert(center != null),
        assert(startAngle != null),
        assert(endAngle != null),

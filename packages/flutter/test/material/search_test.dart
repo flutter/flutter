@@ -423,7 +423,7 @@ class TestHomePage extends StatelessWidget {
   const TestHomePage({
     this.results,
     this.delegate,
-    this.passInInitialQuery: false,
+    this.passInInitialQuery = false,
     this.initialQuery,
   });
 
@@ -472,9 +472,9 @@ class TestHomePage extends StatelessWidget {
 class _TestSearchDelegate extends SearchDelegate<String> {
 
   _TestSearchDelegate({
-    this.suggestions: 'Suggestions',
-    this.result: 'Result',
-    this.actions: const <Widget>[],
+    this.suggestions = 'Suggestions',
+    this.result = 'Result',
+    this.actions = const <Widget>[],
   });
 
   final String suggestions;

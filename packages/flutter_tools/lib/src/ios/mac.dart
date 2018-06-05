@@ -190,8 +190,8 @@ Future<XcodeBuildResult> buildXcodeProject({
   BuildInfo buildInfo,
   String targetOverride,
   bool buildForDevice,
-  bool codesign: true,
-  bool usesTerminalUi: true,
+  bool codesign = true,
+  bool usesTerminalUi = true,
 }) async {
   if (!await upgradePbxProjWithFlutterAssets(app.name, app.appDirectory))
     return new XcodeBuildResult(success: false);

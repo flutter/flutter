@@ -82,12 +82,12 @@ class CupertinoNavigationBar extends StatelessWidget implements ObstructingPrefe
   const CupertinoNavigationBar({
     Key key,
     this.leading,
-    this.automaticallyImplyLeading: true,
+    this.automaticallyImplyLeading = true,
     this.middle,
     this.trailing,
-    this.border: _kDefaultNavBarBorder,
-    this.backgroundColor: _kDefaultNavBarBackgroundColor,
-    this.actionsForegroundColor: CupertinoColors.activeBlue,
+    this.border = _kDefaultNavBarBorder,
+    this.backgroundColor = _kDefaultNavBarBackgroundColor,
+    this.actionsForegroundColor = CupertinoColors.activeBlue,
   }) : assert(automaticallyImplyLeading != null),
        super(key: key);
 
@@ -192,11 +192,11 @@ class CupertinoSliverNavigationBar extends StatelessWidget {
     Key key,
     @required this.largeTitle,
     this.leading,
-    this.automaticallyImplyLeading: true,
+    this.automaticallyImplyLeading = true,
     this.middle,
     this.trailing,
-    this.backgroundColor: _kDefaultNavBarBackgroundColor,
-    this.actionsForegroundColor: CupertinoColors.activeBlue,
+    this.backgroundColor = _kDefaultNavBarBackgroundColor,
+    this.actionsForegroundColor = CupertinoColors.activeBlue,
   }) : assert(largeTitle != null),
        assert(automaticallyImplyLeading != null),
        super(key: key);
@@ -447,8 +447,8 @@ class _CupertinoLargeTitleNavigationBarSliverDelegate
     this.automaticallyImplyLeading,
     this.middle,
     this.trailing,
-    this.border: _kDefaultNavBarBorder,
-    this.backgroundColor: _kDefaultNavBarBackgroundColor,
+    this.border = _kDefaultNavBarBorder,
+    this.backgroundColor = _kDefaultNavBarBackgroundColor,
     this.actionsForegroundColor,
   }) : assert(persistentHeight != null);
 

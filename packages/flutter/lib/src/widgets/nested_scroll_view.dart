@@ -182,8 +182,8 @@ class NestedScrollView extends StatefulWidget {
   const NestedScrollView({
     Key key,
     this.controller,
-    this.scrollDirection: Axis.vertical,
-    this.reverse: false,
+    this.scrollDirection = Axis.vertical,
+    this.reverse = false,
     this.physics,
     @required this.headerSliverBuilder,
     @required this.body,
@@ -835,7 +835,7 @@ class _NestedScrollCoordinator implements ScrollActivityDelegate, ScrollHoldCont
 
 class _NestedScrollController extends ScrollController {
   _NestedScrollController(this.coordinator, {
-    double initialScrollOffset: 0.0,
+    double initialScrollOffset = 0.0,
     String debugLabel,
   }) : super(initialScrollOffset: initialScrollOffset, debugLabel: debugLabel);
 
@@ -902,7 +902,7 @@ class _NestedScrollPosition extends ScrollPosition implements ScrollActivityDele
   _NestedScrollPosition({
     @required ScrollPhysics physics,
     @required ScrollContext context,
-    double initialPixels: 0.0,
+    double initialPixels = 0.0,
     ScrollPosition oldPosition,
     String debugLabel,
     @required this.coordinator,
@@ -1617,12 +1617,12 @@ class NestedScrollViewViewport extends Viewport {
   /// The [handle] must not be null.
   NestedScrollViewViewport({
     Key key,
-    AxisDirection axisDirection: AxisDirection.down,
+    AxisDirection axisDirection = AxisDirection.down,
     AxisDirection crossAxisDirection,
-    double anchor: 0.0,
+    double anchor = 0.0,
     @required ViewportOffset offset,
     Key center,
-    List<Widget> slivers: const <Widget>[],
+    List<Widget> slivers = const <Widget>[],
     @required this.handle,
   }) : assert(handle != null),
        super(
@@ -1675,10 +1675,10 @@ class RenderNestedScrollViewViewport extends RenderViewport {
   ///
   /// The [handle] must not be null.
   RenderNestedScrollViewViewport({
-    AxisDirection axisDirection: AxisDirection.down,
+    AxisDirection axisDirection = AxisDirection.down,
     @required AxisDirection crossAxisDirection,
     @required ViewportOffset offset,
-    double anchor: 0.0,
+    double anchor = 0.0,
     List<RenderSliver> children,
     RenderSliver center,
     @required SliverOverlapAbsorberHandle handle,

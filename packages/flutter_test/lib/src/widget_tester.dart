@@ -51,7 +51,7 @@ typedef Future<Null> WidgetTesterCallback(WidgetTester widgetTester);
 /// ```
 @isTest
 void testWidgets(String description, WidgetTesterCallback callback, {
-  bool skip: false,
+  bool skip = false,
   test_package.Timeout timeout
 }) {
   final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized();

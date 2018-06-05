@@ -83,8 +83,8 @@ class CocoaPods {
     @required Directory appIosDirectory,
     // For backward compatibility with previously created Podfile only.
     @required String iosEngineDir,
-    bool isSwift: false,
-    bool dependenciesChanged: true,
+    bool isSwift = false,
+    bool dependenciesChanged = true,
   }) async {
     if (!(await appIosDirectory.childFile('Podfile').exists())) {
       throwToolExit('Podfile missing');

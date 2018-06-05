@@ -105,7 +105,7 @@ class AnsiTerminal {
     List<String> acceptedCharacters, {
     String prompt,
     int defaultChoiceIndex,
-    bool displayAcceptedCharacters: true,
+    bool displayAcceptedCharacters = true,
     Duration timeout,
   }) async {
     assert(acceptedCharacters != null);

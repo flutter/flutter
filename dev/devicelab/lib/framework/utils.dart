@@ -231,7 +231,7 @@ Future<int> exec(
   String executable,
   List<String> arguments, {
   Map<String, String> environment,
-  bool canFail: false,
+  bool canFail = false,
 }) async {
   final Process process = await startProcess(executable, arguments, environment: environment);
 
@@ -266,7 +266,7 @@ Future<String> eval(
   String executable,
   List<String> arguments, {
   Map<String, String> environment,
-  bool canFail: false,
+  bool canFail = false,
 }) async {
   final Process process = await startProcess(executable, arguments, environment: environment);
 
@@ -297,8 +297,8 @@ Future<String> eval(
 }
 
 Future<int> flutter(String command, {
-  List<String> options: const <String>[],
-  bool canFail: false,
+  List<String> options = const <String>[],
+  bool canFail = false,
   Map<String, String> environment,
 }) {
   final List<String> args = <String>[command]..addAll(options);
@@ -308,8 +308,8 @@ Future<int> flutter(String command, {
 
 /// Runs a `flutter` command and returns the standard output as a string.
 Future<String> evalFlutter(String command, {
-  List<String> options: const <String>[],
-  bool canFail: false,
+  List<String> options = const <String>[],
+  bool canFail = false,
   Map<String, String> environment,
 }) {
   final List<String> args = <String>[command]..addAll(options);
