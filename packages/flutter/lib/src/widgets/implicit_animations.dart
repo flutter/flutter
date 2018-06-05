@@ -234,9 +234,9 @@ typedef Tween<T> TweenVisitor<T>(Tween<T> tween, T targetValue, TweenConstructor
 /// animation, themselves. If you would like `setState()` to be called
 /// automatically as the animation changes, use [AnimatedWidgetBaseState].
 ///
-/// Subclasses must implement the [forEachTween] method to help
-/// [ImplicitlyAnimatedWidgetState] iterate through the subclasses' widget's fields
-/// and animate them.
+/// Subclasses must implement the [forEachTween] method to allow
+/// [ImplicitlyAnimatedWidgetState] to iterate through the subclasses' widget's
+/// fields and animate them.
 abstract class ImplicitlyAnimatedWidgetState<T extends ImplicitlyAnimatedWidget> extends State<T> with SingleTickerProviderStateMixin {
   /// The animation controller driving this widget's implicit animations.
   @protected
@@ -335,13 +335,14 @@ abstract class ImplicitlyAnimatedWidgetState<T extends ImplicitlyAnimatedWidget>
 }
 
 /// A base class for widgets with implicit animations that need to rebuild their
-/// Widget tree as the animation runs.
+/// widget tree as the animation runs.
 ///
-/// If you would rather respond to a running animation directly, use
-/// [ImplicitlyAnimatedWidgetState].
+/// This class calls [build] each frame that the animation tickets. For a
+/// variant that does not rebuild each frame, consider subclassing
+/// [ImplicitlyAnimatedWidgetState] directly.
 ///
-/// Subclasses must implement the [forEachTween] method to help
-/// [AnimatedWidgetBaseState] iterate through the subclasses' widget's fields
+/// Subclasses must implement the [forEachTween] method to allow
+/// [AnimatedWidgetBaseState] to iterate through the subclasses' widget's fields
 /// and animate them.
 abstract class AnimatedWidgetBaseState<T extends ImplicitlyAnimatedWidget> extends ImplicitlyAnimatedWidgetState<T> {
   @override
@@ -351,7 +352,7 @@ abstract class AnimatedWidgetBaseState<T extends ImplicitlyAnimatedWidget> exten
   }
 
   void _handleAnimationChanged() {
-    setState(() { });
+    setState(() { /* The animation ticked. Rebuild with new animation value */ });
   }
 }
 
