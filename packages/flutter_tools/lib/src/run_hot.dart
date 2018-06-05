@@ -412,7 +412,24 @@ class HotRunner extends ResidentRunner {
   /// Prints errors if [printErrors] is [true].
   static bool validateReloadReport(Map<String, dynamic> reloadReport,
       { bool printErrors: true }) {
-    if (reloadReport['type'] != 'ReloadReport') {
+    if (reloadReport == null) {
+      if (printErrors)
+        printError('Hot reload did not receive reload report.');
+      return false;
+    }
+    if (!(reloadReport['type'] == 'ReloadReport' &&
+          (reloadReport['success'] == true ||
+           (reloadReport['success'] == false &&
+            (reloadReport['details'] is Map<String, dynamic> &&
+             reloadReport['details']['notices'] is List<dynamic> &&
+             reloadReport['details']['notices'].isNotEmpty &&
+             reloadReport['details']['notices'].every(
+               (dynamic item) => item is Map<String, dynamic> && item['message'] is String
+             )
+            )
+           )
+          )
+         )) {
       if (printErrors)
         printError('Hot reload received invalid response: $reloadReport');
       return false;
