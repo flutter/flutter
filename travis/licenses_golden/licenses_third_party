@@ -1,4 +1,4 @@
-Signature: e65b667accd33ea6d59a908c7dce1eb9
+Signature: 8c90956f91c310595a860284ec9902de
 
 UNUSED LICENSES:
 
@@ -20742,6 +20742,8 @@ LIBRARY: skia
 ORIGIN: ../../../third_party/skia/src/core/SkFlattenablePriv.h + ../../../third_party/skia/LICENSE
 TYPE: LicenseType.bsd
 FILE: ../../../third_party/skia/src/core/SkFlattenablePriv.h
+FILE: ../../../third_party/skia/src/core/SkGlyphRun.cpp
+FILE: ../../../third_party/skia/src/core/SkGlyphRun.h
 ----------------------------------------------------------------------------------------------------
 Copyright 2018 The Android Open Source Project
 
