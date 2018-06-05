@@ -380,6 +380,7 @@ class RaisedButton extends StatelessWidget {
       shape: shape ?? buttonTheme.shape,
       animationDuration: animationDuration,
       child: child,
+      outerConstraints: const BoxConstraints(minHeight: 48.0),
     );
   }
 
