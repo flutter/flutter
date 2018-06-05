@@ -263,7 +263,10 @@ class FlutterVersion {
     final bool canShowWarning = isNewRemoteVersion || isNewRemoteVersion == null && installationSeemsOutdated;
     
     if (beenAWhileSinceWarningWasPrinted && canShowWarning) {
-      printStatus(versionOutOfDateMessage(frameworkAge), emphasis: true);
+      final String updateMessage = isNewRemoteVersion
+          ? newVersionAvailableMessage()
+          : versionOutOfDateMessage(frameworkAge);
+      printStatus(updateMessage, emphasis: true);
       await Future.wait<Null>(<Future<Null>>[
         stamp.store(
           newTimeWarningWasPrinted: _clock.now(),
@@ -282,6 +285,17 @@ class FlutterVersion {
     return '''
   ╔════════════════════════════════════════════════════════════════════════════╗
   ║ $warning ║
+  ║                                                                            ║
+  ║ To update to the latest version, run "flutter upgrade".                    ║
+  ╚════════════════════════════════════════════════════════════════════════════╝
+''';
+  }
+
+  @visibleForTesting
+  static String newVersionAvailableMessage() {
+    return '''
+  ╔════════════════════════════════════════════════════════════════════════════╗
+  ║ A new version of Flutter is available!                                     ║
   ║                                                                            ║
   ║ To update to the latest version, run "flutter upgrade".                    ║
   ╚════════════════════════════════════════════════════════════════════════════╝

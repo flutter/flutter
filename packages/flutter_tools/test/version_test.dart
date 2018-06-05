@@ -121,7 +121,7 @@ void main() {
       );
 
       await version.checkFlutterVersionFreshness();
-      _expectVersionMessage(FlutterVersion.versionOutOfDateMessage(_testClock.now().difference(_outOfDateVersion)));
+      _expectVersionMessage(FlutterVersion.newVersionAvailableMessage());
     }, overrides: <Type, Generator>{
       FlutterVersion: () => new FlutterVersion(_testClock),
       ProcessManager: () => mockProcessManager,
@@ -143,7 +143,7 @@ void main() {
       );
 
       await version.checkFlutterVersionFreshness();
-      _expectVersionMessage(FlutterVersion.versionOutOfDateMessage(_testClock.now().difference(_outOfDateVersion)));
+      _expectVersionMessage(FlutterVersion.newVersionAvailableMessage());
       expect((await VersionCheckStamp.load()).lastTimeWarningWasPrinted, _testClock.now());
 
       await version.checkFlutterVersionFreshness();
@@ -167,7 +167,7 @@ void main() {
       );
 
       await version.checkFlutterVersionFreshness();
-      _expectVersionMessage(FlutterVersion.versionOutOfDateMessage(_testClock.now().difference(_outOfDateVersion)));
+      _expectVersionMessage(FlutterVersion.newVersionAvailableMessage());
 
       // Immediate subsequent check is not expected to ping the server.
       fakeData(
@@ -201,7 +201,7 @@ void main() {
       );
 
       await version.checkFlutterVersionFreshness();
-      _expectVersionMessage(FlutterVersion.versionOutOfDateMessage(_testClock.now().difference(_outOfDateVersion)));
+      _expectVersionMessage(FlutterVersion.newVersionAvailableMessage());
     }, overrides: <Type, Generator>{
       FlutterVersion: () => new FlutterVersion(_testClock),
       ProcessManager: () => mockProcessManager,
