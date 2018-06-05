@@ -1248,7 +1248,10 @@ class _MatchesGoldenFile extends AsyncMatcher {
     final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized();
     return binding.runAsync<String>(() async {
       final ui.Image image = await imageFuture;
-      final ByteData bytes = await image.toByteData(format: ui.ImageByteFormat.png);
+      final ByteData bytes = await image.toByteData(format: ui.ImageByteFormat.png)
+        .timeout(const Duration(seconds: 10), onTimeout: () => null);
+      if (bytes == null)
+        return 'Failed to generate screenshot from engine within the 10,000ms timeout.';
       if (autoUpdateGoldenFiles) {
         await goldenFileComparator.update(key, bytes.buffer.asUint8List());
       } else {
@@ -1259,7 +1262,7 @@ class _MatchesGoldenFile extends AsyncMatcher {
           return ex.message;
         }
       }
-    });
+    }, additionalTime: const Duration(seconds: 11));
   }
 
   @override
