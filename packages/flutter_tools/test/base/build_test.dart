@@ -120,7 +120,7 @@ void main() {
       GenSnapshot: () => genSnapshot,
     };
 
-    Future<Null> writeFingerprint({ Map<String, String> files = const <String, String>{} }) {
+    Future<void> writeFingerprint({ Map<String, String> files = const <String, String>{} }) {
       return fs.file('output.snapshot.d.fingerprint').writeAsString(json.encode(<String, dynamic>{
         'version': kVersion,
         'properties': <String, String>{

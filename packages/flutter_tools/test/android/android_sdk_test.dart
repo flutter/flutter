@@ -73,7 +73,8 @@ void main() {
 
       final AndroidSdk sdk = AndroidSdk.locateAndroidSdk();
       when(processManager.canRun(sdk.sdkManagerPath)).thenReturn(true);
-      when(processManager.runSync(<String>[sdk.sdkManagerPath, '--version'], environment: argThat(isNotNull)))
+      when(processManager.runSync(<String>[sdk.sdkManagerPath, '--version'],
+          environment: typedArgThat(isNotNull,  named: 'environment')))
           .thenReturn(new ProcessResult(1, 0, '26.1.1\n', ''));
       expect(sdk.sdkManagerVersion, '26.1.1');
     }, overrides: <Type, Generator>{
@@ -87,7 +88,8 @@ void main() {
 
       final AndroidSdk sdk = AndroidSdk.locateAndroidSdk();
       when(processManager.canRun(sdk.sdkManagerPath)).thenReturn(true);
-      when(processManager.runSync(<String>[sdk.sdkManagerPath, '--version'], environment: argThat(isNotNull)))
+      when(processManager.runSync(<String>[sdk.sdkManagerPath, '--version'],
+          environment: typedArgThat(isNotNull,  named: 'environment')))
           .thenReturn(new ProcessResult(1, 1, '26.1.1\n', 'Mystery error'));
       expect(sdk.sdkManagerVersion, isNull);
     }, overrides: <Type, Generator>{
