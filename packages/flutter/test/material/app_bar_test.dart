@@ -8,7 +8,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 import '../widgets/semantics_tester.dart';
 
-Widget buildSliverAppBarApp({ bool floating, bool pinned, double expandedHeight, bool snap: false }) {
+Widget buildSliverAppBarApp({ bool floating, bool pinned, double expandedHeight, bool snap = false }) {
   return new Localizations(
     locale: const Locale('en', 'US'),
     delegates: const <LocalizationsDelegate<dynamic>>[
@@ -178,8 +178,7 @@ void main() {
 
     final Finder titleWidget = find.byKey(const Key('X'));
     expect(tester.getTopLeft(titleWidget).dx, 16.0);
-    // 4.0 is due to AppBar right padding.
-    expect(tester.getTopRight(titleWidget).dx, 800 - 16.0 - 4.0);
+    expect(tester.getTopRight(titleWidget).dx, 800 - 16.0);
   });
 
   testWidgets('AppBar centerTitle:false title start edge is 16.0 (RTL)', (WidgetTester tester) async {
@@ -199,8 +198,7 @@ void main() {
 
     final Finder titleWidget = find.byKey(const Key('X'));
     expect(tester.getTopRight(titleWidget).dx, 800.0 - 16.0);
-    // 4.0 is due to AppBar right padding.
-    expect(tester.getTopLeft(titleWidget).dx, 16.0 + 4.0);
+    expect(tester.getTopLeft(titleWidget).dx, 16.0);
   });
 
   testWidgets('AppBar titleSpacing:32 title start edge is 32.0 (LTR)', (WidgetTester tester) async {
@@ -218,8 +216,7 @@ void main() {
 
     final Finder titleWidget = find.byKey(const Key('X'));
     expect(tester.getTopLeft(titleWidget).dx, 32.0);
-    // 4.0 is due to AppBar right padding.
-    expect(tester.getTopRight(titleWidget).dx, 800 - 32.0 - 4.0);
+    expect(tester.getTopRight(titleWidget).dx, 800 - 32.0);
   });
 
   testWidgets('AppBar titleSpacing:32 title start edge is 32.0 (RTL)', (WidgetTester tester) async {
@@ -240,8 +237,7 @@ void main() {
 
     final Finder titleWidget = find.byKey(const Key('X'));
     expect(tester.getTopRight(titleWidget).dx, 800.0 - 32.0);
-    // 4.0 is due to AppBar right padding.
-    expect(tester.getTopLeft(titleWidget).dx, 32.0 + 4.0);
+    expect(tester.getTopLeft(titleWidget).dx, 32.0);
   });
 
   testWidgets(
@@ -315,7 +311,6 @@ void main() {
     expect(tester.getTopLeft(title).dx, 72.0);
     expect(tester.getSize(title).width, equals(
         800.0 // Screen width.
-        - 4.0 // Left margin before the leading button.
         - 56.0 // Leading button width.
         - 16.0 // Leading button to title padding.
         - 16.0)); // Title right side padding.
@@ -330,7 +325,6 @@ void main() {
     // The title shrinks by 200.0 to allow for the actions widgets.
     expect(tester.getSize(title).width, equals(
         800.0 // Screen width.
-        - 4.0 // Left margin before the leading button.
         - 56.0 // Leading button width.
         - 16.0 // Leading button to title padding.
         - 16.0 // Title to actions padding
@@ -340,7 +334,7 @@ void main() {
     await tester.pumpWidget(buildApp());
     expect(tester.getTopLeft(title).dx, 72.0);
     // Adding a leading widget shouldn't effect the title's size
-    expect(tester.getSize(title).width, equals(800.0 - 4.0 - 56.0 - 16.0 - 16.0 - 200.0));
+    expect(tester.getSize(title).width, equals(800.0 - 56.0 - 16.0 - 16.0 - 200.0));
   });
 
   testWidgets('AppBar centerTitle:true title overflow OK (LTR)', (WidgetTester tester) async {
@@ -380,8 +374,8 @@ void main() {
 
     // Centering a title with width 620 within the 800 pixel wide test widget
     // would mean that its start edge would have to be 90. We reserve 72
-    // on the start and the padded actions occupy 96 + 4 on the end. That
-    // leaves 628, so the title is end justified but its width isn't changed.
+    // on the start and the padded actions occupy 96 on the end. That
+    // leaves 632, so the title is end justified but its width isn't changed.
 
     await tester.pumpWidget(buildApp());
     leading = null;
@@ -391,7 +385,7 @@ void main() {
       const SizedBox(width: 48.0)
     ];
     await tester.pumpWidget(buildApp());
-    expect(tester.getTopLeft(title).dx, 800 - 620 - 48 - 48 - 4);
+    expect(tester.getTopLeft(title).dx, 800 - 620 - 48 - 48);
     expect(tester.getSize(title).width, equals(620.0));
   });
 
@@ -435,8 +429,8 @@ void main() {
 
     // Centering a title with width 620 within the 800 pixel wide test widget
     // would mean that its start edge would have to be 90. We reserve 72
-    // on the start and the padded actions occupy 96 + 4 on the end. That
-    // leaves 628, so the title is end justified but its width isn't changed.
+    // on the start and the padded actions occupy 96 on the end. That
+    // leaves 632, so the title is end justified but its width isn't changed.
 
     await tester.pumpWidget(buildApp());
     leading = null;
@@ -446,7 +440,7 @@ void main() {
       const SizedBox(width: 48.0)
     ];
     await tester.pumpWidget(buildApp());
-    expect(tester.getTopRight(title).dx, 620 + 48 + 48 + 4);
+    expect(tester.getTopRight(title).dx, 620 + 48 + 48);
     expect(tester.getSize(title).width, equals(620.0));
   });
 
@@ -568,8 +562,7 @@ void main() {
     );
 
     final Finder addButton = find.byTooltip('Add');
-    // Right padding is 4dp.
-    expect(tester.getTopRight(addButton), const Offset(800.0 - 4.0, 0.0));
+    expect(tester.getTopRight(addButton), const Offset(800.0, 0.0));
     // It's still the size it was plus the 2 * 8dp padding from IconButton.
     expect(tester.getSize(addButton), const Size(60.0 + 2 * 8.0, 56.0));
 
@@ -1118,8 +1111,8 @@ void main() {
     );
     expect(tester.getTopLeft(find.byType(AppBar)), const Offset(0.0, 0.0));
     expect(tester.getTopLeft(find.byKey(leadingKey)), const Offset(800.0 - 56.0, 100.0));
-    expect(tester.getTopLeft(find.byKey(titleKey)), const Offset(420.0, 100.0));
-    expect(tester.getTopLeft(find.byKey(trailingKey)), const Offset(4.0, 100.0));
+    expect(tester.getTopLeft(find.byKey(titleKey)), const Offset(416.0, 100.0));
+    expect(tester.getTopLeft(find.byKey(trailingKey)), const Offset(0.0, 100.0));
   });
 
   testWidgets('SliverAppBar positioning of leading and trailing widgets with top padding', (WidgetTester tester) async {
@@ -1149,8 +1142,8 @@ void main() {
     );
     expect(tester.getTopLeft(find.byType(AppBar)), const Offset(0.0, 0.0));
     expect(tester.getTopLeft(find.byKey(leadingKey)), const Offset(800.0 - 56.0, 100.0));
-    expect(tester.getTopLeft(find.byKey(titleKey)), const Offset(420.0, 100.0));
-    expect(tester.getTopLeft(find.byKey(trailingKey)), const Offset(4.0, 100.0));
+    expect(tester.getTopLeft(find.byKey(titleKey)), const Offset(416.0, 100.0));
+    expect(tester.getTopLeft(find.byKey(trailingKey)), const Offset(0.0, 100.0));
   });
 
   testWidgets('SliverAppBar positioning of leading and trailing widgets with bottom padding', (WidgetTester tester) async {
@@ -1180,7 +1173,7 @@ void main() {
     );
     expect(tester.getRect(find.byType(AppBar)), new Rect.fromLTRB(0.0, 0.0, 800.00, 100.0 + 56.0));
     expect(tester.getRect(find.byKey(leadingKey)), new Rect.fromLTRB(800.0 - 56.0, 100.0, 800.0, 100.0 + 56.0));
-    expect(tester.getRect(find.byKey(trailingKey)), new Rect.fromLTRB(4.0, 100.0, 400.0 + 4.0, 100.0 + 56.0));
+    expect(tester.getRect(find.byKey(trailingKey)), new Rect.fromLTRB(0.0, 100.0, 400.0, 100.0 + 56.0));
   });
 
   testWidgets('SliverAppBar provides correct semantics in LTR', (WidgetTester tester) async {

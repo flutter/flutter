@@ -177,7 +177,7 @@ Future<Null> main() async {
 
   test('Error reporting - NoSuchMethodError', () async {
     expect(console, isEmpty);
-    final dynamic exception = new NoSuchMethodError(5, #foo, <dynamic>[2, 4], null);
+    final dynamic exception = new NoSuchMethodError(5, #foo, <dynamic>[2, 4], null); // ignore: deprecated_member_use
     FlutterError.dumpErrorToConsole(new FlutterErrorDetails(
       exception: exception,
     ));

@@ -109,7 +109,7 @@ class MutatingRoute extends MaterialPageRoute<void> {
 }
 
 class MyStatefulWidget extends StatefulWidget {
-  const MyStatefulWidget({ Key key, this.value: '123' }) : super(key: key);
+  const MyStatefulWidget({ Key key, this.value = '123' }) : super(key: key);
   final String value;
   @override
   MyStatefulWidgetState createState() => new MyStatefulWidgetState();

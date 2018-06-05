@@ -65,7 +65,7 @@ class StockData extends ChangeNotifier {
     notifyListeners();
   }
 
-  static const int _kChunkCount = 30;
+  static const int _chunkCount = 30;
   int _nextChunk = 0;
 
   String _urlToFetch(int chunk) {
@@ -86,7 +86,7 @@ class StockData extends ChangeNotifier {
       }
       const JsonDecoder decoder = const JsonDecoder();
       add(decoder.convert(json));
-      if (_nextChunk < _kChunkCount) {
+      if (_nextChunk < _chunkCount) {
         _fetchNextChunk();
       } else {
         _end();

@@ -92,9 +92,10 @@ class Draggable<T> extends StatefulWidget {
     @required this.child,
     @required this.feedback,
     this.data,
+    this.axis,
     this.childWhenDragging,
-    this.feedbackOffset: Offset.zero,
-    this.dragAnchor: DragAnchor.child,
+    this.feedbackOffset = Offset.zero,
+    this.dragAnchor = DragAnchor.child,
     this.affinity,
     this.maxSimultaneousDrags,
     this.onDragStarted,
@@ -108,6 +109,19 @@ class Draggable<T> extends StatefulWidget {
 
   /// The data that will be dropped by this draggable.
   final T data;
+
+  /// The [Axis] to restrict this draggable's movement, if specified.
+  ///
+  /// When axis is set to [Axis.horizontal], this widget can only be dragged
+  /// horizontally. Behavior is similar for [Axis.vertical].
+  ///
+  /// Defaults to allowing drag on both [Axis.horizontal] and [Axis.vertical].
+  ///
+  /// When null, allows drag on both [Axis.horizontal] and [Axis.vertical].
+  ///
+  /// For the direction of gestures this widget competes with to start a drag
+  /// event, see [Draggable.affinity].
+  final Axis axis;
 
   /// The widget below this widget in the tree.
   ///
@@ -164,6 +178,9 @@ class Draggable<T> extends StatefulWidget {
   /// affinity, pointer motion in any direction will result in a drag rather
   /// than in a scroll because the draggable widget, being the more specific
   /// widget, will out-compete the [Scrollable] for vertical gestures.
+  ///
+  /// For the directions this widget can be dragged in after the drag event
+  /// starts, see [Draggable.axis].
   final Axis affinity;
 
   /// How many simultaneous drags to support.
@@ -229,9 +246,10 @@ class LongPressDraggable<T> extends Draggable<T> {
     @required Widget child,
     @required Widget feedback,
     T data,
+    Axis axis,
     Widget childWhenDragging,
-    Offset feedbackOffset: Offset.zero,
-    DragAnchor dragAnchor: DragAnchor.child,
+    Offset feedbackOffset = Offset.zero,
+    DragAnchor dragAnchor = DragAnchor.child,
     int maxSimultaneousDrags,
     VoidCallback onDragStarted,
     DraggableCanceledCallback onDraggableCanceled,
@@ -241,6 +259,7 @@ class LongPressDraggable<T> extends Draggable<T> {
     child: child,
     feedback: feedback,
     data: data,
+    axis: axis,
     childWhenDragging: childWhenDragging,
     feedbackOffset: feedbackOffset,
     dragAnchor: dragAnchor,
@@ -311,7 +330,7 @@ class _DraggableState<T> extends State<Draggable<T>> {
         break;
       case DragAnchor.pointer:
         dragStartPoint = Offset.zero;
-      break;
+        break;
     }
     setState(() {
       _activeCount += 1;
@@ -319,6 +338,7 @@ class _DraggableState<T> extends State<Draggable<T>> {
     final _DragAvatar<T> avatar = new _DragAvatar<T>(
       overlayState: Overlay.of(context, debugRequiredFor: widget),
       data: widget.data,
+      axis: widget.axis,
       initialPosition: position,
       dragStartPoint: dragStartPoint,
       feedback: widget.feedback,
@@ -471,10 +491,11 @@ class _DragAvatar<T> extends Drag {
   _DragAvatar({
     @required this.overlayState,
     this.data,
+    this.axis,
     Offset initialPosition,
-    this.dragStartPoint: Offset.zero,
+    this.dragStartPoint = Offset.zero,
     this.feedback,
-    this.feedbackOffset: Offset.zero,
+    this.feedbackOffset = Offset.zero,
     this.onDragEnd
   }) : assert(overlayState != null),
        assert(dragStartPoint != null),
@@ -486,6 +507,7 @@ class _DragAvatar<T> extends Drag {
   }
 
   final T data;
+  final Axis axis;
   final Offset dragStartPoint;
   final Widget feedback;
   final Offset feedbackOffset;
@@ -500,14 +522,15 @@ class _DragAvatar<T> extends Drag {
 
   @override
   void update(DragUpdateDetails details) {
-    _position += details.delta;
+    _position += _restrictAxis(details.delta);
     updateDrag(_position);
   }
 
   @override
   void end(DragEndDetails details) {
-    finishDrag(_DragEndKind.dropped, details.velocity);
+    finishDrag(_DragEndKind.dropped, _restrictVelocityAxis(details.velocity));
   }
+
 
   @override
   void cancel() {
@@ -599,5 +622,24 @@ class _DragAvatar<T> extends Drag {
         child: feedback
       )
     );
+  }
+
+  Velocity _restrictVelocityAxis(Velocity velocity) {
+    if (axis == null) {
+      return velocity;
+    }
+    return new Velocity(
+      pixelsPerSecond: _restrictAxis(velocity.pixelsPerSecond),
+    );
+  }
+
+  Offset _restrictAxis(Offset offset) {
+    if (axis == null) {
+      return offset;
+    } 
+    if (axis == Axis.horizontal) {
+      return new Offset(offset.dx, 0.0);
+    }
+    return new Offset(0.0, offset.dy);
   }
 }

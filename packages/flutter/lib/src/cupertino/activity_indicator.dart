@@ -19,8 +19,8 @@ class CupertinoActivityIndicator extends StatefulWidget {
   /// Creates an iOS-style activity indicator.
   const CupertinoActivityIndicator({
     Key key,
-    this.animating: true,
-    this.radius: _kDefaultIndicatorRadius,
+    this.animating = true,
+    this.radius = _kDefaultIndicatorRadius,
   }) : assert(animating != null),
        assert(radius != null),
        assert(radius > 0),

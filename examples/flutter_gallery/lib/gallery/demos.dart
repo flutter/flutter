@@ -32,7 +32,7 @@ class GalleryDemoCategory {
 }
 
 const GalleryDemoCategory _kDemos = const GalleryDemoCategory._(
-  name: 'Vignettes',
+  name: 'Studies',
   icon: GalleryIcons.animation,
 );
 
@@ -312,6 +312,14 @@ List<GalleryDemo> _buildGalleryDemos() {
       category: _kMaterialComponents,
       routeName: OverscrollDemo.routeName,
       buildRoute: (BuildContext context) => const OverscrollDemo(),
+    ),
+    new GalleryDemo(
+      title: 'Search',
+      subtitle: 'Expandable search',
+      icon: Icons.search,
+      category: _kMaterialComponents,
+      routeName: SearchDemo.routeName,
+      buildRoute: (BuildContext context) => new SearchDemo(),
     ),
     new GalleryDemo(
       title: 'Selection controls',

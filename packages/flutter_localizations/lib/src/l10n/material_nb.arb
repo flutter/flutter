@@ -38,5 +38,6 @@
   "drawerLabel": "Navigasjonsmeny",
   "popupMenuLabel": "Forgrunnsmeny",
   "dialogLabel": "Dialogboks",
-  "alertDialogLabel": "Varsling"
+  "alertDialogLabel": "Varsling",
+  "searchFieldLabel": "Søke"
 }

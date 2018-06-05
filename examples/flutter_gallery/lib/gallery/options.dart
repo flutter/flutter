@@ -12,12 +12,12 @@ class GalleryOptions {
   GalleryOptions({
     this.theme,
     this.textScaleFactor,
-    this.textDirection: TextDirection.ltr,
-    this.timeDilation: 1.0,
+    this.textDirection = TextDirection.ltr,
+    this.timeDilation = 1.0,
     this.platform,
-    this.showOffscreenLayersCheckerboard: false,
-    this.showRasterCacheImagesCheckerboard: false,
-    this.showPerformanceOverlay: false,
+    this.showOffscreenLayersCheckerboard = false,
+    this.showRasterCacheImagesCheckerboard = false,
+    this.showPerformanceOverlay = false,
   });
 
   final GalleryTheme theme;
@@ -93,7 +93,7 @@ class _OptionsItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final double textScaleFactor = MediaQuery.of(context)?.textScaleFactor ?? 1.0;
+    final double textScaleFactor = MediaQuery.textScaleFactorOf(context);
 
     return new MergeSemantics(
       child: new Container(
@@ -184,15 +184,15 @@ class _Heading extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
-    return new Semantics(
-      header: true,
-      child: new _OptionsItem(
-        child: new DefaultTextStyle(
-          style: theme.textTheme.body1.copyWith(
-            fontFamily: 'GoogleSans',
-            color: theme.accentColor,
-          ),
+    return new _OptionsItem(
+      child: new DefaultTextStyle(
+        style: theme.textTheme.body1.copyWith(
+          fontFamily: 'GoogleSans',
+          color: theme.accentColor,
+        ),
+        child: new Semantics(
           child: new Text(text),
+          header: true,
         ),
       ),
     );

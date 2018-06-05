@@ -122,20 +122,20 @@ void main() {
       Platform: () => osx,
     });
 
-    testUsingContext('iPad 2 is unsupported', () {
-      expect(new IOSSimulator('x', name: 'iPad 2').isSupported(), false);
+    testUsingContext('iPad 2 is supported', () {
+      expect(new IOSSimulator('x', name: 'iPad 2').isSupported(), true);
     }, overrides: <Type, Generator>{
       Platform: () => osx,
     });
 
-    testUsingContext('iPad Retina is unsupported', () {
-      expect(new IOSSimulator('x', name: 'iPad Retina').isSupported(), false);
+    testUsingContext('iPad Retina is supported', () {
+      expect(new IOSSimulator('x', name: 'iPad Retina').isSupported(), true);
     }, overrides: <Type, Generator>{
       Platform: () => osx,
     });
 
-    testUsingContext('iPhone 5 is unsupported', () {
-      expect(new IOSSimulator('x', name: 'iPhone 5').isSupported(), false);
+    testUsingContext('iPhone 5 is supported', () {
+      expect(new IOSSimulator('x', name: 'iPhone 5').isSupported(), true);
     }, overrides: <Type, Generator>{
       Platform: () => osx,
     });
@@ -154,6 +154,12 @@ void main() {
 
     testUsingContext('iPhone 7 Plus is supported', () {
       expect(new IOSSimulator('x', name: 'iPhone 7 Plus').isSupported(), true);
+    }, overrides: <Type, Generator>{
+      Platform: () => osx,
+    });
+
+    testUsingContext('iPhone X is supported', () {
+      expect(new IOSSimulator('x', name: 'iPhone X').isSupported(), true);
     }, overrides: <Type, Generator>{
       Platform: () => osx,
     });

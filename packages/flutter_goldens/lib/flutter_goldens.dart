@@ -14,6 +14,10 @@ import 'package:meta/meta.dart';
 import 'package:platform/platform.dart';
 import 'package:process/process.dart';
 
+// If you are here trying to figure out how to use golden files in the Flutter
+// repo itself, consider reading this wiki page:
+// https://github.com/flutter/flutter/wiki/Writing-a-golden-file-test-for-package%3Aflutter
+
 const String _kFlutterRootKey = 'FLUTTER_ROOT';
 
 /// Main method that can be used in a `flutter_test_config.dart` file to set
@@ -42,7 +46,7 @@ class FlutterGoldenFileComparator implements GoldenFileComparator {
   @visibleForTesting
   FlutterGoldenFileComparator(
     this.basedir, {
-    this.fs: const LocalFileSystem(),
+    this.fs = const LocalFileSystem(),
   });
 
   /// The directory to which golden file URIs will be resolved in [compare] and [update].
@@ -105,20 +109,42 @@ class FlutterGoldenFileComparator implements GoldenFileComparator {
 /// repository.
 @visibleForTesting
 class GoldensClient {
+  /// Create a handle to a local clone of the goldens repository.
   GoldensClient({
-    this.fs: const LocalFileSystem(),
-    this.platform: const LocalPlatform(),
-    this.process: const LocalProcessManager(),
+    this.fs = const LocalFileSystem(),
+    this.platform = const LocalPlatform(),
+    this.process = const LocalProcessManager(),
   });
 
+  /// The file system to use for storing the local clone of the repository.
+  ///
+  /// This is useful in tests, where a local file system (the default) can
+  /// be replaced by a memory file system.
   final FileSystem fs;
+
+  /// A wrapper for the [dart:io.Platform] API.
+  ///
+  /// This is useful in tests, where the system platform (the default) can
+  /// be replaced by a mock platform instance.
   final Platform platform;
+
+  /// A controller for launching subprocesses.
+  ///
+  /// This is useful in tests, where the real process manager (the default)
+  /// can be replaced by a mock process manager that doesn't really create
+  /// subprocesses.
   final ProcessManager process;
 
   RandomAccessFile _lock;
 
+  /// The local [Directory] where the Flutter repository is hosted.
+  ///
+  /// Uses the [fs] file system.
   Directory get flutterRoot => fs.directory(platform.environment[_kFlutterRootKey]);
 
+  /// The local [Directory] where the goldens repository is hosted.
+  ///
+  /// Uses the [fs] file system.
   Directory get repositoryRoot => flutterRoot.childDirectory(fs.path.join('bin', 'cache', 'pkg', 'goldens'));
 
   /// Prepares the local clone of the `flutter/goldens` repository for golden
@@ -174,6 +200,7 @@ class GoldensClient {
       <String>[
         'git init',
         'git remote add upstream https://github.com/flutter/goldens.git',
+        'git remote set-url --push upstream git@github.com:flutter/goldens.git',
       ],
       workingDirectory: repositoryRoot,
     );
@@ -221,9 +248,17 @@ class GoldensClient {
 
 /// Exception that signals a process' exit with a non-zero exit code.
 class NonZeroExitCode implements Exception {
+  /// Create an exception that represents a non-zero exit code.
+  ///
+  /// The first argument must be non-zero.
   const NonZeroExitCode(this.exitCode, this.stderr) : assert(exitCode != 0);
 
+  /// The code that the process will signal to th eoperating system.
+  ///
+  /// By definiton, this is not zero.
   final int exitCode;
+
+  /// The message to show on standard error.
   final String stderr;
 
   @override

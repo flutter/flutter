@@ -5,6 +5,7 @@
 import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/painting.dart';
 
 import 'basic.dart';
 import 'debug.dart';
@@ -62,8 +63,8 @@ class BannerPainter extends CustomPainter {
     @required this.textDirection,
     @required this.location,
     @required this.layoutDirection,
-    this.color: _kColor,
-    this.textStyle: _kTextStyle,
+    this.color = _kColor,
+    this.textStyle = _kTextStyle,
   }) : assert(message != null),
        assert(textDirection != null),
        assert(location != null),
@@ -107,15 +108,18 @@ class BannerPainter extends CustomPainter {
   /// Defaults to bold, white text.
   final TextStyle textStyle;
 
+  static const BoxShadow _shadow = const BoxShadow(
+    color: const Color(0x7F000000),
+    blurRadius: 6.0,
+  );
+
   bool _prepared = false;
   TextPainter _textPainter;
   Paint _paintShadow;
   Paint _paintBanner;
 
   void _prepare() {
-    _paintShadow = new Paint()
-      ..color = const Color(0x7F000000)
-      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 4.0);
+    _paintShadow = _shadow.toPaint();
     _paintBanner = new Paint()
       ..color = color;
     _textPainter = new TextPainter(
@@ -245,8 +249,8 @@ class Banner extends StatelessWidget {
     this.textDirection,
     @required this.location,
     this.layoutDirection,
-    this.color: _kColor,
-    this.textStyle: _kTextStyle,
+    this.color = _kColor,
+    this.textStyle = _kTextStyle,
   }) : assert(message != null),
        assert(location != null),
        assert(color != null),

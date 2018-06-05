@@ -5,7 +5,8 @@
 import 'dart:async';
 
 import 'package:args/command_runner.dart';
-import 'package:intl/intl_standalone.dart' as intl;
+import 'package:intl/intl.dart' as intl;
+import 'package:intl/intl_standalone.dart' as intl_standalone;
 import 'package:meta/meta.dart';
 
 import 'src/base/common.dart';
@@ -28,9 +29,9 @@ import 'src/version.dart';
 Future<int> run(
   List<String> args,
   List<FlutterCommand> commands, {
-  bool muteCommandLogging: false,
-  bool verbose: false,
-  bool verboseHelp: false,
+  bool muteCommandLogging = false,
+  bool verbose = false,
+  bool verboseHelp = false,
   bool reportCrashes,
   String flutterVersion,
 }) {
@@ -48,7 +49,11 @@ Future<int> run(
 
   return runInContext<int>(() async {
     // Initialize the system locale.
-    await intl.findSystemLocale();
+    final String systemLocale = await intl_standalone.findSystemLocale();
+    intl.Intl.defaultLocale = intl.Intl.verifiedLocale(
+      systemLocale, intl.NumberFormat.localeExists,
+      onFailure: (String _) => 'en_US'
+    );
 
     try {
       await runner.run(args);

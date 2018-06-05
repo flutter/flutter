@@ -38,5 +38,6 @@
   "drawerLabel": "Menu navigasi",
   "popupMenuLabel": "Menu pop-up",
   "dialogLabel": "Dialog",
-  "alertDialogLabel": "Waspada"
+  "alertDialogLabel": "Waspada",
+  "searchFieldLabel": "Pencarian"
 }

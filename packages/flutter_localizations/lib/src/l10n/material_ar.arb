@@ -42,5 +42,6 @@
   "drawerLabel": "قائمة تنقل",
   "popupMenuLabel": "قائمة منبثقة",
   "dialogLabel": "مربع حوار",
-  "alertDialogLabel": "مربع حوار التنبيه"
+  "alertDialogLabel": "مربع حوار التنبيه",
+  "searchFieldLabel": "بحث"
 }

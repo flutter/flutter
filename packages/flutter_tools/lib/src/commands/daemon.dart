@@ -17,6 +17,7 @@ import '../base/utils.dart';
 import '../build_info.dart';
 import '../cache.dart';
 import '../device.dart';
+import '../emulator.dart';
 import '../globals.dart';
 import '../ios/devices.dart';
 import '../ios/simulators.dart';
@@ -27,7 +28,7 @@ import '../runner/flutter_command.dart';
 import '../tester/flutter_tester.dart';
 import '../vmservice.dart';
 
-const String protocolVersion = '0.2.0';
+const String protocolVersion = '0.3.0';
 
 /// A server process command. This command will start up a long-lived server.
 /// It reads JSON-RPC based commands from stdin, executes them, and returns
@@ -36,7 +37,7 @@ const String protocolVersion = '0.2.0';
 /// It can be shutdown with a `daemon.shutdown` command (or by killing the
 /// process).
 class DaemonCommand extends FlutterCommand {
-  DaemonCommand({ this.hidden: false });
+  DaemonCommand({ this.hidden = false });
 
   @override
   final String name = 'daemon';
@@ -82,12 +83,13 @@ class Daemon {
     this.sendCommand, {
     this.daemonCommand,
     this.notifyingLogger,
-    this.logToStdout: false
+    this.logToStdout = false
   }) {
     // Set up domains.
     _registerDomain(daemonDomain = new DaemonDomain(this));
     _registerDomain(appDomain = new AppDomain(this));
     _registerDomain(deviceDomain = new DeviceDomain(this));
+    _registerDomain(emulatorDomain = new EmulatorDomain(this));
 
     // Start listening.
     _commandSubscription = commandStream.listen(
@@ -102,6 +104,7 @@ class Daemon {
   DaemonDomain daemonDomain;
   AppDomain appDomain;
   DeviceDomain deviceDomain;
+  EmulatorDomain emulatorDomain;
   StreamSubscription<Map<String, dynamic>> _commandSubscription;
 
   final DispatchCommand sendCommand;
@@ -201,7 +204,7 @@ abstract class Domain {
 
   void _send(Map<String, dynamic> map) => daemon._send(map);
 
-  String _getStringArg(Map<String, dynamic> args, String name, { bool required: false }) {
+  String _getStringArg(Map<String, dynamic> args, String name, { bool required = false }) {
     if (required && !args.containsKey(name))
       throw '$name is required';
     final dynamic val = args[name];
@@ -210,7 +213,7 @@ abstract class Domain {
     return val;
   }
 
-  bool _getBoolArg(Map<String, dynamic> args, String name, { bool required: false }) {
+  bool _getBoolArg(Map<String, dynamic> args, String name, { bool required = false }) {
     if (required && !args.containsKey(name))
       throw '$name is required';
     final dynamic val = args[name];
@@ -219,7 +222,7 @@ abstract class Domain {
     return val;
   }
 
-  int _getIntArg(Map<String, dynamic> args, String name, { bool required: false }) {
+  int _getIntArg(Map<String, dynamic> args, String name, { bool required = false }) {
     if (required && !args.containsKey(name))
       throw '$name is required';
     final dynamic val = args[name];
@@ -238,6 +241,14 @@ class DaemonDomain extends Domain {
   DaemonDomain(Daemon daemon) : super(daemon, 'daemon') {
     registerHandler('version', version);
     registerHandler('shutdown', shutdown);
+
+    sendEvent(
+      'daemon.connected',
+      <String, dynamic>{
+        'version': protocolVersion,
+        'pid': pid,
+      },
+    );
 
     _subscription = daemon.notifyingLogger.onMessage.listen((LogMessage message) {
       if (daemon.logToStdout) {
@@ -362,7 +373,7 @@ class AppDomain extends Domain {
     String projectRootPath,
     String packagesFilePath,
     String dillOutputPath,
-    bool ipv6: false,
+    bool ipv6 = false,
   }) async {
     if (await device.isLocalEmulator && !options.buildInfo.supportsEmulator) {
       throw '${toTitleCase(options.buildInfo.modeName)} mode is not supported for emulators.';
@@ -729,6 +740,13 @@ Future<Map<String, dynamic>> _deviceToMap(Device device) async {
   };
 }
 
+Map<String, dynamic> _emulatorToMap(Emulator emulator) {
+  return <String, dynamic>{
+    'id': emulator.id,
+    'name': emulator.name,
+  };
+}
+
 Map<String, dynamic> _operationResultToMap(OperationResult result) {
   final Map<String, dynamic> map = <String, dynamic>{
     'code': result.code,
@@ -759,14 +777,14 @@ class NotifyingLogger extends Logger {
   Stream<LogMessage> get onMessage => _messageController.stream;
 
   @override
-  void printError(String message, { StackTrace stackTrace, bool emphasis: false }) {
+  void printError(String message, { StackTrace stackTrace, bool emphasis = false }) {
     _messageController.add(new LogMessage('error', message, stackTrace));
   }
 
   @override
   void printStatus(
     String message,
-    { bool emphasis: false, bool newline: true, String ansiAlternative, int indent }
+    { bool emphasis = false, bool newline = true, String ansiAlternative, int indent }
   ) {
     _messageController.add(new LogMessage('status', message));
   }
@@ -780,8 +798,8 @@ class NotifyingLogger extends Logger {
   Status startProgress(
     String message, {
     String progressId,
-    bool expectSlowOperation: false,
-    int progressIndicatorPadding: kDefaultStatusPadding,
+    bool expectSlowOperation = false,
+    int progressIndicatorPadding = kDefaultStatusPadding,
   }) {
     printStatus(message);
     return new Status();
@@ -802,7 +820,7 @@ class AppInstance {
 
   _AppRunLogger _logger;
 
-  Future<OperationResult> restart({ bool fullRestart: false, bool pauseAfterRestart: false }) {
+  Future<OperationResult> restart({ bool fullRestart = false, bool pauseAfterRestart = false }) {
     return runner.restart(fullRestart: fullRestart, pauseAfterRestart: pauseAfterRestart);
   }
 
@@ -824,6 +842,34 @@ class AppInstance {
   }
 }
 
+/// This domain responds to methods like [getEmulators] and [launch].
+class EmulatorDomain extends Domain {
+  EmulatorManager emulators = new EmulatorManager();
+
+  EmulatorDomain(Daemon daemon) : super(daemon, 'emulator') {
+    registerHandler('getEmulators', getEmulators);
+    registerHandler('launch', launch);
+  }
+
+  Future<List<Map<String, dynamic>>> getEmulators([Map<String, dynamic> args]) async {
+    final List<Emulator> list = await emulators.getAllAvailableEmulators();
+    return list.map(_emulatorToMap).toList();
+  }
+
+  Future<Null> launch(Map<String, dynamic> args) async {
+    final String emulatorId = _getStringArg(args, 'emulatorId', required: true);
+    final List<Emulator> matches =
+        await emulators.getEmulatorsMatching(emulatorId);
+    if (matches.isEmpty) {
+      throw "emulator '$emulatorId' not found";
+    } else if (matches.length > 1) {
+      throw "multiple emulators match '$emulatorId'";
+    } else {
+      await matches.first.launch();
+    }
+  }
+}
+
 /// A [Logger] which sends log messages to a listening daemon client.
 ///
 /// This class can either:
@@ -841,7 +887,7 @@ class _AppRunLogger extends Logger {
   int _nextProgressId = 0;
 
   @override
-  void printError(String message, { StackTrace stackTrace, bool emphasis: false }) {
+  void printError(String message, { StackTrace stackTrace, bool emphasis = false }) {
     if (parent != null) {
       parent.printError(message, stackTrace: stackTrace, emphasis: emphasis);
     } else {
@@ -863,7 +909,7 @@ class _AppRunLogger extends Logger {
   @override
   void printStatus(
     String message, {
-    bool emphasis: false, bool newline: true, String ansiAlternative, int indent
+    bool emphasis = false, bool newline = true, String ansiAlternative, int indent
   }) {
     if (parent != null) {
       parent.printStatus(message, emphasis: emphasis, newline: newline,
@@ -888,8 +934,8 @@ class _AppRunLogger extends Logger {
   Status startProgress(
     String message, {
     String progressId,
-    bool expectSlowOperation: false,
-    int progressIndicatorPadding: 52,
+    bool expectSlowOperation = false,
+    int progressIndicatorPadding = 52,
   }) {
     // Ignore nested progresses; return a no-op status object.
     if (_status != null)

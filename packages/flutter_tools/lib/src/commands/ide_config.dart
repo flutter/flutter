@@ -12,7 +12,7 @@ import '../runner/flutter_command.dart';
 import '../template.dart';
 
 class IdeConfigCommand extends FlutterCommand {
-  IdeConfigCommand({this.hidden: false}) {
+  IdeConfigCommand({this.hidden = false}) {
     argParser.addFlag(
       'overwrite',
       negatable: true,

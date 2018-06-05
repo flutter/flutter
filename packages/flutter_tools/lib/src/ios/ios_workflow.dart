@@ -12,6 +12,7 @@ import '../base/version.dart';
 import '../doctor.dart';
 import 'cocoapods.dart';
 import 'mac.dart';
+import 'plist_utils.dart' as plist;
 
 IOSWorkflow get iosWorkflow => context[IOSWorkflow];
 
@@ -29,6 +30,13 @@ class IOSWorkflow extends DoctorValidator implements Workflow {
   // for real devices.
   @override
   bool get canLaunchDevices => xcode.isInstalledAndMeetsVersionCheck;
+
+  @override
+  bool get canListEmulators => false;
+
+  String getPlistValueFromFile(String path, String key) {
+    return plist.getValueFromFile(path, key);
+  }
 
   Future<bool> get hasIDeviceInstaller => exitsHappyAsync(<String>['ideviceinstaller', '-h']);
 
@@ -171,7 +179,9 @@ class IOSWorkflow extends DoctorValidator implements Workflow {
         }
       }
 
-      if (await cocoaPods.isCocoaPodsInstalledAndMeetsVersionCheck) {
+      final CocoaPodsStatus cocoaPodsStatus = await cocoaPods.evaluateCocoaPodsInstallation;
+
+      if (cocoaPodsStatus == CocoaPodsStatus.recommended) {
         if (await cocoaPods.isCocoaPodsInitialized) {
           messages.add(new ValidationMessage('CocoaPods version ${await cocoaPods.cocoaPodsVersionText}'));
         } else {
@@ -186,7 +196,7 @@ class IOSWorkflow extends DoctorValidator implements Workflow {
         }
       } else {
         brewStatus = ValidationType.partial;
-        if (!await cocoaPods.hasCocoaPods) {
+        if (cocoaPodsStatus == CocoaPodsStatus.notInstalled) {
           messages.add(new ValidationMessage.error(
             'CocoaPods not installed.\n'
             '$noCocoaPodsConsequence\n'
@@ -194,8 +204,8 @@ class IOSWorkflow extends DoctorValidator implements Workflow {
             '$cocoaPodsInstallInstructions'
           ));
         } else {
-          messages.add(new ValidationMessage.error(
-            'CocoaPods out of date ($cocoaPods.cocoaPodsMinimumVersion is required).\n'
+          messages.add(new ValidationMessage.hint(
+            'CocoaPods out of date (${cocoaPods.cocoaPodsRecommendedVersion} is recommended).\n'
             '$noCocoaPodsConsequence\n'
             'To upgrade:\n'
             '$cocoaPodsUpgradeInstructions'

@@ -46,7 +46,7 @@ class TwoLevelListItem extends StatelessWidget {
     this.leading,
     @required this.title,
     this.trailing,
-    this.enabled: true,
+    this.enabled = true,
     this.onTap,
     this.onLongPress
   }) : assert(title != null),
@@ -113,7 +113,7 @@ class TwoLevelSublist extends StatefulWidget {
     @required this.title,
     this.backgroundColor,
     this.onOpenChanged,
-    this.children: const <Widget>[],
+    this.children = const <Widget>[],
   }) : super(key: key);
 
   /// A widget to display before the title.
@@ -260,8 +260,8 @@ class TwoLevelList extends StatelessWidget {
   /// The [type] argument must not be null.
   const TwoLevelList({
     Key key,
-    this.children: const <Widget>[],
-    this.type: MaterialListType.twoLine,
+    this.children = const <Widget>[],
+    this.type = MaterialListType.twoLine,
     this.padding,
   }) : assert(type != null),
        super(key: key);

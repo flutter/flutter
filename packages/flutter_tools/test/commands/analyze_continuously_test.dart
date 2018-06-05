@@ -6,7 +6,7 @@ import 'dart:async';
 
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/os.dart';
-import 'package:flutter_tools/src/commands/analyze_continuously.dart';
+import 'package:flutter_tools/src/dart/analysis.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/dart/sdk.dart';
 import 'package:flutter_tools/src/runner/flutter_command_runner.dart';
@@ -109,7 +109,7 @@ void main() {
   });
 }
 
-void _createSampleProject(Directory directory, { bool brokenCode: false }) {
+void _createSampleProject(Directory directory, { bool brokenCode = false }) {
   final File pubspecFile = fs.file(fs.path.join(directory.path, 'pubspec.yaml'));
   pubspecFile.writeAsStringSync('''
 name: foo_project

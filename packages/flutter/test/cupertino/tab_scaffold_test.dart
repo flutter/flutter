@@ -294,7 +294,7 @@ void main() {
   });
 }
 
-CupertinoTabBar _buildTabBar({ int selectedTab: 0 }) {
+CupertinoTabBar _buildTabBar({ int selectedTab = 0 }) {
   return new CupertinoTabBar(
     items: const <BottomNavigationBarItem>[
       const BottomNavigationBarItem(

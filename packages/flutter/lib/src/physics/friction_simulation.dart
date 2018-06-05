@@ -19,7 +19,7 @@ class FrictionSimulation extends Simulation {
   /// length units as used for [x]; and the initial velocity, in the same
   /// velocity units as used for [dx].
   FrictionSimulation(double drag, double position, double velocity, {
-    Tolerance tolerance: Tolerance.defaultTolerance,
+    Tolerance tolerance = Tolerance.defaultTolerance,
   }) : _drag = drag,
        _dragLog = math.log(drag),
        _x = position,

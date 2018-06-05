@@ -84,6 +84,9 @@ class FlutterTesterDevice extends Device {
   @override
   bool isSupported() => true;
 
+  bool _isRunning = false;
+  bool get isRunning => _isRunning;
+
   @override
   Future<LaunchResult> startApp(
     ApplicationPackage package, {
@@ -91,10 +94,10 @@ class FlutterTesterDevice extends Device {
     String route,
     @required DebuggingOptions debuggingOptions,
     Map<String, dynamic> platformArgs,
-    bool prebuiltApplication: false,
-    bool applicationNeedsRebuild: false,
-    bool usesTerminalUi: true,
-    bool ipv6: false,
+    bool prebuiltApplication = false,
+    bool applicationNeedsRebuild = false,
+    bool usesTerminalUi = true,
+    bool ipv6 = false,
   }) async {
     final BuildInfo buildInfo = debuggingOptions.buildInfo;
 
@@ -109,6 +112,7 @@ class FlutterTesterDevice extends Device {
 
     final List<String> command = <String>[
       shellPath,
+      '--run-forever',
       '--non-interactive',
       '--enable-dart-profiling',
       '--packages=${PackageMap.globalPackagesPath}',
@@ -147,7 +151,9 @@ class FlutterTesterDevice extends Device {
     try {
       printTrace(command.join(' '));
 
+      _isRunning = true;
       _process = await processManager.start(command);
+      _process.exitCode.then((_) => _isRunning = false);
       _process.stdout
           .transform(utf8.decoder)
           .transform(const LineSplitter())

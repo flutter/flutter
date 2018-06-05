@@ -30,7 +30,7 @@ class _MockToStringDeep {
   /// line break.
   List<String> _lines;
 
-  String toStringDeep({ String prefixLineOne: '', String prefixOtherLines: '' }) {
+  String toStringDeep({ String prefixLineOne = '', String prefixOtherLines = '' }) {
     final StringBuffer sb = new StringBuffer();
     if (_lines.isNotEmpty)
       sb.write('$prefixLineOne${_lines.first}');
@@ -379,6 +379,7 @@ void main() {
       expect(comparator.invocation, _ComparatorInvocation.update);
       expect(comparator.imageBytes, hasLength(greaterThan(0)));
       expect(comparator.golden, Uri.parse('foo.png'));
+      autoUpdateGoldenFiles = false;
     });
   });
 }

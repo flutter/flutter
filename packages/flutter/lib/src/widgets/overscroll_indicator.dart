@@ -43,11 +43,11 @@ class GlowingOverscrollIndicator extends StatefulWidget {
   /// [notificationPredicate] arguments must not be null.
   const GlowingOverscrollIndicator({
     Key key,
-    this.showLeading: true,
-    this.showTrailing: true,
+    this.showLeading = true,
+    this.showTrailing = true,
     @required this.axisDirection,
     @required this.color,
-    this.notificationPredicate: defaultScrollNotificationPredicate,
+    this.notificationPredicate = defaultScrollNotificationPredicate,
     this.child,
   }) : assert(showLeading != null),
        assert(showTrailing != null),
@@ -313,8 +313,8 @@ class _GlowController extends ChangeNotifier {
   static const double _maxOpacity = 0.5;
   static const double _pullOpacityGlowFactor = 0.8;
   static const double _velocityGlowFactor = 0.00006;
-  static const double _SQRT3 = 1.73205080757; // const math.sqrt(3)
-  static const double _kWidthToHeightFactor = (3.0 / 4.0) * (2.0 - _SQRT3);
+  static const double _sqrt3 = 1.73205080757; // const math.sqrt(3)
+  static const double _widthToHeightFactor = (3.0 / 4.0) * (2.0 - _sqrt3);
 
   // absorbed velocities are clamped to the range _minVelocity.._maxVelocity
   static const double _minVelocity = 100.0; // logical pixels per second
@@ -362,7 +362,7 @@ class _GlowController extends ChangeNotifier {
     _pullDistance += overscroll / 200.0; // This factor is magic. Not clear why we need it to match Android.
     _glowOpacityTween.begin = _glowOpacity.value;
     _glowOpacityTween.end = math.min(_glowOpacity.value + overscroll / extent * _pullOpacityGlowFactor, _maxOpacity);
-    final double height = math.min(extent, crossExtent * _kWidthToHeightFactor);
+    final double height = math.min(extent, crossExtent * _widthToHeightFactor);
     _glowSizeTween.begin = _glowSize.value;
     _glowSizeTween.end = math.max(1.0 - 1.0 / (0.7 * math.sqrt(_pullDistance * height)), _glowSize.value);
     _displacementTarget = crossAxisOffset / crossExtent;
@@ -443,7 +443,7 @@ class _GlowController extends ChangeNotifier {
       return;
     final double baseGlowScale = size.width > size.height ? size.height / size.width : 1.0;
     final double radius = size.width * 3.0 / 2.0;
-    final double height = math.min(size.height, size.width * _kWidthToHeightFactor);
+    final double height = math.min(size.height, size.width * _widthToHeightFactor);
     final double scaleY = _glowSize.value * baseGlowScale;
     final Rect rect = new Rect.fromLTWH(0.0, 0.0, size.width, height);
     final Offset center = new Offset((size.width / 2.0) * (0.5 + _displacement), height - radius);

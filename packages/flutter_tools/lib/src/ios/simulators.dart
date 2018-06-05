@@ -247,36 +247,13 @@ class IOSSimulator extends Device {
       return false;
     }
 
-    // Step 1: Check if the device is part of a blacklisted category.
-    //         We do not support WatchOS or tvOS devices.
-
+    // Check if the device is part of a blacklisted category.
+    // We do not yet support WatchOS or tvOS devices.
     final RegExp blacklist = new RegExp(r'Apple (TV|Watch)', caseSensitive: false);
     if (blacklist.hasMatch(name)) {
-      _supportMessage = 'Flutter does not support Apple TV or Apple Watch. Select an iPhone 5s or above.';
+      _supportMessage = 'Flutter does not support Apple TV or Apple Watch.';
       return false;
     }
-
-    // Step 2: Check if the device must be rejected because of its version.
-    //         There is an artificial check on older simulators where arm64
-    //         targeted applications cannot be run (even though the Flutter
-    //         runner on the simulator is completely different).
-
-    // Check for unsupported iPads.
-    final Match iPadMatch = new RegExp(r'iPad (2|Retina)', caseSensitive: false).firstMatch(name);
-    if (iPadMatch != null) {
-      _supportMessage = 'Flutter does not yet support iPad 2 or iPad Retina. Select an iPad Air or above.';
-      return false;
-    }
-
-    // Check for unsupported iPhones.
-    final Match iPhoneMatch = new RegExp(r'iPhone [0-5]').firstMatch(name);
-    if (iPhoneMatch != null) {
-      if (name == 'iPhone 5s')
-        return true;
-      _supportMessage = 'Flutter does not yet support iPhone 5 or earlier. Select an iPhone 5s or above.';
-      return false;
-    }
-
     return true;
   }
 
@@ -297,16 +274,16 @@ class IOSSimulator extends Device {
     String route,
     DebuggingOptions debuggingOptions,
     Map<String, dynamic> platformArgs,
-    bool prebuiltApplication: false,
-    bool applicationNeedsRebuild: false,
-    bool usesTerminalUi: true,
-    bool ipv6: false,
+    bool prebuiltApplication = false,
+    bool applicationNeedsRebuild = false,
+    bool usesTerminalUi = true,
+    bool ipv6 = false,
   }) async {
     if (!prebuiltApplication) {
       printTrace('Building ${package.name} for $id.');
 
       try {
-        await _setupUpdatedApplicationBundle(package, debuggingOptions.buildInfo);
+        await _setupUpdatedApplicationBundle(package, debuggingOptions.buildInfo, mainPath, usesTerminalUi);
       } on ToolExit catch (e) {
         printError(e.message);
         return new LaunchResult.failed();
@@ -373,24 +350,31 @@ class IOSSimulator extends Device {
     return criteria.reduce((bool a, bool b) => a && b);
   }
 
-  Future<Null> _setupUpdatedApplicationBundle(ApplicationPackage app, BuildInfo buildInfo) async {
-    await _sideloadUpdatedAssetsForInstalledApplicationBundle(app, buildInfo);
+  Future<Null> _setupUpdatedApplicationBundle(ApplicationPackage app, BuildInfo buildInfo, String mainPath, bool usesTerminalUi) async {
+    await _sideloadUpdatedAssetsForInstalledApplicationBundle(app, buildInfo, mainPath);
 
     if (!await _applicationIsInstalledAndRunning(app))
-      return _buildAndInstallApplicationBundle(app, buildInfo);
+      return _buildAndInstallApplicationBundle(app, buildInfo, mainPath, usesTerminalUi);
   }
 
-  Future<Null> _buildAndInstallApplicationBundle(ApplicationPackage app, BuildInfo buildInfo) async {
+  Future<Null> _buildAndInstallApplicationBundle(ApplicationPackage app, BuildInfo buildInfo, String mainPath, bool usesTerminalUi) async {
     // Step 1: Build the Xcode project.
     // The build mode for the simulator is always debug.
 
     final BuildInfo debugBuildInfo = new BuildInfo(BuildMode.debug, buildInfo.flavor,
         previewDart2: buildInfo.previewDart2,
+        trackWidgetCreation: buildInfo.trackWidgetCreation,
         extraFrontEndOptions: buildInfo.extraFrontEndOptions,
         extraGenSnapshotOptions: buildInfo.extraGenSnapshotOptions,
-        preferSharedLibrary: buildInfo.preferSharedLibrary);
+        buildSharedLibrary: buildInfo.buildSharedLibrary);
 
-    final XcodeBuildResult buildResult = await buildXcodeProject(app: app, buildInfo: debugBuildInfo, buildForDevice: false);
+    final XcodeBuildResult buildResult = await buildXcodeProject(
+      app: app,
+      buildInfo: debugBuildInfo,
+      targetOverride: mainPath,
+      buildForDevice: false,
+      usesTerminalUi: usesTerminalUi,
+    );
     if (!buildResult.success)
       throwToolExit('Could not build the application for the simulator.');
 
@@ -405,10 +389,11 @@ class IOSSimulator extends Device {
     await SimControl.instance.install(id, fs.path.absolute(bundle.path));
   }
 
-  Future<Null> _sideloadUpdatedAssetsForInstalledApplicationBundle(ApplicationPackage app, BuildInfo buildInfo) {
+  Future<Null> _sideloadUpdatedAssetsForInstalledApplicationBundle(ApplicationPackage app, BuildInfo buildInfo, String mainPath) {
     // When running in previewDart2 mode, we still need to run compiler to
     // produce kernel file for the application.
     return bundle.build(
+      mainPath: mainPath,
       precompiledSnapshot: !buildInfo.previewDart2,
       previewDart2: buildInfo.previewDart2,
       trackWidgetCreation: buildInfo.trackWidgetCreation,

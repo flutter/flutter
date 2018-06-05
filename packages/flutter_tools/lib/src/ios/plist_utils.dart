@@ -8,6 +8,7 @@ import '../base/process.dart';
 const String kCFBundleIdentifierKey = 'CFBundleIdentifier';
 const String kCFBundleShortVersionStringKey = 'CFBundleShortVersionString';
 
+// Prefer using [iosWorkflow.getPlistValueFromFile] to enable mocking.
 String getValueFromFile(String plistFilePath, String key) {
   // TODO(chinmaygarde): For now, we only need to read from plist files on a mac
   // host. If this changes, we will need our own Dart plist reader.

@@ -254,11 +254,11 @@ class _LinearProgressIndicatorState extends State<LinearProgressIndicator> with 
 }
 
 class _CircularProgressIndicatorPainter extends CustomPainter {
-  static const double _kTwoPI = math.pi * 2.0;
-  static const double _kEpsilon = .001;
+  static const double _twoPi = math.pi * 2.0;
+  static const double _epsilon = .001;
   // Canvas.drawArc(r, 0, 2*PI) doesn't draw anything, so just get close.
-  static const double _kSweep = _kTwoPI - _kEpsilon;
-  static const double _kStartAngle = -math.pi / 2.0;
+  static const double _sweep = _twoPi - _epsilon;
+  static const double _startAngle = -math.pi / 2.0;
 
   _CircularProgressIndicatorPainter({
     this.valueColor,
@@ -269,11 +269,11 @@ class _CircularProgressIndicatorPainter extends CustomPainter {
     this.rotationValue,
     this.strokeWidth,
   }) : arcStart = value != null
-         ? _kStartAngle
-         : _kStartAngle + tailValue * 3 / 2 * math.pi + rotationValue * math.pi * 1.7 - stepValue * 0.8 * math.pi,
+         ? _startAngle
+         : _startAngle + tailValue * 3 / 2 * math.pi + rotationValue * math.pi * 1.7 - stepValue * 0.8 * math.pi,
        arcSweep = value != null
-         ? value.clamp(0.0, 1.0) * _kSweep
-         : math.max(headValue * 3 / 2 * math.pi - tailValue * 3 / 2 * math.pi, _kEpsilon);
+         ? value.clamp(0.0, 1.0) * _sweep
+         : math.max(headValue * 3 / 2 * math.pi - tailValue * 3 / 2 * math.pi, _epsilon);
 
   final Color valueColor;
   final double value;
@@ -340,7 +340,7 @@ class CircularProgressIndicator extends ProgressIndicator {
     double value,
     Color backgroundColor,
     Animation<Color> valueColor,
-    this.strokeWidth: 4.0,
+    this.strokeWidth = 4.0,
   }) : super(key: key, value: value, backgroundColor: backgroundColor, valueColor: valueColor);
 
   /// The width of the line used to draw the circle.
@@ -504,7 +504,7 @@ class RefreshProgressIndicator extends CircularProgressIndicator {
     double value,
     Color backgroundColor,
     Animation<Color> valueColor,
-    double strokeWidth: 2.0, // Different default than CircularProgressIndicator.
+    double strokeWidth = 2.0, // Different default than CircularProgressIndicator.
   }) : super(
     key: key,
     value: value,
@@ -518,7 +518,7 @@ class RefreshProgressIndicator extends CircularProgressIndicator {
 }
 
 class _RefreshProgressIndicatorState extends _CircularProgressIndicatorState {
-  static const double _kIndicatorSize = 40.0;
+  static const double _indicatorSize = 40.0;
 
   // Always show the indeterminate version of the circular progress indicator.
   // When value is non-null the sweep of the progress indicator arrow's arc
@@ -528,8 +528,8 @@ class _RefreshProgressIndicatorState extends _CircularProgressIndicatorState {
   Widget build(BuildContext context) {
     if (widget.value != null)
       _controller.value = widget.value / 10.0;
-    else
-      _controller.forward();
+    else if (!_controller.isAnimating)
+      _controller.repeat();
     return _buildAnimation();
   }
 
@@ -537,8 +537,8 @@ class _RefreshProgressIndicatorState extends _CircularProgressIndicatorState {
   Widget _buildIndicator(BuildContext context, double headValue, double tailValue, int stepValue, double rotationValue) {
     final double arrowheadScale = widget.value == null ? 0.0 : (widget.value * 2.0).clamp(0.0, 1.0);
     return new Container(
-      width: _kIndicatorSize,
-      height: _kIndicatorSize,
+      width: _indicatorSize,
+      height: _indicatorSize,
       margin: const EdgeInsets.all(4.0), // accommodate the shadow
       child: new Material(
         type: MaterialType.circle,

@@ -10,6 +10,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/widgets.dart';
+import 'package:meta/meta.dart';
 import 'package:test/test.dart' as test_package;
 
 import 'all_elements.dart';
@@ -48,27 +49,27 @@ typedef Future<Null> WidgetTesterCallback(WidgetTester widgetTester);
 ///       expect(find.text('Success'), findsOneWidget);
 ///     });
 /// ```
+@isTest
 void testWidgets(String description, WidgetTesterCallback callback, {
-  bool skip: false,
+  bool skip = false,
   test_package.Timeout timeout
 }) {
   final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized();
   final WidgetTester tester = new WidgetTester._(binding);
   timeout ??= binding.defaultTestTimeout;
-  test_package.group('-', () {
     test_package.test(
-      description,
-      () {
-        return binding.runTest(
-          () => callback(tester),
-          tester._endOfTestVerifications,
-          description: description ?? '',
-        );
-      },
-      skip: skip,
-    );
-    test_package.tearDown(binding.postTest);
-  }, timeout: timeout);
+    description,
+    () {
+      test_package.addTearDown(binding.postTest);
+      return binding.runTest(
+        () => callback(tester),
+        tester._endOfTestVerifications,
+        description: description ?? '',
+      );
+    },
+    skip: skip,
+    timeout: timeout
+  );
 }
 
 /// Runs the [callback] inside the Flutter benchmark environment.
@@ -177,7 +178,8 @@ Future<void> expectLater(dynamic actual, dynamic matcher, {
   // We can't wrap the delegate in a guard, or we'll hit async barriers in
   // [TestWidgetsFlutterBinding] while we're waiting for the matcher to complete
   TestAsyncUtils.guardSync();
-  return test_package.expectLater(actual, matcher, reason: reason, skip: skip);
+  return test_package.expectLater(actual, matcher, reason: reason, skip: skip)
+           .then<void>((dynamic value) => null);
 }
 
 /// Class that programmatically interacts with widgets and the test environment.

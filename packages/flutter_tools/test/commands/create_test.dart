@@ -436,14 +436,13 @@ Future<Null> _createAndAnalyzeProject(
     { List<String> unexpectedPaths = const <String>[], bool plugin = false }) async {
   await _createProject(dir, createArgs, expectedPaths, unexpectedPaths: unexpectedPaths, plugin: plugin);
   if (plugin) {
-    await _analyzeProject(dir.path, target: fs.path.join(dir.path, 'lib', 'flutter_project.dart'));
-    await _analyzeProject(fs.path.join(dir.path, 'example'));
+    await _analyzeProject(dir.path);
   } else {
     await _analyzeProject(dir.path);
   }
 }
 
-Future<Null> _analyzeProject(String workingDir, {String target}) async {
+Future<Null> _analyzeProject(String workingDir) async {
   final String flutterToolsPath = fs.path.absolute(fs.path.join(
     'bin',
     'flutter_tools.dart',
@@ -453,8 +452,6 @@ Future<Null> _analyzeProject(String workingDir, {String target}) async {
     ..addAll(dartVmFlags)
     ..add(flutterToolsPath)
     ..add('analyze');
-  if (target != null)
-    args.add(target);
 
   final ProcessResult exec = await Process.run(
     '$dartSdkPath/bin/dart',
@@ -506,9 +503,9 @@ class LoggingProcessManager extends LocalProcessManager {
     List<dynamic> command, {
       String workingDirectory,
       Map<String, String> environment,
-      bool includeParentEnvironment: true,
-      bool runInShell: false,
-      ProcessStartMode mode: ProcessStartMode.NORMAL, // ignore: deprecated_member_use
+      bool includeParentEnvironment = true,
+      bool runInShell = false,
+      ProcessStartMode mode = ProcessStartMode.NORMAL, // ignore: deprecated_member_use
     }) {
     commands.add(command);
     return super.start(

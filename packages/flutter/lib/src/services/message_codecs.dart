@@ -245,20 +245,20 @@ class StandardMessageCodec implements MessageCodec<dynamic> {
   // * Maps are encoded by first encoding their length in the expanding format,
   //   then follows the recursive encoding of each key/value pair, including the
   //   type byte for both (Maps are assumed to be heterogeneous).
-  static const int _kNull = 0;
-  static const int _kTrue = 1;
-  static const int _kFalse = 2;
-  static const int _kInt32 = 3;
-  static const int _kInt64 = 4;
-  static const int _kLargeInt = 5;
-  static const int _kFloat64 = 6;
-  static const int _kString = 7;
-  static const int _kUint8List = 8;
-  static const int _kInt32List = 9;
-  static const int _kInt64List = 10;
-  static const int _kFloat64List = 11;
-  static const int _kList = 12;
-  static const int _kMap = 13;
+  static const int _valueNull = 0;
+  static const int _valueTrue = 1;
+  static const int _valueFalse = 2;
+  static const int _valueInt32 = 3;
+  static const int _valueInt64 = 4;
+  static const int _valueLargeInt = 5;
+  static const int _valueFloat64 = 6;
+  static const int _valueString = 7;
+  static const int _valueUint8List = 8;
+  static const int _valueInt32List = 9;
+  static const int _valueInt64List = 10;
+  static const int _valueFloat64List = 11;
+  static const int _valueList = 12;
+  static const int _valueMap = 13;
 
   /// Creates a [MessageCodec] using the Flutter standard binary encoding.
   const StandardMessageCodec();
@@ -297,49 +297,49 @@ class StandardMessageCodec implements MessageCodec<dynamic> {
   /// clashes with any later extensions to the base class.
   void writeValue(WriteBuffer buffer, dynamic value) {
     if (value == null) {
-      buffer.putUint8(_kNull);
+      buffer.putUint8(_valueNull);
     } else if (value is bool) {
-      buffer.putUint8(value ? _kTrue : _kFalse);
+      buffer.putUint8(value ? _valueTrue : _valueFalse);
     } else if (value is int) {
       if (-0x7fffffff - 1 <= value && value <= 0x7fffffff) {
-        buffer.putUint8(_kInt32);
+        buffer.putUint8(_valueInt32);
         buffer.putInt32(value);
       } else {
-        buffer.putUint8(_kInt64);
+        buffer.putUint8(_valueInt64);
         buffer.putInt64(value);
       }
     } else if (value is double) {
-      buffer.putUint8(_kFloat64);
+      buffer.putUint8(_valueFloat64);
       buffer.putFloat64(value);
     } else if (value is String) {
-      buffer.putUint8(_kString);
+      buffer.putUint8(_valueString);
       final List<int> bytes = utf8.encoder.convert(value);
       writeSize(buffer, bytes.length);
       buffer.putUint8List(bytes);
     } else if (value is Uint8List) {
-      buffer.putUint8(_kUint8List);
+      buffer.putUint8(_valueUint8List);
       writeSize(buffer, value.length);
       buffer.putUint8List(value);
     } else if (value is Int32List) {
-      buffer.putUint8(_kInt32List);
+      buffer.putUint8(_valueInt32List);
       writeSize(buffer, value.length);
       buffer.putInt32List(value);
     } else if (value is Int64List) {
-      buffer.putUint8(_kInt64List);
+      buffer.putUint8(_valueInt64List);
       writeSize(buffer, value.length);
       buffer.putInt64List(value);
     } else if (value is Float64List) {
-      buffer.putUint8(_kFloat64List);
+      buffer.putUint8(_valueFloat64List);
       writeSize(buffer, value.length);
       buffer.putFloat64List(value);
     } else if (value is List) {
-      buffer.putUint8(_kList);
+      buffer.putUint8(_valueList);
       writeSize(buffer, value.length);
       for (final dynamic item in value) {
         writeValue(buffer, item);
       }
     } else if (value is Map) {
-      buffer.putUint8(_kMap);
+      buffer.putUint8(_valueMap);
       writeSize(buffer, value.length);
       value.forEach((dynamic key, dynamic value) {
         writeValue(buffer, key);
@@ -368,22 +368,22 @@ class StandardMessageCodec implements MessageCodec<dynamic> {
   dynamic readValueOfType(int type, ReadBuffer buffer) {
     dynamic result;
     switch (type) {
-      case _kNull:
+      case _valueNull:
         result = null;
         break;
-      case _kTrue:
+      case _valueTrue:
         result = true;
         break;
-      case _kFalse:
+      case _valueFalse:
         result = false;
         break;
-      case _kInt32:
+      case _valueInt32:
         result = buffer.getInt32();
         break;
-      case _kInt64:
+      case _valueInt64:
         result = buffer.getInt64();
         break;
-      case _kLargeInt:
+      case _valueLargeInt:
         // Flutter Engine APIs to use large ints have been deprecated on
         // 2018-01-09 and will be made unavailable.
         // TODO(mravn): remove this case once the APIs are unavailable.
@@ -391,37 +391,37 @@ class StandardMessageCodec implements MessageCodec<dynamic> {
         final String hex = utf8.decoder.convert(buffer.getUint8List(length));
         result = int.parse(hex, radix: 16);
         break;
-      case _kFloat64:
+      case _valueFloat64:
         result = buffer.getFloat64();
         break;
-      case _kString:
+      case _valueString:
         final int length = readSize(buffer);
         result = utf8.decoder.convert(buffer.getUint8List(length));
         break;
-      case _kUint8List:
+      case _valueUint8List:
         final int length = readSize(buffer);
         result = buffer.getUint8List(length);
         break;
-      case _kInt32List:
+      case _valueInt32List:
         final int length = readSize(buffer);
         result = buffer.getInt32List(length);
         break;
-      case _kInt64List:
+      case _valueInt64List:
         final int length = readSize(buffer);
         result = buffer.getInt64List(length);
         break;
-      case _kFloat64List:
+      case _valueFloat64List:
         final int length = readSize(buffer);
         result = buffer.getFloat64List(length);
         break;
-      case _kList:
+      case _valueList:
         final int length = readSize(buffer);
         result = new List<dynamic>(length);
         for (int i = 0; i < length; i++) {
           result[i] = readValue(buffer);
         }
         break;
-      case _kMap:
+      case _valueMap:
         final int length = readSize(buffer);
         result = <dynamic, dynamic>{};
         for (int i = 0; i < length; i++) {

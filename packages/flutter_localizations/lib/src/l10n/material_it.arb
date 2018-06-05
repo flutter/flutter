@@ -38,5 +38,6 @@
   "drawerLabel": "Menu di navigazione",
   "popupMenuLabel": "Menu popup",
   "dialogLabel": "Finestra di dialogo",
-  "alertDialogLabel": "Mettere in guardia"
+  "alertDialogLabel": "Mettere in guardia",
+  "searchFieldLabel": "Ricerca"
 }

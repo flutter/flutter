@@ -38,7 +38,7 @@ const String kFlutterToolsScriptFileName = 'flutter_tools.dart'; // in //flutter
 const String kFlutterEnginePackageName = 'sky_engine';
 
 class FlutterCommandRunner extends CommandRunner<Null> {
-  FlutterCommandRunner({ bool verboseHelp: false }) : super(
+  FlutterCommandRunner({ bool verboseHelp = false }) : super(
     'flutter',
     'Manage your Flutter app development.\n'
       '\n'
@@ -71,6 +71,11 @@ class FlutterCommandRunner extends CommandRunner<Null> {
         negatable: true,
         hide: !verboseHelp,
         help: 'Whether to use terminal colors.');
+    argParser.addFlag('version-check',
+        negatable: true,
+        defaultsTo: true,
+        hide: !verboseHelp,
+        help: 'Allow Flutter to check for updates when this command runs.');
     argParser.addFlag('suppress-analytics',
         negatable: false,
         hide: !verboseHelp,
@@ -280,7 +285,7 @@ class FlutterCommandRunner extends CommandRunner<Null> {
 
         _checkFlutterCopy();
         await FlutterVersion.instance.ensureVersionFile();
-        if (topLevelResults.command?.name != 'upgrade') {
+        if (topLevelResults.command?.name != 'upgrade' && topLevelResults['version-check']) {
           await FlutterVersion.instance.checkFlutterVersionFreshness();
         }
 
@@ -383,12 +388,19 @@ class FlutterCommandRunner extends CommandRunner<Null> {
     Cache.flutterRoot ??= _defaultFlutterRoot;
   }
 
-  /// Get all pub packages in the Flutter repo.
-  List<Directory> getRepoPackages() {
+  /// Get the root directories of the repo - the directories containing Dart packages.
+  List<String> getRepoRoots() {
     final String root = fs.path.absolute(Cache.flutterRoot);
     // not bin, and not the root
-    return <String>['dev', 'examples', 'packages']
-      .expand<String>((String path) => _gatherProjectPaths(fs.path.join(root, path)))
+    return <String>['dev', 'examples', 'packages'].map((String item) {
+      return fs.path.join(root, item);
+    }).toList();
+  }
+
+  /// Get all pub packages in the Flutter repo.
+  List<Directory> getRepoPackages() {
+    return getRepoRoots()
+      .expand<String>((String root) => _gatherProjectPaths(root))
       .map((String dir) => fs.directory(dir))
       .toList();
   }

@@ -533,8 +533,8 @@ class InputChip extends StatelessWidget
     @required this.label,
     this.labelStyle,
     this.labelPadding,
-    this.selected: false,
-    this.isEnabled: true,
+    this.selected = false,
+    this.isEnabled = true,
     this.onSelected,
     this.deleteIcon,
     this.onDeleted,
@@ -844,7 +844,7 @@ class FilterChip extends StatelessWidget
     @required this.label,
     this.labelStyle,
     this.labelPadding,
-    this.selected: false,
+    this.selected = false,
     @required this.onSelected,
     this.disabledColor,
     this.selectedColor,
@@ -1067,10 +1067,10 @@ class RawChip extends StatefulWidget
     this.deleteButtonTooltipMessage,
     this.onPressed,
     this.onSelected,
-    this.tapEnabled: true,
+    this.tapEnabled = true,
     this.selected,
-    this.showCheckmark: true,
-    this.isEnabled: true,
+    this.showCheckmark = true,
+    this.isEnabled = true,
     this.disabledColor,
     this.selectedColor,
     this.tooltip,
@@ -1328,7 +1328,7 @@ class _RawChipState extends State<RawChip> with TickerProviderStateMixin<RawChip
     }
   }
 
-  Widget _wrapWithTooltip(Widget child, String tooltip, VoidCallback callback) {
+  Widget _wrapWithTooltip(String tooltip, VoidCallback callback, Widget child) {
     if (child == null || callback == null || tooltip == null) {
       return child;
     }
@@ -1343,17 +1343,17 @@ class _RawChipState extends State<RawChip> with TickerProviderStateMixin<RawChip
       return null;
     }
     return _wrapWithTooltip(
+      widget.deleteButtonTooltipMessage ?? MaterialLocalizations.of(context)?.deleteButtonTooltip,
+      widget.onDeleted,
       new InkResponse(
         onTap: widget.isEnabled ? widget.onDeleted : null,
         child: new IconTheme(
           data: theme.iconTheme.copyWith(
-            color: (widget.deleteIconColor ?? chipTheme.deleteIconColor) ?? theme.iconTheme.color,
+            color: widget.deleteIconColor ?? chipTheme.deleteIconColor,
           ),
           child: widget.deleteIcon,
         ),
       ),
-      widget.deleteButtonTooltipMessage ?? MaterialLocalizations.of(context)?.deleteButtonTooltip,
-      widget.onDeleted,
     );
   }
 
@@ -1388,42 +1388,43 @@ class _RawChipState extends State<RawChip> with TickerProviderStateMixin<RawChip
             );
           },
           child: _wrapWithTooltip(
-              new _ChipRenderWidget(
-                theme: new _ChipRenderTheme(
-                  label: new DefaultTextStyle(
-                    overflow: TextOverflow.fade,
-                    textAlign: TextAlign.start,
-                    maxLines: 1,
-                    softWrap: false,
-                    style: widget.labelStyle ?? chipTheme.labelStyle,
-                    child: widget.label,
-                  ),
-                  avatar: new AnimatedSwitcher(
-                    child: widget.avatar,
-                    duration: _kDrawerDuration,
-                    switchInCurve: Curves.fastOutSlowIn,
-                  ),
-                  deleteIcon: new AnimatedSwitcher(
-                    child: _buildDeleteIcon(context, theme, chipTheme),
-                    duration: _kDrawerDuration,
-                    switchInCurve: Curves.fastOutSlowIn,
-                  ),
-                  brightness: chipTheme.brightness,
-                  padding: (widget.padding ?? chipTheme.padding).resolve(textDirection),
-                  labelPadding: (widget.labelPadding ?? chipTheme.labelPadding).resolve(textDirection),
-                  showAvatar: hasAvatar,
-                  showCheckmark: widget.showCheckmark,
-                  canTapBody: canTap,
+            widget.tooltip,
+            widget.onPressed,
+            new _ChipRenderWidget(
+              theme: new _ChipRenderTheme(
+                label: new DefaultTextStyle(
+                  overflow: TextOverflow.fade,
+                  textAlign: TextAlign.start,
+                  maxLines: 1,
+                  softWrap: false,
+                  style: widget.labelStyle ?? chipTheme.labelStyle,
+                  child: widget.label,
                 ),
-                value: widget.selected,
-                checkmarkAnimation: checkmarkAnimation,
-                enableAnimation: enableAnimation,
-                avatarDrawerAnimation: avatarDrawerAnimation,
-                deleteDrawerAnimation: deleteDrawerAnimation,
-                isEnabled: widget.isEnabled,
+                avatar: new AnimatedSwitcher(
+                  child: widget.avatar,
+                  duration: _kDrawerDuration,
+                  switchInCurve: Curves.fastOutSlowIn,
+                ),
+                deleteIcon: new AnimatedSwitcher(
+                  child: _buildDeleteIcon(context, theme, chipTheme),
+                  duration: _kDrawerDuration,
+                  switchInCurve: Curves.fastOutSlowIn,
+                ),
+                brightness: chipTheme.brightness,
+                padding: (widget.padding ?? chipTheme.padding).resolve(textDirection),
+                labelPadding: (widget.labelPadding ?? chipTheme.labelPadding).resolve(textDirection),
+                showAvatar: hasAvatar,
+                showCheckmark: widget.showCheckmark,
+                canTapBody: canTap,
               ),
-              widget.tooltip,
-              widget.onPressed),
+              value: widget.selected,
+              checkmarkAnimation: checkmarkAnimation,
+              enableAnimation: enableAnimation,
+              avatarDrawerAnimation: avatarDrawerAnimation,
+              deleteDrawerAnimation: deleteDrawerAnimation,
+              isEnabled: widget.isEnabled,
+            ),
+          ),
         ),
       ),
     );
@@ -1854,7 +1855,7 @@ class _RenderChip extends RenderBox {
   @override
   double computeDistanceToActualBaseline(TextBaseline baseline) {
     // The baseline of this widget is the baseline of the label.
-    return label.computeDistanceToActualBaseline(baseline);
+    return label.getDistanceToActualBaseline(baseline);
   }
 
   Size _layoutLabel(double iconSizes, Size size) {

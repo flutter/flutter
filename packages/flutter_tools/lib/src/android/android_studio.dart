@@ -10,7 +10,8 @@ import '../base/platform.dart';
 import '../base/process_manager.dart';
 import '../base/version.dart';
 import '../globals.dart';
-import '../ios/plist_utils.dart';
+import '../ios/ios_workflow.dart';
+import '../ios/plist_utils.dart' as plist;
 
 AndroidStudio get androidStudio => context[AndroidStudio];
 
@@ -46,8 +47,11 @@ class AndroidStudio implements Comparable<AndroidStudio> {
   factory AndroidStudio.fromMacOSBundle(String bundlePath) {
     final String studioPath = fs.path.join(bundlePath, 'Contents');
     final String plistFile = fs.path.join(studioPath, 'Info.plist');
-    final String versionString =
-        getValueFromFile(plistFile, kCFBundleShortVersionStringKey);
+    final String versionString = iosWorkflow.getPlistValueFromFile(
+      plistFile,
+      plist.kCFBundleShortVersionStringKey,
+    );
+
     Version version;
     if (versionString != null)
       version = new Version.parse(versionString);

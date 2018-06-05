@@ -2,9 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../widgets/semantics_tester.dart';
 import 'feedback_tester.dart';
 
 void main () {
@@ -21,8 +25,23 @@ void main () {
   });
 
   group('Feedback on Android', () {
+    List<Map<String, Object>> semanticEvents;
+
+    setUp(() {
+      semanticEvents = <Map<String, Object>>[];
+      SystemChannels.accessibility.setMockMessageHandler((dynamic message) {
+        final Map<dynamic, dynamic> typedMessage = message;
+        semanticEvents.add(typedMessage.cast<String, Object>());
+      });
+    });
+
+    tearDown(() {
+      SystemChannels.accessibility.setMockMessageHandler(null);
+    });
 
     testWidgets('forTap', (WidgetTester tester) async {
+      final SemanticsTester semanticsTester = new SemanticsTester(tester);
+
       await tester.pumpWidget(new TestWidget(
         tapHandler: (BuildContext context) {
           return () => Feedback.forTap(context);
@@ -31,14 +50,27 @@ void main () {
       await tester.pumpAndSettle(kWaitDuration);
       expect(feedback.hapticCount, 0);
       expect(feedback.clickSoundCount, 0);
+      expect(semanticEvents, isEmpty);
 
       await tester.tap(find.text('X'));
       await tester.pumpAndSettle(kWaitDuration);
+      final RenderObject object = tester.firstRenderObject(find.byType(GestureDetector));
+
       expect(feedback.hapticCount, 0);
       expect(feedback.clickSoundCount, 1);
+      expect(semanticEvents.single, <String, dynamic>{
+        'type': 'tap',
+        'nodeId': object.debugSemantics.id,
+        'data': <String, dynamic>{},
+      });
+      expect(object.debugSemantics.getSemanticsData().hasAction(SemanticsAction.tap), true);
+
+      semanticsTester.dispose();
     });
 
     testWidgets('forTap Wrapper', (WidgetTester tester) async {
+      final SemanticsTester semanticsTester = new SemanticsTester(tester);
+
       int callbackCount = 0;
       final VoidCallback callback = () {
         callbackCount++;
@@ -56,12 +88,24 @@ void main () {
 
       await tester.tap(find.text('X'));
       await tester.pumpAndSettle(kWaitDuration);
+      final RenderObject object = tester.firstRenderObject(find.byType(GestureDetector));
+
       expect(feedback.hapticCount, 0);
       expect(feedback.clickSoundCount, 1);
       expect(callbackCount, 1);
+      expect(semanticEvents.single, <String, dynamic>{
+        'type': 'tap',
+        'nodeId': object.debugSemantics.id,
+        'data': <String, dynamic>{},
+      });
+      expect(object.debugSemantics.getSemanticsData().hasAction(SemanticsAction.tap), true);
+
+      semanticsTester.dispose();
     });
 
     testWidgets('forLongPress', (WidgetTester tester) async {
+      final SemanticsTester semanticsTester = new SemanticsTester(tester);
+
       await tester.pumpWidget(new TestWidget(
         longPressHandler: (BuildContext context) {
           return () => Feedback.forLongPress(context);
@@ -73,11 +117,22 @@ void main () {
 
       await tester.longPress(find.text('X'));
       await tester.pumpAndSettle(kWaitDuration);
+      final RenderObject object = tester.firstRenderObject(find.byType(GestureDetector));
+
       expect(feedback.hapticCount, 1);
       expect(feedback.clickSoundCount, 0);
+      expect(semanticEvents.single, <String, dynamic>{
+        'type': 'longPress',
+        'nodeId': object.debugSemantics.id,
+        'data': <String, dynamic>{},
+      });
+      expect(object.debugSemantics.getSemanticsData().hasAction(SemanticsAction.longPress), true);
+
+      semanticsTester.dispose();
     });
 
     testWidgets('forLongPress Wrapper', (WidgetTester tester) async {
+      final SemanticsTester semanticsTester = new SemanticsTester(tester);
       int callbackCount = 0;
       final VoidCallback callback = () {
         callbackCount++;
@@ -89,6 +144,8 @@ void main () {
         },
       ));
       await tester.pumpAndSettle(kWaitDuration);
+      final RenderObject object = tester.firstRenderObject(find.byType(GestureDetector));
+
       expect(feedback.hapticCount, 0);
       expect(feedback.clickSoundCount, 0);
       expect(callbackCount, 0);
@@ -98,6 +155,14 @@ void main () {
       expect(feedback.hapticCount, 1);
       expect(feedback.clickSoundCount, 0);
       expect(callbackCount, 1);
+      expect(semanticEvents.single, <String, dynamic>{
+        'type': 'longPress',
+        'nodeId': object.debugSemantics.id,
+        'data': <String, dynamic>{},
+      });
+      expect(object.debugSemantics.getSemanticsData().hasAction(SemanticsAction.longPress), true);
+
+      semanticsTester.dispose();
     });
 
   });
@@ -140,8 +205,8 @@ void main () {
 class TestWidget extends StatelessWidget {
 
   const TestWidget({
-    this.tapHandler: nullHandler,
-    this.longPressHandler: nullHandler,
+    this.tapHandler = nullHandler,
+    this.longPressHandler = nullHandler,
   });
 
   final HandlerCreator tapHandler;

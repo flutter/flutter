@@ -310,7 +310,7 @@ class DayPicker extends StatelessWidget {
   }
 
   // Do not use this directly - call getDaysInMonth instead.
-  static const List<int> _kDaysInMonth = const <int>[31, -1, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+  static const List<int> _daysInMonth = const <int>[31, -1, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
 
   /// Returns the number of days in a month, according to the proleptic
   /// Gregorian calendar.
@@ -324,7 +324,7 @@ class DayPicker extends StatelessWidget {
         return 29;
       return 28;
     }
-    return _kDaysInMonth[month - 1];
+    return _daysInMonth[month - 1];
   }
 
   /// Computes the offset from the first day of week that the first day of the
@@ -1044,7 +1044,7 @@ Future<DateTime> showDatePicker({
   @required DateTime firstDate,
   @required DateTime lastDate,
   SelectableDayPredicate selectableDayPredicate,
-  DatePickerMode initialDatePickerMode: DatePickerMode.day,
+  DatePickerMode initialDatePickerMode = DatePickerMode.day,
   Locale locale,
   TextDirection textDirection,
 }) async {

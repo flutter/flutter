@@ -103,7 +103,7 @@ enum _WordWrapParseMode { inSpace, inWord, atBreak }
 /// and so forth. It is only intended for formatting error messages.
 ///
 /// The default [debugPrint] implementation uses this for its line wrapping.
-Iterable<String> debugWordWrap(String message, int width, { String wrapIndent: '' }) sync* {
+Iterable<String> debugWordWrap(String message, int width, { String wrapIndent = '' }) sync* {
   if (message.length < width || message.trimLeft()[0] == '#') {
     yield message;
     return;

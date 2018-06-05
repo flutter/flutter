@@ -209,7 +209,8 @@ void main() {
           notifyingLogger: notifyingLogger,
       );
 
-      final Map<String, dynamic> response = await responses.stream.first;
+      final Map<String, dynamic> response =
+        await responses.stream.skipWhile(_isConnectedEvent).first;
       expect(response['event'], 'daemon.showMessage');
       expect(response['params'], isMap);
       expect(response['params'], containsPair('level', 'warning'));
@@ -249,7 +250,7 @@ void main() {
       daemon.deviceDomain.addDeviceDiscoverer(discoverer);
       discoverer.addDevice(new MockAndroidDevice());
 
-      return responses.stream.first.then((Map<String, dynamic> response) {
+      return responses.stream.skipWhile(_isConnectedEvent).first.then((Map<String, dynamic> response) {
         expect(response['event'], 'device.added');
         expect(response['params'], isMap);
 
@@ -262,6 +263,43 @@ void main() {
     }, overrides: <Type, Generator>{
       AndroidWorkflow: () => new MockAndroidWorkflow(),
       IOSWorkflow: () => new MockIOSWorkflow(),
+    });
+
+    testUsingContext('emulator.launch without an emulatorId should report an error', () async {
+      final DaemonCommand command = new DaemonCommand();
+      applyMocksToCommand(command);
+
+      final StreamController<Map<String, dynamic>> commands = new StreamController<Map<String, dynamic>>();
+      final StreamController<Map<String, dynamic>> responses = new StreamController<Map<String, dynamic>>();
+      daemon = new Daemon(
+        commands.stream,
+        responses.add,
+        daemonCommand: command,
+        notifyingLogger: notifyingLogger
+      );
+
+      commands.add(<String, dynamic>{ 'id': 0, 'method': 'emulator.launch' });
+      final Map<String, dynamic> response = await responses.stream.firstWhere(_notEvent);
+      expect(response['id'], 0);
+      expect(response['error'], contains('emulatorId is required'));
+      responses.close();
+      commands.close();
+    });
+
+    testUsingContext('emulator.getEmulators should respond with list', () async {
+      final StreamController<Map<String, dynamic>> commands = new StreamController<Map<String, dynamic>>();
+      final StreamController<Map<String, dynamic>> responses = new StreamController<Map<String, dynamic>>();
+      daemon = new Daemon(
+        commands.stream,
+        responses.add,
+        notifyingLogger: notifyingLogger
+      );
+      commands.add(<String, dynamic>{'id': 0, 'method': 'emulator.getEmulators'});
+      final Map<String, dynamic> response = await responses.stream.firstWhere(_notEvent);
+      expect(response['id'], 0);
+      expect(response['result'], isList);
+      responses.close();
+      commands.close();
     });
   });
 
@@ -285,15 +323,17 @@ void main() {
 
 bool _notEvent(Map<String, dynamic> map) => map['event'] == null;
 
+bool _isConnectedEvent(Map<String, dynamic> map) => map['event'] == 'daemon.connected';
+
 class MockAndroidWorkflow extends AndroidWorkflow {
-  MockAndroidWorkflow({ this.canListDevices: true });
+  MockAndroidWorkflow({ this.canListDevices = true });
 
   @override
   final bool canListDevices;
 }
 
 class MockIOSWorkflow extends IOSWorkflow {
-  MockIOSWorkflow({ this.canListDevices:true });
+  MockIOSWorkflow({ this.canListDevices =true });
 
   @override
   final bool canListDevices;

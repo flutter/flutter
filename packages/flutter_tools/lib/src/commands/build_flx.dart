@@ -9,7 +9,7 @@ import 'build.dart';
 
 class BuildFlxCommand extends BuildSubCommand {
 
-  BuildFlxCommand({bool verboseHelp: false});
+  BuildFlxCommand({bool verboseHelp = false});
   @override
   final String name = 'flx';
 

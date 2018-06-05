@@ -764,8 +764,8 @@ class Scaffold extends StatefulWidget {
     this.endDrawer,
     this.bottomNavigationBar,
     this.backgroundColor,
-    this.resizeToAvoidBottomPadding: true,
-    this.primary: true,
+    this.resizeToAvoidBottomPadding = true,
+    this.primary = true,
   }) : assert(primary != null), super(key: key);
 
   /// An app bar to display at the top of the scaffold.
@@ -834,7 +834,7 @@ class Scaffold extends StatefulWidget {
   /// left-to-right ([TextDirection.rtl])
   ///
   /// In the uncommon case that you wish to open the drawer manually, use the
-  /// [ScaffoldState.openDrawer] function.
+  /// [ScaffoldState.openEndDrawer] function.
   ///
   /// Typically a [Drawer].
   final Widget endDrawer;
@@ -935,7 +935,7 @@ class Scaffold extends StatefulWidget {
   ///
   /// If there is no [Scaffold] in scope, then this will throw an exception.
   /// To return null if there is no [Scaffold], then pass `nullOk: true`.
-  static ScaffoldState of(BuildContext context, { bool nullOk: false }) {
+  static ScaffoldState of(BuildContext context, { bool nullOk = false }) {
     assert(nullOk != null);
     assert(context != null);
     final ScaffoldState result = context.ancestorStateOfType(const TypeMatcher<ScaffoldState>());
@@ -1042,7 +1042,7 @@ class Scaffold extends StatefulWidget {
   /// See also:
   ///  * [Scaffold.of], which provides access to the [ScaffoldState] object as a
   ///    whole, from which you can show snackbars, bottom sheets, and so forth.
-  static bool hasDrawer(BuildContext context, { bool registerForUpdates: true }) {
+  static bool hasDrawer(BuildContext context, { bool registerForUpdates = true }) {
     assert(registerForUpdates != null);
     assert(context != null);
     if (registerForUpdates) {
@@ -1179,7 +1179,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
   ///
   /// The removed snack bar does not run its normal exit animation. If there are
   /// any queued snack bars, they begin their entrance animation immediately.
-  void removeCurrentSnackBar({ SnackBarClosedReason reason: SnackBarClosedReason.remove }) {
+  void removeCurrentSnackBar({ SnackBarClosedReason reason = SnackBarClosedReason.remove }) {
     assert(reason != null);
     if (_snackBars.isEmpty)
       return;
@@ -1194,7 +1194,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
   /// Removes the current [SnackBar] by running its normal exit animation.
   ///
   /// The closed completer is called after the animation is complete.
-  void hideCurrentSnackBar({ SnackBarClosedReason reason: SnackBarClosedReason.hide }) {
+  void hideCurrentSnackBar({ SnackBarClosedReason reason = SnackBarClosedReason.hide }) {
     assert(reason != null);
     if (_snackBars.isEmpty || _snackBarController.status == AnimationStatus.dismissed)
       return;

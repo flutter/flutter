@@ -252,7 +252,7 @@ class UserAccountsDrawerHeader extends StatefulWidget {
   const UserAccountsDrawerHeader({
     Key key,
     this.decoration,
-    this.margin: const EdgeInsets.only(bottom: 8.0),
+    this.margin = const EdgeInsets.only(bottom: 8.0),
     this.currentAccountPicture,
     this.otherAccountsPictures,
     @required this.accountName,

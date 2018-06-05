@@ -79,14 +79,10 @@ class RunCommand extends RunCommandBase {
   @override
   final String description = 'Run your Flutter app on an attached device.';
 
-  RunCommand({ bool verboseHelp: false }) {
+  RunCommand({ bool verboseHelp = false }) {
     requiresPubspecYaml();
 
     argParser
-      ..addFlag('full-restart',
-        defaultsTo: true,
-        help: 'Stop any currently running application process before running the app.',
-      )
       ..addFlag('start-paused',
         negatable: false,
         help: 'Start in a paused mode and wait for a debugger to connect.',
@@ -151,7 +147,7 @@ class RunCommand extends RunCommandBase {
       ..addOption('pid-file',
         help: 'Specify a file to write the process id to.\n'
               'You can send SIGUSR1 to trigger a hot reload\n'
-              'and SIGUSR2 to trigger a full restart.',
+              'and SIGUSR2 to trigger a hot restart.',
       )
       ..addFlag('resident',
         negatable: true,
@@ -216,7 +212,7 @@ class RunCommand extends RunCommandBase {
     if (getCurrentHostPlatform() == HostPlatform.darwin_x64 &&
         xcode.isInstalledAndMeetsVersionCheck) {
       printStatus('');
-      printStatus('To run on a simulator, launch it first: open -a Simulator.app');
+      printStatus("Run 'flutter emulators' to list and start any available device emulators.");
       printStatus('');
       printStatus('If you expected your device to be detected, please run "flutter doctor" to diagnose');
       printStatus('potential issues, or visit https://flutter.io/setup/ for troubleshooting tips.');

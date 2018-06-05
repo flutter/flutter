@@ -60,8 +60,8 @@ class OverlayEntry {
   /// call [remove] on the overlay entry itself.
   OverlayEntry({
     @required this.builder,
-    bool opaque: false,
-    bool maintainState: false,
+    bool opaque = false,
+    bool maintainState = false,
   }) : assert(builder != null),
        assert(opaque != null),
        assert(maintainState != null),
@@ -202,7 +202,7 @@ class Overlay extends StatefulWidget {
   /// created by the [WidgetsApp] or the [MaterialApp] for the application.
   const Overlay({
     Key key,
-    this.initialEntries: const <OverlayEntry>[]
+    this.initialEntries = const <OverlayEntry>[]
   }) : assert(initialEntries != null),
        super(key: key);
 

@@ -278,4 +278,50 @@ void main() {
     await gesture.up(); // generates a tap cancel
     await tester.pumpAndSettle();
   });
+
+  testWidgets('Cancel an InkRipple that was disposed when its animation ended', (WidgetTester tester) async {
+    const Color highlightColor = const Color(0xAAFF0000);
+    const Color splashColor = const Color(0xB40000FF);
+
+    // Regression test for https://github.com/flutter/flutter/issues/14391
+    await tester.pumpWidget(
+      new Material(
+        child: new Center(
+          child: new Container(
+            width: 100.0,
+            height: 100.0,
+            child: new InkWell(
+              splashColor: splashColor,
+              highlightColor: highlightColor,
+              onTap: () { },
+              radius: 100.0,
+              splashFactory: InkRipple.splashFactory,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final Offset tapDownOffset = tester.getTopLeft(find.byType(InkWell));
+    await tester.tapAt(tapDownOffset);
+    await tester.pump(); // start splash
+    // No delay here so _fadeInController.value=1.0 (InkRipple.dart)
+
+    // Generate a tap cancel; Will cancel the ink splash before it started
+    final TestGesture gesture = await tester.startGesture(tapDownOffset);
+    await tester.pump(); // start gesture
+    await gesture.moveTo(const Offset(0.0, 0.0));
+    await gesture.up(); // generates a tap cancel
+
+    final RenderBox box = Material.of(tester.element(find.byType(InkWell))) as dynamic;
+    expect(box, paints..everything((Symbol method, List<dynamic> arguments) {
+      if (method != #drawCircle)
+        return true;
+      final Paint paint = arguments[2];
+      if (paint.color.alpha == 0)
+        return true;
+      throw 'Expected: paint.color.alpha == 0, found: ${paint.color.alpha}';
+    }));
+  });
+
 }

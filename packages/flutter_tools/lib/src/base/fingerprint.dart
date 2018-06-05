@@ -13,6 +13,8 @@ import '../globals.dart';
 import '../version.dart';
 import 'file_system.dart';
 
+typedef bool FingerprintPathFilter(String path);
+
 /// A tool that can be used to compute, compare, and write [Fingerprint]s for a
 /// set of input files and associated build settings.
 ///
@@ -25,10 +27,12 @@ class Fingerprinter {
     @required this.fingerprintPath,
     @required Iterable<String> paths,
     @required Map<String, String> properties,
-    Iterable<String> depfilePaths: const <String>[]
+    Iterable<String> depfilePaths = const <String>[],
+    FingerprintPathFilter pathFilter,
   }) : _paths = paths.toList(),
        _properties = new Map<String, String>.from(properties),
        _depfilePaths = depfilePaths.toList(),
+       _pathFilter = pathFilter,
        assert(fingerprintPath != null),
        assert(paths != null && paths.every((String path) => path != null)),
        assert(properties != null),
@@ -38,6 +42,7 @@ class Fingerprinter {
   final List<String> _paths;
   final Map<String, String> _properties;
   final List<String> _depfilePaths;
+  final FingerprintPathFilter _pathFilter;
 
   Future<Fingerprint> buildFingerprint() async {
     final List<String> paths = await _getPaths();
@@ -81,7 +86,8 @@ class Fingerprinter {
     final Set<String> paths = _paths.toSet();
     for (String depfilePath in _depfilePaths)
       paths.addAll(await readDepfile(depfilePath));
-    return paths.toList()..sort();
+    final FingerprintPathFilter filter = _pathFilter ?? (String path) => true;
+    return paths.where(filter).toList()..sort();
   }
 }
 

@@ -38,5 +38,6 @@
   "drawerLabel": "نیویگیشن مینو",
   "popupMenuLabel": "پاپ اپ مینو",
   "dialogLabel": "ڈائیلاگ",
-  "alertDialogLabel": "انتباہ"
+  "alertDialogLabel": "انتباہ",
+  "searchFieldLabel": "تلاش کریں"
 }

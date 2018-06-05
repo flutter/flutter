@@ -481,6 +481,30 @@ void main() {
     expect(find.text('12'), findsNothing);
   });
 
+  testWidgets('GridView.builder with undefined itemCount', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new GridView.builder(
+          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: 4,
+          ),
+          shrinkWrap: true,
+          itemBuilder: (BuildContext context, int index) {
+            return new Container(
+              child: new Text('$index'),
+            );
+          },
+        ),
+      ),
+    );
+    expect(find.text('0'), findsOneWidget);
+    expect(find.text('11'), findsOneWidget);
+    await tester.drag(find.byType(GridView), const Offset(0.0, -300.0));
+    await tester.pump(const Duration(milliseconds: 200));
+    expect(find.text('13'), findsOneWidget);
+  });
+
   testWidgets('GridView cross axis layout', (WidgetTester tester) async {
     final Key target = new UniqueKey();
 

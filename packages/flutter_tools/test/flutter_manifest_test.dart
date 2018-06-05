@@ -2,9 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
+import 'package:file/file.dart';
+import 'package:file/memory.dart';
+import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/flutter_manifest.dart';
-
 import 'package:test/test.dart';
 
 import 'src/common.dart';
@@ -357,5 +361,176 @@ flutter:
       final FlutterManifest flutterManifest = await FlutterManifest.createFromString(manifest);
       expect(flutterManifest.isEmpty, false);
     });
+
+    Future<void> checkManifestVersion({
+      String manifest,
+      String expectedAppVersion,
+      String expectedBuildName,
+      int expectedBuildNumber,
+    }) async {
+      final FlutterManifest flutterManifest = await FlutterManifest.createFromString(manifest);
+      expect(flutterManifest.appVersion, expectedAppVersion);
+      expect(flutterManifest.buildName, expectedBuildName);
+      expect(flutterManifest.buildNumber, expectedBuildNumber);
+    }
+
+    test('parses major.minor.patch+build version clause', () async {
+      const String manifest = '''
+name: test
+version: 1.0.0+2
+dependencies:
+  flutter:
+    sdk: flutter
+flutter:
+''';
+      await checkManifestVersion(
+        manifest: manifest,
+        expectedAppVersion: '1.0.0+2',
+        expectedBuildName: '1.0.0',
+        expectedBuildNumber: 2,
+      );
+    });
+
+    test('parses major.minor+build version clause', () async {
+      const String manifest = '''
+name: test
+version: 1.0+2
+dependencies:
+  flutter:
+    sdk: flutter
+flutter:
+''';
+      await checkManifestVersion(
+        manifest: manifest,
+        expectedAppVersion: '1.0+2',
+        expectedBuildName: '1.0',
+        expectedBuildNumber: 2,
+      );
+    });
+
+    test('parses major+build version clause', () async {
+      const String manifest = '''
+name: test
+version: 1+2
+dependencies:
+  flutter:
+    sdk: flutter
+flutter:
+''';
+      await checkManifestVersion(
+        manifest: manifest,
+        expectedAppVersion: '1+2',
+        expectedBuildName: '1',
+        expectedBuildNumber: 2,
+      );
+    });
+
+    test('parses major version clause', () async {
+      const String manifest = '''
+name: test
+version: 1
+dependencies:
+  flutter:
+    sdk: flutter
+flutter:
+''';
+      await checkManifestVersion(
+        manifest: manifest,
+        expectedAppVersion: '1',
+        expectedBuildName: '1',
+        expectedBuildNumber: null,
+      );
+    });
+
+    test('parses empty version clause', () async {
+      const String manifest = '''
+name: test
+version:
+dependencies:
+  flutter:
+    sdk: flutter
+flutter:
+''';
+      await checkManifestVersion(
+        manifest: manifest,
+        expectedAppVersion: null,
+        expectedBuildName: null,
+        expectedBuildNumber: null,
+      );
+    });
+    test('parses no version clause', () async {
+      const String manifest = '''
+name: test
+dependencies:
+  flutter:
+    sdk: flutter
+flutter:
+''';
+      await checkManifestVersion(
+        manifest: manifest,
+        expectedAppVersion: null,
+        expectedBuildName: null,
+        expectedBuildNumber: null,
+      );
+    });
   });
+
+  group('FlutterManifest with MemoryFileSystem', () {
+    void assertSchemaIsReadable() async {
+      const String manifest = '''
+name: test
+dependencies:
+  flutter:
+    sdk: flutter
+flutter:
+''';
+
+      final FlutterManifest flutterManifest = await FlutterManifest.createFromString(manifest);
+      expect(flutterManifest.isEmpty, false);
+    }
+
+    void writeSchemaFile(FileSystem filesystem, String schemaData) {
+      final String schemaPath = buildSchemaPath(filesystem);
+      final File schemaFile = filesystem.file(schemaPath);
+
+      final String schemaDir = buildSchemaDir(filesystem);
+
+      filesystem.directory(schemaDir).createSync(recursive: true);
+      filesystem.file(schemaFile).writeAsStringSync(schemaData);
+    }
+
+    void testUsingContextAndFs(String description, FileSystem filesystem,
+        dynamic testMethod()) {
+      const String schemaData = '{}';
+
+      testUsingContext(description,
+              () async {
+            writeSchemaFile( filesystem, schemaData);
+            testMethod();
+      },
+          overrides: <Type, Generator>{
+            FileSystem: () => filesystem,
+          }
+      );
+    }
+
+    testUsingContext('Validate manifest on original fs', () async {
+      assertSchemaIsReadable();
+    });
+
+    testUsingContextAndFs('Validate manifest on Posix FS',
+        new MemoryFileSystem(style: FileSystemStyle.posix), () async {
+          assertSchemaIsReadable();
+        }
+    );
+
+    testUsingContextAndFs('Validate manifest on Windows FS',
+        new MemoryFileSystem(style: FileSystemStyle.windows), () async {
+          assertSchemaIsReadable();
+        }
+    );
+
+  });
+
 }
+

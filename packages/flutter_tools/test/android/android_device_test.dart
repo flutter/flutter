@@ -88,7 +88,9 @@ Use the 'android' tool to install them:
     setUp(() {
       hardware = 'unknown';
       buildCharacteristics = 'unused';
-      when(mockProcessManager.run(argThat(contains('getprop')), stderrEncoding: any, stdoutEncoding: any)).thenAnswer((_) {
+      when(mockProcessManager.run(argThat(contains('getprop')),
+          stderrEncoding: anyNamed('stderrEncoding'),
+          stdoutEncoding: anyNamed('stdoutEncoding'))).thenAnswer((_) {
         final StringBuffer buf = new StringBuffer()
           ..writeln('[ro.hardware]: [$hardware]')
           ..writeln('[ro.build.characteristics]: [$buildCharacteristics]');

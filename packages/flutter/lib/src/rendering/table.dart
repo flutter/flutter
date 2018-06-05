@@ -361,13 +361,13 @@ class RenderTable extends RenderBox {
     int columns,
     int rows,
     Map<int, TableColumnWidth> columnWidths,
-    TableColumnWidth defaultColumnWidth: const FlexColumnWidth(1.0),
+    TableColumnWidth defaultColumnWidth = const FlexColumnWidth(1.0),
     @required TextDirection textDirection,
     TableBorder border,
     List<Decoration> rowDecorations,
-    ImageConfiguration configuration: ImageConfiguration.empty,
+    ImageConfiguration configuration = ImageConfiguration.empty,
     Decoration defaultRowDecoration,
-    TableCellVerticalAlignment defaultVerticalAlignment: TableCellVerticalAlignment.top,
+    TableCellVerticalAlignment defaultVerticalAlignment = TableCellVerticalAlignment.top,
     TextBaseline textBaseline,
     List<List<RenderBox>> children
   }) : assert(columns == null || columns >= 0),
@@ -1119,8 +1119,10 @@ class RenderTable extends RenderBox {
   void paint(PaintingContext context, Offset offset) {
     assert(_children.length == rows * columns);
     if (rows * columns == 0) {
-      final Rect borderRect = new Rect.fromLTWH(offset.dx, offset.dy, size.width, 0.0);
-      border.paint(context.canvas, borderRect, rows: const <double>[], columns: const <double>[]);
+      if (border != null) {
+        final Rect borderRect = new Rect.fromLTWH(offset.dx, offset.dy, size.width, 0.0);
+        border.paint(context.canvas, borderRect, rows: const <double>[], columns: const <double>[]);
+      }
       return;
     }
     assert(_rowTops.length == rows + 1);

@@ -22,8 +22,8 @@ class BeveledRectangleBorder extends ShapeBorder {
   ///
   /// The arguments must not be null.
   const BeveledRectangleBorder({
-    this.side: BorderSide.none,
-    this.borderRadius: BorderRadius.zero,
+    this.side = BorderSide.none,
+    this.borderRadius = BorderRadius.zero,
   }) : assert(side != null),
        assert(borderRadius != null);
 

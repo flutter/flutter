@@ -526,7 +526,7 @@ class DelayedMultiDragGestureRecognizer extends MultiDragGestureRecognizer<_Dela
   /// defaults to [kLongPressTimeout] to match [LongPressGestureRecognizer] but
   /// can be changed for specific behaviors.
   DelayedMultiDragGestureRecognizer({
-    this.delay: kLongPressTimeout,
+    this.delay = kLongPressTimeout,
     Object debugOwner,
   }) : assert(delay != null),
        super(debugOwner: debugOwner);

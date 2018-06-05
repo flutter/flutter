@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' as ui show ParagraphStyle, TextStyle, lerpDouble, Locale;
+import 'dart:ui' as ui show ParagraphStyle, TextStyle, lerpDouble;
 
 import 'package:flutter/foundation.dart';
 
@@ -220,7 +220,7 @@ class TextStyle extends Diagnosticable {
   /// package. It is combined with the `fontFamily` argument to set the
   /// [fontFamily] property.
   const TextStyle({
-    this.inherit: true,
+    this.inherit = true,
     this.color,
     this.fontSize,
     this.fontWeight,
@@ -230,6 +230,7 @@ class TextStyle extends Diagnosticable {
     this.textBaseline,
     this.height,
     this.locale,
+    this.background,
     this.decoration,
     this.decorationColor,
     this.decorationStyle,
@@ -298,7 +299,15 @@ class TextStyle extends Diagnosticable {
   final double height;
 
   /// The locale used to select region-specific glyphs.
-  final ui.Locale locale;
+  final Locale locale;
+
+  /// The paint drawn as a background for the text.
+  ///
+  /// The value should ideally be cached and reused each time if multiple text
+  /// styles are created with the same paint settings. Otherwise, each time it
+  /// will appear like the style changed, which will result in unnecessary
+  /// updates all the way through the framework.
+  final Paint background;
 
   /// The decorations to paint near the text (e.g., an underline).
   final TextDecoration decoration;
@@ -334,7 +343,8 @@ class TextStyle extends Diagnosticable {
     double wordSpacing,
     TextBaseline textBaseline,
     double height,
-    ui.Locale locale,
+    Locale locale,
+    Paint background,
     TextDecoration decoration,
     Color decorationColor,
     TextDecorationStyle decorationStyle,
@@ -358,6 +368,7 @@ class TextStyle extends Diagnosticable {
       textBaseline: textBaseline ?? this.textBaseline,
       height: height ?? this.height,
       locale: locale ?? this.locale,
+      background: background ?? this.background,
       decoration: decoration ?? this.decoration,
       decorationColor: decorationColor ?? this.decorationColor,
       decorationStyle: decorationStyle ?? this.decorationStyle,
@@ -392,15 +403,15 @@ class TextStyle extends Diagnosticable {
     Color decorationColor,
     TextDecorationStyle decorationStyle,
     String fontFamily,
-    double fontSizeFactor: 1.0,
-    double fontSizeDelta: 0.0,
-    int fontWeightDelta: 0,
-    double letterSpacingFactor: 1.0,
-    double letterSpacingDelta: 0.0,
-    double wordSpacingFactor: 1.0,
-    double wordSpacingDelta: 0.0,
-    double heightFactor: 1.0,
-    double heightDelta: 0.0,
+    double fontSizeFactor = 1.0,
+    double fontSizeDelta = 0.0,
+    int fontWeightDelta = 0,
+    double letterSpacingFactor = 1.0,
+    double letterSpacingDelta = 0.0,
+    double wordSpacingFactor = 1.0,
+    double wordSpacingDelta = 0.0,
+    double heightFactor = 1.0,
+    double heightDelta = 0.0,
   }) {
     assert(fontSizeFactor != null);
     assert(fontSizeDelta != null);
@@ -436,6 +447,7 @@ class TextStyle extends Diagnosticable {
       textBaseline: textBaseline,
       height: height == null ? null : height * heightFactor + heightDelta,
       locale: locale,
+      background: background,
       decoration: decoration ?? this.decoration,
       decorationColor: decorationColor ?? this.decorationColor,
       decorationStyle: decorationStyle ?? this.decorationStyle,
@@ -481,6 +493,7 @@ class TextStyle extends Diagnosticable {
       textBaseline: other.textBaseline,
       height: other.height,
       locale: other.locale,
+      background: other.background,
       decoration: other.decoration,
       decorationColor: other.decorationColor,
       decorationStyle: other.decorationStyle,
@@ -529,6 +542,7 @@ class TextStyle extends Diagnosticable {
         textBaseline: t < 0.5 ? null : b.textBaseline,
         height: t < 0.5 ? null : b.height,
         locale: t < 0.5 ? null : b.locale,
+        background: t < 0.5 ? null : b.background,
         decoration: t < 0.5 ? null : b.decoration,
         decorationColor: Color.lerp(null, b.decorationColor, t),
         decorationStyle: t < 0.5 ? null : b.decorationStyle,
@@ -549,6 +563,7 @@ class TextStyle extends Diagnosticable {
         textBaseline: t < 0.5 ? a.textBaseline : null,
         height: t < 0.5 ? a.height : null,
         locale: t < 0.5 ? a.locale : null,
+        background: t < 0.5 ? a.background : null,
         decoration: t < 0.5 ? a.decoration : null,
         decorationColor: Color.lerp(a.decorationColor, null, t),
         decorationStyle: t < 0.5 ? a.decorationStyle : null,
@@ -568,6 +583,7 @@ class TextStyle extends Diagnosticable {
       textBaseline: t < 0.5 ? a.textBaseline : b.textBaseline,
       height: ui.lerpDouble(a.height ?? b.height, b.height ?? a.height, t),
       locale: t < 0.5 ? a.locale : b.locale,
+      background: t < 0.5 ? a.background : b.background,
       decoration: t < 0.5 ? a.decoration : b.decoration,
       decorationColor: Color.lerp(a.decorationColor, b.decorationColor, t),
       decorationStyle: t < 0.5 ? a.decorationStyle : b.decorationStyle,
@@ -576,7 +592,7 @@ class TextStyle extends Diagnosticable {
   }
 
   /// The style information for text runs, encoded for use by `dart:ui`.
-  ui.TextStyle getTextStyle({ double textScaleFactor: 1.0 }) {
+  ui.TextStyle getTextStyle({ double textScaleFactor = 1.0 }) {
     return new ui.TextStyle(
       color: color,
       decoration: decoration,
@@ -591,6 +607,7 @@ class TextStyle extends Diagnosticable {
       wordSpacing: wordSpacing,
       height: height,
       locale: locale,
+      background: background,
     );
   }
 
@@ -605,10 +622,10 @@ class TextStyle extends Diagnosticable {
   ui.ParagraphStyle getParagraphStyle({
       TextAlign textAlign,
       TextDirection textDirection,
-      double textScaleFactor: 1.0,
+      double textScaleFactor = 1.0,
       String ellipsis,
       int maxLines,
-      ui.Locale locale,
+      Locale locale,
   }) {
     assert(textScaleFactor != null);
     assert(maxLines == null || maxLines > 0);
@@ -644,7 +661,8 @@ class TextStyle extends Diagnosticable {
         wordSpacing != other.wordSpacing ||
         textBaseline != other.textBaseline ||
         height != other.height ||
-        locale != other.locale)
+        locale != other.locale ||
+        background != other.background)
       return RenderComparison.layout;
     if (color != other.color ||
         decoration != other.decoration ||
@@ -672,6 +690,7 @@ class TextStyle extends Diagnosticable {
            textBaseline == typedOther.textBaseline &&
            height == typedOther.height &&
            locale == typedOther.locale &&
+           background == typedOther.background &&
            decoration == typedOther.decoration &&
            decorationColor == typedOther.decorationColor &&
            decorationStyle == typedOther.decorationStyle;
@@ -691,6 +710,7 @@ class TextStyle extends Diagnosticable {
       textBaseline,
       height,
       locale,
+      background,
       decoration,
       decorationColor,
       decorationStyle
@@ -702,7 +722,7 @@ class TextStyle extends Diagnosticable {
 
   /// Adds all properties prefixing property names with the optional `prefix`.
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder properties, { String prefix: '' }) {
+  void debugFillProperties(DiagnosticPropertiesBuilder properties, { String prefix = '' }) {
     super.debugFillProperties(properties);
     if (debugLabel != null)
       properties.add(new MessageProperty('${prefix}debugLabel', debugLabel));
@@ -757,6 +777,7 @@ class TextStyle extends Diagnosticable {
     styles.add(new EnumProperty<TextBaseline>('${prefix}baseline', textBaseline, defaultValue: null));
     styles.add(new DoubleProperty('${prefix}height', height, unit: 'x', defaultValue: null));
     styles.add(new StringProperty('${prefix}locale', locale?.toString(), defaultValue: null, quoted: false));
+    styles.add(new StringProperty('${prefix}background', background?.toString(), defaultValue: null, quoted: false));
     if (decoration != null || decorationColor != null || decorationStyle != null) {
       final List<String> decorationDescription = <String>[];
       if (decorationStyle != null)

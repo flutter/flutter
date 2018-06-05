@@ -13,7 +13,7 @@ class TestScrollPosition extends ScrollPositionWithSingleContext {
   TestScrollPosition({
     ScrollPhysics physics,
     ScrollContext state,
-    double initialPixels: 0.0,
+    double initialPixels = 0.0,
     ScrollPosition oldPosition,
   }) : super(
     physics: physics,

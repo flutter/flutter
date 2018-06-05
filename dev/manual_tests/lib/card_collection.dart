@@ -181,7 +181,7 @@ class CardCollectionState extends State<CardCollection> {
     });
   }
 
-  Widget buildDrawerCheckbox(String label, bool value, void callback(), { bool enabled: true }) {
+  Widget buildDrawerCheckbox(String label, bool value, void callback(), { bool enabled = true }) {
     return new ListTile(
       onTap: enabled ? callback : null,
       title: new Text(label),
@@ -192,7 +192,7 @@ class CardCollectionState extends State<CardCollection> {
     );
   }
 
-  Widget buildDrawerColorRadioItem(String label, MaterialColor itemValue, MaterialColor currentValue, ValueChanged<MaterialColor> onChanged, { IconData icon, bool enabled: true }) {
+  Widget buildDrawerColorRadioItem(String label, MaterialColor itemValue, MaterialColor currentValue, ValueChanged<MaterialColor> onChanged, { IconData icon, bool enabled = true }) {
     return new ListTile(
       leading: new Icon(icon),
       title: new Text(label),
@@ -205,7 +205,7 @@ class CardCollectionState extends State<CardCollection> {
     );
   }
 
-  Widget buildDrawerDirectionRadioItem(String label, DismissDirection itemValue, DismissDirection currentValue, ValueChanged<DismissDirection> onChanged, { IconData icon, bool enabled: true }) {
+  Widget buildDrawerDirectionRadioItem(String label, DismissDirection itemValue, DismissDirection currentValue, ValueChanged<DismissDirection> onChanged, { IconData icon, bool enabled = true }) {
     return new ListTile(
       leading: new Icon(icon),
       title: new Text(label),
@@ -218,7 +218,7 @@ class CardCollectionState extends State<CardCollection> {
     );
   }
 
-  Widget buildFontRadioItem(String label, TextAlign itemValue, TextAlign currentValue, ValueChanged<TextAlign> onChanged, { IconData icon, bool enabled: true }) {
+  Widget buildFontRadioItem(String label, TextAlign itemValue, TextAlign currentValue, ValueChanged<TextAlign> onChanged, { IconData icon, bool enabled = true }) {
     return new ListTile(
       leading: new Icon(icon),
       title: new Text(label),

@@ -141,7 +141,7 @@ abstract class FlutterCommand extends Command<Null> {
         valueHelp: 'x.y.z');
   }
 
-  void addBuildModeFlags({bool defaultToRelease: true}) {
+  void addBuildModeFlags({bool defaultToRelease = true}) {
     defaultBuildMode = defaultToRelease ? BuildMode.release : BuildMode.debug;
 
     argParser.addFlag('debug',
@@ -222,8 +222,8 @@ abstract class FlutterCommand extends Command<Null> {
       extraGenSnapshotOptions: argParser.options.containsKey(FlutterOptions.kExtraGenSnapshotOptions)
           ? argResults[FlutterOptions.kExtraGenSnapshotOptions]
           : null,
-      preferSharedLibrary: argParser.options.containsKey('prefer-shared-library')
-        ? argResults['prefer-shared-library']
+      buildSharedLibrary: argParser.options.containsKey('build-shared-library')
+        ? argResults['build-shared-library']
         : false,
       targetPlatform: targetPlatform,
       fileSystemRoots: argParser.options.containsKey(FlutterOptions.kFileSystemRoot)
@@ -329,7 +329,7 @@ abstract class FlutterCommand extends Command<Null> {
 
     if (shouldRunPub) {
       await pubGet(context: PubContext.getVerifyContext(name));
-      new FlutterProject(fs.currentDirectory).ensureReadyForPlatformSpecificTooling();
+      await new FlutterProject(fs.currentDirectory).ensureReadyForPlatformSpecificTooling();
     }
 
     setupApplicationPackages();

@@ -151,12 +151,12 @@ class _TabStyle extends AnimatedWidget {
     final ThemeData themeData = Theme.of(context);
     final TextStyle defaultStyle = labelStyle ?? themeData.primaryTextTheme.body2;
     final TextStyle defaultUnselectedStyle = unselectedLabelStyle ?? labelStyle ?? themeData.primaryTextTheme.body2;
+    final Animation<double> animation = listenable;
     final TextStyle textStyle = selected
-      ? defaultStyle
-      : defaultUnselectedStyle;
+      ? TextStyle.lerp(defaultStyle, defaultUnselectedStyle, animation.value)
+      : TextStyle.lerp(defaultUnselectedStyle, defaultStyle, animation.value);
     final Color selectedColor = labelColor ?? themeData.primaryTextTheme.body2.color;
     final Color unselectedColor = unselectedLabelColor ?? selectedColor.withAlpha(0xB2); // 70% alpha
-    final Animation<double> animation = listenable;
     final Color color = selected
       ? Color.lerp(selectedColor, unselectedColor, animation.value)
       : Color.lerp(unselectedColor, selectedColor, animation.value);
@@ -234,7 +234,7 @@ class _TabLabelBarRenderer extends RenderFlex {
 class _TabLabelBar extends Flex {
   _TabLabelBar({
     Key key,
-    List<Widget> children: const <Widget>[],
+    List<Widget> children = const <Widget>[],
     this.onPerformLayout,
   }) : super(
     key: key,
@@ -526,10 +526,10 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
     Key key,
     @required this.tabs,
     this.controller,
-    this.isScrollable: false,
+    this.isScrollable = false,
     this.indicatorColor,
-    this.indicatorWeight: 2.0,
-    this.indicatorPadding: EdgeInsets.zero,
+    this.indicatorWeight = 2.0,
+    this.indicatorPadding = EdgeInsets.zero,
     this.indicator,
     this.indicatorSize,
     this.labelColor,
@@ -919,13 +919,13 @@ class _TabBarState extends State<TabBar> {
         wrappedTabs[tabIndex] = _buildStyledTab(wrappedTabs[tabIndex], true, centerAnimation);
         if (_currentIndex > 0) {
           final int tabIndex = _currentIndex - 1;
-          final Animation<double> previousAnimation = new _DragAnimation(_controller, tabIndex);
-          wrappedTabs[tabIndex] = _buildStyledTab(wrappedTabs[tabIndex], true, previousAnimation);
+          final Animation<double> previousAnimation = new ReverseAnimation(new _DragAnimation(_controller, tabIndex));
+          wrappedTabs[tabIndex] = _buildStyledTab(wrappedTabs[tabIndex], false, previousAnimation);
         }
         if (_currentIndex < widget.tabs.length - 1) {
           final int tabIndex = _currentIndex + 1;
-          final Animation<double> nextAnimation = new _DragAnimation(_controller, tabIndex);
-          wrappedTabs[tabIndex] = _buildStyledTab(wrappedTabs[tabIndex], true, nextAnimation);
+          final Animation<double> nextAnimation = new ReverseAnimation(new _DragAnimation(_controller, tabIndex));
+          wrappedTabs[tabIndex] = _buildStyledTab(wrappedTabs[tabIndex], false, nextAnimation);
         }
       }
     }
@@ -1222,7 +1222,7 @@ class TabPageSelector extends StatelessWidget {
   const TabPageSelector({
     Key key,
     this.controller,
-    this.indicatorSize: 12.0,
+    this.indicatorSize = 12.0,
     this.color,
     this.selectedColor,
   }) : assert(indicatorSize != null && indicatorSize > 0.0), super(key: key);

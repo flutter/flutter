@@ -23,15 +23,15 @@ import 'watcher.dart';
 Future<int> runTests(
     List<String> testFiles, {
     Directory workDir,
-    List<String> names: const <String>[],
-    List<String> plainNames: const <String>[],
-    bool enableObservatory: false,
-    bool startPaused: false,
-    bool ipv6: false,
-    bool machine: false,
-    bool previewDart2: false,
-    bool trackWidgetCreation: false,
-    bool updateGoldens: false,
+    List<String> names = const <String>[],
+    List<String> plainNames = const <String>[],
+    bool enableObservatory = false,
+    bool startPaused = false,
+    bool ipv6 = false,
+    bool machine = false,
+    bool previewDart2 = false,
+    bool trackWidgetCreation = false,
+    bool updateGoldens = false,
     TestWatcher watcher,
     }) async {
   if (trackWidgetCreation && !previewDart2) {
@@ -43,16 +43,17 @@ Future<int> runTests(
 
   // Compute the command-line arguments for package:test.
   final List<String> testArgs = <String>[];
-  if (!terminal.supportsColor)
-    testArgs.addAll(<String>['--no-color', '-rexpanded']);
+  if (!terminal.supportsColor) {
+    testArgs.addAll(<String>['--no-color']);
+  }
 
   if (machine) {
     testArgs.addAll(<String>['-r', 'json']);
+  } else {
+    testArgs.addAll(<String>['-r', 'compact']);
   }
 
-  if (enableObservatory) {
-    // (In particular, for collecting code coverage.)
-
+  if (enableObservatory) { // (In particular, for collecting code coverage.)
     // Turn on concurrency, but just barely. This is a trade-off between running
     // too many tests such that they all time out, and too few tests such that
     // the tests overall take too much time. The current number is empirically

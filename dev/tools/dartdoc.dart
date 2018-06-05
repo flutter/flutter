@@ -129,7 +129,7 @@ Future<Null> main(List<String> arguments) async {
     '--header', 'survey.html',
     '--footer-text', 'lib/footer.html',
     '--exclude-packages',
-'analyzer,args,barback,cli_util,csslib,flutter_goldens,front_end,glob,html,http_multi_server,io,isolate,js,kernel,logging,mime,mockito,node_preamble,plugin,shelf,shelf_packages_handler,shelf_static,shelf_web_socket,utf,watcher,yaml',
+'analyzer,args,barback,cli_util,csslib,flutter_goldens,front_end,fuchsia_remote_debug_protocol,glob,html,http_multi_server,io,isolate,js,kernel,logging,mime,mockito,node_preamble,plugin,shelf,shelf_packages_handler,shelf_static,shelf_web_socket,utf,watcher,yaml',
     '--exclude',
   'package:Flutter/temp_doc.dart,package:http/browser_client.dart,package:intl/intl_browser.dart,package:matcher/mirror_matchers.dart,package:quiver/mirrors.dart,package:quiver/io.dart,package:vm_service_client/vm_service_client.dart,package:web_socket_channel/html.dart',
     '--favicon=favicon.ico',
@@ -313,7 +313,7 @@ List<Directory> findPackages() {
 /// Returns import or on-disk paths for all libraries in the Flutter SDK.
 ///
 /// diskPath toggles between import paths vs. disk paths.
-Iterable<String> libraryRefs({ bool diskPath: false }) sync* {
+Iterable<String> libraryRefs({ bool diskPath = false }) sync* {
   for (Directory dir in findPackages()) {
     final String dirName = path.basename(dir.path);
     for (FileSystemEntity file in new Directory('${dir.path}/lib').listSync()) {
@@ -336,7 +336,7 @@ Iterable<String> libraryRefs({ bool diskPath: false }) sync* {
   }
 }
 
-void printStream(Stream<List<int>> stream, { String prefix: '', List<Pattern> filter: const <Pattern>[] }) {
+void printStream(Stream<List<int>> stream, { String prefix = '', List<Pattern> filter = const <Pattern>[] }) {
   assert(prefix != null);
   assert(filter != null);
   stream

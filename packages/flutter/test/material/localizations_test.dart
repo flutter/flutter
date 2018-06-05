@@ -34,6 +34,7 @@ void main() {
     expect(localizations.popupMenuLabel, isNotNull);
     expect(localizations.dialogLabel, isNotNull);
     expect(localizations.alertDialogLabel, isNotNull);
+    expect(localizations.searchFieldLabel, isNotNull);
 
     expect(localizations.aboutListTileTitle('FOO'), isNotNull);
     expect(localizations.aboutListTileTitle('FOO'), contains('FOO'));
