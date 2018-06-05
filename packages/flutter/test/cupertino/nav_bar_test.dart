@@ -334,6 +334,149 @@ void main() {
     expect(tester.getBottomLeft(find.text('Title')).dy, 44.0 - 8.0); // Extension gone, (static part - padding) left.
   });
 
+  testWidgets(
+      'Border is displayed by default in sliver nav bar',
+      (WidgetTester tester) async {
+    final ScrollController scrollController = new ScrollController();
+    final Key leadingKey = new GlobalKey();
+    final Key middleKey = new GlobalKey();
+    final Key trailingKey = new GlobalKey();
+    final Key titleKey = new GlobalKey();
+    await tester.pumpWidget(
+      new WidgetsApp(
+        color: const Color(0xFFFFFFFF),
+        onGenerateRoute: (RouteSettings settings) {
+          return new CupertinoPageRoute<void>(
+            settings: settings,
+            builder: (BuildContext context) {
+              return new CupertinoPageScaffold(
+                child: new CustomScrollView(
+                  controller: scrollController,
+                  slivers: <Widget>[
+                    new CupertinoSliverNavigationBar(
+                      leading: new Placeholder(key: leadingKey),
+                      middle: new Placeholder(key: middleKey),
+                      largeTitle: new Text('Large Title', key: titleKey),
+                      trailing: new Placeholder(key: trailingKey),
+                    ),
+                  ],
+                ),
+              );
+            },
+          );
+        },
+      ),
+    );
+
+    final DecoratedBox decoratedBox =
+        tester.widgetList(find.byType(DecoratedBox)).elementAt(2);
+    expect(decoratedBox.decoration.runtimeType, BoxDecoration);
+
+    final BoxDecoration decoration = decoratedBox.decoration;
+    expect(decoration.border, isNotNull);
+
+    final BorderSide bottom = decoration.border.bottom;
+    expect(bottom, isNotNull);
+  });
+
+  testWidgets(
+      'Border is not displayed when null in sliver nav bar',
+      (WidgetTester tester) async {
+    final ScrollController scrollController = new ScrollController();
+    final Key leadingKey = new GlobalKey();
+    final Key middleKey = new GlobalKey();
+    final Key trailingKey = new GlobalKey();
+    final Key titleKey = new GlobalKey();
+    await tester.pumpWidget(
+      new WidgetsApp(
+        color: const Color(0xFFFFFFFF),
+        onGenerateRoute: (RouteSettings settings) {
+          return new CupertinoPageRoute<void>(
+            settings: settings,
+            builder: (BuildContext context) {
+              return new CupertinoPageScaffold(
+                child: new CustomScrollView(
+                  controller: scrollController,
+                  slivers: <Widget>[
+                    new CupertinoSliverNavigationBar(
+                      leading: new Placeholder(key: leadingKey),
+                      middle: new Placeholder(key: middleKey),
+                      largeTitle: new Text('Large Title', key: titleKey),
+                      trailing: new Placeholder(key: trailingKey),
+                      border: null,
+                    ),
+                  ],
+                ),
+              );
+            },
+          );
+        },
+      ),
+    );
+
+    final DecoratedBox decoratedBox =
+        tester.widgetList(find.byType(DecoratedBox)).elementAt(2);
+    expect(decoratedBox.decoration.runtimeType, BoxDecoration);
+
+    final BoxDecoration decoration = decoratedBox.decoration;
+    expect(decoration.border, isNull);
+  });
+
+  testWidgets(
+      'Border can be overridden in sliver nav bar',
+      (WidgetTester tester) async {
+    final ScrollController scrollController = new ScrollController();
+    final Key leadingKey = new GlobalKey();
+    final Key middleKey = new GlobalKey();
+    final Key trailingKey = new GlobalKey();
+    final Key titleKey = new GlobalKey();
+    await tester.pumpWidget(
+      new WidgetsApp(
+        color: const Color(0xFFFFFFFF),
+        onGenerateRoute: (RouteSettings settings) {
+          return new CupertinoPageRoute<void>(
+            settings: settings,
+            builder: (BuildContext context) {
+              return new CupertinoPageScaffold(
+                child: new CustomScrollView(
+                  controller: scrollController,
+                  slivers: <Widget>[
+                    new CupertinoSliverNavigationBar(
+                      leading: new Placeholder(key: leadingKey),
+                      middle: new Placeholder(key: middleKey),
+                      largeTitle: new Text('Large Title', key: titleKey),
+                      trailing: new Placeholder(key: trailingKey),
+                      border: const Border(
+                        bottom: const BorderSide(
+                          color: const Color(0xFFAABBCC),
+                          width: 0.0,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            },
+          );
+        },
+      ),
+    );
+
+    final DecoratedBox decoratedBox =
+        tester.widgetList(find.byType(DecoratedBox)).elementAt(2);
+    expect(decoratedBox.decoration.runtimeType, BoxDecoration);
+
+    final BoxDecoration decoration = decoratedBox.decoration;
+    expect(decoration.border, isNotNull);
+
+    final BorderSide top = decoration.border.top;
+    expect(top, isNotNull);
+    expect(top, BorderSide.none);
+    final BorderSide bottom = decoration.border.bottom;
+    expect(bottom, isNotNull);
+    expect(bottom.color, const Color(0xFFAABBCC));
+  });
+
   testWidgets('Auto back/close button', (WidgetTester tester) async {
     await tester.pumpWidget(
       new WidgetsApp(
