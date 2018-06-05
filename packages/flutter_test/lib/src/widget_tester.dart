@@ -57,9 +57,10 @@ void testWidgets(String description, WidgetTesterCallback callback, {
   final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized();
   final WidgetTester tester = new WidgetTester._(binding);
   timeout ??= binding.defaultTestTimeout;
-    test_package.test(
+  test_package.test(
     description,
     () {
+      tester._recordNumberOfSemanticsHandles();
       test_package.addTearDown(binding.postTest);
       return binding.runTest(
         () => callback(tester),
@@ -125,6 +126,7 @@ Future<Null> benchmarkWidgets(WidgetTesterCallback callback) {
   final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized();
   assert(binding is! AutomatedTestWidgetsFlutterBinding);
   final WidgetTester tester = new WidgetTester._(binding);
+  tester._recordNumberOfSemanticsHandles();
   return binding.runTest(
     () => callback(tester),
     tester._endOfTestVerifications,
@@ -523,7 +525,8 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
   }
 
   void _verifySemanticsHandlesWereDisposed() {
-    if (binding.pipelineOwner.semanticsOwner != null) {
+    assert(_lastRecordedSemanticsHandles != null);
+    if (binding.pipelineOwner.debugOutstandingSemanticsHandles > _lastRecordedSemanticsHandles) {
       throw new FlutterError(
         'A SemanticsHandle was active at the end of the test.\n'
         'All SemanticsHandle instances must be disposed by calling dispose() on '
@@ -532,6 +535,13 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
         'existing handle will leak into another test and alter its behavior.'
       );
     }
+    _lastRecordedSemanticsHandles = null;
+  }
+
+  int _lastRecordedSemanticsHandles;
+
+  void _recordNumberOfSemanticsHandles() {
+    _lastRecordedSemanticsHandles = binding.pipelineOwner.debugOutstandingSemanticsHandles;
   }
 
   /// Returns the TestTextInput singleton.
