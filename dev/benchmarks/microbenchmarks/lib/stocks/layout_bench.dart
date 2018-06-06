@@ -33,7 +33,6 @@ Future<Null> main() async {
     await tester.pump(); // Start drawer animation
     await tester.pump(const Duration(seconds: 1)); // Complete drawer animation
 
-
     // Disable calls from the engine which would interfere with the benchmark.
     ui.window.onBeginFrame = null;
     ui.window.onDrawFrame = null;
