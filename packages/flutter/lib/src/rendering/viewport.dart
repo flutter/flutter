@@ -42,7 +42,7 @@ abstract class RenderAbstractViewport extends RenderObject {
 
   /// Returns the offset that would be needed to reveal the `target` render object.
   ///
-  /// The optional `rect` parameter describes which area of the `target render
+  /// The optional `rect` parameter describes which area of the `target` render
   /// object should be revealed in the viewport. If `rect` is null, the entire
   /// `target` render object will be revealed. If `rect` is provided it has to
   /// be given in the coordinate system of the `target` render object.
@@ -57,6 +57,13 @@ abstract class RenderAbstractViewport extends RenderObject {
   /// The target might not be a direct child of this viewport but it must be a
   /// descendant of the viewport and there must not be any other
   /// [RenderAbstractViewport] objects between the target and this object.
+  ///
+  /// This method assumes that the viewport scrolls linearly, i.e. when the
+  /// scroll offset of the viewport is changed by x then `target` also moves
+  /// by x within the viewport.
+  ///
+  /// See also:
+  ///  * [RevealedOffset], which describes the return value of this method.
   RevealedOffset getOffsetToReveal(RenderObject target, double alignment, {Rect rect});
 
   /// The default value for the cache extent of the viewport.
@@ -71,8 +78,8 @@ abstract class RenderAbstractViewport extends RenderObject {
 /// Return value for [RenderAbstractViewport.getOffsetToReveal].
 ///
 /// It indicates the scroll [offset] required to reveal an element in a
-/// viewport and the position that element would have in the viewport at that
-/// [offset].
+/// viewport and the [rect] position said element would have in the viewport at
+/// that [offset].
 class RevealedOffset {
 
   /// Instantiates a return value for [RenderAbstractViewport.getOffsetToReveal].
@@ -88,13 +95,29 @@ class RevealedOffset {
   ///    value fort a specific element.
   final double offset;
 
-  /// The rect in the coordinate system of the viewport at which a specific
-  /// element would be located if the viewport's scroll offset is set to
-  /// [offset].
+  /// The [Rect] in the outer coordinate system of the viewport at which the to be
+  /// revealed element would be located if the viewport's offset is set
+  /// to [offset].
+  ///
+  /// A viewport usually has two coordinate systems and works as an adapter
+  /// between the two:
+  ///
+  /// The inner coordinate system has its origin at the top left corner of the
+  /// content that moves inside the viewport. The origin of this coordinate
+  /// system usually moves around relative to the leading edge of the viewport
+  /// when the viewport offset changes.
+  ///
+  /// The outer coordinate system has its origin at the top left corner of the
+  /// visible part of the viewport. This origin stays at the same position
+  /// regardless of the current viewport offset.
+  ///
+  /// In other words: [rect] describes where the revealed element would be
+  /// located relative of the top left corner of the visible part of the
+  /// viewport if the viewport's offset is set to [offset].
   ///
   /// See also:
   ///  * [RenderAbstractViewport.getOffsetToReveal], which calculates this
-  ///    value fort a specific element.
+  ///    value for a specific element.
   final Rect rect;
 
   @override
@@ -849,8 +872,10 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
       offset: offset,
       rect: rect,
     );
-    // Make sure the viewport itself is on screen.
-    super.showOnScreen(rect: newRect);
+    super.showOnScreen(
+      // Omitting `descendant` to get this viewport on screen.
+    rect: newRect,
+    );
   }
 
   /// Make the given `child` of the given `viewport` fully visible in the

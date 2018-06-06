@@ -598,8 +598,10 @@ class _RenderSingleChildViewport extends RenderBox with RenderObjectWithChildMix
       offset: offset,
       rect: rect,
     );
-    // Make sure the viewport itself is on screen.
-    super.showOnScreen(rect: newRect);
+    super.showOnScreen(
+      // Omitting `descendant` to get this viewport on screen.
+      rect: newRect,
+    );
   }
 
   @override
