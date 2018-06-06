@@ -60,16 +60,17 @@ void main() {
           child: new Container(
             alignment: Alignment.topLeft,
             child: OutlineButton(
-                shape: const RoundedRectangleBorder(), // default border radius is 0
-                color: fillColor,
-                highlightedBorderColor: highlightedBorderColor,
-                disabledBorderColor: disabledBorderColor,
-                borderSide: const BorderSide(
-                  width: borderWidth,
-                  color: borderColor,
-                ),
-                onPressed: () { },
-                child: const Text('button')
+              shape: const RoundedRectangleBorder(),
+              // default border radius is 0
+              color: fillColor,
+              highlightedBorderColor: highlightedBorderColor,
+              disabledBorderColor: disabledBorderColor,
+              borderSide: const BorderSide(
+                width: borderWidth,
+                color: borderColor,
+              ),
+              onPressed: () {},
+              child: const Text('button'),
             ),
           ),
         ),
