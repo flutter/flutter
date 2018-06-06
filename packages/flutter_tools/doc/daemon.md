@@ -180,6 +180,18 @@ This is sent when a device is connected (and polling has been enabled via `enabl
 
 This is sent when a device is disconnected (and polling has been enabled via `enable()`). The `params` field will be a map with the fields `id`, `name`, `platform`, and `emulator`.
 
+### emulator domain
+
+#### emulator.getEmulators
+
+Return a list of all available emulators. The `params` field will be a List; each item is a map with the fields `id` and `name`.
+
+#### emulator.launch
+
+The `launch()` command takes allows launching an emulator/simulator by its `id`.
+
+- `emulatorId`: the id of an emulator as returned by `getEmulators`.
+
 ## Flutter Run --machine
 
 When running `flutter run --machine` the following subset of the daemon is available:
