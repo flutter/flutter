@@ -556,10 +556,12 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
     double leadingScrollOffset;
     double targetMainAxisExtent;
     RenderObject descendant;
+    rect ??= target.paintBounds;
 
     if (target is RenderBox) {
       final RenderBox targetBox = target;
 
+      // The pivot will be the topmost child before we hit a RenderSliver.
       RenderBox pivot = targetBox;
       while (pivot.parent is RenderBox)
         pivot = pivot.parent;
@@ -567,14 +569,11 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
       assert(pivot.parent != null);
       assert(pivot.parent != this);
       assert(pivot != this);
+      assert(pivot.parent is RenderSliver);  // TODO(abarth): Support other kinds of render objects besides slivers.
+      final RenderSliver pivotParent = pivot.parent;
 
       final Matrix4 transform = targetBox.getTransformTo(pivot);
-      final Rect bounds = MatrixUtils.transformRect(transform, targetBox.paintBounds);
-
-      target = pivot;
-      // TODO(abarth): Support other kinds of render objects besides slivers.
-      assert(target.parent is RenderSliver);
-      final RenderSliver pivotParent = target.parent;
+      final Rect bounds = MatrixUtils.transformRect(transform, rect);
 
       final GrowthDirection growthDirection = pivotParent.constraints.growthDirection;
       switch (applyGrowthDirectionToAxisDirection(axisDirection, growthDirection)) {
@@ -615,12 +614,13 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
       }
       descendant = pivot;
     } else if (target is RenderSliver) {
+      // TODO
       final RenderSliver targetSliver = target;
       leadingScrollOffset = 0.0;
       targetMainAxisExtent = targetSliver.geometry.scrollExtent;
       descendant = targetSliver;
     } else {
-      return null; //offset.pixels;
+      return new RevealedOffset(offset: offset.pixels, rect: rect);
     }
 
     // The child will be the topmost object before we get to the viewport.
@@ -655,7 +655,29 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
         break;
     }
 
-    return null; //leadingScrollOffset - (mainAxisExtent - targetMainAxisExtent) * alignment;
+    final double targetOffset = leadingScrollOffset - (mainAxisExtent - targetMainAxisExtent) * alignment;
+    final double offsetDifference = offset.pixels - targetOffset;
+
+    final Matrix4 transform = target.getTransformTo(this);
+    applyPaintTransform(child, transform);
+    Rect targetRect = MatrixUtils.transformRect(transform, rect);
+
+    switch (axisDirection) {
+      case AxisDirection.down:
+        targetRect = targetRect.translate(0.0, offsetDifference);
+        break;
+      case AxisDirection.right:
+        targetRect = targetRect.translate(offsetDifference, 0.0);
+        break;
+      case AxisDirection.up:
+        targetRect = targetRect.translate(0.0, -offsetDifference);
+        break;
+      case AxisDirection.left:
+        targetRect = targetRect.translate(-offsetDifference, 0.0);
+        break;
+    }
+
+    return new RevealedOffset(offset: targetOffset, rect: targetRect);
   }
 
   /// The offset at which the given `child` should be painted.
@@ -685,8 +707,6 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
     }
     return null;
   }
-
-  // TODO(ianh): semantics - shouldn't walk the invisible children
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
@@ -824,9 +844,14 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
 
   @override
   void showOnScreen({RenderObject descendant, Rect rect}) {
-    RenderViewportBase.showInViewport(child: descendant, viewport: this, offset: offset);
+    final Rect newRect = RenderViewportBase.showInViewport(
+      child: descendant,
+      viewport: this,
+      offset: offset,
+      rect: rect,
+    );
     // Make sure the viewport itself is on screen.
-    super.showOnScreen();
+    super.showOnScreen(rect: newRect);
   }
 
   /// Make the given `child` of the given `viewport` fully visible in the
@@ -848,9 +873,6 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
     final RevealedOffset leadingEdgeOffset = viewport.getOffsetToReveal(child, 0.0, rect: rect);
     final RevealedOffset trailingEdgeOffset = viewport.getOffsetToReveal(child, 1.0, rect: rect);
     final double currentOffset = offset.pixels;
-
-    print('leading: $leadingEdgeOffset');
-    print('trailing: $trailingEdgeOffset');
 
     //        scrollOffset
     //                    0 +---------+

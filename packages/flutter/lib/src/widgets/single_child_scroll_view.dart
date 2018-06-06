@@ -547,6 +547,7 @@ class _RenderSingleChildViewport extends RenderBox with RenderObjectWithChildMix
 
   @override
   RevealedOffset getOffsetToReveal(RenderObject target, double alignment, {Rect rect}) {
+    print(axisDirection);
     rect ??= target.paintBounds;
     if (target is! RenderBox)
       return new RevealedOffset(offset: offset.pixels, rect: rect);

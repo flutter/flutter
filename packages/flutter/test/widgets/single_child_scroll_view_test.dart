@@ -437,6 +437,54 @@ void main() {
   });
 
   testWidgets('SingleChildScrollView getOffsetToReveal - right', (WidgetTester tester) async {
+    List<Widget> children;
+
+    await tester.pumpWidget(
+      new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new Center(
+          child: Container(
+            height: 300.0,
+            width: 200.0,
+            child: new SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              controller: new ScrollController(initialScrollOffset: 300.0),
+              child: new Row(
+                children: children = new List<Widget>.generate(20, (int i) {
+                  return new Container(
+                    height: 300.0,
+                    width: 100.0,
+                    child: new Text('Tile $i'),
+                  );
+                }),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final RenderAbstractViewport viewport = tester.allRenderObjects.firstWhere((RenderObject r) => r is RenderAbstractViewport);
+
+    final RenderObject target = tester.renderObject(find.byWidget(children[5]));
+    RevealedOffset revealed = viewport.getOffsetToReveal(target, 0.0);
+    expect(revealed.offset, 500.0);
+    expect(revealed.rect, new Rect.fromLTWH(0.0, 0.0, 100.0, 300.0));
+
+    revealed = viewport.getOffsetToReveal(target, 1.0);
+    expect(revealed.offset, 400.0);
+    expect(revealed.rect, new Rect.fromLTWH(100.0, 0.0, 100.0, 300.0));
+
+    revealed = viewport.getOffsetToReveal(target, 0.0, rect: new Rect.fromLTWH(40.0, 40.0, 10.0, 10.0));
+    expect(revealed.offset, 540.0);
+    expect(revealed.rect, new Rect.fromLTWH(0.0, 40.0, 10.0, 10.0));
+
+    revealed = viewport.getOffsetToReveal(target, 1.0, rect: new Rect.fromLTWH(40.0, 40.0, 10.0, 10.0));
+    expect(revealed.offset, 350.0);
+    expect(revealed.rect, new Rect.fromLTWH(190.0, 40.0, 10.0, 10.0));
+  });
+
+  testWidgets('SingleChildScrollView getOffsetToReveal - left', (WidgetTester tester) async {
     final List<Widget> children = new List<Widget>.generate(20, (int i) {
       return new Container(
         height: 300.0,
@@ -483,55 +531,6 @@ void main() {
     revealed = viewport.getOffsetToReveal(target, 1.0, rect: new Rect.fromLTWH(40.0, 40.0, 10.0, 10.0));
     expect(revealed.offset, 360.0);
     expect(revealed.rect, new Rect.fromLTWH(0.0, 40.0, 10.0, 10.0));
-  });
-
-  testWidgets('SingleChildScrollView getOffsetToReveal - left', (WidgetTester tester) async {
-    List<Widget> children;
-
-    await tester.pumpWidget(
-      new Directionality(
-        textDirection: TextDirection.ltr,
-        child: new Center(
-          child: Container(
-            height: 300.0,
-            width: 200.0,
-            child: new SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              reverse: true,
-              controller: new ScrollController(initialScrollOffset: 300.0),
-              child: new Row(
-                children: children = new List<Widget>.generate(20, (int i) {
-                  return new Container(
-                    height: 300.0,
-                    width: 100.0,
-                    child: new Text('Tile $i'),
-                  );
-                }),
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-
-    final RenderAbstractViewport viewport = tester.allRenderObjects.firstWhere((RenderObject r) => r is RenderAbstractViewport);
-
-    final RenderObject target = tester.renderObject(find.byWidget(children[5]));
-    RevealedOffset revealed = viewport.getOffsetToReveal(target, 0.0);
-    expect(revealed.offset, 500.0);
-    expect(revealed.rect, new Rect.fromLTWH(0.0, 0.0, 100.0, 300.0));
-
-    revealed = viewport.getOffsetToReveal(target, 1.0);
-    expect(revealed.offset, 400.0);
-    expect(revealed.rect, new Rect.fromLTWH(100.0, 0.0, 100.0, 300.0));
-
-    revealed = viewport.getOffsetToReveal(target, 0.0, rect: new Rect.fromLTWH(40.0, 40.0, 10.0, 10.0));
-    expect(revealed.offset, 540.0);
-    expect(revealed.rect, new Rect.fromLTWH(0.0, 40.0, 10.0, 10.0));
-
-    revealed = viewport.getOffsetToReveal(target, 1.0, rect: new Rect.fromLTWH(40.0, 40.0, 10.0, 10.0));
-    expect(revealed.offset, 350.0);
-    expect(revealed.rect, new Rect.fromLTWH(190.0, 40.0, 10.0, 10.0));
   });
 
   testWidgets('Nested SingleChildScrollView showOnScreen', (WidgetTester tester) async {
