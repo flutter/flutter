@@ -49,30 +49,34 @@ void main() {
     const Color fillColor = const Color(0xFF00FF00);
     const Color borderColor = const Color(0xFFFF0000);
     const Color highlightedBorderColor = const Color(0xFF0000FF);
+    const Color disabledBorderColor = const Color(0xFFFF00FF);
     const double borderWidth = 4.0;
 
-    await tester.pumpWidget(
-      new Directionality(
+    Widget buildFrame(VoidCallback onPressed) {
+      return Directionality(
         textDirection: TextDirection.ltr,
-        child: new Theme(
-          data: new ThemeData(),
-          child: new Container(
+        child: Theme(
+          data: ThemeData(),
+          child: Container(
             alignment: Alignment.topLeft,
-            child: new OutlineButton(
-              shape: const RoundedRectangleBorder(), // default border radius is 0
-              color: fillColor,
-              highlightedBorderColor: highlightedBorderColor,
-              borderSide: const BorderSide(
-                width: borderWidth,
-                color: borderColor,
-              ),
-              onPressed: () { },
-              child: const Text('button')
+            child: OutlineButton(
+                shape: const RoundedRectangleBorder(), // default border radius is 0
+                color: fillColor,
+                highlightedBorderColor: highlightedBorderColor,
+                disabledBorderColor: disabledBorderColor,
+                borderSide: const BorderSide(
+                  width: borderWidth,
+                  color: borderColor,
+                ),
+                onPressed: () { },
+                child: const Text('button')
             ),
           ),
         ),
-      ),
-    );
+      );
+    }
+
+    await tester.pumpWidget(buildFrame(() { }));
 
     final Finder outlineButton = find.byType(OutlineButton);
     expect(tester.widget<OutlineButton>(outlineButton).enabled, true);
@@ -112,7 +116,17 @@ void main() {
         ..clipPath(pathMatcher: coversSameAreaAs(clipPath, areaToCompare: clipRect.inflate(10.0)))
         ..path(color: borderColor, strokeWidth: borderWidth)
     );
+
+    expect(tester.widget<OutlineButton>(outlineButton).enabled, true);
+    await tester.pumpWidget(buildFrame(null));
+    // TODO(clocksmith): Why isn't this false?!
+    expect(tester.widget<OutlineButton>(outlineButton).enabled, true);
+
     debugDisableShadows = true;
+  });
+
+  testWidgets('Outline shape and border theming', (WidgetTester tester) async {
+    // TODO(clocksmith): this.
   });
 
 
