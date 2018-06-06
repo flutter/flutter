@@ -127,7 +127,6 @@ BuildApp() {
       --${build_mode}                                                       \
       --ios-arch="${archs}"                                                 \
       ${local_engine_flag}                                                  \
-      ${preview_dart_2_flag}                                                \
       ${track_widget_creation_flag}
 
     if [[ $? -ne 0 ]]; then
