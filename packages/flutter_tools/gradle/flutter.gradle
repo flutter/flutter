@@ -256,6 +256,10 @@ class FlutterPlugin implements Plugin<Project> {
             target = project.property('target')
         }
 
+        Boolean verboseValue = null
+        if (project.hasProperty('verbose')) {
+            verboseValue = project.property('verbose').toBoolean()
+        }
         Boolean previewDart2Value = true
         if (project.hasProperty('preview-dart-2')) {
             previewDart2Value = project.property('preview-dart-2').toBoolean()
@@ -310,6 +314,7 @@ class FlutterPlugin implements Plugin<Project> {
                 localEngine this.localEngine
                 localEngineSrcPath this.localEngineSrcPath
                 targetPath target
+                verbose verboseValue
                 previewDart2 previewDart2Value
                 fileSystemRoots fileSystemRootsValue
                 fileSystemScheme fileSystemSchemeValue
@@ -352,6 +357,8 @@ abstract class BaseFlutterTask extends DefaultTask {
     String localEngineSrcPath
     @Input
     String targetPath
+    @Optional @Input
+    Boolean verbose
     @Optional @Input
     Boolean previewDart2
     @Optional @Input
@@ -442,6 +449,9 @@ abstract class BaseFlutterTask extends DefaultTask {
             args "build", "bundle"
             args "--suppress-analytics"
             args "--target", targetPath
+            if (verbose) {
+                args "--verbose"
+            }
             if (previewDart2) {
                 args "--preview-dart-2"
             } else {

@@ -314,7 +314,9 @@ Future<Null> _buildGradleProjectV2(String gradle, BuildInfo buildInfo, String ta
   final Status status = logger.startProgress('Running \'gradlew $assembleTask\'...', expectSlowOperation: true);
   final String gradlePath = fs.file(gradle).absolute.path;
   final List<String> command = <String>[gradlePath];
-  if (!logger.isVerbose) {
+  if (logger.isVerbose) {
+    command.add('-Pverbose=true');
+  } else {
     command.add('-q');
   }
   if (artifacts is LocalEngineArtifacts) {
