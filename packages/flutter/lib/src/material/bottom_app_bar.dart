@@ -155,9 +155,6 @@ class _BottomAppBarClipper extends CustomClipper<Path> {
 
   @override
   bool shouldReclip(CustomClipper<Path> oldClipper) {
-    if (oldClipper.runtimeType != _BottomAppBarClipper)
-      return true;
-
     final _BottomAppBarClipper typedOldClipper = oldClipper;
     return typedOldClipper.geometry != geometry;
   }
