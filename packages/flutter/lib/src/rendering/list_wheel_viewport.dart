@@ -615,27 +615,39 @@ class RenderListWheelViewport
 
   @override
   RevealedOffset getOffsetToReveal(RenderObject target, double alignment, {Rect rect}) {
-//    final ListWheelParentData parentData = target.parentData;
-//    final double centerPosition = parentData.offset.dy;
-//
-//    if (alignment < 0.5) {
-//      return centerPosition + _topScrollMarginExtent * alignment * 2.0;
-//    } else if (alignment > 0.5) {
-//      return centerPosition - _topScrollMarginExtent * (alignment - 0.5) * 2.0;
-//    } else {
-//      return centerPosition;
-//    }
-    return null;
+    // `target` is only fully revealed when in the selected/center position. Therefore,
+    // this method always returns the offset that shows `target` in the center position,
+    // which is the same offset for all `alignment` values.
+
+    rect ??= target.paintBounds;
+
+    // The child will be the topmost object before we get to the viewport.
+    RenderObject child = target;
+    while (child.parent != this)
+      child = child.parent;
+
+    final ListWheelParentData parentData = child.parentData;
+    final double targetOffset = parentData.offset.dy; // the so-called "centerPosition"
+
+    final Matrix4 transform = target.getTransformTo(this);
+    final Rect bounds = MatrixUtils.transformRect(transform, rect);
+    final Rect targetRect = bounds.translate(0.0,  (size.height - itemExtent) / 2);
+
+    return new RevealedOffset(offset: targetOffset, rect: targetRect);
   }
 
   @override
   void showOnScreen({RenderObject descendant, Rect rect}) {
     if (descendant != null) {
-      // Shows the child in the selected/center position.
-      offset.jumpTo(getOffsetToReveal(descendant, 0.5).offset);
+      // Shows the descendant in the selected/center position.
+      final RevealedOffset revealedOffset = getOffsetToReveal(descendant, 0.5, rect: rect);
+      offset.jumpTo(revealedOffset.offset);
+      rect = revealedOffset.rect;
     }
 
-    // Make sure the viewport itself is on screen.
-    super.showOnScreen();
+    super.showOnScreen(
+      // Omitting `descendant` to get this viewport on screen.
+      rect: rect,
+    );
   }
 }
