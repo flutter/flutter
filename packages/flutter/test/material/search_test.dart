@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -40,6 +41,51 @@ void main() {
     expect(find.text('HomeTitle'), findsOneWidget);
     expect(find.text('Suggestions'), findsNothing);
     expect(selectedResults, <String>['Result']);
+  });
+
+  testWidgets('Can close search with system back button to return null', (WidgetTester tester) async {
+    // regression test for https://github.com/flutter/flutter/issues/18145
+
+    final _TestSearchDelegate delegate = new _TestSearchDelegate();
+    final List<String> selectedResults = <String>[];
+
+    await tester.pumpWidget(new TestHomePage(
+      delegate: delegate,
+      results: selectedResults,
+    ));
+
+    // We are on the homepage
+    expect(find.text('HomeBody'), findsOneWidget);
+    expect(find.text('HomeTitle'), findsOneWidget);
+    expect(find.text('Suggestions'), findsNothing);
+
+    // Open search
+    await tester.tap(find.byTooltip('Search'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('HomeBody'), findsNothing);
+    expect(find.text('HomeTitle'), findsNothing);
+    expect(find.text('Suggestions'), findsOneWidget);
+
+    // Simulate system back button
+    final ByteData message = const JSONMethodCodec().encodeMethodCall(const MethodCall('popRoute'));
+    await BinaryMessages.handlePlatformMessage('flutter/navigation', message, (_) {});
+    await tester.pumpAndSettle();
+
+    expect(selectedResults, <void>[null]);
+
+    // We are on the homepage again
+    expect(find.text('HomeBody'), findsOneWidget);
+    expect(find.text('HomeTitle'), findsOneWidget);
+    expect(find.text('Suggestions'), findsNothing);
+
+    // Open search again
+    await tester.tap(find.byTooltip('Search'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('HomeBody'), findsNothing);
+    expect(find.text('HomeTitle'), findsNothing);
+    expect(find.text('Suggestions'), findsOneWidget);
   });
 
   testWidgets('Requests suggestions', (WidgetTester tester) async {
@@ -414,7 +460,7 @@ void main() {
     expect(find.text('HomeBody'), findsOneWidget);
     expect(find.text('Suggestions'), findsNothing);
     expect(find.text('Nested Suggestions'), findsNothing);
-    expect(nestedSearchResults, hasLength(0));
+    expect(nestedSearchResults, <String>[null]);
     expect(selectedResults, <String>['Result Foo']);
   });
 }
