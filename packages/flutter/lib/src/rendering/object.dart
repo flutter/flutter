@@ -2571,10 +2571,17 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   @override
   List<DiagnosticsNode> debugDescribeChildren() => <DiagnosticsNode>[];
 
-  /// Attempt to make this or a descendant [RenderObject] visible on screen.
+  /// Attempt to make (a portion of) this or a descendant [RenderObject] visible
+  /// on screen.
   ///
   /// If `descendant` is provided, that [RenderObject] is made visible. If
   /// `descendant` is omitted, this [RenderObject] is made visible.
+  ///
+  /// The optional `rect` parameter describes which area of the [RenderObject]
+  /// should be shown on screen. If `rect` is null, the entire
+  /// [RenderObject] will be revealed. The `rect` parameter is interpreted
+  /// relative to the coordinate system of `descendant` if that argument is
+  /// provided or relative to this [RenderObject] otherwise.
   ///
   /// The `duration` parameter can be set to a non-zero value to bring the
   /// target object on screen in an animation defined by `curve`.

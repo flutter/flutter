@@ -176,7 +176,6 @@ abstract class ViewportOffset extends ChangeNotifier {
   ///
   /// The duration must not be zero. To jump to a particular value without an
   /// animation, use [jumpTo].
-  ///
   Future<Null> animateTo(double to, {
     @required Duration duration,
     @required Curve curve,

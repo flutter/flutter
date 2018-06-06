@@ -658,6 +658,8 @@ class RenderListWheelViewport
     super.showOnScreen(
       // Omitting `descendant` to get this viewport on screen.
       rect: rect,
+      duration: duration,
+      curve: curve,
     );
   }
 }

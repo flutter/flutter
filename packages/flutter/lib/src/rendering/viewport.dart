@@ -114,7 +114,7 @@ class RevealedOffset {
   /// regardless of the current viewport offset.
   ///
   /// In other words: [rect] describes where the revealed element would be
-  /// located relative of the top left corner of the visible part of the
+  /// located relative to the top left corner of the visible part of the
   /// viewport if the viewport's offset is set to [offset].
   ///
   /// See also:
@@ -889,11 +889,24 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
     );
   }
 
-  /// Make the given `child` of the given `viewport` fully visible in the
-  /// `viewport` by manipulating the provided [ViewportOffset] `offset`.
+  /// Make (a portions of) the given `descendant` of the given `viewport` fully
+  /// visible in the `viewport` by manipulating the provided [ViewportOffset]
+  /// `offset`.
+  ///
+  /// The optional `rect` parameter describes which area of the `descendant`
+  /// should be shown in the viewport. If `rect` is null, the entire
+  /// `descendant` will be revealed. The `rect` parameter is interpreted
+  /// relative to the coordinate system of `descendant`.
+  ///
+  /// The returned [Rect] describes the new location of `descendant` or `rect`
+  /// in the viewport after it has been revealed. See [RevealedOffset.rect]
+  /// for a full definition of this [Rect].
   ///
   /// The parameters `viewport` and `offset` are required and cannot be null.
-  /// If `child` is null this is a no-op.
+  /// If `descendant` is null this is a no-op and `rect` is returned.
+  ///
+  /// The `duration` parameter can be set to a non-zero value to animate the
+  /// target object into the viewport with an animation defined by `curve`.
   static Rect showInViewport({
     RenderObject descendant,
     Rect rect,
