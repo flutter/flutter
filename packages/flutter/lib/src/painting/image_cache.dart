@@ -5,7 +5,7 @@
 import 'image_stream.dart';
 
 const int _kDefaultSize = 1000;
-const int _kDefaultSizeBytes = 10000000; // 10 MB
+const int _kDefaultSizeBytes = 10485760; // 10 MiB
 
 /// Class for the [imageCache] object.
 ///
@@ -65,7 +65,6 @@ class ImageCache {
   /// maximum bytes.
   int get maximumSizeBytes => _maximumSizeBytes;
   int _maximumSizeBytes = _kDefaultSizeBytes;
-
   /// Changes the maximum cache bytes.
   ///
   /// If the new size is smaller than the current size in bytes, the
@@ -101,26 +100,23 @@ class ImageCache {
 
   /// Evicts a single entry from the cache, returning true if successful.
   ///
-  /// [key] is usually an image's corresponding [ImageProvider]. For example,
-  /// if you have an image in you Flutter app like the following.
+  /// [key] is usually an image's corresponding [ImageProvider]. To remove an
+  /// image from the cache, pass a [NetworkImage] object to the evict method
+  /// with matching url and scale.
+  ///
+  /// ## sample code
   ///
   /// ```dart
-  ///     Widget build(BuildContext context) {
-  ///       return new Image.network(url);
-  ///     }
-  /// ```
+  /// Widget build(BuildContext context) {
+  ///   return new Image.network(url);
+  /// }
   ///
-  /// To remove it from the cache, pass a [NetworkImage] object to the
-  /// evict method with matching url and scale.
-  ///
-  /// ```dart
-  ///   void evictImage() {
-  ///     final NetworkImage key = new NetworkImage(url);
-  ///     if (imageCache.evict(key))
-  ///       print('image removed!');
-  ///   }
-  /// ```
-  ///
+  /// void evictImage() {
+  ///   final NetworkImage key = new NetworkImage(url);
+  ///   if (imageCache.evict(key))
+  ///     print('image removed!');
+  /// }
+  ///```
   bool evict(Object key) {
     final _CachedImage image = _cache.remove(key);
     if (image != null) {

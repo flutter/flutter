@@ -58,12 +58,11 @@ Future<ImageInfo> extractOneFrame(ImageStream stream) {
 }
 
 class TestImage implements ui.Image {
+  const TestImage({this.height = 0, this.width = 0});
   @override
   final int height;
   @override
   final int width;
-
-  const TestImage({this.height = 0, this.width = 0});
 
   @override
   void dispose() {}
