@@ -104,6 +104,23 @@ String getAvdPath() {
   );
 }
 
+/// Locate 'avdmanager'. Prefer to use one from an Android SDK, if we can locate that.
+/// This should be used over accessing androidSdk.avdManagerPath directly because it
+/// will work for those users who have Android Tools installed but
+/// not the full SDK.
+String getAvdManagerPath([AndroidSdk existingSdk]) {
+  if (existingSdk?.avdManagerPath != null)
+    return existingSdk.avdManagerPath;
+
+  final AndroidSdk sdk = AndroidSdk.locateAndroidSdk();
+
+  if (sdk?.latestVersion == null) {
+    return os.which('avdmanager')?.path;
+  } else {
+    return sdk.avdManagerPath;
+  }
+}
+
 class AndroidNdkSearchError {
   AndroidNdkSearchError(this.reason);
 
@@ -314,6 +331,8 @@ class AndroidSdk {
 
   String get emulatorPath => getEmulatorPath();
 
+  String get avdManagerPath => getAvdManagerPath();
+
   /// Validate the Android SDK. This returns an empty list if there are no
   /// issues; otherwise, it returns a list of issues found.
   List<String> validateSdkWellFormed() {
@@ -340,6 +359,14 @@ class AndroidSdk {
       if (fs.file(path).existsSync())
         return path;
     }
+    return null;
+  }
+
+  String getAvdManagerPath() {
+    final String binaryName = platform.isWindows ? 'avdmanager.exe' : 'avdmanager';
+    final String path = fs.path.join(directory, 'tools', 'bin', binaryName);
+    if (fs.file(path).existsSync())
+      return path;
     return null;
   }
 

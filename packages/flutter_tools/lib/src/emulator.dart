@@ -6,7 +6,9 @@ import 'dart:async';
 import 'dart:math' as math;
 
 import 'android/android_emulator.dart';
+import 'android/android_sdk.dart';
 import 'base/context.dart';
+import 'base/process.dart';
 import 'globals.dart';
 import 'ios/ios_emulators.dart';
 
@@ -55,6 +57,109 @@ class EmulatorManager {
       emulators.addAll(await discoverer.emulators);
     });
     return emulators;
+  }
+
+  /// Return the list of all available emulators.
+  Future<CreateEmulatorResult> createEmulator(String name) async {
+    final String device =  await _getPreferredAvailableDevice();
+    if (device == null)
+      return new CreateEmulatorResult(
+        success: false,
+        error: 'No device definitions are available'
+    );
+
+    final String sdkId =  await _getPreferredSdkId();
+    if (sdkId == null)
+      return new CreateEmulatorResult(
+        success: false,
+        error: 'No Android AVD system images are available'
+    );
+
+    // Cleans up error output from avdmanager to make it more suitable to show
+    // to flutter users. Specifically:
+    // - Removes lines that say "null" (!)
+    // - Removes lines that tell the user to use '--force' to overwrite emulators
+    String cleanError(String error) {
+      return (error ?? '')
+        .split('\n')
+        .where((String l) => l.trim() != 'null')
+        .where((String l) => l.trim() != 'Use --force if you want to replace it.')
+        .join('\n');
+    }
+
+    final List<String> args = <String>[
+      getAvdManagerPath(),
+      'create',
+      'avd',
+      '-n', name,
+      '-k', sdkId,
+      '-d', device
+    ];
+    final RunResult runResult = await runAsync(args);
+    return new CreateEmulatorResult(
+      success: runResult.exitCode == 0,
+      output: runResult.stdout,
+      error: cleanError(runResult.stderr),
+    );
+  }
+
+  static const List<String> preferredDevices = const <String>[
+    'pixel',
+    'pixel_xl',
+  ];
+  Future<String> _getPreferredAvailableDevice() async {
+    final List<String> args = <String>[
+      getAvdManagerPath(),
+      'list',
+      'device',
+      '-c'
+    ];
+    final RunResult runResult = await runAsync(args);
+    if (runResult.exitCode != 0)
+      return null;
+
+    final List<String> availableDevices = runResult.stdout
+      .split('\n')
+      .where((String l) => preferredDevices.contains(l.trim()));
+
+    return preferredDevices.firstWhere(
+      (String d) => availableDevices.contains(d),
+      orElse: () => null,
+    );
+  }
+
+  RegExp androidApiVersion = new RegExp(r';android-(\d+);');
+  Future<String> _getPreferredSdkId() async {
+    // It seems that to get the available list of images, we need to send a
+    // request to create without the image and it'll provide us a list :-(
+    final List<String> args = <String>[
+      getAvdManagerPath(),
+      'create',
+      'avd',
+      '-n', 'temp',
+    ];
+    final RunResult runResult = await runAsync(args);
+   
+    // Get the list of IDs that match our criteria
+    final List<String> availableIDs = runResult.stderr
+      .split('\n')
+      .where((String l) => androidApiVersion.hasMatch(l))
+      .where((String l) => l.contains('system-images'))
+      .where((String l) => l.contains('google_apis_playstore'));
+
+    // Get the highest Android API version or whats left
+    final int apiVersion =
+      availableIDs
+        .map((String id) => androidApiVersion.firstMatch(id).group(1))
+        .map((String apiVersion) => int.parse(apiVersion))
+        .reduce(math.max);
+    
+    // We're out of preferences, we just have to return the first one with the high
+    // API version.
+    return availableIDs.firstWhere(
+      (String id) => id.contains(';android-$apiVersion;'),
+      orElse: () => null,
+    );
   }
 
   /// Whether we're capable of listing any emulators given the current environment configuration.
@@ -136,4 +241,12 @@ abstract class Emulator {
   static void printEmulators(List<Emulator> emulators) {
     descriptions(emulators).forEach(printStatus);
   }
+}
+
+class CreateEmulatorResult {
+  final bool success;
+  final String output;
+  final String error;
+
+  CreateEmulatorResult({this.success, this.output, this.error});
 }
