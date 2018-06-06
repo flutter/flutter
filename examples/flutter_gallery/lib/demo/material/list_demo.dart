@@ -416,44 +416,61 @@ class DraggableListState extends State<DraggableList> with TickerProviderStateMi
             }
           });
           if (dragging == toAccept && toAccept != toWrap.key) {
-            print('Checking to see if we should scroll');
-            if (!scrolling) {
-              final RenderObject contextObject = context.findRenderObject();
-              final RenderAbstractViewport viewport = RenderAbstractViewport.of(contextObject);
-              assert(viewport != null);
-              const double margin = 48.0;
-              final double scrollOffset = scrollController.offset;
-              final double topOffset = viewport.getOffsetToReveal(contextObject, 0.0) - margin;
-              final double bottomOffset = viewport.getOffsetToReveal(contextObject, 1.0) + margin;
-              final double viewHeight = (bottomOffset - topOffset).abs();
-              final bool onScreen = scrollOffset <= topOffset && scrollOffset >= bottomOffset;
-              final double offsetToReveal = max(
-                min(
-                  scrollOffset < bottomOffset ? bottomOffset : topOffset,
-                  scrollController.position.maxScrollExtent,
-                ),
-                scrollController.position.minScrollExtent
+            final RenderObject contextObject = context.findRenderObject();
+            final RenderAbstractViewport viewport = RenderAbstractViewport.of(contextObject);
+            assert(viewport != null);
+            const double margin = 48.0;
+            final double scrollOffset = scrollController.offset;
+            final double topOffset = viewport.getOffsetToReveal(contextObject, 0.0) - margin;
+            final double bottomOffset = viewport.getOffsetToReveal(contextObject, 1.0) + margin;
+            final bool onScreen = scrollOffset <= topOffset && scrollOffset >= bottomOffset; 
+            if (!onScreen) {
+              Scrollable.ensureVisible(
+                context, 
+                duration: const Duration(milliseconds: 200), 
+                alignment: scrollOffset < bottomOffset ? 0.9 : 0.1, 
+                curve: Curves.easeInOut,
               );
-              print('$dragging toWrap: ${toWrap.key} OnScreen: $onScreen, ${topOffset} ${bottomOffset} ${offsetToReveal} ${scrollOffset} ${viewHeight}');
-              if (!onScreen && offsetToReveal != scrollOffset) {
-                print('Scrolling from ${scrollOffset} to ${offsetToReveal}');
-                scrolling = true;
-                scrollController.animateTo(offsetToReveal, duration: const Duration(milliseconds: 200), curve: Curves.easeInOut).then((_) {
-                  setState(() {
-                    scrolling = false;
-                  });
-                });
-              }
-            //   setState(() {
-            //     scrolling = true;
-            //     double targetOffset = scrollController.offset - approximateItemHeight;
-            //     if (currentIndex > ghostIndex) {
-            //       targetOffset = scrollController.offset + approximateItemHeight;
-            //     }
-            //     print('Scrolling from ${scrollController.offset} to ${targetOffset}');
-
-            //   });
             }
+            // print('Checking to see if we should scroll');
+            // if (!scrolling) {
+              
+            //   final RenderObject contextObject = context.findRenderObject();
+            //   final RenderAbstractViewport viewport = RenderAbstractViewport.of(contextObject);
+            //   assert(viewport != null);
+            //   const double margin = 48.0;
+            //   final double scrollOffset = scrollController.offset;
+            //   final double topOffset = viewport.getOffsetToReveal(contextObject, 0.0) - margin;
+            //   final double bottomOffset = viewport.getOffsetToReveal(contextObject, 1.0) + margin;
+            //   final double viewHeight = (bottomOffset - topOffset).abs();
+            //   final bool onScreen = scrollOffset <= topOffset && scrollOffset >= bottomOffset;
+            //   final double offsetToReveal = max(
+            //     min(
+            //       scrollOffset < bottomOffset ? bottomOffset : topOffset,
+            //       scrollController.position.maxScrollExtent,
+            //     ),
+            //     scrollController.position.minScrollExtent
+            //   );
+            //   print('$dragging toWrap: ${toWrap.key} OnScreen: $onScreen, ${topOffset} ${bottomOffset} ${offsetToReveal} ${scrollOffset} ${viewHeight}');
+            //   if (!onScreen && offsetToReveal != scrollOffset) {
+            //     print('Scrolling from ${scrollOffset} to ${offsetToReveal}');
+            //     scrolling = true;
+            //     scrollController.animateTo(offsetToReveal, duration: const Duration(milliseconds: 200), curve: Curves.easeInOut).then((_) {
+            //       setState(() {
+            //         scrolling = false;
+            //       });
+            //     });
+            //   }
+            // //   setState(() {
+            // //     scrolling = true;
+            // //     double targetOffset = scrollController.offset - approximateItemHeight;
+            // //     if (currentIndex > ghostIndex) {
+            // //       targetOffset = scrollController.offset + approximateItemHeight;
+            // //     }
+            // //     print('Scrolling from ${scrollController.offset} to ${targetOffset}');
+
+            // //   });
+            // }
             return true;
           }
           return false;
