@@ -544,6 +544,7 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
   /// animation, use [jumpTo].
   ///
   /// The animation is typically handled by an [DrivenScrollActivity].
+  @override
   Future<Null> animateTo(double to, {
     @required Duration duration,
     @required Curve curve,

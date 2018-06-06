@@ -4,6 +4,7 @@
 
 import 'dart:math' as math;
 
+import 'package:flutter/animation.dart';
 import 'package:flutter/foundation.dart';
 import 'package:vector_math/vector_math_64.dart' show Matrix4;
 
@@ -637,11 +638,20 @@ class RenderListWheelViewport
   }
 
   @override
-  void showOnScreen({RenderObject descendant, Rect rect}) {
+  void showOnScreen({
+    RenderObject descendant,
+    Rect rect,
+    Duration duration: Duration.zero,
+    Curve curve: Curves.ease,
+  }) {
     if (descendant != null) {
       // Shows the descendant in the selected/center position.
       final RevealedOffset revealedOffset = getOffsetToReveal(descendant, 0.5, rect: rect);
-      offset.jumpTo(revealedOffset.offset);
+      if (duration == Duration.zero) {
+        offset.jumpTo(revealedOffset.offset);
+      } else {
+        offset.animateTo(revealedOffset.offset, duration: duration, curve: curve);
+      }
       rect = revealedOffset.rect;
     }
 

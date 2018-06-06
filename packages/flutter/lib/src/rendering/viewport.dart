@@ -4,6 +4,7 @@
 
 import 'dart:math' as math;
 
+import 'package:flutter/animation.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/semantics.dart';
@@ -866,16 +867,25 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
   Iterable<RenderSliver> get childrenInHitTestOrder;
 
   @override
-  void showOnScreen({RenderObject descendant, Rect rect}) {
+  void showOnScreen({
+    RenderObject descendant,
+    Rect rect,
+    Duration duration: Duration.zero,
+    Curve curve: Curves.ease,
+  }) {
     final Rect newRect = RenderViewportBase.showInViewport(
       descendant: descendant,
       viewport: this,
       offset: offset,
       rect: rect,
+      duration: duration,
+      curve: curve,
     );
     super.showOnScreen(
       // Omitting `descendant` to get this viewport on screen.
-    rect: newRect,
+      rect: newRect,
+      duration: duration,
+      curve: curve,
     );
   }
 
@@ -889,6 +899,8 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
     Rect rect,
     @required RenderAbstractViewport viewport,
     @required ViewportOffset offset,
+    Duration duration: Duration.zero,
+    Curve curve: Curves.ease,
   }) {
     assert(viewport != null);
     assert(offset != null);
@@ -920,32 +932,36 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
     // to `trailingEdgeOffset`, the one on the right by setting it to
     // `leadingEdgeOffset`.
 
+    RevealedOffset targetOffset;
     if (leadingEdgeOffset.offset < trailingEdgeOffset.offset) {
       // `descendant` is too big to be visible on screen in its entirety. Let's
       // align it with the edge that requires the least amount of scrolling.
       final double leadingEdgeDiff = (offset.pixels - leadingEdgeOffset.offset).abs();
       final double trailingEdgeDiff = (offset.pixels - trailingEdgeOffset.offset).abs();
-      if (leadingEdgeDiff < trailingEdgeDiff) {
-        offset.jumpTo(leadingEdgeOffset.offset);
-        return leadingEdgeOffset.rect;
-      }
-      offset.jumpTo(trailingEdgeOffset.offset);
-      return trailingEdgeOffset.rect;
+      targetOffset = leadingEdgeDiff < trailingEdgeDiff ? leadingEdgeOffset : trailingEdgeOffset;
     } else if (currentOffset > leadingEdgeOffset.offset) {
       // `descendant` currently starts above the leading edge and can be shown
       // fully on screen by scrolling down (which means: moving viewport up).
-      offset.jumpTo(leadingEdgeOffset.offset);
-      return leadingEdgeOffset.rect;
+      targetOffset = leadingEdgeOffset;
     } else if (currentOffset < trailingEdgeOffset.offset) {
       // `descendant currently ends below the trailing edge and can be shown
       // fully on screen by scrolling up (which means: moving viewport down)
-      offset.jumpTo(trailingEdgeOffset.offset);
-      return trailingEdgeOffset.rect;
+      targetOffset = trailingEdgeOffset;
+    } else {
+      // `descendant` is between leading and trailing edge and hence already
+      //  fully shown on screen. No action necessary.
+      final Matrix4 transform = descendant.getTransformTo(viewport.parent);
+      return MatrixUtils.transformRect(transform, rect ?? descendant.paintBounds);
     }
-    // else: `descendant` is between leading and trailing edge and hence already
-    //     fully shown on screen. No action necessary.
-    final Matrix4 transform = descendant.getTransformTo(viewport.parent);
-    return MatrixUtils.transformRect(transform, rect ?? descendant.paintBounds);
+
+    assert(targetOffset != null);
+
+    if (duration == Duration.zero) {
+      offset.jumpTo(targetOffset.offset);
+    } else {
+      offset.animateTo(targetOffset.offset, duration: duration, curve: curve);
+    }
+    return targetOffset.rect;
   }
 }
 

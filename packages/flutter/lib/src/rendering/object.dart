@@ -5,6 +5,7 @@
 import 'dart:developer';
 import 'dart:ui' as ui show PictureRecorder;
 
+import 'package:flutter/animation.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/painting.dart';
@@ -2570,14 +2571,27 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   @override
   List<DiagnosticsNode> debugDescribeChildren() => <DiagnosticsNode>[];
 
-  /// Attempt to make this or a descendant RenderObject visible on screen.
+  /// Attempt to make this or a descendant [RenderObject] visible on screen.
   ///
-  /// If [descendant] is provided, that [RenderObject] is made visible. If [descendant] is
-  /// omitted, this [RenderObject] is made visible.
-  void showOnScreen({RenderObject descendant, Rect rect}) {
+  /// If `descendant` is provided, that [RenderObject] is made visible. If
+  /// `descendant` is omitted, this [RenderObject] is made visible.
+  ///
+  /// The `duration` parameter can be set to a non-zero value to bring the
+  /// target object on screen in an animation defined by `curve`.
+  void showOnScreen({
+    RenderObject descendant,
+    Rect rect,
+    Duration duration: Duration.zero,
+    Curve curve: Curves.ease,
+  }) {
     if (parent is RenderObject) {
       final RenderObject renderParent = parent;
-      renderParent.showOnScreen(descendant: descendant ?? this, rect: rect);
+      renderParent.showOnScreen(
+        descendant: descendant ?? this,
+        rect: rect,
+        duration: duration,
+        curve: curve,
+      );
     }
   }
 }

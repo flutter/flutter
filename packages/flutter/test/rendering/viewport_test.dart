@@ -331,6 +331,23 @@ void main() {
     await tester.pumpAndSettle();
     expect(controllersX[6].offset, 500.0);
     expect(controllerY.offset, 500.0);
+
+    controllersX[6].jumpTo(400.0);
+    controllerY.jumpTo(400.0);
+    await tester.pumpAndSettle();
+
+    // Below and right of viewport with animations
+    tester.renderObject(find.byWidget(children[6][6], skipOffstage: false)).showOnScreen(duration: const Duration(seconds: 2));
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
+    expect(tester.hasRunningAnimations, isTrue);
+    expect(controllersX[6].offset, greaterThan(400.0));
+    expect(controllersX[6].offset, lessThan(500.0));
+    expect(controllerY.offset, greaterThan(400.0));
+    expect(controllerY.offset, lessThan(500.0));
+    await tester.pumpAndSettle();
+    expect(controllersX[6].offset, 500.0);
+    expect(controllerY.offset, 500.0);
   });
 
   group('Nested viewports (same orientation) showOnScreen', () {

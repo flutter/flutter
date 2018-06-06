@@ -856,5 +856,14 @@ void main() {
     tester.renderObject(find.byWidget(innerChildren[9])).showOnScreen();
     await tester.pumpAndSettle();
     expect(controller.offset, 900.0);
+
+    tester.renderObject(find.byWidget(outerChildren[7])).showOnScreen(duration: const Duration(seconds: 2));
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
+    expect(tester.hasRunningAnimations, isTrue);
+    expect(controller.offset, lessThan(900.0));
+    expect(controller.offset, greaterThan(700.0));
+    await tester.pumpAndSettle();
+    expect(controller.offset, 700.0);
   });
 }
