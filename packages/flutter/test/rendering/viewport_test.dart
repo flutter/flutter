@@ -9,7 +9,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
 void main() {
-  testWidgets('SingleChildScrollView getOffsetToReveal - down', (WidgetTester tester) async {
+  testWidgets('Viewport getOffsetToReveal - down', (WidgetTester tester) async {
     List<Widget> children;
     await tester.pumpWidget(
       new Directionality(
@@ -53,7 +53,7 @@ void main() {
     expect(revealed.rect, new Rect.fromLTWH(40.0, 190.0, 10.0, 10.0));
   });
 
-  testWidgets('SingleChildScrollView getOffsetToReveal - right', (WidgetTester tester) async {
+  testWidgets('Viewport getOffsetToReveal - right', (WidgetTester tester) async {
     List<Widget> children;
 
     await tester.pumpWidget(
@@ -99,7 +99,7 @@ void main() {
     expect(revealed.rect, new Rect.fromLTWH(190.0, 40.0, 10.0, 10.0));
   });
 
-  testWidgets('SingleChildScrollView getOffsetToReveal - up', (WidgetTester tester) async {
+  testWidgets('Viewport getOffsetToReveal - up', (WidgetTester tester) async {
     List<Widget> children;
 
     await tester.pumpWidget(
@@ -145,7 +145,7 @@ void main() {
     expect(revealed.rect, new Rect.fromLTWH(40.0, 0.0, 10.0, 10.0));
   });
 
-  testWidgets('SingleChildScrollView getOffsetToReveal - left', (WidgetTester tester) async {
+  testWidgets('Viewport getOffsetToReveal - left', (WidgetTester tester) async {
     List<Widget> children;
 
     await tester.pumpWidget(
@@ -459,5 +459,65 @@ void main() {
       expect(outer.offset, 200.0);
       expect(inner.offset, 0.0);
     });
+  });
+
+  testWidgets('Viewport showOnScreen with objects larger than viewport', (WidgetTester tester) async {
+    List<Widget> children;
+    ScrollController controller;
+
+    await tester.pumpWidget(
+      new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new Center(
+          child: Container(
+            height: 200.0,
+            child: new ListView(
+              controller: controller = new ScrollController(initialScrollOffset: 300.0),
+              children: children = new List<Widget>.generate(20, (int i) {
+                return new Container(
+                  height: 300.0,
+                  child: new Text('Tile $i'),
+                );
+              }),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(controller.offset, 300.0);
+
+    // Already aligned with leading edge, nothing happens.
+    tester.renderObject(find.byWidget(children[1], skipOffstage: false)).showOnScreen();
+    await tester.pumpAndSettle();
+    expect(controller.offset, 300.0);
+
+    // Above leading edge aligns trailing edges
+    tester.renderObject(find.byWidget(children[0], skipOffstage: false)).showOnScreen();
+    await tester.pumpAndSettle();
+    expect(controller.offset, 100.0);
+
+    // Below trailing edge aligns leading edges
+    tester.renderObject(find.byWidget(children[1], skipOffstage: false)).showOnScreen();
+    await tester.pumpAndSettle();
+    expect(controller.offset, 300.0);
+
+    controller.jumpTo(250.0);
+    await tester.pumpAndSettle();
+    expect(controller.offset, 250.0);
+
+    // Partly visible across leading edge aligns trailing edges
+    tester.renderObject(find.byWidget(children[0], skipOffstage: false)).showOnScreen();
+    await tester.pumpAndSettle();
+    expect(controller.offset, 100.0);
+
+    controller.jumpTo(150.0);
+    await tester.pumpAndSettle();
+    expect(controller.offset, 150.0);
+
+    // Partly visible across trailing edge aligns leading edges
+    tester.renderObject(find.byWidget(children[1], skipOffstage: false)).showOnScreen();
+    await tester.pumpAndSettle();
+    expect(controller.offset, 300.0);
   });
 }

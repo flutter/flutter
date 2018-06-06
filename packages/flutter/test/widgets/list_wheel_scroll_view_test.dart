@@ -765,10 +765,10 @@ void main() {
                       height: 50.0,
                       width: 50.0,
                       child: new Text('Item $i'),
-                    )
+                    ),
                   ),
                 );
-              })
+              }),
             ),
           ),
         ),
@@ -827,20 +827,20 @@ void main() {
             height: 500.0,
             width: 300.0,
             child: new ListWheelScrollView(
-                controller: controller = new ScrollController(initialScrollOffset: 300.0),
-                itemExtent: 100.0,
-                children:
-                outerChildren = new List<Widget>.generate(10, (int i) {
-                  return new Container(
-                    child: new Center(
-                        child: innerChildren[i] = new Container(
-                          height: 50.0,
-                          width: 50.0,
-                          child: new Text('Item $i'),
-                        )
+              controller: controller = new ScrollController(initialScrollOffset: 300.0),
+              itemExtent: 100.0,
+              children:
+              outerChildren = new List<Widget>.generate(10, (int i) {
+                return new Container(
+                  child: new Center(
+                    child: innerChildren[i] = new Container(
+                      height: 50.0,
+                      width: 50.0,
+                      child: new Text('Item $i'),
                     ),
-                  );
-                })
+                  ),
+                );
+              }),
             ),
           ),
         ),

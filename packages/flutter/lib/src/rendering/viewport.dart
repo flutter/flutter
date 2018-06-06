@@ -920,21 +920,29 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
     // to `trailingEdgeOffset`, the one on the right by setting it to
     // `leadingEdgeOffset`.
 
-    // TODO(goderbauer): this one is incorrect
-    assert(leadingEdgeOffset.offset >= trailingEdgeOffset.offset);
-
-    if (currentOffset > leadingEdgeOffset.offset) {
-      // `child` currently starts above the leading edge and can be shown fully
-      // on screen by scrolling down (which means: moving viewport up).
+    if (leadingEdgeOffset.offset < trailingEdgeOffset.offset) {
+      // `descendant` is too big to be visible on screen in its entirety. Let's
+      // align it with the edge that requires the least amount of scrolling.
+      final double leadingEdgeDiff = (offset.pixels - leadingEdgeOffset.offset).abs();
+      final double trailingEdgeDiff = (offset.pixels - trailingEdgeOffset.offset).abs();
+      if (leadingEdgeDiff < trailingEdgeDiff) {
+        offset.jumpTo(leadingEdgeOffset.offset);
+        return leadingEdgeOffset.rect;
+      }
+      offset.jumpTo(trailingEdgeOffset.offset);
+      return trailingEdgeOffset.rect;
+    } else if (currentOffset > leadingEdgeOffset.offset) {
+      // `descendant` currently starts above the leading edge and can be shown
+      // fully on screen by scrolling down (which means: moving viewport up).
       offset.jumpTo(leadingEdgeOffset.offset);
       return leadingEdgeOffset.rect;
     } else if (currentOffset < trailingEdgeOffset.offset) {
-      // `child currently ends below the trailing edge and can be shown fully
-      // on screen by scrolling up (which means: moving viewport down)
+      // `descendant currently ends below the trailing edge and can be shown
+      // fully on screen by scrolling up (which means: moving viewport down)
       offset.jumpTo(trailingEdgeOffset.offset);
       return trailingEdgeOffset.rect;
     }
-    // else: `child` is between leading and trailing edge and hence already
+    // else: `descendant` is between leading and trailing edge and hence already
     //     fully shown on screen. No action necessary.
     final Matrix4 transform = descendant.getTransformTo(viewport.parent);
     return MatrixUtils.transformRect(transform, rect ?? descendant.paintBounds);
