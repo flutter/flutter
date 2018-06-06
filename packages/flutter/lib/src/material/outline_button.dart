@@ -355,34 +355,34 @@ class _OutlineButtonState extends State<OutlineButton> with SingleTickerProvider
   }
 
   BorderSide _getOutline(ThemeData theme, ButtonThemeData buttonTheme) {
-//    if (widget.borderSide?.style == BorderStyle.none)
-//      return widget.borderSide;
-//
+    if (widget.borderSide?.style == BorderStyle.none)
+      return widget.borderSide;
+
 //    // TODO(clocksmith): Replace primaryColor with surfaceColor.
 //    final Color themeColor = theme.primaryColor ??
 //        theme.brightness == Brightness.dark ? Colors.white : Colors.black;
 //    final Color color = widget.enabled
 //      ? (_pressed
-//          ? widget.highlightedBorderColor ?? themeColor
+//          ? (widget.highlightedBorderColor ?? themeColor)
 //          : (widget.borderSide?.color ?? themeColor))
 //      : (widget.disabledBorderColor ?? themeColor);
+
+    return new BorderSide(
+      color: Colors.black,
+      width: widget.borderSide?.width ?? 1.0,
+    );
+
+//    final bool themeIsDark = theme.brightness == Brightness.dark;
+//    if (widget.borderSide?.style == BorderStyle.none)
+//      return widget.borderSide;
 //
-//    return new BorderSide(
-//      color: color,
-//      width: widget.borderSide?.width ?? 1.0,
-//    );
-
-    final bool themeIsDark = theme.brightness == Brightness.dark;
-    if (widget.borderSide?.style == BorderStyle.none)
-      return widget.borderSide;
-
-    final Color color = widget.enabled
-        ? (_pressed
-        ? widget.highlightedBorderColor ?? theme.primaryColor
-        : (widget.borderSide?.color ??
-        (themeIsDark ? Colors.grey[600] : Colors.grey[200])))
-        : (widget.disabledBorderColor ??
-        (themeIsDark ? Colors.grey[800] : Colors.grey[100]));
+//    final Color color = widget.enabled
+//        ? (_pressed
+//        ? widget.highlightedBorderColor ?? theme.primaryColor
+//        : (widget.borderSide?.color ??
+//        (themeIsDark ? Colors.grey[600] : Colors.grey[200])))
+//        : (widget.disabledBorderColor ??
+//        (themeIsDark ? Colors.grey[800] : Colors.grey[100]));
 
     return new BorderSide(
       color: color,
