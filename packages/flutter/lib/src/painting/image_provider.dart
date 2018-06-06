@@ -284,6 +284,34 @@ abstract class ImageProvider<T> {
     return stream;
   }
 
+  /// Evicts an entry from the image cache.
+  ///
+  /// Returns a [Future] which indicates whether the value was successfully
+  /// removed.
+  ///
+  /// The [ImageProvider] used does not need to be the same instance that was
+  /// passed to an [Image] widget, but it does need to create a key which is
+  /// equal to one.
+  ///
+  /// The [configuration] is optional and defaults to
+  /// [ImageConfiguration.empty].
+  ///
+  /// ## Sample code
+  ///
+  /// ```dart
+  /// Widget build(BuildContext context) {
+  ///   return new Image.network(url);
+  /// }
+  ///
+  /// void evictImage() {
+  ///   final NetworkImage provider = new NetworkImage(url);
+  ///   provider.evict().then<void>((bool value) => debugPrint('removed image!'));
+  /// }
+  ///```
+  Future<bool> evict([ImageConfiguration configuration = ImageConfiguration.empty]) {
+    return obtainKey(configuration).then<bool>(imageCache.evict);
+  }
+
   /// Converts an ImageProvider's settings plus an ImageConfiguration to a key
   /// that describes the precise image to load.
   ///
@@ -293,6 +321,7 @@ abstract class ImageProvider<T> {
   /// arguments and [ImageConfiguration] objects should return keys that are
   /// '==' to each other (possibly by using a class for the key that itself
   /// implements [==]).
+  @protected
   Future<T> obtainKey(ImageConfiguration configuration);
 
   /// Converts a key into an [ImageStreamCompleter], and begins fetching the
