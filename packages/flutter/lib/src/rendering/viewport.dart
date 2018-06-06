@@ -40,12 +40,13 @@ abstract class RenderAbstractViewport extends RenderObject {
     return null;
   }
 
-  /// Returns the offset that would be needed to reveal the `target` render object.
+  /// Returns the offset that would be needed to reveal the `target`
+  /// [RenderObject].
   ///
-  /// The optional `rect` parameter describes which area of the `target` render
-  /// object should be revealed in the viewport. If `rect` is null, the entire
-  /// `target` render object will be revealed. If `rect` is provided it has to
-  /// be given in the coordinate system of the `target` render object.
+  /// The optional `rect` parameter describes which area of the `target` object
+  /// should be revealed in the viewport. If `rect` is null, the entire
+  /// `target` [RenderObject] will be revealed. If `rect` is provided it has to
+  /// be given in the coordinate system of the `target` object.
   ///
   /// The `alignment` argument describes where the target should be positioned
   /// after applying the returned offset. If `alignment` is 0.0, the child must
@@ -77,9 +78,9 @@ abstract class RenderAbstractViewport extends RenderObject {
 
 /// Return value for [RenderAbstractViewport.getOffsetToReveal].
 ///
-/// It indicates the scroll [offset] required to reveal an element in a
-/// viewport and the [rect] position said element would have in the viewport at
-/// that [offset].
+/// It indicates the [offset] required to reveal an element in a viewport and
+/// the [rect] position said element would have in the viewport at that
+/// [offset].
 class RevealedOffset {
 
   /// Instantiates a return value for [RenderAbstractViewport.getOffsetToReveal].
