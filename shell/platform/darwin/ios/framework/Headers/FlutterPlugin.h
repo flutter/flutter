@@ -148,7 +148,7 @@ NS_ASSUME_NONNULL_BEGIN
  */
 - (BOOL)application:(UIApplication*)application
     handleEventsForBackgroundURLSession:(nonnull NSString*)identifier
-                      completionHandler:(nonnull void (^)())completionHandler;
+                      completionHandler:(nonnull void (^)(void))completionHandler;
 
 /**
  Called if this plugin has been registered for `UIApplicationDelegate` callbacks.
@@ -290,6 +290,14 @@ NS_ASSUME_NONNULL_BEGIN
    registered.
  */
 - (NSObject*)valuePublishedByPlugin:(NSString*)pluginKey;
+@end
+
+/**
+ Implement this in the `UIAppDelegate` of your app to enable Flutter plugins to register themselves to the application
+ life cycle events.
+*/
+@protocol FlutterAppLifeCycleProvider
+- (void)addApplicationLifeCycleDelegate:(NSObject<FlutterPlugin>*)delegate;
 @end
 
 NS_ASSUME_NONNULL_END;

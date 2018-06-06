@@ -29,6 +29,7 @@ _flutter_framework_headers = [
   "framework/Headers/FlutterMacros.h",
   "framework/Headers/FlutterNavigationController.h",
   "framework/Headers/FlutterPlugin.h",
+  "framework/Headers/FlutterPluginAppLifeCycleDelegate.h",
   "framework/Headers/FlutterTexture.h",
   "framework/Headers/FlutterViewController.h",
 ]
@@ -50,6 +51,7 @@ shared_library("create_flutter_framework_dylib") {
     "framework/Source/FlutterNavigationController.mm",
     "framework/Source/FlutterPlatformPlugin.h",
     "framework/Source/FlutterPlatformPlugin.mm",
+    "framework/Source/FlutterPluginAppLifeCycleDelegate.mm",
     "framework/Source/FlutterStandardCodec.mm",
     "framework/Source/FlutterStandardCodec_Internal.h",
     "framework/Source/FlutterTextInputDelegate.h",
