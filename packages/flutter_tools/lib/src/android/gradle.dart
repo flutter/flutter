@@ -328,7 +328,6 @@ Future<Null> _buildGradleProjectV2(String gradle, BuildInfo buildInfo, String ta
     command.add('-Ptarget=$target');
   }
   if (buildInfo.previewDart2) {
-    command.add('-Ppreview-dart-2=true');
     if (buildInfo.trackWidgetCreation)
       command.add('-Ptrack-widget-creation=true');
     if (buildInfo.extraFrontEndOptions != null)
@@ -339,8 +338,6 @@ Future<Null> _buildGradleProjectV2(String gradle, BuildInfo buildInfo, String ta
       command.add('-Pfilesystem-roots=${buildInfo.fileSystemRoots.join('|')}');
     if (buildInfo.fileSystemScheme != null)
       command.add('-Pfilesystem-scheme=${buildInfo.fileSystemScheme}');
-  } else {
-    command.add('-Ppreview-dart-2=false');
   }
   if (buildInfo.buildSharedLibrary && androidSdk.ndk != null) {
     command.add('-Pbuild-shared-library=true');
