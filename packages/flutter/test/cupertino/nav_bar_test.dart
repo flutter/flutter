@@ -415,7 +415,10 @@ void main() {
       ),
     );
 
-    final DecoratedBox decoratedBox = tester.widgetList(find.byType(DecoratedBox)).elementAt(1);
+    final DecoratedBox decoratedBox = tester.widgetList(find.descendant(
+      of: find.byType(CupertinoNavigationBar),
+      matching: find.byType(DecoratedBox),
+    )).first;
     expect(decoratedBox.decoration.runtimeType, BoxDecoration);
 
     final BoxDecoration decoration = decoratedBox.decoration;
@@ -448,7 +451,10 @@ void main() {
       ),
     );
 
-    final DecoratedBox decoratedBox = tester.widgetList(find.byType(DecoratedBox)).elementAt(1);
+    final DecoratedBox decoratedBox = tester.widgetList(find.descendant(
+      of: find.byType(CupertinoNavigationBar),
+      matching: find.byType(DecoratedBox),
+    )).first;
     expect(decoratedBox.decoration.runtimeType, BoxDecoration);
 
     final BoxDecoration decoration = decoratedBox.decoration;
@@ -477,11 +483,136 @@ void main() {
       ),
     );
 
-    final DecoratedBox decoratedBox = tester.widgetList(find.byType(DecoratedBox)).elementAt(1);
+    final DecoratedBox decoratedBox = tester.widgetList(find.descendant(
+      of: find.byType(CupertinoNavigationBar),
+      matching: find.byType(DecoratedBox),
+    )).first;
     expect(decoratedBox.decoration.runtimeType, BoxDecoration);
 
     final BoxDecoration decoration = decoratedBox.decoration;
     expect(decoration.border, isNull);
+  });
+
+  testWidgets(
+      'Border is displayed by default in sliver nav bar',
+      (WidgetTester tester) async {
+    await tester.pumpWidget(
+      new WidgetsApp(
+        color: const Color(0xFFFFFFFF),
+        onGenerateRoute: (RouteSettings settings) {
+          return new CupertinoPageRoute<void>(
+            settings: settings,
+            builder: (BuildContext context) {
+              return new CupertinoPageScaffold(
+                child: new CustomScrollView(
+                  slivers: const <Widget>[
+                    const CupertinoSliverNavigationBar(
+                      largeTitle: const Text('Large Title'),
+                    ),
+                  ],
+                ),
+              );
+            },
+          );
+        },
+      ),
+    );
+
+    final DecoratedBox decoratedBox = tester.widgetList(find.descendant(
+      of: find.byType(CupertinoSliverNavigationBar),
+      matching: find.byType(DecoratedBox),
+    )).first;
+    expect(decoratedBox.decoration.runtimeType, BoxDecoration);
+
+    final BoxDecoration decoration = decoratedBox.decoration;
+    expect(decoration.border, isNotNull);
+
+    final BorderSide bottom = decoration.border.bottom;
+    expect(bottom, isNotNull);
+  });
+
+  testWidgets(
+      'Border is not displayed when null in sliver nav bar',
+      (WidgetTester tester) async {
+    await tester.pumpWidget(
+      new WidgetsApp(
+        color: const Color(0xFFFFFFFF),
+        onGenerateRoute: (RouteSettings settings) {
+          return new CupertinoPageRoute<void>(
+            settings: settings,
+            builder: (BuildContext context) {
+              return new CupertinoPageScaffold(
+                child: new CustomScrollView(
+                  slivers: const <Widget>[
+                    const CupertinoSliverNavigationBar(
+                      largeTitle: const Text('Large Title'),
+                      border: null,
+                    ),
+                  ],
+                ),
+              );
+            },
+          );
+        },
+      ),
+    );
+
+    final DecoratedBox decoratedBox = tester.widgetList(find.descendant(
+      of: find.byType(CupertinoSliverNavigationBar),
+      matching: find.byType(DecoratedBox),
+    )).first;
+    expect(decoratedBox.decoration.runtimeType, BoxDecoration);
+
+    final BoxDecoration decoration = decoratedBox.decoration;
+    expect(decoration.border, isNull);
+  });
+
+  testWidgets(
+      'Border can be overridden in sliver nav bar',
+      (WidgetTester tester) async {
+    await tester.pumpWidget(
+      new WidgetsApp(
+        color: const Color(0xFFFFFFFF),
+        onGenerateRoute: (RouteSettings settings) {
+          return new CupertinoPageRoute<void>(
+            settings: settings,
+            builder: (BuildContext context) {
+              return new CupertinoPageScaffold(
+                child: new CustomScrollView(
+                  slivers: const <Widget>[
+                    const CupertinoSliverNavigationBar(
+                      largeTitle: const Text('Large Title'),
+                      border: const Border(
+                        bottom: const BorderSide(
+                          color: const Color(0xFFAABBCC),
+                          width: 0.0,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            },
+          );
+        },
+      ),
+    );
+
+    final DecoratedBox decoratedBox = tester.widgetList(find.descendant(
+      of: find.byType(CupertinoSliverNavigationBar),
+      matching: find.byType(DecoratedBox),
+    )).first;
+    expect(decoratedBox.decoration.runtimeType, BoxDecoration);
+
+    final BoxDecoration decoration = decoratedBox.decoration;
+    expect(decoration.border, isNotNull);
+
+    final BorderSide top = decoration.border.top;
+    expect(top, isNotNull);
+    expect(top, BorderSide.none);
+    final BorderSide bottom = decoration.border.bottom;
+    expect(bottom, isNotNull);
+    expect(bottom.color, const Color(0xFFAABBCC));
   });
 
   testWidgets(
