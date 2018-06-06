@@ -100,9 +100,9 @@ class ImageCache {
 
   /// Evicts a single entry from the cache, returning true if successful.
   ///
-  /// [key] is usually an image's corresponding [ImageProvider]. To remove an
-  /// image from the cache, pass a [NetworkImage] object to the evict method
-  /// with matching url and scale.
+  /// The [key] is usually an image's corresponding [ImageProvider]. To remove
+  /// the image created by an [Image.network] from the cache, pass a
+  /// [NetworkImage] object to the evict method with matching url and scale.
   ///
   /// ## sample code
   ///
@@ -117,6 +117,14 @@ class ImageCache {
   ///     print('image removed!');
   /// }
   ///```
+  ///
+  /// See also:
+  ///
+  ///   * [NetworkImage], the key for [Image.network].
+  ///   * [MemoryImage], the key for [Image.memory].
+  ///   * [AssetImage], the key for [Image.asset] when no scale is provided.
+  ///   * [ExactAssetImage], the key for [Image.asset] when a scale is provided.
+  ///   * [FileImage], they key for [Image.file].
   bool evict(Object key) {
     final _CachedImage image = _cache.remove(key);
     if (image != null) {
