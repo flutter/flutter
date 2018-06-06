@@ -78,17 +78,22 @@ class FontCollection : public std::enable_shared_from_this<FontCollection> {
                      std::shared_ptr<minikin::FontCollection>,
                      FamilyKey::Hasher>
       font_collections_cache_;
-  std::unordered_map<SkFontID, std::shared_ptr<minikin::FontFamily>>
+  std::unordered_map<std::string, std::shared_ptr<minikin::FontFamily>>
       fallback_fonts_;
-  std::unordered_map<std::string, std::set<SkFontID>>
+  std::unordered_map<std::string, std::set<std::string>>
       fallback_fonts_for_locale_;
   std::shared_ptr<minikin::FontFamily> null_family_;
   bool enable_font_fallback_;
 
   std::vector<sk_sp<SkFontMgr>> GetFontManagerOrder() const;
 
-  const std::shared_ptr<minikin::FontFamily>& GetFallbackFont(
-      const sk_sp<SkTypeface>& typeface);
+  std::shared_ptr<minikin::FontFamily> CreateMinikinFontFamily(
+      const sk_sp<SkFontMgr>& manager,
+      const std::string& family_name);
+
+  const std::shared_ptr<minikin::FontFamily>& GetFallbackFontFamily(
+      const sk_sp<SkFontMgr>& manager,
+      const std::string& family_name);
 
   FXL_DISALLOW_COPY_AND_ASSIGN(FontCollection);
 };

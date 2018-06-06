@@ -105,45 +105,18 @@ FontCollection::GetMinikinFontCollectionForFamily(
   }
 
   for (sk_sp<SkFontMgr>& manager : GetFontManagerOrder()) {
-    sk_sp<SkFontStyleSet> font_style_set(
-        manager->matchFamily(font_family.c_str()));
-    if (font_style_set == nullptr || font_style_set->count() == 0) {
+    std::shared_ptr<minikin::FontFamily> minikin_family =
+        CreateMinikinFontFamily(manager, font_family);
+    if (!minikin_family)
       continue;
-    }
-
-    std::vector<minikin::Font> minikin_fonts;
-
-    // Add fonts to the Minikin font family.
-    for (int i = 0, style_count = font_style_set->count(); i < style_count;
-         ++i) {
-      // Create the skia typeface.
-      sk_sp<SkTypeface> skia_typeface(
-          sk_sp<SkTypeface>(font_style_set->createTypeface(i)));
-      if (skia_typeface == nullptr) {
-        continue;
-      }
-
-      // Create the minikin font from the skia typeface.
-      // Divide by 100 because the weights are given as "100", "200", etc.
-      minikin::Font minikin_font(
-          std::make_shared<FontSkia>(skia_typeface),
-          minikin::FontStyle{skia_typeface->fontStyle().weight() / 100,
-                             skia_typeface->isItalic()});
-
-      minikin_fonts.emplace_back(std::move(minikin_font));
-    }
-
-    // Create a Minikin font family.
-    auto minikin_family =
-        std::make_shared<minikin::FontFamily>(std::move(minikin_fonts));
 
     // Create a vector of font families for the Minikin font collection.
     std::vector<std::shared_ptr<minikin::FontFamily>> minikin_families = {
         minikin_family,
     };
     if (enable_font_fallback_) {
-      for (SkFontID font_id : fallback_fonts_for_locale_[locale])
-        minikin_families.push_back(fallback_fonts_[font_id]);
+      for (std::string fallback_family : fallback_fonts_for_locale_[locale])
+        minikin_families.push_back(fallback_fonts_[fallback_family]);
     }
 
     // Create the minikin font collection.
@@ -172,6 +145,39 @@ FontCollection::GetMinikinFontCollectionForFamily(
   return nullptr;
 }
 
+std::shared_ptr<minikin::FontFamily> FontCollection::CreateMinikinFontFamily(
+    const sk_sp<SkFontMgr>& manager,
+    const std::string& family_name) {
+  sk_sp<SkFontStyleSet> font_style_set(
+      manager->matchFamily(family_name.c_str()));
+  if (font_style_set == nullptr || font_style_set->count() == 0) {
+    return nullptr;
+  }
+
+  std::vector<minikin::Font> minikin_fonts;
+
+  // Add fonts to the Minikin font family.
+  for (int i = 0; i < font_style_set->count(); ++i) {
+    // Create the skia typeface.
+    sk_sp<SkTypeface> skia_typeface(
+        sk_sp<SkTypeface>(font_style_set->createTypeface(i)));
+    if (skia_typeface == nullptr) {
+      continue;
+    }
+
+    // Create the minikin font from the skia typeface.
+    // Divide by 100 because the weights are given as "100", "200", etc.
+    minikin::Font minikin_font(
+        std::make_shared<FontSkia>(skia_typeface),
+        minikin::FontStyle{skia_typeface->fontStyle().weight() / 100,
+                           skia_typeface->isItalic()});
+
+    minikin_fonts.emplace_back(std::move(minikin_font));
+  }
+
+  return std::make_shared<minikin::FontFamily>(std::move(minikin_fonts));
+}
+
 const std::shared_ptr<minikin::FontFamily>& FontCollection::MatchFallbackFont(
     uint32_t ch,
     std::string locale) {
@@ -184,28 +190,33 @@ const std::shared_ptr<minikin::FontFamily>& FontCollection::MatchFallbackFont(
     if (!typeface)
       continue;
 
-    fallback_fonts_for_locale_[locale].insert(typeface->uniqueID());
+    SkString sk_family_name;
+    typeface->getFamilyName(&sk_family_name);
+    std::string family_name(sk_family_name.c_str());
 
-    return GetFallbackFont(typeface);
+    fallback_fonts_for_locale_[locale].insert(family_name);
+
+    return GetFallbackFontFamily(manager, family_name);
   }
 
   return null_family_;
 }
 
 const std::shared_ptr<minikin::FontFamily>&
-FontCollection::GetFallbackFont(const sk_sp<SkTypeface>& typeface) {
-  SkFontID typeface_id = typeface->uniqueID();
-  auto fallback_it = fallback_fonts_.find(typeface_id);
+FontCollection::GetFallbackFontFamily(const sk_sp<SkFontMgr>& manager,
+                                      const std::string& family_name) {
+  auto fallback_it = fallback_fonts_.find(family_name);
   if (fallback_it != fallback_fonts_.end()) {
     return fallback_it->second;
   }
 
-  std::vector<minikin::Font> minikin_fonts;
-  minikin_fonts.emplace_back(std::make_shared<FontSkia>(typeface),
-                             minikin::FontStyle());
-  auto insert_it = fallback_fonts_.insert(std::make_pair(
-      typeface_id,
-      std::make_shared<minikin::FontFamily>(std::move(minikin_fonts))));
+  std::shared_ptr<minikin::FontFamily> minikin_family =
+      CreateMinikinFontFamily(manager, family_name);
+  if (!minikin_family)
+    return null_family_;
+
+  auto insert_it =
+      fallback_fonts_.insert(std::make_pair(family_name, minikin_family));
 
   // Clear the cache to force creation of new font collections that will include
   // this fallback font.
