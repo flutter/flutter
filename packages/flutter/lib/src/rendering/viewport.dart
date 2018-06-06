@@ -845,7 +845,7 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
   @override
   void showOnScreen({RenderObject descendant, Rect rect}) {
     final Rect newRect = RenderViewportBase.showInViewport(
-      child: descendant,
+      descendant: descendant,
       viewport: this,
       offset: offset,
       rect: rect,
@@ -860,31 +860,31 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
   /// The parameters `viewport` and `offset` are required and cannot be null.
   /// If `child` is null this is a no-op.
   static Rect showInViewport({
-    RenderObject child,
+    RenderObject descendant,
     Rect rect,
     @required RenderAbstractViewport viewport,
     @required ViewportOffset offset,
   }) {
     assert(viewport != null);
     assert(offset != null);
-    if (child == null) {
+    if (descendant == null) {
       return rect;
     }
-    final RevealedOffset leadingEdgeOffset = viewport.getOffsetToReveal(child, 0.0, rect: rect);
-    final RevealedOffset trailingEdgeOffset = viewport.getOffsetToReveal(child, 1.0, rect: rect);
+    final RevealedOffset leadingEdgeOffset = viewport.getOffsetToReveal(descendant, 0.0, rect: rect);
+    final RevealedOffset trailingEdgeOffset = viewport.getOffsetToReveal(descendant, 1.0, rect: rect);
     final double currentOffset = offset.pixels;
 
-    //        scrollOffset
-    //                    0 +---------+
-    //                      |         |
-    //                    _ |         |
-    // viewport position |  |         |
-    //   with `child` at |  |         | _
-    //     trailing edge |_ | xxxxxxx |  | viewport position
-    //                      |         |  | with `child` at
-    //                      |         | _| leading edge
-    //                      |         |
-    //                  800 +---------+
+    //           scrollOffset
+    //                       0 +---------+
+    //                         |         |
+    //                       _ |         |
+    //    viewport position |  |         |
+    // with `descendant` at |  |         | _
+    //        trailing edge |_ | xxxxxxx |  | viewport position
+    //                         |         |  | with `child` at
+    //                         |         | _| leading edge
+    //                         |         |
+    //                     800 +---------+
     //
     // `trailingEdgeOffset`: Distance from scrollOffset 0 to the start of the
     //                       viewport on the left in image above.
@@ -911,8 +911,8 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
     }
     // else: `child` is between leading and trailing edge and hence already
     //     fully shown on screen. No action necessary.
-    final Matrix4 transform = child.getTransformTo(viewport.parent);
-    return MatrixUtils.transformRect(transform, rect ?? child.paintBounds);
+    final Matrix4 transform = descendant.getTransformTo(viewport.parent);
+    return MatrixUtils.transformRect(transform, rect ?? descendant.paintBounds);
   }
 }
 

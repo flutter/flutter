@@ -593,7 +593,7 @@ class _RenderSingleChildViewport extends RenderBox with RenderObjectWithChildMix
   @override
   void showOnScreen({RenderObject descendant, Rect rect}) {
     final Rect newRect = RenderViewportBase.showInViewport(
-      child: descendant,
+      descendant: descendant,
       viewport: this,
       offset: offset,
       rect: rect,

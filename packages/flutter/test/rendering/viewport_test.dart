@@ -194,7 +194,7 @@ void main() {
 
   testWidgets('Nested Viewports showOnScreen', (WidgetTester tester) async {
     final List<List<Widget>> children = new List<List<Widget>>(10);
-    final List<ScrollController> controllersX = new List.generate(10, (int i) => new ScrollController(initialScrollOffset: 400.0));
+    final List<ScrollController> controllersX = new List<ScrollController>.generate(10, (int i) => new ScrollController(initialScrollOffset: 400.0));
     final ScrollController controllerY  = new ScrollController(initialScrollOffset: 400.0);
 
     /// Builds a gird:
