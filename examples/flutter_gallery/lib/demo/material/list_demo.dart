@@ -316,7 +316,7 @@ class DraggableListState extends State<DraggableList> with TickerProviderStateMi
   Widget _wrap(Widget toWrap, int index) {
     assert(toWrap.key != null);
     Widget _buildDragTarget(BuildContext context, List<Key> acceptedCandidates, List<dynamic> rejectedCandidates) {
-      Widget draggable = new LongPressDraggable<Key>(
+      final Widget draggable = new LongPressDraggable<Key>(
         maxSimultaneousDrags: 1,
         axis: widget.axis,
         data: toWrap.key,
@@ -410,7 +410,6 @@ class DraggableListState extends State<DraggableList> with TickerProviderStateMi
 
   // Scrolls to a target context if it's not on the screen.
   void _scrollTo(BuildContext context) {
-    print('scrolling: $scrolling');
     if (scrolling) 
       return;
     final RenderObject contextObject = context.findRenderObject();
