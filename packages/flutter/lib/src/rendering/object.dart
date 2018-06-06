@@ -2588,8 +2588,8 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   void showOnScreen({
     RenderObject descendant,
     Rect rect,
-    Duration duration: Duration.zero,
-    Curve curve: Curves.ease,
+    Duration duration = Duration.zero,
+    Curve curve = Curves.ease,
   }) {
     if (parent is RenderObject) {
       final RenderObject renderParent = parent;

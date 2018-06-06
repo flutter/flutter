@@ -641,8 +641,8 @@ class RenderListWheelViewport
   void showOnScreen({
     RenderObject descendant,
     Rect rect,
-    Duration duration: Duration.zero,
-    Curve curve: Curves.ease,
+    Duration duration = Duration.zero,
+    Curve curve = Curves.ease,
   }) {
     if (descendant != null) {
       // Shows the descendant in the selected/center position.

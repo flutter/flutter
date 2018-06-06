@@ -870,8 +870,8 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
   void showOnScreen({
     RenderObject descendant,
     Rect rect,
-    Duration duration: Duration.zero,
-    Curve curve: Curves.ease,
+    Duration duration = Duration.zero,
+    Curve curve = Curves.ease,
   }) {
     final Rect newRect = RenderViewportBase.showInViewport(
       descendant: descendant,
@@ -912,8 +912,8 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
     Rect rect,
     @required RenderAbstractViewport viewport,
     @required ViewportOffset offset,
-    Duration duration: Duration.zero,
-    Curve curve: Curves.ease,
+    Duration duration = Duration.zero,
+    Curve curve = Curves.ease,
   }) {
     assert(viewport != null);
     assert(offset != null);
