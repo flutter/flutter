@@ -111,7 +111,8 @@ class ImageCache {
   /// widget tree, but it should create a key with the same values. In the case
   /// of an [Image.network], the url and scale must match.
   ///
-  /// The [configuration] is optional defaults to [ImageConfiguration.empty].
+  /// The [configuration] is optional and defaults to
+  /// [ImageConfiguration.empty].
   ///
   /// ## Sample code
   ///
