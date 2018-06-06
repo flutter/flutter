@@ -58,8 +58,8 @@ abstract class RenderAbstractViewport extends RenderObject {
   /// descendant of the viewport and there must not be any other
   /// [RenderAbstractViewport] objects between the target and this object.
   ///
-  /// This method assumes that the viewport scrolls linearly, i.e. when the
-  /// scroll offset of the viewport is changed by x then `target` also moves
+  /// This method assumes that the content of the viewport moves linearly, i.e.
+  /// when the offset of the viewport is changed by x then `target` also moves
   /// by x within the viewport.
   ///
   /// See also:
