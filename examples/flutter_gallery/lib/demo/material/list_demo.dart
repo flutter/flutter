@@ -204,26 +204,6 @@ class _ListDemoState extends State<ListDemo> {
     );
   }
 
-  bool scrolling = false;
-
-  void scrollTo(BuildContext context) {
-    if (scrolling)
-      return;
-    // We can't use scrollable.ensureVisible because in a built list, one of the items may go out of context.
-    scrolling = true;
-    final ScrollController controller = Scrollable.of(context).widget.controller;
-    
-    const Duration scrollDuration = const Duration(milliseconds: 100);
-    final MediaQueryData mediaQuery = MediaQuery.of(context);
-    
-
-    Scrollable.ensureVisible(context, alignment: 0.5, duration: scrollDuration).then((_) {
-      setState(() {
-        scrolling = false;
-      });
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
     void onSwap(int oldIndex, int newIndex) {
@@ -336,11 +316,7 @@ class DraggableListState extends State<DraggableList> with TickerProviderStateMi
   Widget _wrap(Widget toWrap, int index) {
     assert(toWrap.key != null);
     Widget _buildDragTarget(BuildContext context, List<Key> acceptedCandidates, List<dynamic> rejectedCandidates) {
-      // The target for dropping at the end of the list doesn't need to be draggable or to expand.
-      if (index >= widget.children.length) {
-        return toWrap;
-      }
-      final Widget draggable = new LongPressDraggable<Key>(
+      Widget draggable = new LongPressDraggable<Key>(
         maxSimultaneousDrags: 1,
         axis: widget.axis,
         data: toWrap.key,
@@ -365,6 +341,7 @@ class DraggableListState extends State<DraggableList> with TickerProviderStateMi
         },
         onDraggableCanceled: (_, __) {
           setState(() {
+            widget.onSwap(dragStartIndex, currentIndex);
             ghostController.reverse(from: 0.1);
             entranceController.reverse(from: 0.1);
             dragging = null;
@@ -372,13 +349,18 @@ class DraggableListState extends State<DraggableList> with TickerProviderStateMi
         },
         onDragCompleted: () {
           setState(() {
-            widget.onSwap(dragStartIndex, currentIndex);
+            if (dragStartIndex != currentIndex)
+              widget.onSwap(dragStartIndex, currentIndex);
             ghostController.reverse(from: 0.1);
             entranceController.reverse(from: 0.1);
             dragging = null;
           });
         },
       );
+      // The target for dropping at the end of the list doesn't need to be draggable or to expand.
+      if (index >= widget.children.length) {
+        return toWrap;
+      }
       if (currentIndex == index) {
         return new Column(children: <Widget>[
           new SizeTransition(
@@ -405,7 +387,6 @@ class DraggableListState extends State<DraggableList> with TickerProviderStateMi
         builder: _buildDragTarget,
         onWillAccept: (Key toAccept) {
           setState(() {
-            // print('$index, $ghostIndex, $dragging, ${toWrap.key}, ${widget.children.map((w) => w.key)} ${entranceController.value} ${ghostController.value}');
             if (ghostController.isDismissed) {
               currentIndex = index;
               ghostController.reverse(from: 1.0).whenCompleteOrCancel(() {
@@ -415,65 +396,9 @@ class DraggableListState extends State<DraggableList> with TickerProviderStateMi
               entranceController.forward(from: 0.0);
             }
           });
-          if (dragging == toAccept && toAccept != toWrap.key) {
-            final RenderObject contextObject = context.findRenderObject();
-            final RenderAbstractViewport viewport = RenderAbstractViewport.of(contextObject);
-            assert(viewport != null);
-            const double margin = 48.0;
-            final double scrollOffset = scrollController.offset;
-            final double topOffset = viewport.getOffsetToReveal(contextObject, 0.0) - margin;
-            final double bottomOffset = viewport.getOffsetToReveal(contextObject, 1.0) + margin;
-            final bool onScreen = scrollOffset <= topOffset && scrollOffset >= bottomOffset; 
-            if (!onScreen) {
-              Scrollable.ensureVisible(
-                context, 
-                duration: const Duration(milliseconds: 200), 
-                alignment: scrollOffset < bottomOffset ? 0.9 : 0.1, 
-                curve: Curves.easeInOut,
-              );
-            }
-            // print('Checking to see if we should scroll');
-            // if (!scrolling) {
-              
-            //   final RenderObject contextObject = context.findRenderObject();
-            //   final RenderAbstractViewport viewport = RenderAbstractViewport.of(contextObject);
-            //   assert(viewport != null);
-            //   const double margin = 48.0;
-            //   final double scrollOffset = scrollController.offset;
-            //   final double topOffset = viewport.getOffsetToReveal(contextObject, 0.0) - margin;
-            //   final double bottomOffset = viewport.getOffsetToReveal(contextObject, 1.0) + margin;
-            //   final double viewHeight = (bottomOffset - topOffset).abs();
-            //   final bool onScreen = scrollOffset <= topOffset && scrollOffset >= bottomOffset;
-            //   final double offsetToReveal = max(
-            //     min(
-            //       scrollOffset < bottomOffset ? bottomOffset : topOffset,
-            //       scrollController.position.maxScrollExtent,
-            //     ),
-            //     scrollController.position.minScrollExtent
-            //   );
-            //   print('$dragging toWrap: ${toWrap.key} OnScreen: $onScreen, ${topOffset} ${bottomOffset} ${offsetToReveal} ${scrollOffset} ${viewHeight}');
-            //   if (!onScreen && offsetToReveal != scrollOffset) {
-            //     print('Scrolling from ${scrollOffset} to ${offsetToReveal}');
-            //     scrolling = true;
-            //     scrollController.animateTo(offsetToReveal, duration: const Duration(milliseconds: 200), curve: Curves.easeInOut).then((_) {
-            //       setState(() {
-            //         scrolling = false;
-            //       });
-            //     });
-            //   }
-            // //   setState(() {
-            // //     scrolling = true;
-            // //     double targetOffset = scrollController.offset - approximateItemHeight;
-            // //     if (currentIndex > ghostIndex) {
-            // //       targetOffset = scrollController.offset + approximateItemHeight;
-            // //     }
-            // //     print('Scrolling from ${scrollController.offset} to ${targetOffset}');
-
-            // //   });
-            // }
-            return true;
-          }
-          return false;
+          _scrollTo(context);
+          // If the target is not the original starting point, then we will accept the drop.
+          return dragging == toAccept && toAccept != toWrap.key;
         },
         onAccept: (Key accepted) {
         },
@@ -481,6 +406,34 @@ class DraggableListState extends State<DraggableList> with TickerProviderStateMi
         },
       );
     });
+  }
+
+  // Scrolls to a target context if it's not on the screen.
+  void _scrollTo(BuildContext context) {
+    print('scrolling: $scrolling');
+    if (scrolling) 
+      return;
+    final RenderObject contextObject = context.findRenderObject();
+    final RenderAbstractViewport viewport = RenderAbstractViewport.of(contextObject);
+    assert(viewport != null);
+    const double margin = 48.0;
+    final double scrollOffset = scrollController.offset;
+    final double topOffset = viewport.getOffsetToReveal(contextObject, 0.0) - margin;
+    final double bottomOffset = viewport.getOffsetToReveal(contextObject, 1.0) + margin;
+    final bool onScreen = scrollOffset <= topOffset && scrollOffset >= bottomOffset; 
+    if (!onScreen) {
+      scrolling = true;
+      Scrollable.ensureVisible(
+        context, 
+        duration: const Duration(milliseconds: 200), 
+        alignment: scrollOffset < bottomOffset ? 0.9 : 0.1, 
+        curve: Curves.easeInOut,
+      ).then((Null none) {
+        setState(() {
+          scrolling = false;
+        });
+      });
+    }
   }
 
   @override
