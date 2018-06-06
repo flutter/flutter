@@ -614,7 +614,6 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
       }
       descendant = pivot;
     } else if (target is RenderSliver) {
-      // TODO
       final RenderSliver targetSliver = target;
       leadingScrollOffset = 0.0;
       targetMainAxisExtent = targetSliver.geometry.scrollExtent;
@@ -881,7 +880,7 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
     //    viewport position |  |         |
     // with `descendant` at |  |         | _
     //        trailing edge |_ | xxxxxxx |  | viewport position
-    //                         |         |  | with `child` at
+    //                         |         |  | with `descendant` at
     //                         |         | _| leading edge
     //                         |         |
     //                     800 +---------+
