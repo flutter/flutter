@@ -2,6 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
+import 'package:flutter/painting.dart';
+
 import 'image_stream.dart';
 
 const int _kDefaultSize = 1000;
@@ -98,13 +102,18 @@ class ImageCache {
     _currentSizeBytes = 0;
   }
 
-  /// Evicts a single entry from the cache, returning true if successful.
+  /// Evicts a single entry from the cache.
   ///
-  /// The [key] is usually an image's corresponding [ImageProvider]. To remove
-  /// the image created by an [Image.network] from the cache, pass a
-  /// [NetworkImage] object to the evict method with matching url and scale.
+  /// Returns a [Future] which indicates whether the value was successfully
+  /// removed.
   ///
-  /// ## sample code
+  /// The [provider] does not need to be the same as the instance used in the
+  /// widget tree, but it should create a key with the same values. In the case
+  /// of an [Image.network], the url and scale must match.
+  ///
+  /// The [configuration] is optional defaults to [ImageConfiguration.empty].
+  ///
+  /// ## Sample code
   ///
   /// ```dart
   /// Widget build(BuildContext context) {
@@ -112,26 +121,29 @@ class ImageCache {
   /// }
   ///
   /// void evictImage() {
-  ///   final NetworkImage key = new NetworkImage(url);
-  ///   if (imageCache.evict(key))
-  ///     print('image removed!');
+  ///   final NetworkImage provider = new NetworkImage(url);
+  ///   imageCache.evict(provider)
+  ///     .then<void>((bool value) => debugPrint('removed image!'));
   /// }
   ///```
   ///
   /// See also:
   ///
-  ///   * [NetworkImage], the key for [Image.network].
-  ///   * [MemoryImage], the key for [Image.memory].
-  ///   * [AssetImage], the key for [Image.asset] when no scale is provided.
-  ///   * [ExactAssetImage], the key for [Image.asset] when a scale is provided.
-  ///   * [FileImage], they key for [Image.file].
-  bool evict(Object key) {
-    final _CachedImage image = _cache.remove(key);
-    if (image != null) {
-      _currentSizeBytes -= image.sizeBytes;
-      return true;
-    }
-    return false;
+  ///   * [NetworkImage], the provider for [Image.network].
+  ///   * [FileImage], the provider for [Image.file].
+  ///   * [MemoryImage], the provider for [Image.memory].
+  ///   * [AssetImage], the provider for [Image.asset] with no provided scale.
+  ///   * [ExactAssetImage], the provider for [Image.asset] with a provided scale.
+  Future<bool> evict(ImageProvider<Object> provider, [ImageConfiguration configuration = ImageConfiguration.empty]) {
+    return provider.obtainKey(configuration)
+      .then<bool>((Object key) {
+        final _CachedImage image = _cache.remove(key);
+        if (image != null) {
+          _currentSizeBytes -= image.sizeBytes;
+          return true;
+        }
+        return false;
+    });
   }
 
   /// Returns the previously cached [ImageStream] for the given key, if available;

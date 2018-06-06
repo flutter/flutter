@@ -114,7 +114,7 @@ void main() {
 
       expect(imageCache.currentSize, 2);
       expect(imageCache.currentSizeBytes, 256 * 2);
-      expect(imageCache.evict(1), true);
+      expect(await imageCache.evict(const TestImageProvider(1, 1, image: testImage)), true);
       expect(imageCache.currentSize, 1);
       expect(imageCache.currentSizeBytes, 256);
     });

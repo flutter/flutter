@@ -293,7 +293,6 @@ abstract class ImageProvider<T> {
   /// arguments and [ImageConfiguration] objects should return keys that are
   /// '==' to each other (possibly by using a class for the key that itself
   /// implements [==]).
-  @protected
   Future<T> obtainKey(ImageConfiguration configuration);
 
   /// Converts a key into an [ImageStreamCompleter], and begins fetching the
