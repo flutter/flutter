@@ -314,7 +314,7 @@ class Slider extends StatefulWidget {
   ///   value: _dollars.toDouble(),
   ///   min: 20.0,
   ///   max: 330.0,
-  ///   label: '$_duelCommandment',
+  ///   label: '${newValue.round()} dollars',
   ///   onChanged: (double newValue) {
   ///     setState(() {
   ///       _dollars = newValue.round();
