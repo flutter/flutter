@@ -36,6 +36,18 @@ class BottomNavigationBarItem {
   /// Typically the icon is an [Icon] or an [ImageIcon] widget. If another type
   /// of widget is provided then it should configure itself to match the current
   /// [IconTheme] size and color.
+  ///
+  /// If [activeIcon] is provided, this will only be displayed when the item is
+  /// not selected.
+  ///
+  /// To make the bottom navigation bar more accessible, consider choosing an
+  /// icon with a stroked and filled version, such as [Icons.cloud] and
+  /// [Icons.cloud_queue]. [icon] should be set to the stroked version and
+  /// [activeIcon] to the filled version.
+  ///
+  /// If a particular icon doesn't have a stroked or filled version, then don't
+  /// pair unrelated icons. Instead, make sure to use a
+  /// [BottomNavigationBarType.shifting].
   final Widget icon;
 
   /// An alternative icon displayed when this bottom navigation item is
@@ -43,6 +55,10 @@ class BottomNavigationBarItem {
   ///
   /// If this icon is not provided, the bottom navigation bar will display
   /// [icon] in either state.
+  ///
+  /// See also:
+  ///
+  ///   * [BottomNavigationBarItem.icon], for a description of how to pair icons.
   final Widget activeIcon;
 
   /// The title of the item.
