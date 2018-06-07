@@ -44,8 +44,8 @@ abstract class RenderAbstractViewport extends RenderObject {
   /// Returns the offset that would be needed to reveal the `target`
   /// [RenderObject].
   ///
-  /// The optional `rect` parameter describes which area of the `target` object
-  /// should be revealed in the viewport. If `rect` is null, that entire
+  /// The optional `rect` parameter describes which area of that `target` object
+  /// should be revealed in the viewport. If `rect` is null, the entire
   /// `target` [RenderObject] (as defined by its [RenderObject.paintBounds])
   /// will be revealed. If `rect` is provided it has to be given in the
   /// coordinate system of the `target` object.

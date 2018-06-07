@@ -2580,8 +2580,8 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   /// If `descendant` is provided, that [RenderObject] is made visible. If
   /// `descendant` is omitted, this [RenderObject] is made visible.
   ///
-  /// The optional `rect` parameter describes which area of the [RenderObject]
-  /// should be shown on screen. If `rect` is null, that entire
+  /// The optional `rect` parameter describes which area of that [RenderObject]
+  /// should be shown on screen. If `rect` is null, the entire
   /// [RenderObject] (as defined by its [paintBounds]) will be revealed. The
   /// `rect` parameter is interpreted relative to the coordinate system of
   /// `descendant` if that argument is provided and relative to this
