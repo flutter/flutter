@@ -244,11 +244,11 @@ class FlutterVersion {
       final DateTime latestFlutterCommitDate = await _getLatestAvailableFlutterVersion();
 
       if (latestFlutterCommitDate == null)
-        return VersionCheckResult.Unknown;
+        return VersionCheckResult.unknown;
 
       return latestFlutterCommitDate.isAfter(localFrameworkCommitDate)
-          ? VersionCheckResult.NewVersionAvailable
-          : VersionCheckResult.VersionIsCurrent;
+          ? VersionCheckResult.newVersionAvailable
+          : VersionCheckResult.versionIsCurrent;
     }
 
     // Get whether there's a newer version on the remote. This only goes
@@ -263,11 +263,11 @@ class FlutterVersion {
     // We show a warning if either we know there is a new remote version, or we couldn't tell but the local
     // version is outdated.
     final bool canShowWarning =
-      remoteVersion == VersionCheckResult.NewVersionAvailable
-      || remoteVersion == VersionCheckResult.Unknown && installationSeemsOutdated;
+      remoteVersion == VersionCheckResult.newVersionAvailable
+      || remoteVersion == VersionCheckResult.unknown && installationSeemsOutdated;
     
     if (beenAWhileSinceWarningWasPrinted && canShowWarning) {
-      final String updateMessage = remoteVersion == VersionCheckResult.NewVersionAvailable
+      final String updateMessage = remoteVersion == VersionCheckResult.newVersionAvailable
           ? newVersionAvailableMessage()
           : versionOutOfDateMessage(frameworkAge);
       printStatus(updateMessage, emphasis: true);
@@ -548,9 +548,9 @@ class GitTagVersion {
 enum VersionCheckResult {
   /// Unable to check whether a new version is available, possibly due to
   /// a connectivity issue.
-  Unknown,
+  unknown,
   /// The current version is up to date.
-  VersionIsCurrent,
+  versionIsCurrent,
   /// A newer version is available.
-  NewVersionAvailable,
+  newVersionAvailable,
 }
