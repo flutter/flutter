@@ -51,7 +51,7 @@ class CupertinoSwitch extends StatefulWidget {
     Key key,
     @required this.value,
     @required this.onChanged,
-    this.activeColor: CupertinoColors.activeGreen,
+    this.activeColor = CupertinoColors.activeGreen,
   }) : super(key: key);
 
   /// Whether this switch is on or off.

@@ -95,7 +95,7 @@ class Interval extends Curve {
   /// Creates an interval curve.
   ///
   /// The arguments must not be null.
-  const Interval(this.begin, this.end, { this.curve: Curves.linear })
+  const Interval(this.begin, this.end, { this.curve = Curves.linear })
       : assert(begin != null),
         assert(end != null),
         assert(curve != null);

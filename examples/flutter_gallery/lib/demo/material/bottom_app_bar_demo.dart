@@ -402,7 +402,7 @@ class _DemoDrawer extends StatelessWidget {
 class _DiamondFab extends StatefulWidget {
   const _DiamondFab({
     this.child,
-    this.notchMargin: 6.0,
+    this.notchMargin = 6.0,
     this.onPressed,
   });
 

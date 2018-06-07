@@ -420,8 +420,8 @@ abstract class PaintPattern {
 /// Matches a [Path] that contains (as defined by [Path.contains]) the given
 /// `includes` points and does not contain the given `excludes` points.
 Matcher isPathThat({
-  Iterable<Offset> includes: const <Offset>[],
-  Iterable<Offset> excludes: const <Offset>[],
+  Iterable<Offset> includes = const <Offset>[],
+  Iterable<Offset> excludes = const <Offset>[],
 }) {
   return new _PathMatcher(includes.toList(), excludes.toList());
 }

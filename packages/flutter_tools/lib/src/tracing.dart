@@ -32,7 +32,7 @@ class Tracing {
 
   /// Stops tracing; optionally wait for first frame.
   Future<Map<String, dynamic>> stopTracingAndDownloadTimeline({
-    bool waitForFirstFrame: false
+    bool waitForFirstFrame = false
   }) async {
     Map<String, dynamic> timeline;
 

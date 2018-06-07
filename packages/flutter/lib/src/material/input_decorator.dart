@@ -1037,12 +1037,15 @@ class _RenderDecoration extends RenderBox {
     }
 
     if (label != null) {
+      final double labelX = _boxParentData(label).offset.dx;
       switch (textDirection) {
         case TextDirection.rtl:
-          decoration.borderGap.start = _boxParentData(label).offset.dx + label.size.width;
+          decoration.borderGap.start = labelX + label.size.width;
           break;
         case TextDirection.ltr:
-          decoration.borderGap.start = _boxParentData(label).offset.dx;
+          // The value of _InputBorderGap.start is relative to the origin of the
+          // _BorderContainer which is inset by the icon's width.
+          decoration.borderGap.start = labelX - _boxSize(icon).width;
           break;
       }
       decoration.borderGap.extent = label.size.width * 0.75;
@@ -1344,8 +1347,8 @@ class InputDecorator extends StatefulWidget {
     this.decoration,
     this.baseStyle,
     this.textAlign,
-    this.isFocused: false,
-    this.isEmpty: false,
+    this.isFocused = false,
+    this.isEmpty = false,
     this.child,
   }) : assert(isFocused != null),
        assert(isEmpty != null),
@@ -1827,7 +1830,7 @@ class InputDecoration {
     this.filled,
     this.fillColor,
     this.border,
-    this.enabled: true,
+    this.enabled = true,
   }) : assert(enabled != null), isCollapsed = false;
 
   /// Defines an [InputDecorator] that is the same size as the input field.
@@ -1838,10 +1841,10 @@ class InputDecoration {
   const InputDecoration.collapsed({
     @required this.hintText,
     this.hintStyle,
-    this.filled: false,
+    this.filled = false,
     this.fillColor,
-    this.border: InputBorder.none,
-    this.enabled: true,
+    this.border = InputBorder.none,
+    this.enabled = true,
   }) : assert(enabled != null),
        icon = null,
        labelText = null,
@@ -2322,15 +2325,15 @@ class InputDecorationTheme extends Diagnosticable {
     this.hintStyle,
     this.errorStyle,
     this.errorMaxLines,
-    this.isDense: false,
+    this.isDense = false,
     this.contentPadding,
-    this.isCollapsed: false,
+    this.isCollapsed = false,
     this.prefixStyle,
     this.suffixStyle,
     this.counterStyle,
-    this.filled: false,
+    this.filled = false,
     this.fillColor,
-    this.border: const UnderlineInputBorder(),
+    this.border = const UnderlineInputBorder(),
   }) : assert(isDense != null),
        assert(isCollapsed != null),
        assert(filled != null),

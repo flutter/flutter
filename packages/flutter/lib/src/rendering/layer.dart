@@ -523,7 +523,7 @@ class OffsetLayer extends ContainerLayer {
   ///
   /// By default, [offset] is zero. It must be non-null before the compositing
   /// phase of the pipeline.
-  OffsetLayer({ this.offset: Offset.zero });
+  OffsetLayer({ this.offset = Offset.zero });
 
   /// Offset from parent in the parent's coordinate system.
   ///
@@ -566,7 +566,7 @@ class OffsetLayer extends ContainerLayer {
   ///
   ///  * [RenderRepaintBoundary.toImage] for a similar API at the render object level.
   ///  * [dart:ui.Scene.toImage] for more information about the image returned.
-  Future<ui.Image> toImage(Rect bounds, {double pixelRatio: 1.0}) async {
+  Future<ui.Image> toImage(Rect bounds, {double pixelRatio = 1.0}) async {
     assert(bounds != null);
     assert(pixelRatio != null);
     final ui.SceneBuilder builder = new ui.SceneBuilder();
@@ -730,7 +730,7 @@ class TransformLayer extends OffsetLayer {
   ///
   /// The [transform] and [offset] properties must be non-null before the
   /// compositing phase of the pipeline.
-  TransformLayer({ this.transform, Offset offset: Offset.zero }) : super(offset: offset);
+  TransformLayer({ this.transform, Offset offset = Offset.zero }) : super(offset: offset);
 
   /// The matrix to apply.
   ///
@@ -1006,7 +1006,7 @@ class LeaderLayer extends ContainerLayer {
   ///
   /// The [offset] property must be non-null before the compositing phase of the
   /// pipeline.
-  LeaderLayer({ @required this.link, this.offset: Offset.zero }) : assert(link != null);
+  LeaderLayer({ @required this.link, this.offset = Offset.zero }) : assert(link != null);
 
   /// The object with which this layer should register.
   ///
@@ -1104,9 +1104,9 @@ class FollowerLayer extends ContainerLayer {
   /// must be non-null before the compositing phase of the pipeline.
   FollowerLayer({
     @required this.link,
-    this.showWhenUnlinked: true,
-    this.unlinkedOffset: Offset.zero,
-    this.linkedOffset: Offset.zero,
+    this.showWhenUnlinked = true,
+    this.unlinkedOffset = Offset.zero,
+    this.linkedOffset = Offset.zero,
   }) : assert(link != null);
 
   /// The link to the [LeaderLayer].

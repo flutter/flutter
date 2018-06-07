@@ -169,7 +169,7 @@ class GestureDetector extends StatelessWidget {
     this.onScaleUpdate,
     this.onScaleEnd,
     this.behavior,
-    this.excludeFromSemantics: false
+    this.excludeFromSemantics = false
   }) : assert(excludeFromSemantics != null),
        assert(() {
          final bool haveVerticalDrag = onVerticalDragStart != null || onVerticalDragUpdate != null || onVerticalDragEnd != null;
@@ -463,9 +463,9 @@ class RawGestureDetector extends StatefulWidget {
   const RawGestureDetector({
     Key key,
     this.child,
-    this.gestures: const <Type, GestureRecognizerFactory>{},
+    this.gestures = const <Type, GestureRecognizerFactory>{},
     this.behavior,
-    this.excludeFromSemantics: false
+    this.excludeFromSemantics = false
   }) : assert(gestures != null),
        assert(excludeFromSemantics != null),
        super(key: key);

@@ -34,7 +34,7 @@ class BouncingScrollSimulation extends Simulation {
     @required this.leadingExtent,
     @required this.trailingExtent,
     @required this.spring,
-    Tolerance tolerance: Tolerance.defaultTolerance,
+    Tolerance tolerance = Tolerance.defaultTolerance,
   }) : assert(position != null),
        assert(velocity != null),
        assert(leadingExtent != null),
@@ -143,8 +143,8 @@ class ClampingScrollSimulation extends Simulation {
   ClampingScrollSimulation({
     @required this.position,
     @required this.velocity,
-    this.friction: 0.015,
-    Tolerance tolerance: Tolerance.defaultTolerance,
+    this.friction = 0.015,
+    Tolerance tolerance = Tolerance.defaultTolerance,
   }) : assert(_flingVelocityPenetration(0.0) == _initialVelocityPenetration),
        super(tolerance: tolerance) {
     _duration = _flingDuration(velocity);

@@ -39,7 +39,7 @@ class Theme extends StatelessWidget {
   const Theme({
     Key key,
     @required this.data,
-    this.isMaterialAppTheme: false,
+    this.isMaterialAppTheme = false,
     @required this.child,
   }) : assert(child != null),
        assert(data != null),
@@ -123,7 +123,7 @@ class Theme extends StatelessWidget {
   ///   );
   /// }
   /// ```
-  static ThemeData of(BuildContext context, { bool shadowThemeOnly: false }) {
+  static ThemeData of(BuildContext context, { bool shadowThemeOnly = false }) {
     final _InheritedTheme inheritedTheme =
         context.inheritFromWidgetOfExactType(_InheritedTheme);
     if (shadowThemeOnly) {
@@ -206,9 +206,9 @@ class AnimatedTheme extends ImplicitlyAnimatedWidget {
   const AnimatedTheme({
     Key key,
     @required this.data,
-    this.isMaterialAppTheme: false,
-    Curve curve: Curves.linear,
-    Duration duration: kThemeAnimationDuration,
+    this.isMaterialAppTheme = false,
+    Curve curve = Curves.linear,
+    Duration duration = kThemeAnimationDuration,
     @required this.child,
   }) : assert(child != null),
        assert(data != null),

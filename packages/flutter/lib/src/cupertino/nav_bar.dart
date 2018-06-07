@@ -18,7 +18,7 @@ const double _kNavBarPersistentHeight = 44.0;
 
 /// Size increase from expanding the navigation bar into an iOS-11-style large title
 /// form in a [CustomScrollView].
-const double _kNavBarLargeTitleHeightExtension = 56.0;
+const double _kNavBarLargeTitleHeightExtension = 52.0;
 
 /// Number of logical pixels scrolled down before the title text is transferred
 /// from the normal navigation bar to a big title below the navigation bar.
@@ -46,10 +46,10 @@ const Border _kDefaultNavBarBorder = const Border(
 );
 
 const TextStyle _kLargeTitleTextStyle = const TextStyle(
-  fontFamily: '.SF UI Text',
+  fontFamily: '.SF Pro Display',
   fontSize: 34.0,
   fontWeight: FontWeight.w700,
-  letterSpacing: -0.26,
+  letterSpacing: 0.24,
   color: CupertinoColors.black,
 );
 
@@ -82,12 +82,12 @@ class CupertinoNavigationBar extends StatelessWidget implements ObstructingPrefe
   const CupertinoNavigationBar({
     Key key,
     this.leading,
-    this.automaticallyImplyLeading: true,
+    this.automaticallyImplyLeading = true,
     this.middle,
     this.trailing,
-    this.border: _kDefaultNavBarBorder,
-    this.backgroundColor: _kDefaultNavBarBackgroundColor,
-    this.actionsForegroundColor: CupertinoColors.activeBlue,
+    this.border = _kDefaultNavBarBorder,
+    this.backgroundColor = _kDefaultNavBarBackgroundColor,
+    this.actionsForegroundColor = CupertinoColors.activeBlue,
   }) : assert(automaticallyImplyLeading != null),
        super(key: key);
 
@@ -192,11 +192,12 @@ class CupertinoSliverNavigationBar extends StatelessWidget {
     Key key,
     @required this.largeTitle,
     this.leading,
-    this.automaticallyImplyLeading: true,
+    this.automaticallyImplyLeading = true,
     this.middle,
     this.trailing,
-    this.backgroundColor: _kDefaultNavBarBackgroundColor,
-    this.actionsForegroundColor: CupertinoColors.activeBlue,
+    this.border = _kDefaultNavBarBorder,
+    this.backgroundColor = _kDefaultNavBarBackgroundColor,
+    this.actionsForegroundColor = CupertinoColors.activeBlue,
   }) : assert(largeTitle != null),
        assert(automaticallyImplyLeading != null),
        super(key: key);
@@ -245,6 +246,11 @@ class CupertinoSliverNavigationBar extends StatelessWidget {
   /// This widget is visible in both collapsed and expanded states.
   final Widget trailing;
 
+  /// The border of the navigation bar. By default renders a single pixel bottom border side.
+  ///
+  /// If a border is null, the navigation bar will not display a border.
+  final Border border;
+
   /// The background color of the navigation bar. If it contains transparency, the
   /// tab bar will automatically produce a blurring effect to the content
   /// behind it.
@@ -271,6 +277,7 @@ class CupertinoSliverNavigationBar extends StatelessWidget {
         automaticallyImplyLeading: automaticallyImplyLeading,
         middle: middle,
         trailing: trailing,
+        border: border,
         backgroundColor: backgroundColor,
         actionsForegroundColor: actionsForegroundColor,
       ),
@@ -439,8 +446,8 @@ class _CupertinoLargeTitleNavigationBarSliverDelegate
     this.automaticallyImplyLeading,
     this.middle,
     this.trailing,
-    this.border: _kDefaultNavBarBorder,
-    this.backgroundColor: _kDefaultNavBarBackgroundColor,
+    this.border,
+    this.backgroundColor,
     this.actionsForegroundColor,
   }) : assert(persistentHeight != null);
 
@@ -544,6 +551,7 @@ class _CupertinoLargeTitleNavigationBarSliverDelegate
         || leading != oldDelegate.leading
         || middle != oldDelegate.middle
         || trailing != oldDelegate.trailing
+        || border != oldDelegate.border
         || backgroundColor != oldDelegate.backgroundColor
         || actionsForegroundColor != oldDelegate.actionsForegroundColor;
   }

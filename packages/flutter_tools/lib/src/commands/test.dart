@@ -20,7 +20,7 @@ import '../test/runner.dart';
 import '../test/watcher.dart';
 
 class TestCommand extends FlutterCommand {
-  TestCommand({ bool verboseHelp: false }) {
+  TestCommand({ bool verboseHelp = false }) {
     requiresPubspecYaml();
     usesPubOption();
     argParser
@@ -92,7 +92,7 @@ class TestCommand extends FlutterCommand {
   @override
   String get description => 'Run Flutter unit tests for the current project.';
 
-  Future<bool> _collectCoverageData(CoverageCollector collector, { bool mergeCoverageData: false }) async {
+  Future<bool> _collectCoverageData(CoverageCollector collector, { bool mergeCoverageData = false }) async {
     final Status status = logger.startProgress('Collecting coverage information...');
     final String coverageData = await collector.finalizeCoverage(
       timeout: const Duration(seconds: 30),

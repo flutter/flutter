@@ -80,8 +80,8 @@ class CupertinoPageRoute<T> extends PageRoute<T> {
   CupertinoPageRoute({
     @required this.builder,
     RouteSettings settings,
-    this.maintainState: true,
-    bool fullscreenDialog: false,
+    this.maintainState = true,
+    bool fullscreenDialog = false,
     this.hostRoute,
   }) : assert(builder != null),
        assert(maintainState != null),
