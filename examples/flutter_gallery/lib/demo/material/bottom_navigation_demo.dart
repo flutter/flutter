@@ -7,7 +7,7 @@ import 'package:flutter/material.dart';
 class NavigationIconView {
   NavigationIconView({
     Widget icon,
-    Widget inactiveIcon,
+    Widget activeIcon,
     String title,
     Color color,
     TickerProvider vsync,
@@ -16,7 +16,7 @@ class NavigationIconView {
        _title = title,
        item = new BottomNavigationBarItem(
          icon: icon,
-         inactiveIcon: inactiveIcon,
+         activeIcon: activeIcon,
          title: new Text(title),
          backgroundColor: color,
        ),
@@ -122,22 +122,22 @@ class _BottomNavigationDemoState extends State<BottomNavigationDemo>
         vsync: this,
       ),
       new NavigationIconView(
-        icon: new CustomIcon(),
-        inactiveIcon: new CustomInactiveIcon(),
+        activeIcon: new CustomIcon(),
+        icon: new CustomInactiveIcon(),
         title: 'Box',
         color: Colors.deepOrange,
         vsync: this,
       ),
       new NavigationIconView(
-        icon: const Icon(Icons.cloud),
-        inactiveIcon: const Icon(Icons.cloud_queue),
+        activeIcon: const Icon(Icons.cloud),
+        icon: const Icon(Icons.cloud_queue),
         title: 'Cloud',
         color: Colors.teal,
         vsync: this,
       ),
       new NavigationIconView(
-        icon: const Icon(Icons.favorite),
-        inactiveIcon: const Icon(Icons.favorite_border),
+        activeIcon: const Icon(Icons.favorite),
+        icon: const Icon(Icons.favorite_border),
         title: 'Favorites',
         color: Colors.indigo,
         vsync: this,

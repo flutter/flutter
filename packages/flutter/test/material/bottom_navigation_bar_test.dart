@@ -498,8 +498,8 @@ void main() {
           currentIndex: selectedItem,
           items:  const <BottomNavigationBarItem>[
             const BottomNavigationBarItem(
-              icon: const Icon(Icons.favorite, key: filled),
-              inactiveIcon: const Icon(Icons.favorite_border, key: stroked),
+              activeIcon: const Icon(Icons.favorite, key: filled),
+              icon: const Icon(Icons.favorite_border, key: stroked),
               title: const Text('Favorite'),
             ),
             const BottomNavigationBarItem(
@@ -522,8 +522,8 @@ void main() {
           currentIndex: selectedItem,
           items:  const <BottomNavigationBarItem>[
             const BottomNavigationBarItem(
-              icon: const Icon(Icons.favorite, key: filled),
-              inactiveIcon: const Icon(Icons.favorite_border, key: stroked),
+              activeIcon: const Icon(Icons.favorite, key: filled),
+              icon: const Icon(Icons.favorite_border, key: stroked),
               title: const Text('Favorite'),
             ),
             const BottomNavigationBarItem(

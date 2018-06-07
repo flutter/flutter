@@ -131,6 +131,10 @@ class BottomNavigationBar extends StatefulWidget {
   /// See [BottomNavigationBarItem.icon] for more information.
   final double iconSize;
 
+  /// Whether to show the labels of bottom navigation bar items that arent'
+  /// selected.
+  final bool hideLabels = false;
+
   @override
   _BottomNavigationBarState createState() => new _BottomNavigationBarState();
 }
@@ -189,7 +193,7 @@ class _BottomNavigationTile extends StatelessWidget {
             color: iconColor,
             size: iconSize,
           ),
-          child: selected ? item.icon : item.inactiveIcon,
+          child: selected ? item.activeIcon : item.icon,
         ),
       ),
     );

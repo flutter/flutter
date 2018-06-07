@@ -25,9 +25,9 @@ class BottomNavigationBarItem {
   const BottomNavigationBarItem({
     @required this.icon,
     @required this.title,
-    Widget inactiveIcon,
+    Widget activeIcon,
     this.backgroundColor,
-  }) : this.inactiveIcon = inactiveIcon ?? icon,
+  }) : this.activeIcon = activeIcon ?? icon,
        assert(icon != null),
        assert(title != null);
 
@@ -38,15 +38,11 @@ class BottomNavigationBarItem {
   /// [IconTheme] size and color.
   final Widget icon;
 
-  /// An alternative icon displayed when this item is not selected in a material
-  /// fixed bottom navigation bar.
-  ///
-  /// To ensure that bottom navigation items without a title are accessible,
-  /// use a filled version of an icon as [icon] and a stroked version as
-  /// [inactiveIcon].
+  /// An alternative icon displayed when this bottom navigation item is
+  /// selected.
   ///
   /// Defaults to [icon].
-  final Widget inactiveIcon;
+  final Widget activeIcon;
 
   /// The title of the item.
   final Widget title;
