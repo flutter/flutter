@@ -93,22 +93,25 @@ class ImageCache {
   ///
   /// This is useful if, for instance, the root asset bundle has been updated
   /// and therefore new images must be obtained.
+  ///
+  /// Images which have not finished loading yet will not be removed from the
+  /// cache, and when they complete they will be inserted as normal.
   void clear() {
     _cache.clear();
     _currentSizeBytes = 0;
   }
 
-  /// Evicts a single entry from the cache.
+  /// Evicts a single entry from the cache, returning true if successful.
   ///
   /// The [key] must be equal to an object used to cache an image in
   /// [ImageCache.putIfAbsent].
   ///
-  /// Prefer using [ImageProvider.evict] to evict images from the cache instead
-  /// of calling method directly.
+  /// If the key is not immediately available, as is common, consider using
+  /// [ImageProvider.evict] to call this method indirectly instead.
   ///
   /// See also:
   ///
-  ///   * [ImageProvider], for evicting images.
+  ///   * [ImageProvider], for providing images to the [Image] widget.
   bool evict(Object key) {
     final _CachedImage image = _cache.remove(key);
     if (image != null) {

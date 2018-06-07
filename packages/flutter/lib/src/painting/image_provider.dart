@@ -315,13 +315,17 @@ abstract class ImageProvider<T> {
   ///
   ///   void evictImage() {
   ///     final NetworkImage provider = new NetworkImage(url);
-  ///     provider.evict().then<void>((bool value) => debugPrint('removed image!'));
+  ///     provider.evict().then<void>((bool success) {
+  ///       if (success)
+  ///         debugPrint('removed image!');
+  ///     });
   ///   }
   /// }
   /// ```
-  Future<bool> evict({ImageCache cache, ImageConfiguration configuration = ImageConfiguration.empty}) {
+  Future<bool> evict({ImageCache cache, ImageConfiguration configuration = ImageConfiguration.empty}) async {
     cache ??= imageCache;
-    return obtainKey(configuration).then<bool>(imageCache.evict);
+    final T key = await obtainKey(configuration);
+    return cache.evict(key);
   }
 
   /// Converts an ImageProvider's settings plus an ImageConfiguration to a key

@@ -13,24 +13,45 @@ import 'image_data.dart';
 
 void main() {
   new TestRenderingFlutterBinding(); // initializes the imageCache
+  group(ImageProvider, () {
+    tearDown(() {
+      imageCache.clear();
+    });
 
-  test('NetworkImage non-null url test', () {
-    expect(() {
-      new NetworkImage(nonconst(null));
-    }, throwsAssertionError);
-  });
+    test('NetworkImage non-null url test', () {
+      expect(() {
+        new NetworkImage(nonconst(null));
+      }, throwsAssertionError);
+    });
 
-  test('ImageProvider can evict images', () async {
-    imageCache.clear();
-    final Uint8List bytes = new Uint8List.fromList(kTransparentImage);
-    final MemoryImage imageProvider = new MemoryImage(bytes);
-    final ImageStream stream = imageProvider.resolve(ImageConfiguration.empty);
-    final Completer<void> completer = new Completer<void>();
-    stream.addListener((ImageInfo info, bool syncCall) => completer.complete());
-    await completer.future;
+    test('ImageProvider can evict images', () async {
+      final Uint8List bytes = new Uint8List.fromList(kTransparentImage);
+      final MemoryImage imageProvider = new MemoryImage(bytes);
+      final ImageStream stream = imageProvider.resolve(ImageConfiguration.empty);
+      final Completer<void> completer = new Completer<void>();
+      stream.addListener((ImageInfo info, bool syncCall) => completer.complete());
+      await completer.future;
 
-    expect(imageCache.currentSize, 1);
-    expect(await new MemoryImage(bytes).evict(), true);
-    expect(imageCache.currentSize, 0);
+      expect(imageCache.currentSize, 1);
+      expect(await new MemoryImage(bytes).evict(), true);
+      expect(imageCache.currentSize, 0);
+    });
+
+    test('ImageProvider.evict respects the provided ImageCache', () async {
+      final ImageCache otherCache = new ImageCache();
+      final Uint8List bytes = new Uint8List.fromList(kTransparentImage);
+      final MemoryImage imageProvider = new MemoryImage(bytes);
+      otherCache.putIfAbsent(imageProvider, () => imageProvider.load(imageProvider));
+      final ImageStream stream = imageProvider.resolve(ImageConfiguration.empty);
+      final Completer<void> completer = new Completer<void>();
+      stream.addListener((ImageInfo info, bool syncCall) => completer.complete());
+      await completer.future;
+
+      expect(otherCache.currentSize, 1);
+      expect(imageCache.currentSize, 1);
+      expect(await imageProvider.evict(cache: otherCache), true);
+      expect(otherCache.currentSize, 0);
+      expect(imageCache.currentSize, 1);
+    });
   });
 }
