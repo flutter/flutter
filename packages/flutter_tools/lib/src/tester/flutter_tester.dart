@@ -136,16 +136,8 @@ class FlutterTesterDevice extends Device {
       precompiledSnapshot: false,
       trackWidgetCreation: buildInfo.trackWidgetCreation,
     );
-    if (buildInfo.previewDart2) {
-      mainPath = applicationKernelFilePath;
-    }
-
     command.add('--flutter-assets-dir=$assetDirPath');
-
-    // TODO(scheglov): Either remove the check, or make it fail earlier.
-    if (mainPath != null) {
-      command.add(mainPath);
-    }
+    command.add(applicationKernelFilePath);
 
     try {
       printTrace(command.join(' '));
