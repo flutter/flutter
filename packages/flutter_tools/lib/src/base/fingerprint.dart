@@ -27,7 +27,7 @@ class Fingerprinter {
     @required this.fingerprintPath,
     @required Iterable<String> paths,
     @required Map<String, String> properties,
-    Iterable<String> depfilePaths: const <String>[],
+    Iterable<String> depfilePaths = const <String>[],
     FingerprintPathFilter pathFilter,
   }) : _paths = paths.toList(),
        _properties = new Map<String, String>.from(properties),
@@ -120,8 +120,8 @@ class Fingerprint {
     final String version = content['version'];
     if (version != FlutterVersion.instance.frameworkRevision)
       throw new ArgumentError('Incompatible fingerprint version: $version');
-    _checksums = content['files'] ?? <String, String>{};
-    _properties = content['properties'] ?? <String, String>{};
+    _checksums = content['files']?.cast<String,String>() ?? <String, String>{};
+    _properties = content['properties']?.cast<String,String>() ?? <String, String>{};
   }
 
   Map<String, String> _checksums;

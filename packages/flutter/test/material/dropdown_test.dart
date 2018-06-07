@@ -20,13 +20,13 @@ final Type dropdownButtonType = new DropdownButton<String>(
 
 Widget buildFrame({
   Key buttonKey,
-  String value: 'two',
+  String value = 'two',
   ValueChanged<String> onChanged,
-  bool isDense: false,
+  bool isDense = false,
   Widget hint,
-  List<String> items: menuItems,
-  Alignment alignment: Alignment.center,
-  TextDirection textDirection: TextDirection.ltr,
+  List<String> items = menuItems,
+  Alignment alignment = Alignment.center,
+  TextDirection textDirection = TextDirection.ltr,
 }) {
   return new TestApp(
     textDirection: textDirection,

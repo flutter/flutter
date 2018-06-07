@@ -104,7 +104,7 @@ class _TimePickerHeaderFragment {
   const _TimePickerHeaderFragment({
     @required this.layoutId,
     @required this.widget,
-    this.startMargin: 0.0,
+    this.startMargin = 0.0,
   }) : assert(layoutId != null),
         assert(widget != null),
         assert(startMargin != null);
@@ -133,7 +133,7 @@ class _TimePickerHeaderPiece {
   ///
   /// All arguments must be non-null. If the piece does not contain a pivot
   /// fragment, use the value -1 as a convention.
-  const _TimePickerHeaderPiece(this.pivotIndex, this.fragments, { this.bottomMargin: 0.0 })
+  const _TimePickerHeaderPiece(this.pivotIndex, this.fragments, { this.bottomMargin = 0.0 })
       : assert(pivotIndex != null),
         assert(fragments != null),
         assert(bottomMargin != null);
@@ -475,7 +475,7 @@ _TimePickerHeaderFormat _buildHeaderFormat(TimeOfDayFormat timeOfDayFormat, _Tim
   }
 
   // Convenience function for creating a time header piece with up to three fragments.
-  _TimePickerHeaderPiece piece({ int pivotIndex: -1, double bottomMargin: 0.0,
+  _TimePickerHeaderPiece piece({ int pivotIndex = -1, double bottomMargin = 0.0,
       _TimePickerHeaderFragment fragment1, _TimePickerHeaderFragment fragment2, _TimePickerHeaderFragment fragment3 }) {
     final List<_TimePickerHeaderFragment> fragments = <_TimePickerHeaderFragment>[fragment1];
     if (fragment2 != null) {

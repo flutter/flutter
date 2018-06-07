@@ -55,7 +55,7 @@ class Checkbox extends StatefulWidget {
   const Checkbox({
     Key key,
     @required this.value,
-    this.tristate: false,
+    this.tristate = false,
     @required this.onChanged,
     this.activeColor,
   }) : assert(tristate != null),

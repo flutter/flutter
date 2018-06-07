@@ -86,6 +86,9 @@ class CupertinoIcons {
   /// A thicker left chevron used in iOS for the navigation bar back button.
   static const IconData back = const IconData(0xf3cf, fontFamily: iconFont, fontPackage: iconFontPackage, matchTextDirection: true);
 
+  /// A thicker right chevron that's the reverse of [back].
+  static const IconData forward = const IconData(0xf3d1, fontFamily: iconFont, fontPackage: iconFontPackage, matchTextDirection: true);
+
   /// Outline of a simple front-facing house.
   static const IconData home = const IconData(0xf447, fontFamily: iconFont, fontPackage: iconFontPackage);
 

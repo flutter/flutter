@@ -79,7 +79,7 @@ class RunCommand extends RunCommandBase {
   @override
   final String description = 'Run your Flutter app on an attached device.';
 
-  RunCommand({ bool verboseHelp: false }) {
+  RunCommand({ bool verboseHelp = false }) {
     requiresPubspecYaml();
 
     argParser

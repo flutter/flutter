@@ -31,19 +31,19 @@ const String _kDylibKey = 'libapp.so';
 const String _kPlatformKernelKey = 'platform.dill';
 
 Future<void> build({
-  String mainPath: defaultMainPath,
-  String manifestPath: defaultManifestPath,
+  String mainPath = defaultMainPath,
+  String manifestPath = defaultManifestPath,
   String snapshotPath,
   String applicationKernelFilePath,
   String depfilePath,
-  String privateKeyPath: defaultPrivateKeyPath,
+  String privateKeyPath = defaultPrivateKeyPath,
   String assetDirPath,
   String packagesPath,
-  bool previewDart2 : false,
-  bool precompiledSnapshot: false,
-  bool reportLicensedPackages: false,
-  bool trackWidgetCreation: false,
-  List<String> extraFrontEndOptions: const <String>[],
+  bool previewDart2  = false,
+  bool precompiledSnapshot = false,
+  bool reportLicensedPackages = false,
+  bool trackWidgetCreation = false,
+  List<String> extraFrontEndOptions = const <String>[],
   List<String> fileSystemRoots,
   String fileSystemScheme,
 }) async {
@@ -119,8 +119,8 @@ Future<AssetBundle> buildAssets({
   String manifestPath,
   String assetDirPath,
   String packagesPath,
-  bool includeDefaultFonts: true,
-  bool reportLicensedPackages: false
+  bool includeDefaultFonts = true,
+  bool reportLicensedPackages = false
 }) async {
   assetDirPath ??= getAssetBuildDirectory();
   packagesPath ??= fs.path.absolute(PackageMap.globalPackagesPath);
@@ -145,7 +145,7 @@ Future<void> assemble({
   DevFSContent kernelContent,
   File snapshotFile,
   File dylibFile,
-  String privateKeyPath: defaultPrivateKeyPath,
+  String privateKeyPath = defaultPrivateKeyPath,
   String assetDirPath,
 }) async {
   assetDirPath ??= getAssetBuildDirectory();

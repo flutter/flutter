@@ -42,6 +42,16 @@ typedef Future<Null> ReloadSources(
   bool pause,
 });
 
+typedef Future<String> CompileExpression(
+  String isolateId,
+  String expression,
+  List<String> definitions,
+  List<String> typeDefinitions,
+  String libraryUri,
+  String klass,
+  bool isStatic,
+);
+
 const String _kRecordingType = 'vmservice';
 
 Future<StreamChannel<String>> _defaultOpenChannel(Uri uri) async {
@@ -99,6 +109,7 @@ class VMService {
     this.wsAddress,
     this._requestTimeout,
     ReloadSources reloadSources,
+    CompileExpression compileExpression,
   ) {
     _vm = new VM._empty(this);
     _peer.listen().catchError(_connectionError.completeError);
@@ -135,6 +146,42 @@ class VMService {
       // have no effect
       _peer.sendNotification('_registerService', <String, String>{
         'service': 'reloadSources',
+        'alias': 'Flutter Tools'
+      });
+    }
+
+    if (compileExpression != null) {
+      _peer.registerMethod('compileExpression', (rpc.Parameters params) async {
+        final String isolateId = params['isolateId'].asString;
+        if (isolateId is! String || isolateId.isEmpty)
+          throw new rpc.RpcException.invalidParams(
+              'Invalid \'isolateId\': $isolateId');
+        final String expression = params['expression'].asString;
+        if (expression is! String || expression.isEmpty)
+          throw new rpc.RpcException.invalidParams(
+              'Invalid \'expression\': $expression');
+        final List<String> definitions = params['definitions'].asList;
+        final List<String> typeDefinitions = params['typeDefinitions'].asList;
+        final String libraryUri = params['libraryUri'].asString;
+        final String klass = params['klass'] != null ? params['klass'].asString : null;
+        final bool isStatic = params['isStatic'].asBoolOr(false);
+
+        try {
+          final String kernelBytesBase64 = await compileExpression(isolateId,
+              expression, definitions, typeDefinitions, libraryUri, klass,
+              isStatic);
+          return <String, dynamic>{'type': 'Success',
+            'result': <String, dynamic> {'kernelBytes': kernelBytesBase64}};
+        } on rpc.RpcException {
+          rethrow;
+        } catch (e, st) {
+          throw new rpc.RpcException(rpc_error_code.SERVER_ERROR,
+              'Error during expression compilation: $e\n$st');
+        }
+      });
+
+      _peer.sendNotification('_registerService', <String, String>{
+        'service': 'compileExpression',
         'alias': 'Flutter Tools'
       });
     }
@@ -178,13 +225,14 @@ class VMService {
   /// See: https://github.com/dart-lang/sdk/commit/df8bf384eb815cf38450cb50a0f4b62230fba217
   static Future<VMService> connect(
     Uri httpUri, {
-    Duration requestTimeout: kDefaultRequestTimeout,
+    Duration requestTimeout = kDefaultRequestTimeout,
     ReloadSources reloadSources,
+    CompileExpression compileExpression,
   }) async {
     final Uri wsUri = httpUri.replace(scheme: 'ws', path: fs.path.join(httpUri.path, 'ws'));
     final StreamChannel<String> channel = await _openChannel(wsUri);
     final rpc.Peer peer = new rpc.Peer.withoutJson(jsonDocument.bind(channel));
-    final VMService service = new VMService._(peer, httpUri, wsUri, requestTimeout, reloadSources);
+    final VMService service = new VMService._(peer, httpUri, wsUri, requestTimeout, reloadSources, compileExpression);
     // This call is to ensure we are able to establish a connection instead of
     // keeping on trucking and failing farther down the process.
     await service._sendRequest('getVersion', const <String, dynamic>{});
@@ -774,9 +822,9 @@ class VM extends ServiceObjectOwner {
   /// If `timeoutFatal` is false, then a timeout will result in a null return
   /// value. Otherwise, it results in an exception.
   Future<Map<String, dynamic>> invokeRpcRaw(String method, {
-    Map<String, dynamic> params: const <String, dynamic>{},
+    Map<String, dynamic> params = const <String, dynamic>{},
     Duration timeout,
-    bool timeoutFatal: true,
+    bool timeoutFatal = true,
   }) async {
     printTrace('$method: $params');
 
@@ -804,7 +852,7 @@ class VM extends ServiceObjectOwner {
 
   /// Invoke the RPC and return a [ServiceObject] response.
   Future<ServiceObject> invokeRpc(String method, {
-    Map<String, dynamic> params: const <String, dynamic>{},
+    Map<String, dynamic> params = const <String, dynamic>{},
     Duration timeout,
   }) async {
     final Map<String, dynamic> response = await invokeRpcRaw(
@@ -1043,7 +1091,7 @@ class Isolate extends ServiceObjectOwner {
   Future<Map<String, dynamic>> invokeRpcRaw(String method, {
     Map<String, dynamic> params,
     Duration timeout,
-    bool timeoutFatal: true,
+    bool timeoutFatal = true,
   }) {
     // Inject the 'isolateId' parameter.
     if (params == null) {
@@ -1087,7 +1135,7 @@ class Isolate extends ServiceObjectOwner {
   static const int kIsolateReloadBarred = 1005;
 
   Future<Map<String, dynamic>> reloadSources(
-      { bool pause: false,
+      { bool pause = false,
         Uri rootLibUri,
         Uri packagesUri}) async {
     try {
@@ -1178,7 +1226,7 @@ class Isolate extends ServiceObjectOwner {
     String method, {
       Map<String, dynamic> params,
       Duration timeout,
-      bool timeoutFatal: true,
+      bool timeoutFatal = true,
     }
   ) async {
     try {

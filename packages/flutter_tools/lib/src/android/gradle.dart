@@ -141,7 +141,7 @@ void handleKnownGradleExceptions(String exceptionString) {
   }
 }
 
-String _locateProjectGradlew({ bool ensureExecutable: true }) {
+String _locateProjectGradlew({ bool ensureExecutable = true }) {
   final String path = fs.path.join(
     'android',
     platform.isWindows ? 'gradlew.bat' : 'gradlew',
@@ -314,7 +314,9 @@ Future<Null> _buildGradleProjectV2(String gradle, BuildInfo buildInfo, String ta
   final Status status = logger.startProgress('Running \'gradlew $assembleTask\'...', expectSlowOperation: true);
   final String gradlePath = fs.file(gradle).absolute.path;
   final List<String> command = <String>[gradlePath];
-  if (!logger.isVerbose) {
+  if (logger.isVerbose) {
+    command.add('-Pverbose=true');
+  } else {
     command.add('-q');
   }
   if (artifacts is LocalEngineArtifacts) {
@@ -340,8 +342,8 @@ Future<Null> _buildGradleProjectV2(String gradle, BuildInfo buildInfo, String ta
   } else {
     command.add('-Ppreview-dart-2=false');
   }
-  if (buildInfo.preferSharedLibrary && androidSdk.ndk != null) {
-    command.add('-Pprefer-shared-library=true');
+  if (buildInfo.buildSharedLibrary && androidSdk.ndk != null) {
+    command.add('-Pbuild-shared-library=true');
   }
   if (buildInfo.targetPlatform == TargetPlatform.android_arm64)
     command.add('-Ptarget-platform=android-arm64');

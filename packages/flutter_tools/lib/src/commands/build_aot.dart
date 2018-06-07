@@ -17,7 +17,7 @@ import '../runner/flutter_command.dart';
 import 'build.dart';
 
 class BuildAotCommand extends BuildSubCommand {
-  BuildAotCommand({bool verboseHelp: false}) {
+  BuildAotCommand({bool verboseHelp = false}) {
     usesTargetOption();
     addBuildModeFlags();
     usesPubOption();

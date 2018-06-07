@@ -18,7 +18,7 @@ class NotifyMaterial extends StatelessWidget {
 }
 
 Widget buildMaterial(
-    {double elevation: 0.0, Color shadowColor: const Color(0xFF00FF00)}) {
+    {double elevation = 0.0, Color shadowColor = const Color(0xFF00FF00)}) {
   return new Center(
     child: new SizedBox(
       height: 100.0,

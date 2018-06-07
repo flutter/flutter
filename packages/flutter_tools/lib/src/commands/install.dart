@@ -45,7 +45,7 @@ class InstallCommand extends FlutterCommand {
   }
 }
 
-Future<bool> installApp(Device device, ApplicationPackage package, { bool uninstall: true }) async {
+Future<bool> installApp(Device device, ApplicationPackage package, { bool uninstall = true }) async {
   if (package == null)
     return false;
 

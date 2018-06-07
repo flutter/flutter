@@ -226,7 +226,7 @@ class _ButtonsDemoState extends State<ButtonsDemo> {
                   // Perform some action
                 },
               ),
-              const RaisedButton(
+              const OutlineButton(
                 child: const Text('DISABLED'),
                 onPressed: null,
               ),

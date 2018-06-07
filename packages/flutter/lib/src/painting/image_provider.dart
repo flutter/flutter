@@ -441,7 +441,7 @@ class NetworkImage extends ImageProvider<NetworkImage> {
   /// Creates an object that fetches the image at the given URL.
   ///
   /// The arguments must not be null.
-  const NetworkImage(this.url, { this.scale: 1.0 , this.headers })
+  const NetworkImage(this.url, { this.scale = 1.0 , this.headers })
       : assert(url != null),
         assert(scale != null);
 
@@ -518,7 +518,7 @@ class FileImage extends ImageProvider<FileImage> {
   /// Creates an object that decodes a [File] as an image.
   ///
   /// The arguments must not be null.
-  const FileImage(this.file, { this.scale: 1.0 })
+  const FileImage(this.file, { this.scale = 1.0 })
       : assert(file != null),
         assert(scale != null);
 
@@ -586,7 +586,7 @@ class MemoryImage extends ImageProvider<MemoryImage> {
   /// Creates an object that decodes a [Uint8List] buffer as an image.
   ///
   /// The arguments must not be null.
-  const MemoryImage(this.bytes, { this.scale: 1.0 })
+  const MemoryImage(this.bytes, { this.scale = 1.0 })
       : assert(bytes != null),
         assert(scale != null);
 
@@ -713,7 +713,7 @@ class ExactAssetImage extends AssetBundleImageProvider {
   /// included in a package. See the documentation for the [ExactAssetImage] class
   /// itself for details.
   const ExactAssetImage(this.assetName, {
-    this.scale: 1.0,
+    this.scale = 1.0,
     this.bundle,
     this.package,
   }) : assert(assetName != null),

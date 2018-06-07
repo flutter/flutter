@@ -10,7 +10,7 @@ import '../runner/flutter_command.dart' show FlutterOptions;
 import 'build.dart';
 
 class BuildBundleCommand extends BuildSubCommand {
-  BuildBundleCommand({bool verboseHelp: false}) {
+  BuildBundleCommand({bool verboseHelp = false}) {
     usesTargetOption();
     argParser
       ..addFlag('precompiled', negatable: false)

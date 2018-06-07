@@ -57,7 +57,7 @@ void main() {
 
     final GlobalKey insideKey = new GlobalKey();
 
-    String state({ bool skipOffstage: true }) {
+    String state({ bool skipOffstage = true }) {
       String result = '';
       if (tester.any(find.text('A', skipOffstage: skipOffstage)))
         result += 'A';

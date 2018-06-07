@@ -27,7 +27,7 @@ class CompilerOutput {
 }
 
 class _StdoutHandler {
-  _StdoutHandler({this.consumer: printError}) {
+  _StdoutHandler({this.consumer = printError}) {
     reset();
   }
 
@@ -71,10 +71,10 @@ class KernelCompiler {
     String mainPath,
     String outputFilePath,
     String depFilePath,
-    bool linkPlatformKernelIn: false,
-    bool aot: false,
+    bool linkPlatformKernelIn = false,
+    bool aot = false,
     List<String> entryPointsJsonFiles,
-    bool trackWidgetCreation: false,
+    bool trackWidgetCreation = false,
     List<String> extraFrontEndOptions,
     String incrementalCompilerByteStorePath,
     String packagesPath,
@@ -192,9 +192,9 @@ class KernelCompiler {
 /// The wrapper is intended to stay resident in memory as user changes, reloads,
 /// restarts the Flutter app.
 class ResidentCompiler {
-  ResidentCompiler(this._sdkRoot, {bool trackWidgetCreation: false,
+  ResidentCompiler(this._sdkRoot, {bool trackWidgetCreation = false,
       String packagesPath, List<String> fileSystemRoots, String fileSystemScheme ,
-      CompilerMessageConsumer compilerMessageConsumer: printError})
+      CompilerMessageConsumer compilerMessageConsumer = printError})
     : assert(_sdkRoot != null),
       _trackWidgetCreation = trackWidgetCreation,
       _packagesPath = packagesPath,
@@ -299,6 +299,28 @@ class ResidentCompiler {
     return stdoutHandler.compilerOutput.future;
   }
 
+  Future<CompilerOutput> compileExpression(String expression, List<String> definitions,
+      List<String> typeDefinitions, String libraryUri, String klass, bool isStatic) {
+    stdoutHandler.reset();
+
+    // 'compile-expression' should be invoked after compiler has been started,
+    // program was compiled.
+    if (_server == null)
+      return null;
+
+    final String inputKey = new Uuid().generateV4();
+    _server.stdin.writeln('compile-expression $inputKey');
+    _server.stdin.writeln(expression);
+    definitions?.forEach(_server.stdin.writeln);
+    _server.stdin.writeln(inputKey);
+    typeDefinitions?.forEach(_server.stdin.writeln);
+    _server.stdin.writeln(inputKey);
+    _server.stdin.writeln(libraryUri ?? '');
+    _server.stdin.writeln(klass ?? '');
+    _server.stdin.writeln(isStatic ?? false);
+
+    return stdoutHandler.compilerOutput.future;
+  }
 
   /// Should be invoked when results of compilation are accepted by the client.
   ///

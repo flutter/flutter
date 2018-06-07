@@ -146,7 +146,7 @@ Future<ProcessResult> _runFlutterTest(
   String testName,
   String workingDirectory,
   String testDirectory, {
-  List<String> extraArgs: const <String>[],
+  List<String> extraArgs = const <String>[],
 }) async {
 
   final String testFilePath = fs.path.join(testDirectory, '${testName}_test.dart');

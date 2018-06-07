@@ -213,7 +213,7 @@ class CustomTraversalExampleState extends State<CustomTraversalExample> {
     );
   }
 
-  Widget _makeSpinnerButton(int rowOrder, int columnOrder, Field field, {bool increment: true}) {
+  Widget _makeSpinnerButton(int rowOrder, int columnOrder, Field field, {bool increment = true}) {
     return new SpinnerButton(
       rowOrder: rowOrder,
       columnOrder: columnOrder,

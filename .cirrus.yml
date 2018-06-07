@@ -39,7 +39,9 @@ task:
   env:
     SHARD: tests
   windows_container:
-    dockerfile: dev/bots/docker/Dockerfile.windows
+    image: cirrusci/windowsservercore:2016
+    os_version: 2016
+    cpu: 4
   env:
     CIRRUS_WORKING_DIR: "C:\\Windows\\Temp\\flutter sdk"
   git_fetch_script: git fetch origin

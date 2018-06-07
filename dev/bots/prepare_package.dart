@@ -78,9 +78,9 @@ Branch fromBranchName(String name) {
 class ProcessRunner {
   ProcessRunner({
     ProcessManager processManager,
-    this.subprocessOutput: true,
+    this.subprocessOutput = true,
     this.defaultWorkingDirectory,
-    this.platform: const LocalPlatform(),
+    this.platform = const LocalPlatform(),
   }) : processManager = processManager ?? const LocalProcessManager() {
     environment = new Map<String, String>.from(platform.environment);
   }
@@ -112,7 +112,7 @@ class ProcessRunner {
   Future<String> runProcess(
     List<String> commandLine, {
     Directory workingDirectory,
-    bool failOk: false,
+    bool failOk = false,
   }) async {
     workingDirectory ??= defaultWorkingDirectory ?? Directory.current;
     if (subprocessOutput) {
@@ -193,8 +193,8 @@ class ArchiveCreator {
     this.revision,
     this.branch, {
     ProcessManager processManager,
-    bool subprocessOutput: true,
-    this.platform: const LocalPlatform(),
+    bool subprocessOutput = true,
+    this.platform = const LocalPlatform(),
     HttpReader httpReader,
   }) : assert(revision.length == 40),
        flutterRoot = new Directory(path.join(tempDir.path, 'flutter')),
@@ -430,8 +430,8 @@ class ArchivePublisher {
     this.version,
     this.outputFile, {
     ProcessManager processManager,
-    bool subprocessOutput: true,
-    this.platform: const LocalPlatform(),
+    bool subprocessOutput = true,
+    this.platform = const LocalPlatform(),
   }) : assert(revision.length == 40),
        platformName = platform.operatingSystem.toLowerCase(),
        metadataGsPath = '$gsReleaseFolder/${getMetadataFilename(platform)}',
@@ -528,7 +528,7 @@ class ArchivePublisher {
   Future<String> _runGsUtil(
     List<String> args, {
     Directory workingDirectory,
-    bool failOk: false,
+    bool failOk = false,
   }) async {
     return _processRunner.runProcess(
       <String>['gsutil']..addAll(args),

@@ -29,8 +29,8 @@ class RoundedRectangleBorder extends ShapeBorder {
   ///
   /// The arguments must not be null.
   const RoundedRectangleBorder({
-    this.side: BorderSide.none,
-    this.borderRadius: BorderRadius.zero,
+    this.side = BorderSide.none,
+    this.borderRadius = BorderRadius.zero,
   }) : assert(side != null),
        assert(borderRadius != null);
 
@@ -142,8 +142,8 @@ class RoundedRectangleBorder extends ShapeBorder {
 
 class _RoundedRectangleToCircleBorder extends ShapeBorder {
   const _RoundedRectangleToCircleBorder({
-    this.side: BorderSide.none,
-    this.borderRadius: BorderRadius.zero,
+    this.side = BorderSide.none,
+    this.borderRadius = BorderRadius.zero,
     @required this.circleness,
   }) : assert(side != null),
        assert(borderRadius != null),

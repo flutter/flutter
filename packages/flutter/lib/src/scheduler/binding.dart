@@ -86,7 +86,7 @@ class _TaskEntry<T> {
 }
 
 class _FrameCallbackEntry {
-  _FrameCallbackEntry(this.callback, { bool rescheduling: false }) {
+  _FrameCallbackEntry(this.callback, { bool rescheduling = false }) {
     assert(() {
       if (rescheduling) {
         assert(() {
@@ -420,7 +420,7 @@ abstract class SchedulerBinding extends BindingBase with ServicesBinding {
   ///
   /// Callbacks registered with this method can be canceled using
   /// [cancelFrameCallbackWithId].
-  int scheduleFrameCallback(FrameCallback callback, { bool rescheduling: false }) {
+  int scheduleFrameCallback(FrameCallback callback, { bool rescheduling = false }) {
     scheduleFrame();
     _nextFrameCallbackId += 1;
     _transientCallbacks[_nextFrameCallbackId] = new _FrameCallbackEntry(callback, rescheduling: rescheduling);

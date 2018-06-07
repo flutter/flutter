@@ -33,6 +33,10 @@ Future<Null> main() async {
     await tester.pump(); // Start drawer animation
     await tester.pump(const Duration(seconds: 1)); // Complete drawer animation
 
+    // Disable calls from the engine which would interfere with the benchmark.
+    ui.window.onBeginFrame = null;
+    ui.window.onDrawFrame = null;
+
     final TestViewConfiguration big = new TestViewConfiguration(size: const Size(360.0, 640.0));
     final TestViewConfiguration small = new TestViewConfiguration(size: const Size(355.0, 635.0));
     final RenderView renderView = WidgetsBinding.instance.renderView;
@@ -47,8 +51,8 @@ Future<Null> main() async {
       // frames are missed, etc.
       // We use Timer.run to ensure there's a microtask flush in between
       // the two calls below.
-      Timer.run(() { ui.window.onBeginFrame(new Duration(milliseconds: iterations * 16)); });
-      Timer.run(() { ui.window.onDrawFrame(); });
+      Timer.run(() { binding.handleBeginFrame(new Duration(milliseconds: iterations * 16)); });
+      Timer.run(() { binding.handleDrawFrame(); });
       await tester.idle(); // wait until the frame has run (also uses Timer.run)
       iterations += 1;
     }

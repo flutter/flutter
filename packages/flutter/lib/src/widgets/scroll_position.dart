@@ -69,7 +69,7 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
   ScrollPosition({
     @required this.physics,
     @required this.context,
-    this.keepScrollOffset: true,
+    this.keepScrollOffset = true,
     ScrollPosition oldPosition,
     this.debugLabel,
   }) : assert(physics != null),
@@ -489,9 +489,9 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
   /// Animates the position such that the given object is as visible as possible
   /// by just scrolling this position.
   Future<Null> ensureVisible(RenderObject object, {
-    double alignment: 0.0,
-    Duration duration: Duration.zero,
-    Curve curve: Curves.ease,
+    double alignment = 0.0,
+    Duration duration = Duration.zero,
+    Curve curve = Curves.ease,
   }) {
     assert(object.attached);
     final RenderAbstractViewport viewport = RenderAbstractViewport.of(object);
