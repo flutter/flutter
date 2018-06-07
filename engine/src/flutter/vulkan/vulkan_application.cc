@@ -129,6 +129,10 @@ const VulkanHandle<VkInstance>& VulkanApplication::GetInstance() const {
   return instance_;
 }
 
+void VulkanApplication::ReleaseInstanceOwnership() {
+  instance_.ReleaseOwnership();
+}
+
 std::vector<VkPhysicalDevice> VulkanApplication::GetPhysicalDevices() const {
   if (!IsValid()) {
     return {};
