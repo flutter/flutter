@@ -45,9 +45,10 @@ abstract class RenderAbstractViewport extends RenderObject {
   /// [RenderObject].
   ///
   /// The optional `rect` parameter describes which area of the `target` object
-  /// should be revealed in the viewport. If `rect` is null, the entire
-  /// `target` [RenderObject] will be revealed. If `rect` is provided it has to
-  /// be given in the coordinate system of the `target` object.
+  /// should be revealed in the viewport. If `rect` is null, that entire
+  /// `target` [RenderObject] (as defined by its [RenderObject.paintBounds])
+  /// will be revealed. If `rect` is provided it has to be given in the
+  /// coordinate system of the `target` object.
   ///
   /// The `alignment` argument describes where the target should be positioned
   /// after applying the returned offset. If `alignment` is 0.0, the child must
@@ -65,6 +66,7 @@ abstract class RenderAbstractViewport extends RenderObject {
   /// by x within the viewport.
   ///
   /// See also:
+  ///
   ///  * [RevealedOffset], which describes the return value of this method.
   RevealedOffset getOffsetToReveal(RenderObject target, double alignment, {Rect rect});
 
@@ -87,18 +89,19 @@ class RevealedOffset {
   /// Instantiates a return value for [RenderAbstractViewport.getOffsetToReveal].
   const RevealedOffset({
     @required this.offset,
-    @required this.rect
-  }) : assert (offset != null), assert(rect != null);
+    @required this.rect,
+  }) : assert(offset != null), assert(rect != null);
 
   /// Offset for the viewport to reveal a specific element in the viewport.
   ///
   /// See also:
+  ///
   ///  * [RenderAbstractViewport.getOffsetToReveal], which calculates this
-  ///    value fort a specific element.
+  ///    value for a specific element.
   final double offset;
 
-  /// The [Rect] in the outer coordinate system of the viewport at which the to be
-  /// revealed element would be located if the viewport's offset is set
+  /// The [Rect] in the outer coordinate system of the viewport at which the
+  /// to-be-revealed element would be located if the viewport's offset is set
   /// to [offset].
   ///
   /// A viewport usually has two coordinate systems and works as an adapter
@@ -118,6 +121,7 @@ class RevealedOffset {
   /// viewport if the viewport's offset is set to [offset].
   ///
   /// See also:
+  ///
   ///  * [RenderAbstractViewport.getOffsetToReveal], which calculates this
   ///    value for a specific element.
   final Rect rect;
@@ -882,14 +886,13 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
       curve: curve,
     );
     super.showOnScreen(
-      // Omitting `descendant` to get this viewport on screen.
       rect: newRect,
       duration: duration,
       curve: curve,
     );
   }
 
-  /// Make (a portions of) the given `descendant` of the given `viewport` fully
+  /// Make (a portion of) the given `descendant` of the given `viewport` fully
   /// visible in the `viewport` by manipulating the provided [ViewportOffset]
   /// `offset`.
   ///
@@ -903,7 +906,7 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
   /// for a full definition of this [Rect].
   ///
   /// The parameters `viewport` and `offset` are required and cannot be null.
-  /// If `descendant` is null this is a no-op and `rect` is returned.
+  /// If `descendant` is null, this is a no-op and `rect` is returned.
   ///
   /// The `duration` parameter can be set to a non-zero value to animate the
   /// target object into the viewport with an animation defined by `curve`.

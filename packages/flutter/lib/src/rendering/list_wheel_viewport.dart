@@ -622,7 +622,7 @@ class RenderListWheelViewport
 
     rect ??= target.paintBounds;
 
-    // The child will be the topmost object before we get to the viewport.
+    // `child` will be the last RenderObject before the viewport when walking up from `target`.
     RenderObject child = target;
     while (child.parent != this)
       child = child.parent;
@@ -656,7 +656,6 @@ class RenderListWheelViewport
     }
 
     super.showOnScreen(
-      // Omitting `descendant` to get this viewport on screen.
       rect: rect,
       duration: duration,
       curve: curve,

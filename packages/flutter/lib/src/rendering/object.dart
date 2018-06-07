@@ -2037,6 +2037,9 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
 
   /// An estimate of the bounds within which this render object will paint.
   /// Useful for debugging flags such as [debugPaintLayerBordersEnabled].
+  ///
+  /// These are also the bounds used by [showOnScreen] to make a [RenderObject]
+  /// visible on screen.
   Rect get paintBounds;
 
   /// Override this method to paint debugging information.
@@ -2578,10 +2581,11 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   /// `descendant` is omitted, this [RenderObject] is made visible.
   ///
   /// The optional `rect` parameter describes which area of the [RenderObject]
-  /// should be shown on screen. If `rect` is null, the entire
-  /// [RenderObject] will be revealed. The `rect` parameter is interpreted
-  /// relative to the coordinate system of `descendant` if that argument is
-  /// provided or relative to this [RenderObject] otherwise.
+  /// should be shown on screen. If `rect` is null, that entire
+  /// [RenderObject] (as defined by its [paintBounds]) will be revealed. The
+  /// `rect` parameter is interpreted relative to the coordinate system of
+  /// `descendant` if that argument is provided and relative to this
+  /// [RenderObject] otherwise.
   ///
   /// The `duration` parameter can be set to a non-zero value to bring the
   /// target object on screen in an animation defined by `curve`.

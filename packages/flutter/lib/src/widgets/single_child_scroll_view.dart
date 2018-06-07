@@ -605,7 +605,6 @@ class _RenderSingleChildViewport extends RenderBox with RenderObjectWithChildMix
       curve: curve,
     );
     super.showOnScreen(
-      // Omitting `descendant` to get this viewport on screen.
       rect: newRect,
       duration: duration,
       curve: curve,
