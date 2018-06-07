@@ -166,7 +166,7 @@ class KernelCompiler {
       printError('Failed to start frontend server $error, $stack');
     });
 
-    final _StdoutHandler stdoutHandler = new _StdoutHandler();
+    final _StdoutHandler _stdoutHandler = new _StdoutHandler();
 
     server.stderr
       .transform(utf8.decoder)
@@ -174,13 +174,13 @@ class KernelCompiler {
     server.stdout
       .transform(utf8.decoder)
       .transform(const LineSplitter())
-      .listen(stdoutHandler.handler);
+      .listen(_stdoutHandler.handler);
     final int exitCode = await server.exitCode;
     if (exitCode == 0) {
       if (fingerprinter != null) {
         await fingerprinter.writeFingerprint();
       }
-      return stdoutHandler.compilerOutput.future;
+      return _stdoutHandler.compilerOutput.future;
     }
     return null;
   }
@@ -200,7 +200,7 @@ class ResidentCompiler {
       _packagesPath = packagesPath,
       _fileSystemRoots = fileSystemRoots,
       _fileSystemScheme = fileSystemScheme,
-      stdoutHandler = new _StdoutHandler(consumer: compilerMessageConsumer) {
+      _stdoutHandler = new _StdoutHandler(consumer: compilerMessageConsumer) {
     // This is a URI, not a file path, so the forward slash is correct even on Windows.
     if (!_sdkRoot.endsWith('/'))
       _sdkRoot = '$_sdkRoot/';
@@ -212,7 +212,7 @@ class ResidentCompiler {
   final String _fileSystemScheme;
   String _sdkRoot;
   Process _server;
-  final _StdoutHandler stdoutHandler;
+  final _StdoutHandler _stdoutHandler;
 
   /// If invoked for the first time, it compiles Dart script identified by
   /// [mainPath], [invalidatedFiles] list is ignored.
@@ -223,7 +223,7 @@ class ResidentCompiler {
   /// null is returned.
   Future<CompilerOutput> recompile(String mainPath, List<String> invalidatedFiles,
       {String outputPath, String packagesFilePath}) async {
-    stdoutHandler.reset();
+    _stdoutHandler.reset();
 
     // First time recompile is called we actually have to compile the app from
     // scratch ignoring list of invalidated files.
@@ -237,7 +237,7 @@ class ResidentCompiler {
     }
     _server.stdin.writeln(inputKey);
 
-    return stdoutHandler.compilerOutput.future;
+    return _stdoutHandler.compilerOutput.future;
   }
 
   Future<CompilerOutput> _compile(String scriptFilename, String outputPath,
@@ -280,12 +280,12 @@ class ResidentCompiler {
       .transform(utf8.decoder)
       .transform(const LineSplitter())
       .listen(
-        stdoutHandler.handler,
+        _stdoutHandler.handler,
         onDone: () {
           // when outputFilename future is not completed, but stdout is closed
           // process has died unexpectedly.
-          if (!stdoutHandler.compilerOutput.isCompleted) {
-            stdoutHandler.compilerOutput.complete(null);
+          if (!_stdoutHandler.compilerOutput.isCompleted) {
+            _stdoutHandler.compilerOutput.complete(null);
           }
         });
 
@@ -296,12 +296,12 @@ class ResidentCompiler {
 
     _server.stdin.writeln('compile $scriptFilename');
 
-    return stdoutHandler.compilerOutput.future;
+    return _stdoutHandler.compilerOutput.future;
   }
 
   Future<CompilerOutput> compileExpression(String expression, List<String> definitions,
       List<String> typeDefinitions, String libraryUri, String klass, bool isStatic) {
-    stdoutHandler.reset();
+    _stdoutHandler.reset();
 
     // 'compile-expression' should be invoked after compiler has been started,
     // program was compiled.
@@ -319,7 +319,7 @@ class ResidentCompiler {
     _server.stdin.writeln(klass ?? '');
     _server.stdin.writeln(isStatic ?? false);
 
-    return stdoutHandler.compilerOutput.future;
+    return _stdoutHandler.compilerOutput.future;
   }
 
   /// Should be invoked when results of compilation are accepted by the client.
