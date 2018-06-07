@@ -246,10 +246,7 @@ class _FixedViewportOffset extends ViewportOffset {
   Future<Null> animateTo(double to, {
     @required Duration duration,
     @required Curve curve,
-  }) {
-    // Do nothing, viewport is fixed.
-    return new Future<Null>.value();
-  }
+  }) async => null;
 
   @override
   ScrollDirection get userScrollDirection => ScrollDirection.idle;
