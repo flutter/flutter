@@ -484,7 +484,9 @@ void Paragraph::Layout(double width, bool force) {
     double justify_x_offset = 0;
     std::vector<PaintRecord> paint_records;
 
-    for (const BidiRun& run : line_runs) {
+    for (auto line_run_it = line_runs.begin(); line_run_it != line_runs.end();
+         ++line_run_it) {
+      const BidiRun& run = *line_run_it;
       minikin::FontStyle font;
       minikin::MinikinPaint minikin_paint;
       GetFontAndMinikinPaint(run.style(), &font, &minikin_paint);
@@ -503,6 +505,7 @@ void Paragraph::Layout(double width, bool force) {
       const std::u16string& ellipsis = paragraph_style_.ellipsis;
       std::vector<uint16_t> ellipsized_text;
       if (ellipsis.length() && !isinf(width_) && !line_range.hard_break &&
+          line_run_it == line_runs.end() - 1 &&
           (line_number == line_limit - 1 ||
            paragraph_style_.unlimited_lines())) {
         float ellipsis_width = layout.measureText(
@@ -518,7 +521,7 @@ void Paragraph::Layout(double width, bool force) {
         // Truncate characters from the text until the ellipsis fits.
         size_t truncate_count = 0;
         while (truncate_count < text_count &&
-               text_width + ellipsis_width > width_) {
+               run_x_offset + text_width + ellipsis_width > width_) {
           text_width -= text_advances[text_count - truncate_count - 1];
           truncate_count++;
         }
