@@ -533,7 +533,10 @@ class _CupertinoLargeTitleNavigationBarSliverDelegate
                       child: new SafeArea(
                         top: false,
                         bottom: false,
-                        child: new Semantics(child: title, header: true),
+                        child: new Semantics(
+                          header: true,
+                          child: title,
+                        ),
                       ),
                     ),
                   ),
