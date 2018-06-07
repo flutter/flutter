@@ -18,14 +18,11 @@ import 'slider_theme.dart';
 import 'theme.dart';
 
 // Examples can assume:
+// int _dollars = 0.0;
 // int _duelCommandment = 1;
 
 /// A callback that formats a numeric value from a [Slider] widget.
 typedef String SemanticFormatterCallback(double value);
-
-String _kDefaultSemanticFormatterCallback(double value) {
-  return '${(value * 100).round()}%';
-}
 
 /// A Material Design slider.
 ///
@@ -117,11 +114,10 @@ class Slider extends StatefulWidget {
     this.label,
     this.activeColor,
     this.inactiveColor,
-    this.semanticFormatterCallback = _kDefaultSemanticFormatterCallback,
+    this.semanticFormatterCallback,
   }) : assert(value != null),
        assert(min != null),
        assert(max != null),
-       assert(semanticFormatterCallback != null),
        assert(min <= max),
        assert(value >= min && value <= max),
        assert(divisions == null || divisions > 0),
@@ -1086,9 +1082,15 @@ class _RenderSlider extends RenderBox {
       config.textDirection = textDirection;
       config.onIncrease = _increaseAction;
       config.onDecrease = _decreaseAction;
-      config.value = semanticFormatterCallback(_state._lerp(value));
-      config.increasedValue = semanticFormatterCallback(_state._lerp((value + _semanticActionUnit).clamp(0.0, 1.0)));
-      config.decreasedValue = semanticFormatterCallback(_state._lerp((value - _semanticActionUnit).clamp(0.0, 1.0)));
+      if (semanticFormatterCallback != null) {
+        config.value = semanticFormatterCallback(_state._lerp(value));
+        config.increasedValue = semanticFormatterCallback(_state._lerp((value + _semanticActionUnit).clamp(0.0, 1.0)));
+        config.decreasedValue = semanticFormatterCallback(_state._lerp((value - _semanticActionUnit).clamp(0.0, 1.0)));
+      } else {
+        config.value = '${(value * 100).round()}%';
+        config.increasedValue = '${((value + _semanticActionUnit).clamp(0.0, 1.0) * 100).round()}%';
+        config.decreasedValue = '${((value - _semanticActionUnit).clamp(0.0, 1.0) * 100).round()}%';
+      }
     }
   }
 

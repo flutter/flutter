@@ -1174,7 +1174,9 @@ void main() {
             data: new MediaQueryData.fromWindow(window),
             child: new Material(
               child: new Slider(
-                value: 0.5,
+                value: 100.0,
+                min: 0.0,
+                max: 200.0,
                 onChanged: (double v) {},
               ),
             ),
