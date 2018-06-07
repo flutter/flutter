@@ -1,4 +1,4 @@
-Signature: 5f2e864ad9716ee13ebb5957a3a82b47
+Signature: 82bfc318bdc7594176866082788271f1
 
 UNUSED LICENSES:
 
@@ -17427,6 +17427,8 @@ FILE: ../../../third_party/skia/animations/text#1.xml
 FILE: ../../../third_party/skia/bench/microbench.json
 FILE: ../../../third_party/skia/bench/skpbench.json
 FILE: ../../../third_party/skia/docker/skia-release/Dockerfile
+FILE: ../../../third_party/skia/docker/skia-with-swift-shader-base/Dockerfile
+FILE: ../../../third_party/skia/docker/skia-with-swift-shader-base/build-with-swift-shader-and-run
 FILE: ../../../third_party/skia/docs/SkAutoCanvasRestore_Reference.bmh
 FILE: ../../../third_party/skia/docs/SkBitmap_Reference.bmh
 FILE: ../../../third_party/skia/docs/SkCanvas_Reference.bmh
@@ -20743,6 +20745,8 @@ LIBRARY: skia
 ORIGIN: ../../../third_party/skia/src/core/SkFlattenablePriv.h + ../../../third_party/skia/LICENSE
 TYPE: LicenseType.bsd
 FILE: ../../../third_party/skia/src/core/SkFlattenablePriv.h
+FILE: ../../../third_party/skia/src/core/SkGlyphRun.cpp
+FILE: ../../../third_party/skia/src/core/SkGlyphRun.h
 ----------------------------------------------------------------------------------------------------
 Copyright 2018 The Android Open Source Project
 
