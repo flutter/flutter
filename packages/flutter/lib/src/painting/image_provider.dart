@@ -301,6 +301,9 @@ abstract class ImageProvider<T> {
   ///
   /// ## Sample code
   ///
+  /// The following sample code shows how an image loaded using the [Image]
+  /// widget can be evicted using a [NetworkImage] with a matching url.
+  ///
   /// ```dart
   /// Widget build(BuildContext context) {
   ///   return new Image.network(url);
