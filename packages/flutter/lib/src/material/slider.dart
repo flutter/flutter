@@ -18,10 +18,14 @@ import 'slider_theme.dart';
 import 'theme.dart';
 
 // Examples can assume:
-// int _dollars = 0.0;
+// int _dollars = 0;
 // int _duelCommandment = 1;
 
 /// A callback that formats a numeric value from a [Slider] widget.
+///
+/// See also:
+///
+///   * [Slider.semanticFormatterCallback], which shows an example use case.
 typedef String SemanticFormatterCallback(double value);
 
 /// A Material Design slider.
@@ -641,6 +645,7 @@ class _RenderSlider extends RenderBox {
     if (_semanticFormatterCallback == value)
       return;
     _semanticFormatterCallback = value;
+    markNeedsSemanticsUpdate();
   }
 
   int get divisions => _divisions;
