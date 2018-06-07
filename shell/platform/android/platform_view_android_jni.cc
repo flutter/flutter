@@ -215,8 +215,7 @@ static void RunBundleAndSnapshot(
           bundlepath));
     } else {
       asset_manager->PushBack(std::make_unique<blink::DirectoryAssetBundle>(
-          fml::OpenFile(bundlepath.c_str(), fml::OpenPermission::kRead, true),
-          bundlepath));
+          fml::OpenFile(bundlepath.c_str(), fml::OpenPermission::kRead, true)));
     }
 
     // Use the last path component of the bundle path to determine the
