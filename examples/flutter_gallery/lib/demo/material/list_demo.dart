@@ -405,26 +405,21 @@ class DraggableListState extends State<DraggableList> with TickerProviderStateMi
   }
 
   void _requestAnimationTo(int index) {
-    print('considering a move from $currentIndex to $index');
     if (index == currentIndex) {
       return;
     }
     if (entranceController.isCompleted) {
-      print('moving from $currentIndex to $index');
       currentIndex = index;
       ghostController.reverse(from: 1.0).whenCompleteOrCancel(() {
         // The swap is completed when the ghost controller finishes.
         ghostIndex = index;
       });
       entranceController.forward(from: 0.0);
-    } else {
-      print('animation in progress, waiting until later to move to $nextIndex');
     }
   }
 
   void _onEntranceStatusChanged(AnimationStatus status) {
     if (status == AnimationStatus.completed) {
-      print('status now set to ${entranceController.status}');
       // If the next index has changed, then we should animate to it.
       setState(() {
         _requestAnimationTo(nextIndex);
