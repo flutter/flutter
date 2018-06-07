@@ -425,17 +425,6 @@ void main() {
     expect(renderObjects[1].image, isNotNull);
     expect(renderObjects[1].width, 10.0);
   });
-
-  testWidgets('Images can be evicted from the cache using a provider', (WidgetTester tester) async {
-    imageCache.clear();
-    final Uint8List bytes = new Uint8List.fromList(kTransparentImage);
-    final MemoryImage imageProvider = new MemoryImage(bytes);
-
-    await tester.pumpWidget(new TickerMode(enabled: true, child: new Image(image: imageProvider)));
-
-    expect(imageCache.currentSize, 1);
-    expect(imageCache.evict(new MemoryImage(bytes)), true);
-  });
 }
 
 class TestImageProvider extends ImageProvider<TestImageProvider> {
