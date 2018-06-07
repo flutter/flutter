@@ -68,7 +68,7 @@ class TestImage implements ui.Image {
   void dispose() {}
 
   @override
-  Future<ByteData> toByteData({ImageByteFormat format: ImageByteFormat.rawRgba}) {
+  Future<ByteData> toByteData({ImageByteFormat format = ImageByteFormat.rawRgba}) {
     throw new UnimplementedError();
   }
 }
