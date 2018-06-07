@@ -22,8 +22,6 @@ class DirectoryAssetBundle : public AssetResolver {
   const fml::UniqueFD descriptor_;
   bool is_valid_ = false;
 
-  std::string GetPathForAsset(const std::string& asset_name) const;
-
   // |blink::AssetResolver|
   bool IsValid() const override;
 

@@ -9,6 +9,7 @@
 #include <utility>
 
 #include "flutter/assets/directory_asset_bundle.h"
+#include "flutter/assets/zip_asset_store.h"
 #include "flutter/common/settings.h"
 #include "flutter/fml/file.h"
 #include "flutter/fml/platform/android/jni_util.h"
@@ -207,9 +208,16 @@ static void RunBundleAndSnapshot(
 
   if (bundlepath.size() > 0) {
     // If we got a bundle path, attempt to use that as a directory asset
-    // bundle.
-    asset_manager->PushBack(std::make_unique<blink::DirectoryAssetBundle>(
-        fml::OpenFile(bundlepath.c_str(), fml::OpenPermission::kRead, true)));
+    // bundle or a zip asset bundle.
+    const auto file_ext_index = bundlepath.rfind(".");
+    if (bundlepath.substr(file_ext_index) == ".zip") {
+      asset_manager->PushBack(std::make_unique<blink::ZipAssetStore>(
+          bundlepath));
+    } else {
+      asset_manager->PushBack(std::make_unique<blink::DirectoryAssetBundle>(
+          fml::OpenFile(bundlepath.c_str(), fml::OpenPermission::kRead, true),
+          bundlepath));
+    }
 
     // Use the last path component of the bundle path to determine the
     // directory in the APK assets.
