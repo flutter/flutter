@@ -2,7 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 
-/// A reorderable list
+
 class DraggableList extends StatefulWidget {
 
   const DraggableList({this.children, this.onSwap, this.axis : Axis.vertical, this.padding});
@@ -14,11 +14,11 @@ class DraggableList extends StatefulWidget {
 
   @override
   State<StatefulWidget> createState() {
-    return new DraggableListState();
+    return new _DraggableListState();
   }
 }
 
-class DraggableListState extends State<DraggableList> with TickerProviderStateMixin {
+class _DraggableListState extends State<DraggableList> with TickerProviderStateMixin {
   ScrollController scrollController = new ScrollController();
   // This controls the entrance of the dragging widget into a new place.
   AnimationController entranceController;
@@ -167,7 +167,7 @@ class DraggableListState extends State<DraggableList> with TickerProviderStateMi
     }
   }
 
-  // Scrolls to a target context if it's not on the screen.
+  // Scrolls to a target context if that context is not on the screen.
   void _scrollTo(BuildContext context) {
     if (_scrolling) 
       return;
@@ -197,7 +197,9 @@ class DraggableListState extends State<DraggableList> with TickerProviderStateMi
   @override
   Widget build(BuildContext context) {
     final List<Widget> wrappedChildren = <Widget>[];
-    assert(widget.children.every((w) => w.key != null), 'All children of this widget must have a key.');
+    assert(
+      widget.children.every((Widget w) => w.key != null), 
+      'All children of this widget must have a key.');
     for (int i=0; i<widget.children.length; i++) {
       wrappedChildren.add(_wrap(widget.children[i], i));
     }
