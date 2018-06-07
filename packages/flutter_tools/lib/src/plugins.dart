@@ -76,14 +76,12 @@ List<Plugin> _findPlugins(String directory) {
     if (plugin != null)
       plugins.add(plugin);
   });
-  print("Plugins: $plugins");
   return plugins;
 }
 
 /// Returns true if .flutter-plugins has changed, otherwise returns false.
 bool _writeFlutterPluginsList(String directory, List<Plugin> plugins) {
   final File pluginsFile = fs.file(fs.path.join(directory, '.flutter-plugins'));
-  print("Pluginsfile ${pluginsFile.path}");
   final String oldContents = _readFlutterPluginsList(directory);
   final String pluginManifest =
       plugins.map((Plugin p) => '${p.name}=${escapePath(p.path)}').join('\n');
@@ -280,14 +278,12 @@ void _writeIOSPluginRegistrant(String directory, List<Plugin> plugins) {
   final String pluginRegistryPodspec =
     new mustache.Template(_iosPluginRegistryPodSpecTemplate).renderString(context);
   final Directory registryDirectory = fs.directory(fs.path.join(directory, 'ios', 'Flutter', 'PluginRegistrant'));
-  final Directory registryClassesDirectory = fs.directory(fs.path.join(directory, 'ios', 'Flutter', 'PluginRegistrant', "Classes"));
+  final Directory registryClassesDirectory = fs.directory(fs.path.join(directory, 'ios', 'Flutter', 'PluginRegistrant', 'Classes'));
   registryClassesDirectory.createSync(recursive: true);
   final File registryHeaderFile = registryClassesDirectory.childFile('GeneratedPluginRegistrant.h');
   final Directory backwardsCompatibleRegistryDirectory = fs.directory(fs.path.join(directory, 'ios', 'Runner'));
   final File backwardsCompatibleRegistryHeaderFile = backwardsCompatibleRegistryDirectory.childFile('GeneratedPluginRegistrant.h');
   final File backwardsCompatibleRegistryFile = backwardsCompatibleRegistryDirectory.childFile('GeneratedPluginRegistrant.m');
-  print("f ${registryHeaderFile.path}");
-  print("f ${backwardsCompatibleRegistryFile.path}");
   backwardsCompatibleRegistryHeaderFile.writeAsStringSync(backwardsCompatibleIosPluginRegistryHeader);
   backwardsCompatibleRegistryFile.writeAsStringSync(backwardsCompatibleIosPluginRegistry);
   registryHeaderFile.writeAsStringSync(pluginRegistryHeader);
