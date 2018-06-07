@@ -69,7 +69,7 @@ void main() {
                 width: borderWidth,
                 color: borderColor,
               ),
-              onPressed: () {},
+              onPressed: onPressed,
               child: const Text('button'),
             ),
           ),
@@ -77,7 +77,8 @@ void main() {
       );
     }
 
-    await tester.pumpWidget(buildFrame(() { }));
+//    await tester.pumpWidget(buildFrame(() {}));
+    await tester.pumpWidget(buildFrame(null));
 
     final Finder outlineButton = find.byType(OutlineButton);
     expect(tester.widget<OutlineButton>(outlineButton).enabled, true);
@@ -107,6 +108,11 @@ void main() {
         ..path(color: highlightedBorderColor, strokeWidth: borderWidth)
     );
 
+//    expect(tester.widget<OutlineButton>(outlineButton).enabled, true);
+//    await tester.pumpWidget(buildFrame(null));
+    // TODO(clocksmith): Why isn't this false?!
+//    expect(tester.widget<OutlineButton>(outlineButton).enabled, true);
+
     // Tap gesture completes, button returns to its initial configuration.
     await gesture.up();
     await tester.pumpAndSettle();
@@ -118,10 +124,6 @@ void main() {
         ..path(color: borderColor, strokeWidth: borderWidth)
     );
 
-    expect(tester.widget<OutlineButton>(outlineButton).enabled, true);
-    await tester.pumpWidget(buildFrame(null));
-    // TODO(clocksmith): Why isn't this false?!
-    expect(tester.widget<OutlineButton>(outlineButton).enabled, true);
 
     debugDisableShadows = true;
   });
