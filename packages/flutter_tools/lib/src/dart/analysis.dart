@@ -13,7 +13,7 @@ import '../base/process_manager.dart';
 import '../globals.dart';
 
 class AnalysisServer {
-  AnalysisServer(this.sdkPath, this.directories, {this.previewDart2: false});
+  AnalysisServer(this.sdkPath, this.directories, {this.previewDart2 = false});
 
   final String sdkPath;
   final List<String> directories;

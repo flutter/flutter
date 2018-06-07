@@ -39,7 +39,7 @@ class InkHighlight extends InteractiveInkFeature {
     @required MaterialInkController controller,
     @required RenderBox referenceBox,
     @required Color color,
-    BoxShape shape: BoxShape.rectangle,
+    BoxShape shape = BoxShape.rectangle,
     BorderRadius borderRadius,
     RectCallback rectCallback,
     VoidCallback onRemoved,

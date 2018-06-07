@@ -31,10 +31,10 @@ class DrawerHeader extends StatelessWidget {
   const DrawerHeader({
     Key key,
     this.decoration,
-    this.margin: const EdgeInsets.only(bottom: 8.0),
-    this.padding: const EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 8.0),
-    this.duration: const Duration(milliseconds: 250),
-    this.curve: Curves.fastOutSlowIn,
+    this.margin = const EdgeInsets.only(bottom: 8.0),
+    this.padding = const EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 8.0),
+    this.duration = const Duration(milliseconds: 250),
+    this.curve = Curves.fastOutSlowIn,
     @required this.child,
   }) : super(key: key);
 

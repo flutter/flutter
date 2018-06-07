@@ -13,7 +13,7 @@ class SliderDemo extends StatefulWidget {
   _SliderDemoState createState() => new _SliderDemoState();
 }
 
-Path _triangle(double size, Offset thumbCenter, {bool invert: false}) {
+Path _triangle(double size, Offset thumbCenter, {bool invert = false}) {
   final Path thumbPath = new Path();
   final double height = math.sqrt(3.0) / 2.0;
   final double halfSide = size / 2.0;

@@ -64,16 +64,16 @@ final Map<InternetAddressType, InternetAddress> _kHosts = <InternetAddressType, 
 void installHook({
   @required String shellPath,
   TestWatcher watcher,
-  bool enableObservatory: false,
-  bool machine: false,
-  bool startPaused: false,
-  bool previewDart2: false,
-  int port: 0,
+  bool enableObservatory = false,
+  bool machine = false,
+  bool startPaused = false,
+  bool previewDart2 = false,
+  int port = 0,
   String precompiledDillPath,
-  bool trackWidgetCreation: false,
-  bool updateGoldens: false,
+  bool trackWidgetCreation = false,
+  bool updateGoldens = false,
   int observatoryPort,
-  InternetAddressType serverType: InternetAddressType.IP_V4, // ignore: deprecated_member_use
+  InternetAddressType serverType = InternetAddressType.IP_V4, // ignore: deprecated_member_use
 }) {
   assert(!enableObservatory || (!startPaused && observatoryPort == null));
   hack.registerPlatformPlugin(
@@ -114,7 +114,7 @@ String generateTestBootstrap({
   @required Uri testUrl,
   @required InternetAddress host,
   File testConfigFile,
-  bool updateGoldens: false,
+  bool updateGoldens = false,
 }) {
   assert(testUrl != null);
   assert(host != null);
@@ -771,8 +771,8 @@ class _FlutterPlatform extends PlatformPlugin {
     String testPath, {
     String packages,
     String bundlePath,
-    bool enableObservatory: false,
-    bool startPaused: false,
+    bool enableObservatory = false,
+    bool startPaused = false,
     int observatoryPort,
     int serverPort,
   }) {

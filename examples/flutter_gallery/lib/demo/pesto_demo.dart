@@ -45,9 +45,9 @@ class PestoFavorites extends StatelessWidget {
 
 class PestoStyle extends TextStyle {
   const PestoStyle({
-    double fontSize: 12.0,
+    double fontSize = 12.0,
     FontWeight fontWeight,
-    Color color: Colors.black87,
+    Color color = Colors.black87,
     double letterSpacing,
     double height,
   }) : super(

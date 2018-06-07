@@ -17,7 +17,7 @@ class Title extends StatelessWidget {
   /// [color] and [child] are required arguments.
   Title({
     Key key,
-    this.title: '',
+    this.title = '',
     @required this.color,
     @required this.child,
   }) : assert(title != null),

@@ -312,9 +312,9 @@ class WidgetController {
   /// drag started).
   Future<Null> fling(Finder finder, Offset offset, double speed, {
     int pointer,
-    Duration frameInterval: const Duration(milliseconds: 16),
-    Offset initialOffset: Offset.zero,
-    Duration initialOffsetDelay: const Duration(seconds: 1),
+    Duration frameInterval = const Duration(milliseconds: 16),
+    Offset initialOffset = Offset.zero,
+    Duration initialOffsetDelay = const Duration(seconds: 1),
   }) {
     return flingFrom(
       getCenter(finder),
@@ -354,9 +354,9 @@ class WidgetController {
   /// drag started).
   Future<Null> flingFrom(Offset startLocation, Offset offset, double speed, {
     int pointer,
-    Duration frameInterval: const Duration(milliseconds: 16),
-    Offset initialOffset: Offset.zero,
-    Duration initialOffsetDelay: const Duration(seconds: 1),
+    Duration frameInterval = const Duration(milliseconds: 16),
+    Offset initialOffset = Offset.zero,
+    Duration initialOffsetDelay = const Duration(seconds: 1),
   }) {
     assert(offset.distance > 0.0);
     assert(speed > 0.0); // speed is pixels/second

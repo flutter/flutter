@@ -24,7 +24,7 @@ class AnalyzeOnce extends AnalyzeBase {
     this.repoRoots,
     this.repoPackages, {
     this.workingDirectory,
-    this.previewDart2: false,
+    this.previewDart2 = false,
   }) : super(argResults);
 
   final List<String> repoRoots;

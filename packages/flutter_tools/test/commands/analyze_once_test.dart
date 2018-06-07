@@ -224,7 +224,7 @@ Future<Null> runCommand({
   List<String> arguments,
   List<String> statusTextContains,
   List<String> errorTextContains,
-  bool toolExit: false,
+  bool toolExit = false,
   String exitMessageContains,
 }) async {
   try {

@@ -100,16 +100,16 @@ class TextField extends StatefulWidget {
     Key key,
     this.controller,
     this.focusNode,
-    this.decoration: const InputDecoration(),
-    TextInputType keyboardType: TextInputType.text,
+    this.decoration = const InputDecoration(),
+    TextInputType keyboardType = TextInputType.text,
     this.style,
-    this.textAlign: TextAlign.start,
-    this.autofocus: false,
-    this.obscureText: false,
-    this.autocorrect: true,
-    this.maxLines: 1,
+    this.textAlign = TextAlign.start,
+    this.autofocus = false,
+    this.obscureText = false,
+    this.autocorrect = true,
+    this.maxLines = 1,
     this.maxLength,
-    this.maxLengthEnforced: true,
+    this.maxLengthEnforced = true,
     this.onChanged,
     this.onSubmitted,
     this.inputFormatters,
@@ -317,7 +317,7 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
     if (!needsCounter)
       return effectiveDecoration;
 
-    final String counterText = '${_effectiveController.value.text.runes.length} / ${widget.maxLength}';
+    final String counterText = '${_effectiveController.value.text.runes.length}/${widget.maxLength}';
     if (_effectiveController.value.text.runes.length > widget.maxLength) {
       final ThemeData themeData = Theme.of(context);
       return effectiveDecoration.copyWith(

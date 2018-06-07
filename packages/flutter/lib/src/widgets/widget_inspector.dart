@@ -109,11 +109,11 @@ class _InspectorReferenceData {
 class _SerializeConfig {
   _SerializeConfig({
     @required this.groupName,
-    this.summaryTree: false,
-    this.subtreeDepth : 1,
+    this.summaryTree = false,
+    this.subtreeDepth  = 1,
     this.pathToInclude,
-    this.includeProperties: false,
-    this.expandPropertyValues: true,
+    this.includeProperties = false,
+    this.expandPropertyValues = true,
   });
 
   _SerializeConfig.merge(

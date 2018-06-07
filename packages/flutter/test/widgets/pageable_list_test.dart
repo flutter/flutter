@@ -22,8 +22,8 @@ Widget buildPage(int page) {
 }
 
 Widget buildFrame({
-  bool reverse: false,
-  List<int> pages: defaultPages,
+  bool reverse = false,
+  List<int> pages = defaultPages,
   @required TextDirection textDirection,
 }) {
   final PageView child = new PageView(
