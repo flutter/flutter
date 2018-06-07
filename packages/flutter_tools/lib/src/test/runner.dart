@@ -87,7 +87,6 @@ Future<int> runTests(
     machine: machine,
     startPaused: startPaused,
     serverType: serverType,
-    previewDart2: previewDart2,
     trackWidgetCreation: trackWidgetCreation,
     updateGoldens: updateGoldens,
   );
