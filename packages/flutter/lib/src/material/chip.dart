@@ -47,7 +47,7 @@ const BoxConstraints _kDefaultOuterConstraints = const BoxConstraints(minWidth: 
 ///
 /// The defaults mentioned in the documentation for each attribute are what
 /// the implementing classes typically use for defaults (but this class doesn't
-/// provide or enforce them).f
+/// provide or enforce them).
 ///
 /// See also:
 ///
@@ -102,8 +102,8 @@ abstract class ChipAttributes {
   /// label, and zero on top and bottom.
   EdgeInsetsGeometry get labelPadding;
 
-  /// Constraints used to increase the gesture detector size without increasing
-  /// the visible material of the chip.
+  /// Constraints used to increase the layout and gesture detector size without
+  /// increasing the visible material of the chip.
   ///
   /// Defaults to 48 dp minimum width and 48 dp minimum height. Passing null
   /// removes the outer gesture detector.
