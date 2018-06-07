@@ -908,6 +908,9 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
   /// The parameters `viewport` and `offset` are required and cannot be null.
   /// If `descendant` is null, this is a no-op and `rect` is returned.
   ///
+  /// If both `decedent` and `rect` are null, null is returned because there is
+  /// nothing to be shown in the viewport.
+  ///
   /// The `duration` parameter can be set to a non-zero value to animate the
   /// target object into the viewport with an animation defined by `curve`.
   static Rect showInViewport({
