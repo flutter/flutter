@@ -632,7 +632,7 @@ class RenderListWheelViewport
 
     final Matrix4 transform = target.getTransformTo(this);
     final Rect bounds = MatrixUtils.transformRect(transform, rect);
-    final Rect targetRect = bounds.translate(0.0,  (size.height - itemExtent) / 2);
+    final Rect targetRect = bounds.translate(0.0, (size.height - itemExtent) / 2);
 
     return new RevealedOffset(offset: targetOffset, rect: targetRect);
   }
