@@ -333,13 +333,13 @@ class ContainerLayer extends Layer {
 
   @override
   Object findRegion(Offset regionOffset, Type type) {
-    Layer current = lastChild;
+    Layer current = firstChild;
     while (current != null) {
       final Object value = current.findRegion(regionOffset, type);
       if (value != null) {
         return value;
       }
-      current = current.previousSibling;
+      current = current.nextSibling;
     }
     return null;
   }
@@ -536,10 +536,7 @@ class OffsetLayer extends ContainerLayer {
 
   @override
   Object findRegion(Offset regionOffset, Type type) {
-    if (regionOffset <= offset) {
-      return null;
-    }
-    return super.findRegion(regionOffset, type);
+    return super.findRegion(regionOffset - offset , type);
   }
 
   @override
@@ -759,6 +756,13 @@ class TransformLayer extends OffsetLayer {
     builder.pushTransform(_lastEffectiveTransform.storage);
     addChildrenToScene(builder, Offset.zero);
     builder.pop();
+  }
+
+  @override
+  Object findRegion(Offset regionOffset, Type type) {
+    final Vector4 vector = new Vector4(regionOffset.dx, regionOffset.dy, 0.0, 1.0);
+    final Vector4 result = transform.transform(vector);
+    return super.findRegion(new Offset(result[0], result[1]), type);
   }
 
   @override
