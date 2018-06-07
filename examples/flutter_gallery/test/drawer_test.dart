@@ -17,6 +17,7 @@ void main() {
 
     await tester.pumpWidget(
       new GalleryApp(
+        testMode: true,
         onSendFeedback: () {
           hasFeedback = true;
         },

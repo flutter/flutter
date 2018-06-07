@@ -17,7 +17,7 @@ const double kTextTabBarHeight = 48.0;
 const Duration kThemeChangeDuration = const Duration(milliseconds: 200);
 
 /// The radius of a circular material ink response in logical pixels.
-const double kRadialReactionRadius = 24.0;
+const double kRadialReactionRadius = 20.0;
 
 /// The amount of time a circular material ink response should take to expand to its full size.
 const Duration kRadialReactionDuration = const Duration(milliseconds: 100);

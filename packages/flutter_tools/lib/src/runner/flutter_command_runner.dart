@@ -38,7 +38,7 @@ const String kFlutterToolsScriptFileName = 'flutter_tools.dart'; // in //flutter
 const String kFlutterEnginePackageName = 'sky_engine';
 
 class FlutterCommandRunner extends CommandRunner<Null> {
-  FlutterCommandRunner({ bool verboseHelp: false }) : super(
+  FlutterCommandRunner({ bool verboseHelp = false }) : super(
     'flutter',
     'Manage your Flutter app development.\n'
       '\n'
@@ -71,6 +71,11 @@ class FlutterCommandRunner extends CommandRunner<Null> {
         negatable: true,
         hide: !verboseHelp,
         help: 'Whether to use terminal colors.');
+    argParser.addFlag('version-check',
+        negatable: true,
+        defaultsTo: true,
+        hide: !verboseHelp,
+        help: 'Allow Flutter to check for updates when this command runs.');
     argParser.addFlag('suppress-analytics',
         negatable: false,
         hide: !verboseHelp,
@@ -280,7 +285,7 @@ class FlutterCommandRunner extends CommandRunner<Null> {
 
         _checkFlutterCopy();
         await FlutterVersion.instance.ensureVersionFile();
-        if (topLevelResults.command?.name != 'upgrade') {
+        if (topLevelResults.command?.name != 'upgrade' && topLevelResults['version-check']) {
           await FlutterVersion.instance.checkFlutterVersionFreshness();
         }
 

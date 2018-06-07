@@ -4,6 +4,7 @@
 
 import 'dart:math' as math;
 
+import 'package:flutter/animation.dart';
 import 'package:flutter/foundation.dart';
 import 'package:vector_math/vector_math_64.dart' show Matrix4;
 
@@ -97,11 +98,11 @@ class RenderListWheelViewport
   /// All arguments must not be null. Optional arguments have reasonable defaults.
   RenderListWheelViewport({
     @required ViewportOffset offset,
-    double diameterRatio: defaultDiameterRatio,
-    double perspective: defaultPerspective,
+    double diameterRatio = defaultDiameterRatio,
+    double perspective = defaultPerspective,
     @required double itemExtent,
-    bool clipToSize: true,
-    bool renderChildrenOutsideViewport: false,
+    bool clipToSize = true,
+    bool renderChildrenOutsideViewport = false,
     List<RenderBox> children,
   }) : assert(offset != null),
        assert(diameterRatio != null),
@@ -614,27 +615,50 @@ class RenderListWheelViewport
   }
 
   @override
-  double getOffsetToReveal(RenderObject target, double alignment) {
-    final ListWheelParentData parentData = target.parentData;
-    final double centerPosition = parentData.offset.dy;
+  RevealedOffset getOffsetToReveal(RenderObject target, double alignment, {Rect rect}) {
+    // `target` is only fully revealed when in the selected/center position. Therefore,
+    // this method always returns the offset that shows `target` in the center position,
+    // which is the same offset for all `alignment` values.
 
-    if (alignment < 0.5) {
-      return centerPosition + _topScrollMarginExtent * alignment * 2.0;
-    } else if (alignment > 0.5) {
-      return centerPosition - _topScrollMarginExtent * (alignment - 0.5) * 2.0;
-    } else {
-      return centerPosition;
-    }
+    rect ??= target.paintBounds;
+
+    // `child` will be the last RenderObject before the viewport when walking up from `target`.
+    RenderObject child = target;
+    while (child.parent != this)
+      child = child.parent;
+
+    final ListWheelParentData parentData = child.parentData;
+    final double targetOffset = parentData.offset.dy; // the so-called "centerPosition"
+
+    final Matrix4 transform = target.getTransformTo(this);
+    final Rect bounds = MatrixUtils.transformRect(transform, rect);
+    final Rect targetRect = bounds.translate(0.0, (size.height - itemExtent) / 2);
+
+    return new RevealedOffset(offset: targetOffset, rect: targetRect);
   }
 
   @override
-  void showOnScreen([RenderObject child]) {
-    if (child != null) {
-      // Shows the child in the selected/center position.
-      offset.jumpTo(getOffsetToReveal(child, 0.5));
+  void showOnScreen({
+    RenderObject descendant,
+    Rect rect,
+    Duration duration = Duration.zero,
+    Curve curve = Curves.ease,
+  }) {
+    if (descendant != null) {
+      // Shows the descendant in the selected/center position.
+      final RevealedOffset revealedOffset = getOffsetToReveal(descendant, 0.5, rect: rect);
+      if (duration == Duration.zero) {
+        offset.jumpTo(revealedOffset.offset);
+      } else {
+        offset.animateTo(revealedOffset.offset, duration: duration, curve: curve);
+      }
+      rect = revealedOffset.rect;
     }
 
-    // Make sure the viewport itself is on screen.
-    super.showOnScreen();
+    super.showOnScreen(
+      rect: rect,
+      duration: duration,
+      curve: curve,
+    );
   }
 }

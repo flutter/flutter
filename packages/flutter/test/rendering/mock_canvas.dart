@@ -48,7 +48,8 @@ Matcher get paintsNothing => new _TestRecordingCanvasPaintsNothingMatcher();
 /// Matches objects or functions that assert when they try to paint.
 Matcher get paintsAssertion => new _TestRecordingCanvasPaintsAssertionMatcher();
 
-/// Signature for [PaintPattern.something] predicate argument.
+/// Signature for the [PaintPattern.something] and [PaintPattern.everything]
+/// predicate argument.
 ///
 /// Used by the [paints] matcher.
 ///
@@ -398,13 +399,29 @@ abstract class PaintPattern {
   /// displayed from the test framework and should be complete sentence
   /// describing the problem.
   void something(PaintPatternPredicate predicate);
+
+  /// Provides a custom matcher.
+  ///
+  /// Each method call after the last matched call (if any) will be passed to
+  /// the given predicate, along with the values of its (positional) arguments.
+  ///
+  /// For each one, the predicate must either return a boolean or throw a [String].
+  ///
+  /// The predicate will be applied to each [Canvas] call until it returns false
+  /// or all of the method calls have been tested.
+  ///
+  /// If the predicate throws a [String], then the [paints] [Matcher] is
+  /// considered to have failed. The thrown string is used in the message
+  /// displayed from the test framework and should be complete sentence
+  /// describing the problem.
+  void everything(PaintPatternPredicate predicate);
 }
 
 /// Matches a [Path] that contains (as defined by [Path.contains]) the given
 /// `includes` points and does not contain the given `excludes` points.
 Matcher isPathThat({
-  Iterable<Offset> includes: const <Offset>[],
-  Iterable<Offset> excludes: const <Offset>[],
+  Iterable<Offset> includes = const <Offset>[],
+  Iterable<Offset> excludes = const <Offset>[],
 }) {
   return new _PathMatcher(includes.toList(), excludes.toList());
 }
@@ -726,6 +743,11 @@ class _TestRecordingCanvasPatternMatcher extends _TestRecordingCanvasMatcher imp
   @override
   void something(PaintPatternPredicate predicate) {
     _predicates.add(new _SomethingPaintPredicate(predicate));
+  }
+
+  @override
+  void everything(PaintPatternPredicate predicate) {
+    _predicates.add(new _EverythingPaintPredicate(predicate));
   }
 
   @override
@@ -1301,6 +1323,36 @@ class _SomethingPaintPredicate extends _PaintPredicate {
 
   @override
   String toString() => 'a "something" step';
+}
+
+class _EverythingPaintPredicate extends _PaintPredicate {
+  _EverythingPaintPredicate(this.predicate);
+
+  final PaintPatternPredicate predicate;
+
+  @override
+  void match(Iterator<RecordedInvocation> call) {
+    assert(predicate != null);
+    while (call.moveNext()) {
+      final RecordedInvocation currentCall = call.current;
+      if (!currentCall.invocation.isMethod)
+        throw 'It called $currentCall, which was not a method, when the paint pattern expected a method call';
+      if (!_runPredicate(currentCall.invocation.memberName, currentCall.invocation.positionalArguments))
+        return;
+    }
+  }
+
+  bool _runPredicate(Symbol methodName, List<dynamic> arguments) {
+    try {
+      return predicate(methodName, arguments);
+    } on String catch (s) {
+      throw 'It painted something that the predicate passed to an "everything" step '
+            'in the paint pattern considered incorrect:\n      $s\n  ';
+    }
+  }
+
+  @override
+  String toString() => 'an "everything" step';
 }
 
 class _FunctionPaintPredicate extends _PaintPredicate {

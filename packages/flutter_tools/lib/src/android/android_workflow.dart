@@ -45,7 +45,7 @@ class AndroidWorkflow extends DoctorValidator implements Workflow {
   @override
   bool get canListEmulators => getEmulatorPath(androidSdk) != null && getAvdPath() != null;
 
-  static const String _kJdkDownload = 'https://www.oracle.com/technetwork/java/javase/downloads/';
+  static const String _jdkDownload = 'https://www.oracle.com/technetwork/java/javase/downloads/';
 
   /// Returns false if we cannot determine the Java version or if the version
   /// is not compatible.
@@ -100,9 +100,9 @@ class AndroidWorkflow extends DoctorValidator implements Workflow {
 
     messages.add(new ValidationMessage('Android SDK at ${androidSdk.directory}'));
 
-    messages.add(new ValidationMessage(androidSdk.ndkDirectory == null
+    messages.add(new ValidationMessage(androidSdk.ndk == null
           ? 'Android NDK location not configured (optional; useful for native profiling support)'
-          : 'Android NDK at ${androidSdk.ndkDirectory}'));
+          : 'Android NDK at ${androidSdk.ndk.directory}'));
 
     String sdkVersionText;
     if (androidSdk.latestVersion != null) {
@@ -138,7 +138,7 @@ class AndroidWorkflow extends DoctorValidator implements Workflow {
       messages.add(new ValidationMessage.error(
           'No Java Development Kit (JDK) found; You must have the environment '
           'variable JAVA_HOME set and the java binary in your PATH. '
-          'You can download the JDK from $_kJdkDownload.'));
+          'You can download the JDK from $_jdkDownload.'));
       return new ValidationResult(ValidationType.partial, messages, statusInfo: sdkVersionText);
     }
     messages.add(new ValidationMessage('Java binary at: $javaBinary'));
@@ -237,7 +237,7 @@ class AndroidWorkflow extends DoctorValidator implements Workflow {
     );
 
     process.stdin.addStream(stdin);
-    await waitGroup<Null>(<Future<Null>>[
+    await waitGroup<void>(<Future<void>>[
       stdout.addStream(process.stdout),
       stderr.addStream(process.stderr),
     ]);

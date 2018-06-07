@@ -92,7 +92,7 @@ abstract class InteractiveInkFeatureFactory {
     @required RenderBox referenceBox,
     @required Offset position,
     @required Color color,
-    bool containedInkWell: false,
+    bool containedInkWell = false,
     RectCallback rectCallback,
     BorderRadius borderRadius,
     double radius,
@@ -129,11 +129,11 @@ abstract class InteractiveInkFeatureFactory {
 /// The first diagram shows how it looks if the [InkResponse] is relatively
 /// large:
 ///
-/// ![The highlight is a disc centered in the box, smaller than the child widget.](https://flutter.github.io/assets-for-api-docs/material/ink_response_large.png)
+/// ![The highlight is a disc centered in the box, smaller than the child widget.](https://flutter.github.io/assets-for-api-docs/assets/material/ink_response_large.png)
 ///
 /// The second diagram shows how it looks if the [InkResponse] is small:
 ///
-/// ![The highlight is a disc overflowing the box, centered on the child.](https://flutter.github.io/assets-for-api-docs/material/ink_response_small.png)
+/// ![The highlight is a disc overflowing the box, centered on the child.](https://flutter.github.io/assets-for-api-docs/assets/material/ink_response_small.png)
 ///
 /// The main thing to notice from these diagrams is that the splashes happily
 /// exceed the bounds of the widget (because [containedInkWell] is false).
@@ -142,7 +142,7 @@ abstract class InteractiveInkFeatureFactory {
 /// [highlightShape] of [BoxShape.rectangle] with [containedInkWell] set to
 /// true. These are the values used by [InkWell].
 ///
-/// ![The highlight is a rectangle the size of the box.](https://flutter.github.io/assets-for-api-docs/material/ink_well.png)
+/// ![The highlight is a rectangle the size of the box.](https://flutter.github.io/assets-for-api-docs/assets/material/ink_well.png)
 ///
 /// The [InkResponse] widget must have a [Material] widget as an ancestor. The
 /// [Material] widget is where the ink reactions are actually painted. This
@@ -197,15 +197,15 @@ class InkResponse extends StatefulWidget {
     this.onDoubleTap,
     this.onLongPress,
     this.onHighlightChanged,
-    this.containedInkWell: false,
-    this.highlightShape: BoxShape.circle,
+    this.containedInkWell = false,
+    this.highlightShape = BoxShape.circle,
     this.radius,
     this.borderRadius,
     this.highlightColor,
     this.splashColor,
     this.splashFactory,
-    this.enableFeedback: true,
-    this.excludeFromSemantics: false,
+    this.enableFeedback = true,
+    this.excludeFromSemantics = false,
   }) : assert(containedInkWell != null),
        assert(highlightShape != null),
        assert(enableFeedback != null),
@@ -565,7 +565,7 @@ class _InkResponseState<T extends InkResponse> extends State<T> with AutomaticKe
 /// The following diagram shows how an [InkWell] looks when tapped, when using
 /// default values.
 ///
-/// ![The highlight is a rectangle the size of the box.](https://flutter.github.io/assets-for-api-docs/material/ink_well.png)
+/// ![The highlight is a rectangle the size of the box.](https://flutter.github.io/assets-for-api-docs/assets/material/ink_well.png)
 ///
 /// The [InkWell] widget must have a [Material] widget as an ancestor. The
 /// [Material] widget is where the ink reactions are actually painted. This
@@ -626,8 +626,8 @@ class InkWell extends InkResponse {
     InteractiveInkFeatureFactory splashFactory,
     double radius,
     BorderRadius borderRadius,
-    bool enableFeedback: true,
-    bool excludeFromSemantics: false,
+    bool enableFeedback = true,
+    bool excludeFromSemantics = false,
   }) : super(
     key: key,
     child: child,

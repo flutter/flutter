@@ -41,11 +41,11 @@ class RawKeyEventDataAndroid extends RawKeyEventData {
   /// The [flags], [codePoint], [keyCode], [scanCode], and [metaState] arguments
   /// must not be null.
   const RawKeyEventDataAndroid({
-    this.flags: 0,
-    this.codePoint: 0,
-    this.keyCode: 0,
-    this.scanCode: 0,
-    this.metaState: 0,
+    this.flags = 0,
+    this.codePoint = 0,
+    this.keyCode = 0,
+    this.scanCode = 0,
+    this.metaState = 0,
   }) : assert(flags != null),
        assert(codePoint != null),
        assert(keyCode != null),
@@ -81,9 +81,9 @@ class RawKeyEventDataFuchsia extends RawKeyEventData {
   ///
   /// The [hidUsage], [codePoint], and [modifiers] arguments must not be null.
   const RawKeyEventDataFuchsia({
-    this.hidUsage: 0,
-    this.codePoint: 0,
-    this.modifiers: 0,
+    this.hidUsage = 0,
+    this.codePoint = 0,
+    this.modifiers = 0,
   }) : assert(hidUsage != null),
        assert(codePoint != null),
        assert(modifiers != null);

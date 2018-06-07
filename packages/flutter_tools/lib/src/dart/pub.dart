@@ -72,10 +72,10 @@ bool _shouldRunPubGet({ File pubSpecYaml, File dotPackages }) {
 Future<Null> pubGet({
   @required PubContext context,
   String directory,
-  bool skipIfAbsent: false,
-  bool upgrade: false,
-  bool offline: false,
-  bool checkLastModified: true
+  bool skipIfAbsent = false,
+  bool upgrade = false,
+  bool offline = false,
+  bool checkLastModified = true
 }) async {
   directory ??= fs.currentDirectory.path;
 
@@ -137,7 +137,7 @@ Future<Null> pub(List<String> arguments, {
   @required PubContext context,
   String directory,
   MessageFilter filter,
-  String failureMessage: 'pub failed',
+  String failureMessage = 'pub failed',
   @required bool retry,
   bool showTraceForErrors,
 }) async {

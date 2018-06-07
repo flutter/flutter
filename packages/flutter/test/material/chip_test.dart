@@ -61,22 +61,15 @@ double getEnableProgress(WidgetTester tester) => getRenderChip(tester)?.enableAn
 /// Adds the basic requirements for a Chip.
 Widget _wrapForChip({
   Widget child,
-  TextDirection textDirection: TextDirection.ltr,
-  double textScaleFactor: 1.0,
+  TextDirection textDirection = TextDirection.ltr,
+  double textScaleFactor = 1.0,
 }) {
   return new MaterialApp(
-    home: new Localizations(
-      locale: const Locale('en', 'US'),
-      delegates: const <LocalizationsDelegate<dynamic>>[
-        DefaultWidgetsLocalizations.delegate,
-        DefaultMaterialLocalizations.delegate,
-      ],
-      child: new Directionality(
-        textDirection: textDirection,
-        child: new MediaQuery(
-          data: new MediaQueryData.fromWindow(window).copyWith(textScaleFactor: textScaleFactor),
-          child: new Material(child: child),
-        ),
+    home: new Directionality(
+      textDirection: textDirection,
+      child: new MediaQuery(
+        data: new MediaQueryData.fromWindow(window).copyWith(textScaleFactor: textScaleFactor),
+        child: new Material(child: child),
       ),
     ),
   );
@@ -664,7 +657,7 @@ void main() {
     final UniqueKey labelKey = new UniqueKey();
     final UniqueKey deleteButtonKey = new UniqueKey();
     bool wasDeleted = false;
-    Future<Null> pushChip({bool deletable: false}) async {
+    Future<Null> pushChip({bool deletable = false}) async {
       return tester.pumpWidget(
         _wrapForChip(
           child: new Wrap(
@@ -779,7 +772,7 @@ void main() {
   testWidgets('Selection with avatar works as expected on RawChip', (WidgetTester tester) async {
     bool selected = false;
     final UniqueKey labelKey = new UniqueKey();
-    Future<Null> pushChip({Widget avatar, bool selectable: false}) async {
+    Future<Null> pushChip({Widget avatar, bool selectable = false}) async {
       return tester.pumpWidget(
         _wrapForChip(
           child: new Wrap(
@@ -862,7 +855,7 @@ void main() {
   testWidgets('Selection without avatar works as expected on RawChip', (WidgetTester tester) async {
     bool selected = false;
     final UniqueKey labelKey = new UniqueKey();
-    Future<Null> pushChip({bool selectable: false}) async {
+    Future<Null> pushChip({bool selectable = false}) async {
       return tester.pumpWidget(
         _wrapForChip(
           child: new Wrap(
@@ -938,7 +931,7 @@ void main() {
   testWidgets('Activation works as expected on RawChip', (WidgetTester tester) async {
     bool selected = false;
     final UniqueKey labelKey = new UniqueKey();
-    Future<Null> pushChip({Widget avatar, bool selectable: false}) async {
+    Future<Null> pushChip({Widget avatar, bool selectable = false}) async {
       return tester.pumpWidget(
         _wrapForChip(
           child: new Wrap(
@@ -1029,23 +1022,23 @@ void main() {
       platform: TargetPlatform.android,
       primarySwatch: Colors.blue,
     );
-    final ChipThemeData chipTheme = themeData.chipTheme;
+    final ChipThemeData defaultChipTheme = themeData.chipTheme;
     bool value = false;
     Widget buildApp({
-      ChipThemeData theme,
+      ChipThemeData chipTheme,
       Widget avatar,
       Widget deleteIcon,
-      bool isSelectable: true,
-      bool isPressable: false,
-      bool isDeletable: true,
-      bool showCheckmark: true,
+      bool isSelectable = true,
+      bool isPressable = false,
+      bool isDeletable = true,
+      bool showCheckmark = true,
     }) {
-      theme ??= chipTheme;
+      chipTheme ??= defaultChipTheme;
       return _wrapForChip(
         child: new Theme(
           data: themeData,
           child: new ChipTheme(
-            data: theme,
+            data: chipTheme,
             child: new StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
               return new RawChip(
                 showCheckmark: showCheckmark,
@@ -1054,7 +1047,7 @@ void main() {
                 avatar: avatar,
                 deleteIcon: deleteIcon,
                 isEnabled: isSelectable || isPressable,
-                shape: theme.shape,
+                shape: chipTheme.shape,
                 selected: isSelectable ? value : null,
                 label: new Text('$value'),
                 onSelected: isSelectable
@@ -1085,13 +1078,13 @@ void main() {
     DefaultTextStyle labelStyle = getLabelStyle(tester);
 
     // Check default theme for enabled widget.
-    expect(materialBox, paints..path(color: chipTheme.backgroundColor));
+    expect(materialBox, paints..path(color: defaultChipTheme.backgroundColor));
     expect(iconData.color, equals(const Color(0xde000000)));
     expect(labelStyle.style.color, equals(Colors.black.withAlpha(0xde)));
     await tester.tap(find.byType(RawChip));
     await tester.pumpAndSettle();
     materialBox = getMaterialBox(tester);
-    expect(materialBox, paints..path(color: chipTheme.selectedColor));
+    expect(materialBox, paints..path(color: defaultChipTheme.selectedColor));
     await tester.tap(find.byType(RawChip));
     await tester.pumpAndSettle();
 
@@ -1100,7 +1093,7 @@ void main() {
     await tester.pumpAndSettle();
     materialBox = getMaterialBox(tester);
     labelStyle = getLabelStyle(tester);
-    expect(materialBox, paints..path(color: chipTheme.disabledColor));
+    expect(materialBox, paints..path(color: defaultChipTheme.disabledColor));
     expect(labelStyle.style.color, equals(Colors.black.withAlpha(0xde)));
 
     // Apply a custom theme.
@@ -1108,14 +1101,14 @@ void main() {
     const Color customColor2 = const Color(0xdeadbeef);
     const Color customColor3 = const Color(0xbeefcafe);
     const Color customColor4 = const Color(0xaddedabe);
-    final ChipThemeData customTheme = chipTheme.copyWith(
+    final ChipThemeData customTheme = defaultChipTheme.copyWith(
       brightness: Brightness.dark,
       backgroundColor: customColor1,
       disabledColor: customColor2,
       selectedColor: customColor3,
       deleteIconColor: customColor4,
     );
-    await tester.pumpWidget(buildApp(theme: customTheme));
+    await tester.pumpWidget(buildApp(chipTheme: customTheme));
     await tester.pumpAndSettle();
     materialBox = getMaterialBox(tester);
     iconData = getIconData(tester);
@@ -1134,7 +1127,7 @@ void main() {
 
     // Check custom theme with disabled widget.
     await tester.pumpWidget(buildApp(
-      theme: customTheme,
+      chipTheme: customTheme,
       isSelectable: false,
       isPressable: false,
       isDeletable: true,

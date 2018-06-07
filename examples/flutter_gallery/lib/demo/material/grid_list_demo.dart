@@ -21,7 +21,7 @@ class Photo {
     this.assetPackage,
     this.title,
     this.caption,
-    this.isFavorite: false,
+    this.isFavorite = false,
   });
 
   final String assetName;

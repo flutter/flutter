@@ -185,8 +185,8 @@ class SingleChildScrollView extends StatelessWidget {
   /// Creates a box in which a single widget can be scrolled.
   SingleChildScrollView({
     Key key,
-    this.scrollDirection: Axis.vertical,
-    this.reverse: false,
+    this.scrollDirection = Axis.vertical,
+    this.reverse = false,
     this.padding,
     bool primary,
     this.physics,
@@ -293,7 +293,7 @@ class SingleChildScrollView extends StatelessWidget {
 class _SingleChildViewport extends SingleChildRenderObjectWidget {
   const _SingleChildViewport({
     Key key,
-    this.axisDirection: AxisDirection.down,
+    this.axisDirection = AxisDirection.down,
     this.offset,
     Widget child,
   }) : assert(axisDirection != null),
@@ -321,9 +321,9 @@ class _SingleChildViewport extends SingleChildRenderObjectWidget {
 
 class _RenderSingleChildViewport extends RenderBox with RenderObjectWithChildMixin<RenderBox> implements RenderAbstractViewport {
   _RenderSingleChildViewport({
-    AxisDirection axisDirection: AxisDirection.down,
+    AxisDirection axisDirection = AxisDirection.down,
     @required ViewportOffset offset,
-    double cacheExtent: RenderAbstractViewport.defaultCacheExtent,
+    double cacheExtent = RenderAbstractViewport.defaultCacheExtent,
     RenderBox child,
   }) : assert(axisDirection != null),
        assert(offset != null),
@@ -484,17 +484,19 @@ class _RenderSingleChildViewport extends RenderBox with RenderObjectWithChildMix
     offset.applyContentDimensions(_minScrollExtent, _maxScrollExtent);
   }
 
-  Offset get _paintOffset {
+  Offset get _paintOffset => _paintOffsetForPosition(offset.pixels);
+
+  Offset _paintOffsetForPosition(double position) {
     assert(axisDirection != null);
     switch (axisDirection) {
       case AxisDirection.up:
-        return new Offset(0.0, _offset.pixels - child.size.height + size.height);
+        return new Offset(0.0, position - child.size.height + size.height);
       case AxisDirection.down:
-        return new Offset(0.0, -_offset.pixels);
+        return new Offset(0.0, -position);
       case AxisDirection.left:
-        return new Offset(_offset.pixels - child.size.width + size.width, 0.0);
+        return new Offset(position - child.size.width + size.width, 0.0);
       case AxisDirection.right:
-        return new Offset(-_offset.pixels, 0.0);
+        return new Offset(-position, 0.0);
     }
     return null;
   }
@@ -544,13 +546,14 @@ class _RenderSingleChildViewport extends RenderBox with RenderObjectWithChildMix
   }
 
   @override
-  double getOffsetToReveal(RenderObject target, double alignment) {
+  RevealedOffset getOffsetToReveal(RenderObject target, double alignment, {Rect rect}) {
+    rect ??= target.paintBounds;
     if (target is! RenderBox)
-      return offset.pixels;
+      return new RevealedOffset(offset: offset.pixels, rect: rect);
 
     final RenderBox targetBox = target;
     final Matrix4 transform = targetBox.getTransformTo(this);
-    final Rect bounds = MatrixUtils.transformRect(transform, targetBox.paintBounds);
+    final Rect bounds = MatrixUtils.transformRect(transform, rect);
     final Size contentSize = child.size;
 
     double leadingScrollOffset;
@@ -581,26 +584,31 @@ class _RenderSingleChildViewport extends RenderBox with RenderObjectWithChildMix
         break;
     }
 
-    return leadingScrollOffset - (mainAxisExtent - targetMainAxisExtent) * alignment;
+    final double targetOffset = leadingScrollOffset - (mainAxisExtent - targetMainAxisExtent) * alignment;
+    final Rect targetRect = bounds.shift(_paintOffsetForPosition(targetOffset));
+    return new RevealedOffset(offset: targetOffset, rect: targetRect);
   }
 
   @override
-  void showOnScreen([RenderObject child]) {
-    // Logic duplicated in [RenderViewportBase.showOnScreen].
-    if (child != null) {
-      // Move viewport the smallest distance to bring [child] on screen.
-      final double leadingEdgeOffset = getOffsetToReveal(child, 0.0);
-      final double trailingEdgeOffset = getOffsetToReveal(child, 1.0);
-      final double currentOffset = offset.pixels;
-      if ((currentOffset - leadingEdgeOffset).abs() < (currentOffset - trailingEdgeOffset).abs()) {
-        offset.jumpTo(leadingEdgeOffset);
-      } else {
-        offset.jumpTo(trailingEdgeOffset);
-      }
-    }
-
-    // Make sure the viewport itself is on screen.
-    super.showOnScreen();
+  void showOnScreen({
+    RenderObject descendant,
+    Rect rect,
+    Duration duration = Duration.zero,
+    Curve curve = Curves.ease,
+  }) {
+    final Rect newRect = RenderViewportBase.showInViewport(
+      descendant: descendant,
+      viewport: this,
+      offset: offset,
+      rect: rect,
+      duration: duration,
+      curve: curve,
+    );
+    super.showOnScreen(
+      rect: newRect,
+      duration: duration,
+      curve: curve,
+    );
   }
 
   @override

@@ -16,7 +16,7 @@ import '../framework/utils.dart';
 final Directory _editedFlutterGalleryDir = dir(path.join(Directory.systemTemp.path, 'edited_flutter_gallery'));
 final Directory flutterGalleryDir = dir(path.join(flutterDirectory.path, 'examples/flutter_gallery'));
 
-TaskFunction createHotModeTest({ bool isPreviewDart2: true }) {
+TaskFunction createHotModeTest({ bool isPreviewDart2 = true }) {
   return () async {
     final Device device = await devices.workingDevice;
     await device.unlock();

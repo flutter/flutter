@@ -38,7 +38,7 @@ class TestRunner extends ResidentRunner {
     Completer<DebugConnectionInfo> connectionInfoCompleter,
     Completer<dynamic> appStartedCompleter,
     String route,
-    bool shouldBuild: true,
+    bool shouldBuild = true,
   }) => null;
 }
 

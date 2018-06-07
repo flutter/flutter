@@ -25,7 +25,7 @@ abstract class RenderToggleable extends RenderConstrainedBox {
   /// null. The [value] can only be null if tristate is true.
   RenderToggleable({
     @required bool value,
-    bool tristate: false,
+    bool tristate = false,
     Size size,
     @required Color activeColor,
     @required Color inactiveColor,
@@ -134,13 +134,20 @@ abstract class RenderToggleable extends RenderConstrainedBox {
     _position
       ..curve = Curves.easeIn
       ..reverseCurve = Curves.easeOut;
-    switch (_positionController.status) {
-      case AnimationStatus.forward:
-      case AnimationStatus.completed:
-        _positionController.reverse();
-        break;
-      default:
+    if (tristate) {
+      switch (_positionController.status) {
+        case AnimationStatus.forward:
+        case AnimationStatus.completed:
+          _positionController.reverse();
+          break;
+        default:
+          _positionController.forward();
+      }
+    } else {
+      if (value == true)
         _positionController.forward();
+      else
+        _positionController.reverse();
     }
   }
 
@@ -257,8 +264,7 @@ abstract class RenderToggleable extends RenderConstrainedBox {
     if (isInteractive && !tristate) {
       if (status == AnimationStatus.completed && _value == false) {
         onChanged(true);
-      }
-      else if (status == AnimationStatus.dismissed && _value != false) {
+      } else if (status == AnimationStatus.dismissed && _value != false) {
         onChanged(false);
       }
     }
@@ -285,6 +291,7 @@ abstract class RenderToggleable extends RenderConstrainedBox {
         onChanged(false);
         break;
     }
+    sendSemanticsEvent(const TapSemanticEvent());
   }
 
   void _handleTapUp(TapUpDetails details) {

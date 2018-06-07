@@ -178,7 +178,7 @@ class FlutterDriverExtension {
     }
   }
 
-  Map<String, dynamic> _makeResponse(dynamic response, {bool isError: false}) {
+  Map<String, dynamic> _makeResponse(dynamic response, {bool isError = false}) {
     return <String, dynamic>{
       'isError': isError,
       'response': response,

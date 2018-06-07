@@ -38,5 +38,6 @@
   "drawerLabel": "Gezinme menüsü",
   "popupMenuLabel": "Popup menü",
   "dialogLabel": "İletişim kutusu",
-  "alertDialogLabel": "Alarm"
+  "alertDialogLabel": "Alarm",
+  "searchFieldLabel": "Arama"
 }

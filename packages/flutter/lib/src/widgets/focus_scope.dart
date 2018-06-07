@@ -52,7 +52,7 @@ class FocusScope extends StatefulWidget {
   const FocusScope({
     Key key,
     @required this.node,
-    this.autofocus: false,
+    this.autofocus = false,
     this.child,
   }) : assert(node != null),
        assert(autofocus != null),

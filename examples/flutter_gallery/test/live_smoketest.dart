@@ -43,7 +43,7 @@ Future<Null> main() async {
     if (!new Set<String>.from(allDemoTitles).containsAll(_kSkippedDemoTitles))
       fail('Unrecognized demo names in _kSkippedDemoTitles: $_kSkippedDemoTitles');
 
-    runApp(const GalleryApp());
+    runApp(const GalleryApp(testMode: true));
     final _LiveWidgetController controller = new _LiveWidgetController();
     for (GalleryDemoCategory category in kAllGalleryDemoCategories) {
       await controller.tap(find.text(category.name));

@@ -82,7 +82,7 @@ void main() {
 
       testUsingContext('idevicescreenshot captures and returns screenshot', () async {
         when(mockOutputFile.path).thenReturn(outputPath);
-        when(mockProcessManager.run(any, environment: null, workingDirectory: null)).thenAnswer(
+        when(mockProcessManager.run(typed(any), environment: null, workingDirectory: null)).thenAnswer(
             (Invocation invocation) => new Future<ProcessResult>.value(new ProcessResult(4, 0, '', '')));
 
         await iMobileDevice.takeScreenshot(mockOutputFile);

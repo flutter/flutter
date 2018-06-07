@@ -41,7 +41,7 @@ class GenSnapshot {
     @required String packagesPath,
     @required String depfilePath,
     IOSArch iosArch,
-    Iterable<String> additionalArgs: const <String>[],
+    Iterable<String> additionalArgs = const <String>[],
   }) {
     final List<String> args = <String>[
       '--await_is_keyword',
@@ -139,7 +139,7 @@ class AOTSnapshotter {
     @required bool previewDart2,
     @required bool buildSharedLibrary,
     IOSArch iosArch,
-    List<String> extraGenSnapshotOptions: const <String>[],
+    List<String> extraGenSnapshotOptions = const <String>[],
   }) async {
     if (!_isValidAotPlatform(platform, buildMode)) {
       printError('${getNameForTargetPlatform(platform)} does not support AOT compilation.');
@@ -152,9 +152,13 @@ class AOTSnapshotter {
     if (platform == TargetPlatform.ios)
       buildSharedLibrary = false;
 
-    if (buildSharedLibrary && androidSdk.ndkCompiler == null) {
+    if (buildSharedLibrary && androidSdk.ndk == null) {
+      final String explanation = AndroidNdk.explainMissingNdk(androidSdk.directory);
       printError(
-        'Could not find NDK in Android SDK at ${androidSdk.directory}.\n'
+        'Could not find NDK in Android SDK at ${androidSdk.directory}:\n'
+        '\n'
+        '  $explanation\n'
+        '\n'
         'Unable to build with --build-shared-library\n'
         'To install the NDK, see instructions at https://developer.android.com/ndk/guides/'
       );
@@ -222,6 +226,11 @@ class AOTSnapshotter {
     }
 
     if (platform == TargetPlatform.android_arm || iosArch == IOSArch.armv7) {
+      // Use softfp for Android armv7 devices.
+      // Note that this is the default for armv7 iOS builds, but harmless to set.
+      // TODO(cbracken) eliminate this when we fix https://github.com/flutter/flutter/issues/17489
+      genSnapshotArgs.add('--no-sim-use-hardfp');
+
       // Not supported by the Pixel in 32-bit mode.
       genSnapshotArgs.add('--no-use-integer-division');
     }
@@ -339,8 +348,8 @@ class AOTSnapshotter {
     // (which causes it to not look into the other section and therefore not
     // find the correct unwinding information).
     final String assemblySo = fs.path.join(outputPath, 'app.so');
-    return await runCheckedAsync(<String>[androidSdk.ndkCompiler]
-        ..addAll(androidSdk.ndkCompilerArgs)
+    return await runCheckedAsync(<String>[androidSdk.ndk.compiler]
+        ..addAll(androidSdk.ndk.compilerArgs)
         ..addAll(<String>[ '-shared', '-nostdlib', '-o', assemblySo, assemblyPath ]));
   }
 
@@ -352,7 +361,7 @@ class AOTSnapshotter {
     @required BuildMode buildMode,
     @required String mainPath,
     @required String outputPath,
-    List<String> extraFrontEndOptions: const <String>[],
+    List<String> extraFrontEndOptions = const <String>[],
   }) async {
     final Directory outputDir = fs.directory(outputPath);
     outputDir.createSync(recursive: true);

@@ -125,5 +125,40 @@ f577a7903cc54959be2e34bc4f7f80b7009efcf4
     }, overrides: <Type, Generator>{
       IMobileDevice: () => mockIMobileDevice,
     });
+
+    testUsingContext('includes multi-line Flutter logs in the output', () async {
+      when(mockIMobileDevice.startLogger()).thenAnswer((Invocation invocation) {
+        final Process mockProcess = new MockProcess();
+        when(mockProcess.stdout).thenAnswer((Invocation invocation) =>
+            new Stream<List<int>>.fromIterable(<List<int>>['''
+  Runner(Flutter)[297] <Notice>: This is a multi-line message,
+  with another Flutter message following it.
+  Runner(Flutter)[297] <Notice>: This is a multi-line message,
+  with a non-Flutter log message following it.
+  Runner(libsystem_asl.dylib)[297] <Notice>: libMobileGestalt
+  '''.codeUnits]));
+        when(mockProcess.stderr)
+            .thenAnswer((Invocation invocation) => const Stream<List<int>>.empty());
+        // Delay return of exitCode until after stdout stream data, since it terminates the logger.
+        when(mockProcess.exitCode)
+            .thenAnswer((Invocation invocation) => new Future<int>.delayed(Duration.zero, () => 0));
+        return new Future<Process>.value(mockProcess);
+      });
+
+      final IOSDevice device = new IOSDevice('123456');
+      final DeviceLogReader logReader = device.getLogReader(
+        app: new BuildableIOSApp(projectBundleId: 'bundleId'),
+      );
+
+      final List<String> lines = await logReader.logLines.toList();
+      expect(lines, <String>[
+        'This is a multi-line message,',
+        '  with another Flutter message following it.',
+        'This is a multi-line message,',
+        '  with a non-Flutter log message following it.',
+      ]);
+    }, overrides: <Type, Generator>{
+      IMobileDevice: () => mockIMobileDevice,
+    });
   });
 }

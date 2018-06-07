@@ -13,7 +13,7 @@ import '../ios/mac.dart';
 import 'build.dart';
 
 class BuildIOSCommand extends BuildSubCommand {
-  BuildIOSCommand({bool verboseHelp: false}) {
+  BuildIOSCommand({bool verboseHelp = false}) {
     usesTargetOption();
     usesFlavorOption();
     usesPubOption();
@@ -82,7 +82,7 @@ class BuildIOSCommand extends BuildSubCommand {
     final XcodeBuildResult result = await buildXcodeProject(
       app: app,
       buildInfo: buildInfo,
-      target: targetFile,
+      targetOverride: targetFile,
       buildForDevice: !forSimulator,
       codesign: shouldCodesign,
     );

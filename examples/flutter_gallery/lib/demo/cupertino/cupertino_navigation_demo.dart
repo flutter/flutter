@@ -453,7 +453,7 @@ class Tab2Header extends StatelessWidget {
                         'SUPPORT TICKET',
                         style: const TextStyle(
                           color: const Color(0xFF646464),
-                          letterSpacing: -0.8,
+                          letterSpacing: -0.9,
                           fontSize: 14.0,
                           fontWeight: FontWeight.w500,
                         ),
@@ -484,8 +484,8 @@ class Tab2Header extends StatelessWidget {
                         'Product or product packaging damaged during transit',
                         style: const TextStyle(
                           fontSize: 16.0,
-                          fontWeight: FontWeight.w800,
-                          letterSpacing: -0.6,
+                          fontWeight: FontWeight.w700,
+                          letterSpacing: -0.46,
                         ),
                       ),
                       const Padding(padding: const EdgeInsets.only(top: 16.0)),
@@ -577,10 +577,8 @@ class Tab2ConversationBubble extends StatelessWidget {
               ? CupertinoColors.white
               : CupertinoColors.black,
           letterSpacing: -0.4,
-          fontSize: 14.0,
-          fontWeight: color == Tab2ConversationBubbleColor.blue
-              ? FontWeight.w300
-              : FontWeight.w400,
+          fontSize: 15.0,
+          fontWeight: FontWeight.w400,
         ),
       ),
     );

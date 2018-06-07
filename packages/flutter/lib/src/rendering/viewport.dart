@@ -4,6 +4,7 @@
 
 import 'dart:math' as math;
 
+import 'package:flutter/animation.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/semantics.dart';
@@ -40,7 +41,14 @@ abstract class RenderAbstractViewport extends RenderObject {
     return null;
   }
 
-  /// Returns the offset that would be needed to reveal the target render object.
+  /// Returns the offset that would be needed to reveal the `target`
+  /// [RenderObject].
+  ///
+  /// The optional `rect` parameter describes which area of that `target` object
+  /// should be revealed in the viewport. If `rect` is null, the entire
+  /// `target` [RenderObject] (as defined by its [RenderObject.paintBounds])
+  /// will be revealed. If `rect` is provided it has to be given in the
+  /// coordinate system of the `target` object.
   ///
   /// The `alignment` argument describes where the target should be positioned
   /// after applying the returned offset. If `alignment` is 0.0, the child must
@@ -52,7 +60,15 @@ abstract class RenderAbstractViewport extends RenderObject {
   /// The target might not be a direct child of this viewport but it must be a
   /// descendant of the viewport and there must not be any other
   /// [RenderAbstractViewport] objects between the target and this object.
-  double getOffsetToReveal(RenderObject target, double alignment);
+  ///
+  /// This method assumes that the content of the viewport moves linearly, i.e.
+  /// when the offset of the viewport is changed by x then `target` also moves
+  /// by x within the viewport.
+  ///
+  /// See also:
+  ///
+  ///  * [RevealedOffset], which describes the return value of this method.
+  RevealedOffset getOffsetToReveal(RenderObject target, double alignment, {Rect rect});
 
   /// The default value for the cache extent of the viewport.
   ///
@@ -61,6 +77,59 @@ abstract class RenderAbstractViewport extends RenderObject {
   ///  * [RenderViewportBase.cacheExtent] for a definition of the cache extent.
   @protected
   static const double defaultCacheExtent = 250.0;
+}
+
+/// Return value for [RenderAbstractViewport.getOffsetToReveal].
+///
+/// It indicates the [offset] required to reveal an element in a viewport and
+/// the [rect] position said element would have in the viewport at that
+/// [offset].
+class RevealedOffset {
+
+  /// Instantiates a return value for [RenderAbstractViewport.getOffsetToReveal].
+  const RevealedOffset({
+    @required this.offset,
+    @required this.rect,
+  }) : assert(offset != null), assert(rect != null);
+
+  /// Offset for the viewport to reveal a specific element in the viewport.
+  ///
+  /// See also:
+  ///
+  ///  * [RenderAbstractViewport.getOffsetToReveal], which calculates this
+  ///    value for a specific element.
+  final double offset;
+
+  /// The [Rect] in the outer coordinate system of the viewport at which the
+  /// to-be-revealed element would be located if the viewport's offset is set
+  /// to [offset].
+  ///
+  /// A viewport usually has two coordinate systems and works as an adapter
+  /// between the two:
+  ///
+  /// The inner coordinate system has its origin at the top left corner of the
+  /// content that moves inside the viewport. The origin of this coordinate
+  /// system usually moves around relative to the leading edge of the viewport
+  /// when the viewport offset changes.
+  ///
+  /// The outer coordinate system has its origin at the top left corner of the
+  /// visible part of the viewport. This origin stays at the same position
+  /// regardless of the current viewport offset.
+  ///
+  /// In other words: [rect] describes where the revealed element would be
+  /// located relative to the top left corner of the visible part of the
+  /// viewport if the viewport's offset is set to [offset].
+  ///
+  /// See also:
+  ///
+  ///  * [RenderAbstractViewport.getOffsetToReveal], which calculates this
+  ///    value for a specific element.
+  final Rect rect;
+
+  @override
+  String toString() {
+    return '$runtimeType(offset: $offset, rect: $rect)';
+  }
 }
 
 /// A base class for render objects that are bigger on the inside.
@@ -87,7 +156,7 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
     implements RenderAbstractViewport {
   /// Initializes fields for subclasses.
   RenderViewportBase({
-    AxisDirection axisDirection: AxisDirection.down,
+    AxisDirection axisDirection = AxisDirection.down,
     @required AxisDirection crossAxisDirection,
     @required ViewportOffset offset,
     double cacheExtent,
@@ -512,14 +581,16 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
   }
 
   @override
-  double getOffsetToReveal(RenderObject target, double alignment) {
+  RevealedOffset getOffsetToReveal(RenderObject target, double alignment, {Rect rect}) {
     double leadingScrollOffset;
     double targetMainAxisExtent;
     RenderObject descendant;
+    rect ??= target.paintBounds;
 
     if (target is RenderBox) {
       final RenderBox targetBox = target;
 
+      // The pivot will be the topmost child before we hit a RenderSliver.
       RenderBox pivot = targetBox;
       while (pivot.parent is RenderBox)
         pivot = pivot.parent;
@@ -527,14 +598,11 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
       assert(pivot.parent != null);
       assert(pivot.parent != this);
       assert(pivot != this);
+      assert(pivot.parent is RenderSliver);  // TODO(abarth): Support other kinds of render objects besides slivers.
+      final RenderSliver pivotParent = pivot.parent;
 
       final Matrix4 transform = targetBox.getTransformTo(pivot);
-      final Rect bounds = MatrixUtils.transformRect(transform, targetBox.paintBounds);
-
-      target = pivot;
-      // TODO(abarth): Support other kinds of render objects besides slivers.
-      assert(target.parent is RenderSliver);
-      final RenderSliver pivotParent = target.parent;
+      final Rect bounds = MatrixUtils.transformRect(transform, rect);
 
       final GrowthDirection growthDirection = pivotParent.constraints.growthDirection;
       switch (applyGrowthDirectionToAxisDirection(axisDirection, growthDirection)) {
@@ -580,7 +648,7 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
       targetMainAxisExtent = targetSliver.geometry.scrollExtent;
       descendant = targetSliver;
     } else {
-      return offset.pixels;
+      return new RevealedOffset(offset: offset.pixels, rect: rect);
     }
 
     // The child will be the topmost object before we get to the viewport.
@@ -615,7 +683,29 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
         break;
     }
 
-    return leadingScrollOffset - (mainAxisExtent - targetMainAxisExtent) * alignment;
+    final double targetOffset = leadingScrollOffset - (mainAxisExtent - targetMainAxisExtent) * alignment;
+    final double offsetDifference = offset.pixels - targetOffset;
+
+    final Matrix4 transform = target.getTransformTo(this);
+    applyPaintTransform(child, transform);
+    Rect targetRect = MatrixUtils.transformRect(transform, rect);
+
+    switch (axisDirection) {
+      case AxisDirection.down:
+        targetRect = targetRect.translate(0.0, offsetDifference);
+        break;
+      case AxisDirection.right:
+        targetRect = targetRect.translate(offsetDifference, 0.0);
+        break;
+      case AxisDirection.up:
+        targetRect = targetRect.translate(0.0, -offsetDifference);
+        break;
+      case AxisDirection.left:
+        targetRect = targetRect.translate(-offsetDifference, 0.0);
+        break;
+    }
+
+    return new RevealedOffset(offset: targetOffset, rect: targetRect);
   }
 
   /// The offset at which the given `child` should be painted.
@@ -645,8 +735,6 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
     }
     return null;
   }
-
-  // TODO(ianh): semantics - shouldn't walk the invisible children
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
@@ -783,24 +871,116 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
   Iterable<RenderSliver> get childrenInHitTestOrder;
 
   @override
-  void showOnScreen([RenderObject child]) {
-    // Logic duplicated in [_RenderSingleChildViewport.showOnScreen].
-    if (child != null) {
-      // TODO(goderbauer): Don't scroll if it is already visible.
-      // TODO(goderbauer): Don't guess if we need to align at leading or trailing edge.
-      // Move viewport the smallest distance to bring [child] on screen.
-      final double leadingEdgeOffset = getOffsetToReveal(child, 0.0);
-      final double trailingEdgeOffset = getOffsetToReveal(child, 1.0);
-      final double currentOffset = offset.pixels;
-      // TODO(goderbauer): Don't scroll if that puts us outside of viewport's bounds.
-      if ((currentOffset - leadingEdgeOffset).abs() < (currentOffset - trailingEdgeOffset).abs()) {
-        offset.jumpTo(leadingEdgeOffset);
-      } else {
-        offset.jumpTo(trailingEdgeOffset);
-      }
+  void showOnScreen({
+    RenderObject descendant,
+    Rect rect,
+    Duration duration = Duration.zero,
+    Curve curve = Curves.ease,
+  }) {
+    final Rect newRect = RenderViewportBase.showInViewport(
+      descendant: descendant,
+      viewport: this,
+      offset: offset,
+      rect: rect,
+      duration: duration,
+      curve: curve,
+    );
+    super.showOnScreen(
+      rect: newRect,
+      duration: duration,
+      curve: curve,
+    );
+  }
+
+  /// Make (a portion of) the given `descendant` of the given `viewport` fully
+  /// visible in the `viewport` by manipulating the provided [ViewportOffset]
+  /// `offset`.
+  ///
+  /// The optional `rect` parameter describes which area of the `descendant`
+  /// should be shown in the viewport. If `rect` is null, the entire
+  /// `descendant` will be revealed. The `rect` parameter is interpreted
+  /// relative to the coordinate system of `descendant`.
+  ///
+  /// The returned [Rect] describes the new location of `descendant` or `rect`
+  /// in the viewport after it has been revealed. See [RevealedOffset.rect]
+  /// for a full definition of this [Rect].
+  ///
+  /// The parameters `viewport` and `offset` are required and cannot be null.
+  /// If `descendant` is null, this is a no-op and `rect` is returned.
+  ///
+  /// If both `decedent` and `rect` are null, null is returned because there is
+  /// nothing to be shown in the viewport.
+  ///
+  /// The `duration` parameter can be set to a non-zero value to animate the
+  /// target object into the viewport with an animation defined by `curve`.
+  static Rect showInViewport({
+    RenderObject descendant,
+    Rect rect,
+    @required RenderAbstractViewport viewport,
+    @required ViewportOffset offset,
+    Duration duration = Duration.zero,
+    Curve curve = Curves.ease,
+  }) {
+    assert(viewport != null);
+    assert(offset != null);
+    if (descendant == null) {
+      return rect;
     }
-    // Make sure the viewport itself is on screen.
-    super.showOnScreen();
+    final RevealedOffset leadingEdgeOffset = viewport.getOffsetToReveal(descendant, 0.0, rect: rect);
+    final RevealedOffset trailingEdgeOffset = viewport.getOffsetToReveal(descendant, 1.0, rect: rect);
+    final double currentOffset = offset.pixels;
+
+    //           scrollOffset
+    //                       0 +---------+
+    //                         |         |
+    //                       _ |         |
+    //    viewport position |  |         |
+    // with `descendant` at |  |         | _
+    //        trailing edge |_ | xxxxxxx |  | viewport position
+    //                         |         |  | with `descendant` at
+    //                         |         | _| leading edge
+    //                         |         |
+    //                     800 +---------+
+    //
+    // `trailingEdgeOffset`: Distance from scrollOffset 0 to the start of the
+    //                       viewport on the left in image above.
+    // `leadingEdgeOffset`: Distance from scrollOffset 0 to the start of the
+    //                      viewport on the right in image above.
+    //
+    // The viewport position on the left is achieved by setting `offset.pixels`
+    // to `trailingEdgeOffset`, the one on the right by setting it to
+    // `leadingEdgeOffset`.
+
+    RevealedOffset targetOffset;
+    if (leadingEdgeOffset.offset < trailingEdgeOffset.offset) {
+      // `descendant` is too big to be visible on screen in its entirety. Let's
+      // align it with the edge that requires the least amount of scrolling.
+      final double leadingEdgeDiff = (offset.pixels - leadingEdgeOffset.offset).abs();
+      final double trailingEdgeDiff = (offset.pixels - trailingEdgeOffset.offset).abs();
+      targetOffset = leadingEdgeDiff < trailingEdgeDiff ? leadingEdgeOffset : trailingEdgeOffset;
+    } else if (currentOffset > leadingEdgeOffset.offset) {
+      // `descendant` currently starts above the leading edge and can be shown
+      // fully on screen by scrolling down (which means: moving viewport up).
+      targetOffset = leadingEdgeOffset;
+    } else if (currentOffset < trailingEdgeOffset.offset) {
+      // `descendant currently ends below the trailing edge and can be shown
+      // fully on screen by scrolling up (which means: moving viewport down)
+      targetOffset = trailingEdgeOffset;
+    } else {
+      // `descendant` is between leading and trailing edge and hence already
+      //  fully shown on screen. No action necessary.
+      final Matrix4 transform = descendant.getTransformTo(viewport.parent);
+      return MatrixUtils.transformRect(transform, rect ?? descendant.paintBounds);
+    }
+
+    assert(targetOffset != null);
+
+    if (duration == Duration.zero) {
+      offset.jumpTo(targetOffset.offset);
+    } else {
+      offset.animateTo(targetOffset.offset, duration: duration, curve: curve);
+    }
+    return targetOffset.rect;
   }
 }
 
@@ -844,10 +1024,10 @@ class RenderViewport extends RenderViewportBase<SliverPhysicalContainerParentDat
   /// The [offset] must be specified. For testing purposes, consider passing a
   /// [new ViewportOffset.zero] or [new ViewportOffset.fixed].
   RenderViewport({
-    AxisDirection axisDirection: AxisDirection.down,
+    AxisDirection axisDirection = AxisDirection.down,
     @required AxisDirection crossAxisDirection,
     @required ViewportOffset offset,
-    double anchor: 0.0,
+    double anchor = 0.0,
     List<RenderSliver> children,
     RenderSliver center,
     double cacheExtent,
@@ -1008,7 +1188,7 @@ class RenderViewport extends RenderViewportBase<SliverPhysicalContainerParentDat
     }
   }
 
-  static const int _kMaxLayoutCycles = 10;
+  static const int _maxLayoutCycles = 10;
 
   // Out-of-band data computed during layout.
   double _minScrollExtent;
@@ -1057,9 +1237,9 @@ class RenderViewport extends RenderViewportBase<SliverPhysicalContainerParentDat
           break;
       }
       count += 1;
-    } while (count < _kMaxLayoutCycles);
+    } while (count < _maxLayoutCycles);
     assert(() {
-      if (count >= _kMaxLayoutCycles) {
+      if (count >= _maxLayoutCycles) {
         assert(count != 1);
         throw new FlutterError(
           'A RenderViewport exceeded its maximum number of layout cycles.\n'
@@ -1343,7 +1523,7 @@ class RenderShrinkWrappingViewport extends RenderViewportBase<SliverLogicalConta
   /// The [offset] must be specified. For testing purposes, consider passing a
   /// [new ViewportOffset.zero] or [new ViewportOffset.fixed].
   RenderShrinkWrappingViewport({
-    AxisDirection axisDirection: AxisDirection.down,
+    AxisDirection axisDirection = AxisDirection.down,
     @required AxisDirection crossAxisDirection,
     @required ViewportOffset offset,
     List<RenderSliver> children,

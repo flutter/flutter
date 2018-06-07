@@ -4,6 +4,7 @@ import 'dart:ui';
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -676,4 +677,51 @@ void main() {
     semantics.dispose();
   });
 
+  testWidgets('has semantic events', (WidgetTester tester) async {
+    final List<dynamic> semanticEvents = <dynamic>[];
+    SystemChannels.accessibility.setMockMessageHandler((dynamic message) {
+      semanticEvents.add(message);
+    });
+    final SemanticsTester semantics = new SemanticsTester(tester);
+
+    await tester.pumpWidget(
+      new MaterialApp(
+        home: new Center(
+          child: new Tooltip(
+            message: 'Foo',
+            child: new Container(
+              width: 100.0,
+              height: 100.0,
+              color: Colors.green[500],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.longPress(find.byType(Tooltip));
+    final RenderObject object = tester.firstRenderObject(find.byType(Tooltip));
+
+    expect(semanticEvents, unorderedEquals(<dynamic>[
+      <String, dynamic>{
+        'type': 'longPress',
+        'nodeId': findDebugSemantics(object).id,
+        'data': <String, dynamic>{},
+      },
+      <String, dynamic>{
+        'type': 'tooltip',
+        'data': <String, dynamic>{
+          'message': 'Foo',
+        },
+      },
+    ]));
+    semantics.dispose();
+    SystemChannels.accessibility.setMockMessageHandler(null);
+  });
+}
+
+SemanticsNode findDebugSemantics(RenderObject object) {
+  if (object.debugSemantics != null)
+    return object.debugSemantics;
+  return findDebugSemantics(object.parent);
 }

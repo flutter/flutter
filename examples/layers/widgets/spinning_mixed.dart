@@ -8,7 +8,7 @@ import 'package:flutter/rendering.dart';
 import '../rendering/src/solid_color_box.dart';
 
 // Solid colour, RenderObject version
-void addFlexChildSolidColor(RenderFlex parent, Color backgroundColor, { int flex: 0 }) {
+void addFlexChildSolidColor(RenderFlex parent, Color backgroundColor, { int flex = 0 }) {
   final RenderSolidColorBox child = new RenderSolidColorBox(backgroundColor);
   parent.add(child);
   final FlexParentData childParentData = child.parentData;

@@ -12,7 +12,7 @@ abstract class PageRoute<T> extends ModalRoute<T> {
   /// Creates a modal route that replaces the entire screen.
   PageRoute({
     RouteSettings settings,
-    this.fullscreenDialog: false,
+    this.fullscreenDialog = false,
   }) : super(settings: settings);
 
   /// Whether this page route is a full-screen dialog.
@@ -72,13 +72,13 @@ class PageRouteBuilder<T> extends PageRoute<T> {
   PageRouteBuilder({
     RouteSettings settings,
     @required this.pageBuilder,
-    this.transitionsBuilder: _defaultTransitionsBuilder,
-    this.transitionDuration: const Duration(milliseconds: 300),
-    this.opaque: true,
-    this.barrierDismissible: false,
+    this.transitionsBuilder = _defaultTransitionsBuilder,
+    this.transitionDuration = const Duration(milliseconds: 300),
+    this.opaque = true,
+    this.barrierDismissible = false,
     this.barrierColor,
     this.barrierLabel,
-    this.maintainState: true,
+    this.maintainState = true,
   }) : assert(pageBuilder != null),
        assert(transitionsBuilder != null),
        assert(barrierDismissible != null),

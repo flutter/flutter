@@ -333,4 +333,29 @@ void main() {
       -400.0, -300.0, 0.0, 1.0, // it's 1600x1200, centered in an 800x600 square
     ]);
   });
+
+  testWidgets('Translated child into translated box - hit test', (WidgetTester tester) async {
+    final GlobalKey key1 = new GlobalKey();
+    bool _pointerDown = false;
+    await tester.pumpWidget(
+      new Transform.translate(
+        offset: const Offset(100.0, 50.0),
+        child: new Transform.translate(
+          offset: const Offset(1000.0, 1000.0),
+          child: new Listener(
+            onPointerDown: (PointerDownEvent event) {
+              _pointerDown = true;
+            },
+            child: new Container(
+              key: key1,
+              color: const Color(0xFF000000),
+            )
+          )
+        )
+      ),
+    );
+    expect(_pointerDown, isFalse);
+    await tester.tap(find.byKey(key1));
+    expect(_pointerDown, isTrue);
+  });
 }

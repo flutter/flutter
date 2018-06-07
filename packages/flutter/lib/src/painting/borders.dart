@@ -59,9 +59,9 @@ class BorderSide {
   ///
   /// By default, the border is 1.0 logical pixels wide and solid black.
   const BorderSide({
-    this.color: const Color(0xFF000000),
-    this.width: 1.0,
-    this.style: BorderStyle.solid,
+    this.color = const Color(0xFF000000),
+    this.width = 1.0,
+    this.style = BorderStyle.solid,
   }) : assert(color != null),
        assert(width != null),
        assert(width >= 0.0),
@@ -306,7 +306,7 @@ abstract class ShapeBorder {
   /// The `reversed` argument is true if this object was the right operand of
   /// the `+` operator, and false if it was the left operand.
   @protected
-  ShapeBorder add(ShapeBorder other, { bool reversed: false }) => null;
+  ShapeBorder add(ShapeBorder other, { bool reversed = false }) => null;
 
   /// Creates a new border consisting of the two borders on either side of the
   /// operator.
@@ -513,7 +513,7 @@ class _CompoundBorder extends ShapeBorder {
   }
 
   @override
-  ShapeBorder add(ShapeBorder other, { bool reversed: false }) {
+  ShapeBorder add(ShapeBorder other, { bool reversed = false }) {
     // This wraps the list of borders with "other", or, if "reversed" is true,
     // wraps "other" with the list of borders.
     // If "reversed" is false, "other" should end up being at the start of the
@@ -661,10 +661,10 @@ class _CompoundBorder extends ShapeBorder {
 ///    not uniform.
 ///  * [BoxDecoration], which describes its border using the [Border] class.
 void paintBorder(Canvas canvas, Rect rect, {
-  BorderSide top: BorderSide.none,
-  BorderSide right: BorderSide.none,
-  BorderSide bottom: BorderSide.none,
-  BorderSide left: BorderSide.none,
+  BorderSide top = BorderSide.none,
+  BorderSide right = BorderSide.none,
+  BorderSide bottom = BorderSide.none,
+  BorderSide left = BorderSide.none,
 }) {
   assert(canvas != null);
   assert(rect != null);

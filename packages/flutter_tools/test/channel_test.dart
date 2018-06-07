@@ -51,8 +51,8 @@ void main() {
       when(process.exitCode).thenAnswer((_) => new Future<int>.value(0));
       when(mockProcessManager.start(
         <String>['git', 'branch', '-r'],
-        workingDirectory: typed(any, named: 'workingDirectory'),
-        environment: typed(any, named: 'environment')))
+        workingDirectory: anyNamed('workingDirectory'),
+        environment: anyNamed('environment')))
       .thenAnswer((_) => new Future<Process>.value(process));
 
       final ChannelCommand command = new ChannelCommand();
@@ -60,8 +60,8 @@ void main() {
       await runner.run(<String>['channel']);
 
       verify(mockProcessManager.start(<String>['git', 'branch', '-r'],
-          workingDirectory: typed(any, named: 'workingDirectory'),
-          environment: typed(any, named: 'environment'))).called(1);
+          workingDirectory: anyNamed('workingDirectory'),
+          environment: anyNamed('environment'))).called(1);
 
       expect(testLogger.errorText, hasLength(0));
 

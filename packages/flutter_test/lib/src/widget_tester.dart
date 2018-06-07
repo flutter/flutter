@@ -10,6 +10,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/widgets.dart';
+import 'package:meta/meta.dart';
 import 'package:test/test.dart' as test_package;
 
 import 'all_elements.dart';
@@ -48,27 +49,28 @@ typedef Future<Null> WidgetTesterCallback(WidgetTester widgetTester);
 ///       expect(find.text('Success'), findsOneWidget);
 ///     });
 /// ```
+@isTest
 void testWidgets(String description, WidgetTesterCallback callback, {
-  bool skip: false,
+  bool skip = false,
   test_package.Timeout timeout
 }) {
   final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized();
   final WidgetTester tester = new WidgetTester._(binding);
   timeout ??= binding.defaultTestTimeout;
-  test_package.group('-', () {
-    test_package.test(
-      description,
-      () {
-        return binding.runTest(
-          () => callback(tester),
-          tester._endOfTestVerifications,
-          description: description ?? '',
-        );
-      },
-      skip: skip,
-    );
-    test_package.tearDown(binding.postTest);
-  }, timeout: timeout);
+  test_package.test(
+    description,
+    () {
+      tester._recordNumberOfSemanticsHandles();
+      test_package.addTearDown(binding.postTest);
+      return binding.runTest(
+        () => callback(tester),
+        tester._endOfTestVerifications,
+        description: description ?? '',
+      );
+    },
+    skip: skip,
+    timeout: timeout
+  );
 }
 
 /// Runs the [callback] inside the Flutter benchmark environment.
@@ -124,6 +126,7 @@ Future<Null> benchmarkWidgets(WidgetTesterCallback callback) {
   final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized();
   assert(binding is! AutomatedTestWidgetsFlutterBinding);
   final WidgetTester tester = new WidgetTester._(binding);
+  tester._recordNumberOfSemanticsHandles();
   return binding.runTest(
     () => callback(tester),
     tester._endOfTestVerifications,
@@ -522,7 +525,8 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
   }
 
   void _verifySemanticsHandlesWereDisposed() {
-    if (binding.pipelineOwner.semanticsOwner != null) {
+    assert(_lastRecordedSemanticsHandles != null);
+    if (binding.pipelineOwner.debugOutstandingSemanticsHandles > _lastRecordedSemanticsHandles) {
       throw new FlutterError(
         'A SemanticsHandle was active at the end of the test.\n'
         'All SemanticsHandle instances must be disposed by calling dispose() on '
@@ -531,6 +535,13 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
         'existing handle will leak into another test and alter its behavior.'
       );
     }
+    _lastRecordedSemanticsHandles = null;
+  }
+
+  int _lastRecordedSemanticsHandles;
+
+  void _recordNumberOfSemanticsHandles() {
+    _lastRecordedSemanticsHandles = binding.pipelineOwner.debugOutstandingSemanticsHandles;
   }
 
   /// Returns the TestTextInput singleton.
