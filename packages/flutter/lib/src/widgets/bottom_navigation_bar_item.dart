@@ -41,7 +41,8 @@ class BottomNavigationBarItem {
   /// An alternative icon displayed when this bottom navigation item is
   /// selected.
   ///
-  /// Defaults to [icon].
+  /// If this icon is not provided, the bottom navigation bar will display
+  /// [icon] in either state.
   final Widget activeIcon;
 
   /// The title of the item.
