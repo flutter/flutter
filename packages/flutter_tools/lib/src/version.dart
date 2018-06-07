@@ -237,9 +237,6 @@ class FlutterVersion {
     final bool installationSeemsOutdated = frameworkAge > kVersionAgeConsideredUpToDate;
 
     /// Gets whether or not there is a new version of Flutter available on the remote.
-    ///
-    /// Returns null if the cached version is out-of-date or missing, and we are
-    /// unable to reach the server to get the latest version.
     Future<VersionCheckResult> newerFrameworkVersionAvailable() async {
       final DateTime latestFlutterCommitDate = await _getLatestAvailableFlutterVersion();
 
