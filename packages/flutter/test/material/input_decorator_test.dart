@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:io' show Platform;
+
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -9,13 +11,13 @@ import 'package:flutter_test/flutter_test.dart';
 import '../rendering/mock_canvas.dart';
 
 Widget buildInputDecorator({
-  InputDecoration decoration: const InputDecoration(),
+  InputDecoration decoration = const InputDecoration(),
   InputDecorationTheme inputDecorationTheme,
-  TextDirection textDirection: TextDirection.ltr,
-  bool isEmpty: false,
-  bool isFocused: false,
+  TextDirection textDirection = TextDirection.ltr,
+  bool isEmpty = false,
+  bool isFocused = false,
   TextStyle baseStyle,
-  Widget child: const Text(
+  Widget child = const Text(
     'text',
     style: const TextStyle(fontFamily: 'Ahem', fontSize: 16.0),
   ),
@@ -1428,4 +1430,52 @@ void main() {
       ),
     );
   });
+
+  testWidgets(
+    'InputDecorator OutlineBorder focused label with icon',
+    (WidgetTester tester) async {
+      // Regression test for https://github.com/flutter/flutter/issues/18111
+
+      Widget buildFrame(TextDirection textDirection) {
+        return new MaterialApp(
+          home: new Scaffold(
+            body: new Container(
+              padding: const EdgeInsets.all(16.0),
+              alignment: Alignment.center,
+              child: new Directionality(
+                textDirection: textDirection,
+                child: const RepaintBoundary(
+                  child: const InputDecorator(
+                    isFocused: true,
+                    isEmpty: true,
+                    decoration: const InputDecoration(
+                      icon: const Icon(Icons.insert_link),
+                      labelText: 'primaryLink',
+                      hintText: 'Primary link to story',
+                      border: const OutlineInputBorder(),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        );
+      }
+
+      await tester.pumpWidget(buildFrame(TextDirection.ltr));
+      await expectLater(
+        find.byType(InputDecorator),
+        matchesGoldenFile('input_decorator.outline_icon_label.ltr.png'),
+        skip: !Platform.isLinux,
+      );
+
+      await tester.pumpWidget(buildFrame(TextDirection.rtl));
+      await expectLater(
+        find.byType(InputDecorator),
+        matchesGoldenFile('input_decorator.outline_icon_label.rtl.png'),
+        skip: !Platform.isLinux,
+      );
+    },
+    skip: !Platform.isLinux,
+  );
 }

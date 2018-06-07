@@ -96,7 +96,7 @@ class PopupMenuDivider extends PopupMenuEntry<Null> {
   /// Creates a horizontal divider for a popup menu.
   ///
   /// By default, the divider has a height of 16 logical pixels.
-  const PopupMenuDivider({ Key key, this.height: _kMenuDividerHeight }) : super(key: key);
+  const PopupMenuDivider({ Key key, this.height = _kMenuDividerHeight }) : super(key: key);
 
   /// The height of the divider entry.
   ///
@@ -163,8 +163,8 @@ class PopupMenuItem<T> extends PopupMenuEntry<T> {
   const PopupMenuItem({
     Key key,
     this.value,
-    this.enabled: true,
-    this.height: _kMenuItemHeight,
+    this.enabled = true,
+    this.height = _kMenuItemHeight,
     @required this.child,
   }) : assert(enabled != null),
        assert(height != null),
@@ -341,8 +341,8 @@ class CheckedPopupMenuItem<T> extends PopupMenuItem<T> {
   const CheckedPopupMenuItem({
     Key key,
     T value,
-    this.checked: false,
-    bool enabled: true,
+    this.checked = false,
+    bool enabled = true,
     Widget child,
   }) : assert(checked != null),
        super(
@@ -708,7 +708,7 @@ Future<T> showMenu<T>({
   RelativeRect position,
   @required List<PopupMenuEntry<T>> items,
   T initialValue,
-  double elevation: 8.0,
+  double elevation = 8.0,
   String semanticLabel,
 }) {
   assert(context != null);
@@ -814,8 +814,8 @@ class PopupMenuButton<T> extends StatefulWidget {
     this.onSelected,
     this.onCanceled,
     this.tooltip,
-    this.elevation: 8.0,
-    this.padding: const EdgeInsets.all(8.0),
+    this.elevation = 8.0,
+    this.padding = const EdgeInsets.all(8.0),
     this.child,
     this.icon,
   }) : assert(itemBuilder != null),

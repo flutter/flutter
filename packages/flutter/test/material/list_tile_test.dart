@@ -56,7 +56,7 @@ void main() {
 
     const double leftPadding = 10.0;
     const double rightPadding = 20.0;
-    Widget buildFrame({ bool dense: false, bool isTwoLine: false, bool isThreeLine: false, double textScaleFactor: 1.0, double subtitleScaleFactor }) {
+    Widget buildFrame({ bool dense = false, bool isTwoLine = false, bool isThreeLine = false, double textScaleFactor = 1.0, double subtitleScaleFactor }) {
       hasSubtitle = isTwoLine || isThreeLine;
       subtitleScaleFactor ??= textScaleFactor;
       return new MaterialApp(
@@ -256,9 +256,9 @@ void main() {
     ThemeData theme;
 
     Widget buildFrame({
-      bool enabled: true,
-      bool dense: false,
-      bool selected: false,
+      bool enabled = true,
+      bool dense = false,
+      bool selected = false,
       Color selectedColor,
       Color iconColor,
       Color textColor,

@@ -94,10 +94,10 @@ class FlutterTesterDevice extends Device {
     String route,
     @required DebuggingOptions debuggingOptions,
     Map<String, dynamic> platformArgs,
-    bool prebuiltApplication: false,
-    bool applicationNeedsRebuild: false,
-    bool usesTerminalUi: true,
-    bool ipv6: false,
+    bool prebuiltApplication = false,
+    bool applicationNeedsRebuild = false,
+    bool usesTerminalUi = true,
+    bool ipv6 = false,
   }) async {
     final BuildInfo buildInfo = debuggingOptions.buildInfo;
 

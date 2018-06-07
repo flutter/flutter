@@ -21,7 +21,7 @@ import 'print.dart';
 ///
 /// See [https://docs.flutter.io/flutter/foundation/foundation-library.html] for
 /// a complete list.
-bool debugAssertAllFoundationVarsUnset(String reason, { DebugPrintCallback debugPrintOverride: debugPrintThrottled }) {
+bool debugAssertAllFoundationVarsUnset(String reason, { DebugPrintCallback debugPrintOverride = debugPrintThrottled }) {
   assert(() {
     if (debugPrint != debugPrintOverride ||
         debugDefaultTargetPlatformOverride != null)

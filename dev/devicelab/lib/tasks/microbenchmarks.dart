@@ -23,7 +23,7 @@ TaskFunction createMicrobenchmarkTask() {
     final Device device = await devices.workingDevice;
     await device.unlock();
 
-    Future<Map<String, double>> _runMicrobench(String benchmarkPath, {bool previewDart2: true}) async {
+    Future<Map<String, double>> _runMicrobench(String benchmarkPath, {bool previewDart2 = true}) async {
       Future<Map<String, double>> _run() async {
         print('Running $benchmarkPath');
         final Directory appDir = dir(
@@ -86,9 +86,9 @@ TaskFunction createMicrobenchmarkTask() {
 }
 
 Future<Process> _startFlutter({
-  String command: 'run',
-  List<String> options: const <String>[],
-  bool canFail: false,
+  String command = 'run',
+  List<String> options = const <String>[],
+  bool canFail = false,
   Map<String, String> environment,
 }) {
   final List<String> args = <String>['run']..addAll(options);

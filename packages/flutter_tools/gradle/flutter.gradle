@@ -24,7 +24,7 @@ buildscript {
         }
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:3.0.1'
+        classpath 'com.android.tools.build:gradle:3.1.2'
     }
 }
 
@@ -256,6 +256,10 @@ class FlutterPlugin implements Plugin<Project> {
             target = project.property('target')
         }
 
+        Boolean verboseValue = null
+        if (project.hasProperty('verbose')) {
+            verboseValue = project.property('verbose').toBoolean()
+        }
         Boolean previewDart2Value = true
         if (project.hasProperty('preview-dart-2')) {
             previewDart2Value = project.property('preview-dart-2').toBoolean()
@@ -281,9 +285,9 @@ class FlutterPlugin implements Plugin<Project> {
         if (project.hasProperty('extra-gen-snapshot-options')) {
             extraGenSnapshotOptionsValue = project.property('extra-gen-snapshot-options')
         }
-        Boolean preferSharedLibraryValue = false
-        if (project.hasProperty('prefer-shared-library')) {
-            preferSharedLibraryValue = project.property('prefer-shared-library').toBoolean()
+        Boolean buildSharedLibraryValue = false
+        if (project.hasProperty('build-shared-library')) {
+            buildSharedLibraryValue = project.property('build-shared-library').toBoolean()
         }
         String targetPlatformValue = null
         if (project.hasProperty('target-platform')) {
@@ -310,11 +314,12 @@ class FlutterPlugin implements Plugin<Project> {
                 localEngine this.localEngine
                 localEngineSrcPath this.localEngineSrcPath
                 targetPath target
+                verbose verboseValue
                 previewDart2 previewDart2Value
                 fileSystemRoots fileSystemRootsValue
                 fileSystemScheme fileSystemSchemeValue
                 trackWidgetCreation trackWidgetCreationValue
-                preferSharedLibrary preferSharedLibraryValue
+                buildSharedLibrary buildSharedLibraryValue
                 targetPlatform targetPlatformValue
                 sourceDir project.file(project.flutter.source)
                 intermediateDir project.file("${project.buildDir}/${AndroidProject.FD_INTERMEDIATES}/flutter/${variant.name}")
@@ -353,6 +358,8 @@ abstract class BaseFlutterTask extends DefaultTask {
     @Input
     String targetPath
     @Optional @Input
+    Boolean verbose
+    @Optional @Input
     Boolean previewDart2
     @Optional @Input
     String[] fileSystemRoots
@@ -361,7 +368,7 @@ abstract class BaseFlutterTask extends DefaultTask {
     @Optional @Input
     Boolean trackWidgetCreation
     @Optional @Input
-    Boolean preferSharedLibrary
+    Boolean buildSharedLibrary
     @Optional @Input
     String targetPlatform
     File sourceDir
@@ -422,8 +429,8 @@ abstract class BaseFlutterTask extends DefaultTask {
                 if (extraGenSnapshotOptions != null) {
                     args "--extra-gen-snapshot-options", "${extraGenSnapshotOptions}"
                 }
-                if (preferSharedLibrary) {
-                    args "--prefer-shared-library"
+                if (buildSharedLibrary) {
+                    args "--build-shared-library"
                 }
                 if (targetPlatform != null) {
                     args "--target-platform", "${targetPlatform}"
@@ -442,6 +449,9 @@ abstract class BaseFlutterTask extends DefaultTask {
             args "build", "bundle"
             args "--suppress-analytics"
             args "--target", targetPath
+            if (verbose) {
+                args "--verbose"
+            }
             if (previewDart2) {
                 args "--preview-dart-2"
             } else {
@@ -487,7 +497,7 @@ class FlutterTask extends BaseFlutterTask {
             include "flutter_assets/**" // the working dir and its files
 
             if (buildMode != 'debug') {
-                if (preferSharedLibrary) {
+                if (buildSharedLibrary) {
                     include "app.so"
                 } else {
                     include "vm_snapshot_data"

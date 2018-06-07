@@ -82,10 +82,10 @@ class _DebugSize extends Size {
 class BoxConstraints extends Constraints {
   /// Creates box constraints with the given constraints.
   const BoxConstraints({
-    this.minWidth: 0.0,
-    this.maxWidth: double.infinity,
-    this.minHeight: 0.0,
-    this.maxHeight: double.infinity
+    this.minWidth = 0.0,
+    this.maxWidth = double.infinity,
+    this.minHeight = 0.0,
+    this.maxHeight = double.infinity
   });
 
   /// The minimum width that satisfies the constraints.
@@ -134,8 +134,8 @@ class BoxConstraints extends Constraints {
   ///  * [new BoxConstraints.tightFor], which is similar but instead of being
   ///    tight if the value is not infinite, is tight if the value is non-null.
   const BoxConstraints.tightForFinite({
-    double width: double.infinity,
-    double height: double.infinity
+    double width = double.infinity,
+    double height = double.infinity
   }): minWidth = width != double.infinity ? width : 0.0,
       maxWidth = width != double.infinity ? width : double.infinity,
       minHeight = height != double.infinity ? height : 0.0,
@@ -457,7 +457,7 @@ class BoxConstraints extends Constraints {
 
   @override
   bool debugAssertIsValid({
-    bool isAppliedConstraint: false,
+    bool isAppliedConstraint = false,
     InformationCollector informationCollector,
   }) {
     assert(() {
@@ -1602,7 +1602,7 @@ abstract class RenderBox extends RenderObject {
   ///
   /// When implementing a [RenderBox] subclass, to override the baseline
   /// computation, override [computeDistanceToActualBaseline].
-  double getDistanceToBaseline(TextBaseline baseline, { bool onlyReal: false }) {
+  double getDistanceToBaseline(TextBaseline baseline, { bool onlyReal = false }) {
     assert(!_debugDoingBaseline, 'Please see the documentation for computeDistanceToActualBaseline for the required calling conventions of this method.');
     assert(!debugNeedsLayout);
     assert(() {

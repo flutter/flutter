@@ -34,15 +34,15 @@ if [ -n "$TRAVIS" ]; then
     # suppressing output of sdkmanager to keep log under 4MB (travis limit)
     echo y | sdkmanager "tools" >/dev/null
     echo y | sdkmanager "platform-tools" >/dev/null
-    echo y | sdkmanager "build-tools;26.0.3" >/dev/null
-    echo y | sdkmanager "platforms;android-26" >/dev/null
+    echo y | sdkmanager "build-tools;27.0.3" >/dev/null
+    echo y | sdkmanager "platforms;android-27" >/dev/null
     echo y | sdkmanager "extras;android;m2repository" >/dev/null
     echo y | sdkmanager "extras;google;m2repository" >/dev/null
     echo y | sdkmanager "patcher;v4" >/dev/null
     sdkmanager --list
-    wget http://services.gradle.org/distributions/gradle-4.1-bin.zip
-    unzip -qq gradle-4.1-bin.zip
-    export GRADLE_HOME=$PWD/gradle-4.1
+    wget http://services.gradle.org/distributions/gradle-4.4-bin.zip
+    unzip -qq gradle-4.4-bin.zip
+    export GRADLE_HOME=$PWD/gradle-4.4
     export PATH=$GRADLE_HOME/bin:$PATH
     gradle -v
     ./bin/flutter doctor

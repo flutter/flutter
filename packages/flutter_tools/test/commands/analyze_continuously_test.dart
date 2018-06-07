@@ -109,7 +109,7 @@ void main() {
   });
 }
 
-void _createSampleProject(Directory directory, { bool brokenCode: false }) {
+void _createSampleProject(Directory directory, { bool brokenCode = false }) {
   final File pubspecFile = fs.file(fs.path.join(directory.path, 'pubspec.yaml'));
   pubspecFile.writeAsStringSync('''
 name: foo_project

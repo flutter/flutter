@@ -57,8 +57,8 @@ TestRenderingFlutterBinding get renderer {
 /// has no build phase.
 void layout(RenderBox box, {
   BoxConstraints constraints,
-  Alignment alignment: Alignment.center,
-  EnginePhase phase: EnginePhase.layout,
+  Alignment alignment = Alignment.center,
+  EnginePhase phase = EnginePhase.layout,
 }) {
   assert(box != null); // If you want to just repump the last box, call pumpFrame().
   assert(box.parent == null); // We stick the box in another, so you can't reuse it easily, sorry.
@@ -78,7 +78,7 @@ void layout(RenderBox box, {
   pumpFrame(phase: phase);
 }
 
-void pumpFrame({ EnginePhase phase: EnginePhase.layout }) {
+void pumpFrame({ EnginePhase phase = EnginePhase.layout }) {
   assert(renderer != null);
   assert(renderer.renderView != null);
   assert(renderer.renderView.child != null); // call layout() first!

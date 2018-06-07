@@ -359,8 +359,8 @@ class SliverConstraints extends Constraints {
   ///
   /// Useful for slivers that have [RenderBox] children.
   BoxConstraints asBoxConstraints({
-    double minExtent: 0.0,
-    double maxExtent: double.infinity,
+    double minExtent = 0.0,
+    double maxExtent = double.infinity,
     double crossAxisExtent,
   }) {
     crossAxisExtent ??= this.crossAxisExtent;
@@ -385,7 +385,7 @@ class SliverConstraints extends Constraints {
 
   @override
   bool debugAssertIsValid({
-    bool isAppliedConstraint: false,
+    bool isAppliedConstraint = false,
     InformationCollector informationCollector,
   }) {
     assert(() {
@@ -487,15 +487,15 @@ class SliverGeometry extends Diagnosticable {
   ///
   /// The other arguments must not be null.
   const SliverGeometry({
-    this.scrollExtent: 0.0,
-    this.paintExtent: 0.0,
-    this.paintOrigin: 0.0,
+    this.scrollExtent = 0.0,
+    this.paintExtent = 0.0,
+    this.paintOrigin = 0.0,
     double layoutExtent,
-    this.maxPaintExtent: 0.0,
-    this.maxScrollObstructionExtent: 0.0,
+    this.maxPaintExtent = 0.0,
+    this.maxScrollObstructionExtent = 0.0,
     double hitTestExtent,
     bool visible,
-    this.hasVisualOverflow: false,
+    this.hasVisualOverflow = false,
     this.scrollOffsetCorrection,
     double cacheExtent,
   }) : assert(scrollExtent != null),

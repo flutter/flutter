@@ -84,7 +84,7 @@ class PaintingContext {
   ///
   ///  * [RenderObject.isRepaintBoundary], which determines if a [RenderObject]
   ///    has a composited layer.
-  static void repaintCompositedChild(RenderObject child, { bool debugAlsoPaintedParent: false }) {
+  static void repaintCompositedChild(RenderObject child, { bool debugAlsoPaintedParent = false }) {
     assert(child.isRepaintBoundary);
     assert(child._needsPaint);
     assert(() {
@@ -519,7 +519,7 @@ abstract class Constraints {
   ///
   /// Returns the same as [isNormalized] if asserts are disabled.
   bool debugAssertIsValid({
-    bool isAppliedConstraint: false,
+    bool isAppliedConstraint = false,
     InformationCollector informationCollector
   }) {
     assert(isNormalized);
@@ -822,7 +822,12 @@ class PipelineOwner {
   SemanticsOwner get semanticsOwner => _semanticsOwner;
   SemanticsOwner _semanticsOwner;
 
-  int _outstandingSemanticsHandle = 0;
+  /// The number of clients registered to listen for semantics.
+  ///
+  /// The number is increased whenever [ensureSemantics] is called and decreased
+  /// when [SemanticsHandle.dispose] is called.
+  int get debugOutstandingSemanticsHandles => _outstandingSemanticsHandles;
+  int _outstandingSemanticsHandles = 0;
 
   /// Opens a [SemanticsHandle] and calls [listener] whenever the semantics tree
   /// updates.
@@ -837,8 +842,8 @@ class PipelineOwner {
   /// objects for a given [PipelineOwner] are closed, the [PipelineOwner] stops
   /// maintaining the semantics tree.
   SemanticsHandle ensureSemantics({ VoidCallback listener }) {
-    _outstandingSemanticsHandle += 1;
-    if (_outstandingSemanticsHandle == 1) {
+    _outstandingSemanticsHandles += 1;
+    if (_outstandingSemanticsHandles == 1) {
       assert(_semanticsOwner == null);
       _semanticsOwner = new SemanticsOwner();
       if (onSemanticsOwnerCreated != null)
@@ -849,8 +854,8 @@ class PipelineOwner {
 
   void _didDisposeSemanticsHandle() {
     assert(_semanticsOwner != null);
-    _outstandingSemanticsHandle -= 1;
-    if (_outstandingSemanticsHandle == 0) {
+    _outstandingSemanticsHandles -= 1;
+    if (_outstandingSemanticsHandles == 0) {
       _semanticsOwner.dispose();
       _semanticsOwner = null;
       if (onSemanticsOwnerDisposed != null)
@@ -1480,7 +1485,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   /// children unconditionally. It is the [layout] method's responsibility (as
   /// implemented here) to return early if the child does not need to do any
   /// work to update its layout information.
-  void layout(Constraints constraints, { bool parentUsesSize: false }) {
+  void layout(Constraints constraints, { bool parentUsesSize = false }) {
     assert(constraints != null);
     assert(constraints.debugAssertIsValid(
       isAppliedConstraint: true,
@@ -1721,7 +1726,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   ///
   /// This can be used to record metrics about whether the node should actually
   /// be a repaint boundary.
-  void debugRegisterRepaintBoundaryPaint({ bool includedParent: true, bool includedChild: false }) { }
+  void debugRegisterRepaintBoundaryPaint({ bool includedParent = true, bool includedChild = false }) { }
 
   /// Whether this render object always needs compositing.
   ///
@@ -2499,9 +2504,9 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   /// will be prefixed by that string.
   @override
   String toStringDeep({
-    String prefixLineOne: '',
-    String prefixOtherLines: '',
-    DiagnosticLevel minLevel: DiagnosticLevel.debug,
+    String prefixLineOne = '',
+    String prefixOtherLines = '',
+    DiagnosticLevel minLevel = DiagnosticLevel.debug,
   }) {
     RenderObject debugPreviousActiveLayout;
     assert(() {
@@ -2528,8 +2533,8 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   /// [toStringDeep], but does not recurse to any children.
   @override
   String toStringShallow({
-    String joiner: '; ',
-    DiagnosticLevel minLevel: DiagnosticLevel.debug,
+    String joiner = '; ',
+    DiagnosticLevel minLevel = DiagnosticLevel.debug,
   }) {
     RenderObject debugPreviousActiveLayout;
     assert(() {
@@ -2985,7 +2990,7 @@ class FlutterErrorDetailsForRendering extends FlutterErrorDetails {
     String context,
     this.renderObject,
     InformationCollector informationCollector,
-    bool silent: false
+    bool silent = false
   }) : super(
     exception: exception,
     stack: stack,

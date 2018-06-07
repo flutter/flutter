@@ -41,7 +41,7 @@ class AboutListTile extends StatelessWidget {
   /// values default to the empty string.
   const AboutListTile({
     Key key,
-    this.icon: const Icon(null),
+    this.icon = const Icon(null),
     this.child,
     this.applicationName,
     this.applicationVersion,

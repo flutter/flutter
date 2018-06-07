@@ -62,10 +62,10 @@ class RenderPerformanceOverlay extends RenderBox {
   /// The [optionsMask], [rasterizerThreshold], [checkerboardRasterCacheImages],
   /// and [checkerboardOffscreenLayers] arguments must not be null.
   RenderPerformanceOverlay({
-    int optionsMask: 0,
-    int rasterizerThreshold: 0,
-    bool checkerboardRasterCacheImages: false,
-    bool checkerboardOffscreenLayers: false,
+    int optionsMask = 0,
+    int rasterizerThreshold = 0,
+    bool checkerboardRasterCacheImages = false,
+    bool checkerboardOffscreenLayers = false,
   }) : assert(optionsMask != null),
        assert(rasterizerThreshold != null),
        assert(checkerboardRasterCacheImages != null),

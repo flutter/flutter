@@ -108,7 +108,7 @@ TaskFunction createBasicMaterialCompileTest() {
 class StartupTest {
   static const Duration _startupTimeout = const Duration(minutes: 5);
 
-  const StartupTest(this.testDirectory, { this.reportMetrics: true });
+  const StartupTest(this.testDirectory, { this.reportMetrics = true });
 
   final String testDirectory;
   final bool reportMetrics;
@@ -221,7 +221,7 @@ class CompileTest {
     );
   }
 
-  static Future<Map<String, dynamic>> _compileAot({ bool previewDart2: true }) async {
+  static Future<Map<String, dynamic>> _compileAot({ bool previewDart2 = true }) async {
     // Generate blobs instead of assembly.
     await flutter('clean');
     final Stopwatch watch = new Stopwatch()..start();
@@ -258,7 +258,7 @@ class CompileTest {
     return metrics;
   }
 
-  static Future<Map<String, dynamic>> _compileApp({ bool previewDart2: true }) async {
+  static Future<Map<String, dynamic>> _compileApp({ bool previewDart2 = true }) async {
     await flutter('clean');
     final Stopwatch watch = new Stopwatch();
     int releaseSizeInBytes;
@@ -299,7 +299,7 @@ class CompileTest {
     };
   }
 
-  static Future<Map<String, dynamic>> _compileDebug({ bool previewDart2: true }) async {
+  static Future<Map<String, dynamic>> _compileDebug({ bool previewDart2 = true }) async {
     await flutter('clean');
     final Stopwatch watch = new Stopwatch();
     final List<String> options = <String>['--debug'];

@@ -362,9 +362,9 @@ class RenderCustomPaint extends RenderProxyBox {
   RenderCustomPaint({
     CustomPainter painter,
     CustomPainter foregroundPainter,
-    Size preferredSize: Size.zero,
-    this.isComplex: false,
-    this.willChange: false,
+    Size preferredSize = Size.zero,
+    this.isComplex = false,
+    this.willChange = false,
     RenderBox child,
   }) : assert(preferredSize != null),
        _painter = painter,

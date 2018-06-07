@@ -13,7 +13,7 @@ import '../ios/mac.dart';
 import 'build.dart';
 
 class BuildIOSCommand extends BuildSubCommand {
-  BuildIOSCommand({bool verboseHelp: false}) {
+  BuildIOSCommand({bool verboseHelp = false}) {
     usesTargetOption();
     usesFlavorOption();
     usesPubOption();

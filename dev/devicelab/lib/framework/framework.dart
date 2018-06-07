@@ -144,7 +144,7 @@ class _TaskRunner {
 /// A result of running a single task.
 class TaskResult {
   /// Constructs a successful result.
-  TaskResult.success(this.data, {this.benchmarkScoreKeys: const <String>[]})
+  TaskResult.success(this.data, {this.benchmarkScoreKeys = const <String>[]})
       : this.succeeded = true,
         this.message = 'success' {
     const JsonEncoder prettyJson = const JsonEncoder.withIndent('  ');
