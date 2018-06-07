@@ -319,7 +319,7 @@ class InjectPluginsResult{
 void injectPlugins({String directory}) {
   directory ??= fs.currentDirectory.path;
   final List<Plugin> plugins = _findPlugins(directory);
-  final bool changed = _writeFlutterPluginsList(directory, plugins) || true; // XXX
+  final bool changed = _writeFlutterPluginsList(directory, plugins);
 
   if (fs.isDirectorySync(fs.path.join(directory, 'android')))
     _writeAndroidPluginRegistrant(directory, plugins);
