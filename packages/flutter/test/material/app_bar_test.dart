@@ -1214,7 +1214,10 @@ void main() {
                         textDirection: TextDirection.ltr,
                       ),
                       new TestSemantics(
-                        flags: <SemanticsFlag>[SemanticsFlag.namesRoute],
+                        flags: <SemanticsFlag>[
+                          SemanticsFlag.namesRoute,
+                          SemanticsFlag.isHeader,
+                        ],
                         label: 'Title',
                         textDirection: TextDirection.ltr,
                       ),
@@ -1297,7 +1300,10 @@ void main() {
                             textDirection: TextDirection.rtl,
                           ),
                           new TestSemantics(
-                            flags: <SemanticsFlag>[SemanticsFlag.namesRoute],
+                            flags: <SemanticsFlag>[
+                              SemanticsFlag.namesRoute,
+                              SemanticsFlag.isHeader,
+                            ],
                             label: 'Title',
                             textDirection: TextDirection.rtl,
                           ),

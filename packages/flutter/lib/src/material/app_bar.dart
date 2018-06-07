@@ -393,20 +393,24 @@ class _AppBarState extends State<AppBar> {
 
     Widget title = widget.title;
     if (title != null) {
+      bool namesRoute;
       switch (defaultTargetPlatform) {
         case TargetPlatform.android:
         case TargetPlatform.fuchsia:
-           title = new Semantics(namesRoute: true, child: title);
+           namesRoute = true;
            break;
         case TargetPlatform.iOS:
           break;
       }
-
       title = new DefaultTextStyle(
         style: centerStyle,
         softWrap: false,
         overflow: TextOverflow.ellipsis,
-        child: title,
+        child: new Semantics(
+          namesRoute: namesRoute,
+          child: title,
+          header: true,
+        ),
       );
     }
 
