@@ -305,13 +305,18 @@ abstract class ImageProvider<T> {
   /// widget can be evicted using a [NetworkImage] with a matching url.
   ///
   /// ```dart
-  /// Widget build(BuildContext context) {
-  ///   return new Image.network(url);
-  /// }
+  /// class MyWidget extends StatelessWidget {
+  ///   final String url = '...';
   ///
-  /// void evictImage() {
-  ///   final NetworkImage provider = new NetworkImage(url);
-  ///   provider.evict().then<void>((bool value) => debugPrint('removed image!'));
+  ///   @override
+  ///   Widget build(BuildContext context) {
+  ///     return new Image.network(url);
+  ///   }
+  ///
+  ///   void evictImage() {
+  ///     final NetworkImage provider = new NetworkImage(url);
+  ///     provider.evict().then<void>((bool value) => debugPrint('removed image!'));
+  ///   }
   /// }
   /// ```
   Future<bool> evict({ImageCache cache, ImageConfiguration configuration = ImageConfiguration.empty}) {
