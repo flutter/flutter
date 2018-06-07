@@ -313,7 +313,7 @@ abstract class ImageProvider<T> {
   ///   final NetworkImage provider = new NetworkImage(url);
   ///   provider.evict().then<void>((bool value) => debugPrint('removed image!'));
   /// }
-  ///```
+  /// ```
   Future<bool> evict({ImageCache cache, ImageConfiguration configuration = ImageConfiguration.empty}) {
     cache ??= imageCache;
     return obtainKey(configuration).then<bool>(imageCache.evict);
