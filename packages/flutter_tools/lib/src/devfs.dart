@@ -485,7 +485,7 @@ class DevFS {
       // that it is initiated by user key press).
       final List<String> invalidatedFiles = <String>[];
       final Set<Uri> filesUris = new Set<Uri>();
-      for (Uri uri in dirtyEntries.keys) {
+      for (Uri uri in dirtyEntries.keys.toList()) {
         if (!uri.path.startsWith(assetBuildDirPrefix)) {
           final DevFSContent content = dirtyEntries[uri];
           if (content is DevFSFileContent) {
