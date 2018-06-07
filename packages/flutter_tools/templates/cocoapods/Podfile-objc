@@ -52,6 +52,7 @@ target 'Runner' do
     File.symlink(p[:path], symlink)
     pod p[:name], :path => File.join(symlink, 'ios')
   }
+  pod 'PluginRegistrant', :path=>File.join('.', 'Flutter', 'PluginRegistrant')
 end
 
 post_install do |installer|

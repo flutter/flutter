@@ -136,6 +136,14 @@ BuildApp() {
     fi
     StreamOutput "done"
 
+    RunCommand eval "$(echo "static const int Moo = 88;" | xcrun clang -x c \
+        ${arch_flags} \
+        -dynamiclib \
+        -Xlinker -rpath -Xlinker '@executable_path/Frameworks' \
+        -Xlinker -rpath -Xlinker '@loader_path/Frameworks' \
+        -install_name '@rpath/PluginRegistrant.framework/App' \
+        -o "${derived_dir}/PluginRegistrant.framework/App" -)"
+
     RunCommand cp -r -- "${build_dir}/aot/App.framework" "${derived_dir}"
   else
     RunCommand mkdir -p -- "${derived_dir}/App.framework"
