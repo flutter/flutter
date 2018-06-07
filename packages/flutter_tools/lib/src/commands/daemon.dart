@@ -385,7 +385,6 @@ class AppDomain extends Domain {
 
     final FlutterDevice flutterDevice = new FlutterDevice(
       device,
-      previewDart2: options.buildInfo.previewDart2,
       trackWidgetCreation: trackWidgetCreation,
       dillOutputPath: dillOutputPath,
     );

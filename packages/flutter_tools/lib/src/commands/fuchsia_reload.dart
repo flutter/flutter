@@ -132,13 +132,8 @@ class FuchsiaReloadCommand extends FlutterCommand {
       final List<Uri> observatoryUris = fullAddresses.map(
         (String a) => Uri.parse('http://$a')
       ).toList();
-      final FuchsiaDevice device = new FuchsiaDevice(
-          fullAddresses[0], name: _address);
-      final FlutterDevice flutterDevice = new FlutterDevice(
-        device,
-        trackWidgetCreation: false,
-        previewDart2: false,
-      );
+      final FuchsiaDevice device = new FuchsiaDevice(fullAddresses[0], name: _address);
+      final FlutterDevice flutterDevice = new FlutterDevice(device, trackWidgetCreation: false);
       flutterDevice.observatoryUris = observatoryUris;
       final HotRunner hotRunner = new HotRunner(
         <FlutterDevice>[flutterDevice],
