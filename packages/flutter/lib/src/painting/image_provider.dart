@@ -12,6 +12,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 
 import 'binding.dart';
+import 'image_cache.dart';
 import 'image_stream.dart';
 
 /// Configuration information passed to the [ImageProvider.resolve] method to
@@ -293,6 +294,8 @@ abstract class ImageProvider<T> {
   /// passed to an [Image] widget, but it does need to create a key which is
   /// equal to one.
   ///
+  /// The [cache] is optional and defaults to the global image cache.
+  ///
   /// The [configuration] is optional and defaults to
   /// [ImageConfiguration.empty].
   ///
@@ -308,7 +311,8 @@ abstract class ImageProvider<T> {
   ///   provider.evict().then<void>((bool value) => debugPrint('removed image!'));
   /// }
   ///```
-  Future<bool> evict([ImageConfiguration configuration = ImageConfiguration.empty]) {
+  Future<bool> evict({ImageCache cache, ImageConfiguration configuration = ImageConfiguration.empty}) {
+    cache ??= imageCache;
     return obtainKey(configuration).then<bool>(imageCache.evict);
   }
 
