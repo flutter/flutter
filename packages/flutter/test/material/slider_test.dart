@@ -1202,7 +1202,7 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgets('Slider semantics with normalizeSemanticValue = false', (WidgetTester tester) async {
+  testWidgets('Slider semantics with custom formatter', (WidgetTester tester) async {
     final SemanticsTester semantics = new SemanticsTester(tester);
 
     await tester.pumpWidget(new Directionality(
@@ -1215,7 +1215,7 @@ void main() {
             min: 0.0,
             max: 200.0,
             divisions: 10,
-            normalizedSemanticsValue: false,
+            semanticFormatterCallback: (double value) => value.round().toString(),
             onChanged: (double v) {},
           ),
         ),

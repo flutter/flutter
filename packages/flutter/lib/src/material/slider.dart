@@ -20,6 +20,13 @@ import 'theme.dart';
 // Examples can assume:
 // int _duelCommandment = 1;
 
+/// A callback that formats a numeric value from a [Slider] widget.
+typedef String SemanticFormatterCallback(double value);
+
+String _kDefaultSemanticFormatterCallback(double value) {
+  return '${(value * 100).round()}%';
+}
+
 /// A Material Design slider.
 ///
 /// Used to select from a range of values.
@@ -110,10 +117,11 @@ class Slider extends StatefulWidget {
     this.label,
     this.activeColor,
     this.inactiveColor,
-    this.normalizedSemanticsValue = true,
+    this.semanticFormatterCallback = _kDefaultSemanticFormatterCallback,
   }) : assert(value != null),
        assert(min != null),
        assert(max != null),
+       assert(semanticFormatterCallback != null),
        assert(min <= max),
        assert(value >= min && value <= max),
        assert(divisions == null || divisions > 0),
@@ -289,15 +297,35 @@ class Slider extends StatefulWidget {
   /// appearance of various components of the slider.
   final Color inactiveColor;
 
-  /// Whether to normalize the semantic value of the slider to a percentage.
+  /// The callback used to create a semantic value from a slider value.
+  ///
+  /// Defaults to formatting values as a percentage.
   ///
   /// This is used by accessibility frameworks like TalkBack on Android to
-  /// inform users what the currently selected value is. If false, the value
-  /// is communicated instead of the percentage rounded to the nearest whole
-  /// number.
+  /// inform users what the currently selected value is with more context.
   ///
-  /// Defaults to true.
-  final bool normalizedSemanticsValue;
+  /// ## Sample code:
+  ///
+  /// In the example below, a slider for currency values is configured to
+  /// announce a value with a currency label.
+  ///
+  /// ```dart
+  /// new Slider(
+  ///   value: _dollars.toDouble(),
+  ///   min: 20.0,
+  ///   max: 330.0,
+  ///   label: '$_duelCommandment',
+  ///   onChanged: (double newValue) {
+  ///     setState(() {
+  ///       _dollars = newValue.round();
+  ///     });
+  ///   },
+  ///   semanticFormatterCallback: (double newValue) {
+  ///     return '${newValue.round()} dollars';
+  ///   }
+  ///  )
+  /// ```
+  final SemanticFormatterCallback semanticFormatterCallback;
 
   @override
   _SliderState createState() => new _SliderState();
@@ -426,7 +454,7 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
       onChangeStart: widget.onChangeStart != null ? _handleDragStart : null,
       onChangeEnd: widget.onChangeEnd != null ? _handleDragEnd : null,
       state: this,
-      normalizedSemanticsValue: widget.normalizedSemanticsValue,
+      semanticFormatterCallback: widget.semanticFormatterCallback,
     );
   }
 }
@@ -443,7 +471,7 @@ class _SliderRenderObjectWidget extends LeafRenderObjectWidget {
     this.onChangeStart,
     this.onChangeEnd,
     this.state,
-    this.normalizedSemanticsValue,
+    this.semanticFormatterCallback,
   }) : super(key: key);
 
   final double value;
@@ -454,7 +482,7 @@ class _SliderRenderObjectWidget extends LeafRenderObjectWidget {
   final ValueChanged<double> onChanged;
   final ValueChanged<double> onChangeStart;
   final ValueChanged<double> onChangeEnd;
-  final bool normalizedSemanticsValue;
+  final SemanticFormatterCallback semanticFormatterCallback;
   final _SliderState state;
 
   @override
@@ -471,7 +499,7 @@ class _SliderRenderObjectWidget extends LeafRenderObjectWidget {
       onChangeEnd: onChangeEnd,
       state: state,
       textDirection: Directionality.of(context),
-      normalizedSemanticsValue: normalizedSemanticsValue,
+      semanticFormatterCallback: semanticFormatterCallback,
       platform: Theme.of(context).platform,
     );
   }
@@ -489,7 +517,7 @@ class _SliderRenderObjectWidget extends LeafRenderObjectWidget {
       ..onChangeStart = onChangeStart
       ..onChangeEnd = onChangeEnd
       ..textDirection = Directionality.of(context)
-      ..normalizedSemanticsValue = normalizedSemanticsValue
+      ..semanticFormatterCallback = semanticFormatterCallback
       ..platform = Theme.of(context).platform;
     // Ticker provider cannot change since there's a 1:1 relationship between
     // the _SliderRenderObjectWidget object and the _SliderState object.
@@ -506,7 +534,7 @@ class _RenderSlider extends RenderBox {
     MediaQueryData mediaQueryData,
     TargetPlatform platform,
     ValueChanged<double> onChanged,
-    bool normalizedSemanticsValue,
+    SemanticFormatterCallback semanticFormatterCallback,
     this.onChangeStart,
     this.onChangeEnd,
     @required _SliderState state,
@@ -515,7 +543,7 @@ class _RenderSlider extends RenderBox {
        assert(state != null),
        assert(textDirection != null),
        _platform = platform,
-       _normalizedSemanticsValue = normalizedSemanticsValue,
+       _semanticFormatterCallback = semanticFormatterCallback,
        _label = label,
        _value = value,
        _divisions = divisions,
@@ -611,13 +639,12 @@ class _RenderSlider extends RenderBox {
     markNeedsSemanticsUpdate();
   }
 
-  bool _normalizedSemanticsValue;
-  bool get normalizedSemanticsValue => _normalizedSemanticsValue;
-  set normalizedSemanticsValue(bool value) {
-    if (_normalizedSemanticsValue == value)
+  SemanticFormatterCallback _semanticFormatterCallback;
+  SemanticFormatterCallback get semanticFormatterCallback => _semanticFormatterCallback;
+  set semanticFormatterCallback(SemanticFormatterCallback value) {
+    if (_semanticFormatterCallback == value)
       return;
-    _normalizedSemanticsValue = value;
-    markNeedsSemanticsUpdate();
+    _semanticFormatterCallback = value;
   }
 
   int get divisions => _divisions;
@@ -1059,16 +1086,9 @@ class _RenderSlider extends RenderBox {
       config.textDirection = textDirection;
       config.onIncrease = _increaseAction;
       config.onDecrease = _decreaseAction;
-
-      if (normalizedSemanticsValue) {
-        config.value = '${(value * 100).round().clamp(0, 100)}%';
-        config.increasedValue = '${((value + _semanticActionUnit).clamp(0.0, 1.0) * 100).round()}%';
-        config.decreasedValue = '${((value - _semanticActionUnit).clamp(0.0, 1.0) * 100).round()}%' ;
-      } else {
-        config.value = '${_state._lerp(value).round()}';
-        config.increasedValue = '${_state._lerp((value + _semanticActionUnit).clamp(0.0, 1.0)).round()}';
-        config.decreasedValue = '${_state._lerp((value - _semanticActionUnit).clamp(0.0, 1.0)).round()}';
-      }
+      config.value = semanticFormatterCallback(_state._lerp(value));
+      config.increasedValue = semanticFormatterCallback(_state._lerp((value + _semanticActionUnit).clamp(0.0, 1.0)));
+      config.decreasedValue = semanticFormatterCallback(_state._lerp((value - _semanticActionUnit).clamp(0.0, 1.0)));
     }
   }
 

@@ -200,7 +200,7 @@ class _SliderDemoState extends State<SliderDemo> {
                     min: 0.0,
                     max: 200.0,
                     divisions: 5,
-                    normalizedSemanticsValue: false,
+                    semanticFormatterCallback: (double value) => value.round().toString(),
                     label: '${_discreteValue.round()}',
                     onChanged: (double value) {
                       setState(() {
