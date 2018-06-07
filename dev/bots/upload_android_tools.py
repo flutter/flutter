@@ -5,8 +5,8 @@
 
 """
 This script takes an Android Tools tree, creates a tar.gz archive and
-uploads it to Google Cloud Storage at gs://mojo/android/tool. It also produces
-the VERSION stamp files with the sha1 code of the uploaded archive.
+uploads it to Google Cloud Storage at gs://flutter_infra/android/tools. It also
+produces the VERSION stamp files with the sha1 code of the uploaded archive.
 
 This script operates in the INSTALL_DIR directory, so it automatically updates
 your current installation of the android tools binaries on success. On failure
@@ -88,7 +88,7 @@ def Upload(tools_name, sha1):
   upload_cmd = ['python', GSUTIL_PATH, 'cp',
                 '-n', # Do not upload if the file already exists.
                 os.path.join(INSTALL_DIR, file_name),
-                'gs://mojo/android/tool/%s' % file_name]
+                'gs://flutter_infra/android/tools/%s' % file_name]
 
   print "Uploading ' + tools_name + ' tools to GCS."
   if not RunCommand(upload_cmd):
