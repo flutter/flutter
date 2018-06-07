@@ -4248,3 +4248,27 @@ class RenderFollowerLayer extends RenderProxyBox {
     properties.add(new TransformProperty('current transform matrix', getCurrentTransform()));
   }
 }
+
+/// Render object which inserts an [AnnotatedRegionLayer] into the layer tree.
+///
+/// See also:
+///
+///   * [Layer.findRegion], for an example of how this value is retrieved.
+class AnnotatedRegionRenderObject<T> extends RenderProxyBox {
+  /// The value to be annotated in the layer tree.
+  T value;
+
+  @override
+  final bool alwaysNeedsCompositing = true;
+
+  @override
+  void paint(PaintingContext context, Offset offset) {
+    if (child != null) {
+      context.pushLayer(
+        new AnnotatedRegionLayer<T>(value),
+        super.paint,
+        offset,
+      );
+    }
+  }
+}

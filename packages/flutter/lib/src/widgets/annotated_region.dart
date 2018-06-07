@@ -9,6 +9,10 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/src/widgets/framework.dart';
 
 /// Annotates a region of the layer tree with a value.
+///
+/// See also:
+///
+///   * [Layer.findRegion], for an example of how this value is retrieved.
 class AnnotatedRegion<T> extends SingleChildRenderObjectWidget {
   /// Creates a new annotated region.
   const AnnotatedRegion({
@@ -34,22 +38,3 @@ class AnnotatedRegion<T> extends SingleChildRenderObjectWidget {
   }
 }
 
-/// Render object for the [AnnotatedRegion].
-class AnnotatedRegionRenderObject<T> extends RenderProxyBox {
-  /// The value to be annotated in the layer tree.
-  T value;
-
-  @override
-  final bool alwaysNeedsCompositing = true;
-
-  @override
-  void paint(PaintingContext context, Offset offset) {
-    if (child != null) {
-      context.pushLayer(
-        new AnnotatedRegionLayer<T>(value),
-        super.paint,
-        offset,
-      );
-    }
-  }
-}
