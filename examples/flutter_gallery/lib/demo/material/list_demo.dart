@@ -296,6 +296,7 @@ class DraggableListState extends State<DraggableList> with TickerProviderStateMi
   int dragStartIndex = 0;
   int ghostIndex = 0;
   int currentIndex = 0;
+  int nextIndex = 0;
 
   bool scrolling = false;
 
@@ -304,6 +305,7 @@ class DraggableListState extends State<DraggableList> with TickerProviderStateMi
     super.initState();
     entranceController = new AnimationController(vsync: this, value: 0.0, duration: const Duration(milliseconds: 200));
     ghostController = new AnimationController(vsync: this, value: 0.0, duration: const Duration(milliseconds: 200));
+    entranceController.addStatusListener(_onEntranceStatusChanged);
   }
 
   @override
@@ -387,14 +389,8 @@ class DraggableListState extends State<DraggableList> with TickerProviderStateMi
         builder: _buildDragTarget,
         onWillAccept: (Key toAccept) {
           setState(() {
-            if (ghostController.isDismissed) {
-              currentIndex = index;
-              ghostController.reverse(from: 1.0).whenCompleteOrCancel(() {
-                // The swap is completed when the ghost controller finishes.
-                ghostIndex = index;
-              });
-              entranceController.forward(from: 0.0);
-            }
+            nextIndex = index;
+            _requestAnimationTo(nextIndex);
           });
           _scrollTo(context);
           // If the target is not the original starting point, then we will accept the drop.
@@ -408,6 +404,34 @@ class DraggableListState extends State<DraggableList> with TickerProviderStateMi
     });
   }
 
+  void _requestAnimationTo(int index) {
+    print('considering a move from $currentIndex to $index');
+    if (index == currentIndex) {
+      return;
+    }
+    if (entranceController.isCompleted) {
+      print('moving from $currentIndex to $index');
+      currentIndex = index;
+      ghostController.reverse(from: 1.0).whenCompleteOrCancel(() {
+        // The swap is completed when the ghost controller finishes.
+        ghostIndex = index;
+      });
+      entranceController.forward(from: 0.0);
+    } else {
+      print('animation in progress, waiting until later to move to $nextIndex');
+    }
+  }
+
+  void _onEntranceStatusChanged(AnimationStatus status) {
+    if (status == AnimationStatus.completed) {
+      print('status now set to ${entranceController.status}');
+      // If the next index has changed, then we should animate to it.
+      setState(() {
+        _requestAnimationTo(nextIndex);
+      });
+    }
+  }
+
   // Scrolls to a target context if it's not on the screen.
   void _scrollTo(BuildContext context) {
     if (scrolling) 
@@ -417,8 +441,8 @@ class DraggableListState extends State<DraggableList> with TickerProviderStateMi
     assert(viewport != null);
     const double margin = 48.0;
     final double scrollOffset = scrollController.offset;
-    final double topOffset = viewport.getOffsetToReveal(contextObject, 0.0) - margin;
-    final double bottomOffset = viewport.getOffsetToReveal(contextObject, 1.0) + margin;
+    final double topOffset = viewport.getOffsetToReveal(contextObject, 0.0).offset - margin;
+    final double bottomOffset = viewport.getOffsetToReveal(contextObject, 1.0).offset + margin;
     final bool onScreen = scrollOffset <= topOffset && scrollOffset >= bottomOffset; 
     if (!onScreen) {
       scrolling = true;
