@@ -48,7 +48,7 @@ void main() {
       return await device.startApp(null,
           mainPath: mainPath,
           debuggingOptions: new DebuggingOptions.enabled(
-              const BuildInfo(BuildMode.debug, null, previewDart2: true)));
+              const BuildInfo(BuildMode.debug, null)));
     }
 
     testUsingContext('start', () async {

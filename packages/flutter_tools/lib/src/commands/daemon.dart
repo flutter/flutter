@@ -334,7 +334,6 @@ class AppDomain extends Domain {
     final BuildInfo buildInfo = new BuildInfo(
       getBuildModeForName(mode) ?? BuildMode.debug,
       flavor,
-      previewDart2: _getBoolArg(args, 'preview-dart-2'),
     );
     DebuggingOptions options;
     if (buildInfo.isRelease) {
