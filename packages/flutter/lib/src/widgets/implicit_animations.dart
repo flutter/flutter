@@ -210,7 +210,7 @@ abstract class ImplicitlyAnimatedWidget extends StatefulWidget {
   final Duration duration;
 
   @override
-  AnimatedWidgetBaseState<ImplicitlyAnimatedWidget> createState();
+  ImplicitlyAnimatedWidgetState<ImplicitlyAnimatedWidget> createState();
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
@@ -230,10 +230,17 @@ typedef Tween<T> TweenVisitor<T>(Tween<T> tween, T targetValue, TweenConstructor
 
 /// A base class for widgets with implicit animations.
 ///
-/// Subclasses must implement the [forEachTween] method to help
-/// [AnimatedWidgetBaseState] iterate through the subclasses' widget's fields
-/// and animate them.
-abstract class AnimatedWidgetBaseState<T extends ImplicitlyAnimatedWidget> extends State<T> with SingleTickerProviderStateMixin {
+/// [ImplicitlyAnimatedWidgetState] requires that subclasses respond to the
+/// animation, themselves. If you would like `setState()` to be called
+/// automatically as the animation changes, use [AnimatedWidgetBaseState].
+///
+/// Subclasses must implement the [forEachTween] method to allow
+/// [ImplicitlyAnimatedWidgetState] to iterate through the subclasses' widget's
+/// fields and animate them.
+abstract class ImplicitlyAnimatedWidgetState<T extends ImplicitlyAnimatedWidget> extends State<T> with SingleTickerProviderStateMixin {
+  /// The animation controller driving this widget's implicit animations.
+  @protected
+  AnimationController get controller => _controller;
   AnimationController _controller;
 
   /// The animation driving this widget's implicit animations.
@@ -247,7 +254,7 @@ abstract class AnimatedWidgetBaseState<T extends ImplicitlyAnimatedWidget> exten
       duration: widget.duration,
       debugLabel: '${widget.toStringShort()}',
       vsync: this,
-    )..addListener(_handleAnimationChanged);
+    );
     _updateCurve();
     _constructTweens();
   }
@@ -280,10 +287,6 @@ abstract class AnimatedWidgetBaseState<T extends ImplicitlyAnimatedWidget> exten
   void dispose() {
     _controller.dispose();
     super.dispose();
-  }
-
-  void _handleAnimationChanged() {
-    setState(() { });
   }
 
   bool _shouldAnimateTween(Tween<dynamic> tween, dynamic targetValue) {
@@ -329,6 +332,28 @@ abstract class AnimatedWidgetBaseState<T extends ImplicitlyAnimatedWidget> exten
   /// value to use as the current value the next time that the forEachTween()
   /// method is called.
   void forEachTween(TweenVisitor<dynamic> visitor);
+}
+
+/// A base class for widgets with implicit animations that need to rebuild their
+/// widget tree as the animation runs.
+///
+/// This class calls [build] each frame that the animation tickets. For a
+/// variant that does not rebuild each frame, consider subclassing
+/// [ImplicitlyAnimatedWidgetState] directly.
+///
+/// Subclasses must implement the [forEachTween] method to allow
+/// [AnimatedWidgetBaseState] to iterate through the subclasses' widget's fields
+/// and animate them.
+abstract class AnimatedWidgetBaseState<T extends ImplicitlyAnimatedWidget> extends ImplicitlyAnimatedWidgetState<T> {
+  @override
+  void initState() {
+    super.initState();
+    controller.addListener(_handleAnimationChanged);
+  }
+
+  void _handleAnimationChanged() {
+    setState(() { /* The animation ticked. Rebuild with new animation value */ });
+  }
 }
 
 /// A container that gradually changes its values over a period of time.
