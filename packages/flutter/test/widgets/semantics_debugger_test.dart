@@ -318,7 +318,7 @@ void main() {
     // interpreted as a gesture by the semantics debugger and sent to the widget
     // as a semantic action that always moves by 10% of the complete track.
     await tester.fling(find.byType(Slider), const Offset(-100.0, 0.0), 2000.0);
-    expect(value, equals(0.65));
+    expect(value, equals(0.70));
   });
 
   testWidgets('SemanticsDebugger checkbox', (WidgetTester tester) async {
