@@ -497,7 +497,7 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
     final RenderAbstractViewport viewport = RenderAbstractViewport.of(object);
     assert(viewport != null);
 
-    final double target = viewport.getOffsetToReveal(object, alignment).clamp(minScrollExtent, maxScrollExtent);
+    final double target = viewport.getOffsetToReveal(object, alignment).offset.clamp(minScrollExtent, maxScrollExtent);
 
     if (target == pixels)
       return new Future<Null>.value();
@@ -544,6 +544,7 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
   /// animation, use [jumpTo].
   ///
   /// The animation is typically handled by an [DrivenScrollActivity].
+  @override
   Future<Null> animateTo(double to, {
     @required Duration duration,
     @required Curve curve,
