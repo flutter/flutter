@@ -205,23 +205,13 @@ class CompileTest {
       final Map<String, dynamic> metrics = <String, dynamic>{}
         ..addAll(await _compileAot())
         ..addAll(await _compileApp())
-        ..addAll(await _compileDebug())
-        ..addAll(_suffix(await _compileAot(previewDart2: false), '__dart1'))
-        ..addAll(_suffix(await _compileApp(previewDart2: false), '__dart1'))
-        ..addAll(_suffix(await _compileDebug(previewDart2: false), '__dart1'));
+        ..addAll(await _compileDebug());
 
       return new TaskResult.success(metrics, benchmarkScoreKeys: metrics.keys.toList());
     });
   }
 
-  static Map<String, dynamic> _suffix(Map<String, dynamic> map, String suffix) {
-    return new Map<String, dynamic>.fromIterables(
-      map.keys.map<String>((String key) => '$key$suffix'),
-      map.values,
-    );
-  }
-
-  static Future<Map<String, dynamic>> _compileAot({ bool previewDart2 = true }) async {
+  static Future<Map<String, dynamic>> _compileAot() async {
     // Generate blobs instead of assembly.
     await flutter('clean');
     final Stopwatch watch = new Stopwatch()..start();
@@ -240,10 +230,6 @@ class CompileTest {
         options.add('android-arm');
         break;
     }
-    if (previewDart2)
-      options.add('--preview-dart-2');
-    else
-      options.add('--no-preview-dart-2');
     setLocalEngineOptionIfNecessary(options);
     final String compileLog = await evalFlutter('build', options: options);
     watch.stop();
@@ -258,15 +244,11 @@ class CompileTest {
     return metrics;
   }
 
-  static Future<Map<String, dynamic>> _compileApp({ bool previewDart2 = true }) async {
+  static Future<Map<String, dynamic>> _compileApp() async {
     await flutter('clean');
     final Stopwatch watch = new Stopwatch();
     int releaseSizeInBytes;
     final List<String> options = <String>['--release'];
-    if (previewDart2)
-      options.add('--preview-dart-2');
-    else
-      options.add('--no-preview-dart-2');
     setLocalEngineOptionIfNecessary(options);
     switch (deviceOperatingSystem) {
       case DeviceOperatingSystem.ios:
@@ -299,14 +281,10 @@ class CompileTest {
     };
   }
 
-  static Future<Map<String, dynamic>> _compileDebug({ bool previewDart2 = true }) async {
+  static Future<Map<String, dynamic>> _compileDebug() async {
     await flutter('clean');
     final Stopwatch watch = new Stopwatch();
     final List<String> options = <String>['--debug'];
-    if (previewDart2)
-      options.add('--preview-dart-2');
-    else
-      options.add('--no-preview-dart-2');
     setLocalEngineOptionIfNecessary(options);
     switch (deviceOperatingSystem) {
       case DeviceOperatingSystem.ios:
