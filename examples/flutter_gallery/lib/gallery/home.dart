@@ -28,8 +28,8 @@ class _FlutterLogo extends StatelessWidget {
         decoration: const BoxDecoration(
           image: const DecorationImage(
             image: const AssetImage(
-              'white_logo/logo.png',
-              package: _kGalleryAssetsPackage,
+              '/Users/larche/flutter_gallery_assets/lib/logos/flutter_white/logo.png',
+//              package: _kGalleryAssetsPackage,
             ),
           ),
         ),
