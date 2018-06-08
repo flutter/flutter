@@ -2,11 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui';
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
-import 'package:flutter/src/widgets/framework.dart';
+import 'framework.dart';
 
 /// Annotates a region of the layer tree with a value.
 ///

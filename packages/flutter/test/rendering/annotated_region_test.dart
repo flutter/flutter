@@ -1,11 +1,14 @@
+// Copyright 2018 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:test/test.dart';
 
-
 void main() {
   group(AnnotatedRegion, () {
-    test('finds the first value in a ContainerLayer of OffsetLayers without clipped children', () {
+    test('finds the first value in a OffsetLayer', () {
       final ContainerLayer containerLayer = new ContainerLayer();
       final List<OffsetLayer> layers = <OffsetLayer>[
         new OffsetLayer(offset: Offset.zero),
@@ -20,11 +23,11 @@ void main() {
       }
 
       expect(containerLayer.findRegion(const Offset(0.0, 1.0), int), 0);
-      expect(containerLayer.findRegion(const Offset(0.0, 101.0), int), 0);
-      expect(containerLayer.findRegion(const Offset(0.0, 201.0), int), 0);
+      expect(containerLayer.findRegion(const Offset(0.0, 101.0), int), 1);
+      expect(containerLayer.findRegion(const Offset(0.0, 201.0), int), 2);
     });
 
-    test('finds a value within the clip in a ContainerLayer of ClipRectLayer', () {
+    test('finds a value within the clip in a ClipRectLayer', () {
       final ContainerLayer containerLayer = new ContainerLayer();
       final List<ClipRectLayer> layers = <ClipRectLayer>[
         new ClipRectLayer(clipRect: new Rect.fromLTRB(0.0, 0.0, 100.0, 100.0)),
@@ -44,7 +47,7 @@ void main() {
     });
 
 
-    test('finds a value within the clip in a ContainerLayer of ClipRRectLayer', () {
+    test('finds a value within the clip in a ClipRRectLayer', () {
       final ContainerLayer containerLayer = new ContainerLayer();
       final List<ClipRRectLayer> layers = <ClipRRectLayer>[
         new ClipRRectLayer(clipRRect: new RRect.fromLTRBR(0.0, 0.0, 100.0, 100.0, const Radius.circular(4.0))),
