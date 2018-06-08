@@ -93,6 +93,26 @@ void main() {
       expect(transformLayer.findRegion(const Offset(0.0, 400.0), int), 1);
       expect(transformLayer.findRegion(const Offset(0.0, 530.0), int), 2);
     });
+
+    test('looks for child AnnotatedRegions before parents', () {
+      final AnnotatedRegionLayer<int> parent = new AnnotatedRegionLayer<int>(1);
+      final AnnotatedRegionLayer<int> child = new AnnotatedRegionLayer<int>(2);
+      final ContainerLayer layer = new ContainerLayer();
+      parent.append(child);
+      layer.append(parent);
+
+      expect(parent.findRegion(Offset.zero, int), 2);
+    });
+
+    test('looks for correct type', () {
+      final AnnotatedRegionLayer<int> child1 = new AnnotatedRegionLayer<int>(1);
+      final AnnotatedRegionLayer<String> child2 = new AnnotatedRegionLayer<String>('hello');
+      final ContainerLayer layer = new ContainerLayer();
+      layer.append(child1);
+      layer.append(child2);
+
+      expect(layer.findRegion(Offset.zero, String), 'hello');
+    });
   });
 }
 
