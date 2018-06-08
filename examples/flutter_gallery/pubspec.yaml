@@ -108,6 +108,7 @@ flutter:
     - packages/flutter_gallery_assets/food/icons/veggie.png
     - packages/flutter_gallery_assets/logos/pesto/logo_small.png
     - packages/flutter_gallery_assets/places/india_chennai_flower_market.png
+#    - packages/flutter_gallery_assets/places/india_flowers.png
     - packages/flutter_gallery_assets/places/india_tanjore_bronze_works.png
     - packages/flutter_gallery_assets/places/india_tanjore_market_merchant.png
     - packages/flutter_gallery_assets/places/india_tanjore_thanjavur_temple.png
