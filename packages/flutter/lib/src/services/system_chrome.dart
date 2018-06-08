@@ -339,7 +339,7 @@ class SystemChrome {
       if (_pendingStyle != _latestStyle) {
         SystemChannels.platform.invokeMethod(
           'SystemChrome.setSystemUIOverlayStyle',
-          style._toMap(),
+          _pendingStyle._toMap(),
         );
         _latestStyle = _pendingStyle;
       }
