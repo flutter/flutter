@@ -256,6 +256,14 @@ tasks:
     stage: devicelab
     required_agent_capabilities: ["linux/android"]
 
+    focused_textfield_stays_clear_of_keyboard_test:
+    description: >
+      A TextField that just obtained focus should move out of the way of the
+      appearing on-screen keyboard.
+    stage: devicelab
+    required_agent_capabilities: ["linux/android"]
+    flaky: true
+
   # iOS on-device tests
 
   flavors_test_ios:
@@ -351,6 +359,14 @@ tasks:
       Builds sample catalog markdown pages and iOS screenshots
     stage: devicelab_ios
     required_agent_capabilities: ["mac/ios"]
+
+    focused_textfield_stays_clear_of_keyboard_ios_test:
+    description: >
+      A TextField that just obtained focus should move out of the way of the
+      appearing on-screen keyboard.
+    stage: devicelab
+    required_agent_capabilities: ["mac/ios"]
+    flaky: true
 
   # Tests running on Windows host
 
