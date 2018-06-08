@@ -134,30 +134,28 @@ flutter:
     - /Users/larche/flutter_gallery_assets/lib/places/india_tanjore_market_technology.png
     - /Users/larche/flutter_gallery_assets/lib/places/india_chennai_beach.png
     - /Users/larche/flutter_gallery_assets/lib/places/india_pondicherry_fisherman.png
-    - packages/flutter_gallery_assets/shrine/products/backpack.png
-    - packages/flutter_gallery_assets/shrine/products/beachball.png
-    - packages/flutter_gallery_assets/shrine/products/binoculars.png
-    - packages/flutter_gallery_assets/shrine/products/brush.png
-    - packages/flutter_gallery_assets/shrine/products/chair.png
-    - packages/flutter_gallery_assets/shrine/products/chucks.png
-    - packages/flutter_gallery_assets/shrine/products/clock.png
-    - packages/flutter_gallery_assets/shrine/products/fish_bowl.png
-    - packages/flutter_gallery_assets/shrine/products/flippers.png
-    - packages/flutter_gallery_assets/shrine/products/green-shoes.png
-    - packages/flutter_gallery_assets/shrine/products/heels.png
-    - packages/flutter_gallery_assets/shrine/products/helmet.png
-    - packages/flutter_gallery_assets/shrine/products/lawn_chair.png
-    - packages/flutter_gallery_assets/shrine/products/lipstick.png
-    - packages/flutter_gallery_assets/shrine/products/popsicle.png
-    - packages/flutter_gallery_assets/shrine/products/radio.png
-    - packages/flutter_gallery_assets/shrine/products/sunnies.png
-    - packages/flutter_gallery_assets/shrine/products/surfboard.png
-    - packages/flutter_gallery_assets/shrine/products/teapot.png
-    - packages/flutter_gallery_assets/shrine/vendors/16c477b.jpg
-    - packages/flutter_gallery_assets/shrine/vendors/ali-connors.png
-    - packages/flutter_gallery_assets/shrine/vendors/peter-carlsson.png
-    - packages/flutter_gallery_assets/shrine/vendors/sandra-adams.jpg
-    - packages/flutter_gallery_assets/shrine/vendors/zach.jpg
+    - /Users/larche/flutter_gallery_assets/lib/products/belt.png
+    - /Users/larche/flutter_gallery_assets/lib/products/cup.png
+    - /Users/larche/flutter_gallery_assets/lib/products/flatwear.png
+    - /Users/larche/flutter_gallery_assets/lib/products/hat.png
+    - /Users/larche/flutter_gallery_assets/lib/products/jacket.png
+    - /Users/larche/flutter_gallery_assets/lib/products/jumper.png
+    - /Users/larche/flutter_gallery_assets/lib/products/napkins.png
+    - /Users/larche/flutter_gallery_assets/lib/products/planters.png
+    - /Users/larche/flutter_gallery_assets/lib/products/scarf.png
+    - /Users/larche/flutter_gallery_assets/lib/products/shirt.png
+    - /Users/larche/flutter_gallery_assets/lib/products/sunnies.png
+    - /Users/larche/flutter_gallery_assets/lib/products/sweater.png
+    - /Users/larche/flutter_gallery_assets/lib/products/sweats.png
+    - /Users/larche/flutter_gallery_assets/lib/products/table.png
+    - /Users/larche/flutter_gallery_assets/lib/products/teaset.png
+    - /Users/larche/flutter_gallery_assets/lib/products/top.png
+    - /Users/larche/flutter_gallery_assets/lib/people/ali.png
+    - /Users/larche/flutter_gallery_assets/lib/people/square/ali.png
+    - /Users/larche/flutter_gallery_assets/lib/people/square/peter.png
+    - /Users/larche/flutter_gallery_assets/lib/people/square/sandra.png
+    - /Users/larche/flutter_gallery_assets/lib/people/square/stella.png
+    - /Users/larche/flutter_gallery_assets/lib/people/square/trevor.png
     - packages/flutter_gallery_assets/cupertino_navigation/person1.jpg
     - packages/flutter_gallery_assets/cupertino_navigation/person2.jpg
   fonts:
@@ -170,7 +168,7 @@ flutter:
           weight: 600
     - family: AbrilFatface
       fonts:
-        - asset: packages/flutter_gallery_assets/shrine/fonts/abrilfatface/AbrilFatface-Regular.ttf
+        - asset: /Users/larche/flutter_gallery_assets/lib/fonts/abrilfatface/AbrilFatface-Regular.ttf
     - family: GalleryIcons
       fonts:
         - asset: packages/flutter_gallery_assets/fonts/GalleryIcons.ttf
