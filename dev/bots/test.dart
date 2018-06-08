@@ -68,12 +68,8 @@ Future<Null> _generateDocs() async {
 }
 
 Future<Null> _verifyInternationalizations() async {
-  final EvalResult genResult = await _evalCommand(
-    dart,
-    <String>[
-      '--preview-dart-2',
-      path.join('dev', 'tools', 'gen_localizations.dart'),
-    ],
+  final EvalResult genResult = await _evalCommand(dart,
+    <String>[ '--preview-dart-2', path.join('dev', 'tools', 'gen_localizations.dart'), ],
     workingDirectory: flutterRoot,
   );
 

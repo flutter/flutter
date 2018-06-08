@@ -42,7 +42,6 @@ Future<void> generateXcodeProperties(String projectPath) async {
       projectPath: projectPath,
       buildInfo: BuildInfo.debug,
       targetOverride: bundle.defaultMainPath,
-      previewDart2: false,
     );
   }
 }
@@ -55,7 +54,6 @@ Future<void> updateGeneratedXcodeProperties({
   @required String projectPath,
   @required BuildInfo buildInfo,
   String targetOverride,
-  @required bool previewDart2,
 }) async {
   final StringBuffer localsBuffer = new StringBuffer();
 
@@ -111,10 +109,6 @@ Future<void> updateGeneratedXcodeProperties({
     // paths ending in _arm, 64-bit builds are not.
     final String arch = localEngineArtifacts.engineOutPath.endsWith('_arm') ? 'armv7' : 'arm64';
     localsBuffer.writeln('ARCHS=$arch');
-  }
-
-  if (previewDart2) {
-    localsBuffer.writeln('PREVIEW_DART_2=true');
   }
 
   if (buildInfo.trackWidgetCreation) {

@@ -246,7 +246,6 @@ Future<XcodeBuildResult> buildXcodeProject({
     projectPath: fs.currentDirectory.path,
     buildInfo: buildInfo,
     targetOverride: targetOverride,
-    previewDart2: buildInfo.previewDart2,
   );
 
   if (hasPlugins()) {
@@ -428,7 +427,7 @@ Future<XcodeBuildResult> buildXcodeProject({
       outputDir = expectedOutputDirectory.replaceFirst('/$configuration-', '/');
       if (fs.isDirectorySync(outputDir)) {
         // Previous output directory might have incompatible artifacts
-        // (for example, kernel binary files produced from previous `--preview-dart-2` run).
+        // (for example, kernel binary files produced from previous run).
         fs.directory(outputDir).deleteSync(recursive: true);
       }
       copyDirectorySync(fs.directory(expectedOutputDirectory), fs.directory(outputDir));

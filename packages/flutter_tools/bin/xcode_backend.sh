@@ -102,13 +102,6 @@ BuildApp() {
     local_engine_flag="--local-engine=$LOCAL_ENGINE"
   fi
 
-  local preview_dart_2_flag=""
-  if [[ -n "$PREVIEW_DART_2" ]]; then
-    preview_dart_2_flag="--preview-dart-2"
-  else
-    preview_dart_2_flag="--no-preview-dart-2"
-  fi
-
   local track_widget_creation_flag=""
   if [[ -n "$TRACK_WIDGET_CREATION" ]]; then
     track_widget_creation_flag="--track-widget-creation"
@@ -127,7 +120,6 @@ BuildApp() {
       --${build_mode}                                                       \
       --ios-arch="${archs}"                                                 \
       ${local_engine_flag}                                                  \
-      ${preview_dart_2_flag}                                                \
       ${track_widget_creation_flag}
 
     if [[ $? -ne 0 ]]; then
@@ -167,12 +159,10 @@ BuildApp() {
     ${verbose_flag}                                                         \
     build bundle                                                            \
     --target="${target_path}"                                               \
-    --snapshot="${build_dir}/snapshot_blob.bin"                             \
     --depfile="${build_dir}/snapshot_blob.bin.d"                            \
     --asset-dir="${derived_dir}/flutter_assets"                             \
     ${precompilation_flag}                                                  \
     ${local_engine_flag}                                                    \
-    ${preview_dart_2_flag}                                                  \
     ${track_widget_creation_flag}
 
   if [[ $? -ne 0 ]]; then
