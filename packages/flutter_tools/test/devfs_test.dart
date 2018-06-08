@@ -192,12 +192,11 @@ void main() {
       assetBundle.entries['a.txt'] = new DevFSStringContent('abc');
       final int bytes = await devFS.update(mainPath: 'lib/foo.txt', bundle: assetBundle, bundleDirty: true, generator: residentCompiler);
       devFSOperations.expectMessages(<String>[
-        'writeFile test lib/foo.txt.dill',
         'writeFile test ${_inAssetBuildDirectory(fs, 'a.txt')}',
       ]);
       expect(devFS.assetPathsToEvict, unorderedMatches(<String>['a.txt']));
       devFS.assetPathsToEvict.clear();
-      expect(bytes, 22 + 3);
+      expect(bytes, 3);
     }, overrides: <Type, Generator>{
       FileSystem: () => fs,
     });
@@ -207,14 +206,13 @@ void main() {
       final int bytes = await devFS.update(mainPath: 'lib/foo.txt', bundle: assetBundle, bundleDirty: true, generator: residentCompiler);
       // Expect entire asset bundle written because bundleDirty is true
       devFSOperations.expectMessages(<String>[
-        'writeFile test lib/foo.txt.dill',
         'writeFile test ${_inAssetBuildDirectory(fs, 'a.txt')}',
         'writeFile test ${_inAssetBuildDirectory(fs, 'b.txt')}',
       ]);
       expect(devFS.assetPathsToEvict, unorderedMatches(<String>[
         'a.txt', 'b.txt']));
       devFS.assetPathsToEvict.clear();
-      expect(bytes, 22 + 7);
+      expect(bytes, 7);
     }, overrides: <Type, Generator>{
       FileSystem: () => fs,
     });
@@ -223,13 +221,12 @@ void main() {
       assetBundle.entries['c.txt'] = new DevFSStringContent('12');
       final int bytes = await devFS.update(mainPath: 'lib/foo.txt', bundle: assetBundle, generator: residentCompiler);
       devFSOperations.expectMessages(<String>[
-        'writeFile test lib/foo.txt.dill',
         'writeFile test ${_inAssetBuildDirectory(fs, 'c.txt')}',
       ]);
       expect(devFS.assetPathsToEvict, unorderedMatches(<String>[
         'c.txt']));
       devFS.assetPathsToEvict.clear();
-      expect(bytes, 22 + 2);
+      expect(bytes, 2);
     }, overrides: <Type, Generator>{
       FileSystem: () => fs,
     });

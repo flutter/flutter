@@ -500,26 +500,29 @@ class DevFS {
     // No need to send source files because all compilation is done on the
     // host and result of compilation is single kernel file.
     filesUris.forEach(dirtyEntries.remove);
+
     printTrace('Compiling dart to kernel with ${invalidatedFiles.length} updated files');
     if (fullRestart) {
       generator.reset();
     }
-    final CompilerOutput compilerOutput = await generator.recompile(
-      mainPath,
-      invalidatedFiles,
-      outputPath:  dillOutputPath ?? fs.path.join(getBuildDirectory(), 'app.dill'),
-      packagesFilePath : _packagesFilePath,
-    );
-    final String compiledBinary = compilerOutput?.outputFilename;
-    if (compiledBinary != null && compiledBinary.isNotEmpty) {
-      final String entryUri = projectRootPath != null ?
-          fs.path.relative(mainPath, from: projectRootPath):
-          mainPath;
-      final Uri kernelUri = fs.path.toUri(entryUri + '.dill');
-      if (!dirtyEntries.containsKey(kernelUri)) {
-        final DevFSFileContent content = new DevFSFileContent(fs.file(compiledBinary));
-        dirtyEntries[kernelUri] = content;
-        numBytes += content.size;
+    if (invalidatedFiles.isNotEmpty) {
+      final CompilerOutput compilerOutput = await generator.recompile(
+        mainPath,
+        invalidatedFiles,
+        outputPath:  dillOutputPath ?? fs.path.join(getBuildDirectory(), 'app.dill'),
+        packagesFilePath : _packagesFilePath,
+      );
+      final String compiledBinary = compilerOutput?.outputFilename;
+      if (compiledBinary != null && compiledBinary.isNotEmpty) {
+        final String entryUri = projectRootPath != null ?
+            fs.path.relative(mainPath, from: projectRootPath):
+            mainPath;
+        final Uri kernelUri = fs.path.toUri(entryUri + '.dill');
+        if (!dirtyEntries.containsKey(kernelUri)) {
+          final DevFSFileContent content = new DevFSFileContent(fs.file(compiledBinary));
+          dirtyEntries[kernelUri] = content;
+          numBytes += content.size;
+        }
       }
     }
     if (dirtyEntries.isNotEmpty) {
