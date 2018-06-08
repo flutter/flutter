@@ -8,8 +8,8 @@ const String _kGalleryAssetsPackage = 'flutter_gallery_assets';
 
 const Vendor _ali = const Vendor(
   name: 'Ali’s shop',
-  avatarAsset: '/Users/larche/flutter_gallery_assets/lib/people/square/ali.png',
-//  avatarAssetPackage: _kGalleryAssetsPackage,
+  avatarAsset: '/people/square/ali.png',
+  avatarAssetPackage: _kGalleryAssetsPackage,
   description:
     'Ali Connor’s makes custom goods for folks of all shapes and sizes '
     'made by hand and sometimes by machine, but always with love and care. '
@@ -18,8 +18,8 @@ const Vendor _ali = const Vendor(
 
 const Vendor _peter = const Vendor(
   name: 'Peter’s shop',
-  avatarAsset: '/Users/larche/flutter_gallery_assets/lib/people/square/peter.png',
-//  avatarAssetPackage: _kGalleryAssetsPackage,
+  avatarAsset: '/people/square/peter.png',
+  avatarAssetPackage: _kGalleryAssetsPackage,
   description:
     'Peter makes great stuff for awesome people like you. Super cool and extra '
     'awesome all of his shop’s goods are handmade with love. Custom orders are '
@@ -28,8 +28,8 @@ const Vendor _peter = const Vendor(
 
 const Vendor _sandra = const Vendor(
     name: 'Sandra’s shop',
-    avatarAsset: '/Users/larche/flutter_gallery_assets/lib/people/square/sandra.png',
-//    avatarAssetPackage: _kGalleryAssetsPackage,
+    avatarAsset: '/people/square/sandra.png',
+    avatarAssetPackage: _kGalleryAssetsPackage,
     description:
     'Sandra specializes in furniture, beauty and travel products with a classic vibe. '
         'Custom orders are available if you’re looking for a certain color or material.'
@@ -37,8 +37,8 @@ const Vendor _sandra = const Vendor(
 
 const Vendor _stella = const Vendor(
   name: 'Stella’s shop',
-  avatarAsset: '/Users/larche/flutter_gallery_assets/lib/people/square/stella.png',
-//  avatarAssetPackage: _kGalleryAssetsPackage,
+  avatarAsset: '/people/square/stella.png',
+  avatarAssetPackage: _kGalleryAssetsPackage,
   description:
     'Stella sells awesome stuff at lovely prices. made by hand and sometimes by '
     'machine, but always with love and care. Custom orders are available upon request '
@@ -47,8 +47,8 @@ const Vendor _stella = const Vendor(
 
 const Vendor _trevor = const Vendor(
     name: 'Trevor’s shop',
-    avatarAsset: '/Users/larche/flutter_gallery_assets/lib/people/square/trevor.png',
-//    avatarAssetPackage: _kGalleryAssetsPackage,
+    avatarAsset: '/people/square/trevor.png',
+    avatarAssetPackage: _kGalleryAssetsPackage,
     description:
     'Trevor makes great stuff for awesome people like you. Super cool and extra '
         'awesome all of his shop’s goods are handmade with love. Custom orders are '
@@ -58,8 +58,8 @@ const Vendor _trevor = const Vendor(
 const List<Product> _allProducts = const <Product> [
   const Product(
     name: 'Vintage Brown Belt',
-    imageAsset: '/Users/larche/flutter_gallery_assets/lib/products/belt.png',
-//    imageAssetPackage: _kGalleryAssetsPackage,
+    imageAsset: '/products/belt.png',
+    imageAssetPackage: _kGalleryAssetsPackage,
     categories: const <String>['fashion', 'latest'],
     price: 300.00,
     vendor: _sandra,
@@ -69,8 +69,8 @@ const List<Product> _allProducts = const <Product> [
   ),
   const Product(
     name: 'Sunglasses',
-    imageAsset: '/Users/larche/flutter_gallery_assets/lib/products/sunnies.png',
-//    imageAssetPackage: _kGalleryAssetsPackage,
+    imageAsset: '/products/sunnies.png',
+    imageAssetPackage: _kGalleryAssetsPackage,
     categories: const <String>['travel', 'fashion', 'beauty'],
     price: 20.00,
     vendor: _trevor,
@@ -82,8 +82,8 @@ const List<Product> _allProducts = const <Product> [
   ),
   const Product(
     name: 'Flatwear',
-    imageAsset: '/Users/larche/flutter_gallery_assets/lib/products/flatwear.png',
-//    imageAssetPackage: _kGalleryAssetsPackage,
+    imageAsset: '/products/flatwear.png',
+    imageAssetPackage: _kGalleryAssetsPackage,
     categories: const <String>['furniture'],
     price: 30.00,
     vendor: _trevor,
@@ -92,8 +92,8 @@ const List<Product> _allProducts = const <Product> [
   ),
   const Product(
     name: 'Salmon Sweater',
-    imageAsset: '/Users/larche/flutter_gallery_assets/lib/products/sweater.png',
-//    imageAssetPackage: _kGalleryAssetsPackage,
+    imageAsset: '/products/sweater.png',
+    imageAssetPackage: _kGalleryAssetsPackage,
     categories: const <String>['fashion'],
     price: 300.00,
     vendor: _stella,
@@ -104,8 +104,8 @@ const List<Product> _allProducts = const <Product> [
   ),
   const Product(
     name: 'Pine Table',
-    imageAsset: '/Users/larche/flutter_gallery_assets/lib/products/table.png',
-//    imageAssetPackage: _kGalleryAssetsPackage,
+    imageAsset: '/products/table.png',
+    imageAssetPackage: _kGalleryAssetsPackage,
     categories: const <String>['furniture'],
     price: 63.00,
     vendor: _stella,
@@ -114,8 +114,8 @@ const List<Product> _allProducts = const <Product> [
   ),
   const Product(
     name: 'Green Comfort Jacket',
-    imageAsset: '/Users/larche/flutter_gallery_assets/lib/products/jacket.png',
-//    imageAssetPackage: _kGalleryAssetsPackage,
+    imageAsset: '/products/jacket.png',
+    imageAssetPackage: _kGalleryAssetsPackage,
     categories: const <String>['fashion'],
     price: 36.00,
     vendor: _ali,
@@ -124,8 +124,8 @@ const List<Product> _allProducts = const <Product> [
   ),
   const Product(
     name: 'Chambray Top',
-    imageAsset: '/Users/larche/flutter_gallery_assets/lib/products/top.png',
-//    imageAssetPackage: _kGalleryAssetsPackage,
+    imageAsset: '/products/top.png',
+    imageAssetPackage: _kGalleryAssetsPackage,
     categories: const <String>['fashion'],
     price: 125.00,
     vendor: _peter,
@@ -134,8 +134,8 @@ const List<Product> _allProducts = const <Product> [
   ),
   const Product(
     name: 'Blue Cup',
-    imageAsset: '/Users/larche/flutter_gallery_assets/lib/products/cup.png',
-//    imageAssetPackage: _kGalleryAssetsPackage,
+    imageAsset: '/products/cup.png',
+    imageAssetPackage: _kGalleryAssetsPackage,
     categories: const <String>['travel', 'furniture'],
     price: 75.00,
     vendor: _sandra,
@@ -146,8 +146,8 @@ const List<Product> _allProducts = const <Product> [
   ),
   const Product(
     name: 'Tea Set',
-    imageAsset: '/Users/larche/flutter_gallery_assets/lib/products/teaset.png',
-//    imageAssetPackage: _kGalleryAssetsPackage,
+    imageAsset: '/products/teaset.png',
+    imageAssetPackage: _kGalleryAssetsPackage,
     categories: const <String>['furniture', 'fashion'],
     price: 70.00,
     vendor: _trevor,
@@ -161,8 +161,8 @@ const List<Product> _allProducts = const <Product> [
   ),
   const Product(
     name: 'Blue linen napkins',
-    imageAsset: '/Users/larche/flutter_gallery_assets/lib/products/napkins.png',
-//    imageAssetPackage: _kGalleryAssetsPackage,
+    imageAsset: '/products/napkins.png',
+    imageAssetPackage: _kGalleryAssetsPackage,
     categories: const <String>['furniture', 'fashion'],
     price: 89.00,
     vendor: _trevor,
@@ -172,8 +172,8 @@ const List<Product> _allProducts = const <Product> [
   ),
   const Product(
     name: 'Dipped Earrings',
-    imageAsset: '/Users/larche/flutter_gallery_assets/lib/products/earrings.png',
-//    imageAssetPackage: _kGalleryAssetsPackage,
+    imageAsset: '/products/earrings.png',
+    imageAssetPackage: _kGalleryAssetsPackage,
     categories: const <String>['fashion', 'beauty'],
     price: 25.00,
     vendor: _stella,
@@ -184,8 +184,8 @@ const List<Product> _allProducts = const <Product> [
   ),
   const Product(
     name: 'Perfect Planters',
-    imageAsset: '/Users/larche/flutter_gallery_assets/lib/products/planters.png',
-//    imageAssetPackage: _kGalleryAssetsPackage,
+    imageAsset: '/products/planters.png',
+    imageAssetPackage: _kGalleryAssetsPackage,
     categories: const <String>['latest', 'furniture'],
     price: 30.00,
     vendor: _ali,
@@ -196,8 +196,8 @@ const List<Product> _allProducts = const <Product> [
   ),
   const Product(
     name: 'Cloud-White Dress',
-    imageAsset: '/Users/larche/flutter_gallery_assets/lib/products/dress.png',
-//    imageAssetPackage: _kGalleryAssetsPackage,
+    imageAsset: '/products/dress.png',
+    imageAssetPackage: _kGalleryAssetsPackage,
     categories: const <String>['fashion'],
     price: 54.00,
     vendor: _sandra,
@@ -208,8 +208,8 @@ const List<Product> _allProducts = const <Product> [
   ),
   const Product(
     name: 'Backpack',
-    imageAsset: '/Users/larche/flutter_gallery_assets/lib/products/backpack.png',
-//    imageAssetPackage: _kGalleryAssetsPackage,
+    imageAsset: '/products/backpack.png',
+    imageAssetPackage: _kGalleryAssetsPackage,
     categories: const <String>['travel', 'fashion'],
     price: 25.00,
     vendor: _peter,
@@ -220,8 +220,8 @@ const List<Product> _allProducts = const <Product> [
   ),
   const Product(
     name: 'Charcoal Straw Hat',
-    imageAsset: '/Users/larche/flutter_gallery_assets/lib/products/hat.png',
-//    imageAssetPackage: _kGalleryAssetsPackage,
+    imageAsset: '/products/hat.png',
+    imageAssetPackage: _kGalleryAssetsPackage,
     categories: const <String>['travel', 'fashion', 'latest'],
     price: 25.00,
     vendor: _ali,
@@ -232,8 +232,8 @@ const List<Product> _allProducts = const <Product> [
   ),
   const Product(
     name: 'Ginger Scarf',
-    imageAsset: '/Users/larche/flutter_gallery_assets/lib/products/scarf.png',
-//    imageAssetPackage: _kGalleryAssetsPackage,
+    imageAsset: '/products/scarf.png',
+    imageAssetPackage: _kGalleryAssetsPackage,
     categories: const <String>['latest', 'fashion'],
     price: 17.00,
     vendor: _peter,
@@ -242,8 +242,8 @@ const List<Product> _allProducts = const <Product> [
   ),
   const Product(
     name: 'Blush Sweats',
-    imageAsset: '/Users/larche/flutter_gallery_assets/lib/products/sweats.png',
-//    imageAssetPackage: _kGalleryAssetsPackage,
+    imageAsset: '/products/sweats.png',
+    imageAssetPackage: _kGalleryAssetsPackage,
     categories: const <String>['travel', 'fashion', 'latest'],
     price: 25.00,
     vendor: _stella,
@@ -252,8 +252,8 @@ const List<Product> _allProducts = const <Product> [
   ),
   const Product(
     name: 'Mint Jumper',
-    imageAsset: '/Users/larche/flutter_gallery_assets/lib/products/jumper.png',
-//    imageAssetPackage: _kGalleryAssetsPackage,
+    imageAsset: '/products/jumper.png',
+    imageAssetPackage: _kGalleryAssetsPackage,
     categories: const <String>['travel', 'fashion', 'beauty'],
     price: 25.00,
     vendor: _peter,
@@ -262,8 +262,8 @@ const List<Product> _allProducts = const <Product> [
   ),
   const Product(
     name: 'Ochre Shirt',
-    imageAsset: '/Users/larche/flutter_gallery_assets/lib/products/shirt.png',
-//    imageAssetPackage: _kGalleryAssetsPackage,
+    imageAsset: '/products/shirt.png',
+    imageAssetPackage: _kGalleryAssetsPackage,
     categories: const <String>[ 'fashion', 'latest'],
     price: 120.00,
     vendor: _stella,
