@@ -82,6 +82,7 @@ flutter:
     - lib/gallery/example_code.dart
     - packages/flutter_gallery_assets/people/ali_landscape.png
     - packages/flutter_gallery_assets/logos/flutter_white/logo.png
+    - packages/flutter_gallery_assets/videos/bee.mp4
     - packages/flutter_gallery_assets/videos/butterfly.mp4
     - packages/flutter_gallery_assets/animated_images/animated_flutter_lgtm.gif
     - packages/flutter_gallery_assets/animated_images/animated_flutter_stickers.webp
