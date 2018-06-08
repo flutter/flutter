@@ -81,115 +81,115 @@ flutter:
   assets:
     - lib/gallery/example_code.dart
     - packages/flutter_gallery_assets/people/ali_landscape.png
-    - packages/flutter_gallery_assets/lib/logos/flutter_white/logo.png
-    - packages/flutter_gallery_assets/lib/videos/butterfly.mp4
-    - packages/flutter_gallery_assets/lib/animated_images/animated_flutter_lgtm.gif
-    - packages/flutter_gallery_assets/lib/animated_images/animated_flutter_stickers.webp
-    - packages/flutter_gallery_assets/lib/food/image10.jpg
-    - packages/flutter_gallery_assets/lib/food/image11.jpg
-    - packages/flutter_gallery_assets/lib/food/image12.jpg
-    - packages/flutter_gallery_assets/lib/food/image13.jpg
-    - packages/flutter_gallery_assets/lib/food/image1.jpg
-    - packages/flutter_gallery_assets/lib/food/image2.jpg
-    - packages/flutter_gallery_assets/lib/food/image3.jpg
-    - packages/flutter_gallery_assets/lib/food/image4.jpg
-    - packages/flutter_gallery_assets/lib/food/image5.jpg
-    - packages/flutter_gallery_assets/lib/food/image6.jpg
-    - packages/flutter_gallery_assets/lib/food/image7.jpg
-    - packages/flutter_gallery_assets/lib/food/image8.jpg
-    - packages/flutter_gallery_assets/lib/food/image9.jpg
-    - packages/flutter_gallery_assets/lib/food/icons/fish.png
-    - packages/flutter_gallery_assets/lib/food/icons/healthy.png
-    - packages/flutter_gallery_assets/lib/food/icons/main.png
-    - packages/flutter_gallery_assets/lib/food/icons/meat.png
-    - packages/flutter_gallery_assets/lib/food/icons/quick.png
-    - packages/flutter_gallery_assets/lib/food/icons/spicy.png
-    - packages/flutter_gallery_assets/lib/food/icons/veggie.png
-    - packages/flutter_gallery_assets/lib/logos/pesto/logo_small.png
-    - packages/flutter_gallery_assets/lib/places/india_chennai_flower_market.png
-    - packages/flutter_gallery_assets/lib/places/india_tanjore_bronze_works.png
-    - packages/flutter_gallery_assets/lib/places/india_tanjore_market_merchant.png
-    - packages/flutter_gallery_assets/lib/places/india_tanjore_thanjavur_temple.png
-    - packages/flutter_gallery_assets/lib/places/india_pondicherry_salt_farm.png
-    - packages/flutter_gallery_assets/lib/places/india_chennai_highway.png
-    - packages/flutter_gallery_assets/lib/places/india_chettinad_silk_maker.png
-    - packages/flutter_gallery_assets/lib/places/india_tanjore_thanjavur_temple_carvings.png
-    - packages/flutter_gallery_assets/lib/places/india_chettinad_produce.png
-    - packages/flutter_gallery_assets/lib/places/india_tanjore_market_technology.png
-    - packages/flutter_gallery_assets/lib/places/india_chennai_beach.png
-    - packages/flutter_gallery_assets/lib/places/india_pondicherry_fisherman.png
-    - packages/flutter_gallery_assets/lib/products/belt.png
-    - packages/flutter_gallery_assets/lib/products/cup.png
-    - packages/flutter_gallery_assets/lib/products/deskset.png
-    - packages/flutter_gallery_assets/lib/products/flatwear.png
-    - packages/flutter_gallery_assets/lib/products/hat.png
-    - packages/flutter_gallery_assets/lib/products/jacket.png
-    - packages/flutter_gallery_assets/lib/products/jumper.png
-    - packages/flutter_gallery_assets/lib/products/kitchen_quattro.png
-    - packages/flutter_gallery_assets/lib/products/napkins.png
-    - packages/flutter_gallery_assets/lib/products/planters.png
-    - packages/flutter_gallery_assets/lib/products/platter.png
-    - packages/flutter_gallery_assets/lib/products/scarf.png
-    - packages/flutter_gallery_assets/lib/products/shirt.png
-    - packages/flutter_gallery_assets/lib/products/sunnies.png
-    - packages/flutter_gallery_assets/lib/products/sweater.png
-    - packages/flutter_gallery_assets/lib/products/sweats.png
-    - packages/flutter_gallery_assets/lib/products/table.png
-    - packages/flutter_gallery_assets/lib/products/teaset.png
-    - packages/flutter_gallery_assets/lib/products/top.png
-    - packages/flutter_gallery_assets/lib/people/ali.png
-    - packages/flutter_gallery_assets/lib/people/square/ali.png
-    - packages/flutter_gallery_assets/lib/people/square/peter.png
-    - packages/flutter_gallery_assets/lib/people/square/sandra.png
-    - packages/flutter_gallery_assets/lib/people/square/stella.png
-    - packages/flutter_gallery_assets/lib/people/square/trevor.png
+    - packages/flutter_gallery_assets/logos/flutter_white/logo.png
+    - packages/flutter_gallery_assets/videos/butterfly.mp4
+    - packages/flutter_gallery_assets/animated_images/animated_flutter_lgtm.gif
+    - packages/flutter_gallery_assets/animated_images/animated_flutter_stickers.webp
+    - packages/flutter_gallery_assets/food/image10.jpg
+    - packages/flutter_gallery_assets/food/image11.jpg
+    - packages/flutter_gallery_assets/food/image12.jpg
+    - packages/flutter_gallery_assets/food/image13.jpg
+    - packages/flutter_gallery_assets/food/image1.jpg
+    - packages/flutter_gallery_assets/food/image2.jpg
+    - packages/flutter_gallery_assets/food/image3.jpg
+    - packages/flutter_gallery_assets/food/image4.jpg
+    - packages/flutter_gallery_assets/food/image5.jpg
+    - packages/flutter_gallery_assets/food/image6.jpg
+    - packages/flutter_gallery_assets/food/image7.jpg
+    - packages/flutter_gallery_assets/food/image8.jpg
+    - packages/flutter_gallery_assets/food/image9.jpg
+    - packages/flutter_gallery_assets/food/icons/fish.png
+    - packages/flutter_gallery_assets/food/icons/healthy.png
+    - packages/flutter_gallery_assets/food/icons/main.png
+    - packages/flutter_gallery_assets/food/icons/meat.png
+    - packages/flutter_gallery_assets/food/icons/quick.png
+    - packages/flutter_gallery_assets/food/icons/spicy.png
+    - packages/flutter_gallery_assets/food/icons/veggie.png
+    - packages/flutter_gallery_assets/logos/pesto/logo_small.png
+    - packages/flutter_gallery_assets/places/india_chennai_flower_market.png
+    - packages/flutter_gallery_assets/places/india_tanjore_bronze_works.png
+    - packages/flutter_gallery_assets/places/india_tanjore_market_merchant.png
+    - packages/flutter_gallery_assets/places/india_tanjore_thanjavur_temple.png
+    - packages/flutter_gallery_assets/places/india_pondicherry_salt_farm.png
+    - packages/flutter_gallery_assets/places/india_chennai_highway.png
+    - packages/flutter_gallery_assets/places/india_chettinad_silk_maker.png
+    - packages/flutter_gallery_assets/places/india_tanjore_thanjavur_temple_carvings.png
+    - packages/flutter_gallery_assets/places/india_chettinad_produce.png
+    - packages/flutter_gallery_assets/places/india_tanjore_market_technology.png
+    - packages/flutter_gallery_assets/places/india_chennai_beach.png
+    - packages/flutter_gallery_assets/places/india_pondicherry_fisherman.png
+    - packages/flutter_gallery_assets/products/belt.png
+    - packages/flutter_gallery_assets/products/cup.png
+    - packages/flutter_gallery_assets/products/deskset.png
+    - packages/flutter_gallery_assets/products/flatwear.png
+    - packages/flutter_gallery_assets/products/hat.png
+    - packages/flutter_gallery_assets/products/jacket.png
+    - packages/flutter_gallery_assets/products/jumper.png
+    - packages/flutter_gallery_assets/products/kitchen_quattro.png
+    - packages/flutter_gallery_assets/products/napkins.png
+    - packages/flutter_gallery_assets/products/planters.png
+    - packages/flutter_gallery_assets/products/platter.png
+    - packages/flutter_gallery_assets/products/scarf.png
+    - packages/flutter_gallery_assets/products/shirt.png
+    - packages/flutter_gallery_assets/products/sunnies.png
+    - packages/flutter_gallery_assets/products/sweater.png
+    - packages/flutter_gallery_assets/products/sweats.png
+    - packages/flutter_gallery_assets/products/table.png
+    - packages/flutter_gallery_assets/products/teaset.png
+    - packages/flutter_gallery_assets/products/top.png
+    - packages/flutter_gallery_assets/people/ali.png
+    - packages/flutter_gallery_assets/people/square/ali.png
+    - packages/flutter_gallery_assets/people/square/peter.png
+    - packages/flutter_gallery_assets/people/square/sandra.png
+    - packages/flutter_gallery_assets/people/square/stella.png
+    - packages/flutter_gallery_assets/people/square/trevor.png
   fonts:
     - family: Raleway
       fonts:
-        - asset: packages/flutter_gallery_assets/lib/fonts/Raleway/Raleway-Regular.ttf
-        - asset: packages/flutter_gallery_assets/lib/fonts/Raleway/Raleway-Medium.ttf
+        - asset: packages/flutter_gallery_assets/fonts/Raleway/Raleway-Regular.ttf
+        - asset: packages/flutter_gallery_assets/fonts/Raleway/Raleway-Medium.ttf
           weight: 500
-        - asset: packages/flutter_gallery_assets/lib/fonts/Raleway/Raleway-SemiBold.ttf
+        - asset: packages/flutter_gallery_assets/fonts/Raleway/Raleway-SemiBold.ttf
           weight: 600
     - family: AbrilFatface
       fonts:
-        - asset: packages/flutter_gallery_assets/lib/fonts/abrilfatface/AbrilFatface-Regular.ttf
+        - asset: packages/flutter_gallery_assets/fonts/abrilfatface/AbrilFatface-Regular.ttf
     - family: GalleryIcons
       fonts:
-        - asset: packages/flutter_gallery_assets/lib/fonts/private/gallery_icons/GalleryIcons.ttf
+        - asset: packages/flutter_gallery_assets/fonts/private/gallery_icons/GalleryIcons.ttf
     - family: GoogleSans
       fonts:
-        - asset: packages/flutter_gallery_assets/lib/fonts/private/googlesans/GoogleSans-BoldItalic.ttf
+        - asset: packages/flutter_gallery_assets/fonts/private/googlesans/GoogleSans-BoldItalic.ttf
           weight: 700
           style: italic
-        - asset: packages/flutter_gallery_assets/lib/fonts/private/googlesans/GoogleSans-Bold.ttf
+        - asset: packages/flutter_gallery_assets/fonts/private/googlesans/GoogleSans-Bold.ttf
           weight: 700
-        - asset: packages/flutter_gallery_assets/lib/fonts/private/googlesans/GoogleSans-Italic.ttf
+        - asset: packages/flutter_gallery_assets/fonts/private/googlesans/GoogleSans-Italic.ttf
           weight: 400
           style: italic
-        - asset: packages/flutter_gallery_assets/lib/fonts/private/googlesans/GoogleSans-MediumItalic.ttf
+        - asset: packages/flutter_gallery_assets/fonts/private/googlesans/GoogleSans-MediumItalic.ttf
           weight: 500
           style: italic
-        - asset: packages/flutter_gallery_assets/lib/fonts/private/googlesans/GoogleSans-Medium.ttf
+        - asset: packages/flutter_gallery_assets/fonts/private/googlesans/GoogleSans-Medium.ttf
           weight: 500
-        - asset: packages/flutter_gallery_assets/lib/fonts/private/googlesans/GoogleSans-Regular.ttf
+        - asset: packages/flutter_gallery_assets/fonts/private/googlesans/GoogleSans-Regular.ttf
           weight: 400
     - family: GoogleSansDisplay
       fonts:
-        - asset: packages/flutter_gallery_assets/lib/fonts/private/googlesans/GoogleSansDisplay-BoldItalic.ttf
+        - asset: packages/flutter_gallery_assets/fonts/private/googlesans/GoogleSansDisplay-BoldItalic.ttf
           weight: 700
           style: italic
-        - asset: packages/flutter_gallery_assets/lib/fonts/private/googlesans/GoogleSansDisplay-Bold.ttf
+        - asset: packages/flutter_gallery_assets/fonts/private/googlesans/GoogleSansDisplay-Bold.ttf
           weight: 700
-        - asset: packages/flutter_gallery_assets/lib/fonts/private/googlesans/GoogleSansDisplay-Italic.ttf
+        - asset: packages/flutter_gallery_assets/fonts/private/googlesans/GoogleSansDisplay-Italic.ttf
           weight: 400
           style: italic
-        - asset: packages/flutter_gallery_assets/lib/fonts/private/googlesans/GoogleSansDisplay-MediumItalic.ttf
+        - asset: packages/flutter_gallery_assets/fonts/private/googlesans/GoogleSansDisplay-MediumItalic.ttf
           style: italic
           weight: 500
-        - asset: packages/flutter_gallery_assets/lib/fonts/private/googlesans/GoogleSansDisplay-Medium.ttf
+        - asset: packages/flutter_gallery_assets/fonts/private/googlesans/GoogleSansDisplay-Medium.ttf
           weight: 500
-        - asset: packages/flutter_gallery_assets/lib/fonts/private/googlesans/GoogleSansDisplay-Regular.ttf
+        - asset: packages/flutter_gallery_assets/fonts/private/googlesans/GoogleSansDisplay-Regular.ttf
           weight: 400
 
 # PUBSPEC CHECKSUM: b217
