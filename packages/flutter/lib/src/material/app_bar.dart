@@ -630,7 +630,9 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
         automaticallyImplyLeading: automaticallyImplyLeading,
         title: title,
         actions: actions,
-        flexibleSpace: flexibleSpace,
+        flexibleSpace: (title == null && flexibleSpace != null)
+          ? new Semantics(child: flexibleSpace, header: true)
+          : flexibleSpace,
         bottom: bottom,
         elevation: forceElevated || overlapsContent || (pinned && shrinkOffset > maxExtent - minExtent) ? elevation ?? 4.0 : 0.0,
         backgroundColor: backgroundColor,
