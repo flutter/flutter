@@ -15,7 +15,7 @@ class PestoDemo extends StatelessWidget {
 }
 
 
-const String _kSmallLogoImage = '/Users/larche/flutter_gallery_assets/lib/logos/pesto/logo_small.png';
+const String _kSmallLogoImage = '/logos/pesto/logo_small.png';
 const String _kGalleryAssetsPackage = 'flutter_gallery_assets';
 const double _kAppBarHeight = 128.0;
 const double _kFabHalfSize = 28.0; // TODO(mpcomplete): needs to adapt to screen size
@@ -571,11 +571,11 @@ const List<Recipe> kPestoRecipes = const <Recipe>[
   const Recipe(
     name: 'Pesto Bruschetta',
     author: 'Peter Carlsson',
-    ingredientsImagePath: '/Users/larche/flutter_gallery_assets/lib/food/icons/quick.png',
-//    ingredientsImagePackage: _kGalleryAssetsPackage,
+    ingredientsImagePath: '/food/icons/quick.png',
+    ingredientsImagePackage: _kGalleryAssetsPackage,
     description: 'Bask in greens this season by trying this delightful take on traditional bruschetta. Top with a dollop of homemade pesto, and season with freshly ground sea salt and pepper.',
-    imagePath: '/Users/larche/flutter_gallery_assets/lib/food/image1.jpg',
-//    imagePackage: _kGalleryAssetsPackage,
+    imagePath: '/food/image1.jpg',
+    imagePackage: _kGalleryAssetsPackage,
     ingredients: const<RecipeIngredient>[
       const RecipeIngredient(amount: '6 pieces', description: 'Mozzarella cheese'),
       const RecipeIngredient(amount: '6 pieces', description: 'Toasts'),
@@ -591,11 +591,11 @@ const List<Recipe> kPestoRecipes = const <Recipe>[
   const Recipe(
     name: 'Rustic purple mash',
     author: 'Trevor Hansen',
-    ingredientsImagePath: '/Users/larche/flutter_gallery_assets/lib/food/icons/veggie.png',
-//    ingredientsImagePackage: _kGalleryAssetsPackage,
+    ingredientsImagePath: '/food/icons/veggie.png',
+    ingredientsImagePackage: _kGalleryAssetsPackage,
     description: 'Abundant in color, and healthy, delicious goodness, cooking with these South American purple potatoes is a treat. Boil, mash, bake, or roast them. For taste cook with chicken stock, and a dash of extra virgin olive oil.',
-    imagePath: '/Users/larche/flutter_gallery_assets/lib/food/image2.jpg',
-//    imagePackage: _kGalleryAssetsPackage,
+    imagePath: '/food/image2.jpg',
+    imagePackage: _kGalleryAssetsPackage,
     ingredients: const<RecipeIngredient>[
       const RecipeIngredient(amount: '2 lbs', description: 'Purple potatoes, skin on'),
       const RecipeIngredient(amount: '1 tsp', description: 'Salt'),
@@ -611,11 +611,11 @@ const List<Recipe> kPestoRecipes = const <Recipe>[
   const Recipe(
     name: 'Bacon Sprouts',
     author: 'Ali Connors',
-    ingredientsImagePath: '/Users/larche/flutter_gallery_assets/lib/food/icons/main.png',
-//    ingredientsImagePackage: _kGalleryAssetsPackage,
+    ingredientsImagePath: '/food/icons/main.png',
+    ingredientsImagePackage: _kGalleryAssetsPackage,
     description: 'This beautiful sprouts recipe is the most glorious side dish on a cold winter’s night. Construct it with bacon or fake-on, but always make sure the sprouts are deliciously seasoned and appropriately sautéed.',
-    imagePath: '/Users/larche/flutter_gallery_assets/lib/food/image3.jpg',
-//    imagePackage: _kGalleryAssetsPackage,
+    imagePath: '/food/image3.jpg',
+    imagePackage: _kGalleryAssetsPackage,
     ingredients: const<RecipeIngredient>[
       const RecipeIngredient(amount: '2 lbs', description: 'Brussel sprouts'),
       const RecipeIngredient(amount: '3 lbs', description: 'Bacon'),
@@ -632,11 +632,11 @@ const List<Recipe> kPestoRecipes = const <Recipe>[
   const Recipe(
     name: 'Oven Sausage',
     author: 'Sandra Adams',
-    ingredientsImagePath: '/Users/larche/flutter_gallery_assets/lib/food/icons/meat.png',
-//    ingredientsImagePackage: _kGalleryAssetsPackage,
+    ingredientsImagePath: '/food/icons/meat.png',
+    ingredientsImagePackage: _kGalleryAssetsPackage,
     description: 'Robust cuts of portuguese sausage add layers of flavour. Bake or fry until sausages are slightly browned and with a crispy skin. Serve warm and with cuts of pineapple for a delightful mix of sweet and savory flavour. This is the perfect dish after a swim in the sea.',
-    imagePath: '/Users/larche/flutter_gallery_assets/lib/food/image4.jpg',
-//    imagePackage: _kGalleryAssetsPackage,
+    imagePath: '/food/image4.jpg',
+    imagePackage: _kGalleryAssetsPackage,
     ingredients: const<RecipeIngredient>[
       const RecipeIngredient(amount: '1 1/2 lbs', description: 'Linguisa'),
       const RecipeIngredient(amount: '1 lbs', description: 'Pineapple or other fresh citrus fruit'),
@@ -649,11 +649,11 @@ const List<Recipe> kPestoRecipes = const <Recipe>[
   const Recipe(
     name: 'Chicken tostadas',
     author: 'Peter Carlsson',
-    ingredientsImagePath: '/Users/larche/flutter_gallery_assets/lib/food/icons/spicy.png',
-//    ingredientsImagePackage: _kGalleryAssetsPackage,
+    ingredientsImagePath: '/food/icons/spicy.png',
+    ingredientsImagePackage: _kGalleryAssetsPackage,
     description: 'Crisp flavours and a bit of spice make this roasted chicken dish an easy go to when cooking for large groups. Top with Baja sauce for an extra kick of spice.',
-    imagePath: '/Users/larche/flutter_gallery_assets/lib/food/image5.jpg',
-//    imagePackage: _kGalleryAssetsPackage,
+    imagePath: '/food/image5.jpg',
+    imagePackage: _kGalleryAssetsPackage,
     ingredients: const<RecipeIngredient>[
       const RecipeIngredient(amount: '4-6', description: 'Small corn tortillas'),
       const RecipeIngredient(amount: '½ cup', description: 'Chopped onion'),
@@ -668,11 +668,11 @@ const List<Recipe> kPestoRecipes = const <Recipe>[
   const Recipe(
     name: 'Coconut rice',
     author: 'Ali Connors',
-    ingredientsImagePath: '/Users/larche/flutter_gallery_assets/lib/food/icons/healthy.png',
-//    ingredientsImagePackage: _kGalleryAssetsPackage,
+    ingredientsImagePath: '/food/icons/healthy.png',
+    ingredientsImagePackage: _kGalleryAssetsPackage,
     description: 'This dish is a terrific pairing to almost any main. Bonus- it’s quick, easy to make, and turns even the simplest of dishes into a delicacy. Sweet coconut cream will leave your mouth watering, with yummy caramelized flecks of rice adding an extra bit of taste. Fluff with fork before serving for best results.',
-    imagePath: '/Users/larche/flutter_gallery_assets/lib/food/image6.jpg',
-//    imagePackage: _kGalleryAssetsPackage,
+    imagePath: '/food/image6.jpg',
+    imagePackage: _kGalleryAssetsPackage,
     ingredients: const<RecipeIngredient>[
       const RecipeIngredient(amount: '2 cups', description: 'Jasmine rice'),
       const RecipeIngredient(amount: '1 1/2 cups', description: 'Water'),
@@ -688,11 +688,11 @@ const List<Recipe> kPestoRecipes = const <Recipe>[
   const Recipe(
     name: 'Gin basil cocktail',
     author: 'Trevor Hansen',
-    ingredientsImagePath: '/Users/larche/flutter_gallery_assets/lib/food/icons/quick.png',
-//    ingredientsImagePackage: _kGalleryAssetsPackage,
+    ingredientsImagePath: '/food/icons/quick.png',
+    ingredientsImagePackage: _kGalleryAssetsPackage,
     description: 'This mellow and herb filled blending of simple ingredients is easy enough to mix that a novice host will feel like a seasoned bartender. Top with crushed basil, shake or stir.',
-    imagePath: '/Users/larche/flutter_gallery_assets/lib/food/image7.jpg',
-//    imagePackage: _kGalleryAssetsPackage,
+    imagePath: '/food/image7.jpg',
+    imagePackage: _kGalleryAssetsPackage,
     ingredients: const<RecipeIngredient>[
       const RecipeIngredient(amount: '3 parts', description: 'Gin'),
       const RecipeIngredient(amount: '1 part', description: 'Fresh lemon juice'),
@@ -707,11 +707,11 @@ const List<Recipe> kPestoRecipes = const <Recipe>[
   const Recipe(
     name: 'Seared sesame fish',
     author: 'Ali Connors',
-    ingredientsImagePath: '/Users/larche/flutter_gallery_assets/lib/food/icons/fish.png',
-//    ingredientsImagePackage: _kGalleryAssetsPackage,
+    ingredientsImagePath: '/food/icons/fish.png',
+    ingredientsImagePackage: _kGalleryAssetsPackage,
     description: 'Cuts of fish like this are perfect for simple searing with bright flavours. Try Sesame seeds on these fillets for crusty skin filled with crunch. For added flavour try dipping in a homemade ponzu sauce - delicious.',
-    imagePath: '/Users/larche/flutter_gallery_assets/lib/food/image8.jpg',
-//    imagePackage: _kGalleryAssetsPackage,
+    imagePath: '/food/image8.jpg',
+    imagePackage: _kGalleryAssetsPackage,
     ingredients: const<RecipeIngredient>[
       const RecipeIngredient(amount: '1 ½ lbs', description: 'Thin fish fillets'),
       const RecipeIngredient(amount: '1 lb', description: 'Salt and black pepper to taste'),
@@ -728,11 +728,11 @@ const List<Recipe> kPestoRecipes = const <Recipe>[
   const Recipe(
     name: 'Herb artichoke',
     author: 'Sandra Adams',
-    ingredientsImagePath: '/Users/larche/flutter_gallery_assets/lib/food/icons/healthy.png',
-//    ingredientsImagePackage: _kGalleryAssetsPackage,
+    ingredientsImagePath: '/food/icons/healthy.png',
+    ingredientsImagePackage: _kGalleryAssetsPackage,
     description: 'This tasty and healthy veggie is a favorite. Artichoke like this can be paired with a hearty main or works well as a small meal with some white wine on the side. Simple and fresh, all foodies love tasty artichoke.',
-    imagePath: '/Users/larche/flutter_gallery_assets/lib/food/image9.jpg',
-//    imagePackage: _kGalleryAssetsPackage,
+    imagePath: '/food/image9.jpg',
+    imagePackage: _kGalleryAssetsPackage,
     ingredients: const<RecipeIngredient>[
       const RecipeIngredient(amount: '1', description: 'Small garlic clove, peeled'),
       const RecipeIngredient(amount: '2', description: 'Whole artichokes'),
@@ -749,10 +749,10 @@ const List<Recipe> kPestoRecipes = const <Recipe>[
   const Recipe(
     name: 'Pesto bruschetta',
     author: 'Trevor Hansen',
-    ingredientsImagePath: '/Users/larche/flutter_gallery_assets/lib/food/icons/veggie.png',
-//    ingredientsImagePackage: _kGalleryAssetsPackage,
+    ingredientsImagePath: '/food/icons/veggie.png',
+    ingredientsImagePackage: _kGalleryAssetsPackage,
     description: 'Life is good when you add amazingly warm bread, fresh pesto sauce, and roasted tomatoes to the table. This a classic starter to break out in a pinch. It’s easy to make and extra tasty.',
-    imagePath: '/Users/larche/flutter_gallery_assets/lib/food/image10.jpg',
+    imagePath: '/food/image10.jpg',
     imagePackage: _kGalleryAssetsPackage,
     ingredients: const<RecipeIngredient>[
       const RecipeIngredient(amount: '1 loaf', description: 'Sliced French bread'),
@@ -772,11 +772,11 @@ const List<Recipe> kPestoRecipes = const <Recipe>[
   const Recipe(
     name: 'Garlic bok choy',
     author: 'Sandra Adams',
-    ingredientsImagePath: '/Users/larche/flutter_gallery_assets/lib/food/icons/spicy.png',
-//    ingredientsImagePackage: _kGalleryAssetsPackage,
+    ingredientsImagePath: '/food/icons/spicy.png',
+    ingredientsImagePackage: _kGalleryAssetsPackage,
     description: 'Great stir-fried bok choy starts at the market. For me, nothing says tasty like garlic and baby bok choy. Choose fresh, crisp greens. Once home, wash, chop, and then ready for the wok. No family style spread is complete without these greens.',
-    imagePath: '/Users/larche/flutter_gallery_assets/lib/food/image11.jpg',
-//    imagePackage: _kGalleryAssetsPackage,
+    imagePath: '/food/image11.jpg',
+    imagePackage: _kGalleryAssetsPackage,
     ingredients: const<RecipeIngredient>[
       const RecipeIngredient(amount: '1/2 cup', description: 'Chick broth'),
       const RecipeIngredient(amount: '1 tbsp', description: 'Soy sauce'),
@@ -792,11 +792,11 @@ const List<Recipe> kPestoRecipes = const <Recipe>[
   const Recipe(
     name: 'Fresh Fettuccine',
     author: 'Ali Connors',
-    ingredientsImagePath: '/Users/larche/flutter_gallery_assets/lib/food/icons/main.png',
-//    ingredientsImagePackage: _kGalleryAssetsPackage,
+    ingredientsImagePath: '/food/icons/main.png',
+    ingredientsImagePackage: _kGalleryAssetsPackage,
     description: 'Satisfy a need for rich, creamy homemade goodness with this classic. Creamy fettuccine alfredo will have you hitting the gym the next day, but it’s so good it’s worth it.',
-    imagePath: '/Users/larche/flutter_gallery_assets/lib/food/image12.jpg',
-//    imagePackage: _kGalleryAssetsPackage,
+    imagePath: '/food/image12.jpg',
+    imagePackage: _kGalleryAssetsPackage,
     ingredients: const<RecipeIngredient>[
       const RecipeIngredient(amount: '¾ cup', description: 'Milk'),
       const RecipeIngredient(amount: '1 ½ tsp', description: 'Salt'),
@@ -813,11 +813,11 @@ const List<Recipe> kPestoRecipes = const <Recipe>[
   const Recipe(
     name: 'Sicilian-Style sardines',
     author: 'Peter Carlsson',
-    ingredientsImagePath: '/Users/larche/flutter_gallery_assets/lib/food/icons/quick.png',
-//    ingredientsImagePackage: _kGalleryAssetsPackage,
+    ingredientsImagePath: '/food/icons/quick.png',
+    ingredientsImagePackage: _kGalleryAssetsPackage,
     description: 'My go to way to eat sardines is with a splash of tangy lemon and fresh fennel drizzled on top. The best thing about this dish is the flavour it packs. Prepaid with wild caught sardines or canned.',
-    imagePath: '/Users/larche/flutter_gallery_assets/lib/food/image13.jpg',
-//    imagePackage: _kGalleryAssetsPackage,
+    imagePath: '/food/image13.jpg',
+    imagePackage: _kGalleryAssetsPackage,
     ingredients: const<RecipeIngredient>[
       const RecipeIngredient(amount: '1/4 cup', description: 'Dry white wine'),
       const RecipeIngredient(amount: '1', description: 'Finely chopped shallot'),
