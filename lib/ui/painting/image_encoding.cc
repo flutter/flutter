@@ -86,9 +86,10 @@ sk_sp<SkData> EncodeImage(sk_sp<SkImage> image, ImageByteFormat format) {
   if (pixmap.colorType() != kRGBA_8888_SkColorType) {
     TRACE_EVENT0("flutter", "ConvertToRGBA");
 
-    // Convert the pixel data to N32 to adhere to our API contract.
-    const auto image_info = SkImageInfo::MakeN32Premul(image->width(),
-                                                       image->height());
+    // Convert the pixel data to N32 and RGBA to adhere to our API contract.
+    const auto image_info = SkImageInfo::MakeN32Premul(
+        image->width(), image->height()).makeColorType(kRGBA_8888_SkColorType);
+
     auto surface = SkSurface::MakeRaster(image_info);
     surface->writePixels(pixmap, 0, 0);
     if (!surface->peekPixels(&pixmap)) {
