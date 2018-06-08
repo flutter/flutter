@@ -187,6 +187,8 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
   }
 
   void _updateSystemChrome() {
+    if (!SystemChrome.automaticSystemUiAdjustment)
+      return;
     final Size windowSize = ui.window.physicalSize / ui.window.devicePixelRatio;
     final Offset lowerOffset = new Offset(0.0, windowSize.height);
     final SystemUiOverlayStyle upperOverlayStyle = layer.findRegion(
