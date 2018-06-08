@@ -13,6 +13,7 @@ class BuildInfo {
   const BuildInfo(this.mode, this.flavor, {
     this.previewDart2 = false,
     this.trackWidgetCreation = false,
+    this.useApplicationSnapshot = false,
     this.extraFrontEndOptions,
     this.extraGenSnapshotOptions,
     this.buildSharedLibrary,
@@ -41,6 +42,9 @@ class BuildInfo {
 
   /// Whether the build should track widget creation locations.
   final bool trackWidgetCreation;
+
+  /// Whether the build should create VM snapshot instead of using prebuilt one from engine.
+  final bool useApplicationSnapshot;
 
   /// Extra command-line options for front-end.
   final String extraFrontEndOptions;
@@ -95,6 +99,7 @@ class BuildInfo {
       new BuildInfo(mode, flavor,
           previewDart2: previewDart2,
           trackWidgetCreation: trackWidgetCreation,
+          useApplicationSnapshot: useApplicationSnapshot,
           extraFrontEndOptions: extraFrontEndOptions,
           extraGenSnapshotOptions: extraGenSnapshotOptions,
           buildSharedLibrary: buildSharedLibrary,

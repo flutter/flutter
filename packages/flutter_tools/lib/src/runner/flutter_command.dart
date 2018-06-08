@@ -212,10 +212,13 @@ abstract class FlutterCommand extends Command<Null> {
 
     return new BuildInfo(getBuildMode(),
       argParser.options.containsKey('flavor')
-        ? argResults['flavor']
-        : null,
+          ? argResults['flavor']
+          : null,
       previewDart2: previewDart2,
       trackWidgetCreation: trackWidgetCreation,
+      useApplicationSnapshot: argParser.options.containsKey('snapshot')
+          ? argResults['snapshot']
+          : false,
       extraFrontEndOptions: argParser.options.containsKey(FlutterOptions.kExtraFrontEndOptions)
           ? argResults[FlutterOptions.kExtraFrontEndOptions]
           : null,
@@ -223,8 +226,8 @@ abstract class FlutterCommand extends Command<Null> {
           ? argResults[FlutterOptions.kExtraGenSnapshotOptions]
           : null,
       buildSharedLibrary: argParser.options.containsKey('build-shared-library')
-        ? argResults['build-shared-library']
-        : false,
+          ? argResults['build-shared-library']
+          : false,
       targetPlatform: targetPlatform,
       fileSystemRoots: argParser.options.containsKey(FlutterOptions.kFileSystemRoot)
           ? argResults[FlutterOptions.kFileSystemRoot] : null,
