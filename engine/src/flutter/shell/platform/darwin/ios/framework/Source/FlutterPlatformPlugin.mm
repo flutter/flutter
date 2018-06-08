@@ -83,13 +83,14 @@ using namespace shell;
   }
 
   if (@available(iOS 10, *)) {
-    if ([@"HapticFeedbackType.lightImpact" isEqualToString: feedbackType]) {
+    if ([@"HapticFeedbackType.lightImpact" isEqualToString:feedbackType]) {
       [[[UIImpactFeedbackGenerator alloc] initWithStyle:UIImpactFeedbackStyleLight] impactOccurred];
-    } else if ([@"HapticFeedbackType.mediumImpact" isEqualToString: feedbackType]) {
-      [[[UIImpactFeedbackGenerator alloc] initWithStyle:UIImpactFeedbackStyleMedium] impactOccurred];
-    } else if ([@"HapticFeedbackType.heavyImpact" isEqualToString: feedbackType]) {
+    } else if ([@"HapticFeedbackType.mediumImpact" isEqualToString:feedbackType]) {
+      [[[UIImpactFeedbackGenerator alloc] initWithStyle:UIImpactFeedbackStyleMedium]
+          impactOccurred];
+    } else if ([@"HapticFeedbackType.heavyImpact" isEqualToString:feedbackType]) {
       [[[UIImpactFeedbackGenerator alloc] initWithStyle:UIImpactFeedbackStyleHeavy] impactOccurred];
-    } else if ([@"HapticFeedbackType.selectionClick" isEqualToString: feedbackType]) {
+    } else if ([@"HapticFeedbackType.selectionClick" isEqualToString:feedbackType]) {
       [[[UISelectionFeedbackGenerator alloc] init] selectionChanged];
     }
   }
