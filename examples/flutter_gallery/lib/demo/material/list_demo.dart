@@ -186,14 +186,16 @@ class _ListDemoState extends State<ListDemo> {
         'Even more additional list item information appears on line three.',
       );
     }
-    final Widget listTile = new ListTile(
-      isThreeLine: _itemType == _MaterialListType.threeLine,
-      dense: _dense,
-      trailing: new Checkbox(value: valueToCheckboxState[item] ?? false, onChanged: (bool newValue) {setState(() {valueToCheckboxState[item] = newValue;});},),
-      title: new Text('This item represents $item.'),
-      subtitle: secondary,
-      leading: const Icon(Icons.drag_handle),
-    );
+    final Widget listTile = new Container(height: 100.0, width: 100.0, child: new CircleAvatar(child: new Text(item), backgroundColor: Colors.green,));
+    
+    // new ListTile(
+    //   isThreeLine: _itemType == _MaterialListType.threeLine,
+    //   dense: _dense,
+    //   trailing: new Checkbox(value: valueToCheckboxState[item] ?? false, onChanged: (bool newValue) {setState(() {valueToCheckboxState[item] = newValue;});},),
+    //   title: new Text('This item represents $item.'),
+    //   subtitle: secondary,
+    //   leading: const Icon(Icons.drag_handle),
+    // );
     return new MergeSemantics(
       key: new Key(item),
       child: listTile,
@@ -256,7 +258,7 @@ class _ListDemoState extends State<ListDemo> {
       body: new Scrollbar(
         child: new ReorderableListView(
           onSwap: onSwap,
-          scrollDirection: Axis.vertical,
+          scrollDirection: Axis.horizontal,
           children: listTiles,
           padding: new EdgeInsets.symmetric(vertical: _dense ? 4.0 : 8.0),
         ),

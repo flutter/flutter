@@ -26,9 +26,12 @@ void main() {
 
     Widget build() {
       return new MaterialApp(
-        home: new ReorderableListView(
-          children: listItems.map(listItemToWidget).toList(),
-          onSwap: onSwap,
+        home: new SizedBox(
+          height: itemHeight * 10, 
+          child: new ReorderableListView(
+            children: listItems.map(listItemToWidget).toList(),
+            onSwap: onSwap,
+          ),
         ),
       );
     }
@@ -71,6 +74,12 @@ void main() {
       );
       expect(listItems, orderedEquals(<String>['Item 4', 'Item 1', 'Item 2', 'Item 3']));
     });
+
+    testWidgets('allows reordering inside the middle of the widget', (WidgetTester tester) async {
+
+    });
+
+    // TODO(djshuckerow): figure out how to write a test for scrolling the list.
   });
 }
 

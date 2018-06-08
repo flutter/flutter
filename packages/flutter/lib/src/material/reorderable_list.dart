@@ -100,7 +100,16 @@ class _ReorderableListViewState extends State<ReorderableListView> with TickerPr
 
   Widget _wrap(Widget toWrap, int index) {
     assert(toWrap.key != null);
+
+    Widget _buildContainerForAxis({List<Widget> children}) {
+      if (widget.scrollDirection == Axis.horizontal) {
+        return new Row(children: children);
+      } 
+      return new Column(children: children);
+    }
+
     Widget _buildDragTarget(BuildContext context, List<Key> acceptedCandidates, List<dynamic> rejectedCandidates) {
+      final Widget spacing = widget.scrollDirection == Axis.vertical ? const SizedBox(height: approximateItemHeight) : const SizedBox(width: approximateItemHeight);
       final Widget draggable = new LongPressDraggable<Key>(
         maxSimultaneousDrags: 1,
         axis: widget.scrollDirection,
@@ -108,7 +117,8 @@ class _ReorderableListViewState extends State<ReorderableListView> with TickerPr
         feedback: new Material(
           elevation: 6.0,
           child: new SizedBox(
-            width: MediaQuery.of(context).size.width,
+            width: widget.scrollDirection == Axis.vertical ? MediaQuery.of(context).size.width : null,
+            height: widget.scrollDirection == Axis.horizontal ? MediaQuery.of(context).size.height : null,
             child: toWrap,
           ),
         ),
@@ -147,19 +157,21 @@ class _ReorderableListViewState extends State<ReorderableListView> with TickerPr
         return toWrap;
       }
       if (_currentIndex == index) {
-        return new Column(children: <Widget>[
+        return _buildContainerForAxis(children: <Widget>[
           new SizeTransition(
             sizeFactor: entranceController, 
-            child: const SizedBox(height: approximateItemHeight),
+            axis: widget.scrollDirection,
+            child: spacing
           ),
           draggable,
         ]);
       }
       if (_ghostIndex == index) {
-        return new Column(children: <Widget>[
+        return _buildContainerForAxis(children: <Widget>[
           new SizeTransition(
             sizeFactor: ghostController, 
-            child: const SizedBox(height: approximateItemHeight),
+            axis: widget.scrollDirection,
+            child: spacing,
           ),
           draggable,
         ]);
@@ -248,8 +260,8 @@ class _ReorderableListViewState extends State<ReorderableListView> with TickerPr
     }
     wrappedChildren.add(_wrap(
       new SizedBox(
-        height: 72.0, 
-        width: MediaQuery.of(context).size.width,
+        height: widget.scrollDirection == Axis.horizontal ? MediaQuery.of(context).size.height : 72.0, 
+        width: widget.scrollDirection == Axis.vertical ? MediaQuery.of(context).size.width : 72.0,
         key: const Key('DraggableList - End Widget'), 
       ),
       widget.children.length),
@@ -257,7 +269,9 @@ class _ReorderableListViewState extends State<ReorderableListView> with TickerPr
 
     return new SingleChildScrollView(
       scrollDirection: widget.scrollDirection,
-      child: new Column(children: wrappedChildren), 
+      child: widget.scrollDirection == Axis.vertical 
+          ? new Column(children: wrappedChildren) 
+          : new Row(children: wrappedChildren),
       padding: widget.padding, 
       controller: scrollController,
     );
