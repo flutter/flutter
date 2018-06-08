@@ -22,9 +22,9 @@ const List<Category> allCategories = const <Category>[
   const Category(
     title: 'Accessories',
     assets: const <String>[
-      '/Users/larche/flutter_gallery_assets/lib/products/backpack.png',
       '/Users/larche/flutter_gallery_assets/lib/products/belt.png',
       '/Users/larche/flutter_gallery_assets/lib/products/earrings.png',
+      '/Users/larche/flutter_gallery_assets/lib/products/backpack.png',
       '/Users/larche/flutter_gallery_assets/lib/products/hat.png',
       '/Users/larche/flutter_gallery_assets/lib/products/scarf.png',
       '/Users/larche/flutter_gallery_assets/lib/products/sunnies.png',
