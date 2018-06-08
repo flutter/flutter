@@ -187,9 +187,19 @@ class _BottomAppBarDemoState extends State<BottomAppBarDemo> {
       bottomNavigationBar: new _DemoBottomAppBar(
         color: _babColor,
         fabLocation: _fabLocation.value,
-        showNotch: _showNotch.value,
+        notchComputer: _selectNotchComputer(),
       ),
     );
+  }
+
+  NotchComputer _selectNotchComputer() {
+    if (!_showNotch.value)
+      return null;
+    if (_fabShape == kCircularFab)
+      return const CircularNotchComputer();
+    if (_fabShape == kDiamondFab)
+      return const _DiamondNotchComputer();
+    return null;
   }
 }
 
@@ -317,11 +327,15 @@ class _Heading extends StatelessWidget {
 }
 
 class _DemoBottomAppBar extends StatelessWidget {
-  const _DemoBottomAppBar({ this.color, this.fabLocation, this.showNotch });
+  const _DemoBottomAppBar({
+    this.color,
+    this.fabLocation,
+    this.notchComputer
+  });
 
   final Color color;
   final FloatingActionButtonLocation fabLocation;
-  final bool showNotch;
+  final NotchComputer notchComputer;
 
   static final List<FloatingActionButtonLocation> kCenterLocations = <FloatingActionButtonLocation>[
     FloatingActionButtonLocation.centerDocked,
@@ -369,8 +383,8 @@ class _DemoBottomAppBar extends StatelessWidget {
 
     return new BottomAppBar(
       color: color,
-      hasNotch: showNotch,
       child: new Row(children: rowContents),
+      notchComputer: notchComputer,
     );
   }
 }
@@ -399,24 +413,14 @@ class _DemoDrawer extends StatelessWidget {
 }
 
 // A diamond-shaped floating action button.
-class _DiamondFab extends StatefulWidget {
+class _DiamondFab extends StatelessWidget {
   const _DiamondFab({
     this.child,
-    this.notchMargin = 6.0,
     this.onPressed,
   });
 
   final Widget child;
-  final double notchMargin;
   final VoidCallback onPressed;
-
-  @override
-  State createState() => new _DiamondFabState();
-}
-
-class _DiamondFabState extends State<_DiamondFab> {
-
-  VoidCallback _clearComputeNotch;
 
   @override
   Widget build(BuildContext context) {
@@ -424,35 +428,28 @@ class _DiamondFabState extends State<_DiamondFab> {
       shape: const _DiamondBorder(),
       color: Colors.orange,
       child: new InkWell(
-        onTap: widget.onPressed,
+        onTap: onPressed,
         child: new Container(
           width: 56.0,
           height: 56.0,
           child: IconTheme.merge(
             data: new IconThemeData(color: Theme.of(context).accentIconTheme.color),
-            child: widget.child,
+            child: child,
           ),
         ),
       ),
       elevation: 6.0,
     );
   }
+}
+
+class _DiamondNotchComputer implements NotchComputer {
+  const _DiamondNotchComputer();
 
   @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    _clearComputeNotch = Scaffold.setFloatingActionButtonNotchFor(context, _computeNotch);
-  }
-
-  @override
-  void deactivate() {
-    if (_clearComputeNotch != null)
-      _clearComputeNotch();
-    super.deactivate();
-  }
-
-  Path _computeNotch(Rect host, Rect guest, Offset start, Offset end) {
-    final Rect marginedGuest = guest.inflate(widget.notchMargin);
+  Path compute(Rect host, Rect guest, Offset start, Offset end) {
+    const double notchMargin = 6.0;
+    final Rect marginedGuest = guest.inflate(notchMargin);
     if (!host.overlaps(marginedGuest))
       return new Path()..lineTo(end.dx, end.dy);
 

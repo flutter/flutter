@@ -14,7 +14,11 @@ void main() {
           floatingActionButton: const FloatingActionButton(
             onPressed: null,
           ),
-          bottomNavigationBar: const ShapeListener(const BottomAppBar()),
+          bottomNavigationBar: const ShapeListener(
+            const BottomAppBar(
+              child: const SizedBox(height: 100.0),
+            )
+          ),
         ),
       ),
     );
@@ -86,7 +90,7 @@ void main() {
     expect(physicalShape.color, const Color(0xff0000ff));
   });
 
-  // This is a regression test for a bug we had where toggling hasNotch
+  // This is a regression test for a bug we had where toggling the notch on/off
   // will crash, as the shouldReclip method of ShapeBorderClipper or
   // _BottomAppBarClipper will try an illegal downcast.
   testWidgets('toggle hasNotch', (WidgetTester tester) async {
@@ -94,7 +98,7 @@ void main() {
       new MaterialApp(
         home: const Scaffold(
           bottomNavigationBar: const BottomAppBar(
-            hasNotch: true,
+            notchComputer: const RectangularNotchComputer(),
           ),
         ),
       ),
@@ -104,7 +108,7 @@ void main() {
       new MaterialApp(
         home: const Scaffold(
           bottomNavigationBar: const BottomAppBar(
-            hasNotch: false,
+            notchComputer: null,
           ),
         ),
       ),
@@ -114,17 +118,126 @@ void main() {
       new MaterialApp(
         home: const Scaffold(
           bottomNavigationBar: const BottomAppBar(
-            hasNotch: true,
+            notchComputer: const RectangularNotchComputer(),
           ),
         ),
       ),
     );
   });
-  // TODO(amirh): test a BottomAppBar with hasNotch=false and an overlapping
-  // FAB.
-  //
-  // Cannot test this before https://github.com/flutter/flutter/pull/14368
-  // as there is no way to make the FAB and BAB overlap.
+
+  testWidgets('no notch if fab is not overlapping', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      new MaterialApp(
+        home: const Scaffold(
+          bottomNavigationBar: const ShapeListener(const BottomAppBar(
+            notchComputer: const CircularNotchComputer(),
+          )),
+          floatingActionButton: const FloatingActionButton(
+            onPressed: null,
+            child: const Icon(Icons.add),
+          ),
+        ),
+      ),
+    );
+
+    final ShapeListenerState shapeListenerState = tester.state(find.byType(ShapeListener));
+    final RenderBox renderBox = tester.renderObject(find.byType(BottomAppBar));
+    final Path expectedPath = new Path()
+      ..addRect(Offset.zero & renderBox.size);
+
+    final Path actualPath = shapeListenerState.cache.value;
+
+    expect(
+      actualPath,
+      coversSameAreaAs(
+        expectedPath,
+        areaToCompare: (Offset.zero & renderBox.size).inflate(5.0),
+      )
+    );
+  });
+
+  testWidgets('no notch notch computer is null', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      new MaterialApp(
+        home: const Scaffold(
+          bottomNavigationBar: const ShapeListener(const BottomAppBar(
+            notchComputer: null,
+          )),
+          floatingActionButton: const FloatingActionButton(
+            onPressed: null,
+            child: const Icon(Icons.add),
+          ),
+          floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+        ),
+      ),
+    );
+
+    final ShapeListenerState shapeListenerState = tester.state(find.byType(ShapeListener));
+    final RenderBox renderBox = tester.renderObject(find.byType(BottomAppBar));
+    final Path expectedPath = new Path()
+      ..addRect(Offset.zero & renderBox.size);
+
+    final Path actualPath = shapeListenerState.cache.value;
+
+    expect(
+      actualPath,
+      coversSameAreaAs(
+        expectedPath,
+        areaToCompare: (Offset.zero & renderBox.size).inflate(5.0),
+      )
+    );
+  });
+
+  testWidgets('notch', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      new MaterialApp(
+        home: const Scaffold(
+          bottomNavigationBar: const ShapeListener(
+            const BottomAppBar(
+              child: const SizedBox(height: 100.0),
+              notchComputer: const RectangularNotchComputer(),
+            )
+          ),
+          floatingActionButton: const FloatingActionButton(
+            onPressed: null,
+            child: const Icon(Icons.add),
+          ),
+          floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+        ),
+      ),
+    );
+
+    final ShapeListenerState shapeListenerState = tester.state(find.byType(ShapeListener));
+    final RenderBox babBox = tester.renderObject(find.byType(BottomAppBar));
+    final Size babSize = babBox.size;
+    final RenderBox fabBox = tester.renderObject(find.byType(FloatingActionButton));
+    final Size fabSize = fabBox.size;
+
+    final double fabLeft = (babSize.width / 2.0) - (fabSize.width / 2.0);
+    final double fabRight = fabLeft + fabSize.width;
+    final double fabBottom = fabSize.height / 2.0;
+
+    final Path expectedPath = new Path()
+      ..moveTo(0.0, 0.0)
+      ..lineTo(fabLeft, 0.0)
+      ..lineTo(fabLeft, fabBottom)
+      ..lineTo(fabRight, fabBottom)
+      ..lineTo(fabRight, 0.0)
+      ..lineTo(babSize.width, 0.0)
+      ..lineTo(babSize.width, babSize.height)
+      ..lineTo(0.0, babSize.height)
+      ..close();
+
+    final Path actualPath = shapeListenerState.cache.value;
+
+    expect(
+      actualPath,
+      coversSameAreaAs(
+        expectedPath,
+        areaToCompare: (Offset.zero & babSize).inflate(5.0),
+      )
+    );
+  });
 
   testWidgets('observes safe area', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -214,4 +327,18 @@ class ShapeListenerState extends State<ShapeListener> {
     cache = new ClipCachePainter(context);
   }
 
+}
+
+class RectangularNotchComputer implements NotchComputer{
+  const RectangularNotchComputer();
+
+  @override
+  Path compute(Rect host, Rect guest, Offset start, Offset end) {
+    return new Path()
+      ..lineTo(guest.left, host.top)
+      ..lineTo(guest.left, guest.bottom)
+      ..lineTo(guest.right, guest.bottom)
+      ..lineTo(guest.right, host.top)
+      ..lineTo(end.dx, end.dy);
+  }
 }
