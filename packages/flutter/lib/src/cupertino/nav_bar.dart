@@ -147,7 +147,7 @@ class CupertinoNavigationBar extends StatelessWidget implements ObstructingPrefe
       child: new _CupertinoPersistentNavigationBar(
         leading: leading,
         automaticallyImplyLeading: automaticallyImplyLeading,
-        middle: middle,
+        middle: new Semantics(child: middle, header: true),
         trailing: trailing,
         actionsForegroundColor: actionsForegroundColor,
       ),
@@ -491,7 +491,7 @@ class _CupertinoLargeTitleNavigationBarSliverDelegate
         new _CupertinoPersistentNavigationBar(
       leading: leading,
       automaticallyImplyLeading: automaticallyImplyLeading,
-      middle: middle ?? title,
+      middle: new Semantics(child: middle ?? title, header: true),
       trailing: trailing,
       // If middle widget exists, always show it. Otherwise, show title
       // when collapsed.
@@ -533,7 +533,10 @@ class _CupertinoLargeTitleNavigationBarSliverDelegate
                       child: new SafeArea(
                         top: false,
                         bottom: false,
-                        child: title,
+                        child: new Semantics(
+                          header: true,
+                          child: title,
+                        ),
                       ),
                     ),
                   ),

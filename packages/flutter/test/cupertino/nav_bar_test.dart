@@ -8,6 +8,8 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart' hide TypeMatcher;
 
+import '../widgets/semantics_tester.dart';
+
 int count = 0;
 
 void main() {
@@ -565,6 +567,68 @@ void main() {
 
     final BoxDecoration decoration = decoratedBox.decoration;
     expect(decoration.border, isNull);
+  });
+
+  testWidgets('CupertinoSliverNavigationBar has semantics', (WidgetTester tester) async {
+    final SemanticsTester semantics = new SemanticsTester(tester);
+
+    await tester.pumpWidget(new WidgetsApp(
+        color: const Color(0xFFFFFFFF),
+        onGenerateRoute: (RouteSettings settings) {
+          return new CupertinoPageRoute<void>(
+            settings: settings,
+            builder: (BuildContext context) {
+              return new CupertinoPageScaffold(
+                child: new CustomScrollView(
+                  slivers: const <Widget>[
+                    const CupertinoSliverNavigationBar(
+                      largeTitle: const Text('Large Title'),
+                      border: null,
+                    ),
+                  ],
+                ),
+              );
+            },
+          );
+        }
+    ));
+
+    expect(semantics.nodesWith(
+      label: 'Large Title',
+      flags: <SemanticsFlag>[SemanticsFlag.isHeader],
+      textDirection: TextDirection.ltr,
+    ), hasLength(1));
+
+    semantics.dispose();
+  });
+
+  testWidgets('CupertinoNavigationBar has semantics', (WidgetTester tester) async {
+    final SemanticsTester semantics = new SemanticsTester(tester);
+
+    await tester.pumpWidget(new WidgetsApp(
+        color: const Color(0xFFFFFFFF),
+        onGenerateRoute: (RouteSettings settings) {
+          return new CupertinoPageRoute<void>(
+            settings: settings,
+            builder: (BuildContext context) {
+              return new CupertinoPageScaffold(
+                navigationBar: const CupertinoNavigationBar(
+                  middle: const Text('Fixed Title'),
+                ),
+                child: new Container(),
+              );
+            },
+          );
+        }
+    ));
+
+    expect(semantics.nodesWith(
+      label: 'Fixed Title',
+      flags: <SemanticsFlag>[SemanticsFlag.isHeader],
+      textDirection: TextDirection.ltr,
+    ), hasLength(1));
+
+    semantics.dispose();
   });
 
   testWidgets(
