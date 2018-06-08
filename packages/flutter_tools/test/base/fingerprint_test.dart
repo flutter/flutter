@@ -31,6 +31,23 @@ void main() {
       FileSystem: () => fs,
     };
 
+    testUsingContext('throws when depfile is malformed', () async {
+      await fs.file('a.dart').create();
+      await fs.file('b.dart').create();
+      await fs.file('depfile').create();
+
+      final Fingerprinter fingerprinter = new Fingerprinter(
+        fingerprintPath: 'out.fingerprint',
+        paths: <String>['a.dart'],
+        depfilePaths: <String>['depfile'],
+        properties: <String, String>{
+          'bar': 'baz',
+          'wobble': 'womble',
+        },
+      );
+      expect(() async => await fingerprinter.buildFingerprint(), throwsA(anything));
+    }, overrides: contextOverrides);
+
     testUsingContext('creates fingerprint with specified properties and files', () async {
       await fs.file('a.dart').create();
 
@@ -108,6 +125,55 @@ void main() {
         },
       );
       expect(await fingerprinter2.doesFingerprintMatch(), isFalse);
+    }, overrides: contextOverrides);
+
+    testUsingContext('fingerprint does not match if depfile is malformed', () async {
+      await fs.file('a.dart').create();
+      await fs.file('b.dart').create();
+      await fs.file('depfile').writeAsString('depfile : b.dart');
+
+      // Write a valid fingerprint
+      final Fingerprinter fingerprinter = new Fingerprinter(
+        fingerprintPath: 'out.fingerprint',
+        paths: <String>['a.dart', 'b.dart'],
+        depfilePaths: <String>['depfile'],
+        properties: <String, String>{
+          'bar': 'baz',
+          'wobble': 'womble',
+        },
+      );
+      await fingerprinter.writeFingerprint();
+
+      // Write a corrupt depfile.
+      await fs.file('depfile').writeAsString('');
+      final Fingerprinter badFingerprinter = new Fingerprinter(
+        fingerprintPath: 'out.fingerprint',
+        paths: <String>['a.dart', 'b.dart'],
+        depfilePaths: <String>['depfile'],
+        properties: <String, String>{
+          'bar': 'baz',
+          'wobble': 'womble',
+        },
+      );
+
+      expect(await badFingerprinter.doesFingerprintMatch(), isFalse);
+    }, overrides: contextOverrides);
+
+    testUsingContext('fingerprint does not match if previous fingerprint is malformed', () async {
+      await fs.file('a.dart').create();
+      await fs.file('b.dart').create();
+      await fs.file('out.fingerprint').writeAsString('** not JSON **');
+
+      final Fingerprinter fingerprinter = new Fingerprinter(
+        fingerprintPath: 'out.fingerprint',
+        paths: <String>['a.dart', 'b.dart'],
+        depfilePaths: <String>['depfile'],
+        properties: <String, String>{
+          'bar': 'baz',
+          'wobble': 'womble',
+        },
+      );
+      expect(await fingerprinter.doesFingerprintMatch(), isFalse);
     }, overrides: contextOverrides);
 
     testUsingContext('fingerprint does match if identical', () async {
