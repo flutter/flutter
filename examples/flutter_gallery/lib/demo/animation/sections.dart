@@ -59,51 +59,51 @@ class Section {
 // image SectionDetails in the allSections list.
 
 const SectionDetail _eyeglassesDetail = const SectionDetail(
-  imageAsset: '/Users/larche/flutter_gallery_assets/lib/products/sunnies.png',
-//  imageAssetPackage: _kGalleryAssetsPackage,
+  imageAsset: '/products/sunnies.png',
+  imageAssetPackage: _kGalleryAssetsPackage,
   title: 'Flutter enables interactive animation',
   subtitle: '3K views - 5 days',
 );
 
 const SectionDetail _eyeglassesImageDetail = const SectionDetail(
-  imageAsset: '/Users/larche/flutter_gallery_assets/lib/products/sunnies.png',
-//  imageAssetPackage: _kGalleryAssetsPackage,
+  imageAsset: '/products/sunnies.png',
+  imageAssetPackage: _kGalleryAssetsPackage,
 );
 
 const SectionDetail _seatingDetail = const SectionDetail(
-  imageAsset: '/Users/larche/flutter_gallery_assets/lib/products/table.png',
-//  imageAssetPackage: _kGalleryAssetsPackage,
+  imageAsset: '/products/table.png',
+  imageAssetPackage: _kGalleryAssetsPackage,
   title: 'Flutter enables interactive animation',
   subtitle: '3K views - 5 days',
 );
 
 const SectionDetail _seatingImageDetail = const SectionDetail(
-  imageAsset: '/Users/larche/flutter_gallery_assets/lib/products/table.png',
-//  imageAssetPackage: _kGalleryAssetsPackage,
+  imageAsset: '/products/table.png',
+  imageAssetPackage: _kGalleryAssetsPackage,
 );
 
 const SectionDetail _decorationDetail = const SectionDetail(
-  imageAsset: '/Users/larche/flutter_gallery_assets/lib/products/earrings.png',
-//  imageAssetPackage: _kGalleryAssetsPackage,
+  imageAsset: '/products/earrings.png',
+  imageAssetPackage: _kGalleryAssetsPackage,
   title: 'Flutter enables interactive animation',
   subtitle: '3K views - 5 days',
 );
 
 const SectionDetail _decorationImageDetail = const SectionDetail(
-  imageAsset: '/Users/larche/flutter_gallery_assets/lib/products/earrings.png',
-//  imageAssetPackage: _kGalleryAssetsPackage,
+  imageAsset: '/products/earrings.png',
+  imageAssetPackage: _kGalleryAssetsPackage,
 );
 
 const SectionDetail _protectionDetail = const SectionDetail(
-  imageAsset: '/Users/larche/flutter_gallery_assets/lib/products/hat.png',
-//  imageAssetPackage: _kGalleryAssetsPackage,
+  imageAsset: '/products/hat.png',
+  imageAssetPackage: _kGalleryAssetsPackage,
   title: 'Flutter enables interactive animation',
   subtitle: '3K views - 5 days',
 );
 
 const SectionDetail _protectionImageDetail = const SectionDetail(
-  imageAsset: '/Users/larche/flutter_gallery_assets/lib/products/hat.png',
-//  imageAssetPackage: _kGalleryAssetsPackage,
+  imageAsset: '/products/hat.png',
+  imageAssetPackage: _kGalleryAssetsPackage,
 );
 
 final List<Section> allSections = <Section>[
@@ -111,8 +111,8 @@ final List<Section> allSections = <Section>[
     title: 'SUNGLASSES',
     leftColor: _mediumPurple,
     rightColor: _mariner,
-    backgroundAsset: '/Users/larche/flutter_gallery_assets/lib/products/sunnies.png',
-//    backgroundAssetPackage: _kGalleryAssetsPackage,
+    backgroundAsset: '/products/sunnies.png',
+    backgroundAssetPackage: _kGalleryAssetsPackage,
     details: const <SectionDetail>[
       _eyeglassesDetail,
       _eyeglassesImageDetail,
@@ -126,8 +126,8 @@ final List<Section> allSections = <Section>[
     title: 'FURNITURE',
     leftColor: _tomato,
     rightColor: _mediumPurple,
-    backgroundAsset: '/Users/larche/flutter_gallery_assets/lib/products/table.png',
-//    backgroundAssetPackage: _kGalleryAssetsPackage,
+    backgroundAsset: '/products/table.png',
+    backgroundAssetPackage: _kGalleryAssetsPackage,
     details: const <SectionDetail>[
       _seatingDetail,
       _seatingImageDetail,
@@ -141,8 +141,8 @@ final List<Section> allSections = <Section>[
     title: 'JEWELRY',
     leftColor: _mySin,
     rightColor: _tomato,
-    backgroundAsset: '/Users/larche/flutter_gallery_assets/lib/products/earrings.png',
-//    backgroundAssetPackage: _kGalleryAssetsPackage,
+    backgroundAsset: '/products/earrings.png',
+    backgroundAssetPackage: _kGalleryAssetsPackage,
     details: const <SectionDetail>[
       _decorationDetail,
       _decorationImageDetail,
@@ -156,8 +156,8 @@ final List<Section> allSections = <Section>[
     title: 'HEADWEAR',
     leftColor: Colors.white,
     rightColor: _tomato,
-    backgroundAsset: '/Users/larche/flutter_gallery_assets/lib/products/hat.png',
-//    backgroundAssetPackage: _kGalleryAssetsPackage,
+    backgroundAsset: '/products/hat.png',
+    backgroundAssetPackage: _kGalleryAssetsPackage,
     details: const <SectionDetail>[
       _protectionDetail,
       _protectionImageDetail,
