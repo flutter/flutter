@@ -5,12 +5,29 @@ import 'package:flutter/rendering.dart';
 /// A callback used by [ReorderableListView] to swap items in a list.
 /// 
 /// Implementations should remove the corresponding list item at [oldIndex]
-/// and place a new one at [newIndex].
+/// and insert a new one at [newIndex].
+/// 
+/// Note that if [oldIndex] is before [newIndex], removing the item at [oldIndex]
+/// from the list will reduce the list's length by one. Implementations used
+/// by [ReorderableListView] will need to account for this when inserting before
+/// [newIndex].
+/// 
+/// Example implementation:
+/// 
+/// ```dart
+/// final List<MyDataObject> backingList = <MyDataObject>[/* ... */];
+/// void onSwap(int oldIndex, int newIndex) {
+///   if (oldIndex < newIndex) {
+///     // removing the item at oldIndex will shorten the list by 1.
+///     newIndex -= 1;
+///   }
+///   final MyDataObject element = backingList.removeAt(oldIndex);
+///   backingList.insert(newIndex, element);
+/// }
+/// ```
 typedef void OnSwapCallback(int oldIndex, int newIndex);
 
 /// A list with draggable content that the user can re-order.
-/// 
-/// 
 /// 
 /// Note that this widget places its [children] in a [Column] and not a [ListView].
 ///
