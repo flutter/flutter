@@ -83,17 +83,9 @@ flutter:
   uses-material-design: true
   assets:
     - lib/gallery/example_code.dart
-    - packages/flutter_gallery_assets/white_logo/logo.png
-    - packages/flutter_gallery_assets/videos/butterfly.mp4
-    - packages/flutter_gallery_assets/animated_flutter_lgtm.gif
-    - packages/flutter_gallery_assets/animated_flutter_stickers.webp
-    - packages/flutter_gallery_assets/appbar_background.jpg
-    - packages/flutter_gallery_assets/appbar/appbar_background_layer0.png
-    - packages/flutter_gallery_assets/appbar/appbar_background_layer1.png
-    - packages/flutter_gallery_assets/appbar/appbar_background_layer2.png
-    - packages/flutter_gallery_assets/appbar/appbar_background_layer3.png
-    - packages/flutter_gallery_assets/appbar/appbar_background_layer4.png
-    - packages/flutter_gallery_assets/appbar/appbar_background_layer5.png
+    - /Users/larche/flutter_gallery_assets/lib/videos/butterfly.mp4
+    - /Users/larche/flutter_gallery_assets/lib/animated_images/animated_flutter_lgtm.gif
+    - /Users/larche/flutter_gallery_assets/lib/animated_images/animated_flutter_stickers.webp
     - packages/flutter_gallery_assets/pesto/avatar.jpg
     - packages/flutter_gallery_assets/pesto/image10.jpg
     - packages/flutter_gallery_assets/pesto/image11.jpg
@@ -136,12 +128,15 @@ flutter:
     - /Users/larche/flutter_gallery_assets/lib/places/india_pondicherry_fisherman.png
     - /Users/larche/flutter_gallery_assets/lib/products/belt.png
     - /Users/larche/flutter_gallery_assets/lib/products/cup.png
+    - /Users/larche/flutter_gallery_assets/lib/products/deskset.png
     - /Users/larche/flutter_gallery_assets/lib/products/flatwear.png
     - /Users/larche/flutter_gallery_assets/lib/products/hat.png
     - /Users/larche/flutter_gallery_assets/lib/products/jacket.png
     - /Users/larche/flutter_gallery_assets/lib/products/jumper.png
+    - /Users/larche/flutter_gallery_assets/lib/products/kitchen_quattro.png
     - /Users/larche/flutter_gallery_assets/lib/products/napkins.png
     - /Users/larche/flutter_gallery_assets/lib/products/planters.png
+    - /Users/larche/flutter_gallery_assets/lib/products/platter.png
     - /Users/larche/flutter_gallery_assets/lib/products/scarf.png
     - /Users/larche/flutter_gallery_assets/lib/products/shirt.png
     - /Users/larche/flutter_gallery_assets/lib/products/sunnies.png
