@@ -4264,11 +4264,7 @@ class AnnotatedRegionRenderObject<T> extends RenderProxyBox {
   @override
   void paint(PaintingContext context, Offset offset) {
     if (child != null) {
-      context.pushLayer(
-        new AnnotatedRegionLayer<T>(value),
-        super.paint,
-        offset,
-      );
+      context.pushAnnotatedRegion<T>(offset, value, super.paint);
     }
   }
 }

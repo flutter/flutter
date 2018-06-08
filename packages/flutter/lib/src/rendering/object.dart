@@ -436,6 +436,15 @@ class PaintingContext {
     pushLayer(new OpacityLayer(alpha: alpha), painter, offset);
   }
 
+  /// Pushes an annotated region into the layer tree.
+  ///
+  /// See also:
+  ///
+  ///   * [Layer.findRegion], for an example of how this is used.
+  void pushAnnotatedRegion<T>(Offset offset, T value, PaintingContextCallback painter) {
+    pushLayer(new AnnotatedRegionLayer<T>(value), painter, offset);
+  }
+
   @override
   String toString() => '$runtimeType#$hashCode(layer: $_containerLayer, canvas bounds: $estimatedBounds)';
 }

@@ -136,6 +136,11 @@ class TestRecordingPaintingContext implements PaintingContext {
   }
 
   @override
+  void pushAnnotatedRegion<T>(Offset offset, T value, PaintingContextCallback painter) {
+    painter(this, offset);
+  }
+
+  @override
   void noSuchMethod(Invocation invocation) { }
 }
 
