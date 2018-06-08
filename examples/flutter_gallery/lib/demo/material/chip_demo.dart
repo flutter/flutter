@@ -45,11 +45,11 @@ const List<String> _defaultTools = const <String>[
 ];
 
 const Map<String, String> _avatars = const <String, String>{
-  'hammer': 'shrine/vendors/ali-connors.png',
-  'chisel': 'shrine/vendors/sandra-adams.jpg',
-  'fryer': 'shrine/vendors/zach.jpg',
-  'fabricator': 'shrine/vendors/peter-carlsson.png',
-  'customer': 'shrine/vendors/16c477b.jpg',
+  'hammer': '/Users/larche/flutter_gallery_assets/lib/people/square/ali.png',
+  'chisel': '/Users/larche/flutter_gallery_assets/lib/people/square/sandra.png',
+  'fryer': '/Users/larche/flutter_gallery_assets/lib/people/square/trevor.png',
+  'fabricator': '/Users/larche/flutter_gallery_assets/lib/people/square/stella.png',
+  'customer': '/Users/larche/flutter_gallery_assets/lib/people/square/peter.png',
 };
 
 final Map<String, Set<String>> _toolActions = <String, Set<String>>{
