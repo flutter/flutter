@@ -229,7 +229,7 @@ class _PestoLogoState extends State<PestoLogo> {
                 rect: _imageRectTween.lerp(widget.t),
                 child: new Image.asset(
                   _kSmallLogoImage,
-//                  package: _kGalleryAssetsPackage,
+                  package: _kGalleryAssetsPackage,
                   fit: BoxFit.contain,
                 ),
               ),
@@ -270,7 +270,7 @@ class RecipeCard extends StatelessWidget {
               tag: 'packages/$_kGalleryAssetsPackage/${recipe.imagePath}',
               child: new Image.asset(
                 recipe.imagePath,
-//                package: recipe.imagePackage,
+                package: recipe.imagePackage,
                 fit: BoxFit.contain,
               ),
             ),
@@ -281,7 +281,7 @@ class RecipeCard extends StatelessWidget {
                     padding: const EdgeInsets.all(16.0),
                     child: new Image.asset(
                       recipe.ingredientsImagePath,
-//                      package: recipe.ingredientsImagePackage,
+                      package: recipe.ingredientsImagePackage,
                       width: 48.0,
                       height: 48.0,
                     ),
@@ -344,7 +344,7 @@ class _RecipePageState extends State<RecipePage> {
               tag: 'packages/$_kGalleryAssetsPackage/${widget.recipe.imagePath}',
               child: new Image.asset(
                 widget.recipe.imagePath,
-//                package: widget.recipe.imagePackage,
+                package: widget.recipe.imagePackage,
                 fit: fullWidth ? BoxFit.fitWidth : BoxFit.cover,
               ),
             ),
@@ -457,7 +457,7 @@ class RecipeSheet extends StatelessWidget {
                     verticalAlignment: TableCellVerticalAlignment.middle,
                     child: new Image.asset(
                       recipe.ingredientsImagePath,
-//                      package: recipe.ingredientsImagePackage,
+                      package: recipe.ingredientsImagePackage,
                       width: 32.0,
                       height: 32.0,
                       alignment: Alignment.centerLeft,
