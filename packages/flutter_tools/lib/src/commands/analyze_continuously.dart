@@ -19,10 +19,13 @@ import '../globals.dart';
 import 'analyze_base.dart';
 
 class AnalyzeContinuously extends AnalyzeBase {
-  AnalyzeContinuously(ArgResults argResults, this.repoRoots, this.repoPackages) : super(argResults);
+  AnalyzeContinuously(ArgResults argResults, this.repoRoots, this.repoPackages, {
+    this.previewDart2 = false,
+  }) : super(argResults);
 
   final List<String> repoRoots;
   final List<Directory> repoPackages;
+  final bool previewDart2;
 
   String analysisTarget;
   bool firstAnalysis = true;
@@ -57,7 +60,7 @@ class AnalyzeContinuously extends AnalyzeBase {
 
     final String sdkPath = argResults['dart-sdk'] ?? sdk.dartSdkPath;
 
-    final AnalysisServer server = new AnalysisServer(sdkPath, directories);
+    final AnalysisServer server = new AnalysisServer(sdkPath, directories, previewDart2: previewDart2);
     server.onAnalyzing.listen((bool isAnalyzing) => _handleAnalysisStatus(server, isAnalyzing));
     server.onErrors.listen(_handleAnalysisErrors);
 

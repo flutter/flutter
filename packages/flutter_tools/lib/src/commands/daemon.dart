@@ -334,6 +334,7 @@ class AppDomain extends Domain {
     final BuildInfo buildInfo = new BuildInfo(
       getBuildModeForName(mode) ?? BuildMode.debug,
       flavor,
+      previewDart2: _getBoolArg(args, 'preview-dart-2'),
     );
     DebuggingOptions options;
     if (buildInfo.isRelease) {
@@ -384,6 +385,7 @@ class AppDomain extends Domain {
 
     final FlutterDevice flutterDevice = new FlutterDevice(
       device,
+      previewDart2: options.buildInfo.previewDart2,
       trackWidgetCreation: trackWidgetCreation,
       dillOutputPath: dillOutputPath,
     );
