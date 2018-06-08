@@ -189,16 +189,18 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
   void _updateSystemChrome() {
     if (!SystemChrome.automaticSystemUiAdjustment)
       return;
-    final Size windowSize = ui.window.physicalSize / ui.window.devicePixelRatio;
-    final Offset lowerOffset = new Offset(0.0, windowSize.height);
-    final SystemUiOverlayStyle upperOverlayStyle = layer.findRegion(
-      Offset.zero,
-      SystemUiOverlayStyle,
-    );
-    final SystemUiOverlayStyle lowerOverlayStyle = layer.findRegion(
-      lowerOffset,
-      SystemUiOverlayStyle,
-    );
+    final Rect bounds = paintBounds;
+    final Offset top = new Offset(bounds.center.dx, ui.window.padding.top / ui.window.devicePixelRatio);
+    final SystemUiOverlayStyle upperOverlayStyle = layer.findRegion(top, SystemUiOverlayStyle);
+    // Only android has a customizable system navigation bar.
+    SystemUiOverlayStyle lowerOverlayStyle;
+    switch (defaultTargetPlatform) {
+      case TargetPlatform.android:
+      case TargetPlatform.fuchsia:
+        lowerOverlayStyle = layer.findRegion(bounds.bottomCenter, SystemUiOverlayStyle);
+        break;
+      case TargetPlatform.iOS:
+    }
     // If there are no overlay styles in the UI don't bother updating.
     if (upperOverlayStyle != null || lowerOverlayStyle != null) {
       final SystemUiOverlayStyle overlayStyle = new SystemUiOverlayStyle(

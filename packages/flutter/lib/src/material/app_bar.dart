@@ -451,8 +451,14 @@ class _AppBarState extends State<AppBar> {
         ],
       );
     }
-
-    // The padding applies to the toolbar and tabbar, not the flexible space.
+    final Brightness brightness = widget.brightness ?? themeData.primaryColorBrightness;
+    appBar = new AnnotatedRegion<SystemUiOverlayStyle>(
+      value: brightness == Brightness.dark
+          ? SystemUiOverlayStyle.light
+          : SystemUiOverlayStyle.dark,
+      child: appBar,
+    );
+        // The padding applies to the toolbar and tabbar, not the flexible space.
     if (widget.primary) {
       appBar = new SafeArea(
         top: true,
@@ -474,21 +480,14 @@ class _AppBarState extends State<AppBar> {
         ],
       );
     }
-
-    final Brightness brightness = widget.brightness ?? themeData.primaryColorBrightness;
     
-    return new AnnotatedRegion<SystemUiOverlayStyle>(
-      value: brightness == Brightness.dark
-          ? SystemUiOverlayStyle.light
-          : SystemUiOverlayStyle.dark,
-      child: new Semantics(
-        container: true,
-        explicitChildNodes: true,
-        child: new Material(
-          color: widget.backgroundColor ?? themeData.primaryColor,
-          elevation: widget.elevation,
-          child: appBar,
-        ),
+    return new Semantics(
+      container: true,
+      explicitChildNodes: true,
+      child: new Material(
+        color: widget.backgroundColor ?? themeData.primaryColor,
+        elevation: widget.elevation,
+        child: appBar,
       ),
     );
   }
