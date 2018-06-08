@@ -108,6 +108,7 @@ flutter:
     - packages/flutter_gallery_assets/pesto/quick.png
     - packages/flutter_gallery_assets/pesto/spicy.png
     - packages/flutter_gallery_assets/pesto/veggie.png
+    - /Users/larche/flutter_gallery_assets/lib/logos/pesto/logo_small.png
     - /Users/larche/flutter_gallery_assets/lib/places/india_chennai_flower_market.png
     - /Users/larche/flutter_gallery_assets/lib/places/india_tanjore_bronze_works.png
     - /Users/larche/flutter_gallery_assets/lib/places/india_tanjore_market_merchant.png
@@ -145,15 +146,13 @@ flutter:
     - /Users/larche/flutter_gallery_assets/lib/people/square/sandra.png
     - /Users/larche/flutter_gallery_assets/lib/people/square/stella.png
     - /Users/larche/flutter_gallery_assets/lib/people/square/trevor.png
-    - packages/flutter_gallery_assets/cupertino_navigation/person1.jpg
-    - packages/flutter_gallery_assets/cupertino_navigation/person2.jpg
   fonts:
     - family: Raleway
       fonts:
-        - asset: packages/flutter_gallery_assets/pesto/fonts/Raleway-Regular.ttf
-        - asset: packages/flutter_gallery_assets/pesto/fonts/Raleway-Medium.ttf
+        - asset: /Users/larche/flutter_gallery_assets/lib/fonts/Raleway/Raleway-Regular.ttf
+        - asset: /Users/larche/flutter_gallery_assets/lib/fonts/Raleway/Raleway-Medium.ttf
           weight: 500
-        - asset: packages/flutter_gallery_assets/pesto/fonts/Raleway-SemiBold.ttf
+        - asset: /Users/larche/flutter_gallery_assets/lib/fonts/Raleway/Raleway-SemiBold.ttf
           weight: 600
     - family: AbrilFatface
       fonts:
