@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
+import 'package:flutter/animation.dart';
 import 'package:flutter/foundation.dart';
 
 /// The direction of a scroll, relative to the positive scroll offset axis given
@@ -157,7 +160,7 @@ abstract class ViewportOffset extends ChangeNotifier {
   ///    [jumpTo] applies the change immediately and notifies its listeners.
   void correctBy(double correction);
 
-  /// Jumps the scroll position from its current value to the given value,
+  /// Jumps [pixels] from its current value to the given value,
   /// without animation, and without checking if the new value is in range.
   ///
   /// See also:
@@ -165,6 +168,18 @@ abstract class ViewportOffset extends ChangeNotifier {
   ///  * [correctBy], for changing the current offset in the middle of layout
   ///    and that defers the notification of its listeners until after layout.
   void jumpTo(double pixels);
+
+  /// Animates [pixels] from its current value to the given value.
+  ///
+  /// The returned [Future] will complete when the animation ends, whether it
+  /// completed successfully or whether it was interrupted prematurely.
+  ///
+  /// The duration must not be zero. To jump to a particular value without an
+  /// animation, use [jumpTo].
+  Future<Null> animateTo(double to, {
+    @required Duration duration,
+    @required Curve curve,
+  });
 
   /// The direction in which the user is trying to change [pixels], relative to
   /// the viewport's [RenderViewport.axisDirection].
@@ -226,6 +241,12 @@ class _FixedViewportOffset extends ViewportOffset {
   void jumpTo(double pixels) {
     // Do nothing, viewport is fixed.
   }
+
+  @override
+  Future<Null> animateTo(double to, {
+    @required Duration duration,
+    @required Curve curve,
+  }) async => null;
 
   @override
   ScrollDirection get userScrollDirection => ScrollDirection.idle;

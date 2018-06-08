@@ -397,7 +397,9 @@ class DevFS {
     printTrace('DevFS: Deleted filesystem on the device ($_baseUri)');
   }
 
-  /// Update files on the device and return the number of bytes sync'd
+  /// Updates files on the device.
+  ///
+  /// Returns the number of bytes synced.
   Future<int> update({
     String mainPath,
     String target,
@@ -485,7 +487,7 @@ class DevFS {
       // that it is initiated by user key press).
       final List<String> invalidatedFiles = <String>[];
       final Set<Uri> filesUris = new Set<Uri>();
-      for (Uri uri in dirtyEntries.keys) {
+      for (Uri uri in dirtyEntries.keys.toList()) {
         if (!uri.path.startsWith(assetBuildDirPrefix)) {
           final DevFSContent content = dirtyEntries[uri];
           if (content is DevFSFileContent) {
@@ -511,12 +513,13 @@ class DevFS {
         final String entryUri = projectRootPath != null ?
             fs.path.relative(mainPath, from: projectRootPath):
             mainPath;
-        dirtyEntries.putIfAbsent(
-          fs.path.toUri(entryUri + '.dill'),
-          () => new DevFSFileContent(fs.file(compiledBinary))
-        );
+        final Uri kernelUri = fs.path.toUri(entryUri + '.dill');
+        if (!dirtyEntries.containsKey(kernelUri)) {
+          final DevFSFileContent content = new DevFSFileContent(fs.file(compiledBinary));
+          dirtyEntries[kernelUri] = content;
+          numBytes += content.size;
+        }
       }
-
     }
     if (dirtyEntries.isNotEmpty) {
       printTrace('Updating files');
