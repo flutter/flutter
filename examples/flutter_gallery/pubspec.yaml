@@ -122,18 +122,18 @@ flutter:
     - packages/flutter_gallery_assets/drawer_logo.png
     - packages/flutter_gallery_assets/kangaroo_valley_safari.jpg
     - packages/flutter_gallery_assets/top_10_australian_beaches.jpg
-    - packages/flutter_gallery_assets/landscape_0.jpg
-    - packages/flutter_gallery_assets/landscape_1.jpg
-    - packages/flutter_gallery_assets/landscape_2.jpg
-    - packages/flutter_gallery_assets/landscape_3.jpg
-    - packages/flutter_gallery_assets/landscape_4.jpg
-    - packages/flutter_gallery_assets/landscape_5.jpg
-    - packages/flutter_gallery_assets/landscape_6.jpg
-    - packages/flutter_gallery_assets/landscape_7.jpg
-    - packages/flutter_gallery_assets/landscape_8.jpg
-    - packages/flutter_gallery_assets/landscape_9.jpg
-    - packages/flutter_gallery_assets/landscape_10.jpg
-    - packages/flutter_gallery_assets/landscape_11.jpg
+    - /Users/larche/flutter_gallery_assets/lib/places/india_chennai_flower_market.png
+    - /Users/larche/flutter_gallery_assets/lib/places/india_tanjore_bronze_works.png
+    - /Users/larche/flutter_gallery_assets/lib/places/india_tanjore_market_merchant.png
+    - /Users/larche/flutter_gallery_assets/lib/places/india_tanjore_thanjavur_temple.png
+    - /Users/larche/flutter_gallery_assets/lib/places/india_pondicherry_salt_farm.png
+    - /Users/larche/flutter_gallery_assets/lib/places/india_chennai_highway.png
+    - /Users/larche/flutter_gallery_assets/lib/places/india_chettinad_silk_maker.png
+    - /Users/larche/flutter_gallery_assets/lib/places/india_tanjore_thanjavur_temple_carvings.png
+    - /Users/larche/flutter_gallery_assets/lib/places/india_chettinad_produce.png
+    - /Users/larche/flutter_gallery_assets/lib/places/india_tanjore_market_technology.png
+    - /Users/larche/flutter_gallery_assets/lib/places/india_chennai_beach.png
+    - /Users/larche/flutter_gallery_assets/lib/places/india_pondicherry_fisherman.png
     - packages/flutter_gallery_assets/shrine/products/backpack.png
     - packages/flutter_gallery_assets/shrine/products/beachball.png
     - packages/flutter_gallery_assets/shrine/products/binoculars.png
