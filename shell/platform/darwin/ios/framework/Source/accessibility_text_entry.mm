@@ -261,7 +261,8 @@
   // Adding UIAccessibilityTraitKeyboardKey to the trait list so that iOS treats it like
   // a keyboard entry control, thus adding support for text editing features, such as
   // pinch to select text, and up/down fling to move cursor.
-  return [super accessibilityTraits] | [self textInputSurrogate].accessibilityTraits | UIAccessibilityTraitKeyboardKey;
+  return [super accessibilityTraits] | [self textInputSurrogate].accessibilityTraits |
+         UIAccessibilityTraitKeyboardKey;
 }
 
 #pragma mark - UITextInput overrides

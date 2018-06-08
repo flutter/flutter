@@ -95,7 +95,7 @@ static UITextAutocapitalizationType ToUITextAutocapitalizationType(NSString* inp
 
 @end
 
-@interface FlutterTextInputView : UIView<UITextInput>
+@interface FlutterTextInputView : UIView <UITextInput>
 
 // UITextInput
 @property(nonatomic, readonly) NSMutableString* text;

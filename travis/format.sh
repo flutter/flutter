@@ -27,17 +27,26 @@ esac
 
 # Tools
 CLANG_FORMAT="../buildtools/$OS/clang/bin/clang-format"
-CLANG_FORMAT_DIFF="../buildtools/$OS/clang/share/clang/clang-format-diff.py"
 $CLANG_FORMAT --version
 
 # Compute the diffs.
 FILETYPES="*.c *.cc *.cpp *.h *.m *.mm"
-DIFF_OPTS="-U0 --no-color"
-DIFFS="$(git diff $DIFF_OPTS -- master $FILETYPES | "$CLANG_FORMAT_DIFF" -p1 -binary "$CLANG_FORMAT")"
+DIFF_OPTS="-U0 --no-color --name-only"
+FILES_TO_CHECK="$(git diff $DIFF_OPTS -- master $FILETYPES)"
 
-if [[ ! -z "$DIFFS" ]]; then
+FAILED_CHECKS=0
+for f in $FILES_TO_CHECK; do
+  set +e
+  CUR_DIFF="$(diff -u "$f" <("$CLANG_FORMAT" --style=file "$f"))"
+  set -e
+  if [[ ! -z "$CUR_DIFF" ]]; then
+    echo "$CUR_DIFF"
+    FAILED_CHECKS=$(($FAILED_CHECKS+1))
+  fi
+done
+
+if [[ $FAILED_CHECKS -ne 0 ]]; then
   echo ""
-  echo "ERROR: Some files are formatted incorrectly. To fix, apply diffs below via patch -p0:"
-  echo "$DIFFS"
+  echo "ERROR: Some files are formatted incorrectly. To fix, apply diffs above via patch -p0."
   exit 1
 fi
