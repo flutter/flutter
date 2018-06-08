@@ -4,9 +4,9 @@
 
 import 'package:flutter/material.dart';
 
-const String _kAsset0 = 'shrine/vendors/zach.jpg';
-const String _kAsset1 = 'shrine/vendors/16c477b.jpg';
-const String _kAsset2 = 'shrine/vendors/sandra-adams.jpg';
+const String _kAsset0 = '/Users/larche/flutter_gallery_assets/lib/people/square/trevor.png';
+const String _kAsset1 = '/Users/larche/flutter_gallery_assets/lib/people/square/stella.png';
+const String _kAsset2 = '/Users/larche/flutter_gallery_assets/lib/people/square/sandra.png';
 const String _kGalleryAssetsPackage = 'flutter_gallery_assets';
 
 class DrawerDemo extends StatefulWidget {
@@ -92,8 +92,8 @@ class _DrawerDemoState extends State<DrawerDemo> with TickerProviderStateMixin {
         child: new Column(
           children: <Widget>[
             new UserAccountsDrawerHeader(
-              accountName: const Text('Zach Widget'),
-              accountEmail: const Text('zach.widget@example.com'),
+              accountName: const Text('Trevor Widget'),
+              accountEmail: const Text('trevor.widget@example.com'),
               currentAccountPicture: const CircleAvatar(
                 backgroundImage: const AssetImage(
                   _kAsset0,
