@@ -160,7 +160,7 @@ class ContactsDemoState extends State<ContactsDemo> {
                   fit: StackFit.expand,
                   children: <Widget>[
                     new Image.asset(
-                      '/Users/larche/flutter_gallery_assets/lib/people/ali.png',
+                      '/Users/larche/flutter_gallery_assets/lib/people/ali_landscape.png',
 //                      package: 'flutter_gallery_assets',
                       fit: BoxFit.cover,
                       height: _appBarHeight,
