@@ -1,4 +1,4 @@
-Signature: c470e9023198f562f1d9a6b660ed14ed
+Signature: 6b12326b5605368db68bbce25dad1a5a
 
 UNUSED LICENSES:
 
@@ -17183,6 +17183,10 @@ FILE: ../../../third_party/skia/include/private/GrSurfaceProxyRef.h
 FILE: ../../../third_party/skia/include/private/GrVkTypesPriv.h
 FILE: ../../../third_party/skia/include/private/SkSafe32.h
 FILE: ../../../third_party/skia/infra/cts/run_testlab.go
+FILE: ../../../third_party/skia/modules/skjson/include/SkJSON.h
+FILE: ../../../third_party/skia/modules/skjson/src/SkJSON.cpp
+FILE: ../../../third_party/skia/modules/skjson/src/SkJSONBench.cpp
+FILE: ../../../third_party/skia/modules/skjson/src/SkJSONTest.cpp
 FILE: ../../../third_party/skia/modules/skottie/src/SkottieAdapter.cpp
 FILE: ../../../third_party/skia/modules/skottie/src/SkottieAdapter.h
 FILE: ../../../third_party/skia/modules/skottie/src/SkottieJson.cpp
@@ -19876,6 +19880,7 @@ FILE: ../../../third_party/skia/fuzz/oss_fuzz/FuzzPathMeasure.cpp
 FILE: ../../../third_party/skia/fuzz/oss_fuzz/FuzzRasterN32Canvas.cpp
 FILE: ../../../third_party/skia/fuzz/oss_fuzz/FuzzTextBlobDeserialize.cpp
 FILE: ../../../third_party/skia/fuzz/oss_fuzz/FuzzWEBPEncoder.cpp
+FILE: ../../../third_party/skia/modules/skjson/src/FuzzSkJSON.cpp
 FILE: ../../../third_party/skia/modules/skottie/fuzz/FuzzSkottieJSON.cpp
 ----------------------------------------------------------------------------------------------------
 Copyright 2018 Google, LLC
