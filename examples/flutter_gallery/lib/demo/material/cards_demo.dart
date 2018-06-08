@@ -25,23 +25,23 @@ class TravelDestination {
 
 final List<TravelDestination> destinations = <TravelDestination>[
   const TravelDestination(
-    assetName: 'top_10_australian_beaches.jpg',
-    assetPackage: _kGalleryAssetsPackage,
-    title: 'Top 10 Australian beaches',
+    assetName: '/Users/larche/flutter_gallery_assets/lib/places/india_chennai_beach.png',
+//    assetPackage: _kGalleryAssetsPackage,
+    title: 'Top 10 Places to Visit in Chennai',
     description: const <String>[
       'Number 10',
-      'Whitehaven Beach',
-      'Whitsunday Island, Whitsunday Islands',
+      'Marina Beach, Chennai',
+      'Coromandel Coast, Tamil Nadu',
     ],
   ),
   const TravelDestination(
-    assetName: 'kangaroo_valley_safari.jpg',
-    assetPackage: _kGalleryAssetsPackage,
-    title: 'Kangaroo Valley Safari',
+    assetName: '/Users/larche/flutter_gallery_assets/lib/places/india_chettinad_silk_maker.png',
+//    assetPackage: _kGalleryAssetsPackage,
+    title: 'Artisans of Southern India',
     description: const <String>[
-      '2031 Moss Vale Road',
-      'Kangaroo Valley 2577',
-      'New South Wales',
+      'Silk Spinners',
+      'Chettinad',
+      'Panyda Nadu, Tamil Nadu',
     ],
   )
 ];
