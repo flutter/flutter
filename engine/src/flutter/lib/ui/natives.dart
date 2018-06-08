@@ -35,6 +35,17 @@ void _setupHooks() {
   }());
 }
 
+void saveCompilationTrace(String filePath) {
+  final result = _saveCompilationTrace();
+  if (result is Error)
+    throw result;
+
+  final file = new File(filePath);
+  file.writeAsBytesSync(result);
+}
+
+dynamic _saveCompilationTrace() native 'SaveCompilationTrace';
+
 void _scheduleMicrotask(void callback()) native 'ScheduleMicrotask';
 
 // Required for gen_snapshot to work correctly.
