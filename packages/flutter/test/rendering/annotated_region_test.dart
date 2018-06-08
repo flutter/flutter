@@ -65,6 +65,34 @@ void main() {
       expect(containerLayer.findRegion(const Offset(5.0, 105.0), int), 1);
       expect(containerLayer.findRegion(const Offset(5.0, 205.0), int), 2);
     });
+
+    test('finds a value under a TransformLayer', () {
+      final Matrix4 transform = new Matrix4(
+        2.625, 0.0, 0.0, 0.0,
+        0.0, 2.625, 0.0, 0.0,
+        0.0, 0.0, 1.0, 0.0,
+        0.0, 0.0, 0.0, 1.0,
+      );
+      final TransformLayer transformLayer = new TransformLayer(transform: transform);
+      final List<OffsetLayer> layers = <OffsetLayer>[
+        new OffsetLayer(),
+        new OffsetLayer(offset: const Offset(0.0, 100.0)),
+        new OffsetLayer(offset: const Offset(0.0, 200.0)),
+      ];
+      int i = 0;
+      for (OffsetLayer layer in layers) {
+        final AnnotatedRegionLayer<int> annotatedRegionLayer = new AnnotatedRegionLayer<int>(i);
+        layer.append(annotatedRegionLayer);
+        transformLayer.append(layer);
+        i += 1;
+      }
+
+      expect(transformLayer.findRegion(const Offset(0.0, 100.0), int), 0);
+      expect(transformLayer.findRegion(const Offset(0.0, 200.0), int), 0);
+      expect(transformLayer.findRegion(const Offset(0.0, 270.0), int), 1);
+      expect(transformLayer.findRegion(const Offset(0.0, 400.0), int), 1);
+      expect(transformLayer.findRegion(const Offset(0.0, 530.0), int), 2);
+    });
   });
 }
 

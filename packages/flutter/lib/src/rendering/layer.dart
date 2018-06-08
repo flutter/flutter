@@ -734,7 +734,9 @@ class TransformLayer extends OffsetLayer {
   ///
   /// The [transform] and [offset] properties must be non-null before the
   /// compositing phase of the pipeline.
-  TransformLayer({ this.transform, Offset offset = Offset.zero }) : super(offset: offset);
+  TransformLayer({ Matrix4 transform, Offset offset = Offset.zero })
+    : _transform = transform,
+      super(offset: offset);
 
   /// The matrix to apply.
   ///
@@ -745,9 +747,18 @@ class TransformLayer extends OffsetLayer {
   ///
   /// The [transform] property must be non-null before the compositing phase of
   /// the pipeline.
-  Matrix4 transform;
+  Matrix4 get transform => _transform;
+  Matrix4 _transform;
+  set transform(Matrix4 value) {
+    if (value == _transform)
+      return;
+    _transform = value;
+    _invertedTransform ??= new Matrix4.zero();
+    _transform?.copyInto(_invertedTransform)?.invert();
+  }
 
   Matrix4 _lastEffectiveTransform;
+  Matrix4 _invertedTransform;
 
   @override
   void addToScene(ui.SceneBuilder builder, Offset layerOffset) {
@@ -764,8 +775,12 @@ class TransformLayer extends OffsetLayer {
 
   @override
   Object findRegion(Offset regionOffset, Type type) {
+    if (_invertedTransform == null) {
+      _invertedTransform ??= new Matrix4.zero();
+      _transform?.copyInto(_invertedTransform)?.invert();
+    }
     final Vector4 vector = new Vector4(regionOffset.dx, regionOffset.dy, 0.0, 1.0);
-    final Vector4 result = transform.transform(vector);
+    final Vector4 result = _invertedTransform.transform(vector);
     return super.findRegion(new Offset(result[0], result[1]), type);
   }
 
