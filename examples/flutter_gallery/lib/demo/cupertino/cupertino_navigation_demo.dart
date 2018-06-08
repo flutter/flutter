@@ -507,8 +507,8 @@ class Tab2Header extends StatelessWidget {
                             decoration: const BoxDecoration(
                               image: const DecorationImage(
                                 image: const AssetImage(
-                                  'cupertino_navigation/person1.jpg',
-                                  package: _kGalleryAssetsPackage
+                                  '/Users/larche/flutter_gallery_assets/lib/people/square/trevor.png',
+//                                  package: _kGalleryAssetsPackage
                                 ),
                               ),
                               shape: BoxShape.circle,
@@ -521,8 +521,8 @@ class Tab2Header extends StatelessWidget {
                             decoration: const BoxDecoration(
                               image: const DecorationImage(
                                 image: const AssetImage(
-                                  'cupertino_navigation/person2.jpg',
-                                  package: _kGalleryAssetsPackage
+                                  '/Users/larche/flutter_gallery_assets/lib/people/square/sandra.png',
+//                                  package: _kGalleryAssetsPackage
                                 ),
                               ),
                               shape: BoxShape.circle,
