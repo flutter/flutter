@@ -25,7 +25,7 @@ class _CardData {
 }
 
 final Map<_Page, List<_CardData>> _allPages = <_Page, List<_CardData>>{
-  new _Page(label: 'Home'): <_CardData>[
+  new _Page(label: 'HOME'): <_CardData>[
     const _CardData(
       title: 'Flatwear',
       imageAsset: '/Users/larche/flutter_gallery_assets/lib/products/flatwear.png',
@@ -72,7 +72,7 @@ final Map<_Page, List<_CardData>> _allPages = <_Page, List<_CardData>>{
 //      imageAssetPackage: _kGalleryAssetsPackage,
     ),
   ],
-  new _Page(label: 'Apparel'): <_CardData>[
+  new _Page(label: 'APPAREL'): <_CardData>[
     const _CardData(
       title: 'Cloud-White Dress',
       imageAsset: '/Users/larche/flutter_gallery_assets/lib/products/dress.png',
