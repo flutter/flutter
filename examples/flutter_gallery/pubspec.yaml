@@ -118,9 +118,12 @@ flutter:
     - packages/flutter_gallery_assets/places/india_tanjore_market_technology.png
     - packages/flutter_gallery_assets/places/india_chennai_beach.png
     - packages/flutter_gallery_assets/places/india_pondicherry_fisherman.png
+    - packages/flutter_gallery_assets/products/backpack.png
     - packages/flutter_gallery_assets/products/belt.png
     - packages/flutter_gallery_assets/products/cup.png
     - packages/flutter_gallery_assets/products/deskset.png
+    - packages/flutter_gallery_assets/products/dress.png
+    - packages/flutter_gallery_assets/products/earrings.png
     - packages/flutter_gallery_assets/products/flatwear.png
     - packages/flutter_gallery_assets/products/hat.png
     - packages/flutter_gallery_assets/products/jacket.png
