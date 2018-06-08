@@ -171,40 +171,40 @@ flutter:
         - asset: /Users/larche/flutter_gallery_assets/lib/fonts/abrilfatface/AbrilFatface-Regular.ttf
     - family: GalleryIcons
       fonts:
-        - asset: packages/flutter_gallery_assets/fonts/GalleryIcons.ttf
+        - asset: /Users/larche/flutter_gallery_assets/lib/fonts/private/gallery_icons/GalleryIcons.ttf
     - family: GoogleSans
       fonts:
-        - asset: packages/flutter_gallery_assets/fonts/GoogleSans-BoldItalic.ttf
+        - asset: /Users/larche/flutter_gallery_assets/lib/fonts/private/googlesans/GoogleSans-BoldItalic.ttf
           weight: 700
           style: italic
-        - asset: packages/flutter_gallery_assets/fonts/GoogleSans-Bold.ttf
+        - asset: /Users/larche/flutter_gallery_assets/lib/fonts/private/googlesans/GoogleSans-Bold.ttf
           weight: 700
-        - asset: packages/flutter_gallery_assets/fonts/GoogleSans-Italic.ttf
+        - asset: /Users/larche/flutter_gallery_assets/lib/fonts/private/googlesans/GoogleSans-Italic.ttf
           weight: 400
           style: italic
-        - asset: packages/flutter_gallery_assets/fonts/GoogleSans-MediumItalic.ttf
+        - asset: /Users/larche/flutter_gallery_assets/lib/fonts/private/googlesans/GoogleSans-MediumItalic.ttf
           weight: 500
           style: italic
-        - asset: packages/flutter_gallery_assets/fonts/GoogleSans-Medium.ttf
+        - asset: /Users/larche/flutter_gallery_assets/lib/fonts/private/googlesans/GoogleSans-Medium.ttf
           weight: 500
-        - asset: packages/flutter_gallery_assets/fonts/GoogleSans-Regular.ttf
+        - asset: /Users/larche/flutter_gallery_assets/lib/fonts/private/googlesans/GoogleSans-Regular.ttf
           weight: 400
     - family: GoogleSansDisplay
       fonts:
-        - asset: packages/flutter_gallery_assets/fonts/GoogleSansDisplay-BoldItalic.ttf
+        - asset: /Users/larche/flutter_gallery_assets/lib/fonts/private/googlesans/GoogleSansDisplay-BoldItalic.ttf
           weight: 700
           style: italic
-        - asset: packages/flutter_gallery_assets/fonts/GoogleSansDisplay-Bold.ttf
+        - asset: /Users/larche/flutter_gallery_assets/lib/fonts/private/googlesans/GoogleSansDisplay-Bold.ttf
           weight: 700
-        - asset: packages/flutter_gallery_assets/fonts/GoogleSansDisplay-Italic.ttf
+        - asset: /Users/larche/flutter_gallery_assets/lib/fonts/private/googlesans/GoogleSansDisplay-Italic.ttf
           weight: 400
           style: italic
-        - asset: packages/flutter_gallery_assets/fonts/GoogleSansDisplay-MediumItalic.ttf
+        - asset: /Users/larche/flutter_gallery_assets/lib/fonts/private/googlesans/GoogleSansDisplay-MediumItalic.ttf
           style: italic
           weight: 500
-        - asset: packages/flutter_gallery_assets/fonts/GoogleSansDisplay-Medium.ttf
+        - asset: /Users/larche/flutter_gallery_assets/lib/fonts/private/googlesans/GoogleSansDisplay-Medium.ttf
           weight: 500
-        - asset: packages/flutter_gallery_assets/fonts/GoogleSansDisplay-Regular.ttf
+        - asset: /Users/larche/flutter_gallery_assets/lib/fonts/private/googlesans/GoogleSansDisplay-Regular.ttf
           weight: 400
 
 # PUBSPEC CHECKSUM: b217
