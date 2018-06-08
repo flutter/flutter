@@ -87,27 +87,26 @@ flutter:
     - /Users/larche/flutter_gallery_assets/lib/videos/butterfly.mp4
     - /Users/larche/flutter_gallery_assets/lib/animated_images/animated_flutter_lgtm.gif
     - /Users/larche/flutter_gallery_assets/lib/animated_images/animated_flutter_stickers.webp
-    - packages/flutter_gallery_assets/pesto/image10.jpg
-    - packages/flutter_gallery_assets/pesto/image11.jpg
-    - packages/flutter_gallery_assets/pesto/image12.jpg
-    - packages/flutter_gallery_assets/pesto/image13.jpg
-    - packages/flutter_gallery_assets/pesto/image1.jpg
-    - packages/flutter_gallery_assets/pesto/image2.jpg
-    - packages/flutter_gallery_assets/pesto/image3.jpg
-    - packages/flutter_gallery_assets/pesto/image4.jpg
-    - packages/flutter_gallery_assets/pesto/image5.jpg
-    - packages/flutter_gallery_assets/pesto/image6.jpg
-    - packages/flutter_gallery_assets/pesto/image7.jpg
-    - packages/flutter_gallery_assets/pesto/image8.jpg
-    - packages/flutter_gallery_assets/pesto/image9.jpg
-    - packages/flutter_gallery_assets/pesto/logo_small.png
-    - packages/flutter_gallery_assets/pesto/fish.png
-    - packages/flutter_gallery_assets/pesto/healthy.png
-    - packages/flutter_gallery_assets/pesto/main.png
-    - packages/flutter_gallery_assets/pesto/meat.png
-    - packages/flutter_gallery_assets/pesto/quick.png
-    - packages/flutter_gallery_assets/pesto/spicy.png
-    - packages/flutter_gallery_assets/pesto/veggie.png
+    - /Users/larche/flutter_gallery_assets/lib/food/image10.jpg
+    - /Users/larche/flutter_gallery_assets/lib/food/image11.jpg
+    - /Users/larche/flutter_gallery_assets/lib/food/image12.jpg
+    - /Users/larche/flutter_gallery_assets/lib/food/image13.jpg
+    - /Users/larche/flutter_gallery_assets/lib/food/image1.jpg
+    - /Users/larche/flutter_gallery_assets/lib/food/image2.jpg
+    - /Users/larche/flutter_gallery_assets/lib/food/image3.jpg
+    - /Users/larche/flutter_gallery_assets/lib/food/image4.jpg
+    - /Users/larche/flutter_gallery_assets/lib/food/image5.jpg
+    - /Users/larche/flutter_gallery_assets/lib/food/image6.jpg
+    - /Users/larche/flutter_gallery_assets/lib/food/image7.jpg
+    - /Users/larche/flutter_gallery_assets/lib/food/image8.jpg
+    - /Users/larche/flutter_gallery_assets/lib/food/image9.jpg
+    - /Users/larche/flutter_gallery_assets/lib/food/icons/fish.png
+    - /Users/larche/flutter_gallery_assets/lib/food/icons/healthy.png
+    - /Users/larche/flutter_gallery_assets/lib/food/icons/main.png
+    - /Users/larche/flutter_gallery_assets/lib/food/icons/meat.png
+    - /Users/larche/flutter_gallery_assets/lib/food/icons/quick.png
+    - /Users/larche/flutter_gallery_assets/lib/food/icons/spicy.png
+    - /Users/larche/flutter_gallery_assets/lib/food/icons/veggie.png
     - /Users/larche/flutter_gallery_assets/lib/logos/pesto/logo_small.png
     - /Users/larche/flutter_gallery_assets/lib/places/india_chennai_flower_market.png
     - /Users/larche/flutter_gallery_assets/lib/places/india_tanjore_bronze_works.png
