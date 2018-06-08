@@ -349,7 +349,7 @@ class TextPainter {
     _needsLayout = false;
     if (_paragraph == null) {
       final ui.ParagraphBuilder builder = new ui.ParagraphBuilder(_createParagraphStyle());
-      _text.build(builder, textScaleFactor: textScaleFactor, locale: locale);
+      _text.build(builder, textScaleFactor: textScaleFactor);
       _paragraph = builder.build();
     }
     _lastMinWidth = minWidth;

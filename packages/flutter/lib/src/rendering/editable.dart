@@ -258,8 +258,10 @@ class RenderEditable extends RenderBox {
   /// on the locale. For example the '骨' character is rendered differently in
   /// the Chinese and Japanese locales. In these cases the [locale] may be used
   /// to select a locale-specific font.
+  ///
+  /// If this value is null, a system dependent algorithm is used to select
+  /// the font.
   Locale get locale => _textPainter.locale;
-  /// The value may be null.
   set locale(Locale value) {
     if (_textPainter.locale == value)
       return;

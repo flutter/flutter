@@ -229,6 +229,7 @@ class TextStyle extends Diagnosticable {
     this.wordSpacing,
     this.textBaseline,
     this.height,
+    this.locale,
     this.background,
     this.decoration,
     this.decorationColor,
@@ -297,6 +298,16 @@ class TextStyle extends Diagnosticable {
   /// the font size.
   final double height;
 
+  /// The locale used to select region-specific glyphs.
+  ///
+  /// This property is rarely set. Typically the locale used to select
+  /// region-specific glyphs is defined by the text widget's [BuildContext]
+  /// using `Localizations.localeOf(context)`. For example [RichText] defines
+  /// its locale this way. However a rich text widget's [TextSpan]s could specify
+  /// text styles with different explicit locales in order to select different
+  /// region-specifc glyphs for each text span.
+  final Locale locale;
+
   /// The paint drawn as a background for the text.
   ///
   /// The value should ideally be cached and reused each time if multiple text
@@ -339,6 +350,7 @@ class TextStyle extends Diagnosticable {
     double wordSpacing,
     TextBaseline textBaseline,
     double height,
+    Locale locale,
     Paint background,
     TextDecoration decoration,
     Color decorationColor,
@@ -362,6 +374,7 @@ class TextStyle extends Diagnosticable {
       wordSpacing: wordSpacing ?? this.wordSpacing,
       textBaseline: textBaseline ?? this.textBaseline,
       height: height ?? this.height,
+      locale: locale ?? this.locale,
       background: background ?? this.background,
       decoration: decoration ?? this.decoration,
       decorationColor: decorationColor ?? this.decorationColor,
@@ -440,6 +453,7 @@ class TextStyle extends Diagnosticable {
       wordSpacing: wordSpacing == null ? null : wordSpacing * wordSpacingFactor + wordSpacingDelta,
       textBaseline: textBaseline,
       height: height == null ? null : height * heightFactor + heightDelta,
+      locale: locale,
       background: background,
       decoration: decoration ?? this.decoration,
       decorationColor: decorationColor ?? this.decorationColor,
@@ -485,6 +499,7 @@ class TextStyle extends Diagnosticable {
       wordSpacing: other.wordSpacing,
       textBaseline: other.textBaseline,
       height: other.height,
+      locale: other.locale,
       background: other.background,
       decoration: other.decoration,
       decorationColor: other.decorationColor,
@@ -533,6 +548,7 @@ class TextStyle extends Diagnosticable {
         wordSpacing: t < 0.5 ? null : b.wordSpacing,
         textBaseline: t < 0.5 ? null : b.textBaseline,
         height: t < 0.5 ? null : b.height,
+        locale: t < 0.5 ? null : b.locale,
         background: t < 0.5 ? null : b.background,
         decoration: t < 0.5 ? null : b.decoration,
         decorationColor: Color.lerp(null, b.decorationColor, t),
@@ -553,6 +569,7 @@ class TextStyle extends Diagnosticable {
         wordSpacing: t < 0.5 ? a.wordSpacing : null,
         textBaseline: t < 0.5 ? a.textBaseline : null,
         height: t < 0.5 ? a.height : null,
+        locale: t < 0.5 ? a.locale : null,
         background: t < 0.5 ? a.background : null,
         decoration: t < 0.5 ? a.decoration : null,
         decorationColor: Color.lerp(a.decorationColor, null, t),
@@ -572,6 +589,7 @@ class TextStyle extends Diagnosticable {
       wordSpacing: ui.lerpDouble(a.wordSpacing ?? b.wordSpacing, b.wordSpacing ?? a.wordSpacing, t),
       textBaseline: t < 0.5 ? a.textBaseline : b.textBaseline,
       height: ui.lerpDouble(a.height ?? b.height, b.height ?? a.height, t),
+      locale: t < 0.5 ? a.locale : b.locale,
       background: t < 0.5 ? a.background : b.background,
       decoration: t < 0.5 ? a.decoration : b.decoration,
       decorationColor: Color.lerp(a.decorationColor, b.decorationColor, t),
@@ -581,7 +599,7 @@ class TextStyle extends Diagnosticable {
   }
 
   /// The style information for text runs, encoded for use by `dart:ui`.
-  ui.TextStyle getTextStyle({ double textScaleFactor = 1.0, Locale locale }) {
+  ui.TextStyle getTextStyle({ double textScaleFactor = 1.0 }) {
     return new ui.TextStyle(
       color: color,
       decoration: decoration,
@@ -650,6 +668,7 @@ class TextStyle extends Diagnosticable {
         wordSpacing != other.wordSpacing ||
         textBaseline != other.textBaseline ||
         height != other.height ||
+        locale != other.locale ||
         background != other.background)
       return RenderComparison.layout;
     if (color != other.color ||
@@ -677,6 +696,7 @@ class TextStyle extends Diagnosticable {
            wordSpacing == typedOther.wordSpacing &&
            textBaseline == typedOther.textBaseline &&
            height == typedOther.height &&
+           locale == typedOther.locale &&
            background == typedOther.background &&
            decoration == typedOther.decoration &&
            decorationColor == typedOther.decorationColor &&
@@ -696,6 +716,7 @@ class TextStyle extends Diagnosticable {
       wordSpacing,
       textBaseline,
       height,
+      locale,
       background,
       decoration,
       decorationColor,
@@ -762,6 +783,7 @@ class TextStyle extends Diagnosticable {
     styles.add(new DoubleProperty('${prefix}wordSpacing', wordSpacing, defaultValue: null));
     styles.add(new EnumProperty<TextBaseline>('${prefix}baseline', textBaseline, defaultValue: null));
     styles.add(new DoubleProperty('${prefix}height', height, unit: 'x', defaultValue: null));
+    styles.add(new StringProperty('${prefix}locale', locale?.toString(), defaultValue: null, quoted: false));
     styles.add(new StringProperty('${prefix}background', background?.toString(), defaultValue: null, quoted: false));
     if (decoration != null || decorationColor != null || decorationStyle != null) {
       final List<String> decorationDescription = <String>[];
