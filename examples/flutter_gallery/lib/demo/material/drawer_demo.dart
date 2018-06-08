@@ -4,9 +4,9 @@
 
 import 'package:flutter/material.dart';
 
-const String _kAsset0 = '/Users/larche/flutter_gallery_assets/lib/people/square/trevor.png';
-const String _kAsset1 = '/Users/larche/flutter_gallery_assets/lib/people/square/stella.png';
-const String _kAsset2 = '/Users/larche/flutter_gallery_assets/lib/people/square/sandra.png';
+const String _kAsset0 = '/people/square/trevor.png';
+const String _kAsset1 = '/people/square/stella.png';
+const String _kAsset2 = '/people/square/sandra.png';
 const String _kGalleryAssetsPackage = 'flutter_gallery_assets';
 
 class DrawerDemo extends StatefulWidget {

@@ -25,8 +25,8 @@ class TravelDestination {
 
 final List<TravelDestination> destinations = <TravelDestination>[
   const TravelDestination(
-    assetName: '/Users/larche/flutter_gallery_assets/lib/places/india_chennai_beach.png',
-//    assetPackage: _kGalleryAssetsPackage,
+    assetName: '/places/india_chennai_beach.png',
+    assetPackage: _kGalleryAssetsPackage,
     title: 'Top 10 Places to Visit in Chennai',
     description: const <String>[
       'Number 10',
@@ -35,8 +35,8 @@ final List<TravelDestination> destinations = <TravelDestination>[
     ],
   ),
   const TravelDestination(
-    assetName: '/Users/larche/flutter_gallery_assets/lib/places/india_chettinad_silk_maker.png',
-//    assetPackage: _kGalleryAssetsPackage,
+    assetName: '/places/india_chettinad_silk_maker.png',
+    assetPackage: _kGalleryAssetsPackage,
     title: 'Artisans of Southern India',
     description: const <String>[
       'Silk Spinners',
