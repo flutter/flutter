@@ -234,13 +234,13 @@ class SystemChrome {
   /// Whether Flutter should automatically compute the desired system UI.
   ///
   /// When this setting is enabled, Flutter will hit-test the layer tree at the
-  /// top and bottom of the layer tree on each frame looking for an
-  /// [AnnotatedRegionLayer] with an instance of the [SystemUiOverlayStyle]. The
+  /// top and bottom of the screen on each frame looking for an
+  /// [AnnotatedRegionLayer] with an instance of a [SystemUiOverlayStyle]. The
   /// hit-test result from the top of the screen provides the status bar settings
   /// and the hit-test result from the bottom of the screen provides the system
   /// nav bar settings.
   ///
-  /// If instead you want to imperatively set the system ui style, it is
+  /// If you want to imperatively set the system ui style instead, it is
   /// recommended that [automaticSystemUiAdjustment] is set to false.
   ///
   /// See also:
