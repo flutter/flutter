@@ -53,10 +53,6 @@ class FuchsiaReloadCommand extends FlutterCommand {
     argParser.addOption('name-override',
       abbr: 'n',
       help: 'On-device name of the application binary.');
-    argParser.addFlag('preview-dart-2',
-      abbr: '2',
-      defaultsTo: false,
-      help: 'Preview Dart 2.0 functionality.');
     argParser.addOption('target',
       abbr: 't',
       defaultsTo: bundle.defaultMainPath,
