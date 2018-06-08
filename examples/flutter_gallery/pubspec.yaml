@@ -83,10 +83,10 @@ flutter:
   uses-material-design: true
   assets:
     - lib/gallery/example_code.dart
+#    - /Users/larche/flutter_gallery_assets/lib/logos/flutter_white/logo.png
     - /Users/larche/flutter_gallery_assets/lib/videos/butterfly.mp4
     - /Users/larche/flutter_gallery_assets/lib/animated_images/animated_flutter_lgtm.gif
     - /Users/larche/flutter_gallery_assets/lib/animated_images/animated_flutter_stickers.webp
-    - packages/flutter_gallery_assets/pesto/avatar.jpg
     - packages/flutter_gallery_assets/pesto/image10.jpg
     - packages/flutter_gallery_assets/pesto/image11.jpg
     - packages/flutter_gallery_assets/pesto/image12.jpg
@@ -101,7 +101,6 @@ flutter:
     - packages/flutter_gallery_assets/pesto/image8.jpg
     - packages/flutter_gallery_assets/pesto/image9.jpg
     - packages/flutter_gallery_assets/pesto/logo_small.png
-    - packages/flutter_gallery_assets/pesto/logo_medium.png
     - packages/flutter_gallery_assets/pesto/fish.png
     - packages/flutter_gallery_assets/pesto/healthy.png
     - packages/flutter_gallery_assets/pesto/main.png
@@ -109,11 +108,6 @@ flutter:
     - packages/flutter_gallery_assets/pesto/quick.png
     - packages/flutter_gallery_assets/pesto/spicy.png
     - packages/flutter_gallery_assets/pesto/veggie.png
-    - packages/flutter_gallery_assets/about_logo.png
-    - packages/flutter_gallery_assets/ali_connors.jpg
-    - packages/flutter_gallery_assets/drawer_logo.png
-    - packages/flutter_gallery_assets/kangaroo_valley_safari.jpg
-    - packages/flutter_gallery_assets/top_10_australian_beaches.jpg
     - /Users/larche/flutter_gallery_assets/lib/places/india_chennai_flower_market.png
     - /Users/larche/flutter_gallery_assets/lib/places/india_tanjore_bronze_works.png
     - /Users/larche/flutter_gallery_assets/lib/places/india_tanjore_market_merchant.png
