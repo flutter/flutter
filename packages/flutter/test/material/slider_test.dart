@@ -4,6 +4,7 @@
 
 import 'dart:ui';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
@@ -1123,6 +1124,10 @@ void main() {
           new TestSemantics.root(children: <TestSemantics>[
             new TestSemantics.rootChild(
               id: 1,
+              value: '50%',
+              increasedValue: '55%',
+              decreasedValue: '45%',
+              textDirection: TextDirection.ltr,
               actions: SemanticsAction.decrease.index | SemanticsAction.increase.index,
             ),
           ]),
@@ -1152,6 +1157,89 @@ void main() {
           ignoreTransform: true,
         ));
 
+    semantics.dispose();
+  });
+
+  testWidgets('Slider Semantics - iOS', (WidgetTester tester) async {
+    final SemanticsTester semantics = new SemanticsTester(tester);
+
+    await tester.pumpWidget(
+      new Theme(
+        data: ThemeData.light().copyWith(
+          platform: TargetPlatform.iOS,
+        ),
+        child: new Directionality(
+          textDirection: TextDirection.ltr,
+          child: new MediaQuery(
+            data: new MediaQueryData.fromWindow(window),
+            child: new Material(
+              child: new Slider(
+                value: 100.0,
+                min: 0.0,
+                max: 200.0,
+                onChanged: (double v) {},
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(
+      semantics,
+      hasSemantics(
+        new TestSemantics.root(children: <TestSemantics>[
+          new TestSemantics.rootChild(
+            id: 2,
+            value: '50%',
+            increasedValue: '60%',
+            decreasedValue: '40%',
+            textDirection: TextDirection.ltr,
+            actions: SemanticsAction.decrease.index | SemanticsAction.increase.index,
+          ),
+        ]),
+        ignoreRect: true,
+        ignoreTransform: true,
+      ));
+    semantics.dispose();
+  });
+
+  testWidgets('Slider semantics with custom formatter', (WidgetTester tester) async {
+    final SemanticsTester semantics = new SemanticsTester(tester);
+
+    await tester.pumpWidget(new Directionality(
+      textDirection: TextDirection.ltr,
+      child: new MediaQuery(
+        data: new MediaQueryData.fromWindow(window),
+        child: new Material(
+          child: new Slider(
+            value: 40.0,
+            min: 0.0,
+            max: 200.0,
+            divisions: 10,
+            semanticFormatterCallback: (double value) => value.round().toString(),
+            onChanged: (double v) {},
+          ),
+        ),
+      ),
+    ));
+
+    expect(
+        semantics,
+        hasSemantics(
+          new TestSemantics.root(children: <TestSemantics>[
+            new TestSemantics.rootChild(
+              id: 3,
+              value: '40',
+              increasedValue: '60',
+              decreasedValue: '20',
+              textDirection: TextDirection.ltr,
+              actions: SemanticsAction.decrease.index | SemanticsAction.increase.index,
+            ),
+          ]),
+          ignoreRect: true,
+          ignoreTransform: true,
+        ));
     semantics.dispose();
   });
 
