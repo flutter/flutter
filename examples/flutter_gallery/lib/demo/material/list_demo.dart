@@ -254,9 +254,9 @@ class _ListDemoState extends State<ListDemo> {
         ],
       ),
       body: new Scrollbar(
-        child: new DraggableList(
+        child: new ReorderableListView(
           onSwap: onSwap,
-          axis: Axis.vertical,
+          scrollDirection: Axis.vertical,
           children: listTiles,
           padding: new EdgeInsets.symmetric(vertical: _dense ? 4.0 : 8.0),
         ),

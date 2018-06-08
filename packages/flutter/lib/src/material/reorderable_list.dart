@@ -2,23 +2,49 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 
+/// A callback used by [ReorderableListView] to swap items in a list.
+/// 
+/// Implementations should remove the corresponding list item at [oldIndex]
+/// and place a new one at [newIndex].
+typedef void OnSwapCallback(int oldIndex, int newIndex);
 
-class DraggableList extends StatefulWidget {
+/// A list with draggable content that the user can re-order.
+/// 
+/// 
+/// 
+/// Note that this widget places its [children] in a [Column] and not a [ListView].
+///
+/// All [children] must have a key.
+class ReorderableListView extends StatefulWidget {
 
-  const DraggableList({this.children, this.onSwap, this.axis : Axis.vertical, this.padding});
+  /// Creates a reorderable list.
+  const ReorderableListView({this.children, this.onSwap, this.scrollDirection = Axis.vertical, this.padding});
 
+  /// The
   final List<Widget> children;
-  final Axis axis;
+
+  /// The [Axis] along which the list scrolls.
+  /// 
+  /// List children also drag along this [Axis].
+  final Axis scrollDirection;
+
+  /// The amount of space by which to inset the child.
   final EdgeInsets padding;
-  final void Function(int, int) onSwap;
+
+  /// Called when a list child is dropped into a new position to shuffle the
+  /// underlying list.
+  /// 
+  /// This [ReorderableListView] calls [onSwap] after a list child is dropped
+  /// into a new position.
+  final OnSwapCallback onSwap;
 
   @override
   State<StatefulWidget> createState() {
-    return new _DraggableListState();
+    return new _ReorderableListViewState();
   }
 }
 
-class _DraggableListState extends State<DraggableList> with TickerProviderStateMixin {
+class _ReorderableListViewState extends State<ReorderableListView> with TickerProviderStateMixin {
   ScrollController scrollController = new ScrollController();
   // This controls the entrance of the dragging widget into a new place.
   AnimationController entranceController;
@@ -60,7 +86,7 @@ class _DraggableListState extends State<DraggableList> with TickerProviderStateM
     Widget _buildDragTarget(BuildContext context, List<Key> acceptedCandidates, List<dynamic> rejectedCandidates) {
       final Widget draggable = new LongPressDraggable<Key>(
         maxSimultaneousDrags: 1,
-        axis: widget.axis,
+        axis: widget.scrollDirection,
         data: toWrap.key,
         feedback: new Material(
           elevation: 6.0,
@@ -213,6 +239,7 @@ class _DraggableListState extends State<DraggableList> with TickerProviderStateM
     );
 
     return new SingleChildScrollView(
+      scrollDirection: widget.scrollDirection,
       child: new Column(children: wrappedChildren), 
       padding: widget.padding, 
       controller: scrollController,
