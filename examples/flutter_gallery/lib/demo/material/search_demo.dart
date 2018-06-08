@@ -100,12 +100,12 @@ class _SearchDemoState extends State<SearchDemo> {
         child: new Column(
           children: <Widget>[
             const UserAccountsDrawerHeader(
-              accountName: const Text('Zach Widget'),
-              accountEmail: const Text('zach.widget@example.com'),
+              accountName: const Text('Peter Widget'),
+              accountEmail: const Text('peter.widget@example.com'),
               currentAccountPicture: const CircleAvatar(
                 backgroundImage: const AssetImage(
-                  'shrine/vendors/zach.jpg',
-                  package: 'flutter_gallery_assets',
+                  '/Users/larche/flutter_gallery_assets/lib/people/square/peter.png',
+//                  package: 'flutter_gallery_assets',
                 ),
               ),
               margin: EdgeInsets.zero,
