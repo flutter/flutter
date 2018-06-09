@@ -89,11 +89,18 @@ abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
     assert(!attached);
   }
 
-  /// Find the last [AnnotatedRegionLayer] which contains [regionOffset] with a
-  /// value of Type [type].
+  /// Returns the value of [S] that corresponds to the point described by
+  /// [regionOffset].
   ///
   /// Returns null if no matching region is found.
-  Object findRegion(Offset regionOffset, Type type);
+  ///
+  /// The main way for a value to be assigned here is by pushing an
+  /// [AnnotatedRegionLayer] into the layer tree.
+  ///
+  /// See also:
+  ///
+  ///   * [AnnotatedRegionLayer], for placing values in the layer tree.
+  S findRegion<S>(Offset regionOffset);
 
   /// Override this method to upload this layer to the engine.
   ///
@@ -174,7 +181,7 @@ class PictureLayer extends Layer {
   }
 
   @override
-  Object findRegion(Offset regionOffset, Type type) => null;
+  S findRegion<S>(Offset regionOffset) => null;
 }
 
 /// A composited layer that maps a backend texture to a rectangle.
@@ -229,7 +236,7 @@ class TextureLayer extends Layer {
   }
 
   @override
-  Object findRegion(Offset regionOffset, Type type) => null;
+  S findRegion<S>(Offset regionOffset) => null;
 }
 
 /// A layer that indicates to the compositor that it should display
@@ -294,7 +301,7 @@ class PerformanceOverlayLayer extends Layer {
   }
 
   @override
-  Object findRegion(Offset regionOffset, Type type) => null;
+  S findRegion<S>(Offset regionOffset) => null;
 }
 
 /// A composited layer that has a list of children.
@@ -332,10 +339,10 @@ class ContainerLayer extends Layer {
   }
 
   @override
-  Object findRegion(Offset regionOffset, Type type) {
+  S findRegion<S>(Offset regionOffset) {
     Layer current = lastChild;
     while (current != null) {
-      final Object value = current.findRegion(regionOffset, type);
+      final Object value = current.findRegion<S>(regionOffset);
       if (value != null) {
         return value;
       }
@@ -535,12 +542,12 @@ class OffsetLayer extends ContainerLayer {
   Offset offset;
 
   @override
-  Object findRegion(Offset regionOffset, Type type) {
+  S findRegion<S>(Offset regionOffset) {
     final Offset transformed = regionOffset - offset;
     if (transformed.dx < 0.0 || transformed.dy < 0.0 ) {
       return null;
     }
-    return super.findRegion(transformed, type);
+    return super.findRegion<S>(transformed);
   }
 
   @override
@@ -611,10 +618,10 @@ class ClipRectLayer extends ContainerLayer {
   Rect clipRect;
 
   @override
-  Object findRegion(Offset regionOffset, Type type) {
+  S findRegion<S>(Offset regionOffset) {
     if (!clipRect.contains(regionOffset))
       return null;
-    return super.findRegion(regionOffset, type);
+    return super.findRegion<S>(regionOffset);
   }
 
   @override
@@ -657,10 +664,10 @@ class ClipRRectLayer extends ContainerLayer {
   RRect clipRRect;
 
   @override
-  Object findRegion(Offset regionOffset, Type type) {
+  S findRegion<S>(Offset regionOffset) {
     if (!clipRRect.contains(regionOffset))
       return null;
-    return super.findRegion(regionOffset, type);
+    return super.findRegion<S>(regionOffset);
   }
 
   @override
@@ -703,10 +710,10 @@ class ClipPathLayer extends ContainerLayer {
   Path clipPath;
 
   @override
-  Object findRegion(Offset regionOffset, Type type) {
+  S findRegion<S>(Offset regionOffset) {
     if (!clipPath.contains(regionOffset))
       return null;
-    return super.findRegion(regionOffset, type);
+    return super.findRegion<S>(regionOffset);
   }
 
   @override
@@ -753,8 +760,7 @@ class TransformLayer extends OffsetLayer {
     if (value == _transform)
       return;
     _transform = value;
-    _invertedTransform ??= new Matrix4.zero();
-    _transform?.copyInto(_invertedTransform)?.invert();
+    _invertedTransform = null;
   }
 
   Matrix4 _lastEffectiveTransform;
@@ -774,14 +780,14 @@ class TransformLayer extends OffsetLayer {
   }
 
   @override
-  Object findRegion(Offset regionOffset, Type type) {
+  S findRegion<S>(Offset regionOffset) {
     if (_invertedTransform == null) {
       _invertedTransform ??= new Matrix4.zero();
       _transform?.copyInto(_invertedTransform)?.invert();
     }
     final Vector4 vector = new Vector4(regionOffset.dx, regionOffset.dy, 0.0, 1.0);
     final Vector4 result = _invertedTransform.transform(vector);
-    return super.findRegion(new Offset(result[0], result[1]), type);
+    return super.findRegion<S>(new Offset(result[0], result[1]));
   }
 
   @override
@@ -956,10 +962,10 @@ class PhysicalModelLayer extends ContainerLayer {
   Color shadowColor;
 
   @override
-  Object findRegion(Offset regionOffset, Type type) {
+  S findRegion<S>(Offset regionOffset) {
     if (!clipPath.contains(regionOffset))
       return null;
-    return super.findRegion(regionOffset, type);
+    return super.findRegion<S>(regionOffset);
   }
 
   @override
@@ -1066,7 +1072,7 @@ class LeaderLayer extends ContainerLayer {
   Offset _lastOffset;
 
   @override
-  Object findRegion(Offset regionOffset, Type type) {
+  S findRegion<S>(Offset regionOffset) {
     // TODO(jonahwilliams): implement findRegion.
     return null;
   }
@@ -1181,7 +1187,7 @@ class FollowerLayer extends ContainerLayer {
   Matrix4 _lastTransform;
 
   @override
-  Object findRegion(Offset regionOffset, Type type) {
+  S findRegion<S>(Offset regionOffset) {
     // TODO(jonahwilliams): implement findRegion.
     return null;
   }
@@ -1299,9 +1305,8 @@ class FollowerLayer extends ContainerLayer {
   }
 }
 
-/// A composited layer which annotates it's children with a value.
+/// A composited layer which annotates its children with a value.
 class AnnotatedRegionLayer<T> extends ContainerLayer {
-
   /// Creates a new annotated layer.
   AnnotatedRegionLayer(this.value);
 
@@ -1309,12 +1314,15 @@ class AnnotatedRegionLayer<T> extends ContainerLayer {
   final T value;
 
   @override
-  Object findRegion(Offset regionOffset, Type type) {
-    final Object result = super.findRegion(regionOffset, type);
+  S findRegion<S>(Offset regionOffset) {
+    final S result = super.findRegion<S>(regionOffset);
     if (result != null)
       return result;
-    if (T == type)
-      return value;
+    if (T == S) {
+      final Object untypedResult = value;
+      final S typedResult = untypedResult;
+      return typedResult;
+    }
     return null;
   }
 

@@ -1705,9 +1705,7 @@ class _InspectorOverlayLayer extends Layer {
   }
 
   @override
-  Object findRegion(Offset offset, Type type) {
-    return null;
-  }
+  S findRegion<S>(Offset offset) => null;
 }
 
 const double _kScreenEdgeMargin = 10.0;

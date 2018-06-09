@@ -191,13 +191,13 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
       return;
     final Rect bounds = paintBounds;
     final Offset top = new Offset(bounds.center.dx, ui.window.padding.top / ui.window.devicePixelRatio);
-    final SystemUiOverlayStyle upperOverlayStyle = layer.findRegion(top, SystemUiOverlayStyle);
+    final SystemUiOverlayStyle upperOverlayStyle = layer.findRegion<SystemUiOverlayStyle>(top);
     // Only android has a customizable system navigation bar.
     SystemUiOverlayStyle lowerOverlayStyle;
     switch (defaultTargetPlatform) {
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
-        lowerOverlayStyle = layer.findRegion(bounds.bottomCenter, SystemUiOverlayStyle);
+        lowerOverlayStyle = layer.findRegion<SystemUiOverlayStyle>(bounds.bottomCenter);
         break;
       case TargetPlatform.iOS:
     }
