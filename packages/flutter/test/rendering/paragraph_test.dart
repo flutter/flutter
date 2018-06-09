@@ -288,6 +288,7 @@ void main() {
     final RenderParagraph paragraph = new RenderParagraph(
       const TextSpan(text: _kText),
       textDirection: TextDirection.ltr,
+      locale: const Locale('ja', 'JP'),
     );
     expect(paragraph, hasAGoodToStringDeep);
     expect(
@@ -301,6 +302,7 @@ void main() {
         ' │ textDirection: ltr\n'
         ' │ softWrap: wrapping at box width\n'
         ' │ overflow: clip\n'
+        ' │ locale: ja_JP\n'
         ' │ maxLines: unlimited\n'
         ' ╘═╦══ text ═══\n'
         '   ║ TextSpan:\n'

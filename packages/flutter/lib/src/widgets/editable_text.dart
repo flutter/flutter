@@ -12,6 +12,7 @@ import 'basic.dart';
 import 'focus_manager.dart';
 import 'focus_scope.dart';
 import 'framework.dart';
+import 'localizations.dart';
 import 'media_query.dart';
 import 'scroll_controller.dart';
 import 'scroll_physics.dart';
@@ -160,6 +161,7 @@ class EditableText extends StatefulWidget {
     @required this.cursorColor,
     this.textAlign = TextAlign.start,
     this.textDirection,
+    this.locale,
     this.textScaleFactor,
     this.maxLines = 1,
     this.autofocus = false,
@@ -228,6 +230,15 @@ class EditableText extends StatefulWidget {
   ///
   /// Defaults to the ambient [Directionality], if any.
   final TextDirection textDirection;
+
+  /// Used to select a font when the same Unicode character can
+  /// be rendered differently, depending on the locale.
+  ///
+  /// It's rarely necessary to set this property. By default its value
+  /// is inherited from the enclosing app with `Localizations.localeOf(context)`.
+  ///
+  /// See [RenderEditable.locale] for more information.
+  final Locale locale;
 
   /// The number of font pixels for each logical pixel.
   ///
@@ -299,6 +310,7 @@ class EditableText extends StatefulWidget {
     style?.debugFillProperties(properties);
     properties.add(new EnumProperty<TextAlign>('textAlign', textAlign, defaultValue: null));
     properties.add(new EnumProperty<TextDirection>('textDirection', textDirection, defaultValue: null));
+    properties.add(new DiagnosticsProperty<Locale>('locale', locale, defaultValue: null));
     properties.add(new DoubleProperty('textScaleFactor', textScaleFactor, defaultValue: null));
     properties.add(new IntProperty('maxLines', maxLines, defaultValue: 1));
     properties.add(new DiagnosticsProperty<bool>('autofocus', autofocus, defaultValue: false));
@@ -687,6 +699,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
               textScaleFactor: widget.textScaleFactor ?? MediaQuery.textScaleFactorOf(context),
               textAlign: widget.textAlign,
               textDirection: _textDirection,
+              locale: widget.locale,
               obscureText: widget.obscureText,
               autocorrect: widget.autocorrect,
               offset: offset,
@@ -747,6 +760,7 @@ class _Editable extends LeafRenderObjectWidget {
     this.textScaleFactor,
     this.textAlign,
     @required this.textDirection,
+    this.locale,
     this.obscureText,
     this.autocorrect,
     this.offset,
@@ -767,6 +781,7 @@ class _Editable extends LeafRenderObjectWidget {
   final double textScaleFactor;
   final TextAlign textAlign;
   final TextDirection textDirection;
+  final Locale locale;
   final bool obscureText;
   final bool autocorrect;
   final ViewportOffset offset;
@@ -786,6 +801,7 @@ class _Editable extends LeafRenderObjectWidget {
       textScaleFactor: textScaleFactor,
       textAlign: textAlign,
       textDirection: textDirection,
+      locale: locale ?? Localizations.localeOf(context, nullOk: true),
       selection: value.selection,
       offset: offset,
       onSelectionChanged: onSelectionChanged,
@@ -807,6 +823,7 @@ class _Editable extends LeafRenderObjectWidget {
       ..textScaleFactor = textScaleFactor
       ..textAlign = textAlign
       ..textDirection = textDirection
+      ..locale = locale ?? Localizations.localeOf(context, nullOk: true)
       ..selection = value.selection
       ..offset = offset
       ..onSelectionChanged = onSelectionChanged
