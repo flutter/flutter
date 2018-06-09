@@ -312,6 +312,7 @@ Widget _wrapWithBackground({
       SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle.dark);
   }
 
+
   if (backgroundColor.alpha == 0xFF)
     return childWithBackground;
 

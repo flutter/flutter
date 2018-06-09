@@ -373,11 +373,11 @@ class _GalleryHomeState extends State<GalleryHome> with SingleTickerProviderStat
                     setState(() => _category = category);
                   },
                 ),
-              ),
             ),
           ),
         ),
-      );
+      ),
+    );
 
     assert(() {
       GalleryHome.showPreviewBanner = false;
