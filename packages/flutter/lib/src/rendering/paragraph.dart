@@ -458,6 +458,7 @@ class RenderParagraph extends RenderBox {
     properties.add(new FlagProperty('softWrap', value: softWrap, ifTrue: 'wrapping at box width', ifFalse: 'no wrapping except at line break characters', showName: true));
     properties.add(new EnumProperty<TextOverflow>('overflow', overflow));
     properties.add(new DoubleProperty('textScaleFactor', textScaleFactor, defaultValue: 1.0));
+    properties.add(new DiagnosticsProperty<Locale>('locale', locale, defaultValue: null));
     properties.add(new IntProperty('maxLines', maxLines, ifNull: 'unlimited'));
   }
 }
