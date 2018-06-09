@@ -316,7 +316,7 @@ class GridListDemoState extends State<GridListDemo> {
     new Photo(
       assetName: '/places/india_chennai_beach.png',
       assetPackage: _kGalleryAssetsPackage,
-      title: 'Pondi',
+      title: 'Pondicherry',
       caption: 'Beach',
     ),
     new Photo(

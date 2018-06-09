@@ -25,12 +25,12 @@ class TravelDestination {
 
 final List<TravelDestination> destinations = <TravelDestination>[
   const TravelDestination(
-    assetName: '/places/india_chennai_flower_market.png',
+    assetName: '/places/india_thanjavur_market.png',
     assetPackage: _kGalleryAssetsPackage,
-    title: 'Top 10 Places to Visit in Chennai',
+    title: 'Top 10 Places to Visit in Tamil Nadu',
     description: const <String>[
       'Number 10',
-      'Flower Market',
+      'Market',
       'Thanjavur, Tamil Nadu',
     ],
   ),
