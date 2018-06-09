@@ -27,11 +27,11 @@ final List<TravelDestination> destinations = <TravelDestination>[
   const TravelDestination(
     assetName: '/places/india_thanjavur_market.png',
     assetPackage: _kGalleryAssetsPackage,
-    title: 'Top 10 Places to Visit in Tamil Nadu',
+    title: 'Top 10 Cities to Visit in Tamil Nadu',
     description: const <String>[
       'Number 10',
       'Thanjavur',
-      'Tamil Nadu',
+      'Thanjavur, Tamil Nadu',
     ],
   ),
   const TravelDestination(
@@ -41,7 +41,7 @@ final List<TravelDestination> destinations = <TravelDestination>[
     description: const <String>[
       'Silk Spinners',
       'Chettinad',
-      'Panyda Nadu, Tamil Nadu',
+      'Sivaganga, Tamil Nadu',
     ],
   )
 ];
