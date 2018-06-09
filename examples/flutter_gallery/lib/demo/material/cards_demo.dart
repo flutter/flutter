@@ -30,8 +30,8 @@ final List<TravelDestination> destinations = <TravelDestination>[
     title: 'Top 10 Places to Visit in Tamil Nadu',
     description: const <String>[
       'Number 10',
-      'Market',
-      'Thanjavur, Tamil Nadu',
+      'Thanjavur',
+      'Tamil Nadu',
     ],
   ),
   const TravelDestination(
