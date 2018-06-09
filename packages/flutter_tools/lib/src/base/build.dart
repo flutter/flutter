@@ -36,6 +36,11 @@ class SnapshotType {
 class GenSnapshot {
   const GenSnapshot();
 
+  static String getSnapshotterPath(SnapshotType snapshotType) {
+    return artifacts.getArtifactPath(
+        Artifact.genSnapshot, snapshotType.platform, snapshotType.mode);
+  }
+
   Future<int> run({
     @required SnapshotType snapshotType,
     @required String packagesPath,
@@ -50,7 +55,8 @@ class GenSnapshot {
       '--dependencies=$depfilePath',
       '--print_snapshot_sizes',
     ]..addAll(additionalArgs);
-    final String snapshotterPath = artifacts.getArtifactPath(Artifact.genSnapshot, snapshotType.platform, snapshotType.mode);
+
+    final String snapshotterPath = getSnapshotterPath(snapshotType);
 
     // iOS gen_snapshot is a multi-arch binary. Running as an i386 binary will
     // generate armv7 code. Running as an x86_64 binary will generate arm64
@@ -195,8 +201,9 @@ class AOTSnapshotter {
       return 0;
     }
 
+    final SnapshotType snapshotType = new SnapshotType(platform, buildMode);
     final int genSnapshotExitCode = await genSnapshot.run(
-      snapshotType: new SnapshotType(platform, buildMode),
+      snapshotType: snapshotType,
       packagesPath: packageMap.packagesPath,
       depfilePath: depfilePath,
       additionalArgs: genSnapshotArgs,
@@ -209,7 +216,8 @@ class AOTSnapshotter {
 
     // Write path to gen_snapshot, since snapshots have to be re-generated when we roll
     // the Dart SDK.
-    await outputDir.childFile('gen_snapshot.d').writeAsString('snapshot.d: $genSnapshot\n');
+    final String genSnapshotPath = GenSnapshot.getSnapshotterPath(snapshotType);
+    await outputDir.childFile('gen_snapshot.d').writeAsString('snapshot.d: $genSnapshotPath\n');
 
     // On iOS, we use Xcode to compile the snapshot into a dynamic library that the
     // end-developer can link into their app.
