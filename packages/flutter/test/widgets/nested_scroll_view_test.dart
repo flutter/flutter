@@ -558,7 +558,7 @@ void main() {
     expect(buildCount, expectedBuildCount);
     expect(find.text('Item 18'), findsNothing);
     expect(find.text('Item 2'), findsNWidgets(2));
-    expect(find.byType(NestedScrollView), paints..shadow());
+    expect(find.byType(NestedScrollView), isNot(paints..shadow()));
     await tester.pump(const Duration(seconds: 1)); // shadow would be finished coming back
     expect(find.byType(NestedScrollView), isNot(paints..shadow()));
     await gesture5.up();
