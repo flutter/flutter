@@ -151,10 +151,10 @@ flutter:
   fonts:
     - family: Raleway
       fonts:
-        - asset: packages/flutter_gallery_assets/fonts/Raleway/Raleway-Regular.ttf
-        - asset: packages/flutter_gallery_assets/fonts/Raleway/Raleway-Medium.ttf
+        - asset: packages/flutter_gallery_assets/fonts/raleway/Raleway-Regular.ttf
+        - asset: packages/flutter_gallery_assets/fonts/raleway/Raleway-Medium.ttf
           weight: 500
-        - asset: packages/flutter_gallery_assets/fonts/Raleway/Raleway-SemiBold.ttf
+        - asset: packages/flutter_gallery_assets/fonts/raleway/Raleway-SemiBold.ttf
           weight: 600
     - family: AbrilFatface
       fonts:
