@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 
 class _ContactCategory extends StatelessWidget {
   const _ContactCategory({ Key key, this.icon, this.children }) : super(key: key);
@@ -183,56 +182,51 @@ class ContactsDemoState extends State<ContactsDemo> {
             ),
             new SliverList(
               delegate: new SliverChildListDelegate(<Widget>[
-                new AnnotatedRegion<SystemUiOverlayStyle>(
-                  value: SystemUiOverlayStyle.dark,
-                  child: new _ContactCategory(
-                    icon: Icons.call,
-                    children: <Widget>[
-                      new _ContactItem(
-                        icon: Icons.message,
-                        tooltip: 'Send message',
-                        onPressed: () {
-                          _scaffoldKey.currentState.showSnackBar(const SnackBar(
-                            content: const Text('Pretend that this opened your SMS application.')
-                          ));
-                        },
-                        lines: const <String>[
-                          '(650) 555-1234',
-                          'Mobile',
-                        ],
-                      ),
-                      new _ContactItem(
-                        icon: Icons.message,
-                        tooltip: 'Send message',
-                        onPressed: () {
-                          _scaffoldKey.currentState.showSnackBar(const SnackBar(
-                            content: const Text('A messaging app appears.')
-                          ));
-                        },
-                        lines: const <String>[
-                          '(323) 555-6789',
-                          'Work',
-                        ],
-                      ),
-                      new _ContactItem(
-                        icon: Icons.message,
-                        tooltip: 'Send message',
-                        onPressed: () {
-                          _scaffoldKey.currentState.showSnackBar(const SnackBar(
-                            content: const Text('Imagine if you will, a messaging application.')
-                          ));
-                        },
-                        lines: const <String>[
-                          '(650) 555-6789',
-                          'Home',
-                        ],
-                      ),
-                    ],
-                  ),
+                new _ContactCategory(
+                  icon: Icons.call,
+                  children: <Widget>[
+                    new _ContactItem(
+                      icon: Icons.message,
+                      tooltip: 'Send message',
+                      onPressed: () {
+                        _scaffoldKey.currentState.showSnackBar(const SnackBar(
+                          content: const Text('Pretend that this opened your SMS application.')
+                        ));
+                      },
+                      lines: const <String>[
+                        '(650) 555-1234',
+                        'Mobile',
+                      ],
+                    ),
+                    new _ContactItem(
+                      icon: Icons.message,
+                      tooltip: 'Send message',
+                      onPressed: () {
+                        _scaffoldKey.currentState.showSnackBar(const SnackBar(
+                          content: const Text('A messaging app appears.')
+                        ));
+                      },
+                      lines: const <String>[
+                        '(323) 555-6789',
+                        'Work',
+                      ],
+                    ),
+                    new _ContactItem(
+                      icon: Icons.message,
+                      tooltip: 'Send message',
+                      onPressed: () {
+                        _scaffoldKey.currentState.showSnackBar(const SnackBar(
+                          content: const Text('Imagine if you will, a messaging application.')
+                        ));
+                      },
+                      lines: const <String>[
+                        '(650) 555-6789',
+                        'Home',
+                      ],
+                    ),
+                  ],
                 ),
-                new AnnotatedRegion<SystemUiOverlayStyle>(
-                  value: SystemUiOverlayStyle.dark,
-                  child: new _ContactCategory(
+                new _ContactCategory(
                   icon: Icons.contact_mail,
                   children: <Widget>[
                     new _ContactItem(
@@ -263,88 +257,81 @@ class ContactsDemoState extends State<ContactsDemo> {
                     ),
                   ],
                 ),
+                new _ContactCategory(
+                  icon: Icons.location_on,
+                  children: <Widget>[
+                    new _ContactItem(
+                      icon: Icons.map,
+                      tooltip: 'Open map',
+                      onPressed: () {
+                        _scaffoldKey.currentState.showSnackBar(const SnackBar(
+                          content: const Text('This would show a map of San Francisco.')
+                        ));
+                      },
+                      lines: const <String>[
+                        '2000 Main Street',
+                        'San Francisco, CA',
+                        'Home',
+                      ],
+                    ),
+                    new _ContactItem(
+                      icon: Icons.map,
+                      tooltip: 'Open map',
+                      onPressed: () {
+                        _scaffoldKey.currentState.showSnackBar(const SnackBar(
+                          content: const Text('This would show a map of Mountain View.')
+                        ));
+                      },
+                      lines: const <String>[
+                        '1600 Amphitheater Parkway',
+                        'Mountain View, CA',
+                        'Work',
+                      ],
+                    ),
+                    new _ContactItem(
+                      icon: Icons.map,
+                      tooltip: 'Open map',
+                      onPressed: () {
+                        _scaffoldKey.currentState.showSnackBar(const SnackBar(
+                          content: const Text('This would also show a map, if this was not a demo.')
+                        ));
+                      },
+                      lines: const <String>[
+                        '126 Severyns Ave',
+                        'Mountain View, CA',
+                        'Jet Travel',
+                      ],
+                    ),
+                  ],
                 ),
-                new AnnotatedRegion<SystemUiOverlayStyle>(
-                  value: SystemUiOverlayStyle.dark,
-                  child: new _ContactCategory(
-                    icon: Icons.location_on,
-                    children: <Widget>[
-                      new _ContactItem(
-                        icon: Icons.map,
-                        tooltip: 'Open map',
-                        onPressed: () {
-                          _scaffoldKey.currentState.showSnackBar(const SnackBar(
-                            content: const Text('This would show a map of San Francisco.')
-                          ));
-                        },
-                        lines: const <String>[
-                          '2000 Main Street',
-                          'San Francisco, CA',
-                          'Home',
-                        ],
-                      ),
-                      new _ContactItem(
-                        icon: Icons.map,
-                        tooltip: 'Open map',
-                        onPressed: () {
-                          _scaffoldKey.currentState.showSnackBar(const SnackBar(
-                            content: const Text('This would show a map of Mountain View.')
-                          ));
-                        },
-                        lines: const <String>[
-                          '1600 Amphitheater Parkway',
-                          'Mountain View, CA',
-                          'Work',
-                        ],
-                      ),
-                      new _ContactItem(
-                        icon: Icons.map,
-                        tooltip: 'Open map',
-                        onPressed: () {
-                          _scaffoldKey.currentState.showSnackBar(const SnackBar(
-                            content: const Text('This would also show a map, if this was not a demo.')
-                          ));
-                        },
-                        lines: const <String>[
-                          '126 Severyns Ave',
-                          'Mountain View, CA',
-                          'Jet Travel',
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-                new AnnotatedRegion<SystemUiOverlayStyle>(
-                  value: SystemUiOverlayStyle.dark,
-                  child: new _ContactCategory(
-                    icon: Icons.today,
-                    children: <Widget>[
-                      new _ContactItem(
-                        lines: const <String>[
-                          'Birthday',
-                          'January 9th, 1989',
-                        ],
-                      ),
-                      new _ContactItem(
-                        lines: const <String>[
-                          'Wedding anniversary',
-                          'June 21st, 2014',
-                        ],
-                      ),
-                      new _ContactItem(
-                        lines: const <String>[
-                          'First day in office',
-                          'January 20th, 2015',
-                        ],
-                      ),
-                      new _ContactItem(
-                        lines: const <String>[
-                          'Last day in office',
-                          'August 9th, 2015',
-                        ],
-                      ),
-                    ],
-                  ),
+                new _ContactCategory(
+                  icon: Icons.today,
+                  children: <Widget>[
+                    new _ContactItem(
+                      lines: const <String>[
+                        'Birthday',
+                        'January 9th, 1989',
+                      ],
+                    ),
+                    new _ContactItem(
+                      lines: const <String>[
+                        'Wedding anniversary',
+                        'June 21st, 2014',
+                      ],
+                    ),
+                    new _ContactItem(
+                      lines: const <String>[
+                        'First day in office',
+                        'January 20th, 2015',
+                      ],
+                    ),
+                    new _ContactItem(
+                      lines: const <String>[
+                        'Last day in office',
+                        'August 9th, 2015',
+                      ],
+                    ),
+                  ],
                 ),
               ]),
             ),

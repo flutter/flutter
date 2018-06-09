@@ -8,7 +8,7 @@ import 'package:test/test.dart';
 
 void main() {
   group(AnnotatedRegion, () {
-    test('finds the first value in a OffsetLayer', () {
+    test('finds the first value in a OffsetLayer when sized', () {
       final ContainerLayer containerLayer = new ContainerLayer();
       final List<OffsetLayer> layers = <OffsetLayer>[
         new OffsetLayer(offset: Offset.zero),
@@ -17,14 +17,14 @@ void main() {
       ];
       int i = 0;
       for (OffsetLayer layer in layers) {
-        layer.append(new AnnotatedRegionLayer<int>(i));
+        layer.append(new AnnotatedRegionLayer<int>(i, size: const Size(200.0, 100.0)));
         containerLayer.append(layer);
         i += 1;
       }
 
-      expect(containerLayer.findRegion<int>(const Offset(0.0, 1.0)), 0);
-      expect(containerLayer.findRegion<int>(const Offset(0.0, 101.0)), 1);
-      expect(containerLayer.findRegion<int>(const Offset(0.0, 201.0)), 2);
+      expect(containerLayer.find<int>(const Offset(0.0, 1.0)), 0);
+      expect(containerLayer.find<int>(const Offset(0.0, 101.0)), 1);
+      expect(containerLayer.find<int>(const Offset(0.0, 201.0)), 2);
     });
 
     test('finds a value within the clip in a ClipRectLayer', () {
@@ -41,9 +41,9 @@ void main() {
         i += 1;
       }
 
-      expect(containerLayer.findRegion<int>(const Offset(0.0, 1.0)), 0);
-      expect(containerLayer.findRegion<int>(const Offset(0.0, 101.0)), 1);
-      expect(containerLayer.findRegion<int>(const Offset(0.0, 201.0)), 2);
+      expect(containerLayer.find<int>(const Offset(0.0, 1.0)), 0);
+      expect(containerLayer.find<int>(const Offset(0.0, 101.0)), 1);
+      expect(containerLayer.find<int>(const Offset(0.0, 201.0)), 2);
     });
 
 
@@ -61,9 +61,9 @@ void main() {
         i += 1;
       }
 
-      expect(containerLayer.findRegion<int>(const Offset(5.0, 5.0)), 0);
-      expect(containerLayer.findRegion<int>(const Offset(5.0, 105.0)), 1);
-      expect(containerLayer.findRegion<int>(const Offset(5.0, 205.0)), 2);
+      expect(containerLayer.find<int>(const Offset(5.0, 5.0)), 0);
+      expect(containerLayer.find<int>(const Offset(5.0, 105.0)), 1);
+      expect(containerLayer.find<int>(const Offset(5.0, 205.0)), 2);
     });
 
     test('finds a value under a TransformLayer', () {
@@ -81,17 +81,17 @@ void main() {
       ];
       int i = 0;
       for (OffsetLayer layer in layers) {
-        final AnnotatedRegionLayer<int> annotatedRegionLayer = new AnnotatedRegionLayer<int>(i);
+        final AnnotatedRegionLayer<int> annotatedRegionLayer = new AnnotatedRegionLayer<int>(i, size: const Size(100.0, 100.0));
         layer.append(annotatedRegionLayer);
         transformLayer.append(layer);
         i += 1;
       }
 
-      expect(transformLayer.findRegion<int>(const Offset(0.0, 100.0)), 0);
-      expect(transformLayer.findRegion<int>(const Offset(0.0, 200.0)), 0);
-      expect(transformLayer.findRegion<int>(const Offset(0.0, 270.0)), 1);
-      expect(transformLayer.findRegion<int>(const Offset(0.0, 400.0)), 1);
-      expect(transformLayer.findRegion<int>(const Offset(0.0, 530.0)), 2);
+      expect(transformLayer.find<int>(const Offset(0.0, 100.0)), 0);
+      expect(transformLayer.find<int>(const Offset(0.0, 200.0)), 0);
+      expect(transformLayer.find<int>(const Offset(0.0, 270.0)), 1);
+      expect(transformLayer.find<int>(const Offset(0.0, 400.0)), 1);
+      expect(transformLayer.find<int>(const Offset(0.0, 530.0)), 2);
     });
 
     test('looks for child AnnotatedRegions before parents', () {
@@ -101,7 +101,7 @@ void main() {
       parent.append(child);
       layer.append(parent);
 
-      expect(parent.findRegion<int>(Offset.zero), 2);
+      expect(parent.find<int>(Offset.zero), 2);
     });
 
     test('looks for correct type', () {
@@ -111,7 +111,7 @@ void main() {
       layer.append(child2);
       layer.append(child1);
 
-      expect(layer.findRegion<String>(Offset.zero), 'hello');
+      expect(layer.find<String>(Offset.zero), 'hello');
     });
   });
 }

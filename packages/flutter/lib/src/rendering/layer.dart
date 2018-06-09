@@ -100,7 +100,7 @@ abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
   /// See also:
   ///
   ///   * [AnnotatedRegionLayer], for placing values in the layer tree.
-  S findRegion<S>(Offset regionOffset);
+  S find<S>(Offset regionOffset);
 
   /// Override this method to upload this layer to the engine.
   ///
@@ -181,7 +181,7 @@ class PictureLayer extends Layer {
   }
 
   @override
-  S findRegion<S>(Offset regionOffset) => null;
+  S find<S>(Offset regionOffset) => null;
 }
 
 /// A composited layer that maps a backend texture to a rectangle.
@@ -236,7 +236,7 @@ class TextureLayer extends Layer {
   }
 
   @override
-  S findRegion<S>(Offset regionOffset) => null;
+  S find<S>(Offset regionOffset) => null;
 }
 
 /// A layer that indicates to the compositor that it should display
@@ -301,7 +301,7 @@ class PerformanceOverlayLayer extends Layer {
   }
 
   @override
-  S findRegion<S>(Offset regionOffset) => null;
+  S find<S>(Offset regionOffset) => null;
 }
 
 /// A composited layer that has a list of children.
@@ -339,10 +339,10 @@ class ContainerLayer extends Layer {
   }
 
   @override
-  S findRegion<S>(Offset regionOffset) {
+  S find<S>(Offset regionOffset) {
     Layer current = lastChild;
     while (current != null) {
-      final Object value = current.findRegion<S>(regionOffset);
+      final Object value = current.find<S>(regionOffset);
       if (value != null) {
         return value;
       }
@@ -542,12 +542,9 @@ class OffsetLayer extends ContainerLayer {
   Offset offset;
 
   @override
-  S findRegion<S>(Offset regionOffset) {
+  S find<S>(Offset regionOffset) {
     final Offset transformed = regionOffset - offset;
-    if (transformed.dx < 0.0 || transformed.dy < 0.0 ) {
-      return null;
-    }
-    return super.findRegion<S>(transformed);
+    return super.find<S>(transformed);
   }
 
   @override
@@ -618,10 +615,10 @@ class ClipRectLayer extends ContainerLayer {
   Rect clipRect;
 
   @override
-  S findRegion<S>(Offset regionOffset) {
+  S find<S>(Offset regionOffset) {
     if (!clipRect.contains(regionOffset))
       return null;
-    return super.findRegion<S>(regionOffset);
+    return super.find<S>(regionOffset);
   }
 
   @override
@@ -664,10 +661,10 @@ class ClipRRectLayer extends ContainerLayer {
   RRect clipRRect;
 
   @override
-  S findRegion<S>(Offset regionOffset) {
+  S find<S>(Offset regionOffset) {
     if (!clipRRect.contains(regionOffset))
       return null;
-    return super.findRegion<S>(regionOffset);
+    return super.find<S>(regionOffset);
   }
 
   @override
@@ -710,10 +707,10 @@ class ClipPathLayer extends ContainerLayer {
   Path clipPath;
 
   @override
-  S findRegion<S>(Offset regionOffset) {
+  S find<S>(Offset regionOffset) {
     if (!clipPath.contains(regionOffset))
       return null;
-    return super.findRegion<S>(regionOffset);
+    return super.find<S>(regionOffset);
   }
 
   @override
@@ -780,14 +777,14 @@ class TransformLayer extends OffsetLayer {
   }
 
   @override
-  S findRegion<S>(Offset regionOffset) {
+  S find<S>(Offset regionOffset) {
     if (_invertedTransform == null) {
       _invertedTransform ??= new Matrix4.zero();
       _transform?.copyInto(_invertedTransform)?.invert();
     }
     final Vector4 vector = new Vector4(regionOffset.dx, regionOffset.dy, 0.0, 1.0);
     final Vector4 result = _invertedTransform.transform(vector);
-    return super.findRegion<S>(new Offset(result[0], result[1]));
+    return super.find<S>(new Offset(result[0], result[1]));
   }
 
   @override
@@ -962,10 +959,10 @@ class PhysicalModelLayer extends ContainerLayer {
   Color shadowColor;
 
   @override
-  S findRegion<S>(Offset regionOffset) {
+  S find<S>(Offset regionOffset) {
     if (!clipPath.contains(regionOffset))
       return null;
-    return super.findRegion<S>(regionOffset);
+    return super.find<S>(regionOffset);
   }
 
   @override
@@ -1072,9 +1069,8 @@ class LeaderLayer extends ContainerLayer {
   Offset _lastOffset;
 
   @override
-  S findRegion<S>(Offset regionOffset) {
-    // TODO(jonahwilliams): implement findRegion.
-    return null;
+  S find<S>(Offset regionOffset) {
+    return super.find(regionOffset - offset);
   }
 
   @override
@@ -1185,11 +1181,22 @@ class FollowerLayer extends ContainerLayer {
 
   Offset _lastOffset;
   Matrix4 _lastTransform;
+  Matrix4 _invertedTransform;
 
   @override
-  S findRegion<S>(Offset regionOffset) {
-    // TODO(jonahwilliams): implement findRegion.
-    return null;
+  S find<S>(Offset regionOffset) {
+    if (link.leader == null && showWhenUnlinked) {
+      return super.find<S>(regionOffset - unlinkedOffset);
+    }
+    if (_invertedTransform == null) {
+      final Matrix4 transform = getLastTransform();
+      assert(transform != null);
+      _invertedTransform = new Matrix4.zero();
+      transform.copyInverse(_invertedTransform);
+    }
+    final Vector4 vector = new Vector4(regionOffset.dx, regionOffset.dy, 0.0, 1.0);
+    final Vector4 result = _invertedTransform.transform(vector);
+    return super.find<S>(new Offset(result[0] - linkedOffset.dx, result[1] - linkedOffset.dy));
   }
 
   /// The transform that was used during the last composition phase.
@@ -1306,16 +1313,28 @@ class FollowerLayer extends ContainerLayer {
 }
 
 /// A composited layer which annotates its children with a value.
+///
+/// These values can be retrieved using [Layer.find] with a given [Offset]. If
+/// a [Size] is provided to this layer, then find will check if the provided
+/// offset is within the bounds of the layer.
 class AnnotatedRegionLayer<T> extends ContainerLayer {
   /// Creates a new annotated layer.
-  AnnotatedRegionLayer(this.value);
+  AnnotatedRegionLayer(this.value, {this.size});
 
-  /// The value which annotates the children.
+  /// The value returned by [find] if the offset is contained within this layer.
   final T value;
 
+  /// The [size] is optionally used to clip the hit-testing of [find].
+  ///
+  /// If not provided, all offsets are considered to be contained within this
+  /// layer, unless a parent layer applies a clip.
+  final Size size;
+
   @override
-  S findRegion<S>(Offset regionOffset) {
-    final S result = super.findRegion<S>(regionOffset);
+  S find<S>(Offset regionOffset) {
+    if (size != null && !size.contains(regionOffset))
+      return null;
+    final S result = super.find<S>(regionOffset);
     if (result != null)
       return result;
     if (T == S) {
@@ -1330,5 +1349,7 @@ class AnnotatedRegionLayer<T> extends ContainerLayer {
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(new DiagnosticsProperty<T>('value', value));
+    if (size != null)
+      properties.add(new DiagnosticsProperty<Size>('size', size));
   }
 }

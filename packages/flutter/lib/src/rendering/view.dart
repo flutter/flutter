@@ -82,6 +82,24 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
     markNeedsLayout();
   }
 
+  /// Whether Flutter should automatically compute the desired system UI.
+  ///
+  /// When this setting is enabled, Flutter will hit-test the layer tree at the
+  /// top and bottom of the screen on each frame looking for an
+  /// [AnnotatedRegionLayer] with an instance of a [SystemUiOverlayStyle]. The
+  /// hit-test result from the top of the screen provides the status bar settings
+  /// and the hit-test result from the bottom of the screen provides the system
+  /// nav bar settings.
+  ///
+  /// If you want to imperatively set the system ui style instead, it is
+  /// recommended that [automaticSystemUiAdjustment] is set to false.
+  ///
+  /// See also:
+  ///
+  ///   * [AnnotatedRegion], for placing [SystemUiOverlayStyle] in the layer tree.
+  ///   * [SystemChrome.setSystemUIOverlayStyle], for imperatively setting the system ui style.
+  bool automaticSystemUiAdjustment = true;
+
   /// Bootstrap the rendering pipeline by scheduling the first frame.
   ///
   /// This should only be called once, and must be called before changing
@@ -187,17 +205,17 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
   }
 
   void _updateSystemChrome() {
-    if (!SystemChrome.automaticSystemUiAdjustment)
+    if (!automaticSystemUiAdjustment)
       return;
     final Rect bounds = paintBounds;
     final Offset top = new Offset(bounds.center.dx, ui.window.padding.top / ui.window.devicePixelRatio);
-    final SystemUiOverlayStyle upperOverlayStyle = layer.findRegion<SystemUiOverlayStyle>(top);
+    final SystemUiOverlayStyle upperOverlayStyle = layer.find<SystemUiOverlayStyle>(top);
     // Only android has a customizable system navigation bar.
     SystemUiOverlayStyle lowerOverlayStyle;
     switch (defaultTargetPlatform) {
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
-        lowerOverlayStyle = layer.findRegion<SystemUiOverlayStyle>(bounds.bottomCenter);
+        lowerOverlayStyle = layer.find<SystemUiOverlayStyle>(bounds.bottomCenter);
         break;
       case TargetPlatform.iOS:
     }

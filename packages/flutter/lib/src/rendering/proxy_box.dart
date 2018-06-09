@@ -4253,10 +4253,14 @@ class RenderFollowerLayer extends RenderProxyBox {
 ///
 /// See also:
 ///
-///   * [Layer.findRegion], for an example of how this value is retrieved.
+///   * [Layer.find], for an example of how this value is retrieved.
+///   * [AnnotatedRegionLayer], the layer this render object creates.
 class AnnotatedRegionRenderObject<T> extends RenderProxyBox {
-  /// The value to be annotated in the layer tree.
+  /// A value which can be retrieved using [Layer.find].
   T value;
+
+  /// Whether the render object will pass its [size] to the [AnnotatedRegionLayer].
+  bool sized;
 
   @override
   final bool alwaysNeedsCompositing = true;
@@ -4264,7 +4268,8 @@ class AnnotatedRegionRenderObject<T> extends RenderProxyBox {
   @override
   void paint(PaintingContext context, Offset offset) {
     if (child != null) {
-      context.pushLayer(new AnnotatedRegionLayer<T>(value), super.paint, offset);
+      final AnnotatedRegionLayer<T> layer = new AnnotatedRegionLayer<T>(value, size: sized ? size : null);
+      context.pushLayer(layer, super.paint, offset);
     }
   }
 }

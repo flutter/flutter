@@ -11,29 +11,43 @@ import 'framework.dart';
 ///
 /// See also:
 ///
-///   * [Layer.findRegion], for an example of how this value is retrieved.
+///   * [Layer.find], for an example of how this value is retrieved.
+///   * [AnnotatedRegionLayer], the layer pushed into the layer tree.
 class AnnotatedRegion<T> extends SingleChildRenderObjectWidget {
   /// Creates a new annotated region.
   const AnnotatedRegion({
     Key key,
     @required Widget child,
     @required this.value,
+    this.sized = true,
   }) : assert(value != null),
        assert(child != null),
        super(key: key, child: child);
 
-  /// The value inserted into the layer tree.
+  /// A value which can be retrieved using [Layer.find].
   final T value;
+
+  /// If false, the layer pushed into the tree will not be provided with a size.
+  ///
+  /// An [AnnotatedRegionLayer] with a size checks that the offset provided in
+  /// [Layer.find] is within the bounds, returning null otherwise.
+  ///
+  /// See also:
+  ///
+  ///   * [AnnotatedRegionLayer], for a description of this behavior.
+  final bool sized;
 
   @override
   RenderObject createRenderObject(BuildContext context) {
     return new AnnotatedRegionRenderObject<T>()
-      ..value = value;
+      ..value = value
+      ..sized = sized;
   }
 
   @override
   void updateRenderObject(BuildContext context, AnnotatedRegionRenderObject<T> renderObject) {
     renderObject.value = value;
+    renderObject.sized = sized;
   }
 }
 

@@ -345,6 +345,20 @@ class _AppBarState extends State<AppBar> {
     TextStyle centerStyle = widget.textTheme?.title ?? themeData.primaryTextTheme.title;
     TextStyle sideStyle = widget.textTheme?.body1 ?? themeData.primaryTextTheme.body1;
 
+    if (parentRoute?.isCurrent ?? true) {
+      final Brightness brightness = widget.brightness ?? themeData.primaryColorBrightness;
+      switch (defaultTargetPlatform) {
+        case TargetPlatform.iOS:
+          SystemChrome.setSystemUIOverlayStyle(brightness == Brightness.dark
+              ? SystemUiOverlayStyle.light
+              : SystemUiOverlayStyle.dark);
+          break;
+        case TargetPlatform.android:
+        case TargetPlatform.fuchsia:
+          SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle.dark);
+      }
+    }
+
     if (widget.toolbarOpacity != 1.0) {
       final double opacity = const Interval(0.25, 1.0, curve: Curves.fastOutSlowIn).transform(widget.toolbarOpacity);
       if (centerStyle?.color != null)
@@ -450,13 +464,6 @@ class _AppBarState extends State<AppBar> {
         ],
       );
     }
-    final Brightness brightness = widget.brightness ?? themeData.primaryColorBrightness;
-    appBar = new AnnotatedRegion<SystemUiOverlayStyle>(
-      value: brightness == Brightness.dark
-          ? SystemUiOverlayStyle.light
-          : SystemUiOverlayStyle.dark,
-      child: appBar,
-    );
         // The padding applies to the toolbar and tabbar, not the flexible space.
     if (widget.primary) {
       appBar = new SafeArea(
@@ -479,7 +486,6 @@ class _AppBarState extends State<AppBar> {
         ],
       );
     }
-    
     return new Semantics(
       container: true,
       explicitChildNodes: true,

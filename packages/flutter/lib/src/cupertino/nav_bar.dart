@@ -292,19 +292,25 @@ Widget _wrapWithBackground({
   Color backgroundColor,
   Widget child,
 }) {
-  final bool darkBackground = backgroundColor.computeLuminance() < 0.179;
   final DecoratedBox childWithBackground = new DecoratedBox(
     decoration: new BoxDecoration(
       border: border,
       color: backgroundColor,
     ),
-    child: new AnnotatedRegion<SystemUiOverlayStyle>(
-      value: darkBackground
-        ? SystemUiOverlayStyle.light
-        : SystemUiOverlayStyle.dark,
-      child: child,
-    ),
+    child: child,
   );
+
+  final bool darkBackground = backgroundColor.computeLuminance() < 0.179;
+  switch (defaultTargetPlatform) {
+    case TargetPlatform.iOS:
+      SystemChrome.setSystemUIOverlayStyle(
+        darkBackground ? SystemUiOverlayStyle.light : SystemUiOverlayStyle.dark
+      );
+      break;
+    case TargetPlatform.android:
+    case TargetPlatform.fuchsia:
+      SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle.dark);
+  }
 
   if (backgroundColor.alpha == 0xFF)
     return childWithBackground;
