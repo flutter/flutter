@@ -200,7 +200,7 @@ class _RenderCheckbox extends RenderToggleable {
         activeColor: activeColor,
         inactiveColor: inactiveColor,
         onChanged: onChanged,
-        size: const Size(2 * kRadialReactionRadius, 2 * kRadialReactionRadius),
+        size: const Size(2 * kRadialReactionRadius + 8.0, 2 * kRadialReactionRadius + 8.0),
         vsync: vsync,
       );
 
