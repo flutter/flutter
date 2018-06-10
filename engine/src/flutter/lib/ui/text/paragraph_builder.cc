@@ -39,6 +39,7 @@ const int tsWordSpacingIndex = 11;
 const int tsHeightIndex = 12;
 const int tsLocaleIndex = 13;
 const int tsBackgroundIndex = 14;
+const int tsForegroundIndex = 15;
 
 const int tsColorMask = 1 << tsColorIndex;
 const int tsTextDecorationMask = 1 << tsTextDecorationIndex;
@@ -54,6 +55,7 @@ const int tsWordSpacingMask = 1 << tsWordSpacingIndex;
 const int tsHeightMask = 1 << tsHeightIndex;
 const int tsLocaleMask = 1 << tsLocaleIndex;
 const int tsBackgroundMask = 1 << tsBackgroundIndex;
+const int tsForegroundMask = 1 << tsForegroundIndex;
 
 // ParagraphStyle
 
@@ -167,7 +169,9 @@ void ParagraphBuilder::pushStyle(tonic::Int32List& encoded,
                                  double height,
                                  const std::string& locale,
                                  Dart_Handle background_objects,
-                                 Dart_Handle background_data) {
+                                 Dart_Handle background_data,
+                                 Dart_Handle foreground_objects,
+                                 Dart_Handle foreground_data) {
   FXL_DCHECK(encoded.num_elements() == 8);
 
   int32_t mask = encoded[0];
@@ -232,6 +236,14 @@ void ParagraphBuilder::pushStyle(tonic::Int32List& encoded,
     if (background.paint()) {
       style.has_background = true;
       style.background = *background.paint();
+    }
+  }
+
+  if (mask & tsForegroundMask) {
+    Paint foreground(foreground_objects, foreground_data);
+    if (foreground.paint()) {
+      style.has_foreground = true;
+      style.foreground = *foreground.paint();
     }
   }
 

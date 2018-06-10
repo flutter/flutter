@@ -49,6 +49,8 @@ class TextStyle {
   std::string locale;
   bool has_background = false;
   SkPaint background;
+  bool has_foreground = false;
+  SkPaint foreground;
 
   TextStyle();
 
