@@ -5,10 +5,14 @@
 import 'dart:async';
 import 'dart:convert';
 
+
+import 'package:flutter_tools/src/android/gradle.dart';
+
 import 'base/file_system.dart';
+import 'flutter_manifest.dart';
 import 'ios/xcodeproj.dart';
 import 'plugins.dart';
-
+import 'template.dart';
 
 /// Represents the contents of a Flutter project at the specified [directory].
 class FlutterProject {
@@ -54,10 +58,17 @@ class FlutterProject {
   FlutterProject get example => new FlutterProject(directory.childDirectory('example'));
 
   /// Generates project files necessary to make Gradle builds work on Android
-  /// and CocoaPods+Xcode work on iOS, for app projects only
+  /// and CocoaPods+Xcode work on iOS, for app and module projects only.
   Future<void> ensureReadyForPlatformSpecificTooling() async {
     if (!directory.existsSync() || hasExampleApp) {
       return;
+    }
+    final FlutterManifest manifest = await FlutterManifest.createFromPath(directory.childFile('pubspec.yaml').path);
+    final Map<String, dynamic> androidDescriptor = manifest.androidDescriptor;
+    if (androidDescriptor != null) {
+      android._injectModuleWrapper(<String, dynamic>{
+        'androidIdentifier': androidDescriptor['package'],
+      });
     }
     injectPlugins(directory: directory.path);
     await generateXcodeProperties(directory.path);
@@ -94,6 +105,12 @@ class AndroidProject {
   Future<String> group() {
     final File gradleFile = directory.childFile('build.gradle');
     return _firstMatchInFile(gradleFile, _groupPattern).then((Match match) => match?.group(1));
+  }
+
+  Future<void> _injectModuleWrapper(Map<String, dynamic> environment) async {
+    final Template template = new Template.fromName('module_android');
+    template.render(directory, environment, overwriteExisting: false);
+    updateLocalProperties(projectPath: directory.parent.path);
   }
 }
 

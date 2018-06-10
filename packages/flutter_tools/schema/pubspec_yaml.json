@@ -43,6 +43,9 @@
                         }
                     }
                 },
+                "android": {
+                    "type": "object"
+                },
                 "plugin": {
                     "type": "object",
                     "additionalProperties": false,

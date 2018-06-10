@@ -87,6 +87,10 @@ class FlutterManifest {
     return _flutterDescriptor['uses-material-design'] ?? false;
   }
 
+  Map<String, dynamic> get androidDescriptor {
+    return _flutterDescriptor['android'];
+  }
+
   List<Map<String, dynamic>> get fontsDescriptor {
    return _flutterDescriptor['fonts'] ?? const <Map<String, dynamic>>[];
   }
