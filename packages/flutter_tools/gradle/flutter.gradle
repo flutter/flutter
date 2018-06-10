@@ -53,7 +53,7 @@ class FlutterPlugin implements Plugin<Project> {
 
     private String resolveProperty(Project project, String name, String defaultValue) {
         if (localProperties == null) {
-            localProperties = readPropertiesIfExist(project.rootProject.file("local.properties"))
+            localProperties = readPropertiesIfExist(new File(project.projectDir.parentFile, "local.properties"))
         }
         String result
         if (project.hasProperty(name)) {
@@ -155,7 +155,7 @@ class FlutterPlugin implements Plugin<Project> {
         project.extensions.create("flutter", FlutterExtension)
         project.afterEvaluate this.&addFlutterTask
 
-        File pluginsFile = new File(project.rootProject.projectDir.parentFile, '.flutter-plugins')
+        File pluginsFile = new File(project.projectDir.parentFile.parentFile, '.flutter-plugins')
         Properties plugins = readPropertiesIfExist(pluginsFile)
 
         plugins.each { name, _ ->
