@@ -43,7 +43,9 @@ class ParagraphBuilder : public fxl::RefCountedThreadSafe<ParagraphBuilder>,
                  double height,
                  const std::string& locale,
                  Dart_Handle background_objects,
-                 Dart_Handle background_data);
+                 Dart_Handle background_data,
+                 Dart_Handle foreground_objects,
+                 Dart_Handle foreground_data);
 
   void pop();
 

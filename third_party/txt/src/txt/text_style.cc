@@ -49,6 +49,8 @@ bool TextStyle::equals(const TextStyle& other) const {
     return false;
   if (locale != other.locale)
     return false;
+  if (foreground != other.foreground)
+    return false;
 
   return true;
 }
