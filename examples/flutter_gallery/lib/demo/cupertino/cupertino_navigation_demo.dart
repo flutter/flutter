@@ -507,7 +507,7 @@ class Tab2Header extends StatelessWidget {
                             decoration: const BoxDecoration(
                               image: const DecorationImage(
                                 image: const AssetImage(
-                                  '/people/square/trevor.png',
+                                  'people/square/trevor.png',
                                   package: _kGalleryAssetsPackage,
                                 ),
                               ),
@@ -521,7 +521,7 @@ class Tab2Header extends StatelessWidget {
                             decoration: const BoxDecoration(
                               image: const DecorationImage(
                                 image: const AssetImage(
-                                  '/people/square/sandra.png',
+                                  'people/square/sandra.png',
                                   package: _kGalleryAssetsPackage,
                                 ),
                               ),

@@ -25,7 +25,7 @@ class TravelDestination {
 
 final List<TravelDestination> destinations = <TravelDestination>[
   const TravelDestination(
-    assetName: '/places/india_thanjavur_market.png',
+    assetName: 'places/india_thanjavur_market.png',
     assetPackage: _kGalleryAssetsPackage,
     title: 'Top 10 Cities to Visit in Tamil Nadu',
     description: const <String>[
@@ -35,7 +35,7 @@ final List<TravelDestination> destinations = <TravelDestination>[
     ],
   ),
   const TravelDestination(
-    assetName: '/places/india_chettinad_silk_maker.png',
+    assetName: 'places/india_chettinad_silk_maker.png',
     assetPackage: _kGalleryAssetsPackage,
     title: 'Artisans of Southern India',
     description: const <String>[

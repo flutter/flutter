@@ -17,7 +17,7 @@ class ImagesDemo extends StatelessWidget {
           demoWidget: new Semantics(
             label: 'Example of animated WEBP',
             child: new Image.asset(
-              '/animated_images/animated_flutter_stickers.webp',
+              'animated_images/animated_flutter_stickers.webp',
               package: 'flutter_gallery_assets',
             ),
           ),
@@ -29,7 +29,7 @@ class ImagesDemo extends StatelessWidget {
           demoWidget: new Semantics(
             label: 'Example of animated GIF',
             child:new Image.asset(
-              '/animated_images/animated_flutter_lgtm.gif',
+              'animated_images/animated_flutter_lgtm.gif',
               package: 'flutter_gallery_assets',
             ),
           ),

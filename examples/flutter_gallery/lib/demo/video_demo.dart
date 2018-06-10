@@ -353,7 +353,7 @@ class _VideoDemoState extends State<VideoDemo>
     with SingleTickerProviderStateMixin {
   final VideoPlayerController butterflyController =
       new VideoPlayerController.asset(
-        '/videos/butterfly.mp4',
+        'videos/butterfly.mp4',
         package: 'flutter_gallery_assets',
       );
   final VideoPlayerController beeController = new VideoPlayerController.network(
