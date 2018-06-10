@@ -45,11 +45,11 @@ const List<String> _defaultTools = const <String>[
 ];
 
 const Map<String, String> _avatars = const <String, String>{
-  'hammer': '/people/square/ali.png',
-  'chisel': '/people/square/sandra.png',
-  'fryer': '/people/square/trevor.png',
-  'fabricator': '/people/square/stella.png',
-  'customer': '/people/square/peter.png',
+  'hammer': 'people/square/ali.png',
+  'chisel': 'people/square/sandra.png',
+  'fryer': 'people/square/trevor.png',
+  'fabricator': 'people/square/stella.png',
+  'customer': 'people/square/peter.png',
 };
 
 final Map<String, Set<String>> _toolActions = <String, Set<String>>{
