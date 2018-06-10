@@ -118,8 +118,8 @@ class AnimationController extends Animation<double>
     double value,
     this.duration,
     this.debugLabel,
-    this.lowerBound: 0.0,
-    this.upperBound: 1.0,
+    this.lowerBound = 0.0,
+    this.upperBound = 1.0,
     @required TickerProvider vsync,
   }) : assert(lowerBound != null),
        assert(upperBound != null),
@@ -147,7 +147,7 @@ class AnimationController extends Animation<double>
   /// physics simulation, especially when the physics simulation has no
   /// pre-determined bounds.
   AnimationController.unbounded({
-    double value: 0.0,
+    double value = 0.0,
     this.duration,
     this.debugLabel,
     @required TickerProvider vsync,
@@ -358,12 +358,12 @@ class AnimationController extends Animation<double>
   /// regardless of whether `target` > [value] or not. At the end of the
   /// animation, when `target` is reached, [status] is reported as
   /// [AnimationStatus.completed].
-  TickerFuture animateTo(double target, { Duration duration, Curve curve: Curves.linear }) {
+  TickerFuture animateTo(double target, { Duration duration, Curve curve = Curves.linear }) {
     _direction = _AnimationDirection.forward;
     return _animateToInternal(target, duration: duration, curve: curve);
   }
 
-  TickerFuture _animateToInternal(double target, { Duration duration, Curve curve: Curves.linear }) {
+  TickerFuture _animateToInternal(double target, { Duration duration, Curve curve = Curves.linear }) {
     Duration simulationDuration = duration;
     if (simulationDuration == null) {
       assert(() {
@@ -441,7 +441,7 @@ class AnimationController extends Animation<double>
   /// The most recently returned [TickerFuture], if any, is marked as having been
   /// canceled, meaning the future never completes and its [TickerFuture.orCancel]
   /// derivative future completes with a [TickerCanceled] error.
-  TickerFuture fling({ double velocity: 1.0 }) {
+  TickerFuture fling({ double velocity = 1.0 }) {
     _direction = velocity < 0.0 ? _AnimationDirection.reverse : _AnimationDirection.forward;
     final double target = velocity < 0.0 ? lowerBound - _kFlingTolerance.distance
                                          : upperBound + _kFlingTolerance.distance;
@@ -493,7 +493,7 @@ class AnimationController extends Animation<double>
   ///    and which does send notifications.
   ///  * [forward], [reverse], [animateTo], [animateWith], [fling], and [repeat],
   ///    which restart the animation controller.
-  void stop({ bool canceled: true }) {
+  void stop({ bool canceled = true }) {
     _simulation = null;
     _lastElapsedDuration = null;
     _ticker.stop(canceled: canceled);

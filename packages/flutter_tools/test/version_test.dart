@@ -361,9 +361,9 @@ void fakeData(
   DateTime remoteCommitDate,
   VersionCheckStamp stamp,
   String stampJson,
-  bool errorOnFetch: false,
-  bool expectSetStamp: false,
-  bool expectServerPing: false,
+  bool errorOnFetch = false,
+  bool expectSetStamp = false,
+  bool expectServerPing = false,
 }) {
   ProcessResult success(String standardOutput) {
     return new ProcessResult(1, 0, standardOutput, '');

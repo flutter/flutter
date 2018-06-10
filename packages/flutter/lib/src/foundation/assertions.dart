@@ -6,11 +6,11 @@ import 'basic_types.dart';
 import 'print.dart';
 
 /// Signature for [FlutterError.onError] handler.
-typedef void FlutterExceptionHandler(FlutterErrorDetails details);
+typedef FlutterExceptionHandler = void Function(FlutterErrorDetails details);
 
 /// Signature for [FlutterErrorDetails.informationCollector] callback
 /// and other callbacks that collect information into a string buffer.
-typedef void InformationCollector(StringBuffer information);
+typedef InformationCollector = void Function(StringBuffer information);
 
 /// Class for information provided to [FlutterExceptionHandler] callbacks.
 ///
@@ -28,11 +28,11 @@ class FlutterErrorDetails {
   const FlutterErrorDetails({
     this.exception,
     this.stack,
-    this.library: 'Flutter framework',
+    this.library = 'Flutter framework',
     this.context,
     this.stackFilter,
     this.informationCollector,
-    this.silent: false
+    this.silent = false
   });
 
   /// The exception. Often this will be an [AssertionError], maybe specifically
@@ -250,7 +250,7 @@ class FlutterError extends AssertionError {
   /// had not been called before (so the next message is verbose again).
   ///
   /// The default behavior for the [onError] handler is to call this function.
-  static void dumpErrorToConsole(FlutterErrorDetails details, { bool forceReport: false }) {
+  static void dumpErrorToConsole(FlutterErrorDetails details, { bool forceReport = false }) {
     assert(details != null);
     assert(details.exception != null);
     bool reportError = details.silent != true; // could be null

@@ -6,7 +6,7 @@ import 'dart:async';
 import 'dart:collection';
 
 /// Signature for [debugPrint] implementations.
-typedef void DebugPrintCallback(String message, { int wrapWidth });
+typedef DebugPrintCallback = void Function(String message, { int wrapWidth });
 
 /// Prints a message to the console, which you can access using the "flutter"
 /// tool's "logs" command ("flutter logs").
@@ -103,7 +103,7 @@ enum _WordWrapParseMode { inSpace, inWord, atBreak }
 /// and so forth. It is only intended for formatting error messages.
 ///
 /// The default [debugPrint] implementation uses this for its line wrapping.
-Iterable<String> debugWordWrap(String message, int width, { String wrapIndent: '' }) sync* {
+Iterable<String> debugWordWrap(String message, int width, { String wrapIndent = '' }) sync* {
   if (message.length < width || message.trimLeft()[0] == '#') {
     yield message;
     return;

@@ -12,13 +12,13 @@ import '../framework/framework.dart';
 import '../framework/ios.dart';
 import '../framework/utils.dart';
 
-TaskFunction createGalleryTransitionTest({ bool semanticsEnabled: false }) {
+TaskFunction createGalleryTransitionTest({ bool semanticsEnabled = false }) {
   return new GalleryTransitionTest(semanticsEnabled: semanticsEnabled);
 }
 
 class GalleryTransitionTest {
 
-  GalleryTransitionTest({ this.semanticsEnabled: false });
+  GalleryTransitionTest({ this.semanticsEnabled = false });
 
   final bool semanticsEnabled;
 

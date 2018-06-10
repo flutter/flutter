@@ -17,11 +17,11 @@ class ColdRunner extends ResidentRunner {
     List<FlutterDevice> devices, {
     String target,
     DebuggingOptions debuggingOptions,
-    bool usesTerminalUI: true,
-    this.traceStartup: false,
+    bool usesTerminalUI = true,
+    this.traceStartup = false,
     this.applicationBinary,
-    bool stayResident: true,
-    bool ipv6: false,
+    bool stayResident = true,
+    bool ipv6 = false,
   }) : super(devices,
              target: target,
              debuggingOptions: debuggingOptions,
@@ -37,7 +37,7 @@ class ColdRunner extends ResidentRunner {
     Completer<DebugConnectionInfo> connectionInfoCompleter,
     Completer<Null> appStartedCompleter,
     String route,
-    bool shouldBuild: true
+    bool shouldBuild = true
   }) async {
     final bool prebuiltMode = applicationBinary != null;
     if (!prebuiltMode) {

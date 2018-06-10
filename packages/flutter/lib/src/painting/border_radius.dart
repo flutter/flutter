@@ -306,8 +306,8 @@ class BorderRadius extends BorderRadiusGeometry {
   /// Creates a vertically symmetric border radius where the top and bottom
   /// sides of the rectangle have the same radii.
   const BorderRadius.vertical({
-    Radius top: Radius.zero,
-    Radius bottom: Radius.zero,
+    Radius top = Radius.zero,
+    Radius bottom = Radius.zero,
   }) : this.only(
     topLeft: top,
     topRight: top,
@@ -318,8 +318,8 @@ class BorderRadius extends BorderRadiusGeometry {
   /// Creates a horizontally symmetrical border radius where the left and right
   /// sides of the rectangle have the same radii.
   const BorderRadius.horizontal({
-    Radius left: Radius.zero,
-    Radius right: Radius.zero,
+    Radius left = Radius.zero,
+    Radius right = Radius.zero,
   }) : this.only(
     topLeft: left,
     topRight: right,
@@ -330,10 +330,10 @@ class BorderRadius extends BorderRadiusGeometry {
   /// Creates a border radius with only the given non-zero values. The other
   /// corners will be right angles.
   const BorderRadius.only({
-    this.topLeft: Radius.zero,
-    this.topRight: Radius.zero,
-    this.bottomLeft: Radius.zero,
-    this.bottomRight: Radius.zero,
+    this.topLeft = Radius.zero,
+    this.topRight = Radius.zero,
+    this.bottomLeft = Radius.zero,
+    this.bottomRight = Radius.zero,
   });
 
   /// A border radius with all zero radii.
@@ -541,8 +541,8 @@ class BorderRadiusDirectional extends BorderRadiusGeometry {
   /// Creates a vertically symmetric border radius where the top and bottom
   /// sides of the rectangle have the same radii.
   const BorderRadiusDirectional.vertical({
-    Radius top: Radius.zero,
-    Radius bottom: Radius.zero,
+    Radius top = Radius.zero,
+    Radius bottom = Radius.zero,
   }) : this.only(
     topStart: top,
     topEnd: top,
@@ -553,8 +553,8 @@ class BorderRadiusDirectional extends BorderRadiusGeometry {
   /// Creates a horizontally symmetrical border radius where the start and end
   /// sides of the rectangle have the same radii.
   const BorderRadiusDirectional.horizontal({
-    Radius start: Radius.zero,
-    Radius end: Radius.zero,
+    Radius start = Radius.zero,
+    Radius end = Radius.zero,
   }) : this.only(
     topStart: start,
     topEnd: end,
@@ -565,10 +565,10 @@ class BorderRadiusDirectional extends BorderRadiusGeometry {
   /// Creates a border radius with only the given non-zero values. The other
   /// corners will be right angles.
   const BorderRadiusDirectional.only({
-    this.topStart: Radius.zero,
-    this.topEnd: Radius.zero,
-    this.bottomStart: Radius.zero,
-    this.bottomEnd: Radius.zero,
+    this.topStart = Radius.zero,
+    this.topEnd = Radius.zero,
+    this.bottomStart = Radius.zero,
+    this.bottomEnd = Radius.zero,
   });
 
   /// A border radius with all zero radii.

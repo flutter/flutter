@@ -36,10 +36,10 @@ class MockProcessManager extends Mock implements ProcessManager {
     List<dynamic> command, {
     String workingDirectory,
     Map<String, String> environment,
-    bool includeParentEnvironment: true,
-    bool runInShell: false,
-    Encoding stdoutEncoding: SYSTEM_ENCODING, // ignore: deprecated_member_use
-    Encoding stderrEncoding: SYSTEM_ENCODING, // ignore: deprecated_member_use
+    bool includeParentEnvironment = true,
+    bool runInShell = false,
+    Encoding stdoutEncoding = SYSTEM_ENCODING, // ignore: deprecated_member_use
+    Encoding stderrEncoding = SYSTEM_ENCODING, // ignore: deprecated_member_use
   }) async {
     return new ProcessResult(0, 0, '1234\n5678\n5', '');
   }

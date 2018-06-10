@@ -10,7 +10,7 @@ import 'object.dart';
 /// Parent data for use with [RenderListBody].
 class ListBodyParentData extends ContainerBoxParentData<RenderBox> { }
 
-typedef double _ChildSizingFunction(RenderBox child);
+typedef _ChildSizingFunction = double Function(RenderBox child);
 
 /// Displays its children sequentially along a given axis, forcing them to the
 /// dimensions of the parent in the other axis.
@@ -31,7 +31,7 @@ class RenderListBody extends RenderBox
   /// By default, children are arranged along the vertical axis.
   RenderListBody({
     List<RenderBox> children,
-    AxisDirection axisDirection: AxisDirection.down,
+    AxisDirection axisDirection = AxisDirection.down,
   }) : assert(axisDirection != null),
        _axisDirection = axisDirection {
     addAll(children);

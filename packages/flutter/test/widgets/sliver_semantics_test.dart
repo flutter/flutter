@@ -79,7 +79,10 @@ void _tests() {
                         children: <TestSemantics>[
                           new TestSemantics(
                             id: 8,
-                            flags: <SemanticsFlag>[SemanticsFlag.namesRoute],
+                            flags: <SemanticsFlag>[
+                              SemanticsFlag.namesRoute,
+                              SemanticsFlag.isHeader,
+                            ],
                             label: 'Semantics Test with Slivers',
                             textDirection: TextDirection.ltr,
                           ),
@@ -140,7 +143,10 @@ void _tests() {
                     children: <TestSemantics>[
                       new TestSemantics(
                         id: 8,
-                        flags: <SemanticsFlag>[SemanticsFlag.namesRoute],
+                        flags: <SemanticsFlag>[
+                          SemanticsFlag.namesRoute,
+                          SemanticsFlag.isHeader,
+                        ],
                         label: 'Semantics Test with Slivers',
                         textDirection: TextDirection.ltr,
                       ),
@@ -219,7 +225,10 @@ void _tests() {
                         children: <TestSemantics>[
                           new TestSemantics(
                             id: 8,
-                            flags: <SemanticsFlag>[SemanticsFlag.namesRoute],
+                            flags: <SemanticsFlag>[
+                              SemanticsFlag.namesRoute,
+                              SemanticsFlag.isHeader,
+                            ],
                             label: 'Semantics Test with Slivers',
                             textDirection: TextDirection.ltr,
                           ),
@@ -458,7 +467,10 @@ void _tests() {
                     tags: <SemanticsTag>[RenderViewport.excludeFromScrolling],
                     children: <TestSemantics>[
                       new TestSemantics(
-                        flags: <SemanticsFlag>[SemanticsFlag.namesRoute],
+                        flags: <SemanticsFlag>[
+                          SemanticsFlag.namesRoute,
+                          SemanticsFlag.isHeader,
+                        ],
                         label: 'AppBar',
                         textDirection: TextDirection.ltr,
                       ),
@@ -557,7 +569,10 @@ void _tests() {
                     tags: <SemanticsTag>[RenderViewport.excludeFromScrolling],
                     children: <TestSemantics>[
                       new TestSemantics(
-                        flags: <SemanticsFlag>[SemanticsFlag.namesRoute],
+                        flags: <SemanticsFlag>[
+                          SemanticsFlag.namesRoute,
+                          SemanticsFlag.isHeader,
+                        ],
                         label: 'AppBar',
                         textDirection: TextDirection.ltr,
                       ),
@@ -693,7 +708,10 @@ void _tests() {
                     tags: <SemanticsTag>[RenderViewport.excludeFromScrolling],
                     children: <TestSemantics>[
                       new TestSemantics(
-                        flags: <SemanticsFlag>[SemanticsFlag.namesRoute],
+                        flags: <SemanticsFlag>[
+                          SemanticsFlag.namesRoute,
+                          SemanticsFlag.isHeader,
+                        ],
                         label: 'AppBar',
                         textDirection: TextDirection.ltr,
                       ),
@@ -791,7 +809,10 @@ void _tests() {
                     tags: <SemanticsTag>[RenderViewport.excludeFromScrolling],
                     children: <TestSemantics>[
                       new TestSemantics(
-                        flags: <SemanticsFlag>[SemanticsFlag.namesRoute],
+                        flags: <SemanticsFlag>[
+                          SemanticsFlag.namesRoute,
+                          SemanticsFlag.isHeader,
+                        ],
                         label: 'AppBar',
                         textDirection: TextDirection.ltr,
                       ),
@@ -883,7 +904,10 @@ void _tests() {
                     tags: <SemanticsTag>[RenderViewport.excludeFromScrolling],
                     children: <TestSemantics>[
                       new TestSemantics(
-                        flags: <SemanticsFlag>[SemanticsFlag.namesRoute],
+                        flags: <SemanticsFlag>[
+                          SemanticsFlag.namesRoute,
+                          SemanticsFlag.isHeader,
+                        ],
                         label: 'Forward app bar',
                         textDirection: TextDirection.ltr,
                       ),
@@ -986,7 +1010,10 @@ void _tests() {
                     tags: <SemanticsTag>[RenderViewport.excludeFromScrolling],
                     children: <TestSemantics>[
                       new TestSemantics(
-                        flags: <SemanticsFlag>[SemanticsFlag.namesRoute],
+                        flags: <SemanticsFlag>[
+                          SemanticsFlag.namesRoute,
+                          SemanticsFlag.isHeader,
+                        ],
                         label: 'Backward app bar',
                         textDirection: TextDirection.ltr,
                       ),

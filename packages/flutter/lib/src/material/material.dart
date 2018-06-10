@@ -12,7 +12,7 @@ import 'theme.dart';
 /// Signature for the callback used by ink effects to obtain the rectangle for the effect.
 ///
 /// Used by [InkHighlight] and [InkSplash], for example.
-typedef Rect RectCallback();
+typedef RectCallback = Rect Function();
 
 /// The various kinds of material in material design. Used to
 /// configure the default behavior of [Material] widgets.
@@ -164,14 +164,14 @@ class Material extends StatefulWidget {
   /// catch likely errors.
   const Material({
     Key key,
-    this.type: MaterialType.canvas,
-    this.elevation: 0.0,
+    this.type = MaterialType.canvas,
+    this.elevation = 0.0,
     this.color,
-    this.shadowColor: const Color(0xFF000000),
+    this.shadowColor = const Color(0xFF000000),
     this.textStyle,
     this.borderRadius,
     this.shape,
-    this.animationDuration: kThemeChangeDuration,
+    this.animationDuration = kThemeChangeDuration,
     this.child,
   }) : assert(type != null),
        assert(elevation != null),
@@ -585,7 +585,7 @@ class _MaterialInterior extends ImplicitlyAnimatedWidget {
     @required this.elevation,
     @required this.color,
     @required this.shadowColor,
-    Curve curve: Curves.linear,
+    Curve curve = Curves.linear,
     @required Duration duration,
   }) : assert(child != null),
        assert(shape != null),

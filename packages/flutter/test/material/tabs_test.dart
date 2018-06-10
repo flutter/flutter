@@ -12,7 +12,7 @@ import '../rendering/mock_canvas.dart';
 import '../rendering/recording_canvas.dart';
 import '../widgets/semantics_tester.dart';
 
-Widget boilerplate({ Widget child, TextDirection textDirection: TextDirection.ltr }) {
+Widget boilerplate({ Widget child, TextDirection textDirection = TextDirection.ltr }) {
   return new Localizations(
     locale: const Locale('en', 'US'),
     delegates: const <LocalizationsDelegate<dynamic>>[
@@ -52,7 +52,7 @@ Widget buildFrame({
     Key tabBarKey,
     List<String> tabs,
     String value,
-    bool isScrollable: false,
+    bool isScrollable = false,
     Color indicatorColor,
   }) {
   return boilerplate(
@@ -69,10 +69,10 @@ Widget buildFrame({
   );
 }
 
-typedef Widget TabControllerFrameBuilder(BuildContext context, TabController controller);
+typedef TabControllerFrameBuilder = Widget Function(BuildContext context, TabController controller);
 
 class TabControllerFrame extends StatefulWidget {
-  const TabControllerFrame({ this.length, this.initialIndex: 0, this.builder });
+  const TabControllerFrame({ this.length, this.initialIndex = 0, this.builder });
 
   final int length;
   final int initialIndex;

@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 class NavigationIconView {
   NavigationIconView({
     Widget icon,
+    Widget activeIcon,
     String title,
     Color color,
     TickerProvider vsync,
@@ -15,6 +16,7 @@ class NavigationIconView {
        _title = title,
        item = new BottomNavigationBarItem(
          icon: icon,
+         activeIcon: activeIcon,
          title: new Text(title),
          backgroundColor: color,
        ),
@@ -81,6 +83,21 @@ class CustomIcon extends StatelessWidget {
   }
 }
 
+class CustomInactiveIcon extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    final IconThemeData iconTheme = IconTheme.of(context);
+    return new Container(
+      margin: const EdgeInsets.all(4.0),
+      width: iconTheme.size - 8.0,
+      height: iconTheme.size - 8.0,
+      decoration: new BoxDecoration(
+        border: new Border.all(color: iconTheme.color, width: 2.0),
+      )
+    );
+  }
+}
+
 class BottomNavigationDemo extends StatefulWidget {
   static const String routeName = '/material/bottom_navigation';
 
@@ -105,19 +122,22 @@ class _BottomNavigationDemoState extends State<BottomNavigationDemo>
         vsync: this,
       ),
       new NavigationIconView(
-        icon: new CustomIcon(),
+        activeIcon: new CustomIcon(),
+        icon: new CustomInactiveIcon(),
         title: 'Box',
         color: Colors.deepOrange,
         vsync: this,
       ),
       new NavigationIconView(
-        icon: const Icon(Icons.cloud),
+        activeIcon: const Icon(Icons.cloud),
+        icon: const Icon(Icons.cloud_queue),
         title: 'Cloud',
         color: Colors.teal,
         vsync: this,
       ),
       new NavigationIconView(
-        icon: const Icon(Icons.favorite),
+        activeIcon: const Icon(Icons.favorite),
+        icon: const Icon(Icons.favorite_border),
         title: 'Favorites',
         color: Colors.indigo,
         vsync: this,

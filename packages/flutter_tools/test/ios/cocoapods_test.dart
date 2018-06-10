@@ -17,7 +17,7 @@ import 'package:test/test.dart';
 
 import '../src/context.dart';
 
-typedef Future<ProcessResult> InvokeProcess();
+typedef InvokeProcess = Future<ProcessResult> Function();
 
 void main() {
   FileSystem fs;
@@ -142,7 +142,7 @@ void main() {
 
     testUsingContext('creates swift Podfile if swift', () {
       when(mockXcodeProjectInterpreter.isInstalled).thenReturn(true);
-      when(mockXcodeProjectInterpreter.getBuildSettings(any, any)).thenReturn(<String, String>{
+      when(mockXcodeProjectInterpreter.getBuildSettings(typed(any), typed(any))).thenReturn(<String, String>{
         'SWIFT_VERSION': '4.0',
       });
 
@@ -204,7 +204,7 @@ void main() {
         iosEngineDir: 'engine/path',
       );
       verifyNever(mockProcessManager.run(
-        argThat(containsAllInOrder(<String>['pod', 'install'])),
+      typedArgThat(containsAllInOrder(<String>['pod', 'install'])),
         workingDirectory: anyNamed('workingDirectory'),
         environment: anyNamed('environment'),
       ));
@@ -226,7 +226,7 @@ void main() {
       } catch(e) {
         expect(e, const isInstanceOf<ToolExit>());
         verifyNever(mockProcessManager.run(
-          argThat(containsAllInOrder(<String>['pod', 'install'])),
+        typedArgThat(containsAllInOrder(<String>['pod', 'install'])),
           workingDirectory: anyNamed('workingDirectory'),
           environment: anyNamed('environment'),
         ));
@@ -437,7 +437,7 @@ Note: as of CocoaPods 1.0, `pod repo update` does not happen on `pod install` by
       );
       expect(didInstall, isFalse);
       verifyNever(mockProcessManager.run(
-        argThat(containsAllInOrder(<String>['pod', 'install'])),
+      typedArgThat(containsAllInOrder(<String>['pod', 'install'])),
         workingDirectory: anyNamed('workingDirectory'),
         environment: anyNamed('environment'),
       ));

@@ -22,8 +22,8 @@ class ViewConfiguration {
   ///
   /// By default, the view has zero [size] and a [devicePixelRatio] of 1.0.
   const ViewConfiguration({
-    this.size: Size.zero,
-    this.devicePixelRatio: 1.0,
+    this.size = Size.zero,
+    this.devicePixelRatio = 1.0,
   });
 
   /// The size of the output surface.

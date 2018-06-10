@@ -490,12 +490,12 @@ void main() {
 class TestRender extends RenderProxyBox {
 
   TestRender({
-    this.hasTapAction: false,
-    this.hasLongPressAction: false,
-    this.hasScrollLeftAction: false,
-    this.hasScrollRightAction: false,
-    this.hasScrollUpAction: false,
-    this.hasScrollDownAction: false,
+    this.hasTapAction = false,
+    this.hasLongPressAction = false,
+    this.hasScrollLeftAction = false,
+    this.hasScrollRightAction = false,
+    this.hasScrollUpAction = false,
+    this.hasScrollDownAction = false,
     this.isSemanticBoundary,
     RenderObject child
   }) : super(child);

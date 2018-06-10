@@ -583,13 +583,13 @@ void main() {
 
 }
 
-Future<Null> flingUp(WidgetTester tester, { int repetitions: 1 }) => fling(tester, const Offset(0.0, -200.0), repetitions);
+Future<Null> flingUp(WidgetTester tester, { int repetitions = 1 }) => fling(tester, const Offset(0.0, -200.0), repetitions);
 
-Future<Null> flingDown(WidgetTester tester, { int repetitions: 1 }) => fling(tester, const Offset(0.0, 200.0), repetitions);
+Future<Null> flingDown(WidgetTester tester, { int repetitions = 1 }) => fling(tester, const Offset(0.0, 200.0), repetitions);
 
-Future<Null> flingRight(WidgetTester tester, { int repetitions: 1 }) => fling(tester, const Offset(200.0, 0.0), repetitions);
+Future<Null> flingRight(WidgetTester tester, { int repetitions = 1 }) => fling(tester, const Offset(200.0, 0.0), repetitions);
 
-Future<Null> flingLeft(WidgetTester tester, { int repetitions: 1 }) => fling(tester, const Offset(-200.0, 0.0), repetitions);
+Future<Null> flingLeft(WidgetTester tester, { int repetitions = 1 }) => fling(tester, const Offset(-200.0, 0.0), repetitions);
 
 Future<Null> fling(WidgetTester tester, Offset offset, int repetitions) async {
   while (repetitions-- > 0) {

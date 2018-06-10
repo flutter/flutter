@@ -160,7 +160,7 @@ class ContactsDemoState extends State<ContactsDemo> {
                   fit: StackFit.expand,
                   children: <Widget>[
                     new Image.asset(
-                      'ali_connors.jpg',
+                      'people/ali_landscape.png',
                       package: 'flutter_gallery_assets',
                       fit: BoxFit.cover,
                       height: _appBarHeight,
@@ -328,7 +328,7 @@ class ContactsDemoState extends State<ContactsDemo> {
                     new _ContactItem(
                       lines: const <String>[
                         'Last day in office',
-                        'August 9th, 2015',
+                        'August 9th, 2018',
                       ],
                     ),
                   ],

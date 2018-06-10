@@ -201,7 +201,7 @@ const Matcher isAssertionError = const isInstanceOf<AssertionError>();
 ///    required and not named.
 ///  * [inInclusiveRange], which matches if the argument is in a specified
 ///    range.
-Matcher moreOrLessEquals(double value, { double epsilon: 1e-10 }) {
+Matcher moreOrLessEquals(double value, { double epsilon = 1e-10 }) {
   return new _MoreOrLessEquals(value, epsilon);
 }
 
@@ -636,7 +636,7 @@ class _HasGoodToStringDeep extends Matcher {
 ///
 /// This makes it useful for comparing numbers, [Color]s, [Offset]s and other
 /// sets of value for which a metric space is defined.
-typedef num DistanceFunction<T>(T a, T b);
+typedef DistanceFunction<T> = num Function(T a, T b);
 
 /// The type of a union of instances of [DistanceFunction<T>] for various types
 /// T.
@@ -649,7 +649,7 @@ typedef num DistanceFunction<T>(T a, T b);
 ///
 /// Calling an instance of this type must either be done dynamically, or by
 /// first casting it to a [DistanceFunction<T>] for some concrete T.
-typedef num AnyDistanceFunction(Null a, Null b);
+typedef AnyDistanceFunction = num Function(Null a, Null b);
 
 const Map<Type, AnyDistanceFunction> _kStandardDistanceFunctions = const <Type, AnyDistanceFunction>{
   Color: _maxComponentColorDistance,
@@ -1248,7 +1248,10 @@ class _MatchesGoldenFile extends AsyncMatcher {
     final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized();
     return binding.runAsync<String>(() async {
       final ui.Image image = await imageFuture;
-      final ByteData bytes = await image.toByteData(format: ui.ImageByteFormat.png);
+      final ByteData bytes = await image.toByteData(format: ui.ImageByteFormat.png)
+        .timeout(const Duration(seconds: 10), onTimeout: () => null);
+      if (bytes == null)
+        return 'Failed to generate screenshot from engine within the 10,000ms timeout.';
       if (autoUpdateGoldenFiles) {
         await goldenFileComparator.update(key, bytes.buffer.asUint8List());
       } else {
@@ -1259,7 +1262,7 @@ class _MatchesGoldenFile extends AsyncMatcher {
           return ex.message;
         }
       }
-    });
+    }, additionalTime: const Duration(seconds: 11));
   }
 
   @override

@@ -92,7 +92,7 @@ class TimelineSummary {
   Future<Null> writeTimelineToFile(
     String traceName, {
     String destinationDirectory,
-    bool pretty: false,
+    bool pretty = false,
   }) async {
     destinationDirectory ??= testOutputsDirectory;
     await fs.directory(destinationDirectory).create(recursive: true);
@@ -104,7 +104,7 @@ class TimelineSummary {
   Future<Null> writeSummaryToFile(
     String traceName, {
     String destinationDirectory,
-    bool pretty: false,
+    bool pretty = false,
   }) async {
     destinationDirectory ??= testOutputsDirectory;
     await fs.directory(destinationDirectory).create(recursive: true);

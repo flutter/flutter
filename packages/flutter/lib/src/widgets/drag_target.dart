@@ -14,12 +14,12 @@ import 'overlay.dart';
 /// Signature for determining whether the given data will be accepted by a [DragTarget].
 ///
 /// Used by [DragTarget.onWillAccept].
-typedef bool DragTargetWillAccept<T>(T data);
+typedef DragTargetWillAccept<T> = bool Function(T data);
 
 /// Signature for causing a [DragTarget] to accept the given data.
 ///
 /// Used by [DragTarget.onAccept].
-typedef void DragTargetAccept<T>(T data);
+typedef DragTargetAccept<T> = void Function(T data);
 
 /// Signature for building children of a [DragTarget].
 ///
@@ -29,17 +29,17 @@ typedef void DragTargetAccept<T>(T data);
 /// this [DragTarget] and that will not be accepted by the [DragTarget].
 ///
 /// Used by [DragTarget.builder].
-typedef Widget DragTargetBuilder<T>(BuildContext context, List<T> candidateData, List<dynamic> rejectedData);
+typedef DragTargetBuilder<T> = Widget Function(BuildContext context, List<T> candidateData, List<dynamic> rejectedData);
 
 /// Signature for when a [Draggable] is dropped without being accepted by a [DragTarget].
 ///
 /// Used by [Draggable.onDraggableCanceled].
-typedef void DraggableCanceledCallback(Velocity velocity, Offset offset);
+typedef DraggableCanceledCallback = void Function(Velocity velocity, Offset offset);
 
 /// Signature for when a [Draggable] leaves a [DragTarget].
 ///
 /// Used by [DragTarget.onLeave].
-typedef void DragTargetLeave<T>(T data);
+typedef DragTargetLeave<T> = void Function(T data);
 
 /// Where the [Draggable] should be anchored during a drag.
 enum DragAnchor {
@@ -94,8 +94,8 @@ class Draggable<T> extends StatefulWidget {
     this.data,
     this.axis,
     this.childWhenDragging,
-    this.feedbackOffset: Offset.zero,
-    this.dragAnchor: DragAnchor.child,
+    this.feedbackOffset = Offset.zero,
+    this.dragAnchor = DragAnchor.child,
     this.affinity,
     this.maxSimultaneousDrags,
     this.onDragStarted,
@@ -248,8 +248,8 @@ class LongPressDraggable<T> extends Draggable<T> {
     T data,
     Axis axis,
     Widget childWhenDragging,
-    Offset feedbackOffset: Offset.zero,
-    DragAnchor dragAnchor: DragAnchor.child,
+    Offset feedbackOffset = Offset.zero,
+    DragAnchor dragAnchor = DragAnchor.child,
     int maxSimultaneousDrags,
     VoidCallback onDragStarted,
     DraggableCanceledCallback onDraggableCanceled,
@@ -481,7 +481,7 @@ class _DragTargetState<T> extends State<DragTarget<T>> {
 }
 
 enum _DragEndKind { dropped, canceled }
-typedef void _OnDragEnd(Velocity velocity, Offset offset, bool wasAccepted);
+typedef _OnDragEnd = void Function(Velocity velocity, Offset offset, bool wasAccepted);
 
 // The lifetime of this object is a little dubious right now. Specifically, it
 // lives as long as the pointer is down. Arguably it should self-immolate if the
@@ -493,9 +493,9 @@ class _DragAvatar<T> extends Drag {
     this.data,
     this.axis,
     Offset initialPosition,
-    this.dragStartPoint: Offset.zero,
+    this.dragStartPoint = Offset.zero,
     this.feedback,
-    this.feedbackOffset: Offset.zero,
+    this.feedbackOffset = Offset.zero,
     this.onDragEnd
   }) : assert(overlayState != null),
        assert(dragStartPoint != null),

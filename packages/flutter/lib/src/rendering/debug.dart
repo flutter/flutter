@@ -162,7 +162,7 @@ void _debugDrawDoubleRect(Canvas canvas, Rect outerRect, Rect innerRect, Color c
 ///
 /// Called by [RenderPadding.debugPaintSize] when [debugPaintSizeEnabled] is
 /// true.
-void debugPaintPadding(Canvas canvas, Rect outerRect, Rect innerRect, { double outlineWidth: 2.0 }) {
+void debugPaintPadding(Canvas canvas, Rect outerRect, Rect innerRect, { double outlineWidth = 2.0 }) {
   assert(() {
     if (innerRect != null && !innerRect.isEmpty) {
       _debugDrawDoubleRect(canvas, outerRect, innerRect, const Color(0x900090FF));
@@ -187,7 +187,7 @@ void debugPaintPadding(Canvas canvas, Rect outerRect, Rect innerRect, { double o
 /// The `debugCheckIntrinsicSizesOverride` argument can be provided to override
 /// the expected value for [debugCheckIntrinsicSizes]. (This exists because the
 /// test framework itself overrides this value in some cases.)
-bool debugAssertAllRenderVarsUnset(String reason, { bool debugCheckIntrinsicSizesOverride: false }) {
+bool debugAssertAllRenderVarsUnset(String reason, { bool debugCheckIntrinsicSizesOverride = false }) {
   assert(() {
     if (debugPaintSizeEnabled ||
         debugPaintBaselinesEnabled ||

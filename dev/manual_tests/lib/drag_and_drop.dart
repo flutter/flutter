@@ -42,7 +42,7 @@ class ExampleDragTargetState extends State<ExampleDragTarget> {
 }
 
 class Dot extends StatefulWidget {
-  const Dot({ Key key, this.color, this.size, this.child, this.tappable: false }) : super(key: key);
+  const Dot({ Key key, this.color, this.size, this.child, this.tappable = false }) : super(key: key);
 
   final Color color;
   final double size;
@@ -77,8 +77,8 @@ class ExampleDragSource extends StatelessWidget {
   const ExampleDragSource({
     Key key,
     this.color,
-    this.heavy: false,
-    this.under: true,
+    this.heavy = false,
+    this.under = true,
     this.child
   }) : super(key: key);
 
