@@ -313,7 +313,7 @@ List<Directory> findPackages() {
 /// Returns import or on-disk paths for all libraries in the Flutter SDK.
 ///
 /// diskPath toggles between import paths vs. disk paths.
-Iterable<String> libraryRefs({ bool diskPath: false }) sync* {
+Iterable<String> libraryRefs({ bool diskPath = false }) sync* {
   for (Directory dir in findPackages()) {
     final String dirName = path.basename(dir.path);
     for (FileSystemEntity file in new Directory('${dir.path}/lib').listSync()) {
@@ -336,7 +336,7 @@ Iterable<String> libraryRefs({ bool diskPath: false }) sync* {
   }
 }
 
-void printStream(Stream<List<int>> stream, { String prefix: '', List<Pattern> filter: const <Pattern>[] }) {
+void printStream(Stream<List<int>> stream, { String prefix = '', List<Pattern> filter = const <Pattern>[] }) {
   assert(prefix != null);
   assert(filter != null);
   stream

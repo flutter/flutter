@@ -26,8 +26,9 @@ import 'theme.dart';
 /// to the empty string. When `query` is set to null, `delegate.query` will
 /// be used as the initial query.
 ///
-/// The method returns the selected search result, which can be set in the
-/// [SearchDelegate.close] call.
+/// This method returns the selected search result, which can be set in the
+/// [SearchDelegate.close] call. If the search page is closed with the system
+/// back button, it returns null.
 ///
 /// A given [SearchDelegate] can only be associated with one active [showSearch]
 /// call. Call [SearchDelegate.close] before re-using the same delegate instance
@@ -48,18 +49,15 @@ import 'theme.dart';
 Future<T> showSearch<T>({
   @required BuildContext context,
   @required SearchDelegate<T> delegate,
-  String query: '',
+  String query = '',
 }) {
   assert(delegate != null);
   assert(context != null);
-  assert(delegate._result == null || delegate._result.isCompleted);
-  delegate._result = new Completer<T>();
   delegate.query = query ?? delegate.query;
   delegate._currentBody = _SearchBody.suggestions;
-  Navigator.of(context).push(new _SearchPageRoute<T>(
+  return Navigator.of(context).push(new _SearchPageRoute<T>(
     delegate: delegate,
   ));
-  return delegate._result.future;
 }
 
 /// Delegate for [showSearch] to define the content of the search page.
@@ -215,7 +213,6 @@ abstract class SearchDelegate<T> {
   void close(BuildContext context, T result) {
     _currentBody = null;
     _focusNode.unfocus();
-    _result.complete(result);
     Navigator.of(context)
       ..popUntil((Route<dynamic> route) => route == _route)
       ..pop(result);
@@ -242,8 +239,6 @@ abstract class SearchDelegate<T> {
     _currentBodyNotifier.value = value;
   }
 
-  Completer<T> _result;
-
   _SearchPageRoute<T> _route;
 
 }
@@ -263,7 +258,7 @@ enum _SearchBody {
 }
 
 
-class _SearchPageRoute<T> extends PageRoute<void> {
+class _SearchPageRoute<T> extends PageRoute<T> {
   _SearchPageRoute({
     @required this.delegate,
   }) : assert(delegate != null) {
@@ -323,10 +318,11 @@ class _SearchPageRoute<T> extends PageRoute<void> {
   }
 
   @override
-  void didComplete(void result) {
+  void didComplete(T result) {
     super.didComplete(result);
     assert(delegate._route == this);
     delegate._route = null;
+    delegate._currentBody = null;
   }
 }
 

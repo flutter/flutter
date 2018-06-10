@@ -64,16 +64,15 @@ final Map<InternetAddressType, InternetAddress> _kHosts = <InternetAddressType, 
 void installHook({
   @required String shellPath,
   TestWatcher watcher,
-  bool enableObservatory: false,
-  bool machine: false,
-  bool startPaused: false,
-  bool previewDart2: false,
-  int port: 0,
+  bool enableObservatory = false,
+  bool machine = false,
+  bool startPaused = false,
+  int port = 0,
   String precompiledDillPath,
-  bool trackWidgetCreation: false,
-  bool updateGoldens: false,
+  bool trackWidgetCreation = false,
+  bool updateGoldens = false,
   int observatoryPort,
-  InternetAddressType serverType: InternetAddressType.IP_V4, // ignore: deprecated_member_use
+  InternetAddressType serverType = InternetAddressType.IP_V4, // ignore: deprecated_member_use
 }) {
   assert(!enableObservatory || (!startPaused && observatoryPort == null));
   hack.registerPlatformPlugin(
@@ -86,7 +85,6 @@ void installHook({
       startPaused: startPaused,
       explicitObservatoryPort: observatoryPort,
       host: _kHosts[serverType],
-      previewDart2: previewDart2,
       port: port,
       precompiledDillPath: precompiledDillPath,
       trackWidgetCreation: trackWidgetCreation,
@@ -114,7 +112,7 @@ String generateTestBootstrap({
   @required Uri testUrl,
   @required InternetAddress host,
   File testConfigFile,
-  bool updateGoldens: false,
+  bool updateGoldens = false,
 }) {
   assert(testUrl != null);
   assert(host != null);
@@ -306,7 +304,6 @@ class _FlutterPlatform extends PlatformPlugin {
     this.startPaused,
     this.explicitObservatoryPort,
     this.host,
-    this.previewDart2,
     this.port,
     this.precompiledDillPath,
     this.trackWidgetCreation,
@@ -320,7 +317,6 @@ class _FlutterPlatform extends PlatformPlugin {
   final bool startPaused;
   final int explicitObservatoryPort;
   final InternetAddress host;
-  final bool previewDart2;
   final int port;
   final String precompiledDillPath;
   final bool trackWidgetCreation;
@@ -408,17 +404,15 @@ class _FlutterPlatform extends PlatformPlugin {
         cancelOnError: true,
       );
 
-      printTrace('test $ourTestCount: starting shell process${previewDart2? " in preview-dart-2 mode":""}');
+      printTrace('test $ourTestCount: starting shell process');
 
-      // [precompiledDillPath] can be set only if [previewDart2] is [true].
-      assert(precompiledDillPath == null || previewDart2);
       // If a kernel file is given, then use that to launch the test.
       // Otherwise create a "listener" dart that invokes actual test.
       String mainDart = precompiledDillPath != null
           ? precompiledDillPath
           : _createListenerDart(finalizers, ourTestCount, testPath, server);
 
-      if (previewDart2 && precompiledDillPath == null) {
+      if (precompiledDillPath == null) {
         // Lazily instantiate compiler so it is built only if it is actually used.
         compiler ??= new _Compiler(trackWidgetCreation);
         mainDart = await compiler.compile(mainDart);
@@ -675,10 +669,6 @@ class _FlutterPlatform extends PlatformPlugin {
   }
 
   String _getBundlePath(List<_Finalizer> finalizers, int ourTestCount) {
-    if (!previewDart2) {
-      return null;
-    }
-
     if (precompiledDillPath != null) {
       return artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath);
     }
@@ -771,8 +761,8 @@ class _FlutterPlatform extends PlatformPlugin {
     String testPath, {
     String packages,
     String bundlePath,
-    bool enableObservatory: false,
-    bool startPaused: false,
+    bool enableObservatory = false,
+    bool startPaused = false,
     int observatoryPort,
     int serverPort,
   }) {

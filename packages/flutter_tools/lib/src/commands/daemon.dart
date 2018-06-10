@@ -37,7 +37,7 @@ const String protocolVersion = '0.3.0';
 /// It can be shutdown with a `daemon.shutdown` command (or by killing the
 /// process).
 class DaemonCommand extends FlutterCommand {
-  DaemonCommand({ this.hidden: false });
+  DaemonCommand({ this.hidden = false });
 
   @override
   final String name = 'daemon';
@@ -83,7 +83,7 @@ class Daemon {
     this.sendCommand, {
     this.daemonCommand,
     this.notifyingLogger,
-    this.logToStdout: false
+    this.logToStdout = false
   }) {
     // Set up domains.
     _registerDomain(daemonDomain = new DaemonDomain(this));
@@ -204,7 +204,7 @@ abstract class Domain {
 
   void _send(Map<String, dynamic> map) => daemon._send(map);
 
-  String _getStringArg(Map<String, dynamic> args, String name, { bool required: false }) {
+  String _getStringArg(Map<String, dynamic> args, String name, { bool required = false }) {
     if (required && !args.containsKey(name))
       throw '$name is required';
     final dynamic val = args[name];
@@ -213,7 +213,7 @@ abstract class Domain {
     return val;
   }
 
-  bool _getBoolArg(Map<String, dynamic> args, String name, { bool required: false }) {
+  bool _getBoolArg(Map<String, dynamic> args, String name, { bool required = false }) {
     if (required && !args.containsKey(name))
       throw '$name is required';
     final dynamic val = args[name];
@@ -222,7 +222,7 @@ abstract class Domain {
     return val;
   }
 
-  int _getIntArg(Map<String, dynamic> args, String name, { bool required: false }) {
+  int _getIntArg(Map<String, dynamic> args, String name, { bool required = false }) {
     if (required && !args.containsKey(name))
       throw '$name is required';
     final dynamic val = args[name];
@@ -334,7 +334,6 @@ class AppDomain extends Domain {
     final BuildInfo buildInfo = new BuildInfo(
       getBuildModeForName(mode) ?? BuildMode.debug,
       flavor,
-      previewDart2: _getBoolArg(args, 'preview-dart-2'),
     );
     DebuggingOptions options;
     if (buildInfo.isRelease) {
@@ -373,7 +372,7 @@ class AppDomain extends Domain {
     String projectRootPath,
     String packagesFilePath,
     String dillOutputPath,
-    bool ipv6: false,
+    bool ipv6 = false,
   }) async {
     if (await device.isLocalEmulator && !options.buildInfo.supportsEmulator) {
       throw '${toTitleCase(options.buildInfo.modeName)} mode is not supported for emulators.';
@@ -385,7 +384,6 @@ class AppDomain extends Domain {
 
     final FlutterDevice flutterDevice = new FlutterDevice(
       device,
-      previewDart2: options.buildInfo.previewDart2,
       trackWidgetCreation: trackWidgetCreation,
       dillOutputPath: dillOutputPath,
     );
@@ -777,14 +775,14 @@ class NotifyingLogger extends Logger {
   Stream<LogMessage> get onMessage => _messageController.stream;
 
   @override
-  void printError(String message, { StackTrace stackTrace, bool emphasis: false }) {
+  void printError(String message, { StackTrace stackTrace, bool emphasis = false }) {
     _messageController.add(new LogMessage('error', message, stackTrace));
   }
 
   @override
   void printStatus(
     String message,
-    { bool emphasis: false, bool newline: true, String ansiAlternative, int indent }
+    { bool emphasis = false, bool newline = true, String ansiAlternative, int indent }
   ) {
     _messageController.add(new LogMessage('status', message));
   }
@@ -798,8 +796,8 @@ class NotifyingLogger extends Logger {
   Status startProgress(
     String message, {
     String progressId,
-    bool expectSlowOperation: false,
-    int progressIndicatorPadding: kDefaultStatusPadding,
+    bool expectSlowOperation = false,
+    int progressIndicatorPadding = kDefaultStatusPadding,
   }) {
     printStatus(message);
     return new Status();
@@ -820,7 +818,7 @@ class AppInstance {
 
   _AppRunLogger _logger;
 
-  Future<OperationResult> restart({ bool fullRestart: false, bool pauseAfterRestart: false }) {
+  Future<OperationResult> restart({ bool fullRestart = false, bool pauseAfterRestart = false }) {
     return runner.restart(fullRestart: fullRestart, pauseAfterRestart: pauseAfterRestart);
   }
 
@@ -887,7 +885,7 @@ class _AppRunLogger extends Logger {
   int _nextProgressId = 0;
 
   @override
-  void printError(String message, { StackTrace stackTrace, bool emphasis: false }) {
+  void printError(String message, { StackTrace stackTrace, bool emphasis = false }) {
     if (parent != null) {
       parent.printError(message, stackTrace: stackTrace, emphasis: emphasis);
     } else {
@@ -909,7 +907,7 @@ class _AppRunLogger extends Logger {
   @override
   void printStatus(
     String message, {
-    bool emphasis: false, bool newline: true, String ansiAlternative, int indent
+    bool emphasis = false, bool newline = true, String ansiAlternative, int indent
   }) {
     if (parent != null) {
       parent.printStatus(message, emphasis: emphasis, newline: newline,
@@ -934,8 +932,8 @@ class _AppRunLogger extends Logger {
   Status startProgress(
     String message, {
     String progressId,
-    bool expectSlowOperation: false,
-    int progressIndicatorPadding: 52,
+    bool expectSlowOperation = false,
+    int progressIndicatorPadding = 52,
   }) {
     // Ignore nested progresses; return a no-op status object.
     if (_status != null)

@@ -25,67 +25,67 @@ class _CardData {
 }
 
 final Map<_Page, List<_CardData>> _allPages = <_Page, List<_CardData>>{
-  new _Page(label: 'LEFT'): <_CardData>[
+  new _Page(label: 'HOME'): <_CardData>[
     const _CardData(
-      title: 'Vintage Bluetooth Radio',
-      imageAsset: 'shrine/products/radio.png',
+      title: 'Flatwear',
+      imageAsset: 'products/flatwear.png',
       imageAssetPackage: _kGalleryAssetsPackage,
     ),
     const _CardData(
-      title: 'Sunglasses',
-      imageAsset: 'shrine/products/sunnies.png',
+      title: 'Pine Table',
+      imageAsset: 'products/table.png',
       imageAssetPackage: _kGalleryAssetsPackage,
     ),
     const _CardData(
-      title: 'Clock',
-      imageAsset: 'shrine/products/clock.png',
+      title: 'Blue Cup',
+      imageAsset: 'products/cup.png',
       imageAssetPackage: _kGalleryAssetsPackage,
     ),
     const _CardData(
-      title: 'Red popsicle',
-      imageAsset: 'shrine/products/popsicle.png',
+      title: 'Tea Set',
+      imageAsset: 'products/teaset.png',
       imageAssetPackage: _kGalleryAssetsPackage,
     ),
     const _CardData(
-      title: 'Folding Chair',
-      imageAsset: 'shrine/products/lawn_chair.png',
+      title: 'Desk Set',
+      imageAsset: 'products/deskset.png',
       imageAssetPackage: _kGalleryAssetsPackage,
     ),
     const _CardData(
-      title: 'Green comfort chair',
-      imageAsset: 'shrine/products/chair.png',
+      title: 'Blue Linen Napkins',
+      imageAsset: 'products/napkins.png',
       imageAssetPackage: _kGalleryAssetsPackage,
     ),
     const _CardData(
-      title: 'Old Binoculars',
-      imageAsset: 'shrine/products/binoculars.png',
+      title: 'Planters',
+      imageAsset: 'products/planters.png',
       imageAssetPackage: _kGalleryAssetsPackage,
     ),
     const _CardData(
-      title: 'Teapot',
-      imageAsset: 'shrine/products/teapot.png',
+      title: 'Kitchen Quattro',
+      imageAsset: 'products/kitchen_quattro.png',
       imageAssetPackage: _kGalleryAssetsPackage,
     ),
     const _CardData(
-      title: 'Blue suede shoes',
-      imageAsset: 'shrine/products/chucks.png',
+      title: 'Platter',
+      imageAsset: 'products/platter.png',
       imageAssetPackage: _kGalleryAssetsPackage,
     ),
   ],
-  new _Page(label: 'RIGHT'): <_CardData>[
+  new _Page(label: 'APPAREL'): <_CardData>[
     const _CardData(
-      title: 'Beachball',
-      imageAsset: 'shrine/products/beachball.png',
+      title: 'Cloud-White Dress',
+      imageAsset: 'products/dress.png',
       imageAssetPackage: _kGalleryAssetsPackage,
     ),
     const _CardData(
-      title: 'Dipped Brush',
-      imageAsset: 'shrine/products/brush.png',
+      title: 'Ginger Scarf',
+      imageAsset: 'products/scarf.png',
       imageAssetPackage: _kGalleryAssetsPackage,
     ),
     const _CardData(
-      title: 'Perfect Goldfish Bowl',
-      imageAsset: 'shrine/products/fish_bowl.png',
+      title: 'Blush Sweats',
+      imageAsset: 'products/sweats.png',
       imageAssetPackage: _kGalleryAssetsPackage,
     ),
   ],
@@ -108,7 +108,7 @@ class _CardDataItem extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.start,
           children: <Widget>[
             new Align(
-              alignment: page.id == 'L'
+              alignment: page.id == 'H'
                 ? Alignment.centerLeft
                 : Alignment.centerRight,
               child: new CircleAvatar(child: new Text('${page.id}')),

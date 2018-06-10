@@ -14,7 +14,7 @@ List<int> dismissedItems = <int>[];
 Widget background;
 const double crossAxisEndOffset = 0.5;
 
-Widget buildTest({ double startToEndThreshold, TextDirection textDirection: TextDirection.ltr }) {
+Widget buildTest({ double startToEndThreshold, TextDirection textDirection = TextDirection.ltr }) {
   return new Directionality(
     textDirection: textDirection,
     child: new StatefulBuilder(
@@ -98,7 +98,7 @@ Future<Null> dismissElement(WidgetTester tester, Finder finder, { @required Axis
   await gesture.up();
 }
 
-Future<Null> flingElement(WidgetTester tester, Finder finder, { @required AxisDirection gestureDirection, double initialOffsetFactor: 0.0 }) async {
+Future<Null> flingElement(WidgetTester tester, Finder finder, { @required AxisDirection gestureDirection, double initialOffsetFactor = 0.0 }) async {
   Offset delta;
   switch (gestureDirection) {
     case AxisDirection.left:
@@ -129,7 +129,7 @@ Future<Null> flingElementFromZero(WidgetTester tester, Finder finder, { @require
 
 Future<Null> dismissItem(WidgetTester tester, int item, {
   @required AxisDirection gestureDirection,
-  DismissMethod mechanism: dismissElement,
+  DismissMethod mechanism = dismissElement,
 }) async {
   assert(gestureDirection != null);
   final Finder itemFinder = find.text(item.toString());
@@ -146,7 +146,7 @@ Future<Null> dismissItem(WidgetTester tester, int item, {
 
 Future<Null> checkFlingItemBeforeMovementEnd(WidgetTester tester, int item, {
   @required AxisDirection gestureDirection,
-  DismissMethod mechanism: rollbackElement
+  DismissMethod mechanism = rollbackElement
 }) async {
   assert(gestureDirection != null);
   final Finder itemFinder = find.text(item.toString());
@@ -160,7 +160,7 @@ Future<Null> checkFlingItemBeforeMovementEnd(WidgetTester tester, int item, {
 
 Future<Null> checkFlingItemAfterMovement(WidgetTester tester, int item, {
   @required AxisDirection gestureDirection,
-  DismissMethod mechanism: rollbackElement
+  DismissMethod mechanism = rollbackElement
 }) async {
   assert(gestureDirection != null);
   final Finder itemFinder = find.text(item.toString());
@@ -172,7 +172,7 @@ Future<Null> checkFlingItemAfterMovement(WidgetTester tester, int item, {
   await tester.pump(const Duration(milliseconds: 300));
 }
 
-Future<Null> rollbackElement(WidgetTester tester, Finder finder, { @required AxisDirection gestureDirection, double initialOffsetFactor: 0.0 }) async {
+Future<Null> rollbackElement(WidgetTester tester, Finder finder, { @required AxisDirection gestureDirection, double initialOffsetFactor = 0.0 }) async {
   Offset delta;
   switch (gestureDirection) {
     case AxisDirection.left:

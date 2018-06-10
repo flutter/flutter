@@ -38,10 +38,10 @@ class MockApplicationPackageStore extends ApplicationPackageStore {
 /// An SDK installation with several SDK levels (19, 22, 23).
 class MockAndroidSdk extends Mock implements AndroidSdk {
   static Directory createSdkDirectory({
-    bool withAndroidN: false,
+    bool withAndroidN = false,
     String withNdkDir,
-    bool withNdkSysroot: false,
-    bool withSdkManager: true,
+    bool withNdkSysroot = false,
+    bool withSdkManager = true,
   }) {
     final Directory dir = fs.systemTempDirectory.createTempSync('android-sdk');
 
@@ -120,9 +120,9 @@ class MockProcessManager implements ProcessManager {
     List<dynamic> command, {
     String workingDirectory,
     Map<String, String> environment,
-    bool includeParentEnvironment: true,
-    bool runInShell: false,
-    ProcessStartMode mode: ProcessStartMode.NORMAL, // ignore: deprecated_member_use
+    bool includeParentEnvironment = true,
+    bool runInShell = false,
+    ProcessStartMode mode = ProcessStartMode.NORMAL, // ignore: deprecated_member_use
   }) {
     if (!succeed) {
       final String executable = command[0];
@@ -141,11 +141,11 @@ class MockProcessManager implements ProcessManager {
 /// A process that exits successfully with no output and ignores all input.
 class MockProcess extends Mock implements Process {
   MockProcess({
-    this.pid: 1,
+    this.pid = 1,
     Future<int> exitCode,
     Stream<List<int>> stdin,
-    this.stdout: const Stream<List<int>>.empty(),
-    this.stderr: const Stream<List<int>>.empty(),
+    this.stdout = const Stream<List<int>>.empty(),
+    this.stderr = const Stream<List<int>>.empty(),
   }) : exitCode = exitCode ?? new Future<int>.value(0),
        stdin = stdin ?? new MemoryIOSink();
 

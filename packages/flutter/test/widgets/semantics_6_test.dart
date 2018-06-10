@@ -49,7 +49,7 @@ void main() {
   });
 }
 
-Widget buildWidget({ @required String blockedText, bool blocking: true }) {
+Widget buildWidget({ @required String blockedText, bool blocking = true }) {
   assert(blockedText != null);
   return new Directionality(
     textDirection: TextDirection.ltr,

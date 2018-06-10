@@ -5,6 +5,7 @@
 import 'dart:async';
 import 'dart:math' as math;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart' show timeDilation;
@@ -17,7 +18,15 @@ import 'slider_theme.dart';
 import 'theme.dart';
 
 // Examples can assume:
+// int _dollars = 0;
 // int _duelCommandment = 1;
+
+/// A callback that formats a numeric value from a [Slider] widget.
+///
+/// See also:
+///
+///   * [Slider.semanticFormatterCallback], which shows an example use case.
+typedef String SemanticFormatterCallback(double value);
 
 /// A Material Design slider.
 ///
@@ -103,12 +112,13 @@ class Slider extends StatefulWidget {
     @required this.onChanged,
     this.onChangeStart,
     this.onChangeEnd,
-    this.min: 0.0,
-    this.max: 1.0,
+    this.min = 0.0,
+    this.max = 1.0,
     this.divisions,
     this.label,
     this.activeColor,
     this.inactiveColor,
+    this.semanticFormatterCallback,
   }) : assert(value != null),
        assert(min != null),
        assert(max != null),
@@ -287,6 +297,36 @@ class Slider extends StatefulWidget {
   /// appearance of various components of the slider.
   final Color inactiveColor;
 
+  /// The callback used to create a semantic value from a slider value.
+  ///
+  /// Defaults to formatting values as a percentage.
+  ///
+  /// This is used by accessibility frameworks like TalkBack on Android to
+  /// inform users what the currently selected value is with more context.
+  ///
+  /// ## Sample code:
+  ///
+  /// In the example below, a slider for currency values is configured to
+  /// announce a value with a currency label.
+  ///
+  /// ```dart
+  /// new Slider(
+  ///   value: _dollars.toDouble(),
+  ///   min: 20.0,
+  ///   max: 330.0,
+  ///   label: '$_dollars dollars',
+  ///   onChanged: (double newValue) {
+  ///     setState(() {
+  ///       _dollars = newValue.round();
+  ///     });
+  ///   },
+  ///   semanticFormatterCallback: (double newValue) {
+  ///     return '${newValue.round()} dollars';
+  ///   }
+  ///  )
+  /// ```
+  final SemanticFormatterCallback semanticFormatterCallback;
+
   @override
   _SliderState createState() => new _SliderState();
 
@@ -414,6 +454,7 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
       onChangeStart: widget.onChangeStart != null ? _handleDragStart : null,
       onChangeEnd: widget.onChangeEnd != null ? _handleDragEnd : null,
       state: this,
+      semanticFormatterCallback: widget.semanticFormatterCallback,
     );
   }
 }
@@ -430,6 +471,7 @@ class _SliderRenderObjectWidget extends LeafRenderObjectWidget {
     this.onChangeStart,
     this.onChangeEnd,
     this.state,
+    this.semanticFormatterCallback,
   }) : super(key: key);
 
   final double value;
@@ -440,6 +482,7 @@ class _SliderRenderObjectWidget extends LeafRenderObjectWidget {
   final ValueChanged<double> onChanged;
   final ValueChanged<double> onChangeStart;
   final ValueChanged<double> onChangeEnd;
+  final SemanticFormatterCallback semanticFormatterCallback;
   final _SliderState state;
 
   @override
@@ -456,6 +499,8 @@ class _SliderRenderObjectWidget extends LeafRenderObjectWidget {
       onChangeEnd: onChangeEnd,
       state: state,
       textDirection: Directionality.of(context),
+      semanticFormatterCallback: semanticFormatterCallback,
+      platform: Theme.of(context).platform,
     );
   }
 
@@ -471,7 +516,9 @@ class _SliderRenderObjectWidget extends LeafRenderObjectWidget {
       ..onChanged = onChanged
       ..onChangeStart = onChangeStart
       ..onChangeEnd = onChangeEnd
-      ..textDirection = Directionality.of(context);
+      ..textDirection = Directionality.of(context)
+      ..semanticFormatterCallback = semanticFormatterCallback
+      ..platform = Theme.of(context).platform;
     // Ticker provider cannot change since there's a 1:1 relationship between
     // the _SliderRenderObjectWidget object and the _SliderState object.
   }
@@ -485,7 +532,9 @@ class _RenderSlider extends RenderBox {
     SliderThemeData sliderTheme,
     ThemeData theme,
     MediaQueryData mediaQueryData,
+    TargetPlatform platform,
     ValueChanged<double> onChanged,
+    SemanticFormatterCallback semanticFormatterCallback,
     this.onChangeStart,
     this.onChangeEnd,
     @required _SliderState state,
@@ -493,6 +542,8 @@ class _RenderSlider extends RenderBox {
   }) : assert(value != null && value >= 0.0 && value <= 1.0),
        assert(state != null),
        assert(textDirection != null),
+       _platform = platform,
+       _semanticFormatterCallback = semanticFormatterCallback,
        _label = label,
        _value = value,
        _divisions = divisions,
@@ -536,7 +587,6 @@ class _RenderSlider extends RenderBox {
   static const double _preferredTrackWidth = 144.0;
   static const double _preferredTotalWidth = _preferredTrackWidth + _overlayDiameter;
   static const Duration _minimumInteractionTime = const Duration(milliseconds: 500);
-  static const double _adjustmentUnit = 0.1; // Matches iOS implementation of material slider.
   static final Tween<double> _overlayRadiusTween = new Tween<double>(begin: 0.0, end: _overlayRadius);
 
   _SliderState _state;
@@ -577,6 +627,25 @@ class _RenderSlider extends RenderBox {
     } else {
       _state.positionController.value = convertedValue;
     }
+    markNeedsSemanticsUpdate();
+  }
+
+  TargetPlatform _platform;
+  TargetPlatform get platform => _platform;
+  set platform(TargetPlatform value) {
+    if (_platform == value)
+      return;
+    _platform = value;
+    markNeedsSemanticsUpdate();
+  }
+
+  SemanticFormatterCallback _semanticFormatterCallback;
+  SemanticFormatterCallback get semanticFormatterCallback => _semanticFormatterCallback;
+  set semanticFormatterCallback(SemanticFormatterCallback value) {
+    if (_semanticFormatterCallback == value)
+      return;
+    _semanticFormatterCallback = value;
+    markNeedsSemanticsUpdate();
   }
 
   int get divisions => _divisions;
@@ -681,6 +750,19 @@ class _RenderSlider extends RenderBox {
         break;
     }
     return showValueIndicator;
+  }
+
+  double get _adjustmentUnit {
+    switch (_platform) {
+      case TargetPlatform.iOS:
+      // Matches iOS implementation of material slider.
+        return 0.1;
+      case TargetPlatform.android:
+      case TargetPlatform.fuchsia:
+      default:
+      // Matches Android implementation of material slider.
+        return 0.05;
+    }
   }
 
   void _updateLabelPainter() {
@@ -1002,8 +1084,18 @@ class _RenderSlider extends RenderBox {
 
     config.isSemanticBoundary = isInteractive;
     if (isInteractive) {
+      config.textDirection = textDirection;
       config.onIncrease = _increaseAction;
       config.onDecrease = _decreaseAction;
+      if (semanticFormatterCallback != null) {
+        config.value = semanticFormatterCallback(_state._lerp(value));
+        config.increasedValue = semanticFormatterCallback(_state._lerp((value + _semanticActionUnit).clamp(0.0, 1.0)));
+        config.decreasedValue = semanticFormatterCallback(_state._lerp((value - _semanticActionUnit).clamp(0.0, 1.0)));
+      } else {
+        config.value = '${(value * 100).round()}%';
+        config.increasedValue = '${((value + _semanticActionUnit).clamp(0.0, 1.0) * 100).round()}%';
+        config.decreasedValue = '${((value - _semanticActionUnit).clamp(0.0, 1.0) * 100).round()}%';
+      }
     }
   }
 

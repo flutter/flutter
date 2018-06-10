@@ -12,7 +12,7 @@ import 'gradle.dart';
 
 Future<Null> buildApk({
   String target,
-  BuildInfo buildInfo: BuildInfo.debug
+  BuildInfo buildInfo = BuildInfo.debug
 }) async {
   if (!isProjectUsingGradle()) {
     throwToolExit(

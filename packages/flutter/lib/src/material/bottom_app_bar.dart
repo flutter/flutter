@@ -45,8 +45,8 @@ class BottomAppBar extends StatefulWidget {
   const BottomAppBar({
     Key key,
     this.color,
-    this.elevation: 8.0,
-    this.hasNotch: true,
+    this.elevation = 8.0,
+    this.hasNotch = true,
     this.child,
   }) : assert(elevation != null),
        assert(elevation >= 0.0),
@@ -154,11 +154,5 @@ class _BottomAppBarClipper extends CustomClipper<Path> {
   }
 
   @override
-  bool shouldReclip(CustomClipper<Path> oldClipper) {
-    if (oldClipper.runtimeType != _BottomAppBarClipper)
-      return true;
-
-    final _BottomAppBarClipper typedOldClipper = oldClipper;
-    return typedOldClipper.geometry != geometry;
-  }
+  bool shouldReclip(_BottomAppBarClipper oldClipper) => oldClipper.geometry != geometry;
 }

@@ -10,7 +10,7 @@ import 'analyze_continuously.dart';
 import 'analyze_once.dart';
 
 class AnalyzeCommand extends FlutterCommand {
-  AnalyzeCommand({bool verboseHelp: false, this.workingDirectory}) {
+  AnalyzeCommand({bool verboseHelp = false, this.workingDirectory}) {
     argParser.addFlag('flutter-repo',
         negatable: false,
         help: 'Include all the examples and tests from the Flutter repository.',
@@ -26,8 +26,6 @@ class AnalyzeCommand extends FlutterCommand {
     argParser.addFlag('watch',
         help: 'Run analysis continuously, watching the filesystem for changes.',
         negatable: false);
-    argParser.addFlag('preview-dart-2',
-        defaultsTo: true, help: 'Preview Dart 2.0 functionality.');
     argParser.addOption('write',
         valueHelp: 'file',
         help: 'Also output the results to a file. This is useful with --watch '
@@ -87,7 +85,6 @@ class AnalyzeCommand extends FlutterCommand {
         argResults,
         runner.getRepoRoots(),
         runner.getRepoPackages(),
-        previewDart2: argResults['preview-dart-2'],
       ).analyze();
     } else {
       return new AnalyzeOnce(
@@ -95,7 +92,6 @@ class AnalyzeCommand extends FlutterCommand {
         runner.getRepoRoots(),
         runner.getRepoPackages(),
         workingDirectory: workingDirectory,
-        previewDart2: argResults['preview-dart-2'],
       ).analyze();
     }
   }

@@ -503,9 +503,9 @@ class LoggingProcessManager extends LocalProcessManager {
     List<dynamic> command, {
       String workingDirectory,
       Map<String, String> environment,
-      bool includeParentEnvironment: true,
-      bool runInShell: false,
-      ProcessStartMode mode: ProcessStartMode.NORMAL, // ignore: deprecated_member_use
+      bool includeParentEnvironment = true,
+      bool runInShell = false,
+      ProcessStartMode mode = ProcessStartMode.NORMAL, // ignore: deprecated_member_use
     }) {
     commands.add(command);
     return super.start(

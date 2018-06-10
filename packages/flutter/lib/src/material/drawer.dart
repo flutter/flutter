@@ -84,7 +84,7 @@ class Drawer extends StatelessWidget {
   /// Typically used in the [Scaffold.drawer] property.
   const Drawer({
     Key key,
-    this.elevation: 16.0,
+    this.elevation = 16.0,
     this.child,
     this.semanticLabel,
   }) : super(key: key);

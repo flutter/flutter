@@ -59,9 +59,9 @@ class _MarkerPainter extends CustomPainter {
 class Marker extends StatelessWidget {
   const Marker({
     Key key,
-    this.type: MarkerType.touch,
+    this.type = MarkerType.touch,
     this.position,
-    this.size: 40.0,
+    this.size = 40.0,
   }) : super(key: key);
 
   final Offset position;

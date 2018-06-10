@@ -22,7 +22,7 @@ class Form extends StatefulWidget {
   const Form({
     Key key,
     @required this.child,
-    this.autovalidate: false,
+    this.autovalidate = false,
     this.onWillPop,
     this.onChanged,
   }) : assert(child != null),
@@ -226,7 +226,7 @@ class FormField<T> extends StatefulWidget {
     this.onSaved,
     this.validator,
     this.initialValue,
-    this.autovalidate: false,
+    this.autovalidate = false,
   }) : assert(builder != null),
        super(key: key);
 

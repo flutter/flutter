@@ -79,7 +79,7 @@ class _TappableWhileStatusIsState extends State<_TappableWhileStatusIs> {
 class _CrossFadeTransition extends AnimatedWidget {
   const _CrossFadeTransition({
     Key key,
-    this.alignment: Alignment.center,
+    this.alignment = Alignment.center,
     Animation<double> progress,
     this.child0,
     this.child1,
@@ -130,7 +130,7 @@ class _CrossFadeTransition extends AnimatedWidget {
 class _BackAppBar extends StatelessWidget {
   const _BackAppBar({
     Key key,
-    this.leading: const SizedBox(width: 56.0),
+    this.leading = const SizedBox(width: 56.0),
     @required this.title,
     this.trailing,
   }) : assert(leading != null), assert(title != null), super(key: key);

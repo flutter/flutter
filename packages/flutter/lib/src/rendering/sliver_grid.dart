@@ -294,9 +294,9 @@ class SliverGridDelegateWithFixedCrossAxisCount extends SliverGridDelegate {
   /// and `childAspectRatio` arguments must be greater than zero.
   const SliverGridDelegateWithFixedCrossAxisCount({
     @required this.crossAxisCount,
-    this.mainAxisSpacing: 0.0,
-    this.crossAxisSpacing: 0.0,
-    this.childAspectRatio: 1.0,
+    this.mainAxisSpacing = 0.0,
+    this.crossAxisSpacing = 0.0,
+    this.childAspectRatio = 1.0,
   }) : assert(crossAxisCount != null && crossAxisCount > 0),
        assert(mainAxisSpacing != null && mainAxisSpacing >= 0),
        assert(crossAxisSpacing != null && crossAxisSpacing >= 0),
@@ -381,9 +381,9 @@ class SliverGridDelegateWithMaxCrossAxisExtent extends SliverGridDelegate {
   /// The [childAspectRatio] argument must be greater than zero.
   const SliverGridDelegateWithMaxCrossAxisExtent({
     @required this.maxCrossAxisExtent,
-    this.mainAxisSpacing: 0.0,
-    this.crossAxisSpacing: 0.0,
-    this.childAspectRatio: 1.0,
+    this.mainAxisSpacing = 0.0,
+    this.crossAxisSpacing = 0.0,
+    this.childAspectRatio = 1.0,
   }) : assert(maxCrossAxisExtent != null && maxCrossAxisExtent >= 0),
        assert(mainAxisSpacing != null && mainAxisSpacing >= 0),
        assert(crossAxisSpacing != null && crossAxisSpacing >= 0),

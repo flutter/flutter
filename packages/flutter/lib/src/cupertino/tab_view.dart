@@ -41,7 +41,7 @@ class CupertinoTabView extends StatelessWidget {
     this.routes,
     this.onGenerateRoute,
     this.onUnknownRoute,
-    this.navigatorObservers: const <NavigatorObserver>[],
+    this.navigatorObservers = const <NavigatorObserver>[],
   }) : assert(navigatorObservers != null),
        super(key: key);
 

@@ -11,21 +11,27 @@ class ImagesDemo extends StatelessWidget {
       title: 'Animated images',
       demos: <ComponentDemoTabData>[
         new ComponentDemoTabData(
-          tabName: 'ANIMATED WEBP',
+          tabName: 'WEBP',
           description: '',
           exampleCodeTag: 'animated_image',
           demoWidget: new Semantics(
             label: 'Example of animated WEBP',
-            child: new Image.asset('packages/flutter_gallery_assets/animated_flutter_stickers.webp'),
+            child: new Image.asset(
+              'animated_images/animated_flutter_stickers.webp',
+              package: 'flutter_gallery_assets',
+            ),
           ),
         ),
         new ComponentDemoTabData(
-          tabName: 'ANIMATED GIF',
+          tabName: 'GIF',
           description: '',
           exampleCodeTag: 'animated_image',
           demoWidget: new Semantics(
             label: 'Example of animated GIF',
-            child:new Image.asset('packages/flutter_gallery_assets/animated_flutter_lgtm.gif'),
+            child:new Image.asset(
+              'animated_images/animated_flutter_lgtm.gif',
+              package: 'flutter_gallery_assets',
+            ),
           ),
         ),
       ]
