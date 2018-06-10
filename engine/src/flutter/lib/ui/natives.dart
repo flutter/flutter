@@ -36,11 +36,11 @@ void _setupHooks() {
 }
 
 void saveCompilationTrace(String filePath) {
-  final result = _saveCompilationTrace();
+  final dynamic result = _saveCompilationTrace();
   if (result is Error)
     throw result;
 
-  final file = new File(filePath);
+  final File file = new File(filePath);
   file.writeAsBytesSync(result);
 }
 
