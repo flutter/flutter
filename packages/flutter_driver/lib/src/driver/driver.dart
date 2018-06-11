@@ -534,6 +534,8 @@ class FlutterDriver {
     await _sendCommand(new EnterText(text, timeout: timeout));
   }
 
+  /// Configures text entry emulation.
+  ///
   /// If `enabled` is true, enables text entry emulation via [enterText]. If
   /// `enabled` is false, disables it. By default text entry emulation is
   /// enabled.
@@ -544,8 +546,7 @@ class FlutterDriver {
   ///
   /// When enabled, the operating system's configured keyboard will not be
   /// invoked when the widget is focused, as the [SystemChannels.textInput]
-  /// channel will be mocked out. In disabled mode [enterText] can be used to
-  /// emulate text entry.
+  /// channel will be mocked out.
   Future<Null> setTextEntryEmulation({ @required bool enabled, Duration timeout }) async {
     assert(enabled != null);
     await _sendCommand(new SetTextEntryEmulation(enabled, timeout: timeout));

@@ -352,7 +352,7 @@ class UserHeader extends StatelessWidget {
           const Padding(
             padding: const EdgeInsets.only(right: 8.0),
             child: const Image(
-              image: const AssetImage('packages/flutter_gallery_assets/ali_connors_sml.png'),
+              image: const AssetImage('packages/flutter_gallery_assets/people/square/ali.png'),
               width: 32.0,
               height: 32.0
             )
@@ -410,7 +410,7 @@ class ItemImageBox extends StatelessWidget {
                 const SizedBox(
                   height: 230.0,
                   child: const Image(
-                    image: const AssetImage('packages/flutter_gallery_assets/top_10_australian_beaches.png')
+                    image: const AssetImage('packages/flutter_gallery_assets/places/india_chettinad_silk_maker.png')
                   )
                 ),
                 new Theme(
@@ -447,7 +447,7 @@ class ItemImageBox extends StatelessWidget {
                           ),
                           const TextSpan(
                             style: const TextStyle(fontWeight: FontWeight.bold),
-                            text: 'Magic Mike'
+                            text: 'Chris Godley'
                           )
                         ]
                       )
@@ -462,9 +462,9 @@ class ItemImageBox extends StatelessWidget {
               child: new Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: <Widget>[
-                  new Text('Where can you find that amazing sunset?', style: Theme.of(context).textTheme.body2),
-                  new Text('The sun sets over stinson beach', style: Theme.of(context).textTheme.body1),
-                  new Text('flutter.io/amazingsunsets', style: Theme.of(context).textTheme.caption)
+                  new Text('Artisans of Southern India', style: Theme.of(context).textTheme.body2),
+                  new Text('Silk Spinners', style: Theme.of(context).textTheme.body1),
+                  new Text('Sivaganga, Tamil Nadu', style: Theme.of(context).textTheme.caption)
                 ]
               )
             )

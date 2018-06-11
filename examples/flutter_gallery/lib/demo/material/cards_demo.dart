@@ -25,23 +25,23 @@ class TravelDestination {
 
 final List<TravelDestination> destinations = <TravelDestination>[
   const TravelDestination(
-    assetName: 'top_10_australian_beaches.jpg',
+    assetName: 'places/india_thanjavur_market.png',
     assetPackage: _kGalleryAssetsPackage,
-    title: 'Top 10 Australian beaches',
+    title: 'Top 10 Cities to Visit in Tamil Nadu',
     description: const <String>[
       'Number 10',
-      'Whitehaven Beach',
-      'Whitsunday Island, Whitsunday Islands',
+      'Thanjavur',
+      'Thanjavur, Tamil Nadu',
     ],
   ),
   const TravelDestination(
-    assetName: 'kangaroo_valley_safari.jpg',
+    assetName: 'places/india_chettinad_silk_maker.png',
     assetPackage: _kGalleryAssetsPackage,
-    title: 'Kangaroo Valley Safari',
+    title: 'Artisans of Southern India',
     description: const <String>[
-      '2031 Moss Vale Road',
-      'Kangaroo Valley 2577',
-      'New South Wales',
+      'Silk Spinners',
+      'Chettinad',
+      'Sivaganga, Tamil Nadu',
     ],
   )
 ];
