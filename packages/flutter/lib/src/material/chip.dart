@@ -1378,8 +1378,7 @@ class _RawChipState extends State<RawChip> with TickerProviderStateMixin<RawChip
         onTapDown: canTap ? _handleTapDown : null,
         onTapCancel: canTap ? _handleTapCancel : null,
         child: new AnimatedBuilder(
-          animation: new Listenable.merge(
-              <Listenable>[selectController, enableController]),
+          animation: new Listenable.merge(<Listenable>[selectController, enableController]),
           builder: (BuildContext context, Widget child) {
             return new Container(
               decoration: new ShapeDecoration(
@@ -1413,10 +1412,8 @@ class _RawChipState extends State<RawChip> with TickerProviderStateMixin<RawChip
                   switchInCurve: Curves.fastOutSlowIn,
                 ),
                 brightness: chipTheme.brightness,
-                padding: (widget.padding ?? chipTheme.padding).resolve(
-                    textDirection),
-                labelPadding: (widget.labelPadding ?? chipTheme.labelPadding)
-                    .resolve(textDirection),
+                padding: (widget.padding ?? chipTheme.padding).resolve(textDirection),
+                labelPadding: (widget.labelPadding ?? chipTheme.labelPadding).resolve(textDirection),
                 showAvatar: hasAvatar,
                 showCheckmark: widget.showCheckmark,
                 canTapBody: canTap,
