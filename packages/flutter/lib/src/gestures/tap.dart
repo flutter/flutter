@@ -26,7 +26,7 @@ class TapDownDetails {
 ///
 /// The position at which the pointer contacted the screen is available in the
 /// `details`.
-typedef void GestureTapDownCallback(TapDownDetails details);
+typedef GestureTapDownCallback = void Function(TapDownDetails details);
 
 /// Details for [GestureTapUpCallback], such as position.
 class TapUpDetails {
@@ -45,14 +45,14 @@ class TapUpDetails {
 ///
 /// The position at which the pointer stopped contacting the screen is available
 /// in the `details`.
-typedef void GestureTapUpCallback(TapUpDetails details);
+typedef GestureTapUpCallback = void Function(TapUpDetails details);
 
 /// Signature for when a tap has occurred.
-typedef void GestureTapCallback();
+typedef GestureTapCallback = void Function();
 
 /// Signature for when the pointer that previously triggered a
 /// [GestureTapDownCallback] will not end up causing a tap.
-typedef void GestureTapCancelCallback();
+typedef GestureTapCancelCallback = void Function();
 
 /// Recognizes taps.
 ///
