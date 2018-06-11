@@ -10,6 +10,15 @@ import '../dart/sdk.dart';
 import '../runner/flutter_command.dart';
 
 class FormatCommand extends FlutterCommand {
+  FormatCommand() {
+    argParser.addFlag('dry-run',
+      abbr: 'n',
+      help: 'Show which files would be modified but make no changes.',
+      defaultsTo: false,
+      negatable: false,
+    );
+  }
+
   @override
   final String name = 'format';
 
@@ -36,7 +45,8 @@ class FormatCommand extends FlutterCommand {
     }
 
     final String dartfmt = sdkBinaryName('dartfmt');
-    final List<String> cmd = <String>[dartfmt, '-w']..addAll(argResults.rest);
+
+    final List<String> cmd = <String>[dartfmt, argResults['dry-run'] ? '-n' : '-w']..addAll(argResults.rest);
     final int result = await runCommandAndStreamOutput(cmd);
     if (result != 0)
       throwToolExit('Formatting failed: $result', exitCode: result);
