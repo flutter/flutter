@@ -119,10 +119,10 @@ class _RadioState<T> extends State<Radio<T>> with TickerProviderStateMixin {
     final ThemeData themeData = Theme.of(context);
     Size size;
     switch (themeData.materialTapTargetSize) {
-      case MaterialTapTargetSize.expanded:
+      case MaterialTapTargetSize.padded:
         size = const Size(2 * kRadialReactionRadius + 8.0, 2 * kRadialReactionRadius + 8.0);
         break;
-      case MaterialTapTargetSize.collapsed:
+      case MaterialTapTargetSize.shrinkWrap:
         size = const Size(2 * kRadialReactionRadius, 2 * kRadialReactionRadius);
         break;
     }

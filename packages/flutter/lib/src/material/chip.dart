@@ -1430,7 +1430,7 @@ class _RawChipState extends State<RawChip> with TickerProviderStateMixin<RawChip
       ),
     );
     switch (theme.materialTapTargetSize) {
-      case MaterialTapTargetSize.expanded:
+      case MaterialTapTargetSize.padded:
         result = new ConstrainedBox(
           constraints: const BoxConstraints(minWidth: 48.0, minHeight: 48.0),
           child: new Center(
@@ -1450,7 +1450,7 @@ class _RawChipState extends State<RawChip> with TickerProviderStateMixin<RawChip
           );
         }
         break;
-      case MaterialTapTargetSize.collapsed:
+      case MaterialTapTargetSize.shrinkWrap:
         break;
     }
 

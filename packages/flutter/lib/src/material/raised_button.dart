@@ -367,10 +367,10 @@ class RaisedButton extends StatelessWidget {
     final Color textColor = _getTextColor(theme, buttonTheme, fillColor);
     BoxConstraints outerConstraints;
     switch (theme.materialTapTargetSize) {
-      case MaterialTapTargetSize.expanded:
+      case MaterialTapTargetSize.padded:
         outerConstraints = const BoxConstraints(minHeight: 48.0, minWidth: 48.0);
         break;
-      case MaterialTapTargetSize.collapsed:
+      case MaterialTapTargetSize.shrinkWrap:
         break;
     }
 

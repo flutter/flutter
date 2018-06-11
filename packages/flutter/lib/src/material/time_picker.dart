@@ -1583,11 +1583,11 @@ class _TimePickerDialogState extends State<_TimePickerDialog> {
           double timePickerHeightPortrait;
           double timePickerHeightLandscape;
           switch (theme.materialTapTargetSize) {
-            case MaterialTapTargetSize.expanded:
+            case MaterialTapTargetSize.padded:
               timePickerHeightPortrait = _kTimePickerHeightPortrait;
               timePickerHeightLandscape = _kTimePickerHeightLandscape;
               break;
-            case MaterialTapTargetSize.collapsed:
+            case MaterialTapTargetSize.shrinkWrap:
               timePickerHeightPortrait = _kTimePickerHeightPortraitCollapsed;
               timePickerHeightLandscape = _kTimePickerHeightLandscapeCollapsed;
               break;

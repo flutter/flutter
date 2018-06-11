@@ -106,7 +106,7 @@ void main() {
   test('Defaults to MaterialTapTargetBehavior.expanded', () {
     final ThemeData themeData = new ThemeData();
 
-    expect(themeData.materialTapTargetSize, MaterialTapTargetSize.expanded);
+    expect(themeData.materialTapTargetSize, MaterialTapTargetSize.padded);
   });
 
   test('Can control fontFamily', () {

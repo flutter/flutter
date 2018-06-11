@@ -194,7 +194,7 @@ class RadioListTile<T> extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final ThemeData themeData = Theme.of(context).copyWith(materialTapTargetSize: MaterialTapTargetSize.collapsed);
+    final ThemeData themeData = Theme.of(context).copyWith(materialTapTargetSize: MaterialTapTargetSize.shrinkWrap);
     final Widget control = new Radio<T>(
       value: value,
       groupValue: groupValue,

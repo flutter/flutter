@@ -153,10 +153,10 @@ class _SwitchState extends State<Switch> with TickerProviderStateMixin {
     }
     Size size;
     switch (themeData.materialTapTargetSize) {
-      case MaterialTapTargetSize.expanded:
+      case MaterialTapTargetSize.padded:
         size = const Size(_kSwitchWidth, _kSwitchHeight);
         break;
-      case MaterialTapTargetSize.collapsed:
+      case MaterialTapTargetSize.shrinkWrap:
         size = const Size(_kSwitchWidth, _kSwitchHeightCollapsed);
         break;
     }

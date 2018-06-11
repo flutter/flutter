@@ -38,6 +38,9 @@ const Color _kDarkThemeSplashColor = const Color(0x40CCCCCC);
 
 /// Configures the tap target and layout size of certain Material widgets.
 ///
+/// Changing the value in [ThemeData.materialTapTargetSize] will affect the
+/// accessibility experience.
+///
 /// Some of the impacted widgets include:
 ///
 ///   * [FloatingActionButton], only the mini tap target size is increased.
@@ -60,12 +63,13 @@ enum MaterialTapTargetSize {
   /// Expands the minimum tap target size to 48px by 48px.
   ///
   /// This is the default value of [ThemeData.materialHitTestSize] and the
-  /// recommended behavior to conform to Android accessibility recommendations.
-  expanded,
+  /// recommended size to conform to Android accessibility scanner
+  /// recommendations.
+  padded,
 
-  /// Collapses the tap target size to the minimum provided by the Material
+  /// Shrinks the tap target size to the minimum provided by the Material
   /// specification.
-  collapsed,
+  shrinkWrap,
 }
 
 /// Holds the color and typography values for a material design theme.
@@ -139,7 +143,7 @@ class ThemeData extends Diagnosticable {
     TargetPlatform platform,
     MaterialTapTargetSize materialTapTargetSize,
   }) {
-    materialTapTargetSize ??= MaterialTapTargetSize.expanded;
+    materialTapTargetSize ??= MaterialTapTargetSize.padded;
     brightness ??= Brightness.light;
     final bool isDark = brightness == Brightness.dark;
     primarySwatch ??= Colors.blue;

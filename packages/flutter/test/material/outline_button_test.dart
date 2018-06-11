@@ -55,7 +55,7 @@ void main() {
       new Directionality(
         textDirection: TextDirection.ltr,
         child: new Theme(
-          data: new ThemeData(materialTapTargetSize: MaterialTapTargetSize.collapsed),
+          data: new ThemeData(materialTapTargetSize: MaterialTapTargetSize.shrinkWrap),
           child: new Container(
             alignment: Alignment.topLeft,
             child: new OutlineButton(

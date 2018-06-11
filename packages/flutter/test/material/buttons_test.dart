@@ -188,7 +188,7 @@ void main() {
         textDirection: TextDirection.ltr,
         child: new Theme(
           data: new ThemeData(
-            materialTapTargetSize: MaterialTapTargetSize.collapsed,
+            materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
           ),
           child: buttonWidget,
         ),
@@ -235,7 +235,7 @@ void main() {
           data: new ThemeData(
             highlightColor: themeHighlightColor1,
             splashColor: themeSplashColor1,
-            materialTapTargetSize: MaterialTapTargetSize.collapsed,
+            materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
           ),
           child: buttonWidget,
         ),
@@ -263,7 +263,7 @@ void main() {
           data: new ThemeData(
             highlightColor: themeHighlightColor2,
             splashColor: themeSplashColor2,
-            materialTapTargetSize: MaterialTapTargetSize.collapsed,
+            materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
           ),
           child: buttonWidget, // same widget, so does not get updated because of us
         ),
