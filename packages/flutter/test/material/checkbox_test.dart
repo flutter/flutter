@@ -16,7 +16,7 @@ void main() {
     debugResetSemanticsIdCounter();
   });
 
-  testWidgets('Checkbox size is 40x40', (WidgetTester tester) async {
+  testWidgets('Checkbox size is 48x48', (WidgetTester tester) async {
     await tester.pumpWidget(
       new Material(
         child: new Center(
@@ -28,7 +28,7 @@ void main() {
       ),
     );
 
-    expect(tester.getSize(find.byType(Checkbox)), const Size(40.0, 40.0));
+    expect(tester.getSize(find.byType(Checkbox)), const Size(48.0, 48.0));
   });
 
   testWidgets('CheckBox semantics', (WidgetTester tester) async {

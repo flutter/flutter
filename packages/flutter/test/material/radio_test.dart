@@ -64,7 +64,7 @@ void main() {
     expect(log, isEmpty);
   });
 
-  testWidgets('Radio size is 40x40', (WidgetTester tester) async {
+  testWidgets('Radio size is 48x48', (WidgetTester tester) async {
     final Key key = new UniqueKey();
 
     await tester.pumpWidget(
@@ -80,7 +80,7 @@ void main() {
       ),
     );
 
-    expect(tester.getSize(find.byKey(key)), const Size(40.0, 40.0));
+    expect(tester.getSize(find.byKey(key)), const Size(48.0, 48.0));
   });
 
 

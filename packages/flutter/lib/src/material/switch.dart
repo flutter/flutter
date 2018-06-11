@@ -223,7 +223,7 @@ const double _kTrackWidth = 33.0;
 const double _kTrackRadius = _kTrackHeight / 2.0;
 const double _kThumbRadius = 10.0;
 const double _kSwitchWidth = _kTrackWidth - 2 * _kTrackRadius + 2 * kRadialReactionRadius;
-const double _kSwitchHeight = 2 * kRadialReactionRadius;
+const double _kSwitchHeight = 2 * kRadialReactionRadius + 8.0;
 
 class _RenderSwitch extends RenderToggleable {
   _RenderSwitch({
