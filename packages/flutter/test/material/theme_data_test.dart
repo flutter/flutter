@@ -103,10 +103,10 @@ void main() {
     expect(darkTheme.accentTextTheme.title.color, typography.white.title.color);
   });
 
-  test('Defaults to expandedTapTargetSize', () {
+  test('Defaults to MaterialTapTargetBehavior.expanded', () {
     final ThemeData themeData = new ThemeData();
 
-    expect(themeData.expandedTapTargetSize, true);
+    expect(themeData.materialTapTargetSize, MaterialTapTargetSize.expanded);
   });
 
   test('Can control fontFamily', () {

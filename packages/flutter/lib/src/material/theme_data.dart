@@ -36,6 +36,19 @@ const Color _kLightThemeSplashColor = const Color(0x66C8C8C8);
 const Color _kDarkThemeHighlightColor = const Color(0x40CCCCCC);
 const Color _kDarkThemeSplashColor = const Color(0x40CCCCCC);
 
+/// Configures the tap target size of certain Material widgets.
+enum MaterialTapTargetSize {
+  /// Expands the minimum tap target size to 48dp by 48dp.
+  ///
+  /// This is the default value of [ThemeData.materialHitTestSize] and the
+  /// recommended behavior to conform to Android accessibility recommendations.
+  expanded,
+
+  /// Collapses the tap target size to the minimum provided by the Material
+  /// specification.
+  collapsed,
+}
+
 /// Holds the color and typography values for a material design theme.
 ///
 /// Use this class to configure a [Theme] widget.
@@ -105,9 +118,9 @@ class ThemeData extends Diagnosticable {
     SliderThemeData sliderTheme,
     ChipThemeData chipTheme,
     TargetPlatform platform,
-    bool expandedTapTargetSize,
+    MaterialTapTargetSize materialTapTargetSize,
   }) {
-    expandedTapTargetSize ??= true;
+    materialTapTargetSize ??= MaterialTapTargetSize.expanded;
     brightness ??= Brightness.light;
     final bool isDark = brightness == Brightness.dark;
     primarySwatch ??= Colors.blue;
@@ -210,7 +223,7 @@ class ThemeData extends Diagnosticable {
       sliderTheme: sliderTheme,
       chipTheme: chipTheme,
       platform: platform,
-      expandedTapTargetSize: expandedTapTargetSize,
+      materialTapTargetSize: materialTapTargetSize,
     );
   }
 
@@ -260,7 +273,7 @@ class ThemeData extends Diagnosticable {
     @required this.sliderTheme,
     @required this.chipTheme,
     @required this.platform,
-    @required this.expandedTapTargetSize,
+    @required this.materialTapTargetSize,
   }) : assert(brightness != null),
        assert(primaryColor != null),
        assert(primaryColorBrightness != null),
@@ -299,7 +312,7 @@ class ThemeData extends Diagnosticable {
        assert(sliderTheme != null),
        assert(chipTheme != null),
        assert(platform != null),
-       assert(expandedTapTargetSize != null);
+       assert(materialTapTargetSize != null);
 
   /// A default light blue theme.
   ///
@@ -488,9 +501,8 @@ class ThemeData extends Diagnosticable {
   /// Defaults to the current platform.
   final TargetPlatform platform;
 
-  /// Whether to expand the tap target of certain material widgets to a minimum
-  /// of 48dp by 48dp.
-  final bool expandedTapTargetSize;
+  /// Configures the hit test size of certain Material widgets.
+  final MaterialTapTargetSize materialTapTargetSize;
 
   /// Creates a copy of this theme but with the given fields replaced with the new values.
   ThemeData copyWith({
@@ -533,7 +545,7 @@ class ThemeData extends Diagnosticable {
     SliderThemeData sliderTheme,
     ChipThemeData chipTheme,
     TargetPlatform platform,
-    bool expandedTapTargetSize,
+    MaterialTapTargetSize materialTapTargetSize,
   }) {
     return new ThemeData.raw(
       brightness: brightness ?? this.brightness,
@@ -575,7 +587,7 @@ class ThemeData extends Diagnosticable {
       sliderTheme: sliderTheme ?? this.sliderTheme,
       chipTheme: chipTheme ?? this.chipTheme,
       platform: platform ?? this.platform,
-      expandedTapTargetSize: expandedTapTargetSize ?? this.expandedTapTargetSize,
+      materialTapTargetSize: materialTapTargetSize ?? this.materialTapTargetSize,
     );
   }
 
@@ -703,7 +715,7 @@ class ThemeData extends Diagnosticable {
       sliderTheme: SliderThemeData.lerp(a.sliderTheme, b.sliderTheme, t),
       chipTheme: ChipThemeData.lerp(a.chipTheme, b.chipTheme, t),
       platform: t < 0.5 ? a.platform : b.platform,
-      expandedTapTargetSize: t < 0.5 ? a.expandedTapTargetSize : b.expandedTapTargetSize,
+      materialTapTargetSize: t < 0.5 ? a.materialTapTargetSize : b.materialTapTargetSize,
     );
   }
 
@@ -749,7 +761,7 @@ class ThemeData extends Diagnosticable {
            (otherData.sliderTheme == sliderTheme) &&
            (otherData.chipTheme == chipTheme) &&
            (otherData.platform == platform) &&
-           (otherData.expandedTapTargetSize == expandedTapTargetSize);
+           (otherData.materialTapTargetSize == materialTapTargetSize);
   }
 
   @override
@@ -793,7 +805,7 @@ class ThemeData extends Diagnosticable {
         sliderTheme,
         chipTheme,
         platform,
-        expandedTapTargetSize
+        materialTapTargetSize
       ),
     );
   }
@@ -838,7 +850,7 @@ class ThemeData extends Diagnosticable {
     properties.add(new DiagnosticsProperty<IconThemeData>('accentIconTheme', accentIconTheme));
     properties.add(new DiagnosticsProperty<SliderThemeData>('sliderTheme', sliderTheme));
     properties.add(new DiagnosticsProperty<ChipThemeData>('chipTheme', chipTheme));
-    properties.add(new DiagnosticsProperty<bool>('expandedTapTargetSize', expandedTapTargetSize));
+    properties.add(new DiagnosticsProperty<MaterialTapTargetSize>('materialTapTargetSize', materialTapTargetSize));
   }
 }
 
