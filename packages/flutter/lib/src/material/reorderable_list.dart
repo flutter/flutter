@@ -35,7 +35,11 @@ typedef void OnSwapCallback(int oldIndex, int newIndex);
 class ReorderableListView extends StatefulWidget {
 
   /// Creates a reorderable list.
-  const ReorderableListView({this.children, this.onSwap, this.scrollDirection = Axis.vertical, this.padding});
+  const ReorderableListView({this.children, this.onSwap, this.scrollDirection = Axis.vertical, this.padding, this.dropAreaExtent = 96.0})
+    : assert(dropAreaExtent != null),
+      assert(scrollDirection != null),
+      assert(onSwap != null),
+      assert(children != null);
 
   /// The
   final List<Widget> children;
@@ -55,6 +59,17 @@ class ReorderableListView extends StatefulWidget {
   /// into a new position.
   final OnSwapCallback onSwap;
 
+  /// The extent along the [scrollDirection] axis to allow a child to drop
+  /// into when the user reorders list children.
+  /// 
+  /// When the user is dragging a child to reorder it, the list will open up a
+  /// drop area in the space under the widget being dragged. That area will
+  /// have an extent along the main axis of [dropAreaExtent].
+  /// 
+  /// In a vertical list, this should match the height of the list items.
+  /// In a horizontal list, this should match the width of the list items.
+  final double dropAreaExtent;
+
   @override
   State<StatefulWidget> createState() {
     return new _ReorderableListViewState();
@@ -67,8 +82,6 @@ class _ReorderableListViewState extends State<ReorderableListView> with TickerPr
   AnimationController entranceController;
   // This controls the 'ghost' of the dragging widget, which is left behind where the widget used to be.
   AnimationController ghostController;
-
-  static const double approximateItemHeight = 100.0;
 
   Key _dragging;
 
@@ -109,53 +122,56 @@ class _ReorderableListViewState extends State<ReorderableListView> with TickerPr
     }
 
     Widget _buildDragTarget(BuildContext context, List<Key> acceptedCandidates, List<dynamic> rejectedCandidates) {
-      final Widget spacing = widget.scrollDirection == Axis.vertical ? const SizedBox(height: approximateItemHeight) : const SizedBox(width: approximateItemHeight);
-      final Widget draggable = new LongPressDraggable<Key>(
-        maxSimultaneousDrags: 1,
-        axis: widget.scrollDirection,
-        data: toWrap.key,
-        feedback: new Material(
-          elevation: 6.0,
-          child: new SizedBox(
-            width: widget.scrollDirection == Axis.vertical ? MediaQuery.of(context).size.width : null,
-            height: widget.scrollDirection == Axis.horizontal ? MediaQuery.of(context).size.height : null,
-            child: toWrap,
+      final Widget layoutBuilder = new LayoutBuilder(builder: (BuildContext context, BoxConstraints constraints) {
+        return new LongPressDraggable<Key>(
+          maxSimultaneousDrags: 1,
+          axis: widget.scrollDirection,
+          data: toWrap.key,
+          feedback:new Container(
+            alignment: Alignment.topLeft,
+            constraints: constraints,
+            child: new Material(
+              elevation: 6.0,
+              child: toWrap,
+            ),
           ),
-        ),
-        child: _dragging == toWrap.key ? const SizedBox() : toWrap,
-        // The list will take care of inserting dummy space in the correct place.
-        childWhenDragging: const SizedBox(),
-        onDragStarted: () {
-          setState(() {
-            _dragging = toWrap.key;
-            _dragStartIndex = index;
-            _ghostIndex = index;
-            _currentIndex = index;
-            entranceController.forward(from: 1.0);
-          });
-        },
-        onDraggableCanceled: (_, __) {
-          setState(() {
-            widget.onSwap(_dragStartIndex, _currentIndex);
-            ghostController.reverse(from: 0.1);
-            entranceController.reverse(from: 0.1);
-            _dragging = null;
-          });
-        },
-        onDragCompleted: () {
-          setState(() {
-            if (_dragStartIndex != _currentIndex)
+          child: _dragging == toWrap.key ? const SizedBox() : toWrap,
+          // The list will take care of inserting dummy space in the correct place.
+          childWhenDragging: const SizedBox(),
+          dragAnchor: DragAnchor.child,
+          onDragStarted: () {
+            setState(() {
+              _dragging = toWrap.key;
+              _dragStartIndex = index;
+              _ghostIndex = index;
+              _currentIndex = index;
+              entranceController.forward(from: 1.0);
+            });
+          },
+          onDraggableCanceled: (_, __) {
+            setState(() {
               widget.onSwap(_dragStartIndex, _currentIndex);
-            ghostController.reverse(from: 0.1);
-            entranceController.reverse(from: 0.1);
-            _dragging = null;
-          });
-        },
-      );
+              ghostController.reverse(from: 0.1);
+              entranceController.reverse(from: 0.1);
+              _dragging = null;
+            });
+          },
+          onDragCompleted: () {
+            setState(() {
+              if (_dragStartIndex != _currentIndex)
+                widget.onSwap(_dragStartIndex, _currentIndex);
+              ghostController.reverse(from: 0.1);
+              entranceController.reverse(from: 0.1);
+              _dragging = null;
+            });
+          },
+        );
+      });
       // The target for dropping at the end of the list doesn't need to be draggable or to expand.
       if (index >= widget.children.length) {
         return toWrap;
       }
+      final Widget spacing = widget.scrollDirection == Axis.vertical ? new SizedBox(height: widget.dropAreaExtent) : new SizedBox(width: widget.dropAreaExtent);
       if (_currentIndex == index) {
         return _buildContainerForAxis(children: <Widget>[
           new SizeTransition(
@@ -163,7 +179,7 @@ class _ReorderableListViewState extends State<ReorderableListView> with TickerPr
             axis: widget.scrollDirection,
             child: spacing
           ),
-          draggable,
+          layoutBuilder,
         ]);
       }
       if (_ghostIndex == index) {
@@ -173,10 +189,10 @@ class _ReorderableListViewState extends State<ReorderableListView> with TickerPr
             axis: widget.scrollDirection,
             child: spacing,
           ),
-          draggable,
+          layoutBuilder,
         ]);
       }
-      return draggable;
+      return layoutBuilder;
     }
 
     return new Builder(builder: (BuildContext context) {

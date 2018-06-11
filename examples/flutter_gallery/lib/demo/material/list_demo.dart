@@ -188,7 +188,7 @@ class _ListDemoState extends State<ListDemo> {
     }
     final Widget listTile = new Container(height: 100.0, width: 100.0, child: new CircleAvatar(child: new Text(item), backgroundColor: Colors.green,));
     
-    // new ListTile(
+    // final Widget listTile = new ListTile(
     //   isThreeLine: _itemType == _MaterialListType.threeLine,
     //   dense: _dense,
     //   trailing: new Checkbox(value: valueToCheckboxState[item] ?? false, onChanged: (bool newValue) {setState(() {valueToCheckboxState[item] = newValue;});},),
