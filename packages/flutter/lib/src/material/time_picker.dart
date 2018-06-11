@@ -37,8 +37,8 @@ const double _kTimePickerWidthLandscape = 512.0;
 const double _kTimePickerHeightPortrait = 496.0;
 const double _kTimePickerHeightLandscape = 316.0;
 
-const double _kTimePickerHeightPortraitColaped = 484.0;
-const double _kTimePickerHeightLandscapeColapsed = 304.0;
+const double _kTimePickerHeightPortraitCollapsed = 484.0;
+const double _kTimePickerHeightLandscapeCollapsed = 304.0;
 
 /// The horizontal gap between the day period fragment and the fragment
 /// positioned next to it horizontally.
@@ -1580,12 +1580,22 @@ class _TimePickerDialogState extends State<_TimePickerDialog> {
             ),
           );
 
+          double timePickerHeightPortrait;
+          double timePickerHeightLandscape;
+          switch (theme.materialTapTargetSize) {
+            case MaterialTapTargetSize.expanded:
+              timePickerHeightPortrait = _kTimePickerHeightPortrait;
+              timePickerHeightLandscape = _kTimePickerHeightLandscape;
+              break;
+            case MaterialTapTargetSize.collapsed:
+              timePickerHeightPortrait = _kTimePickerHeightPortraitCollapsed;
+              timePickerHeightLandscape = _kTimePickerHeightLandscapeCollapsed;
+              break;
+          }
+
           assert(orientation != null);
           switch (orientation) {
             case Orientation.portrait:
-              final double timePickerHeightPortrait = theme.materialTapTargetSize == MaterialTapTargetSize.expanded
-                  ? _kTimePickerHeightPortrait
-                  : _kTimePickerHeightPortraitColaped;
               return new SizedBox(
                 width: _kTimePickerWidthPortrait,
                 height: timePickerHeightPortrait,
@@ -1601,9 +1611,6 @@ class _TimePickerDialogState extends State<_TimePickerDialog> {
                 )
               );
             case Orientation.landscape:
-              final double timePickerHeightLandscape = theme.materialTapTargetSize == MaterialTapTargetSize.expanded
-                  ? _kTimePickerHeightLandscape
-                  : _kTimePickerHeightLandscapeColapsed;
               return new SizedBox(
                 width: _kTimePickerWidthLandscape,
                 height: timePickerHeightLandscape,
