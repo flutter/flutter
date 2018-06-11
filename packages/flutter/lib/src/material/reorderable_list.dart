@@ -29,13 +29,13 @@ typedef void OnSwapCallback(int oldIndex, int newIndex);
 
 /// A list with draggable content that the user can re-order.
 /// 
-/// Note that this widget places its [children] in a [Column] and not a [ListView].
+/// Note that this widget places its [children] in a [Column] or [Row] and not a [ListView].
 ///
 /// All [children] must have a key.
 class ReorderableListView extends StatefulWidget {
 
   /// Creates a reorderable list.
-  const ReorderableListView({this.children, this.onSwap, this.scrollDirection = Axis.vertical, this.padding, this.dropAreaExtent = 96.0})
+  const ReorderableListView({@required this.children, @required this.onSwap, this.scrollDirection = Axis.vertical, this.padding, this.dropAreaExtent = 96.0})
     : assert(dropAreaExtent != null),
       assert(scrollDirection != null),
       assert(onSwap != null),
@@ -270,7 +270,8 @@ class _ReorderableListViewState extends State<ReorderableListView> with TickerPr
     final List<Widget> wrappedChildren = <Widget>[];
     assert(
       widget.children.every((Widget w) => w.key != null), 
-      'All children of this widget must have a key.');
+      'All children of this widget must have a key.',
+    );
     for (int i=0; i<widget.children.length; i++) {
       wrappedChildren.add(_wrap(widget.children[i], i));
     }
