@@ -6,44 +6,37 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 
-enum _MaterialListType {
+enum _ReorderableListType {
   /// A list tile that contains a single line of text.
-  oneLine,
+  horizontalAvatar,
 
   /// A list tile that contains a [CircleAvatar] followed by a single line of text.
-  oneLineWithAvatar,
-
-  /// A list tile that contains two lines of text.
-  twoLine,
+  verticalAvatar,
 
   /// A list tile that contains three lines of text.
   threeLine,
 }
 
-class ListDemo extends StatefulWidget {
-  const ListDemo({ Key key }) : super(key: key);
+class ReorderableListDemo extends StatefulWidget {
+  const ReorderableListDemo({ Key key }) : super(key: key);
 
-  static const String routeName = '/material/list';
+  static const String routeName = '/material/reorderable-list';
 
   @override
   _ListDemoState createState() => new _ListDemoState();
 }
 
-class _ListDemoState extends State<ListDemo> {
+class _ListDemoState extends State<ReorderableListDemo> {
   static final GlobalKey<ScaffoldState> scaffoldKey = new GlobalKey<ScaffoldState>();
 
   PersistentBottomSheetController<Null> _bottomSheet;
-  _MaterialListType _itemType = _MaterialListType.threeLine;
-  bool _dense = false;
-  bool _showAvatars = true;
-  bool _showIcons = false;
-  bool _showDividers = false;
+  _ReorderableListType _itemType = _ReorderableListType.threeLine;
   bool _reverseSort = false;
   List<String> items = <String>[
     'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N',
   ];
 
-  void changeItemType(_MaterialListType type) {
+  void changeItemType(_ReorderableListType type) {
     setState(() {
       _itemType = type;
     });
@@ -63,9 +56,9 @@ class _ListDemoState extends State<ListDemo> {
             new MergeSemantics(
               child: new ListTile(
                 dense: true,
-                title: const Text('One-line'),
-                trailing: new Radio<_MaterialListType>(
-                  value: _showAvatars ? _MaterialListType.oneLineWithAvatar : _MaterialListType.oneLine,
+                title: const Text('Horizontal Avatars'),
+                trailing: new Radio<_ReorderableListType>(
+                  value: _showAvatars ? _ReorderableListType.horizontalAvatar,
                   groupValue: _itemType,
                   onChanged: changeItemType,
                 )
@@ -74,9 +67,9 @@ class _ListDemoState extends State<ListDemo> {
             new MergeSemantics(
               child: new ListTile(
                 dense: true,
-                title: const Text('Two-line'),
-                trailing: new Radio<_MaterialListType>(
-                  value: _MaterialListType.twoLine,
+                title: const Text('Vertical Avatars'),
+                trailing: new Radio<_ReorderableListType>(
+                  value: _ReorderableListType.verticalAvatar,
                   groupValue: _itemType,
                   onChanged: changeItemType,
                 )
@@ -86,70 +79,10 @@ class _ListDemoState extends State<ListDemo> {
               child: new ListTile(
                 dense: true,
                 title: const Text('Three-line'),
-                trailing: new Radio<_MaterialListType>(
-                  value: _MaterialListType.threeLine,
+                trailing: new Radio<_ReorderableListType>(
+                  value: _ReorderableListType.threeLine,
                   groupValue: _itemType,
                   onChanged: changeItemType,
-                ),
-              ),
-            ),
-            new MergeSemantics(
-              child: new ListTile(
-                dense: true,
-                title: const Text('Show avatar'),
-                trailing: new Checkbox(
-                  value: _showAvatars,
-                  onChanged: (bool value) {
-                    setState(() {
-                      _showAvatars = value;
-                    });
-                    _bottomSheet?.setState(() { });
-                  },
-                ),
-              ),
-            ),
-            new MergeSemantics(
-              child: new ListTile(
-                dense: true,
-                title: const Text('Show icon'),
-                trailing: new Checkbox(
-                  value: _showIcons,
-                  onChanged: (bool value) {
-                    setState(() {
-                      _showIcons = value;
-                    });
-                    _bottomSheet?.setState(() { });
-                  },
-                ),
-              ),
-            ),
-            new MergeSemantics(
-              child: new ListTile(
-                dense: true,
-                title: const Text('Show dividers'),
-                trailing: new Checkbox(
-                  value: _showDividers,
-                  onChanged: (bool value) {
-                    setState(() {
-                      _showDividers = value;
-                    });
-                    _bottomSheet?.setState(() { });
-                  },
-                ),
-              ),
-            ),
-            new MergeSemantics(
-              child: new ListTile(
-                dense: true,
-                title: const Text('Dense layout'),
-                trailing: new Checkbox(
-                  value: _dense,
-                  onChanged: (bool value) {
-                    setState(() {
-                      _dense = value;
-                    });
-                    _bottomSheet?.setState(() { });
-                  },
                 ),
               ),
             ),
@@ -174,28 +107,29 @@ class _ListDemoState extends State<ListDemo> {
   Map<String, bool> valueToCheckboxState = <String, bool>{};
 
   Widget buildListTile(BuildContext context, int index) {
-    // if (index >= items.length) {
-    //   return new MergeSemantics(child: new _DraggableListItem<int>(index: index, child: null, onSwap: onSwap, ensureVisible: scrollTo, isDraggable: false));
-    // }
     final String item = items[index];
-    Widget secondary;
-    if (_itemType == _MaterialListType.twoLine) {
-      secondary = const Text('Additional item information.');
-    } else if (_itemType == _MaterialListType.threeLine) {
-      secondary = const Text(
-        'Even more additional list item information appears on line three.',
+    final Widget secondary = const Text(
+      'Even more additional list item information appears on line three.',
+    );
+    Widget listTile;
+    if (_itemType == _ReorderableListType.threeLine) {
+      listTile = new ListTile(
+      isThreeLine: true,
+      trailing: new Checkbox(value: valueToCheckboxState[item] ?? false, onChanged: (bool newValue) {setState(() {valueToCheckboxState[item] = newValue;});},),
+      title: new Text('This item represents $item.'),
+      subtitle: secondary,
+      leading: const Icon(Icons.drag_handle),
+    );
+    } else {
+      listTile = new Container(
+        height: 100.0, 
+        width: 100.0, 
+        child: new CircleAvatar(child: new Text(item), 
+          backgroundColor: Colors.green,
+        ),
       );
     }
-    final Widget listTile = new Container(height: 100.0, width: 100.0, child: new CircleAvatar(child: new Text(item), backgroundColor: Colors.green,));
     
-    // final Widget listTile = new ListTile(
-    //   isThreeLine: _itemType == _MaterialListType.threeLine,
-    //   dense: _dense,
-    //   trailing: new Checkbox(value: valueToCheckboxState[item] ?? false, onChanged: (bool newValue) {setState(() {valueToCheckboxState[item] = newValue;});},),
-    //   title: new Text('This item represents $item.'),
-    //   subtitle: secondary,
-    //   leading: const Icon(Icons.drag_handle),
-    // );
     return new MergeSemantics(
       key: new Key(item),
       child: listTile,
@@ -216,14 +150,14 @@ class _ListDemoState extends State<ListDemo> {
     final String layoutText = _dense ? ' \u2013 Dense' : '';
     String itemTypeText;
     switch (_itemType) {
-      case _MaterialListType.oneLine:
-      case _MaterialListType.oneLineWithAvatar:
+      case _ReorderableListType.oneLine:
+      case _ReorderableListType.oneLineWithAvatar:
         itemTypeText = 'Single-line';
         break;
-      case _MaterialListType.twoLine:
+      case _ReorderableListType.twoLine:
         itemTypeText = 'Two-line';
         break;
-      case _MaterialListType.threeLine:
+      case _ReorderableListType.threeLine:
         itemTypeText = 'Three-line';
         break;
     }

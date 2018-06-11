@@ -266,6 +266,14 @@ List<GalleryDemo> _buildGalleryDemos() {
       buildRoute: (BuildContext context) => const LeaveBehindDemo(),
     ),
     new GalleryDemo(
+      title: 'Lists: reorderable',
+      subtitle: 'Reorderable lists',
+      icon: GalleryIcons.list_alt,
+      category: _kMaterialComponents,
+      routeName: ReorderableListDemo.routeName,
+      buildRoute: (BuildContext context) => const ReorderableListDemo(),
+    ),
+    new GalleryDemo(
       title: 'Menus',
       subtitle: 'Menu buttons and simple menus',
       icon: GalleryIcons.more_vert,
