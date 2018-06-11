@@ -22,6 +22,12 @@ class FormatCommand extends FlutterCommand {
       defaultsTo: false,
       negatable: false,
     );
+    argParser.addFlag('machine',
+      abbr: 'm',
+      help: 'Produce machine-readable JSON output.',
+      defaultsTo: false,
+      negatable: false,
+    );
   }
 
   @override
@@ -50,12 +56,22 @@ class FormatCommand extends FlutterCommand {
     }
 
     final String dartfmt = sdkBinaryName('dartfmt');
+    final List<String> cmd = <String>[dartfmt];
 
-    final List<String> cmd = <String>[
-      dartfmt, argResults['dry-run'] ? '-n' : '-w'];
+    if (argResults['dry-run']) {
+      cmd.add('-n');
+    }
+    if (argResults['machine']) {
+      cmd.add('-m');
+    }
+    if (!argResults['dry-run'] && !argResults['machine']) {
+      cmd.add('-w');
+    }
+
     if (argResults['set-exit-if-changed']) {
       cmd.add('--set-exit-if-changed');
     }
+
     cmd..addAll(argResults.rest);
 
     final int result = await runCommandAndStreamOutput(cmd);
