@@ -58,7 +58,7 @@ class _ListDemoState extends State<ReorderableListDemo> {
                 dense: true,
                 title: const Text('Horizontal Avatars'),
                 trailing: new Radio<_ReorderableListType>(
-                  value: _showAvatars ? _ReorderableListType.horizontalAvatar,
+                  value:_ReorderableListType.horizontalAvatar,
                   groupValue: _itemType,
                   onChanged: changeItemType,
                 )
@@ -108,14 +108,21 @@ class _ListDemoState extends State<ReorderableListDemo> {
 
   Widget buildListTile(BuildContext context, int index) {
     final String item = items[index];
-    final Widget secondary = const Text(
+    const Widget secondary = const Text(
       'Even more additional list item information appears on line three.',
     );
     Widget listTile;
     if (_itemType == _ReorderableListType.threeLine) {
       listTile = new ListTile(
       isThreeLine: true,
-      trailing: new Checkbox(value: valueToCheckboxState[item] ?? false, onChanged: (bool newValue) {setState(() {valueToCheckboxState[item] = newValue;});},),
+      trailing: new Checkbox(
+        value: valueToCheckboxState[item] ?? false, 
+        onChanged: (bool newValue) {
+          setState(() {
+            valueToCheckboxState[item] = newValue;
+          });
+        },
+      ),
       title: new Text('This item represents $item.'),
       subtitle: secondary,
       leading: const Icon(Icons.drag_handle),
@@ -147,20 +154,6 @@ class _ListDemoState extends State<ReorderableListDemo> {
         items.insert(newIndex, item);
       });
     }
-    final String layoutText = _dense ? ' \u2013 Dense' : '';
-    String itemTypeText;
-    switch (_itemType) {
-      case _ReorderableListType.oneLine:
-      case _ReorderableListType.oneLineWithAvatar:
-        itemTypeText = 'Single-line';
-        break;
-      case _ReorderableListType.twoLine:
-        itemTypeText = 'Two-line';
-        break;
-      case _ReorderableListType.threeLine:
-        itemTypeText = 'Three-line';
-        break;
-    }
 
     final List<MergeSemantics> listTiles = <MergeSemantics>[];
     for (int i = 0; i < items.length; i++) {
@@ -170,7 +163,7 @@ class _ListDemoState extends State<ReorderableListDemo> {
     return new Scaffold(
       key: scaffoldKey,
       appBar: new AppBar(
-        title: new Text('Scrolling list\n$itemTypeText$layoutText'),
+        title: const Text('Reorderable list'),
         actions: <Widget>[
           new IconButton(
             icon: const Icon(Icons.sort_by_alpha),
@@ -192,9 +185,9 @@ class _ListDemoState extends State<ReorderableListDemo> {
       body: new Scrollbar(
         child: new ReorderableListView(
           onSwap: onSwap,
-          scrollDirection: Axis.horizontal,
+          scrollDirection: _itemType == _ReorderableListType.horizontalAvatar ? Axis.horizontal : Axis.vertical,
           children: listTiles,
-          padding: new EdgeInsets.symmetric(vertical: _dense ? 4.0 : 8.0),
+          padding: const EdgeInsets.symmetric(vertical: 8.0),
         ),
       ),
     );
