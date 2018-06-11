@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 
 import 'button.dart';
@@ -11,6 +10,7 @@ import 'button_theme.dart';
 import 'colors.dart';
 import 'constants.dart';
 import 'theme.dart';
+import 'theme_data.dart';
 
 /// A material design "raised button".
 ///
@@ -381,9 +381,6 @@ class RaisedButton extends StatelessWidget {
       shape: shape ?? buttonTheme.shape,
       animationDuration: animationDuration,
       child: child,
-      outerConstraints: theme.materialTapTargetSize == MaterialTapTargetSize.expanded
-        ? const BoxConstraints(minHeight: 48.0)
-        : null,
     );
   }
 

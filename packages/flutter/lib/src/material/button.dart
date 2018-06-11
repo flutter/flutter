@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 
 import 'button_theme.dart';
@@ -12,6 +11,7 @@ import 'constants.dart';
 import 'ink_well.dart';
 import 'material.dart';
 import 'theme.dart';
+import 'theme_data.dart';
 
 /// Creates a button based on [Semantics], [Material], and [InkWell]
 /// widgets.

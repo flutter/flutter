@@ -5,7 +5,6 @@
 import 'dart:async';
 import 'dart:math' as math;
 
-import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
@@ -18,6 +17,7 @@ import 'feedback.dart';
 import 'flat_button.dart';
 import 'material_localizations.dart';
 import 'theme.dart';
+import 'theme_data.dart';
 import 'time.dart';
 import 'typography.dart';
 

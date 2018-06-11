@@ -17,6 +17,7 @@ import 'ink_well.dart';
 import 'material.dart';
 import 'material_localizations.dart';
 import 'theme.dart';
+import 'theme_data.dart';
 import 'tooltip.dart';
 
 // Some design constants
@@ -37,8 +38,6 @@ const Duration _kDisableDuration = const Duration(milliseconds: 75);
 
 const Color _kSelectScrimColor = const Color(0x60191919);
 const Icon _kDefaultDeleteIcon = const Icon(Icons.cancel, size: _kDeleteIconSize);
-
-const BoxConstraints _kDefaultOuterConstraints = const BoxConstraints(minWidth: 48.0, minHeight: 48.0);
 
 /// An interface defining the base attributes for a material design chip.
 ///
@@ -101,13 +100,6 @@ abstract class ChipAttributes {
   /// By default, this is 4 logical pixels at the beginning and the end of the
   /// label, and zero on top and bottom.
   EdgeInsetsGeometry get labelPadding;
-
-  /// Constraints used to increase the gesture detector size without increasing
-  /// the visible material of the chip.
-  ///
-  /// Defaults to 48 dp minimum width and 48 dp minimum height. Passing null
-  /// removes the outer gesture detector.
-  BoxConstraints get outerConstraints;
 }
 
 /// An interface for material design chips that can be deleted.
@@ -432,7 +424,6 @@ class Chip extends StatelessWidget implements ChipAttributes, DeletableChipAttri
     this.shape,
     this.backgroundColor,
     this.padding,
-    this.outerConstraints = _kDefaultOuterConstraints,
   })  : assert(label != null),
         super(key: key);
 
@@ -458,8 +449,6 @@ class Chip extends StatelessWidget implements ChipAttributes, DeletableChipAttri
   final Color deleteIconColor;
   @override
   final String deleteButtonTooltipMessage;
-  @override
-  final BoxConstraints outerConstraints;
 
   @override
   Widget build(BuildContext context) {
@@ -478,7 +467,6 @@ class Chip extends StatelessWidget implements ChipAttributes, DeletableChipAttri
       backgroundColor: backgroundColor,
       padding: padding,
       isEnabled: true,
-      outerConstraints: outerConstraints,
     );
   }
 }
@@ -560,7 +548,6 @@ class InputChip extends StatelessWidget
     this.shape,
     this.backgroundColor,
     this.padding,
-    this.outerConstraints = _kDefaultOuterConstraints,
   })  : assert(selected != null),
         assert(isEnabled != null),
         assert(label != null),
@@ -602,8 +589,6 @@ class InputChip extends StatelessWidget
   final Color backgroundColor;
   @override
   final EdgeInsetsGeometry padding;
-  @override
-  final BoxConstraints outerConstraints;
 
   @override
   Widget build(BuildContext context) {
@@ -627,7 +612,6 @@ class InputChip extends StatelessWidget
       shape: shape,
       backgroundColor: backgroundColor,
       padding: padding,
-      outerConstraints: outerConstraints,
       isEnabled: isEnabled && (onSelected != null || onDeleted != null || onPressed != null),
     );
   }
@@ -706,7 +690,6 @@ class ChoiceChip extends StatelessWidget
     this.shape,
     this.backgroundColor,
     this.padding,
-    this.outerConstraints = _kDefaultOuterConstraints,
   })  : assert(selected != null),
         assert(label != null),
         super(key: key);
@@ -735,8 +718,6 @@ class ChoiceChip extends StatelessWidget
   final Color backgroundColor;
   @override
   final EdgeInsetsGeometry padding;
-  @override
-  final BoxConstraints outerConstraints;
 
   @override
   bool get isEnabled => onSelected != null;
@@ -761,7 +742,6 @@ class ChoiceChip extends StatelessWidget
       backgroundColor: backgroundColor,
       padding: padding,
       isEnabled: isEnabled,
-      outerConstraints: outerConstraints,
     );
   }
 }
@@ -873,7 +853,6 @@ class FilterChip extends StatelessWidget
     this.shape,
     this.backgroundColor,
     this.padding,
-    this.outerConstraints = _kDefaultOuterConstraints,
   })  : assert(selected != null),
         assert(label != null),
         super(key: key);
@@ -902,8 +881,6 @@ class FilterChip extends StatelessWidget
   final Color backgroundColor;
   @override
   final EdgeInsetsGeometry padding;
-  @override
-  final BoxConstraints outerConstraints;
 
   @override
   bool get isEnabled => onSelected != null;
@@ -925,7 +902,6 @@ class FilterChip extends StatelessWidget
       selectedColor: selectedColor,
       padding: padding,
       isEnabled: isEnabled,
-      outerConstraints: outerConstraints,
     );
   }
 }
@@ -991,7 +967,6 @@ class ActionChip extends StatelessWidget implements ChipAttributes, TappableChip
     this.shape,
     this.backgroundColor,
     this.padding,
-    this.outerConstraints = _kDefaultOuterConstraints,
   })  : assert(label != null),
         assert(
           onPressed != null,
@@ -1018,8 +993,6 @@ class ActionChip extends StatelessWidget implements ChipAttributes, TappableChip
   final Color backgroundColor;
   @override
   final EdgeInsetsGeometry padding;
-  @override
-  final BoxConstraints outerConstraints;
 
   @override
   Widget build(BuildContext context) {
@@ -1035,7 +1008,6 @@ class ActionChip extends StatelessWidget implements ChipAttributes, TappableChip
       padding: padding,
       labelPadding: labelPadding,
       isEnabled: true,
-      outerConstraints: outerConstraints,
     );
   }
 }
@@ -1105,7 +1077,6 @@ class RawChip extends StatefulWidget
     this.tooltip,
     this.shape,
     this.backgroundColor,
-    this.outerConstraints = _kDefaultOuterConstraints,
   })  : assert(label != null),
         assert(isEnabled != null),
         deleteIcon = deleteIcon ?? _kDefaultDeleteIcon,
@@ -1147,8 +1118,6 @@ class RawChip extends StatefulWidget
   final Color backgroundColor;
   @override
   final EdgeInsetsGeometry padding;
-  @override
-  final BoxConstraints outerConstraints;
 
   /// Whether or not to show a check mark when [selected] is true.
   ///
@@ -1463,26 +1432,29 @@ class _RawChipState extends State<RawChip> with TickerProviderStateMixin<RawChip
         ),
       ),
     );
-    if (widget.outerConstraints != null) {
-      result = new ConstrainedBox(
-        constraints: widget.outerConstraints,
-        child: new Center(
-          child: result,
-          widthFactor: 1.0,
-          heightFactor: 1.0,
-        ),
-      );
-
-      if (canTap) {
-        result = new GestureDetector(
-          behavior: HitTestBehavior.translucent,
-          onTap: _handleTap,
-          onTapDown: _handleTapDown,
-          onTapCancel: _handleTapCancel,
-          child: result,
-          excludeFromSemantics: true,
+    switch(theme.materialTapTargetSize) {
+      case MaterialTapTargetSize.expanded:
+        result = new ConstrainedBox(
+          constraints: const BoxConstraints(minWidth: 48.0, minHeight: 48.0),
+          child: new Center(
+            child: result,
+            widthFactor: 1.0,
+            heightFactor: 1.0,
+          ),
         );
-      }
+
+        if (canTap) {
+          result = new GestureDetector(
+            behavior: HitTestBehavior.translucent,
+            onTap: _handleTap,
+            onTapDown: _handleTapDown,
+            onTapCancel: _handleTapCancel,
+            child: result,
+            excludeFromSemantics: true,
+          );
+        }
+        break;
+      case MaterialTapTargetSize.collapsed:
     }
 
     return new Semantics(
