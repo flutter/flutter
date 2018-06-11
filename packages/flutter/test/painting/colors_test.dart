@@ -5,7 +5,7 @@
 import 'package:flutter/painting.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-const double _doubleColorPrecision = 0.005;
+const double _doubleColorPrecision = 0.01;
 
 void main() {
   test('HSVColor control test', () {
@@ -29,27 +29,179 @@ void main() {
     expect(result.value, 0.5);
   });
 
-  test('HSVColor converts RGB colors correctly.', () {
-    void testColor(Color color, double alpha, double hue, double saturation, double value) {
-      final HSVColor fromRGB = new HSVColor.fromColor(color);
-      expect(fromRGB.alpha, closeTo(alpha, _doubleColorPrecision));
-      expect(fromRGB.hue, closeTo(hue, _doubleColorPrecision));
-      expect(fromRGB.saturation, closeTo(saturation, _doubleColorPrecision));
-      expect(fromRGB.value, closeTo(value, _doubleColorPrecision));
-      expect(fromRGB.toColor(), equals(color));
-
-      final HSVColor fromHSV = new HSVColor.fromAHSV(alpha, hue, saturation, value);
-      expect(fromHSV.toColor(), equals(color));
+  test('HSVColor hue sweep test', () {
+    final List<Color> output = <Color>[];
+    for (double hue = 0.0; hue <= 360.0; hue += 36.0) {
+      final HSVColor hsvColor = new HSVColor.fromAHSV(1.0, hue, 1.0, 1.0);
+      final Color color = hsvColor.toColor();
+      output.add(color);
+      if (hue != 360.0) {
+        // Check that it's reversible.
+        expect(
+          new HSVColor.fromColor(color),
+          within<HSVColor>(distance: _doubleColorPrecision, from: hsvColor),
+        );
+      }
     }
+    final List<Color> expectedColors = <Color>[
+      const Color(0xffff0000),
+      const Color(0xffff9900),
+      const Color(0xffccff00),
+      const Color(0xff33ff00),
+      const Color(0xff00ff66),
+      const Color(0xff00ffff),
+      const Color(0xff0066ff),
+      const Color(0xff3300ff),
+      const Color(0xffcc00ff),
+      const Color(0xffff0099),
+      const Color(0xffff0000),
+    ];
+    expect(output, equals(expectedColors));
+  });
 
-    testColor(const Color(0xffffffff), 1.0, 0.0, 0.0, 1.0); // White
-    testColor(const Color(0xff000000), 1.0, 0.0, 0.0, 0.0); // Black
-    testColor(const Color(0xff808080), 1.0, 0.0, 0.0, 0.5); // Middle grey
-    testColor(const Color(0xffff0000), 1.0, 0.0, 1.0, 1.0); // Red primary
-    testColor(const Color(0xff00ff00), 1.0, 120.0, 1.0, 1.0); // Green primary
-    testColor(const Color(0xff0000ff), 1.0, 240.0, 1.0, 1.0); // Blue primary
-    testColor(const Color(0xffffffff).withAlpha(0x40), 0.25, 0.0, 0.0, 1.0); // With transparency.
-    testColor(const Color(0xff000000).withAlpha(0xbf), 0.75, 0.0, 0.0, 0.0); // With transparency.
+  test('HSVColor saturation sweep test', () {
+    final List<Color> output = <Color>[];
+    for (double saturation = 0.0; saturation < 1.0; saturation += 0.1) {
+      final HSVColor hslColor = new HSVColor.fromAHSV(1.0, 0.0, saturation, 1.0);
+      final Color color = hslColor.toColor();
+      output.add(color);
+      // Check that it's reversible.
+      expect(
+        new HSVColor.fromColor(color),
+        within<HSVColor>(distance: _doubleColorPrecision, from: hslColor),
+      );
+    }
+    final List<Color> expectedColors = <Color>[
+      const Color(0xffffffff),
+      const Color(0xffffe6e6),
+      const Color(0xffffcccc),
+      const Color(0xffffb3b3),
+      const Color(0xffff9999),
+      const Color(0xffff8080),
+      const Color(0xffff6666),
+      const Color(0xffff4d4d),
+      const Color(0xffff3333),
+      const Color(0xffff1a1a),
+      const Color(0xffff0000),
+    ];
+    expect(output, equals(expectedColors));
+  });
+
+  test('HSVColor value sweep test', () {
+    final List<Color> output = <Color>[];
+    for (double value = 0.0; value < 1.0; value += 0.1) {
+      final HSVColor hsvColor = new HSVColor.fromAHSV(1.0, 0.0, 1.0, value);
+      final Color color = hsvColor.toColor();
+      output.add(color);
+      // Check that it's reversible. Discontinuities at the ends for saturation,
+      // so we skip those.
+      if (value >= _doubleColorPrecision && value <= (1.0 - _doubleColorPrecision)) {
+        expect(
+          new HSVColor.fromColor(color),
+          within<HSVColor>(distance: _doubleColorPrecision, from: hsvColor),
+        );
+      }
+      // output.add(new HSVColor.fromAHSV(1.0, 0.0, 1.0, value).toColor());
+    }
+    final List<Color> expectedColors = <Color>[
+      const Color(0xff000000),
+      const Color(0xff1a0000),
+      const Color(0xff330000),
+      const Color(0xff4d0000),
+      const Color(0xff660000),
+      const Color(0xff800000),
+      const Color(0xff990000),
+      const Color(0xffb30000),
+      const Color(0xffcc0000),
+      const Color(0xffe50000),
+      const Color(0xffff0000),
+    ];
+    expect(output, equals(expectedColors));
+  });
+
+  test('HSVColor lerps hue correctly.', () {
+    final List<Color> output = <Color>[];
+    const HSVColor startColor = const HSVColor.fromAHSV(1.0, 0.0, 1.0, 1.0);
+    const HSVColor endColor = const HSVColor.fromAHSV(1.0, 360.0, 1.0, 1.0);
+
+    for (double t = -0.5; t < 1.5; t += 0.1) {
+      output.add(HSVColor.lerp(startColor, endColor, t).toColor());
+    }
+    final List<Color> expectedColors = <Color>[
+      const Color(0xff00ffff),
+      const Color(0xff0066ff),
+      const Color(0xff3300ff),
+      const Color(0xffcc00ff),
+      const Color(0xffff0099),
+      const Color(0xffff0000),
+      const Color(0xffff9900),
+      const Color(0xffccff00),
+      const Color(0xff33ff00),
+      const Color(0xff00ff66),
+      const Color(0xff00ffff),
+      const Color(0xff0066ff),
+      const Color(0xff3300ff),
+      const Color(0xffcc00ff),
+      const Color(0xffff0099),
+      const Color(0xffff0000),
+      const Color(0xffff9900),
+      const Color(0xffccff00),
+      const Color(0xff33ff00),
+      const Color(0xff00ff66),
+    ];
+    expect(output, equals(expectedColors));
+  });
+
+  test('HSVColor lerps saturation correctly.', () {
+    final List<Color> output = <Color>[];
+    const HSVColor startColor = const HSVColor.fromAHSV(1.0, 0.0, 0.0, 1.0);
+    const HSVColor endColor = const HSVColor.fromAHSV(1.0, 0.0, 1.0, 1.0);
+
+    for (double t = -0.1; t < 1.1; t += 0.1) {
+      output.add(HSVColor.lerp(startColor, endColor, t).toColor());
+    }
+    final List<Color> expectedColors = <Color>[
+      const Color(0xffffffff),
+      const Color(0xffffffff),
+      const Color(0xffffe6e6),
+      const Color(0xffffcccc),
+      const Color(0xffffb3b3),
+      const Color(0xffff9999),
+      const Color(0xffff8080),
+      const Color(0xffff6666),
+      const Color(0xffff4d4d),
+      const Color(0xffff3333),
+      const Color(0xffff1a1a),
+      const Color(0xffff0000),
+      const Color(0xffff0000),
+    ];
+    expect(output, equals(expectedColors));
+  });
+
+  test('HSVColor lerps value correctly.', () {
+    final List<Color> output = <Color>[];
+    const HSVColor startColor = const HSVColor.fromAHSV(1.0, 0.0, 1.0, 0.0);
+    const HSVColor endColor = const HSVColor.fromAHSV(1.0, 0.0, 1.0, 1.0);
+
+    for (double t = -0.1; t < 1.1; t += 0.1) {
+      output.add(HSVColor.lerp(startColor, endColor, t).toColor());
+    }
+    final List<Color> expectedColors = <Color>[
+      const Color(0xff000000),
+      const Color(0xff000000),
+      const Color(0xff1a0000),
+      const Color(0xff330000),
+      const Color(0xff4d0000),
+      const Color(0xff660000),
+      const Color(0xff800000),
+      const Color(0xff990000),
+      const Color(0xffb30000),
+      const Color(0xffcc0000),
+      const Color(0xffe50000),
+      const Color(0xffff0000),
+      const Color(0xffff0000),
+    ];
+    expect(output, equals(expectedColors));
   });
 
   test('HSLColor control test', () {
@@ -61,7 +213,7 @@ void main() {
     expect(color.withAlpha(0.8), const HSLColor.fromAHSL(0.8, 28.0, 0.3, 0.6));
     expect(color.withHue(123.0), const HSLColor.fromAHSL(0.7, 123.0, 0.3, 0.6));
     expect(color.withSaturation(0.9), const HSLColor.fromAHSL(0.7, 28.0, 0.9, 0.6));
-    expect(color.withValue(0.1), const HSLColor.fromAHSL(0.7, 28.0, 0.3, 0.1));
+    expect(color.withLightness(0.1), const HSLColor.fromAHSL(0.7, 28.0, 0.3, 0.1));
 
     expect(color.toColor(), const Color(0xb3b8977a));
 
@@ -73,33 +225,185 @@ void main() {
     expect(result.lightness, 0.5);
   });
 
-  test('HSLColor converts RGB colors correctly.', () {
-    void testColor(Color color, double alpha, double hue, double saturation, double lightness) {
-      final HSLColor fromRGB = new HSLColor.fromColor(color);
-      expect(fromRGB.alpha, closeTo(alpha, _doubleColorPrecision));
-      expect(fromRGB.hue, closeTo(hue, _doubleColorPrecision));
-      expect(fromRGB.saturation, closeTo(saturation, _doubleColorPrecision));
-      expect(fromRGB.lightness, closeTo(lightness, _doubleColorPrecision));
-      expect(fromRGB.toColor(), equals(color));
-
-      final HSLColor fromHSL = new HSLColor.fromAHSL(alpha, hue, saturation, lightness);
-      expect(fromHSL.toColor(), equals(color));
+  test('HSLColor hue sweep test', () {
+    final List<Color> output = <Color>[];
+    for (double hue = 0.0; hue <= 360.0; hue += 36.0) {
+      final HSLColor hslColor = new HSLColor.fromAHSL(1.0, hue, 0.5, 0.5);
+      final Color color = hslColor.toColor();
+      output.add(color);
+      if (hue != 360.0) {
+        // Check that it's reversible.
+        expect(
+          new HSLColor.fromColor(color),
+          within<HSLColor>(distance: _doubleColorPrecision, from: hslColor),
+        );
+      }
     }
+    final List<Color> expectedColors = <Color>[
+      const Color(0xffbf4040),
+      const Color(0xffbf8c40),
+      const Color(0xffa6bf40),
+      const Color(0xff59bf40),
+      const Color(0xff40bf73),
+      const Color(0xff40bfbf),
+      const Color(0xff4073bf),
+      const Color(0xff5940bf),
+      const Color(0xffa640bf),
+      const Color(0xffbf408c),
+      const Color(0xffbf4040),
+    ];
+    expect(output, equals(expectedColors));
+  });
 
-    testColor(const Color(0xffffffff), 1.0, 0.0, 0.0, 1.0);
-    testColor(const Color(0xff000000), 1.0, 0.0, 0.0, 0.0);
-    testColor(const Color(0xff808080), 1.0, 0.0, 0.0, 0.5); // Middle grey
-    testColor(const Color(0xffff0000), 1.0, 0.0, 1.0, 0.5); // Red primary
-    testColor(const Color(0xff00ff00), 1.0, 120.0, 1.0, 0.5); // Green primary
-    testColor(const Color(0xff0000ff), 1.0, 240.0, 1.0, 0.5); // Blue primary
-    testColor(const Color(0xffffffff).withAlpha(0x40), 0.25, 0.0, 0.0, 1.0); // With transparency.
-    testColor(const Color(0xff000000).withAlpha(0xbf), 0.75, 0.0, 0.0, 0.0); // With transparency.
+  test('HSLColor saturation sweep test', () {
+    final List<Color> output = <Color>[];
+    for (double saturation = 0.0; saturation < 1.0; saturation += 0.1) {
+      final HSLColor hslColor = new HSLColor.fromAHSL(1.0, 0.0, saturation, 0.5);
+      final Color color = hslColor.toColor();
+      output.add(color);
+      // Check that it's reversible.
+      expect(
+        new HSLColor.fromColor(color),
+        within<HSLColor>(distance: _doubleColorPrecision, from: hslColor),
+      );
+    }
+    final List<Color> expectedColors = <Color>[
+      const Color(0xff808080),
+      const Color(0xff8c7373),
+      const Color(0xff996666),
+      const Color(0xffa65959),
+      const Color(0xffb34d4d),
+      const Color(0xffbf4040),
+      const Color(0xffcc3333),
+      const Color(0xffd92626),
+      const Color(0xffe51a1a),
+      const Color(0xfff20d0d),
+      const Color(0xffff0000),
+    ];
+    expect(output, equals(expectedColors));
+  });
+
+  test('HSLColor lightness sweep test', () {
+    final List<Color> output = <Color>[];
+    for (double lightness = 0.0; lightness < 1.0; lightness += 0.1) {
+      final HSLColor hslColor = new HSLColor.fromAHSL(1.0, 0.0, 0.5, lightness);
+      final Color color = hslColor.toColor();
+      output.add(color);
+      // Check that it's reversible. Discontinuities at the ends for saturation,
+      // so we skip those.
+      if (lightness >= _doubleColorPrecision && lightness <= (1.0 - _doubleColorPrecision)) {
+        expect(
+          new HSLColor.fromColor(color),
+          within<HSLColor>(distance: _doubleColorPrecision, from: hslColor),
+        );
+      }
+    }
+    final List<Color> expectedColors = <Color>[
+      const Color(0xff000000),
+      const Color(0xff260d0d),
+      const Color(0xff4d1a1a),
+      const Color(0xff732626),
+      const Color(0xff993333),
+      const Color(0xffbf4040),
+      const Color(0xffcc6666),
+      const Color(0xffd98c8c),
+      const Color(0xffe6b3b3),
+      const Color(0xfff2d9d9),
+      const Color(0xffffffff),
+    ];
+    expect(output, equals(expectedColors));
+  });
+
+  test('HSLColor lerps hue correctly.', () {
+    final List<Color> output = <Color>[];
+    const HSLColor startColor = const HSLColor.fromAHSL(1.0, 0.0, 0.5, 0.5);
+    const HSLColor endColor = const HSLColor.fromAHSL(1.0, 360.0, 0.5, 0.5);
+
+    for (double t = -0.5; t < 1.5; t += 0.1) {
+      output.add(HSLColor.lerp(startColor, endColor, t).toColor());
+    }
+    final List<Color> expectedColors = <Color>[
+      const Color(0xff40bfbf),
+      const Color(0xff4073bf),
+      const Color(0xff5940bf),
+      const Color(0xffa640bf),
+      const Color(0xffbf408c),
+      const Color(0xffbf4040),
+      const Color(0xffbf8c40),
+      const Color(0xffa6bf40),
+      const Color(0xff59bf40),
+      const Color(0xff40bf73),
+      const Color(0xff40bfbf),
+      const Color(0xff4073bf),
+      const Color(0xff5940bf),
+      const Color(0xffa640bf),
+      const Color(0xffbf408c),
+      const Color(0xffbf4040),
+      const Color(0xffbf8c40),
+      const Color(0xffa6bf40),
+      const Color(0xff59bf40),
+      const Color(0xff40bf73),
+    ];
+    expect(output, equals(expectedColors));
+  });
+
+  test('HSLColor lerps saturation correctly.', () {
+    final List<Color> output = <Color>[];
+    const HSLColor startColor = const HSLColor.fromAHSL(1.0, 0.0, 0.0, 0.5);
+    const HSLColor endColor = const HSLColor.fromAHSL(1.0, 0.0, 1.0, 0.5);
+
+    for (double t = -0.1; t < 1.1; t += 0.1) {
+      output.add(HSLColor.lerp(startColor, endColor, t).toColor());
+    }
+    final List<Color> expectedColors = <Color>[
+      const Color(0xff808080),
+      const Color(0xff808080),
+      const Color(0xff8c7373),
+      const Color(0xff996666),
+      const Color(0xffa65959),
+      const Color(0xffb34d4d),
+      const Color(0xffbf4040),
+      const Color(0xffcc3333),
+      const Color(0xffd92626),
+      const Color(0xffe51a1a),
+      const Color(0xfff20d0d),
+      const Color(0xffff0000),
+      const Color(0xffff0000),
+    ];
+    expect(output, equals(expectedColors));
+  });
+
+  test('HSLColor lerps lightness correctly.', () {
+    final List<Color> output = <Color>[];
+    const HSLColor startColor = const HSLColor.fromAHSL(1.0, 0.0, 0.5, 0.0);
+    const HSLColor endColor = const HSLColor.fromAHSL(1.0, 0.0, 0.5, 1.0);
+
+    for (double t = -0.1; t < 1.1; t += 0.1) {
+      output.add(HSLColor.lerp(startColor, endColor, t).toColor());
+    }
+    final List<Color> expectedColors = <Color>[
+      const Color(0xff000000),
+      const Color(0xff000000),
+      const Color(0xff260d0d),
+      const Color(0xff4d1a1a),
+      const Color(0xff732626),
+      const Color(0xff993333),
+      const Color(0xffbf4040),
+      const Color(0xffcc6666),
+      const Color(0xffd98c8c),
+      const Color(0xffe6b3b3),
+      const Color(0xfff2d9d9),
+      const Color(0xffffffff),
+      const Color(0xffffffff),
+    ];
+    expect(output, equals(expectedColors));
   });
 
   test('ColorSwatch test', () {
     final int color = nonconst(0xFF027223);
     final ColorSwatch<String> greens1 = new ColorSwatch<String>(
-      color, const <String, Color>{
+      color,
+      const <String, Color>{
         '2259 C': const Color(0xFF027223),
         '2273 C': const Color(0xFF257226),
         '2426 XGC': const Color(0xFF00932F),
@@ -107,7 +411,8 @@ void main() {
       },
     );
     final ColorSwatch<String> greens2 = new ColorSwatch<String>(
-      color, const <String, Color>{
+      color,
+      const <String, Color>{
         '2259 C': const Color(0xFF027223),
         '2273 C': const Color(0xFF257226),
         '2426 XGC': const Color(0xFF00932F),
@@ -118,55 +423,5 @@ void main() {
     expect(greens1.hashCode, greens2.hashCode);
     expect(greens1['2259 C'], const Color(0xFF027223));
     expect(greens1.value, 0xFF027223);
-  });
-
-  test('HSVColor lerps correctly.', () {
-    final HSVColor white = HSVColor.fromColor(const Color(0xffffffff));
-    final HSVColor black = HSVColor.fromColor(const Color(0xff000000));
-    final HSVColor quarterGrey = HSVColor.fromColor(const Color(0xff404040));
-    final HSVColor middleGrey = HSVColor.fromColor(const Color(0xff808080));
-    final HSVColor threeQuarterGrey = HSVColor.fromColor(const Color(0xffbfbfbf));
-    final HSVColor redPrimary = HSVColor.fromColor(const Color(0xffff0000));
-    final HSVColor greenPrimary = HSVColor.fromColor(const Color(0xff00ff00));
-    final HSVColor bluePrimary = HSVColor.fromColor(const Color(0xff0000ff));
-    final HSVColor yellow = HSVColor.fromColor(const Color(0xffffff00));
-    final HSVColor cyan = HSVColor.fromColor(const Color(0xff00ffff));
-    expect(HSVColor.lerp(white, black, 0.25), within<HSVColor>(distance: _doubleColorPrecision, from: threeQuarterGrey));
-    expect(HSVColor.lerp(white, black, 0.5), within<HSVColor>(distance: _doubleColorPrecision, from: middleGrey));
-    expect(HSVColor.lerp(white, black, 0.75), within<HSVColor>(distance: _doubleColorPrecision, from: quarterGrey));
-    expect(HSVColor.lerp(white.withAlpha(0.0), black, 0.25), within<HSVColor>(distance: _doubleColorPrecision, from: threeQuarterGrey.withAlpha(0.25)));
-    expect(HSVColor.lerp(white.withAlpha(0.0), black, 0.5), within<HSVColor>(distance: _doubleColorPrecision, from: middleGrey.withAlpha(0.5)));
-    expect(HSVColor.lerp(white.withAlpha(0.0), black, 0.75), within<HSVColor>(distance: _doubleColorPrecision, from: quarterGrey.withAlpha(0.75)));
-    expect(HSVColor.lerp(redPrimary, greenPrimary, 0.5), within<HSVColor>(distance: _doubleColorPrecision, from: yellow));
-    expect(HSVColor.lerp(redPrimary, bluePrimary, 0.5), within<HSVColor>(distance: _doubleColorPrecision, from: greenPrimary));
-    expect(HSVColor.lerp(greenPrimary, bluePrimary, 0.5), within<HSVColor>(distance: _doubleColorPrecision, from: cyan));
-    expect(HSVColor.lerp(greenPrimary, redPrimary, 0.5), within<HSVColor>(distance: _doubleColorPrecision, from: yellow));
-    expect(HSVColor.lerp(bluePrimary, greenPrimary, 0.5), within<HSVColor>(distance: _doubleColorPrecision, from: cyan));
-    expect(HSVColor.lerp(bluePrimary, redPrimary, 0.5), within<HSVColor>(distance: _doubleColorPrecision, from: greenPrimary));
-  });
-
-  test('HSLColor lerps correctly.', () {
-    final HSLColor white = HSLColor.fromColor(const Color(0xffffffff));
-    final HSLColor black = HSLColor.fromColor(const Color(0xff000000));
-    final HSLColor quarterGrey = HSLColor.fromColor(const Color(0xff404040));
-    final HSLColor middleGrey = HSLColor.fromColor(const Color(0xff808080));
-    final HSLColor threeQuarterGrey = HSLColor.fromColor(const Color(0xffbfbfbf));
-    final HSLColor redPrimary = HSLColor.fromColor(const Color(0xffff0000));
-    final HSLColor greenPrimary = HSLColor.fromColor(const Color(0xff00ff00));
-    final HSLColor bluePrimary = HSLColor.fromColor(const Color(0xff0000ff));
-    final HSLColor yellow = HSLColor.fromColor(const Color(0xffffff00));
-    final HSLColor cyan = HSLColor.fromColor(const Color(0xff00ffff));
-    expect(HSLColor.lerp(white, black, 0.25), within<HSLColor>(distance: _doubleColorPrecision, from: threeQuarterGrey));
-    expect(HSLColor.lerp(white, black, 0.5), within<HSLColor>(distance: _doubleColorPrecision, from: middleGrey));
-    expect(HSLColor.lerp(white, black, 0.75), within<HSLColor>(distance: _doubleColorPrecision, from: quarterGrey));
-    expect(HSLColor.lerp(white.withAlpha(0.0), black, 0.25), within<HSLColor>(distance: _doubleColorPrecision, from: threeQuarterGrey.withAlpha(0.25)));
-    expect(HSLColor.lerp(white.withAlpha(0.0), black, 0.5), within<HSLColor>(distance: _doubleColorPrecision, from: middleGrey.withAlpha(0.5)));
-    expect(HSLColor.lerp(white.withAlpha(0.0), black, 0.75), within<HSLColor>(distance: _doubleColorPrecision, from: quarterGrey.withAlpha(0.75)));
-    expect(HSLColor.lerp(redPrimary, greenPrimary, 0.5), within<HSLColor>(distance: _doubleColorPrecision, from: yellow));
-    expect(HSLColor.lerp(redPrimary, bluePrimary, 0.5), within<HSLColor>(distance: _doubleColorPrecision, from: greenPrimary));
-    expect(HSLColor.lerp(greenPrimary, bluePrimary, 0.5), within<HSLColor>(distance: _doubleColorPrecision, from: cyan));
-    expect(HSLColor.lerp(greenPrimary, redPrimary, 0.5), within<HSLColor>(distance: _doubleColorPrecision, from: yellow));
-    expect(HSLColor.lerp(bluePrimary, greenPrimary, 0.5), within<HSLColor>(distance: _doubleColorPrecision, from: cyan));
-    expect(HSLColor.lerp(bluePrimary, redPrimary, 0.5), within<HSLColor>(distance: _doubleColorPrecision, from: greenPrimary));
   });
 }

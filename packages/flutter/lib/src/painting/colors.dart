@@ -7,6 +7,61 @@ import 'dart:ui' show Color, lerpDouble, hashValues;
 
 import 'package:flutter/foundation.dart';
 
+double _getHue(double red, double green, double blue, double max, double delta) {
+  double hue;
+  if (max == 0.0) {
+    hue = 0.0;
+  } else if (max == red) {
+    hue = 60.0 * (((green - blue) / delta) % 6);
+  } else if (max == green) {
+    hue = 60.0 * (((blue - red) / delta) + 2);
+  } else if (max == blue) {
+    hue = 60.0 * (((red - green) / delta) + 4);
+  }
+
+  /// Set hue to 0.0 when red == green == blue.
+  hue = hue.isNaN ? 0.0 : hue;
+  return hue;
+}
+
+Color _colorFromHue(
+  double alpha,
+  double hue,
+  double chroma,
+  double secondary,
+  double match,
+) {
+  double red;
+  double green;
+  double blue;
+  if (hue < 60.0) {
+    red = chroma;
+    green = secondary;
+    blue = 0.0;
+  } else if (hue < 120.0) {
+    red = secondary;
+    green = chroma;
+    blue = 0.0;
+  } else if (hue < 180.0) {
+    red = 0.0;
+    green = chroma;
+    blue = secondary;
+  } else if (hue < 240.0) {
+    red = 0.0;
+    green = secondary;
+    blue = chroma;
+  } else if (hue < 300.0) {
+    red = secondary;
+    green = 0.0;
+    blue = chroma;
+  } else {
+    red = chroma;
+    green = 0.0;
+    blue = secondary;
+  }
+  return new Color.fromARGB((alpha * 0xFF).round(), ((red + match) * 0xFF).round(), ((green + match) * 0xFF).round(), ((blue + match) * 0xFF).round());
+}
+
 /// A color represented using [alpha], [hue], [saturation], and [value].
 ///
 /// An [HSVColor] is represented in a parameter space that's motivated by human
@@ -42,7 +97,6 @@ class HSVColor {
   /// This constructor does not necessarily round-trip with [toColor] because
   /// of floating point imprecision.
   factory HSVColor.fromColor(Color color) {
-    final double alpha = color.alpha / 0xFF;
     final double red = color.red / 0xFF;
     final double green = color.green / 0xFF;
     final double blue = color.blue / 0xFF;
@@ -51,98 +105,66 @@ class HSVColor {
     final double min = math.min(red, math.min(green, blue));
     final double delta = max - min;
 
-    double hue = 0.0;
-
-    if (max == 0.0) {
-      hue = 0.0;
-    } else if (max == red) {
-      hue = 60.0 * (((green - blue) / delta) % 6);
-    } else if (max == green) {
-      hue = 60.0 * (((blue - red) / delta) + 2);
-    } else if (max == blue) {
-      hue = 60.0 * (((red - green) / delta) + 4);
-    }
-
-    /// fix hue to 0.0 when red == green == blue.
-    hue = hue.isNaN ? 0.0 : hue;
+    final double alpha = color.alpha / 0xFF;
+    final double hue = _getHue(red, green, blue, max, delta);
     final double saturation = max == 0.0 ? 0.0 : delta / max;
 
     return new HSVColor.fromAHSV(alpha, hue, saturation, max);
   }
 
-  /// Alpha, from 0.0 to 1.0.
+  /// Alpha, from 0.0 to 1.0. The describes the transparency of the color.
+  /// A value of 0.0 is fully transparent, and 1.0 is fully opaque.
   final double alpha;
 
-  /// Hue, from 0.0 to 360.0.
+  /// Hue, from 0.0 to 360.0. Describes which color of the spectrum is
+  /// represented. A value of 0.0 represents red, as does 360.0. Values in
+  /// between go through all the hues representable in RGB. You can think of
+  /// this as selecting which pigment will be added.
   final double hue;
 
-  /// Saturation, from 0.0 to 1.0.
+  /// Saturation, from 0.0 to 1.0. This describes how colorful the color is.
+  /// 0.0 implies a shade of grey (i.e. no pigment), and 1.0 implies a color as
+  /// vibrant as that hue gets. You can think of this as the equivalent of
+  /// adding more pigment to get more color.
   final double saturation;
 
-  /// Value, from 0.0 to 1.0.
+  /// Value, from 0.0 to 1.0. The "value" of a color that, in this context,
+  /// describes how bright a color is. A value of 0.0 indicates black, and 1.0
+  /// indicates full intensity color. You can think of this as the equivalent of
+  /// removing black from the color as value increases.
   final double value;
 
-  /// Returns a copy of this color with the alpha parameter replaced with the given value.
+  /// Returns a copy of this color with the [alpha] parameter replaced with the
+  /// given value.
   HSVColor withAlpha(double alpha) {
     return new HSVColor.fromAHSV(alpha, hue, saturation, value);
   }
 
-  /// Returns a copy of this color with the hue parameter replaced with the given value.
+  /// Returns a copy of this color with the [hue] parameter replaced with the
+  /// given value.
   HSVColor withHue(double hue) {
     return new HSVColor.fromAHSV(alpha, hue, saturation, value);
   }
 
-  /// Returns a copy of this color with the saturation parameter replaced with the given value.
+  /// Returns a copy of this color with the [saturation] parameter replaced with
+  /// the given value.
   HSVColor withSaturation(double saturation) {
     return new HSVColor.fromAHSV(alpha, hue, saturation, value);
   }
 
-  /// Returns a copy of this color with the value parameter replaced with the given value.
+  /// Returns a copy of this color with the [value] parameter replaced with the
+  /// given value.
   HSVColor withValue(double value) {
     return new HSVColor.fromAHSV(alpha, hue, saturation, value);
   }
 
   /// Returns this color in RGB.
   Color toColor() {
-    final double h = hue % 360;
-    final double c = saturation * value;
-    final double x = c * (1 - (((h / 60.0) % 2) - 1).abs());
-    final double m = value - c;
+    final double chroma = saturation * value;
+    final double secondary = chroma * (1.0 - (((hue / 60.0) % 2.0) - 1.0).abs());
+    final double match = value - chroma;
 
-    double r;
-    double g;
-    double b;
-    if (h < 60.0) {
-      r = c;
-      g = x;
-      b = 0.0;
-    } else if (h < 120.0) {
-      r = x;
-      g = c;
-      b = 0.0;
-    } else if (h < 180.0) {
-      r = 0.0;
-      g = c;
-      b = x;
-    } else if (h < 240.0) {
-      r = 0.0;
-      g = x;
-      b = c;
-    } else if (h < 300.0) {
-      r = x;
-      g = 0.0;
-      b = c;
-    } else {
-      r = c;
-      g = 0.0;
-      b = x;
-    }
-    return new Color.fromARGB(
-      (alpha   * 0xFF).round(),
-      ((r + m) * 0xFF).round(),
-      ((g + m) * 0xFF).round(),
-      ((b + m) * 0xFF).round()
-    );
+    return _colorFromHue(alpha, hue, chroma, secondary, match);
   }
 
   HSVColor _scaleAlpha(double factor) {
@@ -185,7 +207,7 @@ class HSVColor {
       return a._scaleAlpha(1.0 - t);
     return new HSVColor.fromAHSV(
       lerpDouble(a.alpha, b.alpha, t).clamp(0.0, 1.0),
-      lerpDouble(a.hue, b.hue, t).clamp(0.0, 360.0),
+      lerpDouble(a.hue, b.hue, t) % 360.0,
       lerpDouble(a.saturation, b.saturation, t).clamp(0.0, 1.0),
       lerpDouble(a.value, b.value, t).clamp(0.0, 1.0),
     );
@@ -208,19 +230,19 @@ class HSVColor {
   int get hashCode => hashValues(alpha, hue, saturation, value);
 
   @override
-  String toString() => 'HSVColor($alpha, $hue, $saturation, $value)';
+  String toString() => '$runtimeType($alpha, $hue, $saturation, $value)';
 }
 
 /// A color represented using [alpha], [hue], [saturation], and [lightness].
 ///
 /// An [HSLColor] is represented in a parameter space that's motivated by human
-/// perception. The representation is useful for some color computations (e.g.,
-/// rotating the hue through the colors of the rainbow).
+/// perception of colored light. The representation is useful for some color
+/// computations (e.g., rotating the hue through the colors of the rainbow).
 ///
 /// See also:
 ///
-///   * [HSVColor], a color where the brightness is represented by value
-///     instead of lightness.
+///   * [HSVColor], a color where the brightness is based on a pigment model of
+///     color combination.
 @immutable
 class HSLColor {
   /// Creates a color.
@@ -246,7 +268,6 @@ class HSLColor {
   /// This constructor does not necessarily round-trip with [toColor] because
   /// of floating point imprecision.
   factory HSLColor.fromColor(Color color) {
-    final double alpha = color.alpha / 0xFF;
     final double red = color.red / 0xFF;
     final double green = color.green / 0xFF;
     final double blue = color.blue / 0xFF;
@@ -254,100 +275,72 @@ class HSLColor {
     final double max = math.max(red, math.max(green, blue));
     final double min = math.min(red, math.min(green, blue));
     final double delta = max - min;
+
+    final double alpha = color.alpha / 0xFF;
+    final double hue = _getHue(red, green, blue, max, delta);
     final double lightness = (max + min) / 2.0;
-
-    double hue = 0.0;
-
-    if (max == 0.0) {
-      hue = 0.0;
-    } else if (max == red) {
-      hue = 60.0 * (((green - blue) / delta) % 6);
-    } else if (max == green) {
-      hue = 60.0 * (((blue - red) / delta) + 2);
-    } else if (max == blue) {
-      hue = 60.0 * (((red - green) / delta) + 4);
-    }
-
-    /// fix hue to 0.0 when red == green == blue.
-    hue = hue.isNaN ? 0.0 : hue;
-    final double saturation = max == 0.0 ? 0.0 : delta / max;
-
+    // Saturation can exceed 1.0 with rounding errors, so clamp it.
+    final double saturation = lightness == 1.0
+      ? 0.0
+      : (delta / (1.0 - (2.0 * lightness - 1.0).abs())).clamp(0.0, 1.0);
     return new HSLColor.fromAHSL(alpha, hue, saturation, lightness);
   }
 
-  /// Alpha, from 0.0 to 1.0.
+  /// Alpha, from 0.0 to 1.0. The describes the transparency of the color.
+  /// A value of 0.0 is fully transparent, and 1.0 is fully opaque.
   final double alpha;
 
-  /// Hue, from 0.0 to 360.0.
+  /// Hue, from 0.0 to 360.0. Describes which color of the spectrum is
+  /// represented. A value of 0.0 represents red, as does 360.0. Values in
+  /// between go through all the hues representable in RGB. You can think of
+  /// this as selecting which color filter is placed over a light.
   final double hue;
 
-  /// Saturation, from 0.0 to 1.0.
+  /// Saturation, from 0.0 to 1.0. This describes how colorful the color is.
+  /// 0.0 implies a shade of grey (i.e. no pigment), and 1.0 implies a color as
+  /// vibrant as that hue gets. You can think of this as the purity of the
+  /// color filter over the light.
   final double saturation;
 
-  /// Value, from 0.0 to 1.0.
+  /// Lightness, from 0.0 to 1.0. The lightness of a color describes how bright
+  /// a color is. A value of 0.0 indicates black, and 1.0 indicates white. You
+  /// can think of this as the intensity of the light behind the filter. As the
+  /// lightness approaches 0.5, the colors get brighter and appear more
+  /// saturated, and over 0.5, the colors start to become less saturated and
+  /// approach white at 1.0.
   final double lightness;
 
-  /// Returns a copy of this color with the alpha parameter replaced with the given lightness.
+  /// Returns a copy of this color with the alpha parameter replaced with the
+  /// given value.
   HSLColor withAlpha(double alpha) {
     return new HSLColor.fromAHSL(alpha, hue, saturation, lightness);
   }
 
-  /// Returns a copy of this color with the hue parameter replaced with the given lightness.
+  /// Returns a copy of this color with the [hue] parameter replaced with the
+  /// given value.
   HSLColor withHue(double hue) {
     return new HSLColor.fromAHSL(alpha, hue, saturation, lightness);
   }
 
-  /// Returns a copy of this color with the saturation parameter replaced with the given lightness.
+  /// Returns a copy of this color with the [saturation] parameter replaced with
+  /// the given value.
   HSLColor withSaturation(double saturation) {
     return new HSLColor.fromAHSL(alpha, hue, saturation, lightness);
   }
 
-  /// Returns a copy of this color with the lightness parameter replaced with the given lightness.
-  HSLColor withValue(double lightness) {
+  /// Returns a copy of this color with the [lightness] parameter replaced with
+  /// the given value.
+  HSLColor withLightness(double lightness) {
     return new HSLColor.fromAHSL(alpha, hue, saturation, lightness);
   }
 
   /// Returns this HSL color in RGB.
   Color toColor() {
-    final double h = hue % 360;
-    final double c = (1.0 - (2* lightness - 1.0).abs()) * saturation;
-    final double x = c * (1 - (((h / 60.0) % 2) - 1).abs());
-    final double m = lightness - c / 2.0;
+    final double chroma = (1.0 - (2.0 * lightness - 1.0).abs()) * saturation;
+    final double secondary = chroma * (1.0 - (((hue / 60.0) % 2.0) - 1.0).abs());
+    final double match = lightness - chroma / 2.0;
 
-    double r;
-    double g;
-    double b;
-    if (h < 60.0) {
-      r = c;
-      g = x;
-      b = 0.0;
-    } else if (h < 120.0) {
-      r = x;
-      g = c;
-      b = 0.0;
-    } else if (h < 180.0) {
-      r = 0.0;
-      g = c;
-      b = x;
-    } else if (h < 240.0) {
-      r = 0.0;
-      g = x;
-      b = c;
-    } else if (h < 300.0) {
-      r = x;
-      g = 0.0;
-      b = c;
-    } else {
-      r = c;
-      g = 0.0;
-      b = x;
-    }
-    return new Color.fromARGB(
-      (alpha   * 0xFF).round(),
-      ((r + m) * 0xFF).round(),
-      ((g + m) * 0xFF).round(),
-      ((b + m) * 0xFF).round()
-    );
+    return _colorFromHue(alpha, hue, chroma, secondary, match);
   }
 
   HSLColor _scaleAlpha(double factor) {
@@ -357,9 +350,9 @@ class HSLColor {
   /// Linearly interpolate between two HSLColors.
   ///
   /// The colors are interpolated by interpolating the [alpha], [hue],
-  /// [saturation], and [lightness] channels separately, which usually leads to a
-  /// more pleasing effect than [Color.lerp] (which interpolates the red, green,
-  /// and blue channels separately).
+  /// [saturation], and [lightness] channels separately, which usually leads to
+  /// a more pleasing effect than [Color.lerp] (which interpolates the red,
+  /// green, and blue channels separately).
   ///
   /// If either color is null, this function linearly interpolates from a
   /// transparent instance of the other color. This is usually preferable to
@@ -390,7 +383,7 @@ class HSLColor {
       return a._scaleAlpha(1.0 - t);
     return new HSLColor.fromAHSL(
       lerpDouble(a.alpha, b.alpha, t).clamp(0.0, 1.0),
-      lerpDouble(a.hue, b.hue, t).clamp(0.0, 360.0),
+      lerpDouble(a.hue, b.hue, t) % 360.0,
       lerpDouble(a.saturation, b.saturation, t).clamp(0.0, 1.0),
       lerpDouble(a.lightness, b.lightness, t).clamp(0.0, 1.0),
     );
@@ -413,7 +406,7 @@ class HSLColor {
   int get hashCode => hashValues(alpha, hue, saturation, lightness);
 
   @override
-  String toString() => 'HSLColor($alpha, $hue, $saturation, $lightness)';
+  String toString() => '$runtimeType($alpha, $hue, $saturation, $lightness)';
 }
 
 /// A color that has a small table of related colors called a "swatch".
@@ -424,7 +417,8 @@ class HSLColor {
 ///
 ///  * [MaterialColor] and [MaterialAccentColor], which define material design
 ///    primary and accent color swatches.
-///  * [material.Colors], which defines all of the standard material design colors.
+///  * [material.Colors], which defines all of the standard material design
+///    colors.
 class ColorSwatch<T> extends Color {
   /// Creates a color that has a small table of related colors called a "swatch".
   ///
