@@ -157,7 +157,7 @@ void main() {
 
 }
 
-typedef Future<FlutterCommandResult> CommandFunction();
+typedef CommandFunction = Future<FlutterCommandResult> Function();
 
 class DummyFlutterCommand extends FlutterCommand {
 

@@ -111,7 +111,7 @@ const CommonFinders find = const CommonFinders._();
 /// If computation is asynchronous, the function may return a [Future].
 ///
 /// See also [FlutterDriver.waitFor].
-typedef dynamic EvaluatorFunction();
+typedef EvaluatorFunction = dynamic Function();
 
 /// Drives a Flutter Application running in another process.
 class FlutterDriver {
@@ -770,7 +770,7 @@ class VMServiceClientConnection {
 }
 
 /// A function that connects to a Dart VM service given the [url].
-typedef Future<VMServiceClientConnection> VMServiceConnectFunction(String url);
+typedef VMServiceConnectFunction = Future<VMServiceClientConnection> Function(String url);
 
 /// The connection function used by [FlutterDriver.connect].
 ///

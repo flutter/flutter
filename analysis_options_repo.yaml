@@ -7,10 +7,12 @@
 # See the configuration guide for more
 # https://github.com/dart-lang/sdk/tree/master/pkg/analyzer#configuring-the-analyzer
 #
-# There are three similar analysis options files in the flutter repo:
+# There are five similar analysis options files in the flutter repo:
 #   - analysis_options.yaml
 #   - analysis_options_repo.yaml (this file)
 #   - packages/flutter/lib/analysis_options_user.yaml
+#   - https://github.com/flutter/plugins/blob/master/analysis_options.yaml
+#   - https://github.com/flutter/engine/blob/master/analysis_options.yaml
 #
 # This file contains the analysis options used by 'flutter analyze' when analyzing
 # the flutter repository. It is very similar to analysis_options.yaml;
@@ -33,7 +35,7 @@ analyzer:
     todo: ignore
   # `flutter analyze` (without `--watch`) just ignores directories
   # that contain a .dartignore file, and this file does not have any
-  # effect on what files are actually analyzed.
+  # effect on which files are actually analyzed.
 
 linter:
   rules:
@@ -121,6 +123,7 @@ linter:
     - prefer_final_locals
     - prefer_foreach
     # - prefer_function_declarations_over_variables # not yet tested
+    - prefer_generic_function_type_aliases
     - prefer_initializing_formals
     # - prefer_interpolation_to_compose_strings # not yet tested
     # - prefer_iterable_whereType # https://github.com/dart-lang/sdk/issues/32463

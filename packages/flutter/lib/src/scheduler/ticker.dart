@@ -12,7 +12,7 @@ import 'binding.dart';
 ///
 /// The argument is the time that the object had spent enabled so far
 /// at the time of the callback being called.
-typedef void TickerCallback(Duration elapsed);
+typedef TickerCallback = void Function(Duration elapsed);
 
 /// An interface implemented by classes that can vend [Ticker] objects.
 ///

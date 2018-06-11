@@ -105,7 +105,7 @@ Future<Null> main() async {
   });
 }
 
-typedef void Logger(String caller);
+typedef Logger = void Function(String caller);
 
 class TestBorder extends ShapeBorder {
   const TestBorder(this.onLog) : assert(onLog != null);
