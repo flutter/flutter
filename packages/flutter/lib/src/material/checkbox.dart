@@ -10,6 +10,7 @@ import 'package:flutter/widgets.dart';
 import 'constants.dart';
 import 'debug.dart';
 import 'theme.dart';
+import 'theme_data.dart';
 import 'toggleable.dart';
 
 /// A material design checkbox.
@@ -125,12 +126,23 @@ class _CheckboxState extends State<Checkbox> with TickerProviderStateMixin {
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterial(context));
     final ThemeData themeData = Theme.of(context);
+    Size size;
+    switch (themeData.materialTapTargetSize) {
+      case MaterialTapTargetSize.expanded:
+        size = const Size(2 * kRadialReactionRadius + 8.0, 2 * kRadialReactionRadius + 8.0);
+        break;
+      case MaterialTapTargetSize.collapsed:
+        size = const Size(2 * kRadialReactionRadius, 2 * kRadialReactionRadius);
+        break;
+    }
+    final BoxConstraints additionalConstraints = new BoxConstraints.tight(size);
     return new _CheckboxRenderObjectWidget(
       value: widget.value,
       tristate: widget.tristate,
       activeColor: widget.activeColor ?? themeData.toggleableActiveColor,
       inactiveColor: widget.onChanged != null ? themeData.unselectedWidgetColor : themeData.disabledColor,
       onChanged: widget.onChanged,
+      additionalConstraints: additionalConstraints,
       vsync: this,
     );
   }
@@ -145,6 +157,7 @@ class _CheckboxRenderObjectWidget extends LeafRenderObjectWidget {
     @required this.inactiveColor,
     @required this.onChanged,
     @required this.vsync,
+    @required this.additionalConstraints,
   }) : assert(tristate != null),
        assert(tristate || value != null),
        assert(activeColor != null),
@@ -158,6 +171,7 @@ class _CheckboxRenderObjectWidget extends LeafRenderObjectWidget {
   final Color inactiveColor;
   final ValueChanged<bool> onChanged;
   final TickerProvider vsync;
+  final BoxConstraints additionalConstraints;
 
   @override
   _RenderCheckbox createRenderObject(BuildContext context) => new _RenderCheckbox(
@@ -167,6 +181,7 @@ class _CheckboxRenderObjectWidget extends LeafRenderObjectWidget {
     inactiveColor: inactiveColor,
     onChanged: onChanged,
     vsync: vsync,
+    additionalConstraints: additionalConstraints,
   );
 
   @override
@@ -177,6 +192,7 @@ class _CheckboxRenderObjectWidget extends LeafRenderObjectWidget {
       ..activeColor = activeColor
       ..inactiveColor = inactiveColor
       ..onChanged = onChanged
+      ..additionalConstraints = additionalConstraints
       ..vsync = vsync;
   }
 }
@@ -191,6 +207,7 @@ class _RenderCheckbox extends RenderToggleable {
     bool tristate,
     Color activeColor,
     Color inactiveColor,
+    BoxConstraints additionalConstraints,
     ValueChanged<bool> onChanged,
     @required TickerProvider vsync,
   }): _oldValue = value,
@@ -200,7 +217,7 @@ class _RenderCheckbox extends RenderToggleable {
         activeColor: activeColor,
         inactiveColor: inactiveColor,
         onChanged: onChanged,
-        size: const Size(2 * kRadialReactionRadius + 8.0, 2 * kRadialReactionRadius + 8.0),
+        additionalConstraints: additionalConstraints,
         vsync: vsync,
       );
 

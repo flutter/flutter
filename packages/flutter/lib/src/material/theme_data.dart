@@ -53,6 +53,9 @@ const Color _kDarkThemeSplashColor = const Color(0x40CCCCCC);
 ///   * [ChoiceChip]
 ///   * [FilterChip]
 ///   * [ActionChip]
+///   * [Radio]
+///   * [Switch]
+///   * [Checkbox]
 enum MaterialTapTargetSize {
   /// Expands the minimum tap target size to 48px by 48px.
   ///
