@@ -1,15 +1,5 @@
 include ':flutter_module'
 
-def flutterProjectRoot = settingsDir.parentFile.toPath()
-
-def plugins = new Properties()
-def pluginsFile = new File(flutterProjectRoot.toFile(), '.flutter-plugins')
-if (pluginsFile.exists()) {
-    pluginsFile.withReader('UTF-8') { reader -> plugins.load(reader) }
-}
-
-plugins.each { name, path ->
-    def pluginDirectory = flutterProjectRoot.resolve(path).resolve('android').toFile()
-    include ":$name"
-    project(":$name").projectDir = pluginDirectory
-}
+// Delegate plugin inclusion to shared script.
+setBinding(new Binding([gradle: this]))
+evaluate(new File('include_plugins.groovy'))
