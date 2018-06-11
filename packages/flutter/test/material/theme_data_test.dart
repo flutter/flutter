@@ -103,6 +103,12 @@ void main() {
     expect(darkTheme.accentTextTheme.title.color, typography.white.title.color);
   });
 
+  test('Defaults to expandedTapTargetSize', () {
+    final ThemeData themeData = new ThemeData();
+
+    expect(themeData.expandedTapTargetSize, true);
+  });
+
   test('Can control fontFamily', () {
     final ThemeData themeData = new ThemeData(fontFamily: 'Ahem');
 
