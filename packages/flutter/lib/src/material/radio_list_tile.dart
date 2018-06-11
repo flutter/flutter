@@ -7,6 +7,7 @@ import 'package:flutter/widgets.dart';
 import 'list_tile.dart';
 import 'radio.dart';
 import 'theme.dart';
+import 'theme_data.dart';
 
 /// A [ListTile] with a [Radio]. In other words, a radio button with a label.
 ///
@@ -193,6 +194,7 @@ class RadioListTile<T> extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final ThemeData themeData = Theme.of(context).copyWith(materialTapTargetSize: MaterialTapTargetSize.collapsed);
     final Widget control = new Radio<T>(
       value: value,
       groupValue: groupValue,
@@ -212,18 +214,21 @@ class RadioListTile<T> extends StatelessWidget {
         break;
     }
     return new MergeSemantics(
-      child: ListTileTheme.merge(
-        selectedColor: activeColor ?? Theme.of(context).accentColor,
-        child: new ListTile(
-          leading: leading,
-          title: title,
-          subtitle: subtitle,
-          trailing: trailing,
-          isThreeLine: isThreeLine,
-          dense: dense,
-          enabled: onChanged != null,
-          onTap: onChanged != null ? () { onChanged(value); } : null,
-          selected: selected,
+      child: new Theme(
+        data: themeData,
+        child: ListTileTheme.merge(
+          selectedColor: activeColor ?? Theme.of(context).accentColor,
+          child: new ListTile(
+            leading: leading,
+            title: title,
+            subtitle: subtitle,
+            trailing: trailing,
+            isThreeLine: isThreeLine,
+            dense: dense,
+            enabled: onChanged != null,
+            onTap: onChanged != null ? () { onChanged(value); } : null,
+            selected: selected,
+          ),
         ),
       ),
     );

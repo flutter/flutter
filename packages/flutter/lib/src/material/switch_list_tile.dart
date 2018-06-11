@@ -7,6 +7,7 @@ import 'package:flutter/widgets.dart';
 import 'list_tile.dart';
 import 'switch.dart';
 import 'theme.dart';
+import 'theme_data.dart';
 
 /// A [ListTile] with a [Switch]. In other words, a switch with a label.
 ///
@@ -165,6 +166,7 @@ class SwitchListTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final ThemeData themeData = Theme.of(context).copyWith(materialTapTargetSize: MaterialTapTargetSize.collapsed);
     final Widget control = new Switch(
       value: value,
       onChanged: onChanged,
@@ -173,18 +175,21 @@ class SwitchListTile extends StatelessWidget {
       inactiveThumbImage: inactiveThumbImage,
     );
     return new MergeSemantics(
-      child: ListTileTheme.merge(
-        selectedColor: activeColor ?? Theme.of(context).accentColor,
-        child: new ListTile(
-          leading: secondary,
-          title: title,
-          subtitle: subtitle,
-          trailing: control,
-          isThreeLine: isThreeLine,
-          dense: dense,
-          enabled: onChanged != null,
-          onTap: onChanged != null ? () { onChanged(!value); } : null,
-          selected: selected,
+      child: new Theme(
+        data: themeData,
+        child: ListTileTheme.merge(
+          selectedColor: activeColor ?? Theme.of(context).accentColor,
+          child: new ListTile(
+            leading: secondary,
+            title: title,
+            subtitle: subtitle,
+            trailing: control,
+            isThreeLine: isThreeLine,
+            dense: dense,
+            enabled: onChanged != null,
+            onTap: onChanged != null ? () { onChanged(!value); } : null,
+            selected: selected,
+          ),
         ),
       ),
     );

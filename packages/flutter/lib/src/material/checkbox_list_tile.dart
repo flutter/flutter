@@ -7,6 +7,7 @@ import 'package:flutter/widgets.dart';
 import 'checkbox.dart';
 import 'list_tile.dart';
 import 'theme.dart';
+import 'theme_data.dart';
 
 /// A [ListTile] with a [Checkbox]. In other words, a checkbox with a label.
 ///
@@ -169,6 +170,7 @@ class CheckboxListTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final ThemeData themeData = Theme.of(context).copyWith(materialTapTargetSize: MaterialTapTargetSize.collapsed);
     final Widget control = new Checkbox(
       value: value,
       onChanged: onChanged,
@@ -187,18 +189,21 @@ class CheckboxListTile extends StatelessWidget {
         break;
     }
     return new MergeSemantics(
-      child: ListTileTheme.merge(
-        selectedColor: activeColor ?? Theme.of(context).accentColor,
-        child: new ListTile(
-          leading: leading,
-          title: title,
-          subtitle: subtitle,
-          trailing: trailing,
-          isThreeLine: isThreeLine,
-          dense: dense,
-          enabled: onChanged != null,
-          onTap: onChanged != null ? () { onChanged(!value); } : null,
-          selected: selected,
+      child: new Theme(
+        data: themeData,
+        child: ListTileTheme.merge(
+          selectedColor: activeColor ?? Theme.of(context).accentColor,
+          child: new ListTile(
+            leading: leading,
+            title: title,
+            subtitle: subtitle,
+            trailing: trailing,
+            isThreeLine: isThreeLine,
+            dense: dense,
+            enabled: onChanged != null,
+            onTap: onChanged != null ? () { onChanged(!value); } : null,
+            selected: selected,
+          ),
         ),
       ),
     );
