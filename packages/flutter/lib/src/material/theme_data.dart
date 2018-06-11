@@ -105,7 +105,9 @@ class ThemeData extends Diagnosticable {
     SliderThemeData sliderTheme,
     ChipThemeData chipTheme,
     TargetPlatform platform,
+    bool expandedTapTargetSize,
   }) {
+    expandedTapTargetSize ??= true;
     brightness ??= Brightness.light;
     final bool isDark = brightness == Brightness.dark;
     primarySwatch ??= Colors.blue;
@@ -208,6 +210,7 @@ class ThemeData extends Diagnosticable {
       sliderTheme: sliderTheme,
       chipTheme: chipTheme,
       platform: platform,
+      expandedTapTargetSize: expandedTapTargetSize,
     );
   }
 
@@ -257,6 +260,7 @@ class ThemeData extends Diagnosticable {
     @required this.sliderTheme,
     @required this.chipTheme,
     @required this.platform,
+    @required this.expandedTapTargetSize,
   }) : assert(brightness != null),
        assert(primaryColor != null),
        assert(primaryColorBrightness != null),
@@ -294,7 +298,8 @@ class ThemeData extends Diagnosticable {
        assert(accentIconTheme != null),
        assert(sliderTheme != null),
        assert(chipTheme != null),
-       assert(platform != null);
+       assert(platform != null),
+       assert(expandedTapTargetSize != null);
 
   /// A default light blue theme.
   ///
@@ -483,6 +488,10 @@ class ThemeData extends Diagnosticable {
   /// Defaults to the current platform.
   final TargetPlatform platform;
 
+  /// Whether to expand the tap target of certain material widgets to a minimum
+  /// of 48dp by 48dp.
+  final bool expandedTapTargetSize;
+
   /// Creates a copy of this theme but with the given fields replaced with the new values.
   ThemeData copyWith({
     Brightness brightness,
@@ -524,6 +533,7 @@ class ThemeData extends Diagnosticable {
     SliderThemeData sliderTheme,
     ChipThemeData chipTheme,
     TargetPlatform platform,
+    bool expandedTapTargetSize,
   }) {
     return new ThemeData.raw(
       brightness: brightness ?? this.brightness,
@@ -565,6 +575,7 @@ class ThemeData extends Diagnosticable {
       sliderTheme: sliderTheme ?? this.sliderTheme,
       chipTheme: chipTheme ?? this.chipTheme,
       platform: platform ?? this.platform,
+      expandedTapTargetSize: expandedTapTargetSize ?? this.expandedTapTargetSize,
     );
   }
 
@@ -692,6 +703,7 @@ class ThemeData extends Diagnosticable {
       sliderTheme: SliderThemeData.lerp(a.sliderTheme, b.sliderTheme, t),
       chipTheme: ChipThemeData.lerp(a.chipTheme, b.chipTheme, t),
       platform: t < 0.5 ? a.platform : b.platform,
+      expandedTapTargetSize: t < 0.5 ? a.expandedTapTargetSize : b.expandedTapTargetSize,
     );
   }
 
@@ -736,7 +748,8 @@ class ThemeData extends Diagnosticable {
            (otherData.accentIconTheme == accentIconTheme) &&
            (otherData.sliderTheme == sliderTheme) &&
            (otherData.chipTheme == chipTheme) &&
-           (otherData.platform == platform);
+           (otherData.platform == platform) &&
+           (otherData.expandedTapTargetSize == expandedTapTargetSize);
   }
 
   @override
@@ -780,6 +793,7 @@ class ThemeData extends Diagnosticable {
         sliderTheme,
         chipTheme,
         platform,
+        expandedTapTargetSize
       ),
     );
   }
@@ -824,6 +838,7 @@ class ThemeData extends Diagnosticable {
     properties.add(new DiagnosticsProperty<IconThemeData>('accentIconTheme', accentIconTheme));
     properties.add(new DiagnosticsProperty<SliderThemeData>('sliderTheme', sliderTheme));
     properties.add(new DiagnosticsProperty<ChipThemeData>('chipTheme', chipTheme));
+    properties.add(new DiagnosticsProperty<bool>('expandedTapTargetSize', expandedTapTargetSize));
   }
 }
 
