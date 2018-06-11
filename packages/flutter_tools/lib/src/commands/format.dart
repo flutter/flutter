@@ -17,6 +17,11 @@ class FormatCommand extends FlutterCommand {
       defaultsTo: false,
       negatable: false,
     );
+    argParser.addFlag('set-exit-if-changed',
+      help: 'Return exit code 1 if there are any formatting changes.',
+      defaultsTo: false,
+      negatable: false,
+    );
   }
 
   @override
@@ -46,7 +51,13 @@ class FormatCommand extends FlutterCommand {
 
     final String dartfmt = sdkBinaryName('dartfmt');
 
-    final List<String> cmd = <String>[dartfmt, argResults['dry-run'] ? '-n' : '-w']..addAll(argResults.rest);
+    final List<String> cmd = <String>[
+      dartfmt, argResults['dry-run'] ? '-n' : '-w'];
+    if (argResults['set-exit-if-changed']) {
+      cmd.add('--set-exit-if-changed');
+    }
+    cmd..addAll(argResults.rest);
+
     final int result = await runCommandAndStreamOutput(cmd);
     if (result != 0)
       throwToolExit('Formatting failed: $result', exitCode: result);
