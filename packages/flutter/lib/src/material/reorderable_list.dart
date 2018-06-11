@@ -118,7 +118,7 @@ class _ReorderableListViewState extends State<ReorderableListView> with TickerPr
     super.dispose();
   }
 
-  Widget _wrap(Widget toWrap, int index) {
+  Widget _wrap(Widget toWrap, int index, BoxConstraints constraints) {
     assert(toWrap.key != null);
 
     Widget buildContainerForAxis({List<Widget> children}) {
@@ -141,43 +141,42 @@ class _ReorderableListViewState extends State<ReorderableListView> with TickerPr
     Widget buildDragTarget(BuildContext context, List<Key> acceptedCandidates, List<dynamic> rejectedCandidates) {
       // We build the draggable inside of a layout builder so that we can
       // constrain the size of the feedback dragging widget.
-      Widget child = new LayoutBuilder(
-        builder: (BuildContext context, BoxConstraints constraints) {
-            return new LongPressDraggable<Key>(
-              maxSimultaneousDrags: 1,
-              axis: widget.scrollDirection,
-              data: toWrap.key,
-              feedback:new Container(
-                alignment: Alignment.topLeft,
-                constraints: constraints,
-                child: new Material(
-                  elevation: 6.0,
-                  child: toWrap,
-                ),
-              ),
-              child: _dragging == toWrap.key ? const SizedBox() : toWrap,
-              childWhenDragging: const SizedBox(),
-              dragAnchor: DragAnchor.child,
-              onDragStarted: () {
-                setState(() {
-                  _dragging = toWrap.key;
-                  _dragStartIndex = index;
-                  _ghostIndex = index;
-                  _currentIndex = index;
-                  _entranceController.forward(from: 1.0);
-                });
-              },
-              // When the drag ends inside a DragTarget widget, the drag
-              // succeeds, and we swap the widget into position appropriately.
-              onDragCompleted: onDragEnded,
-              // When the drag does not end inside a DragTarget widget, the
-              // drag fails, but we still swap the widget to the last position it
-              // had been dragged to.
-              onDraggableCanceled: (Velocity velocity, Offset offset) {
-                onDragEnded();
-              },
-            );
-      });
+      Widget child = new LongPressDraggable<Key>(
+        maxSimultaneousDrags: 1,
+        axis: widget.scrollDirection,
+        data: toWrap.key,
+        feedback:new Container(
+          alignment: Alignment.topLeft,
+          // These constraints will limit the cross axis of the drawn widget.
+          constraints: constraints,
+          child: new Material(
+            elevation: 6.0,
+            child: toWrap,
+          ),
+        ),
+        child: _dragging == toWrap.key ? const SizedBox() : toWrap,
+        childWhenDragging: const SizedBox(),
+        dragAnchor: DragAnchor.child,
+        onDragStarted: () {
+          setState(() {
+            _dragging = toWrap.key;
+            _dragStartIndex = index;
+            _ghostIndex = index;
+            _currentIndex = index;
+            _entranceController.forward(from: 1.0);
+          });
+        },
+        // When the drag ends inside a DragTarget widget, the drag
+        // succeeds, and we swap the widget into position appropriately.
+        onDragCompleted: onDragEnded,
+        // When the drag does not end inside a DragTarget widget, the
+        // drag fails, but we still swap the widget to the last position it
+        // had been dragged to.
+        onDraggableCanceled: (Velocity velocity, Offset offset) {
+          onDragEnded();
+        },
+      );
+
       // The target for dropping at the end of the list doesn't need to be
       // draggable.
       if (index >= widget.children.length) {
@@ -287,30 +286,35 @@ class _ReorderableListViewState extends State<ReorderableListView> with TickerPr
 
   @override
   Widget build(BuildContext context) {
-    final List<Widget> wrappedChildren = <Widget>[];
-    assert(
-      widget.children.every((Widget w) => w.key != null), 
-      'All children of this widget must have a key.',
-    );
-    for (int i=0; i<widget.children.length; i++) {
-      wrappedChildren.add(_wrap(widget.children[i], i));
-    }
-    wrappedChildren.add(_wrap(
-      new SizedBox(
-        height: widget.scrollDirection == Axis.horizontal ? MediaQuery.of(context).size.height : 72.0, 
-        width: widget.scrollDirection == Axis.vertical ? MediaQuery.of(context).size.width : 72.0,
-        key: const Key('DraggableList - End Widget'), 
-      ),
-      widget.children.length),
-    );
-
-    return new SingleChildScrollView(
-      scrollDirection: widget.scrollDirection,
-      child: widget.scrollDirection == Axis.vertical 
-          ? new Column(children: wrappedChildren) 
-          : new Row(children: wrappedChildren),
-      padding: widget.padding, 
-      controller: _scrollController,
-    );
+    // We use the layout builder to constrain the cross-axis size of dragging child widgets.
+    return new LayoutBuilder(builder: (BuildContext context, BoxConstraints constraints) {
+        final List<Widget> wrappedChildren = <Widget>[];
+        assert(
+          widget.children.every((Widget w) => w.key != null), 
+          'All children of this widget must have a key.',
+        );
+        for (int i=0; i<widget.children.length; i++) {
+          wrappedChildren.add(_wrap(widget.children[i], i, constraints));
+        }
+        wrappedChildren.add(_wrap(
+          new SizedBox(
+            height: widget.scrollDirection == Axis.horizontal 
+                ? constraints.maxHeight : 72.0, 
+            width: widget.scrollDirection == Axis.vertical 
+                ? constraints.maxWidth : 72.0,
+            key: const Key('DraggableList - End Widget'), 
+          ),
+          widget.children.length,
+          constraints),
+        );
+        return new SingleChildScrollView(
+          scrollDirection: widget.scrollDirection,
+          child: widget.scrollDirection == Axis.vertical 
+              ? new Column(children: wrappedChildren) 
+              : new Row(children: wrappedChildren),
+          padding: widget.padding, 
+          controller: _scrollController,
+        );
+    });
   }
 }
