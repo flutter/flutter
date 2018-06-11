@@ -4,6 +4,7 @@
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
+import 'package:meta/meta.dart';
 import 'package:test/test.dart';
 import 'package:quiver/testing/async.dart';
 
@@ -32,6 +33,7 @@ class GestureTester {
 
 typedef void GestureTest(GestureTester tester);
 
+@isTest
 void testGesture(String description, GestureTest callback) {
   test(description, () {
     new FakeAsync().run((FakeAsync async) {

@@ -104,7 +104,7 @@ class _SearchDemoState extends State<SearchDemo> {
               accountEmail: const Text('peter.widget@example.com'),
               currentAccountPicture: const CircleAvatar(
                 backgroundImage: const AssetImage(
-                  '/people/square/peter.png',
+                  'people/square/peter.png',
                   package: 'flutter_gallery_assets',
                 ),
               ),
