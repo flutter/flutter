@@ -5,7 +5,7 @@
 import 'dart:async';
 import 'dart:io';
 import 'dart:typed_data';
-import 'dart:ui' as ui show instantiateImageCodec, Codec;
+import 'dart:ui' as ui show instantiateImageCodec;
 import 'dart:ui' show Size, Locale, TextDirection, hashValues;
 
 import 'package:flutter/foundation.dart';
@@ -36,6 +36,7 @@ class ImageConfiguration {
     this.textDirection,
     this.size,
     this.platform,
+    this.behaviorDelegate,
   });
 
   /// Creates an object holding the configuration information for an [ImageProvider].
@@ -49,6 +50,7 @@ class ImageConfiguration {
     TextDirection textDirection,
     Size size,
     String platform,
+    ImageService behaviorDelegate,
   }) {
     return new ImageConfiguration(
       bundle: bundle ?? this.bundle,
@@ -57,6 +59,7 @@ class ImageConfiguration {
       textDirection: textDirection ?? this.textDirection,
       size: size ?? this.size,
       platform: platform ?? this.platform,
+      behaviorDelegate: behaviorDelegate ?? this.behaviorDelegate,
     );
   }
 
@@ -81,6 +84,9 @@ class ImageConfiguration {
   /// different platforms, to match local conventions e.g. for color matching or
   /// shadows.
   final TargetPlatform platform;
+
+  ///
+  final ImageService behaviorDelegate;
 
   /// An image configuration that provides no additional information.
   ///
@@ -259,10 +265,12 @@ abstract class ImageProvider<T> {
   ImageStream resolve(ImageConfiguration configuration) {
     assert(configuration != null);
     final ImageStream stream = new ImageStream();
+    final ImageService delegate = configuration.behaviorDelegate;
     T obtainedKey;
     obtainKey(configuration).then<void>((T key) {
       obtainedKey = key;
-      stream.setCompleter(PaintingBinding.instance.imageCache.putIfAbsent(key, () => load(key)));
+      final ImageStreamCompleter completer = delegate.putIfAbsent(key, () => load(key, configuration));
+      stream.setCompleter(completer);
     }).catchError(
       (dynamic exception, StackTrace stack) async {
         FlutterError.reportError(new FlutterErrorDetails(
@@ -299,7 +307,7 @@ abstract class ImageProvider<T> {
   /// Converts a key into an [ImageStreamCompleter], and begins fetching the
   /// image.
   @protected
-  ImageStreamCompleter load(T key);
+  ImageStreamCompleter load(T key, ImageConfiguration configuration);
 
   @override
   String toString() => '$runtimeType()';
@@ -363,29 +371,11 @@ abstract class AssetBundleImageProvider extends ImageProvider<AssetBundleImageKe
   /// Converts a key into an [ImageStreamCompleter], and begins fetching the
   /// image using [loadAsync].
   @override
-  ImageStreamCompleter load(AssetBundleImageKey key) {
-    return new MultiFrameImageStreamCompleter(
-      codec: _loadAsync(key),
-      scale: key.scale,
-      informationCollector: (StringBuffer information) {
-        information.writeln('Image provider: $this');
-        information.write('Image key: $key');
-      }
-    );
-  }
-
-  /// Fetches the image from the asset bundle, decodes it, and returns a
-  /// corresponding [ImageInfo] object.
-  ///
-  /// This function is used by [load].
-  @protected
-  Future<ui.Codec> _loadAsync(AssetBundleImageKey key) async {
-    final ByteData data = await key.bundle.load(key.name);
-    if (data == null)
-      throw 'Unable to read data';
-    return await ui.instantiateImageCodec(data.buffer.asUint8List());
+  ImageStreamCompleter load(AssetBundleImageKey key, ImageConfiguration configuration) {
+    return configuration.behaviorDelegate.loadAsset(key);
   }
 }
+
 
 /// Fetches the given URL from the network, associating it with the given scale.
 ///
@@ -420,36 +410,8 @@ class NetworkImage extends ImageProvider<NetworkImage> {
   }
 
   @override
-  ImageStreamCompleter load(NetworkImage key) {
-    return new MultiFrameImageStreamCompleter(
-      codec: _loadAsync(key),
-      scale: key.scale,
-      informationCollector: (StringBuffer information) {
-        information.writeln('Image provider: $this');
-        information.write('Image key: $key');
-      }
-    );
-  }
-
-  static final HttpClient _httpClient = new HttpClient();
-
-  Future<ui.Codec> _loadAsync(NetworkImage key) async {
-    assert(key == this);
-
-    final Uri resolved = Uri.base.resolve(key.url);
-    final HttpClientRequest request = await _httpClient.getUrl(resolved);
-    headers?.forEach((String name, String value) {
-      request.headers.add(name, value);
-    });
-    final HttpClientResponse response = await request.close();
-    if (response.statusCode != HttpStatus.OK)
-      throw new Exception('HTTP request failed, statusCode: ${response?.statusCode}, $resolved');
-
-    final Uint8List bytes = await consolidateHttpClientResponseBytes(response);
-    if (bytes.lengthInBytes == 0)
-      throw new Exception('NetworkImage is an empty file: $resolved');
-
-    return await ui.instantiateImageCodec(bytes);
+  ImageStreamCompleter load(NetworkImage key, ImageConfiguration configuration) {
+    return configuration.behaviorDelegate.loadUrl(key);
   }
 
   @override
@@ -494,24 +456,8 @@ class FileImage extends ImageProvider<FileImage> {
   }
 
   @override
-  ImageStreamCompleter load(FileImage key) {
-    return new MultiFrameImageStreamCompleter(
-      codec: _loadAsync(key),
-      scale: key.scale,
-      informationCollector: (StringBuffer information) {
-        information.writeln('Path: ${file?.path}');
-      }
-    );
-  }
-
-  Future<ui.Codec> _loadAsync(FileImage key) async {
-    assert(key == this);
-
-    final Uint8List bytes = await file.readAsBytes();
-    if (bytes.lengthInBytes == 0)
-      return null;
-
-    return await ui.instantiateImageCodec(bytes);
+  ImageStreamCompleter load(FileImage key, ImageConfiguration configuration) {
+    return configuration.behaviorDelegate.loadFile(key);
   }
 
   @override
@@ -562,18 +508,9 @@ class MemoryImage extends ImageProvider<MemoryImage> {
   }
 
   @override
-  ImageStreamCompleter load(MemoryImage key) {
-    return new MultiFrameImageStreamCompleter(
-      codec: _loadAsync(key),
-      scale: key.scale
-    );
-  }
-
-  Future<ui.Codec> _loadAsync(MemoryImage key) {
-    assert(key == this);
-
-    return ui.instantiateImageCodec(bytes);
-  }
+  ImageStreamCompleter load(MemoryImage key, ImageConfiguration configuration) {
+    return configuration.behaviorDelegate.loadMemory(key);
+  } 
 
   @override
   bool operator ==(dynamic other) {
@@ -727,4 +664,93 @@ class ExactAssetImage extends AssetBundleImageProvider {
 
   @override
   String toString() => '$runtimeType(name: "$keyName", scale: $scale, bundle: $bundle)';
+}
+
+
+///
+class ImageService {
+  ///
+  const ImageService();
+
+  static final HttpClient _httpClient = new HttpClient();
+
+  ///
+  void dispose() {}
+
+  ///
+  @mustCallSuper
+  void remove(Object key) {
+    PaintingBinding.instance.imageCache.remove(key);
+  }
+ 
+  ///
+  @mustCallSuper
+  void clear() {
+    PaintingBinding.instance.imageCache.clear();
+  }
+
+  ///
+  @mustCallSuper
+  ImageStreamCompleter putIfAbsent(Object key, ImageStreamCompleter loader()) {
+    return PaintingBinding.instance.imageCache.putIfAbsent(key, loader);
+  }
+
+  ///
+  ImageStreamCompleter loadUrl(NetworkImage key) {
+    return new MultiFrameImageStreamCompleter(
+      codec: () async {
+        final Uri resolved = Uri.base.resolve(key.url);
+        final HttpClientRequest request = await _httpClient.getUrl(resolved);
+        key.headers?.forEach((String name, String value) {
+          request.headers.add(name, value);
+        });
+        final HttpClientResponse response = await request.close();
+        if (response.statusCode != HttpStatus.OK)
+          throw new Exception('HTTP request failed, statusCode: ${response?.statusCode}, $resolved');
+
+        final Uint8List bytes = await consolidateHttpClientResponseBytes(response);
+        if (bytes.lengthInBytes == 0)
+          throw new Exception('NetworkImage is an empty file: $resolved');
+        return await ui.instantiateImageCodec(bytes);
+      }(),
+      scale: key.scale,
+    );
+  }
+
+  ///
+  ImageStreamCompleter loadFile(FileImage key) {
+    return new MultiFrameImageStreamCompleter(
+      codec: () async {
+      final Uint8List bytes = await key.file.readAsBytes();
+      if (bytes.lengthInBytes == 0)
+        return null;
+      return await ui.instantiateImageCodec(bytes);
+      }(),
+      scale: key.scale,
+      informationCollector: (StringBuffer information) {
+        information.writeln('Path: ${key.file?.path}');
+      }
+    );
+  }
+
+  ///
+  ImageStreamCompleter loadAsset(AssetBundleImageKey key) {
+    return new MultiFrameImageStreamCompleter(
+      scale: key.scale,
+      codec: () async {
+        final ByteData data = await key.bundle.load(key.name);
+        if (data == null)
+          throw 'Unable to read data';
+        return await ui.instantiateImageCodec(data.buffer.asUint8List());
+      }()
+    );
+  }
+
+  ///
+  ImageStreamCompleter loadMemory(MemoryImage key) {
+     return new MultiFrameImageStreamCompleter(
+      codec: ui.instantiateImageCodec(key.bytes),
+      scale: key.scale
+    );
+  }
 }

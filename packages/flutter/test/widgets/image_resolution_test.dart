@@ -103,7 +103,7 @@ class TestAssetImage extends AssetImage {
   TestAssetImage(String name) : super(name);
 
   @override
-  ImageStreamCompleter load(AssetBundleImageKey key) {
+  ImageStreamCompleter load(AssetBundleImageKey key, _) {
     ImageInfo imageInfo;
     key.bundle.load(key.name).then<void>((ByteData data) {
       final TestByteData testData = data;

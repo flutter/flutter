@@ -9,6 +9,7 @@ import 'dart:typed_data';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/widgets.dart';
 
 import 'basic.dart';
 import 'framework.dart';
@@ -47,6 +48,7 @@ ImageConfiguration createLocalImageConfiguration(BuildContext context, { Size si
     devicePixelRatio: MediaQuery.of(context, nullOk: true)?.devicePixelRatio ?? 1.0,
     locale: Localizations.localeOf(context, nullOk: true),
     textDirection: Directionality.of(context),
+    behaviorDelegate: ImageBehavior.of(context),
     size: size,
     platform: defaultTargetPlatform,
   );
@@ -522,11 +524,11 @@ class _ImageState extends State<Image> {
   }
 
   void _resolveImage() {
-    final ImageStream newStream =
-      widget.image.resolve(createLocalImageConfiguration(
-          context,
-          size: widget.width != null && widget.height != null ? new Size(widget.width, widget.height) : null
-      ));
+    final ImageConfiguration configuration = createLocalImageConfiguration(
+      context,
+       size: widget.width != null && widget.height != null ? new Size(widget.width, widget.height) : null
+    );
+    final ImageStream newStream = widget.image.resolve(configuration);
     assert(newStream != null);
     _updateSourceStream(newStream);
   }

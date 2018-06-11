@@ -183,6 +183,7 @@ class ImageStream extends Diagnosticable {
 /// configure it with the right [ImageStreamCompleter] when possible.
 abstract class ImageStreamCompleter extends Diagnosticable {
   final List<ImageListener> _listeners = <ImageListener>[];
+
   ImageInfo _current;
 
   /// Adds a listener callback that is called whenever a new concrete [ImageInfo]

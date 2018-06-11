@@ -4,8 +4,6 @@
 
 import 'image_stream.dart';
 
-const int _kDefaultSize = 1000;
-
 /// Class for the [imageCache] object.
 ///
 /// Implements a least-recently-used cache of up to 1000 images. The maximum
@@ -25,33 +23,11 @@ const int _kDefaultSize = 1000;
 /// Generally this class is not used directly. The [ImageProvider] class and its
 /// subclasses automatically handle the caching of images.
 class ImageCache {
-  final Map<Object, ImageStreamCompleter> _cache = <Object, ImageStreamCompleter>{};
+  final Map<Object, ImageStreamCompleter> _completers = <Object, ImageStreamCompleter>{};
+  final Map<Object, int> _sizes = <Object, int>{};
 
-  /// Maximum number of entries to store in the cache.
-  ///
-  /// Once this many entries have been cached, the least-recently-used entry is
-  /// evicted when adding a new entry.
-  int get maximumSize => _maximumSize;
-  int _maximumSize = _kDefaultSize;
-  /// Changes the maximum cache size.
-  ///
-  /// If the new size is smaller than the current number of elements, the
-  /// extraneous elements are evicted immediately. Setting this to zero and then
-  /// returning it to its original value will therefore immediately clear the
-  /// cache.
-  set maximumSize(int value) {
-    assert(value != null);
-    assert(value >= 0);
-    if (value == maximumSize)
-      return;
-    _maximumSize = value;
-    if (maximumSize == 0) {
-      _cache.clear();
-    } else {
-      while (_cache.length > maximumSize)
-        _cache.remove(_cache.keys.first);
-    }
-  }
+  int _cacheSize = 0;
+  int _maximumSizeBytes = 1000000;
 
   /// Evicts all entries from the cache.
   ///
@@ -60,7 +36,14 @@ class ImageCache {
   // TODO(ianh): Provide a way to target individual images. This is currently non-trivial
   // because by the time we get to the imageCache, the keys we're using are opaque.
   void clear() {
-    _cache.clear();
+    _completers.clear();
+    _sizes.clear();
+  }
+
+  ///
+  void remove(Object key) {
+    _completers.remove(key);
+    _sizes.remove(key);
   }
 
   /// Returns the previously cached [ImageStream] for the given key, if available;
@@ -71,21 +54,34 @@ class ImageCache {
   ImageStreamCompleter putIfAbsent(Object key, ImageStreamCompleter loader()) {
     assert(key != null);
     assert(loader != null);
-    ImageStreamCompleter result = _cache[key];
+    ImageStreamCompleter result = _completers[key];
     if (result != null) {
-      // Remove the provider from the list so that we can put it back in below
-      // and thus move it to the end of the list.
-      _cache.remove(key);
+      result = _completers.remove(key);
     } else {
-      if (_cache.length == maximumSize && maximumSize > 0)
-        _cache.remove(_cache.keys.first);
       result = loader();
+      void listener(ImageInfo info, bool syncCall) {
+        final int bytes = info.image.width * info.image.height * 4;
+        _cacheSize += bytes;
+        _sizes[key] = bytes;
+        result.removeListener(listener);
+      }
+      result.addListener(listener);
     }
-    if (maximumSize > 0) {
-      assert(_cache.length < maximumSize);
-      _cache[key] = result;
-    }
-    assert(_cache.length <= maximumSize);
+    if (_cacheSize > _maximumSizeBytes)
+      _evictImages();
+    _completers[key] = result;
+    assert(result != null);
     return result;
+  }
+
+  void _evictImages() {
+    while (_cacheSize > _maximumSizeBytes && _completers.isNotEmpty) {
+      final Object key = _completers.keys.first;
+      if (_sizes.containsKey(key)) {
+        _completers.remove(key);
+        final int size = _sizes.remove(key);
+        _cacheSize -= size;
+      }
+    }
   }
 }
