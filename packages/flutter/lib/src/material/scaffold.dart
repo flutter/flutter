@@ -763,6 +763,7 @@ class Scaffold extends StatefulWidget {
     this.drawer,
     this.endDrawer,
     this.bottomNavigationBar,
+    this.bottomSheet,
     this.backgroundColor,
     this.resizeToAvoidBottomPadding = true,
     this.primary = true,
@@ -852,6 +853,36 @@ class Scaffold extends StatefulWidget {
   /// The [bottomNavigationBar] is rendered below the [persistentFooterButtons]
   /// and the [body].
   final Widget bottomNavigationBar;
+
+  /// The persistent bottom sheet to display.
+  ///
+  /// A persistent bottom sheet shows information that supplements the primary
+  /// content of the app. A persistent bottom sheet remains visible even when
+  /// the user interacts with other parts of the app.
+  ///
+  /// A closely related widget is a modal bottom sheet, which is an alternative
+  /// to a menu or a dialog and prevents the user from interacting with the rest
+  /// of the app. Modal bottom sheets can be created and displayed with the
+  /// [showModalBottomSheet] function.
+  ///
+  /// Unlike the persistent bottom sheet displayed by [showBottomSheet]
+  /// this bottom sheet is not a [LocalHistoryEntry] and cannot be dismissed
+  /// with the scaffold appbar's back button.
+  ///
+  /// If a persistent bottom sheet created with [showBottomSheet] is already
+  /// visible, it must be closed before building the Scaffold with a new
+  /// [bottomSheet].
+  ///
+  /// The value of [bottomSheet] can be any widget at all. It's unlikely to
+  /// actually be a [BottomSheet], which is used by the implementations of
+  /// [showBottomSheet] and [showModalBottomSheet].
+  ///
+  /// See also:
+  ///
+  ///  * [showBottomSheet], which displays a bottom sheet as a route that can
+  ///    be dismissed with the scaffold's back button.
+  ///  * [showModalBottomSheet], which displays a modal bottom sheet.
+  final Widget bottomSheet;
 
   /// Whether the [body] (and other floating widgets) should size themselves to
   /// avoid the window's bottom padding.
@@ -1214,61 +1245,53 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
   final List<_PersistentBottomSheet> _dismissedBottomSheets = <_PersistentBottomSheet>[];
   PersistentBottomSheetController<dynamic> _currentBottomSheet;
 
-  /// Shows a persistent material design bottom sheet.
-  ///
-  /// A persistent bottom sheet shows information that supplements the primary
-  /// content of the app. A persistent bottom sheet remains visible even when
-  /// the user interacts with other parts of the app.
-  ///
-  /// A closely related widget is a modal bottom sheet, which is an alternative
-  /// to a menu or a dialog and prevents the user from interacting with the rest
-  /// of the app. Modal bottom sheets can be created and displayed with the
-  /// [showModalBottomSheet] function.
-  ///
-  /// Returns a controller that can be used to close and otherwise manipulate the
-  /// bottom sheet.
-  ///
-  /// To rebuild the bottom sheet (e.g. if it is stateful), call
-  /// [PersistentBottomSheetController.setState] on the value returned from this
-  /// method.
-  ///
-  /// See also:
-  ///
-  ///  * [BottomSheet], which is the widget typically returned by the `builder`.
-  ///  * [showBottomSheet], which calls this method given a [BuildContext].
-  ///  * [showModalBottomSheet], which can be used to display a modal bottom
-  ///    sheet.
-  ///  * [Scaffold.of], for information about how to obtain the [ScaffoldState].
-  ///  * <https://material.google.com/components/bottom-sheets.html#bottom-sheets-persistent-bottom-sheets>
-  PersistentBottomSheetController<T> showBottomSheet<T>(WidgetBuilder builder) {
+  void _maybeBuildCurrentBottomSheet() {
+    if (widget.bottomSheet != null) {
+      final AnimationController controller = BottomSheet.createAnimationController(this)
+        ..value = 1.0;
+      // The new _currentBottomSheet is not a local history entry so a "back" button
+      // will not be added to the Scaffold's appbar.
+      _currentBottomSheet = _buildBottomSheet<void>((BuildContext context) => widget.bottomSheet, controller, false);
+    }
+  }
+
+  void _closeCurrentBottomSheet() {
     if (_currentBottomSheet != null) {
       _currentBottomSheet.close();
       assert(_currentBottomSheet == null);
     }
+  }
+
+  PersistentBottomSheetController<T> _buildBottomSheet<T>(WidgetBuilder builder, AnimationController controller, bool isLocalHistoryEntry) {
     final Completer<T> completer = new Completer<T>();
     final GlobalKey<_PersistentBottomSheetState> bottomSheetKey = new GlobalKey<_PersistentBottomSheetState>();
-    final AnimationController controller = BottomSheet.createAnimationController(this)
-      ..forward();
     _PersistentBottomSheet bottomSheet;
-    final LocalHistoryEntry entry = new LocalHistoryEntry(
-      onRemove: () {
-        assert(_currentBottomSheet._widget == bottomSheet);
-        assert(bottomSheetKey.currentState != null);
-        bottomSheetKey.currentState.close();
-        if (controller.status != AnimationStatus.dismissed)
-          _dismissedBottomSheets.add(bottomSheet);
-        setState(() {
-          _currentBottomSheet = null;
-        });
-        completer.complete();
-      }
-    );
+
+    void _removeCurrentBottomSheet() {
+      assert(_currentBottomSheet._widget == bottomSheet);
+      assert(bottomSheetKey.currentState != null);
+      bottomSheetKey.currentState.close();
+      if (controller.status != AnimationStatus.dismissed)
+        _dismissedBottomSheets.add(bottomSheet);
+      setState(() {
+        _currentBottomSheet = null;
+      });
+      completer.complete();
+    }
+
+    final LocalHistoryEntry entry = isLocalHistoryEntry
+      ? new LocalHistoryEntry(onRemove: _removeCurrentBottomSheet)
+      : null;
+
     bottomSheet = new _PersistentBottomSheet(
       key: bottomSheetKey,
       animationController: controller,
       onClosing: () {
         assert(_currentBottomSheet._widget == bottomSheet);
-        entry.remove();
+        if (isLocalHistoryEntry)
+          entry.remove();
+        else
+          _removeCurrentBottomSheet();
       },
       onDismissed: () {
         if (_dismissedBottomSheets.contains(bottomSheet)) {
@@ -1280,14 +1303,59 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
       },
       builder: builder
     );
-    ModalRoute.of(context).addLocalHistoryEntry(entry);
+
+    if (isLocalHistoryEntry)
+      ModalRoute.of(context).addLocalHistoryEntry(entry);
+
+    return new PersistentBottomSheetController<T>._(
+      bottomSheet,
+      completer,
+      isLocalHistoryEntry ? entry.remove : _removeCurrentBottomSheet,
+      (VoidCallback fn) { bottomSheetKey.currentState?.setState(fn); },
+      isLocalHistoryEntry,
+    );
+  }
+
+  /// Shows a persistent material design bottom sheet in the nearest [Scaffold].
+  ///
+  /// Returns a controller that can be used to close and otherwise manipulate the
+  /// bottom sheet.
+  ///
+  /// To rebuild the bottom sheet (e.g. if it is stateful), call
+  /// [PersistentBottomSheetController.setState] on the controller returned by
+  /// this method.
+  ///
+  /// The new bottom sheet becomes a [LocalHistoryEntry] for the enclosing
+  /// [ModalRoute] and a back button is added to the appbar of the [Scaffold]
+  /// that closes the bottom sheet.
+  ///
+  /// To create a persistent bottom sheet that is not a [LocalHistoryEntry] and
+  /// does not add a back button to the enclosing Scaffold's appbar, use the
+  /// [Scaffold.bottomSheet] constructor parameter.
+  ///
+  /// A persistent bottom sheet shows information that supplements the primary
+  /// content of the app. A persistent bottom sheet remains visible even when
+  /// the user interacts with other parts of the app.
+  ///
+  /// A closely related widget is a modal bottom sheet, which is an alternative
+  /// to a menu or a dialog and prevents the user from interacting with the rest
+  /// of the app. Modal bottom sheets can be created and displayed with the
+  /// [showModalBottomSheet] function.
+  ///
+  /// See also:
+  ///
+  ///  * [BottomSheet], which is the widget typically returned by the `builder`.
+  ///  * [showBottomSheet], which calls this method given a [BuildContext].
+  ///  * [showModalBottomSheet], which can be used to display a modal bottom
+  ///    sheet.
+  ///  * [Scaffold.of], for information about how to obtain the [ScaffoldState].
+  ///  * <https://material.google.com/components/bottom-sheets.html#bottom-sheets-persistent-bottom-sheets>
+  PersistentBottomSheetController<T> showBottomSheet<T>(WidgetBuilder builder) {
+    _closeCurrentBottomSheet();
+    final AnimationController controller = BottomSheet.createAnimationController(this)
+      ..forward();
     setState(() {
-      _currentBottomSheet = new PersistentBottomSheetController<T>._(
-        bottomSheet,
-        completer,
-        entry.remove,
-        (VoidCallback fn) { bottomSheetKey.currentState?.setState(fn); }
-      );
+      _currentBottomSheet = _buildBottomSheet<T>(builder, controller, true);
     });
     return _currentBottomSheet;
   }
@@ -1355,6 +1423,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
       value: 1.0,
       duration: kFloatingActionButtonSegue * 2,
     );
+    _maybeBuildCurrentBottomSheet();
   }
 
   @override
@@ -1366,9 +1435,23 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
     if (widget.floatingActionButtonLocation != oldWidget.floatingActionButtonLocation) {
       _moveFloatingActionButton(widget.floatingActionButtonLocation ?? _kDefaultFloatingActionButtonLocation);
     }
+    if (widget.bottomSheet != oldWidget.bottomSheet) {
+      assert(() {
+        if (widget.bottomSheet != null && _currentBottomSheet?._isLocalHistoryEntry == true) {
+          throw new FlutterError(
+            'Scaffold.bottomSheet cannot be specified while a bottom sheet displayed\n'
+            'with showBottomSheet() is still visible. Use the PersistentBottomSheetController\n'
+            'returned by showBottomSheet() to close the old bottom sheet before creating\n'
+            'a Scaffold with a (non null) bottomSheet.'
+          );
+        }
+        return true;
+      }());
+      _closeCurrentBottomSheet();
+      _maybeBuildCurrentBottomSheet();
+    }
     super.didUpdateWidget(oldWidget);
   }
-
 
   @override
   void dispose() {
@@ -1677,7 +1760,8 @@ class _PersistentBottomSheetState extends State<_PersistentBottomSheet> {
   @override
   void initState() {
     super.initState();
-    assert(widget.animationController.status == AnimationStatus.forward);
+    assert(widget.animationController.status == AnimationStatus.forward
+        || widget.animationController.status == AnimationStatus.completed);
     widget.animationController.addStatusListener(_handleStatusChange);
   }
 
@@ -1728,8 +1812,11 @@ class PersistentBottomSheetController<T> extends ScaffoldFeatureController<_Pers
     _PersistentBottomSheet widget,
     Completer<T> completer,
     VoidCallback close,
-    StateSetter setState
+    StateSetter setState,
+    this._isLocalHistoryEntry,
   ) : super._(widget, completer, close, setState);
+
+  final bool _isLocalHistoryEntry;
 }
 
 class _ScaffoldScope extends InheritedWidget {

@@ -24,7 +24,8 @@ const double _kCloseProgressThreshold = 0.5;
 ///    supplements the primary content of the app. A persistent bottom sheet
 ///    remains visible even when the user interacts with other parts of the app.
 ///    Persistent bottom sheets can be created and displayed with the
-///    [ScaffoldState.showBottomSheet] function.
+///    [ScaffoldState.showBottomSheet] function or by specifying the
+///    [Scaffold.bottomSheet] constructor parameter.
 ///
 ///  * _Modal_. A modal bottom sheet is an alternative to a menu or a dialog and
 ///    prevents the user from interacting with the rest of the app. Modal bottom
@@ -32,8 +33,8 @@ const double _kCloseProgressThreshold = 0.5;
 ///    function.
 ///
 /// The [BottomSheet] widget itself is rarely used directly. Instead, prefer to
-/// create a persistent bottom sheet with [ScaffoldState.showBottomSheet] and a modal
-/// bottom sheet with [showModalBottomSheet].
+/// create a persistent bottom sheet with [ScaffoldState.showBottomSheet] or
+/// [Scaffold.bottomSheet], and a modal bottom sheet with [showModalBottomSheet].
 ///
 /// See also:
 ///
@@ -289,23 +290,29 @@ Future<T> showModalBottomSheet<T>({
 
 /// Shows a persistent material design bottom sheet in the nearest [Scaffold].
 ///
+/// Returns a controller that can be used to close and otherwise manipulate the
+/// bottom sheet.
+///
+/// To rebuild the bottom sheet (e.g. if it is stateful), call
+/// [PersistentBottomSheetController.setState] on the controller returned by
+/// this method.
+///
+/// The new bottom sheet becomes a [LocalHistoryEntry] for the enclosing
+/// [ModalRoute] and a back button is added to the appbar of the [Scaffold]
+/// that closes the bottom sheet.
+///
+/// To create a persistent bottom sheet that is not a [LocalHistoryEntry] and
+/// does not add a back button to the enclosing Scaffold's appbar, use the
+/// [Scaffold.bottomSheet] constructor parameter.
+///
 /// A persistent bottom sheet shows information that supplements the primary
-/// content of the app. A persistent bottom sheet remains visible even when the
-/// user interacts with other parts of the app. A [Scaffold] is required in the
-/// given `context`; its [ScaffoldState.showBottomSheet] method is used to
-/// actually show the bottom sheet.
+/// content of the app. A persistent bottom sheet remains visible even when
+/// the user interacts with other parts of the app.
 ///
 /// A closely related widget is a modal bottom sheet, which is an alternative
 /// to a menu or a dialog and prevents the user from interacting with the rest
 /// of the app. Modal bottom sheets can be created and displayed with the
 /// [showModalBottomSheet] function.
-///
-/// Returns a controller that can be used to close and otherwise manipulate the
-/// bottom sheet.
-///
-/// To rebuild the bottom sheet (e.g. if it is stateful), call
-/// [PersistentBottomSheetController.setState] on the value returned from this
-/// method.
 ///
 /// The `context` argument is used to look up the [Scaffold] for the bottom
 /// sheet. It is only used when the method is called. Its corresponding widget
