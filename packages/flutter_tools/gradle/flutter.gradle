@@ -148,8 +148,8 @@ class FlutterPlugin implements Plugin<Project> {
             }
             // Add flutter.jar dependencies to all <buildType>Implementation configurations, including custom ones
             // added after applying the Flutter plugin.
-            project.android.buildTypes.each { addFlutterJarImplementationDependency(project, it) }
-            project.android.buildTypes.whenObjectAdded { addFlutterJarImplementationDependency(project, it) }
+            project.android.buildTypes.each { addFlutterJarApiDependency(project, it) }
+            project.android.buildTypes.whenObjectAdded { addFlutterJarApiDependency(project, it) }
         }
 
         project.extensions.create("flutter", FlutterExtension)
@@ -199,11 +199,11 @@ class FlutterPlugin implements Plugin<Project> {
     }
 
     /**
-     * Adds suitable flutter.jar implementation dependencies to the specified buildType.
+     * Adds suitable flutter.jar api dependencies to the specified buildType.
      *
      * Note: The BuildType DSL type is not public, and is therefore omitted from the signature.
      */
-    private void addFlutterJarImplementationDependency(Project project, buildType) {
+    private void addFlutterJarApiDependency(Project project, buildType) {
         project.dependencies {
             String configuration;
             if (project.getConfigurations().findByName("api")) {
