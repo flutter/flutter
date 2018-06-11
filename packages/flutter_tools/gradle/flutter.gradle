@@ -107,8 +107,8 @@ class FlutterPlugin implements Plugin<Project> {
             localEngineSrcPath = engineOut.parentFile.parent
 
             project.dependencies {
-                if (project.getConfigurations().findByName("implementation")) {
-                    implementation project.files(flutterJar)
+                if (project.getConfigurations().findByName("api")) {
+                    api project.files(flutterJar)
                 } else {
                     compile project.files(flutterJar)
                 }
@@ -206,10 +206,10 @@ class FlutterPlugin implements Plugin<Project> {
     private void addFlutterJarImplementationDependency(Project project, buildType) {
         project.dependencies {
             String configuration;
-            if (project.getConfigurations().findByName("implementation")) {
-                configuration = buildType.name + "Implementation";
+            if (project.getConfigurations().findByName("api")) {
+                configuration = buildType.name + "Api"
             } else {
-                configuration = buildType.name + "Compile";
+                configuration = buildType.name + "Compile"
             }
             add(configuration, project.files {
                 String buildMode = buildModeFor(buildType)
