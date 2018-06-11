@@ -1332,17 +1332,17 @@ class AnnotatedRegionLayer<T> extends ContainerLayer {
 
   @override
   S find<S>(Offset regionOffset) {
-    if (size != null && !size.contains(regionOffset))
-      return null;
-    final S result = super.find<S>(regionOffset);
-    if (result != null)
-      return result;
     if (T == S) {
+      if (size != null && !size.contains(regionOffset))
+        return null;
+      final S result = super.find<S>(regionOffset);
+      if (result != null)
+        return result;
       final Object untypedResult = value;
       final S typedResult = untypedResult;
       return typedResult;
     }
-    return null;
+    return super.find<S>(regionOffset);
   }
 
   @override

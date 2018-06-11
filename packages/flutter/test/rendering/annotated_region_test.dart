@@ -113,6 +113,16 @@ void main() {
 
       expect(layer.find<String>(Offset.zero), 'hello');
     });
+
+    test('does not clip Layer.find on an AnnotatedRegion with an unrelated type', () {
+      final AnnotatedRegionLayer<int> child = new AnnotatedRegionLayer<int>(1);
+      final AnnotatedRegionLayer<String> parent = new AnnotatedRegionLayer<String>('hello', size: const Size(10.0, 10.0));
+      final ContainerLayer layer = new ContainerLayer();
+      parent.append(child);
+      layer.append(parent);
+
+      expect(layer.find<int>(const Offset(100.0, 100.0)), 1);
+    });
   });
 }
 
