@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 
 import 'button.dart';
@@ -290,7 +291,9 @@ class FlatButton extends StatelessWidget {
       splashColor: _getSplashColor(theme, buttonTheme),
       elevation: 0.0,
       highlightElevation: 0.0,
-      outerConstraints: const BoxConstraints(minHeight: 48.0),
+      outerConstraints: theme.materialTapTargetSize == MaterialTapTargetSize.expanded
+        ? const BoxConstraints(minHeight: 48.0)
+        : null,
       padding: padding ?? buttonTheme.padding,
       constraints: buttonTheme.constraints,
       shape: shape ?? buttonTheme.shape,

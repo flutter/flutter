@@ -36,7 +36,16 @@ const Color _kLightThemeSplashColor = const Color(0x66C8C8C8);
 const Color _kDarkThemeHighlightColor = const Color(0x40CCCCCC);
 const Color _kDarkThemeSplashColor = const Color(0x40CCCCCC);
 
-/// Configures the tap target size of certain Material widgets.
+/// Configures the tap target and layout size of certain Material widgets.
+///
+/// The following widgets are impacted:
+///
+///   * [FloatingActionButton], only the mini tap target size is increased.
+///   * [MaterialButton]
+///   * [OutlineButton]
+///   * [FlatButton]
+///   * [TimePicker]
+///   * [SnackBar]
 enum MaterialTapTargetSize {
   /// Expands the minimum tap target size to 48dp by 48dp.
   ///

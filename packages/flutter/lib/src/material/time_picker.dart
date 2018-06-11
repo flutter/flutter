@@ -5,6 +5,7 @@
 import 'dart:async';
 import 'dart:math' as math;
 
+import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
@@ -29,11 +30,15 @@ enum _TimePickerMode { hour, minute }
 const double _kTimePickerHeaderPortraitHeight = 96.0;
 const double _kTimePickerHeaderLandscapeWidth = 168.0;
 
+
 const double _kTimePickerWidthPortrait = 328.0;
 const double _kTimePickerWidthLandscape = 512.0;
 
 const double _kTimePickerHeightPortrait = 496.0;
 const double _kTimePickerHeightLandscape = 316.0;
+
+const double _kTimePickerHeightPortraitColaped = 484.0;
+const double _kTimePickerHeightLandscapeColapsed = 304.0;
 
 /// The horizontal gap between the day period fragment and the fragment
 /// positioned next to it horizontally.
@@ -1578,9 +1583,12 @@ class _TimePickerDialogState extends State<_TimePickerDialog> {
           assert(orientation != null);
           switch (orientation) {
             case Orientation.portrait:
+              final double timePickerHeightPortrait = theme.materialTapTargetSize == MaterialTapTargetSize.expanded
+                  ? _kTimePickerHeightPortrait
+                  : _kTimePickerHeightPortraitColaped;
               return new SizedBox(
                 width: _kTimePickerWidthPortrait,
-                height: _kTimePickerHeightPortrait,
+                height: timePickerHeightPortrait,
                 child: new Column(
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -1593,9 +1601,12 @@ class _TimePickerDialogState extends State<_TimePickerDialog> {
                 )
               );
             case Orientation.landscape:
+              final double timePickerHeightLandscape = theme.materialTapTargetSize == MaterialTapTargetSize.expanded
+                  ? _kTimePickerHeightLandscape
+                  : _kTimePickerHeightLandscapeColapsed;
               return new SizedBox(
                 width: _kTimePickerWidthLandscape,
-                height: _kTimePickerHeightLandscape,
+                height: timePickerHeightLandscape,
                 child: new Row(
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.stretch,

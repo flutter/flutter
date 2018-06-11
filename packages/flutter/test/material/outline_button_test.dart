@@ -55,7 +55,7 @@ void main() {
       new Directionality(
         textDirection: TextDirection.ltr,
         child: new Theme(
-          data: new ThemeData(),
+          data: new ThemeData(materialTapTargetSize: MaterialTapTargetSize.collapsed),
           child: new Container(
             alignment: Alignment.topLeft,
             child: new OutlineButton(
@@ -77,8 +77,8 @@ void main() {
     final Finder outlineButton = find.byType(OutlineButton);
     expect(tester.widget<OutlineButton>(outlineButton).enabled, true);
 
-    final Rect clipRect = new Rect.fromLTRB(0.0, 6.0, 116.0, 42.0);
-    final Path clipPath = new Path()..addRect(clipRect.inflate(10.0));
+    final Rect clipRect = new Rect.fromLTRB(0.0, 0.0, 116.0, 36.0);
+    final Path clipPath = new Path()..addRect(clipRect);
     expect(
       outlineButton,
       paints
@@ -113,7 +113,7 @@ void main() {
         ..path(color: borderColor, strokeWidth: borderWidth)
     );
     debugDisableShadows = true;
-  }, skip: true);
+  });
 
 
   testWidgets('OutlineButton contributes semantics', (WidgetTester tester) async {

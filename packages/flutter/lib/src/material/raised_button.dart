@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 
 import 'button.dart';
@@ -380,7 +381,9 @@ class RaisedButton extends StatelessWidget {
       shape: shape ?? buttonTheme.shape,
       animationDuration: animationDuration,
       child: child,
-      outerConstraints: const BoxConstraints(minHeight: 48.0),
+      outerConstraints: theme.materialTapTargetSize == MaterialTapTargetSize.expanded
+        ? const BoxConstraints(minHeight: 48.0)
+        : null,
     );
   }
 

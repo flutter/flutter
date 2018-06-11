@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 
 import 'button_theme.dart';
@@ -416,7 +417,9 @@ class MaterialButton extends StatelessWidget {
       ),
       shape: buttonTheme.shape,
       child: child,
-      outerConstraints: const BoxConstraints(minHeight: 48.0),
+      outerConstraints: theme.materialTapTargetSize == MaterialTapTargetSize.expanded
+        ? const BoxConstraints(minHeight: 48.0)
+        : null,
     );
   }
 
