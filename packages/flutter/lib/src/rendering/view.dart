@@ -91,6 +91,9 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
   /// and the hit-test result from the bottom of the screen provides the system
   /// nav bar settings.
   ///
+  /// Setting this to false does not cause previous automatic adjustments to be
+  /// reset, nor does setting it to true cause the app to update immediately.
+  ///
   /// If you want to imperatively set the system ui style instead, it is
   /// recommended that [automaticSystemUiAdjustment] is set to false.
   ///
@@ -191,7 +194,8 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
       final ui.SceneBuilder builder = new ui.SceneBuilder();
       layer.addToScene(builder, Offset.zero);
       final ui.Scene scene = builder.build();
-      _updateSystemChrome();
+      if (automaticSystemUiAdjustment)
+        _updateSystemChrome();
       ui.window.render(scene);
       scene.dispose();
       assert(() {
@@ -205,19 +209,19 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
   }
 
   void _updateSystemChrome() {
-    if (!automaticSystemUiAdjustment)
-      return;
     final Rect bounds = paintBounds;
     final Offset top = new Offset(bounds.center.dx, ui.window.padding.top / ui.window.devicePixelRatio);
+    final Offset bottom = new Offset(bounds.center.dx, ui.window.padding.bottom / ui.window.devicePixelRatio);
     final SystemUiOverlayStyle upperOverlayStyle = layer.find<SystemUiOverlayStyle>(top);
     // Only android has a customizable system navigation bar.
     SystemUiOverlayStyle lowerOverlayStyle;
     switch (defaultTargetPlatform) {
       case TargetPlatform.android:
-      case TargetPlatform.fuchsia:
-        lowerOverlayStyle = layer.find<SystemUiOverlayStyle>(bounds.bottomCenter);
+        lowerOverlayStyle = layer.find<SystemUiOverlayStyle>(bottom);
         break;
       case TargetPlatform.iOS:
+      case TargetPlatform.fuchsia:
+        break;
     }
     // If there are no overlay styles in the UI don't bother updating.
     if (upperOverlayStyle != null || lowerOverlayStyle != null) {
