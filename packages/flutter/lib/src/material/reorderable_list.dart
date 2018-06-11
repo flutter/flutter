@@ -234,15 +234,13 @@ class _ReorderableListViewState extends State<ReorderableListView> with TickerPr
   }
 
   void _requestAnimationToNextIndex() {
-    if (_nextIndex == _currentIndex) {
-      return;
-    }
     if (_entranceController.isCompleted) {
+      _ghostIndex = _currentIndex;
+      if (_nextIndex == _currentIndex) {
+        return;
+      }
       _currentIndex = _nextIndex;
-      _ghostController.reverse(from: 1.0).whenCompleteOrCancel(() {
-        // The swap is completed when the ghost controller finishes.
-        _ghostIndex = _nextIndex;
-      });
+      _ghostController.reverse(from: 1.0);
       _entranceController.forward(from: 0.0);
     }
   }
