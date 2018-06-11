@@ -264,16 +264,21 @@ class _FloatingActionButtonState extends State<FloatingActionButton> {
       result = widget.child != null ? tooltip : new SizedBox.expand(child: tooltip);
     }
 
-    final BoxConstraints outerConstraints = (widget.mini && theme.materialTapTargetSize == MaterialTapTargetSize.expanded)
-      ? const BoxConstraints(minHeight: 48.0, minWidth: 48.0)
-      : null;
+    BoxConstraints outerConstraints;
+    switch (theme.materialTapTargetSize) {
+      case MaterialTapTargetSize.expanded:
+        outerConstraints = const BoxConstraints(minHeight: 48.0, minWidth: 48.0);
+        break;
+      case MaterialTapTargetSize.collapsed:
+        break;
+    }
 
     result = new RawMaterialButton(
       onPressed: widget.onPressed,
       onHighlightChanged: _handleHighlightChanged,
       elevation: _highlight ? widget.highlightElevation : widget.elevation,
       constraints: widget._sizeConstraints,
-      outerConstraints: outerConstraints,
+      outerConstraints: widget.mini ? outerConstraints : null,
       fillColor: widget.backgroundColor ?? theme.accentColor,
       textStyle: theme.accentTextTheme.button.copyWith(
         color: foregroundColor,

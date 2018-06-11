@@ -401,6 +401,14 @@ class MaterialButton extends StatelessWidget {
     final ThemeData theme = Theme.of(context);
     final ButtonThemeData buttonTheme = ButtonTheme.of(context);
     final Color textColor = _getTextColor(theme, buttonTheme, color);
+    BoxConstraints outerConstraints;
+    switch (theme.materialTapTargetSize) {
+      case MaterialTapTargetSize.expanded:
+        outerConstraints = const BoxConstraints(minHeight: 48.0, minWidth: 48.0);
+        break;
+      case MaterialTapTargetSize.collapsed:
+        break;
+    }
 
     return new RawMaterialButton(
       onPressed: onPressed,
@@ -417,9 +425,7 @@ class MaterialButton extends StatelessWidget {
       ),
       shape: buttonTheme.shape,
       child: child,
-      outerConstraints: theme.materialTapTargetSize == MaterialTapTargetSize.expanded
-        ? const BoxConstraints(minHeight: 48.0)
-        : null,
+      outerConstraints: outerConstraints,
     );
   }
 

@@ -38,16 +38,23 @@ const Color _kDarkThemeSplashColor = const Color(0x40CCCCCC);
 
 /// Configures the tap target and layout size of certain Material widgets.
 ///
-/// The following widgets are impacted:
+/// Some of the impacted widgets include:
 ///
 ///   * [FloatingActionButton], only the mini tap target size is increased.
 ///   * [MaterialButton]
 ///   * [OutlineButton]
 ///   * [FlatButton]
+///   * [RaisedButton]
 ///   * [TimePicker]
 ///   * [SnackBar]
+///   * [Chip]
+///   * [RawChip]
+///   * [InputChip]
+///   * [ChoiceChip]
+///   * [FilterChip]
+///   * [ActionChip]
 enum MaterialTapTargetSize {
-  /// Expands the minimum tap target size to 48dp by 48dp.
+  /// Expands the minimum tap target size to 48px by 48px.
   ///
   /// This is the default value of [ThemeData.materialHitTestSize] and the
   /// recommended behavior to conform to Android accessibility recommendations.

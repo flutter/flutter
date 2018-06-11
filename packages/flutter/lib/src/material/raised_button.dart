@@ -365,6 +365,14 @@ class RaisedButton extends StatelessWidget {
     final ButtonThemeData buttonTheme = ButtonTheme.of(context);
     final Color fillColor = _getFillColor(theme, buttonTheme);
     final Color textColor = _getTextColor(theme, buttonTheme, fillColor);
+    BoxConstraints outerConstraints;
+    switch (theme.materialTapTargetSize) {
+      case MaterialTapTargetSize.expanded:
+        outerConstraints = const BoxConstraints(minHeight: 48.0, minWidth: 48.0);
+        break;
+      case MaterialTapTargetSize.collapsed:
+        break;
+    }
 
     return new RawMaterialButton(
       onPressed: onPressed,
@@ -381,6 +389,7 @@ class RaisedButton extends StatelessWidget {
       shape: shape ?? buttonTheme.shape,
       animationDuration: animationDuration,
       child: child,
+      outerConstraints: outerConstraints
     );
   }
 

@@ -187,7 +187,9 @@ void main() {
       new Directionality(
         textDirection: TextDirection.ltr,
         child: new Theme(
-          data: new ThemeData(),
+          data: new ThemeData(
+            materialTapTargetSize: MaterialTapTargetSize.collapsed,
+          ),
           child: buttonWidget,
         ),
       ),
@@ -233,6 +235,7 @@ void main() {
           data: new ThemeData(
             highlightColor: themeHighlightColor1,
             splashColor: themeSplashColor1,
+            materialTapTargetSize: MaterialTapTargetSize.collapsed,
           ),
           child: buttonWidget,
         ),
@@ -260,6 +263,7 @@ void main() {
           data: new ThemeData(
             highlightColor: themeHighlightColor2,
             splashColor: themeSplashColor2,
+            materialTapTargetSize: MaterialTapTargetSize.collapsed,
           ),
           child: buttonWidget, // same widget, so does not get updated because of us
         ),
@@ -274,7 +278,7 @@ void main() {
     );
 
     await gesture.up();
-  }, skip: true);
+  });
 
   testWidgets('Disabled MaterialButton has same semantic size as enabled and exposes disabled semantics', (WidgetTester tester) async {
     final SemanticsTester semantics = new SemanticsTester(tester);

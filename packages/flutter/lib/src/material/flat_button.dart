@@ -281,6 +281,14 @@ class FlatButton extends StatelessWidget {
     final ButtonThemeData buttonTheme = ButtonTheme.of(context);
     final Color fillColor = enabled ? color : disabledColor;
     final Color textColor = _getTextColor(theme, buttonTheme, fillColor);
+    BoxConstraints outerConstraints;
+    switch (theme.materialTapTargetSize) {
+      case MaterialTapTargetSize.expanded:
+        outerConstraints = const BoxConstraints(minHeight: 48.0, minWidth: 48.0);
+        break;
+      case MaterialTapTargetSize.collapsed:
+        break;
+    }
 
     return new RawMaterialButton(
       onPressed: onPressed,
@@ -291,9 +299,7 @@ class FlatButton extends StatelessWidget {
       splashColor: _getSplashColor(theme, buttonTheme),
       elevation: 0.0,
       highlightElevation: 0.0,
-      outerConstraints: theme.materialTapTargetSize == MaterialTapTargetSize.expanded
-        ? const BoxConstraints(minHeight: 48.0)
-        : null,
+      outerConstraints: outerConstraints,
       padding: padding ?? buttonTheme.padding,
       constraints: buttonTheme.constraints,
       shape: shape ?? buttonTheme.shape,

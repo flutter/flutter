@@ -46,7 +46,7 @@ const Icon _kDefaultDeleteIcon = const Icon(Icons.cancel, size: _kDeleteIconSize
 ///
 /// The defaults mentioned in the documentation for each attribute are what
 /// the implementing classes typically use for defaults (but this class doesn't
-/// provide or enforce them).f
+/// provide or enforce them).
 ///
 /// See also:
 ///
@@ -1432,7 +1432,7 @@ class _RawChipState extends State<RawChip> with TickerProviderStateMixin<RawChip
         ),
       ),
     );
-    switch(theme.materialTapTargetSize) {
+    switch (theme.materialTapTargetSize) {
       case MaterialTapTargetSize.expanded:
         result = new ConstrainedBox(
           constraints: const BoxConstraints(minWidth: 48.0, minHeight: 48.0),
@@ -1442,7 +1442,6 @@ class _RawChipState extends State<RawChip> with TickerProviderStateMixin<RawChip
             heightFactor: 1.0,
           ),
         );
-
         if (canTap) {
           result = new GestureDetector(
             behavior: HitTestBehavior.translucent,
@@ -1455,6 +1454,7 @@ class _RawChipState extends State<RawChip> with TickerProviderStateMixin<RawChip
         }
         break;
       case MaterialTapTargetSize.collapsed:
+        break;
     }
 
     return new Semantics(
