@@ -65,6 +65,7 @@ class HSVColor {
 
     /// fix hue to 0.0 when red == green == blue.
     hue = hue.isNaN ? 0.0 : hue;
+    hue = hue % 360.0;
     final double saturation = max == 0.0 ? 0.0 : delta / max;
 
     return new HSVColor.fromAHSV(alpha, hue, saturation, max);
