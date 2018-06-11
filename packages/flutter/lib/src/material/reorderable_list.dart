@@ -77,11 +77,13 @@ class ReorderableListView extends StatefulWidget {
 }
 
 class _ReorderableListViewState extends State<ReorderableListView> with TickerProviderStateMixin {
-  ScrollController scrollController = new ScrollController();
+  final ScrollController _scrollController = new ScrollController();
+
   // This controls the entrance of the dragging widget into a new place.
-  AnimationController entranceController;
+  AnimationController _entranceController;
+
   // This controls the 'ghost' of the dragging widget, which is left behind where the widget used to be.
-  AnimationController ghostController;
+  AnimationController _ghostController;
 
   Key _dragging;
 
@@ -91,117 +93,133 @@ class _ReorderableListViewState extends State<ReorderableListView> with TickerPr
   // The index that the dragging widget most recently left.
   // This is used to show an animation of the widget's position.
   int _ghostIndex = 0;
+
+  // The index that the dragging widget currently occupies.
   int _currentIndex = 0;
+
+  // The widget to move the dragging widget too after the current index.
   int _nextIndex = 0;
 
+  // Whether or not we are scrolling this view to show a widget.
   bool _scrolling = false;
 
   @override 
   void initState() {
     super.initState();
-    entranceController = new AnimationController(vsync: this, value: 0.0, duration: const Duration(milliseconds: 200));
-    ghostController = new AnimationController(vsync: this, value: 0.0, duration: const Duration(milliseconds: 200));
-    entranceController.addStatusListener(_onEntranceStatusChanged);
+    _entranceController = new AnimationController(vsync: this, value: 0.0, duration: const Duration(milliseconds: 200));
+    _ghostController = new AnimationController(vsync: this, value: 0.0, duration: const Duration(milliseconds: 200));
+    _entranceController.addStatusListener(_onEntranceStatusChanged);
   }
 
   @override
   void dispose() {
-    entranceController.dispose();
-    ghostController.dispose();
+    _entranceController.dispose();
+    _ghostController.dispose();
     super.dispose();
   }
 
   Widget _wrap(Widget toWrap, int index) {
     assert(toWrap.key != null);
 
-    Widget _buildContainerForAxis({List<Widget> children}) {
+    Widget buildContainerForAxis({List<Widget> children}) {
       if (widget.scrollDirection == Axis.horizontal) {
         return new Row(children: children);
       } 
       return new Column(children: children);
     }
 
-    Widget _buildDragTarget(BuildContext context, List<Key> acceptedCandidates, List<dynamic> rejectedCandidates) {
-      final Widget layoutBuilder = new LayoutBuilder(builder: (BuildContext context, BoxConstraints constraints) {
-        return new LongPressDraggable<Key>(
-          maxSimultaneousDrags: 1,
-          axis: widget.scrollDirection,
-          data: toWrap.key,
-          feedback:new Container(
-            alignment: Alignment.topLeft,
-            constraints: constraints,
-            child: new Material(
-              elevation: 6.0,
-              child: toWrap,
-            ),
-          ),
-          child: _dragging == toWrap.key ? const SizedBox() : toWrap,
-          // The list will take care of inserting dummy space in the correct place.
-          childWhenDragging: const SizedBox(),
-          dragAnchor: DragAnchor.child,
-          onDragStarted: () {
-            setState(() {
-              _dragging = toWrap.key;
-              _dragStartIndex = index;
-              _ghostIndex = index;
-              _currentIndex = index;
-              entranceController.forward(from: 1.0);
-            });
-          },
-          onDraggableCanceled: (_, __) {
-            setState(() {
-              widget.onSwap(_dragStartIndex, _currentIndex);
-              ghostController.reverse(from: 0.1);
-              entranceController.reverse(from: 0.1);
-              _dragging = null;
-            });
-          },
-          onDragCompleted: () {
-            setState(() {
-              if (_dragStartIndex != _currentIndex)
-                widget.onSwap(_dragStartIndex, _currentIndex);
-              ghostController.reverse(from: 0.1);
-              entranceController.reverse(from: 0.1);
-              _dragging = null;
-            });
-          },
-        );
+    void onDragEnded() {
+      setState(() {
+        if (_dragStartIndex != _currentIndex)
+          widget.onSwap(_dragStartIndex, _currentIndex);
+        _ghostController.reverse(from: 0.1);
+        _entranceController.reverse(from: 0.1);
+        _dragging = null;
       });
-      // The target for dropping at the end of the list doesn't need to be draggable or to expand.
+    }
+
+    Widget buildDragTarget(BuildContext context, List<Key> acceptedCandidates, List<dynamic> rejectedCandidates) {
+      // We build the draggable inside of a layout builder so that we can
+      // constrain the size of the feedback dragging widget.
+      Widget child = new LayoutBuilder(
+        builder: (BuildContext context, BoxConstraints constraints) {
+            return new LongPressDraggable<Key>(
+              maxSimultaneousDrags: 1,
+              axis: widget.scrollDirection,
+              data: toWrap.key,
+              feedback:new Container(
+                alignment: Alignment.topLeft,
+                constraints: constraints,
+                child: new Material(
+                  elevation: 6.0,
+                  child: toWrap,
+                ),
+              ),
+              child: _dragging == toWrap.key ? const SizedBox() : toWrap,
+              childWhenDragging: const SizedBox(),
+              dragAnchor: DragAnchor.child,
+              onDragStarted: () {
+                setState(() {
+                  _dragging = toWrap.key;
+                  _dragStartIndex = index;
+                  _ghostIndex = index;
+                  _currentIndex = index;
+                  _entranceController.forward(from: 1.0);
+                });
+              },
+              // When the drag ends inside a DragTarget widget, the drag
+              // succeeds, and we swap the widget into position appropriately.
+              onDragCompleted: onDragEnded,
+              // When the drag does not end inside a DragTarget widget, the
+              // drag fails, but we still swap the widget to the last position it
+              // had been dragged to.
+              onDraggableCanceled: (Velocity velocity, Offset offset) {
+                onDragEnded();
+              },
+            );
+      });
+      // The target for dropping at the end of the list doesn't need to be
+      // draggable.
       if (index >= widget.children.length) {
-        return toWrap;
+        child = toWrap;
       }
-      final Widget spacing = widget.scrollDirection == Axis.vertical ? new SizedBox(height: widget.dropAreaExtent) : new SizedBox(width: widget.dropAreaExtent);
+      final Widget spacing = widget.scrollDirection == Axis.vertical 
+          ? new SizedBox(height: widget.dropAreaExtent) 
+          : new SizedBox(width: widget.dropAreaExtent);
+      // We open up a space under where the dragging widget currently is to
+      // show it can be dropped.
       if (_currentIndex == index) {
-        return _buildContainerForAxis(children: <Widget>[
+        return buildContainerForAxis(children: <Widget>[
           new SizeTransition(
-            sizeFactor: entranceController, 
+            sizeFactor: _entranceController, 
             axis: widget.scrollDirection,
             child: spacing
           ),
-          layoutBuilder,
+          child,
         ]);
       }
+      // We close up the space under where the dragging widget previously was
+      // with the ghostController animation.
       if (_ghostIndex == index) {
-        return _buildContainerForAxis(children: <Widget>[
+        return buildContainerForAxis(children: <Widget>[
           new SizeTransition(
-            sizeFactor: ghostController, 
+            sizeFactor: _ghostController, 
             axis: widget.scrollDirection,
             child: spacing,
           ),
-          layoutBuilder,
+          child,
         ]);
       }
-      return layoutBuilder;
+      return child;
     }
 
     return new Builder(builder: (BuildContext context) {
       return new DragTarget<Key>(
-        builder: _buildDragTarget,
+        builder: buildDragTarget,
         onWillAccept: (Key toAccept) {
           setState(() {
             _nextIndex = index;
-            _requestAnimationTo(_nextIndex);
+            _requestAnimationToNextIndex();
           });
           _scrollTo(context);
           // If the target is not the original starting point, then we will accept the drop.
@@ -215,17 +233,17 @@ class _ReorderableListViewState extends State<ReorderableListView> with TickerPr
     });
   }
 
-  void _requestAnimationTo(int index) {
-    if (index == _currentIndex) {
+  void _requestAnimationToNextIndex() {
+    if (_nextIndex == _currentIndex) {
       return;
     }
-    if (entranceController.isCompleted) {
-      _currentIndex = index;
-      ghostController.reverse(from: 1.0).whenCompleteOrCancel(() {
+    if (_entranceController.isCompleted) {
+      _currentIndex = _nextIndex;
+      _ghostController.reverse(from: 1.0).whenCompleteOrCancel(() {
         // The swap is completed when the ghost controller finishes.
-        _ghostIndex = index;
+        _ghostIndex = _nextIndex;
       });
-      entranceController.forward(from: 0.0);
+      _entranceController.forward(from: 0.0);
     }
   }
 
@@ -233,7 +251,7 @@ class _ReorderableListViewState extends State<ReorderableListView> with TickerPr
     if (status == AnimationStatus.completed) {
       // If the next index has changed, then we should animate to it.
       setState(() {
-        _requestAnimationTo(_nextIndex);
+        _requestAnimationToNextIndex();
       });
     }
   }
@@ -245,11 +263,15 @@ class _ReorderableListViewState extends State<ReorderableListView> with TickerPr
     final RenderObject contextObject = context.findRenderObject();
     final RenderAbstractViewport viewport = RenderAbstractViewport.of(contextObject);
     assert(viewport != null);
-    const double margin = 48.0;
-    final double scrollOffset = scrollController.offset;
+    // If and only if the current scroll offset falls in-between the offsets
+    // necessary to reveal the selected context at the top or bottom of the
+    // screen, then it is already on-screen.
+    final double margin = widget.dropAreaExtent;
+    final double scrollOffset = _scrollController.offset;
     final double topOffset = viewport.getOffsetToReveal(contextObject, 0.0).offset - margin;
     final double bottomOffset = viewport.getOffsetToReveal(contextObject, 1.0).offset + margin;
-    final bool onScreen = scrollOffset <= topOffset && scrollOffset >= bottomOffset; 
+    final bool onScreen = scrollOffset <= topOffset && scrollOffset >= bottomOffset;
+    // If the context is off screen, then we request a scroll to make it visible.
     if (!onScreen) {
       _scrolling = true;
       Scrollable.ensureVisible(
@@ -290,7 +312,7 @@ class _ReorderableListViewState extends State<ReorderableListView> with TickerPr
           ? new Column(children: wrappedChildren) 
           : new Row(children: wrappedChildren),
       padding: widget.padding, 
-      controller: scrollController,
+      controller: _scrollController,
     );
   }
 }
