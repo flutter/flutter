@@ -81,8 +81,11 @@ class EmulatorsCommand extends FlutterCommand {
     if (createResult.success) {
       printStatus("Emulator '$name' created successfully.");
     } else {
+      printStatus("Failed to create emulator '$name'.\n");
       printStatus(createResult.error);
-      printStatus("Failed to create emulator '$name'.");
+      printStatus('You can find more information on managing emulators at the links below:\n'
+        '  https://developer.android.com/studio/run/managing-avds\n'
+        '  https://developer.android.com/studio/command-line/avdmanager');
     }
   }
 
