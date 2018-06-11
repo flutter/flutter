@@ -5,7 +5,7 @@
 import 'dart:async';
 
 /// Signature for callbacks passed to [LicenseRegistry.addLicense].
-typedef Stream<LicenseEntry> LicenseEntryCollector();
+typedef LicenseEntryCollector = Stream<LicenseEntry> Function();
 
 /// A string that represents one paragraph in a [LicenseEntry].
 ///

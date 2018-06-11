@@ -13,7 +13,7 @@ import '../globals.dart';
 import '../version.dart';
 import 'file_system.dart';
 
-typedef bool FingerprintPathFilter(String path);
+typedef FingerprintPathFilter = bool Function(String path);
 
 /// A tool that can be used to compute, compare, and write [Fingerprint]s for a
 /// set of input files and associated build settings.

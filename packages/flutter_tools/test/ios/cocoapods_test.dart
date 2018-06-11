@@ -17,7 +17,7 @@ import 'package:test/test.dart';
 
 import '../src/context.dart';
 
-typedef Future<ProcessResult> InvokeProcess();
+typedef InvokeProcess = Future<ProcessResult> Function();
 
 void main() {
   FileSystem fs;
