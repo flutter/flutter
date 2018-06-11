@@ -168,16 +168,16 @@ Hello!
         ]));
 
         when(mockKernelCompiler.compile(
-          sdkRoot: any,
-          incrementalCompilerByteStorePath: any,
-          mainPath: any,
-          outputFilePath: any,
-          depFilePath: any,
-          trackWidgetCreation: any,
-          extraFrontEndOptions: any,
-          fileSystemRoots: any,
-          fileSystemScheme: any,
-          packagesPath: any,
+          sdkRoot: anyNamed('sdkRoot'),
+          incrementalCompilerByteStorePath: anyNamed('incrementalCompilerByteStorePath'),
+          mainPath: anyNamed('mainPath'),
+          outputFilePath: anyNamed('outputFilePath'),
+          depFilePath: anyNamed('depFilePath'),
+          trackWidgetCreation: anyNamed('trackWidgetCreation'),
+          extraFrontEndOptions: anyNamed('extraFrontEndOptions'),
+          fileSystemRoots: anyNamed('fileSystemRoots'),
+          fileSystemScheme: anyNamed('fileSystemScheme'),
+          packagesPath: anyNamed('packagesPath'),
         )).thenAnswer((_) async {
           fs.file('$mainPath.dill').createSync(recursive: true);
           return new CompilerOutput('$mainPath.dill', 0);
