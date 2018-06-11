@@ -1,10 +1,8 @@
-import 'package:flutter/foundation.dart';
 // Copyright 2016 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 
 enum _MaterialListType {
   /// A list tile that contains a single line of text.
@@ -171,13 +169,7 @@ class _ListDemoState extends State<ListDemo> {
     });
   }
 
-  Map<String, bool> valueToCheckboxState = <String, bool>{};
-
-  Widget buildListTile(BuildContext context, int index) {
-    // if (index >= items.length) {
-    //   return new MergeSemantics(child: new _DraggableListItem<int>(index: index, child: null, onSwap: onSwap, ensureVisible: scrollTo, isDraggable: false));
-    // }
-    final String item = items[index];
+  Widget buildListTile(BuildContext context, String item) {
     Widget secondary;
     if (_itemType == _MaterialListType.twoLine) {
       secondary = const Text('Additional item information.');
@@ -186,33 +178,20 @@ class _ListDemoState extends State<ListDemo> {
         'Even more additional list item information appears on line three.',
       );
     }
-    final Widget listTile = new Container(height: 100.0, width: 100.0, child: new CircleAvatar(child: new Text(item), backgroundColor: Colors.green,));
-    
-    // final Widget listTile = new ListTile(
-    //   isThreeLine: _itemType == _MaterialListType.threeLine,
-    //   dense: _dense,
-    //   trailing: new Checkbox(value: valueToCheckboxState[item] ?? false, onChanged: (bool newValue) {setState(() {valueToCheckboxState[item] = newValue;});},),
-    //   title: new Text('This item represents $item.'),
-    //   subtitle: secondary,
-    //   leading: const Icon(Icons.drag_handle),
-    // );
     return new MergeSemantics(
-      key: new Key(item),
-      child: listTile,
+      child: new ListTile(
+        isThreeLine: _itemType == _MaterialListType.threeLine,
+        dense: _dense,
+        leading: _showAvatars ? new ExcludeSemantics(child: new CircleAvatar(child: new Text(item))) : null,
+        title: new Text('This item represents $item.'),
+        subtitle: secondary,
+        trailing: _showIcons ? new Icon(Icons.info, color: Theme.of(context).disabledColor) : null,
+      ),
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    void onSwap(int oldIndex, int newIndex) {
-      setState(() {
-        if (newIndex > oldIndex) {
-          newIndex -= 1;
-        }
-        final String item = items.removeAt(oldIndex);
-        items.insert(newIndex, item);
-      });
-    }
     final String layoutText = _dense ? ' \u2013 Dense' : '';
     String itemTypeText;
     switch (_itemType) {
@@ -228,10 +207,9 @@ class _ListDemoState extends State<ListDemo> {
         break;
     }
 
-    final List<MergeSemantics> listTiles = <MergeSemantics>[];
-    for (int i = 0; i < items.length; i++) {
-      listTiles.add(buildListTile(context, i));
-    }
+    Iterable<Widget> listTiles = items.map((String item) => buildListTile(context, item));
+    if (_showDividers)
+      listTiles = ListTile.divideTiles(context: context, tiles: listTiles);
 
     return new Scaffold(
       key: scaffoldKey,
@@ -256,11 +234,9 @@ class _ListDemoState extends State<ListDemo> {
         ],
       ),
       body: new Scrollbar(
-        child: new ReorderableListView(
-          onSwap: onSwap,
-          scrollDirection: Axis.horizontal,
-          children: listTiles,
+        child: new ListView(
           padding: new EdgeInsets.symmetric(vertical: _dense ? 4.0 : 8.0),
+          children: listTiles.toList(),
         ),
       ),
     );
