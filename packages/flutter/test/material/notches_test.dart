@@ -34,26 +34,6 @@ void main() {
       expect(() {notch.getPath(host, guest, start, end);}, throwsFlutterError);
     });
 
-    test('start must be to the left of the notch', () {
-      const CircularNotch notch = const CircularNotch();
-      final Rect host = new Rect.fromLTRB(0.0, 100.0, 300.0, 300.0);
-      final Rect guest = new Rect.fromLTRB(190.0, 90.0, 210.0, 110.0);
-
-      const Offset start = const Offset(191.0, 100.0);
-      const Offset end = const Offset(220.0, 100.0);
-      expect(() {notch.getPath(host, guest, start, end);}, throwsFlutterError);
-    });
-
-    test('end must be to the right of the notch', () {
-      const CircularNotch notch = const CircularNotch();
-      final Rect host = new Rect.fromLTRB(0.0, 100.0, 300.0, 300.0);
-      final Rect guest = new Rect.fromLTRB(190.0, 90.0, 210.0, 110.0);
-
-      const Offset start = const Offset(180.0, 100.0);
-      const Offset end = const Offset(209.0, 100.0);
-      expect(() {notch.getPath(host, guest, start, end);}, throwsFlutterError);
-    });
-
     test('notch no margin', () {
       const CircularNotch notch = const CircularNotch(notchMargin: 0.0);
       final Rect host = new Rect.fromLTRB(0.0, 100.0, 300.0, 300.0);
@@ -94,7 +74,7 @@ void main() {
       expect(pathDoesNotContainCircle(notchedRectangle, guest.inflate(4.0)), isTrue);
     });
 
-    test('notch circle center below BAB', () {
+    test('circular notch, notch center below BAB', () {
       const CircularNotch notch = const CircularNotch(notchMargin: 4.0);
       final Rect host = new Rect.fromLTRB(0.0, 100.0, 300.0, 300.0);
       final Rect guest = new Rect.fromLTRB(190.0, 95.0, 210.0, 115.0);
@@ -105,6 +85,29 @@ void main() {
       final Path notchedRectangle =
         createNotchedRectangle(host, start.dx, end.dx, actualNotch);
       expect(pathDoesNotContainCircle(notchedRectangle, guest.inflate(4.0)), isTrue);
+    });
+
+    test('start/end are swappable', () {
+      const CircularNotch notch = const CircularNotch(notchMargin: 4.0);
+      final Rect host = new Rect.fromLTRB(0.0, 100.0, 300.0, 300.0);
+      final Rect guest = new Rect.fromLTRB(190.0, 95.0, 210.0, 115.0);
+      const Offset start = const Offset(180.0, 100.0);
+      const Offset end = const Offset(220.0, 100.0);
+
+      final Path notch1 = notch.getPath(host, guest, start, end);
+      final Path notchedRectangle1 =
+        createNotchedRectangle(host, start.dx, end.dx,notch1);
+
+      final Path notch2 = notch.getPath(host, guest, end, start);
+      final Path notchedRectangle2 =
+        createNotchedRectangle(host, start.dx, end.dx, notch2);
+
+      expect(notchedRectangle1,
+        coversSameAreaAs(
+          notchedRectangle2,
+          areaToCompare: host.inflate(5.0),
+        )
+      );
     });
 
     test('no notch when there is no overlap', () {

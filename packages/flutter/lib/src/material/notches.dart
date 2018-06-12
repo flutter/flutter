@@ -11,9 +11,8 @@ abstract class Notch {
   /// const constructors so that they can be used in const expressions.
   const Notch();
 
-  /// Returns a path for a notch in the outline of a shape.
-  ///
-  /// The path makes a notch in the host shape that can contain the guest shape.
+  /// Returns a [Path] that defines a cutout or "notch" in the host shape that
+  /// accommodates the guest shape.
   ///
   /// The `host` is the bounding rectangle for the shape into which the notch will
   /// be applied. The `guest` is the bounding rectangle of the shape for which we
@@ -50,8 +49,7 @@ class CircularNotch implements Notch {
     this.notchMargin = 4.0,
   });
 
-  /// Minimal margin that will be kept from the guest. Assuming that the guest's
-  /// shape is circular.
+  /// The margin between the circular guest and the host's circular notch.
   ///
   /// The notch will be sized to contain a circle with a radius of notchMargin + guestRadius.
   /// (guestRadius is half the width or height of the guest bounding box).
@@ -79,12 +77,15 @@ class CircularNotch implements Notch {
     final double fabRadius = guest.width / 2.0;
     final double notchRadius = fabRadius + notchMargin;
 
-    assert(_notchAssertions(host, guest, start, end, fabRadius, notchRadius, notchMargin));
+    final Offset left = start.dx < end.dx ? start : end;
+    final Offset right = start.dx < end.dx ? end : start;
+
+    assert(_notchAssertions(host, guest, left, right, fabRadius, notchRadius, notchMargin));
 
     // If there's no overlap between the guest's margin boundary and the host,
-    // don't make a notch, just return a straight line from start to end.
+    // don't make a notch, just return a straight line from left to right.
     if (!host.overlaps(guest.inflate(notchMargin)))
-      return new Path()..lineTo(end.dx, end.dy);
+      return new Path()..lineTo(right.dx, right.dy);
 
     // We build a path for the notch from 3 segments:
     // Segment A - a Bezier curve from the host's top edge to segment B.
@@ -134,33 +135,45 @@ class CircularNotch implements Notch {
         clockwise: false,
       )
       ..quadraticBezierTo(p[4].dx, p[4].dy, p[5].dx, p[5].dy)
-      ..lineTo(end.dx, end.dy);
+      ..lineTo(right.dx, right.dy);
   }
 
-  bool _notchAssertions(Rect host, Rect guest, Offset start, Offset end,
+  bool _notchAssertions(Rect host, Rect guest, Offset left, Offset right,
     double fabRadius, double notchRadius, double notchMargin) {
-    if (end.dy != host.top)
+    if (right.dy != host.top)
       throw new FlutterError(
-        'The notch of the guest must end at the top edge of the host.\n'
-        'The notch\'s path end point: $end is not in the top edge of $host'
+        'The notch of the guest must start and end at the top edge of the host.\n'
+        'The notch\'s path right point: $right is not in the top edge of $host'
       );
 
-    if (start.dy != host.top)
+    if (left.dy != host.top)
       throw new FlutterError(
-        'The notch of the guest must start at the top edge of the host.\n'
-        'The notch\'s path start point: $start is not in the top edge of $host'
+        'The notch of the guest must start and end at the top edge of the host.\n'
+        'The notch\'s path left point: $left is not in the top edge of $host.'
       );
 
-    if (guest.center.dx - notchRadius < start.dx)
+    if (left.dx < host.left || left.dx > host.right)
       throw new FlutterError(
-        'The notch\'s path start point must be to the left of the guest.\n'
-        'Start point was $start, guest was $guest, notchMargin was $notchMargin.'
+        'The notch must start and end on the outline of the host rect.\n'
+        'The notch\'s path left point: $left is not on the top edge of $host.'
       );
 
-    if (guest.center.dx + notchRadius > end.dx)
+    if (right.dx < host.left || right.dx > host.right)
       throw new FlutterError(
-        'The notch\'s end point must be to the right of the guest.\n'
-        'End point was $start, notch was $guest, notchMargin was $notchMargin.'
+        'The notch must start and end on the outline of the host rect.\n'
+        'The notch\'s path right point: $right is not on the top edge of $host.'
+      );
+
+    if (guest.center.dx - notchRadius < left.dx)
+      throw new FlutterError(
+        'The notch\'s path left point must be to the left of the guest.\n'
+        'left point was $left, guest was $guest, notchMargin was $notchMargin.'
+      );
+
+    if (guest.center.dx + notchRadius > right.dx)
+      throw new FlutterError(
+        'The notch\'s right point must be to the right of the guest.\n'
+        'Right point was $right, notch was $guest, notchMargin was $notchMargin.'
       );
 
     if (guest.width != guest.height)
