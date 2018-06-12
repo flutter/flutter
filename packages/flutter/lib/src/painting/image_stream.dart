@@ -136,7 +136,7 @@ class ImageStream extends Diagnosticable {
   /// a paint.
   void addListener(ImageListener listener, { ImageErrorListener onError }) {
     if (_completer != null)
-      return _completer.addListener(listener);
+      return _completer.addListener(listener, onError: onError);
     _listeners ??= <ImageListener, ImageErrorListener>{};
     _listeners[listener] = onError;
   }
@@ -217,6 +217,19 @@ abstract class ImageStreamCompleter extends Diagnosticable {
           stack: stack,
         );
       }
+    }
+    if (_currentError != null && onError != null) {
+      try {
+          onError(_currentError.exception, _currentError.stack);
+        } catch (exception, stack) {
+          reportError(
+            context: 'by a synchronously-called image error listener',
+            exception: exception,
+            stack: stack,
+            // Error listeners themselves failed. Don't feed back to listeners.
+            skipListeners: true,
+          );
+        }
     }
   }
 
