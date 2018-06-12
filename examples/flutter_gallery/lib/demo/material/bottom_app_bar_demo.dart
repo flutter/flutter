@@ -97,19 +97,19 @@ class _BottomAppBarDemoState extends State<BottomAppBarDemo> {
 
   // App bar color
 
-  static const List<Color> kBabColors = const <Color>[
-    null,
-    const Color(0xFFFFC100),
-    const Color(0xFF91FAFF),
-    const Color(0xFF00D1FF),
-    const Color(0xFF00BCFF),
-    const Color(0xFF009BEE),
+  static const List<_NamedColor> kBabColors = const <_NamedColor>[
+    const _NamedColor(null, 'Clear'),
+    const _NamedColor(const Color(0xFFFFC100), 'Orange'),
+    const _NamedColor(const Color(0xFF91FAFF), 'Light Blue'),
+    const _NamedColor(const Color(0xFF00D1FF), 'Cyan'),
+    const _NamedColor(const Color(0xFF00BCFF), 'Cerulean'),
+    const _NamedColor(const Color(0xFF009BEE), 'Blue'),
   ];
 
   _ChoiceValue<Widget> _fabShape = kCircularFab;
   _ChoiceValue<bool> _showNotch = kShowNotchTrue;
   _ChoiceValue<FloatingActionButtonLocation> _fabLocation = kFabEndDocked;
-  Color _babColor = kBabColors.first;
+  Color _babColor = kBabColors.first.color;
 
   void _onShowNotchChanged(_ChoiceValue<bool> value) {
     setState(() {
@@ -250,37 +250,46 @@ class _RadioItem<T> extends StatelessWidget {
   }
 }
 
+class _NamedColor {
+  const _NamedColor(this.color, this.name);
+
+  final Color color;
+  final String name;
+}
+
 class _ColorsItem extends StatelessWidget {
   const _ColorsItem(this.colors, this.selectedColor, this.onChanged);
 
-  final List<Color> colors;
+  final List<_NamedColor> colors;
   final Color selectedColor;
   final ValueChanged<Color> onChanged;
 
   @override
   Widget build(BuildContext context) {
-    return new ExcludeSemantics(
-      child: new Row(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-        children: colors.map((Color color) {
-          return new RawMaterialButton(
-            onPressed: () {
-              onChanged(color);
-            },
-            constraints: const BoxConstraints.tightFor(
-              width: 32.0,
-              height: 32.0,
+    return new Row(
+      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+      children: colors.map((_NamedColor namedColor) {
+        return new RawMaterialButton(
+          onPressed: () {
+            onChanged(namedColor.color);
+          },
+          constraints: const BoxConstraints.tightFor(
+            width: 32.0,
+            height: 32.0,
+          ),
+          fillColor: namedColor.color,
+          shape: new CircleBorder(
+            side: new BorderSide(
+              color: namedColor.color == selectedColor ? Colors.black : const Color(0xFFD5D7DA),
+              width: 2.0,
             ),
-            fillColor: color,
-            shape: new CircleBorder(
-              side: new BorderSide(
-                color: color == selectedColor ? Colors.black : const Color(0xFFD5D7DA),
-                width: 2.0,
-              ),
-            ),
-          );
-        }).toList(),
-      ),
+          ),
+          child: new Semantics(
+            value: namedColor.name,
+            selected: namedColor.color == selectedColor,
+          ),
+        );
+      }).toList(),
     );
   }
 }
@@ -393,7 +402,7 @@ class _DemoDrawer extends StatelessWidget {
 class _DiamondFab extends StatefulWidget {
   const _DiamondFab({
     this.child,
-    this.notchMargin: 6.0,
+    this.notchMargin = 6.0,
     this.onPressed,
   });
 

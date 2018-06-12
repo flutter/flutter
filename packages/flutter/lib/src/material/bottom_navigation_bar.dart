@@ -88,10 +88,10 @@ class BottomNavigationBar extends StatefulWidget {
     Key key,
     @required this.items,
     this.onTap,
-    this.currentIndex: 0,
+    this.currentIndex = 0,
     BottomNavigationBarType type,
     this.fixedColor,
-    this.iconSize: 24.0,
+    this.iconSize = 24.0,
   }) : assert(items != null),
        assert(items.length >= 2),
        assert(0 <= currentIndex && currentIndex < items.length),
@@ -146,7 +146,7 @@ class _BottomNavigationTile extends StatelessWidget {
     this.onTap,
     this.colorTween,
     this.flex,
-    this.selected: false,
+    this.selected = false,
     this.indexLabel,
     }
   ): assert(selected != null);
@@ -189,7 +189,7 @@ class _BottomNavigationTile extends StatelessWidget {
             color: iconColor,
             size: iconSize,
           ),
-          child: item.icon,
+          child: selected ? item.activeIcon : item.icon,
         ),
       ),
     );

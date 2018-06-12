@@ -205,8 +205,8 @@ void main () {
 class TestWidget extends StatelessWidget {
 
   const TestWidget({
-    this.tapHandler: nullHandler,
-    this.longPressHandler: nullHandler,
+    this.tapHandler = nullHandler,
+    this.longPressHandler = nullHandler,
   });
 
   final HandlerCreator tapHandler;
@@ -224,4 +224,4 @@ class TestWidget extends StatelessWidget {
   }
 }
 
-typedef VoidCallback HandlerCreator(BuildContext context);
+typedef HandlerCreator = VoidCallback Function(BuildContext context);

@@ -17,7 +17,7 @@ Artifacts get artifacts => Artifacts.instance;
 /// fail in some way.
 ///
 /// Set `emphasis` to true to make the output bold if it's supported.
-void printError(String message, { StackTrace stackTrace, bool emphasis: false }) {
+void printError(String message, { StackTrace stackTrace, bool emphasis = false }) {
   logger.printError(message, stackTrace: stackTrace, emphasis: emphasis);
 }
 
@@ -35,7 +35,7 @@ void printError(String message, { StackTrace stackTrace, bool emphasis: false })
 /// whitespaces.
 void printStatus(
   String message,
-  { bool emphasis: false, bool newline: true, String ansiAlternative, int indent }) {
+  { bool emphasis = false, bool newline = true, String ansiAlternative, int indent }) {
   logger.printStatus(
     message,
     emphasis: emphasis,

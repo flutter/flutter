@@ -8,7 +8,7 @@ import 'dart:io';
 
 import 'package:path/path.dart' as path;
 
-typedef Future<Null> ShardRunner();
+typedef ShardRunner = Future<Null> Function();
 
 final String flutterRoot = path.dirname(path.dirname(path.dirname(path.fromUri(Platform.script))));
 final String flutter = path.join(flutterRoot, 'bin', Platform.isWindows ? 'flutter.bat' : 'flutter');
@@ -50,8 +50,11 @@ Future<Null> main(List<String> args) async {
 
   final String shard = Platform.environment['SHARD'];
   if (shard != null) {
-    if (!_kShards.containsKey(shard))
-      throw new ArgumentError('Invalid shard: $shard');
+    if (!_kShards.containsKey(shard)) {
+      print('Invalid shard: $shard');
+      print('The available shards are: ${_kShards.keys.join(", ")}');
+      exit(1);
+    }
     print('${bold}SHARD=$shard$reset');
     await _kShards[shard]();
   } else {
@@ -68,12 +71,8 @@ Future<Null> _generateDocs() async {
 }
 
 Future<Null> _verifyInternationalizations() async {
-  final EvalResult genResult = await _evalCommand(
-    dart,
-    <String>[
-      '--preview-dart-2',
-      path.join('dev', 'tools', 'gen_localizations.dart'),
-    ],
+  final EvalResult genResult = await _evalCommand(dart,
+    <String>[ '--preview-dart-2', path.join('dev', 'tools', 'gen_localizations.dart'), ],
     workingDirectory: flutterRoot,
   );
 
@@ -135,88 +134,101 @@ Future<Null> _analyzeRepo() async {
   print('${bold}DONE: Analysis successful.$reset');
 }
 
-Future<Null> _runTests({List<String> options: const <String>[]}) async {
-  // Verify that the tests actually return failure on failure and success on success.
+Future<Null> _runTests() async {
+  // Verify that the tests actually return failure on failure and success on
+  // success.
   final String automatedTests = path.join(flutterRoot, 'dev', 'automated_tests');
-  await _runFlutterTest(automatedTests,
-    script: path.join('test_smoke_test', 'fail_test.dart'),
-    options: options,
-    expectFailure: true,
-    printOutput: false,
-    timeout: _kShortTimeout,
-  );
+  // We run the "pass" and "fail" smoke tests first, and alone, because those
+  // are particularly critical and sensitive. If one of these fails, there's no
+  // point even trying the others.
   await _runFlutterTest(automatedTests,
     script: path.join('test_smoke_test', 'pass_test.dart'),
-    options: options,
     printOutput: false,
     timeout: _kShortTimeout,
   );
   await _runFlutterTest(automatedTests,
-    script: path.join('test_smoke_test', 'crash1_test.dart'),
-    options: options,
+    script: path.join('test_smoke_test', 'fail_test.dart'),
     expectFailure: true,
+    printOutput: false,
+    timeout: _kShortTimeout,
+  );
+  // We run the timeout tests individually because they are timing-sensitive.
+  await _runFlutterTest(automatedTests,
+    script: path.join('test_smoke_test', 'timeout_pass_test.dart'),
+    expectFailure: false,
     printOutput: false,
     timeout: _kShortTimeout,
   );
   await _runFlutterTest(automatedTests,
-    script: path.join('test_smoke_test', 'crash2_test.dart'),
-    options: options,
+    script: path.join('test_smoke_test', 'timeout_fail_test.dart'),
     expectFailure: true,
     printOutput: false,
     timeout: _kShortTimeout,
   );
-  await _runFlutterTest(automatedTests,
-    script: path.join('test_smoke_test', 'syntax_error_test.broken_dart'),
-    options: options,
-    expectFailure: true,
-    printOutput: false,
-    timeout: _kShortTimeout,
-  );
-  await _runFlutterTest(automatedTests,
-    script: path.join('test_smoke_test', 'missing_import_test.broken_dart'),
-    options: options,
-    expectFailure: true,
-    printOutput: false,
-    timeout: _kShortTimeout,
-  );
-  await _runFlutterTest(automatedTests,
-    script: path.join('test_smoke_test', 'disallow_error_reporter_modification_test.dart'),
-    options: options,
-    expectFailure: true,
-    printOutput: false,
-    timeout: _kShortTimeout,
-  );
-  await _runCommand(flutter,
-    <String>['drive', '--use-existing-app']
-        ..addAll(options)
-        ..addAll(<String>[ '-t', path.join('test_driver', 'failure.dart')]),
-    workingDirectory: path.join(flutterRoot, 'packages', 'flutter_driver'),
-    expectFailure: true,
-    printOutput: false,
-    timeout: _kShortTimeout,
+  // We run the remaining smoketests in parallel, because they each take some
+  // time to run (e.g. compiling), so we don't want to run them in series,
+  // especially on 20-core machines...
+  await Future.wait<void>(
+    <Future<void>>[
+      _runFlutterTest(automatedTests,
+        script: path.join('test_smoke_test', 'crash1_test.dart'),
+        expectFailure: true,
+        printOutput: false,
+        timeout: _kShortTimeout,
+      ),
+      _runFlutterTest(automatedTests,
+        script: path.join('test_smoke_test', 'crash2_test.dart'),
+        expectFailure: true,
+        printOutput: false,
+        timeout: _kShortTimeout,
+      ),
+      _runFlutterTest(automatedTests,
+        script: path.join('test_smoke_test', 'syntax_error_test.broken_dart'),
+        expectFailure: true,
+        printOutput: false,
+        timeout: _kShortTimeout,
+      ),
+      _runFlutterTest(automatedTests,
+        script: path.join('test_smoke_test', 'missing_import_test.broken_dart'),
+        expectFailure: true,
+        printOutput: false,
+        timeout: _kShortTimeout,
+      ),
+      _runFlutterTest(automatedTests,
+        script: path.join('test_smoke_test', 'disallow_error_reporter_modification_test.dart'),
+        expectFailure: true,
+        printOutput: false,
+        timeout: _kShortTimeout,
+      ),
+      _runCommand(flutter,
+        <String>['drive', '--use-existing-app', '-t', path.join('test_driver', 'failure.dart')],
+        workingDirectory: path.join(flutterRoot, 'packages', 'flutter_driver'),
+        expectFailure: true,
+        printOutput: false,
+        timeout: _kShortTimeout,
+      ),
+    ],
   );
 
   // Verify that we correctly generated the version file.
   await _verifyVersion(path.join(flutterRoot, 'version'));
 
   // Run tests.
-  await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter'), options: options);
-  await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter_localizations'), options: options);
-  await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter_driver'), options: options);
-  await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter_test'), options: options);
-  await _runFlutterTest(path.join(flutterRoot, 'packages',
-        'fuchsia_remote_debug_protocol'), options: options);
+  await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter'));
+  await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter_localizations'));
+  await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter_driver'));
+  await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter_test'));
+  await _runFlutterTest(path.join(flutterRoot, 'packages', 'fuchsia_remote_debug_protocol'));
   await _pubRunTest(path.join(flutterRoot, 'packages', 'flutter_tools'));
   await _pubRunTest(path.join(flutterRoot, 'dev', 'bots'));
-
-  await _runAllDartTests(path.join(flutterRoot, 'dev', 'devicelab'), options: options);
-  await _runFlutterTest(path.join(flutterRoot, 'dev', 'manual_tests'), options: options);
-  await _runFlutterTest(path.join(flutterRoot, 'dev', 'tools', 'vitool'), options: options);
-  await _runFlutterTest(path.join(flutterRoot, 'examples', 'hello_world'), options: options);
-  await _runFlutterTest(path.join(flutterRoot, 'examples', 'layers'), options: options);
-  await _runFlutterTest(path.join(flutterRoot, 'examples', 'stocks'), options: options);
-  await _runFlutterTest(path.join(flutterRoot, 'examples', 'flutter_gallery'), options: options);
-  await _runFlutterTest(path.join(flutterRoot, 'examples', 'catalog'), options: options);
+  await _pubRunTest(path.join(flutterRoot, 'dev', 'devicelab'));
+  await _runFlutterTest(path.join(flutterRoot, 'dev', 'manual_tests'));
+  await _runFlutterTest(path.join(flutterRoot, 'dev', 'tools', 'vitool'));
+  await _runFlutterTest(path.join(flutterRoot, 'examples', 'hello_world'));
+  await _runFlutterTest(path.join(flutterRoot, 'examples', 'layers'));
+  await _runFlutterTest(path.join(flutterRoot, 'examples', 'stocks'));
+  await _runFlutterTest(path.join(flutterRoot, 'examples', 'flutter_gallery'));
+  await _runFlutterTest(path.join(flutterRoot, 'examples', 'catalog'));
 
   print('${bold}DONE: All tests successful.$reset');
 }
@@ -256,7 +268,9 @@ Future<Null> _pubRunTest(
   String workingDirectory, {
   String testPath,
 }) {
-  final List<String> args = <String>['run', 'test', '-j1', '-rexpanded'];
+  final List<String> args = <String>['run', 'test', '-j1', '-rcompact'];
+  if (!hasColor)
+    args.add('--no-color');
   if (testPath != null)
     args.add(testPath);
   final Map<String, String> pubEnvironment = <String, String>{};
@@ -283,7 +297,7 @@ class EvalResult {
 Future<EvalResult> _evalCommand(String executable, List<String> arguments, {
   String workingDirectory,
   Map<String, String> environment,
-  bool skip: false,
+  bool skip = false,
 }) async {
   final String commandDescription = '${path.relative(executable, from: workingDirectory)} ${arguments.join(' ')}';
   final String relativeWorkingDir = path.relative(workingDirectory);
@@ -324,10 +338,10 @@ Future<EvalResult> _evalCommand(String executable, List<String> arguments, {
 Future<Null> _runCommand(String executable, List<String> arguments, {
   String workingDirectory,
   Map<String, String> environment,
-  bool expectFailure: false,
-  bool printOutput: true,
-  bool skip: false,
-  Duration timeout: _kLongTimeout,
+  bool expectFailure = false,
+  bool printOutput = true,
+  bool skip = false,
+  Duration timeout = _kLongTimeout,
 }) async {
   final String commandDescription = '${path.relative(executable, from: workingDirectory)} ${arguments.join(' ')}';
   final String relativeWorkingDir = path.relative(workingDirectory);
@@ -373,17 +387,29 @@ Future<Null> _runCommand(String executable, List<String> arguments, {
 
 Future<Null> _runFlutterTest(String workingDirectory, {
   String script,
-  bool expectFailure: false,
-  bool printOutput: true,
-  List<String> options: const <String>[],
-  bool skip: false,
-  Duration timeout: _kLongTimeout,
+  bool expectFailure = false,
+  bool printOutput = true,
+  List<String> options = const <String>[],
+  bool skip = false,
+  Duration timeout = _kLongTimeout,
 }) {
   final List<String> args = <String>['test']..addAll(options);
   if (flutterTestArgs != null && flutterTestArgs.isNotEmpty)
     args.addAll(flutterTestArgs);
-  if (script != null)
+  if (script != null) {
+    final String fullScriptPath = path.join(workingDirectory, script);
+    if (!FileSystemEntity.isFileSync(fullScriptPath)) {
+      print('Could not find test: $fullScriptPath');
+      print('Working directory: $workingDirectory');
+      print('Script: $script');
+      if (!printOutput)
+        print('This is one of the tests that does not normally print output.');
+      if (skip)
+        print('This is one of the tests that is normally skipped in this configuration.');
+      exit(1);
+    }
     args.add(script);
+  }
   return _runCommand(flutter, args,
     workingDirectory: workingDirectory,
     expectFailure: expectFailure,
@@ -393,23 +419,8 @@ Future<Null> _runFlutterTest(String workingDirectory, {
   );
 }
 
-Future<Null> _runAllDartTests(String workingDirectory, {
-  Map<String, String> environment,
-  List<String> options,
-}) {
-  final List<String> args = <String>['--preview-dart-2'];
-  if (options != null) {
-    args.addAll(options);
-  }
-  args.add(path.join('test', 'all.dart'));
-  return _runCommand(dart, args,
-    workingDirectory: workingDirectory,
-    environment: environment,
-  );
-}
-
 Future<Null> _runFlutterAnalyze(String workingDirectory, {
-  List<String> options: const <String>[]
+  List<String> options = const <String>[]
 }) {
   return _runCommand(flutter, <String>['analyze']..addAll(options),
     workingDirectory: workingDirectory,
@@ -488,7 +499,7 @@ bool _matches<T>(List<T> a, List<T> b) {
 final RegExp _importPattern = new RegExp(r"import 'package:flutter/([^.]+)\.dart'");
 final RegExp _importMetaPattern = new RegExp(r"import 'package:meta/meta.dart'");
 
-Set<String> _findDependencies(String srcPath, List<String> errors, { bool checkForMeta: false }) {
+Set<String> _findDependencies(String srcPath, List<String> errors, { bool checkForMeta = false }) {
   return new Directory(srcPath).listSync(recursive: true).where((FileSystemEntity entity) {
     return entity is File && path.extension(entity.path) == '.dart';
   }).map<Set<String>>((FileSystemEntity entity) {

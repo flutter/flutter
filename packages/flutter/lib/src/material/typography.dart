@@ -246,8 +246,8 @@ class TextTheme extends Diagnosticable {
   /// point.
   TextTheme apply({
     String fontFamily,
-    double fontSizeFactor: 1.0,
-    double fontSizeDelta: 0.0,
+    double fontSizeFactor = 1.0,
+    double fontSizeDelta = 0.0,
     Color displayColor,
     Color bodyColor,
     TextDecoration decoration,

@@ -212,7 +212,7 @@ bool _startIsTopLeft(Axis direction, TextDirection textDirection, VerticalDirect
   return null;
 }
 
-typedef double _ChildSizingFunction(RenderBox child, double extent);
+typedef _ChildSizingFunction = double Function(RenderBox child, double extent);
 
 /// Displays its children in a one-dimensional array.
 ///
@@ -270,12 +270,12 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
   /// start of the main axis and the center of the cross axis.
   RenderFlex({
     List<RenderBox> children,
-    Axis direction: Axis.horizontal,
-    MainAxisSize mainAxisSize: MainAxisSize.max,
-    MainAxisAlignment mainAxisAlignment: MainAxisAlignment.start,
-    CrossAxisAlignment crossAxisAlignment: CrossAxisAlignment.center,
+    Axis direction = Axis.horizontal,
+    MainAxisSize mainAxisSize = MainAxisSize.max,
+    MainAxisAlignment mainAxisAlignment = MainAxisAlignment.start,
+    CrossAxisAlignment crossAxisAlignment = CrossAxisAlignment.center,
     TextDirection textDirection,
-    VerticalDirection verticalDirection: VerticalDirection.down,
+    VerticalDirection verticalDirection = VerticalDirection.down,
     TextBaseline textBaseline,
   }) : assert(direction != null),
        assert(mainAxisAlignment != null),

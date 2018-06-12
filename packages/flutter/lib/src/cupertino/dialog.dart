@@ -99,9 +99,17 @@ class CupertinoDialog extends StatelessWidget {
 /// An iOS-style alert dialog.
 ///
 /// An alert dialog informs the user about situations that require
-/// acknowledgement. An alert dialog has an optional title and an optional list
-/// of actions. The title is displayed above the content and the actions are
-/// displayed below the content.
+/// acknowledgement. An alert dialog has an optional title, optional content,
+/// and an optional list of actions. The title is displayed above the content
+/// and the actions are displayed below the content.
+///
+/// This dialog styles its title and content (typically a message) to match the
+/// standard iOS title and message dialog text style. These default styles can
+/// be overridden by explicitly defining [TextStyle]s for [Text] widgets that
+/// are part of the title or content.
+///
+/// To display action buttons that look like standard iOS dialog buttons,
+/// provide [CupertinoDialogAction]s for the [actions] given to this dialog.
 ///
 /// Typically passed as the child widget to [showDialog], which displays the
 /// dialog.
@@ -109,6 +117,7 @@ class CupertinoDialog extends StatelessWidget {
 /// See also:
 ///
 ///  * [CupertinoDialog], which is a generic iOS-style dialog.
+///  * [CupertinoDialogAction], which is an iOS-style dialog button.
 ///  * <https://developer.apple.com/ios/human-interface-guidelines/views/alerts/>
 class CupertinoAlertDialog extends StatelessWidget {
   /// Creates an iOS-style alert dialog.
@@ -118,7 +127,7 @@ class CupertinoAlertDialog extends StatelessWidget {
     Key key,
     this.title,
     this.content,
-    this.actions: const <Widget>[],
+    this.actions = const <Widget>[],
     this.scrollController,
     this.actionScrollController,
   })  : assert(actions != null),
@@ -346,8 +355,8 @@ class CupertinoDialogAction extends StatelessWidget {
   /// Creates an action for an iOS-style dialog.
   const CupertinoDialogAction({
     this.onPressed,
-    this.isDefaultAction: false,
-    this.isDestructiveAction: false,
+    this.isDefaultAction = false,
+    this.isDestructiveAction = false,
     @required this.child,
   }) : assert(child != null);
 

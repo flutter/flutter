@@ -220,7 +220,7 @@ class TextStyle extends Diagnosticable {
   /// package. It is combined with the `fontFamily` argument to set the
   /// [fontFamily] property.
   const TextStyle({
-    this.inherit: true,
+    this.inherit = true,
     this.color,
     this.fontSize,
     this.fontWeight,
@@ -299,6 +299,13 @@ class TextStyle extends Diagnosticable {
   final double height;
 
   /// The locale used to select region-specific glyphs.
+  ///
+  /// This property is rarely set. Typically the locale used to select
+  /// region-specific glyphs is defined by the text widget's [BuildContext]
+  /// using `Localizations.localeOf(context)`. For example [RichText] defines
+  /// its locale this way. However, a rich text widget's [TextSpan]s could specify
+  /// text styles with different explicit locales in order to select different
+  /// region-specifc glyphs for each text span.
   final Locale locale;
 
   /// The paint drawn as a background for the text.
@@ -403,15 +410,15 @@ class TextStyle extends Diagnosticable {
     Color decorationColor,
     TextDecorationStyle decorationStyle,
     String fontFamily,
-    double fontSizeFactor: 1.0,
-    double fontSizeDelta: 0.0,
-    int fontWeightDelta: 0,
-    double letterSpacingFactor: 1.0,
-    double letterSpacingDelta: 0.0,
-    double wordSpacingFactor: 1.0,
-    double wordSpacingDelta: 0.0,
-    double heightFactor: 1.0,
-    double heightDelta: 0.0,
+    double fontSizeFactor = 1.0,
+    double fontSizeDelta = 0.0,
+    int fontWeightDelta = 0,
+    double letterSpacingFactor = 1.0,
+    double letterSpacingDelta = 0.0,
+    double wordSpacingFactor = 1.0,
+    double wordSpacingDelta = 0.0,
+    double heightFactor = 1.0,
+    double heightDelta = 0.0,
   }) {
     assert(fontSizeFactor != null);
     assert(fontSizeDelta != null);
@@ -592,7 +599,7 @@ class TextStyle extends Diagnosticable {
   }
 
   /// The style information for text runs, encoded for use by `dart:ui`.
-  ui.TextStyle getTextStyle({ double textScaleFactor: 1.0 }) {
+  ui.TextStyle getTextStyle({ double textScaleFactor = 1.0 }) {
     return new ui.TextStyle(
       color: color,
       decoration: decoration,
@@ -622,7 +629,7 @@ class TextStyle extends Diagnosticable {
   ui.ParagraphStyle getParagraphStyle({
       TextAlign textAlign,
       TextDirection textDirection,
-      double textScaleFactor: 1.0,
+      double textScaleFactor = 1.0,
       String ellipsis,
       int maxLines,
       Locale locale,
@@ -722,7 +729,7 @@ class TextStyle extends Diagnosticable {
 
   /// Adds all properties prefixing property names with the optional `prefix`.
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder properties, { String prefix: '' }) {
+  void debugFillProperties(DiagnosticPropertiesBuilder properties, { String prefix = '' }) {
     super.debugFillProperties(properties);
     if (debugLabel != null)
       properties.add(new MessageProperty('${prefix}debugLabel', debugLabel));

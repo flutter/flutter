@@ -72,10 +72,10 @@ bool _shouldRunPubGet({ File pubSpecYaml, File dotPackages }) {
 Future<Null> pubGet({
   @required PubContext context,
   String directory,
-  bool skipIfAbsent: false,
-  bool upgrade: false,
-  bool offline: false,
-  bool checkLastModified: true
+  bool skipIfAbsent = false,
+  bool upgrade = false,
+  bool offline = false,
+  bool checkLastModified = true
 }) async {
   directory ??= fs.currentDirectory.path;
 
@@ -121,7 +121,7 @@ Future<Null> pubGet({
     throwToolExit('$directory: pub did not update .packages file (pubspec.yaml file has a newer timestamp)');
 }
 
-typedef String MessageFilter(String message);
+typedef MessageFilter = String Function(String message);
 
 /// Runs pub in 'batch' mode, forwarding complete lines written by pub to its
 /// stdout/stderr streams to the corresponding stream of this process, optionally
@@ -137,7 +137,7 @@ Future<Null> pub(List<String> arguments, {
   @required PubContext context,
   String directory,
   MessageFilter filter,
-  String failureMessage: 'pub failed',
+  String failureMessage = 'pub failed',
   @required bool retry,
   bool showTraceForErrors,
 }) async {

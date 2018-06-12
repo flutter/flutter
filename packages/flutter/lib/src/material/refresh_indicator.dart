@@ -32,7 +32,7 @@ const Duration _kIndicatorScaleDuration = const Duration(milliseconds: 200);
 /// finished.
 ///
 /// Used by [RefreshIndicator.onRefresh].
-typedef Future<Null> RefreshCallback();
+typedef RefreshCallback = Future<Null> Function();
 
 // The state machine moves through these modes only when the scrollable
 // identified by scrollableKey has been scrolled to its min or max limit.
@@ -88,11 +88,11 @@ class RefreshIndicator extends StatefulWidget {
   const RefreshIndicator({
     Key key,
     @required this.child,
-    this.displacement: 40.0,
+    this.displacement = 40.0,
     @required this.onRefresh,
     this.color,
     this.backgroundColor,
-    this.notificationPredicate: defaultScrollNotificationPredicate,
+    this.notificationPredicate = defaultScrollNotificationPredicate,
   }) : assert(child != null),
        assert(onRefresh != null),
        assert(notificationPredicate != null),
@@ -225,6 +225,12 @@ class RefreshIndicatorState extends State<RefreshIndicator> with TickerProviderS
           _dragOffset -= notification.scrollDelta;
           _checkDragOffset(notification.metrics.viewportDimension);
         }
+      }
+      if (_mode == _RefreshIndicatorMode.armed && notification.dragDetails == null) {
+        // On iOS start the refresh when the Scrollable bounces back from the
+        // overscroll (ScrollNotification indicating this don't have dragDetails
+        // because the scroll activity is not directly triggered by a drag).
+        _show();
       }
     } else if (notification is OverscrollNotification) {
       if (_mode == _RefreshIndicatorMode.drag || _mode == _RefreshIndicatorMode.armed) {
@@ -375,7 +381,7 @@ class RefreshIndicatorState extends State<RefreshIndicator> with TickerProviderS
   /// When initiated in this manner, the refresh indicator is independent of any
   /// actual scroll view. It defaults to showing the indicator at the top. To
   /// show it at the bottom, set `atTop` to false.
-  Future<Null> show({ bool atTop: true }) {
+  Future<Null> show({ bool atTop = true }) {
     if (_mode != _RefreshIndicatorMode.refresh &&
         _mode != _RefreshIndicatorMode.snap) {
       if (_mode == null)

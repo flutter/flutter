@@ -51,13 +51,13 @@ class Viewport extends MultiChildRenderObjectWidget {
   /// The [offset] argument must not be null.
   Viewport({
     Key key,
-    this.axisDirection: AxisDirection.down,
+    this.axisDirection = AxisDirection.down,
     this.crossAxisDirection,
-    this.anchor: 0.0,
+    this.anchor = 0.0,
     @required this.offset,
     this.center,
     this.cacheExtent,
-    List<Widget> slivers: const <Widget>[],
+    List<Widget> slivers = const <Widget>[],
   }) : assert(offset != null),
        assert(slivers != null),
        assert(center == null || slivers.where((Widget child) => child.key == center).length == 1),
@@ -250,10 +250,10 @@ class ShrinkWrappingViewport extends MultiChildRenderObjectWidget {
   /// The [offset] argument must not be null.
   ShrinkWrappingViewport({
     Key key,
-    this.axisDirection: AxisDirection.down,
+    this.axisDirection = AxisDirection.down,
     this.crossAxisDirection,
     @required this.offset,
-    List<Widget> slivers: const <Widget>[],
+    List<Widget> slivers = const <Widget>[],
   }) : assert(offset != null),
        super(key: key, children: slivers);
 

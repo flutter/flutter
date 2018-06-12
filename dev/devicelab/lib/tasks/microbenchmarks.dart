@@ -23,7 +23,7 @@ TaskFunction createMicrobenchmarkTask() {
     final Device device = await devices.workingDevice;
     await device.unlock();
 
-    Future<Map<String, double>> _runMicrobench(String benchmarkPath, {bool previewDart2: true}) async {
+    Future<Map<String, double>> _runMicrobench(String benchmarkPath) async {
       Future<Map<String, double>> _run() async {
         print('Running $benchmarkPath');
         final Directory appDir = dir(
@@ -38,10 +38,6 @@ TaskFunction createMicrobenchmarkTask() {
             '-d',
             device.deviceId,
           ];
-          if (previewDart2)
-            options.add('--preview-dart-2');
-          else
-            options.add('--no-preview-dart-2');
           setLocalEngineOptionIfNecessary(options);
           options.add(benchmarkPath);
           return await _startFlutter(
@@ -61,34 +57,14 @@ TaskFunction createMicrobenchmarkTask() {
     allResults.addAll(await _runMicrobench('lib/gestures/velocity_tracker_bench.dart'));
     allResults.addAll(await _runMicrobench('lib/stocks/animation_bench.dart'));
 
-    // Run micro-benchmarks once again in --no-preview-dart-2 mode.
-    // Append "_dart1" suffix to the result keys to distinguish them from
-    // the original results.
-
-    void addDart1Results(Map<String, double> benchmarkResults) {
-      benchmarkResults.forEach((String key, double result) {
-        allResults[key + '_dart1'] = result;
-      });
-    }
-
-    addDart1Results(await _runMicrobench(
-        'lib/stocks/layout_bench.dart', previewDart2: false));
-    addDart1Results(await _runMicrobench(
-        'lib/stocks/layout_bench.dart', previewDart2: false));
-    addDart1Results(await _runMicrobench(
-        'lib/stocks/build_bench.dart', previewDart2: false));
-    addDart1Results(await _runMicrobench(
-        'lib/gestures/velocity_tracker_bench.dart', previewDart2: false));
-    addDart1Results(await _runMicrobench(
-        'lib/stocks/animation_bench.dart', previewDart2: false));
     return new TaskResult.success(allResults, benchmarkScoreKeys: allResults.keys.toList());
   };
 }
 
 Future<Process> _startFlutter({
-  String command: 'run',
-  List<String> options: const <String>[],
-  bool canFail: false,
+  String command = 'run',
+  List<String> options = const <String>[],
+  bool canFail = false,
   Map<String, String> environment,
 }) {
   final List<String> args = <String>['run']..addAll(options);

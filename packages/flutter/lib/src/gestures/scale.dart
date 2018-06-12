@@ -32,7 +32,7 @@ class ScaleStartDetails {
   /// Creates details for [GestureScaleStartCallback].
   ///
   /// The [focalPoint] argument must not be null.
-  ScaleStartDetails({ this.focalPoint: Offset.zero })
+  ScaleStartDetails({ this.focalPoint = Offset.zero })
     : assert(focalPoint != null);
 
   /// The initial focal point of the pointers in contact with the screen.
@@ -50,8 +50,8 @@ class ScaleUpdateDetails {
   /// The [focalPoint] and [scale] arguments must not be null. The [scale]
   /// argument must be greater than or equal to zero.
   ScaleUpdateDetails({
-    this.focalPoint: Offset.zero,
-    this.scale: 1.0,
+    this.focalPoint = Offset.zero,
+    this.scale = 1.0,
   }) : assert(focalPoint != null),
        assert(scale != null && scale >= 0.0);
 
@@ -72,7 +72,7 @@ class ScaleEndDetails {
   /// Creates details for [GestureScaleEndCallback].
   ///
   /// The [velocity] argument must not be null.
-  ScaleEndDetails({ this.velocity: Velocity.zero })
+  ScaleEndDetails({ this.velocity = Velocity.zero })
     : assert(velocity != null);
 
   /// The velocity of the last pointer to be lifted off of the screen.
@@ -84,14 +84,14 @@ class ScaleEndDetails {
 
 /// Signature for when the pointers in contact with the screen have established
 /// a focal point and initial scale of 1.0.
-typedef void GestureScaleStartCallback(ScaleStartDetails details);
+typedef GestureScaleStartCallback = void Function(ScaleStartDetails details);
 
 /// Signature for when the pointers in contact with the screen have indicated a
 /// new focal point and/or scale.
-typedef void GestureScaleUpdateCallback(ScaleUpdateDetails details);
+typedef GestureScaleUpdateCallback = void Function(ScaleUpdateDetails details);
 
 /// Signature for when the pointers are no longer in contact with the screen.
-typedef void GestureScaleEndCallback(ScaleEndDetails details);
+typedef GestureScaleEndCallback = void Function(ScaleEndDetails details);
 
 bool _isFlingGesture(Velocity velocity) {
   assert(velocity != null);

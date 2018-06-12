@@ -14,8 +14,8 @@ import 'icons.dart';
 
 class _CupertinoRefreshSliver extends SingleChildRenderObjectWidget {
   const _CupertinoRefreshSliver({
-    this.refreshIndicatorLayoutExtent: 0.0,
-    this.hasLayoutExtent: false,
+    this.refreshIndicatorLayoutExtent = 0.0,
+    this.hasLayoutExtent = false,
     Widget child,
   }) : assert(refreshIndicatorLayoutExtent != null),
        assert(refreshIndicatorLayoutExtent >= 0.0),
@@ -204,7 +204,7 @@ enum RefreshIndicatorMode {
 ///
 /// The `pulledExtent` parameter is the currently available space either from
 /// overscrolling or as held by the sliver during refresh.
-typedef Widget RefreshControlIndicatorBuilder(
+typedef RefreshControlIndicatorBuilder = Widget Function(
   BuildContext context,
   RefreshIndicatorMode refreshState,
   double pulledExtent,
@@ -216,7 +216,7 @@ typedef Widget RefreshControlIndicatorBuilder(
 /// pulled a `refreshTriggerPullDistance`. Must return a [Future]. Upon
 /// completion of the [Future], the [CupertinoRefreshControl] enters the
 /// [RefreshIndicatorMode.done] state and will start to go away.
-typedef Future<void> RefreshCallback();
+typedef RefreshCallback = Future<void> Function();
 
 /// A sliver widget implementing the iOS-style pull to refresh content control.
 ///
@@ -266,9 +266,9 @@ class CupertinoRefreshControl extends StatefulWidget {
   ///
   /// [onRefresh] will be called when pulled far enough to trigger a refresh.
   const CupertinoRefreshControl({
-    this.refreshTriggerPullDistance: _defaultRefreshTriggerPullDistance,
-    this.refreshIndicatorExtent: _defaultRefreshIndicatorExtent,
-    this.builder: buildSimpleRefreshIndicator,
+    this.refreshTriggerPullDistance = _defaultRefreshTriggerPullDistance,
+    this.refreshIndicatorExtent = _defaultRefreshIndicatorExtent,
+    this.builder = buildSimpleRefreshIndicator,
     this.onRefresh,
   }) : assert(refreshTriggerPullDistance != null),
        assert(refreshTriggerPullDistance > 0.0),

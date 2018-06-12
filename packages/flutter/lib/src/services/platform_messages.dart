@@ -10,7 +10,7 @@ import 'package:flutter/foundation.dart';
 
 import 'platform_channel.dart';
 
-typedef Future<ByteData> _MessageHandler(ByteData message);
+typedef _MessageHandler = Future<ByteData> Function(ByteData message);
 
 /// Sends binary messages to and receives binary messages from platform plugins.
 ///

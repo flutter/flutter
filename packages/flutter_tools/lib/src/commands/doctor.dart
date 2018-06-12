@@ -8,7 +8,7 @@ import '../doctor.dart';
 import '../runner/flutter_command.dart';
 
 class DoctorCommand extends FlutterCommand {
-  DoctorCommand({this.verbose: false}) {
+  DoctorCommand({this.verbose = false}) {
     argParser.addFlag('android-licenses',
       defaultsTo: false,
       negatable: false,

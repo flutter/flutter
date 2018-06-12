@@ -12,7 +12,7 @@ export 'dart:ui' show VoidCallback;
 /// Signature for callbacks that report that an underlying value has changed.
 ///
 /// See also [ValueSetter].
-typedef void ValueChanged<T>(T value);
+typedef ValueChanged<T> = void Function(T value);
 
 /// Signature for callbacks that report that a value has been set.
 ///
@@ -26,7 +26,7 @@ typedef void ValueChanged<T>(T value);
 ///
 ///  * [ValueGetter], the getter equivalent of this signature.
 ///  * [AsyncValueSetter], an asynchronous version of this signature.
-typedef void ValueSetter<T>(T value);
+typedef ValueSetter<T> = void Function(T value);
 
 /// Signature for callbacks that are to report a value on demand.
 ///
@@ -34,10 +34,10 @@ typedef void ValueSetter<T>(T value);
 ///
 ///  * [ValueSetter], the setter equivalent of this signature.
 ///  * [AsyncValueGetter], an asynchronous version of this signature.
-typedef T ValueGetter<T>();
+typedef ValueGetter<T> = T Function();
 
 /// Signature for callbacks that filter an iterable.
-typedef Iterable<T> IterableFilter<T>(Iterable<T> input);
+typedef IterableFilter<T> = Iterable<T> Function(Iterable<T> input);
 
 /// Signature of callbacks that have no arguments and return no data, but that
 /// return a [Future] to indicate when their work is complete.
@@ -47,7 +47,7 @@ typedef Iterable<T> IterableFilter<T>(Iterable<T> input);
 ///  * [VoidCallback], a synchronous version of this signature.
 ///  * [AsyncValueGetter], a signature for asynchronous getters.
 ///  * [AsyncValueSetter], a signature for asynchronous setters.
-typedef Future<Null> AsyncCallback();
+typedef AsyncCallback = Future<Null> Function();
 
 /// Signature for callbacks that report that a value has been set and return a
 /// [Future] that completes when the value has been saved.
@@ -56,7 +56,7 @@ typedef Future<Null> AsyncCallback();
 ///
 ///  * [ValueSetter], a synchronous version of this signature.
 ///  * [AsyncValueGetter], the getter equivalent of this signature.
-typedef Future<Null> AsyncValueSetter<T>(T value);
+typedef AsyncValueSetter<T> = Future<Null> Function(T value);
 
 /// Signature for callbacks that are to asynchronously report a value on demand.
 ///
@@ -64,7 +64,7 @@ typedef Future<Null> AsyncValueSetter<T>(T value);
 ///
 ///  * [ValueGetter], a synchronous version of this signature.
 ///  * [AsyncValueSetter], the setter equivalent of this signature.
-typedef Future<T> AsyncValueGetter<T>();
+typedef AsyncValueGetter<T> = Future<T> Function();
 
 
 // BITFIELD
@@ -239,7 +239,7 @@ class CachingIterable<E> extends IterableBase<E> {
   }
 
   @override
-  List<E> toList({ bool growable: true }) {
+  List<E> toList({ bool growable = true }) {
     _precacheEntireList();
     return new List<E>.from(_results, growable: growable);
   }

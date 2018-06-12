@@ -224,7 +224,7 @@ void _tests() {
   const List<String> labels00To23 = const <String>['00', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', '23'];
 
   Future<Null> mediaQueryBoilerplate(WidgetTester tester, bool alwaysUse24HourFormat,
-      { TimeOfDay initialTime: const TimeOfDay(hour: 7, minute: 0) }) async {
+      { TimeOfDay initialTime = const TimeOfDay(hour: 7, minute: 0) }) async {
     await tester.pumpWidget(
       new Localizations(
         locale: const Locale('en', 'US'),

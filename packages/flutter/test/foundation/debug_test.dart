@@ -24,19 +24,7 @@ void main() {
       debugPrint = originalDebugPrintCallback;
     });
 
-    test('works with sync actions', () async {
-      final int result = await debugInstrumentAction<int>('no-op', () {
-        debugPrint('action()');
-        return 1;
-      });
-      expect(result, 1);
-      expect(
-        printBuffer.toString(),
-        matches(new RegExp('^action\\(\\)\nAction "no-op" took .+\$', multiLine: true)),
-      );
-    });
-
-    test('works with async actions', () async {
+    test('works with non-failing actions', () async {
       final int result = await debugInstrumentAction<int>('no-op', () async {
         debugPrint('action()');
         return 1;
@@ -48,17 +36,7 @@ void main() {
       );
     });
 
-    test('throws if sync action throws', () {
-      try {
-        debugInstrumentAction<void>('throws', () => throw 'Error');
-        fail('Error expected but not thrown');
-      } on String catch (error) {
-        expect(error, 'Error');
-        expect(printBuffer.toString(), matches(r'^Action "throws" took .+'));
-      }
-    });
-
-    test('returns failing future if async action throws', () async {
+    test('returns failing future if action throws', () async {
       try {
         await debugInstrumentAction<void>('throws', () async {
           await new Future<void>.delayed(Duration.zero);

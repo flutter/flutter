@@ -22,7 +22,7 @@ const double _kCaretWidth = 1.0; // pixels
 /// (including the cursor location).
 ///
 /// Used by [RenderEditable.onSelectionChanged].
-typedef void SelectionChangedHandler(TextSelection selection, RenderEditable renderObject, SelectionChangedCause cause);
+typedef SelectionChangedHandler = void Function(TextSelection selection, RenderEditable renderObject, SelectionChangedCause cause);
 
 /// Indicates what triggered the change in selected text (including changes to
 /// the cursor location).
@@ -46,7 +46,7 @@ enum SelectionChangedCause {
 /// Signature for the callback that reports when the caret location changes.
 ///
 /// Used by [RenderEditable.onCaretChanged].
-typedef void CaretChangedHandler(Rect caretRect);
+typedef CaretChangedHandler = void Function(Rect caretRect);
 
 /// Represents the coordinates of the point in a selection, and the text
 /// direction at that point, relative to top left of the [RenderEditable] that
@@ -120,19 +120,20 @@ class RenderEditable extends RenderBox {
   RenderEditable({
     TextSpan text,
     @required TextDirection textDirection,
-    TextAlign textAlign: TextAlign.start,
+    TextAlign textAlign = TextAlign.start,
     Color cursorColor,
     ValueNotifier<bool> showCursor,
     bool hasFocus,
-    int maxLines: 1,
+    int maxLines = 1,
     Color selectionColor,
-    double textScaleFactor: 1.0,
+    double textScaleFactor = 1.0,
     TextSelection selection,
     @required ViewportOffset offset,
     this.onSelectionChanged,
     this.onCaretChanged,
-    this.ignorePointer: false,
-    bool obscureText: false,
+    this.ignorePointer = false,
+    bool obscureText = false,
+    Locale locale,
   }) : assert(textAlign != null),
        assert(textDirection != null, 'RenderEditable created without a textDirection.'),
        assert(maxLines == null || maxLines > 0),
@@ -145,6 +146,7 @@ class RenderEditable extends RenderBox {
          textAlign: textAlign,
          textDirection: textDirection,
          textScaleFactor: textScaleFactor,
+         locale: locale,
        ),
        _cursorColor = cursorColor,
        _showCursor = showCursor ?? new ValueNotifier<bool>(false),
@@ -247,6 +249,24 @@ class RenderEditable extends RenderBox {
     _textPainter.textDirection = value;
     markNeedsTextLayout();
     markNeedsSemanticsUpdate();
+  }
+
+  /// Used by this renderer's internal [TextPainter] to select a locale-specific
+  /// font.
+  ///
+  /// In some cases the same Unicode character may be rendered differently depending
+  /// on the locale. For example the '骨' character is rendered differently in
+  /// the Chinese and Japanese locales. In these cases the [locale] may be used
+  /// to select a locale-specific font.
+  ///
+  /// If this value is null, a system-dependent algorithm is used to select
+  /// the font.
+  Locale get locale => _textPainter.locale;
+  set locale(Locale value) {
+    if (_textPainter.locale == value)
+      return;
+    _textPainter.locale = value;
+    markNeedsTextLayout();
   }
 
   /// The color to use when painting the cursor.
@@ -749,6 +769,7 @@ class RenderEditable extends RenderBox {
     properties.add(new IntProperty('maxLines', maxLines));
     properties.add(new DiagnosticsProperty<Color>('selectionColor', selectionColor));
     properties.add(new DoubleProperty('textScaleFactor', textScaleFactor));
+    properties.add(new DiagnosticsProperty<Locale>('locale', locale, defaultValue: null));
     properties.add(new DiagnosticsProperty<TextSelection>('selection', selection));
     properties.add(new DiagnosticsProperty<ViewportOffset>('offset', offset));
   }

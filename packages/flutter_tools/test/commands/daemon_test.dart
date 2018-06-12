@@ -61,7 +61,7 @@ void main() {
       });
       expect(response['id'], isNull);
       expect(response['event'], 'daemon.logMessage');
-      final Map<String, String> logMessage = response['params'];
+      final Map<String, String> logMessage = response['params'].cast<String, String>();
       expect(logMessage['level'], 'error');
       expect(logMessage['message'], 'daemon.logMessage test');
       responses.close();
@@ -326,14 +326,14 @@ bool _notEvent(Map<String, dynamic> map) => map['event'] == null;
 bool _isConnectedEvent(Map<String, dynamic> map) => map['event'] == 'daemon.connected';
 
 class MockAndroidWorkflow extends AndroidWorkflow {
-  MockAndroidWorkflow({ this.canListDevices: true });
+  MockAndroidWorkflow({ this.canListDevices = true });
 
   @override
   final bool canListDevices;
 }
 
 class MockIOSWorkflow extends IOSWorkflow {
-  MockIOSWorkflow({ this.canListDevices:true });
+  MockIOSWorkflow({ this.canListDevices =true });
 
   @override
   final bool canListDevices;

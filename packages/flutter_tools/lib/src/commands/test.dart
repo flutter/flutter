@@ -20,7 +20,7 @@ import '../test/runner.dart';
 import '../test/watcher.dart';
 
 class TestCommand extends FlutterCommand {
-  TestCommand({ bool verboseHelp: false }) {
+  TestCommand({ bool verboseHelp = false }) {
     requiresPubspecYaml();
     usesPubOption();
     argParser
@@ -68,11 +68,6 @@ class TestCommand extends FlutterCommand {
         help: 'Handle machine structured JSON command input\n'
               'and provide output and progress in machine friendly format.',
       )
-      ..addFlag('preview-dart-2',
-        defaultsTo: true,
-        hide: !verboseHelp,
-        help: 'Preview Dart 2.0 functionality.',
-      )
       ..addFlag('track-widget-creation',
         negatable: false,
         hide: !verboseHelp,
@@ -92,7 +87,7 @@ class TestCommand extends FlutterCommand {
   @override
   String get description => 'Run Flutter unit tests for the current project.';
 
-  Future<bool> _collectCoverageData(CoverageCollector collector, { bool mergeCoverageData: false }) async {
+  Future<bool> _collectCoverageData(CoverageCollector collector, { bool mergeCoverageData = false }) async {
     final Status status = logger.startProgress('Collecting coverage information...');
     final String coverageData = await collector.finalizeCoverage(
       timeout: const Duration(seconds: 30),
@@ -223,7 +218,6 @@ class TestCommand extends FlutterCommand {
       startPaused: startPaused,
       ipv6: argResults['ipv6'],
       machine: machine,
-      previewDart2: argResults['preview-dart-2'],
       trackWidgetCreation: argResults['track-widget-creation'],
       updateGoldens: argResults['update-goldens'],
     );

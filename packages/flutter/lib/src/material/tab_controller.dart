@@ -77,7 +77,7 @@ class TabController extends ChangeNotifier {
   ///
   /// The `initialIndex` must be valid given [length] and must not be null. If [length] is
   /// zero, then `initialIndex` must be 0 (the default).
-  TabController({ int initialIndex: 0, @required this.length, @required TickerProvider vsync })
+  TabController({ int initialIndex = 0, @required this.length, @required TickerProvider vsync })
     : assert(length != null && length >= 0),
       assert(initialIndex != null && initialIndex >= 0 && (length == 0 || initialIndex < length)),
       _index = initialIndex,
@@ -158,7 +158,7 @@ class TabController extends ChangeNotifier {
   ///
   /// While the animation is running [indexIsChanging] is true. When the
   /// animation completes [offset] will be 0.0.
-  void animateTo(int value, { Duration duration: kTabScrollDuration, Curve curve: Curves.ease }) {
+  void animateTo(int value, { Duration duration = kTabScrollDuration, Curve curve = Curves.ease }) {
     _changeIndex(value, duration: duration, curve: curve);
   }
 
@@ -249,7 +249,7 @@ class DefaultTabController extends StatefulWidget {
   const DefaultTabController({
     Key key,
     @required this.length,
-    this.initialIndex: 0,
+    this.initialIndex = 0,
     @required this.child,
   }) : assert(initialIndex != null),
        super(key: key);

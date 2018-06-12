@@ -21,7 +21,7 @@ import 'print.dart';
 ///
 /// See [https://docs.flutter.io/flutter/foundation/foundation-library.html] for
 /// a complete list.
-bool debugAssertAllFoundationVarsUnset(String reason, { DebugPrintCallback debugPrintOverride: debugPrintThrottled }) {
+bool debugAssertAllFoundationVarsUnset(String reason, { DebugPrintCallback debugPrintOverride = debugPrintThrottled }) {
   assert(() {
     if (debugPrint != debugPrintOverride ||
         debugDefaultTargetPlatformOverride != null)
@@ -42,38 +42,25 @@ bool debugInstrumentationEnabled = false;
 /// non-debug builds, or when [debugInstrumentationEnabled] is false, this will
 /// run [action] without any instrumentation.
 ///
-/// Returns the result of running [action], wrapped in a `Future` if the action
-/// was synchronous.
-Future<T> debugInstrumentAction<T>(String description, FutureOr<T> action()) {
-  if (!debugInstrumentationEnabled)
-    return new Future<T>.value(action());
-
-  Stopwatch stopwatch;
-  assert(() {
-    stopwatch = new Stopwatch()..start();
-    return true;
-  } ());
-  void stopStopwatchAndPrintElapsed() {
-    assert(() {
+/// Returns the result of running [action].
+///
+/// See also:
+///
+///   * [Timeline], which is used to record synchronous tracing events for
+///     visualization in Chrome's tracing format. This method does not
+///     implicitly add any timeline events.
+Future<T> debugInstrumentAction<T>(String description, Future<T> action()) {
+  bool instrument = false;
+  assert(() { instrument = debugInstrumentationEnabled; return true; }());
+  if (instrument) {
+    final Stopwatch stopwatch = new Stopwatch()..start();
+    return action().whenComplete(() {
       stopwatch.stop();
       debugPrint('Action "$description" took ${stopwatch.elapsed}');
-      return true;
-    }());
+    });
+  } else {
+    return action();
   }
-
-  Future<T> returnResult;
-  FutureOr<T> actionResult;
-  try {
-    actionResult = action();
-  } finally {
-    if (actionResult is Future<T>) {
-      returnResult = actionResult.whenComplete(stopStopwatchAndPrintElapsed);
-    } else {
-      stopStopwatchAndPrintElapsed();
-      returnResult = new Future<T>.value(actionResult);
-    }
-  }
-  return returnResult;
 }
 
 /// Arguments to whitelist [Timeline] events in order to be shown in the

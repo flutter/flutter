@@ -36,12 +36,17 @@ class SnapshotType {
 class GenSnapshot {
   const GenSnapshot();
 
+  static String getSnapshotterPath(SnapshotType snapshotType) {
+    return artifacts.getArtifactPath(
+        Artifact.genSnapshot, snapshotType.platform, snapshotType.mode);
+  }
+
   Future<int> run({
     @required SnapshotType snapshotType,
     @required String packagesPath,
     @required String depfilePath,
     IOSArch iosArch,
-    Iterable<String> additionalArgs: const <String>[],
+    Iterable<String> additionalArgs = const <String>[],
   }) {
     final List<String> args = <String>[
       '--await_is_keyword',
@@ -50,7 +55,8 @@ class GenSnapshot {
       '--dependencies=$depfilePath',
       '--print_snapshot_sizes',
     ]..addAll(additionalArgs);
-    final String snapshotterPath = artifacts.getArtifactPath(Artifact.genSnapshot, snapshotType.platform, snapshotType.mode);
+
+    final String snapshotterPath = getSnapshotterPath(snapshotType);
 
     // iOS gen_snapshot is a multi-arch binary. Running as an i386 binary will
     // generate armv7 code. Running as an x86_64 binary will generate arm64
@@ -64,70 +70,6 @@ class GenSnapshot {
   }
 }
 
-/// Dart snapshot builder.
-///
-/// Builds Dart snapshots in one of three modes:
-///   * Script snapshot: architecture-independent snapshot of a Dart script
-///     and core libraries.
-///   * AOT snapshot: architecture-specific ahead-of-time compiled snapshot
-///     suitable for loading with `mmap`.
-///   * Assembly AOT snapshot: architecture-specific ahead-of-time compile to
-///     assembly suitable for compilation as a static or dynamic library.
-class ScriptSnapshotter {
-  /// Builds an architecture-independent snapshot of the specified script.
-  Future<int> build({
-    @required String mainPath,
-    @required String snapshotPath,
-    @required String depfilePath,
-    @required String packagesPath
-  }) async {
-    final SnapshotType snapshotType = new SnapshotType(null, BuildMode.debug);
-    final String vmSnapshotData = artifacts.getArtifactPath(Artifact.vmSnapshotData);
-    final String isolateSnapshotData = artifacts.getArtifactPath(Artifact.isolateSnapshotData);
-    final List<String> args = <String>[
-      '--snapshot_kind=script',
-      '--script_snapshot=$snapshotPath',
-      '--vm_snapshot_data=$vmSnapshotData',
-      '--isolate_snapshot_data=$isolateSnapshotData',
-      '--enable-mirrors=false',
-      mainPath,
-    ];
-
-    final Fingerprinter fingerprinter = new Fingerprinter(
-      fingerprintPath: '$depfilePath.fingerprint',
-      paths: <String>[
-        mainPath,
-        snapshotPath,
-        vmSnapshotData,
-        isolateSnapshotData,
-      ],
-      properties: <String, String>{
-        'buildMode': snapshotType.mode.toString(),
-        'targetPlatform': snapshotType.platform?.toString() ?? '',
-        'entryPoint': mainPath,
-      },
-      depfilePaths: <String>[depfilePath],
-    );
-    if (await fingerprinter.doesFingerprintMatch()) {
-      printTrace('Skipping script snapshot build. Fingerprints match.');
-      return 0;
-    }
-
-    // Build the snapshot.
-    final int exitCode = await genSnapshot.run(
-      snapshotType: snapshotType,
-      packagesPath: packagesPath,
-      depfilePath: depfilePath,
-      additionalArgs: args,
-    );
-
-    if (exitCode != 0)
-      return exitCode;
-    await fingerprinter.writeFingerprint();
-    return exitCode;
-  }
-}
-
 class AOTSnapshotter {
   /// Builds an architecture-specific ahead-of-time compiled snapshot of the specified script.
   Future<int> build({
@@ -136,10 +78,9 @@ class AOTSnapshotter {
     @required String mainPath,
     @required String packagesPath,
     @required String outputPath,
-    @required bool previewDart2,
     @required bool buildSharedLibrary,
     IOSArch iosArch,
-    List<String> extraGenSnapshotOptions: const <String>[],
+    List<String> extraGenSnapshotOptions = const <String>[],
   }) async {
     if (!_isValidAotPlatform(platform, buildMode)) {
       printError('${getNameForTargetPlatform(platform)} does not support AOT compilation.');
@@ -192,12 +133,10 @@ class AOTSnapshotter {
       '--embedder_entry_points_manifest=$ioEntryPoints',
       '--dependencies=$depfilePath',
     ];
-    if (previewDart2) {
-      genSnapshotArgs.addAll(<String>[
-        '--reify-generic-functions',
-        '--strong',
-      ]);
-    }
+    genSnapshotArgs.addAll(<String>[
+      '--reify-generic-functions',
+      '--strong',
+    ]);
     if (extraGenSnapshotOptions != null && extraGenSnapshotOptions.isNotEmpty) {
       printTrace('Extra gen_snapshot options: $extraGenSnapshotOptions');
       genSnapshotArgs.addAll(extraGenSnapshotOptions);
@@ -252,7 +191,6 @@ class AOTSnapshotter {
         'buildMode': buildMode.toString(),
         'targetPlatform': platform.toString(),
         'entryPoint': mainPath,
-        'dart2': previewDart2.toString(),
         'sharedLib': buildSharedLibrary.toString(),
         'extraGenSnapshotOptions': extraGenSnapshotOptions.join(' '),
       },
@@ -263,8 +201,9 @@ class AOTSnapshotter {
       return 0;
     }
 
+    final SnapshotType snapshotType = new SnapshotType(platform, buildMode);
     final int genSnapshotExitCode = await genSnapshot.run(
-      snapshotType: new SnapshotType(platform, buildMode),
+      snapshotType: snapshotType,
       packagesPath: packageMap.packagesPath,
       depfilePath: depfilePath,
       additionalArgs: genSnapshotArgs,
@@ -277,7 +216,8 @@ class AOTSnapshotter {
 
     // Write path to gen_snapshot, since snapshots have to be re-generated when we roll
     // the Dart SDK.
-    await outputDir.childFile('gen_snapshot.d').writeAsString('snapshot.d: $genSnapshot\n');
+    final String genSnapshotPath = GenSnapshot.getSnapshotterPath(snapshotType);
+    await outputDir.childFile('gen_snapshot.d').writeAsString('snapshot.d: $genSnapshotPath\n');
 
     // On iOS, we use Xcode to compile the snapshot into a dynamic library that the
     // end-developer can link into their app.
@@ -361,7 +301,7 @@ class AOTSnapshotter {
     @required BuildMode buildMode,
     @required String mainPath,
     @required String outputPath,
-    List<String> extraFrontEndOptions: const <String>[],
+    List<String> extraFrontEndOptions = const <String>[],
   }) async {
     final Directory outputDir = fs.directory(outputPath);
     outputDir.createSync(recursive: true);

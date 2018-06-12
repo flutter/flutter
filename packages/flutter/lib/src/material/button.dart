@@ -35,13 +35,14 @@ class RawMaterialButton extends StatefulWidget {
     this.fillColor,
     this.highlightColor,
     this.splashColor,
-    this.elevation: 2.0,
-    this.highlightElevation: 8.0,
-    this.disabledElevation: 0.0,
-    this.padding: EdgeInsets.zero,
-    this.constraints: const BoxConstraints(minWidth: 88.0, minHeight: 36.0),
-    this.shape: const RoundedRectangleBorder(),
-    this.animationDuration: kThemeChangeDuration,
+    this.elevation = 2.0,
+    this.highlightElevation = 8.0,
+    this.disabledElevation = 0.0,
+    this.outerPadding,
+    this.padding = EdgeInsets.zero,
+    this.constraints = const BoxConstraints(minWidth: 88.0, minHeight: 36.0),
+    this.shape = const RoundedRectangleBorder(),
+    this.animationDuration = kThemeChangeDuration,
     this.child,
   }) : assert(shape != null),
        assert(elevation != null),
@@ -56,6 +57,10 @@ class RawMaterialButton extends StatefulWidget {
   ///
   /// If this is set to null, the button will be disabled, see [enabled].
   final VoidCallback onPressed;
+
+  /// Padding to increase the size of the gesture detector which doesn't
+  /// increase the visible material of the button.
+  final EdgeInsets outerPadding;
 
   /// Called by the underlying [InkWell] widget's [InkWell.onHighlightChanged]
   /// callback.
@@ -153,38 +158,52 @@ class _RawMaterialButtonState extends State<RawMaterialButton> {
       ? (_highlight ? widget.highlightElevation : widget.elevation)
       : widget.disabledElevation;
 
-    return new Semantics(
-      container: true,
-      button: true,
-      enabled: widget.enabled,
-      child: new ConstrainedBox(
-        constraints: widget.constraints,
-        child: new Material(
-          elevation: elevation,
-          textStyle: widget.textStyle,
-          shape: widget.shape,
-          color: widget.fillColor,
-          type: widget.fillColor == null ? MaterialType.transparency : MaterialType.button,
-          animationDuration: widget.animationDuration,
-          child: new InkWell(
-            onHighlightChanged: _handleHighlightChanged,
-            splashColor: widget.splashColor,
-            highlightColor: widget.highlightColor,
-            onTap: widget.onPressed,
-            child: IconTheme.merge(
-              data: new IconThemeData(color: widget.textStyle?.color),
-              child: new Container(
-                padding: widget.padding,
-                child: new Center(
-                  widthFactor: 1.0,
-                  heightFactor: 1.0,
-                  child: widget.child,
-                ),
+    Widget result = new ConstrainedBox(
+      constraints: widget.constraints,
+      child: new Material(
+        elevation: elevation,
+        textStyle: widget.textStyle,
+        shape: widget.shape,
+        color: widget.fillColor,
+        type: widget.fillColor == null ? MaterialType.transparency : MaterialType.button,
+        animationDuration: widget.animationDuration,
+        child: new InkWell(
+          onHighlightChanged: _handleHighlightChanged,
+          splashColor: widget.splashColor,
+          highlightColor: widget.highlightColor,
+          onTap: widget.onPressed,
+          child: IconTheme.merge(
+            data: new IconThemeData(color: widget.textStyle?.color),
+            child: new Container(
+              padding: widget.padding,
+              child: new Center(
+                widthFactor: 1.0,
+                heightFactor: 1.0,
+                child: widget.child,
               ),
             ),
           ),
         ),
       ),
+    );
+
+    if (widget.outerPadding != null) {
+      result = new GestureDetector(
+        behavior: HitTestBehavior.translucent,
+        excludeFromSemantics: true,
+        onTap: widget.onPressed,
+        child: new Padding(
+          padding: widget.outerPadding,
+          child: result
+        ),
+      );
+    }
+
+    return new Semantics(
+      container: true,
+      button: true,
+      enabled: widget.enabled,
+      child: result,
     );
   }
 }
