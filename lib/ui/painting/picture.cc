@@ -18,7 +18,8 @@ IMPLEMENT_WRAPPERTYPEINFO(ui, Picture);
 
 #define FOR_EACH_BINDING(V) \
   V(Picture, toImage)       \
-  V(Picture, dispose)
+  V(Picture, dispose)       \
+  V(Picture, GetAllocationSize)
 
 DART_BIND_ALL(Picture, FOR_EACH_BINDING)
 
