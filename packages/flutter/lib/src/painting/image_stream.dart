@@ -68,6 +68,11 @@ class ImageInfo {
 /// same stack frame as the call to [ImageStream.addListener]).
 typedef void ImageListener(ImageInfo image, bool synchronousCall);
 
+/// Signature for reporting errors when resolving images.
+///
+/// Used by [ImageStream].
+typedef ImageErrorListener = void Function(dynamic exception, StackTrace stackTrace);
+
 /// A handle to an image resource.
 ///
 /// ImageStream represents a handle to a [dart:ui.Image] object and its scale
@@ -96,7 +101,7 @@ class ImageStream extends Diagnosticable {
   ImageStreamCompleter get completer => _completer;
   ImageStreamCompleter _completer;
 
-  List<ImageListener> _listeners;
+  Map<ImageListener, ImageErrorListener> _listeners;
 
   /// Assigns a particular [ImageStreamCompleter] to this [ImageStream].
   ///
@@ -110,9 +115,11 @@ class ImageStream extends Diagnosticable {
     assert(_completer == null);
     _completer = value;
     if (_listeners != null) {
-      final List<ImageListener> initialListeners = _listeners;
+      final Map<ImageListener, ImageErrorListener> initialListeners = _listeners;
       _listeners = null;
-      initialListeners.forEach(_completer.addListener);
+      initialListeners.forEach((ImageListener listener, ImageErrorListener onError) {
+        _completer.addListener(listener, onError: onError);
+      });
     }
   }
 
@@ -127,11 +134,11 @@ class ImageStream extends Diagnosticable {
   /// occurred. If the listener is added within a render object paint function,
   /// then use this flag to avoid calling [RenderObject.markNeedsPaint] during
   /// a paint.
-  void addListener(ImageListener listener) {
+  void addListener(ImageListener listener, { ImageErrorListener onError }) {
     if (_completer != null)
       return _completer.addListener(listener);
-    _listeners ??= <ImageListener>[];
-    _listeners.add(listener);
+    _listeners ??= <ImageListener, ImageErrorListener>{};
+    _listeners[listener] = onError;
   }
 
   /// Stop listening for new concrete [ImageInfo] objects.
@@ -164,7 +171,7 @@ class ImageStream extends Diagnosticable {
       ifPresent: _completer?.toStringShort(),
       ifNull: 'unresolved',
     ));
-    properties.add(new ObjectFlagProperty<List<ImageListener>>(
+    properties.add(new ObjectFlagProperty<Map<ImageListener, ImageErrorListener>>(
       'listeners',
       _listeners,
       ifPresent: '${_listeners?.length} listener${_listeners?.length == 1 ? "" : "s" }',
@@ -182,8 +189,10 @@ class ImageStream extends Diagnosticable {
 /// [ImageProvider] subclass will return an [ImageStream] and automatically
 /// configure it with the right [ImageStreamCompleter] when possible.
 abstract class ImageStreamCompleter extends Diagnosticable {
-  final List<ImageListener> _listeners = <ImageListener>[];
-  ImageInfo _current;
+  final Map<ImageListener, ImageErrorListener> _listeners =
+      <ImageListener, ImageErrorListener>{};
+  ImageInfo _currentImage;
+  FlutterErrorDetails _currentError;
 
   /// Adds a listener callback that is called whenever a new concrete [ImageInfo]
   /// object is available. If a concrete image is already available, this object
@@ -196,13 +205,17 @@ abstract class ImageStreamCompleter extends Diagnosticable {
   /// occurred. If the listener is added within a render object paint function,
   /// then use this flag to avoid calling [RenderObject.markNeedsPaint] during
   /// a paint.
-  void addListener(ImageListener listener) {
-    _listeners.add(listener);
-    if (_current != null) {
+  void addListener(ImageListener listener, { ImageErrorListener onError }) {
+    _listeners[listener] = onError;
+    if (_currentImage != null) {
       try {
-        listener(_current, true);
+        listener(_currentImage, true);
       } catch (exception, stack) {
-        _handleImageError('by a synchronously-called image listener', exception, stack);
+        reportError(
+          context: 'by a synchronously-called image listener',
+          exception: exception,
+          stack: stack,
+        );
       }
     }
   }
@@ -215,26 +228,61 @@ abstract class ImageStreamCompleter extends Diagnosticable {
   /// Calls all the registered listeners to notify them of a new image.
   @protected
   void setImage(ImageInfo image) {
-    _current = image;
+    _currentImage = image;
     if (_listeners.isEmpty)
       return;
-    final List<ImageListener> localListeners = new List<ImageListener>.from(_listeners);
+    final List<ImageListener> localListeners = new List<ImageListener>.from(_listeners.keys);
     for (ImageListener listener in localListeners) {
       try {
         listener(image, false);
       } catch (exception, stack) {
-        _handleImageError('by an image listener', exception, stack);
+        reportError(
+          context: 'by an image listener',
+          exception: exception,
+          stack: stack,
+        );
       }
     }
   }
 
-  void _handleImageError(String context, dynamic exception, dynamic stack) {
-    FlutterError.reportError(new FlutterErrorDetails(
+  @protected
+  void reportError({
+    String context,
+    dynamic exception,
+    StackTrace stack,
+    InformationCollector informationCollector,
+    bool silent = false,
+    bool skipListeners = false,
+  }) {
+    _currentError = new FlutterErrorDetails(
       exception: exception,
       stack: stack,
       library: 'image resource service',
-      context: context
-    ));
+      context: context,
+      informationCollector: informationCollector,
+      silent: silent,
+    );
+
+    final List<ImageErrorListener> localErrorListeners = new List<ImageErrorListener>.from(
+        _listeners.values.where((ImageErrorListener listener) => listener != null)
+    );
+
+    if (localErrorListeners.isEmpty || skipListeners) {
+      FlutterError.reportError(_currentError);
+    } else {
+      for (ImageErrorListener errorListener in localErrorListeners) {
+        try {
+          errorListener(exception, stack);
+        } catch (exception, stack) {
+          reportError(
+            context: 'by an image error listener',
+            exception: exception,
+            stack: stack,
+            skipListeners: true, // Error listeners themselves failed. Don't feed back to listeners.
+          );
+        }
+      }
+    }
   }
 
   /// Accumulates a list of strings describing the object's state. Subclasses
@@ -242,8 +290,8 @@ abstract class ImageStreamCompleter extends Diagnosticable {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder description) {
     super.debugFillProperties(description);
-    description.add(new DiagnosticsProperty<ImageInfo>('current', _current, ifNull: 'unresolved', showName: false));
-    description.add(new ObjectFlagProperty<List<ImageListener>>(
+    description.add(new DiagnosticsProperty<ImageInfo>('current', _currentImage, ifNull: 'unresolved', showName: false));
+    description.add(new ObjectFlagProperty<Map<ImageListener, ImageErrorListener>>(
       'listeners',
       _listeners,
       ifPresent: '${_listeners?.length} listener${_listeners?.length == 1 ? "" : "s" }',
@@ -271,14 +319,13 @@ class OneFrameImageStreamCompleter extends ImageStreamCompleter {
   OneFrameImageStreamCompleter(Future<ImageInfo> image, { InformationCollector informationCollector })
     : assert(image != null) {
     image.then<void>(setImage, onError: (dynamic error, StackTrace stack) {
-      FlutterError.reportError(new FlutterErrorDetails(
+      reportError(
+        context: 'resolving a single-frame image stream',
         exception: error,
         stack: stack,
-        library: 'services',
-        context: 'resolving a single-frame image stream',
         informationCollector: informationCollector,
         silent: true,
-      ));
+      );
     });
   }
 }
@@ -334,14 +381,13 @@ class MultiFrameImageStreamCompleter extends ImageStreamCompleter {
        _framesEmitted = 0,
        _timer = null {
     codec.then<void>(_handleCodecReady, onError: (dynamic error, StackTrace stack) {
-      FlutterError.reportError(new FlutterErrorDetails(
+      reportError(
+        context: 'resolving an image codec',
         exception: error,
         stack: stack,
-        library: 'services',
-        context: 'resolving an image codec',
         informationCollector: informationCollector,
         silent: true,
-      ));
+      );
     });
   }
 
@@ -397,14 +443,13 @@ class MultiFrameImageStreamCompleter extends ImageStreamCompleter {
     try {
       _nextFrame = await _codec.getNextFrame();
     } catch (exception, stack) {
-      FlutterError.reportError(new FlutterErrorDetails(
-          exception: exception,
-          stack: stack,
-          library: 'services',
-          context: 'resolving an image frame',
-          informationCollector: _informationCollector,
-          silent: true,
-      ));
+      reportError(
+        context: 'resolving an image frame',
+        exception: exception,
+        stack: stack,
+        informationCollector: _informationCollector,
+        silent: true,
+      );
       return;
     }
     if (_codec.frameCount == 1) {
@@ -424,7 +469,7 @@ class MultiFrameImageStreamCompleter extends ImageStreamCompleter {
   bool get _hasActiveListeners => _listeners.isNotEmpty;
 
   @override
-  void addListener(ImageListener listener) {
+  void addListener(ImageListener listener, { ImageErrorListener onError }) {
     if (!_hasActiveListeners && _codec != null) {
       _decodeNextFrameAndSchedule();
     }
