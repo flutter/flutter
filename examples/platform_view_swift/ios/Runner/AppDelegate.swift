@@ -1,3 +1,7 @@
+// Copyright 2017, the Flutter project authors.  Please see the AUTHORS file
+// for details. All rights reserved. Use of this source code is governed by a
+// BSD-style license that can be found in the LICENSE file.
+
 import UIKit
 import Flutter
 
@@ -12,7 +16,7 @@ import Flutter
 		GeneratedPluginRegistrant.register(with: self)
 
 		let controller: FlutterViewController = window?.rootViewController as! FlutterViewController
-		let channel = FlutterMethodChannel.init(name: "splodium.com/splodium", binaryMessenger: controller)
+		let channel = FlutterMethodChannel.init(name: "samples.flutter.io/platform_view_swift", binaryMessenger: controller)
 
 		channel.setMethodCallHandler({
 			(call: FlutterMethodCall, result: FlutterResult) -> Void in
