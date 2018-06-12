@@ -66,9 +66,12 @@ class FlutterProject {
     final FlutterManifest manifest = await FlutterManifest.createFromPath(directory.childFile('pubspec.yaml').path);
     final Map<String, dynamic> androidDescriptor = manifest.androidDescriptor;
     if (androidDescriptor != null && shouldRegenerateAndroidDirectory()) {
-      android._injectModuleWrapper(<String, dynamic>{
+      await android._injectModuleWrapper(<String, dynamic>{
         'androidIdentifier': androidDescriptor['package'],
       });
+    }
+    if (manifest.iosDescriptor != null) {
+      await ios._injectModuleWrapper(<String, dynamic>{});
     }
     injectPlugins(directory: directory.path);
     await generateXcodeProperties(directory.path);
@@ -95,6 +98,11 @@ class IosProject {
     final File projectFile = directory.childDirectory('Runner.xcodeproj').childFile('project.pbxproj');
     return _firstMatchInFile(projectFile, _productBundleIdPattern).then((Match match) => match?.group(1));
   }
+
+  Future<void> _injectModuleWrapper(Map<String, dynamic> environment) async {
+    final Template template = new Template.fromName('module_ios');
+    template.render(directory, environment, overwriteExisting: false);
+  }
 }
 
 /// Represents the contents of the android/ folder of a Flutter project.
@@ -119,7 +127,7 @@ class AndroidProject {
   Future<void> _injectModuleWrapper(Map<String, dynamic> environment) async {
     final Template template = new Template.fromName('module_android');
     template.render(directory, environment);
-    updateLocalProperties(projectPath: directory.parent.path);
+    await updateLocalProperties(projectPath: directory.parent.path);
   }
 }
 

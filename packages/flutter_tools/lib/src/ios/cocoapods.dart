@@ -155,6 +155,10 @@ class CocoaPods {
       // Don't do anything for iOS when host platform doesn't support it.
       return;
     }
+    if (!fs.file(fs.path.join(appDirectory, 'ios', 'Runner')).existsSync()) {
+      // Don't create a Podfile if there is no main project (as for a module).
+      return;
+    }
     final String podfilePath = fs.path.join(appDirectory, 'ios', 'Podfile');
     if (!fs.file(podfilePath).existsSync()) {
       final bool isSwift = xcodeProjectInterpreter.getBuildSettings(
