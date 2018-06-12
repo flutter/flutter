@@ -600,7 +600,7 @@ class _CupertinoAlertActionSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final devicePixelRatio = MediaQuery.of(context).devicePixelRatio;
+    final double devicePixelRatio = MediaQuery.of(context).devicePixelRatio;
 
     if (children.isEmpty) {
       return new SingleChildScrollView(

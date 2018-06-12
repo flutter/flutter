@@ -81,7 +81,7 @@ class BoxDecoration extends Decoration {
     this.boxShadow,
     this.gradient,
     this.backgroundBlendMode,
-    this.shape: BoxShape.rectangle,
+    this.shape = BoxShape.rectangle,
   }) : assert(shape != null),
        // TODO(mattcarroll): Use "backgroundBlendMode == null" when Dart #31140 is in.
        assert(
