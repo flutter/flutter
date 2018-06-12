@@ -175,9 +175,15 @@ class FuchsiaRemoteConnection {
   /// successfully (that being the outgoing interface of your machine, not the
   /// interface on the target machine).
   ///
-  /// Attempts to `address` via the environment variable `FUCHSIA_DEVICE_URL` in
-  /// the event that the argument is not passed. If `address` is not supplied,
-  /// `interface` is also ignored.
+  /// Attempts to set `address` via the environment variable
+  /// `FUCHSIA_DEVICE_URL` in the event that the argument is not passed.
+  /// If `address` is not supplied, `interface` is also ignored, as the format
+  /// is expected to contain the interface as well (in the event that it is
+  /// link-local), like the following:
+  ///
+  /// ```
+  /// fe80::1%eth0
+  /// ```
   ///
   /// In the event that `FUCHSIA_SSH_CONFIG` is set in the environment, that
   /// will be used when `sshConfigPath` isn't supplied.
