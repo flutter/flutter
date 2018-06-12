@@ -5,45 +5,33 @@
 import UIKit
 import Foundation
 
-protocol PlatformViewControllerDelegate
-{
-	func didUpdateCounter(counter: Int)
+protocol PlatformViewControllerDelegate {
+  func didUpdateCounter(counter: Int)
 }
 
-class PlatformViewController : UIViewController
-{
-	var delegate: PlatformViewControllerDelegate? = nil
-	var counter: Int = 0
+class PlatformViewController : UIViewController {
+  var delegate: PlatformViewControllerDelegate? = nil
+  var counter: Int = 0
 
-	@IBOutlet weak var backButton: UIButton!
-	@IBOutlet weak var incrementLabel: UILabel!
+  @IBOutlet weak var incrementLabel: UILabel!
 
-	override func viewDidLoad()
-	{
-		super.viewDidLoad()
-		setIncrementLabelText()
-	}
+  override func viewDidLoad() {
+    super.viewDidLoad()
+    setIncrementLabelText()
+  }
 
-	func handleIncrement()
-	{
-		self.counter += 1
-		self.setIncrementLabelText()
-	}
+  func handleIncrement(_ sender: Any) {
+    self.counter += 1
+    self.setIncrementLabelText()
+  }
 
-	@IBAction func buttonPressed(_ sender: Any)
-	{
-		dismiss(animated:true, completion:nil)
-	}
-	
-	func switchToFlutterView()
-	{
-//		self.delegate?.didUpdateCounter(counter: self.counter)
-		dismiss(animated:false, completion:nil)
-	}
+  func switchToFlutterView(_ sender: Any) {
+    self.delegate?.didUpdateCounter(counter: self.counter)
+    dismiss(animated:false, completion:nil)
+  }
 
-	func setIncrementLabelText()
-	{
-//		NSString* text = [NSString stringWithFormat:@"Button tapped %d %@.", self.counter, (self.counter == 1) ? @"time" : @"times"];
-//		self.incrementLabel.text = text;
-	}
+  func setIncrementLabelText() {
+    let text = String(format: "Button tapped %d %@", self.counter, (self.counter == 1) ? "time" : "times")
+    self.incrementLabel.text = text;
+  }
 }
