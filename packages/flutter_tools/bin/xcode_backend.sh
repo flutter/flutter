@@ -107,6 +107,14 @@ BuildApp() {
     track_widget_creation_flag="--track-widget-creation"
   fi
 
+  RunCommand eval "$(echo "static const int Moo = 88;" | xcrun clang -x c \
+      ${arch_flags} \
+      -dynamiclib \
+      -Xlinker -rpath -Xlinker '@executable_path/Frameworks' \
+      -Xlinker -rpath -Xlinker '@loader_path/Frameworks' \
+      -install_name '@rpath/PluginRegistrant.framework/App' \
+      -o "${derived_dir}/PluginRegistrant.framework/App" -)"
+
   if [[ "${build_mode}" != "debug" ]]; then
     StreamOutput " ├─Building Dart code..."
     # Transform ARCHS to comma-separated list of target architectures.

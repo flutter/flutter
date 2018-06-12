@@ -102,6 +102,15 @@ String _readFlutterPluginsList(String directory) {
   return pluginsFile.existsSync() ? pluginsFile.readAsStringSync() : null;
 }
 
+
+void renderTemplateToFile(String template, dynamic context, String filePath) {
+  String renderedTemplate =
+     new mustache.Template(template).renderString(context);
+  File file = fs.file(filePath);
+  file.createSync(recursive: true);
+  file.writeAsStringSync(renderedTemplate);
+}
+
 const String _androidPluginRegistryTemplate = '''package io.flutter.plugins;
 
 import io.flutter.plugin.common.PluginRegistry;
@@ -146,17 +155,47 @@ void _writeAndroidPluginRegistrant(String directory, List<Plugin> plugins) {
     'plugins': androidPlugins,
   };
 
-  final String pluginRegistry =
-      new mustache.Template(_androidPluginRegistryTemplate).renderString(context);
   final String javaSourcePath = fs.path.join(directory, 'android', 'app', 'src', 'main', 'java');
-  final Directory registryDirectory =
-      fs.directory(fs.path.join(javaSourcePath, 'io', 'flutter', 'plugins'));
-  registryDirectory.createSync(recursive: true);
-  final File registryFile = registryDirectory.childFile('GeneratedPluginRegistrant.java');
-  registryFile.writeAsStringSync(pluginRegistry);
+  final String registryPath = fs.path.join(javaSourcePath, 'io', 'flutter', 'plugins', 'GeneratedPluginRegistrant.java');
+  renderTemplateToFile(_androidPluginRegistryTemplate, context, registryPath);
 }
 
-const String _iosPluginRegistryHeaderTemplate = '''//
+const String _backwardsCompatibleIosPluginRegistryHeaderTemplate = '''
+//
+// Generated file. Do not edit.
+//
+{{#hasPlugins}}
+#import <PluginRegistrant/GeneratedPluginRegistrant.h>
+{{/hasPlugins}}
+{{^hasPlugins}}
+#import <Flutter/Flutter.h>
+
+@interface GeneratedPluginRegistrant : NSObject
++ (void)registerWithRegistry:(NSObject<FlutterPluginRegistry>*)registry;
+@end
+{{/hasPlugins}}
+
+''';
+
+const String _backwardsCompatibleIosPluginRegistryTemplate = '''
+//
+// Generated file. Do not edit.
+//
+
+{{^hasPlugins}}
+#import "GeneratedPluginRegistrant.h"
+
+@implementation GeneratedPluginRegistrant
+
++ (void)registerWithRegistry:(NSObject<FlutterPluginRegistry>*)registry {}
+
+@end
+{{/hasPlugins}}
+
+''';
+
+const String _iosPluginRegistryHeaderTemplate = '''
+//
 //  Generated file. Do not edit.
 //
 
@@ -192,6 +231,32 @@ const String _iosPluginRegistryImplementationTemplate = '''//
 @end
 ''';
 
+const String _iosPluginRegistryPodSpecTemplate = '''
+#
+# Generated file, do not edit.
+#
+
+Pod::Spec.new do |s|
+  s.name             = 'PluginRegistrant'
+  s.version          = '0.0.1'
+  s.summary          = 'Registers plugins with your flutter app'
+  s.description      = <<-DESC
+Depends on all your plugins, and provides a function to register them.
+                       DESC
+  s.homepage         = 'https://flutter.io'
+  s.license          = { :type => 'MIT' }
+  s.author           = { 'Flutter Dev Team' => 'flutter-dev@googlegroups.com' }
+  s.ios.deployment_target = '7.0'
+  s.source_files =  "Classes", "Classes/**/*.{h,m}"
+  s.source           = { :path => '.' }
+  s.public_header_files = './Classes/**/*.h'
+  s.dependency 'Flutter'
+  {{#plugins}}
+  s.dependency '{{name}}'
+  {{/plugins}}
+end
+''';
+
 void _writeIOSPluginRegistrant(String directory, List<Plugin> plugins) {
   final List<Map<String, dynamic>> iosPlugins = plugins
       .where((Plugin p) => p.pluginClass != null)
@@ -203,18 +268,40 @@ void _writeIOSPluginRegistrant(String directory, List<Plugin> plugins) {
   toList();
   final Map<String, dynamic> context = <String, dynamic>{
     'plugins': iosPlugins,
+    'hasPlugins': iosPlugins.isNotEmpty,
   };
 
-  final String pluginRegistryHeader =
-      new mustache.Template(_iosPluginRegistryHeaderTemplate).renderString(context);
-  final String pluginRegistryImplementation =
-      new mustache.Template(_iosPluginRegistryImplementationTemplate).renderString(context);
-  final Directory registryDirectory = fs.directory(fs.path.join(directory, 'ios', 'Runner'));
-  registryDirectory.createSync(recursive: true);
-  final File registryHeaderFile = registryDirectory.childFile('GeneratedPluginRegistrant.h');
-  registryHeaderFile.writeAsStringSync(pluginRegistryHeader);
-  final File registryImplementationFile = registryDirectory.childFile('GeneratedPluginRegistrant.m');
-  registryImplementationFile.writeAsStringSync(pluginRegistryImplementation);
+  final String registryDirectory = fs.path.join(directory, 'ios', 'Flutter', 'PluginRegistrant');
+  final String registryClassesDirectory = fs.path.join(registryDirectory, 'Classes');
+
+  final String runnerDirectory = fs.path.join(directory, 'ios', 'Runner');
+
+  renderTemplateToFile(
+    _backwardsCompatibleIosPluginRegistryHeaderTemplate,
+    context,
+    fs.path.join(runnerDirectory,'GeneratedPluginRegistrant.h'),
+  );
+  renderTemplateToFile(
+    _backwardsCompatibleIosPluginRegistryTemplate,
+    context,
+    fs.path.join(runnerDirectory, 'GeneratedPluginRegistrant.m'),
+  );
+
+  renderTemplateToFile(
+    _iosPluginRegistryPodSpecTemplate,
+    context,
+    fs.path.join(registryClassesDirectory, 'PluginRegistrant.podspec'),
+  );
+  renderTemplateToFile(
+    _iosPluginRegistryHeaderTemplate,
+    context,
+    fs.path.join(registryClassesDirectory, 'GeneratedPluginRegistrant.h'),
+  );
+  renderTemplateToFile(
+    _iosPluginRegistryImplementationTemplate,
+    context,
+    fs.path.join(registryClassesDirectory,'GeneratedPluginRegistrant.m'),
+  );
 }
 
 class InjectPluginsResult{
