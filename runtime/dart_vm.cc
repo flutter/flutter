@@ -83,14 +83,6 @@ static const char* kDartAssertArgs[] = {
     // clang-format on
 };
 
-static const char* kDartCheckedModeArgs[] = {
-    // clang-format off
-    "--enable_type_checks",
-    "--error_on_bad_type",
-    "--error_on_bad_override",
-    // clang-format on
-};
-
 static const char* kDartStrongModeArgs[] = {
     // clang-format off
     "--strong",
@@ -324,18 +316,18 @@ DartVM::DartVM(const Settings& settings,
                 arraysize(kDartPrecompilationArgs));
   }
 
-  // Enable checked mode if we are not running precompiled code. We run non-
+  // Enable asserts if we are not running precompiled code. We run non-
   // precompiled code only in the debug product mode.
-  bool use_checked_mode = !settings.dart_non_checked_mode;
+  bool enable_asserts = true;
 
 #if FLUTTER_RUNTIME_MODE == FLUTTER_RUNTIME_MODE_DYNAMIC_PROFILE || \
     FLUTTER_RUNTIME_MODE == FLUTTER_RUNTIME_MODE_DYNAMIC_RELEASE
-  use_checked_mode = false;
+  enable_asserts = false;
 #endif
 
 #if !OS_FUCHSIA
   if (IsRunningPrecompiledCode()) {
-    use_checked_mode = false;
+    enable_asserts = false;
   }
 #endif  // !OS_FUCHSIA
 
@@ -346,29 +338,12 @@ DartVM::DartVM(const Settings& settings,
               arraysize(kDartWriteProtectCodeArgs));
 #endif
 
-  const bool isolate_snapshot_is_dart_2 =
-      Dart_IsDart2Snapshot(isolate_snapshot_->GetData()->GetSnapshotPointer());
+  // Require Dart 2.
+  FML_DCHECK(platform_kernel_mapping_->GetSize() > 0);
 
-  const bool is_preview_dart2 =
-      (platform_kernel_mapping_->GetSize() > 0) || isolate_snapshot_is_dart_2;
-
-  FXL_DLOG(INFO) << "Dart 2 " << (is_preview_dart2 ? "is" : "is NOT")
-                 << " enabled. Platform kernel: "
-                 << static_cast<bool>(platform_kernel_mapping_->GetSize() > 0)
-                 << " Isolate Snapshot is Dart 2: "
-                 << isolate_snapshot_is_dart_2;
-
-  if (is_preview_dart2) {
-    PushBackAll(&args, kDartStrongModeArgs, arraysize(kDartStrongModeArgs));
-    if (use_checked_mode) {
-      PushBackAll(&args, kDartAssertArgs, arraysize(kDartAssertArgs));
-    }
-  } else if (use_checked_mode) {
-    FXL_DLOG(INFO) << "Checked mode is ON";
+  PushBackAll(&args, kDartStrongModeArgs, arraysize(kDartStrongModeArgs));
+  if (enable_asserts) {
     PushBackAll(&args, kDartAssertArgs, arraysize(kDartAssertArgs));
-    PushBackAll(&args, kDartCheckedModeArgs, arraysize(kDartCheckedModeArgs));
-  } else {
-    FXL_DLOG(INFO) << "Is not Dart 2 and Checked mode is OFF";
   }
 
   if (settings.start_paused) {
@@ -390,6 +365,7 @@ DartVM::DartVM(const Settings& settings,
   PushBackAll(&args, kDartFuchsiaTraceArgs, arraysize(kDartFuchsiaTraceArgs));
 #endif
 
+  // Add VM dart_flags last to allow user overrides.
   for (size_t i = 0; i < settings.dart_flags.size(); i++)
     args.push_back(settings.dart_flags[i].c_str());
 

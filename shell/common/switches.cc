@@ -129,10 +129,6 @@ blink::Settings SettingsFromCommandLine(const fxl::CommandLine& command_line) {
     }
   }
 
-  // Checked mode overrides.
-  settings.dart_non_checked_mode =
-      command_line.HasOption(FlagForSwitch(Switch::DartNonCheckedMode));
-
   settings.ipv6 = command_line.HasOption(FlagForSwitch(Switch::IPv6));
 
   settings.start_paused =
@@ -160,9 +156,6 @@ blink::Settings SettingsFromCommandLine(const fxl::CommandLine& command_line) {
 
   command_line.GetOptionValue(FlagForSwitch(Switch::FlutterAssetsDir),
                               &settings.assets_path);
-
-  command_line.GetOptionValue(FlagForSwitch(Switch::Snapshot),
-                              &settings.script_snapshot_path);
 
   command_line.GetOptionValue(FlagForSwitch(Switch::MainDartFile),
                               &settings.main_dart_file_path);

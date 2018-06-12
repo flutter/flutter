@@ -18,9 +18,6 @@ FLUTTER_EXPORT
                              dartMain:(NSURL*)dartMainURL
                              packages:(NSURL*)dartPackages NS_DESIGNATED_INITIALIZER;
 
-- (instancetype)initWithFlutterAssetsWithScriptSnapshot:(NSURL*)flutterAssetsURL
-    NS_DESIGNATED_INITIALIZER;
-
 - (instancetype)initFromDefaultSourceForConfiguration;
 
 /**
