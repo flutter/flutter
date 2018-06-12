@@ -80,9 +80,15 @@ class BoxDecoration extends Decoration {
     this.borderRadius,
     this.boxShadow,
     this.gradient,
-    this.backgroundBlendMode: BlendMode.srcOver,
+    this.backgroundBlendMode,
     this.shape: BoxShape.rectangle,
-  }) : assert(shape != null);
+  }) : assert(shape != null),
+       // TODO(mattcarroll): Use "backgroundBlendMode == null" when Dart #31140 is in.
+       assert(
+         identical(backgroundBlendMode, null) || color != null || gradient != null,
+         'backgroundBlendMode applies to BoxDecoration\'s background color or'
+         'gradient, but no color or gradient were provided.'
+       );
 
   @override
   bool debugAssertIsValid() {
@@ -140,10 +146,8 @@ class BoxDecoration extends Decoration {
 
   /// The blend mode applied to the [color] or [gradient] background of the box.
   ///
-  /// If no [backgroundBlendMode] is provided then a default of
-  /// [backgroundBlendMode.srcOver] is used. [backgroundBlendMode.srcOver] is
-  /// the standard painting blend mode that adds colors together the way
-  /// developers are used to.
+  /// If no [backgroundBlendMode] is provided then the default painting blend
+  /// mode is used.
   ///
   /// If no [color] or [gradient] is provided then blend mode has no impact.
   final BlendMode backgroundBlendMode;
@@ -344,7 +348,8 @@ class _BoxDecorationPainter extends BoxPainter {
     if (_cachedBackgroundPaint == null ||
         (_decoration.gradient != null && _rectForCachedBackgroundPaint != rect)) {
       final Paint paint = new Paint();
-      paint.blendMode = _decoration.backgroundBlendMode;
+      if (_decoration.backgroundBlendMode != null)
+        paint.blendMode = _decoration.backgroundBlendMode;
       if (_decoration.color != null)
         paint.color = _decoration.color;
       if (_decoration.gradient != null) {

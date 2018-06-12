@@ -41,15 +41,17 @@ const TextStyle _kCupertinoDialogActionStyle = const TextStyle(
 );
 
 const double _kCupertinoDialogWidth = 270.0;
-const BoxDecoration _kCupertinoDialogFrontFillDecoration = const BoxDecoration(
+const BoxDecoration _kCupertinoDialogBlurOverlayDecoration = const BoxDecoration(
+  borderRadius: const BorderRadius.all(const Radius.circular(_kDialogCornerRadius)),
   color: CupertinoColors.white,
   backgroundBlendMode: BlendMode.overlay,
 );
 
 const double _kEdgePadding = 20.0;
 const double _kButtonHeight = 45.0;
+const double _kDialogCornerRadius = 12.0;
 
-const Color _kDialogForegroundColor = const Color(0xC0FFFFFF);
+const Color _kDialogColor = const Color(0xC0FFFFFF);
 const Color _kButtonDividerColor = const Color(0x20000000);
 
 /// An iOS-style dialog.
@@ -80,12 +82,12 @@ class CupertinoDialog extends StatelessWidget {
   Widget build(BuildContext context) {
     return new Center(
       child: new ClipRRect(
-        borderRadius: const BorderRadius.all(const Radius.circular(12.0)),
+        borderRadius: const BorderRadius.all(const Radius.circular(_kDialogCornerRadius)),
         child: new BackdropFilter(
           filter: new ImageFilter.blur(sigmaX: 10.0, sigmaY: 10.0),
           child: new Container(
             width: _kCupertinoDialogWidth,
-            decoration: _kCupertinoDialogFrontFillDecoration,
+            decoration: _kCupertinoDialogBlurOverlayDecoration,
             child: child,
           ),
         ),
@@ -164,14 +166,11 @@ class CupertinoAlertDialog extends StatelessWidget {
   final ScrollController actionScrollController;
 
   Widget _buildBlurBackground() {
-    return new ClipRRect(
-      borderRadius: const BorderRadius.all(const Radius.circular(12.0)),
-      child: new BackdropFilter(
-        filter: new ImageFilter.blur(sigmaX: 10.0, sigmaY: 10.0),
-        child: new Container(
-          width: _kCupertinoDialogWidth,
-          decoration: _kCupertinoDialogFrontFillDecoration,
-        ),
+    return new BackdropFilter(
+      filter: new ImageFilter.blur(sigmaX: 10.0, sigmaY: 10.0),
+      child: new Container(
+        width: _kCupertinoDialogWidth,
+        decoration: _kCupertinoDialogBlurOverlayDecoration,
       ),
     );
   }
@@ -190,18 +189,18 @@ class CupertinoAlertDialog extends StatelessWidget {
       children.add(const Padding(padding: const EdgeInsets.only(top: 8.0)));
     }
 
-    return new ClipRRect(
-      borderRadius: const BorderRadius.only(
-        topLeft: const Radius.circular(12.0),
-        topRight: const Radius.circular(12.0),
-      ),
-      child: new Container(
-        color: _kDialogForegroundColor,
-        child: new Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: children,
+    return new Container(
+      decoration: const BoxDecoration(
+        borderRadius: const BorderRadius.only(
+          topLeft: const Radius.circular(_kDialogCornerRadius),
+          topRight: const Radius.circular(_kDialogCornerRadius),
         ),
+        color: _kDialogColor,
+      ),
+      child: new Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: children,
       ),
     );
   }
@@ -217,8 +216,8 @@ class CupertinoAlertDialog extends StatelessWidget {
 
     return new ClipRRect(
       borderRadius: const BorderRadius.only(
-        bottomLeft: const Radius.circular(12.0),
-        bottomRight: const Radius.circular(12.0),
+        bottomLeft: const Radius.circular(_kDialogCornerRadius),
+        bottomRight: const Radius.circular(_kDialogCornerRadius),
       ),
       child: actionSection,
     );
@@ -262,15 +261,15 @@ enum _AlertDialogSection {
 
 class _CupertinoAlertDialogLayoutDelegate extends MultiChildLayoutDelegate {
 
-  final int actionsCount;
-
   _CupertinoAlertDialogLayoutDelegate({
     this.actionsCount,
   });
 
+  final int actionsCount;
+
   @override
   void performLayout(Size size) {
-    // TODO: @mattcarroll, handle 2 buttons that need to stack due to long text
+    // TODO(mattcarroll): handle 2 buttons that need to stack due to long text
     double minActionSpace = 0.0;
     if (actionsCount > 0 && actionsCount <= 2) {
       minActionSpace = _kButtonHeight;
@@ -306,7 +305,7 @@ class _CupertinoAlertDialogLayoutDelegate extends MultiChildLayoutDelegate {
     );
 
     // Layout the blur, content, and the actions.
-    final double dialogTop = (size.height - dialogHeight) / 2;
+    final double dialogTop = (size.height - dialogHeight) / 2.0;
     positionChild(
       _AlertDialogSection.blur,
       new Offset(
@@ -315,26 +314,26 @@ class _CupertinoAlertDialogLayoutDelegate extends MultiChildLayoutDelegate {
       ),
     );
     positionChild(
-        _AlertDialogSection.content,
-        new Offset(
-          0.0,
-          dialogTop,
-        ),
+      _AlertDialogSection.content,
+      new Offset(
+        0.0,
+        dialogTop,
+      ),
     );
     positionChild(
-        _AlertDialogSection.actions,
-        new Offset(
-          0.0,
-          dialogTop + contentSize.height,
-        ),
+      _AlertDialogSection.actions,
+      new Offset(
+        0.0,
+        dialogTop + contentSize.height,
+      ),
     );
   }
 
   @override
-  bool shouldRelayout(MultiChildLayoutDelegate oldDelegate) {
-    return false;
+  bool shouldRelayout(_CupertinoAlertDialogLayoutDelegate oldDelegate) {
+    // TODO(mattcarroll): account for possible change in stacking even when count is same.
+    return actionsCount != oldDelegate.actionsCount;
   }
-
 }
 
 /// A button typically used in a [CupertinoAlertDialog].
@@ -530,21 +529,21 @@ class _CupertinoAlertActionSection extends StatelessWidget {
 
   bool get _layoutActionsVertically => children.length > 2;
 
-  Widget _buildHorizontalDivider() {
+  Widget _buildHorizontalDivider(double devicePixelRatio) {
     return new Container(
-      height: 0.3,
+      height: 1.0 / devicePixelRatio,
       color: _kButtonDividerColor,
     );
   }
 
-  Widget _buildVerticalDivider() {
+  Widget _buildVerticalDivider(double devicePixelRatio) {
     return new Container(
-      width: 0.3,
+      width: 1.0 / devicePixelRatio,
       color: _kButtonDividerColor,
     );
   }
 
-  Widget _buildHorizontalButtons() {
+  Widget _buildHorizontalButtons(double devicePixelRatio) {
     assert(
       children.length <= 2,
       'Horizontal dialog buttons can only be constructed with 2 or fewer '
@@ -555,17 +554,18 @@ class _CupertinoAlertActionSection extends StatelessWidget {
       return Row(
         children: <Widget>[
           new Expanded(
-            child: _buildDialogButton(children[0]),
+            child: _buildDialogButton(children.single),
           ),
         ],
       );
     } else {
+      // TODO(abarth): Hide the divider when one of the adjacent buttons is highlighted
       return Row(
         children: <Widget>[
           new Expanded(
             child: _buildDialogButton(children[0]),
           ),
-          _buildVerticalDivider(),
+          _buildVerticalDivider(devicePixelRatio),
           new Expanded(
             child: _buildDialogButton(children[1]),
           ),
@@ -574,30 +574,25 @@ class _CupertinoAlertActionSection extends StatelessWidget {
     }
   }
 
-  List<Widget> _buildVerticalButtons() {
-    final List<Widget> buttonsWithDividers = <Widget>[];
-    for (int i = 0; i < children.length; ++i) {
-      buttonsWithDividers.add(
-        _buildHorizontalDivider(),
-      );
-      buttonsWithDividers.add(
-        _buildDialogButton(children[i]),
-      );
+  Iterable<Widget> _buildVerticalButtons(double devicePixelRatio) sync* {
+    for (Widget child in children) {
+      yield _buildHorizontalDivider(devicePixelRatio);
+      yield _buildDialogButton(child);
     }
-
-    return buttonsWithDividers;
   }
 
   Widget _buildDialogButton(Widget buttonContent) {
     return Container(
       height: _kButtonHeight,
-      color: _kDialogForegroundColor,
+      color: _kDialogColor,
       child: buttonContent,
     );
   }
 
   @override
   Widget build(BuildContext context) {
+    final devicePixelRatio = MediaQuery.of(context).devicePixelRatio;
+
     if (children.isEmpty) {
       return new SingleChildScrollView(
         controller: scrollController,
@@ -614,7 +609,7 @@ class _CupertinoAlertActionSection extends StatelessWidget {
           child: new Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: _buildVerticalButtons(),
+            children: _buildVerticalButtons(devicePixelRatio).toList(),
           ),
         ),
       );
@@ -628,8 +623,8 @@ class _CupertinoAlertActionSection extends StatelessWidget {
               constrainedAxis: Axis.horizontal,
               child: Column(
                 children: <Widget>[
-                  _buildHorizontalDivider(),
-                  _buildHorizontalButtons(),
+                  _buildHorizontalDivider(devicePixelRatio),
+                  _buildHorizontalButtons(devicePixelRatio),
                 ],
               ),
             ),
