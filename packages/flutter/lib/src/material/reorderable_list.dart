@@ -255,7 +255,8 @@ class _ReorderableListContentState extends State<_ReorderableListContent> with T
     return new Column(children: children);
   }
 
-
+  // Wraps one of the widget's children in a DragTarget and Draggable.
+  // Handles up the logic for dragging and reordering items in the list.
   Widget _wrap(Widget toWrap, int index, BoxConstraints constraints) {
     assert(toWrap.key != null);
 
