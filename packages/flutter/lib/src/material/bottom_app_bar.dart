@@ -7,7 +7,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
 import 'material.dart';
-import 'notch_computers.dart';
+import 'notches.dart';
 import 'scaffold.dart';
 import 'theme.dart';
 
@@ -47,7 +47,7 @@ class BottomAppBar extends StatefulWidget {
     Key key,
     this.color,
     this.elevation = 8.0,
-    this.notchComputer,
+    this.notch,
     this.child,
   }) : assert(elevation != null),
        assert(elevation >= 0.0),
@@ -72,11 +72,11 @@ class BottomAppBar extends StatefulWidget {
   /// Defaults to 8, the appropriate elevation for bottom app bars.
   final double elevation;
 
-  /// The notch computer that is used to make a notch for the floating action
+  /// The notch that is used to make a notch for the floating action
   /// button.
   ///
   /// If null there will be no notch in the bottom app bar.
-  final NotchComputer notchComputer;
+  final Notch notch;
 
   @override
   State createState() => new _BottomAppBarState();
@@ -93,8 +93,8 @@ class _BottomAppBarState extends State<BottomAppBar> {
 
   @override
   Widget build(BuildContext context) {
-    final CustomClipper<Path> clipper = widget.notchComputer != null
-      ? new _BottomAppBarClipper(geometry: geometryListenable, notchComputer: widget.notchComputer)
+    final CustomClipper<Path> clipper = widget.notch != null
+      ? new _BottomAppBarClipper(geometry: geometryListenable, notch: widget.notch)
       : const ShapeBorderClipper(shape: const RoundedRectangleBorder());
     return new PhysicalShape(
       clipper: clipper,
@@ -113,13 +113,13 @@ class _BottomAppBarState extends State<BottomAppBar> {
 class _BottomAppBarClipper extends CustomClipper<Path> {
   const _BottomAppBarClipper({
     @required this.geometry,
-    @required this.notchComputer,
+    @required this.notch,
   }) : assert(geometry != null),
-       assert(notchComputer != null),
+       assert(notch != null),
        super(reclip: geometry);
 
   final ValueListenable<ScaffoldGeometry> geometry;
-  final NotchComputer notchComputer;
+  final Notch notch;
 
   @override
   Path getClip(Size size) {
@@ -136,7 +136,7 @@ class _BottomAppBarClipper extends CustomClipper<Path> {
     return new Path()
       ..moveTo(appBar.left, appBar.top)
       ..addPath(
-        notchComputer.compute(
+        notch.getPath(
           appBar,
           button,
           new Offset(appBar.left, appBar.top),

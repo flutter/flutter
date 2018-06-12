@@ -6,10 +6,10 @@ import 'package:flutter/rendering.dart';
 /// Computes notches in the outline of a shape.
 ///
 /// Typically used to compute notches by a [BottomAppBar].
-abstract class NotchComputer {
+abstract class Notch {
   /// Abstract const constructor. This constructor enables subclasses to provide
   /// const constructors so that they can be used in const expressions.
-  const NotchComputer();
+  const Notch();
 
   /// Returns a path for a notch in the outline of a shape.
   ///
@@ -27,30 +27,40 @@ abstract class NotchComputer {
   /// not end with a [Path.close]. The returned [Path] is built under the
   /// assumption it will be added to an existing path that is at the `start`
   /// coordinates using [Path.addPath].
-  Path compute(Rect host, Rect guest, Offset start, Offset end);
+  Path getPath(Rect host, Rect guest, Offset start, Offset end);
 }
 
 /// Computes smooth circular notches.
 ///
 /// The notches computed by this class are paths that smoothly connect a top
-/// horizontal edge with a circle circumference.
+/// horizontal edge with a circular arc.
 ///
-/// See also: [compute].
-class CircularNotchComputer implements NotchComputer {
-  /// Constructs a [CircularNotchComputer] that can be used for multiple notch
+/// The notch computed by this class is intended to contain a circle bound by a
+/// square of the guest + [notchMargin] size, and will not be smaller than this
+/// circle.
+///
+/// The guest shape is assumed to be a circle (hence the guest rectangle is
+/// assumed to be a square).
+///
+/// See also: [getPath].
+class CircularNotch implements Notch {
+  /// Constructs a [CircularNotch] that can be used for multiple notch
   /// computations.
-  const CircularNotchComputer({
+  const CircularNotch({
     this.notchMargin = 4.0,
   });
 
   /// Minimal margin that will be kept from the guest. Assuming that the guest's
   /// shape is circular.
+  ///
+  /// The notch will be sized to contain a circle with a radius of notchMargin + guestRadius.
+  /// (guestRadius is half the width or height of the guest bounding box).
   final double notchMargin;
 
-  /// Returns a path for a smooth circular notch in a horizontal top edge of a shape.
+  /// Returns a path that defines a smooth circular notch in the top edge of the [host] shape.
   ///
   /// The guest's shape is assumed to be a circle bounded by the [guest]
-  /// rectangle.
+  /// rectangle. The host's top edge is assumed to be a horizontal line.
   ///
   /// The returned path makes a notch in the host top edge that can contain the
   /// guest shape, and keep a [notchMargin] margin between the notch and the
@@ -63,7 +73,7 @@ class CircularNotchComputer implements NotchComputer {
   /// The `start` and `end` arguments are points on the outline of the host shape
   /// that will be connected by the returned path.
   @override
-  Path compute(Rect host, Rect guest, Offset start, Offset end) {
+  Path getPath(Rect host, Rect guest, Offset start, Offset end) {
     // The guest's shape is a circle bounded by the guest rectangle.
     // So the guest's radius is half the guest width.
     final double fabRadius = guest.width / 2.0;
@@ -131,26 +141,32 @@ class CircularNotchComputer implements NotchComputer {
     double fabRadius, double notchRadius, double notchMargin) {
     if (end.dy != host.top)
       throw new FlutterError(
-        'The notch of the floating action button must end at the top edge of the host.\n'
+        'The notch of the guest must end at the top edge of the host.\n'
         'The notch\'s path end point: $end is not in the top edge of $host'
       );
 
     if (start.dy != host.top)
       throw new FlutterError(
-        'The notch of the floating action button must start at the top edge of the host.\n'
+        'The notch of the guest must start at the top edge of the host.\n'
         'The notch\'s path start point: $start is not in the top edge of $host'
       );
 
     if (guest.center.dx - notchRadius < start.dx)
       throw new FlutterError(
-        'The notch\'s path start point must be to the left of the floating action button.\n'
+        'The notch\'s path start point must be to the left of the guest.\n'
         'Start point was $start, guest was $guest, notchMargin was $notchMargin.'
       );
 
     if (guest.center.dx + notchRadius > end.dx)
       throw new FlutterError(
-        'The notch\'s end point must be to the right of the floating action button.\n'
+        'The notch\'s end point must be to the right of the guest.\n'
         'End point was $start, notch was $guest, notchMargin was $notchMargin.'
+      );
+
+    if (guest.width != guest.height)
+      throw new FlutterError(
+        'The guest bounding box must be square.'
+        'The width of the guest was ${guest.width} and the height was ${guest.height}.'
       );
 
     return true;

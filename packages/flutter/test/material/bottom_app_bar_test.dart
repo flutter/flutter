@@ -98,7 +98,7 @@ void main() {
       new MaterialApp(
         home: const Scaffold(
           bottomNavigationBar: const BottomAppBar(
-            notchComputer: const RectangularNotchComputer(),
+            notch: const RectangularNotch(),
           ),
         ),
       ),
@@ -108,7 +108,7 @@ void main() {
       new MaterialApp(
         home: const Scaffold(
           bottomNavigationBar: const BottomAppBar(
-            notchComputer: null,
+            notch: null,
           ),
         ),
       ),
@@ -118,7 +118,7 @@ void main() {
       new MaterialApp(
         home: const Scaffold(
           bottomNavigationBar: const BottomAppBar(
-            notchComputer: const RectangularNotchComputer(),
+            notch: const RectangularNotch(),
           ),
         ),
       ),
@@ -130,7 +130,7 @@ void main() {
       new MaterialApp(
         home: const Scaffold(
           bottomNavigationBar: const ShapeListener(const BottomAppBar(
-            notchComputer: const CircularNotchComputer(),
+            notch: const CircularNotch(),
           )),
           floatingActionButton: const FloatingActionButton(
             onPressed: null,
@@ -156,12 +156,12 @@ void main() {
     );
   });
 
-  testWidgets('no notch notch computer is null', (WidgetTester tester) async {
+  testWidgets('no notch when notch param is null', (WidgetTester tester) async {
     await tester.pumpWidget(
       new MaterialApp(
         home: const Scaffold(
           bottomNavigationBar: const ShapeListener(const BottomAppBar(
-            notchComputer: null,
+            notch: null,
           )),
           floatingActionButton: const FloatingActionButton(
             onPressed: null,
@@ -195,7 +195,7 @@ void main() {
           bottomNavigationBar: const ShapeListener(
             const BottomAppBar(
               child: const SizedBox(height: 100.0),
-              notchComputer: const RectangularNotchComputer(),
+              notch: const RectangularNotch(),
             )
           ),
           floatingActionButton: const FloatingActionButton(
@@ -329,11 +329,11 @@ class ShapeListenerState extends State<ShapeListener> {
 
 }
 
-class RectangularNotchComputer implements NotchComputer{
-  const RectangularNotchComputer();
+class RectangularNotch implements Notch {
+  const RectangularNotch();
 
   @override
-  Path compute(Rect host, Rect guest, Offset start, Offset end) {
+  Path getPath(Rect host, Rect guest, Offset start, Offset end) {
     return new Path()
       ..lineTo(guest.left, host.top)
       ..lineTo(guest.left, guest.bottom)

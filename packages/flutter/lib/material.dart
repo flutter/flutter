@@ -67,7 +67,7 @@ export 'src/material/list_tile.dart';
 export 'src/material/material.dart';
 export 'src/material/material_localizations.dart';
 export 'src/material/mergeable_material.dart';
-export 'src/material/notch_computers.dart';
+export 'src/material/notches.dart';
 export 'src/material/outline_button.dart';
 export 'src/material/page.dart';
 export 'src/material/paginated_data_table.dart';

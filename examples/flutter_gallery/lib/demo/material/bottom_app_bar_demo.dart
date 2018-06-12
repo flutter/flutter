@@ -187,18 +187,18 @@ class _BottomAppBarDemoState extends State<BottomAppBarDemo> {
       bottomNavigationBar: new _DemoBottomAppBar(
         color: _babColor,
         fabLocation: _fabLocation.value,
-        notchComputer: _selectNotchComputer(),
+        notch: _selectNotch(),
       ),
     );
   }
 
-  NotchComputer _selectNotchComputer() {
+  Notch _selectNotch() {
     if (!_showNotch.value)
       return null;
     if (_fabShape == kCircularFab)
-      return const CircularNotchComputer();
+      return const CircularNotch();
     if (_fabShape == kDiamondFab)
-      return const _DiamondNotchComputer();
+      return const _DiamondNotch();
     return null;
   }
 }
@@ -330,12 +330,12 @@ class _DemoBottomAppBar extends StatelessWidget {
   const _DemoBottomAppBar({
     this.color,
     this.fabLocation,
-    this.notchComputer
+    this.notch
   });
 
   final Color color;
   final FloatingActionButtonLocation fabLocation;
-  final NotchComputer notchComputer;
+  final Notch notch;
 
   static final List<FloatingActionButtonLocation> kCenterLocations = <FloatingActionButtonLocation>[
     FloatingActionButtonLocation.centerDocked,
@@ -384,7 +384,7 @@ class _DemoBottomAppBar extends StatelessWidget {
     return new BottomAppBar(
       color: color,
       child: new Row(children: rowContents),
-      notchComputer: notchComputer,
+      notch: notch,
     );
   }
 }
@@ -443,11 +443,11 @@ class _DiamondFab extends StatelessWidget {
   }
 }
 
-class _DiamondNotchComputer implements NotchComputer {
-  const _DiamondNotchComputer();
+class _DiamondNotch implements Notch {
+  const _DiamondNotch();
 
   @override
-  Path compute(Rect host, Rect guest, Offset start, Offset end) {
+  Path getPath(Rect host, Rect guest, Offset start, Offset end) {
     const double notchMargin = 6.0;
     final Rect marginedGuest = guest.inflate(notchMargin);
     if (!host.overlaps(marginedGuest))
