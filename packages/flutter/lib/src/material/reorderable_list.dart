@@ -119,7 +119,7 @@ class _ReorderableListViewState extends State<ReorderableListView> {
   }
 }
 
-// This class is placed inside of the Overlay in the ReorderableListView.
+// This widget goes inside of the Overlay in the ReorderableListView.
 class _ReorderableListContent extends StatefulWidget {
   _ReorderableListContent(ReorderableListView parent)
       : children = parent.children,
@@ -260,6 +260,7 @@ class _ReorderableListContentState extends State<_ReorderableListContent> with T
   Widget _wrap(Widget toWrap, int index, BoxConstraints constraints) {
     assert(toWrap.key != null);
 
+    // Starts dragging toWrap.
     void onDragStarted() {
       setState(() {
         _dragging = toWrap.key;
@@ -270,6 +271,7 @@ class _ReorderableListContentState extends State<_ReorderableListContent> with T
       });
     }
 
+    // Drops toWrap into the last position it was hovering over.
     void onDragEnded() {
       setState(() {
         if (_dragStartIndex != _currentIndex)
