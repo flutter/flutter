@@ -7,6 +7,7 @@
 #include "flutter/lib/ui/compositing/scene.h"
 #include "flutter/lib/ui/compositing/scene_builder.h"
 #include "flutter/lib/ui/dart_runtime_hooks.h"
+#include "flutter/lib/ui/isolate_name_server/isolate_name_server_natives.h"
 #include "flutter/lib/ui/painting/canvas.h"
 #include "flutter/lib/ui/painting/codec.h"
 #include "flutter/lib/ui/painting/frame_info.h"
@@ -60,6 +61,7 @@ void DartUI::InitForGlobal() {
     FrameInfo::RegisterNatives(g_natives);
     ImageFilter::RegisterNatives(g_natives);
     ImageShader::RegisterNatives(g_natives);
+    IsolateNameServerNatives::RegisterNatives(g_natives);
     Paragraph::RegisterNatives(g_natives);
     ParagraphBuilder::RegisterNatives(g_natives);
     Picture::RegisterNatives(g_natives);

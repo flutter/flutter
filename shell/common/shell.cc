@@ -400,7 +400,7 @@ fml::WeakPtr<PlatformView> Shell::GetPlatformView() {
   return platform_view_->GetWeakPtr();
 }
 
-const blink::DartVM& Shell::GetDartVM() const {
+blink::DartVM& Shell::GetDartVM() const {
   return *vm_;
 }
 
