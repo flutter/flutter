@@ -128,7 +128,7 @@ class Switch extends StatefulWidget {
   ///
   /// See also:
   ///
-  ///   * [MaterialTapTargetSize], for a description of how this effects tap targets.
+  ///   * [MaterialTapTargetSize], for a description of how this affects tap targets.
   final MaterialTapTargetSize materialTapTargetSize;
 
   @override
