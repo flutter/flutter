@@ -146,7 +146,7 @@ class FlutterPlugin implements Plugin<Project> {
                     into "lib/x86_64"
                 }
             }
-            // Add flutter.jar dependencies to all <buildType>Implementation configurations, including custom ones
+            // Add flutter.jar dependencies to all <buildType>Api configurations, including custom ones
             // added after applying the Flutter plugin.
             project.android.buildTypes.each { addFlutterJarApiDependency(project, it) }
             project.android.buildTypes.whenObjectAdded { addFlutterJarApiDependency(project, it) }

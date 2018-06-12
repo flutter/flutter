@@ -12,6 +12,8 @@ import io.flutter.plugins.GeneratedPluginRegistrant;
 
 /**
  * Main entry point for using Flutter in Android applications.
+ *
+ * TODO(mravn): Move this file to the flutter/engine repo.
  */
 @MainThread
 public final class Flutter {

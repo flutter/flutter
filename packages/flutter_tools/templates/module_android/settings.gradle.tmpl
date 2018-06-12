@@ -1,5 +1,2 @@
-include ':flutter_module'
-
-// Delegate plugin inclusion to shared script.
 setBinding(new Binding([gradle: this]))
-evaluate(new File('include_plugins.groovy'))
+evaluate(new File('include_module.groovy'))
