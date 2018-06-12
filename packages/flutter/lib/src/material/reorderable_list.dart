@@ -42,8 +42,13 @@ typedef void OnSwapCallback(int oldIndex, int newIndex);
 class ReorderableListView extends StatefulWidget {
 
   /// Creates a reorderable list.
-  const ReorderableListView({@required this.children, @required this.onSwap, this.scrollDirection = Axis.vertical, this.padding, this.dropAreaExtent = 96.0})
-    : assert(dropAreaExtent != null),
+  const ReorderableListView({
+    @required this.children, 
+    @required this.onSwap, 
+    this.scrollDirection = Axis.vertical, 
+    this.padding, 
+    this.dropAreaExtent = 96.0,
+  }): assert(dropAreaExtent != null),
       assert(scrollDirection != null),
       assert(onSwap != null),
       assert(children != null);
