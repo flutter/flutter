@@ -83,10 +83,20 @@ BuildApp() {
   RunCommand mkdir -p -- "$derived_dir"
   AssertExists "$derived_dir"
 
-  RunCommand rm -rf -- "${derived_dir}/Flutter.framework"
   RunCommand rm -rf -- "${derived_dir}/App.framework"
-  RunCommand cp -r -- "${framework_path}/Flutter.framework" "${derived_dir}"
-  RunCommand find "${derived_dir}/Flutter.framework" -type f -exec chmod a-w "{}" \;
+
+  if [[ -e "${project_path/.ios}" ]]; then
+    RunCommand rm -rf -- "${derived_dir}/engine"
+    mkdir "${derived_dir}/engine"
+    RunCommand cp -r -- "${framework_path}/Flutter.podspec" "${derived_dir}/engine"
+    RunCommand cp -r -- "${framework_path}/Flutter.framework" "${derived_dir}/engine"
+    RunCommand find "${derived_dir}/engine/Flutter.framework" -type f -exec chmod a-w "{}" \;
+  else
+    RunCommand rm -rf -- "${derived_dir}/Flutter.framework"
+    RunCommand cp -r -- "${framework_path}/Flutter.framework" "${derived_dir}"
+    RunCommand find "${derived_dir}/Flutter.framework" -type f -exec chmod a-w "{}" \;
+  fi
+
   RunCommand pushd "${project_path}" > /dev/null
 
   AssertExists "${target_path}"
@@ -155,7 +165,13 @@ BuildApp() {
         -install_name '@rpath/App.framework/App' \
         -o "${derived_dir}/App.framework/App" -)"
   fi
-  RunCommand cp -- "${project_path}/ios/Flutter/AppFrameworkInfo.plist" "${derived_dir}/App.framework/Info.plist"
+
+  local plistPath="${project_path}/ios/Flutter/AppFrameworkInfo.plist"
+  if [[ -e "${project_path/.ios}" ]]; then
+    plistPath="${project_path}/.ios/AppFrameworkInfo.plist"
+  fi
+
+  RunCommand cp -- "$plistPath" "${derived_dir}/App.framework/Info.plist"
 
   local precompilation_flag=""
   if [[ "$CURRENT_ARCH" != "x86_64" ]] && [[ "$build_mode" != "debug" ]]; then

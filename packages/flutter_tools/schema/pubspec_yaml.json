@@ -50,6 +50,12 @@
                         "androidPackage": { "type": "string" }
                     }
                 },
+                "module": {
+                    "oneOf": [
+                        { "type": "object" },
+                        { "type": "null" }
+                    ]
+                },
                 "plugin": {
                     "type": "object",
                     "additionalProperties": false,

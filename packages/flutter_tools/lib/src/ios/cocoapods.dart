@@ -15,6 +15,7 @@ import '../base/process.dart';
 import '../base/process_manager.dart';
 import '../base/version.dart';
 import '../cache.dart';
+import '../flutter_manifest.dart';
 import '../globals.dart';
 import 'xcodeproj.dart';
 
@@ -150,9 +151,13 @@ class CocoaPods {
   /// Ensures the `ios` sub-project of the Flutter project at [appDirectory]
   /// contains a suitable `Podfile` and that its `Flutter/Xxx.xcconfig` files
   /// include pods configuration.
-  void setupPodfile(String appDirectory) {
+  void setupPodfile(String appDirectory, FlutterManifest manifest) {
     if (!xcodeProjectInterpreter.isInstalled) {
       // Don't do anything for iOS when host platform doesn't support it.
+      return;
+    }
+    if (manifest.isModule) {
+      // Don't create a Podfile if there is no main project (as for a module).
       return;
     }
     final String podfilePath = fs.path.join(appDirectory, 'ios', 'Podfile');

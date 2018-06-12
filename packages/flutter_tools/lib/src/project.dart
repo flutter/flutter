@@ -54,6 +54,9 @@ class FlutterProject {
   /// The generated AndroidModule sub project of this module project.
   AndroidModuleProject get androidModule => new AndroidModuleProject(directory.childDirectory('.android'));
 
+  /// The generated IosModule sub project of this module project.
+  IosModuleProject get iosModule => new IosModuleProject(directory.childDirectory('.ios'));
+
   /// Returns true if this project has an example application
   bool get hasExampleApp => directory.childDirectory('example').childFile('pubspec.yaml').existsSync();
 
@@ -71,9 +74,10 @@ class FlutterProject {
     final FlutterManifest manifest = await FlutterManifest.createFromPath(directory.childFile('pubspec.yaml').path);
     if (manifest.isModule) {
       await androidModule.ensureReadyForPlatformSpecificTooling(manifest);
+      await iosModule.ensureReadyForPlatformSpecificTooling(manifest);
     }
-    injectPlugins(directory: directory.path);
-    await xcode.generateXcodeProperties(directory.path);
+    xcode.generateXcodeProperties(directory.path, manifest);
+    injectPlugins(directory: directory.path, manifest: manifest);
   }
 }
 
@@ -87,6 +91,25 @@ class IosProject {
   Future<String> productBundleIdentifier() {
     final File projectFile = directory.childDirectory('Runner.xcodeproj').childFile('project.pbxproj');
     return _firstMatchInFile(projectFile, _productBundleIdPattern).then((Match match) => match?.group(1));
+  }
+}
+
+/// Represents the contents of the .ios/ folder of a Flutter module
+/// project.
+class IosModuleProject {
+  IosModuleProject(this.directory);
+
+  final Directory directory;
+
+  Future<void> ensureReadyForPlatformSpecificTooling(FlutterManifest manifest) async {
+    if (_shouldRegenerate()) {
+      final Template template = new Template.fromName(fs.path.join('module', 'ios'));
+      template.render(directory, <String, dynamic>{}, printStatusWhenWriting: false);
+    }
+  }
+
+  bool _shouldRegenerate() {
+    return Cache.instance.fileOlderThanToolsStamp(directory.childFile('podhelper.rb'));
   }
 }
 
@@ -129,14 +152,7 @@ class AndroidModuleProject {
   }
 
   bool _shouldRegenerate() {
-    final File flutterToolsStamp = Cache.instance.getStampFileFor('flutter_tools');
-    final File buildDotGradleFile = directory.childFile('build.gradle');
-    if (!buildDotGradleFile.existsSync())
-      return true;
-    return flutterToolsStamp.existsSync() &&
-        flutterToolsStamp
-            .lastModifiedSync()
-            .isAfter(buildDotGradleFile.lastModifiedSync());
+    return Cache.instance.fileOlderThanToolsStamp(directory.childFile('build.gradle'));
   }
 }
 
