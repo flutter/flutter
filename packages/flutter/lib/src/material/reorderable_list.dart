@@ -48,7 +48,7 @@ class ReorderableListView extends StatefulWidget {
       assert(onSwap != null),
       assert(children != null);
 
-  /// The
+  /// The widgets to display.
   final List<Widget> children;
 
   /// The [Axis] along which the list scrolls.
@@ -83,7 +83,57 @@ class ReorderableListView extends StatefulWidget {
   }
 }
 
-class _ReorderableListViewState extends State<ReorderableListView> with TickerProviderStateMixin {
+class _ReorderableListViewState extends State<ReorderableListView> {
+  // We use an inner overlay so that the dragging list item doesn't draw outside of the list itself.
+  GlobalKey _overlayKey;
+
+  // This entry contains the scrolling list itself.
+  OverlayEntry _bottomOverlayEntry;
+
+  @override 
+  void initState() {
+    super.initState();
+    _overlayKey = new GlobalKey(debugLabel: '$this overlay key');
+    _bottomOverlayEntry = new OverlayEntry(
+      opaque: true,
+      builder: _buildOverlayContent,
+    );
+  }
+
+  Widget _buildOverlayContent(BuildContext context) {
+    return new _ReorderableListContent(widget);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return new Overlay(
+      key: _overlayKey,
+      initialEntries: <OverlayEntry>[
+        _bottomOverlayEntry,
+    ]);
+  }
+}
+
+// This class is placed inside of the Overlay in the ReorderableListView.
+class _ReorderableListContent extends StatefulWidget {
+  _ReorderableListContent(ReorderableListView parent)
+      : children = parent.children,
+        scrollDirection = parent.scrollDirection,
+        padding = parent.padding,
+        onSwap = parent.onSwap,
+        dropAreaExtent = parent.dropAreaExtent;
+        
+  final List<Widget> children;
+  final Axis scrollDirection;
+  final EdgeInsets padding;
+  final OnSwapCallback onSwap;
+  final double dropAreaExtent;
+
+  @override
+  _ReorderableListContentState createState() => new _ReorderableListContentState();
+}
+
+class _ReorderableListContentState extends State<_ReorderableListContent> with TickerProviderStateMixin {
   final ScrollController _scrollController = new ScrollController();
 
   // This controls the entrance of the dragging widget into a new place.
@@ -92,6 +142,7 @@ class _ReorderableListViewState extends State<ReorderableListView> with TickerPr
   // This controls the 'ghost' of the dragging widget, which is left behind where the widget used to be.
   AnimationController _ghostController;
 
+  // The widget currently being dragged. Null if no drag is underway.
   Key _dragging;
 
   // The location that the dragging widget occupied before it started to drag.
@@ -107,26 +158,15 @@ class _ReorderableListViewState extends State<ReorderableListView> with TickerPr
   // The widget to move the dragging widget too after the current index.
   int _nextIndex = 0;
 
-  // Whether or not we are scrolling this view to show a widget.
+  // Whether or not we are currently scrolling this view to show a widget.
   bool _scrolling = false;
-
-  // We use an inner overlay so that the dragging list item doesn't draw outside of the list itself.
-  GlobalKey _overlayKey;
-
-  // This entry contains the scrolling list itself.
-  OverlayEntry _bottomOverlayEntry;
 
   @override 
   void initState() {
     super.initState();
-    _overlayKey = new GlobalKey(debugLabel: '$this overlay key');
     _entranceController = new AnimationController(vsync: this, value: 0.0, duration: const Duration(milliseconds: 200));
     _ghostController = new AnimationController(vsync: this, value: 0.0, duration: const Duration(milliseconds: 200));
     _entranceController.addStatusListener(_onEntranceStatusChanged);
-    _bottomOverlayEntry = new OverlayEntry(
-      opaque: true,
-      builder: _buildOverlayContent,
-    );
   }
 
   @override
@@ -134,6 +174,64 @@ class _ReorderableListViewState extends State<ReorderableListView> with TickerPr
     _entranceController.dispose();
     _ghostController.dispose();
     super.dispose();
+  }
+
+  // Animates the dropable space from _currentIndex to _nextIndex.
+  void _requestAnimationToNextIndex() {
+    if (_entranceController.isCompleted) {
+      _ghostIndex = _currentIndex;
+      if (_nextIndex == _currentIndex) {
+        return;
+      }
+      _currentIndex = _nextIndex;
+      _ghostController.reverse(from: 1.0);
+      _entranceController.forward(from: 0.0);
+    }
+  }
+
+  // Requests animation to the latest next index if it changes during an animation.
+  void _onEntranceStatusChanged(AnimationStatus status) {
+    if (status == AnimationStatus.completed) {
+      setState(() {
+        _requestAnimationToNextIndex();
+      });
+    }
+  }
+
+  // Scrolls to a target context if that context is not on the screen.
+  void _scrollTo(BuildContext context) {
+    if (_scrolling) 
+      return;
+    final RenderObject contextObject = context.findRenderObject();
+    final RenderAbstractViewport viewport = RenderAbstractViewport.of(contextObject);
+    assert(viewport != null);
+    // If and only if the current scroll offset falls in-between the offsets
+    // necessary to reveal the selected context at the top or bottom of the
+    // screen, then it is already on-screen.
+    final double margin = widget.dropAreaExtent;
+    final double scrollOffset = _scrollController.offset;
+    final double topOffset = max(
+      _scrollController.position.minScrollExtent, 
+      viewport.getOffsetToReveal(contextObject, 0.0).offset - margin,
+    );
+    final double bottomOffset = min(
+      _scrollController.position.maxScrollExtent,
+      viewport.getOffsetToReveal(contextObject, 1.0).offset + margin,
+    );
+    final bool onScreen = scrollOffset <= topOffset && scrollOffset >= bottomOffset;
+    // If the context is off screen, then we request a scroll to make it visible.
+    if (!onScreen) {
+      _scrolling = true;
+      _scrollController.position.animateTo(
+        scrollOffset < bottomOffset ? bottomOffset : topOffset, 
+        duration: const Duration(milliseconds: 200), 
+        curve: Curves.easeInOut,
+      ).then((Null none) {
+        setState(() {
+          _scrolling = false;
+        });
+      });
+    }
   }
 
   Widget _wrap(Widget toWrap, int index, BoxConstraints constraints) {
@@ -250,79 +348,8 @@ class _ReorderableListViewState extends State<ReorderableListView> with TickerPr
     });
   }
 
-  void _requestAnimationToNextIndex() {
-    if (_entranceController.isCompleted) {
-      _ghostIndex = _currentIndex;
-      if (_nextIndex == _currentIndex) {
-        return;
-      }
-      _currentIndex = _nextIndex;
-      _ghostController.reverse(from: 1.0);
-      _entranceController.forward(from: 0.0);
-    }
-  }
-
-  void _onEntranceStatusChanged(AnimationStatus status) {
-    if (status == AnimationStatus.completed) {
-      // If the next index has changed, then we should animate to it.
-      setState(() {
-        _requestAnimationToNextIndex();
-      });
-    }
-  }
-
-  // Scrolls to a target context if that context is not on the screen.
-  void _scrollTo(BuildContext context) {
-    if (_scrolling) 
-      return;
-    final RenderObject contextObject = context.findRenderObject();
-    final RenderAbstractViewport viewport = RenderAbstractViewport.of(contextObject);
-    assert(viewport != null);
-    // If and only if the current scroll offset falls in-between the offsets
-    // necessary to reveal the selected context at the top or bottom of the
-    // screen, then it is already on-screen.
-    final double margin = widget.dropAreaExtent;
-    final double scrollOffset = _scrollController.offset;
-    final double topOffset = max(
-      _scrollController.position.minScrollExtent, 
-      viewport.getOffsetToReveal(contextObject, 0.0).offset - margin,
-    );
-    final double bottomOffset = min(
-      _scrollController.position.maxScrollExtent,
-      viewport.getOffsetToReveal(contextObject, 1.0).offset + margin,
-    );
-    final bool onScreen = scrollOffset <= topOffset && scrollOffset >= bottomOffset;
-    // If the context is off screen, then we request a scroll to make it visible.
-    if (!onScreen) {
-      _scrolling = true;
-      _scrollController.position.animateTo(
-        scrollOffset < bottomOffset ? bottomOffset : topOffset, 
-        duration: const Duration(milliseconds: 200), 
-        curve: Curves.easeInOut,
-      ).then((Null none) {
-        setState(() {
-          _scrolling = false;
-        });
-      });
-    }
-  }
-
-  @override
-  void setState(VoidCallback callback) {
-    super.setState(callback);
-    _bottomOverlayEntry?.markNeedsBuild();
-  }
-
   @override
   Widget build(BuildContext context) {
-    return new Overlay(
-      key: _overlayKey,
-      initialEntries: <OverlayEntry>[
-        _bottomOverlayEntry,
-    ]);
-  }
-
-  Widget _buildOverlayContent(BuildContext context) {
     // We use the layout builder to constrain the cross-axis size of dragging child widgets.
     return new LayoutBuilder(builder: (BuildContext context, BoxConstraints constraints) {
         final List<Widget> wrappedChildren = <Widget>[];
@@ -355,4 +382,5 @@ class _ReorderableListViewState extends State<ReorderableListView> with TickerPr
         );
     });
   }
+
 }
