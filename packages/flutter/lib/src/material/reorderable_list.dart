@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:math';
+
 import 'package:flutter/widgets.dart';
 import 'package:flutter/rendering.dart';
 
@@ -108,12 +110,23 @@ class _ReorderableListViewState extends State<ReorderableListView> with TickerPr
   // Whether or not we are scrolling this view to show a widget.
   bool _scrolling = false;
 
+  // We use an inner overlay so that the dragging list item doesn't draw outside of the list itself.
+  GlobalKey _overlayKey;
+
+  // This entry contains the scrolling list itself.
+  OverlayEntry _bottomOverlayEntry;
+
   @override 
   void initState() {
     super.initState();
+    _overlayKey = new GlobalKey(debugLabel: '$this overlay key');
     _entranceController = new AnimationController(vsync: this, value: 0.0, duration: const Duration(milliseconds: 200));
     _ghostController = new AnimationController(vsync: this, value: 0.0, duration: const Duration(milliseconds: 200));
     _entranceController.addStatusListener(_onEntranceStatusChanged);
+    _bottomOverlayEntry = new OverlayEntry(
+      opaque: true,
+      builder: _buildOverlayContent,
+    );
   }
 
   @override
@@ -270,16 +283,21 @@ class _ReorderableListViewState extends State<ReorderableListView> with TickerPr
     // screen, then it is already on-screen.
     final double margin = widget.dropAreaExtent;
     final double scrollOffset = _scrollController.offset;
-    final double topOffset = viewport.getOffsetToReveal(contextObject, 0.0).offset - margin;
-    final double bottomOffset = viewport.getOffsetToReveal(contextObject, 1.0).offset + margin;
+    final double topOffset = max(
+      _scrollController.position.minScrollExtent, 
+      viewport.getOffsetToReveal(contextObject, 0.0).offset - margin,
+    );
+    final double bottomOffset = min(
+      _scrollController.position.maxScrollExtent,
+      viewport.getOffsetToReveal(contextObject, 1.0).offset + margin,
+    );
     final bool onScreen = scrollOffset <= topOffset && scrollOffset >= bottomOffset;
     // If the context is off screen, then we request a scroll to make it visible.
     if (!onScreen) {
       _scrolling = true;
-      Scrollable.ensureVisible(
-        context, 
+      _scrollController.position.animateTo(
+        scrollOffset < bottomOffset ? bottomOffset : topOffset, 
         duration: const Duration(milliseconds: 200), 
-        alignment: scrollOffset < bottomOffset ? 0.9 : 0.1, 
         curve: Curves.easeInOut,
       ).then((Null none) {
         setState(() {
@@ -290,7 +308,21 @@ class _ReorderableListViewState extends State<ReorderableListView> with TickerPr
   }
 
   @override
+  void setState(VoidCallback callback) {
+    super.setState(callback);
+    _bottomOverlayEntry?.markNeedsBuild();
+  }
+
+  @override
   Widget build(BuildContext context) {
+    return new Overlay(
+      key: _overlayKey,
+      initialEntries: <OverlayEntry>[
+        _bottomOverlayEntry,
+    ]);
+  }
+
+  Widget _buildOverlayContent(BuildContext context) {
     // We use the layout builder to constrain the cross-axis size of dragging child widgets.
     return new LayoutBuilder(builder: (BuildContext context, BoxConstraints constraints) {
         final List<Widget> wrappedChildren = <Widget>[];
@@ -312,11 +344,12 @@ class _ReorderableListViewState extends State<ReorderableListView> with TickerPr
           widget.children.length,
           constraints),
         );
+        final Widget wrappedContents = widget.scrollDirection == Axis.vertical 
+              ? new Column(children: wrappedChildren) 
+              : new Row(children: wrappedChildren);
         return new SingleChildScrollView(
           scrollDirection: widget.scrollDirection,
-          child: widget.scrollDirection == Axis.vertical 
-              ? new Column(children: wrappedChildren) 
-              : new Row(children: wrappedChildren),
+          child: wrappedContents,
           padding: widget.padding, 
           controller: _scrollController,
         );
