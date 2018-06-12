@@ -27,7 +27,6 @@
   }
 
 #define kLibrarySourceNamePrefix "/vmservice"
-static const char* kServiceIsolateScript = "vmservice_io.dart";
 
 namespace flutter {
 namespace runtime {
@@ -84,7 +83,6 @@ void DartServiceIsolate::Shutdown(Dart_NativeArguments args) {
 bool DartServiceIsolate::Startup(std::string server_ip,
                                  intptr_t server_port,
                                  Dart_LibraryTagHandler embedder_tag_handler,
-                                 bool running_from_sources,
                                  bool disable_origin_check,
                                  char** error) {
   Dart_Isolate isolate = Dart_CurrentIsolate();
@@ -108,31 +106,14 @@ bool DartServiceIsolate::Startup(std::string server_ip,
         &flutter::runtime::__flutter_embedded_service_isolate_resources_[0]);
   }
 
-  Dart_Handle result;
-
-  if (running_from_sources) {
-    // Use our own library tag handler when loading service isolate sources.
-    Dart_SetLibraryTagHandler(DartServiceIsolate::LibraryTagHandler);
-    // Load main script.
-    Dart_Handle library = LoadScript(kServiceIsolateScript);
-    FXL_DCHECK(library != Dart_Null());
-    SHUTDOWN_ON_ERROR(library);
-    // Setup native entry resolution.
-    result = Dart_SetNativeResolver(library, GetNativeFunction, GetSymbol);
-
-    SHUTDOWN_ON_ERROR(result);
-    // Finalize loading.
-    result = Dart_FinalizeLoading(false);
-    SHUTDOWN_ON_ERROR(result);
-  } else {
-    Dart_Handle uri = Dart_NewStringFromCString("dart:vmservice_io");
-    Dart_Handle library = Dart_LookupLibrary(uri);
-    SHUTDOWN_ON_ERROR(library);
-    result = Dart_SetRootLibrary(library);
-    SHUTDOWN_ON_ERROR(result);
-    result = Dart_SetNativeResolver(library, GetNativeFunction, GetSymbol);
-    SHUTDOWN_ON_ERROR(result);
-  }
+  // Set the root library for the isolate.
+  Dart_Handle uri = Dart_NewStringFromCString("dart:vmservice_io");
+  Dart_Handle library = Dart_LookupLibrary(uri);
+  SHUTDOWN_ON_ERROR(library);
+  Dart_Handle result = Dart_SetRootLibrary(library);
+  SHUTDOWN_ON_ERROR(result);
+  result = Dart_SetNativeResolver(library, GetNativeFunction, GetSymbol);
+  SHUTDOWN_ON_ERROR(result);
 
   // Make runnable.
   Dart_ExitScope();
@@ -146,7 +127,7 @@ bool DartServiceIsolate::Startup(std::string server_ip,
   Dart_EnterIsolate(isolate);
   Dart_EnterScope();
 
-  Dart_Handle library = Dart_RootLibrary();
+  library = Dart_RootLibrary();
   SHUTDOWN_ON_ERROR(library);
 
   // Set the HTTP server's ip.
@@ -172,30 +153,6 @@ bool DartServiceIsolate::Startup(std::string server_ip,
                     Dart_NewBoolean(disable_origin_check));
   SHUTDOWN_ON_ERROR(result);
   return true;
-}
-
-Dart_Handle DartServiceIsolate::GetSource(const char* name) {
-  const intptr_t kBufferSize = 512;
-  char buffer[kBufferSize];
-  snprintf(&buffer[0], kBufferSize - 1, "%s/%s", kLibrarySourceNamePrefix,
-           name);
-  const char* vmservice_source = NULL;
-  int r = g_resources->ResourceLookup(buffer, &vmservice_source);
-  FXL_DCHECK(r != EmbedderResources::kNoSuchInstance);
-  return Dart_NewStringFromCString(vmservice_source);
-}
-
-Dart_Handle DartServiceIsolate::LoadScript(const char* name) {
-  Dart_Handle url = Dart_NewStringFromCString("dart:vmservice_io");
-  Dart_Handle source = GetSource(name);
-  return Dart_LoadScript(url, Dart_Null(), source, 0, 0);
-}
-
-Dart_Handle DartServiceIsolate::LoadSource(Dart_Handle library,
-                                           const char* name) {
-  Dart_Handle url = Dart_NewStringFromCString(name);
-  Dart_Handle source = GetSource(name);
-  return Dart_LoadSource(library, url, Dart_Null(), source, 0, 0);
 }
 
 Dart_Handle DartServiceIsolate::LoadResource(Dart_Handle library,
@@ -246,43 +203,6 @@ Dart_Handle DartServiceIsolate::LoadResources(Dart_Handle library) {
     }
   }
   return result;
-}
-
-Dart_Handle DartServiceIsolate::LibraryTagHandler(Dart_LibraryTag tag,
-                                                  Dart_Handle library,
-                                                  Dart_Handle url) {
-  if (!Dart_IsLibrary(library)) {
-    return Dart_NewApiError("not a library");
-  }
-  if (!Dart_IsString(url)) {
-    return Dart_NewApiError("url is not a string");
-  }
-  const char* url_string = NULL;
-  Dart_Handle result = Dart_StringToCString(url, &url_string);
-  if (Dart_IsError(result)) {
-    return result;
-  }
-  Dart_Handle library_url = Dart_LibraryUrl(library);
-  const char* library_url_string = NULL;
-  result = Dart_StringToCString(library_url, &library_url_string);
-  if (Dart_IsError(result)) {
-    return result;
-  }
-  if (tag == Dart_kImportTag) {
-    // Embedder handles all requests for external libraries.
-    return g_embedder_tag_handler(tag, library, url);
-  }
-  FXL_DCHECK((tag == Dart_kSourceTag) || (tag == Dart_kCanonicalizeUrl));
-  if (tag == Dart_kCanonicalizeUrl) {
-    // url is already canonicalized.
-    return url;
-  }
-  // Get source from builtin resources.
-  Dart_Handle source = GetSource(url_string);
-  if (Dart_IsError(source)) {
-    return source;
-  }
-  return Dart_LoadSource(library, url, Dart_Null(), source, 0, 0);
 }
 
 }  // namespace blink
