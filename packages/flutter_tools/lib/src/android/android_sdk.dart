@@ -64,16 +64,8 @@ String getAdbPath([AndroidSdk existingSdk]) {
 /// will work for those users who have Android Tools installed but
 /// not the full SDK.
 String getEmulatorPath([AndroidSdk existingSdk]) {
-  if (existingSdk?.emulatorPath != null)
-    return existingSdk.emulatorPath;
-
-  final AndroidSdk sdk = AndroidSdk.locateAndroidSdk();
-
-  if (sdk?.latestVersion == null) {
-    return os.which('emulator')?.path;
-  } else {
-    return sdk.emulatorPath;
-  }
+  return existingSdk?.emulatorPath ??
+    AndroidSdk.locateAndroidSdk()?.emulatorPath;
 }
 
 /// Locate the path for storing AVD emulator images. Returns null if none found.
