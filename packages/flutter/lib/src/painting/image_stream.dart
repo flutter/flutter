@@ -150,7 +150,7 @@ class ImageStream extends Diagnosticable {
   }
 
   /// Stop listening for new concrete [ImageInfo] objects and errors from
-  /// its associated [ImageErrorListener].
+  /// the `listener`'s associated [ImageErrorListener].
   void removeListener(ImageListener listener) {
     if (_completer != null)
       return _completer.removeListener(listener);
