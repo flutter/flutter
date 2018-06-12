@@ -139,6 +139,13 @@ class _ReorderableListContent extends StatefulWidget {
 }
 
 class _ReorderableListContentState extends State<_ReorderableListContent> with TickerProviderStateMixin {
+  // How long an animation to reorder an element in the list takes.
+  static const Duration _kReorderAnimationDuration = const Duration(milliseconds: 200);
+
+  // How long an animation to scroll to an off-screen element in the list takes.
+  static const Duration _kScrollAnimationDuration = const Duration(milliseconds: 200);
+
+  // Controls scrolls and measures scroll progress.
   final ScrollController _scrollController = new ScrollController();
 
   // This controls the entrance of the dragging widget into a new place.
@@ -169,8 +176,8 @@ class _ReorderableListContentState extends State<_ReorderableListContent> with T
   @override 
   void initState() {
     super.initState();
-    _entranceController = new AnimationController(vsync: this, value: 0.0, duration: const Duration(milliseconds: 200));
-    _ghostController = new AnimationController(vsync: this, value: 0.0, duration: const Duration(milliseconds: 200));
+    _entranceController = new AnimationController(vsync: this, value: 0.0, duration: _kReorderAnimationDuration);
+    _ghostController = new AnimationController(vsync: this, value: 0.0, duration: _kReorderAnimationDuration);
     _entranceController.addStatusListener(_onEntranceStatusChanged);
   }
 
@@ -229,7 +236,7 @@ class _ReorderableListContentState extends State<_ReorderableListContent> with T
       _scrolling = true;
       _scrollController.position.animateTo(
         scrollOffset < bottomOffset ? bottomOffset : topOffset, 
-        duration: const Duration(milliseconds: 200), 
+        duration: _kScrollAnimationDuration, 
         curve: Curves.easeInOut,
       ).then((Null none) {
         setState(() {
@@ -239,14 +246,27 @@ class _ReorderableListContentState extends State<_ReorderableListContent> with T
     }
   }
 
+  // Wraps children in Row or Column, so that the children flow in
+  // the widget's scrollDirection.
+  Widget _buildContainerForScrollDirection({List<Widget> children}) {
+    if (widget.scrollDirection == Axis.horizontal) {
+      return new Row(children: children);
+    } 
+    return new Column(children: children);
+  }
+
+
   Widget _wrap(Widget toWrap, int index, BoxConstraints constraints) {
     assert(toWrap.key != null);
 
-    Widget buildContainerForAxis({List<Widget> children}) {
-      if (widget.scrollDirection == Axis.horizontal) {
-        return new Row(children: children);
-      } 
-      return new Column(children: children);
+    void onDragStarted() {
+      setState(() {
+        _dragging = toWrap.key;
+        _dragStartIndex = index;
+        _ghostIndex = index;
+        _currentIndex = index;
+        _entranceController.forward(from: 1.0);
+      });
     }
 
     void onDragEnded() {
@@ -278,15 +298,7 @@ class _ReorderableListContentState extends State<_ReorderableListContent> with T
         child: _dragging == toWrap.key ? const SizedBox() : toWrap,
         childWhenDragging: const SizedBox(),
         dragAnchor: DragAnchor.child,
-        onDragStarted: () {
-          setState(() {
-            _dragging = toWrap.key;
-            _dragStartIndex = index;
-            _ghostIndex = index;
-            _currentIndex = index;
-            _entranceController.forward(from: 1.0);
-          });
-        },
+        onDragStarted: onDragStarted,
         // When the drag ends inside a DragTarget widget, the drag
         // succeeds, and we swap the widget into position appropriately.
         onDragCompleted: onDragEnded,
@@ -309,7 +321,7 @@ class _ReorderableListContentState extends State<_ReorderableListContent> with T
       // We open up a space under where the dragging widget currently is to
       // show it can be dropped.
       if (_currentIndex == index) {
-        return buildContainerForAxis(children: <Widget>[
+        return _buildContainerForScrollDirection(children: <Widget>[
           new SizeTransition(
             sizeFactor: _entranceController, 
             axis: widget.scrollDirection,
@@ -321,7 +333,7 @@ class _ReorderableListContentState extends State<_ReorderableListContent> with T
       // We close up the space under where the dragging widget previously was
       // with the ghostController animation.
       if (_ghostIndex == index) {
-        return buildContainerForAxis(children: <Widget>[
+        return _buildContainerForScrollDirection(children: <Widget>[
           new SizeTransition(
             sizeFactor: _ghostController, 
             axis: widget.scrollDirection,
@@ -333,6 +345,7 @@ class _ReorderableListContentState extends State<_ReorderableListContent> with T
       return child;
     }
 
+    // We wrap the drag target in a Builder so that we can scroll to its specific context.
     return new Builder(builder: (BuildContext context) {
       return new DragTarget<Key>(
         builder: buildDragTarget,
@@ -345,10 +358,8 @@ class _ReorderableListContentState extends State<_ReorderableListContent> with T
           // If the target is not the original starting point, then we will accept the drop.
           return _dragging == toAccept && toAccept != toWrap.key;
         },
-        onAccept: (Key accepted) {
-        },
-        onLeave: (Key leaving) {
-        },
+        onAccept: (Key accepted) {},
+        onLeave: (Key leaving) {},
       );
     });
   }
@@ -357,11 +368,12 @@ class _ReorderableListContentState extends State<_ReorderableListContent> with T
   Widget build(BuildContext context) {
     // We use the layout builder to constrain the cross-axis size of dragging child widgets.
     return new LayoutBuilder(builder: (BuildContext context, BoxConstraints constraints) {
-        final List<Widget> wrappedChildren = <Widget>[];
         assert(
           widget.children.every((Widget w) => w.key != null), 
           'All children of this widget must have a key.',
         );
+
+        final List<Widget> wrappedChildren = <Widget>[];
         for (int i=0; i<widget.children.length; i++) {
           wrappedChildren.add(_wrap(widget.children[i], i, constraints));
         }
@@ -376,16 +388,12 @@ class _ReorderableListContentState extends State<_ReorderableListContent> with T
           widget.children.length,
           constraints),
         );
-        final Widget wrappedContents = widget.scrollDirection == Axis.vertical 
-              ? new Column(children: wrappedChildren) 
-              : new Row(children: wrappedChildren);
         return new SingleChildScrollView(
           scrollDirection: widget.scrollDirection,
-          child: wrappedContents,
+          child: _buildContainerForScrollDirection(children: wrappedChildren),
           padding: widget.padding, 
           controller: _scrollController,
         );
     });
   }
-
 }
