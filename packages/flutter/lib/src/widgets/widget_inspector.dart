@@ -24,9 +24,9 @@ import 'icon_data.dart';
 
 /// Signature for the builder callback used by
 /// [WidgetInspector.selectButtonBuilder].
-typedef Widget InspectorSelectButtonBuilder(BuildContext context, VoidCallback onPressed);
+typedef InspectorSelectButtonBuilder = Widget Function(BuildContext context, VoidCallback onPressed);
 
-typedef void _RegisterServiceExtensionCallback({
+typedef _RegisterServiceExtensionCallback = void Function({
   @required String name,
   @required ServiceExtensionCallback callback
 });
@@ -93,7 +93,7 @@ List<_DiagnosticsPathNode> _followDiagnosticableChain(List<Diagnosticable> chain
 
 /// Signature for the selection change callback used by
 /// [WidgetInspectorService.selectionChangedCallback].
-typedef void InspectorSelectionChangedCallback();
+typedef InspectorSelectionChangedCallback = void Function();
 
 /// Structure to help reference count Dart objects referenced by a GUI tool
 /// using [WidgetInspectorService].

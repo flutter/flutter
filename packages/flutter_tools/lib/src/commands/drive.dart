@@ -62,10 +62,7 @@ class DriveCommand extends RunCommandBase {
               'just before the extension, so e.g. if the target is "lib/main.dart", the\n'
               'driver will be "test_driver/main_test.dart".',
         valueHelp: 'path',
-      )
-      ..addFlag('preview-dart-2',
-        defaultsTo: true,
-        help: 'Preview Dart 2.0 functionality.');
+      );
   }
 
   @override
@@ -123,7 +120,7 @@ class DriveCommand extends RunCommandBase {
     Cache.releaseLockEarly();
 
     try {
-      await testRunner(<String>[testFile], observatoryUri, argResults['preview-dart-2']);
+      await testRunner(<String>[testFile], observatoryUri);
     } catch (error, stackTrace) {
       if (error is ToolExit)
         rethrow;
@@ -182,7 +179,7 @@ class DriveCommand extends RunCommandBase {
 }
 
 /// Finds a device to test on. May launch a simulator, if necessary.
-typedef Future<Device> TargetDeviceFinder();
+typedef TargetDeviceFinder = Future<Device> Function();
 TargetDeviceFinder targetDeviceFinder = findTargetDevice;
 void restoreTargetDeviceFinder() {
   targetDeviceFinder = findTargetDevice;
@@ -216,7 +213,7 @@ Future<Device> findTargetDevice() async {
 }
 
 /// Starts the application on the device given command configuration.
-typedef Future<LaunchResult> AppStarter(DriveCommand command);
+typedef AppStarter = Future<LaunchResult> Function(DriveCommand command);
 
 AppStarter appStarter = _startApp; // (mutable for testing)
 void restoreAppStarter() {
@@ -275,24 +272,20 @@ Future<LaunchResult> _startApp(DriveCommand command) async {
 }
 
 /// Runs driver tests.
-typedef Future<Null> TestRunner(List<String> testArgs, String observatoryUri, bool previewDart2);
+typedef TestRunner = Future<Null> Function(List<String> testArgs, String observatoryUri);
 TestRunner testRunner = _runTests;
 void restoreTestRunner() {
   testRunner = _runTests;
 }
 
-Future<Null> _runTests(List<String> testArgs, String observatoryUri, bool previewDart2) async {
+Future<Null> _runTests(List<String> testArgs, String observatoryUri) async {
   printTrace('Running driver tests.');
 
   PackageMap.globalPackagesPath = fs.path.normalize(fs.path.absolute(PackageMap.globalPackagesPath));
   final List<String> args = testArgs.toList()
     ..add('--packages=${PackageMap.globalPackagesPath}')
-    ..add('-rexpanded');
-  if (previewDart2) {
-    args.add('--preview-dart-2');
-  } else {
-    args.add('--no-preview-dart-2');
-  }
+    ..add('-rexpanded')
+    ..add('--preview-dart-2');
 
   final String dartVmPath = fs.path.join(dartSdkPath, 'bin', 'dart');
   final int result = await runCommandAndStreamOutput(
@@ -305,7 +298,7 @@ Future<Null> _runTests(List<String> testArgs, String observatoryUri, bool previe
 
 
 /// Stops the application.
-typedef Future<bool> AppStopper(DriveCommand command);
+typedef AppStopper = Future<bool> Function(DriveCommand command);
 AppStopper appStopper = _stopApp;
 void restoreAppStopper() {
   appStopper = _stopApp;

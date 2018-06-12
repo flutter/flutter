@@ -24,7 +24,6 @@ class AnalyzeOnce extends AnalyzeBase {
     this.repoRoots,
     this.repoPackages, {
     this.workingDirectory,
-    this.previewDart2 = false,
   }) : super(argResults);
 
   final List<String> repoRoots;
@@ -32,8 +31,6 @@ class AnalyzeOnce extends AnalyzeBase {
 
   /// The working directory for testing analysis using dartanalyzer.
   final Directory workingDirectory;
-
-  final bool previewDart2;
 
   @override
   Future<Null> analyze() async {
@@ -91,7 +88,6 @@ class AnalyzeOnce extends AnalyzeBase {
     final AnalysisServer server = new AnalysisServer(
       sdkPath,
       directories.toList(),
-      previewDart2: previewDart2,
     );
 
     StreamSubscription<bool> subscription;

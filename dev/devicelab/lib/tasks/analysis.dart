@@ -15,7 +15,7 @@ const int _kRunsPerBenchmark = 3;
 
 /// Runs a benchmark once and reports the result as a lower-is-better numeric
 /// value.
-typedef Future<double> _Benchmark();
+typedef _Benchmark = Future<double> Function();
 
 /// Path to the generated "mega gallery" app.
 Directory get _megaGalleryDirectory => dir(path.join(Directory.systemTemp.path, 'mega_gallery'));

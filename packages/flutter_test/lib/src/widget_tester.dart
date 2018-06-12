@@ -24,7 +24,7 @@ import 'test_text_input.dart';
 export 'package:test/test.dart' hide expect;
 
 /// Signature for callback to [testWidgets] and [benchmarkWidgets].
-typedef Future<Null> WidgetTesterCallback(WidgetTester widgetTester);
+typedef WidgetTesterCallback = Future<Null> Function(WidgetTester widgetTester);
 
 /// Runs the [callback] inside the Flutter test environment.
 ///
@@ -317,7 +317,9 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
   /// are required to wait for the returned future to complete before calling
   /// this method again. Attempts to do otherwise will result in a
   /// [TestFailure] error being thrown.
-  Future<T> runAsync<T>(Future<T> callback()) => binding.runAsync(callback);
+  Future<T> runAsync<T>(Future<T> callback(), {
+    Duration additionalTime = const Duration(milliseconds: 250),
+  }) => binding.runAsync(callback, additionalTime: additionalTime);
 
   /// Whether there are any any transient callbacks scheduled.
   ///
@@ -606,7 +608,7 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
   }
 }
 
-typedef void _TickerDisposeCallback(_TestTicker ticker);
+typedef _TickerDisposeCallback = void Function(_TestTicker ticker);
 
 class _TestTicker extends Ticker {
   _TestTicker(TickerCallback onTick, this._onDispose) : super(onTick);

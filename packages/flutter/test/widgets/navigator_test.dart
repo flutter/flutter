@@ -42,7 +42,7 @@ class SecondWidgetState extends State<SecondWidget> {
   }
 }
 
-typedef void ExceptionCallback(dynamic exception);
+typedef ExceptionCallback = void Function(dynamic exception);
 
 class ThirdWidget extends StatelessWidget {
   const ThirdWidget({ this.targetKey, this.onException });
@@ -89,7 +89,7 @@ class OnTapPage extends StatelessWidget {
   }
 }
 
-typedef void OnObservation(Route<dynamic> route, Route<dynamic> previousRoute);
+typedef OnObservation = void Function(Route<dynamic> route, Route<dynamic> previousRoute);
 
 class TestObserver extends NavigatorObserver {
   OnObservation onPushed;
@@ -789,7 +789,10 @@ void main() {
     ));
     expect(semantics, includesNodeWith(
       label: 'Page 1',
-      flags: <SemanticsFlag>[SemanticsFlag.namesRoute],
+      flags: <SemanticsFlag>[
+        SemanticsFlag.namesRoute,
+        SemanticsFlag.isHeader,
+      ],
     ));
 
     await tester.tap(find.text('1')); // pushNamed('/A')
@@ -801,7 +804,10 @@ void main() {
     ));
     expect(semantics, includesNodeWith(
       label: 'Page 2',
-      flags: <SemanticsFlag>[SemanticsFlag.namesRoute],
+      flags: <SemanticsFlag>[
+        SemanticsFlag.namesRoute,
+        SemanticsFlag.isHeader,
+      ],
     ));
 
     await tester.tap(find.text('2')); // pushNamed('/B/C')
@@ -809,11 +815,16 @@ void main() {
     await tester.pump(const Duration(seconds: 1));
 
     expect(semantics, includesNodeWith(
-      flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
+      flags: <SemanticsFlag>[
+        SemanticsFlag.scopesRoute,
+      ],
     ));
     expect(semantics, includesNodeWith(
       label: 'Page 3',
-      flags: <SemanticsFlag>[SemanticsFlag.namesRoute],
+      flags: <SemanticsFlag>[
+        SemanticsFlag.namesRoute,
+        SemanticsFlag.isHeader,
+      ],
     ));
 
 

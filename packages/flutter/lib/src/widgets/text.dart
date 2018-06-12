@@ -206,6 +206,7 @@ class Text extends StatelessWidget {
     this.style,
     this.textAlign,
     this.textDirection,
+    this.locale,
     this.softWrap,
     this.overflow,
     this.textScaleFactor,
@@ -220,6 +221,7 @@ class Text extends StatelessWidget {
     this.style,
     this.textAlign,
     this.textDirection,
+    this.locale,
     this.softWrap,
     this.overflow,
     this.textScaleFactor,
@@ -263,6 +265,15 @@ class Text extends StatelessWidget {
   /// Defaults to the ambient [Directionality], if any.
   final TextDirection textDirection;
 
+  /// Used to select a font when the same Unicode character can
+  /// be rendered differently, depending on the locale.
+  ///
+  /// It's rarely necessary to set this property. By default its value
+  /// is inherited from the enclosing app with `Localizations.localeOf(context)`.
+  ///
+  /// See [RenderParagraph.locale] for more information.
+  final Locale locale;
+
   /// Whether the text should break at soft line breaks.
   ///
   /// If false, the glyphs in the text will be positioned as if there was unlimited horizontal space.
@@ -303,6 +314,7 @@ class Text extends StatelessWidget {
     return new RichText(
       textAlign: textAlign ?? defaultTextStyle.textAlign ?? TextAlign.start,
       textDirection: textDirection, // RichText uses Directionality.of to obtain a default if this is null.
+      locale: locale, // RichText uses Localizations.localeOf to obtain a default if this is null
       softWrap: softWrap ?? defaultTextStyle.softWrap,
       overflow: overflow ?? defaultTextStyle.overflow,
       textScaleFactor: textScaleFactor ?? MediaQuery.textScaleFactorOf(context),
@@ -325,6 +337,7 @@ class Text extends StatelessWidget {
     style?.debugFillProperties(properties);
     properties.add(new EnumProperty<TextAlign>('textAlign', textAlign, defaultValue: null));
     properties.add(new EnumProperty<TextDirection>('textDirection', textDirection, defaultValue: null));
+    properties.add(new DiagnosticsProperty<Locale>('locale', locale, defaultValue: null));
     properties.add(new FlagProperty('softWrap', value: softWrap, ifTrue: 'wrapping at box width', ifFalse: 'no wrapping except at line break characters', showName: true));
     properties.add(new EnumProperty<TextOverflow>('overflow', overflow, defaultValue: null));
     properties.add(new DoubleProperty('textScaleFactor', textScaleFactor, defaultValue: null));

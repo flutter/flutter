@@ -84,14 +84,14 @@ class ScaleEndDetails {
 
 /// Signature for when the pointers in contact with the screen have established
 /// a focal point and initial scale of 1.0.
-typedef void GestureScaleStartCallback(ScaleStartDetails details);
+typedef GestureScaleStartCallback = void Function(ScaleStartDetails details);
 
 /// Signature for when the pointers in contact with the screen have indicated a
 /// new focal point and/or scale.
-typedef void GestureScaleUpdateCallback(ScaleUpdateDetails details);
+typedef GestureScaleUpdateCallback = void Function(ScaleUpdateDetails details);
 
 /// Signature for when the pointers are no longer in contact with the screen.
-typedef void GestureScaleEndCallback(ScaleEndDetails details);
+typedef GestureScaleEndCallback = void Function(ScaleEndDetails details);
 
 bool _isFlingGesture(Velocity velocity) {
   assert(velocity != null);

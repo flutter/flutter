@@ -73,9 +73,9 @@ class DaemonCommand extends FlutterCommand {
   }
 }
 
-typedef void DispatchCommand(Map<String, dynamic> command);
+typedef DispatchCommand = void Function(Map<String, dynamic> command);
 
-typedef Future<dynamic> CommandHandler(Map<String, dynamic> args);
+typedef CommandHandler = Future<dynamic> Function(Map<String, dynamic> args);
 
 class Daemon {
   Daemon(
@@ -334,7 +334,6 @@ class AppDomain extends Domain {
     final BuildInfo buildInfo = new BuildInfo(
       getBuildModeForName(mode) ?? BuildMode.debug,
       flavor,
-      previewDart2: _getBoolArg(args, 'preview-dart-2'),
     );
     DebuggingOptions options;
     if (buildInfo.isRelease) {
@@ -385,7 +384,6 @@ class AppDomain extends Domain {
 
     final FlutterDevice flutterDevice = new FlutterDevice(
       device,
-      previewDart2: options.buildInfo.previewDart2,
       trackWidgetCreation: trackWidgetCreation,
       dillOutputPath: dillOutputPath,
     );
@@ -565,7 +563,7 @@ class AppDomain extends Domain {
   }
 }
 
-typedef void _DeviceEventHandler(Device device);
+typedef _DeviceEventHandler = void Function(Device device);
 
 /// This domain lets callers list and monitor connected devices.
 ///
