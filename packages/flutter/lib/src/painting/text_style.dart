@@ -246,6 +246,8 @@ class TextStyle extends Diagnosticable {
     String package,
   }) : fontFamily = package == null ? fontFamily : 'packages/$package/$fontFamily',
        assert(inherit != null),
+       // TODO(dnfield): once https://github.com/dart-lang/sdk/issues/33408 is finished, this can be replaced with
+       // assert(color == null || foreground == null, _kColorForegroundWarning);
        assert(identical(color, null) || identical(foreground, null), _kColorForegroundWarning);
 
 
@@ -259,8 +261,8 @@ class TextStyle extends Diagnosticable {
 
   /// The color to use when painting the text.
   /// 
-  ///  If [foreground] is specified, this value must be null.  [color] is shorthand for
-  /// `new Paint()..color = color`.
+  /// If [foreground] is specified, this value must be null. The [color] property
+  /// is shorthand for `new Paint()..color = color`.
   ///   
   /// In [merge], [apply], and [lerp], conflicts between [color] and [foreground]
   /// specification are resolved in [foreground]'s favor - i.e. if [foreground] is
@@ -330,8 +332,8 @@ class TextStyle extends Diagnosticable {
   /// will appear like the style changed, which will result in unnecessary
   /// updates all the way through the framework.
   /// 
-  /// If [color] is specified, this value must be null.  [color] is shorthand for
-  /// `new Paint()..color = color`.
+  /// If [color] is specified, this value must be null. The [color] property
+  /// is shorthand for `new Paint()..color = color`.
   /// 
   /// In [merge], [apply], and [lerp], conflicts between [color] and [foreground]
   /// specification are resolved in [foreground]'s favor - i.e. if [foreground] is
@@ -475,7 +477,6 @@ class TextStyle extends Diagnosticable {
     assert(heightFactor != null);
     assert(heightDelta != null);
     assert(heightFactor != null || (heightFactor == 1.0 && heightDelta == 0.0));
-    assert(color == null || foreground == null, _kColorForegroundWarning);
 
     String modifiedDebugLabel;
     assert(() {
@@ -496,7 +497,7 @@ class TextStyle extends Diagnosticable {
       textBaseline: textBaseline,
       height: height == null ? null : height * heightFactor + heightDelta,
       locale: locale,
-      foreground: color == null ? foreground : null,
+      foreground: foreground != null ? foreground : null,
       background: background,
       decoration: decoration ?? this.decoration,
       decorationColor: decorationColor ?? this.decorationColor,
@@ -520,8 +521,8 @@ class TextStyle extends Diagnosticable {
   ///
   /// If the given text style is null, returns this text style.
   /// 
-  /// Resolution of conflicts between [color] and [foreground] are handled as in
-  /// [copyWith].
+  /// One of [color] or [foreground] must be null, and if this or `other` has
+  /// [foreground] specified it will be given preference over any color parameter.
   TextStyle merge(TextStyle other) {
     if (other == null)
       return this;
@@ -645,8 +646,8 @@ class TextStyle extends Diagnosticable {
       locale: t < 0.5 ? a.locale : b.locale,
       foreground: (a.foreground != null || b.foreground != null)
         ? t < 0.5 
-          ? (a.foreground ?? new Paint()..color = a.color)
-          : (b.foreground ?? new Paint()..color = b.color)
+          ? a.foreground ?? (new Paint()..color = a.color)
+          : b.foreground ?? (new Paint()..color = b.color)
         : null,
       background: t < 0.5 ? a.background : b.background,
       decoration: t < 0.5 ? a.decoration : b.decoration,
@@ -845,9 +846,9 @@ class TextStyle extends Diagnosticable {
     styles.add(new DoubleProperty('${prefix}wordSpacing', wordSpacing, defaultValue: null));
     styles.add(new EnumProperty<TextBaseline>('${prefix}baseline', textBaseline, defaultValue: null));
     styles.add(new DoubleProperty('${prefix}height', height, unit: 'x', defaultValue: null));
-    styles.add(new StringProperty('${prefix}locale', locale?.toString(), defaultValue: null, quoted: false));
-    styles.add(new StringProperty('${prefix}foreground', foreground?.toString(), defaultValue: null, quoted: false));
-    styles.add(new StringProperty('${prefix}background', background?.toString(), defaultValue: null, quoted: false));
+    styles.add(new DiagnosticsProperty<Locale>('${prefix}locale', locale, defaultValue: null));
+    styles.add(new DiagnosticsProperty<Paint>('${prefix}foreground', foreground, defaultValue: null));
+    styles.add(new DiagnosticsProperty<Paint>('${prefix}background', background, defaultValue: null));
     if (decoration != null || decorationColor != null || decorationStyle != null) {
       final List<String> decorationDescription = <String>[];
       if (decorationStyle != null)
