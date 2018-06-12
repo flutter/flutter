@@ -875,7 +875,8 @@ class Scaffold extends StatefulWidget {
   ///
   /// The value of [bottomSheet] can be any widget at all. It's unlikely to
   /// actually be a [BottomSheet], which is used by the implementations of
-  /// [showBottomSheet] and [showModalBottomSheet].
+  /// [showBottomSheet] and [showModalBottomSheet]. Typically it's a widget
+  /// that includes [Material].
   ///
   /// See also:
   ///
@@ -1247,11 +1248,14 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
 
   void _maybeBuildCurrentBottomSheet() {
     if (widget.bottomSheet != null) {
-      final AnimationController controller = BottomSheet.createAnimationController(this)
-        ..value = 1.0;
       // The new _currentBottomSheet is not a local history entry so a "back" button
-      // will not be added to the Scaffold's appbar.
-      _currentBottomSheet = _buildBottomSheet<void>((BuildContext context) => widget.bottomSheet, controller, false);
+      // will not be added to the Scaffold's appbar and the bottom sheet will not
+      // support drag or swipe to dismiss.
+      _currentBottomSheet = _buildBottomSheet<void>(
+        (BuildContext context) => widget.bottomSheet,
+        BottomSheet.createAnimationController(this) ..value = 1.0,
+        false,
+      );
     }
   }
 
@@ -1286,6 +1290,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
     bottomSheet = new _PersistentBottomSheet(
       key: bottomSheetKey,
       animationController: controller,
+      enableDrag: isLocalHistoryEntry,
       onClosing: () {
         assert(_currentBottomSheet._widget == bottomSheet);
         if (isLocalHistoryEntry)
@@ -1439,9 +1444,9 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
       assert(() {
         if (widget.bottomSheet != null && _currentBottomSheet?._isLocalHistoryEntry == true) {
           throw new FlutterError(
-            'Scaffold.bottomSheet cannot be specified while a bottom sheet displayed\n'
-            'with showBottomSheet() is still visible. Use the PersistentBottomSheetController\n'
-            'returned by showBottomSheet() to close the old bottom sheet before creating\n'
+            'Scaffold.bottomSheet cannot be specified while a bottom sheet displayed '
+            'with showBottomSheet() is still visible.\n Use the PersistentBottomSheetController '
+            'returned by showBottomSheet() to close the old bottom sheet before creating '
             'a Scaffold with a (non null) bottomSheet.'
           );
         }
@@ -1742,12 +1747,14 @@ class _PersistentBottomSheet extends StatefulWidget {
   const _PersistentBottomSheet({
     Key key,
     this.animationController,
+    this.enableDrag = true,
     this.onClosing,
     this.onDismissed,
     this.builder
   }) : super(key: key);
 
   final AnimationController animationController; // we control it, but it must be disposed by whoever created it
+  final bool enableDrag;
   final VoidCallback onClosing;
   final VoidCallback onDismissed;
   final WidgetBuilder builder;
@@ -1795,6 +1802,7 @@ class _PersistentBottomSheetState extends State<_PersistentBottomSheet> {
         container: true,
         child: new BottomSheet(
           animationController: widget.animationController,
+          enableDrag: widget.enableDrag,
           onClosing: widget.onClosing,
           builder: widget.builder
         )

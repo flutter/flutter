@@ -50,9 +50,11 @@ class BottomSheet extends StatefulWidget {
   const BottomSheet({
     Key key,
     this.animationController,
+    this.enableDrag = true,
     @required this.onClosing,
     @required this.builder
-  }) : assert(onClosing != null),
+  }) : assert(enableDrag != null),
+       assert(onClosing != null),
        assert(builder != null),
        super(key: key);
 
@@ -74,6 +76,12 @@ class BottomSheet extends StatefulWidget {
   /// The bottom sheet will wrap the widget produced by this builder in a
   /// [Material] widget.
   final WidgetBuilder builder;
+
+  /// If true, the bottom sheet can dragged up and down and dismissed by swiping
+  /// downards.
+  ///
+  /// Default is true.
+  final bool enableDrag;
 
   @override
   _BottomSheetState createState() => new _BottomSheetState();
@@ -125,13 +133,14 @@ class _BottomSheetState extends State<BottomSheet> {
 
   @override
   Widget build(BuildContext context) {
-    return new GestureDetector(
+    final Widget bottomSheet = new Material(
+      key: _childKey,
+      child: widget.builder(context),
+    );
+    return !widget.enableDrag ? bottomSheet : new GestureDetector(
       onVerticalDragUpdate: _handleDragUpdate,
       onVerticalDragEnd: _handleDragEnd,
-      child: new Material(
-        key: _childKey,
-        child: widget.builder(context)
-      )
+      child: bottomSheet,
     );
   }
 }
