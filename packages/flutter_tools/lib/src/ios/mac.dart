@@ -98,7 +98,7 @@ class IMobileDevice {
   Future<Process> startLogger() => runCommand(<String>['idevicesyslog']);
 
   /// Captures a screenshot to the specified outputFile.
-  Future<Null> takeScreenshot(File outputFile) {
+  Future<void> takeScreenshot(File outputFile) {
     return runCheckedAsync(<String>['idevicescreenshot', outputFile.path]);
   }
 }
