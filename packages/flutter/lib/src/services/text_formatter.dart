@@ -53,7 +53,7 @@ abstract class TextInputFormatter {
 
 /// Function signature expected for creating custom [TextInputFormatter]
 /// shorthands via [TextInputFormatter.withFunction];
-typedef TextEditingValue TextInputFormatFunction(
+typedef TextInputFormatFunction = TextEditingValue Function(
     TextEditingValue oldValue,
     TextEditingValue newValue,
 );
@@ -95,7 +95,7 @@ class BlacklistingTextInputFormatter extends TextInputFormatter {
   /// The [blacklistedPattern] must not be null.
   BlacklistingTextInputFormatter(
     this.blacklistedPattern, {
-    this.replacementString: '',
+    this.replacementString = '',
   }) : assert(blacklistedPattern != null);
 
   /// A [Pattern] to match and replace incoming [TextEditingValue]s.

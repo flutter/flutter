@@ -18,7 +18,7 @@ class ImageInfo {
   /// Creates an [ImageInfo] object for the given image and scale.
   ///
   /// Both the image and the scale must not be null.
-  const ImageInfo({ @required this.image, this.scale: 1.0 })
+  const ImageInfo({ @required this.image, this.scale = 1.0 })
       : assert(image != null),
         assert(scale != null);
 
@@ -66,7 +66,7 @@ class ImageInfo {
 /// frame is requested if the call was asynchronous (after the current frame)
 /// and no rendering frame is requested if the call was synchronous (within the
 /// same stack frame as the call to [ImageStream.addListener]).
-typedef void ImageListener(ImageInfo image, bool synchronousCall);
+typedef ImageListener = void Function(ImageInfo image, bool synchronousCall);
 
 /// A handle to an image resource.
 ///

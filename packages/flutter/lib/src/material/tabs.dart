@@ -174,7 +174,7 @@ class _TabStyle extends AnimatedWidget {
   }
 }
 
-typedef void _LayoutCallback(List<double> xOffsets, TextDirection textDirection, double width);
+typedef _LayoutCallback = void Function(List<double> xOffsets, TextDirection textDirection, double width);
 
 class _TabLabelBarRenderer extends RenderFlex {
   _TabLabelBarRenderer({
@@ -234,7 +234,7 @@ class _TabLabelBarRenderer extends RenderFlex {
 class _TabLabelBar extends Flex {
   _TabLabelBar({
     Key key,
-    List<Widget> children: const <Widget>[],
+    List<Widget> children = const <Widget>[],
     this.onPerformLayout,
   }) : super(
     key: key,
@@ -526,10 +526,10 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
     Key key,
     @required this.tabs,
     this.controller,
-    this.isScrollable: false,
+    this.isScrollable = false,
     this.indicatorColor,
-    this.indicatorWeight: 2.0,
-    this.indicatorPadding: EdgeInsets.zero,
+    this.indicatorWeight = 2.0,
+    this.indicatorPadding = EdgeInsets.zero,
     this.indicator,
     this.indicatorSize,
     this.labelColor,
@@ -1222,7 +1222,7 @@ class TabPageSelector extends StatelessWidget {
   const TabPageSelector({
     Key key,
     this.controller,
-    this.indicatorSize: 12.0,
+    this.indicatorSize = 12.0,
     this.color,
     this.selectedColor,
   }) : assert(indicatorSize != null && indicatorSize > 0.0), super(key: key);

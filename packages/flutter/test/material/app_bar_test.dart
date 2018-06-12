@@ -8,7 +8,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 import '../widgets/semantics_tester.dart';
 
-Widget buildSliverAppBarApp({ bool floating, bool pinned, double expandedHeight, bool snap: false }) {
+Widget buildSliverAppBarApp({ bool floating, bool pinned, double expandedHeight, bool snap = false }) {
   return new Localizations(
     locale: const Locale('en', 'US'),
     delegates: const <LocalizationsDelegate<dynamic>>[
@@ -1214,7 +1214,10 @@ void main() {
                         textDirection: TextDirection.ltr,
                       ),
                       new TestSemantics(
-                        flags: <SemanticsFlag>[SemanticsFlag.namesRoute],
+                        flags: <SemanticsFlag>[
+                          SemanticsFlag.namesRoute,
+                          SemanticsFlag.isHeader,
+                        ],
                         label: 'Title',
                         textDirection: TextDirection.ltr,
                       ),
@@ -1297,7 +1300,10 @@ void main() {
                             textDirection: TextDirection.rtl,
                           ),
                           new TestSemantics(
-                            flags: <SemanticsFlag>[SemanticsFlag.namesRoute],
+                            flags: <SemanticsFlag>[
+                              SemanticsFlag.namesRoute,
+                              SemanticsFlag.isHeader,
+                            ],
                             label: 'Title',
                             textDirection: TextDirection.rtl,
                           ),

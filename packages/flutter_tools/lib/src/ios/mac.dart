@@ -190,8 +190,8 @@ Future<XcodeBuildResult> buildXcodeProject({
   BuildInfo buildInfo,
   String targetOverride,
   bool buildForDevice,
-  bool codesign: true,
-  bool usesTerminalUi: true,
+  bool codesign = true,
+  bool usesTerminalUi = true,
 }) async {
   if (!await upgradePbxProjWithFlutterAssets(app.name, app.appDirectory))
     return new XcodeBuildResult(success: false);
@@ -242,11 +242,10 @@ Future<XcodeBuildResult> buildXcodeProject({
   final Directory appDirectory = fs.directory(app.appDirectory);
   await _addServicesToBundle(appDirectory);
 
-  updateGeneratedXcodeProperties(
+  await updateGeneratedXcodeProperties(
     projectPath: fs.currentDirectory.path,
     buildInfo: buildInfo,
     targetOverride: targetOverride,
-    previewDart2: buildInfo.previewDart2,
   );
 
   if (hasPlugins()) {
@@ -270,53 +269,6 @@ Future<XcodeBuildResult> buildXcodeProject({
     );
     if (didPodInstall)
       await fingerprinter.writeFingerprint();
-  }
-
-  // If buildNumber is not specified, keep the project untouched.
-  if (buildInfo.buildNumber != null) {
-    final Status buildNumberStatus =
-        logger.startProgress('Setting CFBundleVersion...', expectSlowOperation: true);
-    try {
-      final RunResult buildNumberResult = await runAsync(
-        <String>[
-          '/usr/bin/env',
-          'xcrun',
-          'agvtool',
-          'new-version',
-          '-all',
-          buildInfo.buildNumber.toString(),
-        ],
-        workingDirectory: app.appDirectory,
-      );
-      if (buildNumberResult.exitCode != 0) {
-        throwToolExit('Xcode failed to set new version\n${buildNumberResult.stderr}');
-      }
-    } finally {
-      buildNumberStatus.stop();
-    }
-  }
-
-  // If buildName is not specified, keep the project untouched.
-  if (buildInfo.buildName != null) {
-    final Status buildNameStatus =
-        logger.startProgress('Setting CFBundleShortVersionString...', expectSlowOperation: true);
-    try {
-      final RunResult buildNameResult = await runAsync(
-        <String>[
-          '/usr/bin/env',
-          'xcrun',
-          'agvtool',
-          'new-marketing-version',
-          buildInfo.buildName,
-        ],
-        workingDirectory: app.appDirectory,
-      );
-      if (buildNameResult.exitCode != 0) {
-        throwToolExit('Xcode failed to set new marketing version\n${buildNameResult.stderr}');
-      }
-    } finally {
-      buildNameStatus.stop();
-    }
   }
 
   final List<String> buildCommands = <String>[
@@ -475,7 +427,7 @@ Future<XcodeBuildResult> buildXcodeProject({
       outputDir = expectedOutputDirectory.replaceFirst('/$configuration-', '/');
       if (fs.isDirectorySync(outputDir)) {
         // Previous output directory might have incompatible artifacts
-        // (for example, kernel binary files produced from previous `--preview-dart-2` run).
+        // (for example, kernel binary files produced from previous run).
         fs.directory(outputDir).deleteSync(recursive: true);
       }
       copyDirectorySync(fs.directory(expectedOutputDirectory), fs.directory(outputDir));

@@ -22,7 +22,7 @@ class Form extends StatefulWidget {
   const Form({
     Key key,
     @required this.child,
-    this.autovalidate: false,
+    this.autovalidate = false,
     this.onWillPop,
     this.onChanged,
   }) : assert(child != null),
@@ -183,17 +183,17 @@ class _FormScope extends InheritedWidget {
 /// Signature for validating a form field.
 ///
 /// Used by [FormField.validator].
-typedef String FormFieldValidator<T>(T value);
+typedef FormFieldValidator<T> = String Function(T value);
 
 /// Signature for being notified when a form field changes value.
 ///
 /// Used by [FormField.onSaved].
-typedef void FormFieldSetter<T>(T newValue);
+typedef FormFieldSetter<T> = void Function(T newValue);
 
 /// Signature for building the widget representing the form field.
 ///
 /// Used by [FormField.builder].
-typedef Widget FormFieldBuilder<T>(FormFieldState<T> field);
+typedef FormFieldBuilder<T> = Widget Function(FormFieldState<T> field);
 
 /// A single form field.
 ///
@@ -226,7 +226,7 @@ class FormField<T> extends StatefulWidget {
     this.onSaved,
     this.validator,
     this.initialValue,
-    this.autovalidate: false,
+    this.autovalidate = false,
   }) : assert(builder != null),
        super(key: key);
 

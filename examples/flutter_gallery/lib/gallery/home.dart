@@ -28,7 +28,7 @@ class _FlutterLogo extends StatelessWidget {
         decoration: const BoxDecoration(
           image: const DecorationImage(
             image: const AssetImage(
-              'white_logo/logo.png',
+              'logos/flutter_white/logo.png',
               package: _kGalleryAssetsPackage,
             ),
           ),
@@ -270,7 +270,7 @@ class GalleryHome extends StatefulWidget {
 
   const GalleryHome({
     Key key,
-    this.testMode: false,
+    this.testMode = false,
     this.optionsPage,
   }) : super(key: key);
 

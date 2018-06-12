@@ -70,14 +70,14 @@ class FloatingActionButton extends StatefulWidget {
     this.tooltip,
     this.foregroundColor,
     this.backgroundColor,
-    this.heroTag: const _DefaultHeroTag(),
-    this.elevation: 6.0,
-    this.highlightElevation: 12.0,
+    this.heroTag = const _DefaultHeroTag(),
+    this.elevation = 6.0,
+    this.highlightElevation = 12.0,
     @required this.onPressed,
-    this.mini: false,
-    this.notchMargin: 4.0,
-    this.shape: const CircleBorder(),
-    this.isExtended: false,
+    this.mini = false,
+    this.notchMargin = 4.0,
+    this.shape = const CircleBorder(),
+    this.isExtended = false,
   }) :  assert(elevation != null),
         assert(highlightElevation != null),
         assert(mini != null),
@@ -97,13 +97,13 @@ class FloatingActionButton extends StatefulWidget {
     this.tooltip,
     this.foregroundColor,
     this.backgroundColor,
-    this.heroTag: const _DefaultHeroTag(),
-    this.elevation: 6.0,
-    this.highlightElevation: 12.0,
+    this.heroTag = const _DefaultHeroTag(),
+    this.elevation = 6.0,
+    this.highlightElevation = 12.0,
     @required this.onPressed,
-    this.notchMargin: 4.0,
-    this.shape: const StadiumBorder(),
-    this.isExtended: true,
+    this.notchMargin = 4.0,
+    this.shape = const StadiumBorder(),
+    this.isExtended = true,
     @required Widget icon,
     @required Widget label,
   }) :  assert(elevation != null),
@@ -187,7 +187,8 @@ class FloatingActionButton extends StatefulWidget {
   ///
   /// By default, floating action buttons are non-mini and have a height and
   /// width of 56.0 logical pixels. Mini floating action buttons have a height
-  /// and width of 40.0 logical pixels.
+  /// and width of 40.0 logical pixels with a layout width and height of 48.0
+  /// logical pixels.
   final bool mini;
 
   /// The margin to keep around the floating action button when creating a
@@ -267,6 +268,7 @@ class _FloatingActionButtonState extends State<FloatingActionButton> {
       onHighlightChanged: _handleHighlightChanged,
       elevation: _highlight ? widget.highlightElevation : widget.elevation,
       constraints: widget._sizeConstraints,
+      outerPadding: widget.mini ? const EdgeInsets.all(4.0) : null,
       fillColor: widget.backgroundColor ?? theme.accentColor,
       textStyle: theme.accentTextTheme.button.copyWith(
         color: foregroundColor,

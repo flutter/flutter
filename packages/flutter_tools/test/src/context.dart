@@ -36,13 +36,13 @@ BufferLogger get testLogger => context[Logger];
 MockDeviceManager get testDeviceManager => context[DeviceManager];
 MockDoctor get testDoctor => context[Doctor];
 
-typedef void ContextInitializer(AppContext testContext);
+typedef ContextInitializer = void Function(AppContext testContext);
 
 @isTest
 void testUsingContext(String description, dynamic testMethod(), {
   Timeout timeout,
-  Map<Type, Generator> overrides: const <Type, Generator>{},
-  bool initializeFlutterRoot: true,
+  Map<Type, Generator> overrides = const <Type, Generator>{},
+  bool initializeFlutterRoot = true,
   String testOn,
   bool skip, // should default to `false`, but https://github.com/dart-lang/test/issues/545 doesn't allow this
 }) {

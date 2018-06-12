@@ -233,13 +233,13 @@ class Uuid {
 
 Clock get clock => context[Clock];
 
-typedef Future<Null> AsyncCallback();
+typedef AsyncCallback = Future<Null> Function();
 
 /// A [Timer] inspired class that:
 ///   - has a different initial value for the first callback delay
 ///   - waits for a callback to be complete before it starts the next timer
 class Poller {
-  Poller(this.callback, this.pollingInterval, { this.initialDelay: Duration.zero }) {
+  Poller(this.callback, this.pollingInterval, { this.initialDelay = Duration.zero }) {
     new Future<Null>.delayed(initialDelay, _handleCallback);
   }
 

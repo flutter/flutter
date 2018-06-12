@@ -12,7 +12,7 @@ import 'binding.dart';
 ///
 /// The argument is the time that the object had spent enabled so far
 /// at the time of the callback being called.
-typedef void TickerCallback(Duration elapsed);
+typedef TickerCallback = void Function(Duration elapsed);
 
 /// An interface implemented by classes that can vend [Ticker] objects.
 ///
@@ -178,7 +178,7 @@ class Ticker {
   ///
   /// By convention, this method is used by the object that receives the ticks
   /// (as opposed to the [TickerProvider] which created the ticker).
-  void stop({ bool canceled: false }) {
+  void stop({ bool canceled = false }) {
     if (!isActive)
       return;
 
@@ -238,7 +238,7 @@ class Ticker {
   ///
   /// This should only be called if [shouldScheduleTick] is true.
   @protected
-  void scheduleTick({ bool rescheduling: false }) {
+  void scheduleTick({ bool rescheduling = false }) {
     assert(!scheduled);
     assert(shouldScheduleTick);
     _animationId = SchedulerBinding.instance.scheduleFrameCallback(_tick, rescheduling: rescheduling);
@@ -312,7 +312,7 @@ class Ticker {
   StackTrace _debugCreationStack;
 
   @override
-  String toString({ bool debugIncludeStack: false }) {
+  String toString({ bool debugIncludeStack = false }) {
     final StringBuffer buffer = new StringBuffer();
     buffer.write('$runtimeType(');
     assert(() {

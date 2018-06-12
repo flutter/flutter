@@ -53,10 +53,6 @@ class FuchsiaReloadCommand extends FlutterCommand {
     argParser.addOption('name-override',
       abbr: 'n',
       help: 'On-device name of the application binary.');
-    argParser.addFlag('preview-dart-2',
-      abbr: '2',
-      defaultsTo: false,
-      help: 'Preview Dart 2.0 functionality.');
     argParser.addOption('target',
       abbr: 't',
       defaultsTo: bundle.defaultMainPath,
@@ -132,13 +128,8 @@ class FuchsiaReloadCommand extends FlutterCommand {
       final List<Uri> observatoryUris = fullAddresses.map(
         (String a) => Uri.parse('http://$a')
       ).toList();
-      final FuchsiaDevice device = new FuchsiaDevice(
-          fullAddresses[0], name: _address);
-      final FlutterDevice flutterDevice = new FlutterDevice(
-        device,
-        trackWidgetCreation: false,
-        previewDart2: false,
-      );
+      final FuchsiaDevice device = new FuchsiaDevice(fullAddresses[0], name: _address);
+      final FlutterDevice flutterDevice = new FlutterDevice(device, trackWidgetCreation: false);
       flutterDevice.observatoryUris = observatoryUris;
       final HotRunner hotRunner = new HotRunner(
         <FlutterDevice>[flutterDevice],
@@ -196,7 +187,7 @@ class FuchsiaReloadCommand extends FlutterCommand {
   static const String _bold = '\u001B[0;1m';
   static const String _reset = '\u001B[0m';
 
-  String _vmServiceToString(VMService vmService, {int tabDepth: 0}) {
+  String _vmServiceToString(VMService vmService, {int tabDepth = 0}) {
     final Uri addr = vmService.httpAddress;
     final String embedder = vmService.vm.embedder;
     final int numIsolates = vmService.vm.isolates.length;
@@ -237,7 +228,7 @@ class FuchsiaReloadCommand extends FlutterCommand {
     return stringBuffer.toString();
   }
 
-  String _isolateToString(Isolate isolate, {int tabDepth: 0}) {
+  String _isolateToString(Isolate isolate, {int tabDepth = 0}) {
     final Uri vmServiceAddr = isolate.owner.vmService.httpAddress;
     final String name = isolate.name;
     final String shortName = name.substring(0, name.indexOf('\$'));

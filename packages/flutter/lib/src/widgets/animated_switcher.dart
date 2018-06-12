@@ -43,7 +43,7 @@ class _AnimatedSwitcherChildEntry {
 ///
 /// The function should return a widget which wraps the given `child`. It may
 /// also use the `animation` to inform its transition. It must not return null.
-typedef Widget AnimatedSwitcherTransitionBuilder(Widget child, Animation<double> animation);
+typedef AnimatedSwitcherTransitionBuilder = Widget Function(Widget child, Animation<double> animation);
 
 /// Signature for builders used to generate custom layouts for
 /// [AnimatedSwitcher].
@@ -55,7 +55,7 @@ typedef Widget AnimatedSwitcherTransitionBuilder(Widget child, Animation<double>
 /// The `previousChildren` list is an unmodifiable list, sorted with the oldest
 /// at the beginning and the newest at the end. It does not include the
 /// `currentChild`.
-typedef Widget AnimatedSwitcherLayoutBuilder(Widget currentChild, List<Widget> previousChildren);
+typedef AnimatedSwitcherLayoutBuilder = Widget Function(Widget currentChild, List<Widget> previousChildren);
 
 /// A widget that by default does a [FadeTransition] between a new widget and
 /// the widget previously set on the [AnimatedSwitcher] as a child.
@@ -136,10 +136,10 @@ class AnimatedSwitcher extends StatefulWidget {
     Key key,
     this.child,
     @required this.duration,
-    this.switchInCurve: Curves.linear,
-    this.switchOutCurve: Curves.linear,
-    this.transitionBuilder: AnimatedSwitcher.defaultTransitionBuilder,
-    this.layoutBuilder: AnimatedSwitcher.defaultLayoutBuilder,
+    this.switchInCurve = Curves.linear,
+    this.switchOutCurve = Curves.linear,
+    this.transitionBuilder = AnimatedSwitcher.defaultTransitionBuilder,
+    this.layoutBuilder = AnimatedSwitcher.defaultLayoutBuilder,
   })  : assert(duration != null),
         assert(switchInCurve != null),
         assert(switchOutCurve != null),
@@ -247,7 +247,7 @@ class _AnimatedSwitcherState extends State<AnimatedSwitcher> with TickerProvider
   }) {
     final _AnimatedSwitcherChildEntry entry = new _AnimatedSwitcherChildEntry(
       widgetChild: widget.child,
-      transition: KeyedSubtree.wrap(
+      transition: new KeyedSubtree.wrap(
         widget.transitionBuilder(
           widget.child,
           animation,

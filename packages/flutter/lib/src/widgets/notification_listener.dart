@@ -10,7 +10,7 @@ import 'framework.dart';
 /// notification to continue to be dispatched to further ancestors.
 ///
 /// Used by [NotificationListener.onNotification].
-typedef bool NotificationListenerCallback<T extends Notification>(T notification);
+typedef NotificationListenerCallback<T extends Notification> = bool Function(T notification);
 
 /// A notification that can bubble up the widget tree.
 ///

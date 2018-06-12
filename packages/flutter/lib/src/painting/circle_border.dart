@@ -25,7 +25,7 @@ class CircleBorder extends ShapeBorder {
   /// Create a circle border.
   ///
   /// The [side] argument must not be null.
-  const CircleBorder({ this.side: BorderSide.none }) : assert(side != null);
+  const CircleBorder({ this.side = BorderSide.none }) : assert(side != null);
 
   /// The style of this border.
   final BorderSide side;

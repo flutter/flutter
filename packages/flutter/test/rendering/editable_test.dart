@@ -14,6 +14,7 @@ void main() {
       ),
       textAlign: TextAlign.start,
       textDirection: TextDirection.ltr,
+      locale: const Locale('ja', 'JP'),
       offset: new ViewportOffset.zero(),
     );
     expect(editable.getMinIntrinsicWidth(double.infinity), 50.0);
@@ -33,6 +34,7 @@ void main() {
         ' │ maxLines: 1\n'
         ' │ selectionColor: null\n'
         ' │ textScaleFactor: 1.0\n'
+        ' │ locale: ja_JP\n'
         ' │ selection: null\n'
         ' │ offset: _FixedViewportOffset#00000(offset: 0.0)\n'
         ' ╘═╦══ text ═══\n'

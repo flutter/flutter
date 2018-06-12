@@ -13,11 +13,10 @@ import '../base/process_manager.dart';
 import '../globals.dart';
 
 class AnalysisServer {
-  AnalysisServer(this.sdkPath, this.directories, {this.previewDart2: false});
+  AnalysisServer(this.sdkPath, this.directories);
 
   final String sdkPath;
   final List<String> directories;
-  final bool previewDart2;
 
   Process _process;
   final StreamController<bool> _analyzingController =
@@ -35,13 +34,8 @@ class AnalysisServer {
       snapshot,
       '--sdk',
       sdkPath,
+      '--preview-dart-2',
     ];
-
-    if (previewDart2) {
-      command.add('--preview-dart-2');
-    } else {
-      command.add('--no-preview-dart-2');
-    }
 
     printTrace('dart ${command.skip(1).join(' ')}');
     _process = await processManager.start(command);

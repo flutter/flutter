@@ -47,6 +47,18 @@ IF NOT EXIST "%flutter_root%\.git" (
 REM Ensure that bin/cache exists.
 IF NOT EXIST "%cache_dir%" MKDIR "%cache_dir%"
 
+REM If the cache still doesn't exist, fail with an error that we probably don't have permissions.
+IF NOT EXIST "%cache_dir%" (
+  ECHO Error: Unable to create cache directory at
+  ECHO            %cache_dir%
+  ECHO.
+  ECHO        This may be because flutter doesn't have write permissions for
+  ECHO        this path. Try moving the flutter directory to a writable location,
+  ECHO        such as within your home directory.
+  EXIT /B 1
+)
+
+
 REM To debug the tool, you can uncomment the following lines to enable checked mode and set an observatory port:
 REM SET FLUTTER_TOOL_ARGS="--checked %FLUTTER_TOOL_ARGS%"
 REM SET FLUTTER_TOOL_ARGS="%FLUTTER_TOOL_ARGS% --observe=65432"

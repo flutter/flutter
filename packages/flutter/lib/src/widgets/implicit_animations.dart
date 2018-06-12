@@ -197,7 +197,7 @@ abstract class ImplicitlyAnimatedWidget extends StatefulWidget {
   /// The [curve] and [duration] arguments must not be null.
   const ImplicitlyAnimatedWidget({
     Key key,
-    this.curve: Curves.linear,
+    this.curve = Curves.linear,
     @required this.duration
   }) : assert(curve != null),
        assert(duration != null),
@@ -210,7 +210,7 @@ abstract class ImplicitlyAnimatedWidget extends StatefulWidget {
   final Duration duration;
 
   @override
-  AnimatedWidgetBaseState<ImplicitlyAnimatedWidget> createState();
+  ImplicitlyAnimatedWidgetState<ImplicitlyAnimatedWidget> createState();
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
@@ -223,17 +223,24 @@ abstract class ImplicitlyAnimatedWidget extends StatefulWidget {
 ///
 /// This is the type of one of the arguments of [TweenVisitor], the signature
 /// used by [AnimatedWidgetBaseState.forEachTween].
-typedef Tween<T> TweenConstructor<T>(T targetValue);
+typedef TweenConstructor<T> = Tween<T> Function(T targetValue);
 
 /// Signature for callbacks passed to [AnimatedWidgetBaseState.forEachTween].
-typedef Tween<T> TweenVisitor<T>(Tween<T> tween, T targetValue, TweenConstructor<T> constructor);
+typedef TweenVisitor<T> = Tween<T> Function(Tween<T> tween, T targetValue, TweenConstructor<T> constructor);
 
 /// A base class for widgets with implicit animations.
 ///
-/// Subclasses must implement the [forEachTween] method to help
-/// [AnimatedWidgetBaseState] iterate through the subclasses' widget's fields
-/// and animate them.
-abstract class AnimatedWidgetBaseState<T extends ImplicitlyAnimatedWidget> extends State<T> with SingleTickerProviderStateMixin {
+/// [ImplicitlyAnimatedWidgetState] requires that subclasses respond to the
+/// animation, themselves. If you would like `setState()` to be called
+/// automatically as the animation changes, use [AnimatedWidgetBaseState].
+///
+/// Subclasses must implement the [forEachTween] method to allow
+/// [ImplicitlyAnimatedWidgetState] to iterate through the subclasses' widget's
+/// fields and animate them.
+abstract class ImplicitlyAnimatedWidgetState<T extends ImplicitlyAnimatedWidget> extends State<T> with SingleTickerProviderStateMixin {
+  /// The animation controller driving this widget's implicit animations.
+  @protected
+  AnimationController get controller => _controller;
   AnimationController _controller;
 
   /// The animation driving this widget's implicit animations.
@@ -247,7 +254,7 @@ abstract class AnimatedWidgetBaseState<T extends ImplicitlyAnimatedWidget> exten
       duration: widget.duration,
       debugLabel: '${widget.toStringShort()}',
       vsync: this,
-    )..addListener(_handleAnimationChanged);
+    );
     _updateCurve();
     _constructTweens();
   }
@@ -280,10 +287,6 @@ abstract class AnimatedWidgetBaseState<T extends ImplicitlyAnimatedWidget> exten
   void dispose() {
     _controller.dispose();
     super.dispose();
-  }
-
-  void _handleAnimationChanged() {
-    setState(() { });
   }
 
   bool _shouldAnimateTween(Tween<dynamic> tween, dynamic targetValue) {
@@ -331,6 +334,28 @@ abstract class AnimatedWidgetBaseState<T extends ImplicitlyAnimatedWidget> exten
   void forEachTween(TweenVisitor<dynamic> visitor);
 }
 
+/// A base class for widgets with implicit animations that need to rebuild their
+/// widget tree as the animation runs.
+///
+/// This class calls [build] each frame that the animation tickets. For a
+/// variant that does not rebuild each frame, consider subclassing
+/// [ImplicitlyAnimatedWidgetState] directly.
+///
+/// Subclasses must implement the [forEachTween] method to allow
+/// [AnimatedWidgetBaseState] to iterate through the subclasses' widget's fields
+/// and animate them.
+abstract class AnimatedWidgetBaseState<T extends ImplicitlyAnimatedWidget> extends ImplicitlyAnimatedWidgetState<T> {
+  @override
+  void initState() {
+    super.initState();
+    controller.addListener(_handleAnimationChanged);
+  }
+
+  void _handleAnimationChanged() {
+    setState(() { /* The animation ticked. Rebuild with new animation value */ });
+  }
+}
+
 /// A container that gradually changes its values over a period of time.
 ///
 /// The [AnimatedContainer] will automatically animate between the old and
@@ -365,7 +390,7 @@ class AnimatedContainer extends ImplicitlyAnimatedWidget {
     this.margin,
     this.transform,
     this.child,
-    Curve curve: Curves.linear,
+    Curve curve = Curves.linear,
     @required Duration duration,
   }) : assert(margin == null || margin.isNonNegative),
        assert(padding == null || padding.isNonNegative),
@@ -515,7 +540,7 @@ class AnimatedPadding extends ImplicitlyAnimatedWidget {
     Key key,
     @required this.padding,
     this.child,
-    Curve curve: Curves.linear,
+    Curve curve = Curves.linear,
     @required Duration duration,
   }) : assert(padding != null),
        assert(padding.isNonNegative),
@@ -577,7 +602,7 @@ class AnimatedAlign extends ImplicitlyAnimatedWidget {
     Key key,
     @required this.alignment,
     this.child,
-    Curve curve: Curves.linear,
+    Curve curve = Curves.linear,
     @required Duration duration,
   }) : assert(alignment != null),
        super(key: key, curve: curve, duration: duration);
@@ -666,7 +691,7 @@ class AnimatedPositioned extends ImplicitlyAnimatedWidget {
     this.bottom,
     this.width,
     this.height,
-    Curve curve: Curves.linear,
+    Curve curve = Curves.linear,
     @required Duration duration,
   }) : assert(left == null || right == null || width == null),
        assert(top == null || bottom == null || height == null),
@@ -679,7 +704,7 @@ class AnimatedPositioned extends ImplicitlyAnimatedWidget {
     Key key,
     this.child,
     Rect rect,
-    Curve curve: Curves.linear,
+    Curve curve = Curves.linear,
     @required Duration duration
   }) : left = rect.left,
        top = rect.top,
@@ -806,7 +831,7 @@ class AnimatedPositionedDirectional extends ImplicitlyAnimatedWidget {
     this.bottom,
     this.width,
     this.height,
-    Curve curve: Curves.linear,
+    Curve curve = Curves.linear,
     @required Duration duration,
   }) : assert(start == null || end == null || width == null),
        assert(top == null || bottom == null || height == null),
@@ -950,7 +975,7 @@ class AnimatedOpacity extends ImplicitlyAnimatedWidget {
     Key key,
     this.child,
     @required this.opacity,
-    Curve curve: Curves.linear,
+    Curve curve = Curves.linear,
     @required Duration duration,
   }) : assert(opacity != null && opacity >= 0.0 && opacity <= 1.0),
        super(key: key, curve: curve, duration: duration);
@@ -1012,10 +1037,10 @@ class AnimatedDefaultTextStyle extends ImplicitlyAnimatedWidget {
     @required this.child,
     @required this.style,
     this.textAlign,
-    this.softWrap: true,
-    this.overflow: TextOverflow.clip,
+    this.softWrap = true,
+    this.overflow = TextOverflow.clip,
     this.maxLines,
-    Curve curve: Curves.linear,
+    Curve curve = Curves.linear,
     @required Duration duration,
   }) : assert(style != null),
        assert(child != null),
@@ -1118,13 +1143,13 @@ class AnimatedPhysicalModel extends ImplicitlyAnimatedWidget {
     Key key,
     @required this.child,
     @required this.shape,
-    this.borderRadius: BorderRadius.zero,
+    this.borderRadius = BorderRadius.zero,
     @required this.elevation,
     @required this.color,
-    this.animateColor: true,
+    this.animateColor = true,
     @required this.shadowColor,
-    this.animateShadowColor: true,
-    Curve curve: Curves.linear,
+    this.animateShadowColor = true,
+    Curve curve = Curves.linear,
     @required Duration duration,
   }) : assert(child != null),
        assert(shape != null),

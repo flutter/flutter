@@ -31,7 +31,7 @@ export 'dart:ui' show Locale;
 /// The `locale` is the device's locale when the app started, or the device
 /// locale the user selected after the app was started. The `supportedLocales`
 /// parameter is just the value of [WidgetsApp.supportedLocales].
-typedef Locale LocaleResolutionCallback(Locale locale, Iterable<Locale> supportedLocales);
+typedef LocaleResolutionCallback = Locale Function(Locale locale, Iterable<Locale> supportedLocales);
 
 /// The signature of [WidgetsApp.onGenerateTitle].
 ///
@@ -41,7 +41,7 @@ typedef Locale LocaleResolutionCallback(Locale locale, Iterable<Locale> supporte
 /// localized title.
 ///
 /// This function must not return null.
-typedef String GenerateAppTitle(BuildContext context);
+typedef GenerateAppTitle = String Function(BuildContext context);
 
 /// A convenience class that wraps a number of widgets that are commonly
 /// required for an application.
@@ -72,23 +72,23 @@ class WidgetsApp extends StatefulWidget {
     this.navigatorKey,
     this.onGenerateRoute,
     this.onUnknownRoute,
-    this.navigatorObservers: const <NavigatorObserver>[],
+    this.navigatorObservers = const <NavigatorObserver>[],
     this.initialRoute,
     this.builder,
-    this.title: '',
+    this.title = '',
     this.onGenerateTitle,
     this.textStyle,
     @required this.color,
     this.locale,
     this.localizationsDelegates,
     this.localeResolutionCallback,
-    this.supportedLocales: const <Locale>[const Locale('en', 'US')],
-    this.showPerformanceOverlay: false,
-    this.checkerboardRasterCacheImages: false,
-    this.checkerboardOffscreenLayers: false,
-    this.showSemanticsDebugger: false,
-    this.debugShowWidgetInspector: false,
-    this.debugShowCheckedModeBanner: true,
+    this.supportedLocales = const <Locale>[const Locale('en', 'US')],
+    this.showPerformanceOverlay = false,
+    this.checkerboardRasterCacheImages = false,
+    this.checkerboardOffscreenLayers = false,
+    this.showSemanticsDebugger = false,
+    this.debugShowWidgetInspector = false,
+    this.debugShowCheckedModeBanner = true,
     this.inspectorSelectButtonBuilder,
   }) : assert(navigatorObservers != null),
        assert(onGenerateRoute != null || navigatorKey == null),

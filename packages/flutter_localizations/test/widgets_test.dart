@@ -141,7 +141,7 @@ Widget buildFrame({
   Iterable<LocalizationsDelegate<dynamic>> delegates,
   WidgetBuilder buildContent,
   LocaleResolutionCallback localeResolutionCallback,
-  List<Locale> supportedLocales: const <Locale>[
+  List<Locale> supportedLocales = const <Locale>[
     const Locale('en', 'US'),
     const Locale('en', 'GB'),
   ],

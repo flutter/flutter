@@ -216,6 +216,89 @@ void main() {
       ProcessManager: () => mockProcessManager,
     });
   });
+
+  group('compile expression', ()
+  {
+    ProcessManager mockProcessManager;
+    ResidentCompiler generator;
+    MockProcess mockFrontendServer;
+    MockStdIn mockFrontendServerStdIn;
+    MockStream mockFrontendServerStdErr;
+    StreamController<String> stdErrStreamController;
+
+    setUp(() {
+      generator = new ResidentCompiler('sdkroot');
+      mockProcessManager = new MockProcessManager();
+      mockFrontendServer = new MockProcess();
+      mockFrontendServerStdIn = new MockStdIn();
+      mockFrontendServerStdErr = new MockStream();
+
+      when(mockFrontendServer.stdin).thenReturn(mockFrontendServerStdIn);
+      when(mockFrontendServer.stderr)
+          .thenAnswer((Invocation invocation) => mockFrontendServerStdErr);
+      stdErrStreamController = new StreamController<String>();
+      when(mockFrontendServerStdErr.transform<String>(any))
+          .thenAnswer((Invocation invocation) => stdErrStreamController.stream);
+
+      when(mockProcessManager.canRun(any)).thenReturn(true);
+      when(mockProcessManager.start(any)).thenAnswer(
+              (Invocation invocation) =>
+          new Future<Process>.value(mockFrontendServer)
+      );
+    });
+
+    tearDown(() {
+      verifyNever(mockFrontendServer.exitCode);
+    });
+
+    testUsingContext('fails if not previously compiled', () async {
+      final CompilerOutput result = await generator.compileExpression(
+          '2+2', null, null, null, null, false);
+      expect(result, isNull);
+    });
+
+    testUsingContext('compile single expression', () async {
+      final BufferLogger logger = context[Logger];
+
+      final Completer<List<int>> compileResponseCompleter =
+          new Completer<List<int>>();
+      final Completer<List<int>> compileExpressionResponseCompleter =
+          new Completer<List<int>>();
+
+      when(mockFrontendServer.stdout)
+          .thenAnswer((Invocation invocation) =>
+      new Stream<List<int>>.fromFutures(
+        <Future<List<int>>>[
+          compileResponseCompleter.future,
+          compileExpressionResponseCompleter.future]));
+
+      compileResponseCompleter.complete(new Future<List<int>>.value(utf8.encode(
+        'result abc\nline1\nline2\nabc /path/to/main.dart.dill 0\n'
+      )));
+
+      final CompilerOutput output = await generator.recompile(
+          '/path/to/main.dart', null /* invalidatedFiles */
+      );
+      expect(mockFrontendServerStdIn.getAndClear(),
+          'compile /path/to/main.dart\n');
+      verifyNoMoreInteractions(mockFrontendServerStdIn);
+      expect(logger.errorText,
+          equals('compiler message: line1\ncompiler message: line2\n'));
+      expect(output.outputFilename, equals('/path/to/main.dart.dill'));
+
+      compileExpressionResponseCompleter.complete(new Future<List<int>>.value(utf8.encode(
+          'result def\nline1\nline2\ndef /path/to/main.dart.dill.incremental 0\n'
+      )));
+
+      final CompilerOutput outputExpression = await generator.compileExpression(
+          '2+2', null, null, null, null, false);
+      expect(outputExpression, isNotNull);
+      expect(outputExpression.outputFilename, equals('/path/to/main.dart.dill.incremental'));
+      expect(outputExpression.errorCount, 0);
+    }, overrides: <Type, Generator>{
+      ProcessManager: () => mockProcessManager,
+    });
+  });
 }
 
 Future<Null> _recompile(StreamController<List<int>> streamController,

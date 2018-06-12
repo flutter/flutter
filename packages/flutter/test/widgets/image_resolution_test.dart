@@ -52,7 +52,7 @@ const String testManifest = '''
 ''';
 
 class TestAssetBundle extends CachingAssetBundle {
-  TestAssetBundle({ this.manifest: testManifest });
+  TestAssetBundle({ this.manifest = testManifest });
 
   final String manifest;
 
@@ -83,7 +83,7 @@ class TestAssetBundle extends CachingAssetBundle {
   }
 
   @override
-  Future<String> loadString(String key, { bool cache: true }) {
+  Future<String> loadString(String key, { bool cache = true }) {
     if (key == 'AssetManifest.json')
       return new SynchronousFuture<String>(manifest);
     return null;

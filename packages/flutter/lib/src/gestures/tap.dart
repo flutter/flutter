@@ -14,7 +14,7 @@ class TapDownDetails {
   /// Creates details for a [GestureTapDownCallback].
   ///
   /// The [globalPosition] argument must not be null.
-  TapDownDetails({ this.globalPosition: Offset.zero })
+  TapDownDetails({ this.globalPosition = Offset.zero })
     : assert(globalPosition != null);
 
   /// The global position at which the pointer contacted the screen.
@@ -26,14 +26,14 @@ class TapDownDetails {
 ///
 /// The position at which the pointer contacted the screen is available in the
 /// `details`.
-typedef void GestureTapDownCallback(TapDownDetails details);
+typedef GestureTapDownCallback = void Function(TapDownDetails details);
 
 /// Details for [GestureTapUpCallback], such as position.
 class TapUpDetails {
   /// Creates details for a [GestureTapUpCallback].
   ///
   /// The [globalPosition] argument must not be null.
-  TapUpDetails({ this.globalPosition: Offset.zero })
+  TapUpDetails({ this.globalPosition = Offset.zero })
     : assert(globalPosition != null);
 
   /// The global position at which the pointer contacted the screen.
@@ -45,14 +45,14 @@ class TapUpDetails {
 ///
 /// The position at which the pointer stopped contacting the screen is available
 /// in the `details`.
-typedef void GestureTapUpCallback(TapUpDetails details);
+typedef GestureTapUpCallback = void Function(TapUpDetails details);
 
 /// Signature for when a tap has occurred.
-typedef void GestureTapCallback();
+typedef GestureTapCallback = void Function();
 
 /// Signature for when the pointer that previously triggered a
 /// [GestureTapDownCallback] will not end up causing a tap.
-typedef void GestureTapCancelCallback();
+typedef GestureTapCancelCallback = void Function();
 
 /// Recognizes taps.
 ///

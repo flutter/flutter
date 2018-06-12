@@ -31,7 +31,7 @@ class SpringDescription {
   SpringDescription.withDampingRatio({
     this.mass,
     this.stiffness,
-    double ratio: 1.0
+    double ratio = 1.0
   }) : damping = ratio * 2.0 * math.sqrt(mass * stiffness);
 
   /// The mass of the spring (m). The units are arbitrary, but all springs
@@ -92,7 +92,7 @@ class SpringSimulation extends Simulation {
     double start,
     double end,
     double velocity, {
-    Tolerance tolerance: Tolerance.defaultTolerance,
+    Tolerance tolerance = Tolerance.defaultTolerance,
   }) : _endPosition = end,
       _solution = new _SpringSolution(spring, start - end, velocity),
       super(tolerance: tolerance);
@@ -135,7 +135,7 @@ class ScrollSpringSimulation extends SpringSimulation {
     double start,
     double end,
     double velocity, {
-    Tolerance tolerance: Tolerance.defaultTolerance,
+    Tolerance tolerance = Tolerance.defaultTolerance,
   }) : super(spring, start, end, velocity, tolerance: tolerance);
 
   @override

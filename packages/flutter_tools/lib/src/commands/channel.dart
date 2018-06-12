@@ -12,7 +12,7 @@ import '../runner/flutter_command.dart';
 import '../version.dart';
 
 class ChannelCommand extends FlutterCommand {
-  ChannelCommand({ bool verboseHelp: false }) {
+  ChannelCommand({ bool verboseHelp = false }) {
     argParser.addFlag(
       'all',
       abbr: 'a',

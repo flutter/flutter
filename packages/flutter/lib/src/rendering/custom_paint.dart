@@ -22,7 +22,7 @@ import 'proxy_box.dart';
 /// The returned list must not be mutated after this function completes. To
 /// change the semantic information, the function must return a new list
 /// instead.
-typedef List<CustomPainterSemantics> SemanticsBuilderCallback(Size size);
+typedef SemanticsBuilderCallback = List<CustomPainterSemantics> Function(Size size);
 
 /// The interface used by [CustomPaint] (in the widgets library) and
 /// [RenderCustomPaint] (in the rendering library).
@@ -362,9 +362,9 @@ class RenderCustomPaint extends RenderProxyBox {
   RenderCustomPaint({
     CustomPainter painter,
     CustomPainter foregroundPainter,
-    Size preferredSize: Size.zero,
-    this.isComplex: false,
-    this.willChange: false,
+    Size preferredSize = Size.zero,
+    this.isComplex = false,
+    this.willChange = false,
     RenderBox child,
   }) : assert(preferredSize != null),
        _painter = painter,

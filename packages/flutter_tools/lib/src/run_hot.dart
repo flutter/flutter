@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:json_rpc_2/error_code.dart' as rpc_error_code;
 import 'package:json_rpc_2/json_rpc_2.dart' as rpc;
@@ -13,6 +14,7 @@ import 'base/file_system.dart';
 import 'base/logger.dart';
 import 'base/utils.dart';
 import 'build_info.dart';
+import 'compile.dart';
 import 'dart/dependencies.dart';
 import 'device.dart';
 import 'globals.dart';
@@ -36,15 +38,15 @@ class HotRunner extends ResidentRunner {
     List<FlutterDevice> devices, {
     String target,
     DebuggingOptions debuggingOptions,
-    bool usesTerminalUI: true,
-    this.benchmarkMode: false,
+    bool usesTerminalUI = true,
+    this.benchmarkMode = false,
     this.applicationBinary,
-    this.hostIsIde: false,
+    this.hostIsIde = false,
     String projectRootPath,
     String packagesFilePath,
     this.dillOutputPath,
-    bool stayResident: true,
-    bool ipv6: false,
+    bool stayResident = true,
+    bool ipv6 = false,
   }) : super(devices,
              target: target,
              debuggingOptions: debuggingOptions,
@@ -94,7 +96,7 @@ class HotRunner extends ResidentRunner {
   }
 
   Future<Null> _reloadSourcesService(String isolateId,
-      { bool force: false, bool pause: false }) async {
+      { bool force = false, bool pause = false }) async {
     // TODO(cbernaschina): check that isolateId is the id of the UI isolate.
     final OperationResult result = await restart(pauseAfterRestart: pause);
     if (!result.isOk) {
@@ -105,6 +107,23 @@ class HotRunner extends ResidentRunner {
     }
   }
 
+  Future<String> _compileExpressionService(String isolateId, String expression,
+      List<String> definitions, List<String> typeDefinitions,
+      String libraryUri, String klass, bool isStatic,
+      ) async {
+    for (FlutterDevice device in flutterDevices) {
+      if (device.generator != null) {
+        final CompilerOutput compilerOutput =
+            await device.generator.compileExpression(expression, definitions,
+                typeDefinitions, libraryUri, klass, isStatic);
+        if (compilerOutput.outputFilename != null) {
+          return base64.encode(fs.file(compilerOutput.outputFilename).readAsBytesSync());
+        }
+      }
+    }
+    return null;
+  }
+
   Future<int> attach({
     Completer<DebugConnectionInfo> connectionInfoCompleter,
     Completer<Null> appStartedCompleter,
@@ -112,7 +131,8 @@ class HotRunner extends ResidentRunner {
   }) async {
     try {
       await connectToServiceProtocol(viewFilter: viewFilter,
-          reloadSources: _reloadSourcesService);
+          reloadSources: _reloadSourcesService,
+          compileExpression: _compileExpressionService);
     } catch (error) {
       printError('Error connecting to the service protocol: $error');
       return 2;
@@ -194,7 +214,7 @@ class HotRunner extends ResidentRunner {
     Completer<DebugConnectionInfo> connectionInfoCompleter,
     Completer<Null> appStartedCompleter,
     String route,
-    bool shouldBuild: true
+    bool shouldBuild = true
   }) async {
     if (!fs.isFileSync(mainPath)) {
       String message = 'Tried to run $mainPath, but that file does not exist.';
@@ -256,7 +276,7 @@ class HotRunner extends ResidentRunner {
     return devFSUris;
   }
 
-  Future<bool> _updateDevFS({ bool fullRestart: false }) async {
+  Future<bool> _updateDevFS({ bool fullRestart = false }) async {
     if (!_refreshDartDependencies()) {
       // Did not update DevFS because of a Dart source error.
       return false;
@@ -392,15 +412,11 @@ class HotRunner extends ResidentRunner {
     }
     // We are now running from source.
     _runningFromSnapshot = false;
-    final String launchPath = debuggingOptions.buildInfo.previewDart2
-        ? mainPath + '.dill'
-        : mainPath;
-    await _launchFromDevFS(launchPath);
+
+    await _launchFromDevFS('$mainPath.dill');
     restartTimer.stop();
-    printTrace('Restart performed in '
-        '${getElapsedAsMilliseconds(restartTimer.elapsed)}.');
-    // We are now running from sources.
-    _runningFromSnapshot = false;
+    printTrace('Restart performed in ${getElapsedAsMilliseconds(restartTimer.elapsed)}.');
+
     _addBenchmarkData('hotRestartMillisecondsToFrame',
         restartTimer.elapsed.inMilliseconds);
     flutterUsage.sendEvent('hot', 'restart');
@@ -411,8 +427,25 @@ class HotRunner extends ResidentRunner {
   /// Returns [true] if the reload was successful.
   /// Prints errors if [printErrors] is [true].
   static bool validateReloadReport(Map<String, dynamic> reloadReport,
-      { bool printErrors: true }) {
-    if (reloadReport['type'] != 'ReloadReport') {
+      { bool printErrors = true }) {
+    if (reloadReport == null) {
+      if (printErrors)
+        printError('Hot reload did not receive reload report.');
+      return false;
+    }
+    if (!(reloadReport['type'] == 'ReloadReport' &&
+          (reloadReport['success'] == true ||
+           (reloadReport['success'] == false &&
+            (reloadReport['details'] is Map<String, dynamic> &&
+             reloadReport['details']['notices'] is List<dynamic> &&
+             reloadReport['details']['notices'].isNotEmpty &&
+             reloadReport['details']['notices'].every(
+               (dynamic item) => item is Map<String, dynamic> && item['message'] is String
+             )
+            )
+           )
+          )
+         )) {
       if (printErrors)
         printError('Hot reload received invalid response: $reloadReport');
       return false;
@@ -432,7 +465,7 @@ class HotRunner extends ResidentRunner {
   bool get supportsRestart => true;
 
   @override
-  Future<OperationResult> restart({ bool fullRestart: false, bool pauseAfterRestart: false }) async {
+  Future<OperationResult> restart({ bool fullRestart = false, bool pauseAfterRestart = false }) async {
     if (fullRestart) {
       final Status status = logger.startProgress(
         'Performing hot restart...',
@@ -473,15 +506,7 @@ class HotRunner extends ResidentRunner {
     }
   }
 
-  String _uriToRelativePath(Uri uri) {
-    final String path = uri.toString();
-    final String base = new Uri.file(projectRootPath).toString();
-    if (path.startsWith(base))
-      return path.substring(base.length + 1);
-    return path;
-  }
-
-  Future<OperationResult> _reloadSources({ bool pause: false }) async {
+  Future<OperationResult> _reloadSources({ bool pause = false }) async {
     for (FlutterDevice device in flutterDevices) {
       for (FlutterView view in device.views) {
         if (view.uiIsolate == null)
@@ -500,7 +525,6 @@ class HotRunner extends ResidentRunner {
     // change from host path to a device path). Subsequent reloads will
     // not be affected, so we resume reporting reload times on the second
     // reload.
-    final bool reportUnused = !debuggingOptions.buildInfo.previewDart2;
     final bool shouldReportReloadTime = !_runningFromSnapshot;
     final Stopwatch reloadTimer = new Stopwatch()..start();
 
@@ -514,10 +538,7 @@ class HotRunner extends ResidentRunner {
     String reloadMessage;
     final Stopwatch vmReloadTimer = new Stopwatch()..start();
     try {
-      final String entryPath = fs.path.relative(
-        debuggingOptions.buildInfo.previewDart2 ? mainPath + '.dill' : mainPath,
-        from: projectRootPath,
-      );
+      final String entryPath = fs.path.relative('$mainPath.dill', from: projectRootPath);
       final Completer<Map<String, dynamic>> retrieveFirstReloadReport = new Completer<Map<String, dynamic>>();
 
       int countExpectedReports = 0;
@@ -529,10 +550,7 @@ class HotRunner extends ResidentRunner {
         }
 
         // List has one report per Flutter view.
-        final List<Future<Map<String, dynamic>>> reports = device.reloadSources(
-          entryPath,
-          pause: pause
-        );
+        final List<Future<Map<String, dynamic>>> reports = device.reloadSources(entryPath, pause: pause);
         countExpectedReports += reports.length;
         Future.wait(reports).catchError((dynamic error) {
           return <Map<String, dynamic>>[error];
@@ -600,8 +618,8 @@ class HotRunner extends ResidentRunner {
     }
     // We are now running from source.
     _runningFromSnapshot = false;
-    // Check if the isolate is paused.
 
+    // Check if the isolate is paused.
     final List<FlutterView> reassembleViews = <FlutterView>[];
     for (FlutterDevice device in flutterDevices) {
       for (FlutterView view in device.views) {
@@ -662,36 +680,9 @@ class HotRunner extends ResidentRunner {
         shouldReportReloadTime)
       flutterUsage.sendTiming('hot', 'reload', reloadTimer.elapsed);
 
-    String unusedElementMessage;
-    if (reportUnused && !reassembleAndScheduleErrors && !reassembleTimedOut) {
-      final List<Future<List<ProgramElement>>> unusedReports =
-        <Future<List<ProgramElement>>>[];
-      for (FlutterDevice device in flutterDevices)
-        unusedReports.add(device.unusedChangesInLastReload());
-      final List<ProgramElement> unusedElements = <ProgramElement>[];
-      for (Future<List<ProgramElement>> unusedReport in unusedReports)
-        unusedElements.addAll(await unusedReport);
-
-      if (unusedElements.isNotEmpty) {
-        final String restartCommand = hostIsIde ? '' : ' (by pressing "R")';
-        unusedElementMessage =
-          'Some program elements were changed during reload but did not run when the view was reassembled;\n'
-          'you may need to restart the app$restartCommand for the changes to have an effect.';
-        for (ProgramElement unusedElement in unusedElements) {
-          final String name = unusedElement.qualifiedName;
-          final String path = _uriToRelativePath(unusedElement.uri);
-          final int line = unusedElement.line;
-          final String description = line == null ? '$name ($path)' : '$name ($path:$line)';
-          unusedElementMessage += '\n  • $description';
-        }
-      }
-    }
-
     return new OperationResult(
       reassembleAndScheduleErrors ? 1 : OperationResult.ok.code,
       reloadMessage,
-      hintMessage: unusedElementMessage,
-      hintId: unusedElementMessage != null ? 'restartRecommended' : null,
     );
   }
 
