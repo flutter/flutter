@@ -1,4 +1,4 @@
-Signature: ab27dd2fbccbe0dc2ea0869473799c13
+Signature: 245264e071bbc5718149880a56087206
 
 UNUSED LICENSES:
 
@@ -17180,6 +17180,7 @@ FILE: ../../../third_party/skia/include/private/GrCCClipPath.h
 FILE: ../../../third_party/skia/include/private/GrCCPerOpListPaths.h
 FILE: ../../../third_party/skia/include/private/GrSurfaceProxyRef.h
 FILE: ../../../third_party/skia/include/private/GrVkTypesPriv.h
+FILE: ../../../third_party/skia/include/private/SkMacros.h
 FILE: ../../../third_party/skia/include/private/SkSafe32.h
 FILE: ../../../third_party/skia/include/private/SkTo.h
 FILE: ../../../third_party/skia/infra/cts/run_testlab.go
