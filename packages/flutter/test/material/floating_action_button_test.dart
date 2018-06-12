@@ -69,6 +69,44 @@ void main() {
     expect(find.byType(Text), findsOneWidget);
   });
 
+  testWidgets('FlatActionButton mini size is configurable by ThemeData.materialTapTargetSize', (WidgetTester tester) async {
+    final Key key1 = new UniqueKey();
+    await tester.pumpWidget(
+      new MaterialApp(
+        home: new Theme(
+          data: new ThemeData(materialTapTargetSize: MaterialTapTargetSize.padded),
+          child: new Scaffold(
+            floatingActionButton: new FloatingActionButton(
+              key: key1,
+              mini: true,
+              onPressed: null,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(tester.getSize(find.byKey(key1)), const Size(48.0, 48.0));
+
+    final Key key2 = new UniqueKey();
+    await tester.pumpWidget(
+      new MaterialApp(
+        home: new Theme(
+          data: new ThemeData(materialTapTargetSize: MaterialTapTargetSize.shrinkWrap),
+          child: new Scaffold(
+            floatingActionButton: new FloatingActionButton(
+              key: key2,
+              mini: true,
+              onPressed: null,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(tester.getSize(find.byKey(key2)), const Size(40.0, 40.0));
+  });
+
   testWidgets('FloatingActionButton.isExtended', (WidgetTester tester) async {
     await tester.pumpWidget(
       new MaterialApp(

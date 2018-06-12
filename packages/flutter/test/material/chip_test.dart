@@ -1019,6 +1019,42 @@ void main() {
     expect(materialBox, paints..path(color: chipTheme.disabledColor));
   });
 
+  testWidgets('Chip size is configurable by ThemeData.materialTapTargetSize', (WidgetTester tester) async {
+    final Key key1 = new UniqueKey();
+    await tester.pumpWidget(
+      _wrapForChip(
+        child: new Theme(
+          data: new ThemeData(materialTapTargetSize: MaterialTapTargetSize.padded),
+          child: new Center(
+            child: new RawChip(
+              key: key1,
+              label: const Text('test'),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(tester.getSize(find.byKey(key1)), const Size(80.0, 48.0));
+
+    final Key key2 = new UniqueKey();
+    await tester.pumpWidget(
+      _wrapForChip(
+        child: new Theme(
+          data: new ThemeData(materialTapTargetSize: MaterialTapTargetSize.shrinkWrap),
+          child: new Center(
+            child: new RawChip(
+              key: key2,
+              label: const Text('test'),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(tester.getSize(find.byKey(key2)), const Size(80.0, 32.0));
+  });
+
   testWidgets('Chip uses the right theme colors for the right components', (WidgetTester tester) async {
     final ThemeData themeData = new ThemeData(
       platform: TargetPlatform.android,

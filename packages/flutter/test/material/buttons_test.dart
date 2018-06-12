@@ -358,4 +358,136 @@ void main() {
 
     semantics.dispose();
   });
+
+  testWidgets('MaterialButton size is configurable by ThemeData.materialTapTargetSize', (WidgetTester tester) async {
+    final Key key1 = new UniqueKey();
+    await tester.pumpWidget(
+      new Theme(
+        data: new ThemeData(materialTapTargetSize: MaterialTapTargetSize.padded),
+        child: new Directionality(
+          textDirection: TextDirection.ltr,
+          child: new Material(
+            child: new Center(
+              child: new MaterialButton(
+                key: key1,
+                child: const SizedBox(width: 50.0, height: 8.0),
+                onPressed: () {},
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(tester.getSize(find.byKey(key1)), const Size(88.0, 48.0));
+
+    final Key key2 = new UniqueKey();
+    await tester.pumpWidget(
+      new Theme(
+        data: new ThemeData(materialTapTargetSize: MaterialTapTargetSize.shrinkWrap),
+        child: new Directionality(
+          textDirection: TextDirection.ltr,
+          child: new Material(
+            child: new Center(
+              child: new MaterialButton(
+                key: key2,
+                child: const SizedBox(width: 50.0, height: 8.0),
+                onPressed: () {},
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(tester.getSize(find.byKey(key2)), const Size(88.0, 36.0));
+  });
+
+  testWidgets('FlatButton size is configurable by ThemeData.materialTapTargetSize', (WidgetTester tester) async {
+    final Key key1 = new UniqueKey();
+    await tester.pumpWidget(
+      new Theme(
+        data: new ThemeData(materialTapTargetSize: MaterialTapTargetSize.padded),
+        child: new Directionality(
+          textDirection: TextDirection.ltr,
+          child: new Material(
+            child: new Center(
+              child: new FlatButton(
+                key: key1,
+                child: const SizedBox(width: 50.0, height: 8.0),
+                onPressed: () {},
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(tester.getSize(find.byKey(key1)), const Size(88.0, 48.0));
+
+    final Key key2 = new UniqueKey();
+    await tester.pumpWidget(
+      new Theme(
+        data: new ThemeData(materialTapTargetSize: MaterialTapTargetSize.shrinkWrap),
+        child: new Directionality(
+          textDirection: TextDirection.ltr,
+          child: new Material(
+            child: new Center(
+              child: new FlatButton(
+                key: key2,
+                child: const SizedBox(width: 50.0, height: 8.0),
+                onPressed: () {},
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(tester.getSize(find.byKey(key2)), const Size(88.0, 36.0));
+  });
+
+  testWidgets('RaisedButton size is configurable by ThemeData.materialTapTargetSize', (WidgetTester tester) async {
+    final Key key1 = new UniqueKey();
+    await tester.pumpWidget(
+      new Theme(
+        data: new ThemeData(materialTapTargetSize: MaterialTapTargetSize.padded),
+        child: new Directionality(
+          textDirection: TextDirection.ltr,
+          child: new Material(
+            child: new Center(
+              child: new RaisedButton(
+                key: key1,
+                child: const SizedBox(width: 50.0, height: 8.0),
+                onPressed: () {},
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(tester.getSize(find.byKey(key1)), const Size(88.0, 48.0));
+
+    final Key key2 = new UniqueKey();
+    await tester.pumpWidget(
+      new Theme(
+        data: new ThemeData(materialTapTargetSize: MaterialTapTargetSize.shrinkWrap),
+        child: new Directionality(
+          textDirection: TextDirection.ltr,
+          child: new Material(
+            child: new Center(
+              child: new RaisedButton(
+                key: key2,
+                child: const SizedBox(width: 50.0, height: 8.0),
+                onPressed: () {},
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(tester.getSize(find.byKey(key2)), const Size(88.0, 36.0));
+  });
 }
