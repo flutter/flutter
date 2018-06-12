@@ -6,6 +6,7 @@ You can read more about
 [accessing platform and third-party services in Flutter](https://flutter.io/platform-channels/).
 
 ## iOS
+
 You can use the commands `flutter build` and `flutter run` from the app's root
 directory to build/run the app or you can open `ios/Runner.xcworkspace` in Xcode
 and build/run the project as usual.
