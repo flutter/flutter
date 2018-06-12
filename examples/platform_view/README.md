@@ -3,10 +3,16 @@
 This project demonstrates how to bring up a full-screen iOS/Android view from a
 full-screen Flutter view along with passing data back and forth between the two.
 
+## iOS
+
 On iOS we use a CocoaPods dependency to add a Material Design button, and so
 `pod install` needs to be invoked in the `ios/` folder before `flutter run`:
 
-```
 pushd ios/ ; pod install ; popd
 flutter run
-```
+
+## Android
+
+You can use the commands `flutter build` and `flutter run` from the app's root
+directory to build/run the app or to build with Android Studio, open the
+`android` folder in Android Studio and build the project as usual.
