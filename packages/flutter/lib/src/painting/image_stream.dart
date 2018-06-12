@@ -70,8 +70,8 @@ typedef void ImageListener(ImageInfo image, bool synchronousCall);
 
 /// Signature for reporting errors when resolving images.
 ///
-/// Used by [ImageStream].
-typedef ImageErrorListener = void Function(dynamic exception, StackTrace stackTrace);
+/// Used by [ImageStream] and [precacheImage] to report errors.
+typedef void ImageErrorListener(dynamic exception, StackTrace stackTrace);
 
 /// A handle to an image resource.
 ///
@@ -134,6 +134,14 @@ class ImageStream extends Diagnosticable {
   /// occurred. If the listener is added within a render object paint function,
   /// then use this flag to avoid calling [RenderObject.markNeedsPaint] during
   /// a paint.
+  ///
+  /// An [ImageErrorListener] can also optionally be added along with the
+  /// `listener`. If an error occurred, `onError` will be called instead of
+  /// `listener`.
+  ///
+  /// Many `listener`s can have the same `onError` but each `listener` can only
+  /// have one `onError`. Calling [addListener] a second time with a different
+  /// `onError` replaces the previous `onError` listener.
   void addListener(ImageListener listener, { ImageErrorListener onError }) {
     if (_completer != null)
       return _completer.addListener(listener, onError: onError);
@@ -141,7 +149,8 @@ class ImageStream extends Diagnosticable {
     _listeners[listener] = onError;
   }
 
-  /// Stop listening for new concrete [ImageInfo] objects.
+  /// Stop listening for new concrete [ImageInfo] objects and errors from
+  /// its associated [ImageErrorListener].
   void removeListener(ImageListener listener) {
     if (_completer != null)
       return _completer.removeListener(listener);
@@ -195,8 +204,9 @@ abstract class ImageStreamCompleter extends Diagnosticable {
   FlutterErrorDetails _currentError;
 
   /// Adds a listener callback that is called whenever a new concrete [ImageInfo]
-  /// object is available. If a concrete image is already available, this object
-  /// will call the listener synchronously.
+  /// object is available or an error is reported. If a concrete image is
+  /// already available, or if an error has been already reported, this object
+  /// will call the listener or error listener synchronously.
   ///
   /// If the [ImageStreamCompleter] completes multiple images over its lifetime,
   /// this listener will fire multiple times.
@@ -233,7 +243,8 @@ abstract class ImageStreamCompleter extends Diagnosticable {
     }
   }
 
-  /// Stop listening for new concrete [ImageInfo] objects.
+  /// Stop listening for new concrete [ImageInfo] objects and errors from
+  /// its associated [ImageErrorListener].
   void removeListener(ImageListener listener) {
     _listeners.remove(listener);
   }
@@ -258,6 +269,14 @@ abstract class ImageStreamCompleter extends Diagnosticable {
     }
   }
 
+  /// Calls all the registered error listeners to notify them of an error that
+  /// occurred while resolving the image.
+  ///
+  /// If the same error listener is attached with multiple listeners, that
+  /// error listener will only be notified once.
+  ///
+  /// If no error listeners are attached, a [FlutterError] will be reported
+  /// instead.
   @protected
   void reportError({
     String context,
@@ -276,9 +295,10 @@ abstract class ImageStreamCompleter extends Diagnosticable {
       silent: silent,
     );
 
-    final List<ImageErrorListener> localErrorListeners = new List<ImageErrorListener>.from(
+    // Many listeners can have the same error listener. De-duplicate.
+    final List<ImageErrorListener> localErrorListeners = new Set<ImageErrorListener>.from(
         _listeners.values.where((ImageErrorListener listener) => listener != null)
-    );
+    ).toList();
 
     if (localErrorListeners.isEmpty || skipListeners) {
       FlutterError.reportError(_currentError);

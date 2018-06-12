@@ -65,15 +65,17 @@ ImageConfiguration createLocalImageConfiguration(BuildContext context, { Size si
 /// The [BuildContext] and [Size] are used to select an image configuration
 /// (see [createLocalImageConfiguration]).
 ///
+/// The `onError` argument can be used to manually handle errors while precaching.
+///
 /// See also:
 ///
 ///   * [ImageCache], which holds images that may be reused.
 Future<Null> precacheImage(
   ImageProvider provider,
   BuildContext context, {
-    Size size,
-    ImageErrorListener onError,
-  }) {
+  Size size,
+  ImageErrorListener onError,
+}) {
   final ImageConfiguration config = createLocalImageConfiguration(context, size: size);
   final Completer<Null> completer = new Completer<Null>();
   final ImageStream stream = provider.resolve(config);
