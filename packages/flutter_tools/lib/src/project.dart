@@ -5,6 +5,8 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:flutter_tools/src/cache.dart';
+
 import 'android/gradle.dart';
 import 'base/file_system.dart';
 import 'flutter_manifest.dart';
@@ -63,13 +65,22 @@ class FlutterProject {
     }
     final FlutterManifest manifest = await FlutterManifest.createFromPath(directory.childFile('pubspec.yaml').path);
     final Map<String, dynamic> androidDescriptor = manifest.androidDescriptor;
-    if (androidDescriptor != null) {
+    if (androidDescriptor != null && shouldRegenerateAndroidDirectory()) {
       android._injectModuleWrapper(<String, dynamic>{
         'androidIdentifier': androidDescriptor['package'],
       });
     }
     injectPlugins(directory: directory.path);
     await generateXcodeProperties(directory.path);
+  }
+
+  bool shouldRegenerateAndroidDirectory() {
+    final File flutterToolsStamp = Cache.instance.getStampFileFor('flutter_tools');
+    final File buildDotGradleFile = directory.childDirectory('android').childFile('build.gradle');
+    return flutterToolsStamp.existsSync() &&
+        flutterToolsStamp
+            .lastModifiedSync()
+            .isAfter(buildDotGradleFile.lastModifiedSync());
   }
 }
 
@@ -107,7 +118,7 @@ class AndroidProject {
 
   Future<void> _injectModuleWrapper(Map<String, dynamic> environment) async {
     final Template template = new Template.fromName('module_android');
-    template.render(directory, environment, overwriteExisting: false);
+    template.render(directory, environment);
     updateLocalProperties(projectPath: directory.parent.path);
   }
 }
