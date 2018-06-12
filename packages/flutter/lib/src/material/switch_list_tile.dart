@@ -166,30 +166,27 @@ class SwitchListTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final ThemeData themeData = Theme.of(context).copyWith(materialTapTargetSize: MaterialTapTargetSize.shrinkWrap);
     final Widget control = new Switch(
       value: value,
       onChanged: onChanged,
       activeColor: activeColor,
       activeThumbImage: activeThumbImage,
       inactiveThumbImage: inactiveThumbImage,
+      materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
     );
     return new MergeSemantics(
-      child: new Theme(
-        data: themeData,
-        child: ListTileTheme.merge(
-          selectedColor: activeColor ?? Theme.of(context).accentColor,
-          child: new ListTile(
-            leading: secondary,
-            title: title,
-            subtitle: subtitle,
-            trailing: control,
-            isThreeLine: isThreeLine,
-            dense: dense,
-            enabled: onChanged != null,
-            onTap: onChanged != null ? () { onChanged(!value); } : null,
-            selected: selected,
-          ),
+      child: ListTileTheme.merge(
+        selectedColor: activeColor ?? Theme.of(context).accentColor,
+        child: new ListTile(
+          leading: secondary,
+          title: title,
+          subtitle: subtitle,
+          trailing: control,
+          isThreeLine: isThreeLine,
+          dense: dense,
+          enabled: onChanged != null,
+          onTap: onChanged != null ? () { onChanged(!value); } : null,
+          selected: selected,
         ),
       ),
     );

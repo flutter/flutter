@@ -55,7 +55,8 @@ class Radio<T> extends StatefulWidget {
     @required this.value,
     @required this.groupValue,
     @required this.onChanged,
-    this.activeColor
+    this.activeColor,
+    this.materialTapTargetSize,
   }) : super(key: key);
 
   /// The value represented by this radio button.
@@ -97,6 +98,15 @@ class Radio<T> extends StatefulWidget {
   /// Defaults to [ThemeData.toggleableActiveColor].
   final Color activeColor;
 
+  /// Configures the minimum size of the tap target.
+  ///
+  /// Defaults to [ThemeData.materialTapTargetSize].
+  ///
+  /// See also:
+  ///
+  ///   * [MaterialTapTargetSize], for a description of how this effects tap targets.
+  final MaterialTapTargetSize materialTapTargetSize;
+
   @override
   _RadioState<T> createState() => new _RadioState<T>();
 }
@@ -118,7 +128,7 @@ class _RadioState<T> extends State<Radio<T>> with TickerProviderStateMixin {
     assert(debugCheckHasMaterial(context));
     final ThemeData themeData = Theme.of(context);
     Size size;
-    switch (themeData.materialTapTargetSize) {
+    switch (widget.materialTapTargetSize ?? themeData.materialTapTargetSize) {
       case MaterialTapTargetSize.padded:
         size = const Size(2 * kRadialReactionRadius + 8.0, 2 * kRadialReactionRadius + 8.0);
         break;

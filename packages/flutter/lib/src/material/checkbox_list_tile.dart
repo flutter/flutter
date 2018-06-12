@@ -170,11 +170,11 @@ class CheckboxListTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final ThemeData themeData = Theme.of(context).copyWith(materialTapTargetSize: MaterialTapTargetSize.shrinkWrap);
     final Widget control = new Checkbox(
       value: value,
       onChanged: onChanged,
       activeColor: activeColor,
+      materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
     );
     Widget leading, trailing;
     switch (controlAffinity) {
@@ -189,21 +189,18 @@ class CheckboxListTile extends StatelessWidget {
         break;
     }
     return new MergeSemantics(
-      child: new Theme(
-        data: themeData,
-        child: ListTileTheme.merge(
-          selectedColor: activeColor ?? Theme.of(context).accentColor,
-          child: new ListTile(
-            leading: leading,
-            title: title,
-            subtitle: subtitle,
-            trailing: trailing,
-            isThreeLine: isThreeLine,
-            dense: dense,
-            enabled: onChanged != null,
-            onTap: onChanged != null ? () { onChanged(!value); } : null,
-            selected: selected,
-          ),
+      child: ListTileTheme.merge(
+        selectedColor: activeColor ?? Theme.of(context).accentColor,
+        child: new ListTile(
+          leading: leading,
+          title: title,
+          subtitle: subtitle,
+          trailing: trailing,
+          isThreeLine: isThreeLine,
+          dense: dense,
+          enabled: onChanged != null,
+          onTap: onChanged != null ? () { onChanged(!value); } : null,
+          selected: selected,
         ),
       ),
     );

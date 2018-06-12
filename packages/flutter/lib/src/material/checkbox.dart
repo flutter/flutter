@@ -59,6 +59,7 @@ class Checkbox extends StatefulWidget {
     this.tristate = false,
     @required this.onChanged,
     this.activeColor,
+    this.materialTapTargetSize,
   }) : assert(tristate != null),
        assert(tristate || value != null),
        super(key: key);
@@ -114,6 +115,15 @@ class Checkbox extends StatefulWidget {
   /// If tristate is false (the default), [value] must not be null.
   final bool tristate;
 
+  /// Configures the minimum size of the tap target.
+  ///
+  /// Defaults to [ThemeData.materialTapTargetSize].
+  ///
+  /// See also:
+  ///
+  ///   * [MaterialTapTargetSize], for a description of how this effects tap targets.
+  final MaterialTapTargetSize materialTapTargetSize;
+
   /// The width of a checkbox widget.
   static const double width = 18.0;
 
@@ -127,7 +137,7 @@ class _CheckboxState extends State<Checkbox> with TickerProviderStateMixin {
     assert(debugCheckHasMaterial(context));
     final ThemeData themeData = Theme.of(context);
     Size size;
-    switch (themeData.materialTapTargetSize) {
+    switch (widget.materialTapTargetSize ?? themeData.materialTapTargetSize) {
       case MaterialTapTargetSize.padded:
         size = const Size(2 * kRadialReactionRadius + 8.0, 2 * kRadialReactionRadius + 8.0);
         break;

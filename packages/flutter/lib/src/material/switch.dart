@@ -63,7 +63,8 @@ class Switch extends StatefulWidget {
     this.inactiveThumbColor,
     this.inactiveTrackColor,
     this.activeThumbImage,
-    this.inactiveThumbImage
+    this.inactiveThumbImage,
+    this.materialTapTargetSize,
   }) : super(key: key);
 
   /// Whether this switch is on or off.
@@ -121,6 +122,15 @@ class Switch extends StatefulWidget {
   /// An image to use on the thumb of this switch when the switch is off.
   final ImageProvider inactiveThumbImage;
 
+  /// Configures the minimum size of the tap target.
+  ///
+  /// Defaults to [ThemeData.materialTapTargetSize].
+  ///
+  /// See also:
+  ///
+  ///   * [MaterialTapTargetSize], for a description of how this effects tap targets.
+  final MaterialTapTargetSize materialTapTargetSize;
+
   @override
   _SwitchState createState() => new _SwitchState();
 
@@ -152,7 +162,7 @@ class _SwitchState extends State<Switch> with TickerProviderStateMixin {
       inactiveTrackColor = widget.inactiveTrackColor ?? (isDark ? Colors.white10 : Colors.black12);
     }
     Size size;
-    switch (themeData.materialTapTargetSize) {
+    switch (widget.materialTapTargetSize ?? themeData.materialTapTargetSize) {
       case MaterialTapTargetSize.padded:
         size = const Size(_kSwitchWidth, _kSwitchHeight);
         break;
