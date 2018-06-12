@@ -145,6 +145,17 @@ std::unique_ptr<IsolateConfiguration> IsolateConfiguration::InferFromSettings(
     }
   }
 
+  // Running from script snapshot.
+  {
+    // TODO(engine): Add AssetManager::GetAsMapping or such to avoid the copy.
+    std::vector<uint8_t> script_snapshot;
+    if (asset_manager && asset_manager->GetAsBuffer(
+                             settings.script_snapshot_path, &script_snapshot)) {
+      return CreateForSnapshot(
+          std::make_unique<fml::DataMapping>(std::move(script_snapshot)));
+    }
+  }
+
   // Running from kernel divided into several pieces (for sharing).
   {
     // TODO(fuchsia): Add AssetManager::GetAsMapping or such to avoid the copy.

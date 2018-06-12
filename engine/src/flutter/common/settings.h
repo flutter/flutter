@@ -23,6 +23,7 @@ using TaskObserverRemove = std::function<void(intptr_t /* key */)>;
 
 struct Settings {
   // VM settings
+  std::string script_snapshot_path;
   std::string platform_kernel_path;
 
   std::string vm_snapshot_data_path;
@@ -46,6 +47,7 @@ struct Settings {
   bool trace_startup = false;
   bool endless_trace_buffer = false;
   bool enable_dart_profiling = false;
+  bool dart_non_checked_mode = false;
   // Used as the script URI in debug messages. Does not affect how the Dart code
   // is executed.
   std::string advisory_script_uri = "main.dart";
