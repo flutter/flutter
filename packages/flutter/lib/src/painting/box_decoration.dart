@@ -70,6 +70,7 @@ class BoxDecoration extends Decoration {
   ///   [BoxShape.circle].
   /// * If [boxShadow] is null, this decoration does not paint a shadow.
   /// * If [gradient] is null, this decoration does not paint gradients.
+  /// * If [backgroundBlendMode] is null, this decoration paints with [BlendMode.srcOver]
   ///
   /// The [shape] argument must not be null.
   const BoxDecoration({
@@ -79,6 +80,7 @@ class BoxDecoration extends Decoration {
     this.borderRadius,
     this.boxShadow,
     this.gradient,
+    this.backgroundBlendMode: BlendMode.srcOver,
     this.shape: BoxShape.rectangle,
   }) : assert(shape != null);
 
@@ -135,6 +137,16 @@ class BoxDecoration extends Decoration {
   ///
   /// The [gradient] is drawn under the [image].
   final Gradient gradient;
+
+  /// The blend mode applied to the [color] or [gradient] background of the box.
+  ///
+  /// If no [backgroundBlendMode] is provided then a default of
+  /// [backgroundBlendMode.srcOver] is used. [backgroundBlendMode.srcOver] is
+  /// the standard painting blend mode that adds colors together the way
+  /// developers are used to.
+  ///
+  /// If no [color] or [gradient] is provided then blend mode has no impact.
+  final BlendMode backgroundBlendMode;
 
   /// The shape to fill the background [color], [gradient], and [image] into and
   /// to cast as the [boxShadow].
@@ -332,6 +344,7 @@ class _BoxDecorationPainter extends BoxPainter {
     if (_cachedBackgroundPaint == null ||
         (_decoration.gradient != null && _rectForCachedBackgroundPaint != rect)) {
       final Paint paint = new Paint();
+      paint.blendMode = _decoration.backgroundBlendMode;
       if (_decoration.color != null)
         paint.color = _decoration.color;
       if (_decoration.gradient != null) {

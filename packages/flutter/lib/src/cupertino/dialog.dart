@@ -42,18 +42,15 @@ const TextStyle _kCupertinoDialogActionStyle = const TextStyle(
 
 const double _kCupertinoDialogWidth = 270.0;
 const BoxDecoration _kCupertinoDialogFrontFillDecoration = const BoxDecoration(
-  color: const Color(0xccffffff),
-);
-const BoxDecoration _kCupertinoDialogBackFill = const BoxDecoration(
-  color: const Color(0x77ffffff),
+  color: CupertinoColors.white,
+  backgroundBlendMode: BlendMode.overlay,
 );
 
 const double _kEdgePadding = 20.0;
 const double _kButtonHeight = 45.0;
 
-// TODO(gspencer): This color isn't correct. Instead, we should carve a hole in
-// the dialog and show more of the background.
-const Color _kButtonDividerColor = const Color(0xffd5d5d5);
+const Color _kDialogForegroundColor = const Color(0xC0FFFFFF);
+const Color _kButtonDividerColor = const Color(0x20000000);
 
 /// An iOS-style dialog.
 ///
@@ -84,18 +81,12 @@ class CupertinoDialog extends StatelessWidget {
     return new Center(
       child: new ClipRRect(
         borderRadius: const BorderRadius.all(const Radius.circular(12.0)),
-        child: new DecoratedBox(
-          // To get the effect, 2 white fills are needed. One blended with the
-          // background before applying the blur and one overlaid on top of
-          // the blur.
-          decoration: _kCupertinoDialogBackFill,
-          child: new BackdropFilter(
-            filter: new ImageFilter.blur(sigmaX: 10.0, sigmaY: 10.0),
-            child: new Container(
-              width: _kCupertinoDialogWidth,
-              decoration: _kCupertinoDialogFrontFillDecoration,
-              child: child,
-            ),
+        child: new BackdropFilter(
+          filter: new ImageFilter.blur(sigmaX: 10.0, sigmaY: 10.0),
+          child: new Container(
+            width: _kCupertinoDialogWidth,
+            decoration: _kCupertinoDialogFrontFillDecoration,
+            child: child,
           ),
         ),
       ),
@@ -172,8 +163,20 @@ class CupertinoAlertDialog extends StatelessWidget {
   ///    section when it is long.
   final ScrollController actionScrollController;
 
-  @override
-  Widget build(BuildContext context) {
+  Widget _buildBlurBackground() {
+    return new ClipRRect(
+      borderRadius: const BorderRadius.all(const Radius.circular(12.0)),
+      child: new BackdropFilter(
+        filter: new ImageFilter.blur(sigmaX: 10.0, sigmaY: 10.0),
+        child: new Container(
+          width: _kCupertinoDialogWidth,
+          decoration: _kCupertinoDialogFrontFillDecoration,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildContent() {
     final List<Widget> children = <Widget>[];
 
     if (title != null || content != null) {
@@ -187,19 +190,13 @@ class CupertinoAlertDialog extends StatelessWidget {
       children.add(const Padding(padding: const EdgeInsets.only(top: 8.0)));
     }
 
-    if (actions.isNotEmpty) {
-      final Widget actionSection = new _CupertinoAlertActionSection(
-        children: actions,
-        scrollController: actionScrollController,
-      );
-      children.add(
-        new Flexible(child: actionSection),
-      );
-    }
-
-    return new Padding(
-      padding: const EdgeInsets.symmetric(vertical: _kEdgePadding),
-      child: new CupertinoDialog(
+    return new ClipRRect(
+      borderRadius: const BorderRadius.only(
+        topLeft: const Radius.circular(12.0),
+        topRight: const Radius.circular(12.0),
+      ),
+      child: new Container(
+        color: _kDialogForegroundColor,
         child: new Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -208,6 +205,136 @@ class CupertinoAlertDialog extends StatelessWidget {
       ),
     );
   }
+
+  Widget _buildActions() {
+    Widget actionSection = new Container();
+    if (actions.isNotEmpty) {
+      actionSection = new _CupertinoAlertActionSection(
+        children: actions,
+        scrollController: actionScrollController,
+      );
+    }
+
+    return new ClipRRect(
+      borderRadius: const BorderRadius.only(
+        bottomLeft: const Radius.circular(12.0),
+        bottomRight: const Radius.circular(12.0),
+      ),
+      child: actionSection,
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return new Center(
+      child: new Container(
+        width: _kCupertinoDialogWidth,
+        padding: const EdgeInsets.symmetric(vertical: _kEdgePadding),
+        child: new CustomMultiChildLayout(
+          delegate: new _CupertinoAlertDialogLayoutDelegate(
+            actionsCount: actions.length,
+          ),
+          children: <Widget>[
+            new LayoutId(
+              id: _AlertDialogSection.blur,
+              child: _buildBlurBackground(),
+            ),
+            new LayoutId(
+              id: _AlertDialogSection.content,
+              child: _buildContent(),
+            ),
+            new LayoutId(
+              id: _AlertDialogSection.actions,
+              child: _buildActions(),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+enum _AlertDialogSection {
+  blur,
+  content,
+  actions,
+}
+
+class _CupertinoAlertDialogLayoutDelegate extends MultiChildLayoutDelegate {
+
+  final int actionsCount;
+
+  _CupertinoAlertDialogLayoutDelegate({
+    this.actionsCount,
+  });
+
+  @override
+  void performLayout(Size size) {
+    // TODO: @mattcarroll, handle 2 buttons that need to stack due to long text
+    double minActionSpace = 0.0;
+    if (actionsCount > 0 && actionsCount <= 2) {
+      minActionSpace = _kButtonHeight;
+    } else {
+      minActionSpace = 1.5 * _kButtonHeight;
+    }
+
+    // Size alert dialog content.
+    final Size maxContentSize = new Size(size.width, size.height - minActionSpace);
+    final Size contentSize = layoutChild(
+        _AlertDialogSection.content,
+        new BoxConstraints.loose(maxContentSize),
+    );
+
+    // Size alert dialog actions.
+    final Size maxActionSize = new Size(
+        size.width,
+        size.height - contentSize.height,
+    );
+    final Size actionsSize = layoutChild(
+        _AlertDialogSection.actions,
+        new BoxConstraints.loose(maxActionSize),
+    );
+
+    // Calculate overall dialog height.
+    final double dialogHeight = contentSize.height + actionsSize.height;
+
+    // Size blur background.
+    final Size backgroundSize = new Size(size.width, dialogHeight);
+    layoutChild(
+      _AlertDialogSection.blur,
+      new BoxConstraints.loose(backgroundSize),
+    );
+
+    // Layout the blur, content, and the actions.
+    final double dialogTop = (size.height - dialogHeight) / 2;
+    positionChild(
+      _AlertDialogSection.blur,
+      new Offset(
+        0.0,
+        dialogTop,
+      ),
+    );
+    positionChild(
+        _AlertDialogSection.content,
+        new Offset(
+          0.0,
+          dialogTop,
+        ),
+    );
+    positionChild(
+        _AlertDialogSection.actions,
+        new Offset(
+          0.0,
+          dialogTop + contentSize.height,
+        ),
+    );
+  }
+
+  @override
+  bool shouldRelayout(MultiChildLayoutDelegate oldDelegate) {
+    return false;
+  }
+
 }
 
 /// A button typically used in a [CupertinoAlertDialog].
@@ -403,6 +530,72 @@ class _CupertinoAlertActionSection extends StatelessWidget {
 
   bool get _layoutActionsVertically => children.length > 2;
 
+  Widget _buildHorizontalDivider() {
+    return new Container(
+      height: 0.3,
+      color: _kButtonDividerColor,
+    );
+  }
+
+  Widget _buildVerticalDivider() {
+    return new Container(
+      width: 0.3,
+      color: _kButtonDividerColor,
+    );
+  }
+
+  Widget _buildHorizontalButtons() {
+    assert(
+      children.length <= 2,
+      'Horizontal dialog buttons can only be constructed with 2 or fewer '
+      'buttons. Actual button count: ${children.length}',
+    );
+
+    if (children.length == 1) {
+      return Row(
+        children: <Widget>[
+          new Expanded(
+            child: _buildDialogButton(children[0]),
+          ),
+        ],
+      );
+    } else {
+      return Row(
+        children: <Widget>[
+          new Expanded(
+            child: _buildDialogButton(children[0]),
+          ),
+          _buildVerticalDivider(),
+          new Expanded(
+            child: _buildDialogButton(children[1]),
+          ),
+        ],
+      );
+    }
+  }
+
+  List<Widget> _buildVerticalButtons() {
+    final List<Widget> buttonsWithDividers = <Widget>[];
+    for (int i = 0; i < children.length; ++i) {
+      buttonsWithDividers.add(
+        _buildHorizontalDivider(),
+      );
+      buttonsWithDividers.add(
+        _buildDialogButton(children[i]),
+      );
+    }
+
+    return buttonsWithDividers;
+  }
+
+  Widget _buildDialogButton(Widget buttonContent) {
+    return Container(
+      height: _kButtonHeight,
+      color: _kDialogForegroundColor,
+      child: buttonContent,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     if (children.isEmpty) {
@@ -415,26 +608,13 @@ class _CupertinoAlertActionSection extends StatelessWidget {
     // TODO(abarth): Listen for the buttons being highlighted.
 
     if (_layoutActionsVertically) {
-      // Skip the first divider
-      final List<Widget> buttons = <Widget>[children.first];
-      buttons.addAll(
-        children.sublist(1).map<Widget>(
-          (Widget child) {
-            return new CustomPaint(
-              painter: new _CupertinoVerticalDividerPainter(),
-              child: child,
-            );
-          },
-        ),
-      );
-
       return new CupertinoScrollbar(
         child: new SingleChildScrollView(
           controller: scrollController,
           child: new Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: buttons,
+            children: _buildVerticalButtons(),
           ),
         ),
       );
@@ -444,63 +624,17 @@ class _CupertinoAlertActionSection extends StatelessWidget {
       return new CupertinoScrollbar(
         child: new SingleChildScrollView(
           controller: scrollController,
-          child: new CustomPaint(
-            painter: new _CupertinoHorizontalDividerPainter(children.length),
             child: new UnconstrainedBox(
               constrainedAxis: Axis.horizontal,
-              child: new ConstrainedBox(
-                constraints: const BoxConstraints(minHeight: _kButtonHeight),
-                child: new Row(
-                  children: children.map<Widget>((Widget button) {
-                    return new Expanded(child: button);
-                  }).toList(),
-                ),
+              child: Column(
+                children: <Widget>[
+                  _buildHorizontalDivider(),
+                  _buildHorizontalButtons(),
+                ],
               ),
             ),
-          ),
         ),
       );
     }
   }
-}
-
-// A CustomPainter to draw the divider lines.
-//
-// Draws the cross-axis divider lines, used when the layout is horizontal.
-class _CupertinoHorizontalDividerPainter extends CustomPainter {
-  _CupertinoHorizontalDividerPainter(this.count);
-
-  final int count;
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final Paint paint = new Paint()..color = _kButtonDividerColor;
-
-    canvas.drawLine(Offset.zero, new Offset(size.width, 0.0), paint);
-    for (int i = 1; i < count; ++i) {
-      // TODO(abarth): Hide the divider when one of the adjacent buttons is
-      // highlighted.
-      final double x = size.width * i / count;
-      canvas.drawLine(new Offset(x, 0.0), new Offset(x, size.height), paint);
-    }
-  }
-
-  @override
-  bool shouldRepaint(_CupertinoHorizontalDividerPainter other) => count != other.count;
-}
-
-// A CustomPainter to draw the divider lines.
-//
-// Draws the cross-axis divider lines, used when the layout is vertical.
-class _CupertinoVerticalDividerPainter extends CustomPainter {
-  _CupertinoVerticalDividerPainter();
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final Paint paint = new Paint()..color = _kButtonDividerColor;
-    canvas.drawLine(const Offset(0.0, 0.0), new Offset(size.width, 0.0), paint);
-  }
-
-  @override
-  bool shouldRepaint(_CupertinoVerticalDividerPainter other) => false;
 }
