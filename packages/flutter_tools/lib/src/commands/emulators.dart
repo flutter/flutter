@@ -16,8 +16,11 @@ class EmulatorsCommand extends FlutterCommand {
   EmulatorsCommand() {
     argParser.addOption('launch',
         help: 'The full or partial ID of the emulator to launch.');
-    argParser.addOption('create',
-        help: 'A name for the Android emulator to create.');
+    argParser.addFlag('create',
+        help: 'Creates a new Android emulator.',
+        negatable: false);
+    argParser.addOption('name',
+        help: 'The name for the emulator being created.');
   }
 
   @override
@@ -43,7 +46,7 @@ class EmulatorsCommand extends FlutterCommand {
     if (argResults.wasParsed('launch')) {
       await _launchEmulator(argResults['launch']);
     } else if (argResults.wasParsed('create')) {
-      await _createEmulator(argResults['create']);
+      await _createEmulator(argResults['name']);
     } else {
       final String searchText =
           argResults.rest != null && argResults.rest.isNotEmpty
@@ -75,6 +78,18 @@ class EmulatorsCommand extends FlutterCommand {
   }
 
   Future<Null> _createEmulator(String name) async {
+    if (name == null) {
+      const String autoName = "flutter_emulator";
+      final Set<String> takenNames =
+          (await emulatorManager.getEmulatorsMatching(autoName))
+          .map((Emulator e) => e.id)
+          .toSet();
+      int suffix = 1;
+      name = autoName;
+      while (takenNames.contains(name)) {
+        name = '${name}_${++suffix}';
+      }
+    }
     final CreateEmulatorResult createResult =
         await emulatorManager.createEmulator(name);
 
