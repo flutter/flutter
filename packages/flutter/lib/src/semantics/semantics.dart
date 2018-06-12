@@ -310,6 +310,7 @@ class SemanticsProperties extends DiagnosticableTree {
     this.obscured,
     this.scopesRoute,
     this.namesRoute,
+    this.liveRegion,
     this.label,
     this.value,
     this.increasedValue,
@@ -433,6 +434,9 @@ class SemanticsProperties extends DiagnosticableTree {
   /// 
   ///  * [SemanticsFlag.namesRoute] for a description of how the name is used.
   final bool namesRoute;
+
+  /// If non-null, whether the node should be considered a live region.
+  final bool liveRegion;
 
   /// Provides a textual description of the widget.
   ///
@@ -2586,6 +2590,16 @@ class SemanticsConfiguration {
   bool get namesRoute => _hasFlag(SemanticsFlag.namesRoute);
   set namesRoute(bool value) {
     _setFlag(SemanticsFlag.namesRoute, value);
+  }
+
+  /// Whether the semantics node is a live region.
+  ///
+  /// See also:
+  ///
+  ///   * [SemanticsFlag.isLiveRegion], for a full description of live regions.
+  bool get liveRegion => _hasFlag(SemanticsFlag.isLiveRegion);
+  set liveRegion(bool value) {
+    _setFlag(SemanticsFlag.isLiveRegion, value);
   }
 
   /// The reading direction for the text in [label], [value], [hint],
