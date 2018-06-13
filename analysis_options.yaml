@@ -57,7 +57,7 @@ linter:
     - avoid_classes_with_only_static_members
     # - avoid_double_and_int_checks # only useful when targeting JS runtime
     - avoid_empty_else
-    # - avoid_field_initializers_in_const_classes # not yet tested
+    - avoid_field_initializers_in_const_classes
     - avoid_function_literals_in_foreach_calls
     - avoid_init_to_null
     # - avoid_js_rounded_ints # only useful when targeting JS runtime
