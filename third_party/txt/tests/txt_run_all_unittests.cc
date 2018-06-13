@@ -36,7 +36,7 @@ int main(int argc, char** argv) {
   }
   FXL_DCHECK(txt::GetFontDir().length() > 0);
 
-  fml::icu::InitializeICU();
+  fml::icu::InitializeICU("icudtl.dat");
   SkGraphics::Init();
   testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
