@@ -11,7 +11,7 @@ import 'package:meta/meta.dart';
 ///
 /// Generators are allowed to return `null`, in which case the context will
 /// store the `null` value as the value for that type.
-typedef Generator = dynamic Function();
+typedef dynamic Generator();
 
 /// An exception thrown by [AppContext] when you try to get a [Type] value from
 /// the context, and the instantiation of the value results in a dependency

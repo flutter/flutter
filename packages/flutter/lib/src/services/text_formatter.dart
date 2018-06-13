@@ -53,7 +53,7 @@ abstract class TextInputFormatter {
 
 /// Function signature expected for creating custom [TextInputFormatter]
 /// shorthands via [TextInputFormatter.withFunction];
-typedef TextInputFormatFunction = TextEditingValue Function(
+typedef TextEditingValue TextInputFormatFunction(
     TextEditingValue oldValue,
     TextEditingValue newValue,
 );

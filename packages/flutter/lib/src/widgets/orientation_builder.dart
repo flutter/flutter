@@ -10,7 +10,7 @@ import 'media_query.dart';
 /// Signature for a function that builds a widget given an [Orientation].
 ///
 /// Used by [OrientationBuilder.builder].
-typedef OrientationWidgetBuilder = Widget Function(BuildContext context, Orientation orientation);
+typedef Widget OrientationWidgetBuilder(BuildContext context, Orientation orientation);
 
 /// Builds a widget tree that can depend on the parent widget's orientation
 /// (distinct from the device orientation).

@@ -6,11 +6,11 @@ import 'basic_types.dart';
 import 'print.dart';
 
 /// Signature for [FlutterError.onError] handler.
-typedef FlutterExceptionHandler = void Function(FlutterErrorDetails details);
+typedef void FlutterExceptionHandler(FlutterErrorDetails details);
 
 /// Signature for [FlutterErrorDetails.informationCollector] callback
 /// and other callbacks that collect information into a string buffer.
-typedef InformationCollector = void Function(StringBuffer information);
+typedef void InformationCollector(StringBuffer information);
 
 /// Class for information provided to [FlutterExceptionHandler] callbacks.
 ///

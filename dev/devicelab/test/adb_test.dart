@@ -112,7 +112,7 @@ CommandArgs cmd({
   );
 }
 
-typedef ExitErrorFactory = dynamic Function();
+typedef dynamic ExitErrorFactory();
 
 class CommandArgs {
   CommandArgs({ this.command, this.arguments, this.environment });
