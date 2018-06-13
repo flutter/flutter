@@ -13,7 +13,6 @@
 #include "flutter/common/task_runners.h"
 #include "flutter/flow/skia_gpu_object.h"
 #include "flutter/fml/memory/weak_ptr.h"
-#include "flutter/lib/ui/isolate_name_server/isolate_name_server.h"
 #include "lib/fxl/build_config.h"
 #include "lib/tonic/dart_microtask_queue.h"
 #include "lib/tonic/dart_persistent_value.h"
@@ -47,8 +46,6 @@ class UIDartState : public tonic::DartState {
 
   fml::WeakPtr<GrContext> GetResourceContext() const;
 
-  IsolateNameServer* GetIsolateNameServer();
-
   template <class T>
   static flow::SkiaGPUObject<T> CreateGPUObject(sk_sp<T> object) {
     if (!object) {
@@ -68,8 +65,7 @@ class UIDartState : public tonic::DartState {
               fxl::RefPtr<flow::SkiaUnrefQueue> skia_unref_queue,
               std::string advisory_script_uri,
               std::string advisory_script_entrypoint,
-              std::string logger_prefix,
-              IsolateNameServer* isolate_name_server);
+              std::string logger_prefix);
 
   ~UIDartState() override;
 
@@ -94,7 +90,6 @@ class UIDartState : public tonic::DartState {
   std::unique_ptr<Window> window_;
   fxl::RefPtr<flow::SkiaUnrefQueue> skia_unref_queue_;
   tonic::DartMicrotaskQueue microtask_queue_;
-  IsolateNameServer* isolate_name_server_;
 
   void AddOrRemoveTaskObserver(bool add);
 };

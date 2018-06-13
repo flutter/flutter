@@ -39,7 +39,7 @@ class Engine final : public blink::RuntimeDelegate {
   };
 
   Engine(Delegate& delegate,
-         blink::DartVM& vm,
+         const blink::DartVM& vm,
          fxl::RefPtr<blink::DartSnapshot> isolate_snapshot,
          fxl::RefPtr<blink::DartSnapshot> shared_snapshot,
          blink::TaskRunners task_runners,

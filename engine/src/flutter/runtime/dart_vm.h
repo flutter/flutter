@@ -10,7 +10,6 @@
 #include <vector>
 
 #include "flutter/common/settings.h"
-#include "flutter/lib/ui/isolate_name_server/isolate_name_server.h"
 #include "flutter/runtime/dart_isolate.h"
 #include "flutter/runtime/dart_snapshot.h"
 #include "flutter/runtime/service_protocol.h"
@@ -44,8 +43,6 @@ class DartVM : public fxl::RefCountedThreadSafe<DartVM> {
 
   const DartSnapshot& GetVMSnapshot() const;
 
-  IsolateNameServer* GetIsolateNameServer();
-
   fxl::RefPtr<DartSnapshot> GetIsolateSnapshot() const;
   fxl::RefPtr<DartSnapshot> GetSharedSnapshot() const;
 
@@ -56,7 +53,6 @@ class DartVM : public fxl::RefCountedThreadSafe<DartVM> {
  private:
   const Settings settings_;
   const fxl::RefPtr<DartSnapshot> vm_snapshot_;
-  IsolateNameServer isolate_name_server_;
   const fxl::RefPtr<DartSnapshot> isolate_snapshot_;
   const fxl::RefPtr<DartSnapshot> shared_snapshot_;
   std::unique_ptr<fml::Mapping> platform_kernel_mapping_;

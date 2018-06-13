@@ -18,18 +18,4 @@ TEST(DartVM, SimpleInitialization) {
   ASSERT_EQ(vm->GetPlatformKernel().GetSize(), 0u);
 }
 
-TEST(DartVM, SimpleIsolateNameServer) {
-  Settings settings = {};
-  settings.task_observer_add = [](intptr_t, fxl::Closure) {};
-  settings.task_observer_remove = [](intptr_t) {};
-  auto vm = DartVM::ForProcess(settings);
-  auto ns = vm->GetIsolateNameServer();
-  ASSERT_EQ(ns->LookupIsolatePortByName("foobar"), ILLEGAL_PORT);
-  ASSERT_FALSE(ns->RemoveIsolateNameMapping("foobar"));
-  ASSERT_TRUE(ns->RegisterIsolatePortWithName(123, "foobar"));
-  ASSERT_FALSE(ns->RegisterIsolatePortWithName(123, "foobar"));
-  ASSERT_EQ(ns->LookupIsolatePortByName("foobar"), 123);
-  ASSERT_TRUE(ns->RemoveIsolateNameMapping("foobar"));
-}
-
 }  // namespace blink
