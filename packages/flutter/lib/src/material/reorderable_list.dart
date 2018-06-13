@@ -39,7 +39,7 @@ typedef void OnSwapCallback(int oldIndex, int newIndex);
 /// Note that this widget places its [children] in a [Column] or [Row] and not a [ListView].
 ///
 /// All [children] must have a key.
-class ReorderableListView extends StatefulWidget {
+class ReorderableListView extends StatelessWidget {
 
   /// Creates a reorderable list.
   const ReorderableListView({
@@ -82,47 +82,25 @@ class ReorderableListView extends StatefulWidget {
   /// In a horizontal list, this should match the width of the list items.
   final double dropAreaExtent;
 
-  @override
-  State<StatefulWidget> createState() {
-    return new _ReorderableListViewState();
-  }
-}
-
-class _ReorderableListViewState extends State<ReorderableListView> {
-  // We use an inner overlay so that the dragging list item doesn't draw outside of the list itself.
-  GlobalKey _overlayKey;
-
-  // This entry contains the scrolling list itself.
-  OverlayEntry _bottomOverlayEntry;
-
-  @override 
-  void initState() {
-    super.initState();
-    _overlayKey = new GlobalKey(debugLabel: '$this overlay key');
-    _bottomOverlayEntry = new OverlayEntry(
-      opaque: true,
-      builder: _buildOverlayContent,
-    );
-  }
-
-  Widget _buildOverlayContent(BuildContext context) {
-    return new _ReorderableListContent(
-      children: widget.children,
-      scrollDirection: widget.scrollDirection,
-      padding: widget.padding,
-      onSwap: widget.onSwap,
-      dropAreaExtent: widget.dropAreaExtent,
-    );
-  }
-
+  
   @override
   Widget build(BuildContext context) {
+    // We place the content inside of an Overlay to constrain dragging
+    // list items to the list's area of the screen.
     return new Overlay(
-      key: _overlayKey,
       initialEntries: <OverlayEntry>[
-        _bottomOverlayEntry,
+        new OverlayEntry(
+          opaque: true,
+          builder: (BuildContext context) => new _ReorderableListContent(
+            children: children,
+            scrollDirection: scrollDirection,
+            padding: padding,
+            onSwap: onSwap,
+            dropAreaExtent: dropAreaExtent,
+          ),
+        ),
     ]);
-  }
+  }  
 }
 
 // This widget is responsible for the inside of the Overlay in the
