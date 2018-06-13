@@ -121,7 +121,7 @@ Future<Null> pubGet({
     throwToolExit('$directory: pub did not update .packages file (pubspec.yaml file has a newer timestamp)');
 }
 
-typedef MessageFilter = String Function(String message);
+typedef String MessageFilter(String message);
 
 /// Runs pub in 'batch' mode, forwarding complete lines written by pub to its
 /// stdout/stderr streams to the corresponding stream of this process, optionally

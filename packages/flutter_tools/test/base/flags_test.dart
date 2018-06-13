@@ -12,7 +12,7 @@ import 'package:test/test.dart';
 import '../src/common.dart';
 import '../src/context.dart';
 
-typedef _TestMethod = FutureOr<Null> Function();
+typedef FutureOr<Null> _TestMethod();
 
 void main() {
   Cache.disableLocking();

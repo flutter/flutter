@@ -233,7 +233,7 @@ class Uuid {
 
 Clock get clock => context[Clock];
 
-typedef AsyncCallback = Future<Null> Function();
+typedef Future<Null> AsyncCallback();
 
 /// A [Timer] inspired class that:
 ///   - has a different initial value for the first callback delay

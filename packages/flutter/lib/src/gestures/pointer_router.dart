@@ -9,7 +9,7 @@ import 'package:flutter/foundation.dart';
 import 'events.dart';
 
 /// A callback that receives a [PointerEvent]
-typedef PointerRoute = void Function(PointerEvent event);
+typedef void PointerRoute(PointerEvent event);
 
 /// A routing table for [PointerEvent] events.
 class PointerRouter {

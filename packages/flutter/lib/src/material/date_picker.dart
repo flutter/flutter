@@ -1008,7 +1008,7 @@ class _DatePickerDialogState extends State<_DatePickerDialog> {
 /// Signature for predicating dates for enabled date selections.
 ///
 /// See [showDatePicker].
-typedef SelectableDayPredicate = bool Function(DateTime day);
+typedef bool SelectableDayPredicate(DateTime day);
 
 /// Shows a dialog containing a material design date picker.
 ///
