@@ -120,7 +120,6 @@ class KernelCompiler {
       '--sdk-root',
       sdkRoot,
       '--strong',
-      '--sync-async',
       '--target=flutter',
     ];
     if (trackWidgetCreation)
@@ -253,7 +252,6 @@ class ResidentCompiler {
       _sdkRoot,
       '--incremental',
       '--strong',
-      '--sync-async',
       '--target=flutter',
     ];
     if (outputPath != null) {
