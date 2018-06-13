@@ -18,9 +18,9 @@ import 'transitions.dart';
 /// This is typically used with a [HeroController] to provide an animation for
 /// [Hero] positions that looks nicer than a linear movement. For example, see
 /// [MaterialRectArcTween].
-typedef CreateRectTween = Tween<Rect> Function(Rect begin, Rect end);
+typedef Tween<Rect> CreateRectTween(Rect begin, Rect end);
 
-typedef _OnFlightEnded = void Function(_HeroFlight flight);
+typedef void _OnFlightEnded(_HeroFlight flight);
 
 enum _HeroFlightType {
   push, // Fly the "to" hero and animate with the "to" route.
