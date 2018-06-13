@@ -1,4 +1,4 @@
 name: engine_tests
 dependencies:
-  test: any
-  path: any
+  test: 0.12.40
+  path: 1.6.0
