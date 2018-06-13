@@ -39,7 +39,7 @@ class DartIsolate : public UIDartState {
   // bindings. From the VM's perspective, this isolate is not special in any
   // way.
   static fml::WeakPtr<DartIsolate> CreateRootIsolate(
-      DartVM* vm,
+      const DartVM* vm,
       fxl::RefPtr<DartSnapshot> isolate_snapshot,
       fxl::RefPtr<DartSnapshot> shared_snapshot,
       TaskRunners task_runners,
@@ -50,7 +50,7 @@ class DartIsolate : public UIDartState {
       std::string advisory_script_entrypoint,
       Dart_IsolateFlags* flags = nullptr);
 
-  DartIsolate(DartVM* vm,
+  DartIsolate(const DartVM* vm,
               fxl::RefPtr<DartSnapshot> isolate_snapshot,
               fxl::RefPtr<DartSnapshot> shared_snapshot,
               TaskRunners task_runners,
@@ -84,7 +84,7 @@ class DartIsolate : public UIDartState {
 
   void AddIsolateShutdownCallback(fxl::Closure closure);
 
-  DartVM* GetDartVM() const;
+  const DartVM* GetDartVM() const;
 
   fxl::RefPtr<DartSnapshot> GetIsolateSnapshot() const;
   fxl::RefPtr<DartSnapshot> GetSharedSnapshot() const;
@@ -107,7 +107,7 @@ class DartIsolate : public UIDartState {
   };
   friend class DartVM;
 
-  DartVM* const vm_ = nullptr;
+  const DartVM* vm_ = nullptr;
   Phase phase_ = Phase::Unknown;
   const fxl::RefPtr<DartSnapshot> isolate_snapshot_;
   const fxl::RefPtr<DartSnapshot> shared_snapshot_;

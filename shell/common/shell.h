@@ -72,7 +72,7 @@ class Shell final : public PlatformView::Delegate,
 
   fml::WeakPtr<PlatformView> GetPlatformView();
 
-  blink::DartVM& GetDartVM() const;
+  const blink::DartVM& GetDartVM() const;
 
   bool IsSetup() const;
 

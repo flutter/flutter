@@ -7,7 +7,6 @@ dart_ui_files = [
   "$flutter_root/lib/ui/geometry.dart",
   "$flutter_root/lib/ui/hash_codes.dart",
   "$flutter_root/lib/ui/hooks.dart",
-  "$flutter_root/lib/ui/isolate_name_server.dart",
   "$flutter_root/lib/ui/lerp.dart",
   "$flutter_root/lib/ui/natives.dart",
   "$flutter_root/lib/ui/painting.dart",

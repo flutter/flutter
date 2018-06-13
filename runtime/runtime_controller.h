@@ -24,7 +24,7 @@ class Window;
 class RuntimeController final : public WindowClient {
  public:
   RuntimeController(RuntimeDelegate& client,
-                    DartVM* vm,
+                    const DartVM* vm,
                     fxl::RefPtr<DartSnapshot> isolate_snapshot,
                     fxl::RefPtr<DartSnapshot> shared_snapshot,
                     TaskRunners task_runners,
@@ -82,7 +82,7 @@ class RuntimeController final : public WindowClient {
   };
 
   RuntimeDelegate& client_;
-  DartVM* const vm_;
+  const DartVM* vm_;
   fxl::RefPtr<DartSnapshot> isolate_snapshot_;
   fxl::RefPtr<DartSnapshot> shared_snapshot_;
   TaskRunners task_runners_;
@@ -95,7 +95,7 @@ class RuntimeController final : public WindowClient {
   std::pair<bool, uint32_t> root_isolate_return_code_ = {false, 0};
 
   RuntimeController(RuntimeDelegate& client,
-                    DartVM* vm,
+                    const DartVM* vm,
                     fxl::RefPtr<DartSnapshot> isolate_snapshot,
                     fxl::RefPtr<DartSnapshot> shared_snapshot,
                     TaskRunners task_runners,

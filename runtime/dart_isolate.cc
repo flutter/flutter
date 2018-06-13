@@ -33,7 +33,7 @@
 namespace blink {
 
 fml::WeakPtr<DartIsolate> DartIsolate::CreateRootIsolate(
-    DartVM* vm,
+    const DartVM* vm,
     fxl::RefPtr<DartSnapshot> isolate_snapshot,
     fxl::RefPtr<DartSnapshot> shared_snapshot,
     TaskRunners task_runners,
@@ -94,7 +94,7 @@ fml::WeakPtr<DartIsolate> DartIsolate::CreateRootIsolate(
   return embedder_isolate;
 }
 
-DartIsolate::DartIsolate(DartVM* vm,
+DartIsolate::DartIsolate(const DartVM* vm,
                          fxl::RefPtr<DartSnapshot> isolate_snapshot,
                          fxl::RefPtr<DartSnapshot> shared_snapshot,
                          TaskRunners task_runners,
@@ -110,8 +110,7 @@ DartIsolate::DartIsolate(DartVM* vm,
                   std::move(unref_queue),
                   advisory_script_uri,
                   advisory_script_entrypoint,
-                  vm->GetSettings().log_tag,
-                  vm->GetIsolateNameServer()),
+                  vm->GetSettings().log_tag),
       vm_(vm),
       isolate_snapshot_(std::move(isolate_snapshot)),
       shared_snapshot_(std::move(shared_snapshot)),
@@ -132,7 +131,7 @@ DartIsolate::Phase DartIsolate::GetPhase() const {
   return phase_;
 }
 
-DartVM* DartIsolate::GetDartVM() const {
+const DartVM* DartIsolate::GetDartVM() const {
   return vm_;
 }
 
@@ -652,7 +651,7 @@ DartIsolate::CreateDartVMAndEmbedderObjectPair(
     return {nullptr, {}};
   }
 
-  DartVM* const vm = embedder_isolate->GetDartVM();
+  const DartVM* vm = embedder_isolate->GetDartVM();
 
   if (!is_root_isolate) {
     auto raw_embedder_isolate = embedder_isolate.release();

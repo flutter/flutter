@@ -471,10 +471,6 @@ const DartSnapshot& DartVM::GetVMSnapshot() const {
   return *vm_snapshot_.get();
 }
 
-IsolateNameServer* DartVM::GetIsolateNameServer() {
-  return &isolate_name_server_;
-}
-
 fxl::RefPtr<DartSnapshot> DartVM::GetIsolateSnapshot() const {
   return isolate_snapshot_;
 }
