@@ -205,7 +205,7 @@ The following subset of the daemon domain is available in `flutter run --machine
   - [`shutdown`](#daemonshutdown)
 - Events
   - [`connected`](#daemonconnected)
-  - [`logMessage`](#daemonlogMessage)
+  - [`logMessage`](#daemonlogmessage)
 
 ### app domain
 
@@ -213,11 +213,11 @@ The following subset of the app domain is available in `flutter run --machine`. 
 
 - Commands
   - [`restart`](#apprestart)
-  - [`callServiceExtension`](#appcallServiceExtension)
+  - [`callServiceExtension`](#appcallserviceextension)
   - [`stop`](#appstop)
 - Events
   - [`start`](#appstart)
-  - [`debugPort`](#appdebugPort)
+  - [`debugPort`](#appdebugport)
   - [`started`](#appstarted)
   - [`log`](#applog)
   - [`progress`](#appprogress)
