@@ -229,6 +229,6 @@ void main() {
     );
     final CurvedAnimation curved = new CurvedAnimation(parent: controller, curve: new BogusCurve());
 
-    expect(() { curved.value; }, throwsFlutterError);
+    expect(() { noop(curved.value); }, throwsFlutterError);
   });
 }

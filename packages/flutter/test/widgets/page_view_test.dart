@@ -595,7 +595,7 @@ void main() {
       (WidgetTester tester) async {
     final PageController controller = new PageController();
     try {
-      controller.page;
+      noop(controller.page);
       fail('Accessing page before attaching should fail.');
     } on AssertionError catch (e) {
       expect(
@@ -630,7 +630,7 @@ void main() {
       ),
     );
     try {
-      controller.page;
+      noop(controller.page);
       fail('Accessing page after detaching all PageViews should fail.');
     } on AssertionError catch (e) {
       expect(
