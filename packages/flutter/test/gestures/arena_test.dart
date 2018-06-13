@@ -5,7 +5,7 @@
 import 'package:flutter/gestures.dart';
 import 'package:test/test.dart';
 
-typedef void GestureArenaCallback(Object key);
+typedef GestureArenaCallback = void Function(Object key);
 
 const int primaryKey = 4;
 

@@ -24,7 +24,7 @@ export 'package:flutter/rendering.dart' show SelectionChangedCause;
 
 /// Signature for the callback that reports when the user changes the selection
 /// (including the cursor location).
-typedef void SelectionChangedCallback(TextSelection selection, SelectionChangedCause cause);
+typedef SelectionChangedCallback = void Function(TextSelection selection, SelectionChangedCause cause);
 
 const Duration _kCursorBlinkHalfPeriod = const Duration(milliseconds: 500);
 

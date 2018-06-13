@@ -22,7 +22,7 @@ import 'print.dart';
 /// "type" key will be set to the string `_extensionType` to indicate
 /// that this is a return value from a service extension, and the
 /// "method" key will be set to the full name of the method.
-typedef Future<Map<String, dynamic>> ServiceExtensionCallback(Map<String, String> parameters);
+typedef ServiceExtensionCallback = Future<Map<String, dynamic>> Function(Map<String, String> parameters);
 
 /// Base class for mixins that provide singleton services (also known as
 /// "bindings").
