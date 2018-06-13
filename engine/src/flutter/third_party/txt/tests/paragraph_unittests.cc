@@ -419,41 +419,46 @@ TEST_F(ParagraphTest, DISABLE_ON_WINDOWS(RightAlignParagraph)) {
   ASSERT_TRUE(paragraph->records_[0].style().equals(text_style));
   ASSERT_DOUBLE_EQ(paragraph->records_[0].offset().y(), expected_y);
   expected_y += 30;
-  ASSERT_DOUBLE_EQ(
+  ASSERT_NEAR(
       paragraph->records_[0].offset().x(),
       paragraph->width_ -
-          paragraph->breaker_.getWidths()[paragraph->records_[0].line()]);
+          paragraph->breaker_.getWidths()[paragraph->records_[0].line()],
+      2.0);
 
   ASSERT_TRUE(paragraph->records_[1].style().equals(text_style));
   ASSERT_DOUBLE_EQ(paragraph->records_[1].offset().y(), expected_y);
   expected_y += 30;
-  ASSERT_DOUBLE_EQ(
+  ASSERT_NEAR(
       paragraph->records_[1].offset().x(),
       paragraph->width_ -
-          paragraph->breaker_.getWidths()[paragraph->records_[1].line()]);
+          paragraph->breaker_.getWidths()[paragraph->records_[1].line()],
+      2.0);
 
   ASSERT_TRUE(paragraph->records_[2].style().equals(text_style));
   ASSERT_DOUBLE_EQ(paragraph->records_[2].offset().y(), expected_y);
   expected_y += 30;
-  ASSERT_DOUBLE_EQ(
+  ASSERT_NEAR(
       paragraph->records_[2].offset().x(),
       paragraph->width_ -
-          paragraph->breaker_.getWidths()[paragraph->records_[2].line()]);
+          paragraph->breaker_.getWidths()[paragraph->records_[2].line()],
+      2.0);
 
   ASSERT_TRUE(paragraph->records_[3].style().equals(text_style));
   ASSERT_DOUBLE_EQ(paragraph->records_[3].offset().y(), expected_y);
   expected_y += 30 * 10;
-  ASSERT_DOUBLE_EQ(
+  ASSERT_NEAR(
       paragraph->records_[3].offset().x(),
       paragraph->width_ -
-          paragraph->breaker_.getWidths()[paragraph->records_[3].line()]);
+          paragraph->breaker_.getWidths()[paragraph->records_[3].line()],
+      2.0);
 
   ASSERT_TRUE(paragraph->records_[13].style().equals(text_style));
   ASSERT_DOUBLE_EQ(paragraph->records_[13].offset().y(), expected_y);
-  ASSERT_DOUBLE_EQ(
+  ASSERT_NEAR(
       paragraph->records_[13].offset().x(),
       paragraph->width_ -
-          paragraph->breaker_.getWidths()[paragraph->records_[13].line()]);
+          paragraph->breaker_.getWidths()[paragraph->records_[13].line()],
+      2.0);
 
   ASSERT_EQ(paragraph_style.text_align,
             paragraph->GetParagraphStyle().text_align);
@@ -523,45 +528,47 @@ TEST_F(ParagraphTest, DISABLE_ON_WINDOWS(CenterAlignParagraph)) {
   ASSERT_TRUE(paragraph->records_[0].style().equals(text_style));
   ASSERT_DOUBLE_EQ(paragraph->records_[0].offset().y(), expected_y);
   expected_y += 30;
-  ASSERT_DOUBLE_EQ(
-      paragraph->records_[0].offset().x(),
-      (paragraph->width_ -
-       paragraph->breaker_.getWidths()[paragraph->records_[0].line()]) /
-          2);
+  ASSERT_NEAR(paragraph->records_[0].offset().x(),
+              (paragraph->width_ -
+               paragraph->breaker_.getWidths()[paragraph->records_[0].line()]) /
+                  2,
+              2.0);
 
   ASSERT_TRUE(paragraph->records_[1].style().equals(text_style));
   ASSERT_DOUBLE_EQ(paragraph->records_[1].offset().y(), expected_y);
   expected_y += 30;
-  ASSERT_DOUBLE_EQ(
-      paragraph->records_[1].offset().x(),
-      (paragraph->width_ -
-       paragraph->breaker_.getWidths()[paragraph->records_[1].line()]) /
-          2);
+  ASSERT_NEAR(paragraph->records_[1].offset().x(),
+              (paragraph->width_ -
+               paragraph->breaker_.getWidths()[paragraph->records_[1].line()]) /
+                  2,
+              2.0);
 
   ASSERT_TRUE(paragraph->records_[2].style().equals(text_style));
   ASSERT_DOUBLE_EQ(paragraph->records_[2].offset().y(), expected_y);
   expected_y += 30;
-  ASSERT_EQ(paragraph->records_[2].offset().x(),
-            (paragraph->width_ -
-             paragraph->breaker_.getWidths()[paragraph->records_[2].line()]) /
-                2);
+  ASSERT_NEAR(paragraph->records_[2].offset().x(),
+              (paragraph->width_ -
+               paragraph->breaker_.getWidths()[paragraph->records_[2].line()]) /
+                  2,
+              2.0);
 
   ASSERT_TRUE(paragraph->records_[3].style().equals(text_style));
   ASSERT_DOUBLE_EQ(paragraph->records_[3].offset().y(), expected_y);
   expected_y += 30 * 10;
-  ASSERT_DOUBLE_EQ(
-      paragraph->records_[3].offset().x(),
-      (paragraph->width_ -
-       paragraph->breaker_.getWidths()[paragraph->records_[3].line()]) /
-          2);
+  ASSERT_NEAR(paragraph->records_[3].offset().x(),
+              (paragraph->width_ -
+               paragraph->breaker_.getWidths()[paragraph->records_[3].line()]) /
+                  2,
+              2.0);
 
   ASSERT_TRUE(paragraph->records_[13].style().equals(text_style));
   ASSERT_DOUBLE_EQ(paragraph->records_[13].offset().y(), expected_y);
-  ASSERT_DOUBLE_EQ(
+  ASSERT_NEAR(
       paragraph->records_[13].offset().x(),
       (paragraph->width_ -
        paragraph->breaker_.getWidths()[paragraph->records_[13].line()]) /
-          2);
+          2,
+      2.0);
 
   ASSERT_EQ(paragraph_style.text_align,
             paragraph->GetParagraphStyle().text_align);

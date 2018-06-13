@@ -35,7 +35,7 @@ int main(int argc, char** argv) {
   }
   FXL_DCHECK(txt::GetFontDir().length() > 0);
 
-  fml::icu::InitializeICU();
+  fml::icu::InitializeICU("icudtl.dat");
 
   ::benchmark::RunSpecifiedBenchmarks();
 }
