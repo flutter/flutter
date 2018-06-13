@@ -42,7 +42,6 @@ const TextStyle _kCupertinoDialogActionStyle = const TextStyle(
 
 const double _kCupertinoDialogWidth = 270.0;
 const BoxDecoration _kCupertinoDialogBlurOverlayDecoration = const BoxDecoration(
-  borderRadius: const BorderRadius.all(const Radius.circular(_kDialogCornerRadius)),
   color: CupertinoColors.white,
   backgroundBlendMode: BlendMode.overlay,
 );
@@ -175,11 +174,14 @@ class CupertinoAlertDialog extends StatelessWidget {
   final ScrollController actionScrollController;
 
   Widget _buildBlurBackground() {
-    return new BackdropFilter(
-      filter: new ImageFilter.blur(sigmaX: 10.0, sigmaY: 10.0),
-      child: new Container(
-        width: _kCupertinoDialogWidth,
-        decoration: _kCupertinoDialogBlurOverlayDecoration,
+    return new ClipRRect(
+      borderRadius: const BorderRadius.all(const Radius.circular(_kDialogCornerRadius)),
+      child: new BackdropFilter(
+        filter: new ImageFilter.blur(sigmaX: 10.0, sigmaY: 10.0),
+        child: new Container(
+          width: _kCupertinoDialogWidth,
+          decoration: _kCupertinoDialogBlurOverlayDecoration,
+        ),
       ),
     );
   }
