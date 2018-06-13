@@ -61,7 +61,7 @@ void main() {
 
       expect(
         verify(usage.sendTiming(
-                typed(captureAny), typed(captureAny), typed(captureAny),
+                captureAny, captureAny, captureAny,
                 label: captureAnyNamed('label'))).captured,
         <dynamic>['flutter', 'dummy', const Duration(milliseconds: 1000), null]
       );
@@ -80,7 +80,7 @@ void main() {
       await flutterCommand.run();
       verify(clock.now()).called(2);
       verifyNever(usage.sendTiming(
-                   typed(captureAny), typed(captureAny), typed(captureAny),
+                   captureAny, captureAny, captureAny,
                    label: captureAnyNamed('label')));
     },
     overrides: <Type, Generator>{
@@ -106,7 +106,7 @@ void main() {
       verify(clock.now()).called(2);
       expect(
         verify(usage.sendTiming(
-                typed(captureAny), typed(captureAny), typed(captureAny),
+                captureAny, captureAny, captureAny,
                 label: captureAnyNamed('label'))).captured,
         <dynamic>[
           'flutter',
@@ -137,7 +137,7 @@ void main() {
 
         expect(
           verify(usage.sendTiming(
-                  typed(captureAny), typed(captureAny), typed(captureAny),
+                  captureAny, captureAny, captureAny,
                   label: captureAnyNamed('label'))).captured,
           <dynamic>[
             'flutter',

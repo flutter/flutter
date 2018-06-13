@@ -27,7 +27,7 @@ import '../runner/flutter_command.dart';
 /// ```
 const Map<String, String> _kManuallyPinnedDependencies = const <String, String>{
   // Add pinned packages here.
-  'mockito': '3.0.0-alpha+5', // TODO(aam): https://github.com/dart-lang/mockito/issues/110
+  'mockito': '3.0.0-beta', // TODO(aam): https://github.com/dart-lang/mockito/issues/110
 };
 
 class UpdatePackagesCommand extends FlutterCommand {
