@@ -23,7 +23,7 @@ export 'dart:ui' show TextAffinity;
 class TextInputType {
   const TextInputType._(this.index) : signed = null, decimal = null;
 
-  /// Optimize for textual information.
+  /// Optimize for numerical information.
   ///
   /// Requests a numeric keyboard with additional settings.
   /// The [signed] and [decimal] parameters are optional.
@@ -59,7 +59,7 @@ class TextInputType {
   /// fields.
   static const TextInputType multiline = const TextInputType._(1);
 
-  /// Optimize for numerical information.
+  /// Optimize for unsigned numerical information without a decimal point.
   ///
   /// Requests a default keyboard with ready access to the number keys.
   /// Additional options, such as decimal point and/or positive/negative
@@ -94,7 +94,7 @@ class TextInputType {
     text, multiline, number, phone, datetime, emailAddress, url,
   ];
 
-  // Corresponding string name for each the [values].
+  // Corresponding string name for each of the [values].
   static const List<String> _names = const <String>[
     'text', 'multiline', 'number', 'phone', 'datetime', 'emailAddress', 'url',
   ];
