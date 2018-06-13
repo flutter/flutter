@@ -260,6 +260,10 @@ class FlutterPlugin implements Plugin<Project> {
         if (project.hasProperty('verbose')) {
             verboseValue = project.property('verbose').toBoolean()
         }
+        Boolean previewDart2Value = true
+        if (project.hasProperty('preview-dart-2')) {
+            previewDart2Value = project.property('preview-dart-2').toBoolean()
+        }
         String[] fileSystemRootsValue = null
         if (project.hasProperty('filesystem-roots')) {
             fileSystemRootsValue = project.property('filesystem-roots').split('\\|')
@@ -311,6 +315,7 @@ class FlutterPlugin implements Plugin<Project> {
                 localEngineSrcPath this.localEngineSrcPath
                 targetPath target
                 verbose verboseValue
+                previewDart2 previewDart2Value
                 fileSystemRoots fileSystemRootsValue
                 fileSystemScheme fileSystemSchemeValue
                 trackWidgetCreation trackWidgetCreationValue
@@ -355,6 +360,8 @@ abstract class BaseFlutterTask extends DefaultTask {
     @Optional @Input
     Boolean verbose
     @Optional @Input
+    Boolean previewDart2
+    @Optional @Input
     String[] fileSystemRoots
     @Optional @Input
     String fileSystemScheme
@@ -376,10 +383,12 @@ abstract class BaseFlutterTask extends DefaultTask {
         if (buildMode != 'debug') {
             // For AOT builds, include the gen_snapshot depfile.
             FileCollection depfiles = project.files("${intermediateDir}/snapshot.d")
-            // Include the kernel compiler depfile, since kernel compile is the
-            // first stage of AOT build in this mode, and it includes all the
-            // Dart sources.
-            depfiles += project.files("${intermediateDir}/kernel_compile.d")
+            if (previewDart2) {
+                // For Dart 2, also include the kernel compiler depfile, since
+                // kernel compile is the first stage of AOT build in this mode,
+                // and it includes all the Dart sources.
+                depfiles += project.files("${intermediateDir}/kernel_compile.d")
+            }
             return depfiles
         }
         return project.files("${intermediateDir}/snapshot_blob.bin.d")
@@ -406,6 +415,11 @@ abstract class BaseFlutterTask extends DefaultTask {
                 args "--target", targetPath
                 args "--target-platform", "android-arm"
                 args "--output-dir", "${intermediateDir}"
+                if (previewDart2) {
+                    args "--preview-dart-2"
+                } else {
+                    args "--no-preview-dart-2"
+                }
                 if (trackWidgetCreation) {
                     args "--track-widget-creation"
                 }
@@ -438,6 +452,11 @@ abstract class BaseFlutterTask extends DefaultTask {
             if (verbose) {
                 args "--verbose"
             }
+            if (previewDart2) {
+                args "--preview-dart-2"
+            } else {
+                args "--no-preview-dart-2"
+            }
             if (fileSystemRoots != null) {
                 for (root in fileSystemRoots) {
                     args "--filesystem-root", root
@@ -456,6 +475,9 @@ abstract class BaseFlutterTask extends DefaultTask {
                 args "--precompiled"
             } else {
                 args "--depfile", "${intermediateDir}/snapshot_blob.bin.d"
+                if (!previewDart2) {
+                    args "--snapshot", "${intermediateDir}/snapshot_blob.bin"
+                }
             }
             args "--asset-dir", "${intermediateDir}/flutter_assets"
         }
@@ -511,7 +533,9 @@ class FlutterTask extends BaseFlutterTask {
             // We have a dependencies file. Add a dependency on gen_snapshot as well, since the
             // snapshots have to be rebuilt if it changes.
             sources += readDependencies(project.file("${intermediateDir}/gen_snapshot.d"))
-            sources += readDependencies(project.file("${intermediateDir}/frontend_server.d"))
+            if (previewDart2) {
+                sources += readDependencies(project.file("${intermediateDir}/frontend_server.d"))
+            }
             if (localEngineSrcPath != null) {
                 sources += project.files("$localEngineSrcPath/$localEngine")
             }

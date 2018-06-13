@@ -362,6 +362,7 @@ class IOSSimulator extends Device {
     // The build mode for the simulator is always debug.
 
     final BuildInfo debugBuildInfo = new BuildInfo(BuildMode.debug, buildInfo.flavor,
+        previewDart2: buildInfo.previewDart2,
         trackWidgetCreation: buildInfo.trackWidgetCreation,
         extraFrontEndOptions: buildInfo.extraFrontEndOptions,
         extraGenSnapshotOptions: buildInfo.extraGenSnapshotOptions,
@@ -389,10 +390,12 @@ class IOSSimulator extends Device {
   }
 
   Future<Null> _sideloadUpdatedAssetsForInstalledApplicationBundle(ApplicationPackage app, BuildInfo buildInfo, String mainPath) {
-    // Run compiler to produce kernel file for the application.
+    // When running in previewDart2 mode, we still need to run compiler to
+    // produce kernel file for the application.
     return bundle.build(
       mainPath: mainPath,
-      precompiledSnapshot: false,
+      precompiledSnapshot: !buildInfo.previewDart2,
+      previewDart2: buildInfo.previewDart2,
       trackWidgetCreation: buildInfo.trackWidgetCreation,
     );
   }
