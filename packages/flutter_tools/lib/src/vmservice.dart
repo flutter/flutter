@@ -953,7 +953,7 @@ class VM extends ServiceObjectOwner {
     if (!isFlutterEngine)
       return;
     _viewCache.clear();
-    for (Isolate isolate in isolates) {
+    for (Isolate isolate in isolates.toList()) {
       await vmService.vm.invokeRpc('_flutter.listViews',
           timeout: kLongRequestTimeout,
           params: <String, dynamic> {'isolateId': isolate.id});
