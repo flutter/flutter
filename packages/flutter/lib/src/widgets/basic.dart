@@ -4246,7 +4246,8 @@ class Flow extends MultiChildRenderObjectWidget {
 ///
 /// When all the text uses the same style, consider using the [Text] widget,
 /// which is less verbose and integrates with [DefaultTextStyle] for default
-/// styling.
+/// styling. The [Text.rich] constructor also allows you to style multiple spans
+/// with the default text style while still allowing specified styles per span.
 ///
 /// ## Sample code
 ///
