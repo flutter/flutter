@@ -106,7 +106,13 @@ class _ReorderableListViewState extends State<ReorderableListView> {
   }
 
   Widget _buildOverlayContent(BuildContext context) {
-    return new _ReorderableListContent(widget);
+    return new _ReorderableListContent(
+      children: widget.children,
+      scrollDirection: widget.scrollDirection,
+      padding: widget.padding,
+      onSwap: widget.onSwap,
+      dropAreaExtent: widget.dropAreaExtent,
+    );
   }
 
   @override
@@ -119,14 +125,10 @@ class _ReorderableListViewState extends State<ReorderableListView> {
   }
 }
 
-// This widget goes inside of the Overlay in the ReorderableListView.
+// This widget is responsible for the inside of the Overlay in the
+// ReorderableListView.
 class _ReorderableListContent extends StatefulWidget {
-  _ReorderableListContent(ReorderableListView parent)
-      : children = parent.children,
-        scrollDirection = parent.scrollDirection,
-        padding = parent.padding,
-        onSwap = parent.onSwap,
-        dropAreaExtent = parent.dropAreaExtent;
+  const _ReorderableListContent({this.children, this.scrollDirection, this.padding, this.onSwap, this.dropAreaExtent});
         
   final List<Widget> children;
   final Axis scrollDirection;
