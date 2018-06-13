@@ -154,6 +154,21 @@ tasks:
     stage: devicelab
     required_agent_capabilities: ["mac/android"]
 
+  hot_mode_dev_cycle__benchmark_dart1:
+    description: >
+      Measures the performance of Dart VM hot patching feature under
+      --no-preview-dart-2 option, that disables Dart 2.0 frontend.
+    stage: devicelab
+    required_agent_capabilities: ["mac/android"]
+
+  hot_mode_dev_cycle_ios__benchmark_dart1:
+    description: >
+      Measures the performance of Dart VM hot patching feature under
+      --no-preview-dart-2 option, that disables Dart 2.0 frontend.
+    stage: devicelab_ios
+    required_agent_capabilities: ["mac/ios"]
+    flaky: true
+
   complex_layout_scroll_perf__memory:
     description: >
       Measures memory usage of the scroll performance test.

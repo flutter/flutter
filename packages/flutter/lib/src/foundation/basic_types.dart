@@ -12,7 +12,7 @@ export 'dart:ui' show VoidCallback;
 /// Signature for callbacks that report that an underlying value has changed.
 ///
 /// See also [ValueSetter].
-typedef ValueChanged<T> = void Function(T value);
+typedef void ValueChanged<T>(T value);
 
 /// Signature for callbacks that report that a value has been set.
 ///
@@ -26,7 +26,7 @@ typedef ValueChanged<T> = void Function(T value);
 ///
 ///  * [ValueGetter], the getter equivalent of this signature.
 ///  * [AsyncValueSetter], an asynchronous version of this signature.
-typedef ValueSetter<T> = void Function(T value);
+typedef void ValueSetter<T>(T value);
 
 /// Signature for callbacks that are to report a value on demand.
 ///
@@ -34,10 +34,10 @@ typedef ValueSetter<T> = void Function(T value);
 ///
 ///  * [ValueSetter], the setter equivalent of this signature.
 ///  * [AsyncValueGetter], an asynchronous version of this signature.
-typedef ValueGetter<T> = T Function();
+typedef T ValueGetter<T>();
 
 /// Signature for callbacks that filter an iterable.
-typedef IterableFilter<T> = Iterable<T> Function(Iterable<T> input);
+typedef Iterable<T> IterableFilter<T>(Iterable<T> input);
 
 /// Signature of callbacks that have no arguments and return no data, but that
 /// return a [Future] to indicate when their work is complete.
@@ -47,7 +47,7 @@ typedef IterableFilter<T> = Iterable<T> Function(Iterable<T> input);
 ///  * [VoidCallback], a synchronous version of this signature.
 ///  * [AsyncValueGetter], a signature for asynchronous getters.
 ///  * [AsyncValueSetter], a signature for asynchronous setters.
-typedef AsyncCallback = Future<Null> Function();
+typedef Future<Null> AsyncCallback();
 
 /// Signature for callbacks that report that a value has been set and return a
 /// [Future] that completes when the value has been saved.
@@ -56,7 +56,7 @@ typedef AsyncCallback = Future<Null> Function();
 ///
 ///  * [ValueSetter], a synchronous version of this signature.
 ///  * [AsyncValueGetter], the getter equivalent of this signature.
-typedef AsyncValueSetter<T> = Future<Null> Function(T value);
+typedef Future<Null> AsyncValueSetter<T>(T value);
 
 /// Signature for callbacks that are to asynchronously report a value on demand.
 ///
@@ -64,7 +64,7 @@ typedef AsyncValueSetter<T> = Future<Null> Function(T value);
 ///
 ///  * [ValueGetter], a synchronous version of this signature.
 ///  * [AsyncValueSetter], the setter equivalent of this signature.
-typedef AsyncValueGetter<T> = Future<T> Function();
+typedef Future<T> AsyncValueGetter<T>();
 
 
 // BITFIELD

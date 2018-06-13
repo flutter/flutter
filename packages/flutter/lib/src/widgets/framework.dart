@@ -829,7 +829,7 @@ enum _StateLifecycle {
 }
 
 /// The signature of [State.setState] functions.
-typedef StateSetter = void Function(VoidCallback fn);
+typedef void StateSetter(VoidCallback fn);
 
 /// The logic and internal state for a [StatefulWidget].
 ///
@@ -1751,7 +1751,7 @@ class _InactiveElements {
 ///
 /// It is safe to call `element.visitChildElements` reentrantly within
 /// this callback.
-typedef ElementVisitor = void Function(Element element);
+typedef void ElementVisitor(Element element);
 
 /// A handle to the location of a widget in the widget tree.
 ///
@@ -3518,7 +3518,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
 ///  * [FlutterError.reportError], which is typically called with the same
 ///    [FlutterErrorDetails] object immediately prior to [ErrorWidget.builder]
 ///    being called.
-typedef ErrorWidgetBuilder = Widget Function(FlutterErrorDetails details);
+typedef Widget ErrorWidgetBuilder(FlutterErrorDetails details);
 
 /// A widget that renders an exception's message.
 ///
@@ -3581,13 +3581,13 @@ class ErrorWidget extends LeafRenderObjectWidget {
 /// or [State.build].
 ///
 /// Used by [Builder.builder], [OverlayEntry.builder], etc.
-typedef WidgetBuilder = Widget Function(BuildContext context);
+typedef Widget WidgetBuilder(BuildContext context);
 
 /// Signature for a function that creates a widget for a given index, e.g., in a
 /// list.
 ///
 /// Used by [ListView.builder] and other APIs that use lazily-generated widgets.
-typedef IndexedWidgetBuilder = Widget Function(BuildContext context, int index);
+typedef Widget IndexedWidgetBuilder(BuildContext context, int index);
 
 /// A builder that builds a widget given a child.
 ///
@@ -3595,7 +3595,7 @@ typedef IndexedWidgetBuilder = Widget Function(BuildContext context, int index);
 ///
 /// Used by [AnimatedBuilder.builder], as well as [WidgetsApp.builder] and
 /// [MaterialApp.builder].
-typedef TransitionBuilder = Widget Function(BuildContext context, Widget child);
+typedef Widget TransitionBuilder(BuildContext context, Widget child);
 
 /// An [Element] that composes other [Element]s.
 ///

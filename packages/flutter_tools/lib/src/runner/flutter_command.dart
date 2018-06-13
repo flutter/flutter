@@ -182,6 +182,10 @@ abstract class FlutterCommand extends Command<Null> {
   }
 
   BuildInfo getBuildInfo() {
+    final bool previewDart2 = argParser.options.containsKey('preview-dart-2')
+        ? argResults['preview-dart-2']
+        : true;
+
     TargetPlatform targetPlatform;
     if (argParser.options.containsKey('target-platform') &&
         argResults['target-platform'] != 'default') {
@@ -191,6 +195,10 @@ abstract class FlutterCommand extends Command<Null> {
     final bool trackWidgetCreation = argParser.options.containsKey('track-widget-creation')
         ? argResults['track-widget-creation']
         : false;
+    if (trackWidgetCreation == true && previewDart2 == false) {
+      throw new UsageException(
+          '--track-widget-creation is valid only when --preview-dart-2 is specified.', null);
+    }
 
     int buildNumber;
     try {
@@ -206,6 +214,7 @@ abstract class FlutterCommand extends Command<Null> {
       argParser.options.containsKey('flavor')
         ? argResults['flavor']
         : null,
+      previewDart2: previewDart2,
       trackWidgetCreation: trackWidgetCreation,
       extraFrontEndOptions: argParser.options.containsKey(FlutterOptions.kExtraFrontEndOptions)
           ? argResults[FlutterOptions.kExtraFrontEndOptions]

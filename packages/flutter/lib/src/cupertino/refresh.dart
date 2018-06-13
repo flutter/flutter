@@ -204,7 +204,7 @@ enum RefreshIndicatorMode {
 ///
 /// The `pulledExtent` parameter is the currently available space either from
 /// overscrolling or as held by the sliver during refresh.
-typedef RefreshControlIndicatorBuilder = Widget Function(
+typedef Widget RefreshControlIndicatorBuilder(
   BuildContext context,
   RefreshIndicatorMode refreshState,
   double pulledExtent,
@@ -216,7 +216,7 @@ typedef RefreshControlIndicatorBuilder = Widget Function(
 /// pulled a `refreshTriggerPullDistance`. Must return a [Future]. Upon
 /// completion of the [Future], the [CupertinoRefreshControl] enters the
 /// [RefreshIndicatorMode.done] state and will start to go away.
-typedef RefreshCallback = Future<void> Function();
+typedef Future<void> RefreshCallback();
 
 /// A sliver widget implementing the iOS-style pull to refresh content control.
 ///

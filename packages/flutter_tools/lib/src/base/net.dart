@@ -11,7 +11,7 @@ import 'io.dart';
 
 const int kNetworkProblemExitCode = 50;
 
-typedef HttpClientFactory = HttpClient Function();
+typedef HttpClient HttpClientFactory();
 
 /// Download a file from the given URL and return the bytes.
 Future<List<int>> fetchUrl(Uri url) async {
