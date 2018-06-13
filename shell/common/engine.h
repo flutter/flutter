@@ -11,6 +11,7 @@
 #include "flutter/assets/asset_manager.h"
 #include "flutter/common/task_runners.h"
 #include "flutter/lib/ui/semantics/semantics_node.h"
+#include "flutter/lib/ui/text/font_collection.h"
 #include "flutter/lib/ui/window/platform_message.h"
 #include "flutter/lib/ui/window/viewport_metrics.h"
 #include "flutter/runtime/dart_vm.h"
@@ -109,6 +110,7 @@ class Engine final : public blink::RuntimeDelegate {
   fml::RefPtr<blink::AssetManager> asset_manager_;
   bool activity_running_;
   bool have_surface_;
+  blink::FontCollection font_collection_;
   fml::WeakPtrFactory<Engine> weak_factory_;
 
   // |blink::RuntimeDelegate|
@@ -123,6 +125,9 @@ class Engine final : public blink::RuntimeDelegate {
   // |blink::RuntimeDelegate|
   void HandlePlatformMessage(
       fxl::RefPtr<blink::PlatformMessage> message) override;
+
+  // |blink::RuntimeDelegate|
+  blink::FontCollection& GetFontCollection() override;
 
   void StopAnimator();
 

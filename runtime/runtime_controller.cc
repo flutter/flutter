@@ -249,6 +249,10 @@ void RuntimeController::HandlePlatformMessage(
   client_.HandlePlatformMessage(std::move(message));
 }
 
+FontCollection& RuntimeController::GetFontCollection() {
+  return client_.GetFontCollection();
+}
+
 Dart_Port RuntimeController::GetMainPort() {
   return root_isolate_ ? root_isolate_->main_port() : ILLEGAL_PORT;
 }

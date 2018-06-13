@@ -17,7 +17,9 @@ namespace blink {
 
 class FontCollection {
  public:
-  static FontCollection& ForProcess();
+  FontCollection();
+
+  ~FontCollection();
 
   std::shared_ptr<txt::FontCollection> GetFontCollection() const;
 
@@ -27,10 +29,6 @@ class FontCollection {
 
  private:
   std::shared_ptr<txt::FontCollection> collection_;
-
-  FontCollection();
-
-  ~FontCollection();
 
   FXL_DISALLOW_COPY_AND_ASSIGN(FontCollection);
 };

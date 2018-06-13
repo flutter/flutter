@@ -10,6 +10,7 @@
 
 #include "flutter/flow/layers/layer_tree.h"
 #include "flutter/lib/ui/semantics/semantics_node.h"
+#include "flutter/lib/ui/text/font_collection.h"
 #include "flutter/lib/ui/window/platform_message.h"
 #include "third_party/dart/runtime/include/dart_api.h"
 
@@ -26,6 +27,8 @@ class RuntimeDelegate {
   virtual void UpdateSemantics(blink::SemanticsNodeUpdates update) = 0;
 
   virtual void HandlePlatformMessage(fxl::RefPtr<PlatformMessage> message) = 0;
+
+  virtual FontCollection& GetFontCollection() = 0;
 
  protected:
   virtual ~RuntimeDelegate();

@@ -96,7 +96,6 @@ source_set("ui") {
     "$flutter_root/fml",
     "$flutter_root/glue",
     "$flutter_root/runtime:test_font",
-    "$flutter_root/third_party/txt",
     "//third_party/dart/runtime/bin:embedded_dart_io",
     "//third_party/rapidjson",
     "//third_party/skia",
@@ -107,4 +106,6 @@ source_set("ui") {
   if (is_fuchsia) {
     deps += [ "//topaz/public/dart-pkg/zircon" ]
   }
+
+  public_deps = ["$flutter_root/third_party/txt"]
 }

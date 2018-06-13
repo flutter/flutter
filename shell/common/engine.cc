@@ -87,9 +87,9 @@ bool Engine::UpdateAssetManager(
 
   // Using libTXT as the text engine.
   if (settings_.use_test_fonts) {
-    blink::FontCollection::ForProcess().RegisterTestFonts();
+    font_collection_.RegisterTestFonts();
   } else {
-    blink::FontCollection::ForProcess().RegisterFonts(*asset_manager_.get());
+    font_collection_.RegisterFonts(*asset_manager_.get());
   }
 
   return true;
@@ -375,6 +375,10 @@ void Engine::HandlePlatformMessage(
   } else {
     delegate_.OnEngineHandlePlatformMessage(*this, std::move(message));
   }
+}
+
+blink::FontCollection& Engine::GetFontCollection() {
+  return font_collection_;
 }
 
 void Engine::HandleAssetPlatformMessage(

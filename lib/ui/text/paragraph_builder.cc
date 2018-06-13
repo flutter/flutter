@@ -8,6 +8,7 @@
 #include "flutter/common/task_runners.h"
 #include "flutter/lib/ui/text/font_collection.h"
 #include "flutter/lib/ui/ui_dart_state.h"
+#include "flutter/lib/ui/window/window.h"
 #include "flutter/third_party/txt/src/txt/font_style.h"
 #include "flutter/third_party/txt/src/txt/font_weight.h"
 #include "flutter/third_party/txt/src/txt/paragraph_style.h"
@@ -110,8 +111,8 @@ fxl::RefPtr<ParagraphBuilder> ParagraphBuilder::create(
     double lineHeight,
     const std::u16string& ellipsis,
     const std::string& locale) {
-  return fxl::MakeRefCounted<ParagraphBuilder>(
-      encoded, fontFamily, fontSize, lineHeight, ellipsis, locale);
+  return fxl::MakeRefCounted<ParagraphBuilder>(encoded, fontFamily, fontSize,
+                                               lineHeight, ellipsis, locale);
 }
 
 ParagraphBuilder::ParagraphBuilder(tonic::Int32List& encoded,
@@ -155,8 +156,10 @@ ParagraphBuilder::ParagraphBuilder(tonic::Int32List& encoded,
     style.locale = locale;
   }
 
+  FontCollection& font_collection =
+      UIDartState::Current()->window()->client()->GetFontCollection();
   m_paragraphBuilder = std::make_unique<txt::ParagraphBuilder>(
-      style, blink::FontCollection::ForProcess().GetFontCollection());
+      style, font_collection.GetFontCollection());
 }  // namespace blink
 
 ParagraphBuilder::~ParagraphBuilder() = default;
@@ -207,8 +210,7 @@ void ParagraphBuilder::pushStyle(tonic::Int32List& encoded,
           static_cast<txt::FontWeight>(encoded[tsFontWeightIndex]);
 
     if (mask & tsFontStyleMask)
-      style.font_style =
-          static_cast<txt::FontStyle>(encoded[tsFontStyleIndex]);
+      style.font_style = static_cast<txt::FontStyle>(encoded[tsFontStyleIndex]);
 
     if (mask & tsFontFamilyMask)
       style.font_family = fontFamily;
