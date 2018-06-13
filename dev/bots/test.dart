@@ -8,7 +8,7 @@ import 'dart:io';
 
 import 'package:path/path.dart' as path;
 
-typedef ShardRunner = Future<Null> Function();
+typedef Future<Null> ShardRunner();
 
 final String flutterRoot = path.dirname(path.dirname(path.dirname(path.fromUri(Platform.script))));
 final String flutter = path.join(flutterRoot, 'bin', Platform.isWindows ? 'flutter.bat' : 'flutter');
@@ -71,8 +71,12 @@ Future<Null> _generateDocs() async {
 }
 
 Future<Null> _verifyInternationalizations() async {
-  final EvalResult genResult = await _evalCommand(dart,
-    <String>[ '--preview-dart-2', path.join('dev', 'tools', 'gen_localizations.dart'), ],
+  final EvalResult genResult = await _evalCommand(
+    dart,
+    <String>[
+      '--preview-dart-2',
+      path.join('dev', 'tools', 'gen_localizations.dart'),
+    ],
     workingDirectory: flutterRoot,
   );
 

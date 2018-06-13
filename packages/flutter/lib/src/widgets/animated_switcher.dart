@@ -43,7 +43,7 @@ class _AnimatedSwitcherChildEntry {
 ///
 /// The function should return a widget which wraps the given `child`. It may
 /// also use the `animation` to inform its transition. It must not return null.
-typedef AnimatedSwitcherTransitionBuilder = Widget Function(Widget child, Animation<double> animation);
+typedef Widget AnimatedSwitcherTransitionBuilder(Widget child, Animation<double> animation);
 
 /// Signature for builders used to generate custom layouts for
 /// [AnimatedSwitcher].
@@ -55,7 +55,7 @@ typedef AnimatedSwitcherTransitionBuilder = Widget Function(Widget child, Animat
 /// The `previousChildren` list is an unmodifiable list, sorted with the oldest
 /// at the beginning and the newest at the end. It does not include the
 /// `currentChild`.
-typedef AnimatedSwitcherLayoutBuilder = Widget Function(Widget currentChild, List<Widget> previousChildren);
+typedef Widget AnimatedSwitcherLayoutBuilder(Widget currentChild, List<Widget> previousChildren);
 
 /// A widget that by default does a [FadeTransition] between a new widget and
 /// the widget previously set on the [AnimatedSwitcher] as a child.

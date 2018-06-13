@@ -39,13 +39,13 @@ set timeDilation(double value) {
 /// scheduler's epoch. Use timeStamp to determine how far to advance animation
 /// timelines so that all the animations in the system are synchronized to a
 /// common time base.
-typedef FrameCallback = void Function(Duration timeStamp);
+typedef void FrameCallback(Duration timeStamp);
 
 /// Signature for [Scheduler.scheduleTask] callbacks.
 ///
 /// The type argument `T` is the task's return value. Consider [void] if the
 /// task does not return a value.
-typedef TaskCallback<T> = T Function();
+typedef T TaskCallback<T>();
 
 /// Signature for the [SchedulerBinding.schedulingStrategy] callback. Called
 /// whenever the system needs to decide whether a task at a given
@@ -55,7 +55,7 @@ typedef TaskCallback<T> = T Function();
 /// at this time, false otherwise.
 ///
 /// See also [defaultSchedulingStrategy].
-typedef SchedulingStrategy = bool Function({ int priority, SchedulerBinding scheduler });
+typedef bool SchedulingStrategy({ int priority, SchedulerBinding scheduler });
 
 class _TaskEntry<T> {
   _TaskEntry(this.task, this.priority, this.debugLabel, this.flow) {

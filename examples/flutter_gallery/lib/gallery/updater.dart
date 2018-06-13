@@ -8,7 +8,7 @@ import 'package:flutter/material.dart';
 
 import 'package:url_launcher/url_launcher.dart';
 
-typedef UpdateUrlFetcher = Future<String> Function();
+typedef Future<String> UpdateUrlFetcher();
 
 class Updater extends StatefulWidget {
   const Updater({ @required this.updateUrlFetcher, this.child, Key key })

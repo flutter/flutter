@@ -10,7 +10,7 @@ import 'object.dart';
 /// Parent data for use with [RenderListBody].
 class ListBodyParentData extends ContainerBoxParentData<RenderBox> { }
 
-typedef _ChildSizingFunction = double Function(RenderBox child);
+typedef double _ChildSizingFunction(RenderBox child);
 
 /// Displays its children sequentially along a given axis, forcing them to the
 /// dimensions of the parent in the other axis.

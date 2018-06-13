@@ -34,7 +34,7 @@ class FlutterDevice {
   List<VMService> vmServices;
   DevFS devFS;
   ApplicationPackage package;
-  final ResidentCompiler generator;
+  ResidentCompiler generator;
   String dillOutputPath;
   List<String> fileSystemRoots;
   String fileSystemScheme;
@@ -42,15 +42,20 @@ class FlutterDevice {
   StreamSubscription<String> _loggingSubscription;
 
   FlutterDevice(this.device, {
+    @required bool previewDart2,
     @required bool trackWidgetCreation,
     this.dillOutputPath,
     this.fileSystemRoots,
     this.fileSystemScheme,
-  }) : generator = new ResidentCompiler(
-      artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath),
-      trackWidgetCreation: trackWidgetCreation,
-      fileSystemRoots: fileSystemRoots,
-      fileSystemScheme: fileSystemScheme);
+  }) {
+    if (previewDart2) {
+      generator = new ResidentCompiler(
+        artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath),
+        trackWidgetCreation: trackWidgetCreation,
+        fileSystemRoots: fileSystemRoots, fileSystemScheme: fileSystemScheme
+      );
+    }
+  }
 
   String viewFilter;
 
@@ -407,9 +412,9 @@ class FlutterDevice {
 
   void updateReloadStatus(bool wasReloadSuccessful) {
     if (wasReloadSuccessful)
-      generator.accept();
+      generator?.accept();
     else
-      generator.reject();
+      generator?.reject();
   }
 }
 
