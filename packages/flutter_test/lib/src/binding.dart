@@ -857,8 +857,8 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
       // Run all queued microtasks.
       await new Future<Null>.microtask(() {});
       // When the test had an exception, the test-framework already
-      // ran the teardown functions, removing the _fakeAsync function.
-      if (_fakeAsync == null)
+      // ran the teardown functions, removing the fakeAsync object.
+      if (fakeAsync == null)
         return null;
       // Resolve interplay between fake async and real async calls.
       fakeAsync.flushMicrotasks();
