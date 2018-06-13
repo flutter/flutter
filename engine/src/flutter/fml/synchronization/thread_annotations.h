@@ -15,9 +15,11 @@
 #ifndef FLUTTER_FML_SYNCHRONIZATION_THREAD_ANNOTATIONS_H_
 #define FLUTTER_FML_SYNCHRONIZATION_THREAD_ANNOTATIONS_H_
 
+#include "flutter/fml/build_config.h"
+
 // Enable thread-safety attributes only with clang.
 // The attributes can be safely erased when compiling with other compilers.
-#if defined(__clang__)
+#if defined(__clang__) && !defined(OS_ANDROID)
 #define FML_THREAD_ANNOTATION_ATTRIBUTE__(x) __attribute__((x))
 #else
 #define FML_THREAD_ANNOTATION_ATTRIBUTE__(x)
