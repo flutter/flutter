@@ -16,13 +16,6 @@
 
 namespace blink {
 
-FontCollection& FontCollection::ForProcess() {
-  static std::once_flag once = {};
-  static FontCollection* gCollection = nullptr;
-  std::call_once(once, []() { gCollection = new FontCollection(); });
-  return *gCollection;
-}
-
 FontCollection::FontCollection()
     : collection_(std::make_shared<txt::FontCollection>()) {
   collection_->SetDefaultFontManager(SkFontMgr::RefDefault());

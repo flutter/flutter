@@ -10,6 +10,7 @@
 #include "flutter/common/task_runners.h"
 #include "flutter/flow/layers/layer_tree.h"
 #include "flutter/lib/ui/ui_dart_state.h"
+#include "flutter/lib/ui/text/font_collection.h"
 #include "flutter/lib/ui/window/pointer_data_packet.h"
 #include "flutter/lib/ui/window/window.h"
 #include "flutter/runtime/dart_vm.h"
@@ -123,6 +124,9 @@ class RuntimeController final : public WindowClient {
 
   // |blink::WindowClient|
   void HandlePlatformMessage(fxl::RefPtr<PlatformMessage> message) override;
+
+  // |blink::WindowClient|
+  FontCollection& GetFontCollection() override;
 
   FXL_DISALLOW_COPY_AND_ASSIGN(RuntimeController);
 };

@@ -100,7 +100,6 @@ source_set("common") {
     "$flutter_root/lib/ui",
     "$flutter_root/runtime",
     "$flutter_root/synchronization",
-    "$flutter_root/third_party/txt",
     "//garnet/public/lib/fxl",
     "//third_party/dart/runtime:dart_api",
     "//third_party/rapidjson",
@@ -109,6 +108,7 @@ source_set("common") {
   ]
 
   public_deps = [
+    "$flutter_root/third_party/txt",
     "//topaz/lib/tonic",
   ]
 
