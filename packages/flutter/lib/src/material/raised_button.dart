@@ -63,6 +63,7 @@ class RaisedButton extends StatelessWidget {
     this.disabledElevation = 0.0,
     this.padding,
     this.shape,
+    this.materialTapTargetSize,
     this.animationDuration = kThemeChangeDuration,
     this.child,
   }) : assert(elevation != null),
@@ -95,6 +96,7 @@ class RaisedButton extends StatelessWidget {
     this.highlightElevation = 8.0,
     this.disabledElevation = 0.0,
     this.shape,
+    this.materialTapTargetSize,
     this.animationDuration = kThemeChangeDuration,
     @required Widget icon,
     @required Widget label,
@@ -290,6 +292,15 @@ class RaisedButton extends StatelessWidget {
   /// The default value is [kThemeChangeDuration].
   final Duration animationDuration;
 
+  /// Configures the minimum size of the tap target.
+  ///
+  /// Defaults to [ThemeData.materialTapTargetSize].
+  ///
+  /// See also:
+  ///
+  ///   * [MaterialTapTargetSize], for a description of how this affects tap targets.
+  final MaterialTapTargetSize materialTapTargetSize;
+
   Brightness _getBrightness(ThemeData theme) {
     return colorBrightness ?? theme.brightness;
   }
@@ -365,14 +376,6 @@ class RaisedButton extends StatelessWidget {
     final ButtonThemeData buttonTheme = ButtonTheme.of(context);
     final Color fillColor = _getFillColor(theme, buttonTheme);
     final Color textColor = _getTextColor(theme, buttonTheme, fillColor);
-    BoxConstraints outerConstraints;
-    switch (theme.materialTapTargetSize) {
-      case MaterialTapTargetSize.padded:
-        outerConstraints = const BoxConstraints(minHeight: 48.0, minWidth: 48.0);
-        break;
-      case MaterialTapTargetSize.shrinkWrap:
-        break;
-    }
 
     return new RawMaterialButton(
       onPressed: onPressed,
@@ -389,7 +392,7 @@ class RaisedButton extends StatelessWidget {
       shape: shape ?? buttonTheme.shape,
       animationDuration: animationDuration,
       child: child,
-      outerConstraints: outerConstraints
+      materialTapTargetSize: materialTapTargetSize ?? theme.materialTapTargetSize,
     );
   }
 

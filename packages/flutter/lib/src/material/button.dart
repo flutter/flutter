@@ -39,13 +39,14 @@ class RawMaterialButton extends StatefulWidget {
     this.elevation = 2.0,
     this.highlightElevation = 8.0,
     this.disabledElevation = 0.0,
-    this.outerConstraints,
     this.padding = EdgeInsets.zero,
     this.constraints = const BoxConstraints(minWidth: 88.0, minHeight: 36.0),
     this.shape = const RoundedRectangleBorder(),
     this.animationDuration = kThemeChangeDuration,
+    MaterialTapTargetSize materialTapTargetSize,
     this.child,
-  }) : assert(shape != null),
+  }) : this.materialTapTargetSize = materialTapTargetSize ?? MaterialTapTargetSize.padded,
+       assert(shape != null),
        assert(elevation != null),
        assert(highlightElevation != null),
        assert(disabledElevation != null),
@@ -58,10 +59,6 @@ class RawMaterialButton extends StatefulWidget {
   ///
   /// If this is set to null, the button will be disabled, see [enabled].
   final VoidCallback onPressed;
-
-  /// Constraints used to increase the gesture detector size without increasing
-  /// the visible material of the button.
-  final BoxConstraints outerConstraints;
 
   /// Called by the underlying [InkWell] widget's [InkWell.onHighlightChanged]
   /// callback.
@@ -139,6 +136,15 @@ class RawMaterialButton extends StatefulWidget {
   /// property to a non-null value.
   bool get enabled => onPressed != null;
 
+  /// Configures the minimum size of the tap target.
+  ///
+  /// Defaults to [MaterialTapTargetSize.padded].
+  ///
+  /// See also:
+  ///
+  ///   * [MaterialTapTargetSize], for a description of how this affects tap targets.
+  final MaterialTapTargetSize materialTapTargetSize;
+
   @override
   _RawMaterialButtonState createState() => new _RawMaterialButtonState();
 }
@@ -188,20 +194,24 @@ class _RawMaterialButtonState extends State<RawMaterialButton> {
       ),
     );
 
-    if (widget.outerConstraints != null) {
-      result = new ConstrainedBox(
-        constraints: widget.outerConstraints,
-        child: new GestureDetector(
-          behavior: HitTestBehavior.translucent,
-          excludeFromSemantics: true,
-          onTap: widget.onPressed,
-          child: new Center(
-            child: result,
-            widthFactor: 1.0,
-            heightFactor: 1.0,
+    switch (widget.materialTapTargetSize) {
+      case MaterialTapTargetSize.padded:
+        result = new ConstrainedBox(
+          constraints: const BoxConstraints(minWidth: 48.0, minHeight: 48.0),
+          child: new GestureDetector(
+            behavior: HitTestBehavior.translucent,
+            excludeFromSemantics: true,
+            onTap: widget.onPressed,
+            child: new Center(
+              child: result,
+              widthFactor: 1.0,
+              heightFactor: 1.0,
+            ),
           ),
-        ),
-      );
+        );
+        break;
+      case MaterialTapTargetSize.shrinkWrap:
+        break;
     }
 
     return new Semantics(
@@ -253,6 +263,7 @@ class MaterialButton extends StatelessWidget {
     this.minWidth,
     this.height,
     this.padding,
+    this.materialTapTargetSize,
     @required this.onPressed,
     this.child
   }) : super(key: key);
@@ -358,6 +369,15 @@ class MaterialButton extends StatelessWidget {
   /// {@macro flutter.widgets.child}
   final Widget child;
 
+  /// Configures the minimum size of the tap target.
+  ///
+  /// Defaults to [ThemeData.materialTapTargetSize].
+  ///
+  /// See also:
+  ///
+  ///   * [MaterialTapTargetSize], for a description of how this affects tap targets.
+  final MaterialTapTargetSize materialTapTargetSize;
+
   /// Whether the button is enabled or disabled. Buttons are disabled by default. To
   /// enable a button, set its [onPressed] property to a non-null value.
   bool get enabled => onPressed != null;
@@ -401,14 +421,6 @@ class MaterialButton extends StatelessWidget {
     final ThemeData theme = Theme.of(context);
     final ButtonThemeData buttonTheme = ButtonTheme.of(context);
     final Color textColor = _getTextColor(theme, buttonTheme, color);
-    BoxConstraints outerConstraints;
-    switch (theme.materialTapTargetSize) {
-      case MaterialTapTargetSize.padded:
-        outerConstraints = const BoxConstraints(minHeight: 48.0, minWidth: 48.0);
-        break;
-      case MaterialTapTargetSize.shrinkWrap:
-        break;
-    }
 
     return new RawMaterialButton(
       onPressed: onPressed,
@@ -425,7 +437,7 @@ class MaterialButton extends StatelessWidget {
       ),
       shape: buttonTheme.shape,
       child: child,
-      outerConstraints: outerConstraints,
+      materialTapTargetSize: materialTapTargetSize ?? theme.materialTapTargetSize,
     );
   }
 

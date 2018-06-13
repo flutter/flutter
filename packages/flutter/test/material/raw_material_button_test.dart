@@ -5,7 +5,7 @@ import 'package:flutter_test/flutter_test.dart';
 import '../widgets/semantics_tester.dart';
 
 void main() {
-  testWidgets('outerConstraints expands hit test area', (WidgetTester tester) async {
+  testWidgets('materialTapTargetSize.padded expands hit test area', (WidgetTester tester) async {
     int pressed = 0;
 
     await tester.pumpWidget(new RawMaterialButton(
@@ -13,23 +13,23 @@ void main() {
         pressed++;
       },
       constraints: new BoxConstraints.tight(const Size(10.0, 10.0)),
-      outerConstraints: const BoxConstraints(minWidth: 100.0, minHeight: 100.0),
+      materialTapTargetSize: MaterialTapTargetSize.padded,
       child: const Text('+', textDirection: TextDirection.ltr),
     ));
 
-    await tester.tapAt(const Offset(100.0, 100.0));
+    await tester.tapAt(const Offset(40.0, 400.0));
 
     expect(pressed, 1);
   });
 
-  testWidgets('outerConstraints expands semantics area', (WidgetTester tester) async {
+  testWidgets('materialTapTargetSize.padded expands semantics area', (WidgetTester tester) async {
     final SemanticsTester semantics = new SemanticsTester(tester);
     await tester.pumpWidget(
       new Center(
         child: new RawMaterialButton(
           onPressed: () {},
           constraints: new BoxConstraints.tight(const Size(10.0, 10.0)),
-          outerConstraints: const BoxConstraints(minWidth: 100.0, minHeight: 100.0),
+          materialTapTargetSize: MaterialTapTargetSize.padded,
           child: const Text('+', textDirection: TextDirection.ltr),
         ),
       ),
@@ -50,7 +50,7 @@ void main() {
           ],
           label: '+',
           textDirection: TextDirection.ltr,
-          rect: Rect.fromLTRB(0.0, 0.0, 100.0, 100.0),
+          rect: Rect.fromLTRB(0.0, 0.0, 48.0, 48.0),
           children: <TestSemantics>[],
         ),
       ]

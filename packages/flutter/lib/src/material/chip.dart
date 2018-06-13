@@ -100,6 +100,15 @@ abstract class ChipAttributes {
   /// By default, this is 4 logical pixels at the beginning and the end of the
   /// label, and zero on top and bottom.
   EdgeInsetsGeometry get labelPadding;
+
+  /// Configures the minimum size of the tap target.
+  ///
+  /// Defaults to [ThemeData.materialTapTargetSize].
+  ///
+  /// See also:
+  ///
+  ///   * [MaterialTapTargetSize], for a description of how this affects tap targets.
+  MaterialTapTargetSize get materialTapTargetSize;
 }
 
 /// An interface for material design chips that can be deleted.
@@ -424,6 +433,7 @@ class Chip extends StatelessWidget implements ChipAttributes, DeletableChipAttri
     this.shape,
     this.backgroundColor,
     this.padding,
+    this.materialTapTargetSize,
   })  : assert(label != null),
         super(key: key);
 
@@ -449,6 +459,8 @@ class Chip extends StatelessWidget implements ChipAttributes, DeletableChipAttri
   final Color deleteIconColor;
   @override
   final String deleteButtonTooltipMessage;
+  @override
+  final MaterialTapTargetSize materialTapTargetSize;
 
   @override
   Widget build(BuildContext context) {
@@ -466,6 +478,7 @@ class Chip extends StatelessWidget implements ChipAttributes, DeletableChipAttri
       shape: shape,
       backgroundColor: backgroundColor,
       padding: padding,
+      materialTapTargetSize: materialTapTargetSize,
       isEnabled: true,
     );
   }
@@ -548,6 +561,7 @@ class InputChip extends StatelessWidget
     this.shape,
     this.backgroundColor,
     this.padding,
+    this.materialTapTargetSize,
   })  : assert(selected != null),
         assert(isEnabled != null),
         assert(label != null),
@@ -589,6 +603,8 @@ class InputChip extends StatelessWidget
   final Color backgroundColor;
   @override
   final EdgeInsetsGeometry padding;
+  @override
+  final MaterialTapTargetSize materialTapTargetSize;
 
   @override
   Widget build(BuildContext context) {
@@ -612,6 +628,7 @@ class InputChip extends StatelessWidget
       shape: shape,
       backgroundColor: backgroundColor,
       padding: padding,
+      materialTapTargetSize: materialTapTargetSize,
       isEnabled: isEnabled && (onSelected != null || onDeleted != null || onPressed != null),
     );
   }
@@ -690,6 +707,7 @@ class ChoiceChip extends StatelessWidget
     this.shape,
     this.backgroundColor,
     this.padding,
+    this.materialTapTargetSize,
   })  : assert(selected != null),
         assert(label != null),
         super(key: key);
@@ -718,6 +736,8 @@ class ChoiceChip extends StatelessWidget
   final Color backgroundColor;
   @override
   final EdgeInsetsGeometry padding;
+  @override
+  final MaterialTapTargetSize materialTapTargetSize;
 
   @override
   bool get isEnabled => onSelected != null;
@@ -742,6 +762,7 @@ class ChoiceChip extends StatelessWidget
       backgroundColor: backgroundColor,
       padding: padding,
       isEnabled: isEnabled,
+      materialTapTargetSize: materialTapTargetSize,
     );
   }
 }
@@ -853,6 +874,7 @@ class FilterChip extends StatelessWidget
     this.shape,
     this.backgroundColor,
     this.padding,
+    this.materialTapTargetSize,
   })  : assert(selected != null),
         assert(label != null),
         super(key: key);
@@ -881,6 +903,8 @@ class FilterChip extends StatelessWidget
   final Color backgroundColor;
   @override
   final EdgeInsetsGeometry padding;
+  @override
+  final MaterialTapTargetSize materialTapTargetSize;
 
   @override
   bool get isEnabled => onSelected != null;
@@ -902,6 +926,7 @@ class FilterChip extends StatelessWidget
       selectedColor: selectedColor,
       padding: padding,
       isEnabled: isEnabled,
+      materialTapTargetSize: materialTapTargetSize,
     );
   }
 }
@@ -967,6 +992,7 @@ class ActionChip extends StatelessWidget implements ChipAttributes, TappableChip
     this.shape,
     this.backgroundColor,
     this.padding,
+    this.materialTapTargetSize,
   })  : assert(label != null),
         assert(
           onPressed != null,
@@ -993,6 +1019,8 @@ class ActionChip extends StatelessWidget implements ChipAttributes, TappableChip
   final Color backgroundColor;
   @override
   final EdgeInsetsGeometry padding;
+  @override
+  final MaterialTapTargetSize materialTapTargetSize;
 
   @override
   Widget build(BuildContext context) {
@@ -1008,6 +1036,7 @@ class ActionChip extends StatelessWidget implements ChipAttributes, TappableChip
       padding: padding,
       labelPadding: labelPadding,
       isEnabled: true,
+      materialTapTargetSize: materialTapTargetSize
     );
   }
 }
@@ -1077,6 +1106,7 @@ class RawChip extends StatefulWidget
     this.tooltip,
     this.shape,
     this.backgroundColor,
+    this.materialTapTargetSize,
   })  : assert(label != null),
         assert(isEnabled != null),
         deleteIcon = deleteIcon ?? _kDefaultDeleteIcon,
@@ -1118,6 +1148,8 @@ class RawChip extends StatefulWidget
   final Color backgroundColor;
   @override
   final EdgeInsetsGeometry padding;
+  @override
+  final MaterialTapTargetSize materialTapTargetSize;
 
   /// Whether or not to show a check mark when [selected] is true.
   ///
@@ -1429,7 +1461,7 @@ class _RawChipState extends State<RawChip> with TickerProviderStateMixin<RawChip
         ),
       ),
     );
-    switch (theme.materialTapTargetSize) {
+    switch (widget.materialTapTargetSize ?? theme.materialTapTargetSize) {
       case MaterialTapTargetSize.padded:
         result = new ConstrainedBox(
           constraints: const BoxConstraints(minWidth: 48.0, minHeight: 48.0),
