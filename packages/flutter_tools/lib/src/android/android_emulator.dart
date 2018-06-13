@@ -11,7 +11,6 @@ import '../android/android_workflow.dart';
 import '../base/file_system.dart';
 import '../base/process.dart';
 import '../emulator.dart';
-import '../globals.dart';
 import 'android_sdk.dart';
 
 class AndroidEmulators extends EmulatorDiscovery {
@@ -41,22 +40,20 @@ class AndroidEmulator extends Emulator {
   String get label => _properties['avd.ini.displayname'];
 
   @override
-  Future<bool> launch() async {
-    final Future<bool> launchResult =
+  Future<void> launch() async {
+    final Future<void> launchResult =
         runAsync(<String>[getEmulatorPath(), '-avd', id])
             .then((RunResult runResult) {
               if (runResult.exitCode != 0) {
-                printError('$runResult');
-                return false;
+                throw '$runResult';
               }
-              return true;
             });
     // emulator continues running on a successful launch so if we
     // haven't quit within 3 seconds we assume that's a success and just
     // return.
-    return Future.any<bool>(<Future<bool>>[
+    return Future.any<void>(<Future<void>>[
       launchResult,
-      new Future<void>.delayed(const Duration(seconds: 3)).then((_) => true)
+      new Future<void>.delayed(const Duration(seconds: 3))
     ]);
   }
 }
