@@ -15,25 +15,29 @@
  */
 
 #include "txt/asset_font_manager.h"
+
 #include <memory>
+
 #include "lib/fxl/logging.h"
+#include "third_party/skia/include/core/SkString.h"
+#include "third_party/skia/include/core/SkTypeface.h"
 
 namespace txt {
 
 AssetFontManager::AssetFontManager(
-    std::unique_ptr<AssetDataProvider> data_provider)
-    : data_provider_(std::move(data_provider)) {
-  FXL_DCHECK(data_provider_ != nullptr);
+    std::unique_ptr<FontAssetProvider> font_provider)
+    : font_provider_(std::move(font_provider)) {
+  FXL_DCHECK(font_provider_ != nullptr);
 }
 
 AssetFontManager::~AssetFontManager() = default;
 
 int AssetFontManager::onCountFamilies() const {
-  return data_provider_->GetFamilyCount();
+  return font_provider_->GetFamilyCount();
 }
 
 void AssetFontManager::onGetFamilyName(int index, SkString* familyName) const {
-  familyName->set(data_provider_->GetFamilyName(index).c_str());
+  familyName->set(font_provider_->GetFamilyName(index).c_str());
 }
 
 SkFontStyleSet* AssetFontManager::onCreateStyleSet(int index) const {
@@ -44,14 +48,14 @@ SkFontStyleSet* AssetFontManager::onCreateStyleSet(int index) const {
 SkFontStyleSet* AssetFontManager::onMatchFamily(
     const char family_name_string[]) const {
   std::string family_name(family_name_string);
-  return data_provider_->MatchFamily(family_name);
+  return font_provider_->MatchFamily(family_name);
 }
 
 SkTypeface* AssetFontManager::onMatchFamilyStyle(
     const char familyName[],
     const SkFontStyle& style) const {
   SkFontStyleSet* font_style_set =
-      data_provider_->MatchFamily(std::string(familyName));
+      font_provider_->MatchFamily(std::string(familyName));
   if (font_style_set == nullptr)
     return nullptr;
   return font_style_set->matchStyle(style);

@@ -64,14 +64,9 @@ source_set("txt") {
     "src/minikin/SparseBitSet.h",
     "src/minikin/WordBreaker.cpp",
     "src/minikin/WordBreaker.h",
-    "src/txt/asset_data_provider.cc",
-    "src/txt/asset_data_provider.h",
     "src/txt/asset_font_manager.cc",
     "src/txt/asset_font_manager.h",
-    "src/txt/asset_font_style_set.cc",
-    "src/txt/asset_font_style_set.h",
-    "src/txt/directory_asset_data_provider.cc",
-    "src/txt/directory_asset_data_provider.h",
+    "src/txt/font_asset_provider.h",
     "src/txt/font_collection.cc",
     "src/txt/font_collection.h",
     "src/txt/font_skia.cc",
@@ -96,6 +91,8 @@ source_set("txt") {
     "src/txt/text_decoration.h",
     "src/txt/text_style.cc",
     "src/txt/text_style.h",
+    "src/txt/typeface_font_asset_provider.cc",
+    "src/txt/typeface_font_asset_provider.h",
     "src/utils/JenkinsHash.cpp",
     "src/utils/JenkinsHash.h",
     "src/utils/LruCache.h",
@@ -133,6 +130,19 @@ txt_common_executable_deps = [
   "$flutter_root/fml",  # For ICU initialization.
 ]
 
+source_set("txt_test_utils") {
+  sources = [
+    "tests/txt_test_utils.cc",
+    "tests/txt_test_utils.h",
+  ]
+
+  deps = [
+    ":txt",
+    "//garnet/public/lib/fxl",
+    "//third_party/skia",
+  ]
+}
+
 executable("txt_unittests") {
   testonly = true
 
@@ -155,8 +165,6 @@ executable("txt_unittests") {
     "tests/render_test.cc",
     "tests/render_test.h",
     "tests/txt_run_all_unittests.cc",
-    "tests/utils.cc",
-    "tests/utils.h",
 
     # These tests require static fixtures.
     # "tests/FontCollectionItemizeTest.cpp",
@@ -178,6 +186,7 @@ executable("txt_unittests") {
 
   deps = [
            ":txt",
+           ":txt_test_utils",
            "//third_party/googletest:gtest",
          ] + txt_common_executable_deps
 }
@@ -191,12 +200,11 @@ executable("txt_benchmarks") {
     "benchmarks/paragraph_builder_benchmarks.cc",
     "benchmarks/styled_runs_benchmarks.cc",
     "benchmarks/txt_run_all_benchmarks.cc",
-    "benchmarks/utils.cc",
-    "benchmarks/utils.h",
   ]
 
   deps = [
            ":txt",
+           ":txt_test_utils",
            "//third_party/benchmark",
          ] + txt_common_executable_deps
 }

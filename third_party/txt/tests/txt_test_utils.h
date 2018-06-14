@@ -17,27 +17,18 @@
 #include <string>
 
 #include "lib/fxl/command_line.h"
-#include "utils.h"
+#include "txt/font_collection.h"
 
 namespace txt {
 
-static std::string gFontDir;
-static fxl::CommandLine gCommandLine;
+const std::string& GetFontDir();
 
-const std::string& GetFontDir() {
-  return gFontDir;
-}
+void SetFontDir(const std::string& dir);
 
-void SetFontDir(const std::string& dir) {
-  gFontDir = dir;
-}
+const fxl::CommandLine& GetCommandLineForProcess();
 
-const fxl::CommandLine& GetCommandLineForProcess() {
-  return gCommandLine;
-}
+void SetCommandLine(fxl::CommandLine cmd);
 
-void SetCommandLine(fxl::CommandLine cmd) {
-  gCommandLine = std::move(cmd);
-}
+std::shared_ptr<FontCollection> GetTestFontCollection();
 
 }  // namespace txt

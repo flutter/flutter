@@ -22,7 +22,7 @@
 #include "txt/font_weight.h"
 #include "txt/paragraph.h"
 #include "txt/paragraph_builder.h"
-#include "utils.h"
+#include "txt_test_utils.h"
 
 #define DISABLE_ON_WINDOWS(TEST) DISABLE_TEST_WINDOWS(TEST)
 
