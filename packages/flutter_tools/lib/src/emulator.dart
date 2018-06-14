@@ -105,7 +105,7 @@ class EmulatorManager {
     }
 
     final List<String> args = <String>[
-      getAvdManagerPath(),
+      getAvdManagerPath(androidSdk),
       'create',
       'avd',
       '-n', name,
@@ -127,7 +127,7 @@ class EmulatorManager {
   ];
   Future<String> _getPreferredAvailableDevice() async {
     final List<String> args = <String>[
-      getAvdManagerPath(),
+      getAvdManagerPath(androidSdk),
       'list',
       'device',
       '-c'
@@ -151,7 +151,7 @@ class EmulatorManager {
     // It seems that to get the available list of images, we need to send a
     // request to create without the image and it'll provide us a list :-(
     final List<String> args = <String>[
-      getAvdManagerPath(),
+      getAvdManagerPath(androidSdk),
       'create',
       'avd',
       '-n', 'temp',
