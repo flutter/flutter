@@ -61,6 +61,23 @@ class EmulatorManager {
 
   /// Return the list of all available emulators.
   Future<CreateEmulatorResult> createEmulator(String name) async {
+    if (name == null || name == '') {
+      const String autoName = 'flutter_emulator';
+      // Don't use getEmulatorsMatching here, as it will only return one
+      // if there's an exact match and we need all those with this prefix
+      // so we can keep adding suffixes until we miss.
+      final List<Emulator> all = await getAllAvailableEmulators();
+      final Set<String> takenNames = all
+          .map((Emulator e) => e.id)
+          .where((String id) => id.startsWith(autoName))
+          .toSet();
+      int suffix = 1;
+      name = autoName;
+      while (takenNames.contains(name)) {
+        name = '${autoName}_${++suffix}';
+      }
+    }
+    
     final String device =  await _getPreferredAvailableDevice();
     if (device == null)
       return new CreateEmulatorResult(
@@ -98,6 +115,7 @@ class EmulatorManager {
     final ProcessResult runResult = processManager.runSync(args);
     return new CreateEmulatorResult(
       success: runResult.exitCode == 0,
+      createdEmulatorName: runResult.exitCode == 0 ? name : null,
       output: runResult.stdout,
       error: cleanError(runResult.stderr),
     );
@@ -245,8 +263,9 @@ abstract class Emulator {
 
 class CreateEmulatorResult {
   final bool success;
+  final String createdEmulatorName;
   final String output;
   final String error;
 
-  CreateEmulatorResult({this.success, this.output, this.error});
+  CreateEmulatorResult({this.success, this.createdEmulatorName, this.output, this.error});
 }

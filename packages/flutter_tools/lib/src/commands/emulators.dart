@@ -78,23 +78,11 @@ class EmulatorsCommand extends FlutterCommand {
   }
 
   Future<Null> _createEmulator(String name) async {
-    if (name == null) {
-      const String autoName = 'flutter_emulator';
-      final Set<String> takenNames =
-          (await emulatorManager.getEmulatorsMatching(autoName))
-          .map((Emulator e) => e.id)
-          .toSet();
-      int suffix = 1;
-      name = autoName;
-      while (takenNames.contains(name)) {
-        name = '${name}_${++suffix}';
-      }
-    }
     final CreateEmulatorResult createResult =
         await emulatorManager.createEmulator(name);
 
     if (createResult.success) {
-      printStatus("Emulator '$name' created successfully.");
+      printStatus("Emulator '${createResult.createdEmulatorName}' created successfully.");
     } else {
       printStatus("Failed to create emulator '$name'.\n");
       printStatus(createResult.error.trim());
