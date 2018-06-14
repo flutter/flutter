@@ -81,11 +81,11 @@ List<AndroidEmulator> getEmulatorAvds() {
 /// of emulators by reading information from the relevant ini files.
 void extractEmulatorAvdInfo(String text, List<AndroidEmulator> emulators) {
   for (String id in text.trim().split('\n').where((String l) => l != '')) {
-    emulators.add(_createEmulator(id));
+    emulators.add(_loadEmulatorInfo(id));
   }
 }
 
-AndroidEmulator _createEmulator(String id) {
+AndroidEmulator _loadEmulatorInfo(String id) {
   id = id.trim();
   final File iniFile = fs.file(fs.path.join(getAvdPath(), '$id.ini'));
   if (iniFile.existsSync()) {
