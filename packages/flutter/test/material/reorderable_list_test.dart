@@ -92,6 +92,79 @@ void main() {
         );
         expect(listItems, orderedEquals(<String>['Item 1', 'Item 3', 'Item 2', 'Item 4']));
       });
+
+      testWidgets('properly determines the vertical drop area extents', (WidgetTester tester) async {
+        final Widget reorderableListView = new ReorderableListView(
+          children: const <Widget>[
+            const SizedBox(
+              key: const Key('Normal item'),
+              height: itemHeight,
+              child: const Text('Normal item'),
+            ),
+            const SizedBox(
+              key: const Key('Tall item'),
+              height: itemHeight * 2,
+              child: const Text('Tall item'),
+            ),
+            const SizedBox(
+              key: const Key('Last item'),
+              height: itemHeight,
+              child: const Text('Last item'),
+            )
+          ],
+          scrollDirection: Axis.vertical,
+          onSwap: (int oldIndex, int newIndex) {},
+        );
+        await tester.pumpWidget(new MaterialApp(
+          home: new SizedBox(
+            height: itemHeight * 10, 
+            child: reorderableListView,
+          ),
+        ));
+
+        Element getContentElement() {
+          final SingleChildScrollView listScrollView = find.byType(SingleChildScrollView).evaluate().first.widget;
+          final Widget scrollContents = listScrollView.child;
+          final Element contentElement = find.byElementPredicate((Element element) => element.widget == scrollContents).evaluate().first;
+          return contentElement;
+        }
+
+        const double kNonDraggingListHeight = 264.0;
+        // The list view pads the drop area by 8dp.
+        const double kDraggingListHeight = 272.0;
+        // Drag a normal text item
+        expect(getContentElement().size.height, kNonDraggingListHeight);
+        TestGesture drag = await tester.startGesture(tester.getCenter(find.text('Normal item')));
+        await tester.pump(kLongPressTimeout + kPressTimeout);
+        await tester.pumpAndSettle();
+        expect(getContentElement().size.height, kDraggingListHeight);
+
+        // Move it
+        await drag.moveTo(tester.getCenter(find.text('Last item')));
+        await tester.pumpAndSettle();
+        expect(getContentElement().size.height, kDraggingListHeight);
+
+        // Drop it
+        await drag.up();
+        await tester.pumpAndSettle();
+        expect(getContentElement().size.height, kNonDraggingListHeight);
+
+        // Drag a tall item
+        drag = await tester.startGesture(tester.getCenter(find.text('Tall item')));
+        await tester.pump(kLongPressTimeout + kPressTimeout);
+        await tester.pumpAndSettle();
+        expect(getContentElement().size.height, kDraggingListHeight);
+        
+        // Move it
+        await drag.moveTo(tester.getCenter(find.text('Last item')));
+        await tester.pumpAndSettle();
+        expect(getContentElement().size.height, kDraggingListHeight);
+
+        // Drop it
+        await drag.up();
+        await tester.pumpAndSettle();
+        expect(getContentElement().size.height, kNonDraggingListHeight);
+      });
     });
 
     group('in horizontal mode', () {
@@ -126,6 +199,79 @@ void main() {
           tester.getCenter(find.text('Item 2')),
         );
         expect(listItems, orderedEquals(<String>['Item 1', 'Item 3', 'Item 2', 'Item 4']));
+      });
+
+      testWidgets('properly determines the horizontal drop area extents', (WidgetTester tester) async {
+        final Widget reorderableListView = new ReorderableListView(
+          children: const <Widget>[
+            const SizedBox(
+              key: const Key('Normal item'),
+              width: itemHeight,
+              child: const Text('Normal item'),
+            ),
+            const SizedBox(
+              key: const Key('Tall item'),
+              width: itemHeight * 2,
+              child: const Text('Tall item'),
+            ),
+            const SizedBox(
+              key: const Key('Last item'),
+              width: itemHeight,
+              child: const Text('Last item'),
+            )
+          ],
+          scrollDirection: Axis.horizontal,
+          onSwap: (int oldIndex, int newIndex) {},
+        );
+        await tester.pumpWidget(new MaterialApp(
+          home: new SizedBox(
+            width: itemHeight * 10, 
+            child: reorderableListView,
+          ),
+        ));
+
+        Element getContentElement() {
+          final SingleChildScrollView listScrollView = find.byType(SingleChildScrollView).evaluate().first.widget;
+          final Widget scrollContents = listScrollView.child;
+          final Element contentElement = find.byElementPredicate((Element element) => element.widget == scrollContents).evaluate().first;
+          return contentElement;
+        }
+
+        const double kNonDraggingListWidth = 264.0;
+        // The list view pads the drop area by 8dp.
+        const double kDraggingListWidth = 272.0;
+        // Drag a normal text item
+        expect(getContentElement().size.width, kNonDraggingListWidth);
+        TestGesture drag = await tester.startGesture(tester.getCenter(find.text('Normal item')));
+        await tester.pump(kLongPressTimeout + kPressTimeout);
+        await tester.pumpAndSettle();
+        expect(getContentElement().size.width, kDraggingListWidth);
+
+        // Move it
+        await drag.moveTo(tester.getCenter(find.text('Last item')));
+        await tester.pumpAndSettle();
+        expect(getContentElement().size.width, kDraggingListWidth);
+
+        // Drop it
+        await drag.up();
+        await tester.pumpAndSettle();
+        expect(getContentElement().size.width, kNonDraggingListWidth);
+
+        // Drag a tall item
+        drag = await tester.startGesture(tester.getCenter(find.text('Tall item')));
+        await tester.pump(kLongPressTimeout + kPressTimeout);
+        await tester.pumpAndSettle();
+        expect(getContentElement().size.width, kDraggingListWidth);
+        
+        // Move it
+        await drag.moveTo(tester.getCenter(find.text('Last item')));
+        await tester.pumpAndSettle();
+        expect(getContentElement().size.width, kDraggingListWidth);
+
+        // Drop it
+        await drag.up();
+        await tester.pumpAndSettle();
+        expect(getContentElement().size.width, kNonDraggingListWidth);
       });
     });
 
