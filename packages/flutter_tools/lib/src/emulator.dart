@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:io';
 import 'dart:math' as math;
 
 import 'android/android_emulator.dart';
@@ -138,7 +139,8 @@ class EmulatorManager {
 
     final List<String> availableDevices = runResult.stdout
       .split('\n')
-      .where((String l) => preferredDevices.contains(l.trim()));
+      .where((String l) => preferredDevices.contains(l.trim()))
+      .toList();
 
     return preferredDevices.firstWhere(
       (String d) => availableDevices.contains(d),
@@ -163,7 +165,8 @@ class EmulatorManager {
       .split('\n')
       .where((String l) => androidApiVersion.hasMatch(l))
       .where((String l) => l.contains('system-images'))
-      .where((String l) => l.contains('google_apis_playstore'));
+      .where((String l) => l.contains('google_apis_playstore'))
+      .toList();
 
     // Get the highest Android API version or whats left
     final int apiVersion =
