@@ -295,10 +295,11 @@ class _CupertinoAppState extends State<CupertinoApp> {
                      widget.onUnknownRoute != null;
   }
 
-  // The `child` coming back out from WidgetsApp will always be null since
-  // we never passed in anything for it to create a Navigator inside
-  // WidgetsApp.
   Widget defaultBuilder(BuildContext context, Widget child) {
+    // The `child` coming back out from WidgetsApp will always be null since
+    // we never passed in anything for it to create a Navigator inside
+    // WidgetsApp.
+    assert(child == null);
     if (_haveNavigator) {
       // Reuse CupertinoTabView which creates a routing Navigator for us.
       final Widget navigator = new CupertinoTabView(
@@ -316,7 +317,8 @@ class _CupertinoAppState extends State<CupertinoApp> {
         return navigator;
       }
     } else {
-      return widget.builder(context, child);
+      // We asserted that child is null above.
+      return widget.builder(context, null);
     }
   }
 
@@ -326,6 +328,9 @@ class _CupertinoAppState extends State<CupertinoApp> {
       behavior: new _AlwaysCupertinoScrollBehavior(),
       child: new WidgetsApp(
         key: new GlobalObjectKey(this),
+        // We're passing in a builder and nothing else that the WidgetsApp uses
+        // to build its own Navigator because we're building a Navigator with
+        // routes in this class.
         builder: defaultBuilder,
         title: widget.title,
         onGenerateTitle: widget.onGenerateTitle,
