@@ -347,7 +347,7 @@ class AndroidSdk {
   }
 
   String getAvdManagerPath() {
-    final String binaryName = platform.isWindows ? 'avdmanager.exe' : 'avdmanager';
+    final String binaryName = platform.isWindows ? 'avdmanager.bat' : 'avdmanager';
     final String path = fs.path.join(directory, 'tools', 'bin', binaryName);
     if (fs.file(path).existsSync())
       return path;
