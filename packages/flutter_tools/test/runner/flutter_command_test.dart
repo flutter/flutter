@@ -80,8 +80,8 @@ void main() {
       await flutterCommand.run();
       verify(clock.now()).called(2);
       verifyNever(usage.sendTiming(
-                   captureAny, captureAny, captureAny,
-                   label: captureAnyNamed('label')));
+                   any, any, any,
+                   label: anyNamed('label')));
     },
     overrides: <Type, Generator>{
       Clock: () => clock,

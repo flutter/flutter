@@ -84,32 +84,30 @@ class FakeProcessManager extends Mock implements ProcessManager {
     // expected to be called.
     // TODO(gspencer): make this more general so that any call will be captured.
     when(start(
-      captureAny,
-      environment: captureAnyNamed('environment'),
-      workingDirectory: captureAnyNamed('workingDirectory'),
+      any,
+      environment: anyNamed('environment'),
+      workingDirectory: anyNamed('workingDirectory'),
     )).thenAnswer(_nextProcess);
 
-    when(start(captureAny)).thenAnswer(_nextProcess);
+    when(start(any)).thenAnswer(_nextProcess);
 
     when(run(
-      captureAny,
-      environment: captureAnyNamed('environment'),
-      workingDirectory: captureAnyNamed('workingDirectory'),
+      any,
+      environment: anyNamed('environment'),
+      workingDirectory: anyNamed('workingDirectory'),
     )).thenAnswer(_nextResult);
 
-    when(captureAny).thenAnswer(_nextResult);
-
     when(runSync(
-      captureAny,
-      environment: captureAnyNamed('environment'),
-      workingDirectory: captureAnyNamed('workingDirectory')
+      any,
+      environment: anyNamed('environment'),
+      workingDirectory: anyNamed('workingDirectory')
     )).thenAnswer(_nextResultSync);
 
     when(runSync(any)).thenAnswer(_nextResultSync);
 
     when(killPid(any, any)).thenReturn(true);
 
-    when(canRun(any, workingDirectory: captureAnyNamed('workingDirectory')))
+    when(canRun(any, workingDirectory: anyNamed('workingDirectory')))
         .thenReturn(true);
   }
 }

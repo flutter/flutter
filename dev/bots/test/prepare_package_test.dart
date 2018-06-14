@@ -143,8 +143,8 @@ void main() {
         expect(
           verify(processManager.start(
             captureAny,
-            workingDirectory: captureAnyNamed('workingDirectory',
-            environment: captureAnyNamed('environment',
+            workingDirectory: captureAnyNamed('workingDirectory'),
+            environment: captureAnyNamed('environment'),
           )).captured[2]['PUB_CACHE'],
           endsWith(path.join('flutter', '.pub-cache')),
         );
