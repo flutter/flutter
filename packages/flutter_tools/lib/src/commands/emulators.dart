@@ -27,7 +27,7 @@ class EmulatorsCommand extends FlutterCommand {
   final String name = 'emulators';
 
   @override
-  final String description = 'List and launch available emulators.';
+  final String description = 'List, launch and create emulators.';
 
   @override
   final List<String> aliases = <String>['emulator'];
@@ -79,7 +79,7 @@ class EmulatorsCommand extends FlutterCommand {
 
   Future<Null> _createEmulator(String name) async {
     if (name == null) {
-      const String autoName = "flutter_emulator";
+      const String autoName = 'flutter_emulator';
       final Set<String> takenNames =
           (await emulatorManager.getEmulatorsMatching(autoName))
           .map((Emulator e) => e.id)
@@ -97,10 +97,8 @@ class EmulatorsCommand extends FlutterCommand {
       printStatus("Emulator '$name' created successfully.");
     } else {
       printStatus("Failed to create emulator '$name'.\n");
-      printStatus(createResult.error);
-      printStatus('You can find more information on managing emulators at the links below:\n'
-        '  https://developer.android.com/studio/run/managing-avds\n'
-        '  https://developer.android.com/studio/command-line/avdmanager');
+      printStatus(createResult.error.trim());
+      _printAdditionalInfo();
     }
   }
 
@@ -110,11 +108,8 @@ class EmulatorsCommand extends FlutterCommand {
         : await emulatorManager.getEmulatorsMatching(searchText);
 
     if (emulators.isEmpty) {
-      printStatus('No emulators available.\n\n'
-          // TODO(dantup): Change these when we support creation
-          // 'You may need to create images using "flutter emulators --create"\n'
-          'You may need to create one using Android Studio '
-          'or visit https://flutter.io/setup/ for troubleshooting tips.');
+      printStatus('No emulators available.');
+      _printAdditionalInfo(showCreateInstruction: true);
     } else {
       _printEmulatorList(
         emulators,
@@ -126,7 +121,28 @@ class EmulatorsCommand extends FlutterCommand {
   void _printEmulatorList(List<Emulator> emulators, String message) {
     printStatus('$message\n');
     Emulator.printEmulators(emulators);
-    printStatus(
-        "\nTo run an emulator, run 'flutter emulators --launch <emulator id>'.");
+    _printAdditionalInfo(showCreateInstruction: true, showRunInstruction: true);
+  }
+
+  void _printAdditionalInfo({ bool showRunInstruction = false,
+      bool showCreateInstruction = false }) {
+    printStatus('');
+    if (showRunInstruction) {
+      printStatus(
+          "To run an emulator, run 'flutter emulators --launch <emulator id>'.");
+    }
+    if (showCreateInstruction) {
+      printStatus(
+          "To create a new emulator, run 'flutter emulators --create [--name xyz]'.");
+    }
+
+    if (showRunInstruction || showCreateInstruction) {
+      printStatus('');
+    }
+    // TODO(dantup): Update this link to flutter.io if/when we have a better page.
+    // That page can then link out to these places if required.
+    printStatus('You can find more information on managing emulators at the links below:\n'
+        '  https://developer.android.com/studio/run/managing-avds\n'
+        '  https://developer.android.com/studio/command-line/avdmanager');
   }
 }
