@@ -39,7 +39,7 @@ typedef void OnSwapCallback(int oldIndex, int newIndex);
 /// Note that this widget places its [children] in a [Column] or [Row] and not a [ListView].
 ///
 /// All [children] must have a key.
-class ReorderableListView extends StatelessWidget {
+class ReorderableListView extends StatefulWidget {
 
   /// Creates a reorderable list.
   const ReorderableListView({
@@ -47,9 +47,7 @@ class ReorderableListView extends StatelessWidget {
     @required this.onSwap, 
     this.scrollDirection = Axis.vertical, 
     this.padding, 
-    this.dropAreaExtent = 96.0,
-  }): assert(dropAreaExtent != null),
-      assert(scrollDirection != null),
+  }): assert(scrollDirection != null),
       assert(onSwap != null),
       assert(children != null);
 
@@ -70,59 +68,79 @@ class ReorderableListView extends StatelessWidget {
   /// This [ReorderableListView] calls [onSwap] after a list child is dropped
   /// into a new position.
   final OnSwapCallback onSwap;
-
-  /// The extent along the [scrollDirection] axis to allow a child to drop
-  /// into when the user reorders list children.
-  /// 
-  /// When the user is dragging a child to reorder it, the list will open up a
-  /// drop area in the space under the widget being dragged. That area will
-  /// have an extent along the main axis of [dropAreaExtent].
-  /// 
-  /// In a vertical list, this should match the height of the list items.
-  /// In a horizontal list, this should match the width of the list items.
-  final double dropAreaExtent;
-
   
   @override
+  State<StatefulWidget> createState() {
+    return new _ReorderableListViewState();
+  }
+}
+
+class _ReorderableListViewState extends State<ReorderableListView> {
+  // We use an inner overlay so that the dragging list item doesn't draw outside of the list itself.
+  GlobalKey _overlayKey;
+
+  // This entry contains the scrolling list itself.
+  OverlayEntry _bottomOverlayEntry;
+
+  @override 
+  void initState() {
+    super.initState();
+    _overlayKey = new GlobalKey(debugLabel: '$this overlay key');
+    _bottomOverlayEntry = new OverlayEntry(
+      opaque: true,
+      builder: (BuildContext context) {
+        return new _ReorderableListContent(
+          children: widget.children,
+          scrollDirection: widget.scrollDirection,
+          onSwap: widget.onSwap,
+          padding: widget.padding,
+        );
+      },
+    );
+  }
+
+  @override
   Widget build(BuildContext context) {
-    // We place the content inside of an Overlay to constrain dragging
-    // list items to the list's area of the screen.
     return new Overlay(
+      key: _overlayKey,
       initialEntries: <OverlayEntry>[
-        new OverlayEntry(
-          opaque: true,
-          builder: (BuildContext context) => new _ReorderableListContent(
-            children: children,
-            scrollDirection: scrollDirection,
-            padding: padding,
-            onSwap: onSwap,
-            dropAreaExtent: dropAreaExtent,
-          ),
-        ),
+        _bottomOverlayEntry,
     ]);
-  }  
+  }
 }
 
 // This widget is responsible for the inside of the Overlay in the
 // ReorderableListView.
 class _ReorderableListContent extends StatefulWidget {
-  const _ReorderableListContent({this.children, this.scrollDirection, this.padding, this.onSwap, this.dropAreaExtent});
+  const _ReorderableListContent({
+    @required this.children,
+    @required this.scrollDirection,
+    @required this.padding,
+    @required this.onSwap,
+  });
         
   final List<Widget> children;
   final Axis scrollDirection;
   final EdgeInsets padding;
   final OnSwapCallback onSwap;
-  final double dropAreaExtent;
 
   @override
   _ReorderableListContentState createState() => new _ReorderableListContentState();
 }
 
 class _ReorderableListContentState extends State<_ReorderableListContent> with TickerProviderStateMixin {
+  // The extent along the [widget.scrollDirection] axis to allow a child to
+  // drop into when the user reorders list children.
+  //
+  // This value is used as a fallback when the extents haven't yet been
+  // calculated from the currently dragging widget.
+  static const double _kDefaultDropAreaExtent = 100.0;
+
   // How long an animation to reorder an element in the list takes.
   static const Duration _kReorderAnimationDuration = const Duration(milliseconds: 200);
 
-  // How long an animation to scroll to an off-screen element in the list takes.
+  // How long an animation to scroll to an off-screen element in the
+  // list takes.
   static const Duration _kScrollAnimationDuration = const Duration(milliseconds: 200);
 
   // Controls scrolls and measures scroll progress.
@@ -131,11 +149,17 @@ class _ReorderableListContentState extends State<_ReorderableListContent> with T
   // This controls the entrance of the dragging widget into a new place.
   AnimationController _entranceController;
 
-  // This controls the 'ghost' of the dragging widget, which is left behind where the widget used to be.
+  // This controls the 'ghost' of the dragging widget, which is left behind
+  // where the widget used to be.
   AnimationController _ghostController;
 
-  // The widget currently being dragged. Null if no drag is underway.
+  // The member of widget.children currently being dragged.
+  //
+  // Null if no drag is underway.
   Key _dragging;
+
+  // The last computed size of the feedback widget being dragged.
+  Size _draggingFeedbackSize;
 
   // The location that the dragging widget occupied before it started to drag.
   int _dragStartIndex = 0;
@@ -152,6 +176,15 @@ class _ReorderableListContentState extends State<_ReorderableListContent> with T
 
   // Whether or not we are currently scrolling this view to show a widget.
   bool _scrolling = false;
+
+  double get _dropAreaExtent {
+    if (_draggingFeedbackSize == null) {
+      return _kDefaultDropAreaExtent;
+    }
+    return widget.scrollDirection == Axis.vertical
+        ? _draggingFeedbackSize.height
+        : _draggingFeedbackSize.width;
+  }
 
   @override 
   void initState() {
@@ -200,7 +233,7 @@ class _ReorderableListContentState extends State<_ReorderableListContent> with T
     // If and only if the current scroll offset falls in-between the offsets
     // necessary to reveal the selected context at the top or bottom of the
     // screen, then it is already on-screen.
-    final double margin = widget.dropAreaExtent;
+    final double margin = _dropAreaExtent;
     final double scrollOffset = _scrollController.offset;
     final double topOffset = max(
       _scrollController.position.minScrollExtent, 
@@ -269,12 +302,17 @@ class _ReorderableListContentState extends State<_ReorderableListContent> with T
         maxSimultaneousDrags: 1,
         axis: widget.scrollDirection,
         data: toWrap.key,
-        feedback:new Container(
+        feedback: new Container(
           alignment: Alignment.topLeft,
           // These constraints will limit the cross axis of the drawn widget.
           constraints: constraints,
-          child: new Material(
-            elevation: 6.0,
+          child: new _DraggingWidget(
+            constraints: constraints,
+            onUpdateSize: (Size newSize) {
+              setState(() {
+                _draggingFeedbackSize = newSize;
+              });
+            },
             child: toWrap,
           ),
         ),
@@ -298,9 +336,12 @@ class _ReorderableListContentState extends State<_ReorderableListContent> with T
       if (index >= widget.children.length) {
         child = toWrap;
       }
-      final Widget spacing = widget.scrollDirection == Axis.vertical 
-          ? new SizedBox(height: widget.dropAreaExtent) 
-          : new SizedBox(width: widget.dropAreaExtent);
+
+      // Determine the size of the drop area to show under the dragging widget.
+      final Widget spacing = (widget.scrollDirection == Axis.vertical)
+          ? new SizedBox(height: _dropAreaExtent)
+          : new SizedBox(width: _dropAreaExtent);
+
       // We open up a space under where the dragging widget currently is to
       // show it can be dropped.
       if (_currentIndex == index) {
@@ -378,5 +419,54 @@ class _ReorderableListContentState extends State<_ReorderableListContent> with T
           controller: _scrollController,
         );
     });
+  }
+}
+
+class _DraggingWidget extends StatefulWidget {
+  _DraggingWidget({Key key, this.child, this.constraints, this.onUpdateSize}) : super(key: key) {
+    if (key != null) {
+      print('${child.key}, $key');
+    }
+  }
+
+  final Widget child;
+  final BoxConstraints constraints;
+  final void Function(Size newSize) onUpdateSize;
+
+  @override
+  State<_DraggingWidget> createState() => new _DraggingWidgetState();
+}
+
+class _DraggingWidgetState extends State<_DraggingWidget> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback(_computeSize);
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+  }
+
+  @override
+  void didUpdateWidget(_DraggingWidget oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    WidgetsBinding.instance.addPostFrameCallback(_computeSize);
+  }
+
+  // Computes the widget's size as a post-frame callback.
+  void _computeSize([Duration duration]) {
+    final RenderBox box = context.findRenderObject();
+    print('Setting parent size to ${box.size}');
+    widget.onUpdateSize(box.size);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+     return new Material(
+      elevation: 6.0,
+      child: widget.child,
+    );
   }
 }
