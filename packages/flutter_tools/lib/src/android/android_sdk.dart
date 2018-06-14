@@ -101,16 +101,8 @@ String getAvdPath() {
 /// will work for those users who have Android Tools installed but
 /// not the full SDK.
 String getAvdManagerPath([AndroidSdk existingSdk]) {
-  if (existingSdk?.avdManagerPath != null)
-    return existingSdk.avdManagerPath;
-
-  final AndroidSdk sdk = AndroidSdk.locateAndroidSdk();
-
-  if (sdk?.latestVersion == null) {
-    return os.which('avdmanager')?.path;
-  } else {
-    return sdk.avdManagerPath;
-  }
+  return existingSdk?.avdManagerPath ??
+    AndroidSdk.locateAndroidSdk()?.avdManagerPath;
 }
 
 class AndroidNdkSearchError {
