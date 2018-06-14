@@ -5,12 +5,12 @@
 import 'dart:async';
 import 'dart:io' show ProcessResult;
 
-import 'package:flutter_tools/src/base/process_manager.dart';
 import 'package:meta/meta.dart';
 
 import '../android/android_sdk.dart';
 import '../android/android_workflow.dart';
 import '../base/file_system.dart';
+import '../base/process_manager.dart';
 import '../emulator.dart';
 import 'android_sdk.dart';
 
