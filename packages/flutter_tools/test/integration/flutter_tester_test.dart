@@ -3,19 +3,16 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:convert';
 
 import 'package:file/file.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
-import 'package:flutter_tools/src/base/io.dart';
-import 'package:flutter_tools/src/base/process_manager.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/tester/flutter_tester.dart';
 import 'package:test/test.dart';
 
-import '../src/common.dart';
 import '../src/context.dart';
+import 'util.dart';
 
 void main() {
   Directory tempDir;
@@ -52,11 +49,11 @@ void main() {
     }
 
     testUsingContext('start', () async {
-      _writePubspec();
-      _writePackages();
+      writePubspec(tempDir.path);
+      writePackages(tempDir.path);
 
       final String mainPath = fs.path.join('lib', 'main.dart');
-      _writeFile(mainPath, r'''
+      writeFile(mainPath, r'''
 import 'dart:async';
 void main() {
   new Timer.periodic(const Duration(milliseconds: 1), (Timer timer) {
@@ -76,12 +73,12 @@ void main() {
     });
 
     testUsingContext('keeps running', () async {
-      _writePubspec();
-      _writePackages();
-      await _getPackages();
+      writePubspec(tempDir.path);
+      writePackages(tempDir.path);
+      await getPackages(tempDir.path);
 
       final String mainPath = fs.path.join('lib', 'main.dart');
-      _writeFile(mainPath, r'''
+      writeFile(mainPath, r'''
 import 'package:flutter/material.dart';
 
 void main() => runApp(new MyApp());
@@ -108,39 +105,4 @@ class MyApp extends StatelessWidget {
       expect(await device.stopApp(null), isTrue);
     });
   });
-}
-
-void _writeFile(String path, String content) {
-  fs.file(path)
-    ..createSync(recursive: true)
-    ..writeAsStringSync(content);
-}
-
-void _writePackages() {
-  _writeFile('.packages', '''
-test:${fs.path.join(fs.currentDirectory.path, 'lib')}/
-''');
-}
-
-void _writePubspec() {
-  _writeFile('pubspec.yaml', '''
-name: test
-dependencies:
-  flutter:
-    sdk: flutter
-''');
-}
-
-Future<void> _getPackages() async {
-  final List<String> command = <String>[
-    fs.path.join(getFlutterRoot(), 'bin', 'flutter'),
-    'packages',
-    'get'
-  ];
-  final Process process = await processManager.start(command);
-  final StringBuffer errorOutput = new StringBuffer();
-  process.stderr.transform(utf8.decoder).listen(errorOutput.write);
-  final int exitCode = await process.exitCode;
-  if (exitCode != 0)
-    throw new Exception('flutter packages get failed: ${errorOutput.toString()}');
 }
