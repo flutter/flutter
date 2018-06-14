@@ -192,8 +192,7 @@ Paragraph::GlyphPosition::GlyphPosition(double x_start,
       x_pos(x_start, x_start + x_advance) {}
 
 void Paragraph::GlyphPosition::Shift(double delta) {
-  x_pos.start += delta;
-  x_pos.end += delta;
+  x_pos.Shift(delta);
 }
 
 Paragraph::GlyphLine::GlyphLine(std::vector<GlyphPosition>&& p, size_t tcu)
@@ -211,6 +210,12 @@ Paragraph::CodeUnitRun::CodeUnitRun(std::vector<GlyphPosition>&& p,
       line_number(line),
       font_metrics(metrics),
       direction(dir) {}
+
+void Paragraph::CodeUnitRun::Shift(double delta) {
+  x_pos.Shift(delta);
+  for (GlyphPosition& position : positions)
+    position.Shift(delta);
+}
 
 Paragraph::Paragraph() {
   breaker_.setLocale(icu::Locale(), nullptr);
@@ -697,9 +702,7 @@ void Paragraph::Layout(double width, bool force) {
     double line_x_offset = GetLineXOffset(run_x_offset);
     if (line_x_offset) {
       for (CodeUnitRun& code_unit_run : line_code_unit_runs) {
-        for (GlyphPosition& position : code_unit_run.positions) {
-          position.Shift(line_x_offset);
-        }
+        code_unit_run.Shift(line_x_offset);
       }
       for (GlyphPosition& position : line_glyph_positions) {
         position.Shift(line_x_offset);
