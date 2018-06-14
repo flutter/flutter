@@ -195,7 +195,6 @@ void main() {
         ),
       ),
     );
-
     // The important lines below are the ones marked with "<----"
     expect(tester.binding.renderView.toStringDeep(minLevel: DiagnosticLevel.info), equalsIgnoringHashCodes(
       'RenderView#00000\n'
@@ -319,9 +318,7 @@ void main() {
       '                           parentData: <none> (can use size)\n'
       '                           constraints: BoxConstraints(w=800.0, h=400.0)\n'
       '                           size: Size(800.0, 400.0)\n'
-      ''
     ));
-
     const GlobalObjectKey<_LeafState>(0).currentState.setKeepAlive(true);
     await tester.drag(find.byType(ListView), const Offset(0.0, -1000.0));
     await tester.pump();

@@ -6,6 +6,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 
+import '../rendering/mock_canvas.dart';
+
 import 'test_widgets.dart';
 
 void main() {
@@ -431,6 +433,7 @@ void main() {
   });
 
   testWidgets('ListView should not paint hidden children', (WidgetTester tester) async {
+    const Text text = const Text('test');
     await tester.pumpWidget(
         new Directionality(
             textDirection: TextDirection.ltr,
@@ -441,12 +444,12 @@ void main() {
                     cacheExtent: 500.0,
                     controller: new ScrollController(initialScrollOffset: 300.0),
                     children: <Widget>[
-                      new Container(height: 140.0),
-                      new Container(height: 160.0),
-                      new Container(height: 90.0),
-                      new Container(height: 110.0),
-                      new Container(height: 80.0),
-                      new Container(height: 70.0),
+                      new Container(height: 140.0, child: text),
+                      new Container(height: 160.0, child: text),
+                      new Container(height: 90.0, child: text),
+                      new Container(height: 110.0, child: text),
+                      new Container(height: 80.0, child: text),
+                      new Container(height: 70.0, child: text),
                     ],
                   )
               ),
@@ -455,10 +458,6 @@ void main() {
     );
 
     final RenderSliverList list = tester.renderObject(find.byType(SliverList));
-    expect(list, isNotNull);
-    expect(list, hasAGoodToStringDeep);
-    final String dump = list.toStringDeep(minLevel: DiagnosticLevel.info);
-    final int numChildrenPainted = 'layer: OffsetLayer'.allMatches(dump).length;
-    expect(numChildrenPainted, 2);  // only the middle two should be painted
+    expect(list, paintsExactlyCountTimes(#drawParagraph, 2));
   });
 }
