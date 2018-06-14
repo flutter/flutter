@@ -860,7 +860,7 @@ class PopupMenuButton<T> extends StatefulWidget {
   final Widget child;
 
   /// If provided, the icon used for this button.
-  final Icon icon;
+  final Widget icon;
 
   @override
   _PopupMenuButtonState<T> createState() => new _PopupMenuButtonState<T>();
