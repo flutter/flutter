@@ -174,7 +174,8 @@ class EmulatorManager {
 
     final List<int> availableApiVersions = availableIDs
       .map((String id) => androidApiVersion.firstMatch(id).group(1))
-      .map((String apiVersion) => int.parse(apiVersion));
+      .map((String apiVersion) => int.parse(apiVersion))
+      .toList();
 
     // Get the highest Android API version or whats left
     final int apiVersion = availableApiVersions.isNotEmpty
