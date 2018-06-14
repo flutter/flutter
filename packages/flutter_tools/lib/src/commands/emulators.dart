@@ -82,9 +82,9 @@ class EmulatorsCommand extends FlutterCommand {
         await emulatorManager.createEmulator(name);
 
     if (createResult.success) {
-      printStatus("Emulator '${createResult.createdEmulatorName}' created successfully.");
+      printStatus("Emulator '${createResult.emulatorName}' created successfully.");
     } else {
-      printStatus("Failed to create emulator '$name'.\n");
+      printStatus("Failed to create emulator '${createResult.emulatorName}'.\n");
       printStatus(createResult.error.trim());
       _printAdditionalInfo();
     }

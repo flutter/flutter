@@ -82,6 +82,7 @@ class EmulatorManager {
     final String device =  await _getPreferredAvailableDevice();
     if (device == null)
       return new CreateEmulatorResult(
+        name,
         success: false,
         error: 'No device definitions are available'
     );
@@ -89,6 +90,7 @@ class EmulatorManager {
     final String sdkId =  await _getPreferredSdkId();
     if (sdkId == null)
       return new CreateEmulatorResult(
+        name,
         success: false,
         error: 'No Android AVD system images are available'
     );
@@ -115,8 +117,8 @@ class EmulatorManager {
     ];
     final ProcessResult runResult = processManager.runSync(args);
     return new CreateEmulatorResult(
+      name,
       success: runResult.exitCode == 0,
-      createdEmulatorName: runResult.exitCode == 0 ? name : null,
       output: runResult.stdout,
       error: cleanError(runResult.stderr),
     );
@@ -268,9 +270,9 @@ abstract class Emulator {
 
 class CreateEmulatorResult {
   final bool success;
-  final String createdEmulatorName;
+  final String emulatorName;
   final String output;
   final String error;
 
-  CreateEmulatorResult({this.success, this.createdEmulatorName, this.output, this.error});
+  CreateEmulatorResult(this.emulatorName, {this.success, this.output, this.error});
 }
