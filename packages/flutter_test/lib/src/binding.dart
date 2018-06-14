@@ -859,8 +859,15 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
     });
 
     return new Future<Null>.microtask(() async {
-      // Run all queued microtasks.
-      await new Future<Null>.microtask(() {});
+      // testBodyResult is a Future that was created in the Zone of the
+      // fakeAsync. This means that if we await it here, it will register a
+      // microtask to handle the future _in the fake async zone_. We avoid this
+      // by calling '.then' in the current zone. While flushing the microtasks
+      // of the fake-zone below, the new future will be completed and can then
+      // be used without fakeAsync.
+      var resultFuture = testBodyResult.then<Null>((_) {
+        /* Do nothing. */
+      });
 
       // Resolve interplay between fake async and real async calls.
       fakeAsync.flushMicrotasks();
@@ -868,16 +875,7 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
         await _pendingAsyncTasks.future;
         fakeAsync.flushMicrotasks();
       }
-
-      // If we get here and fakeAsync != _currentFakeAsync, then the test
-      // probably timed out.
-
-      // testBodyResult is a Future that was created in the Zone of the
-      // fakeAsync. This means that if we await it here, it will register a
-      // microtask to handle the future _in the fake async zone_. We avoid this
-      // by returning the wrapped microtask future that we've created _outside_
-      // the fake async zone.
-      return testBodyResult;
+      return resultFuture;
     });
   }
 
