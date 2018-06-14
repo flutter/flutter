@@ -168,12 +168,14 @@ class EmulatorManager {
       .where((String l) => l.contains('google_apis_playstore'))
       .toList();
 
+    final List<int> availableApiVersions = availableIDs
+      .map((String id) => androidApiVersion.firstMatch(id).group(1))
+      .map((String apiVersion) => int.parse(apiVersion));
+
     // Get the highest Android API version or whats left
-    final int apiVersion =
-      availableIDs
-        .map((String id) => androidApiVersion.firstMatch(id).group(1))
-        .map((String apiVersion) => int.parse(apiVersion))
-        .reduce(math.max);
+    final int apiVersion = availableApiVersions.isNotEmpty
+      ? availableApiVersions.reduce(math.max)
+      : -1; // Don't match below
     
     // We're out of preferences, we just have to return the first one with the high
     // API version.
