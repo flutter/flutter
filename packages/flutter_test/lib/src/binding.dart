@@ -508,10 +508,15 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
 
   Future<Null> _runTestBody(Future<Null> testBody(), VoidCallback invariantTester) async {
     // Delay this function by a microtask.
-    // Otherwise it will open a scope immediately, which is then open when
-    // the `asyncBarrier` is invoked. The `asyncBarrier` is immediately
-    // following the call to `testZone.runBinary(_runTestBody)`, so delaying
-    // by one microtask is enough to ensure that the timing is correct.
+    //
+    // The `_runTest` functions invokes `_runTestBody` and then invokes
+    // `asyncBarrier()` afterwardes. The `asyncBarrier` verifies that no scope is
+    // open.
+    // We don't want to move the `asyncBarrier()` earlier, because it also
+    // flushes all microtasks.
+    // By delaying by one microtask, the `asyncBarrier` will not yet see the
+    // open scope and also ensure that the all microtasks (including this one)
+    // are flushed.
     await new Future<Null>.microtask(() {});
     assert(inTest);
 
@@ -856,10 +861,6 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
     return new Future<Null>.microtask(() async {
       // Run all queued microtasks.
       await new Future<Null>.microtask(() {});
-      // When the test had an exception, the test-framework already ran the
-      // teardown functions, removing the _fakeAsync object.
-      if (fakeAsync == null)
-        return null;
 
       // Resolve interplay between fake async and real async calls.
       fakeAsync.flushMicrotasks();
