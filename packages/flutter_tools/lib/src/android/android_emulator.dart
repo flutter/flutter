@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:io';
 
 import 'package:flutter_tools/src/base/process_manager.dart';
 import 'package:meta/meta.dart';
@@ -32,13 +33,15 @@ class AndroidEmulator extends Emulator {
   Map<String, String> _properties;
 
   @override
-  String get name => _properties['hw.device.name'];
+  String get name => _prop('hw.device.name');
 
   @override
-  String get manufacturer => _properties['hw.device.manufacturer'];
+  String get manufacturer => _prop('hw.device.manufacturer');
 
   @override
   String get label => _properties['avd.ini.displayname'];
+
+  String _prop(String name) => _properties != null ? _properties[name] : null;
 
   @override
   Future<void> launch() async {
@@ -86,14 +89,15 @@ void extractEmulatorAvdInfo(String text, List<AndroidEmulator> emulators) {
 AndroidEmulator _createEmulator(String id) {
   id = id.trim();
   final File iniFile = fs.file(fs.path.join(getAvdPath(), '$id.ini'));
-  final Map<String, String> ini = parseIniLines(iniFile.readAsLinesSync());
-
-  if (ini['path'] != null) {
-    final File configFile = fs.file(fs.path.join(ini['path'], 'config.ini'));
-    if (configFile.existsSync()) {
-      final Map<String, String> properties =
-          parseIniLines(configFile.readAsLinesSync());
-      return new AndroidEmulator(id, properties);
+  if (iniFile.existsSync()) {
+    final Map<String, String> ini = parseIniLines(iniFile.readAsLinesSync());
+    if (ini['path'] != null) {
+      final File configFile = fs.file(fs.path.join(ini['path'], 'config.ini'));
+      if (configFile.existsSync()) {
+        final Map<String, String> properties =
+            parseIniLines(configFile.readAsLinesSync());
+        return new AndroidEmulator(id, properties);
+      }
     }
   }
 
