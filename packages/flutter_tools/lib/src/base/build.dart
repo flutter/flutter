@@ -52,7 +52,6 @@ class GenSnapshot {
       '--await_is_keyword',
       '--causal_async_stacks',
       '--packages=$packagesPath',
-      '--dependencies=$depfilePath',
     ]..addAll(additionalArgs);
 
     final String snapshotterPath = getSnapshotterPath(snapshotType);
@@ -195,7 +194,6 @@ class AOTSnapshotter {
       '--url_mapping=dart:vmservice_io,$vmServicePath',
       '--embedder_entry_points_manifest=$vmEntryPoints',
       '--embedder_entry_points_manifest=$ioEntryPoints',
-      '--dependencies=$depfilePath',
     ];
     if (previewDart2) {
       genSnapshotArgs.addAll(<String>[
