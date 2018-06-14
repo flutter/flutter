@@ -429,4 +429,36 @@ void main() {
     expect(position.viewportDimension, equals(600.0));
     expect(position.minScrollExtent, equals(0.0));
   });
+
+  testWidgets('ListView should not paint hidden children', (WidgetTester tester) async {
+    await tester.pumpWidget(
+        new Directionality(
+            textDirection: TextDirection.ltr,
+            child: new Center(
+              child: new Container(
+                  height: 200.0,
+                  child: new ListView(
+                    cacheExtent: 500.0,
+                    controller: new ScrollController(initialScrollOffset: 300.0),
+                    children: <Widget>[
+                      new Container(height: 140.0),
+                      new Container(height: 160.0),
+                      new Container(height: 90.0),
+                      new Container(height: 110.0),
+                      new Container(height: 80.0),
+                      new Container(height: 70.0),
+                    ],
+                  )
+              ),
+            )
+        )
+    );
+
+    final RenderSliverList list = tester.renderObject(find.byType(SliverList));
+    expect(list, isNotNull);
+    expect(list, hasAGoodToStringDeep);
+    final String dump = list.toStringDeep(minLevel: DiagnosticLevel.info);
+    final int numChildrenPainted = 'layer: OffsetLayer'.allMatches(dump).length;
+    expect(numChildrenPainted, 2);  // only the middle two should be painted
+  });
 }
