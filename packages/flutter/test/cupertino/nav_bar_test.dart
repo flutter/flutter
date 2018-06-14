@@ -575,18 +575,20 @@ void main() {
     (WidgetTester tester) async {
       await tester.pumpWidget(
         new CupertinoApp(
-          home: new CupertinoPageScaffold(
-            child: new CustomScrollView(
-              slivers: <Widget>[
-                const CupertinoSliverNavigationBar(
-                  largeTitle: const Text('Bling bling'),
-                ),
-                new SliverToBoxAdapter(
-                  child: new Container(
-                    height: 1200.0,
+          home: new RepaintBoundary(
+            child: new CupertinoPageScaffold(
+              child: new CustomScrollView(
+                slivers: <Widget>[
+                  const CupertinoSliverNavigationBar(
+                    largeTitle: const Text('Bling bling'),
                   ),
-                ),
-              ],
+                  new SliverToBoxAdapter(
+                    child: new Container(
+                      height: 1200.0,
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         ),
