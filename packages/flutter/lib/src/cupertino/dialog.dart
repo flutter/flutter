@@ -2,7 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:math';
 import 'dart:ui' show ImageFilter;
+import 'package:flutter/foundation.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
 import 'colors.dart';
@@ -173,19 +176,6 @@ class CupertinoAlertDialog extends StatelessWidget {
   ///    section when it is long.
   final ScrollController actionScrollController;
 
-  Widget _buildBlurBackground() {
-    return new ClipRRect(
-      borderRadius: const BorderRadius.all(const Radius.circular(_kDialogCornerRadius)),
-      child: new BackdropFilter(
-        filter: new ImageFilter.blur(sigmaX: 10.0, sigmaY: 10.0),
-        child: new Container(
-          width: _kCupertinoDialogWidth,
-          decoration: _kCupertinoDialogBlurOverlayDecoration,
-        ),
-      ),
-    );
-  }
-
   Widget _buildContent() {
     final List<Widget> children = <Widget>[];
 
@@ -201,13 +191,7 @@ class CupertinoAlertDialog extends StatelessWidget {
     }
 
     return new Container(
-      decoration: const BoxDecoration(
-        borderRadius: const BorderRadius.only(
-          topLeft: const Radius.circular(_kDialogCornerRadius),
-          topRight: const Radius.circular(_kDialogCornerRadius),
-        ),
-        color: _kDialogColor,
-      ),
+      color: _kDialogColor,
       child: new Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -225,13 +209,7 @@ class CupertinoAlertDialog extends StatelessWidget {
       );
     }
 
-    return new ClipRRect(
-      borderRadius: const BorderRadius.only(
-        bottomLeft: const Radius.circular(_kDialogCornerRadius),
-        bottomRight: const Radius.circular(_kDialogCornerRadius),
-      ),
-      child: actionSection,
-    );
+    return actionSection;
   }
 
   @override
@@ -240,24 +218,26 @@ class CupertinoAlertDialog extends StatelessWidget {
       child: new Container(
         width: _kCupertinoDialogWidth,
         padding: const EdgeInsets.symmetric(vertical: _kEdgePadding),
-        child: new CustomMultiChildLayout(
-          delegate: new _CupertinoAlertDialogLayoutDelegate(
-            actionsCount: actions.length,
+        child: ClipRRect(
+          borderRadius: const BorderRadius.all(const Radius.circular(_kDialogCornerRadius)),
+          child: new BackdropFilter(
+            filter: new ImageFilter.blur(sigmaX: 10.0, sigmaY: 10.0),
+            child: new Container(
+              decoration: _kCupertinoDialogBlurOverlayDecoration,
+              child: new CupertinoDialogRenderWidget(
+                children: <Widget>[
+                  new CupertinoLayoutId(
+                    id: _AlertDialogSection.content,
+                    child: _buildContent(),
+                  ),
+                  new CupertinoLayoutId(
+                    id: _AlertDialogSection.actions,
+                    child: _buildActions(),
+                  ),
+                ],
+              ),
+            ),
           ),
-          children: <Widget>[
-            new LayoutId(
-              id: _AlertDialogSection.blur,
-              child: _buildBlurBackground(),
-            ),
-            new LayoutId(
-              id: _AlertDialogSection.content,
-              child: _buildContent(),
-            ),
-            new LayoutId(
-              id: _AlertDialogSection.actions,
-              child: _buildActions(),
-            ),
-          ],
         ),
       ),
     );
@@ -265,22 +245,152 @@ class CupertinoAlertDialog extends StatelessWidget {
 }
 
 enum _AlertDialogSection {
-  blur,
   content,
   actions,
 }
 
-class _CupertinoAlertDialogLayoutDelegate extends MultiChildLayoutDelegate {
-
-  _CupertinoAlertDialogLayoutDelegate({
-    this.actionsCount,
-  });
-
-  final int actionsCount;
+class CupertinoDialogRenderWidget extends MultiChildRenderObjectWidget {
+  CupertinoDialogRenderWidget({
+    Key key,
+    @required List<Widget> children,
+  }) : super(key: key, children: children);
 
   @override
-  void performLayout(Size size) {
-    // TODO(mattcarroll): handle 2 buttons that need to stack due to long text
+  RenderObject createRenderObject(BuildContext context) {
+    return new CupertinoDialogRenderBox();
+  }
+}
+
+class CupertinoDialogRenderBox extends RenderBox
+    with ContainerRenderObjectMixin<RenderBox, CupertinoDialogRenderBoxParentData>,
+        RenderBoxContainerDefaultsMixin<RenderBox, CupertinoDialogRenderBoxParentData> {
+  CupertinoDialogRenderBox({
+    List<RenderBox> children,
+  }) {
+    addAll(children);
+  }
+
+  @override
+  void setupParentData(RenderBox child) {
+    if (child.parentData is! CupertinoDialogRenderBoxParentData)
+      child.parentData = new CupertinoDialogRenderBoxParentData();
+  }
+
+  @override
+  double computeMinIntrinsicWidth(double height) {
+    RenderBox _content;
+    RenderBox _actions;
+    getChildrenAsList().forEach((RenderBox child) {
+      MultiChildLayoutParentData parentData = child.parentData;
+      if (parentData.id == _AlertDialogSection.content) {
+        _content = child;
+      } else if (parentData.id == _AlertDialogSection.actions) {
+        _actions = child;
+      }
+    });
+    assert(_content != null);
+    assert(_actions != null);
+
+    final double contentWidth = _content.getMaxIntrinsicWidth(height);
+    final double actionsWidth = _actions.getMaxIntrinsicWidth(height);
+    final double width = max(contentWidth, actionsWidth);
+
+    if (width.isFinite)
+      return width;
+    return 0.0;
+  }
+
+  @override
+  double computeMaxIntrinsicWidth(double height) {
+    RenderBox _content;
+    RenderBox _actions;
+    getChildrenAsList().forEach((RenderBox child) {
+      CupertinoDialogRenderBoxParentData parentData = child.parentData;
+      if (parentData.id == _AlertDialogSection.content) {
+        _content = child;
+      } else if (parentData.id == _AlertDialogSection.actions) {
+        _actions = child;
+      }
+    });
+    assert(_content != null);
+    assert(_actions != null);
+
+
+    final double contentWidth = _content.getMaxIntrinsicWidth(height);
+    final double actionsWidth = _actions.getMaxIntrinsicWidth(height);
+    final double width = min(contentWidth, actionsWidth);
+
+    if (width.isFinite)
+      return width;
+    return 0.0;
+  }
+
+  @override
+  double computeMinIntrinsicHeight(double width) {
+    RenderBox _content;
+    RenderBox _actions;
+    getChildrenAsList().forEach((RenderBox child) {
+      CupertinoDialogRenderBoxParentData parentData = child.parentData;
+      if (parentData.id == _AlertDialogSection.content) {
+        _content = child;
+      } else if (parentData.id == _AlertDialogSection.actions) {
+        _actions = child;
+      }
+    });
+    assert(_content != null);
+    assert(_actions != null);
+
+    final double contentHeight = _content.getMaxIntrinsicHeight(width);
+    final double actionsHeight = _actions.getMaxIntrinsicHeight(width);
+    final double height = max(contentHeight, actionsHeight);
+
+    if (height.isFinite)
+      return height;
+    return 0.0;
+  }
+
+  @override
+  double computeMaxIntrinsicHeight(double width) {
+    RenderBox _content;
+    RenderBox _actions;
+    getChildrenAsList().forEach((RenderBox child) {
+      CupertinoDialogRenderBoxParentData parentData = child.parentData;
+      if (parentData.id == _AlertDialogSection.content) {
+        _content = child;
+      } else if (parentData.id == _AlertDialogSection.actions) {
+        _actions = child;
+      }
+    });
+    assert(_content != null);
+    assert(_actions != null);
+
+    final double contentHeight = _content.getMaxIntrinsicHeight(width);
+    final double actionsHeight = _actions.getMaxIntrinsicHeight(width);
+    final double height = min(contentHeight, actionsHeight);
+
+    if (height.isFinite)
+      return height;
+    return 0.0;
+  }
+
+  @override
+  void performLayout() {
+    RenderBox _content;
+    RenderBox _actions;
+    getChildrenAsList().forEach((RenderBox child) {
+      CupertinoDialogRenderBoxParentData parentData = child.parentData;
+      if (parentData.id == _AlertDialogSection.content) {
+        _content = child;
+      } else if (parentData.id == _AlertDialogSection.actions) {
+        _actions = child;
+      }
+    });
+    assert(_content != null);
+    assert(_actions != null);
+
+    // TODO(mattcarroll): parameterize actions count.
+    final actionsCount = 3;
+
     double minActionSpace = 0.0;
     if (actionsCount > 0 && actionsCount <= 2) {
       minActionSpace = _kButtonHeight;
@@ -288,62 +398,86 @@ class _CupertinoAlertDialogLayoutDelegate extends MultiChildLayoutDelegate {
       minActionSpace = 1.5 * _kButtonHeight;
     }
 
+    final size = constraints.constrain(const Size(double.infinity, double.infinity));
+
     // Size alert dialog content.
     final Size maxContentSize = new Size(size.width, size.height - minActionSpace);
-    final Size contentSize = layoutChild(
-        _AlertDialogSection.content,
-        new BoxConstraints.loose(maxContentSize),
+    _content.layout(
+      new BoxConstraints.loose(maxContentSize),
+      parentUsesSize: true,
     );
+    final Size contentSize = _content.size;
 
     // Size alert dialog actions.
     final Size maxActionSize = new Size(
-        size.width,
-        size.height - contentSize.height,
+      size.width,
+      size.height - contentSize.height,
     );
-    final Size actionsSize = layoutChild(
-        _AlertDialogSection.actions,
-        new BoxConstraints.loose(maxActionSize),
+    _actions.layout(
+      new BoxConstraints.loose(maxActionSize),
+      parentUsesSize: true,
     );
+    final Size actionsSize = _actions.size;
 
     // Calculate overall dialog height.
     final double dialogHeight = contentSize.height + actionsSize.height;
 
-    // Size blur background.
-    final Size backgroundSize = new Size(size.width, dialogHeight);
-    layoutChild(
-      _AlertDialogSection.blur,
-      new BoxConstraints.loose(backgroundSize),
-    );
+    this.size = new Size(size.width, dialogHeight);
 
     // Layout the blur, content, and the actions.
-    final double dialogTop = (size.height - dialogHeight) / 2.0;
-    positionChild(
-      _AlertDialogSection.blur,
-      new Offset(
-        0.0,
-        dialogTop,
-      ),
+    _content.layout(
+      new BoxConstraints.tight(contentSize),
     );
-    positionChild(
-      _AlertDialogSection.content,
-      new Offset(
-        0.0,
-        dialogTop,
-      ),
+    _actions.layout(
+      new BoxConstraints.tight(actionsSize),
     );
-    positionChild(
-      _AlertDialogSection.actions,
-      new Offset(
-        0.0,
-        dialogTop + contentSize.height,
-      ),
-    );
+    (_actions.parentData as CupertinoDialogRenderBoxParentData).offset = new Offset(0.0, contentSize.height);
+  }
+
+  void paint(PaintingContext context, Offset offset) {
+    defaultPaint(context, offset);
+  }
+
+  bool hitTestChildren(HitTestResult result, { Offset position }) {
+    return defaultHitTestChildren(result, position: position);
+  }
+}
+
+class CupertinoDialogRenderBoxParentData extends ContainerBoxParentData<RenderBox> {
+  /// An object representing the identity of this child.
+  Object id;
+
+  @override
+  String toString() => '${super.toString()}; id=$id';
+}
+
+class CupertinoLayoutId extends ParentDataWidget<CupertinoDialogRenderWidget> {
+  CupertinoLayoutId({
+    Key key,
+    @required this.id,
+    @required Widget child
+  }) : assert(child != null),
+        assert(id != null),
+        super(key: key ?? new ValueKey<Object>(id), child: child);
+
+  final Object id;
+
+  @override
+  void applyParentData(RenderObject renderObject) {
+    assert(renderObject.parentData is CupertinoDialogRenderBoxParentData);
+    final CupertinoDialogRenderBoxParentData parentData = renderObject.parentData;
+    if (parentData.id != id) {
+      parentData.id = id;
+      final AbstractNode targetParent = renderObject.parent;
+      if (targetParent is RenderObject)
+        targetParent.markNeedsLayout();
+    }
   }
 
   @override
-  bool shouldRelayout(_CupertinoAlertDialogLayoutDelegate oldDelegate) {
-    // TODO(mattcarroll): account for possible change in stacking even when count is same.
-    return actionsCount != oldDelegate.actionsCount;
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(new DiagnosticsProperty<Object>('id', id));
   }
 }
 
