@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Google, Inc.
+ * Copyright 2018 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,18 +14,22 @@
  * limitations under the License.
  */
 
-#include <string>
+#ifndef TXT_FONT_ASSET_PROVIDER_H_
+#define TXT_FONT_ASSET_PROVIDER_H_
 
-#include "lib/fxl/command_line.h"
+#include "third_party/skia/include/ports/SkFontMgr.h"
 
 namespace txt {
 
-const std::string& GetFontDir();
+class FontAssetProvider {
+ public:
+  virtual ~FontAssetProvider() = default;
 
-void SetFontDir(const std::string& dir);
-
-const fxl::CommandLine& GetCommandLineForProcess();
-
-void SetCommandLine(fxl::CommandLine cmd);
+  virtual size_t GetFamilyCount() const = 0;
+  virtual std::string GetFamilyName(int index) const = 0;
+  virtual SkFontStyleSet* MatchFamily(const std::string& family_name) = 0;
+};
 
 }  // namespace txt
+
+#endif  // TXT_FONT_ASSET_PROVIDER_H_

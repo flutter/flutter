@@ -23,7 +23,7 @@ class FontCollection {
 
   std::shared_ptr<txt::FontCollection> GetFontCollection() const;
 
-  void RegisterFonts(const AssetManager& asset_manager);
+  void RegisterFonts(fml::RefPtr<AssetManager> asset_manager);
 
   void RegisterTestFonts();
 

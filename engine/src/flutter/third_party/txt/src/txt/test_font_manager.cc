@@ -20,9 +20,9 @@
 namespace txt {
 
 TestFontManager::TestFontManager(
-    std::unique_ptr<AssetDataProvider> data_provider,
+    std::unique_ptr<FontAssetProvider> font_provider,
     std::string test_font_family_name)
-    : AssetFontManager(std::move(data_provider)),
+    : AssetFontManager(std::move(font_provider)),
       test_font_family_name_(test_font_family_name) {}
 
 TestFontManager::~TestFontManager() = default;

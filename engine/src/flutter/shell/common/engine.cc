@@ -89,7 +89,7 @@ bool Engine::UpdateAssetManager(
   if (settings_.use_test_fonts) {
     font_collection_.RegisterTestFonts();
   } else {
-    font_collection_.RegisterFonts(*asset_manager_.get());
+    font_collection_.RegisterFonts(asset_manager_);
   }
 
   return true;
