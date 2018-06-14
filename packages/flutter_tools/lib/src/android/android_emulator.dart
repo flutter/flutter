@@ -87,15 +87,19 @@ void extractEmulatorAvdInfo(String text, List<AndroidEmulator> emulators) {
 
 AndroidEmulator _loadEmulatorInfo(String id) {
   id = id.trim();
-  final File iniFile = fs.file(fs.path.join(getAvdPath(), '$id.ini'));
-  if (iniFile.existsSync()) {
-    final Map<String, String> ini = parseIniLines(iniFile.readAsLinesSync());
-    if (ini['path'] != null) {
-      final File configFile = fs.file(fs.path.join(ini['path'], 'config.ini'));
-      if (configFile.existsSync()) {
-        final Map<String, String> properties =
-            parseIniLines(configFile.readAsLinesSync());
-        return new AndroidEmulator(id, properties);
+  final String avdPath = getAvdPath();
+  if (avdPath != null) {
+    final File iniFile = fs.file(fs.path.join(avdPath, '$id.ini'));
+    if (iniFile.existsSync()) {
+      final Map<String, String> ini = parseIniLines(iniFile.readAsLinesSync());
+      if (ini['path'] != null) {
+        final File configFile =
+            fs.file(fs.path.join(ini['path'], 'config.ini'));
+        if (configFile.existsSync()) {
+          final Map<String, String> properties =
+              parseIniLines(configFile.readAsLinesSync());
+          return new AndroidEmulator(id, properties);
+        }
       }
     }
   }
