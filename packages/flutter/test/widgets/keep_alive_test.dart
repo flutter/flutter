@@ -195,6 +195,7 @@ void main() {
         ),
       ),
     );
+
     // The important lines below are the ones marked with "<----"
     expect(tester.binding.renderView.toStringDeep(minLevel: DiagnosticLevel.info), equalsIgnoringHashCodes(
       'RenderView#00000\n'
@@ -307,18 +308,20 @@ void main() {
       '                     │     constraints: BoxConstraints(w=800.0, h=400.0)\n'
       '                     │     size: Size(800.0, 400.0)\n'
       '                     │\n'
-      '                     └─child with index 2: RenderLimitedBox#00000\n'
+      '                     └─child with index 2: RenderLimitedBox#00000 NEEDS-PAINT\n'
       '                       │ parentData: index=2; layoutOffset=800.0\n'
       '                       │ constraints: BoxConstraints(w=800.0, h=400.0)\n'
       '                       │ size: Size(800.0, 400.0)\n'
       '                       │ maxWidth: 400.0\n'
       '                       │ maxHeight: 400.0\n'
       '                       │\n'
-      '                       └─child: RenderCustomPaint#00000\n'
+      '                       └─child: RenderCustomPaint#00000 NEEDS-PAINT\n'
       '                           parentData: <none> (can use size)\n'
       '                           constraints: BoxConstraints(w=800.0, h=400.0)\n'
       '                           size: Size(800.0, 400.0)\n'
+      ''
     ));
+
     const GlobalObjectKey<_LeafState>(0).currentState.setKeepAlive(true);
     await tester.drag(find.byType(ListView), const Offset(0.0, -1000.0));
     await tester.pump();
@@ -412,14 +415,14 @@ void main() {
       '                     │   cacheExtent: 1100.0)\n'
       '                     │ currently live children: 4 to 7\n'
       '                     │\n'
-      '                     ├─child with index 4: RenderLimitedBox#00000\n'
+      '                     ├─child with index 4: RenderLimitedBox#00000 NEEDS-PAINT\n'
       '                     │ │ parentData: index=4; layoutOffset=1600.0\n'
       '                     │ │ constraints: BoxConstraints(w=800.0, h=400.0)\n'
       '                     │ │ size: Size(800.0, 400.0)\n'
       '                     │ │ maxWidth: 400.0\n'
       '                     │ │ maxHeight: 400.0\n'
       '                     │ │\n'
-      '                     │ └─child: RenderCustomPaint#00000\n'
+      '                     │ └─child: RenderCustomPaint#00000 NEEDS-PAINT\n'
       '                     │     parentData: <none> (can use size)\n'
       '                     │     constraints: BoxConstraints(w=800.0, h=400.0)\n'
       '                     │     size: Size(800.0, 400.0)\n'
@@ -448,14 +451,14 @@ void main() {
       '                     │     constraints: BoxConstraints(w=800.0, h=400.0)\n'
       '                     │     size: Size(800.0, 400.0)\n'
       '                     │\n'
-      '                     ├─child with index 7: RenderLimitedBox#00000\n'
+      '                     ├─child with index 7: RenderLimitedBox#00000 NEEDS-PAINT\n'
       '                     ╎ │ parentData: index=7; layoutOffset=2800.0\n'
       '                     ╎ │ constraints: BoxConstraints(w=800.0, h=400.0)\n'
       '                     ╎ │ size: Size(800.0, 400.0)\n'
       '                     ╎ │ maxWidth: 400.0\n'
       '                     ╎ │ maxHeight: 400.0\n'
       '                     ╎ │\n'
-      '                     ╎ └─child: RenderCustomPaint#00000\n'
+      '                     ╎ └─child: RenderCustomPaint#00000 NEEDS-PAINT\n'
       '                     ╎     parentData: <none> (can use size)\n'
       '                     ╎     constraints: BoxConstraints(w=800.0, h=400.0)\n'
       '                     ╎     size: Size(800.0, 400.0)\n'
