@@ -35,9 +35,12 @@ import 'material.dart';
 /// ```
 typedef void OnReorderCallback(int oldIndex, int newIndex);
 
-/// A list with draggable content that the user can re-order.
+/// A list whose items the user can interactively reorder by dragging.
 /// 
-/// Note that this widget places its [children] in a [Column] or [Row] and not a [ListView].
+/// This class is appropriate for views with a small number of
+/// children because constructing the [List] requires doing work for every
+/// child that could possibly be displayed in the list view instead of just
+/// those children that are actually visible.
 ///
 /// All [children] must have a key.
 class ReorderableListView extends StatefulWidget {
