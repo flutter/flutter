@@ -2,7 +2,7 @@ name: integration_ui
 description: Flutter non-plugin UI integration tests.
 
 dependencies:
-  image: 1.1.14
+  image: 2.0.4
   flutter:
     sdk: flutter
   flutter_driver:
@@ -73,4 +73,4 @@ dev_dependencies:
 flutter:
   uses-material-design: true
 
-# PUBSPEC CHECKSUM: 41d4
+# PUBSPEC CHECKSUM: 77a3
