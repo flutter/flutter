@@ -36,7 +36,7 @@ void main() {
           child: new ReorderableListView(
             children: listItems.map(listItemToWidget).toList(),
             scrollDirection: scrollDirection,
-            onSwap: onSwap,
+            onReorder: onSwap,
           ),
         ),
       );
@@ -113,7 +113,7 @@ void main() {
             )
           ],
           scrollDirection: Axis.vertical,
-          onSwap: (int oldIndex, int newIndex) {},
+          onReorder: (int oldIndex, int newIndex) {},
         );
         await tester.pumpWidget(new MaterialApp(
           home: new SizedBox(
@@ -221,7 +221,7 @@ void main() {
             )
           ],
           scrollDirection: Axis.horizontal,
-          onSwap: (int oldIndex, int newIndex) {},
+          onReorder: (int oldIndex, int newIndex) {},
         );
         await tester.pumpWidget(new MaterialApp(
           home: new SizedBox(

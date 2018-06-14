@@ -9,10 +9,11 @@ import 'package:flutter/rendering.dart';
 
 import 'material.dart';
 
-/// A callback used by [ReorderableListView] to swap items in a list.
+/// The callback used by [ReorderableListView] to move an item to a new
+/// position in a list.
 /// 
 /// Implementations should remove the corresponding list item at [oldIndex]
-/// and insert a new one at [newIndex].
+/// and reinsert it at [newIndex].
 /// 
 /// Note that if [oldIndex] is before [newIndex], removing the item at [oldIndex]
 /// from the list will reduce the list's length by one. Implementations used
@@ -32,7 +33,7 @@ import 'material.dart';
 ///   backingList.insert(newIndex, element);
 /// }
 /// ```
-typedef void OnSwapCallback(int oldIndex, int newIndex);
+typedef void OnReorderCallback(int oldIndex, int newIndex);
 
 /// A list with draggable content that the user can re-order.
 /// 
@@ -44,11 +45,11 @@ class ReorderableListView extends StatefulWidget {
   /// Creates a reorderable list.
   const ReorderableListView({
     @required this.children, 
-    @required this.onSwap, 
+    @required this.onReorder, 
     this.scrollDirection = Axis.vertical, 
     this.padding, 
   }): assert(scrollDirection != null),
-      assert(onSwap != null),
+      assert(onReorder != null),
       assert(children != null);
 
   /// The widgets to display.
@@ -65,9 +66,9 @@ class ReorderableListView extends StatefulWidget {
   /// Called when a list child is dropped into a new position to shuffle the
   /// underlying list.
   /// 
-  /// This [ReorderableListView] calls [onSwap] after a list child is dropped
+  /// This [ReorderableListView] calls [onReorder] after a list child is dropped
   /// into a new position.
-  final OnSwapCallback onSwap;
+  final OnReorderCallback onReorder;
   
   @override
   State<StatefulWidget> createState() {
@@ -92,7 +93,7 @@ class _ReorderableListViewState extends State<ReorderableListView> {
         return new _ReorderableListContent(
           children: widget.children,
           scrollDirection: widget.scrollDirection,
-          onSwap: widget.onSwap,
+          onSwap: widget.onReorder,
           padding: widget.padding,
         );
       },
@@ -122,7 +123,7 @@ class _ReorderableListContent extends StatefulWidget {
   final List<Widget> children;
   final Axis scrollDirection;
   final EdgeInsets padding;
-  final OnSwapCallback onSwap;
+  final OnReorderCallback onSwap;
 
   @override
   _ReorderableListContentState createState() => new _ReorderableListContentState();
@@ -430,11 +431,7 @@ class _ReorderableListContentState extends State<_ReorderableListContent> with T
 
 // Notifies its parent when its size has changed.
 class _SizeDetectingWidget extends StatefulWidget {
-  _SizeDetectingWidget({Key key, this.child, this.onUpdateSize}) : super(key: key) {
-    if (key != null) {
-      print('${child.key}, $key');
-    }
-  }
+  const _SizeDetectingWidget({Key key, this.child, this.onUpdateSize}) : super(key: key);
 
   final void Function(Size newSize) onUpdateSize;
   final Widget child;
@@ -464,7 +461,6 @@ class _SizeDetectingWidgetState extends State<_SizeDetectingWidget> {
   // Computes the widget's size as a post-frame callback.
   void _computeSize([Duration duration]) {
     final RenderBox box = context.findRenderObject();
-    print('Setting parent size to ${box.size}');
     widget.onUpdateSize(box.size);
   }
 

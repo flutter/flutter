@@ -7,13 +7,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 
 enum _ReorderableListType {
-  /// A list tile that contains a single line of text.
+  /// A list tile that contains a [CircleAvatar].
   horizontalAvatar,
 
-  /// A list tile that contains a [CircleAvatar] followed by a single line of text.
+  /// A list tile that contains a [CircleAvatar].
   verticalAvatar,
 
-  /// A list tile that contains three lines of text.
+  /// A list tile that contains three lines of text and a checkbox.
   threeLine,
 }
 
@@ -26,15 +26,22 @@ class ReorderableListDemo extends StatefulWidget {
   _ListDemoState createState() => new _ListDemoState();
 }
 
+class _ListItem {
+  _ListItem(this.value, this.checkState);
+
+  String value;
+  bool checkState;
+}
+
 class _ListDemoState extends State<ReorderableListDemo> {
   static final GlobalKey<ScaffoldState> scaffoldKey = new GlobalKey<ScaffoldState>();
 
   PersistentBottomSheetController<Null> _bottomSheet;
   _ReorderableListType _itemType = _ReorderableListType.threeLine;
   bool _reverseSort = false;
-  List<String> items = <String>[
+  List<_ListItem> items = <String>[
     'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N',
-  ];
+  ].map((String item) => new _ListItem(item, false)).toList();
 
   void changeItemType(_ReorderableListType type) {
     setState(() {
@@ -45,7 +52,7 @@ class _ListDemoState extends State<ReorderableListDemo> {
 
   void _showConfigurationSheet() {
     final PersistentBottomSheetController<Null> bottomSheet = scaffoldKey.currentState.showBottomSheet((BuildContext bottomSheetContext) {
-      return new Container(
+      return new DecoratedBox(
         decoration: const BoxDecoration(
           border: const Border(top: const BorderSide(color: Colors.black26)),
         ),
@@ -53,38 +60,26 @@ class _ListDemoState extends State<ReorderableListDemo> {
           shrinkWrap: true,
           primary: false,
           children: <Widget>[
-            new MergeSemantics(
-              child: new ListTile(
-                dense: true,
-                title: const Text('Horizontal Avatars'),
-                trailing: new Radio<_ReorderableListType>(
-                  value:_ReorderableListType.horizontalAvatar,
-                  groupValue: _itemType,
-                  onChanged: changeItemType,
-                )
-              ),
+            new RadioListTile<_ReorderableListType>(
+              dense: true,
+              title: const Text('Horizontal Avatars'),
+              value:_ReorderableListType.horizontalAvatar,
+              groupValue: _itemType,
+              onChanged: changeItemType,
             ),
-            new MergeSemantics(
-              child: new ListTile(
-                dense: true,
-                title: const Text('Vertical Avatars'),
-                trailing: new Radio<_ReorderableListType>(
-                  value: _ReorderableListType.verticalAvatar,
-                  groupValue: _itemType,
-                  onChanged: changeItemType,
-                )
-              ),
+            new RadioListTile<_ReorderableListType>(
+              dense: true,
+              title: const Text('Vertical Avatars'),
+              value: _ReorderableListType.verticalAvatar,
+              groupValue: _itemType,
+              onChanged: changeItemType,
             ),
-            new MergeSemantics(
-              child: new ListTile(
-                dense: true,
-                title: const Text('Three-line'),
-                trailing: new Radio<_ReorderableListType>(
-                  value: _ReorderableListType.threeLine,
-                  groupValue: _itemType,
-                  onChanged: changeItemType,
-                ),
-              ),
+            new RadioListTile<_ReorderableListType>(
+              dense: true,
+              title: const Text('Three-line'),
+              value: _ReorderableListType.threeLine,
+              groupValue: _itemType,
+              onChanged: changeItemType,
             ),
           ],
         ),
@@ -95,7 +90,8 @@ class _ListDemoState extends State<ReorderableListDemo> {
       _bottomSheet = bottomSheet;
     });
 
-    _bottomSheet.closed.whenComplete(() {
+    // Garbage collect the bottom sheet when it closes.
+    bottomSheet.closed.whenComplete(() {
       if (mounted) {
         setState(() {
           _bottomSheet = null;
@@ -104,62 +100,56 @@ class _ListDemoState extends State<ReorderableListDemo> {
     });
   }
 
-  Map<String, bool> valueToCheckboxState = <String, bool>{};
-
-  Widget buildListTile(BuildContext context, int index) {
-    final String item = items[index];
+  Widget buildListTile(_ListItem item) {
     const Widget secondary = const Text(
       'Even more additional list item information appears on line three.',
     );
     Widget listTile;
-    if (_itemType == _ReorderableListType.threeLine) {
-      listTile = new ListTile(
-      isThreeLine: true,
-      trailing: new Checkbox(
-        value: valueToCheckboxState[item] ?? false, 
-        onChanged: (bool newValue) {
-          setState(() {
-            valueToCheckboxState[item] = newValue;
-          });
-        },
-      ),
-      title: new Text('This item represents $item.'),
-      subtitle: secondary,
-      leading: const Icon(Icons.drag_handle),
-    );
-    } else {
-      listTile = new Container(
-        height: 100.0, 
-        width: 100.0, 
-        child: new CircleAvatar(child: new Text(item), 
-          backgroundColor: Colors.green,
-        ),
-      );
+    switch (_itemType) {
+      case _ReorderableListType.threeLine:
+        listTile = new CheckboxListTile(
+          key: new Key(item.value),
+          isThreeLine: true,
+          value: item.checkState ?? false, 
+          onChanged: (bool newValue) {
+            setState(() {
+              item.checkState = newValue;
+            });
+          },
+          title: new Text('This item represents ${item.value}.'),
+          subtitle: secondary,
+          secondary: const Icon(Icons.drag_handle),
+        );
+        break;
+      case _ReorderableListType.horizontalAvatar:
+      case _ReorderableListType.verticalAvatar:
+        listTile = new Container(
+          key: new Key(item.value),
+          height: 100.0, 
+          width: 100.0, 
+          child: new CircleAvatar(child: new Text(item.value), 
+            backgroundColor: Colors.green,
+          ),
+        );
+        break;
     }
     
-    return new MergeSemantics(
-      key: new Key(item),
-      child: listTile,
-    );
+    return listTile;
   }
+
+  void _onSwap(int oldIndex, int newIndex) {
+    setState(() {
+      if (newIndex > oldIndex) {
+        newIndex -= 1;
+      }
+      final _ListItem item = items.removeAt(oldIndex);
+      items.insert(newIndex, item);
+    });
+  }
+
 
   @override
   Widget build(BuildContext context) {
-    void onSwap(int oldIndex, int newIndex) {
-      setState(() {
-        if (newIndex > oldIndex) {
-          newIndex -= 1;
-        }
-        final String item = items.removeAt(oldIndex);
-        items.insert(newIndex, item);
-      });
-    }
-
-    final List<MergeSemantics> listTiles = <MergeSemantics>[];
-    for (int i = 0; i < items.length; i++) {
-      listTiles.add(buildListTile(context, i));
-    }
-
     return new Scaffold(
       key: scaffoldKey,
       appBar: new AppBar(
@@ -171,7 +161,7 @@ class _ListDemoState extends State<ReorderableListDemo> {
             onPressed: () {
               setState(() {
                 _reverseSort = !_reverseSort;
-                items.sort((String a, String b) => _reverseSort ? b.compareTo(a) : a.compareTo(b));
+                items.sort((_ListItem a, _ListItem b) => _reverseSort ? b.value.compareTo(a.value) : a.value.compareTo(b.value));
               });
             },
           ),
@@ -184,10 +174,10 @@ class _ListDemoState extends State<ReorderableListDemo> {
       ),
       body: new Scrollbar(
         child: new ReorderableListView(
-          onSwap: onSwap,
+          onReorder: _onSwap,
           scrollDirection: _itemType == _ReorderableListType.horizontalAvatar ? Axis.horizontal : Axis.vertical,
-          children: listTiles,
           padding: const EdgeInsets.symmetric(vertical: 8.0),
+          children: items.map(buildListTile).toList(),
         ),
       ),
     );
