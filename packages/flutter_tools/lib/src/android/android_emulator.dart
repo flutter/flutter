@@ -48,7 +48,7 @@ class AndroidEmulator extends Emulator {
         processManager.run(<String>[getEmulatorPath(), '-avd', id])
             .then((ProcessResult runResult) {
               if (runResult.exitCode != 0) {
-                throw '$runResult';
+                throw '${runResult.stdout}\n${runResult.stderr}'.trimRight();
               }
             });
     // emulator continues running on a successful launch so if we
