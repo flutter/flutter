@@ -213,7 +213,6 @@ class MockProcessManager extends Mock implements ProcessManager {
       // tracking any created emulators and reject when they already exist so this
       // mock will compare the name of the AVD being created with the fake existing
       // list and either reject if it exists, or add it to the list and return success.
-      // Push this name into the list of existing AVDs.
       final String name = args[3];
       // Error if this AVD already existed
       if (_existingAvds.contains(name)) {
