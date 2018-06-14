@@ -219,18 +219,60 @@ class MaterialApp extends StatefulWidget {
   final Map<String, WidgetBuilder> routes;
 
   /// {@macro flutter.widgets.widgetsApp.initialRoute}
+  ///
+  /// The [Navigator] is only built if routes are provided (either via [home],
+  /// [routes], [onGenerateRoute], or [onUnknownRoute]); if they are not,
+  /// [initialRoute] must be null and [builder] must not be null.
+  ///
+  /// See also:
+  ///
+  ///  * [Navigator.initialRoute], which is used to implement this property.
+  ///  * [Navigator.push], for pushing additional routes.
+  ///  * [Navigator.pop], for removing a route from the stack.
   final String initialRoute;
 
   /// {@macro flutter.widgets.widgetsApp.onGenerateRoute}
+  ///
+  /// This is used if [routes] does not contain the requested route.
+  ///
+  /// The [Navigator] is only built if routes are provided (either via [home],
+  /// [routes], [onGenerateRoute], or [onUnknownRoute]); if they are not,
+  /// [builder] must not be null.
   final RouteFactory onGenerateRoute;
 
+  /// Called when [onGenerateRoute] fails to generate a route, except for the
+  /// [initialRoute].
+  ///
   /// {@macro flutter.widgets.widgetsApp.onUnknownRoute}
+  ///
+  /// The [Navigator] is only built if routes are provided (either via [home],
+  /// [routes], [onGenerateRoute], or [onUnknownRoute]); if they are not,
+  /// [builder] must not be null.
   final RouteFactory onUnknownRoute;
 
   /// {@macro flutter.widgets.widgetsApp.navigatorObservers}
+  ///
+  /// The [Navigator] is only built if routes are provided (either via [home],
+  /// [routes], [onGenerateRoute], or [onUnknownRoute]); if they are not,
+  /// [navigatorObservers] must be the empty list and [builder] must not be null.
   final List<NavigatorObserver> navigatorObservers;
 
   /// {@macro flutter.widgets.widgetsApp.builder}
+  ///
+  /// If no routes are provided using [home], [routes], [onGenerateRoute], or
+  /// [onUnknownRoute], the `child` will be null, and it is the responsibility
+  /// of the [builder] to provide the application's routing machinery.
+  ///
+  /// If routes _are_ provided using one or more of those properties, then
+  /// `child` is not null, and the returned value should include the `child` in
+  /// the widget subtree; if it does not, then the application will have no
+  /// navigator and the [navigatorKey], [home], [routes], [onGenerateRoute],
+  /// [onUnknownRoute], [initialRoute], and [navigatorObservers] properties will
+  /// have no effect.
+  ///
+  /// If [builder] is null, it is as if a builder was specified that returned
+  /// the `child` directly. If it is null, routes must be provided using one of
+  /// the other properties listed above.
   ///
   /// Unless a [Navigator] is provided, either implicitly from [builder] being
   /// null, or by a [builder] including its `child` argument, or by a [builder]

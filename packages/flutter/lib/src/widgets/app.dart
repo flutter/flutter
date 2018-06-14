@@ -127,8 +127,6 @@ class WidgetsApp extends StatefulWidget {
   /// The route generator callback used when the app is navigated to a
   /// named route.
   ///
-  /// This is used if [routes] does not contain the requested route.
-  ///
   /// If this returns null when building the routes to handle the specified
   /// [initialRoute], then all the routes are discarded and
   /// [Navigator.defaultRouteName] is used instead (`/`). See [initialRoute].
@@ -136,28 +134,25 @@ class WidgetsApp extends StatefulWidget {
   /// During normal app operation, the [onGenerateRoute] callback will only be
   /// applied to route names pushed by the application, and so should never
   /// return null.
-  ///
-  /// The [Navigator] is only built if routes are provided (either via [home],
-  /// [routes], [onGenerateRoute], or [onUnknownRoute]); if they are not,
-  /// [builder] must not be null.
   /// {@endtemplate}
+  ///
+  /// The [Navigator] is only built if [onGenerateRoute] is not null. If
+  /// [onGenerateRoute] is null, the [builder] must be non-null.
   final RouteFactory onGenerateRoute;
 
-  /// {@template flutter.widgets.widgetsApp.onUnknownRoute}
-  /// Called when [onGenerateRoute] fails to generate a route, except for the
-  /// [initialRoute].
+  /// Called when [onGenerateRoute] fails to generate a route.
   ///
+  /// {@template flutter.widgets.widgetsApp.onUnknownRoute}
   /// This callback is typically used for error handling. For example, this
   /// callback might always generate a "not found" page that describes the route
   /// that wasn't found.
   ///
-  /// The default implementation pushes a route that displays an ugly error
-  /// message.
-  ///
-  /// The [Navigator] is only built if routes are provided (either via [home],
-  /// [routes], [onGenerateRoute], or [onUnknownRoute]); if they are not,
-  /// [builder] must not be null.
+  /// Unknown routes can arise either from errors in the app or from external
+  /// requests to push routes, such as from Android intents.
   /// {@endtemplate}
+  ///
+  /// The [Navigator] is only built if [onGenerateRoute] is not null; if it is
+  /// null, [onUnknownRoute] must also be null.
   final RouteFactory onUnknownRoute;
 
   /// {@template flutter.widgets.widgetsApp.initialRoute}
@@ -175,17 +170,16 @@ class WidgetsApp extends StatefulWidget {
   /// [initialRoute] is ignored and [Navigator.defaultRouteName] is used instead
   /// (`/`). This can happen if the app is started with an intent that specifies
   /// a non-existent route.
+  /// {@endtemplate}
   ///
-  /// The [Navigator] is only built if routes are provided (either via [home],
-  /// [routes], [onGenerateRoute], or [onUnknownRoute]); if they are not,
-  /// [initialRoute] must be null and [builder] must not be null.
+  /// The [Navigator] is only built if [onGenerateRoute] is not null; if it is
+  /// null, [initialRoute] must also be null.
   ///
   /// See also:
   ///
   ///  * [Navigator.initialRoute], which is used to implement this property.
   ///  * [Navigator.push], for pushing additional routes.
   ///  * [Navigator.pop], for removing a route from the stack.
-  /// {@endtemplate}
   final String initialRoute;
 
   /// {@template flutter.widgets.widgetsApp.navigatorObservers}
@@ -193,16 +187,16 @@ class WidgetsApp extends StatefulWidget {
   ///
   /// This list must be replaced by a list of newly-created observers if the
   /// [navigatorKey] is changed.
-  ///
-  /// The [Navigator] is only built if routes are provided (either via [home],
-  /// [routes], [onGenerateRoute], or [onUnknownRoute]); if they are not,
-  /// [navigatorObservers] must be the empty list and [builder] must not be null.
   /// {@endtemplate}
+  ///
+  /// The [Navigator] is only built if [onGenerateRoute] is not null; if it is
+  /// null, [navigatorObservers] must be left to its default value, the empty
+  /// list.
   final List<NavigatorObserver> navigatorObservers;
 
   /// {@template flutter.widgets.widgetsApp.builder}
   /// A builder for inserting widgets above the [Navigator] but below the other
-  /// widgets created by the [MaterialApp] widget, or for replacing the
+  /// widgets created by the [WidgetsApp] widget, or for replacing the
   /// [Navigator] entirely.
   ///
   /// For example, from the [BuildContext] passed to this method, the
@@ -215,27 +209,26 @@ class WidgetsApp extends StatefulWidget {
   /// mode despite being in English, or to override the [MediaQuery] metrics
   /// (e.g. to leave a gap for advertisements shown by a plugin from OEM code).
   ///
-  /// The [builder] callback is passed two arguments, the [BuildContext] (as
-  /// `context`) and a [Navigator] widget (as `child`).
-  ///
-  /// If no routes are provided using [home], [routes], [onGenerateRoute], or
-  /// [onUnknownRoute], the `child` will be null, and it is the responsibility
-  /// of the [builder] to provide the application's routing machinery.
-  ///
-  /// If routes _are_ provided using one or more of those properties, then
-  /// `child` is not null, and the returned value should include the `child` in
-  /// the widget subtree; if it does not, then the application will have no
-  /// navigator and the [navigatorKey], [home], [routes], [onGenerateRoute],
-  /// [onUnknownRoute], [initialRoute], and [navigatorObservers] properties will
-  /// have no effect.
-  ///
-  /// If [builder] is null, it is as if a builder was specified that returned
-  /// the `child` directly. If it is null, routes must be provided using one of
-  /// the other properties listed above.
-  ///
   /// For specifically overriding the [title] with a value based on the
   /// [Localizations], consider [onGenerateTitle] instead.
+  ///
+  /// The [builder] callback is passed two arguments, the [BuildContext] (as
+  /// `context`) and a [Navigator] widget (as `child`).
   /// {@endtemplate}
+  ///
+  /// If [onGenerateRoute] is null, the `child` will be null, and it is the
+  /// responsibility of the [builder] to provide the application's routing
+  /// machinery.
+  ///
+  /// If [onGenerateRoute] is not null, then `child` is not null, and the
+  /// returned value should include the `child` in the widget subtree; if it
+  /// does not, then the application will have no navigator and the
+  /// [navigatorKey], [onGenerateRoute], [onUnknownRoute], [initialRoute], and
+  /// [navigatorObservers] properties will have no effect.
+  ///
+  /// If [builder] is null, it is as if a builder was specified that returned
+  /// the `child` directly. At least one of either [onGenerateRoute] or
+  /// [builder] must be non-null.
   final TransitionBuilder builder;
 
   /// {@template flutter.widgets.widgetsApp.title}
