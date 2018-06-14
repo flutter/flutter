@@ -154,7 +154,7 @@ class _MaterialTextSelectionControls extends TextSelectionControls {
   @override
   Widget buildHandle(BuildContext context, TextSelectionHandleType type, double textHeight) {
     final Widget handle = new Padding(
-      padding: const EdgeInsets.only(left: 0.0, right: 26.0, bottom: 26.0),
+      padding: const EdgeInsets.only(right: 26.0, bottom: 26.0),
       child: new SizedBox(
         width: _kHandleSize,
         height: _kHandleSize,
