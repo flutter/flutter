@@ -7,7 +7,6 @@ import 'dart:async';
 import 'package:flutter_tools/src/android/android_sdk.dart';
 import 'package:flutter_tools/src/base/config.dart';
 import 'package:flutter_tools/src/base/io.dart';
-import 'package:flutter_tools/src/base/utils.dart';
 import 'package:flutter_tools/src/emulator.dart';
 import 'package:mockito/mockito.dart';
 import 'package:process/process.dart';
