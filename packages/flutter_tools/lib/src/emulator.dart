@@ -8,7 +8,7 @@ import 'dart:math' as math;
 import 'android/android_emulator.dart';
 import 'android/android_sdk.dart';
 import 'base/context.dart';
-import 'base/process.dart';
+import 'base/process_manager.dart';
 import 'globals.dart';
 import 'ios/ios_emulators.dart';
 
@@ -95,7 +95,7 @@ class EmulatorManager {
       '-k', sdkId,
       '-d', device
     ];
-    final RunResult runResult = await runAsync(args);
+    final ProcessResult runResult = processManager.runSync(args);
     return new CreateEmulatorResult(
       success: runResult.exitCode == 0,
       output: runResult.stdout,
@@ -114,7 +114,7 @@ class EmulatorManager {
       'device',
       '-c'
     ];
-    final RunResult runResult = await runAsync(args);
+    final ProcessResult runResult = processManager.runSync(args);
     if (runResult.exitCode != 0)
       return null;
 
@@ -138,7 +138,7 @@ class EmulatorManager {
       'avd',
       '-n', 'temp',
     ];
-    final RunResult runResult = await runAsync(args);
+    final ProcessResult runResult = processManager.runSync(args);
    
     // Get the list of IDs that match our criteria
     final List<String> availableIDs = runResult.stderr

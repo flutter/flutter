@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import 'package:flutter_tools/src/base/process_manager.dart';
 import 'package:meta/meta.dart';
 
 import '../android/android_sdk.dart';
@@ -42,8 +43,8 @@ class AndroidEmulator extends Emulator {
   @override
   Future<void> launch() async {
     final Future<void> launchResult =
-        runAsync(<String>[getEmulatorPath(), '-avd', id])
-            .then((RunResult runResult) {
+        processManager.run(<String>[getEmulatorPath(), '-avd', id])
+            .then((ProcessResult runResult) {
               if (runResult.exitCode != 0) {
                 throw '$runResult';
               }
@@ -65,10 +66,12 @@ List<AndroidEmulator> getEmulatorAvds() {
     return <AndroidEmulator>[];
   }
 
-  final String listAvdsOutput = runSync(<String>[emulatorPath, '-list-avds']);
+  final String listAvdsOutput = processManager.runSync(<String>[emulatorPath, '-list-avds']).stdout;
 
   final List<AndroidEmulator> emulators = <AndroidEmulator>[];
-  extractEmulatorAvdInfo(listAvdsOutput, emulators);
+  if (listAvdsOutput != null) {
+    extractEmulatorAvdInfo(listAvdsOutput, emulators);
+  }
   return emulators;
 }
 
