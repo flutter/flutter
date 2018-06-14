@@ -865,7 +865,7 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
       // by calling '.then' in the current zone. While flushing the microtasks
       // of the fake-zone below, the new future will be completed and can then
       // be used without fakeAsync.
-      var resultFuture = testBodyResult.then<Null>((_) {
+      final Future<Null> resultFuture = testBodyResult.then<Null>((_) {
         /* Do nothing. */
       });
 
