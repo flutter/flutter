@@ -129,17 +129,17 @@ void main() {
       CreateEmulatorResult res = await emulatorManager.createEmulator('');
       expect(res.success, equals(true));
       
-      final String defaultName = res.createdEmulatorName;
+      final String defaultName = res.emulatorName;
 
       // Second...
       res = await emulatorManager.createEmulator('');
       expect(res.success, equals(true));
-      expect(res.createdEmulatorName, equals('${defaultName}_2'));
+      expect(res.emulatorName, equals('${defaultName}_2'));
 
       // Third...
       res = await emulatorManager.createEmulator('');
       expect(res.success, equals(true));
-      expect(res.createdEmulatorName, equals('${defaultName}_3'));
+      expect(res.emulatorName, equals('${defaultName}_3'));
     }, overrides: <Type, Generator>{
       ProcessManager: () => mockProcessManager,
       Config: () => mockConfig,
