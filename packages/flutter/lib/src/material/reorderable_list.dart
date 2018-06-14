@@ -46,24 +46,28 @@ typedef void OnReorderCallback(int oldIndex, int newIndex);
 class ReorderableListView extends StatefulWidget {
 
   /// Creates a reorderable list.
-  const ReorderableListView({
+  ReorderableListView({
     @required this.children, 
     @required this.onReorder, 
     this.scrollDirection = Axis.vertical, 
     this.padding, 
   }): assert(scrollDirection != null),
       assert(onReorder != null),
-      assert(children != null);
+      assert(children != null),
+      assert(
+        children.every((Widget w) => w.key != null), 
+        'All children of this widget must have a key.',
+      );
 
   /// The widgets to display.
   final List<Widget> children;
 
   /// The [Axis] along which the list scrolls.
   /// 
-  /// List children also drag along this [Axis].
+  /// List [children] can only drag along this [Axis].
   final Axis scrollDirection;
 
-  /// The amount of space by which to inset the child.
+  /// The amount of space by which to inset the [children].
   final EdgeInsets padding;
 
   /// Called when a list child is dropped into a new position to shuffle the
@@ -89,7 +93,7 @@ class _ReorderableListViewState extends State<ReorderableListView> {
   @override 
   void initState() {
     super.initState();
-    _overlayKey = new GlobalKey(debugLabel: '$this overlay key');
+    _overlayKey = new GlobalKey(debugLabel: '$ReorderableListView overlay key');
     _bottomOverlayEntry = new OverlayEntry(
       opaque: true,
       builder: (BuildContext context) {
@@ -402,11 +406,6 @@ class _ReorderableListContentState extends State<_ReorderableListContent> with T
   Widget build(BuildContext context) {
     // We use the layout builder to constrain the cross-axis size of dragging child widgets.
     return new LayoutBuilder(builder: (BuildContext context, BoxConstraints constraints) {
-        assert(
-          widget.children.every((Widget w) => w.key != null), 
-          'All children of this widget must have a key.',
-        );
-
         final List<Widget> wrappedChildren = <Widget>[];
         for (int i=0; i<widget.children.length; i++) {
           wrappedChildren.add(_wrap(widget.children[i], i, constraints));
