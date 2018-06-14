@@ -1871,6 +1871,12 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   /// Once [markNeedsPaint] has been called on a render object,
   /// [debugNeedsPaint] returns true for that render object until just after
   /// the pipeline owner has called [paint] on the render object.
+  ///
+  /// See also:
+  ///
+  ///  * [RepaintBoundary], to scope a subtree of render objects to their own
+  ///    layer, thus limiting the number of nodes that [markNeedsPaint] must mark
+  ///    dirty.
   void markNeedsPaint() {
     assert(owner == null || !owner.debugDoingPaint);
     if (_needsPaint)
