@@ -1687,23 +1687,33 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
         ),
       );
 
-    final Widget prefixIcon = decoration.prefixIcon == null ? null :
-      IconTheme.merge(
-        data: new IconThemeData(
-          color: iconColor,
-          size: iconSize,
+    Widget prefixIcon;
+    if (decoration.prefixIcon != null) {
+      prefixIcon = new ConstrainedBox(
+        constraints: const BoxConstraints(minWidth: 48.0, minHeight: 48.0),
+        child: IconTheme.merge(
+          data: new IconThemeData(
+            color: iconColor,
+            size: iconSize,
+          ),
+          child: decoration.prefixIcon,
         ),
-        child: decoration.prefixIcon,
       );
+    }
 
-    final Widget suffixIcon = decoration.suffixIcon == null ? null :
-      IconTheme.merge(
-        data: new IconThemeData(
-          color: iconColor,
-          size: iconSize,
+    Widget suffixIcon;
+    if (decoration.suffixIcon != null) {
+      suffixIcon = new ConstrainedBox(
+        constraints: const BoxConstraints(minWidth: 48.0, minHeight: 48.0),
+        child: IconTheme.merge(
+          data: new IconThemeData(
+            color: iconColor,
+            size: iconSize,
+          ),
+          child: decoration.suffixIcon,
         ),
-        child: decoration.suffixIcon,
       );
+    }
 
     final Widget helperError = new _HelperError(
       textAlign: textAlign,
