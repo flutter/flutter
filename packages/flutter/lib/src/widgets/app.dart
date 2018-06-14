@@ -123,8 +123,11 @@ class WidgetsApp extends StatefulWidget {
   /// null, [navigatorKey] must also be null.
   final GlobalKey<NavigatorState> navigatorKey;
 
+  /// {@template flutter.widgets.widgetsApp.onGenerateRoute}
   /// The route generator callback used when the app is navigated to a
   /// named route.
+  ///
+  /// This is used if [routes] does not contain the requested route.
   ///
   /// If this returns null when building the routes to handle the specified
   /// [initialRoute], then all the routes are discarded and
@@ -134,24 +137,31 @@ class WidgetsApp extends StatefulWidget {
   /// applied to route names pushed by the application, and so should never
   /// return null.
   ///
-  /// The [Navigator] is only built if [onGenerateRoute] is not null. If
-  /// [onGenerateRoute] is null, the [builder] must be non-null.
+  /// The [Navigator] is only built if routes are provided (either via [home],
+  /// [routes], [onGenerateRoute], or [onUnknownRoute]); if they are not,
+  /// [builder] must not be null.
+  /// {@endtemplate}
   final RouteFactory onGenerateRoute;
 
-  /// Called when [onGenerateRoute] fails to generate a route.
+  /// {@template flutter.widgets.widgetsApp.onUnknownRoute}
+  /// Called when [onGenerateRoute] fails to generate a route, except for the
+  /// [initialRoute].
   ///
   /// This callback is typically used for error handling. For example, this
   /// callback might always generate a "not found" page that describes the route
   /// that wasn't found.
   ///
-  /// Unknown routes can arise either from errors in the app or from external
-  /// requests to push routes, such as from Android intents.
+  /// The default implementation pushes a route that displays an ugly error
+  /// message.
   ///
-  /// The [Navigator] is only built if [onGenerateRoute] is not null; if it is
-  /// null, [onUnknownRoute] must also be null.
+  /// The [Navigator] is only built if routes are provided (either via [home],
+  /// [routes], [onGenerateRoute], or [onUnknownRoute]); if they are not,
+  /// [builder] must not be null.
+  /// {@endtemplate}
   final RouteFactory onUnknownRoute;
 
-  /// The name of the first route to show.
+  /// {@template flutter.widgets.widgetsApp.initialRoute}
+  /// The name of the first route to show, if a [Navigator] is built.
   ///
   /// Defaults to [Window.defaultRouteName], which may be overridden by the code
   /// that launched the application.
@@ -166,28 +176,33 @@ class WidgetsApp extends StatefulWidget {
   /// (`/`). This can happen if the app is started with an intent that specifies
   /// a non-existent route.
   ///
-  /// The [Navigator] is only built if [onGenerateRoute] is not null; if it is
-  /// null, [initialRoute] must also be null.
+  /// The [Navigator] is only built if routes are provided (either via [home],
+  /// [routes], [onGenerateRoute], or [onUnknownRoute]); if they are not,
+  /// [initialRoute] must be null and [builder] must not be null.
   ///
   /// See also:
   ///
   ///  * [Navigator.initialRoute], which is used to implement this property.
   ///  * [Navigator.push], for pushing additional routes.
   ///  * [Navigator.pop], for removing a route from the stack.
+  /// {@endtemplate}
   final String initialRoute;
 
+  /// {@template flutter.widgets.widgetsApp.navigatorObservers}
   /// The list of observers for the [Navigator] created for this app.
   ///
   /// This list must be replaced by a list of newly-created observers if the
   /// [navigatorKey] is changed.
   ///
-  /// The [Navigator] is only built if [onGenerateRoute] is not null; if it is
-  /// null, [navigatorObservers] must be left to its default value, the empty
-  /// list.
+  /// The [Navigator] is only built if routes are provided (either via [home],
+  /// [routes], [onGenerateRoute], or [onUnknownRoute]); if they are not,
+  /// [navigatorObservers] must be the empty list and [builder] must not be null.
+  /// {@endtemplate}
   final List<NavigatorObserver> navigatorObservers;
 
+  /// {@template flutter.widgets.widgetsApp.builder}
   /// A builder for inserting widgets above the [Navigator] but below the other
-  /// widgets created by the [WidgetsApp] widget, or for replacing the
+  /// widgets created by the [MaterialApp] widget, or for replacing the
   /// [Navigator] entirely.
   ///
   /// For example, from the [BuildContext] passed to this method, the
@@ -203,24 +218,27 @@ class WidgetsApp extends StatefulWidget {
   /// The [builder] callback is passed two arguments, the [BuildContext] (as
   /// `context`) and a [Navigator] widget (as `child`).
   ///
-  /// If [onGenerateRoute] is null, the `child` will be null, and it is the
-  /// responsibility of the [builder] to provide the application's routing
-  /// machinery.
+  /// If no routes are provided using [home], [routes], [onGenerateRoute], or
+  /// [onUnknownRoute], the `child` will be null, and it is the responsibility
+  /// of the [builder] to provide the application's routing machinery.
   ///
-  /// If [onGenerateRoute] is not null, then `child` is not null, and the
-  /// returned value should include the `child` in the widget subtree; if it
-  /// does not, then the application will have no navigator and the
-  /// [navigatorKey], [onGenerateRoute], [onUnknownRoute], [initialRoute], and
-  /// [navigatorObservers] properties will have no effect.
+  /// If routes _are_ provided using one or more of those properties, then
+  /// `child` is not null, and the returned value should include the `child` in
+  /// the widget subtree; if it does not, then the application will have no
+  /// navigator and the [navigatorKey], [home], [routes], [onGenerateRoute],
+  /// [onUnknownRoute], [initialRoute], and [navigatorObservers] properties will
+  /// have no effect.
   ///
   /// If [builder] is null, it is as if a builder was specified that returned
-  /// the `child` directly. At least one of either [onGenerateRoute] or
-  /// [builder] must be non-null.
+  /// the `child` directly. If it is null, routes must be provided using one of
+  /// the other properties listed above.
   ///
   /// For specifically overriding the [title] with a value based on the
   /// [Localizations], consider [onGenerateTitle] instead.
+  /// {@endtemplate}
   final TransitionBuilder builder;
 
+  /// {@template flutter.widgets.widgetsApp.title}
   /// A one-line description used by the device to identify the app for the user.
   ///
   /// On Android the titles appear above the task manager's app snapshots which are
@@ -229,8 +247,10 @@ class WidgetsApp extends StatefulWidget {
   /// home button.
   ///
   /// To provide a localized title instead, use [onGenerateTitle].
+  /// {@endtemplate}
   final String title;
 
+  /// {@template flutter.widgets.widgetsApp.onGenerateTitle}
   /// If non-null this callback function is called to produce the app's
   /// title string, otherwise [title] is used.
   ///
@@ -242,29 +262,37 @@ class WidgetsApp extends StatefulWidget {
   ///
   /// The [onGenerateTitle] callback is called each time the [WidgetsApp]
   /// rebuilds.
+  /// {@endtemplate}
   final GenerateAppTitle onGenerateTitle;
 
   /// The default text style for [Text] in the application.
   final TextStyle textStyle;
 
+  /// {@template flutter.widgets.widgetsApp.color}
   /// The primary color to use for the application in the operating system
   /// interface.
   ///
   /// For example, on Android this is the color used for the application in the
   /// application switcher.
+  /// {@endtemplate}
   final Color color;
 
+  /// {@template flutter.widgets.widgetsApp.locale}
   /// The initial locale for this app's [Localizations] widget.
   ///
   /// If the 'locale' is null the system's locale value is used.
+  /// {@endtemplate}
   final Locale locale;
 
+  /// {@template flutter.widgets.widgetsApp.localizationsDelegates}
   /// The delegates for this app's [Localizations] widget.
   ///
   /// The delegates collectively define all of the localized resources
   /// for this application's [Localizations] widget.
+  /// {@endtemplate}
   final Iterable<LocalizationsDelegate<dynamic>> localizationsDelegates;
 
+  /// {@template flutter.widgets.widgetsApp.localeResolutionCallback}
   /// This callback is responsible for choosing the app's locale
   /// when the app is started, and when the user changes the
   /// device's locale.
@@ -281,6 +309,7 @@ class WidgetsApp extends StatefulWidget {
   /// - The first supported locale with the same [Locale.languageCode] as the
   ///   callback's `locale` parameter.
   /// - The first locale in [supportedLocales].
+  /// {@endtemplate}
   ///
   /// See also:
   ///
@@ -288,6 +317,7 @@ class WidgetsApp extends StatefulWidget {
   ///    [WidgetsApp] it creates.
   final LocaleResolutionCallback localeResolutionCallback;
 
+  /// {@template flutter.widgets.widgetsApp.supportedLocales}
   /// The list of locales that this app has been localized for.
   ///
   /// By default only the American English locale is supported. Apps should
@@ -301,6 +331,7 @@ class WidgetsApp extends StatefulWidget {
   /// [supportedLocales] with a matching [Locale.languageCode] is used. If that
   /// fails then the first locale in [supportedLocales] is used. The default
   /// locale resolution algorithm can be overridden with [localeResolutionCallback].
+  /// {@endtemplate}
   ///
   /// See also:
   ///
@@ -315,7 +346,10 @@ class WidgetsApp extends StatefulWidget {
   final Iterable<Locale> supportedLocales;
 
   /// Turns on a performance overlay.
-  /// https://flutter.io/debugging/#performanceoverlay
+  ///
+  /// See also:
+  ///
+  ///  * <https://flutter.io/debugging/#performanceoverlay>
   final bool showPerformanceOverlay;
 
   /// Checkerboards raster cache images.
@@ -347,7 +381,8 @@ class WidgetsApp extends StatefulWidget {
   /// material package.
   final InspectorSelectButtonBuilder inspectorSelectButtonBuilder;
 
-  /// Turns on a "DEBUG" little banner in checked mode to indicate
+  /// {@template flutter.widgets.widgetsApp.debugShowCheckedModeBanner}
+  /// Turns on a little "DEBUG" banner in checked mode to indicate
   /// that the app is in checked mode. This is on by default (in
   /// checked mode), to turn it off, set the constructor argument to
   /// false. In release mode this has no effect.
@@ -355,11 +390,12 @@ class WidgetsApp extends StatefulWidget {
   /// To get this banner in your application if you're not using
   /// WidgetsApp, include a [CheckedModeBanner] widget in your app.
   ///
-  /// This banner is intended to avoid people complaining that your
+  /// This banner is intended to deter people from complaining that your
   /// app is slow when it's in checked mode. In checked mode, Flutter
   /// enables a large number of expensive diagnostics to aid in
   /// development, and so performance in checked mode is not
   /// representative of what will happen in release mode.
+  /// {@endtemplate}
   final bool debugShowCheckedModeBanner;
 
   /// If true, forces the performance overlay to be visible in all instances.
