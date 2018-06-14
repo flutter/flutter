@@ -136,6 +136,9 @@ class _ReorderableListContentState extends State<_ReorderableListContent> with T
   // calculated from the currently dragging widget.
   static const double _kDefaultDropAreaExtent = 100.0;
 
+  // The additional margin to place around a computed drop area.
+  static const double _kDropAreaMargin = 8.0;
+
   // How long an animation to reorder an element in the list takes.
   static const Duration _kReorderAnimationDuration = const Duration(milliseconds: 200);
 
@@ -181,9 +184,10 @@ class _ReorderableListContentState extends State<_ReorderableListContent> with T
     if (_draggingFeedbackSize == null) {
       return _kDefaultDropAreaExtent;
     }
-    return widget.scrollDirection == Axis.vertical
+    final double dropAreaWithoutMargin = widget.scrollDirection == Axis.vertical
         ? _draggingFeedbackSize.height
         : _draggingFeedbackSize.width;
+    return dropAreaWithoutMargin + _kDropAreaMargin;
   }
 
   @override 
@@ -306,14 +310,16 @@ class _ReorderableListContentState extends State<_ReorderableListContent> with T
           alignment: Alignment.topLeft,
           // These constraints will limit the cross axis of the drawn widget.
           constraints: constraints,
-          child: new _DraggingWidget(
-            constraints: constraints,
-            onUpdateSize: (Size newSize) {
-              setState(() {
-                _draggingFeedbackSize = newSize;
-              });
-            },
-            child: toWrap,
+          child: new Material(
+          elevation: 6.0,
+          child: new _SizeDetectingWidget(
+              onUpdateSize: (Size newSize) {
+                setState(() {
+                  _draggingFeedbackSize = newSize;
+                });
+              },
+              child: toWrap,
+            ),
           ),
         ),
         child: _dragging == toWrap.key ? const SizedBox() : toWrap,
@@ -422,22 +428,22 @@ class _ReorderableListContentState extends State<_ReorderableListContent> with T
   }
 }
 
-class _DraggingWidget extends StatefulWidget {
-  _DraggingWidget({Key key, this.child, this.constraints, this.onUpdateSize}) : super(key: key) {
+// Notifies its parent when its size has changed.
+class _SizeDetectingWidget extends StatefulWidget {
+  _SizeDetectingWidget({Key key, this.child, this.onUpdateSize}) : super(key: key) {
     if (key != null) {
       print('${child.key}, $key');
     }
   }
 
-  final Widget child;
-  final BoxConstraints constraints;
   final void Function(Size newSize) onUpdateSize;
+  final Widget child;
 
   @override
-  State<_DraggingWidget> createState() => new _DraggingWidgetState();
+  _SizeDetectingWidgetState createState() => new _SizeDetectingWidgetState();
 }
 
-class _DraggingWidgetState extends State<_DraggingWidget> {
+class _SizeDetectingWidgetState extends State<_SizeDetectingWidget> {
   @override
   void initState() {
     super.initState();
@@ -450,7 +456,7 @@ class _DraggingWidgetState extends State<_DraggingWidget> {
   }
 
   @override
-  void didUpdateWidget(_DraggingWidget oldWidget) {
+  void didUpdateWidget(_SizeDetectingWidget oldWidget) {
     super.didUpdateWidget(oldWidget);
     WidgetsBinding.instance.addPostFrameCallback(_computeSize);
   }
@@ -464,9 +470,6 @@ class _DraggingWidgetState extends State<_DraggingWidget> {
 
   @override
   Widget build(BuildContext context) {
-     return new Material(
-      elevation: 6.0,
-      child: widget.child,
-    );
+     return widget.child;
   }
 }
