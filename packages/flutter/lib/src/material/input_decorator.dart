@@ -1687,9 +1687,8 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
         ),
       );
 
-    Widget prefixIcon;
-    if (decoration.prefixIcon != null) {
-      prefixIcon = new ConstrainedBox(
+    final Widget prefixIcon = decoration.prefixIcon == null ? null :
+      new ConstrainedBox(
         constraints: const BoxConstraints(minWidth: 48.0, minHeight: 48.0),
         child: IconTheme.merge(
           data: new IconThemeData(
@@ -1699,11 +1698,9 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
           child: decoration.prefixIcon,
         ),
       );
-    }
 
-    Widget suffixIcon;
-    if (decoration.suffixIcon != null) {
-      suffixIcon = new ConstrainedBox(
+    final Widget suffixIcon = decoration.suffixIcon == null ? null :
+      new ConstrainedBox(
         constraints: const BoxConstraints(minWidth: 48.0, minHeight: 48.0),
         child: IconTheme.merge(
           data: new IconThemeData(
@@ -1713,7 +1710,6 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
           child: decoration.suffixIcon,
         ),
       );
-    }
 
     final Widget helperError = new _HelperError(
       textAlign: textAlign,
