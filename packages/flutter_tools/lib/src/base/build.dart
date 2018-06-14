@@ -445,6 +445,9 @@ class CoreJITSnapshotter {
       '--reify-generic-functions',
       '--strong',
     ];
+    if (buildMode == BuildMode.debug) {
+      genSnapshotArgs.add('--enable_asserts');
+    }
     if (extraGenSnapshotOptions != null && extraGenSnapshotOptions.isNotEmpty) {
       printTrace('Extra gen_snapshot options: $extraGenSnapshotOptions');
       genSnapshotArgs.addAll(extraGenSnapshotOptions);
