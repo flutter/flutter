@@ -30,6 +30,12 @@
 
 namespace txt {
 
+namespace {
+
+const std::shared_ptr<minikin::FontFamily> g_null_family;
+
+}  // anonymous namespace
+
 bool FontCollection::FamilyKey::operator==(
     const FontCollection::FamilyKey& other) const {
   return font_family == other.font_family && locale == other.locale;
@@ -50,11 +56,16 @@ class TxtFallbackFontProvider
   virtual const std::shared_ptr<minikin::FontFamily>& matchFallbackFont(
       uint32_t ch,
       std::string locale) {
-    return font_collection_->MatchFallbackFont(ch, locale);
+    std::shared_ptr<FontCollection> fc = font_collection_.lock();
+    if (fc) {
+      return fc->MatchFallbackFont(ch, locale);
+    } else {
+      return g_null_family;
+    }
   }
 
  private:
-  std::shared_ptr<FontCollection> font_collection_;
+  std::weak_ptr<FontCollection> font_collection_;
 };
 
 FontCollection::FontCollection() : enable_font_fallback_(true) {}
@@ -199,7 +210,7 @@ const std::shared_ptr<minikin::FontFamily>& FontCollection::MatchFallbackFont(
     return GetFallbackFontFamily(manager, family_name);
   }
 
-  return null_family_;
+  return g_null_family;
 }
 
 const std::shared_ptr<minikin::FontFamily>&
@@ -213,7 +224,7 @@ FontCollection::GetFallbackFontFamily(const sk_sp<SkFontMgr>& manager,
   std::shared_ptr<minikin::FontFamily> minikin_family =
       CreateMinikinFontFamily(manager, family_name);
   if (!minikin_family)
-    return null_family_;
+    return g_null_family;
 
   auto insert_it =
       fallback_fonts_.insert(std::make_pair(family_name, minikin_family));
