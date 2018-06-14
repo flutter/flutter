@@ -20,7 +20,7 @@ class EmulatorsCommand extends FlutterCommand {
         help: 'Creates a new Android emulator.',
         negatable: false);
     argParser.addOption('name',
-        help: 'The name for the emulator being created.');
+        help: 'Used with flag --create. Specifies a name for the emulator being created.');
   }
 
   @override
