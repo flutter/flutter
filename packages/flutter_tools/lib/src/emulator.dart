@@ -3,12 +3,12 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:io';
 import 'dart:math' as math;
 
 import 'android/android_emulator.dart';
 import 'android/android_sdk.dart';
 import 'base/context.dart';
+import 'base/io.dart' show ProcessResult;
 import 'base/process_manager.dart';
 import 'globals.dart';
 import 'ios/ios_emulators.dart';
