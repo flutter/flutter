@@ -80,7 +80,8 @@ class FlutterProject {
   bool shouldRegenerateAndroidDirectory() {
     final File flutterToolsStamp = Cache.instance.getStampFileFor('flutter_tools');
     final File buildDotGradleFile = directory.childDirectory('android').childFile('build.gradle');
-    if (!buildDotGradleFile.existsSync()) return true;
+    if (!buildDotGradleFile.existsSync())
+      return true;
     return flutterToolsStamp.existsSync() &&
         flutterToolsStamp
             .lastModifiedSync()
