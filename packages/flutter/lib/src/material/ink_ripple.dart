@@ -74,7 +74,7 @@ class _InkRippleFactory extends InteractiveInkFeatureFactory {
 /// This object is rarely created directly. Instead of creating an ink ripple,
 /// consider using an [InkResponse] or [InkWell] widget, which uses
 /// gestures (such as tap and long-press) to trigger ink splashes. This class
-/// is used when the [Theme]'s [ThemeData.splashFactory] is [InkRipple.splashFactor].
+/// is used when the [Theme]'s [ThemeData.splashFactory] is [InkRipple.splashFactory].
 ///
 /// See also:
 ///
