@@ -182,6 +182,12 @@ tasks:
     stage: devicelab
     required_agent_capabilities: ["mac/android"]
 
+  hello_world_android__compile:
+    description: >
+      Measures the APK size of Hello World.
+    stage: devicelab
+    required_agent_capabilities: ["mac/android"]
+
   hello_world__memory:
     description: >
       Measures starting memory usage of the simplest Flutter app.
@@ -331,6 +337,12 @@ tasks:
       Measures the performance of screen transitions in Flutter Gallery on
       iOS.
     stage: devicelab_ios
+    required_agent_capabilities: ["mac/ios"]
+
+  hello_world_ios__compile:
+    description: >
+      Measures the IPA size of Hello World.
+    stage: devicelab
     required_agent_capabilities: ["mac/ios"]
 
   microbenchmarks_ios:
