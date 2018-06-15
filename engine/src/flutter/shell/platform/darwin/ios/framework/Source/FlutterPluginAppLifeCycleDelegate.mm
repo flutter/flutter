@@ -275,4 +275,22 @@ static BOOL isPowerOfTwo(NSUInteger x) {
   }
   return NO;
 }
+
+- (BOOL)application:(UIApplication*)application
+    continueUserActivity:(NSUserActivity*)userActivity
+      restorationHandler:(void (^)(NSArray*))restorationHandler {
+  for (id<FlutterPlugin> plugin in _pluginDelegates) {
+    if (!plugin) {
+      continue;
+    }
+    if ([plugin respondsToSelector:_cmd]) {
+      if ([plugin application:application
+              continueUserActivity:userActivity
+                restorationHandler:restorationHandler]) {
+        return YES;
+      }
+    }
+  }
+  return NO;
+}
 @end
