@@ -767,6 +767,8 @@ void main() {
     //   12 - top padding
     //   16 - input text (ahem font size 16dps)
     //   12 - bottom padding
+    //   48 - prefix icon
+    //   48 - suffix icon
 
     expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, 48.0));
     expect(tester.getSize(find.text('text')).height, 16.0);
