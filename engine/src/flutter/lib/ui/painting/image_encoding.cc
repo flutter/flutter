@@ -16,6 +16,7 @@
 #include "lib/tonic/dart_persistent_value.h"
 #include "lib/tonic/logging/dart_invoke.h"
 #include "lib/tonic/typed_data/uint8_list.h"
+#include "third_party/skia/include/core/SkCanvas.h"
 #include "third_party/skia/include/core/SkEncodedImageFormat.h"
 #include "third_party/skia/include/core/SkImage.h"
 #include "third_party/skia/include/core/SkSurface.h"
@@ -54,61 +55,131 @@ void InvokeDataCallback(std::unique_ptr<DartPersistentValue> callback,
   }
 }
 
-sk_sp<SkData> EncodeImage(sk_sp<SkImage> image, ImageByteFormat format) {
+sk_sp<SkImage> ConvertToRasterImageIfNecessary(sk_sp<SkImage> image,
+                                               GrContext* context) {
+  if (context == nullptr) {
+    // The context was null (software rendering contexts) so the image is likely
+    // already a raster image. Nothing more to do.
+    return image;
+  }
+
   TRACE_EVENT0("flutter", __FUNCTION__);
 
-  if (image == nullptr) {
+  // Create a GPU surface with the context and then do a device to host copy of
+  // image contents.
+  auto surface = SkSurface::MakeRenderTarget(
+      context, SkBudgeted::kNo,
+      SkImageInfo::MakeN32Premul(image->dimensions()));
+
+  if (surface == nullptr || surface->getCanvas() == nullptr) {
+    FXL_LOG(ERROR) << "Could not create a surface to copy the texture into.";
     return nullptr;
   }
 
-  if (format == kPNG) {
-    return image->encodeToData(SkEncodedImageFormat::kPNG, 0);
-  }
+  surface->getCanvas()->drawImage(image, 0, 0);
+  surface->getCanvas()->flush();
 
-  // Copy the GPU image snapshot into CPU memory.
-  auto cpu_snapshot = image->makeRasterImage();
-  if (!cpu_snapshot) {
-    FXL_LOG(ERROR) << "Pixel copy failed.";
+  auto snapshot = surface->makeImageSnapshot();
+
+  if (snapshot == nullptr) {
+    FXL_LOG(ERROR) << "Could not snapshot image to encode.";
     return nullptr;
   }
+
+  return snapshot->makeRasterImage();
+}
+
+sk_sp<SkData> CopyImageByteData(sk_sp<SkImage> raster_image,
+                                SkColorType color_type) {
+  FXL_DCHECK(raster_image);
 
   SkPixmap pixmap;
-  if (!cpu_snapshot->peekPixels(&pixmap)) {
+
+  if (!raster_image->peekPixels(&pixmap)) {
+    FXL_LOG(ERROR) << "Could not copy pixels from the raster image.";
+    return nullptr;
+  }
+
+  // The color types already match. No need to swizzle. Return early.
+  if (pixmap.colorType() == color_type) {
+    return SkData::MakeWithCopy(pixmap.addr(), pixmap.computeByteSize());
+  }
+
+  // Perform swizzle if the type doesnt match the specification.
+  auto surface = SkSurface::MakeRaster(
+      SkImageInfo::Make(raster_image->width(), raster_image->height(),
+                        color_type, kPremul_SkAlphaType, nullptr));
+
+  if (!surface) {
+    FXL_LOG(ERROR) << "Could not setup the surface for swizzle.";
+    return nullptr;
+  }
+
+  surface->writePixels(pixmap, 0, 0);
+
+  if (!surface->peekPixels(&pixmap)) {
     FXL_LOG(ERROR) << "Pixel address is not available.";
     return nullptr;
   }
 
-  if (format == kRawUnmodified) {
-    return SkData::MakeWithCopy(pixmap.addr(), pixmap.computeByteSize());
+  return SkData::MakeWithCopy(pixmap.addr(), pixmap.computeByteSize());
+}
+
+sk_sp<SkData> EncodeImage(sk_sp<SkImage> p_image,
+                          GrContext* context,
+                          ImageByteFormat format) {
+  TRACE_EVENT0("flutter", __FUNCTION__);
+
+  // Check validity of the image.
+  if (p_image == nullptr) {
+    FXL_LOG(ERROR) << "Image was null.";
+    return nullptr;
   }
 
-  FXL_CHECK(format == kRawRGBA);
-  if (pixmap.colorType() != kRGBA_8888_SkColorType) {
-    TRACE_EVENT0("flutter", "ConvertToRGBA");
+  auto dimensions = p_image->dimensions();
 
-    // Convert the pixel data to N32 and RGBA to adhere to our API contract.
-    const auto image_info = SkImageInfo::MakeN32Premul(
-        image->width(), image->height()).makeColorType(kRGBA_8888_SkColorType);
-
-    auto surface = SkSurface::MakeRaster(image_info);
-    surface->writePixels(pixmap, 0, 0);
-    if (!surface->peekPixels(&pixmap)) {
-      FXL_LOG(ERROR) << "Pixel address is not available.";
-      return nullptr;
-    }
-
-    return SkData::MakeWithCopy(pixmap.addr32(), pixmap.computeByteSize());
-  } else {
-    return SkData::MakeWithCopy(pixmap.addr32(), pixmap.computeByteSize());
+  if (dimensions.isEmpty()) {
+    FXL_LOG(ERROR) << "Image dimensions were empty.";
+    return nullptr;
   }
+
+  auto raster_image = ConvertToRasterImageIfNecessary(p_image, context);
+
+  if (raster_image == nullptr) {
+    FXL_LOG(ERROR) << "Could not create a raster copy of the image.";
+    return nullptr;
+  }
+
+  switch (format) {
+    case kPNG: {
+      auto png_image =
+          raster_image->encodeToData(SkEncodedImageFormat::kPNG, 0);
+
+      if (png_image == nullptr) {
+        FXL_LOG(ERROR) << "Could not convert raster image to PNG.";
+        return nullptr;
+      }
+      return png_image;
+    } break;
+    case kRawRGBA: {
+      return CopyImageByteData(raster_image, kRGBA_8888_SkColorType);
+    } break;
+    case kRawUnmodified: {
+      return CopyImageByteData(raster_image, kN32_SkColorType);
+    } break;
+  }
+
+  FXL_LOG(ERROR) << "Unknown error encoding image.";
+  return nullptr;
 }
 
 void EncodeImageAndInvokeDataCallback(
     std::unique_ptr<DartPersistentValue> callback,
     sk_sp<SkImage> image,
+    GrContext* context,
     fxl::RefPtr<fxl::TaskRunner> ui_task_runner,
     ImageByteFormat format) {
-  sk_sp<SkData> encoded = EncodeImage(std::move(image), format);
+  sk_sp<SkData> encoded = EncodeImage(std::move(image), context, format);
 
   ui_task_runner->PostTask(
       fxl::MakeCopyable([callback = std::move(callback), encoded]() mutable {
@@ -131,18 +202,23 @@ Dart_Handle EncodeImage(CanvasImage* canvas_image,
 
   auto callback = std::make_unique<DartPersistentValue>(
       tonic::DartState::Current(), callback_handle);
-  sk_sp<SkImage> image = canvas_image->image();
 
   const auto& task_runners = UIDartState::Current()->GetTaskRunners();
+  auto context = UIDartState::Current()->GetResourceContext();
 
-  task_runners.GetIOTaskRunner()->PostTask(fxl::MakeCopyable(
-      [callback = std::move(callback), image,
-       ui_task_runner = task_runners.GetUITaskRunner(),
-       image_format]() mutable {
-        EncodeImageAndInvokeDataCallback(std::move(callback),
-                                         std::move(image),
-                                         std::move(ui_task_runner),
-                                         image_format);
+  task_runners.GetIOTaskRunner()->PostTask(
+      fxl::MakeCopyable([callback = std::move(callback),                   //
+                         image = canvas_image->image(),                    //
+                         context = std::move(context),                     //
+                         ui_task_runner = task_runners.GetUITaskRunner(),  //
+                         image_format                                      //
+  ]() mutable {
+        EncodeImageAndInvokeDataCallback(std::move(callback),        //
+                                         std::move(image),           //
+                                         context.get(),              //
+                                         std::move(ui_task_runner),  //
+                                         image_format                //
+        );
       }));
 
   return Dart_Null();
