@@ -101,22 +101,6 @@ Future<void> build({
     }
     kernelContent = new DevFSFileContent(fs.file(compilerOutput.outputFilename));
 
-    if (useApplicationSnapshot) {
-      final CoreJITSnapshotter snapshotter = new CoreJITSnapshotter();
-      final int snapshotExitCode = await snapshotter.build(
-        platform: platform,
-        buildMode: buildMode,
-        mainPath: applicationKernelFilePath,
-        outputPath: getBuildDirectory(),
-        packagesPath: packagesPath,
-        extraGenSnapshotOptions: extraGenSnapshotOptions,
-      );
-      if (snapshotExitCode != 0) {
-        printError('Snapshotting exited with non-zero exit code: $snapshotExitCode');
-        return;
-      }
-    }
-
     await fs.directory(getBuildDirectory()).childFile('frontend_server.d')
         .writeAsString('frontend_server.d: ${artifacts.getArtifactPath(Artifact.frontendServerSnapshotForEngineDartSdk)}\n');
 
