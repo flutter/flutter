@@ -98,7 +98,7 @@ class MediaQueryData {
   /// If you consumed this padding (e.g. by building a widget that envelops or
   /// accounts for this padding in its layout in such a way that children are
   /// no longer exposed to this padding), you should remove this padding
-  /// for subsequent descendents in the widget tree by inserting a new
+  /// for subsequent descendants in the widget tree by inserting a new
   /// [MediaQuery] widget using the [MediaQuery.removePadding] factory.
   ///
   /// See also:
@@ -283,7 +283,7 @@ class MediaQuery extends InheritedWidget {
   ///
   /// This should be inserted into the widget tree when the [MediaQuery] padding
   /// is consumed by a widget in such a way that the padding is no longer
-  /// exposed to the widget's descendents or siblings.
+  /// exposed to the widget's descendants or siblings.
   ///
   /// The [context] argument is required, must not be null, and must have a
   /// [MediaQuery] in scope.
@@ -327,7 +327,7 @@ class MediaQuery extends InheritedWidget {
   ///
   /// This should be inserted into the widget tree when the [MediaQuery] view
   /// insets are consumed by a widget in such a way that the view insets are no
-  /// longer exposed to the widget's descendents or siblings.
+  /// longer exposed to the widget's descendants or siblings.
   ///
   /// The [context] argument is required, must not be null, and must have a
   /// [MediaQuery] in scope.
