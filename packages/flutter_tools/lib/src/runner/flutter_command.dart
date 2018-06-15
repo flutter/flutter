@@ -203,8 +203,8 @@ abstract class FlutterCommand extends Command<Null> {
     int buildNumber;
     try {
       buildNumber = argParser.options.containsKey('build-number') && argResults['build-number'] != null
-          ? int.parse(argResults['build-number'])
-          : null;
+        ? int.parse(argResults['build-number'])
+        : null;
     } catch (e) {
       throw new UsageException(
           '--build-number (${argResults['build-number']}) must be an int.', null);
@@ -212,8 +212,8 @@ abstract class FlutterCommand extends Command<Null> {
 
     return new BuildInfo(getBuildMode(),
       argParser.options.containsKey('flavor')
-          ? argResults['flavor']
-          : null,
+        ? argResults['flavor']
+        : null,
       previewDart2: previewDart2,
       trackWidgetCreation: trackWidgetCreation,
       buildSnapshot: argParser.options.containsKey('build-snapshot')
