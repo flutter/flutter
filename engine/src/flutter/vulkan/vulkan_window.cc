@@ -97,9 +97,9 @@ GrContext* VulkanWindow::GetSkiaGrContext() {
 }
 
 bool VulkanWindow::CreateSkiaGrContext() {
-  auto backend_context = CreateSkiaBackendContext();
+  GrVkBackendContext backend_context;
 
-  if (backend_context == nullptr) {
+  if (!CreateSkiaBackendContext(&backend_context)) {
     return false;
   }
 
@@ -111,25 +111,23 @@ bool VulkanWindow::CreateSkiaGrContext() {
 
   context->setResourceCacheLimits(kGrCacheMaxCount, kGrCacheMaxByteSize);
 
-  skia_vk_backend_context_ = backend_context;
   skia_gr_context_ = context;
 
   return true;
 }
 
-sk_sp<GrVkBackendContext> VulkanWindow::CreateSkiaBackendContext() {
+bool VulkanWindow::CreateSkiaBackendContext(GrVkBackendContext* context) {
   auto interface = vk->CreateSkiaInterface();
 
   if (interface == nullptr || !interface->validate(0)) {
-    return nullptr;
+    return false;
   }
 
   uint32_t skia_features = 0;
   if (!logical_device_->GetPhysicalDeviceFeaturesSkia(&skia_features)) {
-    return nullptr;
+    return false;
   }
 
-  auto context = sk_make_sp<GrVkBackendContext>();
   context->fInstance = application_->GetInstance();
   context->fPhysicalDevice = logical_device_->GetPhysicalDeviceHandle();
   context->fDevice = logical_device_->GetHandle();
@@ -142,7 +140,7 @@ sk_sp<GrVkBackendContext> VulkanWindow::CreateSkiaBackendContext() {
   context->fFeatures = skia_features;
   context->fInterface.reset(interface.release());
   context->fOwnsInstanceAndDevice = false;
-  return context;
+  return true;
 }
 
 sk_sp<SkSurface> VulkanWindow::AcquireSurface() {
