@@ -35,7 +35,7 @@ class VsCode {
         .listSync()
         .where((FileSystemEntity d) => d is Directory)
         .where(
-            (FileSystemEntity d) => d.basename.startsWith(extensionIdentifier));
+            (FileSystemEntity d) => d.basename.toLowerCase().startsWith(extensionIdentifier.toLowerCase()));
 
     if (extensionDirs.isNotEmpty) {
       final FileSystemEntity extensionDir = extensionDirs.first;
