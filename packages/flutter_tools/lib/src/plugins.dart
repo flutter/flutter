@@ -201,7 +201,7 @@ const String _iosPluginRegistrantPodspecTemplate = '''
 #
 
 Pod::Spec.new do |s|
-  s.name             = 'PluginRegistrant'
+  s.name             = 'FlutterPluginRegistrant'
   s.version          = '0.0.1'
   s.summary          = 'Registers plugins with your flutter app'
   s.description      = <<-DESC
@@ -247,12 +247,12 @@ void _writeIOSPluginRegistrant(String directory, List<Plugin> plugins) {
       fs.path.join(runnerDirectory, 'GeneratedPluginRegistrant.m'),
     );
   } else {
-    final String registryDirectory = fs.path.join(directory, 'ios', 'Flutter', 'PluginRegistrant');
+    final String registryDirectory = fs.path.join(directory, 'ios', 'Flutter', 'FlutterPluginRegistrant');
     final String registryClassesDirectory = fs.path.join(registryDirectory, 'Classes');
     _renderTemplateToFile(
       _iosPluginRegistrantPodspecTemplate,
       context,
-      fs.path.join(registryDirectory, 'PluginRegistrant.podspec'),
+      fs.path.join(registryDirectory, 'FlutterPluginRegistrant.podspec'),
     );
     _renderTemplateToFile(
       _iosPluginRegistryHeaderTemplate,

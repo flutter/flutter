@@ -103,7 +103,7 @@ class IosProject {
 
   Future<void> _injectModuleWrapper(Map<String, dynamic> environment) async {
     final Template template = new Template.fromName('module_ios');
-    template.render(directory, environment, overwriteExisting: false);
+    template.render(directory, environment);
   }
 }
 
