@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:math';
 import 'dart:ui' show ImageFilter;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
@@ -44,6 +43,12 @@ const TextStyle _kCupertinoDialogActionStyle = const TextStyle(
 );
 
 const double _kCupertinoDialogWidth = 270.0;
+
+// _kCupertinoDialogBlurOverlayDecoration is applied to the blurred backdrop to
+// lighten the blurred image. Brightening is done to counteract the dark modal
+// barrier that appears behind the dialog. The overlay blend mode does the
+// brightening. The white color doesn't paint any white, it's just the basis
+// for the overlay blend mode.
 const BoxDecoration _kCupertinoDialogBlurOverlayDecoration = const BoxDecoration(
   color: CupertinoColors.white,
   backgroundBlendMode: BlendMode.overlay,
@@ -53,6 +58,8 @@ const double _kEdgePadding = 20.0;
 const double _kButtonHeight = 45.0;
 const double _kDialogCornerRadius = 12.0;
 
+// _kDialogColor is a translucent white that is painted on top of the blurred
+// backdrop.
 const Color _kDialogColor = const Color(0xC0FFFFFF);
 const Color _kButtonDividerColor = const Color(0x20000000);
 
@@ -84,7 +91,7 @@ class CupertinoDialog extends StatelessWidget {
   Widget build(BuildContext context) {
     return new Center(
       child: new ClipRRect(
-        borderRadius: const BorderRadius.all(const Radius.circular(_kDialogCornerRadius)),
+        borderRadius: BorderRadius.circular(_kDialogCornerRadius),
         child: new BackdropFilter(
           filter: new ImageFilter.blur(sigmaX: 10.0, sigmaY: 10.0),
           child: new Container(
@@ -216,21 +223,22 @@ class CupertinoAlertDialog extends StatelessWidget {
   Widget build(BuildContext context) {
     return new Center(
       child: new Container(
+        margin: const EdgeInsets.symmetric(vertical: _kEdgePadding),
         width: _kCupertinoDialogWidth,
-        padding: const EdgeInsets.symmetric(vertical: _kEdgePadding),
         child: ClipRRect(
-          borderRadius: const BorderRadius.all(const Radius.circular(_kDialogCornerRadius)),
+          borderRadius: BorderRadius.circular(_kDialogCornerRadius),
           child: new BackdropFilter(
             filter: new ImageFilter.blur(sigmaX: 10.0, sigmaY: 10.0),
             child: new Container(
               decoration: _kCupertinoDialogBlurOverlayDecoration,
-              child: new CupertinoDialogRenderWidget(
+              child: new _CupertinoDialogRenderWidget(
+                buttonsAreStacked: actions.length > 2,
                 children: <Widget>[
-                  new CupertinoLayoutId(
+                  new _CupertinoLayoutId(
                     id: _AlertDialogSection.content,
                     child: _buildContent(),
                   ),
-                  new CupertinoLayoutId(
+                  new _CupertinoLayoutId(
                     id: _AlertDialogSection.actions,
                     child: _buildActions(),
                   ),
@@ -249,124 +257,69 @@ enum _AlertDialogSection {
   actions,
 }
 
-class CupertinoDialogRenderWidget extends MultiChildRenderObjectWidget {
-  CupertinoDialogRenderWidget({
+class _CupertinoDialogRenderWidget extends MultiChildRenderObjectWidget {
+  _CupertinoDialogRenderWidget({
     Key key,
     @required List<Widget> children,
-  }) : super(key: key, children: children);
+    bool buttonsAreStacked = false,
+  }) : _buttonsAreStacked = buttonsAreStacked,
+       super(key: key, children: children);
+
+  final bool _buttonsAreStacked;
 
   @override
   RenderObject createRenderObject(BuildContext context) {
-    return new CupertinoDialogRenderBox();
+    return new _CupertinoDialogRenderBox(buttonsAreStacked: _buttonsAreStacked);
   }
 }
 
-class CupertinoDialogRenderBox extends RenderBox
-    with ContainerRenderObjectMixin<RenderBox, CupertinoDialogRenderBoxParentData>,
-        RenderBoxContainerDefaultsMixin<RenderBox, CupertinoDialogRenderBoxParentData> {
-  CupertinoDialogRenderBox({
+class _CupertinoDialogRenderBox extends RenderBox
+    with ContainerRenderObjectMixin<RenderBox, _CupertinoDialogRenderBoxParentData>,
+    RenderBoxContainerDefaultsMixin<RenderBox, _CupertinoDialogRenderBoxParentData> {
+  _CupertinoDialogRenderBox({
     List<RenderBox> children,
-  }) {
+    bool buttonsAreStacked = false,
+  }) : _buttonsAreStacked = buttonsAreStacked {
     addAll(children);
   }
 
+  final bool _buttonsAreStacked;
+
   @override
   void setupParentData(RenderBox child) {
-    if (child.parentData is! CupertinoDialogRenderBoxParentData)
-      child.parentData = new CupertinoDialogRenderBoxParentData();
+    if (child.parentData is! _CupertinoDialogRenderBoxParentData)
+      child.parentData = new _CupertinoDialogRenderBoxParentData();
   }
 
   @override
   double computeMinIntrinsicWidth(double height) {
-    RenderBox _content;
-    RenderBox _actions;
-    getChildrenAsList().forEach((RenderBox child) {
-      MultiChildLayoutParentData parentData = child.parentData;
-      if (parentData.id == _AlertDialogSection.content) {
-        _content = child;
-      } else if (parentData.id == _AlertDialogSection.actions) {
-        _actions = child;
-      }
-    });
-    assert(_content != null);
-    assert(_actions != null);
-
-    final double contentWidth = _content.getMaxIntrinsicWidth(height);
-    final double actionsWidth = _actions.getMaxIntrinsicWidth(height);
-    final double width = max(contentWidth, actionsWidth);
-
-    if (width.isFinite)
-      return width;
-    return 0.0;
+    return _kCupertinoDialogWidth;
   }
 
   @override
   double computeMaxIntrinsicWidth(double height) {
-    RenderBox _content;
-    RenderBox _actions;
-    getChildrenAsList().forEach((RenderBox child) {
-      CupertinoDialogRenderBoxParentData parentData = child.parentData;
-      if (parentData.id == _AlertDialogSection.content) {
-        _content = child;
-      } else if (parentData.id == _AlertDialogSection.actions) {
-        _actions = child;
-      }
-    });
-    assert(_content != null);
-    assert(_actions != null);
-
-
-    final double contentWidth = _content.getMaxIntrinsicWidth(height);
-    final double actionsWidth = _actions.getMaxIntrinsicWidth(height);
-    final double width = min(contentWidth, actionsWidth);
-
-    if (width.isFinite)
-      return width;
-    return 0.0;
+    return _kCupertinoDialogWidth;
   }
 
   @override
   double computeMinIntrinsicHeight(double width) {
-    RenderBox _content;
-    RenderBox _actions;
-    getChildrenAsList().forEach((RenderBox child) {
-      CupertinoDialogRenderBoxParentData parentData = child.parentData;
-      if (parentData.id == _AlertDialogSection.content) {
-        _content = child;
-      } else if (parentData.id == _AlertDialogSection.actions) {
-        _actions = child;
-      }
-    });
-    assert(_content != null);
-    assert(_actions != null);
-
-    final double contentHeight = _content.getMaxIntrinsicHeight(width);
-    final double actionsHeight = _actions.getMaxIntrinsicHeight(width);
-    final double height = max(contentHeight, actionsHeight);
-
-    if (height.isFinite)
-      return height;
-    return 0.0;
+    return _computeIntrinsicHeight(width);
   }
 
   @override
   double computeMaxIntrinsicHeight(double width) {
-    RenderBox _content;
-    RenderBox _actions;
-    getChildrenAsList().forEach((RenderBox child) {
-      CupertinoDialogRenderBoxParentData parentData = child.parentData;
-      if (parentData.id == _AlertDialogSection.content) {
-        _content = child;
-      } else if (parentData.id == _AlertDialogSection.actions) {
-        _actions = child;
-      }
-    });
-    assert(_content != null);
-    assert(_actions != null);
+    return _computeIntrinsicHeight(width);
+  }
 
-    final double contentHeight = _content.getMaxIntrinsicHeight(width);
-    final double actionsHeight = _actions.getMaxIntrinsicHeight(width);
-    final double height = min(contentHeight, actionsHeight);
+  double _computeIntrinsicHeight(double width) {
+    // Obtain references to the specific children we need lay out.
+    final _DialogChildren dialogChildren = _findDialogChildren();
+    final RenderBox content = dialogChildren.content;
+    final RenderBox actions = dialogChildren.actions;
+
+    final double contentHeight = content.getMaxIntrinsicHeight(width);
+    final double actionsHeight = actions.getMaxIntrinsicHeight(width);
+    final double height = contentHeight + actionsHeight;
 
     if (height.isFinite)
       return height;
@@ -375,75 +328,92 @@ class CupertinoDialogRenderBox extends RenderBox
 
   @override
   void performLayout() {
-    RenderBox _content;
-    RenderBox _actions;
-    getChildrenAsList().forEach((RenderBox child) {
-      CupertinoDialogRenderBoxParentData parentData = child.parentData;
-      if (parentData.id == _AlertDialogSection.content) {
-        _content = child;
-      } else if (parentData.id == _AlertDialogSection.actions) {
-        _actions = child;
-      }
-    });
-    assert(_content != null);
-    assert(_actions != null);
+    // Obtain references to the specific children we need lay out.
+    final _DialogChildren dialogChildren = _findDialogChildren();
+    final RenderBox content = dialogChildren.content;
+    final RenderBox actions = dialogChildren.actions;
 
-    // TODO(mattcarroll): parameterize actions count.
-    final actionsCount = 3;
-
+    // The minimum height of the action area depends on whether or not we're
+    // stacking buttons vertically.
     double minActionSpace = 0.0;
-    if (actionsCount > 0 && actionsCount <= 2) {
-      minActionSpace = _kButtonHeight;
-    } else {
+    if (_buttonsAreStacked) {
       minActionSpace = 1.5 * _kButtonHeight;
+    } else {
+      minActionSpace = _kButtonHeight;
     }
 
-    final size = constraints.constrain(const Size(double.infinity, double.infinity));
+    final Size maxDialogSize = constraints.biggest;
 
     // Size alert dialog content.
-    final Size maxContentSize = new Size(size.width, size.height - minActionSpace);
-    _content.layout(
-      new BoxConstraints.loose(maxContentSize),
+    content.layout(
+      constraints.deflate(new EdgeInsets.only(bottom: minActionSpace)),
       parentUsesSize: true,
     );
-    final Size contentSize = _content.size;
+    final Size contentSize = content.size;
 
     // Size alert dialog actions.
-    final Size maxActionSize = new Size(
-      size.width,
-      size.height - contentSize.height,
-    );
-    _actions.layout(
-      new BoxConstraints.loose(maxActionSize),
+    actions.layout(
+      constraints.deflate(new EdgeInsets.only(top: contentSize.height)),
       parentUsesSize: true,
     );
-    final Size actionsSize = _actions.size;
+    final Size actionsSize = actions.size;
 
     // Calculate overall dialog height.
     final double dialogHeight = contentSize.height + actionsSize.height;
 
-    this.size = new Size(size.width, dialogHeight);
+    // Set our size now that layout calculations are complete.
+    size = new Size(maxDialogSize.width, dialogHeight);
 
-    // Layout the blur, content, and the actions.
-    _content.layout(
-      new BoxConstraints.tight(contentSize),
-    );
-    _actions.layout(
-      new BoxConstraints.tight(actionsSize),
-    );
-    (_actions.parentData as CupertinoDialogRenderBoxParentData).offset = new Offset(0.0, contentSize.height);
+    // Set the position of the actions box to sit at the bottom of the dialog.
+    // The content box defaults to the top left, which is where we want it.
+    assert(actions.parentData is _CupertinoDialogRenderBoxParentData);
+    final _CupertinoDialogRenderBoxParentData actionParentData = actions.parentData;
+    actionParentData.offset = new Offset(0.0, contentSize.height);
   }
 
+  _DialogChildren _findDialogChildren() {
+    RenderBox content;
+    RenderBox actions;
+    final List<RenderBox> children = getChildrenAsList();
+    for (RenderBox child in children) {
+      final _CupertinoDialogRenderBoxParentData parentData = child.parentData;
+      if (parentData.id == _AlertDialogSection.content) {
+        content = child;
+      } else if (parentData.id == _AlertDialogSection.actions) {
+        actions = child;
+      }
+    }
+    assert(content != null);
+    assert(actions != null);
+
+    return new _DialogChildren(
+      content: content,
+      actions: actions,
+    );
+  }
+
+  @override
   void paint(PaintingContext context, Offset offset) {
     defaultPaint(context, offset);
   }
 
+  @override
   bool hitTestChildren(HitTestResult result, { Offset position }) {
     return defaultHitTestChildren(result, position: position);
   }
 }
 
-class CupertinoDialogRenderBoxParentData extends ContainerBoxParentData<RenderBox> {
+class _DialogChildren {
+  final RenderBox content;
+  final RenderBox actions;
+
+  _DialogChildren({
+    this.content,
+    this.actions,
+  });
+}
+
+class _CupertinoDialogRenderBoxParentData extends ContainerBoxParentData<RenderBox> {
   /// An object representing the identity of this child.
   Object id;
 
@@ -451,8 +421,8 @@ class CupertinoDialogRenderBoxParentData extends ContainerBoxParentData<RenderBo
   String toString() => '${super.toString()}; id=$id';
 }
 
-class CupertinoLayoutId extends ParentDataWidget<CupertinoDialogRenderWidget> {
-  CupertinoLayoutId({
+class _CupertinoLayoutId extends ParentDataWidget<_CupertinoDialogRenderWidget> {
+  _CupertinoLayoutId({
     Key key,
     @required this.id,
     @required Widget child
@@ -464,8 +434,8 @@ class CupertinoLayoutId extends ParentDataWidget<CupertinoDialogRenderWidget> {
 
   @override
   void applyParentData(RenderObject renderObject) {
-    assert(renderObject.parentData is CupertinoDialogRenderBoxParentData);
-    final CupertinoDialogRenderBoxParentData parentData = renderObject.parentData;
+    assert(renderObject.parentData is _CupertinoDialogRenderBoxParentData);
+    final _CupertinoDialogRenderBoxParentData parentData = renderObject.parentData;
     if (parentData.id != id) {
       parentData.id = id;
       final AbstractNode targetParent = renderObject.parent;
