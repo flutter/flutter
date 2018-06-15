@@ -78,13 +78,13 @@ double getBorderWeight(WidgetTester tester) => getBorderSide(tester)?.width;
 Color getBorderColor(WidgetTester tester) => getBorderSide(tester)?.color;
 
 double getHintOpacity(WidgetTester tester) {
-  final Opacity opacityWidget = tester.widget<Opacity>(
+  final FadeTransition opacityWidget = tester.widget<FadeTransition>(
     find.ancestor(
       of: find.text('hint'),
-      matching: find.byType(Opacity),
+      matching: find.byType(FadeTransition),
     ).last
   );
-  return opacityWidget.opacity;
+  return opacityWidget.opacity.value;
 }
 
 void main() {
