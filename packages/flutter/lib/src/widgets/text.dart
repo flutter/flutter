@@ -368,6 +368,8 @@ class Text extends StatelessWidget {
     properties.add(new EnumProperty<TextOverflow>('overflow', overflow, defaultValue: null));
     properties.add(new DoubleProperty('textScaleFactor', textScaleFactor, defaultValue: null));
     properties.add(new IntProperty('maxLines', maxLines, defaultValue: null));
-    properties.add(new StringProperty('semanticsLabel', semanticsLabel));
+    if (semanticsLabel != null) {
+      properties.add(new StringProperty('semanticsLabel', semanticsLabel));
+    }
   }
 }
