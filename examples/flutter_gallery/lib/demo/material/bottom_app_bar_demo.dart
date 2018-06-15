@@ -187,18 +187,18 @@ class _BottomAppBarDemoState extends State<BottomAppBarDemo> {
       bottomNavigationBar: new _DemoBottomAppBar(
         color: _babColor,
         fabLocation: _fabLocation.value,
-        notch: _selectNotch(),
+        shape: _selectNotch(),
       ),
     );
   }
 
-  Notch _selectNotch() {
+  NotchedShape _selectNotch() {
     if (!_showNotch.value)
       return null;
     if (_fabShape == kCircularFab)
-      return const CircularNotch();
+      return const CircularNotchedRectangle();
     if (_fabShape == kDiamondFab)
-      return const _DiamondNotch();
+      return const _DiamondNotchedRectangle();
     return null;
   }
 }
@@ -330,12 +330,12 @@ class _DemoBottomAppBar extends StatelessWidget {
   const _DemoBottomAppBar({
     this.color,
     this.fabLocation,
-    this.notch
+    this.shape
   });
 
   final Color color;
   final FloatingActionButtonLocation fabLocation;
-  final Notch notch;
+  final NotchedShape shape;
 
   static final List<FloatingActionButtonLocation> kCenterLocations = <FloatingActionButtonLocation>[
     FloatingActionButtonLocation.centerDocked,
@@ -384,7 +384,7 @@ class _DemoBottomAppBar extends StatelessWidget {
     return new BottomAppBar(
       color: color,
       child: new Row(children: rowContents),
-      notch: notch,
+      shape: shape,
     );
   }
 }
@@ -443,17 +443,15 @@ class _DiamondFab extends StatelessWidget {
   }
 }
 
-class _DiamondNotch implements Notch {
-  const _DiamondNotch();
+class _DiamondNotchedRectangle implements NotchedShape {
+  const _DiamondNotchedRectangle();
 
   @override
-  Path getPath(Rect host, Rect guest, Offset start, Offset end) {
-    const double notchMargin = 6.0;
-    final Rect marginedGuest = guest.inflate(notchMargin);
-    if (!host.overlaps(marginedGuest))
-      return new Path()..lineTo(end.dx, end.dy);
+  Path getOuterPath(Rect host, Rect guest) {
+    if (!host.overlaps(guest))
+      return new Path()..addRect(host);
 
-    final Rect intersection = marginedGuest.intersect(host);
+    final Rect intersection = guest.intersect(host);
     // We are computing a "V" shaped notch, as in this diagram:
     //    -----\****   /-----
     //          \     /
@@ -467,14 +465,18 @@ class _DiamondNotch implements Notch {
     //  the host's top edge where the notch starts (marked with "*").
     //  We compute notchToCenter by similar triangles:
     final double notchToCenter =
-      intersection.height * (marginedGuest.height / 2.0)
-      / (marginedGuest.width / 2.0);
+      intersection.height * (guest.height / 2.0)
+      / (guest.width / 2.0);
 
     return new Path()
-      ..lineTo(marginedGuest.center.dx - notchToCenter, host.top)
-      ..lineTo(marginedGuest.left + marginedGuest.width / 2.0, marginedGuest.bottom)
-      ..lineTo(marginedGuest.center.dx + notchToCenter, host.top)
-      ..lineTo(end.dx, end.dy);
+      ..moveTo(host.left, host.top)
+      ..lineTo(guest.center.dx - notchToCenter, host.top)
+      ..lineTo(guest.left + guest.width / 2.0, guest.bottom)
+      ..lineTo(guest.center.dx + notchToCenter, host.top)
+      ..lineTo(host.right, host.top)
+      ..lineTo(host.right, host.bottom)
+      ..lineTo(host.left, host.bottom)
+      ..close();
   }
 }
 
