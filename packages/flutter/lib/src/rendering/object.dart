@@ -42,7 +42,7 @@ class ParentData {
 /// of the [PaintingContext.canvas] to the coordinate system of the callee.
 ///
 /// Used by many of the methods of [PaintingContext].
-typedef PaintingContextCallback = void Function(PaintingContext context, Offset offset);
+typedef void PaintingContextCallback(PaintingContext context, Offset offset);
 
 /// A place to paint.
 ///
@@ -531,12 +531,12 @@ abstract class Constraints {
 /// Signature for a function that is called for each [RenderObject].
 ///
 /// Used by [RenderObject.visitChildren] and [RenderObject.visitChildrenForSemantics].
-typedef RenderObjectVisitor = void Function(RenderObject child);
+typedef void RenderObjectVisitor(RenderObject child);
 
 /// Signature for a function that is called during layout.
 ///
 /// Used by [RenderObject.invokeLayoutCallback].
-typedef LayoutCallback<T extends Constraints> = void Function(T constraints);
+typedef void LayoutCallback<T extends Constraints>(T constraints);
 
 /// A reference to the semantics tree.
 ///
@@ -1871,6 +1871,12 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   /// Once [markNeedsPaint] has been called on a render object,
   /// [debugNeedsPaint] returns true for that render object until just after
   /// the pipeline owner has called [paint] on the render object.
+  ///
+  /// See also:
+  ///
+  ///  * [RepaintBoundary], to scope a subtree of render objects to their own
+  ///    layer, thus limiting the number of nodes that [markNeedsPaint] must mark
+  ///    dirty.
   void markNeedsPaint() {
     assert(owner == null || !owner.debugDoingPaint);
     if (_needsPaint)

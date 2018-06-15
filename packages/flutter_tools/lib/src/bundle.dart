@@ -6,6 +6,7 @@ import 'dart:async';
 
 import 'artifacts.dart';
 import 'asset.dart';
+import 'base/build.dart';
 import 'base/common.dart';
 import 'base/file_system.dart';
 import 'build_info.dart';
@@ -23,6 +24,7 @@ String get defaultApplicationKernelPath => fs.path.join(getBuildDirectory(), 'ap
 const String defaultPrivateKeyPath = 'privatekey.der';
 
 const String _kKernelKey = 'kernel_blob.bin';
+const String _kSnapshotKey = 'snapshot_blob.bin';
 const String _kVMSnapshotData = 'vm_snapshot_data';
 const String _kIsolateSnapshotData = 'isolate_snapshot_data';
 const String _kDylibKey = 'libapp.so';
@@ -31,11 +33,13 @@ const String _kPlatformKernelKey = 'platform.dill';
 Future<void> build({
   String mainPath = defaultMainPath,
   String manifestPath = defaultManifestPath,
+  String snapshotPath,
   String applicationKernelFilePath,
   String depfilePath,
   String privateKeyPath = defaultPrivateKeyPath,
   String assetDirPath,
   String packagesPath,
+  bool previewDart2  = false,
   bool precompiledSnapshot = false,
   bool reportLicensedPackages = false,
   bool trackWidgetCreation = false,
@@ -43,13 +47,32 @@ Future<void> build({
   List<String> fileSystemRoots,
   String fileSystemScheme,
 }) async {
+  snapshotPath ??= defaultSnapshotPath;
   depfilePath ??= defaultDepfilePath;
   assetDirPath ??= getAssetBuildDirectory();
   packagesPath ??= fs.path.absolute(PackageMap.globalPackagesPath);
   applicationKernelFilePath ??= defaultApplicationKernelPath;
+  File snapshotFile;
+
+  if (!precompiledSnapshot && !previewDart2) {
+    ensureDirectoryExists(snapshotPath);
+
+    // In a precompiled snapshot, the instruction buffer contains script
+    // content equivalents
+    final int result = await new ScriptSnapshotter().build(
+      mainPath: mainPath,
+      snapshotPath: snapshotPath,
+      depfilePath: depfilePath,
+      packagesPath: packagesPath,
+    );
+    if (result != 0)
+      throwToolExit('Failed to run the Flutter compiler. Exit code: $result', exitCode: result);
+
+    snapshotFile = fs.file(snapshotPath);
+  }
 
   DevFSContent kernelContent;
-  if (!precompiledSnapshot) {
+  if (!precompiledSnapshot && previewDart2) {
     if ((extraFrontEndOptions != null) && extraFrontEndOptions.isNotEmpty)
       printTrace('Extra front-end options: $extraFrontEndOptions');
     ensureDirectoryExists(applicationKernelFilePath);
@@ -86,6 +109,7 @@ Future<void> build({
   await assemble(
     assetBundle: assets,
     kernelContent: kernelContent,
+    snapshotFile: snapshotFile,
     privateKeyPath: privateKeyPath,
     assetDirPath: assetDirPath,
   );
@@ -119,6 +143,7 @@ Future<AssetBundle> buildAssets({
 Future<void> assemble({
   AssetBundle assetBundle,
   DevFSContent kernelContent,
+  File snapshotFile,
   File dylibFile,
   String privateKeyPath = defaultPrivateKeyPath,
   String assetDirPath,
@@ -127,13 +152,18 @@ Future<void> assemble({
   printTrace('Building bundle');
 
   final Map<String, DevFSContent> assetEntries = new Map<String, DevFSContent>.from(assetBundle.entries);
+  final String vmSnapshotData = artifacts.getArtifactPath(Artifact.vmSnapshotData);
+  final String isolateSnapshotData = artifacts.getArtifactPath(Artifact.isolateSnapshotData);
 
   if (kernelContent != null) {
     final String platformKernelDill = artifacts.getArtifactPath(Artifact.platformKernelDill);
-    final String vmSnapshotData = artifacts.getArtifactPath(Artifact.vmSnapshotData);
-    final String isolateSnapshotData = artifacts.getArtifactPath(Artifact.isolateSnapshotData);
     assetEntries[_kKernelKey] = kernelContent;
     assetEntries[_kPlatformKernelKey] = new DevFSFileContent(fs.file(platformKernelDill));
+    assetEntries[_kVMSnapshotData] = new DevFSFileContent(fs.file(vmSnapshotData));
+    assetEntries[_kIsolateSnapshotData] = new DevFSFileContent(fs.file(isolateSnapshotData));
+  }
+  if (snapshotFile != null) {
+    assetEntries[_kSnapshotKey] = new DevFSFileContent(snapshotFile);
     assetEntries[_kVMSnapshotData] = new DevFSFileContent(fs.file(vmSnapshotData));
     assetEntries[_kIsolateSnapshotData] = new DevFSFileContent(fs.file(isolateSnapshotData));
   }

@@ -22,13 +22,13 @@ enum _DragState {
 /// the screen is available in the `details`.
 ///
 /// See [DragGestureRecognizer.onEnd].
-typedef GestureDragEndCallback = void Function(DragEndDetails details);
+typedef void GestureDragEndCallback(DragEndDetails details);
 
 /// Signature for when the pointer that previously triggered a
 /// [GestureDragDownCallback] did not complete.
 ///
 /// See [DragGestureRecognizer.onCancel].
-typedef GestureDragCancelCallback = void Function();
+typedef void GestureDragCancelCallback();
 
 /// Recognizes movement.
 ///

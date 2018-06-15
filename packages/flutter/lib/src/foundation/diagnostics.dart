@@ -743,7 +743,7 @@ abstract class DiagnosticsNode {
 
   String get _separator => showSeparator ? ':' : '';
 
-  /// Serialize the node excluding its descendents to a JSON map.
+  /// Serialize the node excluding its descendants to a JSON map.
   ///
   /// Subclasses should override if they have additional properties that are
   /// useful for the GUI tools that consume this JSON.
@@ -1661,7 +1661,7 @@ class ObjectFlagProperty<T> extends DiagnosticsProperty<T> {
 /// May throw exception if accessing the property would throw an exception
 /// and callers must handle that case gracefully. For example, accessing a
 /// property may trigger an assert that layout constraints were violated.
-typedef ComputePropertyValueCallback<T> = T Function();
+typedef T ComputePropertyValueCallback<T>();
 
 /// Property with a [value] of type [T].
 ///

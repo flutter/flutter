@@ -327,16 +327,21 @@ Future<Null> _buildGradleProjectV2(String gradle, BuildInfo buildInfo, String ta
   if (target != null) {
     command.add('-Ptarget=$target');
   }
-  if (buildInfo.trackWidgetCreation)
-    command.add('-Ptrack-widget-creation=true');
-  if (buildInfo.extraFrontEndOptions != null)
-    command.add('-Pextra-front-end-options=${buildInfo.extraFrontEndOptions}');
-  if (buildInfo.extraGenSnapshotOptions != null)
-    command.add('-Pextra-gen-snapshot-options=${buildInfo.extraGenSnapshotOptions}');
-  if (buildInfo.fileSystemRoots != null && buildInfo.fileSystemRoots.isNotEmpty)
-    command.add('-Pfilesystem-roots=${buildInfo.fileSystemRoots.join('|')}');
-  if (buildInfo.fileSystemScheme != null)
-    command.add('-Pfilesystem-scheme=${buildInfo.fileSystemScheme}');
+  if (buildInfo.previewDart2) {
+    command.add('-Ppreview-dart-2=true');
+    if (buildInfo.trackWidgetCreation)
+      command.add('-Ptrack-widget-creation=true');
+    if (buildInfo.extraFrontEndOptions != null)
+      command.add('-Pextra-front-end-options=${buildInfo.extraFrontEndOptions}');
+    if (buildInfo.extraGenSnapshotOptions != null)
+      command.add('-Pextra-gen-snapshot-options=${buildInfo.extraGenSnapshotOptions}');
+    if (buildInfo.fileSystemRoots != null && buildInfo.fileSystemRoots.isNotEmpty)
+      command.add('-Pfilesystem-roots=${buildInfo.fileSystemRoots.join('|')}');
+    if (buildInfo.fileSystemScheme != null)
+      command.add('-Pfilesystem-scheme=${buildInfo.fileSystemScheme}');
+  } else {
+    command.add('-Ppreview-dart-2=false');
+  }
   if (buildInfo.buildSharedLibrary && androidSdk.ndk != null) {
     command.add('-Pbuild-shared-library=true');
   }

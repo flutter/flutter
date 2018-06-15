@@ -3,7 +3,9 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:typed_data';
 import 'dart:ui' as ui show Image;
+import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
@@ -53,4 +55,20 @@ Future<ImageInfo> extractOneFrame(ImageStream stream) {
   }
   stream.addListener(listener);
   return completer.future;
+}
+
+class TestImage implements ui.Image {
+  const TestImage({this.height = 0, this.width = 0});
+  @override
+  final int height;
+  @override
+  final int width;
+
+  @override
+  void dispose() {}
+
+  @override
+  Future<ByteData> toByteData({ImageByteFormat format = ImageByteFormat.rawRgba}) {
+    throw new UnimplementedError();
+  }
 }

@@ -58,7 +58,7 @@ enum _TextSelectionHandlePosition { start, end }
 /// of the [RenderBox] given by the [TextSelectionOverlay.renderObject].
 ///
 /// Used by [TextSelectionOverlay.onSelectionOverlayChanged].
-typedef TextSelectionOverlayChanged = void Function(TextEditingValue value, Rect caretRect);
+typedef void TextSelectionOverlayChanged(TextEditingValue value, Rect caretRect);
 
 /// An interface for manipulating the selection, to be used by the implementor
 /// of the toolbar widget.

@@ -32,6 +32,14 @@ void main() async {
         return new TaskResult.failure(errorMessage);
       }
 
+      section('gradlew assembleDebug no-preview-dart-2');
+      await project.runGradleTask('assembleDebug', options: <String>['-Ppreview-dart-2=false']);
+      errorMessage = _validateSnapshotDependency(project,
+          '${project.rootPath}/build/app/intermediates/flutter/debug/snapshot_blob.bin');
+      if (errorMessage != null) {
+        return new TaskResult.failure(errorMessage);
+      }
+
       section('gradlew assembleProfile');
       await project.runGradleTask('assembleProfile');
 

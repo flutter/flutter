@@ -284,10 +284,14 @@ Information about project "Runner":
     testUsingOsxContext('sets ARCHS=armv7 when armv7 local engine is set', () async {
       when(mockArtifacts.getArtifactPath(Artifact.flutterFramework, TargetPlatform.ios, typed(any))).thenReturn('engine');
       when(mockArtifacts.engineOutPath).thenReturn(fs.path.join('out', 'ios_profile_arm'));
-      const BuildInfo buildInfo = const BuildInfo(BuildMode.debug, null, targetPlatform: TargetPlatform.ios);
+      const BuildInfo buildInfo = const BuildInfo(BuildMode.debug, null,
+        previewDart2: true,
+        targetPlatform: TargetPlatform.ios,
+      );
       await updateGeneratedXcodeProperties(
         projectPath: 'path/to/project',
         buildInfo: buildInfo,
+        previewDart2: true,
       );
 
       final File config = fs.file('path/to/project/ios/Flutter/Generated.xcconfig');
@@ -301,12 +305,14 @@ Information about project "Runner":
       when(mockArtifacts.getArtifactPath(Artifact.flutterFramework, TargetPlatform.ios, typed(any))).thenReturn('engine');
       when(mockArtifacts.engineOutPath).thenReturn(fs.path.join('out', 'ios_profile_arm'));
       const BuildInfo buildInfo = const BuildInfo(BuildMode.debug, null,
+        previewDart2: true,
         trackWidgetCreation: true,
         targetPlatform: TargetPlatform.ios,
       );
       await updateGeneratedXcodeProperties(
         projectPath: 'path/to/project',
         buildInfo: buildInfo,
+        previewDart2: true,
       );
 
       final File config = fs.file('path/to/project/ios/Flutter/Generated.xcconfig');
@@ -319,10 +325,14 @@ Information about project "Runner":
     testUsingOsxContext('does not set TRACK_WIDGET_CREATION when trackWidgetCreation is false', () async {
       when(mockArtifacts.getArtifactPath(Artifact.flutterFramework, TargetPlatform.ios, typed(any))).thenReturn('engine');
       when(mockArtifacts.engineOutPath).thenReturn(fs.path.join('out', 'ios_profile_arm'));
-      const BuildInfo buildInfo = const BuildInfo(BuildMode.debug, null, targetPlatform: TargetPlatform.ios);
+      const BuildInfo buildInfo = const BuildInfo(BuildMode.debug, null,
+        previewDart2: true,
+        targetPlatform: TargetPlatform.ios,
+      );
       await updateGeneratedXcodeProperties(
         projectPath: 'path/to/project',
         buildInfo: buildInfo,
+        previewDart2: true,
       );
 
       final File config = fs.file('path/to/project/ios/Flutter/Generated.xcconfig');
@@ -335,10 +345,14 @@ Information about project "Runner":
     testUsingOsxContext('sets ARCHS=armv7 when armv7 local engine is set', () async {
       when(mockArtifacts.getArtifactPath(Artifact.flutterFramework, TargetPlatform.ios, typed(any))).thenReturn('engine');
       when(mockArtifacts.engineOutPath).thenReturn(fs.path.join('out', 'ios_profile'));
-      const BuildInfo buildInfo = const BuildInfo(BuildMode.debug, null, targetPlatform: TargetPlatform.ios);
+      const BuildInfo buildInfo = const BuildInfo(BuildMode.debug, null,
+        previewDart2: true,
+        targetPlatform: TargetPlatform.ios,
+      );
       await updateGeneratedXcodeProperties(
         projectPath: 'path/to/project',
         buildInfo: buildInfo,
+        previewDart2: true,
       );
 
       final File config = fs.file('path/to/project/ios/Flutter/Generated.xcconfig');
@@ -391,6 +405,7 @@ Information about project "Runner":
         projectPath: projectPath,
         buildInfo: buildInfo,
         targetOverride: bundle.defaultMainPath,
+        previewDart2: false,
       );
 
       final String propertiesPath = fs.path.join(projectPath, 'ios', 'Flutter', 'Generated.xcconfig');

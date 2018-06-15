@@ -147,7 +147,7 @@ void main() {
   });
 }
 
-typedef StartCallback = void Function(List<dynamic> command);
+typedef void StartCallback(List<dynamic> command);
 
 class MockProcessManager implements ProcessManager {
   MockProcessManager(this.fakeExitCode);
