@@ -23,7 +23,7 @@ vars = {
   'fuchsia_git': 'https://fuchsia.googlesource.com',
   'github_git': 'https://github.com',
   'skia_git': 'https://skia.googlesource.com',
-  'skia_revision': '76c37997541f0b138620b7a0ec55b9b409357e3e',
+  'skia_revision': 'cdae28ee591a3d1380f18fe605b973c7380f67e4',
 
   # When updating the Dart revision, ensure that all entries that are
   # dependencies of Dart are also updated to match the entries in the
