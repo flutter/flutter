@@ -1741,9 +1741,11 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
       // 4.0: the vertical gap between the inline elements and the floating label.
       floatingLabelHeight = 4.0 + 0.75 * inlineLabelStyle.fontSize;
       if (decoration.filled == true) { // filled == null same as filled == false
+        final double leftInset = decoration.prefixIcon == null ? 12.0 : 0.0;
+        final double rightInset = decoration.suffixIcon == null ? 12.0 : 0.0;
         contentPadding = decorationContentPadding ?? (decorationIsDense
-          ? const EdgeInsets.fromLTRB(12.0, 8.0, 12.0, 8.0)
-          : const EdgeInsets.fromLTRB(12.0, 12.0, 12.0, 12.0));
+          ? new EdgeInsets.fromLTRB(leftInset, 8.0, rightInset, 8.0)
+          : new EdgeInsets.fromLTRB(leftInset, 12.0, rightInset, 12.0));
       } else {
         // Not left or right padding for underline borders that aren't filled
         // is a small concession to backwards compatibility. This eliminates
