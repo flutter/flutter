@@ -855,7 +855,7 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
       // of the fake-zone below, the new future will be completed and can then
       // be used without fakeAsync.
       final Future<Null> resultFuture = testBodyResult.then<Null>((_) {
-        /* Do nothing. */
+        // Do nothing.
       });
 
       // Resolve interplay between fake async and real async calls.
