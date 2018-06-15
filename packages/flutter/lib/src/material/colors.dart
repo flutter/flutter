@@ -15,6 +15,7 @@ import 'package:flutter/painting.dart';
 /// See also:
 ///
 ///  * [Colors], which defines all of the standard material colors.
+///  * [PaletteGenerator] for selecting dominant, distinct colors from images.
 class MaterialColor extends ColorSwatch<int> {
   /// Creates a color swatch with a variety of shades.
   ///
@@ -66,6 +67,7 @@ class MaterialColor extends ColorSwatch<int> {
 /// See also:
 ///
 ///  * [Colors], which defines all of the standard material colors.
+///  * [PaletteGenerator] for selecting dominant, distinct colors from images.
 ///  * <https://material.io/go/design-theming#color-color-schemes>
 class MaterialAccentColor extends ColorSwatch<int> {
   /// Creates a color swatch with a variety of shades appropriate for accent
@@ -188,6 +190,11 @@ class MaterialAccentColor extends ColorSwatch<int> {
 ///
 /// The [Colors.transparent] color isn't shown here because it is entirely
 /// invisible!
+///
+/// See also:
+///
+///   * [PaletteGenerator], a class that selects distinct, dominant colors from
+///     images.
 class Colors {
   Colors._();
 
