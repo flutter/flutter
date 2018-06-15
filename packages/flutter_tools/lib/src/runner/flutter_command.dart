@@ -203,8 +203,8 @@ abstract class FlutterCommand extends Command<Null> {
     int buildNumber;
     try {
       buildNumber = argParser.options.containsKey('build-number') && argResults['build-number'] != null
-        ? int.parse(argResults['build-number'])
-        : null;
+          ? int.parse(argResults['build-number'])
+          : null;
     } catch (e) {
       throw new UsageException(
           '--build-number (${argResults['build-number']}) must be an int.', null);
@@ -226,8 +226,8 @@ abstract class FlutterCommand extends Command<Null> {
           ? argResults[FlutterOptions.kExtraGenSnapshotOptions]
           : null,
       buildSharedLibrary: argParser.options.containsKey('build-shared-library')
-          ? argResults['build-shared-library']
-          : false,
+        ? argResults['build-shared-library']
+        : false,
       targetPlatform: targetPlatform,
       fileSystemRoots: argParser.options.containsKey(FlutterOptions.kFileSystemRoot)
           ? argResults[FlutterOptions.kFileSystemRoot] : null,
