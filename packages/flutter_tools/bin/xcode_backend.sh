@@ -166,8 +166,10 @@ BuildApp() {
   RunCommand "${FLUTTER_ROOT}/bin/flutter" --suppress-analytics             \
     ${verbose_flag}                                                         \
     build bundle                                                            \
+    --target-platform=ios                                                   \
     --target="${target_path}"                                               \
     --snapshot="${build_dir}/snapshot_blob.bin"                             \
+    --${build_mode}                                                         \
     --depfile="${build_dir}/snapshot_blob.bin.d"                            \
     --asset-dir="${derived_dir}/flutter_assets"                             \
     ${precompilation_flag}                                                  \

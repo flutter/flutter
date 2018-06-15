@@ -203,8 +203,8 @@ abstract class FlutterCommand extends Command<Null> {
     int buildNumber;
     try {
       buildNumber = argParser.options.containsKey('build-number') && argResults['build-number'] != null
-          ? int.parse(argResults['build-number'])
-          : null;
+        ? int.parse(argResults['build-number'])
+        : null;
     } catch (e) {
       throw new UsageException(
           '--build-number (${argResults['build-number']}) must be an int.', null);

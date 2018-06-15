@@ -470,7 +470,6 @@ class CoreJITSnapshotter {
 
     if (platform == TargetPlatform.android_arm) {
       // Use softfp for Android armv7 devices.
-      // Note that this is the default for armv7 iOS builds, but harmless to set.
       // TODO(cbracken) eliminate this when we fix https://github.com/flutter/flutter/issues/17489
       genSnapshotArgs.add('--no-sim-use-hardfp');
 
