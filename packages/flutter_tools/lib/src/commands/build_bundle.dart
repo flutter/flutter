@@ -37,7 +37,7 @@ class BuildBundleCommand extends BuildSubCommand {
         hide: !verboseHelp,
         help: 'Track widget creation locations. Requires Dart 2.0 functionality.',
       )
-      ..addFlag('snapshot',
+      ..addFlag('build-snapshot',
         hide: !verboseHelp,
         defaultsTo: false,
         help: 'Build and use application-specific VM snapshot instead of\n'
@@ -106,7 +106,7 @@ class BuildBundleCommand extends BuildSubCommand {
       precompiledSnapshot: argResults['precompiled'],
       reportLicensedPackages: argResults['report-licensed-packages'],
       trackWidgetCreation: argResults['track-widget-creation'],
-      useApplicationSnapshot: argResults['snapshot'],
+      buildSnapshot: argResults['build-snapshot'],
       extraFrontEndOptions: argResults[FlutterOptions.kExtraFrontEndOptions],
       extraGenSnapshotOptions: argResults[FlutterOptions.kExtraGenSnapshotOptions],
       fileSystemScheme: argResults['filesystem-scheme'],

@@ -276,9 +276,9 @@ class FlutterPlugin implements Plugin<Project> {
         if (project.hasProperty('track-widget-creation')) {
             trackWidgetCreationValue = project.property('track-widget-creation').toBoolean()
         }
-        Boolean useApplicationSnapshotValue = false
-        if (project.hasProperty('snapshot')) {
-            useApplicationSnapshotValue = project.property('snapshot').toBoolean()
+        Boolean buildSnapshotValue = false
+        if (project.hasProperty('build-snapshot')) {
+            buildSnapshotValue = project.property('build-snapshot').toBoolean()
         }
         String extraFrontEndOptionsValue = null
         if (project.hasProperty('extra-front-end-options')) {
@@ -322,7 +322,7 @@ class FlutterPlugin implements Plugin<Project> {
                 fileSystemRoots fileSystemRootsValue
                 fileSystemScheme fileSystemSchemeValue
                 trackWidgetCreation trackWidgetCreationValue
-                useApplicationSnapshot useApplicationSnapshotValue
+                buildSnapshot buildSnapshotValue
                 buildSharedLibrary buildSharedLibraryValue
                 targetPlatform targetPlatformValue
                 sourceDir project.file(project.flutter.source)
@@ -372,7 +372,7 @@ abstract class BaseFlutterTask extends DefaultTask {
     @Optional @Input
     Boolean trackWidgetCreation
     @Optional @Input
-    Boolean useApplicationSnapshot
+    Boolean buildSnapshot
     @Optional @Input
     Boolean buildSharedLibrary
     @Optional @Input
@@ -476,8 +476,8 @@ abstract class BaseFlutterTask extends DefaultTask {
             if (trackWidgetCreation) {
                 args "--track-widget-creation"
             }
-            if (useApplicationSnapshot) {
-                args "--snapshot"
+            if (buildSnapshot) {
+                args "--build-snapshot"
             }
             if (extraFrontEndOptions != null) {
                 args "--extra-front-end-options", "${extraFrontEndOptions}"
@@ -514,7 +514,7 @@ class FlutterTask extends BaseFlutterTask {
 
             include "flutter_assets/**" // the working dir and its files
 
-            if (buildMode != 'debug' || useApplicationSnapshot) {
+            if (buildMode != 'debug' || buildSnapshot) {
                 if (buildSharedLibrary) {
                     include "app.so"
                 } else {

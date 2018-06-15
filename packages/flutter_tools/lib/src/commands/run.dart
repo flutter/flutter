@@ -125,7 +125,7 @@ class RunCommand extends RunCommandBase {
         hide: !verboseHelp,
         help: 'Preview Dart 2.0 functionality.',
       )
-      ..addFlag('snapshot',
+      ..addFlag('build-snapshot',
         hide: !verboseHelp,
         defaultsTo: false,
         help: 'Build and use application-specific VM snapshot instead of\n'

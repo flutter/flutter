@@ -331,8 +331,8 @@ Future<Null> _buildGradleProjectV2(String gradle, BuildInfo buildInfo, String ta
     command.add('-Ppreview-dart-2=true');
     if (buildInfo.trackWidgetCreation)
       command.add('-Ptrack-widget-creation=true');
-    if (buildInfo.useApplicationSnapshot)
-      command.add('-Psnapshot=true');
+    if (buildInfo.buildSnapshot)
+      command.add('-Pbuild-snapshot=true');
     if (buildInfo.extraFrontEndOptions != null)
       command.add('-Pextra-front-end-options=${buildInfo.extraFrontEndOptions}');
     if (buildInfo.extraGenSnapshotOptions != null)
