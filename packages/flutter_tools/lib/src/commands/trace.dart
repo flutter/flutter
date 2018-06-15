@@ -16,18 +16,14 @@ import '../tracing.dart';
 class TraceCommand extends FlutterCommand {
   TraceCommand() {
     requiresPubspecYaml();
-    argParser.addOption('debug-port',
-      help: 'Local port where the observatory is listening. Required.',
-    );
-    argParser.addFlag('start', negatable: false, help: 'Start tracing. Implied if --stop is also omitted.');
-    argParser.addFlag('stop', negatable: false, help: 'Stop tracing. Implied if --start is also omitted.');
-    argParser.addOption('duration',
-      abbr: 'd',
-      help: 'Time to wait after starting (if --start is specified or implied) and before\n'
-            'stopping (if --stop is specified or implied).\n'
-            'Defaults to ten seconds if --stop is specified or implied, zero otherwise.',
-    );
+    argParser.addFlag('start', negatable: false, help: 'Start tracing.');
+    argParser.addFlag('stop', negatable: false, help: 'Stop tracing.');
     argParser.addOption('out', help: 'Specify the path of the saved trace file.');
+    argParser.addOption('duration',
+        defaultsTo: '10', abbr: 'd', help: 'Duration in seconds to trace.');
+    argParser.addOption('debug-port',
+        defaultsTo: kDefaultObservatoryPort.toString(),
+        help: 'Local port where the observatory is listening.');
   }
 
   @override
@@ -38,39 +34,13 @@ class TraceCommand extends FlutterCommand {
 
   @override
   final String usageFooter =
-    '\`trace\` called without the --start or --stop flags will automatically start tracing,\n'
-    'delay a set amount of time (controlled by --duration), and stop tracing. To explicitly\n'
-    'control tracing, call trace with --start and later with --stop.\n'
-    'The --debug-port argument is required.';
+    '\`trace\` called with no arguments will automatically start tracing, delay a set amount of\n'
+    'time (controlled by --duration), and stop tracing. To explicitly control tracing, call trace\n'
+    'with --start and later with --stop.';
 
   @override
   Future<Null> runCommand() async {
-    int observatoryPort;
-    if (argResults.wasParsed('debug-port')) {
-      observatoryPort = int.tryParse(argResults['debug-port']);
-    }
-    if (observatoryPort == null) {
-      throwToolExit('The --debug-port argument must be specified.');
-    }
-
-    bool start = argResults['start'];
-    bool stop = argResults['stop'];
-    if (!start && !stop) {
-      start = true;
-      stop = true;
-    }
-    assert(start || stop);
-
-    Duration duration;
-    if (argResults.wasParsed('duration')) {
-      try {
-        duration = new Duration(seconds: int.parse(argResults['duration']));
-      } on FormatException {
-        throwToolExit('Invalid duration passed to --duration; it should be a positive number of seconds.');
-      }
-    } else {
-      duration = stop ? const Duration(seconds: 10) : Duration.zero;
-    }
+    final int observatoryPort = int.parse(argResults['debug-port']);
 
     // TODO(danrubel): this will break if we move to the new observatory URL
     // See https://github.com/flutter/flutter/issues/7038
@@ -86,11 +56,20 @@ class TraceCommand extends FlutterCommand {
 
     Cache.releaseLockEarly();
 
-    if (start)
+    if ((!argResults['start'] && !argResults['stop']) ||
+        (argResults['start'] && argResults['stop'])) {
+      // Setting neither flags or both flags means do both commands and wait
+      // duration seconds in between.
       await tracing.startTracing();
-    await new Future<Null>.delayed(duration);
-    if (stop)
+      await new Future<Null>.delayed(
+        new Duration(seconds: int.parse(argResults['duration'])),
+        () => _stopTracing(tracing)
+      );
+    } else if (argResults['stop']) {
       await _stopTracing(tracing);
+    } else {
+      await tracing.startTracing();
+    }
   }
 
   Future<Null> _stopTracing(Tracing tracing) async {
