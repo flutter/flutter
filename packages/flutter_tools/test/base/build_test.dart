@@ -381,7 +381,7 @@ void main() {
         fs.path.join(outputPath, 'snapshot.d'): '${fs.path.join(outputPath, 'snapshot_assembly.S')} : ',
       };
 
-      final RunResult successResult = new RunResult(new ProcessResult(1, 0, '', ''), <String>['command name', 'arguments...']);
+      final RunResult successResult = new RunResult(new ProcessResult(1, 0, '', ''));
       when(xcode.cc(any)).thenAnswer((_) => new Future<RunResult>.value(successResult));
       when(xcode.clang(any)).thenAnswer((_) => new Future<RunResult>.value(successResult));
 
@@ -428,7 +428,7 @@ void main() {
         fs.path.join(outputPath, 'snapshot.d'): '${fs.path.join(outputPath, 'snapshot_assembly.S')} : ',
       };
 
-      final RunResult successResult = new RunResult(new ProcessResult(1, 0, '', ''), <String>['command name', 'arguments...']);
+      final RunResult successResult = new RunResult(new ProcessResult(1, 0, '', ''));
       when(xcode.cc(any)).thenAnswer((_) => new Future<RunResult>.value(successResult));
       when(xcode.clang(any)).thenAnswer((_) => new Future<RunResult>.value(successResult));
 
@@ -476,7 +476,7 @@ void main() {
         fs.path.join(outputPath, 'snapshot.d'): '${fs.path.join(outputPath, 'vm_snapshot_data')} : ',
       };
 
-      final RunResult successResult = new RunResult(new ProcessResult(1, 0, '', ''), <String>['command name', 'arguments...']);
+      final RunResult successResult = new RunResult(new ProcessResult(1, 0, '', ''));
       when(xcode.cc(any)).thenAnswer((_) => new Future<RunResult>.value(successResult));
       when(xcode.clang(any)).thenAnswer((_) => new Future<RunResult>.value(successResult));
 
@@ -528,7 +528,7 @@ void main() {
         fs.path.join(outputPath, 'snapshot.d'): '${fs.path.join(outputPath, 'vm_snapshot_data')} : ',
       };
 
-      final RunResult successResult = new RunResult(new ProcessResult(1, 0, '', ''), <String>['command name', 'arguments...']);
+      final RunResult successResult = new RunResult(new ProcessResult(1, 0, '', ''));
       when(xcode.cc(any)).thenAnswer((_) => new Future<RunResult>.value(successResult));
       when(xcode.clang(any)).thenAnswer((_) => new Future<RunResult>.value(successResult));
 
@@ -575,7 +575,7 @@ void main() {
         fs.path.join(outputPath, 'snapshot.d'): '${fs.path.join(outputPath, 'snapshot_assembly.S')} : ',
       };
 
-      final RunResult successResult = new RunResult(new ProcessResult(1, 0, '', ''), <String>['command name', 'arguments...']);
+      final RunResult successResult = new RunResult(new ProcessResult(1, 0, '', ''));
       when(xcode.cc(any)).thenAnswer((_) => new Future<RunResult>.value(successResult));
       when(xcode.clang(any)).thenAnswer((_) => new Future<RunResult>.value(successResult));
 
@@ -622,7 +622,7 @@ void main() {
         fs.path.join(outputPath, 'snapshot.d'): '${fs.path.join(outputPath, 'snapshot_assembly.S')} : ',
       };
 
-      final RunResult successResult = new RunResult(new ProcessResult(1, 0, '', ''), <String>['command name', 'arguments...']);
+      final RunResult successResult = new RunResult(new ProcessResult(1, 0, '', ''));
       when(xcode.cc(any)).thenAnswer((_) => new Future<RunResult>.value(successResult));
       when(xcode.clang(any)).thenAnswer((_) => new Future<RunResult>.value(successResult));
 
@@ -689,7 +689,7 @@ void main() {
         fs.path.join(outputPath, 'snapshot.d'): '${fs.path.join(outputPath, 'vm_snapshot_data')} : ',
       };
 
-      final RunResult successResult = new RunResult(new ProcessResult(1, 0, '', ''), <String>['command name', 'arguments...']);
+      final RunResult successResult = new RunResult(new ProcessResult(1, 0, '', ''));
       when(xcode.cc(any)).thenAnswer((_) => new Future<RunResult>.value(successResult));
       when(xcode.clang(any)).thenAnswer((_) => new Future<RunResult>.value(successResult));
 
@@ -741,7 +741,7 @@ void main() {
         fs.path.join(outputPath, 'snapshot.d'): '${fs.path.join(outputPath, 'vm_snapshot_data')} : ',
       };
 
-      final RunResult successResult = new RunResult(new ProcessResult(1, 0, '', ''), <String>['command name', 'arguments...']);
+      final RunResult successResult = new RunResult(new ProcessResult(1, 0, '', ''));
       when(xcode.cc(any)).thenAnswer((_) => new Future<RunResult>.value(successResult));
       when(xcode.clang(any)).thenAnswer((_) => new Future<RunResult>.value(successResult));
 

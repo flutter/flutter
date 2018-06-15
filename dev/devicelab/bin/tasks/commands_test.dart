@@ -35,14 +35,12 @@ void main() {
         .listen((String line) {
           print('run:stdout: $line');
           stdout.add(line);
-          if (vmServicePort == null) {
+          if (lineContainsServicePort(line)) {
             vmServicePort = parseServicePort(line);
-            if (vmServicePort != null) {
-              print('service protocol connection available at port $vmServicePort');
-              print('run: ready!');
-              ready.complete();
-              ok ??= true;
-            }
+            print('service protocol connection available at port $vmServicePort');
+            print('run: ready!');
+            ready.complete();
+            ok ??= true;
           }
         });
       run.stderr
