@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import '../base/common.dart';
 import '../build_info.dart';
 import '../bundle.dart';
 import '../runner/flutter_command.dart' show FlutterOptions;
@@ -12,6 +13,7 @@ import 'build.dart';
 class BuildBundleCommand extends BuildSubCommand {
   BuildBundleCommand({bool verboseHelp = false}) {
     usesTargetOption();
+    addBuildModeFlags();
     argParser
       ..addFlag('precompiled', negatable: false)
       // This option is still referenced by the iOS build scripts. We should
@@ -27,11 +29,25 @@ class BuildBundleCommand extends BuildSubCommand {
         hide: !verboseHelp,
         help: 'Preview Dart 2.0 functionality.',
       )
+      ..addOption('target-platform',
+        defaultsTo: 'android-arm',
+        allowed: <String>['android-arm', 'android-arm64', 'ios']
+      )
       ..addFlag('track-widget-creation',
         hide: !verboseHelp,
         help: 'Track widget creation locations. Requires Dart 2.0 functionality.',
       )
+      ..addFlag('build-snapshot',
+        hide: !verboseHelp,
+        defaultsTo: false,
+        help: 'Build and use application-specific VM snapshot instead of\n'
+            'prebuilt one provided by the engine.',
+      )
       ..addMultiOption(FlutterOptions.kExtraFrontEndOptions,
+        splitCommas: true,
+        hide: true,
+      )
+      ..addMultiOption(FlutterOptions.kExtraGenSnapshotOptions,
         splitCommas: true,
         hide: true,
       )
@@ -69,7 +85,16 @@ class BuildBundleCommand extends BuildSubCommand {
   Future<Null> runCommand() async {
     await super.runCommand();
 
+    final String targetPlatform = argResults['target-platform'];
+    final TargetPlatform platform = getTargetPlatformForName(targetPlatform);
+    if (platform == null)
+      throwToolExit('Unknown platform: $targetPlatform');
+
+    final BuildMode buildMode = getBuildMode();
+
     await build(
+      platform: platform,
+      buildMode: buildMode,
       mainPath: targetFile,
       manifestPath: argResults['manifest'],
       snapshotPath: argResults['snapshot'],
@@ -81,7 +106,9 @@ class BuildBundleCommand extends BuildSubCommand {
       precompiledSnapshot: argResults['precompiled'],
       reportLicensedPackages: argResults['report-licensed-packages'],
       trackWidgetCreation: argResults['track-widget-creation'],
+      buildSnapshot: argResults['build-snapshot'],
       extraFrontEndOptions: argResults[FlutterOptions.kExtraFrontEndOptions],
+      extraGenSnapshotOptions: argResults[FlutterOptions.kExtraGenSnapshotOptions],
       fileSystemScheme: argResults['filesystem-scheme'],
       fileSystemRoots: argResults['filesystem-root'],
     );

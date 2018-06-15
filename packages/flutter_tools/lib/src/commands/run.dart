@@ -55,8 +55,7 @@ abstract class RunCommandBase extends FlutterCommand {
   void usesPortOptions() {
     argParser.addOption('observatory-port',
         help: 'Listen to the given port for an observatory debugger connection.\n'
-              'Specifying port 0 will find a random free port.\n'
-              'Defaults to the first available port after $kDefaultObservatoryPort.'
+              'Specifying port 0 (the default) will find a random free port.'
     );
   }
 
@@ -124,6 +123,12 @@ class RunCommand extends RunCommandBase {
         defaultsTo: true,
         hide: !verboseHelp,
         help: 'Preview Dart 2.0 functionality.',
+      )
+      ..addFlag('build-snapshot',
+        hide: !verboseHelp,
+        defaultsTo: false,
+        help: 'Build and use application-specific VM snapshot instead of\n'
+              'prebuilt one provided by the engine.',
       )
       ..addFlag('track-widget-creation',
         hide: !verboseHelp,

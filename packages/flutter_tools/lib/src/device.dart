@@ -7,10 +7,8 @@ import 'dart:math' as math;
 
 import 'android/android_device.dart';
 import 'application_package.dart';
-import 'base/common.dart';
 import 'base/context.dart';
 import 'base/file_system.dart';
-import 'base/port_scanner.dart';
 import 'base/utils.dart';
 import 'build_info.dart';
 import 'globals.dart';
@@ -367,14 +365,6 @@ class DebuggingOptions {
   final int observatoryPort;
 
   bool get hasObservatoryPort => observatoryPort != null;
-
-  /// Return the user specified observatory port. If that isn't available,
-  /// return [kDefaultObservatoryPort], or a port close to that one.
-  Future<int> findBestObservatoryPort() {
-    if (hasObservatoryPort)
-      return new Future<int>.value(observatoryPort);
-    return portScanner.findPreferredPort(observatoryPort ?? kDefaultObservatoryPort);
-  }
 }
 
 class LaunchResult {
@@ -414,9 +404,9 @@ abstract class DevicePortForwarder {
   List<ForwardedPort> get forwardedPorts;
 
   /// Forward [hostPort] on the host to [devicePort] on the device.
-  /// If [hostPort] is null, will auto select a host port.
+  /// If [hostPort] is null or zero, will auto select a host port.
   /// Returns a Future that completes with the host port.
-  Future<int> forward(int devicePort, { int hostPort });
+  Future<int> forward(int devicePort, {int hostPort});
 
   /// Stops forwarding [forwardedPort].
   Future<Null> unforward(ForwardedPort forwardedPort);
