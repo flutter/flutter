@@ -279,7 +279,7 @@ class AndroidDevice extends Device {
       return false;
 
     final Status status = logger.startProgress('Installing ${apk.apkPath}...', expectSlowOperation: true);
-    final RunResult installResult = await runAsync(adbCommandForDevice(<String>['install', '-r', apk.apkPath]));
+    final RunResult installResult = await runAsync(adbCommandForDevice(<String>['install', '-t', '-r', apk.apkPath]));
     status.stop();
     // Some versions of adb exit with exit code 0 even on failure :(
     // Parsing the output to check for failures.
