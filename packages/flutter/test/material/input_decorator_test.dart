@@ -768,13 +768,13 @@ void main() {
     //   16 - input text (ahem font size 16dps)
     //   12 - bottom padding
 
-    expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, 40.0));
+    expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, 48.0));
     expect(tester.getSize(find.text('text')).height, 16.0);
     expect(tester.getSize(find.byIcon(Icons.pages)).height, 48.0);
     expect(tester.getSize(find.byIcon(Icons.satellite)).height, 48.0);
     expect(tester.getTopLeft(find.text('text')).dy, 12.0);
-    expect(tester.getTopLeft(find.byIcon(Icons.pages)).dy, -4.0);
-    expect(tester.getTopLeft(find.byIcon(Icons.satellite)).dy, -4.0);
+    expect(tester.getTopLeft(find.byIcon(Icons.pages)).dy, 0.0);
+    expect(tester.getTopLeft(find.byIcon(Icons.satellite)).dy, 0.0);
     expect(tester.getTopRight(find.byIcon(Icons.satellite)).dx, 800.0);
 
 

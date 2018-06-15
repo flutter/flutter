@@ -799,10 +799,11 @@ class _RenderDecoration extends RenderBox {
     layoutLineBox(input);
 
     double inputBaseline = contentPadding.top + aboveBaseline;
-    double containerHeight = contentPadding.top
+    double containerHeight = math.max(contentPadding.top
       + aboveBaseline
       + belowBaseline
-      + contentPadding.bottom;
+      + contentPadding.bottom,
+      math.max( _boxSize(suffixIcon).height, _boxSize(prefixIcon).height));
 
     if (label != null) {
       // floatingLabelHeight includes the vertical gap between the inline
@@ -897,7 +898,7 @@ class _RenderDecoration extends RenderBox {
       subtextHeight += 8.0;
     return contentPadding.top
       + (label == null ? 0.0 : decoration.floatingLabelHeight)
-      + _lineHeight(width, <RenderBox>[prefix, input, suffix])
+      + _lineHeight(width, <RenderBox>[prefix, prefixIcon, input, suffix])
       + subtextHeight
       + contentPadding.bottom;
   }
@@ -1734,6 +1735,8 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
 
     EdgeInsets contentPadding;
     double floatingLabelHeight;
+    final double leftInset = decoration.prefixIcon == null ? 12.0 : 0.0;
+    final double rightInset = decoration.suffixIcon == null ? 12.0 : 0.0;
     if (decoration.isCollapsed) {
       floatingLabelHeight = 0.0;
       contentPadding = decorationContentPadding ?? EdgeInsets.zero;
@@ -1741,8 +1744,6 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
       // 4.0: the vertical gap between the inline elements and the floating label.
       floatingLabelHeight = 4.0 + 0.75 * inlineLabelStyle.fontSize;
       if (decoration.filled == true) { // filled == null same as filled == false
-        final double leftInset = decoration.prefixIcon == null ? 12.0 : 0.0;
-        final double rightInset = decoration.suffixIcon == null ? 12.0 : 0.0;
         contentPadding = decorationContentPadding ?? (decorationIsDense
           ? new EdgeInsets.fromLTRB(leftInset, 8.0, rightInset, 8.0)
           : new EdgeInsets.fromLTRB(leftInset, 12.0, rightInset, 12.0));
@@ -1757,8 +1758,8 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
     } else {
       floatingLabelHeight = 0.0;
       contentPadding = decorationContentPadding ?? (decorationIsDense
-        ? const EdgeInsets.fromLTRB(12.0, 20.0, 12.0, 12.0)
-        : const EdgeInsets.fromLTRB(12.0, 24.0, 12.0, 16.0));
+        ? new EdgeInsets.fromLTRB(leftInset, 20.0, rightInset, 12.0)
+        : new EdgeInsets.fromLTRB(leftInset, 24.0, rightInset, 16.0));
     }
 
     return new _Decorator(
