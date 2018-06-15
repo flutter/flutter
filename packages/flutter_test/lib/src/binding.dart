@@ -498,26 +498,15 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
       }
     );
     _parentZone = Zone.current;
+    asyncBarrier(); // When using AutomatedTestWidgetsFlutterBinding, this flushes the microtasks.
     final Zone testZone = _parentZone.fork(specification: errorHandlingZoneSpecification);
     testZone.runBinary(_runTestBody, testBody, invariantTester)
       .whenComplete(testCompletionHandler);
     timeout?.catchError(handleUncaughtError);
-    asyncBarrier(); // When using AutomatedTestWidgetsFlutterBinding, this flushes the microtasks.
     return testCompleter.future;
   }
 
   Future<Null> _runTestBody(Future<Null> testBody(), VoidCallback invariantTester) async {
-    // Delay this function by a microtask.
-    //
-    // The `_runTest` functions invokes `_runTestBody` and then invokes
-    // `asyncBarrier()` afterwards. The `asyncBarrier` verifies that no scope is
-    // open.
-    // We don't want to move the `asyncBarrier()` earlier, because it also
-    // flushes all microtasks.
-    // By delaying by one microtask, the `asyncBarrier` will not yet see the
-    // open scope and also ensure that the all microtasks (including this one)
-    // are flushed.
-    await new Future<Null>.microtask(() {});
     assert(inTest);
 
     runApp(new Container(key: new UniqueKey(), child: _preTestMessage)); // Reset the tree to a known state.
