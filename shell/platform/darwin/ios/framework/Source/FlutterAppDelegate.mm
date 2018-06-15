@@ -127,6 +127,14 @@
   [_lifeCycleDelegate application:application performFetchWithCompletionHandler:completionHandler];
 }
 
+- (BOOL)application:(UIApplication*)application
+    continueUserActivity:(NSUserActivity*)userActivity
+      restorationHandler:(void (^)(NSArray*))restorationHandler {
+  return [_lifeCycleDelegate application:application
+                    continueUserActivity:userActivity
+                      restorationHandler:restorationHandler];
+}
+
 #pragma mark - FlutterPluginRegistry methods. All delegating to the rootViewController
 
 - (NSObject<FlutterPluginRegistrar>*)registrarForPlugin:(NSString*)pluginKey {

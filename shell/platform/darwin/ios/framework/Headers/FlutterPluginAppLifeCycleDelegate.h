@@ -128,6 +128,15 @@ FLUTTER_EXPORT
 */
 - (BOOL)application:(UIApplication*)application
     performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))completionHandler;
+
+/**
+ Calls all plugins registered for `UIApplicationDelegate` callbacks in order of registration until some plugin handles
+ the request.
+  - Returns: `YES` if any plugin handles the request.
+*/
+- (BOOL)application:(UIApplication*)application
+    continueUserActivity:(NSUserActivity*)userActivity
+      restorationHandler:(void (^)(NSArray*))restorationHandler;
 @end
 
 NS_ASSUME_NONNULL_END
