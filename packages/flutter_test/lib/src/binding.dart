@@ -498,7 +498,6 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
       }
     );
     _parentZone = Zone.current;
-    asyncBarrier(); // When using AutomatedTestWidgetsFlutterBinding, this flushes the microtasks.
     final Zone testZone = _parentZone.fork(specification: errorHandlingZoneSpecification);
     testZone.runBinary(_runTestBody, testBody, invariantTester)
       .whenComplete(testCompletionHandler);
@@ -532,6 +531,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
     }
 
     assert(inTest);
+    asyncBarrier(); // When using AutomatedTestWidgetsFlutterBinding, this flushes the microtasks.
     return null;
   }
 
