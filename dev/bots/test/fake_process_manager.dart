@@ -150,7 +150,7 @@ class FakeProcess extends Mock implements Process {
 }
 
 /// Callback used to receive stdin input when it occurs.
-typedef StringReceivedCallback = void Function(String received);
+typedef void StringReceivedCallback(String received);
 
 /// A stream consumer class that consumes UTF8 strings as lists of ints.
 class StringStreamConsumer implements StreamConsumer<List<int>> {

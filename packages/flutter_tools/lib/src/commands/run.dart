@@ -120,6 +120,17 @@ class RunCommand extends RunCommandBase {
         hide: !verboseHelp,
         help: 'Specify a pre-built application binary to use when running.',
       )
+      ..addFlag('preview-dart-2',
+        defaultsTo: true,
+        hide: !verboseHelp,
+        help: 'Preview Dart 2.0 functionality.',
+      )
+      ..addFlag('build-snapshot',
+        hide: !verboseHelp,
+        defaultsTo: false,
+        help: 'Build and use application-specific VM snapshot instead of\n'
+              'prebuilt one provided by the engine.',
+      )
       ..addFlag('track-widget-creation',
         hide: !verboseHelp,
         help: 'Track widget creation locations. Requires Dart 2.0 functionality.',
@@ -342,6 +353,7 @@ class RunCommand extends RunCommandBase {
     final List<FlutterDevice> flutterDevices = devices.map((Device device) {
       return new FlutterDevice(
         device,
+        previewDart2: argResults['preview-dart-2'],
         trackWidgetCreation: argResults['track-widget-creation'],
         dillOutputPath: argResults['output-dill'],
         fileSystemRoots: argResults['filesystem-root'],

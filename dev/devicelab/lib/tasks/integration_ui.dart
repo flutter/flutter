@@ -25,6 +25,7 @@ Future<TaskResult> runEndToEndTests() async {
       'lib/keyboard_resize.dart',
       'lib/driver.dart',
       'lib/screenshot.dart',
+      'lib/keyboard_textfield.dart',
     ];
 
     for (final String entryPoint in entryPoints) {

@@ -26,7 +26,7 @@ import 'theme.dart';
 /// See also:
 ///
 ///   * [Slider.semanticFormatterCallback], which shows an example use case.
-typedef SemanticFormatterCallback = String Function(double value);
+typedef String SemanticFormatterCallback(double value);
 
 /// A Material Design slider.
 ///
