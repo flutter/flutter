@@ -510,7 +510,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
     // Delay this function by a microtask.
     //
     // The `_runTest` functions invokes `_runTestBody` and then invokes
-    // `asyncBarrier()` afterwardes. The `asyncBarrier` verifies that no scope is
+    // `asyncBarrier()` afterwards. The `asyncBarrier` verifies that no scope is
     // open.
     // We don't want to move the `asyncBarrier()` earlier, because it also
     // flushes all microtasks.
