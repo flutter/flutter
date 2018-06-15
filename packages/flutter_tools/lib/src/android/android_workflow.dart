@@ -172,7 +172,7 @@ class AndroidWorkflow extends DoctorValidator implements Workflow {
     LicensesAccepted status = LicensesAccepted.unknown;
 
     void _onLine(String line) {
-      if (licenseAccepted.hasMatch(line)) {
+      if (status == null && licenseAccepted.hasMatch(line)) {
         status = LicensesAccepted.all;
       } else if (licenseCounts.hasMatch(line)) {
         final Match match = licenseCounts.firstMatch(line);
