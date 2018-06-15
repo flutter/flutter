@@ -115,16 +115,16 @@ void main() {
       testUsingContext('default port', () async {
         final MockDeviceLogReader logReader = new MockDeviceLogReader();
         final ProtocolDiscovery discoverer = new ProtocolDiscovery.observatory(
-          logReader,
-          portForwarder: new MockPortForwarder(99),
-        );
+            logReader,
+            portForwarder: new MockPortForwarder(99),
+            hostPort: 54777);
 
         // Get next port future.
         final Future<Uri> nextUri = discoverer.uri;
         logReader.addLine('I/flutter : Observatory listening on http://127.0.0.1:54804/PTwjm8Ii8qg=/');
         final Uri uri = await nextUri;
-        expect(uri.port, 99);
-        expect('$uri', 'http://127.0.0.1:99/PTwjm8Ii8qg=/');
+        expect(uri.port, 54777);
+        expect('$uri', 'http://127.0.0.1:54777/PTwjm8Ii8qg=/');
 
         discoverer.cancel();
         logReader.dispose();
@@ -133,10 +133,9 @@ void main() {
       testUsingContext('specified port', () async {
         final MockDeviceLogReader logReader = new MockDeviceLogReader();
         final ProtocolDiscovery discoverer = new ProtocolDiscovery.observatory(
-          logReader,
-          portForwarder: new MockPortForwarder(99),
-          hostPort: 1243,
-        );
+            logReader,
+            portForwarder: new MockPortForwarder(99),
+            hostPort: 1243);
 
         // Get next port future.
         final Future<Uri> nextUri = discoverer.uri;
@@ -149,33 +148,13 @@ void main() {
         logReader.dispose();
       });
 
-      testUsingContext('specified port zero', () async {
-        final MockDeviceLogReader logReader = new MockDeviceLogReader();
-        final ProtocolDiscovery discoverer = new ProtocolDiscovery.observatory(
-          logReader,
-          portForwarder: new MockPortForwarder(99),
-          hostPort: 0,
-        );
-
-        // Get next port future.
-        final Future<Uri> nextUri = discoverer.uri;
-        logReader.addLine('I/flutter : Observatory listening on http://127.0.0.1:54804/PTwjm8Ii8qg=/');
-        final Uri uri = await nextUri;
-        expect(uri.port, 99);
-        expect('$uri', 'http://127.0.0.1:99/PTwjm8Ii8qg=/');
-
-        discoverer.cancel();
-        logReader.dispose();
-      });
-
       testUsingContext('ipv6', () async {
         final MockDeviceLogReader logReader = new MockDeviceLogReader();
         final ProtocolDiscovery discoverer = new ProtocolDiscovery.observatory(
-          logReader,
-          portForwarder: new MockPortForwarder(99),
-          hostPort: 54777,
-          ipv6: true,
-        );
+            logReader,
+            portForwarder: new MockPortForwarder(99),
+            hostPort: 54777,
+            ipv6: true);
 
         // Get next port future.
         final Future<Uri> nextUri = discoverer.uri;
@@ -196,12 +175,7 @@ class MockPortForwarder extends DevicePortForwarder {
   MockPortForwarder([this.availablePort]);
 
   @override
-  Future<int> forward(int devicePort, {int hostPort}) async {
-    hostPort ??= 0;
-    if (hostPort == 0)
-      return availablePort;
-    return hostPort;
-  }
+  Future<int> forward(int devicePort, {int hostPort}) async => hostPort ?? availablePort;
 
   @override
   List<ForwardedPort> get forwardedPorts => throw 'not implemented';

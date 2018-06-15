@@ -305,7 +305,8 @@ class IOSSimulator extends Device {
         args.add('--skia-deterministic-rendering');
       if (debuggingOptions.useTestFonts)
         args.add('--use-test-fonts');
-      final int observatoryPort = debuggingOptions.observatoryPort ?? 0;
+
+      final int observatoryPort = await debuggingOptions.findBestObservatoryPort();
       args.add('--observatory-port=$observatoryPort');
     }
 
@@ -692,7 +693,7 @@ class _IOSSimulatorDevicePortForwarder extends DevicePortForwarder {
 
   @override
   Future<int> forward(int devicePort, {int hostPort}) async {
-    if (hostPort == null || hostPort == 0) {
+    if ((hostPort == null) || (hostPort == 0)) {
       hostPort = devicePort;
     }
     assert(devicePort == hostPort);
