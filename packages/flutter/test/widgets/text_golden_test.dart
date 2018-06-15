@@ -65,6 +65,8 @@ void main() {
     const Color black = const Color(0xFF000000);
     const Color red = const Color(0xFFFF0000);
     const Color blue = const Color(0xFF0000FF);
+    final Shader linearGradient = const LinearGradient(colors: <Color>[red, blue]).createShader(new Rect.fromLTWH(0.0, 0.0, 50.0, 20.0));
+
     await tester.pumpWidget(
       new RepaintBoundary(
         child: new Text('Hello',
@@ -72,7 +74,7 @@ void main() {
           style: new TextStyle(
             foreground: new Paint()
               ..color = black
-              ..shader = const LinearGradient(colors: <Color>[red, blue] ).createShader(new Rect.fromLTWH(0.0, 0.0, 50.0, 20.0))
+              ..shader = linearGradient
           )
         ),
       ),
@@ -101,6 +103,27 @@ void main() {
     await expectLater(
       find.byType(RepaintBoundary),
       matchesGoldenFile('text_golden.Foreground.stroke.png'),
+      skip: !Platform.isLinux,
+    );
+
+    await tester.pumpWidget(
+      new RepaintBoundary(
+        child: new Text('Hello', 
+          textDirection: TextDirection.ltr,          
+          style: new TextStyle(
+            foreground: new Paint()
+              ..color = black
+              ..style = PaintingStyle.stroke
+              ..strokeWidth = 2.0
+              ..shader = linearGradient
+          )
+        ),
+      ),
+    );
+
+    await expectLater(
+      find.byType(RepaintBoundary),
+      matchesGoldenFile('text_golden.Foreground.stroke_and_gradient.png'),
       skip: !Platform.isLinux,
     );
   });
