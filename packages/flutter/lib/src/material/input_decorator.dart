@@ -799,11 +799,13 @@ class _RenderDecoration extends RenderBox {
     layoutLineBox(input);
 
     double inputBaseline = contentPadding.top + aboveBaseline;
-    double containerHeight = math.max(contentPadding.top
+    double containerHeight = contentPadding.top
       + aboveBaseline
       + belowBaseline
-      + contentPadding.bottom,
-      math.max( _boxSize(suffixIcon).height, _boxSize(prefixIcon).height));
+      + contentPadding.bottom;
+    containerHeight = math.max(
+      containerHeight,
+      math.max(_boxSize(suffixIcon).height, _boxSize(prefixIcon).height));
 
     if (label != null) {
       // floatingLabelHeight includes the vertical gap between the inline
@@ -898,7 +900,7 @@ class _RenderDecoration extends RenderBox {
       subtextHeight += 8.0;
     return contentPadding.top
       + (label == null ? 0.0 : decoration.floatingLabelHeight)
-      + _lineHeight(width, <RenderBox>[prefix, prefixIcon, input, suffix])
+      + _lineHeight(width, <RenderBox>[prefix, input, suffix])
       + subtextHeight
       + contentPadding.bottom;
   }
