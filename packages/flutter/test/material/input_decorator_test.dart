@@ -750,6 +750,40 @@ void main() {
     expect(tester.getTopRight(find.text('text')).dx, lessThanOrEqualTo(tester.getTopLeft(find.text('s')).dx));
   });
 
+  testWidgets('InputDecorator prefixIcon/suffixIcon', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      buildInputDecorator(
+        // isEmpty: false (default)
+        // isFocused: false (default)
+        decoration: const InputDecoration(
+          prefixIcon: const Icon(Icons.pages),
+          suffixIcon: const Icon(Icons.satellite),
+          filled: true,
+        ),
+      ),
+    );
+
+    // Overall height for this InputDecorator is 48dps:
+    //   12 - top padding
+    //   16 - input text (ahem font size 16dps)
+    //   12 - bottom padding
+
+    expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, 40.0));
+    expect(tester.getSize(find.text('text')).height, 16.0);
+    expect(tester.getSize(find.byIcon(Icons.pages)).height, 48.0);
+    expect(tester.getSize(find.byIcon(Icons.satellite)).height, 48.0);
+    expect(tester.getTopLeft(find.text('text')).dy, 12.0);
+    expect(tester.getTopLeft(find.byIcon(Icons.pages)).dy, -4.0);
+    expect(tester.getTopLeft(find.byIcon(Icons.satellite)).dy, -4.0);
+    expect(tester.getTopRight(find.byIcon(Icons.satellite)).dx, 800.0);
+
+
+    // layout is a row: [icon text icon]
+    expect(tester.getTopLeft(find.byIcon(Icons.pages)).dx, 0.0);
+    expect(tester.getTopRight(find.byIcon(Icons.pages)).dx, lessThanOrEqualTo(tester.getTopLeft(find.text('text')).dx));
+    expect(tester.getTopRight(find.text('text')).dx, lessThanOrEqualTo(tester.getTopLeft(find.byIcon(Icons.satellite)).dx));
+  });
+
   testWidgets('InputDecorator error/helper/counter RTL layout', (WidgetTester tester) async {
     await tester.pumpWidget(
       buildInputDecorator(

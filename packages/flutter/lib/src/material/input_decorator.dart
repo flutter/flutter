@@ -1995,11 +1995,16 @@ class InputDecoration {
   /// [IconTheme] and therefore does not need to be explicitly given in the
   /// icon widget.
   ///
-  /// The prefix icon is not padded. To pad the trailing edge of the prefix icon:
+  /// The prefix icon is constrained with a minimum size of 48px by 48px, but
+  /// can be expanded beyond that. Anything larger than 24px will require
+  /// additional padding to ensure it matches the material spec of 12px padding
+  /// between the left edge of the input and leading edge of the prefix icon.
+  /// To pad the leading edge of the prefix icon:
+  ///
   /// ```dart
   /// prefixIcon: new Padding(
-  ///   padding: const EdgeInsetsDirectional.only(end: 16.0),
-  ///   child: myIcon,
+  ///   padding: const EdgeInsetsDirectional.only(start: 12.0),
+  ///   child: myIcon, // icon is 48px widget.
   /// )
   /// ```
   ///
@@ -2029,11 +2034,16 @@ class InputDecoration {
   /// [IconTheme] and therefore does not need to be explicitly given in the
   /// icon widget.
   ///
-  /// The suffix icon is not padded. To pad the leading edge of the suffix icon:
+  /// The suffix icon is constrained with a minimum size of 48px by 48px, but
+  /// can be expanded beyond that. Anything larger than 24px will require
+  /// additional padding to ensure it matches the material spec of 12px padding
+  /// between the right edge of the input and trailing edge of the prefix icon.
+  /// To pad the trailing edge of the suffix icon:
+  ///
   /// ```dart
   /// suffixIcon: new Padding(
-  ///   padding: const EdgeInsetsDirectional.only(start: 16.0),
-  ///   child: new Icon(Icons.search),
+  ///   padding: const EdgeInsetsDirectional.only(end: 12.0),
+  ///   child: myIcon, // icon is 48px widget.
   /// )
   /// ```
   ///
