@@ -391,7 +391,7 @@ class TextPainter {
     return value & 0xF800 == 0xD800;
   }
 
-  /// Returns the closest offset after `offset` at which the inout cursor can be
+  /// Returns the closest offset after `offset` at which the input cursor can be
   /// positioned.
   int getOffsetAfter(int offset) {
     final int nextCodeUnit = _text.codeUnitAt(offset);
