@@ -43,6 +43,10 @@ TaskFunction createFlutterGalleryCompileTest() {
   return new CompileTest('${flutterDirectory.path}/examples/flutter_gallery').run;
 }
 
+TaskFunction createHelloWorldCompileTest() {
+  return new CompileTest('${flutterDirectory.path}/examples/hello_world').run;
+}
+
 TaskFunction createComplexLayoutCompileTest() {
   return new CompileTest('${flutterDirectory.path}/dev/benchmarks/complex_layout').run;
 }
