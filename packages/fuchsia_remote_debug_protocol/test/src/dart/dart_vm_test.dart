@@ -149,7 +149,7 @@ void main() {
       }
 
       // Both views should be invalid as they were missing required fields.
-      expect(failingFunction, throwsA(const isInstanceOf<RpcFormatError>()));
+      expect(failingFunction, throwsA(const TypeMatcher<RpcFormatError>()));
     });
 
     test('invalid flutter view missing ID', () async {
@@ -187,7 +187,7 @@ void main() {
       }
 
       // Both views should be invalid as they were missing required fields.
-      expect(failingFunction, throwsA(const isInstanceOf<RpcFormatError>()));
+      expect(failingFunction, throwsA(const TypeMatcher<RpcFormatError>()));
     });
   });
 
@@ -220,7 +220,7 @@ void main() {
         await vm.invokeRpc('somesillyfunction', timeout: timeoutTime);
       }
 
-      expect(failingFunction, throwsA(const isInstanceOf<TimeoutException>()));
+      expect(failingFunction, throwsA(const TypeMatcher<TimeoutException>()));
     });
   });
 }
