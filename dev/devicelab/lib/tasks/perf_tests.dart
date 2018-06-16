@@ -228,6 +228,7 @@ class CompileTest {
     final List<String> options = <String>[
       'aot',
       '-v',
+      '--extra-gen-snapshot-options=--print_snapshot_sizes',
       '--release',
       '--no-pub',
       '--target-platform',
@@ -252,6 +253,9 @@ class CompileTest {
     final Map<String, dynamic> metrics = <String, dynamic>{};
     for (Match m in metricExpression.allMatches(compileLog)) {
       metrics[_sdkNameToMetricName(m.group(1))] = int.parse(m.group(2));
+    }
+    if (metrics.length != _kSdkNameToMetricNameMapping.length) {
+      throw 'Expected metrics: ${_kSdkNameToMetricNameMapping.keys}, but got: ${metrics.keys}.';
     }
     metrics['aot_snapshot_compile_millis'] = watch.elapsedMilliseconds;
 
@@ -326,19 +330,20 @@ class CompileTest {
     };
   }
 
-  static String _sdkNameToMetricName(String sdkName) {
-    const Map<String, String> kSdkNameToMetricNameMapping = const <String, String> {
-      'VMIsolate': 'aot_snapshot_size_vmisolate',
-      'Isolate': 'aot_snapshot_size_isolate',
-      'ReadOnlyData': 'aot_snapshot_size_rodata',
-      'Instructions': 'aot_snapshot_size_instructions',
-      'Total': 'aot_snapshot_size_total',
-    };
+  static const Map<String, String> _kSdkNameToMetricNameMapping = const <String, String> {
+    'VMIsolate': 'aot_snapshot_size_vmisolate',
+    'Isolate': 'aot_snapshot_size_isolate',
+    'ReadOnlyData': 'aot_snapshot_size_rodata',
+    'Instructions': 'aot_snapshot_size_instructions',
+    'Total': 'aot_snapshot_size_total',
+  };
 
-    if (!kSdkNameToMetricNameMapping.containsKey(sdkName))
+  static String _sdkNameToMetricName(String sdkName) {
+
+    if (!_kSdkNameToMetricNameMapping.containsKey(sdkName))
       throw 'Unrecognized SDK snapshot metric name: $sdkName';
 
-    return kSdkNameToMetricNameMapping[sdkName];
+    return _kSdkNameToMetricNameMapping[sdkName];
   }
 }
 
@@ -364,6 +369,8 @@ class MemoryTest {
       if (deviceOperatingSystem == DeviceOperatingSystem.ios)
         await prepareProvisioningCertificates(testDirectory);
 
+      final int observatoryPort = await findAvailablePort();
+
       final List<String> runOptions = <String>[
         '-v',
         '--profile',
@@ -371,14 +378,11 @@ class MemoryTest {
         '-d',
         deviceId,
         '--observatory-port',
-        '0',
+        observatoryPort.toString(),
       ];
       if (testTarget != null)
         runOptions.addAll(<String>['-t', testTarget]);
-      final String output = await evalFlutter('run', options: runOptions);
-      final int observatoryPort = parseServicePort(output, prefix: 'Successfully connected to service protocol: ', multiLine: true);
-      if (observatoryPort == null)
-        throw new Exception('Could not find observatory port in "flutter run" output.');
+      await flutter('run', options: runOptions);
 
       final Map<String, dynamic> startData = await device.getMemoryStats(packageName);
 

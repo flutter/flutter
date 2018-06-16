@@ -122,7 +122,8 @@ class FlutterTesterDevice extends Device {
         command.add('--start-paused');
       }
       if (debuggingOptions.hasObservatoryPort)
-        command.add('--observatory-port=${debuggingOptions.observatoryPort}');
+        command
+            .add('--observatory-port=${debuggingOptions.hasObservatoryPort}');
     }
 
     // Build assets and perform initial compilation.
@@ -169,10 +170,9 @@ class FlutterTesterDevice extends Device {
       if (!debuggingOptions.debuggingEnabled)
         return new LaunchResult.succeeded();
 
-      final ProtocolDiscovery observatoryDiscovery = new ProtocolDiscovery.observatory(
-        getLogReader(),
-        hostPort: debuggingOptions.observatoryPort,
-      );
+      final ProtocolDiscovery observatoryDiscovery =
+          new ProtocolDiscovery.observatory(getLogReader(),
+              hostPort: debuggingOptions.observatoryPort);
 
       final Uri observatoryUri = await observatoryDiscovery.uri;
       return new LaunchResult.succeeded(observatoryUri: observatoryUri);
