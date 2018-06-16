@@ -150,10 +150,7 @@ class Directionality extends InheritedWidget {
 ///
 /// Animating an [Opacity] widget directly causes the widget (and possibly its
 /// subtree) to rebuild each frame, which is not very efficient. Consider using
-/// an [AnimatedOpacity] instead. [AnimatedOpacity] uses a
-/// [RenderAnimatedOpacity] internally, which listens directly to an [Animation]
-/// so that the widget tree below the [AnimatedOpacity] is not rebuilt every
-/// frame.
+/// an [AnimatedOpacity] instead.
 ///
 /// See also:
 ///
