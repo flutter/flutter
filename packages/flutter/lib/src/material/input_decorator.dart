@@ -803,6 +803,9 @@ class _RenderDecoration extends RenderBox {
       + aboveBaseline
       + belowBaseline
       + contentPadding.bottom;
+    containerHeight = math.max(
+      containerHeight,
+      math.max(_boxSize(suffixIcon).height, _boxSize(prefixIcon).height));
 
     if (label != null) {
       // floatingLabelHeight includes the vertical gap between the inline
@@ -1688,21 +1691,27 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
       );
 
     final Widget prefixIcon = decoration.prefixIcon == null ? null :
-      IconTheme.merge(
-        data: new IconThemeData(
-          color: iconColor,
-          size: iconSize,
+      new ConstrainedBox(
+        constraints: const BoxConstraints(minWidth: 48.0, minHeight: 48.0),
+        child: IconTheme.merge(
+          data: new IconThemeData(
+            color: iconColor,
+            size: iconSize,
+          ),
+          child: decoration.prefixIcon,
         ),
-        child: decoration.prefixIcon,
       );
 
     final Widget suffixIcon = decoration.suffixIcon == null ? null :
-      IconTheme.merge(
-        data: new IconThemeData(
-          color: iconColor,
-          size: iconSize,
+      new ConstrainedBox(
+        constraints: const BoxConstraints(minWidth: 48.0, minHeight: 48.0),
+        child: IconTheme.merge(
+          data: new IconThemeData(
+            color: iconColor,
+            size: iconSize,
+          ),
+          child: decoration.suffixIcon,
         ),
-        child: decoration.suffixIcon,
       );
 
     final Widget helperError = new _HelperError(
@@ -1728,6 +1737,8 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
 
     EdgeInsets contentPadding;
     double floatingLabelHeight;
+    final double leftInset = decoration.prefixIcon == null ? 12.0 : 0.0;
+    final double rightInset = decoration.suffixIcon == null ? 12.0 : 0.0;
     if (decoration.isCollapsed) {
       floatingLabelHeight = 0.0;
       contentPadding = decorationContentPadding ?? EdgeInsets.zero;
@@ -1736,8 +1747,8 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
       floatingLabelHeight = 4.0 + 0.75 * inlineLabelStyle.fontSize;
       if (decoration.filled == true) { // filled == null same as filled == false
         contentPadding = decorationContentPadding ?? (decorationIsDense
-          ? const EdgeInsets.fromLTRB(12.0, 8.0, 12.0, 8.0)
-          : const EdgeInsets.fromLTRB(12.0, 12.0, 12.0, 12.0));
+          ? new EdgeInsets.fromLTRB(leftInset, 8.0, rightInset, 8.0)
+          : new EdgeInsets.fromLTRB(leftInset, 12.0, rightInset, 12.0));
       } else {
         // Not left or right padding for underline borders that aren't filled
         // is a small concession to backwards compatibility. This eliminates
@@ -1749,8 +1760,8 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
     } else {
       floatingLabelHeight = 0.0;
       contentPadding = decorationContentPadding ?? (decorationIsDense
-        ? const EdgeInsets.fromLTRB(12.0, 20.0, 12.0, 12.0)
-        : const EdgeInsets.fromLTRB(12.0, 24.0, 12.0, 16.0));
+        ? new EdgeInsets.fromLTRB(leftInset, 20.0, rightInset, 12.0)
+        : new EdgeInsets.fromLTRB(leftInset, 24.0, rightInset, 16.0));
     }
 
     return new _Decorator(
@@ -1987,11 +1998,16 @@ class InputDecoration {
   /// [IconTheme] and therefore does not need to be explicitly given in the
   /// icon widget.
   ///
-  /// The prefix icon is not padded. To pad the trailing edge of the prefix icon:
+  /// The prefix icon is constrained with a minimum size of 48px by 48px, but
+  /// can be expanded beyond that. Anything larger than 24px will require
+  /// additional padding to ensure it matches the material spec of 12px padding
+  /// between the left edge of the input and leading edge of the prefix icon.
+  /// To pad the leading edge of the prefix icon:
+  ///
   /// ```dart
   /// prefixIcon: new Padding(
-  ///   padding: const EdgeInsetsDirectional.only(end: 16.0),
-  ///   child: myIcon,
+  ///   padding: const EdgeInsetsDirectional.only(start: 12.0),
+  ///   child: myIcon, // icon is 48px widget.
   /// )
   /// ```
   ///
@@ -2021,11 +2037,16 @@ class InputDecoration {
   /// [IconTheme] and therefore does not need to be explicitly given in the
   /// icon widget.
   ///
-  /// The suffix icon is not padded. To pad the leading edge of the suffix icon:
+  /// The suffix icon is constrained with a minimum size of 48px by 48px, but
+  /// can be expanded beyond that. Anything larger than 24px will require
+  /// additional padding to ensure it matches the material spec of 12px padding
+  /// between the right edge of the input and trailing edge of the prefix icon.
+  /// To pad the trailing edge of the suffix icon:
+  ///
   /// ```dart
   /// suffixIcon: new Padding(
-  ///   padding: const EdgeInsetsDirectional.only(start: 16.0),
-  ///   child: new Icon(Icons.search),
+  ///   padding: const EdgeInsetsDirectional.only(end: 12.0),
+  ///   child: myIcon, // icon is 48px widget.
   /// )
   /// ```
   ///
