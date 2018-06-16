@@ -316,7 +316,7 @@ class Text extends StatelessWidget {
   /// text value:
   ///
   /// ```dart
-  /// new Text('$$', semanticsLabel: 'Double dollars')
+  /// new Text(r'$$', semanticsLabel: 'Double dollars')
   ///
   /// ```
   final String semanticsLabel;
