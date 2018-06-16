@@ -338,8 +338,6 @@ abstract class LocalHistoryRoute<T> extends Route<T> {
   /// Therefore, the second press navigates back to the `HomePage`.
   ///
   /// ```dart
-  /// void main() => runApp(new App());
-  ///
   /// class App extends StatelessWidget {
   ///   @override
   ///   Widget build(BuildContext context) {
