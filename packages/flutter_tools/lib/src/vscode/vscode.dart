@@ -30,12 +30,13 @@ class VsCode {
     }
 
     // Check for presence of extension.
+    final String extensionIdentifierLower = extensionIdentifier.toLowerCase();
     final Iterable<FileSystemEntity> extensionDirs = fs
         .directory(extensionDirectory)
         .listSync()
         .where((FileSystemEntity d) => d is Directory)
         .where(
-            (FileSystemEntity d) => d.basename.toLowerCase().startsWith(extensionIdentifier.toLowerCase()));
+            (FileSystemEntity d) => d.basename.toLowerCase().startsWith(extensionIdentifierLower));
 
     if (extensionDirs.isNotEmpty) {
       final FileSystemEntity extensionDir = extensionDirs.first;
