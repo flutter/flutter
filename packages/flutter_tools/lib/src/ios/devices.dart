@@ -10,6 +10,7 @@ import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/platform.dart';
+import '../base/port_scanner.dart';
 import '../base/process.dart';
 import '../base/process_manager.dart';
 import '../build_info.dart';
@@ -508,40 +509,26 @@ class _IOSDevicePortForwarder extends DevicePortForwarder {
 
   @override
   Future<int> forward(int devicePort, {int hostPort}) async {
-    final bool autoselect = hostPort == null || hostPort == 0;
-    if (autoselect)
-      hostPort = 1024;
-
-    Process process;
-
-    bool connected = false;
-    while (!connected) {
-      // Usage: iproxy LOCAL_TCP_PORT DEVICE_TCP_PORT UDID
-      process = await runCommand(<String>[
-        device._iproxyPath,
-        hostPort.toString(),
-        devicePort.toString(),
-        device.id,
-      ]);
-      connected = !await process.stdout.isEmpty;
-      if (!connected) {
-        if (autoselect) {
-          hostPort += 1;
-          if (hostPort > 65535)
-            throw 'Could not find open port on host.';
-        } else {
-          throw 'Port $hostPort is not available.';
-        }
-      }
+    if ((hostPort == null) || (hostPort == 0)) {
+      // Auto select host port.
+      hostPort = await portScanner.findAvailablePort();
     }
-    assert(connected);
-    assert(process != null);
 
-    final ForwardedPort forwardedPort = new ForwardedPort.withContext(
-      hostPort, devicePort, process,
-    );
+    // Usage: iproxy LOCAL_TCP_PORT DEVICE_TCP_PORT UDID
+    final Process process = await runCommand(<String>[
+      device._iproxyPath,
+      hostPort.toString(),
+      devicePort.toString(),
+      device.id,
+    ]);
+
+    final ForwardedPort forwardedPort = new ForwardedPort.withContext(hostPort,
+        devicePort, process);
+
     printTrace('Forwarded port $forwardedPort');
+
     _forwardedPorts.add(forwardedPort);
+
     return hostPort;
   }
 

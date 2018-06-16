@@ -4,7 +4,9 @@
 
 import 'dart:async';
 
+import 'base/common.dart';
 import 'base/io.dart';
+import 'base/port_scanner.dart';
 import 'device.dart';
 import 'globals.dart';
 
@@ -16,8 +18,10 @@ class ProtocolDiscovery {
     this.serviceName, {
     this.portForwarder,
     this.hostPort,
+    this.defaultHostPort,
     this.ipv6,
   }) : assert(logReader != null),
+       assert(portForwarder == null || defaultHostPort != null),
        _prefix = '$serviceName listening on ' {
     _deviceLogSubscription = logReader.logLines.listen(_handleLine);
   }
@@ -33,6 +37,7 @@ class ProtocolDiscovery {
       logReader, kObservatoryService,
       portForwarder: portForwarder,
       hostPort: hostPort,
+      defaultHostPort: kDefaultObservatoryPort,
       ipv6: ipv6,
     );
   }
@@ -41,6 +46,7 @@ class ProtocolDiscovery {
   final String serviceName;
   final DevicePortForwarder portForwarder;
   final int hostPort;
+  final int defaultHostPort;
   final bool ipv6;
 
   final String _prefix;
@@ -82,15 +88,16 @@ class ProtocolDiscovery {
     Uri hostUri = deviceUri;
 
     if (portForwarder != null) {
-      final int actualDevicePort = deviceUri.port;
-      final int actualHostPort = await portForwarder.forward(actualDevicePort, hostPort: hostPort);
-      printTrace('Forwarded host port $actualHostPort to device port $actualDevicePort for $serviceName');
-      hostUri = deviceUri.replace(port: actualHostPort);
+      final int devicePort = deviceUri.port;
+      int hostPort = this.hostPort ?? await portScanner.findPreferredPort(defaultHostPort);
+      hostPort = await portForwarder.forward(devicePort, hostPort: hostPort);
+      printTrace('Forwarded host port $hostPort to device port $devicePort for $serviceName');
+      hostUri = deviceUri.replace(port: hostPort);
     }
 
     assert(new InternetAddress(hostUri.host).isLoopback);
     if (ipv6) {
-      hostUri = hostUri.replace(host: InternetAddress.loopbackIPv6.host);
+      hostUri = hostUri.replace(host: InternetAddress.LOOPBACK_IP_V6.host); // ignore: deprecated_member_use
     }
 
     return hostUri;
