@@ -5,6 +5,8 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/widgets.dart';
 
+import 'semantics_tester.dart';
+
 void main() {
   testWidgets('Text respects media query', (WidgetTester tester) async {
     await tester.pumpWidget(const MediaQuery(
@@ -108,5 +110,30 @@ void main() {
     final RichText text = tester.firstWidget(find.byType(RichText));
     expect(text, isNotNull);
     expect(text.text.style.fontSize, 20.0);
+  });
+
+  testWidgets('semanticsLabel can override text label', (WidgetTester tester) async {
+    final SemanticsTester semantics = new SemanticsTester(tester);
+    await tester.pumpWidget(
+      const Text('\$\$', semanticsLabel: 'Double dollars', textDirection: TextDirection.ltr)
+    );
+    final TestSemantics expectedSemantics = new TestSemantics.root(
+      children: <TestSemantics>[
+        new TestSemantics.rootChild(
+          label: 'Double dollars',
+          textDirection: TextDirection.ltr,
+        ),
+      ],
+    );
+    expect(semantics, hasSemantics(expectedSemantics, ignoreTransform: true, ignoreId: true, ignoreRect: true));
+
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: const Text('\$\$', semanticsLabel: 'Double dollars')),
+    );
+
+    expect(semantics, hasSemantics(expectedSemantics, ignoreTransform: true, ignoreId: true, ignoreRect: true));
+    semantics.dispose();
   });
 }

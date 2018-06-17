@@ -66,6 +66,6 @@ dependencies:
 
 dev_dependencies:
   mockito: 3.0.0-alpha+5
-  test: 0.12.40
+  test: 0.12.41
 
-# PUBSPEC CHECKSUM: eaae
+# PUBSPEC CHECKSUM: ccaf
