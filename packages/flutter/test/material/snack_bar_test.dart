@@ -273,7 +273,7 @@ void main() {
                             content: const Text('hello'),
                             action: new SnackBarAction(label: 'test', onPressed: () {
                               pressed = true;
-                              Scaffold.of(context).showSnackBar(const SnackBar(content: const Text('test')));
+                              Scaffold.of(context).hideCurrentSnackBar();
                             }),
                             duration: const Duration(seconds: 2)
                         ));
@@ -292,11 +292,11 @@ void main() {
     await tester.tap(find.byKey(tapTarget));
     await tester.pump();
     expect(find.text('hello'), findsOneWidget);
-    await tester.pump(const Duration(seconds: 5));
+    await tester.pumpAndSettle(const Duration(seconds: 3));
     expect(find.text('hello'), findsOneWidget);
     await tester.tap(find.text('test'));
     expect(pressed, true);
-    await tester.pump(const Duration(seconds: 50));
+    await tester.pumpAndSettle(const Duration(seconds: 3));
     expect(find.text('hello'), findsNothing);
     semantics.dispose();
   });

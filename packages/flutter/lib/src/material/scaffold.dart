@@ -1509,13 +1509,13 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
       if (route == null || route.isCurrent) {
         final SnackBar snackBar = _snackBars.first._widget;
         if (_snackBarController.isCompleted && _snackBarTimer == null)
-          _snackBarTimer = new Timer.periodic(snackBar.duration, (Timer timer) {
+          _snackBarTimer = new Timer(snackBar.duration, () {
             assert(_snackBarController.status == AnimationStatus.forward ||
                    _snackBarController.status == AnimationStatus.completed);
             if (!semanticsEnabled || snackBar.action == null) {
-              timer.cancel();
               hideCurrentSnackBar(reason: SnackBarClosedReason.timeout);
             }
+            _snackBarTimer?.cancel();
           });
       } else {
         _snackBarTimer?.cancel();
