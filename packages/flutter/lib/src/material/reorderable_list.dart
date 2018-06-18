@@ -310,7 +310,9 @@ class _ReorderableListContentState extends State<_ReorderableListContent> with T
       setState(() {
         if (_dragStartIndex != _currentIndex)
           widget.onReorder(_dragStartIndex, _currentIndex);
-        // Ease the 
+        // Animates leftover space in the drop area closed.
+        // TODO(djshuckerow): bring the animation in line with the Material
+        // specifications.
         _ghostController.reverse(from: 0.1);
         _entranceController.reverse(from: 0.1);
         _dragging = null;
@@ -329,8 +331,8 @@ class _ReorderableListContentState extends State<_ReorderableListContent> with T
           // These constraints will limit the cross axis of the drawn widget.
           constraints: constraints,
           child: new Material(
-          elevation: 6.0,
-          child: new _FeedbackWrapper(
+            elevation: 6.0,
+            child: new _FeedbackWrapper(
               onUpdateSize: (Size newSize) {
                 setState(() {
                   _draggingFeedbackSize = newSize;
