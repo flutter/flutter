@@ -6,6 +6,8 @@ import 'dart:async';
 import 'dart:convert' show json;
 import 'dart:io';
 
+import 'package:meta/meta.dart';
+
 import '../framework/adb.dart';
 import '../framework/framework.dart';
 import '../framework/ios.dart';
@@ -362,14 +364,12 @@ class CompileTest {
   static Future<Map<String, dynamic>> getSizesFromApk(String apkPath) async {
     final  String output = await eval('unzip', <String>['-v', apkPath]);
     final List<String> lines = output.split('\n');
-
     final Map<String, _UnzipListEntry> fileToMetadata = <String, _UnzipListEntry>{};
 
     // First three lines are header, last two lines are footer.
     for (int i = 3; i < lines.length - 2; i++) {
-      final List<String> line = lines[i].trim().split(new RegExp('\\s+'));
-      assert(line.length == 8);
-      fileToMetadata[line[7]] = new _UnzipListEntry(line);
+      final _UnzipListEntry entry = new _UnzipListEntry.fromLine(lines[i]);
+      fileToMetadata[entry.path] = entry;
     }
 
     final _UnzipListEntry icudtl = fileToMetadata['assets/icudtl.dat'];
@@ -518,12 +518,26 @@ class AndroidBackButtonMemoryTest {
 }
 
 class _UnzipListEntry {
-  _UnzipListEntry(List<String> lines)
-      : assert(lines.length == 8),
-        uncompressedSize = int.parse(lines[0]),
-        compressedSize = int.parse(lines[2]),
-        assert(uncompressedSize >= compressedSize);
+  factory _UnzipListEntry.fromLine(String line) {
+    final List<String> data = line.trim().split(new RegExp('\\s+'));
+    assert(data.length == 8);
+    return new _UnzipListEntry._(
+      uncompressedSize:  int.parse(data[0]),
+      compressedSize: int.parse(data[2]),
+      path: data[7],
+    );
+  }
+
+  _UnzipListEntry._({
+    @required this.uncompressedSize,
+    @required this.compressedSize,
+    @required this.path,
+  }) : assert(uncompressedSize != null),
+       assert(compressedSize != null),
+       assert(compressedSize <= uncompressedSize),
+       assert(path != null);
 
   final int uncompressedSize;
   final int compressedSize;
+  final String path;
 }
