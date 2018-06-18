@@ -320,7 +320,7 @@ class _ReorderableListContentState extends State<_ReorderableListContent> with T
           constraints: constraints,
           child: new Material(
           elevation: 6.0,
-          child: new _SizeDetectingWidget(
+          child: new _FeedbackWrapper(
               onUpdateSize: (Size newSize) {
                 setState(() {
                   _draggingFeedbackSize = newSize;
@@ -431,9 +431,11 @@ class _ReorderableListContentState extends State<_ReorderableListContent> with T
   }
 }
 
-// Notifies its parent when its size has changed.
-class _SizeDetectingWidget extends StatefulWidget {
-  const _SizeDetectingWidget({Key key, this.child, this.onUpdateSize}) : super(key: key);
+// Wrapper around the dragging feedback in a _ReorderableListContent.
+//
+// Calls onUpdateSize when the child's size changes.
+class _FeedbackWrapper extends StatefulWidget {
+  const _FeedbackWrapper({Key key, this.child, this.onUpdateSize}) : super(key: key);
 
   final void Function(Size newSize) onUpdateSize;
   final Widget child;
@@ -442,7 +444,7 @@ class _SizeDetectingWidget extends StatefulWidget {
   _SizeDetectingWidgetState createState() => new _SizeDetectingWidgetState();
 }
 
-class _SizeDetectingWidgetState extends State<_SizeDetectingWidget> {
+class _SizeDetectingWidgetState extends State<_FeedbackWrapper> {
   @override
   void initState() {
     super.initState();
@@ -455,7 +457,7 @@ class _SizeDetectingWidgetState extends State<_SizeDetectingWidget> {
   }
 
   @override
-  void didUpdateWidget(_SizeDetectingWidget oldWidget) {
+  void didUpdateWidget(_FeedbackWrapper oldWidget) {
     super.didUpdateWidget(oldWidget);
     WidgetsBinding.instance.addPostFrameCallback(_computeSize);
   }
