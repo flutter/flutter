@@ -406,7 +406,6 @@ void main() {
         '--url_mapping=dart:vmservice_io,${fs.path.join(skyEnginePath, 'sdk_ext', 'vmservice_io.dart')}',
         '--embedder_entry_points_manifest=$kVmEntrypoints',
         '--embedder_entry_points_manifest=$kIoEntries',
-        '--dependencies=${fs.path.join(outputPath, 'snapshot.d')}',
         '--reify-generic-functions',
         '--strong',
         '--snapshot_kind=app-aot-assembly',
