@@ -32,7 +32,7 @@ class AttachCommand extends FlutterCommand {
   AttachCommand({bool verboseHelp = false}) {
     addBuildModeFlags(defaultToRelease: false);
     argParser.addOption('debug-port',
-        help: 'Local port where the observatory is listening. Required.');
+        help: 'Local port where the observatory is listening.');
   }
 
   @override
@@ -42,12 +42,30 @@ class AttachCommand extends FlutterCommand {
   final String description = 'Attach to a running application.';
 
   int get observatoryPort {
+    if (argResults['debug-port'] == null) return null;
     try {
       return int.parse(argResults['debug-port']);
     } catch (error) {
       throwToolExit('Invalid port for `--debug-port`: $error');
     }
     return null;
+  }
+
+  Future<int> listenForObservatoryStart(Device device) async {
+    await for (String line in device.getLogReader().logLines) {
+      if (line.contains('Observatory listening on http')) {
+        Match match = new RegExp(
+                r'Observatory listening on http://127\.0\.0\.1:([0-9]+)')
+            .firstMatch(line);
+        if (match == null) {
+          throwToolExit("Couldn't extract observatory port: $line");
+          return 0;
+        }
+        return int.parse(match[1]);
+      }
+    }
+    throwToolExit("Unexpected end of log.");
+    return -1;
   }
 
   @override
@@ -57,10 +75,15 @@ class AttachCommand extends FlutterCommand {
     await _validateArguments();
 
     final Device device = await findTargetDevice();
-    int localPort = await device.portForwarder.forward(observatoryPort);
+    var devicePort = observatoryPort;
+    if (devicePort == null) {
+      devicePort = await listenForObservatoryStart(device);
+    }
+    int localPort = await device.portForwarder.forward(devicePort);
+    device.getLogReader();
     try {
       final FlutterDevice flutterDevice =
-      new FlutterDevice(device, trackWidgetCreation: false);
+          new FlutterDevice(device, trackWidgetCreation: false);
       flutterDevice.observatoryUris = [
         Uri.parse('http://$ipv4Loopback:$localPort/')
       ]; // observatoryUris;
@@ -71,13 +94,10 @@ class AttachCommand extends FlutterCommand {
       );
       await hotRunner.attach();
     } finally {
-      device.portForwarder.unforward(new ForwardedPort(localPort, observatoryPort));
+      device.portForwarder
+          .unforward(new ForwardedPort(localPort, observatoryPort));
     }
   }
 
-  Future<void> _validateArguments() async {
-    if (argResults['debug-port'] == null) {
-      throwToolExit("Missing required parameter --debug-port");
-    }
-  }
+  Future<void> _validateArguments() async {}
 }
