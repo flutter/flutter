@@ -10,17 +10,17 @@
 namespace blink {
 
 struct ViewportMetrics {
-  double device_pixel_ratio = 1.0;
-  double physical_width = 0;
-  double physical_height = 0;
-  double physical_padding_top = 0;
-  double physical_padding_right = 0;
-  double physical_padding_bottom = 0;
-  double physical_padding_left = 0;
-  double physical_view_inset_top = 0;
-  double physical_view_inset_right = 0;
-  double physical_view_inset_bottom = 0;
-  double physical_view_inset_left = 0;
+  float device_pixel_ratio = 1.0;
+  int32_t physical_width = 0;
+  int32_t physical_height = 0;
+  int32_t physical_padding_top = 0;
+  int32_t physical_padding_right = 0;
+  int32_t physical_padding_bottom = 0;
+  int32_t physical_padding_left = 0;
+  int32_t physical_view_inset_top = 0;
+  int32_t physical_view_inset_right = 0;
+  int32_t physical_view_inset_bottom = 0;
+  int32_t physical_view_inset_left = 0;
 };
 
 struct LogicalSize {
