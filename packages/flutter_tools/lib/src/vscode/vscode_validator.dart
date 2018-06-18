@@ -10,7 +10,7 @@ import 'vscode.dart';
 
 class VsCodeValidator extends DoctorValidator {
   static const String extensionMarketplaceUrl =
-    'https://marketplace.visualstudio.com/items?itemName=Dart-Code.flutter';
+    'https://marketplace.visualstudio.com/items?itemName=${VsCode.extensionIdentifier}';
   final VsCode _vsCode;
 
   VsCodeValidator(this._vsCode) : super(_vsCode.productName);
