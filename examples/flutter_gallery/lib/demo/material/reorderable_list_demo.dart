@@ -29,7 +29,8 @@ class ReorderableListDemo extends StatefulWidget {
 class _ListItem {
   _ListItem(this.value, this.checkState);
 
-  String value;
+  final String value;
+
   bool checkState;
 }
 
