@@ -35,6 +35,7 @@ void main() {
   });
 
   group('FlutterTesterDevice', () {
+    // This test fails on Windows due to https://github.com/flutter/flutter/issues/17833
     testUsingContext('can hot reload', () async {
       await _setupSampleProject();
 
