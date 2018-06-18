@@ -85,7 +85,7 @@ void main() {
     await expectLater(
       find.byType(RepaintBoundary),
       matchesGoldenFile('text_golden.Foreground.gradient.png'),
-      skip: !Platform.Linux,
+      skip: !Platform.isLinux,
     );
 
     await tester.pumpWidget(
@@ -107,7 +107,7 @@ void main() {
     await expectLater(
       find.byType(RepaintBoundary),
       matchesGoldenFile('text_golden.Foreground.stroke.png'),
-      skip: !Platform.Linux,
+      skip: !Platform.isLinux,
     );
 
     await tester.pumpWidget(
@@ -130,7 +130,7 @@ void main() {
     await expectLater(
       find.byType(RepaintBoundary),
       matchesGoldenFile('text_golden.Foreground.stroke_and_gradient.png'),
-      skip: !Platform.Linux,
+      skip: !Platform.isLinux,
     );
   });
 }
