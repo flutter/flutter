@@ -310,6 +310,7 @@ class _ReorderableListContentState extends State<_ReorderableListContent> with T
       setState(() {
         if (_dragStartIndex != _currentIndex)
           widget.onReorder(_dragStartIndex, _currentIndex);
+        // Ease the 
         _ghostController.reverse(from: 0.1);
         _entranceController.reverse(from: 0.1);
         _dragging = null;
@@ -450,10 +451,10 @@ class _FeedbackWrapper extends StatefulWidget {
   final Widget child;
 
   @override
-  _SizeDetectingWidgetState createState() => new _SizeDetectingWidgetState();
+  _FeedbackWrapperState createState() => new _FeedbackWrapperState();
 }
 
-class _SizeDetectingWidgetState extends State<_FeedbackWrapper> {
+class _FeedbackWrapperState extends State<_FeedbackWrapper> {
   @override
   void initState() {
     super.initState();
