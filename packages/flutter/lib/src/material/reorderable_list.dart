@@ -143,17 +143,17 @@ class _ReorderableListContentState extends State<_ReorderableListContent> with T
   //
   // This value is used when the extents haven't yet been calculated from
   // the currently dragging widget, such as when it first builds.
-  static const double _kDefaultDropAreaExtent = 100.0;
+  static const double _defaultDropAreaExtent = 100.0;
 
   // The additional margin to place around a computed drop area.
-  static const double _kDropAreaMargin = 8.0;
+  static const double _dropAreaMargin = 8.0;
 
   // How long an animation to reorder an element in the list takes.
-  static const Duration _kReorderAnimationDuration = const Duration(milliseconds: 200);
+  static const Duration _reorderAnimationDuration = const Duration(milliseconds: 200);
 
   // How long an animation to scroll to an off-screen element in the
   // list takes.
-  static const Duration _kScrollAnimationDuration = const Duration(milliseconds: 200);
+  static const Duration _scrollAnimationDuration = const Duration(milliseconds: 200);
 
   // Controls scrolls and measures scroll progress.
   final ScrollController _scrollController = new ScrollController();
@@ -191,19 +191,19 @@ class _ReorderableListContentState extends State<_ReorderableListContent> with T
 
   double get _dropAreaExtent {
     if (_draggingFeedbackSize == null) {
-      return _kDefaultDropAreaExtent;
+      return _defaultDropAreaExtent;
     }
     final double dropAreaWithoutMargin = widget.scrollDirection == Axis.vertical
         ? _draggingFeedbackSize.height
         : _draggingFeedbackSize.width;
-    return dropAreaWithoutMargin + _kDropAreaMargin;
+    return dropAreaWithoutMargin + _dropAreaMargin;
   }
 
   @override 
   void initState() {
     super.initState();
-    _entranceController = new AnimationController(vsync: this, value: 0.0, duration: _kReorderAnimationDuration);
-    _ghostController = new AnimationController(vsync: this, value: 0.0, duration: _kReorderAnimationDuration);
+    _entranceController = new AnimationController(vsync: this, value: 0.0, duration: _reorderAnimationDuration);
+    _ghostController = new AnimationController(vsync: this, value: 0.0, duration: _reorderAnimationDuration);
     _entranceController.addStatusListener(_onEntranceStatusChanged);
   }
 
@@ -262,7 +262,7 @@ class _ReorderableListContentState extends State<_ReorderableListContent> with T
       _scrolling = true;
       _scrollController.position.animateTo(
         scrollOffset < bottomOffset ? bottomOffset : topOffset, 
-        duration: _kScrollAnimationDuration, 
+        duration: _scrollAnimationDuration, 
         curve: Curves.easeInOut,
       ).then((Null none) {
         setState(() {
