@@ -12,7 +12,7 @@ void main() {
     const List<String> originalListItems = const <String>['Item 1', 'Item 2', 'Item 3', 'Item 4'];
     List<String> listItems;
 
-    void onSwap(int oldIndex, int newIndex) {
+    void onReorder(int oldIndex, int newIndex) {
       if (oldIndex < newIndex) {
         newIndex -= 1;
       }
@@ -36,7 +36,7 @@ void main() {
           child: new ReorderableListView(
             children: listItems.map(listItemToWidget).toList(),
             scrollDirection: scrollDirection,
-            onReorder: onSwap,
+            onReorder: onReorder,
           ),
         ),
       );

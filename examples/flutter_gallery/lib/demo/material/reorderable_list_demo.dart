@@ -138,7 +138,7 @@ class _ListDemoState extends State<ReorderableListDemo> {
     return listTile;
   }
 
-  void _onSwap(int oldIndex, int newIndex) {
+  void _onReorder(int oldIndex, int newIndex) {
     setState(() {
       if (newIndex > oldIndex) {
         newIndex -= 1;
@@ -175,7 +175,7 @@ class _ListDemoState extends State<ReorderableListDemo> {
       ),
       body: new Scrollbar(
         child: new ReorderableListView(
-          onReorder: _onSwap,
+          onReorder: _onReorder,
           scrollDirection: _itemType == _ReorderableListType.horizontalAvatar ? Axis.horizontal : Axis.vertical,
           padding: const EdgeInsets.symmetric(vertical: 8.0),
           children: _items.map(buildListTile).toList(),

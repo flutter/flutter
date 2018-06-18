@@ -24,7 +24,8 @@ import 'material.dart';
 /// 
 /// ```dart
 /// final List<MyDataObject> backingList = <MyDataObject>[/* ... */];
-/// void onSwap(int oldIndex, int newIndex) {
+/// 
+/// void onReorder(int oldIndex, int newIndex) {
 ///   if (oldIndex < newIndex) {
 ///     // removing the item at oldIndex will shorten the list by 1.
 ///     newIndex -= 1;
@@ -100,7 +101,7 @@ class _ReorderableListViewState extends State<ReorderableListView> {
         return new _ReorderableListContent(
           children: widget.children,
           scrollDirection: widget.scrollDirection,
-          onSwap: widget.onReorder,
+          onReorder: widget.onReorder,
           padding: widget.padding,
         );
       },
@@ -124,13 +125,13 @@ class _ReorderableListContent extends StatefulWidget {
     @required this.children,
     @required this.scrollDirection,
     @required this.padding,
-    @required this.onSwap,
+    @required this.onReorder,
   });
         
   final List<Widget> children;
   final Axis scrollDirection;
   final EdgeInsets padding;
-  final OnReorderCallback onSwap;
+  final OnReorderCallback onReorder;
 
   @override
   _ReorderableListContentState createState() => new _ReorderableListContentState();
@@ -300,7 +301,7 @@ class _ReorderableListContentState extends State<_ReorderableListContent> with T
     void onDragEnded() {
       setState(() {
         if (_dragStartIndex != _currentIndex)
-          widget.onSwap(_dragStartIndex, _currentIndex);
+          widget.onReorder(_dragStartIndex, _currentIndex);
         _ghostController.reverse(from: 0.1);
         _entranceController.reverse(from: 0.1);
         _dragging = null;
@@ -335,10 +336,10 @@ class _ReorderableListContentState extends State<_ReorderableListContent> with T
         dragAnchor: DragAnchor.child,
         onDragStarted: onDragStarted,
         // When the drag ends inside a DragTarget widget, the drag
-        // succeeds, and we swap the widget into position appropriately.
+        // succeeds, and we reorder the widget into position appropriately.
         onDragCompleted: onDragEnded,
         // When the drag does not end inside a DragTarget widget, the
-        // drag fails, but we still swap the widget to the last position it
+        // drag fails, but we still reorder the widget to the last position it
         // had been dragged to.
         onDraggableCanceled: (Velocity velocity, Offset offset) {
           onDragEnded();
