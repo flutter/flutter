@@ -141,8 +141,8 @@ class _ReorderableListContentState extends State<_ReorderableListContent> with T
   // The extent along the [widget.scrollDirection] axis to allow a child to
   // drop into when the user reorders list children.
   //
-  // This value is used as a fallback when the extents haven't yet been
-  // calculated from the currently dragging widget.
+  // This value is used when the extents haven't yet been calculated from
+  // the currently dragging widget, such as when it first builds.
   static const double _kDefaultDropAreaExtent = 100.0;
 
   // The additional margin to place around a computed drop area.
