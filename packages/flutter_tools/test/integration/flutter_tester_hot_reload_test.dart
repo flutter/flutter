@@ -224,8 +224,8 @@ Future<Map<String, dynamic>> _waitFor(Stream<String> stdout, Stream<String> stde
     }
   });
   // TODO(dantup): Why can't I remove this Null/Null/Object?
-  final Future<Null> timeout = Future<Null>.delayed(const Duration(seconds: 30))
-      .then((Object a) => throw 'Did not receive expected event/response within 10s.\n'
+  final Future<void> timeout = new Future<void>.delayed(const Duration(seconds: 30))
+      .then((Object _) => throw 'Did not receive expected event/response within 10s.\n'
           'Did get:\n${messages.toString()}');
   try {
     return await Future.any(<Future<Map<String, dynamic>>>[response.future, timeout]);
