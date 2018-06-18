@@ -69,13 +69,15 @@ void main() {
 
     await tester.pumpWidget(
       new RepaintBoundary(
-        child: new Text('Hello',
-          textDirection: TextDirection.ltr,
-          style: new TextStyle(
-            foreground: new Paint()
-              ..color = black
-              ..shader = linearGradient
-          )
+        child: new Center(
+          child: new Text('Hello',
+            textDirection: TextDirection.ltr,
+            style: new TextStyle(
+              foreground: new Paint()
+                ..color = black
+                ..shader = linearGradient
+            ),
+          ),
         ),
       ),
     );
@@ -83,19 +85,21 @@ void main() {
     await expectLater(
       find.byType(RepaintBoundary),
       matchesGoldenFile('text_golden.Foreground.gradient.png'),
-      skip: !Platform.isLinux,
+      skip: !Platform.Linux,
     );
 
     await tester.pumpWidget(
       new RepaintBoundary(
-        child: new Text('Hello', 
-          textDirection: TextDirection.ltr,          
-          style: new TextStyle(
-            foreground: new Paint()
-              ..color = black
-              ..style = PaintingStyle.stroke
-              ..strokeWidth = 2.0
-          )
+        child: new Center(
+          child: new Text('Hello', 
+            textDirection: TextDirection.ltr,          
+            style: new TextStyle(
+              foreground: new Paint()
+                ..color = black
+                ..style = PaintingStyle.stroke
+                ..strokeWidth = 2.0
+            ),
+          ),
         ),
       ),
     );
@@ -103,20 +107,22 @@ void main() {
     await expectLater(
       find.byType(RepaintBoundary),
       matchesGoldenFile('text_golden.Foreground.stroke.png'),
-      skip: !Platform.isLinux,
+      skip: !Platform.Linux,
     );
 
     await tester.pumpWidget(
       new RepaintBoundary(
-        child: new Text('Hello', 
-          textDirection: TextDirection.ltr,          
-          style: new TextStyle(
-            foreground: new Paint()
-              ..color = black
-              ..style = PaintingStyle.stroke
-              ..strokeWidth = 2.0
-              ..shader = linearGradient
-          )
+        child: new Center(
+          child: new Text('Hello', 
+            textDirection: TextDirection.ltr,          
+            style: new TextStyle(
+              foreground: new Paint()
+                ..color = black
+                ..style = PaintingStyle.stroke
+                ..strokeWidth = 2.0
+                ..shader = linearGradient
+            ),
+          ),
         ),
       ),
     );
@@ -124,7 +130,7 @@ void main() {
     await expectLater(
       find.byType(RepaintBoundary),
       matchesGoldenFile('text_golden.Foreground.stroke_and_gradient.png'),
-      skip: !Platform.isLinux,
+      skip: !Platform.Linux,
     );
   });
 }
