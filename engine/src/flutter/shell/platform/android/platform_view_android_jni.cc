@@ -211,8 +211,8 @@ static void RunBundleAndSnapshot(
     // bundle or a zip asset bundle.
     const auto file_ext_index = bundlepath.rfind(".");
     if (bundlepath.substr(file_ext_index) == ".zip") {
-      asset_manager->PushBack(std::make_unique<blink::ZipAssetStore>(
-          bundlepath));
+      asset_manager->PushBack(
+          std::make_unique<blink::ZipAssetStore>(bundlepath));
     } else {
       asset_manager->PushBack(std::make_unique<blink::DirectoryAssetBundle>(
           fml::OpenFile(bundlepath.c_str(), fml::OpenPermission::kRead, true)));
@@ -332,17 +332,18 @@ static void SetViewportMetrics(JNIEnv* env,
                                jint physicalViewInsetBottom,
                                jint physicalViewInsetLeft) {
   const blink::ViewportMetrics metrics = {
-      .device_pixel_ratio = devicePixelRatio,
-      .physical_width = physicalWidth,
-      .physical_height = physicalHeight,
-      .physical_padding_top = physicalPaddingTop,
-      .physical_padding_right = physicalPaddingRight,
-      .physical_padding_bottom = physicalPaddingBottom,
-      .physical_padding_left = physicalPaddingLeft,
-      .physical_view_inset_top = physicalViewInsetTop,
-      .physical_view_inset_right = physicalViewInsetRight,
-      .physical_view_inset_bottom = physicalViewInsetBottom,
-      .physical_view_inset_left = physicalViewInsetLeft,
+      .device_pixel_ratio = static_cast<double>(devicePixelRatio),
+      .physical_width = static_cast<double>(physicalWidth),
+      .physical_height = static_cast<double>(physicalHeight),
+      .physical_padding_top = static_cast<double>(physicalPaddingTop),
+      .physical_padding_right = static_cast<double>(physicalPaddingRight),
+      .physical_padding_bottom = static_cast<double>(physicalPaddingBottom),
+      .physical_padding_left = static_cast<double>(physicalPaddingLeft),
+      .physical_view_inset_top = static_cast<double>(physicalViewInsetTop),
+      .physical_view_inset_right = static_cast<double>(physicalViewInsetRight),
+      .physical_view_inset_bottom =
+          static_cast<double>(physicalViewInsetBottom),
+      .physical_view_inset_left = static_cast<double>(physicalViewInsetLeft),
   };
 
   ANDROID_SHELL_HOLDER->SetViewportMetrics(metrics);
