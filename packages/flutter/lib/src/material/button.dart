@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
 import 'button_theme.dart';
@@ -187,22 +188,14 @@ class _RawMaterialButtonState extends State<RawMaterialButton> {
         ),
       ),
     );
-
-    if (widget.outerConstraints != null) {
-      result = new ConstrainedBox(
-        constraints: widget.outerConstraints,
-        child: new GestureDetector(
-          behavior: HitTestBehavior.translucent,
-          excludeFromSemantics: true,
-          onTap: widget.onPressed,
-          child: new Center(
-            child: result,
-            widthFactor: 1.0,
-            heightFactor: 1.0,
-          ),
-        ),
-      );
-    }
+    result = new _RedirectingHitDetectionWidget(
+      constraints: widget.outerConstraints ?? const BoxConstraints(),
+      child: new Center(
+        child: result,
+        widthFactor: 1.0,
+        heightFactor: 1.0,
+      ),
+    );
 
     return new Semantics(
       container: true,
@@ -404,7 +397,7 @@ class MaterialButton extends StatelessWidget {
     BoxConstraints outerConstraints;
     switch (theme.materialTapTargetSize) {
       case MaterialTapTargetSize.padded:
-        outerConstraints = const BoxConstraints(minHeight: 48.0, minWidth: 48.0);
+        outerConstraints = const BoxConstraints(minHeight: 248.0, minWidth: 148.0);
         break;
       case MaterialTapTargetSize.shrinkWrap:
         break;
@@ -433,5 +426,36 @@ class MaterialButton extends StatelessWidget {
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(new FlagProperty('enabled', value: enabled, ifFalse: 'disabled'));
+  }
+}
+
+/// Redirects the position passed to [RenderBox.hitTest] to the center of the widget.
+///
+/// The primary purpose of this widget is to allow padding around [Material] widgets
+/// to trigger the child ink feature without increasing the size of the material.
+class _RedirectingHitDetectionWidget extends SingleChildRenderObjectWidget {
+  const _RedirectingHitDetectionWidget({this.constraints, Widget child}) : super(child: child);
+
+  final BoxConstraints constraints;
+
+  @override
+  RenderObject createRenderObject(BuildContext context) {
+    return _RedirectingHitDetectionRenderObject(constraints);
+  }
+
+  @override
+  void updateRenderObject(BuildContext context, covariant _RedirectingHitDetectionRenderObject renderObject) {
+    renderObject.additionalConstraints = constraints;
+  }
+}
+
+class _RedirectingHitDetectionRenderObject extends RenderConstrainedBox {
+  _RedirectingHitDetectionRenderObject(BoxConstraints additionalConstraints) : super(additionalConstraints: additionalConstraints);
+
+  @override
+  bool hitTest(HitTestResult result, {Offset position}) {
+    if (!size.contains(position))
+      return false;
+    return child.hitTest(result, position: size.center(Offset.zero));
   }
 }
