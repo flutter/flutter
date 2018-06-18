@@ -82,7 +82,7 @@ void main() {
       }
     }, skip: true);
 
-    // This test fails on Windows due to https://github.com/flutter/flutter/issues/18441
+    // This test fails due to https://github.com/flutter/flutter/issues/18441
     testUsingContext('can reload if breakpoints have file:// prefixes', () async {
       await _setupSampleProject();
 
