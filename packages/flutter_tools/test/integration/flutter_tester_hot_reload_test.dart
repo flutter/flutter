@@ -80,7 +80,7 @@ void main() {
       } catch (e) {
         throw '$e\n${errorBuffer.toString()}';
       }
-    }, skip: true);
+    });
 
     // This test fails due to https://github.com/flutter/flutter/issues/18441
     testUsingContext('can reload if breakpoints have file:// prefixes', () async {
