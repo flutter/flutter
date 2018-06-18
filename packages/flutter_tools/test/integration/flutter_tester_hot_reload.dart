@@ -10,6 +10,7 @@ import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:process/process.dart';
 import 'package:test/test.dart';
+import 'package:vm_service_client/vm_service_client.dart';
 
 import '../src/common.dart';
 import '../src/context.dart';
@@ -79,6 +80,65 @@ void main() {
       } catch (e) {
         throw '$e\n${errorBuffer.toString()}';
       }
+    }, skip: true);
+
+    // This test fails on Windows due to https://github.com/flutter/flutter/issues/18441
+    testUsingContext('can reload if breakpoints have file:// prefixes', () async {
+      await _setupSampleProject();
+
+      final Process proc = await _runFlutter(_tempDir);
+
+      // Make broadcast streams so we can have many listeners
+      final StreamController<String> stdout = new StreamController<String>.broadcast();
+      final StreamController<String> stderr = new StreamController<String>.broadcast();
+      _transformToLines(proc.stdout).listen((String line) => stdout.add(line));
+      _transformToLines(proc.stderr).listen((String line) => stderr.add(line));
+
+      // Capture stderr to a buffer for better error messages
+      final StringBuffer errorBuffer = new StringBuffer();
+      stderr.stream.listen(errorBuffer.writeln);
+
+      if (_printJsonAndStderr) {
+        stdout.stream.listen(print);
+        stderr.stream.listen(print);
+      }
+
+      try {
+        final Future<Map<String, dynamic>> started = _waitFor(stdout.stream, stderr.stream, event: 'app.started');
+        final Future<Map<String, dynamic>> debugPort = _waitFor(stdout.stream, stderr.stream, event: 'app.debugPort');
+
+        final String appId = (await started)['params']['appId'];
+        final String wsUri = (await debugPort)['params']['wsUri'];
+
+        final VMServiceClient vmService = new VMServiceClient.connect(wsUri);
+        final VM vm = await vmService.getVM();
+        VMIsolate isolate = await vm.isolates.first.load();
+
+        // Add a breakpoint using a file:// URI.
+        final String breakpoint = new Uri.file(fs.path.join(_tempDir.path, 'lib', 'main.dart')).toString();
+        await isolate.addBreakpoint(breakpoint, 8);
+
+        final Map<String, dynamic> hotReloadResp = await _send(
+            stdout.stream,
+            stderr.stream,
+            proc.stdin,
+            'app.restart',
+            <String, dynamic>{'appId': appId, 'fullRestart': false});
+
+        if (hotReloadResp['error'] != null || hotReloadResp['result'] == false)
+          throw 'Unexpected error response: ${hotReloadResp['error']}\n\n${errorBuffer.toString()}';
+
+        // Ensure we hit the breakpoint/
+        await isolate.waitUntilPaused();
+        isolate = await isolate.load();
+        expect(isolate.pauseEvent, const isInstanceOf<VMPauseBreakpointEvent>());
+
+        // Send a stop request and wait for exit.
+        await _send(stdout.stream, stderr.stream, proc.stdin, 'app.stop', <String, dynamic>{'appId': appId});
+        await proc.exitCode;
+      } catch (e) {
+        throw '$e\n${errorBuffer.toString()}';
+      }
     });
   }, timeout: const Timeout.factor(3));
 }
@@ -113,7 +173,8 @@ Future<Process> _runFlutter(Directory projectDir) async {
     'run',
     '--machine',
     '-d',
-    'flutter-tester'
+    'flutter-tester',
+    '--observatory-port=0',
   ];
   if (_printJsonAndStderr) {
     print('Spawning $command in ${projectDir.path}');
