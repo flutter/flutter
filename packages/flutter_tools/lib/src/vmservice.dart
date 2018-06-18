@@ -21,7 +21,7 @@ import 'globals.dart';
 import 'vmservice_record_replay.dart';
 
 /// A function that opens a two-way communication channel to the specified [uri].
-typedef Future<StreamChannel<String>> _OpenChannel(Uri uri);
+typedef _OpenChannel = Future<StreamChannel<String>> Function(Uri uri);
 
 _OpenChannel _openChannel = _defaultOpenChannel;
 
@@ -36,13 +36,13 @@ _OpenChannel _openChannel = _defaultOpenChannel;
 /// hot mode.
 ///
 /// See: https://github.com/dart-lang/sdk/issues/30023
-typedef Future<Null> ReloadSources(
+typedef ReloadSources = Future<Null> Function(
   String isolateId, {
   bool force,
   bool pause,
 });
 
-typedef Future<String> CompileExpression(
+typedef CompileExpression = Future<String> Function(
   String isolateId,
   String expression,
   List<String> definitions,

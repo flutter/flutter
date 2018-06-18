@@ -31,7 +31,7 @@ export 'dart:ui' show Locale;
 /// The `locale` is the device's locale when the app started, or the device
 /// locale the user selected after the app was started. The `supportedLocales`
 /// parameter is just the value of [WidgetsApp.supportedLocales].
-typedef Locale LocaleResolutionCallback(Locale locale, Iterable<Locale> supportedLocales);
+typedef LocaleResolutionCallback = Locale Function(Locale locale, Iterable<Locale> supportedLocales);
 
 /// The signature of [WidgetsApp.onGenerateTitle].
 ///
@@ -41,7 +41,7 @@ typedef Locale LocaleResolutionCallback(Locale locale, Iterable<Locale> supporte
 /// localized title.
 ///
 /// This function must not return null.
-typedef String GenerateAppTitle(BuildContext context);
+typedef GenerateAppTitle = String Function(BuildContext context);
 
 /// A convenience class that wraps a number of widgets that are commonly
 /// required for an application.

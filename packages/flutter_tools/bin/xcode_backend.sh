@@ -147,7 +147,7 @@ BuildApp() {
         -install_name '@rpath/App.framework/App' \
         -o "${derived_dir}/App.framework/App" -)"
   fi
-  RunCommand cp -- "${derived_dir}/AppFrameworkInfo.plist" "${derived_dir}/App.framework/Info.plist"
+  RunCommand cp -- "${project_path}/ios/Flutter/AppFrameworkInfo.plist" "${derived_dir}/App.framework/Info.plist"
 
   local precompilation_flag=""
   if [[ "$CURRENT_ARCH" != "x86_64" ]] && [[ "$build_mode" != "debug" ]]; then

@@ -78,6 +78,7 @@ class FloatingActionButton extends StatefulWidget {
     this.mini = false,
     this.notchMargin = 4.0,
     this.shape = const CircleBorder(),
+    this.materialTapTargetSize,
     this.isExtended = false,
   }) :  assert(elevation != null),
         assert(highlightElevation != null),
@@ -105,6 +106,7 @@ class FloatingActionButton extends StatefulWidget {
     this.notchMargin = 4.0,
     this.shape = const StadiumBorder(),
     this.isExtended = true,
+    this.materialTapTargetSize,
     @required Widget icon,
     @required Widget label,
   }) :  assert(elevation != null),
@@ -223,6 +225,15 @@ class FloatingActionButton extends StatefulWidget {
   /// floating action buttons are scaled and faded in.
   final bool isExtended;
 
+  /// Configures the minimum size of the tap target.
+  ///
+  /// Defaults to [ThemeData.materialTapTargetSize].
+  ///
+  /// See also:
+  ///
+  ///   * [MaterialTapTargetSize], for a description of how this affects tap targets.
+  final MaterialTapTargetSize materialTapTargetSize;
+
   final BoxConstraints _sizeConstraints;
 
   @override
@@ -264,21 +275,12 @@ class _FloatingActionButtonState extends State<FloatingActionButton> {
       result = widget.child != null ? tooltip : new SizedBox.expand(child: tooltip);
     }
 
-    BoxConstraints outerConstraints;
-    switch (theme.materialTapTargetSize) {
-      case MaterialTapTargetSize.padded:
-        outerConstraints = const BoxConstraints(minHeight: 48.0, minWidth: 48.0);
-        break;
-      case MaterialTapTargetSize.shrinkWrap:
-        break;
-    }
-
     result = new RawMaterialButton(
       onPressed: widget.onPressed,
       onHighlightChanged: _handleHighlightChanged,
       elevation: _highlight ? widget.highlightElevation : widget.elevation,
       constraints: widget._sizeConstraints,
-      outerConstraints: widget.mini ? outerConstraints : null,
+      materialTapTargetSize: widget.materialTapTargetSize ?? theme.materialTapTargetSize,
       fillColor: widget.backgroundColor ?? theme.accentColor,
       textStyle: theme.accentTextTheme.button.copyWith(
         color: foregroundColor,

@@ -63,6 +63,7 @@ class FlatButton extends StatelessWidget {
     this.colorBrightness,
     this.padding,
     this.shape,
+    this.materialTapTargetSize,
     @required this.child,
   }) : super(key: key);
 
@@ -86,6 +87,7 @@ class FlatButton extends StatelessWidget {
     this.splashColor,
     this.colorBrightness,
     this.shape,
+    this.materialTapTargetSize,
     @required Widget icon,
     @required Widget label,
   }) : assert(icon != null),
@@ -186,6 +188,15 @@ class FlatButton extends StatelessWidget {
   /// Defaults to the theme's brightness, [ThemeData.brightness].
   final Brightness colorBrightness;
 
+  /// Configures the minimum size of the tap target.
+  ///
+  /// Defaults to [ThemeData.materialTapTargetSize].
+  ///
+  /// See also:
+  ///
+  ///   * [MaterialTapTargetSize], for a description of how this affects tap targets.
+  final MaterialTapTargetSize materialTapTargetSize;
+
   /// The widget below this widget in the tree.
   ///
   /// Typically a [Text] widget in all caps.
@@ -281,14 +292,6 @@ class FlatButton extends StatelessWidget {
     final ButtonThemeData buttonTheme = ButtonTheme.of(context);
     final Color fillColor = enabled ? color : disabledColor;
     final Color textColor = _getTextColor(theme, buttonTheme, fillColor);
-    BoxConstraints outerConstraints;
-    switch (theme.materialTapTargetSize) {
-      case MaterialTapTargetSize.padded:
-        outerConstraints = const BoxConstraints(minHeight: 48.0, minWidth: 48.0);
-        break;
-      case MaterialTapTargetSize.shrinkWrap:
-        break;
-    }
 
     return new RawMaterialButton(
       onPressed: onPressed,
@@ -299,7 +302,7 @@ class FlatButton extends StatelessWidget {
       splashColor: _getSplashColor(theme, buttonTheme),
       elevation: 0.0,
       highlightElevation: 0.0,
-      outerConstraints: outerConstraints,
+      materialTapTargetSize: materialTapTargetSize ?? theme.materialTapTargetSize,
       padding: padding ?? buttonTheme.padding,
       constraints: buttonTheme.constraints,
       shape: shape ?? buttonTheme.shape,
@@ -321,5 +324,6 @@ class FlatButton extends StatelessWidget {
     properties.add(new DiagnosticsProperty<Brightness>('colorBrightness', colorBrightness, defaultValue: null));
     properties.add(new DiagnosticsProperty<EdgeInsetsGeometry>('padding', padding, defaultValue: null));
     properties.add(new DiagnosticsProperty<ShapeBorder>('shape', shape, defaultValue: null));
+    properties.add(new DiagnosticsProperty<MaterialTapTargetSize>('materialTapTargetSize', materialTapTargetSize, defaultValue: null));
   }
 }

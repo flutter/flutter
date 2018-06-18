@@ -130,7 +130,7 @@ class UpdatePackagesCommand extends FlutterCommand {
           // we need to run update-packages to recapture the transitive deps.
           printError(
             'Warning: pubspec in ${directory.path} has invalid dependencies. '
-            'Please run "flutter update-packages" --force-upgrade to update them correctly.'
+            'Please run "flutter update-packages --force-upgrade" to update them correctly.'
           );
           needsUpdate = true;
         } else {
