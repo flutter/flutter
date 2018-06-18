@@ -64,14 +64,24 @@ Color _colorFromHue(
 
 /// A color represented using [alpha], [hue], [saturation], and [value].
 ///
-/// An [HSVColor] is represented in a parameter space that's motivated by human
-/// perception. The representation is useful for some color computations (e.g.,
-/// rotating the hue through the colors of the rainbow).
+/// An [HSVColor] is represented in a parameter space that's based on human
+/// perception of color in pigments (e.g. paint and printer's ink). The
+/// representation is useful for some color computations (e.g. rotating the hue
+/// through the colors), because interpolation and picking of
+/// colors as red, green, and blue channels doesn't always produce intuitive
+/// results.
+///
+/// The HSV color space models the way that different pigments are perceived
+/// when mixed. The hue describes which pigment is used, the saturation
+/// describes which shade of the pigment, and the value resembles mixing the
+/// pigment with different amounts of black or white pigment.
 ///
 /// See also:
 ///
-///   * [HSLColor], a color where the brightness is represented by lightness
-///     instead of value.
+///   * [HSLColor], a color that uses a color space based on human perception of
+///     colored light.
+///   * [HSV and HSL](https://en.wikipedia.org/wiki/HSL_and_HSV) Wikipedia
+///     article, which this implementation is based upon.
 @immutable
 class HSVColor {
   /// Creates a color.
@@ -119,13 +129,13 @@ class HSVColor {
   /// Hue, from 0.0 to 360.0. Describes which color of the spectrum is
   /// represented. A value of 0.0 represents red, as does 360.0. Values in
   /// between go through all the hues representable in RGB. You can think of
-  /// this as selecting which pigment will be added.
+  /// this as selecting which pigment will be added to a color.
   final double hue;
 
   /// Saturation, from 0.0 to 1.0. This describes how colorful the color is.
   /// 0.0 implies a shade of grey (i.e. no pigment), and 1.0 implies a color as
   /// vibrant as that hue gets. You can think of this as the equivalent of
-  /// adding more pigment to get more color.
+  /// how much of a pigment is added.
   final double saturation;
 
   /// Value, from 0.0 to 1.0. The "value" of a color that, in this context,
@@ -235,14 +245,24 @@ class HSVColor {
 
 /// A color represented using [alpha], [hue], [saturation], and [lightness].
 ///
-/// An [HSLColor] is represented in a parameter space that's motivated by human
+/// An [HSLColor] is represented in a parameter space that's based up human
 /// perception of colored light. The representation is useful for some color
-/// computations (e.g., rotating the hue through the colors of the rainbow).
+/// computations (e.g., combining colors of light), because interpolation and
+/// picking of colors as red, green, and blue channels doesn't always produce
+/// intuitive results.
+///
+/// HSL is a perceptual color model, placing fully saturated colors around a
+/// circle (conceptually) at a lightness of ​0.5, with a lightness of 0.0 being
+/// completely black, and a lightness of 1.0 being completely white. As the
+/// lightness increases or decreases from 0.5, the apparent saturation decreases
+/// proportionally (even though the [saturation] parameter hasn't changed).
 ///
 /// See also:
 ///
-///   * [HSVColor], a color where the brightness is based on a pigment model of
-///     color combination.
+///   * [HSVColor], a color that uses a color space based on human perception of
+///     pigments (e.g. paint and printer's ink).
+///   * [HSV and HSL](https://en.wikipedia.org/wiki/HSL_and_HSV) Wikipedia
+///     article, which this implementation is based upon.
 @immutable
 class HSLColor {
   /// Creates a color.
@@ -397,9 +417,9 @@ class HSLColor {
       return false;
     final HSLColor typedOther = other;
     return typedOther.alpha == alpha
-      && typedOther.hue == hue
-      && typedOther.saturation == saturation
-      && typedOther.lightness == lightness;
+        && typedOther.hue == hue
+        && typedOther.saturation == saturation
+        && typedOther.lightness == lightness;
   }
 
   @override
