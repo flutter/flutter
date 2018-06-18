@@ -84,18 +84,26 @@ class ReorderableListView extends StatefulWidget {
   }
 }
 
+// This top-level state manages an Overlay that contains the list and
+// also any Draggables it creates.
+//
+// _ReorderableListContent manages the list itself and reorder operations.
+//
+// The Overlay doesn't properly keep state by building new overlay entries,
+// and so we cache a single OverlayEntry for use as the list layer.
+// That overlay entry then builds a _ReorderableListContent which may
+// insert Draggables into the Overlay above itself.
 class _ReorderableListViewState extends State<ReorderableListView> {
   // We use an inner overlay so that the dragging list item doesn't draw outside of the list itself.
-  GlobalKey _overlayKey;
+  final GlobalKey _overlayKey = new GlobalKey(debugLabel: '$ReorderableListView overlay key');
 
   // This entry contains the scrolling list itself.
-  OverlayEntry _bottomOverlayEntry;
+  OverlayEntry _listOverlayEntry;
 
   @override 
   void initState() {
     super.initState();
-    _overlayKey = new GlobalKey(debugLabel: '$ReorderableListView overlay key');
-    _bottomOverlayEntry = new OverlayEntry(
+    _listOverlayEntry = new OverlayEntry(
       opaque: true,
       builder: (BuildContext context) {
         return new _ReorderableListContent(
@@ -113,7 +121,7 @@ class _ReorderableListViewState extends State<ReorderableListView> {
     return new Overlay(
       key: _overlayKey,
       initialEntries: <OverlayEntry>[
-        _bottomOverlayEntry,
+        _listOverlayEntry,
     ]);
   }
 }
@@ -202,8 +210,8 @@ class _ReorderableListContentState extends State<_ReorderableListContent> with T
   @override 
   void initState() {
     super.initState();
-    _entranceController = new AnimationController(vsync: this, value: 0.0, duration: _reorderAnimationDuration);
-    _ghostController = new AnimationController(vsync: this, value: 0.0, duration: _reorderAnimationDuration);
+    _entranceController = new AnimationController(vsync: this, duration: _reorderAnimationDuration);
+    _ghostController = new AnimationController(vsync: this, duration: _reorderAnimationDuration);
     _entranceController.addStatusListener(_onEntranceStatusChanged);
   }
 
@@ -214,7 +222,7 @@ class _ReorderableListContentState extends State<_ReorderableListContent> with T
     super.dispose();
   }
 
-  // Animates the dropable space from _currentIndex to _nextIndex.
+  // Animates the droppable space from _currentIndex to _nextIndex.
   void _requestAnimationToNextIndex() {
     if (_entranceController.isCompleted) {
       _ghostIndex = _currentIndex;
@@ -293,7 +301,7 @@ class _ReorderableListContentState extends State<_ReorderableListContent> with T
         _dragStartIndex = index;
         _ghostIndex = index;
         _currentIndex = index;
-        _entranceController.forward(from: 1.0);
+        _entranceController.value = 1.0;
       });
     }
 
