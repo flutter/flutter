@@ -35,8 +35,8 @@ git:
   depth: false
 cache:
   bundler: true
-  directories:
-    - $HOME/.pub-cache
+  #  directories:
+  #  - $HOME/.pub-cache
 install:
   - ./dev/bots/travis_install.sh
 
