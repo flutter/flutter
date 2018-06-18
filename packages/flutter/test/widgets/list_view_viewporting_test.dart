@@ -6,6 +6,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 
+import '../rendering/mock_canvas.dart';
+
 import 'test_widgets.dart';
 
 void main() {
@@ -429,4 +431,33 @@ void main() {
     expect(position.viewportDimension, equals(600.0));
     expect(position.minScrollExtent, equals(0.0));
   });
+
+  testWidgets('ListView should not paint hidden children', (WidgetTester tester) async {
+    const Text text = const Text('test');
+    await tester.pumpWidget(
+        new Directionality(
+            textDirection: TextDirection.ltr,
+            child: new Center(
+              child: new Container(
+                  height: 200.0,
+                  child: new ListView(
+                    cacheExtent: 500.0,
+                    controller: new ScrollController(initialScrollOffset: 300.0),
+                    children: <Widget>[
+                      new Container(height: 140.0, child: text),
+                      new Container(height: 160.0, child: text),
+                      new Container(height: 90.0, child: text),
+                      new Container(height: 110.0, child: text),
+                      new Container(height: 80.0, child: text),
+                      new Container(height: 70.0, child: text),
+                    ],
+                  )
+              ),
+            )
+        )
+    );
+
+    final RenderSliverList list = tester.renderObject(find.byType(SliverList));
+    expect(list, paintsExactlyCountTimes(#drawParagraph, 2));
+  }, skip: true);
 }
