@@ -14,7 +14,12 @@ import 'framework.dart';
 ///   * [Layer.find], for an example of how this value is retrieved.
 ///   * [AnnotatedRegionLayer], the layer pushed into the layer tree.
 class AnnotatedRegion<T> extends SingleChildRenderObjectWidget {
-  /// Creates a new annotated region.
+  /// Creates a new annotated region to insert [value] into the layer tree.
+  ///
+  /// Neither [child] nor [value] may be null.
+  ///
+  /// [sized] defaults to true and controls whether the annotated region will
+  /// clip its child.
   const AnnotatedRegion({
     Key key,
     @required Widget child,
@@ -39,15 +44,14 @@ class AnnotatedRegion<T> extends SingleChildRenderObjectWidget {
 
   @override
   RenderObject createRenderObject(BuildContext context) {
-    return new AnnotatedRegionRenderObject<T>()
-      ..value = value
-      ..sized = sized;
+    return new AnnotatedRegionRenderObject<T>(value, sized);
   }
 
   @override
   void updateRenderObject(BuildContext context, AnnotatedRegionRenderObject<T> renderObject) {
-    renderObject.value = value;
-    renderObject.sized = sized;
+    renderObject
+      ..value = value
+      ..sized = sized;
   }
 }
 

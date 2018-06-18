@@ -4256,20 +4256,46 @@ class RenderFollowerLayer extends RenderProxyBox {
 ///   * [Layer.find], for an example of how this value is retrieved.
 ///   * [AnnotatedRegionLayer], the layer this render object creates.
 class AnnotatedRegionRenderObject<T> extends RenderProxyBox {
+
+  /// Creates a new [AnnotatedRegionRenderObject] to insert [value] into the
+  /// layer tree.
+  ///
+  /// If [sized] is true, the layer is provided with the size of this render
+  /// object to clip the results of [Layer.findRegion].
+  ///
+  /// Neither [value] nor [sized] can be null.
+  AnnotatedRegionRenderObject(T value, bool sized)
+    : assert(value != null),
+      assert(sized != null),
+      _value = value,
+      _sized = sized;
+
   /// A value which can be retrieved using [Layer.find].
-  T value;
+  T get value => _value;
+  T _value;
+  set value (T newValue) {
+    if (_value == newValue)
+      return;
+    _value = newValue;
+    markNeedsPaint();
+  }
 
   /// Whether the render object will pass its [size] to the [AnnotatedRegionLayer].
-  bool sized;
+  bool get sized => _sized;
+  bool _sized;
+  set sized(bool value) {
+    if (_sized == value)
+      return;
+    _sized = value;
+    markNeedsPaint();
+  }
 
   @override
   final bool alwaysNeedsCompositing = true;
 
   @override
   void paint(PaintingContext context, Offset offset) {
-    if (child != null) {
-      final AnnotatedRegionLayer<T> layer = new AnnotatedRegionLayer<T>(value, size: sized ? size : null);
-      context.pushLayer(layer, super.paint, offset);
-    }
+    final AnnotatedRegionLayer<T> layer = new AnnotatedRegionLayer<T>(value, size: sized ? size : null);
+    context.pushLayer(layer, super.paint, offset);
   }
 }

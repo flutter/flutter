@@ -543,8 +543,7 @@ class OffsetLayer extends ContainerLayer {
 
   @override
   S find<S>(Offset regionOffset) {
-    final Offset transformed = regionOffset - offset;
-    return super.find<S>(transformed);
+    return super.find<S>(regionOffset - offset);
   }
 
   @override
@@ -778,10 +777,7 @@ class TransformLayer extends OffsetLayer {
 
   @override
   S find<S>(Offset regionOffset) {
-    if (_invertedTransform == null) {
-      _invertedTransform ??= new Matrix4.zero();
-      _transform?.copyInto(_invertedTransform)?.invert();
-    }
+    _invertedTransform ??= new Matrix4.inverted(transform);
     final Vector4 vector = new Vector4(regionOffset.dx, regionOffset.dy, 0.0, 1.0);
     final Vector4 result = _invertedTransform.transform(vector);
     return super.find<S>(new Offset(result[0], result[1]));
@@ -1185,8 +1181,8 @@ class FollowerLayer extends ContainerLayer {
 
   @override
   S find<S>(Offset regionOffset) {
-    if (link.leader == null && showWhenUnlinked) {
-      return super.find<S>(regionOffset - unlinkedOffset);
+    if (link.leader == null) {
+      return showWhenUnlinked ? super.find<S>(regionOffset - unlinkedOffset) : null;
     }
     if (_invertedTransform == null) {
       final Matrix4 transform = getLastTransform();
@@ -1318,8 +1314,10 @@ class FollowerLayer extends ContainerLayer {
 /// a [Size] is provided to this layer, then find will check if the provided
 /// offset is within the bounds of the layer.
 class AnnotatedRegionLayer<T> extends ContainerLayer {
-  /// Creates a new annotated layer.
-  AnnotatedRegionLayer(this.value, {this.size});
+  /// Creates a new layer annotated with [value] that clips to [size] if provided.
+  ///
+  /// The value provided cannot be null.
+  AnnotatedRegionLayer(this.value, {this.size}) : assert(value != null);
 
   /// The value returned by [find] if the offset is contained within this layer.
   final T value;
@@ -1327,7 +1325,7 @@ class AnnotatedRegionLayer<T> extends ContainerLayer {
   /// The [size] is optionally used to clip the hit-testing of [find].
   ///
   /// If not provided, all offsets are considered to be contained within this
-  /// layer, unless a parent layer applies a clip.
+  /// layer, unless an ancestor layer applies a clip.
   final Size size;
 
   @override
@@ -1349,7 +1347,6 @@ class AnnotatedRegionLayer<T> extends ContainerLayer {
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(new DiagnosticsProperty<T>('value', value));
-    if (size != null)
-      properties.add(new DiagnosticsProperty<Size>('size', size));
+    properties.add(new DiagnosticsProperty<Size>('size', size, defaultValue: null));
   }
 }
