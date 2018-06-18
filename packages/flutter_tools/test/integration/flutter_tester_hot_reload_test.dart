@@ -128,7 +128,7 @@ void main() {
         if (hotReloadResp['error'] != null || hotReloadResp['result'] == false)
           throw 'Unexpected error response: ${hotReloadResp['error']}\n\n${errorBuffer.toString()}';
 
-        // Ensure we hit the breakpoint/
+        // Ensure we hit the breakpoint.
         await isolate.waitUntilPaused();
         isolate = await isolate.load();
         expect(isolate.pauseEvent, const isInstanceOf<VMPauseBreakpointEvent>());
