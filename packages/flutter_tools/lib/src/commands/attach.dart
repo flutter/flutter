@@ -57,17 +57,22 @@ class AttachCommand extends FlutterCommand {
     await _validateArguments();
 
     final Device device = await findTargetDevice();
-    final FlutterDevice flutterDevice =
-        new FlutterDevice(device, trackWidgetCreation: false);
-    flutterDevice.observatoryUris = [
-      Uri.parse('http://$ipv4Loopback:$observatoryPort/')
-    ]; // observatoryUris;
-    final HotRunner hotRunner = new HotRunner(
-      <FlutterDevice>[flutterDevice],
-      debuggingOptions: new DebuggingOptions.enabled(getBuildInfo()),
-      packagesFilePath: globalResults['packages'],
-    );
-    await hotRunner.attach();
+    int localPort = await device.portForwarder.forward(observatoryPort);
+    try {
+      final FlutterDevice flutterDevice =
+      new FlutterDevice(device, trackWidgetCreation: false);
+      flutterDevice.observatoryUris = [
+        Uri.parse('http://$ipv4Loopback:$localPort/')
+      ]; // observatoryUris;
+      final HotRunner hotRunner = new HotRunner(
+        <FlutterDevice>[flutterDevice],
+        debuggingOptions: new DebuggingOptions.enabled(getBuildInfo()),
+        packagesFilePath: globalResults['packages'],
+      );
+      await hotRunner.attach();
+    } finally {
+      device.portForwarder.unforward(new ForwardedPort(localPort, observatoryPort));
+    }
   }
 
   Future<void> _validateArguments() async {
