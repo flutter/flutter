@@ -1007,18 +1007,20 @@ class AnimatedOpacity extends ImplicitlyAnimatedWidget {
 
 class _AnimatedOpacityState extends ImplicitlyAnimatedWidgetState<AnimatedOpacity> {
   Tween<double> _opacity;
+  Animation<double> _opacityAnimation;
 
   @override
   void forEachTween(TweenVisitor<dynamic> visitor) {
     _opacity = visitor(_opacity, widget.opacity, (dynamic value) {
       return new Tween<double>(begin: value);
     });
+    _opacityAnimation = _opacity.animate(controller);
   }
 
   @override
   Widget build(BuildContext context) {
     return new FadeTransition(
-      opacity: _opacity.animate(controller),
+      opacity: _opacityAnimation,
       child: widget.child
     );
   }
