@@ -39,7 +39,7 @@ class _ListDemoState extends State<ReorderableListDemo> {
   PersistentBottomSheetController<Null> _bottomSheet;
   _ReorderableListType _itemType = _ReorderableListType.threeLine;
   bool _reverseSort = false;
-  List<_ListItem> items = <String>[
+  List<_ListItem> _items = <String>[
     'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N',
   ].map((String item) => new _ListItem(item, false)).toList();
 
@@ -142,8 +142,8 @@ class _ListDemoState extends State<ReorderableListDemo> {
       if (newIndex > oldIndex) {
         newIndex -= 1;
       }
-      final _ListItem item = items.removeAt(oldIndex);
-      items.insert(newIndex, item);
+      final _ListItem item = _items.removeAt(oldIndex);
+      _items.insert(newIndex, item);
     });
   }
 
@@ -161,7 +161,7 @@ class _ListDemoState extends State<ReorderableListDemo> {
             onPressed: () {
               setState(() {
                 _reverseSort = !_reverseSort;
-                items.sort((_ListItem a, _ListItem b) => _reverseSort ? b.value.compareTo(a.value) : a.value.compareTo(b.value));
+                _items.sort((_ListItem a, _ListItem b) => _reverseSort ? b.value.compareTo(a.value) : a.value.compareTo(b.value));
               });
             },
           ),
@@ -177,7 +177,7 @@ class _ListDemoState extends State<ReorderableListDemo> {
           onReorder: _onSwap,
           scrollDirection: _itemType == _ReorderableListType.horizontalAvatar ? Axis.horizontal : Axis.vertical,
           padding: const EdgeInsets.symmetric(vertical: 8.0),
-          children: items.map(buildListTile).toList(),
+          children: _items.map(buildListTile).toList(),
         ),
       ),
     );
