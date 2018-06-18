@@ -149,16 +149,16 @@ void Window::UpdateWindowMetrics(const ViewportMetrics& metrics) {
       library_.value(), "_updateWindowMetrics",
       {
           ToDart(metrics.device_pixel_ratio),
-          ToDart(static_cast<double>(metrics.physical_width)),
-          ToDart(static_cast<double>(metrics.physical_height)),
-          ToDart(static_cast<double>(metrics.physical_padding_top)),
-          ToDart(static_cast<double>(metrics.physical_padding_right)),
-          ToDart(static_cast<double>(metrics.physical_padding_bottom)),
-          ToDart(static_cast<double>(metrics.physical_padding_left)),
-          ToDart(static_cast<double>(metrics.physical_view_inset_top)),
-          ToDart(static_cast<double>(metrics.physical_view_inset_right)),
-          ToDart(static_cast<double>(metrics.physical_view_inset_bottom)),
-          ToDart(static_cast<double>(metrics.physical_view_inset_left)),
+          ToDart(metrics.physical_width),
+          ToDart(metrics.physical_height),
+          ToDart(metrics.physical_padding_top),
+          ToDart(metrics.physical_padding_right),
+          ToDart(metrics.physical_padding_bottom),
+          ToDart(metrics.physical_padding_left),
+          ToDart(metrics.physical_view_inset_top),
+          ToDart(metrics.physical_view_inset_right),
+          ToDart(metrics.physical_view_inset_bottom),
+          ToDart(metrics.physical_view_inset_left),
       });
 }
 
