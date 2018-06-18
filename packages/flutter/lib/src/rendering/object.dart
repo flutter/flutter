@@ -368,15 +368,15 @@ class PaintingContext {
   ///   clip the painting done by `painter`.
   /// * `painter` is a callback that will paint with the `clipPath` applied. This
   ///   function calls the `painter` synchronously.
-  void pushClipPath(bool needsCompositing, Offset offset, Rect bounds, Path clipPath, PaintingContextCallback painter) {
+  void pushClipPath(bool needsCompositing, Offset offset, Rect bounds, Path clipPath, Clip clip, PaintingContextCallback painter) {
     final Rect offsetBounds = bounds.shift(offset);
     final Path offsetClipPath = clipPath.shift(offset);
     if (needsCompositing) {
-      pushLayer(new ClipPathLayer(clipPath: offsetClipPath), painter, offset, childPaintBounds: offsetBounds);
+      pushLayer(new ClipPathLayer(clipPath: offsetClipPath, clip: clip), painter, offset, childPaintBounds: offsetBounds);
     } else {
       canvas
         ..save()
-        ..clipPath(clipPath.shift(offset));
+        ..clipPath(clipPath.shift(offset)); // TODO(liyuqian): respect Clip
       painter(this, offset);
       canvas
         ..restore();

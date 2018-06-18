@@ -677,6 +677,7 @@ class PhysicalModel extends SingleChildRenderObjectWidget {
   const PhysicalModel({
     Key key,
     this.shape = BoxShape.rectangle,
+    this.clip = Clip.none,
     this.borderRadius,
     this.elevation = 0.0,
     @required this.color,
@@ -690,6 +691,9 @@ class PhysicalModel extends SingleChildRenderObjectWidget {
 
   /// The type of shape.
   final BoxShape shape;
+
+  /// {@macro flutter.widgets.Clip}
+  final Clip clip;
 
   /// The border radius of the rounded corners.
   ///
@@ -712,6 +716,7 @@ class PhysicalModel extends SingleChildRenderObjectWidget {
   RenderPhysicalModel createRenderObject(BuildContext context) {
     return new RenderPhysicalModel(
       shape: shape,
+      clip: clip,
       borderRadius: borderRadius,
       elevation: elevation, color: color,
       shadowColor: shadowColor,

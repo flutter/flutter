@@ -697,13 +697,16 @@ class ClipPathLayer extends ContainerLayer {
   ///
   /// The [clipPath] property must be non-null before the compositing phase of
   /// the pipeline.
-  ClipPathLayer({ this.clipPath });
+  ClipPathLayer({ this.clipPath, this.clip });
 
   /// The path to clip in the parent's coordinate system.
   ///
   /// The scene must be explicitly recomposited after this property is changed
   /// (as described at [Layer]).
   Path clipPath;
+
+  /// Whether and how to clip.
+  Clip clip;
 
   @override
   S find<S>(Offset regionOffset) {
@@ -720,6 +723,7 @@ class ClipPathLayer extends ContainerLayer {
       return true;
     }());
     if (enabled)
+      // TODO(liyuqian): respect Clip
       builder.pushClipPath(clipPath.shift(layerOffset));
     addChildrenToScene(builder, layerOffset);
     if (enabled)
@@ -925,10 +929,13 @@ class PhysicalModelLayer extends ContainerLayer {
   /// The [clipPath], [elevation], and [color] arguments must not be null.
   PhysicalModelLayer({
     @required this.clipPath,
+    this.clip = Clip.none,
     @required this.elevation,
     @required this.color,
     @required this.shadowColor,
   }) : assert(clipPath != null),
+       assert(clip != null),
+       assert(clip != null),
        assert(elevation != null),
        assert(color != null),
        assert(shadowColor != null);
@@ -938,6 +945,9 @@ class PhysicalModelLayer extends ContainerLayer {
   /// The scene must be explicitly recomposited after this property is changed
   /// (as described at [Layer]).
   Path clipPath;
+
+  /// Whether and how to clip its children.
+  Clip clip;
 
   /// The z-coordinate at which to place this physical object.
   ///
@@ -975,6 +985,7 @@ class PhysicalModelLayer extends ContainerLayer {
       return true;
     }());
     if (enabled) {
+      // TODO(liyuqian): respect Clip
       builder.pushPhysicalShape(
         path: clipPath.shift(layerOffset),
         elevation: elevation,

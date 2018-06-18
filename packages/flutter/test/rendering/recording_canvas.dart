@@ -119,10 +119,10 @@ class TestRecordingPaintingContext implements PaintingContext {
   }
 
   @override
-  void pushClipPath(bool needsCompositing, Offset offset, Rect bounds, Path clipPath, PaintingContextCallback painter) {
+  void pushClipPath(bool needsCompositing, Offset offset, Rect bounds, Path clipPath, Clip clip, PaintingContextCallback painter) {
     canvas
       ..save()
-      ..clipPath(clipPath.shift(offset));
+      ..clipPath(clipPath.shift(offset)); // TODO(liyuqian): respect Clip
     painter(this, offset);
     canvas.restore();
   }

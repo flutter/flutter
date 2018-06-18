@@ -87,12 +87,14 @@ abstract class MaterialInkController {
 ///
 /// The Material widget is responsible for:
 ///
-/// 1. Clipping: Material clips its widget sub-tree to the shape specified by
-///    [shape], [type], and [borderRadius].
-/// 2. Elevation: Material elevates its widget sub-tree on the Z axis by
+/// 1. Elevation: Material elevates its widget sub-tree on the Z axis by
 ///    [elevation] pixels, and draws the appropriate shadow.
-/// 3. Ink effects: Material shows ink effects implemented by [InkFeature]s
+/// 2. Ink effects: Material shows ink effects implemented by [InkFeature]s
 ///    like [InkSplash] and [InkHighlight] below its children.
+///
+/// By default, [clip] is [Clip.None] and no clipping is performed. You
+/// may override it to other [Clip] enums to explicitly clip its widget
+/// sub-tree to the shape specified by [shape], [type], and [borderRadius].
 ///
 /// ## The Material Metaphor
 ///
@@ -171,6 +173,7 @@ class Material extends StatefulWidget {
     this.textStyle,
     this.borderRadius,
     this.shape,
+    this.clip = Clip.none,
     this.animationDuration = kThemeChangeDuration,
     this.child,
   }) : assert(type != null),
@@ -179,6 +182,7 @@ class Material extends StatefulWidget {
        assert(!(shape != null && borderRadius != null)),
        assert(animationDuration != null),
        assert(!(identical(type, MaterialType.circle) && (borderRadius != null || shape != null))),
+       assert(clip != null),
        super(key: key);
 
   /// The widget below this widget in the tree.
@@ -225,6 +229,12 @@ class Material extends StatefulWidget {
   /// A shadow is only displayed if the [elevation] is greater than
   /// zero.
   final ShapeBorder shape;
+
+  /// {@template flutter.widgets.Clip}
+  /// The content will be clipped (or not) according to this option.
+  /// See enum [Clip] for details of all possible options and their common use cases.
+  /// {@endtemplate}
+  final Clip clip;
 
   /// Defines the duration of animated changes for [shape], [elevation],
   /// and [shadowColor].
@@ -329,6 +339,7 @@ class _MaterialState extends State<Material> with TickerProviderStateMixin {
         curve: Curves.fastOutSlowIn,
         duration: widget.animationDuration,
         shape: BoxShape.rectangle,
+        clip: widget.clip,
         borderRadius: BorderRadius.zero,
         elevation: widget.elevation,
         color: backgroundColor,
@@ -341,12 +352,13 @@ class _MaterialState extends State<Material> with TickerProviderStateMixin {
     final ShapeBorder shape = _getShape();
 
     if (widget.type == MaterialType.transparency)
-      return _transparentInterior(shape: shape, contents: contents);
+      return _transparentInterior(shape: shape, clip: widget.clip, contents: contents);
 
     return new _MaterialInterior(
       curve: Curves.fastOutSlowIn,
       duration: widget.animationDuration,
       shape: shape,
+      clip: widget.clip,
       elevation: widget.elevation,
       color: backgroundColor,
       shadowColor: widget.shadowColor,
@@ -354,7 +366,7 @@ class _MaterialState extends State<Material> with TickerProviderStateMixin {
     );
   }
 
-  static Widget _transparentInterior({ShapeBorder shape, Widget contents}) {
+  static Widget _transparentInterior({ShapeBorder shape, Clip clip, Widget contents}) {
     return new ClipPath(
       child: new _ShapeBorderPaint(
         child: contents,
@@ -362,6 +374,7 @@ class _MaterialState extends State<Material> with TickerProviderStateMixin {
       ),
       clipper: new ShapeBorderClipper(
         shape: shape,
+        clip: clip
       ),
     );
   }
@@ -582,6 +595,7 @@ class _MaterialInterior extends ImplicitlyAnimatedWidget {
     Key key,
     @required this.child,
     @required this.shape,
+    this.clip = Clip.none,
     @required this.elevation,
     @required this.color,
     @required this.shadowColor,
@@ -589,6 +603,7 @@ class _MaterialInterior extends ImplicitlyAnimatedWidget {
     @required Duration duration,
   }) : assert(child != null),
        assert(shape != null),
+       assert(clip != null),
        assert(elevation != null),
        assert(color != null),
        assert(shadowColor != null),
@@ -604,6 +619,9 @@ class _MaterialInterior extends ImplicitlyAnimatedWidget {
   /// This border will be painted, and in addition the outer path of the border
   /// determines the physical shape.
   final ShapeBorder shape;
+
+  /// {@macro flutter.widgets.Clip}
+  final Clip clip;
 
   /// The target z-coordinate at which to place this physical object.
   final double elevation;
@@ -649,6 +667,7 @@ class _MaterialInteriorState extends AnimatedWidgetBaseState<_MaterialInterior> 
       ),
       clipper: new ShapeBorderClipper(
         shape: shape,
+        clip: widget.clip,
         textDirection: Directionality.of(context)
       ),
       elevation: _elevation.evaluate(animation),

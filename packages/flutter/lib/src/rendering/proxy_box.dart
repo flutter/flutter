@@ -1043,6 +1043,9 @@ abstract class CustomClipper<T> {
   /// clipped is of the given size.
   T getClip(Size size);
 
+  /// How to clip.
+  Clip get clipOption => Clip.antiAlias;
+
   /// Returns an approximation of the clip returned by [getClip], as
   /// an axis-aligned Rect. This is used by the semantics layer to
   /// determine whether widgets should be excluded.
@@ -1086,17 +1089,25 @@ class ShapeBorderClipper extends CustomClipper<Path> {
   /// the border will not need the text direction to paint itself.
   const ShapeBorderClipper({
     @required this.shape,
+    this.clip = Clip.none,
     this.textDirection,
-  }) : assert(shape != null);
+  }) : assert(shape != null), assert(clip != null);
 
   /// The shape border whose outer path this clipper clips to.
   final ShapeBorder shape;
+
+  /// {@macro flutter.widgets.Clip}
+  final Clip clip;
 
   /// The text direction to use for getting the outer path for [shape].
   ///
   /// [ShapeBorder]s can depend on the text direction (e.g having a "dent"
   /// towards the start of the shape).
   final TextDirection textDirection;
+
+
+  @override
+  Clip get clipOption => clip;
 
   /// Returns the outer path of [shape] as the clip.
   @override
@@ -1376,7 +1387,7 @@ class RenderClipOval extends _RenderCustomClip<Rect> {
   void paint(PaintingContext context, Offset offset) {
     if (child != null) {
       _updateClip();
-      context.pushClipPath(needsCompositing, offset, _clip, _getClipPath(_clip), super.paint);
+      context.pushClipPath(needsCompositing, offset, _clip, _getClipPath(_clip), clipper == null ? Clip.none : clipper.clipOption, super.paint);
     }
   }
 
@@ -1434,7 +1445,7 @@ class RenderClipPath extends _RenderCustomClip<Path> {
   void paint(PaintingContext context, Offset offset) {
     if (child != null) {
       _updateClip();
-      context.pushClipPath(needsCompositing, offset, Offset.zero & size, _clip, super.paint);
+      context.pushClipPath(needsCompositing, offset, Offset.zero & size, _clip, clipper == null ? Clip.none : clipper.clipOption, super.paint);
     }
   }
 
@@ -1539,11 +1550,13 @@ class RenderPhysicalModel extends _RenderPhysicalModelBase<RRect> {
   RenderPhysicalModel({
     RenderBox child,
     BoxShape shape = BoxShape.rectangle,
+    this.clip = Clip.none,
     BorderRadius borderRadius,
     double elevation = 0.0,
     @required Color color,
     Color shadowColor = const Color(0xFF000000),
   }) : assert(shape != null),
+       assert(clip != null),
        assert(elevation != null),
        assert(color != null),
        assert(shadowColor != null),
@@ -1569,6 +1582,9 @@ class RenderPhysicalModel extends _RenderPhysicalModelBase<RRect> {
     _shape = value;
     _markNeedsClip();
   }
+
+  /// {@macro flutter.widgets.Clip}
+  final Clip clip;
 
   /// The border radius of the rounded corners.
   ///
@@ -1638,6 +1654,7 @@ class RenderPhysicalModel extends _RenderPhysicalModelBase<RRect> {
       if (needsCompositing) {
         final PhysicalModelLayer physicalModel = new PhysicalModelLayer(
           clipPath: offsetRRectAsPath,
+          clip: clip,
           elevation: paintShadows ? elevation : 0.0,
           color: color,
           shadowColor: shadowColor,
@@ -1663,7 +1680,7 @@ class RenderPhysicalModel extends _RenderPhysicalModelBase<RRect> {
         }
         canvas.drawRRect(offsetRRect, new Paint()..color = color);
         canvas.save();
-        canvas.clipRRect(offsetRRect);
+        canvas.clipRRect(offsetRRect); // TODO(liyquian): respect Clip
         super.paint(context, offset);
         canvas.restore();
         assert(context.canvas == canvas, 'canvas changed even though needsCompositing was false');
@@ -1751,6 +1768,7 @@ class RenderPhysicalShape extends _RenderPhysicalModelBase<Path> {
       if (needsCompositing) {
         final PhysicalModelLayer physicalModel = new PhysicalModelLayer(
           clipPath: offsetPath,
+          clip: clipper == null ? Clip.none : clipper.clipOption,
           elevation: paintShadows ? elevation : 0.0,
           color: color,
           shadowColor: shadowColor,
@@ -1776,7 +1794,7 @@ class RenderPhysicalShape extends _RenderPhysicalModelBase<Path> {
         }
         canvas.drawPath(offsetPath, new Paint()..color = color..style = PaintingStyle.fill);
         canvas.save();
-        canvas.clipPath(offsetPath);
+        canvas.clipPath(offsetPath); // TODO(liyuqian): respect Clip
         super.paint(context, offset);
         canvas.restore();
         assert(context.canvas == canvas, 'canvas changed even though needsCompositing was false');
