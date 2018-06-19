@@ -83,9 +83,8 @@ void Stopwatch::Visualize(SkCanvas& canvas, const SkRect& rect) const {
   // Prepare a path for the data.
   // we start at the height of the last point, so it looks like we wrap around
   SkPath path;
+  path.setIsVolatile(true);
   const double sample_unit_width = (1.0 / kMaxSamples);
-  const double sample_margin_unit_width = sample_unit_width / 6.0;
-  const double sample_margin_width = width * sample_margin_unit_width;
   path.moveTo(x, bottom);
   path.lineTo(x, y + height * (1.0 - UnitHeight(laps_[0].ToMillisecondsF(),
                                                 max_unit_interval)));
@@ -97,8 +96,8 @@ void Stopwatch::Visualize(SkCanvas& canvas, const SkRect& rect) const {
     const double sample_y =
         y + height * (1.0 - UnitHeight(laps_[i].ToMillisecondsF(),
                                        max_unit_interval));
-    path.lineTo(x + width * unit_x + sample_margin_width, sample_y);
-    path.lineTo(x + width * unit_next_x - sample_margin_width, sample_y);
+    path.lineTo(x + width * unit_x, sample_y);
+    path.lineTo(x + width * unit_next_x, sample_y);
   }
   path.lineTo(
       right,
@@ -146,12 +145,11 @@ void Stopwatch::Visualize(SkCanvas& canvas, const SkRect& rect) const {
     paint.setColor(SK_ColorGREEN);
   }
   double sample_x =
-      x + width * (static_cast<double>(current_sample_) / kMaxSamples) -
-      sample_margin_width;
+      x + width * (static_cast<double>(current_sample_) / kMaxSamples);
 
   const auto marker_rect = SkRect::MakeLTRB(
       sample_x, y,
-      sample_x + width * sample_unit_width + sample_margin_width * 2, bottom);
+      sample_x + width * sample_unit_width, bottom);
   canvas.drawRect(marker_rect, paint);
 }
 
