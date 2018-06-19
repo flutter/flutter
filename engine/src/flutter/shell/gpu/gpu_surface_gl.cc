@@ -12,7 +12,14 @@
 #include "third_party/skia/include/gpu/GrBackendSurface.h"
 #include "third_party/skia/include/gpu/GrContextOptions.h"
 #include "third_party/skia/include/gpu/gl/GrGLInterface.h"
-#include "third_party/skia/src/gpu/gl/GrGLDefines.h"
+
+// These are common defines present on all OpenGL headers. However, we don't
+// want to perform GL header reasolution on each platform we support. So just
+// define these upfront. It is unlikely we will need more. But, if we do, we can
+// add the same here.
+#define GPU_GL_RGBA8 0x8058
+#define GPU_GL_RGBA4 0x8056
+#define GPU_GL_RGB565 0x8D62
 
 namespace shell {
 
@@ -83,9 +90,9 @@ static SkColorType FirstSupportedColorType(GrContext* context,
     *format = (y);                                 \
     return (x);                                    \
   }
-  RETURN_IF_RENDERABLE(kRGBA_8888_SkColorType, GR_GL_RGBA8);
-  RETURN_IF_RENDERABLE(kARGB_4444_SkColorType, GR_GL_RGBA4);
-  RETURN_IF_RENDERABLE(kRGB_565_SkColorType, GR_GL_RGB565);
+  RETURN_IF_RENDERABLE(kRGBA_8888_SkColorType, GPU_GL_RGBA8);
+  RETURN_IF_RENDERABLE(kARGB_4444_SkColorType, GPU_GL_RGBA4);
+  RETURN_IF_RENDERABLE(kRGB_565_SkColorType, GPU_GL_RGB565);
   return kUnknown_SkColorType;
 }
 
