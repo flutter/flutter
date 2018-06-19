@@ -13,14 +13,13 @@ String javaHome;
 String errorMessage;
 
 /// Runs the given [testFunction] in a clean temporary directory.
-Future<void> runTest(Future<void> testFunction(FlutterProject project)) async {
+Future<void> runTest(Future<void> testFunction(FlutterProject project, FlutterPluginProject pluginProject)) async {
   final Directory tmp = await Directory.systemTemp.createTemp('gradle');
   final FlutterProject project = await FlutterProject.create(tmp, 'hello');
-  final FlutterPluginProject pluginProject =
-      await FlutterPluginProject.create(tmp, 'aaa');
+  final FlutterPluginProject pluginProject = await FlutterPluginProject.create(tmp, 'aaa');
 
   try {
-    await testFunction(project);
+    await testFunction(project, pluginProject);
   } finally {
     project.parent.deleteSync(recursive: true);
   }
@@ -34,7 +33,7 @@ void main() async {
     javaHome = javaHomeExtractor.firstMatch(flutterDoctor).group(1) + '/jre';
 
     try {
-      await runTest((project) async {
+      await runTest((project, pluginProject) async {
         section('gradlew assembleDebug');
         await project.runGradleTask('assembleDebug');
         errorMessage = _validateSnapshotDependency(project, 'build/app.dill');
@@ -43,40 +42,35 @@ void main() async {
         }
       });
 
-      await runTest((project) async {
+      await runTest((project, pluginProject) async {
         section('gradlew assembleDebug no-preview-dart-2');
         await project.runGradleTask('assembleDebug',
             options: <String>['-Ppreview-dart-2=false']);
-        errorMessage = _validateSnapshotDependency(project,
-            '${project.rootPath}/build/app/intermediates/flutter/debug/snapshot_blob.bin');
-        if (errorMessage != null) {
-          throw new TaskResult.failure(errorMessage);
-        }
       });
 
-      await runTest((project) async {
+      await runTest((project, pluginProject) async {
         section('gradlew assembleProfile');
         await project.runGradleTask('assembleProfile');
       });
 
-      await runTest((project) async {
+      await runTest((project, pluginProject) async {
         section('gradlew assembleRelease');
         await project.runGradleTask('assembleRelease');
       });
 
-      await runTest((project) async {
+      await runTest((project, pluginProject) async {
         section('gradlew assembleLocal (custom debug build)');
         await project.addCustomBuildType('local', initWith: 'debug');
         await project.runGradleTask('assembleLocal');
       });
 
-      await runTest((project) async {
+      await runTest((project, pluginProject) async {
         section('gradlew assembleBeta (custom release build)');
         await project.addCustomBuildType('beta', initWith: 'release');
         await project.runGradleTask('assembleBeta');
       });
 
-      await runTest((project) async {
+      await runTest((project, pluginProject) async {
         section('gradlew assembleFreeDebug (product flavor)');
         await project.addProductFlavor('free');
         await project.runGradleTask('assembleFreeDebug');
@@ -84,7 +78,7 @@ void main() async {
         await project.introduceError();
       });
 
-      await runTest((project) async {
+      await runTest((project, pluginProject) async {
         section('gradlew on build script with error');
         {
           final ProcessResult result =
@@ -105,7 +99,7 @@ void main() async {
         }
       });
 
-      await runTest((project) async {
+      await runTest((project, pluginProject) async {
         section('flutter build apk on build script with error');
         {
           final ProcessResult result = await project.resultOfFlutterCommand('build', <String>['apk']);
@@ -124,7 +118,7 @@ void main() async {
         }
       });
 
-      await runTest((project) async {
+      await runTest((project, pluginProject) async {
         section('gradlew assembleDebug on plugin example');
         await pluginProject.runGradleTask('assembleDebug');
         if (!pluginProject.hasDebugApk)
