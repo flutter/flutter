@@ -705,6 +705,23 @@ class ListView extends BoxScrollView {
   /// advance, or all at once when the [ListView] itself is created, it is more
   /// efficient to use [new ListView].
   ///
+  /// ## Sample code
+  ///
+  /// This example shows how to create [ListView] whose [ListTile] list items
+  /// are separated by [Divider]s.
+  ///
+  /// ```dart
+  /// new ListView.separated(
+  ///   itemCount: 25,
+  ///   separatorBuilder: (BuildContext context, int index) => new Divider(),
+  ///   itemBuilder: (BuildContext context, int index) {
+  ///     return new ListTile(
+  ///       title: new Text('item $index'),
+  ///     );
+  ///   },
+  /// )
+  /// ```
+  ///
   /// The `addAutomaticKeepAlives` argument corresponds to the
   /// [SliverChildBuilderDelegate.addAutomaticKeepAlives] property. The
   /// `addRepaintBoundaries` argument corresponds to the
