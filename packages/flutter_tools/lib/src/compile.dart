@@ -186,6 +186,45 @@ class KernelCompiler {
   }
 }
 
+/// Class that allows to serialize compilation requests to the compiler.
+abstract class _CompilationRequest {
+  Future<void> run(ResidentCompiler compiler);
+}
+
+class _RecompileRequest implements _CompilationRequest {
+  _RecompileRequest(this.completer, this.mainPath, this.invalidatedFiles,
+      this.outputPath, this.packagesFilePath);
+
+  Completer<CompilerOutput> completer;
+  String mainPath;
+  List<String> invalidatedFiles;
+  String outputPath;
+  String packagesFilePath;
+
+  @override
+  Future<void> run(ResidentCompiler compiler) async {
+    completer.complete(await compiler._recompile(this));
+  }
+}
+
+class _CompileExpressionRequest implements _CompilationRequest {
+  _CompileExpressionRequest(this.completer, this.expression, this.definitions,
+      this.typeDefinitions, this.libraryUri, this.klass, this.isStatic);
+
+  Completer<CompilerOutput> completer;
+  String expression;
+  List<String> definitions;
+  List<String> typeDefinitions;
+  String libraryUri;
+  String klass;
+  bool isStatic;
+
+  @override
+  Future<void> run(ResidentCompiler compiler) async {
+    completer.complete(await compiler._compileExpression(this));
+  }
+}
+
 /// Wrapper around incremental frontend server compiler, that communicates with
 /// server via stdin/stdout.
 ///
@@ -200,10 +239,12 @@ class ResidentCompiler {
       _packagesPath = packagesPath,
       _fileSystemRoots = fileSystemRoots,
       _fileSystemScheme = fileSystemScheme,
-      _stdoutHandler = new _StdoutHandler(consumer: compilerMessageConsumer) {
+      _stdoutHandler = new _StdoutHandler(consumer: compilerMessageConsumer),
+      _controller = new StreamController<_CompilationRequest>() {
     // This is a URI, not a file path, so the forward slash is correct even on Windows.
     if (!_sdkRoot.endsWith('/'))
       _sdkRoot = '$_sdkRoot/';
+    _controller.stream.listen(_handleCompilationRequest);
   }
 
   final bool _trackWidgetCreation;
@@ -214,6 +255,8 @@ class ResidentCompiler {
   Process _server;
   final _StdoutHandler _stdoutHandler;
 
+  final StreamController<_CompilationRequest> _controller;
+
   /// If invoked for the first time, it compiles Dart script identified by
   /// [mainPath], [invalidatedFiles] list is ignored.
   /// On successive runs [invalidatedFiles] indicates which files need to be
@@ -223,21 +266,48 @@ class ResidentCompiler {
   /// null is returned.
   Future<CompilerOutput> recompile(String mainPath, List<String> invalidatedFiles,
       {String outputPath, String packagesFilePath}) async {
+    final Completer<CompilerOutput> completer = new Completer<CompilerOutput>();
+    _controller.add(
+        new _RecompileRequest(completer, mainPath, invalidatedFiles, outputPath, packagesFilePath)
+    );
+    return completer.future;
+  }
+
+  Future<CompilerOutput> _recompile(_RecompileRequest request) async {
     _stdoutHandler.reset();
 
     // First time recompile is called we actually have to compile the app from
     // scratch ignoring list of invalidated files.
-    if (_server == null)
-      return _compile(_mapFilename(mainPath), outputPath, _mapFilename(packagesFilePath));
+    if (_server == null) {
+      return _compile(_mapFilename(request.mainPath),
+          request.outputPath, _mapFilename(request.packagesFilePath));
+    }
 
     final String inputKey = new Uuid().generateV4();
-    _server.stdin.writeln('recompile ${mainPath != null ? _mapFilename(mainPath) + " ": ""}$inputKey');
-    for (String fileUri in invalidatedFiles) {
+    _server.stdin.writeln('recompile ${request.mainPath != null ? _mapFilename(request.mainPath) + " ": ""}$inputKey');
+    for (String fileUri in request.invalidatedFiles) {
       _server.stdin.writeln(_mapFileUri(fileUri));
     }
     _server.stdin.writeln(inputKey);
 
     return _stdoutHandler.compilerOutput.future;
+  }
+
+  final List<_CompilationRequest> compilationQueue = <_CompilationRequest>[];
+
+  void _handleCompilationRequest(_CompilationRequest request) async {
+    final bool isEmpty = compilationQueue.isEmpty;
+    compilationQueue.add(request);
+    // Only trigger processing if queue was empty - i.e. no other requests
+    // are currently being processed. This effectively enforces "one
+    // compilation request at a time".
+    if (isEmpty) {
+      while (compilationQueue.isNotEmpty) {
+        final _CompilationRequest request = compilationQueue.first;
+        await request.run(this);
+        compilationQueue.removeAt(0);
+      }
+    }
   }
 
   Future<CompilerOutput> _compile(String scriptFilename, String outputPath,
@@ -301,6 +371,16 @@ class ResidentCompiler {
 
   Future<CompilerOutput> compileExpression(String expression, List<String> definitions,
       List<String> typeDefinitions, String libraryUri, String klass, bool isStatic) {
+    Completer<CompilerOutput> completer = new Completer<CompilerOutput>();
+    _controller.add(
+        new _CompileExpressionRequest(
+            completer, expression, definitions, typeDefinitions, libraryUri, klass, isStatic)
+    );
+    return completer.future;
+  }
+
+  Future<CompilerOutput> _compileExpression(
+      _CompileExpressionRequest request) async {
     _stdoutHandler.reset();
 
     // 'compile-expression' should be invoked after compiler has been started,
@@ -310,14 +390,14 @@ class ResidentCompiler {
 
     final String inputKey = new Uuid().generateV4();
     _server.stdin.writeln('compile-expression $inputKey');
-    _server.stdin.writeln(expression);
-    definitions?.forEach(_server.stdin.writeln);
+    _server.stdin.writeln(request.expression);
+    request.definitions?.forEach(_server.stdin.writeln);
     _server.stdin.writeln(inputKey);
-    typeDefinitions?.forEach(_server.stdin.writeln);
+    request.typeDefinitions?.forEach(_server.stdin.writeln);
     _server.stdin.writeln(inputKey);
-    _server.stdin.writeln(libraryUri ?? '');
-    _server.stdin.writeln(klass ?? '');
-    _server.stdin.writeln(isStatic ?? false);
+    _server.stdin.writeln(request.libraryUri ?? '');
+    _server.stdin.writeln(request.klass ?? '');
+    _server.stdin.writeln(request.isStatic ?? false);
 
     return _stdoutHandler.compilerOutput.future;
   }
