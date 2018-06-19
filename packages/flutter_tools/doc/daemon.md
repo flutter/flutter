@@ -10,6 +10,8 @@ flutter daemon
 
 It runs a persistent, JSON-RPC based server to communicate with devices. IDEs and other tools can start the flutter tool in this mode and get device addition and removal notifications, as well as being able to programmatically start and stop apps on those devices.
 
+A subset of the `flutter daemon` commands/events are also exposed via `flutter run --machine` which allows IDEs and tools to launch flutter applications and interact to send commands like Hot Reload. Which commands/events are available in this mode is documented at the bottom of this document.
+
 ## Protocol
 
 The daemon speaks [JSON-RPC](http://json-rpc.org/) to clients. It uses stdin and stdout as the protocol transport. To send a command to the server, create your command as a JSON-RPC message, encode it to json, surround the encoded text with square brackets, and write it as one line of text to the stdin of the process:
@@ -44,37 +46,37 @@ Any params for that command should be passed in through a `params` field. Here's
 
 ### daemon domain
 
-#### version
+#### daemon.version
 
 The `version()` command responds with a String with the protocol version.
 
-#### shutdown
+#### daemon.shutdown
 
 The `shutdown()` command will terminate the flutter daemon. It is not necessary to call this before shutting down the daemon; it is perfectly acceptable to just kill the daemon process.
 
 #### Events
 
-#### connected
+#### daemon.connected
 
 The `daemon.connected` event is sent when the daemon starts. The `params` field will be a map with the following fields:
 
 - `version`: The protocol version. This is the same version returned by the `version()` command.
 - `pid`: The `pid` of the daemon process.
 
-#### logMessage
+#### daemon.logMessage
 
-The `daemon.logMessage` event is sent whenever a log message is created - either a status level message or an error. The JSON message will contains an `event` field with the value `daemon.logMessage`, and an `params` field containing a map with `level`, `message`, and (optionally) `stackTrace` fields.
+The `daemon.logMessage` event is sent whenever a log message is created - either a status level message or an error. The JSON message will contain an `event` field with the value `daemon.logMessage`, and an `params` field containing a map with `level`, `message`, and (optionally) `stackTrace` fields.
 
 
-#### showMessage
+#### daemon.showMessage
 
-The `daemon.showMessage` event is sent by the daemon when some if would be useful to show a message to the user. This could be an error notification or a notification that some development tools are not configured or not installed. The JSON message will contains an `event` field with the value `daemon.showMessage`, and an `params` field containing a map with `level`, `title`, and `message` fields. The valid options for `level` are `info`, `warning`, and `error`.
+The `daemon.showMessage` event is sent by the daemon when some if would be useful to show a message to the user. This could be an error notification or a notification that some development tools are not configured or not installed. The JSON message will contain an `event` field with the value `daemon.showMessage`, and an `params` field containing a map with `level`, `title`, and `message` fields. The valid options for `level` are `info`, `warning`, and `error`.
 
 It is up to the client to decide how best to display the message; for some clients, it may map well to a toast style notification. There is an implicit contract that the daemon will not send too many messages over some reasonable period of time.
 
 ### app domain
 
-#### start
+#### app.start
 
 The `start()` command is used to start applications.
 
@@ -92,7 +94,7 @@ On success, returns a map with the fields:
 - `directory`
 - `supportsRestart`
 
-#### restart
+#### app.restart
 
 The `restart()` restarts the given application. It returns a Map of `{ int code, String message, String hintMessage, String hintId }` to indicate success or failure in restarting the app. A `code` of `0` indicates success, and non-zero indicates a failure. If `hintId` is non-null and equal to `restartRecommended`, that indicates that the reload was successful, but not all reloaded elements were executed during view reassembly (i.e., the user might not see all the changes in the current UI, and a restart could be necessary).
 
@@ -100,7 +102,7 @@ The `restart()` restarts the given application. It returns a Map of `{ int code,
 - `fullRestart`: optional; whether to do a full (rather than an incremental) restart of the application
 - `pause`: optional; when doing a hot restart the isolate should enter a paused mode
 
-#### callServiceExtension
+#### app.callServiceExtension
 
 The `callServiceExtension()` allows clients to make arbitrary calls to service protocol extensions. It returns a `Map` - the result returned by the service protocol method.
 
@@ -108,13 +110,13 @@ The `callServiceExtension()` allows clients to make arbitrary calls to service p
 - `methodName`: the name of the service protocol extension to invoke; this is required.
 - `params`: an optional Map of parameters to pass to the service protocol extension.
 
-#### stop
+#### app.stop
 
 The `stop()` command takes one parameter, `appId`. It returns a `bool` to indicate success or failure in stopping an app.
 
 - `appId`: the id of a previously started app; this is required.
 
-#### discover
+#### app.discover
 
 The `discover()` command takes one parameter, a `deviceId`. It returns a list of applications discovered on the device. Each application is represented by a map with two fields, an `id` - an Android or iOS application id - and an `observatoryDevicePort`. The `observatoryDevicePort` is the device port to connect to to debug the application. The port may first have to be made accessable via `device.forward`.
 
@@ -146,25 +148,25 @@ This is sent when an app is stopped. The `params` field will be a map with the f
 
 ### device domain
 
-#### getDevices
+#### device.getDevices
 
 Return a list of all connected devices. The `params` field will be a List; each item is a map with the fields `id`, `name`, `platform`, and `emulator` (a boolean).
 
-#### enable
+#### device.enable
 
 Turn on device polling. This will poll for newly connected devices, and fire `device.added` and `device.removed` events.
 
-#### disable
+#### device.disable
 
 Turn off device polling.
 
-#### forward
+#### device.forward
 
 Forward a host port to a device port. This call takes two required arguments, `deviceId` and `devicePort`, and one optional argument, `hostPort`. If `hostPort` is not specified, the host port will be any available port.
 
 This method returns a map with a `hostPort` field set.
 
-#### unforward
+#### device.unforward
 
 Removed a forwarded port. It takes `deviceId`, `devicePort`, and `hostPort` as required arguments.
 
@@ -177,6 +179,49 @@ This is sent when a device is connected (and polling has been enabled via `enabl
 #### device.removed
 
 This is sent when a device is disconnected (and polling has been enabled via `enable()`). The `params` field will be a map with the fields `id`, `name`, `platform`, and `emulator`.
+
+### emulator domain
+
+#### emulator.getEmulators
+
+Return a list of all available emulators. The `params` field will be a List; each item is a map with the fields `id` and `name`.
+
+#### emulator.launch
+
+The `launch()` command takes allows launching an emulator/simulator by its `id`.
+
+- `emulatorId`: the id of an emulator as returned by `getEmulators`.
+
+## Flutter Run --machine
+
+When running `flutter run --machine` the following subset of the daemon is available:
+
+### daemon domain
+
+The following subset of the daemon domain is available in `flutter run --machine`. Refer to the documentation above for details.
+
+- Commands
+  - [`version`](#daemonversion)
+  - [`shutdown`](#daemonshutdown)
+- Events
+  - [`connected`](#daemonconnected)
+  - [`logMessage`](#daemonlogmessage)
+
+### app domain
+
+The following subset of the app domain is available in `flutter run --machine`. Refer to the documentation above for details.
+
+- Commands
+  - [`restart`](#apprestart)
+  - [`callServiceExtension`](#appcallserviceextension)
+  - [`stop`](#appstop)
+- Events
+  - [`start`](#appstart)
+  - [`debugPort`](#appdebugport)
+  - [`started`](#appstarted)
+  - [`log`](#applog)
+  - [`progress`](#appprogress)
+  - [`stop`](#appstop)
 
 ## Source
 

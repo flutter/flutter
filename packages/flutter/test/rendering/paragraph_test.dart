@@ -288,6 +288,7 @@ void main() {
     final RenderParagraph paragraph = new RenderParagraph(
       const TextSpan(text: _kText),
       textDirection: TextDirection.ltr,
+      locale: const Locale('ja', 'JP'),
     );
     expect(paragraph, hasAGoodToStringDeep);
     expect(
@@ -301,6 +302,7 @@ void main() {
         ' │ textDirection: ltr\n'
         ' │ softWrap: wrapping at box width\n'
         ' │ overflow: clip\n'
+        ' │ locale: ja_JP\n'
         ' │ maxLines: unlimited\n'
         ' ╘═╦══ text ═══\n'
         '   ║ TextSpan:\n'
@@ -310,4 +312,19 @@ void main() {
       ),
     );
   });
+
+  test('locale setter', () {
+    // Regression test for https://github.com/flutter/flutter/issues/18175
+
+    final RenderParagraph paragraph = new RenderParagraph(
+      const TextSpan(text: _kText),
+      locale: const Locale('zh', 'HK'),
+      textDirection: TextDirection.ltr,
+    );
+    expect(paragraph.locale, const Locale('zh', 'HK'));
+
+    paragraph.locale = const Locale('ja', 'JP');
+    expect(paragraph.locale, const Locale('ja', 'JP'));
+  });
+
 }

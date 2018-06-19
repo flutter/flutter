@@ -314,7 +314,9 @@ Future<Null> _buildGradleProjectV2(String gradle, BuildInfo buildInfo, String ta
   final Status status = logger.startProgress('Running \'gradlew $assembleTask\'...', expectSlowOperation: true);
   final String gradlePath = fs.file(gradle).absolute.path;
   final List<String> command = <String>[gradlePath];
-  if (!logger.isVerbose) {
+  if (logger.isVerbose) {
+    command.add('-Pverbose=true');
+  } else {
     command.add('-q');
   }
   if (artifacts is LocalEngineArtifacts) {
@@ -329,6 +331,8 @@ Future<Null> _buildGradleProjectV2(String gradle, BuildInfo buildInfo, String ta
     command.add('-Ppreview-dart-2=true');
     if (buildInfo.trackWidgetCreation)
       command.add('-Ptrack-widget-creation=true');
+    if (buildInfo.buildSnapshot)
+      command.add('-Pbuild-snapshot=true');
     if (buildInfo.extraFrontEndOptions != null)
       command.add('-Pextra-front-end-options=${buildInfo.extraFrontEndOptions}');
     if (buildInfo.extraGenSnapshotOptions != null)
@@ -343,8 +347,8 @@ Future<Null> _buildGradleProjectV2(String gradle, BuildInfo buildInfo, String ta
   if (buildInfo.buildSharedLibrary && androidSdk.ndk != null) {
     command.add('-Pbuild-shared-library=true');
   }
-  if (buildInfo.targetPlatform == TargetPlatform.android_arm64)
-    command.add('-Ptarget-platform=android-arm64');
+  if (buildInfo.targetPlatform != null)
+    command.add('-Ptarget-platform=${getNameForTargetPlatform(buildInfo.targetPlatform)}');
 
   command.add(assembleTask);
   final int exitCode = await runCommandAndStreamOutput(

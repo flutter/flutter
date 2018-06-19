@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' as ui show Gradient, Shader, TextBox, Locale;
+import 'dart:ui' as ui show Gradient, Shader, TextBox;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -44,7 +44,7 @@ class RenderParagraph extends RenderBox {
     TextOverflow overflow = TextOverflow.clip,
     double textScaleFactor = 1.0,
     int maxLines,
-    ui.Locale locale,
+    Locale locale,
   }) : assert(text != null),
        assert(text.debugAssertIsValid()),
        assert(textAlign != null),
@@ -176,11 +176,19 @@ class RenderParagraph extends RenderBox {
     markNeedsLayout();
   }
 
-  ui.Locale get locale => _textPainter.locale;
-  set locale(ui.Locale value) {
+  /// Used by this paragraph's internal [TextPainter] to select a locale-specific
+  /// font.
+  ///
+  /// In some cases the same Unicode character may be rendered differently depending
+  /// on the locale. For example the '骨' character is rendered differently in
+  /// the Chinese and Japanese locales. In these cases the [locale] may be used
+  /// to select a locale-specific font.
+  Locale get locale => _textPainter.locale;
+  /// The value may be null.
+  set locale(Locale value) {
     if (_textPainter.locale == value)
       return;
-    _textPainter.locale = locale;
+    _textPainter.locale = value;
     _overflowShader = null;
     markNeedsLayout();
   }
@@ -286,6 +294,7 @@ class RenderParagraph extends RenderBox {
             text: new TextSpan(style: _textPainter.text.style, text: '\u2026'),
             textDirection: textDirection,
             textScaleFactor: textScaleFactor,
+            locale: locale,
           )..layout();
           if (didOverflowWidth) {
             double fadeEnd, fadeStart;
@@ -449,6 +458,7 @@ class RenderParagraph extends RenderBox {
     properties.add(new FlagProperty('softWrap', value: softWrap, ifTrue: 'wrapping at box width', ifFalse: 'no wrapping except at line break characters', showName: true));
     properties.add(new EnumProperty<TextOverflow>('overflow', overflow));
     properties.add(new DoubleProperty('textScaleFactor', textScaleFactor, defaultValue: 1.0));
+    properties.add(new DiagnosticsProperty<Locale>('locale', locale, defaultValue: null));
     properties.add(new IntProperty('maxLines', maxLines, ifNull: 'unlimited'));
   }
 }

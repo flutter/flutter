@@ -124,6 +124,13 @@ tasks:
     stage: devicelab
     required_agent_capabilities: ["mac/android"]
 
+  run_release_test:
+    description: >
+      Checks that `flutter run --release` does not crash.
+    stage: devicelab
+    required_agent_capabilities: ["mac/android"]
+    flaky: true
+
   platform_interaction_test:
     description: >
       Checks platform interaction on Android.
@@ -172,6 +179,12 @@ tasks:
   complex_layout_scroll_perf__memory:
     description: >
       Measures memory usage of the scroll performance test.
+    stage: devicelab
+    required_agent_capabilities: ["mac/android"]
+
+  hello_world_android__compile:
+    description: >
+      Measures the APK size of Hello World.
     stage: devicelab
     required_agent_capabilities: ["mac/android"]
 
@@ -324,6 +337,12 @@ tasks:
       Measures the performance of screen transitions in Flutter Gallery on
       iOS.
     stage: devicelab_ios
+    required_agent_capabilities: ["mac/ios"]
+
+  hello_world_ios__compile:
+    description: >
+      Measures the IPA size of Hello World.
+    stage: devicelab
     required_agent_capabilities: ["mac/ios"]
 
   microbenchmarks_ios:

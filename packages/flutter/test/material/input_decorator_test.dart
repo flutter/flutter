@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:io' show Platform;
+
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -748,6 +750,42 @@ void main() {
     expect(tester.getTopRight(find.text('text')).dx, lessThanOrEqualTo(tester.getTopLeft(find.text('s')).dx));
   });
 
+  testWidgets('InputDecorator prefixIcon/suffixIcon', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      buildInputDecorator(
+        // isEmpty: false (default)
+        // isFocused: false (default)
+        decoration: const InputDecoration(
+          prefixIcon: const Icon(Icons.pages),
+          suffixIcon: const Icon(Icons.satellite),
+          filled: true,
+        ),
+      ),
+    );
+
+    // Overall height for this InputDecorator is 48dps:
+    //   12 - top padding
+    //   16 - input text (ahem font size 16dps)
+    //   12 - bottom padding
+    //   48 - prefix icon
+    //   48 - suffix icon
+
+    expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, 48.0));
+    expect(tester.getSize(find.text('text')).height, 16.0);
+    expect(tester.getSize(find.byIcon(Icons.pages)).height, 48.0);
+    expect(tester.getSize(find.byIcon(Icons.satellite)).height, 48.0);
+    expect(tester.getTopLeft(find.text('text')).dy, 12.0);
+    expect(tester.getTopLeft(find.byIcon(Icons.pages)).dy, 0.0);
+    expect(tester.getTopLeft(find.byIcon(Icons.satellite)).dy, 0.0);
+    expect(tester.getTopRight(find.byIcon(Icons.satellite)).dx, 800.0);
+
+
+    // layout is a row: [icon text icon]
+    expect(tester.getTopLeft(find.byIcon(Icons.pages)).dx, 0.0);
+    expect(tester.getTopRight(find.byIcon(Icons.pages)).dx, lessThanOrEqualTo(tester.getTopLeft(find.text('text')).dx));
+    expect(tester.getTopRight(find.text('text')).dx, lessThanOrEqualTo(tester.getTopLeft(find.byIcon(Icons.satellite)).dx));
+  });
+
   testWidgets('InputDecorator error/helper/counter RTL layout', (WidgetTester tester) async {
     await tester.pumpWidget(
       buildInputDecorator(
@@ -1428,4 +1466,52 @@ void main() {
       ),
     );
   });
+
+  testWidgets(
+    'InputDecorator OutlineBorder focused label with icon',
+    (WidgetTester tester) async {
+      // Regression test for https://github.com/flutter/flutter/issues/18111
+
+      Widget buildFrame(TextDirection textDirection) {
+        return new MaterialApp(
+          home: new Scaffold(
+            body: new Container(
+              padding: const EdgeInsets.all(16.0),
+              alignment: Alignment.center,
+              child: new Directionality(
+                textDirection: textDirection,
+                child: const RepaintBoundary(
+                  child: const InputDecorator(
+                    isFocused: true,
+                    isEmpty: true,
+                    decoration: const InputDecoration(
+                      icon: const Icon(Icons.insert_link),
+                      labelText: 'primaryLink',
+                      hintText: 'Primary link to story',
+                      border: const OutlineInputBorder(),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        );
+      }
+
+      await tester.pumpWidget(buildFrame(TextDirection.ltr));
+      await expectLater(
+        find.byType(InputDecorator),
+        matchesGoldenFile('input_decorator.outline_icon_label.ltr.png'),
+        skip: !Platform.isLinux,
+      );
+
+      await tester.pumpWidget(buildFrame(TextDirection.rtl));
+      await expectLater(
+        find.byType(InputDecorator),
+        matchesGoldenFile('input_decorator.outline_icon_label.rtl.png'),
+        skip: !Platform.isLinux,
+      );
+    },
+    skip: !Platform.isLinux,
+  );
 }

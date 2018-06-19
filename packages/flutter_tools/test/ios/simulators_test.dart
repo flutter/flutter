@@ -175,7 +175,7 @@ void main() {
       mockProcessManager = new MockProcessManager();
       // Let everything else return exit code 0 so process.dart doesn't crash.
       when(
-        mockProcessManager.run(any, environment: null, workingDirectory: null)
+        mockProcessManager.run(typed(any), environment: null, workingDirectory: null)
       ).thenAnswer((Invocation invocation) =>
         new Future<ProcessResult>.value(new ProcessResult(2, 0, '', ''))
       );
@@ -229,7 +229,7 @@ void main() {
 
     setUp(() {
       mockProcessManager = new MockProcessManager();
-      when(mockProcessManager.start(any, environment: null, workingDirectory: null))
+      when(mockProcessManager.start(typed(any), environment: null, workingDirectory: null))
         .thenAnswer((Invocation invocation) => new Future<Process>.value(new MockProcess()));
     });
 
@@ -237,7 +237,7 @@ void main() {
       final IOSSimulator device = new IOSSimulator('x', name: 'iPhone SE', category: 'iOS 9.3');
       await launchDeviceLogTool(device);
       expect(
-        verify(mockProcessManager.start(captureAny, environment: null, workingDirectory: null)).captured.single,
+        verify(mockProcessManager.start(typed(captureAny), environment: null, workingDirectory: null)).captured.single,
         contains('tail'),
       );
     },
@@ -249,7 +249,7 @@ void main() {
       final IOSSimulator device = new IOSSimulator('x', name: 'iPhone SE', category: 'iOS 11.0');
       await launchDeviceLogTool(device);
       expect(
-        verify(mockProcessManager.start(captureAny, environment: null, workingDirectory: null)).captured.single,
+        verify(mockProcessManager.start(typed(captureAny), environment: null, workingDirectory: null)).captured.single,
         contains('/usr/bin/log'),
       );
     },
@@ -271,7 +271,7 @@ void main() {
       final IOSSimulator device = new IOSSimulator('x', name: 'iPhone SE', category: 'iOS 9.3');
       await launchSystemLogTool(device);
       expect(
-        verify(mockProcessManager.start(captureAny, environment: null, workingDirectory: null)).captured.single,
+        verify(mockProcessManager.start(typed(captureAny), environment: null, workingDirectory: null)).captured.single,
         contains('tail'),
       );
     },

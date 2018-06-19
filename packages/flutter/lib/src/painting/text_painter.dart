@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' as ui show Paragraph, ParagraphBuilder, ParagraphConstraints, ParagraphStyle, Locale;
+import 'dart:ui' as ui show Paragraph, ParagraphBuilder, ParagraphConstraints, ParagraphStyle;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -46,7 +46,7 @@ class TextPainter {
     double textScaleFactor = 1.0,
     int maxLines,
     String ellipsis,
-    ui.Locale locale,
+    Locale locale,
   }) : assert(text == null || text.debugAssertIsValid()),
        assert(textAlign != null),
        assert(textScaleFactor != null),
@@ -168,9 +168,9 @@ class TextPainter {
   }
 
   /// The locale used to select region-specific glyphs.
-  ui.Locale get locale => _locale;
-  ui.Locale _locale;
-  set locale(ui.Locale value) {
+  Locale get locale => _locale;
+  Locale _locale;
+  set locale(Locale value) {
     if (_locale == value)
       return;
     _locale = value;
@@ -391,7 +391,7 @@ class TextPainter {
     return value & 0xF800 == 0xD800;
   }
 
-  /// Returns the closest offset after `offset` at which the inout cursor can be
+  /// Returns the closest offset after `offset` at which the input cursor can be
   /// positioned.
   int getOffsetAfter(int offset) {
     final int nextCodeUnit = _text.codeUnitAt(offset);

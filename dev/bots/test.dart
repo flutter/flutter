@@ -50,8 +50,11 @@ Future<Null> main(List<String> args) async {
 
   final String shard = Platform.environment['SHARD'];
   if (shard != null) {
-    if (!_kShards.containsKey(shard))
-      throw new ArgumentError('Invalid shard: $shard');
+    if (!_kShards.containsKey(shard)) {
+      print('Invalid shard: $shard');
+      print('The available shards are: ${_kShards.keys.join(", ")}');
+      exit(1);
+    }
     print('${bold}SHARD=$shard$reset');
     await _kShards[shard]();
   } else {
@@ -136,55 +139,79 @@ Future<Null> _analyzeRepo() async {
 }
 
 Future<Null> _runTests() async {
-  // Verify that the tests actually return failure on failure and success on success.
+  // Verify that the tests actually return failure on failure and success on
+  // success.
   final String automatedTests = path.join(flutterRoot, 'dev', 'automated_tests');
-  await _runFlutterTest(automatedTests,
-    script: path.join('test_smoke_test', 'fail_test.dart'),
-    expectFailure: true,
-    printOutput: false,
-    timeout: _kShortTimeout,
-  );
+  // We run the "pass" and "fail" smoke tests first, and alone, because those
+  // are particularly critical and sensitive. If one of these fails, there's no
+  // point even trying the others.
   await _runFlutterTest(automatedTests,
     script: path.join('test_smoke_test', 'pass_test.dart'),
     printOutput: false,
     timeout: _kShortTimeout,
   );
   await _runFlutterTest(automatedTests,
-    script: path.join('test_smoke_test', 'crash1_test.dart'),
+    script: path.join('test_smoke_test', 'fail_test.dart'),
     expectFailure: true,
+    printOutput: false,
+    timeout: _kShortTimeout,
+  );
+  // We run the timeout tests individually because they are timing-sensitive.
+  await _runFlutterTest(automatedTests,
+    script: path.join('test_smoke_test', 'timeout_pass_test.dart'),
+    expectFailure: false,
     printOutput: false,
     timeout: _kShortTimeout,
   );
   await _runFlutterTest(automatedTests,
-    script: path.join('test_smoke_test', 'crash2_test.dart'),
+    script: path.join('test_smoke_test', 'timeout_fail_test.dart'),
     expectFailure: true,
     printOutput: false,
     timeout: _kShortTimeout,
   );
-  await _runFlutterTest(automatedTests,
-    script: path.join('test_smoke_test', 'syntax_error_test.broken_dart'),
-    expectFailure: true,
-    printOutput: false,
-    timeout: _kShortTimeout,
-  );
-  await _runFlutterTest(automatedTests,
-    script: path.join('test_smoke_test', 'missing_import_test.broken_dart'),
-    expectFailure: true,
-    printOutput: false,
-    timeout: _kShortTimeout,
-  );
-  await _runFlutterTest(automatedTests,
-    script: path.join('test_smoke_test', 'disallow_error_reporter_modification_test.dart'),
-    expectFailure: true,
-    printOutput: false,
-    timeout: _kShortTimeout,
-  );
-  await _runCommand(flutter,
-    <String>['drive', '--use-existing-app', '-t', path.join('test_driver', 'failure.dart')],
-    workingDirectory: path.join(flutterRoot, 'packages', 'flutter_driver'),
-    expectFailure: true,
-    printOutput: false,
-    timeout: _kShortTimeout,
+  // We run the remaining smoketests in parallel, because they each take some
+  // time to run (e.g. compiling), so we don't want to run them in series,
+  // especially on 20-core machines...
+  await Future.wait<void>(
+    <Future<void>>[
+      _runFlutterTest(automatedTests,
+        script: path.join('test_smoke_test', 'crash1_test.dart'),
+        expectFailure: true,
+        printOutput: false,
+        timeout: _kShortTimeout,
+      ),
+      _runFlutterTest(automatedTests,
+        script: path.join('test_smoke_test', 'crash2_test.dart'),
+        expectFailure: true,
+        printOutput: false,
+        timeout: _kShortTimeout,
+      ),
+      _runFlutterTest(automatedTests,
+        script: path.join('test_smoke_test', 'syntax_error_test.broken_dart'),
+        expectFailure: true,
+        printOutput: false,
+        timeout: _kShortTimeout,
+      ),
+      _runFlutterTest(automatedTests,
+        script: path.join('test_smoke_test', 'missing_import_test.broken_dart'),
+        expectFailure: true,
+        printOutput: false,
+        timeout: _kShortTimeout,
+      ),
+      _runFlutterTest(automatedTests,
+        script: path.join('test_smoke_test', 'disallow_error_reporter_modification_test.dart'),
+        expectFailure: true,
+        printOutput: false,
+        timeout: _kShortTimeout,
+      ),
+      _runCommand(flutter,
+        <String>['drive', '--use-existing-app', '-t', path.join('test_driver', 'failure.dart')],
+        workingDirectory: path.join(flutterRoot, 'packages', 'flutter_driver'),
+        expectFailure: true,
+        printOutput: false,
+        timeout: _kShortTimeout,
+      ),
+    ],
   );
 
   // Verify that we correctly generated the version file.
@@ -373,8 +400,20 @@ Future<Null> _runFlutterTest(String workingDirectory, {
   final List<String> args = <String>['test']..addAll(options);
   if (flutterTestArgs != null && flutterTestArgs.isNotEmpty)
     args.addAll(flutterTestArgs);
-  if (script != null)
+  if (script != null) {
+    final String fullScriptPath = path.join(workingDirectory, script);
+    if (!FileSystemEntity.isFileSync(fullScriptPath)) {
+      print('Could not find test: $fullScriptPath');
+      print('Working directory: $workingDirectory');
+      print('Script: $script');
+      if (!printOutput)
+        print('This is one of the tests that does not normally print output.');
+      if (skip)
+        print('This is one of the tests that is normally skipped in this configuration.');
+      exit(1);
+    }
     args.add(script);
+  }
   return _runCommand(flutter, args,
     workingDirectory: workingDirectory,
     expectFailure: expectFailure,

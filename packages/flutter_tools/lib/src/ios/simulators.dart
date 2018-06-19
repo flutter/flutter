@@ -137,7 +137,7 @@ class SimControl {
     return runCheckedAsync(args);
   }
 
-  Future<Null> takeScreenshot(String deviceId, String outputPath) {
+  Future<void> takeScreenshot(String deviceId, String outputPath) {
     return runCheckedAsync(<String>[_xcrunPath, 'simctl', 'io', deviceId, 'screenshot', outputPath]);
   }
 }
@@ -461,7 +461,7 @@ class IOSSimulator extends Device {
   bool get supportsScreenshot => _xcodeVersionSupportsScreenshot;
 
   @override
-  Future<Null> takeScreenshot(File outputFile) {
+  Future<void> takeScreenshot(File outputFile) {
     return SimControl.instance.takeScreenshot(id, outputFile.path);
   }
 }

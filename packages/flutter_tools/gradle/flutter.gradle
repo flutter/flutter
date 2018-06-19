@@ -256,6 +256,10 @@ class FlutterPlugin implements Plugin<Project> {
             target = project.property('target')
         }
 
+        Boolean verboseValue = null
+        if (project.hasProperty('verbose')) {
+            verboseValue = project.property('verbose').toBoolean()
+        }
         Boolean previewDart2Value = true
         if (project.hasProperty('preview-dart-2')) {
             previewDart2Value = project.property('preview-dart-2').toBoolean()
@@ -272,7 +276,10 @@ class FlutterPlugin implements Plugin<Project> {
         if (project.hasProperty('track-widget-creation')) {
             trackWidgetCreationValue = project.property('track-widget-creation').toBoolean()
         }
-
+        Boolean buildSnapshotValue = false
+        if (project.hasProperty('build-snapshot')) {
+            buildSnapshotValue = project.property('build-snapshot').toBoolean()
+        }
         String extraFrontEndOptionsValue = null
         if (project.hasProperty('extra-front-end-options')) {
             extraFrontEndOptionsValue = project.property('extra-front-end-options')
@@ -310,10 +317,12 @@ class FlutterPlugin implements Plugin<Project> {
                 localEngine this.localEngine
                 localEngineSrcPath this.localEngineSrcPath
                 targetPath target
+                verbose verboseValue
                 previewDart2 previewDart2Value
                 fileSystemRoots fileSystemRootsValue
                 fileSystemScheme fileSystemSchemeValue
                 trackWidgetCreation trackWidgetCreationValue
+                buildSnapshot buildSnapshotValue
                 buildSharedLibrary buildSharedLibraryValue
                 targetPlatform targetPlatformValue
                 sourceDir project.file(project.flutter.source)
@@ -353,6 +362,8 @@ abstract class BaseFlutterTask extends DefaultTask {
     @Input
     String targetPath
     @Optional @Input
+    Boolean verbose
+    @Optional @Input
     Boolean previewDart2
     @Optional @Input
     String[] fileSystemRoots
@@ -360,6 +371,8 @@ abstract class BaseFlutterTask extends DefaultTask {
     String fileSystemScheme
     @Optional @Input
     Boolean trackWidgetCreation
+    @Optional @Input
+    Boolean buildSnapshot
     @Optional @Input
     Boolean buildSharedLibrary
     @Optional @Input
@@ -373,18 +386,20 @@ abstract class BaseFlutterTask extends DefaultTask {
 
     @OutputFiles
     FileCollection getDependenciesFiles() {
-        if (buildMode != 'debug') {
-            // For AOT builds, include the gen_snapshot depfile.
-            FileCollection depfiles = project.files("${intermediateDir}/snapshot.d")
-            if (previewDart2) {
-                // For Dart 2, also include the kernel compiler depfile, since
-                // kernel compile is the first stage of AOT build in this mode,
-                // and it includes all the Dart sources.
-                depfiles += project.files("${intermediateDir}/kernel_compile.d")
-            }
-            return depfiles
+        // For AOT and Core JIT builds, include the gen_snapshot depfile.
+        FileCollection depfiles = project.files("${intermediateDir}/snapshot.d")
+        if (previewDart2) {
+            // For Dart 2, also include the kernel compiler depfile, since
+            // kernel compile is the first stage of AOT build in this mode,
+            // and it includes all the Dart sources.
+            depfiles += project.files("${intermediateDir}/kernel_compile.d")
         }
-        return project.files("${intermediateDir}/snapshot_blob.bin.d")
+
+        // Include Core JIT kernel compiler depfile, since kernel compile is
+        // the first stage of JIT builds in this mode, and it includes all the
+        // Dart sources.
+        depfiles += project.files("${intermediateDir}/snapshot_blob.bin.d")
+        return depfiles
     }
 
     void buildBundle() {
@@ -442,6 +457,9 @@ abstract class BaseFlutterTask extends DefaultTask {
             args "build", "bundle"
             args "--suppress-analytics"
             args "--target", targetPath
+            if (verbose) {
+                args "--verbose"
+            }
             if (previewDart2) {
                 args "--preview-dart-2"
             } else {
@@ -458,8 +476,17 @@ abstract class BaseFlutterTask extends DefaultTask {
             if (trackWidgetCreation) {
                 args "--track-widget-creation"
             }
+            if (buildSnapshot) {
+                args "--build-snapshot"
+            }
             if (extraFrontEndOptions != null) {
                 args "--extra-front-end-options", "${extraFrontEndOptions}"
+            }
+            if (extraGenSnapshotOptions != null) {
+                args "--extra-gen-snapshot-options", "${extraGenSnapshotOptions}"
+            }
+            if (targetPlatform != null) {
+                args "--target-platform", "${targetPlatform}"
             }
             if (buildMode != "debug") {
                 args "--precompiled"
@@ -470,6 +497,7 @@ abstract class BaseFlutterTask extends DefaultTask {
                 }
             }
             args "--asset-dir", "${intermediateDir}/flutter_assets"
+            args "--${buildMode}"
         }
     }
 }
@@ -486,7 +514,7 @@ class FlutterTask extends BaseFlutterTask {
 
             include "flutter_assets/**" // the working dir and its files
 
-            if (buildMode != 'debug') {
+            if (buildMode != 'debug' || buildSnapshot) {
                 if (buildSharedLibrary) {
                     include "app.so"
                 } else {

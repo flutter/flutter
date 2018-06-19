@@ -167,7 +167,7 @@ class _SliderDemoState extends State<SliderDemo> {
                 new Slider(
                   value: _discreteValue,
                   min: 0.0,
-                  max: 100.0,
+                  max: 200.0,
                   divisions: 5,
                   label: '${_discreteValue.round()}',
                   onChanged: (double value) {
@@ -198,8 +198,9 @@ class _SliderDemoState extends State<SliderDemo> {
                   child: new Slider(
                     value: _discreteValue,
                     min: 0.0,
-                    max: 100.0,
+                    max: 200.0,
                     divisions: 5,
+                    semanticFormatterCallback: (double value) => value.round().toString(),
                     label: '${_discreteValue.round()}',
                     onChanged: (double value) {
                       setState(() {
