@@ -173,7 +173,6 @@ class XcodeProjectInterpreter {
   }
 
   Map<String, String> getBuildSettings(String projectPath, String target) {
-    print("ProjectPath: ${projectPath}");
     final String out = runCheckedSync(<String>[
       _executable,
       '-project',
