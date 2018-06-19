@@ -103,7 +103,7 @@ void main() {
     updatedScale = null;
     expect(didTap, isFalse);
 
-    // Three-finger scaling
+      // Three-finger scaling
     final TestPointer pointer3 = new TestPointer(3);
     final PointerDownEvent down3 = pointer3.down(const Offset(25.0, 35.0));
     scale.addPointer(down3);
@@ -382,6 +382,38 @@ void main() {
     expect(updatedRotation, isNull);
     expect(didStartScale, isFalse);
 
+    // Zoom in
+    tester.route(pointer3.move(const Offset(55.0, 65.0)));
+    expect(didStartScale, isTrue);
+    didStartScale = false;
+    expect(updatedFocalPoint, const Offset(25.0, 35.0));
+    updatedFocalPoint = null;
+    expect(updatedRotation, 0.0);
+    updatedRotation = null;
+    expect(didEndScale, isFalse);
+    expect(didTap, isFalse);
+
+    // Return to original positions but with different fingers
+    tester.route(pointer1.move(const Offset(25.0, 35.0)));
+    tester.route(pointer2.move(const Offset(20.0, 30.0)));
+    tester.route(pointer3.move(const Offset(15.0, 25.0)));
+    expect(didStartScale, isFalse);
+    expect(updatedFocalPoint, const Offset(20.0, 30.0));
+    updatedFocalPoint = null;
+    expect(updatedRotation, 0.0);
+    updatedRotation = null;
+    expect(didEndScale, isFalse);
+    expect(didTap, isFalse);
+
+    tester.route(pointer1.up());
+    expect(didStartScale, isFalse);
+    expect(updatedFocalPoint, isNull);
+    expect(updatedRotation, isNull);
+    expect(didEndScale, isTrue);
+    didEndScale = false;
+    expect(didTap, isFalse);
+
+
     // Continue scaling with two fingers
     tester.route(pointer3.move(const Offset(10.0, 20.0)));
     expect(didStartScale, isTrue);
@@ -416,7 +448,7 @@ void main() {
     expect(didStartScale, isFalse);
     expect(updatedFocalPoint, isNull);
     expect(updatedRotation, isNull);
-    expect(didEndScale, isTrue);
+    expect(didEndScale, isFalse);
     didEndScale = false;
     expect(didTap, isFalse);
 
