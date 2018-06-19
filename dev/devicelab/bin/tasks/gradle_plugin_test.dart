@@ -80,42 +80,38 @@ void main() async {
 
       await runTest((project, pluginProject) async {
         section('gradlew on build script with error');
-        {
-          final ProcessResult result =
-              await project.resultOfGradleTask('assembleRelease');
-          if (result.exitCode == 0)
-            return _failure(
-                'Gradle did not exit with error as expected', result);
-          final String output = result.stdout + '\n' + result.stderr;
-          if (output.contains('GradleException') ||
-              output.contains('Failed to notify') ||
-              output.contains('at org.gradle'))
-            return _failure(
-                'Gradle output should not contain stacktrace', result);
-          if (!output.contains('Build failed') || !output.contains('builTypes'))
-            return _failure(
-                'Gradle output should contain a readable error message',
-                result);
-        }
+        final ProcessResult result =
+            await project.resultOfGradleTask('assembleRelease');
+        if (result.exitCode == 0)
+          return _failure(
+              'Gradle did not exit with error as expected', result);
+        final String output = result.stdout + '\n' + result.stderr;
+        if (output.contains('GradleException') ||
+            output.contains('Failed to notify') ||
+            output.contains('at org.gradle'))
+          return _failure(
+              'Gradle output should not contain stacktrace', result);
+        if (!output.contains('Build failed') || !output.contains('builTypes'))
+          return _failure(
+              'Gradle output should contain a readable error message',
+              result);
       });
 
       await runTest((project, pluginProject) async {
         section('flutter build apk on build script with error');
-        {
-          final ProcessResult result = await project.resultOfFlutterCommand('build', <String>['apk']);
-          if (result.exitCode == 0)
-            return _failure(
-                'flutter build apk should fail when Gradle does', result);
-          final String output = result.stdout + '\n' + result.stderr;
-          if (!output.contains('Build failed') || !output.contains('builTypes'))
-            return _failure(
-                'flutter build apk output should contain a readable Gradle error message',
-                result);
-          if (_hasMultipleOccurrences(output, 'builTypes'))
-            return _failure(
-                'flutter build apk should not invoke Gradle repeatedly on error',
-                result);
-        }
+        final ProcessResult result = await project.resultOfFlutterCommand('build', <String>['apk']);
+        if (result.exitCode == 0)
+          return _failure(
+              'flutter build apk should fail when Gradle does', result);
+        final String output = result.stdout + '\n' + result.stderr;
+        if (!output.contains('Build failed') || !output.contains('builTypes'))
+          return _failure(
+              'flutter build apk output should contain a readable Gradle error message',
+              result);
+        if (_hasMultipleOccurrences(output, 'builTypes'))
+          return _failure(
+              'flutter build apk should not invoke Gradle repeatedly on error',
+              result);
       });
 
       await runTest((project, pluginProject) async {
