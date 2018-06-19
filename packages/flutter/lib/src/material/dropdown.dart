@@ -479,12 +479,9 @@ class DropdownButton<T> extends StatefulWidget {
     this.style,
     this.iconSize = 24.0,
     this.isDense = false,
-  })  : assert(items == null ||
-            value == null ||
-            items
-                    .where((DropdownMenuItem<T> item) => item.value == value)
-                    .length ==
-                1),
+  })  : assert(items == null 
+                || value == null 
+                || items.where((DropdownMenuItem<T> item) => item.value == value).length == 1),
         super(key: key);
 
   /// The list of possible items to select among.
