@@ -436,16 +436,6 @@ class _AppBarState extends State<AppBar> {
         ),
       ),
     );
-    final Brightness brightness = widget.brightness ?? themeData.primaryColorBrightness;
-    final SystemUiOverlayStyle overlayStyle = brightness == Brightness.dark
-        ? SystemUiOverlayStyle.dark
-        : SystemUiOverlayStyle.dark;
-    appBar = new AnnotatedRegion<SystemUiOverlayStyle>(
-      value: overlayStyle,
-      child: appBar,
-      sized: true,
-    );
-
     if (widget.bottom != null) {
       appBar = new Column(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -486,14 +476,21 @@ class _AppBarState extends State<AppBar> {
         ],
       );
     }
+    final Brightness brightness = widget.brightness ?? themeData.primaryColorBrightness;
+    final SystemUiOverlayStyle overlayStyle = brightness == Brightness.dark
+        ? SystemUiOverlayStyle.dark
+        : SystemUiOverlayStyle.light;
 
     return new Semantics(
       container: true,
       explicitChildNodes: true,
-      child: new Material(
-        color: widget.backgroundColor ?? themeData.primaryColor,
-        elevation: widget.elevation,
-        child: appBar,
+      child: new AnnotatedRegion<SystemUiOverlayStyle>(
+        value: overlayStyle,
+        child: new Material(
+          color: widget.backgroundColor ?? themeData.primaryColor,
+          elevation: widget.elevation,
+          child: appBar,
+        ),
       ),
     );
   }
