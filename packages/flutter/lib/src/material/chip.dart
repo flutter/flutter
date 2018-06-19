@@ -1461,37 +1461,68 @@ class _RawChipState extends State<RawChip> with TickerProviderStateMixin<RawChip
         ),
       ),
     );
+    BoxConstraints constraints;
     switch (widget.materialTapTargetSize ?? theme.materialTapTargetSize) {
       case MaterialTapTargetSize.padded:
-        result = new ConstrainedBox(
-          constraints: const BoxConstraints(minWidth: 48.0, minHeight: 48.0),
-          child: new Center(
-            child: result,
-            widthFactor: 1.0,
-            heightFactor: 1.0,
-          ),
-        );
-        if (canTap) {
-          result = new GestureDetector(
-            behavior: HitTestBehavior.translucent,
-            onTap: _handleTap,
-            onTapDown: _handleTapDown,
-            onTapCancel: _handleTapCancel,
-            child: result,
-            excludeFromSemantics: true,
-          );
-        }
+        constraints = const BoxConstraints(minHeight: 48.0);
         break;
       case MaterialTapTargetSize.shrinkWrap:
+        constraints = const BoxConstraints();
         break;
     }
-
+    result = _ChipRedirectingHitDetectionWidget(
+      constraints: constraints,
+      child: new Center(
+        child: result,
+        widthFactor: 1.0,
+        heightFactor: 1.0,
+      ),
+    );
     return new Semantics(
       container: true,
       selected: widget.selected,
       enabled: canTap ? widget.isEnabled : null,
       child: result,
     );
+  }
+}
+
+/// Redirects the [position.dy] passed to [RenderBox.hitTest] to the vertical
+/// center of the widget.
+///
+/// The primary purpose of this widget is to allow padding around the [RawChip]
+/// to trigger the child ink feature without increasing the size of the material.
+class _ChipRedirectingHitDetectionWidget extends SingleChildRenderObjectWidget {
+  const _ChipRedirectingHitDetectionWidget({
+    Key key,
+    Widget child,
+    this.constraints,
+  }) : super(key: key, child: child);
+
+  final BoxConstraints constraints;
+
+  @override
+  RenderObject createRenderObject(BuildContext context) {
+    return new _RenderChipRedirectingHitDetection(constraints);
+  }
+
+  @override
+  void updateRenderObject(BuildContext context, covariant _RenderChipRedirectingHitDetection renderObject) {
+    renderObject.additionalConstraints = constraints;
+  }
+}
+
+class _RenderChipRedirectingHitDetection extends RenderConstrainedBox {
+  _RenderChipRedirectingHitDetection(BoxConstraints additionalConstraints) : super(additionalConstraints: additionalConstraints);
+
+  @override
+  bool hitTest(HitTestResult result, {Offset position}) {
+    if (!size.contains(position))
+      return false;
+    // Only redirects hit detection which occurs above and below the render object.
+    // In order to make this assumption true, I have removed the minimum width
+    // constraints, since any reasonable chip would be at least that wide.
+    return child.hitTest(result, position: new Offset(position.dx, size.height / 2));
   }
 }
 
@@ -1997,6 +2028,28 @@ class _RenderChip extends RenderBox {
   }
 
   @override
+  bool hitTest(HitTestResult result, {Offset position}) {
+    if (!size.contains(position))
+      return false;
+    RenderBox hitTestChild;
+    switch (textDirection) {
+      case TextDirection.ltr:
+        if (position.dx / size.width > 0.66)
+          hitTestChild = deleteIcon ?? label ?? avatar;
+        else
+          hitTestChild = label ?? avatar;
+        break;
+      case TextDirection.rtl:
+        if (position.dx / size.width < 0.33)
+          hitTestChild = deleteIcon ?? label ?? avatar;
+        else
+          hitTestChild = label ?? avatar;
+        break;
+    }
+    return hitTestChild?.hitTest(result, position: hitTestChild.size.center(Offset.zero)) ?? false;
+  }
+
+  @override
   void performLayout() {
     final BoxConstraints contentConstraints = constraints.loosen();
     // Find out the height of the label within the constraints.
@@ -2314,20 +2367,4 @@ class _RenderChip extends RenderBox {
 
   @override
   bool hitTestSelf(Offset position) => deleteButtonRect.contains(position) || pressRect.contains(position);
-
-  @override
-  bool hitTestChildren(HitTestResult result, {@required Offset position}) {
-    assert(position != null);
-    if (deleteIcon != null && deleteButtonRect.contains(position)) {
-      // This simulates a position at the center of the delete icon if the hit
-      // on the chip is inside of the delete area.
-      return deleteIcon.hitTest(result, position: (Offset.zero & _boxSize(deleteIcon)).center);
-    }
-    for (RenderBox child in _children) {
-      if (child.hasSize && child.hitTest(result, position: position - _boxParentData(child).offset)) {
-        return true;
-      }
-    }
-    return false;
-  }
 }
