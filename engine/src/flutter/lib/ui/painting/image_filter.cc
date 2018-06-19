@@ -12,7 +12,6 @@
 #include "third_party/skia/include/effects/SkBlurImageFilter.h"
 #include "third_party/skia/include/effects/SkImageSource.h"
 #include "third_party/skia/include/effects/SkPictureImageFilter.h"
-#include "third_party/skia/src/core/SkMatrixImageFilter.h"
 
 namespace blink {
 
@@ -59,7 +58,7 @@ void ImageFilter::initBlur(double sigma_x, double sigma_y) {
 
 void ImageFilter::initMatrix(const tonic::Float64List& matrix4,
                              int filterQuality) {
-  filter_ = SkMatrixImageFilter::Make(
+  filter_ = SkImageFilter::MakeMatrixFilter(
       ToSkMatrix(matrix4), static_cast<SkFilterQuality>(filterQuality),
       nullptr);
 }
