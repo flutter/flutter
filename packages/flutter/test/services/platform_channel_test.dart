@@ -215,7 +215,7 @@ void main() {
       await new Future<Null>.delayed(Duration.zero);
       expect(events, isEmpty);
       expect(errors, hasLength(1));
-      expect(errors[0], const isInstanceOf<PlatformException>());
+      expect(errors[0], const TypeMatcher<PlatformException>());
       final PlatformException error = errors[0];
       expect(error.code, '404');
       expect(error.message, 'Not Found.');
