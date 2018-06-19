@@ -378,7 +378,7 @@ class ResidentCompiler {
       _controller.stream.listen(_handleCompilationRequest);
     }
 
-    Completer<CompilerOutput> completer = new Completer<CompilerOutput>();
+    final Completer<CompilerOutput> completer = new Completer<CompilerOutput>();
     _controller.add(
         new _CompileExpressionRequest(
             completer, expression, definitions, typeDefinitions, libraryUri, klass, isStatic)
