@@ -1,4 +1,4 @@
-Signature: 94538027829e7e01c4bcccc2e9bd981c
+Signature: c1b2926fa60a35144cd66921ba72813d
 
 UNUSED LICENSES:
 
@@ -17290,6 +17290,9 @@ FILE: ../../../third_party/skia/src/gpu/effects/GrConfigConversionEffect.h
 FILE: ../../../third_party/skia/src/gpu/effects/GrConstColorProcessor.cpp
 FILE: ../../../third_party/skia/src/gpu/effects/GrConstColorProcessor.fp
 FILE: ../../../third_party/skia/src/gpu/effects/GrConstColorProcessor.h
+FILE: ../../../third_party/skia/src/gpu/effects/GrDitherEffect.cpp
+FILE: ../../../third_party/skia/src/gpu/effects/GrDitherEffect.fp
+FILE: ../../../third_party/skia/src/gpu/effects/GrDitherEffect.h
 FILE: ../../../third_party/skia/src/gpu/effects/GrLumaColorFilterEffect.cpp
 FILE: ../../../third_party/skia/src/gpu/effects/GrLumaColorFilterEffect.fp
 FILE: ../../../third_party/skia/src/gpu/effects/GrLumaColorFilterEffect.h
@@ -17308,8 +17311,6 @@ FILE: ../../../third_party/skia/src/gpu/effects/GrRRectBlurEffect.h
 FILE: ../../../third_party/skia/src/gpu/effects/GrRectBlurEffect.cpp
 FILE: ../../../third_party/skia/src/gpu/effects/GrRectBlurEffect.fp
 FILE: ../../../third_party/skia/src/gpu/effects/GrRectBlurEffect.h
-FILE: ../../../third_party/skia/src/gpu/effects/GrSkSLFP.cpp
-FILE: ../../../third_party/skia/src/gpu/effects/GrSkSLFP.h
 FILE: ../../../third_party/skia/src/gpu/effects/GrUnpremulInputFragmentProcessor.cpp
 FILE: ../../../third_party/skia/src/gpu/effects/GrUnpremulInputFragmentProcessor.fp
 FILE: ../../../third_party/skia/src/gpu/effects/GrUnpremulInputFragmentProcessor.h
@@ -17334,7 +17335,6 @@ FILE: ../../../third_party/skia/src/sksl/SkSLInterpreter.cpp
 FILE: ../../../third_party/skia/src/sksl/SkSLInterpreter.h
 FILE: ../../../third_party/skia/src/sksl/SkSLJIT.cpp
 FILE: ../../../third_party/skia/src/sksl/SkSLJIT.h
-FILE: ../../../third_party/skia/src/sksl/SkSLPipelineStageCodeGenerator.cpp
 FILE: ../../../third_party/skia/src/sksl/ir/SkSLAppendStage.h
 FILE: ../../../third_party/skia/src/sksl/ir/SkSLVariableReference.cpp
 FILE: ../../../third_party/skia/src/utils/Sk3D.cpp
@@ -17845,10 +17845,10 @@ FILE: ../../../third_party/skia/src/core/SkOrderedReadBuffer.h
 FILE: ../../../third_party/skia/src/sksl/lex/layout.lex
 FILE: ../../../third_party/skia/src/sksl/lex/sksl.lex
 FILE: ../../../third_party/skia/src/sksl/sksl.inc
+FILE: ../../../third_party/skia/src/sksl/sksl_cpu.inc
 FILE: ../../../third_party/skia/src/sksl/sksl_fp.inc
 FILE: ../../../third_party/skia/src/sksl/sksl_frag.inc
 FILE: ../../../third_party/skia/src/sksl/sksl_geom.inc
-FILE: ../../../third_party/skia/src/sksl/sksl_pipeline.inc
 FILE: ../../../third_party/skia/src/sksl/sksl_vert.inc
 ----------------------------------------------------------------------------------------------------
 Copyright (c) 2011 Google Inc. All rights reserved.
@@ -19674,7 +19674,6 @@ FILE: ../../../third_party/skia/src/sksl/SkSLLayoutLexer.h
 FILE: ../../../third_party/skia/src/sksl/SkSLLexer.cpp
 FILE: ../../../third_party/skia/src/sksl/SkSLLexer.h
 FILE: ../../../third_party/skia/src/sksl/SkSLOutputStream.h
-FILE: ../../../third_party/skia/src/sksl/SkSLPipelineStageCodeGenerator.h
 FILE: ../../../third_party/skia/src/sksl/SkSLSectionAndParameterHelper.h
 FILE: ../../../third_party/skia/src/sksl/SkSLString.cpp
 FILE: ../../../third_party/skia/src/sksl/SkSLString.h
