@@ -5,7 +5,7 @@
 import 'dart:ui' show window, SemanticsFlag;
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart' hide TypeMatcher;
 
 import '../widgets/semantics_tester.dart';
 
@@ -179,7 +179,7 @@ void main() {
             icon: const Icon(Icons.view_carousel),
             itemBuilder: simplePopupMenuItemBuilder,
         );
-      }, throwsA(const isInstanceOf<AssertionError>()));
+      }, throwsA(const TypeMatcher<AssertionError>()));
     });
 
     testWidgets('PopupMenuButton creates IconButton when given an icon', (WidgetTester tester) async {

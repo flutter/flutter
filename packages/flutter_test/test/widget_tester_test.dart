@@ -5,8 +5,8 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart' hide TypeMatcher;
+import 'package:flutter/material.dart' hide TypeMatcher;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:test/test.dart' as test_package;
 import 'package:test/src/frontend/async_matcher.dart' show AsyncMatcher;
@@ -334,7 +334,7 @@ void main() {
 
       expect(
         expectAsync0(tester.pageBack),
-        throwsA(const isInstanceOf<TestFailure>()),
+        throwsA(const TypeMatcher<TestFailure>()),
       );
     });
 
@@ -490,7 +490,7 @@ void main() {
     testWidgets('disallows re-entry', (WidgetTester tester) async {
       final Completer<void> completer = new Completer<void>();
       tester.runAsync<void>(() => completer.future);
-      expect(() => tester.runAsync(() async {}), throwsA(const isInstanceOf<TestFailure>()));
+      expect(() => tester.runAsync(() async {}), throwsA(const TypeMatcher<TestFailure>()));
       completer.complete();
     });
 
