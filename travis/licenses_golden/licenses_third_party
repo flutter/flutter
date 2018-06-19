@@ -1,4 +1,4 @@
-Signature: 5bc6c974e589ab091f8b9d9230af0253
+Signature: 493ff7b41e2ce6a053ba89eff4558265
 
 UNUSED LICENSES:
 
@@ -14359,7 +14359,6 @@ FILE: ../../../third_party/skia/include/private/GrOpList.h
 FILE: ../../../third_party/skia/include/private/GrRenderTargetProxy.h
 FILE: ../../../third_party/skia/include/private/GrSingleOwner.h
 FILE: ../../../third_party/skia/include/private/GrSurfaceProxy.h
-FILE: ../../../third_party/skia/include/private/GrSwizzle.h
 FILE: ../../../third_party/skia/include/private/GrTextureProxy.h
 FILE: ../../../third_party/skia/include/private/SkArenaAlloc.h
 FILE: ../../../third_party/skia/include/private/SkBitmaskEnum.h
@@ -14447,9 +14446,9 @@ FILE: ../../../third_party/skia/src/core/SkSpecialImage.h
 FILE: ../../../third_party/skia/src/core/SkSpecialSurface.cpp
 FILE: ../../../third_party/skia/src/core/SkSpecialSurface.h
 FILE: ../../../third_party/skia/src/core/SkSwizzle.cpp
-FILE: ../../../third_party/skia/src/effects/SkArithmeticImageFilter.cpp
 FILE: ../../../third_party/skia/src/effects/SkOverdrawColorFilter.cpp
-FILE: ../../../third_party/skia/src/effects/SkPaintImageFilter.cpp
+FILE: ../../../third_party/skia/src/effects/imagefilters/SkArithmeticImageFilter.cpp
+FILE: ../../../third_party/skia/src/effects/imagefilters/SkPaintImageFilter.cpp
 FILE: ../../../third_party/skia/src/gpu/GrAppliedClip.h
 FILE: ../../../third_party/skia/src/gpu/GrAuditTrail.cpp
 FILE: ../../../third_party/skia/src/gpu/GrBitmapTextureMaker.cpp
@@ -14485,6 +14484,7 @@ FILE: ../../../third_party/skia/src/gpu/GrSurfaceContext.cpp
 FILE: ../../../third_party/skia/src/gpu/GrSurfaceContext.h
 FILE: ../../../third_party/skia/src/gpu/GrSurfaceContextPriv.h
 FILE: ../../../third_party/skia/src/gpu/GrSurfaceProxy.cpp
+FILE: ../../../third_party/skia/src/gpu/GrSwizzle.h
 FILE: ../../../third_party/skia/src/gpu/GrTextureAdjuster.cpp
 FILE: ../../../third_party/skia/src/gpu/GrTextureAdjuster.h
 FILE: ../../../third_party/skia/src/gpu/GrTextureContext.cpp
@@ -17217,9 +17217,12 @@ FILE: ../../../third_party/skia/modules/sksg/src/SkSGPlane.cpp
 FILE: ../../../third_party/skia/modules/sksg/src/SkSGRoundEffect.cpp
 FILE: ../../../third_party/skia/modules/sksg/src/SkSGScene.cpp
 FILE: ../../../third_party/skia/modules/sksg/src/SkSGText.cpp
+FILE: ../../../third_party/skia/samplecode/Nima.cpp
+FILE: ../../../third_party/skia/samplecode/Nima.h
 FILE: ../../../third_party/skia/samplecode/SampleAnimatedImage.cpp
 FILE: ../../../third_party/skia/samplecode/SampleFlutterAnimate.cpp
 FILE: ../../../third_party/skia/samplecode/SampleGlyphTransform.cpp
+FILE: ../../../third_party/skia/samplecode/SampleNima.cpp
 FILE: ../../../third_party/skia/src/android/SkAnimatedImage.cpp
 FILE: ../../../third_party/skia/src/core/SkBlurPriv.h
 FILE: ../../../third_party/skia/src/core/SkCanvasPriv.cpp
@@ -17983,7 +17986,6 @@ FILE: ../../../third_party/skia/include/gpu/gl/GrGLConfig_chrome.h
 FILE: ../../../third_party/skia/include/gpu/gl/GrGLInterface.h
 FILE: ../../../third_party/skia/include/ports/SkTypeface_mac.h
 FILE: ../../../third_party/skia/include/ports/SkTypeface_win.h
-FILE: ../../../third_party/skia/include/private/GrGLSL.h
 FILE: ../../../third_party/skia/include/private/SkTArray.h
 FILE: ../../../third_party/skia/include/utils/SkNWayCanvas.h
 FILE: ../../../third_party/skia/include/utils/mac/SkCGUtils.h
@@ -18138,6 +18140,7 @@ FILE: ../../../third_party/skia/src/gpu/gl/GrGLUtil.cpp
 FILE: ../../../third_party/skia/src/gpu/gl/mac/GrGLMakeNativeInterface_mac.cpp
 FILE: ../../../third_party/skia/src/gpu/gl/win/GrGLMakeNativeInterface_win.cpp
 FILE: ../../../third_party/skia/src/gpu/glsl/GrGLSL.cpp
+FILE: ../../../third_party/skia/src/gpu/glsl/GrGLSL.h
 FILE: ../../../third_party/skia/src/gpu/ops/GrAAHairLinePathRenderer.cpp
 FILE: ../../../third_party/skia/src/gpu/ops/GrAAHairLinePathRenderer.h
 FILE: ../../../third_party/skia/src/gpu/ops/GrDefaultPathRenderer.cpp
@@ -18158,6 +18161,7 @@ FILE: ../../../third_party/skia/src/pdf/SkPDFTypes.cpp
 FILE: ../../../third_party/skia/src/pdf/SkPDFUtils.cpp
 FILE: ../../../third_party/skia/src/pdf/SkPDFUtils.h
 FILE: ../../../third_party/skia/src/ports/SkGlobalInitialization_default.cpp
+FILE: ../../../third_party/skia/src/ports/SkGlobalInitialization_default_imagefilters.cpp
 FILE: ../../../third_party/skia/src/ports/SkImageEncoder_WIC.cpp
 FILE: ../../../third_party/skia/src/ports/SkMemory_malloc.cpp
 FILE: ../../../third_party/skia/src/ports/SkScalerContext_win_dw.cpp
@@ -18919,8 +18923,8 @@ FILE: ../../../third_party/skia/src/core/SkXfermodeInterpretation.cpp
 FILE: ../../../third_party/skia/src/core/SkXfermodeInterpretation.h
 FILE: ../../../third_party/skia/src/core/SkYUVPlanesCache.cpp
 FILE: ../../../third_party/skia/src/core/SkYUVPlanesCache.h
-FILE: ../../../third_party/skia/src/effects/SkImageSource.cpp
 FILE: ../../../third_party/skia/src/effects/SkTableColorFilter.cpp
+FILE: ../../../third_party/skia/src/effects/imagefilters/SkImageSource.cpp
 FILE: ../../../third_party/skia/src/gpu/GrAutoLocaleSetter.h
 FILE: ../../../third_party/skia/src/gpu/GrBlend.cpp
 FILE: ../../../third_party/skia/src/gpu/GrBlurUtils.cpp
@@ -19283,12 +19287,12 @@ FILE: ../../../third_party/skia/src/core/SkTMultiMap.h
 FILE: ../../../third_party/skia/src/core/SkTypefacePriv.h
 FILE: ../../../third_party/skia/src/core/SkValidatingReadBuffer.h
 FILE: ../../../third_party/skia/src/core/SkValidationUtils.h
-FILE: ../../../third_party/skia/src/effects/SkAlphaThresholdFilter.cpp
-FILE: ../../../third_party/skia/src/effects/SkComposeImageFilter.cpp
-FILE: ../../../third_party/skia/src/effects/SkDisplacementMapEffect.cpp
-FILE: ../../../third_party/skia/src/effects/SkDropShadowImageFilter.cpp
 FILE: ../../../third_party/skia/src/effects/SkLumaColorFilter.cpp
-FILE: ../../../third_party/skia/src/effects/SkTileImageFilter.cpp
+FILE: ../../../third_party/skia/src/effects/imagefilters/SkAlphaThresholdFilter.cpp
+FILE: ../../../third_party/skia/src/effects/imagefilters/SkComposeImageFilter.cpp
+FILE: ../../../third_party/skia/src/effects/imagefilters/SkDisplacementMapEffect.cpp
+FILE: ../../../third_party/skia/src/effects/imagefilters/SkDropShadowImageFilter.cpp
+FILE: ../../../third_party/skia/src/effects/imagefilters/SkTileImageFilter.cpp
 FILE: ../../../third_party/skia/src/gpu/GrCaps.h
 FILE: ../../../third_party/skia/src/gpu/GrCoordTransform.h
 FILE: ../../../third_party/skia/src/gpu/GrGeometryProcessor.h
@@ -19661,6 +19665,7 @@ FILE: ../../../third_party/skia/src/ports/SkFontMgr_custom_directory.cpp
 FILE: ../../../third_party/skia/src/ports/SkFontMgr_custom_embedded.cpp
 FILE: ../../../third_party/skia/src/ports/SkFontMgr_custom_empty.cpp
 FILE: ../../../third_party/skia/src/ports/SkGlobalInitialization_none.cpp
+FILE: ../../../third_party/skia/src/ports/SkGlobalInitialization_none_imagefilters.cpp
 FILE: ../../../third_party/skia/src/ports/SkOSFile_ios.h
 FILE: ../../../third_party/skia/src/sfnt/SkOTTable_fvar.h
 FILE: ../../../third_party/skia/src/shaders/SkShaderBase.h
@@ -19755,13 +19760,13 @@ FILE: ../../../third_party/skia/include/effects/SkOffsetImageFilter.h
 FILE: ../../../third_party/skia/src/core/SkImageFilter.cpp
 FILE: ../../../third_party/skia/src/core/SkUtilsArm.cpp
 FILE: ../../../third_party/skia/src/core/SkUtilsArm.h
-FILE: ../../../third_party/skia/src/effects/SkColorFilterImageFilter.cpp
-FILE: ../../../third_party/skia/src/effects/SkLightingImageFilter.cpp
-FILE: ../../../third_party/skia/src/effects/SkMagnifierImageFilter.cpp
-FILE: ../../../third_party/skia/src/effects/SkMatrixConvolutionImageFilter.cpp
-FILE: ../../../third_party/skia/src/effects/SkMergeImageFilter.cpp
-FILE: ../../../third_party/skia/src/effects/SkMorphologyImageFilter.cpp
-FILE: ../../../third_party/skia/src/effects/SkOffsetImageFilter.cpp
+FILE: ../../../third_party/skia/src/effects/imagefilters/SkColorFilterImageFilter.cpp
+FILE: ../../../third_party/skia/src/effects/imagefilters/SkLightingImageFilter.cpp
+FILE: ../../../third_party/skia/src/effects/imagefilters/SkMagnifierImageFilter.cpp
+FILE: ../../../third_party/skia/src/effects/imagefilters/SkMatrixConvolutionImageFilter.cpp
+FILE: ../../../third_party/skia/src/effects/imagefilters/SkMergeImageFilter.cpp
+FILE: ../../../third_party/skia/src/effects/imagefilters/SkMorphologyImageFilter.cpp
+FILE: ../../../third_party/skia/src/effects/imagefilters/SkOffsetImageFilter.cpp
 FILE: ../../../third_party/skia/src/images/SkImageEncoderFns.h
 FILE: ../../../third_party/skia/src/opts/SkBitmapProcState_filter_neon.h
 FILE: ../../../third_party/skia/src/opts/SkBitmapProcState_opts_SSSE3.cpp
@@ -20324,8 +20329,8 @@ ORIGIN: ../../../third_party/skia/include/effects/SkPictureImageFilter.h + ../..
 TYPE: LicenseType.bsd
 FILE: ../../../third_party/skia/include/effects/SkPictureImageFilter.h
 FILE: ../../../third_party/skia/include/effects/SkXfermodeImageFilter.h
-FILE: ../../../third_party/skia/src/effects/SkPictureImageFilter.cpp
-FILE: ../../../third_party/skia/src/effects/SkXfermodeImageFilter.cpp
+FILE: ../../../third_party/skia/src/effects/imagefilters/SkPictureImageFilter.cpp
+FILE: ../../../third_party/skia/src/effects/imagefilters/SkXfermodeImageFilter.cpp
 ----------------------------------------------------------------------------------------------------
 Copyright 2013 The Android Open Source Project
 
