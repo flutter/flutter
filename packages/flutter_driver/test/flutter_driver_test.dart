@@ -138,7 +138,7 @@ void main() {
     group('ByValueKey', () {
       test('restricts value types', () async {
         expect(() => find.byValueKey(null),
-            throwsA(const isInstanceOf<DriverError>()));
+            throwsA(const TypeMatcher<DriverError>()));
       });
 
       test('finds by ValueKey', () async {
@@ -158,7 +158,7 @@ void main() {
 
     group('tap', () {
       test('requires a target reference', () async {
-        expect(driver.tap(null), throwsA(const isInstanceOf<DriverError>()));
+        expect(driver.tap(null), throwsA(const TypeMatcher<DriverError>()));
       });
 
       test('sends the tap command', () async {
@@ -177,7 +177,7 @@ void main() {
 
     group('getText', () {
       test('requires a target reference', () async {
-        expect(driver.getText(null), throwsA(const isInstanceOf<DriverError>()));
+        expect(driver.getText(null), throwsA(const TypeMatcher<DriverError>()));
       });
 
       test('sends the getText command', () async {
@@ -200,7 +200,7 @@ void main() {
 
     group('waitFor', () {
       test('requires a target reference', () async {
-        expect(driver.waitFor(null), throwsA(const isInstanceOf<DriverError>()));
+        expect(driver.waitFor(null), throwsA(const TypeMatcher<DriverError>()));
       });
 
       test('sends the waitFor command', () async {

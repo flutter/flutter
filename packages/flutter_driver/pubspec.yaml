@@ -10,7 +10,7 @@ dependencies:
   file: 5.0.1
   json_rpc_2: 2.0.8
   meta: 1.1.5
-  path: 1.6.0
+  path: 1.6.1
   web_socket_channel: 1.0.8
   vm_service_client: 0.2.4+3
   flutter:
@@ -66,7 +66,7 @@ dependencies:
 
 dev_dependencies:
   test: 0.12.42
-  mockito: 3.0.0-beta
+  mockito: 3.0.0-alpha+5
   quiver: 0.29.0+1
 
-# PUBSPEC CHECKSUM: 833f
+# PUBSPEC CHECKSUM: 0a0b

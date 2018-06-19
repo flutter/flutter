@@ -59,7 +59,7 @@ void main() {
       expect(devices, hasLength(1));
 
       final Device device = devices.single;
-      expect(device, const isInstanceOf<FlutterTesterDevice>());
+      expect(device, const TypeMatcher<FlutterTesterDevice>());
       expect(device.id, 'flutter-tester');
     });
   });

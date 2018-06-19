@@ -6,6 +6,8 @@ import 'dart:async';
 import 'dart:convert' show json;
 import 'dart:io';
 
+import 'package:meta/meta.dart';
+
 import '../framework/adb.dart';
 import '../framework/framework.dart';
 import '../framework/ios.dart';
@@ -41,6 +43,10 @@ TaskFunction createComplexLayoutStartupTest() {
 
 TaskFunction createFlutterGalleryCompileTest() {
   return new CompileTest('${flutterDirectory.path}/examples/flutter_gallery').run;
+}
+
+TaskFunction createHelloWorldCompileTest() {
+  return new CompileTest('${flutterDirectory.path}/examples/hello_world', reportPackageContentSizes: true).run;
 }
 
 TaskFunction createComplexLayoutCompileTest() {
@@ -192,9 +198,10 @@ class PerfTest {
 /// Measures how long it takes to compile a Flutter app and how big the compiled
 /// code is.
 class CompileTest {
-  const CompileTest(this.testDirectory);
+  const CompileTest(this.testDirectory, { this.reportPackageContentSizes = false });
 
   final String testDirectory;
+  final bool reportPackageContentSizes;
 
   Future<TaskResult> run() async {
     return await inDirectory(testDirectory, () async {
@@ -204,7 +211,7 @@ class CompileTest {
 
       final Map<String, dynamic> metrics = <String, dynamic>{}
         ..addAll(await _compileAot())
-        ..addAll(await _compileApp())
+        ..addAll(await _compileApp(reportPackageContentSizes: reportPackageContentSizes))
         ..addAll(await _compileDebug())
         ..addAll(_suffix(await _compileAot(previewDart2: false), '__dart1'))
         ..addAll(_suffix(await _compileApp(previewDart2: false), '__dart1'))
@@ -262,7 +269,7 @@ class CompileTest {
     return metrics;
   }
 
-  static Future<Map<String, dynamic>> _compileApp({ bool previewDart2 = true }) async {
+  static Future<Map<String, dynamic>> _compileApp({ bool previewDart2 = true, bool reportPackageContentSizes = false }) async {
     await flutter('clean');
     final Stopwatch watch = new Stopwatch();
     int releaseSizeInBytes;
@@ -272,6 +279,8 @@ class CompileTest {
     else
       options.add('--no-preview-dart-2');
     setLocalEngineOptionIfNecessary(options);
+    final Map<String, dynamic> metrics = <String, dynamic>{};
+
     switch (deviceOperatingSystem) {
       case DeviceOperatingSystem.ios:
         options.insert(0, 'ios');
@@ -288,19 +297,25 @@ class CompileTest {
         watch.start();
         await flutter('build', options: options);
         watch.stop();
-        File apk = file('$cwd/build/app/outputs/apk/app.apk');
+        String apkPath = '$cwd/build/app/outputs/apk/app.apk';
+        File apk = file(apkPath);
         if (!apk.existsSync()) {
           // Pre Android SDK 26 path
-          apk = file('$cwd/build/app/outputs/apk/app-release.apk');
+          apkPath = '$cwd/build/app/outputs/apk/app-release.apk';
+          apk = file(apkPath);
         }
         releaseSizeInBytes = apk.lengthSync();
+        if (reportPackageContentSizes)
+          metrics.addAll(await getSizesFromApk(apkPath));
         break;
     }
 
-    return <String, dynamic>{
+    metrics.addAll(<String, dynamic>{
       'release_full_compile_millis': watch.elapsedMilliseconds,
       'release_size_bytes': releaseSizeInBytes,
-    };
+    });
+
+    return metrics;
   }
 
   static Future<Map<String, dynamic>> _compileDebug({ bool previewDart2 = true }) async {
@@ -344,6 +359,40 @@ class CompileTest {
       throw 'Unrecognized SDK snapshot metric name: $sdkName';
 
     return _kSdkNameToMetricNameMapping[sdkName];
+  }
+
+  static Future<Map<String, dynamic>> getSizesFromApk(String apkPath) async {
+    final  String output = await eval('unzip', <String>['-v', apkPath]);
+    final List<String> lines = output.split('\n');
+    final Map<String, _UnzipListEntry> fileToMetadata = <String, _UnzipListEntry>{};
+
+    // First three lines are header, last two lines are footer.
+    for (int i = 3; i < lines.length - 2; i++) {
+      final _UnzipListEntry entry = new _UnzipListEntry.fromLine(lines[i]);
+      fileToMetadata[entry.path] = entry;
+    }
+
+    final _UnzipListEntry icudtl = fileToMetadata['assets/icudtl.dat'];
+    final _UnzipListEntry libflutter = fileToMetadata['lib/armeabi-v7a/libflutter.so'];
+    final _UnzipListEntry isolateSnapshotData = fileToMetadata['assets/isolate_snapshot_data'];
+    final _UnzipListEntry isolateSnapshotInstr = fileToMetadata['assets/isolate_snapshot_instr'];
+    final _UnzipListEntry vmSnapshotData = fileToMetadata['assets/vm_snapshot_data'];
+    final _UnzipListEntry vmSnapshotInstr = fileToMetadata['assets/vm_snapshot_instr'];
+
+    return <String, dynamic>{
+      'icudtl_uncompressed_bytes': icudtl.uncompressedSize,
+      'icudtl_compressed_bytes': icudtl.compressedSize,
+      'libflutter_uncompressed_bytes': libflutter.uncompressedSize,
+      'libflutter_compressed_bytes': libflutter.compressedSize,
+      'snapshot_uncompressed_bytes': isolateSnapshotData.uncompressedSize +
+          isolateSnapshotInstr.uncompressedSize +
+          vmSnapshotData.uncompressedSize +
+          vmSnapshotInstr.uncompressedSize,
+      'snapshot_compressed_bytes': isolateSnapshotData.compressedSize +
+          isolateSnapshotInstr.compressedSize +
+          vmSnapshotData.compressedSize +
+          vmSnapshotInstr.compressedSize,
+    };
   }
 }
 
@@ -466,4 +515,29 @@ class AndroidBackButtonMemoryTest {
       return new TaskResult.success(data, benchmarkScoreKeys: data.keys.toList());
     });
   }
+}
+
+class _UnzipListEntry {
+  factory _UnzipListEntry.fromLine(String line) {
+    final List<String> data = line.trim().split(new RegExp('\\s+'));
+    assert(data.length == 8);
+    return new _UnzipListEntry._(
+      uncompressedSize:  int.parse(data[0]),
+      compressedSize: int.parse(data[2]),
+      path: data[7],
+    );
+  }
+
+  _UnzipListEntry._({
+    @required this.uncompressedSize,
+    @required this.compressedSize,
+    @required this.path,
+  }) : assert(uncompressedSize != null),
+       assert(compressedSize != null),
+       assert(compressedSize <= uncompressedSize),
+       assert(path != null);
+
+  final int uncompressedSize;
+  final int compressedSize;
+  final String path;
 }

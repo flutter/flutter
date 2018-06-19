@@ -459,5 +459,5 @@ void main() {
 
     final RenderSliverList list = tester.renderObject(find.byType(SliverList));
     expect(list, paintsExactlyCountTimes(#drawParagraph, 2));
-  });
+  }, skip: true);
 }
