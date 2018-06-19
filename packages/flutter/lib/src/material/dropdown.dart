@@ -625,13 +625,12 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
     return math.max(_textStyle.fontSize, math.max(widget.iconSize, _kDenseButtonHeight));
   }
 
-  bool _enabled;
+  // just so we don't have to repeat this test and make it easier to understand
+  bool get _enabled =>widget.items != null;
 
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterial(context));
-
-    _enabled = widget.items != null;
 
     // The width of the button and the menu are defined by the widest
     // item and the width of the hint.
