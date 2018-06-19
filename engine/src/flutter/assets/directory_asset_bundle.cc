@@ -28,29 +28,23 @@ bool DirectoryAssetBundle::IsValid() const {
 }
 
 // |blink::AssetResolver|
-bool DirectoryAssetBundle::GetAsBuffer(const std::string& asset_name,
-                                       std::vector<uint8_t>* data) const {
-  if (data == nullptr) {
-    return false;
-  }
-
+std::unique_ptr<fml::Mapping> DirectoryAssetBundle::GetAsMapping(
+    const std::string& asset_name) const {
   if (!is_valid_) {
     FML_DLOG(WARNING) << "Asset bundle was not valid.";
-    return false;
+    return nullptr;
   }
 
-  fml::FileMapping mapping(
+  auto mapping = std::make_unique<fml::FileMapping>(
       fml::OpenFile(descriptor_, asset_name.c_str(), fml::OpenPermission::kRead,
                     false /* directory */),
       false /* executable */);
 
-  if (mapping.GetMapping() == nullptr) {
-    return false;
+  if (mapping->GetMapping() == nullptr) {
+    return nullptr;
   }
 
-  data->resize(mapping.GetSize());
-  memmove(data->data(), mapping.GetMapping(), mapping.GetSize());
-  return true;
+  return mapping;
 }
 
 }  // namespace blink

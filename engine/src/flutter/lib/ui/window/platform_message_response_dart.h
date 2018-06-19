@@ -16,7 +16,7 @@ class PlatformMessageResponseDart : public PlatformMessageResponse {
 
  public:
   // Callable on any thread.
-  void Complete(std::vector<uint8_t> data) override;
+  void Complete(std::unique_ptr<fml::Mapping> data) override;
   void CompleteEmpty() override;
 
  protected:

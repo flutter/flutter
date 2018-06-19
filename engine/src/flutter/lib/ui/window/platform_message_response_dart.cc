@@ -39,6 +39,12 @@ Dart_Handle WrapByteData(std::vector<uint8_t> data) {
   }
 }
 
+Dart_Handle WrapByteData(std::unique_ptr<fml::Mapping> mapping) {
+  std::vector<uint8_t> data(mapping->GetSize());
+  memcpy(data.data(), mapping->GetMapping(), mapping->GetSize());
+  return WrapByteData(std::move(data));
+}
+
 }  // anonymous namespace
 
 PlatformMessageResponseDart::PlatformMessageResponseDart(
@@ -56,7 +62,7 @@ PlatformMessageResponseDart::~PlatformMessageResponseDart() {
   }
 }
 
-void PlatformMessageResponseDart::Complete(std::vector<uint8_t> data) {
+void PlatformMessageResponseDart::Complete(std::unique_ptr<fml::Mapping> data) {
   if (callback_.is_empty())
     return;
   FXL_DCHECK(!is_complete_);

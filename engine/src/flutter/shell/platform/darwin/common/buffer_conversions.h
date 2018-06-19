@@ -9,11 +9,17 @@
 
 #include <vector>
 
+#include "flutter/fml/mapping.h"
+
 namespace shell {
 
 std::vector<uint8_t> GetVectorFromNSData(NSData* data);
 
 NSData* GetNSDataFromVector(const std::vector<uint8_t>& buffer);
+
+std::unique_ptr<fml::Mapping> GetMappingFromNSData(NSData* data);
+
+NSData* GetNSDataFromMapping(std::unique_ptr<fml::Mapping> mapping);
 
 }  // namespace shell
 

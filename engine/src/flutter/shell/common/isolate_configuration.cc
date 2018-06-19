@@ -135,60 +135,56 @@ std::unique_ptr<IsolateConfiguration> IsolateConfiguration::InferFromSettings(
   }
 
   // Running from kernel snapshot.
-  {
-    // TODO(engine): Add AssetManager::GetAsMapping or such to avoid the copy.
-    std::vector<uint8_t> kernel;
-    if (asset_manager && asset_manager->GetAsBuffer(
-                             settings.application_kernel_asset, &kernel)) {
-      return CreateForSnapshot(
-          std::make_unique<fml::DataMapping>(std::move(kernel)));
+  if (asset_manager) {
+    std::unique_ptr<fml::Mapping> kernel =
+        asset_manager->GetAsMapping(settings.application_kernel_asset);
+    if (kernel) {
+      return CreateForSnapshot(std::move(kernel));
     }
   }
 
   // Running from script snapshot.
-  {
-    // TODO(engine): Add AssetManager::GetAsMapping or such to avoid the copy.
-    std::vector<uint8_t> script_snapshot;
-    if (asset_manager && asset_manager->GetAsBuffer(
-                             settings.script_snapshot_path, &script_snapshot)) {
-      return CreateForSnapshot(
-          std::make_unique<fml::DataMapping>(std::move(script_snapshot)));
+  if (asset_manager) {
+    std::unique_ptr<fml::Mapping> script_snapshot =
+        asset_manager->GetAsMapping(settings.script_snapshot_path);
+    if (script_snapshot) {
+      return CreateForSnapshot(std::move(script_snapshot));
     }
   }
 
   // Running from kernel divided into several pieces (for sharing).
-  {
-    // TODO(fuchsia): Add AssetManager::GetAsMapping or such to avoid the copy.
-    // TODO(fuchsia): Use async blobfs API once it becomes available.
-    std::vector<uint8_t> kernel_list;
-    if (asset_manager &&
-        asset_manager->GetAsBuffer(settings.application_kernel_list_asset,
-                                   &kernel_list)) {
+  // TODO(fuchsia): Use async blobfs API once it becomes available.
+  if (asset_manager) {
+    std::unique_ptr<fml::Mapping> kernel_list =
+        asset_manager->GetAsMapping(settings.application_kernel_list_asset);
+    if (kernel_list) {
+      const char* kernel_list_str =
+          reinterpret_cast<const char*>(kernel_list->GetMapping());
+      size_t kernel_list_size = kernel_list->GetSize();
+
       std::vector<std::unique_ptr<fml::Mapping>> kernel_pieces;
 
       size_t piece_path_start = 0;
-      while (piece_path_start < kernel_list.size()) {
+      while (piece_path_start < kernel_list_size) {
         size_t piece_path_end = piece_path_start;
-        while ((piece_path_end < kernel_list.size()) &&
-               (kernel_list[piece_path_end] != '\n')) {
+        while ((piece_path_end < kernel_list_size) &&
+               (kernel_list_str[piece_path_end] != '\n')) {
           piece_path_end++;
         }
 
-        std::string piece_path(
-            reinterpret_cast<const char*>(&kernel_list[piece_path_start]),
-            piece_path_end - piece_path_start);
-        std::vector<uint8_t> piece;
-        if (!asset_manager->GetAsBuffer(piece_path, &piece)) {
+        std::string piece_path(&kernel_list_str[piece_path_start],
+                               piece_path_end - piece_path_start);
+        std::unique_ptr<fml::Mapping> piece =
+            asset_manager->GetAsMapping(piece_path);
+        if (piece == nullptr) {
           FXL_LOG(ERROR) << "Failed to load: " << piece_path;
           return nullptr;
         }
 
-        kernel_pieces.emplace_back(
-            std::make_unique<fml::DataMapping>(std::move(piece)));
+        kernel_pieces.emplace_back(std::move(piece));
 
         piece_path_start = piece_path_end + 1;
       }
-
       return CreateForKernelList(std::move(kernel_pieces));
     }
   }

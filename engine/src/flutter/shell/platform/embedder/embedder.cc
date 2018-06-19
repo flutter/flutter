@@ -360,7 +360,8 @@ FlutterResult FlutterEngineSendPlatformMessageResponse(
   if (data_length == 0) {
     response->CompleteEmpty();
   } else {
-    response->Complete({data, data + data_length});
+    response->Complete(std::make_unique<fml::DataMapping>(
+        std::vector<uint8_t>({data, data + data_length})));
   }
 
   delete handle;

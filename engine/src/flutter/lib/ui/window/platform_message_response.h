@@ -7,6 +7,7 @@
 
 #include <vector>
 
+#include "flutter/fml/mapping.h"
 #include "lib/fxl/memory/ref_counted.h"
 #include "lib/fxl/memory/ref_ptr.h"
 
@@ -18,7 +19,7 @@ class PlatformMessageResponse
 
  public:
   // Callable on any thread.
-  virtual void Complete(std::vector<uint8_t> data) = 0;
+  virtual void Complete(std::unique_ptr<fml::Mapping> data) = 0;
   virtual void CompleteEmpty() = 0;
 
   bool is_complete() const { return is_complete_; }

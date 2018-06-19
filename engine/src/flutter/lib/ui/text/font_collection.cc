@@ -31,19 +31,18 @@ std::shared_ptr<txt::FontCollection> FontCollection::GetFontCollection() const {
 }
 
 void FontCollection::RegisterFonts(fml::RefPtr<AssetManager> asset_manager) {
-  std::vector<uint8_t> manifest_data;
-  if (!asset_manager->GetAsBuffer("FontManifest.json", &manifest_data)) {
+  std::unique_ptr<fml::Mapping> manifest_mapping =
+      asset_manager->GetAsMapping("FontManifest.json");
+  if (manifest_mapping == nullptr) {
     FXL_DLOG(WARNING) << "Could not find the font manifest in the asset store.";
     return;
   }
 
   rapidjson::Document document;
-  static_assert(sizeof(decltype(manifest_data)::value_type) ==
-                    sizeof(decltype(document)::Ch),
-                "");
-  document.Parse(
-      reinterpret_cast<decltype(document)::Ch*>(manifest_data.data()),
-      manifest_data.size());
+  static_assert(sizeof(decltype(document)::Ch) == sizeof(uint8_t), "");
+  document.Parse(reinterpret_cast<const decltype(document)::Ch*>(
+                     manifest_mapping->GetMapping()),
+                 manifest_mapping->GetSize());
 
   if (document.HasParseError()) {
     FXL_DLOG(WARNING) << "Error parsing the font manifest in the asset store.";
@@ -82,8 +81,8 @@ void FontCollection::RegisterFonts(fml::RefPtr<AssetManager> asset_manager) {
       }
 
       // TODO: Handle weights and styles.
-      font_provider->RegisterAsset(
-          family_name->value.GetString(), font_asset->value.GetString());
+      font_provider->RegisterAsset(family_name->value.GetString(),
+                                   font_asset->value.GetString());
     }
   }
 

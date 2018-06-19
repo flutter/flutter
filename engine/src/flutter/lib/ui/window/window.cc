@@ -98,6 +98,7 @@ void RespondToPlatformMessage(Dart_Handle window,
     UIDartState::Current()->window()->CompletePlatformMessageEmptyResponse(
         response_id);
   } else {
+    // TODO(engine): Avoid this copy.
     const uint8_t* buffer = static_cast<const uint8_t*>(data.data());
     UIDartState::Current()->window()->CompletePlatformMessageResponse(
         response_id,
@@ -288,7 +289,7 @@ void Window::CompletePlatformMessageResponse(int response_id,
     return;
   auto response = std::move(it->second);
   pending_responses_.erase(it);
-  response->Complete(std::move(data));
+  response->Complete(std::make_unique<fml::DataMapping>(std::move(data)));
 }
 
 void Window::RegisterNatives(tonic::DartLibraryNatives* natives) {
