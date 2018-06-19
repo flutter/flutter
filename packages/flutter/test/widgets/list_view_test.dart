@@ -5,6 +5,8 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/widgets.dart';
 
+import '../rendering/mock_canvas.dart';
+
 class TestSliverChildListDelegate extends SliverChildListDelegate {
   TestSliverChildListDelegate(List<Widget> children) : super(children);
 
@@ -292,5 +294,115 @@ void main() {
     expect(tester.getTopLeft(find.text('top')).dy, 30.0);
     // Leave left/right padding as is for children.
     expect(innerMediaQueryPadding, const EdgeInsets.symmetric(horizontal: 30.0));
+  });
+
+  testWidgets('ListView clips if overflow is smaller than cacheExtent', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/17426.
+
+    await tester.pumpWidget(
+      new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new Center(
+          child: new Container(
+            height: 200.0,
+            child: new ListView(
+              cacheExtent: 500.0,
+              children: <Widget>[
+                new Container(
+                  height: 90.0,
+                ),
+                new Container(
+                  height: 110.0,
+                ),
+                new Container(
+                  height: 80.0,
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(find.byType(Viewport), paints..clipRect());
+  });
+
+  testWidgets('ListView does not clips if no overflow', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new Center(
+          child: new Container(
+            height: 200.0,
+            child: new ListView(
+              cacheExtent: 500.0,
+              children: <Widget>[
+                new Container(
+                  height: 100.0,
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+  );
+
+    expect(find.byType(Viewport), isNot(paints..clipRect()));
+  });
+
+  testWidgets('ListView (fixed extent) clips if overflow is smaller than cacheExtent', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/17426.
+
+    await tester.pumpWidget(
+      new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new Center(
+          child: new Container(
+            height: 200.0,
+            child: new ListView(
+              itemExtent: 100.0,
+              cacheExtent: 500.0,
+              children: <Widget>[
+                new Container(
+                  height: 100.0,
+                ),
+                new Container(
+                  height: 100.0,
+                ),
+                new Container(
+                  height: 100.0,
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(find.byType(Viewport), paints..clipRect());
+  });
+
+  testWidgets('ListView (fixed extent) does not clips if no overflow', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new Center(
+          child: new Container(
+            height: 200.0,
+            child: new ListView(
+              itemExtent: 100.0,
+              cacheExtent: 500.0,
+              children: <Widget>[
+                new Container(
+                  height: 100.0,
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(find.byType(Viewport), isNot(paints..clipRect()));
   });
 }

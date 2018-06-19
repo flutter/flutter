@@ -216,6 +216,9 @@ abstract class FlutterCommand extends Command<Null> {
         : null,
       previewDart2: previewDart2,
       trackWidgetCreation: trackWidgetCreation,
+      buildSnapshot: argParser.options.containsKey('build-snapshot')
+          ? argResults['build-snapshot']
+          : false,
       extraFrontEndOptions: argParser.options.containsKey(FlutterOptions.kExtraFrontEndOptions)
           ? argResults[FlutterOptions.kExtraFrontEndOptions]
           : null,

@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/widgets.dart';
+import 'package:flutter/widgets.dart' hide TypeMatcher;
 import 'package:flutter_test/flutter_test.dart';
 
 class TestScrollBehavior extends ScrollBehavior {
@@ -47,7 +47,7 @@ void main() {
 
     expect(behavior, isNotNull);
     expect(behavior.flag, isTrue);
-    expect(position.physics, const isInstanceOf<ClampingScrollPhysics>());
+    expect(position.physics, const TypeMatcher<ClampingScrollPhysics>());
     ScrollMetrics metrics = position.copyWith();
     expect(metrics.extentAfter, equals(400.0));
     expect(metrics.viewportDimension, equals(600.0));
@@ -62,7 +62,7 @@ void main() {
 
     expect(behavior, isNotNull);
     expect(behavior.flag, isFalse);
-    expect(position.physics, const isInstanceOf<BouncingScrollPhysics>());
+    expect(position.physics, const TypeMatcher<BouncingScrollPhysics>());
     // Regression test for https://github.com/flutter/flutter/issues/5856
     metrics = position.copyWith();
     expect(metrics.extentAfter, equals(400.0));

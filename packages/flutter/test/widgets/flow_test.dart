@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:flutter/widgets.dart';
+import 'package:flutter/widgets.dart' hide TypeMatcher;
 import 'package:flutter/rendering.dart';
 
 class TestFlowDelegate extends FlowDelegate {
@@ -113,9 +113,9 @@ void main() {
     ContainerLayer layer = RendererBinding.instance.renderView.debugLayer;
     while (layer != null && !(layer is OpacityLayer))
       layer = layer.firstChild;
-    expect(layer, const isInstanceOf<OpacityLayer>());
+    expect(layer, const TypeMatcher<OpacityLayer>());
     final OpacityLayer opacityLayer = layer;
     expect(opacityLayer.alpha, equals(opacity * 255));
-    expect(layer.firstChild, const isInstanceOf<TransformLayer>());
+    expect(layer.firstChild, const TypeMatcher<TransformLayer>());
   });
 }

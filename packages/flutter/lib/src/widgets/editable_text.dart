@@ -3,12 +3,15 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:ui' as ui;
 
 import 'package:flutter/rendering.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 
 import 'automatic_keep_alive.dart';
 import 'basic.dart';
+import 'binding.dart';
 import 'focus_manager.dart';
 import 'focus_scope.dart';
 import 'framework.dart';
@@ -319,7 +322,7 @@ class EditableText extends StatefulWidget {
 }
 
 /// State for a [EditableText].
-class EditableTextState extends State<EditableText> with AutomaticKeepAliveClientMixin implements TextInputClient, TextSelectionDelegate {
+class EditableTextState extends State<EditableText> with AutomaticKeepAliveClientMixin, WidgetsBindingObserver implements TextInputClient, TextSelectionDelegate {
   Timer _cursorTimer;
   final ValueNotifier<bool> _showCursor = new ValueNotifier<bool>(false);
   final GlobalKey _editableKey = new GlobalKey();
@@ -389,6 +392,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   void updateEditingValue(TextEditingValue value) {
     if (value.text != _value.text) {
       _hideSelectionOverlayIfNeeded();
+      _showCaretOnScreen();
       if (widget.obscureText && value.text.length == _value.text.length + 1) {
         _obscureShowCharTicksPending = _kObscureShowLatestCharCursorTicks;
         _obscureLatestCharIndex = _value.selection.baseOffset;
@@ -442,6 +446,12 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     else if (caretEnd >= viewportExtent) // cursor after end of bounds
       scrollOffset += caretEnd - viewportExtent;
     return scrollOffset;
+  }
+
+  // Calculates where the `caretRect` would be if `_scrollController.offset` is set to `scrollOffset`.
+  Rect _getCaretRectAtScrollOffset(Rect caretRect, double scrollOffset) {
+    final double offsetDiff = _scrollController.offset - scrollOffset;
+    return _isMultiline ? caretRect.translate(0.0, offsetDiff) : caretRect.translate(offsetDiff, 0.0);
   }
 
   bool get _hasInputConnection => _textInputConnection != null && _textInputConnection.attached;
@@ -541,20 +551,58 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   }
 
   bool _textChangedSinceLastCaretUpdate = false;
+  Rect _currentCaretRect;
 
   void _handleCaretChanged(Rect caretRect) {
+    _currentCaretRect = caretRect;
     // If the caret location has changed due to an update to the text or
     // selection, then scroll the caret into view.
     if (_textChangedSinceLastCaretUpdate) {
       _textChangedSinceLastCaretUpdate = false;
-      scheduleMicrotask(() {
-        _scrollController.animateTo(
-          _getScrollOffsetForCaret(caretRect),
-          curve: Curves.fastOutSlowIn,
-          duration: const Duration(milliseconds: 50),
-        );
-      });
+      _showCaretOnScreen();
     }
+  }
+
+  // Animation configuration for scrolling the caret back on screen.
+  static const Duration _caretAnimationDuration = const Duration(milliseconds: 100);
+  static const Curve _caretAnimationCurve = Curves.fastOutSlowIn;
+
+  bool _showCaretOnScreenScheduled = false;
+
+  void _showCaretOnScreen() {
+    if (_showCaretOnScreenScheduled) {
+      return;
+    }
+    _showCaretOnScreenScheduled = true;
+    SchedulerBinding.instance.addPostFrameCallback((Duration _) {
+      _showCaretOnScreenScheduled = false;
+      if (_currentCaretRect == null || !_scrollController.hasClients){
+        return;
+      }
+      final double scrollOffsetForCaret =  _getScrollOffsetForCaret(_currentCaretRect);
+      _scrollController.animateTo(
+        scrollOffsetForCaret,
+        duration: _caretAnimationDuration,
+        curve: _caretAnimationCurve,
+      );
+      final Rect newCaretRect = _getCaretRectAtScrollOffset(_currentCaretRect, scrollOffsetForCaret);
+      _editableKey.currentContext.findRenderObject().showOnScreen(
+        // Inflate ensures that caret is not positioned directly at the edge.
+        rect: newCaretRect.inflate(20.0),
+        duration: _caretAnimationDuration,
+        curve: _caretAnimationCurve,
+      );
+    });
+  }
+
+  double _lastBottomViewInset;
+
+  @override
+  void didChangeMetrics() {
+    if (_lastBottomViewInset < ui.window.viewInsets.bottom) {
+      _showCaretOnScreen();
+    }
+    _lastBottomViewInset = ui.window.viewInsets.bottom;
   }
 
   void _formatAndSetValue(TextEditingValue value) {
@@ -629,12 +677,19 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     _openOrCloseInputConnectionIfNeeded();
     _startOrStopCursorTimerIfNeeded();
     _updateOrDisposeSelectionOverlayIfNeeded();
-    if (!_hasFocus) {
+    if (_hasFocus) {
+      // Listen for changing viewInsets, which indicates keyboard showing up.
+      WidgetsBinding.instance.addObserver(this);
+      _lastBottomViewInset = ui.window.viewInsets.bottom;
+      _showCaretOnScreen();
+      if (!_value.selection.isValid) {
+        // Place cursor at the end if the selection is invalid when we receive focus.
+        widget.controller.selection = new TextSelection.collapsed(offset: _value.text.length);
+      }
+    } else {
+      WidgetsBinding.instance.removeObserver(this);
       // Clear the selection and composition state if this widget lost focus.
       _value = new TextEditingValue(text: _value.text);
-    } else if (!_value.selection.isValid) {
-      // Place cursor at the end if the selection is invalid when we receive focus.
-      widget.controller.selection = new TextSelection.collapsed(offset: _value.text.length);
     }
     updateKeepAlive();
   }

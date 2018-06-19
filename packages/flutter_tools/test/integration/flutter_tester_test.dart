@@ -69,8 +69,8 @@ void main() {
       expect(result.started, isTrue);
       expect(result.observatoryUri, isNotNull);
 
-      final String line = await device.getLogReader().logLines.first;
-      expect(line, 'Hello!');
+      final String line = await device.getLogReader().logLines.firstWhere((String line) => !line.contains('TeXGyreSchola'));
+      expect(line, equals('Hello!'));
 
       expect(await device.stopApp(null), isTrue);
     });

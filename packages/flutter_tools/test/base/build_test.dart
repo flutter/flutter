@@ -406,7 +406,6 @@ void main() {
         '--url_mapping=dart:vmservice_io,${fs.path.join(skyEnginePath, 'sdk_ext', 'vmservice_io.dart')}',
         '--embedder_entry_points_manifest=$kVmEntrypoints',
         '--embedder_entry_points_manifest=$kIoEntries',
-        '--dependencies=${fs.path.join(outputPath, 'snapshot.d')}',
         '--reify-generic-functions',
         '--strong',
         '--snapshot_kind=app-aot-assembly',
@@ -453,7 +452,6 @@ void main() {
         '--url_mapping=dart:vmservice_io,${fs.path.join(skyEnginePath, 'sdk_ext', 'vmservice_io.dart')}',
         '--embedder_entry_points_manifest=$kVmEntrypoints',
         '--embedder_entry_points_manifest=$kIoEntries',
-        '--dependencies=${fs.path.join(outputPath, 'snapshot.d')}',
         '--reify-generic-functions',
         '--strong',
         '--snapshot_kind=app-aot-assembly',
@@ -500,7 +498,6 @@ void main() {
         '--url_mapping=dart:vmservice_io,${fs.path.join(skyEnginePath, 'sdk_ext', 'vmservice_io.dart')}',
         '--embedder_entry_points_manifest=$kVmEntrypoints',
         '--embedder_entry_points_manifest=$kIoEntries',
-        '--dependencies=${fs.path.join(outputPath, 'snapshot.d')}',
         '--reify-generic-functions',
         '--strong',
         '--snapshot_kind=app-aot-blobs',
@@ -552,7 +549,6 @@ void main() {
         '--url_mapping=dart:vmservice_io,${fs.path.join(skyEnginePath, 'sdk_ext', 'vmservice_io.dart')}',
         '--embedder_entry_points_manifest=$kVmEntrypoints',
         '--embedder_entry_points_manifest=$kIoEntries',
-        '--dependencies=${fs.path.join(outputPath, 'snapshot.d')}',
         '--reify-generic-functions',
         '--strong',
         '--snapshot_kind=app-aot-blobs',
@@ -600,7 +596,6 @@ void main() {
         '--url_mapping=dart:vmservice_io,${fs.path.join(skyEnginePath, 'sdk_ext', 'vmservice_io.dart')}',
         '--embedder_entry_points_manifest=$kVmEntrypoints',
         '--embedder_entry_points_manifest=$kIoEntries',
-        '--dependencies=${fs.path.join(outputPath, 'snapshot.d')}',
         '--reify-generic-functions',
         '--strong',
         '--snapshot_kind=app-aot-assembly',
@@ -647,7 +642,6 @@ void main() {
         '--url_mapping=dart:vmservice_io,${fs.path.join(skyEnginePath, 'sdk_ext', 'vmservice_io.dart')}',
         '--embedder_entry_points_manifest=$kVmEntrypoints',
         '--embedder_entry_points_manifest=$kIoEntries',
-        '--dependencies=${fs.path.join(outputPath, 'snapshot.d')}',
         '--reify-generic-functions',
         '--strong',
         '--snapshot_kind=app-aot-assembly',
@@ -713,7 +707,6 @@ void main() {
         '--url_mapping=dart:vmservice_io,${fs.path.join(skyEnginePath, 'sdk_ext', 'vmservice_io.dart')}',
         '--embedder_entry_points_manifest=$kVmEntrypoints',
         '--embedder_entry_points_manifest=$kIoEntries',
-        '--dependencies=${fs.path.join(outputPath, 'snapshot.d')}',
         '--reify-generic-functions',
         '--strong',
         '--snapshot_kind=app-aot-blobs',
@@ -765,7 +758,6 @@ void main() {
         '--url_mapping=dart:vmservice_io,${fs.path.join(skyEnginePath, 'sdk_ext', 'vmservice_io.dart')}',
         '--embedder_entry_points_manifest=$kVmEntrypoints',
         '--embedder_entry_points_manifest=$kIoEntries',
-        '--dependencies=${fs.path.join(outputPath, 'snapshot.d')}',
         '--reify-generic-functions',
         '--strong',
         '--snapshot_kind=app-aot-blobs',
@@ -773,6 +765,315 @@ void main() {
         '--isolate_snapshot_data=build/foo/isolate_snapshot_data',
         '--vm_snapshot_instructions=build/foo/vm_snapshot_instr',
         '--isolate_snapshot_instructions=build/foo/isolate_snapshot_instr',
+        'main.dill',
+      ]);
+    }, overrides: contextOverrides);
+
+  });
+
+  group('Snapshotter - Core JIT', () {
+    const String kTrace = 'trace.txt';
+
+    _FakeGenSnapshot genSnapshot;
+    MemoryFileSystem fs;
+    CoreJITSnapshotter snapshotter;
+    MockAndroidSdk mockAndroidSdk;
+    MockArtifacts mockArtifacts;
+
+    setUp(() async {
+      fs = new MemoryFileSystem();
+      fs.file(kTrace).createSync();
+
+      genSnapshot = new _FakeGenSnapshot();
+      snapshotter = new CoreJITSnapshotter();
+      mockAndroidSdk = new MockAndroidSdk();
+      mockArtifacts = new MockArtifacts();
+    });
+
+    final Map<Type, Generator> contextOverrides = <Type, Generator>{
+      AndroidSdk: () => mockAndroidSdk,
+      Artifacts: () => mockArtifacts,
+      FileSystem: () => fs,
+      GenSnapshot: () => genSnapshot,
+    };
+
+    testUsingContext('iOS debug Core JIT snapshot is invalid', () async {
+      final String outputPath = fs.path.join('build', 'foo');
+      expect(await snapshotter.build(
+        platform: TargetPlatform.ios,
+        buildMode: BuildMode.debug,
+        mainPath: 'main.dill',
+        packagesPath: '.packages',
+        outputPath: outputPath,
+      ), isNot(equals(0)));
+    }, overrides: contextOverrides);
+
+    testUsingContext('builds Android arm debug Core JIT snapshot', () async {
+      fs.file('main.dill').writeAsStringSync('binary magic');
+
+      final String outputPath = fs.path.join('build', 'foo');
+      fs.directory(outputPath).createSync(recursive: true);
+
+      genSnapshot.outputs = <String, String>{
+        fs.path.join(outputPath, 'vm_snapshot_data'): '',
+        fs.path.join(outputPath, 'isolate_snapshot_data'): '',
+        fs.path.join(outputPath, 'vm_snapshot_instr'): '',
+        fs.path.join(outputPath, 'isolate_snapshot_instr'): '',
+        fs.path.join(outputPath, 'snapshot.d'): '${fs.path.join(outputPath, 'vm_snapshot_data')} : ',
+      };
+
+      final int genSnapshotExitCode = await snapshotter.build(
+        platform: TargetPlatform.android_arm,
+        buildMode: BuildMode.debug,
+        mainPath: 'main.dill',
+        packagesPath: '.packages',
+        outputPath: outputPath,
+      );
+
+      expect(genSnapshotExitCode, 0);
+      expect(genSnapshot.callCount, 1);
+      expect(genSnapshot.snapshotType.platform, TargetPlatform.android_arm);
+      expect(genSnapshot.snapshotType.mode, BuildMode.debug);
+      expect(genSnapshot.packagesPath, '.packages');
+      expect(genSnapshot.additionalArgs, <String>[
+        '--reify-generic-functions',
+        '--strong',
+        '--enable_asserts',
+        '--snapshot_kind=core-jit',
+        '--vm_snapshot_data=build/foo/vm_snapshot_data',
+        '--isolate_snapshot_data=build/foo/isolate_snapshot_data',
+        '--vm_snapshot_instructions=build/foo/vm_snapshot_instr',
+        '--isolate_snapshot_instructions=build/foo/isolate_snapshot_instr',
+        '--load_compilation_trace=trace.txt',
+        '--no-sim-use-hardfp',
+        '--no-use-integer-division',
+        'main.dill',
+      ]);
+    }, overrides: contextOverrides);
+
+    testUsingContext('builds Android arm64 debug Core JIT snapshot', () async {
+      fs.file('main.dill').writeAsStringSync('binary magic');
+
+      final String outputPath = fs.path.join('build', 'foo');
+      fs.directory(outputPath).createSync(recursive: true);
+
+      genSnapshot.outputs = <String, String>{
+        fs.path.join(outputPath, 'vm_snapshot_data'): '',
+        fs.path.join(outputPath, 'isolate_snapshot_data'): '',
+        fs.path.join(outputPath, 'vm_snapshot_instr'): '',
+        fs.path.join(outputPath, 'isolate_snapshot_instr'): '',
+        fs.path.join(outputPath, 'snapshot.d'): '${fs.path.join(outputPath, 'vm_snapshot_data')} : ',
+      };
+
+      final int genSnapshotExitCode = await snapshotter.build(
+        platform: TargetPlatform.android_arm64,
+        buildMode: BuildMode.debug,
+        mainPath: 'main.dill',
+        packagesPath: '.packages',
+        outputPath: outputPath,
+      );
+
+      expect(genSnapshotExitCode, 0);
+      expect(genSnapshot.callCount, 1);
+      expect(genSnapshot.snapshotType.platform, TargetPlatform.android_arm64);
+      expect(genSnapshot.snapshotType.mode, BuildMode.debug);
+      expect(genSnapshot.packagesPath, '.packages');
+      expect(genSnapshot.additionalArgs, <String>[
+        '--reify-generic-functions',
+        '--strong',
+        '--enable_asserts',
+        '--snapshot_kind=core-jit',
+        '--vm_snapshot_data=build/foo/vm_snapshot_data',
+        '--isolate_snapshot_data=build/foo/isolate_snapshot_data',
+        '--vm_snapshot_instructions=build/foo/vm_snapshot_instr',
+        '--isolate_snapshot_instructions=build/foo/isolate_snapshot_instr',
+        '--load_compilation_trace=trace.txt',
+        'main.dill',
+      ]);
+    }, overrides: contextOverrides);
+
+    testUsingContext('iOS release Core JIT snapshot is invalid', () async {
+      final String outputPath = fs.path.join('build', 'foo');
+      expect(await snapshotter.build(
+        platform: TargetPlatform.ios,
+        buildMode: BuildMode.profile,
+        mainPath: 'main.dill',
+        packagesPath: '.packages',
+        outputPath: outputPath,
+      ), isNot(equals(0)));
+    }, overrides: contextOverrides);
+
+    testUsingContext('builds Android arm profile Core JIT snapshot', () async {
+      fs.file('main.dill').writeAsStringSync('binary magic');
+
+      final String outputPath = fs.path.join('build', 'foo');
+      fs.directory(outputPath).createSync(recursive: true);
+
+      genSnapshot.outputs = <String, String>{
+        fs.path.join(outputPath, 'vm_snapshot_data'): '',
+        fs.path.join(outputPath, 'isolate_snapshot_data'): '',
+        fs.path.join(outputPath, 'vm_snapshot_instr'): '',
+        fs.path.join(outputPath, 'isolate_snapshot_instr'): '',
+        fs.path.join(outputPath, 'snapshot.d'): '${fs.path.join(outputPath, 'vm_snapshot_data')} : ',
+      };
+
+      final int genSnapshotExitCode = await snapshotter.build(
+        platform: TargetPlatform.android_arm,
+        buildMode: BuildMode.profile,
+        mainPath: 'main.dill',
+        packagesPath: '.packages',
+        outputPath: outputPath,
+      );
+
+      expect(genSnapshotExitCode, 0);
+      expect(genSnapshot.callCount, 1);
+      expect(genSnapshot.snapshotType.platform, TargetPlatform.android_arm);
+      expect(genSnapshot.snapshotType.mode, BuildMode.profile);
+      expect(genSnapshot.packagesPath, '.packages');
+      expect(genSnapshot.additionalArgs, <String>[
+        '--reify-generic-functions',
+        '--strong',
+        '--snapshot_kind=core-jit',
+        '--vm_snapshot_data=build/foo/vm_snapshot_data',
+        '--isolate_snapshot_data=build/foo/isolate_snapshot_data',
+        '--vm_snapshot_instructions=build/foo/vm_snapshot_instr',
+        '--isolate_snapshot_instructions=build/foo/isolate_snapshot_instr',
+        '--load_compilation_trace=trace.txt',
+        '--no-sim-use-hardfp',
+        '--no-use-integer-division',
+        'main.dill',
+      ]);
+    }, overrides: contextOverrides);
+
+    testUsingContext('builds Android arm64 profile Core JIT snapshot', () async {
+      fs.file('main.dill').writeAsStringSync('binary magic');
+
+      final String outputPath = fs.path.join('build', 'foo');
+      fs.directory(outputPath).createSync(recursive: true);
+
+      genSnapshot.outputs = <String, String>{
+        fs.path.join(outputPath, 'vm_snapshot_data'): '',
+        fs.path.join(outputPath, 'isolate_snapshot_data'): '',
+        fs.path.join(outputPath, 'vm_snapshot_instr'): '',
+        fs.path.join(outputPath, 'isolate_snapshot_instr'): '',
+        fs.path.join(outputPath, 'snapshot.d'): '${fs.path.join(outputPath, 'vm_snapshot_data')} : ',
+      };
+
+      final int genSnapshotExitCode = await snapshotter.build(
+        platform: TargetPlatform.android_arm64,
+        buildMode: BuildMode.profile,
+        mainPath: 'main.dill',
+        packagesPath: '.packages',
+        outputPath: outputPath,
+      );
+
+      expect(genSnapshotExitCode, 0);
+      expect(genSnapshot.callCount, 1);
+      expect(genSnapshot.snapshotType.platform, TargetPlatform.android_arm64);
+      expect(genSnapshot.snapshotType.mode, BuildMode.profile);
+      expect(genSnapshot.packagesPath, '.packages');
+      expect(genSnapshot.additionalArgs, <String>[
+        '--reify-generic-functions',
+        '--strong',
+        '--snapshot_kind=core-jit',
+        '--vm_snapshot_data=build/foo/vm_snapshot_data',
+        '--isolate_snapshot_data=build/foo/isolate_snapshot_data',
+        '--vm_snapshot_instructions=build/foo/vm_snapshot_instr',
+        '--isolate_snapshot_instructions=build/foo/isolate_snapshot_instr',
+        '--load_compilation_trace=trace.txt',
+        'main.dill',
+      ]);
+    }, overrides: contextOverrides);
+
+    testUsingContext('iOS release Core JIT snapshot is invalid', () async {
+      final String outputPath = fs.path.join('build', 'foo');
+      expect(await snapshotter.build(
+        platform: TargetPlatform.ios,
+        buildMode: BuildMode.release,
+        mainPath: 'main.dill',
+        packagesPath: '.packages',
+        outputPath: outputPath,
+      ), isNot(equals(0)));
+    }, overrides: contextOverrides);
+
+    testUsingContext('builds Android arm release Core JIT snapshot', () async {
+      fs.file('main.dill').writeAsStringSync('binary magic');
+
+      final String outputPath = fs.path.join('build', 'foo');
+      fs.directory(outputPath).createSync(recursive: true);
+
+      genSnapshot.outputs = <String, String>{
+        fs.path.join(outputPath, 'vm_snapshot_data'): '',
+        fs.path.join(outputPath, 'isolate_snapshot_data'): '',
+        fs.path.join(outputPath, 'vm_snapshot_instr'): '',
+        fs.path.join(outputPath, 'isolate_snapshot_instr'): '',
+        fs.path.join(outputPath, 'snapshot.d'): '${fs.path.join(outputPath, 'vm_snapshot_data')} : ',
+      };
+
+      final int genSnapshotExitCode = await snapshotter.build(
+        platform: TargetPlatform.android_arm,
+        buildMode: BuildMode.release,
+        mainPath: 'main.dill',
+        packagesPath: '.packages',
+        outputPath: outputPath,
+      );
+
+      expect(genSnapshotExitCode, 0);
+      expect(genSnapshot.callCount, 1);
+      expect(genSnapshot.snapshotType.platform, TargetPlatform.android_arm);
+      expect(genSnapshot.snapshotType.mode, BuildMode.release);
+      expect(genSnapshot.packagesPath, '.packages');
+      expect(genSnapshot.additionalArgs, <String>[
+        '--reify-generic-functions',
+        '--strong',
+        '--snapshot_kind=core-jit',
+        '--vm_snapshot_data=build/foo/vm_snapshot_data',
+        '--isolate_snapshot_data=build/foo/isolate_snapshot_data',
+        '--vm_snapshot_instructions=build/foo/vm_snapshot_instr',
+        '--isolate_snapshot_instructions=build/foo/isolate_snapshot_instr',
+        '--load_compilation_trace=trace.txt',
+        '--no-sim-use-hardfp',
+        '--no-use-integer-division',
+        'main.dill',
+      ]);
+    }, overrides: contextOverrides);
+
+    testUsingContext('builds Android arm64 release Core JIT snapshot', () async {
+      fs.file('main.dill').writeAsStringSync('binary magic');
+
+      final String outputPath = fs.path.join('build', 'foo');
+      fs.directory(outputPath).createSync(recursive: true);
+
+      genSnapshot.outputs = <String, String>{
+        fs.path.join(outputPath, 'vm_snapshot_data'): '',
+        fs.path.join(outputPath, 'isolate_snapshot_data'): '',
+        fs.path.join(outputPath, 'vm_snapshot_instr'): '',
+        fs.path.join(outputPath, 'isolate_snapshot_instr'): '',
+        fs.path.join(outputPath, 'snapshot.d'): '${fs.path.join(outputPath, 'vm_snapshot_data')} : ',
+      };
+
+      final int genSnapshotExitCode = await snapshotter.build(
+        platform: TargetPlatform.android_arm64,
+        buildMode: BuildMode.release,
+        mainPath: 'main.dill',
+        packagesPath: '.packages',
+        outputPath: outputPath,
+      );
+
+      expect(genSnapshotExitCode, 0);
+      expect(genSnapshot.callCount, 1);
+      expect(genSnapshot.snapshotType.platform, TargetPlatform.android_arm64);
+      expect(genSnapshot.snapshotType.mode, BuildMode.release);
+      expect(genSnapshot.packagesPath, '.packages');
+      expect(genSnapshot.additionalArgs, <String>[
+        '--reify-generic-functions',
+        '--strong',
+        '--snapshot_kind=core-jit',
+        '--vm_snapshot_data=build/foo/vm_snapshot_data',
+        '--isolate_snapshot_data=build/foo/isolate_snapshot_data',
+        '--vm_snapshot_instructions=build/foo/vm_snapshot_instr',
+        '--isolate_snapshot_instructions=build/foo/isolate_snapshot_instr',
+        '--load_compilation_trace=trace.txt',
         'main.dill',
       ]);
     }, overrides: contextOverrides);

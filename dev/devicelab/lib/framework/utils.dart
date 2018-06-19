@@ -183,16 +183,42 @@ Future<DateTime> getFlutterRepoCommitTimestamp(String commit) {
   });
 }
 
+/// Starts a subprocess.
+///
+/// The first argument is the full path to the executable to run.
+///
+/// The second argument is the list of arguments to provide on the command line.
+/// This argument can be null, indicating no arguments (same as the empty list).
+///
+/// The `environment` argument can be provided to configure environment variables
+/// that will be made available to the subprocess. The `BOT` environment variable
+/// is always set and overrides any value provided in the `environment` argument.
+/// The `isBot` argument controls the value of the `BOT` variable. It will either
+/// be "true", if `isBot` is true (the default), or "false" if it is false.
+///
+/// The `BOT` variable is in particular used by the `flutter` tool to determine
+/// how verbose to be and whether to enable analytics by default.
+///
+/// The working directory can be provided using the `workingDirectory` argument.
+/// By default it will default to the current working directory (see [cwd]).
+///
+/// Information regarding the execution of the subprocess is printed to the
+/// console.
+///
+/// The actual process executes asynchronously. A handle to the subprocess is
+/// returned in the form of a [Future] that completes to a [Process] object.
 Future<Process> startProcess(
   String executable,
   List<String> arguments, {
   Map<String, String> environment,
+  bool isBot = true, // set to false to pretend not to be on a bot (e.g. to test user-facing outputs)
   String workingDirectory,
 }) async {
+  assert(isBot != null);
   final String command = '$executable ${arguments?.join(" ") ?? ""}';
   print('\nExecuting: $command');
   environment ??= <String, String>{};
-  environment['BOT'] = 'true';
+  environment['BOT'] = isBot ? 'true' : 'false';
   final Process process = await _processManager.start(
     <String>[executable]..addAll(arguments),
     environment: environment,
