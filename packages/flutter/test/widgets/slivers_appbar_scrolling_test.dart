@@ -4,11 +4,11 @@
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/rendering.dart';
-import 'package:flutter/widgets.dart';
+import 'package:flutter/widgets.dart' hide TypeMatcher;
 
 void verifyPaintPosition(GlobalKey key, Offset ideal) {
   final RenderObject target = key.currentContext.findRenderObject();
-  expect(target.parent, const isInstanceOf<RenderViewport>());
+  expect(target.parent, const TypeMatcher<RenderViewport>());
   final SliverPhysicalParentData parentData = target.parentData;
   final Offset actual = parentData.paintOffset;
   expect(actual, ideal);
