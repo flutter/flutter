@@ -677,7 +677,7 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
                         : Colors.white70
                     : Theme.of(context).brightness == Brightness.light
                         ? Colors.grey.shade400
-                        : Colors.white70),
+                        : Colors.white10),
           ],
         ),
       ),
