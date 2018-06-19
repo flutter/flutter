@@ -86,7 +86,7 @@ void main() {
       when(response.contentLength).thenReturn(-1);
 
       expect(consolidateHttpClientResponseBytes(response),
-          throwsA(const isInstanceOf<Exception>()));
+          throwsA(const TypeMatcher<Exception>()));
     });
   });
 }

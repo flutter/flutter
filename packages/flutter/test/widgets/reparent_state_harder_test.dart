@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/widgets.dart';
-import 'package:flutter_test/flutter_test.dart' hide TypeMatcher;
+import 'package:flutter_test/flutter_test.dart';
 
 // This is a regression test for https://github.com/flutter/flutter/issues/5588.
 
