@@ -572,10 +572,8 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
     if (widget.items != null) {
       assert(widget.value == null ||
           widget.items
-                  .where(
-                      (DropdownMenuItem<T> item) => item.value == widget.value)
-                  .length ==
-              1);
+            .where((DropdownMenuItem<T> item) => item.value == widget.value)
+                  .length == 1);
       _selectedIndex = null;
       for (int itemIndex = 0; itemIndex < widget.items.length; itemIndex++) {
         if (widget.items[itemIndex].value == widget.value) {
@@ -626,7 +624,7 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
   }
 
   // just so we don't have to repeat this test and make it easier to understand
-  bool get _enabled =>widget.items != null;
+  bool get _enabled => widget.items != null;
 
   @override
   Widget build(BuildContext context) {
@@ -676,7 +674,8 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
                         : Colors.white70
                     : Theme.of(context).brightness == Brightness.light
                         ? Colors.grey.shade400
-                        : Colors.white10),
+                        : Colors.white10,
+            ),
           ],
         ),
       ),
@@ -705,6 +704,7 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
     return new GestureDetector(
         onTap: _enabled ? _handleTap : null,
         behavior: HitTestBehavior.opaque,
-        child: result);
+        child: result,
+    );
   }
 }
