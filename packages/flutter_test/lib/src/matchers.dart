@@ -653,6 +653,8 @@ typedef num AnyDistanceFunction(Null a, Null b);
 
 const Map<Type, AnyDistanceFunction> _kStandardDistanceFunctions = const <Type, AnyDistanceFunction>{
   Color: _maxComponentColorDistance,
+  HSVColor: _maxComponentHSVColorDistance,
+  HSLColor: _maxComponentHSLColorDistance,
   Offset: _offsetDistance,
   int: _intDistance,
   double: _doubleDistance,
@@ -669,6 +671,22 @@ double _maxComponentColorDistance(Color a, Color b) {
   delta = math.max<int>(delta, (a.blue - b.blue).abs());
   delta = math.max<int>(delta, (a.alpha - b.alpha).abs());
   return delta.toDouble();
+}
+
+// Compares hue by converting it to a 0.0 - 1.0 range, so that the comparison
+// can be a similar error percentage per component.
+double _maxComponentHSVColorDistance(HSVColor a, HSVColor b) {
+  double delta = math.max<double>((a.saturation - b.saturation).abs(), (a.value - b.value).abs());
+  delta = math.max<double>(delta, ((a.hue - b.hue) / 360.0).abs());
+  return math.max<double>(delta, (a.alpha - b.alpha).abs());
+}
+
+// Compares hue by converting it to a 0.0 - 1.0 range, so that the comparison
+// can be a similar error percentage per component.
+double _maxComponentHSLColorDistance(HSLColor a, HSLColor b) {
+  double delta = math.max<double>((a.saturation - b.saturation).abs(), (a.lightness - b.lightness).abs());
+  delta = math.max<double>(delta, ((a.hue - b.hue) / 360.0).abs());
+  return math.max<double>(delta, (a.alpha - b.alpha).abs());
 }
 
 double _rectDistance(Rect a, Rect b) {
