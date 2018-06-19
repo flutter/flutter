@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:flutter/widgets.dart';
+import 'package:flutter/widgets.dart' hide TypeMatcher;
 
 final RouteFactory generateRoute = (RouteSettings settings) => new PageRouteBuilder<void>(
   settings: settings,
@@ -20,7 +20,7 @@ void main() {
       color: const Color(0xFF112233),
       onGenerateRoute: generateRoute,
     ));
-    expect(key.currentState, const isInstanceOf<NavigatorState>());
+    expect(key.currentState, const TypeMatcher<NavigatorState>());
     await tester.pumpWidget(new WidgetsApp(
       color: const Color(0xFF112233),
       onGenerateRoute: generateRoute,
@@ -31,6 +31,6 @@ void main() {
       color: const Color(0xFF112233),
       onGenerateRoute: generateRoute,
     ));
-    expect(key.currentState, const isInstanceOf<NavigatorState>());
+    expect(key.currentState, const TypeMatcher<NavigatorState>());
   });
 }

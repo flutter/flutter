@@ -5,7 +5,7 @@
 import 'package:flutter/src/widgets/basic.dart';
 import 'package:flutter/src/widgets/framework.dart';
 import 'package:flutter/src/widgets/layout_builder.dart';
-import 'package:flutter_test/flutter_test.dart' hide TypeMatcher;
+import 'package:flutter_test/flutter_test.dart';
 
 class Wrapper extends StatelessWidget {
   const Wrapper({

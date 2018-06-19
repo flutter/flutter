@@ -76,7 +76,7 @@ Matcher throwsToolExit({int exitCode, String message}) {
 }
 
 /// Matcher for [ToolExit]s.
-const Matcher isToolExit = const isInstanceOf<ToolExit>();
+const Matcher isToolExit = const TypeMatcher<ToolExit>();
 
 /// Matcher for functions that throw [ProcessExit].
 Matcher throwsProcessExit([dynamic exitCode]) {
@@ -86,7 +86,7 @@ Matcher throwsProcessExit([dynamic exitCode]) {
 }
 
 /// Matcher for [ProcessExit]s.
-const Matcher isProcessExit = const isInstanceOf<ProcessExit>();
+const Matcher isProcessExit = const TypeMatcher<ProcessExit>();
 
 /// Creates a flutter project in the [temp] directory using the
 /// [arguments] list if specified, or `--no-pub` if not.

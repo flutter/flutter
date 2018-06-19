@@ -59,7 +59,7 @@ class Upload {
         ..add(content);
 
       final HttpClientResponse response = await request.close().timeout(timeLimit);
-      if (response.statusCode == HttpStatus.OK) {
+      if (response.statusCode == HttpStatus.ok) {
         logMessage('Saved $name');
         await response.drain<Null>();
       } else {
@@ -67,7 +67,7 @@ class Upload {
         logMessage('Request to save "$name" (length ${content.length}) failed with status ${response.statusCode}, will retry');
         logMessage(await response.transform(utf8.decoder).join());
       }
-      return response.statusCode == HttpStatus.OK;
+      return response.statusCode == HttpStatus.ok;
     } on TimeoutException catch (_) {
       logMessage('Request to save "$name" (length ${content.length}) timed out, will retry');
       return false;
