@@ -40,7 +40,7 @@ class _ListDemoState extends State<ReorderableListDemo> {
   PersistentBottomSheetController<Null> _bottomSheet;
   _ReorderableListType _itemType = _ReorderableListType.threeLine;
   bool _reverseSort = false;
-  List<_ListItem> _items = <String>[
+  final List<_ListItem> _items = <String>[
     'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N',
   ].map((String item) => new _ListItem(item, false)).toList();
 
