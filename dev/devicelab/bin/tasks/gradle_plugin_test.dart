@@ -33,7 +33,7 @@ void main() async {
     javaHome = javaHomeExtractor.firstMatch(flutterDoctor).group(1) + '/jre';
 
     try {
-      await runTest((project, pluginProject) async {
+      await runTest((FlutterProject project, FlutterPluginProject pluginProject) async {
         section('gradlew assembleDebug');
         await project.runGradleTask('assembleDebug');
         errorMessage = _validateSnapshotDependency(project, 'build/app.dill');
@@ -42,35 +42,35 @@ void main() async {
         }
       });
 
-      await runTest((project, pluginProject) async {
+      await runTest((FlutterProject project, FlutterPluginProject pluginProject) async {
         section('gradlew assembleDebug no-preview-dart-2');
         await project.runGradleTask('assembleDebug',
             options: <String>['-Ppreview-dart-2=false']);
       });
 
-      await runTest((project, pluginProject) async {
+      await runTest((FlutterProject project, FlutterPluginProject pluginProject) async {
         section('gradlew assembleProfile');
         await project.runGradleTask('assembleProfile');
       });
 
-      await runTest((project, pluginProject) async {
+      await runTest((FlutterProject project, FlutterPluginProject pluginProject) async {
         section('gradlew assembleRelease');
         await project.runGradleTask('assembleRelease');
       });
 
-      await runTest((project, pluginProject) async {
+      await runTest((FlutterProject project, FlutterPluginProject pluginProject) async {
         section('gradlew assembleLocal (custom debug build)');
         await project.addCustomBuildType('local', initWith: 'debug');
         await project.runGradleTask('assembleLocal');
       });
 
-      await runTest((project, pluginProject) async {
+      await runTest((FlutterProject project, FlutterPluginProject pluginProject) async {
         section('gradlew assembleBeta (custom release build)');
         await project.addCustomBuildType('beta', initWith: 'release');
         await project.runGradleTask('assembleBeta');
       });
 
-      await runTest((project, pluginProject) async {
+      await runTest((FlutterProject project, FlutterPluginProject pluginProject) async {
         section('gradlew assembleFreeDebug (product flavor)');
         await project.addProductFlavor('free');
         await project.runGradleTask('assembleFreeDebug');
@@ -78,7 +78,7 @@ void main() async {
         await project.introduceError();
       });
 
-      await runTest((project, pluginProject) async {
+      await runTest((FlutterProject project, FlutterPluginProject pluginProject) async {
         section('gradlew on build script with error');
         final ProcessResult result =
             await project.resultOfGradleTask('assembleRelease');
@@ -97,7 +97,7 @@ void main() async {
               result);
       });
 
-      await runTest((project, pluginProject) async {
+      await runTest((FlutterProject project, FlutterPluginProject pluginProject) async {
         section('flutter build apk on build script with error');
         final ProcessResult result = await project.resultOfFlutterCommand('build', <String>['apk']);
         if (result.exitCode == 0)
@@ -114,7 +114,7 @@ void main() async {
               result);
       });
 
-      await runTest((project, pluginProject) async {
+      await runTest((FlutterProject project, FlutterPluginProject pluginProject) async {
         section('gradlew assembleDebug on plugin example');
         await pluginProject.runGradleTask('assembleDebug');
         if (!pluginProject.hasDebugApk)
