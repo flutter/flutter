@@ -51,11 +51,9 @@ class ScaleUpdateDetails {
   /// The [focalPoint], [scale] and [rotation] arguments must not be null. The [scale]
   /// argument must be greater than or equal to zero.
   ScaleUpdateDetails({
-    this.focalPoint: Offset.zero,
-    this.scale: 1.0,
-    this.rotation: 0.0,
     this.focalPoint = Offset.zero,
     this.scale = 1.0,
+    this.rotation = 0.0,
   }) : assert(focalPoint != null),
        assert(scale != null && scale >= 0.0),
        assert(rotation != null);
