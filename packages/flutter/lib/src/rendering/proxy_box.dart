@@ -4264,11 +4264,15 @@ class RenderAnnotatedRegion<T> extends RenderProxyBox {
   /// object to clip the results of [Layer.findRegion].
   ///
   /// Neither [value] nor [sized] can be null.
-  RenderAnnotatedRegion(T value, bool sized)
-    : assert(value != null),
-      assert(sized != null),
-      _value = value,
-      _sized = sized;
+  RenderAnnotatedRegion({
+    @required T value,
+    @required bool sized,
+    RenderBox child,
+  }) : assert(value != null),
+       assert(sized != null),
+       _value = value,
+       _sized = sized,
+       super(child);
 
   /// A value which can be retrieved using [Layer.find].
   T get value => _value;
