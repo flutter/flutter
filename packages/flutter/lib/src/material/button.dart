@@ -451,23 +451,27 @@ class MaterialButton extends StatelessWidget {
 /// The primary purpose of this widget is to allow padding around [Material] widgets
 /// to trigger the child ink feature without increasing the size of the material.
 class _RedirectingHitDetectionWidget extends SingleChildRenderObjectWidget {
-  const _RedirectingHitDetectionWidget({this.constraints, Widget child}) : super(child: child);
+  const _RedirectingHitDetectionWidget({
+    Key key,
+    Widget child,
+    this.constraints
+  }) : super(key: key, child: child);
 
   final BoxConstraints constraints;
 
   @override
   RenderObject createRenderObject(BuildContext context) {
-    return _RedirectingHitDetectionRenderObject(constraints);
+    return new  _RenderRedirectingHitDetection(constraints);
   }
 
   @override
-  void updateRenderObject(BuildContext context, covariant _RedirectingHitDetectionRenderObject renderObject) {
+  void updateRenderObject(BuildContext context, covariant  _RenderRedirectingHitDetection renderObject) {
     renderObject.additionalConstraints = constraints;
   }
 }
 
-class _RedirectingHitDetectionRenderObject extends RenderConstrainedBox {
-  _RedirectingHitDetectionRenderObject(BoxConstraints additionalConstraints) : super(additionalConstraints: additionalConstraints);
+class _RenderRedirectingHitDetection extends RenderConstrainedBox {
+  _RenderRedirectingHitDetection(BoxConstraints additionalConstraints) : super(additionalConstraints: additionalConstraints);
 
   @override
   bool hitTest(HitTestResult result, {Offset position}) {
