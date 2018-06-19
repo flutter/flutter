@@ -12,6 +12,20 @@ import 'package:flutter_devicelab/framework/utils.dart';
 String javaHome;
 String errorMessage;
 
+/// Runs the given [testFunction] in a clean temporary directory.
+Future<void> runTest(Future<void> testFunction(FlutterProject project)) async {
+  final Directory tmp = await Directory.systemTemp.createTemp('gradle');
+  final FlutterProject project = await FlutterProject.create(tmp, 'hello');
+  final FlutterPluginProject pluginProject =
+      await FlutterPluginProject.create(tmp, 'aaa');
+
+  try {
+    await testFunction(project);
+  } finally {
+    project.parent.deleteSync(recursive: true);
+  }
+}
+
 void main() async {
   await task(() async {
     section('Running flutter doctor to get JAVA_HOME');
@@ -19,81 +33,110 @@ void main() async {
     final RegExp javaHomeExtractor = new RegExp(r'Android Studio at (.*)');
     javaHome = javaHomeExtractor.firstMatch(flutterDoctor).group(1) + '/jre';
 
-    section('Setting up flutter projects');
-    final Directory tmp = await Directory.systemTemp.createTemp('gradle');
-    final FlutterProject project = await FlutterProject.create(tmp, 'hello');
-    final FlutterPluginProject pluginProject = await FlutterPluginProject.create(tmp, 'aaa');
-
     try {
-      section('gradlew assembleDebug');
-      await project.runGradleTask('assembleDebug');
-      errorMessage = _validateSnapshotDependency(project, 'build/app.dill');
-      if (errorMessage != null) {
-        return new TaskResult.failure(errorMessage);
-      }
+      await runTest((project) async {
+        section('gradlew assembleDebug');
+        await project.runGradleTask('assembleDebug');
+        errorMessage = _validateSnapshotDependency(project, 'build/app.dill');
+        if (errorMessage != null) {
+          throw new TaskResult.failure(errorMessage);
+        }
+      });
 
-      section('gradlew assembleDebug no-preview-dart-2');
-      await project.runGradleTask('assembleDebug', options: <String>['-Ppreview-dart-2=false']);
-      errorMessage = _validateSnapshotDependency(project,
-          '${project.rootPath}/build/app/intermediates/flutter/debug/snapshot_blob.bin');
-      if (errorMessage != null) {
-        return new TaskResult.failure(errorMessage);
-      }
+      await runTest((project) async {
+        section('gradlew assembleDebug no-preview-dart-2');
+        await project.runGradleTask('assembleDebug',
+            options: <String>['-Ppreview-dart-2=false']);
+        errorMessage = _validateSnapshotDependency(project,
+            '${project.rootPath}/build/app/intermediates/flutter/debug/snapshot_blob.bin');
+        if (errorMessage != null) {
+          throw new TaskResult.failure(errorMessage);
+        }
+      });
 
-      section('gradlew assembleProfile');
-      await project.runGradleTask('assembleProfile');
+      await runTest((project) async {
+        section('gradlew assembleProfile');
+        await project.runGradleTask('assembleProfile');
+      });
 
-      section('gradlew assembleRelease');
-      await project.runGradleTask('assembleRelease');
+      await runTest((project) async {
+        section('gradlew assembleRelease');
+        await project.runGradleTask('assembleRelease');
+      });
 
-      section('gradlew assembleLocal (custom debug build)');
-      await project.addCustomBuildType('local', initWith: 'debug');
-      await project.runGradleTask('assembleLocal');
+      await runTest((project) async {
+        section('gradlew assembleLocal (custom debug build)');
+        await project.addCustomBuildType('local', initWith: 'debug');
+        await project.runGradleTask('assembleLocal');
+      });
 
-      section('gradlew assembleBeta (custom release build)');
-      await project.addCustomBuildType('beta', initWith: 'release');
-      await project.runGradleTask('assembleBeta');
+      await runTest((project) async {
+        section('gradlew assembleBeta (custom release build)');
+        await project.addCustomBuildType('beta', initWith: 'release');
+        await project.runGradleTask('assembleBeta');
+      });
 
-      section('gradlew assembleFreeDebug (product flavor)');
-      await project.addProductFlavor('free');
-      await project.runGradleTask('assembleFreeDebug');
+      await runTest((project) async {
+        section('gradlew assembleFreeDebug (product flavor)');
+        await project.addProductFlavor('free');
+        await project.runGradleTask('assembleFreeDebug');
 
-      await project.introduceError();
+        await project.introduceError();
+      });
 
-      section('gradlew on build script with error');
-      {
-        final ProcessResult result = await project.resultOfGradleTask('assembleRelease');
-        if (result.exitCode == 0)
-          return _failure('Gradle did not exit with error as expected', result);
-        final String output = result.stdout + '\n' + result.stderr;
-        if (output.contains('GradleException') || output.contains('Failed to notify') || output.contains('at org.gradle'))
-          return _failure('Gradle output should not contain stacktrace', result);
-        if (!output.contains('Build failed') || !output.contains('builTypes'))
-          return _failure('Gradle output should contain a readable error message', result);
-      }
+      await runTest((project) async {
+        section('gradlew on build script with error');
+        {
+          final ProcessResult result =
+              await project.resultOfGradleTask('assembleRelease');
+          if (result.exitCode == 0)
+            return _failure(
+                'Gradle did not exit with error as expected', result);
+          final String output = result.stdout + '\n' + result.stderr;
+          if (output.contains('GradleException') ||
+              output.contains('Failed to notify') ||
+              output.contains('at org.gradle'))
+            return _failure(
+                'Gradle output should not contain stacktrace', result);
+          if (!output.contains('Build failed') || !output.contains('builTypes'))
+            return _failure(
+                'Gradle output should contain a readable error message',
+                result);
+        }
+      });
 
-      section('flutter build apk on build script with error');
-      {
-        final ProcessResult result = await project.resultOfFlutterCommand('build', <String>['apk']);
-        if (result.exitCode == 0)
-          return _failure('flutter build apk should fail when Gradle does', result);
-        final String output = result.stdout + '\n' + result.stderr;
-        if (!output.contains('Build failed') || !output.contains('builTypes'))
-          return _failure('flutter build apk output should contain a readable Gradle error message', result);
-        if (_hasMultipleOccurrences(output, 'builTypes'))
-          return _failure('flutter build apk should not invoke Gradle repeatedly on error', result);
-      }
+      await runTest((project) async {
+        section('flutter build apk on build script with error');
+        {
+          final ProcessResult result = await project.resultOfFlutterCommand('build', <String>['apk']);
+          if (result.exitCode == 0)
+            return _failure(
+                'flutter build apk should fail when Gradle does', result);
+          final String output = result.stdout + '\n' + result.stderr;
+          if (!output.contains('Build failed') || !output.contains('builTypes'))
+            return _failure(
+                'flutter build apk output should contain a readable Gradle error message',
+                result);
+          if (_hasMultipleOccurrences(output, 'builTypes'))
+            return _failure(
+                'flutter build apk should not invoke Gradle repeatedly on error',
+                result);
+        }
+      });
 
-      section('gradlew assembleDebug on plugin example');
-      await pluginProject.runGradleTask('assembleDebug');
-      if (!pluginProject.hasDebugApk)
-        return new TaskResult.failure('Gradle did not produce an apk file at the expected place');
+      await runTest((project) async {
+        section('gradlew assembleDebug on plugin example');
+        await pluginProject.runGradleTask('assembleDebug');
+        if (!pluginProject.hasDebugApk)
+          throw new TaskResult.failure(
+              'Gradle did not produce an apk file at the expected place');
+      });
 
       return new TaskResult.success(null);
+    } on TaskResult catch (taskResult) {
+      return taskResult;
     } catch (e) {
       return new TaskResult.failure(e.toString());
-    } finally {
-      project.parent.deleteSync(recursive: true);
     }
   });
 }
