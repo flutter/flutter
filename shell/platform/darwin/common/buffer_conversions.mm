@@ -15,4 +15,12 @@ NSData* GetNSDataFromVector(const std::vector<uint8_t>& buffer) {
   return [NSData dataWithBytes:buffer.data() length:buffer.size()];
 }
 
+std::unique_ptr<fml::Mapping> GetMappingFromNSData(NSData* data) {
+  return std::make_unique<fml::DataMapping>(GetVectorFromNSData(data));
+}
+
+NSData* GetNSDataFromMapping(std::unique_ptr<fml::Mapping> mapping) {
+  return [NSData dataWithBytes:mapping->GetMapping() length:mapping->GetSize()];
+}
+
 }  // namespace shell

@@ -30,8 +30,8 @@ class APKAssetProvider final : public AssetResolver {
   bool IsValid() const override;
 
   // |blink::AssetResolver|
-  virtual bool GetAsBuffer(const std::string& asset_name,
-                           std::vector<uint8_t>* data) const override;
+  std::unique_ptr<fml::Mapping> GetAsMapping(
+      const std::string& asset_name) const override;
 
   FXL_DISALLOW_COPY_AND_ASSIGN(APKAssetProvider);
 };

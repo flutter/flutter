@@ -15,7 +15,7 @@ namespace shell {
 class PlatformMessageResponseAndroid : public blink::PlatformMessageResponse {
  public:
   // |blink::PlatformMessageResponse|
-  void Complete(std::vector<uint8_t> data) override;
+  void Complete(std::unique_ptr<fml::Mapping> data) override;
 
   // |blink::PlatformMessageResponse|
   void CompleteEmpty() override;

@@ -14,8 +14,8 @@ namespace blink {
 
 namespace {
 
-void VectorReleaseProc(const void* ptr, void* context) {
-  delete reinterpret_cast<std::vector<uint8_t>*>(context);
+void MappingReleaseProc(const void* ptr, void* context) {
+  delete reinterpret_cast<fml::Mapping*>(context);
 }
 
 }  // anonymous namespace
@@ -90,15 +90,16 @@ SkTypeface* AssetManagerFontStyleSet::createTypeface(int i) {
 
   TypefaceAsset& asset = assets_[index];
   if (!asset.typeface) {
-    std::unique_ptr<std::vector<uint8_t>> asset_buf =
-        std::make_unique<std::vector<uint8_t>>();
-    if (!asset_manager_->GetAsBuffer(asset.asset, asset_buf.get()))
+    std::unique_ptr<fml::Mapping> asset_mapping =
+        asset_manager_->GetAsMapping(asset.asset);
+    if (asset_mapping == nullptr) {
       return nullptr;
+    }
 
-    std::vector<uint8_t>* asset_buf_ptr = asset_buf.release();
-    sk_sp<SkData> asset_data =
-        SkData::MakeWithProc(asset_buf_ptr->data(), asset_buf_ptr->size(),
-                             VectorReleaseProc, asset_buf_ptr);
+    fml::Mapping* asset_mapping_ptr = asset_mapping.release();
+    sk_sp<SkData> asset_data = SkData::MakeWithProc(
+        asset_mapping_ptr->GetMapping(), asset_mapping_ptr->GetSize(),
+        MappingReleaseProc, asset_mapping_ptr);
     std::unique_ptr<SkMemoryStream> stream = SkMemoryStream::Make(asset_data);
 
     // Ownership of the stream is transferred.

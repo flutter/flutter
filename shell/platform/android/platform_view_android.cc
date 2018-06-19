@@ -106,7 +106,8 @@ void PlatformViewAndroid::InvokePlatformMessageResponseCallback(
       response_data, response_data + java_response_position);
   auto message_response = std::move(it->second);
   pending_responses_.erase(it);
-  message_response->Complete(std::move(response));
+  message_response->Complete(
+      std::make_unique<fml::DataMapping>(std::move(response)));
 }
 
 void PlatformViewAndroid::InvokePlatformMessageEmptyResponseCallback(
@@ -190,7 +191,8 @@ void PlatformViewAndroid::UpdateSemantics(blink::SemanticsNodeUpdates update) {
     size_t num_bytes = 0;
     for (const auto& value : update) {
       num_bytes += kBytesPerNode;
-      num_bytes += value.second.childrenInTraversalOrder.size() * kBytesPerChild;
+      num_bytes +=
+          value.second.childrenInTraversalOrder.size() * kBytesPerChild;
       num_bytes += value.second.childrenInHitTestOrder.size() * kBytesPerChild;
     }
 

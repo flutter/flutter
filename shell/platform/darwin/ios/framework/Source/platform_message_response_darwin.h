@@ -20,10 +20,10 @@ namespace shell {
 
 class PlatformMessageResponseDarwin : public blink::PlatformMessageResponse {
  public:
-  void Complete(std::vector<uint8_t> data) override {
+  void Complete(std::unique_ptr<fml::Mapping> data) override {
     fxl::RefPtr<PlatformMessageResponseDarwin> self(this);
     platform_task_runner_->PostTask(fxl::MakeCopyable([self, data = std::move(data)]() mutable {
-      self->callback_.get()(shell::GetNSDataFromVector(data));
+      self->callback_.get()(shell::GetNSDataFromMapping(std::move(data)));
     }));
   }
 

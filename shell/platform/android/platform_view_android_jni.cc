@@ -174,10 +174,10 @@ std::unique_ptr<IsolateConfiguration> CreateIsolateConfiguration(
   const auto configuration_from_blob =
       [&asset_manager](const std::string& snapshot_name)
       -> std::unique_ptr<IsolateConfiguration> {
-    std::vector<uint8_t> blob;
-    if (asset_manager.GetAsBuffer(snapshot_name, &blob)) {
-      return IsolateConfiguration::CreateForSnapshot(
-          std::make_unique<fml::DataMapping>(std::move(blob)));
+    std::unique_ptr<fml::Mapping> blob =
+        asset_manager.GetAsMapping(snapshot_name);
+    if (blob) {
+      return IsolateConfiguration::CreateForSnapshot(std::move(blob));
     }
     return nullptr;
   };

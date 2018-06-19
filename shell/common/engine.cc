@@ -391,12 +391,16 @@ void Engine::HandleAssetPlatformMessage(
   std::string asset_name(reinterpret_cast<const char*>(data.data()),
                          data.size());
 
-  std::vector<uint8_t> asset_data;
-  if (asset_manager_ && asset_manager_->GetAsBuffer(asset_name, &asset_data)) {
-    response->Complete(std::move(asset_data));
-  } else {
-    response->CompleteEmpty();
+  if (asset_manager_) {
+    std::unique_ptr<fml::Mapping> asset_mapping =
+        asset_manager_->GetAsMapping(asset_name);
+    if (asset_mapping) {
+      response->Complete(std::move(asset_mapping));
+      return;
+    }
   }
+
+  response->CompleteEmpty();
 }
 
 }  // namespace shell

@@ -34,19 +34,20 @@ void AssetManager::PushBack(std::unique_ptr<AssetResolver> resolver) {
 }
 
 // |blink::AssetResolver|
-bool AssetManager::GetAsBuffer(const std::string& asset_name,
-                               std::vector<uint8_t>* data) const {
+std::unique_ptr<fml::Mapping> AssetManager::GetAsMapping(
+    const std::string& asset_name) const {
   if (asset_name.size() == 0) {
-    return false;
+    return nullptr;
   }
-  TRACE_EVENT0("flutter", "AssetManager::GetAsBuffer");
+  TRACE_EVENT0("flutter", "AssetManager::GetAsMapping");
   for (const auto& resolver : resolvers_) {
-    if (resolver->GetAsBuffer(asset_name, data)) {
-      return true;
+    auto mapping = resolver->GetAsMapping(asset_name);
+    if (mapping != nullptr) {
+      return mapping;
     }
   }
   FML_DLOG(WARNING) << "Could not find asset: " << asset_name;
-  return false;
+  return nullptr;
 }
 
 // |blink::AssetResolver|
