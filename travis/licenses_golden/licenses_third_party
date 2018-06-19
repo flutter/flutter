@@ -1,4 +1,4 @@
-Signature: 624f651136a86d0ec2cbb3d8d21f3c50
+Signature: 94538027829e7e01c4bcccc2e9bd981c
 
 UNUSED LICENSES:
 
@@ -5121,6 +5121,11 @@ FILE: ../../../third_party/dart/sdk/lib/svg/dart2js/svg_dart2js.dart
 FILE: ../../../third_party/dart/sdk/lib/web_audio/dart2js/web_audio_dart2js.dart
 FILE: ../../../third_party/dart/sdk/lib/web_audio/dart2js/web_audio_dart2js.dart
 FILE: ../../../third_party/dart/sdk/lib/web_audio/dart2js/web_audio_dart2js.dart
+FILE: ../../../third_party/dart/sdk/lib/web_gl/dart2js/web_gl_dart2js.dart
+FILE: ../../../third_party/dart/sdk/lib/web_gl/dart2js/web_gl_dart2js.dart
+FILE: ../../../third_party/dart/sdk/lib/web_gl/dart2js/web_gl_dart2js.dart
+FILE: ../../../third_party/dart/sdk/lib/web_gl/dart2js/web_gl_dart2js.dart
+FILE: ../../../third_party/dart/sdk/lib/web_gl/dart2js/web_gl_dart2js.dart
 FILE: ../../../third_party/dart/sdk/lib/web_sql/dart2js/web_sql_dart2js.dart
 FILE: ../../../third_party/dart/sdk/lib/web_sql/dart2js/web_sql_dart2js.dart
 FILE: ../../../third_party/dart/sdk/lib/web_sql/dart2js/web_sql_dart2js.dart
@@ -5291,7 +5296,7 @@ FILE: ../../../third_party/dart/sdk/lib/io/namespace_impl.dart
 FILE: ../../../third_party/dart/sdk/lib/io/overrides.dart
 FILE: ../../../third_party/dart/sdk/lib/io/sync_socket.dart
 FILE: ../../../third_party/dart/sdk/lib/vmservice/named_lookup.dart
-FILE: ../../../third_party/dart/utils/bazel/kernel_summary_worker.dart
+FILE: ../../../third_party/dart/utils/bazel/kernel_worker.dart
 ----------------------------------------------------------------------------------------------------
 Copyright (c) 2017, the Dart project authors.  Please see the AUTHORS file
 for details. All rights reserved.
