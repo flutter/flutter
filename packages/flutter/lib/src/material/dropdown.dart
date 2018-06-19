@@ -464,7 +464,7 @@ class DropdownButton<T> extends StatefulWidget {
   /// Creates a dropdown button.
   ///
   /// The [items] must have distinct values and if [value] isn't null it must be among them.
-  /// If [items] is null the button shows the optional [hintDisabled] and the down arrow is drawn in leight grey
+  /// If [items] is null the button is disabled and shows the optional [hintDisabled] and the down arrow is drawn as disabled
   ///
   /// The [elevation] and [iconSize] arguments must not be null (they both have
   /// defaults, so do not need to be specified).
