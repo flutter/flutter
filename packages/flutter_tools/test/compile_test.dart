@@ -276,25 +276,30 @@ void main() {
         'result abc\nline1\nline2\nabc /path/to/main.dart.dill 0\n'
       )));
 
-      final CompilerOutput output = await generator.recompile(
+      generator.recompile(
           '/path/to/main.dart', null /* invalidatedFiles */
-      );
-      expect(mockFrontendServerStdIn.getAndClear(),
-          'compile /path/to/main.dart\n');
-      verifyNoMoreInteractions(mockFrontendServerStdIn);
-      expect(logger.errorText,
-          equals('compiler message: line1\ncompiler message: line2\n'));
-      expect(output.outputFilename, equals('/path/to/main.dart.dill'));
+      ).then((CompilerOutput output) {
+        expect(mockFrontendServerStdIn.getAndClear(),
+            'compile /path/to/main.dart\n');
+        verifyNoMoreInteractions(mockFrontendServerStdIn);
+        expect(logger.errorText,
+            equals('compiler message: line1\ncompiler message: line2\n'));
+        expect(output.outputFilename, equals('/path/to/main.dart.dill'));
 
-      compileExpressionResponseCompleter.complete(new Future<List<int>>.value(utf8.encode(
-          'result def\nline1\nline2\ndef /path/to/main.dart.dill.incremental 0\n'
-      )));
+        compileExpressionResponseCompleter.complete(
+            new Future<List<int>>.value(utf8.encode(
+                'result def\nline1\nline2\ndef /path/to/main.dart.dill.incremental 0\n'
+            )));
+        generator.compileExpression(
+            '2+2', null, null, null, null, false).then(
+                (CompilerOutput outputExpression) {
+                  expect(outputExpression, isNotNull);
+                  expect(outputExpression.outputFilename, equals('/path/to/main.dart.dill.incremental'));
+                  expect(outputExpression.errorCount, 0);
+                }
+        );
+      });
 
-      final CompilerOutput outputExpression = await generator.compileExpression(
-          '2+2', null, null, null, null, false);
-      expect(outputExpression, isNotNull);
-      expect(outputExpression.outputFilename, equals('/path/to/main.dart.dill.incremental'));
-      expect(outputExpression.errorCount, 0);
     }, overrides: <Type, Generator>{
       ProcessManager: () => mockProcessManager,
     });
@@ -318,9 +323,6 @@ void main() {
       generator.recompile(
           '/path/to/main.dart', null /* invalidatedFiles */
       ).then((outputCompile) {
-        expect(mockFrontendServerStdIn.getAndClear(),
-            'compile /path/to/main.dart\n');
-        verifyNoMoreInteractions(mockFrontendServerStdIn);
         expect(logger.errorText,
             equals('compiler message: line1\ncompiler message: line2\n'));
         expect(outputCompile.outputFilename, equals('/path/to/main.dart.dill'));
@@ -339,7 +341,6 @@ void main() {
         compileExpressionResponseCompleter2.complete(new Future<List<int>>.value(utf8.encode(
             'result def\nline1\nline2\ndef /path/to/main.dart.dill.incremental 0\n'
         )));
-        lastExpressionCompleted.complete(true);
       });
 
       generator.compileExpression('1+1', null, null, null, null, false).then((outputExpression) {
@@ -347,6 +348,7 @@ void main() {
         expect(outputExpression.outputFilename,
             equals('/path/to/main.dart.dill.incremental'));
         expect(outputExpression.errorCount, 0);
+        lastExpressionCompleted.complete(true);
       });
 
       compileResponseCompleter.complete(new Future<List<int>>.value(utf8.encode(

@@ -244,7 +244,6 @@ class ResidentCompiler {
     // This is a URI, not a file path, so the forward slash is correct even on Windows.
     if (!_sdkRoot.endsWith('/'))
       _sdkRoot = '$_sdkRoot/';
-    _controller.stream.listen(_handleCompilationRequest);
   }
 
   final bool _trackWidgetCreation;
@@ -266,6 +265,10 @@ class ResidentCompiler {
   /// null is returned.
   Future<CompilerOutput> recompile(String mainPath, List<String> invalidatedFiles,
       {String outputPath, String packagesFilePath}) async {
+    if (!_controller.hasListener) {
+      _controller.stream.listen(_handleCompilationRequest);
+    }
+
     final Completer<CompilerOutput> completer = new Completer<CompilerOutput>();
     _controller.add(
         new _RecompileRequest(completer, mainPath, invalidatedFiles, outputPath, packagesFilePath)
@@ -371,6 +374,10 @@ class ResidentCompiler {
 
   Future<CompilerOutput> compileExpression(String expression, List<String> definitions,
       List<String> typeDefinitions, String libraryUri, String klass, bool isStatic) {
+    if (!_controller.hasListener) {
+      _controller.stream.listen(_handleCompilationRequest);
+    }
+
     Completer<CompilerOutput> completer = new Completer<CompilerOutput>();
     _controller.add(
         new _CompileExpressionRequest(
