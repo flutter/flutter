@@ -84,9 +84,10 @@ void main() {
     expect(updatedFocalPoint, isNull);
     expect(didStartScale, isFalse);
 
-
     // Zoom in
     tester.route(pointer2.move(const Offset(0.0, 10.0)));
+    expect(didStartScale, isTrue);
+    didStartScale = false;
     expect(updatedFocalPoint, const Offset(10.0, 20.0));
     updatedFocalPoint = null;
     expect(updatedScale, 2.0);
@@ -184,7 +185,6 @@ void main() {
     updatedFocalPoint = null;
     expect(updatedScale, 1.0);
     updatedScale = null;
-
 
     // We are done
     tester.route(pointer3.up());
