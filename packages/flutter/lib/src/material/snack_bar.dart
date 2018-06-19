@@ -27,6 +27,9 @@ const Duration _kSnackBarDisplayDuration = const Duration(milliseconds: 1500);
 const Curve _snackBarHeightCurve = Curves.fastOutSlowIn;
 const Curve _snackBarFadeCurve = const Interval(0.72, 1.0, curve: Curves.fastOutSlowIn);
 
+/// A long duration for the [SnackBar] display duration.
+const Duration kSnackBarLongDuration = const Duration(seconds: 10);
+
 /// Specify how a [SnackBar] was closed.
 ///
 /// The [ScaffoldState.showSnackBar] function returns a
