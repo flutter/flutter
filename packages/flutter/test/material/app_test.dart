@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:flutter/material.dart' hide TypeMatcher;
+import 'package:flutter/material.dart';
 
 class StateMarker extends StatefulWidget {
   const StateMarker({ Key key, this.child }) : super(key: key);
@@ -397,7 +397,7 @@ void main() {
       color: const Color(0xFF112233),
       home: const Placeholder(),
     ));
-    expect(key.currentState, const TypeMatcher<NavigatorState>());
+    expect(key.currentState, isInstanceOf<NavigatorState>());
     await tester.pumpWidget(new MaterialApp(
       color: const Color(0xFF112233),
       home: const Placeholder(),
@@ -408,6 +408,6 @@ void main() {
       color: const Color(0xFF112233),
       home: const Placeholder(),
     ));
-    expect(key.currentState, const TypeMatcher<NavigatorState>());
+    expect(key.currentState, isInstanceOf<NavigatorState>());
   });
 }

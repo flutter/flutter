@@ -7,11 +7,12 @@ import 'dart:math' as math;
 import 'dart:ui' as ui;
 
 import 'package:meta/meta.dart';
-import 'package:test/test.dart';
+import 'package:test/test.dart' hide TypeMatcher, isInstanceOf;
+import 'package:test/test.dart' as test_package show isInstanceOf;
 import 'package:test/src/frontend/async_matcher.dart'; // ignore: implementation_imports
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart' hide TypeMatcher;
+import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 
@@ -148,7 +149,7 @@ const Matcher hasAGoodToStringDeep = const _HasGoodToStringDeep();
 
 /// A matcher for functions that throw [FlutterError].
 ///
-/// This is equivalent to `throwsA(const TypeMatcher<FlutterError>())`.
+/// This is equivalent to `throwsA(isInstanceOf<FlutterError>())`.
 ///
 /// See also:
 ///
@@ -159,7 +160,7 @@ final Matcher throwsFlutterError = throwsA(isFlutterError);
 
 /// A matcher for functions that throw [AssertionError].
 ///
-/// This is equivalent to `throwsA(const TypeMatcher<AssertionError>())`.
+/// This is equivalent to `throwsA(isInstanceOf<AssertionError>())`.
 ///
 /// See also:
 ///
@@ -170,23 +171,27 @@ final Matcher throwsAssertionError = throwsA(isAssertionError);
 
 /// A matcher for [FlutterError].
 ///
-/// This is equivalent to `const TypeMatcher<FlutterError>()`.
+/// This is equivalent to `isInstanceOf<FlutterError>()`.
 ///
 /// See also:
 ///
 ///  * [throwsFlutterError], to test if a function throws a [FlutterError].
 ///  * [isAssertionError], to test if any object is any kind of [AssertionError].
-const Matcher isFlutterError = const TypeMatcher<FlutterError>();
+final Matcher isFlutterError = isInstanceOf<FlutterError>();
 
 /// A matcher for [AssertionError].
 ///
-/// This is equivalent to `const TypeMatcher<AssertionError>()`.
+/// This is equivalent to `isInstanceOf<AssertionError>()`.
 ///
 /// See also:
 ///
 ///  * [throwsAssertionError], to test if a function throws any [AssertionError].
 ///  * [isFlutterError], to test if any object is a [FlutterError].
-const Matcher isAssertionError = const TypeMatcher<AssertionError>();
+final Matcher isAssertionError = isInstanceOf<AssertionError>();
+
+/// A matcher that compares the type of the actual value to the type argument T.
+// TODO(ianh): https://github.com/flutter/flutter/issues/18608, https://github.com/dart-lang/matcher/pull/88
+Matcher isInstanceOf<T>() => new test_package.isInstanceOf<T>(); // ignore: prefer_const_constructors, https://github.com/dart-lang/sdk/issues/32544
 
 /// Asserts that two [double]s are equal, within some tolerated error.
 ///

@@ -180,7 +180,7 @@ Future<Null> main() async {
     buffer.add('import \'dart:math\' as math;');
     buffer.add('import \'dart:typed_data\';');
     buffer.add('import \'dart:ui\' as ui;');
-    buffer.add('import \'package:flutter_test/flutter_test.dart\' hide TypeMatcher;');
+    buffer.add('import \'package:flutter_test/flutter_test.dart\';');
     for (FileSystemEntity file in flutterPackage.listSync(recursive: false, followLinks: false)) {
       if (file is File && path.extension(file.path) == '.dart') {
         buffer.add('');
