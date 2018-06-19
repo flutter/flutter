@@ -44,7 +44,7 @@ def main(args):
     for asset_file in os.listdir(options.asset_dir):
       input_deps.append(asset_file)
       out_zip.write(os.path.join(options.asset_dir, asset_file),
-                    'assets/%s' % asset_file)
+                    'assets/flutter_shared/%s' % asset_file)
 
   if options.depfile:
     build_utils.WriteDepfile(
