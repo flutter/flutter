@@ -7,6 +7,9 @@ import 'package:flutter/rendering.dart';
 /// Typically used as the outline of a 'host' widget to make a notch that
 /// accomodates a 'guest' widget. e.g the [BottomAppBar] may have a notch to
 /// accomodate the [FloatingActionBar].
+
+/// See also: [ShapeBorder], which defines a shaped border without a dynamic
+/// notch.
 abstract class NotchedShape {
   /// Abstract const constructor. This constructor enables subclasses to provide
   /// const constructors so that they can be used in const expressions.

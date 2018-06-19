@@ -91,7 +91,7 @@ void main() {
   });
 
   // This is a regression test for a bug we had where toggling the notch on/off
-  // will crash, as the shouldReclip method of ShapeBorderClipper or
+  // would crash, as the shouldReclip method of ShapeBorderClipper or
   // _BottomAppBarClipper will try an illegal downcast.
   testWidgets('toggle shape to null', (WidgetTester tester) async {
     await tester.pumpWidget(

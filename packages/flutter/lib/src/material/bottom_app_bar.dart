@@ -72,10 +72,9 @@ class BottomAppBar extends StatefulWidget {
   /// Defaults to 8, the appropriate elevation for bottom app bars.
   final double elevation;
 
-  /// The notch that is used to make a notch for the floating action
-  /// button.
+  /// The notch that is made for the floating action button.
   ///
-  /// If null there will be no notch in the bottom app bar.
+  /// If null the bottom app bar will be rectangular with no notch.
   final NotchedShape shape;
 
   /// The margin between the [FloatingActionButton] and the [BottomAppBar]'s
