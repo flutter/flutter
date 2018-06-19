@@ -219,9 +219,7 @@ source_set("snapshot") {
 }
 
 compile_platform("non_strong_platform") {
-  sources = [
-    "libraries.json",
-  ]
+  libraries_specification_uri = "libraries.json"
 
   outputs = [
     "$root_out_dir/flutter_patched_sdk/platform.dill",
@@ -235,9 +233,7 @@ compile_platform("non_strong_platform") {
 }
 
 compile_platform("strong_platform") {
-  sources = [
-    "libraries.json",
-  ]
+  libraries_specification_uri = "libraries.json"
 
   outputs = [
     "$root_out_dir/flutter_patched_sdk/platform_strong.dill",
