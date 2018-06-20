@@ -122,9 +122,10 @@ class DartVm {
   Future<List<IsolateRef>> getMainIsolatesByPattern(Pattern pattern) async {
     final Map<String, dynamic> jsonVmRef =
         await invokeRpc('getVM', timeout: _kRpcTimeout);
-    final List<Map<String, dynamic>> jsonIsolates = jsonVmRef['isolates'];
     final List<IsolateRef> result = <IsolateRef>[];
-    for (Map<String, dynamic> jsonIsolate in jsonIsolates) {
+    // Grabs key within for-loop to prevent possible casting issues, as this key
+    // can return a `List<dynamic>` instead of `List<Map<String, dynamic>>`.
+    for (Map<String, dynamic> jsonIsolate in jsonVmRef['isolates']) {
       final String name = jsonIsolate['name'];
       if (name.contains(pattern) && name.contains(new RegExp(r':main\(\)'))) {
         result.add(new IsolateRef._fromJson(jsonIsolate, this));
@@ -164,8 +165,9 @@ class DartVm {
     final List<FlutterView> views = <FlutterView>[];
     final Map<String, dynamic> rpcResponse =
         await invokeRpc('_flutter.listViews', timeout: _kRpcTimeout);
-    final List<Map<String, dynamic>> flutterViewsJson = rpcResponse['views'];
-    for (Map<String, dynamic> jsonView in flutterViewsJson) {
+    // Grabs key within for-loop to prevent possible casting issues, as this key
+    // can return a `List<dynamic>` instead of `List<Map<String, dynamic>>`.
+    for (Map<String, dynamic> jsonView in rpcResponse['views']) {
       final FlutterView flutterView = new FlutterView._fromJson(jsonView);
       if (flutterView != null) {
         views.add(flutterView);
