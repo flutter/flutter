@@ -78,11 +78,11 @@ dependencies:
 
 dev_dependencies:
   collection: 1.14.6
-  mockito: 3.0.0-alpha+5
+  mockito: 3.0.0-beta
   file_testing: 2.0.0
 
 dartdoc:
   # Exclude this package from the hosted API docs.
   nodoc: true
 
-# PUBSPEC CHECKSUM: 3ac4
+# PUBSPEC CHECKSUM: baf9
