@@ -1396,6 +1396,8 @@ class ServiceMap extends ServiceObject implements Map<String, dynamic> {
   @override
   void updateAll(dynamic update(String key, dynamic value)) => _map.updateAll(update);
   @override
+  Map<RK, RV> retype<RK, RV>() => _map.retype<RK, RV>();  // ignore: deprecated_member_use
+  @override
   dynamic update(String key, dynamic update(dynamic value), {dynamic ifAbsent()}) => _map.update(key, update, ifAbsent: ifAbsent);
 }
 

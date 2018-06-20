@@ -486,7 +486,8 @@ class NetworkImage extends ImageProvider<NetworkImage> {
       request.headers.add(name, value);
     });
     final HttpClientResponse response = await request.close();
-    if (response.statusCode != HttpStatus.ok)
+    // ignore: deprecated_member_use
+    if (response.statusCode != HttpStatus.OK)
       throw new Exception('HTTP request failed, statusCode: ${response?.statusCode}, $resolved');
 
     final Uint8List bytes = await consolidateHttpClientResponseBytes(response);

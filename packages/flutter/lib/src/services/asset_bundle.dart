@@ -115,7 +115,8 @@ class NetworkAssetBundle extends AssetBundle {
   Future<ByteData> load(String key) async {
     final HttpClientRequest request = await _httpClient.getUrl(_urlFromKey(key));
     final HttpClientResponse response = await request.close();
-    if (response.statusCode != HttpStatus.ok)
+    // ignore: deprecated_member_use
+    if (response.statusCode != HttpStatus.OK)
       throw new FlutterError(
         'Unable to load asset: $key\n'
         'HTTP status code: ${response.statusCode}'

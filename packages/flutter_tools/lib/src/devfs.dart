@@ -296,7 +296,8 @@ class _DevFSHttpWriter {
   ]) async {
     try {
       final HttpClientRequest request = await _client.putUrl(httpAddress);
-      request.headers.removeAll(HttpHeaders.acceptEncodingHeader);
+      // ignore: deprecated_member_use
+      request.headers.removeAll(HttpHeaders.ACCEPT_ENCODING);
       request.headers.add('dev_fs_name', fsName);
       request.headers.add('dev_fs_uri_b64',
           base64.encode(utf8.encode(deviceUri.toString())));
