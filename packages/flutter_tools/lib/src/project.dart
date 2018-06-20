@@ -5,10 +5,13 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'android/gradle.dart';
 import 'base/file_system.dart';
+import 'cache.dart';
+import 'flutter_manifest.dart';
 import 'ios/xcodeproj.dart';
 import 'plugins.dart';
-
+import 'template.dart';
 
 /// Represents the contents of a Flutter project at the specified [directory].
 class FlutterProject {
@@ -54,13 +57,34 @@ class FlutterProject {
   FlutterProject get example => new FlutterProject(directory.childDirectory('example'));
 
   /// Generates project files necessary to make Gradle builds work on Android
-  /// and CocoaPods+Xcode work on iOS, for app projects only
+  /// and CocoaPods+Xcode work on iOS, for app and module projects only.
   Future<void> ensureReadyForPlatformSpecificTooling() async {
     if (!directory.existsSync() || hasExampleApp) {
       return;
     }
+    final FlutterManifest manifest = await FlutterManifest.createFromPath(directory.childFile('pubspec.yaml').path);
+    final Map<String, dynamic> androidDescriptor = manifest.androidDescriptor;
+    if (androidDescriptor != null && shouldRegenerateAndroidDirectory()) {
+      await android._injectModuleWrapper(<String, dynamic>{
+        'androidIdentifier': androidDescriptor['package'],
+      });
+    }
+    if (manifest.iosDescriptor != null) {
+      await ios._injectModuleWrapper(<String, dynamic>{});
+    }
     injectPlugins(directory: directory.path);
     await generateXcodeProperties(directory.path);
+  }
+
+  bool shouldRegenerateAndroidDirectory() {
+    final File flutterToolsStamp = Cache.instance.getStampFileFor('flutter_tools');
+    final File buildDotGradleFile = directory.childDirectory('android').childFile('build.gradle');
+    if (!buildDotGradleFile.existsSync())
+      return true;
+    return flutterToolsStamp.existsSync() &&
+        flutterToolsStamp
+            .lastModifiedSync()
+            .isAfter(buildDotGradleFile.lastModifiedSync());
   }
 }
 
@@ -74,6 +98,11 @@ class IosProject {
   Future<String> productBundleIdentifier() {
     final File projectFile = directory.childDirectory('Runner.xcodeproj').childFile('project.pbxproj');
     return _firstMatchInFile(projectFile, _productBundleIdPattern).then((Match match) => match?.group(1));
+  }
+
+  Future<void> _injectModuleWrapper(Map<String, dynamic> environment) async {
+    final Template template = new Template.fromName('module_ios');
+    template.render(directory, environment);
   }
 }
 
@@ -94,6 +123,12 @@ class AndroidProject {
   Future<String> group() {
     final File gradleFile = directory.childFile('build.gradle');
     return _firstMatchInFile(gradleFile, _groupPattern).then((Match match) => match?.group(1));
+  }
+
+  Future<void> _injectModuleWrapper(Map<String, dynamic> environment) async {
+    final Template template = new Template.fromName('module_android');
+    template.render(directory, environment);
+    await updateLocalProperties(projectPath: directory.parent.path);
   }
 }
 

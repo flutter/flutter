@@ -43,6 +43,15 @@
                         }
                     }
                 },
+                "android": {
+                    "type": "object"
+                },
+                "ios": {
+                    "oneOf": [
+                        { "type": "object" },
+                        { "type": "null" }
+                    ]
+                },
                 "plugin": {
                     "type": "object",
                     "additionalProperties": false,

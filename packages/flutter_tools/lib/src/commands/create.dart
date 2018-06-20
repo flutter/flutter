@@ -44,11 +44,12 @@ class CreateCommand extends FlutterCommand {
     argParser.addOption(
       'template',
       abbr: 't',
-      allowed: <String>['app', 'package', 'plugin'],
+      allowed: <String>['app', 'module', 'package', 'plugin'],
       help: 'Specify the type of project to create.',
       valueHelp: 'type',
       allowedHelp: <String, String>{
         'app': '(default) Generate a Flutter application.',
+        'module': 'Generate a Flutter module for inclusion into an existing application.',
         'package': 'Generate a shareable Flutter project containing modular Dart code.',
         'plugin': 'Generate a shareable Flutter project containing an API in Dart code\n'
             'with a platform-specific implementation for Android, for iOS code, or for both.',
@@ -124,6 +125,7 @@ class CreateCommand extends FlutterCommand {
       throwToolExit('Unable to find package:flutter_driver in $flutterDriverPackagePath', exitCode: 2);
 
     final String template = argResults['template'];
+    final bool generateModule = template == 'module';
     final bool generatePlugin = template == 'plugin';
     final bool generatePackage = template == 'package';
 
@@ -172,6 +174,9 @@ class CreateCommand extends FlutterCommand {
       case 'app':
         generatedFileCount += await _generateApp(dirPath, templateContext);
         break;
+      case 'module':
+        generatedFileCount += await _generateModule(dirPath, templateContext);
+        break;
       case 'package':
         generatedFileCount += await _generatePackage(dirPath, templateContext);
         break;
@@ -182,9 +187,9 @@ class CreateCommand extends FlutterCommand {
     }
     printStatus('Wrote $generatedFileCount files.');
     printStatus('');
-    if (generatePackage) {
+    if (generateModule || generatePackage) {
       final String relativePath = fs.path.relative(dirPath);
-      printStatus('Your package code is in lib/${templateContext['projectName']}.dart in the $relativePath directory.');
+      printStatus('Your code is in lib/${templateContext['projectName']}.dart in the $relativePath directory.');
     } else {
       // Run doctor; tell the user the next steps.
       final String relativeAppPath = fs.path.relative(appPath);
@@ -226,11 +231,29 @@ To edit platform code in an IDE see https://flutter.io/developing-packages/#edit
     }
   }
 
+  Future<int> _generateModule(String dirPath, Map<String, dynamic> templateContext) async {
+    int generatedCount = 0;
+    final String description = argResults.wasParsed('description')
+        ? argResults['description']
+        : 'A new flutter module project.';
+    templateContext['description'] = description;
+    generatedCount += _renderTemplate('module', dirPath, templateContext);
+    if (argResults['pub']) {
+      await pubGet(
+        context: PubContext.create,
+        directory: dirPath,
+        offline: argResults['offline'],
+      );
+      await new FlutterProject(fs.directory(dirPath)).ensureReadyForPlatformSpecificTooling();
+    }
+    return generatedCount;
+  }
+
   Future<int> _generatePackage(String dirPath, Map<String, dynamic> templateContext) async {
     int generatedCount = 0;
     final String description = argResults.wasParsed('description')
        ? argResults['description']
-       : 'A new flutter package project.';
+       : 'A new Flutter package project.';
     templateContext['description'] = description;
     generatedCount += _renderTemplate('package', dirPath, templateContext);
 
@@ -248,7 +271,7 @@ To edit platform code in an IDE see https://flutter.io/developing-packages/#edit
     int generatedCount = 0;
     final String description = argResults.wasParsed('description')
         ? argResults['description']
-        : 'A new flutter plugin project.';
+        : 'A new Flutter plugin project.';
     templateContext['description'] = description;
     generatedCount += _renderTemplate('plugin', dirPath, templateContext);
 
