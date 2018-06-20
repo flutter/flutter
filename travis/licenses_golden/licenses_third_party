@@ -1,4 +1,4 @@
-Signature: 493ff7b41e2ce6a053ba89eff4558265
+Signature: 1570c26fb3ac06244ab79c9de27df68a
 
 UNUSED LICENSES:
 
@@ -14383,6 +14383,36 @@ FILE: ../../../third_party/skia/src/codec/SkRawCodec.cpp
 FILE: ../../../third_party/skia/src/codec/SkRawCodec.h
 FILE: ../../../third_party/skia/src/codec/SkStreamBuffer.cpp
 FILE: ../../../third_party/skia/src/codec/SkStreamBuffer.h
+FILE: ../../../third_party/skia/src/compute/common/cl/assert_cl.c
+FILE: ../../../third_party/skia/src/compute/common/cl/assert_cl.h
+FILE: ../../../third_party/skia/src/compute/common/macros.h
+FILE: ../../../third_party/skia/src/compute/common/util.c
+FILE: ../../../third_party/skia/src/compute/common/util.h
+FILE: ../../../third_party/skia/src/compute/hs/cl/bench/main.c
+FILE: ../../../third_party/skia/src/compute/hs/cl/hs_cl_launcher.c
+FILE: ../../../third_party/skia/src/compute/hs/cl/hs_cl_launcher.h
+FILE: ../../../third_party/skia/src/compute/hs/gen/gen.h
+FILE: ../../../third_party/skia/src/compute/hs/gen/main.c
+FILE: ../../../third_party/skia/src/compute/hs/gen/networks.h
+FILE: ../../../third_party/skia/src/compute/hs/gen/networks_merging.c
+FILE: ../../../third_party/skia/src/compute/hs/gen/networks_sorting.c
+FILE: ../../../third_party/skia/src/compute/hs/gen/target_cuda_sm3x.c
+FILE: ../../../third_party/skia/src/compute/hs/gen/target_igp_genx.c
+FILE: ../../../third_party/skia/src/compute/sk/SkContext_Compute.cpp
+FILE: ../../../third_party/skia/src/compute/sk/SkContext_Compute.h
+FILE: ../../../third_party/skia/src/compute/sk/SkDevice_Compute.cpp
+FILE: ../../../third_party/skia/src/compute/sk/SkImage_Compute.cpp
+FILE: ../../../third_party/skia/src/compute/sk/SkImage_Compute.h
+FILE: ../../../third_party/skia/src/compute/sk/SkSurface_Compute.cpp
+FILE: ../../../third_party/skia/src/compute/sk/SkSurface_Compute.h
+FILE: ../../../third_party/skia/src/compute/skc/assert_skc.c
+FILE: ../../../third_party/skia/src/compute/skc/assert_skc.h
+FILE: ../../../third_party/skia/src/compute/skc/render.cl
+FILE: ../../../third_party/skia/src/compute/skc/styling.c
+FILE: ../../../third_party/skia/src/compute/skc/styling.h
+FILE: ../../../third_party/skia/src/compute/skc/styling_types.h
+FILE: ../../../third_party/skia/src/compute/skc/tile.h
+FILE: ../../../third_party/skia/src/compute/skc/util.c
 FILE: ../../../third_party/skia/src/core/Sk4x4f.h
 FILE: ../../../third_party/skia/src/core/SkATrace.cpp
 FILE: ../../../third_party/skia/src/core/SkATrace.h
@@ -17224,6 +17254,24 @@ FILE: ../../../third_party/skia/samplecode/SampleFlutterAnimate.cpp
 FILE: ../../../third_party/skia/samplecode/SampleGlyphTransform.cpp
 FILE: ../../../third_party/skia/samplecode/SampleNima.cpp
 FILE: ../../../third_party/skia/src/android/SkAnimatedImage.cpp
+FILE: ../../../third_party/skia/src/compute/common/cl/find_cl.c
+FILE: ../../../third_party/skia/src/compute/common/cl/find_cl.h
+FILE: ../../../third_party/skia/src/compute/hs/cl/bench/sort.cpp
+FILE: ../../../third_party/skia/src/compute/hs/gen/transpose.c
+FILE: ../../../third_party/skia/src/compute/hs/gen/transpose.h
+FILE: ../../../third_party/skia/src/compute/skc/allocator_device_cl.c
+FILE: ../../../third_party/skia/src/compute/skc/allocator_device_cl.h
+FILE: ../../../third_party/skia/src/compute/skc/allocator_host.c
+FILE: ../../../third_party/skia/src/compute/skc/allocator_host.h
+FILE: ../../../third_party/skia/src/compute/skc/interop.c
+FILE: ../../../third_party/skia/src/compute/skc/interop.h
+FILE: ../../../third_party/skia/src/compute/skc/runtime.h
+FILE: ../../../third_party/skia/src/compute/skc/segment_ttck.cl
+FILE: ../../../third_party/skia/src/compute/skc/segment_ttrk.cl
+FILE: ../../../third_party/skia/src/compute/skc/suballocator.c
+FILE: ../../../third_party/skia/src/compute/skc/suballocator.h
+FILE: ../../../third_party/skia/src/compute/ts/transform_stack.c
+FILE: ../../../third_party/skia/src/compute/ts/transform_stack.h
 FILE: ../../../third_party/skia/src/core/SkBlurPriv.h
 FILE: ../../../third_party/skia/src/core/SkCanvasPriv.cpp
 FILE: ../../../third_party/skia/src/core/SkColorSpaceXformSteps.cpp
@@ -19520,6 +19568,82 @@ FILE: ../../../third_party/skia/src/codec/SkHeifCodec.h
 FILE: ../../../third_party/skia/src/codec/SkJpegPriv.h
 FILE: ../../../third_party/skia/src/codec/SkPngPriv.h
 FILE: ../../../third_party/skia/src/codec/SkStubHeifDecoderAPI.h
+FILE: ../../../third_party/skia/src/compute/color/color.c
+FILE: ../../../third_party/skia/src/compute/color/color.h
+FILE: ../../../third_party/skia/src/compute/skc/assert_state.h
+FILE: ../../../third_party/skia/src/compute/skc/atomic_cl.h
+FILE: ../../../third_party/skia/src/compute/skc/block.h
+FILE: ../../../third_party/skia/src/compute/skc/block_pool_cl.h
+FILE: ../../../third_party/skia/src/compute/skc/block_pool_cl_12.h
+FILE: ../../../third_party/skia/src/compute/skc/block_pool_init.cl
+FILE: ../../../third_party/skia/src/compute/skc/cl_20/extent.c
+FILE: ../../../third_party/skia/src/compute/skc/cl_20/extent.h
+FILE: ../../../third_party/skia/src/compute/skc/cl_20/ring_cl_svm_fine.cpp
+FILE: ../../../third_party/skia/src/compute/skc/cl_20/ring_cl_svm_fine.h
+FILE: ../../../third_party/skia/src/compute/skc/common.h
+FILE: ../../../third_party/skia/src/compute/skc/composition.c
+FILE: ../../../third_party/skia/src/compute/skc/composition.h
+FILE: ../../../third_party/skia/src/compute/skc/composition_cl_12.c
+FILE: ../../../third_party/skia/src/compute/skc/composition_cl_12.h
+FILE: ../../../third_party/skia/src/compute/skc/config_cl.h
+FILE: ../../../third_party/skia/src/compute/skc/context.c
+FILE: ../../../third_party/skia/src/compute/skc/context.h
+FILE: ../../../third_party/skia/src/compute/skc/cq_pool_cl.c
+FILE: ../../../third_party/skia/src/compute/skc/cq_pool_cl.h
+FILE: ../../../third_party/skia/src/compute/skc/device_cl_12.h
+FILE: ../../../third_party/skia/src/compute/skc/device_cl_12_avx2.h
+FILE: ../../../third_party/skia/src/compute/skc/device_cl_12_gen9.c
+FILE: ../../../third_party/skia/src/compute/skc/device_cl_12_gen9.h
+FILE: ../../../third_party/skia/src/compute/skc/export_cl_12.h
+FILE: ../../../third_party/skia/src/compute/skc/extent_cl_12.c
+FILE: ../../../third_party/skia/src/compute/skc/extent_cl_12.h
+FILE: ../../../third_party/skia/src/compute/skc/extent_cl_12_unified.c
+FILE: ../../../third_party/skia/src/compute/skc/extent_ring.c
+FILE: ../../../third_party/skia/src/compute/skc/extent_ring.h
+FILE: ../../../third_party/skia/src/compute/skc/fills_expand.cl
+FILE: ../../../third_party/skia/src/compute/skc/grid.c
+FILE: ../../../third_party/skia/src/compute/skc/grid.h
+FILE: ../../../third_party/skia/src/compute/skc/handle.h
+FILE: ../../../third_party/skia/src/compute/skc/handle_pool_cl_12.c
+FILE: ../../../third_party/skia/src/compute/skc/handle_pool_cl_12.h
+FILE: ../../../third_party/skia/src/compute/skc/macros.h
+FILE: ../../../third_party/skia/src/compute/skc/main.c
+FILE: ../../../third_party/skia/src/compute/skc/path.h
+FILE: ../../../third_party/skia/src/compute/skc/path_builder.c
+FILE: ../../../third_party/skia/src/compute/skc/path_builder.h
+FILE: ../../../third_party/skia/src/compute/skc/path_builder_cl_12.c
+FILE: ../../../third_party/skia/src/compute/skc/path_builder_cl_12.h
+FILE: ../../../third_party/skia/src/compute/skc/paths_copy.cl
+FILE: ../../../third_party/skia/src/compute/skc/paths_reclaim.cl
+FILE: ../../../third_party/skia/src/compute/skc/place.cl
+FILE: ../../../third_party/skia/src/compute/skc/prefix.cl
+FILE: ../../../third_party/skia/src/compute/skc/raster.h
+FILE: ../../../third_party/skia/src/compute/skc/raster_builder.c
+FILE: ../../../third_party/skia/src/compute/skc/raster_builder.h
+FILE: ../../../third_party/skia/src/compute/skc/raster_builder_cl_12.c
+FILE: ../../../third_party/skia/src/compute/skc/raster_builder_cl_12.h
+FILE: ../../../third_party/skia/src/compute/skc/rasterize.cl
+FILE: ../../../third_party/skia/src/compute/skc/rasters_alloc.cl
+FILE: ../../../third_party/skia/src/compute/skc/rasters_reclaim.cl
+FILE: ../../../third_party/skia/src/compute/skc/runtime_cl.c
+FILE: ../../../third_party/skia/src/compute/skc/runtime_cl.h
+FILE: ../../../third_party/skia/src/compute/skc/runtime_cl_12.c
+FILE: ../../../third_party/skia/src/compute/skc/runtime_cl_12.h
+FILE: ../../../third_party/skia/src/compute/skc/scheduler.cpp
+FILE: ../../../third_party/skia/src/compute/skc/scheduler.h
+FILE: ../../../third_party/skia/src/compute/skc/skc.h
+FILE: ../../../third_party/skia/src/compute/skc/skc_styling.h
+FILE: ../../../third_party/skia/src/compute/skc/styling_cl_12.c
+FILE: ../../../third_party/skia/src/compute/skc/styling_cl_12.h
+FILE: ../../../third_party/skia/src/compute/skc/subblock.h
+FILE: ../../../third_party/skia/src/compute/skc/surface.c
+FILE: ../../../third_party/skia/src/compute/skc/surface.h
+FILE: ../../../third_party/skia/src/compute/skc/surface_cl_12.h
+FILE: ../../../third_party/skia/src/compute/skc/surface_cl_12_buffer.c
+FILE: ../../../third_party/skia/src/compute/skc/types.h
+FILE: ../../../third_party/skia/src/compute/skc/util.h
+FILE: ../../../third_party/skia/src/compute/skc/weakref.c
+FILE: ../../../third_party/skia/src/compute/skc/weakref.h
 FILE: ../../../third_party/skia/src/core/SkArenaAllocList.h
 FILE: ../../../third_party/skia/src/core/SkAutoBlitterChoose.h
 FILE: ../../../third_party/skia/src/core/SkBitmapProcState_utils.h
@@ -20644,6 +20768,43 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ====================================================================================================
 LIBRARY: skia
+ORIGIN: ../../../third_party/skia/src/compute/sk/SkDevice_Compute.h + ../../../third_party/skia/LICENSE
+TYPE: LicenseType.bsd
+FILE: ../../../third_party/skia/src/compute/sk/SkDevice_Compute.h
+FILE: ../../../third_party/skia/src/core/SkScan_AAAPath.cpp
+FILE: ../../../third_party/skia/src/core/SkScan_DAAPath.cpp
+----------------------------------------------------------------------------------------------------
+Copyright 2016 The Android Open Source Project
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are
+met:
+
+   * Redistributions of source code must retain the above copyright
+notice, this list of conditions and the following disclaimer.
+   * Redistributions in binary form must reproduce the above
+copyright notice, this list of conditions and the following disclaimer
+in the documentation and/or other materials provided with the
+distribution.
+   * Neither the name of Google Inc. nor the names of its
+contributors may be used to endorse or promote products derived from
+this software without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+====================================================================================================
+
+====================================================================================================
+LIBRARY: skia
 ORIGIN: ../../../third_party/skia/src/core/SkBitmapProcState_matrixProcs.cpp + ../../../third_party/skia/LICENSE
 TYPE: LicenseType.bsd
 FILE: ../../../third_party/skia/src/core/SkBitmapProcState_matrixProcs.cpp
@@ -20804,42 +20965,6 @@ FILE: ../../../third_party/skia/src/core/SkMatrixImageFilter.h
 FILE: ../../../third_party/skia/src/opts/SkColor_opts_SSE2.h
 ----------------------------------------------------------------------------------------------------
 Copyright 2014 The Android Open Source Project
-
-Redistribution and use in source and binary forms, with or without
-modification, are permitted provided that the following conditions are
-met:
-
-   * Redistributions of source code must retain the above copyright
-notice, this list of conditions and the following disclaimer.
-   * Redistributions in binary form must reproduce the above
-copyright notice, this list of conditions and the following disclaimer
-in the documentation and/or other materials provided with the
-distribution.
-   * Neither the name of Google Inc. nor the names of its
-contributors may be used to endorse or promote products derived from
-this software without specific prior written permission.
-
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
-OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
-LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
-THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
-OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-====================================================================================================
-
-====================================================================================================
-LIBRARY: skia
-ORIGIN: ../../../third_party/skia/src/core/SkScan_AAAPath.cpp + ../../../third_party/skia/LICENSE
-TYPE: LicenseType.bsd
-FILE: ../../../third_party/skia/src/core/SkScan_AAAPath.cpp
-FILE: ../../../third_party/skia/src/core/SkScan_DAAPath.cpp
-----------------------------------------------------------------------------------------------------
-Copyright 2016 The Android Open Source Project
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are
