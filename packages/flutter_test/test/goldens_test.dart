@@ -59,7 +59,7 @@ void main() {
   group('goldenFileComparator', () {
     test('is initialized by test framework', () {
       expect(goldenFileComparator, isNotNull);
-      expect(goldenFileComparator, const TypeMatcher<LocalFileComparator>());
+      expect(goldenFileComparator, const isInstanceOf<LocalFileComparator>());
       final LocalFileComparator comparator = goldenFileComparator;
       expect(comparator.basedir.path, contains('flutter_test'));
     });
@@ -133,7 +133,7 @@ void main() {
       group('fails', () {
         test('when golden file does not exist', () async {
           final Future<bool> comparison = doComparison();
-          expect(comparison, throwsA(const TypeMatcher<TestFailure>()));
+          expect(comparison, throwsA(const isInstanceOf<TestFailure>()));
         });
 
         test('when golden bytes are leading subset of image bytes', () async {

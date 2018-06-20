@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/widgets.dart' hide TypeMatcher;
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -221,7 +221,7 @@ void main() {
 
     expect(find.byType(Column), findsOneWidget);
     for (Widget child in foundChildren) {
-      expect(child, const TypeMatcher<KeyedSubtree>());
+      expect(child, isInstanceOf<KeyedSubtree>());
     }
 
     await tester.pumpWidget(
@@ -239,7 +239,7 @@ void main() {
     await tester.pump(const Duration(milliseconds: 50));
 
     for (Widget child in foundChildren) {
-      expect(child, const TypeMatcher<KeyedSubtree>());
+      expect(child, isInstanceOf<KeyedSubtree>());
       expect(
         find.descendant(of: find.byWidget(child), matching: find.byType(SizeTransition)),
         findsOneWidget,
@@ -389,7 +389,7 @@ void main() {
 
     expect(foundChildren.length, equals(3));
     for (Widget child in foundChildren) {
-      expect(child, const TypeMatcher<KeyedSubtree>());
+      expect(child, isInstanceOf<KeyedSubtree>());
       expect(
         find.descendant(of: find.byWidget(child), matching: find.byType(FadeTransition)),
         findsOneWidget,
@@ -419,7 +419,7 @@ void main() {
 
     expect(foundChildren.length, equals(3));
     for (Widget child in foundChildren) {
-      expect(child, const TypeMatcher<KeyedSubtree>());
+      expect(child, isInstanceOf<KeyedSubtree>());
       expect(
         find.descendant(of: find.byWidget(child), matching: find.byType(ScaleTransition)),
         findsOneWidget,
