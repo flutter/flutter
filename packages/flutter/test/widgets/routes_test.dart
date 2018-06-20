@@ -6,7 +6,7 @@ import 'dart:collection';
 
 import 'package:mockito/mockito.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:flutter/widgets.dart' hide TypeMatcher;
+import 'package:flutter/widgets.dart';
 
 final List<String> results = <String>[];
 
@@ -46,7 +46,7 @@ class TestRoute extends LocalHistoryRoute<String> {
 
   @override
   void didReplace(Route<dynamic> oldRoute) {
-    expect(oldRoute, const TypeMatcher<TestRoute>());
+    expect(oldRoute, isInstanceOf<TestRoute>());
     final TestRoute castRoute = oldRoute;
     log('didReplace ${castRoute.name}');
     super.didReplace(castRoute);
@@ -63,7 +63,7 @@ class TestRoute extends LocalHistoryRoute<String> {
 
   @override
   void didPopNext(Route<dynamic> nextRoute) {
-    expect(nextRoute, const TypeMatcher<TestRoute>());
+    expect(nextRoute, isInstanceOf<TestRoute>());
     final TestRoute castRoute = nextRoute;
     log('didPopNext ${castRoute.name}');
     super.didPopNext(castRoute);
@@ -71,7 +71,7 @@ class TestRoute extends LocalHistoryRoute<String> {
 
   @override
   void didChangeNext(Route<dynamic> nextRoute) {
-    expect(nextRoute, anyOf(isNull, const TypeMatcher<TestRoute>()));
+    expect(nextRoute, anyOf(isNull, isInstanceOf<TestRoute>()));
     final TestRoute castRoute = nextRoute;
     log('didChangeNext ${castRoute?.name}');
     super.didChangeNext(castRoute);
