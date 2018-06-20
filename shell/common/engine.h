@@ -99,6 +99,9 @@ class Engine final : public blink::RuntimeDelegate {
 
   void ScheduleFrame(bool regenerate_layer_tree = true) override;
 
+  // |blink::RuntimeDelegate|
+  blink::FontCollection& GetFontCollection() override;
+
  private:
   Engine::Delegate& delegate_;
   const blink::Settings settings_;
@@ -125,9 +128,6 @@ class Engine final : public blink::RuntimeDelegate {
   // |blink::RuntimeDelegate|
   void HandlePlatformMessage(
       fxl::RefPtr<blink::PlatformMessage> message) override;
-
-  // |blink::RuntimeDelegate|
-  blink::FontCollection& GetFontCollection() override;
 
   void StopAnimator();
 
