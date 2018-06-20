@@ -133,3 +133,19 @@ class TapSemanticEvent extends SemanticsEvent {
   @override
   Map<String, dynamic> getDataMap() => const <String, dynamic>{};
 }
+
+
+/// Requests semantic focus from the platform.
+///
+/// This should only be used in rare cases where an action needs to trigger
+/// movement of semantic focus that would be difficult for a user to perform.
+/// For example, dismissing a [SnackBar] widget may send accessibility focus
+/// back to the widget which triggered it.
+class RequestSemanticFocusEvent extends SemanticsEvent {
+
+  /// Constructs an event that requests semantic focus from the platform.
+  const RequestSemanticFocusEvent() : super('focus');
+
+  @override
+  Map<String, dynamic> getDataMap() => const <String, dynamic>{};
+}
