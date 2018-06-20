@@ -2046,7 +2046,7 @@ String describeIdentity(Object object) => '${object.runtimeType}#${shortHash(obj
 ///   monday, tuesday, wednesday, thursday, friday, saturday, sunday
 /// }
 ///
-/// validateDescribeEnum() {
+/// void validateDescribeEnum() {
 ///   assert(Day.monday.toString() == 'Day.monday');
 ///   assert(describeEnum(Day.monday) == 'monday');
 /// }

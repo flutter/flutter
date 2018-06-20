@@ -334,7 +334,7 @@ void main() {
 
       expect(
         expectAsync0(tester.pageBack),
-        throwsA(const isInstanceOf<TestFailure>()),
+        throwsA(isInstanceOf<TestFailure>()),
       );
     });
 
@@ -490,7 +490,7 @@ void main() {
     testWidgets('disallows re-entry', (WidgetTester tester) async {
       final Completer<void> completer = new Completer<void>();
       tester.runAsync<void>(() => completer.future);
-      expect(() => tester.runAsync(() async {}), throwsA(const isInstanceOf<TestFailure>()));
+      expect(() => tester.runAsync(() async {}), throwsA(isInstanceOf<TestFailure>()));
       completer.complete();
     });
 

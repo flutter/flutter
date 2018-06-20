@@ -153,14 +153,17 @@ class _MaterialTextSelectionControls extends TextSelectionControls {
   /// Builder for material-style text selection handles.
   @override
   Widget buildHandle(BuildContext context, TextSelectionHandleType type, double textHeight) {
-    final Widget handle = new SizedBox(
-      width: _kHandleSize,
-      height: _kHandleSize,
-      child: new CustomPaint(
-        painter: new _TextSelectionHandlePainter(
-          color: Theme.of(context).textSelectionHandleColor
-        )
-      )
+    final Widget handle = new Padding(
+      padding: const EdgeInsets.only(right: 26.0, bottom: 26.0),
+      child: new SizedBox(
+        width: _kHandleSize,
+        height: _kHandleSize,
+        child: new CustomPaint(
+          painter: new _TextSelectionHandlePainter(
+            color: Theme.of(context).textSelectionHandleColor
+          ),
+        ),
+      ),
     );
 
     // [handle] is a circle, with a rectangle in the top left quadrant of that

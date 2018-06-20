@@ -944,7 +944,8 @@ class Navigator extends StatefulWidget {
   ///
   /// ```dart
   /// void _completeLogin() {
-  ///   Navigator.pushReplacement(context, new MaterialPageRoute(builder: (BuildContext context) => new MyHomePage()));
+  ///   Navigator.pushReplacement(
+  ///       context, new MaterialPageRoute(builder: (BuildContext context) => new MyHomePage()));
   /// }
   /// ```
   @optionalTypeArgs
@@ -1559,7 +1560,8 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
   ///
   /// ```dart
   /// void _doOpenPage() {
-  ///   navigator.pushReplacement(new MaterialPageRoute(builder: (BuildContext context) => new MyHomePage()));
+  ///   navigator.pushReplacement(
+  ///       new MaterialPageRoute(builder: (BuildContext context) => new MyHomePage()));
   /// }
   /// ```
   @optionalTypeArgs

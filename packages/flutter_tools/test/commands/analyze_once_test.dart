@@ -142,7 +142,7 @@ void main() {
         foo.writeAsStringSync('''
 import 'bar.dart';
 
-foo() => bar();
+void foo() => bar();
 ''');
 
         final File bar = fs.file(fs.path.join(tempDir.path, 'bar.dart'));
