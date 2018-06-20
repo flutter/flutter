@@ -144,10 +144,12 @@ class ExpansionPanelList extends StatelessWidget {
               curve: Curves.fastOutSlowIn,
               margin: _isChildExpanded(index) ? kExpandedEdgeInsets : EdgeInsets.zero,
               child: new SizedBox(
-                height: _kPanelHeaderCollapsedHeight,
-                child: children[index].headerBuilder(
-                  context,
-                  children[index].isExpanded,
+                child: new ConstrainedBox(
+                  constraints: const BoxConstraints(minHeight: _kPanelHeaderCollapsedHeight),
+                  child: children[index].headerBuilder(
+                    context,
+                    children[index].isExpanded,
+                  ),
                 ),
               ),
             ),
