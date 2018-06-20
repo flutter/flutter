@@ -1,4 +1,4 @@
-Signature: 1570c26fb3ac06244ab79c9de27df68a
+Signature: 4496b02fa0d9cc770662ab523b6bcf2e
 
 UNUSED LICENSES:
 
@@ -17375,6 +17375,8 @@ FILE: ../../../third_party/skia/src/gpu/text/GrSDFMaskFilter.h
 FILE: ../../../third_party/skia/src/gpu/vk/GrVkAMDMemoryAllocator.cpp
 FILE: ../../../third_party/skia/src/gpu/vk/GrVkAMDMemoryAllocator.h
 FILE: ../../../third_party/skia/src/gpu/vk/GrVkImageLayout.h
+FILE: ../../../third_party/skia/src/gpu/vk/GrVkPipelineLayout.cpp
+FILE: ../../../third_party/skia/src/gpu/vk/GrVkPipelineLayout.h
 FILE: ../../../third_party/skia/src/gpu/vk/GrVkTypesPriv.cpp
 FILE: ../../../third_party/skia/src/opts/SkOpts_hsw.cpp
 FILE: ../../../third_party/skia/src/opts/SkRasterPipeline_opts.h
