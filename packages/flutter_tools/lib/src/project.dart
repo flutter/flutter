@@ -5,10 +5,9 @@
 import 'dart:async';
 import 'dart:convert';
 
-import 'package:flutter_tools/src/cache.dart';
-
 import 'android/gradle.dart';
 import 'base/file_system.dart';
+import 'cache.dart';
 import 'flutter_manifest.dart';
 import 'ios/xcodeproj.dart';
 import 'plugins.dart';
