@@ -259,6 +259,7 @@ abstract class ImplicitlyAnimatedWidgetState<T extends ImplicitlyAnimatedWidget>
     );
     _updateCurve();
     _constructTweens();
+    onTweensUpdated();
   }
 
   @override
@@ -275,6 +276,7 @@ abstract class ImplicitlyAnimatedWidgetState<T extends ImplicitlyAnimatedWidget>
       _controller
         ..value = 0.0
         ..forward();
+      onTweensUpdated();
     }
   }
 
@@ -333,7 +335,19 @@ abstract class ImplicitlyAnimatedWidgetState<T extends ImplicitlyAnimatedWidget>
   /// 2. Take the value returned from the callback, and store it. This is the
   /// value to use as the current value the next time that the forEachTween()
   /// method is called.
+  ///
+  /// Subclasses that contain properties based on tweens created by
+  /// forEachTween() should override onTweensUpdated() to update those
+  /// properties. Dependent properties should not be updated within
+  /// forEachTween().
   void forEachTween(TweenVisitor<dynamic> visitor);
+
+  /// Optional hook for subclasses that runs after all tweens have been updated
+  /// via forEachTween().
+  ///
+  /// Any properties that depend upon tweens created by forEachTween() should be
+  /// updated within onTweensUpdated(), not within forEachTween().
+  void onTweensUpdated() {}
 }
 
 /// A base class for widgets with implicit animations that need to rebuild their
@@ -1014,6 +1028,10 @@ class _AnimatedOpacityState extends ImplicitlyAnimatedWidgetState<AnimatedOpacit
     _opacity = visitor(_opacity, widget.opacity, (dynamic value) {
       return new Tween<double>(begin: value);
     });
+  }
+
+  @override
+  void onTweensUpdated() {
     _opacityAnimation = _opacity.animate(controller);
   }
 
