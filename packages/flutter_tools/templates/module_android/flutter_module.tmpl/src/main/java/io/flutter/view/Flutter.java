@@ -5,7 +5,9 @@ import android.arch.lifecycle.Lifecycle;
 import android.arch.lifecycle.LifecycleObserver;
 import android.arch.lifecycle.OnLifecycleEvent;
 import android.content.Context;
-import android.support.annotation.MainThread;
+import android.os.Bundle;
+import android.support.v4.app.Fragment;
+import android.view.View;
 
 import io.flutter.app.FlutterActivityDelegate;
 import io.flutter.plugins.GeneratedPluginRegistrant;
@@ -15,7 +17,6 @@ import io.flutter.plugins.GeneratedPluginRegistrant;
  *
  * TODO(mravn): Move this file to the flutter/engine repo.
  */
-@MainThread
 public final class Flutter {
   private Flutter() {
     // to prevent instantiation
@@ -25,8 +26,12 @@ public final class Flutter {
     FlutterMain.startInitialization(applicationContext, null);
   }
 
-  public static void startInitialization(Context applicationContext, FlutterMain.Settings settings) {
-    FlutterMain.startInitialization(applicationContext, settings);
+  public static Fragment createFragment(String route) {
+    final FlutterFragment fragment = new FlutterFragment();
+    final Bundle args = new Bundle();
+    args.putString(FlutterFragment.ARG_ROUTE, route);
+    fragment.setArguments(args);
+    return fragment;
   }
 
   public static View createView(final Activity activity, final Lifecycle lifecycle, final String route) {
