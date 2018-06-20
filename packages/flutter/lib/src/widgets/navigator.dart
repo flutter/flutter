@@ -18,7 +18,6 @@ import 'ticker_provider.dart';
 // Examples can assume:
 // class MyPage extends Placeholder { MyPage({String title}); }
 // class MyHomePage extends Placeholder { }
-// class MyNavigationData {}
 // NavigatorState navigator;
 
 /// Creates a route for the given route settings.
@@ -903,7 +902,7 @@ class Navigator extends StatefulWidget {
   ///
   /// ```dart
   /// void _openMyPage() {
-  ///   Navigator.push<MyNavigationData>(context, new MaterialPageRoute<MyNavigationData>(builder: (BuildContext context) => new MyPage()));
+  ///   Navigator.push(context, new MaterialPageRoute(builder: (BuildContext context) => new MyPage()));
   /// }
   /// ```
   @optionalTypeArgs
@@ -945,8 +944,8 @@ class Navigator extends StatefulWidget {
   ///
   /// ```dart
   /// void _completeLogin() {
-  ///   Navigator.pushReplacement<MyNavigationData, MyNavigationData>(
-  ///       context, new MaterialPageRoute<MyNavigationData>(builder: (BuildContext context) => new MyHomePage()));
+  ///   Navigator.pushReplacement(
+  ///       context, new MaterialPageRoute(builder: (BuildContext context) => new MyHomePage()));
   /// }
   /// ```
   @optionalTypeArgs
@@ -995,9 +994,9 @@ class Navigator extends StatefulWidget {
   ///
   /// ```dart
   /// void _finishAccountCreation() {
-  ///   Navigator.pushAndRemoveUntil<MyNavigationData>(
+  ///   Navigator.pushAndRemoveUntil(
   ///     context,
-  ///     new MaterialPageRoute<MyNavigationData>(builder: (BuildContext context) => new MyHomePage()),
+  ///     new MaterialPageRoute(builder: (BuildContext context) => new MyHomePage()),
   ///     ModalRoute.withName('/'),
   ///   );
   /// }
@@ -1525,7 +1524,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
   ///
   /// ```dart
   /// void _openPage() {
-  ///   navigator.push<MyNavigationData>(new MaterialPageRoute<MyNavigationData>(builder: (BuildContext context) => new MyPage()));
+  ///   navigator.push(new MaterialPageRoute(builder: (BuildContext context) => new MyPage()));
   /// }
   /// ```
   @optionalTypeArgs
@@ -1561,8 +1560,8 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
   ///
   /// ```dart
   /// void _doOpenPage() {
-  ///   navigator.pushReplacement<MyNavigationData, MyNavigationData>(
-  ///       new MaterialPageRoute<MyNavigationData>(builder: (BuildContext context) => new MyHomePage()));
+  ///   navigator.pushReplacement(
+  ///       new MaterialPageRoute(builder: (BuildContext context) => new MyHomePage()));
   /// }
   /// ```
   @optionalTypeArgs
@@ -1610,8 +1609,8 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
   ///
   /// ```dart
   /// void _resetAndOpenPage() {
-  ///   navigator.pushAndRemoveUntil<MyNavigationData>(
-  ///     new MaterialPageRoute<MyNavigationData>(builder: (BuildContext context) => new MyHomePage()),
+  ///   navigator.pushAndRemoveUntil(
+  ///     new MaterialPageRoute(builder: (BuildContext context) => new MyHomePage()),
   ///     ModalRoute.withName('/'),
   ///   );
   /// }
