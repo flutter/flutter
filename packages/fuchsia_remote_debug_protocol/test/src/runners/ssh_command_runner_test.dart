@@ -99,7 +99,7 @@ void main() {
         await runner.run('oihaw');
       }
 
-      expect(failingFunction, throwsA(const TypeMatcher<SshCommandError>()));
+      expect(failingFunction, throwsA(const isInstanceOf<SshCommandError>()));
     });
 
     test('verify correct args with config', () async {

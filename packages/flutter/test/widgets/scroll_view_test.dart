@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:flutter/widgets.dart' hide TypeMatcher;
+import 'package:flutter/widgets.dart';
 
 import 'states.dart';
 
@@ -319,22 +319,22 @@ void main() {
 
   testWidgets('Primary ListViews are always scrollable', (WidgetTester tester) async {
     final ListView view = new ListView(primary: true);
-    expect(view.physics, const TypeMatcher<AlwaysScrollableScrollPhysics>());
+    expect(view.physics, isInstanceOf<AlwaysScrollableScrollPhysics>());
   });
 
   testWidgets('Non-primary ListViews are not always scrollable', (WidgetTester tester) async {
     final ListView view = new ListView(primary: false);
-    expect(view.physics, isNot(const TypeMatcher<AlwaysScrollableScrollPhysics>()));
+    expect(view.physics, isNot(isInstanceOf<AlwaysScrollableScrollPhysics>()));
   });
 
   testWidgets('Defaulting-to-primary ListViews are always scrollable', (WidgetTester tester) async {
     final ListView view = new ListView(scrollDirection: Axis.vertical);
-    expect(view.physics, const TypeMatcher<AlwaysScrollableScrollPhysics>());
+    expect(view.physics, isInstanceOf<AlwaysScrollableScrollPhysics>());
   });
 
   testWidgets('Defaulting-to-not-primary ListViews are not always scrollable', (WidgetTester tester) async {
     final ListView view = new ListView(scrollDirection: Axis.horizontal);
-    expect(view.physics, isNot(const TypeMatcher<AlwaysScrollableScrollPhysics>()));
+    expect(view.physics, isNot(isInstanceOf<AlwaysScrollableScrollPhysics>()));
   });
 
   testWidgets('primary:true leads to scrolling', (WidgetTester tester) async {

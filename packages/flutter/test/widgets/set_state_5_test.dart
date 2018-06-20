@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:flutter/widgets.dart' hide TypeMatcher;
+import 'package:flutter/widgets.dart';
 
 class BadWidget extends StatefulWidget {
   @override
@@ -29,6 +29,6 @@ class BadWidgetState extends State<BadWidget> {
 void main() {
   testWidgets('setState() catches being used inside a constructor', (WidgetTester tester) async {
     await tester.pumpWidget(new BadWidget());
-    expect(tester.takeException(), const TypeMatcher<FlutterError>());
+    expect(tester.takeException(), isInstanceOf<FlutterError>());
   });
 }
