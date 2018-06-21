@@ -278,8 +278,9 @@ bool DartIsolate::PrepareForRunningFromPrecompiledCode() {
   return true;
 }
 
-static bool LoadScriptSnapshot(std::shared_ptr<const fml::Mapping> mapping,
-                               bool last_piece) {
+bool DartIsolate::LoadScriptSnapshot(
+    std::shared_ptr<const fml::Mapping> mapping,
+    bool last_piece) {
   FXL_CHECK(last_piece) << "Script snapshots cannot be divided";
   if (tonic::LogIfError(Dart_LoadScriptFromSnapshot(mapping->GetMapping(),
                                                     mapping->GetSize()))) {
@@ -288,8 +289,12 @@ static bool LoadScriptSnapshot(std::shared_ptr<const fml::Mapping> mapping,
   return true;
 }
 
-static bool LoadKernelSnapshot(std::shared_ptr<const fml::Mapping> mapping,
-                               bool last_piece) {
+bool DartIsolate::LoadKernelSnapshot(
+    std::shared_ptr<const fml::Mapping> mapping,
+    bool last_piece) {
+  // Mapping must be retained until isolate shutdown.
+  kernel_buffers_.push_back(mapping);
+
   Dart_Handle library =
       Dart_LoadLibraryFromKernel(mapping->GetMapping(), mapping->GetSize());
   if (tonic::LogIfError(library)) {
@@ -308,8 +313,8 @@ static bool LoadKernelSnapshot(std::shared_ptr<const fml::Mapping> mapping,
   return true;
 }
 
-static bool LoadSnapshot(std::shared_ptr<const fml::Mapping> mapping,
-                         bool last_piece) {
+bool DartIsolate::LoadSnapshot(std::shared_ptr<const fml::Mapping> mapping,
+                               bool last_piece) {
   if (Dart_IsKernel(mapping->GetMapping(), mapping->GetSize())) {
     return LoadKernelSnapshot(std::move(mapping), last_piece);
   } else {
