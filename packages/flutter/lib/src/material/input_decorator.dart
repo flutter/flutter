@@ -805,7 +805,9 @@ class _RenderDecoration extends RenderBox {
       + contentPadding.bottom;
     containerHeight = math.max(
       containerHeight,
-      math.max(_boxSize(suffixIcon).height, _boxSize(prefixIcon).height));
+      math.max(
+        _boxSize(suffixIcon).height - (contentPadding.top + contentPadding.bottom),
+        _boxSize(prefixIcon).height - (contentPadding.top + contentPadding.bottom)));
 
     if (label != null) {
       // floatingLabelHeight includes the vertical gap between the inline
@@ -1001,8 +1003,10 @@ class _RenderDecoration extends RenderBox {
       case TextDirection.ltr: {
         double start = left + _boxSize(icon).width;
         double end = right;
-        if (prefixIcon != null)
+        if (prefixIcon != null) {
+          start -= contentPadding.left;
           start += centerLayout(prefixIcon, start);
+        }
         if (label != null)
           centerLayout(label, start);
         if (prefix != null)
@@ -1011,8 +1015,10 @@ class _RenderDecoration extends RenderBox {
           baselineLayout(input, start);
         if (hint != null)
           baselineLayout(hint, start);
-        if (suffixIcon != null)
+        if (suffixIcon != null) {
+          end += contentPadding.right;
           end -= centerLayout(suffixIcon, end - suffixIcon.size.width);
+        }
         if (suffix != null)
           end -= baselineLayout(suffix, end - suffix.size.width);
         break;
@@ -1691,26 +1697,34 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
       );
 
     final Widget prefixIcon = decoration.prefixIcon == null ? null :
-      new ConstrainedBox(
-        constraints: const BoxConstraints(minWidth: 48.0, minHeight: 48.0),
-        child: IconTheme.merge(
-          data: new IconThemeData(
-            color: iconColor,
-            size: iconSize,
+      new Center(
+        widthFactor: 1.0,
+        heightFactor: 1.0,
+        child: new ConstrainedBox(
+          constraints: const BoxConstraints(minWidth: 48.0, minHeight: 48.0),
+          child: IconTheme.merge(
+            data: new IconThemeData(
+              color: iconColor,
+              size: iconSize,
+            ),
+            child: decoration.prefixIcon,
           ),
-          child: decoration.prefixIcon,
         ),
       );
 
     final Widget suffixIcon = decoration.suffixIcon == null ? null :
-      new ConstrainedBox(
-        constraints: const BoxConstraints(minWidth: 48.0, minHeight: 48.0),
-        child: IconTheme.merge(
-          data: new IconThemeData(
-            color: iconColor,
-            size: iconSize,
+      new Center(
+        widthFactor: 1.0,
+        heightFactor: 1.0,
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(minWidth: 48.0, minHeight: 48.0),
+          child: IconTheme.merge(
+            data: new IconThemeData(
+              color: iconColor,
+              size: iconSize,
+            ),
+            child: decoration.suffixIcon,
           ),
-          child: decoration.suffixIcon,
         ),
       );
 
@@ -1737,8 +1751,6 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
 
     EdgeInsets contentPadding;
     double floatingLabelHeight;
-    final double leftInset = decoration.prefixIcon == null ? 12.0 : 0.0;
-    final double rightInset = decoration.suffixIcon == null ? 12.0 : 0.0;
     if (decoration.isCollapsed) {
       floatingLabelHeight = 0.0;
       contentPadding = decorationContentPadding ?? EdgeInsets.zero;
@@ -1747,8 +1759,8 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
       floatingLabelHeight = 4.0 + 0.75 * inlineLabelStyle.fontSize;
       if (decoration.filled == true) { // filled == null same as filled == false
         contentPadding = decorationContentPadding ?? (decorationIsDense
-          ? new EdgeInsets.fromLTRB(leftInset, 8.0, rightInset, 8.0)
-          : new EdgeInsets.fromLTRB(leftInset, 12.0, rightInset, 12.0));
+          ? const EdgeInsets.fromLTRB(12.0, 8.0, 12.0, 8.0)
+          : const EdgeInsets.fromLTRB(12.0, 12.0, 12.0, 12.0));
       } else {
         // Not left or right padding for underline borders that aren't filled
         // is a small concession to backwards compatibility. This eliminates
@@ -1760,8 +1772,8 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
     } else {
       floatingLabelHeight = 0.0;
       contentPadding = decorationContentPadding ?? (decorationIsDense
-        ? new EdgeInsets.fromLTRB(leftInset, 20.0, rightInset, 12.0)
-        : new EdgeInsets.fromLTRB(leftInset, 24.0, rightInset, 16.0));
+        ? const EdgeInsets.fromLTRB(12.0, 20.0, 12.0, 12.0)
+        : const EdgeInsets.fromLTRB(12.0, 24.0, 12.0, 16.0));
     }
 
     return new _Decorator(
