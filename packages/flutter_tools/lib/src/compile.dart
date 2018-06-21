@@ -192,7 +192,6 @@ abstract class _CompilationRequest {
 
   _CompilationRequest(this.completer);
 
-  @override
   Future<CompilerOutput> _run(ResidentCompiler compiler);
 
   Future<void> run(ResidentCompiler compiler) async {
