@@ -837,7 +837,7 @@ class RenderAnimatedOpacity extends RenderProxyBox {
     _alpha = _getAlphaFromOpacity(_opacity.value.clamp(0.0, 1.0));
     if (oldAlpha != _alpha) {
       final bool didNeedCompositing = _currentlyNeedsCompositing;
-      _currentlyNeedsCompositing = _alpha > 0 || _alpha < 255;
+      _currentlyNeedsCompositing = _alpha > 0 && _alpha < 255;
       if (child != null && didNeedCompositing != _currentlyNeedsCompositing)
         markNeedsCompositingBitsUpdate();
       markNeedsPaint();
@@ -1487,7 +1487,6 @@ abstract class _RenderPhysicalModelBase<T> extends _RenderCustomClip<T> {
     markNeedsPaint();
   }
 
-  static final Paint _defaultPaint = new Paint();
   static final Paint _transparentPaint = new Paint()..color = const Color(0x00000000);
 
   // On Fuchsia, the system compositor is responsible for drawing shadows
@@ -1642,17 +1641,7 @@ class RenderPhysicalModel extends _RenderPhysicalModelBase<RRect> {
         canvas.drawRRect(offsetRRect, new Paint()..color = color);
         canvas.save();
         canvas.clipRRect(offsetRRect);
-        // We only use a new layer for non-rectangular clips, on the basis that
-        // rectangular clips won't need antialiasing. This is not really
-        // correct, because if we're e.g. rotated, rectangles will also be
-        // aliased. Unfortunately, it's too much of a performance win to err on
-        // the side of correctness here.
-        // TODO(ianh): Find a better solution.
-        if (!offsetRRect.isRect)
-          canvas.saveLayer(offsetBounds, _RenderPhysicalModelBase._defaultPaint);
         super.paint(context, offset);
-        if (!offsetRRect.isRect)
-          canvas.restore();
         canvas.restore();
         assert(context.canvas == canvas, 'canvas changed even though needsCompositing was false');
       }
@@ -1763,10 +1752,8 @@ class RenderPhysicalShape extends _RenderPhysicalModelBase<Path> {
           );
         }
         canvas.drawPath(offsetPath, new Paint()..color = color..style = PaintingStyle.fill);
-        canvas.saveLayer(offsetBounds, _RenderPhysicalModelBase._defaultPaint);
         canvas.clipPath(offsetPath);
         super.paint(context, offset);
-        canvas.restore();
         assert(context.canvas == canvas, 'canvas changed even though needsCompositing was false');
       }
     }
