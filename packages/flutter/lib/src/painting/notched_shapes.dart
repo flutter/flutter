@@ -1,6 +1,6 @@
 import 'dart:math' as math;
 
-import 'package:flutter/rendering.dart';
+import 'basic_types.dart';
 
 /// A shape with a notch in its outline.
 ///
