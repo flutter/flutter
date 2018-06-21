@@ -133,8 +133,8 @@ class HotRunner extends ResidentRunner {
       await connectToServiceProtocol(viewFilter: viewFilter,
           reloadSources: _reloadSourcesService,
           compileExpression: _compileExpressionService);
-    } catch (error, st) {
-      printError('Error connecting to the service protocol: $error $st');
+    } catch (error) {
+      printError('Error connecting to the service protocol: $error');
       return 2;
     }
 

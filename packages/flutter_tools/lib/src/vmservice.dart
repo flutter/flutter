@@ -284,7 +284,7 @@ class VMService {
     Map<String, dynamic> params,
   ) {
     return Future.any(<Future<Map<String, dynamic>>>[
-      _peer.sendRequest(method, params).then((dynamic x) => x as Map<String, dynamic>),
+      _peer.sendRequest(method, params),
       _connectionError.future,
     ]);
   }
