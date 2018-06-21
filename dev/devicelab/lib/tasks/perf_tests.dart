@@ -367,7 +367,6 @@ class CompileTest {
 
   static Future<Map<String, dynamic>> getSizesFromIosApp(String appPath) async {
     // Thin the binary to only contain one architecture.
-    print(appPath);
     final String xcodeBackend = p.join(flutterDirectory.path, 'packages', 'flutter_tools', 'bin', 'xcode_backend.sh');
     await exec(xcodeBackend, <String>['thin'], environment: <String, String>{
       'ARCHS': 'arm64',
