@@ -837,7 +837,7 @@ class RenderAnimatedOpacity extends RenderProxyBox {
     _alpha = _getAlphaFromOpacity(_opacity.value.clamp(0.0, 1.0));
     if (oldAlpha != _alpha) {
       final bool didNeedCompositing = _currentlyNeedsCompositing;
-      _currentlyNeedsCompositing = _alpha > 0 || _alpha < 255;
+      _currentlyNeedsCompositing = _alpha > 0 && _alpha < 255;
       if (child != null && didNeedCompositing != _currentlyNeedsCompositing)
         markNeedsCompositingBitsUpdate();
       markNeedsPaint();
