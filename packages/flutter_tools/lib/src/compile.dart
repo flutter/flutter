@@ -188,30 +188,38 @@ class KernelCompiler {
 
 /// Class that allows to serialize compilation requests to the compiler.
 abstract class _CompilationRequest {
-  Future<void> run(ResidentCompiler compiler);
+  Completer<CompilerOutput> completer;
+
+  _CompilationRequest(this.completer);
+
+  @override
+  Future<CompilerOutput> _run(ResidentCompiler compiler);
+
+  Future<void> run(ResidentCompiler compiler) async {
+    completer.complete(await _run(compiler));
+  }
 }
 
-class _RecompileRequest implements _CompilationRequest {
-  _RecompileRequest(this.completer, this.mainPath, this.invalidatedFiles,
-      this.outputPath, this.packagesFilePath);
+class _RecompileRequest extends _CompilationRequest {
+  _RecompileRequest(Completer<CompilerOutput> completer, this.mainPath,
+      this.invalidatedFiles, this.outputPath, this.packagesFilePath) :
+      super(completer);
 
-  Completer<CompilerOutput> completer;
   String mainPath;
   List<String> invalidatedFiles;
   String outputPath;
   String packagesFilePath;
 
   @override
-  Future<void> run(ResidentCompiler compiler) async {
-    completer.complete(await compiler._recompile(this));
-  }
+  Future<CompilerOutput> _run(ResidentCompiler compiler) async =>
+      compiler._recompile(this);
 }
 
-class _CompileExpressionRequest implements _CompilationRequest {
-  _CompileExpressionRequest(this.completer, this.expression, this.definitions,
-      this.typeDefinitions, this.libraryUri, this.klass, this.isStatic);
+class _CompileExpressionRequest extends _CompilationRequest {
+  _CompileExpressionRequest(Completer<CompilerOutput> completer, this.expression, this.definitions,
+      this.typeDefinitions, this.libraryUri, this.klass, this.isStatic) :
+      super(completer);
 
-  Completer<CompilerOutput> completer;
   String expression;
   List<String> definitions;
   List<String> typeDefinitions;
@@ -220,9 +228,8 @@ class _CompileExpressionRequest implements _CompilationRequest {
   bool isStatic;
 
   @override
-  Future<void> run(ResidentCompiler compiler) async {
-    completer.complete(await compiler._compileExpression(this));
-  }
+  Future<CompilerOutput> _run(ResidentCompiler compiler) async =>
+      compiler._compileExpression(this);
 }
 
 /// Wrapper around incremental frontend server compiler, that communicates with
