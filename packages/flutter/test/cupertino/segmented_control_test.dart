@@ -925,6 +925,6 @@ void main() {
     await tester.startGesture(center);
     await tester.pumpAndSettle();
 
-    expect(find.byType(RepaintBoundary), matchesGoldenFile('segmented_control_test.1.0.png'));
+    await expectLater(find.byType(RepaintBoundary), matchesGoldenFile('segmented_control_test.1.0.png'));
   });
 }
