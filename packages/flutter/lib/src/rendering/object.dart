@@ -235,8 +235,6 @@ class PaintingContext {
     _canvas = null;
   }
 
-  static final Paint _defaultPaint = new Paint();
-
   /// Hints that the painting in the current layer is complex and would benefit
   /// from caching.
   ///
@@ -351,11 +349,9 @@ class PaintingContext {
     } else {
       canvas
         ..save()
-        ..clipRRect(offsetClipRRect)
-        ..saveLayer(offsetBounds, _defaultPaint);
+        ..clipRRect(offsetClipRRect);
       painter(this, offset);
       canvas
-        ..restore()
         ..restore();
     }
   }
@@ -380,11 +376,9 @@ class PaintingContext {
     } else {
       canvas
         ..save()
-        ..clipPath(clipPath.shift(offset))
-        ..saveLayer(bounds.shift(offset), _defaultPaint);
+        ..clipPath(clipPath.shift(offset));
       painter(this, offset);
       canvas
-        ..restore()
         ..restore();
     }
   }
