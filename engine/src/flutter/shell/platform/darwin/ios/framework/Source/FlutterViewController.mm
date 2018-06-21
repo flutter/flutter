@@ -167,18 +167,6 @@
     return false;
   }
 
-  // Launch the Dart application with the inferred run configuration.
-  _shell->GetTaskRunners().GetUITaskRunner()->PostTask(
-      fxl::MakeCopyable([engine = _shell->GetEngine(),                   //
-                         config = [_dartProject.get() runConfiguration]  //
-  ]() mutable {
-        if (engine) {
-          auto result = engine->Run(std::move(config));
-          if (!result) {
-            FXL_LOG(ERROR) << "Could not launch engine with configuration.";
-          }
-        }
-      }));
   return true;
 }
 
@@ -398,6 +386,20 @@
 
 - (void)viewWillAppear:(BOOL)animated {
   TRACE_EVENT0("flutter", "viewWillAppear");
+
+  // Launch the Dart application with the inferred run configuration.
+  _shell->GetTaskRunners().GetUITaskRunner()->PostTask(
+      fxl::MakeCopyable([engine = _shell->GetEngine(),                   //
+                         config = [_dartProject.get() runConfiguration]  //
+  ]() mutable {
+        if (engine) {
+          auto result = engine->Run(std::move(config));
+          if (!result) {
+            FXL_LOG(ERROR) << "Could not launch engine with configuration.";
+          }
+        }
+      }));
+
   // Only recreate surface on subsequent appearances when viewport metrics are known.
   // First time surface creation is done on viewDidLayoutSubviews.
   if (_viewportMetrics.physical_width)
