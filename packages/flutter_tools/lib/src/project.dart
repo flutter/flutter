@@ -5,10 +5,14 @@
 import 'dart:async';
 import 'dart:convert';
 
-import 'base/file_system.dart';
-import 'ios/xcodeproj.dart';
-import 'plugins.dart';
 
+import 'android/gradle.dart' as gradle;
+import 'base/file_system.dart';
+import 'cache.dart';
+import 'flutter_manifest.dart';
+import 'ios/xcodeproj.dart' as xcode;
+import 'plugins.dart';
+import 'template.dart';
 
 /// Represents the contents of a Flutter project at the specified [directory].
 class FlutterProject {
@@ -47,6 +51,9 @@ class FlutterProject {
   /// The Android sub project of this project.
   AndroidProject get android => new AndroidProject(directory.childDirectory('android'));
 
+  /// The generated AndroidModule sub project of this module project.
+  AndroidModuleProject get androidModule => new AndroidModuleProject(directory.childDirectory('android_gen'));
+
   /// Returns true if this project has an example application
   bool get hasExampleApp => directory.childDirectory('example').childFile('pubspec.yaml').existsSync();
 
@@ -54,13 +61,19 @@ class FlutterProject {
   FlutterProject get example => new FlutterProject(directory.childDirectory('example'));
 
   /// Generates project files necessary to make Gradle builds work on Android
-  /// and CocoaPods+Xcode work on iOS, for app projects only
+  /// and CocoaPods+Xcode work on iOS, for app and module projects only.
+  ///
+  /// Returns the number of files written.
   Future<void> ensureReadyForPlatformSpecificTooling() async {
     if (!directory.existsSync() || hasExampleApp) {
-      return;
+      return 0;
+    }
+    final FlutterManifest manifest = await FlutterManifest.createFromPath(directory.childFile('pubspec.yaml').path);
+    if (manifest.isModule) {
+      await androidModule.ensureReadyForPlatformSpecificTooling(manifest);
     }
     injectPlugins(directory: directory.path);
-    await generateXcodeProperties(directory.path);
+    await xcode.generateXcodeProperties(directory.path);
   }
 }
 
@@ -94,6 +107,36 @@ class AndroidProject {
   Future<String> group() {
     final File gradleFile = directory.childFile('build.gradle');
     return _firstMatchInFile(gradleFile, _groupPattern).then((Match match) => match?.group(1));
+  }
+}
+
+/// Represents the contents of the .android-generated/ folder of a Flutter module
+/// project.
+class AndroidModuleProject {
+  AndroidModuleProject(this.directory);
+
+  final Directory directory;
+
+  Future<void> ensureReadyForPlatformSpecificTooling(FlutterManifest manifest) async {
+    if (_shouldRegenerate()) {
+      final Template template = new Template.fromName(fs.path.join('module', 'android'));
+      template.render(directory, <String, dynamic>{
+        'androidIdentifier': manifest.moduleDescriptor['androidPackage'],
+      }, printStatusWhenWriting: false);
+      gradle.injectGradleWrapper(directory);
+    }
+    gradle.updateLocalPropertiesSync(directory, manifest);
+  }
+
+  bool _shouldRegenerate() {
+    final File flutterToolsStamp = Cache.instance.getStampFileFor('flutter_tools');
+    final File buildDotGradleFile = directory.childFile('build.gradle');
+    if (!buildDotGradleFile.existsSync())
+      return true;
+    return flutterToolsStamp.existsSync() &&
+        flutterToolsStamp
+            .lastModifiedSync()
+            .isAfter(buildDotGradleFile.lastModifiedSync());
   }
 }
 

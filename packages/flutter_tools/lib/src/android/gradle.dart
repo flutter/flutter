@@ -141,16 +141,13 @@ void handleKnownGradleExceptions(String exceptionString) {
   }
 }
 
-String _locateProjectGradlew({ bool ensureExecutable = true }) {
-  final String path = fs.path.join(
-    'android',
+String _locateGradlewExecutable(Directory directory) {
+  final File gradle = directory.childFile(
     platform.isWindows ? 'gradlew.bat' : 'gradlew',
   );
 
-  if (fs.isFileSync(path)) {
-    final File gradle = fs.file(path);
-    if (ensureExecutable)
-      os.makeExecutable(gradle);
+  if (gradle.existsSync()) {
+    os.makeExecutable(gradle);
     return gradle.absolute.path;
   } else {
     return null;
@@ -165,11 +162,12 @@ Future<String> _ensureGradle() async {
 // Note: Gradle may be bootstrapped and possibly downloaded as a side-effect
 // of validating the Gradle executable. This may take several seconds.
 Future<String> _initializeGradle() async {
+  final Directory android = fs.directory('android');
   final Status status = logger.startProgress('Initializing gradle...', expectSlowOperation: true);
-  String gradle = _locateProjectGradlew();
+  String gradle = _locateGradlewExecutable(android);
   if (gradle == null) {
-    _injectGradleWrapper();
-    gradle = _locateProjectGradlew();
+    injectGradleWrapper(android);
+    gradle = _locateGradlewExecutable(android);
   }
   if (gradle == null)
     throwToolExit('Unable to locate gradlew script');
@@ -181,11 +179,13 @@ Future<String> _initializeGradle() async {
   return gradle;
 }
 
-void _injectGradleWrapper() {
-  copyDirectorySync(cache.getArtifactDirectory('gradle_wrapper'), fs.directory('android'));
-  final String propertiesPath = fs.path.join('android', 'gradle', 'wrapper', 'gradle-wrapper.properties');
-  if (!fs.file(propertiesPath).existsSync()) {
-    fs.file(propertiesPath).writeAsStringSync('''
+/// Injects the Gradle wrapper into the specified directory.
+void injectGradleWrapper(Directory directory) {
+  copyDirectorySync(cache.getArtifactDirectory('gradle_wrapper'), directory);
+  _locateGradlewExecutable(directory);
+  final File propertiesFile = directory.childFile(fs.path.join('gradle', 'wrapper', 'gradle-wrapper.properties'));
+  if (!propertiesFile.existsSync()) {
+    propertiesFile.writeAsStringSync('''
 distributionBase=GRADLE_USER_HOME
 distributionPath=wrapper/dists
 zipStoreBase=GRADLE_USER_HOME
@@ -196,14 +196,26 @@ distributionUrl=https\\://services.gradle.org/distributions/gradle-$gradleVersio
   }
 }
 
-/// Create android/local.properties if needed, and update Flutter settings.
+/// Overwrite android/local.properties in the specified Flutter project, if needed.
 Future<void> updateLocalProperties({String projectPath, BuildInfo buildInfo}) async {
-  final File localProperties = (projectPath == null)
-      ? fs.file(fs.path.join('android', 'local.properties'))
-      : fs.file(fs.path.join(projectPath, 'android', 'local.properties'));
+  final Directory android = (projectPath == null)
+      ? fs.directory('android')
+      : fs.directory(fs.path.join(projectPath, 'android'));
   final String flutterManifest = (projectPath == null)
       ? fs.path.join(bundle.defaultManifestPath)
       : fs.path.join(projectPath, bundle.defaultManifestPath);
+  FlutterManifest manifest;
+  try {
+    manifest = await FlutterManifest.createFromPath(flutterManifest);
+  } catch (error) {
+    throwToolExit('Failed to load pubspec.yaml: $error');
+  }
+  updateLocalPropertiesSync(android, manifest, buildInfo);
+}
+
+/// Overwrite local.properties in the specified directory, if needed.
+void updateLocalPropertiesSync(Directory android, FlutterManifest manifest, [BuildInfo buildInfo]) {
+  final File localProperties = android.childFile('local.properties');
   bool changed = false;
 
   SettingsFile settings;
@@ -225,13 +237,6 @@ Future<void> updateLocalProperties({String projectPath, BuildInfo buildInfo}) as
   if (buildInfo != null && settings.values['flutter.buildMode'] != buildInfo.modeName) {
     settings.values['flutter.buildMode'] = buildInfo.modeName;
     changed = true;
-  }
-
-  FlutterManifest manifest;
-  try {
-    manifest = await FlutterManifest.createFromPath(flutterManifest);
-  } catch (error) {
-    throwToolExit('Failed to load pubspec.yaml: $error');
   }
 
   final String buildName = buildInfo?.buildName ?? manifest.buildName;

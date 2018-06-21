@@ -148,7 +148,7 @@ void _writeAndroidPluginRegistrant(String directory, List<Plugin> plugins) {
 
   final String pluginRegistry =
       new mustache.Template(_androidPluginRegistryTemplate).renderString(context);
-  final String javaSourcePath = fs.path.join(directory, 'android', 'app', 'src', 'main', 'java');
+  final String javaSourcePath = fs.path.join(directory, 'src', 'main', 'java');
   final Directory registryDirectory =
       fs.directory(fs.path.join(javaSourcePath, 'io', 'flutter', 'plugins'));
   registryDirectory.createSync(recursive: true);
@@ -233,9 +233,11 @@ void injectPlugins({String directory}) {
   directory ??= fs.currentDirectory.path;
   final List<Plugin> plugins = _findPlugins(directory);
   final bool changed = _writeFlutterPluginsList(directory, plugins);
-
-  if (fs.isDirectorySync(fs.path.join(directory, 'android')))
-    _writeAndroidPluginRegistrant(directory, plugins);
+  if (fs.isDirectorySync(fs.path.join(directory, 'android_gen', 'Flutter'))) {
+    _writeAndroidPluginRegistrant(fs.path.join(directory, 'android_gen', 'Flutter'), plugins);
+  } else if (fs.isDirectorySync(fs.path.join(directory, 'android', 'app'))) {
+    _writeAndroidPluginRegistrant(fs.path.join(directory, 'android', 'app'), plugins);
+  }
   if (fs.isDirectorySync(fs.path.join(directory, 'ios'))) {
     _writeIOSPluginRegistrant(directory, plugins);
     final CocoaPods cocoaPods = new CocoaPods();
