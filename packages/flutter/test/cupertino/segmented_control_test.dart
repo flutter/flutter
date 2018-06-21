@@ -895,6 +895,8 @@ void main() {
       ),
     );
 
+    // if golden files are regenerated on a non-Mac machine,
+    // change the 'skip' line to only run this test on that type of machine
     await expectLater(
         find.byType(RepaintBoundary), 
         matchesGoldenFile('segmented_control_test.0.0.png'),
@@ -931,6 +933,8 @@ void main() {
     await tester.startGesture(center);
     await tester.pumpAndSettle();
 
+    // if golden files are regenerated on a non-Mac machine,
+    // change the 'skip' line to only run this test on that type of machine
     expect(
         find.byType(RepaintBoundary),
         matchesGoldenFile('segmented_control_test.1.0.png'),
