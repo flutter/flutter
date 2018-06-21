@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:flutter/material.dart' hide TypeMatcher;
+import 'package:flutter/material.dart';
 
 void main() {
   testWidgets('builder doesn\'t get called if app doesn\'t change', (WidgetTester tester) async {
@@ -17,7 +17,7 @@ void main() {
         log.add('build');
         expect(Theme.of(context).primaryColor, Colors.green);
         expect(Directionality.of(context), TextDirection.ltr);
-        expect(child, const TypeMatcher<Navigator>());
+        expect(child, isInstanceOf<Navigator>());
         return const Placeholder();
       },
     );

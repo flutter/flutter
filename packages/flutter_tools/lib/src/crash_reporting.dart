@@ -37,14 +37,17 @@ const String _kStackTraceFileField = 'DartError';
 const String _kStackTraceFilename = 'stacktrace_file';
 
 /// Sends crash reports to Google.
+/// 
+/// There are two ways to override the behavior of this class:
+/// 
+/// * Define a `FLUTTER_CRASH_SERVER_BASE_URL` environment variable that points
+///   to a custom crash reporting server. This is useful if your development
+///   environment is behind a firewall and unable to send crash reports to
+///   Google, or when you wish to use your own server for collecting crash
+///   reports from Flutter Tools.
+/// * In tests call [initializeWith] and provide a mock implementation of
+///   [http.Client].
 class CrashReportSender {
-  static final Uri _baseUri = new Uri(
-      scheme: 'https',
-      host: _kCrashServerHost,
-      port: 443,
-      path: _kCrashEndpointPath,
-  );
-
   static CrashReportSender _instance;
 
   CrashReportSender._(this._client);
@@ -59,6 +62,20 @@ class CrashReportSender {
 
   final http.Client _client;
   final Usage _usage = Usage.instance;
+
+  Uri get _baseUrl {
+    final String overrideUrl = platform.environment['FLUTTER_CRASH_SERVER_BASE_URL'];
+
+    if (overrideUrl != null) {
+      return Uri.parse(overrideUrl);
+    }
+    return new Uri(
+      scheme: 'https',
+      host: _kCrashServerHost,
+      port: 443,
+      path: _kCrashEndpointPath,
+    );
+  }
 
   /// Sends one crash report.
   ///
@@ -75,7 +92,7 @@ class CrashReportSender {
       printStatus('Sending crash report to Google.');
 
       final String flutterVersion = getFlutterVersion();
-      final Uri uri = _baseUri.replace(
+      final Uri uri = _baseUrl.replace(
         queryParameters: <String, String>{
           'product': _kProductId,
           'version': flutterVersion,

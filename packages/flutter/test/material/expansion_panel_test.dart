@@ -126,17 +126,25 @@ void main() {
               animationDuration: kSizeAnimationDuration,
               children: <ExpansionPanel>[
                 new ExpansionPanel(
-                  headerBuilder: (BuildContext context, bool isExpanded) => const Placeholder(),
-                  body: const SizedBox(height: 100.0, child: const Placeholder()),
+                  headerBuilder: (BuildContext context, bool isExpanded) => const Placeholder(
+                    fallbackHeight: 12.0,
+                  ),
+                  body: const SizedBox(height: 100.0, child: const Placeholder(
+                    fallbackHeight: 12.0,
+                  )),
                   isExpanded: a,
                 ),
                 new ExpansionPanel(
-                  headerBuilder: (BuildContext context, bool isExpanded) => const Placeholder(),
+                  headerBuilder: (BuildContext context, bool isExpanded) => const Placeholder(
+                    fallbackHeight: 12.0,
+                  ),
                   body: const SizedBox(height: 100.0, child: const Placeholder()),
                   isExpanded: b,
                 ),
                 new ExpansionPanel(
-                  headerBuilder: (BuildContext context, bool isExpanded) => const Placeholder(),
+                  headerBuilder: (BuildContext context, bool isExpanded) => const Placeholder(
+                    fallbackHeight: 12.0,
+                  ),
                   body: const SizedBox(height: 100.0, child: const Placeholder()),
                   isExpanded: c,
                 ),
