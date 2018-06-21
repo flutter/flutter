@@ -2,8 +2,10 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
+import("//build/dart/dart.gni")
 import("//build/dart/dart_library.gni")
 import("//build/dart/dart_tool.gni")
+import("//build/sdk/sdk_atom.gni")
 
 dart_library("flutter_tools") {
   package_name = "flutter_tools"
@@ -73,5 +75,29 @@ dart_tool("fuchsia_tester") {
 
   non_dart_deps = [
     "$flutter_root/shell",
+  ]
+}
+
+sdk_atom("fuchsia_asset_builder_sdk") {
+  domain = "exe"
+  name = "fuchsia_asset_builder"
+  id = "sdk://tools/dart/fuchsia_asset_builder"
+  category = "partner"
+
+  tags = [ "type:tool" ]
+
+  dart_target_gen_dir =
+      get_label_info(":bogus($host_toolchain)", "target_gen_dir")
+  fuchsia_asset_builder_path = "$dart_target_gen_dir/fuchsia_asset_builder.snapshot"
+
+  files = [
+    {
+      source = "$fuchsia_asset_builder_path"
+      dest = "dart_prebuilts/fuchsia_asset_builder.snapshot"
+    },
+  ]
+
+  non_sdk_deps = dart_sdk_deps + [
+    ":fuchsia_asset_builder_snapshot($host_toolchain)",
   ]
 }
