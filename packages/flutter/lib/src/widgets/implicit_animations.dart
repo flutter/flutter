@@ -340,6 +340,7 @@ abstract class ImplicitlyAnimatedWidgetState<T extends ImplicitlyAnimatedWidget>
   /// [forEachTween] should override [didUpdateTweens] to update those
   /// properties. Dependent properties should not be updated within
   /// [forEachTween].
+  @protected
   void forEachTween(TweenVisitor<dynamic> visitor);
 
   /// Optional hook for subclasses that runs after all tweens have been updated
@@ -347,6 +348,7 @@ abstract class ImplicitlyAnimatedWidgetState<T extends ImplicitlyAnimatedWidget>
   ///
   /// Any properties that depend upon tweens created by [forEachTween] should be
   /// updated within [didUpdateTweens], not within [forEachTween].
+  @protected
   void didUpdateTweens() {}
 }
 
