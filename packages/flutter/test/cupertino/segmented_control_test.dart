@@ -920,7 +920,7 @@ void main() {
     );
 
     // if golden files are regenerated on a non-Mac machine,
-    // change this line to only run tests on that platform
+    // change this to only run tests on that platform
     await expectLater(
       find.byType(RepaintBoundary),
       matchesGoldenFile('segmented_control_test.0.0.png'),
@@ -958,7 +958,7 @@ void main() {
     await tester.pumpAndSettle();
 
     // if golden files are regenerated on a non-Mac machine,
-    // change this line to only run tests on that platform
+    // change this to only run tests on that platform
     await expectLater(
       find.byType(RepaintBoundary),
       matchesGoldenFile('segmented_control_test.1.0.png'),
