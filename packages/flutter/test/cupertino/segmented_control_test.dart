@@ -921,7 +921,7 @@ void main() {
 
     // if golden files are regenerated on a non-Mac machine,
     // change the 'skip' line to only run this test on that type of machine
-    expect(
+    await expectLater(
       find.byType(RepaintBoundary),
       matchesGoldenFile('segmented_control_test.0.0.png'),
       skip: !Platform.isMacOS,
@@ -959,7 +959,7 @@ void main() {
 
     // if golden files are regenerated on a non-Mac machine,
     // change the 'skip' line to only run this test on that type of machine
-    expect(
+    await expectLater(
       find.byType(RepaintBoundary),
       matchesGoldenFile('segmented_control_test.1.0.png'),
       skip: !Platform.isMacOS,
