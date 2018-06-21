@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:io';
+
 import 'package:flutter/widgets.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -893,7 +895,13 @@ void main() {
       ),
     );
 
-    await expectLater(find.byType(RepaintBoundary), matchesGoldenFile('segmented_control_test.0.0.png'));
+    // if golden files are regenerated on a non-Mac machine,
+    // change the 'skip' line to only run this on that type of machine
+    await expectLater(
+        find.byType(RepaintBoundary), 
+        matchesGoldenFile('segmented_control_test.0.0.png'),
+        skip: !Platform.isMacOS,
+    );
   });
 
   testWidgets('Golden Test Pressed State', (WidgetTester tester) async {
@@ -925,6 +933,12 @@ void main() {
     await tester.startGesture(center);
     await tester.pumpAndSettle();
 
-    expect(find.byType(RepaintBoundary), matchesGoldenFile('segmented_control_test.1.0.png'));
+    // if golden files are regenerated on a non-Mac machine,
+    // change the 'skip' line to only run this on that type of machine
+    expect(
+        find.byType(RepaintBoundary),
+        matchesGoldenFile('segmented_control_test.1.0.png'),
+        skip: !Platform.isMacOS,
+    );
   });
 }
