@@ -92,6 +92,13 @@ class DartIsolate : public UIDartState {
   fml::WeakPtr<DartIsolate> GetWeakIsolatePtr() const;
 
  private:
+  bool LoadScriptSnapshot(std::shared_ptr<const fml::Mapping> mapping,
+                          bool last_piece);
+  bool LoadKernelSnapshot(std::shared_ptr<const fml::Mapping> mapping,
+                          bool last_piece);
+  bool LoadSnapshot(std::shared_ptr<const fml::Mapping> mapping,
+                    bool last_piece);
+
   class AutoFireClosure {
    public:
     AutoFireClosure(fxl::Closure closure) : closure_(std::move(closure)) {}
@@ -111,6 +118,7 @@ class DartIsolate : public UIDartState {
   Phase phase_ = Phase::Unknown;
   const fxl::RefPtr<DartSnapshot> isolate_snapshot_;
   const fxl::RefPtr<DartSnapshot> shared_snapshot_;
+  std::vector<std::shared_ptr<const fml::Mapping>> kernel_buffers_;
   std::vector<std::unique_ptr<AutoFireClosure>> shutdown_callbacks_;
   ChildIsolatePreparer child_isolate_preparer_;
   std::unique_ptr<fml::WeakPtrFactory<DartIsolate>> weak_factory_;
