@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:io';
+
 import 'package:flutter/widgets.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -94,7 +96,8 @@ void main() {
           ),
         ),
       );
-      fail('Should not be possible to create a segmented control with no children');
+      fail(
+          'Should not be possible to create a segmented control with no children');
     } on AssertionError catch (e) {
       expect(e.toString(), contains('children.length'));
     }
@@ -109,14 +112,15 @@ void main() {
           ),
         ),
       );
-      fail('Should not be possible to create a segmented control with just one child');
+      fail(
+          'Should not be possible to create a segmented control with just one child');
     } on AssertionError catch (e) {
       expect(e.toString(), contains('children.length'));
     }
   });
 
   testWidgets('Value attribute must be the key of one of the children widgets',
-          (WidgetTester tester) async {
+      (WidgetTester tester) async {
     final Map<int, Widget> children = <int, Widget>{};
     children[0] = const Text('Child 1');
     children[1] = const Text('Child 2');
@@ -138,7 +142,8 @@ void main() {
     }
   });
 
-  testWidgets('Children and onValueChanged can not be null', (WidgetTester tester) async {
+  testWidgets('Children and onValueChanged can not be null',
+      (WidgetTester tester) async {
     try {
       await tester.pumpWidget(
         boilerplate(
@@ -148,7 +153,8 @@ void main() {
           ),
         ),
       );
-      fail('Should not be possible to create segmented control with null children');
+      fail(
+          'Should not be possible to create segmented control with null children');
     } on AssertionError catch (e) {
       expect(e.toString(), contains('children'));
     }
@@ -166,14 +172,16 @@ void main() {
           ),
         ),
       );
-      fail('Should not be possible to create segmented control with null onValueChanged');
+      fail(
+          'Should not be possible to create segmented control with null onValueChanged');
     } on AssertionError catch (e) {
       expect(e.toString(), contains('onValueChanged'));
     }
   });
 
-  testWidgets('Widgets have correct default text/icon styles, change correctly on selection',
-          (WidgetTester tester) async {
+  testWidgets(
+      'Widgets have correct default text/icon styles, change correctly on selection',
+      (WidgetTester tester) async {
     final Map<int, Widget> children = <int, Widget>{};
     children[0] = const Text('Child 1');
     children[1] = const Icon(IconData(1));
@@ -198,8 +206,10 @@ void main() {
       ),
     );
 
-    DefaultTextStyle textStyle = tester.widget(find.widgetWithText(DefaultTextStyle, 'Child 1'));
-    IconTheme iconTheme = tester.widget(find.widgetWithIcon(IconTheme, const IconData(1)));
+    DefaultTextStyle textStyle =
+        tester.widget(find.widgetWithText(DefaultTextStyle, 'Child 1'));
+    IconTheme iconTheme =
+        tester.widget(find.widgetWithIcon(IconTheme, const IconData(1)));
 
     expect(textStyle.style.color, CupertinoColors.white);
     expect(iconTheme.data.color, CupertinoColors.activeBlue);
@@ -208,7 +218,8 @@ void main() {
     await tester.pump();
 
     textStyle = tester.widget(find.widgetWithText(DefaultTextStyle, 'Child 1'));
-    iconTheme = tester.widget(find.widgetWithIcon(IconTheme, const IconData(1)));
+    iconTheme =
+        tester.widget(find.widgetWithIcon(IconTheme, const IconData(1)));
 
     expect(textStyle.style.color, CupertinoColors.activeBlue);
     expect(iconTheme.data.color, CupertinoColors.white);
@@ -243,8 +254,9 @@ void main() {
     expect(value, isTrue);
   });
 
-  testWidgets('State does not change if onValueChanged does not call setState()',
-          (WidgetTester tester) async {
+  testWidgets(
+      'State does not change if onValueChanged does not call setState()',
+      (WidgetTester tester) async {
     final Map<int, Widget> children = <int, Widget>{};
     children[0] = const Text('Child 1');
     children[1] = const Text('Child 2');
@@ -265,7 +277,8 @@ void main() {
       ),
     );
 
-    final dynamic childList = getRenderSegmentedControl(tester).getChildrenAsList();
+    final dynamic childList =
+        getRenderSegmentedControl(tester).getChildrenAsList();
 
     expect(
       getRenderSegmentedControl(tester),
@@ -314,7 +327,8 @@ void main() {
       'and should not change when tapped again', (WidgetTester tester) async {
     await tester.pumpWidget(setupSimpleSegmentedControl());
 
-    final dynamic childList = getRenderSegmentedControl(tester).getChildrenAsList();
+    final dynamic childList =
+        getRenderSegmentedControl(tester).getChildrenAsList();
 
     expect(
       getRenderSegmentedControl(tester),
@@ -389,12 +403,14 @@ void main() {
     },
   );
 
-  testWidgets('Passed in value is child initially selected', (WidgetTester tester) async {
+  testWidgets('Passed in value is child initially selected',
+      (WidgetTester tester) async {
     await tester.pumpWidget(setupSimpleSegmentedControl());
 
     expect(getRenderSegmentedControl(tester).selectedIndex, 0);
 
-    final dynamic childList = getRenderSegmentedControl(tester).getChildrenAsList();
+    final dynamic childList =
+        getRenderSegmentedControl(tester).getChildrenAsList();
 
     expect(
       getRenderSegmentedControl(tester),
@@ -417,7 +433,7 @@ void main() {
   });
 
   testWidgets('Null input for value results in no child initially selected',
-          (WidgetTester tester) async {
+      (WidgetTester tester) async {
     final Map<int, Widget> children = <int, Widget>{};
     children[0] = const Text('Child 1');
     children[1] = const Text('Child 2');
@@ -444,7 +460,8 @@ void main() {
 
     expect(getRenderSegmentedControl(tester).selectedIndex, null);
 
-    final dynamic childList = getRenderSegmentedControl(tester).getChildrenAsList();
+    final dynamic childList =
+        getRenderSegmentedControl(tester).getChildrenAsList();
 
     expect(
       getRenderSegmentedControl(tester),
@@ -467,10 +484,11 @@ void main() {
   });
 
   testWidgets('Long press changes background color of not-selected child',
-          (WidgetTester tester) async {
+      (WidgetTester tester) async {
     await tester.pumpWidget(setupSimpleSegmentedControl());
 
-    final dynamic childList = getRenderSegmentedControl(tester).getChildrenAsList();
+    final dynamic childList =
+        getRenderSegmentedControl(tester).getChildrenAsList();
 
     expect(
       getRenderSegmentedControl(tester),
@@ -515,11 +533,13 @@ void main() {
     );
   });
 
-  testWidgets('Long press does not change background color of currently-selected child',
-          (WidgetTester tester) async {
+  testWidgets(
+      'Long press does not change background color of currently-selected child',
+      (WidgetTester tester) async {
     await tester.pumpWidget(setupSimpleSegmentedControl());
 
-    final dynamic childList = getRenderSegmentedControl(tester).getChildrenAsList();
+    final dynamic childList =
+        getRenderSegmentedControl(tester).getChildrenAsList();
 
     expect(
       getRenderSegmentedControl(tester),
@@ -565,7 +585,7 @@ void main() {
   });
 
   testWidgets('Height of segmented control is determined by tallest widget',
-          (WidgetTester tester) async {
+      (WidgetTester tester) async {
     final Map<int, Widget> children = <int, Widget>{};
     children[0] = new Container(
       constraints: const BoxConstraints.tightFor(height: 100.0),
@@ -591,15 +611,16 @@ void main() {
       ),
     );
 
-    final RenderBox buttonBox = tester.renderObject(
-        find.byKey(const ValueKey<String>('Segmented Control')));
+    final RenderBox buttonBox = tester
+        .renderObject(find.byKey(const ValueKey<String>('Segmented Control')));
 
     // Default height of Placeholder is 400.0px, which is greater than heights
     // of other child widgets.
     expect(buttonBox.size.height, 400.0);
   });
 
-  testWidgets('Width of each child widget is the same', (WidgetTester tester) async {
+  testWidgets('Width of each child widget is the same',
+      (WidgetTester tester) async {
     final Map<int, Widget> children = <int, Widget>{};
     children[0] = new Container();
     children[1] = const Placeholder();
@@ -619,21 +640,23 @@ void main() {
       ),
     );
 
-    final RenderBox segmentedControl = tester.renderObject(
-        find.byKey(const ValueKey<String>('Segmented Control')));
+    final RenderBox segmentedControl = tester
+        .renderObject(find.byKey(const ValueKey<String>('Segmented Control')));
 
     // Subtract the 16.0px from each side. Remaining width should be allocated
     // to each child equally.
     final double childWidth = (segmentedControl.size.width - 32.0) / 3;
 
-    final dynamic childList = getRenderSegmentedControl(tester).getChildrenAsList();
+    final dynamic childList =
+        getRenderSegmentedControl(tester).getChildrenAsList();
 
     for (dynamic child in childList) {
       expect(childWidth, child.parentData.surroundingRect.width);
     }
   });
 
-  testWidgets('Width is finite in unbounded space', (WidgetTester tester) async {
+  testWidgets('Width is finite in unbounded space',
+      (WidgetTester tester) async {
     final Map<int, Widget> children = <int, Widget>{};
     children[0] = const Text('Child 1');
     children[1] = const Text('Child 2');
@@ -656,14 +679,14 @@ void main() {
       ),
     );
 
-    final RenderBox segmentedControl = tester.renderObject(
-        find.byKey(const ValueKey<String>('Segmented Control')));
+    final RenderBox segmentedControl = tester
+        .renderObject(find.byKey(const ValueKey<String>('Segmented Control')));
 
     expect(segmentedControl.size.width.isFinite, isTrue);
   });
 
   testWidgets('Directionality test - RTL should reverse order of widgets',
-          (WidgetTester tester) async {
+      (WidgetTester tester) async {
     final Map<int, Widget> children = <int, Widget>{};
     children[0] = const Text('Child 1');
     children[1] = const Text('Child 2');
@@ -680,12 +703,14 @@ void main() {
       ),
     );
 
-    expect(tester.getTopRight(find.text('Child 1')).dx > tester.getTopRight(
-        find.text('Child 2')).dx, isTrue);
+    expect(
+        tester.getTopRight(find.text('Child 1')).dx >
+            tester.getTopRight(find.text('Child 2')).dx,
+        isTrue);
   });
 
   testWidgets('Correct initial selection and toggling behavior - RTL',
-          (WidgetTester tester) async {
+      (WidgetTester tester) async {
     final Map<int, Widget> children = <int, Widget>{};
     children[0] = const Text('Child 1');
     children[1] = const Text('Child 2');
@@ -713,7 +738,8 @@ void main() {
       ),
     );
 
-    final dynamic childList = getRenderSegmentedControl(tester).getChildrenAsList();
+    final dynamic childList =
+        getRenderSegmentedControl(tester).getChildrenAsList();
 
     expect(
       getRenderSegmentedControl(tester),
@@ -893,7 +919,13 @@ void main() {
       ),
     );
 
-    await expectLater(find.byType(RepaintBoundary), matchesGoldenFile('segmented_control_test.0.0.png'));
+    // if golden files are regenerated on a non-Mac machine,
+    // change the 'skip' line to only run this test on that type of machine
+    expect(
+      find.byType(RepaintBoundary),
+      matchesGoldenFile('segmented_control_test.0.0.png'),
+      skip: !Platform.isMacOS,
+    );
   });
 
   testWidgets('Golden Test Pressed State', (WidgetTester tester) async {
@@ -925,6 +957,12 @@ void main() {
     await tester.startGesture(center);
     await tester.pumpAndSettle();
 
-    expect(find.byType(RepaintBoundary), matchesGoldenFile('segmented_control_test.1.0.png'));
+    // if golden files are regenerated on a non-Mac machine,
+    // change the 'skip' line to only run this test on that type of machine
+    expect(
+      find.byType(RepaintBoundary),
+      matchesGoldenFile('segmented_control_test.1.0.png'),
+      skip: !Platform.isMacOS,
+    );
   });
 }
