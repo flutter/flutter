@@ -763,19 +763,19 @@ void main() {
       ),
     );
 
-    // Overall height for this InputDecorator is 40dps:
+    // Overall height for this InputDecorator is 48dps:
     //   12 - top padding
     //   16 - input text (ahem font size 16dps)
     //   12 - bottom padding
+    //   48  - prefixIcon
 
-
-    expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, 40.0));
+    expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, 48.0));
     expect(tester.getSize(find.text('text')).height, 16.0);
     expect(tester.getSize(find.byIcon(Icons.pages)).height, 48.0);
     expect(tester.getSize(find.byIcon(Icons.satellite)).height, 48.0);
     expect(tester.getTopLeft(find.text('text')).dy, 12.0);
-    expect(tester.getTopLeft(find.byIcon(Icons.pages)).dy, -4.0);
-    expect(tester.getTopLeft(find.byIcon(Icons.satellite)).dy, -4.0);
+    expect(tester.getTopLeft(find.byIcon(Icons.pages)).dy, 0.0);
+    expect(tester.getTopLeft(find.byIcon(Icons.satellite)).dy, 0.0);
     expect(tester.getTopRight(find.byIcon(Icons.satellite)).dx, 800.0);
 
 
@@ -783,6 +783,69 @@ void main() {
     expect(tester.getTopLeft(find.byIcon(Icons.pages)).dx, 0.0);
     expect(tester.getTopRight(find.byIcon(Icons.pages)).dx, lessThanOrEqualTo(tester.getTopLeft(find.text('text')).dx));
     expect(tester.getTopRight(find.text('text')).dx, lessThanOrEqualTo(tester.getTopLeft(find.byIcon(Icons.satellite)).dx));
+  });
+
+  testWidgets('prefix/suffix icons are centered when smaller than 48 by 48', (WidgetTester tester) async {
+    const Key prefixKey = const Key('prefix');
+    await tester.pumpWidget(
+      buildInputDecorator(
+        decoration: const InputDecoration(
+          prefixIcon: const Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: const SizedBox(width: 8.0, height: 8.0, key: prefixKey),
+          ),
+          filled: true,
+        ),
+      ),
+    );
+
+    // Overall height for this InputDecorator is 48dps:
+    //   12 - top padding
+    //   16 - input text (ahem font size 16dps)
+    //   12 - bottom padding
+    //   48  - prefixIcon
+
+    expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, 48.0));
+    expect(tester.getSize(find.byKey(prefixKey)).height, 16.0);
+    expect(tester.getTopLeft(find.byKey(prefixKey)).dy, 16.0);
+  });
+
+  testWidgets('prefix/suffix icons increase height of decoration when larger than 48 by 48', (WidgetTester tester) async {
+    const Key prefixKey = const Key('prefix');
+    await tester.pumpWidget(
+      buildInputDecorator(
+        decoration: const InputDecoration(
+          prefixIcon: const SizedBox(width: 100.0, height: 100.0, key: prefixKey),
+          filled: true,
+        ),
+      ),
+    );
+
+    // Overall height for this InputDecorator is 100dps:
+    //   12 - top padding
+    //   16 - input text (ahem font size 16dps)
+    //   12 - bottom padding
+    //   100 - prefix icon
+
+    expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, 100.0));
+    expect(tester.getSize(find.byKey(prefixKey)).height, 100.0);
+    expect(tester.getTopLeft(find.byKey(prefixKey)).dy, 0.0);
+  });
+
+
+  testWidgets('counter text has correct right margin', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      buildInputDecorator(
+        // isEmpty: false (default)
+        // isFocused: false (default)
+        decoration: const InputDecoration(
+          counterText: 'test',
+        ),
+      ),
+    );
+
+    expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, 60.0));
+    expect(tester.getBottomLeft(find.text('test')).dx, 752.0);
   });
 
   testWidgets('InputDecorator error/helper/counter RTL layout', (WidgetTester tester) async {

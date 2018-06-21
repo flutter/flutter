@@ -803,11 +803,6 @@ class _RenderDecoration extends RenderBox {
       + aboveBaseline
       + belowBaseline
       + contentPadding.bottom;
-    containerHeight = math.max(
-      containerHeight,
-      math.max(
-        _boxSize(suffixIcon).height - (contentPadding.top + contentPadding.bottom),
-        _boxSize(prefixIcon).height - (contentPadding.top + contentPadding.bottom)));
 
     if (label != null) {
       // floatingLabelHeight includes the vertical gap between the inline
@@ -815,6 +810,12 @@ class _RenderDecoration extends RenderBox {
       containerHeight += decoration.floatingLabelHeight;
       inputBaseline += decoration.floatingLabelHeight;
     }
+
+    containerHeight = math.max(
+      containerHeight,
+      math.max(
+        _boxSize(suffixIcon).height,
+        _boxSize(prefixIcon).height));
 
     // Inline text within an outline border is centered within the container
     // less 2.0 dps at the top to account for the vertical space occupied
@@ -984,8 +985,10 @@ class _RenderDecoration extends RenderBox {
       case TextDirection.rtl: {
         double start = right - _boxSize(icon).width;
         double end = left;
-        if (prefixIcon != null)
+        if (prefixIcon != null) {
+          start += contentPadding.left;
           start -= centerLayout(prefixIcon, start - prefixIcon.size.width);
+        }
         if (label != null)
           centerLayout(label, start - label.size.width);
         if (prefix != null)
@@ -994,8 +997,10 @@ class _RenderDecoration extends RenderBox {
           baselineLayout(input, start - input.size.width);
         if (hint != null)
           baselineLayout(hint, start - hint.size.width);
-        if (suffixIcon != null)
+        if (suffixIcon != null) {
+          end -= contentPadding.left;
           end += centerLayout(suffixIcon, end);
+        }
         if (suffix != null)
           end += baselineLayout(suffix, end);
         break;
@@ -1775,7 +1780,6 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
         ? const EdgeInsets.fromLTRB(12.0, 20.0, 12.0, 12.0)
         : const EdgeInsets.fromLTRB(12.0, 24.0, 12.0, 16.0));
     }
-
     return new _Decorator(
       decoration: new _Decoration(
         contentPadding: contentPadding,
