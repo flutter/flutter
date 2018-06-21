@@ -450,6 +450,7 @@ class _DiamondNotchedRectangle implements NotchedShape {
   Path getOuterPath(Rect host, Rect guest) {
     if (!host.overlaps(guest))
       return new Path()..addRect(host);
+    assert(guest.width > 0.0);
 
     final Rect intersection = guest.intersect(host);
     // We are computing a "V" shaped notch, as in this diagram:
