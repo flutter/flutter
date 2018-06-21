@@ -12,13 +12,25 @@ import '../resident_runner.dart';
 import '../run_hot.dart';
 import '../runner/flutter_command.dart';
 import '../protocol_discovery.dart';
-// Usage:
-// With an application already running, a HotRunner can be attached to it
-// with:
-// $ flutter attach --debug-port 12345
 
 final String ipv4Loopback = InternetAddress.loopbackIPv4.address;
 
+/// A Flutter-command that attaches to Flutter programs that have been launched
+/// without `flutter run`.
+///
+/// With an application already running, a HotRunner can be attached to it
+/// with:
+/// ```
+/// $ flutter attach --debug-port 12345
+/// ```
+///
+/// Alternatively, the attach command can start listening and scan for new
+/// programs that become active:
+/// ```
+/// $ flutter attach
+/// ```
+/// As soon as a new observatory is detected the command attaches to it and
+/// enables hot reloading.
 class AttachCommand extends FlutterCommand {
   AttachCommand({bool verboseHelp = false}) {
     addBuildModeFlags(defaultToRelease: false);
