@@ -49,7 +49,7 @@ Future<Null> main(List<String> args) async {
 
   await runner.run(args, <FlutterCommand>[
     new AnalyzeCommand(verboseHelp: verboseHelp),
-    new AttachCommand(),
+    new AttachCommand(verboseHelp: verboseHelp),
     new BuildCommand(verboseHelp: verboseHelp),
     new ChannelCommand(verboseHelp: verboseHelp),
     new CleanCommand(),
