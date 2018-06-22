@@ -17,7 +17,7 @@
 #ifndef TXT_FONT_ASSET_PROVIDER_H_
 #define TXT_FONT_ASSET_PROVIDER_H_
 
-#include "third_party/skia/include/ports/SkFontMgr.h"
+#include "third_party/skia/include/core/SkFontMgr.h"
 
 namespace txt {
 

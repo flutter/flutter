@@ -19,8 +19,8 @@
 
 #include <memory>
 #include "lib/fxl/macros.h"
+#include "third_party/skia/include/core/SkFontMgr.h"
 #include "third_party/skia/include/core/SkStream.h"
-#include "third_party/skia/include/ports/SkFontMgr.h"
 #include "txt/font_asset_provider.h"
 
 namespace txt {

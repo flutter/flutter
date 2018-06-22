@@ -20584,9 +20584,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ====================================================================================================
 LIBRARY: skia
-ORIGIN: ../../../third_party/skia/include/ports/SkFontMgr.h + ../../../third_party/skia/LICENSE
+ORIGIN: ../../../third_party/skia/include/core/SkFontMgr.h + ../../../third_party/skia/LICENSE
 TYPE: LicenseType.bsd
-FILE: ../../../third_party/skia/include/ports/SkFontMgr.h
+FILE: ../../../third_party/skia/include/core/SkFontMgr.h
 ----------------------------------------------------------------------------------------------------
 Copyright 2018 Google LLC.
 
