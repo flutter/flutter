@@ -36,7 +36,7 @@ void main() {
         return mockLogReader;
       });
       when(device.portForwarder).thenReturn(portForwarder);
-      when(portForwarder.forward(devicePort, hostPort: anyNamed("hostPort"))).thenAnswer((_) async => hostPort);
+      when(portForwarder.forward(devicePort, hostPort: anyNamed('hostPort'))).thenAnswer((_) async => hostPort);
       when(portForwarder.forwardedPorts).thenReturn(<ForwardedPort>[new ForwardedPort(hostPort, devicePort)]);
       when(portForwarder.unforward).thenReturn((ForwardedPort _) async => null);
       testDeviceManager.addDevice(device);
@@ -45,7 +45,7 @@ void main() {
 
       await createTestCommandRunner(command).run(<String>['attach']);
 
-      verify(portForwarder.forward(devicePort, hostPort: anyNamed("hostPort"))).called(1);
+      verify(portForwarder.forward(devicePort, hostPort: anyNamed('hostPort'))).called(1);
 
       mockLogReader.dispose();
     });
