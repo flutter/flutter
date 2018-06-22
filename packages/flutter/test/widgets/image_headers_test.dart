@@ -31,7 +31,7 @@ void main() {
       when(request.headers).thenReturn(headers);
       when(request.close()).thenAnswer((_) => new Future<HttpClientResponse>.value(response));
       when(response.contentLength).thenReturn(kTransparentImage.length);
-      when(response.statusCode).thenReturn(HttpStatus.OK); // ignore: deprecated_member_use
+      when(response.statusCode).thenReturn(HttpStatus.ok);
       when(response.listen(typed(any))).thenAnswer((Invocation invocation) {
         final void Function(List<int>) onData = invocation.positionalArguments[0];
         final void Function() onDone = invocation.namedArguments[#onDone];
