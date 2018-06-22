@@ -7,6 +7,7 @@ import 'dart:developer';
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import 'backdrop.dart';
 import 'demos.dart';
@@ -356,8 +357,8 @@ class _GalleryHomeState extends State<GalleryHome> with SingleTickerProviderStat
             frontTitle: new AnimatedSwitcher(
               duration: _kFrontLayerSwitchDuration,
               child: _category == null
-                ? const Text('Flutter gallery')
-                : new Text(_category.name),
+                  ? const Text('Flutter gallery')
+                  : new Text(_category.name),
             ),
             frontHeading: widget.testMode ? null: new Container(height: 24.0),
             frontLayer: new AnimatedSwitcher(
@@ -399,6 +400,10 @@ class _GalleryHomeState extends State<GalleryHome> with SingleTickerProviderStat
         ]
       );
     }
+    home = new AnnotatedRegion<SystemUiOverlayStyle>(
+      child: home,
+      value: SystemUiOverlayStyle.dark
+    );
 
     return home;
   }
