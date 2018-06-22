@@ -8,14 +8,14 @@ import '../base/common.dart';
 import '../base/io.dart';
 import '../cache.dart';
 import '../device.dart';
+import '../protocol_discovery.dart';
 import '../resident_runner.dart';
 import '../run_hot.dart';
 import '../runner/flutter_command.dart';
-import '../protocol_discovery.dart';
 
 final String ipv4Loopback = InternetAddress.loopbackIPv4.address;
 
-/// A Flutter-command that attaches to Flutter programs that have been launched
+/// A Flutter-command that attaches to applications that have been launched
 /// without `flutter run`.
 ///
 /// With an application already running, a HotRunner can be attached to it
@@ -34,9 +34,12 @@ final String ipv4Loopback = InternetAddress.loopbackIPv4.address;
 class AttachCommand extends FlutterCommand {
   AttachCommand({bool verboseHelp = false}) {
     addBuildModeFlags(defaultToRelease: false);
-    argParser.addOption('debug-port',
-        help: 'Local port where the observatory is listening.');
-    argParser.addFlag('preview-dart-2',
+    argParser.addOption(
+        'debug-port',
+        help: 'Local port where the observatory is listening.',
+    );
+    argParser.addFlag(
+      'preview-dart-2',
       defaultsTo: true,
       hide: !verboseHelp,
       help: 'Preview Dart 2.0 functionality.',
@@ -50,7 +53,8 @@ class AttachCommand extends FlutterCommand {
   final String description = 'Attach to a running application.';
 
   int get observatoryPort {
-    if (argResults['debug-port'] == null) return null;
+    if (argResults['debug-port'] == null)
+      return null;
     try {
       return int.parse(argResults['debug-port']);
     } catch (error) {
@@ -78,13 +82,13 @@ class AttachCommand extends FlutterCommand {
         await observatoryDiscovery?.cancel();
       }
     } else {
-      int localPort = await device.portForwarder.forward(devicePort);
-      observatoryUri = Uri.parse("http://$ipv4Loopback:$localPort/");
+      final int localPort = await device.portForwarder.forward(devicePort);
+      observatoryUri = Uri.parse('http://$ipv4Loopback:$localPort/');
     }
     try {
       final FlutterDevice flutterDevice =
           new FlutterDevice(device, trackWidgetCreation: false, previewDart2: argResults['preview-dart-2']);
-      flutterDevice.observatoryUris = [ observatoryUri ];
+      flutterDevice.observatoryUris = <Uri>[ observatoryUri ];
       final HotRunner hotRunner = new HotRunner(
         <FlutterDevice>[flutterDevice],
         debuggingOptions: new DebuggingOptions.enabled(getBuildInfo()),

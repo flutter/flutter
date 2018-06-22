@@ -16,21 +16,13 @@ import '../src/mocks.dart';
 
 void main() {
   group('attach', () {
-    DeviceManager mockDeviceManager;
-    DeviceLogReader mockLogReader;
-
     setUpAll(() {
       Cache.disableLocking();
     });
 
-    setUp(() {
-      mockDeviceManager = new MockDeviceManager();
-      mockLogReader = new MockDeviceLogReader();
-    });
-
     testUsingContext('finds observatory port and forwards', () async {
-      final int devicePort = 499;
-      final int hostPort = 42;
+      const int devicePort = 499;
+      const int hostPort = 42;
       final MockDeviceLogReader mockLogReader = new MockDeviceLogReader();
       final MockPortForwarder portForwarder = new MockPortForwarder();
       final MockAndroidDevice device = new MockAndroidDevice();
@@ -44,9 +36,9 @@ void main() {
         return mockLogReader;
       });
       when(device.portForwarder).thenReturn(portForwarder);
-      when(portForwarder.forward(devicePort, hostPort: any)).thenAnswer((_) => new Future<int>.value(hostPort));
-      when(portForwarder.forwardedPorts).thenReturn([new ForwardedPort(hostPort, devicePort)]);
-      when(portForwarder.unforward).thenReturn((ForwardedPort _) => new Future<Null>.value(null));
+      when(portForwarder.forward(devicePort, hostPort: any)).thenAnswer((_) async => hostPort);
+      when(portForwarder.forwardedPorts).thenReturn(<ForwardedPort>[new ForwardedPort(hostPort, devicePort)]);
+      when(portForwarder.unforward).thenReturn((ForwardedPort _) async => null);
       testDeviceManager.addDevice(device);
 
       final AttachCommand command = new AttachCommand();
@@ -59,15 +51,15 @@ void main() {
     });
 
     testUsingContext('forwards to given port', () async {
-      final int devicePort = 499;
-      final int hostPort = 42;
+      const int devicePort = 499;
+      const int hostPort = 42;
       final MockPortForwarder portForwarder = new MockPortForwarder();
       final MockAndroidDevice device = new MockAndroidDevice();
 
       when(device.portForwarder).thenReturn(portForwarder);
-      when(portForwarder.forward(devicePort)).thenAnswer((_) => new Future<int>.value(hostPort));
-      when(portForwarder.forwardedPorts).thenReturn([new ForwardedPort(hostPort, devicePort)]);
-      when(portForwarder.unforward).thenReturn((ForwardedPort _) => new Future<Null>.value(null));
+      when(portForwarder.forward(devicePort)).thenAnswer((_) async => hostPort);
+      when(portForwarder.forwardedPorts).thenReturn(<ForwardedPort>[new ForwardedPort(hostPort, devicePort)]);
+      when(portForwarder.unforward).thenReturn((ForwardedPort _) async => null);
       testDeviceManager.addDevice(device);
 
       final AttachCommand command = new AttachCommand();
