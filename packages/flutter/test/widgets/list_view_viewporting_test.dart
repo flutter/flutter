@@ -459,5 +459,36 @@ void main() {
 
     final RenderSliverList list = tester.renderObject(find.byType(SliverList));
     expect(list, paintsExactlyCountTimes(#drawParagraph, 2));
-  }, skip: true);
+  });
+
+  testWidgets('ListView should paint with offset', (WidgetTester tester) async {
+    await tester.pumpWidget(
+        new MaterialApp(
+            home: new Scaffold(
+                body: new Container(
+                    height: 500.0,
+                    child: new CustomScrollView(
+                      controller: new ScrollController(initialScrollOffset: 120.0),
+                      slivers: <Widget>[
+                        const SliverAppBar(
+                          expandedHeight: 250.0,
+                        ),
+                        new SliverList(
+                            delegate: new ListView.builder(
+                                itemExtent: 100.0,
+                                itemCount: 100,
+                                itemBuilder: (_, __) => new Container(
+                                  height: 40.0,
+                                  child: const Text('hey'),
+                                )).childrenDelegate),
+                      ],
+                    )
+                )
+            )
+        )
+    );
+
+    final RenderObject renderObject = tester.renderObject(find.byType(Scrollable));
+    expect(renderObject, paintsExactlyCountTimes(#drawParagraph, 10));
+  });
 }
