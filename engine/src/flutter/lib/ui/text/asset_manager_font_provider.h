@@ -11,7 +11,7 @@
 
 #include "flutter/assets/asset_manager.h"
 #include "lib/fxl/macros.h"
-#include "third_party/skia/include/ports/SkFontMgr.h"
+#include "third_party/skia/include/core/SkFontMgr.h"
 #include "txt/font_asset_provider.h"
 
 namespace blink {
