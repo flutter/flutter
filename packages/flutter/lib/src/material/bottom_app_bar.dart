@@ -46,7 +46,8 @@ class BottomAppBar extends StatefulWidget {
     Key key,
     this.color,
     this.elevation = 8.0,
-    this.hasNotch = true,
+    this.shape,
+    this.notchMargin = 4.0,
     this.child,
   }) : assert(elevation != null),
        assert(elevation >= 0.0),
@@ -71,16 +72,16 @@ class BottomAppBar extends StatefulWidget {
   /// Defaults to 8, the appropriate elevation for bottom app bars.
   final double elevation;
 
-  /// Whether to make a notch in the bottom app bar's shape for the floating
-  /// action button.
+  /// The notch that is made for the floating action button.
   ///
-  /// When true, the bottom app bar uses
-  /// [ScaffoldGeometry.floatingActionButtonNotch] to make a notch along its
-  /// top edge, where it is overlapped by the
-  /// [ScaffoldGeometry.floatingActionButtonArea].
+  /// If null the bottom app bar will be rectangular with no notch.
+  final NotchedShape shape;
+
+  /// The margin between the [FloatingActionButton] and the [BottomAppBar]'s
+  /// notch.
   ///
-  /// When false, the shape of the bottom app bar is a rectangle.
-  final bool hasNotch;
+  /// Not used if [shape] is null.
+  final double notchMargin;
 
   @override
   State createState() => new _BottomAppBarState();
@@ -97,8 +98,12 @@ class _BottomAppBarState extends State<BottomAppBar> {
 
   @override
   Widget build(BuildContext context) {
-    final CustomClipper<Path> clipper = widget.hasNotch
-      ? new _BottomAppBarClipper(geometry: geometryListenable)
+    final CustomClipper<Path> clipper = widget.shape != null
+      ? new _BottomAppBarClipper(
+        geometry: geometryListenable,
+        shape: widget.shape,
+        notchMargin: widget.notchMargin,
+      )
       : const ShapeBorderClipper(shape: const RoundedRectangleBorder());
     return new PhysicalShape(
       clipper: clipper,
@@ -116,17 +121,22 @@ class _BottomAppBarState extends State<BottomAppBar> {
 
 class _BottomAppBarClipper extends CustomClipper<Path> {
   const _BottomAppBarClipper({
-    @required this.geometry
+    @required this.geometry,
+    @required this.shape,
+    @required this.notchMargin,
   }) : assert(geometry != null),
+       assert(shape != null),
+       assert(notchMargin != null),
        super(reclip: geometry);
 
   final ValueListenable<ScaffoldGeometry> geometry;
+  final NotchedShape shape;
+  final double notchMargin;
 
   @override
   Path getClip(Size size) {
     final Rect appBar = Offset.zero & size;
-    if (geometry.value.floatingActionButtonArea == null ||
-        geometry.value.floatingActionButtonNotch == null) {
+    if (geometry.value.floatingActionButtonArea == null) {
       return new Path()..addRect(appBar);
     }
 
@@ -135,22 +145,7 @@ class _BottomAppBarClipper extends CustomClipper<Path> {
     final Rect button = geometry.value.floatingActionButtonArea
       .translate(0.0, geometry.value.bottomNavigationBarTop * -1.0);
 
-    final ComputeNotch computeNotch = geometry.value.floatingActionButtonNotch;
-    return new Path()
-      ..moveTo(appBar.left, appBar.top)
-      ..addPath(
-        computeNotch(
-          appBar,
-          button,
-          new Offset(appBar.left, appBar.top),
-          new Offset(appBar.right, appBar.top)
-        ),
-        Offset.zero
-      )
-      ..lineTo(appBar.right, appBar.top)
-      ..lineTo(appBar.right, appBar.bottom)
-      ..lineTo(appBar.left, appBar.bottom)
-      ..close();
+    return shape.getOuterPath(appBar, button.inflate(notchMargin));
   }
 
   @override
