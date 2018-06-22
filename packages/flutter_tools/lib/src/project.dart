@@ -52,7 +52,7 @@ class FlutterProject {
   AndroidProject get android => new AndroidProject(directory.childDirectory('android'));
 
   /// The generated AndroidModule sub project of this module project.
-  AndroidModuleProject get androidModule => new AndroidModuleProject(directory.childDirectory('android_gen'));
+  AndroidModuleProject get androidModule => new AndroidModuleProject(directory.childDirectory('.android'));
 
   /// Returns true if this project has an example application
   bool get hasExampleApp => directory.childDirectory('example').childFile('pubspec.yaml').existsSync();
