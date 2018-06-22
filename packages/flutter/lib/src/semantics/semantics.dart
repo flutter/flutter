@@ -69,6 +69,29 @@ class SemanticsTag {
   String toString() => '$runtimeType($name)';
 }
 
+class LocalContextAction {
+  const factory LocalContextAction({String label, int id}) = LocalContextAction._;
+
+  const LocalContextAction._({this.label, this.id});
+
+  final String label;
+  final int id;
+
+  @override
+  int get hashCode => label.hashCode ^ id.hashCode;
+
+  @override
+  bool operator ==(Object other) {
+    if (other.runtimeType != runtimeType)
+      return false;
+    final LocalContextAction typedOther = other;
+    return typedOther.id == id && typedOther.label == label;
+  }
+
+  @override
+  String toString() => 'LocalContextAction{id:$id, label:$label}';
+}
+
 /// Summary information about a [SemanticsNode] object.
 ///
 /// A semantics node might [SemanticsNode.mergeAllDescendantsIntoThisNode],
@@ -100,6 +123,7 @@ class SemanticsData extends Diagnosticable {
     @required this.scrollExtentMin,
     this.tags,
     this.transform,
+    this.localContextActions,
   }) : assert(flags != null),
        assert(actions != null),
        assert(label != null),
@@ -200,6 +224,9 @@ class SemanticsData extends Diagnosticable {
   /// parent).
   final Matrix4 transform;
 
+  ///
+  final Set<LocalContextAction> localContextActions;
+
   /// Whether [flags] contains the given flag.
   bool hasFlag(SemanticsFlag flag) => (flags & flag.index) != 0;
 
@@ -219,7 +246,9 @@ class SemanticsData extends Diagnosticable {
       if ((actions & action.index) != 0)
         actionSummary.add(describeEnum(action));
     }
+    final List<String> localContextActionSummary = localContextActions.map((LocalContextAction action) => action.toString()).toList();
     properties.add(new IterableProperty<String>('actions', actionSummary, ifEmpty: null));
+    properties.add(new IterableProperty<String>('localContextActions', localContextActionSummary, ifEmpty: null));
 
     final List<String> flagSummary = <String>[];
     for (SemanticsFlag flag in SemanticsFlag.values.values) {
@@ -259,11 +288,12 @@ class SemanticsData extends Diagnosticable {
         && typedOther.scrollPosition == scrollPosition
         && typedOther.scrollExtentMax == scrollExtentMax
         && typedOther.scrollExtentMin == scrollExtentMin
-        && typedOther.transform == transform;
+        && typedOther.transform == transform
+        && setEquals(typedOther.localContextActions, localContextActions);
   }
 
   @override
-  int get hashCode => ui.hashValues(flags, actions, label, value, increasedValue, decreasedValue, hint, textDirection, rect, tags, textSelection, scrollPosition, scrollExtentMax, scrollExtentMin, transform);
+  int get hashCode => ui.hashValues(flags, actions, label, value, increasedValue, decreasedValue, hint, textDirection, rect, tags, textSelection, scrollPosition, scrollExtentMax, scrollExtentMin, transform, localContextActions);
 }
 
 class _SemanticsDiagnosticableNode extends DiagnosticableNode<SemanticsNode> {
@@ -333,6 +363,7 @@ class SemanticsProperties extends DiagnosticableTree {
     this.onSetSelection,
     this.onDidGainAccessibilityFocus,
     this.onDidLoseAccessibilityFocus,
+    this.localContextActions,
   });
 
   /// If non-null, indicates that this subtree represents something that can be
@@ -695,6 +726,9 @@ class SemanticsProperties extends DiagnosticableTree {
   ///    accessibility focus
   ///  * [FocusNode], [FocusScope], [FocusManager], which manage the input focus
   final VoidCallback onDidLoseAccessibilityFocus;
+
+
+  final Map<LocalContextAction, VoidCallback> localContextActions;
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
@@ -1103,6 +1137,7 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
   // TAGS, LABELS, ACTIONS
 
   Map<SemanticsAction, _SemanticsActionHandler> _actions = _kEmptyConfig._actions;
+  Map<LocalContextAction, _SemanticsActionHandler> _localContextActions = _kEmptyConfig._localContextActions;
 
   int _actionsAsBits = _kEmptyConfig._actionsAsBits;
 
@@ -1242,6 +1277,7 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
     _textDirection = config.textDirection;
     _sortKey = config.sortKey;
     _actions = new Map<SemanticsAction, _SemanticsActionHandler>.from(config._actions);
+    _localContextActions = new Map<LocalContextAction, _SemanticsActionHandler>.from(config._localContextActions);
     _actionsAsBits = config._actionsAsBits;
     _textSelection = config._textSelection;
     _scrollPosition = config._scrollPosition;
@@ -1258,6 +1294,7 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
       !_canPerformAction(SemanticsAction.decrease) || (_value == '') == (_decreasedValue == ''),
       'A SemanticsNode with action "increase" needs to be annotated with either both "value" and "decreasedValue" or neither',
     );
+    assert(_localContextActions.isNotEmpty && _canPerformAction(SemanticsAction.localContextAction) == true);
   }
 
 
@@ -1341,6 +1378,7 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
   }
 
   static final Int32List _kEmptyChildList = new Int32List(0);
+  static final Int32List _kEmptyLocalContextActionList = new Int32List(0);
   static final Float64List _kIdentityTransform = _initIdentityTransform();
 
   void _addToUpdate(ui.SemanticsUpdateBuilder builder) {
@@ -1384,6 +1422,7 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
       transform: data.transform?.storage ?? _kIdentityTransform,
       childrenInTraversalOrder: childrenInTraversalOrder,
       childrenInHitTestOrder: childrenInHitTestOrder,
+      localContextActions: _kEmptyLocalContextActionList,
     );
     _dirty = false;
   }
@@ -1495,7 +1534,9 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
       properties.add(new DiagnosticsProperty<Rect>('rect', rect, description: description, showName: false));
     }
     final List<String> actions = _actions.keys.map((SemanticsAction action) => describeEnum(action)).toList()..sort();
+    final List<String> localContextActions = _localContextActions.keys.map((LocalContextAction action) => action.toString());
     properties.add(new IterableProperty<String>('actions', actions, ifEmpty: null));
+    properties.add(new IterableProperty<String>('localContextActions', localContextActions, ifEmpty: null));
     final List<String> flags = SemanticsFlag.values.values.where((SemanticsFlag flag) => _hasFlag(flag)).map((SemanticsFlag flag) => flag.toString().substring('SemanticsFlag.'.length)).toList();
     properties.add(new IterableProperty<String>('flags', flags, ifEmpty: null));
     properties.add(new FlagProperty('isInvisible', value: isInvisible, ifTrue: 'invisible'));
@@ -1892,6 +1933,11 @@ class SemanticsOwner extends ChangeNotifier {
 
   /// Update the semantics using [Window.updateSemantics].
   void sendSemanticsUpdate() {
+    final ui.LocalContextActionUpdateBuilder actions = new ui.LocalContextActionUpdateBuilder();
+    actions.updateAction(id: 1, textDirection: TextDirection.ltr, label: 'Hello');
+    actions.updateAction(id: 2, textDirection: TextDirection.ltr, label: 'Goodbye');
+    actions.updateAction(id: 3, textDirection: TextDirection.ltr, label: 'Loop');
+    ui.window.updateLocalContextActions(actions.build());
     if (_dirtyNodes.isEmpty)
       return;
     final List<SemanticsNode> visitedNodes = <SemanticsNode>[];
@@ -2100,6 +2146,7 @@ class SemanticsConfiguration {
   ///
   /// * [addAction] to add an action.
   final Map<SemanticsAction, _SemanticsActionHandler> _actions = <SemanticsAction, _SemanticsActionHandler>{};
+  final Map<LocalContextAction, _SemanticsActionHandler> _localContextActions = <LocalContextAction, _SemanticsActionHandler>{};
 
   int _actionsAsBits = 0;
 

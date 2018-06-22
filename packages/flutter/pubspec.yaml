@@ -76,3 +76,9 @@ environment:
   sdk: '>=1.19.0 <2.0.0'
 
 # PUBSPEC CHECKSUM: b1ad
+
+dependency_overrides:
+  sky_engine:
+    path: /usr/local/google/home/jonahwilliams/Documents/engine/src/out/android_debug_unopt/gen/dart-pkg/sky_engine
+  sky_services:
+    path: /usr/local/google/home/jonahwilliams/Documents/engine/src/out/android_debug_unopt/gen/dart-pkg/sky_services
