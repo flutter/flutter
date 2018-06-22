@@ -60,7 +60,7 @@ class _StdoutHandler {
 
   // This is needed to get ready to process next compilation result output,
   // with its own boundary key and new completer.
-  void reset({bool suppressCompilerMessages: false}) {
+  void reset({bool suppressCompilerMessages = false}) {
     boundaryKey = null;
     compilerOutput = new Completer<CompilerOutput>();
     _suppressCompilerMessages = suppressCompilerMessages;
