@@ -1376,4 +1376,55 @@ void main() {
       semanticsTester.dispose();
     });
   });
+
+  testWidgets('can be tapped outside of chip delete icon', (WidgetTester tester) async {
+    bool deleted = false;
+    await tester.pumpWidget(
+      _wrapForChip(
+        child: new Row(
+          children: <Widget>[
+            new Chip(
+              materialTapTargetSize: MaterialTapTargetSize.padded,
+              shape: const RoundedRectangleBorder(borderRadius: const BorderRadius.all(const Radius.circular(0.0))),
+              avatar: const CircleAvatar(child: const Text('A')),
+              label: const Text('Chip A'),
+              onDeleted: () {
+                deleted = true;
+              },
+              deleteIcon: const Icon(Icons.delete),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    await tester.tapAt(tester.getTopRight(find.byType(Chip)) - const Offset(2.0, -2.0));
+    await tester.pumpAndSettle();
+    expect(deleted, true);
+  });
+
+  testWidgets('can be tapped outside of chip body', (WidgetTester tester) async {
+    bool pressed = false;
+    await tester.pumpWidget(
+      _wrapForChip(
+        child: new Row(
+          children: <Widget>[
+            new InputChip(
+              materialTapTargetSize: MaterialTapTargetSize.padded,
+              shape: const RoundedRectangleBorder(borderRadius: const BorderRadius.all(const Radius.circular(0.0))),
+              avatar: const CircleAvatar(child: const Text('A')),
+              label: const Text('Chip A'),
+              onPressed: () {
+                pressed = true;
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+
+    await tester.tapAt(tester.getRect(find.byType(InputChip)).topCenter);
+    await tester.pumpAndSettle();
+    expect(pressed, true);
+  });
 }
