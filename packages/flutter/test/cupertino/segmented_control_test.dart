@@ -895,80 +895,79 @@ void main() {
   });
 
   testWidgets('Golden Test Placeholder Widget', (WidgetTester tester) async {
-    final Map<int, Widget> children = <int, Widget>{};
-    children[0] = new Container();
-    children[1] = const Placeholder();
-    children[2] = new Container();
+    // Different machines render this content differently. Since the golden
+    // files are rendered on MacOS, this test should only be run on MacOS.
+    // If the golden files are regenerated on another OS, please change this
+    // test to only run on that OS.
+    if (Platform.isMacOS) {
+      final Map<int, Widget> children = <int, Widget>{};
+      children[0] = new Container();
+      children[1] = const Placeholder();
+      children[2] = new Container();
 
-    const int currentValue = 0;
+      const int currentValue = 0;
 
-    await tester.pumpWidget(
-      new RepaintBoundary(
-        child: new StatefulBuilder(
-          builder: (BuildContext context, StateSetter setState) {
-            return boilerplate(
-              child: new SegmentedControl<int>(
-                key: const ValueKey<String>('Segmented Control'),
-                children: children,
-                onValueChanged: (int newValue) {},
-                groupValue: currentValue,
-              ),
-            );
-          },
+      await tester.pumpWidget(
+        new RepaintBoundary(
+          child: new StatefulBuilder(
+            builder: (BuildContext context, StateSetter setState) {
+              return boilerplate(
+                child: new SegmentedControl<int>(
+                  key: const ValueKey<String>('Segmented Control'),
+                  children: children,
+                  onValueChanged: (int newValue) {},
+                  groupValue: currentValue,
+                ),
+              );
+            },
+          ),
         ),
-      ),
-    );
+      );
 
-    // If golden files are regenerated on a non-Mac machine,
-    // change the 'skip' line to only run this expect on that type of machine.
-    // The content renders slightly differently on different types of
-    // machines, so this golden file test should only be run on the same type
-    // machine as was used to generate the golden file. 
-    await expectLater(
-      find.byType(RepaintBoundary),
-      matchesGoldenFile('segmented_control_test.0.0.png'),
-      skip: !Platform.isMacOS,
-    );
+      await expectLater(
+        find.byType(RepaintBoundary),
+        matchesGoldenFile('segmented_control_test.0.0.png'),
+      );
+    }
   });
 
   testWidgets('Golden Test Pressed State', (WidgetTester tester) async {
-    final Map<int, Widget> children = <int, Widget>{};
-    children[0] = const Text('A');
-    children[1] = const Text('B');
-    children[2] = const Text('C');
+    // Different machines render this content differently. Since the golden
+    // files are rendered on MacOS, this test should only be run on MacOS.
+    // If the golden files are regenerated on another OS, please change this
+    // test to only run on that OS.
+    if (Platform.isMacOS) {
+      final Map<int, Widget> children = <int, Widget>{};
+      children[0] = const Text('A');
+      children[1] = const Text('B');
+      children[2] = const Text('C');
 
-    const int currentValue = 0;
+      const int currentValue = 0;
 
-    await tester.pumpWidget(
-      new RepaintBoundary(
-        child: new StatefulBuilder(
-          builder: (BuildContext context, StateSetter setState) {
-            return boilerplate(
-              child: new SegmentedControl<int>(
-                key: const ValueKey<String>('Segmented Control'),
-                children: children,
-                onValueChanged: (int newValue) {},
-                groupValue: currentValue,
-              ),
-            );
-          },
+      await tester.pumpWidget(
+        new RepaintBoundary(
+          child: new StatefulBuilder(
+            builder: (BuildContext context, StateSetter setState) {
+              return boilerplate(
+                child: new SegmentedControl<int>(
+                  key: const ValueKey<String>('Segmented Control'),
+                  children: children,
+                  onValueChanged: (int newValue) {},
+                  groupValue: currentValue,
+                ),
+              );
+            },
+          ),
         ),
-      ),
-    );
+      );
 
-    final Offset center = tester.getCenter(find.text('B'));
-    await tester.startGesture(center);
-    await tester.pumpAndSettle();
-
-    // If golden files are regenerated on a non-Mac machine,
-    // change the 'skip' line to only run this expect on that type of machine.
-    // The content renders slightly differently on different types of
-    // machines, so this golden file test should only be run on the same type
-    // machine as was used to generate the golden file.
-    await expectLater(
-      find.byType(RepaintBoundary),
-      matchesGoldenFile('segmented_control_test.1.0.png'),
-      skip: !Platform.isMacOS,
-    );
+      final Offset center = tester.getCenter(find.text('B'));
+      await tester.startGesture(center);
+      await tester.pumpAndSettle();
+      await expectLater(
+        find.byType(RepaintBoundary),
+        matchesGoldenFile('segmented_control_test.1.0.png'),
+      );
+    }
   });
 }
