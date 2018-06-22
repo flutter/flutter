@@ -103,11 +103,21 @@ Depending on the platform you choose below, you will need to replace `host_debug
 
 Run the following steps, from the `src` directory created in the steps above:
 
-* `git pull upstream master` in `src/flutter` to update the Flutter Engine repo.
-* `gclient sync` to update your dependencies.
-* `./flutter/tools/gn --android --unoptimized` to prepare your build files for device-side executables (or `--android --android-cpu [x86|x64] --unoptimized` for x86/x64 emulators) .
-* `./flutter/tools/gn --unoptimized` to prepare the build files for host-side executables.
-* `ninja -C out/android_debug_unopt && ninja -C out/host_debug_unopt` to build all executables (use `out/android_debug_unopt_x64` for x86/x64 emulators).
+* Update the Flutter Engine repo.
+    * `git pull upstream master` in `src/flutter`
+* Update your dependencies
+    * `gclient sync`
+* Prepare your build files
+    * `./flutter/tools/gn --android --unoptimized` for device-side executables
+    * `./flutter/tools/gn --android --android-cpu x86 --unoptimized` for x86 emulators
+    * `./flutter/tools/gn --android --android-cpu x64 --unoptimized` for x64 emulators
+    * `./flutter/tools/gn --unoptimized` for host-side executables
+* Build your executables
+    * `ninja -C out/android_debug_unopt` for device-side executables
+    * `ninja -C out/android_debug_unopt_x86` for x86 emulators
+    * `ninja -C out/android_debug_unopt_x64` for x64 emulators
+    * `ninja -C out/host_debug_unopt` for host-side executables
+    * These commands can be combined. Ex: `ninja -C out/android_debug_unopt && ninja -C out/host_debug_unopt`
     * For Googlers, consider also using the option `-j 1000` to parallelize the build using Goma.
 
 This builds a debug-enabled ("unoptimized") binary configured to run Dart in
