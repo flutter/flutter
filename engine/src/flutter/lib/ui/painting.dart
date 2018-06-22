@@ -1381,10 +1381,13 @@ enum PixelFormat {
 }
 
 class _ImageInfo {
-  _ImageInfo(this.width, this.height, this.format);
+  _ImageInfo(this.width, this.height, this.format, this.rowBytes) {
+    rowBytes ??= width * 4;
+  }
   int width;
   int height;
   int format;
+  int rowBytes;
 }
 
 /// Opaque handle to raw decoded image data (pixels).
@@ -1529,14 +1532,19 @@ Future<Null> _decodeImageFromListAsync(Uint8List list,
 /// Convert an array of pixel values into an [Image] object.
 ///
 /// [pixels] is the pixel data in the encoding described by [format].
+///
+/// [rowBytes] is the number of bytes consumed by each row of pixels in the
+/// data buffer.  If unspecified, it defaults to [width] multipled by the
+/// number of bytes per pixel in the provided [format].
 void decodeImageFromPixels(
   Uint8List pixels,
   int width,
   int height,
   PixelFormat format,
-  ImageDecoderCallback callback
+  ImageDecoderCallback callback,
+  {int rowBytes}
 ) {
-  final _ImageInfo imageInfo = new _ImageInfo(width, height, format.index);
+  final _ImageInfo imageInfo = new _ImageInfo(width, height, format.index, rowBytes);
   final Future<Codec> codecFuture = _futurize(
     (_Callback<Codec> callback) => _instantiateImageCodec(pixels, callback, imageInfo)
   );
