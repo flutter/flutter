@@ -269,6 +269,12 @@ tasks:
     stage: devicelab
     required_agent_capabilities: ["linux/android"]
 
+  flutter_attach_test:
+    description: >
+      Tests the `flutter attach` command.
+    stage: devicelab
+    required_agent_capabilities: ["linux/android"]
+
   # iOS on-device tests
 
   flavors_test_ios:
