@@ -1,4 +1,4 @@
-Signature: 7209f4630c616d4ce27e88a8b0770d0d
+Signature: 5e9e954fa5d3ecc99a6e5ac44747f06f
 
 UNUSED LICENSES:
 
@@ -17250,12 +17250,12 @@ FILE: ../../../third_party/skia/modules/sksg/src/SkSGPlane.cpp
 FILE: ../../../third_party/skia/modules/sksg/src/SkSGRoundEffect.cpp
 FILE: ../../../third_party/skia/modules/sksg/src/SkSGScene.cpp
 FILE: ../../../third_party/skia/modules/sksg/src/SkSGText.cpp
-FILE: ../../../third_party/skia/samplecode/Nima.cpp
-FILE: ../../../third_party/skia/samplecode/Nima.h
 FILE: ../../../third_party/skia/samplecode/SampleAnimatedImage.cpp
 FILE: ../../../third_party/skia/samplecode/SampleFlutterAnimate.cpp
 FILE: ../../../third_party/skia/samplecode/SampleGlyphTransform.cpp
 FILE: ../../../third_party/skia/samplecode/SampleNima.cpp
+FILE: ../../../third_party/skia/samplecode/SampleNimaActor.cpp
+FILE: ../../../third_party/skia/samplecode/SampleNimaActor.h
 FILE: ../../../third_party/skia/src/android/SkAnimatedImage.cpp
 FILE: ../../../third_party/skia/src/compute/common/cl/find_cl.c
 FILE: ../../../third_party/skia/src/compute/common/cl/find_cl.h
