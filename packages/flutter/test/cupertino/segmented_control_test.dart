@@ -919,8 +919,11 @@ void main() {
       ),
     );
 
-    // if golden files are regenerated on a non-Mac machine,
-    // change the 'skip' line to only run this test on that type of machine
+    // If golden files are regenerated on a non-Mac machine,
+    // change the 'skip' line to only run this expect on that type of machine.
+    // The content renders slightly differently on different types of
+    // machines, so this golden file test should only be run on the same type
+    // machine as was used to generate the golden file. 
     await expectLater(
       find.byType(RepaintBoundary),
       matchesGoldenFile('segmented_control_test.0.0.png'),
@@ -957,8 +960,11 @@ void main() {
     await tester.startGesture(center);
     await tester.pumpAndSettle();
 
-    // if golden files are regenerated on a non-Mac machine,
-    // change the 'skip' line to only run this test on that type of machine
+    // If golden files are regenerated on a non-Mac machine,
+    // change the 'skip' line to only run this expect on that type of machine.
+    // The content renders slightly differently on different types of
+    // machines, so this golden file test should only be run on the same type
+    // machine as was used to generate the golden file.
     await expectLater(
       find.byType(RepaintBoundary),
       matchesGoldenFile('segmented_control_test.1.0.png'),
