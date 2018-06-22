@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/widgets.dart' hide TypeMatcher;
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 class NotifyMaterial extends StatelessWidget {
@@ -37,7 +37,7 @@ void main() {
       new Center(
         child: new NotificationListener<LayoutChangedNotification>(
           onNotification: (LayoutChangedNotification notification) {
-            expect(notification, const TypeMatcher<SizeChangedLayoutNotification>());
+            expect(notification, isInstanceOf<SizeChangedLayoutNotification>());
             notified = true;
             return true;
           },
