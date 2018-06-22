@@ -899,36 +899,37 @@ void main() {
     // files are rendered on MacOS, this test should only be run on MacOS.
     // If the golden files are regenerated on another OS, please change this
     // test to only run on that OS.
-    if (Platform.isMacOS) {
-      final Map<int, Widget> children = <int, Widget>{};
-      children[0] = new Container();
-      children[1] = const Placeholder();
-      children[2] = new Container();
+    if (Platform.isMacOS)
+      return;
 
-      const int currentValue = 0;
+    final Map<int, Widget> children = <int, Widget>{};
+    children[0] = new Container();
+    children[1] = const Placeholder();
+    children[2] = new Container();
 
-      await tester.pumpWidget(
-        new RepaintBoundary(
-          child: new StatefulBuilder(
-            builder: (BuildContext context, StateSetter setState) {
-              return boilerplate(
-                child: new SegmentedControl<int>(
-                  key: const ValueKey<String>('Segmented Control'),
-                  children: children,
-                  onValueChanged: (int newValue) {},
-                  groupValue: currentValue,
-                ),
-              );
-            },
-          ),
+    const int currentValue = 0;
+
+    await tester.pumpWidget(
+      new RepaintBoundary(
+        child: new StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return boilerplate(
+              child: new SegmentedControl<int>(
+                key: const ValueKey<String>('Segmented Control'),
+                children: children,
+                onValueChanged: (int newValue) {},
+                groupValue: currentValue,
+              ),
+            );
+          },
         ),
-      );
+      ),
+    );
 
-      await expectLater(
-        find.byType(RepaintBoundary),
-        matchesGoldenFile('segmented_control_test.0.0.png'),
-      );
-    }
+    await expectLater(
+      find.byType(RepaintBoundary),
+      matchesGoldenFile('segmented_control_test.0.0.png'),
+    );
   });
 
   testWidgets('Golden Test Pressed State', (WidgetTester tester) async {
@@ -936,38 +937,39 @@ void main() {
     // files are rendered on MacOS, this test should only be run on MacOS.
     // If the golden files are regenerated on another OS, please change this
     // test to only run on that OS.
-    if (Platform.isMacOS) {
-      final Map<int, Widget> children = <int, Widget>{};
-      children[0] = const Text('A');
-      children[1] = const Text('B');
-      children[2] = const Text('C');
+    if (!Platform.isMacOS)
+      return;
 
-      const int currentValue = 0;
+    final Map<int, Widget> children = <int, Widget>{};
+    children[0] = const Text('A');
+    children[1] = const Text('B');
+    children[2] = const Text('C');
 
-      await tester.pumpWidget(
-        new RepaintBoundary(
-          child: new StatefulBuilder(
-            builder: (BuildContext context, StateSetter setState) {
-              return boilerplate(
-                child: new SegmentedControl<int>(
-                  key: const ValueKey<String>('Segmented Control'),
-                  children: children,
-                  onValueChanged: (int newValue) {},
-                  groupValue: currentValue,
-                ),
-              );
-            },
-          ),
+    const int currentValue = 0;
+
+    await tester.pumpWidget(
+      new RepaintBoundary(
+        child: new StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return boilerplate(
+              child: new SegmentedControl<int>(
+                key: const ValueKey<String>('Segmented Control'),
+                children: children,
+                onValueChanged: (int newValue) {},
+                groupValue: currentValue,
+              ),
+            );
+          },
         ),
-      );
+      ),
+    );
 
-      final Offset center = tester.getCenter(find.text('B'));
-      await tester.startGesture(center);
-      await tester.pumpAndSettle();
-      await expectLater(
-        find.byType(RepaintBoundary),
-        matchesGoldenFile('segmented_control_test.1.0.png'),
-      );
-    }
+    final Offset center = tester.getCenter(find.text('B'));
+    await tester.startGesture(center);
+    await tester.pumpAndSettle();
+    await expectLater(
+      find.byType(RepaintBoundary),
+      matchesGoldenFile('segmented_control_test.1.0.png'),
+    );
   });
 }
