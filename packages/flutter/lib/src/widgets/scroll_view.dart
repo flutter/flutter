@@ -466,7 +466,7 @@ abstract class BoxScrollView extends ScrollView {
 ///     only for those children that are actually visible.
 ///
 ///  3. The [ListView.separated] constructor takes two [IndexedWidgetBuilder]s:
-///     itemBuilder` builds child items on demand, and `separatorBuilder`
+///     `itemBuilder` builds child items on demand, and `separatorBuilder`
 ///     similarly builds separator children which appear in between the child items.
 ///     This constructor is appropriate for list views with a fixed number of children.
 ///
