@@ -1752,8 +1752,10 @@ class RenderPhysicalShape extends _RenderPhysicalModelBase<Path> {
           );
         }
         canvas.drawPath(offsetPath, new Paint()..color = color..style = PaintingStyle.fill);
+        canvas.save();
         canvas.clipPath(offsetPath);
         super.paint(context, offset);
+        canvas.restore();
         assert(context.canvas == canvas, 'canvas changed even though needsCompositing was false');
       }
     }
