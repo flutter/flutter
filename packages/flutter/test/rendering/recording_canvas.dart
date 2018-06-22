@@ -136,6 +136,11 @@ class TestRecordingPaintingContext implements PaintingContext {
   }
 
   @override
+  void pushLayer(Layer childLayer, PaintingContextCallback painter, Offset offset, {Rect childPaintBounds}) {
+    painter(this, offset);
+  }
+
+  @override
   void noSuchMethod(Invocation invocation) { }
 }
 
