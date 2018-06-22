@@ -38,6 +38,11 @@ enum PixelFormat {
   kBGRA8888,
 };
 
+struct ImageInfo {
+  SkImageInfo sk_info;
+  size_t row_bytes;
+};
+
 static void InvokeCodecCallback(fxl::RefPtr<Codec> codec,
                                 std::unique_ptr<DartPersistentValue> callback,
                                 size_t trace_id) {
@@ -113,7 +118,7 @@ fxl::RefPtr<Codec> InitCodec(fml::WeakPtr<GrContext> context,
 fxl::RefPtr<Codec> InitCodecUncompressed(
     fml::WeakPtr<GrContext> context,
     sk_sp<SkData> buffer,
-    SkImageInfo image_info,
+    ImageInfo image_info,
     fxl::RefPtr<flow::SkiaUnrefQueue> unref_queue,
     size_t trace_id) {
   TRACE_FLOW_STEP("flutter", kInitCodecTraceTag, trace_id);
@@ -126,12 +131,12 @@ fxl::RefPtr<Codec> InitCodecUncompressed(
 
   sk_sp<SkImage> skImage;
   if (context) {
-    SkPixmap pixmap(image_info, buffer->data(), image_info.minRowBytes());
+    SkPixmap pixmap(image_info.sk_info, buffer->data(), image_info.row_bytes);
     skImage = SkImage::MakeCrossContextFromPixmap(context.get(), pixmap, false,
                                                   nullptr, true);
   } else {
-    skImage = SkImage::MakeRasterData(image_info, std::move(buffer),
-                                      image_info.minRowBytes());
+    skImage = SkImage::MakeRasterData(image_info.sk_info, std::move(buffer),
+                                      image_info.row_bytes);
   }
 
   auto image = CanvasImage::Create();
@@ -146,7 +151,7 @@ void InitCodecAndInvokeCodecCallback(
     fxl::RefPtr<flow::SkiaUnrefQueue> unref_queue,
     std::unique_ptr<DartPersistentValue> callback,
     sk_sp<SkData> buffer,
-    std::unique_ptr<SkImageInfo> image_info,
+    std::unique_ptr<ImageInfo> image_info,
     size_t trace_id) {
   fxl::RefPtr<Codec> codec;
   if (image_info) {
@@ -165,7 +170,7 @@ void InitCodecAndInvokeCodecCallback(
 
 bool ConvertImageInfo(Dart_Handle image_info_handle,
                       Dart_NativeArguments args,
-                      SkImageInfo* image_info) {
+                      ImageInfo* image_info) {
   Dart_Handle width_handle = Dart_GetField(image_info_handle, ToDart("width"));
   if (!Dart_IsInteger(width_handle)) {
     Dart_SetReturnValue(args, ToDart("ImageInfo.width must be an integer"));
@@ -181,6 +186,12 @@ bool ConvertImageInfo(Dart_Handle image_info_handle,
       Dart_GetField(image_info_handle, ToDart("format"));
   if (!Dart_IsInteger(format_handle)) {
     Dart_SetReturnValue(args, ToDart("ImageInfo.format must be an integer"));
+    return false;
+  }
+  Dart_Handle row_bytes_handle =
+      Dart_GetField(image_info_handle, ToDart("rowBytes"));
+  if (!Dart_IsInteger(row_bytes_handle)) {
+    Dart_SetReturnValue(args, ToDart("ImageInfo.rowBytes must be an integer"));
     return false;
   }
 
@@ -200,10 +211,26 @@ bool ConvertImageInfo(Dart_Handle image_info_handle,
     return false;
   }
 
-  *image_info =
-      SkImageInfo::Make(tonic::DartConverter<int>::FromDart(width_handle),
-                        tonic::DartConverter<int>::FromDart(height_handle),
-                        color_type, kPremul_SkAlphaType);
+  int width = tonic::DartConverter<int>::FromDart(width_handle);
+  if (width <= 0) {
+    Dart_SetReturnValue(args, ToDart("width must be greater than zero"));
+    return false;
+  }
+  int height = tonic::DartConverter<int>::FromDart(height_handle);
+  if (height <= 0) {
+    Dart_SetReturnValue(args, ToDart("height must be greater than zero"));
+    return false;
+  }
+  image_info->sk_info =
+      SkImageInfo::Make(width, height, color_type, kPremul_SkAlphaType);
+  image_info->row_bytes =
+      tonic::DartConverter<size_t>::FromDart(row_bytes_handle);
+
+  if (image_info->row_bytes < image_info->sk_info.minRowBytes()) {
+    Dart_SetReturnValue(
+        args, ToDart("rowBytes does not match the width of the image"));
+    return false;
+  }
 
   return true;
 }
@@ -221,9 +248,9 @@ void InstantiateImageCodec(Dart_NativeArguments args) {
   }
 
   Dart_Handle image_info_handle = Dart_GetNativeArgument(args, 2);
-  std::unique_ptr<SkImageInfo> image_info;
+  std::unique_ptr<ImageInfo> image_info;
   if (!Dart_IsNull(image_info_handle)) {
-    image_info = std::make_unique<SkImageInfo>();
+    image_info = std::make_unique<ImageInfo>();
     if (!ConvertImageInfo(image_info_handle, args, image_info.get())) {
       TRACE_FLOW_END("flutter", kInitCodecTraceTag, trace_id);
       return;
@@ -240,7 +267,7 @@ void InstantiateImageCodec(Dart_NativeArguments args) {
   }
 
   if (image_info) {
-    int expected_size = image_info->minRowBytes() * image_info->height();
+    int expected_size = image_info->row_bytes * image_info->sk_info.height();
     if (list.num_elements() < expected_size) {
       TRACE_FLOW_END("flutter", kInitCodecTraceTag, trace_id);
       list.Release();
