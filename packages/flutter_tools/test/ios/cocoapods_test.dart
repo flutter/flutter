@@ -142,7 +142,7 @@ void main() {
 
     testUsingContext('creates swift Podfile if swift', () {
       when(mockXcodeProjectInterpreter.isInstalled).thenReturn(true);
-      when(mockXcodeProjectInterpreter.getBuildSettings(typed(any), typed(any))).thenReturn(<String, String>{
+      when(mockXcodeProjectInterpreter.getBuildSettings(any, any)).thenReturn(<String, String>{
         'SWIFT_VERSION': '4.0',
       });
 
@@ -204,7 +204,7 @@ void main() {
         iosEngineDir: 'engine/path',
       );
       verifyNever(mockProcessManager.run(
-      typedArgThat(containsAllInOrder(<String>['pod', 'install'])),
+      argThat(containsAllInOrder(<String>['pod', 'install'])),
         workingDirectory: anyNamed('workingDirectory'),
         environment: anyNamed('environment'),
       ));
@@ -224,9 +224,9 @@ void main() {
         );
         fail('ToolExit expected');
       } catch(e) {
-        expect(e, const TypeMatcher<ToolExit>());
+        expect(e, const isInstanceOf<ToolExit>());
         verifyNever(mockProcessManager.run(
-        typedArgThat(containsAllInOrder(<String>['pod', 'install'])),
+        argThat(containsAllInOrder(<String>['pod', 'install'])),
           workingDirectory: anyNamed('workingDirectory'),
           environment: anyNamed('environment'),
         ));
@@ -271,7 +271,7 @@ Note: as of CocoaPods 1.0, `pod repo update` does not happen on `pod install` by
         );
         fail('ToolExit expected');
       } catch (e) {
-        expect(e, const TypeMatcher<ToolExit>());
+        expect(e, const isInstanceOf<ToolExit>());
         expect(
           testLogger.errorText,
           contains("CocoaPods's specs repository is too out-of-date to satisfy dependencies"),
@@ -437,7 +437,7 @@ Note: as of CocoaPods 1.0, `pod repo update` does not happen on `pod install` by
       );
       expect(didInstall, isFalse);
       verifyNever(mockProcessManager.run(
-      typedArgThat(containsAllInOrder(<String>['pod', 'install'])),
+      argThat(containsAllInOrder(<String>['pod', 'install'])),
         workingDirectory: anyNamed('workingDirectory'),
         environment: anyNamed('environment'),
       ));

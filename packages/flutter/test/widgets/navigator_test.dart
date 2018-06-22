@@ -5,7 +5,7 @@
 import 'dart:ui';
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:flutter/material.dart' hide TypeMatcher;
+import 'package:flutter/material.dart';
 
 import 'semantics_tester.dart';
 
@@ -186,7 +186,7 @@ void main() {
     );
     await tester.pumpWidget(widget);
     await tester.tap(find.byKey(targetKey));
-    expect(exception, const TypeMatcher<FlutterError>());
+    expect(exception, isInstanceOf<FlutterError>());
     expect('$exception', startsWith('Navigator operation requested with a context'));
   });
 

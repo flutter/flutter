@@ -3,11 +3,13 @@
 // found in the LICENSE file.
 
 import 'dart:typed_data';
-
 import 'dart:ui' as ui show Image;
+
+import 'package:flutter/animation.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/src/scheduler/ticker.dart';
 import 'package:test/test.dart';
 
 import 'rendering_tester.dart';
@@ -190,4 +192,99 @@ void main() {
     expect(data.getUint32(0), equals(0x00000080));
     expect(data.getUint32(stride - 4), equals(0xffffffff));
   });
+
+  test('RenderOpacity does not composite if it is transparent', () {
+    final RenderOpacity renderOpacity = new RenderOpacity(
+      opacity: 0.0,
+      child: new RenderSizedBox(const Size(1.0, 1.0)), // size doesn't matter
+    );
+
+    layout(renderOpacity, phase: EnginePhase.composite);
+    expect(renderOpacity.needsCompositing, false);
+  });
+
+  test('RenderOpacity does not composite if it is opaque', () {
+    final RenderOpacity renderOpacity = new RenderOpacity(
+      opacity: 1.0,
+      child: new RenderSizedBox(const Size(1.0, 1.0)), // size doesn't matter
+    );
+
+    layout(renderOpacity, phase: EnginePhase.composite);
+    expect(renderOpacity.needsCompositing, false);
+  });
+
+  test('RenderAnimatedOpacity does not composite if it is transparent', () async {
+    final Animation<double> opacityAnimation = new AnimationController(
+      vsync: new _FakeTickerProvider(),
+    )..value = 0.0;
+
+    final RenderAnimatedOpacity renderAnimatedOpacity = new RenderAnimatedOpacity(
+      opacity: opacityAnimation,
+      child: new RenderSizedBox(const Size(1.0, 1.0)), // size doesn't matter
+    );
+
+    layout(renderAnimatedOpacity, phase: EnginePhase.composite);
+    expect(renderAnimatedOpacity.needsCompositing, false);
+  });
+
+  test('RenderAnimatedOpacity does not composite if it is opaque', () {
+    final Animation<double> opacityAnimation = new AnimationController(
+      vsync: new _FakeTickerProvider(),
+    )..value = 1.0;
+
+    final RenderAnimatedOpacity renderAnimatedOpacity = new RenderAnimatedOpacity(
+      opacity: opacityAnimation,
+      child: new RenderSizedBox(const Size(1.0, 1.0)), // size doesn't matter
+    );
+
+    layout(renderAnimatedOpacity, phase: EnginePhase.composite);
+    expect(renderAnimatedOpacity.needsCompositing, false);
+  });
+}
+
+class _FakeTickerProvider implements TickerProvider {
+  @override
+  Ticker createTicker(TickerCallback onTick) {
+    return new _FakeTicker();
+  }
+}
+
+class _FakeTicker implements Ticker {
+  @override
+  bool muted;
+
+  @override
+  void absorbTicker(Ticker originalTicker) {}
+
+  @override
+  String get debugLabel => null;
+
+  @override
+  bool get isActive => null;
+
+  @override
+  bool get isTicking => null;
+
+  @override
+  bool get scheduled => null;
+
+  @override
+  bool get shouldScheduleTick => null;
+
+  @override
+  void dispose() {}
+
+  @override
+  void scheduleTick({bool rescheduling = false}) {}
+
+  @override
+  TickerFuture start() {
+    return null;
+  }
+
+  @override
+  void stop({bool canceled = false}) {}
+
+  @override
+  void unscheduleTick() {}
 }

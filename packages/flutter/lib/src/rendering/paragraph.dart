@@ -355,13 +355,7 @@ class RenderParagraph extends RenderBox {
 
     if (_hasVisualOverflow) {
       final Rect bounds = offset & size;
-      if (_overflowShader != null) {
-        // This layer limits what the shader below blends with to be just the text
-        // (as opposed to the text and its background).
-        canvas.saveLayer(bounds, new Paint());
-      } else {
         canvas.save();
-      }
       canvas.clipRect(bounds);
     }
     _textPainter.paint(canvas, offset);

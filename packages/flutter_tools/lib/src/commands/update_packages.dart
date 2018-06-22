@@ -27,7 +27,8 @@ import '../runner/flutter_command.dart';
 /// ```
 const Map<String, String> _kManuallyPinnedDependencies = const <String, String>{
   // Add pinned packages here.
-  'mockito': '3.0.0-alpha+5', // TODO(aam): https://github.com/dart-lang/mockito/issues/110
+  'mockito': '3.0.0-beta', // TODO(aam): https://github.com/dart-lang/mockito/issues/110
+  'matcher': '0.12.2', // TODO(ianh): https://github.com/flutter/flutter/issues/18608, https://github.com/dart-lang/matcher/pull/88
 };
 
 class UpdatePackagesCommand extends FlutterCommand {
@@ -1015,7 +1016,8 @@ class PubspecDependency extends PubspecLine {
         assert(kind != DependencyKind.unknown);
         break;
       case DependencyKind.normal:
-        dependencies.writeln('  $name: ${_kManuallyPinnedDependencies[name] ?? 'any'}');
+        if (!_kManuallyPinnedDependencies.containsKey(name))
+          dependencies.writeln('  $name: any');
         break;
       case DependencyKind.path:
         if (_lockIsOverride) {
@@ -1049,22 +1051,19 @@ File _pubspecFor(Directory directory) {
 /// Generates the source of a fake pubspec.yaml file given a list of
 /// dependencies.
 String _generateFakePubspec(Iterable<PubspecDependency> dependencies) {
-  if (_kManuallyPinnedDependencies.isNotEmpty) {
-    final String hardCodedConstraints = _kManuallyPinnedDependencies.keys
-      .map((String packageName) {
-        return '  - $packageName: ${_kManuallyPinnedDependencies[packageName]}';
-      })
-      .join('\n');
-    printStatus(
-      'WARNING: the following packages use hard-coded version constraints:\n'
-      '$hardCodedConstraints',
-    );
-  }
   final StringBuffer result = new StringBuffer();
   final StringBuffer overrides = new StringBuffer();
   result.writeln('name: flutter_update_packages');
   result.writeln('dependencies:');
   overrides.writeln('dependency_overrides:');
+  if (_kManuallyPinnedDependencies.isNotEmpty) {
+    printStatus('WARNING: the following packages use hard-coded version constraints:');
+    for (String package in _kManuallyPinnedDependencies.keys) {
+      final String version = _kManuallyPinnedDependencies[package];
+      result.writeln('  $package: $version');
+      printStatus('  - $package: $version');
+    }
+  }
   for (PubspecDependency dependency in dependencies)
     if (!dependency.pointsToSdk)
       dependency.describeForFakePubspec(result, overrides);

@@ -164,7 +164,7 @@ class DefaultTextStyle extends InheritedWidget {
 /// for example, to make the text bold while using the default font family and
 /// size.
 ///
-/// Using the [new TextSpan.rich] constructor, the [Text] widget can also be
+/// Using the [new Text.rich] constructor, the [Text] widget can also be
 /// created with a [TextSpan] to display text that use multiple styles
 /// (e.g., a paragraph with some bold words).
 ///

@@ -40,7 +40,7 @@ void main() {
       when(mockClient.getVM()).thenAnswer((_) => new Future<MockVM>.value(mockVM));
       when(mockVM.isolates).thenReturn(<VMRunnableIsolate>[mockIsolate]);
       when(mockIsolate.loadRunnable()).thenAnswer((_) => new Future<MockIsolate>.value(mockIsolate));
-      when(mockIsolate.invokeExtension(typed(any), typed(any))).thenAnswer(
+      when(mockIsolate.invokeExtension(any, any)).thenAnswer(
           (Invocation invocation) => makeMockResponse(<String, dynamic>{'status': 'ok'}));
       vmServiceConnectFunction = (String url) {
         return new Future<VMServiceClientConnection>.value(
@@ -124,7 +124,7 @@ void main() {
     });
 
     test('checks the health of the driver extension', () async {
-      when(mockIsolate.invokeExtension(typed(any), typed(any))).thenAnswer(
+      when(mockIsolate.invokeExtension(any, any)).thenAnswer(
           (Invocation invocation) => makeMockResponse(<String, dynamic>{'status': 'ok'}));
       final Health result = await driver.checkHealth();
       expect(result.status, HealthStatus.ok);
@@ -138,11 +138,11 @@ void main() {
     group('ByValueKey', () {
       test('restricts value types', () async {
         expect(() => find.byValueKey(null),
-            throwsA(const TypeMatcher<DriverError>()));
+            throwsA(const isInstanceOf<DriverError>()));
       });
 
       test('finds by ValueKey', () async {
-        when(mockIsolate.invokeExtension(typed(any), typed(any))).thenAnswer((Invocation i) {
+        when(mockIsolate.invokeExtension(any, any)).thenAnswer((Invocation i) {
           expect(i.positionalArguments[1], <String, String>{
             'command': 'tap',
             'timeout': _kSerializedTestTimeout,
@@ -158,11 +158,11 @@ void main() {
 
     group('tap', () {
       test('requires a target reference', () async {
-        expect(driver.tap(null), throwsA(const TypeMatcher<DriverError>()));
+        expect(driver.tap(null), throwsA(const isInstanceOf<DriverError>()));
       });
 
       test('sends the tap command', () async {
-        when(mockIsolate.invokeExtension(typed(any), typed(any))).thenAnswer((Invocation i) {
+        when(mockIsolate.invokeExtension(any, any)).thenAnswer((Invocation i) {
           expect(i.positionalArguments[1], <String, dynamic>{
             'command': 'tap',
             'timeout': _kSerializedTestTimeout,
@@ -177,11 +177,11 @@ void main() {
 
     group('getText', () {
       test('requires a target reference', () async {
-        expect(driver.getText(null), throwsA(const TypeMatcher<DriverError>()));
+        expect(driver.getText(null), throwsA(const isInstanceOf<DriverError>()));
       });
 
       test('sends the getText command', () async {
-        when(mockIsolate.invokeExtension(typed(any), typed(any))).thenAnswer((Invocation i) {
+        when(mockIsolate.invokeExtension(any, any)).thenAnswer((Invocation i) {
           expect(i.positionalArguments[1], <String, dynamic>{
             'command': 'get_text',
             'timeout': _kSerializedTestTimeout,
@@ -200,11 +200,11 @@ void main() {
 
     group('waitFor', () {
       test('requires a target reference', () async {
-        expect(driver.waitFor(null), throwsA(const TypeMatcher<DriverError>()));
+        expect(driver.waitFor(null), throwsA(const isInstanceOf<DriverError>()));
       });
 
       test('sends the waitFor command', () async {
-        when(mockIsolate.invokeExtension(typed(any), typed(any))).thenAnswer((Invocation i) {
+        when(mockIsolate.invokeExtension(any, any)).thenAnswer((Invocation i) {
           expect(i.positionalArguments[1], <String, dynamic>{
             'command': 'waitFor',
             'finderType': 'ByTooltipMessage',
@@ -219,7 +219,7 @@ void main() {
 
     group('waitUntilNoTransientCallbacks', () {
       test('sends the waitUntilNoTransientCallbacks command', () async {
-        when(mockIsolate.invokeExtension(typed(any), typed(any))).thenAnswer((Invocation i) {
+        when(mockIsolate.invokeExtension(any, any)).thenAnswer((Invocation i) {
           expect(i.positionalArguments[1], <String, dynamic>{
             'command': 'waitUntilNoTransientCallbacks',
             'timeout': _kSerializedTestTimeout,
@@ -356,7 +356,7 @@ void main() {
 
     group('sendCommand error conditions', () {
       test('local timeout', () async {
-        when(mockIsolate.invokeExtension(typed(any), typed(any))).thenAnswer((Invocation i) {
+        when(mockIsolate.invokeExtension(any, any)).thenAnswer((Invocation i) {
           // completer never competed to trigger timeout
           return new Completer<Map<String, dynamic>>().future;
         });
@@ -370,7 +370,7 @@ void main() {
       });
 
       test('remote error', () async {
-        when(mockIsolate.invokeExtension(typed(any), typed(any))).thenAnswer((Invocation i) {
+        when(mockIsolate.invokeExtension(any, any)).thenAnswer((Invocation i) {
           return makeMockResponse(<String, dynamic>{
             'message': 'This is a failure'
           }, isError: true);

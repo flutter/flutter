@@ -14,7 +14,7 @@ void main() {
     setUp(() {
       response = new MockHttpClientResponse();
        when(response.listen(
-         typed(any),
+         any,
          onDone: anyNamed('onDone'),
          onError: anyNamed('onError'),
          cancelOnError: anyNamed('cancelOnError')
@@ -64,7 +64,7 @@ void main() {
 
     test('forwards errors from HttpClientResponse', () async {
       when(response.listen(
-        typed(any),
+        any,
         onDone: anyNamed('onDone'),
         onError: anyNamed('onError'),
         cancelOnError: anyNamed('cancelOnError')
@@ -86,7 +86,7 @@ void main() {
       when(response.contentLength).thenReturn(-1);
 
       expect(consolidateHttpClientResponseBytes(response),
-          throwsA(const TypeMatcher<Exception>()));
+          throwsA(const isInstanceOf<Exception>()));
     });
   });
 }

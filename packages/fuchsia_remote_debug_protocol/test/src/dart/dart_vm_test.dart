@@ -84,8 +84,7 @@ void main() {
       };
 
       Future<json_rpc.Peer> mockVmConnectionFunction(Uri uri) {
-        when(mockPeer.sendRequest(
-                typed<String>(any), typed<Map<String, dynamic>>(any)))
+        when(mockPeer.sendRequest(any, any))
             .thenAnswer((_) => new Future<Map<String, dynamic>>(
                 () => flutterViewCannedResponses));
         return new Future<json_rpc.Peer>(() => mockPeer);
@@ -133,8 +132,7 @@ void main() {
       };
 
       Future<json_rpc.Peer> mockVmConnectionFunction(Uri uri) {
-        when(mockPeer.sendRequest(
-                typed<String>(any), typed<Map<String, dynamic>>(any)))
+        when(mockPeer.sendRequest(any, any))
             .thenAnswer((_) => new Future<Map<String, dynamic>>(
                 () => flutterViewCannedResponseMissingId));
         return new Future<json_rpc.Peer>(() => mockPeer);
@@ -149,7 +147,7 @@ void main() {
       }
 
       // Both views should be invalid as they were missing required fields.
-      expect(failingFunction, throwsA(const TypeMatcher<RpcFormatError>()));
+      expect(failingFunction, throwsA(const isInstanceOf<RpcFormatError>()));
     });
 
     test('invalid flutter view missing ID', () async {
@@ -171,8 +169,7 @@ void main() {
       };
 
       Future<json_rpc.Peer> mockVmConnectionFunction(Uri uri) {
-        when(mockPeer.sendRequest(
-                typed<String>(any), typed<Map<String, dynamic>>(any)))
+        when(mockPeer.sendRequest(any, any))
             .thenAnswer((_) => new Future<Map<String, dynamic>>(
                 () => flutterViewCannedResponseMissingIsolateName));
         return new Future<json_rpc.Peer>(() => mockPeer);
@@ -187,7 +184,7 @@ void main() {
       }
 
       // Both views should be invalid as they were missing required fields.
-      expect(failingFunction, throwsA(const TypeMatcher<RpcFormatError>()));
+      expect(failingFunction, throwsA(const isInstanceOf<RpcFormatError>()));
     });
   });
 
@@ -206,8 +203,7 @@ void main() {
       const Duration timeoutTime = const Duration(milliseconds: 100);
       Future<json_rpc.Peer> mockVmConnectionFunction(Uri uri) {
         // Return a command that will never complete.
-        when(mockPeer.sendRequest(
-                typed<String>(any), typed<Map<String, dynamic>>(any)))
+        when(mockPeer.sendRequest(any, any))
             .thenAnswer((_) => new Completer<Map<String, dynamic>>().future);
         return new Future<json_rpc.Peer>(() => mockPeer);
       }
@@ -220,7 +216,7 @@ void main() {
         await vm.invokeRpc('somesillyfunction', timeout: timeoutTime);
       }
 
-      expect(failingFunction, throwsA(const TypeMatcher<TimeoutException>()));
+      expect(failingFunction, throwsA(const isInstanceOf<TimeoutException>()));
     });
   });
 }
