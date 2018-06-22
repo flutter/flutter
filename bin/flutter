@@ -79,7 +79,9 @@ function upgrade_flutter () {
   if hash flock 2>/dev/null; then
     flock 3 2>/dev/null || true
   elif hash shlock 2>/dev/null; then
-    FLUTTER_UPGRADE_LOCK="$FLUTTER_ROOT/bin/cache/.upgrade_lock"
+    # FLUTTER_UPGRADE_LOCK="$FLUTTER_ROOT/bin/cache/.upgrade_lock"
+    FLUTTER_UPGRADE_LOCK="$HOME/flutter.upgrade_lock"
+    
     while ! shlock -f "$FLUTTER_UPGRADE_LOCK" -p $$ ; do sleep .1 ; done
     trap _rmlock EXIT
   fi
