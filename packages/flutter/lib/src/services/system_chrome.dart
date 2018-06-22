@@ -104,8 +104,8 @@ class SystemUiOverlayStyle {
     systemNavigationBarDividerColor: null,
     statusBarColor: null,
     systemNavigationBarIconBrightness: Brightness.dark,
-    statusBarIconBrightness: Brightness.light,
-    statusBarBrightness: Brightness.dark,
+    statusBarIconBrightness: Brightness.dark,
+    statusBarBrightness: Brightness.light,
   );
 
   /// System overlays should be drawn with a dark color. Intended for
@@ -115,8 +115,8 @@ class SystemUiOverlayStyle {
     systemNavigationBarDividerColor: null,
     statusBarColor: null,
     systemNavigationBarIconBrightness: Brightness.light,
-    statusBarIconBrightness: Brightness.dark,
-    statusBarBrightness: Brightness.light,
+    statusBarIconBrightness: Brightness.light,
+    statusBarBrightness: Brightness.dark,
   );
 
   /// Creates a new [SystemUiOverlayStyle].
@@ -151,12 +151,12 @@ class SystemUiOverlayStyle {
 
   /// The brightness of top status bar.
   /// 
-  /// Only honored in Android version M and greater.
+  /// Only honored in iOS.
   final Brightness statusBarBrightness;
 
   /// The brightness of the top status bar icons.
   /// 
-  /// Only in iOS.
+  /// Only honored in Android version M and greater.
   final Brightness statusBarIconBrightness;
 
   /// Convert this event to a map for serialization.
