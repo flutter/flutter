@@ -5066,6 +5066,7 @@ class Semantics extends SingleChildRenderObjectWidget {
     bool scopesRoute,
     bool namesRoute,
     bool hidden,
+    bool image,
     String label,
     String value,
     String increasedValue,
@@ -5107,6 +5108,7 @@ class Semantics extends SingleChildRenderObjectWidget {
       scopesRoute: scopesRoute,
       namesRoute: namesRoute,
       hidden: hidden,
+      image: image,
       label: label,
       value: value,
       increasedValue: increasedValue,
@@ -5193,6 +5195,7 @@ class Semantics extends SingleChildRenderObjectWidget {
       scopesRoute: properties.scopesRoute,
       namesRoute: properties.namesRoute,
       hidden: properties.hidden,
+      image: properties.image,
       label: properties.label,
       value: properties.value,
       increasedValue: properties.increasedValue,
@@ -5247,6 +5250,7 @@ class Semantics extends SingleChildRenderObjectWidget {
       ..inMutuallyExclusiveGroup = properties.inMutuallyExclusiveGroup
       ..obscured = properties.obscured
       ..hidden = properties.hidden
+      ..image = properties.image
       ..label = properties.label
       ..value = properties.value
       ..increasedValue = properties.increasedValue

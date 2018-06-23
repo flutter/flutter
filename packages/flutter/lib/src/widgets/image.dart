@@ -123,6 +123,8 @@ class Image extends StatefulWidget {
   const Image({
     Key key,
     @required this.image,
+    this.semanticLabel,
+    this.excludeFromSemantics = false,
     this.width,
     this.height,
     this.color,
@@ -137,6 +139,7 @@ class Image extends StatefulWidget {
        assert(alignment != null),
        assert(repeat != null),
        assert(matchTextDirection != null),
+              assert((excludeFromSemantics && semanticLabel == null) || !excludeFromSemantics),
        super(key: key);
 
   /// Creates a widget that displays an [ImageStream] obtained from the network.
@@ -155,6 +158,8 @@ class Image extends StatefulWidget {
   Image.network(String src, {
     Key key,
     double scale = 1.0,
+    this.semanticLabel,
+    this.excludeFromSemantics = false,
     this.width,
     this.height,
     this.color,
@@ -170,6 +175,7 @@ class Image extends StatefulWidget {
        assert(alignment != null),
        assert(repeat != null),
        assert(matchTextDirection != null),
+              assert((excludeFromSemantics && semanticLabel == null) || !excludeFromSemantics),
        super(key: key);
 
   /// Creates a widget that displays an [ImageStream] obtained from a [File].
@@ -186,6 +192,8 @@ class Image extends StatefulWidget {
   Image.file(File file, {
     Key key,
     double scale = 1.0,
+    this.semanticLabel,
+    this.excludeFromSemantics = false,
     this.width,
     this.height,
     this.color,
@@ -200,6 +208,7 @@ class Image extends StatefulWidget {
        assert(alignment != null),
        assert(repeat != null),
        assert(matchTextDirection != null),
+       assert((excludeFromSemantics && semanticLabel == null) || !excludeFromSemantics),
        super(key: key);
 
   /// Creates a widget that displays an [ImageStream] obtained from an asset
@@ -319,6 +328,8 @@ class Image extends StatefulWidget {
   Image.asset(String name, {
     Key key,
     AssetBundle bundle,
+    this.semanticLabel,
+    this.excludeFromSemantics = false,
     double scale,
     this.width,
     this.height,
@@ -337,6 +348,7 @@ class Image extends StatefulWidget {
        assert(alignment != null),
        assert(repeat != null),
        assert(matchTextDirection != null),
+              assert((excludeFromSemantics && semanticLabel == null) || !excludeFromSemantics),
        super(key: key);
 
   /// Creates a widget that displays an [ImageStream] obtained from a [Uint8List].
@@ -350,6 +362,8 @@ class Image extends StatefulWidget {
   Image.memory(Uint8List bytes, {
     Key key,
     double scale = 1.0,
+    this.semanticLabel,
+    this.excludeFromSemantics = false,
     this.width,
     this.height,
     this.color,
@@ -364,6 +378,7 @@ class Image extends StatefulWidget {
        assert(alignment != null),
        assert(repeat != null),
        assert(matchTextDirection != null),
+       assert((excludeFromSemantics && semanticLabel == null) || !excludeFromSemantics),
        super(key: key);
 
   /// The image to display.
@@ -472,6 +487,18 @@ class Image extends StatefulWidget {
   /// (false), when the image provider changes.
   final bool gaplessPlayback;
 
+  /// A Semantic description of the image.
+  /// 
+  /// Used for accessibility features like screen reader to announce to users in
+  /// accessibility mode.
+  final String semanticLabel;
+
+  /// Whether to exclude this image from semantics.
+  /// 
+  /// This should not be set at the same time as [semanticLabel]. Useful for
+  /// images which do not contribute meaningful semantics to an application.
+  final bool excludeFromSemantics;
+
   @override
   _ImageState createState() => new _ImageState();
 
@@ -488,6 +515,8 @@ class Image extends StatefulWidget {
     properties.add(new EnumProperty<ImageRepeat>('repeat', repeat, defaultValue: ImageRepeat.noRepeat));
     properties.add(new DiagnosticsProperty<Rect>('centerSlice', centerSlice, defaultValue: null));
     properties.add(new FlagProperty('matchTextDirection', value: matchTextDirection, ifTrue: 'match text direction'));
+    properties.add(new StringProperty('semanticLabel', semanticLabel, defaultValue: null));
+    properties.add(new DiagnosticsProperty<bool>('this.excludeFromSemantics', excludeFromSemantics));
   }
 }
 
@@ -578,7 +607,7 @@ class _ImageState extends State<Image> {
 
   @override
   Widget build(BuildContext context) {
-    return new RawImage(
+    final RawImage image = RawImage(
       image: _imageInfo?.image,
       width: widget.width,
       height: widget.height,
@@ -590,6 +619,14 @@ class _ImageState extends State<Image> {
       repeat: widget.repeat,
       centerSlice: widget.centerSlice,
       matchTextDirection: widget.matchTextDirection,
+    );
+    if (widget.excludeFromSemantics)
+      return image;
+    return new Semantics(
+      container: widget.semanticLabel != null,
+      image: true,
+      label: widget.semanticLabel == null ? '' : widget.semanticLabel,
+      child: image,
     );
   }
 

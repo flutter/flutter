@@ -12,6 +12,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../painting/image_data.dart';
+import 'semantics_tester.dart';
 
 void main() {
   testWidgets('Verify Image resets its RenderImage when changing providers', (WidgetTester tester) async {
@@ -21,7 +22,8 @@ void main() {
       new Container(
         key: key,
         child: new Image(
-          image: imageProvider1
+          image: imageProvider1,
+          excludeFromSemantics: true,
         )
       ),
       null,
@@ -42,7 +44,8 @@ void main() {
       new Container(
         key: key,
         child: new Image(
-          image: imageProvider2
+          image: imageProvider2,
+          excludeFromSemantics: true,
         )
       ),
       null,
@@ -61,7 +64,8 @@ void main() {
         key: key,
         child: new Image(
           gaplessPlayback: true,
-          image: imageProvider1
+          image: imageProvider1,
+          excludeFromSemantics: true,
         )
       ),
       null,
@@ -83,7 +87,8 @@ void main() {
         key: key,
         child: new Image(
           gaplessPlayback: true,
-          image: imageProvider2
+          image: imageProvider2,
+          excludeFromSemantics: true,
         )
       ),
       null,
@@ -100,7 +105,8 @@ void main() {
     await tester.pumpWidget(
       new Image(
         key: key,
-        image: imageProvider1
+        image: imageProvider1,
+        excludeFromSemantics: true,
       ),
       null,
       EnginePhase.layout
@@ -119,7 +125,8 @@ void main() {
     await tester.pumpWidget(
       new Image(
         key: key,
-        image: imageProvider2
+        image: imageProvider2,
+        excludeFromSemantics: true,
       ),
       null,
       EnginePhase.layout
@@ -136,7 +143,8 @@ void main() {
       new Image(
         key: key,
         gaplessPlayback: true,
-        image: imageProvider1
+        image: imageProvider1,
+        excludeFromSemantics: true,
       ),
       null,
       EnginePhase.layout
@@ -156,6 +164,7 @@ void main() {
       new Image(
         key: key,
         gaplessPlayback: true,
+        excludeFromSemantics: true,
         image: imageProvider2
       ),
       null,
@@ -188,6 +197,7 @@ void main() {
             padding: EdgeInsets.zero,
           ),
           child: new Image(
+            excludeFromSemantics: true,
             key: imageKey,
             image: imageProvider
           ),
@@ -214,6 +224,7 @@ void main() {
             padding: EdgeInsets.zero,
           ),
           child: new Image(
+            excludeFromSemantics: true,
             key: imageKey,
             image: imageProvider
           ),
@@ -243,6 +254,7 @@ void main() {
               padding: EdgeInsets.zero,
             ),
             child: new Image(
+              excludeFromSemantics: true,
               key: imageKey,
               image: imageProvider
             )
@@ -280,6 +292,7 @@ void main() {
               padding: EdgeInsets.zero,
             ),
             child: new Image(
+              excludeFromSemantics: true,
               key: imageKey,
               image: imageProvider
             )
@@ -293,7 +306,7 @@ void main() {
 
   testWidgets('Verify Image stops listening to ImageStream', (WidgetTester tester) async {
     final TestImageProvider imageProvider = new TestImageProvider();
-    await tester.pumpWidget(new Image(image: imageProvider));
+    await tester.pumpWidget(new Image(image: imageProvider, excludeFromSemantics: true));
     final State<Image> image = tester.state/*State<Image>*/(find.byType(Image));
     expect(image.toString(), equalsIgnoringHashCodes('_ImageState#00000(stream: ImageStream#00000(OneFrameImageStreamCompleter#00000, unresolved, 2 listeners), pixels: null)'));
     imageProvider.complete();
@@ -304,12 +317,13 @@ void main() {
   });
 
   testWidgets('Image.memory control test', (WidgetTester tester) async {
-    await tester.pumpWidget(new Image.memory(new Uint8List.fromList(kTransparentImage)));
+    await tester.pumpWidget(new Image.memory(new Uint8List.fromList(kTransparentImage), excludeFromSemantics: true,));
   });
 
   testWidgets('Image color and colorBlend parameters', (WidgetTester tester) async {
     await tester.pumpWidget(
       new Image(
+        excludeFromSemantics: true,
         image: new TestImageProvider(),
         color: const Color(0xFF00FF00),
         colorBlendMode: BlendMode.clear
@@ -345,6 +359,7 @@ void main() {
   testWidgets('TickerMode controls stream registration', (WidgetTester tester) async {
     final TestImageStreamCompleter imageStreamCompleter = new TestImageStreamCompleter();
     final Image image = new Image(
+      excludeFromSemantics: true,
       image: new TestImageProvider(streamCompleter: imageStreamCompleter),
     );
     await tester.pumpWidget(
@@ -373,6 +388,7 @@ void main() {
         new Container(
             key: key,
             child: new Image(
+                excludeFromSemantics: true,
                 image: imageProvider1
             )
         ),
@@ -396,7 +412,8 @@ void main() {
         new Container(
             key: key,
             child: new Image(
-                image: imageProvider2
+              excludeFromSemantics: true,
+              image: imageProvider2
             )
         ),
         null,
@@ -409,8 +426,8 @@ void main() {
   });
 
   testWidgets('Image State can be reconfigured to use another image', (WidgetTester tester) async {
-    final Image image1 = new Image(image: new TestImageProvider()..complete(), width: 10.0);
-    final Image image2 = new Image(image: new TestImageProvider()..complete(), width: 20.0);
+    final Image image1 = new Image(image: new TestImageProvider()..complete(), width: 10.0, excludeFromSemantics: true);
+    final Image image2 = new Image(image: new TestImageProvider()..complete(), width: 20.0, excludeFromSemantics: true);
 
     final Column column = new Column(children: <Widget>[image1, image2]);
     await tester.pumpWidget(column, null, EnginePhase.layout);
@@ -424,6 +441,58 @@ void main() {
     expect(renderObjects[0].width, 20.0);
     expect(renderObjects[1].image, isNotNull);
     expect(renderObjects[1].width, 10.0);
+  });
+
+  testWidgets('Image contributes semantics', (WidgetTester tester) async {
+    final SemanticsTester semantics = new SemanticsTester(tester);
+    await tester.pumpWidget(
+      new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new Row(
+          children: <Widget>[
+            new Image(
+              image: new TestImageProvider(),
+              width: 100.0,
+              height: 100.0,
+              semanticLabel: 'test',
+            ),
+          ],
+        ),
+      ),
+    );
+
+    expect(semantics, hasSemantics(new TestSemantics.root(
+      children: <TestSemantics>[
+        new TestSemantics.rootChild(
+          id: 1,
+          label: 'test',
+          rect: new Rect.fromLTWH(0.0, 0.0, 100.0, 100.0),
+          textDirection: TextDirection.ltr,
+          flags: <SemanticsFlag>[SemanticsFlag.isImage],
+        )
+      ]
+    ), ignoreTransform: true));
+    semantics.dispose();
+  }); 
+
+  testWidgets('Image can exclude semantics', (WidgetTester tester) async {
+    final SemanticsTester semantics = new SemanticsTester(tester);
+    await tester.pumpWidget(
+      new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new Image(
+          image: new TestImageProvider(),
+          width: 100.0,
+          height: 100.0,
+          excludeFromSemantics: true,
+        ),
+      ),
+    );
+
+    expect(semantics, hasSemantics(new TestSemantics.root(
+      children: <TestSemantics>[]
+    )));
+    semantics.dispose();
   });
 }
 

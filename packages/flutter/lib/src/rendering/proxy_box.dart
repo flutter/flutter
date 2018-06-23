@@ -3132,6 +3132,7 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     bool scopesRoute,
     bool namesRoute,
     bool hidden,
+    bool image,
     String label,
     String value,
     String increasedValue,
@@ -3170,6 +3171,7 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
        _scopesRoute = scopesRoute,
        _namesRoute = namesRoute,
        _hidden = hidden,
+       _image = image,
        _label = label,
        _value = value,
        _increasedValue = increasedValue,
@@ -3357,6 +3359,17 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     if (hidden == value)
       return;
     _hidden = value;
+    markNeedsSemanticsUpdate();
+  }
+
+  /// If non-null, sets the [SemanticsNode.isImage] semantic to the given
+  /// value.
+  bool get image => _image;
+  bool _image;
+  set image(bool value) {
+    if (_image == value)
+      return;
+    _image = value;
     markNeedsSemanticsUpdate();
   }
 
@@ -3803,6 +3816,8 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
       config.isObscured = obscured;
     if (hidden != null)
       config.isHidden = hidden;
+    if (image != null)
+      config.isImage = image;
     if (label != null)
       config.label = label;
     if (value != null)
