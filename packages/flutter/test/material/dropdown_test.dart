@@ -26,6 +26,7 @@ Widget buildFrame({
   bool isDense = false,
   bool isExpanded = false,
   Widget hint,
+  Widget disabledHint,
   List<String> items = menuItems,
   Alignment alignment = Alignment.center,
   TextDirection textDirection = TextDirection.ltr,
@@ -777,4 +778,49 @@ void main() {
     ), ignoreId: true, ignoreRect: true, ignoreTransform: true));
     semantics.dispose();
   });
+
+  testWidgets('Empty items or items == null or onChangedHandler == null,  disables item and displays disabledHint', (WidgetTester tester) async {
+  final Key buttonKey = new UniqueKey();
+  String value;
+  List<String> items = null;
+  ValueChanged<String> onChanged = (s) => print(s);
+
+
+  Widget build() => buildFrame(buttonKey: buttonKey, value: value,
+                      onChanged: onChanged,
+                      items: items,
+                      hint: const Text('onetwothree'),
+                      disabledHint: const Text('four'));
+
+  // items = null should display disabledHint
+  await tester.pumpWidget(build());
+  expect(find.text('four'), findsOneWidget);
+  final RenderBox buttonBoxHintValue = tester.renderObject(find.byKey(buttonKey));
+  assert(buttonBoxHintValue.attached);
+
+  // empty items should display disabledHint
+  items = <String>[];
+  onChanged = null;
+
+  await tester.pumpWidget(build());
+  expect(find.text('four'), findsOneWidget);
+
+  // onChanged = null should display disabledHint
+  items = menuItems;
+  onChanged = null;
+
+  await tester.pumpWidget(build());
+  expect(find.text('four'), findsOneWidget);
+
+  // onChanged != null and items != null should not display disabledHint but normal hint
+  items = menuItems;
+  onChanged = onChanged = (s) => print(s);
+
+  await tester.pumpWidget(build());
+  expect(find.text('four'), findsNothing);
+  expect(find.text('onetwothree'), findsOneWidget);
+
+});
+
+
 }
