@@ -464,6 +464,7 @@ class DropdownButton<T> extends StatefulWidget {
   /// Creates a dropdown button.
   ///
   /// The [items] must have distinct values and if [value] isn't null it must be among them.
+  /// If [items] is null the button is disabled and shows the optional [hintDisabled] and the down arrow is drawn as disabled
   ///
   /// The [elevation] and [iconSize] arguments must not be null (they both have
   /// defaults, so do not need to be specified).
@@ -472,14 +473,16 @@ class DropdownButton<T> extends StatefulWidget {
     @required this.items,
     this.value,
     this.hint,
+    this.hintDisabled,
     @required this.onChanged,
     this.elevation = 8,
     this.style,
     this.iconSize = 24.0,
     this.isDense = false,
-  }) : assert(items != null),
-       assert(value == null || items.where((DropdownMenuItem<T> item) => item.value == value).length == 1),
-      super(key: key);
+  })  : assert(items == null 
+                || value == null 
+                || items.where((DropdownMenuItem<T> item) => item.value == value).length == 1),
+        super(key: key);
 
   /// The list of possible items to select among.
   final List<DropdownMenuItem<T>> items;
@@ -491,6 +494,9 @@ class DropdownButton<T> extends StatefulWidget {
 
   /// Displayed if [value] is null.
   final Widget hint;
+
+  /// Displayed if [items] is null.
+  final Widget hintDisabled;
 
   /// Called when the user selects an item.
   final ValueChanged<T> onChanged;
@@ -563,13 +569,17 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
   }
 
   void _updateSelectedIndex() {
-    assert(widget.value == null ||
-      widget.items.where((DropdownMenuItem<T> item) => item.value == widget.value).length == 1);
-    _selectedIndex = null;
-    for (int itemIndex = 0; itemIndex < widget.items.length; itemIndex++) {
-      if (widget.items[itemIndex].value == widget.value) {
-        _selectedIndex = itemIndex;
-        return;
+    if (widget.items != null) {
+      assert(widget.value == null ||
+          widget.items
+            .where((DropdownMenuItem<T> item) => item.value == widget.value)
+                  .length == 1);
+      _selectedIndex = null;
+      for (int itemIndex = 0; itemIndex < widget.items.length; itemIndex++) {
+        if (widget.items[itemIndex].value == widget.value) {
+          _selectedIndex = itemIndex;
+          return;
+        }
       }
     }
   }
@@ -613,20 +623,24 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
     return math.max(_textStyle.fontSize, math.max(widget.iconSize, _kDenseButtonHeight));
   }
 
+  // just so we don't have to repeat this test and make it easier to understand
+  bool get _enabled => widget.items != null;
+
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterial(context));
 
     // The width of the button and the menu are defined by the widest
     // item and the width of the hint.
-    final List<Widget> items = new List<Widget>.from(widget.items);
+    final List<Widget> items =
+        _enabled ? new List<Widget>.from(widget.items) : <Widget>[];
     int hintIndex;
-    if (widget.hint != null) {
+    if (widget.hint != null || (!_enabled && widget.hintDisabled != null)) {
       hintIndex = items.length;
       items.add(new DefaultTextStyle(
         style: _textStyle.copyWith(color: Theme.of(context).hintColor),
         child: new IgnorePointer(
-          child: widget.hint,
+          child: _enabled ? widget.hint : widget.hintDisabled ?? widget.hint,
         ),
       ));
     }
@@ -644,17 +658,23 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           mainAxisSize: MainAxisSize.min,
           children: <Widget>[
-            // If value is null (then _selectedIndex is null) then we display
+            // If value is null (then _selectedIndex is null) or if disabled then we display
             // the hint or nothing at all.
             new IndexedStack(
-              index: _selectedIndex ?? hintIndex,
+              index: _enabled ? (_selectedIndex ?? hintIndex) : hintIndex,
               alignment: AlignmentDirectional.centerStart,
               children: items,
             ),
             new Icon(Icons.arrow_drop_down,
-              size: widget.iconSize,
-              // These colors are not defined in the Material Design spec.
-              color: Theme.of(context).brightness == Brightness.light ? Colors.grey.shade700 : Colors.white70
+                size: widget.iconSize,
+                // These colors are not defined in the Material Design spec.
+                color: _enabled
+                    ? Theme.of(context).brightness == Brightness.light
+                        ? Colors.grey.shade700
+                        : Colors.white70
+                    : Theme.of(context).brightness == Brightness.light
+                        ? Colors.grey.shade400
+                        : Colors.white10,
             ),
           ],
         ),
@@ -682,9 +702,9 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
     }
 
     return new GestureDetector(
-      onTap: _handleTap,
-      behavior: HitTestBehavior.opaque,
-      child: result
+        onTap: _enabled ? _handleTap : null,
+        behavior: HitTestBehavior.opaque,
+        child: result,
     );
   }
 }
