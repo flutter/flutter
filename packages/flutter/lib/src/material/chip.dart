@@ -26,7 +26,6 @@ const double _kDeleteIconSize = 18.0;
 const int _kCheckmarkAlpha = 0xde; // 87%
 const int _kDisabledAlpha = 0x61; // 38%
 const double _kCheckmarkStrokeWidth = 2.0;
-const double _kPressElevation = 8.0;
 
 const Duration _kSelectDuration = const Duration(milliseconds: 195);
 const Duration _kCheckmarkDuration = const Duration(milliseconds: 150);
@@ -262,6 +261,12 @@ abstract class SelectableChipAttributes {
   /// ```
   ValueChanged<bool> get onSelected;
 
+  /// Elevation to be applied on the chip during the press motion. 
+  /// This controls the size of the shadow below the chip.
+  /// 
+  /// Defaults to 8.
+  double get pressElevation;
+
   /// Color to be used for the chip's background, indicating that it is
   /// selected.
   ///
@@ -364,6 +369,12 @@ abstract class TappableChipAttributes {
   /// }
   /// ```
   VoidCallback get onPressed;
+
+  /// Elevation to be applied on the chip during the press motion. 
+  /// This controls the size of the shadow below the chip.
+  /// 
+  /// Defaults to 8.
+  double get pressElevation;
 
   /// Tooltip string to be used for the body area (where the label and avatar
   /// are) of the chip.
@@ -541,6 +552,7 @@ class InputChip extends StatelessWidget
     this.deleteIconColor,
     this.deleteButtonTooltipMessage,
     this.onPressed,
+    this.pressElevation,
     this.disabledColor,
     this.selectedColor,
     this.tooltip,
@@ -576,6 +588,8 @@ class InputChip extends StatelessWidget
   final String deleteButtonTooltipMessage;
   @override
   final VoidCallback onPressed;
+  @override
+  final double pressElevation;
   @override
   final Color disabledColor;
   @override
@@ -704,6 +718,8 @@ class ChoiceChip extends StatelessWidget
   @override
   final ValueChanged<bool> onSelected;
   @override
+  final double pressElevation;
+  @override
   final bool selected;
   @override
   final Color disabledColor;
@@ -731,6 +747,7 @@ class ChoiceChip extends StatelessWidget
       labelStyle: labelStyle ?? (selected ? chipTheme.secondaryLabelStyle : null),
       labelPadding: labelPadding,
       onSelected: onSelected,
+      pressElevation: pressElevation,
       selected: selected,
       showCheckmark: false,
       onDeleted: null,
@@ -846,6 +863,7 @@ class FilterChip extends StatelessWidget
     this.labelPadding,
     this.selected = false,
     @required this.onSelected,
+    this.pressElevation,
     this.disabledColor,
     this.selectedColor,
     this.tooltip,
@@ -868,6 +886,8 @@ class FilterChip extends StatelessWidget
   final bool selected;
   @override
   final ValueChanged<bool> onSelected;
+  @override
+  final double pressElevation;
   @override
   final Color disabledColor;
   @override
@@ -962,6 +982,7 @@ class ActionChip extends StatelessWidget implements ChipAttributes, TappableChip
     this.labelStyle,
     this.labelPadding,
     @required this.onPressed,
+    this.pressElevation,
     this.tooltip,
     this.shape,
     this.backgroundColor,
@@ -984,6 +1005,8 @@ class ActionChip extends StatelessWidget implements ChipAttributes, TappableChip
   final EdgeInsetsGeometry labelPadding;
   @override
   final VoidCallback onPressed;
+  @override
+  final double pressElevation;
   @override
   final String tooltip;
   @override
@@ -1067,6 +1090,7 @@ class RawChip extends StatefulWidget
     this.deleteButtonTooltipMessage,
     this.onPressed,
     this.onSelected,
+    this.pressElevation = 8.0,
     this.tapEnabled = true,
     this.selected,
     this.showCheckmark = true,
@@ -1101,6 +1125,8 @@ class RawChip extends StatefulWidget
   final ValueChanged<bool> onSelected;
   @override
   final VoidCallback onPressed;
+  @override
+  final double pressElevation;
   @override
   final bool selected;
   @override
@@ -1153,10 +1179,6 @@ class _RawChipState extends State<RawChip> with TickerProviderStateMixin<RawChip
   Animation<double> enableAnimation;
   Animation<double> selectionFade;
 
-  static final Tween<double> pressedShadowTween = new Tween<double>(
-    begin: 0.0,
-    end: _kPressElevation,
-  );
   bool get hasDeleteButton => widget.onDeleted != null;
   bool get hasAvatar => widget.avatar != null;
 
@@ -1369,7 +1391,7 @@ class _RawChipState extends State<RawChip> with TickerProviderStateMixin<RawChip
     final ShapeBorder shape = widget.shape ?? chipTheme.shape;
 
     return new Material(
-      elevation: isTapping ? _kPressElevation : 0.0,
+      elevation: isTapping ? widget.pressElevation : 0.0,
       animationDuration: pressedAnimationDuration,
       shape: shape,
       child: new InkResponse(
