@@ -1,4 +1,4 @@
-Signature: 735395be7ffeceb29476cc9235a6687a
+Signature: 8be605988a80955e05c8d5dafaf6cd00
 
 UNUSED LICENSES:
 
@@ -17264,10 +17264,10 @@ FILE: ../../../third_party/skia/src/compute/hs/gen/transpose.c
 FILE: ../../../third_party/skia/src/compute/hs/gen/transpose.h
 FILE: ../../../third_party/skia/src/compute/skc/allocator_host.c
 FILE: ../../../third_party/skia/src/compute/skc/allocator_host.h
+FILE: ../../../third_party/skia/src/compute/skc/interop.h
 FILE: ../../../third_party/skia/src/compute/skc/platforms/cl_12/allocator_device_cl.c
 FILE: ../../../third_party/skia/src/compute/skc/platforms/cl_12/allocator_device_cl.h
-FILE: ../../../third_party/skia/src/compute/skc/platforms/cl_12/gl/interop.c
-FILE: ../../../third_party/skia/src/compute/skc/platforms/cl_12/gl/interop.h
+FILE: ../../../third_party/skia/src/compute/skc/platforms/cl_12/interop/interop_glfw.c
 FILE: ../../../third_party/skia/src/compute/skc/platforms/cl_12/kernels/segment_ttck.cl
 FILE: ../../../third_party/skia/src/compute/skc/platforms/cl_12/kernels/segment_ttrk.cl
 FILE: ../../../third_party/skia/src/compute/skc/runtime.h
@@ -19625,17 +19625,17 @@ FILE: ../../../third_party/skia/src/compute/skc/platforms/cl_12/raster_builder_c
 FILE: ../../../third_party/skia/src/compute/skc/platforms/cl_12/raster_builder_cl_12.h
 FILE: ../../../third_party/skia/src/compute/skc/platforms/cl_12/runtime_cl_12.c
 FILE: ../../../third_party/skia/src/compute/skc/platforms/cl_12/runtime_cl_12.h
+FILE: ../../../third_party/skia/src/compute/skc/platforms/cl_12/skc_cl.h
 FILE: ../../../third_party/skia/src/compute/skc/platforms/cl_12/styling_cl_12.c
 FILE: ../../../third_party/skia/src/compute/skc/platforms/cl_12/styling_cl_12.h
+FILE: ../../../third_party/skia/src/compute/skc/platforms/cl_12/surface_cl_12.c
 FILE: ../../../third_party/skia/src/compute/skc/platforms/cl_12/surface_cl_12.h
-FILE: ../../../third_party/skia/src/compute/skc/platforms/cl_12/surface_cl_12_buffer.c
 FILE: ../../../third_party/skia/src/compute/skc/raster.h
 FILE: ../../../third_party/skia/src/compute/skc/raster_builder.c
 FILE: ../../../third_party/skia/src/compute/skc/raster_builder.h
 FILE: ../../../third_party/skia/src/compute/skc/scheduler.cpp
 FILE: ../../../third_party/skia/src/compute/skc/scheduler.h
 FILE: ../../../third_party/skia/src/compute/skc/skc.h
-FILE: ../../../third_party/skia/src/compute/skc/skc_create_cl.h
 FILE: ../../../third_party/skia/src/compute/skc/skc_styling.h
 FILE: ../../../third_party/skia/src/compute/skc/subblock.h
 FILE: ../../../third_party/skia/src/compute/skc/surface.c
