@@ -32,7 +32,7 @@ const Duration _kIndicatorScaleDuration = const Duration(milliseconds: 200);
 /// finished.
 ///
 /// Used by [RefreshIndicator.onRefresh].
-typedef Future<Null> RefreshCallback();
+typedef Future<void> RefreshCallback();
 
 // The state machine moves through these modes only when the scrollable
 // identified by scrollableKey has been scrolled to its min or max limit.
@@ -146,7 +146,7 @@ class RefreshIndicatorState extends State<RefreshIndicator> with TickerProviderS
   Animation<Color> _valueColor;
 
   _RefreshIndicatorMode _mode;
-  Future<Null> _pendingRefreshFuture;
+  Future<void> _pendingRefreshFuture;
   bool _isIndicatorAtTop;
   double _dragOffset;
 
@@ -297,7 +297,7 @@ class RefreshIndicatorState extends State<RefreshIndicator> with TickerProviderS
   }
 
   // Stop showing the refresh indicator.
-  Future<Null> _dismiss(_RefreshIndicatorMode newMode) async {
+  Future<void> _dismiss(_RefreshIndicatorMode newMode) async {
     // This can only be called from _show() when refreshing and
     // _handleScrollNotification in response to a ScrollEndNotification or
     // direction change.
@@ -327,7 +327,7 @@ class RefreshIndicatorState extends State<RefreshIndicator> with TickerProviderS
   void _show() {
     assert(_mode != _RefreshIndicatorMode.refresh);
     assert(_mode != _RefreshIndicatorMode.snap);
-    final Completer<Null> completer = new Completer<Null>();
+    final Completer<void> completer = new Completer<void>();
     _pendingRefreshFuture = completer.future;
     _mode = _RefreshIndicatorMode.snap;
     _positionController
@@ -340,7 +340,7 @@ class RefreshIndicatorState extends State<RefreshIndicator> with TickerProviderS
             _mode = _RefreshIndicatorMode.refresh;
           });
 
-          final Future<Null> refreshResult = widget.onRefresh();
+          final Future<void> refreshResult = widget.onRefresh();
           assert(() {
             if (refreshResult == null)
               FlutterError.reportError(new FlutterErrorDetails(
@@ -381,7 +381,7 @@ class RefreshIndicatorState extends State<RefreshIndicator> with TickerProviderS
   /// When initiated in this manner, the refresh indicator is independent of any
   /// actual scroll view. It defaults to showing the indicator at the top. To
   /// show it at the bottom, set `atTop` to false.
-  Future<Null> show({ bool atTop = true }) {
+  Future<void> show({ bool atTop = true }) {
     if (_mode != _RefreshIndicatorMode.refresh &&
         _mode != _RefreshIndicatorMode.snap) {
       if (_mode == null)
