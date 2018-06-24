@@ -74,6 +74,9 @@ class SwitchListTile extends StatelessWidget {
     @required this.value,
     @required this.onChanged,
     this.activeColor,
+    this.activeTrackColor,
+    this.inactiveThumbColor,
+    this.inactiveTrackColor,
     this.activeThumbImage,
     this.inactiveThumbImage,
     this.title,
@@ -83,10 +86,10 @@ class SwitchListTile extends StatelessWidget {
     this.secondary,
     this.selected = false,
   }) : assert(value != null),
-       assert(isThreeLine != null),
-       assert(!isThreeLine || subtitle != null),
-       assert(selected != null),
-       super(key: key);
+        assert(isThreeLine != null),
+        assert(!isThreeLine || subtitle != null),
+        assert(selected != null),
+        super(key: key);
 
   /// Whether this switch is checked.
   ///
@@ -122,6 +125,22 @@ class SwitchListTile extends StatelessWidget {
   ///
   /// Defaults to accent color of the current [Theme].
   final Color activeColor;
+
+  /// The color to use on the track when this switch is on.
+  ///
+  /// Defaults to [ThemeData.toggleableActiveColor] with the opacity set at 50%.
+  final Color activeTrackColor;
+
+  /// The color to use on the thumb when this switch is off.
+  ///
+  /// Defaults to the colors described in the Material design specification.
+  final Color inactiveThumbColor;
+
+  /// The color to use on the track when this switch is off.
+  ///
+  /// Defaults to the colors described in the Material design specification.
+  final Color inactiveTrackColor;
+
 
   /// An image to use on the thumb of this switch when the switch is on.
   final ImageProvider activeThumbImage;
@@ -173,6 +192,9 @@ class SwitchListTile extends StatelessWidget {
       activeThumbImage: activeThumbImage,
       inactiveThumbImage: inactiveThumbImage,
       materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+      activeTrackColor: activeTrackColor,
+      inactiveTrackColor: inactiveTrackColor,
+      inactiveThumbColor: inactiveThumbColor,
     );
     return MergeSemantics(
       child: ListTileTheme.merge(
