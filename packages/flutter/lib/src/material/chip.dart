@@ -697,6 +697,7 @@ class ChoiceChip extends StatelessWidget
     this.labelStyle,
     this.labelPadding,
     this.onSelected,
+    this.pressElevation,
     @required this.selected,
     this.selectedColor,
     this.disabledColor,
