@@ -114,7 +114,7 @@ class Color {
   ///
   /// Out of range values are brought into range using modulo 255.
   ///
-  /// See also [fromARGB], which takes the alpha value as a floating point
+  /// See also [fromRGBO], which takes the alpha value as a floating point
   /// value.
   const Color.fromARGB(int a, int r, int g, int b) :
     value = (((a & 0xff) << 24) |
