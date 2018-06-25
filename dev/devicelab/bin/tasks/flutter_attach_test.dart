@@ -102,7 +102,7 @@ void main() {
 
       section('Installing $apkPath');
 
-      await device.adb(<String>['install', apkPath]);
+      await device.adb(<String>['install', '-r', apkPath]);
 
       try {
         section('Launching attach.');
