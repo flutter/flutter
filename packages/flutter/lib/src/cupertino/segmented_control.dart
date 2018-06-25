@@ -176,14 +176,20 @@ class _SegmentedControlState<T> extends State<SegmentedControl<T>>
   @override
   void initState() {
     super.initState();
+    setupAnimationControllers();
+  }
+
+  void setupAnimationControllers() {
     for (T key in widget.children.keys) {
       selectionControllers.add(
         new AnimationController(
           duration: _kFadeDuration,
           vsync: this,
         )..addListener(() {
-            setState(() {});
-          }),
+          setState(() {
+            // State of background/text colors has changed
+          });
+        }),
       );
 
       if (widget.groupValue == key) {
@@ -229,6 +235,13 @@ class _SegmentedControlState<T> extends State<SegmentedControl<T>>
   @override
   void didUpdateWidget(SegmentedControl<T> oldWidget) {
     super.didUpdateWidget(oldWidget);
+
+    if (oldWidget.children != widget.children) {
+      selectionControllers.clear();
+      childTweens.clear();
+      setupAnimationControllers();
+    }
+
     if (oldWidget.groupValue != widget.groupValue) {
       int index = 0;
       for (T key in widget.children.keys) {
@@ -249,22 +262,20 @@ class _SegmentedControlState<T> extends State<SegmentedControl<T>>
       return textColorTween.evaluate(selectionControllers.elementAt(index));
     } else if (widget.groupValue == currentKey) {
       return CupertinoColors.white;
-    } else {
-      return CupertinoColors.activeBlue;
     }
+    return CupertinoColors.activeBlue;
   }
 
   Color getBackgroundColor(int index, T currentKey) {
-    Color backgroundColor = CupertinoColors.white;
     if (selectionControllers.elementAt(index).isAnimating) {
-      backgroundColor = childTweens.elementAt(index).evaluate(
+      return childTweens.elementAt(index).evaluate(
           selectionControllers.elementAt(index));
     } else if (widget.groupValue == currentKey) {
-      backgroundColor = CupertinoColors.activeBlue;
+      return CupertinoColors.activeBlue;
     } else if (_pressedKey == currentKey) {
-      backgroundColor = _kPressedBackground;
+      return _kPressedBackground;
     }
-    return backgroundColor;
+    return CupertinoColors.white;
   }
 
   @override
@@ -550,6 +561,7 @@ class _RenderSegmentedControl<T> extends RenderBox
 
     child = firstChild;
     while (child != null) {
+      print(child.getMaxIntrinsicWidth(maxHeight));
       child.layout(childConstraints, parentUsesSize: true);
       child = childAfter(child);
     }
