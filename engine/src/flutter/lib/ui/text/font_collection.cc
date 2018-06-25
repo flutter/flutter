@@ -11,6 +11,7 @@
 #include "third_party/rapidjson/rapidjson/document.h"
 #include "third_party/rapidjson/rapidjson/rapidjson.h"
 #include "third_party/skia/include/core/SkFontMgr.h"
+#include "third_party/skia/include/core/SkGraphics.h"
 #include "third_party/skia/include/core/SkStream.h"
 #include "third_party/skia/include/core/SkTypeface.h"
 #include "txt/asset_font_manager.h"
@@ -24,7 +25,10 @@ FontCollection::FontCollection()
   collection_->SetDefaultFontManager(SkFontMgr::RefDefault());
 }
 
-FontCollection::~FontCollection() = default;
+FontCollection::~FontCollection() {
+  collection_.reset();
+  SkGraphics::PurgeFontCache();
+}
 
 std::shared_ptr<txt::FontCollection> FontCollection::GetFontCollection() const {
   return collection_;
