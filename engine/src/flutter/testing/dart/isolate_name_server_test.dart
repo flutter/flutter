@@ -81,20 +81,6 @@ void main() {
     receivePort2.close();
   });
 
-  test('isolate name server null args', () {
-    // None of our IsolateNameServer methods should accept null.
-    expect(() => IsolateNameServer.lookupPortByName(null), throwsArgumentError);
-    expect(() => IsolateNameServer.registerPortWithName(null, 'abc'),
-        throwsArgumentError);
-    final receivePort = new ReceivePort();
-    final sendPort = receivePort.sendPort;
-    expect(() => IsolateNameServer.registerPortWithName(sendPort, null),
-        throwsArgumentError);
-    expect(() => IsolateNameServer.removePortNameMapping(null),
-        throwsArgumentError);
-    receivePort.close();
-  });
-
   test('isolate name server multi-isolate', () async {
     // Register our send port with the name server.
     final receivePort = new ReceivePort();
