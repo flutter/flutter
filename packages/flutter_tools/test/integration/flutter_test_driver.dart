@@ -141,21 +141,15 @@ class FlutterTestDriver {
       }
     });
     
-    try {
-      // This 'await' is important to ensure the `finally block does not run
-      // and unsubscribe before the response comes through.
-      return await _withTimeout(
-          response.future,
-          () {
-            if (event != null)
-              return 'Did not receive expected $event event.\nDid get:\n${messages.toString()}';
-            else if (id != null)
-              return 'Did not receive response to request "$id".\nDid get:\n${messages.toString()}';
-          }
-      );
-    } finally {
-      sub.cancel();
-    }
+    return _withTimeout(
+        () => response.future,
+        () {
+          if (event != null)
+            return 'Did not receive expected $event event.\nDid get:\n${messages.toString()}';
+          else if (id != null)
+            return 'Did not receive response to request "$id".\nDid get:\n${messages.toString()}';
+        }
+    ).whenComplete(() => sub.cancel());
   }
 
   Map<String, dynamic> _parseFlutterResponse(String line) {
