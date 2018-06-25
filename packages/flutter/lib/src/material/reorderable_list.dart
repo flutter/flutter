@@ -204,11 +204,11 @@ class _ReorderableListContentState extends State<_ReorderableListContent> with T
     double dropAreaWithoutMargin;
     switch (widget.scrollDirection) {
       case Axis.horizontal:
-        dropAreaWithoutMargin = _draggingFeedbackSize.height;
+        dropAreaWithoutMargin = _draggingFeedbackSize.width;
         break;
       case Axis.vertical:
       default:
-        dropAreaWithoutMargin = _draggingFeedbackSize.width;
+        dropAreaWithoutMargin = _draggingFeedbackSize.height;
         break;
     }
     return dropAreaWithoutMargin + _dropAreaMargin;
@@ -439,14 +439,23 @@ class _ReorderableListContentState extends State<_ReorderableListContent> with T
         for (int i = 0; i < widget.children.length; i += 1) {
           wrappedChildren.add(_wrap(widget.children[i], i, constraints));
         }
+        const Key endWidgetKey = const Key('DraggableList - End Widget');
         Widget finalDropArea;
         switch (widget.scrollDirection) {
           case Axis.horizontal:
-            finalDropArea = new SizedBox(width: _dropAreaExtent);
+            finalDropArea = new SizedBox(
+              key: endWidgetKey,
+              width: _defaultDropAreaExtent,
+              height: constraints.maxHeight,
+            );
             break;
           case Axis.vertical:
           default:
-            finalDropArea = new SizedBox(height: _dropAreaExtent);
+            finalDropArea = new SizedBox(
+              key: endWidgetKey,
+              height: _defaultDropAreaExtent,
+              width: constraints.maxWidth,
+            );
             break;
         }
         wrappedChildren.add(_wrap(

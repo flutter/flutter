@@ -129,9 +129,9 @@ void main() {
           return contentElement;
         }
 
-        const double kNonDraggingListHeight = 264.0;
+        const double kNonDraggingListHeight = 292.0;
         // The list view pads the drop area by 8dp.
-        const double kDraggingListHeight = 272.0;
+        const double kDraggingListHeight = 300.0;
         // Drag a normal text item
         expect(getContentElement().size.height, kNonDraggingListHeight);
         TestGesture drag = await tester.startGesture(tester.getCenter(find.text('Normal item')));
@@ -237,9 +237,9 @@ void main() {
           return contentElement;
         }
 
-        const double kNonDraggingListWidth = 264.0;
+        const double kNonDraggingListWidth = 292.0;
         // The list view pads the drop area by 8dp.
-        const double kDraggingListWidth = 272.0;
+        const double kDraggingListWidth = 300.0;
         // Drag a normal text item
         expect(getContentElement().size.width, kNonDraggingListWidth);
         TestGesture drag = await tester.startGesture(tester.getCenter(find.text('Normal item')));
@@ -283,5 +283,6 @@ Future<void> longPressDrag(WidgetTester tester, Offset start, Offset end) async 
   final TestGesture drag = await tester.startGesture(start);
   await tester.pump(kLongPressTimeout + kPressTimeout);
   await drag.moveTo(end);
+  await tester.pump(kPressTimeout);
   await drag.up();
 }
