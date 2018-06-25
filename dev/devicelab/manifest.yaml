@@ -274,6 +274,7 @@ tasks:
       Tests the `flutter attach` command.
     stage: devicelab
     required_agent_capabilities: ["linux/android"]
+    flaky: true
 
   # iOS on-device tests
 
