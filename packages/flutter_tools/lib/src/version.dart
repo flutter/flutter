@@ -240,7 +240,7 @@ class FlutterVersion {
 
     // Get whether there's a newer version on the remote. This only goes
     // to the server if we haven't checked recently so won't happen often.
-    final DateTime latestFlutterCommitDate = await _getLatestAvailableFlutterVersion();
+    final DateTime latestFlutterCommitDate = await _getLatestAvailableFlutterDate();
     final VersionCheckResult remoteVersion =
         latestFlutterCommitDate == null
             ? VersionCheckResult.unknown
@@ -305,7 +305,7 @@ class FlutterVersion {
   ///
   /// Returns null if the cached version is out-of-date or missing, and we are
   /// unable to reach the server to get the latest version.
-  Future<DateTime> _getLatestAvailableFlutterVersion() async {
+  Future<DateTime> _getLatestAvailableFlutterDate() async {
     Cache.checkLockAcquired();
     final VersionCheckStamp versionCheckStamp = await VersionCheckStamp.load();
 
