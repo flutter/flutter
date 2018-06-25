@@ -23,6 +23,10 @@ const double _kMinSegmentedControlHeight = 28.0;
 // press or drag.
 const Color _kPressedBackground = const Color(0x33007aff);
 
+// The duration of the fade animation used to transition when a new widget
+// is selected.
+const Duration _kFadeDuration = const Duration(milliseconds: 165);
+
 /// An iOS-style segmented control.
 ///
 /// Displays the widgets provided in the [Map] of [children] in a
@@ -147,8 +151,48 @@ class SegmentedControl<T> extends StatefulWidget {
   _SegmentedControlState<T> createState() => _SegmentedControlState<T>();
 }
 
-class _SegmentedControlState<T> extends State<SegmentedControl<T>> {
+class _SegmentedControlState<T> extends State<SegmentedControl<T>>
+    with TickerProviderStateMixin<SegmentedControl<T>> {
   T _pressedKey;
+
+  List<AnimationController> selectionControllers = <AnimationController>[];
+  List<ColorTween> childTweens = <ColorTween>[];
+
+  static final ColorTween forwardBackgroundColorTween = new ColorTween(
+    begin: _kPressedBackground,
+    end: CupertinoColors.activeBlue,
+  );
+
+  static final ColorTween reverseBackgroundColorTween = new ColorTween(
+    begin: CupertinoColors.white,
+    end: CupertinoColors.activeBlue,
+  );
+
+  static final ColorTween textColorTween = new ColorTween(
+    begin: CupertinoColors.activeBlue,
+    end: CupertinoColors.white,
+  );
+
+  @override
+  void initState() {
+    super.initState();
+    for (T key in widget.children.keys) {
+      selectionControllers.add(
+        new AnimationController(
+          duration: _kFadeDuration,
+          vsync: this,
+        )..addListener(() {
+            setState(() {});
+          }),
+      );
+
+      if (widget.groupValue == key) {
+        childTweens.add(forwardBackgroundColorTween);
+      } else {
+        childTweens.add(reverseBackgroundColorTween);
+      }
+    }
+  }
 
   void _onTapDown(T currentKey) {
     setState(() {
@@ -175,8 +219,58 @@ class _SegmentedControlState<T> extends State<SegmentedControl<T>> {
   }
 
   @override
+  void dispose() {
+    for (AnimationController animationController in selectionControllers) {
+      animationController.dispose();
+    }
+    super.dispose();
+  }
+
+  @override
+  void didUpdateWidget(SegmentedControl<T> oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.groupValue != widget.groupValue) {
+      int index = 0;
+      for (T key in widget.children.keys) {
+        if (widget.groupValue == key) {
+          childTweens.insert(index, forwardBackgroundColorTween);
+          selectionControllers.elementAt(index).forward();
+        } else {
+          childTweens.insert(index, reverseBackgroundColorTween);
+          selectionControllers.elementAt(index).reverse();
+        }
+        index += 1;
+      }
+    }
+  }
+
+  Color getTextColor(int index, T currentKey) {
+    if (selectionControllers.elementAt(index).isAnimating) {
+      return textColorTween.evaluate(selectionControllers.elementAt(index));
+    } else if (widget.groupValue == currentKey) {
+      return CupertinoColors.white;
+    } else {
+      return CupertinoColors.activeBlue;
+    }
+  }
+
+  Color getBackgroundColor(int index, T currentKey) {
+    Color backgroundColor = CupertinoColors.white;
+    if (selectionControllers.elementAt(index).isAnimating) {
+      backgroundColor = childTweens.elementAt(index).evaluate(
+          selectionControllers.elementAt(index));
+    } else if (widget.groupValue == currentKey) {
+      backgroundColor = CupertinoColors.activeBlue;
+    } else if (_pressedKey == currentKey) {
+      backgroundColor = _kPressedBackground;
+    }
+    return backgroundColor;
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final List<Widget> gestureChildren = <Widget>[];
+    final List<Widget> _gestureChildren = <Widget>[];
+    final List<Color> _backgroundColors = <Color>[];
     int index = 0;
     int selectedIndex;
     int pressedIndex;
@@ -185,12 +279,10 @@ class _SegmentedControlState<T> extends State<SegmentedControl<T>> {
       pressedIndex = (_pressedKey == currentKey) ? index : pressedIndex;
 
       final TextStyle textStyle = DefaultTextStyle.of(context).style.copyWith(
-        color: (widget.groupValue == currentKey) ?
-          CupertinoColors.white : CupertinoColors.activeBlue,
+        color: getTextColor(index, currentKey),
       );
       final IconThemeData iconTheme = new IconThemeData(
-        color: (widget.groupValue == currentKey) ?
-          CupertinoColors.white : CupertinoColors.activeBlue,
+        color: getTextColor(index, currentKey),
       );
 
       Widget child = widget.children[currentKey];
@@ -215,14 +307,17 @@ class _SegmentedControlState<T> extends State<SegmentedControl<T>> {
           ),
         ),
       );
-      gestureChildren.add(child);
+
+      _backgroundColors.add(getBackgroundColor(index, currentKey));
+      _gestureChildren.add(child);
       index += 1;
     }
 
     final Widget box = new _SegmentedControlRenderWidget<T>(
-      children: gestureChildren,
+      children: _gestureChildren,
       selectedIndex: selectedIndex,
       pressedIndex: pressedIndex,
+      backgroundColors: _backgroundColors,
     );
 
     return new Padding(
@@ -241,6 +336,7 @@ class _SegmentedControlRenderWidget<T> extends MultiChildRenderObjectWidget {
     List<Widget> children = const <Widget>[],
     @required this.selectedIndex,
     @required this.pressedIndex,
+    @required this.backgroundColors,
   }) : super(
           key: key,
           children: children,
@@ -248,6 +344,7 @@ class _SegmentedControlRenderWidget<T> extends MultiChildRenderObjectWidget {
 
   final int selectedIndex;
   final int pressedIndex;
+  final List<Color> backgroundColors;
 
   @override
   RenderObject createRenderObject(BuildContext context) {
@@ -255,6 +352,7 @@ class _SegmentedControlRenderWidget<T> extends MultiChildRenderObjectWidget {
       textDirection: Directionality.of(context),
       selectedIndex: selectedIndex,
       pressedIndex: pressedIndex,
+      backgroundColors: backgroundColors,
     );
   }
 
@@ -263,7 +361,8 @@ class _SegmentedControlRenderWidget<T> extends MultiChildRenderObjectWidget {
     renderObject
       ..textDirection = Directionality.of(context)
       ..selectedIndex = selectedIndex
-      ..pressedIndex = pressedIndex;
+      ..pressedIndex = pressedIndex
+      ..backgroundColors = backgroundColors;
   }
 }
 
@@ -281,11 +380,23 @@ class _RenderSegmentedControl<T> extends RenderBox
     @required int selectedIndex,
     @required int pressedIndex,
     @required TextDirection textDirection,
+    @required List<Color> backgroundColors,
   })  : assert(textDirection != null),
         _textDirection = textDirection,
         _selectedIndex = selectedIndex,
-        _pressedIndex = pressedIndex {
+        _pressedIndex = pressedIndex,
+        _backgroundColors = backgroundColors {
     addAll(children);
+  }
+
+  List<Color> get backgroundColors => _backgroundColors;
+  List<Color> _backgroundColors;
+  set backgroundColors(List<Color> value) {
+    if (_backgroundColors == value) {
+      return;
+    }
+    _backgroundColors = value;
+    markNeedsPaint();
   }
 
   int get selectedIndex => _selectedIndex;
@@ -397,11 +508,9 @@ class _RenderSegmentedControl<T> extends RenderBox
       final Rect childRect = new Rect.fromLTWH(start, 0.0, child.size.width, child.size.height);
       RRect rChildRect;
       if (child == leftChild) {
-        rChildRect = new RRect.fromRectAndCorners(childRect, topLeft: const Radius.circular(3.0),
-            bottomLeft: const Radius.circular(3.0));
+        rChildRect = new RRect.fromRectAndCorners(childRect, topLeft: const Radius.circular(3.0), bottomLeft: const Radius.circular(3.0));
       } else if (child == rightChild) {
-        rChildRect = new RRect.fromRectAndCorners(childRect, topRight: const Radius.circular(3.0),
-            bottomRight: const Radius.circular(3.0));
+        rChildRect = new RRect.fromRectAndCorners(childRect, topRight: const Radius.circular(3.0), bottomRight: const Radius.circular(3.0));
       } else {
         rChildRect = new RRect.fromRectAndCorners(childRect);
       }
@@ -481,17 +590,10 @@ class _RenderSegmentedControl<T> extends RenderBox
 
     final _SegmentedControlContainerBoxParentData childParentData = child.parentData;
 
-    Color color = CupertinoColors.white;
-    if (selectedIndex != null && selectedIndex == childIndex) {
-      color = CupertinoColors.activeBlue;
-    } else if (pressedIndex != null && pressedIndex == childIndex) {
-      color = _kPressedBackground;
-    }
-
     context.canvas.drawRRect(
       childParentData.surroundingRect.shift(offset),
       new Paint()
-        ..color = color
+        ..color = backgroundColors.elementAt(childIndex)
         ..style = PaintingStyle.fill,
     );
     context.canvas.drawRRect(

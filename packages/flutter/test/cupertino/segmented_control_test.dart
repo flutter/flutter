@@ -205,7 +205,7 @@ void main() {
     expect(iconTheme.data.color, CupertinoColors.activeBlue);
 
     await tester.tap(find.widgetWithIcon(IconTheme, const IconData(1)));
-    await tester.pump();
+    await tester.pumpAndSettle();
 
     textStyle = tester.widget(find.widgetWithText(DefaultTextStyle, 'Child 1'));
     iconTheme = tester.widget(find.widgetWithIcon(IconTheme, const IconData(1)));
@@ -328,7 +328,7 @@ void main() {
     );
 
     await tester.tap(find.text('Child 2'));
-    await tester.pump();
+    await tester.pumpAndSettle(const Duration(milliseconds: 200));
 
     expect(
       getRenderSegmentedControl(tester),
@@ -735,7 +735,7 @@ void main() {
     );
 
     await tester.tap(find.text('Child 2'));
-    await tester.pump();
+    await tester.pumpAndSettle();
 
     expect(
       getRenderSegmentedControl(tester),
@@ -893,7 +893,8 @@ void main() {
       ),
     );
 
-    await expectLater(find.byType(RepaintBoundary), matchesGoldenFile('segmented_control_test.0.0.png'));
+    await expectLater(find.byType(RepaintBoundary),
+        matchesGoldenFile('segmented_control_test.0.0.png'));
   });
 
   testWidgets('Golden Test Pressed State', (WidgetTester tester) async {
@@ -925,6 +926,7 @@ void main() {
     await tester.startGesture(center);
     await tester.pumpAndSettle();
 
-    expect(find.byType(RepaintBoundary), matchesGoldenFile('segmented_control_test.1.0.png'));
+    expect(find.byType(RepaintBoundary),
+        matchesGoldenFile('segmented_control_test.1.0.png'));
   });
 }
