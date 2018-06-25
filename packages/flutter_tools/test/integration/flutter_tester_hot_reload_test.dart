@@ -50,7 +50,7 @@ void main() {
           // Test currently passes with a FS path, but not with file:// URI.
           // fs.path.join(_tempDir.path, 'lib', 'main.dart'),
           new Uri.file(fs.path.join(_tempDir.path, 'lib', 'main.dart')).toString(),
-          8
+          9
       );
       
       await _flutter.hotReload();
@@ -76,11 +76,16 @@ Future<void> _setupSampleProject() async {
   class MyApp extends StatelessWidget {
     @override
     Widget build(BuildContext context) {
+      topLevelFunction();
       return new MaterialApp(
   title: 'Flutter Demo',
   home: new Container(),
       );
     }
+  }
+
+  topLevelFunction() {
+    print("test");
   }
   ''');
 }
