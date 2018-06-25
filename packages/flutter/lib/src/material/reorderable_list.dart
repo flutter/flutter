@@ -419,7 +419,7 @@ class _ReorderableListContentState extends State<_ReorderableListContent> with T
     // We use the layout builder to constrain the cross-axis size of dragging child widgets.
     return new LayoutBuilder(builder: (BuildContext context, BoxConstraints constraints) {
         final List<Widget> wrappedChildren = <Widget>[];
-        for (int i=0; i<widget.children.length; i++) {
+        for (int i = 0; i < widget.children.length; i += 1) {
           wrappedChildren.add(_wrap(widget.children[i], i, constraints));
         }
         wrappedChildren.add(_wrap(
