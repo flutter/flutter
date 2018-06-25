@@ -187,6 +187,9 @@ public class FlutterMain {
         if (Looper.myLooper() != Looper.getMainLooper()) {
           throw new IllegalStateException("ensureInitializationComplete must be called on the main thread");
         }
+        if (sSettings == null) {
+          throw new IllegalStateException("ensureInitializationComplete must be called after startInitialization");
+        }
         if (sInitialized) {
             return;
         }
