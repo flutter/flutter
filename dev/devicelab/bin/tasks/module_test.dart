@@ -8,7 +8,7 @@ import 'package:flutter_devicelab/framework/framework.dart';
 import 'package:flutter_devicelab/framework/utils.dart';
 import 'package:path/path.dart' as path;
 
-/// Tests that the Flutter module project template woraks and supports
+/// Tests that the Flutter module project template works and supports
 /// adding Flutter to an existing Android app.
 Future<Null> main() async {
   await task(() async {
@@ -46,28 +46,28 @@ Future<Null> main() async {
 
       section('Add to Android app');
 
-      final Directory add2app = new Directory(path.join(directory.path, 'Add2App'));
-      mkdir(add2app);
+      final Directory hostApp = new Directory(path.join(directory.path, 'hello_host_app'));
+      mkdir(hostApp);
       recursiveCopy(
-        new Directory(path.join(flutterDirectory.path, 'dev', 'integration_tests', 'Add2App')),
-        add2app,
+        new Directory(path.join(flutterDirectory.path, 'dev', 'integration_tests', 'android_host_app')),
+        hostApp,
       );
       copy(
         new File(path.join(directory.path, 'hello', '.android', 'gradlew')),
-        add2app,
+        hostApp,
       );
       copy(
         new File(path.join(directory.path, 'hello', '.android', 'gradle', 'wrapper', 'gradle-wrapper.jar')),
-        new Directory(path.join(add2app.path, 'gradle', 'wrapper')),
+        new Directory(path.join(hostApp.path, 'gradle', 'wrapper')),
       );
 
-      await inDirectory(add2app, () async {
+      await inDirectory(hostApp, () async {
         await exec('chmod', <String>['+x', 'gradlew']);
         await exec('./gradlew', <String>['app:assembleDebug']);
       });
 
       final bool appBuilt = exists(new File(path.join(
-        add2app.path,
+        hostApp.path,
         'app',
         'build',
         'outputs',

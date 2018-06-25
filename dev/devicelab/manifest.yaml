@@ -263,9 +263,10 @@ tasks:
 
   module_test:
     description: >
-      Checks that the module project template works and supports add2app.
+      Checks that the module project template works and supports add2app on Android.
     stage: devicelab
     required_agent_capabilities: ["linux/android"]
+    flaky: true
 
   flutter_gallery_instrumentation_test:
     description: >
