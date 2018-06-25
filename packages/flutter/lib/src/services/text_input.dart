@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:io' show Platform;
 import 'dart:ui' show TextAffinity, hashValues;
 
 import 'package:flutter/foundation.dart';
@@ -135,8 +136,46 @@ class TextInputType {
 
 /// An action the user has requested the text input control to perform.
 enum TextInputAction {
+  /// Show no action button. Android only.
+  none,
+
+  /// Let the OS choose the button. Corresponds to "unspecified" on Android and
+  /// "default" on iOS.
+  unspecified,
+
   /// Complete the text input operation.
   done,
+
+  /// Complete the text input operation. Corresponds to "go" on Android and iOS.
+  go,
+
+  /// Complete the text input operation. Corresponds to "search" on Android and
+  /// iOS.
+  search,
+
+  /// Complete the text input operation. Corresponds to "send" on Android and
+  /// iOS.
+  send,
+
+  /// Complete the text input operation and move focus to the logical "next"
+  /// input. Corresponds to "next" on Android and iOS.
+  next,
+
+  /// Complete the text input operation and move focus to the logical "previous"
+  /// input. Android only.
+  previous,
+
+  /// Complete the text input operation. iOS only, corresponds to "continue."
+  continue_action,
+
+  /// iOS only.
+  join,
+
+  /// iOS only.
+  route,
+
+  /// iOS only.
+  emergencyCall,
 
   /// The action to take when the enter button is pressed in a multi-line
   /// text field (which is typically to do nothing).
@@ -368,6 +407,28 @@ class TextInputConnection {
 
 TextInputAction _toTextInputAction(String action) {
   switch (action) {
+    case 'TextInputAction.none':
+      return TextInputAction.none;
+    case 'TextInputAction.unspecified':
+      return TextInputAction.unspecified;
+    case 'TextInputAction.go':
+      return TextInputAction.go;
+    case 'TextInputAction.search':
+      return TextInputAction.search;
+    case 'TextInputAction.send':
+      return TextInputAction.send;
+    case 'TextInputAction.next':
+      return TextInputAction.next;
+    case 'TextInputAction.previuos':
+      return TextInputAction.previous;
+    case 'TextInputAction.continue_action':
+      return TextInputAction.continue_action;
+    case 'TextInputAction.join':
+      return TextInputAction.join;
+    case 'TextInputAction.route':
+      return TextInputAction.route;
+    case 'TextInputAction.emergencyCall':
+      return TextInputAction.emergencyCall;
     case 'TextInputAction.done':
       return TextInputAction.done;
     case 'TextInputAction.newline':
@@ -426,6 +487,32 @@ final _TextInputClientHandler _clientHandler = new _TextInputClientHandler();
 
 /// An interface to the system's text input control.
 class TextInput {
+  static const List<TextInputAction> _androidSupportedInputActions = <TextInputAction>[
+    TextInputAction.none,
+    TextInputAction.unspecified,
+    TextInputAction.done,
+    TextInputAction.send,
+    TextInputAction.go,
+    TextInputAction.search,
+    TextInputAction.next,
+    TextInputAction.previous,
+    TextInputAction.newline,
+  ];
+
+  static const List<TextInputAction> _iOSSupportedInputActions = <TextInputAction>[
+    TextInputAction.unspecified,
+    TextInputAction.done,
+    TextInputAction.send,
+    TextInputAction.go,
+    TextInputAction.search,
+    TextInputAction.next,
+    TextInputAction.newline,
+    TextInputAction.continue_action,
+    TextInputAction.join,
+    TextInputAction.route,
+    TextInputAction.emergencyCall,
+  ];
+
   TextInput._();
 
   /// Begin interacting with the text input control.
@@ -441,6 +528,7 @@ class TextInput {
   static TextInputConnection attach(TextInputClient client, TextInputConfiguration configuration) {
     assert(client != null);
     assert(configuration != null);
+    _ensureInputActionWorksOnPlatform(configuration.inputAction);
     final TextInputConnection connection = new TextInputConnection._(client);
     _clientHandler._currentConnection = connection;
     SystemChannels.textInput.invokeMethod(
@@ -448,5 +536,19 @@ class TextInput {
       <dynamic>[ connection._id, configuration.toJSON() ],
     );
     return connection;
+  }
+
+  static void _ensureInputActionWorksOnPlatform(TextInputAction inputAction) {
+    if (Platform.isIOS) {
+      assert(
+        _iOSSupportedInputActions.contains(inputAction),
+        'The requested TextInputAction "$inputAction" is not supported on iOS.',
+      );
+    } else if (Platform.isAndroid) {
+      assert(
+        _androidSupportedInputActions.contains(inputAction),
+        'The requested TextInputAction "$inputAction" is not supported on Android.',
+      );
+    }
   }
 }

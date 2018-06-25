@@ -171,6 +171,7 @@ class EditableText extends StatefulWidget {
     this.selectionColor,
     this.selectionControls,
     TextInputType keyboardType,
+    this.textInputAction = TextInputAction.done,
     this.onChanged,
     this.onSubmitted,
     this.onSelectionChanged,
@@ -280,8 +281,29 @@ class EditableText extends StatefulWidget {
   /// The type of keyboard to use for editing the text.
   final TextInputType keyboardType;
 
+  /// The type of action button to use with the soft keyboard.
+  final TextInputAction textInputAction;
+
   /// Called when the text being edited changes.
   final ValueChanged<String> onChanged;
+
+  /// Called when the user submits editable content (ex: user presses the "done"
+  /// button on the keyboard).
+  ///
+  /// The default implementation of [onEditingComplete] executes 2 different
+  /// behaviors based on the situation:
+  ///
+  ///  - When a completion action is pressed, such as "done," "go," "send," or
+  ///    "search," the user's content is submitted to the [controller] and then
+  ///    focus is given up.
+  ///
+  ///  - When a non-completion action is pressed, such as "next" or "previous,"
+  ///    the user's content is submitted to the [controller], but focus is not
+  ///    given up because developers may want to immediately move focus to
+  ///    another input widget within [onSubmitted].
+  ///
+  /// Providing [onEditingComplete] prevents the aforementioned default behavior.
+  final VoidCallback onEditingComplete;
 
   /// Called when the user indicates that they are done editing the text in the field.
   final ValueChanged<String> onSubmitted;
@@ -405,14 +427,42 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   @override
   void performAction(TextInputAction action) {
     switch (action) {
+      case TextInputAction.newline:
+        // Do nothing for a "newline" action: the newline is already inserted.
+        break;
       case TextInputAction.done:
-        widget.controller.clearComposing();
-        widget.focusNode.unfocus();
+      case TextInputAction.go:
+      case TextInputAction.send:
+      case TextInputAction.search:
+        // Take any actions necessary now that the user has completed editing.
+        if (widget.onEditingComplete != null) {
+          widget.onEditingComplete();
+        } else {
+          // Default behavior if the developer did not provide an
+          // onEditingComplete callback: Finalize editing, remove focus, and
+          // invoke the provided submission callback.
+          widget.controller.clearComposing();
+          widget.focusNode.unfocus();
+        }
+
+        // Invoke optional callback with the user's submitted content.
         if (widget.onSubmitted != null)
           widget.onSubmitted(_value.text);
         break;
-      case TextInputAction.newline:
-        // Do nothing for a "newline" action: the newline is already inserted.
+      default:
+        if (widget.onEditingComplete != null) {
+          widget.onEditingComplete();
+        } else {
+          // Default behavior if the developer did not provide an
+          // onEditingComplete callback: Finalize editing, but don't give up
+          // focus because this keyboard action does not imply the user is done
+          // inputting information.
+          widget.controller.clearComposing();
+        }
+
+        // Invoke optional callback with the user's submitted content.
+        if (widget.onSubmitted != null)
+          widget.onSubmitted(_value.text);
         break;
     }
   }
@@ -467,7 +517,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
               autocorrect: widget.autocorrect,
               inputAction: widget.keyboardType == TextInputType.multiline
                   ? TextInputAction.newline
-                  : TextInputAction.done
+                  : widget.textInputAction,
           )
       )..setEditingState(localValue);
     }
