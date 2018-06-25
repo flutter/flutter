@@ -210,8 +210,10 @@ class FlutterVersion {
 
   /// We warn the user if the age of their Flutter installation is greater than
   /// this duration.
+  /// 
+  /// This is set to 5 weeks because releases are currently around every 4 weeks. 
   @visibleForTesting
-  static final Duration kVersionAgeConsideredUpToDate = kCheckAgeConsideredUpToDate * 4;
+  static const Duration kVersionAgeConsideredUpToDate = const Duration(days: 35);
 
   /// The amount of time we wait between issuing a warning.
   ///
