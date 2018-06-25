@@ -237,7 +237,7 @@ class FlutterVersion {
     final bool installationSeemsOutdated = frameworkAge > kVersionAgeConsideredUpToDate;
 
     /// Gets whether or not there is a new version of Flutter available on the remote.
-    Future<VersionCheckResult> newerFrameworkVersionAvailable() async {
+    Future<VersionCheckResult> isNewerFrameworkVersionAvailable() async {
       final DateTime latestFlutterCommitDate = await _getLatestAvailableFlutterVersion();
 
       if (latestFlutterCommitDate == null)
@@ -252,7 +252,7 @@ class FlutterVersion {
     // to the server if we haven't checked recently so won't happen often.
     // Note: This must come before the stamp load below because it also reads/writes
     // the stamp and otherwise one will be stale.
-    final VersionCheckResult remoteVersion = await newerFrameworkVersionAvailable();
+    final VersionCheckResult remoteVersion = await isNewerFrameworkVersionAvailable();
     final VersionCheckStamp stamp = await VersionCheckStamp.load();
     final DateTime lastTimeWarningWasPrinted = stamp.lastTimeWarningWasPrinted ?? _clock.agoBy(kMaxTimeSinceLastWarning * 2);
     final bool beenAWhileSinceWarningWasPrinted = _clock.now().difference(lastTimeWarningWasPrinted) > kMaxTimeSinceLastWarning;
