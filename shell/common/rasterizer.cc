@@ -11,7 +11,7 @@
 #include "third_party/skia/include/core/SkPictureRecorder.h"
 #include "third_party/skia/include/core/SkSurface.h"
 #include "third_party/skia/include/core/SkSurfaceCharacterization.h"
-#include "third_party/skia/src/utils/SkBase64.h"
+#include "third_party/skia/include/utils/SkBase64.h"
 
 namespace shell {
 

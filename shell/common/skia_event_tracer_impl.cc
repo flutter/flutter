@@ -12,7 +12,7 @@
 #include "lib/fxl/logging.h"
 #include "third_party/dart/runtime/include/dart_tools_api.h"
 #include "third_party/skia/include/utils/SkEventTracer.h"
-#include "third_party/skia/src/core/SkTraceEventCommon.h"
+#include "third_party/skia/include/utils/SkTraceEventPhase.h"
 
 namespace skia {
 
