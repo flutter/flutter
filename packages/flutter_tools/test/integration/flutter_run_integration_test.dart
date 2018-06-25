@@ -59,13 +59,11 @@ void main() {
 
   group('FlutterTesterDevice', () {
 
-    // This test fails on Windows due to https://github.com/flutter/flutter/issues/17833
     testUsingContext('can hot reload', () async {
       await _flutter.run();
       await _flutter.hotReload();
-    });
+    }, skip: true); // https://github.com/flutter/flutter/issues/17833
 
-    // This test fails due to https://github.com/flutter/flutter/issues/18441
     testUsingContext('can hit breakpoints with file:// prefixes after reload', () async {
       await _flutter.run(withDebugger: true);
       
@@ -82,7 +80,7 @@ void main() {
       // Ensure we hit the breakpoint.
       final VMIsolate isolate = await _flutter.waitForBreakpointHit();
       expect(isolate.pauseEvent, const isInstanceOf<VMPauseBreakpointEvent>());
-    });
+    }, skip: true); // https://github.com/flutter/flutter/issues/18441
 
     Future<void> evaluateTrivialExpressions() async {
       expectTypeAndValue(
@@ -118,47 +116,41 @@ void main() {
           equals('${now.year}-${now.month}-${now.day}'));
     }
 
-    // This test fails due to https://github.com/flutter/flutter/issues/18678.
     testUsingContext('can evaluate trivial expressions in top level function', () async {
       await _flutter.run(withDebugger: true);
       await breakInTopLevelFunction(_flutter);
       await evaluateTrivialExpressions();
-    });
+    }, skip: true); // https://github.com/flutter/flutter/issues/18678
 
-    // This test fails due to https://github.com/flutter/flutter/issues/18678.
     testUsingContext('can evaluate trivial expressions in build method', () async {
       await _flutter.run(withDebugger: true);
       await breakInBuildMethod(_flutter);
       await evaluateTrivialExpressions();
-    });
+    }, skip: true); // https://github.com/flutter/flutter/issues/18678
 
-    // This test fails due to https://github.com/flutter/flutter/issues/18678.
     testUsingContext('can evaluate complex expressions in top level function', () async {
       await _flutter.run(withDebugger: true);
       await breakInTopLevelFunction(_flutter);
       await evaluateTrivialExpressions();
-    });
+    }, skip: true); // https://github.com/flutter/flutter/issues/18678
 
-    // This test fails due to https://github.com/flutter/flutter/issues/18678.
     testUsingContext('can evaluate complex expressions in build method', () async {
       await _flutter.run(withDebugger: true);
       await breakInBuildMethod(_flutter);
       await evaluateComplexExpressions();
-    });
+    }, skip: true); // https://github.com/flutter/flutter/issues/18678
 
-    // This test fails due to https://github.com/flutter/flutter/issues/18678.
     testUsingContext('can evaluate expressions returning complex objects in top level function', () async {
       await _flutter.run(withDebugger: true);
       await breakInTopLevelFunction(_flutter);
       await evaluateComplexReturningExpressions();
-    });
+    }, skip: true); // https://github.com/flutter/flutter/issues/18678
 
-    // This test fails due to https://github.com/flutter/flutter/issues/18678.
     testUsingContext('can evaluate expressions returning complex objects in build method', () async {
       await _flutter.run(withDebugger: true);
       await breakInBuildMethod(_flutter);
       await evaluateComplexReturningExpressions();
-    });
+    }, skip: true); // https://github.com/flutter/flutter/issues/18678
 
   }, timeout: const Timeout.factor(3));
 }
