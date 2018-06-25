@@ -7,31 +7,29 @@ part of dart.ui;
 abstract class IsolateNameServer {
   // Looks up the [SendPort] associated with a given name. Returns null
   // if the name does not exist.
+  //
+  // `name` must not be null.
   static SendPort lookupPortByName(String name) {
-    if (name == null) {
-      throw new ArgumentError("'name' cannot be null.");
-    }
+    assert(name != null, "'name' cannot be null.");
     return _lookupPortByName(name);
   }
 
   // Registers a SendPort with a given name. Returns true if registration is
   // successful, false if the name entry already exists.
+  //
+  // `port` and `name` must not be null.
   static bool registerPortWithName(SendPort port, String name) {
-    if (name == null) {
-      throw new ArgumentError("'name' cannot be null.");
-    }
-    if (port == null) {
-      throw new ArgumentError("'port' cannot be null.");
-    }
+    assert(port != null, "'port' cannot be null.");
+    assert(name != null, "'name' cannot be null.");
     return _registerPortWithName(port, name);
   }
 
   // Removes a name to SendPort mapping given a name. Returns true if the
   // mapping was successfully removed, false if the mapping does not exist.
+  //
+  // `name` must not be null.
   static bool removePortNameMapping(String name) {
-    if (name == null) {
-      throw new ArgumentError("'name' cannot be null.");
-    }
+    assert(name != null, "'name' cannot be null.");
     return _removePortNameMapping(name);
   }
 
