@@ -201,9 +201,16 @@ class _ReorderableListContentState extends State<_ReorderableListContent> with T
     if (_draggingFeedbackSize == null) {
       return _defaultDropAreaExtent;
     }
-    final double dropAreaWithoutMargin = widget.scrollDirection == Axis.vertical
-        ? _draggingFeedbackSize.height
-        : _draggingFeedbackSize.width;
+    double dropAreaWithoutMargin;
+    switch (widget.scrollDirection) {
+      case Axis.horizontal:
+        dropAreaWithoutMargin = _draggingFeedbackSize.height;
+        break;
+      case Axis.vertical:
+      default:
+        dropAreaWithoutMargin = _draggingFeedbackSize.width;
+        break;
+    }
     return dropAreaWithoutMargin + _dropAreaMargin;
   }
 
@@ -283,10 +290,13 @@ class _ReorderableListContentState extends State<_ReorderableListContent> with T
   // Wraps children in Row or Column, so that the children flow in
   // the widget's scrollDirection.
   Widget _buildContainerForScrollDirection({List<Widget> children}) {
-    if (widget.scrollDirection == Axis.horizontal) {
-      return new Row(children: children);
-    } 
-    return new Column(children: children);
+    switch (widget.scrollDirection) {
+      case Axis.horizontal:
+        return new Row(children: children);
+      case Axis.vertical:
+      default:
+        return new Column(children: children);
+    }
   }
 
   // Wraps one of the widget's children in a DragTarget and Draggable.
@@ -364,9 +374,16 @@ class _ReorderableListContentState extends State<_ReorderableListContent> with T
       }
 
       // Determine the size of the drop area to show under the dragging widget.
-      final Widget spacing = (widget.scrollDirection == Axis.vertical)
-          ? new SizedBox(height: _dropAreaExtent)
-          : new SizedBox(width: _dropAreaExtent);
+      Widget spacing;
+      switch (widget.scrollDirection) {
+        case Axis.horizontal:
+          spacing = new SizedBox(width: _dropAreaExtent);
+          break;
+        case Axis.vertical:
+        default:
+          spacing = new SizedBox(height: _dropAreaExtent);
+          break;
+      }
 
       // We open up a space under where the dragging widget currently is to
       // show it can be dropped.
@@ -422,14 +439,18 @@ class _ReorderableListContentState extends State<_ReorderableListContent> with T
         for (int i = 0; i < widget.children.length; i += 1) {
           wrappedChildren.add(_wrap(widget.children[i], i, constraints));
         }
+        Widget finalDropArea;
+        switch (widget.scrollDirection) {
+          case Axis.horizontal:
+            finalDropArea = new SizedBox(width: _dropAreaExtent);
+            break;
+          case Axis.vertical:
+          default:
+            finalDropArea = new SizedBox(height: _dropAreaExtent);
+            break;
+        }
         wrappedChildren.add(_wrap(
-          new SizedBox(
-            height: widget.scrollDirection == Axis.horizontal 
-                ? constraints.maxHeight : 72.0, 
-            width: widget.scrollDirection == Axis.vertical 
-                ? constraints.maxWidth : 72.0,
-            key: const Key('DraggableList - End Widget'), 
-          ),
+          finalDropArea,
           widget.children.length,
           constraints),
         );
