@@ -12,11 +12,12 @@ import 'package:flutter_devicelab/framework/framework.dart';
 import 'package:flutter_devicelab/framework/utils.dart';
 
 Future<void> testReload(Process process, { Future<void> Function() onListening }) async {
-  print('Testing hot reload, restart and quit');
+  section('Testing hot reload, restart and quit');
   final Completer<Null> listening = new Completer<Null>();
   final Completer<Null> ready = new Completer<Null>();
   final Completer<Null> reloaded = new Completer<Null>();
   final Completer<Null> restarted = new Completer<Null>();
+  final Completer<Null> finished = new Completer<Null>();
   final List<String> stdout = <String>[];
   final List<String> stderr = <String>[];
 
@@ -39,6 +40,8 @@ Future<void> testReload(Process process, { Future<void> Function() onListening }
       reloaded.complete();
     if (line.contains('Restarted app in '))
       restarted.complete();
+    if (line.contains('Application finished'))
+      finished.complete();
   });
   process.stderr
       .transform(utf8.decoder)
@@ -50,20 +53,25 @@ Future<void> testReload(Process process, { Future<void> Function() onListening }
 
   process.exitCode.then((int processExitCode) { exitCode = processExitCode; });
 
-  await Future.any<dynamic>(<Future<dynamic>>[ listening.future, process.exitCode ]);
-  await Future.any<dynamic>(<Future<dynamic>>[ ready.future, process.exitCode ]);
+  Future<dynamic> eventOrExit(Future<Null> event) {
+    return Future.any<dynamic>(<Future<dynamic>>[ event, process.exitCode ]);
+  }
+
+  await eventOrExit(listening.future);
+  await eventOrExit(ready.future);
 
   if (exitCode != null)
     throw 'Failed to attach to test app; command unexpected exited, with exit code $exitCode.';
 
   process.stdin.write('r');
   process.stdin.flush();
-  await reloaded.future;
+  await eventOrExit(reloaded.future);
   process.stdin.write('R');
   process.stdin.flush();
-  await restarted.future;
+  await eventOrExit(restarted.future);
   process.stdin.write('q');
   process.stdin.flush();
+  await eventOrExit(finished.future);
 
   await process.exitCode;
 
@@ -72,35 +80,18 @@ Future<void> testReload(Process process, { Future<void> Function() onListening }
 
   if (exitCode != 0)
     throw 'exit code was not 0';
-
-  const List<String> expectedLinePrefixes = const <String>[
-    'Initializing hot reload...',
-    'Reloaded ',
-    'Performing hot restart...',
-    'Restarted app in ',
-    'Application finished',
-  ];
-
-  int expectedIndex = 0;
-  for (int i = 0; i < stdout.length; i++) {
-    if (stdout[i].startsWith(expectedLinePrefixes[expectedIndex])) {
-      expectedIndex++;
-      if (expectedIndex >= expectedLinePrefixes.length)
-        break;
-    }
-  }
-
-  if (expectedIndex != expectedLinePrefixes.length)
-    throw 'not all expected lines were found';
 }
 
 void main() {
+  const String kAppId = 'com.yourcompany.integration_ui';
+  const String kActivityId = '$kAppId/com.yourcompany.integration_ui.MainActivity';
+
   task(() async {
     final AndroidDevice device = await devices.workingDevice;
     await device.unlock();
     final Directory appDir = dir(path.join(flutterDirectory.path, 'dev/integration_tests/ui'));
     await inDirectory(appDir, () async {
-      print('Build: starting...');
+      section('Build: starting...');
       final String buildStdout = await eval(
           path.join(flutterDirectory.path, 'bin', 'flutter'),
           <String>['--suppress-analytics', 'build', 'apk', '--debug', 'lib/main.dart'],
@@ -109,12 +100,12 @@ void main() {
       final RegExp builtRegExp = new RegExp(r'Built (.+)( \(|\.$)');
       final String apkPath = builtRegExp.firstMatch(lastLine)[1];
 
-      print('Installing $apkPath');
+      section('Installing $apkPath');
 
       await device.adb(<String>['install', apkPath]);
 
       try {
-        print('Launching attach.');
+        section('Launching attach.');
         Process attachProcess = await startProcess(
           path.join(flutterDirectory.path, 'bin', 'flutter'),
           <String>['--suppress-analytics', 'attach', '-d', device.deviceId],
@@ -122,21 +113,21 @@ void main() {
         );
 
         await testReload(attachProcess, onListening: () async {
-          print('Launching app.');
-          await device.shellExec('am', <String>['start', '-n', 'com.yourcompany.integration_ui/com.yourcompany.integration_ui.MainActivity']);
+          section('Launching app.');
+          await device.shellExec('am', <String>['start', '-n', kActivityId]);
         });
 
         final String currentTime = (await device.shellEval('date', <String>['"+%F %R:%S.000"'])).trim();
         print('Start time on device: $currentTime');
-        print('Launching app');
-        await device.shellExec('am', <String>['start', '-n', 'com.yourcompany.integration_ui/com.yourcompany.integration_ui.MainActivity']);
+        section('Launching app');
+        await device.shellExec('am', <String>['start', '-n', kActivityId]);
 
         final String observatoryLine = await device.adb(<String>['logcat', '-e', 'Observatory listening on http:', '-m', '1', '-T', currentTime]);
         print('Found observatory line: $observatoryLine');
         final String observatoryPort = new RegExp(r'Observatory listening on http://.*:([0-9]+)').firstMatch(observatoryLine)[1];
         print('Extracted observatory port: $observatoryPort');
 
-        print('Launching attach with given port.');
+        section('Launching attach with given port.');
         attachProcess = await startProcess(
           path.join(flutterDirectory.path, 'bin', 'flutter'),
           <String>['--suppress-analytics', 'attach', '--debug-port', observatoryPort, '-d', device.deviceId],
@@ -145,8 +136,8 @@ void main() {
         await testReload(attachProcess);
 
       } finally {
-        print('Uninstalling');
-        await device.adb(<String>['uninstall', 'com.yourcompany.integration_ui']);
+        section('Uninstalling');
+        await device.adb(<String>['uninstall', kAppId]);
       }
     });
     return new TaskResult.success(null);
