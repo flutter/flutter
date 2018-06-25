@@ -250,7 +250,7 @@ class FlutterVersion {
 
     // Get whether there's a newer version on the remote. This only goes
     // to the server if we haven't checked recently so won't happen often.
-    // Note: This must come before the stamp load below because it also reads/writes
+    // This must come before the stamp load below because it also reads/writes
     // the stamp and otherwise one will be stale.
     final VersionCheckResult remoteVersion = await isNewerFrameworkVersionAvailable();
     final VersionCheckStamp stamp = await VersionCheckStamp.load();
