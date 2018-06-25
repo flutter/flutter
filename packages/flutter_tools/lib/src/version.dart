@@ -224,7 +224,7 @@ class FlutterVersion {
   ///
   /// This can be customized in tests to speed them up.
   @visibleForTesting
-  static Duration kPauseToLetUserReadTheMessage = const Duration(seconds: 2);
+  static Duration timeToPauseToLetUserReadTheMessage = const Duration(seconds: 2);
 
   /// Checks if the currently installed version of Flutter is up-to-date, and
   /// warns the user if it isn't.
@@ -272,7 +272,7 @@ class FlutterVersion {
         stamp.store(
           newTimeWarningWasPrinted: _clock.now(),
         ),
-        new Future<Null>.delayed(kPauseToLetUserReadTheMessage),
+        new Future<Null>.delayed(timeToPauseToLetUserReadTheMessage),
       ]);
     }
   }

@@ -62,7 +62,7 @@ void main() {
   group('$FlutterVersion', () {
     setUpAll(() {
       Cache.disableLocking();
-      FlutterVersion.kPauseToLetUserReadTheMessage = Duration.zero;
+      FlutterVersion.timeToPauseToLetUserReadTheMessage = Duration.zero;
     });
 
     testUsingContext('prints nothing when Flutter installation looks fresh', () async {
