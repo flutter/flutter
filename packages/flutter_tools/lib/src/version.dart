@@ -210,8 +210,8 @@ class FlutterVersion {
 
   /// We warn the user if the age of their Flutter installation is greater than
   /// this duration.
-  /// 
-  /// This is set to 5 weeks because releases are currently around every 4 weeks. 
+  ///
+  /// This is set to 5 weeks because releases are currently around every 4 weeks.
   @visibleForTesting
   static const Duration kVersionAgeConsideredUpToDate = const Duration(days: 35);
 
@@ -239,15 +239,17 @@ class FlutterVersion {
     final bool installationSeemsOutdated = frameworkAge > kVersionAgeConsideredUpToDate;
 
     // Get whether there's a newer version on the remote. This only goes
-    // to the server if we haven't checked recently so won't happen often.
     final DateTime latestFlutterCommitDate = await _getLatestAvailableFlutterDate();
-    final VersionCheckResult remoteVersion =
+    final VersionCheckResult remoteVersionStatus =
+    // to the server if we haven't checked recently so won't happen on every
+    // command.
         latestFlutterCommitDate == null
             ? VersionCheckResult.unknown
             : latestFlutterCommitDate.isAfter(localFrameworkCommitDate)
                 ? VersionCheckResult.newVersionAvailable
                 : VersionCheckResult.versionIsCurrent;
 
+    // Do not load the stamp before the above server check as it may modify the stamp file.
     final VersionCheckStamp stamp = await VersionCheckStamp.load();
     final DateTime lastTimeWarningWasPrinted = stamp.lastTimeWarningWasPrinted ?? _clock.agoBy(kMaxTimeSinceLastWarning * 2);
     final bool beenAWhileSinceWarningWasPrinted = _clock.now().difference(lastTimeWarningWasPrinted) > kMaxTimeSinceLastWarning;
@@ -255,13 +257,15 @@ class FlutterVersion {
     // We show a warning if either we know there is a new remote version, or we couldn't tell but the local
     // version is outdated.
     final bool canShowWarning =
-        remoteVersion == VersionCheckResult.newVersionAvailable
-        || remoteVersion == VersionCheckResult.unknown && installationSeemsOutdated;
-    
+        remoteVersionStatus == VersionCheckResult.newVersionAvailable ||
+            (remoteVersionStatus == VersionCheckResult.unknown &&
+                installationSeemsOutdated);
+
     if (beenAWhileSinceWarningWasPrinted && canShowWarning) {
-      final String updateMessage = remoteVersion == VersionCheckResult.newVersionAvailable
-          ? newVersionAvailableMessage()
-          : versionOutOfDateMessage(frameworkAge);
+      final String updateMessage =
+          remoteVersionStatus == VersionCheckResult.newVersionAvailable
+              ? newVersionAvailableMessage()
+              : versionOutOfDateMessage(frameworkAge);
       printStatus(updateMessage, emphasis: true);
       await Future.wait<Null>(<Future<Null>>[
         stamp.store(
@@ -378,8 +382,8 @@ class VersionCheckStamp {
   static VersionCheckStamp fromJson(Map<String, String> jsonObject) {
     DateTime readDateTime(String property) {
       return jsonObject.containsKey(property)
-        ? DateTime.parse(jsonObject[property])
-        : null;
+          ? DateTime.parse(jsonObject[property])
+          : null;
     }
 
     return new VersionCheckStamp(
