@@ -331,7 +331,7 @@ class SystemChrome {
 
   static SystemUiOverlayStyle _pendingStyle;
 
-  /// The last style the was set using [SystemChrome.setSystemUIOverlayStyle].
+  /// The last style that was set using [SystemChrome.setSystemUIOverlayStyle].
   @visibleForTesting
   static SystemUiOverlayStyle get latestStyle => _latestStyle;
   static SystemUiOverlayStyle _latestStyle;
