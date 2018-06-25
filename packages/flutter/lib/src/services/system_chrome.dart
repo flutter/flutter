@@ -103,8 +103,8 @@ class SystemUiOverlayStyle {
     systemNavigationBarColor: const Color(0xFFFFFFFF),
     systemNavigationBarDividerColor: null,
     statusBarColor: null,
-    systemNavigationBarIconBrightness: Brightness.dark,
-    statusBarIconBrightness: Brightness.dark,
+    systemNavigationBarIconBrightness: Brightness.light,
+    statusBarIconBrightness: Brightness.light,
     statusBarBrightness: Brightness.light,
   );
 
@@ -114,8 +114,8 @@ class SystemUiOverlayStyle {
     systemNavigationBarColor: const Color(0xFF000000),
     systemNavigationBarDividerColor: null,
     statusBarColor: null,
-    systemNavigationBarIconBrightness: Brightness.light,
-    statusBarIconBrightness: Brightness.light,
+    systemNavigationBarIconBrightness: Brightness.dark,
+    statusBarIconBrightness: Brightness.dark,
     statusBarBrightness: Brightness.dark,
   );
 
