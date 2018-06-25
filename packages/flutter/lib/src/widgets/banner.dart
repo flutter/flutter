@@ -87,7 +87,7 @@ class BannerPainter extends CustomPainter {
   /// [location].
   final TextDirection textDirection;
 
-  /// Where to show the banner (e.g., the upper right corder).
+  /// Where to show the banner (e.g., the upper right corner).
   final BannerLocation location;
 
   /// The directionality of the layout.
@@ -280,7 +280,7 @@ class Banner extends StatelessWidget {
   /// [location].
   final TextDirection textDirection;
 
-  /// Where to show the banner (e.g., the upper right corder).
+  /// Where to show the banner (e.g., the upper right corner).
   final BannerLocation location;
 
   /// The directionality of the layout.
