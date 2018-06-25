@@ -385,13 +385,15 @@ class _Element extends _Entry {
   _Attribute firstAttribute(String name) {
     return children.firstWhere(
         (_Entry e) => e is _Attribute && e.key.startsWith(name),
-        orElse: () => null);
+        orElse: () => null,
+    );
   }
 
   _Element firstElement(String name) {
     return children.firstWhere(
         (_Entry e) => e is _Element && e.name.startsWith(name),
-        orElse: () => null);
+        orElse: () => null,
+    );
   }
 
   Iterable<_Entry> allElements(String name) {
@@ -406,7 +408,10 @@ class _Attribute extends _Entry {
 
   _Attribute.fromLine(String line, _Element parent) {
     //     A: android:label(0x01010001)="hello_world" (Raw: "hello_world")
-    final List<String> keyVal = line.substring(line.indexOf('A: ') + 3).split('=');
+    const String attributePrefix = 'A: ';
+    final List<String> keyVal = line
+        .substring(line.indexOf(attributePrefix) + attributePrefix.length)
+        .split('=');
     key = keyVal[0];
     value = keyVal[1];
     level = line.length - line.trimLeft().length;
@@ -443,7 +448,7 @@ class ApkManifestData {
                 .addChild(new _Attribute.fromLine(line, currentElement));
             break;
           case 'E':
-            final _Element element = new _Element.fromLine(line,currentElement);
+            final _Element element = new _Element.fromLine(line, currentElement);
             currentElement.addChild(element);
             currentElement = element;
         }
