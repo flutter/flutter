@@ -19,7 +19,7 @@ const bool _printJsonAndStderr = false;
 class FlutterTestDriver {
   Directory _projectFolder;
   Process _proc;
-  final StreamController<String> _stdout = StreamController<String>.broadcast();
+  final StreamController<String> _stdout = new StreamController<String>.broadcast();
   final StreamController<String> _stderr = new StreamController<String>.broadcast();
   final StringBuffer _errorBuffer = new StringBuffer();
   String _currentRunningAppId;
