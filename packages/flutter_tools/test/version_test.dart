@@ -217,6 +217,7 @@ void main() {
         localCommitDate: _upToDateVersion,
         errorOnFetch: true,
         expectServerPing: true,
+        expectSetStamp: true,
       );
 
       await version.checkFlutterVersionFreshness();

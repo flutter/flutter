@@ -206,7 +206,7 @@ class FlutterVersion {
   /// The amount of time we wait before pinging the server to check for the
   /// availability of a newer version of Flutter.
   @visibleForTesting
-  static const Duration kCheckAgeConsideredUpToDate = const Duration(days: 7);
+  static const Duration kCheckAgeConsideredUpToDate = const Duration(days: 3);
 
   /// We warn the user if the age of their Flutter installation is greater than
   /// this duration.
@@ -335,6 +335,11 @@ class FlutterVersion {
       // there's no Internet connectivity. Remote version check is best effort
       // only. We do not prevent the command from running when it fails.
       printTrace('Failed to check Flutter version in the remote repository: $error');
+      // Still update the timestamp to avoid us hitting the server on every single
+      // command if for some reason we cannot connect (eg. we may be offline).
+      await versionCheckStamp.store(
+        newTimeVersionWasChecked: _clock.now(),
+      );
       return null;
     }
   }
