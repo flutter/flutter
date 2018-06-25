@@ -186,7 +186,7 @@ void main() {
     );
     await tester.pumpWidget(widget);
     await tester.tap(find.byKey(targetKey));
-    expect(exception, const isInstanceOf<FlutterError>());
+    expect(exception, isInstanceOf<FlutterError>());
     expect('$exception', startsWith('Navigator operation requested with a context'));
   });
 

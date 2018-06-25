@@ -44,7 +44,7 @@ class CreateCommand extends FlutterCommand {
     argParser.addOption(
       'template',
       abbr: 't',
-      allowed: <String>['app', 'package', 'plugin'],
+      allowed: <String>['app', 'module', 'package', 'plugin'],
       help: 'Specify the type of project to create.',
       valueHelp: 'type',
       allowedHelp: <String, String>{
@@ -124,6 +124,7 @@ class CreateCommand extends FlutterCommand {
       throwToolExit('Unable to find package:flutter_driver in $flutterDriverPackagePath', exitCode: 2);
 
     final String template = argResults['template'];
+    final bool generateModule = template == 'module';
     final bool generatePlugin = template == 'plugin';
     final bool generatePackage = template == 'package';
 
@@ -172,6 +173,9 @@ class CreateCommand extends FlutterCommand {
       case 'app':
         generatedFileCount += await _generateApp(dirPath, templateContext);
         break;
+      case 'module':
+        generatedFileCount += await _generateModule(dirPath, templateContext);
+        break;
       case 'package':
         generatedFileCount += await _generatePackage(dirPath, templateContext);
         break;
@@ -185,6 +189,9 @@ class CreateCommand extends FlutterCommand {
     if (generatePackage) {
       final String relativePath = fs.path.relative(dirPath);
       printStatus('Your package code is in lib/${templateContext['projectName']}.dart in the $relativePath directory.');
+    } else if (generateModule) {
+      final String relativePath = fs.path.relative(dirPath);
+      printStatus('Your module code is in lib/main.dart in the $relativePath directory.');
     } else {
       // Run doctor; tell the user the next steps.
       final String relativeAppPath = fs.path.relative(appPath);
@@ -206,7 +213,7 @@ Your main program file is lib/main.dart in the $relativeAppPath directory.
 Your plugin code is in lib/$projectName.dart in the $relativePluginPath directory.
 
 Host platform code is in the android/ and ios/ directories under $relativePluginPath.
-To edit platform code in an IDE see https://flutter.io/platform-plugins/#edit-code.
+To edit platform code in an IDE see https://flutter.io/developing-packages/#edit-plugin-package.
 ''');
         }
       } else {
@@ -224,6 +231,25 @@ To edit platform code in an IDE see https://flutter.io/platform-plugins/#edit-co
         printStatus('Your main program file is: $relativeAppPath/lib/main.dart');
       }
     }
+  }
+
+  Future<int> _generateModule(String dirPath, Map<String, dynamic> templateContext) async {
+    int generatedCount = 0;
+    final String description = argResults.wasParsed('description')
+        ? argResults['description']
+        : 'A new flutter module project.';
+    templateContext['description'] = description;
+    generatedCount += _renderTemplate(fs.path.join('module', 'common'), dirPath, templateContext);
+    if (argResults['pub']) {
+      await pubGet(
+        context: PubContext.create,
+        directory: dirPath,
+        offline: argResults['offline'],
+      );
+      final FlutterProject project = new FlutterProject(fs.directory(dirPath));
+      await project.ensureReadyForPlatformSpecificTooling();
+    }
+    return generatedCount;
   }
 
   Future<int> _generatePackage(String dirPath, Map<String, dynamic> templateContext) async {

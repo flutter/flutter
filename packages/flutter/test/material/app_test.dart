@@ -397,7 +397,7 @@ void main() {
       color: const Color(0xFF112233),
       home: const Placeholder(),
     ));
-    expect(key.currentState, const isInstanceOf<NavigatorState>());
+    expect(key.currentState, isInstanceOf<NavigatorState>());
     await tester.pumpWidget(new MaterialApp(
       color: const Color(0xFF112233),
       home: const Placeholder(),
@@ -408,6 +408,6 @@ void main() {
       color: const Color(0xFF112233),
       home: const Placeholder(),
     ));
-    expect(key.currentState, const isInstanceOf<NavigatorState>());
+    expect(key.currentState, isInstanceOf<NavigatorState>());
   });
 }

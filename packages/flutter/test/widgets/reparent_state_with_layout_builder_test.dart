@@ -5,7 +5,7 @@
 import 'dart:ui' as ui show window;
 
 import 'package:flutter/material.dart';
-import 'package:flutter_test/flutter_test.dart' hide TypeMatcher;
+import 'package:flutter_test/flutter_test.dart';
 
 // This is a regression test for https://github.com/flutter/flutter/issues/5840.
 

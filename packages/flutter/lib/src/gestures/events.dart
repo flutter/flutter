@@ -176,7 +176,7 @@ abstract class PointerEvent {
   final double distance;
 
   /// The minimum value that a distance can return for this pointer (always 0.0).
-  final double distanceMin = 0.0;
+  double get distanceMin => 0.0;
 
   /// The maximum value that a distance can return for this pointer. If this
   /// input device cannot detect "hover touch" input events, then this will be

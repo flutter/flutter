@@ -1362,7 +1362,7 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
       // order.
       childrenInHitTestOrder = new Int32List(childCount);
       for (int i = childCount - 1; i >= 0; i -= 1) {
-        childrenInHitTestOrder[i] = _children[i].id;
+        childrenInHitTestOrder[i] = _children[childCount - i - 1].id;
       }
     }
     builder.updateNode(

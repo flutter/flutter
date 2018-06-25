@@ -21,7 +21,10 @@ import 'matchers.dart';
 import 'test_async_utils.dart';
 import 'test_text_input.dart';
 
-export 'package:test/test.dart' hide expect;
+export 'package:test/test.dart' hide
+  expect, // we have our own wrapper below
+  TypeMatcher, // matcher's TypeMatcher conflicts with the one in the Flutter framework
+  isInstanceOf; // we have our own wrapper in matchers.dart
 
 /// Signature for callback to [testWidgets] and [benchmarkWidgets].
 typedef Future<Null> WidgetTesterCallback(WidgetTester widgetTester);
@@ -317,7 +320,9 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
   /// are required to wait for the returned future to complete before calling
   /// this method again. Attempts to do otherwise will result in a
   /// [TestFailure] error being thrown.
-  Future<T> runAsync<T>(Future<T> callback()) => binding.runAsync(callback);
+  Future<T> runAsync<T>(Future<T> callback(), {
+    Duration additionalTime = const Duration(milliseconds: 250),
+  }) => binding.runAsync(callback, additionalTime: additionalTime);
 
   /// Whether there are any any transient callbacks scheduled.
   ///

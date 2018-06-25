@@ -124,6 +124,13 @@ tasks:
     stage: devicelab
     required_agent_capabilities: ["mac/android"]
 
+  run_release_test:
+    description: >
+      Checks that `flutter run --release` does not crash.
+    stage: devicelab
+    required_agent_capabilities: ["mac/android"]
+    flaky: true
+
   platform_interaction_test:
     description: >
       Checks platform interaction on Android.
@@ -154,9 +161,30 @@ tasks:
     stage: devicelab
     required_agent_capabilities: ["mac/android"]
 
+  hot_mode_dev_cycle__benchmark_dart1:
+    description: >
+      Measures the performance of Dart VM hot patching feature under
+      --no-preview-dart-2 option, that disables Dart 2.0 frontend.
+    stage: devicelab
+    required_agent_capabilities: ["mac/android"]
+
+  hot_mode_dev_cycle_ios__benchmark_dart1:
+    description: >
+      Measures the performance of Dart VM hot patching feature under
+      --no-preview-dart-2 option, that disables Dart 2.0 frontend.
+    stage: devicelab_ios
+    required_agent_capabilities: ["mac/ios"]
+    flaky: true
+
   complex_layout_scroll_perf__memory:
     description: >
       Measures memory usage of the scroll performance test.
+    stage: devicelab
+    required_agent_capabilities: ["mac/android"]
+
+  hello_world_android__compile:
+    description: >
+      Measures the APK size of Hello World.
     stage: devicelab
     required_agent_capabilities: ["mac/android"]
 
@@ -233,6 +261,13 @@ tasks:
     stage: devicelab
     required_agent_capabilities: ["linux/android"]
 
+  module_test:
+    description: >
+      Checks that the module project template works and supports add2app on Android.
+    stage: devicelab
+    required_agent_capabilities: ["linux/android"]
+    flaky: true
+
   flutter_gallery_instrumentation_test:
     description: >
       Same as flutter_gallery__transition_perf but uses Android instrumentation
@@ -240,6 +275,13 @@ tasks:
       test can run on off-the-shelf infrastructures, such as Firebase Test Lab.
     stage: devicelab
     required_agent_capabilities: ["linux/android"]
+
+  flutter_attach_test:
+    description: >
+      Tests the `flutter attach` command.
+    stage: devicelab
+    required_agent_capabilities: ["linux/android"]
+    flaky: true
 
   # iOS on-device tests
 
@@ -309,6 +351,12 @@ tasks:
       Measures the performance of screen transitions in Flutter Gallery on
       iOS.
     stage: devicelab_ios
+    required_agent_capabilities: ["mac/ios"]
+
+  hello_world_ios__compile:
+    description: >
+      Measures the IPA size of Hello World.
+    stage: devicelab
     required_agent_capabilities: ["mac/ios"]
 
   microbenchmarks_ios:
