@@ -18,21 +18,24 @@ import 'src/context.dart';
 
 void main() {
   group('ApkManifestData', () {
-    testUsingContext('parse sdk with explicit enabled activity', () {
+    test('Select explicity enabled activity', () {
       final ApkManifestData data = ApkManifestData.parseFromXmlDump(_aaptDataWithExplicitEnabledActivity);
       expect(data, isNotNull);
       expect(data.packageName, 'io.flutter.examples.hello_world');
       expect(data.launchableActivityName, 'io.flutter.examples.hello_world.MainActivity2');
     });
-    testUsingContext('parse sdk with default enabled activity', () {
+    test('Select default enabled activity', () {
       final ApkManifestData data = ApkManifestData.parseFromXmlDump(_aaptDataWithDefaultEnabledActivity);
       expect(data, isNotNull);
       expect(data.packageName, 'io.flutter.examples.hello_world');
       expect(data.launchableActivityName, 'io.flutter.examples.hello_world.MainActivity2');
     });
-    testUsingContext('parse sdk with no enabled activity', () {
+    testUsingContext('Error on no enabled activity', () {
       final ApkManifestData data = ApkManifestData.parseFromXmlDump(_aaptDataWithNoEnabledActivity);
       expect(data, isNull);
+      final BufferLogger logger = context[Logger];
+      expect(
+          logger.errorText, 'Error running io.flutter.examples.hello_world. Default activity not found\n');
     });
   });
 

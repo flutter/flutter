@@ -360,51 +360,51 @@ class ApplicationPackageStore {
   }
 }
 
-class Entry {
-  Element parent;
+class _Entry {
+  _Element parent;
   int level;
 }
 
-class Element extends Entry {
-  List<Entry> children;
+class _Element extends _Entry {
+  List<_Entry> children;
   String name;
 
-  Element.fromLine(String line, Element parent) {
+  _Element.fromLine(String line, _Element parent) {
     //      E: application (line=29)
     final List<String> parts = line.trimLeft().split(' ');
     name = parts[1];
     level = line.length - line.trimLeft().length;
     this.parent = parent;
-    children = <Entry>[];
+    children = <_Entry>[];
   }
 
-  void addChild(Entry child) {
+  void addChild(_Entry child) {
     children.add(child);
   }
 
-  Attribute firstAttribute(String name) {
+  _Attribute firstAttribute(String name) {
     return children.firstWhere(
-        (Entry e) => e is Attribute && e.key.startsWith(name),
+        (_Entry e) => e is _Attribute && e.key.startsWith(name),
         orElse: () => null);
   }
 
-  Element firstElement(String name) {
+  _Element firstElement(String name) {
     return children.firstWhere(
-        (Entry e) => e is Element && e.name.startsWith(name),
+        (_Entry e) => e is _Element && e.name.startsWith(name),
         orElse: () => null);
   }
 
-  Iterable<Entry> allElements(String name) {
+  Iterable<_Entry> allElements(String name) {
     return children.where(
-            (Entry e) => e is Element && e.name.startsWith(name));
+            (_Entry e) => e is _Element && e.name.startsWith(name));
   }
 }
 
-class Attribute extends Entry {
+class _Attribute extends _Entry {
   String key;
   String value;
 
-  Attribute.fromLine(String line, Element parent) {
+  _Attribute.fromLine(String line, _Element parent) {
     //     A: android:label(0x01010001)="hello_world" (Raw: "hello_world")
     final List<String> keyVal = line.substring(line.indexOf('A: ') + 3).split('=');
     key = keyVal[0];
@@ -424,8 +424,8 @@ class ApkManifestData {
     final List<String> lines = data.split('\n');
     assert(lines.length > 3);
 
-    final Element manifest = new Element.fromLine(lines[1], null);
-    Element currentElement = manifest;
+    final _Element manifest = new _Element.fromLine(lines[1], null);
+    _Element currentElement = manifest;
 
     for (String line in lines.skip(2)) {
       final String trimLine = line.trimLeft();
@@ -440,30 +440,31 @@ class ApkManifestData {
         switch (trimLine[0]) {
           case 'A':
             currentElement
-                .addChild(new Attribute.fromLine(line, currentElement));
+                .addChild(new _Attribute.fromLine(line, currentElement));
             break;
           case 'E':
-            final Element element = new Element.fromLine(line,currentElement);
+            final _Element element = new _Element.fromLine(line,currentElement);
             currentElement.addChild(element);
             currentElement = element;
         }
       }
     }
 
-    final Element application = manifest.firstElement('application');
+    final _Element application = manifest.firstElement('application');
     assert(application != null);
 
-    final Iterable<Entry> activities = application.allElements('activity');
+    final Iterable<_Entry> activities = application.allElements('activity');
 
-    Element launchActivity;
-    for (Element activity in activities) {
-      final Attribute enabled = activity.firstAttribute('android:enabled');
+    _Element launchActivity;
+    for (_Element activity in activities) {
+      final _Attribute enabled = activity.firstAttribute('android:enabled');
       if (enabled == null || enabled.value.contains('0xffffffff')) {
         launchActivity = activity;
+        break;
       }
     }
 
-    final Attribute package = manifest.firstAttribute('package');
+    final _Attribute package = manifest.firstAttribute('package');
     // "io.flutter.examples.hello_world" (Raw: "io.flutter.examples.hello_world")
     final String packageName = package.value.substring(1, package.value.indexOf('" '));
 
@@ -472,7 +473,7 @@ class ApkManifestData {
       return null;
     }
 
-    final Attribute nameAttribute = launchActivity.firstAttribute('android:name');
+    final _Attribute nameAttribute = launchActivity.firstAttribute('android:name');
     // "io.flutter.examples.hello_world.MainActivity" (Raw: "io.flutter.examples.hello_world.MainActivity")
     final String activityName = nameAttribute
         .value.substring(1, nameAttribute.value.indexOf('" '));
