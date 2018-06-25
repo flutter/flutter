@@ -42,7 +42,7 @@ void main() {
     });
 
     // This test fails due to https://github.com/flutter/flutter/issues/18441
-    testUsingContext('can reload if breakpoints have file:// prefixes', () async {
+    testUsingContext('can hit breakpoints with file:// prefixes after reload', () async {
       await _flutter.run(withDebugger: true);
       
       // Add the breakpoint using a file:// URI.
