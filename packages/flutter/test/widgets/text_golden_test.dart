@@ -5,6 +5,7 @@
 import 'dart:io' show Platform;
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 
 void main() {
@@ -137,6 +138,31 @@ void main() {
       // this was generated on MacOS and will fail on Linux
       // change to !Platform.isLinux once they're properly generated
       skip: true, // !Platform.isLinux,
+    );
+  });
+
+  testWidgets('Text Fade', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      new RepaintBoundary(
+        child: new MaterialApp(
+          home: new Scaffold(
+            body: new Container(
+              width: 100.0,
+              child: const Text(
+                'Test Test Test Test Test Test Test Test Test Test Test',
+                maxLines: 3,
+                overflow: TextOverflow.fade,
+              ),
+            ),
+          ),
+        )
+      )
+    );
+
+    await expectLater(
+      find.byType(RepaintBoundary).first,
+      matchesGoldenFile('text_golden.Fade.1.png'),
+      skip: !Platform.isLinux,
     );
   });
 }
