@@ -491,4 +491,30 @@ void main() {
     final RenderObject renderObject = tester.renderObject(find.byType(Scrollable));
     expect(renderObject, paintsExactlyCountTimes(#drawParagraph, 10));
   });
+
+  testWidgets('ListView should paint with rtl', (WidgetTester tester) async {
+    await tester.pumpWidget(
+        new Directionality(
+          textDirection: TextDirection.rtl,
+          child: new Container(
+            height: 200.0,
+            child: new ListView.builder(
+              padding: const EdgeInsets.symmetric(
+                  horizontal: 0.0, vertical: 0.0),
+              scrollDirection: Axis.horizontal,
+              itemExtent: 200.0,
+              itemCount: 10,
+              itemBuilder: (_, int i) => new Container(
+                height: 200.0,
+                width: 200.0,
+                color: i % 2 == 0 ? Colors.black : Colors.red,
+              ),
+            ),
+          ),
+        )
+    );
+
+    final RenderObject renderObject = tester.renderObject(find.byType(Scrollable));
+    expect(renderObject, paintsExactlyCountTimes(#drawRect, 4));
+  });
 }
