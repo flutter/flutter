@@ -77,7 +77,7 @@ class AttachCommand extends FlutterCommand {
       try {
         observatoryDiscovery = new ProtocolDiscovery.observatory(
             device.getLogReader(), portForwarder: device.portForwarder);
-        print("Listening.");
+        print('Listening.');
         observatoryUri = await observatoryDiscovery.uri;
       } finally {
         await observatoryDiscovery?.cancel();
