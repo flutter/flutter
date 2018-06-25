@@ -122,6 +122,26 @@ class FlutterTestDriver {
     return isolate.load();
   }
 
+  Future<VMIsolate> breakAt(String path, int line) async {
+    await addBreakpoint(path, line);
+    await hotReload();
+    return waitForBreakpointHit();
+  }
+
+  Future<VMInstanceRef> evaluateExpression(String expression) async {
+    final VM vm = await vmService.getVM();
+    final VMIsolate isolate = await vm.isolates.first.load();
+    final VMStack stack = await isolate.getStack();
+    if (stack.frames.isEmpty) {
+      throw new Exception('Stack is empty; unable to evaluate expression');
+    }
+    final VMFrame topFrame = stack.frames.first;
+    return _withTimeout(
+        topFrame.evaluate(expression),
+        () => 'Timed out evaluating expression'
+    );
+  }
+
   Future<Map<String, dynamic>> _waitFor({String event, int id}) async {
     // Capture output to a buffer so if we don't get the repsonse we want we can show
     // the output that did arrive in the timeout errr.
@@ -142,7 +162,7 @@ class FlutterTestDriver {
     });
     
     return _withTimeout(
-        () => response.future,
+        response.future,
         () {
           if (event != null)
             return 'Did not receive expected $event event.\nDid get:\n${messages.toString()}';
