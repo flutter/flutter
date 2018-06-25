@@ -261,6 +261,12 @@ tasks:
     stage: devicelab
     required_agent_capabilities: ["linux/android"]
 
+  module_test:
+    description: >
+      Checks that the module project template works and supports add2app.
+    stage: devicelab
+    required_agent_capabilities: ["linux/android"]
+
   flutter_gallery_instrumentation_test:
     description: >
       Same as flutter_gallery__transition_perf but uses Android instrumentation
