@@ -255,8 +255,8 @@ class FlutterVersion {
     // We show a warning if either we know there is a new remote version, or we couldn't tell but the local
     // version is outdated.
     final bool canShowWarning =
-      remoteVersion == VersionCheckResult.newVersionAvailable
-      || remoteVersion == VersionCheckResult.unknown && installationSeemsOutdated;
+        remoteVersion == VersionCheckResult.newVersionAvailable
+        || remoteVersion == VersionCheckResult.unknown && installationSeemsOutdated;
     
     if (beenAWhileSinceWarningWasPrinted && canShowWarning) {
       final String updateMessage = remoteVersion == VersionCheckResult.newVersionAvailable
