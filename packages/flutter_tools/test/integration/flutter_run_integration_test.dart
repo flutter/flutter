@@ -48,15 +48,6 @@ void main() {
     );
   }
 
-  // TODO(dantup): Is there a better way to do this (ideally inlined in the tests)?
-  // Feels clumsy, and not being able to use `as` means an extra line just for
-  // casting.
-  void expectTypeAndValue<T extends VMInstanceRef>(VMInstanceRef ref, bool Function(T ref) checkValue) {
-    expect(ref, new isInstanceOf<T>());
-    final T typedRef = ref;
-    checkValue(typedRef);
-  }
-
   group('FlutterTesterDevice', () {
 
     testUsingContext('can hot reload', () async {
@@ -83,25 +74,21 @@ void main() {
     }, skip: true); // https://github.com/flutter/flutter/issues/18441
 
     Future<void> evaluateTrivialExpressions() async {
-      expectTypeAndValue(
-          await _flutter.evaluateExpression('"test"'),
-          (VMStringInstanceRef s) => s.value == 'test2',
-      );
-      expectTypeAndValue(
-          await _flutter.evaluateExpression('1'),
-          (VMIntInstanceRef s) => s.value == 2,
-      );
-      expectTypeAndValue(
-          await _flutter.evaluateExpression('true'),
-          (VMBoolInstanceRef s) => s.value == false,
-      );
+      VMInstanceRef res;
+
+      res = await _flutter.evaluateExpression('"test"');
+      expect(res is VMStringInstanceRef && res.value == 'test', isTrue);
+
+      res = await _flutter.evaluateExpression('"test"');
+      expect(res is VMIntInstanceRef && res.value == 1, isTrue);
+
+      res = await _flutter.evaluateExpression('"test"');
+      expect(res is VMBoolInstanceRef && res.value == true, isTrue);
     }
 
     Future<void> evaluateComplexExpressions() async {
-      expectTypeAndValue(
-          await _flutter.evaluateExpression('new DateTime.now().year'),
-          (VMIntInstanceRef s) => s.value == new DateTime.now().year,
-      );
+      final VMInstanceRef res = await _flutter.evaluateExpression('"test"');
+      expect(res is VMIntInstanceRef && res.value == new DateTime.now().year, isTrue);
     }
 
     Future<void> evaluateComplexReturningExpressions() async {
