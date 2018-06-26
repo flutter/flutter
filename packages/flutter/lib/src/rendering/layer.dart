@@ -757,6 +757,7 @@ class TransformLayer extends OffsetLayer {
       return;
     _transform = value;
     _invertedTransform = null;
+    _lastDeterminate = null;
   }
 
   Matrix4 _lastEffectiveTransform;
@@ -1187,7 +1188,6 @@ class FollowerLayer extends ContainerLayer {
   Offset _lastOffset;
   Matrix4 _lastTransform;
   Matrix4 _invertedTransform;
-  double _lastDeterminate;
 
   @override
   S find<S>(Offset regionOffset) {
@@ -1195,15 +1195,9 @@ class FollowerLayer extends ContainerLayer {
       return showWhenUnlinked ? super.find<S>(regionOffset - unlinkedOffset) : null;
     }
     if (_invertedTransform == null) {
-      if (_lastDeterminate == 0.0)
-        return null;
       final Matrix4 transform = getLastTransform();
       assert(transform != null);
-      final Matrix4 result = new Matrix4.zero();
-      _lastDeterminate = transform.copyInverse(result);
-      if (_lastDeterminate == 0.0)
-        return null;
-      _invertedTransform = result;
+      transform.copyInverse(_invertedTransform);
     }
     final Vector4 vector = new Vector4(regionOffset.dx, regionOffset.dy, 0.0, 1.0);
     final Vector4 result = _invertedTransform.transform(vector);
