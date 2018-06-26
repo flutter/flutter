@@ -352,6 +352,7 @@ class AndroidDevice extends Device {
     String route,
     DebuggingOptions debuggingOptions,
     Map<String, dynamic> platformArgs,
+    String deviceId,
     bool prebuiltApplication = false,
     bool applicationNeedsRebuild = false,
     bool usesTerminalUi = true,
@@ -380,7 +381,7 @@ class AndroidDevice extends Device {
       );
       // Package has been built, so we can get the updated application ID and
       // activity name from the .apk.
-      package = await AndroidApk.fromCurrentDirectory();
+      package = await AndroidApk.fromCurrentDirectory(deviceId);
     }
 
     printTrace("Stopping app '${package.name}' on $name.");

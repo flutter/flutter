@@ -56,7 +56,7 @@ Future<Null> run(List<String> args) async {
   Cache.flutterRoot = platform.environment['FLUTTER_ROOT'];
 
   final String assetDir = argResults[_kOptionAsset];
-  final AssetBundle assets = await buildAssets(
+  final AssetBundle assets = await buildAssets(/* deviceId??? */
     manifestPath: argResults[_kOptionManifest] ?? defaultManifestPath,
     assetDirPath: assetDir,
     packagesPath: argResults[_kOptionPackages],

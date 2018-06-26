@@ -120,14 +120,14 @@ class IOSDevice extends Device {
   @override
   Future<bool> installApp(ApplicationPackage app) async {
     final IOSApp iosApp = app;
-    final Directory bundle = fs.directory(iosApp.deviceBundlePath);
+    final Directory bundle = fs.directory(iosApp.getDeviceBundlePath(id));
     if (!bundle.existsSync()) {
       printError('Could not find application bundle at ${bundle.path}; have you run "flutter build ios"?');
       return false;
     }
 
     try {
-      await runCheckedAsync(<String>[_installerPath, '-i', iosApp.deviceBundlePath]);
+      await runCheckedAsync(<String>[_installerPath, '-i', iosApp.getDeviceBundlePath(id)]);
       return true;
     } catch (e) {
       return false;
@@ -184,7 +184,7 @@ class IOSDevice extends Device {
 
     // Step 2: Check that the application exists at the specified path.
     final IOSApp iosApp = package;
-    final Directory bundle = fs.directory(iosApp.deviceBundlePath);
+    final Directory bundle = fs.directory(iosApp.getDeviceBundlePath(id));
     if (!bundle.existsSync()) {
       printError('Could not find the built application bundle at ${bundle.path}.');
       return new LaunchResult.failed();

@@ -90,10 +90,11 @@ class _ManifestAssetBundle implements AssetBundle {
     String manifestPath = defaultManifestPath,
     String assetDirPath,
     String packagesPath,
+    String deviceId,
     bool includeDefaultFonts = true,
     bool reportLicensedPackages = false
   }) async {
-    assetDirPath ??= getAssetBuildDirectory();
+    assetDirPath ??= getAssetBuildDirectory(deviceId);
     packagesPath ??= fs.path.absolute(PackageMap.globalPackagesPath);
     FlutterManifest flutterManifest;
     try {
@@ -125,7 +126,7 @@ class _ManifestAssetBundle implements AssetBundle {
       packageMap,
       flutterManifest,
       assetBasePath,
-      excludeDirs: <String>[assetDirPath, getBuildDirectory()]
+      excludeDirs: <String>[assetDirPath, getBuildDirectory(deviceId)]
     );
 
     if (assetVariants == null)

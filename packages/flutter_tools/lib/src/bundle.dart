@@ -18,9 +18,9 @@ import 'globals.dart';
 const String defaultMainPath = 'lib/main.dart';
 const String defaultAssetBasePath = '.';
 const String defaultManifestPath = 'pubspec.yaml';
-String get defaultSnapshotPath => fs.path.join(getBuildDirectory(), 'snapshot_blob.bin');
-String get defaultDepfilePath => fs.path.join(getBuildDirectory(), 'snapshot_blob.bin.d');
-String get defaultApplicationKernelPath => fs.path.join(getBuildDirectory(), 'app.dill');
+String getDefaultSnapshotPath(String deviceId) => fs.path.join(getBuildDirectory(deviceId), 'snapshot_blob.bin');
+String getDefaultDepfilePath(String deviceId) => fs.path.join(getBuildDirectory(deviceId), 'snapshot_blob.bin.d');
+String getDefaultApplicationKernelPath(String deviceId) => fs.path.join(getBuildDirectory(deviceId), 'app.dill');
 const String defaultPrivateKeyPath = 'privatekey.der';
 
 const String _kKernelKey = 'kernel_blob.bin';
@@ -43,6 +43,7 @@ Future<void> build({
   String privateKeyPath = defaultPrivateKeyPath,
   String assetDirPath,
   String packagesPath,
+  String deviceId,
   bool previewDart2  = false,
   bool precompiledSnapshot = false,
   bool reportLicensedPackages = false,
@@ -53,11 +54,11 @@ Future<void> build({
   List<String> fileSystemRoots,
   String fileSystemScheme,
 }) async {
-  snapshotPath ??= defaultSnapshotPath;
-  depfilePath ??= defaultDepfilePath;
-  assetDirPath ??= getAssetBuildDirectory();
+  snapshotPath ??= getDefaultSnapshotPath(deviceId);
+  depfilePath ??= getDefaultDepfilePath(deviceId);
+  assetDirPath ??= getAssetBuildDirectory(deviceId);
   packagesPath ??= fs.path.absolute(PackageMap.globalPackagesPath);
-  applicationKernelFilePath ??= defaultApplicationKernelPath;
+  applicationKernelFilePath ??= getDefaultApplicationKernelPath(deviceId);
   File snapshotFile;
 
   if (!precompiledSnapshot && !previewDart2) {
@@ -85,7 +86,7 @@ Future<void> build({
     final CompilerOutput compilerOutput = await kernelCompiler.compile(
       sdkRoot: artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath),
       incrementalCompilerByteStorePath: buildSnapshot ? null :
-          fs.path.absolute(getIncrementalCompilerByteStoreDirectory()),
+          fs.path.absolute(getIncrementalCompilerByteStoreDirectory(deviceId)),
       mainPath: fs.file(mainPath).absolute.path,
       outputFilePath: applicationKernelFilePath,
       depFilePath: depfilePath,
@@ -101,7 +102,7 @@ Future<void> build({
     }
     kernelContent = new DevFSFileContent(fs.file(compilerOutput.outputFilename));
 
-    await fs.directory(getBuildDirectory()).childFile('frontend_server.d')
+    await fs.directory(getBuildDirectory(deviceId)).childFile('frontend_server.d')
         .writeAsString('frontend_server.d: ${artifacts.getArtifactPath(Artifact.frontendServerSnapshotForEngineDartSdk)}\n');
 
     if (buildSnapshot) {
@@ -110,7 +111,7 @@ Future<void> build({
         platform: platform,
         buildMode: buildMode,
         mainPath: applicationKernelFilePath,
-        outputPath: getBuildDirectory(),
+        outputPath: getBuildDirectory(deviceId),
         packagesPath: packagesPath,
         extraGenSnapshotOptions: extraGenSnapshotOptions,
       );
@@ -122,6 +123,7 @@ Future<void> build({
   }
 
   final AssetBundle assets = await buildAssets(
+    /* deviceId???, */
     manifestPath: manifestPath,
     assetDirPath: assetDirPath,
     packagesPath: packagesPath,
@@ -140,14 +142,15 @@ Future<void> build({
   );
 }
 
-Future<AssetBundle> buildAssets({
+Future<AssetBundle> buildAssets(
+  String deviceId, {
   String manifestPath,
   String assetDirPath,
   String packagesPath,
   bool includeDefaultFonts = true,
   bool reportLicensedPackages = false
 }) async {
-  assetDirPath ??= getAssetBuildDirectory();
+  assetDirPath ??= getAssetBuildDirectory(deviceId);
   packagesPath ??= fs.path.absolute(PackageMap.globalPackagesPath);
 
   // Build the asset bundle.
@@ -173,17 +176,18 @@ Future<void> assemble({
   String privateKeyPath = defaultPrivateKeyPath,
   String assetDirPath,
   bool buildSnapshot,
+  String deviceId,
 }) async {
-  assetDirPath ??= getAssetBuildDirectory();
+  assetDirPath ??= getAssetBuildDirectory(deviceId);
   printTrace('Building bundle');
 
   final Map<String, DevFSContent> assetEntries = new Map<String, DevFSContent>.from(assetBundle.entries);
   if (kernelContent != null) {
     if (buildSnapshot) {
-      final String vmSnapshotData = fs.path.join(getBuildDirectory(), _kVMSnapshotData);
-      final String vmSnapshotInstr = fs.path.join(getBuildDirectory(), _kVMSnapshotInstr);
-      final String isolateSnapshotData = fs.path.join(getBuildDirectory(), _kIsolateSnapshotData);
-      final String isolateSnapshotInstr = fs.path.join(getBuildDirectory(), _kIsolateSnapshotInstr);
+      final String vmSnapshotData = fs.path.join(getBuildDirectory(deviceId), _kVMSnapshotData);
+      final String vmSnapshotInstr = fs.path.join(getBuildDirectory(deviceId), _kVMSnapshotInstr);
+      final String isolateSnapshotData = fs.path.join(getBuildDirectory(deviceId), _kIsolateSnapshotData);
+      final String isolateSnapshotInstr = fs.path.join(getBuildDirectory(deviceId), _kIsolateSnapshotInstr);
       assetEntries[_kVMSnapshotData] = new DevFSFileContent(fs.file(vmSnapshotData));
       assetEntries[_kVMSnapshotInstr] = new DevFSFileContent(fs.file(vmSnapshotInstr));
       assetEntries[_kIsolateSnapshotData] = new DevFSFileContent(fs.file(isolateSnapshotData));

@@ -88,7 +88,7 @@ class ColdRunner extends ResidentRunner {
       if (device.vmServices != null && device.vmServices.isNotEmpty) {
         printStatus('Downloading startup trace info for ${device.device.name}');
         try {
-          await downloadStartupTrace(device.vmServices.first);
+          await downloadStartupTrace(device.vmServices.first, device.device.id);
         } catch (error) {
           printError('Error downloading startup trace: $error');
           return 2;

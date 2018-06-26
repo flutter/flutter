@@ -400,7 +400,8 @@ class DevFS {
   /// Updates files on the device.
   ///
   /// Returns the number of bytes synced.
-  Future<int> update({
+  Future<int> update(
+    String deviceId, {
     String mainPath,
     String target,
     AssetBundle bundle,
@@ -422,23 +423,24 @@ class DevFS {
     printTrace('DevFS: Starting sync from $rootDirectory');
     logger.printTrace('Scanning project files');
     await _scanDirectory(rootDirectory,
+                         deviceId,
                          recursive: true,
                          fileFilter: fileFilter);
     final bool previewDart2 = generator != null;
     if (fs.isFileSync(_packagesFilePath)) {
       printTrace('Scanning package files');
-      await _scanPackages(fileFilter, previewDart2);
+      await _scanPackages(fileFilter, previewDart2, deviceId);
     }
     if (bundle != null) {
       printTrace('Scanning asset files');
       bundle.entries.forEach((String archivePath, DevFSContent content) {
-        _scanBundleEntry(archivePath, content);
+        _scanBundleEntry(archivePath, content, deviceId);
       });
     }
 
     // Handle deletions.
     printTrace('Scanning for deleted files');
-    final String assetBuildDirPrefix = _asUriPath(getAssetBuildDirectory());
+    final String assetBuildDirPrefix = _asUriPath(getAssetBuildDirectory(deviceId));
     final List<Uri> toRemove = <Uri>[];
     _entries.forEach((Uri deviceUri, DevFSContent content) {
       if (!content._exists) {
@@ -506,7 +508,7 @@ class DevFS {
       }
       final CompilerOutput compilerOutput =
           await generator.recompile(mainPath, invalidatedFiles,
-              outputPath:  dillOutputPath ?? fs.path.join(getBuildDirectory(), 'app.dill'),
+              outputPath:  dillOutputPath ?? fs.path.join(getBuildDirectory(deviceId), 'app.dill'),
               packagesFilePath : _packagesFilePath);
       final String compiledBinary = compilerOutput?.outputFilename;
       if (compiledBinary != null && compiledBinary.isNotEmpty) {
@@ -556,18 +558,18 @@ class DevFS {
     content._exists = true;
   }
 
-  void _scanBundleEntry(String archivePath, DevFSContent content) {
+  void _scanBundleEntry(String archivePath, DevFSContent content, String deviceId) {
     // We write the assets into the AssetBundle working dir so that they
     // are in the same location in DevFS and the iOS simulator.
-    final Uri deviceUri = fs.path.toUri(fs.path.join(getAssetBuildDirectory(), archivePath));
+    final Uri deviceUri = fs.path.toUri(fs.path.join(getAssetBuildDirectory(deviceId), archivePath));
 
     _entries[deviceUri] = content;
     content._exists = true;
   }
 
-  bool _shouldIgnore(Uri deviceUri) {
+  bool _shouldIgnore(Uri deviceUri, String deviceId) {
     final List<String> ignoredUriPrefixes = <String>['android/',
-                                               _asUriPath(getBuildDirectory()),
+                                               _asUriPath(getBuildDirectory(deviceId)),
                                                'ios/',
                                                '.pub/'];
     for (String ignoredUriPrefix in ignoredUriPrefixes) {
@@ -613,6 +615,7 @@ class DevFS {
   /// pass various filters (e.g. ignoreDotFiles).
   Future<bool> _scanFilteredDirectory(Set<String> fileFilter,
                                       Directory directory,
+                                      String deviceId,
                                       {Uri directoryUriOnDevice,
                                        bool ignoreDotFiles = true}) async {
     directoryUriOnDevice =
@@ -632,7 +635,7 @@ class DevFS {
           continue;
         }
         final Uri deviceUri = directoryUriOnDevice.resolveUri(fs.path.toUri(relativePath));
-        if (!_shouldIgnore(deviceUri))
+        if (!_shouldIgnore(deviceUri, deviceId))
           _scanFile(deviceUri, file);
       }
     } on FileSystemException catch (e) {
@@ -644,6 +647,7 @@ class DevFS {
 
   /// Scan all files in [directory] that pass various filters (e.g. ignoreDotFiles).
   Future<bool> _scanDirectory(Directory directory,
+                              String deviceId,
                               {Uri directoryUriOnDevice,
                                bool recursive = false,
                                bool ignoreDotFiles = true,
@@ -654,6 +658,7 @@ class DevFS {
       // tree and instead use the fileFilter as the source of potential files.
       return _scanFilteredDirectory(fileFilter,
                                     directory,
+                                    deviceId,
                                     directoryUriOnDevice: directoryUriOnDevice,
                                     ignoreDotFiles: ignoreDotFiles);
     }
@@ -679,7 +684,7 @@ class DevFS {
           continue;
         }
         final Uri deviceUri = directoryUriOnDevice.resolveUri(fs.path.toUri(relativePath));
-        if (!_shouldIgnore(deviceUri))
+        if (!_shouldIgnore(deviceUri, deviceId))
           _scanFile(deviceUri, file);
       }
     } on FileSystemException catch (e) {
@@ -697,7 +702,7 @@ class DevFS {
     );
   }
 
-  Future<Null> _scanPackages(Set<String> fileFilter, bool previewDart2) async {
+  Future<Null> _scanPackages(Set<String> fileFilter, bool previewDart2, String deviceId) async {
     StringBuffer sb;
     final PackageMap packageMap = new PackageMap(_packagesFilePath);
 
@@ -721,6 +726,7 @@ class DevFS {
       } else {
         packageExists =
             await _scanDirectory(packageDirectory,
+                                 deviceId,
                                  directoryUriOnDevice: directoryUriOnDevice,
                                  recursive: true,
                                  fileFilter: fileFilter);

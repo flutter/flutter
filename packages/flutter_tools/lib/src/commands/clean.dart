@@ -23,7 +23,8 @@ class CleanCommand extends FlutterCommand {
 
   @override
   Future<Null> runCommand() async {
-    final Directory buildDir = fs.directory(getBuildDirectory());
+    // Pass null as deviceID as we want the parent folder to clean all
+    final Directory buildDir = fs.directory(getBuildDirectory(null));
     printStatus("Deleting '${buildDir.path}${fs.path.separator}'.");
 
     if (!buildDir.existsSync())

@@ -77,9 +77,9 @@ Future<void> updateGeneratedXcodeProperties({
   localsBuffer.writeln('FLUTTER_BUILD_MODE=${buildInfo.modeName}');
 
   // The build outputs directory, relative to FLUTTER_APPLICATION_PATH.
-  localsBuffer.writeln('FLUTTER_BUILD_DIR=${getBuildDirectory()}');
+  localsBuffer.writeln('FLUTTER_BUILD_DIR=${getBuildDirectory(/* deviceId??? */)}');
 
-  localsBuffer.writeln('SYMROOT=\${SOURCE_ROOT}/../${getIosBuildDirectory()}');
+  localsBuffer.writeln('SYMROOT=\${SOURCE_ROOT}/../${getIosBuildDirectory(/* deviceId??? */)}');
 
   localsBuffer.writeln('FLUTTER_FRAMEWORK_DIR=${flutterFrameworkDir(buildInfo.mode)}');
 
