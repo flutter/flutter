@@ -757,12 +757,12 @@ class TransformLayer extends OffsetLayer {
       return;
     _transform = value;
     _invertedTransform = null;
-    _lastDeterminate = null;
+    _lastDeterminant = null;
   }
 
   Matrix4 _lastEffectiveTransform;
   Matrix4 _invertedTransform;
-  double _lastDeterminate;
+  double _lastDeterminant;
 
   @override
   void addToScene(ui.SceneBuilder builder, Offset layerOffset) {
@@ -780,11 +780,11 @@ class TransformLayer extends OffsetLayer {
   @override
   S find<S>(Offset regionOffset) {
     if (_invertedTransform == null) {
-      if (_lastDeterminate == 0.0)
+      if (_lastDeterminant == 0.0)
         return null;
       final Matrix4 result = new Matrix4.zero();
-      _lastDeterminate = result.copyInverse(transform);
-      if (_lastDeterminate == 0.0)
+      _lastDeterminant = result.copyInverse(transform);
+      if (_lastDeterminant == 0.0)
         return null;
       _invertedTransform = result;
     }
