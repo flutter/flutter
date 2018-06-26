@@ -1,4 +1,4 @@
-Signature: 6ac280cdc47485075090bb3c0fa69715
+Signature: 9ebebf36b0fd87fd5a95f5eaa35266e9
 
 UNUSED LICENSES:
 
@@ -20280,10 +20280,10 @@ TYPE: LicenseType.bsd
 FILE: ../../../third_party/skia/include/core/SkDrawFilter.h
 FILE: ../../../third_party/skia/include/core/SkDrawLooper.h
 FILE: ../../../third_party/skia/include/effects/SkBlurImageFilter.h
-FILE: ../../../third_party/skia/src/core/SkBlurImageFilter.cpp
 FILE: ../../../third_party/skia/src/core/SkScan.h
 FILE: ../../../third_party/skia/src/core/SkScan_Antihair.cpp
 FILE: ../../../third_party/skia/src/core/SkTypeface.cpp
+FILE: ../../../third_party/skia/src/effects/imagefilters/SkBlurImageFilter.cpp
 FILE: ../../../third_party/skia/src/ports/SkFontMgr_android_parser.cpp
 FILE: ../../../third_party/skia/src/ports/SkFontMgr_android_parser.h
 ----------------------------------------------------------------------------------------------------
