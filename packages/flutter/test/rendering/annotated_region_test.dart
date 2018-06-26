@@ -123,6 +123,14 @@ void main() {
 
       expect(layer.find<int>(const Offset(100.0, 100.0)), 1);
     });
+
+    test('handles non-invertable transforms', () {
+      final AnnotatedRegionLayer<int> child = new AnnotatedRegionLayer<int>(1);
+      final TransformLayer parent = new TransformLayer(transform: new Matrix4.diagonal3Values(0.0, 1.0, 1.0));
+      parent.append(child);
+
+      expect(parent.find<int>(const Offset(0.0, 0.0)), null);
+    });
   });
 }
 

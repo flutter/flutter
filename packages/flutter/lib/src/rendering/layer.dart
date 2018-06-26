@@ -761,6 +761,7 @@ class TransformLayer extends OffsetLayer {
 
   Matrix4 _lastEffectiveTransform;
   Matrix4 _invertedTransform;
+  double _lastDeterminate;
 
   @override
   void addToScene(ui.SceneBuilder builder, Offset layerOffset) {
@@ -777,7 +778,15 @@ class TransformLayer extends OffsetLayer {
 
   @override
   S find<S>(Offset regionOffset) {
-    _invertedTransform ??= new Matrix4.inverted(transform);
+    if (_invertedTransform == null) {
+      if (_lastDeterminate == 0.0)
+        return null;
+      final Matrix4 result = new Matrix4.zero();
+      _lastDeterminate = result.copyInverse(transform);
+      if (_lastDeterminate == 0.0)
+        return null;
+      _invertedTransform = result;
+    }
     final Vector4 vector = new Vector4(regionOffset.dx, regionOffset.dy, 0.0, 1.0);
     final Vector4 result = _invertedTransform.transform(vector);
     return super.find<S>(new Offset(result[0], result[1]));
@@ -1178,6 +1187,7 @@ class FollowerLayer extends ContainerLayer {
   Offset _lastOffset;
   Matrix4 _lastTransform;
   Matrix4 _invertedTransform;
+  double _lastDeterminate;
 
   @override
   S find<S>(Offset regionOffset) {
@@ -1185,10 +1195,15 @@ class FollowerLayer extends ContainerLayer {
       return showWhenUnlinked ? super.find<S>(regionOffset - unlinkedOffset) : null;
     }
     if (_invertedTransform == null) {
+      if (_lastDeterminate == 0.0)
+        return null;
       final Matrix4 transform = getLastTransform();
       assert(transform != null);
-      _invertedTransform = new Matrix4.zero();
-      transform.copyInverse(_invertedTransform);
+      final Matrix4 result = new Matrix4.zero();
+      _lastDeterminate = transform.copyInverse(result);
+      if (_lastDeterminate == 0.0)
+        return null;
+      _invertedTransform = result;
     }
     final Vector4 vector = new Vector4(regionOffset.dx, regionOffset.dy, 0.0, 1.0);
     final Vector4 result = _invertedTransform.transform(vector);
