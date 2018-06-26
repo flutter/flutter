@@ -176,7 +176,7 @@ class EditableText extends StatefulWidget {
     this.onSelectionChanged,
     List<TextInputFormatter> inputFormatters,
     this.rendererIgnoresPointer = false,
-    @required this.cursorWidth,
+    this.cursorWidth = 2.0,
     this.cursorRadius,
     this.cursorHeight,
   }) : assert(controller != null),
@@ -189,7 +189,6 @@ class EditableText extends StatefulWidget {
        assert(maxLines == null || maxLines > 0),
        assert(autofocus != null),
        assert(rendererIgnoresPointer != null),
-       assert(cursorWidth != null),
        keyboardType = keyboardType ?? (maxLines == 1 ? TextInputType.text : TextInputType.multiline),
        inputFormatters = maxLines == 1
            ? (
