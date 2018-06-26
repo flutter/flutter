@@ -87,7 +87,7 @@ void main() {
     }
 
     Future<void> evaluateComplexExpressions() async {
-      final VMInstanceRef res = await _flutter.evaluateExpression('"test"');
+      final VMInstanceRef res = await _flutter.evaluateExpression('new DateTime.now().year');
       expect(res is VMIntInstanceRef && res.value == new DateTime.now().year, isTrue);
     }
 
