@@ -27,10 +27,12 @@ Future<void> runTest(Future<void> testFunction(FlutterProject project, FlutterPl
 
 void main() async {
   await task(() async {
-    section('Running flutter doctor to get JAVA_HOME');
-    final String flutterDoctor = await evalFlutter('doctor', options: <String>['-v']);
-    final RegExp javaHomeExtractor = new RegExp(r'Android Studio at (.*)');
-    javaHome = javaHomeExtractor.firstMatch(flutterDoctor).group(1) + '/jre';
+    section('Find Java');
+
+    javaHome = await findJavaHome();
+    if (javaHome == null)
+      return new TaskResult.failure('Could not find Java');
+    print('\nUsing JAVA_HOME=$javaHome');
 
     try {
       await runTest((FlutterProject project, FlutterPluginProject pluginProject) async {
