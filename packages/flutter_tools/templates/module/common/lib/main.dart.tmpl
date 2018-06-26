@@ -6,7 +6,14 @@ import 'package:package_info/package_info.dart';
 
 Future<void> main() async {
   final PackageInfo packageInfo = await PackageInfo.fromPlatform();
-  runApp(Directionality(textDirection: TextDirection.ltr, child: Router(packageInfo)));
+  runApp(
+    Directionality(
+      textDirection: TextDirection.ltr,
+      child: new CheckedModeBanner(
+        child: Router(packageInfo),
+      ),
+    ),
+  );
 }
 
 class Router extends StatelessWidget {
