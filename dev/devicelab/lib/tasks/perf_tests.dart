@@ -395,7 +395,7 @@ class CompileTest {
       fileToMetadata[entry.path] = entry;
     }
 
-    final _UnzipListEntry icudtl = fileToMetadata['assets/icudtl.dat'];
+    final _UnzipListEntry icudtl = fileToMetadata['assets/flutter_shared/icudtl.dat'];
     final _UnzipListEntry libflutter = fileToMetadata['lib/armeabi-v7a/libflutter.so'];
     final _UnzipListEntry isolateSnapshotData = fileToMetadata['assets/isolate_snapshot_data'];
     final _UnzipListEntry isolateSnapshotInstr = fileToMetadata['assets/isolate_snapshot_instr'];
