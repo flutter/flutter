@@ -178,7 +178,6 @@ class EditableText extends StatefulWidget {
     this.rendererIgnoresPointer = false,
     this.cursorWidth = 2.0,
     this.cursorRadius,
-    this.cursorHeight,
   }) : assert(controller != null),
        assert(focusNode != null),
        assert(obscureText != null),
@@ -306,8 +305,6 @@ class EditableText extends StatefulWidget {
   final double cursorWidth;
 
   final Radius cursorRadius;
-
-  final double cursorHeight;
 
   @override
   EditableTextState createState() => new EditableTextState();
@@ -864,7 +861,7 @@ class _Editable extends LeafRenderObjectWidget {
     return new RenderEditable(
       text: textSpan,
       cursorColor: cursorColor,
-      showCursor: showCursor,
+      showCursor: new ValueNotifier<bool>(true),
       hasFocus: hasFocus,
       maxLines: maxLines,
       selectionColor: selectionColor,
