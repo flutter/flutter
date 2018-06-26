@@ -2,12 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
-
 import 'package:meta/meta.dart';
 
 import '../artifacts.dart';
-import '../base/common.dart';
 import '../base/context.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
@@ -41,7 +38,7 @@ String _generatedXcodePropertiesPath(String projectPath, FlutterManifest manifes
 /// already exist.
 void generateXcodeProperties(String projectPath, FlutterManifest manifest) {
   if (manifest.isModule || fs.isDirectorySync(fs.path.join(projectPath, 'ios'))) {
-    File propertiesFile = fs.file(_generatedXcodePropertiesPath(projectPath, manifest));
+    final File propertiesFile = fs.file(_generatedXcodePropertiesPath(projectPath, manifest));
     if (!Cache.instance.fileOlderThanToolsStamp(propertiesFile)) {
       return;
     }
