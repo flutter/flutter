@@ -13,6 +13,13 @@ import 'package:path/path.dart' as path;
 Future<Null> main() async {
   await task(() async {
 
+    section('Find Java');
+
+    final String javaHome = await findJavaHome();
+    if (javaHome == null)
+      return new TaskResult.failure('Could not find Java');
+    print('\nUsing JAVA_HOME=$javaHome');
+
     section('Create Flutter module project');
 
     final Directory directory = await Directory.systemTemp.createTemp('module');
@@ -27,7 +34,11 @@ Future<Null> main() async {
       section('Build Android .aar');
 
       await inDirectory(new Directory(path.join(directory.path, 'hello', '.android')), () async {
-        await exec('./gradlew', <String>['flutter:assembleDebug']);
+        await exec(
+          './gradlew',
+          <String>['flutter:assembleDebug'],
+          environment: <String, String>{ 'JAVA_HOME': javaHome },
+        );
       });
 
       final bool aarBuilt = exists(new File(path.join(
@@ -63,7 +74,10 @@ Future<Null> main() async {
 
       await inDirectory(hostApp, () async {
         await exec('chmod', <String>['+x', 'gradlew']);
-        await exec('./gradlew', <String>['app:assembleDebug']);
+        await exec('./gradlew',
+          <String>['app:assembleDebug'],
+          environment: <String, String>{ 'JAVA_HOME': javaHome },
+        );
       });
 
       final bool appBuilt = exists(new File(path.join(
