@@ -37,6 +37,7 @@ void main() {
     expect(editableText.maxLines, equals(1));
     expect(editableText.obscureText, isFalse);
     expect(editableText.autocorrect, isTrue);
+    expect(editableText.cursorWidth, 2.0);
   });
 
   testWidgets('text keyboard is requested when maxLines is default',
