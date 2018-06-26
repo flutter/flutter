@@ -1267,6 +1267,9 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
     config ??= _kEmptyConfig;
     if (_isDifferentFromCurrentSemanticAnnotation(config))
       _markDirty();
+    if (config._localContextActions?.isNotEmpty == true) {
+      debugPrint('found lcoal context actons: ${config._localContextActions}');
+    }
 
     _label = config.label;
     _decreasedValue = config.decreasedValue;
@@ -1294,7 +1297,7 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
       !_canPerformAction(SemanticsAction.decrease) || (_value == '') == (_decreasedValue == ''),
       'A SemanticsNode with action "increase" needs to be annotated with either both "value" and "decreasedValue" or neither',
     );
-    assert(_localContextActions.isNotEmpty && _canPerformAction(SemanticsAction.localContextAction) == true);
+    //assert(_localContextActions.isNotEmpty && _canPerformAction(SemanticsAction.localContextAction) == true || _localContextActions.isEmpty);
   }
 
 
@@ -1317,6 +1320,7 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
     double scrollPosition = _scrollPosition;
     double scrollExtentMax = _scrollExtentMax;
     double scrollExtentMin = _scrollExtentMin;
+    Set<LocalContextAction> localContextActions = _localContextActions.keys.toSet();
 
     if (mergeAllDescendantsIntoThisNode) {
       _visitDescendants((SemanticsNode node) {
@@ -1337,6 +1341,10 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
         if (node.tags != null) {
           mergedTags ??= new Set<SemanticsTag>();
           mergedTags.addAll(node.tags);
+        }
+        if (node._localContextActions != null) {
+          localContextActions ??= new Set<LocalContextAction>();
+          localContextActions.addAll(node._localContextActions.keys);
         }
         label = _concatStrings(
           thisString: label,
@@ -1370,6 +1378,7 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
       scrollPosition: scrollPosition,
       scrollExtentMax: scrollExtentMax,
       scrollExtentMin: scrollExtentMin,
+      localContextActions: localContextActions,
     );
   }
 
@@ -1381,7 +1390,7 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
   static final Int32List _kEmptyLocalContextActionList = new Int32List(0);
   static final Float64List _kIdentityTransform = _initIdentityTransform();
 
-  void _addToUpdate(ui.SemanticsUpdateBuilder builder) {
+  void _addToUpdate(ui.SemanticsUpdateBuilder builder, ui.LocalContextActionUpdateBuilder actionBuilder) {
     assert(_dirty);
     final SemanticsData data = getSemanticsData();
     Int32List childrenInTraversalOrder;
@@ -1403,6 +1412,22 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
         childrenInHitTestOrder[i] = _children[childCount - i - 1].id;
       }
     }
+    Int32List localContextActionIds;
+    if (data.localContextActions?.isNotEmpty == true) {
+      localContextActionIds = new Int32List(data.localContextActions.length);
+      int index = 0;
+      for (LocalContextAction action in data.localContextActions) {
+        actionBuilder.updateAction(
+          id: action.id,
+          label: action.label,
+          textDirection: data.textDirection,
+        );
+        localContextActionIds[index] = action.id;
+        index++;
+      }
+    } else {
+      localContextActionIds = new Int32List.fromList(const <int>[1]);
+    }
     builder.updateNode(
       id: id,
       flags: data.flags,
@@ -1422,7 +1447,7 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
       transform: data.transform?.storage ?? _kIdentityTransform,
       childrenInTraversalOrder: childrenInTraversalOrder,
       childrenInHitTestOrder: childrenInHitTestOrder,
-      localContextActions: _kEmptyLocalContextActionList,
+      localContextActions: localContextActionIds ?? _kEmptyLocalContextActionList,
     );
     _dirty = false;
   }
@@ -1534,7 +1559,7 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
       properties.add(new DiagnosticsProperty<Rect>('rect', rect, description: description, showName: false));
     }
     final List<String> actions = _actions.keys.map((SemanticsAction action) => describeEnum(action)).toList()..sort();
-    final List<String> localContextActions = _localContextActions.keys.map((LocalContextAction action) => action.toString());
+    final List<String> localContextActions = _localContextActions.keys.map((LocalContextAction action) => action.toString()).toList();
     properties.add(new IterableProperty<String>('actions', actions, ifEmpty: null));
     properties.add(new IterableProperty<String>('localContextActions', localContextActions, ifEmpty: null));
     final List<String> flags = SemanticsFlag.values.values.where((SemanticsFlag flag) => _hasFlag(flag)).map((SemanticsFlag flag) => flag.toString().substring('SemanticsFlag.'.length)).toList();
@@ -1933,11 +1958,6 @@ class SemanticsOwner extends ChangeNotifier {
 
   /// Update the semantics using [Window.updateSemantics].
   void sendSemanticsUpdate() {
-    final ui.LocalContextActionUpdateBuilder actions = new ui.LocalContextActionUpdateBuilder();
-    actions.updateAction(id: 1, textDirection: TextDirection.ltr, label: 'Hello');
-    actions.updateAction(id: 2, textDirection: TextDirection.ltr, label: 'Goodbye');
-    actions.updateAction(id: 3, textDirection: TextDirection.ltr, label: 'Loop');
-    ui.window.updateLocalContextActions(actions.build());
     if (_dirtyNodes.isEmpty)
       return;
     final List<SemanticsNode> visitedNodes = <SemanticsNode>[];
@@ -1959,6 +1979,7 @@ class SemanticsOwner extends ChangeNotifier {
       }
     }
     visitedNodes.sort((SemanticsNode a, SemanticsNode b) => a.depth - b.depth);
+    final ui.LocalContextActionUpdateBuilder actions = new ui.LocalContextActionUpdateBuilder();
     final ui.SemanticsUpdateBuilder builder = new ui.SemanticsUpdateBuilder();
     for (SemanticsNode node in visitedNodes) {
       assert(node.parent?._dirty != true); // could be null (no parent) or false (not dirty)
@@ -1973,9 +1994,11 @@ class SemanticsOwner extends ChangeNotifier {
       // which happens e.g. when the node is no longer contributing
       // semantics).
       if (node._dirty && node.attached)
-        node._addToUpdate(builder);
+        node._addToUpdate(builder, actions);
     }
     _dirtyNodes.clear();
+    actions.updateAction(id: 1, textDirection: TextDirection.ltr, label: 'test');
+    ui.window.updateLocalContextActions(actions.build());
     ui.window.updateSemantics(builder.build());
     notifyListeners();
   }
@@ -2531,6 +2554,12 @@ class SemanticsConfiguration {
     _hasBeenAnnotated = true;
   }
 
+  /// 
+  void addLocalContextAction(LocalContextAction action, VoidCallback callback) {
+    debugPrint('added $action');
+    _localContextActions[action] = (dynamic arg) { callback(); };
+  }
+
   /// A textual description of the owning [RenderObject].
   ///
   /// On iOS this is used for the `accessibilityLabel` property defined in the
@@ -2886,6 +2915,7 @@ class SemanticsConfiguration {
       return;
 
     _actions.addAll(other._actions);
+    _localContextActions.addAll(other._localContextActions);
     _actionsAsBits |= other._actionsAsBits;
     _flags |= other._flags;
     _textSelection ??= other._textSelection;
@@ -2939,7 +2969,8 @@ class SemanticsConfiguration {
       .._scrollExtentMax = _scrollExtentMax
       .._scrollExtentMin = _scrollExtentMin
       .._actionsAsBits = _actionsAsBits
-      .._actions.addAll(_actions);
+      .._actions.addAll(_actions)
+      .._localContextActions.addAll(_localContextActions);
   }
 }
 

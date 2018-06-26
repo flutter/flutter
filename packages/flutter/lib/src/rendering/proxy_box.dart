@@ -3166,6 +3166,7 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     SetSelectionHandler onSetSelection,
     VoidCallback onDidGainAccessibilityFocus,
     VoidCallback onDidLoseAccessibilityFocus,
+    Map<LocalContextAction, VoidCallback> localContextActions,
   }) : assert(container != null),
        _container = container,
        _explicitChildNodes = explicitChildNodes,
@@ -3204,6 +3205,7 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
        _onSetSelection = onSetSelection,
        _onDidGainAccessibilityFocus = onDidGainAccessibilityFocus,
        _onDidLoseAccessibilityFocus = onDidLoseAccessibilityFocus,
+       _localContextActions = localContextActions,
        super(child);
 
   /// If 'container' is true, this [RenderObject] will introduce a new
@@ -3786,6 +3788,13 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
       markNeedsSemanticsUpdate();
   }
 
+  Map<LocalContextAction, VoidCallback> get localContextActions => _localContextActions;
+  Map<LocalContextAction, VoidCallback> _localContextActions;
+  set localContextActions(Map<LocalContextAction, VoidCallback> value) {
+    _localContextActions = value;
+    markNeedsSemanticsUpdate();
+  }
+
   @override
   void describeSemanticsConfiguration(SemanticsConfiguration config) {
     super.describeSemanticsConfiguration(config);
@@ -3867,6 +3876,9 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
       config.onDidGainAccessibilityFocus = _performDidGainAccessibilityFocus;
     if (onDidLoseAccessibilityFocus != null)
       config.onDidLoseAccessibilityFocus = _performDidLoseAccessibilityFocus;
+    if (localContextActions != null) {
+      localContextActions.forEach(config.addLocalContextAction);
+    }
   }
 
   void _performTap() {

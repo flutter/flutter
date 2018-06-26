@@ -7,6 +7,7 @@ import 'dart:developer';
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
+import 'package:flutter/semantics.dart';
 
 import 'backdrop.dart';
 import 'demos.dart';
@@ -139,14 +140,21 @@ class _CategoriesPage extends StatelessWidget {
                       final int index = rowIndex * columnCount + columnIndex;
                       final GalleryDemoCategory category = categoriesList[index];
 
-                      return new SizedBox(
-                        width: columnWidth,
-                        height: rowHeight,
-                        child: new _CategoryItem(
-                          category: category,
-                          onTap: () {
-                            onCategoryTap(category);
-                          },
+                      return new Semantics(
+                        localContextActions: <LocalContextAction, VoidCallback>{
+                          const LocalContextAction(id: 1, label: 'test'): () {
+                            print('hello');
+                          }
+                        },
+                        child: new SizedBox(
+                          width: columnWidth,
+                          height: rowHeight,
+                          child: new _CategoryItem(
+                            category: category,
+                            onTap: () {
+                              onCategoryTap(category);
+                            },
+                          ),
                         ),
                       );
                     }),

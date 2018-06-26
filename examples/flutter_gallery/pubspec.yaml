@@ -201,6 +201,6 @@ flutter:
 
 dependency_overrides:
   sky_engine:
-    path: /usr/local/google/home/jonahwilliams/Documents/engine/src/out/android_debug_unopt/gen/dart-pkg/sky_engine
+    path: /Users/jonahwilliams/Documents/Flutter/engine/src/out/ios_debug_sim_unopt/gen/dart-pkg/sky_engine
   sky_services:
-    path: /usr/local/google/home/jonahwilliams/Documents/engine/src/out/android_debug_unopt/gen/dart-pkg/sky_services
+    path: /Users/jonahwilliams/Documents/Flutter/engine/src/out/ios_debug_sim_unopt/gen/dart-pkg/sky_services

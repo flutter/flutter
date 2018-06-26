@@ -5089,6 +5089,7 @@ class Semantics extends SingleChildRenderObjectWidget {
     SetSelectionHandler onSetSelection,
     VoidCallback onDidGainAccessibilityFocus,
     VoidCallback onDidLoseAccessibilityFocus,
+    Map<LocalContextAction, VoidCallback> localContextActions,
   }) : this.fromProperties(
     key: key,
     child: child,
@@ -5129,6 +5130,7 @@ class Semantics extends SingleChildRenderObjectWidget {
       onMoveCursorBackwardByCharacter: onMoveCursorBackwardByCharacter,
       onDidGainAccessibilityFocus: onDidGainAccessibilityFocus,
       onDidLoseAccessibilityFocus: onDidLoseAccessibilityFocus,
+      localContextActions: localContextActions,
     onSetSelection: onSetSelection,),
   );
 
@@ -5216,6 +5218,7 @@ class Semantics extends SingleChildRenderObjectWidget {
       onSetSelection: properties.onSetSelection,
       onDidGainAccessibilityFocus: properties.onDidGainAccessibilityFocus,
       onDidLoseAccessibilityFocus: properties.onDidLoseAccessibilityFocus,
+      localContextActions: properties.localContextActions,
     );
   }
 
@@ -5270,7 +5273,8 @@ class Semantics extends SingleChildRenderObjectWidget {
       ..onMoveCursorBackwardByCharacter = properties.onMoveCursorForwardByCharacter
       ..onSetSelection = properties.onSetSelection
       ..onDidGainAccessibilityFocus = properties.onDidGainAccessibilityFocus
-      ..onDidLoseAccessibilityFocus = properties.onDidLoseAccessibilityFocus;
+      ..onDidLoseAccessibilityFocus = properties.onDidLoseAccessibilityFocus
+      ..localContextActions = properties.localContextActions;
   }
 
   @override
