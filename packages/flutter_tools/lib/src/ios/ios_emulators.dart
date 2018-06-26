@@ -37,7 +37,7 @@ class IOSEmulator extends Emulator {
 
   @override
   Future<void> launch() async {
-    Future<void> launchSimulator(List<String> additionalArgs) async {
+    Future<bool> launchSimulator(List<String> additionalArgs) async {
       final List<String> args = <String>['open']
           .followedBy(additionalArgs)
           .followedBy(<String>['-a', getSimulatorPath()]);
@@ -53,7 +53,7 @@ class IOSEmulator extends Emulator {
     // First run with `-n` to force a device to boot if there isn't already one
     if (!await launchSimulator(<String>['-n']))
       return false;
-    
+
     // Run again to force it to Foreground (using -n doesn't force existing
     // devices to the foreground)
     return launchSimulator(<String>[]);
