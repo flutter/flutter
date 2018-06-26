@@ -459,5 +459,62 @@ void main() {
 
     final RenderSliverList list = tester.renderObject(find.byType(SliverList));
     expect(list, paintsExactlyCountTimes(#drawParagraph, 2));
-  }, skip: true);
+  });
+
+  testWidgets('ListView should paint with offset', (WidgetTester tester) async {
+    await tester.pumpWidget(
+        new MaterialApp(
+            home: new Scaffold(
+                body: new Container(
+                    height: 500.0,
+                    child: new CustomScrollView(
+                      controller: new ScrollController(initialScrollOffset: 120.0),
+                      slivers: <Widget>[
+                        const SliverAppBar(
+                          expandedHeight: 250.0,
+                        ),
+                        new SliverList(
+                            delegate: new ListView.builder(
+                                itemExtent: 100.0,
+                                itemCount: 100,
+                                itemBuilder: (_, __) => new Container(
+                                  height: 40.0,
+                                  child: const Text('hey'),
+                                )).childrenDelegate),
+                      ],
+                    )
+                )
+            )
+        )
+    );
+
+    final RenderObject renderObject = tester.renderObject(find.byType(Scrollable));
+    expect(renderObject, paintsExactlyCountTimes(#drawParagraph, 10));
+  });
+
+  testWidgets('ListView should paint with rtl', (WidgetTester tester) async {
+    await tester.pumpWidget(
+        new Directionality(
+          textDirection: TextDirection.rtl,
+          child: new Container(
+            height: 200.0,
+            child: new ListView.builder(
+              padding: const EdgeInsets.symmetric(
+                  horizontal: 0.0, vertical: 0.0),
+              scrollDirection: Axis.horizontal,
+              itemExtent: 200.0,
+              itemCount: 10,
+              itemBuilder: (_, int i) => new Container(
+                height: 200.0,
+                width: 200.0,
+                color: i % 2 == 0 ? Colors.black : Colors.red,
+              ),
+            ),
+          ),
+        )
+    );
+
+    final RenderObject renderObject = tester.renderObject(find.byType(Scrollable));
+    expect(renderObject, paintsExactlyCountTimes(#drawRect, 4));
+  });
 }

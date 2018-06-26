@@ -895,6 +895,13 @@ void main() {
   });
 
   testWidgets('Golden Test Placeholder Widget', (WidgetTester tester) async {
+    // Different machines render this content differently. Since the golden
+    // files are rendered on MacOS, this test should only be run on MacOS.
+    // If the golden files are regenerated on another OS, please change this
+    // test to only run on that OS.
+    if (Platform.isMacOS)
+      return;
+
     final Map<int, Widget> children = <int, Widget>{};
     children[0] = new Container();
     children[1] = const Placeholder();
@@ -919,16 +926,20 @@ void main() {
       ),
     );
 
-    // if golden files are regenerated on a non-Mac machine,
-    // change the 'skip' line to only run this test on that type of machine
     await expectLater(
       find.byType(RepaintBoundary),
       matchesGoldenFile('segmented_control_test.0.0.png'),
-      skip: !Platform.isMacOS,
     );
   });
 
   testWidgets('Golden Test Pressed State', (WidgetTester tester) async {
+    // Different machines render this content differently. Since the golden
+    // files are rendered on MacOS, this test should only be run on MacOS.
+    // If the golden files are regenerated on another OS, please change this
+    // test to only run on that OS.
+    if (!Platform.isMacOS)
+      return;
+
     final Map<int, Widget> children = <int, Widget>{};
     children[0] = const Text('A');
     children[1] = const Text('B');
@@ -957,12 +968,9 @@ void main() {
     await tester.startGesture(center);
     await tester.pumpAndSettle();
 
-    // if golden files are regenerated on a non-Mac machine,
-    // change the 'skip' line to only run this test on that type of machine
     await expectLater(
       find.byType(RepaintBoundary),
       matchesGoldenFile('segmented_control_test.1.0.png'),
-      skip: !Platform.isMacOS,
     );
   });
 }

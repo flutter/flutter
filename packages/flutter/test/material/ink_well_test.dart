@@ -160,7 +160,7 @@ void main() {
           ),
         ),
       );
-      expect(tester.renderObject<RenderProxyBox>(find.byType(PhysicalModel)).child, paintsNothing);
+      expect(tester.renderObject<RenderProxyBox>(find.byType(PhysicalModel)).child, isNot(paints..circle()));
       await tester.tap(find.byType(InkWell));
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 10));
@@ -171,7 +171,7 @@ void main() {
       await tester.pump(const Duration(milliseconds: 10));
       expect(
         tester.renderObject<RenderProxyBox>(find.byType(PhysicalModel)).child,
-        keepAlive ? (paints..circle()) : paintsNothing,
+        keepAlive ? (paints..circle()) : isNot(paints..circle()),
       );
     }
     await runTest(true);

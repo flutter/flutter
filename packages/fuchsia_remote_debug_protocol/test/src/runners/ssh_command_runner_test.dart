@@ -40,7 +40,7 @@ void main() {
     setUp(() {
       mockProcessManager = new MockProcessManager();
       mockProcessResult = new MockProcessResult();
-      when(mockProcessManager.run(typed(any))).thenAnswer(
+      when(mockProcessManager.run(any)).thenAnswer(
           (_) => new Future<MockProcessResult>.value(mockProcessResult));
     });
 
@@ -57,7 +57,7 @@ void main() {
       when(mockProcessResult.exitCode).thenReturn(0);
       await runner.run('ls /whatever');
       final List<String> passedCommand =
-          verify(mockProcessManager.run(typed(captureAny))).captured.single;
+          verify(mockProcessManager.run(captureAny)).captured.single;
       expect(passedCommand, contains('$ipV6Addr%$interface'));
     });
 
@@ -72,7 +72,7 @@ void main() {
       when(mockProcessResult.exitCode).thenReturn(0);
       await runner.run('ls /whatever');
       final List<String> passedCommand =
-          verify(mockProcessManager.run(typed(captureAny))).captured.single;
+          verify(mockProcessManager.run(captureAny)).captured.single;
       expect(passedCommand, contains(ipV6Addr));
     });
 
@@ -114,7 +114,7 @@ void main() {
       when(mockProcessResult.exitCode).thenReturn(0);
       await runner.run('ls /whatever');
       final List<String> passedCommand =
-          verify(mockProcessManager.run(typed(captureAny))).captured.single;
+          verify(mockProcessManager.run(captureAny)).captured.single;
       expect(passedCommand, contains('-F'));
       final int indexOfFlag = passedCommand.indexOf('-F');
       final String passedConfig = passedCommand[indexOfFlag + 1];
@@ -131,7 +131,7 @@ void main() {
       when(mockProcessResult.exitCode).thenReturn(0);
       await runner.run('ls /whatever');
       final List<String> passedCommand =
-          verify(mockProcessManager.run(typed(captureAny))).captured.single;
+          verify(mockProcessManager.run(captureAny)).captured.single;
       final int indexOfFlag = passedCommand.indexOf('-F');
       expect(indexOfFlag, equals(-1));
     });

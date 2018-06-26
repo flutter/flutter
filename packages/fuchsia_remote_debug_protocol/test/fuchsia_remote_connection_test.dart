@@ -20,7 +20,7 @@ void main() {
     setUp(() {
       mockRunner = new MockSshCommandRunner();
       // Adds some extra junk to make sure the strings will be cleaned up.
-      when(mockRunner.run(typed(any))).thenAnswer((_) =>
+      when(mockRunner.run(any)).thenAnswer((_) =>
           new Future<List<String>>.value(
               <String>['123\n\n\n', '456  ', '789']));
       const String address = 'fe80::8eae:4cff:fef4:9247';
@@ -90,7 +90,7 @@ void main() {
           final MockPeer mp = new MockPeer();
           mockPeerConnections.add(mp);
           uriConnections.add(uri);
-          when(mp.sendRequest(typed<String>(any), typed<String>(any)))
+          when(mp.sendRequest(any, any))
               // The local ports match the desired indices for now, so get the
               // canned response from the URI port.
               .thenAnswer((_) => new Future<Map<String, dynamic>>(

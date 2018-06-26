@@ -524,7 +524,12 @@ abstract class RenderSliverMultiBoxAdaptor extends RenderSliver
       );
       if (addExtent)
         childOffset += mainAxisUnit * paintExtentOf(child);
-      context.paintChild(child, childOffset);
+
+      // If the child's visible interval (mainAxisDelta, mainAxisDelta + paintExtentOf(child))
+      // does not intersect the paint extent interval (0, constraints.remainingPaintExtent), it's hidden.
+      if (mainAxisDelta < constraints.remainingPaintExtent && mainAxisDelta + paintExtentOf(child) > 0)
+        context.paintChild(child, childOffset);
+
       child = childAfter(child);
     }
   }
