@@ -16,7 +16,6 @@ import 'viewport_offset.dart';
 
 const double _kCaretGap = 1.0; // pixels
 const double _kCaretHeightOffset = 2.0; // pixels
-const double _kCaretWidth = 1.0; // pixels
 
 /// Signature for the callback that reports when the user changes the selection
 /// (including the cursor location).
@@ -134,6 +133,8 @@ class RenderEditable extends RenderBox {
     this.ignorePointer = false,
     bool obscureText = false,
     Locale locale,
+    double cursorWidth,
+    Radius cursorRadius,
   }) : assert(textAlign != null),
        assert(textDirection != null, 'RenderEditable created without a textDirection.'),
        assert(maxLines == null || maxLines > 0),
@@ -155,6 +156,8 @@ class RenderEditable extends RenderBox {
        _selectionColor = selectionColor,
        _selection = selection,
        _offset = offset,
+       _cursorWidth = cursorWidth,
+       _cursorRadius = cursorRadius,
        _obscureText = obscureText {
     assert(_showCursor != null);
     assert(!_showCursor.value || cursorColor != null);
@@ -382,6 +385,24 @@ class RenderEditable extends RenderBox {
     markNeedsLayout();
   }
 
+  double get cursorWidth => _cursorWidth;
+  double _cursorWidth = null;
+  set cursorWidth(double value) {
+    if (_cursorWidth == value)
+      return;
+    _cursorWidth = value;
+    markNeedsLayout();
+  }
+
+  Radius get cursorRadius => _cursorRadius;
+  Radius _cursorRadius = null;
+  set cursorRadius(Radius value) {
+    if (_cursorRadius == value)
+      return;
+    _cursorRadius = value;
+    markNeedsLayout();
+  }
+
   @override
   void describeSemanticsConfiguration(SemanticsConfiguration config) {
     super.describeSemanticsConfiguration(config);
@@ -546,7 +567,7 @@ class RenderEditable extends RenderBox {
     _layoutText(constraints.maxWidth);
     final Offset caretOffset = _textPainter.getOffsetForCaret(caretPosition, _caretPrototype);
     // This rect is the same as _caretPrototype but without the vertical padding.
-    return new Rect.fromLTWH(0.0, 0.0, _kCaretWidth, preferredLineHeight).shift(caretOffset + _paintOffset);
+    return new Rect.fromLTWH(0.0, 0.0, cursorWidth, preferredLineHeight).shift(caretOffset + _paintOffset);
   }
 
   @override
@@ -683,7 +704,7 @@ class RenderEditable extends RenderBox {
     assert(constraintWidth != null);
     if (_textLayoutLastWidth == constraintWidth)
       return;
-    const double caretMargin = _kCaretGap + _kCaretWidth;
+    double caretMargin = _kCaretGap + cursorWidth;
     final double availableWidth = math.max(0.0, constraintWidth - caretMargin);
     final double maxWidth = _isMultiline ? availableWidth : double.infinity;
     _textPainter.layout(minWidth: availableWidth, maxWidth: maxWidth);
@@ -693,7 +714,7 @@ class RenderEditable extends RenderBox {
   @override
   void performLayout() {
     _layoutText(constraints.maxWidth);
-    _caretPrototype = new Rect.fromLTWH(0.0, _kCaretHeightOffset, _kCaretWidth, preferredLineHeight - 2.0 * _kCaretHeightOffset);
+    _caretPrototype = new Rect.fromLTWH(0.0, _kCaretHeightOffset, cursorWidth, preferredLineHeight - 2.0 * _kCaretHeightOffset);
     _selectionRects = null;
     // We grab _textPainter.size here because assigning to `size` on the next
     // line will trigger us to validate our intrinsic sizes, which will change
@@ -705,7 +726,7 @@ class RenderEditable extends RenderBox {
     // See also RenderParagraph which has a similar issue.
     final Size textPainterSize = _textPainter.size;
     size = new Size(constraints.maxWidth, constraints.constrainHeight(_preferredHeight(constraints.maxWidth)));
-    final Size contentSize = new Size(textPainterSize.width + _kCaretGap + _kCaretWidth, textPainterSize.height);
+    final Size contentSize = new Size(textPainterSize.width + _kCaretGap + cursorWidth, textPainterSize.height);
     final double _maxScrollExtent = _getMaxScrollExtent(contentSize);
     _hasVisualOverflow = _maxScrollExtent > 0.0;
     offset.applyViewportDimension(_viewportExtent);
@@ -715,9 +736,18 @@ class RenderEditable extends RenderBox {
   void _paintCaret(Canvas canvas, Offset effectiveOffset) {
     assert(_textLayoutLastWidth == constraints.maxWidth);
     final Offset caretOffset = _textPainter.getOffsetForCaret(_selection.extent, _caretPrototype);
-    final Paint paint = new Paint()..color = _cursorColor;
+    final Paint paint = new Paint()
+      ..color = _cursorColor;
+
     final Rect caretRect = _caretPrototype.shift(caretOffset + effectiveOffset);
-    canvas.drawRect(caretRect, paint);
+
+    if (cursorRadius == null) {
+      canvas.drawRect(caretRect, paint);
+    } else {
+      final RRect caretRRect = RRect.fromRectAndRadius(caretRect, cursorRadius);
+      canvas.drawRRect(caretRRect, paint);
+    }
+
     if (caretRect != _lastCaretRect) {
       _lastCaretRect = caretRect;
       if (onCaretChanged != null)

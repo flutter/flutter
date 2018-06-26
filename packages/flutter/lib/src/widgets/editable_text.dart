@@ -176,6 +176,9 @@ class EditableText extends StatefulWidget {
     this.onSelectionChanged,
     List<TextInputFormatter> inputFormatters,
     this.rendererIgnoresPointer = false,
+    @required this.cursorWidth,
+    this.cursorRadius,
+    this.cursorHeight,
   }) : assert(controller != null),
        assert(focusNode != null),
        assert(obscureText != null),
@@ -186,6 +189,7 @@ class EditableText extends StatefulWidget {
        assert(maxLines == null || maxLines > 0),
        assert(autofocus != null),
        assert(rendererIgnoresPointer != null),
+       assert(cursorWidth != null),
        keyboardType = keyboardType ?? (maxLines == 1 ? TextInputType.text : TextInputType.multiline),
        inputFormatters = maxLines == 1
            ? (
@@ -299,6 +303,12 @@ class EditableText extends StatefulWidget {
   ///
   /// This property is false by default.
   final bool rendererIgnoresPointer;
+
+  final double cursorWidth;
+
+  final Radius cursorRadius;
+
+  final double cursorHeight;
 
   @override
   EditableTextState createState() => new EditableTextState();
@@ -761,6 +771,8 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
               onSelectionChanged: _handleSelectionChanged,
               onCaretChanged: _handleCaretChanged,
               rendererIgnoresPointer: widget.rendererIgnoresPointer,
+              cursorWidth: widget.cursorWidth,
+              cursorRadius: widget.cursorRadius,
             ),
           ),
         );
@@ -822,6 +834,8 @@ class _Editable extends LeafRenderObjectWidget {
     this.onSelectionChanged,
     this.onCaretChanged,
     this.rendererIgnoresPointer = false,
+    this.cursorWidth,
+    this.cursorRadius,
   }) : assert(textDirection != null),
        assert(rendererIgnoresPointer != null),
        super(key: key);
@@ -843,6 +857,8 @@ class _Editable extends LeafRenderObjectWidget {
   final SelectionChangedHandler onSelectionChanged;
   final CaretChangedHandler onCaretChanged;
   final bool rendererIgnoresPointer;
+  final double cursorWidth;
+  final Radius cursorRadius;
 
   @override
   RenderEditable createRenderObject(BuildContext context) {
@@ -863,6 +879,8 @@ class _Editable extends LeafRenderObjectWidget {
       onCaretChanged: onCaretChanged,
       ignorePointer: rendererIgnoresPointer,
       obscureText: obscureText,
+      cursorWidth: cursorWidth,
+      cursorRadius: cursorRadius,
     );
   }
 
@@ -884,6 +902,8 @@ class _Editable extends LeafRenderObjectWidget {
       ..onSelectionChanged = onSelectionChanged
       ..onCaretChanged = onCaretChanged
       ..ignorePointer = rendererIgnoresPointer
-      ..obscureText = obscureText;
+      ..obscureText = obscureText
+      ..cursorWidth = cursorWidth
+      ..cursorRadius = cursorRadius;
   }
 }
