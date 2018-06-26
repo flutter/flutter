@@ -123,7 +123,7 @@ Future<void> build({
   }
 
   final AssetBundle assets = await buildAssets(
-    /* deviceId???, */
+    deviceId,
     manifestPath: manifestPath,
     assetDirPath: assetDirPath,
     packagesPath: packagesPath,
