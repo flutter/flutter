@@ -130,6 +130,10 @@ void main() {
       parent.append(child);
 
       expect(parent.find<int>(const Offset(0.0, 0.0)), null);
+
+      parent.transform = new Matrix4.diagonal3Values(1.0, 1.0, 1.0);
+
+      expect(parent.find<int>(const Offset(0.0, 0.0)), 1);
     });
   });
 }
