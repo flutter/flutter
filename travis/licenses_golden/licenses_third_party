@@ -1,4 +1,4 @@
-Signature: 9ebebf36b0fd87fd5a95f5eaa35266e9
+Signature: b011ed8e46d01d11708c8e353e6138de
 
 UNUSED LICENSES:
 
@@ -14354,6 +14354,8 @@ FILE: ../../../third_party/skia/include/gpu/vk/GrVkBackendContext.h
 FILE: ../../../third_party/skia/include/gpu/vk/GrVkDefines.h
 FILE: ../../../third_party/skia/include/gpu/vk/GrVkTypes.h
 FILE: ../../../third_party/skia/include/ports/SkFontMgr_FontConfigInterface.h
+FILE: ../../../third_party/skia/include/ports/SkImageGeneratorCG.h
+FILE: ../../../third_party/skia/include/ports/SkImageGeneratorWIC.h
 FILE: ../../../third_party/skia/include/private/GrAuditTrail.h
 FILE: ../../../third_party/skia/include/private/GrOpList.h
 FILE: ../../../third_party/skia/include/private/GrRenderTargetProxy.h
@@ -14608,9 +14610,7 @@ FILE: ../../../third_party/skia/src/pipe/SkRefSet.h
 FILE: ../../../third_party/skia/src/ports/SkFontConfigInterface.cpp
 FILE: ../../../third_party/skia/src/ports/SkFontMgr_custom_empty_factory.cpp
 FILE: ../../../third_party/skia/src/ports/SkImageGeneratorCG.cpp
-FILE: ../../../third_party/skia/src/ports/SkImageGeneratorCG.h
 FILE: ../../../third_party/skia/src/ports/SkImageGeneratorWIC.cpp
-FILE: ../../../third_party/skia/src/ports/SkImageGeneratorWIC.h
 FILE: ../../../third_party/skia/src/shaders/SkColorFilterShader.h
 FILE: ../../../third_party/skia/src/shaders/SkColorShader.cpp
 FILE: ../../../third_party/skia/src/shaders/gradients/Sk4fGradientBase.cpp
