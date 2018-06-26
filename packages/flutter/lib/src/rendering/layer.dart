@@ -1197,7 +1197,7 @@ class FollowerLayer extends ContainerLayer {
     if (_invertedTransform == null) {
       final Matrix4 transform = getLastTransform();
       assert(transform != null);
-      transform.copyInverse(_invertedTransform);
+      _invertedTransform = new Matrix4.inverted(transform);
     }
     final Vector4 vector = new Vector4(regionOffset.dx, regionOffset.dy, 0.0, 1.0);
     final Vector4 result = _invertedTransform.transform(vector);
