@@ -117,6 +117,11 @@ void main() {
           await device.shellExec('am', <String>['start', '-n', kActivityId]);
         });
 
+        // Give the device the time to really shut down the app.
+        await new Future<Null>.delayed(const Duration(milliseconds: 200));
+        // After the delay, force-stopping it shouldn't do anything, but doesn't hurt.
+        await device.shellExec('am', <String>['force-stop', kAppId]);
+
         final String currentTime = (await device.shellEval('date', <String>['"+%F %R:%S.000"'])).trim();
         print('Start time on device: $currentTime');
         section('Launching app');
