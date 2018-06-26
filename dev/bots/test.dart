@@ -26,10 +26,11 @@ final String cyan = hasColor ? '\x1B[36m' : '';
 final String reset = hasColor ? '\x1B[0m' : '';
 
 const Map<String, ShardRunner> _kShards = const <String, ShardRunner>{
-  'docs': _generateDocs,
   'analyze': _analyzeRepo,
   'tests': _runTests,
   'coverage': _runCoverage,
+  // 'docs': handled by travis_script.sh and docs.sh
+  // 'build_and_deploy_gallery': handled by travis_script.sh
 };
 
 const Duration _kLongTimeout = const Duration(minutes: 45);
@@ -64,10 +65,6 @@ Future<Null> main(List<String> args) async {
       print('');
     }
   }
-}
-
-Future<Null> _generateDocs() async {
-  print('${bold}DONE: test.dart does nothing in the docs shard.$reset');
 }
 
 Future<Null> _verifyInternationalizations() async {
@@ -238,15 +235,6 @@ Future<Null> _runTests() async {
 }
 
 Future<Null> _runCoverage() async {
-  if (Platform.environment['TRAVIS'] != null) {
-    print('${bold}DONE: test.dart does not run coverage in Travis$reset');
-    return;
-  }
-  if (Platform.isWindows) {
-    print('${bold}DONE: test.dart does not run coverage on Windows$reset');
-    return;
-  }
-
   final File coverageFile = new File(path.join(flutterRoot, 'packages', 'flutter', 'coverage', 'lcov.info'));
   if (!coverageFile.existsSync()) {
     print('${red}Coverage file not found.$reset');
