@@ -558,7 +558,7 @@ class _SshPortForwarder implements PortForwarder {
     }
     final String targetAddress =
         isIpV6 && interface.isNotEmpty ? '$address%$interface' : address;
-    const String dummyRemoteCommand = 'date';
+    const String dummyRemoteCommand = 'true';
     command.addAll(<String>[
       '-nNT',
       '-f',

@@ -60,8 +60,16 @@ class AndroidApk extends ApplicationPackage {
       return null;
     }
 
-    final List<String> aaptArgs = <String>[aaptPath, 'dump', 'badging', applicationBinary];
-    final ApkManifestData data = ApkManifestData.parseFromAaptBadging(runCheckedSync(aaptArgs));
+     final List<String> aaptArgs = <String>[
+       aaptPath,
+      'dump',
+      'xmltree',
+      applicationBinary,
+      'AndroidManifest.xml',
+    ];
+
+    final ApkManifestData data = ApkManifestData
+        .parseFromXmlDump(runCheckedSync(aaptArgs));
 
     if (data == null) {
       printError('Unable to read manifest info from $applicationBinary.');
@@ -116,9 +124,12 @@ class AndroidApk extends ApplicationPackage {
     for (xml.XmlElement category in document.findAllElements('category')) {
       if (category.getAttribute('android:name') == 'android.intent.category.LAUNCHER') {
         final xml.XmlElement activity = category.parent.parent;
-        final String activityName = activity.getAttribute('android:name');
-        launchActivity = '$packageId/$activityName';
-        break;
+        final String enabled = activity.getAttribute('android:enabled');
+        if (enabled == null || enabled == 'true') {
+          final String activityName = activity.getAttribute('android:name');
+          launchActivity = '$packageId/$activityName';
+          break;
+        }
       }
     }
 
@@ -349,33 +360,132 @@ class ApplicationPackageStore {
   }
 }
 
+class _Entry {
+  _Element parent;
+  int level;
+}
+
+class _Element extends _Entry {
+  List<_Entry> children;
+  String name;
+
+  _Element.fromLine(String line, _Element parent) {
+    //      E: application (line=29)
+    final List<String> parts = line.trimLeft().split(' ');
+    name = parts[1];
+    level = line.length - line.trimLeft().length;
+    this.parent = parent;
+    children = <_Entry>[];
+  }
+
+  void addChild(_Entry child) {
+    children.add(child);
+  }
+
+  _Attribute firstAttribute(String name) {
+    return children.firstWhere(
+        (_Entry e) => e is _Attribute && e.key.startsWith(name),
+        orElse: () => null,
+    );
+  }
+
+  _Element firstElement(String name) {
+    return children.firstWhere(
+        (_Entry e) => e is _Element && e.name.startsWith(name),
+        orElse: () => null,
+    );
+  }
+
+  Iterable<_Entry> allElements(String name) {
+    return children.where(
+            (_Entry e) => e is _Element && e.name.startsWith(name));
+  }
+}
+
+class _Attribute extends _Entry {
+  String key;
+  String value;
+
+  _Attribute.fromLine(String line, _Element parent) {
+    //     A: android:label(0x01010001)="hello_world" (Raw: "hello_world")
+    const String attributePrefix = 'A: ';
+    final List<String> keyVal = line
+        .substring(line.indexOf(attributePrefix) + attributePrefix.length)
+        .split('=');
+    key = keyVal[0];
+    value = keyVal[1];
+    level = line.length - line.trimLeft().length;
+    this.parent = parent;
+  }
+}
+
 class ApkManifestData {
   ApkManifestData._(this._data);
 
-  static ApkManifestData parseFromAaptBadging(String data) {
+  static ApkManifestData parseFromXmlDump(String data) {
     if (data == null || data.trim().isEmpty)
       return null;
 
-    // package: name='io.flutter.gallery' versionCode='1' versionName='0.0.1' platformBuildVersionName='NMR1'
-    // launchable-activity: name='io.flutter.app.FlutterActivity'  label='' icon=''
-    final Map<String, Map<String, String>> map = <String, Map<String, String>>{};
+    final List<String> lines = data.split('\n');
+    assert(lines.length > 3);
 
-    final RegExp keyValueRegex = new RegExp(r"(\S+?)='(.*?)'");
+    final _Element manifest = new _Element.fromLine(lines[1], null);
+    _Element currentElement = manifest;
 
-    for (String line in data.split('\n')) {
-      final int index = line.indexOf(':');
-      if (index != -1) {
-        final String name = line.substring(0, index);
-        line = line.substring(index + 1).trim();
+    for (String line in lines.skip(2)) {
+      final String trimLine = line.trimLeft();
+      final int level = line.length - trimLine.length;
 
-        final Map<String, String> entries = <String, String>{};
-        map[name] = entries;
+      // Handle level out
+      while(level <= currentElement.level) {
+        currentElement = currentElement.parent;
+      }
 
-        for (Match m in keyValueRegex.allMatches(line)) {
-          entries[m.group(1)] = m.group(2);
+      if (level > currentElement.level) {
+        switch (trimLine[0]) {
+          case 'A':
+            currentElement
+                .addChild(new _Attribute.fromLine(line, currentElement));
+            break;
+          case 'E':
+            final _Element element = new _Element.fromLine(line, currentElement);
+            currentElement.addChild(element);
+            currentElement = element;
         }
       }
     }
+
+    final _Element application = manifest.firstElement('application');
+    assert(application != null);
+
+    final Iterable<_Entry> activities = application.allElements('activity');
+
+    _Element launchActivity;
+    for (_Element activity in activities) {
+      final _Attribute enabled = activity.firstAttribute('android:enabled');
+      if (enabled == null || enabled.value.contains('0xffffffff')) {
+        launchActivity = activity;
+        break;
+      }
+    }
+
+    final _Attribute package = manifest.firstAttribute('package');
+    // "io.flutter.examples.hello_world" (Raw: "io.flutter.examples.hello_world")
+    final String packageName = package.value.substring(1, package.value.indexOf('" '));
+
+    if (launchActivity == null) {
+      printError('Error running $packageName. Default activity not found');
+      return null;
+    }
+
+    final _Attribute nameAttribute = launchActivity.firstAttribute('android:name');
+    // "io.flutter.examples.hello_world.MainActivity" (Raw: "io.flutter.examples.hello_world.MainActivity")
+    final String activityName = nameAttribute
+        .value.substring(1, nameAttribute.value.indexOf('" '));
+
+    final Map<String, Map<String, String>> map = <String, Map<String, String>>{};
+    map['package'] = <String, String>{'name': packageName};
+    map['launchable-activity'] = <String, String>{'name': activityName};
 
     return new ApkManifestData._(map);
   }
