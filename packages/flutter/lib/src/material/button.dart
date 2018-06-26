@@ -3,7 +3,10 @@
 // found in the LICENSE file.
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/src/material/scaffold.dart';
+import 'package:flutter/src/material/snack_bar.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter/semantics.dart';
 
 import 'button_theme.dart';
 import 'colors.dart';
@@ -204,6 +207,13 @@ class _RawMaterialButtonState extends State<RawMaterialButton> {
       button: true,
       enabled: widget.enabled,
       child: result,
+      localContextActions: <LocalContextAction, VoidCallback>{
+        const LocalContextAction(id: 1, label: 'Open a snackbar'): () {
+          Scaffold.of(context).showSnackBar(const SnackBar(
+           content: const Text('It works!'),
+          ));
+        }
+      },
     );
   }
 }
