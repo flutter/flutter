@@ -6,8 +6,11 @@ import 'dart:async';
 import 'dart:typed_data';
 
 import 'package:flutter/services.dart';
+import 'package:flutter/foundation.dart';
 
 import 'widget_tester.dart';
+
+export 'package:flutter/services.dart' show TextEditingValue, TextInputAction;
 
 /// A testing stub for the system's onscreen keyboard.
 ///
@@ -19,6 +22,19 @@ import 'widget_tester.dart';
 /// * [WidgetTester.showKeyboard], which uses this class to simulate showing the
 ///   popup keyboard and initializing its text.
 class TestTextInput {
+  /// Create a fake keyboard backend.
+  ///
+  /// The [onCleared] argument may be set to be notified of when the keyboard
+  /// is dismissed.
+  TestTextInput({ this.onCleared });
+
+  /// Called when the keyboard goes away.
+  ///
+  /// To use the methods on this API that send fake keyboard messages (such as
+  /// [updateEditingValue], [enterText], or [receiveAction]), the keyboard must
+  /// first be requested, e.g. using [WidgetTester.showKeyboard].
+  final VoidCallback onCleared;
+
   /// Installs this object as a mock handler for [SystemChannels.textInput].
   void register() {
     SystemChannels.textInput.setMockMethodCallHandler(_handleTextInputCall);
@@ -63,6 +79,8 @@ class TestTextInput {
       case 'TextInput.clearClient':
         _client = 0;
         _isVisible = false;
+        if (onCleared != null)
+          onCleared();
         break;
       case 'TextInput.setEditingState':
         editingState = methodCall.arguments;
@@ -84,9 +102,8 @@ class TestTextInput {
   void updateEditingValue(TextEditingValue value) {
     // Not using the `expect` function because in the case of a FlutterDriver
     // test this code does not run in a package:test test zone.
-    if (_client == 0) {
-      throw new TestFailure('_client must be non-zero');
-    }
+    if (_client == 0)
+      throw new TestFailure('Tried to use TestTextInput with no keyboard attached. You must use WidgetTester.showKeyboard() first.');
     BinaryMessages.handlePlatformMessage(
       SystemChannels.textInput.name,
       SystemChannels.textInput.codec.encodeMethodCall(
@@ -112,9 +129,8 @@ class TestTextInput {
   void receiveAction(TextInputAction action) {
     // Not using the `expect` function because in the case of a FlutterDriver
     // test this code does not run in a package:test test zone.
-    if (_client == 0) {
-      throw new TestFailure('_client must be non-zero');
-    }
+    if (_client == 0)
+      throw new TestFailure('Tried to use TestTextInput with no keyboard attached. You must use WidgetTester.showKeyboard() first.');
     BinaryMessages.handlePlatformMessage(
       SystemChannels.textInput.name,
       SystemChannels.textInput.codec.encodeMethodCall(

@@ -558,6 +558,8 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
   /// Give the text input widget specified by [finder] the focus, as if the
   /// onscreen keyboard had appeared.
   ///
+  /// Implies a call to [pump].
+  ///
   /// The widget specified by [finder] must be an [EditableText] or have
   /// an [EditableText] descendant. For example `find.byType(TextField)`
   /// or `find.byType(TextFormField)`, or `find.byType(EditableText)`.
@@ -566,15 +568,15 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
   /// or [TextFormField] only need to call [enterText].
   Future<Null> showKeyboard(Finder finder) async {
     return TestAsyncUtils.guard(() async {
-      final EditableTextState editable = state(find.descendant(
-        of: finder,
-        matching: find.byType(EditableText),
-        matchRoot: true,
-      ));
-      if (editable != binding.focusedEditable) {
-        binding.focusedEditable = editable;
-        await pump();
-      }
+      final EditableTextState editable = state(
+        find.descendant(
+          of: finder,
+          matching: find.byType(EditableText),
+          matchRoot: true,
+        ),
+      );
+      binding.focusedEditable = editable;
+      await pump();
     });
   }
 
