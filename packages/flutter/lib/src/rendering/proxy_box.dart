@@ -3777,7 +3777,16 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
       markNeedsSemanticsUpdate();
   }
 
-  /// The handlers for any [CustomAccessibilityActions].
+  /// A map from each supported [CustomAccessibilityAction] to a provided handler.
+  /// 
+  /// The handler associated with each custom action is invoked whenever a
+  /// semantics event of type [SemanticsEvent.customEvent] is recieved. The
+  /// provided argument will be an identifier used to retrieve an instance of
+  /// a custom action which can then retrieve the correct handler from this map.
+  /// 
+  /// See also:
+  /// 
+  ///   * [CustomAccessibilityAction], for an explaination of custom actions.
   Map<CustomAccessibilityAction, VoidCallback> get customAccessibilityActions => _customAccessibilityActions;
   Map<CustomAccessibilityAction, VoidCallback> _customAccessibilityActions;
   set customAccessibilityActions(Map<CustomAccessibilityAction, VoidCallback> value) {
