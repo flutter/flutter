@@ -8,9 +8,9 @@ import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/io.dart';
-import 'package:flutter_tools/src/bundle.dart' as bundle;
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/flutter_manifest.dart';
+import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/ios/cocoapods.dart';
 import 'package:flutter_tools/src/ios/xcodeproj.dart';
 import 'package:mockito/mockito.dart';
@@ -136,7 +136,7 @@ void main() {
 
     testUsingContext('creates objective-c Podfile when not present', () async {
       final FlutterManifest manifest =
-          await FlutterManifest.createFromPath(fs.path.join('project', bundle.defaultManifestPath));
+          await new FlutterProject.fromPath('project').manifest;
       cocoaPodsUnderTest.setupPodfile('project', manifest);
 
       expect(podFile.readAsStringSync(), 'Objective-C podfile template');
@@ -151,7 +151,7 @@ void main() {
       });
 
       final FlutterManifest manifest =
-          await FlutterManifest.createFromPath(fs.path.join('project', bundle.defaultManifestPath));
+          await new FlutterProject.fromPath('project').manifest;
       cocoaPodsUnderTest.setupPodfile('project', manifest);
 
       expect(podFile.readAsStringSync(), 'Swift podfile template');
@@ -164,7 +164,7 @@ void main() {
       podFile..createSync()..writeAsStringSync('Existing Podfile');
 
       final FlutterManifest manifest =
-          await FlutterManifest.createFromPath(fs.path.join('project', bundle.defaultManifestPath));
+          await new FlutterProject.fromPath('project').manifest;
       cocoaPodsUnderTest.setupPodfile('project', manifest);
 
       expect(podFile.readAsStringSync(), 'Existing Podfile');
@@ -176,7 +176,7 @@ void main() {
       when(mockXcodeProjectInterpreter.isInstalled).thenReturn(false);
 
       final FlutterManifest manifest =
-          await FlutterManifest.createFromPath(fs.path.join('project', bundle.defaultManifestPath));
+          await new FlutterProject.fromPath('project').manifest;
       cocoaPodsUnderTest.setupPodfile('project', manifest);
 
       expect(podFile.existsSync(), false);
@@ -191,7 +191,7 @@ void main() {
       releaseConfigFile..createSync(recursive: true)..writeAsStringSync('Existing release config');
 
       final FlutterManifest manifest =
-          await FlutterManifest.createFromPath(fs.path.join('project', bundle.defaultManifestPath));
+          await new FlutterProject.fromPath('project').manifest;
       cocoaPodsUnderTest.setupPodfile('project', manifest);
 
       final String debugContents = debugConfigFile.readAsStringSync();

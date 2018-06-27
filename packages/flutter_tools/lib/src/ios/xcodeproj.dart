@@ -25,9 +25,9 @@ String flutterFrameworkDir(BuildMode mode) {
   return fs.path.normalize(fs.path.dirname(artifacts.getArtifactPath(Artifact.flutterFramework, TargetPlatform.ios, mode)));
 }
 
-String _generatedXcodePropertiesPath(String projectPath, FlutterManifest manifest) {
+String _generatedXcodePropertiesPath({@required String projectPath, @required FlutterManifest manifest}) {
   if (manifest.isModule) {
-    return fs.path.join(projectPath, '.ios', 'Generated.xcconfig');
+    return fs.path.join(projectPath, '.ios', 'Flutter', 'Generated.xcconfig');
   } else {
     return fs.path.join(projectPath, 'ios', 'Flutter', 'Generated.xcconfig');
   }
@@ -36,9 +36,9 @@ String _generatedXcodePropertiesPath(String projectPath, FlutterManifest manifes
 /// Writes default Xcode properties files in the Flutter project at [projectPath],
 /// if project is an iOS project and such files are out of date or do not
 /// already exist.
-void generateXcodeProperties(String projectPath, FlutterManifest manifest) {
+void generateXcodeProperties({String projectPath, FlutterManifest manifest}) {
   if (manifest.isModule || fs.isDirectorySync(fs.path.join(projectPath, 'ios'))) {
-    final File propertiesFile = fs.file(_generatedXcodePropertiesPath(projectPath, manifest));
+    final File propertiesFile = fs.file(_generatedXcodePropertiesPath(projectPath: projectPath, manifest: manifest));
     if (!Cache.instance.fileOlderThanToolsStamp(propertiesFile)) {
       return;
     }
@@ -125,7 +125,7 @@ void updateGeneratedXcodeProperties({
     localsBuffer.writeln('TRACK_WIDGET_CREATION=true');
   }
 
-  final File localsFile = fs.file(_generatedXcodePropertiesPath(projectPath, manifest));
+  final File localsFile = fs.file(_generatedXcodePropertiesPath(projectPath: projectPath, manifest: manifest));
   localsFile.createSync(recursive: true);
   localsFile.writeAsStringSync(localsBuffer.toString());
 }

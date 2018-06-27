@@ -156,8 +156,7 @@ class CocoaPods {
       // Don't do anything for iOS when host platform doesn't support it.
       return;
     }
-    if (manifest.isModule) {
-      // Don't create a Podfile if there is no main project (as for a module).
+    if (!fs.file(fs.path.join(appDirectory, 'ios')).existsSync()) {
       return;
     }
     final String podfilePath = fs.path.join(appDirectory, 'ios', 'Podfile');

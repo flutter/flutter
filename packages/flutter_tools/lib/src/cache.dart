@@ -169,7 +169,8 @@ class Cache {
     return fs.file(fs.path.join(getRoot().path, '$artifactName.stamp'));
   }
 
-  /// `true` if [file] is older than the tools stamp or it doesn't exist.
+  /// Returns `true` if either [file] is older than the tools stamp or if
+  /// [file] doesn't exist.
   bool fileOlderThanToolsStamp(File file) {
     if (!file.existsSync()) {
       return true;

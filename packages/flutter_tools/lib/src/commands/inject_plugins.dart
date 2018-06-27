@@ -26,9 +26,9 @@ class InjectPluginsCommand extends FlutterCommand {
 
   @override
   Future<Null> runCommand() async {
-    final String directory = fs.currentDirectory.path;
-    final FlutterManifest manifest = await FlutterManifest.createFromPath(directory);
-    injectPlugins(directory: directory, manifest: manifest);
+    final String projectPath = fs.currentDirectory.path;
+    final FlutterManifest manifest = await FlutterManifest.createFromPath(projectPath);
+    injectPlugins(projectPath: projectPath, manifest: manifest);
     final bool result = hasPlugins();
     if (result) {
       printStatus('GeneratedPluginRegistrants successfully written.');

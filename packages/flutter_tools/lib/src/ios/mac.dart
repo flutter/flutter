@@ -244,7 +244,8 @@ Future<XcodeBuildResult> buildXcodeProject({
   await _addServicesToBundle(appDirectory);
 
   final FlutterManifest manifest = await FlutterManifest.createFromPath(
-      fs.currentDirectory.childFile('pubspec.yaml').path);
+    fs.currentDirectory.childFile('pubspec.yaml').path,
+  );
   updateGeneratedXcodeProperties(
     projectPath: fs.currentDirectory.path,
     buildInfo: buildInfo,

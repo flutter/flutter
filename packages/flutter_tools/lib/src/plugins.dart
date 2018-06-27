@@ -255,6 +255,8 @@ void _writeIOSPluginRegistrant(String directory, FlutterManifest manifest, List<
       fs.path.join(registryClassesDirectory, 'GeneratedPluginRegistrant.m'),
     );
   } else {
+    // For a non-module create the GeneratedPluginRegistrant as source files
+    // directly in the ios project.
     final String runnerDirectory = fs.path.join(directory, 'Runner');
     _renderTemplateToFile(
       _iosPluginRegistryHeaderTemplate,
@@ -281,23 +283,23 @@ class InjectPluginsResult{
 }
 
 /// Injects plugins found in `pubspec.yaml` into the platform-specific projects.
-void injectPlugins({String directory, @required FlutterManifest manifest}) {
-  final List<Plugin> plugins = findPlugins(directory);
-  final bool changed = _writeFlutterPluginsList(directory, plugins);
+void injectPlugins({@required String projectPath, @required FlutterManifest manifest}) {
+  final List<Plugin> plugins = findPlugins(projectPath);
+  final bool changed = _writeFlutterPluginsList(projectPath, plugins);
   if (manifest.isModule) {
-    _writeAndroidPluginRegistrant(fs.path.join(directory, '.android', 'Flutter'), plugins);
-  } else if (fs.isDirectorySync(fs.path.join(directory, 'android', 'app'))) {
-    _writeAndroidPluginRegistrant(fs.path.join(directory, 'android', 'app'), plugins);
+    _writeAndroidPluginRegistrant(fs.path.join(projectPath, '.android', 'Flutter'), plugins);
+  } else if (fs.isDirectorySync(fs.path.join(projectPath, 'android', 'app'))) {
+    _writeAndroidPluginRegistrant(fs.path.join(projectPath, 'android', 'app'), plugins);
   }
   if (manifest.isModule) {
-    _writeIOSPluginRegistrant(fs.path.join(directory, '.ios'), manifest, plugins);
-  } else if (fs.isDirectorySync(fs.path.join(directory, 'ios'))) {
-    _writeIOSPluginRegistrant(fs.path.join(directory, 'ios'), manifest, plugins);
+    _writeIOSPluginRegistrant(fs.path.join(projectPath, '.ios'), manifest, plugins);
+  } else if (fs.isDirectorySync(fs.path.join(projectPath, 'ios'))) {
+    _writeIOSPluginRegistrant(fs.path.join(projectPath, 'ios'), manifest, plugins);
     final CocoaPods cocoaPods = new CocoaPods();
     if (plugins.isNotEmpty)
-      cocoaPods.setupPodfile(directory, manifest);
+      cocoaPods.setupPodfile(projectPath, manifest);
     if (changed)
-      cocoaPods.invalidatePodInstallOutput(directory);
+      cocoaPods.invalidatePodInstallOutput(projectPath);
   }
 }
 

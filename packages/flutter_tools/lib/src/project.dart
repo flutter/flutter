@@ -8,18 +8,28 @@ import 'dart:convert';
 
 import 'android/gradle.dart' as gradle;
 import 'base/file_system.dart';
+import 'bundle.dart' as bundle;
 import 'cache.dart';
 import 'flutter_manifest.dart';
 import 'ios/xcodeproj.dart' as xcode;
 import 'plugins.dart';
 import 'template.dart';
 
-/// Represents the contents of a Flutter project at the specified [directory].
+/// Represents the contents of a Flutter project at the specified [projectPath].
 class FlutterProject {
+
   FlutterProject(this.directory);
+  FlutterProject.fromPath(String projectPath) : directory = fs.directory(projectPath);
 
   /// The location of this project.
   final Directory directory;
+
+  Future<FlutterManifest> get manifest {
+    return _manifest ??= FlutterManifest.createFromPath(
+      directory.childFile(bundle.defaultManifestPath).path,
+    );
+  }
+  Future<FlutterManifest> _manifest;
 
   /// Asynchronously returns the organization names found in this project as
   /// part of iOS product bundle identifier, Android application ID, or
@@ -58,10 +68,13 @@ class FlutterProject {
   IosModuleProject get iosModule => new IosModuleProject(directory.childDirectory('.ios'));
 
   /// Returns true if this project has an example application
-  bool get hasExampleApp => directory.childDirectory('example').childFile('pubspec.yaml').existsSync();
+  bool get hasExampleApp => _exampleDirectory.childFile('pubspec.yaml').existsSync();
 
   /// The example sub project of this (package or plugin) project.
-  FlutterProject get example => new FlutterProject(directory.childDirectory('example'));
+  FlutterProject get example => new FlutterProject(_exampleDirectory);
+
+  /// The directory that will contain the example if an example exists.
+  Directory get _exampleDirectory => directory.childDirectory('example');
 
   /// Generates project files necessary to make Gradle builds work on Android
   /// and CocoaPods+Xcode work on iOS, for app and module projects only.
@@ -71,13 +84,13 @@ class FlutterProject {
     if (!directory.existsSync() || hasExampleApp) {
       return 0;
     }
-    final FlutterManifest manifest = await FlutterManifest.createFromPath(directory.childFile('pubspec.yaml').path);
+    final FlutterManifest manifest = await this.manifest;
     if (manifest.isModule) {
       await androidModule.ensureReadyForPlatformSpecificTooling(manifest);
       await iosModule.ensureReadyForPlatformSpecificTooling(manifest);
     }
-    xcode.generateXcodeProperties(directory.path, manifest);
-    injectPlugins(directory: directory.path, manifest: manifest);
+    xcode.generateXcodeProperties(projectPath: directory.path, manifest: manifest);
+    injectPlugins(projectPath: directory.path, manifest: manifest);
   }
 }
 
