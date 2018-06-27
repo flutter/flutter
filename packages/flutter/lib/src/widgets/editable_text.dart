@@ -306,6 +306,8 @@ class EditableText extends StatefulWidget {
 
   final Radius cursorRadius;
 
+  static bool debugKeepCursorOn = false;
+
   @override
   EditableTextState createState() => new EditableTextState();
 
@@ -754,7 +756,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
               textSpan: buildTextSpan(),
               value: _value,
               cursorColor: widget.cursorColor,
-              showCursor: widget.debugKeepCursorOn ? ValueNotifier<bool>(true) : _showCursor,
+              showCursor: EditableText.debugKeepCursorOn ? ValueNotifier<bool>(true) : _showCursor,
               hasFocus: _hasFocus,
               maxLines: widget.maxLines,
               selectionColor: widget.selectionColor,
