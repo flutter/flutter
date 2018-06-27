@@ -85,7 +85,7 @@ BuildApp() {
 
   RunCommand rm -rf -- "${derived_dir}/App.framework"
 
-  if [[ -e "${project_path/.ios}" ]]; then
+  if [[ -e "${project_path}/.ios" ]]; then
     RunCommand rm -rf -- "${derived_dir}/engine"
     mkdir "${derived_dir}/engine"
     RunCommand cp -r -- "${framework_path}/Flutter.podspec" "${derived_dir}/engine"
