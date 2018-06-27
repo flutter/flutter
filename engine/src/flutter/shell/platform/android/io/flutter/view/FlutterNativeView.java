@@ -81,23 +81,8 @@ public class FlutterNativeView implements BinaryMessenger {
         applicationIsRunning = true;
     }
 
-    public void runFromSource(final String assetsDirectory, final String main, final String packages) {
-        assertAttached();
-        if (applicationIsRunning)
-            throw new AssertionError("This Flutter engine instance is already running an application");
-
-        nativeRunBundleAndSource(mNativePlatformView, assetsDirectory, main, packages);
-
-        applicationIsRunning = true;
-    }
-
     public boolean isApplicationRunning() {
       return applicationIsRunning;
-    }
-
-    public void setAssetBundlePathOnUI(final String assetsDirectory) {
-        assertAttached();
-        nativeSetAssetBundlePathOnUI(mNativePlatformView, assetsDirectory);
     }
 
     public static String getObservatoryUri() {
@@ -215,14 +200,6 @@ public class FlutterNativeView implements BinaryMessenger {
         String entrypoint,
         boolean reuseRuntimeController,
         AssetManager manager);
-
-    private static native void nativeRunBundleAndSource(long nativePlatformViewAndroid,
-        String bundlePath,
-        String main,
-        String packages);
-
-    private static native void nativeSetAssetBundlePathOnUI(long nativePlatformViewAndroid,
-        String bundlePath);
 
     private static native String nativeGetObservatoryUri();
 
