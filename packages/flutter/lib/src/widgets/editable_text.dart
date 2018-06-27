@@ -178,7 +178,7 @@ class EditableText extends StatefulWidget {
     this.rendererIgnoresPointer = false,
     this.cursorWidth = 2.0,
     this.cursorRadius,
-    this.blinkCursor = true,
+    this.debugKeepCursorOn = false,
   }) : assert(controller != null),
        assert(focusNode != null),
        assert(obscureText != null),
@@ -307,7 +307,7 @@ class EditableText extends StatefulWidget {
 
   final Radius cursorRadius;
 
-  final bool blinkCursor;
+  final bool debugKeepCursorOn;
 
   @override
   EditableTextState createState() => new EditableTextState();
@@ -739,6 +739,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     FocusScope.of(context).reparentIfNeeded(widget.focusNode);
     super.build(context); // See AutomaticKeepAliveClientMixin.
     final TextSelectionControls controls = widget.selectionControls;
+
     return new Scrollable(
       excludeFromSemantics: true,
       axisDirection: _isMultiline ? AxisDirection.down : AxisDirection.right,
@@ -756,7 +757,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
               textSpan: buildTextSpan(),
               value: _value,
               cursorColor: widget.cursorColor,
-              showCursor: widget.blinkCursor ? _showCursor : ValueNotifier<bool>(true),
+              showCursor: widget.debugKeepCursorOn ? ValueNotifier<bool>(true) : _showCursor,
               hasFocus: _hasFocus,
               maxLines: widget.maxLines,
               selectionColor: widget.selectionColor,

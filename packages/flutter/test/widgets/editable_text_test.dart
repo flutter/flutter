@@ -40,6 +40,24 @@ void main() {
     expect(editableText.cursorWidth, 2.0);
   });
 
+  testWidgets('cursor has expected width and radius', (WidgetTester tester) async {
+    await tester.pumpWidget(new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new EditableText(
+          controller: controller,
+          focusNode: focusNode,
+          style: textStyle,
+          cursorColor: cursorColor,
+          cursorWidth: 10.0,
+          cursorRadius: const Radius.circular(2.0),
+        )));
+
+    final EditableText editableText =
+    tester.firstWidget(find.byType(EditableText));
+    expect(editableText.cursorWidth, 10.0);
+    expect(editableText.cursorRadius.x, 2.0);
+  });
+
   testWidgets('text keyboard is requested when maxLines is default',
       (WidgetTester tester) async {
     await tester.pumpWidget(new Directionality(
@@ -200,6 +218,105 @@ void main() {
     await tester.pump();
 
     expect(changedValue, clipboardContent);
+  });
+
+  testWidgets('cursor layout has correct width', (WidgetTester tester) async {
+    final GlobalKey<EditableTextState> editableTextKey = new GlobalKey<EditableTextState>();
+
+    String changedValue;
+    final Widget widget = new MaterialApp(
+      home: new RepaintBoundary(
+        key: const ValueKey<int>(1),
+        child: new EditableText(
+          key: editableTextKey,
+          controller: new TextEditingController(),
+          focusNode: new FocusNode(),
+          style: new Typography(platform: TargetPlatform.android).black.subhead,
+          cursorColor: Colors.blue,
+          selectionControls: materialTextSelectionControls,
+          keyboardType: TextInputType.text,
+          onChanged: (String value) {
+            changedValue = value;
+          },
+          cursorWidth: 15.0,
+          debugKeepCursorOn: true,
+        ),
+      ),
+    );
+    await tester.pumpWidget(widget);
+
+    // Populate a fake clipboard.
+    const String clipboardContent = ' ';
+    SystemChannels.platform.setMockMethodCallHandler((MethodCall methodCall) async {
+      if (methodCall.method == 'Clipboard.getData')
+        return const <String, dynamic>{ 'text': clipboardContent };
+      return null;
+    });
+
+    // Long-press to bring up the text editing controls.
+    final Finder textFinder = find.byKey(editableTextKey);
+    await tester.longPress(textFinder);
+    await tester.pump();
+
+    await tester.tap(find.text('PASTE'));
+    await tester.pump();
+
+    expect(changedValue, clipboardContent);
+
+    await expectLater(
+      find.byKey(const ValueKey<int>(1)),
+      matchesGoldenFile('editable_text_test.0.0.png'),
+    );
+  });
+
+  testWidgets('cursor layout has correct radius', (WidgetTester tester) async {
+    final GlobalKey<EditableTextState> editableTextKey = new GlobalKey<EditableTextState>();
+
+    String changedValue;
+    final Widget widget = new MaterialApp(
+      home: new RepaintBoundary(
+        key: const ValueKey<int>(1),
+        child: new EditableText(
+          key: editableTextKey,
+          controller: new TextEditingController(),
+          focusNode: new FocusNode(),
+          style: new Typography(platform: TargetPlatform.android).black.subhead,
+          cursorColor: Colors.blue,
+          selectionControls: materialTextSelectionControls,
+          keyboardType: TextInputType.text,
+          onChanged: (String value) {
+            changedValue = value;
+          },
+          cursorWidth: 15.0,
+          cursorRadius: const Radius.circular(3.0),
+          debugKeepCursorOn: true,
+        ),
+      ),
+    );
+    await tester.pumpWidget(widget);
+
+    // Populate a fake clipboard.
+    const String clipboardContent = ' ';
+    SystemChannels.platform.setMockMethodCallHandler((MethodCall methodCall) async {
+      if (methodCall.method == 'Clipboard.getData')
+        return const <String, dynamic>{ 'text': clipboardContent };
+      return null;
+    });
+
+    // Long-press to bring up the text editing controls.
+    final Finder textFinder = find.byKey(editableTextKey);
+    await tester.longPress(textFinder);
+    await tester.pump();
+
+    await tester.tap(find.text('PASTE'));
+    await tester.pump();
+
+    expect(changedValue, clipboardContent);
+
+    await expectLater(
+      find.byKey(const ValueKey<int>(1)),
+      matchesGoldenFile('editable_text_test.1.0.png'),
+    );
   });
 
   testWidgets('Changing controller updates EditableText', (WidgetTester tester) async {
