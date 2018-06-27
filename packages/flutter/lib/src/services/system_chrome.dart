@@ -100,12 +100,12 @@ class SystemUiOverlayStyle {
   /// System overlays should be drawn with a light color. Intended for
   /// applications with a dark background.
   static const SystemUiOverlayStyle light = const SystemUiOverlayStyle(
-    systemNavigationBarColor: const Color(0xFF000000),
+    systemNavigationBarColor: const Color(0xFFFFFFFF),
     systemNavigationBarDividerColor: null,
     statusBarColor: null,
-    systemNavigationBarIconBrightness: Brightness.light,
-    statusBarIconBrightness: Brightness.light,
-    statusBarBrightness: Brightness.dark,
+    systemNavigationBarIconBrightness: Brightness.dark,
+    statusBarIconBrightness: Brightness.dark,
+    statusBarBrightness: Brightness.light,
   );
 
   /// System overlays should be drawn with a dark color. Intended for
@@ -115,8 +115,8 @@ class SystemUiOverlayStyle {
     systemNavigationBarDividerColor: null,
     statusBarColor: null,
     systemNavigationBarIconBrightness: Brightness.light,
-    statusBarIconBrightness: Brightness.dark,
-    statusBarBrightness: Brightness.light,
+    statusBarIconBrightness: Brightness.light,
+    statusBarBrightness: Brightness.dark,
   );
 
   /// Creates a new [SystemUiOverlayStyle].
@@ -330,9 +330,5 @@ class SystemChrome {
   }
 
   static SystemUiOverlayStyle _pendingStyle;
-
-  /// The last style that was set using [SystemChrome.setSystemUIOverlayStyle].
-  @visibleForTesting
-  static SystemUiOverlayStyle get latestStyle => _latestStyle;
   static SystemUiOverlayStyle _latestStyle;
 }
