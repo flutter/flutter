@@ -235,8 +235,6 @@ class PaintingContext {
     _canvas = null;
   }
 
-  static final Paint _defaultPaint = new Paint();
-
   /// Hints that the painting in the current layer is complex and would benefit
   /// from caching.
   ///
@@ -351,11 +349,9 @@ class PaintingContext {
     } else {
       canvas
         ..save()
-        ..clipRRect(offsetClipRRect)
-        ..saveLayer(offsetBounds, _defaultPaint);
+        ..clipRRect(offsetClipRRect);
       painter(this, offset);
       canvas
-        ..restore()
         ..restore();
     }
   }
@@ -380,11 +376,9 @@ class PaintingContext {
     } else {
       canvas
         ..save()
-        ..clipPath(clipPath.shift(offset))
-        ..saveLayer(bounds.shift(offset), _defaultPaint);
+        ..clipPath(clipPath.shift(offset));
       painter(this, offset);
       canvas
-        ..restore()
         ..restore();
     }
   }
@@ -1345,7 +1339,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   /// [markParentNeedsLayout], in the case where the parent needs to be laid out
   /// as well as the child.
   ///
-  /// If [sizedByParent] has changed, called
+  /// If [sizedByParent] has changed, calls
   /// [markNeedsLayoutForSizedByParentChange] instead of [markNeedsLayout].
   void markNeedsLayout() {
     assert(_debugCanPerformMutations);
@@ -1642,7 +1636,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   /// children, passing true for parentUsesSize if your layout information is
   /// dependent on your child's layout information. Passing true for
   /// parentUsesSize ensures that this render object will undergo layout if the
-  /// child undergoes layout. Otherwise, the child can changes its layout
+  /// child undergoes layout. Otherwise, the child can change its layout
   /// information without informing this render object.
   @protected
   void performLayout();
@@ -1871,6 +1865,12 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   /// Once [markNeedsPaint] has been called on a render object,
   /// [debugNeedsPaint] returns true for that render object until just after
   /// the pipeline owner has called [paint] on the render object.
+  ///
+  /// See also:
+  ///
+  ///  * [RepaintBoundary], to scope a subtree of render objects to their own
+  ///    layer, thus limiting the number of nodes that [markNeedsPaint] must mark
+  ///    dirty.
   void markNeedsPaint() {
     assert(owner == null || !owner.debugDoingPaint);
     if (_needsPaint)

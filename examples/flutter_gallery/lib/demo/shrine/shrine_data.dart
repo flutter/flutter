@@ -8,7 +8,7 @@ const String _kGalleryAssetsPackage = 'flutter_gallery_assets';
 
 const Vendor _ali = const Vendor(
   name: 'Ali’s shop',
-  avatarAsset: '/people/square/ali.png',
+  avatarAsset: 'people/square/ali.png',
   avatarAssetPackage: _kGalleryAssetsPackage,
   description:
     'Ali Connor’s makes custom goods for folks of all shapes and sizes '
@@ -18,7 +18,7 @@ const Vendor _ali = const Vendor(
 
 const Vendor _peter = const Vendor(
   name: 'Peter’s shop',
-  avatarAsset: '/people/square/peter.png',
+  avatarAsset: 'people/square/peter.png',
   avatarAssetPackage: _kGalleryAssetsPackage,
   description:
     'Peter makes great stuff for awesome people like you. Super cool and extra '
@@ -28,7 +28,7 @@ const Vendor _peter = const Vendor(
 
 const Vendor _sandra = const Vendor(
     name: 'Sandra’s shop',
-    avatarAsset: '/people/square/sandra.png',
+    avatarAsset: 'people/square/sandra.png',
     avatarAssetPackage: _kGalleryAssetsPackage,
     description:
     'Sandra specializes in furniture, beauty and travel products with a classic vibe. '
@@ -37,7 +37,7 @@ const Vendor _sandra = const Vendor(
 
 const Vendor _stella = const Vendor(
   name: 'Stella’s shop',
-  avatarAsset: '/people/square/stella.png',
+  avatarAsset: 'people/square/stella.png',
   avatarAssetPackage: _kGalleryAssetsPackage,
   description:
     'Stella sells awesome stuff at lovely prices. made by hand and sometimes by '
@@ -47,7 +47,7 @@ const Vendor _stella = const Vendor(
 
 const Vendor _trevor = const Vendor(
     name: 'Trevor’s shop',
-    avatarAsset: '/people/square/trevor.png',
+    avatarAsset: 'people/square/trevor.png',
     avatarAssetPackage: _kGalleryAssetsPackage,
     description:
     'Trevor makes great stuff for awesome people like you. Super cool and extra '
@@ -58,7 +58,7 @@ const Vendor _trevor = const Vendor(
 const List<Product> _allProducts = const <Product> [
   const Product(
     name: 'Vintage Brown Belt',
-    imageAsset: '/products/belt.png',
+    imageAsset: 'products/belt.png',
     imageAssetPackage: _kGalleryAssetsPackage,
     categories: const <String>['fashion', 'latest'],
     price: 300.00,
@@ -69,7 +69,7 @@ const List<Product> _allProducts = const <Product> [
   ),
   const Product(
     name: 'Sunglasses',
-    imageAsset: '/products/sunnies.png',
+    imageAsset: 'products/sunnies.png',
     imageAssetPackage: _kGalleryAssetsPackage,
     categories: const <String>['travel', 'fashion', 'beauty'],
     price: 20.00,
@@ -82,7 +82,7 @@ const List<Product> _allProducts = const <Product> [
   ),
   const Product(
     name: 'Flatwear',
-    imageAsset: '/products/flatwear.png',
+    imageAsset: 'products/flatwear.png',
     imageAssetPackage: _kGalleryAssetsPackage,
     categories: const <String>['furniture'],
     price: 30.00,
@@ -92,7 +92,7 @@ const List<Product> _allProducts = const <Product> [
   ),
   const Product(
     name: 'Salmon Sweater',
-    imageAsset: '/products/sweater.png',
+    imageAsset: 'products/sweater.png',
     imageAssetPackage: _kGalleryAssetsPackage,
     categories: const <String>['fashion'],
     price: 300.00,
@@ -104,7 +104,7 @@ const List<Product> _allProducts = const <Product> [
   ),
   const Product(
     name: 'Pine Table',
-    imageAsset: '/products/table.png',
+    imageAsset: 'products/table.png',
     imageAssetPackage: _kGalleryAssetsPackage,
     categories: const <String>['furniture'],
     price: 63.00,
@@ -114,7 +114,7 @@ const List<Product> _allProducts = const <Product> [
   ),
   const Product(
     name: 'Green Comfort Jacket',
-    imageAsset: '/products/jacket.png',
+    imageAsset: 'products/jacket.png',
     imageAssetPackage: _kGalleryAssetsPackage,
     categories: const <String>['fashion'],
     price: 36.00,
@@ -124,7 +124,7 @@ const List<Product> _allProducts = const <Product> [
   ),
   const Product(
     name: 'Chambray Top',
-    imageAsset: '/products/top.png',
+    imageAsset: 'products/top.png',
     imageAssetPackage: _kGalleryAssetsPackage,
     categories: const <String>['fashion'],
     price: 125.00,
@@ -134,7 +134,7 @@ const List<Product> _allProducts = const <Product> [
   ),
   const Product(
     name: 'Blue Cup',
-    imageAsset: '/products/cup.png',
+    imageAsset: 'products/cup.png',
     imageAssetPackage: _kGalleryAssetsPackage,
     categories: const <String>['travel', 'furniture'],
     price: 75.00,
@@ -146,7 +146,7 @@ const List<Product> _allProducts = const <Product> [
   ),
   const Product(
     name: 'Tea Set',
-    imageAsset: '/products/teaset.png',
+    imageAsset: 'products/teaset.png',
     imageAssetPackage: _kGalleryAssetsPackage,
     categories: const <String>['furniture', 'fashion'],
     price: 70.00,
@@ -161,7 +161,7 @@ const List<Product> _allProducts = const <Product> [
   ),
   const Product(
     name: 'Blue linen napkins',
-    imageAsset: '/products/napkins.png',
+    imageAsset: 'products/napkins.png',
     imageAssetPackage: _kGalleryAssetsPackage,
     categories: const <String>['furniture', 'fashion'],
     price: 89.00,
@@ -172,7 +172,7 @@ const List<Product> _allProducts = const <Product> [
   ),
   const Product(
     name: 'Dipped Earrings',
-    imageAsset: '/products/earrings.png',
+    imageAsset: 'products/earrings.png',
     imageAssetPackage: _kGalleryAssetsPackage,
     categories: const <String>['fashion', 'beauty'],
     price: 25.00,
@@ -184,7 +184,7 @@ const List<Product> _allProducts = const <Product> [
   ),
   const Product(
     name: 'Perfect Planters',
-    imageAsset: '/products/planters.png',
+    imageAsset: 'products/planters.png',
     imageAssetPackage: _kGalleryAssetsPackage,
     categories: const <String>['latest', 'furniture'],
     price: 30.00,
@@ -196,7 +196,7 @@ const List<Product> _allProducts = const <Product> [
   ),
   const Product(
     name: 'Cloud-White Dress',
-    imageAsset: '/products/dress.png',
+    imageAsset: 'products/dress.png',
     imageAssetPackage: _kGalleryAssetsPackage,
     categories: const <String>['fashion'],
     price: 54.00,
@@ -208,7 +208,7 @@ const List<Product> _allProducts = const <Product> [
   ),
   const Product(
     name: 'Backpack',
-    imageAsset: '/products/backpack.png',
+    imageAsset: 'products/backpack.png',
     imageAssetPackage: _kGalleryAssetsPackage,
     categories: const <String>['travel', 'fashion'],
     price: 25.00,
@@ -220,7 +220,7 @@ const List<Product> _allProducts = const <Product> [
   ),
   const Product(
     name: 'Charcoal Straw Hat',
-    imageAsset: '/products/hat.png',
+    imageAsset: 'products/hat.png',
     imageAssetPackage: _kGalleryAssetsPackage,
     categories: const <String>['travel', 'fashion', 'latest'],
     price: 25.00,
@@ -232,7 +232,7 @@ const List<Product> _allProducts = const <Product> [
   ),
   const Product(
     name: 'Ginger Scarf',
-    imageAsset: '/products/scarf.png',
+    imageAsset: 'products/scarf.png',
     imageAssetPackage: _kGalleryAssetsPackage,
     categories: const <String>['latest', 'fashion'],
     price: 17.00,
@@ -242,7 +242,7 @@ const List<Product> _allProducts = const <Product> [
   ),
   const Product(
     name: 'Blush Sweats',
-    imageAsset: '/products/sweats.png',
+    imageAsset: 'products/sweats.png',
     imageAssetPackage: _kGalleryAssetsPackage,
     categories: const <String>['travel', 'fashion', 'latest'],
     price: 25.00,
@@ -252,7 +252,7 @@ const List<Product> _allProducts = const <Product> [
   ),
   const Product(
     name: 'Mint Jumper',
-    imageAsset: '/products/jumper.png',
+    imageAsset: 'products/jumper.png',
     imageAssetPackage: _kGalleryAssetsPackage,
     categories: const <String>['travel', 'fashion', 'beauty'],
     price: 25.00,
@@ -262,7 +262,7 @@ const List<Product> _allProducts = const <Product> [
   ),
   const Product(
     name: 'Ochre Shirt',
-    imageAsset: '/products/shirt.png',
+    imageAsset: 'products/shirt.png',
     imageAssetPackage: _kGalleryAssetsPackage,
     categories: const <String>[ 'fashion', 'latest'],
     price: 120.00,

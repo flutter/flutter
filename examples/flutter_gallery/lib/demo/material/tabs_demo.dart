@@ -28,64 +28,64 @@ final Map<_Page, List<_CardData>> _allPages = <_Page, List<_CardData>>{
   new _Page(label: 'HOME'): <_CardData>[
     const _CardData(
       title: 'Flatwear',
-      imageAsset: '/products/flatwear.png',
+      imageAsset: 'products/flatwear.png',
       imageAssetPackage: _kGalleryAssetsPackage,
     ),
     const _CardData(
       title: 'Pine Table',
-      imageAsset: '/products/table.png',
+      imageAsset: 'products/table.png',
       imageAssetPackage: _kGalleryAssetsPackage,
     ),
     const _CardData(
       title: 'Blue Cup',
-      imageAsset: '/products/cup.png',
+      imageAsset: 'products/cup.png',
       imageAssetPackage: _kGalleryAssetsPackage,
     ),
     const _CardData(
       title: 'Tea Set',
-      imageAsset: '/products/teaset.png',
+      imageAsset: 'products/teaset.png',
       imageAssetPackage: _kGalleryAssetsPackage,
     ),
     const _CardData(
       title: 'Desk Set',
-      imageAsset: '/products/deskset.png',
+      imageAsset: 'products/deskset.png',
       imageAssetPackage: _kGalleryAssetsPackage,
     ),
     const _CardData(
       title: 'Blue Linen Napkins',
-      imageAsset: '/products/napkins.png',
+      imageAsset: 'products/napkins.png',
       imageAssetPackage: _kGalleryAssetsPackage,
     ),
     const _CardData(
       title: 'Planters',
-      imageAsset: '/products/planters.png',
+      imageAsset: 'products/planters.png',
       imageAssetPackage: _kGalleryAssetsPackage,
     ),
     const _CardData(
       title: 'Kitchen Quattro',
-      imageAsset: '/products/kitchen_quattro.png',
+      imageAsset: 'products/kitchen_quattro.png',
       imageAssetPackage: _kGalleryAssetsPackage,
     ),
     const _CardData(
       title: 'Platter',
-      imageAsset: '/products/platter.png',
+      imageAsset: 'products/platter.png',
       imageAssetPackage: _kGalleryAssetsPackage,
     ),
   ],
   new _Page(label: 'APPAREL'): <_CardData>[
     const _CardData(
       title: 'Cloud-White Dress',
-      imageAsset: '/products/dress.png',
+      imageAsset: 'products/dress.png',
       imageAssetPackage: _kGalleryAssetsPackage,
     ),
     const _CardData(
       title: 'Ginger Scarf',
-      imageAsset: '/products/scarf.png',
+      imageAsset: 'products/scarf.png',
       imageAssetPackage: _kGalleryAssetsPackage,
     ),
     const _CardData(
       title: 'Blush Sweats',
-      imageAsset: '/products/sweats.png',
+      imageAsset: 'products/sweats.png',
       imageAssetPackage: _kGalleryAssetsPackage,
     ),
   ],

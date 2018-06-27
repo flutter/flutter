@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 class _ContactCategory extends StatelessWidget {
   const _ContactCategory({ Key key, this.icon, this.children }) : super(key: key);
@@ -160,7 +161,7 @@ class ContactsDemoState extends State<ContactsDemo> {
                   fit: StackFit.expand,
                   children: <Widget>[
                     new Image.asset(
-                      '/people/ali_landscape.png',
+                      'people/ali_landscape.png',
                       package: 'flutter_gallery_assets',
                       fit: BoxFit.cover,
                       height: _appBarHeight,
@@ -182,49 +183,52 @@ class ContactsDemoState extends State<ContactsDemo> {
             ),
             new SliverList(
               delegate: new SliverChildListDelegate(<Widget>[
-                new _ContactCategory(
-                  icon: Icons.call,
-                  children: <Widget>[
-                    new _ContactItem(
-                      icon: Icons.message,
-                      tooltip: 'Send message',
-                      onPressed: () {
-                        _scaffoldKey.currentState.showSnackBar(const SnackBar(
-                          content: const Text('Pretend that this opened your SMS application.')
-                        ));
-                      },
-                      lines: const <String>[
-                        '(650) 555-1234',
-                        'Mobile',
-                      ],
-                    ),
-                    new _ContactItem(
-                      icon: Icons.message,
-                      tooltip: 'Send message',
-                      onPressed: () {
-                        _scaffoldKey.currentState.showSnackBar(const SnackBar(
-                          content: const Text('A messaging app appears.')
-                        ));
-                      },
-                      lines: const <String>[
-                        '(323) 555-6789',
-                        'Work',
-                      ],
-                    ),
-                    new _ContactItem(
-                      icon: Icons.message,
-                      tooltip: 'Send message',
-                      onPressed: () {
-                        _scaffoldKey.currentState.showSnackBar(const SnackBar(
-                          content: const Text('Imagine if you will, a messaging application.')
-                        ));
-                      },
-                      lines: const <String>[
-                        '(650) 555-6789',
-                        'Home',
-                      ],
-                    ),
-                  ],
+                new AnnotatedRegion<SystemUiOverlayStyle>(
+                  value: SystemUiOverlayStyle.dark,
+                  child: new _ContactCategory(
+                    icon: Icons.call,
+                    children: <Widget>[
+                      new _ContactItem(
+                        icon: Icons.message,
+                        tooltip: 'Send message',
+                        onPressed: () {
+                          _scaffoldKey.currentState.showSnackBar(const SnackBar(
+                            content: const Text('Pretend that this opened your SMS application.')
+                          ));
+                        },
+                        lines: const <String>[
+                          '(650) 555-1234',
+                          'Mobile',
+                        ],
+                      ),
+                      new _ContactItem(
+                        icon: Icons.message,
+                        tooltip: 'Send message',
+                        onPressed: () {
+                          _scaffoldKey.currentState.showSnackBar(const SnackBar(
+                            content: const Text('A messaging app appears.')
+                          ));
+                        },
+                        lines: const <String>[
+                          '(323) 555-6789',
+                          'Work',
+                        ],
+                      ),
+                      new _ContactItem(
+                        icon: Icons.message,
+                        tooltip: 'Send message',
+                        onPressed: () {
+                          _scaffoldKey.currentState.showSnackBar(const SnackBar(
+                            content: const Text('Imagine if you will, a messaging application.')
+                          ));
+                        },
+                        lines: const <String>[
+                          '(650) 555-6789',
+                          'Home',
+                        ],
+                      ),
+                    ],
+                  ),
                 ),
                 new _ContactCategory(
                   icon: Icons.contact_mail,

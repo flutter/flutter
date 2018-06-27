@@ -13,9 +13,9 @@ import 'common/network.dart';
 import 'dart/dart_vm.dart';
 import 'runners/ssh_command_runner.dart';
 
-final String _ipv4Loopback = InternetAddress.LOOPBACK_IP_V4.address; // ignore: deprecated_member_use
+final String _ipv4Loopback = InternetAddress.loopbackIPv4.address;
 
-final String _ipv6Loopback = InternetAddress.LOOPBACK_IP_V6.address; // ignore: deprecated_member_use
+final String _ipv6Loopback = InternetAddress.loopbackIPv6.address;
 
 const ProcessManager _processManager = const LocalProcessManager();
 
@@ -45,6 +45,21 @@ PortForwardingFunction fuchsiaPortForwardingFunction = _SshPortForwarder.start;
 /// implementation.
 void restoreFuchsiaPortForwardingFunction() {
   fuchsiaPortForwardingFunction = _SshPortForwarder.start;
+}
+
+/// A general error raised when something fails within a
+/// [FuchsiaRemoteConnection].
+class FuchsiaRemoteConnectionError extends Error {
+  /// Basic constructor outlining the reason for the failure in `message`.
+  FuchsiaRemoteConnectionError(this.message);
+
+  /// The reason for the failure.
+  final String message;
+
+  @override
+  String toString() {
+    return '$FuchsiaRemoteConnectionError: $message';
+  }
 }
 
 /// An enum specifying a Dart VM's state.
@@ -157,11 +172,38 @@ class FuchsiaRemoteConnection {
   /// then `interface` will probably need to be set in order to connect
   /// successfully (that being the outgoing interface of your machine, not the
   /// interface on the target machine).
-  static Future<FuchsiaRemoteConnection> connect(
-    String address, [
+  ///
+  /// Attempts to set `address` via the environment variable
+  /// `FUCHSIA_DEVICE_URL` in the event that the argument is not passed.
+  /// If `address` is not supplied, `interface` is also ignored, as the format
+  /// is expected to contain the interface as well (in the event that it is
+  /// link-local), like the following:
+  ///
+  /// ```
+  /// fe80::1%eth0
+  /// ```
+  ///
+  /// In the event that `FUCHSIA_SSH_CONFIG` is set in the environment, that
+  /// will be used when `sshConfigPath` isn't supplied.
+  static Future<FuchsiaRemoteConnection> connect([
+    String address,
     String interface = '',
     String sshConfigPath,
   ]) async {
+    address ??= Platform.environment['FUCHSIA_DEVICE_URL'];
+    sshConfigPath ??= Platform.environment['FUCHSIA_SSH_CONFIG'];
+    if (address == null) {
+      throw new FuchsiaRemoteConnectionError(
+          'No address supplied, and \$FUCHSIA_DEVICE_URL not found.');
+    }
+    const String interfaceDelimiter = '%';
+    if (address.contains(interfaceDelimiter)) {
+      final List<String> addressAndInterface =
+          address.split(interfaceDelimiter);
+      address = addressAndInterface[0];
+      interface = addressAndInterface[1];
+    }
+
     return await FuchsiaRemoteConnection.connectWithSshCommandRunner(
       new SshCommandRunner(
         address: address,
@@ -516,7 +558,7 @@ class _SshPortForwarder implements PortForwarder {
     }
     final String targetAddress =
         isIpV6 && interface.isNotEmpty ? '$address%$interface' : address;
-    const String dummyRemoteCommand = 'date';
+    const String dummyRemoteCommand = 'true';
     command.addAll(<String>[
       '-nNT',
       '-f',

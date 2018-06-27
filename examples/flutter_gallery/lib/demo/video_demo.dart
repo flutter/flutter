@@ -151,7 +151,8 @@ class _VideoPlayPauseState extends State<VideoPlayPause> {
 
   _VideoPlayPauseState() {
     listener = () {
-      setState(() {});
+      if (mounted)
+        setState(() {});
     };
   }
 
@@ -353,7 +354,7 @@ class _VideoDemoState extends State<VideoDemo>
     with SingleTickerProviderStateMixin {
   final VideoPlayerController butterflyController =
       new VideoPlayerController.asset(
-        '/videos/butterfly.mp4',
+        'videos/butterfly.mp4',
         package: 'flutter_gallery_assets',
       );
   final VideoPlayerController beeController = new VideoPlayerController.network(
@@ -374,7 +375,8 @@ class _VideoDemoState extends State<VideoDemo>
       controller.play();
       await connectedCompleter.future;
       await controller.initialize();
-      setState(() {});
+      if (mounted)
+        setState(() {});
     }
 
     initController(butterflyController);

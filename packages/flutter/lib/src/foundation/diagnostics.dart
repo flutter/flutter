@@ -743,7 +743,7 @@ abstract class DiagnosticsNode {
 
   String get _separator => showSeparator ? ':' : '';
 
-  /// Serialize the node excluding its descendents to a JSON map.
+  /// Serialize the node excluding its descendants to a JSON map.
   ///
   /// Subclasses should override if they have additional properties that are
   /// useful for the GUI tools that consume this JSON.
@@ -2046,7 +2046,7 @@ String describeIdentity(Object object) => '${object.runtimeType}#${shortHash(obj
 ///   monday, tuesday, wednesday, thursday, friday, saturday, sunday
 /// }
 ///
-/// validateDescribeEnum() {
+/// void validateDescribeEnum() {
 ///   assert(Day.monday.toString() == 'Day.monday');
 ///   assert(describeEnum(Day.monday) == 'monday');
 /// }

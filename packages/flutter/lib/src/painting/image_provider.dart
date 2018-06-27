@@ -12,6 +12,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 
 import 'binding.dart';
+import 'image_cache.dart';
 import 'image_stream.dart';
 
 /// Configuration information passed to the [ImageProvider.resolve] method to
@@ -284,6 +285,49 @@ abstract class ImageProvider<T> {
     return stream;
   }
 
+  /// Evicts an entry from the image cache.
+  ///
+  /// Returns a [Future] which indicates whether the value was successfully
+  /// removed.
+  ///
+  /// The [ImageProvider] used does not need to be the same instance that was
+  /// passed to an [Image] widget, but it does need to create a key which is
+  /// equal to one.
+  ///
+  /// The [cache] is optional and defaults to the global image cache.
+  ///
+  /// The [configuration] is optional and defaults to
+  /// [ImageConfiguration.empty].
+  ///
+  /// ## Sample code
+  ///
+  /// The following sample code shows how an image loaded using the [Image]
+  /// widget can be evicted using a [NetworkImage] with a matching url.
+  ///
+  /// ```dart
+  /// class MyWidget extends StatelessWidget {
+  ///   final String url = '...';
+  ///
+  ///   @override
+  ///   Widget build(BuildContext context) {
+  ///     return new Image.network(url);
+  ///   }
+  ///
+  ///   void evictImage() {
+  ///     final NetworkImage provider = new NetworkImage(url);
+  ///     provider.evict().then<void>((bool success) {
+  ///       if (success)
+  ///         debugPrint('removed image!');
+  ///     });
+  ///   }
+  /// }
+  /// ```
+  Future<bool> evict({ImageCache cache, ImageConfiguration configuration = ImageConfiguration.empty}) async {
+    cache ??= imageCache;
+    final T key = await obtainKey(configuration);
+    return cache.evict(key);
+  }
+
   /// Converts an ImageProvider's settings plus an ImageConfiguration to a key
   /// that describes the precise image to load.
   ///
@@ -442,7 +486,7 @@ class NetworkImage extends ImageProvider<NetworkImage> {
       request.headers.add(name, value);
     });
     final HttpClientResponse response = await request.close();
-    if (response.statusCode != HttpStatus.OK)
+    if (response.statusCode != HttpStatus.ok)
       throw new Exception('HTTP request failed, statusCode: ${response?.statusCode}, $resolved');
 
     final Uint8List bytes = await consolidateHttpClientResponseBytes(response);

@@ -120,6 +120,45 @@ void main() {
     }, overrides: <Type, Generator>{
       Stdio: () => const _NoStderr(),
     });
+
+    testUsingContext('can override base URL', () async {
+      Uri uri;
+      CrashReportSender.initializeWith(new MockClient((Request request) async {
+        uri = request.url;
+        return new Response('test-report-id', 200);
+      }));
+
+      final int exitCode = await tools.run(
+        <String>['crash'],
+        <FlutterCommand>[new _CrashCommand()],
+        reportCrashes: true,
+        flutterVersion: 'test-version',
+      );
+
+      expect(exitCode, 1);
+
+      // Verify that we sent the crash report.
+      expect(uri, isNotNull);
+      expect(uri, new Uri(
+        scheme: 'https',
+        host: 'localhost',
+        port: 12345,
+        path: '/fake_server',
+        queryParameters: <String, String>{
+          'product': 'Flutter_Tools',
+          'version' : 'test-version',
+        },
+      ));
+    }, overrides: <Type, Generator> {
+      Platform: () => new FakePlatform(
+        operatingSystem: 'linux',
+        environment: <String, String>{
+          'FLUTTER_CRASH_SERVER_BASE_URL': 'https://localhost:12345/fake_server',
+        },
+        script: new Uri(scheme: 'data'),
+      ),
+      Stdio: () => const _NoStderr(),
+    });
   });
 }
 

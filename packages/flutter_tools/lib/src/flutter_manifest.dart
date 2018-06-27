@@ -87,6 +87,23 @@ class FlutterManifest {
     return _flutterDescriptor['uses-material-design'] ?? false;
   }
 
+  /// Properties defining how to expose this Flutter project as a module
+  /// for integration into an unspecified host app.
+  Map<String, dynamic> get moduleDescriptor {
+    return _flutterDescriptor.containsKey('module')
+        ? _flutterDescriptor['module'] ?? const <String, dynamic>{}
+        : null;
+  }
+
+  /// True if this manifest declares a Flutter module project.
+  ///
+  /// A Flutter project is considered a module when it has a `module:`
+  /// descriptor. A Flutter module project supports integration into an
+  /// existing host app.
+  ///
+  /// Such a project can be created using `flutter create -t module`.
+  bool get isModule => moduleDescriptor != null;
+
   List<Map<String, dynamic>> get fontsDescriptor {
    return _flutterDescriptor['fonts'] ?? const <Map<String, dynamic>>[];
   }

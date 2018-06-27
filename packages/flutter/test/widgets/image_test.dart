@@ -295,7 +295,7 @@ void main() {
     final TestImageProvider imageProvider = new TestImageProvider();
     await tester.pumpWidget(new Image(image: imageProvider));
     final State<Image> image = tester.state/*State<Image>*/(find.byType(Image));
-    expect(image.toString(), equalsIgnoringHashCodes('_ImageState#00000(stream: ImageStream#00000(OneFrameImageStreamCompleter#00000, unresolved, 1 listener), pixels: null)'));
+    expect(image.toString(), equalsIgnoringHashCodes('_ImageState#00000(stream: ImageStream#00000(OneFrameImageStreamCompleter#00000, unresolved, 2 listeners), pixels: null)'));
     imageProvider.complete();
     await tester.pump();
     expect(image.toString(), equalsIgnoringHashCodes('_ImageState#00000(stream: ImageStream#00000(OneFrameImageStreamCompleter#00000, [100×100] @ 1.0x, 1 listener), pixels: [100×100] @ 1.0x)'));
@@ -353,14 +353,14 @@ void main() {
         child: image,
       ),
     );
-    expect(imageStreamCompleter.listeners.length, 1);
+    expect(imageStreamCompleter.listeners.length, 2);
     await tester.pumpWidget(
       new TickerMode(
         enabled: false,
         child: image,
       ),
     );
-    expect(imageStreamCompleter.listeners.length, 0);
+    expect(imageStreamCompleter.listeners.length, 1);
   });
 
   testWidgets('Verify Image shows correct RenderImage when changing to an already completed provider', (WidgetTester tester) async {

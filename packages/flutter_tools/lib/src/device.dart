@@ -277,7 +277,7 @@ abstract class Device {
 
   bool get supportsScreenshot => false;
 
-  Future<Null> takeScreenshot(File outputFile) => new Future<Null>.error('unimplemented');
+  Future<void> takeScreenshot(File outputFile) => new Future<Null>.error('unimplemented');
 
   /// Find the apps that are currently running on this device.
   Future<List<DiscoveredApp>> discoverApps() =>

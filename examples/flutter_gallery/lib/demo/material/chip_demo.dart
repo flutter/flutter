@@ -45,11 +45,11 @@ const List<String> _defaultTools = const <String>[
 ];
 
 const Map<String, String> _avatars = const <String, String>{
-  'hammer': '/people/square/ali.png',
-  'chisel': '/people/square/sandra.png',
-  'fryer': '/people/square/trevor.png',
-  'fabricator': '/people/square/stella.png',
-  'customer': '/people/square/peter.png',
+  'hammer': 'people/square/ali.png',
+  'chisel': 'people/square/sandra.png',
+  'fryer': 'people/square/trevor.png',
+  'fabricator': 'people/square/stella.png',
+  'customer': 'people/square/peter.png',
 };
 
 final Map<String, Set<String>> _toolActions = <String, Set<String>>{
@@ -167,7 +167,7 @@ class _ChipDemoState extends State<ChipDemo> {
   Color _nameToColor(String name) {
     assert(name.length > 1);
     final int hash = name.hashCode & 0xffff;
-    final double hue = 360.0 * hash / (1 << 15);
+    final double hue = (360.0 * hash / (1 << 15)) % 360.0;
     return new HSVColor.fromAHSV(1.0, hue, 0.4, 0.90).toColor();
   }
 

@@ -137,7 +137,7 @@ class SimControl {
     return runCheckedAsync(args);
   }
 
-  Future<Null> takeScreenshot(String deviceId, String outputPath) {
+  Future<void> takeScreenshot(String deviceId, String outputPath) {
     return runCheckedAsync(<String>[_xcrunPath, 'simctl', 'io', deviceId, 'screenshot', outputPath]);
   }
 }
@@ -362,6 +362,7 @@ class IOSSimulator extends Device {
     // The build mode for the simulator is always debug.
 
     final BuildInfo debugBuildInfo = new BuildInfo(BuildMode.debug, buildInfo.flavor,
+        previewDart2: buildInfo.previewDart2,
         trackWidgetCreation: buildInfo.trackWidgetCreation,
         extraFrontEndOptions: buildInfo.extraFrontEndOptions,
         extraGenSnapshotOptions: buildInfo.extraGenSnapshotOptions,
@@ -389,10 +390,12 @@ class IOSSimulator extends Device {
   }
 
   Future<Null> _sideloadUpdatedAssetsForInstalledApplicationBundle(ApplicationPackage app, BuildInfo buildInfo, String mainPath) {
-    // Run compiler to produce kernel file for the application.
+    // When running in previewDart2 mode, we still need to run compiler to
+    // produce kernel file for the application.
     return bundle.build(
       mainPath: mainPath,
-      precompiledSnapshot: false,
+      precompiledSnapshot: !buildInfo.previewDart2,
+      previewDart2: buildInfo.previewDart2,
       trackWidgetCreation: buildInfo.trackWidgetCreation,
     );
   }
@@ -458,7 +461,7 @@ class IOSSimulator extends Device {
   bool get supportsScreenshot => _xcodeVersionSupportsScreenshot;
 
   @override
-  Future<Null> takeScreenshot(File outputFile) {
+  Future<void> takeScreenshot(File outputFile) {
     return SimControl.instance.takeScreenshot(id, outputFile.path);
   }
 }

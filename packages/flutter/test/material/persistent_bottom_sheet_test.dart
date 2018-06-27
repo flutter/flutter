@@ -133,4 +133,62 @@ void main() {
       ),
     );
   });
+
+  testWidgets('Scaffold.bottomSheet', (WidgetTester tester) async {
+    final Key bottomSheetKey = new UniqueKey();
+
+    await tester.pumpWidget(
+      new MaterialApp(
+        home: new Scaffold(
+          body: const Placeholder(),
+          bottomSheet: new Container(
+            key: bottomSheetKey,
+            alignment: Alignment.center,
+            height: 200.0,
+            child: new Builder(
+              builder: (BuildContext context) {
+                return new RaisedButton(
+                  child: const Text('showModalBottomSheet'),
+                  onPressed: () {
+                    showModalBottomSheet<void>(
+                      context: context,
+                      builder: (BuildContext context) => const Text('modal bottom sheet'),
+                    );
+                  },
+                );
+              },
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(find.text('showModalBottomSheet'), findsOneWidget);
+    expect(tester.getSize(find.byKey(bottomSheetKey)), const Size(800.0, 200.0));
+    expect(tester.getTopLeft(find.byKey(bottomSheetKey)), const Offset(0.0, 400.0));
+
+    // Show the modal bottomSheet
+    await tester.tap(find.text('showModalBottomSheet'));
+    await tester.pumpAndSettle();
+    expect(find.text('modal bottom sheet'), findsOneWidget);
+
+    // Dismiss the modal bottomSheet
+    await tester.tap(find.text('modal bottom sheet'));
+    await tester.pumpAndSettle();
+    expect(find.text('modal bottom sheet'), findsNothing);
+    expect(find.text('showModalBottomSheet'), findsOneWidget);
+
+    // Remove the persistent bottomSheet
+    await tester.pumpWidget(
+      new MaterialApp(
+        home: const Scaffold(
+          bottomSheet: null,
+          body: const Placeholder(),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(find.text('showModalBottomSheet'), findsNothing);
+    expect(find.byKey(bottomSheetKey), findsNothing);
+  });
 }
