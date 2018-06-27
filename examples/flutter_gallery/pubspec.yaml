@@ -198,9 +198,3 @@ flutter:
           weight: 400
 
 # PUBSPEC CHECKSUM: 6137
-
-dependency_overrides:
-  sky_engine:
-    path: /Users/jonahwilliams/Documents/Flutter/engine/src/out/ios_debug_sim_unopt/gen/dart-pkg/sky_engine
-  sky_services:
-    path: /Users/jonahwilliams/Documents/Flutter/engine/src/out/ios_debug_sim_unopt/gen/dart-pkg/sky_services

@@ -75,14 +75,4 @@ dev_dependencies:
 environment:
   sdk: '>=1.19.0 <2.0.0'
 
-<<<<<<< HEAD
 # PUBSPEC CHECKSUM: b1ad
-
-dependency_overrides:
-  sky_engine:
-    path: /Users/jonahwilliams/Documents/Flutter/engine/src/out/ios_debug_sim_unopt/gen/dart-pkg/sky_engine
-  sky_services:
-    path: /Users/jonahwilliams/Documents/Flutter/engine/src/out/ios_debug_sim_unopt/gen/dart-pkg/sky_services
-=======
-# PUBSPEC CHECKSUM: 91e2
->>>>>>> cfd26d321e198f4215e1b9e062f9914be8f0e460

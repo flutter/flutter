@@ -2603,7 +2603,7 @@ class SemanticsConfiguration {
 
   /// The handlers for each [CustomAccessibilityAction].
   Map<CustomAccessibilityAction, VoidCallback> get customAccessibilityActions => _customAccessibilityActions;
-  Map<CustomAccessibilityAction, VoidCallback> _customAccessibilityActions;
+  Map<CustomAccessibilityAction, VoidCallback> _customAccessibilityActions = <CustomAccessibilityAction, VoidCallback>{};
   set customAccessibilityActions(Map<CustomAccessibilityAction, VoidCallback> value) {
     _hasBeenAnnotated = true;
     _actionsAsBits |= SemanticsAction.customAction.index;
