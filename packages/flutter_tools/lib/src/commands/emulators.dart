@@ -17,7 +17,7 @@ class EmulatorsCommand extends FlutterCommand {
     argParser.addOption('launch',
         help: 'The full or partial ID of the emulator to launch.');
     argParser.addFlag('create',
-        help: 'Creates a new Android emulator.',
+        help: 'Creates a new Android emulator based on a Pixel device.',
         negatable: false);
     argParser.addOption('name',
         help: 'Used with flag --create. Specifies a name for the emulator being created.');
