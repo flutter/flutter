@@ -425,6 +425,13 @@ tasks:
     stage: devicelab
     required_agent_capabilities: ["linux/android"]
 
+  flutter_test_performance:
+    description: >
+      Measures performance of running flutter test.
+    stage: devicelab
+    required_agent_capabilities: ["linux/android"]
+    flaky: true
+
   technical_debt__cost:
     description: >
       Estimates our technical debt (TODOs, analyzer ignores, etc).
