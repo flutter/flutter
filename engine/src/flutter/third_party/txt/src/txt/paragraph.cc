@@ -877,7 +877,7 @@ sk_sp<SkTypeface> Paragraph::GetDefaultSkiaTypeface(const TextStyle& style) {
 // The x,y coordinates will be the very top left corner of the rendered
 // paragraph.
 void Paragraph::Paint(SkCanvas* canvas, double x, double y) {
-  canvas->translate(x, y);
+  SkPoint base_offset = SkPoint::Make(x, y);
   SkPaint paint;
   for (const PaintRecord& record : records_) {
     if (record.style().has_foreground) {
@@ -886,15 +886,16 @@ void Paragraph::Paint(SkCanvas* canvas, double x, double y) {
       paint.reset();
       paint.setColor(record.style().color);
     }
-    SkPoint offset = record.offset();
-    PaintBackground(canvas, record);
+    SkPoint offset = base_offset + record.offset();
+    PaintBackground(canvas, record, base_offset);
     canvas->drawTextBlob(record.text(), offset.x(), offset.y(), paint);
-    PaintDecorations(canvas, record);
+    PaintDecorations(canvas, record, base_offset);
   }
-  canvas->translate(-x, -y);
 }
 
-void Paragraph::PaintDecorations(SkCanvas* canvas, const PaintRecord& record) {
+void Paragraph::PaintDecorations(SkCanvas* canvas,
+                                 const PaintRecord& record,
+                                 SkPoint base_offset) {
   if (record.style().decoration == TextDecoration::kNone)
     return;
 
@@ -935,8 +936,9 @@ void Paragraph::PaintDecorations(SkCanvas* canvas, const PaintRecord& record) {
   paint.setStrokeWidth(underline_thickness *
                        record.style().decoration_thickness_multiplier);
 
-  SkScalar x = record.offset().x();
-  SkScalar y = record.offset().y();
+  SkPoint record_offset = base_offset + record.offset();
+  SkScalar x = record_offset.x();
+  SkScalar y = record_offset.y();
 
   // Setup the decorations.
   switch (record.style().decoration_style) {
@@ -1052,14 +1054,16 @@ void Paragraph::PaintDecorations(SkCanvas* canvas, const PaintRecord& record) {
   }
 }
 
-void Paragraph::PaintBackground(SkCanvas* canvas, const PaintRecord& record) {
+void Paragraph::PaintBackground(SkCanvas* canvas,
+                                const PaintRecord& record,
+                                SkPoint base_offset) {
   if (!record.style().has_background)
     return;
 
   const SkPaint::FontMetrics& metrics = record.metrics();
   SkRect rect(SkRect::MakeLTRB(0, metrics.fAscent, record.GetRunWidth(),
                                metrics.fDescent));
-  rect.offset(record.offset());
+  rect.offset(base_offset + record.offset());
   canvas->drawRect(rect, record.style().background);
 }
 
