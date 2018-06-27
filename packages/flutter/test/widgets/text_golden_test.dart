@@ -146,10 +146,13 @@ void main() {
       new RepaintBoundary(
         child: new MaterialApp(
           home: new Scaffold(
+            backgroundColor: Colors.green,
             body: new Container(
               width: 100.0,
+              color: Colors.red,
               child: const Text(
-                'Test Test Test Test Test Test Test Test Test Test Test',
+                'Pp PPp PPPp PPPPp PPPPpp PPPPppp PPPPppppp ',
+                style: const TextStyle(color: Colors.black),
                 maxLines: 3,
                 overflow: TextOverflow.fade,
               ),
