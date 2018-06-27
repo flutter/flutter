@@ -10,7 +10,7 @@ import 'package:test/test.dart';
 import 'package:vm_service_client/vm_service_client.dart';
 
 import '../src/context.dart';
-import 'flutter_test_driver.dart';
+import 'test_driver.dart';
 import 'test_utils.dart';
 
 Directory _tempDir;
