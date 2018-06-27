@@ -302,8 +302,14 @@ class EditableText extends StatefulWidget {
   /// This property is false by default.
   final bool rendererIgnoresPointer;
 
+  /// How thick the cursor will be.
+  ///
+  /// Defaults to 2.0
   final double cursorWidth;
 
+  /// How rounded the corners of the cursor should be.
+  ///
+  /// By default, the cursor has a Radius of zero.
   final Radius cursorRadius;
 
   @override

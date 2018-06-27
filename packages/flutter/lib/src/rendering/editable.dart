@@ -385,8 +385,9 @@ class RenderEditable extends RenderBox {
     markNeedsLayout();
   }
 
+  /// How thick the cursor will be.
   double get cursorWidth => _cursorWidth;
-  double _cursorWidth = null;
+  double _cursorWidth;
   set cursorWidth(double value) {
     if (_cursorWidth == value)
       return;
@@ -394,8 +395,9 @@ class RenderEditable extends RenderBox {
     markNeedsLayout();
   }
 
+  /// How rounded the corners of the cursor should be.
   Radius get cursorRadius => _cursorRadius;
-  Radius _cursorRadius = null;
+  Radius _cursorRadius;
   set cursorRadius(Radius value) {
     if (_cursorRadius == value)
       return;
@@ -704,7 +706,7 @@ class RenderEditable extends RenderBox {
     assert(constraintWidth != null);
     if (_textLayoutLastWidth == constraintWidth)
       return;
-    double caretMargin = _kCaretGap + cursorWidth;
+    final double caretMargin = _kCaretGap + cursorWidth;
     final double availableWidth = math.max(0.0, constraintWidth - caretMargin);
     final double maxWidth = _isMultiline ? availableWidth : double.infinity;
     _textPainter.layout(minWidth: availableWidth, maxWidth: maxWidth);
