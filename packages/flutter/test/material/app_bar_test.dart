@@ -4,7 +4,6 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../widgets/semantics_tester.dart';
@@ -1340,37 +1339,5 @@ void main() {
     ));
 
     semantics.dispose();
-  });
-
-  testWidgets('AppBar draws a light system bar for a dark background', (WidgetTester tester) async {
-    final ThemeData darkTheme = new ThemeData.dark();
-    await tester.pumpWidget(new MaterialApp(
-      theme: darkTheme,
-      home: Scaffold(
-        appBar: new AppBar(title: const Text('test'))
-      ),
-    ));
-
-    expect(darkTheme.primaryColorBrightness, Brightness.dark);
-    expect(SystemChrome.latestStyle, const SystemUiOverlayStyle(
-      statusBarBrightness: Brightness.dark,
-      statusBarIconBrightness: Brightness.light,
-    ));
-  });
-
-  testWidgets('AppBar draws a dark system bar for a light background', (WidgetTester tester) async {
-    final ThemeData lightTheme = new ThemeData(primaryColor: Colors.white);
-    await tester.pumpWidget(new MaterialApp(
-      theme: lightTheme,
-      home: Scaffold(
-        appBar: new AppBar(title: const Text('test'))
-      ),
-    ));
-
-    expect(lightTheme.primaryColorBrightness, Brightness.light);
-    expect(SystemChrome.latestStyle, const SystemUiOverlayStyle(
-      statusBarBrightness: Brightness.light,
-      statusBarIconBrightness: Brightness.dark,
-    ));
   });
 }

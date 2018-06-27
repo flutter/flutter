@@ -6,7 +6,6 @@ import 'dart:io';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/rendering.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../widgets/semantics_tester.dart';
@@ -753,47 +752,6 @@ void main() {
     // is fixed.
     skip: !Platform.isLinux,
    );
-
-
-  testWidgets('NavBar draws a light system bar for a dark background', (WidgetTester tester) async {
-    await tester.pumpWidget(
-      new WidgetsApp(
-        color: const Color(0xFFFFFFFF),
-        onGenerateRoute: (RouteSettings settings) {
-          return new CupertinoPageRoute<void>(
-            settings: settings,
-            builder: (BuildContext context) {
-              return const CupertinoNavigationBar(
-                middle: const Text('Test'),
-                backgroundColor: const Color(0xFF000000),
-              );
-            },
-          );
-        },
-      ),
-    );
-    expect(SystemChrome.latestStyle, SystemUiOverlayStyle.light);
-  });
-
-  testWidgets('NavBar draws a dark system bar for a light background', (WidgetTester tester) async {
-    await tester.pumpWidget(
-      new WidgetsApp(
-        color: const Color(0xFFFFFFFF),
-        onGenerateRoute: (RouteSettings settings) {
-          return new CupertinoPageRoute<void>(
-            settings: settings,
-            builder: (BuildContext context) {
-              return const CupertinoNavigationBar(
-                middle: const Text('Test'),
-                backgroundColor: const Color(0xFFFFFFFF),
-              );
-            },
-          );
-        },
-      ),
-    );
-    expect(SystemChrome.latestStyle, SystemUiOverlayStyle.dark);
-  });
 }
 
 class _ExpectStyles extends StatelessWidget {
