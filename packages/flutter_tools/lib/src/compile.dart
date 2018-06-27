@@ -84,7 +84,7 @@ class KernelCompiler {
     String packagesPath,
     List<String> fileSystemRoots,
     String fileSystemScheme,
-    bool target_product_vm = false
+    bool target_product_vm = false,
   }) async {
     final String frontendServer = artifacts.getArtifactPath(
       Artifact.frontendServerSnapshotForEngineDartSdk
