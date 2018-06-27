@@ -105,12 +105,12 @@ Future<Null> skipPastScrollingAnimation(WidgetTester tester) async {
 }
 
 double getOpacity(WidgetTester tester, Finder finder) {
-  return tester.widget<Opacity>(
+  return tester.widget<FadeTransition>(
     find.ancestor(
       of: finder,
-      matching: find.byType(Opacity),
+      matching: find.byType(FadeTransition),
     )
-  ).opacity;
+  ).opacity.value;
 }
 
 void main() {

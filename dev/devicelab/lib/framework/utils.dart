@@ -348,6 +348,20 @@ String get dartBin =>
 
 Future<int> dart(List<String> args) => exec(dartBin, args);
 
+/// Returns a future that completes with a path suitable for JAVA_HOME
+/// or with null, if Java cannot be found.
+Future<String> findJavaHome() async {
+  final Iterable<String> hits = grep(
+    'Java binary at: ',
+    from: await evalFlutter('doctor', options: <String>['-v']),
+  );
+  if (hits.isEmpty)
+    return null;
+  final String javaBinary = hits.first.split(': ').last;
+  // javaBinary == /some/path/to/java/home/bin/java
+  return path.dirname(path.dirname(javaBinary));
+}
+
 Future<dynamic> inDirectory(dynamic directory, Future<dynamic> action()) async {
   final String previousCwd = cwd;
   try {

@@ -7,6 +7,7 @@ import 'dart:convert' show json;
 import 'dart:io';
 
 import 'package:meta/meta.dart';
+import 'package:path/path.dart' as p;
 
 import '../framework/adb.dart';
 import '../framework/framework.dart';
@@ -288,9 +289,12 @@ class CompileTest {
         watch.start();
         await flutter('build', options: options);
         watch.stop();
-        // IPAs are created manually AFAICT
-        await exec('tar', <String>['-zcf', 'build/app.ipa', 'build/ios/Release-iphoneos/Runner.app/']);
+        final String appPath =  '$cwd/build/ios/Release-iphoneos/Runner.app/';
+        // IPAs are created manually, https://flutter.io/ios-release/
+        await exec('tar', <String>['-zcf', 'build/app.ipa', appPath]);
         releaseSizeInBytes = await file('$cwd/build/app.ipa').length();
+        if (reportPackageContentSizes)
+          metrics.addAll(await getSizesFromIosApp(appPath));
         break;
       case DeviceOperatingSystem.android:
         options.insert(0, 'apk');
@@ -361,6 +365,25 @@ class CompileTest {
     return _kSdkNameToMetricNameMapping[sdkName];
   }
 
+  static Future<Map<String, dynamic>> getSizesFromIosApp(String appPath) async {
+    // Thin the binary to only contain one architecture.
+    final String xcodeBackend = p.join(flutterDirectory.path, 'packages', 'flutter_tools', 'bin', 'xcode_backend.sh');
+    await exec(xcodeBackend, <String>['thin'], environment: <String, String>{
+      'ARCHS': 'arm64',
+      'WRAPPER_NAME': p.basename(appPath),
+      'TARGET_BUILD_DIR': p.dirname(appPath),
+    });
+
+    final File appFramework = new File(p.join(appPath, 'Frameworks', 'App.framework', 'App'));
+    final File flutterFramework = new File(p.join(appPath, 'Frameworks', 'Flutter.framework', 'Flutter'));
+
+    return <String, dynamic>{
+      'app_framework_uncompressed_bytes': await appFramework.length(),
+      'flutter_framework_uncompressed_bytes': await flutterFramework.length(),
+    };
+  }
+
+
   static Future<Map<String, dynamic>> getSizesFromApk(String apkPath) async {
     final  String output = await eval('unzip', <String>['-v', apkPath]);
     final List<String> lines = output.split('\n');
@@ -372,7 +395,7 @@ class CompileTest {
       fileToMetadata[entry.path] = entry;
     }
 
-    final _UnzipListEntry icudtl = fileToMetadata['assets/icudtl.dat'];
+    final _UnzipListEntry icudtl = fileToMetadata['assets/flutter_shared/icudtl.dat'];
     final _UnzipListEntry libflutter = fileToMetadata['lib/armeabi-v7a/libflutter.so'];
     final _UnzipListEntry isolateSnapshotData = fileToMetadata['assets/isolate_snapshot_data'];
     final _UnzipListEntry isolateSnapshotInstr = fileToMetadata['assets/isolate_snapshot_instr'];
