@@ -3166,7 +3166,7 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     SetSelectionHandler onSetSelection,
     VoidCallback onDidGainAccessibilityFocus,
     VoidCallback onDidLoseAccessibilityFocus,
-    Map<LocalContextAction, VoidCallback> localContextActions,
+    Map<CustomAccessibilityAction, VoidCallback> customAccessibilityActions,
   }) : assert(container != null),
        _container = container,
        _explicitChildNodes = explicitChildNodes,
@@ -3205,7 +3205,7 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
        _onSetSelection = onSetSelection,
        _onDidGainAccessibilityFocus = onDidGainAccessibilityFocus,
        _onDidLoseAccessibilityFocus = onDidLoseAccessibilityFocus,
-       _localContextActions = localContextActions,
+       _customAccessibilityActions = customAccessibilityActions,
        super(child);
 
   /// If 'container' is true, this [RenderObject] will introduce a new
@@ -3788,10 +3788,13 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
       markNeedsSemanticsUpdate();
   }
 
-  Map<LocalContextAction, VoidCallback> get localContextActions => _localContextActions;
-  Map<LocalContextAction, VoidCallback> _localContextActions;
-  set localContextActions(Map<LocalContextAction, VoidCallback> value) {
-    _localContextActions = value;
+  /// The handlers for any [CustomAccessibilityActions].
+  Map<CustomAccessibilityAction, VoidCallback> get customAccessibilityActions => _customAccessibilityActions;
+  Map<CustomAccessibilityAction, VoidCallback> _customAccessibilityActions;
+  set customAccessibilityActions(Map<CustomAccessibilityAction, VoidCallback> value) {
+    if (_customAccessibilityActions == value)
+      return;
+    _customAccessibilityActions = value;
     markNeedsSemanticsUpdate();
   }
 
@@ -3876,8 +3879,8 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
       config.onDidGainAccessibilityFocus = _performDidGainAccessibilityFocus;
     if (onDidLoseAccessibilityFocus != null)
       config.onDidLoseAccessibilityFocus = _performDidLoseAccessibilityFocus;
-    if (localContextActions != null) {
-      localContextActions.forEach(config.addLocalContextAction);
+    if (customAccessibilityActions != null) {
+      config.customAccessibilityActions = _customAccessibilityActions;
     }
   }
 

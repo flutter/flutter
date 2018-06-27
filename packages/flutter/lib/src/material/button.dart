@@ -207,8 +207,8 @@ class _RawMaterialButtonState extends State<RawMaterialButton> {
       button: true,
       enabled: widget.enabled,
       child: result,
-      localContextActions: <LocalContextAction, VoidCallback>{
-        const LocalContextAction(id: 1, label: 'Open a snackbar'): () {
+      customAccessibilityActions: <CustomAccessibilityAction, VoidCallback>{
+        const CustomAccessibilityAction(label: 'Open a snackbar'): () {
           Scaffold.of(context).showSnackBar(const SnackBar(
            content: const Text('It works!'),
           ));
