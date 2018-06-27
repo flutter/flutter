@@ -37,8 +37,8 @@ class EmulatorManager {
         emulator.id?.toLowerCase()?.startsWith(searchText) == true ||
         emulator.name?.toLowerCase()?.startsWith(searchText) == true;
 
-    final Emulator exactMatch = emulators.firstWhere(
-        exactlyMatchesEmulatorId, orElse: () => null);
+    final Emulator exactMatch =
+        emulators.firstWhere(exactlyMatchesEmulatorId, orElse: () => null);
     if (exactMatch != null) {
       return <Emulator>[exactMatch];
     }
@@ -78,24 +78,20 @@ class EmulatorManager {
         name = '${autoName}_${++suffix}';
       }
     }
-    
-    final String device =  await _getPreferredAvailableDevice();
-    if (device == null)
-      return new CreateEmulatorResult(
-        name,
-        success: false,
-        error: 'No device definitions are available'
-    );
 
-    final String sdkId =  await _getPreferredSdkId();
+    final String device = await _getPreferredAvailableDevice();
+    if (device == null)
+      return new CreateEmulatorResult(name,
+          success: false, error: 'No device definitions are available');
+
+    final String sdkId = await _getPreferredSdkId();
     if (sdkId == null)
-      return new CreateEmulatorResult(
-        name,
-        success: false,
-        error: 'No suitable Android AVD system images are available. You may need to install these'
-            ' using sdkmanager, for example:\n'
-            '  sdkmanager "system-images;android-27;google_apis_playstore;x86"'
-    );
+      return new CreateEmulatorResult(name,
+          success: false,
+          error:
+              'No suitable Android AVD system images are available. You may need to install these'
+              ' using sdkmanager, for example:\n'
+              '  sdkmanager "system-images;android-27;google_apis_playstore;x86"');
 
     // Cleans up error output from avdmanager to make it more suitable to show
     // to flutter users. Specifically:
@@ -103,10 +99,11 @@ class EmulatorManager {
     // - Removes lines that tell the user to use '--force' to overwrite emulators
     String cleanError(String error) {
       return (error ?? '')
-        .split('\n')
-        .where((String l) => l.trim() != 'null')
-        .where((String l) => l.trim() != 'Use --force if you want to replace it.')
-        .join('\n');
+          .split('\n')
+          .where((String l) => l.trim() != 'null')
+          .where((String l) =>
+              l.trim() != 'Use --force if you want to replace it.')
+          .join('\n');
     }
 
     final List<String> args = <String>[
@@ -142,9 +139,9 @@ class EmulatorManager {
       return null;
 
     final List<String> availableDevices = runResult.stdout
-      .split('\n')
-      .where((String l) => preferredDevices.contains(l.trim()))
-      .toList();
+        .split('\n')
+        .where((String l) => preferredDevices.contains(l.trim()))
+        .toList();
 
     return preferredDevices.firstWhere(
       (String d) => availableDevices.contains(d),
@@ -163,25 +160,25 @@ class EmulatorManager {
       '-n', 'temp',
     ];
     final ProcessResult runResult = processManager.runSync(args);
-   
+
     // Get the list of IDs that match our criteria
     final List<String> availableIDs = runResult.stderr
-      .split('\n')
-      .where((String l) => androidApiVersion.hasMatch(l))
-      .where((String l) => l.contains('system-images'))
-      .where((String l) => l.contains('google_apis_playstore'))
-      .toList();
+        .split('\n')
+        .where((String l) => androidApiVersion.hasMatch(l))
+        .where((String l) => l.contains('system-images'))
+        .where((String l) => l.contains('google_apis_playstore'))
+        .toList();
 
     final List<int> availableApiVersions = availableIDs
-      .map((String id) => androidApiVersion.firstMatch(id).group(1))
-      .map((String apiVersion) => int.parse(apiVersion))
-      .toList();
+        .map((String id) => androidApiVersion.firstMatch(id).group(1))
+        .map((String apiVersion) => int.parse(apiVersion))
+        .toList();
 
     // Get the highest Android API version or whats left
     final int apiVersion = availableApiVersions.isNotEmpty
-      ? availableApiVersions.reduce(math.max)
-      : -1; // Don't match below
-    
+        ? availableApiVersions.reduce(math.max)
+        : -1; // Don't match below
+
     // We're out of preferences, we just have to return the first one with the high
     // API version.
     return availableIDs.firstWhere(
@@ -257,11 +254,13 @@ abstract class Emulator {
 
     // Join columns into lines of text
     final RegExp whiteSpaceAndDots = new RegExp(r'[•\s]+$');
-    return table.map((List<String> row) {
-      return indices
-        .map((int i) => row[i].padRight(widths[i]))
-        .join(' • ') + ' • ${row.last}';
-    })
+    return table
+        .map((List<String> row) {
+          return indices
+                  .map((int i) => row[i].padRight(widths[i]))
+                  .join(' • ') +
+              ' • ${row.last}';
+        })
         .map((String line) => line.replaceAll(whiteSpaceAndDots, ''))
         .toList();
   }
