@@ -5,8 +5,11 @@
 import 'dart:async';
 
 import '../base/common.dart';
+import '../base/file_system.dart';
 import '../build_info.dart';
 import '../globals.dart';
+import '../project.dart';
+
 import 'android_sdk.dart';
 import 'gradle.dart';
 
@@ -33,5 +36,9 @@ Future<Null> buildApk({
     throwToolExit('Try re-installing or updating your Android SDK.');
   }
 
-  return buildGradleProject(buildInfo, target);
+  return buildGradleProject(
+    project: new FlutterProject(fs.currentDirectory),
+    buildInfo: buildInfo,
+    target: target,
+  );
 }

@@ -11,7 +11,6 @@ import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/bundle.dart' as bundle;
 import 'package:flutter_tools/src/cache.dart';
-import 'package:flutter_tools/src/flutter_manifest.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/ios/xcodeproj.dart';
 import 'package:mockito/mockito.dart';
@@ -291,11 +290,9 @@ Information about project "Runner":
         previewDart2: true,
         targetPlatform: TargetPlatform.ios,
       );
-      final FlutterManifest manifest =
-        await new FlutterProject.fromPath('path/to/project').manifest;
-      updateGeneratedXcodeProperties(
-        projectPath: 'path/to/project',
-        manifest: manifest,
+      final FlutterProject project = new FlutterProject.fromPath('path/to/project');
+      await updateGeneratedXcodeProperties(
+        project: project,
         buildInfo: buildInfo,
         previewDart2: true,
       );
@@ -315,11 +312,9 @@ Information about project "Runner":
         trackWidgetCreation: true,
         targetPlatform: TargetPlatform.ios,
       );
-      final FlutterManifest manifest =
-          await new FlutterProject.fromPath('path/to/project').manifest;
-      updateGeneratedXcodeProperties(
-        projectPath: 'path/to/project',
-        manifest: manifest,
+      final FlutterProject project = new FlutterProject.fromPath('path/to/project');
+      await updateGeneratedXcodeProperties(
+        project: project,
         buildInfo: buildInfo,
         previewDart2: true,
       );
@@ -338,11 +333,9 @@ Information about project "Runner":
         previewDart2: true,
         targetPlatform: TargetPlatform.ios,
       );
-      final FlutterManifest manifest =
-          await new FlutterProject.fromPath('path/to/project').manifest;
-      updateGeneratedXcodeProperties(
-        projectPath: 'path/to/project',
-        manifest: manifest,
+      final FlutterProject project = new FlutterProject.fromPath('path/to/project');
+      await updateGeneratedXcodeProperties(
+        project: project,
         buildInfo: buildInfo,
         previewDart2: true,
       );
@@ -362,11 +355,9 @@ Information about project "Runner":
         targetPlatform: TargetPlatform.ios,
       );
 
-      final FlutterManifest manifest =
-          await new FlutterProject.fromPath('path/to/project').manifest;
-      updateGeneratedXcodeProperties(
-        projectPath: 'path/to/project',
-        manifest: manifest,
+      final FlutterProject project = new FlutterProject.fromPath('path/to/project');
+      await updateGeneratedXcodeProperties(
+        project: project,
         buildInfo: buildInfo,
         previewDart2: true,
       );
@@ -391,13 +382,13 @@ Information about project "Runner":
       temp.deleteSync(recursive: true);
     });
 
-    Future<String> createMinimalProject(String manifest) async {
+    FlutterProject createMinimalProject(String manifest) {
       final Directory directory = temp.childDirectory('ios_project');
       final File manifestFile = directory.childFile('pubspec.yaml');
       manifestFile.createSync(recursive: true);
       manifestFile.writeAsStringSync(manifest);
 
-      return directory.path;
+      return new FlutterProject(directory);
     }
 
     String propertyFor(String key, File file) {
@@ -415,19 +406,16 @@ Information about project "Runner":
       String expectedBuildName,
       String expectedBuildNumber,
     }) async {
-      final String projectPath = await createMinimalProject(manifestString);
+      final FlutterProject project = createMinimalProject(manifestString);
 
-      final FlutterManifest manifest =
-          await new FlutterProject.fromPath(projectPath).manifest;
-      updateGeneratedXcodeProperties(
-        projectPath: projectPath,
-        manifest: manifest,
+      await updateGeneratedXcodeProperties(
+        project: project,
         buildInfo: buildInfo,
         targetOverride: bundle.defaultMainPath,
         previewDart2: false,
       );
 
-      final String propertiesPath = fs.path.join(projectPath, 'ios', 'Flutter', 'Generated.xcconfig');
+      final String propertiesPath = fs.path.join(project.directory.path, 'ios', 'Flutter', 'Generated.xcconfig');
       final File localPropertiesFile = fs.file(propertiesPath);
 
       expect(propertyFor('FLUTTER_BUILD_NAME', localPropertiesFile), expectedBuildName);

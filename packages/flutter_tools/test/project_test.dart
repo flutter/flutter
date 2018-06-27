@@ -17,8 +17,7 @@ void main() {
       final Directory directory = fs.directory('myproject');
       expect(
         new FlutterProject(directory).directory.absolute.path,
-        directory.absolute.path,
-      );
+        directory.absolute.path,);
       expect(
         new FlutterProject.fromPath(directory.path).directory.absolute.path,
         directory.absolute.path,
@@ -127,13 +126,6 @@ void testInMemory(String description, Future<Null> testMethod()) {
       FileSystem: () => new MemoryFileSystem(),
     },
   );
-}
-
-void addPubPackages(Directory directory) {
-  directory.childFile('pubspec.yaml')
-    ..createSync(recursive: true);
-  directory.childFile('.packages')
-    ..createSync(recursive: true);
 }
 
 void addIosWithBundleId(Directory directory, String id) {

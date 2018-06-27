@@ -4,6 +4,8 @@
 
 import 'dart:async';
 
+import 'package:meta/meta.dart';
+
 import '../android/android_sdk.dart';
 import '../artifacts.dart';
 import '../base/common.dart';
@@ -14,10 +16,10 @@ import '../base/platform.dart';
 import '../base/process.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
-import '../bundle.dart' as bundle;
 import '../cache.dart';
 import '../flutter_manifest.dart';
 import '../globals.dart';
+import '../project.dart';
 import 'android_sdk.dart';
 import 'android_studio.dart';
 
@@ -94,7 +96,7 @@ Future<GradleProject> _gradleProject() async {
 // of calculating the app properties using Gradle. This may take minutes.
 Future<GradleProject> _readGradleProject() async {
   final String gradle = await _ensureGradle();
-  await updateLocalProperties();
+  await updateLocalProperties(project: new FlutterProject(fs.currentDirectory));
   try {
     final Status status = logger.startProgress('Resolving dependencies...', expectSlowOperation: true);
     final RunResult runResult = await runCheckedAsync(
@@ -199,28 +201,12 @@ distributionUrl=https\\://services.gradle.org/distributions/gradle-$gradleVersio
 /// Overwrite android/local.properties in the specified Flutter project, if needed.
 ///
 /// Throws, if `pubspec.yaml` or Android SDK cannot be located.
-Future<void> updateLocalProperties({String projectPath, BuildInfo buildInfo}) async {
-  final Directory android = (projectPath == null)
-      ? fs.directory('android')
-      : fs.directory(fs.path.join(projectPath, 'android'));
-  final String flutterManifest = (projectPath == null)
-      ? fs.path.join(bundle.defaultManifestPath)
-      : fs.path.join(projectPath, bundle.defaultManifestPath);
+Future<void> updateLocalProperties({@required FlutterProject project, BuildInfo buildInfo}) async {
   if (androidSdk == null) {
     throwToolExit('Unable to locate Android SDK. Please run `flutter doctor` for more details.');
   }
-  FlutterManifest manifest;
-  try {
-    manifest = await FlutterManifest.createFromPath(flutterManifest);
-  } catch (error) {
-    throwToolExit('Failed to load pubspec.yaml: $error');
-  }
-  updateLocalPropertiesSync(android, manifest, buildInfo);
-}
 
-/// Overwrite local.properties in the specified directory, if needed.
-void updateLocalPropertiesSync(Directory android, FlutterManifest manifest, [BuildInfo buildInfo]) {
-  final File localProperties = android.childFile('local.properties');
+  final File localProperties = await project.androidLocalPropertiesFile;
   bool changed = false;
 
   SettingsFile settings;
@@ -238,6 +224,8 @@ void updateLocalPropertiesSync(Directory android, FlutterManifest manifest, [Bui
     }
   }
 
+  final FlutterManifest manifest = await project.manifest;
+
   if (androidSdk != null)
     changeIfNecessary('sdk.dir', escapePath(androidSdk.directory));
   changeIfNecessary('flutter.sdk', escapePath(Cache.flutterRoot));
@@ -254,7 +242,11 @@ void updateLocalPropertiesSync(Directory android, FlutterManifest manifest, [Bui
     settings.writeContents(localProperties);
 }
 
-Future<Null> buildGradleProject(BuildInfo buildInfo, String target) async {
+Future<Null> buildGradleProject({
+  @required FlutterProject project,
+  @required BuildInfo buildInfo,
+  @required String target,
+}) async {
   // Update the local.properties file with the build mode, version name and code.
   // FlutterPlugin v1 reads local.properties to determine build mode. Plugin v2
   // uses the standard Android way to determine what to build, but we still
@@ -263,7 +255,7 @@ Future<Null> buildGradleProject(BuildInfo buildInfo, String target) async {
   // and can be overwritten with flutter build command.
   // The default Gradle script reads the version name and number
   // from the local.properties file.
-  await updateLocalProperties(buildInfo: buildInfo);
+  await updateLocalProperties(project: project, buildInfo: buildInfo);
 
   final String gradle = await _ensureGradle();
 

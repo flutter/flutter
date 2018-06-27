@@ -67,6 +67,57 @@ class FlutterProject {
   /// The generated IosModule sub project of this module project.
   IosModuleProject get iosModule => new IosModuleProject(directory.childDirectory('.ios'));
 
+  Future<File> get androidLocalPropertiesFile {
+    return _androidLocalPropertiesFile ??= manifest.then((FlutterManifest manifest) {
+      return directory.childDirectory(manifest.isModule ? '.android' : 'android')
+          .childFile('local.properties');
+    });
+  }
+  Future<File> _androidLocalPropertiesFile;
+
+  Future<File> get generatedXcodePropertiesFile {
+    return _generatedXcodeProperties ??= manifest.then((FlutterManifest manifest) {
+      return directory.childDirectory(manifest.isModule ? '.ios' : 'ios')
+          .childDirectory('Flutter')
+          .childFile('Generated.xcconfig');
+    });
+  }
+  Future<File> _generatedXcodeProperties;
+
+  File get flutterPluginsDotFile {
+    return _flutterPluginsDotFile ??= directory.childFile('.flutter-plugins');
+  }
+  File _flutterPluginsDotFile;
+
+  Future<Directory> get androidPluginRegistrantDirectory async {
+    return _androidPluginRegistrantDirectory ??= manifest.then((FlutterManifest manifest) {
+      if (manifest.isModule) {
+        return directory.childDirectory('.android').childDirectory('Flutter');
+      } else {
+        return directory.childDirectory('android').childDirectory('app');
+      }
+    });
+  }
+  Future<Directory> _androidPluginRegistrantDirectory;
+
+  Future<Directory> get iosPluginRegistrantDirectory async {
+    return _iosPluginRegistrantDirectory ??= manifest.then((FlutterManifest manifest) {
+      if (manifest.isModule) {
+        // In a module create the GeneratedPluginRegistrant as a pod to be included
+        // from a hosting app.
+        return directory
+            .childDirectory('.ios')
+            .childDirectory('Flutter')
+            .childDirectory('FlutterPluginRegistrant');
+      } else {
+        // For a non-module create the GeneratedPluginRegistrant as source files
+        // directly in the iOS project.
+        return directory.childDirectory('ios').childDirectory('Runner');
+      }
+    });
+  }
+  Future<Directory> _iosPluginRegistrantDirectory;
+
   /// Returns true if this project has an example application
   bool get hasExampleApp => _exampleDirectory.childFile('pubspec.yaml').existsSync();
 
@@ -86,11 +137,11 @@ class FlutterProject {
     }
     final FlutterManifest manifest = await this.manifest;
     if (manifest.isModule) {
-      await androidModule.ensureReadyForPlatformSpecificTooling(manifest);
-      await iosModule.ensureReadyForPlatformSpecificTooling(manifest);
+      await androidModule.ensureReadyForPlatformSpecificTooling(this);
+      await iosModule.ensureReadyForPlatformSpecificTooling();
     }
-    xcode.generateXcodeProperties(projectPath: directory.path, manifest: manifest);
-    injectPlugins(projectPath: directory.path, manifest: manifest);
+    await xcode.generateXcodeProperties(project: this);
+    await injectPlugins(project: this);
   }
 }
 
@@ -100,6 +151,20 @@ class IosProject {
   IosProject(this.directory);
 
   final Directory directory;
+
+  /// The xcode config file for [mode].
+  File xcodeConfigFor(String mode) {
+    return directory.childDirectory('Flutter').childFile('$mode.xcconfig');
+  }
+
+  /// The 'Podfile'.
+  File get podfile => directory.childFile('Podfile');
+
+  /// The 'Podfile.lock'.
+  File get podfileLock => directory.childFile('Podfile.lock');
+
+  /// The 'Manifest.lock'.
+  File get podManifestLock => directory.childDirectory('Pods').childFile('Manifest.lock');
 
   Future<String> productBundleIdentifier() {
     final File projectFile = directory.childDirectory('Runner.xcodeproj').childFile('project.pbxproj');
@@ -114,7 +179,7 @@ class IosModuleProject {
 
   final Directory directory;
 
-  Future<void> ensureReadyForPlatformSpecificTooling(FlutterManifest manifest) async {
+  Future<void> ensureReadyForPlatformSpecificTooling() async {
     if (_shouldRegenerate()) {
       final Template template = new Template.fromName(fs.path.join('module', 'ios'));
       template.render(directory, <String, dynamic>{}, printStatusWhenWriting: false);
@@ -153,15 +218,15 @@ class AndroidModuleProject {
 
   final Directory directory;
 
-  Future<void> ensureReadyForPlatformSpecificTooling(FlutterManifest manifest) async {
+  Future<void> ensureReadyForPlatformSpecificTooling(FlutterProject project) async {
     if (_shouldRegenerate()) {
       final Template template = new Template.fromName(fs.path.join('module', 'android'));
       template.render(directory, <String, dynamic>{
-        'androidIdentifier': manifest.moduleDescriptor['androidPackage'],
+        'androidIdentifier': (await project.manifest).moduleDescriptor['androidPackage'],
       }, printStatusWhenWriting: false);
       gradle.injectGradleWrapper(directory);
     }
-    gradle.updateLocalPropertiesSync(directory, manifest);
+    await gradle.updateLocalProperties(project: project);
   }
 
   bool _shouldRegenerate() {

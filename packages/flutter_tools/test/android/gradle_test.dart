@@ -8,6 +8,7 @@ import 'package:flutter_tools/src/android/gradle.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
+import 'package:flutter_tools/src/project.dart';
 import 'package:test/test.dart';
 
 import '../src/common.dart';
@@ -25,7 +26,7 @@ void main() {
         // This test is written to fail if our bots get Android SDKs in the future: shouldBeToolExit
         // will be null and our expectation would fail. That would remind us to make these tests
         // hermetic before adding Android SDKs to the bots.
-        await updateLocalProperties();
+        await updateLocalProperties(project: new FlutterProject(fs.currentDirectory));
       } on Exception catch (e) {
         shouldBeToolExit = e;
       }
@@ -143,13 +144,13 @@ someOtherProperty: someOtherValue
       temp.deleteSync(recursive: true);
     });
 
-    Future<String> createMinimalProject(String manifest) async {
+    FlutterProject createMinimalProject(String manifest) {
       final Directory directory = temp.childDirectory('android_project');
       final File manifestFile = directory.childFile('pubspec.yaml');
       manifestFile.createSync(recursive: true);
       manifestFile.writeAsStringSync(manifest);
 
-      return directory.path;
+      return new FlutterProject(directory);
     }
 
     String propertyFor(String key, File file) {
@@ -166,13 +167,12 @@ someOtherProperty: someOtherValue
       String expectedBuildName,
       String expectedBuildNumber,
     }) async {
-      final String projectPath = await createMinimalProject(manifest);
+      final FlutterProject project = createMinimalProject(manifest);
 
       try {
-        await updateLocalProperties(projectPath: projectPath, buildInfo: buildInfo);
+        await updateLocalProperties(project: project, buildInfo: buildInfo);
 
-        final String propertiesPath = fs.path.join(projectPath, 'android', 'local.properties');
-        final File localPropertiesFile = fs.file(propertiesPath);
+        final File localPropertiesFile = await project.androidLocalPropertiesFile;
 
         expect(propertyFor('flutter.versionName', localPropertiesFile), expectedBuildName);
         expect(propertyFor('flutter.versionCode', localPropertiesFile), expectedBuildNumber);
