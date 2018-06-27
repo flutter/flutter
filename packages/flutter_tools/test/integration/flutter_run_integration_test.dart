@@ -9,25 +9,23 @@ import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:test/test.dart';
 import 'package:vm_service_client/vm_service_client.dart';
 
+import 'test_data/basic_project.dart';
 import 'test_driver.dart';
-import 'test_utils.dart';
 
-Directory _tempDir;
+BasicProject _project = new BasicProject();
 FlutterTestDriver _flutter;
 
 void main() {
-
   setUp(() async {
-    _tempDir = await fs.systemTempDirectory.createTemp('test_app');
-    await _setupSampleProject();
-    _flutter = new FlutterTestDriver(_tempDir); 
+    final Directory tempDir = await fs.systemTempDirectory.createTemp('test_app');
+    await _project.setUpIn(tempDir);
+    _flutter = new FlutterTestDriver(tempDir);
   });
 
   tearDown(() async {
     try {
       await _flutter.stop();
-      _tempDir?.deleteSync(recursive: true);
-      _tempDir = null;
+      _project.cleanup();
     } catch (e) {
       // Don't fail tests if we failed to clean up temp folder.
     }
@@ -35,20 +33,17 @@ void main() {
 
   Future<VMIsolate> breakInBuildMethod(FlutterTestDriver flutter) async {
     return _flutter.breakAt(
-      fs.path.join(_tempDir.path, 'lib', 'main.dart'),
-      9
-    );
+        _project.buildMethodBreakpointFile,
+        _project.buildMethodBreakpointLine);
   }
 
   Future<VMIsolate> breakInTopLevelFunction(FlutterTestDriver flutter) async {
     return _flutter.breakAt(
-      fs.path.join(_tempDir.path, 'lib', 'main.dart'),
-      17
-    );
+        _project.topLevelFunctionBreakpointFile,
+        _project.topLevelFunctionBreakpointLine);
   }
 
   group('FlutterTesterDevice', () {
-
     test('can hot reload', () async {
       await _flutter.run();
       await _flutter.hotReload();
@@ -59,8 +54,8 @@ void main() {
       
       // Ensure we hit the breakpoint.
       final VMIsolate isolate = await _flutter.breakAt(
-        new Uri.file(fs.path.join(_tempDir.path, 'lib', 'main.dart')).toString(),
-        9
+        new Uri.file(_project.breakpointFile).toString(),
+        _project.breakpointLine
       );
       expect(isolate.pauseEvent, const isInstanceOf<VMPauseBreakpointEvent>());
     }, skip: true); // https://github.com/flutter/flutter/issues/18441
@@ -130,34 +125,5 @@ void main() {
       await breakInBuildMethod(_flutter);
       await evaluateComplexReturningExpressions();
     }, skip: true); // https://github.com/flutter/flutter/issues/18678
-
   }, timeout: const Timeout.factor(3));
-}
-
-Future<void> _setupSampleProject() async {
-  writePubspec(_tempDir.path);
-  writePackages(_tempDir.path);
-  await getPackages(_tempDir.path);
-  
-  final String mainPath = fs.path.join(_tempDir.path, 'lib', 'main.dart');
-  writeFile(mainPath, r'''
-  import 'package:flutter/material.dart';
-  
-  void main() => runApp(new MyApp());
-  
-  class MyApp extends StatelessWidget {
-    @override
-    Widget build(BuildContext context) {
-      topLevelFunction();
-      return new MaterialApp(
-  title: 'Flutter Demo',
-  home: new Container(),
-      );
-    }
-  }
-
-  topLevelFunction() {
-    print("test");
-  }
-  ''');
 }
