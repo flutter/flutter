@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter_tools/src/base/file_system.dart';
-
 import 'test_project.dart';
 
 class BasicProject extends TestProject {
@@ -44,6 +42,6 @@ class BasicProject extends TestProject {
   String get buildMethodBreakpointFile => breakpointFile;
   int get buildMethodBreakpointLine => breakpointLine;
 
-  String get topLevelFunctionBreakpointFile => fs.path.join(dir.path, 'lib', 'main.dart');
+  String get topLevelFunctionBreakpointFile => breakpointFile;
   int get topLevelFunctionBreakpointLine => lineContaining(main, '// TOP LEVEL BREAKPOINT');
 }
