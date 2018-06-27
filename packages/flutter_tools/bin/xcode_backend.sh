@@ -167,7 +167,7 @@ BuildApp() {
   fi
 
   local plistPath="${project_path}/ios/Flutter/AppFrameworkInfo.plist"
-  if [[ -e "${project_path/.ios}" ]]; then
+  if [[ -e "${project_path}/.ios" ]]; then
     plistPath="${project_path}/.ios/Flutter/AppFrameworkInfo.plist"
   fi
 
