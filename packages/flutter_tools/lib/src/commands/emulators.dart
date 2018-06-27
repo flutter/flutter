@@ -77,7 +77,7 @@ class EmulatorsCommand extends FlutterCommand {
     }
   }
 
-  Future<Null> _createEmulator(String name) async {
+  Future<Null> _createEmulator([String name]) async {
     final CreateEmulatorResult createResult =
         await emulatorManager.createEmulator(name);
 
