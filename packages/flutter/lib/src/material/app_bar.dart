@@ -478,8 +478,8 @@ class _AppBarState extends State<AppBar> {
     }
     final Brightness brightness = widget.brightness ?? themeData.primaryColorBrightness;
     final SystemUiOverlayStyle overlayStyle = brightness == Brightness.dark
-        ? SystemUiOverlayStyle.dark
-        : SystemUiOverlayStyle.light;
+        ? SystemUiOverlayStyle.light
+        : SystemUiOverlayStyle.dark;
 
     return new Semantics(
       container: true,
