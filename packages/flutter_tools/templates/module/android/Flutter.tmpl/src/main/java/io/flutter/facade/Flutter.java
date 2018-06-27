@@ -6,10 +6,10 @@ import android.arch.lifecycle.LifecycleObserver;
 import android.arch.lifecycle.OnLifecycleEvent;
 import android.content.Context;
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
-import android.view.View;
+import android.support.annotation.NonNull;
 
-import io.flutter.app.FlutterActivityDelegate;
+import io.flutter.plugin.common.BasicMessageChannel;
+import io.flutter.plugin.common.StringCodec;
 import io.flutter.view.FlutterMain;
 import io.flutter.view.FlutterNativeView;
 import io.flutter.view.FlutterView;
@@ -27,11 +27,24 @@ public final class Flutter {
     // to prevent instantiation
   }
 
-  public static void startInitialization(Context applicationContext) {
+  /**
+   * Initiates the Dart VM. Calling this method at an early point may help decreasing time to first
+   * frame for a subsequently created {@link FlutterView}.
+   *
+   * @param applicationContext the application's {@link Context}
+   */
+  public static void startInitialization(@NonNull Context applicationContext) {
     FlutterMain.startInitialization(applicationContext, null);
   }
 
-  public static Fragment createFragment(String route) {
+  /**
+   * Creates a {@link FlutterFragment} managing a {@link FlutterView}.
+   *
+   * @param route the route String for the {@link FlutterView}
+   * @return a {@link FlutterFragment}
+   */
+  @NonNull
+  public static FlutterFragment createFragment(String route) {
     final FlutterFragment fragment = new FlutterFragment();
     final Bundle args = new Bundle();
     args.putString(FlutterFragment.ARG_ROUTE, route);
@@ -39,60 +52,69 @@ public final class Flutter {
     return fragment;
   }
 
-  public static View createView(final Activity activity, final Lifecycle lifecycle, final String route) {
+  /**
+   * Creates a {@link FlutterView} linked to the specified {@link Activity} and {@link Lifecycle}
+   * and whose contents is determined using the specified route {@link String}.
+   *
+   * @param activity an {@link Activity}
+   * @param lifecycle a {@link Lifecycle}
+   * @param route a route {@link String}
+   * @return a {@link FlutterView}
+   */
+  @NonNull
+  public static FlutterView createView(@NonNull final Activity activity, @NonNull final Lifecycle lifecycle, final String route) {
     FlutterMain.startInitialization(activity.getApplicationContext());
     FlutterMain.ensureInitializationComplete(activity.getApplicationContext(), null);
-    final FlutterActivityDelegate delegate = new FlutterActivityDelegate(activity, new FlutterActivityDelegate.ViewFactory() {
+    final FlutterNativeView nativeView = new FlutterNativeView(activity);
+    final FlutterView flutterView = new FlutterView(activity, null, nativeView) {
+      private final BasicMessageChannel<String> lifecycleMessages = new BasicMessageChannel<>(this, "flutter/lifecycle", StringCodec.INSTANCE);
       @Override
-      public FlutterView createFlutterView(Context context) {
-        final FlutterNativeView nativeView = new FlutterNativeView(context);
-        final FlutterView flutterView = new FlutterView(activity, null, nativeView);
-        flutterView.setInitialRoute(route);
-        return flutterView;
+      public void onFirstFrame() {
+        super.onFirstFrame();
+        setAlpha(1.0f);
       }
 
       @Override
-      public boolean retainFlutterNativeView() {
-        return false;
+      public void onPostResume() {
+        // Overriding default behavior to avoid dictating system UI via PlatformPlugin.
+        lifecycleMessages.send("AppLifecycleState.resumed");
       }
-
-      @Override
-      public FlutterNativeView createFlutterNativeView() {
-        throw new UnsupportedOperationException();
-      }
-    });
+    };
+    flutterView.setInitialRoute(route);
+    final String appBundlePath = FlutterMain.findAppBundlePath(activity.getApplicationContext());
     lifecycle.addObserver(new LifecycleObserver() {
       @OnLifecycleEvent(Lifecycle.Event.ON_CREATE)
       public void onCreate() {
-        delegate.onCreate(null);
-        GeneratedPluginRegistrant.registerWith(delegate);
+        flutterView.runFromBundle(appBundlePath, null, "main", true);
+        GeneratedPluginRegistrant.registerWith(flutterView.getPluginRegistry());
       }
 
       @OnLifecycleEvent(Lifecycle.Event.ON_START)
       public void onStart() {
-        delegate.onStart();
+        flutterView.onStart();
       }
 
       @OnLifecycleEvent(Lifecycle.Event.ON_RESUME)
       public void onResume() {
-        delegate.onResume();
+        flutterView.onPostResume();
       }
 
       @OnLifecycleEvent(Lifecycle.Event.ON_PAUSE)
       public void onPause() {
-        delegate.onPause();
+        flutterView.onPause();
       }
 
       @OnLifecycleEvent(Lifecycle.Event.ON_STOP)
       public void onStop() {
-        delegate.onStop();
+        flutterView.onStop();
       }
 
       @OnLifecycleEvent(Lifecycle.Event.ON_DESTROY)
       public void onDestroy() {
-        delegate.onDestroy();
+        flutterView.destroy();
       }
     });
-    return delegate.getFlutterView();
+    flutterView.setAlpha(0.0f);
+    return flutterView;
   }
 }
