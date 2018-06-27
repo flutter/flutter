@@ -103,6 +103,6 @@ class MyApp extends StatelessWidget {
       expect(device.isRunning, true);
 
       expect(await device.stopApp(null), isTrue);
-    });
+    }, skip: true);
   });
 }
