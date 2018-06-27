@@ -36,7 +36,7 @@ void main() {
       <String>['git', 'rev-parse', '--abbrev-ref', '--symbolic', '@{u}'],
       workingDirectory: anyNamed('workingDirectory'),
       environment: anyNamed('environment'),
-    )).thenReturn(new ProcessResult(101, 0, 'channel', ''));
+    )).thenReturn(new ProcessResult(101, 0, 'master', ''));
     when(mockProcessManager.runSync(
       <String>['git', 'rev-parse', '--abbrev-ref', 'HEAD'],
       workingDirectory: anyNamed('workingDirectory'),
