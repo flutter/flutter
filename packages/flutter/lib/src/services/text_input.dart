@@ -185,9 +185,18 @@ enum TextInputAction {
 
 /// Controls the visual appearance of the text input control.
 ///
+/// Many [TextInputAction]s are common between Android and iOS. However, if an
+/// [inputAction] is provided that is not supported by the current
+/// platform, an error will be thrown when the corresponding text input
+/// is attached. For example, providing iOS's "emergencyCall" action when
+/// running on an Android device will result in an error. Appropriate
+/// [inputAction]s can be chosen by checking the current platform and then
+/// selecting the appropriate action.
+///
 /// See also:
 ///
 ///  * [TextInput.attach]
+///  * [TextInputAction]
 @immutable
 class TextInputConfiguration {
   /// Creates configuration information for a text input control.
@@ -529,7 +538,7 @@ class TextInput {
   static TextInputConnection attach(TextInputClient client, TextInputConfiguration configuration) {
     assert(client != null);
     assert(configuration != null);
-    _ensureInputActionWorksOnPlatform(configuration.inputAction);
+    assert(_debugEnsureInputActionWorksOnPlatform(configuration.inputAction));
     final TextInputConnection connection = new TextInputConnection._(client);
     _clientHandler._currentConnection = connection;
     SystemChannels.textInput.invokeMethod(
@@ -539,7 +548,7 @@ class TextInput {
     return connection;
   }
 
-  static void _ensureInputActionWorksOnPlatform(TextInputAction inputAction) {
+  static bool _debugEnsureInputActionWorksOnPlatform(TextInputAction inputAction) {
     if (Platform.isIOS) {
       assert(
         _iOSSupportedInputActions.contains(inputAction),
@@ -551,5 +560,6 @@ class TextInput {
         'The requested TextInputAction "$inputAction" is not supported on Android.',
       );
     }
+    return true;
   }
 }

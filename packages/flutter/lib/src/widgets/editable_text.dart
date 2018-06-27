@@ -133,6 +133,22 @@ class TextEditingController extends ValueNotifier<TextEditingValue> {
 /// movement. This widget does not provide any focus management (e.g.,
 /// tap-to-focus).
 ///
+/// ## Input Actions
+///
+/// A [TextInputAction] can be provided to customize the appearance of the
+/// action button on the soft keyboard for Android and iOS. The default action
+/// is [TextInputAction.done].
+///
+/// Many [TextInputAction]s are common between Android and iOS. However, if an
+/// [inputAction] is provided that is not supported by the current
+/// platform, an error will be thrown when the corresponding EditableText
+/// receives focus. For example, providing iOS's "emergencyCall" action when
+/// running on an Android device will result in an error. Appropriate
+/// [inputAction]s can be chosen by checking the current platform and then
+/// selecting the appropriate action.
+///
+/// ## Lifecycle
+///
 /// Upon completion of editing, like pressing the "done" button on the keyboard,
 /// two actions take place:
 ///
@@ -300,7 +316,7 @@ class EditableText extends StatefulWidget {
   /// Called when the text being edited changes.
   final ValueChanged<String> onChanged;
 
-  /// Called when the user submits editable content (ex: user presses the "done"
+  /// Called when the user submits editable content (e.g., user presses the "done"
   /// button on the keyboard).
   ///
   /// The default implementation of [onEditingComplete] executes 2 different
