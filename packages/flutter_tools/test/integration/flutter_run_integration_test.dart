@@ -11,7 +11,7 @@ import 'package:vm_service_client/vm_service_client.dart';
 
 import '../src/context.dart';
 import 'flutter_test_driver.dart';
-import 'util.dart';
+import 'test_utils.dart';
 
 Directory _tempDir;
 FlutterTestDriver _flutter;
