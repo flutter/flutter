@@ -133,7 +133,7 @@ class RenderEditable extends RenderBox {
     this.ignorePointer = false,
     bool obscureText = false,
     Locale locale,
-    double cursorWidth,
+    double cursorWidth = 2.0,
     Radius cursorRadius,
   }) : assert(textAlign != null),
        assert(textDirection != null, 'RenderEditable created without a textDirection.'),
@@ -387,7 +387,7 @@ class RenderEditable extends RenderBox {
 
   /// How thick the cursor will be.
   double get cursorWidth => _cursorWidth;
-  double _cursorWidth;
+  double _cursorWidth = 2.0;
   set cursorWidth(double value) {
     if (_cursorWidth == value)
       return;
