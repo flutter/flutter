@@ -258,7 +258,8 @@ class SemanticsData extends Diagnosticable {
   /// The custom accessibility actions enabled for this node.
   /// 
   /// See also:
-  ///   [CustomAccessibilityAction], for an explanation of how to use them.
+  /// 
+  ///   * [CustomAccessibilityAction], for an explanation of how to use them.
   final Set<CustomAccessibilityAction> customAccessibilityActions;
 
   /// Whether [flags] contains the given flag.
@@ -281,10 +282,10 @@ class SemanticsData extends Diagnosticable {
         actionSummary.add(describeEnum(action));
     }
     final List<String> customAccessibilityActionSummary = customAccessibilityActions
-      .map<String>((CustomAccessibilityAction action) => action.toString())
+      .map<String>((CustomAccessibilityAction action) => action.label)
       .toList();
     properties.add(new IterableProperty<String>('actions', actionSummary, ifEmpty: null));
-    properties.add(new IterableProperty<String>('customAccessibilityAction', customAccessibilityActionSummary, ifEmpty: null));
+    properties.add(new IterableProperty<String>('customActions', customAccessibilityActionSummary, ifEmpty: null));
 
     final List<String> flagSummary = <String>[];
     for (SemanticsFlag flag in SemanticsFlag.values.values) {
@@ -763,7 +764,16 @@ class SemanticsProperties extends DiagnosticableTree {
   ///  * [FocusNode], [FocusScope], [FocusManager], which manage the input focus
   final VoidCallback onDidLoseAccessibilityFocus;
 
+  /// A map from each supported [CustomAccessibilityAction] to a provided handler.
   /// 
+  /// The handler associated with each custom action is invoked whenever a
+  /// semantics event of type [SemanticsEvent.customEvent] is recieved. The
+  /// provided argument will be an identifier used to retrieve an instance of
+  /// a custom action which can then retrieve the correct handler from this map.
+  /// 
+  /// See also:
+  /// 
+  ///   * [CustomAccessibilityAction], for an explaination of custom actions.
   final Map<CustomAccessibilityAction, VoidCallback> customAccessibilityActions;
 
   @override
@@ -1330,7 +1340,6 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
       !_canPerformAction(SemanticsAction.decrease) || (_value == '') == (_decreasedValue == ''),
       'A SemanticsNode with action "increase" needs to be annotated with either both "value" and "decreasedValue" or neither',
     );
-    //assert(_localContextActions.isNotEmpty && _canPerformAction(SemanticsAction.localContextAction) == true || _localContextActions.isEmpty);
   }
 
 
@@ -1587,10 +1596,10 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
     }
     final List<String> actions = _actions.keys.map((SemanticsAction action) => describeEnum(action)).toList()..sort();
     final List<String> customAccessibilityActions = _customAccessibilityActions.keys
-      .map<String>((CustomAccessibilityAction action) => action.toString())
+      .map<String>((CustomAccessibilityAction action) => action.label)
       .toList();
     properties.add(new IterableProperty<String>('actions', actions, ifEmpty: null));
-    properties.add(new IterableProperty<String>('customAccessibilityActions', customAccessibilityActions, ifEmpty: null));
+    properties.add(new IterableProperty<String>('customActions', customAccessibilityActions, ifEmpty: null));
     final List<String> flags = SemanticsFlag.values.values.where((SemanticsFlag flag) => _hasFlag(flag)).map((SemanticsFlag flag) => flag.toString().substring('SemanticsFlag.'.length)).toList();
     properties.add(new IterableProperty<String>('flags', flags, ifEmpty: null));
     properties.add(new FlagProperty('isInvisible', value: isInvisible, ifTrue: 'invisible'));
@@ -1990,7 +1999,7 @@ class SemanticsOwner extends ChangeNotifier {
   void sendSemanticsUpdate() {
     if (_dirtyNodes.isEmpty)
       return;
-    final Set<CustomAccessibilityAction> localContextActions = new Set<CustomAccessibilityAction>();
+    final Set<CustomAccessibilityAction> customAccessibilityActions = new Set<CustomAccessibilityAction>();
     final List<SemanticsNode> visitedNodes = <SemanticsNode>[];
     while (_dirtyNodes.isNotEmpty) {
       final List<SemanticsNode> localDirtyNodes = _dirtyNodes.where((SemanticsNode node) => !_detachedNodes.contains(node)).toList();
@@ -2024,10 +2033,10 @@ class SemanticsOwner extends ChangeNotifier {
       // which happens e.g. when the node is no longer contributing
       // semantics).
       if (node._dirty && node.attached)
-        node._addToUpdate(builder, localContextActions);
+        node._addToUpdate(builder, customAccessibilityActions);
     }
     _dirtyNodes.clear();
-    for (CustomAccessibilityAction action in localContextActions)
+    for (CustomAccessibilityAction action in customAccessibilityActions)
       builder.updateAction(id: CustomAccessibilityAction._getIdentifier(action), label: action.label);
     ui.window.updateSemantics(builder.build());
     notifyListeners();
@@ -2583,25 +2592,12 @@ class SemanticsConfiguration {
     _hasBeenAnnotated = true;
   }
 
-  
-
-  /// Adds a [CustomAccessibilityAction] to this semantics node.
-  void addLocalContextAction(CustomAccessibilityAction action, VoidCallback callback) {
-    _actionsAsBits |= SemanticsAction.customAction.index;
-    if (!_actions.containsKey(SemanticsAction.customAction)) {
-      _actions[SemanticsAction.customAction] = (dynamic args) {
-        final CustomAccessibilityAction action = CustomAccessibilityAction._getAction(args);
-        if (action == null)
-          return;
-        final VoidCallback callback = _customAccessibilityActions[action];
-        if (callback != null)
-          callback();
-      };
-    }
-    _customAccessibilityActions[action] = callback;
-  }
-
-  /// The handlers for each [CustomAccessibilityAction].
+  /// The handlers for each supported [CustomAccessibilityAction].
+  /// 
+  /// Whenever a custom accessibility action is added to a node, the action
+  /// [SemanticAction.customAction] is automatically added. A handler is 
+  /// created which uses the passed argument to lookup the custom action
+  /// handler from this map and invoke it, if present.
   Map<CustomAccessibilityAction, VoidCallback> get customAccessibilityActions => _customAccessibilityActions;
   Map<CustomAccessibilityAction, VoidCallback> _customAccessibilityActions = <CustomAccessibilityAction, VoidCallback>{};
   set customAccessibilityActions(Map<CustomAccessibilityAction, VoidCallback> value) {
