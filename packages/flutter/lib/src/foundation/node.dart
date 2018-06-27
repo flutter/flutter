@@ -4,6 +4,10 @@
 
 import 'package:meta/meta.dart';
 
+// This file gets mutated by //dev/devicelab/bin/tasks/flutter_test_performance.dart
+// during device lab performance tests. When editing this file, check to make sure
+// that it didn't break that test.
+
 /// An abstract node in a tree.
 ///
 /// AbstractNode has as notion of depth, attachment, and parent, but does not
@@ -142,5 +146,4 @@ class AbstractNode {
     if (attached)
       child.detach();
   }
-
 }

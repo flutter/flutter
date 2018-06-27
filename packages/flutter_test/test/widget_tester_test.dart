@@ -506,6 +506,27 @@ void main() {
       });
     });
   });
+
+  testWidgets('showKeyboard can be called twice', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      new MaterialApp(
+        home: new Material(
+          child: new Center(
+            child: new TextFormField(),
+          ),
+        ),
+      ),
+    );
+    await tester.showKeyboard(find.byType(TextField));
+    tester.testTextInput.receiveAction(TextInputAction.done);
+    await tester.pump();
+    await tester.showKeyboard(find.byType(TextField));
+    tester.testTextInput.receiveAction(TextInputAction.done);
+    await tester.pump();
+    await tester.showKeyboard(find.byType(TextField));
+    await tester.showKeyboard(find.byType(TextField));
+    await tester.pump();
+  });
 }
 
 class FakeMatcher extends AsyncMatcher {
