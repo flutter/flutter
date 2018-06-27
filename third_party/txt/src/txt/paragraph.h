@@ -318,10 +318,14 @@ class Paragraph {
   double GetLineXOffset(double line_total_advance);
 
   // Creates and draws the decorations onto the canvas.
-  void PaintDecorations(SkCanvas* canvas, const PaintRecord& record);
+  void PaintDecorations(SkCanvas* canvas,
+                        const PaintRecord& record,
+                        SkPoint base_offset);
 
   // Draws the background onto the canvas.
-  void PaintBackground(SkCanvas* canvas, const PaintRecord& record);
+  void PaintBackground(SkCanvas* canvas,
+                       const PaintRecord& record,
+                       SkPoint base_offset);
 
   // Obtain a Minikin font collection matching this text style.
   std::shared_ptr<minikin::FontCollection> GetMinikinFontCollectionForStyle(
