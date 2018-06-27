@@ -179,37 +179,41 @@ class _SegmentedControlState<T> extends State<SegmentedControl<T>>
     setupAnimationControllers();
   }
 
+  @override
+  void dispose() {
+    for (AnimationController animationController in selectionControllers) {
+      animationController.dispose();
+    }
+    super.dispose();
+  }
+
   void setupAnimationControllers() {
     for (T key in widget.children.keys) {
-      selectionControllers.add(
-        new AnimationController(
-          duration: _kFadeDuration,
-          vsync: this,
-        )..addListener(() {
+      final AnimationController animationController = new AnimationController(
+        duration: _kFadeDuration,
+        vsync: this,
+      )..addListener(() {
           setState(() {
             // State of background/text colors has changed
           });
-        }),
-      );
+        });
 
       if (widget.groupValue == key) {
-        childTweens.add(forwardBackgroundColorTween);
-      } else {
         childTweens.add(reverseBackgroundColorTween);
+        animationController.forward();
+      } else {
+        childTweens.add(forwardBackgroundColorTween);
       }
+      selectionControllers.add(animationController);
     }
   }
 
   void _onTapDown(T currentKey) {
-    setState(() {
-      _pressedKey = currentKey;
-    });
-  }
-
-  void _onTapUp(TapUpDetails event) {
-    setState(() {
-      _pressedKey = null;
-    });
+    if (_pressedKey == null && currentKey != widget.groupValue) {
+      setState(() {
+        _pressedKey = currentKey;
+      });
+    }
   }
 
   void _onTapCancel() {
@@ -219,41 +223,9 @@ class _SegmentedControlState<T> extends State<SegmentedControl<T>>
   }
 
   void _onTap(T currentKey) {
-    if (currentKey != widget.groupValue) {
+    if (currentKey != widget.groupValue && currentKey == _pressedKey) {
       widget.onValueChanged(currentKey);
-    }
-  }
-
-  @override
-  void dispose() {
-    for (AnimationController animationController in selectionControllers) {
-      animationController.dispose();
-    }
-    super.dispose();
-  }
-
-  @override
-  void didUpdateWidget(SegmentedControl<T> oldWidget) {
-    super.didUpdateWidget(oldWidget);
-
-    if (oldWidget.children != widget.children) {
-      selectionControllers.clear();
-      childTweens.clear();
-      setupAnimationControllers();
-    }
-
-    if (oldWidget.groupValue != widget.groupValue) {
-      int index = 0;
-      for (T key in widget.children.keys) {
-        if (widget.groupValue == key) {
-          childTweens.insert(index, forwardBackgroundColorTween);
-          selectionControllers.elementAt(index).forward();
-        } else {
-          childTweens.insert(index, reverseBackgroundColorTween);
-          selectionControllers.elementAt(index).reverse();
-        }
-        index += 1;
-      }
+      _pressedKey = null;
     }
   }
 
@@ -268,14 +240,36 @@ class _SegmentedControlState<T> extends State<SegmentedControl<T>>
 
   Color getBackgroundColor(int index, T currentKey) {
     if (selectionControllers.elementAt(index).isAnimating) {
-      return childTweens.elementAt(index).evaluate(
-          selectionControllers.elementAt(index));
+      return childTweens.elementAt(index).evaluate(selectionControllers.elementAt(index));
     } else if (widget.groupValue == currentKey) {
       return CupertinoColors.activeBlue;
     } else if (_pressedKey == currentKey) {
       return _kPressedBackground;
     }
     return CupertinoColors.white;
+  }
+
+  @override
+  void didUpdateWidget(SegmentedControl<T> oldWidget) {
+    super.didUpdateWidget(oldWidget);
+
+    selectionControllers.clear();
+    childTweens.clear();
+    setupAnimationControllers();
+
+    if (oldWidget.groupValue != widget.groupValue) {
+      int index = 0;
+      for (T key in widget.children.keys) {
+        if (widget.groupValue == key) {
+          childTweens.insert(index, forwardBackgroundColorTween);
+          selectionControllers.elementAt(index).forward();
+        } else {
+          childTweens.insert(index, reverseBackgroundColorTween);
+          selectionControllers.elementAt(index).reverse();
+        }
+        index += 1;
+      }
+    }
   }
 
   @override
@@ -301,7 +295,6 @@ class _SegmentedControlState<T> extends State<SegmentedControl<T>>
         onTapDown: (TapDownDetails event) {
           _onTapDown(currentKey);
         },
-        onTapUp: _onTapUp,
         onTapCancel: _onTapCancel,
         onTap: () {
           _onTap(currentKey);
@@ -400,16 +393,6 @@ class _RenderSegmentedControl<T> extends RenderBox
     addAll(children);
   }
 
-  List<Color> get backgroundColors => _backgroundColors;
-  List<Color> _backgroundColors;
-  set backgroundColors(List<Color> value) {
-    if (_backgroundColors == value) {
-      return;
-    }
-    _backgroundColors = value;
-    markNeedsPaint();
-  }
-
   int get selectedIndex => _selectedIndex;
   int _selectedIndex;
   set selectedIndex(int value) {
@@ -438,6 +421,16 @@ class _RenderSegmentedControl<T> extends RenderBox
     }
     _textDirection = value;
     markNeedsLayout();
+  }
+
+  List<Color> get backgroundColors => _backgroundColors;
+  List<Color> _backgroundColors;
+  set backgroundColors(List<Color> value) {
+    if (_backgroundColors == value) {
+      return;
+    }
+    _backgroundColors = value;
+    markNeedsPaint();
   }
 
   final Paint _outlinePaint = new Paint()
@@ -519,9 +512,11 @@ class _RenderSegmentedControl<T> extends RenderBox
       final Rect childRect = new Rect.fromLTWH(start, 0.0, child.size.width, child.size.height);
       RRect rChildRect;
       if (child == leftChild) {
-        rChildRect = new RRect.fromRectAndCorners(childRect, topLeft: const Radius.circular(3.0), bottomLeft: const Radius.circular(3.0));
+        rChildRect = new RRect.fromRectAndCorners(childRect, topLeft: const Radius.circular(3.0),
+            bottomLeft: const Radius.circular(3.0));
       } else if (child == rightChild) {
-        rChildRect = new RRect.fromRectAndCorners(childRect, topRight: const Radius.circular(3.0), bottomRight: const Radius.circular(3.0));
+        rChildRect = new RRect.fromRectAndCorners(childRect, topRight: const Radius.circular(3.0),
+            bottomRight: const Radius.circular(3.0));
       } else {
         rChildRect = new RRect.fromRectAndCorners(childRect);
       }
@@ -561,7 +556,6 @@ class _RenderSegmentedControl<T> extends RenderBox
 
     child = firstChild;
     while (child != null) {
-      print(child.getMaxIntrinsicWidth(maxHeight));
       child.layout(childConstraints, parentUsesSize: true);
       child = childAfter(child);
     }
@@ -619,6 +613,14 @@ class _RenderSegmentedControl<T> extends RenderBox
   @override
   bool hitTestChildren(HitTestResult result, {@required Offset position}) {
     assert(position != null);
-    return defaultHitTestChildren(result, position: position);
+    RenderBox child = lastChild;
+    while (child != null) {
+      final _SegmentedControlContainerBoxParentData childParentData = child.parentData;
+      if (childParentData.surroundingRect.contains(position)) {
+        return child.hitTest(result, position: (Offset.zero & child.size).center);
+      }
+      child = childParentData.previousSibling;
+    }
+    return false;
   }
 }
