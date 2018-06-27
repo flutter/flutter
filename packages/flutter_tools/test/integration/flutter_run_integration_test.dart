@@ -9,7 +9,6 @@ import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:test/test.dart';
 import 'package:vm_service_client/vm_service_client.dart';
 
-import '../src/context.dart';
 import 'test_driver.dart';
 import 'test_utils.dart';
 
