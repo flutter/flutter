@@ -134,11 +134,16 @@ class TextEditingController extends ValueNotifier<TextEditingValue> {
 /// tap-to-focus).
 ///
 /// Upon completion of editing, like pressing the "done" button on the keyboard,
-/// two actions take place.
+/// two actions take place:
 ///
-///   1st: Editing is finalized. See [onEditingComplete] for details.
+///   1st: Editing is finalized. The default behavior of this step includes
+///   an invocation of [onChanged]. That default behavior can be overridden.
+///   See [onEditingComplete] for details.
 ///
-///   2nd: [onSubmitted] is invoked, if [onSubmitted] is non-null.
+///   2nd: [onSubmitted] is invoked with the user's input value.
+///
+/// [onSubmitted] can be used to manually move focus to another input widget
+/// when a user finishes with the currently focused input widget.
 ///
 /// Rather than using this widget directly, consider using [TextField], which
 /// is a full-featured, material-design text input field with placeholder text,

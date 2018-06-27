@@ -143,38 +143,39 @@ enum TextInputAction {
   /// "default" on iOS.
   unspecified,
 
-  /// Complete the text input operation.
+  /// Complete the text input operation. Corresponds to "Done" on Android and iOS.
   done,
 
-  /// Complete the text input operation. Corresponds to "go" on Android and iOS.
+  /// Complete the text input operation. Corresponds to "Go" on Android and iOS.
   go,
 
-  /// Complete the text input operation. Corresponds to "search" on Android and
+  /// Complete the text input operation. Corresponds to "Search" on Android and
   /// iOS.
   search,
 
-  /// Complete the text input operation. Corresponds to "send" on Android and
+  /// Complete the text input operation. Corresponds to "Send" on Android and
   /// iOS.
   send,
 
-  /// Complete the text input operation and move focus to the logical "next"
-  /// input. Corresponds to "next" on Android and iOS.
+  /// Complete the text input operation and move focus to the logical "Next"
+  /// input. Corresponds to "Next" on Android and iOS.
   next,
 
-  /// Complete the text input operation and move focus to the logical "previous"
+  /// Complete the text input operation and move focus to the logical "Previous"
   /// input. Android only.
   previous,
 
-  /// Complete the text input operation. iOS only, corresponds to "continue."
+  /// Complete the text input operation. iOS only, corresponds to "Continue."
+  /// This action is only available on iOS 9.0+
   continueAction,
 
-  /// iOS only.
+  /// iOS only, corresponds to "Join".
   join,
 
-  /// iOS only.
+  /// iOS only, corresponds to "Route".
   route,
 
-  /// iOS only.
+  /// iOS only, corresponds to "Emergency Call".
   emergencyCall,
 
   /// The action to take when the enter button is pressed in a multi-line
