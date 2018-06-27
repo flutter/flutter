@@ -68,7 +68,7 @@ void main() {
 
     testUsingContext('create emulator with an empty name does not fail',
         () async {
-      final CreateEmulatorResult res = await emulatorManager.createEmulator('');
+      final CreateEmulatorResult res = await emulatorManager.createEmulator();
       expect(res.success, equals(true));
     }, overrides: <Type, Generator>{
       ProcessManager: () => mockProcessManager,
@@ -79,7 +79,7 @@ void main() {
     testUsingContext('create emulator with a unique name does not throw',
         () async {
       final CreateEmulatorResult res =
-          await emulatorManager.createEmulator('test');
+          await emulatorManager.createEmulator(name: 'test');
       expect(res.success, equals(true));
     }, overrides: <Type, Generator>{
       ProcessManager: () => mockProcessManager,
@@ -89,7 +89,7 @@ void main() {
 
     testUsingContext('create emulator with an existing name errors', () async {
       final CreateEmulatorResult res =
-          await emulatorManager.createEmulator('existing-avd-1');
+          await emulatorManager.createEmulator(name: 'existing-avd-1');
       expect(res.success, equals(false));
     }, overrides: <Type, Generator>{
       ProcessManager: () => mockProcessManager,
@@ -101,18 +101,18 @@ void main() {
         'create emulator without a name but when default exists adds a suffix',
         () async {
       // First will get default name.
-      CreateEmulatorResult res = await emulatorManager.createEmulator('');
+      CreateEmulatorResult res = await emulatorManager.createEmulator();
       expect(res.success, equals(true));
 
       final String defaultName = res.emulatorName;
 
       // Second...
-      res = await emulatorManager.createEmulator('');
+      res = await emulatorManager.createEmulator();
       expect(res.success, equals(true));
       expect(res.emulatorName, equals('${defaultName}_2'));
 
       // Third...
-      res = await emulatorManager.createEmulator('');
+      res = await emulatorManager.createEmulator();
       expect(res.success, equals(true));
       expect(res.emulatorName, equals('${defaultName}_3'));
     }, overrides: <Type, Generator>{

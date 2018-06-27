@@ -46,7 +46,7 @@ class EmulatorsCommand extends FlutterCommand {
     if (argResults.wasParsed('launch')) {
       await _launchEmulator(argResults['launch']);
     } else if (argResults.wasParsed('create')) {
-      await _createEmulator(argResults['name']);
+      await _createEmulator(name: argResults['name']);
     } else {
       final String searchText =
           argResults.rest != null && argResults.rest.isNotEmpty
@@ -77,9 +77,9 @@ class EmulatorsCommand extends FlutterCommand {
     }
   }
 
-  Future<Null> _createEmulator([String name]) async {
+  Future<Null> _createEmulator({String name}) async {
     final CreateEmulatorResult createResult =
-        await emulatorManager.createEmulator(name);
+        await emulatorManager.createEmulator(name: name);
 
     if (createResult.success) {
       printStatus("Emulator '${createResult.emulatorName}' created successfully.");
