@@ -10,7 +10,7 @@ flutter daemon
 
 It runs a persistent, JSON-RPC based server to communicate with devices. IDEs and other tools can start the flutter tool in this mode and get device addition and removal notifications, as well as being able to programmatically start and stop apps on those devices.
 
-A subset of the `flutter daemon` commands/events are also exposed via `flutter run --machine` which allows IDEs and tools to launch flutter applications and interact to send commands like Hot Reload. Which commands/events are available in this mode is documented at the bottom of this document.
+A set of `flutter daemon` commands/events are also exposed via `flutter run --machine` which allows IDEs and tools to launch flutter applications and interact to send commands like Hot Reload. Which commands/events are available in this mode is documented at the bottom of this document.
 
 ## Protocol
 
@@ -76,23 +76,7 @@ It is up to the client to decide how best to display the message; for some clien
 
 ### app domain
 
-#### app.start
-
-The `start()` command is used to start applications.
-
-- `deviceId`: The device to launch the app on; this is required.
-- `projectDirectory`: The project directory; this is required. It is used to determine the application to start.
-- `startPaused`: Start the VM in a paused mode.
-- `route`: A string; the route to use when restoring the application.
-- `mode`: One of either `debug`, `profile`, or `release`.
-- `target`: Optional; the target file to start.
-- `hot`: Optional; whether to start the application using `--hot` mode
-
-On success, returns a map with the fields:
-- `appId`: this is is used when sending app events, and can be used by clients to stop the app (`app.stop`).
-- `deviceId`
-- `directory`
-- `supportsRestart`
+The app domain is only available via `flutter run --machine` and not in `flutter daemon`.
 
 #### app.restart
 
@@ -115,10 +99,6 @@ The `callServiceExtension()` allows clients to make arbitrary calls to service p
 The `stop()` command takes one parameter, `appId`. It returns a `bool` to indicate success or failure in stopping an app.
 
 - `appId`: the id of a previously started app; this is required.
-
-#### app.discover
-
-The `discover()` command takes one parameter, a `deviceId`. It returns a list of applications discovered on the device. Each application is represented by a map with two fields, an `id` - an Android or iOS application id - and an `observatoryDevicePort`. The `observatoryDevicePort` is the device port to connect to to debug the application. The port may first have to be made accessable via `device.forward`.
 
 #### Events
 
