@@ -15,7 +15,7 @@ import 'ios/xcodeproj.dart' as xcode;
 import 'plugins.dart';
 import 'template.dart';
 
-/// Represents the contents of a Flutter project at the specified [projectPath].
+/// Represents the contents of a Flutter project at the specified [directory].
 class FlutterProject {
 
   FlutterProject(this.directory);
