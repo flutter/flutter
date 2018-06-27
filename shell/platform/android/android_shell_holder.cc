@@ -181,21 +181,4 @@ fml::WeakPtr<PlatformViewAndroid> AndroidShellHolder::GetPlatformView() {
   return platform_view_;
 }
 
-void AndroidShellHolder::UpdateAssetManager(
-    fml::RefPtr<blink::AssetManager> asset_manager) {
-  if (!IsValid() || !asset_manager) {
-    return;
-  }
-
-  shell_->GetTaskRunners().GetUITaskRunner()->PostTask(
-      [engine = shell_->GetEngine(),
-       asset_manager = std::move(asset_manager)]() {
-        if (engine) {
-          if (!engine->UpdateAssetManager(std::move(asset_manager))) {
-            FXL_DLOG(ERROR) << "Could not update asset asset manager.";
-          }
-        }
-      });
-}
-
 }  // namespace shell

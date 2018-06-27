@@ -254,69 +254,6 @@ static void RunBundleAndSnapshot(
   ANDROID_SHELL_HOLDER->Launch(std::move(config));
 }
 
-static void RunBundleAndSource(JNIEnv* env,
-                               jobject jcaller,
-                               jlong shell_holder,
-                               jstring jBundlePath,
-                               jstring main,
-                               jstring packages) {
-  auto asset_manager = fml::MakeRefCounted<blink::AssetManager>();
-
-  const auto bundlepath = fml::jni::JavaStringToString(env, jBundlePath);
-
-  if (bundlepath.size() > 0) {
-    auto directory =
-        fml::OpenFile(bundlepath.c_str(), fml::OpenPermission::kRead, true);
-    asset_manager->PushBack(
-        std::make_unique<blink::DirectoryAssetBundle>(std::move(directory)));
-  }
-
-  auto main_file_path = fml::jni::JavaStringToString(env, main);
-  auto packages_file_path = fml::jni::JavaStringToString(env, packages);
-
-  auto config =
-      IsolateConfiguration::CreateForSource(main_file_path, packages_file_path);
-
-  if (!config) {
-    return;
-  }
-
-  RunConfiguration run_configuration(std::move(config),
-                                     std::move(asset_manager));
-
-  ANDROID_SHELL_HOLDER->Launch(std::move(run_configuration));
-}
-
-void SetAssetBundlePathOnUI(JNIEnv* env,
-                            jobject jcaller,
-                            jlong shell_holder,
-                            jstring jBundlePath) {
-  const auto bundlepath = fml::jni::JavaStringToString(env, jBundlePath);
-
-  if (bundlepath.size() == 0) {
-    return;
-  }
-
-  auto directory =
-      fml::OpenFile(bundlepath.c_str(), fml::OpenPermission::kRead, true);
-
-  if (!directory.is_valid()) {
-    return;
-  }
-
-  std::unique_ptr<blink::AssetResolver> directory_asset_bundle =
-      std::make_unique<blink::DirectoryAssetBundle>(std::move(directory));
-
-  if (!directory_asset_bundle->IsValid()) {
-    return;
-  }
-
-  auto asset_manager = fml::MakeRefCounted<blink::AssetManager>();
-  asset_manager->PushBack(std::move(directory_asset_bundle));
-
-  ANDROID_SHELL_HOLDER->UpdateAssetManager(std::move(asset_manager));
-}
-
 static void SetViewportMetrics(JNIEnv* env,
                                jobject jcaller,
                                jlong shell_holder,
@@ -577,17 +514,6 @@ bool PlatformViewAndroid::Register(JNIEnv* env) {
           .signature = "(JLjava/lang/String;Ljava/lang/String;Ljava/lang/"
                        "String;ZLandroid/content/res/AssetManager;)V",
           .fnPtr = reinterpret_cast<void*>(&shell::RunBundleAndSnapshot),
-      },
-      {
-          .name = "nativeRunBundleAndSource",
-          .signature =
-              "(JLjava/lang/String;Ljava/lang/String;Ljava/lang/String;)V",
-          .fnPtr = reinterpret_cast<void*>(&shell::RunBundleAndSource),
-      },
-      {
-          .name = "nativeSetAssetBundlePathOnUI",
-          .signature = "(JLjava/lang/String;)V",
-          .fnPtr = reinterpret_cast<void*>(&shell::SetAssetBundlePathOnUI),
       },
       {
           .name = "nativeDetach",

@@ -646,55 +646,6 @@ public class FlutterView extends SurfaceView
         postRun();
     }
 
-    private void runFromSource(final String assetsDirectory, final String main, final String packages) {
-        Runnable runnable = new Runnable() {
-            public void run() {
-                assertAttached();
-                preRun();
-                mNativeView.runFromSource(assetsDirectory, main, packages);
-                postRun();
-                synchronized (this) {
-                    notify();
-                }
-            }
-        };
-
-        try {
-            synchronized (runnable) {
-                // Post to the Android UI thread and wait for the response.
-                post(runnable);
-                runnable.wait();
-            }
-        } catch (InterruptedException e) {
-            Log.e(TAG, "Thread got interrupted waiting for " +
-                "RunFromSourceRunnable to finish", e);
-        }
-    }
-
-    private void setAssetBundlePath(final String assetsDirectory) {
-        Runnable runnable = new Runnable() {
-            public void run() {
-                assertAttached();
-                mNativeView.setAssetBundlePathOnUI(assetsDirectory);
-                synchronized (this) {
-                    notify();
-                }
-            }
-        };
-
-        try {
-            synchronized (runnable) {
-                // Post to the Android UI thread and wait for the response.
-                post(runnable);
-                runnable.wait();
-            }
-        } catch (InterruptedException e) {
-            Log.e(TAG, "Thread got interrupted waiting for " +
-                "setAssetBundlePath to finish", e);
-        }
-    }
-
-
     /**
      * Return the most recent frame as a bitmap.
      *
