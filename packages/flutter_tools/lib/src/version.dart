@@ -239,10 +239,10 @@ class FlutterVersion {
     final bool installationSeemsOutdated = frameworkAge > kVersionAgeConsideredUpToDate;
 
     // Get whether there's a newer version on the remote. This only goes
-    final DateTime latestFlutterCommitDate = await _getLatestAvailableFlutterDate();
-    final VersionCheckResult remoteVersionStatus =
     // to the server if we haven't checked recently so won't happen on every
     // command.
+    final DateTime latestFlutterCommitDate = await _getLatestAvailableFlutterDate();
+    final VersionCheckResult remoteVersionStatus =
         latestFlutterCommitDate == null
             ? VersionCheckResult.unknown
             : latestFlutterCommitDate.isAfter(localFrameworkCommitDate)
