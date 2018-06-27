@@ -31,6 +31,17 @@ void main() {
       'name': 'GPURasterizer::Draw', 'ph': 'E', 'ts': timeStamp
     };
 
+    List<Map<String, dynamic>> rasterizeTimeSequenceInMillis(List<int> sequence) {
+      var result = new List<Map<String, dynamic>>();
+      int t = 0;
+      for(int duration in sequence) {
+        result.add(begin(t));
+        t += duration * 1000;
+        result.add(end(t));
+      }
+      return result;
+    };
+
     group('frame_count', () {
       test('counts frames', () {
         expect(
@@ -170,6 +181,44 @@ void main() {
               begin(5000),
             ]).computeWorstFrameRasterizerTimeMillis(),
             2.0
+        );
+      });
+    });
+
+    group('percentile_frame_rasterizer_time_millis', () {
+      test('returns null when there is no data', () {
+        expect(summarize(<Map<String, dynamic>>[]).computeWorstFrameRasterizerTimeMillis(), isNull);
+      });
+
+      const List<List<int>> sequences = [
+        [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+        [1, 2, 3, 4, 5],
+        [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
+      ];
+
+      const List<int> p90s = [
+        9,
+        5,
+        18
+      ];
+
+      test('computes 90th frame rasterizer time in milliseconds', () {
+        for(int i = 0; i < sequences.length; ++i) {
+          expect(
+            summarize(rasterizeTimeSequenceInMillis(sequences[i])).computePercentileFrameRasterizerTimeMillis(90.0),
+            p90s[i]
+          );
+        }
+      });
+
+      test('compute 99th frame rasterizer time in milliseconds', () {
+        final List<int> sequence = [];
+        for(int i = 1; i <= 100; ++i) {
+          sequence.add(i);
+        }
+        expect(
+          summarize(rasterizeTimeSequenceInMillis(sequence)).computePercentileFrameRasterizerTimeMillis(99.0),
+          99
         );
       });
     });
