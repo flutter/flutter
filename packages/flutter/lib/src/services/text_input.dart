@@ -166,7 +166,7 @@ enum TextInputAction {
   previous,
 
   /// Complete the text input operation. iOS only, corresponds to "continue."
-  continue_action,
+  continueAction,
 
   /// iOS only.
   join,
@@ -422,7 +422,7 @@ TextInputAction _toTextInputAction(String action) {
     case 'TextInputAction.previuos':
       return TextInputAction.previous;
     case 'TextInputAction.continue_action':
-      return TextInputAction.continue_action;
+      return TextInputAction.continueAction;
     case 'TextInputAction.join':
       return TextInputAction.join;
     case 'TextInputAction.route':
@@ -507,7 +507,7 @@ class TextInput {
     TextInputAction.search,
     TextInputAction.next,
     TextInputAction.newline,
-    TextInputAction.continue_action,
+    TextInputAction.continueAction,
     TextInputAction.join,
     TextInputAction.route,
     TextInputAction.emergencyCall,

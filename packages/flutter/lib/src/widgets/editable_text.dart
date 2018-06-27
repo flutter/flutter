@@ -133,6 +133,13 @@ class TextEditingController extends ValueNotifier<TextEditingValue> {
 /// movement. This widget does not provide any focus management (e.g.,
 /// tap-to-focus).
 ///
+/// Upon completion of editing, like pressing the "done" button on the keyboard,
+/// two actions take place.
+///
+///   1st: Editing is finalized. See [onEditingComplete] for details.
+///
+///   2nd: [onSubmitted] is invoked, if [onSubmitted] is non-null.
+///
 /// Rather than using this widget directly, consider using [TextField], which
 /// is a full-featured, material-design text input field with placeholder text,
 /// labels, and [Form] integration.
@@ -173,6 +180,7 @@ class EditableText extends StatefulWidget {
     TextInputType keyboardType,
     this.textInputAction = TextInputAction.done,
     this.onChanged,
+    this.onEditingComplete,
     this.onSubmitted,
     this.onSelectionChanged,
     List<TextInputFormatter> inputFormatters,
@@ -293,11 +301,11 @@ class EditableText extends StatefulWidget {
   /// The default implementation of [onEditingComplete] executes 2 different
   /// behaviors based on the situation:
   ///
-  ///  - When a completion action is pressed, such as "done," "go," "send," or
-  ///    "search," the user's content is submitted to the [controller] and then
+  ///  - When a completion action is pressed, such as "done", "go", "send", or
+  ///    "search", the user's content is submitted to the [controller] and then
   ///    focus is given up.
   ///
-  ///  - When a non-completion action is pressed, such as "next" or "previous,"
+  ///  - When a non-completion action is pressed, such as "next" or "previous",
   ///    the user's content is submitted to the [controller], but focus is not
   ///    given up because developers may want to immediately move focus to
   ///    another input widget within [onSubmitted].
