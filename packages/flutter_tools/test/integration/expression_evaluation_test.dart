@@ -16,18 +16,26 @@ BasicProject _project = new BasicProject();
 FlutterTestDriver _flutter;
 
 void main() {
-  setUp(() async {
-    final Directory tempDir = await fs.systemTempDirectory.createTemp('test_app');
-    await _project.setUpIn(tempDir);
-    _flutter = new FlutterTestDriver(tempDir);
-  });
+  group('expression evaluation', () {
+    setUp(() async {
+      final Directory tempDir = await fs.systemTempDirectory.createTemp('test_app');
+      await _project.setUpIn(tempDir);
+      _flutter = new FlutterTestDriver(tempDir);
+    });
 
-  tearDown(() async {
-    try {
-      await _flutter.stop();
-      _project.cleanup();
-    } catch (e) {
-      // Don't fail tests if we failed to clean up temp folder.
+    tearDown(() async {
+      try {
+        await _flutter.stop();
+        _project.cleanup();
+      } catch (e) {
+        // Don't fail tests if we failed to clean up temp folder.
+      }
+    });
+
+    Future<VMIsolate> breakInBuildMethod(FlutterTestDriver flutter) async {
+      return _flutter.breakAt(
+          _project.buildMethodBreakpointFile,
+          _project.buildMethodBreakpointLine);
     }
   });
 
