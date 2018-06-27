@@ -52,11 +52,12 @@ class IOSEmulator extends Emulator {
 
     // First run with `-n` to force a device to boot if there isn't already one
     if (!await launchSimulator(<String>['-n']))
-      return false;
+      return;
 
     // Run again to force it to Foreground (using -n doesn't force existing
     // devices to the foreground)
-    return launchSimulator(<String>[]);
+    await launchSimulator(<String>[]);
+    return;
   }
 }
 
