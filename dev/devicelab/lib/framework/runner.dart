@@ -28,9 +28,8 @@ Future<Map<String, dynamic>> runTask(String taskName, { bool silent = false }) a
   if (!file(taskExecutable).existsSync())
     throw 'Executable Dart file not found: $taskExecutable';
 
-  final int vmServicePort = await findAvailablePort();
   final Process runner = await startProcess(dartBin, <String>[
-    '--enable-vm-service=$vmServicePort',
+    '--enable-vm-service=0', // zero causes the system to choose a free port
     '--no-pause-isolates-on-exit',
     taskExecutable,
   ]);
@@ -41,10 +40,17 @@ Future<Map<String, dynamic>> runTask(String taskName, { bool silent = false }) a
     runnerFinished = true;
   });
 
+  final Completer<int> port = new Completer<int>();
+
   final StreamSubscription<String> stdoutSub = runner.stdout
       .transform(const Utf8Decoder())
       .transform(const LineSplitter())
       .listen((String line) {
+    if (!port.isCompleted) {
+      final int portValue = parseServicePort(line, prefix: 'Observatory listening on ');
+      if (portValue != null)
+        port.complete(portValue);
+    }
     if (!silent) {
       stdout.writeln('[$taskName] [STDOUT] $line');
     }
@@ -59,7 +65,7 @@ Future<Map<String, dynamic>> runTask(String taskName, { bool silent = false }) a
 
   String waitingFor = 'connection';
   try {
-    final VMIsolateRef isolate = await _connectToRunnerIsolate(vmServicePort);
+    final VMIsolateRef isolate = await _connectToRunnerIsolate(await port.future);
     waitingFor = 'task completion';
     final Map<String, dynamic> taskResult =
         await isolate.invokeExtension('ext.cocoonRunTask').timeout(taskTimeoutWithGracePeriod);
