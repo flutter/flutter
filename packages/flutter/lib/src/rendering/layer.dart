@@ -929,7 +929,7 @@ class PhysicalModelLayer extends ContainerLayer {
   /// The [clipPath], [elevation], and [color] arguments must not be null.
   PhysicalModelLayer({
     @required this.clipPath,
-    this.clip = Clip.none,
+    this.clip = defaultClipBehavior,
     @required this.elevation,
     @required this.color,
     @required this.shadowColor,

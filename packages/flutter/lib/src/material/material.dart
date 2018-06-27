@@ -92,7 +92,7 @@ abstract class MaterialInkController {
 /// 2. Ink effects: Material shows ink effects implemented by [InkFeature]s
 ///    like [InkSplash] and [InkHighlight] below its children.
 ///
-/// By default, [clip] is [Clip.None] and no clipping is performed. You
+/// By default, [clip] is [Clip.none] and no clipping is performed. You
 /// may override it to other [Clip] enums to explicitly clip its widget
 /// sub-tree to the shape specified by [shape], [type], and [borderRadius].
 ///
@@ -173,7 +173,7 @@ class Material extends StatefulWidget {
     this.textStyle,
     this.borderRadius,
     this.shape,
-    this.clip = Clip.none,
+    this.clip = defaultClipBehavior,
     this.animationDuration = kThemeChangeDuration,
     this.child,
   }) : assert(type != null),
@@ -596,7 +596,7 @@ class _MaterialInterior extends ImplicitlyAnimatedWidget {
     Key key,
     @required this.child,
     @required this.shape,
-    this.clip = Clip.none,
+    this.clip = defaultClipBehavior,
     @required this.elevation,
     @required this.color,
     @required this.shadowColor,

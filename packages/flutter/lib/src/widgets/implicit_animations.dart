@@ -1181,7 +1181,7 @@ class AnimatedPhysicalModel extends ImplicitlyAnimatedWidget {
     Key key,
     @required this.child,
     @required this.shape,
-    this.clip = Clip.none,
+    this.clip = defaultClipBehavior,
     this.borderRadius = BorderRadius.zero,
     @required this.elevation,
     @required this.color,

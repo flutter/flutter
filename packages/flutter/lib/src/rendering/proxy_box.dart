@@ -1089,7 +1089,7 @@ class ShapeBorderClipper extends CustomClipper<Path> {
   /// the border will not need the text direction to paint itself.
   const ShapeBorderClipper({
     @required this.shape,
-    this.clip = Clip.none,
+    this.clip = defaultClipBehavior,
     this.textDirection,
   }) : assert(shape != null), assert(clip != null);
 
@@ -1386,7 +1386,7 @@ class RenderClipOval extends _RenderCustomClip<Rect> {
   void paint(PaintingContext context, Offset offset) {
     if (child != null) {
       _updateClip();
-      context.pushClipPath(needsCompositing, offset, _clip, _getClipPath(_clip), clipper == null ? Clip.none : clipper.clipOption, super.paint);
+      context.pushClipPath(needsCompositing, offset, _clip, _getClipPath(_clip), clipper == null ? defaultClipBehavior : clipper.clipOption, super.paint);
     }
   }
 
@@ -1444,7 +1444,7 @@ class RenderClipPath extends _RenderCustomClip<Path> {
   void paint(PaintingContext context, Offset offset) {
     if (child != null) {
       _updateClip();
-      context.pushClipPath(needsCompositing, offset, Offset.zero & size, _clip, clipper == null ? Clip.none : clipper.clipOption, super.paint);
+      context.pushClipPath(needsCompositing, offset, Offset.zero & size, _clip, clipper == null ? defaultClipBehavior : clipper.clipOption, super.paint);
     }
   }
 
@@ -1549,7 +1549,7 @@ class RenderPhysicalModel extends _RenderPhysicalModelBase<RRect> {
   RenderPhysicalModel({
     RenderBox child,
     BoxShape shape = BoxShape.rectangle,
-    this.clip = Clip.none,
+    this.clip = defaultClipBehavior,
     BorderRadius borderRadius,
     double elevation = 0.0,
     @required Color color,
@@ -1767,7 +1767,7 @@ class RenderPhysicalShape extends _RenderPhysicalModelBase<Path> {
       if (needsCompositing) {
         final PhysicalModelLayer physicalModel = new PhysicalModelLayer(
           clipPath: offsetPath,
-          clip: clipper == null ? Clip.none : clipper.clipOption,
+          clip: clipper == null ? defaultClipBehavior : clipper.clipOption,
           elevation: paintShadows ? elevation : 0.0,
           color: color,
           shadowColor: shadowColor,

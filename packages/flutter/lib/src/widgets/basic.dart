@@ -677,7 +677,7 @@ class PhysicalModel extends SingleChildRenderObjectWidget {
   const PhysicalModel({
     Key key,
     this.shape = BoxShape.rectangle,
-    this.clip = Clip.none,
+    this.clip = defaultClipBehavior,
     this.borderRadius,
     this.elevation = 0.0,
     @required this.color,
