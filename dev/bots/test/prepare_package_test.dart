@@ -142,9 +142,9 @@ void main() {
         await creator.createArchive();
         expect(
           verify(processManager.start(
-            typed(captureAny),
-            workingDirectory: typed(captureAny, named: 'workingDirectory'),
-            environment: typed(captureAny, named: 'environment'),
+            captureAny,
+            workingDirectory: captureAnyNamed('workingDirectory'),
+            environment: captureAnyNamed('environment'),
           )).captured[2]['PUB_CACHE'],
           endsWith(path.join('flutter', '.pub-cache')),
         );

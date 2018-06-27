@@ -1703,6 +1703,9 @@ class _InspectorOverlayLayer extends Layer {
     _textPainter.paint(canvas, tipOffset + const Offset(_kTooltipPadding, _kTooltipPadding));
     canvas.restore();
   }
+
+  @override
+  S find<S>(Offset regionOffset) => null;
 }
 
 const double _kScreenEdgeMargin = 10.0;

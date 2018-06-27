@@ -51,6 +51,8 @@ Future<void> generateXcodeProperties(String projectPath) async {
 ///
 /// targetOverride: Optional parameter, if null or unspecified the default value
 /// from xcode_backend.sh is used 'lib/main.dart'.
+///
+/// Returns the number of files written.
 Future<void> updateGeneratedXcodeProperties({
   @required String projectPath,
   @required BuildInfo buildInfo,

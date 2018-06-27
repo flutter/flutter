@@ -1487,7 +1487,6 @@ abstract class _RenderPhysicalModelBase<T> extends _RenderCustomClip<T> {
     markNeedsPaint();
   }
 
-  static final Paint _defaultPaint = new Paint();
   static final Paint _transparentPaint = new Paint()..color = const Color(0x00000000);
 
   // On Fuchsia, the system compositor is responsible for drawing shadows
@@ -1642,17 +1641,7 @@ class RenderPhysicalModel extends _RenderPhysicalModelBase<RRect> {
         canvas.drawRRect(offsetRRect, new Paint()..color = color);
         canvas.save();
         canvas.clipRRect(offsetRRect);
-        // We only use a new layer for non-rectangular clips, on the basis that
-        // rectangular clips won't need antialiasing. This is not really
-        // correct, because if we're e.g. rotated, rectangles will also be
-        // aliased. Unfortunately, it's too much of a performance win to err on
-        // the side of correctness here.
-        // TODO(ianh): Find a better solution.
-        if (!offsetRRect.isRect)
-          canvas.saveLayer(offsetBounds, _RenderPhysicalModelBase._defaultPaint);
         super.paint(context, offset);
-        if (!offsetRRect.isRect)
-          canvas.restore();
         canvas.restore();
         assert(context.canvas == canvas, 'canvas changed even though needsCompositing was false');
       }
@@ -1763,7 +1752,7 @@ class RenderPhysicalShape extends _RenderPhysicalModelBase<Path> {
           );
         }
         canvas.drawPath(offsetPath, new Paint()..color = color..style = PaintingStyle.fill);
-        canvas.saveLayer(offsetBounds, _RenderPhysicalModelBase._defaultPaint);
+        canvas.save();
         canvas.clipPath(offsetPath);
         super.paint(context, offset);
         canvas.restore();
@@ -4261,5 +4250,60 @@ class RenderFollowerLayer extends RenderProxyBox {
     properties.add(new DiagnosticsProperty<bool>('showWhenUnlinked', showWhenUnlinked));
     properties.add(new DiagnosticsProperty<Offset>('offset', offset));
     properties.add(new TransformProperty('current transform matrix', getCurrentTransform()));
+  }
+}
+
+/// Render object which inserts an [AnnotatedRegionLayer] into the layer tree.
+///
+/// See also:
+///
+///   * [Layer.find], for an example of how this value is retrieved.
+///   * [AnnotatedRegionLayer], the layer this render object creates.
+class RenderAnnotatedRegion<T> extends RenderProxyBox {
+
+  /// Creates a new [RenderAnnotatedRegion] to insert [value] into the
+  /// layer tree.
+  ///
+  /// If [sized] is true, the layer is provided with the size of this render
+  /// object to clip the results of [Layer.findRegion].
+  ///
+  /// Neither [value] nor [sized] can be null.
+  RenderAnnotatedRegion({
+    @required T value,
+    @required bool sized,
+    RenderBox child,
+  }) : assert(value != null),
+       assert(sized != null),
+       _value = value,
+       _sized = sized,
+       super(child);
+
+  /// A value which can be retrieved using [Layer.find].
+  T get value => _value;
+  T _value;
+  set value (T newValue) {
+    if (_value == newValue)
+      return;
+    _value = newValue;
+    markNeedsPaint();
+  }
+
+  /// Whether the render object will pass its [size] to the [AnnotatedRegionLayer].
+  bool get sized => _sized;
+  bool _sized;
+  set sized(bool value) {
+    if (_sized == value)
+      return;
+    _sized = value;
+    markNeedsPaint();
+  }
+
+  @override
+  final bool alwaysNeedsCompositing = true;
+
+  @override
+  void paint(PaintingContext context, Offset offset) {
+    final AnnotatedRegionLayer<T> layer = new AnnotatedRegionLayer<T>(value, size: sized ? size : null);
+    context.pushLayer(layer, super.paint, offset);
   }
 }

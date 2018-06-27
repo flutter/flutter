@@ -7,6 +7,7 @@ import 'dart:developer';
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import 'backdrop.dart';
 import 'demos.dart';
@@ -399,6 +400,10 @@ class _GalleryHomeState extends State<GalleryHome> with SingleTickerProviderStat
         ]
       );
     }
+    home = new AnnotatedRegion<SystemUiOverlayStyle>(
+      child: home,
+      value: SystemUiOverlayStyle.light
+    );
 
     return home;
   }
