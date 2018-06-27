@@ -202,6 +202,8 @@ void main() {
       ),
     );
 
+    await tester.pumpAndSettle();
+
     DefaultTextStyle textStyle = tester.widget(find.widgetWithText(DefaultTextStyle, 'Child 1'));
     IconTheme iconTheme = tester.widget(find.widgetWithIcon(IconTheme, const IconData(1)));
 
@@ -268,6 +270,8 @@ void main() {
         },
       ),
     );
+
+    await tester.pumpAndSettle();
 
     final dynamic childList = getRenderSegmentedControl(tester).getChildrenAsList();
 
@@ -396,6 +400,8 @@ void main() {
   testWidgets('Passed in value is child initially selected', (WidgetTester tester) async {
     await tester.pumpWidget(setupSimpleSegmentedControl());
 
+    await tester.pumpAndSettle();
+
     expect(getRenderSegmentedControl(tester).selectedIndex, 0);
 
     final dynamic childList = getRenderSegmentedControl(tester).getChildrenAsList();
@@ -474,6 +480,8 @@ void main() {
           (WidgetTester tester) async {
     await tester.pumpWidget(setupSimpleSegmentedControl());
 
+    await tester.pumpAndSettle();
+
     final dynamic childList = getRenderSegmentedControl(tester).getChildrenAsList();
 
     expect(
@@ -522,6 +530,8 @@ void main() {
   testWidgets('Long press does not change background color of currently-selected child',
           (WidgetTester tester) async {
     await tester.pumpWidget(setupSimpleSegmentedControl());
+
+    await tester.pumpAndSettle();
 
     final dynamic childList = getRenderSegmentedControl(tester).getChildrenAsList();
 
@@ -717,6 +727,8 @@ void main() {
       ),
     );
 
+    await tester.pumpAndSettle();
+
     final dynamic childList = getRenderSegmentedControl(tester).getChildrenAsList();
 
     expect(
@@ -803,6 +815,8 @@ void main() {
         },
       ),
     );
+
+    await tester.pumpAndSettle();
 
     expect(
         semantics,
@@ -1081,7 +1095,7 @@ void main() {
   });
 
   testWidgets('Add segment while animation is running', (WidgetTester tester) async {
-    final Map<int, Widget> children = <int, Widget>{};
+    Map<int, Widget> children = <int, Widget>{};
     children[0] = const Text('A');
     children[1] = const Text('B');
     children[2] = const Text('C');
@@ -1100,6 +1114,7 @@ void main() {
                 });
                 if (sharedValue == 1) {
                   children[3] = const Text('D');
+                  children = new Map<int, Widget>.from(children);
                 }
               },
               groupValue: sharedValue,
@@ -1127,7 +1142,7 @@ void main() {
   });
 
   testWidgets('Remove segment while animation is running', (WidgetTester tester) async {
-    final Map<int, Widget> children = <int, Widget>{};
+    Map<int, Widget> children = <int, Widget>{};
     children[0] = const Text('A');
     children[1] = const Text('B');
     children[2] = const Text('C');
@@ -1146,6 +1161,7 @@ void main() {
                 });
                 if (sharedValue == 1) {
                   children.remove(2);
+                  children = new Map<int, Widget>.from(children);
                 }
               },
               groupValue: sharedValue,
@@ -1173,7 +1189,7 @@ void main() {
   });
 
   testWidgets('Remove currently animating segment', (WidgetTester tester) async {
-    final Map<int, Widget> children = <int, Widget>{};
+    Map<int, Widget> children = <int, Widget>{};
     children[0] = const Text('A');
     children[1] = const Text('B');
     children[2] = const Text('C');
@@ -1192,6 +1208,7 @@ void main() {
                 });
                 if (sharedValue == 1) {
                   children.remove(1);
+                  children = new Map<int, Widget>.from(children);
                   sharedValue = null;
                 }
               },
@@ -1244,6 +1261,8 @@ void main() {
         ),
       ),
     );
+
+    await tester.pumpAndSettle();
 
     await expectLater(find.byType(RepaintBoundary), matchesGoldenFile('segmented_control_test.0.0.png'));
   });

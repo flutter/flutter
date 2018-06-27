@@ -155,8 +155,8 @@ class _SegmentedControlState<T> extends State<SegmentedControl<T>>
     with TickerProviderStateMixin<SegmentedControl<T>> {
   T _pressedKey;
 
-  List<AnimationController> selectionControllers = <AnimationController>[];
-  List<ColorTween> childTweens = <ColorTween>[];
+  final List<AnimationController> _selectionControllers = <AnimationController>[];
+  final List<ColorTween> _childTweens = <ColorTween>[];
 
   static final ColorTween forwardBackgroundColorTween = new ColorTween(
     begin: _kPressedBackground,
@@ -181,7 +181,7 @@ class _SegmentedControlState<T> extends State<SegmentedControl<T>>
 
   @override
   void dispose() {
-    for (AnimationController animationController in selectionControllers) {
+    for (AnimationController animationController in _selectionControllers) {
       animationController.dispose();
     }
     super.dispose();
@@ -199,12 +199,12 @@ class _SegmentedControlState<T> extends State<SegmentedControl<T>>
         });
 
       if (widget.groupValue == key) {
-        childTweens.add(reverseBackgroundColorTween);
+        _childTweens.add(reverseBackgroundColorTween);
         animationController.forward();
       } else {
-        childTweens.add(forwardBackgroundColorTween);
+        _childTweens.add(forwardBackgroundColorTween);
       }
-      selectionControllers.add(animationController);
+      _selectionControllers.add(animationController);
     }
   }
 
@@ -230,8 +230,8 @@ class _SegmentedControlState<T> extends State<SegmentedControl<T>>
   }
 
   Color getTextColor(int index, T currentKey) {
-    if (selectionControllers.elementAt(index).isAnimating) {
-      return textColorTween.evaluate(selectionControllers.elementAt(index));
+    if (_selectionControllers.elementAt(index).isAnimating) {
+      return textColorTween.evaluate(_selectionControllers.elementAt(index));
     } else if (widget.groupValue == currentKey) {
       return CupertinoColors.white;
     }
@@ -239,8 +239,8 @@ class _SegmentedControlState<T> extends State<SegmentedControl<T>>
   }
 
   Color getBackgroundColor(int index, T currentKey) {
-    if (selectionControllers.elementAt(index).isAnimating) {
-      return childTweens.elementAt(index).evaluate(selectionControllers.elementAt(index));
+    if (_selectionControllers.elementAt(index).isAnimating) {
+      return _childTweens.elementAt(index).evaluate(_selectionControllers.elementAt(index));
     } else if (widget.groupValue == currentKey) {
       return CupertinoColors.activeBlue;
     } else if (_pressedKey == currentKey) {
@@ -253,19 +253,21 @@ class _SegmentedControlState<T> extends State<SegmentedControl<T>>
   void didUpdateWidget(SegmentedControl<T> oldWidget) {
     super.didUpdateWidget(oldWidget);
 
-    selectionControllers.clear();
-    childTweens.clear();
-    setupAnimationControllers();
+    if(oldWidget.children != widget.children) {
+      _selectionControllers.clear();
+      _childTweens.clear();
+      setupAnimationControllers();
+    }
 
     if (oldWidget.groupValue != widget.groupValue) {
       int index = 0;
       for (T key in widget.children.keys) {
         if (widget.groupValue == key) {
-          childTweens.insert(index, forwardBackgroundColorTween);
-          selectionControllers.elementAt(index).forward();
+          _childTweens.insert(index, forwardBackgroundColorTween);
+          _selectionControllers.elementAt(index).forward();
         } else {
-          childTweens.insert(index, reverseBackgroundColorTween);
-          selectionControllers.elementAt(index).reverse();
+          _childTweens.insert(index, reverseBackgroundColorTween);
+          _selectionControllers.elementAt(index).reverse();
         }
         index += 1;
       }
