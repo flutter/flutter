@@ -184,7 +184,7 @@ class ContactsDemoState extends State<ContactsDemo> {
             new SliverList(
               delegate: new SliverChildListDelegate(<Widget>[
                 new AnnotatedRegion<SystemUiOverlayStyle>(
-                  value: SystemUiOverlayStyle.light,
+                  value: SystemUiOverlayStyle.dark,
                   child: new _ContactCategory(
                     icon: Icons.call,
                     children: <Widget>[
