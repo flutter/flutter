@@ -156,7 +156,7 @@ class CocoaPods {
       // Don't do anything for iOS when host platform doesn't support it.
       return;
     }
-    if (!fs.file(fs.path.join(appDirectory, 'ios')).existsSync()) {
+    if (!fs.directory(fs.path.join(appDirectory, 'ios')).existsSync()) {
       return;
     }
     final String podfilePath = fs.path.join(appDirectory, 'ios', 'Podfile');
@@ -175,6 +175,7 @@ class CocoaPods {
       ));
       podfileTemplate.copySync(podfilePath);
     }
+
     _addPodsDependencyToFlutterXcconfig(appDirectory, 'Debug');
     _addPodsDependencyToFlutterXcconfig(appDirectory, 'Release');
   }
