@@ -116,12 +116,12 @@ class HotRunner extends ResidentRunner {
         final CompilerOutput compilerOutput =
             await device.generator.compileExpression(expression, definitions,
                 typeDefinitions, libraryUri, klass, isStatic);
-        if (compilerOutput.outputFilename != null) {
+        if (compilerOutput != null && compilerOutput.outputFilename != null) {
           return base64.encode(fs.file(compilerOutput.outputFilename).readAsBytesSync());
         }
       }
     }
-    return null;
+    throw 'Failed to compile $expression';
   }
 
   Future<int> attach({
