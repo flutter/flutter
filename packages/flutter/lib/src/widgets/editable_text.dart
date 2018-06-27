@@ -754,7 +754,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
               textSpan: buildTextSpan(),
               value: _value,
               cursorColor: widget.cursorColor,
-              showCursor: widget.debugKeepCursorOn ? ValueNotifier<bool>(true) : _showCursor,
+              showCursor: _showCursor,
               hasFocus: _hasFocus,
               maxLines: widget.maxLines,
               selectionColor: widget.selectionColor,
@@ -862,7 +862,7 @@ class _Editable extends LeafRenderObjectWidget {
     return new RenderEditable(
       text: textSpan,
       cursorColor: cursorColor,
-      showCursor: new ValueNotifier<bool>(true),
+      showCursor: showCursor,
       hasFocus: hasFocus,
       maxLines: maxLines,
       selectionColor: selectionColor,
