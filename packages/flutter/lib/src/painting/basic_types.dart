@@ -270,7 +270,7 @@ bool axisDirectionIsReversed(AxisDirection axisDirection) {
   return null;
 }
 
-/// Different ways to clip a widget's content
+/// Different ways to clip a widget's content.
 enum Clip {
   /// No clip at all.
   ///

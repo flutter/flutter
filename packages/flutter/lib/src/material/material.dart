@@ -232,6 +232,7 @@ class Material extends StatefulWidget {
 
   /// {@template flutter.widgets.Clip}
   /// The content will be clipped (or not) according to this option.
+  ///
   /// See enum [Clip] for details of all possible options and their common use cases.
   /// {@endtemplate}
   final Clip clip;

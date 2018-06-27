@@ -1105,7 +1105,6 @@ class ShapeBorderClipper extends CustomClipper<Path> {
   /// towards the start of the shape).
   final TextDirection textDirection;
 
-
   @override
   Clip get clipOption => clip;
 
