@@ -42,10 +42,13 @@ void main() {
     });
 
     Future<LaunchResult> start(String mainPath) async {
-      return await device.startApp(null,
-          mainPath: mainPath,
-          debuggingOptions: new DebuggingOptions.enabled(
-              const BuildInfo(BuildMode.debug, null)));
+      return await device.startApp(
+        null,
+        mainPath: mainPath,
+        debuggingOptions: new DebuggingOptions.enabled(
+          const BuildInfo(BuildMode.debug, null),
+        ),
+      );
     }
 
     testUsingContext('start', () async {
