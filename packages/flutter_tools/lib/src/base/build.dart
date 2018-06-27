@@ -391,6 +391,7 @@ class AOTSnapshotter {
       aot: true,
       entryPointsJsonFiles: entryPointsJsonFiles,
       trackWidgetCreation: false,
+      target_product_vm: buildMode == BuildMode.release
     );
 
     // Write path to frontend_server, since things need to be re-generated when that changes.
