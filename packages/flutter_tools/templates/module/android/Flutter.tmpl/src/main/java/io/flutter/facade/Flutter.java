@@ -81,10 +81,10 @@ public final class Flutter {
       }
     };
     flutterView.setInitialRoute(route);
-    final String appBundlePath = FlutterMain.findAppBundlePath(activity.getApplicationContext());
     lifecycle.addObserver(new LifecycleObserver() {
       @OnLifecycleEvent(Lifecycle.Event.ON_CREATE)
       public void onCreate() {
+        final String appBundlePath = FlutterMain.findAppBundlePath(activity.getApplicationContext());
         flutterView.runFromBundle(appBundlePath, null, "main", true);
         GeneratedPluginRegistrant.registerWith(flutterView.getPluginRegistry());
       }
