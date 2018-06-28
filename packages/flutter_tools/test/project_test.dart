@@ -15,14 +15,7 @@ void main() {
   group('Project', () {
     testInMemory('knows location', () {
       final Directory directory = fs.directory('myproject');
-      expect(
-        new FlutterProject(directory).directory.absolute.path,
-        directory.absolute.path,
-      );
-      expect(
-        new FlutterProject.fromPath(directory.path).directory.absolute.path,
-        directory.absolute.path,
-      );
+      expect(new FlutterProject(directory).directory, directory);
     });
     group('ensure ready for platform-specific tooling', () {
       testInMemory('does nothing, if project is not created', () async {
@@ -101,7 +94,7 @@ void main() {
   });
 }
 
-FlutterProject someProject() => new FlutterProject.fromPath('some_project');
+FlutterProject someProject() => new FlutterProject(fs.directory('some_project'));
 
 FlutterProject aProjectWithIos() {
   final Directory directory = fs.directory('ios_project');

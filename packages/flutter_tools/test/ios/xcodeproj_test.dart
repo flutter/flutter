@@ -11,8 +11,6 @@ import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/bundle.dart' as bundle;
 import 'package:flutter_tools/src/cache.dart';
-import 'package:flutter_tools/src/flutter_manifest.dart';
-import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/ios/xcodeproj.dart';
 import 'package:mockito/mockito.dart';
 import 'package:platform/platform.dart';
@@ -286,16 +284,12 @@ Information about project "Runner":
     testUsingOsxContext('sets ARCHS=armv7 when armv7 local engine is set', () async {
       when(mockArtifacts.getArtifactPath(Artifact.flutterFramework, TargetPlatform.ios, any)).thenReturn('engine');
       when(mockArtifacts.engineOutPath).thenReturn(fs.path.join('out', 'ios_profile_arm'));
-
       const BuildInfo buildInfo = const BuildInfo(BuildMode.debug, null,
         previewDart2: true,
         targetPlatform: TargetPlatform.ios,
       );
-      final FlutterManifest manifest =
-        await new FlutterProject.fromPath('path/to/project').manifest;
-      updateGeneratedXcodeProperties(
+      await updateGeneratedXcodeProperties(
         projectPath: 'path/to/project',
-        manifest: manifest,
         buildInfo: buildInfo,
         previewDart2: true,
       );
@@ -315,11 +309,8 @@ Information about project "Runner":
         trackWidgetCreation: true,
         targetPlatform: TargetPlatform.ios,
       );
-      final FlutterManifest manifest =
-          await new FlutterProject.fromPath('path/to/project').manifest;
-      updateGeneratedXcodeProperties(
+      await updateGeneratedXcodeProperties(
         projectPath: 'path/to/project',
-        manifest: manifest,
         buildInfo: buildInfo,
         previewDart2: true,
       );
@@ -338,11 +329,8 @@ Information about project "Runner":
         previewDart2: true,
         targetPlatform: TargetPlatform.ios,
       );
-      final FlutterManifest manifest =
-          await new FlutterProject.fromPath('path/to/project').manifest;
-      updateGeneratedXcodeProperties(
+      await updateGeneratedXcodeProperties(
         projectPath: 'path/to/project',
-        manifest: manifest,
         buildInfo: buildInfo,
         previewDart2: true,
       );
@@ -361,12 +349,8 @@ Information about project "Runner":
         previewDart2: true,
         targetPlatform: TargetPlatform.ios,
       );
-
-      final FlutterManifest manifest =
-          await new FlutterProject.fromPath('path/to/project').manifest;
-      updateGeneratedXcodeProperties(
+      await updateGeneratedXcodeProperties(
         projectPath: 'path/to/project',
-        manifest: manifest,
         buildInfo: buildInfo,
         previewDart2: true,
       );
@@ -410,18 +394,15 @@ Information about project "Runner":
     }
 
     Future<void> checkBuildVersion({
-      String manifestString,
+      String manifest,
       BuildInfo buildInfo,
       String expectedBuildName,
       String expectedBuildNumber,
     }) async {
-      final String projectPath = await createMinimalProject(manifestString);
+      final String projectPath = await createMinimalProject(manifest);
 
-      final FlutterManifest manifest =
-          await new FlutterProject.fromPath(projectPath).manifest;
-      updateGeneratedXcodeProperties(
+      await updateGeneratedXcodeProperties(
         projectPath: projectPath,
-        manifest: manifest,
         buildInfo: buildInfo,
         targetOverride: bundle.defaultMainPath,
         previewDart2: false,
@@ -446,7 +427,7 @@ flutter:
 
       const BuildInfo buildInfo = const BuildInfo(BuildMode.release, null);
       await checkBuildVersion(
-        manifestString: manifest,
+        manifest: manifest,
         buildInfo: buildInfo,
         expectedBuildName: '1.0.0',
         expectedBuildNumber: '1',
@@ -464,7 +445,7 @@ flutter:
 ''';
       const BuildInfo buildInfo = const BuildInfo(BuildMode.release, null);
       await checkBuildVersion(
-        manifestString: manifest,
+        manifest: manifest,
         buildInfo: buildInfo,
         expectedBuildName: '1.0.0',
         expectedBuildNumber: null,
@@ -482,7 +463,7 @@ flutter:
 ''';
       const BuildInfo buildInfo = const BuildInfo(BuildMode.release, null, buildName: '1.0.2');
       await checkBuildVersion(
-        manifestString: manifest,
+        manifest: manifest,
         buildInfo: buildInfo,
         expectedBuildName: '1.0.2',
         expectedBuildNumber: '1',
@@ -500,7 +481,7 @@ flutter:
 ''';
       const BuildInfo buildInfo = const BuildInfo(BuildMode.release, null, buildNumber: 3);
       await checkBuildVersion(
-        manifestString: manifest,
+        manifest: manifest,
         buildInfo: buildInfo,
         expectedBuildName: '1.0.0',
         expectedBuildNumber: '3',
@@ -518,7 +499,7 @@ flutter:
 ''';
       const BuildInfo buildInfo = const BuildInfo(BuildMode.release, null, buildName: '1.0.2', buildNumber: 3);
       await checkBuildVersion(
-        manifestString: manifest,
+        manifest: manifest,
         buildInfo: buildInfo,
         expectedBuildName: '1.0.2',
         expectedBuildNumber: '3',
@@ -536,7 +517,7 @@ flutter:
 ''';
       const BuildInfo buildInfo = const BuildInfo(BuildMode.release, null, buildName: '1.0.2', buildNumber: 3);
       await checkBuildVersion(
-        manifestString: manifest,
+        manifest: manifest,
         buildInfo: buildInfo,
         expectedBuildName: '1.0.2',
         expectedBuildNumber: '3',
@@ -553,7 +534,7 @@ flutter:
 ''';
       const BuildInfo buildInfo = const BuildInfo(BuildMode.release, null, buildName: '1.0.2', buildNumber: 3);
       await checkBuildVersion(
-        manifestString: manifest,
+        manifest: manifest,
         buildInfo: buildInfo,
         expectedBuildName: '1.0.2',
         expectedBuildNumber: '3',

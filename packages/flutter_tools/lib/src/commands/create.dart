@@ -233,20 +233,20 @@ To edit platform code in an IDE see https://flutter.io/developing-packages/#edit
     }
   }
 
-  Future<int> _generateModule(String path, Map<String, dynamic> templateContext) async {
+  Future<int> _generateModule(String dirPath, Map<String, dynamic> templateContext) async {
     int generatedCount = 0;
     final String description = argResults.wasParsed('description')
         ? argResults['description']
         : 'A new flutter module project.';
     templateContext['description'] = description;
-    generatedCount += _renderTemplate(fs.path.join('module', 'common'), path, templateContext);
+    generatedCount += _renderTemplate(fs.path.join('module', 'common'), dirPath, templateContext);
     if (argResults['pub']) {
       await pubGet(
         context: PubContext.create,
-        directory: path,
+        directory: dirPath,
         offline: argResults['offline'],
       );
-      final FlutterProject project = new FlutterProject.fromPath(path);
+      final FlutterProject project = new FlutterProject(fs.directory(dirPath));
       await project.ensureReadyForPlatformSpecificTooling();
     }
     return generatedCount;
@@ -303,23 +303,23 @@ To edit platform code in an IDE see https://flutter.io/developing-packages/#edit
     return generatedCount;
   }
 
-  Future<int> _generateApp(String projectPath, Map<String, dynamic> templateContext) async {
+  Future<int> _generateApp(String appPath, Map<String, dynamic> templateContext) async {
     int generatedCount = 0;
-    generatedCount += _renderTemplate('create', projectPath, templateContext);
-    generatedCount += _injectGradleWrapper(projectPath);
+    generatedCount += _renderTemplate('create', appPath, templateContext);
+    generatedCount += _injectGradleWrapper(appPath);
 
     if (argResults['with-driver-test']) {
-      final String testPath = fs.path.join(projectPath, 'test_driver');
+      final String testPath = fs.path.join(appPath, 'test_driver');
       generatedCount += _renderTemplate('driver', testPath, templateContext);
     }
 
     if (argResults['pub']) {
-      await pubGet(context: PubContext.create, directory: projectPath, offline: argResults['offline']);
-      await new FlutterProject.fromPath(projectPath).ensureReadyForPlatformSpecificTooling();
+      await pubGet(context: PubContext.create, directory: appPath, offline: argResults['offline']);
+      await new FlutterProject(fs.directory(appPath)).ensureReadyForPlatformSpecificTooling();
     }
 
     if (android_sdk.androidSdk != null)
-      await gradle.updateLocalProperties(projectPath: projectPath);
+      await gradle.updateLocalProperties(projectPath: appPath);
 
     return generatedCount;
   }
