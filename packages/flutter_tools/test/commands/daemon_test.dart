@@ -121,7 +121,6 @@ void main() {
         responses.add,
         daemonCommand: command,
         notifyingLogger: notifyingLogger,
-        enableAppDomain: true
       );
 
       commands.add(<String, dynamic>{ 'id': 0, 'method': 'app.restart' });
@@ -143,7 +142,6 @@ void main() {
           responses.add,
           daemonCommand: command,
           notifyingLogger: notifyingLogger,
-          enableAppDomain: true
       );
 
       commands.add(<String, dynamic>{
@@ -171,7 +169,6 @@ void main() {
         responses.add,
         daemonCommand: command,
         notifyingLogger: notifyingLogger,
-        enableAppDomain: true
       );
 
       commands.add(<String, dynamic>{ 'id': 0, 'method': 'app.stop' });

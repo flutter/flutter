@@ -84,13 +84,10 @@ class Daemon {
     this.daemonCommand,
     this.notifyingLogger,
     this.logToStdout = false,
-    this.enableAppDomain = false,
   }) {
     // Set up domains.
     _registerDomain(daemonDomain = new DaemonDomain(this));
-    if (enableAppDomain) {
-      _registerDomain(appDomain = new AppDomain(this));
-    }
+    _registerDomain(appDomain = new AppDomain(this));
     _registerDomain(deviceDomain = new DeviceDomain(this));
     _registerDomain(emulatorDomain = new EmulatorDomain(this));
 
@@ -114,7 +111,6 @@ class Daemon {
   final DaemonCommand daemonCommand;
   final NotifyingLogger notifyingLogger;
   final bool logToStdout;
-  final bool enableAppDomain;
 
   final Completer<int> _onExitCompleter = new Completer<int>();
   final Map<String, Domain> _domainMap = <String, Domain>{};
@@ -304,7 +300,6 @@ class DaemonDomain extends Domain {
 /// It fires events for application start, stop, and stdout and stderr.
 class AppDomain extends Domain {
   AppDomain(Daemon daemon) : super(daemon, 'app') {
-    // TODO(dantup): Should we only register these when running in flutter run --machine?
     registerHandler('restart', restart);
     registerHandler('callServiceExtension', callServiceExtension);
     registerHandler('stop', stop);

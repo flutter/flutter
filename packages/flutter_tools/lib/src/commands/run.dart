@@ -287,8 +287,7 @@ class RunCommand extends RunCommandBase {
       if (devices.length > 1)
         throwToolExit('--machine does not support -d all.');
       final Daemon daemon = new Daemon(stdinCommandStream, stdoutCommandResponse,
-          notifyingLogger: new NotifyingLogger(), logToStdout: true,
-          enableAppDomain: true);
+          notifyingLogger: new NotifyingLogger(), logToStdout: true);
       AppInstance app;
       try {
         app = await daemon.appDomain.startApp(
