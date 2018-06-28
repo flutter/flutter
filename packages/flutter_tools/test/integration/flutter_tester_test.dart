@@ -75,10 +75,19 @@ void main() {
       expect(await device.stopApp(null), isTrue);
     });
 
-    testUsingContext('keeps running', () async {
+    void _log(String m) {
+      final DateTime now = new DateTime.now();
+      print('${now.hour}:${now.minute}:${now.second}.${now.millisecond} $m');
+    }
+
+    testUsingContext('keeps running.', () async {
+      _log('1111');
       writePubspec(tempDir.path);
+      _log('2222');
       writePackages(tempDir.path);
+      _log('3333');
       await getPackages(tempDir.path);
+      _log('4444');
 
       final String mainPath = fs.path.join('lib', 'main.dart');
       writeFile(mainPath, r'''
@@ -100,22 +109,32 @@ class MyApp extends StatelessWidget {
       // Capture process output so that if the process quits we can print the
       // stdout/stderr in the error.
       final StringBuffer logs = new StringBuffer();
-      device.getLogReader().logLines.listen(logs.write);
+      _log('5555');
+      device.getLogReader().logLines.listen(_log);
+      _log('6666');
 
       final LaunchResult result = await start(mainPath);
+      _log('7777');
 
       expect(result.started, isTrue);
       expect(result.observatoryUri, isNotNull);
 
-      // This test has been seen to fail on mac_bot because the process did not keep running.
-      // Capturing stdout/stderr has been added subsequently to try and track this down.
-      // If you're ivnestigating this test failing in the future, feel free to
-      // mark is as skip (it's not currently critical) and notifiy dantup@ to look at the logs.
+      // This test has been seen to flake on mac_bot because the process did not keep running.
+      // and on Travis with a timeout:
+      // 05:33 +416 ~9 -1: test/integration/flutter_tester_test.dart: FlutterTesterDevice start [E]                                                                                                             
+      // TimeoutException after 0:00:30.000000: Test timed out after 30 seconds.
+      // package:test  Invoker._onRun.<fn>.<fn>.<fn>
+      // 06:00 +623 ~9 -1: Some tests failed.
+      //
+      // TODO(dantup): Find a way to better log what's going on before un-skipping again.
 
       await new Future<void>.delayed(const Duration(seconds: 3));
+      _log('8888');
       expect(device.isRunning, true, reason: 'Device did not remain running.\n\n$logs'.trim());
 
+      _log('9999');
       expect(await device.stopApp(null), isTrue);
+      _log('1010');
     });
   });
 }
