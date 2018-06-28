@@ -466,6 +466,8 @@ class AndroidSdk {
   }
 
   Map<String, String> _sdkManagerEnv;
+  /// Returns an environment with the Java folder added to PATH for use in calling
+  /// Java-based Android SDK commands such as sdkmanager and avdmanager.
   Map<String, String> get sdkManagerEnv {
     if (_sdkManagerEnv == null) {
       // If we can locate Java, then add it to the path used to run the Android SDK manager.
