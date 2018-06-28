@@ -279,6 +279,9 @@ abstract class Device {
 
   Future<void> takeScreenshot(File outputFile) => new Future<Null>.error('unimplemented');
 
+  // TODO(dantup): discoverApps is no longer used and can possibly be removed.
+  // Waiting for a response here:
+  // https://github.com/flutter/flutter/pull/18873#discussion_r198862179
   /// Find the apps that are currently running on this device.
   Future<List<DiscoveredApp>> discoverApps() =>
       new Future<List<DiscoveredApp>>.value(<DiscoveredApp>[]);
