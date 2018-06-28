@@ -28,7 +28,7 @@ import '../runner/flutter_command.dart';
 import '../tester/flutter_tester.dart';
 import '../vmservice.dart';
 
-const String protocolVersion = '0.3.0';
+const String protocolVersion = '0.4.0';
 
 /// A server process command. This command will start up a long-lived server.
 /// It reads JSON-RPC based commands from stdin, executes them, and returns
@@ -849,6 +849,7 @@ class EmulatorDomain extends Domain {
   EmulatorDomain(Daemon daemon) : super(daemon, 'emulator') {
     registerHandler('getEmulators', getEmulators);
     registerHandler('launch', launch);
+    registerHandler('create', create);
   }
 
   Future<List<Map<String, dynamic>>> getEmulators([Map<String, dynamic> args]) async {
@@ -867,6 +868,16 @@ class EmulatorDomain extends Domain {
     } else {
       await matches.first.launch();
     }
+  }
+
+  Future<Map<String, dynamic>> create(Map<String, dynamic> args) async {
+    final String name = _getStringArg(args, 'name', required: false);
+    final CreateEmulatorResult res = await emulators.createEmulator(name: name);
+    return <String, dynamic>{
+      'success': res.success,
+      'emulatorName': res.emulatorName,
+      'error': res.error,
+    };
   }
 }
 

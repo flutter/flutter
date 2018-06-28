@@ -192,6 +192,18 @@ The `launch()` command allows launching an emulator/simulator by its `id`.
 
 - `emulatorId`: the id of an emulator as returned by `getEmulators`.
 
+#### emulator.create
+
+The `create()` command creates a new Android emulator with an optional `name`.
+
+- `name`: an optional name for this emulator
+
+The returned `params` will contain:
+
+- `success` - whether the emulator was successfully created
+- `emulatorName` - the name of the emulator created; this will have been auto-generated if you did not supply one
+- `error` - when `success`=`false`, a message explaining why the creation of the emulator failed
+
 ## Flutter Run --machine
 
 When running `flutter run --machine` the following subset of the daemon is available:
@@ -230,3 +242,4 @@ See the [source](https://github.com/flutter/flutter/blob/master/packages/flutter
 ## Changelog
 
 - 0.3.0: Added `daemon.connected` event at startup
+- 0.4.0: Added `emulator.create` command
