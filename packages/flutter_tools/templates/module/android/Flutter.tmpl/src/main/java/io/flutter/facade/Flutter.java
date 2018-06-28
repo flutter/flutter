@@ -38,31 +38,36 @@ public final class Flutter {
   }
 
   /**
-   * Creates a {@link FlutterFragment} managing a {@link FlutterView}.
+   * Creates a {@link FlutterFragment} managing a {@link FlutterView}. The optional
+   * initial route string will be made available to the Dart code
+   * (via {@code window.defaultRouteName}) and may be used to determine which widget
+   * should be displayed in the view. The default initialRoute is "/".
    *
-   * @param route the route String for the {@link FlutterView}
+   * @param initialRoute an initial route {@link String}, or null
    * @return a {@link FlutterFragment}
    */
   @NonNull
-  public static FlutterFragment createFragment(String route) {
+  public static FlutterFragment createFragment(String initialRoute) {
     final FlutterFragment fragment = new FlutterFragment();
     final Bundle args = new Bundle();
-    args.putString(FlutterFragment.ARG_ROUTE, route);
+    args.putString(FlutterFragment.ARG_ROUTE, initialRoute);
     fragment.setArguments(args);
     return fragment;
   }
 
   /**
-   * Creates a {@link FlutterView} linked to the specified {@link Activity} and {@link Lifecycle}
-   * and whose contents is determined using the specified route {@link String}.
+   * Creates a {@link FlutterView} linked to the specified {@link Activity} and {@link Lifecycle}.
+   * The optional initial route string will be made available to the Dart code (via
+   * {@code window.defaultRouteName}) and may be used to determine which widget should be displayed
+   * in the view. The default initialRoute is "/".
    *
    * @param activity an {@link Activity}
    * @param lifecycle a {@link Lifecycle}
-   * @param route a route {@link String}
+   * @param initialRoute an initial route {@link String}, or null
    * @return a {@link FlutterView}
    */
   @NonNull
-  public static FlutterView createView(@NonNull final Activity activity, @NonNull final Lifecycle lifecycle, final String route) {
+  public static FlutterView createView(@NonNull final Activity activity, @NonNull final Lifecycle lifecycle, final String initialRoute) {
     FlutterMain.startInitialization(activity.getApplicationContext());
     FlutterMain.ensureInitializationComplete(activity.getApplicationContext(), null);
     final FlutterNativeView nativeView = new FlutterNativeView(activity);
@@ -80,7 +85,9 @@ public final class Flutter {
         lifecycleMessages.send("AppLifecycleState.resumed");
       }
     };
-    flutterView.setInitialRoute(route);
+    if (initialRoute != null) {
+      flutterView.setInitialRoute(initialRoute);
+    }
     lifecycle.addObserver(new LifecycleObserver() {
       @OnLifecycleEvent(Lifecycle.Event.ON_CREATE)
       public void onCreate() {
