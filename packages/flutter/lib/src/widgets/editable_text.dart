@@ -468,8 +468,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
           widget.onEditingComplete();
         } else {
           // Default behavior if the developer did not provide an
-          // onEditingComplete callback: Finalize editing, remove focus, and
-          // invoke the provided submission callback.
+          // onEditingComplete callback: Finalize editing and remove focus.
           widget.controller.clearComposing();
           widget.focusNode.unfocus();
         }
