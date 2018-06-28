@@ -1,4 +1,4 @@
-Signature: bb93df10d0b6b7b727917f6b44fd7c60
+Signature: 6e6764dfa1de955bc41f3d2e2bf778b5
 
 UNUSED LICENSES:
 
@@ -17371,6 +17371,8 @@ FILE: ../../../third_party/skia/src/gpu/effects/GrUnpremulInputFragmentProcessor
 FILE: ../../../third_party/skia/src/gpu/effects/GrYUVtoRGBEffect.cpp
 FILE: ../../../third_party/skia/src/gpu/effects/GrYUVtoRGBEffect.fp
 FILE: ../../../third_party/skia/src/gpu/effects/GrYUVtoRGBEffect.h
+FILE: ../../../third_party/skia/src/gpu/mtl/GrMtlTextureRenderTarget.h
+FILE: ../../../third_party/skia/src/gpu/mtl/GrMtlTextureRenderTarget.mm
 FILE: ../../../third_party/skia/src/gpu/ops/GrClearStencilClipOp.cpp
 FILE: ../../../third_party/skia/src/gpu/ops/GrDebugMarkerOp.cpp
 FILE: ../../../third_party/skia/src/gpu/text/GrAtlasManager.cpp
@@ -19078,7 +19080,6 @@ FILE: ../../../third_party/skia/src/gpu/text/GrTextContext.cpp
 FILE: ../../../third_party/skia/src/gpu/text/GrTextContext.h
 FILE: ../../../third_party/skia/src/gpu/text/GrTextUtils.cpp
 FILE: ../../../third_party/skia/src/gpu/text/GrTextUtils.h
-FILE: ../../../third_party/skia/src/gpu/vk/GrVkBackendContext.cpp
 FILE: ../../../third_party/skia/src/gpu/vk/GrVkBuffer.cpp
 FILE: ../../../third_party/skia/src/gpu/vk/GrVkBuffer.h
 FILE: ../../../third_party/skia/src/gpu/vk/GrVkCaps.cpp
