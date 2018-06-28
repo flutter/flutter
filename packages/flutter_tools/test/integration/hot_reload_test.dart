@@ -43,7 +43,7 @@ void main() {
           _project.breakpointLine);
 
       expect(isolate.pauseEvent, const isInstanceOf<VMPauseBreakpointEvent>());
-    }, skip: true); // https://github.com/flutter/flutter/issues/17833
+    }, skip: platform.isWindows); // https://github.com/flutter/flutter/issues/17833
 
     test('hits breakpoints with file:// prefixes after reload', () async {
       await _flutter.run(withDebugger: true);
