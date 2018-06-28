@@ -241,5 +241,5 @@ See the [source](https://github.com/flutter/flutter/blob/master/packages/flutter
 
 ## Changelog
 
-- 0.3.0: Added `daemon.connected` event at startup
 - 0.4.0: Added `emulator.create` command
+- 0.3.0: Added `daemon.connected` event at startup
