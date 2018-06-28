@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:io';
+
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
@@ -221,6 +223,9 @@ void main() {
   });
 
   testWidgets('cursor layout has correct width', (WidgetTester tester) async {
+    if (!Platform.isMacOS)
+      return;
+    
     final GlobalKey<EditableTextState> editableTextKey = new GlobalKey<EditableTextState>();
 
     String changedValue;
@@ -269,6 +274,9 @@ void main() {
   });
 
   testWidgets('cursor layout has correct radius', (WidgetTester tester) async {
+    if (!Platform.isMacOS)
+      return;
+
     final GlobalKey<EditableTextState> editableTextKey = new GlobalKey<EditableTextState>();
 
     String changedValue;
