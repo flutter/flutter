@@ -135,6 +135,8 @@ class MyApp extends StatelessWidget {
       _log('9999');
       expect(await device.stopApp(null), isTrue);
       _log('1010');
+
+      throw new Exception('force failure');
     });
   });
 }
