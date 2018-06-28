@@ -143,23 +143,32 @@ void main() {
 
   testWidgets('Text Fade', (WidgetTester tester) async {
     await tester.pumpWidget(
-      new RepaintBoundary(
-        child: new MaterialApp(
+        new MaterialApp(
           home: new Scaffold(
-            backgroundColor: Colors.green,
-            body: new Container(
-              width: 100.0,
-              color: Colors.red,
-              child: const Text(
-                'Pp PPp PPPp PPPPp PPPPpp PPPPppp PPPPppppp ',
-                style: const TextStyle(color: Colors.black),
-                maxLines: 3,
-                overflow: TextOverflow.fade,
+            backgroundColor: Colors.transparent,
+            body: new RepaintBoundary(
+              child: Center(
+                child: new Container(
+                  width: 200.0,
+                  height: 200.0,
+                  color: Colors.green,
+                  child: new Center(
+                    child: new Container(
+                      width: 100.0,
+                      color: Colors.blue,
+                      child: const Text(
+                        'Pp PPp PPPp PPPPp PPPPpp PPPPppp PPPPppppp ',
+                        style: const TextStyle(color: Colors.black),
+                        maxLines: 3,
+                        overflow: TextOverflow.fade,
+                      ),
+                    ),
+                  ),
+                ),
               ),
             ),
-          ),
+          )
         )
-      )
     );
 
     await expectLater(
