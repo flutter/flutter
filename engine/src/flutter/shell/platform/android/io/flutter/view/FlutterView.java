@@ -808,6 +808,7 @@ public class FlutterView extends SurfaceView
             if (mAccessibilityNodeProvider != null) {
                 mAccessibilityNodeProvider.setAccessibilityEnabled(false);
             }
+            nativeSetSemanticsEnabled(mNativeView.get(), false);
         }
         resetWillNotDraw();
     }
@@ -846,8 +847,8 @@ public class FlutterView extends SurfaceView
         mAccessibilityEnabled = true;
         if (mAccessibilityNodeProvider == null) {
             mAccessibilityNodeProvider = new AccessibilityBridge(this);
-            nativeSetSemanticsEnabled(mNativeView.get(), true);
         }
+        nativeSetSemanticsEnabled(mNativeView.get(), true);
         mAccessibilityNodeProvider.setAccessibilityEnabled(true);
     }
 
