@@ -107,15 +107,19 @@ class MyApp extends StatelessWidget {
       expect(result.started, isTrue);
       expect(result.observatoryUri, isNotNull);
 
-      // This test has been seen to fail on mac_bot because the process did not keep running.
-      // Capturing stdout/stderr has been added subsequently to try and track this down.
-      // If you're ivnestigating this test failing in the future, feel free to
-      // mark is as skip (it's not currently critical) and notifiy dantup@ to look at the logs.
+      // This test has been seen to flake on mac_bot because the process did not keep running.
+      // and on Travis with a timeout:
+      // 05:33 +416 ~9 -1: test/integration/flutter_tester_test.dart: FlutterTesterDevice start [E]                                                                                                             
+      // TimeoutException after 0:00:30.000000: Test timed out after 30 seconds.
+      // package:test  Invoker._onRun.<fn>.<fn>.<fn>
+      // 06:00 +623 ~9 -1: Some tests failed.
+      //
+      // TODO(dantup): Find a way to better log what's going on before un-skipping again.
 
       await new Future<void>.delayed(const Duration(seconds: 3));
       expect(device.isRunning, true, reason: 'Device did not remain running.\n\n$logs'.trim());
 
       expect(await device.stopApp(null), isTrue);
-    });
+    }, skip: true);
   });
 }
