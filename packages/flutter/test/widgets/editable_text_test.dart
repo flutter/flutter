@@ -379,7 +379,7 @@ void main() {
     await tester.pump();
 
     // Lost focus because "done" was pressed.
-    assert(!focusNode.hasFocus);
+    expect(focusNode.hasFocus, false);
   });
 
   testWidgets('Does not lose focus by default when "next" action is pressed', (WidgetTester tester) async {
@@ -410,7 +410,7 @@ void main() {
     await tester.pump();
 
     // Still has focus after pressing "next".
-    assert(focusNode.hasFocus);
+    expect(focusNode.hasFocus, true);
   });
 
   testWidgets('Does not lose focus by default when "done" action is pressed and onEditingComplete is provided',
@@ -446,7 +446,7 @@ void main() {
 
     // Still has focus even though "done" was pressed because onEditingComplete
     // was provided and it overrides the default behavior.
-    assert(focusNode.hasFocus);
+    expect(focusNode.hasFocus, true);
   });
 
   testWidgets('When "done" is pressed callbacks are invoked: onEditingComplete > onSubmitted',
