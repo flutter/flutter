@@ -188,7 +188,7 @@ Return a list of all available emulators. The `params` field will be a List; eac
 
 #### emulator.launch
 
-The `launch()` command takes allows launching an emulator/simulator by its `id`.
+The `launch()` command allows launching an emulator/simulator by its `id`.
 
 - `emulatorId`: the id of an emulator as returned by `getEmulators`.
 
