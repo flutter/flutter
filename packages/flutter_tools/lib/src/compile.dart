@@ -336,6 +336,7 @@ class ResidentCompiler {
       '--incremental',
       '--strong',
       '--target=flutter',
+      '--initialize-from-dill=foo' // TODO(aam): remove once dartbug.com/33087 fixed
     ];
     if (outputPath != null) {
       command.addAll(<String>['--output-dill', outputPath]);
