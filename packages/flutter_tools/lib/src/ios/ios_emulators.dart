@@ -57,7 +57,6 @@ class IOSEmulator extends Emulator {
     // Run again to force it to Foreground (using -n doesn't force existing
     // devices to the foreground)
     await launchSimulator(<String>[]);
-    return;
   }
 }
 
