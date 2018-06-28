@@ -75,10 +75,19 @@ void main() {
       expect(await device.stopApp(null), isTrue);
     });
 
+    void _log(String m) {
+      final DateTime now = new DateTime.now();
+      print('${now.hour}:${now.minute}:${now.second}.${now.millisecond} $m');
+    }
+
     testUsingContext('keeps running', () async {
+      _log('1111');
       writePubspec(tempDir.path);
+      _log('2222');
       writePackages(tempDir.path);
+      _log('3333');
       await getPackages(tempDir.path);
+      _log('4444');
 
       final String mainPath = fs.path.join('lib', 'main.dart');
       writeFile(mainPath, r'''
@@ -100,9 +109,12 @@ class MyApp extends StatelessWidget {
       // Capture process output so that if the process quits we can print the
       // stdout/stderr in the error.
       final StringBuffer logs = new StringBuffer();
-      device.getLogReader().logLines.listen(logs.write);
+      _log('5555');
+      device.getLogReader().logLines.listen(_log);
+      _log('6666');
 
       final LaunchResult result = await start(mainPath);
+      _log('7777');
 
       expect(result.started, isTrue);
       expect(result.observatoryUri, isNotNull);
@@ -117,9 +129,12 @@ class MyApp extends StatelessWidget {
       // TODO(dantup): Find a way to better log what's going on before un-skipping again.
 
       await new Future<void>.delayed(const Duration(seconds: 3));
+      _log('8888');
       expect(device.isRunning, true, reason: 'Device did not remain running.\n\n$logs'.trim());
 
+      _log('9999');
       expect(await device.stopApp(null), isTrue);
-    }, skip: true);
+      _log('1010');
+    });
   });
 }
