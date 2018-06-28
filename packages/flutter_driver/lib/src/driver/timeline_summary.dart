@@ -173,7 +173,7 @@ class TimelineSummary {
       return null;
 
     assert(percentile >= 0.0 && percentile <= 100.0);
-    List<double> doubles = durations.map<double>((Duration duration) => duration.inMilliseconds.toDouble()).toList();
+    final List<double> doubles = durations.map<double>((Duration duration) => duration.inMilliseconds.toDouble()).toList();
     doubles.sort();
     return doubles[((doubles.length - 1) * (percentile / 100)).round()];
 

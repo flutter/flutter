@@ -32,7 +32,7 @@ void main() {
     };
 
     List<Map<String, dynamic>> rasterizeTimeSequenceInMillis(List<int> sequence) {
-      var result = new List<Map<String, dynamic>>();
+      final List<Map<String, dynamic>> result = <Map<String, dynamic>>[];
       int t = 0;
       for(int duration in sequence) {
         result.add(begin(t));
@@ -40,7 +40,7 @@ void main() {
         result.add(end(t));
       }
       return result;
-    };
+    }
 
     group('frame_count', () {
       test('counts frames', () {
@@ -190,13 +190,13 @@ void main() {
         expect(summarize(<Map<String, dynamic>>[]).computeWorstFrameRasterizerTimeMillis(), isNull);
       });
 
-      const List<List<int>> sequences = [
-        [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
-        [1, 2, 3, 4, 5],
-        [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
+      const List<List<int>> sequences = <List<int>>[
+        <int>[1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+        <int>[1, 2, 3, 4, 5],
+        <int>[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
       ];
 
-      const List<int> p90s = [
+      const List<int> p90s = <int>[
         9,
         5,
         18
@@ -212,7 +212,7 @@ void main() {
       });
 
       test('compute 99th frame rasterizer time in milliseconds', () {
-        final List<int> sequence = [];
+        final List<int> sequence = <int>[];
         for(int i = 1; i <= 100; ++i) {
           sequence.add(i);
         }
