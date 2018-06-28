@@ -1676,6 +1676,7 @@ class RenderPhysicalModel extends _RenderPhysicalModelBase<RRect> {
             color.alpha != 0xFF,
           );
         }
+        // TODO(liyuqian): respect Clip
         canvas.drawRRect(offsetRRect, new Paint()..color = color);
         canvas.save();
         canvas.clipRRect(offsetRRect); // TODO(liyquian): respect Clip
@@ -1790,11 +1791,11 @@ class RenderPhysicalShape extends _RenderPhysicalModelBase<Path> {
             color.alpha != 0xFF,
           );
         }
+        // TODO(liyuqian): respect Clip
         canvas.drawPath(offsetPath, new Paint()..color = color..style = PaintingStyle.fill);
-        canvas.save();
-        canvas.clipPath(offsetPath); // TODO(liyuqian): respect Clip
+        int saveCount = RenderObject.optionallyClipPath(canvas, clip, offsetPath, offsetBounds);
         super.paint(context, offset);
-        canvas.restore();
+        canvas.restoreToCount(saveCount);
         assert(context.canvas == canvas, 'canvas changed even though needsCompositing was false');
       }
     }

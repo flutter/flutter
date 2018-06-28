@@ -347,12 +347,9 @@ class PaintingContext {
     if (needsCompositing) {
       pushLayer(new ClipRRectLayer(clipRRect: offsetClipRRect, clip: clip), painter, offset, childPaintBounds: offsetBounds);
     } else {
-      canvas
-        ..save()
-        ..clipRRect(offsetClipRRect);
+      int saveCount = RenderObject.optionallyClipRRect(canvas, clip, offsetClipRRect, offsetBounds);
       painter(this, offset);
-      canvas
-        ..restore();
+      canvas.restoreToCount(saveCount);
     }
   }
 
@@ -374,12 +371,9 @@ class PaintingContext {
     if (needsCompositing) {
       pushLayer(new ClipPathLayer(clipPath: offsetClipPath, clip: clip), painter, offset, childPaintBounds: offsetBounds);
     } else {
-      canvas
-        ..save()
-        ..clipPath(clipPath.shift(offset)); // TODO(liyuqian): respect Clip
+      int saveCount = RenderObject.optionallyClipPath(canvas, clip, offsetClipPath, offsetBounds);
       painter(this, offset);
-      canvas
-        ..restore();
+      canvas.restoreToCount(saveCount);
     }
   }
 
@@ -2604,6 +2598,53 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
         curve: curve,
       );
     }
+  }
+
+
+  /// Optionally clip the canvas with path according to [Clip]. Return the
+  /// save count for [Canvas.restoreToCount]. The bounds is only used for
+  /// [Clip.antiAliasWithSaveLayer].
+  @protected
+  static int optionallyClipPath(Canvas canvas, Clip clip, Path path, Rect bounds) {
+    canvas.save();
+    int saveCount = canvas.getSaveCount();
+    switch (clip) {
+      case Clip.none:
+        break;
+      case Clip.hardEdge:
+        canvas.clipPath(path, false);
+        break;
+      case Clip.antiAlias:
+        canvas.clipPath(path, true);
+        break;
+      case Clip.antiAliasWithSaveLayer:
+        canvas..clipPath(path, true)..saveLayer(bounds, new Paint());
+        break;
+    }
+    return saveCount;
+  }
+
+  /// Optionally clip the canvas with rrect according to [Clip]. Return the
+  /// save count for [Canvas.restoreToCount]. The bounds is only used for
+  /// [Clip.antiAliasWithSaveLayer].
+  @protected
+  static int optionallyClipRRect(Canvas canvas, Clip clip, RRect rrect, Rect bounds) {
+    canvas.save();
+    int saveCount = canvas.getSaveCount();
+    switch (clip) {
+      case Clip.none:
+        break;
+      case Clip.hardEdge:
+        canvas.clipRRect(rrect, false);
+        break;
+      case Clip.antiAlias:
+        canvas.clipRRect(rrect, true);
+        break;
+      case Clip.antiAliasWithSaveLayer:
+        canvas..clipRRect(rrect, true)..saveLayer(bounds, new Paint());
+        break;
+    }
+    return saveCount;
   }
 }
 

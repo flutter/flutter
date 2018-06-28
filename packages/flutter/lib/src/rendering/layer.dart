@@ -673,11 +673,11 @@ class ClipRRectLayer extends ContainerLayer {
   void addToScene(ui.SceneBuilder builder, Offset layerOffset) {
     bool enabled = true;
     assert(() {
-      enabled = !debugDisableClipLayers;
+      enabled = !debugDisableClipLayers && clip != Clip.none;
       return true;
     }());
     if (enabled)
-      builder.pushClipRRect(clipRRect.shift(layerOffset));
+      builder.pushClipRRect(clipRRect.shift(layerOffset), clip.index);
     addChildrenToScene(builder, layerOffset);
     if (enabled)
       builder.pop();
@@ -722,12 +722,12 @@ class ClipPathLayer extends ContainerLayer {
   void addToScene(ui.SceneBuilder builder, Offset layerOffset) {
     bool enabled = true;
     assert(() {
-      enabled = !debugDisableClipLayers;
+      enabled = !debugDisableClipLayers && clip != Clip.none;
       return true;
     }());
     if (enabled)
       // TODO(liyuqian): respect Clip
-      builder.pushClipPath(clipPath.shift(layerOffset));
+      builder.pushClipPath(clipPath.shift(layerOffset), clip.index);
     addChildrenToScene(builder, layerOffset);
     if (enabled)
       builder.pop();
@@ -994,6 +994,7 @@ class PhysicalModelLayer extends ContainerLayer {
         elevation: elevation,
         color: color,
         shadowColor: shadowColor,
+        clipMode: clip.index,
       );
     }
     addChildrenToScene(builder, layerOffset);
