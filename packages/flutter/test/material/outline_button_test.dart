@@ -47,7 +47,7 @@ void main() {
     expect(pressedCount, 1);
   });
 
-  testWidgets('Outline shape and border overrides',
+  testWidgets('OutlineButton shape and border component overrides',
       (WidgetTester tester) async {
     const Color fillColor = const Color(0xFF00FF00);
     const Color borderColor = const Color(0xFFFF0000);
@@ -121,37 +121,33 @@ void main() {
               pathMatcher: coversSameAreaAs(clipPath,
                   areaToCompare: clipRect.inflate(10.0)))
           ..path(color: borderColor, strokeWidth: borderWidth));
-//
-//    final Offset center = tester.getCenter(outlineButton);
-//    final TestGesture gesture = await tester.startGesture(center);
-//    await tester.pump(); // start gesture
-//    // Wait for the border's color to change to highlightedBorderColor and
-//    // the fillColor to become opaque.
-//    await tester.pump(const Duration(milliseconds: 200));
-//    expect(
-//        outlineButton,
-//        paints
-//          ..path(color: fillColor.withAlpha(0xFF))
-//          ..clipPath(
-//              pathMatcher: coversSameAreaAs(clipPath,
-//                  areaToCompare: clipRect.inflate(10.0)))
-//          ..path(color: highlightedBorderColor, strokeWidth: borderWidth));
-//
-//    // Tap gesture completes, button returns to its initial configuration.
-//    await gesture.up();
-//    await tester.pumpAndSettle();
-//    expect(
-//        outlineButton,
-//        paints
-//          ..path(color: fillColor.withAlpha(0x00))
-//          ..clipPath(
-//              pathMatcher: coversSameAreaAs(clipPath,
-//                  areaToCompare: clipRect.inflate(10.0)))
-//          ..path(color: borderColor, strokeWidth: borderWidth));
-  });
 
-  testWidgets('Outline shape and border theming', (WidgetTester tester) async {
-    // TODO(clocksmith): this.
+    final Offset center = tester.getCenter(enabledOutlineButton);
+    final TestGesture gesture = await tester.startGesture(center);
+    await tester.pump(); // start gesture
+    // Wait for the border's color to change to highlightedBorderColor and
+    // the fillColor to become opaque.
+    await tester.pump(const Duration(milliseconds: 200));
+    expect(
+        enabledOutlineButton,
+        paints
+          ..path(color: fillColor.withAlpha(0xFF))
+          ..clipPath(
+              pathMatcher: coversSameAreaAs(clipPath,
+                  areaToCompare: clipRect.inflate(10.0)))
+          ..path(color: highlightedBorderColor, strokeWidth: borderWidth));
+
+    // Tap gesture completes, button returns to its initial configuration.
+    await gesture.up();
+    await tester.pumpAndSettle();
+    expect(
+        enabledOutlineButton,
+        paints
+          ..path(color: fillColor.withAlpha(0x00))
+          ..clipPath(
+              pathMatcher: coversSameAreaAs(clipPath,
+                  areaToCompare: clipRect.inflate(10.0)))
+          ..path(color: borderColor, strokeWidth: borderWidth));
   });
 
   testWidgets('OutlineButton contributes semantics',

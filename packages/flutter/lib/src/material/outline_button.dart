@@ -354,19 +354,24 @@ class _OutlineButtonState extends State<OutlineButton> with SingleTickerProvider
     return Colors.transparent;
   }
 
+  /// Returns outline color for appropriate state, while respecting any theme
+  /// or component overrides.
+  /// TODO(clocksmith): Logic like this may be common accross components once
+  /// the theming architecture is formalized.
   Color _getOutlineColor(ThemeData theme) {
     if (_pressed && widget.highlightedBorderColor != null) {
       return widget.highlightedBorderColor;
     } else if (!widget.enabled && widget.disabledBorderColor != null) {
       return widget.disabledBorderColor;
     } else {
-      // TODO(clocksmith): Prioritize with on surface color once its available.
-      final Color themeColor = theme.brightness == Brightness.dark
-          ? Colors.white : Colors.black;
+      // TODO(clocksmith): Use theme.surfaceColor once its available.
+      final Color themeColor = theme.primaryColor ??
+          theme.brightness == Brightness.dark ? Colors.white : Colors.black;
       return widget.borderSide?.color ?? themeColor.withOpacity(0.12);
     }
   }
 
+  // TODO(clocksmith): Use buttonTheme.
   BorderSide _getOutline(ThemeData theme, ButtonThemeData buttonTheme) {
     if (widget.borderSide?.style == BorderStyle.none)
       return widget.borderSide;
