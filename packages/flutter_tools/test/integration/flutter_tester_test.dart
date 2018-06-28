@@ -80,7 +80,7 @@ void main() {
       print('${now.hour}:${now.minute}:${now.second}.${now.millisecond} $m');
     }
 
-    testUsingContext('keeps running', () async {
+    testUsingContext('keeps running.', () async {
       _log('1111');
       writePubspec(tempDir.path);
       _log('2222');
