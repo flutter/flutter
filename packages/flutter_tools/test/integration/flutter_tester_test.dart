@@ -74,52 +74,5 @@ void main() {
 
       expect(await device.stopApp(null), isTrue);
     });
-
-    testUsingContext('keeps running', () async {
-      writePubspec(tempDir.path);
-      writePackages(tempDir.path);
-      await getPackages(tempDir.path);
-
-      final String mainPath = fs.path.join('lib', 'main.dart');
-      writeFile(mainPath, r'''
-import 'package:flutter/material.dart';
-
-void main() => runApp(new MyApp());
-
-class MyApp extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return new MaterialApp(
-      title: 'Flutter Demo',
-      home: new Container(),
-    );
-  }
-}
-''');
-
-      // Capture process output so that if the process quits we can print the
-      // stdout/stderr in the error.
-      final StringBuffer logs = new StringBuffer();
-      device.getLogReader().logLines.listen(logs.write);
-
-      final LaunchResult result = await start(mainPath);
-
-      expect(result.started, isTrue);
-      expect(result.observatoryUri, isNotNull);
-
-      // This test has been seen to flake on mac_bot because the process did not keep running.
-      // and on Travis with a timeout:
-      // 05:33 +416 ~9 -1: test/integration/flutter_tester_test.dart: FlutterTesterDevice start [E]                                                                                                             
-      // TimeoutException after 0:00:30.000000: Test timed out after 30 seconds.
-      // package:test  Invoker._onRun.<fn>.<fn>.<fn>
-      // 06:00 +623 ~9 -1: Some tests failed.
-      //
-      // TODO(dantup): Find a way to better log what's going on before un-skipping again.
-
-      await new Future<void>.delayed(const Duration(seconds: 3));
-      expect(device.isRunning, true, reason: 'Device did not remain running.\n\n$logs'.trim());
-
-      expect(await device.stopApp(null), isTrue);
-    }, skip: true);
   });
 }
