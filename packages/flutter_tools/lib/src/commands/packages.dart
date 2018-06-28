@@ -5,6 +5,7 @@
 import 'dart:async';
 
 import '../base/common.dart';
+import '../base/file_system.dart';
 import '../base/os.dart';
 import '../dart/pub.dart';
 import '../project.dart';
@@ -80,7 +81,7 @@ class PackagesGetCommand extends FlutterCommand {
     }
 
     await _runPubGet(target);
-    final FlutterProject rootProject = new FlutterProject.fromPath(target);
+    final FlutterProject rootProject = new FlutterProject(fs.directory(target));
     await rootProject.ensureReadyForPlatformSpecificTooling();
 
     // Get/upgrade packages in example app as well
