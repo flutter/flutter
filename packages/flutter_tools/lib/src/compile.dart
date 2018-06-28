@@ -35,6 +35,8 @@ class _StdoutHandler {
   String boundaryKey;
   Completer<CompilerOutput> compilerOutput;
 
+  bool _suppressCompilerMessages;
+
   void handler(String string) {
     const String kResultPrefix = 'result ';
     if (boundaryKey == null) {
@@ -51,15 +53,17 @@ class _StdoutHandler {
           string.substring(boundaryKey.length + 1, spaceDelimiter),
           int.parse(string.substring(spaceDelimiter + 1).trim())));
     }
-    else
+    else if (!_suppressCompilerMessages) {
       consumer('compiler message: $string');
+    }
   }
 
   // This is needed to get ready to process next compilation result output,
   // with its own boundary key and new completer.
-  void reset() {
+  void reset({bool suppressCompilerMessages = false}) {
     boundaryKey = null;
     compilerOutput = new Completer<CompilerOutput>();
+    _suppressCompilerMessages = suppressCompilerMessages;
   }
 }
 
@@ -332,6 +336,7 @@ class ResidentCompiler {
       '--incremental',
       '--strong',
       '--target=flutter',
+      '--initialize-from-dill=foo' // TODO(aam): remove once dartbug.com/33087 fixed
     ];
     if (outputPath != null) {
       command.addAll(<String>['--output-dill', outputPath]);
@@ -394,7 +399,7 @@ class ResidentCompiler {
 
   Future<CompilerOutput> _compileExpression(
       _CompileExpressionRequest request) async {
-    _stdoutHandler.reset();
+    _stdoutHandler.reset(suppressCompilerMessages: true);
 
     // 'compile-expression' should be invoked after compiler has been started,
     // program was compiled.

@@ -6,6 +6,7 @@ import 'dart:async';
 
 import 'runner.dart' as runner;
 import 'src/commands/analyze.dart';
+import 'src/commands/attach.dart';
 import 'src/commands/build.dart';
 import 'src/commands/channel.dart';
 import 'src/commands/clean.dart';
@@ -48,6 +49,7 @@ Future<Null> main(List<String> args) async {
 
   await runner.run(args, <FlutterCommand>[
     new AnalyzeCommand(verboseHelp: verboseHelp),
+    new AttachCommand(verboseHelp: verboseHelp),
     new BuildCommand(verboseHelp: verboseHelp),
     new ChannelCommand(verboseHelp: verboseHelp),
     new CleanCommand(),
