@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
@@ -708,4 +710,54 @@ class _CupertinoEdgeShadowPainter extends BoxPainter {
 
     canvas.drawRect(rect, paint);
   }
+}
+
+
+class _CupertinoModalPopupRoute<T> extends PopupRoute<T> {
+  _CupertinoModalPopupRoute({
+    this.builder,
+    this.barrierLabel,
+    this.child,
+    RouteSettings settings,
+  }) : super(settings: settings);
+
+  final WidgetBuilder builder;
+  final Widget child;
+
+  @override
+  Duration get transitionDuration => const Duration(milliseconds: 1000);
+
+  @override
+  bool get barrierDismissible => true;
+
+  @override
+  final String barrierLabel;
+
+  @override
+  Color get barrierColor => const Color(0xFF8E8E93);
+
+  @override
+  AnimationController createAnimationController() {
+    return new AnimationController(
+      duration: const Duration(milliseconds: 1000),
+      vsync: navigator.overlay,
+    );
+  }
+
+  @override
+  Widget buildPage(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
+    return child;
+  }
+}
+
+Future<T> showCupertinoModalPopup<T>({
+  @required BuildContext context,
+  @required WidgetBuilder builder,
+  @required Widget child,
+}) {
+  return Navigator.push(context, new _CupertinoModalPopupRoute<T>(
+    builder: builder,
+    barrierLabel: 'ModalPopup',
+    child: child,
+  ));
 }
