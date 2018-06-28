@@ -651,13 +651,16 @@ class ClipRRectLayer extends ContainerLayer {
   ///
   /// The [clipRRect] property must be non-null before the compositing phase of
   /// the pipeline.
-  ClipRRectLayer({ this.clipRRect });
+  ClipRRectLayer({ this.clipRRect, this.clip });
 
   /// The rounded-rect to clip in the parent's coordinate system.
   ///
   /// The scene must be explicitly recomposited after this property is changed
   /// (as described at [Layer]).
   RRect clipRRect;
+
+  /// {@macro flutter.widgets.Clip}
+  Clip clip;
 
   @override
   S find<S>(Offset regionOffset) {

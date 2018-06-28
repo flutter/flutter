@@ -1014,7 +1014,7 @@ class RenderBackdropFilter extends RenderProxyBox {
 /// This class is used by a number of clip widgets (e.g., [ClipRect] and
 /// [ClipPath]).
 ///
-/// The [getClip] method is called whenever the custom clip needs to be updated.
+/// The [getClipShape] method is called whenever the custom clip needs to be updated.
 ///
 /// The [shouldReclip] method is called when a new instance of the class
 /// is provided, to check if the new instance actually represents different
@@ -1035,18 +1035,18 @@ abstract class CustomClipper<T> {
   /// Creates a custom clipper.
   ///
   /// The clipper will update its clip whenever [reclip] notifies its listeners.
-  const CustomClipper({ Listenable reclip }) : _reclip = reclip;
+  const CustomClipper({ Listenable reclip, this.clip = Clip.antiAlias }) : _reclip = reclip;
 
   final Listenable _reclip;
 
   /// Returns a description of the clip given that the render object being
   /// clipped is of the given size.
-  T getClip(Size size);
+  T getClipShape(Size size);
 
   /// How to clip.
-  Clip get clipOption => Clip.antiAlias;
+  final Clip clip;
 
-  /// Returns an approximation of the clip returned by [getClip], as
+  /// Returns an approximation of the clip returned by [getClipShape], as
   /// an axis-aligned Rect. This is used by the semantics layer to
   /// determine whether widgets should be excluded.
   ///
@@ -1065,10 +1065,10 @@ abstract class CustomClipper<T> {
   /// instance, then the method should return true, otherwise it should return
   /// false.
   ///
-  /// If the method returns false, then the [getClip] call might be optimized
+  /// If the method returns false, then the [getClipShape] call might be optimized
   /// away.
   ///
-  /// It's possible that the [getClip] method will get called even if
+  /// It's possible that the [getClipShape] method will get called even if
   /// [shouldReclip] returns false or if the [shouldReclip] method is never
   /// called at all (e.g. if the box changes size).
   bool shouldReclip(covariant CustomClipper<T> oldClipper);
@@ -1089,15 +1089,12 @@ class ShapeBorderClipper extends CustomClipper<Path> {
   /// the border will not need the text direction to paint itself.
   const ShapeBorderClipper({
     @required this.shape,
-    this.clip = defaultClipBehavior,
+    Clip clip = defaultClipBehavior,
     this.textDirection,
-  }) : assert(shape != null), assert(clip != null);
+  }) : assert(shape != null), assert(clip != null), super(clip: clip);
 
   /// The shape border whose outer path this clipper clips to.
   final ShapeBorder shape;
-
-  /// {@macro flutter.widgets.Clip}
-  final Clip clip;
 
   /// The text direction to use for getting the outer path for [shape].
   ///
@@ -1105,12 +1102,9 @@ class ShapeBorderClipper extends CustomClipper<Path> {
   /// towards the start of the shape).
   final TextDirection textDirection;
 
-  @override
-  Clip get clipOption => clip;
-
   /// Returns the outer path of [shape] as the clip.
   @override
-  Path getClip(Size size) {
+  Path getClipShape(Size size) {
     return shape.getOuterPath(Offset.zero & size, textDirection: textDirection);
   }
 
@@ -1126,7 +1120,8 @@ class ShapeBorderClipper extends CustomClipper<Path> {
 abstract class _RenderCustomClip<T> extends RenderProxyBox {
   _RenderCustomClip({
     RenderBox child,
-    CustomClipper<T> clipper
+    this.initialClip = defaultClipBehavior,
+    CustomClipper<T> clipper // this would override _clip and initialClip
   }) : _clipper = clipper, super(child);
 
   /// If non-null, determines which clip to use on the child.
@@ -1162,24 +1157,28 @@ abstract class _RenderCustomClip<T> extends RenderProxyBox {
   }
 
   void _markNeedsClip() {
-    _clip = null;
+    _clipShape = null;
     markNeedsPaint();
     markNeedsSemanticsUpdate();
   }
 
-  T get _defaultClip;
-  T _clip;
+  T get _defaultClipShape;
+  T _clipShape;
+
+  final Clip initialClip; // May be overridden by clipper.
+
+  Clip get clip => clipper == null ? initialClip : clipper.clip;
 
   @override
   void performLayout() {
     final Size oldSize = hasSize ? size : null;
     super.performLayout();
     if (oldSize != size)
-      _clip = null;
+      _clipShape = null;
   }
 
   void _updateClip() {
-    _clip ??= _clipper?.getClip(size) ?? _defaultClip;
+    _clipShape ??= _clipper?.getClipShape(size) ?? _defaultClipShape;
   }
 
   @override
@@ -1234,14 +1233,14 @@ class RenderClipRect extends _RenderCustomClip<Rect> {
   }) : super(child: child, clipper: clipper);
 
   @override
-  Rect get _defaultClip => Offset.zero & size;
+  Rect get _defaultClipShape => Offset.zero & size;
 
   @override
   bool hitTest(HitTestResult result, { Offset position }) {
     if (_clipper != null) {
       _updateClip();
-      assert(_clip != null);
-      if (!_clip.contains(position))
+      assert(_clipShape != null);
+      if (!_clipShape.contains(position))
         return false;
     }
     return super.hitTest(result, position: position);
@@ -1251,7 +1250,7 @@ class RenderClipRect extends _RenderCustomClip<Rect> {
   void paint(PaintingContext context, Offset offset) {
     if (child != null) {
       _updateClip();
-      context.pushClipRect(needsCompositing, offset, _clip, super.paint);
+      context.pushClipRect(needsCompositing, offset, _clipShape, super.paint);
     }
   }
 
@@ -1260,8 +1259,8 @@ class RenderClipRect extends _RenderCustomClip<Rect> {
     assert(() {
       if (child != null) {
         super.debugPaintSize(context, offset);
-        context.canvas.drawRect(_clip.shift(offset), _debugPaint);
-        _debugText.paint(context.canvas, offset + new Offset(_clip.width / 8.0, -_debugText.text.style.fontSize * 1.1));
+        context.canvas.drawRect(_clipShape.shift(offset), _debugPaint);
+        _debugText.paint(context.canvas, offset + new Offset(_clipShape.width / 8.0, -_debugText.text.style.fontSize * 1.1));
       }
       return true;
     }());
@@ -1305,14 +1304,14 @@ class RenderClipRRect extends _RenderCustomClip<RRect> {
   }
 
   @override
-  RRect get _defaultClip => _borderRadius.toRRect(Offset.zero & size);
+  RRect get _defaultClipShape => _borderRadius.toRRect(Offset.zero & size);
 
   @override
   bool hitTest(HitTestResult result, { Offset position }) {
     if (_clipper != null) {
       _updateClip();
-      assert(_clip != null);
-      if (!_clip.contains(position))
+      assert(_clipShape != null);
+      if (!_clipShape.contains(position))
         return false;
     }
     return super.hitTest(result, position: position);
@@ -1322,7 +1321,7 @@ class RenderClipRRect extends _RenderCustomClip<RRect> {
   void paint(PaintingContext context, Offset offset) {
     if (child != null) {
       _updateClip();
-      context.pushClipRRect(needsCompositing, offset, _clip.outerRect, _clip, super.paint);
+      context.pushClipRRect(needsCompositing, offset, _clipShape.outerRect, _clipShape, clip, super.paint);
     }
   }
 
@@ -1331,8 +1330,8 @@ class RenderClipRRect extends _RenderCustomClip<RRect> {
     assert(() {
       if (child != null) {
         super.debugPaintSize(context, offset);
-        context.canvas.drawRRect(_clip.shift(offset), _debugPaint);
-        _debugText.paint(context.canvas, offset + new Offset(_clip.tlRadiusX, -_debugText.text.style.fontSize * 1.1));
+        context.canvas.drawRRect(_clipShape.shift(offset), _debugPaint);
+        _debugText.paint(context.canvas, offset + new Offset(_clipShape.tlRadiusX, -_debugText.text.style.fontSize * 1.1));
       }
       return true;
     }());
@@ -1366,16 +1365,16 @@ class RenderClipOval extends _RenderCustomClip<Rect> {
   }
 
   @override
-  Rect get _defaultClip => Offset.zero & size;
+  Rect get _defaultClipShape => Offset.zero & size;
 
   @override
   bool hitTest(HitTestResult result, { Offset position }) {
     _updateClip();
-    assert(_clip != null);
-    final Offset center = _clip.center;
+    assert(_clipShape != null);
+    final Offset center = _clipShape.center;
     // convert the position to an offset from the center of the unit circle
-    final Offset offset = new Offset((position.dx - center.dx) / _clip.width,
-                                     (position.dy - center.dy) / _clip.height);
+    final Offset offset = new Offset((position.dx - center.dx) / _clipShape.width,
+                                     (position.dy - center.dy) / _clipShape.height);
     // check if the point is outside the unit circle
     if (offset.distanceSquared > 0.25) // x^2 + y^2 > r^2
       return false;
@@ -1386,7 +1385,7 @@ class RenderClipOval extends _RenderCustomClip<Rect> {
   void paint(PaintingContext context, Offset offset) {
     if (child != null) {
       _updateClip();
-      context.pushClipPath(needsCompositing, offset, _clip, _getClipPath(_clip), clipper == null ? defaultClipBehavior : clipper.clipOption, super.paint);
+      context.pushClipPath(needsCompositing, offset, _clipShape, _getClipPath(_clipShape), clip, super.paint);
     }
   }
 
@@ -1395,8 +1394,8 @@ class RenderClipOval extends _RenderCustomClip<Rect> {
     assert(() {
       if (child != null) {
         super.debugPaintSize(context, offset);
-        context.canvas.drawPath(_getClipPath(_clip).shift(offset), _debugPaint);
-        _debugText.paint(context.canvas, offset + new Offset((_clip.width - _debugText.width) / 2.0, -_debugText.text.style.fontSize * 1.1));
+        context.canvas.drawPath(_getClipPath(_clipShape).shift(offset), _debugPaint);
+        _debugText.paint(context.canvas, offset + new Offset((_clipShape.width - _debugText.width) / 2.0, -_debugText.text.style.fontSize * 1.1));
       }
       return true;
     }());
@@ -1427,14 +1426,14 @@ class RenderClipPath extends _RenderCustomClip<Path> {
   }) : super(child: child, clipper: clipper);
 
   @override
-  Path get _defaultClip => new Path()..addRect(Offset.zero & size);
+  Path get _defaultClipShape => new Path()..addRect(Offset.zero & size);
 
   @override
   bool hitTest(HitTestResult result, { Offset position }) {
     if (_clipper != null) {
       _updateClip();
-      assert(_clip != null);
-      if (!_clip.contains(position))
+      assert(_clipShape != null);
+      if (!_clipShape.contains(position))
         return false;
     }
     return super.hitTest(result, position: position);
@@ -1444,7 +1443,7 @@ class RenderClipPath extends _RenderCustomClip<Path> {
   void paint(PaintingContext context, Offset offset) {
     if (child != null) {
       _updateClip();
-      context.pushClipPath(needsCompositing, offset, Offset.zero & size, _clip, clipper == null ? defaultClipBehavior : clipper.clipOption, super.paint);
+      context.pushClipPath(needsCompositing, offset, Offset.zero & size, _clipShape, clip, super.paint);
     }
   }
 
@@ -1453,7 +1452,7 @@ class RenderClipPath extends _RenderCustomClip<Path> {
     assert(() {
       if (child != null) {
         super.debugPaintSize(context, offset);
-        context.canvas.drawPath(_clip.shift(offset), _debugPaint);
+        context.canvas.drawPath(_clipShape.shift(offset), _debugPaint);
         _debugText.paint(context.canvas, offset);
       }
       return true;
@@ -1472,14 +1471,16 @@ abstract class _RenderPhysicalModelBase<T> extends _RenderCustomClip<T> {
     @required double elevation,
     @required Color color,
     @required Color shadowColor,
+    Clip clip = defaultClipBehavior,
     CustomClipper<T> clipper,
   }) : assert(elevation != null),
        assert(color != null),
        assert(shadowColor != null),
+       assert(clip != null),
        _elevation = elevation,
        _color = color,
        _shadowColor = shadowColor,
-       super(child: child, clipper: clipper);
+       super(child: child, initialClip: clip, clipper: clipper);
 
   /// The z-coordinate at which to place this material.
   ///
@@ -1549,7 +1550,7 @@ class RenderPhysicalModel extends _RenderPhysicalModelBase<RRect> {
   RenderPhysicalModel({
     RenderBox child,
     BoxShape shape = BoxShape.rectangle,
-    this.clip = defaultClipBehavior,
+    Clip clip = defaultClipBehavior,
     BorderRadius borderRadius,
     double elevation = 0.0,
     @required Color color,
@@ -1562,6 +1563,7 @@ class RenderPhysicalModel extends _RenderPhysicalModelBase<RRect> {
        _shape = shape,
        _borderRadius = borderRadius,
        super(
+         clip: clip,
          child: child,
          elevation: elevation,
          color: color,
@@ -1582,9 +1584,6 @@ class RenderPhysicalModel extends _RenderPhysicalModelBase<RRect> {
     _markNeedsClip();
   }
 
-  /// {@macro flutter.widgets.Clip}
-  final Clip clip;
-
   /// The border radius of the rounded corners.
   ///
   /// Values are clamped so that horizontal and vertical radii sums do not
@@ -1603,7 +1602,7 @@ class RenderPhysicalModel extends _RenderPhysicalModelBase<RRect> {
   }
 
   @override
-  RRect get _defaultClip {
+  RRect get _defaultClipShape {
     assert(hasSize);
     assert(_shape != null);
     switch (_shape) {
@@ -1620,8 +1619,8 @@ class RenderPhysicalModel extends _RenderPhysicalModelBase<RRect> {
   bool hitTest(HitTestResult result, { Offset position }) {
     if (_clipper != null) {
       _updateClip();
-      assert(_clip != null);
-      if (!_clip.contains(position))
+      assert(_clipShape != null);
+      if (!_clipShape.contains(position))
         return false;
     }
     return super.hitTest(result, position: position);
@@ -1631,7 +1630,7 @@ class RenderPhysicalModel extends _RenderPhysicalModelBase<RRect> {
   void paint(PaintingContext context, Offset offset) {
     if (child != null) {
       _updateClip();
-      final RRect offsetRRect = _clip.shift(offset);
+      final RRect offsetRRect = _clipShape.shift(offset);
       final Rect offsetBounds = offsetRRect.outerRect;
       final Path offsetRRectAsPath = new Path()..addRRect(offsetRRect);
       bool paintShadows = true;
@@ -1729,14 +1728,14 @@ class RenderPhysicalShape extends _RenderPhysicalModelBase<Path> {
        );
 
   @override
-  Path get _defaultClip => new Path()..addRect(Offset.zero & size);
+  Path get _defaultClipShape => new Path()..addRect(Offset.zero & size);
 
   @override
   bool hitTest(HitTestResult result, { Offset position }) {
     if (_clipper != null) {
       _updateClip();
-      assert(_clip != null);
-      if (!_clip.contains(position))
+      assert(_clipShape != null);
+      if (!_clipShape.contains(position))
         return false;
     }
     return super.hitTest(result, position: position);
@@ -1747,7 +1746,7 @@ class RenderPhysicalShape extends _RenderPhysicalModelBase<Path> {
     if (child != null) {
       _updateClip();
       final Rect offsetBounds = offset & size;
-      final Path offsetPath = _clip.shift(offset);
+      final Path offsetPath = _clipShape.shift(offset);
       bool paintShadows = true;
       assert(() {
         if (debugDisableShadows) {
@@ -1767,7 +1766,7 @@ class RenderPhysicalShape extends _RenderPhysicalModelBase<Path> {
       if (needsCompositing) {
         final PhysicalModelLayer physicalModel = new PhysicalModelLayer(
           clipPath: offsetPath,
-          clip: clipper == null ? defaultClipBehavior : clipper.clipOption,
+          clip: clip,
           elevation: paintShadows ? elevation : 0.0,
           color: color,
           shadowColor: shadowColor,

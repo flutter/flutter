@@ -348,4 +348,4 @@ enum Clip {
 ///
 /// TODO(liyuqian): Set it to Clip.none. (https://github.com/flutter/flutter/issues/18057)
 /// We currently have Clip.antiAlias to preserve our old behaviors.
-const defaultClipBehavior = Clip.none;
+const Clip defaultClipBehavior = Clip.none;

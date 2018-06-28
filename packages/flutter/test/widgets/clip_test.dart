@@ -12,7 +12,7 @@ final List<String> log = <String>[];
 
 class PathClipper extends CustomClipper<Path> {
   @override
-  Path getClip(Size size) {
+  Path getClipShape(Size size) {
     log.add('getClip');
     return new Path()
       ..addRect(new Rect.fromLTWH(50.0, 50.0, 100.0, 100.0));
@@ -28,7 +28,7 @@ class ValueClipper<T> extends CustomClipper<T> {
   final T value;
 
   @override
-  T getClip(Size size) {
+  T getClipShape(Size size) {
     log.add(message);
     return value;
   }
