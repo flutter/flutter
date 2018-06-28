@@ -9,6 +9,8 @@ import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/cache.dart';
+import 'package:flutter_tools/src/flutter_manifest.dart';
+import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/ios/cocoapods.dart';
 import 'package:flutter_tools/src/ios/xcodeproj.dart';
 import 'package:mockito/mockito.dart';
@@ -132,21 +134,25 @@ void main() {
       podFile = fs.file(fs.path.join('project', 'ios', 'Podfile'));
     });
 
-    testUsingContext('creates objective-c Podfile when not present', () {
-      cocoaPodsUnderTest.setupPodfile('project');
+    testUsingContext('creates objective-c Podfile when not present', () async {
+      final FlutterManifest manifest =
+          await new FlutterProject.fromPath('project').manifest;
+      cocoaPodsUnderTest.setupPodfile('project', manifest);
 
       expect(podFile.readAsStringSync(), 'Objective-C podfile template');
     }, overrides: <Type, Generator>{
       FileSystem: () => fs,
     });
 
-    testUsingContext('creates swift Podfile if swift', () {
+    testUsingContext('creates swift Podfile if swift', () async {
       when(mockXcodeProjectInterpreter.isInstalled).thenReturn(true);
       when(mockXcodeProjectInterpreter.getBuildSettings(any, any)).thenReturn(<String, String>{
         'SWIFT_VERSION': '4.0',
       });
 
-      cocoaPodsUnderTest.setupPodfile('project');
+      final FlutterManifest manifest =
+          await new FlutterProject.fromPath('project').manifest;
+      cocoaPodsUnderTest.setupPodfile('project', manifest);
 
       expect(podFile.readAsStringSync(), 'Swift podfile template');
     }, overrides: <Type, Generator>{
@@ -154,20 +160,24 @@ void main() {
       XcodeProjectInterpreter: () => mockXcodeProjectInterpreter,
     });
 
-    testUsingContext('does not recreate Podfile when already present', () {
+    testUsingContext('does not recreate Podfile when already present', () async {
       podFile..createSync()..writeAsStringSync('Existing Podfile');
 
-      cocoaPodsUnderTest.setupPodfile('project');
+      final FlutterManifest manifest =
+          await new FlutterProject.fromPath('project').manifest;
+      cocoaPodsUnderTest.setupPodfile('project', manifest);
 
       expect(podFile.readAsStringSync(), 'Existing Podfile');
     }, overrides: <Type, Generator>{
       FileSystem: () => fs,
     });
 
-    testUsingContext('does not create Podfile when we cannot interpret Xcode projects', () {
+    testUsingContext('does not create Podfile when we cannot interpret Xcode projects', () async {
       when(mockXcodeProjectInterpreter.isInstalled).thenReturn(false);
 
-      cocoaPodsUnderTest.setupPodfile('project');
+      final FlutterManifest manifest =
+          await new FlutterProject.fromPath('project').manifest;
+      cocoaPodsUnderTest.setupPodfile('project', manifest);
 
       expect(podFile.existsSync(), false);
     }, overrides: <Type, Generator>{
@@ -175,12 +185,14 @@ void main() {
       XcodeProjectInterpreter: () => mockXcodeProjectInterpreter,
     });
 
-    testUsingContext('includes Pod config in xcconfig files, if not present', () {
+    testUsingContext('includes Pod config in xcconfig files, if not present', () async {
       podFile..createSync()..writeAsStringSync('Existing Podfile');
       debugConfigFile..createSync(recursive: true)..writeAsStringSync('Existing debug config');
       releaseConfigFile..createSync(recursive: true)..writeAsStringSync('Existing release config');
 
-      cocoaPodsUnderTest.setupPodfile('project');
+      final FlutterManifest manifest =
+          await new FlutterProject.fromPath('project').manifest;
+      cocoaPodsUnderTest.setupPodfile('project', manifest);
 
       final String debugContents = debugConfigFile.readAsStringSync();
       expect(debugContents, contains(
