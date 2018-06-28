@@ -375,7 +375,7 @@ void main() {
 
     assert(focusNode.hasFocus);
 
-    tester.testTextInput.receiveAction(TextInputAction.done);
+    await tester.testTextInput.receiveAction(TextInputAction.done);
     await tester.pump();
 
     // Lost focus because "done" was pressed.
@@ -406,7 +406,7 @@ void main() {
 
     assert(focusNode.hasFocus);
 
-    tester.testTextInput.receiveAction(TextInputAction.next);
+    await tester.testTextInput.receiveAction(TextInputAction.next);
     await tester.pump();
 
     // Still has focus after pressing "next".
@@ -441,7 +441,7 @@ void main() {
 
     assert(focusNode.hasFocus);
 
-    tester.testTextInput.receiveAction(TextInputAction.done);
+    await tester.testTextInput.receiveAction(TextInputAction.done);
     await tester.pump();
 
     // Still has focus even though "done" was pressed because onEditingComplete
