@@ -97,15 +97,25 @@ class MyApp extends StatelessWidget {
 }
 ''');
 
+      // Capture process output so that if the process quits we can print the
+      // stdout/stderr in the error.
+      final StringBuffer logs = new StringBuffer();
+      device.getLogReader().logLines.listen(logs.write);
+
       final LaunchResult result = await start(mainPath);
 
       expect(result.started, isTrue);
       expect(result.observatoryUri, isNotNull);
 
+      // This test has been seen to fail on mac_bot because the process did not keep running.
+      // Capturing stdout/stderr has been added subsequently to try and track this down.
+      // If you're ivnestigating this test failing in the future, feel free to
+      // mark is as skip (it's not currently critical) and notifiy dantup@ to look at the logs.
+
       await new Future<void>.delayed(const Duration(seconds: 3));
-      expect(device.isRunning, true);
+      expect(device.isRunning, true, reason: 'Device did not remain running.\n\n$logs'.trim());
 
       expect(await device.stopApp(null), isTrue);
-    }, skip: true);
+    });
   });
 }
