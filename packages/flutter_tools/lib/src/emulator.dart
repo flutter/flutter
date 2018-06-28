@@ -98,12 +98,15 @@ class EmulatorManager {
     // - Removes lines that say "null" (!)
     // - Removes lines that tell the user to use '--force' to overwrite emulators
     String cleanError(String error) {
-      return (error ?? '')
+      if (error == null || error.trim() == '')
+        return null;
+      return error
           .split('\n')
           .where((String l) => l.trim() != 'null')
           .where((String l) =>
               l.trim() != 'Use --force if you want to replace it.')
-          .join('\n');
+          .join('\n')
+          .trim();
     }
 
     final List<String> args = <String>[
