@@ -176,28 +176,8 @@ class _SegmentedControlState<T> extends State<SegmentedControl<T>>
   @override
   void initState() {
     super.initState();
-    setupAnimationControllers();
-  }
-
-  @override
-  void dispose() {
-    for (AnimationController animationController in _selectionControllers) {
-      animationController.dispose();
-    }
-    super.dispose();
-  }
-
-  void setupAnimationControllers() {
     for (T key in widget.children.keys) {
-      final AnimationController animationController = new AnimationController(
-        duration: _kFadeDuration,
-        vsync: this,
-      )..addListener(() {
-          setState(() {
-            // State of background/text colors has changed
-          });
-        });
-
+      final AnimationController animationController = createAnimationController();
       if (widget.groupValue == key) {
         _childTweens.add(reverseBackgroundColorTween);
         animationController.forward();
@@ -206,6 +186,25 @@ class _SegmentedControlState<T> extends State<SegmentedControl<T>>
       }
       _selectionControllers.add(animationController);
     }
+  }
+
+  AnimationController createAnimationController() {
+    return new AnimationController(
+      duration: _kFadeDuration,
+      vsync: this,
+    )..addListener(() {
+        setState(() {
+          // State of background/text colors has changed
+        });
+      });
+  }
+
+  @override
+  void dispose() {
+    for (AnimationController animationController in _selectionControllers) {
+      animationController.dispose();
+    }
+    super.dispose();
   }
 
   void _onTapDown(T currentKey) {
@@ -230,8 +229,8 @@ class _SegmentedControlState<T> extends State<SegmentedControl<T>>
   }
 
   Color getTextColor(int index, T currentKey) {
-    if (_selectionControllers.elementAt(index).isAnimating) {
-      return textColorTween.evaluate(_selectionControllers.elementAt(index));
+    if (_selectionControllers[index].isAnimating) {
+      return textColorTween.evaluate(_selectionControllers[index]);
     } else if (widget.groupValue == currentKey) {
       return CupertinoColors.white;
     }
@@ -239,8 +238,8 @@ class _SegmentedControlState<T> extends State<SegmentedControl<T>>
   }
 
   Color getBackgroundColor(int index, T currentKey) {
-    if (_selectionControllers.elementAt(index).isAnimating) {
-      return _childTweens.elementAt(index).evaluate(_selectionControllers.elementAt(index));
+    if (_selectionControllers[index].isAnimating) {
+      return _childTweens[index].evaluate(_selectionControllers[index]);
     } else if (widget.groupValue == currentKey) {
       return CupertinoColors.activeBlue;
     } else if (_pressedKey == currentKey) {
@@ -249,14 +248,23 @@ class _SegmentedControlState<T> extends State<SegmentedControl<T>>
     return CupertinoColors.white;
   }
 
+  void updateAnimationControllers() {
+    while (_selectionControllers.length != widget.children.length) {
+      if (_selectionControllers.length > widget.children.length) {
+        _selectionControllers.removeLast();
+        _childTweens.removeLast();
+      } else {
+        _selectionControllers.add(createAnimationController());
+      }
+    }
+  }
+
   @override
   void didUpdateWidget(SegmentedControl<T> oldWidget) {
     super.didUpdateWidget(oldWidget);
 
-    if(oldWidget.children != widget.children) {
-      _selectionControllers.clear();
-      _childTweens.clear();
-      setupAnimationControllers();
+    if (oldWidget.children.length != widget.children.length) {
+      updateAnimationControllers();
     }
 
     if (oldWidget.groupValue != widget.groupValue) {
@@ -264,10 +272,10 @@ class _SegmentedControlState<T> extends State<SegmentedControl<T>>
       for (T key in widget.children.keys) {
         if (widget.groupValue == key) {
           _childTweens.insert(index, forwardBackgroundColorTween);
-          _selectionControllers.elementAt(index).forward();
+          _selectionControllers[index].forward();
         } else {
           _childTweens.insert(index, reverseBackgroundColorTween);
-          _selectionControllers.elementAt(index).reverse();
+          _selectionControllers[index].reverse();
         }
         index += 1;
       }
@@ -601,7 +609,7 @@ class _RenderSegmentedControl<T> extends RenderBox
     context.canvas.drawRRect(
       childParentData.surroundingRect.shift(offset),
       new Paint()
-        ..color = backgroundColors.elementAt(childIndex)
+        ..color = backgroundColors[childIndex]
         ..style = PaintingStyle.fill,
     );
     context.canvas.drawRRect(
