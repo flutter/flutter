@@ -146,9 +146,9 @@ class TextInputType {
 /// when an action button is pressed is appropriate for the action button chosen.
 ///
 /// For example: If the user presses the keyboard action button on iOS when it
-/// reads "Emergency Call," the result should not be a focus change to the next
+/// reads "Emergency Call", the result should not be a focus change to the next
 /// TextField. This behavior is not logically appropriate for a button that says
-/// "Emergency Call."
+/// "Emergency Call".
 ///
 /// See [EditableText] for more information about customizing action button
 /// behavior.
@@ -263,7 +263,7 @@ enum TextInputAction {
   /// iOS: Corresponds to iOS's "UIReturnKeyContinue". The title displayed in the
   /// action button is "Continue". This action is only available on iOS 9.0+.
   ///
-  /// Note: the reason that this value has "Action" post-fixed to it is because
+  /// The reason that this value has "Action" post-fixed to it is because
   /// "continue" is a reserved word in Dart, as well as many other languages.
   continueAction,
 
@@ -304,13 +304,12 @@ enum TextInputAction {
   /// iOS: Corresponds to iOS's "UIReturnKeyDefault". The title displayed in the
   /// action button is "return".
   ///
-  /// Notice that [TextInputAction.newline] is a term that exists in Flutter
-  /// but not in Android or iOS. The reason for introducing this term is so
-  /// that developers can achieve the common result of inserting new lines
-  /// without needing to understand the various IME actions on Android and
-  /// return keys on iOS. Thus, [TextInputAction.newline] is a convenience term
-  /// that alleviates the need to understand the underlying platforms to achieve
-  /// this common behavior.
+  /// The term [TextInputAction.newline] exists in Flutter but not in Android
+  /// or iOS. The reason for introducing this term is so that developers can
+  /// achieve the common result of inserting new lines without needing to
+  /// understand the various IME actions on Android and return keys on iOS.
+  /// Thus, [TextInputAction.newline] is a convenience term that alleviates the
+  /// need to understand the underlying platforms to achieve this common behavior.
   newline,
 }
 
@@ -685,13 +684,13 @@ class TextInput {
     assert(() {
       if (Platform.isIOS) {
         assert(
-        _iOSSupportedInputActions.contains(inputAction),
-        'The requested TextInputAction "$inputAction" is not supported on iOS.',
+          _iOSSupportedInputActions.contains(inputAction),
+          'The requested TextInputAction "$inputAction" is not supported on iOS.',
         );
       } else if (Platform.isAndroid) {
         assert(
-        _androidSupportedInputActions.contains(inputAction),
-        'The requested TextInputAction "$inputAction" is not supported on Android.',
+          _androidSupportedInputActions.contains(inputAction),
+          'The requested TextInputAction "$inputAction" is not supported on Android.',
         );
       }
       return true;
