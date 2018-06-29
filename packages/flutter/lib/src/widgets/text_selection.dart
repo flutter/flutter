@@ -541,23 +541,24 @@ class _TextSelectionHandleOverlayState extends State<_TextSelectionHandleOverlay
     return new CompositedTransformFollower(
       link: widget.layerLink,
       showWhenUnlinked: false,
-      child: new GestureDetector(
-        onPanStart: _handleDragStart,
-        onPanUpdate: _handleDragUpdate,
-        onTap: _handleTap,
-        child: new Stack(
-          children: <Widget>[
-            new Positioned(
-              left: point.dx,
-              top: point.dy,
+      child: new Stack(
+        children: <Widget>[
+          new Positioned(
+            left: point.dx,
+            top: point.dy,
+            child: new GestureDetector(
+              onPanStart: _handleDragStart,
+              onPanUpdate: _handleDragUpdate,
+              behavior: HitTestBehavior.opaque,
+              onTap: _handleTap,
               child: widget.selectionControls.buildHandle(
                 context,
                 type,
                 widget.renderObject.preferredLineHeight,
               ),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
