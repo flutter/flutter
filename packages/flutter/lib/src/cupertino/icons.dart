@@ -56,7 +56,7 @@ class CupertinoIcons {
 
   /// A curved up and left pointing arrow.
   ///
-  /// For another version of this icon, see [reply_thick_solid].
+  /// For another version of this icon, see [reply_thick_].
   static const IconData reply = const IconData(0xf4c6, fontFamily: iconFont, fontPackage: iconFontPackage);
 
   /// A chat bubble.
@@ -143,4 +143,28 @@ class CupertinoIcons {
 
   /// Two right-facing intertwined arrows.
   static const IconData shuffle_thick = const IconData(0xf221, fontFamily: iconFont, fontPackage: iconFontPackage);
+  
+  /// Symbolizes a photo camera
+  static const IconData photo_camera = const IconData(0xf3f5, fontFamily: iconFont, fontPackage: iconFontPackage);
+  
+  /// Solid [photo_camera]
+  static const IconData photo_camera_solid = const IconData(0xf3f6, fontFamily: iconFont, fontPackage: iconFontPackage);
+  
+  /// Symbolizes a video camera
+  static const IconData video_camera = const IconData(0xf4cc, fontFamily: iconFont, fontPackage: iconFontPackage);
+  
+  /// Solid [video_camera]
+  static const IconData video_camera_solid = const IconData(0xf4cd, fontFamily: iconFont, fontPackage: iconFontPackage);
+  
+  /// Camera filled with two circular arrows, which indicate switching 
+  static const IconData switch_camera = const IconData(0xf49e, fontFamily: iconFont, fontPackage: iconFontPackage);
+  
+  /// Solid [switch_camera]
+  static const IconData switch_camera_solid = const IconData(0xf49f, fontFamily: iconFont, fontPackage: iconFontPackage);
+  
+  /// Envelopes stacked facing forwards
+  static const IconData collections = const IconData(0xf3c9, fontFamily: iconFont, fontPackage: iconFontPackage);
+  
+  /// Solid [collections]
+  static const IconData collections_solid = const IconData(0xf3ca, fontFamily: iconFont, fontPackage: iconFontPackage);
 }
