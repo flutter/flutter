@@ -84,7 +84,7 @@ class KernelCompiler {
     String packagesPath,
     List<String> fileSystemRoots,
     String fileSystemScheme,
-    bool target_product_vm = false,
+    bool targetProductVm = false,
   }) async {
     final String frontendServer = artifacts.getArtifactPath(
       Artifact.frontendServerSnapshotForEngineDartSdk
@@ -135,7 +135,7 @@ class KernelCompiler {
       command.add('--aot');
       command.add('--tfa');
     }
-    if (target_product_vm) {
+    if (targetProductVm) {
       command.add('-Ddart.vm.product=true');
     }
     if (entryPointsJsonFiles != null) {
