@@ -43,4 +43,3 @@ dart:ui,SemanticsUpdate,SemanticsUpdate._
 dart:ui,SemanticsUpdateBuilder,SemanticsUpdateBuilder.
 dart:ui,Shader,Shader._
 dart:ui,TextBox,TextBox._
-dart:vmservice_io,::,main
