@@ -3,20 +3,114 @@
 // found in the LICENSE file.
 
 import 'package:flutter/widgets.dart';
+import 'colors.dart';
 
+const TextStyle _kCupertinoDialogTitleStyle = const TextStyle(
+  fontFamily: '.SF UI Display',
+  inherit: false,
+  fontSize: 18.0,
+  fontWeight: FontWeight.w500,
+  color: CupertinoColors.black,
+  height: 1.06,
+  letterSpacing: 0.48,
+  textBaseline: TextBaseline.alphabetic,
+);
+
+const TextStyle _kCupertinoDialogContentStyle = const TextStyle(
+  fontFamily: '.SF UI Text',
+  inherit: false,
+  fontSize: 13.4,
+  fontWeight: FontWeight.w300,
+  color: CupertinoColors.black,
+  height: 1.036,
+  textBaseline: TextBaseline.alphabetic,
+);
+
+const TextStyle _kCupertinoDialogActionStyle = const TextStyle(
+  fontFamily: '.SF UI Text',
+  inherit: false,
+  fontSize: 16.8,
+  fontWeight: FontWeight.w400,
+  color: CupertinoColors.activeBlue,
+  textBaseline: TextBaseline.alphabetic,
+);
+
+/// An iOS-style action sheet.
 class ActionSheet extends StatelessWidget {
 
+  /// Creates an iOS-style action sheet;
   const ActionSheet({
     Key key,
-    this.actions,
+    this.title,
+    this.message,
+    @required this.actions,
   }) : assert(actions != null),
        super(key : key);
+
+  final Widget title;
+
+  final Widget message;
 
   final List<Widget> actions;
 
   @override
   Widget build(BuildContext context) {
     return Container();
+  }
+}
+
+/// A button typically used in an [ActionSheet].
+///
+/// See also:
+///
+///  * [ActionSheet], an alert that presents the user with a set of two or
+///    more choices related to the current context.
+class ActionSheetAction extends StatelessWidget {
+
+  ///Creates an action for an iOS-style action sheet.
+  const ActionSheetAction({
+    this.onPressed,
+    this.isDefaultAction = false,
+    this.isDestructiveAction = false,
+    this.isCancelAction = false,
+    @required this.child,
+  }) : assert(child != null);
+
+  final VoidCallback onPressed;
+
+  final bool isDefaultAction;
+
+  final bool isDestructiveAction;
+
+  final bool isCancelAction;
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    TextStyle style = _kCupertinoDialogActionStyle;
+
+    if(isDefaultAction) {
+      style = style.copyWith(fontWeight: FontWeight.w600);
+    }
+
+    if(isDestructiveAction) {
+      style = style.copyWith(color: CupertinoColors.destructiveRed);
+    }
+
+    return new GestureDetector(
+      onTap: onPressed,
+      behavior: HitTestBehavior.opaque,
+      child: new Container(
+        alignment: Alignment.center,
+        padding: const EdgeInsets.all(8.0),
+        child: new DefaultTextStyle(
+          style: style,
+          child: child,
+          textAlign: TextAlign.center,
+        )
+      ),
+    );
   }
 }
 
