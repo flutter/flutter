@@ -563,6 +563,7 @@ class TextInput {
         'The requested TextInputAction "$inputAction" is not supported on Android.',
         );
       }
+      return true;
     }());
     return true;
   }
