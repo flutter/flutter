@@ -58,7 +58,7 @@ void main() {
       test('throws when there is no data', () {
         expect(
           () => summarize(<Map<String, dynamic>>[]).computeAverageFrameBuildTimeMillis(),
-          throwsA(predicate<ArgumentError>((e) => e.message == 'durations is empty!'))
+          throwsA(predicate<ArgumentError>((ArgumentError e) => e.message == 'durations is empty!'))
         );
       });
 
@@ -77,7 +77,7 @@ void main() {
       test('throws when there is no data', () {
         expect(
           () => summarize(<Map<String, dynamic>>[]).computeWorstFrameBuildTimeMillis(),
-          throwsA(predicate<ArgumentError>((e) => e.message == 'durations is empty!'))
+          throwsA(predicate<ArgumentError>((ArgumentError e) => e.message == 'durations is empty!'))
         );
       });
 
@@ -116,7 +116,7 @@ void main() {
       test('throws when there is no data', () {
         expect(
           () => summarize(<Map<String, dynamic>>[]).computeAverageFrameRasterizerTimeMillis(),
-          throwsA(predicate<ArgumentError>((e) => e.message == 'durations is empty!'))
+          throwsA(predicate<ArgumentError>((ArgumentError e) => e.message == 'durations is empty!'))
         );
       });
 
@@ -155,7 +155,7 @@ void main() {
       test('throws when there is no data', () {
         expect(
           () => summarize(<Map<String, dynamic>>[]).computeWorstFrameRasterizerTimeMillis(),
-          throwsA(predicate<ArgumentError>((e) => e.message == 'durations is empty!'))
+          throwsA(predicate<ArgumentError>((ArgumentError e) => e.message == 'durations is empty!'))
         );
       });
 
@@ -202,7 +202,7 @@ void main() {
       test('throws when there is no data', () {
         expect(
           () => summarize(<Map<String, dynamic>>[]).computePercentileFrameRasterizerTimeMillis(90.0),
-          throwsA(predicate<ArgumentError>((e) => e.message == 'durations is empty!'))
+          throwsA(predicate<ArgumentError>((ArgumentError e) => e.message == 'durations is empty!'))
         );
       });
 
