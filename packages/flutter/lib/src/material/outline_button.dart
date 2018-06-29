@@ -18,6 +18,8 @@ const Duration _kPressDuration = const Duration(milliseconds: 150);
 // elevation.
 const Duration _kElevationDuration = const Duration(milliseconds: 75);
 
+const double _kOutlineOpacity = 0.12;
+
 /// A cross between [RaisedButton] and [FlatButton]: a bordered button whose
 /// elevation increases and whose background becomes opaque when the button
 /// is pressed.
@@ -349,7 +351,7 @@ class _OutlineButtonState extends State<OutlineButton> with SingleTickerProvider
       case ButtonTextTheme.primary:
         return theme.brightness == Brightness.dark
           ? Colors.white12
-          : theme.primaryColor.withOpacity(0.12);
+          : theme.primaryColor.withOpacity(_kOutlineOpacity);
     }
     return Colors.transparent;
   }
@@ -367,7 +369,7 @@ class _OutlineButtonState extends State<OutlineButton> with SingleTickerProvider
       // TODO(clocksmith): Check buttonThemeData once its passed.
       final Color themeColor = theme.primaryColor ??
           theme.brightness == Brightness.dark ? Colors.white : Colors.black;
-      return widget.borderSide?.color ?? themeColor.withOpacity(0.12);
+      return widget.borderSide?.color ?? themeColor.withOpacity_kOutlineOpacity;
     }
   }
 
