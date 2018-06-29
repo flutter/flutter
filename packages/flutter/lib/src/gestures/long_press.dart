@@ -27,6 +27,7 @@ class LongPressGestureRecognizer extends PrimaryPointerGestureRecognizer {
 
   /// Called when a long-press is recognized.
   GestureLongPressCallback onLongPress;
+  
   /// Called when long-press is recognized and the pointer stops to contact the screen
   GestureLongPressUpCallback onLongPressUp;
 
