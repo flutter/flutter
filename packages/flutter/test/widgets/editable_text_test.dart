@@ -26,7 +26,7 @@ void main() {
 
   // Tests that the desired keyboard action button is requested.
   //
-  // I.E., when an EditableText is given a particular [action], Flutter
+  // More technically, when an EditableText is given a particular [action], Flutter
   // requests [serializedActionName] when attaching to the platform's input
   // system.
   Future<Null> _desiredKeyboardActionIsRequested({
@@ -34,18 +34,22 @@ void main() {
     TextInputAction action,
     String serializedActionName,
   }) async {
-    await tester.pumpWidget(new Directionality(
+    await tester.pumpWidget(
+      new Directionality(
         textDirection: TextDirection.ltr,
         child: new FocusScope(
-            node: focusScopeNode,
-            autofocus: true,
-            child: new EditableText(
-              controller: controller,
-              focusNode: focusNode,
-              textInputAction: action,
-              style: textStyle,
-              cursorColor: cursorColor,
-            ))));
+          node: focusScopeNode,
+          autofocus: true,
+          child: new EditableText(
+            controller: controller,
+            focusNode: focusNode,
+            textInputAction: action,
+            style: textStyle,
+            cursorColor: cursorColor,
+          ),
+        ),
+      ),
+    );
 
     await tester.tap(find.byType(EditableText));
     await tester.showKeyboard(find.byType(EditableText));
@@ -56,14 +60,17 @@ void main() {
   }
 
   testWidgets('has expected defaults', (WidgetTester tester) async {
-    await tester.pumpWidget(new Directionality(
+    await tester.pumpWidget(
+      new Directionality(
         textDirection: TextDirection.ltr,
         child: new EditableText(
           controller: controller,
           focusNode: focusNode,
           style: textStyle,
           cursorColor: cursorColor,
-        )));
+        ),
+      ),
+    );
 
     final EditableText editableText =
         tester.firstWidget(find.byType(EditableText));
@@ -74,17 +81,21 @@ void main() {
 
   testWidgets('text keyboard is requested when maxLines is default',
       (WidgetTester tester) async {
-    await tester.pumpWidget(new Directionality(
+    await tester.pumpWidget(
+      new Directionality(
         textDirection: TextDirection.ltr,
         child: new FocusScope(
-            node: focusScopeNode,
-            autofocus: true,
-            child: new EditableText(
-              controller: controller,
-              focusNode: focusNode,
-              style: textStyle,
-              cursorColor: cursorColor,
-            ))));
+          node: focusScopeNode,
+          autofocus: true,
+          child: new EditableText(
+            controller: controller,
+            focusNode: focusNode,
+            style: textStyle,
+            cursorColor: cursorColor,
+          ),
+        ),
+      ),
+    );
     await tester.tap(find.byType(EditableText));
     await tester.showKeyboard(find.byType(EditableText));
     controller.text = 'test';
@@ -217,18 +228,22 @@ void main() {
 
   testWidgets('multiline keyboard is requested when set explicitly',
       (WidgetTester tester) async {
-    await tester.pumpWidget(new Directionality(
+    await tester.pumpWidget(
+      new Directionality(
         textDirection: TextDirection.ltr,
         child: new FocusScope(
-            node: focusScopeNode,
-            autofocus: true,
-            child: new EditableText(
-              controller: controller,
-              focusNode: focusNode,
-              keyboardType: TextInputType.multiline,
-              style: textStyle,
-              cursorColor: cursorColor,
-            ))));
+          node: focusScopeNode,
+          autofocus: true,
+          child: new EditableText(
+            controller: controller,
+            focusNode: focusNode,
+            keyboardType: TextInputType.multiline,
+            style: textStyle,
+            cursorColor: cursorColor,
+          ),
+        ),
+      ),
+    );
 
     await tester.tap(find.byType(EditableText));
     await tester.showKeyboard(find.byType(EditableText));
@@ -241,19 +256,23 @@ void main() {
 
   testWidgets('Correct keyboard is requested when set explicitly and maxLines > 1',
       (WidgetTester tester) async {
-    await tester.pumpWidget(new Directionality(
+    await tester.pumpWidget(
+      new Directionality(
         textDirection: TextDirection.ltr,
         child: new FocusScope(
-            node: focusScopeNode,
-            autofocus: true,
-            child: new EditableText(
-              controller: controller,
-              focusNode: focusNode,
-              keyboardType: TextInputType.phone,
-              maxLines: 3,
-              style: textStyle,
-              cursorColor: cursorColor,
-            ))));
+          node: focusScopeNode,
+          autofocus: true,
+          child: new EditableText(
+            controller: controller,
+            focusNode: focusNode,
+            keyboardType: TextInputType.phone,
+            maxLines: 3,
+            style: textStyle,
+            cursorColor: cursorColor,
+          ),
+        ),
+      ),
+    );
 
     await tester.tap(find.byType(EditableText));
     await tester.showKeyboard(find.byType(EditableText));
@@ -266,18 +285,22 @@ void main() {
 
   testWidgets('multiline keyboard is requested when set implicitly',
       (WidgetTester tester) async {
-    await tester.pumpWidget(new Directionality(
+    await tester.pumpWidget(
+      new Directionality(
         textDirection: TextDirection.ltr,
         child: new FocusScope(
-            node: focusScopeNode,
-            autofocus: true,
-            child: new EditableText(
-              controller: controller,
-              focusNode: focusNode,
-              maxLines: 3, // Sets multiline keyboard implicitly.
-              style: textStyle,
-              cursorColor: cursorColor,
-            ))));
+          node: focusScopeNode,
+          autofocus: true,
+          child: new EditableText(
+            controller: controller,
+            focusNode: focusNode,
+            maxLines: 3, // Sets multiline keyboard implicitly.
+            style: textStyle,
+            cursorColor: cursorColor,
+          ),
+        ),
+      ),
+    );
 
     await tester.tap(find.byType(EditableText));
     await tester.showKeyboard(find.byType(EditableText));
@@ -290,18 +313,22 @@ void main() {
 
   testWidgets('single line inputs have correct default keyboard',
       (WidgetTester tester) async {
-    await tester.pumpWidget(new Directionality(
+    await tester.pumpWidget(
+      new Directionality(
         textDirection: TextDirection.ltr,
         child: new FocusScope(
-            node: focusScopeNode,
-            autofocus: true,
-            child: new EditableText(
-              controller: controller,
-              focusNode: focusNode,
-              maxLines: 1, // Sets text keyboard implicitly.
-              style: textStyle,
-              cursorColor: cursorColor,
-            ))));
+          node: focusScopeNode,
+          autofocus: true,
+          child: new EditableText(
+            controller: controller,
+            focusNode: focusNode,
+            maxLines: 1, // Sets text keyboard implicitly.
+            style: textStyle,
+            cursorColor: cursorColor,
+          ),
+        ),
+      ),
+    );
 
     await tester.tap(find.byType(EditableText));
     await tester.showKeyboard(find.byType(EditableText));

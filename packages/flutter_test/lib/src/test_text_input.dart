@@ -128,7 +128,7 @@ class TestTextInput {
   /// Does not check that the [TextInputAction] performed is an acceptable one
   /// based on the `inputAction` [setClientArgs].
   Future<Null> receiveAction(TextInputAction action) async {
-    return TestAsyncUtils.guard(() async {
+    return TestAsyncUtils.guard(() {
       // Not using the `expect` function because in the case of a FlutterDriver
       // test this code does not run in a package:test test zone.
       if (_client == 0) {
@@ -153,10 +153,10 @@ class TestTextInput {
 
             // No error was found. Complete without issue.
             completer.complete();
-          } catch (e) {
+          } catch (error) {
             // An exception occurred as a result of receiveAction()'ing. Report
             // that error.
-            completer.completeError(e);
+            completer.completeError(error);
           }
         },
       );
