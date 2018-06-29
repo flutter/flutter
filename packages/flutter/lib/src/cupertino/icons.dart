@@ -56,7 +56,7 @@ class CupertinoIcons {
 
   /// A curved up and left pointing arrow.
   ///
-  /// For another version of this icon, see [reply_thick_].
+  /// For another version of this icon, see [reply_thick_solid].
   static const IconData reply = const IconData(0xf4c6, fontFamily: iconFont, fontPackage: iconFontPackage);
 
   /// A chat bubble.
