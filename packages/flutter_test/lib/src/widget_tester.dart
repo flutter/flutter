@@ -21,6 +21,9 @@ import 'matchers.dart';
 import 'test_async_utils.dart';
 import 'test_text_input.dart';
 
+/// Keep users from needing multiple imports to test semantics.
+export 'package:flutter/rendering.dart' show SemanticsHandle;
+
 export 'package:test/test.dart' hide
   expect, // we have our own wrapper below
   TypeMatcher, // matcher's TypeMatcher conflicts with the one in the Flutter framework

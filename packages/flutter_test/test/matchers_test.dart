@@ -406,17 +406,73 @@ void main() {
           hint: 'bar',
           value: 'baz',
           textDirection: TextDirection.rtl,
-          actions: <SemanticsAction>[
-            SemanticsAction.tap,
-          ],
-          flags: <SemanticsFlag>[
-            SemanticsFlag.isButton,
-            SemanticsFlag.isHeader,
-            SemanticsFlag.namesRoute,
-          ],
+          hasTap: true,
+          isButton: true,
+          isHeader: true,
+          namesRoute: true,
         ),
       );
       handle.dispose();
+    });
+
+    testWidgets('Can match all semantics flags and actions', (WidgetTester tester) async {
+      int actions = 0;
+      int flags = 0;
+      for (int index in SemanticsAction.values.keys)
+        actions |= index;
+      for (int index in SemanticsFlag.values.keys)
+        flags |= index;
+      final SemanticsData data = new SemanticsData(
+        flags: flags,
+        actions: actions,
+        label: '',
+        increasedValue: '',
+        value: '',
+        decreasedValue: '',
+        hint: '',
+        textDirection: TextDirection.ltr,
+        rect: Rect.fromLTRB(0.0, 0.0, 10.0, 10.0),
+        textSelection: null,
+        scrollPosition: null,
+        scrollExtentMax: null,
+        scrollExtentMin: null,
+      );
+
+      expect(data, matchesSemanticsData(
+         /* Flags */
+         hasCheckedState: true,
+         isChecked: true,
+         isSelected: true,
+         isButton: true,
+         isTextField: true,
+         hasEnabledState: true,
+         isFocused: true,
+         isEnabled: true,
+         isInMutuallyExclusiveGroup: true,
+         isHeader: true,
+         isObscured: true,
+         namesRoute: true,
+         scopesRoute: true,
+         isHidden: true,
+         /* Actions */
+         hasTap: true,
+         hasLongPress: true,
+         hasScrollLeft: true,
+         hasScrollRight: true,
+         hasScrollUp: true,
+         hasScrollDown: true,
+         hasIncrease: true,
+         hasDecrease: true,
+         hasShowOnScreen: true,
+         hasMoveCursorForwardByCharacter: true,
+         hasMoveCursorBackwardByCharacter: true,
+         hasSetSelection: true,
+         hasCopy: true,
+         hasCut: true,
+         hasPaste: true,
+         hasDidGainAccessibilityFocus: true,
+         hasDidLoseAccessibilityFocus: true,
+      ));
     });
   });
 }

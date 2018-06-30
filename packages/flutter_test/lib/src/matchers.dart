@@ -278,7 +278,11 @@ Matcher matchesGoldenFile(dynamic key) {
   throw new ArgumentError('Unexpected type for golden file: ${key.runtimeType}');
 }
 
-/// Asserts that two [SemanticsData] are equal considering the provided fields.
+/// Asserts that a [SemanticsData] contains the specified information.
+///
+/// If the either the label, hint, value, textDirection, or rect fields are not
+/// provided, then they are not part of the comparison.  All of the boolean
+/// flag and action fields must match, and default to false.
 ///
 /// To retrieve the semantics data of a widget, use [tester.getSemanticsData]
 /// with a [Finder] that returns a single widget.  Semantics must be enabled
@@ -300,10 +304,107 @@ Matcher matchesSemanticsData({
   String label,
   String hint,
   String value,
-  List<SemanticsAction> actions = const <SemanticsAction>[],
-  List<SemanticsFlag> flags = const <SemanticsFlag>[],
-  TextDirection textDirection = TextDirection.ltr,
+  TextDirection textDirection,
+  Rect rect,
+  // Flags //
+  bool hasCheckedState = false,
+  bool isChecked = false,
+  bool isSelected = false,
+  bool isButton = false,
+  bool isFocused = false,
+  bool isTextField = false,
+  bool hasEnabledState = false,
+  bool isEnabled = false,
+  bool isInMutuallyExclusiveGroup = false,
+  bool isHeader = false,
+  bool isObscured = false,
+  bool namesRoute = false,
+  bool scopesRoute = false,
+  bool isHidden = false,
+  // Actions //
+  bool hasTap = false,
+  bool hasLongPress = false,
+  bool hasScrollLeft = false,
+  bool hasScrollRight = false,
+  bool hasScrollUp = false,
+  bool hasScrollDown = false,
+  bool hasIncrease = false,
+  bool hasDecrease = false,
+  bool hasShowOnScreen = false,
+  bool hasMoveCursorForwardByCharacter = false,
+  bool hasMoveCursorBackwardByCharacter = false,
+  bool hasSetSelection = false,
+  bool hasCopy = false,
+  bool hasCut = false,
+  bool hasPaste = false,
+  bool hasDidGainAccessibilityFocus = false,
+  bool hasDidLoseAccessibilityFocus = false,
 }) {
+  final List<SemanticsFlag> flags = <SemanticsFlag>[];
+  if (hasCheckedState)
+    flags.add(SemanticsFlag.hasCheckedState);
+  if (isChecked)
+    flags.add(SemanticsFlag.isChecked);
+  if (isSelected)
+    flags.add(SemanticsFlag.isSelected);
+  if (isButton)
+    flags.add(SemanticsFlag.isButton);
+  if (isTextField)
+    flags.add(SemanticsFlag.isTextField);
+  if (isFocused)
+    flags.add(SemanticsFlag.isFocused);
+  if (hasEnabledState)
+    flags.add(SemanticsFlag.hasEnabledState);
+  if (isEnabled)
+    flags.add(SemanticsFlag.isEnabled);
+  if (isInMutuallyExclusiveGroup)
+    flags.add(SemanticsFlag.isInMutuallyExclusiveGroup);
+  if (isHeader)
+    flags.add(SemanticsFlag.isHeader);
+  if (isObscured)
+    flags.add(SemanticsFlag.isObscured);
+  if (namesRoute)
+    flags.add(SemanticsFlag.namesRoute);
+  if (scopesRoute)
+    flags.add(SemanticsFlag.scopesRoute);
+  if (isHidden)
+    flags.add(SemanticsFlag.isHidden);
+  final List<SemanticsAction> actions = <SemanticsAction>[];
+  if (hasTap)
+    actions.add(SemanticsAction.tap);
+  if (hasLongPress)
+    actions.add(SemanticsAction.longPress);
+  if (hasScrollLeft)
+    actions.add(SemanticsAction.scrollLeft);
+  if (hasScrollRight)
+    actions.add(SemanticsAction.scrollRight);
+  if (hasScrollUp)
+    actions.add(SemanticsAction.scrollUp);
+  if (hasScrollDown)
+    actions.add(SemanticsAction.scrollDown);
+  if (hasIncrease)
+    actions.add(SemanticsAction.increase);
+  if (hasDecrease)
+    actions.add(SemanticsAction.decrease);
+  if (hasShowOnScreen)
+    actions.add(SemanticsAction.showOnScreen);
+  if (hasMoveCursorForwardByCharacter)
+    actions.add(SemanticsAction.moveCursorForwardByCharacter);
+  if (hasMoveCursorBackwardByCharacter)
+    actions.add(SemanticsAction.moveCursorBackwardByCharacter);
+  if (hasSetSelection)
+    actions.add(SemanticsAction.setSelection);
+  if (hasCopy)
+    actions.add(SemanticsAction.copy);
+  if (hasCut)
+    actions.add(SemanticsAction.cut);
+  if (hasPaste)
+    actions.add(SemanticsAction.paste);
+  if (hasDidGainAccessibilityFocus)
+    actions.add(SemanticsAction.didGainAccessibilityFocus);
+  if (hasDidLoseAccessibilityFocus)
+    actions.add(SemanticsAction.didLoseAccessibilityFocus);
+
   return new _MatchesSemanticsData(
     label: label,
     hint: hint,
@@ -311,6 +412,7 @@ Matcher matchesSemanticsData({
     actions: actions,
     flags: flags,
     textDirection: textDirection,
+    rect: rect,
   );
 }
 
@@ -1338,7 +1440,8 @@ class _MatchesSemanticsData extends Matcher {
     this.hint,
     this.flags,
     this.actions,
-    this.textDirection = TextDirection.ltr,
+    this.textDirection,
+    this.rect,
   });
 
   final String label;
@@ -1347,57 +1450,67 @@ class _MatchesSemanticsData extends Matcher {
   final List<SemanticsAction> actions;
   final List<SemanticsFlag> flags;
   final TextDirection textDirection;
+  final Rect rect;
 
   @override
   Description describe(Description description) {
     description.add('has semantics');
     if (label != null)
-      description.add('with label: $label');
+      description.add('with label: $label ');
     if (value != null)
-      description.add('with value: $value');
+      description.add('with value: $value ');
     if (hint != null)
-      description.add('with hint: $hint');
+      description.add('with hint: $hint ');
     if (actions != null)
       description.add('with actions:').addDescriptionOf(actions);
     if (flags != null)
       description.add('with flags:').addDescriptionOf(flags);
     if (textDirection != null)
-      description.add('with textDirection: $textDirection');
+      description.add('with textDirection: $textDirection ');
+    if (rect != null)
+      description.add('with rect: $rect');
     return description;
   }
 
 
   @override
   bool matches(covariant SemanticsData data, Map<dynamic, dynamic> matchState) {
-    if (label != data.label)
+    if (label != null && label != data.label)
       return failWithDescription(matchState, 'label was: ${data.label}');
-    if (hint != data.hint)
+    if (hint != null && hint != data.hint)
       return failWithDescription(matchState, 'hint was: ${data.hint}');
-    if (value != data.value)
+    if (value != null && value != data.value)
       return failWithDescription(matchState, 'value was: ${data.value}');
-    if (textDirection != data.textDirection)
+    if (textDirection != null && textDirection != data.textDirection)
       return failWithDescription(matchState, 'textDirection was: $textDirection');
-    int actionBits = 0;
-    for (SemanticsAction action in actions)
-      actionBits |= action.index;
-    if (actionBits != data.actions) {
-      final List<String> actionSummary = <String>[];
-      for (SemanticsAction action in SemanticsAction.values.values) {
-        if ((data.actions & action.index) != 0)
-          actionSummary.add(describeEnum(action));
-      }
-      return failWithDescription(matchState, 'actions were: $actionSummary');
+    if (rect != null && rect == data.rect) {
+      return failWithDescription(matchState, 'rect was: $rect');
     }
-    int flagBits = 0;
-    for (SemanticsFlag flag in flags)
-      flagBits |= flag.index;
-    if (flagBits != data.flags) {
-      final List<String> flagSummary = <String>[];
-      for (SemanticsFlag flag in SemanticsFlag.values.values) {
-        if ((data.flags & flag.index) != 0)
-          flagSummary.add(describeEnum(flag));
+    if (actions != null) {
+      int actionBits = 0;
+      for (SemanticsAction action in actions)
+        actionBits |= action.index;
+      if (actionBits != data.actions) {
+        final List<String> actionSummary = <String>[];
+        for (SemanticsAction action in SemanticsAction.values.values) {
+          if ((data.actions & action.index) != 0)
+            actionSummary.add(describeEnum(action));
+        }
+        return failWithDescription(matchState, 'actions were: $actionSummary');
       }
-      return failWithDescription(matchState, 'flags were: $flagSummary');
+    }
+    if (flags != null) {
+      int flagBits = 0;
+      for (SemanticsFlag flag in flags)
+        flagBits |= flag.index;
+      if (flagBits != data.flags) {
+        final List<String> flagSummary = <String>[];
+        for (SemanticsFlag flag in SemanticsFlag.values.values) {
+          if ((data.flags & flag.index) != 0)
+            flagSummary.add(describeEnum(flag));
+        }
+        return failWithDescription(matchState, 'flags were: $flagSummary');
+      }
     }
     return true;
   }
