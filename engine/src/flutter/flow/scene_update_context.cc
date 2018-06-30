@@ -11,7 +11,7 @@
 
 namespace flow {
 
-SceneUpdateContext::SceneUpdateContext(scenic_lib::Session* session,
+SceneUpdateContext::SceneUpdateContext(scenic::Session* session,
                                        SurfaceProducer* surface_producer)
     : session_(session), surface_producer_(surface_producer) {
   FXL_DCHECK(surface_producer_ != nullptr);
@@ -40,7 +40,7 @@ void SceneUpdateContext::RemoveExportNode(ExportNode* export_node) {
   export_nodes_.erase(export_node);
 }
 
-void SceneUpdateContext::CreateFrame(scenic_lib::EntityNode& entity_node,
+void SceneUpdateContext::CreateFrame(scenic::EntityNode& entity_node,
                                      const SkRRect& rrect,
                                      SkColor color,
                                      const SkRect& paint_bounds,
@@ -56,7 +56,7 @@ void SceneUpdateContext::CreateFrame(scenic_lib::EntityNode& entity_node,
   // and possibly for its texture.
   // TODO(MZ-137): Need to be able to express the radii as vectors.
   SkRect shape_bounds = rrect.getBounds();
-  scenic_lib::RoundedRectangle shape(
+  scenic::RoundedRectangle shape(
       session_,                                      // session
       rrect.width(),                                 // width
       rrect.height(),                                // height
@@ -65,7 +65,7 @@ void SceneUpdateContext::CreateFrame(scenic_lib::EntityNode& entity_node,
       rrect.radii(SkRRect::kLowerRight_Corner).x(),  // bottom_right_radius
       rrect.radii(SkRRect::kLowerLeft_Corner).x()    // bottom_left_radius
   );
-  scenic_lib::ShapeNode shape_node(session_);
+  scenic::ShapeNode shape_node(session_);
   shape_node.SetShape(shape);
   shape_node.SetTranslation(shape_bounds.width() * 0.5f + shape_bounds.left(),
                             shape_bounds.height() * 0.5f + shape_bounds.top(),
@@ -93,9 +93,9 @@ void SceneUpdateContext::CreateFrame(scenic_lib::EntityNode& entity_node,
   if (inner_bounds != shape_bounds && rrect.contains(inner_bounds)) {
     SetShapeColor(shape_node, color);
 
-    scenic_lib::Rectangle inner_shape(session_, inner_bounds.width(),
+    scenic::Rectangle inner_shape(session_, inner_bounds.width(),
                                       inner_bounds.height());
-    scenic_lib::ShapeNode inner_node(session_);
+    scenic::ShapeNode inner_node(session_);
     inner_node.SetShape(inner_shape);
     inner_node.SetTranslation(inner_bounds.width() * 0.5f + inner_bounds.left(),
                               inner_bounds.height() * 0.5f + inner_bounds.top(),
@@ -112,16 +112,16 @@ void SceneUpdateContext::CreateFrame(scenic_lib::EntityNode& entity_node,
 }
 
 void SceneUpdateContext::SetShapeTextureOrColor(
-    scenic_lib::ShapeNode& shape_node,
+    scenic::ShapeNode& shape_node,
     SkColor color,
     SkScalar scale_x,
     SkScalar scale_y,
     const SkRect& paint_bounds,
     std::vector<Layer*> paint_layers) {
-  scenic_lib::Image* image = GenerateImageIfNeeded(
+  scenic::Image* image = GenerateImageIfNeeded(
       color, scale_x, scale_y, paint_bounds, std::move(paint_layers));
   if (image != nullptr) {
-    scenic_lib::Material material(session_);
+    scenic::Material material(session_);
     material.SetTexture(*image);
     shape_node.SetMaterial(material);
     return;
@@ -130,18 +130,18 @@ void SceneUpdateContext::SetShapeTextureOrColor(
   SetShapeColor(shape_node, color);
 }
 
-void SceneUpdateContext::SetShapeColor(scenic_lib::ShapeNode& shape_node,
+void SceneUpdateContext::SetShapeColor(scenic::ShapeNode& shape_node,
                                        SkColor color) {
   if (SkColorGetA(color) == 0)
     return;
 
-  scenic_lib::Material material(session_);
+  scenic::Material material(session_);
   material.SetColor(SkColorGetR(color), SkColorGetG(color), SkColorGetB(color),
                     SkColorGetA(color));
   shape_node.SetMaterial(material);
 }
 
-scenic_lib::Image* SceneUpdateContext::GenerateImageIfNeeded(
+scenic::Image* SceneUpdateContext::GenerateImageIfNeeded(
     SkColor color,
     SkScalar scale_x,
     SkScalar scale_y,
@@ -219,10 +219,10 @@ SceneUpdateContext::Entity::~Entity() {
 }
 
 SceneUpdateContext::Clip::Clip(SceneUpdateContext& context,
-                               scenic_lib::Shape& shape,
+                               scenic::Shape& shape,
                                const SkRect& shape_bounds)
     : Entity(context) {
-  scenic_lib::ShapeNode shape_node(context.session());
+  scenic::ShapeNode shape_node(context.session());
   shape_node.SetShape(shape);
   shape_node.SetTranslation(shape_bounds.width() * 0.5f + shape_bounds.left(),
                             shape_bounds.height() * 0.5f + shape_bounds.top(),

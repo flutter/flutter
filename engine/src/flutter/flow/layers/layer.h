@@ -27,8 +27,8 @@
 #if defined(OS_FUCHSIA)
 
 #include "flutter/flow/scene_update_context.h"  //nogncheck
-#include "lib/ui/scenic/client/resources.h"     //nogncheck
-#include "lib/ui/scenic/client/session.h"       //nogncheck
+#include "lib/ui/scenic/cpp/resources.h"     //nogncheck
+#include "lib/ui/scenic/cpp/session.h"       //nogncheck
 
 #endif  // defined(OS_FUCHSIA)
 

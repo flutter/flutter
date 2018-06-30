@@ -29,7 +29,7 @@ class LayerTree {
 
 #if defined(OS_FUCHSIA)
   void UpdateScene(SceneUpdateContext& context,
-                   scenic_lib::ContainerNode& container);
+                   scenic::ContainerNode& container);
 #endif
 
   void Paint(CompositorContext::ScopedFrame& frame) const;

@@ -13,7 +13,7 @@
 #include "lib/fxl/build_config.h"
 #include "lib/fxl/logging.h"
 #include "lib/fxl/macros.h"
-#include "lib/ui/scenic/client/resources.h"
+#include "lib/ui/scenic/cpp/resources.h"
 #include "third_party/skia/include/core/SkRect.h"
 #include "third_party/skia/include/core/SkSurface.h"
 
@@ -40,7 +40,7 @@ class SceneUpdateContext {
     virtual void SignalWritesFinished(
         std::function<void(void)> on_writes_committed) = 0;
 
-    virtual scenic_lib::Image* GetImage() = 0;
+    virtual scenic::Image* GetImage() = 0;
 
     virtual sk_sp<SkSurface> GetSkiaSurface() const = 0;
   };
@@ -62,19 +62,19 @@ class SceneUpdateContext {
     ~Entity();
 
     SceneUpdateContext& context() { return context_; }
-    scenic_lib::EntityNode& entity_node() { return entity_node_; }
+    scenic::EntityNode& entity_node() { return entity_node_; }
 
    private:
     SceneUpdateContext& context_;
     Entity* const previous_entity_;
 
-    scenic_lib::EntityNode entity_node_;
+    scenic::EntityNode entity_node_;
   };
 
   class Clip : public Entity {
    public:
     Clip(SceneUpdateContext& context,
-         scenic_lib::Shape& shape,
+         scenic::Shape& shape,
          const SkRect& shape_bounds);
     ~Clip();
   };
@@ -111,12 +111,12 @@ class SceneUpdateContext {
     SkRect paint_bounds_;
   };
 
-  SceneUpdateContext(scenic_lib::Session* session,
+  SceneUpdateContext(scenic::Session* session,
                      SurfaceProducer* surface_producer);
 
   ~SceneUpdateContext();
 
-  scenic_lib::Session* session() { return session_; }
+  scenic::Session* session() { return session_; }
 
   bool has_metrics() const { return !!metrics_; }
   void set_metrics(fuchsia::ui::gfx::MetricsPtr metrics) {
@@ -157,19 +157,19 @@ class SceneUpdateContext {
     std::vector<Layer*> layers;
   };
 
-  void CreateFrame(scenic_lib::EntityNode& entity_node,
+  void CreateFrame(scenic::EntityNode& entity_node,
                    const SkRRect& rrect,
                    SkColor color,
                    const SkRect& paint_bounds,
                    std::vector<Layer*> paint_layers);
-  void SetShapeTextureOrColor(scenic_lib::ShapeNode& shape_node,
+  void SetShapeTextureOrColor(scenic::ShapeNode& shape_node,
                               SkColor color,
                               SkScalar scale_x,
                               SkScalar scale_y,
                               const SkRect& paint_bounds,
                               std::vector<Layer*> paint_layers);
-  void SetShapeColor(scenic_lib::ShapeNode& shape_node, SkColor color);
-  scenic_lib::Image* GenerateImageIfNeeded(SkColor color,
+  void SetShapeColor(scenic::ShapeNode& shape_node, SkColor color);
+  scenic::Image* GenerateImageIfNeeded(SkColor color,
                                            SkScalar scale_x,
                                            SkScalar scale_y,
                                            const SkRect& paint_bounds,
@@ -179,7 +179,7 @@ class SceneUpdateContext {
   float top_scale_x_ = 1.f;
   float top_scale_y_ = 1.f;
 
-  scenic_lib::Session* const session_;
+  scenic::Session* const session_;
   SurfaceProducer* const surface_producer_;
 
   fuchsia::ui::gfx::MetricsPtr metrics_;
