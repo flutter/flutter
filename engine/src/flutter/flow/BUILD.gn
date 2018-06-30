@@ -84,7 +84,7 @@ source_set("flow") {
     ]
 
     public_deps += [
-      "//garnet/public/lib/ui/scenic:client",
+      "//garnet/public/lib/ui/scenic/cpp",
       "//garnet/public/lib/ui/scenic/fidl",
       "//topaz/public/dart-pkg/zircon",
     ]
