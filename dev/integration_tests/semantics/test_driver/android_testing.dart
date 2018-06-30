@@ -14,6 +14,15 @@ class AndroidClassName {
 
   /// The default className if none is provided by flutter.
   static const String view = 'android.view.View';
+
+  /// A radio widget.
+  static const String radio = 'android.widget.RadioButton';
+
+  /// An editable text widget.
+  static const String editText = 'android.widget.EditText';
+
+  /// A read-only text widget.
+  static const String textView = 'android.widget.TextView';
 }
 
 /// Action constants Taken from [AccessibilityAction].
@@ -66,6 +75,54 @@ class AndroidSemanticsAction {
   static const AndroidSemanticsAction clearAccessibilityFocus =
       const AndroidSemanticsAction._(0x80);
 
+  /// Taken from [AccessibilityAction.ACTION_NEXT_AT_MOVEMENT_GRANULARITY].
+  static const AndroidSemanticsAction nextAtMovementGranularity =
+      const AndroidSemanticsAction._(0x100);
+
+  /// Taken from [AccessibilityAction.ACTION_PREVIOUS_AT_MOVEMENT_GRANULARITY].
+  static const AndroidSemanticsAction previousAtMovementGranularity =
+      const AndroidSemanticsAction._(0x200);
+
+  /// Taken from [AccessibilityAction.ACTION_NEXT_HTML_ELEMENT].
+  static const AndroidSemanticsAction nextHtmlElement =
+      const AndroidSemanticsAction._(0x400);
+
+  /// Taken from [AccessibilityAction.ACTION_PREVIOUS_HTML_ELEMENT].
+  static const AndroidSemanticsAction previousHtmlElement =
+      const AndroidSemanticsAction._(0x800);
+
+  /// Taken from [AccessibilityAction.ACTION_SCROLL_FORWARD].
+  static const AndroidSemanticsAction scrollForward =
+      const AndroidSemanticsAction._(0x1000);
+
+  /// Taken from [AccessibilityAction.ACTION_SCROLL_BACKWARD].
+  static const AndroidSemanticsAction scrollBackward =
+      const AndroidSemanticsAction._(0x2000);
+
+  /// Taken from [AccessibilityAction.ACTION_CUT].
+  static const AndroidSemanticsAction cut =
+      const AndroidSemanticsAction._(0x4000);
+
+  /// Taken from [AccessibilityAction.ACTION_COPY].
+  static const AndroidSemanticsAction copy =
+      const AndroidSemanticsAction._(0x8000);
+
+  /// Taken from [AccessibilityAction.ACTION_PASTE].
+  static const AndroidSemanticsAction paste =
+      const AndroidSemanticsAction._(0x10000);
+
+  /// Taken from [AccessibilityAction.ACTION_SET_SELECTION].
+  static const AndroidSemanticsAction setSelection =
+      const AndroidSemanticsAction._(0x20000);
+
+  /// Taken from [AccessibilityAction.ACTION_EXPANwD].
+  static const AndroidSemanticsAction expand =
+      const AndroidSemanticsAction._(0x40000);
+
+  /// Taken from [AccessibilityAction.ACTION_COLLAPSE].
+  static const AndroidSemanticsAction collapse =
+      const AndroidSemanticsAction._(0x80000);
+
   @override
   String toString() {
     switch (id) {
@@ -85,6 +142,30 @@ class AndroidSemanticsAction {
         return 'AndroidSemanticsAction.accessibilityFocus';
       case 0x80:
         return 'AndroidSemanticsAction.clearAccessibilityFocus';
+      case 0x100:
+        return 'AndroidSemanticsAction.nextAtMovementGranularity';
+      case 0x200:
+        return 'AndroidSemanticsAction.previousAtMovementGranularity';
+      case 0x400:
+        return 'AndroidSemanticsAction.nextHtmlElement';
+      case 0x800:
+        return 'AndroidSemanticsAction.previousHtmlElement';
+      case 0x1000:
+        return 'AndroidSemanticsAction.scrollForward';
+      case 0x2000:
+        return 'AndroidSemanticsAction.scrollBackward';
+      case 0x4000:
+        return 'AndroidSemanticsAction.cut';
+      case 0x8000:
+        return 'AndroidSemanticsAction.copy';
+      case 0x10000:
+        return 'AndroidSemanticsAction.paste';
+      case 0x20000:
+        return 'AndroidSemanticsAction.setSelection';
+      case 0x40000:
+        return 'AndroidSemanticsAction.expand';
+      case 0x80000:
+        return 'AndroidSemanticsAction.collapse';
       default:
         return 'AndroidSemanticsAction.unknown';
     }
@@ -278,212 +359,88 @@ class _AndroidSemanticsMatcher extends Matcher {
       description.add(' with className: $className');
     if (id != null)
       description.add(' with id: $id');
+    if (actions != null)
+      description.add(' with actions: $actions');
+    if (rect != null)
+      description.add(' with rect: $rect');
+    if (size != null)
+      description.add(' with size: $size');
+    if (isChecked != null)
+      description.add(' with flag isChecked: $isChecked');
+    if (isEditable != null)
+      description.add(' with flag isEditable: $isEditable');
+    if (isEnabled != null)
+      description.add(' with flag isEnabled: $isEnabled');
+    if (isFocusable != null)
+      description.add(' with flag isFocusable: $isFocusable');
+    if (isFocused != null)
+      description.add(' with flag isFocused: $isFocused');
+    if (isPassword != null)
+      description.add(' with flag isPassword: $isPassword');
+    if (isLongClickable != null)
+      description.add(' with flag isLongClickable: $isLongClickable');
     return description;
   }
 
   @override
-  bool matches(Object item, Map<Object, Object> matchState) {
-    bool doesMatch = true;
-    if (item is AndroidSemanticsNode) {
-      if (text != null && text != item.text) {
-        matchState['text'] = true;
-        doesMatch = false;
+  bool matches(covariant AndroidSemanticsNode item, Map<Object, Object> matchState) {
+    if (text != null && text != item.text)
+      return _failWithMessage('Expected text: $text', matchState);
+    if (className != null && className != item.className)
+      return _failWithMessage('Expected className: $className', matchState);
+    if (id != null && id != item.id)
+      return _failWithMessage('Expected id: $id', matchState);
+    if (rect != null && rect != item.getRect())
+      return _failWithMessage('Expected rect: $rect', matchState);
+    if (size != null && size != item.getSize())
+      return _failWithMessage('Expected size: $size', matchState);
+    if (actions != null) {
+      final List<AndroidSemanticsAction> itemActions = item.getActions();
+      if (actions.length != itemActions.length) {
+        return _failWithMessage('Expected actions: $actions', matchState);
       }
-      if (className != null && className != item.className) {
-        matchState['className'] = true;
-        doesMatch = false;
-      }
-      if (id != null && id != item.id) {
-        matchState['id'] = true;
-        doesMatch = false;
-      }
-      if (rect != null && rect != item.getRect()) {
-        matchState['rect'] = true;
-        doesMatch = false;
-      }
-      if (size != null && size != item.getSize()) {
-        matchState['size'] = true;
-        doesMatch = false;
-      }
-      if (actions != null) {
-        final List<AndroidSemanticsAction> itemActions = item.getActions();
-        if (actions.length != itemActions.length) {
-          doesMatch = false;
-          matchState['actions'] = true;
-        } else {
-          final List<int> usedIds = <int>[];
-          outer: for (int i = 0; i < actions.length; i++) {
-            final AndroidSemanticsAction leftAction = actions[i];
-            for (int j = 0; j < actions.length; j++) {
-              if (usedIds.contains(j))
-                continue;
-              if (itemActions[j] == leftAction) {
-                usedIds.add(j);
-                continue outer;
-              }
-            }
-            doesMatch = false;
-            matchState['actions'] = true;
+      final List<int> usedIds = <int>[];
+      outer: for (int i = 0; i < actions.length; i++) {
+        final AndroidSemanticsAction leftAction = actions[i];
+        for (int j = 0; j < actions.length; j++) {
+          if (usedIds.contains(j))
+            continue;
+          if (itemActions[j] == leftAction) {
+            usedIds.add(j);
+            continue outer;
           }
         }
+        return _failWithMessage('Expected actions: $actions', matchState);
       }
-      if (isChecked != null && isChecked != item.isChecked) {
-        matchState['isChecked'] = true;
-        doesMatch = false;
-      }
-      if (isCheckable != null && isCheckable != item.isCheckable) {
-        matchState['isCheckable'] = true;
-        doesMatch = false;
-      }
-      if (isEditable != null && isEditable != item.isEditable) {
-        matchState['isEditable'] = true;
-        doesMatch = false;
-      }
-      if (isEnabled != null && isEnabled != item.isEnabled) {
-        matchState['isEnabled'] = true;
-        doesMatch = false;
-      }
-      if (isFocusable != null && isFocusable != item.isFocusable) {
-        matchState['isFocusable'] = true;
-        doesMatch = false;
-      }
-      if (isFocused != null && isFocusable != item.isFocusable) {
-        matchState['isFocused'] = true;
-        doesMatch = false;
-      }
-      if (isPassword != null && isPassword != item.isPassword) {
-        matchState['isPassword'] = true;
-        doesMatch = false;
-      }
-      if (isLongClickable != null && isLongClickable != item.isLongClickable) {
-        matchState['isLongClickable'] = true;
-        doesMatch = false;
-      }
-      return doesMatch;
     }
-    return false;
+    if (isChecked != null && isChecked != item.isChecked)
+      return _failWithMessage('Expected isChecked: $isChecked', matchState);
+    if (isCheckable != null && isCheckable != item.isCheckable)
+      return _failWithMessage('Expected isCheckable: $isCheckable', matchState);
+    if (isEditable != null && isEditable != item.isEditable)
+      return _failWithMessage('Expected isEditable: $isEditable', matchState);
+    if (isEnabled != null && isEnabled != item.isEnabled)
+      return _failWithMessage('Expected isEnabled: $isEnabled', matchState);
+    if (isFocusable != null && isFocusable != item.isFocusable)
+      return _failWithMessage('Expected isFocusable: $isFocusable', matchState);
+    if (isFocused != null && isFocused != item.isFocused)
+      return _failWithMessage('Expected isFocused: $isFocused', matchState);
+    if (isPassword != null && isPassword != item.isPassword)
+      return _failWithMessage('Expected isPassword: $isPassword', matchState);
+    if (isLongClickable != null && isLongClickable != item.isLongClickable)
+      return _failWithMessage('Expected longClickable: $isLongClickable', matchState);
+    return true;
   }
 
   @override
   Description describeMismatch(Object item, Description mismatchDescription,
       Map<Object, Object> matchState, bool verbose) {
-    if (item is AndroidSemanticsNode) {
-      if (matchState['text']) {
-        mismatchDescription
-            .add('Expected text:  ')
-            .addDescriptionOf(text)
-            .add(' but got ')
-            .addDescriptionOf(item.text)
-            .add('\n');
-      }
-      if (matchState['id']) {
-        mismatchDescription
-            .add('Expected id:  ')
-            .addDescriptionOf(id)
-            .add(' but got ')
-            .addDescriptionOf(item.id)
-            .add('\n');
-      }
-      if (matchState['className']) {
-        mismatchDescription
-            .add('Expected className: ')
-            .addDescriptionOf(className)
-            .add(' but got ')
-            .addDescriptionOf(item.className)
-            .add('\n');
-      }
-      if (matchState['rect']) {
-        mismatchDescription
-            .add('Expected rect:  ')
-            .addDescriptionOf(rect)
-            .add(' but got ')
-            .addDescriptionOf(item.getRect())
-            .add('\n');
-      }
-      if (matchState['size']) {
-        mismatchDescription
-            .add('Expected size:  ')
-            .addDescriptionOf(size)
-            .add(' but got ')
-            .addDescriptionOf(item.getSize())
-            .add('\n');
-      }
-      if (matchState['actions']) {
-        mismatchDescription
-            .add('Expected actions: ')
-            .addDescriptionOf(actions)
-            .add(' but got ')
-            .addDescriptionOf(item.getActions())
-            .add('\n');
-      }
-      if (matchState['isChecked']) {
-        mismatchDescription
-            .add('Expected isChecked: ')
-            .addDescriptionOf(isChecked)
-            .add(' but got ')
-            .addDescriptionOf(item.isChecked)
-            .add('\n');
-      }
-      if (matchState['isCheckable']) {
-        mismatchDescription
-            .add('Expected isCheckable: ')
-            .addDescriptionOf(isCheckable)
-            .add(' but got ')
-            .addDescriptionOf(item.isCheckable)
-            .add('\n');
-      }
-      if (matchState['isEditable']) {
-        mismatchDescription
-            .add('Expected isEditable: ')
-            .addDescriptionOf(isEditable)
-            .add(' but got ')
-            .addDescriptionOf(item.isEditable)
-            .add('\n');
-      }
-      if (matchState['isEnabled']) {
-        mismatchDescription
-            .add('Expected isEnabled: ')
-            .addDescriptionOf(isEnabled)
-            .add(' but got ')
-            .addDescriptionOf(item.isEnabled)
-            .add('\n');
-      }
-      if (matchState['isFocusable']) {
-        mismatchDescription
-            .add('Expected isFocusable: ')
-            .addDescriptionOf(isFocusable)
-            .add(' but got ')
-            .addDescriptionOf(item.isFocusable)
-            .add('\n');
-      }
-      if (matchState['isFocused']) {
-        mismatchDescription
-            .add('Expected isFocused: ')
-            .addDescriptionOf(isFocused)
-            .add(' but got ')
-            .addDescriptionOf(item.isFocused)
-            .add('\n');
-      }
-      if (matchState['isPassword']) {
-        mismatchDescription
-            .add('Expected isPassword: ')
-            .addDescriptionOf(isPassword)
-            .add(' but got ')
-            .addDescriptionOf(item.isPassword)
-            .add('\n');
-      }
-      if (matchState['isLongClickable']) {
-        mismatchDescription
-            .add('Expected isLongClickable: ')
-            .addDescriptionOf(isLongClickable)
-            .add(' but got ')
-            .addDescriptionOf(item.isLongClickable)
-            .add('\n');
-      }
-      return mismatchDescription;
-    }
-    return mismatchDescription
-        .add('Expected AndroidSemanticsNode but found $item');
+    return mismatchDescription.add(matchState['failure']);
+  }
+
+  bool _failWithMessage(String value, Map<dynamic, dynamic> matchState) {
+    matchState['failure'] = value;
+    return false;
   }
 }
 

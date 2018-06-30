@@ -7,11 +7,11 @@
   [GeneratedPluginRegistrant registerWithRegistry:self];
   // Override point for customization after application launch.
   FlutterViewController* controller = (FlutterViewController*)self.window.rootViewController;
-  FlutterMethodChannel* flavorChannel = [FlutterMethodChannel methodChannelWithName:@"flavor" binaryMessenger:controller];
+  FlutterMethodChannel* semanticsChannel = [FlutterMethodChannel methodChannelWithName:@"semantics" binaryMessenger:controller];
   
-  [flavorChannel setMethodCallHandler:^(FlutterMethodCall *call, FlutterResult result) {
-    NSString* flavor = (NSString*)[[NSBundle mainBundle].infoDictionary valueForKey:@"Flavor"];
-    result(flavor);
+  [semanticsChannel setMethodCallHandler:^(FlutterMethodCall *call, FlutterResult result) {
+    NSNumber* id = (NSNumber*)[[NSBundle mainBundle].infoDictionary valueForKey:@"id"];
+    result(nil);
   }];
   return [super application:application didFinishLaunchingWithOptions:launchOptions];
 }

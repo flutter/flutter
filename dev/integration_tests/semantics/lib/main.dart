@@ -1,9 +1,16 @@
+// Copyright 2018 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
 import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_driver/driver_extension.dart';
+
+import 'src/selection_controls.dart';
+import 'src/text_fields.dart';
 
 void main() {
   enableFlutterDriverExtension(handler: dataHandler);
@@ -24,32 +31,32 @@ Future<String> dataHandler(String message) async {
 }
 
 
-const List<String> kTestData = const <String>[
-  'California',
-  'Oregon',
-  'Washington',
-  'Nevada',
-  'Arizona',
-  'Nebraska',
-  'Kansas',
-  'Idaho',
-];
-
 class TestApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return new MaterialApp(
-      home: new Scaffold(
-        appBar: new AppBar(title: const Text('test app')),
-        body: new ListView(
-          children: kTestData.map<Widget>((String data) {
-            return new Row(children: <Widget>[
-              new Text(data),
-              new Checkbox(key: new ValueKey<String>(data), value: data.length.isEven, onChanged: (bool value) {}),
-            ]);
-          }).toList(),
-        ),
-      ),
+      routes: <String, WidgetBuilder>{
+        'SelectionControls': (BuildContext context) => new SelectionControlsPage(),
+        'TextFields': (BuildContext context) => new TextFieldsPage(),
+      },
+      home: new StatefulBuilder(builder: (BuildContext context, Function setState) {
+        return new Scaffold(
+          body: new Column(children: <Widget>[
+            new OutlineButton(
+              child: const Text('SelectionControls'),
+              onPressed: () {
+                Navigator.of(context).pushNamed('SelectionControls');
+              }
+            ),
+            new OutlineButton(
+              child: const Text('TextFields'),
+              onPressed: () {
+                Navigator.of(context).pushNamed('TextFields');
+              },
+            )
+          ]),
+        );
+      }),
     );
   }
 }
