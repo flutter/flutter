@@ -21,9 +21,8 @@ Future<Null> main() async {
       await flutter('packages', options: <String>['get']);
       await flutter('clean');
       await flutter('build', options: <String>['apk', '--target', 'test/live_smoketest.dart']);
-      final String androidStudioPath = grep('Android Studio at', from: await evalFlutter('doctor', options: <String>['-v'])).first.split(' ').last;
       await exec('./tool/run_instrumentation_test.sh', <String>[], environment: <String, String>{
-        'JAVA_HOME': '$androidStudioPath/jre',
+        'JAVA_HOME': await findJavaHome(),
       });
     });
 

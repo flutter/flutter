@@ -129,7 +129,6 @@ tasks:
       Checks that `flutter run --release` does not crash.
     stage: devicelab
     required_agent_capabilities: ["mac/android"]
-    flaky: true
 
   platform_interaction_test:
     description: >
@@ -261,11 +260,24 @@ tasks:
     stage: devicelab
     required_agent_capabilities: ["linux/android"]
 
+  module_test:
+    description: >
+      Checks that the module project template works and supports add2app on Android.
+    stage: devicelab
+    required_agent_capabilities: ["linux/android"]
+
   flutter_gallery_instrumentation_test:
     description: >
       Same as flutter_gallery__transition_perf but uses Android instrumentation
       framework, and therefore does not require a host computer to run. This
       test can run on off-the-shelf infrastructures, such as Firebase Test Lab.
+    stage: devicelab
+    required_agent_capabilities: ["linux/android"]
+    flaky: true
+
+  flutter_attach_test:
+    description: >
+      Tests the `flutter attach` command.
     stage: devicelab
     required_agent_capabilities: ["linux/android"]
 
@@ -411,6 +423,12 @@ tasks:
     stage: devicelab
     required_agent_capabilities: ["linux/android"]
 
+  flutter_test_performance:
+    description: >
+      Measures performance of running flutter test.
+    stage: devicelab
+    required_agent_capabilities: ["linux/android"]
+
   technical_debt__cost:
     description: >
       Estimates our technical debt (TODOs, analyzer ignores, etc).
@@ -429,6 +447,7 @@ tasks:
       Android.
     stage: devicelab
     required_agent_capabilities: ["linux/android"]
+    flaky: true
 
   flutter_gallery__transition_perf_with_semantics:
     description: >
