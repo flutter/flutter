@@ -37,7 +37,7 @@ void LayerTree::Preroll(CompositorContext::ScopedFrame& frame,
 
 #if defined(OS_FUCHSIA)
 void LayerTree::UpdateScene(SceneUpdateContext& context,
-                            scenic_lib::ContainerNode& container) {
+                            scenic::ContainerNode& container) {
   TRACE_EVENT0("flutter", "LayerTree::UpdateScene");
   const auto& metrics = context.metrics();
   SceneUpdateContext::Transform transform(context,                  // context

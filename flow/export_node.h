@@ -14,7 +14,7 @@
 #include "lib/fxl/build_config.h"
 #include "lib/fxl/macros.h"
 #include "lib/fxl/memory/ref_counted.h"
-#include "lib/ui/scenic/client/resources.h"
+#include "lib/ui/scenic/cpp/resources.h"
 #include "third_party/flutter/fml/task_runner.h"
 #include "third_party/skia/include/core/SkPoint.h"
 
@@ -31,7 +31,7 @@ class ExportNodeHolder : public fxl::RefCountedThreadSafe<ExportNodeHolder> {
 
   // Calls Bind() on the wrapped ExportNode.
   void Bind(SceneUpdateContext& context,
-            scenic_lib::ContainerNode& container,
+            scenic::ContainerNode& container,
             const SkPoint& offset,
             bool hit_testable);
 
@@ -58,7 +58,7 @@ class ExportNode {
   // Binds the export token to the entity node and adds it as a child of
   // the specified container. Must be called on the Rasterizer thread.
   void Bind(SceneUpdateContext& context,
-            scenic_lib::ContainerNode& container,
+            scenic::ContainerNode& container,
             const SkPoint& offset,
             bool hit_testable);
 
@@ -73,7 +73,7 @@ class ExportNode {
   // Member variables can only be read or modified on Rasterizer thread.
   SceneUpdateContext* scene_update_context_ = nullptr;
   zx::eventpair export_token_;
-  std::unique_ptr<scenic_lib::EntityNode> node_;
+  std::unique_ptr<scenic::EntityNode> node_;
 
   FXL_DISALLOW_COPY_AND_ASSIGN(ExportNode);
 };
