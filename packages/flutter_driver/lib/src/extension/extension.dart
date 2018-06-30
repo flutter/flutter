@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import 'package:flutter/semantics.dart';
 import 'package:meta/meta.dart';
 
 import 'package:flutter/foundation.dart';
@@ -105,6 +106,7 @@ class FlutterDriverExtension {
       'waitFor': _waitFor,
       'waitForAbsent': _waitForAbsent,
       'waitUntilNoTransientCallbacks': _waitUntilNoTransientCallbacks,
+      'get_semantics_id': _getSemanticsId,
     });
 
     _commandDeserializers.addAll(<String, CommandDeserializerCallback>{
@@ -122,6 +124,7 @@ class FlutterDriverExtension {
       'waitFor': (Map<String, String> params) => new WaitFor.deserialize(params),
       'waitForAbsent': (Map<String, String> params) => new WaitForAbsent.deserialize(params),
       'waitUntilNoTransientCallbacks': (Map<String, String> params) => new WaitUntilNoTransientCallbacks.deserialize(params),
+      'get_semantics_id': (Map<String, String> params) => new GetSemanticsId.deserialize(params),
     });
 
     _finders.addAll(<String, FinderConstructor>{
@@ -296,6 +299,19 @@ class FlutterDriverExtension {
   Future<Null> _waitUntilNoTransientCallbacks(Command command) async {
     if (SchedulerBinding.instance.transientCallbackCount != 0)
       await _waitUntilFrame(() => SchedulerBinding.instance.transientCallbackCount == 0);
+  }
+
+  Future<GetSemanticsIdResult> _getSemanticsId(Command command) async {
+    final GetSemanticsId semanticsCommand = command;
+    final Finder target = await _waitForElement(_createFinder(semanticsCommand.finder));
+    final Element element = target.evaluate().single;
+    RenderObject renderObject = element.renderObject;
+    SemanticsNode node = renderObject.debugSemantics;
+    while (renderObject != null && node == null) {
+      renderObject = renderObject.parent;
+      node = renderObject.debugSemantics;
+    }
+    return new GetSemanticsIdResult(node?.id);
   }
 
   Future<ScrollResult> _scroll(Command command) async {

@@ -571,6 +571,11 @@ class FlutterDriver {
     return result.changedState;
   }
 
+  Future<int> getSemanticsId(SerializableFinder finder, { Duration timeout = _kShortTimeout}) async {
+    final GetSemanticsIdResult result = GetSemanticsIdResult.fromJson(await _sendCommand(new GetSemanticsId(finder, timeout: timeout)));
+    return result.id;
+  }
+
   /// Take a screenshot.  The image will be returned as a PNG.
   Future<List<int>> screenshot({ Duration timeout }) async {
     timeout ??= _kLongTimeout;

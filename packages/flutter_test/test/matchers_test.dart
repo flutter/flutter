@@ -5,6 +5,7 @@
 import 'dart:typed_data';
 import 'dart:ui';
 
+import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -380,6 +381,42 @@ void main() {
       expect(comparator.imageBytes, hasLength(greaterThan(0)));
       expect(comparator.golden, Uri.parse('foo.png'));
       autoUpdateGoldenFiles = false;
+    });
+  });
+
+  group('matchesSemanticsData', () {
+    testWidgets('matches SemanticsData', (WidgetTester tester) async {
+      final SemanticsHandle handle = tester.ensureSemantics();
+      const Key key = const Key('semantics');
+      await tester.pumpWidget(new Semantics(
+        key: key,
+        namesRoute: true,
+        header: true,
+        button: true,
+        onTap: () {},
+        label: 'foo',
+        hint: 'bar',
+        value: 'baz',
+        textDirection: TextDirection.rtl,
+      ));
+
+      expect(tester.getSemanticsData(find.byKey(key)),
+        matchesSemanticsData(
+          label: 'foo',
+          hint: 'bar',
+          value: 'baz',
+          textDirection: TextDirection.rtl,
+          actions: <SemanticsAction>[
+            SemanticsAction.tap,
+          ],
+          flags: <SemanticsFlag>[
+            SemanticsFlag.isButton,
+            SemanticsFlag.isHeader,
+            SemanticsFlag.namesRoute,
+          ],
+        ),
+      );
+      handle.dispose();
     });
   });
 }

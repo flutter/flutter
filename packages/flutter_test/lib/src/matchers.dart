@@ -5,6 +5,7 @@
 import 'dart:async';
 import 'dart:math' as math;
 import 'dart:ui' as ui;
+import 'dart:ui';
 
 import 'package:meta/meta.dart';
 import 'package:test/test.dart' hide TypeMatcher, isInstanceOf;
@@ -275,6 +276,42 @@ Matcher matchesGoldenFile(dynamic key) {
     return new _MatchesGoldenFile.forStringPath(key);
   }
   throw new ArgumentError('Unexpected type for golden file: ${key.runtimeType}');
+}
+
+/// Asserts that two [SemanticsData] are equal considering the provided fields.
+///
+/// To retrieve the semantics data of a widget, use [tester.getSemanticsData]
+/// with a [Finder] that returns a single widget.  Semantics must be enabled
+/// in order to use this method.
+///
+/// ## Sample code
+///
+/// ```dart
+/// final SemanticsHandle handle = tester.ensureSemantics();
+/// final SemanticsData data = tester.getSemanticsData(find.text('hello'));
+/// expect(data, matchesSemanticsData(label: 'hello'));
+/// handle.dispose();
+/// ```
+///
+/// See also:
+///
+///   * [WidgetTester.getSemanticsData], the tester method which retrieves data.
+Matcher matchesSemanticsData({
+  String label,
+  String hint,
+  String value,
+  List<SemanticsAction> actions = const <SemanticsAction>[],
+  List<SemanticsFlag> flags = const <SemanticsFlag>[],
+  TextDirection textDirection = TextDirection.ltr,
+}) {
+  return new _MatchesSemanticsData(
+    label: label,
+    hint: hint,
+    value: value,
+    actions: actions,
+    flags: flags,
+    textDirection: textDirection,
+  );
 }
 
 class _FindsWidgetMatcher extends Matcher {
@@ -1292,4 +1329,91 @@ class _MatchesGoldenFile extends AsyncMatcher {
   @override
   Description describe(Description description) =>
       description.add('one widget whose rasterized image matches golden image "$key"');
+}
+
+class _MatchesSemanticsData extends Matcher {
+  _MatchesSemanticsData({
+    this.label,
+    this.value,
+    this.hint,
+    this.flags,
+    this.actions,
+    this.textDirection = TextDirection.ltr,
+  });
+
+  final String label;
+  final String value;
+  final String hint;
+  final List<SemanticsAction> actions;
+  final List<SemanticsFlag> flags;
+  final TextDirection textDirection;
+
+  @override
+  Description describe(Description description) {
+    description.add('has semantics');
+    if (label != null)
+      description.add('with label: $label');
+    if (value != null)
+      description.add('with value: $value');
+    if (hint != null)
+      description.add('with hint: $hint');
+    if (actions != null)
+      description.add('with actions:').addDescriptionOf(actions);
+    if (flags != null)
+      description.add('with flags:').addDescriptionOf(flags);
+    if (textDirection != null)
+      description.add('with textDirection: $textDirection');
+    return description;
+  }
+
+
+  @override
+  bool matches(covariant SemanticsData data, Map<dynamic, dynamic> matchState) {
+    if (label != data.label)
+      return failWithDescription(matchState, 'label was: ${data.label}');
+    if (hint != data.hint)
+      return failWithDescription(matchState, 'hint was: ${data.hint}');
+    if (value != data.value)
+      return failWithDescription(matchState, 'value was: ${data.value}');
+    if (textDirection != data.textDirection)
+      return failWithDescription(matchState, 'textDirection was: $textDirection');
+    int actionBits = 0;
+    for (SemanticsAction action in actions)
+      actionBits |= action.index;
+    if (actionBits != data.actions) {
+      final List<String> actionSummary = <String>[];
+      for (SemanticsAction action in SemanticsAction.values.values) {
+        if ((data.actions & action.index) != 0)
+          actionSummary.add(describeEnum(action));
+      }
+      return failWithDescription(matchState, 'actions were: $actionSummary');
+    }
+    int flagBits = 0;
+    for (SemanticsFlag flag in flags)
+      flagBits |= flag.index;
+    if (flagBits != data.flags) {
+      final List<String> flagSummary = <String>[];
+      for (SemanticsFlag flag in SemanticsFlag.values.values) {
+        if ((data.flags & flag.index) != 0)
+          flagSummary.add(describeEnum(flag));
+      }
+      return failWithDescription(matchState, 'flags were: $flagSummary');
+    }
+    return true;
+  }
+
+  bool failWithDescription(Map<dynamic, dynamic> matchState, String description) {
+    matchState['failure'] = description;
+    return false;
+  }
+
+  @override
+  Description describeMismatch(
+      dynamic item,
+      Description mismatchDescription,
+      Map<dynamic, dynamic> matchState,
+      bool verbose
+      ) {
+    return mismatchDescription.add(matchState['failure']);
+  }
 }
