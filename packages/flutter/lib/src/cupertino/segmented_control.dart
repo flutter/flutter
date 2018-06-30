@@ -180,7 +180,7 @@ class _SegmentedControlState<T> extends State<SegmentedControl<T>>
       final AnimationController animationController = createAnimationController();
       if (widget.groupValue == key) {
         _childTweens.add(reverseBackgroundColorTween);
-        animationController.forward();
+        animationController.value = 1.0;
       } else {
         _childTweens.add(forwardBackgroundColorTween);
       }
@@ -229,32 +229,31 @@ class _SegmentedControlState<T> extends State<SegmentedControl<T>>
   }
 
   Color getTextColor(int index, T currentKey) {
-    if (_selectionControllers[index].isAnimating) {
+    if (_selectionControllers[index].isAnimating)
       return textColorTween.evaluate(_selectionControllers[index]);
-    } else if (widget.groupValue == currentKey) {
+    if (widget.groupValue == currentKey)
       return CupertinoColors.white;
-    }
     return CupertinoColors.activeBlue;
   }
 
   Color getBackgroundColor(int index, T currentKey) {
-    if (_selectionControllers[index].isAnimating) {
+    if (_selectionControllers[index].isAnimating)
       return _childTweens[index].evaluate(_selectionControllers[index]);
-    } else if (widget.groupValue == currentKey) {
+    if (widget.groupValue == currentKey)
       return CupertinoColors.activeBlue;
-    } else if (_pressedKey == currentKey) {
+    if (_pressedKey == currentKey)
       return _kPressedBackground;
-    }
     return CupertinoColors.white;
   }
 
   void updateAnimationControllers() {
-    while (_selectionControllers.length != widget.children.length) {
-      if (_selectionControllers.length > widget.children.length) {
-        _selectionControllers.removeLast();
-        _childTweens.removeLast();
-      } else {
+    if (_selectionControllers.length > widget.children.length) {
+      _selectionControllers.length = widget.children.length;
+      _childTweens.length = widget.children.length;
+    } else {
+      for (int index = _selectionControllers.length; index < widget.children.length; index += 1) {
         _selectionControllers.add(createAnimationController());
+        _childTweens.add(reverseBackgroundColorTween);
       }
     }
   }
@@ -271,10 +270,10 @@ class _SegmentedControlState<T> extends State<SegmentedControl<T>>
       int index = 0;
       for (T key in widget.children.keys) {
         if (widget.groupValue == key) {
-          _childTweens.insert(index, forwardBackgroundColorTween);
+          _childTweens[index] = forwardBackgroundColorTween;
           _selectionControllers[index].forward();
         } else {
-          _childTweens.insert(index, reverseBackgroundColorTween);
+          _childTweens[index] = reverseBackgroundColorTween;
           _selectionControllers[index].reverse();
         }
         index += 1;

@@ -271,8 +271,6 @@ void main() {
       ),
     );
 
-    await tester.pumpAndSettle();
-
     expect(getBackgroundColor(tester, 0), CupertinoColors.activeBlue);
     expect(getBackgroundColor(tester, 1), CupertinoColors.white);
 
@@ -338,8 +336,6 @@ void main() {
           (WidgetTester tester) async {
     await tester.pumpWidget(setupSimpleSegmentedControl());
 
-    await tester.pumpAndSettle();
-
     expect(getRenderSegmentedControl(tester).selectedIndex, 0);
 
     expect(getBackgroundColor(tester, 0), CupertinoColors.activeBlue);
@@ -382,8 +378,6 @@ void main() {
           (WidgetTester tester) async {
     await tester.pumpWidget(setupSimpleSegmentedControl());
 
-    await tester.pumpAndSettle();
-
     expect(getBackgroundColor(tester, 0), CupertinoColors.activeBlue);
     expect(getBackgroundColor(tester, 1), CupertinoColors.white);
 
@@ -398,8 +392,6 @@ void main() {
   testWidgets('Long press does not change background color of currently-selected child',
           (WidgetTester tester) async {
     await tester.pumpWidget(setupSimpleSegmentedControl());
-
-    await tester.pumpAndSettle();
 
     expect(getBackgroundColor(tester, 0), CupertinoColors.activeBlue);
     expect(getBackgroundColor(tester, 1), CupertinoColors.white);
@@ -562,8 +554,6 @@ void main() {
       ),
     );
 
-    await tester.pumpAndSettle();
-
     expect(getBackgroundColor(tester, 0), CupertinoColors.activeBlue);
     expect(getBackgroundColor(tester, 1), CupertinoColors.white);
 
@@ -607,8 +597,6 @@ void main() {
         },
       ),
     );
-
-    await tester.pumpAndSettle();
 
     expect(
         semantics,
@@ -719,8 +707,6 @@ void main() {
           (WidgetTester tester) async {
     await tester.pumpWidget(setupSimpleSegmentedControl());
 
-    await tester.pumpAndSettle();
-
     await tester.tap(find.text('Child 2'));
 
     await tester.pump();
@@ -771,8 +757,6 @@ void main() {
         },
       ),
     );
-
-    await tester.pumpAndSettle();
 
     await tester.tap(find.text('Child 2'));
 
@@ -971,8 +955,6 @@ void main() {
       ),
     );
 
-    await tester.pumpAndSettle();
-
     await tester.tap(find.text('B'));
 
     await tester.pump();
@@ -1012,8 +994,6 @@ void main() {
   testWidgets('Segment is selected while it is transitioning to unselected state',
           (WidgetTester tester) async {
     await tester.pumpWidget(setupSimpleSegmentedControl());
-
-    await tester.pumpAndSettle();
 
     await tester.tap(find.text('Child 2'));
 
@@ -1070,8 +1050,6 @@ void main() {
       ),
     );
 
-    await tester.pumpAndSettle();
-
     await tester.tap(find.text('B'));
 
     await tester.pump();
@@ -1120,8 +1098,6 @@ void main() {
       ),
     );
 
-    await tester.pumpAndSettle();
-
     expect(getRenderSegmentedControl(tester).getChildrenAsList().length, 3);
 
     await tester.tap(find.text('B'));
@@ -1167,8 +1143,6 @@ void main() {
         },
       ),
     );
-
-    await tester.pumpAndSettle();
 
     expect(getRenderSegmentedControl(tester).getChildrenAsList().length, 3);
 
@@ -1221,8 +1195,6 @@ void main() {
         ),
       ),
     );
-
-    await tester.pumpAndSettle();
 
     await expectLater(
       find.byType(RepaintBoundary),
