@@ -51,7 +51,7 @@ class _CupertinoRefreshControlDemoState extends State<CupertinoRefreshControlDem
               const CupertinoSliverNavigationBar(
                 largeTitle: const Text('Cupertino Refresh'),
               ),
-              new CupertinoRefreshControl(
+              new CupertinoSliverRefreshControl(
                 onRefresh: () {
                   return new Future<void>.delayed(const Duration(seconds: 2))
                       ..then((_) => setState(() => repopulateList()));
