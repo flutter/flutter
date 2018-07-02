@@ -334,6 +334,7 @@ class SemanticsProperties extends DiagnosticableTree {
     this.onSetSelection,
     this.onDidGainAccessibilityFocus,
     this.onDidLoseAccessibilityFocus,
+    this.onDismiss,
   });
 
   /// If non-null, indicates that this subtree represents something that can be
@@ -436,6 +437,10 @@ class SemanticsProperties extends DiagnosticableTree {
   final bool namesRoute;
 
   /// If non-null, whether the node represents an image.
+  ///
+  /// See also:
+  ///
+  ///   * [SemanticsFlag.image], for the flag this setting controls.
   final bool image;
 
   /// Provides a textual description of the widget.
@@ -699,6 +704,14 @@ class SemanticsProperties extends DiagnosticableTree {
   ///    accessibility focus
   ///  * [FocusNode], [FocusScope], [FocusManager], which manage the input focus
   final VoidCallback onDidLoseAccessibilityFocus;
+
+  /// The handler for [SemanticsAction.dismiss].
+  ///
+  /// This handler is invoked when the user indicates they want to dismiss this
+  /// node. TalkBack users on Android can trigger this action in the local
+  /// context menu, and VoiceOver users on iOS can trigger this action with a
+  /// standard gesture or menu option.
+  final VoidCallback onDismiss;
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
@@ -2189,6 +2202,19 @@ class SemanticsConfiguration {
   set onScrollLeft(VoidCallback value) {
     _addArgumentlessAction(SemanticsAction.scrollLeft, value);
     _onScrollLeft = value;
+  }
+
+  /// The handler for [SemanticsAction.dismiss].
+  ///
+  /// This is a request to dismiss the current node, such as a modal or
+  /// snackbar.  TalkBack users on Android can trigger this action in the local
+  /// context menu, and VoiceOver users on iOS can trigger this action with a
+  /// standard gesture or menu option.
+  VoidCallback get onDismiss => _onDismiss;
+  VoidCallback _onDismiss;
+  set onDismiss(VoidCallback value) {
+    _addArgumentlessAction(SemanticsAction.dismiss, value);
+    _onDismiss = value;
   }
 
   /// The handler for [SemanticsAction.scrollRight].

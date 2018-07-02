@@ -448,6 +448,10 @@ class _DismissibleState extends State<Dismissible> with TickerProviderStateMixin
     }
   }
 
+  void _semanticDismiss() {
+    widget.onDismissed(DismissDirection.down);
+  }
+
   @override
   Widget build(BuildContext context) {
     super.build(context); // See AutomaticKeepAliveClientMixin.
@@ -511,15 +515,18 @@ class _DismissibleState extends State<Dismissible> with TickerProviderStateMixin
     }
 
     // We are not resizing but we may be being dragging in widget.direction.
-    return new GestureDetector(
-      onHorizontalDragStart: _directionIsXAxis ? _handleDragStart : null,
-      onHorizontalDragUpdate: _directionIsXAxis ? _handleDragUpdate : null,
-      onHorizontalDragEnd: _directionIsXAxis ? _handleDragEnd : null,
-      onVerticalDragStart: _directionIsXAxis ? null : _handleDragStart,
-      onVerticalDragUpdate: _directionIsXAxis ? null : _handleDragUpdate,
-      onVerticalDragEnd: _directionIsXAxis ? null : _handleDragEnd,
-      behavior: HitTestBehavior.opaque,
-      child: content
+    return new Semantics(
+      onDismiss: _semanticDismiss,
+      child: GestureDetector(
+        onHorizontalDragStart: _directionIsXAxis ? _handleDragStart : null,
+        onHorizontalDragUpdate: _directionIsXAxis ? _handleDragUpdate : null,
+        onHorizontalDragEnd: _directionIsXAxis ? _handleDragEnd : null,
+        onVerticalDragStart: _directionIsXAxis ? null : _handleDragStart,
+        onVerticalDragUpdate: _directionIsXAxis ? null : _handleDragUpdate,
+        onVerticalDragEnd: _directionIsXAxis ? null : _handleDragEnd,
+        behavior: HitTestBehavior.opaque,
+        child: content
+      ),
     );
   }
 }

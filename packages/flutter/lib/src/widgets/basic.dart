@@ -5085,6 +5085,7 @@ class Semantics extends SingleChildRenderObjectWidget {
     VoidCallback onCopy,
     VoidCallback onCut,
     VoidCallback onPaste,
+    VoidCallback onDismiss,
     MoveCursorHandler onMoveCursorForwardByCharacter,
     MoveCursorHandler onMoveCursorBackwardByCharacter,
     SetSelectionHandler onSetSelection,
@@ -5131,7 +5132,8 @@ class Semantics extends SingleChildRenderObjectWidget {
       onMoveCursorBackwardByCharacter: onMoveCursorBackwardByCharacter,
       onDidGainAccessibilityFocus: onDidGainAccessibilityFocus,
       onDidLoseAccessibilityFocus: onDidLoseAccessibilityFocus,
-    onSetSelection: onSetSelection,),
+      onDismiss: onDismiss,
+      onSetSelection: onSetSelection,),
   );
 
   /// Creates a semantic annotation using [SemanticsProperties].
@@ -5212,6 +5214,7 @@ class Semantics extends SingleChildRenderObjectWidget {
       onIncrease: properties.onIncrease,
       onDecrease: properties.onDecrease,
       onCopy: properties.onCopy,
+      onDismiss: properties.onDismiss,
       onCut: properties.onCut,
       onPaste: properties.onPaste,
       onMoveCursorForwardByCharacter: properties.onMoveCursorForwardByCharacter,
@@ -5266,6 +5269,7 @@ class Semantics extends SingleChildRenderObjectWidget {
       ..onScrollUp = properties.onScrollUp
       ..onScrollDown = properties.onScrollDown
       ..onIncrease = properties.onIncrease
+      ..onDismiss = properties.onDismiss
       ..onDecrease = properties.onDecrease
       ..onCopy = properties.onCopy
       ..onCut = properties.onCut
