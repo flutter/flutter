@@ -90,11 +90,11 @@ void main() {
       final DateTime now = new DateTime.now();
       final VMInstanceRef resp = await _flutter.evaluateExpression('new DateTime.now()');
       expect(resp.klass.name, equals('DateTime'));
-      final DateTime value = await resp.getValue();
       // Ensure we got a reasonable approximation. The more accurate we try to
       // make this, the more likely it'll fail due to differences in the time
       // in the remote VM and the local VM.
-      expect('${value.year}-${value.month}-${value.day}',
+      final VMStringInstanceRef res = await resp.evaluate(r'"$year-$month-$day"');
+      expect(res.value,
           equals('${now.year}-${now.month}-${now.day}'));
     }
 
