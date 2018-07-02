@@ -92,7 +92,7 @@ void main() {
       expect(resp.klass.name, equals('DateTime'));
       // Ensure we got a reasonable approximation. The more accurate we try to
       // make this, the more likely it'll fail due to differences in the time
-      // in the remote VM and the local VM.
+      // in the remote VM and the local VM at the time the code runs.
       final VMStringInstanceRef res = await resp.evaluate(r'"$year-$month-$day"');
       expect(res.value,
           equals('${now.year}-${now.month}-${now.day}'));
@@ -102,36 +102,36 @@ void main() {
       await _flutter.run(withDebugger: true);
       await breakInTopLevelFunction(_flutter);
       await evaluateTrivialExpressions();
-    }, skip: true); // https://github.com/flutter/flutter/issues/18678
+    });
 
     test('can evaluate trivial expressions in build method', () async {
       await _flutter.run(withDebugger: true);
       await breakInBuildMethod(_flutter);
       await evaluateTrivialExpressions();
-    }, skip: true); // https://github.com/flutter/flutter/issues/18678
+    });
 
     test('can evaluate complex expressions in top level function', () async {
       await _flutter.run(withDebugger: true);
       await breakInTopLevelFunction(_flutter);
       await evaluateTrivialExpressions();
-    }, skip: true); // https://github.com/flutter/flutter/issues/18678
+    });
 
     test('can evaluate complex expressions in build method', () async {
       await _flutter.run(withDebugger: true);
       await breakInBuildMethod(_flutter);
       await evaluateComplexExpressions();
-    }, skip: true); // https://github.com/flutter/flutter/issues/18678
+    });
 
     test('can evaluate expressions returning complex objects in top level function', () async {
       await _flutter.run(withDebugger: true);
       await breakInTopLevelFunction(_flutter);
       await evaluateComplexReturningExpressions();
-    }, skip: true); // https://github.com/flutter/flutter/issues/18678
+    });
 
     test('can evaluate expressions returning complex objects in build method', () async {
       await _flutter.run(withDebugger: true);
       await breakInBuildMethod(_flutter);
       await evaluateComplexReturningExpressions();
-    }, skip: true); // https://github.com/flutter/flutter/issues/18678
+    });
   }, timeout: const Timeout.factor(3));
 }
