@@ -2642,7 +2642,7 @@ class SemanticsConfiguration {
   /// subsequent updates to the label of this node. This flag is not currently
   /// supported on iOS.
   /// 
-  /// An example of a live region is the [SnackBar] widget. When it appears
+  /// An example of a live region is the [Snackbar] widget. When it appears
   /// on the screen it may be difficult to focus to read the value. A live
   /// region causes a polite announcement to be generated automatically.
   /// 
