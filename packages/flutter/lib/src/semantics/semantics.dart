@@ -2634,9 +2634,9 @@ class SemanticsConfiguration {
 
   /// Whether the semantics node is a live region.
   /// 
-  /// A live region indicates that this semantics node will update its 
-  /// semantics label. Platforms are free to use this information to
-  /// make polite updates to the user to inform them of this.
+  /// A live region indicates that updates to semantics node are important.
+  /// Platforms are free to use this information to make polite updates to the
+  /// user to inform them of this.
   /// 
   /// On Android, TalkBack will make a polite announcement of the first and
   /// subsequent updates to the label of this node. This flag is not currently
