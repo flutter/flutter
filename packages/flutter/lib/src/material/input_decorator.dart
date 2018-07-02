@@ -1619,11 +1619,14 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
       opacity: (isEmpty && !_hasInlineLabel) ? 1.0 : 0.0,
       duration: _kTransitionDuration,
       curve: _kTransitionCurve,
-      child: new Text(
-        decoration.hintText,
-        style: hintStyle,
-        overflow: TextOverflow.ellipsis,
-        textAlign: textAlign,
+      child: new Semantics(
+        liveRegion: true,
+        child: new Text(
+          decoration.hintText,
+          style: hintStyle,
+          overflow: TextOverflow.ellipsis,
+          textAlign: textAlign,
+        ),
       ),
     );
 

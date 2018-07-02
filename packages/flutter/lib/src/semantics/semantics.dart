@@ -311,6 +311,7 @@ class SemanticsProperties extends DiagnosticableTree {
     this.scopesRoute,
     this.namesRoute,
     this.image,
+    this.liveRegion,
     this.label,
     this.value,
     this.increasedValue,
@@ -442,6 +443,13 @@ class SemanticsProperties extends DiagnosticableTree {
   ///
   ///   * [SemanticsFlag.image], for the flag this setting controls.
   final bool image;
+
+  /// If non-null, whether the node should be considered a live region.
+  /// 
+  /// See also:
+  ///   * [SemanticsFlag.liveRegion], the semantics flag this setting controls.
+  ///   * [SemanticsConfiguration.liveRegion], for a full description of a live region.
+  final bool liveRegion;
 
   /// Provides a textual description of the widget.
   ///
@@ -2622,6 +2630,28 @@ class SemanticsConfiguration {
   bool get isImage => _hasFlag(SemanticsFlag.isImage);
   set isImage(bool value) {
     _setFlag(SemanticsFlag.isImage, value);
+  }
+
+  /// Whether the semantics node is a live region.
+  /// 
+  /// A live region indicates that this semantics node will update its 
+  /// semantics label. Platforms are free to use this information to
+  /// make polite updates to the user to inform them of this.
+  /// 
+  /// On Android, TalkBack will make a polite announcement of the first and
+  /// subsequent updates to the label of this node. This flag is not currently
+  /// supported on iOS.
+  /// 
+  /// An example of a live region is the [SnackBar] widget. When it appears
+  /// on the screen it may be difficult to focus to read the value. A live
+  /// region causes a polite announcement to be generated automatically.
+  /// 
+  /// See also:
+  ///
+  ///   * [SemanticsFlag.isLiveRegion], the semantics flag that this setting controls.
+  bool get liveRegion => _hasFlag(SemanticsFlag.isLiveRegion);
+  set liveRegion(bool value) {
+    _setFlag(SemanticsFlag.isLiveRegion, value);
   }
 
   /// The reading direction for the text in [label], [value], [hint],
