@@ -43,6 +43,7 @@ const Curve _snackBarFadeCurve = const Interval(0.72, 1.0, curve: Curves.fastOut
 ///    ...
 /// });
 /// ```
+
 enum SnackBarClosedReason {
   /// The snack bar was closed after the user tapped a [SnackBarAction].
   action,
