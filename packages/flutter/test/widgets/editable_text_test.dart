@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:io';
 import 'dart:async';
 
 import 'package:flutter/rendering.dart';
@@ -397,7 +398,10 @@ void main() {
     expect(changedValue, clipboardContent);
   });
 
-  testWidgets('Loses focus by default when "done" action is pressed', (WidgetTester tester) async {
+  testWidgets('cursor layout has correct width', (WidgetTester tester) async {
+    if (!Platform.isMacOS)
+      return;
+
     final GlobalKey<EditableTextState> editableTextKey = new GlobalKey<EditableTextState>();
     final FocusNode focusNode = new FocusNode();
 
