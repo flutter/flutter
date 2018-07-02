@@ -169,6 +169,19 @@ class Cache {
     return fs.file(fs.path.join(getRoot().path, '$artifactName.stamp'));
   }
 
+  /// Returns `true` if either [file] is older than the tools stamp or if
+  /// [file] doesn't exist.
+  bool fileOlderThanToolsStamp(File file) {
+    if (!file.existsSync()) {
+      return true;
+    }
+    final File flutterToolsStamp = getStampFileFor('flutter_tools');
+    return flutterToolsStamp.existsSync() &&
+        flutterToolsStamp
+            .lastModifiedSync()
+            .isAfter(file.lastModifiedSync());
+  }
+
   bool isUpToDate() => _artifacts.every((CachedArtifact artifact) => artifact.isUpToDate());
 
   Future<String> getThirdPartyFile(String urlStr, String serviceName) async {

@@ -44,8 +44,9 @@ Future<Null> main() async {
       final bool aarBuilt = exists(new File(path.join(
         directory.path,
         'hello',
+        '.android',
+        'Flutter',
         'build',
-        'android_gen',
         'outputs',
         'aar',
         'flutter-debug.aar',

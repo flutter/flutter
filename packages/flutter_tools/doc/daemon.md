@@ -10,7 +10,7 @@ flutter daemon
 
 It runs a persistent, JSON-RPC based server to communicate with devices. IDEs and other tools can start the flutter tool in this mode and get device addition and removal notifications, as well as being able to programmatically start and stop apps on those devices.
 
-A subset of the `flutter daemon` commands/events are also exposed via `flutter run --machine` which allows IDEs and tools to launch flutter applications and interact to send commands like Hot Reload. Which commands/events are available in this mode is documented at the bottom of this document.
+A set of `flutter daemon` commands/events are also exposed via `flutter run --machine` which allows IDEs and tools to launch flutter applications and interact to send commands like Hot Reload. The command and events that are available in this mode are documented at the bottom of this document.
 
 ## Protocol
 
@@ -76,24 +76,6 @@ It is up to the client to decide how best to display the message; for some clien
 
 ### app domain
 
-#### app.start
-
-The `start()` command is used to start applications.
-
-- `deviceId`: The device to launch the app on; this is required.
-- `projectDirectory`: The project directory; this is required. It is used to determine the application to start.
-- `startPaused`: Start the VM in a paused mode.
-- `route`: A string; the route to use when restoring the application.
-- `mode`: One of either `debug`, `profile`, or `release`.
-- `target`: Optional; the target file to start.
-- `hot`: Optional; whether to start the application using `--hot` mode
-
-On success, returns a map with the fields:
-- `appId`: this is is used when sending app events, and can be used by clients to stop the app (`app.stop`).
-- `deviceId`
-- `directory`
-- `supportsRestart`
-
 #### app.restart
 
 The `restart()` restarts the given application. It returns a Map of `{ int code, String message, String hintMessage, String hintId }` to indicate success or failure in restarting the app. A `code` of `0` indicates success, and non-zero indicates a failure. If `hintId` is non-null and equal to `restartRecommended`, that indicates that the reload was successful, but not all reloaded elements were executed during view reassembly (i.e., the user might not see all the changes in the current UI, and a restart could be necessary).
@@ -115,10 +97,6 @@ The `callServiceExtension()` allows clients to make arbitrary calls to service p
 The `stop()` command takes one parameter, `appId`. It returns a `bool` to indicate success or failure in stopping an app.
 
 - `appId`: the id of a previously started app; this is required.
-
-#### app.discover
-
-The `discover()` command takes one parameter, a `deviceId`. It returns a list of applications discovered on the device. Each application is represented by a map with two fields, an `id` - an Android or iOS application id - and an `observatoryDevicePort`. The `observatoryDevicePort` is the device port to connect to to debug the application. The port may first have to be made accessable via `device.forward`.
 
 #### Events
 
@@ -188,9 +166,21 @@ Return a list of all available emulators. The `params` field will be a List; eac
 
 #### emulator.launch
 
-The `launch()` command takes allows launching an emulator/simulator by its `id`.
+The `launch()` command allows launching an emulator/simulator by its `id`.
 
 - `emulatorId`: the id of an emulator as returned by `getEmulators`.
+
+#### emulator.create
+
+The `create()` command creates a new Android emulator with an optional `name`.
+
+- `name`: an optional name for this emulator
+
+The returned `params` will contain:
+
+- `success` - whether the emulator was successfully created
+- `emulatorName` - the name of the emulator created; this will have been auto-generated if you did not supply one
+- `error` - when `success`=`false`, a message explaining why the creation of the emulator failed
 
 ## Flutter Run --machine
 
@@ -229,4 +219,5 @@ See the [source](https://github.com/flutter/flutter/blob/master/packages/flutter
 
 ## Changelog
 
+- 0.4.0: Added `emulator.create` command
 - 0.3.0: Added `daemon.connected` event at startup

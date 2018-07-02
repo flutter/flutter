@@ -402,7 +402,7 @@ class _GalleryHomeState extends State<GalleryHome> with SingleTickerProviderStat
     }
     home = new AnnotatedRegion<SystemUiOverlayStyle>(
       child: home,
-      value: SystemUiOverlayStyle.dark
+      value: SystemUiOverlayStyle.light
     );
 
     return home;
