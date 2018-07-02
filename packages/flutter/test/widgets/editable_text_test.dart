@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
@@ -22,15 +24,53 @@ void main() {
     debugResetSemanticsIdCounter();
   });
 
+  // Tests that the desired keyboard action button is requested.
+  //
+  // More technically, when an EditableText is given a particular [action], Flutter
+  // requests [serializedActionName] when attaching to the platform's input
+  // system.
+  Future<Null> _desiredKeyboardActionIsRequested({
+    WidgetTester tester,
+    TextInputAction action,
+    String serializedActionName,
+  }) async {
+    await tester.pumpWidget(
+      new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new FocusScope(
+          node: focusScopeNode,
+          autofocus: true,
+          child: new EditableText(
+            controller: controller,
+            focusNode: focusNode,
+            textInputAction: action,
+            style: textStyle,
+            cursorColor: cursorColor,
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.byType(EditableText));
+    await tester.showKeyboard(find.byType(EditableText));
+    controller.text = 'test';
+    await tester.idle();
+    expect(tester.testTextInput.editingState['text'], equals('test'));
+    expect(tester.testTextInput.setClientArgs['inputAction'], equals(serializedActionName));
+  }
+
   testWidgets('has expected defaults', (WidgetTester tester) async {
-    await tester.pumpWidget(new Directionality(
+    await tester.pumpWidget(
+      new Directionality(
         textDirection: TextDirection.ltr,
         child: new EditableText(
           controller: controller,
           focusNode: focusNode,
           style: textStyle,
           cursorColor: cursorColor,
-        )));
+        ),
+      ),
+    );
 
     final EditableText editableText =
         tester.firstWidget(find.byType(EditableText));
@@ -41,17 +81,21 @@ void main() {
 
   testWidgets('text keyboard is requested when maxLines is default',
       (WidgetTester tester) async {
-    await tester.pumpWidget(new Directionality(
+    await tester.pumpWidget(
+      new Directionality(
         textDirection: TextDirection.ltr,
         child: new FocusScope(
-            node: focusScopeNode,
-            autofocus: true,
-            child: new EditableText(
-              controller: controller,
-              focusNode: focusNode,
-              style: textStyle,
-              cursorColor: cursorColor,
-            ))));
+          node: focusScopeNode,
+          autofocus: true,
+          child: new EditableText(
+            controller: controller,
+            focusNode: focusNode,
+            style: textStyle,
+            cursorColor: cursorColor,
+          ),
+        ),
+      ),
+    );
     await tester.tap(find.byType(EditableText));
     await tester.showKeyboard(find.byType(EditableText));
     controller.text = 'test';
@@ -65,20 +109,141 @@ void main() {
         equals('TextInputAction.done'));
   });
 
+  testWidgets('Keyboard is configured for "unspecified" action when explicitly requested',
+          (WidgetTester tester) async {
+    await _desiredKeyboardActionIsRequested(
+      tester: tester,
+      action: TextInputAction.unspecified,
+      serializedActionName: 'TextInputAction.unspecified',
+    );
+  });
+
+  testWidgets('Keyboard is configured for "none" action when explicitly requested',
+          (WidgetTester tester) async {
+    await _desiredKeyboardActionIsRequested(
+      tester: tester,
+      action: TextInputAction.none,
+      serializedActionName: 'TextInputAction.none',
+    );
+  });
+
+  testWidgets('Keyboard is configured for "done" action when explicitly requested',
+          (WidgetTester tester) async {
+    await _desiredKeyboardActionIsRequested(
+      tester: tester,
+      action: TextInputAction.done,
+      serializedActionName: 'TextInputAction.done',
+    );
+  });
+
+  testWidgets('Keyboard is configured for "send" action when explicitly requested',
+          (WidgetTester tester) async {
+    await _desiredKeyboardActionIsRequested(
+      tester: tester,
+      action: TextInputAction.send,
+      serializedActionName: 'TextInputAction.send',
+    );
+  });
+
+  testWidgets('Keyboard is configured for "go" action when explicitly requested',
+          (WidgetTester tester) async {
+    await _desiredKeyboardActionIsRequested(
+      tester: tester,
+      action: TextInputAction.go,
+      serializedActionName: 'TextInputAction.go',
+    );
+  });
+
+  testWidgets('Keyboard is configured for "search" action when explicitly requested',
+          (WidgetTester tester) async {
+    await _desiredKeyboardActionIsRequested(
+      tester: tester,
+      action: TextInputAction.search,
+      serializedActionName: 'TextInputAction.search',
+    );
+  });
+
+  testWidgets('Keyboard is configured for "send" action when explicitly requested',
+          (WidgetTester tester) async {
+    await _desiredKeyboardActionIsRequested(
+      tester: tester,
+      action: TextInputAction.send,
+      serializedActionName: 'TextInputAction.send',
+    );
+  });
+
+  testWidgets('Keyboard is configured for "next" action when explicitly requested',
+          (WidgetTester tester) async {
+    await _desiredKeyboardActionIsRequested(
+      tester: tester,
+      action: TextInputAction.next,
+      serializedActionName: 'TextInputAction.next',
+    );
+  });
+
+  testWidgets('Keyboard is configured for "previous" action when explicitly requested',
+          (WidgetTester tester) async {
+    await _desiredKeyboardActionIsRequested(
+      tester: tester,
+      action: TextInputAction.previous,
+      serializedActionName: 'TextInputAction.previous',
+    );
+  });
+
+  testWidgets('Keyboard is configured for "continue" action when explicitly requested',
+          (WidgetTester tester) async {
+    await _desiredKeyboardActionIsRequested(
+      tester: tester,
+      action: TextInputAction.continueAction,
+      serializedActionName: 'TextInputAction.continueAction',
+    );
+  });
+
+  testWidgets('Keyboard is configured for "join" action when explicitly requested',
+          (WidgetTester tester) async {
+    await _desiredKeyboardActionIsRequested(
+      tester: tester,
+      action: TextInputAction.join,
+      serializedActionName: 'TextInputAction.join',
+    );
+  });
+
+  testWidgets('Keyboard is configured for "route" action when explicitly requested',
+          (WidgetTester tester) async {
+    await _desiredKeyboardActionIsRequested(
+      tester: tester,
+      action: TextInputAction.route,
+      serializedActionName: 'TextInputAction.route',
+    );
+  });
+
+  testWidgets('Keyboard is configured for "emergencyCall" action when explicitly requested',
+          (WidgetTester tester) async {
+    await _desiredKeyboardActionIsRequested(
+      tester: tester,
+      action: TextInputAction.emergencyCall,
+      serializedActionName: 'TextInputAction.emergencyCall',
+    );
+  });
+
   testWidgets('multiline keyboard is requested when set explicitly',
       (WidgetTester tester) async {
-    await tester.pumpWidget(new Directionality(
+    await tester.pumpWidget(
+      new Directionality(
         textDirection: TextDirection.ltr,
         child: new FocusScope(
-            node: focusScopeNode,
-            autofocus: true,
-            child: new EditableText(
-              controller: controller,
-              focusNode: focusNode,
-              keyboardType: TextInputType.multiline,
-              style: textStyle,
-              cursorColor: cursorColor,
-            ))));
+          node: focusScopeNode,
+          autofocus: true,
+          child: new EditableText(
+            controller: controller,
+            focusNode: focusNode,
+            keyboardType: TextInputType.multiline,
+            style: textStyle,
+            cursorColor: cursorColor,
+          ),
+        ),
+      ),
+    );
 
     await tester.tap(find.byType(EditableText));
     await tester.showKeyboard(find.byType(EditableText));
@@ -91,19 +256,23 @@ void main() {
 
   testWidgets('Correct keyboard is requested when set explicitly and maxLines > 1',
       (WidgetTester tester) async {
-    await tester.pumpWidget(new Directionality(
+    await tester.pumpWidget(
+      new Directionality(
         textDirection: TextDirection.ltr,
         child: new FocusScope(
-            node: focusScopeNode,
-            autofocus: true,
-            child: new EditableText(
-              controller: controller,
-              focusNode: focusNode,
-              keyboardType: TextInputType.phone,
-              maxLines: 3,
-              style: textStyle,
-              cursorColor: cursorColor,
-            ))));
+          node: focusScopeNode,
+          autofocus: true,
+          child: new EditableText(
+            controller: controller,
+            focusNode: focusNode,
+            keyboardType: TextInputType.phone,
+            maxLines: 3,
+            style: textStyle,
+            cursorColor: cursorColor,
+          ),
+        ),
+      ),
+    );
 
     await tester.tap(find.byType(EditableText));
     await tester.showKeyboard(find.byType(EditableText));
@@ -116,18 +285,22 @@ void main() {
 
   testWidgets('multiline keyboard is requested when set implicitly',
       (WidgetTester tester) async {
-    await tester.pumpWidget(new Directionality(
+    await tester.pumpWidget(
+      new Directionality(
         textDirection: TextDirection.ltr,
         child: new FocusScope(
-            node: focusScopeNode,
-            autofocus: true,
-            child: new EditableText(
-              controller: controller,
-              focusNode: focusNode,
-              maxLines: 3, // Sets multiline keyboard implicitly.
-              style: textStyle,
-              cursorColor: cursorColor,
-            ))));
+          node: focusScopeNode,
+          autofocus: true,
+          child: new EditableText(
+            controller: controller,
+            focusNode: focusNode,
+            maxLines: 3, // Sets multiline keyboard implicitly.
+            style: textStyle,
+            cursorColor: cursorColor,
+          ),
+        ),
+      ),
+    );
 
     await tester.tap(find.byType(EditableText));
     await tester.showKeyboard(find.byType(EditableText));
@@ -140,18 +313,22 @@ void main() {
 
   testWidgets('single line inputs have correct default keyboard',
       (WidgetTester tester) async {
-    await tester.pumpWidget(new Directionality(
+    await tester.pumpWidget(
+      new Directionality(
         textDirection: TextDirection.ltr,
         child: new FocusScope(
-            node: focusScopeNode,
-            autofocus: true,
-            child: new EditableText(
-              controller: controller,
-              focusNode: focusNode,
-              maxLines: 1, // Sets text keyboard implicitly.
-              style: textStyle,
-              cursorColor: cursorColor,
-            ))));
+          node: focusScopeNode,
+          autofocus: true,
+          child: new EditableText(
+            controller: controller,
+            focusNode: focusNode,
+            maxLines: 1, // Sets text keyboard implicitly.
+            style: textStyle,
+            cursorColor: cursorColor,
+          ),
+        ),
+      ),
+    );
 
     await tester.tap(find.byType(EditableText));
     await tester.showKeyboard(find.byType(EditableText));
@@ -199,6 +376,188 @@ void main() {
     await tester.pump();
 
     expect(changedValue, clipboardContent);
+  });
+
+  testWidgets('Loses focus by default when "done" action is pressed', (WidgetTester tester) async {
+    final GlobalKey<EditableTextState> editableTextKey = new GlobalKey<EditableTextState>();
+    final FocusNode focusNode = new FocusNode();
+
+    final Widget widget = new MaterialApp(
+      home: new EditableText(
+        key: editableTextKey,
+        controller: new TextEditingController(),
+        focusNode: focusNode,
+        style: new Typography(platform: TargetPlatform.android).black.subhead,
+        cursorColor: Colors.blue,
+        selectionControls: materialTextSelectionControls,
+        keyboardType: TextInputType.text,
+      ),
+    );
+    await tester.pumpWidget(widget);
+
+    // Select EditableText to give it focus.
+    final Finder textFinder = find.byKey(editableTextKey);
+    await tester.tap(textFinder);
+    await tester.pump();
+
+    assert(focusNode.hasFocus);
+
+    await tester.testTextInput.receiveAction(TextInputAction.done);
+    await tester.pump();
+
+    // Lost focus because "done" was pressed.
+    expect(focusNode.hasFocus, false);
+  });
+
+  testWidgets('Does not lose focus by default when "next" action is pressed', (WidgetTester tester) async {
+    final GlobalKey<EditableTextState> editableTextKey = new GlobalKey<EditableTextState>();
+    final FocusNode focusNode = new FocusNode();
+
+    final Widget widget = new MaterialApp(
+      home: new EditableText(
+        key: editableTextKey,
+        controller: new TextEditingController(),
+        focusNode: focusNode,
+        style: new Typography(platform: TargetPlatform.android).black.subhead,
+        cursorColor: Colors.blue,
+        selectionControls: materialTextSelectionControls,
+        keyboardType: TextInputType.text,
+      ),
+    );
+    await tester.pumpWidget(widget);
+
+    // Select EditableText to give it focus.
+    final Finder textFinder = find.byKey(editableTextKey);
+    await tester.tap(textFinder);
+    await tester.pump();
+
+    assert(focusNode.hasFocus);
+
+    await tester.testTextInput.receiveAction(TextInputAction.next);
+    await tester.pump();
+
+    // Still has focus after pressing "next".
+    expect(focusNode.hasFocus, true);
+  });
+
+  testWidgets('Does not lose focus by default when "done" action is pressed and onEditingComplete is provided',
+          (WidgetTester tester) async {
+    final GlobalKey<EditableTextState> editableTextKey = new GlobalKey<EditableTextState>();
+    final FocusNode focusNode = new FocusNode();
+
+    final Widget widget = new MaterialApp(
+      home: new EditableText(
+        key: editableTextKey,
+        controller: new TextEditingController(),
+        focusNode: focusNode,
+        style: new Typography(platform: TargetPlatform.android).black.subhead,
+        cursorColor: Colors.blue,
+        selectionControls: materialTextSelectionControls,
+        keyboardType: TextInputType.text,
+        onEditingComplete: () {
+          // This prevents the default focus change behavior on submission.
+        },
+      ),
+    );
+    await tester.pumpWidget(widget);
+
+    // Select EditableText to give it focus.
+    final Finder textFinder = find.byKey(editableTextKey);
+    await tester.tap(textFinder);
+    await tester.pump();
+
+    assert(focusNode.hasFocus);
+
+    await tester.testTextInput.receiveAction(TextInputAction.done);
+    await tester.pump();
+
+    // Still has focus even though "done" was pressed because onEditingComplete
+    // was provided and it overrides the default behavior.
+    expect(focusNode.hasFocus, true);
+  });
+
+  testWidgets('When "done" is pressed callbacks are invoked: onEditingComplete > onSubmitted',
+          (WidgetTester tester) async {
+    final GlobalKey<EditableTextState> editableTextKey = new GlobalKey<EditableTextState>();
+    final FocusNode focusNode = new FocusNode();
+
+    bool onEditingCompleteCalled = false;
+    bool onSubmittedCalled = false;
+
+    final Widget widget = new MaterialApp(
+      home: new EditableText(
+        key: editableTextKey,
+        controller: new TextEditingController(),
+        focusNode: focusNode,
+        style: new Typography(platform: TargetPlatform.android).black.subhead,
+        cursorColor: Colors.blue,
+        onEditingComplete: () {
+          onEditingCompleteCalled = true;
+          expect(onSubmittedCalled, false);
+        },
+        onSubmitted: (String value) {
+          onSubmittedCalled = true;
+          expect(onEditingCompleteCalled, true);
+        },
+      ),
+    );
+    await tester.pumpWidget(widget);
+
+    // Select EditableText to give it focus.
+    final Finder textFinder = find.byKey(editableTextKey);
+    await tester.tap(textFinder);
+    await tester.pump();
+
+    assert(focusNode.hasFocus);
+
+    // The execution path starting with receiveAction() will trigger the
+    // onEditingComplete and onSubmission callbacks.
+    await tester.testTextInput.receiveAction(TextInputAction.done);
+
+    // The expectations we care about are up above in the onEditingComplete
+    // and onSubmission callbacks.
+  });
+
+  testWidgets('When "next" is pressed callbacks are invoked: onEditingComplete > onSubmitted',
+          (WidgetTester tester) async {
+    final GlobalKey<EditableTextState> editableTextKey = new GlobalKey<EditableTextState>();
+    final FocusNode focusNode = new FocusNode();
+
+    bool onEditingCompleteCalled = false;
+    bool onSubmittedCalled = false;
+
+    final Widget widget = new MaterialApp(
+      home: new EditableText(
+        key: editableTextKey,
+        controller: new TextEditingController(),
+        focusNode: focusNode,
+        style: new Typography(platform: TargetPlatform.android).black.subhead,
+        cursorColor: Colors.blue,
+        onEditingComplete: () {
+          onEditingCompleteCalled = true;
+          assert(!onSubmittedCalled);
+        },
+        onSubmitted: (String value) {
+          onSubmittedCalled = true;
+          assert(onEditingCompleteCalled);
+        },
+      ),
+    );
+    await tester.pumpWidget(widget);
+
+    // Select EditableText to give it focus.
+    final Finder textFinder = find.byKey(editableTextKey);
+    await tester.tap(textFinder);
+    await tester.pump();
+
+    assert(focusNode.hasFocus);
+
+    // The execution path starting with receiveAction() will trigger the
+    // onEditingComplete and onSubmission callbacks.
+    await tester.testTextInput.receiveAction(TextInputAction.done);
+
+    // The expectations we care about are up above in the onEditingComplete
+    // and onSubmission callbacks.
   });
 
   testWidgets('Changing controller updates EditableText', (WidgetTester tester) async {

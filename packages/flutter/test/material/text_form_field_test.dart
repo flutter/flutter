@@ -45,7 +45,7 @@ void main() {
     );
 
     await tester.showKeyboard(find.byType(TextField));
-    tester.testTextInput.receiveAction(TextInputAction.done);
+    await tester.testTextInput.receiveAction(TextInputAction.done);
     await tester.pump();
     expect(_called, true);
   });
