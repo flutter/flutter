@@ -7,6 +7,7 @@ import 'dart:developer';
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
+import 'package:flutter/semantics.dart';
 import 'package:flutter/services.dart';
 
 import 'backdrop.dart';
@@ -143,11 +144,14 @@ class _CategoriesPage extends StatelessWidget {
                       return new SizedBox(
                         width: columnWidth,
                         height: rowHeight,
-                        child: new _CategoryItem(
-                          category: category,
-                          onTap: () {
-                            onCategoryTap(category);
-                          },
+                        child: new Semantics(
+                          sortKey: new OrdinalSortKey(index.toDouble()),
+                          child: new _CategoryItem(
+                            category: category,
+                            onTap: () {
+                              onCategoryTap(category);
+                            },
+                          ),
                         ),
                       );
                     }),
