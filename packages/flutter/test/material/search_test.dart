@@ -463,6 +463,20 @@ void main() {
     expect(nestedSearchResults, <String>[null]);
     expect(selectedResults, <String>['Result Foo']);
   });
+
+  testWidgets('keyboard show search button', (WidgetTester tester) async {
+    final _TestSearchDelegate delegate = new _TestSearchDelegate();
+
+    await tester.pumpWidget(new TestHomePage(
+      delegate: delegate,
+    ));
+    await tester.tap(find.byTooltip('Search'));
+    await tester.pumpAndSettle();
+
+    await tester.showKeyboard(find.byType(TextField));
+
+    expect(tester.testTextInput.setClientArgs['inputAction'], TextInputAction.search.toString());
+  });
 }
 
 class TestHomePage extends StatelessWidget {
