@@ -19,7 +19,7 @@ import zipfile
 # How to roll the dart sdk: Just change this url! We write this to the stamp
 # file after we download, and then check the stamp file for differences.
 SDK_URL_BASE = ('http://gsdview.appspot.com/dart-archive/channels/dev/raw/'
-                '2.0.0-dev.55.0/sdk/')
+                '2.0.0-dev.65.0/sdk/')
 
 LINUX_64_SDK = 'dartsdk-linux-x64-release.zip'
 MACOS_64_SDK = 'dartsdk-macos-x64-release.zip'
@@ -55,13 +55,10 @@ def main():
   get_sdk = False
   set_unix_file_modes = True
   if sys.platform.startswith('linux'):
-    os_infix = 'linux'
     zip_filename = LINUX_64_SDK
   elif sys.platform.startswith('darwin'):
-    os_infix = 'mac'
     zip_filename = MACOS_64_SDK
   elif sys.platform.startswith('win'):
-    os_infix = 'win'
     zip_filename = WINDOWS_64_SDK
     set_unix_file_modes = False
   else:
@@ -69,10 +66,9 @@ def main():
     return 1
 
   sdk_url = SDK_URL_BASE + zip_filename
-  dart_base_sdk_dir = os.path.join(DART_SDKS_DIR, os_infix)
-  output_file = os.path.join(dart_base_sdk_dir, zip_filename)
+  output_file = os.path.join(DART_SDKS_DIR, zip_filename)
 
-  dart_sdk_dir = os.path.join(dart_base_sdk_dir, 'dart-sdk')
+  dart_sdk_dir = os.path.join(DART_SDKS_DIR, 'dart-sdk')
 
   stamp_file = os.path.join(dart_sdk_dir, 'STAMP_FILE')
   if IsStampFileUpToDate(stamp_file, sdk_url):
@@ -84,7 +80,7 @@ def main():
   os.mkdir(dart_sdk_dir)
 
   urllib.urlretrieve(sdk_url, output_file)
-  ExtractZipInto(output_file, dart_base_sdk_dir, set_unix_file_modes)
+  ExtractZipInto(output_file, DART_SDKS_DIR, set_unix_file_modes)
 
   # Write our stamp file so we don't redownload the sdk.
   with open(stamp_file, "w") as stamp_file:
