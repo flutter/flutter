@@ -1,4 +1,4 @@
-Signature: 17d988d6163a5d451cd32d7949fdbe92
+Signature: 2d5de1e7a4985bf6c894c5b328917a94
 
 UNUSED LICENSES:
 
@@ -17400,20 +17400,7 @@ FILE: ../../../third_party/skia/src/utils/SkJSON.cpp
 FILE: ../../../third_party/skia/src/utils/SkJSON.h
 FILE: ../../../third_party/skia/third_party/skcms/skcms.c
 FILE: ../../../third_party/skia/third_party/skcms/skcms.h
-FILE: ../../../third_party/skia/third_party/skcms/src/Curve.c
-FILE: ../../../third_party/skia/third_party/skcms/src/Curve.h
-FILE: ../../../third_party/skia/third_party/skcms/src/ICCProfile.c
-FILE: ../../../third_party/skia/third_party/skcms/src/ICCProfile.h
-FILE: ../../../third_party/skia/third_party/skcms/src/LinearAlgebra.c
-FILE: ../../../third_party/skia/third_party/skcms/src/LinearAlgebra.h
-FILE: ../../../third_party/skia/third_party/skcms/src/Macros.h
-FILE: ../../../third_party/skia/third_party/skcms/src/PortableMath.c
-FILE: ../../../third_party/skia/third_party/skcms/src/PortableMath.h
-FILE: ../../../third_party/skia/third_party/skcms/src/RandomBytes.h
-FILE: ../../../third_party/skia/third_party/skcms/src/TransferFunction.c
-FILE: ../../../third_party/skia/third_party/skcms/src/TransferFunction.h
-FILE: ../../../third_party/skia/third_party/skcms/src/Transform.c
-FILE: ../../../third_party/skia/third_party/skcms/src/Transform.h
+FILE: ../../../third_party/skia/third_party/skcms/skcms_internal.h
 FILE: ../../../third_party/skia/third_party/skcms/src/Transform_inl.h
 FILE: ../../../third_party/skia/third_party/vulkanmemoryallocator/GrVulkanMemoryAllocator.cpp
 FILE: ../../../third_party/skia/third_party/vulkanmemoryallocator/GrVulkanMemoryAllocator.h
