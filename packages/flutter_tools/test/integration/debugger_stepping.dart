@@ -43,7 +43,10 @@ void main() {
       for (int i = 1; i <= _project.numberOfSteps; i++) {
         await _flutter.stepOver();
         final FileLocation location = await _flutter.getSourceLocation();
-        expect(location.line, equals(_project.lineForStep(i)));
+        final int actualLine = location.line;
+        final int expectedLine = _project.lineForStep(i);
+        expect(actualLine, equals(expectedLine),
+          reason: 'After $i steps, debugger should stop at $expectedLine but stopped at $actualLine');
       }
       // Fails initially because of
       // https://github.com/flutter/flutter/issues/18877
