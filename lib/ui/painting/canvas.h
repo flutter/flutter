@@ -48,7 +48,6 @@ class Canvas : public fxl::RefCountedThreadSafe<Canvas>,
                  const Paint& paint,
                  const PaintData& paint_data);
   void restore();
-  void restoreToCount(int saveCount);
   int getSaveCount();
 
   void translate(double dx, double dy);
@@ -62,8 +61,8 @@ class Canvas : public fxl::RefCountedThreadSafe<Canvas>,
                 double right,
                 double bottom,
                 SkClipOp clipOp);
-  void clipRRect(const RRect& rrect, bool doAntiAlias = true);
-  void clipPath(const CanvasPath* path, bool doAntiAlias = true);
+  void clipRRect(const RRect& rrect);
+  void clipPath(const CanvasPath* path);
 
   void drawColor(SkColor color, SkBlendMode blend_mode);
   void drawLine(double x1,
