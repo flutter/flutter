@@ -399,10 +399,7 @@ void main() {
   });
 
   testWidgets('cursor layout has correct width', (WidgetTester tester) async {
-    if (!Platform.isMacOS)
-      return;
-
-    final GlobalKey<EditableTextState> editableTextKey = new GlobalKey<EditableTextState>();
+final GlobalKey<EditableTextState> editableTextKey = new GlobalKey<EditableTextState>();
 
     String changedValue;
     final Widget widget = new MaterialApp(
@@ -447,7 +444,8 @@ void main() {
       find.byKey(const ValueKey<int>(1)),
       matchesGoldenFile('editable_text_test.0.0.png'),
     );
-  });
+  },
+  skip: !Platform.isLinux);
 
   testWidgets('Does not lose focus by default when "next" action is pressed', (WidgetTester tester) async {
     final GlobalKey<EditableTextState> editableTextKey = new GlobalKey<EditableTextState>();
@@ -730,9 +728,6 @@ void main() {
   });
 
   testWidgets('cursor layout has correct radius', (WidgetTester tester) async {
-    if (!Platform.isMacOS)
-      return;
-
     final GlobalKey<EditableTextState> editableTextKey = new GlobalKey<EditableTextState>();
 
     String changedValue;
@@ -779,7 +774,7 @@ void main() {
       find.byKey(const ValueKey<int>(1)),
       matchesGoldenFile('editable_text_test.1.0.png'),
     );
-  });
+  }, skip: !Platform.isLinux);
 
   testWidgets('changing selection with keyboard does not show handles', (WidgetTester tester) async {
     const String value1 = 'Hello World';
