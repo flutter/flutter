@@ -403,33 +403,50 @@ void main() {
       return;
 
     final GlobalKey<EditableTextState> editableTextKey = new GlobalKey<EditableTextState>();
-    final FocusNode focusNode = new FocusNode();
 
+    String changedValue;
     final Widget widget = new MaterialApp(
-      home: new EditableText(
-        key: editableTextKey,
-        controller: new TextEditingController(),
-        focusNode: focusNode,
-        style: new Typography(platform: TargetPlatform.android).black.subhead,
-        cursorColor: Colors.blue,
-        selectionControls: materialTextSelectionControls,
-        keyboardType: TextInputType.text,
+      home: new RepaintBoundary(
+        key: const ValueKey<int>(1),
+        child: new EditableText(
+          key: editableTextKey,
+          controller: new TextEditingController(),
+          focusNode: new FocusNode(),
+          style: new Typography(platform: TargetPlatform.android).black.subhead,
+          cursorColor: Colors.blue,
+          selectionControls: materialTextSelectionControls,
+          keyboardType: TextInputType.text,
+          onChanged: (String value) {
+            changedValue = value;
+          },
+          cursorWidth: 15.0,
+        ),
       ),
     );
     await tester.pumpWidget(widget);
 
-    // Select EditableText to give it focus.
+    // Populate a fake clipboard.
+    const String clipboardContent = ' ';
+    SystemChannels.platform.setMockMethodCallHandler((MethodCall methodCall) async {
+      if (methodCall.method == 'Clipboard.getData')
+        return const <String, dynamic>{ 'text': clipboardContent };
+      return null;
+    });
+
+    // Long-press to bring up the text editing controls.
     final Finder textFinder = find.byKey(editableTextKey);
-    await tester.tap(textFinder);
+    await tester.longPress(textFinder);
     await tester.pump();
 
-    assert(focusNode.hasFocus);
-
-    await tester.testTextInput.receiveAction(TextInputAction.done);
+    await tester.tap(find.text('PASTE'));
     await tester.pump();
 
-    // Lost focus because "done" was pressed.
-    expect(focusNode.hasFocus, false);
+    expect(changedValue, clipboardContent);
+
+    await expectLater(
+      find.byKey(const ValueKey<int>(1)),
+      matchesGoldenFile('editable_text_test.0.0.png'),
+    );
   });
 
   testWidgets('Does not lose focus by default when "next" action is pressed', (WidgetTester tester) async {
@@ -710,6 +727,58 @@ void main() {
     ));
 
     semantics.dispose();
+  });
+
+  testWidgets('cursor layout has correct radius', (WidgetTester tester) async {
+    if (!Platform.isMacOS)
+      return;
+
+    final GlobalKey<EditableTextState> editableTextKey = new GlobalKey<EditableTextState>();
+
+    String changedValue;
+    final Widget widget = new MaterialApp(
+      home: new RepaintBoundary(
+        key: const ValueKey<int>(1),
+        child: new EditableText(
+          key: editableTextKey,
+          controller: new TextEditingController(),
+          focusNode: new FocusNode(),
+          style: new Typography(platform: TargetPlatform.android).black.subhead,
+          cursorColor: Colors.blue,
+          selectionControls: materialTextSelectionControls,
+          keyboardType: TextInputType.text,
+          onChanged: (String value) {
+            changedValue = value;
+          },
+          cursorWidth: 15.0,
+          cursorRadius: const Radius.circular(3.0),
+        ),
+      ),
+    );
+    await tester.pumpWidget(widget);
+
+    // Populate a fake clipboard.
+    const String clipboardContent = ' ';
+    SystemChannels.platform.setMockMethodCallHandler((MethodCall methodCall) async {
+      if (methodCall.method == 'Clipboard.getData')
+        return const <String, dynamic>{ 'text': clipboardContent };
+      return null;
+    });
+
+    // Long-press to bring up the text editing controls.
+    final Finder textFinder = find.byKey(editableTextKey);
+    await tester.longPress(textFinder);
+    await tester.pump();
+
+    await tester.tap(find.text('PASTE'));
+    await tester.pump();
+
+    expect(changedValue, clipboardContent);
+
+    await expectLater(
+      find.byKey(const ValueKey<int>(1)),
+      matchesGoldenFile('editable_text_test.1.0.png'),
+    );
   });
 
   testWidgets('changing selection with keyboard does not show handles', (WidgetTester tester) async {
