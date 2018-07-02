@@ -368,8 +368,9 @@ class _OutlineButtonState extends State<OutlineButton> with SingleTickerProvider
       // TODO(clocksmith): Check theme.surfaceColor once its available.
       // TODO(clocksmith): Check buttonThemeData once its passed.
       final Color themeColor = theme.primaryColor ??
-          theme.brightness == Brightness.dark ? Colors.white : Colors.black;
-      return widget.borderSide?.color ?? themeColor.withOpacity_kOutlineOpacity;
+          (theme.brightness == Brightness.dark ? Colors.white : Colors.black);
+      return widget.borderSide?.color ??
+          themeColor.withOpacity(_kOutlineOpacity);
     }
   }
 
