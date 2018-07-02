@@ -115,9 +115,29 @@ public class TextInputPlugin implements MethodCallHandler {
     }
 
     private static int inputActionFromTextInputAction(String inputAction) {
-        if (inputAction.equals("TextInputAction.newline"))
-            return EditorInfo.IME_ACTION_NONE;
-        return EditorInfo.IME_ACTION_DONE;
+        switch (inputAction) {
+            case "TextInputAction.newline":
+                return EditorInfo.IME_ACTION_NONE;
+            case "TextInputAction.none":
+                return EditorInfo.IME_ACTION_NONE;
+            case "TextInputAction.unspecified":
+                return EditorInfo.IME_ACTION_UNSPECIFIED;
+            case "TextInputAction.done":
+                return EditorInfo.IME_ACTION_DONE;
+            case "TextInputAction.go":
+                return EditorInfo.IME_ACTION_GO;
+            case "TextInputAction.search":
+                return EditorInfo.IME_ACTION_SEARCH;
+            case "TextInputAction.send":
+                return EditorInfo.IME_ACTION_SEND;
+            case "TextInputAction.next":
+                return EditorInfo.IME_ACTION_NEXT;
+            case "TextInputAction.previous":
+                return EditorInfo.IME_ACTION_PREVIOUS;
+            default:
+                // Present default key if bad input type is given.
+                return EditorInfo.IME_ACTION_UNSPECIFIED;
+        }
     }
 
     public InputConnection createInputConnection(FlutterView view, EditorInfo outAttrs)
