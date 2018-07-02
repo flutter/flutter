@@ -10,6 +10,7 @@ import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/platform.dart';
 import '../base/process_manager.dart';
+import '../base/utils.dart';
 import '../globals.dart';
 
 class AnalysisServer {
@@ -136,7 +137,9 @@ class AnalysisServer {
   void _handleAnalysisIssues(Map<String, dynamic> issueInfo) {
     // {"event":"analysis.errors","params":{"file":"/Users/.../lib/main.dart","errors":[]}}
     final String file = issueInfo['file'];
-    final List<AnalysisError> errors = issueInfo['errors']
+    final List<dynamic> errorsList = issueInfo['errors'];
+    final List<AnalysisError> errors = errorsList
+        .map(castStringKeyedMap)
         .map((Map<String, dynamic> json) => new AnalysisError(json))
         .toList();
     if (!_errorsController.isClosed)
