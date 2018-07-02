@@ -19,6 +19,9 @@ class CupertinoPickerDemo extends StatefulWidget {
 class _CupertinoPickerDemoState extends State<CupertinoPickerDemo> {
   int _selectedItemIndex = 0;
 
+  int _alarmHour = 0;
+  int _alarmMinute = 0;
+
   Widget _buildMenu() {
     return new Container(
       decoration: const BoxDecoration(
@@ -93,6 +96,109 @@ class _CupertinoPickerDemoState extends State<CupertinoPickerDemo> {
     );
   }
 
+  Widget _buildAlarmMenu() {
+    String time = _alarmHour.toString().padLeft(2, '0') + ': ' +
+                  _alarmMinute.toString().padLeft(2, '0');
+    return new Container(
+      decoration: const BoxDecoration(
+        color: CupertinoColors.white,
+        border: const Border(
+          top: const BorderSide(color: const Color(0xFFBCBBC1), width: 0.0),
+          bottom: const BorderSide(color: const Color(0xFFBCBBC1), width: 0.0),
+        ),
+      ),
+      height: 44.0,
+      child: new Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16.0),
+        child: new SafeArea(
+          top: false,
+          bottom: false,
+          child: new DefaultTextStyle(
+            style: const TextStyle(
+              letterSpacing: -0.24,
+              fontSize: 17.0,
+              color: CupertinoColors.black,
+            ),
+            child: new Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: <Widget>[
+                const Text('Alarm'),
+                new Text(
+                  time,
+                  style: const TextStyle(color: CupertinoColors.inactiveGray),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildAlarmBottomPicker() {
+    return new Container(
+      height: _kPickerSheetHeight,
+      color: CupertinoColors.white,
+      child: new DefaultTextStyle(
+        style: const TextStyle(
+          color: CupertinoColors.black,
+          fontSize: 22.0,
+        ),
+        child: new GestureDetector(
+          // Blocks taps from propagating to the modal sheet and popping.
+          onTap: () {},
+          child: new SafeArea(
+            child: new MultiColumnCupertinoPicker(
+              children: <CupertinoPicker>[
+                new CupertinoPicker(
+                  scrollController: new FixedExtentScrollController(
+                                      initialItem: _alarmHour,
+                                    ),
+                  centerViewRate: 2.0,
+                  magnifyRate: 1.1,
+                  itemExtent: _kPickerItemHeight,
+                  backgroundColor: CupertinoColors.white,
+                  onSelectedItemChanged: (int index) {
+                    setState(() {
+                      _alarmHour = index;
+                    });
+                  },
+                  children: new List<Widget>.generate(24, (int index) {
+                    return new Container(
+                      alignment: Alignment.centerRight,
+                      padding: EdgeInsets.only(right: 32.0),
+                      child: new Text(index.toString()),
+                    );
+                  }),
+                ),
+                new CupertinoPicker(
+                  scrollController: new FixedExtentScrollController(
+                                      initialItem: _alarmMinute,
+                                    ),
+                  centerViewRate: 0.0,
+                  magnifyRate: 1.1,
+                  itemExtent: _kPickerItemHeight,
+                  backgroundColor: CupertinoColors.white,
+                  onSelectedItemChanged: (int index) {
+                    setState(() {
+                      _alarmMinute = index;
+                    });
+                  },
+                  children: new List<Widget>.generate(60, (int index) {
+                    return new Container(
+                      alignment: Alignment.centerLeft,
+                      padding: EdgeInsets.only(left: 32.0),
+                      child: new Text(index.toString()),
+                    );
+                  }),
+                ),
+                ]),
+          ),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return new Scaffold(
@@ -120,6 +226,18 @@ class _CupertinoPickerDemoState extends State<CupertinoPickerDemo> {
                   );
                 },
                 child: _buildMenu(),
+              ),
+              const Padding(padding: const EdgeInsets.only(top: 4.0)),
+              new GestureDetector(
+                onTap: () async {
+                  await showModalBottomSheet<void>(
+                    context: context,
+                    builder: (BuildContext context) {
+                      return _buildAlarmBottomPicker();
+                    },
+                  );
+                },
+                child: _buildAlarmMenu(),
               ),
             ],
           ),
