@@ -6,6 +6,7 @@ import 'package:file/file.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:source_span/src/file.dart';
 import 'package:test/test.dart';
+import 'package:vm_service_client/vm_service_client.dart';
 
 import 'test_data/stepping_project.dart';
 import 'test_driver.dart';
@@ -34,14 +35,18 @@ void main() {
       await _flutter.run(withDebugger: true);
 
       // Add a breakpoint and reload to stop on it.
-      await _flutter.breakAt(
+      VMIsolate isolate = await _flutter.breakAt(
           _project.breakpointFile,
           20,
           restart: true);
 
       // Issue 5 steps, ensuring that we end up on the annotated lines each time
       for (int i = 1; i <= _project.numberOfSteps; i++) {
-        await _flutter.stepOver();
+        // TODO(dantup): Need to step async properly:
+        // https://github.com/dart-lang/vm_service_client/issues/30
+        // https://github.com/dart-lang/vm_service_client/issues/31
+        // isolate.pauseEvent.atAsyncSuspension ? _flutter.stepOverAsync() : _flutter.stepOver();
+        _flutter.stepOver();
         final FileLocation location = await _flutter.getSourceLocation();
         final int actualLine = location.line;
         final int expectedLine = _project.lineForStep(i);
