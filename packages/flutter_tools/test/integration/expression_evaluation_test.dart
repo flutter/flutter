@@ -74,10 +74,10 @@ void main() {
       res = await _flutter.evaluateExpression('"test"');
       expect(res is VMStringInstanceRef && res.value == 'test', isTrue);
 
-      res = await _flutter.evaluateExpression('"test"');
+      res = await _flutter.evaluateExpression('1');
       expect(res is VMIntInstanceRef && res.value == 1, isTrue);
 
-      res = await _flutter.evaluateExpression('"test"');
+      res = await _flutter.evaluateExpression('true');
       expect(res is VMBoolInstanceRef && res.value == true, isTrue);
     }
 
