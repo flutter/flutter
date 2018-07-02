@@ -55,8 +55,11 @@ void main() {
     });
 
     group('average_frame_build_time_millis', () {
-      test('returns null when there is no data', () {
-        expect(summarize(<Map<String, dynamic>>[]).computeAverageFrameBuildTimeMillis(), isNull);
+      test('throws when there is no data', () {
+        expect(
+          () => summarize(<Map<String, dynamic>>[]).computeAverageFrameBuildTimeMillis(),
+          throwsA(predicate<ArgumentError>((ArgumentError e) => e.message == 'durations is empty!'))
+        );
       });
 
       test('computes average frame build time in milliseconds', () {
@@ -71,8 +74,11 @@ void main() {
     });
 
     group('worst_frame_build_time_millis', () {
-      test('returns null when there is no data', () {
-        expect(summarize(<Map<String, dynamic>>[]).computeWorstFrameBuildTimeMillis(), isNull);
+      test('throws when there is no data', () {
+        expect(
+          () => summarize(<Map<String, dynamic>>[]).computeWorstFrameBuildTimeMillis(),
+          throwsA(predicate<ArgumentError>((ArgumentError e) => e.message == 'durations is empty!'))
+        );
       });
 
       test('computes worst frame build time in milliseconds', () {
@@ -107,8 +113,11 @@ void main() {
     });
 
     group('average_frame_rasterizer_time_millis', () {
-      test('returns null when there is no data', () {
-        expect(summarize(<Map<String, dynamic>>[]).computeAverageFrameRasterizerTimeMillis(), isNull);
+      test('throws when there is no data', () {
+        expect(
+          () => summarize(<Map<String, dynamic>>[]).computeAverageFrameRasterizerTimeMillis(),
+          throwsA(predicate<ArgumentError>((ArgumentError e) => e.message == 'durations is empty!'))
+        );
       });
 
       test('computes average frame rasterizer time in milliseconds', () {
@@ -143,9 +152,13 @@ void main() {
     });
 
     group('worst_frame_rasterizer_time_millis', () {
-      test('returns null when there is no data', () {
-        expect(summarize(<Map<String, dynamic>>[]).computeWorstFrameRasterizerTimeMillis(), isNull);
+      test('throws when there is no data', () {
+        expect(
+          () => summarize(<Map<String, dynamic>>[]).computeWorstFrameRasterizerTimeMillis(),
+          throwsA(predicate<ArgumentError>((ArgumentError e) => e.message == 'durations is empty!'))
+        );
       });
+
 
       test('computes worst frame rasterizer time in milliseconds', () {
         expect(
@@ -186,9 +199,13 @@ void main() {
     });
 
     group('percentile_frame_rasterizer_time_millis', () {
-      test('returns null when there is no data', () {
-        expect(summarize(<Map<String, dynamic>>[]).computeWorstFrameRasterizerTimeMillis(), isNull);
+      test('throws when there is no data', () {
+        expect(
+          () => summarize(<Map<String, dynamic>>[]).computePercentileFrameRasterizerTimeMillis(90.0),
+          throwsA(predicate<ArgumentError>((ArgumentError e) => e.message == 'durations is empty!'))
+        );
       });
+
 
       const List<List<int>> sequences = <List<int>>[
         <int>[1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
