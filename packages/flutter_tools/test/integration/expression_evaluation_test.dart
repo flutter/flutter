@@ -133,6 +133,7 @@ void main() {
       await _flutter.run(withDebugger: true);
       await breakInBuildMethod(_flutter);
       await evaluateComplexReturningExpressions();
-    }, skip: platform.isWindows); // https://github.com/flutter/flutter/issues/17833
-  }, timeout: const Timeout.factor(3));
+    });
+  // https://github.com/flutter/flutter/issues/17833
+  }, timeout: const Timeout.factor(3), skip: platform.isWindows);
 }
