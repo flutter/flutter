@@ -66,8 +66,7 @@ void main() {
             _project.breakpointLine
         );
         expect(isolate.pauseEvent, const isInstanceOf<VMPauseBreakpointEvent>());
-      },
-        platform.isLinux ? completes : throwsA(anything)
+      }(), platform.isLinux ? completes : throwsA(anything)
       );
     });
   }, timeout: const Timeout.factor(3));
