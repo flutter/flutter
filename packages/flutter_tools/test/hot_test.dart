@@ -90,27 +90,27 @@ void main() {
   });
 
   group('hotRestart', () {
-    FlutterDevice device;
+    final List<FlutterDevice> devices = <FlutterDevice>[];
 
     setUp(() {
-      device = new FlutterDevice(new MockDevice(),
-          previewDart2: false, trackWidgetCreation: false);
+      devices.add(new FlutterDevice(new MockDevice(),
+          previewDart2: false, trackWidgetCreation: false));
     });
 
     testUsingContext('no setup', () async {
-      expect((await new HotRunner([device]).restart(fullRestart: true)).isOk,
+      expect((await new HotRunner(devices).restart(fullRestart: true)).isOk,
           true);
     });
 
     testUsingContext('setup function succeeds', () async {
-      expect((await new HotRunner([device]).restart(fullRestart: true)).isOk,
+      expect((await new HotRunner(devices).restart(fullRestart: true)).isOk,
           true);
     }, overrides: <Type, Generator>{
       HotRunnerConfig: () => new TestHotRunnerConfig(true),
     });
 
     testUsingContext('setup function fails', () async {
-      expect((await new HotRunner([device]).restart(fullRestart: true)).isOk,
+      expect((await new HotRunner(devices).restart(fullRestart: true)).isOk,
           false);
     }, overrides: <Type, Generator>{
       HotRunnerConfig: () => new TestHotRunnerConfig(false),
