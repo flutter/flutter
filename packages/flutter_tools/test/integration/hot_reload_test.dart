@@ -4,6 +4,7 @@
 
 import 'package:file/file.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
+import 'package:flutter_tools/src/base/platform.dart';
 import 'package:test/test.dart';
 import 'package:vm_service_client/vm_service_client.dart';
 
@@ -32,18 +33,41 @@ void main() {
 
     test('works without error', () async {
       await _flutter.run();
-      await _flutter.hotReload();
-    }, skip: true); // https://github.com/flutter/flutter/issues/17833
+
+      // Due to https://github.com/flutter/flutter/issues/17833 this will
+      // throw on Windows. If you merge a fix for this and this test starts failing
+      // because it didn't throw on Windows, you should delete the wrapping expect()
+      // and just `await` the hotReload directly
+      // (dantup)
+      expect(
+        _flutter.hotReload,
+        platform.isWindows ? throwsA(anything) : returnsNormally,
+      );
+    });
 
     test('hits breakpoints with file:// prefixes after reload', () async {
       await _flutter.run(withDebugger: true);
 
-      // Hit breakpoint using a file:// URI.
-      final VMIsolate isolate = await _flutter.breakAt(
-          new Uri.file(_project.breakpointFile).toString(),
-          _project.breakpointLine);
-
-      expect(isolate.pauseEvent, const isInstanceOf<VMPauseBreakpointEvent>());
-    }, skip: true); // https://github.com/flutter/flutter/issues/18441
+      // This test fails due to // https://github.com/flutter/flutter/issues/18441
+      // If you merge a fix for this and the test starts failing because it's not
+      // timing out, delete the wrapping expect/return below.
+      // (dantup)
+      //
+      // final VMIsolate isolate = await _flutter.breakAt(
+      //     new Uri.file(_project.breakpointFile).toString(),
+      //     _project.breakpointLine
+      // );
+      // expect(isolate.pauseEvent, const isInstanceOf<VMPauseBreakpointEvent>());
+      expect(() async {
+        // Hit breakpoint using a file:// URI.
+        final VMIsolate isolate = await _flutter.breakAt(
+            new Uri.file(_project.breakpointFile).toString(),
+            _project.breakpointLine
+        );
+        expect(isolate.pauseEvent, const isInstanceOf<VMPauseBreakpointEvent>());
+      },
+        throwsA(anything)
+      );
+    });
   }, timeout: const Timeout.factor(3));
 }
