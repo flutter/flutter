@@ -51,7 +51,7 @@ void main() {
 
       // This test fails due to // https://github.com/flutter/flutter/issues/18441
       // If you merge a fix for this and the test starts failing because it's not
-      // timing out, delete the wrapping expect/return below.
+      // throwing, delete the wrapping expect/return below.
       // (dantup)
       //
       // final VMIsolate isolate = await _flutter.breakAt(
@@ -67,7 +67,7 @@ void main() {
         );
         expect(isolate.pauseEvent, const isInstanceOf<VMPauseBreakpointEvent>());
       },
-        throwsA(anything)
+        platform.isLinux ? completes : throwsA(anything)
       );
     });
   }, timeout: const Timeout.factor(3));
