@@ -38,12 +38,19 @@ void main() {
 
     test('hits breakpoints after reload', () async {
       await _flutter.run(withDebugger: true);
-      
-      final VMIsolate isolate = await _flutter.breakAt(_project.breakpointFile,
-          _project.breakpointLine);
 
-      expect(isolate.pauseEvent, const isInstanceOf<VMPauseBreakpointEvent>());
-    }, skip: platform.isWindows); // https://github.com/flutter/flutter/issues/17833
+      // Due to https://github.com/flutter/flutter/issues/17833 this will
+      // throw on Windows. If you merge a fix for this and this test starts failing
+      // because it didn't throw on Windows, you should delete the wrapping expect()
+      // (dantup)
+
+      await expectLater(() async {
+        final VMIsolate isolate = await _flutter.breakAt(
+            _project.breakpointFile, _project.breakpointLine);
+
+        expect(isolate.pauseEvent, const isInstanceOf<VMPauseBreakpointEvent>());
+      }(), platform.isWindows ? throwsA(anything) : completes);
+    }); // https://github.com/flutter/flutter/issues/17833
 
     test('hits breakpoints with file:// prefixes after reload', () async {
       await _flutter.run(withDebugger: true);
