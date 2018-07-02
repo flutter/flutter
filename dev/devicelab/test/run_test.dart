@@ -31,9 +31,8 @@ void main() {
       }
       final ProcessResult result = await runScript(testNames);
       expect(result.exitCode, expectedExitCode,
-          reason: 'Exit code was ${result.exitCode} (expected $expectedExitCode)\n\n'
-          '[ stderr from test process ]\n\n${_indent(result.stderr)}\n\n[ end of stderr ]\n\n'
-          '[ stdout from test process ]\n\n${_indent(result.stdout)}\n\n[ end of stdout ]');
+          reason: '[ stderr from test process ]\n\n${_indent(result.stderr)}\n\n[ end of stderr ]'
+          '\n\n[ stdout from test process ]\n\n${_indent(result.stdout)}\n\n[ end of stdout ]');
     }
 
     test('exits with code 0 when succeeds', () async {
