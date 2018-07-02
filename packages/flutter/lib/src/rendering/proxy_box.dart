@@ -3136,6 +3136,7 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     bool scopesRoute,
     bool namesRoute,
     bool hidden,
+    bool liveRegion,
     String label,
     String value,
     String increasedValue,
@@ -3173,6 +3174,7 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
        _obscured = obscured,
        _scopesRoute = scopesRoute,
        _namesRoute = namesRoute,
+       _liveRegion = liveRegion,
        _hidden = hidden,
        _label = label,
        _value = value,
@@ -3361,6 +3363,17 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     if (hidden == value)
       return;
     _hidden = value;
+    markNeedsSemanticsUpdate();
+  }
+
+  /// If non-null, sets the [SemanticsNode.isLiveRegion] semantic to the given
+  /// value.
+  bool get liveRegion => _liveRegion;
+  bool _liveRegion;
+  set liveRegion(bool value) {
+    if (_liveRegion == value)
+      return;
+    _liveRegion = value;
     markNeedsSemanticsUpdate();
   }
 
@@ -3821,6 +3834,8 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
       config.scopesRoute = scopesRoute;
     if (namesRoute != null)
       config.namesRoute = namesRoute;
+    if (liveRegion != null)
+      config.liveRegion = liveRegion;
     if (textDirection != null)
       config.textDirection = textDirection;
     if (sortKey != null)

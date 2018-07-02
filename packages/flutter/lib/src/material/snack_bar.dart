@@ -225,6 +225,7 @@ class SnackBar extends StatelessWidget {
           );
         },
         child: new Semantics(
+          liveRegion: true,
           container: true,
           child: new Dismissible(
             key: const Key('dismissible'),
