@@ -39,9 +39,10 @@ void main() {
       // because it didn't throw on Windows, you should delete the wrapping expect()
       // and just `await` the hotReload directly
       // (dantup)
-      expect(
-        _flutter.hotReload,
-        platform.isWindows ? throwsA(anything) : returnsNormally,
+
+      await expectLater(
+        _flutter.hotReload(),
+        platform.isWindows ? throwsA(anything) : completes,
       );
     });
 
@@ -58,7 +59,7 @@ void main() {
       //     _project.breakpointLine
       // );
       // expect(isolate.pauseEvent, const isInstanceOf<VMPauseBreakpointEvent>());
-      expect(() async {
+      await expectLater(() async {
         // Hit breakpoint using a file:// URI.
         final VMIsolate isolate = await _flutter.breakAt(
             new Uri.file(_project.breakpointFile).toString(),
