@@ -38,15 +38,11 @@ void main() {
     test('hits breakpoints with file:// prefixes after reload', () async {
       await _flutter.run(withDebugger: true);
 
-      // Add a breakpoint using a file:// URI.
-      await _flutter.addBreakpoint(
+      // Hit breakpoint using a file:// URI.
+      final VMIsolate isolate = await _flutter.breakAt(
           new Uri.file(_project.breakpointFile).toString(),
           _project.breakpointLine);
 
-      await _flutter.hotReload();
-
-      // Ensure we hit the breakpoint.
-      final VMIsolate isolate = await _flutter.waitForBreakpointHit();
       expect(isolate.pauseEvent, const isInstanceOf<VMPauseBreakpointEvent>());
     }, skip: true); // https://github.com/flutter/flutter/issues/18441
   }, timeout: const Timeout.factor(3));
