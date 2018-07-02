@@ -26,13 +26,10 @@ void main() {
     }
 
     Future<void> expectScriptResult(List<String> testNames, int expectedExitCode) async {
-      String _indent(String msg) {
-        return '    ' + msg.replaceAll('\n', '\n    ').trim();
-      }
       final ProcessResult result = await runScript(testNames);
       expect(result.exitCode, expectedExitCode,
-          reason: '[ stderr from test process ]\n\n${_indent(result.stderr)}\n\n[ end of stderr ]'
-          '\n\n[ stdout from test process ]\n\n${_indent(result.stdout)}\n\n[ end of stdout ]');
+          reason: '[ stderr from test process ]\n\n${result.stderr}\n\n[ end of stderr ]'
+          '\n\n[ stdout from test process ]\n\n${result.stdout}\n\n[ end of stdout ]');
     }
 
     test('exits with code 0 when succeeds', () async {
