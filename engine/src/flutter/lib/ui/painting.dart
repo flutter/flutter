@@ -2886,15 +2886,6 @@ class Canvas extends NativeFieldWrapperClass2 {
   /// cause the new layer to be composited into the previous layer.
   void restore() native 'Canvas_restore';
 
-  /// Restore the current save stack to the state where [saveCount] is gotten.
-  ///
-  /// Use [save] and [saveLayer] to push state onto the stack, and use
-  /// [getSaveCount] to get the [saveCount].
-  ///
-  /// If a state was pushed with with [saveLayer], then this call will also
-  /// cause the new layer to be composited into the previous layer.
-  void restoreToCount(int saveCount) native 'Canvas_restoreToCount';
-
   /// Returns the number of items on the save stack, including the
   /// initial state. This means it returns 1 for a clean canvas, and
   /// that each call to [save] and [saveLayer] increments it, and that
@@ -2965,11 +2956,11 @@ class Canvas extends NativeFieldWrapperClass2 {
   /// multiple draw commands intersect with the clip boundary, this can result
   /// in incorrect blending at the clip boundary. See [saveLayer] for a
   /// discussion of how to address that and some examples of using [clipRRect].
-  void clipRRect(RRect rrect, [bool doAntiAlias = true]) {
+  void clipRRect(RRect rrect) {
     assert(_rrectIsValid(rrect));
-    _clipRRect(rrect._value, doAntiAlias);
+    _clipRRect(rrect._value);
   }
-  void _clipRRect(Float32List rrect, bool doAntiAlias) native 'Canvas_clipRRect';
+  void _clipRRect(Float32List rrect) native 'Canvas_clipRRect';
 
   /// Reduces the clip region to the intersection of the current clip and the
   /// given [Path].
@@ -2978,11 +2969,11 @@ class Canvas extends NativeFieldWrapperClass2 {
   /// multiple draw commands intersect with the clip boundary, this can result
   /// in incorrect blending at the clip boundary. See [saveLayer] for a
   /// discussion of how to address that.
-  void clipPath(Path path, [bool doAntiAlias = true]) {
+  void clipPath(Path path) {
     assert(path != null); // path is checked on the engine side
-    _clipPath(path, doAntiAlias);
+    _clipPath(path);
   }
-  void _clipPath(Path path, bool doAntiAlias) native 'Canvas_clipPath';
+  void _clipPath(Path path) native 'Canvas_clipPath';
 
   /// Paints the given [Color] onto the canvas, applying the given
   /// [BlendMode], with the given color being the source and the background

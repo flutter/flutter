@@ -35,7 +35,6 @@ IMPLEMENT_WRAPPERTYPEINFO(ui, Canvas);
   V(Canvas, saveLayerWithoutBounds) \
   V(Canvas, saveLayer)              \
   V(Canvas, restore)                \
-  V(Canvas, restoreToCount)         \
   V(Canvas, getSaveCount)           \
   V(Canvas, translate)              \
   V(Canvas, scale)                  \
@@ -121,12 +120,6 @@ void Canvas::restore() {
   canvas_->restore();
 }
 
-void Canvas::restoreToCount(int saveCount) {
-  if (!canvas_)
-    return;
-  canvas_->restoreToCount(saveCount);
-}
-
 int Canvas::getSaveCount() {
   if (!canvas_)
     return 0;
@@ -173,19 +166,19 @@ void Canvas::clipRect(double left,
   canvas_->clipRect(SkRect::MakeLTRB(left, top, right, bottom), clipOp, true);
 }
 
-void Canvas::clipRRect(const RRect& rrect, bool doAntiAlias) {
+void Canvas::clipRRect(const RRect& rrect) {
   if (!canvas_)
     return;
-  canvas_->clipRRect(rrect.sk_rrect, doAntiAlias);
+  canvas_->clipRRect(rrect.sk_rrect, true);
 }
 
-void Canvas::clipPath(const CanvasPath* path, bool doAntiAlias) {
+void Canvas::clipPath(const CanvasPath* path) {
   if (!canvas_)
     return;
   if (!path)
     Dart_ThrowException(
         ToDart("Canvas.clipPath called with non-genuine Path."));
-  canvas_->clipPath(path->path(), doAntiAlias);
+  canvas_->clipPath(path->path(), true);
 }
 
 void Canvas::drawColor(SkColor color, SkBlendMode blend_mode) {
