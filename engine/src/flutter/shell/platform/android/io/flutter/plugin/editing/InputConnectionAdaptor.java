@@ -172,11 +172,35 @@ class InputConnectionAdaptor extends BaseInputConnection {
 
     @Override
     public boolean performEditorAction(int actionCode) {
-        // TODO(abarth): Support more actions.
         switch (actionCode) {
+            // TODO(mattcarroll): is newline an appropriate action for "none"?
             case EditorInfo.IME_ACTION_NONE:
                 mFlutterChannel.invokeMethod("TextInputClient.performAction",
                     Arrays.asList(mClient, "TextInputAction.newline"));
+                break;
+            case EditorInfo.IME_ACTION_UNSPECIFIED:
+                mFlutterChannel.invokeMethod("TextInputClient.performAction",
+                        Arrays.asList(mClient, "TextInputAction.unspecified"));
+                break;
+            case EditorInfo.IME_ACTION_GO:
+                mFlutterChannel.invokeMethod("TextInputClient.performAction",
+                        Arrays.asList(mClient, "TextInputAction.go"));
+                break;
+            case EditorInfo.IME_ACTION_SEARCH:
+                mFlutterChannel.invokeMethod("TextInputClient.performAction",
+                        Arrays.asList(mClient, "TextInputAction.search"));
+                break;
+            case EditorInfo.IME_ACTION_SEND:
+                mFlutterChannel.invokeMethod("TextInputClient.performAction",
+                        Arrays.asList(mClient, "TextInputAction.send"));
+                break;
+            case EditorInfo.IME_ACTION_NEXT:
+                mFlutterChannel.invokeMethod("TextInputClient.performAction",
+                        Arrays.asList(mClient, "TextInputAction.next"));
+                break;
+            case EditorInfo.IME_ACTION_PREVIOUS:
+                mFlutterChannel.invokeMethod("TextInputClient.performAction",
+                        Arrays.asList(mClient, "TextInputAction.previous"));
                 break;
             default:
             case EditorInfo.IME_ACTION_DONE:

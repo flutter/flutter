@@ -8,7 +8,16 @@
 #import <Foundation/Foundation.h>
 
 typedef NS_ENUM(NSInteger, FlutterTextInputAction) {
+  FlutterTextInputActionUnspecified,
   FlutterTextInputActionDone,
+  FlutterTextInputActionGo,
+  FlutterTextInputActionSend,
+  FlutterTextInputActionSearch,
+  FlutterTextInputActionNext,
+  FlutterTextInputActionContinue,
+  FlutterTextInputActionJoin,
+  FlutterTextInputActionRoute,
+  FlutterTextInputActionEmergencyCall,
   FlutterTextInputActionNewline,
 };
 
