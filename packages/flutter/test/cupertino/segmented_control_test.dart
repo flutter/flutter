@@ -967,7 +967,6 @@ void main() {
     final Offset center = tester.getCenter(find.text('B'));
     await tester.startGesture(center);
     await tester.pumpAndSettle();
-
     await expectLater(
       find.byType(RepaintBoundary),
       matchesGoldenFile('segmented_control_test.1.0.png'),
