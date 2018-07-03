@@ -1150,10 +1150,7 @@ class _TabBarViewState extends State<TabBarView> {
       }
       _controller.offset = (_pageController.page - _controller.index).clamp(-1.0, 1.0);
     } else if (notification is ScrollEndNotification) {
-      final ScrollPosition position = _pageController.position;
-      final double pageTolerance = position.physics.tolerance.distance
-          / (position.viewportDimension * _pageController.viewportFraction);
-      _controller.index = (_pageController.page + pageTolerance).floor();
+      _controller.index = _pageController.page.round();
       _currentIndex = _controller.index;
     }
     _warpUnderwayCount -= 1;
