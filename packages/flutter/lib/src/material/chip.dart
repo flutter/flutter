@@ -17,7 +17,6 @@ import 'ink_well.dart';
 import 'material.dart';
 import 'material_localizations.dart';
 import 'theme.dart';
-import 'theme_data.dart';
 import 'tooltip.dart';
 
 // Some design constants
@@ -100,15 +99,6 @@ abstract class ChipAttributes {
   /// By default, this is 4 logical pixels at the beginning and the end of the
   /// label, and zero on top and bottom.
   EdgeInsetsGeometry get labelPadding;
-
-  /// Configures the minimum size of the tap target.
-  ///
-  /// Defaults to [ThemeData.materialTapTargetSize].
-  ///
-  /// See also:
-  ///
-  ///   * [MaterialTapTargetSize], for a description of how this affects tap targets.
-  MaterialTapTargetSize get materialTapTargetSize;
 }
 
 /// An interface for material design chips that can be deleted.
@@ -433,7 +423,6 @@ class Chip extends StatelessWidget implements ChipAttributes, DeletableChipAttri
     this.shape,
     this.backgroundColor,
     this.padding,
-    this.materialTapTargetSize,
   })  : assert(label != null),
         super(key: key);
 
@@ -459,8 +448,6 @@ class Chip extends StatelessWidget implements ChipAttributes, DeletableChipAttri
   final Color deleteIconColor;
   @override
   final String deleteButtonTooltipMessage;
-  @override
-  final MaterialTapTargetSize materialTapTargetSize;
 
   @override
   Widget build(BuildContext context) {
@@ -478,7 +465,6 @@ class Chip extends StatelessWidget implements ChipAttributes, DeletableChipAttri
       shape: shape,
       backgroundColor: backgroundColor,
       padding: padding,
-      materialTapTargetSize: materialTapTargetSize,
       isEnabled: true,
     );
   }
@@ -561,7 +547,6 @@ class InputChip extends StatelessWidget
     this.shape,
     this.backgroundColor,
     this.padding,
-    this.materialTapTargetSize,
   })  : assert(selected != null),
         assert(isEnabled != null),
         assert(label != null),
@@ -603,8 +588,6 @@ class InputChip extends StatelessWidget
   final Color backgroundColor;
   @override
   final EdgeInsetsGeometry padding;
-  @override
-  final MaterialTapTargetSize materialTapTargetSize;
 
   @override
   Widget build(BuildContext context) {
@@ -628,7 +611,6 @@ class InputChip extends StatelessWidget
       shape: shape,
       backgroundColor: backgroundColor,
       padding: padding,
-      materialTapTargetSize: materialTapTargetSize,
       isEnabled: isEnabled && (onSelected != null || onDeleted != null || onPressed != null),
     );
   }
@@ -707,7 +689,6 @@ class ChoiceChip extends StatelessWidget
     this.shape,
     this.backgroundColor,
     this.padding,
-    this.materialTapTargetSize,
   })  : assert(selected != null),
         assert(label != null),
         super(key: key);
@@ -736,8 +717,6 @@ class ChoiceChip extends StatelessWidget
   final Color backgroundColor;
   @override
   final EdgeInsetsGeometry padding;
-  @override
-  final MaterialTapTargetSize materialTapTargetSize;
 
   @override
   bool get isEnabled => onSelected != null;
@@ -762,7 +741,6 @@ class ChoiceChip extends StatelessWidget
       backgroundColor: backgroundColor,
       padding: padding,
       isEnabled: isEnabled,
-      materialTapTargetSize: materialTapTargetSize,
     );
   }
 }
@@ -874,7 +852,6 @@ class FilterChip extends StatelessWidget
     this.shape,
     this.backgroundColor,
     this.padding,
-    this.materialTapTargetSize,
   })  : assert(selected != null),
         assert(label != null),
         super(key: key);
@@ -903,8 +880,6 @@ class FilterChip extends StatelessWidget
   final Color backgroundColor;
   @override
   final EdgeInsetsGeometry padding;
-  @override
-  final MaterialTapTargetSize materialTapTargetSize;
 
   @override
   bool get isEnabled => onSelected != null;
@@ -926,7 +901,6 @@ class FilterChip extends StatelessWidget
       selectedColor: selectedColor,
       padding: padding,
       isEnabled: isEnabled,
-      materialTapTargetSize: materialTapTargetSize,
     );
   }
 }
@@ -992,7 +966,6 @@ class ActionChip extends StatelessWidget implements ChipAttributes, TappableChip
     this.shape,
     this.backgroundColor,
     this.padding,
-    this.materialTapTargetSize,
   })  : assert(label != null),
         assert(
           onPressed != null,
@@ -1019,8 +992,6 @@ class ActionChip extends StatelessWidget implements ChipAttributes, TappableChip
   final Color backgroundColor;
   @override
   final EdgeInsetsGeometry padding;
-  @override
-  final MaterialTapTargetSize materialTapTargetSize;
 
   @override
   Widget build(BuildContext context) {
@@ -1036,7 +1007,6 @@ class ActionChip extends StatelessWidget implements ChipAttributes, TappableChip
       padding: padding,
       labelPadding: labelPadding,
       isEnabled: true,
-      materialTapTargetSize: materialTapTargetSize
     );
   }
 }
@@ -1106,7 +1076,6 @@ class RawChip extends StatefulWidget
     this.tooltip,
     this.shape,
     this.backgroundColor,
-    this.materialTapTargetSize,
   })  : assert(label != null),
         assert(isEnabled != null),
         deleteIcon = deleteIcon ?? _kDefaultDeleteIcon,
@@ -1148,8 +1117,6 @@ class RawChip extends StatefulWidget
   final Color backgroundColor;
   @override
   final EdgeInsetsGeometry padding;
-  @override
-  final MaterialTapTargetSize materialTapTargetSize;
 
   /// Whether or not to show a check mark when [selected] is true.
   ///
@@ -1401,7 +1368,7 @@ class _RawChipState extends State<RawChip> with TickerProviderStateMixin<RawChip
     final TextDirection textDirection = Directionality.of(context);
     final ShapeBorder shape = widget.shape ?? chipTheme.shape;
 
-    Widget result = new Material(
+    return new Material(
       elevation: isTapping ? _kPressElevation : 0.0,
       animationDuration: pressedAnimationDuration,
       shape: shape,
@@ -1461,68 +1428,6 @@ class _RawChipState extends State<RawChip> with TickerProviderStateMixin<RawChip
         ),
       ),
     );
-    BoxConstraints constraints;
-    switch (widget.materialTapTargetSize ?? theme.materialTapTargetSize) {
-      case MaterialTapTargetSize.padded:
-        constraints = const BoxConstraints(minHeight: 48.0);
-        break;
-      case MaterialTapTargetSize.shrinkWrap:
-        constraints = const BoxConstraints();
-        break;
-    }
-    result = _ChipRedirectingHitDetectionWidget(
-      constraints: constraints,
-      child: new Center(
-        child: result,
-        widthFactor: 1.0,
-        heightFactor: 1.0,
-      ),
-    );
-    return new Semantics(
-      container: true,
-      selected: widget.selected,
-      enabled: canTap ? widget.isEnabled : null,
-      child: result,
-    );
-  }
-}
-
-/// Redirects the [position.dy] passed to [RenderBox.hitTest] to the vertical
-/// center of the widget.
-///
-/// The primary purpose of this widget is to allow padding around the [RawChip]
-/// to trigger the child ink feature without increasing the size of the material.
-class _ChipRedirectingHitDetectionWidget extends SingleChildRenderObjectWidget {
-  const _ChipRedirectingHitDetectionWidget({
-    Key key,
-    Widget child,
-    this.constraints,
-  }) : super(key: key, child: child);
-
-  final BoxConstraints constraints;
-
-  @override
-  RenderObject createRenderObject(BuildContext context) {
-    return new _RenderChipRedirectingHitDetection(constraints);
-  }
-
-  @override
-  void updateRenderObject(BuildContext context, covariant _RenderChipRedirectingHitDetection renderObject) {
-    renderObject.additionalConstraints = constraints;
-  }
-}
-
-class _RenderChipRedirectingHitDetection extends RenderConstrainedBox {
-  _RenderChipRedirectingHitDetection(BoxConstraints additionalConstraints) : super(additionalConstraints: additionalConstraints);
-
-  @override
-  bool hitTest(HitTestResult result, {Offset position}) {
-    if (!size.contains(position))
-      return false;
-    // Only redirects hit detection which occurs above and below the render object.
-    // In order to make this assumption true, I have removed the minimum width
-    // constraints, since any reasonable chip would be at least that wide.
-    return child.hitTest(result, position: new Offset(position.dx, size.height / 2));
   }
 }
 
@@ -2028,28 +1933,6 @@ class _RenderChip extends RenderBox {
   }
 
   @override
-  bool hitTest(HitTestResult result, {Offset position}) {
-    if (!size.contains(position))
-      return false;
-    RenderBox hitTestChild;
-    switch (textDirection) {
-      case TextDirection.ltr:
-        if (position.dx / size.width > 0.66)
-          hitTestChild = deleteIcon ?? label ?? avatar;
-        else
-          hitTestChild = label ?? avatar;
-        break;
-      case TextDirection.rtl:
-        if (position.dx / size.width < 0.33)
-          hitTestChild = deleteIcon ?? label ?? avatar;
-        else
-          hitTestChild = label ?? avatar;
-        break;
-    }
-    return hitTestChild?.hitTest(result, position: hitTestChild.size.center(Offset.zero)) ?? false;
-  }
-
-  @override
   void performLayout() {
     final BoxConstraints contentConstraints = constraints.loosen();
     // Find out the height of the label within the constraints.
@@ -2367,4 +2250,20 @@ class _RenderChip extends RenderBox {
 
   @override
   bool hitTestSelf(Offset position) => deleteButtonRect.contains(position) || pressRect.contains(position);
+
+  @override
+  bool hitTestChildren(HitTestResult result, {@required Offset position}) {
+    assert(position != null);
+    if (deleteIcon != null && deleteButtonRect.contains(position)) {
+      // This simulates a position at the center of the delete icon if the hit
+      // on the chip is inside of the delete area.
+      return deleteIcon.hitTest(result, position: (Offset.zero & _boxSize(deleteIcon)).center);
+    }
+    for (RenderBox child in _children) {
+      if (child.hasSize && child.hitTest(result, position: position - _boxParentData(child).offset)) {
+        return true;
+      }
+    }
+    return false;
+  }
 }

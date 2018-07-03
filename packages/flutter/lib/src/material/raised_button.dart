@@ -10,7 +10,6 @@ import 'button_theme.dart';
 import 'colors.dart';
 import 'constants.dart';
 import 'theme.dart';
-import 'theme_data.dart';
 
 /// A material design "raised button".
 ///
@@ -63,7 +62,6 @@ class RaisedButton extends StatelessWidget {
     this.disabledElevation = 0.0,
     this.padding,
     this.shape,
-    this.materialTapTargetSize,
     this.animationDuration = kThemeChangeDuration,
     this.child,
   }) : assert(elevation != null),
@@ -96,7 +94,6 @@ class RaisedButton extends StatelessWidget {
     this.highlightElevation = 8.0,
     this.disabledElevation = 0.0,
     this.shape,
-    this.materialTapTargetSize,
     this.animationDuration = kThemeChangeDuration,
     @required Widget icon,
     @required Widget label,
@@ -292,15 +289,6 @@ class RaisedButton extends StatelessWidget {
   /// The default value is [kThemeChangeDuration].
   final Duration animationDuration;
 
-  /// Configures the minimum size of the tap target.
-  ///
-  /// Defaults to [ThemeData.materialTapTargetSize].
-  ///
-  /// See also:
-  ///
-  ///   * [MaterialTapTargetSize], for a description of how this affects tap targets.
-  final MaterialTapTargetSize materialTapTargetSize;
-
   Brightness _getBrightness(ThemeData theme) {
     return colorBrightness ?? theme.brightness;
   }
@@ -392,7 +380,6 @@ class RaisedButton extends StatelessWidget {
       shape: shape ?? buttonTheme.shape,
       animationDuration: animationDuration,
       child: child,
-      materialTapTargetSize: materialTapTargetSize ?? theme.materialTapTargetSize,
     );
   }
 

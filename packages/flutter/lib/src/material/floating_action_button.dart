@@ -8,7 +8,6 @@ import 'package:flutter/widgets.dart';
 import 'button.dart';
 import 'scaffold.dart';
 import 'theme.dart';
-import 'theme_data.dart';
 import 'tooltip.dart';
 
 const BoxConstraints _kSizeConstraints = const BoxConstraints.tightFor(
@@ -68,7 +67,6 @@ class FloatingActionButton extends StatefulWidget {
     @required this.onPressed,
     this.mini = false,
     this.shape = const CircleBorder(),
-    this.materialTapTargetSize,
     this.isExtended = false,
   }) :  assert(elevation != null),
         assert(highlightElevation != null),
@@ -94,7 +92,6 @@ class FloatingActionButton extends StatefulWidget {
     @required this.onPressed,
     this.shape = const StadiumBorder(),
     this.isExtended = true,
-    this.materialTapTargetSize,
     @required Widget icon,
     @required Widget label,
   }) :  assert(elevation != null),
@@ -199,15 +196,6 @@ class FloatingActionButton extends StatefulWidget {
   /// floating action buttons are scaled and faded in.
   final bool isExtended;
 
-  /// Configures the minimum size of the tap target.
-  ///
-  /// Defaults to [ThemeData.materialTapTargetSize].
-  ///
-  /// See also:
-  ///
-  ///   * [MaterialTapTargetSize], for a description of how this affects tap targets.
-  final MaterialTapTargetSize materialTapTargetSize;
-
   final BoxConstraints _sizeConstraints;
 
   @override
@@ -253,7 +241,7 @@ class _FloatingActionButtonState extends State<FloatingActionButton> {
       onHighlightChanged: _handleHighlightChanged,
       elevation: _highlight ? widget.highlightElevation : widget.elevation,
       constraints: widget._sizeConstraints,
-      materialTapTargetSize: widget.materialTapTargetSize ?? theme.materialTapTargetSize,
+      outerPadding: widget.mini ? const EdgeInsets.all(4.0) : null,
       fillColor: widget.backgroundColor ?? theme.accentColor,
       textStyle: theme.accentTextTheme.button.copyWith(
         color: foregroundColor,
