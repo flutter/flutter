@@ -112,4 +112,16 @@ void main() {
     expect(box, paints..circle(x: 44.0, y: 0.0, color: splashColor));
     await gesture.up();
   });
+
+  testWidgets('is hitTestable', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      new RawMaterialButton(
+        materialTapTargetSize: MaterialTapTargetSize.padded,
+        onPressed: () {},
+        child: const SizedBox(),
+      )
+    );
+
+    expect(find.byType(RawMaterialButton).hitTestable(at: Alignment.center), findsOneWidget);
+  });
 }
