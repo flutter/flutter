@@ -511,9 +511,9 @@ class DevFS {
               packagesFilePath : _packagesFilePath);
       final String compiledBinary = compilerOutput?.outputFilename;
       if (compiledBinary != null && compiledBinary.isNotEmpty) {
-        final String entryUri = projectRootPath != null ?
+        final Uri entryUri = fs.path.toUri(projectRootPath != null ?
             fs.path.relative(pathToReload, from: projectRootPath):
-            pathToReload;
+            pathToReload);
         if (!dirtyEntries.containsKey(entryUri)) {
           final DevFSFileContent content = new DevFSFileContent(fs.file(compiledBinary));
           dirtyEntries[entryUri] = content;
