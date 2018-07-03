@@ -96,7 +96,7 @@ class SimControl {
 
     for (String deviceCategory in devicesSection.keys) {
       final List<dynamic> devicesData = devicesSection[deviceCategory];
-      for (Map<String, dynamic> data in devicesData.map(castStringKeyedMap)) {
+      for (Map<String, dynamic> data in devicesData.map<Map<String, dynamic>>(castStringKeyedMap)) {
         devices.add(new SimDevice(deviceCategory, data));
       }
     }

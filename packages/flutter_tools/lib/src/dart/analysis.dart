@@ -139,8 +139,8 @@ class AnalysisServer {
     final String file = issueInfo['file'];
     final List<dynamic> errorsList = issueInfo['errors'];
     final List<AnalysisError> errors = errorsList
-        .map(castStringKeyedMap)
-        .map((Map<String, dynamic> json) => new AnalysisError(json))
+        .map<Map<String, dynamic>>(castStringKeyedMap)
+        .map<AnalysisError>((Map<String, dynamic> json) => new AnalysisError(json))
         .toList();
     if (!_errorsController.isClosed)
       _errorsController.add(new FileAnalysisErrors(file, errors));

@@ -276,7 +276,7 @@ final Map<String, dynamic> _materialFontsManifest = _readMaterialFontsManifest()
 
 List<Map<String, dynamic>> _getMaterialFonts(String fontSet) {
   final List<dynamic> fontsList = _materialFontsManifest[fontSet];
-  return fontsList?.map(castStringKeyedMap)?.toList();
+  return fontsList?.map<Map<String, dynamic>>(castStringKeyedMap)?.toList();
 }
 
 List<_Asset> _getMaterialAssets(String fontSet) {

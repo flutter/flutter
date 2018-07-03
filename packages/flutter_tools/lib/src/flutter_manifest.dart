@@ -121,7 +121,7 @@ class FlutterManifest {
     final List<dynamic> fontList = _flutterDescriptor['fonts'];
     return fontList == null
         ? const <Map<String, dynamic>>[]
-        : fontList.map(castStringKeyedMap).toList();
+        : fontList.map<Map<String, dynamic>>(castStringKeyedMap).toList();
   }
 
   List<Uri> get assets {
@@ -129,7 +129,11 @@ class FlutterManifest {
     if (assets == null) {
       return const <Uri>[];
     }
-    return assets.cast<String>().map(Uri.encodeFull)?.map(Uri.parse)?.toList();
+    return assets
+        .cast<String>()
+        .map<String>(Uri.encodeFull)
+        ?.map<Uri>(Uri.parse)
+        ?.toList();
   }
 
   List<Font> _fonts;
