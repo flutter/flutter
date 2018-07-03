@@ -5,8 +5,6 @@
 package io.flutter.util;
 
 import android.content.Context;
-import java.io.IOException;
-import java.lang.String;
 
 public final class PathUtils {
     public static String getDataDirectory(Context applicationContext) {

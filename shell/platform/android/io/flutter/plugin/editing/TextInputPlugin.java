@@ -4,7 +4,6 @@
 
 package io.flutter.plugin.editing;
 
-import android.app.Activity;
 import android.content.Context;
 import android.text.Editable;
 import android.text.InputType;
@@ -13,16 +12,12 @@ import android.view.inputmethod.BaseInputConnection;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputConnection;
 import android.view.inputmethod.InputMethodManager;
-
+import io.flutter.plugin.common.JSONMethodCodec;
+import io.flutter.plugin.common.MethodCall;
 import io.flutter.plugin.common.MethodChannel;
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler;
 import io.flutter.plugin.common.MethodChannel.Result;
-import io.flutter.plugin.common.JSONMethodCodec;
-import io.flutter.plugin.common.JSONUtil;
-import io.flutter.plugin.common.MethodCall;
 import io.flutter.view.FlutterView;
-
-import java.util.Map;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;

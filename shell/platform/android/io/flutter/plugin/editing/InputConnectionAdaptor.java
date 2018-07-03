@@ -7,17 +7,15 @@ package io.flutter.plugin.editing;
 import android.content.Context;
 import android.text.Editable;
 import android.text.Selection;
+import android.view.KeyEvent;
 import android.view.inputmethod.BaseInputConnection;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
-import android.view.KeyEvent;
-
 import io.flutter.plugin.common.MethodChannel;
 import io.flutter.view.FlutterView;
 
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.Map;
 
 class InputConnectionAdaptor extends BaseInputConnection {
     private final FlutterView mFlutterView;
