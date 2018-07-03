@@ -80,6 +80,7 @@ flutter:
   uses-material-design: true
   assets:
     - lib/gallery/example_code.dart
+    - assets/
     - packages/flutter_gallery_assets/people/ali_landscape.png
     - packages/flutter_gallery_assets/logos/flutter_white/logo.png
     - packages/flutter_gallery_assets/videos/bee.mp4
