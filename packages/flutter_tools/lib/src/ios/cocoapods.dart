@@ -182,7 +182,7 @@ class CocoaPods {
   void _addPodsDependencyToFlutterXcconfig(IosProject iosProject, String mode) {
     final File file = iosProject.xcodeConfigFor(mode);
     if (file.existsSync()) {
-      final String content = iosProject.xcodeConfigFor(mode).readAsStringSync();
+      final String content = file.readAsStringSync();
       final String include = '#include "Pods/Target Support Files/Pods-Runner/Pods-Runner.${mode
           .toLowerCase()}.xcconfig"';
       if (!content.contains(include))
@@ -210,7 +210,7 @@ class CocoaPods {
 
     final File podfileFile = iosProject.podfile;
     final File podfileLockFile = iosProject.podfileLock;
-    final File manifestLockFile =iosProject.podManifestLock;
+    final File manifestLockFile = iosProject.podManifestLock;
 
     return !podfileLockFile.existsSync()
         || !manifestLockFile.existsSync()

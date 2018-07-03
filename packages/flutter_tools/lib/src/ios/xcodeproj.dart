@@ -33,7 +33,7 @@ String flutterFrameworkDir(BuildMode mode) {
 /// already exist.
 Future<void> generateXcodeProperties({FlutterProject project}) async {
   if ((await project.manifest).isModule ||
-      project.directory.childDirectory('ios').existsSync()) {
+      project.ios.directory.existsSync()) {
     if (!Cache.instance.fileOlderThanToolsStamp(await project.generatedXcodePropertiesFile)) {
       return;
     }

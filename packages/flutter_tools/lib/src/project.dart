@@ -68,7 +68,7 @@ class FlutterProject {
   IosModuleProject get iosModule => new IosModuleProject(directory.childDirectory('.ios'));
 
   Future<File> get androidLocalPropertiesFile {
-    return _androidLocalPropertiesFile ??= manifest.then((FlutterManifest manifest) {
+    return _androidLocalPropertiesFile ??= manifest.then<File>((FlutterManifest manifest) {
       return directory.childDirectory(manifest.isModule ? '.android' : 'android')
           .childFile('local.properties');
     });
@@ -76,7 +76,7 @@ class FlutterProject {
   Future<File> _androidLocalPropertiesFile;
 
   Future<File> get generatedXcodePropertiesFile {
-    return _generatedXcodeProperties ??= manifest.then((FlutterManifest manifest) {
+    return _generatedXcodeProperties ??= manifest.then<File>((FlutterManifest manifest) {
       return directory.childDirectory(manifest.isModule ? '.ios' : 'ios')
           .childDirectory('Flutter')
           .childFile('Generated.xcconfig');
@@ -84,13 +84,13 @@ class FlutterProject {
   }
   Future<File> _generatedXcodeProperties;
 
-  File get flutterPluginsDotFile {
-    return _flutterPluginsDotFile ??= directory.childFile('.flutter-plugins');
+  File get flutterPluginsFile {
+    return _flutterPluginsFile ??= directory.childFile('.flutter-plugins');
   }
-  File _flutterPluginsDotFile;
+  File _flutterPluginsFile;
 
-  Future<Directory> get androidPluginRegistrantDirectory async {
-    return _androidPluginRegistrantDirectory ??= manifest.then((FlutterManifest manifest) {
+  Future<Directory> get androidPluginRegistrantHost async {
+    return _androidPluginRegistrantHost ??= manifest.then((FlutterManifest manifest) {
       if (manifest.isModule) {
         return directory.childDirectory('.android').childDirectory('Flutter');
       } else {
@@ -98,10 +98,10 @@ class FlutterProject {
       }
     });
   }
-  Future<Directory> _androidPluginRegistrantDirectory;
+  Future<Directory> _androidPluginRegistrantHost;
 
-  Future<Directory> get iosPluginRegistrantDirectory async {
-    return _iosPluginRegistrantDirectory ??= manifest.then((FlutterManifest manifest) {
+  Future<Directory> get iosPluginRegistrantHost async {
+    return _iosPluginRegistrantHost ??= manifest.then((FlutterManifest manifest) {
       if (manifest.isModule) {
         // In a module create the GeneratedPluginRegistrant as a pod to be included
         // from a hosting app.
@@ -116,7 +116,7 @@ class FlutterProject {
       }
     });
   }
-  Future<Directory> _iosPluginRegistrantDirectory;
+  Future<Directory> _iosPluginRegistrantHost;
 
   /// Returns true if this project has an example application
   bool get hasExampleApp => _exampleDirectory.childFile('pubspec.yaml').existsSync();
@@ -141,7 +141,7 @@ class FlutterProject {
       await iosModule.ensureReadyForPlatformSpecificTooling();
     }
     await xcode.generateXcodeProperties(project: this);
-    await injectPlugins(project: this);
+    await injectPlugins(this);
   }
 }
 

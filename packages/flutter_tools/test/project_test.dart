@@ -17,7 +17,8 @@ void main() {
       final Directory directory = fs.directory('myproject');
       expect(
         new FlutterProject(directory).directory.absolute.path,
-        directory.absolute.path,);
+        directory.absolute.path,
+      );
       expect(
         new FlutterProject.fromPath(directory.path).directory.absolute.path,
         directory.absolute.path,
