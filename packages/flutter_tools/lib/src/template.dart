@@ -105,6 +105,7 @@ class Template {
         finalDestinationPath = finalDestinationPath.replaceAll('pluginClass', pluginClass);
       return finalDestinationPath;
     }
+
     _templateFilePaths.forEach((String relativeDestinationPath, String absoluteSourcePath) {
       final String finalDestinationPath = renderPath(relativeDestinationPath);
       if (finalDestinationPath == null)
@@ -129,6 +130,7 @@ class Template {
         if (printStatusWhenWriting)
           printStatus('  $relativePathForLogging (created)');
       }
+
       fileCount++;
 
       finalDestinationFile.createSync(recursive: true);
@@ -145,6 +147,7 @@ class Template {
 
       // Step 3: If the absolute path ends with a '.tmpl', this file needs
       //         rendering via mustache.
+
       if (sourceFile.path.endsWith(templateExtension)) {
         final String templateContents = sourceFile.readAsStringSync();
         final String renderedContents = new mustache.Template(templateContents).renderString(context);
