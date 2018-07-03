@@ -152,7 +152,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   void initInstances() {
     timeDilation = 1.0; // just in case the developer has artificially changed it for development
     HttpOverrides.global = new _MockHttpOverrides();
-    _testTextInput = new TestTextInput()..register();
+    _testTextInput = new TestTextInput(onCleared: _resetFocusedEditable)..register();
     super.initInstances();
   }
 
@@ -280,10 +280,20 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   /// The current client of the onscreen keyboard. Callers must pump
   /// an additional frame after setting this property to complete the
   /// the focus change.
+  ///
+  /// Instead of setting this directly, consider using
+  /// [WidgetTester.showKeyboard].
   EditableTextState get focusedEditable => _focusedEditable;
   EditableTextState _focusedEditable;
   set focusedEditable(EditableTextState value) {
-    _focusedEditable = value..requestKeyboard();
+    if (_focusedEditable != value) {
+      _focusedEditable = value;
+      value?.requestKeyboard();
+    }
+  }
+
+  void _resetFocusedEditable() {
+    _focusedEditable = null;
   }
 
   /// Returns the exception most recently caught by the Flutter framework.

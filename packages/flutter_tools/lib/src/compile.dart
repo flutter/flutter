@@ -84,6 +84,7 @@ class KernelCompiler {
     String packagesPath,
     List<String> fileSystemRoots,
     String fileSystemScheme,
+    bool targetProductVm = false,
   }) async {
     final String frontendServer = artifacts.getArtifactPath(
       Artifact.frontendServerSnapshotForEngineDartSdk
@@ -133,6 +134,9 @@ class KernelCompiler {
     if (aot) {
       command.add('--aot');
       command.add('--tfa');
+    }
+    if (targetProductVm) {
+      command.add('-Ddart.vm.product=true');
     }
     if (entryPointsJsonFiles != null) {
       for (String entryPointsJson in entryPointsJsonFiles) {
@@ -336,6 +340,7 @@ class ResidentCompiler {
       '--incremental',
       '--strong',
       '--target=flutter',
+      '--initialize-from-dill=foo' // TODO(aam): remove once dartbug.com/33087 fixed
     ];
     if (outputPath != null) {
       command.addAll(<String>['--output-dill', outputPath]);

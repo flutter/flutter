@@ -71,6 +71,8 @@ List<IOSEmulator> getEmulators() {
 }
 
 String getSimulatorPath() {
+  if (xcode.xcodeSelectPath == null)
+    return null;
   final List<String> searchPaths = <String>[
     fs.path.join(xcode.xcodeSelectPath, 'Applications', 'Simulator.app'),
   ];
