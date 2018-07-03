@@ -61,5 +61,12 @@ echo "SDK directory is: $PWD"
 
 ./bin/flutter --version
 
+
+git rev-parse --abbrev-ref --symbolic @{u}
+git rev-parse --abbrev-ref HEAD
+git ls-remote --get-url origin
+git log -n 1 --pretty=format:%H
+git log -n 1 --pretty=format:%ar
+
 # run pub get in all the repo packages
 ./bin/flutter update-packages
