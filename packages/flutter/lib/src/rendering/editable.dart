@@ -392,7 +392,7 @@ class RenderEditable extends RenderBox {
     if (_cursorWidth == value)
       return;
     _cursorWidth = value;
-    markNeedsLayout();
+    markNeedsPaint();
   }
 
   /// How rounded the corners of the cursor should be.
@@ -402,7 +402,7 @@ class RenderEditable extends RenderBox {
     if (_cursorRadius == value)
       return;
     _cursorRadius = value;
-    markNeedsLayout();
+    markNeedsPaint();
   }
 
   @override
