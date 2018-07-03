@@ -68,6 +68,7 @@ git ls-remote --get-url origin
 git log -n 1 --pretty=format:%H
 git log -n 1 --pretty=format:%ar
 git describe --match v*.*.* --first-parent --long --tags
+git tag
 
 # run pub get in all the repo packages
 ./bin/flutter update-packages
