@@ -307,14 +307,17 @@ To edit platform code in an IDE see https://flutter.io/developing-packages/#edit
     int generatedCount = 0;
     generatedCount += _renderTemplate('create', projectPath, templateContext);
     generatedCount += _injectGradleWrapper(projectPath);
+
     if (argResults['with-driver-test']) {
       final String testPath = fs.path.join(projectPath, 'test_driver');
       generatedCount += _renderTemplate('driver', testPath, templateContext);
     }
+
     if (argResults['pub']) {
       await pubGet(context: PubContext.create, directory: projectPath, offline: argResults['offline']);
       await new FlutterProject.fromPath(projectPath).ensureReadyForPlatformSpecificTooling();
     }
+    
     if (android_sdk.androidSdk != null)
       await gradle.updateLocalProperties(projectPath: projectPath);
 
