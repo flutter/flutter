@@ -7,6 +7,7 @@ import 'dart:async';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/resident_runner.dart';
 import 'package:flutter_tools/src/run_hot.dart';
+import 'package:meta/meta.dart';
 import 'package:mockito/mockito.dart';
 import 'package:test/test.dart';
 
@@ -106,14 +107,14 @@ void main() {
       expect((await new HotRunner(devices).restart(fullRestart: true)).isOk,
           true);
     }, overrides: <Type, Generator>{
-      HotRunnerConfig: () => new TestHotRunnerConfig(true),
+      HotRunnerConfig: () => new TestHotRunnerConfig(successfulSetup: true),
     });
 
     testUsingContext('setup function fails', () async {
       expect((await new HotRunner(devices).restart(fullRestart: true)).isOk,
           false);
     }, overrides: <Type, Generator>{
-      HotRunnerConfig: () => new TestHotRunnerConfig(false),
+      HotRunnerConfig: () => new TestHotRunnerConfig(successfulSetup: false),
     });
   });
 }
@@ -125,12 +126,12 @@ class MockDevice extends Mock implements Device {
 }
 
 class TestHotRunnerConfig extends HotRunnerConfig {
-  bool _successfulSetup;
+  bool successfulSetup;
 
-  TestHotRunnerConfig(this._successfulSetup);
+  TestHotRunnerConfig({@required this.successfulSetup});
 
   @override
   Future<bool> setupHotRestart() async {
-    return _successfulSetup;
+    return successfulSetup;
   }
 }
