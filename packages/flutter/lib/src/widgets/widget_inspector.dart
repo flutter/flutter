@@ -24,9 +24,9 @@ import 'icon_data.dart';
 
 /// Signature for the builder callback used by
 /// [WidgetInspector.selectButtonBuilder].
-typedef InspectorSelectButtonBuilder = Widget Function(BuildContext context, VoidCallback onPressed);
+typedef Widget InspectorSelectButtonBuilder(BuildContext context, VoidCallback onPressed);
 
-typedef _RegisterServiceExtensionCallback = void Function({
+typedef void _RegisterServiceExtensionCallback({
   @required String name,
   @required ServiceExtensionCallback callback
 });
@@ -93,7 +93,7 @@ List<_DiagnosticsPathNode> _followDiagnosticableChain(List<Diagnosticable> chain
 
 /// Signature for the selection change callback used by
 /// [WidgetInspectorService.selectionChangedCallback].
-typedef InspectorSelectionChangedCallback = void Function();
+typedef void InspectorSelectionChangedCallback();
 
 /// Structure to help reference count Dart objects referenced by a GUI tool
 /// using [WidgetInspectorService].
@@ -1703,6 +1703,9 @@ class _InspectorOverlayLayer extends Layer {
     _textPainter.paint(canvas, tipOffset + const Offset(_kTooltipPadding, _kTooltipPadding));
     canvas.restore();
   }
+
+  @override
+  S find<S>(Offset regionOffset) => null;
 }
 
 const double _kScreenEdgeMargin = 10.0;

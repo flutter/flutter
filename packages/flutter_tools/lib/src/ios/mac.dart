@@ -20,6 +20,7 @@ import '../base/process.dart';
 import '../base/process_manager.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
+import '../flutter_manifest.dart';
 import '../globals.dart';
 import '../plugins.dart';
 import '../services.dart';
@@ -242,10 +243,15 @@ Future<XcodeBuildResult> buildXcodeProject({
   final Directory appDirectory = fs.directory(app.appDirectory);
   await _addServicesToBundle(appDirectory);
 
-  await updateGeneratedXcodeProperties(
+  final FlutterManifest manifest = await FlutterManifest.createFromPath(
+    fs.currentDirectory.childFile('pubspec.yaml').path,
+  );
+  updateGeneratedXcodeProperties(
     projectPath: fs.currentDirectory.path,
     buildInfo: buildInfo,
     targetOverride: targetOverride,
+    previewDart2: buildInfo.previewDart2,
+    manifest: manifest,
   );
 
   if (hasPlugins()) {
@@ -427,7 +433,7 @@ Future<XcodeBuildResult> buildXcodeProject({
       outputDir = expectedOutputDirectory.replaceFirst('/$configuration-', '/');
       if (fs.isDirectorySync(outputDir)) {
         // Previous output directory might have incompatible artifacts
-        // (for example, kernel binary files produced from previous run).
+        // (for example, kernel binary files produced from previous `--preview-dart-2` run).
         fs.directory(outputDir).deleteSync(recursive: true);
       }
       copyDirectorySync(fs.directory(expectedOutputDirectory), fs.directory(outputDir));

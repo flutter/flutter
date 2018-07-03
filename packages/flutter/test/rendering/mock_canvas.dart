@@ -48,6 +48,11 @@ Matcher get paintsNothing => new _TestRecordingCanvasPaintsNothingMatcher();
 /// Matches objects or functions that assert when they try to paint.
 Matcher get paintsAssertion => new _TestRecordingCanvasPaintsAssertionMatcher();
 
+/// Matches objects or functions that draw `methodName` exactly `count` number of times
+Matcher paintsExactlyCountTimes(Symbol methodName, int count) {
+  return new _TestRecordingCanvasPaintsCountMatcher(methodName, count);
+}
+
 /// Signature for the [PaintPattern.something] and [PaintPattern.everything]
 /// predicate argument.
 ///
@@ -59,13 +64,13 @@ Matcher get paintsAssertion => new _TestRecordingCanvasPaintsAssertionMatcher();
 /// ```dart
 /// if (methodName == #drawCircle) { ... }
 /// ```
-typedef PaintPatternPredicate = bool Function(Symbol methodName, List<dynamic> arguments);
+typedef bool PaintPatternPredicate(Symbol methodName, List<dynamic> arguments);
 
 /// The signature of [RenderObject.paint] functions.
-typedef _ContextPainterFunction = void Function(PaintingContext context, Offset offset);
+typedef void _ContextPainterFunction(PaintingContext context, Offset offset);
 
 /// The signature of functions that paint directly on a canvas.
-typedef _CanvasPainterFunction = void Function(Canvas canvas);
+typedef void _CanvasPainterFunction(Canvas canvas);
 
 /// Builder interface for patterns used to match display lists (canvas calls).
 ///
@@ -549,6 +554,34 @@ abstract class _TestRecordingCanvasMatcher extends Matcher {
     bool verbose,
   ) {
     return description.add(matchState[this]);
+  }
+}
+
+class _TestRecordingCanvasPaintsCountMatcher extends _TestRecordingCanvasMatcher {
+  final Symbol _methodName;
+  final int _count;
+
+  _TestRecordingCanvasPaintsCountMatcher(Symbol methodName, int count)
+      : _methodName = methodName, _count = count;
+
+  @override
+  Description describe(Description description) {
+    return description.add('Object or closure painting $_methodName exactly $_count times');
+  }
+
+  @override
+  bool _evaluatePredicates(Iterable<RecordedInvocation> calls,
+      StringBuffer description) {
+    int count = 0;
+    for(RecordedInvocation call in calls) {
+      if (call.invocation.isMethod && call.invocation.memberName == _methodName) {
+        count++;
+      }
+    }
+    if (count != _count) {
+      description.write('It painted $_methodName $count times instead of $_count times.');
+    }
+    return count == _count;
   }
 }
 

@@ -37,7 +37,7 @@ void main() {
       new Center(
         child: new NotificationListener<LayoutChangedNotification>(
           onNotification: (LayoutChangedNotification notification) {
-            expect(notification, const isInstanceOf<SizeChangedLayoutNotification>());
+            expect(notification, isInstanceOf<SizeChangedLayoutNotification>());
             notified = true;
             return true;
           },

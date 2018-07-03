@@ -77,7 +77,7 @@ export 'dart:io'
         WebSocketTransformer;
 
 /// Exits the process with the given [exitCode].
-typedef ExitFunction = void Function(int exitCode);
+typedef void ExitFunction(int exitCode);
 
 const ExitFunction _defaultExitFunction = io.exit;
 

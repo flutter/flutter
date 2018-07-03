@@ -2,10 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter_test/flutter_test.dart' hide TypeMatcher;
+import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/widgets.dart';
 
-typedef TestCallback = void Function(BuildContext context);
+typedef void TestCallback(BuildContext context);
 
 class TestWidget extends StatefulWidget {
   const TestWidget(this.callback);

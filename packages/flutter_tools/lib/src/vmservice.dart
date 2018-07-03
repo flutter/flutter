@@ -21,7 +21,7 @@ import 'globals.dart';
 import 'vmservice_record_replay.dart';
 
 /// A function that opens a two-way communication channel to the specified [uri].
-typedef _OpenChannel = Future<StreamChannel<String>> Function(Uri uri);
+typedef Future<StreamChannel<String>> _OpenChannel(Uri uri);
 
 _OpenChannel _openChannel = _defaultOpenChannel;
 
@@ -36,13 +36,13 @@ _OpenChannel _openChannel = _defaultOpenChannel;
 /// hot mode.
 ///
 /// See: https://github.com/dart-lang/sdk/issues/30023
-typedef ReloadSources = Future<Null> Function(
+typedef Future<Null> ReloadSources(
   String isolateId, {
   bool force,
   bool pause,
 });
 
-typedef CompileExpression = Future<String> Function(
+typedef Future<String> CompileExpression(
   String isolateId,
   String expression,
   List<String> definitions,
@@ -163,7 +163,7 @@ class VMService {
         final List<String> definitions = params['definitions'].asList;
         final List<String> typeDefinitions = params['typeDefinitions'].asList;
         final String libraryUri = params['libraryUri'].asString;
-        final String klass = params['klass'] != null ? params['klass'].asString : null;
+        final String klass = params['klass'].exists ? params['klass'].asString : null;
         final bool isStatic = params['isStatic'].asBoolOr(false);
 
         try {
@@ -953,7 +953,7 @@ class VM extends ServiceObjectOwner {
     if (!isFlutterEngine)
       return;
     _viewCache.clear();
-    for (Isolate isolate in isolates) {
+    for (Isolate isolate in isolates.toList()) {
       await vmService.vm.invokeRpc('_flutter.listViews',
           timeout: kLongRequestTimeout,
           params: <String, dynamic> {'isolateId': isolate.id});
@@ -1395,8 +1395,7 @@ class ServiceMap extends ServiceObject implements Map<String, dynamic> {
   Iterable<MapEntry<String, dynamic>> get entries => _map.entries;
   @override
   void updateAll(dynamic update(String key, dynamic value)) => _map.updateAll(update);
-  @override
-  Map<RK, RV> retype<RK, RV>() => _map.retype<RK, RV>();  // ignore: deprecated_member_use
+  Map<RK, RV> retype<RK, RV>() => _map.cast<RK, RV>(); // ignore: deprecated_member_use,annotate_overrides
   @override
   dynamic update(String key, dynamic update(dynamic value), {dynamic ifAbsent()}) => _map.update(key, update, ifAbsent: ifAbsent);
 }

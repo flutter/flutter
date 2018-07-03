@@ -21,10 +21,13 @@ import 'matchers.dart';
 import 'test_async_utils.dart';
 import 'test_text_input.dart';
 
-export 'package:test/test.dart' hide expect;
+export 'package:test/test.dart' hide
+  expect, // we have our own wrapper below
+  TypeMatcher, // matcher's TypeMatcher conflicts with the one in the Flutter framework
+  isInstanceOf; // we have our own wrapper in matchers.dart
 
 /// Signature for callback to [testWidgets] and [benchmarkWidgets].
-typedef WidgetTesterCallback = Future<Null> Function(WidgetTester widgetTester);
+typedef Future<Null> WidgetTesterCallback(WidgetTester widgetTester);
 
 /// Runs the [callback] inside the Flutter test environment.
 ///
@@ -555,6 +558,8 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
   /// Give the text input widget specified by [finder] the focus, as if the
   /// onscreen keyboard had appeared.
   ///
+  /// Implies a call to [pump].
+  ///
   /// The widget specified by [finder] must be an [EditableText] or have
   /// an [EditableText] descendant. For example `find.byType(TextField)`
   /// or `find.byType(TextFormField)`, or `find.byType(EditableText)`.
@@ -563,15 +568,15 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
   /// or [TextFormField] only need to call [enterText].
   Future<Null> showKeyboard(Finder finder) async {
     return TestAsyncUtils.guard(() async {
-      final EditableTextState editable = state(find.descendant(
-        of: finder,
-        matching: find.byType(EditableText),
-        matchRoot: true,
-      ));
-      if (editable != binding.focusedEditable) {
-        binding.focusedEditable = editable;
-        await pump();
-      }
+      final EditableTextState editable = state(
+        find.descendant(
+          of: finder,
+          matching: find.byType(EditableText),
+          matchRoot: true,
+        ),
+      );
+      binding.focusedEditable = editable;
+      await pump();
     });
   }
 
@@ -608,7 +613,7 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
   }
 }
 
-typedef _TickerDisposeCallback = void Function(_TestTicker ticker);
+typedef void _TickerDisposeCallback(_TestTicker ticker);
 
 class _TestTicker extends Ticker {
   _TestTicker(TickerCallback onTick, this._onDispose) : super(onTick);

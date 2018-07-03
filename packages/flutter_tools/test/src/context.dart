@@ -12,7 +12,6 @@ import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/os.dart';
-import 'package:flutter_tools/src/base/port_scanner.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/context_runner.dart';
 import 'package:flutter_tools/src/device.dart';
@@ -36,7 +35,7 @@ BufferLogger get testLogger => context[Logger];
 MockDeviceManager get testDeviceManager => context[DeviceManager];
 MockDoctor get testDoctor => context[Doctor];
 
-typedef ContextInitializer = void Function(AppContext testContext);
+typedef void ContextInitializer(AppContext testContext);
 
 @isTest
 void testUsingContext(String description, dynamic testMethod(), {
@@ -77,7 +76,6 @@ void testUsingContext(String description, dynamic testMethod(), {
           },
           Logger: () => new BufferLogger(),
           OperatingSystemUtils: () => new MockOperatingSystemUtils(),
-          PortScanner: () => new MockPortScanner(),
           SimControl: () => new MockSimControl(),
           Usage: () => new MockUsage(),
           XcodeProjectInterpreter: () => new MockXcodeProjectInterpreter(),
@@ -125,16 +123,6 @@ void _printBufferedErrors(AppContext testContext) {
       print(bufferLogger.errorText);
     bufferLogger.clear();
   }
-}
-
-class MockPortScanner extends PortScanner {
-  static int _nextAvailablePort = 12345;
-
-  @override
-  Future<bool> isPortAvailable(int port) async => true;
-
-  @override
-  Future<int> findAvailablePort() async => _nextAvailablePort++;
 }
 
 class MockDeviceManager implements DeviceManager {

@@ -227,6 +227,69 @@ void main() {
     expect(checkBoxValue, null);
   });
 
+  testWidgets('has semantics for tristate', (WidgetTester tester) async {
+    final SemanticsTester semantics = new SemanticsTester(tester);
+    await tester.pumpWidget(
+      new Material(
+        child: new Checkbox(
+          tristate: true,
+          value: null,
+          onChanged: (bool newValue) {},
+        ),
+      ),
+    );
+
+    expect(semantics.nodesWith(
+      flags: <SemanticsFlag>[
+        SemanticsFlag.hasCheckedState,
+        SemanticsFlag.hasEnabledState,
+        SemanticsFlag.isEnabled
+      ],
+      actions: <SemanticsAction>[SemanticsAction.tap],
+    ), hasLength(1));
+
+    await tester.pumpWidget(
+      new Material(
+        child: new Checkbox(
+          tristate: true,
+          value: true,
+          onChanged: (bool newValue) {},
+        ),
+      ),
+    );
+
+    expect(semantics.nodesWith(
+      flags: <SemanticsFlag>[
+        SemanticsFlag.hasCheckedState,
+        SemanticsFlag.hasEnabledState,
+        SemanticsFlag.isEnabled,
+        SemanticsFlag.isChecked,
+      ],
+      actions: <SemanticsAction>[SemanticsAction.tap],
+    ), hasLength(1));
+
+    await tester.pumpWidget(
+      new Material(
+        child: new Checkbox(
+          tristate: true,
+          value: false,
+          onChanged: (bool newValue) {},
+        ),
+      ),
+    );
+
+    expect(semantics.nodesWith(
+      flags: <SemanticsFlag>[
+        SemanticsFlag.hasCheckedState,
+        SemanticsFlag.hasEnabledState,
+        SemanticsFlag.isEnabled,
+      ],
+      actions: <SemanticsAction>[SemanticsAction.tap],
+    ), hasLength(1));
+
+    semantics.dispose();
+  });
+
   testWidgets('has semantic events', (WidgetTester tester) async {
     dynamic semanticEvent;
     bool checkboxValue = false;

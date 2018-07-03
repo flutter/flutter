@@ -6,6 +6,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 
+import '../rendering/mock_canvas.dart';
+
 import 'test_widgets.dart';
 
 void main() {
@@ -428,5 +430,91 @@ void main() {
 
     expect(position.viewportDimension, equals(600.0));
     expect(position.minScrollExtent, equals(0.0));
+  });
+
+  testWidgets('ListView should not paint hidden children', (WidgetTester tester) async {
+    const Text text = const Text('test');
+    await tester.pumpWidget(
+        new Directionality(
+            textDirection: TextDirection.ltr,
+            child: new Center(
+              child: new Container(
+                  height: 200.0,
+                  child: new ListView(
+                    cacheExtent: 500.0,
+                    controller: new ScrollController(initialScrollOffset: 300.0),
+                    children: <Widget>[
+                      new Container(height: 140.0, child: text),
+                      new Container(height: 160.0, child: text),
+                      new Container(height: 90.0, child: text),
+                      new Container(height: 110.0, child: text),
+                      new Container(height: 80.0, child: text),
+                      new Container(height: 70.0, child: text),
+                    ],
+                  )
+              ),
+            )
+        )
+    );
+
+    final RenderSliverList list = tester.renderObject(find.byType(SliverList));
+    expect(list, paintsExactlyCountTimes(#drawParagraph, 2));
+  });
+
+  testWidgets('ListView should paint with offset', (WidgetTester tester) async {
+    await tester.pumpWidget(
+        new MaterialApp(
+            home: new Scaffold(
+                body: new Container(
+                    height: 500.0,
+                    child: new CustomScrollView(
+                      controller: new ScrollController(initialScrollOffset: 120.0),
+                      slivers: <Widget>[
+                        const SliverAppBar(
+                          expandedHeight: 250.0,
+                        ),
+                        new SliverList(
+                            delegate: new ListView.builder(
+                                itemExtent: 100.0,
+                                itemCount: 100,
+                                itemBuilder: (_, __) => new Container(
+                                  height: 40.0,
+                                  child: const Text('hey'),
+                                )).childrenDelegate),
+                      ],
+                    )
+                )
+            )
+        )
+    );
+
+    final RenderObject renderObject = tester.renderObject(find.byType(Scrollable));
+    expect(renderObject, paintsExactlyCountTimes(#drawParagraph, 10));
+  });
+
+  testWidgets('ListView should paint with rtl', (WidgetTester tester) async {
+    await tester.pumpWidget(
+        new Directionality(
+          textDirection: TextDirection.rtl,
+          child: new Container(
+            height: 200.0,
+            child: new ListView.builder(
+              padding: const EdgeInsets.symmetric(
+                  horizontal: 0.0, vertical: 0.0),
+              scrollDirection: Axis.horizontal,
+              itemExtent: 200.0,
+              itemCount: 10,
+              itemBuilder: (_, int i) => new Container(
+                height: 200.0,
+                width: 200.0,
+                color: i % 2 == 0 ? Colors.black : Colors.red,
+              ),
+            ),
+          ),
+        )
+    );
+
+    final RenderObject renderObject = tester.renderObject(find.byType(Scrollable));
+    expect(renderObject, paintsExactlyCountTimes(#drawRect, 4));
   });
 }

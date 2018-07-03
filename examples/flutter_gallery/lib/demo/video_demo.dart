@@ -151,7 +151,8 @@ class _VideoPlayPauseState extends State<VideoPlayPause> {
 
   _VideoPlayPauseState() {
     listener = () {
-      setState(() {});
+      if (mounted)
+        setState(() {});
     };
   }
 
@@ -374,7 +375,8 @@ class _VideoDemoState extends State<VideoDemo>
       controller.play();
       await connectedCompleter.future;
       await controller.initialize();
-      setState(() {});
+      if (mounted)
+        setState(() {});
     }
 
     initController(butterflyController);

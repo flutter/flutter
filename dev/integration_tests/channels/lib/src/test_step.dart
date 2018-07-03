@@ -11,7 +11,7 @@ import 'pair.dart';
 
 enum TestStatus { ok, pending, failed, complete }
 
-typedef TestStep = Future<TestStepResult> Function();
+typedef Future<TestStepResult> TestStep();
 
 const String nothing = '-';
 

@@ -334,7 +334,7 @@ void main() {
 
       expect(
         expectAsync0(tester.pageBack),
-        throwsA(const isInstanceOf<TestFailure>()),
+        throwsA(isInstanceOf<TestFailure>()),
       );
     });
 
@@ -490,7 +490,7 @@ void main() {
     testWidgets('disallows re-entry', (WidgetTester tester) async {
       final Completer<void> completer = new Completer<void>();
       tester.runAsync<void>(() => completer.future);
-      expect(() => tester.runAsync(() async {}), throwsA(const isInstanceOf<TestFailure>()));
+      expect(() => tester.runAsync(() async {}), throwsA(isInstanceOf<TestFailure>()));
       completer.complete();
     });
 
@@ -505,6 +505,27 @@ void main() {
         key: 'abczed',
       });
     });
+  });
+
+  testWidgets('showKeyboard can be called twice', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      new MaterialApp(
+        home: new Material(
+          child: new Center(
+            child: new TextFormField(),
+          ),
+        ),
+      ),
+    );
+    await tester.showKeyboard(find.byType(TextField));
+    await tester.testTextInput.receiveAction(TextInputAction.done);
+    await tester.pump();
+    await tester.showKeyboard(find.byType(TextField));
+    await tester.testTextInput.receiveAction(TextInputAction.done);
+    await tester.pump();
+    await tester.showKeyboard(find.byType(TextField));
+    await tester.showKeyboard(find.byType(TextField));
+    await tester.pump();
   });
 }
 

@@ -467,7 +467,7 @@ void main() {
     );
     expect(
       const BorderDirectional(start: magenta3) + const BorderDirectional(start: yellow2),
-      isNot(const isInstanceOf<BorderDirectional>()), // see shape_border_test.dart for better tests of this case
+      isNot(isInstanceOf<BorderDirectional>()), // see shape_border_test.dart for better tests of this case
     );
     const BorderDirectional b3 = const BorderDirectional(top: magenta3);
     const BorderDirectional b6 = const BorderDirectional(top: magenta6);

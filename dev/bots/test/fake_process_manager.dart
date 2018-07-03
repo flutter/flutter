@@ -84,32 +84,32 @@ class FakeProcessManager extends Mock implements ProcessManager {
     // expected to be called.
     // TODO(gspencer): make this more general so that any call will be captured.
     when(start(
-      typed(captureAny),
-      environment: typed(captureAny, named: 'environment'),
-      workingDirectory: typed(captureAny, named: 'workingDirectory'),
+      any,
+      environment: anyNamed('environment'),
+      workingDirectory: anyNamed('workingDirectory'),
     )).thenAnswer(_nextProcess);
 
-    when(start(typed(captureAny))).thenAnswer(_nextProcess);
+    when(start(any)).thenAnswer(_nextProcess);
 
     when(run(
-      typed(captureAny),
-      environment: typed(captureAny, named: 'environment'),
-      workingDirectory: typed(captureAny, named: 'workingDirectory'),
+      any,
+      environment: anyNamed('environment'),
+      workingDirectory: anyNamed('workingDirectory'),
     )).thenAnswer(_nextResult);
 
-    when(run(typed(captureAny))).thenAnswer(_nextResult);
+    when(run(any)).thenAnswer(_nextResult);
 
     when(runSync(
-      typed(captureAny),
-      environment: typed(captureAny, named: 'environment'),
-      workingDirectory: typed(captureAny, named: 'workingDirectory')
+      any,
+      environment: anyNamed('environment'),
+      workingDirectory: anyNamed('workingDirectory')
     )).thenAnswer(_nextResultSync);
 
-    when(runSync(typed(captureAny))).thenAnswer(_nextResultSync);
+    when(runSync(any)).thenAnswer(_nextResultSync);
 
-    when(killPid(typed(captureAny), typed(captureAny))).thenReturn(true);
+    when(killPid(any, any)).thenReturn(true);
 
-    when(canRun(captureAny, workingDirectory: typed(captureAny, named: 'workingDirectory')))
+    when(canRun(any, workingDirectory: anyNamed('workingDirectory')))
         .thenReturn(true);
   }
 }
@@ -130,7 +130,7 @@ class FakeProcess extends Mock implements Process {
   final int desiredExitCode;
 
   void _setupMock() {
-    when(kill(typed(captureAny))).thenReturn(true);
+    when(kill(any)).thenReturn(true);
   }
 
   @override
@@ -150,7 +150,7 @@ class FakeProcess extends Mock implements Process {
 }
 
 /// Callback used to receive stdin input when it occurs.
-typedef StringReceivedCallback = void Function(String received);
+typedef void StringReceivedCallback(String received);
 
 /// A stream consumer class that consumes UTF8 strings as lists of ints.
 class StringStreamConsumer implements StreamConsumer<List<int>> {

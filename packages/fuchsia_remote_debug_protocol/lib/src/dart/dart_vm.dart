@@ -20,7 +20,7 @@ final Logger _log = new Logger('DartVm');
 
 /// Signature of an asynchronous function for astablishing a JSON RPC-2
 /// connection to a [Uri].
-typedef RpcPeerConnectionFunction = Future<json_rpc.Peer> Function(Uri uri);
+typedef Future<json_rpc.Peer> RpcPeerConnectionFunction(Uri uri);
 
 /// [DartVm] uses this function to connect to the Dart VM on Fuchsia.
 ///
@@ -58,7 +58,7 @@ Future<json_rpc.Peer> _waitAndConnect(Uri uri) async {
         await new Future<Null>.delayed(_kReconnectAttemptInterval);
         return attemptConnection(uri);
       } else {
-        _log.severe('Connection to Fuchsia\'s Dart VM timed out at '
+        _log.warning('Connection to Fuchsia\'s Dart VM timed out at '
             '${uri.toString()}');
         rethrow;
       }
@@ -122,9 +122,8 @@ class DartVm {
   Future<List<IsolateRef>> getMainIsolatesByPattern(Pattern pattern) async {
     final Map<String, dynamic> jsonVmRef =
         await invokeRpc('getVM', timeout: _kRpcTimeout);
-    final List<Map<String, dynamic>> jsonIsolates = jsonVmRef['isolates'];
     final List<IsolateRef> result = <IsolateRef>[];
-    for (Map<String, dynamic> jsonIsolate in jsonIsolates) {
+    for (Map<String, dynamic> jsonIsolate in jsonVmRef['isolates']) {
       final String name = jsonIsolate['name'];
       if (name.contains(pattern) && name.contains(new RegExp(r':main\(\)'))) {
         result.add(new IsolateRef._fromJson(jsonIsolate, this));
@@ -164,8 +163,7 @@ class DartVm {
     final List<FlutterView> views = <FlutterView>[];
     final Map<String, dynamic> rpcResponse =
         await invokeRpc('_flutter.listViews', timeout: _kRpcTimeout);
-    final List<Map<String, dynamic>> flutterViewsJson = rpcResponse['views'];
-    for (Map<String, dynamic> jsonView in flutterViewsJson) {
+    for (Map<String, dynamic> jsonView in rpcResponse['views']) {
       final FlutterView flutterView = new FlutterView._fromJson(jsonView);
       if (flutterView != null) {
         views.add(flutterView);

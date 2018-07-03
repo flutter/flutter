@@ -36,8 +36,8 @@ class IOSEmulator extends Emulator {
   String get label => null;
 
   @override
-  Future<bool> launch() async {
-    Future<bool> launchSimulator(List<String> additionalArgs) async {
+  Future<void> launch() async {
+    Future<void> launchSimulator(List<String> additionalArgs) async {
       final List<String> args = <String>['open']
           .followedBy(additionalArgs)
           .followedBy(<String>['-a', getSimulatorPath()]);
@@ -71,6 +71,8 @@ List<IOSEmulator> getEmulators() {
 }
 
 String getSimulatorPath() {
+  if (xcode.xcodeSelectPath == null)
+    return null;
   final List<String> searchPaths = <String>[
     fs.path.join(xcode.xcodeSelectPath, 'Applications', 'Simulator.app'),
   ];

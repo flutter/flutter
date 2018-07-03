@@ -339,7 +339,7 @@ abstract class RenderToggleable extends RenderConstrainedBox {
     config.isEnabled = isInteractive;
     if (isInteractive)
       config.onTap = _handleTap;
-    config.isChecked = _value != false;
+    config.isChecked = _value == true;
   }
 
   @override

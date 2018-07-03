@@ -41,12 +41,9 @@ class FlutterTesterApp extends ApplicationPackage {
 
 // TODO(scheglov): This device does not currently work with full restarts.
 class FlutterTesterDevice extends Device {
-  final _FlutterTesterDeviceLogReader _logReader =
-      new _FlutterTesterDeviceLogReader();
+  FlutterTesterDevice(String deviceId) : super(deviceId);
 
   Process _process;
-
-  FlutterTesterDevice(String deviceId) : super(deviceId);
 
   @override
   Future<bool> get isLocalEmulator async => false;
@@ -68,6 +65,9 @@ class FlutterTesterDevice extends Device {
 
   @override
   void clearLogs() {}
+
+  final _FlutterTesterDeviceLogReader _logReader =
+      new _FlutterTesterDeviceLogReader();
 
   @override
   DeviceLogReader getLogReader({ApplicationPackage app}) => _logReader;
@@ -118,12 +118,10 @@ class FlutterTesterDevice extends Device {
       '--packages=${PackageMap.globalPackagesPath}',
     ];
     if (debuggingOptions.debuggingEnabled) {
-      if (debuggingOptions.startPaused) {
+      if (debuggingOptions.startPaused)
         command.add('--start-paused');
-      }
       if (debuggingOptions.hasObservatoryPort)
-        command
-            .add('--observatory-port=${debuggingOptions.hasObservatoryPort}');
+        command.add('--observatory-port=${debuggingOptions.observatoryPort}');
     }
 
     // Build assets and perform initial compilation.
@@ -133,17 +131,29 @@ class FlutterTesterDevice extends Device {
       mainPath: mainPath,
       assetDirPath: assetDirPath,
       applicationKernelFilePath: applicationKernelFilePath,
-      precompiledSnapshot: false,
+      precompiledSnapshot: !buildInfo.previewDart2,
+      previewDart2: buildInfo.previewDart2,
       trackWidgetCreation: buildInfo.trackWidgetCreation,
     );
+    if (buildInfo.previewDart2) {
+      mainPath = applicationKernelFilePath;
+    }
+
     command.add('--flutter-assets-dir=$assetDirPath');
-    command.add(applicationKernelFilePath);
+
+    // TODO(scheglov): Either remove the check, or make it fail earlier.
+    if (mainPath != null) {
+      command.add(mainPath);
+    }
 
     try {
       printTrace(command.join(' '));
 
       _isRunning = true;
-      _process = await processManager.start(command);
+      _process = await processManager.start(command,
+      environment: <String, String>{
+        'FLUTTER_TEST': 'true',
+      });
       _process.exitCode.then((_) => _isRunning = false);
       _process.stdout
           .transform(utf8.decoder)
@@ -161,9 +171,10 @@ class FlutterTesterDevice extends Device {
       if (!debuggingOptions.debuggingEnabled)
         return new LaunchResult.succeeded();
 
-      final ProtocolDiscovery observatoryDiscovery =
-          new ProtocolDiscovery.observatory(getLogReader(),
-              hostPort: debuggingOptions.observatoryPort);
+      final ProtocolDiscovery observatoryDiscovery = new ProtocolDiscovery.observatory(
+        getLogReader(),
+        hostPort: debuggingOptions.observatoryPort,
+      );
 
       final Uri observatoryUri = await observatoryDiscovery.uri;
       return new LaunchResult.succeeded(observatoryUri: observatoryUri);
@@ -177,7 +188,6 @@ class FlutterTesterDevice extends Device {
   Future<bool> stopApp(ApplicationPackage app) async {
     _process?.kill();
     _process = null;
-
     return true;
   }
 
@@ -186,14 +196,14 @@ class FlutterTesterDevice extends Device {
 }
 
 class FlutterTesterDevices extends PollingDeviceDiscovery {
+  FlutterTesterDevices() : super('Flutter tester');
+
   static const String kTesterDeviceId = 'flutter-tester';
 
   static bool showFlutterTesterDevice = false;
 
   final FlutterTesterDevice _testerDevice =
       new FlutterTesterDevice(kTesterDeviceId);
-
-  FlutterTesterDevices() : super('Flutter tester');
 
   @override
   bool get canListAnything => true;

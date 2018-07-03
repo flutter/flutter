@@ -175,7 +175,7 @@ class ProcessRunner {
   }
 }
 
-typedef HttpReader = Future<Uint8List> Function(Uri url, {Map<String, String> headers});
+typedef Future<Uint8List> HttpReader(Uri url, {Map<String, String> headers});
 
 /// Creates a pre-populated Flutter archive from a git repo.
 class ArchiveCreator {

@@ -6,13 +6,15 @@ import 'dart:async';
 import 'dart:math' as math;
 import 'dart:ui' as ui;
 
+import 'package:meta/meta.dart';
+import 'package:test/test.dart' hide TypeMatcher, isInstanceOf;
+import 'package:test/test.dart' as test_package show isInstanceOf;
+import 'package:test/src/frontend/async_matcher.dart'; // ignore: implementation_imports
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
-import 'package:meta/meta.dart';
-import 'package:test/test.dart' hide TypeMatcher;
-import 'package:test/src/frontend/async_matcher.dart'; // ignore: implementation_imports
 
 import 'binding.dart';
 import 'finders.dart';
@@ -147,7 +149,7 @@ const Matcher hasAGoodToStringDeep = const _HasGoodToStringDeep();
 
 /// A matcher for functions that throw [FlutterError].
 ///
-/// This is equivalent to `throwsA(const isInstanceOf<FlutterError>())`.
+/// This is equivalent to `throwsA(isInstanceOf<FlutterError>())`.
 ///
 /// See also:
 ///
@@ -158,7 +160,7 @@ final Matcher throwsFlutterError = throwsA(isFlutterError);
 
 /// A matcher for functions that throw [AssertionError].
 ///
-/// This is equivalent to `throwsA(const isInstanceOf<AssertionError>())`.
+/// This is equivalent to `throwsA(isInstanceOf<AssertionError>())`.
 ///
 /// See also:
 ///
@@ -169,23 +171,27 @@ final Matcher throwsAssertionError = throwsA(isAssertionError);
 
 /// A matcher for [FlutterError].
 ///
-/// This is equivalent to `const isInstanceOf<FlutterError>()`.
+/// This is equivalent to `isInstanceOf<FlutterError>()`.
 ///
 /// See also:
 ///
 ///  * [throwsFlutterError], to test if a function throws a [FlutterError].
 ///  * [isAssertionError], to test if any object is any kind of [AssertionError].
-const Matcher isFlutterError = const isInstanceOf<FlutterError>();
+final Matcher isFlutterError = isInstanceOf<FlutterError>();
 
 /// A matcher for [AssertionError].
 ///
-/// This is equivalent to `const isInstanceOf<AssertionError>()`.
+/// This is equivalent to `isInstanceOf<AssertionError>()`.
 ///
 /// See also:
 ///
 ///  * [throwsAssertionError], to test if a function throws any [AssertionError].
 ///  * [isFlutterError], to test if any object is a [FlutterError].
-const Matcher isAssertionError = const isInstanceOf<AssertionError>();
+final Matcher isAssertionError = isInstanceOf<AssertionError>();
+
+/// A matcher that compares the type of the actual value to the type argument T.
+// TODO(ianh): https://github.com/flutter/flutter/issues/18608, https://github.com/dart-lang/matcher/pull/88
+Matcher isInstanceOf<T>() => new test_package.isInstanceOf<T>(); // ignore: prefer_const_constructors, https://github.com/dart-lang/sdk/issues/32544
 
 /// Asserts that two [double]s are equal, within some tolerated error.
 ///
@@ -636,7 +642,7 @@ class _HasGoodToStringDeep extends Matcher {
 ///
 /// This makes it useful for comparing numbers, [Color]s, [Offset]s and other
 /// sets of value for which a metric space is defined.
-typedef DistanceFunction<T> = num Function(T a, T b);
+typedef num DistanceFunction<T>(T a, T b);
 
 /// The type of a union of instances of [DistanceFunction<T>] for various types
 /// T.
@@ -649,10 +655,12 @@ typedef DistanceFunction<T> = num Function(T a, T b);
 ///
 /// Calling an instance of this type must either be done dynamically, or by
 /// first casting it to a [DistanceFunction<T>] for some concrete T.
-typedef AnyDistanceFunction = num Function(Null a, Null b);
+typedef num AnyDistanceFunction(Null a, Null b);
 
 const Map<Type, AnyDistanceFunction> _kStandardDistanceFunctions = const <Type, AnyDistanceFunction>{
   Color: _maxComponentColorDistance,
+  HSVColor: _maxComponentHSVColorDistance,
+  HSLColor: _maxComponentHSLColorDistance,
   Offset: _offsetDistance,
   int: _intDistance,
   double: _doubleDistance,
@@ -669,6 +677,22 @@ double _maxComponentColorDistance(Color a, Color b) {
   delta = math.max<int>(delta, (a.blue - b.blue).abs());
   delta = math.max<int>(delta, (a.alpha - b.alpha).abs());
   return delta.toDouble();
+}
+
+// Compares hue by converting it to a 0.0 - 1.0 range, so that the comparison
+// can be a similar error percentage per component.
+double _maxComponentHSVColorDistance(HSVColor a, HSVColor b) {
+  double delta = math.max<double>((a.saturation - b.saturation).abs(), (a.value - b.value).abs());
+  delta = math.max<double>(delta, ((a.hue - b.hue) / 360.0).abs());
+  return math.max<double>(delta, (a.alpha - b.alpha).abs());
+}
+
+// Compares hue by converting it to a 0.0 - 1.0 range, so that the comparison
+// can be a similar error percentage per component.
+double _maxComponentHSLColorDistance(HSLColor a, HSLColor b) {
+  double delta = math.max<double>((a.saturation - b.saturation).abs(), (a.lightness - b.lightness).abs());
+  delta = math.max<double>(delta, ((a.hue - b.hue) / 360.0).abs());
+  return math.max<double>(delta, (a.alpha - b.alpha).abs());
 }
 
 double _rectDistance(Rect a, Rect b) {

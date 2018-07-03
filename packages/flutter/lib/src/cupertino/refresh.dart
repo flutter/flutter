@@ -8,6 +8,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
+
 import 'activity_indicator.dart';
 import 'colors.dart';
 import 'icons.dart';
@@ -204,7 +205,7 @@ enum RefreshIndicatorMode {
 ///
 /// The `pulledExtent` parameter is the currently available space either from
 /// overscrolling or as held by the sliver during refresh.
-typedef RefreshControlIndicatorBuilder = Widget Function(
+typedef Widget RefreshControlIndicatorBuilder(
   BuildContext context,
   RefreshIndicatorMode refreshState,
   double pulledExtent,
@@ -216,7 +217,7 @@ typedef RefreshControlIndicatorBuilder = Widget Function(
 /// pulled a `refreshTriggerPullDistance`. Must return a [Future]. Upon
 /// completion of the [Future], the [CupertinoRefreshControl] enters the
 /// [RefreshIndicatorMode.done] state and will start to go away.
-typedef RefreshCallback = Future<void> Function();
+typedef Future<void> RefreshCallback();
 
 /// A sliver widget implementing the iOS-style pull to refresh content control.
 ///

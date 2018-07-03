@@ -3,12 +3,15 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:ui' as ui;
 
 import 'package:flutter/rendering.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 
 import 'automatic_keep_alive.dart';
 import 'basic.dart';
+import 'binding.dart';
 import 'focus_manager.dart';
 import 'focus_scope.dart';
 import 'framework.dart';
@@ -24,7 +27,7 @@ export 'package:flutter/rendering.dart' show SelectionChangedCause;
 
 /// Signature for the callback that reports when the user changes the selection
 /// (including the cursor location).
-typedef SelectionChangedCallback = void Function(TextSelection selection, SelectionChangedCause cause);
+typedef void SelectionChangedCallback(TextSelection selection, SelectionChangedCause cause);
 
 const Duration _kCursorBlinkHalfPeriod = const Duration(milliseconds: 500);
 
@@ -130,6 +133,36 @@ class TextEditingController extends ValueNotifier<TextEditingValue> {
 /// movement. This widget does not provide any focus management (e.g.,
 /// tap-to-focus).
 ///
+/// ## Input Actions
+///
+/// A [TextInputAction] can be provided to customize the appearance of the
+/// action button on the soft keyboard for Android and iOS. The default action
+/// is [TextInputAction.done].
+///
+/// Many [TextInputAction]s are common between Android and iOS. However, if an
+/// [inputAction] is provided that is not supported by the current
+/// platform in debug mode, an error will be thrown when the corresponding
+/// EditableText receives focus. For example, providing iOS's "emergencyCall"
+/// action when running on an Android device will result in an error when in
+/// debug mode. In release mode, incompatible [TextInputAction]s are replaced
+/// either with "unspecified" on Android, or "default" on iOS. Appropriate
+/// [inputAction]s can be chosen by checking the current platform and then
+/// selecting the appropriate action.
+///
+/// ## Lifecycle
+///
+/// Upon completion of editing, like pressing the "done" button on the keyboard,
+/// two actions take place:
+///
+///   1st: Editing is finalized. The default behavior of this step includes
+///   an invocation of [onChanged]. That default behavior can be overridden.
+///   See [onEditingComplete] for details.
+///
+///   2nd: [onSubmitted] is invoked with the user's input value.
+///
+/// [onSubmitted] can be used to manually move focus to another input widget
+/// when a user finishes with the currently focused input widget.
+///
 /// Rather than using this widget directly, consider using [TextField], which
 /// is a full-featured, material-design text input field with placeholder text,
 /// labels, and [Form] integration.
@@ -168,7 +201,9 @@ class EditableText extends StatefulWidget {
     this.selectionColor,
     this.selectionControls,
     TextInputType keyboardType,
+    this.textInputAction = TextInputAction.done,
     this.onChanged,
+    this.onEditingComplete,
     this.onSubmitted,
     this.onSelectionChanged,
     List<TextInputFormatter> inputFormatters,
@@ -277,8 +312,29 @@ class EditableText extends StatefulWidget {
   /// The type of keyboard to use for editing the text.
   final TextInputType keyboardType;
 
+  /// The type of action button to use with the soft keyboard.
+  final TextInputAction textInputAction;
+
   /// Called when the text being edited changes.
   final ValueChanged<String> onChanged;
+
+  /// Called when the user submits editable content (e.g., user presses the "done"
+  /// button on the keyboard).
+  ///
+  /// The default implementation of [onEditingComplete] executes 2 different
+  /// behaviors based on the situation:
+  ///
+  ///  - When a completion action is pressed, such as "done", "go", "send", or
+  ///    "search", the user's content is submitted to the [controller] and then
+  ///    focus is given up.
+  ///
+  ///  - When a non-completion action is pressed, such as "next" or "previous",
+  ///    the user's content is submitted to the [controller], but focus is not
+  ///    given up because developers may want to immediately move focus to
+  ///    another input widget within [onSubmitted].
+  ///
+  /// Providing [onEditingComplete] prevents the aforementioned default behavior.
+  final VoidCallback onEditingComplete;
 
   /// Called when the user indicates that they are done editing the text in the field.
   final ValueChanged<String> onSubmitted;
@@ -319,7 +375,7 @@ class EditableText extends StatefulWidget {
 }
 
 /// State for a [EditableText].
-class EditableTextState extends State<EditableText> with AutomaticKeepAliveClientMixin implements TextInputClient, TextSelectionDelegate {
+class EditableTextState extends State<EditableText> with AutomaticKeepAliveClientMixin, WidgetsBindingObserver implements TextInputClient, TextSelectionDelegate {
   Timer _cursorTimer;
   final ValueNotifier<bool> _showCursor = new ValueNotifier<bool>(false);
   final GlobalKey _editableKey = new GlobalKey();
@@ -389,6 +445,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   void updateEditingValue(TextEditingValue value) {
     if (value.text != _value.text) {
       _hideSelectionOverlayIfNeeded();
+      _showCaretOnScreen();
       if (widget.obscureText && value.text.length == _value.text.length + 1) {
         _obscureShowCharTicksPending = _kObscureShowLatestCharCursorTicks;
         _obscureLatestCharIndex = _value.selection.baseOffset;
@@ -401,14 +458,41 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   @override
   void performAction(TextInputAction action) {
     switch (action) {
+      case TextInputAction.newline:
+        // Do nothing for a "newline" action: the newline is already inserted.
+        break;
       case TextInputAction.done:
-        widget.controller.clearComposing();
-        widget.focusNode.unfocus();
+      case TextInputAction.go:
+      case TextInputAction.send:
+      case TextInputAction.search:
+        // Take any actions necessary now that the user has completed editing.
+        if (widget.onEditingComplete != null) {
+          widget.onEditingComplete();
+        } else {
+          // Default behavior if the developer did not provide an
+          // onEditingComplete callback: Finalize editing and remove focus.
+          widget.controller.clearComposing();
+          widget.focusNode.unfocus();
+        }
+
+        // Invoke optional callback with the user's submitted content.
         if (widget.onSubmitted != null)
           widget.onSubmitted(_value.text);
         break;
-      case TextInputAction.newline:
-        // Do nothing for a "newline" action: the newline is already inserted.
+      default:
+        if (widget.onEditingComplete != null) {
+          widget.onEditingComplete();
+        } else {
+          // Default behavior if the developer did not provide an
+          // onEditingComplete callback: Finalize editing, but don't give up
+          // focus because this keyboard action does not imply the user is done
+          // inputting information.
+          widget.controller.clearComposing();
+        }
+
+        // Invoke optional callback with the user's submitted content.
+        if (widget.onSubmitted != null)
+          widget.onSubmitted(_value.text);
         break;
     }
   }
@@ -444,6 +528,12 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     return scrollOffset;
   }
 
+  // Calculates where the `caretRect` would be if `_scrollController.offset` is set to `scrollOffset`.
+  Rect _getCaretRectAtScrollOffset(Rect caretRect, double scrollOffset) {
+    final double offsetDiff = _scrollController.offset - scrollOffset;
+    return _isMultiline ? caretRect.translate(0.0, offsetDiff) : caretRect.translate(offsetDiff, 0.0);
+  }
+
   bool get _hasInputConnection => _textInputConnection != null && _textInputConnection.attached;
 
   void _openInputConnection() {
@@ -457,7 +547,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
               autocorrect: widget.autocorrect,
               inputAction: widget.keyboardType == TextInputType.multiline
                   ? TextInputAction.newline
-                  : TextInputAction.done
+                  : widget.textInputAction,
           )
       )..setEditingState(localValue);
     }
@@ -541,20 +631,58 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   }
 
   bool _textChangedSinceLastCaretUpdate = false;
+  Rect _currentCaretRect;
 
   void _handleCaretChanged(Rect caretRect) {
+    _currentCaretRect = caretRect;
     // If the caret location has changed due to an update to the text or
     // selection, then scroll the caret into view.
     if (_textChangedSinceLastCaretUpdate) {
       _textChangedSinceLastCaretUpdate = false;
-      scheduleMicrotask(() {
-        _scrollController.animateTo(
-          _getScrollOffsetForCaret(caretRect),
-          curve: Curves.fastOutSlowIn,
-          duration: const Duration(milliseconds: 50),
-        );
-      });
+      _showCaretOnScreen();
     }
+  }
+
+  // Animation configuration for scrolling the caret back on screen.
+  static const Duration _caretAnimationDuration = const Duration(milliseconds: 100);
+  static const Curve _caretAnimationCurve = Curves.fastOutSlowIn;
+
+  bool _showCaretOnScreenScheduled = false;
+
+  void _showCaretOnScreen() {
+    if (_showCaretOnScreenScheduled) {
+      return;
+    }
+    _showCaretOnScreenScheduled = true;
+    SchedulerBinding.instance.addPostFrameCallback((Duration _) {
+      _showCaretOnScreenScheduled = false;
+      if (_currentCaretRect == null || !_scrollController.hasClients){
+        return;
+      }
+      final double scrollOffsetForCaret =  _getScrollOffsetForCaret(_currentCaretRect);
+      _scrollController.animateTo(
+        scrollOffsetForCaret,
+        duration: _caretAnimationDuration,
+        curve: _caretAnimationCurve,
+      );
+      final Rect newCaretRect = _getCaretRectAtScrollOffset(_currentCaretRect, scrollOffsetForCaret);
+      _editableKey.currentContext.findRenderObject().showOnScreen(
+        // Inflate ensures that caret is not positioned directly at the edge.
+        rect: newCaretRect.inflate(20.0),
+        duration: _caretAnimationDuration,
+        curve: _caretAnimationCurve,
+      );
+    });
+  }
+
+  double _lastBottomViewInset;
+
+  @override
+  void didChangeMetrics() {
+    if (_lastBottomViewInset < ui.window.viewInsets.bottom) {
+      _showCaretOnScreen();
+    }
+    _lastBottomViewInset = ui.window.viewInsets.bottom;
   }
 
   void _formatAndSetValue(TextEditingValue value) {
@@ -629,12 +757,19 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     _openOrCloseInputConnectionIfNeeded();
     _startOrStopCursorTimerIfNeeded();
     _updateOrDisposeSelectionOverlayIfNeeded();
-    if (!_hasFocus) {
+    if (_hasFocus) {
+      // Listen for changing viewInsets, which indicates keyboard showing up.
+      WidgetsBinding.instance.addObserver(this);
+      _lastBottomViewInset = ui.window.viewInsets.bottom;
+      _showCaretOnScreen();
+      if (!_value.selection.isValid) {
+        // Place cursor at the end if the selection is invalid when we receive focus.
+        widget.controller.selection = new TextSelection.collapsed(offset: _value.text.length);
+      }
+    } else {
+      WidgetsBinding.instance.removeObserver(this);
       // Clear the selection and composition state if this widget lost focus.
       _value = new TextEditingValue(text: _value.text);
-    } else if (!_value.selection.isValid) {
-      // Place cursor at the end if the selection is invalid when we receive focus.
-      widget.controller.selection = new TextSelection.collapsed(offset: _value.text.length);
     }
     updateKeepAlive();
   }

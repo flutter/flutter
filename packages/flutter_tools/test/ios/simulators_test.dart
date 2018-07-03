@@ -175,7 +175,7 @@ void main() {
       mockProcessManager = new MockProcessManager();
       // Let everything else return exit code 0 so process.dart doesn't crash.
       when(
-        mockProcessManager.run(typed(any), environment: null, workingDirectory: null)
+        mockProcessManager.run(any, environment: null, workingDirectory: null)
       ).thenAnswer((Invocation invocation) =>
         new Future<ProcessResult>.value(new ProcessResult(2, 0, '', ''))
       );
@@ -229,7 +229,7 @@ void main() {
 
     setUp(() {
       mockProcessManager = new MockProcessManager();
-      when(mockProcessManager.start(typed(any), environment: null, workingDirectory: null))
+      when(mockProcessManager.start(any, environment: null, workingDirectory: null))
         .thenAnswer((Invocation invocation) => new Future<Process>.value(new MockProcess()));
     });
 
@@ -237,7 +237,7 @@ void main() {
       final IOSSimulator device = new IOSSimulator('x', name: 'iPhone SE', category: 'iOS 9.3');
       await launchDeviceLogTool(device);
       expect(
-        verify(mockProcessManager.start(typed(captureAny), environment: null, workingDirectory: null)).captured.single,
+        verify(mockProcessManager.start(captureAny, environment: null, workingDirectory: null)).captured.single,
         contains('tail'),
       );
     },
@@ -249,7 +249,7 @@ void main() {
       final IOSSimulator device = new IOSSimulator('x', name: 'iPhone SE', category: 'iOS 11.0');
       await launchDeviceLogTool(device);
       expect(
-        verify(mockProcessManager.start(typed(captureAny), environment: null, workingDirectory: null)).captured.single,
+        verify(mockProcessManager.start(captureAny, environment: null, workingDirectory: null)).captured.single,
         contains('/usr/bin/log'),
       );
     },
@@ -271,7 +271,7 @@ void main() {
       final IOSSimulator device = new IOSSimulator('x', name: 'iPhone SE', category: 'iOS 9.3');
       await launchSystemLogTool(device);
       expect(
-        verify(mockProcessManager.start(typed(captureAny), environment: null, workingDirectory: null)).captured.single,
+        verify(mockProcessManager.start(captureAny, environment: null, workingDirectory: null)).captured.single,
         contains('tail'),
       );
     },
@@ -327,6 +327,82 @@ void main() {
       ]);
     }, overrides: <Type, Generator>{
       ProcessManager: () => mockProcessManager,
+    });
+  });
+
+  group('SimControl', () {
+    const int mockPid = 123;
+    const String validSimControlOutput = '''
+{
+  "devices" : {
+    "watchOS 4.3" : [
+      {
+        "state" : "Shutdown",
+        "availability" : "(available)",
+        "name" : "Apple Watch - 38mm",
+        "udid" : "TEST-WATCH-UDID"
+      }
+    ],
+    "iOS 11.4" : [
+      {
+        "state" : "Booted",
+        "availability" : "(available)",
+        "name" : "iPhone 5s",
+        "udid" : "TEST-PHONE-UDID"
+      }
+    ],
+    "tvOS 11.4" : [
+      {
+        "state" : "Shutdown",
+        "availability" : "(available)",
+        "name" : "Apple TV",
+        "udid" : "TEST-TV-UDID"
+      }
+    ]
+  }
+}
+    ''';
+
+    MockProcessManager mockProcessManager;
+    SimControl simControl;
+
+    setUp(() {
+      mockProcessManager = new MockProcessManager();
+      when(mockProcessManager.runSync(any))
+          .thenReturn(new ProcessResult(mockPid, 0, validSimControlOutput, ''));
+
+      simControl = new SimControl();
+    });
+
+    testUsingContext('getDevices succeeds', () {
+      final List<SimDevice> devices = simControl.getDevices();
+
+      final SimDevice watch = devices[0];
+      expect(watch.category, 'watchOS 4.3');
+      expect(watch.state, 'Shutdown');
+      expect(watch.availability, '(available)');
+      expect(watch.name, 'Apple Watch - 38mm');
+      expect(watch.udid, 'TEST-WATCH-UDID');
+      expect(watch.isBooted, isFalse);
+
+      final SimDevice phone = devices[1];
+      expect(phone.category, 'iOS 11.4');
+      expect(phone.state, 'Booted');
+      expect(phone.availability, '(available)');
+      expect(phone.name, 'iPhone 5s');
+      expect(phone.udid, 'TEST-PHONE-UDID');
+      expect(phone.isBooted, isTrue);
+
+      final SimDevice tv = devices[2];
+      expect(tv.category, 'tvOS 11.4');
+      expect(tv.state, 'Shutdown');
+      expect(tv.availability, '(available)');
+      expect(tv.name, 'Apple TV');
+      expect(tv.udid, 'TEST-TV-UDID');
+      expect(tv.isBooted, isFalse);
+    }, overrides: <Type, Generator>{
+      ProcessManager: () => mockProcessManager,
+      SimControl: () => simControl,
     });
   });
 }
