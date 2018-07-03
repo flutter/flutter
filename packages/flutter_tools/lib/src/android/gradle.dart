@@ -44,7 +44,6 @@ final RegExp ndkMessageFilter = new RegExp(r'^(?!NDK is missing a ".*" directory
   r'|If you are using NDK, verify the ndk.dir is set to a valid NDK directory.  It is currently set to .*)');
 
 
-
 FlutterPluginVersion getFlutterPluginVersion(AndroidProject project) {
   final File plugin = project.directory.childFile(
       fs.path.join('buildSrc', 'src', 'main', 'groovy', 'FlutterPlugin.groovy'));
@@ -61,6 +60,9 @@ FlutterPluginVersion getFlutterPluginVersion(AndroidProject project) {
     for (String line in appGradle.readAsLinesSync()) {
       if (line.contains(new RegExp(r'apply from: .*/flutter.gradle'))) {
         return FlutterPluginVersion.managed;
+      }
+      if (line.contains("def flutterPluginVersion = 'managed'")) {
+        return  FlutterPluginVersion.managed;
       }
     }
   }
@@ -98,13 +100,13 @@ Future<GradleProject> _readGradleProject() async {
   try {
     final RunResult runResult = await runCheckedAsync(
       <String>[gradle, 'app:properties'],
-      workingDirectory: flutterProject.android.directory.path,
+      workingDirectory: (await flutterProject.android).directory.path,
       environment: _gradleEnv,
     );
     final String properties = runResult.stdout.trim();
     project = new GradleProject.fromAppProperties(properties);
   } catch (exception) {
-    if (getFlutterPluginVersion(flutterProject.android) == FlutterPluginVersion.managed) {
+    if (getFlutterPluginVersion(await flutterProject.android) == FlutterPluginVersion.managed) {
       status.cancel();
       // Handle known exceptions. This will exit if handled.
       handleKnownGradleExceptions(exception);
@@ -116,7 +118,7 @@ Future<GradleProject> _readGradleProject() async {
     // Fall back to the default
     project = new GradleProject(
       <String>['debug', 'profile', 'release'],
-      <String>[], flutterProject.android.gradleAppOutV1Directory,
+      <String>[], (await flutterProject.android).gradleAppOutV1Directory,
     );
   }
   status.stop();
@@ -165,7 +167,7 @@ Future<String> _ensureGradle(FlutterProject project) async {
 // Note: Gradle may be bootstrapped and possibly downloaded as a side-effect
 // of validating the Gradle executable. This may take several seconds.
 Future<String> _initializeGradle(FlutterProject project) async {
-  final Directory android = project.android.directory;
+  final Directory android = (await project.android).directory;
   final Status status = logger.startProgress('Initializing gradle...', expectSlowOperation: true);
   String gradle = _locateGradlewExecutable(android);
   if (gradle == null) {
@@ -267,7 +269,7 @@ Future<Null> buildGradleProject({
 
   final String gradle = await _ensureGradle(project);
 
-  switch (getFlutterPluginVersion(project.android)) {
+  switch (getFlutterPluginVersion(await project.android)) {
     case FlutterPluginVersion.none:
       // Fall through. Pretend it's v1, and just go for it.
     case FlutterPluginVersion.v1:
@@ -284,7 +286,7 @@ Future<Null> _buildGradleProjectV1(FlutterProject project, String gradle) async 
   final Status status = logger.startProgress('Running \'gradlew build\'...', expectSlowOperation: true);
   final int exitCode = await runCommandAndStreamOutput(
     <String>[fs.file(gradle).absolute.path, 'build'],
-    workingDirectory: project.android.directory.path,
+    workingDirectory: (await project.android).directory.path,
     allowReentrantFlutter: true,
     environment: _gradleEnv,
   );
@@ -293,7 +295,7 @@ Future<Null> _buildGradleProjectV1(FlutterProject project, String gradle) async 
   if (exitCode != 0)
     throwToolExit('Gradle build failed: $exitCode', exitCode: exitCode);
 
-  printStatus('Built ${fs.path.relative(project.android.gradleAppOutV1File.path)}.');
+  printStatus('Built ${fs.path.relative((await project.android).gradleAppOutV1File.path)}.');
 }
 
 Future<Null> _buildGradleProjectV2(
@@ -361,7 +363,7 @@ Future<Null> _buildGradleProjectV2(
   command.add(assembleTask);
   final int exitCode = await runCommandAndStreamOutput(
       command,
-      workingDirectory: flutterProject.android.directory.path,
+      workingDirectory: (await flutterProject.android).directory.path,
       allowReentrantFlutter: true,
       environment: _gradleEnv,
       filter: logger.isVerbose ? null : ndkMessageFilter,
