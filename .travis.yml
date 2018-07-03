@@ -29,7 +29,7 @@ addons:
       - fonts-droid
 language: node_js
 node_js:
-  - "6"
+  - "8.1"
 git:
   # We rely on git tags for determining the version.
   depth: false
