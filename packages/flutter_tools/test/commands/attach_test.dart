@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/attach.dart';
 import 'package:flutter_tools/src/device.dart';
@@ -67,6 +68,17 @@ void main() {
       await createTestCommandRunner(command).run(<String>['attach', '--debug-port', '$devicePort']);
 
       verify(portForwarder.forward(devicePort)).called(1);
+    });
+
+    testUsingContext('exits when no device connected', () async {
+      final AttachCommand command = new AttachCommand();
+      applyMocksToCommand(command);
+      try {
+        await createTestCommandRunner(command).run(<String>['attach']);
+        fail('Expect exception');
+      } catch (e) {
+        expect(e, const isInstanceOf<ToolExit>());
+      }
     });
   });
 }
