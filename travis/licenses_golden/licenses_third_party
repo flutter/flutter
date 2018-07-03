@@ -1,4 +1,4 @@
-Signature: 650df7cae093ff5f8985d89194da8c02
+Signature: e2ebc854c280677e329ef08433c91e99
 
 UNUSED LICENSES:
 
@@ -4479,34 +4479,8 @@ FILE: ../../../third_party/dart/.mailmap
 FILE: ../../../third_party/dart/client/idea/.idea/.name
 FILE: ../../../third_party/dart/client/idea/.idea/inspectionProfiles/Project_Default.xml
 FILE: ../../../third_party/dart/client/idea/.idea/vcs.xml
-FILE: ../../../third_party/dart/runtime/.idea/codeStyles/Project.xml
-FILE: ../../../third_party/dart/runtime/.idea/misc.xml
-FILE: ../../../third_party/dart/runtime/.idea/modules.xml
-FILE: ../../../third_party/dart/runtime/.idea/runtime.iml
-FILE: ../../../third_party/dart/runtime/.idea/workspace.xml
 FILE: ../../../third_party/dart/runtime/CPPLINT.cfg
-FILE: ../../../third_party/dart/runtime/cmake-build-debug/CMakeFiles/3.10.2/CMakeDetermineCompilerABI_C.bin
-FILE: ../../../third_party/dart/runtime/cmake-build-debug/CMakeFiles/3.10.2/CMakeDetermineCompilerABI_CXX.bin
-FILE: ../../../third_party/dart/runtime/cmake-build-debug/CMakeFiles/3.10.2/CompilerIdC/CMakeCCompilerId.c
-FILE: ../../../third_party/dart/runtime/cmake-build-debug/CMakeFiles/3.10.2/CompilerIdC/a.out
-FILE: ../../../third_party/dart/runtime/cmake-build-debug/CMakeFiles/3.10.2/CompilerIdCXX/CMakeCXXCompilerId.cpp
-FILE: ../../../third_party/dart/runtime/cmake-build-debug/CMakeFiles/3.10.2/CompilerIdCXX/a.out
-FILE: ../../../third_party/dart/runtime/cmake-build-debug/CMakeFiles/Makefile2
-FILE: ../../../third_party/dart/runtime/cmake-build-debug/CMakeFiles/cmake.check_cache
-FILE: ../../../third_party/dart/runtime/cmake-build-debug/CMakeFiles/feature_tests.bin
-FILE: ../../../third_party/dart/runtime/cmake-build-debug/CMakeFiles/feature_tests.c
-FILE: ../../../third_party/dart/runtime/cmake-build-debug/CMakeFiles/feature_tests.cxx
-FILE: ../../../third_party/dart/runtime/cmake-build-debug/CMakeFiles/progress.marks
-FILE: ../../../third_party/dart/runtime/cmake-build-debug/CMakeFiles/runtime.dir/build.make
-FILE: ../../../third_party/dart/runtime/cmake-build-debug/CMakeFiles/runtime.dir/depend.make
-FILE: ../../../third_party/dart/runtime/cmake-build-debug/CMakeFiles/runtime.dir/flags.make
-FILE: ../../../third_party/dart/runtime/cmake-build-debug/CMakeFiles/runtime.dir/progress.make
-FILE: ../../../third_party/dart/runtime/cmake-build-debug/runtime.cbp
 FILE: ../../../third_party/dart/runtime/observatory/.analysis_options
-FILE: ../../../third_party/dart/runtime/observatory/.idea/libraries/Dart_SDK.xml
-FILE: ../../../third_party/dart/runtime/observatory/.idea/modules.xml
-FILE: ../../../third_party/dart/runtime/observatory/.idea/observatory.iml
-FILE: ../../../third_party/dart/runtime/observatory/.idea/workspace.xml
 FILE: ../../../third_party/dart/runtime/observatory/lib/elements.dart
 FILE: ../../../third_party/dart/runtime/observatory/lib/src/elements/img/chromium_icon.png
 FILE: ../../../third_party/dart/runtime/observatory/lib/src/elements/img/dart_icon.png
@@ -4515,23 +4489,16 @@ FILE: ../../../third_party/dart/runtime/observatory/web/favicon.ico
 FILE: ../../../third_party/dart/runtime/observatory/web/index.html
 FILE: ../../../third_party/dart/runtime/observatory/web/third_party/trace_viewer_full.html
 FILE: ../../../third_party/dart/runtime/observatory/web/timeline.html
-FILE: ../../../third_party/dart/runtime/vm/compiler/frontend/kernel_binary_flowgraph.cc.rej
 FILE: ../../../third_party/dart/runtime/vm/snapshot_test_in.dat
 FILE: ../../../third_party/dart/samples/build_dart/test.foo
 FILE: ../../../third_party/dart/samples/build_dart_simple/test.foo
 FILE: ../../../third_party/dart/sdk/lib/html/html_common/conversions_dart2js.dart
 FILE: ../../../third_party/dart/sdk/lib/html/html_common/html_common.dart
 FILE: ../../../third_party/dart/sdk/lib/libraries.json
-FILE: ../../../third_party/dart/sdk/lib/vmservice/.idea/libraries/Dart_SDK.xml
-FILE: ../../../third_party/dart/sdk/lib/vmservice/.idea/misc.xml
-FILE: ../../../third_party/dart/sdk/lib/vmservice/.idea/modules.xml
-FILE: ../../../third_party/dart/sdk/lib/vmservice/.idea/vmservice.iml
-FILE: ../../../third_party/dart/sdk/lib/vmservice/.idea/workspace.xml
 FILE: ../../../third_party/dart/sdk/lib/vmservice_libraries.json
 FILE: ../../../third_party/dart/third_party/7zip.tar.gz.sha1
 FILE: ../../../third_party/dart/third_party/clang.tar.gz.sha1
 FILE: ../../../third_party/dart/third_party/gsutil.tar.gz.sha1
-FILE: ../../../third_party/dart/vm_outline_strong.dill
 ----------------------------------------------------------------------------------------------------
 Copyright 2012, the Dart project authors. All rights reserved.
 Redistribution and use in source and binary forms, with or without
@@ -4851,9 +4818,7 @@ FILE: ../../../third_party/dart/runtime/vm/native_arguments.h
 FILE: ../../../third_party/dart/runtime/vm/native_message_handler.cc
 FILE: ../../../third_party/dart/runtime/vm/native_message_handler.h
 FILE: ../../../third_party/dart/runtime/vm/object.cc
-FILE: ../../../third_party/dart/runtime/vm/object.cc.orig
 FILE: ../../../third_party/dart/runtime/vm/object.h
-FILE: ../../../third_party/dart/runtime/vm/object.h.orig
 FILE: ../../../third_party/dart/runtime/vm/object_arm_test.cc
 FILE: ../../../third_party/dart/runtime/vm/object_ia32_test.cc
 FILE: ../../../third_party/dart/runtime/vm/object_set.h
@@ -5451,7 +5416,6 @@ FILE: ../../../third_party/dart/runtime/vm/compiler/backend/redundancy_eliminati
 FILE: ../../../third_party/dart/runtime/vm/compiler/backend/redundancy_elimination.h
 FILE: ../../../third_party/dart/runtime/vm/compiler/frontend/flow_graph_builder_test.cc
 FILE: ../../../third_party/dart/runtime/vm/compiler/frontend/kernel_binary_flowgraph.cc
-FILE: ../../../third_party/dart/runtime/vm/compiler/frontend/kernel_binary_flowgraph.cc.orig
 FILE: ../../../third_party/dart/runtime/vm/compiler/frontend/kernel_to_il.cc
 FILE: ../../../third_party/dart/runtime/vm/compiler/frontend/kernel_to_il.h
 FILE: ../../../third_party/dart/runtime/vm/compiler/intrinsifier_dbc.cc
