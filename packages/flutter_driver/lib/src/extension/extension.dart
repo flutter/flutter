@@ -311,7 +311,9 @@ class FlutterDriverExtension {
       renderObject = renderObject.parent;
       node = renderObject.debugSemantics;
     }
-    return new GetSemanticsIdResult(node?.id);
+    if (node == null)
+      throw new StateError('No semantics data found');
+    return new GetSemanticsIdResult(node.id);
   }
 
   Future<ScrollResult> _scroll(Command command) async {

@@ -254,10 +254,13 @@ class ByType extends SerializableFinder {
 }
 
 
-/// A Flutter driver command that retrieves a semantics id using a specified
-/// finder.
+/// A Flutter driver command that retrieves a semantics id using a specified finder.
+/// 
+/// If the finder returns multiple objects, or there are no semantics nodes then
+/// a [StateError] is thrown by the extension.
 ///
-/// Semantics must be enabled before using this command.
+/// Semantics must be enabled to use this method, either using a platform
+/// specific shell command or [FlutterDriver.setSemantics].
 class GetSemanticsId extends CommandWithTarget {
 
   /// Creates a command which finds a Widget and then looks up the semantic id.
