@@ -81,11 +81,18 @@ void main() {
     });
 
     testUsingContext('exits when multiple devices connected', () async {
+      Device aDeviceWithId(String id) {
+        final MockAndroidDevice device = new MockAndroidDevice();
+        when(device.name).thenReturn('d$id');
+        when(device.id).thenReturn(id);
+        when(device.isLocalEmulator).thenAnswer((_) async => false);
+        when(device.sdkNameAndVersion).thenAnswer((_) async => 'Android 46');
+        return device;
+      }
+
       final AttachCommand command = new AttachCommand();
-      final MockAndroidDevice device1 = new MockAndroidDevice();
-      final MockAndroidDevice device2 = new MockAndroidDevice();
-      when(device1.isLocalEmulator).thenAnswer((_) async => false);
-      when(device2.isLocalEmulator).thenAnswer((_) async => false);
+      testDeviceManager.addDevice(aDeviceWithId('1'));
+      testDeviceManager.addDevice(aDeviceWithId('2'));
       try {
         await createTestCommandRunner(command).run(<String>['attach']);
         fail('Expect exception');
