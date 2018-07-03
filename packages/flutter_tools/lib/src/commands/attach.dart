@@ -71,6 +71,8 @@ class AttachCommand extends FlutterCommand {
     await _validateArguments();
 
     final Device device = await findTargetDevice();
+    if (device == null)
+      throwToolExit(null);
     final int devicePort = observatoryPort;
     Uri observatoryUri;
     if (devicePort == null) {
