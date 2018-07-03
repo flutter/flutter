@@ -57,7 +57,8 @@ void main() {
     controller.text = 'test';
     await tester.idle();
     expect(tester.testTextInput.editingState['text'], equals('test'));
-    expect(tester.testTextInput.setClientArgs['inputAction'], equals(serializedActionName));
+    expect(tester.testTextInput.setClientArgs['inputAction'],
+        equals(serializedActionName));
   }
 
   testWidgets('has expected defaults', (WidgetTester tester) async {
@@ -78,10 +79,11 @@ void main() {
     expect(editableText.maxLines, equals(1));
     expect(editableText.obscureText, isFalse);
     expect(editableText.autocorrect, isTrue);
-    expect(editableText.cursorWidth, 2.0);
+    expect(editableText.cursorWidth, 1.0);
   });
 
-  testWidgets('cursor has expected width and radius', (WidgetTester tester) async {
+  testWidgets('cursor has expected width and radius',
+      (WidgetTester tester) async {
     await tester.pumpWidget(new Directionality(
         textDirection: TextDirection.ltr,
         child: new EditableText(
@@ -94,7 +96,7 @@ void main() {
         )));
 
     final EditableText editableText =
-    tester.firstWidget(find.byType(EditableText));
+        tester.firstWidget(find.byType(EditableText));
     expect(editableText.cursorWidth, 10.0);
     expect(editableText.cursorRadius.x, 2.0);
   });
@@ -124,13 +126,15 @@ void main() {
         tester.firstWidget(find.byType(EditableText));
     expect(editableText.maxLines, equals(1));
     expect(tester.testTextInput.editingState['text'], equals('test'));
-    expect(tester.testTextInput.setClientArgs['inputType']['name'], equals('TextInputType.text'));
+    expect(tester.testTextInput.setClientArgs['inputType']['name'],
+        equals('TextInputType.text'));
     expect(tester.testTextInput.setClientArgs['inputAction'],
         equals('TextInputAction.done'));
   });
 
-  testWidgets('Keyboard is configured for "unspecified" action when explicitly requested',
-          (WidgetTester tester) async {
+  testWidgets(
+      'Keyboard is configured for "unspecified" action when explicitly requested',
+      (WidgetTester tester) async {
     await _desiredKeyboardActionIsRequested(
       tester: tester,
       action: TextInputAction.unspecified,
@@ -138,8 +142,9 @@ void main() {
     );
   });
 
-  testWidgets('Keyboard is configured for "none" action when explicitly requested',
-          (WidgetTester tester) async {
+  testWidgets(
+      'Keyboard is configured for "none" action when explicitly requested',
+      (WidgetTester tester) async {
     await _desiredKeyboardActionIsRequested(
       tester: tester,
       action: TextInputAction.none,
@@ -147,8 +152,9 @@ void main() {
     );
   });
 
-  testWidgets('Keyboard is configured for "done" action when explicitly requested',
-          (WidgetTester tester) async {
+  testWidgets(
+      'Keyboard is configured for "done" action when explicitly requested',
+      (WidgetTester tester) async {
     await _desiredKeyboardActionIsRequested(
       tester: tester,
       action: TextInputAction.done,
@@ -156,8 +162,9 @@ void main() {
     );
   });
 
-  testWidgets('Keyboard is configured for "send" action when explicitly requested',
-          (WidgetTester tester) async {
+  testWidgets(
+      'Keyboard is configured for "send" action when explicitly requested',
+      (WidgetTester tester) async {
     await _desiredKeyboardActionIsRequested(
       tester: tester,
       action: TextInputAction.send,
@@ -165,8 +172,9 @@ void main() {
     );
   });
 
-  testWidgets('Keyboard is configured for "go" action when explicitly requested',
-          (WidgetTester tester) async {
+  testWidgets(
+      'Keyboard is configured for "go" action when explicitly requested',
+      (WidgetTester tester) async {
     await _desiredKeyboardActionIsRequested(
       tester: tester,
       action: TextInputAction.go,
@@ -174,8 +182,9 @@ void main() {
     );
   });
 
-  testWidgets('Keyboard is configured for "search" action when explicitly requested',
-          (WidgetTester tester) async {
+  testWidgets(
+      'Keyboard is configured for "search" action when explicitly requested',
+      (WidgetTester tester) async {
     await _desiredKeyboardActionIsRequested(
       tester: tester,
       action: TextInputAction.search,
@@ -183,8 +192,9 @@ void main() {
     );
   });
 
-  testWidgets('Keyboard is configured for "send" action when explicitly requested',
-          (WidgetTester tester) async {
+  testWidgets(
+      'Keyboard is configured for "send" action when explicitly requested',
+      (WidgetTester tester) async {
     await _desiredKeyboardActionIsRequested(
       tester: tester,
       action: TextInputAction.send,
@@ -192,8 +202,9 @@ void main() {
     );
   });
 
-  testWidgets('Keyboard is configured for "next" action when explicitly requested',
-          (WidgetTester tester) async {
+  testWidgets(
+      'Keyboard is configured for "next" action when explicitly requested',
+      (WidgetTester tester) async {
     await _desiredKeyboardActionIsRequested(
       tester: tester,
       action: TextInputAction.next,
@@ -201,8 +212,9 @@ void main() {
     );
   });
 
-  testWidgets('Keyboard is configured for "previous" action when explicitly requested',
-          (WidgetTester tester) async {
+  testWidgets(
+      'Keyboard is configured for "previous" action when explicitly requested',
+      (WidgetTester tester) async {
     await _desiredKeyboardActionIsRequested(
       tester: tester,
       action: TextInputAction.previous,
@@ -210,8 +222,9 @@ void main() {
     );
   });
 
-  testWidgets('Keyboard is configured for "continue" action when explicitly requested',
-          (WidgetTester tester) async {
+  testWidgets(
+      'Keyboard is configured for "continue" action when explicitly requested',
+      (WidgetTester tester) async {
     await _desiredKeyboardActionIsRequested(
       tester: tester,
       action: TextInputAction.continueAction,
@@ -219,8 +232,9 @@ void main() {
     );
   });
 
-  testWidgets('Keyboard is configured for "join" action when explicitly requested',
-          (WidgetTester tester) async {
+  testWidgets(
+      'Keyboard is configured for "join" action when explicitly requested',
+      (WidgetTester tester) async {
     await _desiredKeyboardActionIsRequested(
       tester: tester,
       action: TextInputAction.join,
@@ -228,8 +242,9 @@ void main() {
     );
   });
 
-  testWidgets('Keyboard is configured for "route" action when explicitly requested',
-          (WidgetTester tester) async {
+  testWidgets(
+      'Keyboard is configured for "route" action when explicitly requested',
+      (WidgetTester tester) async {
     await _desiredKeyboardActionIsRequested(
       tester: tester,
       action: TextInputAction.route,
@@ -237,8 +252,9 @@ void main() {
     );
   });
 
-  testWidgets('Keyboard is configured for "emergencyCall" action when explicitly requested',
-          (WidgetTester tester) async {
+  testWidgets(
+      'Keyboard is configured for "emergencyCall" action when explicitly requested',
+      (WidgetTester tester) async {
     await _desiredKeyboardActionIsRequested(
       tester: tester,
       action: TextInputAction.emergencyCall,
@@ -270,11 +286,14 @@ void main() {
     controller.text = 'test';
     await tester.idle();
     expect(tester.testTextInput.editingState['text'], equals('test'));
-    expect(tester.testTextInput.setClientArgs['inputType']['name'], equals('TextInputType.multiline'));
-    expect(tester.testTextInput.setClientArgs['inputAction'], equals('TextInputAction.newline'));
+    expect(tester.testTextInput.setClientArgs['inputType']['name'],
+        equals('TextInputType.multiline'));
+    expect(tester.testTextInput.setClientArgs['inputAction'],
+        equals('TextInputAction.newline'));
   });
 
-  testWidgets('Correct keyboard is requested when set explicitly and maxLines > 1',
+  testWidgets(
+      'Correct keyboard is requested when set explicitly and maxLines > 1',
       (WidgetTester tester) async {
     await tester.pumpWidget(
       new Directionality(
@@ -299,8 +318,10 @@ void main() {
     controller.text = 'test';
     await tester.idle();
     expect(tester.testTextInput.editingState['text'], equals('test'));
-    expect(tester.testTextInput.setClientArgs['inputType']['name'], equals('TextInputType.phone'));
-    expect(tester.testTextInput.setClientArgs['inputAction'], equals('TextInputAction.done'));
+    expect(tester.testTextInput.setClientArgs['inputType']['name'],
+        equals('TextInputType.phone'));
+    expect(tester.testTextInput.setClientArgs['inputAction'],
+        equals('TextInputAction.done'));
   });
 
   testWidgets('multiline keyboard is requested when set implicitly',
@@ -327,8 +348,10 @@ void main() {
     controller.text = 'test';
     await tester.idle();
     expect(tester.testTextInput.editingState['text'], equals('test'));
-    expect(tester.testTextInput.setClientArgs['inputType']['name'], equals('TextInputType.multiline'));
-    expect(tester.testTextInput.setClientArgs['inputAction'], equals('TextInputAction.newline'));
+    expect(tester.testTextInput.setClientArgs['inputType']['name'],
+        equals('TextInputType.multiline'));
+    expect(tester.testTextInput.setClientArgs['inputAction'],
+        equals('TextInputAction.newline'));
   });
 
   testWidgets('single line inputs have correct default keyboard',
@@ -355,12 +378,16 @@ void main() {
     controller.text = 'test';
     await tester.idle();
     expect(tester.testTextInput.editingState['text'], equals('test'));
-    expect(tester.testTextInput.setClientArgs['inputType']['name'], equals('TextInputType.text'));
-    expect(tester.testTextInput.setClientArgs['inputAction'], equals('TextInputAction.done'));
+    expect(tester.testTextInput.setClientArgs['inputType']['name'],
+        equals('TextInputType.text'));
+    expect(tester.testTextInput.setClientArgs['inputAction'],
+        equals('TextInputAction.done'));
   });
 
-  testWidgets('Fires onChanged when text changes via TextSelectionOverlay', (WidgetTester tester) async {
-    final GlobalKey<EditableTextState> editableTextKey = new GlobalKey<EditableTextState>();
+  testWidgets('Fires onChanged when text changes via TextSelectionOverlay',
+      (WidgetTester tester) async {
+    final GlobalKey<EditableTextState> editableTextKey =
+        new GlobalKey<EditableTextState>();
 
     String changedValue;
     final Widget widget = new MaterialApp(
@@ -381,9 +408,10 @@ void main() {
 
     // Populate a fake clipboard.
     const String clipboardContent = 'Dobunezumi mitai ni utsukushiku naritai';
-    SystemChannels.platform.setMockMethodCallHandler((MethodCall methodCall) async {
+    SystemChannels.platform
+        .setMockMethodCallHandler((MethodCall methodCall) async {
       if (methodCall.method == 'Clipboard.getData')
-        return const <String, dynamic>{ 'text': clipboardContent };
+        return const <String, dynamic>{'text': clipboardContent};
       return null;
     });
 
@@ -399,7 +427,8 @@ void main() {
   });
 
   testWidgets('cursor layout has correct width', (WidgetTester tester) async {
-final GlobalKey<EditableTextState> editableTextKey = new GlobalKey<EditableTextState>();
+    final GlobalKey<EditableTextState> editableTextKey =
+        new GlobalKey<EditableTextState>();
 
     String changedValue;
     final Widget widget = new MaterialApp(
@@ -424,9 +453,10 @@ final GlobalKey<EditableTextState> editableTextKey = new GlobalKey<EditableTextS
 
     // Populate a fake clipboard.
     const String clipboardContent = ' ';
-    SystemChannels.platform.setMockMethodCallHandler((MethodCall methodCall) async {
+    SystemChannels.platform
+        .setMockMethodCallHandler((MethodCall methodCall) async {
       if (methodCall.method == 'Clipboard.getData')
-        return const <String, dynamic>{ 'text': clipboardContent };
+        return const <String, dynamic>{'text': clipboardContent};
       return null;
     });
 
@@ -444,11 +474,63 @@ final GlobalKey<EditableTextState> editableTextKey = new GlobalKey<EditableTextS
       find.byKey(const ValueKey<int>(1)),
       matchesGoldenFile('editable_text_test.0.0.png'),
     );
-  },
-  skip: !Platform.isLinux);
+  }, skip: !Platform.isLinux);
 
-  testWidgets('Does not lose focus by default when "next" action is pressed', (WidgetTester tester) async {
-    final GlobalKey<EditableTextState> editableTextKey = new GlobalKey<EditableTextState>();
+  testWidgets('cursor layout has correct radius', (WidgetTester tester) async {
+    final GlobalKey<EditableTextState> editableTextKey =
+        new GlobalKey<EditableTextState>();
+
+    String changedValue;
+    final Widget widget = new MaterialApp(
+      home: new RepaintBoundary(
+        key: const ValueKey<int>(1),
+        child: new EditableText(
+          key: editableTextKey,
+          controller: new TextEditingController(),
+          focusNode: new FocusNode(),
+          style: new Typography(platform: TargetPlatform.android).black.subhead,
+          cursorColor: Colors.blue,
+          selectionControls: materialTextSelectionControls,
+          keyboardType: TextInputType.text,
+          onChanged: (String value) {
+            changedValue = value;
+          },
+          cursorWidth: 15.0,
+          cursorRadius: const Radius.circular(3.0),
+        ),
+      ),
+    );
+    await tester.pumpWidget(widget);
+
+    // Populate a fake clipboard.
+    const String clipboardContent = ' ';
+    SystemChannels.platform
+        .setMockMethodCallHandler((MethodCall methodCall) async {
+      if (methodCall.method == 'Clipboard.getData')
+        return const <String, dynamic>{'text': clipboardContent};
+      return null;
+    });
+
+    // Long-press to bring up the text editing controls.
+    final Finder textFinder = find.byKey(editableTextKey);
+    await tester.longPress(textFinder);
+    await tester.pump();
+
+    await tester.tap(find.text('PASTE'));
+    await tester.pump();
+
+    expect(changedValue, clipboardContent);
+
+    await expectLater(
+      find.byKey(const ValueKey<int>(1)),
+      matchesGoldenFile('editable_text_test.1.0.png'),
+    );
+  }, skip: !Platform.isLinux);
+
+  testWidgets('Does not lose focus by default when "next" action is pressed',
+      (WidgetTester tester) async {
+    final GlobalKey<EditableTextState> editableTextKey =
+        new GlobalKey<EditableTextState>();
     final FocusNode focusNode = new FocusNode();
 
     final Widget widget = new MaterialApp(
@@ -478,9 +560,11 @@ final GlobalKey<EditableTextState> editableTextKey = new GlobalKey<EditableTextS
     expect(focusNode.hasFocus, true);
   });
 
-  testWidgets('Does not lose focus by default when "done" action is pressed and onEditingComplete is provided',
-          (WidgetTester tester) async {
-    final GlobalKey<EditableTextState> editableTextKey = new GlobalKey<EditableTextState>();
+  testWidgets(
+      'Does not lose focus by default when "done" action is pressed and onEditingComplete is provided',
+      (WidgetTester tester) async {
+    final GlobalKey<EditableTextState> editableTextKey =
+        new GlobalKey<EditableTextState>();
     final FocusNode focusNode = new FocusNode();
 
     final Widget widget = new MaterialApp(
@@ -514,9 +598,11 @@ final GlobalKey<EditableTextState> editableTextKey = new GlobalKey<EditableTextS
     expect(focusNode.hasFocus, true);
   });
 
-  testWidgets('When "done" is pressed callbacks are invoked: onEditingComplete > onSubmitted',
-          (WidgetTester tester) async {
-    final GlobalKey<EditableTextState> editableTextKey = new GlobalKey<EditableTextState>();
+  testWidgets(
+      'When "done" is pressed callbacks are invoked: onEditingComplete > onSubmitted',
+      (WidgetTester tester) async {
+    final GlobalKey<EditableTextState> editableTextKey =
+        new GlobalKey<EditableTextState>();
     final FocusNode focusNode = new FocusNode();
 
     bool onEditingCompleteCalled = false;
@@ -556,9 +642,11 @@ final GlobalKey<EditableTextState> editableTextKey = new GlobalKey<EditableTextS
     // and onSubmission callbacks.
   });
 
-  testWidgets('When "next" is pressed callbacks are invoked: onEditingComplete > onSubmitted',
-          (WidgetTester tester) async {
-    final GlobalKey<EditableTextState> editableTextKey = new GlobalKey<EditableTextState>();
+  testWidgets(
+      'When "next" is pressed callbacks are invoked: onEditingComplete > onSubmitted',
+      (WidgetTester tester) async {
+    final GlobalKey<EditableTextState> editableTextKey =
+        new GlobalKey<EditableTextState>();
     final FocusNode focusNode = new FocusNode();
 
     bool onEditingCompleteCalled = false;
@@ -598,10 +686,14 @@ final GlobalKey<EditableTextState> editableTextKey = new GlobalKey<EditableTextS
     // and onSubmission callbacks.
   });
 
-  testWidgets('Changing controller updates EditableText', (WidgetTester tester) async {
-    final GlobalKey<EditableTextState> editableTextKey = new GlobalKey<EditableTextState>();
-    final TextEditingController controller1 = new TextEditingController(text: 'Wibble');
-    final TextEditingController controller2 = new TextEditingController(text: 'Wobble');
+  testWidgets('Changing controller updates EditableText',
+      (WidgetTester tester) async {
+    final GlobalKey<EditableTextState> editableTextKey =
+        new GlobalKey<EditableTextState>();
+    final TextEditingController controller1 =
+        new TextEditingController(text: 'Wibble');
+    final TextEditingController controller2 =
+        new TextEditingController(text: 'Wobble');
     TextEditingController currentController = controller1;
     StateSetter setState;
 
@@ -617,11 +709,13 @@ final GlobalKey<EditableTextState> editableTextKey = new GlobalKey<EditableTextS
                   key: editableTextKey,
                   controller: currentController,
                   focusNode: new FocusNode(),
-                  style: new Typography(platform: TargetPlatform.android).black.subhead,
+                  style: new Typography(platform: TargetPlatform.android)
+                      .black
+                      .subhead,
                   cursorColor: Colors.blue,
                   selectionControls: materialTextSelectionControls,
                   keyboardType: TextInputType.text,
-                  onChanged: (String value) { },
+                  onChanged: (String value) {},
                 ),
               ),
             ),
@@ -629,6 +723,7 @@ final GlobalKey<EditableTextState> editableTextKey = new GlobalKey<EditableTextS
         },
       );
     }
+
     await tester.pumpWidget(builder());
     await tester.showKeyboard(find.byType(EditableText));
 
@@ -643,7 +738,9 @@ final GlobalKey<EditableTextState> editableTextKey = new GlobalKey<EditableTextS
     await tester.pump();
 
     expect(log, hasLength(1));
-    expect(log.single, isMethodCall(
+    expect(
+        log.single,
+        isMethodCall(
           'TextInput.setEditingState',
           arguments: const <String, dynamic>{
             'text': 'Wobble',
@@ -654,10 +751,11 @@ final GlobalKey<EditableTextState> editableTextKey = new GlobalKey<EditableTextS
             'composingBase': -1,
             'composingExtent': -1,
           },
-    ));
+        ));
   });
 
-  testWidgets('EditableText identifies as text field (w/ focus) in semantics', (WidgetTester tester) async {
+  testWidgets('EditableText identifies as text field (w/ focus) in semantics',
+      (WidgetTester tester) async {
     final SemanticsTester semantics = new SemanticsTester(tester);
 
     await tester.pumpWidget(
@@ -676,18 +774,25 @@ final GlobalKey<EditableTextState> editableTextKey = new GlobalKey<EditableTextS
       ),
     );
 
-    expect(semantics, includesNodeWith(flags: <SemanticsFlag>[SemanticsFlag.isTextField]));
+    expect(semantics,
+        includesNodeWith(flags: <SemanticsFlag>[SemanticsFlag.isTextField]));
 
     await tester.tap(find.byType(EditableText));
     await tester.idle();
     await tester.pump();
 
-    expect(semantics, includesNodeWith(flags: <SemanticsFlag>[SemanticsFlag.isTextField, SemanticsFlag.isFocused]));
+    expect(
+        semantics,
+        includesNodeWith(flags: <SemanticsFlag>[
+          SemanticsFlag.isTextField,
+          SemanticsFlag.isFocused
+        ]));
 
     semantics.dispose();
   });
 
-  testWidgets('EditableText includes text as value in semantics', (WidgetTester tester) async {
+  testWidgets('EditableText includes text as value in semantics',
+      (WidgetTester tester) async {
     final SemanticsTester semantics = new SemanticsTester(tester);
 
     const String value1 = 'EditableText content';
@@ -709,107 +814,73 @@ final GlobalKey<EditableTextState> editableTextKey = new GlobalKey<EditableTextS
       ),
     );
 
-    expect(semantics, includesNodeWith(
-      flags: <SemanticsFlag>[SemanticsFlag.isTextField],
-      value: value1,
-    ));
+    expect(
+        semantics,
+        includesNodeWith(
+          flags: <SemanticsFlag>[SemanticsFlag.isTextField],
+          value: value1,
+        ));
 
     const String value2 = 'Changed the EditableText content';
     controller.text = value2;
     await tester.idle();
     await tester.pump();
 
-    expect(semantics, includesNodeWith(
-      flags: <SemanticsFlag>[SemanticsFlag.isTextField],
-      value: value2,
-    ));
+    expect(
+        semantics,
+        includesNodeWith(
+          flags: <SemanticsFlag>[SemanticsFlag.isTextField],
+          value: value2,
+        ));
 
     semantics.dispose();
   });
 
-  testWidgets('cursor layout has correct radius', (WidgetTester tester) async {
-    final GlobalKey<EditableTextState> editableTextKey = new GlobalKey<EditableTextState>();
-
-    String changedValue;
-    final Widget widget = new MaterialApp(
-      home: new RepaintBoundary(
-        key: const ValueKey<int>(1),
-        child: new EditableText(
-          key: editableTextKey,
-          controller: new TextEditingController(),
-          focusNode: new FocusNode(),
-          style: new Typography(platform: TargetPlatform.android).black.subhead,
-          cursorColor: Colors.blue,
-          selectionControls: materialTextSelectionControls,
-          keyboardType: TextInputType.text,
-          onChanged: (String value) {
-            changedValue = value;
-          },
-          cursorWidth: 15.0,
-          cursorRadius: const Radius.circular(3.0),
-        ),
-      ),
-    );
-    await tester.pumpWidget(widget);
-
-    // Populate a fake clipboard.
-    const String clipboardContent = ' ';
-    SystemChannels.platform.setMockMethodCallHandler((MethodCall methodCall) async {
-      if (methodCall.method == 'Clipboard.getData')
-        return const <String, dynamic>{ 'text': clipboardContent };
-      return null;
-    });
-
-    // Long-press to bring up the text editing controls.
-    final Finder textFinder = find.byKey(editableTextKey);
-    await tester.longPress(textFinder);
-    await tester.pump();
-
-    await tester.tap(find.text('PASTE'));
-    await tester.pump();
-
-    expect(changedValue, clipboardContent);
-
-    await expectLater(
-      find.byKey(const ValueKey<int>(1)),
-      matchesGoldenFile('editable_text_test.1.0.png'),
-    );
-  }, skip: !Platform.isLinux);
-
-  testWidgets('changing selection with keyboard does not show handles', (WidgetTester tester) async {
+  testWidgets('changing selection with keyboard does not show handles',
+      (WidgetTester tester) async {
     const String value1 = 'Hello World';
 
     controller.text = value1;
 
-    await tester.pumpWidget(new MaterialApp(
-      home: new EditableText(
-        controller: controller,
-        selectionControls: materialTextSelectionControls,
-        focusNode: focusNode,
-        style: textStyle,
-        cursorColor: cursorColor,
+    await tester.pumpWidget(
+      new MaterialApp(
+        home: new EditableText(
+          controller: controller,
+          selectionControls: materialTextSelectionControls,
+          focusNode: focusNode,
+          style: textStyle,
+          cursorColor: cursorColor,
+        ),
       ),
-    ));
+    );
 
     // Simulate selection change via tap to show handles.
-    final RenderEditable render = tester.allRenderObjects.firstWhere((RenderObject o) => o.runtimeType == RenderEditable);
-    render.onSelectionChanged(const TextSelection.collapsed(offset: 4), render, SelectionChangedCause.tap);
+    final RenderEditable render = tester.allRenderObjects
+        .firstWhere((RenderObject o) => o.runtimeType == RenderEditable);
+    render.onSelectionChanged(const TextSelection.collapsed(offset: 4), render,
+        SelectionChangedCause.tap);
 
     await tester.pumpAndSettle();
     final EditableTextState textState = tester.state(find.byType(EditableText));
 
     expect(textState.selectionOverlay.handlesAreVisible, isTrue);
-    expect(textState.selectionOverlay.selectionDelegate.textEditingValue.selection, const TextSelection.collapsed(offset: 4));
+    expect(
+        textState.selectionOverlay.selectionDelegate.textEditingValue.selection,
+        const TextSelection.collapsed(offset: 4));
 
     // Simulate selection change via keyboard and expect handles to disappear.
-    render.onSelectionChanged(const TextSelection.collapsed(offset: 10), render, SelectionChangedCause.keyboard);
+    render.onSelectionChanged(const TextSelection.collapsed(offset: 10), render,
+        SelectionChangedCause.keyboard);
     await tester.pumpAndSettle();
 
     expect(textState.selectionOverlay.handlesAreVisible, isFalse);
-    expect(textState.selectionOverlay.selectionDelegate.textEditingValue.selection, const TextSelection.collapsed(offset: 10));
+    expect(
+        textState.selectionOverlay.selectionDelegate.textEditingValue.selection,
+        const TextSelection.collapsed(offset: 10));
   });
 
-  testWidgets('exposes correct cursor movement semantics', (WidgetTester tester) async {
+  testWidgets('exposes correct cursor movement semantics',
+      (WidgetTester tester) async {
     final SemanticsTester semantics = new SemanticsTester(tester);
 
     controller.text = 'test';
@@ -823,46 +894,56 @@ final GlobalKey<EditableTextState> editableTextKey = new GlobalKey<EditableTextS
       ),
     ));
 
-    expect(semantics, includesNodeWith(
-      value: 'test',
-    ));
+    expect(
+        semantics,
+        includesNodeWith(
+          value: 'test',
+        ));
 
-    controller.selection = new TextSelection.collapsed(offset: controller.text.length);
+    controller.selection =
+        new TextSelection.collapsed(offset: controller.text.length);
     await tester.pumpAndSettle();
 
     // At end, can only go backwards.
-    expect(semantics, includesNodeWith(
-      value: 'test',
-      actions: <SemanticsAction>[
-        SemanticsAction.moveCursorBackwardByCharacter,
-        SemanticsAction.setSelection,
-      ],
-    ));
+    expect(
+        semantics,
+        includesNodeWith(
+          value: 'test',
+          actions: <SemanticsAction>[
+            SemanticsAction.moveCursorBackwardByCharacter,
+            SemanticsAction.setSelection,
+          ],
+        ));
 
-    controller.selection = new TextSelection.collapsed(offset: controller.text.length - 2);
+    controller.selection =
+        new TextSelection.collapsed(offset: controller.text.length - 2);
     await tester.pumpAndSettle();
 
     // Somewhere in the middle, can go in both directions.
-    expect(semantics, includesNodeWith(
-      value: 'test',
-      actions: <SemanticsAction>[
-        SemanticsAction.moveCursorBackwardByCharacter,
-        SemanticsAction.moveCursorForwardByCharacter,
-        SemanticsAction.setSelection,
-      ],
-    ));
+    expect(
+        semantics,
+        includesNodeWith(
+          value: 'test',
+          actions: <SemanticsAction>[
+            SemanticsAction.moveCursorBackwardByCharacter,
+            SemanticsAction.moveCursorForwardByCharacter,
+            SemanticsAction.setSelection,
+          ],
+        ));
 
     controller.selection = const TextSelection.collapsed(offset: 0);
     await tester.pumpAndSettle();
 
     // At beginning, can only go forward.
-    expect(semantics, includesNodeWith(
-      value: 'test',
-      actions: <SemanticsAction>[
-        SemanticsAction.moveCursorForwardByCharacter,
-        SemanticsAction.setSelection,
-      ],
-    ));
+    expect(
+        semantics,
+        includesNodeWith(
+          value: 'test',
+          actions: <SemanticsAction>[
+            SemanticsAction.moveCursorForwardByCharacter,
+            SemanticsAction.setSelection,
+          ],
+        ));
 
     semantics.dispose();
   });
@@ -872,7 +953,8 @@ final GlobalKey<EditableTextState> editableTextKey = new GlobalKey<EditableTextS
     const bool doNotExtendSelection = false;
 
     controller.text = 'test';
-    controller.selection = new TextSelection.collapsed(offset: controller.text.length);
+    controller.selection =
+        new TextSelection.collapsed(offset: controller.text.length);
 
     await tester.pumpWidget(new MaterialApp(
       home: new EditableText(
@@ -883,54 +965,66 @@ final GlobalKey<EditableTextState> editableTextKey = new GlobalKey<EditableTextS
       ),
     ));
 
-    expect(semantics, includesNodeWith(
-      value: 'test',
-      actions: <SemanticsAction>[
-        SemanticsAction.moveCursorBackwardByCharacter,
-      ],
-    ));
+    expect(
+        semantics,
+        includesNodeWith(
+          value: 'test',
+          actions: <SemanticsAction>[
+            SemanticsAction.moveCursorBackwardByCharacter,
+          ],
+        ));
 
-    final RenderEditable render = tester.allRenderObjects.firstWhere((RenderObject o) => o.runtimeType == RenderEditable);
+    final RenderEditable render = tester.allRenderObjects
+        .firstWhere((RenderObject o) => o.runtimeType == RenderEditable);
     final int semanticsId = render.debugSemantics.id;
 
     expect(controller.selection.baseOffset, 4);
     expect(controller.selection.extentOffset, 4);
 
-    tester.binding.pipelineOwner.semanticsOwner.performAction(semanticsId, SemanticsAction.moveCursorBackwardByCharacter, doNotExtendSelection);
+    tester.binding.pipelineOwner.semanticsOwner.performAction(semanticsId,
+        SemanticsAction.moveCursorBackwardByCharacter, doNotExtendSelection);
     await tester.pumpAndSettle();
 
     expect(controller.selection.baseOffset, 3);
     expect(controller.selection.extentOffset, 3);
 
-    expect(semantics, includesNodeWith(
-      value: 'test',
-      actions: <SemanticsAction>[
-        SemanticsAction.moveCursorBackwardByCharacter,
-        SemanticsAction.moveCursorForwardByCharacter,
-        SemanticsAction.setSelection,
-      ],
-    ));
+    expect(
+        semantics,
+        includesNodeWith(
+          value: 'test',
+          actions: <SemanticsAction>[
+            SemanticsAction.moveCursorBackwardByCharacter,
+            SemanticsAction.moveCursorForwardByCharacter,
+            SemanticsAction.setSelection,
+          ],
+        ));
 
-    tester.binding.pipelineOwner.semanticsOwner.performAction(semanticsId, SemanticsAction.moveCursorBackwardByCharacter, doNotExtendSelection);
+    tester.binding.pipelineOwner.semanticsOwner.performAction(semanticsId,
+        SemanticsAction.moveCursorBackwardByCharacter, doNotExtendSelection);
     await tester.pumpAndSettle();
-    tester.binding.pipelineOwner.semanticsOwner.performAction(semanticsId, SemanticsAction.moveCursorBackwardByCharacter, doNotExtendSelection);
+    tester.binding.pipelineOwner.semanticsOwner.performAction(semanticsId,
+        SemanticsAction.moveCursorBackwardByCharacter, doNotExtendSelection);
     await tester.pumpAndSettle();
-    tester.binding.pipelineOwner.semanticsOwner.performAction(semanticsId, SemanticsAction.moveCursorBackwardByCharacter, doNotExtendSelection);
+    tester.binding.pipelineOwner.semanticsOwner.performAction(semanticsId,
+        SemanticsAction.moveCursorBackwardByCharacter, doNotExtendSelection);
     await tester.pumpAndSettle();
 
     expect(controller.selection.baseOffset, 0);
     expect(controller.selection.extentOffset, 0);
 
     await tester.pumpAndSettle();
-    expect(semantics, includesNodeWith(
-      value: 'test',
-      actions: <SemanticsAction>[
-        SemanticsAction.moveCursorForwardByCharacter,
-        SemanticsAction.setSelection,
-      ],
-    ));
+    expect(
+        semantics,
+        includesNodeWith(
+          value: 'test',
+          actions: <SemanticsAction>[
+            SemanticsAction.moveCursorForwardByCharacter,
+            SemanticsAction.setSelection,
+          ],
+        ));
 
-    tester.binding.pipelineOwner.semanticsOwner.performAction(semanticsId, SemanticsAction.moveCursorForwardByCharacter, doNotExtendSelection);
+    tester.binding.pipelineOwner.semanticsOwner.performAction(semanticsId,
+        SemanticsAction.moveCursorForwardByCharacter, doNotExtendSelection);
     await tester.pumpAndSettle();
 
     expect(controller.selection.baseOffset, 1);
@@ -939,13 +1033,15 @@ final GlobalKey<EditableTextState> editableTextKey = new GlobalKey<EditableTextS
     semantics.dispose();
   });
 
-  testWidgets('can extend selection with a11y means', (WidgetTester tester) async {
+  testWidgets('can extend selection with a11y means',
+      (WidgetTester tester) async {
     final SemanticsTester semantics = new SemanticsTester(tester);
     const bool extendSelection = true;
     const bool doNotExtendSelection = false;
 
     controller.text = 'test';
-    controller.selection = new TextSelection.collapsed(offset: controller.text.length);
+    controller.selection =
+        new TextSelection.collapsed(offset: controller.text.length);
 
     await tester.pumpWidget(new MaterialApp(
       home: new EditableText(
@@ -956,60 +1052,73 @@ final GlobalKey<EditableTextState> editableTextKey = new GlobalKey<EditableTextS
       ),
     ));
 
-    expect(semantics, includesNodeWith(
-      value: 'test',
-      actions: <SemanticsAction>[
-        SemanticsAction.moveCursorBackwardByCharacter,
-      ],
-    ));
+    expect(
+        semantics,
+        includesNodeWith(
+          value: 'test',
+          actions: <SemanticsAction>[
+            SemanticsAction.moveCursorBackwardByCharacter,
+          ],
+        ));
 
-    final RenderEditable render = tester.allRenderObjects.firstWhere((RenderObject o) => o.runtimeType == RenderEditable);
+    final RenderEditable render = tester.allRenderObjects
+        .firstWhere((RenderObject o) => o.runtimeType == RenderEditable);
     final int semanticsId = render.debugSemantics.id;
 
     expect(controller.selection.baseOffset, 4);
     expect(controller.selection.extentOffset, 4);
 
-    tester.binding.pipelineOwner.semanticsOwner.performAction(semanticsId, SemanticsAction.moveCursorBackwardByCharacter, extendSelection);
+    tester.binding.pipelineOwner.semanticsOwner.performAction(semanticsId,
+        SemanticsAction.moveCursorBackwardByCharacter, extendSelection);
     await tester.pumpAndSettle();
 
     expect(controller.selection.baseOffset, 4);
     expect(controller.selection.extentOffset, 3);
 
-    expect(semantics, includesNodeWith(
-      value: 'test',
-      actions: <SemanticsAction>[
-        SemanticsAction.moveCursorBackwardByCharacter,
-        SemanticsAction.moveCursorForwardByCharacter,
-        SemanticsAction.setSelection,
-      ],
-    ));
+    expect(
+        semantics,
+        includesNodeWith(
+          value: 'test',
+          actions: <SemanticsAction>[
+            SemanticsAction.moveCursorBackwardByCharacter,
+            SemanticsAction.moveCursorForwardByCharacter,
+            SemanticsAction.setSelection,
+          ],
+        ));
 
-    tester.binding.pipelineOwner.semanticsOwner.performAction(semanticsId, SemanticsAction.moveCursorBackwardByCharacter, extendSelection);
+    tester.binding.pipelineOwner.semanticsOwner.performAction(semanticsId,
+        SemanticsAction.moveCursorBackwardByCharacter, extendSelection);
     await tester.pumpAndSettle();
-    tester.binding.pipelineOwner.semanticsOwner.performAction(semanticsId, SemanticsAction.moveCursorBackwardByCharacter, extendSelection);
+    tester.binding.pipelineOwner.semanticsOwner.performAction(semanticsId,
+        SemanticsAction.moveCursorBackwardByCharacter, extendSelection);
     await tester.pumpAndSettle();
-    tester.binding.pipelineOwner.semanticsOwner.performAction(semanticsId, SemanticsAction.moveCursorBackwardByCharacter, extendSelection);
+    tester.binding.pipelineOwner.semanticsOwner.performAction(semanticsId,
+        SemanticsAction.moveCursorBackwardByCharacter, extendSelection);
     await tester.pumpAndSettle();
 
     expect(controller.selection.baseOffset, 4);
     expect(controller.selection.extentOffset, 0);
 
     await tester.pumpAndSettle();
-    expect(semantics, includesNodeWith(
-      value: 'test',
-      actions: <SemanticsAction>[
-        SemanticsAction.moveCursorForwardByCharacter,
-        SemanticsAction.setSelection,
-      ],
-    ));
+    expect(
+        semantics,
+        includesNodeWith(
+          value: 'test',
+          actions: <SemanticsAction>[
+            SemanticsAction.moveCursorForwardByCharacter,
+            SemanticsAction.setSelection,
+          ],
+        ));
 
-    tester.binding.pipelineOwner.semanticsOwner.performAction(semanticsId, SemanticsAction.moveCursorForwardByCharacter, doNotExtendSelection);
+    tester.binding.pipelineOwner.semanticsOwner.performAction(semanticsId,
+        SemanticsAction.moveCursorForwardByCharacter, doNotExtendSelection);
     await tester.pumpAndSettle();
 
     expect(controller.selection.baseOffset, 1);
     expect(controller.selection.extentOffset, 1);
 
-    tester.binding.pipelineOwner.semanticsOwner.performAction(semanticsId, SemanticsAction.moveCursorForwardByCharacter, extendSelection);
+    tester.binding.pipelineOwner.semanticsOwner.performAction(semanticsId,
+        SemanticsAction.moveCursorForwardByCharacter, extendSelection);
     await tester.pumpAndSettle();
 
     expect(controller.selection.baseOffset, 1);
@@ -1018,7 +1127,8 @@ final GlobalKey<EditableTextState> editableTextKey = new GlobalKey<EditableTextS
     semantics.dispose();
   });
 
-  testWidgets('password fields have correct semantics', (WidgetTester tester) async {
+  testWidgets('password fields have correct semantics',
+      (WidgetTester tester) async {
     final SemanticsTester semantics = new SemanticsTester(tester);
 
     controller.text = 'super-secret-password!!1';
@@ -1035,30 +1145,40 @@ final GlobalKey<EditableTextState> editableTextKey = new GlobalKey<EditableTextS
 
     final String expectedValue = '•' * controller.text.length;
 
-    expect(semantics, hasSemantics(new TestSemantics(
-      children: <TestSemantics>[
-        new TestSemantics.rootChild(
-          children: <TestSemantics>[
+    expect(
+        semantics,
+        hasSemantics(
             new TestSemantics(
-              flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
-              children:  <TestSemantics>[
-                new TestSemantics(
-                  flags: <SemanticsFlag>[SemanticsFlag.isTextField, SemanticsFlag.isObscured],
-                  value: expectedValue,
-                  textDirection: TextDirection.ltr,
+              children: <TestSemantics>[
+                new TestSemantics.rootChild(
+                  children: <TestSemantics>[
+                    new TestSemantics(
+                      flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
+                      children: <TestSemantics>[
+                        new TestSemantics(
+                          flags: <SemanticsFlag>[
+                            SemanticsFlag.isTextField,
+                            SemanticsFlag.isObscured
+                          ],
+                          value: expectedValue,
+                          textDirection: TextDirection.ltr,
+                        ),
+                      ],
+                    ),
+                  ],
                 ),
               ],
             ),
-          ],
-        ),
-      ],
-    ), ignoreTransform: true, ignoreRect: true, ignoreId: true));
+            ignoreTransform: true,
+            ignoreRect: true,
+            ignoreId: true));
 
     semantics.dispose();
   });
 
   group('a11y copy/cut/paste', () {
-    Future<Null> _buildApp(MockTextSelectionControls controls, WidgetTester tester) {
+    Future<Null> _buildApp(
+        MockTextSelectionControls controls, WidgetTester tester) {
       return tester.pumpWidget(new MaterialApp(
         home: new EditableText(
           controller: controller,
@@ -1074,11 +1194,13 @@ final GlobalKey<EditableTextState> editableTextKey = new GlobalKey<EditableTextS
 
     setUp(() {
       controller.text = 'test';
-      controller.selection = new TextSelection.collapsed(offset: controller.text.length);
+      controller.selection =
+          new TextSelection.collapsed(offset: controller.text.length);
 
       controls = new MockTextSelectionControls();
       when(controls.buildHandle(any, any, any)).thenReturn(new Container());
-      when(controls.buildToolbar(any, any, any, any)).thenReturn(new Container());
+      when(controls.buildToolbar(any, any, any, any))
+          .thenReturn(new Container());
     });
 
     testWidgets('are exposed', (WidgetTester tester) async {
@@ -1092,63 +1214,73 @@ final GlobalKey<EditableTextState> editableTextKey = new GlobalKey<EditableTextS
       await tester.tap(find.byType(EditableText));
       await tester.pump();
 
-      expect(semantics, includesNodeWith(
-        value: 'test',
-        actions: <SemanticsAction>[
-          SemanticsAction.moveCursorBackwardByCharacter,
-          SemanticsAction.setSelection,
-        ],
-      ));
+      expect(
+          semantics,
+          includesNodeWith(
+            value: 'test',
+            actions: <SemanticsAction>[
+              SemanticsAction.moveCursorBackwardByCharacter,
+              SemanticsAction.setSelection,
+            ],
+          ));
 
       when(controls.canCopy(any)).thenReturn(true);
       await _buildApp(controls, tester);
-      expect(semantics, includesNodeWith(
-        value: 'test',
-        actions: <SemanticsAction>[
-          SemanticsAction.moveCursorBackwardByCharacter,
-          SemanticsAction.setSelection,
-          SemanticsAction.copy,
-        ],
-      ));
+      expect(
+          semantics,
+          includesNodeWith(
+            value: 'test',
+            actions: <SemanticsAction>[
+              SemanticsAction.moveCursorBackwardByCharacter,
+              SemanticsAction.setSelection,
+              SemanticsAction.copy,
+            ],
+          ));
 
       when(controls.canCopy(any)).thenReturn(false);
       when(controls.canPaste(any)).thenReturn(true);
       await _buildApp(controls, tester);
-      expect(semantics, includesNodeWith(
-        value: 'test',
-        actions: <SemanticsAction>[
-          SemanticsAction.moveCursorBackwardByCharacter,
-          SemanticsAction.setSelection,
-          SemanticsAction.paste,
-        ],
-      ));
+      expect(
+          semantics,
+          includesNodeWith(
+            value: 'test',
+            actions: <SemanticsAction>[
+              SemanticsAction.moveCursorBackwardByCharacter,
+              SemanticsAction.setSelection,
+              SemanticsAction.paste,
+            ],
+          ));
 
       when(controls.canPaste(any)).thenReturn(false);
       when(controls.canCut(any)).thenReturn(true);
       await _buildApp(controls, tester);
-      expect(semantics, includesNodeWith(
-        value: 'test',
-        actions: <SemanticsAction>[
-          SemanticsAction.moveCursorBackwardByCharacter,
-          SemanticsAction.setSelection,
-          SemanticsAction.cut,
-        ],
-      ));
+      expect(
+          semantics,
+          includesNodeWith(
+            value: 'test',
+            actions: <SemanticsAction>[
+              SemanticsAction.moveCursorBackwardByCharacter,
+              SemanticsAction.setSelection,
+              SemanticsAction.cut,
+            ],
+          ));
 
       when(controls.canCopy(any)).thenReturn(true);
       when(controls.canCut(any)).thenReturn(true);
       when(controls.canPaste(any)).thenReturn(true);
       await _buildApp(controls, tester);
-      expect(semantics, includesNodeWith(
-        value: 'test',
-        actions: <SemanticsAction>[
-          SemanticsAction.moveCursorBackwardByCharacter,
-          SemanticsAction.setSelection,
-          SemanticsAction.cut,
-          SemanticsAction.copy,
-          SemanticsAction.paste,
-        ],
-      ));
+      expect(
+          semantics,
+          includesNodeWith(
+            value: 'test',
+            actions: <SemanticsAction>[
+              SemanticsAction.moveCursorBackwardByCharacter,
+              SemanticsAction.setSelection,
+              SemanticsAction.cut,
+              SemanticsAction.copy,
+              SemanticsAction.paste,
+            ],
+          ));
 
       semantics.dispose();
     });
@@ -1166,38 +1298,44 @@ final GlobalKey<EditableTextState> editableTextKey = new GlobalKey<EditableTextS
       final SemanticsOwner owner = tester.binding.pipelineOwner.semanticsOwner;
       const int expectedNodeId = 4;
 
-      expect(semantics, hasSemantics(new TestSemantics.root(
-        children: <TestSemantics>[
-          new TestSemantics.rootChild(
-            id: 1,
-            children: <TestSemantics>[
-              new TestSemantics(
-                id: 2,
-                flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
+      expect(
+          semantics,
+          hasSemantics(
+              new TestSemantics.root(
                 children: <TestSemantics>[
                   new TestSemantics.rootChild(
-                    id: expectedNodeId,
-                    flags: <SemanticsFlag>[
-                      SemanticsFlag.isTextField,
-                      SemanticsFlag.isFocused
+                    id: 1,
+                    children: <TestSemantics>[
+                      new TestSemantics(
+                        id: 2,
+                        flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
+                        children: <TestSemantics>[
+                          new TestSemantics.rootChild(
+                            id: expectedNodeId,
+                            flags: <SemanticsFlag>[
+                              SemanticsFlag.isTextField,
+                              SemanticsFlag.isFocused
+                            ],
+                            actions: <SemanticsAction>[
+                              SemanticsAction.moveCursorBackwardByCharacter,
+                              SemanticsAction.setSelection,
+                              SemanticsAction.copy,
+                              SemanticsAction.cut,
+                              SemanticsAction.paste
+                            ],
+                            value: 'test',
+                            textSelection: new TextSelection.collapsed(
+                                offset: controller.text.length),
+                            textDirection: TextDirection.ltr,
+                          ),
+                        ],
+                      ),
                     ],
-                    actions: <SemanticsAction>[
-                      SemanticsAction.moveCursorBackwardByCharacter,
-                      SemanticsAction.setSelection,
-                      SemanticsAction.copy,
-                      SemanticsAction.cut,
-                      SemanticsAction.paste
-                    ],
-                    value: 'test',
-                    textSelection: new TextSelection.collapsed(offset: controller.text.length),
-                    textDirection: TextDirection.ltr,
                   ),
                 ],
               ),
-            ],
-          ),
-        ],
-      ), ignoreRect: true, ignoreTransform: true));
+              ignoreRect: true,
+              ignoreTransform: true));
 
       owner.performAction(expectedNodeId, SemanticsAction.copy);
       verify(controls.handleCopy(any)).called(1);
@@ -1212,7 +1350,8 @@ final GlobalKey<EditableTextState> editableTextKey = new GlobalKey<EditableTextS
     });
   });
 
-  testWidgets('allows customizing text style in subclasses', (WidgetTester tester) async {
+  testWidgets('allows customizing text style in subclasses',
+      (WidgetTester tester) async {
     controller.text = 'Hello World';
 
     await tester.pumpWidget(new MaterialApp(
@@ -1225,11 +1364,13 @@ final GlobalKey<EditableTextState> editableTextKey = new GlobalKey<EditableTextS
     ));
 
     // Simulate selection change via tap to show handles.
-    final RenderEditable render = tester.allRenderObjects.firstWhere((RenderObject o) => o.runtimeType == RenderEditable);
+    final RenderEditable render = tester.allRenderObjects
+        .firstWhere((RenderObject o) => o.runtimeType == RenderEditable);
     expect(render.text.style.fontStyle, FontStyle.italic);
   });
 
-  testWidgets('autofocus sets cursor to the end of text', (WidgetTester tester) async {
+  testWidgets('autofocus sets cursor to the end of text',
+      (WidgetTester tester) async {
     const String text = 'hello world';
     final FocusScopeNode focusScopeNode = new FocusScopeNode();
     final FocusNode focusNode = new FocusNode();
@@ -1264,12 +1405,12 @@ class CustomStyleEditableText extends EditableText {
     Color cursorColor,
     FocusNode focusNode,
     TextStyle style,
-  }): super(
-      controller:controller,
-      cursorColor: cursorColor,
-      focusNode: focusNode,
-      style: style,
-  );
+  }) : super(
+          controller: controller,
+          cursorColor: cursorColor,
+          focusNode: focusNode,
+          style: style,
+        );
   @override
   CustomStyleEditableTextState createState() =>
       new CustomStyleEditableTextState();
@@ -1279,8 +1420,8 @@ class CustomStyleEditableTextState extends EditableTextState {
   @override
   TextSpan buildTextSpan() {
     return new TextSpan(
-        style: const TextStyle(fontStyle: FontStyle.italic),
-        text: widget.controller.value.text,
+      style: const TextStyle(fontStyle: FontStyle.italic),
+      text: widget.controller.value.text,
     );
   }
 }

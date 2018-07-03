@@ -208,7 +208,7 @@ class EditableText extends StatefulWidget {
     this.onSelectionChanged,
     List<TextInputFormatter> inputFormatters,
     this.rendererIgnoresPointer = false,
-    this.cursorWidth = 2.0,
+    this.cursorWidth = 1.0,
     this.cursorRadius,
   }) : assert(controller != null),
        assert(focusNode != null),
@@ -357,7 +357,7 @@ class EditableText extends StatefulWidget {
 
   /// How thick the cursor will be.
   ///
-  /// Defaults to 2.0
+  /// Defaults to 1.0
   final double cursorWidth;
 
   /// How rounded the corners of the cursor should be.
