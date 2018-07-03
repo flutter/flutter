@@ -34,7 +34,7 @@ void main() {
     List<Map<String, dynamic>> rasterizeTimeSequenceInMillis(List<int> sequence) {
       final List<Map<String, dynamic>> result = <Map<String, dynamic>>[];
       int t = 0;
-      for(int duration in sequence) {
+      for (int duration in sequence) {
         result.add(begin(t));
         t += duration * 1000;
         result.add(end(t));
