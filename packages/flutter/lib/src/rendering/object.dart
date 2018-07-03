@@ -5,6 +5,7 @@
 import 'dart:developer';
 import 'dart:ui' as ui show PictureRecorder;
 
+import 'package:flutter/animation.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/painting.dart';
@@ -84,7 +85,7 @@ class PaintingContext {
   ///
   ///  * [RenderObject.isRepaintBoundary], which determines if a [RenderObject]
   ///    has a composited layer.
-  static void repaintCompositedChild(RenderObject child, { bool debugAlsoPaintedParent: false }) {
+  static void repaintCompositedChild(RenderObject child, { bool debugAlsoPaintedParent = false }) {
     assert(child.isRepaintBoundary);
     assert(child._needsPaint);
     assert(() {
@@ -234,8 +235,6 @@ class PaintingContext {
     _canvas = null;
   }
 
-  static final Paint _defaultPaint = new Paint();
-
   /// Hints that the painting in the current layer is complex and would benefit
   /// from caching.
   ///
@@ -350,11 +349,9 @@ class PaintingContext {
     } else {
       canvas
         ..save()
-        ..clipRRect(offsetClipRRect)
-        ..saveLayer(offsetBounds, _defaultPaint);
+        ..clipRRect(offsetClipRRect);
       painter(this, offset);
       canvas
-        ..restore()
         ..restore();
     }
   }
@@ -379,11 +376,9 @@ class PaintingContext {
     } else {
       canvas
         ..save()
-        ..clipPath(clipPath.shift(offset))
-        ..saveLayer(bounds.shift(offset), _defaultPaint);
+        ..clipPath(clipPath.shift(offset));
       painter(this, offset);
       canvas
-        ..restore()
         ..restore();
     }
   }
@@ -519,7 +514,7 @@ abstract class Constraints {
   ///
   /// Returns the same as [isNormalized] if asserts are disabled.
   bool debugAssertIsValid({
-    bool isAppliedConstraint: false,
+    bool isAppliedConstraint = false,
     InformationCollector informationCollector
   }) {
     assert(isNormalized);
@@ -822,7 +817,12 @@ class PipelineOwner {
   SemanticsOwner get semanticsOwner => _semanticsOwner;
   SemanticsOwner _semanticsOwner;
 
-  int _outstandingSemanticsHandle = 0;
+  /// The number of clients registered to listen for semantics.
+  ///
+  /// The number is increased whenever [ensureSemantics] is called and decreased
+  /// when [SemanticsHandle.dispose] is called.
+  int get debugOutstandingSemanticsHandles => _outstandingSemanticsHandles;
+  int _outstandingSemanticsHandles = 0;
 
   /// Opens a [SemanticsHandle] and calls [listener] whenever the semantics tree
   /// updates.
@@ -837,8 +837,8 @@ class PipelineOwner {
   /// objects for a given [PipelineOwner] are closed, the [PipelineOwner] stops
   /// maintaining the semantics tree.
   SemanticsHandle ensureSemantics({ VoidCallback listener }) {
-    _outstandingSemanticsHandle += 1;
-    if (_outstandingSemanticsHandle == 1) {
+    _outstandingSemanticsHandles += 1;
+    if (_outstandingSemanticsHandles == 1) {
       assert(_semanticsOwner == null);
       _semanticsOwner = new SemanticsOwner();
       if (onSemanticsOwnerCreated != null)
@@ -849,8 +849,8 @@ class PipelineOwner {
 
   void _didDisposeSemanticsHandle() {
     assert(_semanticsOwner != null);
-    _outstandingSemanticsHandle -= 1;
-    if (_outstandingSemanticsHandle == 0) {
+    _outstandingSemanticsHandles -= 1;
+    if (_outstandingSemanticsHandles == 0) {
       _semanticsOwner.dispose();
       _semanticsOwner = null;
       if (onSemanticsOwnerDisposed != null)
@@ -1339,7 +1339,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   /// [markParentNeedsLayout], in the case where the parent needs to be laid out
   /// as well as the child.
   ///
-  /// If [sizedByParent] has changed, called
+  /// If [sizedByParent] has changed, calls
   /// [markNeedsLayoutForSizedByParentChange] instead of [markNeedsLayout].
   void markNeedsLayout() {
     assert(_debugCanPerformMutations);
@@ -1480,7 +1480,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   /// children unconditionally. It is the [layout] method's responsibility (as
   /// implemented here) to return early if the child does not need to do any
   /// work to update its layout information.
-  void layout(Constraints constraints, { bool parentUsesSize: false }) {
+  void layout(Constraints constraints, { bool parentUsesSize = false }) {
     assert(constraints != null);
     assert(constraints.debugAssertIsValid(
       isAppliedConstraint: true,
@@ -1636,7 +1636,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   /// children, passing true for parentUsesSize if your layout information is
   /// dependent on your child's layout information. Passing true for
   /// parentUsesSize ensures that this render object will undergo layout if the
-  /// child undergoes layout. Otherwise, the child can changes its layout
+  /// child undergoes layout. Otherwise, the child can change its layout
   /// information without informing this render object.
   @protected
   void performLayout();
@@ -1721,7 +1721,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   ///
   /// This can be used to record metrics about whether the node should actually
   /// be a repaint boundary.
-  void debugRegisterRepaintBoundaryPaint({ bool includedParent: true, bool includedChild: false }) { }
+  void debugRegisterRepaintBoundaryPaint({ bool includedParent = true, bool includedChild = false }) { }
 
   /// Whether this render object always needs compositing.
   ///
@@ -1865,6 +1865,12 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   /// Once [markNeedsPaint] has been called on a render object,
   /// [debugNeedsPaint] returns true for that render object until just after
   /// the pipeline owner has called [paint] on the render object.
+  ///
+  /// See also:
+  ///
+  ///  * [RepaintBoundary], to scope a subtree of render objects to their own
+  ///    layer, thus limiting the number of nodes that [markNeedsPaint] must mark
+  ///    dirty.
   void markNeedsPaint() {
     assert(owner == null || !owner.debugDoingPaint);
     if (_needsPaint)
@@ -2031,6 +2037,9 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
 
   /// An estimate of the bounds within which this render object will paint.
   /// Useful for debugging flags such as [debugPaintLayerBordersEnabled].
+  ///
+  /// These are also the bounds used by [showOnScreen] to make a [RenderObject]
+  /// visible on screen.
   Rect get paintBounds;
 
   /// Override this method to paint debugging information.
@@ -2499,9 +2508,9 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   /// will be prefixed by that string.
   @override
   String toStringDeep({
-    String prefixLineOne: '',
-    String prefixOtherLines: '',
-    DiagnosticLevel minLevel: DiagnosticLevel.debug,
+    String prefixLineOne = '',
+    String prefixOtherLines = '',
+    DiagnosticLevel minLevel = DiagnosticLevel.debug,
   }) {
     RenderObject debugPreviousActiveLayout;
     assert(() {
@@ -2528,8 +2537,8 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   /// [toStringDeep], but does not recurse to any children.
   @override
   String toStringShallow({
-    String joiner: '; ',
-    DiagnosticLevel minLevel: DiagnosticLevel.debug,
+    String joiner = '; ',
+    DiagnosticLevel minLevel = DiagnosticLevel.debug,
   }) {
     RenderObject debugPreviousActiveLayout;
     assert(() {
@@ -2565,14 +2574,35 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   @override
   List<DiagnosticsNode> debugDescribeChildren() => <DiagnosticsNode>[];
 
-  /// Attempt to make this or a descendant RenderObject visible on screen.
+  /// Attempt to make (a portion of) this or a descendant [RenderObject] visible
+  /// on screen.
   ///
-  /// If [child] is provided, that [RenderObject] is made visible. If [child] is
-  /// omitted, this [RenderObject] is made visible.
-  void showOnScreen([RenderObject child]) {
+  /// If `descendant` is provided, that [RenderObject] is made visible. If
+  /// `descendant` is omitted, this [RenderObject] is made visible.
+  ///
+  /// The optional `rect` parameter describes which area of that [RenderObject]
+  /// should be shown on screen. If `rect` is null, the entire
+  /// [RenderObject] (as defined by its [paintBounds]) will be revealed. The
+  /// `rect` parameter is interpreted relative to the coordinate system of
+  /// `descendant` if that argument is provided and relative to this
+  /// [RenderObject] otherwise.
+  ///
+  /// The `duration` parameter can be set to a non-zero value to bring the
+  /// target object on screen in an animation defined by `curve`.
+  void showOnScreen({
+    RenderObject descendant,
+    Rect rect,
+    Duration duration = Duration.zero,
+    Curve curve = Curves.ease,
+  }) {
     if (parent is RenderObject) {
       final RenderObject renderParent = parent;
-      renderParent.showOnScreen(child ?? this);
+      renderParent.showOnScreen(
+        descendant: descendant ?? this,
+        rect: rect,
+        duration: duration,
+        curve: curve,
+      );
     }
   }
 }
@@ -2985,7 +3015,7 @@ class FlutterErrorDetailsForRendering extends FlutterErrorDetails {
     String context,
     this.renderObject,
     InformationCollector informationCollector,
-    bool silent: false
+    bool silent = false
   }) : super(
     exception: exception,
     stack: stack,

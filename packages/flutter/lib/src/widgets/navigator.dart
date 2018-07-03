@@ -287,7 +287,7 @@ class RouteSettings {
   /// Creates data used to construct routes.
   const RouteSettings({
     this.name,
-    this.isInitialRoute: false,
+    this.isInitialRoute = false,
   });
 
   /// Creates a copy of this route settings object with the given fields
@@ -551,6 +551,100 @@ class NavigatorObserver {
 /// because it doesn't depend on its animation parameters (elided with `_`
 /// and `__` in this example). The transition is built on every frame
 /// for its duration.
+///
+/// ### Nesting Navigators
+///
+/// An app can use more than one Navigator. Nesting one Navigator below
+/// another Navigator can be used to create an "inner journey" such as tabbed
+/// navigation, user registration, store checkout, or other independent journeys
+/// that represent a subsection of your overall application.
+///
+/// #### Real World Example
+///
+/// It is standard practice for iOS apps to use tabbed navigation where each
+/// tab maintains its own navigation history. Therefore, each tab has its own
+/// [Navigator], creating a kind of "parallel navigation."
+///
+/// In addition to the parallel navigation of the tabs, it is still possible to
+/// launch full-screen pages that completely cover the tabs. For example: an
+/// on-boarding flow, or an alert dialog. Therefore, there must exist a "root"
+/// [Navigator] that sits above the tab navigation. As a result, each of the
+/// tab's [Navigator]s are actually nested [Navigator]s sitting below a single
+/// root [Navigator].
+///
+/// The nested [Navigator]s for tabbed navigation sit in [WidgetApp] and
+/// [CupertinoTabView], so you don't need to worry about nested [Navigator]s
+/// in this situation, but it's a real world example where nested [Navigator]s
+/// are used.
+///
+/// #### Sample Code
+///
+/// The following example demonstrates how a nested [Navigator] can be used to
+/// present a standalone user registration journey.
+///
+/// Even though this example uses two [Navigator]s to demonstrate nested
+/// [Navigator]s, a similar result is possible using only a single [Navigator].
+///
+/// ```dart
+/// class MyApp extends StatelessWidget {
+///  @override
+///  Widget build(BuildContext context) {
+///    return new MaterialApp(
+///      // ...some parameters omitted...
+///      // MaterialApp contains our top-level Navigator
+///      initialRoute: '/',
+///      routes: {
+///        '/': (BuildContext context) => new HomePage(),
+///        '/signup': (BuildContext context) => new SignUpPage(),
+///      },
+///    );
+///  }
+/// }
+///
+/// class SignUpPage extends StatelessWidget {
+///  @override
+///  Widget build(BuildContext context) {
+///    // SignUpPage builds its own Navigator which ends up being a nested
+///    // Navigator in our app.
+///    return new Navigator(
+///      initialRoute: 'signup/personal_info',
+///      onGenerateRoute: (RouteSettings settings) {
+///        WidgetBuilder builder;
+///        switch (settings.name) {
+///          case 'signup/personal_info':
+///            // Assume CollectPersonalInfoPage collects personal info and then
+///            // navigates to 'signup/choose_credentials'.
+///            builder = (BuildContext _) => new CollectPersonalInfoPage();
+///            break;
+///          case 'signup/choose_credentials':
+///            // Assume ChooseCredentialsPage collects new credentials and then
+///            // invokes 'onSignupComplete()'.
+///            builder = (BuildContext _) => new ChooseCredentialsPage(
+///              onSignupComplete: () {
+///                // Referencing Navigator.of(context) from here refers to the
+///                // top level Navigator because SignUpPage is above the
+///                // nested Navigator that it created. Therefore, this pop()
+///                // will pop the entire "sign up" journey and return to the
+///                // "/" route, AKA HomePage.
+///                Navigator.of(context).pop();
+///              },
+///            );
+///            break;
+///          default:
+///            throw new Exception('Invalid route: ${settings.name}');
+///        }
+///        return new MaterialPageRoute(builder: builder, settings: settings);
+///      },
+///    );
+///  }
+/// }
+/// ```
+///
+/// [Navigator.of] operates on the nearest ancestor [Navigator] from the given
+/// [BuildContext]. Be sure to provide a [BuildContext] below the intended
+/// [Navigator], especially in large [build] methods where nested [Navigator]s
+/// are created. The [Builder] widget can be used to access a [BuildContext] at
+/// a desired location in the widget subtree.
 class Navigator extends StatefulWidget {
   /// Creates a widget that maintains a stack-based history of child widgets.
   ///
@@ -560,7 +654,7 @@ class Navigator extends StatefulWidget {
     this.initialRoute,
     @required this.onGenerateRoute,
     this.onUnknownRoute,
-    this.observers: const <NavigatorObserver>[]
+    this.observers = const <NavigatorObserver>[]
   }) : assert(onGenerateRoute != null),
        super(key: key);
 
@@ -850,7 +944,8 @@ class Navigator extends StatefulWidget {
   ///
   /// ```dart
   /// void _completeLogin() {
-  ///   Navigator.pushReplacement(context, new MaterialPageRoute(builder: (BuildContext context) => new MyHomePage()));
+  ///   Navigator.pushReplacement(
+  ///       context, new MaterialPageRoute(builder: (BuildContext context) => new MyHomePage()));
   /// }
   /// ```
   @optionalTypeArgs
@@ -1168,8 +1263,8 @@ class Navigator extends StatefulWidget {
   /// instances of [Navigator].
   static NavigatorState of(
     BuildContext context, {
-      bool rootNavigator: false,
-      bool nullOk: false,
+      bool rootNavigator = false,
+      bool nullOk = false,
     }) {
     final NavigatorState navigator = rootNavigator
         ? context.rootAncestorStateOfType(const TypeMatcher<NavigatorState>())
@@ -1304,7 +1399,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
 
   bool _debugLocked = false; // used to prevent re-entrant calls to push, pop, and friends
 
-  Route<T> _routeNamed<T>(String name, { bool allowNull: false }) {
+  Route<T> _routeNamed<T>(String name, { bool allowNull = false }) {
     assert(!_debugLocked);
     assert(name != null);
     final RouteSettings settings = new RouteSettings(
@@ -1465,7 +1560,8 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
   ///
   /// ```dart
   /// void _doOpenPage() {
-  ///   navigator.pushReplacement(new MaterialPageRoute(builder: (BuildContext context) => new MyHomePage()));
+  ///   navigator.pushReplacement(
+  ///       new MaterialPageRoute(builder: (BuildContext context) => new MyHomePage()));
   /// }
   /// ```
   @optionalTypeArgs

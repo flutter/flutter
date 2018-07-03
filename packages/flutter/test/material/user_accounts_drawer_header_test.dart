@@ -13,9 +13,9 @@ const Key avatarC = const Key('C');
 const Key avatarD = const Key('D');
 
 Future<Null> pumpTestWidget(WidgetTester tester, {
-  bool withName: true,
-  bool withEmail: true,
-  bool withOnDetailsPressedHandler: true,
+  bool withName = true,
+  bool withEmail = true,
+  bool withOnDetailsPressedHandler = true,
 }) async {
   await tester.pumpWidget(
     new MaterialApp(

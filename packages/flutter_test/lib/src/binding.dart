@@ -169,6 +169,10 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   int get microtaskCount;
 
   /// The default test timeout for tests when using this binding.
+  ///
+  /// The [AutomatedTestWidgetsFlutterBinding] layers in an additional timeout
+  /// mechanism beyond this, with much more aggressive timeouts. See
+  /// [AutomatedTestWidgetsFlutterBinding.addTime].
   test_package.Timeout get defaultTestTimeout;
 
   /// The current time.
@@ -194,16 +198,16 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   /// this method works when the test is run with `flutter run`.
   Future<Null> pump([ Duration duration, EnginePhase newPhase = EnginePhase.sendSemanticsUpdate ]);
 
-  /// Runs a [callback] that performs real asynchronous work.
+  /// Runs a `callback` that performs real asynchronous work.
   ///
   /// This is intended for callers who need to call asynchronous methods where
   /// the methods spawn isolates or OS threads and thus cannot be executed
   /// synchronously by calling [pump].
   ///
-  /// If [callback] completes successfully, this will return the future
-  /// returned by [callback].
+  /// If `callback` completes successfully, this will return the future
+  /// returned by `callback`.
   ///
-  /// If [callback] completes with an error, the error will be caught by the
+  /// If `callback` completes with an error, the error will be caught by the
   /// Flutter framework and made available via [takeException], and this method
   /// will return a future that completes will `null`.
   ///
@@ -211,7 +215,14 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   /// are required to wait for the returned future to complete before calling
   /// this method again. Attempts to do otherwise will result in a
   /// [TestFailure] error being thrown.
-  Future<T> runAsync<T>(Future<T> callback());
+  ///
+  /// The `additionalTime` argument is used by the
+  /// [AutomatedTestWidgetsFlutterBinding] implementation to increase the
+  /// current timeout. See [AutomatedTestWidgetsFlutterBinding.addTime] for
+  /// details. The value is ignored by the [LiveTestWidgetsFlutterBinding].
+  Future<T> runAsync<T>(Future<T> callback(), {
+    Duration additionalTime = const Duration(milliseconds: 250),
+  });
 
   /// Artificially calls dispatchLocaleChanged on the Widget binding,
   /// then flushes microtasks.
@@ -255,7 +266,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
 
   @override
   void dispatchEvent(PointerEvent event, HitTestResult result, {
-    TestBindingEventSource source: TestBindingEventSource.device
+    TestBindingEventSource source = TestBindingEventSource.device
   }) {
     assert(source == TestBindingEventSource.test);
     super.dispatchEvent(event, result);
@@ -337,7 +348,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   /// The `description` is used by the [LiveTestWidgetsFlutterBinding] to
   /// show a label on the screen during the test. The description comes from
   /// the value passed to [testWidgets]. It must not be null.
-  Future<Null> runTest(Future<Null> testBody(), VoidCallback invariantTester, { String description: '' });
+  Future<Null> runTest(Future<Null> testBody(), VoidCallback invariantTester, { String description = '' });
 
   /// This is called during test execution before and after the body has been
   /// executed.
@@ -349,22 +360,20 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   }
 
   Zone _parentZone;
-  Completer<Null> _currentTestCompleter;
-  String _currentTestDescription; // set from _runTest to _testCompletionHandler
 
-  void _testCompletionHandler() {
-    // This can get called twice, in the case of a Future without listeners failing, and then
-    // our main future completing.
-    assert(Zone.current == _parentZone);
-    assert(_currentTestCompleter != null);
-    if (_pendingExceptionDetails != null) {
-      debugPrint = debugPrintOverride; // just in case the test overrides it -- otherwise we won't see the error!
-      reportTestException(_pendingExceptionDetails, _currentTestDescription);
-      _pendingExceptionDetails = null;
-    }
-    _currentTestDescription = null;
-    if (!_currentTestCompleter.isCompleted)
-      _currentTestCompleter.complete(null);
+  VoidCallback _createTestCompletionHandler(String testDescription, Completer<Null> completer) {
+    return () {
+      // This can get called twice, in the case of a Future without listeners failing, and then
+      // our main future completing.
+      assert(Zone.current == _parentZone);
+      if (_pendingExceptionDetails != null) {
+        debugPrint = debugPrintOverride; // just in case the test overrides it -- otherwise we won't see the error!
+        reportTestException(_pendingExceptionDetails, testDescription);
+        _pendingExceptionDetails = null;
+      }
+      if (!completer.isCompleted)
+        completer.complete(null);
+    };
   }
 
   /// Called when the framework catches an exception, even if that exception is
@@ -379,10 +388,10 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
     // The LiveTestWidgetsFlutterBinding overrides this to report the exception to the console.
   }
 
-  Future<Null> _runTest(Future<Null> testBody(), VoidCallback invariantTester, String description) {
+  Future<Null> _runTest(Future<Null> testBody(), VoidCallback invariantTester, String description, {
+    Future<Null> timeout,
+  }) {
     assert(description != null);
-    assert(_currentTestDescription == null);
-    _currentTestDescription = description; // cleared by _testCompletionHandler
     assert(inTest);
     _oldExceptionHandler = FlutterError.onError;
     int _exceptionCount = 0; // number of un-taken exceptions
@@ -405,97 +414,98 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
         _pendingExceptionDetails = details;
       }
     };
-    _currentTestCompleter = new Completer<Null>();
-    final ZoneSpecification errorHandlingZoneSpecification = new ZoneSpecification(
-      handleUncaughtError: (Zone self, ZoneDelegate parent, Zone zone, dynamic exception, StackTrace stack) {
-        if (_currentTestCompleter.isCompleted) {
-          // Well this is not a good sign.
-          // Ideally, once the test has failed we would stop getting errors from the test.
-          // However, if someone tries hard enough they could get in a state where this happens.
-          // If we silently dropped these errors on the ground, nobody would ever know. So instead
-          // we report them to the console. They don't cause test failures, but hopefully someone
-          // will see them in the logs at some point.
-          debugPrint = debugPrintOverride; // just in case the test overrides it -- otherwise we won't see the error!
-          FlutterError.dumpErrorToConsole(new FlutterErrorDetails(
-            exception: exception,
-            stack: _unmangle(stack),
-            context: 'running a test (but after the test had completed)',
-            library: 'Flutter test framework'
-          ), forceReport: true);
-          return;
-        }
-        // This is where test failures, e.g. those in expect(), will end up.
-        // Specifically, runUnaryGuarded() will call this synchronously and
-        // return our return value if _runTestBody fails synchronously (which it
-        // won't, so this never happens), and Future will call this when the
-        // Future completes with an error and it would otherwise call listeners
-        // if the listener is in a different zone (which it would be for the
-        // `whenComplete` handler below), or if the Future completes with an
-        // error and the future has no listeners at all.
-        // This handler further calls the onError handler above, which sets
-        // _pendingExceptionDetails. Nothing gets printed as a result of that
-        // call unless we already had an exception pending, because in general
-        // we want people to be able to cause the framework to report exceptions
-        // and then use takeException to verify that they were really caught.
-        // Now, if we actually get here, this isn't going to be one of those
-        // cases. We only get here if the test has actually failed. So, once
-        // we've carefully reported it, we then immediately end the test by
-        // calling the _testCompletionHandler in the _parentZone.
-        // We have to manually call _testCompletionHandler because if the Future
-        // library calls us, it is maybe _instead_ of calling a registered
-        // listener from a different zone. In our case, that would be instead of
-        // calling the whenComplete() listener below.
-        // We have to call it in the parent zone because if we called it in
-        // _this_ zone, the test framework would find this zone was the current
-        // zone and helpfully throw the error in this zone, causing us to be
-        // directly called again.
-        String treeDump;
-        try {
-          treeDump = renderViewElement?.toStringDeep() ?? '<no tree>';
-        } catch (exception) {
-          treeDump = '<additional error caught while dumping tree: $exception>';
-        }
-        final StringBuffer expectLine = new StringBuffer();
-        final int stackLinesToOmit = reportExpectCall(stack, expectLine);
-        FlutterError.reportError(new FlutterErrorDetails(
+    final Completer<Null> testCompleter = new Completer<Null>();
+    final VoidCallback testCompletionHandler = _createTestCompletionHandler(description, testCompleter);
+    void handleUncaughtError(dynamic exception, StackTrace stack) {
+      if (testCompleter.isCompleted) {
+        // Well this is not a good sign.
+        // Ideally, once the test has failed we would stop getting errors from the test.
+        // However, if someone tries hard enough they could get in a state where this happens.
+        // If we silently dropped these errors on the ground, nobody would ever know. So instead
+        // we report them to the console. They don't cause test failures, but hopefully someone
+        // will see them in the logs at some point.
+        debugPrint = debugPrintOverride; // just in case the test overrides it -- otherwise we won't see the error!
+        FlutterError.dumpErrorToConsole(new FlutterErrorDetails(
           exception: exception,
           stack: _unmangle(stack),
-          context: 'running a test',
-          library: 'Flutter test framework',
-          stackFilter: (Iterable<String> frames) {
-            return FlutterError.defaultStackFilter(frames.skip(stackLinesToOmit));
-          },
-          informationCollector: (StringBuffer information) {
-            if (stackLinesToOmit > 0)
-              information.writeln(expectLine.toString());
-            if (showAppDumpInErrors) {
-              information.writeln('At the time of the failure, the widget tree looked as follows:');
-              information.writeln('# ${treeDump.split("\n").takeWhile((String s) => s != "").join("\n# ")}');
-            }
-            if (description.isNotEmpty)
-              information.writeln('The test description was:\n$description');
+          context: 'running a test (but after the test had completed)',
+          library: 'Flutter test framework'
+        ), forceReport: true);
+        return;
+      }
+      // This is where test failures, e.g. those in expect(), will end up.
+      // Specifically, runUnaryGuarded() will call this synchronously and
+      // return our return value if _runTestBody fails synchronously (which it
+      // won't, so this never happens), and Future will call this when the
+      // Future completes with an error and it would otherwise call listeners
+      // if the listener is in a different zone (which it would be for the
+      // `whenComplete` handler below), or if the Future completes with an
+      // error and the future has no listeners at all.
+      //
+      // This handler further calls the onError handler above, which sets
+      // _pendingExceptionDetails. Nothing gets printed as a result of that
+      // call unless we already had an exception pending, because in general
+      // we want people to be able to cause the framework to report exceptions
+      // and then use takeException to verify that they were really caught.
+      // Now, if we actually get here, this isn't going to be one of those
+      // cases. We only get here if the test has actually failed. So, once
+      // we've carefully reported it, we then immediately end the test by
+      // calling the testCompletionHandler in the _parentZone.
+      //
+      // We have to manually call testCompletionHandler because if the Future
+      // library calls us, it is maybe _instead_ of calling a registered
+      // listener from a different zone. In our case, that would be instead of
+      // calling the whenComplete() listener below.
+      //
+      // We have to call it in the parent zone because if we called it in
+      // _this_ zone, the test framework would find this zone was the current
+      // zone and helpfully throw the error in this zone, causing us to be
+      // directly called again.
+      String treeDump;
+      try {
+        treeDump = renderViewElement?.toStringDeep() ?? '<no tree>';
+      } catch (exception) {
+        treeDump = '<additional error caught while dumping tree: $exception>';
+      }
+      final StringBuffer expectLine = new StringBuffer();
+      final int stackLinesToOmit = reportExpectCall(stack, expectLine);
+      FlutterError.reportError(new FlutterErrorDetails(
+        exception: exception,
+        stack: _unmangle(stack),
+        context: 'running a test',
+        library: 'Flutter test framework',
+        stackFilter: (Iterable<String> frames) {
+          return FlutterError.defaultStackFilter(frames.skip(stackLinesToOmit));
+        },
+        informationCollector: (StringBuffer information) {
+          if (stackLinesToOmit > 0)
+            information.writeln(expectLine.toString());
+          if (showAppDumpInErrors) {
+            information.writeln('At the time of the failure, the widget tree looked as follows:');
+            information.writeln('# ${treeDump.split("\n").takeWhile((String s) => s != "").join("\n# ")}');
           }
-        ));
-        assert(_parentZone != null);
-        assert(_pendingExceptionDetails != null, 'A test overrode FlutterError.onError but either failed to return it to its original state, or had unexpected additional errors that it could not handle. Typically, this is caused by using expect() before restoring FlutterError.onError.');
-        _parentZone.run<void>(_testCompletionHandler);
+          if (description.isNotEmpty)
+            information.writeln('The test description was:\n$description');
+        }
+      ));
+      assert(_parentZone != null);
+      assert(_pendingExceptionDetails != null, 'A test overrode FlutterError.onError but either failed to return it to its original state, or had unexpected additional errors that it could not handle. Typically, this is caused by using expect() before restoring FlutterError.onError.');
+      _parentZone.run<void>(testCompletionHandler);
+    }
+    final ZoneSpecification errorHandlingZoneSpecification = new ZoneSpecification(
+      handleUncaughtError: (Zone self, ZoneDelegate parent, Zone zone, dynamic exception, StackTrace stack) {
+        handleUncaughtError(exception, stack);
       }
     );
     _parentZone = Zone.current;
     final Zone testZone = _parentZone.fork(specification: errorHandlingZoneSpecification);
     testZone.runBinary(_runTestBody, testBody, invariantTester)
-      .whenComplete(_testCompletionHandler);
-    asyncBarrier(); // When using AutomatedTestWidgetsFlutterBinding, this flushes the microtasks.
-    return _currentTestCompleter.future;
+      .whenComplete(testCompletionHandler);
+    timeout?.catchError(handleUncaughtError);
+    return testCompleter.future;
   }
 
   Future<Null> _runTestBody(Future<Null> testBody(), VoidCallback invariantTester) async {
-    // Delay this function by a microtask.
-    // Otherwise it will open a scope immediately, which is then open when
-    // the `asyncBarrier` is invoked. The `asyncBarrier` is immediately
-    // following the call to `testZone.runBinary(_runTestBody)`, so delaying
-    // by one microtask is enough to ensure that the timing is correct.
-    await new Future<Null>.microtask(() {});
     assert(inTest);
 
     runApp(new Container(key: new UniqueKey(), child: _preTestMessage)); // Reset the tree to a known state.
@@ -521,6 +531,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
     }
 
     assert(inTest);
+    asyncBarrier(); // When using AutomatedTestWidgetsFlutterBinding, this flushes the microtasks.
     return null;
   }
 
@@ -591,7 +602,6 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
     assert(inTest);
     FlutterError.onError = _oldExceptionHandler;
     _pendingExceptionDetails = null;
-    _currentTestCompleter = null;
     _parentZone = null;
   }
 }
@@ -612,7 +622,7 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
     ui.window.onDrawFrame = null;
   }
 
-  FakeAsync _fakeAsync;
+  FakeAsync _currentFakeAsync; // set in runTest; cleared in postTest
   Completer<void> _pendingAsyncTasks;
 
   @override
@@ -628,14 +638,16 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
   @override
   bool get checkIntrinsicSizes => true;
 
+  // The timeout here is absurdly high because we do our own timeout logic and
+  // this is just a backstop.
   @override
-  test_package.Timeout get defaultTestTimeout => const test_package.Timeout(const Duration(seconds: 5));
+  test_package.Timeout get defaultTestTimeout => const test_package.Timeout(const Duration(minutes: 5));
 
   @override
-  bool get inTest => _fakeAsync != null;
+  bool get inTest => _currentFakeAsync != null;
 
   @override
-  int get microtaskCount => _fakeAsync.microtaskCount;
+  int get microtaskCount => _currentFakeAsync.microtaskCount;
 
   @override
   Future<Null> pump([ Duration duration, EnginePhase newPhase = EnginePhase.sendSemanticsUpdate ]) {
@@ -643,23 +655,27 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
       assert(inTest);
       assert(_clock != null);
       if (duration != null)
-        _fakeAsync.elapse(duration);
+        _currentFakeAsync.elapse(duration);
       _phase = newPhase;
       if (hasScheduledFrame) {
-        _fakeAsync.flushMicrotasks();
+        addTime(const Duration(milliseconds: 100));
+        _currentFakeAsync.flushMicrotasks();
         handleBeginFrame(new Duration(
           milliseconds: _clock.now().millisecondsSinceEpoch,
         ));
-        _fakeAsync.flushMicrotasks();
+        _currentFakeAsync.flushMicrotasks();
         handleDrawFrame();
       }
-      _fakeAsync.flushMicrotasks();
+      _currentFakeAsync.flushMicrotasks();
       return new Future<Null>.value();
     });
   }
 
   @override
-  Future<T> runAsync<T>(Future<T> callback()) {
+  Future<T> runAsync<T>(Future<T> callback(), {
+    Duration additionalTime = const Duration(milliseconds: 250),
+  }) {
+    assert(additionalTime != null);
     assert(() {
       if (_pendingAsyncTasks == null)
         return true;
@@ -684,6 +700,8 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
         },
       ),
     );
+
+    addTime(additionalTime);
 
     return realAsyncZone.run(() {
       _pendingAsyncTasks = new Completer<void>();
@@ -712,15 +730,15 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
     // We override the default version of this so that the application-startup warm-up frame
     // does not schedule timers which we might never get around to running.
     handleBeginFrame(null);
-    _fakeAsync.flushMicrotasks();
+    _currentFakeAsync.flushMicrotasks();
     handleDrawFrame();
-    _fakeAsync.flushMicrotasks();
+    _currentFakeAsync.flushMicrotasks();
   }
 
   @override
   Future<Null> idle() {
     final Future<Null> result = super.idle();
-    _fakeAsync.elapse(const Duration());
+    _currentFakeAsync.elapse(const Duration());
     return result;
   }
 
@@ -757,48 +775,103 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
     }
   }
 
+  Duration _timeout;
+  Stopwatch _timeoutStopwatch;
+  Timer _timeoutTimer;
+  Completer<Null> _timeoutCompleter;
+
+  void _checkTimeout(Timer timer) {
+    assert(_timeoutTimer == timer);
+    if (_timeoutStopwatch.elapsed > _timeout) {
+      _timeoutCompleter.completeError(
+        new TimeoutException(
+          'The test exceeded the timeout. It may have hung.\n'
+          'Consider using "addTime" to increase the timeout before expensive operations.',
+          _timeout,
+        ),
+      );
+    }
+  }
+
+  /// Increase the timeout for the current test by the given duration.
+  ///
+  /// Tests by default time out after two seconds, but the timeout can be
+  /// increased before an expensive operation to allow it to complete without
+  /// hitting the test timeout.
+  ///
+  /// By default, each [pump] and [pumpWidget] call increases the timeout by a
+  /// hundred milliseconds, and each [matchesGoldenFile] expectation increases
+  /// it by several seconds.
+  ///
+  /// In general, unit tests are expected to run very fast, and this method is
+  /// usually not necessary.
+  ///
+  /// The granularity of timeouts is coarse: the time is checked once per
+  /// second, and only when the test is not executing. It is therefore possible
+  /// for a timeout to be exceeded by hundreds of milliseconds and for the test
+  /// to still succeed. If precise timing is required, it should be implemented
+  /// as a part of the test rather than relying on this mechanism.
+  ///
+  /// See also:
+  ///
+  ///  * [defaultTestTimeout], the maximum that the timeout can reach.
+  ///    (That timeout is implemented by the test package.)
+  void addTime(Duration duration) {
+    assert(_timeout != null, 'addTime can only be called during a test.');
+    _timeout += duration;
+  }
+
   @override
-  Future<Null> runTest(Future<Null> testBody(), VoidCallback invariantTester, { String description: '' }) {
+  Future<Null> runTest(Future<Null> testBody(), VoidCallback invariantTester, {
+    String description = '',
+    Duration timeout = const Duration(seconds: 2),
+  }) {
     assert(description != null);
     assert(!inTest);
-    assert(_fakeAsync == null);
+    assert(_currentFakeAsync == null);
     assert(_clock == null);
-    _fakeAsync = new FakeAsync();
-    _clock = _fakeAsync.getClock(new DateTime.utc(2015, 1, 1));
+
+    _timeout = timeout;
+    _timeoutStopwatch = new Stopwatch()..start();
+    _timeoutTimer = new Timer.periodic(const Duration(seconds: 1), _checkTimeout);
+    _timeoutCompleter = new Completer<Null>();
+
+    final FakeAsync fakeAsync = new FakeAsync();
+    _currentFakeAsync = fakeAsync; // reset in postTest
+    _clock = fakeAsync.getClock(new DateTime.utc(2015, 1, 1));
     Future<Null> testBodyResult;
-    _fakeAsync.run((FakeAsync fakeAsync) {
-      assert(fakeAsync == _fakeAsync);
-      testBodyResult = _runTest(testBody, invariantTester, description);
+    fakeAsync.run((FakeAsync localFakeAsync) {
+      assert(fakeAsync == _currentFakeAsync);
+      assert(fakeAsync == localFakeAsync);
+      testBodyResult = _runTest(testBody, invariantTester, description, timeout: _timeoutCompleter.future);
       assert(inTest);
     });
 
     return new Future<Null>.microtask(() async {
-      // Run all queued microtasks.
-      await new Future<Null>.microtask(() {});
-      // When the test had an exception, the test-framework already
-      // ran the teardown functions, removing the _fakeAsync function.
-      if (_fakeAsync == null)
-        return null;
-      // Resolve interplay between fake async and real async calls.
-      _fakeAsync.flushMicrotasks();
-      while (_pendingAsyncTasks != null) {
-        await _pendingAsyncTasks.future;
-        _fakeAsync.flushMicrotasks();
-      }
-
       // testBodyResult is a Future that was created in the Zone of the
       // fakeAsync. This means that if we await it here, it will register a
       // microtask to handle the future _in the fake async zone_. We avoid this
-      // by returning the wrapped microtask future that we've created _outside_
-      // the fake async zone.
-      return testBodyResult;
+      // by calling '.then' in the current zone. While flushing the microtasks
+      // of the fake-zone below, the new future will be completed and can then
+      // be used without fakeAsync.
+      final Future<Null> resultFuture = testBodyResult.then<Null>((_) {
+        // Do nothing.
+      });
+
+      // Resolve interplay between fake async and real async calls.
+      fakeAsync.flushMicrotasks();
+      while (_pendingAsyncTasks != null) {
+        await _pendingAsyncTasks.future;
+        fakeAsync.flushMicrotasks();
+      }
+      return resultFuture;
     });
   }
 
   @override
   void asyncBarrier() {
-    assert(_fakeAsync != null);
-    _fakeAsync.flushMicrotasks();
+    assert(_currentFakeAsync != null);
+    _currentFakeAsync.flushMicrotasks();
     super.asyncBarrier();
   }
 
@@ -806,23 +879,28 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
   void _verifyInvariants() {
     super._verifyInvariants();
     assert(
-      _fakeAsync.periodicTimerCount == 0,
+      _currentFakeAsync.periodicTimerCount == 0,
       'A periodic Timer is still running even after the widget tree was disposed.'
     );
     assert(
-      _fakeAsync.nonPeriodicTimerCount == 0,
+      _currentFakeAsync.nonPeriodicTimerCount == 0,
       'A Timer is still pending even after the widget tree was disposed.'
     );
-    assert(_fakeAsync.microtaskCount == 0); // Shouldn't be possible.
+    assert(_currentFakeAsync.microtaskCount == 0); // Shouldn't be possible.
   }
 
   @override
   void postTest() {
     super.postTest();
-    assert(_fakeAsync != null);
+    assert(_currentFakeAsync != null);
     assert(_clock != null);
     _clock = null;
-    _fakeAsync = null;
+    _currentFakeAsync = null;
+    _timeoutCompleter = null;
+    _timeoutTimer.cancel();
+    _timeoutTimer = null;
+    _timeoutStopwatch = null;
+    _timeout = null;
   }
 
 }
@@ -995,13 +1073,6 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
 
   @override
   void handleBeginFrame(Duration rawTimeStamp) {
-    // Don't run this function when `handleBeginFrame` was invoked
-    // immediately before without a call of `handleDrawFrame` in between.
-    // TODO(floitsch): Remove this line when the spurious calls from the
-    //                 framework don't happen anymore. See
-    //                 https://github.com/flutter/flutter/issues/17963
-    if (_doDrawThisFrame != null)
-      return;
     assert(_doDrawThisFrame == null);
     if (_expectingFrame ||
         (framePolicy == LiveTestWidgetsFlutterBindingFramePolicy.fullyLive) ||
@@ -1016,13 +1087,6 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
 
   @override
   void handleDrawFrame() {
-    // Don't run this function when `handleBeginFrame` wasn't invoked
-    // immediately before.
-    // TODO(floitsch): Remove this line when the spurious calls from the
-    //                 framework don't happen anymore. See
-    //                 https://github.com/flutter/flutter/issues/17963
-    if (_doDrawThisFrame == null)
-      return;
     assert(_doDrawThisFrame != null);
     if (_doDrawThisFrame)
       super.handleDrawFrame();
@@ -1068,7 +1132,7 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
 
   @override
   void dispatchEvent(PointerEvent event, HitTestResult result, {
-    TestBindingEventSource source: TestBindingEventSource.device
+    TestBindingEventSource source = TestBindingEventSource.device
   }) {
     switch (source) {
       case TestBindingEventSource.test:
@@ -1112,7 +1176,9 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
   }
 
   @override
-  Future<T> runAsync<T>(Future<T> callback()) async {
+  Future<T> runAsync<T>(Future<T> callback(), {
+    Duration additionalTime = const Duration(milliseconds: 250),
+  }) async {
     assert(() {
       if (!_runningAsyncTasks)
         return true;
@@ -1141,7 +1207,7 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
   }
 
   @override
-  Future<Null> runTest(Future<Null> testBody(), VoidCallback invariantTester, { String description: '' }) async {
+  Future<Null> runTest(Future<Null> testBody(), VoidCallback invariantTester, { String description = '' }) async {
     assert(description != null);
     assert(!inTest);
     _inTest = true;
@@ -1198,7 +1264,7 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
 /// size onto the actual display using the [BoxFit.contain] algorithm.
 class TestViewConfiguration extends ViewConfiguration {
   /// Creates a [TestViewConfiguration] with the given size. Defaults to 800x600.
-  TestViewConfiguration({ Size size: _kDefaultTestViewportSize })
+  TestViewConfiguration({ Size size = _kDefaultTestViewportSize })
     : _paintMatrix = _getMatrix(size, ui.window.devicePixelRatio),
       _hitTestMatrix = _getMatrix(size, 1.0),
       super(size: size);
@@ -1390,7 +1456,7 @@ class _MockHttpClient implements HttpClient {
   set badCertificateCallback(bool Function(X509Certificate cert, String host, int port) callback) {}
 
   @override
-  void close({bool force: false}) {}
+  void close({bool force = false}) {}
 
   @override
   Future<HttpClientRequest> delete(String host, int port, String path) {

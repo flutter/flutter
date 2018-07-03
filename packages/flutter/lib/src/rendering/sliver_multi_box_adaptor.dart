@@ -315,7 +315,7 @@ abstract class RenderSliverMultiBoxAdaptor extends RenderSliver
   /// that call either, except for the one that is created and returned by
   /// `createChild`.
   @protected
-  bool addInitialChild({ int index: 0, double layoutOffset: 0.0 }) {
+  bool addInitialChild({ int index = 0, double layoutOffset = 0.0 }) {
     assert(_debugAssertChildListLocked());
     assert(firstChild == null);
     _createOrObtainChild(index, after: null);
@@ -345,7 +345,7 @@ abstract class RenderSliverMultiBoxAdaptor extends RenderSliver
   /// for the one that is created and returned by `createChild`.
   @protected
   RenderBox insertAndLayoutLeadingChild(BoxConstraints childConstraints, {
-    bool parentUsesSize: false,
+    bool parentUsesSize = false,
   }) {
     assert(_debugAssertChildListLocked());
     final int index = indexOf(firstChild) - 1;
@@ -373,7 +373,7 @@ abstract class RenderSliverMultiBoxAdaptor extends RenderSliver
   @protected
   RenderBox insertAndLayoutChild(BoxConstraints childConstraints, {
     @required RenderBox after,
-    bool parentUsesSize: false,
+    bool parentUsesSize = false,
   }) {
     assert(_debugAssertChildListLocked());
     assert(after != null);
@@ -524,7 +524,12 @@ abstract class RenderSliverMultiBoxAdaptor extends RenderSliver
       );
       if (addExtent)
         childOffset += mainAxisUnit * paintExtentOf(child);
-      context.paintChild(child, childOffset);
+
+      // If the child's visible interval (mainAxisDelta, mainAxisDelta + paintExtentOf(child))
+      // does not intersect the paint extent interval (0, constraints.remainingPaintExtent), it's hidden.
+      if (mainAxisDelta < constraints.remainingPaintExtent && mainAxisDelta + paintExtentOf(child) > 0)
+        context.paintChild(child, childOffset);
+
       child = childAfter(child);
     }
   }

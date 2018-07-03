@@ -11,11 +11,12 @@ import 'globals.dart';
 /// Information about a build to be performed or used.
 class BuildInfo {
   const BuildInfo(this.mode, this.flavor, {
-    this.previewDart2: false,
-    this.trackWidgetCreation,
+    this.previewDart2 = false,
+    this.trackWidgetCreation = false,
+    this.buildSnapshot = false,
     this.extraFrontEndOptions,
     this.extraGenSnapshotOptions,
-    this.preferSharedLibrary,
+    this.buildSharedLibrary,
     this.targetPlatform,
     this.fileSystemRoots,
     this.fileSystemScheme,
@@ -42,6 +43,9 @@ class BuildInfo {
   /// Whether the build should track widget creation locations.
   final bool trackWidgetCreation;
 
+  /// Whether the build should create VM snapshot instead of using prebuilt one from engine.
+  final bool buildSnapshot;
+
   /// Extra command-line options for front-end.
   final String extraFrontEndOptions;
 
@@ -49,7 +53,7 @@ class BuildInfo {
   final String extraGenSnapshotOptions;
 
   /// Whether to prefer AOT compiling to a *so file.
-  final bool preferSharedLibrary;
+  final bool buildSharedLibrary;
 
   /// Target platform for the build (e.g. android_arm versus android_arm64).
   final TargetPlatform targetPlatform;
@@ -95,9 +99,10 @@ class BuildInfo {
       new BuildInfo(mode, flavor,
           previewDart2: previewDart2,
           trackWidgetCreation: trackWidgetCreation,
+          buildSnapshot: buildSnapshot,
           extraFrontEndOptions: extraFrontEndOptions,
           extraGenSnapshotOptions: extraGenSnapshotOptions,
-          preferSharedLibrary: preferSharedLibrary,
+          buildSharedLibrary: buildSharedLibrary,
           targetPlatform: targetPlatform);
 }
 

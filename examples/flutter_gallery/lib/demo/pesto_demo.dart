@@ -15,7 +15,7 @@ class PestoDemo extends StatelessWidget {
 }
 
 
-const String _kSmallLogoImage = 'pesto/logo_small.png';
+const String _kSmallLogoImage = 'logos/pesto/logo_small.png';
 const String _kGalleryAssetsPackage = 'flutter_gallery_assets';
 const double _kAppBarHeight = 128.0;
 const double _kFabHalfSize = 28.0; // TODO(mpcomplete): needs to adapt to screen size
@@ -45,9 +45,9 @@ class PestoFavorites extends StatelessWidget {
 
 class PestoStyle extends TextStyle {
   const PestoStyle({
-    double fontSize: 12.0,
+    double fontSize = 12.0,
     FontWeight fontWeight,
-    Color color: Colors.black87,
+    Color color = Colors.black87,
     double letterSpacing,
     double height,
   }) : super(
@@ -250,13 +250,13 @@ class _PestoLogoState extends State<PestoLogo> {
 
 // A card with the recipe's image, author, and title.
 class RecipeCard extends StatelessWidget {
-  final TextStyle titleStyle = const PestoStyle(fontSize: 24.0, fontWeight: FontWeight.w600);
-  final TextStyle authorStyle = const PestoStyle(fontWeight: FontWeight.w500, color: Colors.black54);
-
   const RecipeCard({ Key key, this.recipe, this.onTap }) : super(key: key);
 
   final Recipe recipe;
   final VoidCallback onTap;
+
+  TextStyle get titleStyle => const PestoStyle(fontSize: 24.0, fontWeight: FontWeight.w600);
+  TextStyle get authorStyle => const PestoStyle(fontWeight: FontWeight.w500, color: Colors.black54);
 
   @override
   Widget build(BuildContext context) {
@@ -571,10 +571,10 @@ const List<Recipe> kPestoRecipes = const <Recipe>[
   const Recipe(
     name: 'Pesto Bruschetta',
     author: 'Peter Carlsson',
-    ingredientsImagePath: 'pesto/quick.png',
+    ingredientsImagePath: 'food/icons/quick.png',
     ingredientsImagePackage: _kGalleryAssetsPackage,
     description: 'Bask in greens this season by trying this delightful take on traditional bruschetta. Top with a dollop of homemade pesto, and season with freshly ground sea salt and pepper.',
-    imagePath: 'pesto/image1.jpg',
+    imagePath: 'food/image1.jpg',
     imagePackage: _kGalleryAssetsPackage,
     ingredients: const<RecipeIngredient>[
       const RecipeIngredient(amount: '6 pieces', description: 'Mozzarella cheese'),
@@ -591,10 +591,10 @@ const List<Recipe> kPestoRecipes = const <Recipe>[
   const Recipe(
     name: 'Rustic purple mash',
     author: 'Trevor Hansen',
-    ingredientsImagePath: 'pesto/veggie.png',
+    ingredientsImagePath: 'food/icons/veggie.png',
     ingredientsImagePackage: _kGalleryAssetsPackage,
     description: 'Abundant in color, and healthy, delicious goodness, cooking with these South American purple potatoes is a treat. Boil, mash, bake, or roast them. For taste cook with chicken stock, and a dash of extra virgin olive oil.',
-    imagePath: 'pesto/image2.jpg',
+    imagePath: 'food/image2.jpg',
     imagePackage: _kGalleryAssetsPackage,
     ingredients: const<RecipeIngredient>[
       const RecipeIngredient(amount: '2 lbs', description: 'Purple potatoes, skin on'),
@@ -611,10 +611,10 @@ const List<Recipe> kPestoRecipes = const <Recipe>[
   const Recipe(
     name: 'Bacon Sprouts',
     author: 'Ali Connors',
-    ingredientsImagePath: 'pesto/main.png',
+    ingredientsImagePath: 'food/icons/main.png',
     ingredientsImagePackage: _kGalleryAssetsPackage,
     description: 'This beautiful sprouts recipe is the most glorious side dish on a cold winter’s night. Construct it with bacon or fake-on, but always make sure the sprouts are deliciously seasoned and appropriately sautéed.',
-    imagePath: 'pesto/image3.jpg',
+    imagePath: 'food/image3.jpg',
     imagePackage: _kGalleryAssetsPackage,
     ingredients: const<RecipeIngredient>[
       const RecipeIngredient(amount: '2 lbs', description: 'Brussel sprouts'),
@@ -632,10 +632,10 @@ const List<Recipe> kPestoRecipes = const <Recipe>[
   const Recipe(
     name: 'Oven Sausage',
     author: 'Sandra Adams',
-    ingredientsImagePath: 'pesto/meat.png',
+    ingredientsImagePath: 'food/icons/meat.png',
     ingredientsImagePackage: _kGalleryAssetsPackage,
     description: 'Robust cuts of portuguese sausage add layers of flavour. Bake or fry until sausages are slightly browned and with a crispy skin. Serve warm and with cuts of pineapple for a delightful mix of sweet and savory flavour. This is the perfect dish after a swim in the sea.',
-    imagePath: 'pesto/image4.jpg',
+    imagePath: 'food/image4.jpg',
     imagePackage: _kGalleryAssetsPackage,
     ingredients: const<RecipeIngredient>[
       const RecipeIngredient(amount: '1 1/2 lbs', description: 'Linguisa'),
@@ -649,10 +649,10 @@ const List<Recipe> kPestoRecipes = const <Recipe>[
   const Recipe(
     name: 'Chicken tostadas',
     author: 'Peter Carlsson',
-    ingredientsImagePath: 'pesto/spicy.png',
+    ingredientsImagePath: 'food/icons/spicy.png',
     ingredientsImagePackage: _kGalleryAssetsPackage,
     description: 'Crisp flavours and a bit of spice make this roasted chicken dish an easy go to when cooking for large groups. Top with Baja sauce for an extra kick of spice.',
-    imagePath: 'pesto/image5.jpg',
+    imagePath: 'food/image5.jpg',
     imagePackage: _kGalleryAssetsPackage,
     ingredients: const<RecipeIngredient>[
       const RecipeIngredient(amount: '4-6', description: 'Small corn tortillas'),
@@ -668,10 +668,10 @@ const List<Recipe> kPestoRecipes = const <Recipe>[
   const Recipe(
     name: 'Coconut rice',
     author: 'Ali Connors',
-    ingredientsImagePath: 'pesto/healthy.png',
+    ingredientsImagePath: 'food/icons/healthy.png',
     ingredientsImagePackage: _kGalleryAssetsPackage,
     description: 'This dish is a terrific pairing to almost any main. Bonus- it’s quick, easy to make, and turns even the simplest of dishes into a delicacy. Sweet coconut cream will leave your mouth watering, with yummy caramelized flecks of rice adding an extra bit of taste. Fluff with fork before serving for best results.',
-    imagePath: 'pesto/image6.jpg',
+    imagePath: 'food/image6.jpg',
     imagePackage: _kGalleryAssetsPackage,
     ingredients: const<RecipeIngredient>[
       const RecipeIngredient(amount: '2 cups', description: 'Jasmine rice'),
@@ -688,10 +688,10 @@ const List<Recipe> kPestoRecipes = const <Recipe>[
   const Recipe(
     name: 'Gin basil cocktail',
     author: 'Trevor Hansen',
-    ingredientsImagePath: 'pesto/quick.png',
+    ingredientsImagePath: 'food/icons/quick.png',
     ingredientsImagePackage: _kGalleryAssetsPackage,
     description: 'This mellow and herb filled blending of simple ingredients is easy enough to mix that a novice host will feel like a seasoned bartender. Top with crushed basil, shake or stir.',
-    imagePath: 'pesto/image7.jpg',
+    imagePath: 'food/image7.jpg',
     imagePackage: _kGalleryAssetsPackage,
     ingredients: const<RecipeIngredient>[
       const RecipeIngredient(amount: '3 parts', description: 'Gin'),
@@ -707,10 +707,10 @@ const List<Recipe> kPestoRecipes = const <Recipe>[
   const Recipe(
     name: 'Seared sesame fish',
     author: 'Ali Connors',
-    ingredientsImagePath: 'pesto/fish.png',
+    ingredientsImagePath: 'food/icons/fish.png',
     ingredientsImagePackage: _kGalleryAssetsPackage,
     description: 'Cuts of fish like this are perfect for simple searing with bright flavours. Try Sesame seeds on these fillets for crusty skin filled with crunch. For added flavour try dipping in a homemade ponzu sauce - delicious.',
-    imagePath: 'pesto/image8.jpg',
+    imagePath: 'food/image8.jpg',
     imagePackage: _kGalleryAssetsPackage,
     ingredients: const<RecipeIngredient>[
       const RecipeIngredient(amount: '1 ½ lbs', description: 'Thin fish fillets'),
@@ -728,10 +728,10 @@ const List<Recipe> kPestoRecipes = const <Recipe>[
   const Recipe(
     name: 'Herb artichoke',
     author: 'Sandra Adams',
-    ingredientsImagePath: 'pesto/healthy.png',
+    ingredientsImagePath: 'food/icons/healthy.png',
     ingredientsImagePackage: _kGalleryAssetsPackage,
     description: 'This tasty and healthy veggie is a favorite. Artichoke like this can be paired with a hearty main or works well as a small meal with some white wine on the side. Simple and fresh, all foodies love tasty artichoke.',
-    imagePath: 'pesto/image9.jpg',
+    imagePath: 'food/image9.jpg',
     imagePackage: _kGalleryAssetsPackage,
     ingredients: const<RecipeIngredient>[
       const RecipeIngredient(amount: '1', description: 'Small garlic clove, peeled'),
@@ -749,10 +749,10 @@ const List<Recipe> kPestoRecipes = const <Recipe>[
   const Recipe(
     name: 'Pesto bruschetta',
     author: 'Trevor Hansen',
-    ingredientsImagePath: 'pesto/veggie.png',
+    ingredientsImagePath: 'food/icons/veggie.png',
     ingredientsImagePackage: _kGalleryAssetsPackage,
     description: 'Life is good when you add amazingly warm bread, fresh pesto sauce, and roasted tomatoes to the table. This a classic starter to break out in a pinch. It’s easy to make and extra tasty.',
-    imagePath: 'pesto/image10.jpg',
+    imagePath: 'food/image10.jpg',
     imagePackage: _kGalleryAssetsPackage,
     ingredients: const<RecipeIngredient>[
       const RecipeIngredient(amount: '1 loaf', description: 'Sliced French bread'),
@@ -772,10 +772,10 @@ const List<Recipe> kPestoRecipes = const <Recipe>[
   const Recipe(
     name: 'Garlic bok choy',
     author: 'Sandra Adams',
-    ingredientsImagePath: 'pesto/spicy.png',
+    ingredientsImagePath: 'food/icons/spicy.png',
     ingredientsImagePackage: _kGalleryAssetsPackage,
     description: 'Great stir-fried bok choy starts at the market. For me, nothing says tasty like garlic and baby bok choy. Choose fresh, crisp greens. Once home, wash, chop, and then ready for the wok. No family style spread is complete without these greens.',
-    imagePath: 'pesto/image11.jpg',
+    imagePath: 'food/image11.jpg',
     imagePackage: _kGalleryAssetsPackage,
     ingredients: const<RecipeIngredient>[
       const RecipeIngredient(amount: '1/2 cup', description: 'Chick broth'),
@@ -792,10 +792,10 @@ const List<Recipe> kPestoRecipes = const <Recipe>[
   const Recipe(
     name: 'Fresh Fettuccine',
     author: 'Ali Connors',
-    ingredientsImagePath: 'pesto/main.png',
+    ingredientsImagePath: 'food/icons/main.png',
     ingredientsImagePackage: _kGalleryAssetsPackage,
     description: 'Satisfy a need for rich, creamy homemade goodness with this classic. Creamy fettuccine alfredo will have you hitting the gym the next day, but it’s so good it’s worth it.',
-    imagePath: 'pesto/image12.jpg',
+    imagePath: 'food/image12.jpg',
     imagePackage: _kGalleryAssetsPackage,
     ingredients: const<RecipeIngredient>[
       const RecipeIngredient(amount: '¾ cup', description: 'Milk'),
@@ -813,10 +813,10 @@ const List<Recipe> kPestoRecipes = const <Recipe>[
   const Recipe(
     name: 'Sicilian-Style sardines',
     author: 'Peter Carlsson',
-    ingredientsImagePath: 'pesto/quick.png',
+    ingredientsImagePath: 'food/icons/quick.png',
     ingredientsImagePackage: _kGalleryAssetsPackage,
     description: 'My go to way to eat sardines is with a splash of tangy lemon and fresh fennel drizzled on top. The best thing about this dish is the flavour it packs. Prepaid with wild caught sardines or canned.',
-    imagePath: 'pesto/image13.jpg',
+    imagePath: 'food/image13.jpg',
     imagePackage: _kGalleryAssetsPackage,
     ingredients: const<RecipeIngredient>[
       const RecipeIngredient(amount: '1/4 cup', description: 'Dry white wine'),

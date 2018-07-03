@@ -135,21 +135,21 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
   AppBar({
     Key key,
     this.leading,
-    this.automaticallyImplyLeading: true,
+    this.automaticallyImplyLeading = true,
     this.title,
     this.actions,
     this.flexibleSpace,
     this.bottom,
-    this.elevation: 4.0,
+    this.elevation = 4.0,
     this.backgroundColor,
     this.brightness,
     this.iconTheme,
     this.textTheme,
-    this.primary: true,
+    this.primary = true,
     this.centerTitle,
-    this.titleSpacing: NavigationToolbar.kMiddleSpacing,
-    this.toolbarOpacity: 1.0,
-    this.bottomOpacity: 1.0,
+    this.titleSpacing = NavigationToolbar.kMiddleSpacing,
+    this.toolbarOpacity = 1.0,
+    this.bottomOpacity = 1.0,
   }) : assert(automaticallyImplyLeading != null),
        assert(elevation != null),
        assert(primary != null),
@@ -345,21 +345,6 @@ class _AppBarState extends State<AppBar> {
     TextStyle centerStyle = widget.textTheme?.title ?? themeData.primaryTextTheme.title;
     TextStyle sideStyle = widget.textTheme?.body1 ?? themeData.primaryTextTheme.body1;
 
-    if (parentRoute?.isCurrent ?? true) {
-      final Brightness brightness = widget.brightness ?? themeData.primaryColorBrightness;
-      // TODO(jonahwilliams): remove once we have platform themes.
-      switch (defaultTargetPlatform) {
-        case TargetPlatform.iOS:
-          SystemChrome.setSystemUIOverlayStyle(brightness == Brightness.dark
-              ? SystemUiOverlayStyle.light
-              : SystemUiOverlayStyle.dark);
-          break;
-        case TargetPlatform.android:
-        case TargetPlatform.fuchsia:
-          SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle.dark);
-      }
-    }
-
     if (widget.toolbarOpacity != 1.0) {
       final double opacity = const Interval(0.25, 1.0, curve: Curves.fastOutSlowIn).transform(widget.toolbarOpacity);
       if (centerStyle?.color != null)
@@ -393,20 +378,24 @@ class _AppBarState extends State<AppBar> {
 
     Widget title = widget.title;
     if (title != null) {
+      bool namesRoute;
       switch (defaultTargetPlatform) {
         case TargetPlatform.android:
         case TargetPlatform.fuchsia:
-           title = new Semantics(namesRoute: true, child: title);
+           namesRoute = true;
            break;
         case TargetPlatform.iOS:
           break;
       }
-
       title = new DefaultTextStyle(
         style: centerStyle,
         softWrap: false,
         overflow: TextOverflow.ellipsis,
-        child: title,
+        child: new Semantics(
+          namesRoute: namesRoute,
+          child: title,
+          header: true,
+        ),
       );
     }
 
@@ -447,7 +436,6 @@ class _AppBarState extends State<AppBar> {
         ),
       ),
     );
-
     if (widget.bottom != null) {
       appBar = new Column(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -488,14 +476,21 @@ class _AppBarState extends State<AppBar> {
         ],
       );
     }
+    final Brightness brightness = widget.brightness ?? themeData.primaryColorBrightness;
+    final SystemUiOverlayStyle overlayStyle = brightness == Brightness.dark
+        ? SystemUiOverlayStyle.dark
+        : SystemUiOverlayStyle.light;
 
     return new Semantics(
       container: true,
       explicitChildNodes: true,
-      child: new Material(
-        color: widget.backgroundColor ?? themeData.primaryColor,
-        elevation: widget.elevation,
-        child: appBar,
+      child: new AnnotatedRegion<SystemUiOverlayStyle>(
+        value: overlayStyle,
+        child: new Material(
+          color: widget.backgroundColor ?? themeData.primaryColor,
+          elevation: widget.elevation,
+          child: appBar,
+        ),
       ),
     );
   }
@@ -626,7 +621,9 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
         automaticallyImplyLeading: automaticallyImplyLeading,
         title: title,
         actions: actions,
-        flexibleSpace: flexibleSpace,
+        flexibleSpace: (title == null && flexibleSpace != null)
+          ? new Semantics(child: flexibleSpace, header: true)
+          : flexibleSpace,
         bottom: bottom,
         elevation: forceElevated || overlapsContent || (pinned && shrinkOffset > maxExtent - minExtent) ? elevation ?? 4.0 : 0.0,
         backgroundColor: backgroundColor,
@@ -731,24 +728,24 @@ class SliverAppBar extends StatefulWidget {
   const SliverAppBar({
     Key key,
     this.leading,
-    this.automaticallyImplyLeading: true,
+    this.automaticallyImplyLeading = true,
     this.title,
     this.actions,
     this.flexibleSpace,
     this.bottom,
     this.elevation,
-    this.forceElevated: false,
+    this.forceElevated = false,
     this.backgroundColor,
     this.brightness,
     this.iconTheme,
     this.textTheme,
-    this.primary: true,
+    this.primary = true,
     this.centerTitle,
-    this.titleSpacing: NavigationToolbar.kMiddleSpacing,
+    this.titleSpacing = NavigationToolbar.kMiddleSpacing,
     this.expandedHeight,
-    this.floating: false,
-    this.pinned: false,
-    this.snap: false,
+    this.floating = false,
+    this.pinned = false,
+    this.snap = false,
   }) : assert(automaticallyImplyLeading != null),
        assert(forceElevated != null),
        assert(primary != null),

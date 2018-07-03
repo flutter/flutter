@@ -55,9 +55,12 @@ linter:
     # - avoid_catches_without_on_clauses # we do this commonly
     # - avoid_catching_errors # we do this commonly
     - avoid_classes_with_only_static_members
+    # - avoid_double_and_int_checks # only useful when targeting JS runtime
     - avoid_empty_else
+    - avoid_field_initializers_in_const_classes
     - avoid_function_literals_in_foreach_calls
     - avoid_init_to_null
+    # - avoid_js_rounded_ints # only useful when targeting JS runtime
     - avoid_null_checks_in_equality_operators
     # - avoid_positional_boolean_parameters # not yet tested
     # - avoid_private_typedef_functions # we prefer having typedef (discussion in https://github.com/flutter/flutter/pull/16356)
@@ -115,7 +118,7 @@ linter:
     - prefer_const_literals_to_create_immutables
     # - prefer_constructors_over_static_methods # not yet tested
     - prefer_contains
-    # - prefer_equal_for_default_values # not yet tested
+    - prefer_equal_for_default_values
     # - prefer_expression_function_bodies # conflicts with https://github.com/flutter/flutter/wiki/Style-guide-for-Flutter-repo#consider-using--for-short-functions-and-methods
     - prefer_final_fields
     - prefer_final_locals
@@ -123,6 +126,7 @@ linter:
     # - prefer_function_declarations_over_variables # not yet tested
     - prefer_initializing_formals
     # - prefer_interpolation_to_compose_strings # not yet tested
+    # - prefer_iterable_whereType # https://github.com/dart-lang/sdk/issues/32463
     - prefer_is_empty
     - prefer_is_not_empty
     - prefer_single_quotes
@@ -152,3 +156,4 @@ linter:
     # - use_string_buffers # https://github.com/dart-lang/linter/pull/664
     # - use_to_and_as_if_applicable # has false positives, so we prefer to catch this by code-review
     - valid_regexps
+    # - void_checks # not yet tested

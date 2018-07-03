@@ -28,7 +28,7 @@ class RecordedInvocation {
   String toString() => _describeInvocation(invocation);
 
   /// Converts [stack] to a string using the [FlutterError.defaultStackFilter] logic.
-  String stackToString({ String indent: '' }) {
+  String stackToString({ String indent = '' }) {
     assert(indent != null);
     return indent + FlutterError.defaultStackFilter(
       stack.toString().trimRight().split('\n')
@@ -133,6 +133,11 @@ class TestRecordingPaintingContext implements PaintingContext {
     canvas.transform(transform.storage);
     painter(this, offset);
     canvas.restore();
+  }
+
+  @override
+  void pushLayer(Layer childLayer, PaintingContextCallback painter, Offset offset, {Rect childPaintBounds}) {
+    painter(this, offset);
   }
 
   @override

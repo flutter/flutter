@@ -113,9 +113,9 @@ void main() {
     ContainerLayer layer = RendererBinding.instance.renderView.debugLayer;
     while (layer != null && !(layer is OpacityLayer))
       layer = layer.firstChild;
-    expect(layer, const isInstanceOf<OpacityLayer>());
+    expect(layer, isInstanceOf<OpacityLayer>());
     final OpacityLayer opacityLayer = layer;
     expect(opacityLayer.alpha, equals(opacity * 255));
-    expect(layer.firstChild, const isInstanceOf<TransformLayer>());
+    expect(layer.firstChild, isInstanceOf<TransformLayer>());
   });
 }

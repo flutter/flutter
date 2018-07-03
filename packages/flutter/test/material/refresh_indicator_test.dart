@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
 
@@ -377,5 +378,42 @@ void main() {
     await tester.pump(const Duration(seconds: 1)); // finish the scroll animation
     expect(refreshCalled, true);
     expect(tester.takeException(), isFlutterError);
+  });
+
+  testWidgets('Refresh starts while scroll view moves back to 0.0 after overscroll on iOS', (WidgetTester tester) async {
+    debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
+    refreshCalled = false;
+    double lastScrollOffset;
+    final ScrollController controller = new ScrollController();
+
+    await tester.pumpWidget(
+      new MaterialApp(
+        home: new RefreshIndicator(
+          onRefresh: refresh,
+          child: new ListView(
+            controller: controller,
+            physics: const AlwaysScrollableScrollPhysics(),
+            children: <String>['A', 'B', 'C', 'D', 'E', 'F'].map((String item) {
+              return new SizedBox(
+                height: 200.0,
+                child: new Text(item),
+              );
+            }).toList(),
+          ),
+        ),
+      ),
+    );
+
+    await tester.fling(find.text('A'), const Offset(0.0, 300.0), 1000.0);
+    await tester.pump(const Duration(milliseconds: 100));
+    expect(lastScrollOffset = controller.offset, lessThan(0.0));
+    expect(refreshCalled, isFalse);
+
+    await tester.pump(const Duration(milliseconds: 100));
+    expect(controller.offset, greaterThan(lastScrollOffset));
+    expect(controller.offset, lessThan(0.0));
+    expect(refreshCalled, isTrue);
+
+    debugDefaultTargetPlatformOverride = null;
   });
 }

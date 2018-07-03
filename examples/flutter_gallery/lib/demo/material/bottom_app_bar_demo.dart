@@ -97,19 +97,19 @@ class _BottomAppBarDemoState extends State<BottomAppBarDemo> {
 
   // App bar color
 
-  static const List<Color> kBabColors = const <Color>[
-    null,
-    const Color(0xFFFFC100),
-    const Color(0xFF91FAFF),
-    const Color(0xFF00D1FF),
-    const Color(0xFF00BCFF),
-    const Color(0xFF009BEE),
+  static const List<_NamedColor> kBabColors = const <_NamedColor>[
+    const _NamedColor(null, 'Clear'),
+    const _NamedColor(const Color(0xFFFFC100), 'Orange'),
+    const _NamedColor(const Color(0xFF91FAFF), 'Light Blue'),
+    const _NamedColor(const Color(0xFF00D1FF), 'Cyan'),
+    const _NamedColor(const Color(0xFF00BCFF), 'Cerulean'),
+    const _NamedColor(const Color(0xFF009BEE), 'Blue'),
   ];
 
   _ChoiceValue<Widget> _fabShape = kCircularFab;
   _ChoiceValue<bool> _showNotch = kShowNotchTrue;
   _ChoiceValue<FloatingActionButtonLocation> _fabLocation = kFabEndDocked;
-  Color _babColor = kBabColors.first;
+  Color _babColor = kBabColors.first.color;
 
   void _onShowNotchChanged(_ChoiceValue<bool> value) {
     setState(() {
@@ -187,9 +187,19 @@ class _BottomAppBarDemoState extends State<BottomAppBarDemo> {
       bottomNavigationBar: new _DemoBottomAppBar(
         color: _babColor,
         fabLocation: _fabLocation.value,
-        showNotch: _showNotch.value,
+        shape: _selectNotch(),
       ),
     );
+  }
+
+  NotchedShape _selectNotch() {
+    if (!_showNotch.value)
+      return null;
+    if (_fabShape == kCircularFab)
+      return const CircularNotchedRectangle();
+    if (_fabShape == kDiamondFab)
+      return const _DiamondNotchedRectangle();
+    return null;
   }
 }
 
@@ -250,37 +260,46 @@ class _RadioItem<T> extends StatelessWidget {
   }
 }
 
+class _NamedColor {
+  const _NamedColor(this.color, this.name);
+
+  final Color color;
+  final String name;
+}
+
 class _ColorsItem extends StatelessWidget {
   const _ColorsItem(this.colors, this.selectedColor, this.onChanged);
 
-  final List<Color> colors;
+  final List<_NamedColor> colors;
   final Color selectedColor;
   final ValueChanged<Color> onChanged;
 
   @override
   Widget build(BuildContext context) {
-    return new ExcludeSemantics(
-      child: new Row(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-        children: colors.map((Color color) {
-          return new RawMaterialButton(
-            onPressed: () {
-              onChanged(color);
-            },
-            constraints: const BoxConstraints.tightFor(
-              width: 32.0,
-              height: 32.0,
+    return new Row(
+      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+      children: colors.map((_NamedColor namedColor) {
+        return new RawMaterialButton(
+          onPressed: () {
+            onChanged(namedColor.color);
+          },
+          constraints: const BoxConstraints.tightFor(
+            width: 32.0,
+            height: 32.0,
+          ),
+          fillColor: namedColor.color,
+          shape: new CircleBorder(
+            side: new BorderSide(
+              color: namedColor.color == selectedColor ? Colors.black : const Color(0xFFD5D7DA),
+              width: 2.0,
             ),
-            fillColor: color,
-            shape: new CircleBorder(
-              side: new BorderSide(
-                color: color == selectedColor ? Colors.black : const Color(0xFFD5D7DA),
-                width: 2.0,
-              ),
-            ),
-          );
-        }).toList(),
-      ),
+          ),
+          child: new Semantics(
+            value: namedColor.name,
+            selected: namedColor.color == selectedColor,
+          ),
+        );
+      }).toList(),
     );
   }
 }
@@ -308,11 +327,15 @@ class _Heading extends StatelessWidget {
 }
 
 class _DemoBottomAppBar extends StatelessWidget {
-  const _DemoBottomAppBar({ this.color, this.fabLocation, this.showNotch });
+  const _DemoBottomAppBar({
+    this.color,
+    this.fabLocation,
+    this.shape
+  });
 
   final Color color;
   final FloatingActionButtonLocation fabLocation;
-  final bool showNotch;
+  final NotchedShape shape;
 
   static final List<FloatingActionButtonLocation> kCenterLocations = <FloatingActionButtonLocation>[
     FloatingActionButtonLocation.centerDocked,
@@ -360,8 +383,8 @@ class _DemoBottomAppBar extends StatelessWidget {
 
     return new BottomAppBar(
       color: color,
-      hasNotch: showNotch,
       child: new Row(children: rowContents),
+      shape: shape,
     );
   }
 }
@@ -390,24 +413,14 @@ class _DemoDrawer extends StatelessWidget {
 }
 
 // A diamond-shaped floating action button.
-class _DiamondFab extends StatefulWidget {
+class _DiamondFab extends StatelessWidget {
   const _DiamondFab({
     this.child,
-    this.notchMargin: 6.0,
     this.onPressed,
   });
 
   final Widget child;
-  final double notchMargin;
   final VoidCallback onPressed;
-
-  @override
-  State createState() => new _DiamondFabState();
-}
-
-class _DiamondFabState extends State<_DiamondFab> {
-
-  VoidCallback _clearComputeNotch;
 
   @override
   Widget build(BuildContext context) {
@@ -415,39 +428,31 @@ class _DiamondFabState extends State<_DiamondFab> {
       shape: const _DiamondBorder(),
       color: Colors.orange,
       child: new InkWell(
-        onTap: widget.onPressed,
+        onTap: onPressed,
         child: new Container(
           width: 56.0,
           height: 56.0,
           child: IconTheme.merge(
             data: new IconThemeData(color: Theme.of(context).accentIconTheme.color),
-            child: widget.child,
+            child: child,
           ),
         ),
       ),
       elevation: 6.0,
     );
   }
+}
+
+class _DiamondNotchedRectangle implements NotchedShape {
+  const _DiamondNotchedRectangle();
 
   @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    _clearComputeNotch = Scaffold.setFloatingActionButtonNotchFor(context, _computeNotch);
-  }
+  Path getOuterPath(Rect host, Rect guest) {
+    if (!host.overlaps(guest))
+      return new Path()..addRect(host);
+    assert(guest.width > 0.0);
 
-  @override
-  void deactivate() {
-    if (_clearComputeNotch != null)
-      _clearComputeNotch();
-    super.deactivate();
-  }
-
-  Path _computeNotch(Rect host, Rect guest, Offset start, Offset end) {
-    final Rect marginedGuest = guest.inflate(widget.notchMargin);
-    if (!host.overlaps(marginedGuest))
-      return new Path()..lineTo(end.dx, end.dy);
-
-    final Rect intersection = marginedGuest.intersect(host);
+    final Rect intersection = guest.intersect(host);
     // We are computing a "V" shaped notch, as in this diagram:
     //    -----\****   /-----
     //          \     /
@@ -461,14 +466,18 @@ class _DiamondFabState extends State<_DiamondFab> {
     //  the host's top edge where the notch starts (marked with "*").
     //  We compute notchToCenter by similar triangles:
     final double notchToCenter =
-      intersection.height * (marginedGuest.height / 2.0)
-      / (marginedGuest.width / 2.0);
+      intersection.height * (guest.height / 2.0)
+      / (guest.width / 2.0);
 
     return new Path()
-      ..lineTo(marginedGuest.center.dx - notchToCenter, host.top)
-      ..lineTo(marginedGuest.left + marginedGuest.width / 2.0, marginedGuest.bottom)
-      ..lineTo(marginedGuest.center.dx + notchToCenter, host.top)
-      ..lineTo(end.dx, end.dy);
+      ..moveTo(host.left, host.top)
+      ..lineTo(guest.center.dx - notchToCenter, host.top)
+      ..lineTo(guest.left + guest.width / 2.0, guest.bottom)
+      ..lineTo(guest.center.dx + notchToCenter, host.top)
+      ..lineTo(host.right, host.top)
+      ..lineTo(host.right, host.bottom)
+      ..lineTo(host.left, host.bottom)
+      ..close();
   }
 }
 

@@ -74,11 +74,11 @@ class Scrollable extends StatefulWidget {
   /// The [axisDirection] and [viewportBuilder] arguments must not be null.
   const Scrollable({
     Key key,
-    this.axisDirection: AxisDirection.down,
+    this.axisDirection = AxisDirection.down,
     this.controller,
     this.physics,
     @required this.viewportBuilder,
-    this.excludeFromSemantics: false,
+    this.excludeFromSemantics = false,
   }) : assert(axisDirection != null),
        assert(viewportBuilder != null),
        assert(excludeFromSemantics != null),
@@ -191,9 +191,9 @@ class Scrollable extends StatefulWidget {
   /// Scrolls the scrollables that enclose the given context so as to make the
   /// given context visible.
   static Future<Null> ensureVisible(BuildContext context, {
-    double alignment: 0.0,
-    Duration duration: Duration.zero,
-    Curve curve: Curves.ease,
+    double alignment = 0.0,
+    Duration duration = Duration.zero,
+    Curve curve = Curves.ease,
   }) {
     final List<Future<Null>> futures = <Future<Null>>[];
 

@@ -13,6 +13,8 @@ import 'base/file_system.dart';
 import 'cache.dart';
 import 'globals.dart';
 
+final RegExp _versionPattern = new RegExp(r'^(\d+)(\.(\d+)(\.(\d+))?)?(\+(\d+))?$');
+
 /// A wrapper around the `flutter` section in the `pubspec.yaml` file.
 class FlutterManifest {
   FlutterManifest._();
@@ -51,9 +53,56 @@ class FlutterManifest {
 
   String get appName => _descriptor['name'] ?? '';
 
+  /// The version String from the `pubspec.yaml` file.
+  /// Can be null if it isn't set or has a wrong format.
+  String get appVersion {
+    final String version = _descriptor['version']?.toString();
+    if (version != null && _versionPattern.hasMatch(version))
+      return version;
+    else
+      return null;
+  }
+
+  /// The build version name from the `pubspec.yaml` file.
+  /// Can be null if version isn't set or has a wrong format.
+  String get buildName {
+    if (appVersion != null && appVersion.contains('+'))
+      return appVersion.split('+')?.elementAt(0);
+    else
+      return appVersion;
+  }
+
+  /// The build version number from the `pubspec.yaml` file.
+  /// Can be null if version isn't set or has a wrong format.
+  int get buildNumber {
+    if (appVersion != null && appVersion.contains('+')) {
+      final String value = appVersion.split('+')?.elementAt(1);
+      return value == null ? null : int.tryParse(value);
+    } else {
+      return null;
+    }
+  }
+
   bool get usesMaterialDesign {
     return _flutterDescriptor['uses-material-design'] ?? false;
   }
+
+  /// Properties defining how to expose this Flutter project as a module
+  /// for integration into an unspecified host app.
+  Map<String, dynamic> get moduleDescriptor {
+    return _flutterDescriptor.containsKey('module')
+        ? _flutterDescriptor['module'] ?? const <String, dynamic>{}
+        : null;
+  }
+
+  /// True if this manifest declares a Flutter module project.
+  ///
+  /// A Flutter project is considered a module when it has a `module:`
+  /// descriptor. A Flutter module project supports integration into an
+  /// existing host app.
+  ///
+  /// Such a project can be created using `flutter create -t module`.
+  bool get isModule => moduleDescriptor != null;
 
   List<Map<String, dynamic>> get fontsDescriptor {
    return _flutterDescriptor['fonts'] ?? const <Map<String, dynamic>>[];

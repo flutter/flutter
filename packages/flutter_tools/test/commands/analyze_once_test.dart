@@ -142,7 +142,7 @@ void main() {
         foo.writeAsStringSync('''
 import 'bar.dart';
 
-foo() => bar();
+void foo() => bar();
 ''');
 
         final File bar = fs.file(fs.path.join(tempDir.path, 'bar.dart'));
@@ -224,7 +224,7 @@ Future<Null> runCommand({
   List<String> arguments,
   List<String> statusTextContains,
   List<String> errorTextContains,
-  bool toolExit: false,
+  bool toolExit = false,
   String exitMessageContains,
 }) async {
   try {

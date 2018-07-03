@@ -1651,7 +1651,7 @@ abstract class MultiChildRenderObjectWidget extends RenderObjectWidget {
   ///
   /// The [children] argument must not be null and must not contain any null
   /// objects.
-  MultiChildRenderObjectWidget({ Key key, this.children: const <Widget>[] })
+  MultiChildRenderObjectWidget({ Key key, this.children = const <Widget>[] })
     : assert(children != null),
       assert(!children.any((Widget child) => child == null)), // https://github.com/dart-lang/sdk/issues/29276
       super(key: key);
@@ -2073,7 +2073,20 @@ class BuildOwner {
 
   final List<Element> _dirtyElements = <Element>[];
   bool _scheduledFlushDirtyElements = false;
-  bool _dirtyElementsNeedsResorting; // null means we're not in a buildScope
+
+  /// Whether [_dirtyElements] need to be sorted again as a result of more
+  /// elements becoming dirty during the build.
+  /// 
+  /// This is necessary to preserve the sort order defined by [Element._sort].
+  /// 
+  /// This field is set to null when [buildScope] is not actively rebuilding
+  /// the widget tree.
+  bool _dirtyElementsNeedsResorting;
+
+  /// Whether [buildScope] is actively rebuilding the widget tree.
+  /// 
+  /// [scheduleBuildFor] should only be called when this value is true.
+  bool get _debugIsInBuildScope => _dirtyElementsNeedsResorting != null;
 
   /// The object in charge of the focus tree.
   ///
@@ -2108,11 +2121,11 @@ class BuildOwner {
     if (element._inDirtyList) {
       assert(() {
         if (debugPrintScheduleBuildForStacks)
-          debugPrintStack(label: 'markNeedsToResortDirtyElements() called; _dirtyElementsNeedsResorting was $_dirtyElementsNeedsResorting (now true); dirty list is: $_dirtyElements');
-        if (_dirtyElementsNeedsResorting == null) {
+          debugPrintStack(label: 'BuildOwner.scheduleBuildFor() called; _dirtyElementsNeedsResorting was $_dirtyElementsNeedsResorting (now true); dirty list is: $_dirtyElements');
+        if (!_debugIsInBuildScope) {
           throw new FlutterError(
-            'markNeedsToResortDirtyElements() called inappropriately.\n'
-            'The markNeedsToResortDirtyElements() method should only be called while the '
+            'BuildOwner.scheduleBuildFor() called inappropriately.\n'
+            'The BuildOwner.scheduleBuildFor() method should only be called while the '
             'buildScope() method is actively rebuilding the widget tree.'
           );
         }

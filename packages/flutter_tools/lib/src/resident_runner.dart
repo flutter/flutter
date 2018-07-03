@@ -64,16 +64,19 @@ class FlutterDevice {
   /// The 'reloadSources' service can be used by other Service Protocol clients
   /// connected to the VM (e.g. Observatory) to request a reload of the source
   /// code of the running application (a.k.a. HotReload).
+  /// The 'compileExpression' service can be used to compile user-provided
+  /// expressions requested during debugging of the application.
   /// This ensures that the reload process follows the normal orchestration of
   /// the Flutter Tools and not just the VM internal service.
-  Future<Null> _connect({ReloadSources reloadSources}) async {
+  Future<Null> _connect({ReloadSources reloadSources, CompileExpression compileExpression}) async {
     if (vmServices != null)
       return;
     vmServices = new List<VMService>(observatoryUris.length);
     for (int i = 0; i < observatoryUris.length; i++) {
       printTrace('Connecting to service protocol: ${observatoryUris[i]}');
       vmServices[i] = await VMService.connect(observatoryUris[i],
-          reloadSources: reloadSources);
+          reloadSources: reloadSources,
+          compileExpression: compileExpression);
       printTrace('Successfully connected to service protocol: ${observatoryUris[i]}');
     }
   }
@@ -137,7 +140,7 @@ class FlutterDevice {
 
   List<Future<Map<String, dynamic>>> reloadSources(
     String entryPath, {
-    bool pause: false
+    bool pause = false
   }) {
     final Uri deviceEntryUri = devFS.baseUri.resolveUri(fs.path.toUri(entryPath));
     final Uri devicePackagesUri = devFS.baseUri.resolve('.packages');
@@ -313,7 +316,7 @@ class FlutterDevice {
   Future<int> runCold({
     ColdRunner coldRunner,
     String route,
-    bool shouldBuild: true,
+    bool shouldBuild = true,
   }) async {
     final TargetPlatform targetPlatform = await device.targetPlatform;
     package = await getApplicationPackageForPlatform(
@@ -373,10 +376,10 @@ class FlutterDevice {
     String target,
     AssetBundle bundle,
     DateTime firstBuildTime,
-    bool bundleFirstUpload: false,
-    bool bundleDirty: false,
+    bool bundleFirstUpload = false,
+    bool bundleDirty = false,
     Set<String> fileFilter,
-    bool fullRestart: false,
+    bool fullRestart = false,
     String projectRootPath,
     String pathToReload,
   }) async {
@@ -422,7 +425,7 @@ abstract class ResidentRunner {
   ResidentRunner(this.flutterDevices, {
     this.target,
     this.debuggingOptions,
-    this.usesTerminalUI: true,
+    this.usesTerminalUI = true,
     String projectRootPath,
     String packagesFilePath,
     this.stayResident,
@@ -466,12 +469,12 @@ abstract class ResidentRunner {
     Completer<DebugConnectionInfo> connectionInfoCompleter,
     Completer<Null> appStartedCompleter,
     String route,
-    bool shouldBuild: true
+    bool shouldBuild = true
   });
 
   bool get supportsRestart => false;
 
-  Future<OperationResult> restart({ bool fullRestart: false, bool pauseAfterRestart: false }) {
+  Future<OperationResult> restart({ bool fullRestart = false, bool pauseAfterRestart = false }) {
     throw 'unsupported';
   }
 
@@ -628,14 +631,15 @@ abstract class ResidentRunner {
   /// If the [reloadSources] parameter is not null the 'reloadSources' service
   /// will be registered
   Future<Null> connectToServiceProtocol({String viewFilter,
-      ReloadSources reloadSources}) async {
+      ReloadSources reloadSources, CompileExpression compileExpression}) async {
     if (!debuggingOptions.debuggingEnabled)
       return new Future<Null>.error('Error the service protocol is not enabled.');
 
     bool viewFound = false;
     for (FlutterDevice device in flutterDevices) {
       device.viewFilter = viewFilter;
-      await device._connect(reloadSources: reloadSources);
+      await device._connect(reloadSources: reloadSources,
+          compileExpression: compileExpression);
       await device.getVMs();
       await device.waitForViews();
       if (device.views == null)
@@ -847,8 +851,9 @@ abstract class ResidentRunner {
       }
       printStatus('To display the performance overlay (WidgetsApp.showPerformanceOverlay), press "P".');
     }
-    if (flutterDevices.any((FlutterDevice d) => d.device.supportsScreenshot))
+    if (flutterDevices.any((FlutterDevice d) => d.device.supportsScreenshot)) {
       printStatus('To save a screenshot to flutter.png, press "s".');
+    }
   }
 
   /// Called when a signal has requested we exit.

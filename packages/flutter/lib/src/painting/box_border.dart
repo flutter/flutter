@@ -38,7 +38,7 @@ enum BoxShape {
   // Don't add more, instead create a new ShapeBorder.
 }
 
-/// Base class for box borders that can paint as rectangle, circles, or rounded
+/// Base class for box borders that can paint as rectangles, circles, or rounded
 /// rectangles.
 ///
 /// This class is extended by [Border] and [BorderDirectional] to provide
@@ -80,7 +80,7 @@ abstract class BoxBorder extends ShapeBorder {
   // We override this to tighten the return value, so that callers can assume
   // that we'll return a [BoxBorder].
   @override
-  BoxBorder add(ShapeBorder other, { bool reversed: false }) => null;
+  BoxBorder add(ShapeBorder other, { bool reversed = false }) => null;
 
   /// Linearly interpolate between two borders.
   ///
@@ -205,7 +205,7 @@ abstract class BoxBorder extends ShapeBorder {
   @override
   void paint(Canvas canvas, Rect rect, {
     TextDirection textDirection,
-    BoxShape shape: BoxShape.rectangle,
+    BoxShape shape = BoxShape.rectangle,
     BorderRadius borderRadius,
   });
 
@@ -305,10 +305,10 @@ class Border extends BoxBorder {
   ///
   /// The arguments must not be null.
   const Border({
-    this.top: BorderSide.none,
-    this.right: BorderSide.none,
-    this.bottom: BorderSide.none,
-    this.left: BorderSide.none,
+    this.top = BorderSide.none,
+    this.right = BorderSide.none,
+    this.bottom = BorderSide.none,
+    this.left = BorderSide.none,
   }) : assert(top != null),
        assert(right != null),
        assert(bottom != null),
@@ -318,9 +318,9 @@ class Border extends BoxBorder {
   ///
   /// The sides default to black solid borders, one logical pixel wide.
   factory Border.all({
-    Color color: const Color(0xFF000000),
-    double width: 1.0,
-    BorderStyle style: BorderStyle.solid,
+    Color color = const Color(0xFF000000),
+    double width = 1.0,
+    BorderStyle style = BorderStyle.solid,
   }) {
     final BorderSide side = new BorderSide(color: color, width: width, style: style);
     return new Border(top: side, right: side, bottom: side, left: side);
@@ -389,7 +389,7 @@ class Border extends BoxBorder {
   }
 
   @override
-  Border add(ShapeBorder other, { bool reversed: false }) {
+  Border add(ShapeBorder other, { bool reversed = false }) {
     if (other is! Border)
       return null;
     final Border typedOther = other;
@@ -480,7 +480,7 @@ class Border extends BoxBorder {
   @override
   void paint(Canvas canvas, Rect rect, {
     TextDirection textDirection,
-    BoxShape shape: BoxShape.rectangle,
+    BoxShape shape = BoxShape.rectangle,
     BorderRadius borderRadius,
   }) {
     if (isUniform) {
@@ -574,10 +574,10 @@ class BorderDirectional extends BoxBorder {
   ///
   /// The arguments must not be null.
   const BorderDirectional({
-    this.top: BorderSide.none,
-    this.start: BorderSide.none,
-    this.end: BorderSide.none,
-    this.bottom: BorderSide.none,
+    this.top = BorderSide.none,
+    this.start = BorderSide.none,
+    this.end = BorderSide.none,
+    this.bottom = BorderSide.none,
   }) : assert(top != null),
        assert(start != null),
        assert(end != null),
@@ -660,7 +660,7 @@ class BorderDirectional extends BoxBorder {
   }
 
   @override
-  BoxBorder add(ShapeBorder other, { bool reversed: false }) {
+  BoxBorder add(ShapeBorder other, { bool reversed = false }) {
     if (other is BorderDirectional) {
       final BorderDirectional typedOther = other;
       if (BorderSide.canMerge(top, typedOther.top) &&
@@ -783,7 +783,7 @@ class BorderDirectional extends BoxBorder {
   @override
   void paint(Canvas canvas, Rect rect, {
     TextDirection textDirection,
-    BoxShape shape: BoxShape.rectangle,
+    BoxShape shape = BoxShape.rectangle,
     BorderRadius borderRadius,
   }) {
     if (isUniform) {

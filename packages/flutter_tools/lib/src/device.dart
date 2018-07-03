@@ -263,10 +263,10 @@ abstract class Device {
     String route,
     DebuggingOptions debuggingOptions,
     Map<String, dynamic> platformArgs,
-    bool prebuiltApplication: false,
-    bool applicationNeedsRebuild: false,
-    bool usesTerminalUi: true,
-    bool ipv6: false,
+    bool prebuiltApplication = false,
+    bool applicationNeedsRebuild = false,
+    bool usesTerminalUi = true,
+    bool ipv6 = false,
   });
 
   /// Does this device implement support for hot reloading / restarting?
@@ -277,7 +277,7 @@ abstract class Device {
 
   bool get supportsScreenshot => false;
 
-  Future<Null> takeScreenshot(File outputFile) => new Future<Null>.error('unimplemented');
+  Future<void> takeScreenshot(File outputFile) => new Future<Null>.error('unimplemented');
 
   /// Find the apps that are currently running on this device.
   Future<List<DiscoveredApp>> discoverApps() =>
@@ -339,11 +339,11 @@ abstract class Device {
 
 class DebuggingOptions {
   DebuggingOptions.enabled(this.buildInfo, {
-    this.startPaused: false,
-    this.enableSoftwareRendering: false,
-    this.skiaDeterministicRendering: false,
-    this.traceSkia: false,
-    this.useTestFonts: false,
+    this.startPaused = false,
+    this.enableSoftwareRendering = false,
+    this.skiaDeterministicRendering = false,
+    this.traceSkia = false,
+    this.useTestFonts = false,
     this.observatoryPort,
    }) : debuggingEnabled = true;
 

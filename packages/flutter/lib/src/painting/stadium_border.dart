@@ -129,8 +129,8 @@ class StadiumBorder extends ShapeBorder {
 // Class to help with transitioning to/from a CircleBorder.
 class _StadiumToCircleBorder extends ShapeBorder {
   const _StadiumToCircleBorder({
-    this.side: BorderSide.none,
-    this.circleness: 0.0,
+    this.side = BorderSide.none,
+    this.circleness = 0.0,
   }) : assert(side != null),
        assert(circleness != null);
 
@@ -278,9 +278,9 @@ class _StadiumToCircleBorder extends ShapeBorder {
 // Class to help with transitioning to/from a RoundedRectBorder.
 class _StadiumToRoundedRectangleBorder extends ShapeBorder {
   const _StadiumToRoundedRectangleBorder({
-    this.side: BorderSide.none,
-    this.borderRadius: BorderRadius.zero,
-    this.rectness: 0.0,
+    this.side = BorderSide.none,
+    this.borderRadius = BorderRadius.zero,
+    this.rectness = 0.0,
   }) : assert(side != null),
        assert(borderRadius != null),
        assert(rectness != null);

@@ -27,7 +27,7 @@ class Fingerprinter {
     @required this.fingerprintPath,
     @required Iterable<String> paths,
     @required Map<String, String> properties,
-    Iterable<String> depfilePaths: const <String>[],
+    Iterable<String> depfilePaths = const <String>[],
     FingerprintPathFilter pathFilter,
   }) : _paths = paths.toList(),
        _properties = new Map<String, String>.from(properties),
@@ -50,18 +50,18 @@ class Fingerprinter {
   }
 
   Future<bool> doesFingerprintMatch() async {
-    final File fingerprintFile = fs.file(fingerprintPath);
-    if (!fingerprintFile.existsSync())
-      return false;
-
-    if (!_depfilePaths.every(fs.isFileSync))
-      return false;
-
-    final List<String> paths = await _getPaths();
-    if (!paths.every(fs.isFileSync))
-      return false;
-
     try {
+      final File fingerprintFile = fs.file(fingerprintPath);
+      if (!fingerprintFile.existsSync())
+        return false;
+
+      if (!_depfilePaths.every(fs.isFileSync))
+        return false;
+
+      final List<String> paths = await _getPaths();
+      if (!paths.every(fs.isFileSync))
+        return false;
+
       final Fingerprint oldFingerprint = new Fingerprint.fromJson(await fingerprintFile.readAsString());
       final Fingerprint newFingerprint = await buildFingerprint();
       return oldFingerprint == newFingerprint;
@@ -75,7 +75,7 @@ class Fingerprinter {
   Future<void> writeFingerprint() async {
     try {
       final Fingerprint fingerprint = await buildFingerprint();
-      return fs.file(fingerprintPath).writeAsStringSync(fingerprint.toJson());
+      fs.file(fingerprintPath).writeAsStringSync(fingerprint.toJson());
     } catch (e) {
       // Log exception and continue, fingerprinting is only a performance improvement.
       printTrace('Fingerprint write error: $e');
@@ -120,8 +120,8 @@ class Fingerprint {
     final String version = content['version'];
     if (version != FlutterVersion.instance.frameworkRevision)
       throw new ArgumentError('Incompatible fingerprint version: $version');
-    _checksums = content['files'] ?? <String, String>{};
-    _properties = content['properties'] ?? <String, String>{};
+    _checksums = content['files']?.cast<String,String>() ?? <String, String>{};
+    _properties = content['properties']?.cast<String,String>() ?? <String, String>{};
   }
 
   Map<String, String> _checksums;
@@ -153,6 +153,9 @@ class Fingerprint {
   // Ignore map entries here to avoid becoming inconsistent with equals
   // due to differences in map entry order.
   int get hashCode => hash2(_properties.length, _checksums.length);
+
+  @override
+  String toString() => '{checksums: $_checksums, properties: $_properties}';
 }
 
 final RegExp _separatorExpr = new RegExp(r'([^\\]) ');
@@ -171,6 +174,7 @@ Future<Set<String>> readDepfile(String depfilePath) async {
   // Depfile format:
   // outfile1 outfile2 : file1.dart file2.dart file3.dart
   final String contents = await fs.file(depfilePath).readAsString();
+
   final String dependencies = contents.split(': ')[1];
   return dependencies
       .replaceAllMapped(_separatorExpr, (Match match) => '${match.group(1)}\n')

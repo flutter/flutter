@@ -79,7 +79,7 @@ class RunCommand extends RunCommandBase {
   @override
   final String description = 'Run your Flutter app on an attached device.';
 
-  RunCommand({ bool verboseHelp: false }) {
+  RunCommand({ bool verboseHelp = false }) {
     requiresPubspecYaml();
 
     argParser
@@ -124,6 +124,12 @@ class RunCommand extends RunCommandBase {
         defaultsTo: true,
         hide: !verboseHelp,
         help: 'Preview Dart 2.0 functionality.',
+      )
+      ..addFlag('build-snapshot',
+        hide: !verboseHelp,
+        defaultsTo: false,
+        help: 'Build and use application-specific VM snapshot instead of\n'
+              'prebuilt one provided by the engine.',
       )
       ..addFlag('track-widget-creation',
         hide: !verboseHelp,

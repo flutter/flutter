@@ -95,13 +95,13 @@ class Table extends RenderObjectWidget {
   /// arguments must not be null.
   Table({
     Key key,
-    this.children: const <TableRow>[],
+    this.children = const <TableRow>[],
     this.columnWidths,
-    this.defaultColumnWidth: const FlexColumnWidth(1.0),
+    this.defaultColumnWidth = const FlexColumnWidth(1.0),
     this.textDirection,
     this.border,
-    this.defaultVerticalAlignment: TableCellVerticalAlignment.top,
-    this.textBaseline
+    this.defaultVerticalAlignment = TableCellVerticalAlignment.top,
+    this.textBaseline,
   }) : assert(children != null),
        assert(defaultColumnWidth != null),
        assert(defaultVerticalAlignment != null),
@@ -213,7 +213,7 @@ class Table extends RenderObjectWidget {
       rowDecorations: _rowDecorations,
       configuration: createLocalImageConfiguration(context),
       defaultVerticalAlignment: defaultVerticalAlignment,
-      textBaseline: textBaseline
+      textBaseline: textBaseline,
     );
   }
 

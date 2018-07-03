@@ -22,10 +22,10 @@ class ExpandIcon extends StatefulWidget {
   /// triggered when the icon is pressed.
   const ExpandIcon({
     Key key,
-    this.isExpanded: false,
-    this.size: 24.0,
+    this.isExpanded = false,
+    this.size = 24.0,
     @required this.onPressed,
-    this.padding: const EdgeInsets.all(8.0)
+    this.padding = const EdgeInsets.all(8.0)
   }) : assert(isExpanded != null),
        assert(size != null),
        assert(padding != null),

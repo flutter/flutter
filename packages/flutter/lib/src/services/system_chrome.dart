@@ -105,7 +105,7 @@ class SystemUiOverlayStyle {
     statusBarColor: null,
     systemNavigationBarIconBrightness: Brightness.dark,
     statusBarIconBrightness: Brightness.dark,
-    statusBarBrightness: Brightness.dark,
+    statusBarBrightness: Brightness.light,
   );
 
   /// System overlays should be drawn with a dark color. Intended for
@@ -116,7 +116,7 @@ class SystemUiOverlayStyle {
     statusBarColor: null,
     systemNavigationBarIconBrightness: Brightness.light,
     statusBarIconBrightness: Brightness.light,
-    statusBarBrightness: Brightness.light,
+    statusBarBrightness: Brightness.dark,
   );
 
   /// Creates a new [SystemUiOverlayStyle].
@@ -151,7 +151,7 @@ class SystemUiOverlayStyle {
 
   /// The brightness of top status bar.
   /// 
-  /// Only honored in iOS .
+  /// Only honored in iOS.
   final Brightness statusBarBrightness;
 
   /// The brightness of the top status bar icons.
@@ -170,6 +170,9 @@ class SystemUiOverlayStyle {
       'systemNavigationBarIconBrightness': systemNavigationBarIconBrightness?.toString(),
     };
   }
+
+  @override
+  String toString() => _toMap().toString();
 
   /// Creates a copy of this theme with the given fields replaced with new values.
   SystemUiOverlayStyle copyWith({
@@ -302,19 +305,16 @@ class SystemChrome {
   /// ```
   static void setSystemUIOverlayStyle(SystemUiOverlayStyle style) {
     assert(style != null);
-
     if (_pendingStyle != null) {
       // The microtask has already been queued; just update the pending value.
       _pendingStyle = style;
       return;
     }
-
     if (style == _latestStyle) {
       // Trivial success: no microtask has been queued and the given style is
       // already in effect, so no need to queue a microtask.
       return;
     }
-
     _pendingStyle = style;
     scheduleMicrotask(() {
       assert(_pendingStyle != null);

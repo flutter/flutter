@@ -72,8 +72,11 @@ void main() {
       when(mockProcessManager.runSync(<String>['which', 'openssl']))
           .thenReturn(exitsHappy);
       when(mockProcessManager.runSync(
-        argThat(contains('find-identity')), environment: any, workingDirectory: any)
-      ).thenReturn(exitsHappy);
+      argThat(contains('find-identity')),
+        environment: anyNamed('environment'),
+        workingDirectory: anyNamed('workingDirectory'),
+      )).thenReturn(exitsHappy);
+
 
       Map<String, String> signingConfigs;
       try {
@@ -94,7 +97,9 @@ void main() {
       when(mockProcessManager.runSync(<String>['which', 'openssl']))
           .thenReturn(exitsHappy);
       when(mockProcessManager.runSync(
-        argThat(contains('find-identity')), environment: any, workingDirectory: any,
+      argThat(contains('find-identity')),
+        environment: anyNamed('environment'),
+        workingDirectory: anyNamed('workingDirectory'),
       )).thenReturn(new ProcessResult(
         1, // pid
         0, // exitCode
@@ -105,8 +110,8 @@ void main() {
       ));
       when(mockProcessManager.runSync(
         <String>['security', 'find-certificate', '-c', '1111AAAA11', '-p'],
-        environment: any,
-        workingDirectory: any,
+        environment: anyNamed('environment'),
+        workingDirectory: anyNamed('workingDirectory'),
       )).thenReturn(new ProcessResult(
         1, // pid
         0, // exitCode
@@ -119,7 +124,9 @@ void main() {
       final MockStream mockStdErr = new MockStream();
 
       when(mockProcessManager.start(
-        argThat(contains('openssl')), environment: any, workingDirectory: any,
+      argThat(contains('openssl')),
+        environment: anyNamed('environment'),
+        workingDirectory: anyNamed('workingDirectory'),
       )).thenAnswer((Invocation invocation) => new Future<Process>.value(mockProcess));
 
       when(mockProcess.stdin).thenReturn(mockStdIn);
@@ -149,7 +156,9 @@ void main() {
       when(mockProcessManager.runSync(<String>['which', 'openssl']))
           .thenReturn(exitsHappy);
       when(mockProcessManager.runSync(
-        argThat(contains('find-identity')), environment: any, workingDirectory: any,
+      argThat(contains('find-identity')),
+        environment: anyNamed('environment'),
+        workingDirectory: anyNamed('workingDirectory'),
       )).thenReturn(new ProcessResult(
         1, // pid
         0, // exitCode
@@ -160,8 +169,8 @@ void main() {
       ));
       when(mockProcessManager.runSync(
         <String>['security', 'find-certificate', '-c', '1111AAAA11', '-p'],
-        environment: any,
-        workingDirectory: any,
+        environment: anyNamed('environment'),
+        workingDirectory: anyNamed('workingDirectory'),
       )).thenReturn(new ProcessResult(
         1, // pid
         0, // exitCode
@@ -174,7 +183,9 @@ void main() {
       final MockStream mockStdErr = new MockStream();
 
       when(mockProcessManager.start(
-        argThat(contains('openssl')), environment: any, workingDirectory: any,
+      argThat(contains('openssl')),
+        environment: anyNamed('environment'),
+        workingDirectory: anyNamed('workingDirectory'),
       )).thenAnswer((Invocation invocation) => new Future<Process>.value(mockProcess));
 
       when(mockProcess.stdin).thenReturn(mockStdIn);
@@ -208,7 +219,9 @@ void main() {
       when(mockProcessManager.runSync(<String>['which', 'openssl']))
           .thenReturn(exitsHappy);
       when(mockProcessManager.runSync(
-        argThat(contains('find-identity')), environment: any, workingDirectory: any,
+      argThat(contains('find-identity')),
+        environment: anyNamed('environment'),
+        workingDirectory: anyNamed('workingDirectory'),
       )).thenReturn(new ProcessResult(
         1, // pid
         0, // exitCode
@@ -223,8 +236,8 @@ void main() {
           new Stream<String>.fromFuture(new Future<String>.value('3'));
       when(mockProcessManager.runSync(
         <String>['security', 'find-certificate', '-c', '3333CCCC33', '-p'],
-        environment: any,
-        workingDirectory: any,
+        environment: anyNamed('environment'),
+        workingDirectory: anyNamed('workingDirectory'),
       )).thenReturn(new ProcessResult(
         1, // pid
         0, // exitCode
@@ -237,7 +250,9 @@ void main() {
       final MockStream mockOpenSslStdErr = new MockStream();
 
       when(mockProcessManager.start(
-        argThat(contains('openssl')), environment: any, workingDirectory: any,
+      argThat(contains('openssl')),
+        environment: anyNamed('environment'),
+        workingDirectory: anyNamed('workingDirectory'),
       )).thenAnswer((Invocation invocation) => new Future<Process>.value(mockOpenSslProcess));
 
       when(mockOpenSslProcess.stdin).thenReturn(mockOpenSslStdIn);
@@ -278,7 +293,9 @@ void main() {
       when(mockProcessManager.runSync(<String>['which', 'openssl']))
           .thenReturn(exitsHappy);
       when(mockProcessManager.runSync(
-        argThat(contains('find-identity')), environment: any, workingDirectory: any,
+      argThat(contains('find-identity')),
+        environment: anyNamed('environment'),
+        workingDirectory: anyNamed('workingDirectory'),
       )).thenReturn(new ProcessResult(
         1, // pid
         0, // exitCode
@@ -293,8 +310,8 @@ void main() {
         new Stream<String>.fromFuture(new Future<String>.error(new Exception('Cannot read from StdIn')));
       when(mockProcessManager.runSync(
         <String>['security', 'find-certificate', '-c', '1111AAAA11', '-p'],
-        environment: any,
-        workingDirectory: any,
+        environment: anyNamed('environment'),
+        workingDirectory: anyNamed('workingDirectory'),
       )).thenReturn(new ProcessResult(
         1, // pid
         0, // exitCode
@@ -307,7 +324,9 @@ void main() {
       final MockStream mockOpenSslStdErr = new MockStream();
 
       when(mockProcessManager.start(
-        argThat(contains('openssl')), environment: any, workingDirectory: any,
+      argThat(contains('openssl')),
+        environment: anyNamed('environment'),
+        workingDirectory: anyNamed('workingDirectory'),
       )).thenAnswer((Invocation invocation) => new Future<Process>.value(mockOpenSslProcess));
 
       when(mockOpenSslProcess.stdin).thenReturn(mockOpenSslStdIn);
@@ -342,7 +361,9 @@ void main() {
       when(mockProcessManager.runSync(<String>['which', 'openssl']))
           .thenReturn(exitsHappy);
       when(mockProcessManager.runSync(
-        argThat(contains('find-identity')), environment: any, workingDirectory: any,
+      argThat(contains('find-identity')),
+        environment: anyNamed('environment'),
+        workingDirectory: anyNamed('workingDirectory'),
       )).thenReturn(new ProcessResult(
         1, // pid
         0, // exitCode
@@ -355,8 +376,8 @@ void main() {
       ));
       when(mockProcessManager.runSync(
         <String>['security', 'find-certificate', '-c', '3333CCCC33', '-p'],
-        environment: any,
-        workingDirectory: any,
+        environment: anyNamed('environment'),
+        workingDirectory: anyNamed('workingDirectory'),
       )).thenReturn(new ProcessResult(
         1, // pid
         0, // exitCode
@@ -369,7 +390,9 @@ void main() {
       final MockStream mockOpenSslStdErr = new MockStream();
 
       when(mockProcessManager.start(
-        argThat(contains('openssl')), environment: any, workingDirectory: any,
+      argThat(contains('openssl')),
+        environment: anyNamed('environment'),
+        workingDirectory: anyNamed('workingDirectory'),
       )).thenAnswer((Invocation invocation) => new Future<Process>.value(mockOpenSslProcess));
 
       when(mockOpenSslProcess.stdin).thenReturn(mockOpenSslStdIn);
@@ -408,7 +431,9 @@ void main() {
       when(mockProcessManager.runSync(<String>['which', 'openssl']))
           .thenReturn(exitsHappy);
       when(mockProcessManager.runSync(
-        argThat(contains('find-identity')), environment: any, workingDirectory: any,
+      argThat(contains('find-identity')),
+        environment: anyNamed('environment'),
+        workingDirectory: anyNamed('workingDirectory'),
       )).thenReturn(new ProcessResult(
         1, // pid
         0, // exitCode
@@ -423,8 +448,8 @@ void main() {
           new Stream<String>.fromFuture(new Future<String>.value('3'));
       when(mockProcessManager.runSync(
         <String>['security', 'find-certificate', '-c', '3333CCCC33', '-p'],
-        environment: any,
-        workingDirectory: any,
+        environment: anyNamed('environment'),
+        workingDirectory: anyNamed('workingDirectory'),
       )).thenReturn(new ProcessResult(
         1, // pid
         0, // exitCode
@@ -438,7 +463,9 @@ void main() {
       final MockStream mockOpenSslStdErr = new MockStream();
 
       when(mockProcessManager.start(
-        argThat(contains('openssl')), environment: any, workingDirectory: any,
+      argThat(contains('openssl')),
+        environment: anyNamed('environment'),
+        workingDirectory: anyNamed('workingDirectory'),
       )).thenAnswer((Invocation invocation) => new Future<Process>.value(mockOpenSslProcess));
 
       when(mockOpenSslProcess.stdin).thenReturn(mockOpenSslStdIn);

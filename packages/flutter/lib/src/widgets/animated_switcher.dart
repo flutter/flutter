@@ -136,10 +136,10 @@ class AnimatedSwitcher extends StatefulWidget {
     Key key,
     this.child,
     @required this.duration,
-    this.switchInCurve: Curves.linear,
-    this.switchOutCurve: Curves.linear,
-    this.transitionBuilder: AnimatedSwitcher.defaultTransitionBuilder,
-    this.layoutBuilder: AnimatedSwitcher.defaultLayoutBuilder,
+    this.switchInCurve = Curves.linear,
+    this.switchOutCurve = Curves.linear,
+    this.transitionBuilder = AnimatedSwitcher.defaultTransitionBuilder,
+    this.layoutBuilder = AnimatedSwitcher.defaultLayoutBuilder,
   })  : assert(duration != null),
         assert(switchInCurve != null),
         assert(switchOutCurve != null),
@@ -247,7 +247,7 @@ class _AnimatedSwitcherState extends State<AnimatedSwitcher> with TickerProvider
   }) {
     final _AnimatedSwitcherChildEntry entry = new _AnimatedSwitcherChildEntry(
       widgetChild: widget.child,
-      transition: KeyedSubtree.wrap(
+      transition: new KeyedSubtree.wrap(
         widget.transitionBuilder(
           widget.child,
           animation,

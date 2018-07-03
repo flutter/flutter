@@ -196,7 +196,7 @@ class FuchsiaReloadCommand extends FlutterCommand {
   static const String _bold = '\u001B[0;1m';
   static const String _reset = '\u001B[0m';
 
-  String _vmServiceToString(VMService vmService, {int tabDepth: 0}) {
+  String _vmServiceToString(VMService vmService, {int tabDepth = 0}) {
     final Uri addr = vmService.httpAddress;
     final String embedder = vmService.vm.embedder;
     final int numIsolates = vmService.vm.isolates.length;
@@ -237,7 +237,7 @@ class FuchsiaReloadCommand extends FlutterCommand {
     return stringBuffer.toString();
   }
 
-  String _isolateToString(Isolate isolate, {int tabDepth: 0}) {
+  String _isolateToString(Isolate isolate, {int tabDepth = 0}) {
     final Uri vmServiceAddr = isolate.owner.vmService.httpAddress;
     final String name = isolate.name;
     final String shortName = name.substring(0, name.indexOf('\$'));

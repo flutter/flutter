@@ -25,7 +25,7 @@ abstract class RenderToggleable extends RenderConstrainedBox {
   /// null. The [value] can only be null if tristate is true.
   RenderToggleable({
     @required bool value,
-    bool tristate: false,
+    bool tristate = false,
     Size size,
     @required Color activeColor,
     @required Color inactiveColor,
@@ -339,7 +339,7 @@ abstract class RenderToggleable extends RenderConstrainedBox {
     config.isEnabled = isInteractive;
     if (isInteractive)
       config.onTap = _handleTap;
-    config.isChecked = _value != false;
+    config.isChecked = _value == true;
   }
 
   @override

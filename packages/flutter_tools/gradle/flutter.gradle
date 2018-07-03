@@ -24,7 +24,7 @@ buildscript {
         }
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:3.0.1'
+        classpath 'com.android.tools.build:gradle:3.1.2'
     }
 }
 
@@ -53,7 +53,7 @@ class FlutterPlugin implements Plugin<Project> {
 
     private String resolveProperty(Project project, String name, String defaultValue) {
         if (localProperties == null) {
-            localProperties = readPropertiesIfExist(project.rootProject.file("local.properties"))
+            localProperties = readPropertiesIfExist(new File(project.projectDir.parentFile, "local.properties"))
         }
         String result
         if (project.hasProperty(name)) {
@@ -107,8 +107,8 @@ class FlutterPlugin implements Plugin<Project> {
             localEngineSrcPath = engineOut.parentFile.parent
 
             project.dependencies {
-                if (project.getConfigurations().findByName("implementation")) {
-                    implementation project.files(flutterJar)
+                if (project.getConfigurations().findByName("api")) {
+                    api project.files(flutterJar)
                 } else {
                     compile project.files(flutterJar)
                 }
@@ -146,16 +146,16 @@ class FlutterPlugin implements Plugin<Project> {
                     into "lib/x86_64"
                 }
             }
-            // Add flutter.jar dependencies to all <buildType>Implementation configurations, including custom ones
+            // Add flutter.jar dependencies to all <buildType>Api configurations, including custom ones
             // added after applying the Flutter plugin.
-            project.android.buildTypes.each { addFlutterJarImplementationDependency(project, it) }
-            project.android.buildTypes.whenObjectAdded { addFlutterJarImplementationDependency(project, it) }
+            project.android.buildTypes.each { addFlutterJarApiDependency(project, it) }
+            project.android.buildTypes.whenObjectAdded { addFlutterJarApiDependency(project, it) }
         }
 
         project.extensions.create("flutter", FlutterExtension)
         project.afterEvaluate this.&addFlutterTask
 
-        File pluginsFile = new File(project.rootProject.projectDir.parentFile, '.flutter-plugins')
+        File pluginsFile = new File(project.projectDir.parentFile.parentFile, '.flutter-plugins')
         Properties plugins = readPropertiesIfExist(pluginsFile)
 
         plugins.each { name, _ ->
@@ -199,15 +199,15 @@ class FlutterPlugin implements Plugin<Project> {
     }
 
     /**
-     * Adds suitable flutter.jar implementation dependencies to the specified buildType.
+     * Adds suitable flutter.jar api dependencies to the specified buildType.
      *
      * Note: The BuildType DSL type is not public, and is therefore omitted from the signature.
      */
-    private void addFlutterJarImplementationDependency(Project project, buildType) {
+    private void addFlutterJarApiDependency(Project project, buildType) {
         project.dependencies {
             String configuration;
-            if (project.getConfigurations().findByName("implementation")) {
-                configuration = buildType.name + "Implementation";
+            if (project.getConfigurations().findByName("api")) {
+                configuration = buildType.name + "Api";
             } else {
                 configuration = buildType.name + "Compile";
             }
@@ -256,6 +256,10 @@ class FlutterPlugin implements Plugin<Project> {
             target = project.property('target')
         }
 
+        Boolean verboseValue = null
+        if (project.hasProperty('verbose')) {
+            verboseValue = project.property('verbose').toBoolean()
+        }
         Boolean previewDart2Value = true
         if (project.hasProperty('preview-dart-2')) {
             previewDart2Value = project.property('preview-dart-2').toBoolean()
@@ -272,7 +276,10 @@ class FlutterPlugin implements Plugin<Project> {
         if (project.hasProperty('track-widget-creation')) {
             trackWidgetCreationValue = project.property('track-widget-creation').toBoolean()
         }
-
+        Boolean buildSnapshotValue = false
+        if (project.hasProperty('build-snapshot')) {
+            buildSnapshotValue = project.property('build-snapshot').toBoolean()
+        }
         String extraFrontEndOptionsValue = null
         if (project.hasProperty('extra-front-end-options')) {
             extraFrontEndOptionsValue = project.property('extra-front-end-options')
@@ -281,9 +288,9 @@ class FlutterPlugin implements Plugin<Project> {
         if (project.hasProperty('extra-gen-snapshot-options')) {
             extraGenSnapshotOptionsValue = project.property('extra-gen-snapshot-options')
         }
-        Boolean preferSharedLibraryValue = false
-        if (project.hasProperty('prefer-shared-library')) {
-            preferSharedLibraryValue = project.property('prefer-shared-library').toBoolean()
+        Boolean buildSharedLibraryValue = false
+        if (project.hasProperty('build-shared-library')) {
+            buildSharedLibraryValue = project.property('build-shared-library').toBoolean()
         }
         String targetPlatformValue = null
         if (project.hasProperty('target-platform')) {
@@ -310,11 +317,13 @@ class FlutterPlugin implements Plugin<Project> {
                 localEngine this.localEngine
                 localEngineSrcPath this.localEngineSrcPath
                 targetPath target
+                verbose verboseValue
                 previewDart2 previewDart2Value
                 fileSystemRoots fileSystemRootsValue
                 fileSystemScheme fileSystemSchemeValue
                 trackWidgetCreation trackWidgetCreationValue
-                preferSharedLibrary preferSharedLibraryValue
+                buildSnapshot buildSnapshotValue
+                buildSharedLibrary buildSharedLibraryValue
                 targetPlatform targetPlatformValue
                 sourceDir project.file(project.flutter.source)
                 intermediateDir project.file("${project.buildDir}/${AndroidProject.FD_INTERMEDIATES}/flutter/${variant.name}")
@@ -353,6 +362,8 @@ abstract class BaseFlutterTask extends DefaultTask {
     @Input
     String targetPath
     @Optional @Input
+    Boolean verbose
+    @Optional @Input
     Boolean previewDart2
     @Optional @Input
     String[] fileSystemRoots
@@ -361,7 +372,9 @@ abstract class BaseFlutterTask extends DefaultTask {
     @Optional @Input
     Boolean trackWidgetCreation
     @Optional @Input
-    Boolean preferSharedLibrary
+    Boolean buildSnapshot
+    @Optional @Input
+    Boolean buildSharedLibrary
     @Optional @Input
     String targetPlatform
     File sourceDir
@@ -373,18 +386,20 @@ abstract class BaseFlutterTask extends DefaultTask {
 
     @OutputFiles
     FileCollection getDependenciesFiles() {
-        if (buildMode != 'debug') {
-            // For AOT builds, include the gen_snapshot depfile.
-            FileCollection depfiles = project.files("${intermediateDir}/snapshot.d")
-            if (previewDart2) {
-                // For Dart 2, also include the kernel compiler depfile, since
-                // kernel compile is the first stage of AOT build in this mode,
-                // and it includes all the Dart sources.
-                depfiles += project.files("${intermediateDir}/kernel_compile.d")
-            }
-            return depfiles
+        // For AOT and Core JIT builds, include the gen_snapshot depfile.
+        FileCollection depfiles = project.files("${intermediateDir}/snapshot.d")
+        if (previewDart2) {
+            // For Dart 2, also include the kernel compiler depfile, since
+            // kernel compile is the first stage of AOT build in this mode,
+            // and it includes all the Dart sources.
+            depfiles += project.files("${intermediateDir}/kernel_compile.d")
         }
-        return project.files("${intermediateDir}/snapshot_blob.bin.d")
+
+        // Include Core JIT kernel compiler depfile, since kernel compile is
+        // the first stage of JIT builds in this mode, and it includes all the
+        // Dart sources.
+        depfiles += project.files("${intermediateDir}/snapshot_blob.bin.d")
+        return depfiles
     }
 
     void buildBundle() {
@@ -422,8 +437,8 @@ abstract class BaseFlutterTask extends DefaultTask {
                 if (extraGenSnapshotOptions != null) {
                     args "--extra-gen-snapshot-options", "${extraGenSnapshotOptions}"
                 }
-                if (preferSharedLibrary) {
-                    args "--prefer-shared-library"
+                if (buildSharedLibrary) {
+                    args "--build-shared-library"
                 }
                 if (targetPlatform != null) {
                     args "--target-platform", "${targetPlatform}"
@@ -442,6 +457,9 @@ abstract class BaseFlutterTask extends DefaultTask {
             args "build", "bundle"
             args "--suppress-analytics"
             args "--target", targetPath
+            if (verbose) {
+                args "--verbose"
+            }
             if (previewDart2) {
                 args "--preview-dart-2"
             } else {
@@ -458,8 +476,17 @@ abstract class BaseFlutterTask extends DefaultTask {
             if (trackWidgetCreation) {
                 args "--track-widget-creation"
             }
+            if (buildSnapshot) {
+                args "--build-snapshot"
+            }
             if (extraFrontEndOptions != null) {
                 args "--extra-front-end-options", "${extraFrontEndOptions}"
+            }
+            if (extraGenSnapshotOptions != null) {
+                args "--extra-gen-snapshot-options", "${extraGenSnapshotOptions}"
+            }
+            if (targetPlatform != null) {
+                args "--target-platform", "${targetPlatform}"
             }
             if (buildMode != "debug") {
                 args "--precompiled"
@@ -470,6 +497,7 @@ abstract class BaseFlutterTask extends DefaultTask {
                 }
             }
             args "--asset-dir", "${intermediateDir}/flutter_assets"
+            args "--${buildMode}"
         }
     }
 }
@@ -486,8 +514,8 @@ class FlutterTask extends BaseFlutterTask {
 
             include "flutter_assets/**" // the working dir and its files
 
-            if (buildMode != 'debug') {
-                if (preferSharedLibrary) {
+            if (buildMode != 'debug' || buildSnapshot) {
+                if (buildSharedLibrary) {
                     include "app.so"
                 } else {
                     include "vm_snapshot_data"

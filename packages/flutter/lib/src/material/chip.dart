@@ -533,8 +533,8 @@ class InputChip extends StatelessWidget
     @required this.label,
     this.labelStyle,
     this.labelPadding,
-    this.selected: false,
-    this.isEnabled: true,
+    this.selected = false,
+    this.isEnabled = true,
     this.onSelected,
     this.deleteIcon,
     this.onDeleted,
@@ -844,7 +844,7 @@ class FilterChip extends StatelessWidget
     @required this.label,
     this.labelStyle,
     this.labelPadding,
-    this.selected: false,
+    this.selected = false,
     @required this.onSelected,
     this.disabledColor,
     this.selectedColor,
@@ -1067,10 +1067,10 @@ class RawChip extends StatefulWidget
     this.deleteButtonTooltipMessage,
     this.onPressed,
     this.onSelected,
-    this.tapEnabled: true,
+    this.tapEnabled = true,
     this.selected,
-    this.showCheckmark: true,
-    this.isEnabled: true,
+    this.showCheckmark = true,
+    this.isEnabled = true,
     this.disabledColor,
     this.selectedColor,
     this.tooltip,
@@ -1855,7 +1855,7 @@ class _RenderChip extends RenderBox {
   @override
   double computeDistanceToActualBaseline(TextBaseline baseline) {
     // The baseline of this widget is the baseline of the label.
-    return label.computeDistanceToActualBaseline(baseline);
+    return label.getDistanceToActualBaseline(baseline);
   }
 
   Size _layoutLabel(double iconSizes, Size size) {

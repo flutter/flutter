@@ -261,9 +261,52 @@ void main() {
     callbackTracker.clear();
   });
 
+  testWidgets('ListView.separated', (WidgetTester tester) async {
+    Widget buildFrame({ int itemCount }) {
+      return new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new ListView.separated(
+          itemCount: itemCount,
+          itemBuilder: (BuildContext context, int index) {
+            return new SizedBox(
+              height: 100.0,
+              child: new Text('i$index'),
+            );
+          },
+          separatorBuilder: (BuildContext context, int index) {
+            return new SizedBox(
+              height: 10.0,
+              child: new Text('s$index'),
+            );
+          },
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildFrame(itemCount: 0));
+    expect(find.text('i0'), findsNothing);
+    expect(find.text('s0'), findsNothing);
+
+    await tester.pumpWidget(buildFrame(itemCount: 1));
+    expect(find.text('i0'), findsOneWidget);
+    expect(find.text('s0'), findsNothing);
+
+    await tester.pumpWidget(buildFrame(itemCount: 2));
+    expect(find.text('i0'), findsOneWidget);
+    expect(find.text('s0'), findsOneWidget);
+    expect(find.text('i1'), findsOneWidget);
+    expect(find.text('s1'), findsNothing);
+
+    // ListView's height is 600, so items i0-i5 and s0-s4 fit.
+    await tester.pumpWidget(buildFrame(itemCount: 25));
+    for(String s in <String>['i0', 's0', 'i1', 's1', 'i2', 's2', 'i3', 's3', 'i4', 's4', 'i5'])
+      expect(find.text(s), findsOneWidget);
+    expect(find.text('s5'), findsNothing);
+    expect(find.text('i6'), findsNothing);
+  });
 }
 
-void check({List<int> visible: const <int>[], List<int> hidden: const <int>[]}) {
+void check({List<int> visible = const <int>[], List<int> hidden = const <int>[]}) {
   for (int i in visible) {
     expect(find.text('$i'), findsOneWidget);
   }

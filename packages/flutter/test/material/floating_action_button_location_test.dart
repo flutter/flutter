@@ -233,14 +233,14 @@ class _GeometryCachePainter extends CustomPainter {
 }
 
 Widget buildFrame({
-  FloatingActionButton fab: const FloatingActionButton(
+  FloatingActionButton fab = const FloatingActionButton(
     onPressed: null,
     child: const Text('1'),
   ),
   FloatingActionButtonLocation location,
   _GeometryListener listener,
-  TextDirection textDirection: TextDirection.ltr,
-  EdgeInsets viewInsets: const EdgeInsets.only(bottom: 200.0),
+  TextDirection textDirection = TextDirection.ltr,
+  EdgeInsets viewInsets = const EdgeInsets.only(bottom: 200.0),
   Widget bab,
 }) {
   return new Directionality(

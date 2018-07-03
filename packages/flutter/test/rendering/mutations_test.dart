@@ -14,7 +14,7 @@ class RenderLayoutTestBox extends RenderProxyBox {
   final VoidCallback onLayout;
 
   @override
-  void layout(Constraints constraints, { bool parentUsesSize: false }) {
+  void layout(Constraints constraints, { bool parentUsesSize = false }) {
     // Doing this in tests is ok, but if you're writing your own
     // render object, you want to override performLayout(), not
     // layout(). Overriding layout() would remove many critical

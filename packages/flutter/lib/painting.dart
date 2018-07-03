@@ -43,6 +43,7 @@ export 'src/painting/image_provider.dart';
 export 'src/painting/image_resolution.dart';
 export 'src/painting/image_stream.dart';
 export 'src/painting/matrix_utils.dart';
+export 'src/painting/notched_shapes.dart';
 export 'src/painting/paint_utilities.dart';
 export 'src/painting/rounded_rectangle_border.dart';
 export 'src/painting/shape_decoration.dart';

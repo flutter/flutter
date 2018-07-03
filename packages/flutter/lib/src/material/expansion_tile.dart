@@ -37,9 +37,9 @@ class ExpansionTile extends StatefulWidget {
     @required this.title,
     this.backgroundColor,
     this.onExpansionChanged,
-    this.children: const <Widget>[],
+    this.children = const <Widget>[],
     this.trailing,
-    this.initiallyExpanded: false,
+    this.initiallyExpanded = false,
   }) : assert(initiallyExpanded != null),
        super(key: key);
 

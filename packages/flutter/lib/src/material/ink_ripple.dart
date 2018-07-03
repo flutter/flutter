@@ -45,7 +45,7 @@ class _InkRippleFactory extends InteractiveInkFeatureFactory {
     @required RenderBox referenceBox,
     @required Offset position,
     @required Color color,
-    bool containedInkWell: false,
+    bool containedInkWell = false,
     RectCallback rectCallback,
     BorderRadius borderRadius,
     double radius,
@@ -74,7 +74,7 @@ class _InkRippleFactory extends InteractiveInkFeatureFactory {
 /// This object is rarely created directly. Instead of creating an ink ripple,
 /// consider using an [InkResponse] or [InkWell] widget, which uses
 /// gestures (such as tap and long-press) to trigger ink splashes. This class
-/// is used when the [Theme]'s [ThemeData.splashType] is [InkSplashType.ripple].
+/// is used when the [Theme]'s [ThemeData.splashFactory] is [InkRipple.splashFactory].
 ///
 /// See also:
 ///
@@ -112,7 +112,7 @@ class InkRipple extends InteractiveInkFeature {
     @required RenderBox referenceBox,
     @required Offset position,
     @required Color color,
-    bool containedInkWell: false,
+    bool containedInkWell = false,
     RectCallback rectCallback,
     BorderRadius borderRadius,
     double radius,

@@ -63,7 +63,7 @@ abstract class AssetBundle {
   /// caller is going to be doing its own caching. (It might not be cached if
   /// it's set to true either, that depends on the asset bundle
   /// implementation.)
-  Future<String> loadString(String key, { bool cache: true }) async {
+  Future<String> loadString(String key, { bool cache = true }) async {
     final ByteData data = await load(key);
     if (data == null)
       throw new FlutterError('Unable to load asset: $key');
@@ -115,7 +115,7 @@ class NetworkAssetBundle extends AssetBundle {
   Future<ByteData> load(String key) async {
     final HttpClientRequest request = await _httpClient.getUrl(_urlFromKey(key));
     final HttpClientResponse response = await request.close();
-    if (response.statusCode != HttpStatus.OK)
+    if (response.statusCode != HttpStatus.ok)
       throw new FlutterError(
         'Unable to load asset: $key\n'
         'HTTP status code: ${response.statusCode}'
@@ -157,7 +157,7 @@ abstract class CachingAssetBundle extends AssetBundle {
   final Map<String, Future<dynamic>> _structuredDataCache = <String, Future<dynamic>>{};
 
   @override
-  Future<String> loadString(String key, { bool cache: true }) {
+  Future<String> loadString(String key, { bool cache = true }) {
     if (cache)
       return _stringCache.putIfAbsent(key, () => super.loadString(key));
     return super.loadString(key);

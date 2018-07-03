@@ -17,11 +17,11 @@ class ColdRunner extends ResidentRunner {
     List<FlutterDevice> devices, {
     String target,
     DebuggingOptions debuggingOptions,
-    bool usesTerminalUI: true,
-    this.traceStartup: false,
+    bool usesTerminalUI = true,
+    this.traceStartup = false,
     this.applicationBinary,
-    bool stayResident: true,
-    bool ipv6: false,
+    bool stayResident = true,
+    bool ipv6 = false,
   }) : super(devices,
              target: target,
              debuggingOptions: debuggingOptions,
@@ -37,7 +37,7 @@ class ColdRunner extends ResidentRunner {
     Completer<DebugConnectionInfo> connectionInfoCompleter,
     Completer<Null> appStartedCompleter,
     String route,
-    bool shouldBuild: true
+    bool shouldBuild = true
   }) async {
     final bool prebuiltMode = applicationBinary != null;
     if (!prebuiltMode) {
@@ -125,22 +125,29 @@ class ColdRunner extends ResidentRunner {
   @override
   void printHelp({ @required bool details }) {
     bool haveDetails = false;
+    bool haveAnything = false;
     for (FlutterDevice device in flutterDevices) {
       final String dname = device.device.name;
       if (device.observatoryUris != null) {
-        for (Uri uri in device.observatoryUris)
+        for (Uri uri in device.observatoryUris) {
           printStatus('An Observatory debugger and profiler on $dname is available at $uri');
+          haveAnything = true;
+        }
       }
     }
     if (supportsServiceProtocol) {
       haveDetails = true;
-      if (details)
+      if (details) {
         printHelpDetails();
+        haveAnything = true;
+      }
     }
     if (haveDetails && !details) {
       printStatus('For a more detailed help message, press "h". To quit, press "q".');
-    } else {
+    } else if (haveAnything) {
       printStatus('To repeat this help message, press "h". To quit, press "q".');
+    } else {
+      printStatus('To quit, press "q".');
     }
   }
 
