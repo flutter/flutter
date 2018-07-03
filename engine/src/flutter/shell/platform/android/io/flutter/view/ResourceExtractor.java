@@ -10,22 +10,13 @@ import android.content.pm.PackageManager;
 import android.content.res.AssetManager;
 import android.os.AsyncTask;
 import android.util.Log;
+import io.flutter.util.PathUtils;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.FileNotFoundException;
-import java.io.FilenameFilter;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.util.Arrays;
+import java.io.*;
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
-
-import io.flutter.util.PathUtils;
 
 /**
  * A class to intialize the native code.

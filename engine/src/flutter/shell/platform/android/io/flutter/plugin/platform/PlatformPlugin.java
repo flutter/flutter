@@ -5,24 +5,20 @@
 package io.flutter.plugin.platform;
 
 import android.app.Activity;
-import android.content.ClipboardManager;
 import android.content.ClipData;
-import android.content.ClipDescription;
+import android.content.ClipboardManager;
 import android.content.Context;
-import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.os.Build;
+import android.util.Log;
 import android.view.HapticFeedbackConstants;
 import android.view.SoundEffectConstants;
 import android.view.View;
 import android.view.Window;
-import android.util.Log;
-
 import io.flutter.plugin.common.ActivityLifecycleListener;
+import io.flutter.plugin.common.MethodCall;
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler;
 import io.flutter.plugin.common.MethodChannel.Result;
-import io.flutter.plugin.common.MethodCall;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
