@@ -6,6 +6,7 @@ import 'dart:async';
 import 'dart:convert';
 
 
+import 'android/android_sdk.dart';
 import 'android/gradle.dart' as gradle;
 import 'base/file_system.dart';
 import 'bundle.dart' as bundle;
@@ -226,7 +227,8 @@ class AndroidModuleProject {
       }, printStatusWhenWriting: false);
       gradle.injectGradleWrapper(directory);
     }
-    await gradle.updateLocalProperties(project: project);
+    if (androidSdk != null)
+      await gradle.updateLocalProperties(project: project);
   }
 
   bool _shouldRegenerate() {
