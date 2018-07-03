@@ -1415,15 +1415,20 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
     final MediaQueryData mediaQuery = MediaQuery.of(context);
     final ThemeData themeData = Theme.of(context);
     final TextDirection textDirection = Directionality.of(context);
+    final bool semanticsEnabled = RendererBinding.instance.pipelineOwner.semanticsOwner != null;
 
     if (_snackBars.isNotEmpty) {
       final ModalRoute<dynamic> route = ModalRoute.of(context);
       if (route == null || route.isCurrent) {
+        final SnackBar snackBar = _snackBars.first._widget;
         if (_snackBarController.isCompleted && _snackBarTimer == null)
-          _snackBarTimer = new Timer(_snackBars.first._widget.duration, () {
+          _snackBarTimer = new Timer(snackBar.duration, () {
             assert(_snackBarController.status == AnimationStatus.forward ||
                    _snackBarController.status == AnimationStatus.completed);
-            hideCurrentSnackBar(reason: SnackBarClosedReason.timeout);
+            if (!semanticsEnabled || snackBar.action == null) {
+              hideCurrentSnackBar(reason: SnackBarClosedReason.timeout);
+            }
+            _snackBarTimer?.cancel();
           });
       } else {
         _snackBarTimer?.cancel();

@@ -5,6 +5,8 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
 
+import '../widgets/semantics_tester.dart';
+
 void main() {
   testWidgets('SnackBar control test', (WidgetTester tester) async {
     const String helloSnackBar = 'Hello SnackBar';
@@ -255,6 +257,48 @@ void main() {
     await tester.pump(); // bar1 dismissed, bar2 begins animating
     expect(find.text('bar1'), findsNothing);
     expect(find.text('bar2'), findsOneWidget);
+  });
+
+  testWidgets('snackbar with action does not timeout when semantics are enabled', (WidgetTester tester) async {
+    final SemanticsTester semantics = new SemanticsTester(tester);
+    const Key tapTarget = const Key('tap-target');
+    bool pressed = false;
+    await tester.pumpWidget(new MaterialApp(
+        home: new Scaffold(
+            body: new Builder(
+                builder: (BuildContext context) {
+                  return new GestureDetector(
+                      onTap: () {
+                        Scaffold.of(context).showSnackBar(new SnackBar(
+                            content: const Text('hello'),
+                            action: new SnackBarAction(label: 'test', onPressed: () {
+                              pressed = true;
+                              Scaffold.of(context).hideCurrentSnackBar();
+                            }),
+                            duration: const Duration(seconds: 2)
+                        ));
+                      },
+                      behavior: HitTestBehavior.opaque,
+                      child: new Container(
+                          height: 100.0,
+                          width: 100.0,
+                          key: tapTarget
+                      )
+                  );
+                }
+            )
+        )
+    ));
+    await tester.tap(find.byKey(tapTarget));
+    await tester.pump();
+    expect(find.text('hello'), findsOneWidget);
+    await tester.pumpAndSettle(const Duration(seconds: 3));
+    expect(find.text('hello'), findsOneWidget);
+    await tester.tap(find.text('test'));
+    expect(pressed, true);
+    await tester.pumpAndSettle(const Duration(seconds: 3));
+    expect(find.text('hello'), findsNothing);
+    semantics.dispose();
   });
 
   testWidgets('SnackBar cannot be tapped twice', (WidgetTester tester) async {
