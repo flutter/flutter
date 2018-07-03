@@ -3196,7 +3196,12 @@ class _RootSemanticsFragment extends _InterestingSemanticsFragment {
     }
     node.updateWith(config: null, childrenInInversePaintOrder: children);
 
-    assert(!node.isInvisible);
+    // The root node is the only semantics node allowed to be invisible. This
+    // can happen when the canvas the app is drawn on has a size of 0 by 0
+    // pixel. If this happens, the root node must not have any children (because
+    // these would be invisible as well and are therefore excluded from the
+    // tree).
+    assert(!node.isInvisible || children.isEmpty);
     yield node;
   }
 
