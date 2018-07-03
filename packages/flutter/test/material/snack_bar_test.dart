@@ -482,49 +482,4 @@ void main() {
     expect(closedReason, equals(SnackBarClosedReason.timeout));
   });
 
-  testWidgets('SnackBar default display duration test', (WidgetTester tester) async {
-    int snackBarCount = 0;
-    const Key tapTarget = const Key('tap-target');
-    await tester.pumpWidget(new MaterialApp(
-        home: new Scaffold(
-            body: new Builder(
-                builder: (BuildContext context) {
-                  return new GestureDetector(
-                      onTap: () {
-                        snackBarCount += 1;
-                        Scaffold.of(context).showSnackBar(new SnackBar(
-                            content: new Text('bar$snackBarCount')
-                        ));
-                      },
-                      behavior: HitTestBehavior.opaque,
-                      child: new Container(
-                          height: 100.0,
-                          width: 100.0,
-                          key: tapTarget
-                      )
-                  );
-                }
-            )
-        )
-    ));
-
-    expect(find.text('bar1'), findsNothing);
-    expect(find.text('bar2'), findsNothing);
-    await tester.tap(find.byKey(tapTarget)); // queue bar1
-    await tester.tap(find.byKey(tapTarget)); // queue bar2
-    expect(find.text('bar1'), findsNothing);
-    expect(find.text('bar2'), findsNothing);
-    await tester.pump(); // schedule animation for bar1
-    expect(find.text('bar1'), findsOneWidget);
-    expect(find.text('bar2'), findsNothing);
-    await tester.pump(); // begin animation
-    expect(find.text('bar1'), findsOneWidget);
-    expect(find.text('bar2'), findsNothing);
-    await tester.pump(const Duration(milliseconds: 750)); // 0.75s // animation last frame; two second timer starts here
-    await tester.drag(find.text('bar1'), const Offset(0.0, 50.0));
-    await tester.pump(); // bar1 dismissed, bar2 begins animating
-    expect(find.text('bar1'), findsNothing);
-    expect(find.text('bar2'), findsOneWidget);
-  });
-
 }
