@@ -59,5 +59,7 @@ echo "SDK directory is: $PWD"
 # disable analytics on the bots and download Flutter dependencies
 ./bin/flutter config --no-analytics
 
+./bin/flutter --version
+
 # run pub get in all the repo packages
 ./bin/flutter update-packages
