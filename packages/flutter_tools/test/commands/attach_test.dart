@@ -72,7 +72,20 @@ void main() {
 
     testUsingContext('exits when no device connected', () async {
       final AttachCommand command = new AttachCommand();
-      applyMocksToCommand(command);
+      try {
+        await createTestCommandRunner(command).run(<String>['attach']);
+        fail('Expect exception');
+      } catch (e) {
+        expect(e, const isInstanceOf<ToolExit>());
+      }
+    });
+
+    testUsingContext('exits when multiple devices connected', () async {
+      final AttachCommand command = new AttachCommand();
+      final MockAndroidDevice device1 = new MockAndroidDevice();
+      final MockAndroidDevice device2 = new MockAndroidDevice();
+      when(device1.isLocalEmulator).thenAnswer((_) async => false);
+      when(device2.isLocalEmulator).thenAnswer((_) async => false);
       try {
         await createTestCommandRunner(command).run(<String>['attach']);
         fail('Expect exception');
