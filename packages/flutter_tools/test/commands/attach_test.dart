@@ -72,12 +72,11 @@ void main() {
 
     testUsingContext('exits when no device connected', () async {
       final AttachCommand command = new AttachCommand();
-      try {
-        await createTestCommandRunner(command).run(<String>['attach']);
-        fail('Expect exception');
-      } catch (e) {
-        expect(e, const isInstanceOf<ToolExit>());
-      }
+      await expectLater(
+        createTestCommandRunner(command).run(<String>['attach']),
+        throwsA(const isInstanceOf<ToolExit>()),
+      );
+      expect(testLogger.statusText, contains('No connected devices'));
     });
 
     testUsingContext('exits when multiple devices connected', () async {
@@ -91,14 +90,15 @@ void main() {
       }
 
       final AttachCommand command = new AttachCommand();
-      testDeviceManager.addDevice(aDeviceWithId('1'));
-      testDeviceManager.addDevice(aDeviceWithId('2'));
-      try {
-        await createTestCommandRunner(command).run(<String>['attach']);
-        fail('Expect exception');
-      } catch (e) {
-        expect(e, const isInstanceOf<ToolExit>());
-      }
+      testDeviceManager.addDevice(aDeviceWithId('xx1'));
+      testDeviceManager.addDevice(aDeviceWithId('yy2'));
+      await expectLater(
+        createTestCommandRunner(command).run(<String>['attach']),
+        throwsA(const isInstanceOf<ToolExit>()),
+      );
+      expect(testLogger.statusText, contains('More than one device'));
+      expect(testLogger.statusText, contains('xx1'));
+      expect(testLogger.statusText, contains('yy2'));
     });
   });
 }
