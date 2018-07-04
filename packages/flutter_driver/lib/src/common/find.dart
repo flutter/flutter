@@ -253,8 +253,10 @@ class ByType extends SerializableFinder {
   }
 }
 
-
 /// A Flutter driver command that retrieves a semantics id using a specified finder.
+/// 
+/// If the object returned by the finder does not have its own semantics node,
+/// then the semantics node of the first ancestor is returned instead.
 /// 
 /// If the finder returns multiple objects, or there are no semantics nodes then
 /// a [StateError] is thrown by the extension.
