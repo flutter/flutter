@@ -5,7 +5,6 @@
 import 'dart:async';
 
 import 'package:flutter_tools/src/base/file_system.dart';
-import 'package:flutter_tools/src/base/utils.dart';
 import 'package:flutter_tools/src/commands/daemon.dart';
 
 import '../base/common.dart';
@@ -75,15 +74,28 @@ class AttachCommand extends FlutterCommand {
   }
 
   @override
-  Future<FlutterCommandResult> runCommand() async {
+  Future<Null> validateCommand() async {
+    super.validateCommand();
+    if (await findTargetDevice() == null)
+      throwToolExit(null);
+    observatoryPort;
+  }
+
+  @override
+  Future<Null> runCommand() async {
     Cache.releaseLockEarly();
 
     await _validateArguments();
 
     final Device device = await findTargetDevice();
-    if (device == null)
-      throwToolExit(null);
     final int devicePort = observatoryPort;
+
+    final Daemon daemon = argResults['machine']
+      ? new Daemon(
+            stdinCommandStream, stdoutCommandResponse,
+            notifyingLogger: new NotifyingLogger(), logToStdout: true)
+      : null;
+
     Uri observatoryUri;
     if (devicePort == null) {
       ProtocolDiscovery observatoryDiscovery;
@@ -91,7 +103,11 @@ class AttachCommand extends FlutterCommand {
         observatoryDiscovery = new ProtocolDiscovery.observatory(
             device.getLogReader(),
             portForwarder: device.portForwarder);
-        printStatus('Listening.');
+        // TODO(dantup): Do we need to send something via the daemon in --machine
+        // mode or should clients assume that we're waiting until they get the
+        // app.started event?
+        if (daemon == null)
+          printStatus('Listening.');
         observatoryUri = await observatoryDiscovery.uri;
       } finally {
         await observatoryDiscovery?.cancel();
@@ -108,13 +124,10 @@ class AttachCommand extends FlutterCommand {
         <FlutterDevice>[flutterDevice],
         debuggingOptions: new DebuggingOptions.enabled(getBuildInfo()),
         packagesFilePath: globalResults['packages'],
-        usesTerminalUI: !argResults['machine']
+        usesTerminalUI: daemon == null
       );
 
-      if (argResults['machine']) {
-        final Daemon daemon = new Daemon(
-            stdinCommandStream, stdoutCommandResponse,
-            notifyingLogger: new NotifyingLogger(), logToStdout: true);
+      if (daemon != null) {
         AppInstance app;
         try {
           app = await daemon.appDomain.launch(hotRunner, hotRunner.attach,
@@ -122,23 +135,15 @@ class AttachCommand extends FlutterCommand {
         } catch (error) {
           throwToolExit(error.toString());
         }
-        final DateTime appStartedTime = clock.now();
         final int result = await app.runner.waitForAppToFinish();
         if (result != 0)
           throwToolExit(null, exitCode: result);
-        return new FlutterCommandResult(
-          ExitStatus.success,
-          timingLabelParts: <String>['daemon'],
-          endTimeOverride: appStartedTime,
-        );
       } else {
         await hotRunner.attach();
       }
     } finally {
       device.portForwarder.forwardedPorts.forEach(device.portForwarder.unforward);
     }
-
-    return const FlutterCommandResult(ExitStatus.success);
   }
 
   Future<void> _validateArguments() async {}
