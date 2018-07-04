@@ -446,7 +446,8 @@ class MaterialButton extends StatelessWidget {
   }
 }
 
-/// Redirects the position passed to [RenderBox.hitTest] to the center of the widget.
+/// Redirects the position passed to [RenderBox.hitTest] to the center of the
+/// widget if the child hit test would have failed otherwise.
 ///
 /// The primary purpose of this widget is to allow padding around [Material] widgets
 /// to trigger the child ink feature without increasing the size of the material.
@@ -477,6 +478,8 @@ class _RenderButtonRedirectingHitDetection extends RenderConstrainedBox {
   bool hitTest(HitTestResult result, {Offset position}) {
     if (!size.contains(position))
       return false;
+    if (child.hitTest(result, position: position))
+      return true;
     return child.hitTest(result, position: size.center(Offset.zero));
   }
 }
