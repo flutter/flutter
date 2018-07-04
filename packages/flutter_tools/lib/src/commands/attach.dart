@@ -103,12 +103,9 @@ class AttachCommand extends FlutterCommand {
         observatoryDiscovery = new ProtocolDiscovery.observatory(
             device.getLogReader(),
             portForwarder: device.portForwarder);
-        // TODO(dantup): Do we need to send something via the daemon in --machine
-        // mode or should clients assume that we're waiting until they get the
-        // app.started event?
-        if (daemon == null)
-          printStatus('Listening.');
+        printStatus('Waiting for a connection from Flutter on ${device.name}...');
         observatoryUri = await observatoryDiscovery.uri;
+        printStatus('Done.');
       } finally {
         await observatoryDiscovery?.cancel();
       }
