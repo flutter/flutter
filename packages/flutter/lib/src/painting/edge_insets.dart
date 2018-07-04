@@ -44,10 +44,10 @@ abstract class EdgeInsetsGeometry {
         && _bottom >= 0.0;
   }
 
-  /// The total offset in the vertical direction.
+  /// The total offset in the horizontal direction.
   double get horizontal => _left + _right + _start + _end;
 
-  /// The total offset in the horizontal direction.
+  /// The total offset in the vertical direction.
   double get vertical => _top + _bottom;
 
   /// The total offset in the given direction.

@@ -756,11 +756,12 @@ class TransformLayer extends OffsetLayer {
     if (value == _transform)
       return;
     _transform = value;
-    _invertedTransform = null;
+    _inverseDirty = true;
   }
 
   Matrix4 _lastEffectiveTransform;
   Matrix4 _invertedTransform;
+  bool _inverseDirty = true;
 
   @override
   void addToScene(ui.SceneBuilder builder, Offset layerOffset) {
@@ -777,7 +778,12 @@ class TransformLayer extends OffsetLayer {
 
   @override
   S find<S>(Offset regionOffset) {
-    _invertedTransform ??= new Matrix4.inverted(transform);
+    if (_inverseDirty) {
+      _invertedTransform = Matrix4.tryInvert(transform);
+      _inverseDirty = false;
+    }
+    if (_invertedTransform == null)
+      return null;
     final Vector4 vector = new Vector4(regionOffset.dx, regionOffset.dy, 0.0, 1.0);
     final Vector4 result = _invertedTransform.transform(vector);
     return super.find<S>(new Offset(result[0], result[1]));
@@ -1178,18 +1184,19 @@ class FollowerLayer extends ContainerLayer {
   Offset _lastOffset;
   Matrix4 _lastTransform;
   Matrix4 _invertedTransform;
+  bool _inverseDirty = true;
 
   @override
   S find<S>(Offset regionOffset) {
     if (link.leader == null) {
       return showWhenUnlinked ? super.find<S>(regionOffset - unlinkedOffset) : null;
     }
-    if (_invertedTransform == null) {
-      final Matrix4 transform = getLastTransform();
-      assert(transform != null);
-      _invertedTransform = new Matrix4.zero();
-      transform.copyInverse(_invertedTransform);
+    if (_inverseDirty) {
+      _invertedTransform = Matrix4.tryInvert(getLastTransform());
+      _inverseDirty = false;
     }
+    if (_invertedTransform == null)
+      return null;
     final Vector4 vector = new Vector4(regionOffset.dx, regionOffset.dy, 0.0, 1.0);
     final Vector4 result = _invertedTransform.transform(vector);
     return super.find<S>(new Offset(result[0] - linkedOffset.dx, result[1] - linkedOffset.dy));
@@ -1269,6 +1276,7 @@ class FollowerLayer extends ContainerLayer {
     inverseTransform.multiply(forwardTransform);
     inverseTransform.translate(linkedOffset.dx, linkedOffset.dy);
     _lastTransform = inverseTransform;
+    _inverseDirty = true;
   }
 
   @override
@@ -1278,6 +1286,7 @@ class FollowerLayer extends ContainerLayer {
     if (link.leader == null && !showWhenUnlinked) {
       _lastTransform = null;
       _lastOffset = null;
+      _inverseDirty = true;
       return;
     }
     _establishTransform();
@@ -1290,6 +1299,7 @@ class FollowerLayer extends ContainerLayer {
       _lastOffset = null;
       addChildrenToScene(builder, unlinkedOffset + layerOffset);
     }
+    _inverseDirty = true;
   }
 
   @override

@@ -10,7 +10,6 @@ import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/platform.dart';
-import '../base/port_scanner.dart';
 import '../base/process.dart';
 import '../base/process_manager.dart';
 import '../build_info.dart';
@@ -199,13 +198,8 @@ class IOSDevice extends Device {
     if (debuggingOptions.useTestFonts)
       launchArguments.add('--use-test-fonts');
 
-    if (debuggingOptions.debuggingEnabled) {
+    if (debuggingOptions.debuggingEnabled)
       launchArguments.add('--enable-checked-mode');
-
-      // Note: We do NOT need to set the observatory port since this is going to
-      // be setup on the device. Let it pick a port automatically. We will check
-      // the port picked and scrape that later.
-    }
 
     if (debuggingOptions.enableSoftwareRendering)
       launchArguments.add('--enable-software-rendering');
@@ -507,28 +501,46 @@ class _IOSDevicePortForwarder extends DevicePortForwarder {
   @override
   List<ForwardedPort> get forwardedPorts => _forwardedPorts;
 
+  static const Duration _kiProxyPortForwardTimeout = const Duration(seconds: 1);
+
   @override
   Future<int> forward(int devicePort, {int hostPort}) async {
-    if ((hostPort == null) || (hostPort == 0)) {
-      // Auto select host port.
-      hostPort = await portScanner.findAvailablePort();
+    final bool autoselect = hostPort == null || hostPort == 0;
+    if (autoselect)
+      hostPort = 1024;
+
+    Process process;
+
+    bool connected = false;
+    while (!connected) {
+      printTrace('attempting to forward device port $devicePort to host port $hostPort');
+      // Usage: iproxy LOCAL_TCP_PORT DEVICE_TCP_PORT UDID
+      process = await runCommand(<String>[
+        device._iproxyPath,
+        hostPort.toString(),
+        devicePort.toString(),
+        device.id,
+      ]);
+      // TODO(ianh): This is a flakey race condition, https://github.com/libimobiledevice/libimobiledevice/issues/674
+      connected = !await process.stdout.isEmpty.timeout(_kiProxyPortForwardTimeout, onTimeout: () => false);
+      if (!connected) {
+        if (autoselect) {
+          hostPort += 1;
+          if (hostPort > 65535)
+            throw new Exception('Could not find open port on host.');
+        } else {
+          throw new Exception('Port $hostPort is not available.');
+        }
+      }
     }
+    assert(connected);
+    assert(process != null);
 
-    // Usage: iproxy LOCAL_TCP_PORT DEVICE_TCP_PORT UDID
-    final Process process = await runCommand(<String>[
-      device._iproxyPath,
-      hostPort.toString(),
-      devicePort.toString(),
-      device.id,
-    ]);
-
-    final ForwardedPort forwardedPort = new ForwardedPort.withContext(hostPort,
-        devicePort, process);
-
+    final ForwardedPort forwardedPort = new ForwardedPort.withContext(
+      hostPort, devicePort, process,
+    );
     printTrace('Forwarded port $forwardedPort');
-
     _forwardedPorts.add(forwardedPort);
-
     return hostPort;
   }
 
