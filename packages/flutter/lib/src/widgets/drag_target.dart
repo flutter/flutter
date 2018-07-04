@@ -270,7 +270,7 @@ class LongPressDraggable<T> extends Draggable<T> {
     onDragCompleted: onDragCompleted
   );
 
-  /// If haptic feedback should be triggered on drag start.
+  /// Whether haptic feedback should be triggered on drag start.
   final bool hapticFeedbackOnStart;
 
   @override
