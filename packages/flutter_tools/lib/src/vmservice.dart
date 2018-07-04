@@ -592,7 +592,7 @@ class ServiceEvent extends ServiceObject {
   String _kind;
   String get kind => _kind;
   DateTime _timestamp;
-  DateTime get timestmap => _timestamp;
+  DateTime get timestamp => _timestamp;
   String _extensionKind;
   String get extensionKind => _extensionKind;
   Map<String, dynamic> _extensionData;
@@ -1400,7 +1400,7 @@ class ServiceMap extends ServiceObject implements Map<String, dynamic> {
   dynamic update(String key, dynamic update(dynamic value), {dynamic ifAbsent()}) => _map.update(key, update, ifAbsent: ifAbsent);
 }
 
-/// Peered to a Android/iOS FlutterView widget on a device.
+/// Peered to an Android/iOS FlutterView widget on a device.
 class FlutterView extends ServiceObject {
   FlutterView._empty(ServiceObjectOwner owner) : super._empty(owner);
 
