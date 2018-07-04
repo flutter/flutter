@@ -1594,7 +1594,11 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
   double get _borderWeight {
     if (decoration.isCollapsed || decoration.border == InputBorder.none || !decoration.enabled)
       return 0.0;
-    return isFocused ? 2.0 : 1.0;
+    final double defaultWeight = isFocused ? 2.0 : 1.0;
+    if(decoration.border != null){
+      return decoration?.border?.borderSide?.width ?? defaultWeight;
+    }
+    return defaultWeight;
   }
 
   Color _getBorderColor(ThemeData themeData) {
@@ -1604,7 +1608,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
       return themeData.disabledColor;
     }
     return decoration.errorText == null
-      ? _getActiveColor(themeData)
+      ? decoration?.border?.borderSide?.color ?? _getActiveColor(themeData)
       : themeData.errorColor;
   }
 
