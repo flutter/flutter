@@ -8,8 +8,7 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   testWidgets('test iOS page transition (LTR)', (WidgetTester tester) async {
     await tester.pumpWidget(
-      new WidgetsApp(
-        color: const Color(0xFFFFFFFF),
+      new CupertinoApp(
         onGenerateRoute: (RouteSettings settings) {
           return new CupertinoPageRoute<void>(
             settings: settings,
@@ -76,11 +75,10 @@ void main() {
 
   testWidgets('test iOS page transition (RTL)', (WidgetTester tester) async {
     await tester.pumpWidget(
-      new WidgetsApp(
+      new CupertinoApp(
         localizationsDelegates: const <LocalizationsDelegate<dynamic>>[
           const RtlOverrideWidgetsDelegate(),
         ],
-        color: const Color(0xFFFFFFFF),
         onGenerateRoute: (RouteSettings settings) {
           return new CupertinoPageRoute<void>(
             settings: settings,
@@ -148,16 +146,8 @@ void main() {
 
   testWidgets('test iOS fullscreen dialog transition', (WidgetTester tester) async {
     await tester.pumpWidget(
-      new WidgetsApp(
-        color: const Color(0xFFFFFFFF),
-        onGenerateRoute: (RouteSettings settings) {
-          return new CupertinoPageRoute<void>(
-            settings: settings,
-            builder: (BuildContext context) {
-              return const Center(child: const Text('Page 1'));
-            }
-          );
-        },
+      new CupertinoApp(
+        home: const Center(child: const Text('Page 1')),
       ),
     );
 
@@ -216,8 +206,7 @@ void main() {
 
   testWidgets('test only edge swipes work (LTR)', (WidgetTester tester) async {
     await tester.pumpWidget(
-      new WidgetsApp(
-        color: const Color(0xFFFFFFFF),
+      new CupertinoApp(
         onGenerateRoute: (RouteSettings settings) {
           return new CupertinoPageRoute<void>(
             settings: settings,
@@ -278,11 +267,10 @@ void main() {
 
   testWidgets('test only edge swipes work (RTL)', (WidgetTester tester) async {
     await tester.pumpWidget(
-      new WidgetsApp(
+      new CupertinoApp(
         localizationsDelegates: const <LocalizationsDelegate<dynamic>>[
           const RtlOverrideWidgetsDelegate(),
         ],
-        color: const Color(0xFFFFFFFF),
         onGenerateRoute: (RouteSettings settings) {
           return new CupertinoPageRoute<void>(
             settings: settings,
