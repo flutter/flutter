@@ -227,8 +227,7 @@ class AndroidModuleProject {
       }, printStatusWhenWriting: false);
       gradle.injectGradleWrapper(directory);
     }
-    if (androidSdk != null)
-      await gradle.updateLocalProperties(project: project);
+    await gradle.updateLocalProperties(project: project, requireAndroidSdk: false);
   }
 
   bool _shouldRegenerate() {

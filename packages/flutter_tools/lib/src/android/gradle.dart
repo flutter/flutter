@@ -201,8 +201,15 @@ distributionUrl=https\\://services.gradle.org/distributions/gradle-$gradleVersio
 /// Overwrite android/local.properties in the specified Flutter project, if needed.
 ///
 /// Throws, if `pubspec.yaml` or Android SDK cannot be located.
-Future<void> updateLocalProperties({@required FlutterProject project, BuildInfo buildInfo}) async {
-  if (androidSdk == null) {
+///
+/// If [requireSdk] is `true` this will fail with a tool-exit if no Android Sdk
+/// is found.
+Future<void> updateLocalProperties({
+  @required FlutterProject project,
+  BuildInfo buildInfo,
+  bool requireAndroidSdk = true,
+}) async {
+  if (requireAndroidSdk && androidSdk == null) {
     throwToolExit('Unable to locate Android SDK. Please run `flutter doctor` for more details.');
   }
 
