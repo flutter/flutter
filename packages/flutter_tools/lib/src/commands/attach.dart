@@ -4,6 +4,10 @@
 
 import 'dart:async';
 
+import 'package:flutter_tools/src/base/file_system.dart';
+import 'package:flutter_tools/src/base/utils.dart';
+import 'package:flutter_tools/src/commands/daemon.dart';
+
 import '../base/common.dart';
 import '../base/io.dart';
 import '../cache.dart';
@@ -35,16 +39,22 @@ final String ipv4Loopback = InternetAddress.loopbackIPv4.address;
 class AttachCommand extends FlutterCommand {
   AttachCommand({bool verboseHelp = false}) {
     addBuildModeFlags(defaultToRelease: false);
-    argParser.addOption(
+    argParser
+      ..addOption(
         'debug-port',
         help: 'Local port where the observatory is listening.',
-    );
-    argParser.addFlag(
-      'preview-dart-2',
-      defaultsTo: true,
-      hide: !verboseHelp,
-      help: 'Preview Dart 2.0 functionality.',
-    );
+      )
+      ..addFlag(
+        'preview-dart-2',
+        defaultsTo: true,
+        hide: !verboseHelp,
+        help: 'Preview Dart 2.0 functionality.',
+      )..addFlag('machine',
+          hide: !verboseHelp,
+          negatable: false,
+          help: 'Handle machine structured JSON command input and provide output\n'
+                'and progress in machine friendly format.',
+      );
   }
 
   @override
@@ -65,7 +75,7 @@ class AttachCommand extends FlutterCommand {
   }
 
   @override
-  Future<Null> runCommand() async {
+  Future<FlutterCommandResult> runCommand() async {
     Cache.releaseLockEarly();
 
     await _validateArguments();
@@ -79,7 +89,8 @@ class AttachCommand extends FlutterCommand {
       ProtocolDiscovery observatoryDiscovery;
       try {
         observatoryDiscovery = new ProtocolDiscovery.observatory(
-            device.getLogReader(), portForwarder: device.portForwarder);
+            device.getLogReader(),
+            portForwarder: device.portForwarder);
         printStatus('Listening.');
         observatoryUri = await observatoryDiscovery.uri;
       } finally {
@@ -97,11 +108,37 @@ class AttachCommand extends FlutterCommand {
         <FlutterDevice>[flutterDevice],
         debuggingOptions: new DebuggingOptions.enabled(getBuildInfo()),
         packagesFilePath: globalResults['packages'],
+        usesTerminalUI: !argResults['machine']
       );
-      await hotRunner.attach();
+
+      if (argResults['machine']) {
+        final Daemon daemon = new Daemon(
+            stdinCommandStream, stdoutCommandResponse,
+            notifyingLogger: new NotifyingLogger(), logToStdout: true);
+        AppInstance app;
+        try {
+          app = await daemon.appDomain.launch(hotRunner, hotRunner.attach,
+              device, null, true, fs.currentDirectory);
+        } catch (error) {
+          throwToolExit(error.toString());
+        }
+        final DateTime appStartedTime = clock.now();
+        final int result = await app.runner.waitForAppToFinish();
+        if (result != 0)
+          throwToolExit(null, exitCode: result);
+        return new FlutterCommandResult(
+          ExitStatus.success,
+          timingLabelParts: <String>['daemon'],
+          endTimeOverride: appStartedTime,
+        );
+      } else {
+        await hotRunner.attach();
+      }
     } finally {
       device.portForwarder.forwardedPorts.forEach(device.portForwarder.unforward);
     }
+
+    return const FlutterCommandResult(ExitStatus.success);
   }
 
   Future<void> _validateArguments() async {}

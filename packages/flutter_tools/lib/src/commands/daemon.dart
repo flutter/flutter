@@ -370,22 +370,31 @@ class AppDomain extends Domain {
       );
     }
     
-    return launch(runner, runner.run, device, projectDirectory, enableHotReload,
-        options, route, cwd);
+    return launch(
+        runner,
+        ({
+          Completer<DebugConnectionInfo> connectionInfoCompleter,
+          Completer<Null> appStartedCompleter
+        }) =>
+            runner.run(
+                connectionInfoCompleter: connectionInfoCompleter,
+                appStartedCompleter: appStartedCompleter,
+                route: route),
+        device,
+        projectDirectory,
+        enableHotReload,
+        cwd);
   }
 
   Future<AppInstance> launch(
       ResidentRunner runner,
       Function({
         Completer<DebugConnectionInfo> connectionInfoCompleter,
-        Completer<Null> appStartedCompleter,
-        String route
+        Completer<Null> appStartedCompleter
       }) run,
       Device device,
       String projectDirectory,
       bool enableHotReload,
-      DebuggingOptions options,
-      String route,
       Directory cwd) async {
     final AppInstance app = new AppInstance(_getNewAppId(),
         runner: runner, logToStdout: daemon.logToStdout);
@@ -398,7 +407,7 @@ class AppDomain extends Domain {
 
     Completer<DebugConnectionInfo> connectionInfoCompleter;
 
-    if (options.debuggingEnabled) {
+    if (runner.debuggingOptions.debuggingEnabled) {
       connectionInfoCompleter = new Completer<DebugConnectionInfo>();
       // We don't want to wait for this future to complete and callbacks won't fail.
       // As it just writes to stdout.
@@ -422,10 +431,8 @@ class AppDomain extends Domain {
     await app._runInZone<Null>(this, () async {
       try {
         await run(
-          connectionInfoCompleter: connectionInfoCompleter,
-          appStartedCompleter: appStartedCompleter,
-          route: route,
-        );
+            connectionInfoCompleter: connectionInfoCompleter,
+            appStartedCompleter: appStartedCompleter);
         _sendAppEvent(app, 'stop');
       } catch (error, trace) {
         _sendAppEvent(app, 'stop', <String, dynamic>{
