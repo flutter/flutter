@@ -369,8 +369,26 @@ class AppDomain extends Domain {
         ipv6: ipv6,
       );
     }
+    
+    return launch(runner, runner.run, device, projectDirectory, enableHotReload,
+        options, route, cwd);
+  }
 
-    final AppInstance app = new AppInstance(_getNewAppId(), runner: runner, logToStdout: daemon.logToStdout);
+  Future<AppInstance> launch(
+      ResidentRunner runner,
+      Function({
+        Completer<DebugConnectionInfo> connectionInfoCompleter,
+        Completer<Null> appStartedCompleter,
+        String route
+      }) run,
+      Device device,
+      String projectDirectory,
+      bool enableHotReload,
+      DebuggingOptions options,
+      String route,
+      Directory cwd) async {
+    final AppInstance app = new AppInstance(_getNewAppId(),
+        runner: runner, logToStdout: daemon.logToStdout);
     _apps.add(app);
     _sendAppEvent(app, 'start', <String, dynamic>{
       'deviceId': device.id,
@@ -403,7 +421,7 @@ class AppDomain extends Domain {
 
     await app._runInZone<Null>(this, () async {
       try {
-        await runner.run(
+        await run(
           connectionInfoCompleter: connectionInfoCompleter,
           appStartedCompleter: appStartedCompleter,
           route: route,
@@ -419,7 +437,6 @@ class AppDomain extends Domain {
         _apps.remove(app);
       }
     });
-
     return app;
   }
 
