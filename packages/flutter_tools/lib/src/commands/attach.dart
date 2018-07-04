@@ -4,12 +4,11 @@
 
 import 'dart:async';
 
-import 'package:flutter_tools/src/base/file_system.dart';
-import 'package:flutter_tools/src/commands/daemon.dart';
-
 import '../base/common.dart';
+import '../base/file_system.dart';
 import '../base/io.dart';
 import '../cache.dart';
+import '../commands/daemon.dart';
 import '../device.dart';
 import '../globals.dart';
 import '../protocol_discovery.dart';
