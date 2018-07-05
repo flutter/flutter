@@ -128,11 +128,8 @@ Future<Map<String, double>> _readJsonResults(Process process) {
       process.kill(ProcessSignal.SIGINT); // flutter run doesn't quit automatically
       final String jsonOutput = jsonBuf.toString();
       try {
-        print('[DEBUG:DANTUP] Completing successfully');
         completer.complete(json.decode(jsonOutput));
-        print('[DEBUG:DANTUP] (done)');
       } catch (ex) {
-        print('[DEBUG:DANTUP] Decoding JSON failed ($ex). JSON string was: $jsonOutput');
         completer.completeError('Decoding JSON failed ($ex). JSON string was: $jsonOutput');
       }
       return;
@@ -148,7 +145,6 @@ Future<Map<String, double>> _readJsonResults(Process process) {
       stderrSub.cancel(),
     ]);
     if (!processWasKilledIntentionally && code != 0) {
-      print('[DEBUG:DANTUP] Completing with failure due to exit code=$code');
       completer.completeError('flutter run failed: exit code=$code');
     }
   });
