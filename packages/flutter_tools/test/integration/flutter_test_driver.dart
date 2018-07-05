@@ -205,7 +205,7 @@ class FlutterTestDriver {
 
   Future<Map<String, dynamic>> _waitFor({String event, int id}) async {
     // Capture output to a buffer so if we don't get the repsonse we want we can show
-    // the output that did arrive in the timeout errr.
+    // the output that did arrive in the timeout error.
     final StringBuffer messages = new StringBuffer();
     _stdout.stream.listen(messages.writeln);
     _stderr.stream.listen(messages.writeln);
