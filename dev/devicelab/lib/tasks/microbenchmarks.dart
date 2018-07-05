@@ -115,7 +115,7 @@ Future<Map<String, double>> _readJsonResults(Process process) {
   final StreamSubscription<String> stdoutSub = process.stdout
       .transform(const Utf8Decoder())
       .transform(const LineSplitter())
-      .listen((String line) async {
+      .listen((String line) {
     print(line);
 
     if (line.contains(jsonStart)) {
