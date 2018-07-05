@@ -232,12 +232,13 @@ abstract class ImageStreamCompleter extends Diagnosticable {
       try {
           onError(_currentError.exception, _currentError.stack);
         } catch (exception, stack) {
-          reportError(
-            context: 'by a synchronously-called image error listener',
-            exception: exception,
-            stack: stack,
-            // Error listeners themselves failed. Don't feed back to listeners.
-            skipListeners: true,
+          FlutterError.reportError(
+            new FlutterErrorDetails(
+              exception: exception,
+              library: 'image resource service',
+              context: 'by a synchronously-called image error listener',
+              stack: stack,
+            ),
           );
         }
     }
@@ -284,7 +285,6 @@ abstract class ImageStreamCompleter extends Diagnosticable {
     StackTrace stack,
     InformationCollector informationCollector,
     bool silent = false,
-    bool skipListeners = false,
   }) {
     _currentError = new FlutterErrorDetails(
       exception: exception,
@@ -300,18 +300,20 @@ abstract class ImageStreamCompleter extends Diagnosticable {
         _listeners.values.where((ImageErrorListener listener) => listener != null)
     ).toList();
 
-    if (localErrorListeners.isEmpty || skipListeners) {
+    if (localErrorListeners.isEmpty) {
       FlutterError.reportError(_currentError);
     } else {
       for (ImageErrorListener errorListener in localErrorListeners) {
         try {
           errorListener(exception, stack);
         } catch (exception, stack) {
-          reportError(
-            context: 'by an image error listener',
-            exception: exception,
-            stack: stack,
-            skipListeners: true, // Error listeners themselves failed. Don't feed back to listeners.
+          FlutterError.reportError(
+            new FlutterErrorDetails(
+              context: 'by an image error listener',
+              library: 'image resource service',
+              exception: exception,
+              stack: stack,
+            ),
           );
         }
       }
@@ -506,7 +508,7 @@ class MultiFrameImageStreamCompleter extends ImageStreamCompleter {
     if (!_hasActiveListeners && _codec != null) {
       _decodeNextFrameAndSchedule();
     }
-    super.addListener(listener);
+    super.addListener(listener, onError: onError);
   }
 
   @override
