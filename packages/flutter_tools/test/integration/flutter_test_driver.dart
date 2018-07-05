@@ -65,7 +65,7 @@ class FlutterTestDriver {
       final Future<Map<String, dynamic>> debugPort = _waitFor(event: 'app.debugPort');
       final String wsUriString = (await debugPort)['params']['wsUri'];
       final Uri uri = Uri.parse(wsUriString);
-      // Proxy the steram/sink for the VM Client so we can debugPrint it.
+      // Proxy the stream/sink for the VM Client so we can debugPrint it.
       final StreamChannel<String> channel = new IOWebSocketChannel.connect(uri)
           .cast<String>()
           .changeStream((Stream<String> stream) => stream.map(debugPrint))
@@ -267,7 +267,7 @@ class FlutterTestDriver {
   }
 
   void _throwErrorResponse(String msg) {
-    throw' $msg\n\n$_lastResponse\n\n${_errorBuffer.toString()}'.trim();
+    throw '$msg\n\n$_lastResponse\n\n${_errorBuffer.toString()}'.trim();
   }
 }
 
