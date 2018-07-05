@@ -65,6 +65,7 @@ class FlutterTestDriver {
       final Future<Map<String, dynamic>> debugPort = _waitFor(event: 'app.debugPort');
       final String wsUriString = (await debugPort)['params']['wsUri'];
       final Uri uri = Uri.parse(wsUriString);
+      // Proxy the steram/sink for the VM Client so we can debugPrint it.
       final StreamChannel<String> channel = new IOWebSocketChannel.connect(uri)
           .cast<String>()
           .changeStream((Stream<String> stream) => stream.map(debugPrint))
@@ -170,9 +171,7 @@ class FlutterTestDriver {
       // For a hot restart, we need to send the breakpoints after the restart
       // so we need to pause during the restart to avoid races.
       await hotRestart(pause: true);
-      await new Future<void>.delayed(const Duration(seconds: 1));
       await addBreakpoint(path, line);
-      await new Future<void>.delayed(const Duration(seconds: 1));
       return resume();
     } else {
       await addBreakpoint(path, line);
