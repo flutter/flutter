@@ -74,8 +74,6 @@ TaskFunction createMicrobenchmarkTask() {
     addDart1Results(await _runMicrobench(
         'lib/stocks/layout_bench.dart', previewDart2: false));
     addDart1Results(await _runMicrobench(
-        'lib/stocks/layout_bench.dart', previewDart2: false));
-    addDart1Results(await _runMicrobench(
         'lib/stocks/build_bench.dart', previewDart2: false));
     addDart1Results(await _runMicrobench(
         'lib/gestures/velocity_tracker_bench.dart', previewDart2: false));
