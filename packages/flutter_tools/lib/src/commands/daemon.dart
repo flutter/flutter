@@ -303,6 +303,11 @@ class DaemonDomain extends Domain {
   }
 }
 
+typedef Future<void> _RunOrAttach({
+  Completer<DebugConnectionInfo> connectionInfoCompleter,
+  Completer<void> appStartedCompleter
+});
+
 /// This domain responds to methods like [start] and [stop].
 ///
 /// It fires events for application start, stop, and stdout and stderr.
@@ -374,7 +379,7 @@ class AppDomain extends Domain {
         runner,
         ({
           Completer<DebugConnectionInfo> connectionInfoCompleter,
-          Completer<Null> appStartedCompleter
+          Completer<void> appStartedCompleter
         }) =>
             runner.run(
                 connectionInfoCompleter: connectionInfoCompleter,
@@ -388,10 +393,7 @@ class AppDomain extends Domain {
 
   Future<AppInstance> launch(
       ResidentRunner runner,
-      Function({
-        Completer<DebugConnectionInfo> connectionInfoCompleter,
-        Completer<Null> appStartedCompleter
-      }) run,
+      _RunOrAttach runOrAttach,
       Device device,
       String projectDirectory,
       bool enableHotReload,
@@ -421,16 +423,16 @@ class AppDomain extends Domain {
         _sendAppEvent(app, 'debugPort', params);
       });
     }
-    final Completer<Null> appStartedCompleter = new Completer<Null>();
+    final Completer<void> appStartedCompleter = new Completer<void>();
     // We don't want to wait for this future to complete and callbacks won't fail.
     // As it just writes to stdout.
-    appStartedCompleter.future.then<Null>((Null value) { // ignore: unawaited_futures
+    appStartedCompleter.future.then<void>((_) { // ignore: unawaited_futures
       _sendAppEvent(app, 'started');
     });
 
     await app._runInZone<Null>(this, () async {
       try {
-        await run(
+        await runOrAttach(
             connectionInfoCompleter: connectionInfoCompleter,
             appStartedCompleter: appStartedCompleter);
         _sendAppEvent(app, 'stop');

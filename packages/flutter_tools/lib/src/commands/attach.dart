@@ -90,8 +90,7 @@ class AttachCommand extends FlutterCommand {
     final int devicePort = observatoryPort;
 
     final Daemon daemon = argResults['machine']
-      ? new Daemon(
-            stdinCommandStream, stdoutCommandResponse,
+      ? new Daemon(stdinCommandStream, stdoutCommandResponse,
             notifyingLogger: new NotifyingLogger(), logToStdout: true)
       : null;
 
@@ -100,8 +99,9 @@ class AttachCommand extends FlutterCommand {
       ProtocolDiscovery observatoryDiscovery;
       try {
         observatoryDiscovery = new ProtocolDiscovery.observatory(
-            device.getLogReader(),
-            portForwarder: device.portForwarder);
+          device.getLogReader(),
+          portForwarder: device.portForwarder,
+        );
         printStatus('Waiting for a connection from Flutter on ${device.name}...');
         observatoryUri = await observatoryDiscovery.uri;
         printStatus('Done.');
@@ -113,14 +113,14 @@ class AttachCommand extends FlutterCommand {
       observatoryUri = Uri.parse('http://$ipv4Loopback:$localPort/');
     }
     try {
-      final FlutterDevice flutterDevice =
-          new FlutterDevice(device, trackWidgetCreation: false, previewDart2: argResults['preview-dart-2']);
+      final FlutterDevice flutterDevice = new FlutterDevice(device,
+          trackWidgetCreation: false, previewDart2: argResults['preview-dart-2']);
       flutterDevice.observatoryUris = <Uri>[ observatoryUri ];
       final HotRunner hotRunner = new HotRunner(
         <FlutterDevice>[flutterDevice],
         debuggingOptions: new DebuggingOptions.enabled(getBuildInfo()),
         packagesFilePath: globalResults['packages'],
-        usesTerminalUI: daemon == null
+        usesTerminalUI: daemon == null,
       );
 
       if (daemon != null) {
