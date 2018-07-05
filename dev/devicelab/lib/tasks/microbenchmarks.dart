@@ -139,9 +139,11 @@ Future<Map<String, double>> _readJsonResults(Process process) {
       jsonBuf.writeln(line.substring(line.indexOf(jsonPrefix) + jsonPrefix.length));
   });
 
-  process.exitCode.then<int>((int code) {
-    stdoutSub.cancel();
-    stderrSub.cancel();
+  process.exitCode.then<int>((int code) async {
+    await Future.wait<void>(<Future<void>>[
+      stdoutSub.cancel(),
+      stderrSub.cancel(),
+    ]);
     if (!processWasKilledIntentionally && code != 0) {
       completer.completeError('flutter run failed: exit code=$code');
     }
