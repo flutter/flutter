@@ -22,15 +22,14 @@ const Duration taskTimeoutWithGracePeriod = const Duration(minutes: 26);
 ///
 /// Running the task in [silent] mode will suppress standard output from task
 /// processes and only print standard errors.
-Future<Map<String, dynamic>> runTask(String taskName, { bool silent: false }) async {
+Future<Map<String, dynamic>> runTask(String taskName, { bool silent = false }) async {
   final String taskExecutable = 'bin/tasks/$taskName.dart';
 
   if (!file(taskExecutable).existsSync())
     throw 'Executable Dart file not found: $taskExecutable';
 
-  final int vmServicePort = await findAvailablePort();
   final Process runner = await startProcess(dartBin, <String>[
-    '--enable-vm-service=$vmServicePort',
+    '--enable-vm-service=0', // zero causes the system to choose a free port
     '--no-pause-isolates-on-exit',
     taskExecutable,
   ]);
@@ -41,10 +40,17 @@ Future<Map<String, dynamic>> runTask(String taskName, { bool silent: false }) as
     runnerFinished = true;
   });
 
+  final Completer<int> port = new Completer<int>();
+
   final StreamSubscription<String> stdoutSub = runner.stdout
       .transform(const Utf8Decoder())
       .transform(const LineSplitter())
       .listen((String line) {
+    if (!port.isCompleted) {
+      final int portValue = parseServicePort(line, prefix: 'Observatory listening on ');
+      if (portValue != null)
+        port.complete(portValue);
+    }
     if (!silent) {
       stdout.writeln('[$taskName] [STDOUT] $line');
     }
@@ -59,7 +65,7 @@ Future<Map<String, dynamic>> runTask(String taskName, { bool silent: false }) as
 
   String waitingFor = 'connection';
   try {
-    final VMIsolateRef isolate = await _connectToRunnerIsolate(vmServicePort);
+    final VMIsolateRef isolate = await _connectToRunnerIsolate(await port.future);
     waitingFor = 'task completion';
     final Map<String, dynamic> taskResult =
         await isolate.invokeExtension('ext.cocoonRunTask').timeout(taskTimeoutWithGracePeriod);
@@ -67,14 +73,14 @@ Future<Map<String, dynamic>> runTask(String taskName, { bool silent: false }) as
     await runner.exitCode.timeout(const Duration(seconds: 1));
     return taskResult;
   } on TimeoutException catch (timeout) {
-    runner.kill(ProcessSignal.SIGINT);
+    runner.kill(ProcessSignal.SIGINT); // ignore: deprecated_member_use
     return <String, dynamic>{
       'success': false,
       'reason': 'Timeout waiting for $waitingFor: ${timeout.message}',
     };
   } finally {
     if (!runnerFinished)
-      runner.kill(ProcessSignal.SIGKILL);
+      runner.kill(ProcessSignal.SIGKILL); // ignore: deprecated_member_use
     await stdoutSub.cancel();
     await stderrSub.cancel();
   }

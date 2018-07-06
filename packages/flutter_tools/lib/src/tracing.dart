@@ -32,7 +32,7 @@ class Tracing {
 
   /// Stops tracing; optionally wait for first frame.
   Future<Map<String, dynamic>> stopTracingAndDownloadTimeline({
-    bool waitForFirstFrame: false
+    bool waitForFirstFrame = false
   }) async {
     Map<String, dynamic> timeline;
 
@@ -43,7 +43,7 @@ class Tracing {
     } else {
       final Completer<Null> whenFirstFrameRendered = new Completer<Null>();
 
-      vmService.onTimelineEvent.listen((ServiceEvent timelineEvent) {
+      (await vmService.onTimelineEvent).listen((ServiceEvent timelineEvent) {
         final List<Map<String, dynamic>> events = timelineEvent.timelineEvents;
         for (Map<String, dynamic> event in events) {
           if (event['name'] == _kFirstUsefulFrameEventName)

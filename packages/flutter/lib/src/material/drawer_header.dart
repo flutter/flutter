@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
 import 'debug.dart';
@@ -32,10 +31,10 @@ class DrawerHeader extends StatelessWidget {
   const DrawerHeader({
     Key key,
     this.decoration,
-    this.margin: const EdgeInsets.only(bottom: 8.0),
-    this.padding: const EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 8.0),
-    this.duration: const Duration(milliseconds: 250),
-    this.curve: Curves.fastOutSlowIn,
+    this.margin = const EdgeInsets.only(bottom: 8.0),
+    this.padding = const EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 8.0),
+    this.duration = const Duration(milliseconds: 250),
+    this.curve = Curves.fastOutSlowIn,
     @required this.child,
   }) : super(key: key);
 

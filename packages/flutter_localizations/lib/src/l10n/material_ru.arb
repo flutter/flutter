@@ -40,6 +40,7 @@
   "modalBarrierDismissLabel": "Закрыть",
   "drawerLabel": "Меню навигации",
   "popupMenuLabel": "Всплывающее меню",
-  "dialogLabel": "диалог",
-  "alertDialogLabel": "бдительный"
+  "dialogLabel": "Диалоговое окно",
+  "alertDialogLabel": "бдительный",
+  "searchFieldLabel": "Поиск"
 }

@@ -6,6 +6,9 @@ import 'dart:async';
 import 'dart:convert' show json;
 import 'dart:io';
 
+import 'package:meta/meta.dart';
+import 'package:path/path.dart' as p;
+
 import '../framework/adb.dart';
 import '../framework/framework.dart';
 import '../framework/ios.dart';
@@ -43,6 +46,10 @@ TaskFunction createFlutterGalleryCompileTest() {
   return new CompileTest('${flutterDirectory.path}/examples/flutter_gallery').run;
 }
 
+TaskFunction createHelloWorldCompileTest() {
+  return new CompileTest('${flutterDirectory.path}/examples/hello_world', reportPackageContentSizes: true).run;
+}
+
 TaskFunction createComplexLayoutCompileTest() {
   return new CompileTest('${flutterDirectory.path}/dev/benchmarks/complex_layout').run;
 }
@@ -77,6 +84,13 @@ TaskFunction createFlutterViewStartupTest() {
   ).run;
 }
 
+TaskFunction createPlatformViewStartupTest() {
+  return new StartupTest(
+    '${flutterDirectory.path}/examples/platform_view',
+    reportMetrics: false,
+  ).run;
+}
+
 TaskFunction createBasicMaterialCompileTest() {
   return () async {
     const String sampleAppName = 'sample_flutter_app';
@@ -101,7 +115,7 @@ TaskFunction createBasicMaterialCompileTest() {
 class StartupTest {
   static const Duration _startupTimeout = const Duration(minutes: 5);
 
-  const StartupTest(this.testDirectory, { this.reportMetrics: true });
+  const StartupTest(this.testDirectory, { this.reportMetrics = true });
 
   final String testDirectory;
   final bool reportMetrics;
@@ -176,7 +190,8 @@ class PerfTest {
         'missed_frame_build_budget_count',
         'average_frame_rasterizer_time_millis',
         'worst_frame_rasterizer_time_millis',
-        'missed_frame_rasterizer_budget_count',
+        '90th_percentile_frame_rasterizer_time_millis',
+        '99th_percentile_frame_rasterizer_time_millis',
       ]);
     });
   }
@@ -185,9 +200,10 @@ class PerfTest {
 /// Measures how long it takes to compile a Flutter app and how big the compiled
 /// code is.
 class CompileTest {
-  const CompileTest(this.testDirectory);
+  const CompileTest(this.testDirectory, { this.reportPackageContentSizes = false });
 
   final String testDirectory;
+  final bool reportPackageContentSizes;
 
   Future<TaskResult> run() async {
     return await inDirectory(testDirectory, () async {
@@ -197,7 +213,7 @@ class CompileTest {
 
       final Map<String, dynamic> metrics = <String, dynamic>{}
         ..addAll(await _compileAot())
-        ..addAll(await _compileApp())
+        ..addAll(await _compileApp(reportPackageContentSizes: reportPackageContentSizes))
         ..addAll(await _compileDebug())
         ..addAll(_suffix(await _compileAot(previewDart2: false), '__dart1'))
         ..addAll(_suffix(await _compileApp(previewDart2: false), '__dart1'))
@@ -214,13 +230,14 @@ class CompileTest {
     );
   }
 
-  static Future<Map<String, dynamic>> _compileAot({ bool previewDart2: true }) async {
+  static Future<Map<String, dynamic>> _compileAot({ bool previewDart2 = true }) async {
     // Generate blobs instead of assembly.
     await flutter('clean');
     final Stopwatch watch = new Stopwatch()..start();
     final List<String> options = <String>[
       'aot',
       '-v',
+      '--extra-gen-snapshot-options=--print_snapshot_sizes',
       '--release',
       '--no-pub',
       '--target-platform',
@@ -246,12 +263,15 @@ class CompileTest {
     for (Match m in metricExpression.allMatches(compileLog)) {
       metrics[_sdkNameToMetricName(m.group(1))] = int.parse(m.group(2));
     }
+    if (metrics.length != _kSdkNameToMetricNameMapping.length) {
+      throw 'Expected metrics: ${_kSdkNameToMetricNameMapping.keys}, but got: ${metrics.keys}.';
+    }
     metrics['aot_snapshot_compile_millis'] = watch.elapsedMilliseconds;
 
     return metrics;
   }
 
-  static Future<Map<String, dynamic>> _compileApp({ bool previewDart2: true }) async {
+  static Future<Map<String, dynamic>> _compileApp({ bool previewDart2 = true, bool reportPackageContentSizes = false }) async {
     await flutter('clean');
     final Stopwatch watch = new Stopwatch();
     int releaseSizeInBytes;
@@ -261,6 +281,8 @@ class CompileTest {
     else
       options.add('--no-preview-dart-2');
     setLocalEngineOptionIfNecessary(options);
+    final Map<String, dynamic> metrics = <String, dynamic>{};
+
     switch (deviceOperatingSystem) {
       case DeviceOperatingSystem.ios:
         options.insert(0, 'ios');
@@ -268,31 +290,40 @@ class CompileTest {
         watch.start();
         await flutter('build', options: options);
         watch.stop();
-        // IPAs are created manually AFAICT
-        await exec('tar', <String>['-zcf', 'build/app.ipa', 'build/ios/Release-iphoneos/Runner.app/']);
+        final String appPath =  '$cwd/build/ios/Release-iphoneos/Runner.app/';
+        // IPAs are created manually, https://flutter.io/ios-release/
+        await exec('tar', <String>['-zcf', 'build/app.ipa', appPath]);
         releaseSizeInBytes = await file('$cwd/build/app.ipa').length();
+        if (reportPackageContentSizes)
+          metrics.addAll(await getSizesFromIosApp(appPath));
         break;
       case DeviceOperatingSystem.android:
         options.insert(0, 'apk');
         watch.start();
         await flutter('build', options: options);
         watch.stop();
-        File apk = file('$cwd/build/app/outputs/apk/app.apk');
+        String apkPath = '$cwd/build/app/outputs/apk/app.apk';
+        File apk = file(apkPath);
         if (!apk.existsSync()) {
           // Pre Android SDK 26 path
-          apk = file('$cwd/build/app/outputs/apk/app-release.apk');
+          apkPath = '$cwd/build/app/outputs/apk/app-release.apk';
+          apk = file(apkPath);
         }
         releaseSizeInBytes = apk.lengthSync();
+        if (reportPackageContentSizes)
+          metrics.addAll(await getSizesFromApk(apkPath));
         break;
     }
 
-    return <String, dynamic>{
+    metrics.addAll(<String, dynamic>{
       'release_full_compile_millis': watch.elapsedMilliseconds,
       'release_size_bytes': releaseSizeInBytes,
-    };
+    });
+
+    return metrics;
   }
 
-  static Future<Map<String, dynamic>> _compileDebug({ bool previewDart2: true }) async {
+  static Future<Map<String, dynamic>> _compileDebug({ bool previewDart2 = true }) async {
     await flutter('clean');
     final Stopwatch watch = new Stopwatch();
     final List<String> options = <String>['--debug'];
@@ -319,19 +350,73 @@ class CompileTest {
     };
   }
 
-  static String _sdkNameToMetricName(String sdkName) {
-    const Map<String, String> kSdkNameToMetricNameMapping = const <String, String> {
-      'VMIsolate': 'aot_snapshot_size_vmisolate',
-      'Isolate': 'aot_snapshot_size_isolate',
-      'ReadOnlyData': 'aot_snapshot_size_rodata',
-      'Instructions': 'aot_snapshot_size_instructions',
-      'Total': 'aot_snapshot_size_total',
-    };
+  static const Map<String, String> _kSdkNameToMetricNameMapping = const <String, String> {
+    'VMIsolate': 'aot_snapshot_size_vmisolate',
+    'Isolate': 'aot_snapshot_size_isolate',
+    'ReadOnlyData': 'aot_snapshot_size_rodata',
+    'Instructions': 'aot_snapshot_size_instructions',
+    'Total': 'aot_snapshot_size_total',
+  };
 
-    if (!kSdkNameToMetricNameMapping.containsKey(sdkName))
+  static String _sdkNameToMetricName(String sdkName) {
+
+    if (!_kSdkNameToMetricNameMapping.containsKey(sdkName))
       throw 'Unrecognized SDK snapshot metric name: $sdkName';
 
-    return kSdkNameToMetricNameMapping[sdkName];
+    return _kSdkNameToMetricNameMapping[sdkName];
+  }
+
+  static Future<Map<String, dynamic>> getSizesFromIosApp(String appPath) async {
+    // Thin the binary to only contain one architecture.
+    final String xcodeBackend = p.join(flutterDirectory.path, 'packages', 'flutter_tools', 'bin', 'xcode_backend.sh');
+    await exec(xcodeBackend, <String>['thin'], environment: <String, String>{
+      'ARCHS': 'arm64',
+      'WRAPPER_NAME': p.basename(appPath),
+      'TARGET_BUILD_DIR': p.dirname(appPath),
+    });
+
+    final File appFramework = new File(p.join(appPath, 'Frameworks', 'App.framework', 'App'));
+    final File flutterFramework = new File(p.join(appPath, 'Frameworks', 'Flutter.framework', 'Flutter'));
+
+    return <String, dynamic>{
+      'app_framework_uncompressed_bytes': await appFramework.length(),
+      'flutter_framework_uncompressed_bytes': await flutterFramework.length(),
+    };
+  }
+
+
+  static Future<Map<String, dynamic>> getSizesFromApk(String apkPath) async {
+    final  String output = await eval('unzip', <String>['-v', apkPath]);
+    final List<String> lines = output.split('\n');
+    final Map<String, _UnzipListEntry> fileToMetadata = <String, _UnzipListEntry>{};
+
+    // First three lines are header, last two lines are footer.
+    for (int i = 3; i < lines.length - 2; i++) {
+      final _UnzipListEntry entry = new _UnzipListEntry.fromLine(lines[i]);
+      fileToMetadata[entry.path] = entry;
+    }
+
+    final _UnzipListEntry icudtl = fileToMetadata['assets/flutter_shared/icudtl.dat'];
+    final _UnzipListEntry libflutter = fileToMetadata['lib/armeabi-v7a/libflutter.so'];
+    final _UnzipListEntry isolateSnapshotData = fileToMetadata['assets/isolate_snapshot_data'];
+    final _UnzipListEntry isolateSnapshotInstr = fileToMetadata['assets/isolate_snapshot_instr'];
+    final _UnzipListEntry vmSnapshotData = fileToMetadata['assets/vm_snapshot_data'];
+    final _UnzipListEntry vmSnapshotInstr = fileToMetadata['assets/vm_snapshot_instr'];
+
+    return <String, dynamic>{
+      'icudtl_uncompressed_bytes': icudtl.uncompressedSize,
+      'icudtl_compressed_bytes': icudtl.compressedSize,
+      'libflutter_uncompressed_bytes': libflutter.uncompressedSize,
+      'libflutter_compressed_bytes': libflutter.compressedSize,
+      'snapshot_uncompressed_bytes': isolateSnapshotData.uncompressedSize +
+          isolateSnapshotInstr.uncompressedSize +
+          vmSnapshotData.uncompressedSize +
+          vmSnapshotInstr.uncompressedSize,
+      'snapshot_compressed_bytes': isolateSnapshotData.compressedSize +
+          isolateSnapshotInstr.compressedSize +
+          vmSnapshotData.compressedSize +
+          vmSnapshotInstr.compressedSize,
+    };
   }
 }
 
@@ -357,8 +442,6 @@ class MemoryTest {
       if (deviceOperatingSystem == DeviceOperatingSystem.ios)
         await prepareProvisioningCertificates(testDirectory);
 
-      final int observatoryPort = await findAvailablePort();
-
       final List<String> runOptions = <String>[
         '-v',
         '--profile',
@@ -366,11 +449,14 @@ class MemoryTest {
         '-d',
         deviceId,
         '--observatory-port',
-        observatoryPort.toString(),
+        '0',
       ];
       if (testTarget != null)
         runOptions.addAll(<String>['-t', testTarget]);
-      await flutter('run', options: runOptions);
+      final String output = await evalFlutter('run', options: runOptions);
+      final int observatoryPort = parseServicePort(output, prefix: 'Successfully connected to service protocol: ', multiLine: true);
+      if (observatoryPort == null)
+        throw new Exception('Could not find observatory port in "flutter run" output.');
 
       final Map<String, dynamic> startData = await device.getMemoryStats(packageName);
 
@@ -454,4 +540,29 @@ class AndroidBackButtonMemoryTest {
       return new TaskResult.success(data, benchmarkScoreKeys: data.keys.toList());
     });
   }
+}
+
+class _UnzipListEntry {
+  factory _UnzipListEntry.fromLine(String line) {
+    final List<String> data = line.trim().split(new RegExp('\\s+'));
+    assert(data.length == 8);
+    return new _UnzipListEntry._(
+      uncompressedSize:  int.parse(data[0]),
+      compressedSize: int.parse(data[2]),
+      path: data[7],
+    );
+  }
+
+  _UnzipListEntry._({
+    @required this.uncompressedSize,
+    @required this.compressedSize,
+    @required this.path,
+  }) : assert(uncompressedSize != null),
+       assert(compressedSize != null),
+       assert(compressedSize <= uncompressedSize),
+       assert(path != null);
+
+  final int uncompressedSize;
+  final int compressedSize;
+  final String path;
 }

@@ -21,32 +21,35 @@ const FileSystem _fs = const LocalFileSystem();
 // --trace-startup, as we do in this test, the VM stores trace events in an
 // endless buffer instead of a ring buffer.
 //
-// These names must match GalleryItem titles from  kAllGalleryItems
-// in examples/flutter_gallery/lib/gallery.item.dart
+// These names must match GalleryItem titles from kAllGalleryDemos
+// in examples/flutter_gallery/lib/gallery/demos.dart
 const List<String> kProfiledDemos = const <String>[
-  'Shrine',
-  'Contact profile',
-  'Animation',
-  'Bottom navigation',
-  'Buttons',
-  'Cards',
-  'Chips',
-  'Date and time pickers',
-  'Dialog',
+  'Shrine@Studies',
+  'Contact profile@Studies',
+  'Animation@Studies',
+  'Bottom navigation@Material',
+  'Buttons@Material',
+  'Cards@Material',
+  'Chips@Material',
+  'Dialogs@Material',
+  'Pickers@Material',
 ];
 
 // Demos that will be backed out of within FlutterDriver.runUnsynchronized();
 //
-// These names must match GalleryItem titles from  kAllGalleryItems
-// in examples/flutter_gallery/lib/gallery.item.dart
+// These names must match GalleryItem titles from kAllGalleryDemos
+// in examples/flutter_gallery/lib/gallery/demos.dart
 const List<String> kUnsynchronizedDemos = const <String>[
-  'Progress indicators',
-  'Activity Indicator',
-  'Video',
+  'Progress indicators@Material',
+  'Activity Indicator@Cupertino',
+  'Video@Media',
 ];
 
-// All of the gallery demo titles in the order they appear on the
-// gallery home page.
+const List<String> kSkippedDemos = const <String>[
+  'Pull to refresh@Cupertino', // The back button lacks a tooltip.
+];
+
+// All of the gallery demos, identified as "title@category".
 //
 // These names are reported by the test app, see _handleMessages()
 // in transitions_perf.dart.
@@ -121,20 +124,36 @@ Future<Null> saveDurationsHistogram(List<Map<String, dynamic>> events, String ou
 /// Scrolls each demo menu item into view, launches it, then returns to the
 /// home screen twice.
 Future<Null> runDemos(List<String> demos, FlutterDriver driver) async {
+  final SerializableFinder demoList = find.byValueKey('GalleryDemoList');
+  String currentDemoCategory;
+
   for (String demo in demos) {
-    print('Testing "$demo" demo');
-    final SerializableFinder menuItem = find.text(demo);
-    await driver.scrollUntilVisible(find.byType('CustomScrollView'), menuItem,
+    if (kSkippedDemos.contains(demo))
+      continue;
+
+    final String demoName = demo.substring(0, demo.indexOf('@'));
+    final String demoCategory = demo.substring(demo.indexOf('@') + 1);
+    print('> $demo');
+
+    if (currentDemoCategory == null) {
+      await driver.tap(find.text(demoCategory));
+    } else if (currentDemoCategory != demoCategory) {
+      await driver.tap(find.byTooltip('Back'));
+      await driver.tap(find.text(demoCategory));
+      // Scroll back to the top
+      await driver.scroll(demoList, 0.0, 10000.0, const Duration(milliseconds: 100));
+    }
+    currentDemoCategory = demoCategory;
+
+    final SerializableFinder demoItem = find.text(demoName);
+    await driver.scrollUntilVisible(demoList, demoItem,
       dyScroll: -48.0,
       alignment: 0.5,
+      timeout: const Duration(seconds: 30),
     );
 
     for (int i = 0; i < 2; i += 1) {
-      await driver.tap(menuItem); // Launch the demo
-
-      // This demo's back button isn't initially visible.
-      if (demo == 'Backdrop')
-        await driver.tap(find.byTooltip('Tap to dismiss'));
+      await driver.tap(demoItem); // Launch the demo
 
       if (kUnsynchronizedDemos.contains(demo)) {
         await driver.runUnsynchronized<Future<Null>>(() async {
@@ -144,8 +163,12 @@ Future<Null> runDemos(List<String> demos, FlutterDriver driver) async {
         await driver.tap(find.byTooltip('Back'));
       }
     }
-    print('Success');
+
+    print('< Success');
   }
+
+  // Return to the home screen
+  await driver.tap(find.byTooltip('Back'));
 }
 
 void main([List<String> args = const <String>[]]) {
@@ -171,6 +194,7 @@ void main([List<String> args = const <String>[]]) {
     });
 
     test('all demos', () async {
+
       // Collect timeline data for just a limited set of demos to avoid OOMs.
       final Timeline timeline = await driver.traceAction(
         () async {
@@ -189,12 +213,6 @@ void main([List<String> args = const <String>[]]) {
       await summary.writeSummaryToFile('transitions', pretty: true);
       final String histogramPath = path.join(testOutputsDirectory, 'transition_durations.timeline.json');
       await saveDurationsHistogram(timeline.json['traceEvents'], histogramPath);
-
-      // Scroll back to the top
-      await driver.scrollUntilVisible(find.byType('CustomScrollView'), find.text(_allDemos[0]),
-        dyScroll: 200.0,
-        alignment: 0.0
-      );
 
       // Execute the remaining tests.
       final Set<String> unprofiledDemos = new Set<String>.from(_allDemos)..removeAll(kProfiledDemos);

@@ -186,6 +186,59 @@ void main() {
       );
     }, timeout: allowForRemotePubInvocation);
 
+    testUsingContext('module', () async {
+      return _createProject(
+        projectDir,
+        <String>['--no-pub', '--template=module'],
+        <String>[
+          '.gitignore',
+          '.metadata',
+          'lib/main.dart',
+          'pubspec.yaml',
+          'README.md',
+        ],
+        unexpectedPaths: <String>[
+          '.android/',
+          'android/',
+          'ios/',
+        ]
+      );
+    }, timeout: allowForCreateFlutterProject);
+
+    testUsingContext('module with pub', () async {
+      return _createProject(
+          projectDir,
+          <String>['-t', 'module'],
+          <String>[
+            '.gitignore',
+            '.metadata',
+            'lib/main.dart',
+            'pubspec.lock',
+            'pubspec.yaml',
+            'README.md',
+            '.packages',
+            '.android/build.gradle',
+            '.android/Flutter/build.gradle',
+            '.android/Flutter/src/main/java/io/flutter/facade/Flutter.java',
+            '.android/Flutter/src/main/java/io/flutter/facade/FlutterFragment.java',
+            '.android/Flutter/src/main/java/io/flutter/plugins/GeneratedPluginRegistrant.java',
+            '.android/Flutter/src/main/AndroidManifest.xml',
+            '.android/gradle.properties',
+            '.android/gradle/wrapper/gradle-wrapper.jar',
+            '.android/gradle/wrapper/gradle-wrapper.properties',
+            '.android/gradlew',
+            '.android/gradlew.bat',
+            '.android/local.properties',
+            '.android/include_flutter.groovy',
+            '.android/settings.gradle',
+          ],
+          unexpectedPaths: <String>[
+            'android/',
+            'ios/',
+          ]
+      );
+    }, timeout: allowForRemotePubInvocation);
+
     // Verify content and formatting
     testUsingContext('content', () async {
       Cache.flutterRoot = '../..';
@@ -423,11 +476,16 @@ Future<Null> _createProject(
   args.add(dir.path);
   await runner.run(args);
 
+  bool pathExists(String path) {
+    final String fullPath = fs.path.join(dir.path, path);
+    return fs.typeSync(fullPath) != FileSystemEntityType.notFound;
+  }
+
   for (String path in expectedPaths) {
-    expect(fs.file(fs.path.join(dir.path, path)).existsSync(), true, reason: '$path does not exist');
+    expect(pathExists(path), true, reason: '$path does not exist');
   }
   for (String path in unexpectedPaths) {
-    expect(fs.file(fs.path.join(dir.path, path)).existsSync(), false, reason: '$path exists');
+    expect(pathExists(path), false, reason: '$path exists');
   }
 }
 
@@ -436,14 +494,13 @@ Future<Null> _createAndAnalyzeProject(
     { List<String> unexpectedPaths = const <String>[], bool plugin = false }) async {
   await _createProject(dir, createArgs, expectedPaths, unexpectedPaths: unexpectedPaths, plugin: plugin);
   if (plugin) {
-    await _analyzeProject(dir.path, target: fs.path.join(dir.path, 'lib', 'flutter_project.dart'));
-    await _analyzeProject(fs.path.join(dir.path, 'example'));
+    await _analyzeProject(dir.path);
   } else {
     await _analyzeProject(dir.path);
   }
 }
 
-Future<Null> _analyzeProject(String workingDir, {String target}) async {
+Future<Null> _analyzeProject(String workingDir) async {
   final String flutterToolsPath = fs.path.absolute(fs.path.join(
     'bin',
     'flutter_tools.dart',
@@ -453,8 +510,6 @@ Future<Null> _analyzeProject(String workingDir, {String target}) async {
     ..addAll(dartVmFlags)
     ..add(flutterToolsPath)
     ..add('analyze');
-  if (target != null)
-    args.add(target);
 
   final ProcessResult exec = await Process.run(
     '$dartSdkPath/bin/dart',
@@ -506,9 +561,9 @@ class LoggingProcessManager extends LocalProcessManager {
     List<dynamic> command, {
       String workingDirectory,
       Map<String, String> environment,
-      bool includeParentEnvironment: true,
-      bool runInShell: false,
-      ProcessStartMode mode: ProcessStartMode.NORMAL,
+      bool includeParentEnvironment = true,
+      bool runInShell = false,
+      ProcessStartMode mode = ProcessStartMode.NORMAL, // ignore: deprecated_member_use
     }) {
     commands.add(command);
     return super.start(

@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:io' show Platform;
 import 'dart:ui' show TextAffinity, hashValues;
 
 import 'package:flutter/foundation.dart';
@@ -23,13 +24,13 @@ export 'dart:ui' show TextAffinity;
 class TextInputType {
   const TextInputType._(this.index) : signed = null, decimal = null;
 
-  /// Optimize for textual information.
+  /// Optimize for numerical information.
   ///
   /// Requests a numeric keyboard with additional settings.
   /// The [signed] and [decimal] parameters are optional.
   const TextInputType.numberWithOptions({
-    this.signed: false,
-    this.decimal: false,
+    this.signed = false,
+    this.decimal = false,
   }) : index = 2;
 
   /// Enum value index, corresponds to one of the [values].
@@ -59,7 +60,7 @@ class TextInputType {
   /// fields.
   static const TextInputType multiline = const TextInputType._(1);
 
-  /// Optimize for numerical information.
+  /// Optimize for unsigned numerical information without a decimal point.
   ///
   /// Requests a default keyboard with ready access to the number keys.
   /// Additional options, such as decimal point and/or positive/negative
@@ -94,7 +95,7 @@ class TextInputType {
     text, multiline, number, phone, datetime, emailAddress, url,
   ];
 
-  // Corresponding string name for each the [values].
+  // Corresponding string name for each of the [values].
   static const List<String> _names = const <String>[
     'text', 'multiline', 'number', 'phone', 'datetime', 'emailAddress', 'url',
   ];
@@ -134,20 +135,200 @@ class TextInputType {
 }
 
 /// An action the user has requested the text input control to perform.
+///
+/// Each action represents a logical meaning, and also configures the soft
+/// keyboard to display a certain kind of action button. The visual appearance
+/// of the action button might differ between versions of the same OS.
+///
+/// Despite the logical meaning of each action, choosing a particular
+/// [TextInputAction] does not necessarily cause any specific behavior to
+/// happen. It is up to the developer to ensure that the behavior that occurs
+/// when an action button is pressed is appropriate for the action button chosen.
+///
+/// For example: If the user presses the keyboard action button on iOS when it
+/// reads "Emergency Call", the result should not be a focus change to the next
+/// TextField. This behavior is not logically appropriate for a button that says
+/// "Emergency Call".
+///
+/// See [EditableText] for more information about customizing action button
+/// behavior.
+///
+/// Most [TextInputAction]s are supported equally by both Android and iOS.
+/// However, there is not a complete, direct mapping between Android's IME input
+/// types and iOS's keyboard return types. Therefore, some [TextInputAction]s
+/// are inappropriate for one of the platforms. If a developer chooses an
+/// inappropriate [TextInputAction] when running in debug mode, an error will be
+/// thrown. If the same thing is done in release mode, then instead of sending
+/// the inappropriate value, Android will use "unspecified" on the platform
+/// side and iOS will use "default" on the platform side.
+///
+/// See also:
+///
+///  * [TextInput], which configures the platform's keyboard setup.
+///  * [EditableText], which invokes callbacks when the action button is pressed.
 enum TextInputAction {
-  /// Complete the text input operation.
+  /// Logical meaning: There is no relevant input action for the current input
+  /// source, e.g., [TextField].
+  ///
+  /// Android: Corresponds to Android's "IME_ACTION_NONE". The keyboard setup
+  /// is decided by the OS. The keyboard will likely show a return key.
+  ///
+  /// iOS: iOS does not have a keyboard return type of "none." It is
+  /// inappropriate to choose this [TextInputAction] when running on iOS.
+  none,
+
+  /// Logical meaning: Let the OS decide which action is most appropriate.
+  ///
+  /// Android: Corresponds to Android's "IME_ACTION_UNSPECIFIED". The OS chooses
+  /// which keyboard action to display. The decision will likely be a done
+  /// button or a return key.
+  ///
+  /// iOS: Corresponds to iOS's "UIReturnKeyDefault". The title displayed in
+  /// the action button is "return".
+  unspecified,
+
+  /// Logical meaning: The user is done providing input to a group of inputs
+  /// (like a form). Some kind of finalization behavior should now take place.
+  ///
+  /// Android: Corresponds to Android's "IME_ACTION_DONE". The OS displays a
+  /// button that represents completion, e.g., a checkmark button.
+  ///
+  /// iOS: Corresponds to iOS's "UIReturnKeyDone". The title displayed in the
+  /// action button is "Done".
   done,
 
-  /// The action to take when the enter button is pressed in a multi-line
-  /// text field (which is typically to do nothing).
+  /// Logical meaning: The user has entered some text that represents a
+  /// destination, e.g., a restaurant name. The "go" button is intended to take
+  /// the user to a part of the app that corresponds to this destination.
+  ///
+  /// Android: Corresponds to Android's "IME_ACTION_GO". The OS displays a
+  /// button that represents taking "the user to the target of the text they
+  /// typed", e.g., a right-facing arrow button.
+  ///
+  /// iOS: Corresponds to iOS's "UIReturnKeyGo". The title displayed in the
+  /// action button is "Go".
+  go,
+
+  /// Logical meaning: Execute a search query.
+  ///
+  /// Android: Corresponds to Android's "IME_ACTION_SEARCH". The OS displays a
+  /// button that represents a search, e.g., a magnifying glass button.
+  ///
+  /// iOS: Corresponds to iOS's "UIReturnKeySearch". The title displayed in the
+  /// action button is "Search".
+  search,
+
+  /// Logical meaning: Sends something that the user has composed, e.g., an
+  /// email or a text message.
+  ///
+  /// Android: Corresponds to Android's "IME_ACTION_SEND". The OS displays a
+  /// button that represents sending something, e.g., a paper plane button.
+  ///
+  /// iOS: Corresponds to iOS's "UIReturnKeySend". The title displayed in the
+  /// action button is "Send".
+  send,
+
+  /// Logical meaning: The user is done with the current input source and wants
+  /// to move to the next one.
+  ///
+  /// Android: Corresponds to Android's "IME_ACTION_NEXT". The OS displays a
+  /// button that represents moving forward, e.g., a right-facing arrow button.
+  ///
+  /// iOS: Corresponds to iOS's "UIReturnKeyNext". The title displayed in the
+  /// action button is "Next".
+  next,
+
+  /// Logical meaning: The user wishes to return to the previous input source
+  /// in the group, e.g., a form with multiple [TextField]s.
+  ///
+  /// Android: Corresponds to Android's "IME_ACTION_PREVIOUS". The OS displays a
+  /// button that represents moving backward, e.g., a left-facing arrow button.
+  ///
+  /// iOS: iOS does not have a keyboard return type of "previous." It is
+  /// inappropriate to choose this [TextInputAction] when running on iOS.
+  previous,
+
+  /// Logical meaning: In iOS apps, it is common for a "Back" button and
+  /// "Continue" button to appear at the top of the screen. However, when the
+  /// keyboard is open, these buttons are often hidden off-screen. Therefore,
+  /// the purpose of the "Continue" return key on iOS is to make the "Continue"
+  /// button available when the user is entering text.
+  ///
+  /// Historical context aside, [TextInputAction.continueAction] can be used any
+  /// time that the term "Continue" seems most appropriate for the given action.
+  ///
+  /// Android: Android does not have an IME input type of "continue." It is
+  /// inappropriate to choose this [TextInputAction] when running on Android.
+  ///
+  /// iOS: Corresponds to iOS's "UIReturnKeyContinue". The title displayed in the
+  /// action button is "Continue". This action is only available on iOS 9.0+.
+  ///
+  /// The reason that this value has "Action" post-fixed to it is because
+  /// "continue" is a reserved word in Dart, as well as many other languages.
+  continueAction,
+
+  /// Logical meaning: The user wants to join something, e.g., a wireless
+  /// network.
+  ///
+  /// Android: Android does not have an IME input type of "join." It is
+  /// inappropriate to choose this [TextInputAction] when running on Android.
+  ///
+  /// iOS: Corresponds to iOS's "UIReturnKeyJoin". The title displayed in the
+  /// action button is "Join".
+  join,
+
+  /// Logical meaning: The user wants routing options, e.g., driving directions.
+  ///
+  /// Android: Android does not have an IME input type of "route." It is
+  /// inappropriate to choose this [TextInputAction] when running on Android.
+  ///
+  /// iOS: Corresponds to iOS's "UIReturnKeyRoute". The title displayed in the
+  /// action button is "Route".
+  route,
+
+  /// Logical meaning: Initiate a call to emergency services.
+  ///
+  /// Android: Android does not have an IME input type of "emergencyCall." It is
+  /// inappropriate to choose this [TextInputAction] when running on Android.
+  ///
+  /// iOS: Corresponds to iOS's "UIReturnKeyEmergencyCall". The title displayed
+  /// in the action button is "Emergency Call".
+  emergencyCall,
+
+  /// Logical meaning: Insert a newline character in the focused text input,
+  /// e.g., [TextField].
+  ///
+  /// Android: Corresponds to Android's "IME_ACTION_NONE". The OS displays a
+  /// button that represents a new line, e.g., a carriage return button.
+  ///
+  /// iOS: Corresponds to iOS's "UIReturnKeyDefault". The title displayed in the
+  /// action button is "return".
+  ///
+  /// The term [TextInputAction.newline] exists in Flutter but not in Android
+  /// or iOS. The reason for introducing this term is so that developers can
+  /// achieve the common result of inserting new lines without needing to
+  /// understand the various IME actions on Android and return keys on iOS.
+  /// Thus, [TextInputAction.newline] is a convenience term that alleviates the
+  /// need to understand the underlying platforms to achieve this common behavior.
   newline,
 }
 
 /// Controls the visual appearance of the text input control.
 ///
+/// Many [TextInputAction]s are common between Android and iOS. However, if an
+/// [inputAction] is provided that is not supported by the current
+/// platform in debug mode, an error will be thrown when the corresponding
+/// text input is attached. For example, providing iOS's "emergencyCall"
+/// action when running on an Android device will result in an error when in
+/// debug mode. In release mode, incompatible [TextInputAction]s are replaced
+/// either with "unspecified" on Android, or "default" on iOS. Appropriate
+/// [inputAction]s can be chosen by checking the current platform and then
+/// selecting the appropriate action.
+///
 /// See also:
 ///
 ///  * [TextInput.attach]
+///  * [TextInputAction]
 @immutable
 class TextInputConfiguration {
   /// Creates configuration information for a text input control.
@@ -155,11 +336,11 @@ class TextInputConfiguration {
   /// All arguments have default values, except [actionLabel]. Only
   /// [actionLabel] may be null.
   const TextInputConfiguration({
-    this.inputType: TextInputType.text,
-    this.obscureText: false,
-    this.autocorrect: true,
+    this.inputType = TextInputType.text,
+    this.obscureText = false,
+    this.autocorrect = true,
     this.actionLabel,
-    this.inputAction: TextInputAction.done,
+    this.inputAction = TextInputAction.done,
   }) : assert(inputType != null),
        assert(obscureText != null),
        assert(autocorrect != null),
@@ -216,9 +397,9 @@ class TextEditingValue {
   /// The [text], [selection], and [composing] arguments must not be null but
   /// each have default values.
   const TextEditingValue({
-    this.text: '',
-    this.selection: const TextSelection.collapsed(offset: -1),
-    this.composing: TextRange.empty
+    this.text = '',
+    this.selection = const TextSelection.collapsed(offset: -1),
+    this.composing = TextRange.empty
   }) : assert(text != null),
        assert(selection != null),
        assert(composing != null);
@@ -368,6 +549,28 @@ class TextInputConnection {
 
 TextInputAction _toTextInputAction(String action) {
   switch (action) {
+    case 'TextInputAction.none':
+      return TextInputAction.none;
+    case 'TextInputAction.unspecified':
+      return TextInputAction.unspecified;
+    case 'TextInputAction.go':
+      return TextInputAction.go;
+    case 'TextInputAction.search':
+      return TextInputAction.search;
+    case 'TextInputAction.send':
+      return TextInputAction.send;
+    case 'TextInputAction.next':
+      return TextInputAction.next;
+    case 'TextInputAction.previuos':
+      return TextInputAction.previous;
+    case 'TextInputAction.continue_action':
+      return TextInputAction.continueAction;
+    case 'TextInputAction.join':
+      return TextInputAction.join;
+    case 'TextInputAction.route':
+      return TextInputAction.route;
+    case 'TextInputAction.emergencyCall':
+      return TextInputAction.emergencyCall;
     case 'TextInputAction.done':
       return TextInputAction.done;
     case 'TextInputAction.newline':
@@ -426,6 +629,32 @@ final _TextInputClientHandler _clientHandler = new _TextInputClientHandler();
 
 /// An interface to the system's text input control.
 class TextInput {
+  static const List<TextInputAction> _androidSupportedInputActions = <TextInputAction>[
+    TextInputAction.none,
+    TextInputAction.unspecified,
+    TextInputAction.done,
+    TextInputAction.send,
+    TextInputAction.go,
+    TextInputAction.search,
+    TextInputAction.next,
+    TextInputAction.previous,
+    TextInputAction.newline,
+  ];
+
+  static const List<TextInputAction> _iOSSupportedInputActions = <TextInputAction>[
+    TextInputAction.unspecified,
+    TextInputAction.done,
+    TextInputAction.send,
+    TextInputAction.go,
+    TextInputAction.search,
+    TextInputAction.next,
+    TextInputAction.newline,
+    TextInputAction.continueAction,
+    TextInputAction.join,
+    TextInputAction.route,
+    TextInputAction.emergencyCall,
+  ];
+
   TextInput._();
 
   /// Begin interacting with the text input control.
@@ -441,6 +670,7 @@ class TextInput {
   static TextInputConnection attach(TextInputClient client, TextInputConfiguration configuration) {
     assert(client != null);
     assert(configuration != null);
+    assert(_debugEnsureInputActionWorksOnPlatform(configuration.inputAction));
     final TextInputConnection connection = new TextInputConnection._(client);
     _clientHandler._currentConnection = connection;
     SystemChannels.textInput.invokeMethod(
@@ -448,5 +678,23 @@ class TextInput {
       <dynamic>[ connection._id, configuration.toJSON() ],
     );
     return connection;
+  }
+
+  static bool _debugEnsureInputActionWorksOnPlatform(TextInputAction inputAction) {
+    assert(() {
+      if (Platform.isIOS) {
+        assert(
+          _iOSSupportedInputActions.contains(inputAction),
+          'The requested TextInputAction "$inputAction" is not supported on iOS.',
+        );
+      } else if (Platform.isAndroid) {
+        assert(
+          _androidSupportedInputActions.contains(inputAction),
+          'The requested TextInputAction "$inputAction" is not supported on Android.',
+        );
+      }
+      return true;
+    }());
+    return true;
   }
 }

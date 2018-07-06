@@ -46,7 +46,7 @@ abstract class DevFSContent {
   Stream<List<int>> contentsAsStream();
 
   Stream<List<int>> contentsAsCompressedStream() {
-    return contentsAsStream().transform(GZIP.encoder);
+    return contentsAsStream().transform(GZIP.encoder); // ignore: deprecated_member_use
   }
 
   /// Return the list of files this content depends on.
@@ -86,7 +86,7 @@ class DevFSFileContent extends DevFSContent {
       return;
     }
     _fileStat = file.statSync();
-    if (_fileStat.type == FileSystemEntityType.LINK) {
+    if (_fileStat.type == FileSystemEntityType.LINK) { // ignore: deprecated_member_use
       // Resolve, stat, and maybe cache the symlink target.
       final String resolved = file.resolveSymbolicLinksSync();
       final FileSystemEntity linkTarget = fs.file(resolved);
@@ -296,7 +296,7 @@ class _DevFSHttpWriter {
   ]) async {
     try {
       final HttpClientRequest request = await _client.putUrl(httpAddress);
-      request.headers.removeAll(HttpHeaders.ACCEPT_ENCODING);
+      request.headers.removeAll(HttpHeaders.acceptEncodingHeader);
       request.headers.add('dev_fs_name', fsName);
       request.headers.add('dev_fs_uri_b64',
           base64.encode(utf8.encode(deviceUri.toString())));
@@ -397,18 +397,20 @@ class DevFS {
     printTrace('DevFS: Deleted filesystem on the device ($_baseUri)');
   }
 
-  /// Update files on the device and return the number of bytes sync'd
+  /// Updates files on the device.
+  ///
+  /// Returns the number of bytes synced.
   Future<int> update({
     String mainPath,
     String target,
     AssetBundle bundle,
     DateTime firstBuildTime,
-    bool bundleFirstUpload: false,
-    bool bundleDirty: false,
+    bool bundleFirstUpload = false,
+    bool bundleDirty = false,
     Set<String> fileFilter,
     ResidentCompiler generator,
     String dillOutputPath,
-    bool fullRestart: false,
+    bool fullRestart = false,
     String projectRootPath,
   }) async {
     // Mark all entries as possibly deleted.
@@ -441,7 +443,8 @@ class DevFS {
     _entries.forEach((Uri deviceUri, DevFSContent content) {
       if (!content._exists) {
         final Future<Map<String, dynamic>> operation =
-            _operations.deleteFile(fsName, deviceUri);
+            _operations.deleteFile(fsName, deviceUri)
+            .then((dynamic v) => v?.cast<String,dynamic>());
         if (operation != null)
           _pendingOperations.add(operation);
         toRemove.add(deviceUri);
@@ -484,7 +487,7 @@ class DevFS {
       // that it is initiated by user key press).
       final List<String> invalidatedFiles = <String>[];
       final Set<Uri> filesUris = new Set<Uri>();
-      for (Uri uri in dirtyEntries.keys) {
+      for (Uri uri in dirtyEntries.keys.toList()) {
         if (!uri.path.startsWith(assetBuildDirPrefix)) {
           final DevFSContent content = dirtyEntries[uri];
           if (content is DevFSFileContent) {
@@ -510,12 +513,13 @@ class DevFS {
         final String entryUri = projectRootPath != null ?
             fs.path.relative(mainPath, from: projectRootPath):
             mainPath;
-        dirtyEntries.putIfAbsent(
-          fs.path.toUri(entryUri + '.dill'),
-          () => new DevFSFileContent(fs.file(compiledBinary))
-        );
+        final Uri kernelUri = fs.path.toUri(entryUri + '.dill');
+        if (!dirtyEntries.containsKey(kernelUri)) {
+          final DevFSFileContent content = new DevFSFileContent(fs.file(compiledBinary));
+          dirtyEntries[kernelUri] = content;
+          numBytes += content.size;
+        }
       }
-
     }
     if (dirtyEntries.isNotEmpty) {
       printTrace('Updating files');
@@ -533,7 +537,8 @@ class DevFS {
         // Make service protocol requests for each.
         dirtyEntries.forEach((Uri deviceUri, DevFSContent content) {
           final Future<Map<String, dynamic>> operation =
-              _operations.writeFile(fsName, deviceUri, content);
+              _operations.writeFile(fsName, deviceUri, content)
+                  .then((dynamic v) => v?.cast<String, dynamic>());
           if (operation != null)
             _pendingOperations.add(operation);
         });
@@ -575,7 +580,7 @@ class DevFS {
   bool _shouldSkip(FileSystemEntity file,
                    String relativePath,
                    Uri directoryUriOnDevice, {
-                   bool ignoreDotFiles: true,
+                   bool ignoreDotFiles = true,
                    }) {
     if (file is Directory) {
       // Skip non-files.
@@ -609,7 +614,7 @@ class DevFS {
   Future<bool> _scanFilteredDirectory(Set<String> fileFilter,
                                       Directory directory,
                                       {Uri directoryUriOnDevice,
-                                       bool ignoreDotFiles: true}) async {
+                                       bool ignoreDotFiles = true}) async {
     directoryUriOnDevice =
         _directoryUriOnDevice(directoryUriOnDevice, directory);
     try {
@@ -640,8 +645,8 @@ class DevFS {
   /// Scan all files in [directory] that pass various filters (e.g. ignoreDotFiles).
   Future<bool> _scanDirectory(Directory directory,
                               {Uri directoryUriOnDevice,
-                               bool recursive: false,
-                               bool ignoreDotFiles: true,
+                               bool recursive = false,
+                               bool ignoreDotFiles = true,
                                Set<String> fileFilter}) async {
     directoryUriOnDevice = _directoryUriOnDevice(directoryUriOnDevice, directory);
     if ((fileFilter != null) && fileFilter.isNotEmpty) {
@@ -661,7 +666,7 @@ class DevFS {
           try {
             final FileSystemEntityType linkType =
                 fs.statSync(file.resolveSymbolicLinksSync()).type;
-            if (linkType == FileSystemEntityType.DIRECTORY)
+            if (linkType == FileSystemEntityType.DIRECTORY) // ignore: deprecated_member_use
               continue;
           } on FileSystemException catch (e) {
             _printScanDirectoryError(file.path, e);

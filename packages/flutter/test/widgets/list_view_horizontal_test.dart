@@ -2,14 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 const List<int> items = const <int>[0, 1, 2, 3, 4, 5];
 
-Widget buildFrame({ bool reverse: false, @required TextDirection textDirection }) {
+Widget buildFrame({ bool reverse = false, @required TextDirection textDirection }) {
   return new Directionality(
     textDirection: textDirection,
     child: new Center(

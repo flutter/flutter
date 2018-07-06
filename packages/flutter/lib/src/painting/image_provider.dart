@@ -12,6 +12,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 
 import 'binding.dart';
+import 'image_cache.dart';
 import 'image_stream.dart';
 
 /// Configuration information passed to the [ImageProvider.resolve] method to
@@ -284,6 +285,49 @@ abstract class ImageProvider<T> {
     return stream;
   }
 
+  /// Evicts an entry from the image cache.
+  ///
+  /// Returns a [Future] which indicates whether the value was successfully
+  /// removed.
+  ///
+  /// The [ImageProvider] used does not need to be the same instance that was
+  /// passed to an [Image] widget, but it does need to create a key which is
+  /// equal to one.
+  ///
+  /// The [cache] is optional and defaults to the global image cache.
+  ///
+  /// The [configuration] is optional and defaults to
+  /// [ImageConfiguration.empty].
+  ///
+  /// ## Sample code
+  ///
+  /// The following sample code shows how an image loaded using the [Image]
+  /// widget can be evicted using a [NetworkImage] with a matching url.
+  ///
+  /// ```dart
+  /// class MyWidget extends StatelessWidget {
+  ///   final String url = '...';
+  ///
+  ///   @override
+  ///   Widget build(BuildContext context) {
+  ///     return new Image.network(url);
+  ///   }
+  ///
+  ///   void evictImage() {
+  ///     final NetworkImage provider = new NetworkImage(url);
+  ///     provider.evict().then<void>((bool success) {
+  ///       if (success)
+  ///         debugPrint('removed image!');
+  ///     });
+  ///   }
+  /// }
+  /// ```
+  Future<bool> evict({ImageCache cache, ImageConfiguration configuration = ImageConfiguration.empty}) async {
+    cache ??= imageCache;
+    final T key = await obtainKey(configuration);
+    return cache.evict(key);
+  }
+
   /// Converts an ImageProvider's settings plus an ImageConfiguration to a key
   /// that describes the precise image to load.
   ///
@@ -401,7 +445,7 @@ class NetworkImage extends ImageProvider<NetworkImage> {
   /// Creates an object that fetches the image at the given URL.
   ///
   /// The arguments must not be null.
-  const NetworkImage(this.url, { this.scale: 1.0 , this.headers })
+  const NetworkImage(this.url, { this.scale = 1.0 , this.headers })
       : assert(url != null),
         assert(scale != null);
 
@@ -442,7 +486,7 @@ class NetworkImage extends ImageProvider<NetworkImage> {
       request.headers.add(name, value);
     });
     final HttpClientResponse response = await request.close();
-    if (response.statusCode != HttpStatus.OK)
+    if (response.statusCode != HttpStatus.ok)
       throw new Exception('HTTP request failed, statusCode: ${response?.statusCode}, $resolved');
 
     final Uint8List bytes = await consolidateHttpClientResponseBytes(response);
@@ -478,7 +522,7 @@ class FileImage extends ImageProvider<FileImage> {
   /// Creates an object that decodes a [File] as an image.
   ///
   /// The arguments must not be null.
-  const FileImage(this.file, { this.scale: 1.0 })
+  const FileImage(this.file, { this.scale = 1.0 })
       : assert(file != null),
         assert(scale != null);
 
@@ -546,7 +590,7 @@ class MemoryImage extends ImageProvider<MemoryImage> {
   /// Creates an object that decodes a [Uint8List] buffer as an image.
   ///
   /// The arguments must not be null.
-  const MemoryImage(this.bytes, { this.scale: 1.0 })
+  const MemoryImage(this.bytes, { this.scale = 1.0 })
       : assert(bytes != null),
         assert(scale != null);
 
@@ -673,7 +717,7 @@ class ExactAssetImage extends AssetBundleImageProvider {
   /// included in a package. See the documentation for the [ExactAssetImage] class
   /// itself for details.
   const ExactAssetImage(this.assetName, {
-    this.scale: 1.0,
+    this.scale = 1.0,
     this.bundle,
     this.package,
   }) : assert(assetName != null),

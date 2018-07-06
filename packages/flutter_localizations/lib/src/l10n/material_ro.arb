@@ -37,8 +37,9 @@
   "hideAccountsLabel": "Ascundeți conturile",
   "showAccountsLabel": "Afișați conturile",
   "modalBarrierDismissLabel": "Închideți",
-  "drawerLabel": "Meniu de navigatie",
+  "drawerLabel": "Meniu de navigare",
   "popupMenuLabel": "Meniu pop-up",
-  "dialogLabel": "Dialog",
-  "alertDialogLabel": "Alerta"
+  "dialogLabel": "Casetă de dialog",
+  "alertDialogLabel": "Alerta",
+  "searchFieldLabel": "Căutare"
 }

@@ -5,7 +5,6 @@ import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:flutter/animation.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/physics.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
@@ -40,7 +39,7 @@ class FixedExtentScrollController extends ScrollController {
   ///
   /// [initialItem] defaults to 0 and must not be null.
   FixedExtentScrollController({
-    this.initialItem: 0,
+    this.initialItem = 0,
   }) : assert(initialItem != null);
 
   /// The page to show when first creating the scroll view.
@@ -194,7 +193,7 @@ class _FixedExtentScrollPosition extends ScrollPositionWithSingleContext impleme
     @required ScrollPhysics physics,
     @required ScrollContext context,
     @required int initialItem,
-    bool keepScrollOffset: true,
+    bool keepScrollOffset = true,
     ScrollPosition oldPosition,
     String debugLabel,
   }) : assert(
@@ -252,7 +251,7 @@ class _FixedExtentScrollPosition extends ScrollPositionWithSingleContext impleme
 class _FixedExtentScrollable extends Scrollable {
   const _FixedExtentScrollable({
     Key key,
-    AxisDirection axisDirection: AxisDirection.down,
+    AxisDirection axisDirection = AxisDirection.down,
     ScrollController controller,
     ScrollPhysics physics,
     @required this.itemExtent,
@@ -394,12 +393,12 @@ class ListWheelScrollView extends StatefulWidget {
     Key key,
     this.controller,
     this.physics,
-    this.diameterRatio: RenderListWheelViewport.defaultDiameterRatio,
-    this.perspective: RenderListWheelViewport.defaultPerspective,
+    this.diameterRatio = RenderListWheelViewport.defaultDiameterRatio,
+    this.perspective = RenderListWheelViewport.defaultPerspective,
     @required this.itemExtent,
     this.onSelectedItemChanged,
-    this.clipToSize: true,
-    this.renderChildrenOutsideViewport: false,
+    this.clipToSize = true,
+    this.renderChildrenOutsideViewport = false,
     @required this.children,
   }) : assert(diameterRatio != null),
        assert(diameterRatio > 0.0, RenderListWheelViewport.diameterRatioZeroMessage),
@@ -559,11 +558,11 @@ class ListWheelViewport extends MultiChildRenderObjectWidget {
   /// The [offset] argument must be provided and must not be null.
   ListWheelViewport({
     Key key,
-    this.diameterRatio: RenderListWheelViewport.defaultDiameterRatio,
-    this.perspective: RenderListWheelViewport.defaultPerspective,
+    this.diameterRatio = RenderListWheelViewport.defaultDiameterRatio,
+    this.perspective = RenderListWheelViewport.defaultPerspective,
     @required this.itemExtent,
-    this.clipToSize: true,
-    this.renderChildrenOutsideViewport: false,
+    this.clipToSize = true,
+    this.renderChildrenOutsideViewport = false,
     @required this.offset,
     List<Widget> children,
   }) : assert(offset != null),

@@ -2,9 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
+
+import '../painting/image_data.dart';
 
 void main() {
   testWidgets('CircleAvatar with dark background color', (WidgetTester tester) async {
@@ -20,8 +24,7 @@ void main() {
     );
 
     final RenderConstrainedBox box = tester.renderObject(find.byType(CircleAvatar));
-    expect(box.size.width, equals(100.0));
-    expect(box.size.height, equals(100.0));
+    expect(box.size, equals(const Size(100.0, 100.0)));
     final RenderDecoratedBox child = box.child;
     final BoxDecoration decoration = child.decoration;
     expect(decoration.color, equals(backgroundColor));
@@ -43,14 +46,30 @@ void main() {
     );
 
     final RenderConstrainedBox box = tester.renderObject(find.byType(CircleAvatar));
-    expect(box.size.width, equals(100.0));
-    expect(box.size.height, equals(100.0));
+    expect(box.size, equals(const Size(100.0, 100.0)));
     final RenderDecoratedBox child = box.child;
     final BoxDecoration decoration = child.decoration;
     expect(decoration.color, equals(backgroundColor));
 
     final RenderParagraph paragraph = tester.renderObject(find.text('Z'));
     expect(paragraph.text.style.color, equals(new ThemeData.fallback().primaryColorDark));
+  });
+
+  testWidgets('CircleAvatar with image background', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      wrap(
+        child: new CircleAvatar(
+          backgroundImage: new MemoryImage(new Uint8List.fromList(kTransparentImage)),
+          radius: 50.0,
+        ),
+      ),
+    );
+
+    final RenderConstrainedBox box = tester.renderObject(find.byType(CircleAvatar));
+    expect(box.size, equals(const Size(100.0, 100.0)));
+    final RenderDecoratedBox child = box.child;
+    final BoxDecoration decoration = child.decoration;
+    expect(decoration.image.fit, equals(BoxFit.cover));
   });
 
   testWidgets('CircleAvatar with foreground color', (WidgetTester tester) async {
@@ -67,8 +86,7 @@ void main() {
     final ThemeData fallback = new ThemeData.fallback();
 
     final RenderConstrainedBox box = tester.renderObject(find.byType(CircleAvatar));
-    expect(box.size.width, equals(40.0));
-    expect(box.size.height, equals(40.0));
+    expect(box.size, equals(const Size(40.0, 40.0)));
     final RenderDecoratedBox child = box.child;
     final BoxDecoration decoration = child.decoration;
     expect(decoration.color, equals(fallback.primaryColorDark));
@@ -138,7 +156,7 @@ void main() {
       ),
     );
 
-    expect(tester.getSize(find.text('Z')), equals(const Size(20.0, 20.0)));
+    expect(tester.getSize(find.text('Z')), equals(const Size(16.0, 16.0)));
 
     await tester.pumpWidget(
       wrap(
@@ -167,7 +185,7 @@ void main() {
         ),
       ),
     );
-    expect(tester.getSize(find.text('Z')), equals(const Size(20.0, 20.0)));
+    expect(tester.getSize(find.text('Z')), equals(const Size(16.0, 16.0)));
   });
 
   testWidgets('CircleAvatar respects minRadius', (WidgetTester tester) async {
@@ -185,8 +203,7 @@ void main() {
     );
 
     final RenderConstrainedBox box = tester.renderObject(find.byType(CircleAvatar));
-    expect(box.size.width, equals(100.0));
-    expect(box.size.height, equals(100.0));
+    expect(box.size, equals(const Size(100.0, 100.0)));
     final RenderDecoratedBox child = box.child;
     final BoxDecoration decoration = child.decoration;
     expect(decoration.color, equals(backgroundColor));
@@ -208,8 +225,7 @@ void main() {
     );
 
     final RenderConstrainedBox box = tester.renderObject(find.byType(CircleAvatar));
-    expect(box.size.width, equals(100.0));
-    expect(box.size.height, equals(100.0));
+    expect(box.size, equals(const Size(100.0, 100.0)));
     final RenderDecoratedBox child = box.child;
     final BoxDecoration decoration = child.decoration;
     expect(decoration.color, equals(backgroundColor));
@@ -232,8 +248,7 @@ void main() {
     );
 
     final RenderConstrainedBox box = tester.renderObject(find.byType(CircleAvatar));
-    expect(box.size.width, equals(100.0));
-    expect(box.size.height, equals(100.0));
+    expect(box.size, equals(const Size(100.0, 100.0)));
     final RenderDecoratedBox child = box.child;
     final BoxDecoration decoration = child.decoration;
     expect(decoration.color, equals(backgroundColor));

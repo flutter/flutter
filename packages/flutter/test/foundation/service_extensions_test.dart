@@ -193,11 +193,11 @@ void main() {
     console.clear();
   });
 
-  test('Service extensions - debugDumpSemanticsTreeInGeometricOrder', () async {
+  test('Service extensions - debugDumpSemanticsTreeInTraversalOrder', () async {
     Map<String, dynamic> result;
 
     await binding.doFrame();
-    result = await binding.testExtension('debugDumpSemanticsTreeInGeometricOrder', <String, String>{});
+    result = await binding.testExtension('debugDumpSemanticsTreeInTraversalOrder', <String, String>{});
     expect(result, <String, String>{});
     expect(console, <String>['Semantics not collected.']);
     console.clear();
@@ -511,7 +511,7 @@ void main() {
 
     // If you add a service extension... TEST IT! :-)
     // ...then increment this number.
-    expect(binding.extensions.length, 32);
+    expect(binding.extensions.length, 37);
 
     expect(console, isEmpty);
     debugPrint = debugPrintThrottled;

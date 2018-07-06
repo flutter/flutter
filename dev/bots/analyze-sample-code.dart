@@ -9,6 +9,7 @@
 // Code is denoted by markdown ```dart / ``` markers.
 //
 // Only code in "## Sample code" or "### Sample code" sections is examined.
+// Subheadings can also be specified, as in "## Sample code: foo".
 //
 // There are several kinds of sample code you can specify:
 //
@@ -162,7 +163,10 @@ Future<Null> main() async {
             assert(block.isEmpty);
             startLine = new Line(file.path, lineNumber + 1, 3);
             inPreamble = true;
-          } else if (trimmedLine == '/// ## Sample code' || trimmedLine == '/// ### Sample code') {
+          } else if (trimmedLine == '/// ## Sample code' ||
+                     trimmedLine.startsWith('/// ## Sample code:') ||
+                     trimmedLine == '/// ### Sample code' ||
+                     trimmedLine.startsWith('/// ### Sample code:')) {
             inSampleSection = true;
             foundDart = false;
             sampleCodeSections += 1;
@@ -176,7 +180,7 @@ Future<Null> main() async {
     buffer.add('import \'dart:math\' as math;');
     buffer.add('import \'dart:typed_data\';');
     buffer.add('import \'dart:ui\' as ui;');
-    buffer.add('import \'package:flutter_test/flutter_test.dart\' hide TypeMatcher;');
+    buffer.add('import \'package:flutter_test/flutter_test.dart\';');
     for (FileSystemEntity file in flutterPackage.listSync(recursive: false, followLinks: false)) {
       if (file is File && path.extension(file.path) == '.dart') {
         buffer.add('');
@@ -184,6 +188,8 @@ Future<Null> main() async {
         buffer.add('import \'package:flutter/${path.basename(file.path)}\';');
       }
     }
+    buffer.add('');
+    buffer.add('// ignore_for_file: unused_element');
     buffer.add('');
     final List<Line> lines = new List<Line>.filled(buffer.length, null, growable: true);
     for (Section section in sections) {
@@ -203,7 +209,7 @@ dependencies:
     print('Found $sampleCodeSections sample code sections.');
     final Process process = await Process.start(
       _flutter,
-      <String>['analyze', '--no-preamble', mainDart.path],
+      <String>['analyze', '--no-preamble', '--no-congratulate', mainDart.parent.path],
       workingDirectory: temp.path,
     );
     stderr.addStream(process.stderr);
@@ -212,10 +218,6 @@ dependencies:
       errors.removeAt(0);
     if (errors.first.startsWith('Running "flutter packages get" in '))
       errors.removeAt(0);
-    if (errors.first.startsWith('Analyzing '))
-      errors.removeAt(0);
-    if (errors.last.endsWith(' issues found.') || errors.last.endsWith(' issue found.'))
-      errors.removeLast();
     int errorCount = 0;
     for (String error in errors) {
       final String kBullet = Platform.isWindows ? ' - ' : ' • ';
@@ -292,7 +294,12 @@ dependencies:
       }
       print('-------8<-------');
     } else {
-      temp.deleteSync(recursive: true);
+      try {
+        temp.deleteSync(recursive: true);
+      } on FileSystemException catch (e) {
+        // ignore errors deleting the temporary directory
+        print('Ignored exception during tearDown: $e');
+      }
     }
   }
   exit(exitCode);

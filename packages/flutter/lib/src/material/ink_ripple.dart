@@ -4,7 +4,6 @@
 
 import 'dart:math' as math;
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
@@ -46,7 +45,7 @@ class _InkRippleFactory extends InteractiveInkFeatureFactory {
     @required RenderBox referenceBox,
     @required Offset position,
     @required Color color,
-    bool containedInkWell: false,
+    bool containedInkWell = false,
     RectCallback rectCallback,
     BorderRadius borderRadius,
     double radius,
@@ -75,7 +74,7 @@ class _InkRippleFactory extends InteractiveInkFeatureFactory {
 /// This object is rarely created directly. Instead of creating an ink ripple,
 /// consider using an [InkResponse] or [InkWell] widget, which uses
 /// gestures (such as tap and long-press) to trigger ink splashes. This class
-/// is used when the [Theme]'s [ThemeData.splashType] is [InkSplashType.ripple].
+/// is used when the [Theme]'s [ThemeData.splashFactory] is [InkRipple.splashFactory].
 ///
 /// See also:
 ///
@@ -113,7 +112,7 @@ class InkRipple extends InteractiveInkFeature {
     @required RenderBox referenceBox,
     @required Offset position,
     @required Color color,
-    bool containedInkWell: false,
+    bool containedInkWell = false,
     RectCallback rectCallback,
     BorderRadius borderRadius,
     double radius,
@@ -199,15 +198,13 @@ class InkRipple extends InteractiveInkFeature {
   @override
   void cancel() {
     _fadeInController.stop();
-    // Watch out: setting _fadeOutController's value to 1.0 would
-    // trigger a call to _handleAlphaStatusChanged() which would
+    // Watch out: setting _fadeOutController's value to 1.0 will
+    // trigger a call to _handleAlphaStatusChanged() which will
     // dispose _fadeOutController.
-    final double _fadeOutValue = 1.0 - _fadeInController.value;
-    if (_fadeOutValue < 1.0) {
-      _fadeOutController
-        ..value = _fadeOutValue
-        ..animateTo(1.0, duration: _kCancelDuration);
-    }
+    final double fadeOutValue = 1.0 - _fadeInController.value;
+    _fadeOutController.value = fadeOutValue;
+    if (fadeOutValue < 1.0)
+      _fadeOutController.animateTo(1.0, duration: _kCancelDuration);
   }
 
   void _handleAlphaStatusChanged(AnimationStatus status) {

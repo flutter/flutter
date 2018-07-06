@@ -35,8 +35,9 @@
   "hideAccountsLabel": "پنهان کردن حساب‌ها",
   "showAccountsLabel": "نشان دادن حساب‌ها",
   "modalBarrierDismissLabel": "نپذیرفتن",
-  "drawerLabel": "منوی هدایت",
-  "popupMenuLabel": "منوی پنجره",
-  "dialogLabel": "گفتگو",
-  "alertDialogLabel": "هشدار"
+  "drawerLabel": "منوی پیمایش",
+  "popupMenuLabel": "منوی بازشو",
+  "dialogLabel": "کادر گفتگو",
+  "alertDialogLabel": "هشدار",
+  "searchFieldLabel": "جستجو کردن"
 }

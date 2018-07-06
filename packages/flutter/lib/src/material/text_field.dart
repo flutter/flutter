@@ -5,7 +5,6 @@
 import 'dart:collection';
 
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
@@ -18,7 +17,7 @@ import 'material.dart';
 import 'text_selection.dart';
 import 'theme.dart';
 
-export 'package:flutter/services.dart' show TextInputType;
+export 'package:flutter/services.dart' show TextInputType, TextInputAction;
 
 /// A material design text field.
 ///
@@ -101,21 +100,23 @@ class TextField extends StatefulWidget {
     Key key,
     this.controller,
     this.focusNode,
-    this.decoration: const InputDecoration(),
-    TextInputType keyboardType: TextInputType.text,
+    this.decoration = const InputDecoration(),
+    TextInputType keyboardType = TextInputType.text,
+    this.textInputAction = TextInputAction.done,
     this.style,
-    this.textAlign: TextAlign.start,
-    this.autofocus: false,
-    this.obscureText: false,
-    this.autocorrect: true,
-    this.maxLines: 1,
+    this.textAlign = TextAlign.start,
+    this.autofocus = false,
+    this.obscureText = false,
+    this.autocorrect = true,
+    this.maxLines = 1,
     this.maxLength,
-    this.maxLengthEnforced: true,
+    this.maxLengthEnforced = true,
     this.onChanged,
     this.onSubmitted,
     this.inputFormatters,
     this.enabled,
   }) : assert(keyboardType != null),
+       assert(textInputAction != null),
        assert(textAlign != null),
        assert(autofocus != null),
        assert(obscureText != null),
@@ -151,6 +152,11 @@ class TextField extends StatefulWidget {
   /// [maxLines] is not one, then [keyboardType] is ignored, and the
   /// [TextInputType.multiline] keyboard type is used.
   final TextInputType keyboardType;
+
+  /// The type of action button to use for the keyboard.
+  ///
+  /// Defaults to [TextInputAction.done]. Must not be null.
+  final TextInputAction textInputAction;
 
   /// The style to use for the text being edited.
   ///
@@ -318,7 +324,7 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
     if (!needsCounter)
       return effectiveDecoration;
 
-    final String counterText = '${_effectiveController.value.text.runes.length} / ${widget.maxLength}';
+    final String counterText = '${_effectiveController.value.text.runes.length}/${widget.maxLength}';
     if (_effectiveController.value.text.runes.length > widget.maxLength) {
       final ThemeData themeData = Theme.of(context);
       return effectiveDecoration.copyWith(
@@ -345,6 +351,11 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
       _controller = new TextEditingController.fromValue(oldWidget.controller.value);
     else if (widget.controller != null && oldWidget.controller == null)
       _controller = null;
+    final bool isEnabled = widget.enabled ?? widget.decoration?.enabled ?? true;
+    final bool wasEnabled = oldWidget.enabled ?? oldWidget.decoration?.enabled ?? true;
+    if (wasEnabled && !isEnabled) {
+      _effectiveFocusNode.unfocus();
+    }
   }
 
   @override
@@ -364,7 +375,8 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
 
   InteractiveInkFeature _createInkFeature(TapDownDetails details) {
     final MaterialInkController inkController = Material.of(context);
-    final RenderBox referenceBox = InputDecorator.containerOf(_editableTextKey.currentContext);
+    final BuildContext editableContext = _editableTextKey.currentContext;
+    final RenderBox referenceBox = InputDecorator.containerOf(editableContext) ?? editableContext.findRenderObject();
     final Offset position = referenceBox.globalToLocal(details.globalPosition);
     final Color color = Theme.of(context).splashColor;
 
@@ -468,6 +480,7 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
         controller: controller,
         focusNode: focusNode,
         keyboardType: widget.keyboardType,
+        textInputAction: widget.textInputAction,
         style: style,
         textAlign: widget.textAlign,
         autofocus: widget.autofocus,
@@ -506,8 +519,8 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
 
     return new Semantics(
       onTap: () {
-        if (!_controller.selection.isValid)
-          _controller.selection = new TextSelection.collapsed(offset: _controller.text.length);
+        if (!_effectiveController.selection.isValid)
+          _effectiveController.selection = new TextSelection.collapsed(offset: _effectiveController.text.length);
         _requestKeyboard();
       },
       child: new IgnorePointer(

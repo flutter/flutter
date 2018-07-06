@@ -42,10 +42,10 @@ class DecorationImage {
     @required this.image,
     this.colorFilter,
     this.fit,
-    this.alignment: Alignment.center,
+    this.alignment = Alignment.center,
     this.centerSlice,
-    this.repeat: ImageRepeat.noRepeat,
-    this.matchTextDirection: false,
+    this.repeat = ImageRepeat.noRepeat,
+    this.matchTextDirection = false,
   }) : assert(image != null),
        assert(alignment != null),
        assert(repeat != null),
@@ -353,10 +353,10 @@ void paintImage({
   @required ui.Image image,
   ColorFilter colorFilter,
   BoxFit fit,
-  Alignment alignment: Alignment.center,
+  Alignment alignment = Alignment.center,
   Rect centerSlice,
-  ImageRepeat repeat: ImageRepeat.noRepeat,
-  bool flipHorizontally: false,
+  ImageRepeat repeat = ImageRepeat.noRepeat,
+  bool flipHorizontally = false,
 }) {
   assert(canvas != null);
   assert(image != null);

@@ -388,11 +388,11 @@ class MockVMService extends BasicMock implements VMService {
 
   Future<Null> setUp() async {
     try {
-      _server = await HttpServer.bind(InternetAddress.LOOPBACK_IP_V6, 0);
+      _server = await HttpServer.bind(InternetAddress.LOOPBACK_IP_V6, 0); // ignore: deprecated_member_use
       _httpAddress = Uri.parse('http://[::1]:${_server.port}');
     } on SocketException {
       // Fall back to IPv4 if the host doesn't support binding to IPv6 localhost
-      _server = await HttpServer.bind(InternetAddress.LOOPBACK_IP_V4, 0);
+      _server = await HttpServer.bind(InternetAddress.LOOPBACK_IP_V4, 0); // ignore: deprecated_member_use
       _httpAddress = Uri.parse('http://127.0.0.1:${_server.port}');
     }
     _server.listen((HttpRequest request) {
@@ -443,9 +443,9 @@ class MockVM implements VM {
 
   @override
   Future<Map<String, dynamic>> invokeRpcRaw(String method, {
-    Map<String, dynamic> params: const <String, dynamic>{},
+    Map<String, dynamic> params = const <String, dynamic>{},
     Duration timeout,
-    bool timeoutFatal: true,
+    bool timeoutFatal = true,
   }) async {
     _service.messages.add('$method $params');
     return <String, dynamic>{'success': true};
@@ -471,7 +471,7 @@ void _cleanupTempDirs() {
   }
 }
 
-Future<Null> _createPackage(FileSystem fs, String pkgName, String pkgFileName, { bool doubleSlash: false }) async {
+Future<Null> _createPackage(FileSystem fs, String pkgName, String pkgFileName, { bool doubleSlash = false }) async {
   final Directory pkgTempDir = _newTempDir(fs);
   String pkgFilePath = fs.path.join(pkgTempDir.path, pkgName, 'lib', pkgFileName);
   if (doubleSlash) {

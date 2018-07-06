@@ -21,8 +21,9 @@ void main() {
     'it', // Italian
     'ja', // Japanese
     'ko', // Korean
+    'ms', // Malay
     'nl', // Dutch
-    'no', // Norwegian
+    'nb', // Norwegian
     'pl', // Polish
     'ps', // Pashto
     'pt', // Portugese
@@ -31,6 +32,7 @@ void main() {
     'th', // Thai
     'tr', // Turkish
     'ur', // Urdu
+    'vi', // Vietnamese
     'zh', // Chinese (simplified)
   ];
 

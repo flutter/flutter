@@ -36,7 +36,8 @@
   "showAccountsLabel": "Mostra account",
   "modalBarrierDismissLabel": "Ignora",
   "drawerLabel": "Menu di navigazione",
-  "popupMenuLabel": "Menù popup",
-  "dialogLabel": "Dialogo",
-  "alertDialogLabel": "Mettere in guardia"
+  "popupMenuLabel": "Menu popup",
+  "dialogLabel": "Finestra di dialogo",
+  "alertDialogLabel": "Mettere in guardia",
+  "searchFieldLabel": "Ricerca"
 }

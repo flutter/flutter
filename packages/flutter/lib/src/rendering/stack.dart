@@ -77,6 +77,12 @@ class RelativeRect {
   /// May be negative if the bottom side of the rectangle is outside of the container.
   final double bottom;
 
+  /// Returns whether any of the values are greater than zero.
+  ///
+  /// This corresponds to one of the sides ([left], [top], [right], or [bottom]) having
+  /// some positive inset towards the center.
+  bool get hasInsets => left > 0.0 || top > 0.0 || right > 0.0 || bottom > 0.0;
+
   /// Returns a new rectangle object translated by the given offset.
   RelativeRect shift(Offset offset) {
     return new RelativeRect.fromLTRB(left + offset.dx, top + offset.dy, right - offset.dx, bottom - offset.dy);
@@ -334,10 +340,10 @@ class RenderStack extends RenderBox
   /// top left corners.
   RenderStack({
     List<RenderBox> children,
-    AlignmentGeometry alignment: AlignmentDirectional.topStart,
+    AlignmentGeometry alignment = AlignmentDirectional.topStart,
     TextDirection textDirection,
-    StackFit fit: StackFit.loose,
-    Overflow overflow: Overflow.clip,
+    StackFit fit = StackFit.loose,
+    Overflow overflow = Overflow.clip,
   }) : assert(alignment != null),
        assert(fit != null),
        assert(overflow != null),
@@ -631,9 +637,9 @@ class RenderIndexedStack extends RenderStack {
   /// If the [index] parameter is null, nothing is displayed.
   RenderIndexedStack({
     List<RenderBox> children,
-    AlignmentGeometry alignment: AlignmentDirectional.topStart,
+    AlignmentGeometry alignment = AlignmentDirectional.topStart,
     TextDirection textDirection,
-    int index: 0,
+    int index = 0,
   }) : _index = index, super(
     children: children,
     alignment: alignment,

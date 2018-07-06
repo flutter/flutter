@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:convert' as convert;
 
 import 'package:json_schema/json_schema.dart';
 import 'package:meta/meta.dart';
@@ -11,6 +12,8 @@ import 'package:yaml/yaml.dart';
 import 'base/file_system.dart';
 import 'cache.dart';
 import 'globals.dart';
+
+final RegExp _versionPattern = new RegExp(r'^(\d+)(\.(\d+)(\.(\d+))?)?(\+(\d+))?$');
 
 /// A wrapper around the `flutter` section in the `pubspec.yaml` file.
 class FlutterManifest {
@@ -50,9 +53,56 @@ class FlutterManifest {
 
   String get appName => _descriptor['name'] ?? '';
 
+  /// The version String from the `pubspec.yaml` file.
+  /// Can be null if it isn't set or has a wrong format.
+  String get appVersion {
+    final String version = _descriptor['version']?.toString();
+    if (version != null && _versionPattern.hasMatch(version))
+      return version;
+    else
+      return null;
+  }
+
+  /// The build version name from the `pubspec.yaml` file.
+  /// Can be null if version isn't set or has a wrong format.
+  String get buildName {
+    if (appVersion != null && appVersion.contains('+'))
+      return appVersion.split('+')?.elementAt(0);
+    else
+      return appVersion;
+  }
+
+  /// The build version number from the `pubspec.yaml` file.
+  /// Can be null if version isn't set or has a wrong format.
+  int get buildNumber {
+    if (appVersion != null && appVersion.contains('+')) {
+      final String value = appVersion.split('+')?.elementAt(1);
+      return value == null ? null : int.tryParse(value);
+    } else {
+      return null;
+    }
+  }
+
   bool get usesMaterialDesign {
     return _flutterDescriptor['uses-material-design'] ?? false;
   }
+
+  /// Properties defining how to expose this Flutter project as a module
+  /// for integration into an unspecified host app.
+  Map<String, dynamic> get moduleDescriptor {
+    return _flutterDescriptor.containsKey('module')
+        ? _flutterDescriptor['module'] ?? const <String, dynamic>{}
+        : null;
+  }
+
+  /// True if this manifest declares a Flutter module project.
+  ///
+  /// A Flutter project is considered a module when it has a `module:`
+  /// descriptor. A Flutter module project supports integration into an
+  /// existing host app.
+  ///
+  /// Such a project can be created using `flutter create -t module`.
+  bool get isModule => moduleDescriptor != null;
 
   List<Map<String, dynamic>> get fontsDescriptor {
    return _flutterDescriptor['fonts'] ?? const <Map<String, dynamic>>[];
@@ -151,13 +201,27 @@ class FontAsset {
   String toString() => '$runtimeType(asset: ${assetUri.path}, weight; $weight, style: $style)';
 }
 
-Future<bool> _validate(Object manifest) async {
-  final String schemaPath = fs.path.join(
+@visibleForTesting
+String buildSchemaDir(FileSystem fs) {
+  return fs.path.join(
     fs.path.absolute(Cache.flutterRoot), 'packages', 'flutter_tools', 'schema',
+  );
+}
+
+@visibleForTesting
+String buildSchemaPath(FileSystem fs) {
+  return fs.path.join(
+    buildSchemaDir(fs),
     'pubspec_yaml.json',
   );
-  final Schema schema = await Schema.createSchemaFromUrl(fs.path.toUri(schemaPath).toString());
+}
 
+Future<bool> _validate(Object manifest) async {
+  final String schemaPath = buildSchemaPath(fs);
+
+  final String schemaData = fs.file(schemaPath).readAsStringSync();
+  final Schema schema = await Schema.createSchema(
+      convert.json.decode(schemaData));
   final Validator validator = new Validator(schema);
   if (validator.validate(manifest)) {
     return true;

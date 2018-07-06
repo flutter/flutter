@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 
@@ -186,7 +185,7 @@ class OverscrollNotification extends ScrollNotification {
     @required BuildContext context,
     this.dragDetails,
     @required this.overscroll,
-    this.velocity: 0.0,
+    this.velocity = 0.0,
   }) : assert(overscroll != null),
        assert(overscroll.isFinite),
        assert(overscroll != 0.0),

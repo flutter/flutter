@@ -11,7 +11,7 @@ import 'package:device_info/device_info.dart';
 
 // TODO(sigurdm): This should not be stored here.
 const String beeUri =
-    'https://flutter.github.io/assets-for-api-docs/videos/bee.mp4';
+    'https://flutter.github.io/assets-for-api-docs/assets/videos/bee.mp4';
 
 class VideoCard extends StatelessWidget {
   final VideoPlayerController controller;
@@ -151,7 +151,8 @@ class _VideoPlayPauseState extends State<VideoPlayPause> {
 
   _VideoPlayPauseState() {
     listener = () {
-      setState(() {});
+      if (mounted)
+        setState(() {});
     };
   }
 
@@ -206,7 +207,7 @@ class FadeAnimation extends StatefulWidget {
 
   const FadeAnimation({
     this.child,
-    this.duration: const Duration(milliseconds: 500),
+    this.duration = const Duration(milliseconds: 500),
   });
 
   @override
@@ -374,7 +375,8 @@ class _VideoDemoState extends State<VideoDemo>
       controller.play();
       await connectedCompleter.future;
       await controller.initialize();
-      setState(() {});
+      if (mounted)
+        setState(() {});
     }
 
     initController(butterflyController);
@@ -419,7 +421,7 @@ class _VideoDemoState extends State<VideoDemo>
             )
           : const Center(
               child: const Text(
-                'The video demo is not supported on the iOS Simulator.',
+                'Video playback not supported on the iOS Simulator.',
               ),
             ),
     );

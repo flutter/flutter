@@ -2,15 +2,23 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
 import 'dart:math' as math;
+import 'dart:ui' as ui;
 
+import 'package:meta/meta.dart';
+import 'package:test/test.dart' hide TypeMatcher, isInstanceOf;
+import 'package:test/test.dart' as test_package show isInstanceOf;
+import 'package:test/src/frontend/async_matcher.dart'; // ignore: implementation_imports
+
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
-import 'package:meta/meta.dart';
-import 'package:test/test.dart';
 
+import 'binding.dart';
 import 'finders.dart';
+import 'goldens.dart';
 
 /// Asserts that the [Finder] matches no widgets in the widget tree.
 ///
@@ -141,45 +149,49 @@ const Matcher hasAGoodToStringDeep = const _HasGoodToStringDeep();
 
 /// A matcher for functions that throw [FlutterError].
 ///
-/// This is equivalent to `throwsA(const isInstanceOf<FlutterError>())`.
+/// This is equivalent to `throwsA(isInstanceOf<FlutterError>())`.
 ///
 /// See also:
 ///
 ///  * [throwsAssertionError], to test if a function throws any [AssertionError].
 ///  * [throwsArgumentError], to test if a functions throws an [ArgumentError].
 ///  * [isFlutterError], to test if any object is a [FlutterError].
-Matcher throwsFlutterError = throwsA(isFlutterError);
+final Matcher throwsFlutterError = throwsA(isFlutterError);
 
 /// A matcher for functions that throw [AssertionError].
 ///
-/// This is equivalent to `throwsA(const isInstanceOf<AssertionError>())`.
+/// This is equivalent to `throwsA(isInstanceOf<AssertionError>())`.
 ///
 /// See also:
 ///
 ///  * [throwsFlutterError], to test if a function throws a [FlutterError].
 ///  * [throwsArgumentError], to test if a functions throws an [ArgumentError].
 ///  * [isAssertionError], to test if any object is any kind of [AssertionError].
-Matcher throwsAssertionError = throwsA(isAssertionError);
+final Matcher throwsAssertionError = throwsA(isAssertionError);
 
 /// A matcher for [FlutterError].
 ///
-/// This is equivalent to `const isInstanceOf<FlutterError>()`.
+/// This is equivalent to `isInstanceOf<FlutterError>()`.
 ///
 /// See also:
 ///
 ///  * [throwsFlutterError], to test if a function throws a [FlutterError].
 ///  * [isAssertionError], to test if any object is any kind of [AssertionError].
-const Matcher isFlutterError = const isInstanceOf<FlutterError>();
+final Matcher isFlutterError = isInstanceOf<FlutterError>();
 
 /// A matcher for [AssertionError].
 ///
-/// This is equivalent to `const isInstanceOf<AssertionError>()`.
+/// This is equivalent to `isInstanceOf<AssertionError>()`.
 ///
 /// See also:
 ///
 ///  * [throwsAssertionError], to test if a function throws any [AssertionError].
 ///  * [isFlutterError], to test if any object is a [FlutterError].
-const Matcher isAssertionError = const isInstanceOf<AssertionError>();
+final Matcher isAssertionError = isInstanceOf<AssertionError>();
+
+/// A matcher that compares the type of the actual value to the type argument T.
+// TODO(ianh): https://github.com/flutter/flutter/issues/18608, https://github.com/dart-lang/matcher/pull/88
+Matcher isInstanceOf<T>() => new test_package.isInstanceOf<T>(); // ignore: prefer_const_constructors, https://github.com/dart-lang/sdk/issues/32544
 
 /// Asserts that two [double]s are equal, within some tolerated error.
 ///
@@ -195,7 +207,7 @@ const Matcher isAssertionError = const isInstanceOf<AssertionError>();
 ///    required and not named.
 ///  * [inInclusiveRange], which matches if the argument is in a specified
 ///    range.
-Matcher moreOrLessEquals(double value, { double epsilon: 1e-10 }) {
+Matcher moreOrLessEquals(double value, { double epsilon = 1e-10 }) {
   return new _MoreOrLessEquals(value, epsilon);
 }
 
@@ -234,7 +246,36 @@ Matcher isMethodCall(String name, {@required dynamic arguments}) {
 /// the area you expect to paint in for [areaToCompare] to catch errors where
 /// the path draws outside the expected area.
 Matcher coversSameAreaAs(Path expectedPath, {@required Rect areaToCompare, int sampleSize = 20})
-  => new _CoversSameAreaAs(expectedPath, areaToCompare: areaToCompare, sampleSize: sampleSize); 
+  => new _CoversSameAreaAs(expectedPath, areaToCompare: areaToCompare, sampleSize: sampleSize);
+
+/// Asserts that a [Finder] matches exactly one widget whose rendered image
+/// matches the golden image file identified by [key].
+///
+/// [key] may be either a [Uri] or a [String] representation of a URI.
+///
+/// This is an asynchronous matcher, meaning that callers should use
+/// [expectLater] when using this matcher and await the future returned by
+/// [expectLater].
+///
+/// ## Sample code
+///
+/// ```dart
+/// await expectLater(find.text('Save'), matchesGoldenFile('save.png'));
+/// ```
+///
+/// See also:
+///
+///  * [goldenFileComparator], which acts as the backend for this matcher.
+///  * [flutter_test] for a discussion of test configurations, whereby callers
+///    may swap out the backend for this matcher.
+Matcher matchesGoldenFile(dynamic key) {
+  if (key is Uri) {
+    return new _MatchesGoldenFile(key);
+  } else if (key is String) {
+    return new _MatchesGoldenFile.forStringPath(key);
+  }
+  throw new ArgumentError('Unexpected type for golden file: ${key.runtimeType}');
+}
 
 class _FindsWidgetMatcher extends Matcher {
   const _FindsWidgetMatcher(this.min, this.max);
@@ -618,6 +659,8 @@ typedef num AnyDistanceFunction(Null a, Null b);
 
 const Map<Type, AnyDistanceFunction> _kStandardDistanceFunctions = const <Type, AnyDistanceFunction>{
   Color: _maxComponentColorDistance,
+  HSVColor: _maxComponentHSVColorDistance,
+  HSLColor: _maxComponentHSLColorDistance,
   Offset: _offsetDistance,
   int: _intDistance,
   double: _doubleDistance,
@@ -634,6 +677,22 @@ double _maxComponentColorDistance(Color a, Color b) {
   delta = math.max<int>(delta, (a.blue - b.blue).abs());
   delta = math.max<int>(delta, (a.alpha - b.alpha).abs());
   return delta.toDouble();
+}
+
+// Compares hue by converting it to a 0.0 - 1.0 range, so that the comparison
+// can be a similar error percentage per component.
+double _maxComponentHSVColorDistance(HSVColor a, HSVColor b) {
+  double delta = math.max<double>((a.saturation - b.saturation).abs(), (a.value - b.value).abs());
+  delta = math.max<double>(delta, ((a.hue - b.hue) / 360.0).abs());
+  return math.max<double>(delta, (a.alpha - b.alpha).abs());
+}
+
+// Compares hue by converting it to a 0.0 - 1.0 range, so that the comparison
+// can be a similar error percentage per component.
+double _maxComponentHSLColorDistance(HSLColor a, HSLColor b) {
+  double delta = math.max<double>((a.saturation - b.saturation).abs(), (a.lightness - b.lightness).abs());
+  delta = math.max<double>(delta, ((a.hue - b.hue) / 360.0).abs());
+  return math.max<double>(delta, (a.alpha - b.alpha).abs());
 }
 
 double _rectDistance(Rect a, Rect b) {
@@ -1182,4 +1241,55 @@ class _CoversSameAreaAs extends Matcher {
   @override
   Description describe(Description description) =>
     description.add('covers expected area and only expected area');
+}
+
+class _MatchesGoldenFile extends AsyncMatcher {
+  const _MatchesGoldenFile(this.key);
+
+  _MatchesGoldenFile.forStringPath(String path) : key = Uri.parse(path);
+
+  final Uri key;
+
+  @override
+  Future<String> matchAsync(covariant Finder finder) async {
+    final Iterable<Element> elements = finder.evaluate();
+    if (elements.isEmpty) {
+      return 'could not be rendered because no widget was found';
+    } else if (elements.length > 1) {
+      return 'matched too many widgets';
+    }
+    final Element element = elements.single;
+
+    RenderObject renderObject = element.renderObject;
+    while (!renderObject.isRepaintBoundary) {
+      renderObject = renderObject.parent;
+      assert(renderObject != null);
+    }
+    assert(!renderObject.debugNeedsPaint);
+    final OffsetLayer layer = renderObject.layer;
+    final Future<ui.Image> imageFuture = layer.toImage(renderObject.paintBounds);
+
+    final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized();
+    return binding.runAsync<String>(() async {
+      final ui.Image image = await imageFuture;
+      final ByteData bytes = await image.toByteData(format: ui.ImageByteFormat.png)
+        .timeout(const Duration(seconds: 10), onTimeout: () => null);
+      if (bytes == null)
+        return 'Failed to generate screenshot from engine within the 10,000ms timeout.';
+      if (autoUpdateGoldenFiles) {
+        await goldenFileComparator.update(key, bytes.buffer.asUint8List());
+      } else {
+        try {
+          final bool success = await goldenFileComparator.compare(bytes.buffer.asUint8List(), key);
+          return success ? null : 'does not match';
+        } on TestFailure catch (ex) {
+          return ex.message;
+        }
+      }
+    }, additionalTime: const Duration(seconds: 11));
+  }
+
+  @override
+  Description describe(Description description) =>
+      description.add('one widget whose rasterized image matches golden image "$key"');
 }

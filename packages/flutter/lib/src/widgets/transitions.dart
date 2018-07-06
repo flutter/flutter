@@ -4,7 +4,6 @@
 
 import 'dart:math' as math;
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:vector_math/vector_math_64.dart' show Matrix4;
 
@@ -115,7 +114,7 @@ class SlideTransition extends AnimatedWidget {
   const SlideTransition({
     Key key,
     @required Animation<Offset> position,
-    this.transformHitTests: true,
+    this.transformHitTests = true,
     this.textDirection,
     this.child,
   }) : assert(position != null),
@@ -176,7 +175,7 @@ class ScaleTransition extends AnimatedWidget {
   const ScaleTransition({
     Key key,
     @required Animation<double> scale,
-    this.alignment: Alignment.center,
+    this.alignment = Alignment.center,
     this.child,
   }) : super(key: key, listenable: scale);
 
@@ -257,9 +256,9 @@ class SizeTransition extends AnimatedWidget {
   /// child along the main axis during the transition.
   const SizeTransition({
     Key key,
-    this.axis: Axis.vertical,
+    this.axis = Axis.vertical,
     @required Animation<double> sizeFactor,
-    this.axisAlignment: 0.0,
+    this.axisAlignment = 0.0,
     this.child,
   }) : assert(axis != null),
        super(key: key, listenable: sizeFactor);
@@ -290,8 +289,8 @@ class SizeTransition extends AnimatedWidget {
     return new ClipRect(
       child: new Align(
         alignment: alignment,
-        heightFactor: axis == Axis.vertical ? sizeFactor.value : null,
-        widthFactor: axis == Axis.horizontal ? sizeFactor.value : null,
+        heightFactor: axis == Axis.vertical ? math.max(sizeFactor.value, 0.0) : null,
+        widthFactor: axis == Axis.horizontal ? math.max(sizeFactor.value, 0.0) : null,
         child: child,
       )
     );
@@ -464,7 +463,7 @@ class DecoratedBoxTransition extends AnimatedWidget {
   const DecoratedBoxTransition({
     Key key,
     @required this.decoration,
-    this.position: DecorationPosition.background,
+    this.position = DecorationPosition.background,
     @required this.child,
   }) : super(key: key, listenable: decoration);
 

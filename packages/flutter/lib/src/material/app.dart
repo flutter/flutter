@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'package:flutter/rendering.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
 import 'arc.dart';
@@ -84,26 +83,26 @@ class MaterialApp extends StatefulWidget {
     Key key,
     this.navigatorKey,
     this.home,
-    this.routes: const <String, WidgetBuilder>{},
+    this.routes = const <String, WidgetBuilder>{},
     this.initialRoute,
     this.onGenerateRoute,
     this.onUnknownRoute,
-    this.navigatorObservers: const <NavigatorObserver>[],
+    this.navigatorObservers = const <NavigatorObserver>[],
     this.builder,
-    this.title: '',
+    this.title = '',
     this.onGenerateTitle,
     this.color,
     this.theme,
     this.locale,
     this.localizationsDelegates,
     this.localeResolutionCallback,
-    this.supportedLocales: const <Locale>[const Locale('en', 'US')],
-    this.debugShowMaterialGrid: false,
-    this.showPerformanceOverlay: false,
-    this.checkerboardRasterCacheImages: false,
-    this.checkerboardOffscreenLayers: false,
-    this.showSemanticsDebugger: false,
-    this.debugShowCheckedModeBanner: true,
+    this.supportedLocales = const <Locale>[const Locale('en', 'US')],
+    this.debugShowMaterialGrid = false,
+    this.showPerformanceOverlay = false,
+    this.checkerboardRasterCacheImages = false,
+    this.checkerboardOffscreenLayers = false,
+    this.showSemanticsDebugger = false,
+    this.debugShowCheckedModeBanner = true,
   }) : assert(routes != null),
        assert(navigatorObservers != null),
        assert(
@@ -219,20 +218,7 @@ class MaterialApp extends StatefulWidget {
   /// [builder] must not be null.
   final Map<String, WidgetBuilder> routes;
 
-  /// The name of the first route to show, if a [Navigator] is built.
-  ///
-  /// Defaults to [Window.defaultRouteName], which may be overridden by the code
-  /// that launched the application.
-  ///
-  /// If the route contains slashes, then it is treated as a "deep link", and
-  /// before this route is pushed, the routes leading to this one are pushed
-  /// also. For example, if the route was `/a/b/c`, then the app would start
-  /// with the three routes `/a`, `/a/b`, and `/a/b/c` loaded, in that order.
-  ///
-  /// If any part of this process fails to generate routes, then the
-  /// [initialRoute] is ignored and [Navigator.defaultRouteName] is used instead
-  /// (`/`). This can happen if the app is started with an intent that specifies
-  /// a non-existent route.
+  /// {@macro flutter.widgets.widgetsApp.initialRoute}
   ///
   /// The [Navigator] is only built if routes are provided (either via [home],
   /// [routes], [onGenerateRoute], or [onUnknownRoute]); if they are not,
@@ -245,18 +231,9 @@ class MaterialApp extends StatefulWidget {
   ///  * [Navigator.pop], for removing a route from the stack.
   final String initialRoute;
 
-  /// The route generator callback used when the app is navigated to a
-  /// named route.
+  /// {@macro flutter.widgets.widgetsApp.onGenerateRoute}
   ///
   /// This is used if [routes] does not contain the requested route.
-  ///
-  /// If this returns null when building the routes to handle the specified
-  /// [initialRoute], then all the routes are discarded and
-  /// [Navigator.defaultRouteName] is used instead (`/`). See [initialRoute].
-  ///
-  /// During normal app operation, the [onGenerateRoute] callback will only be
-  /// applied to route names pushed by the application, and so should never
-  /// return null.
   ///
   /// The [Navigator] is only built if routes are provided (either via [home],
   /// [routes], [onGenerateRoute], or [onUnknownRoute]); if they are not,
@@ -266,44 +243,21 @@ class MaterialApp extends StatefulWidget {
   /// Called when [onGenerateRoute] fails to generate a route, except for the
   /// [initialRoute].
   ///
-  /// This callback is typically used for error handling. For example, this
-  /// callback might always generate a "not found" page that describes the route
-  /// that wasn't found.
-  ///
-  /// The default implementation pushes a route that displays an ugly error
-  /// message.
+  /// {@macro flutter.widgets.widgetsApp.onUnknownRoute}
   ///
   /// The [Navigator] is only built if routes are provided (either via [home],
   /// [routes], [onGenerateRoute], or [onUnknownRoute]); if they are not,
   /// [builder] must not be null.
   final RouteFactory onUnknownRoute;
 
-  /// The list of observers for the [Navigator] created for this app.
-  ///
-  /// This list must be replaced by a list of newly-created observers if the
-  /// [navigatorKey] is changed.
+  /// {@macro flutter.widgets.widgetsApp.navigatorObservers}
   ///
   /// The [Navigator] is only built if routes are provided (either via [home],
   /// [routes], [onGenerateRoute], or [onUnknownRoute]); if they are not,
   /// [navigatorObservers] must be the empty list and [builder] must not be null.
   final List<NavigatorObserver> navigatorObservers;
 
-  /// A builder for inserting widgets above the [Navigator] but below the other
-  /// widgets created by the [MaterialApp] widget, or for replacing the
-  /// [Navigator] entirely.
-  ///
-  /// For example, from the [BuildContext] passed to this method, the
-  /// [Directionality], [Localizations], [DefaultTextStyle], [MediaQuery], etc,
-  /// are all available. They can also be overridden in a way that impacts all
-  /// the routes in the [Navigator].
-  ///
-  /// This is rarely useful, but can be used in applications that wish to
-  /// override those defaults, e.g. to force the application into right-to-left
-  /// mode despite being in English, or to override the [MediaQuery] metrics
-  /// (e.g. to leave a gap for advertisements shown by a plugin from OEM code).
-  ///
-  /// The [builder] callback is passed two arguments, the [BuildContext] (as
-  /// `context`) and a [Navigator] widget (as `child`).
+  /// {@macro flutter.widgets.widgetsApp.builder}
   ///
   /// If no routes are provided using [home], [routes], [onGenerateRoute], or
   /// [onUnknownRoute], the `child` will be null, and it is the responsibility
@@ -326,34 +280,14 @@ class MaterialApp extends StatefulWidget {
   /// [showDialog] and [showMenu], widgets such as [Tooltip], [PopupMenuButton],
   /// or [Hero], and APIs such as [Navigator.push] and [Navigator.pop], will not
   /// function.
-  ///
-  /// For specifically overriding the [title] with a value based on the
-  /// [Localizations], consider [onGenerateTitle] instead.
   final TransitionBuilder builder;
 
-  /// A one-line description used by the device to identify the app for the user.
-  ///
-  /// On Android the titles appear above the task manager's app snapshots which are
-  /// displayed when the user presses the "recent apps" button. Similarly, on
-  /// iOS the titles appear in the App Switcher when the user double presses the
-  /// home button.
-  ///
-  /// To provide a localized title instead, use [onGenerateTitle].
+  /// {@macro flutter.widgets.widgetsApp.title}
   ///
   /// This value is passed unmodified to [WidgetsApp.title].
   final String title;
 
-  /// If non-null this callback is called to produce the app's
-  /// title string, otherwise [title] is used.
-  ///
-  /// The [onGenerateTitle] `context` parameter includes the [WidgetsApp]'s
-  /// [Localizations] widget so that this callback can be used to produce a
-  /// localized title.
-  ///
-  /// This callback function must not return null.
-  ///
-  /// The [onGenerateTitle] callback is called each time the [MaterialApp]
-  /// rebuilds.
+  /// {@macro flutter.widgets.widgetsApp.onGenerateTitle}
   ///
   /// This value is passed unmodified to [WidgetsApp.onGenerateTitle].
   final GenerateAppTitle onGenerateTitle;
@@ -361,22 +295,13 @@ class MaterialApp extends StatefulWidget {
   /// The colors to use for the application's widgets.
   final ThemeData theme;
 
-  /// The primary color to use for the application in the operating system
-  /// interface.
-  ///
-  /// For example, on Android this is the color used for the application in the
-  /// application switcher.
+  /// {@macro flutter.widgets.widgetsApp.color}
   final Color color;
 
-  /// The initial locale for this app's [Localizations] widget.
-  ///
-  /// If the `locale` is null the system's locale value is used.
+  /// {@macro flutter.widgets.widgetsApp.locale}
   final Locale locale;
 
-  /// The delegates for this app's [Localizations] widget.
-  ///
-  /// The delegates collectively define all of the localized resources
-  /// for this application's [Localizations] widget.
+  /// {@macro flutter.widgets.widgetsApp.localizationsDelegates}
   ///
   /// Delegates that produce [WidgetsLocalizations] and [MaterialLocalizations]
   /// are included automatically. Apps can provide their own versions of these
@@ -434,43 +359,14 @@ class MaterialApp extends StatefulWidget {
   /// ```
   final Iterable<LocalizationsDelegate<dynamic>> localizationsDelegates;
 
-  /// This callback is responsible for choosing the app's locale
-  /// when the app is started, and when the user changes the
-  /// device's locale.
-  ///
-  /// The returned value becomes the locale of this app's [Localizations]
-  /// widget. The callback's `locale` parameter is the device's locale when
-  /// the app started, or the device locale the user selected after the app was
-  /// started. The callback's `supportedLocales` parameter is just the value
-  /// [supportedLocales].
-  ///
-  /// An app could use this callback to substitute locales based on the app's
-  /// intended audience. If the device's OS provides a prioritized
-  /// list of locales, this callback could be used to defer to it.
-  ///
-  /// If the callback is null then the resolved locale is:
-  /// - The callback's `locale` parameter if it's equal to a supported locale.
-  /// - The first supported locale with the same [Locale.languageCode] as the
-  ///   callback's `locale` parameter.
-  /// - The first supported locale.
+  /// {@macro flutter.widgets.widgetsApp.localeResolutionCallback}
   ///
   /// This callback is passed along to the [WidgetsApp] built by this widget.
   final LocaleResolutionCallback localeResolutionCallback;
 
-  /// The list of locales that this app has been localized for.
+  /// {@macro flutter.widgets.widgetsApp.supportedLocales}
   ///
-  /// By default only the American English locale is supported. Apps should
-  /// configure this list to match the locales they support.
-  ///
-  /// This list must not null. It's default value is just
-  /// `[const Locale('en', 'US')]`. It is passed along unmodified to the
-  /// [WidgetsApp] built by this widget.
-  ///
-  /// The order of the list matters. By default, if the device's locale doesn't
-  /// exactly match a locale in [supportedLocales] then the first locale in
-  /// [supportedLocales] with a matching [Locale.languageCode] is used. If that
-  /// fails then the first locale in [supportedLocales] is used. The default
-  /// locale resolution algorithm can be overridden with [localeResolutionCallback].
+  /// It is passed along unmodified to the [WidgetsApp] built by this widget.
   ///
   /// The material widgets include translations for locales with the following
   /// language codes:
@@ -511,19 +407,7 @@ class MaterialApp extends StatefulWidget {
   /// reported by the framework.
   final bool showSemanticsDebugger;
 
-  /// Turns on a little "DEBUG" banner in checked mode to indicate
-  /// that the app is in checked mode. This is on by default (in
-  /// checked mode), to turn it off, set the constructor argument to
-  /// false. In release mode this has no effect.
-  ///
-  /// To get this banner in your application if you're not using
-  /// WidgetsApp, include a [CheckedModeBanner] widget in your app.
-  ///
-  /// This banner is intended to deter people from complaining that your
-  /// app is slow when it's in checked mode. In checked mode, Flutter
-  /// enables a large number of expensive diagnostics to aid in
-  /// development, and so performance in checked mode is not
-  /// representative of what will happen in release mode.
+  /// {@macro flutter.widgets.widgetsApp.debugShowCheckedModeBanner}
   final bool debugShowCheckedModeBanner;
 
   /// Turns on a [GridPaper] overlay that paints a baseline grid
@@ -703,7 +587,7 @@ class _MaterialAppState extends State<MaterialApp> {
         },
       )
     );
-
+    
     assert(() {
       if (widget.debugShowMaterialGrid) {
         result = new GridPaper(

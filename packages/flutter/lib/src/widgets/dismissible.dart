@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/foundation.dart';
-
 import 'automatic_keep_alive.dart';
 import 'basic.dart';
 import 'debug.dart';
@@ -79,11 +77,11 @@ class Dismissible extends StatefulWidget {
     this.secondaryBackground,
     this.onResize,
     this.onDismissed,
-    this.direction: DismissDirection.horizontal,
-    this.resizeDuration: const Duration(milliseconds: 300),
-    this.dismissThresholds: const <DismissDirection, double>{},
-    this.movementDuration: const Duration(milliseconds: 200),
-    this.crossAxisEndOffset: 0.0,
+    this.direction = DismissDirection.horizontal,
+    this.resizeDuration = const Duration(milliseconds: 300),
+    this.dismissThresholds = const <DismissDirection, double>{},
+    this.movementDuration = const Duration(milliseconds: 200),
+    this.crossAxisEndOffset = 0.0,
   }) : assert(key != null),
        assert(secondaryBackground != null ? background != null : true),
        super(key: key);

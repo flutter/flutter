@@ -205,8 +205,8 @@ class MatrixUtils {
   static Matrix4 createCylindricalProjectionTransform({
     @required double radius,
     @required double angle,
-    double perspective: 0.001,
-    Axis orientation: Axis.vertical,
+    double perspective = 0.001,
+    Axis orientation = Axis.vertical,
   }) {
     assert(radius != null);
     assert(angle != null);
@@ -266,9 +266,9 @@ class TransformProperty extends DiagnosticsProperty<Matrix4> {
   ///
   /// The [showName] and [level] arguments must not be null.
   TransformProperty(String name, Matrix4 value, {
-    bool showName: true,
-    Object defaultValue: kNoDefaultValue,
-    DiagnosticLevel level: DiagnosticLevel.info,
+    bool showName = true,
+    Object defaultValue = kNoDefaultValue,
+    DiagnosticLevel level = DiagnosticLevel.info,
   }) : assert(showName != null),
        assert(level != null),
        super(

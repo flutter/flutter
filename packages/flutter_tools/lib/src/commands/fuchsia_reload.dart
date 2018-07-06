@@ -27,7 +27,7 @@ import '../vmservice.dart';
 // $ flutter fuchsia_reload -f ~/fuchsia -a 192.168.1.39 \
 //       -g //lib/flutter/examples/flutter_gallery:flutter_gallery
 
-final String ipv4Loopback = InternetAddress.LOOPBACK_IP_V4.address;
+final String ipv4Loopback = InternetAddress.LOOPBACK_IP_V4.address; // ignore: deprecated_member_use
 
 class FuchsiaReloadCommand extends FlutterCommand {
   FuchsiaReloadCommand() {
@@ -196,7 +196,7 @@ class FuchsiaReloadCommand extends FlutterCommand {
   static const String _bold = '\u001B[0;1m';
   static const String _reset = '\u001B[0m';
 
-  String _vmServiceToString(VMService vmService, {int tabDepth: 0}) {
+  String _vmServiceToString(VMService vmService, {int tabDepth = 0}) {
     final Uri addr = vmService.httpAddress;
     final String embedder = vmService.vm.embedder;
     final int numIsolates = vmService.vm.isolates.length;
@@ -237,7 +237,7 @@ class FuchsiaReloadCommand extends FlutterCommand {
     return stringBuffer.toString();
   }
 
-  String _isolateToString(Isolate isolate, {int tabDepth: 0}) {
+  String _isolateToString(Isolate isolate, {int tabDepth = 0}) {
     final Uri vmServiceAddr = isolate.owner.vmService.httpAddress;
     final String name = isolate.name;
     final String shortName = name.substring(0, name.indexOf('\$'));
@@ -432,9 +432,10 @@ class _PortForwarder {
           '_PortForwarder failed to find a local port for $address:$remotePort');
       return new _PortForwarder._(null, 0, 0, null, null);
     }
+    const String dummyRemoteCommand = 'date';
     final List<String> command = <String>[
-        'ssh', '-F', sshConfig, '-nNT', '-vvv',
-        '-L', '$localPort:$ipv4Loopback:$remotePort', address];
+        'ssh', '-F', sshConfig, '-nNT', '-vvv', '-f',
+        '-L', '$localPort:$ipv4Loopback:$remotePort', address, dummyRemoteCommand];
     printTrace("_PortForwarder running '${command.join(' ')}'");
     final Process process = await processManager.start(command);
     process.stderr

@@ -122,20 +122,20 @@ void main() {
       Platform: () => osx,
     });
 
-    testUsingContext('iPad 2 is unsupported', () {
-      expect(new IOSSimulator('x', name: 'iPad 2').isSupported(), false);
+    testUsingContext('iPad 2 is supported', () {
+      expect(new IOSSimulator('x', name: 'iPad 2').isSupported(), true);
     }, overrides: <Type, Generator>{
       Platform: () => osx,
     });
 
-    testUsingContext('iPad Retina is unsupported', () {
-      expect(new IOSSimulator('x', name: 'iPad Retina').isSupported(), false);
+    testUsingContext('iPad Retina is supported', () {
+      expect(new IOSSimulator('x', name: 'iPad Retina').isSupported(), true);
     }, overrides: <Type, Generator>{
       Platform: () => osx,
     });
 
-    testUsingContext('iPhone 5 is unsupported', () {
-      expect(new IOSSimulator('x', name: 'iPhone 5').isSupported(), false);
+    testUsingContext('iPhone 5 is supported', () {
+      expect(new IOSSimulator('x', name: 'iPhone 5').isSupported(), true);
     }, overrides: <Type, Generator>{
       Platform: () => osx,
     });
@@ -154,6 +154,12 @@ void main() {
 
     testUsingContext('iPhone 7 Plus is supported', () {
       expect(new IOSSimulator('x', name: 'iPhone 7 Plus').isSupported(), true);
+    }, overrides: <Type, Generator>{
+      Platform: () => osx,
+    });
+
+    testUsingContext('iPhone X is supported', () {
+      expect(new IOSSimulator('x', name: 'iPhone X').isSupported(), true);
     }, overrides: <Type, Generator>{
       Platform: () => osx,
     });
@@ -321,6 +327,82 @@ void main() {
       ]);
     }, overrides: <Type, Generator>{
       ProcessManager: () => mockProcessManager,
+    });
+  });
+
+  group('SimControl', () {
+    const int mockPid = 123;
+    const String validSimControlOutput = '''
+{
+  "devices" : {
+    "watchOS 4.3" : [
+      {
+        "state" : "Shutdown",
+        "availability" : "(available)",
+        "name" : "Apple Watch - 38mm",
+        "udid" : "TEST-WATCH-UDID"
+      }
+    ],
+    "iOS 11.4" : [
+      {
+        "state" : "Booted",
+        "availability" : "(available)",
+        "name" : "iPhone 5s",
+        "udid" : "TEST-PHONE-UDID"
+      }
+    ],
+    "tvOS 11.4" : [
+      {
+        "state" : "Shutdown",
+        "availability" : "(available)",
+        "name" : "Apple TV",
+        "udid" : "TEST-TV-UDID"
+      }
+    ]
+  }
+}
+    ''';
+
+    MockProcessManager mockProcessManager;
+    SimControl simControl;
+
+    setUp(() {
+      mockProcessManager = new MockProcessManager();
+      when(mockProcessManager.runSync(any))
+          .thenReturn(new ProcessResult(mockPid, 0, validSimControlOutput, ''));
+
+      simControl = new SimControl();
+    });
+
+    testUsingContext('getDevices succeeds', () {
+      final List<SimDevice> devices = simControl.getDevices();
+
+      final SimDevice watch = devices[0];
+      expect(watch.category, 'watchOS 4.3');
+      expect(watch.state, 'Shutdown');
+      expect(watch.availability, '(available)');
+      expect(watch.name, 'Apple Watch - 38mm');
+      expect(watch.udid, 'TEST-WATCH-UDID');
+      expect(watch.isBooted, isFalse);
+
+      final SimDevice phone = devices[1];
+      expect(phone.category, 'iOS 11.4');
+      expect(phone.state, 'Booted');
+      expect(phone.availability, '(available)');
+      expect(phone.name, 'iPhone 5s');
+      expect(phone.udid, 'TEST-PHONE-UDID');
+      expect(phone.isBooted, isTrue);
+
+      final SimDevice tv = devices[2];
+      expect(tv.category, 'tvOS 11.4');
+      expect(tv.state, 'Shutdown');
+      expect(tv.availability, '(available)');
+      expect(tv.name, 'Apple TV');
+      expect(tv.udid, 'TEST-TV-UDID');
+      expect(tv.isBooted, isFalse);
+    }, overrides: <Type, Generator>{
+      ProcessManager: () => mockProcessManager,
+      SimControl: () => simControl,
     });
   });
 }

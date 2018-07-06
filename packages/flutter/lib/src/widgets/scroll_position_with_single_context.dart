@@ -4,7 +4,6 @@
 
 import 'dart:async';
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/physics.dart';
 import 'package:flutter/rendering.dart';
@@ -52,8 +51,8 @@ class ScrollPositionWithSingleContext extends ScrollPosition implements ScrollAc
   ScrollPositionWithSingleContext({
     @required ScrollPhysics physics,
     @required ScrollContext context,
-    double initialPixels: 0.0,
-    bool keepScrollOffset: true,
+    double initialPixels = 0.0,
+    bool keepScrollOffset = true,
     ScrollPosition oldPosition,
     String debugLabel,
   }) : super(
@@ -83,11 +82,6 @@ class ScrollPositionWithSingleContext extends ScrollPosition implements ScrollAc
   double setPixels(double newPixels) {
     assert(activity.isScrolling);
     return super.setPixels(newPixels);
-  }
-
-  @override
-  void correctBy(double correction) {
-    correctPixels(pixels + correction);
   }
 
   @override

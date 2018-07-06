@@ -12,6 +12,7 @@ import 'package:flutter_tools/src/tester/flutter_tester.dart';
 import 'package:test/test.dart';
 
 import '../src/context.dart';
+import 'util.dart';
 
 void main() {
   Directory tempDir;
@@ -41,18 +42,21 @@ void main() {
     });
 
     Future<LaunchResult> start(String mainPath) async {
-      return await device.startApp(null,
-          mainPath: mainPath,
-          debuggingOptions: new DebuggingOptions.enabled(
-              const BuildInfo(BuildMode.debug, null)));
+      return await device.startApp(
+        null,
+        mainPath: mainPath,
+        debuggingOptions: new DebuggingOptions.enabled(
+          const BuildInfo(BuildMode.debug, null),
+        ),
+      );
     }
 
     testUsingContext('start', () async {
-      _writePubspec();
-      _writePackages();
+      writePubspec(tempDir.path);
+      writePackages(tempDir.path);
 
       final String mainPath = fs.path.join('lib', 'main.dart');
-      _writeFile(mainPath, r'''
+      writeFile(mainPath, r'''
 import 'dart:async';
 void main() {
   new Timer.periodic(const Duration(milliseconds: 1), (Timer timer) {
@@ -65,31 +69,10 @@ void main() {
       expect(result.started, isTrue);
       expect(result.observatoryUri, isNotNull);
 
-      final String line = await device.getLogReader().logLines.first;
-      expect(line, 'Hello!');
+      final String line = await device.getLogReader().logLines.firstWhere((String line) => !line.contains('TeXGyreSchola'));
+      expect(line, equals('Hello!'));
 
       expect(await device.stopApp(null), isTrue);
     });
   });
-}
-
-void _writeFile(String path, String content) {
-  fs.file(path)
-    ..createSync(recursive: true)
-    ..writeAsStringSync(content);
-}
-
-void _writePackages() {
-  _writeFile('.packages', '''
-test:${fs.path.join(fs.currentDirectory.path, 'lib')}/
-''');
-}
-
-void _writePubspec() {
-  _writeFile('pubspec.yaml', '''
-name: test
-dependencies:
-  flutter:
-    sdk: flutter
-''');
 }

@@ -46,7 +46,7 @@ const String _actionText =
 const String _actionCode = 'buttons_action';
 
 class ButtonsDemo extends StatefulWidget {
-  static const String routeName = '/material//buttons';
+  static const String routeName = '/material/buttons';
 
   @override
   _ButtonsDemoState createState() => new _ButtonsDemoState();
@@ -226,7 +226,7 @@ class _ButtonsDemoState extends State<ButtonsDemo> {
                   // Perform some action
                 },
               ),
-              const RaisedButton(
+              const OutlineButton(
                 child: const Text('DISABLED'),
                 onPressed: null,
               ),

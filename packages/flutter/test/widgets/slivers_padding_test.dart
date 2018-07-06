@@ -27,7 +27,7 @@ Future<Null> test(WidgetTester tester, double offset, EdgeInsetsGeometry padding
 }
 
 void verify(WidgetTester tester, List<Rect> answerKey) {
-  final List<Rect> testAnswers = tester.renderObjectList<RenderBox>(find.byType(SizedBox)).map<Rect>(
+  final List<Rect> testAnswers = tester.renderObjectList<RenderBox>(find.byType(SizedBox, skipOffstage: false)).map<Rect>(
     (RenderBox target) {
       final Offset topLeft = target.localToGlobal(Offset.zero);
       final Offset bottomRight = target.localToGlobal(target.size.bottomRight(Offset.zero));
@@ -45,14 +45,14 @@ void main() {
     verify(tester, <Rect>[
       new Rect.fromLTWH(0.0, 0.0, 800.0, 400.0),
       new Rect.fromLTWH(25.0, 420.0, 760.0, 400.0),
-      new Rect.fromLTWH(0.0, 600.0, 800.0, 400.0),
+      new Rect.fromLTWH(0.0, 855.0, 800.0, 400.0),
     ]);
 
     await test(tester, 200.0, padding, AxisDirection.down, TextDirection.ltr);
     verify(tester, <Rect>[
       new Rect.fromLTWH(0.0, -200.0, 800.0, 400.0),
       new Rect.fromLTWH(25.0, 220.0, 760.0, 400.0),
-      new Rect.fromLTWH(0.0, 600.0, 800.0, 400.0),
+      new Rect.fromLTWH(0.0, 655.0, 800.0, 400.0),
     ]);
 
     await test(tester, 390.0, padding, AxisDirection.down, TextDirection.ltr);
@@ -84,14 +84,14 @@ void main() {
     verify(tester, <Rect>[
       new Rect.fromLTWH(0.0, 0.0, 800.0, 400.0),
       new Rect.fromLTWH(25.0, 420.0, 760.0, 400.0),
-      new Rect.fromLTWH(0.0, 600.0, 800.0, 400.0),
+      new Rect.fromLTWH(0.0, 855.0, 800.0, 400.0),
     ]);
 
     await test(tester, 200.0, padding, AxisDirection.down, TextDirection.ltr);
     verify(tester, <Rect>[
       new Rect.fromLTWH(0.0, -200.0, 800.0, 400.0),
       new Rect.fromLTWH(25.0, 220.0, 760.0, 400.0),
-      new Rect.fromLTWH(0.0, 600.0, 800.0, 400.0),
+      new Rect.fromLTWH(0.0, 655.0, 800.0, 400.0),
     ]);
 
     await test(tester, 390.0, padding, AxisDirection.down, TextDirection.ltr);
@@ -123,14 +123,14 @@ void main() {
     verify(tester, <Rect>[
       new Rect.fromLTWH(0.0, 0.0, 800.0, 400.0),
       new Rect.fromLTWH(15.0, 420.0, 760.0, 400.0),
-      new Rect.fromLTWH(0.0, 600.0, 800.0, 400.0),
+      new Rect.fromLTWH(0.0, 855.0, 800.0, 400.0),
     ]);
 
     await test(tester, 200.0, padding, AxisDirection.down, TextDirection.rtl);
     verify(tester, <Rect>[
       new Rect.fromLTWH(0.0, -200.0, 800.0, 400.0),
       new Rect.fromLTWH(15.0, 220.0, 760.0, 400.0),
-      new Rect.fromLTWH(0.0, 600.0, 800.0, 400.0),
+      new Rect.fromLTWH(0.0, 655.0, 800.0, 400.0),
     ]);
 
     await test(tester, 390.0, padding, AxisDirection.down, TextDirection.rtl);
@@ -168,11 +168,11 @@ void main() {
     result = tester.hitTestOnBinding(const Offset(10.0, 10.0));
     expect(result.path.first.target, tester.firstRenderObject<RenderObject>(find.byType(Text)));
     result = tester.hitTestOnBinding(const Offset(10.0, 60.0));
-    expect(result.path.first.target, const isInstanceOf<RenderView>());
+    expect(result.path.first.target, isInstanceOf<RenderView>());
     result = tester.hitTestOnBinding(const Offset(100.0, 100.0));
     expect(result.path.first.target, tester.renderObjectList<RenderObject>(find.byType(Text)).skip(1).first);
     result = tester.hitTestOnBinding(const Offset(100.0, 490.0));
-    expect(result.path.first.target, const isInstanceOf<RenderView>());
+    expect(result.path.first.target, isInstanceOf<RenderView>());
     result = tester.hitTestOnBinding(const Offset(10.0, 520.0));
     expect(result.path.first.target, tester.renderObjectList<RenderObject>(find.byType(Text)).last);
   });
@@ -190,11 +190,11 @@ void main() {
     result = tester.hitTestOnBinding(const Offset(10.0, 600.0-10.0));
     expect(result.path.first.target, tester.firstRenderObject<RenderObject>(find.byType(Text)));
     result = tester.hitTestOnBinding(const Offset(10.0, 600.0-60.0));
-    expect(result.path.first.target, const isInstanceOf<RenderView>());
+    expect(result.path.first.target, isInstanceOf<RenderView>());
     result = tester.hitTestOnBinding(const Offset(100.0, 600.0-100.0));
     expect(result.path.first.target, tester.renderObjectList<RenderObject>(find.byType(Text)).skip(1).first);
     result = tester.hitTestOnBinding(const Offset(100.0, 600.0-490.0));
-    expect(result.path.first.target, const isInstanceOf<RenderView>());
+    expect(result.path.first.target, isInstanceOf<RenderView>());
     result = tester.hitTestOnBinding(const Offset(10.0, 600.0-520.0));
     expect(result.path.first.target, tester.renderObjectList<RenderObject>(find.byType(Text)).last);
   });
@@ -212,11 +212,11 @@ void main() {
     result = tester.hitTestOnBinding(const Offset(800.0-10.0, 10.0));
     expect(result.path.first.target, tester.firstRenderObject<RenderObject>(find.byType(Text)));
     result = tester.hitTestOnBinding(const Offset(800.0-60.0, 10.0));
-    expect(result.path.first.target, const isInstanceOf<RenderView>());
+    expect(result.path.first.target, isInstanceOf<RenderView>());
     result = tester.hitTestOnBinding(const Offset(800.0-100.0, 100.0));
     expect(result.path.first.target, tester.renderObjectList<RenderObject>(find.byType(Text)).skip(1).first);
     result = tester.hitTestOnBinding(const Offset(800.0-490.0, 100.0));
-    expect(result.path.first.target, const isInstanceOf<RenderView>());
+    expect(result.path.first.target, isInstanceOf<RenderView>());
     result = tester.hitTestOnBinding(const Offset(800.0-520.0, 10.0));
     expect(result.path.first.target, tester.renderObjectList<RenderObject>(find.byType(Text)).last);
   });
@@ -234,11 +234,11 @@ void main() {
     result = tester.hitTestOnBinding(const Offset(10.0, 10.0));
     expect(result.path.first.target, tester.firstRenderObject<RenderObject>(find.byType(Text)));
     result = tester.hitTestOnBinding(const Offset(60.0, 10.0));
-    expect(result.path.first.target, const isInstanceOf<RenderView>());
+    expect(result.path.first.target, isInstanceOf<RenderView>());
     result = tester.hitTestOnBinding(const Offset(100.0, 100.0));
     expect(result.path.first.target, tester.renderObjectList<RenderObject>(find.byType(Text)).skip(1).first);
     result = tester.hitTestOnBinding(const Offset(490.0, 100.0));
-    expect(result.path.first.target, const isInstanceOf<RenderView>());
+    expect(result.path.first.target, isInstanceOf<RenderView>());
     result = tester.hitTestOnBinding(const Offset(520.0, 10.0));
     expect(result.path.first.target, tester.renderObjectList<RenderObject>(find.byType(Text)).last);
   });
@@ -363,6 +363,7 @@ void main() {
       return new Directionality(
         textDirection: TextDirection.ltr,
         child: new CustomScrollView(
+          cacheExtent: 0.0,
           slivers: <Widget>[
             new SliverPadding(
               padding: EdgeInsets.zero,

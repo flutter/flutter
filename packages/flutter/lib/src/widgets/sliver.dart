@@ -140,8 +140,8 @@ class SliverChildBuilderDelegate extends SliverChildDelegate {
   const SliverChildBuilderDelegate(
     this.builder, {
     this.childCount,
-    this.addAutomaticKeepAlives: true,
-    this.addRepaintBoundaries: true,
+    this.addAutomaticKeepAlives = true,
+    this.addRepaintBoundaries = true,
   }) : assert(builder != null),
        assert(addAutomaticKeepAlives != null),
        assert(addRepaintBoundaries != null);
@@ -248,8 +248,8 @@ class SliverChildListDelegate extends SliverChildDelegate {
   /// arguments must not be null.
   const SliverChildListDelegate(
     this.children, {
-    this.addAutomaticKeepAlives: true,
-    this.addRepaintBoundaries: true,
+    this.addAutomaticKeepAlives = true,
+    this.addRepaintBoundaries = true,
   }) : assert(children != null),
        assert(addAutomaticKeepAlives != null),
        assert(addRepaintBoundaries != null);
@@ -534,10 +534,10 @@ class SliverGrid extends SliverMultiBoxAdaptorWidget {
   SliverGrid.count({
     Key key,
     @required int crossAxisCount,
-    double mainAxisSpacing: 0.0,
-    double crossAxisSpacing: 0.0,
-    double childAspectRatio: 1.0,
-    List<Widget> children: const <Widget>[],
+    double mainAxisSpacing = 0.0,
+    double crossAxisSpacing = 0.0,
+    double childAspectRatio = 1.0,
+    List<Widget> children = const <Widget>[],
   }) : gridDelegate = new SliverGridDelegateWithFixedCrossAxisCount(
          crossAxisCount: crossAxisCount,
          mainAxisSpacing: mainAxisSpacing,
@@ -558,10 +558,10 @@ class SliverGrid extends SliverMultiBoxAdaptorWidget {
   SliverGrid.extent({
     Key key,
     @required double maxCrossAxisExtent,
-    double mainAxisSpacing: 0.0,
-    double crossAxisSpacing: 0.0,
-    double childAspectRatio: 1.0,
-    List<Widget> children: const <Widget>[],
+    double mainAxisSpacing = 0.0,
+    double crossAxisSpacing = 0.0,
+    double childAspectRatio = 1.0,
+    List<Widget> children = const <Widget>[],
   }) : gridDelegate = new SliverGridDelegateWithMaxCrossAxisExtent(
          maxCrossAxisExtent: maxCrossAxisExtent,
          mainAxisSpacing: mainAxisSpacing,
@@ -622,7 +622,7 @@ class SliverFillViewport extends SliverMultiBoxAdaptorWidget {
   const SliverFillViewport({
     Key key,
     @required SliverChildDelegate delegate,
-    this.viewportFraction: 1.0,
+    this.viewportFraction = 1.0,
   }) : assert(viewportFraction != null),
        assert(viewportFraction > 0.0),
        super(key: key, delegate: delegate);
@@ -739,6 +739,20 @@ class SliverMultiBoxAdaptorElement extends RenderObjectElement implements Render
   }
 
   @override
+  Element updateChild(Element child, Widget newWidget, dynamic newSlot) {
+    final SliverMultiBoxAdaptorParentData oldParentData = child?.renderObject?.parentData;
+    final Element newChild = super.updateChild(child, newWidget, newSlot);
+    final SliverMultiBoxAdaptorParentData newParentData = newChild?.renderObject?.parentData;
+
+    // Preserve the old layoutOffset if the renderObject was swapped out.
+    if (oldParentData != newParentData && oldParentData != null && newParentData != null) {
+      newParentData.layoutOffset = oldParentData.layoutOffset;
+    }
+
+    return newChild;
+  }
+
+  @override
   void forgetChild(Element child) {
     assert(child != null);
     assert(child.slot != null);
@@ -765,15 +779,13 @@ class SliverMultiBoxAdaptorElement extends RenderObjectElement implements Render
     });
   }
 
-  double _extrapolateMaxScrollOffset(
+  static double _extrapolateMaxScrollOffset(
     int firstIndex,
     int lastIndex,
     double leadingScrollOffset,
     double trailingScrollOffset,
+    int childCount,
   ) {
-    final int childCount = this.childCount;
-    if (childCount == null)
-      return double.infinity;
     if (lastIndex == childCount - 1)
       return trailingScrollOffset;
     final int reifiedCount = lastIndex - firstIndex + 1;
@@ -789,6 +801,9 @@ class SliverMultiBoxAdaptorElement extends RenderObjectElement implements Render
     double leadingScrollOffset,
     double trailingScrollOffset,
   }) {
+    final int childCount = this.childCount;
+    if (childCount == null)
+      return double.infinity;
     return widget.estimateMaxScrollOffset(
       constraints,
       firstIndex,
@@ -800,6 +815,7 @@ class SliverMultiBoxAdaptorElement extends RenderObjectElement implements Render
       lastIndex,
       leadingScrollOffset,
       trailingScrollOffset,
+      childCount,
     );
   }
 
@@ -873,6 +889,25 @@ class SliverMultiBoxAdaptorElement extends RenderObjectElement implements Render
    // the visitor:
    assert(!_childElements.values.any((Element child) => child == null));
     _childElements.values.toList().forEach(visitor);
+  }
+
+  @override
+  void debugVisitOnstageChildren(ElementVisitor visitor) {
+    _childElements.values.where((Element child) {
+      final SliverMultiBoxAdaptorParentData parentData = child.renderObject.parentData;
+      double itemExtent;
+      switch (renderObject.constraints.axis) {
+        case Axis.horizontal:
+          itemExtent = child.renderObject.paintBounds.width;
+          break;
+        case Axis.vertical:
+          itemExtent = child.renderObject.paintBounds.height;
+          break;
+      }
+
+      return parentData.layoutOffset < renderObject.constraints.scrollOffset + renderObject.constraints.remainingPaintExtent &&
+          parentData.layoutOffset + itemExtent > renderObject.constraints.scrollOffset;
+    }).forEach(visitor);
   }
 }
 

@@ -60,7 +60,9 @@ void main() {
       verify(clock.now()).called(2);
 
       expect(
-        verify(usage.sendTiming(captureAny, captureAny, captureAny, label: captureAny)).captured,
+        verify(usage.sendTiming(
+                captureAny, captureAny, captureAny,
+                label: captureAnyNamed('label'))).captured,
         <dynamic>['flutter', 'dummy', const Duration(milliseconds: 1000), null]
       );
     },
@@ -77,7 +79,9 @@ void main() {
           new DummyFlutterCommand(noUsagePath: true);
       await flutterCommand.run();
       verify(clock.now()).called(2);
-      verifyNever(usage.sendTiming(captureAny, captureAny, captureAny, label: captureAny));
+      verifyNever(usage.sendTiming(
+                   any, any, any,
+                   label: anyNamed('label')));
     },
     overrides: <Type, Generator>{
       Clock: () => clock,
@@ -101,7 +105,9 @@ void main() {
       await flutterCommand.run();
       verify(clock.now()).called(2);
       expect(
-        verify(usage.sendTiming(captureAny, captureAny, captureAny, label: captureAny)).captured,
+        verify(usage.sendTiming(
+                captureAny, captureAny, captureAny,
+                label: captureAnyNamed('label'))).captured,
         <dynamic>[
           'flutter',
           'dummy',
@@ -130,8 +136,15 @@ void main() {
         verify(clock.now()).called(2);
 
         expect(
-          verify(usage.sendTiming(captureAny, captureAny, captureAny, label: captureAny)).captured,
-          <dynamic>['flutter', 'dummy', const Duration(milliseconds: 1000), 'fail']
+          verify(usage.sendTiming(
+                  captureAny, captureAny, captureAny,
+                  label: captureAnyNamed('label'))).captured,
+          <dynamic>[
+            'flutter',
+            'dummy',
+            const Duration(milliseconds: 1000),
+            'fail'
+          ]
         );
       }
     },
@@ -149,8 +162,8 @@ typedef Future<FlutterCommandResult> CommandFunction();
 class DummyFlutterCommand extends FlutterCommand {
 
   DummyFlutterCommand({
-    this.shouldUpdateCache : false,
-    this.noUsagePath : false,
+    this.shouldUpdateCache  = false,
+    this.noUsagePath  = false,
     this.commandFunction,
   });
 

@@ -4,19 +4,19 @@
 import 'dart:async';
 import 'dart:math';
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
+
 import 'activity_indicator.dart';
 import 'colors.dart';
 import 'icons.dart';
 
 class _CupertinoRefreshSliver extends SingleChildRenderObjectWidget {
   const _CupertinoRefreshSliver({
-    this.refreshIndicatorLayoutExtent: 0.0,
-    this.hasLayoutExtent: false,
+    this.refreshIndicatorLayoutExtent = 0.0,
+    this.hasLayoutExtent = false,
     Widget child,
   }) : assert(refreshIndicatorLayoutExtent != null),
        assert(refreshIndicatorLayoutExtent >= 0.0),
@@ -267,9 +267,9 @@ class CupertinoRefreshControl extends StatefulWidget {
   ///
   /// [onRefresh] will be called when pulled far enough to trigger a refresh.
   const CupertinoRefreshControl({
-    this.refreshTriggerPullDistance: _kDefaultRefreshTriggerPullDistance,
-    this.refreshIndicatorExtent: _kDefaultRefreshIndicatorExtent,
-    this.builder: buildSimpleRefreshIndicator,
+    this.refreshTriggerPullDistance = _defaultRefreshTriggerPullDistance,
+    this.refreshIndicatorExtent = _defaultRefreshIndicatorExtent,
+    this.builder = buildSimpleRefreshIndicator,
     this.onRefresh,
   }) : assert(refreshTriggerPullDistance != null),
        assert(refreshTriggerPullDistance > 0.0),
@@ -283,7 +283,8 @@ class CupertinoRefreshControl extends StatefulWidget {
 
   /// The amount of overscroll the scrollable must be dragged to trigger a reload.
   ///
-  /// Must not be null, must be larger than 0.0 and larger than [refreshIndicatorExtent].
+  /// Must not be null, must be larger than 0.0 and larger than
+  /// [refreshIndicatorExtent]. Defaults to 100px when not specified.
   ///
   /// When overscrolled past this distance, [onRefresh] will be called if not
   /// null and the [builder] will build in the [RefreshIndicatorMode.armed] state.
@@ -294,6 +295,7 @@ class CupertinoRefreshControl extends StatefulWidget {
   ///
   /// Must not be null and must be positive, but can be 0.0, in which case the
   /// sliver will start retracting back to 0.0 as soon as the refresh is started.
+  /// Defaults to 60px when not specified.
   ///
   /// Must be smaller than [refreshTriggerPullDistance], since the sliver
   /// shouldn't grow further after triggering the refresh.
@@ -322,8 +324,8 @@ class CupertinoRefreshControl extends StatefulWidget {
   /// where the sliver will start retracting.
   final RefreshCallback onRefresh;
 
-  static const double _kDefaultRefreshTriggerPullDistance = 100.0;
-  static const double _kDefaultRefreshIndicatorExtent = 60.0;
+  static const double _defaultRefreshTriggerPullDistance = 100.0;
+  static const double _defaultRefreshIndicatorExtent = 60.0;
 
   /// Retrieve the current state of the CupertinoRefreshControl. The same as the
   /// state that gets passed into the [builder] function. Used for testing.
@@ -377,7 +379,7 @@ class CupertinoRefreshControl extends StatefulWidget {
 class _CupertinoRefreshControlState extends State<CupertinoRefreshControl> {
   /// Reset the state from done to inactive when only this fraction of the
   /// original `refreshTriggerPullDistance` is left.
-  static const double _kInactiveResetOverscrollFraction = 0.1;
+  static const double _inactiveResetOverscrollFraction = 0.1;
 
   RefreshIndicatorMode refreshState;
   // [Future] returned by the widget's `onRefresh`.
@@ -483,7 +485,7 @@ class _CupertinoRefreshControlState extends State<CupertinoRefreshControl> {
         // can feel sluggish if not going all the way back to 0.0 prevented
         // a subsequent pull-to-refresh from starting.
         if (lastIndicatorExtent >
-            widget.refreshTriggerPullDistance * _kInactiveResetOverscrollFraction) {
+            widget.refreshTriggerPullDistance * _inactiveResetOverscrollFraction) {
           return RefreshIndicatorMode.done;
         } else {
           nextState = RefreshIndicatorMode.inactive;

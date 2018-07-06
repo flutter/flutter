@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 
@@ -18,8 +17,8 @@ class AnimatedSize extends SingleChildRenderObjectWidget {
   const AnimatedSize({
     Key key,
     Widget child,
-    this.alignment: Alignment.center,
-    this.curve: Curves.linear,
+    this.alignment = Alignment.center,
+    this.curve = Curves.linear,
     @required this.duration,
     @required this.vsync,
   }) : super(key: key, child: child);

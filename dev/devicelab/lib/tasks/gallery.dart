@@ -12,13 +12,13 @@ import '../framework/framework.dart';
 import '../framework/ios.dart';
 import '../framework/utils.dart';
 
-TaskFunction createGalleryTransitionTest({ bool semanticsEnabled: false }) {
+TaskFunction createGalleryTransitionTest({ bool semanticsEnabled = false }) {
   return new GalleryTransitionTest(semanticsEnabled: semanticsEnabled);
 }
 
 class GalleryTransitionTest {
 
-  GalleryTransitionTest({ this.semanticsEnabled: false });
+  GalleryTransitionTest({ this.semanticsEnabled = false });
 
   final bool semanticsEnabled;
 
@@ -73,7 +73,8 @@ class GalleryTransitionTest {
       'missed_frame_build_budget_count',
       'average_frame_rasterizer_time_millis',
       'worst_frame_rasterizer_time_millis',
-      'missed_frame_rasterizer_budget_count',
+      '90th_percentile_frame_rasterizer_time_millis',
+      '99th_percentile_frame_rasterizer_time_millis',
     ]);
   }
 }

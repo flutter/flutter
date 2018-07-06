@@ -4,7 +4,6 @@
 
 import 'dart:ui';
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -487,6 +486,59 @@ void main() {
     expect(box, paints..circle(x: 600.0)..circle(x: 200.0)..circle(x: 600.0));
   });
 
+  testWidgets('BottomNavigationBar inactiveIcon shown', (WidgetTester tester) async {
+    const Key filled = const Key('filled');
+    const Key stroked = const Key('stroked');
+    int selectedItem = 0;
+
+    await tester.pumpWidget(
+      boilerplate(
+        textDirection: TextDirection.ltr,
+        bottomNavigationBar: new BottomNavigationBar(
+          currentIndex: selectedItem,
+          items:  const <BottomNavigationBarItem>[
+            const BottomNavigationBarItem(
+              activeIcon: const Icon(Icons.favorite, key: filled),
+              icon: const Icon(Icons.favorite_border, key: stroked),
+              title: const Text('Favorite'),
+            ),
+            const BottomNavigationBarItem(
+              icon: const Icon(Icons.access_alarm),
+              title: const Text('Alarm'),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    expect(find.byKey(filled), findsOneWidget);
+    expect(find.byKey(stroked), findsNothing);
+    selectedItem = 1;
+
+    await tester.pumpWidget(
+      boilerplate(
+        textDirection: TextDirection.ltr,
+        bottomNavigationBar: new BottomNavigationBar(
+          currentIndex: selectedItem,
+          items:  const <BottomNavigationBarItem>[
+            const BottomNavigationBarItem(
+              activeIcon: const Icon(Icons.favorite, key: filled),
+              icon: const Icon(Icons.favorite_border, key: stroked),
+              title: const Text('Favorite'),
+            ),
+            const BottomNavigationBarItem(
+              icon: const Icon(Icons.access_alarm),
+              title: const Text('Alarm'),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    expect(find.byKey(filled), findsNothing);
+    expect(find.byKey(stroked), findsOneWidget);
+  });
+
   testWidgets('BottomNavigationBar semantics', (WidgetTester tester) async {
     final SemanticsTester semantics = new SemanticsTester(tester);
 
@@ -512,32 +564,36 @@ void main() {
       ),
     );
 
-    // TODO(goderbauer): traversal order is incorrect, https://github.com/flutter/flutter/issues/14375
     final TestSemantics expected = new TestSemantics.root(
       children: <TestSemantics>[
         new TestSemantics(
           id: 1,
-          flags: <SemanticsFlag>[SemanticsFlag.isSelected],
-          actions: <SemanticsAction>[SemanticsAction.tap],
-          label: 'AC\nTab 1 of 3',
-          textDirection: TextDirection.ltr,
-          previousNodeId: 3, // Should be 2
-        ),
-        new TestSemantics(
-          id: 2,
-          actions: <SemanticsAction>[SemanticsAction.tap],
-          label: 'Alarm\nTab 2 of 3',
-          textDirection: TextDirection.ltr,
-          nextNodeId: 3,
-          previousNodeId: -1, // Should be 1
-        ),
-        new TestSemantics(
-          id: 3,
-          actions: <SemanticsAction>[SemanticsAction.tap],
-          label: 'Hot Tub\nTab 3 of 3',
-          textDirection: TextDirection.ltr,
-          nextNodeId: 1, // Should be -1
-          previousNodeId: 2,
+          children: <TestSemantics>[
+            new TestSemantics(
+              id: 2,
+              children: <TestSemantics>[
+                new TestSemantics(
+                  id: 3,
+                  flags: <SemanticsFlag>[SemanticsFlag.isSelected],
+                  actions: <SemanticsAction>[SemanticsAction.tap],
+                  label: 'AC\nTab 1 of 3',
+                  textDirection: TextDirection.ltr,
+                ),
+                new TestSemantics(
+                  id: 4,
+                  actions: <SemanticsAction>[SemanticsAction.tap],
+                  label: 'Alarm\nTab 2 of 3',
+                  textDirection: TextDirection.ltr,
+                ),
+                new TestSemantics(
+                  id: 5,
+                  actions: <SemanticsAction>[SemanticsAction.tap],
+                  label: 'Hot Tub\nTab 3 of 3',
+                  textDirection: TextDirection.ltr,
+                ),
+              ],
+            ),
+          ],
         ),
       ],
     );

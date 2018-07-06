@@ -4,7 +4,6 @@
 
 import 'dart:math' as math;
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
 import 'button_theme.dart';
@@ -289,7 +288,7 @@ class _DropdownRoute<T> extends PopupRoute<_DropdownRouteResult<T>> {
     this.padding,
     this.buttonRect,
     this.selectedIndex,
-    this.elevation: 8,
+    this.elevation = 8,
     this.theme,
     @required this.style,
     this.barrierLabel,
@@ -474,10 +473,10 @@ class DropdownButton<T> extends StatefulWidget {
     this.value,
     this.hint,
     @required this.onChanged,
-    this.elevation: 8,
+    this.elevation = 8,
     this.style,
-    this.iconSize: 24.0,
-    this.isDense: false,
+    this.iconSize = 24.0,
+    this.isDense = false,
   }) : assert(items != null),
        assert(value == null || items.where((DropdownMenuItem<T> item) => item.value == value).length == 1),
       super(key: key);

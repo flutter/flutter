@@ -41,12 +41,9 @@ class FlutterTesterApp extends ApplicationPackage {
 
 // TODO(scheglov): This device does not currently work with full restarts.
 class FlutterTesterDevice extends Device {
-  final _FlutterTesterDeviceLogReader _logReader =
-      new _FlutterTesterDeviceLogReader();
+  FlutterTesterDevice(String deviceId) : super(deviceId);
 
   Process _process;
-
-  FlutterTesterDevice(String deviceId) : super(deviceId);
 
   @override
   Future<bool> get isLocalEmulator async => false;
@@ -69,6 +66,9 @@ class FlutterTesterDevice extends Device {
   @override
   void clearLogs() {}
 
+  final _FlutterTesterDeviceLogReader _logReader =
+      new _FlutterTesterDeviceLogReader();
+
   @override
   DeviceLogReader getLogReader({ApplicationPackage app}) => _logReader;
 
@@ -84,6 +84,9 @@ class FlutterTesterDevice extends Device {
   @override
   bool isSupported() => true;
 
+  bool _isRunning = false;
+  bool get isRunning => _isRunning;
+
   @override
   Future<LaunchResult> startApp(
     ApplicationPackage package, {
@@ -91,10 +94,10 @@ class FlutterTesterDevice extends Device {
     String route,
     @required DebuggingOptions debuggingOptions,
     Map<String, dynamic> platformArgs,
-    bool prebuiltApplication: false,
-    bool applicationNeedsRebuild: false,
-    bool usesTerminalUi: true,
-    bool ipv6: false,
+    bool prebuiltApplication = false,
+    bool applicationNeedsRebuild = false,
+    bool usesTerminalUi = true,
+    bool ipv6 = false,
   }) async {
     final BuildInfo buildInfo = debuggingOptions.buildInfo;
 
@@ -109,17 +112,16 @@ class FlutterTesterDevice extends Device {
 
     final List<String> command = <String>[
       shellPath,
+      '--run-forever',
       '--non-interactive',
       '--enable-dart-profiling',
       '--packages=${PackageMap.globalPackagesPath}',
     ];
     if (debuggingOptions.debuggingEnabled) {
-      if (debuggingOptions.startPaused) {
+      if (debuggingOptions.startPaused)
         command.add('--start-paused');
-      }
       if (debuggingOptions.hasObservatoryPort)
-        command
-            .add('--observatory-port=${debuggingOptions.hasObservatoryPort}');
+        command.add('--observatory-port=${debuggingOptions.observatoryPort}');
     }
 
     // Build assets and perform initial compilation.
@@ -147,7 +149,12 @@ class FlutterTesterDevice extends Device {
     try {
       printTrace(command.join(' '));
 
-      _process = await processManager.start(command);
+      _isRunning = true;
+      _process = await processManager.start(command,
+      environment: <String, String>{
+        'FLUTTER_TEST': 'true',
+      });
+      _process.exitCode.then((_) => _isRunning = false);
       _process.stdout
           .transform(utf8.decoder)
           .transform(const LineSplitter())
@@ -164,9 +171,10 @@ class FlutterTesterDevice extends Device {
       if (!debuggingOptions.debuggingEnabled)
         return new LaunchResult.succeeded();
 
-      final ProtocolDiscovery observatoryDiscovery =
-          new ProtocolDiscovery.observatory(getLogReader(),
-              hostPort: debuggingOptions.observatoryPort);
+      final ProtocolDiscovery observatoryDiscovery = new ProtocolDiscovery.observatory(
+        getLogReader(),
+        hostPort: debuggingOptions.observatoryPort,
+      );
 
       final Uri observatoryUri = await observatoryDiscovery.uri;
       return new LaunchResult.succeeded(observatoryUri: observatoryUri);
@@ -180,7 +188,6 @@ class FlutterTesterDevice extends Device {
   Future<bool> stopApp(ApplicationPackage app) async {
     _process?.kill();
     _process = null;
-
     return true;
   }
 
@@ -189,14 +196,14 @@ class FlutterTesterDevice extends Device {
 }
 
 class FlutterTesterDevices extends PollingDeviceDiscovery {
+  FlutterTesterDevices() : super('Flutter tester');
+
   static const String kTesterDeviceId = 'flutter-tester';
 
   static bool showFlutterTesterDevice = false;
 
   final FlutterTesterDevice _testerDevice =
       new FlutterTesterDevice(kTesterDeviceId);
-
-  FlutterTesterDevices() : super('Flutter tester');
 
   @override
   bool get canListAnything => true;

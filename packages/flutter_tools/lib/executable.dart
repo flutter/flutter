@@ -6,6 +6,7 @@ import 'dart:async';
 
 import 'runner.dart' as runner;
 import 'src/commands/analyze.dart';
+import 'src/commands/attach.dart';
 import 'src/commands/build.dart';
 import 'src/commands/channel.dart';
 import 'src/commands/clean.dart';
@@ -15,6 +16,7 @@ import 'src/commands/daemon.dart';
 import 'src/commands/devices.dart';
 import 'src/commands/doctor.dart';
 import 'src/commands/drive.dart';
+import 'src/commands/emulators.dart';
 import 'src/commands/format.dart';
 import 'src/commands/fuchsia_reload.dart';
 import 'src/commands/ide_config.dart';
@@ -47,6 +49,7 @@ Future<Null> main(List<String> args) async {
 
   await runner.run(args, <FlutterCommand>[
     new AnalyzeCommand(verboseHelp: verboseHelp),
+    new AttachCommand(verboseHelp: verboseHelp),
     new BuildCommand(verboseHelp: verboseHelp),
     new ChannelCommand(verboseHelp: verboseHelp),
     new CleanCommand(),
@@ -57,6 +60,7 @@ Future<Null> main(List<String> args) async {
     new DevicesCommand(),
     new DoctorCommand(verbose: verbose),
     new DriveCommand(),
+    new EmulatorsCommand(),
     new FormatCommand(),
     new FuchsiaReloadCommand(),
     new IdeConfigCommand(hidden: !verboseHelp),

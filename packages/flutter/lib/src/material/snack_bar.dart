@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
 import 'button_theme.dart';
@@ -147,7 +146,7 @@ class SnackBar extends StatelessWidget {
     @required this.content,
     this.backgroundColor,
     this.action,
-    this.duration: _kSnackBarDisplayDuration,
+    this.duration = _kSnackBarDisplayDuration,
     this.animation,
   }) : assert(content != null),
        super(key: key);

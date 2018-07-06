@@ -6,7 +6,7 @@ import 'dart:async';
 import '../base/io.dart' show Process;
 
 /// Callbacks for reporting progress while running tests.
-class TestWatcher {
+abstract class TestWatcher {
   /// Called after a child process starts.
   ///
   /// If startPaused was true, the caller needs to resume in Observatory to
@@ -17,12 +17,19 @@ class TestWatcher {
   ///
   /// The child process won't exit until this method completes.
   /// Not called if the process died.
-  Future<Null> onFinishedTests(ProcessEvent event) async {}
+  Future<void> onFinishedTest(ProcessEvent event) async {}
+
+  /// Called when the test process crashed before connecting to test harness.
+  Future<void> onTestCrashed(ProcessEvent event) async {}
+
+  /// Called if we timed out waiting for the test process to connect to test
+  /// harness.
+  Future<void> onTestTimedOut(ProcessEvent event) async {}
 }
 
 /// Describes a child process started during testing.
 class ProcessEvent {
-  ProcessEvent(this.childIndex, this.process, this.observatoryUri);
+  ProcessEvent(this.childIndex, this.process, [this.observatoryUri]);
 
   /// The index assigned when the child process was launched.
   ///

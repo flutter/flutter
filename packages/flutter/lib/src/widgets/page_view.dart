@@ -5,7 +5,6 @@
 import 'dart:async';
 import 'dart:math' as math;
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/physics.dart';
 import 'package:flutter/rendering.dart';
 
@@ -41,9 +40,9 @@ class PageController extends ScrollController {
   ///
   /// The [initialPage], [keepPage], and [viewportFraction] arguments must not be null.
   PageController({
-    this.initialPage: 0,
-    this.keepPage: true,
-    this.viewportFraction: 1.0,
+    this.initialPage = 0,
+    this.keepPage = true,
+    this.viewportFraction = 1.0,
   }) : assert(initialPage != null),
        assert(keepPage != null),
        assert(viewportFraction != null),
@@ -229,9 +228,9 @@ class _PagePosition extends ScrollPositionWithSingleContext implements PageMetri
   _PagePosition({
     ScrollPhysics physics,
     ScrollContext context,
-    this.initialPage: 0,
-    bool keepPage: true,
-    double viewportFraction: 1.0,
+    this.initialPage = 0,
+    bool keepPage = true,
+    double viewportFraction = 1.0,
     ScrollPosition oldPosition,
   }) : assert(initialPage != null),
        assert(keepPage != null),
@@ -414,13 +413,13 @@ class PageView extends StatefulWidget {
   /// those children that are actually visible.
   PageView({
     Key key,
-    this.scrollDirection: Axis.horizontal,
-    this.reverse: false,
+    this.scrollDirection = Axis.horizontal,
+    this.reverse = false,
     PageController controller,
     this.physics,
-    this.pageSnapping: true,
+    this.pageSnapping = true,
     this.onPageChanged,
-    List<Widget> children: const <Widget>[],
+    List<Widget> children = const <Widget>[],
   }) : controller = controller ?? _defaultPageController,
        childrenDelegate = new SliverChildListDelegate(children),
        super(key: key);
@@ -439,11 +438,11 @@ class PageView extends StatefulWidget {
   /// zero and less than [itemCount].
   PageView.builder({
     Key key,
-    this.scrollDirection: Axis.horizontal,
-    this.reverse: false,
+    this.scrollDirection = Axis.horizontal,
+    this.reverse = false,
     PageController controller,
     this.physics,
-    this.pageSnapping: true,
+    this.pageSnapping = true,
     this.onPageChanged,
     @required IndexedWidgetBuilder itemBuilder,
     int itemCount,
@@ -455,11 +454,11 @@ class PageView extends StatefulWidget {
   /// model.
   PageView.custom({
     Key key,
-    this.scrollDirection: Axis.horizontal,
-    this.reverse: false,
+    this.scrollDirection = Axis.horizontal,
+    this.reverse = false,
     PageController controller,
     this.physics,
-    this.pageSnapping: true,
+    this.pageSnapping = true,
     this.onPageChanged,
     @required this.childrenDelegate,
   }) : assert(childrenDelegate != null),
@@ -565,6 +564,7 @@ class _PageViewState extends State<PageView> {
         physics: physics,
         viewportBuilder: (BuildContext context, ViewportOffset position) {
           return new Viewport(
+            cacheExtent: 0.0,
             axisDirection: axisDirection,
             offset: position,
             slivers: <Widget>[

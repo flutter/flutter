@@ -8,6 +8,7 @@ import 'package:flutter/widgets.dart';
 import 'colors.dart';
 import 'list_tile.dart';
 import 'material.dart';
+import 'material_localizations.dart';
 
 /// The possible alignments of a [Drawer].
 enum DrawerAlignment {
@@ -83,8 +84,9 @@ class Drawer extends StatelessWidget {
   /// Typically used in the [Scaffold.drawer] property.
   const Drawer({
     Key key,
-    this.elevation: 16.0,
+    this.elevation = 16.0,
     this.child,
+    this.semanticLabel,
   }) : super(key: key);
 
   /// The z-coordinate at which to place this drawer. This controls the size of
@@ -100,13 +102,40 @@ class Drawer extends StatelessWidget {
   /// {@macro flutter.widgets.child}
   final Widget child;
 
+  /// The semantic label of the dialog used by accessibility frameworks to 
+  /// announce screen transitions when the drawer is opened and closed.
+  /// 
+  /// If this label is not provided, it will default to
+  /// [MaterialLocalizations.drawerLabel].
+  /// 
+  /// See also:
+  /// 
+  ///  * [SemanticsConfiguration.namesRoute], for a description of how this
+  ///    value is used.
+  final String semanticLabel;
+
   @override
   Widget build(BuildContext context) {
-    return new ConstrainedBox(
-      constraints: const BoxConstraints.expand(width: _kWidth),
-      child: new Material(
-        elevation: elevation,
-        child: child,
+    String label = semanticLabel;
+    switch (defaultTargetPlatform) {
+      case TargetPlatform.iOS:
+        label = semanticLabel;
+        break;
+      case TargetPlatform.android:
+      case TargetPlatform.fuchsia:
+        label = semanticLabel ?? MaterialLocalizations.of(context)?.drawerLabel;
+    }
+    return new Semantics(
+      scopesRoute: true,
+      namesRoute: true,
+      explicitChildNodes: true,
+      label: label,
+      child: new ConstrainedBox(
+        constraints: const BoxConstraints.expand(width: _kWidth),
+        child: new Material(
+          elevation: elevation,
+          child: child,
+        ),
       ),
     );
   }

@@ -299,43 +299,30 @@ void main() {
       testBuildCalled = 0;
       ThemeData themeData = new ThemeData(primaryColor: const Color(0xFF000000));
 
-      await tester.pumpWidget(
-        new Theme(
+      Widget buildTheme() {
+        return new Theme(
           data: themeData,
           child: const Test(),
-        ),
-      );
+        );
+      }
+
+      await tester.pumpWidget(buildTheme());
       expect(testBuildCalled, 1);
 
       // Pump the same widgets again.
-      await tester.pumpWidget(
-        new Theme(
-          data: themeData,
-          child: const Test(),
-        ),
-      );
+      await tester.pumpWidget(buildTheme());
       // No repeated build calls to the child since it's the same theme data.
       expect(testBuildCalled, 1);
 
       // New instance of theme data but still the same content.
       themeData = new ThemeData(primaryColor: const Color(0xFF000000));
-      await tester.pumpWidget(
-        new Theme(
-          data: themeData,
-          child: const Test(),
-        ),
-      );
+      await tester.pumpWidget(buildTheme());
       // Still no repeated calls.
       expect(testBuildCalled, 1);
 
       // Different now.
       themeData = new ThemeData(primaryColor: const Color(0xFF222222));
-      await tester.pumpWidget(
-        new Theme(
-          data: themeData,
-          child: const Test(),
-        ),
-      );
+      await tester.pumpWidget(buildTheme());
       // Should call build again.
       expect(testBuildCalled, 2);
     },
@@ -416,6 +403,8 @@ void main() {
         expect(style.decorationColor, null);
         expect(style.decorationStyle, null);
         expect(style.debugLabel, isNotNull);
+        expect(style.locale, null);
+        expect(style.background, null);
       }
     }
 
@@ -462,7 +451,9 @@ class _TextStyleProxy implements TextStyle {
   @override FontStyle get fontStyle => _delegate.fontStyle;
   @override FontWeight get fontWeight => _delegate.fontWeight;
   @override double get height => _delegate.height;
-  @override ui.Locale get locale => _delegate.locale;
+  @override Locale get locale => _delegate.locale;
+  @override ui.Paint get foreground => _delegate.foreground;
+  @override ui.Paint get background => _delegate.background;
   @override bool get inherit => _delegate.inherit;
   @override double get letterSpacing => _delegate.letterSpacing;
   @override TextBaseline get textBaseline => _delegate.textBaseline;
@@ -479,7 +470,7 @@ class _TextStyleProxy implements TextStyle {
   }
 
   @override
-  TextStyle apply({Color color, TextDecoration decoration, Color decorationColor, TextDecorationStyle decorationStyle, String fontFamily, double fontSizeFactor: 1.0, double fontSizeDelta: 0.0, int fontWeightDelta: 0, double letterSpacingFactor: 1.0, double letterSpacingDelta: 0.0, double wordSpacingFactor: 1.0, double wordSpacingDelta: 0.0, double heightFactor: 1.0, double heightDelta: 0.0}) {
+  TextStyle apply({Color color, TextDecoration decoration, Color decorationColor, TextDecorationStyle decorationStyle, String fontFamily, double fontSizeFactor = 1.0, double fontSizeDelta = 0.0, int fontWeightDelta = 0, double letterSpacingFactor = 1.0, double letterSpacingDelta = 0.0, double wordSpacingFactor = 1.0, double wordSpacingDelta = 0.0, double heightFactor = 1.0, double heightDelta = 0.0}) {
     throw new UnimplementedError();
   }
 
@@ -489,22 +480,22 @@ class _TextStyleProxy implements TextStyle {
   }
 
   @override
-  TextStyle copyWith({Color color, String fontFamily, double fontSize, FontWeight fontWeight, FontStyle fontStyle, double letterSpacing, double wordSpacing, TextBaseline textBaseline, double height, ui.Locale locale, TextDecoration decoration, Color decorationColor, TextDecorationStyle decorationStyle, String debugLabel}) {
+  TextStyle copyWith({Color color, String fontFamily, double fontSize, FontWeight fontWeight, FontStyle fontStyle, double letterSpacing, double wordSpacing, TextBaseline textBaseline, double height, Locale locale, ui.Paint foreground, ui.Paint background, TextDecoration decoration, Color decorationColor, TextDecorationStyle decorationStyle, String debugLabel}) {
     throw new UnimplementedError();
   }
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder properties, {String prefix: ''}) {
+  void debugFillProperties(DiagnosticPropertiesBuilder properties, {String prefix = ''}) {
     throw new UnimplementedError();
   }
 
   @override
-  ui.ParagraphStyle getParagraphStyle({TextAlign textAlign, TextDirection textDirection, double textScaleFactor: 1.0, String ellipsis, int maxLines, ui.Locale locale}) {
+  ui.ParagraphStyle getParagraphStyle({TextAlign textAlign, TextDirection textDirection, double textScaleFactor = 1.0, String ellipsis, int maxLines, Locale locale}) {
     throw new UnimplementedError();
   }
 
   @override
-  ui.TextStyle getTextStyle({double textScaleFactor: 1.0}) {
+  ui.TextStyle getTextStyle({double textScaleFactor = 1.0}) {
     throw new UnimplementedError();
   }
 

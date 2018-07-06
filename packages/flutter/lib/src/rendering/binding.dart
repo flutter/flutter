@@ -101,8 +101,8 @@ abstract class RendererBinding extends BindingBase with ServicesBinding, Schedul
     );
 
     registerSignalServiceExtension(
-      name: 'debugDumpSemanticsTreeInGeometricOrder',
-      callback: () { debugDumpSemanticsTree(DebugSemanticsDumpOrder.geometricOrder); return debugPrintDone; }
+      name: 'debugDumpSemanticsTreeInTraversalOrder',
+      callback: () { debugDumpSemanticsTree(DebugSemanticsDumpOrder.traversalOrder); return debugPrintDone; }
     );
 
     registerSignalServiceExtension(

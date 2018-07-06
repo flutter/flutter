@@ -6,6 +6,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 
+import '../rendering/mock_canvas.dart';
+
 import 'test_widgets.dart';
 
 void main() {
@@ -38,7 +40,10 @@ void main() {
 
     final FlipWidgetState testWidget = tester.state(find.byType(FlipWidget));
 
-    expect(callbackTracker, equals(<int>[0, 1, 2, 3, 4, 5]));
+    expect(callbackTracker, equals(<int>[
+      0, 1, 2, 3, 4, 5, // visible
+      6, 7, 8 // in cached area
+    ]));
 
     callbackTracker.clear();
     testWidget.flip();
@@ -50,7 +55,10 @@ void main() {
     testWidget.flip();
     await tester.pump();
 
-    expect(callbackTracker, equals(<int>[0, 1, 2, 3, 4, 5]));
+    expect(callbackTracker, equals(<int>[
+      0, 1, 2, 3, 4, 5, // visible
+      6, 7, 8, // in cached area
+    ]));
   });
 
   testWidgets('ListView vertical', (WidgetTester tester) async {
@@ -86,22 +94,34 @@ void main() {
     await tester.pumpWidget(builder());
 
     // 0 is built to find its height
-    expect(callbackTracker, equals(<int>[0, 1, 2, 3, 4]));
+    expect(callbackTracker, equals(<int>[
+      0, 1, 2, 3, 4,
+      5, // in cached area
+    ]));
     callbackTracker.clear();
 
     final ScrollableState scrollable = tester.state(find.byType(Scrollable));
-    scrollable.position.jumpTo(400.0); // now only 3 should fit, numbered 2-4.
+    scrollable.position.jumpTo(600.0); // now only 3 should fit, numbered 3-5.
 
     await tester.pumpWidget(builder());
 
     // We build the visible children to find their new size.
-    expect(callbackTracker, equals(<int>[1, 2, 3, 4]));
+    expect(callbackTracker, equals(<int>[
+      0, 1, 2,
+      3, 4, 5, //visible
+      6, 7
+    ]));
     callbackTracker.clear();
 
     await tester.pumpWidget(builder());
 
     // 0 isn't built because they're not visible.
-    expect(callbackTracker, equals(<int>[1, 2, 3, 4]));
+    expect(callbackTracker, equals(<int>[
+      1, 2,
+      3, 4, 5, // visible
+      6, 7,
+    ]
+    ));
     callbackTracker.clear();
   });
 
@@ -128,7 +148,7 @@ void main() {
         child: new FlipWidget(
           left: new ListView.builder(
             scrollDirection: Axis.horizontal,
-            controller: new ScrollController(initialScrollOffset: 300.0),
+            controller: new ScrollController(initialScrollOffset: 500.0),
             itemBuilder: itemBuilder,
           ),
           right: const Text('Not Today'),
@@ -139,23 +159,23 @@ void main() {
     await tester.pumpWidget(builder());
 
     // 0 is built to find its width
-    expect(callbackTracker, equals(<int>[0, 1, 2, 3, 4, 5]));
+    expect(callbackTracker, equals(<int>[0, 1, 2, 3, 4, 5, 6, 7]));
 
     callbackTracker.clear();
 
     final ScrollableState scrollable = tester.state(find.byType(Scrollable));
-    scrollable.position.jumpTo(400.0); // now only 4 should fit, numbered 2-5.
+    scrollable.position.jumpTo(600.0); // now only 4 should fit, numbered 2-5.
 
     await tester.pumpWidget(builder());
 
     // We build the visible children to find their new size.
-    expect(callbackTracker, equals(<int>[1, 2, 3, 4, 5]));
+    expect(callbackTracker, equals(<int>[1, 2, 3, 4, 5, 6, 7, 8]));
     callbackTracker.clear();
 
     await tester.pumpWidget(builder());
 
     // 0 isn't built because they're not visible.
-    expect(callbackTracker, equals(<int>[1, 2, 3, 4, 5]));
+    expect(callbackTracker, equals(<int>[1, 2, 3, 4, 5, 6, 7, 8]));
     callbackTracker.clear();
   });
 
@@ -189,18 +209,24 @@ void main() {
 
     await tester.pumpWidget(builder());
 
-    expect(callbackTracker, equals(<int>[0, 1, 2]));
+    expect(callbackTracker, equals(<int>[
+      0, 1, 2,
+      3, // in cached area
+    ]));
     callbackTracker.clear();
     tester.allWidgets.forEach(collectText);
-    expect(text, equals(<String>['0', '1', '2']));
+    expect(text, equals(<String>['0', '1', '2', '3']));
     text.clear();
 
     await tester.pumpWidget(builder());
 
-    expect(callbackTracker, equals(<int>[0, 1, 2]));
+    expect(callbackTracker, equals(<int>[
+      0, 1, 2,
+      3, // in cached area
+    ]));
     callbackTracker.clear();
     tester.allWidgets.forEach(collectText);
-    expect(text, equals(<String>['0', '1', '2']));
+    expect(text, equals(<String>['0', '1', '2', '3']));
     text.clear();
   });
 
@@ -308,9 +334,10 @@ void main() {
         ' │   GrowthDirection.forward, ScrollDirection.idle, scrollOffset:\n'
         ' │   0.0, remainingPaintExtent: 600.0, crossAxisExtent: 800.0,\n'
         ' │   crossAxisDirection: AxisDirection.right,\n'
-        ' │   viewportMainAxisExtent: 600.0)\n'
+        ' │   viewportMainAxisExtent: 600.0, remainingCacheExtent: 850.0\n'
+        ' │   cacheOrigin: 0.0 )\n'
         ' │ geometry: SliverGeometry(scrollExtent: 300.0, paintExtent: 300.0,\n'
-        ' │   maxPaintExtent: 300.0)\n'
+        ' │   maxPaintExtent: 300.0, cacheExtent: 300.0)\n'
         ' │ currently live children: 0 to 2\n'
         ' │\n'
         ' ├─child with index 0: RenderRepaintBoundary#00000 relayoutBoundary=up2\n'
@@ -403,5 +430,91 @@ void main() {
 
     expect(position.viewportDimension, equals(600.0));
     expect(position.minScrollExtent, equals(0.0));
+  });
+
+  testWidgets('ListView should not paint hidden children', (WidgetTester tester) async {
+    const Text text = const Text('test');
+    await tester.pumpWidget(
+        new Directionality(
+            textDirection: TextDirection.ltr,
+            child: new Center(
+              child: new Container(
+                  height: 200.0,
+                  child: new ListView(
+                    cacheExtent: 500.0,
+                    controller: new ScrollController(initialScrollOffset: 300.0),
+                    children: <Widget>[
+                      new Container(height: 140.0, child: text),
+                      new Container(height: 160.0, child: text),
+                      new Container(height: 90.0, child: text),
+                      new Container(height: 110.0, child: text),
+                      new Container(height: 80.0, child: text),
+                      new Container(height: 70.0, child: text),
+                    ],
+                  )
+              ),
+            )
+        )
+    );
+
+    final RenderSliverList list = tester.renderObject(find.byType(SliverList));
+    expect(list, paintsExactlyCountTimes(#drawParagraph, 2));
+  });
+
+  testWidgets('ListView should paint with offset', (WidgetTester tester) async {
+    await tester.pumpWidget(
+        new MaterialApp(
+            home: new Scaffold(
+                body: new Container(
+                    height: 500.0,
+                    child: new CustomScrollView(
+                      controller: new ScrollController(initialScrollOffset: 120.0),
+                      slivers: <Widget>[
+                        const SliverAppBar(
+                          expandedHeight: 250.0,
+                        ),
+                        new SliverList(
+                            delegate: new ListView.builder(
+                                itemExtent: 100.0,
+                                itemCount: 100,
+                                itemBuilder: (_, __) => new Container(
+                                  height: 40.0,
+                                  child: const Text('hey'),
+                                )).childrenDelegate),
+                      ],
+                    )
+                )
+            )
+        )
+    );
+
+    final RenderObject renderObject = tester.renderObject(find.byType(Scrollable));
+    expect(renderObject, paintsExactlyCountTimes(#drawParagraph, 10));
+  });
+
+  testWidgets('ListView should paint with rtl', (WidgetTester tester) async {
+    await tester.pumpWidget(
+        new Directionality(
+          textDirection: TextDirection.rtl,
+          child: new Container(
+            height: 200.0,
+            child: new ListView.builder(
+              padding: const EdgeInsets.symmetric(
+                  horizontal: 0.0, vertical: 0.0),
+              scrollDirection: Axis.horizontal,
+              itemExtent: 200.0,
+              itemCount: 10,
+              itemBuilder: (_, int i) => new Container(
+                height: 200.0,
+                width: 200.0,
+                color: i % 2 == 0 ? Colors.black : Colors.red,
+              ),
+            ),
+          ),
+        )
+    );
+
+    final RenderObject renderObject = tester.renderObject(find.byType(Scrollable));
+    expect(renderObject, paintsExactlyCountTimes(#drawRect, 4));
   });
 }

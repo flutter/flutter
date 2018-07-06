@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 
 import 'basic.dart';
@@ -52,12 +51,13 @@ class Viewport extends MultiChildRenderObjectWidget {
   /// The [offset] argument must not be null.
   Viewport({
     Key key,
-    this.axisDirection: AxisDirection.down,
+    this.axisDirection = AxisDirection.down,
     this.crossAxisDirection,
-    this.anchor: 0.0,
+    this.anchor = 0.0,
     @required this.offset,
     this.center,
-    List<Widget> slivers: const <Widget>[],
+    this.cacheExtent,
+    List<Widget> slivers = const <Widget>[],
   }) : assert(offset != null),
        assert(slivers != null),
        assert(center == null || slivers.where((Widget child) => child.key == center).length == 1),
@@ -109,6 +109,9 @@ class Viewport extends MultiChildRenderObjectWidget {
   /// The [center] must be the key of a child of the viewport.
   final Key center;
 
+  /// {@macro flutter.rendering.viewport.cacheExtent}
+  final double cacheExtent;
+
   /// Given a [BuildContext] and an [AxisDirection], determine the correct cross
   /// axis direction.
   ///
@@ -136,6 +139,7 @@ class Viewport extends MultiChildRenderObjectWidget {
       crossAxisDirection: crossAxisDirection ?? Viewport.getDefaultCrossAxisDirection(context, axisDirection),
       anchor: anchor,
       offset: offset,
+      cacheExtent: cacheExtent,
     );
   }
 
@@ -145,7 +149,8 @@ class Viewport extends MultiChildRenderObjectWidget {
       ..axisDirection = axisDirection
       ..crossAxisDirection = crossAxisDirection ?? Viewport.getDefaultCrossAxisDirection(context, axisDirection)
       ..anchor = anchor
-      ..offset = offset;
+      ..offset = offset
+      ..cacheExtent = cacheExtent;
   }
 
   @override
@@ -200,6 +205,14 @@ class _ViewportElement extends MultiChildRenderObjectElement {
       renderObject.center = null;
     }
   }
+
+  @override
+  void debugVisitOnstageChildren(ElementVisitor visitor) {
+    children.where((Element e) {
+      final RenderSliver renderSliver = e.renderObject;
+      return renderSliver.geometry.visible;
+    }).forEach(visitor);
+  }
 }
 
 /// A widget that is bigger on the inside and shrink wraps its children in the
@@ -237,10 +250,10 @@ class ShrinkWrappingViewport extends MultiChildRenderObjectWidget {
   /// The [offset] argument must not be null.
   ShrinkWrappingViewport({
     Key key,
-    this.axisDirection: AxisDirection.down,
+    this.axisDirection = AxisDirection.down,
     this.crossAxisDirection,
     @required this.offset,
-    List<Widget> slivers: const <Widget>[],
+    List<Widget> slivers = const <Widget>[],
   }) : assert(offset != null),
        super(key: key, children: slivers);
 

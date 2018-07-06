@@ -26,7 +26,7 @@ abstract class AnalyzeBase {
   void dumpErrors(Iterable<String> errors) {
     if (argResults['write'] != null) {
       try {
-        final RandomAccessFile resultsFile = fs.file(argResults['write']).openSync(mode: FileMode.WRITE);
+        final RandomAccessFile resultsFile = fs.file(argResults['write']).openSync(mode: FileMode.WRITE); // ignore: deprecated_member_use
         try {
           resultsFile.lockSync();
           resultsFile.writeStringSync(errors.join('\n'));

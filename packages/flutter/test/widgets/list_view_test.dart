@@ -5,6 +5,8 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/widgets.dart';
 
+import '../rendering/mock_canvas.dart';
+
 class TestSliverChildListDelegate extends SliverChildListDelegate {
   TestSliverChildListDelegate(List<Widget> children) : super(children);
 
@@ -96,7 +98,7 @@ void main() {
       ),
     );
 
-    expect(log, equals(<int>[0, 1, 2]));
+    expect(log, equals(<int>[0, 1, 2, 3, 4]));
     log.clear();
 
     final ScrollableState state = tester.state(find.byType(Scrollable));
@@ -106,7 +108,7 @@ void main() {
     expect(log, isEmpty);
     await tester.pump();
 
-    expect(log, equals(<int>[10, 11, 12, 13]));
+    expect(log, equals(<int>[8, 9, 10, 11, 12, 13, 14]));
     log.clear();
 
     position.jumpTo(975.0);
@@ -114,7 +116,7 @@ void main() {
     expect(log, isEmpty);
     await tester.pump();
 
-    expect(log, equals(<int>[4, 5, 6, 7]));
+    expect(log, equals(<int>[7, 6, 5, 4, 3]));
     log.clear();
   });
 
@@ -196,7 +198,7 @@ void main() {
         ),
       ),
     );
-    expect(find.text('padded'), findsOneWidget);
+    expect(find.text('padded', skipOffstage: false), findsOneWidget);
   });
 
   testWidgets('ListView with itemExtent in unbounded context', (WidgetTester tester) async {
@@ -240,7 +242,7 @@ void main() {
       ),
     );
 
-    expect(delegate.log, equals(<String>['didFinishLayout firstIndex=0 lastIndex=5']));
+    expect(delegate.log, equals(<String>['didFinishLayout firstIndex=0 lastIndex=7']));
     delegate.log.clear();
 
     await tester.pumpWidget(
@@ -253,7 +255,7 @@ void main() {
       ),
     );
 
-    expect(delegate.log, equals(<String>['didFinishLayout firstIndex=0 lastIndex=2']));
+    expect(delegate.log, equals(<String>['didFinishLayout firstIndex=0 lastIndex=4']));
     delegate.log.clear();
 
     await tester.drag(find.byType(ListView), const Offset(0.0, -600.0));
@@ -262,7 +264,7 @@ void main() {
 
     await tester.pump();
 
-    expect(delegate.log, equals(<String>['didFinishLayout firstIndex=2 lastIndex=5']));
+    expect(delegate.log, equals(<String>['didFinishLayout firstIndex=1 lastIndex=6']));
     delegate.log.clear();
   });
 
@@ -292,5 +294,115 @@ void main() {
     expect(tester.getTopLeft(find.text('top')).dy, 30.0);
     // Leave left/right padding as is for children.
     expect(innerMediaQueryPadding, const EdgeInsets.symmetric(horizontal: 30.0));
+  });
+
+  testWidgets('ListView clips if overflow is smaller than cacheExtent', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/17426.
+
+    await tester.pumpWidget(
+      new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new Center(
+          child: new Container(
+            height: 200.0,
+            child: new ListView(
+              cacheExtent: 500.0,
+              children: <Widget>[
+                new Container(
+                  height: 90.0,
+                ),
+                new Container(
+                  height: 110.0,
+                ),
+                new Container(
+                  height: 80.0,
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(find.byType(Viewport), paints..clipRect());
+  });
+
+  testWidgets('ListView does not clips if no overflow', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new Center(
+          child: new Container(
+            height: 200.0,
+            child: new ListView(
+              cacheExtent: 500.0,
+              children: <Widget>[
+                new Container(
+                  height: 100.0,
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+  );
+
+    expect(find.byType(Viewport), isNot(paints..clipRect()));
+  });
+
+  testWidgets('ListView (fixed extent) clips if overflow is smaller than cacheExtent', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/17426.
+
+    await tester.pumpWidget(
+      new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new Center(
+          child: new Container(
+            height: 200.0,
+            child: new ListView(
+              itemExtent: 100.0,
+              cacheExtent: 500.0,
+              children: <Widget>[
+                new Container(
+                  height: 100.0,
+                ),
+                new Container(
+                  height: 100.0,
+                ),
+                new Container(
+                  height: 100.0,
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(find.byType(Viewport), paints..clipRect());
+  });
+
+  testWidgets('ListView (fixed extent) does not clips if no overflow', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new Center(
+          child: new Container(
+            height: 200.0,
+            child: new ListView(
+              itemExtent: 100.0,
+              cacheExtent: 500.0,
+              children: <Widget>[
+                new Container(
+                  height: 100.0,
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(find.byType(Viewport), isNot(paints..clipRect()));
   });
 }

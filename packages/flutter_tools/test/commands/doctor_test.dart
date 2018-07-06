@@ -46,8 +46,8 @@ void main() {
       expect(message.message, 'VS Code at ${VsCodeValidatorTestTargets.validInstall}');
 
       message = result.messages
-          .firstWhere((ValidationMessage m) => m.message.startsWith('Dart Code '));
-      expect(message.message, 'Dart Code extension version 4.5.6');
+          .firstWhere((ValidationMessage m) => m.message.startsWith('Flutter '));
+      expect(message.message, 'Flutter extension version 4.5.6');
     });
 
     testUsingContext('vs code validator when 64bit installed', () async {
@@ -62,8 +62,8 @@ void main() {
       expect(message.message, 'VS Code at ${VsCodeValidatorTestTargets.validInstall}');
 
       message = result.messages
-          .firstWhere((ValidationMessage m) => m.message.startsWith('Dart Code '));
-      expect(message.message, 'Dart Code extension version 4.5.6');
+          .firstWhere((ValidationMessage m) => m.message.startsWith('Flutter '));
+      expect(message.message, 'Flutter extension version 4.5.6');
     });
 
     testUsingContext('vs code validator when extension missing', () async {
@@ -77,12 +77,29 @@ void main() {
       expect(message.message, 'VS Code at ${VsCodeValidatorTestTargets.validInstall}');
 
       message = result.messages
-          .firstWhere((ValidationMessage m) => m.message.startsWith('Dart Code '));
-      expect(message.message, startsWith('Dart Code extension not installed'));
+          .firstWhere((ValidationMessage m) => m.message.startsWith('Flutter '));
+      expect(message.message, startsWith('Flutter extension not installed'));
     });
   });
 
-  group('doctor with fake validators', () {
+  group('doctor with overriden validators', () {
+    testUsingContext('validate non-verbose output format for run without issues', () async {
+      expect(await doctor.diagnose(verbose: false), isTrue);
+      expect(testLogger.statusText, equals(
+              'Doctor summary (to see all details, run flutter doctor -v):\n'
+              '[✓] Passing Validator (with statusInfo)\n'
+              '[✓] Another Passing Validator (with statusInfo)\n'
+              '[✓] Providing validators is fun (with statusInfo)\n'
+              '\n'
+              '• No issues found!\n'
+      ));
+    }, overrides: <Type, Generator>{
+      DoctorValidatorsProvider: () => new FakeDoctorValidatorsProvider()
+    });
+  });
+
+
+ group('doctor with fake validators', () {
     testUsingContext('validate non-verbose output format for run without issues', () async {
       expect(await new FakeQuietDoctor().diagnose(verbose: false), isTrue);
       expect(testLogger.statusText, equals(
@@ -288,6 +305,19 @@ class FakeQuietDoctor extends Doctor {
       _validators.add(new PassingValidator('Four score and seven validators ago'));
     }
     return _validators;
+  }
+}
+
+/// A DoctorValidatorsProvider that overrides the default validators without
+/// overriding the doctor.
+class FakeDoctorValidatorsProvider implements DoctorValidatorsProvider {
+  @override
+  List<DoctorValidator> get validators {
+    return <DoctorValidator>[
+      new PassingValidator('Passing Validator'),
+      new PassingValidator('Another Passing Validator'),
+      new PassingValidator('Providing validators is fun')
+    ];
   }
 }
 

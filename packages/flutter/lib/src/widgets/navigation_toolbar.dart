@@ -4,7 +4,6 @@
 
 import 'dart:math' as math;
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 
 import 'basic.dart';
@@ -31,8 +30,8 @@ class NavigationToolbar extends StatelessWidget {
     this.leading,
     this.middle,
     this.trailing,
-    this.centerMiddle: true,
-    this.middleSpacing: kMiddleSpacing,
+    this.centerMiddle = true,
+    this.middleSpacing = kMiddleSpacing,
   }) : assert(centerMiddle != null),
        assert(middleSpacing != null),
        super(key: key);

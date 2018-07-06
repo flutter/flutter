@@ -56,6 +56,26 @@ void main() {
     expect(darkTheme.accentTextTheme.title.color, typography.white.title.color);
   });
 
+  test('Default slider indicator style gets a default body2 if accentTextTheme.body2 is null', () {
+    const TextTheme noBody2TextTheme = const TextTheme(body2: null);
+    final ThemeData lightTheme = new ThemeData(brightness: Brightness.light, accentTextTheme: noBody2TextTheme);
+    final ThemeData darkTheme = new ThemeData(brightness: Brightness.dark, accentTextTheme: noBody2TextTheme);
+    final Typography typography = new Typography(platform: lightTheme.platform);
+
+    expect(lightTheme.sliderTheme.valueIndicatorTextStyle, equals(typography.white.body2));
+    expect(darkTheme.sliderTheme.valueIndicatorTextStyle, equals(typography.black.body2));
+  });
+
+  test('Default chip label style gets a default body2 if textTheme.body2 is null', () {
+    const TextTheme noBody2TextTheme = const TextTheme(body2: null);
+    final ThemeData lightTheme = new ThemeData(brightness: Brightness.light, textTheme: noBody2TextTheme);
+    final ThemeData darkTheme = new ThemeData(brightness: Brightness.dark, textTheme: noBody2TextTheme);
+    final Typography typography = new Typography(platform: lightTheme.platform);
+
+    expect(lightTheme.chipTheme.labelStyle.color, equals(typography.black.body2.color.withAlpha(0xde)));
+    expect(darkTheme.chipTheme.labelStyle.color, equals(typography.white.body2.color.withAlpha(0xde)));
+  });
+
   test('Default icon theme contrasts with brightness', () {
     final ThemeData lightTheme = new ThemeData(brightness: Brightness.light);
     final ThemeData darkTheme = new ThemeData(brightness: Brightness.dark);

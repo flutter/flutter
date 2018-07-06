@@ -37,6 +37,7 @@
   "modalBarrierDismissLabel": "닫기",
   "drawerLabel": "탐색 메뉴",
   "popupMenuLabel": "팝업 메뉴",
-  "dialogLabel": "대화",
-  "alertDialogLabel": "경보"
+  "dialogLabel": "대화상자",
+  "alertDialogLabel": "경보",
+  "searchFieldLabel": "수색"
 }

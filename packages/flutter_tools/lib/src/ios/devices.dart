@@ -10,7 +10,6 @@ import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/platform.dart';
-import '../base/port_scanner.dart';
 import '../base/process.dart';
 import '../base/process_manager.dart';
 import '../build_info.dart';
@@ -154,10 +153,10 @@ class IOSDevice extends Device {
     String route,
     DebuggingOptions debuggingOptions,
     Map<String, dynamic> platformArgs,
-    bool prebuiltApplication: false,
-    bool applicationNeedsRebuild: false,
-    bool usesTerminalUi: true,
-    bool ipv6: false,
+    bool prebuiltApplication = false,
+    bool applicationNeedsRebuild = false,
+    bool usesTerminalUi = true,
+    bool ipv6 = false,
   }) async {
     if (!prebuiltApplication) {
       // TODO(chinmaygarde): Use mainPath, route.
@@ -167,7 +166,7 @@ class IOSDevice extends Device {
       final XcodeBuildResult buildResult = await buildXcodeProject(
           app: package,
           buildInfo: debuggingOptions.buildInfo,
-          target: mainPath,
+          targetOverride: mainPath,
           buildForDevice: true,
           usesTerminalUi: usesTerminalUi,
       );
@@ -199,13 +198,8 @@ class IOSDevice extends Device {
     if (debuggingOptions.useTestFonts)
       launchArguments.add('--use-test-fonts');
 
-    if (debuggingOptions.debuggingEnabled) {
+    if (debuggingOptions.debuggingEnabled)
       launchArguments.add('--enable-checked-mode');
-
-      // Note: We do NOT need to set the observatory port since this is going to
-      // be setup on the device. Let it pick a port automatically. We will check
-      // the port picked and scrape that later.
-    }
 
     if (debuggingOptions.enableSoftwareRendering)
       launchArguments.add('--enable-software-rendering');
@@ -415,7 +409,10 @@ String decodeSyslog(String line) {
 }
 
 class _IOSDeviceLogReader extends DeviceLogReader {
-  RegExp _lineRegex;
+  // Matches a syslog line from the runner.
+  RegExp _runnerLineRegex;
+  // Matches a syslog line from any app.
+  RegExp _anyLineRegex;
 
   _IOSDeviceLogReader(this.device, ApplicationPackage app) {
     _linesController = new StreamController<String>.broadcast(
@@ -428,7 +425,11 @@ class _IOSDeviceLogReader extends DeviceLogReader {
     // iOS 9 format:  Runner[297] <Notice>:
     // iOS 10 format: Runner(Flutter)[297] <Notice>:
     final String appName = app == null ? '' : app.name.replaceAll('.app', '');
-    _lineRegex = new RegExp(appName + r'(\(Flutter\))?\[[\d]+\] <[A-Za-z]+>: ');
+    _runnerLineRegex = new RegExp(appName + r'(\(Flutter\))?\[[\d]+\] <[A-Za-z]+>: ');
+    // Similar to above, but allows ~arbitrary components instead of "Runner"
+    // and "Flutter". The regex tries to strike a balance between not producing
+    // false positives and not producing false negatives.
+    _anyLineRegex = new RegExp(r'\w+(\([^)]*\))?\[\d+\] <[A-Za-z]+>: ');
   }
 
   final IOSDevice device;
@@ -445,8 +446,8 @@ class _IOSDeviceLogReader extends DeviceLogReader {
   void _start() {
     iMobileDevice.startLogger().then<Null>((Process process) {
       _process = process;
-      _process.stdout.transform(utf8.decoder).transform(const LineSplitter()).listen(_onLine);
-      _process.stderr.transform(utf8.decoder).transform(const LineSplitter()).listen(_onLine);
+      _process.stdout.transform(utf8.decoder).transform(const LineSplitter()).listen(_newLineHandler());
+      _process.stderr.transform(utf8.decoder).transform(const LineSplitter()).listen(_newLineHandler());
       _process.exitCode.whenComplete(() {
         if (_linesController.hasListener)
           _linesController.close();
@@ -454,14 +455,35 @@ class _IOSDeviceLogReader extends DeviceLogReader {
     });
   }
 
-  void _onLine(String line) {
-    final Match match = _lineRegex.firstMatch(line);
+  // Returns a stateful line handler to properly capture multi-line output.
+  //
+  // For multi-line log messages, any line after the first is logged without
+  // any specific prefix. To properly capture those, we enter "printing" mode
+  // after matching a log line from the runner. When in printing mode, we print
+  // all lines until we find the start of another log message (from any app).
+  Function _newLineHandler() {
+    bool printing = false;
 
-    if (match != null) {
-      final String logLine = line.substring(match.end);
-      // Only display the log line after the initial device and executable information.
-      _linesController.add(decodeSyslog(logLine));
-    }
+    return (String line) {
+      if (printing) {
+        if (!_anyLineRegex.hasMatch(line)) {
+          _linesController.add(decodeSyslog(line));
+          return;
+        }
+
+        printing = false;
+      }
+
+      final Match match = _runnerLineRegex.firstMatch(line);
+
+      if (match != null) {
+        final String logLine = line.substring(match.end);
+        // Only display the log line after the initial device and executable information.
+        _linesController.add(decodeSyslog(logLine));
+
+        printing = true;
+      }
+    };
   }
 
   void _stop() {
@@ -479,28 +501,46 @@ class _IOSDevicePortForwarder extends DevicePortForwarder {
   @override
   List<ForwardedPort> get forwardedPorts => _forwardedPorts;
 
+  static const Duration _kiProxyPortForwardTimeout = const Duration(seconds: 1);
+
   @override
   Future<int> forward(int devicePort, {int hostPort}) async {
-    if ((hostPort == null) || (hostPort == 0)) {
-      // Auto select host port.
-      hostPort = await portScanner.findAvailablePort();
+    final bool autoselect = hostPort == null || hostPort == 0;
+    if (autoselect)
+      hostPort = 1024;
+
+    Process process;
+
+    bool connected = false;
+    while (!connected) {
+      printTrace('attempting to forward device port $devicePort to host port $hostPort');
+      // Usage: iproxy LOCAL_TCP_PORT DEVICE_TCP_PORT UDID
+      process = await runCommand(<String>[
+        device._iproxyPath,
+        hostPort.toString(),
+        devicePort.toString(),
+        device.id,
+      ]);
+      // TODO(ianh): This is a flakey race condition, https://github.com/libimobiledevice/libimobiledevice/issues/674
+      connected = !await process.stdout.isEmpty.timeout(_kiProxyPortForwardTimeout, onTimeout: () => false);
+      if (!connected) {
+        if (autoselect) {
+          hostPort += 1;
+          if (hostPort > 65535)
+            throw new Exception('Could not find open port on host.');
+        } else {
+          throw new Exception('Port $hostPort is not available.');
+        }
+      }
     }
+    assert(connected);
+    assert(process != null);
 
-    // Usage: iproxy LOCAL_TCP_PORT DEVICE_TCP_PORT UDID
-    final Process process = await runCommand(<String>[
-      device._iproxyPath,
-      hostPort.toString(),
-      devicePort.toString(),
-      device.id,
-    ]);
-
-    final ForwardedPort forwardedPort = new ForwardedPort.withContext(hostPort,
-        devicePort, process);
-
+    final ForwardedPort forwardedPort = new ForwardedPort.withContext(
+      hostPort, devicePort, process,
+    );
     printTrace('Forwarded port $forwardedPort');
-
     _forwardedPorts.add(forwardedPort);
-
     return hostPort;
   }
 

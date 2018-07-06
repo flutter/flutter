@@ -2,10 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' show window;
+import 'dart:ui' show window, SemanticsFlag;
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
+
+import '../widgets/semantics_tester.dart';
 
 void main() {
   testWidgets('Navigator.push works within a PopupMenuButton', (WidgetTester tester) async {
@@ -177,7 +179,7 @@ void main() {
             icon: const Icon(Icons.view_carousel),
             itemBuilder: simplePopupMenuItemBuilder,
         );
-      }, throwsA(const isInstanceOf<AssertionError>()));
+      }, throwsA(isInstanceOf<AssertionError>()));
     });
 
     testWidgets('PopupMenuButton creates IconButton when given an icon', (WidgetTester tester) async {
@@ -426,6 +428,86 @@ void main() {
     await tester.pump();
 
     expect(MediaQuery.of(popupContext).padding, EdgeInsets.zero);
+  });
+
+  testWidgets('open PopupMenu has correct semantics', (WidgetTester tester) async {
+    final SemanticsTester semantics = new SemanticsTester(tester);
+    await tester.pumpWidget(new MaterialApp(
+      home: new Material(
+        child: new PopupMenuButton<int>(
+          itemBuilder: (BuildContext context) {
+            return <PopupMenuItem<int>>[
+              const PopupMenuItem<int>(value: 1, child: const Text('1')),
+              const PopupMenuItem<int>(value: 2, child: const Text('2')),
+              const PopupMenuItem<int>(value: 3, child: const Text('3')),
+              const PopupMenuItem<int>(value: 4, child: const Text('4')),
+              const PopupMenuItem<int>(value: 5, child: const Text('5')),
+            ];
+          },
+          child: const SizedBox(
+            height: 100.0,
+            width: 100.0,
+            child: const Text('XXX'),
+          ),
+        ),
+      ),
+    ));
+    await tester.tap(find.text('XXX'));
+    await tester.pumpAndSettle();
+
+    expect(semantics, hasSemantics(
+      new TestSemantics.root(
+        children: <TestSemantics>[
+          new TestSemantics(
+            textDirection: TextDirection.ltr,
+            children: <TestSemantics>[
+              new TestSemantics(
+                flags: <SemanticsFlag>[
+                  SemanticsFlag.scopesRoute,
+                  SemanticsFlag.namesRoute,
+                ],
+                label: 'Popup menu',
+                textDirection: TextDirection.ltr,
+                children: <TestSemantics>[
+                  new TestSemantics(
+                    children: <TestSemantics>[
+                      new TestSemantics(
+                        actions: <SemanticsAction>[SemanticsAction.tap],
+                        label: '1',
+                        textDirection: TextDirection.ltr,
+                      ),
+                      new TestSemantics(
+                        actions: <SemanticsAction>[SemanticsAction.tap],
+                        label: '2',
+                        textDirection: TextDirection.ltr,
+                      ),
+                      new TestSemantics(
+                        actions: <SemanticsAction>[SemanticsAction.tap],
+                        label: '3',
+                        textDirection: TextDirection.ltr,
+                      ),
+                      new TestSemantics(
+                        actions: <SemanticsAction>[SemanticsAction.tap],
+                        label: '4',
+                        textDirection: TextDirection.ltr,
+                      ),
+                      new TestSemantics(
+                        actions: <SemanticsAction>[SemanticsAction.tap],
+                        label: '5',
+                        textDirection: TextDirection.ltr,
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ],
+      ),
+      ignoreId: true, ignoreTransform: true, ignoreRect: true,
+    ));
+
+    semantics.dispose();
   });
 }
 

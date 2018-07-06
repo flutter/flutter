@@ -141,6 +141,19 @@ class _FlexibleSpaceBarState extends State<FlexibleSpaceBar> {
     }
 
     if (widget.title != null) {
+      Widget title;
+      switch (defaultTargetPlatform) {
+        case TargetPlatform.iOS:
+          title = widget.title;
+          break;
+        case TargetPlatform.fuchsia:
+        case TargetPlatform.android:
+          title = new Semantics(
+            namesRoute: true,
+            child: widget.title,
+          );
+      }
+
       final ThemeData theme = Theme.of(context);
       final double opacity = settings.toolbarOpacity;
       if (opacity > 0.0) {
@@ -163,7 +176,10 @@ class _FlexibleSpaceBarState extends State<FlexibleSpaceBar> {
             transform: scaleTransform,
             child: new Align(
               alignment: titleAlignment,
-              child: new DefaultTextStyle(style: titleStyle, child: widget.title)
+              child: new DefaultTextStyle(
+                style: titleStyle,
+                child: title,
+              )
             )
           )
         ));

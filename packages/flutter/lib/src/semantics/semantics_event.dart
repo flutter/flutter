@@ -88,3 +88,48 @@ class AnnounceSemanticsEvent extends SemanticsEvent {
     };
   }
 }
+
+/// An event for a semantic announcement of a tooltip.
+/// 
+/// This is only used by Android to announce tooltip values.
+class TooltipSemanticsEvent extends SemanticsEvent {
+
+  /// Constructs an event that triggers a tooltip announcement by the platform.
+  const TooltipSemanticsEvent(this.message) : super('tooltip');
+
+  /// The text content of the tooltip.
+  final String message;
+
+  @override
+  Map<String, dynamic> getDataMap() {
+    return <String, dynamic>{
+      'message': message,
+    };
+  }
+}
+
+/// An event which triggers long press semantic feedback.
+///
+/// Currently only honored on Android. Triggers a long-press specific sound
+/// when TalkBack is enabled.
+class LongPressSemanticsEvent extends SemanticsEvent {
+
+  /// Constructs an event that triggers a long-press semantic feedback by the platform.
+  const LongPressSemanticsEvent() : super('longPress');
+
+  @override
+  Map<String, dynamic> getDataMap() => const <String, dynamic>{};
+}
+
+/// An event which triggers tap semantic feedback.
+///
+/// Currently only honored on Android. Triggers a tap specific sound when
+/// TalkBack is enabled.
+class TapSemanticEvent extends SemanticsEvent {
+
+  /// Constructs an event that triggers a long-press semantic feedback by the platform.
+  const TapSemanticEvent() : super('tap');
+
+  @override
+  Map<String, dynamic> getDataMap() => const <String, dynamic>{};
+}

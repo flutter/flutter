@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 class _ContactCategory extends StatelessWidget {
   const _ContactCategory({ Key key, this.icon, this.children }) : super(key: key);
@@ -124,7 +125,7 @@ class ContactsDemoState extends State<ContactsDemo> {
                   tooltip: 'Edit',
                   onPressed: () {
                     _scaffoldKey.currentState.showSnackBar(const SnackBar(
-                      content: const Text('This is actually just a demo. Editing isn\'t supported.')
+                      content: const Text("Editing isn't supported in this screen.")
                     ));
                   },
                 ),
@@ -160,7 +161,7 @@ class ContactsDemoState extends State<ContactsDemo> {
                   fit: StackFit.expand,
                   children: <Widget>[
                     new Image.asset(
-                      'ali_connors.jpg',
+                      'people/ali_landscape.png',
                       package: 'flutter_gallery_assets',
                       fit: BoxFit.cover,
                       height: _appBarHeight,
@@ -182,49 +183,52 @@ class ContactsDemoState extends State<ContactsDemo> {
             ),
             new SliverList(
               delegate: new SliverChildListDelegate(<Widget>[
-                new _ContactCategory(
-                  icon: Icons.call,
-                  children: <Widget>[
-                    new _ContactItem(
-                      icon: Icons.message,
-                      tooltip: 'Send message',
-                      onPressed: () {
-                        _scaffoldKey.currentState.showSnackBar(const SnackBar(
-                          content: const Text('Pretend that this opened your SMS application.')
-                        ));
-                      },
-                      lines: const <String>[
-                        '(650) 555-1234',
-                        'Mobile',
-                      ],
-                    ),
-                    new _ContactItem(
-                      icon: Icons.message,
-                      tooltip: 'Send message',
-                      onPressed: () {
-                        _scaffoldKey.currentState.showSnackBar(const SnackBar(
-                          content: const Text('In this demo, this button doesn\'t do anything.')
-                        ));
-                      },
-                      lines: const <String>[
-                        '(323) 555-6789',
-                        'Work',
-                      ],
-                    ),
-                    new _ContactItem(
-                      icon: Icons.message,
-                      tooltip: 'Send message',
-                      onPressed: () {
-                        _scaffoldKey.currentState.showSnackBar(const SnackBar(
-                          content: const Text('Imagine if you will, a messaging application.')
-                        ));
-                      },
-                      lines: const <String>[
-                        '(650) 555-6789',
-                        'Home',
-                      ],
-                    ),
-                  ],
+                new AnnotatedRegion<SystemUiOverlayStyle>(
+                  value: SystemUiOverlayStyle.dark,
+                  child: new _ContactCategory(
+                    icon: Icons.call,
+                    children: <Widget>[
+                      new _ContactItem(
+                        icon: Icons.message,
+                        tooltip: 'Send message',
+                        onPressed: () {
+                          _scaffoldKey.currentState.showSnackBar(const SnackBar(
+                            content: const Text('Pretend that this opened your SMS application.')
+                          ));
+                        },
+                        lines: const <String>[
+                          '(650) 555-1234',
+                          'Mobile',
+                        ],
+                      ),
+                      new _ContactItem(
+                        icon: Icons.message,
+                        tooltip: 'Send message',
+                        onPressed: () {
+                          _scaffoldKey.currentState.showSnackBar(const SnackBar(
+                            content: const Text('A messaging app appears.')
+                          ));
+                        },
+                        lines: const <String>[
+                          '(323) 555-6789',
+                          'Work',
+                        ],
+                      ),
+                      new _ContactItem(
+                        icon: Icons.message,
+                        tooltip: 'Send message',
+                        onPressed: () {
+                          _scaffoldKey.currentState.showSnackBar(const SnackBar(
+                            content: const Text('Imagine if you will, a messaging application.')
+                          ));
+                        },
+                        lines: const <String>[
+                          '(650) 555-6789',
+                          'Home',
+                        ],
+                      ),
+                    ],
+                  ),
                 ),
                 new _ContactCategory(
                   icon: Icons.contact_mail,
@@ -247,7 +251,7 @@ class ContactsDemoState extends State<ContactsDemo> {
                       tooltip: 'Send work e-mail',
                       onPressed: () {
                         _scaffoldKey.currentState.showSnackBar(const SnackBar(
-                          content: const Text('This is a demo, so this button does not actually work.')
+                          content: const Text('Summon your favorite e-mail application here.')
                         ));
                       },
                       lines: const <String>[
@@ -328,7 +332,7 @@ class ContactsDemoState extends State<ContactsDemo> {
                     new _ContactItem(
                       lines: const <String>[
                         'Last day in office',
-                        'August 9th, 2015',
+                        'August 9th, 2018',
                       ],
                     ),
                   ],

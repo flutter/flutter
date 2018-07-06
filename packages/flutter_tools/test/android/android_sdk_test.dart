@@ -73,7 +73,8 @@ void main() {
 
       final AndroidSdk sdk = AndroidSdk.locateAndroidSdk();
       when(processManager.canRun(sdk.sdkManagerPath)).thenReturn(true);
-      when(processManager.runSync(<String>[sdk.sdkManagerPath, '--version'], environment: argThat(isNotNull)))
+      when(processManager.runSync(<String>[sdk.sdkManagerPath, '--version'],
+          environment: argThat(isNotNull,  named: 'environment')))
           .thenReturn(new ProcessResult(1, 0, '26.1.1\n', ''));
       expect(sdk.sdkManagerVersion, '26.1.1');
     }, overrides: <Type, Generator>{
@@ -87,7 +88,8 @@ void main() {
 
       final AndroidSdk sdk = AndroidSdk.locateAndroidSdk();
       when(processManager.canRun(sdk.sdkManagerPath)).thenReturn(true);
-      when(processManager.runSync(<String>[sdk.sdkManagerPath, '--version'], environment: argThat(isNotNull)))
+      when(processManager.runSync(<String>[sdk.sdkManagerPath, '--version'],
+          environment: argThat(isNotNull,  named: 'environment')))
           .thenReturn(new ProcessResult(1, 1, '26.1.1\n', 'Mystery error'));
       expect(sdk.sdkManagerVersion, isNull);
     }, overrides: <Type, Generator>{
@@ -132,9 +134,10 @@ void main() {
 
           final AndroidSdk sdk = AndroidSdk.locateAndroidSdk();
           expect(sdk.directory, realSdkDir);
-          expect(sdk.ndkDirectory, realNdkDir);
-          expect(sdk.ndkCompiler, realNdkCompiler);
-          expect(sdk.ndkCompilerArgs, <String>['--sysroot', realNdkSysroot]);
+          expect(sdk.ndk, isNotNull);
+          expect(sdk.ndk.directory, realNdkDir);
+          expect(sdk.ndk.compiler, realNdkCompiler);
+          expect(sdk.ndk.compilerArgs, <String>['--sysroot', realNdkSysroot]);
         }, overrides: <Type, Generator>{
           FileSystem: () => fs,
           Platform: () => new FakePlatform(operatingSystem: os),
@@ -149,9 +152,9 @@ void main() {
           final String realSdkDir = sdkDir.path;
           final AndroidSdk sdk = AndroidSdk.locateAndroidSdk();
           expect(sdk.directory, realSdkDir);
-          expect(sdk.ndkDirectory, null);
-          expect(sdk.ndkCompiler, null);
-          expect(sdk.ndkCompilerArgs, null);
+          expect(sdk.ndk, isNull);
+          final String explanation = AndroidNdk.explainMissingNdk(sdk.directory);
+          expect(explanation, contains('Can not locate ndk-bundle'));
         }, overrides: <Type, Generator>{
           FileSystem: () => fs,
           Platform: () => new FakePlatform(operatingSystem: os),

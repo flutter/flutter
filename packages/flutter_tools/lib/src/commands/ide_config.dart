@@ -12,7 +12,7 @@ import '../runner/flutter_command.dart';
 import '../template.dart';
 
 class IdeConfigCommand extends FlutterCommand {
-  IdeConfigCommand({this.hidden: false}) {
+  IdeConfigCommand({this.hidden = false}) {
     argParser.addFlag(
       'overwrite',
       negatable: true,
@@ -261,9 +261,9 @@ class IdeConfigCommand extends FlutterCommand {
 String _validateFlutterDir(String dirPath, {String flutterRoot}) {
   final FileSystemEntityType type = fs.typeSync(dirPath);
 
-  if (type != FileSystemEntityType.NOT_FOUND) {
+  if (type != FileSystemEntityType.NOT_FOUND) { // ignore: deprecated_member_use
     switch (type) {
-      case FileSystemEntityType.LINK:
+      case FileSystemEntityType.LINK: // ignore: deprecated_member_use
         // Do not overwrite links.
         return "Invalid project root dir: '$dirPath' - refers to a link.";
     }

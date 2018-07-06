@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
@@ -40,7 +39,7 @@ class InkHighlight extends InteractiveInkFeature {
     @required MaterialInkController controller,
     @required RenderBox referenceBox,
     @required Color color,
-    BoxShape shape: BoxShape.rectangle,
+    BoxShape shape = BoxShape.rectangle,
     BorderRadius borderRadius,
     RectCallback rectCallback,
     VoidCallback onRemoved,

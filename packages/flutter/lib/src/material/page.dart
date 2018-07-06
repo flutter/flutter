@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
 import 'theme.dart';
@@ -57,7 +56,7 @@ class _MountainViewPageTransition extends StatelessWidget {
 /// The transition is adaptive to the platform and on iOS, the page slides in
 /// from the right and exits in reverse. The page also shifts to the left in
 /// parallax when another page enters to cover it. (These directions are flipped
-/// in environements with a right-to-left reading direction.)
+/// in environments with a right-to-left reading direction.)
 ///
 /// By default, when a modal route is replaced by another, the previous route
 /// remains in memory. To free all the resources when this is not necessary, set
@@ -80,8 +79,8 @@ class MaterialPageRoute<T> extends PageRoute<T> {
   MaterialPageRoute({
     @required this.builder,
     RouteSettings settings,
-    this.maintainState: true,
-    bool fullscreenDialog: false,
+    this.maintainState = true,
+    bool fullscreenDialog = false,
   }) : assert(builder != null),
        super(settings: settings, fullscreenDialog: fullscreenDialog) {
     // ignore: prefer_asserts_in_initializer_lists , https://github.com/dart-lang/sdk/issues/31223
@@ -151,7 +150,11 @@ class MaterialPageRoute<T> extends PageRoute<T> {
 
   @override
   Widget buildPage(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
-    final Widget result = builder(context);
+    final Widget result = new Semantics(
+      scopesRoute: true,
+      explicitChildNodes: true,
+      child: builder(context),
+    );
     assert(() {
       if (result == null) {
         throw new FlutterError(

@@ -16,7 +16,7 @@ import 'widgets_localizations.dart';
 
 // Watch out: the supported locales list in the doc comment below must be kept
 // in sync with the list we test, see test/translations_test.dart, and of course
-// the acutal list of supported locales in _MaterialLocalizationsDelegate.
+// the actual list of supported locales in _MaterialLocalizationsDelegate.
 
 /// Localized strings for the material widgets.
 ///
@@ -50,8 +50,9 @@ import 'widgets_localizations.dart';
 ///   * it - Italian
 ///   * ja - Japanese
 ///   * ko - Korean
+///   * ms - Malay
 ///   * nl - Dutch
-///   * no - Norwegian
+///   * nb - Norwegian
 ///   * pl - Polish
 ///   * ps - Pashto
 ///   * pt - Portuguese
@@ -60,6 +61,7 @@ import 'widgets_localizations.dart';
 ///   * th - Thai
 ///   * tr - Turkish
 ///   * ur - Urdu
+///   * vi - Vietnamese
 ///   * zh - Simplified Chinese
 ///
 /// See also:
@@ -133,12 +135,11 @@ class GlobalMaterialLocalizations implements MaterialLocalizations {
   intl.DateFormat _yearMonthFormat;
 
   static String _computeLocaleName(Locale locale) {
-    final String localeName = locale.countryCode.isEmpty ? locale.languageCode : locale.toString();
-    return intl.Intl.canonicalizedLocale(localeName);
+    return intl.Intl.canonicalizedLocale(locale.toString());
   }
 
   @override
-  String formatHour(TimeOfDay timeOfDay, { bool alwaysUse24HourFormat: false }) {
+  String formatHour(TimeOfDay timeOfDay, { bool alwaysUse24HourFormat = false }) {
     switch (hourFormat(of: timeOfDayFormat(alwaysUse24HourFormat: alwaysUse24HourFormat))) {
       case HourFormat.HH:
         return _twoDigitZeroPaddedFormat.format(timeOfDay.hour);
@@ -190,7 +191,7 @@ class GlobalMaterialLocalizations implements MaterialLocalizations {
   }
 
   @override
-  String formatTimeOfDay(TimeOfDay timeOfDay, { bool alwaysUse24HourFormat: false }) {
+  String formatTimeOfDay(TimeOfDay timeOfDay, { bool alwaysUse24HourFormat = false }) {
     // Not using intl.DateFormat for two reasons:
     //
     // - DateFormat supports more formats than our material time picker does,
@@ -266,6 +267,9 @@ class GlobalMaterialLocalizations implements MaterialLocalizations {
 
   @override
   String get alertDialogLabel => _translationBundle.alertDialogLabel;
+
+  @override
+  String get searchFieldLabel => _translationBundle.searchFieldLabel;
 
   @override
   String aboutListTileTitle(String applicationName) {
@@ -389,7 +393,7 @@ class GlobalMaterialLocalizations implements MaterialLocalizations {
   ///  * http://demo.icu-project.org/icu-bin/locexp?d_=en&_=en_US shows the
   ///    short time pattern used in locale en_US
   @override
-  TimeOfDayFormat timeOfDayFormat({ bool alwaysUse24HourFormat: false }) {
+  TimeOfDayFormat timeOfDayFormat({ bool alwaysUse24HourFormat = false }) {
     final String icuShortTimePattern = _translationBundle.timeOfDayFormat;
 
     assert(() {
@@ -525,8 +529,9 @@ class _MaterialLocalizationsDelegate extends LocalizationsDelegate<MaterialLocal
     'it', // Italian
     'ja', // Japanese
     'ko', // Korean
+    'ms', // Malay
     'nl', // Dutch
-    'no', // Norwegian
+    'nb', // Norwegian
     'pl', // Polish
     'ps', // Pashto
     'pt', // Portugese
@@ -535,6 +540,7 @@ class _MaterialLocalizationsDelegate extends LocalizationsDelegate<MaterialLocal
     'th', // Thai
     'tr', // Turkish
     'ur', // Urdu
+    'vi', // Vietnamese
     'zh', // Chinese (simplified)
   ];
 

@@ -45,9 +45,6 @@ void main() {
       testWidgets('formats h', (WidgetTester tester) async {
         expect(await formatHour(tester, const Locale('en', 'US'), const TimeOfDay(hour: 10, minute: 0)), '10');
         expect(await formatHour(tester, const Locale('en', 'US'), const TimeOfDay(hour: 20, minute: 0)), '8');
-
-        expect(await formatHour(tester, const Locale('ar', ''), const TimeOfDay(hour: 10, minute: 0)), '١٠');
-        expect(await formatHour(tester, const Locale('ar', ''), const TimeOfDay(hour: 20, minute: 0)), '٨');
       });
 
       testWidgets('formats HH', (WidgetTester tester) async {
@@ -72,11 +69,6 @@ void main() {
         final GlobalMaterialLocalizations localizations = new GlobalMaterialLocalizations(const Locale('en', 'US'));
         expect(localizations.formatMinute(const TimeOfDay(hour: 1, minute: 32)), '32');
       });
-
-      test('formats Arabic', () {
-        final GlobalMaterialLocalizations localizations = new GlobalMaterialLocalizations(const Locale('ar', ''));
-        expect(localizations.formatMinute(const TimeOfDay(hour: 1, minute: 32)), '٣٢');
-      });
     });
 
     group('formatTimeOfDay', () {
@@ -97,9 +89,6 @@ void main() {
       }
 
       testWidgets('formats ${TimeOfDayFormat.h_colon_mm_space_a}', (WidgetTester tester) async {
-        expect(await formatTimeOfDay(tester, const Locale('ar', ''), const TimeOfDay(hour: 9, minute: 32)), '٩:٣٢ ص');
-        expect(await formatTimeOfDay(tester, const Locale('ar', ''), const TimeOfDay(hour: 20, minute: 32)), '٨:٣٢ م');
-
         expect(await formatTimeOfDay(tester, const Locale('en', ''), const TimeOfDay(hour: 9, minute: 32)), '9:32 AM');
         expect(await formatTimeOfDay(tester, const Locale('en', ''), const TimeOfDay(hour: 20, minute: 32)), '8:32 PM');
       });

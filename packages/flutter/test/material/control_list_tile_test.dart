@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' show SemanticsFlag;
-
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -100,7 +98,6 @@ void main() {
       children: <TestSemantics>[
         new TestSemantics.rootChild(
           id: 1,
-          nextNodeId: 3,
           rect: new Rect.fromLTWH(0.0, 0.0, 800.0, 56.0),
           transform: null,
           flags: <SemanticsFlag>[
@@ -114,8 +111,6 @@ void main() {
         ),
         new TestSemantics.rootChild(
           id: 3,
-          previousNodeId: 1,
-          nextNodeId: 5,
           rect: new Rect.fromLTWH(0.0, 0.0, 800.0, 56.0),
           transform: new Matrix4.translationValues(0.0, 56.0, 0.0),
           flags: <SemanticsFlag>[
@@ -129,7 +124,6 @@ void main() {
         ),
         new TestSemantics.rootChild(
           id: 5,
-          previousNodeId: 3,
           rect: new Rect.fromLTWH(0.0, 0.0, 800.0, 56.0),
           transform: new Matrix4.translationValues(0.0, 112.0, 0.0),
           flags: <SemanticsFlag>[

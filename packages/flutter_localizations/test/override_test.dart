@@ -16,8 +16,8 @@ class FooMaterialLocalizations extends GlobalMaterialLocalizations {
 
 class FooMaterialLocalizationsDelegate extends LocalizationsDelegate<MaterialLocalizations> {
   const FooMaterialLocalizationsDelegate({
-    this.supportedLanguage: 'en',
-    this.backButtonTooltip: 'foo'
+    this.supportedLanguage = 'en',
+    this.backButtonTooltip = 'foo'
   });
 
   final String supportedLanguage;
@@ -39,10 +39,10 @@ class FooMaterialLocalizationsDelegate extends LocalizationsDelegate<MaterialLoc
 
 Widget buildFrame({
   Locale locale,
-  Iterable<LocalizationsDelegate<dynamic>> delegates: GlobalMaterialLocalizations.delegates,
+  Iterable<LocalizationsDelegate<dynamic>> delegates = GlobalMaterialLocalizations.delegates,
   WidgetBuilder buildContent,
   LocaleResolutionCallback localeResolutionCallback,
-  Iterable<Locale> supportedLocales: const <Locale>[
+  Iterable<Locale> supportedLocales = const <Locale>[
     const Locale('en', 'US'),
     const Locale('es', 'es'),
   ],

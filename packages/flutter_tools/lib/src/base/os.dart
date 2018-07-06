@@ -68,7 +68,7 @@ abstract class OperatingSystemUtils {
     return osNames.containsKey(osName) ? osNames[osName] : osName;
   }
 
-  List<File> _which(String execName, {bool all: false});
+  List<File> _which(String execName, {bool all = false});
 
   /// Returns the separator between items in the PATH environment variable.
   String get pathVarSeparator;
@@ -83,7 +83,7 @@ class _PosixUtils extends OperatingSystemUtils {
   }
 
   @override
-  List<File> _which(String execName, {bool all: false}) {
+  List<File> _which(String execName, {bool all = false}) {
     final List<String> command = <String>['which'];
     if (all)
       command.add('-a');
@@ -91,7 +91,8 @@ class _PosixUtils extends OperatingSystemUtils {
     final ProcessResult result = processManager.runSync(command);
     if (result.exitCode != 0)
       return const <File>[];
-    return result.stdout.trim().split('\n').map((String path) => fs.file(path.trim())).toList();
+    final String stdout = result.stdout;
+    return stdout.trim().split('\n').map((String path) => fs.file(path.trim())).toList();
   }
 
   @override
@@ -158,7 +159,7 @@ class _WindowsUtils extends OperatingSystemUtils {
   }
 
   @override
-  List<File> _which(String execName, {bool all: false}) {
+  List<File> _which(String execName, {bool all = false}) {
     // `where` always returns all matches, not just the first one.
     final ProcessResult result = processManager.runSync(<String>['where', execName]);
     if (result.exitCode != 0)

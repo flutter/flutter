@@ -198,6 +198,7 @@ void main() {
   testWidgets('Removing offscreen items above and rescrolling does not crash', (WidgetTester tester) async {
     await tester.pumpWidget(new MaterialApp(
       home: new CustomScrollView(
+        cacheExtent: 0.0,
         slivers: <Widget>[
           new SliverFixedExtentList(
             itemExtent: 100.0,
@@ -225,6 +226,7 @@ void main() {
     // Stop returning the first 3 items.
     await tester.pumpWidget(new MaterialApp(
       home: new CustomScrollView(
+        cacheExtent: 0.0,
         slivers: <Widget>[
           new SliverFixedExtentList(
             itemExtent: 100.0,

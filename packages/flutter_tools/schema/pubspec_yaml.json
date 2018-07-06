@@ -43,6 +43,13 @@
                         }
                     }
                 },
+                "module": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                        "androidPackage": { "type": "string" }
+                    }
+                },
                 "plugin": {
                     "type": "object",
                     "additionalProperties": false,

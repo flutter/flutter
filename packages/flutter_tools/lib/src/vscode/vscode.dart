@@ -13,7 +13,7 @@ import '../base/version.dart';
 const bool _includeInsiders = false;
 
 class VsCode {
-  static const String extensionIdentifier = 'Dart-Code.dart-code';
+  static const String extensionIdentifier = 'Dart-Code.flutter';
 
   VsCode._(this.directory, this.extensionDirectory, { Version version, this.edition })
       : this.version = version ?? Version.unknown {
@@ -30,12 +30,13 @@ class VsCode {
     }
 
     // Check for presence of extension.
+    final String extensionIdentifierLower = extensionIdentifier.toLowerCase();
     final Iterable<FileSystemEntity> extensionDirs = fs
         .directory(extensionDirectory)
         .listSync()
         .where((FileSystemEntity d) => d is Directory)
         .where(
-            (FileSystemEntity d) => d.basename.startsWith(extensionIdentifier));
+            (FileSystemEntity d) => d.basename.toLowerCase().startsWith(extensionIdentifierLower));
 
     if (extensionDirs.isNotEmpty) {
       final FileSystemEntity extensionDir = extensionDirs.first;
@@ -43,7 +44,7 @@ class VsCode {
       _isValid = true;
       _extensionVersion = new Version.parse(
           extensionDir.basename.substring('$extensionIdentifier-'.length));
-      _validationMessages.add('Dart Code extension version $_extensionVersion');
+      _validationMessages.add('Flutter extension version $_extensionVersion');
     }
   }
 
@@ -163,7 +164,7 @@ class VsCode {
     final List<VsCode> results = <VsCode>[];
 
     for (_VsCodeInstallLocation searchLocation in searchLocations) {
-      if (fs.directory(searchLocation.installPath).existsSync()) {
+      if (fs.isDirectorySync(searchLocation.installPath)) {
         final String extensionDirectory =
             fs.path.join(homeDirPath, searchLocation.extensionsFolder, 'extensions');
         results.add(new VsCode.fromDirectory(searchLocation.installPath, extensionDirectory, edition: searchLocation.edition));
@@ -175,13 +176,13 @@ class VsCode {
 
   @override
   String toString() =>
-      'VS Code ($version)${_extensionVersion != Version.unknown ? ', Dart Code ($_extensionVersion)' : ''}';
+      'VS Code ($version)${_extensionVersion != Version.unknown ? ', Flutter ($_extensionVersion)' : ''}';
 
   static String _getVersionFromPackageJson(String packageJsonPath) {
     if (!fs.isFileSync(packageJsonPath))
       return null;
     final String jsonString = fs.file(packageJsonPath).readAsStringSync();
-    final Map<String, String> jsonObject = json.decode(jsonString);
+    final Map<String, dynamic> jsonObject = json.decode(jsonString);
     return jsonObject['version'];
   }
 }

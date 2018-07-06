@@ -20,7 +20,7 @@ import '../test/runner.dart';
 import '../test/watcher.dart';
 
 class TestCommand extends FlutterCommand {
-  TestCommand({ bool verboseHelp: false }) {
+  TestCommand({ bool verboseHelp = false }) {
     requiresPubspecYaml();
     usesPubOption();
     argParser
@@ -78,6 +78,11 @@ class TestCommand extends FlutterCommand {
         hide: !verboseHelp,
         help: 'Track widget creation locations.\n'
               'This enables testing of features such as the widget inspector.',
+      )
+      ..addFlag('update-goldens',
+        negatable: false,
+        help: 'Whether matchesGoldenFile() calls within your test methods should\n'
+              'update the golden files rather than test for an existing match.',
       );
   }
 
@@ -87,7 +92,7 @@ class TestCommand extends FlutterCommand {
   @override
   String get description => 'Run Flutter unit tests for the current project.';
 
-  Future<bool> _collectCoverageData(CoverageCollector collector, { bool mergeCoverageData: false }) async {
+  Future<bool> _collectCoverageData(CoverageCollector collector, { bool mergeCoverageData = false }) async {
     final Status status = logger.startProgress('Collecting coverage information...');
     final String coverageData = await collector.finalizeCoverage(
       timeout: const Duration(seconds: 30),
@@ -220,6 +225,7 @@ class TestCommand extends FlutterCommand {
       machine: machine,
       previewDart2: argResults['preview-dart-2'],
       trackWidgetCreation: argResults['track-widget-creation'],
+      updateGoldens: argResults['update-goldens'],
     );
 
     if (collector != null) {

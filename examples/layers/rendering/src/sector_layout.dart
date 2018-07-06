@@ -11,14 +11,14 @@ const double kTwoPi = 2 * math.pi;
 
 class SectorConstraints extends Constraints {
   const SectorConstraints({
-    this.minDeltaRadius: 0.0,
-    this.maxDeltaRadius: double.infinity,
-    this.minDeltaTheta: 0.0,
-    this.maxDeltaTheta: kTwoPi
+    this.minDeltaRadius = 0.0,
+    this.maxDeltaRadius = double.infinity,
+    this.minDeltaTheta = 0.0,
+    this.maxDeltaTheta = kTwoPi
   }) : assert(maxDeltaRadius >= minDeltaRadius),
        assert(maxDeltaTheta >= minDeltaTheta);
 
-  const SectorConstraints.tight({ double deltaRadius: 0.0, double deltaTheta: 0.0 })
+  const SectorConstraints.tight({ double deltaRadius = 0.0, double deltaTheta = 0.0 })
     : minDeltaRadius = deltaRadius,
       maxDeltaRadius = deltaRadius,
       minDeltaTheta = deltaTheta,
@@ -45,7 +45,7 @@ class SectorConstraints extends Constraints {
 
   @override
   bool debugAssertIsValid({
-    bool isAppliedConstraint: false,
+    bool isAppliedConstraint = false,
     InformationCollector informationCollector
   }) {
     assert(isNormalized);
@@ -54,11 +54,11 @@ class SectorConstraints extends Constraints {
 }
 
 class SectorDimensions {
-  const SectorDimensions({ this.deltaRadius: 0.0, this.deltaTheta: 0.0 });
+  const SectorDimensions({ this.deltaRadius = 0.0, this.deltaTheta = 0.0 });
 
   factory SectorDimensions.withConstraints(
     SectorConstraints constraints,
-    { double deltaRadius: 0.0, double deltaTheta: 0.0 }
+    { double deltaRadius = 0.0, double deltaTheta = 0.0 }
   ) {
     return new SectorDimensions(
       deltaRadius: constraints.constrainDeltaRadius(deltaRadius),
@@ -215,8 +215,8 @@ class RenderSectorRing extends RenderSectorWithChildren {
 
   RenderSectorRing({
     BoxDecoration decoration,
-    double deltaRadius: double.infinity,
-    double padding: 0.0
+    double deltaRadius = double.infinity,
+    double padding = 0.0
   }) : _padding = padding,
        assert(deltaRadius >= 0.0),
        _desiredDeltaRadius = deltaRadius,
@@ -333,8 +333,8 @@ class RenderSectorSlice extends RenderSectorWithChildren {
 
   RenderSectorSlice({
     BoxDecoration decoration,
-    double deltaTheta: kTwoPi,
-    double padding: 0.0
+    double deltaTheta = kTwoPi,
+    double padding = 0.0
   }) : _padding = padding, _desiredDeltaTheta = deltaTheta, super(decoration);
 
   double _desiredDeltaTheta;
@@ -440,7 +440,7 @@ class RenderSectorSlice extends RenderSectorWithChildren {
 
 class RenderBoxToRenderSectorAdapter extends RenderBox with RenderObjectWithChildMixin<RenderSector> {
 
-  RenderBoxToRenderSectorAdapter({ double innerRadius: 0.0, RenderSector child }) :
+  RenderBoxToRenderSectorAdapter({ double innerRadius = 0.0, RenderSector child }) :
     _innerRadius = innerRadius {
     this.child = child;
   }
@@ -487,8 +487,8 @@ class RenderBoxToRenderSectorAdapter extends RenderBox with RenderObjectWithChil
   }
 
   Size getIntrinsicDimensions({
-    double width: double.infinity,
-    double height: double.infinity
+    double width = double.infinity,
+    double height = double.infinity
   }) {
     assert(child is RenderSector);
     assert(child.parentData is SectorParentData);
@@ -555,8 +555,8 @@ class RenderBoxToRenderSectorAdapter extends RenderBox with RenderObjectWithChil
 
 class RenderSolidColor extends RenderDecoratedSector {
   RenderSolidColor(this.backgroundColor, {
-    this.desiredDeltaRadius: double.infinity,
-    this.desiredDeltaTheta: kTwoPi
+    this.desiredDeltaRadius = double.infinity,
+    this.desiredDeltaTheta = kTwoPi
   }) : super(new BoxDecoration(color: backgroundColor));
 
   double desiredDeltaRadius;

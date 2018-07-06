@@ -5,9 +5,11 @@
 import 'package:args/command_runner.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/cache.dart';
+import 'package:flutter_tools/src/commands/build.dart';
 import 'package:flutter_tools/src/commands/config.dart';
 import 'package:flutter_tools/src/commands/doctor.dart';
 import 'package:flutter_tools/src/doctor.dart';
+import 'package:flutter_tools/src/runner/flutter_command.dart';
 import 'package:flutter_tools/src/usage.dart';
 import 'package:flutter_tools/src/version.dart';
 import 'package:mockito/mockito.dart';
@@ -104,7 +106,7 @@ void main() {
       verify(mockClock.now()).called(2);
 
       expect(
-        verify(mockUsage.sendTiming(captureAny, captureAny, captureAny, label: captureAny)).captured,
+        verify(mockUsage.sendTiming(captureAny, captureAny, captureAny, label: captureAnyNamed('label'))).captured,
         <dynamic>['flutter', 'doctor', const Duration(milliseconds: 1000), 'success']
       );
     }, overrides: <Type, Generator>{
@@ -123,12 +125,27 @@ void main() {
       verify(mockClock.now()).called(2);
 
       expect(
-        verify(mockUsage.sendTiming(captureAny, captureAny, captureAny, label: captureAny)).captured,
+        verify(mockUsage.sendTiming(captureAny, captureAny, captureAny, label: captureAnyNamed('label'))).captured,
         <dynamic>['flutter', 'doctor', const Duration(milliseconds: 1000), 'warning']
       );
     }, overrides: <Type, Generator>{
       Clock: () => mockClock,
       Doctor: () => mockDoctor,
+      Usage: () => mockUsage,
+    });
+
+    testUsingContext('single command usage path', () async {
+      final FlutterCommand doctorCommand = new DoctorCommand();
+      expect(await doctorCommand.usagePath, 'doctor');
+    }, overrides: <Type, Generator>{
+      Usage: () => mockUsage,
+    });
+
+    testUsingContext('compound command usage path', () async {
+      final BuildCommand buildCommand = new BuildCommand();
+      final FlutterCommand buildApkCommand = buildCommand.subcommands['apk'];
+      expect(await buildApkCommand.usagePath, 'build/apk');
+    }, overrides: <Type, Generator>{
       Usage: () => mockUsage,
     });
   });

@@ -7,10 +7,8 @@ import 'dart:math' as math;
 
 import 'android/android_device.dart';
 import 'application_package.dart';
-import 'base/common.dart';
 import 'base/context.dart';
 import 'base/file_system.dart';
-import 'base/port_scanner.dart';
 import 'base/utils.dart';
 import 'build_info.dart';
 import 'globals.dart';
@@ -263,10 +261,10 @@ abstract class Device {
     String route,
     DebuggingOptions debuggingOptions,
     Map<String, dynamic> platformArgs,
-    bool prebuiltApplication: false,
-    bool applicationNeedsRebuild: false,
-    bool usesTerminalUi: true,
-    bool ipv6: false,
+    bool prebuiltApplication = false,
+    bool applicationNeedsRebuild = false,
+    bool usesTerminalUi = true,
+    bool ipv6 = false,
   });
 
   /// Does this device implement support for hot reloading / restarting?
@@ -277,8 +275,11 @@ abstract class Device {
 
   bool get supportsScreenshot => false;
 
-  Future<Null> takeScreenshot(File outputFile) => new Future<Null>.error('unimplemented');
+  Future<void> takeScreenshot(File outputFile) => new Future<Null>.error('unimplemented');
 
+  // TODO(dantup): discoverApps is no longer used and can possibly be removed.
+  // Waiting for a response here:
+  // https://github.com/flutter/flutter/pull/18873#discussion_r198862179
   /// Find the apps that are currently running on this device.
   Future<List<DiscoveredApp>> discoverApps() =>
       new Future<List<DiscoveredApp>>.value(<DiscoveredApp>[]);
@@ -339,11 +340,11 @@ abstract class Device {
 
 class DebuggingOptions {
   DebuggingOptions.enabled(this.buildInfo, {
-    this.startPaused: false,
-    this.enableSoftwareRendering: false,
-    this.skiaDeterministicRendering: false,
-    this.traceSkia: false,
-    this.useTestFonts: false,
+    this.startPaused = false,
+    this.enableSoftwareRendering = false,
+    this.skiaDeterministicRendering = false,
+    this.traceSkia = false,
+    this.useTestFonts = false,
     this.observatoryPort,
    }) : debuggingEnabled = true;
 
@@ -367,14 +368,6 @@ class DebuggingOptions {
   final int observatoryPort;
 
   bool get hasObservatoryPort => observatoryPort != null;
-
-  /// Return the user specified observatory port. If that isn't available,
-  /// return [kDefaultObservatoryPort], or a port close to that one.
-  Future<int> findBestObservatoryPort() {
-    if (hasObservatoryPort)
-      return new Future<int>.value(observatoryPort);
-    return portScanner.findPreferredPort(observatoryPort ?? kDefaultObservatoryPort);
-  }
 }
 
 class LaunchResult {
@@ -414,9 +407,9 @@ abstract class DevicePortForwarder {
   List<ForwardedPort> get forwardedPorts;
 
   /// Forward [hostPort] on the host to [devicePort] on the device.
-  /// If [hostPort] is null, will auto select a host port.
+  /// If [hostPort] is null or zero, will auto select a host port.
   /// Returns a Future that completes with the host port.
-  Future<int> forward(int devicePort, { int hostPort });
+  Future<int> forward(int devicePort, {int hostPort});
 
   /// Stops forwarding [forwardedPort].
   Future<Null> unforward(ForwardedPort forwardedPort);

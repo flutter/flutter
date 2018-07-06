@@ -35,12 +35,14 @@ void main() {
         .listen((String line) {
           print('run:stdout: $line');
           stdout.add(line);
-          if (lineContainsServicePort(line)) {
+          if (vmServicePort == null) {
             vmServicePort = parseServicePort(line);
-            print('service protocol connection available at port $vmServicePort');
-            print('run: ready!');
-            ready.complete();
-            ok ??= true;
+            if (vmServicePort != null) {
+              print('service protocol connection available at port $vmServicePort');
+              print('run: ready!');
+              ready.complete();
+              ok ??= true;
+            }
           }
         });
       run.stderr
@@ -81,7 +83,7 @@ void main() {
       await reloadEndingText;
       await driver.drive('none');
       final Future<String> restartStartingText =
-        stdout.stream.firstWhere((String line) => line.endsWith('full restart...'));
+        stdout.stream.firstWhere((String line) => line.endsWith('hot restart...'));
       final Future<String> restartEndingText =
         stdout.stream.firstWhere((String line) => line.contains('Restart performed in '));
       print('test: pressing "R" to perform a full reload...');

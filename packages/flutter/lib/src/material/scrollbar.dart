@@ -5,7 +5,6 @@
 import 'dart:async';
 
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
 import 'theme.dart';
@@ -19,8 +18,8 @@ const Duration _kScrollbarTimeToFade = const Duration(milliseconds: 600);
 /// A scrollbar indicates which portion of a [Scrollable] widget is actually
 /// visible.
 ///
-/// Dynamically changes to a iOS style scrollbar that looks like
-/// [CupertinoScrollbar] on iOS platform.
+/// Dynamically changes to an iOS style scrollbar that looks like
+/// [CupertinoScrollbar] on the iOS platform.
 ///
 /// To add a scrollbar to a [ScrollView], simply wrap the scroll view widget in
 /// a [Scrollbar] widget.

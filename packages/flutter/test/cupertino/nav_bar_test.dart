@@ -2,28 +2,25 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:io';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/rendering.dart';
-import 'package:flutter_test/flutter_test.dart' hide TypeMatcher;
+import 'package:flutter/services.dart';
+import 'package:flutter_test/flutter_test.dart';
+
+import '../widgets/semantics_tester.dart';
 
 int count = 0;
 
 void main() {
   testWidgets('Middle still in center with asymmetrical actions', (WidgetTester tester) async {
     await tester.pumpWidget(
-      new WidgetsApp(
-        color: const Color(0xFFFFFFFF),
-        onGenerateRoute: (RouteSettings settings) {
-          return new CupertinoPageRoute<void>(
-            settings: settings,
-            builder: (BuildContext context) {
-              return const CupertinoNavigationBar(
-                leading: const CupertinoButton(child: const Text('Something'), onPressed: null,),
-                middle: const Text('Title'),
-              );
-            },
-          );
-        },
+      new CupertinoApp(
+        home: const CupertinoNavigationBar(
+          leading: const CupertinoButton(child: const Text('Something'), onPressed: null,),
+          middle: const Text('Title'),
+        ),
       ),
     );
 
@@ -33,19 +30,11 @@ void main() {
 
   testWidgets('Opaque background does not add blur effects', (WidgetTester tester) async {
     await tester.pumpWidget(
-      new WidgetsApp(
-        color: const Color(0xFFFFFFFF),
-        onGenerateRoute: (RouteSettings settings) {
-          return new CupertinoPageRoute<void>(
-            settings: settings,
-            builder: (BuildContext context) {
-              return const CupertinoNavigationBar(
-                middle: const Text('Title'),
-                backgroundColor: const Color(0xFFE5E5E5),
-              );
-            },
-          );
-        },
+      new CupertinoApp(
+        home: const CupertinoNavigationBar(
+          middle: const Text('Title'),
+          backgroundColor: const Color(0xFFE5E5E5),
+        ),
       ),
     );
     expect(find.byType(BackdropFilter), findsNothing);
@@ -53,18 +42,10 @@ void main() {
 
   testWidgets('Non-opaque background adds blur effects', (WidgetTester tester) async {
     await tester.pumpWidget(
-      new WidgetsApp(
-        color: const Color(0xFFFFFFFF),
-        onGenerateRoute: (RouteSettings settings) {
-          return new CupertinoPageRoute<void>(
-            settings: settings,
-            builder: (BuildContext context) {
-              return const CupertinoNavigationBar(
-                middle: const Text('Title'),
-              );
-            },
-          );
-        },
+      new CupertinoApp(
+        home: const CupertinoNavigationBar(
+          middle: const Text('Title'),
+        ),
       ),
     );
     expect(find.byType(BackdropFilter), findsOneWidget);
@@ -73,21 +54,13 @@ void main() {
   testWidgets('Verify styles of each slot', (WidgetTester tester) async {
     count = 0x000000;
     await tester.pumpWidget(
-      new WidgetsApp(
-        color: const Color(0xFFFFFFFF),
-        onGenerateRoute: (RouteSettings settings) {
-          return new CupertinoPageRoute<void>(
-            settings: settings,
-            builder: (BuildContext context) {
-              return const CupertinoNavigationBar(
-                leading: const _ExpectStyles(color: const Color(0xFF001122), index: 0x000001),
-                middle: const _ExpectStyles(color: const Color(0xFF000000), letterSpacing: -0.72, index: 0x000100),
-                trailing: const _ExpectStyles(color: const Color(0xFF001122), index: 0x010000),
-                actionsForegroundColor: const Color(0xFF001122),
-              );
-            },
-          );
-        },
+      new CupertinoApp(
+        home: const CupertinoNavigationBar(
+          leading: const _ExpectStyles(color: const Color(0xFF001122), index: 0x000001),
+          middle: const _ExpectStyles(color: const Color(0xFF000000), letterSpacing: -0.08, index: 0x000100),
+          trailing: const _ExpectStyles(color: const Color(0xFF001122), index: 0x010000),
+          actionsForegroundColor: const Color(0xFF001122),
+        ),
       ),
     );
     expect(count, 0x010101);
@@ -95,21 +68,13 @@ void main() {
 
   testWidgets('No slivers with no large titles', (WidgetTester tester) async {
     await tester.pumpWidget(
-      new WidgetsApp(
-        color: const Color(0xFFFFFFFF),
-        onGenerateRoute: (RouteSettings settings) {
-          return new CupertinoPageRoute<void>(
-            settings: settings,
-            builder: (BuildContext context) {
-              return const CupertinoPageScaffold(
-                navigationBar: const CupertinoNavigationBar(
-                  middle: const Text('Title'),
-                ),
-                child: const Center(),
-              );
-            },
-          );
-        },
+      new CupertinoApp(
+        home: const CupertinoPageScaffold(
+          navigationBar: const CupertinoNavigationBar(
+            middle: const Text('Title'),
+          ),
+          child: const Center(),
+        ),
       ),
     );
 
@@ -123,43 +88,35 @@ void main() {
     final Key trailingKey = new GlobalKey();
     final Key titleKey = new GlobalKey();
     await tester.pumpWidget(
-      new WidgetsApp(
-        color: const Color(0xFFFFFFFF),
-        onGenerateRoute: (RouteSettings settings) {
-          return new CupertinoPageRoute<void>(
-            settings: settings,
-            builder: (BuildContext context) {
-              return new MediaQuery(
-                data: const MediaQueryData(
-                  padding: const EdgeInsets.only(
-                    top: 10.0,
-                    left: 20.0,
-                    bottom: 30.0,
-                    right: 40.0,
+      new CupertinoApp(
+        home: new MediaQuery(
+          data: const MediaQueryData(
+            padding: const EdgeInsets.only(
+              top: 10.0,
+              left: 20.0,
+              bottom: 30.0,
+              right: 40.0,
+            ),
+          ),
+          child: new CupertinoPageScaffold(
+            child: new CustomScrollView(
+              controller: scrollController,
+              slivers: <Widget>[
+                new CupertinoSliverNavigationBar(
+                  leading: new Placeholder(key: leadingKey),
+                  middle: new Placeholder(key: middleKey),
+                  largeTitle: new Text('Large Title', key: titleKey),
+                  trailing: new Placeholder(key: trailingKey),
+                ),
+                new SliverToBoxAdapter(
+                  child: new Container(
+                    height: 1200.0,
                   ),
                 ),
-                child: new CupertinoPageScaffold(
-                  child: new CustomScrollView(
-                    controller: scrollController,
-                    slivers: <Widget>[
-                      new CupertinoSliverNavigationBar(
-                        leading: new Placeholder(key: leadingKey),
-                        middle: new Placeholder(key: middleKey),
-                        largeTitle: new Text('Large Title', key: titleKey),
-                        trailing: new Placeholder(key: trailingKey),
-                      ),
-                      new SliverToBoxAdapter(
-                        child: new Container(
-                          height: 1200.0,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              );
-            },
-          );
-        },
+              ],
+            ),
+          ),
+        ),
       ),
     );
 
@@ -169,36 +126,28 @@ void main() {
     expect(tester.getTopRight(find.byKey(trailingKey)), const Offset(800.0 - 16.0 - 40.0, 10.0));
 
     // Top and left padding is applied to large title.
-    expect(tester.getTopLeft(find.byKey(titleKey)), const Offset(16.0 + 20.0, 58.0 + 10.0));
+    expect(tester.getTopLeft(find.byKey(titleKey)), const Offset(16.0 + 20.0, 54.0 + 10.0));
   });
 
   testWidgets('Large title nav bar scrolls', (WidgetTester tester) async {
     final ScrollController scrollController = new ScrollController();
     await tester.pumpWidget(
-      new WidgetsApp(
-        color: const Color(0xFFFFFFFF),
-        onGenerateRoute: (RouteSettings settings) {
-          return new CupertinoPageRoute<void>(
-            settings: settings,
-            builder: (BuildContext context) {
-              return new CupertinoPageScaffold(
-                child: new CustomScrollView(
-                  controller: scrollController,
-                  slivers: <Widget>[
-                    const CupertinoSliverNavigationBar(
-                      largeTitle: const Text('Title'),
-                    ),
-                    new SliverToBoxAdapter(
-                      child: new Container(
-                        height: 1200.0,
-                      ),
-                    ),
-                  ],
+      new CupertinoApp(
+        home: new CupertinoPageScaffold(
+          child: new CustomScrollView(
+            controller: scrollController,
+            slivers: <Widget>[
+              const CupertinoSliverNavigationBar(
+                largeTitle: const Text('Title'),
+              ),
+              new SliverToBoxAdapter(
+                child: new Container(
+                  height: 1200.0,
                 ),
-              );
-            },
-          );
-        },
+              ),
+            ],
+          ),
+        ),
       ),
     );
 
@@ -217,8 +166,8 @@ void main() {
         });
 
     Iterable<double> opacities = titles.map((Element element) {
-      final RenderOpacity renderOpacity = element.ancestorRenderObjectOfType(const TypeMatcher<RenderOpacity>());
-      return renderOpacity.opacity;
+      final RenderAnimatedOpacity renderOpacity = element.ancestorRenderObjectOfType(const TypeMatcher<RenderAnimatedOpacity>());
+      return renderOpacity.opacity.value;
     });
 
     expect(opacities, <double> [
@@ -227,7 +176,7 @@ void main() {
     ]);
 
     expect(tester.getTopLeft(find.widgetWithText(OverflowBox, 'Title')).dy, 44.0);
-    expect(tester.getSize(find.widgetWithText(OverflowBox, 'Title')).height, 56.0);
+    expect(tester.getSize(find.widgetWithText(OverflowBox, 'Title')).height, 52.0);
 
     scrollController.jumpTo(600.0);
     await tester.pump(); // Once to trigger the opacity animation.
@@ -242,8 +191,8 @@ void main() {
         });
 
     opacities = titles.map((Element element) {
-      final RenderOpacity renderOpacity = element.ancestorRenderObjectOfType(const TypeMatcher<RenderOpacity>());
-      return renderOpacity.opacity;
+      final RenderAnimatedOpacity renderOpacity = element.ancestorRenderObjectOfType(const TypeMatcher<RenderAnimatedOpacity>());
+      return renderOpacity.opacity.value;
     });
 
     expect(opacities, <double> [
@@ -263,31 +212,23 @@ void main() {
   testWidgets('Small title can be overridden', (WidgetTester tester) async {
     final ScrollController scrollController = new ScrollController();
     await tester.pumpWidget(
-      new WidgetsApp(
-        color: const Color(0xFFFFFFFF),
-        onGenerateRoute: (RouteSettings settings) {
-          return new CupertinoPageRoute<void>(
-            settings: settings,
-            builder: (BuildContext context) {
-              return new CupertinoPageScaffold(
-                child: new CustomScrollView(
-                  controller: scrollController,
-                  slivers: <Widget>[
-                    const CupertinoSliverNavigationBar(
-                      middle: const Text('Different title'),
-                      largeTitle: const Text('Title'),
-                    ),
-                    new SliverToBoxAdapter(
-                      child: new Container(
-                        height: 1200.0,
-                      ),
-                    ),
-                  ],
+      new CupertinoApp(
+        home: new CupertinoPageScaffold(
+          child: new CustomScrollView(
+            controller: scrollController,
+            slivers: <Widget>[
+              const CupertinoSliverNavigationBar(
+                middle: const Text('Different title'),
+                largeTitle: const Text('Title'),
+              ),
+              new SliverToBoxAdapter(
+                child: new Container(
+                  height: 1200.0,
                 ),
-              );
-            },
-          );
-        },
+              ),
+            ],
+          ),
+        ),
       ),
     );
 
@@ -298,11 +239,11 @@ void main() {
     expect(find.text('Title'), findsOneWidget);
     expect(find.text('Different title'), findsOneWidget);
 
-    RenderOpacity largeTitleOpacity =
-        tester.element(find.text('Title')).ancestorRenderObjectOfType(const TypeMatcher<RenderOpacity>());
+    RenderAnimatedOpacity largeTitleOpacity =
+        tester.element(find.text('Title')).ancestorRenderObjectOfType(const TypeMatcher<RenderAnimatedOpacity>());
     // Large title initially visible.
     expect(
-      largeTitleOpacity.opacity,
+      largeTitleOpacity.opacity.value,
       1.0
     );
     // Middle widget not even wrapped with RenderOpacity, i.e. is always visible.
@@ -311,17 +252,17 @@ void main() {
       isNull,
     );
 
-    expect(tester.getBottomLeft(find.text('Title')).dy, 44.0 + 56.0 - 8.0); // Static part + extension - padding.
+    expect(tester.getBottomLeft(find.text('Title')).dy, 44.0 + 52.0 - 8.0); // Static part + extension - padding.
 
     scrollController.jumpTo(600.0);
     await tester.pump(); // Once to trigger the opacity animation.
     await tester.pump(const Duration(milliseconds: 300));
 
     largeTitleOpacity =
-        tester.element(find.text('Title')).ancestorRenderObjectOfType(const TypeMatcher<RenderOpacity>());
+        tester.element(find.text('Title')).ancestorRenderObjectOfType(const TypeMatcher<RenderAnimatedOpacity>());
     // Large title no longer visible.
     expect(
-      largeTitleOpacity.opacity,
+      largeTitleOpacity.opacity.value,
       0.0
     );
 
@@ -334,18 +275,10 @@ void main() {
 
   testWidgets('Auto back/close button', (WidgetTester tester) async {
     await tester.pumpWidget(
-      new WidgetsApp(
-        color: const Color(0xFFFFFFFF),
-        onGenerateRoute: (RouteSettings settings) {
-          return new CupertinoPageRoute<void>(
-            settings: settings,
-            builder: (BuildContext context) {
-              return const CupertinoNavigationBar(
-                middle: const Text('Home page'),
-              );
-            },
-          );
-        },
+      new CupertinoApp(
+        home: const CupertinoNavigationBar(
+          middle: const Text('Home page'),
+        ),
       ),
     );
 
@@ -398,22 +331,17 @@ void main() {
 
   testWidgets('Border should be displayed by default', (WidgetTester tester) async {
     await tester.pumpWidget(
-      new WidgetsApp(
-        color: const Color(0xFFFFFFFF),
-        onGenerateRoute: (RouteSettings settings) {
-          return new CupertinoPageRoute<void>(
-            settings: settings,
-            builder: (BuildContext context) {
-              return const CupertinoNavigationBar(
-                middle: const Text('Title'),
-              );
-            },
-          );
-        },
+      new CupertinoApp(
+        home: const CupertinoNavigationBar(
+          middle: const Text('Title'),
+        ),
       ),
     );
 
-    final DecoratedBox decoratedBox = tester.widgetList(find.byType(DecoratedBox)).elementAt(1);
+    final DecoratedBox decoratedBox = tester.widgetList(find.descendant(
+      of: find.byType(CupertinoNavigationBar),
+      matching: find.byType(DecoratedBox),
+    )).first;
     expect(decoratedBox.decoration.runtimeType, BoxDecoration);
 
     final BoxDecoration decoration = decoratedBox.decoration;
@@ -425,28 +353,23 @@ void main() {
 
   testWidgets('Overrides border color', (WidgetTester tester) async {
     await tester.pumpWidget(
-      new WidgetsApp(
-        color: const Color(0xFFFFFFFF),
-        onGenerateRoute: (RouteSettings settings) {
-          return new CupertinoPageRoute<void>(
-            settings: settings,
-            builder: (BuildContext context) {
-              return const CupertinoNavigationBar(
-                middle: const Text('Title'),
-                border: const Border(
-                  bottom: const BorderSide(
-                    color: const Color(0xFFAABBCC),
-                    width: 0.0,
-                  ),
-                ),
-              );
-            },
-          );
-        },
+      new CupertinoApp(
+        home: const CupertinoNavigationBar(
+          middle: const Text('Title'),
+          border: const Border(
+            bottom: const BorderSide(
+              color: const Color(0xFFAABBCC),
+              width: 0.0,
+            ),
+          ),
+        ),
       ),
     );
 
-    final DecoratedBox decoratedBox = tester.widgetList(find.byType(DecoratedBox)).elementAt(1);
+    final DecoratedBox decoratedBox = tester.widgetList(find.descendant(
+      of: find.byType(CupertinoNavigationBar),
+      matching: find.byType(DecoratedBox),
+    )).first;
     expect(decoratedBox.decoration.runtimeType, BoxDecoration);
 
     final BoxDecoration decoration = decoratedBox.decoration;
@@ -459,6 +382,231 @@ void main() {
 
   testWidgets('Border should not be displayed when null', (WidgetTester tester) async {
     await tester.pumpWidget(
+      new CupertinoApp(
+        home: const CupertinoNavigationBar(
+          middle: const Text('Title'),
+          border: null,
+        ),
+      ),
+    );
+
+    final DecoratedBox decoratedBox = tester.widgetList(find.descendant(
+      of: find.byType(CupertinoNavigationBar),
+      matching: find.byType(DecoratedBox),
+    )).first;
+    expect(decoratedBox.decoration.runtimeType, BoxDecoration);
+
+    final BoxDecoration decoration = decoratedBox.decoration;
+    expect(decoration.border, isNull);
+  });
+
+  testWidgets(
+      'Border is displayed by default in sliver nav bar',
+      (WidgetTester tester) async {
+    await tester.pumpWidget(
+      new CupertinoApp(
+        home: new CupertinoPageScaffold(
+          child: new CustomScrollView(
+            slivers: const <Widget>[
+              const CupertinoSliverNavigationBar(
+                largeTitle: const Text('Large Title'),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    final DecoratedBox decoratedBox = tester.widgetList(find.descendant(
+      of: find.byType(CupertinoSliverNavigationBar),
+      matching: find.byType(DecoratedBox),
+    )).first;
+    expect(decoratedBox.decoration.runtimeType, BoxDecoration);
+
+    final BoxDecoration decoration = decoratedBox.decoration;
+    expect(decoration.border, isNotNull);
+
+    final BorderSide bottom = decoration.border.bottom;
+    expect(bottom, isNotNull);
+  });
+
+  testWidgets(
+      'Border is not displayed when null in sliver nav bar',
+      (WidgetTester tester) async {
+    await tester.pumpWidget(
+      new CupertinoApp(
+        home: new CupertinoPageScaffold(
+          child: new CustomScrollView(
+            slivers: const <Widget>[
+              const CupertinoSliverNavigationBar(
+                largeTitle: const Text('Large Title'),
+                border: null,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    final DecoratedBox decoratedBox = tester.widgetList(find.descendant(
+      of: find.byType(CupertinoSliverNavigationBar),
+      matching: find.byType(DecoratedBox),
+    )).first;
+    expect(decoratedBox.decoration.runtimeType, BoxDecoration);
+
+    final BoxDecoration decoration = decoratedBox.decoration;
+    expect(decoration.border, isNull);
+  });
+
+  testWidgets('CupertinoSliverNavigationBar has semantics', (WidgetTester tester) async {
+    final SemanticsTester semantics = new SemanticsTester(tester);
+
+    await tester.pumpWidget(new CupertinoApp(
+      home: new CupertinoPageScaffold(
+        child: new CustomScrollView(
+          slivers: const <Widget>[
+            const CupertinoSliverNavigationBar(
+              largeTitle: const Text('Large Title'),
+              border: null,
+            ),
+          ],
+        ),
+      ),
+    ));
+
+    expect(semantics.nodesWith(
+      label: 'Large Title',
+      flags: <SemanticsFlag>[SemanticsFlag.isHeader],
+      textDirection: TextDirection.ltr,
+    ), hasLength(1));
+
+    semantics.dispose();
+  });
+
+  testWidgets('CupertinoNavigationBar has semantics', (WidgetTester tester) async {
+    final SemanticsTester semantics = new SemanticsTester(tester);
+
+    await tester.pumpWidget(new CupertinoApp(
+      home: new CupertinoPageScaffold(
+        navigationBar: const CupertinoNavigationBar(
+          middle: const Text('Fixed Title'),
+        ),
+        child: new Container(),
+      ),
+    ));
+
+    expect(semantics.nodesWith(
+      label: 'Fixed Title',
+      flags: <SemanticsFlag>[SemanticsFlag.isHeader],
+      textDirection: TextDirection.ltr,
+    ), hasLength(1));
+
+    semantics.dispose();
+  });
+
+  testWidgets(
+      'Border can be overridden in sliver nav bar',
+      (WidgetTester tester) async {
+    await tester.pumpWidget(
+      new CupertinoApp(
+        home: new CupertinoPageScaffold(
+          child: new CustomScrollView(
+            slivers: const <Widget>[
+              const CupertinoSliverNavigationBar(
+                largeTitle: const Text('Large Title'),
+                border: const Border(
+                  bottom: const BorderSide(
+                    color: const Color(0xFFAABBCC),
+                    width: 0.0,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    final DecoratedBox decoratedBox = tester.widgetList(find.descendant(
+      of: find.byType(CupertinoSliverNavigationBar),
+      matching: find.byType(DecoratedBox),
+    )).first;
+    expect(decoratedBox.decoration.runtimeType, BoxDecoration);
+
+    final BoxDecoration decoration = decoratedBox.decoration;
+    expect(decoration.border, isNotNull);
+
+    final BorderSide top = decoration.border.top;
+    expect(top, isNotNull);
+    expect(top, BorderSide.none);
+    final BorderSide bottom = decoration.border.bottom;
+    expect(bottom, isNotNull);
+    expect(bottom.color, const Color(0xFFAABBCC));
+  });
+
+  testWidgets(
+    'Standard title golden',
+    (WidgetTester tester) async {
+      await tester.pumpWidget(
+        new CupertinoApp(
+          home: const RepaintBoundary(
+            child: const CupertinoPageScaffold(
+              navigationBar: const CupertinoNavigationBar(
+                middle: const Text('Bling bling'),
+              ),
+              child: const Center(),
+            ),
+          ),
+        ),
+      );
+
+      await expectLater(
+        find.byType(RepaintBoundary).last,
+        matchesGoldenFile('nav_bar_test.standard_title.1.png'),
+      );
+    },
+    // TODO(xster): remove once https://github.com/flutter/flutter/issues/17483
+    // is fixed.
+    skip: !Platform.isLinux,
+  );
+
+  testWidgets(
+    'Large title golden',
+    (WidgetTester tester) async {
+      await tester.pumpWidget(
+        new CupertinoApp(
+          home: new RepaintBoundary(
+            child: new CupertinoPageScaffold(
+              child: new CustomScrollView(
+                slivers: <Widget>[
+                  const CupertinoSliverNavigationBar(
+                    largeTitle: const Text('Bling bling'),
+                  ),
+                  new SliverToBoxAdapter(
+                    child: new Container(
+                      height: 1200.0,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
+
+      await expectLater(
+        find.byType(RepaintBoundary).last,
+        matchesGoldenFile('nav_bar_test.large_title.1.png'),
+      );
+    },
+    // TODO(xster): remove once https://github.com/flutter/flutter/issues/17483
+    // is fixed.
+    skip: !Platform.isLinux,
+   );
+
+
+  testWidgets('NavBar draws a light system bar for a dark background', (WidgetTester tester) async {
+    await tester.pumpWidget(
       new WidgetsApp(
         color: const Color(0xFFFFFFFF),
         onGenerateRoute: (RouteSettings settings) {
@@ -466,20 +614,35 @@ void main() {
             settings: settings,
             builder: (BuildContext context) {
               return const CupertinoNavigationBar(
-                middle: const Text('Title'),
-                border: null,
+                middle: const Text('Test'),
+                backgroundColor: const Color(0xFF000000),
               );
             },
           );
         },
       ),
     );
+    expect(SystemChrome.latestStyle, SystemUiOverlayStyle.light);
+  });
 
-    final DecoratedBox decoratedBox = tester.widgetList(find.byType(DecoratedBox)).elementAt(1);
-    expect(decoratedBox.decoration.runtimeType, BoxDecoration);
-
-    final BoxDecoration decoration = decoratedBox.decoration;
-    expect(decoration.border, isNull);
+  testWidgets('NavBar draws a dark system bar for a light background', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      new WidgetsApp(
+        color: const Color(0xFFFFFFFF),
+        onGenerateRoute: (RouteSettings settings) {
+          return new CupertinoPageRoute<void>(
+            settings: settings,
+            builder: (BuildContext context) {
+              return const CupertinoNavigationBar(
+                middle: const Text('Test'),
+                backgroundColor: const Color(0xFFFFFFFF),
+              );
+            },
+          );
+        },
+      ),
+    );
+    expect(SystemChrome.latestStyle, SystemUiOverlayStyle.dark);
   });
 }
 

@@ -5,8 +5,8 @@
 import 'dart:math';
 
 import 'package:collection/collection.dart';
+import 'package:flutter_test/flutter_test.dart';
 import 'package:vitool/vitool.dart';
-import 'package:test/test.dart';
 import 'package:path/path.dart' as path;
 
 const String kPackagePath = '..';
@@ -16,7 +16,7 @@ void main() {
   test('parsePixels', () {
     expect(parsePixels('23px'), 23);
     expect(parsePixels('9px'), 9);
-    expect(() { parsePixels('9pt'); }, throwsA(const isInstanceOf<ArgumentError>()));
+    expect(() { parsePixels('9pt'); }, throwsA(isInstanceOf<ArgumentError>()));
   });
 
   test('parsePoints', () {

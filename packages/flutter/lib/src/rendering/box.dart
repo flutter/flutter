@@ -75,6 +75,10 @@ class _DebugSize extends Size {
 /// _expanding_ if it is tightly infinite (its minimum and maximum constraints
 /// are both infinite). See: [new BoxConstraints.expand].
 ///
+/// An axis whose _minimum_ constraint is infinite is just said to be _infinite_
+/// (since by definition the maximum constraint must also be infinite in that
+/// case). See: [hasInfiniteWidth], [hasInfiniteHeight].
+///
 /// A size is _constrained_ when it satisfies a [BoxConstraints] description.
 /// See: [constrain], [constrainWidth], [constrainHeight],
 /// [constrainDimensions], [constrainSizeAndAttemptToPreserveAspectRatio],
@@ -82,10 +86,10 @@ class _DebugSize extends Size {
 class BoxConstraints extends Constraints {
   /// Creates box constraints with the given constraints.
   const BoxConstraints({
-    this.minWidth: 0.0,
-    this.maxWidth: double.infinity,
-    this.minHeight: 0.0,
-    this.maxHeight: double.infinity
+    this.minWidth = 0.0,
+    this.maxWidth = double.infinity,
+    this.minHeight = 0.0,
+    this.maxHeight = double.infinity
   });
 
   /// The minimum width that satisfies the constraints.
@@ -134,8 +138,8 @@ class BoxConstraints extends Constraints {
   ///  * [new BoxConstraints.tightFor], which is similar but instead of being
   ///    tight if the value is not infinite, is tight if the value is non-null.
   const BoxConstraints.tightForFinite({
-    double width: double.infinity,
-    double height: double.infinity
+    double width = double.infinity,
+    double height = double.infinity
   }): minWidth = width != double.infinity ? width : 0.0,
       maxWidth = width != double.infinity ? width : double.infinity,
       minHeight = height != double.infinity ? height : 0.0,
@@ -346,10 +350,52 @@ class BoxConstraints extends Constraints {
   bool get isTight => hasTightWidth && hasTightHeight;
 
   /// Whether there is an upper bound on the maximum width.
+  ///
+  /// See also:
+  ///
+  ///  * [hasBoundedHeight], the equivalent for the vertical axis.
+  ///  * [hasInfiniteWidth], which describes whether the minimum width
+  ///    constraint is infinite.
   bool get hasBoundedWidth => maxWidth < double.infinity;
 
   /// Whether there is an upper bound on the maximum height.
+  ///
+  /// See also:
+  ///
+  ///  * [hasBoundedWidth], the equivalent for the horizontal axis.
+  ///  * [hasInfiniteHeight], which describes whether the minimum height
+  ///    constraint is infinite.
   bool get hasBoundedHeight => maxHeight < double.infinity;
+
+  /// Whether the width constraint is infinite.
+  ///
+  /// Such a constraint is used to indicate that a box should grow as large as
+  /// some other constraint (in this case, horizontally). If constraints are
+  /// infinite, then they must have other (non-infinite) constraints [enforce]d
+  /// upon them, or must be [tighten]ed, before they can be used to derive a
+  /// [Size] for a [RenderBox.size].
+  ///
+  /// See also:
+  ///
+  ///  * [hasInfiniteHeight], the equivalent for the vertical axis.
+  ///  * [hasBoundedWidth], which describes whether the maximum width
+  ///    constraint is finite.
+  bool get hasInfiniteWidth => minWidth >= double.infinity;
+
+  /// Whether the height constraint is infinite.
+  ///
+  /// Such a constraint is used to indicate that a box should grow as large as
+  /// some other constraint (in this case, vertically). If constraints are
+  /// infinite, then they must have other (non-infinite) constraints [enforce]d
+  /// upon them, or must be [tighten]ed, before they can be used to derive a
+  /// [Size] for a [RenderBox.size].
+  ///
+  /// See also:
+  ///
+  ///  * [hasInfiniteWidth], the equivalent for the horizontal axis.
+  ///  * [hasBoundedHeight], which describes whether the maximum height
+  ///    constraint is finite.
+  bool get hasInfiniteHeight => minHeight >= double.infinity;
 
   /// Whether the given size satisfies the constraints.
   bool isSatisfiedBy(Size size) {
@@ -457,7 +503,7 @@ class BoxConstraints extends Constraints {
 
   @override
   bool debugAssertIsValid({
-    bool isAppliedConstraint: false,
+    bool isAppliedConstraint = false,
     InformationCollector informationCollector,
   }) {
     assert(() {
@@ -1464,10 +1510,10 @@ abstract class RenderBox extends RenderObject {
     return _size;
   }
   Size _size;
-  @protected
   /// Setting the size, in checked mode, triggers some analysis of the render box,
   /// as implemented by [debugAssertDoesMeetConstraints], including calling the intrinsic
   /// sizing methods and checking that they meet certain invariants.
+  @protected
   set size(Size value) {
     assert(!(debugDoingThisResize && debugDoingThisLayout));
     assert(sizedByParent || !debugDoingThisResize);
@@ -1599,9 +1645,12 @@ abstract class RenderBox extends RenderObject {
   /// Only call this function after calling [layout] on this box. You
   /// are only allowed to call this from the parent of this box during
   /// that parent's [performLayout] or [paint] functions.
-  double getDistanceToBaseline(TextBaseline baseline, { bool onlyReal: false }) {
+  ///
+  /// When implementing a [RenderBox] subclass, to override the baseline
+  /// computation, override [computeDistanceToActualBaseline].
+  double getDistanceToBaseline(TextBaseline baseline, { bool onlyReal = false }) {
+    assert(!_debugDoingBaseline, 'Please see the documentation for computeDistanceToActualBaseline for the required calling conventions of this method.');
     assert(!debugNeedsLayout);
-    assert(!_debugDoingBaseline);
     assert(() {
       final RenderObject parent = this.parent;
       if (owner.debugDoingLayout)
@@ -1628,7 +1677,7 @@ abstract class RenderBox extends RenderObject {
   @protected
   @mustCallSuper
   double getDistanceToActualBaseline(TextBaseline baseline) {
-    assert(_debugDoingBaseline);
+    assert(_debugDoingBaseline, 'Please see the documentation for computeDistanceToActualBaseline for the required calling conventions of this method.');
     _cachedBaselines ??= <TextBaseline, double>{};
     _cachedBaselines.putIfAbsent(baseline, () => computeDistanceToActualBaseline(baseline));
     return _cachedBaselines[baseline];
@@ -1638,17 +1687,29 @@ abstract class RenderBox extends RenderObject {
   /// the y-coordinate of the first given baseline in the box's contents, if
   /// any, or null otherwise.
   ///
-  /// Do not call this function directly. Instead, call [getDistanceToBaseline]
-  /// if you need to know the baseline of a child from an invocation of
-  /// [performLayout] or [paint] and call [getDistanceToActualBaseline] if you
-  /// are implementing [computeDistanceToActualBaseline] and need to defer to a
-  /// child.
+  /// Do not call this function directly. If you need to know the baseline of a
+  /// child from an invocation of [performLayout] or [paint], call
+  /// [getDistanceToBaseline].
   ///
   /// Subclasses should override this method to supply the distances to their
-  /// baselines.
+  /// baselines. When implementing this method, there are generally three
+  /// strategies:
+  ///
+  ///  * For classes that use the [ContainerRenderObjectMixin] child model,
+  ///    consider mixing in the [RenderBoxContainerDefaultsMixin] class and
+  ///    using
+  ///    [RenderBoxContainerDefaultsMixin.defaultComputeDistanceToFirstActualBaseline].
+  ///
+  ///  * For classes that define a particular baseline themselves, return that
+  ///    value directly.
+  ///
+  ///  * For classes that have a child to which they wish to defer the
+  ///    computation, call [getDistanceToActualBaseline] on the child (not
+  ///    [computeDistanceToActualBaseline], the internal implementation, and not
+  ///    [getDistanceToBaseline], the public entry point for this API).
   @protected
   double computeDistanceToActualBaseline(TextBaseline baseline) {
-    assert(_debugDoingBaseline);
+    assert(_debugDoingBaseline, 'Please see the documentation for computeDistanceToActualBaseline for the required calling conventions of this method.');
     return null;
   }
 

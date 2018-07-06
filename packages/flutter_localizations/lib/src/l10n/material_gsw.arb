@@ -36,7 +36,8 @@
   "postMeridiemAbbreviation": "NACHM.",
   "modalBarrierDismissLabel": "Schließen",
   "drawerLabel": "Navigationsmenü",
-  "popupMenuLabel": "Popup-Menü",
-  "dialogLabel": "Dialog",
-  "alertDialogLabel": "Aufmerksam"
+  "popupMenuLabel": "Pop-up-Menü",
+  "dialogLabel": "Dialogfeld",
+  "alertDialogLabel": "Aufmerksam",
+  "searchFieldLabel": "Suchen"
 }

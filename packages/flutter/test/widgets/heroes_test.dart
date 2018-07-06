@@ -109,7 +109,7 @@ class MutatingRoute extends MaterialPageRoute<void> {
 }
 
 class MyStatefulWidget extends StatefulWidget {
-  const MyStatefulWidget({ Key key, this.value: '123' }) : super(key: key);
+  const MyStatefulWidget({ Key key, this.value = '123' }) : super(key: key);
   final String value;
   @override
   MyStatefulWidgetState createState() => new MyStatefulWidgetState();
@@ -781,6 +781,7 @@ void main() {
       builder: (BuildContext context) {
         return new Material(
           child: new ListView(
+            cacheExtent: 0.0,
             children: <Widget>[
               const SizedBox(height: 100.0),
               // This container will appear at Y=100

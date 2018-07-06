@@ -1,7 +1,10 @@
+import 'dart:ui';
+
 // Copyright 2015 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -486,12 +489,13 @@ void main() {
     );
 
     final TestSemantics expected = new TestSemantics.root(
-        children: <TestSemantics>[
-          new TestSemantics.rootChild(
-            id: 1,
-            label: tooltipText,
-          ),
-        ]
+      children: <TestSemantics>[
+        new TestSemantics.rootChild(
+          id: 1,
+          label: 'TIP',
+          textDirection: TextDirection.ltr,
+        ),
+      ]
     );
 
     expect(semantics, hasSemantics(expected, ignoreTransform: true, ignoreRect: true));
@@ -619,8 +623,17 @@ void main() {
     expect(semantics, hasSemantics(new TestSemantics.root(
       children: <TestSemantics>[
         new TestSemantics.rootChild(
-          label: 'Foo\nBar',
-          textDirection: TextDirection.ltr,
+          children: <TestSemantics>[
+            new TestSemantics(
+              flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
+              children: <TestSemantics>[
+                new TestSemantics(
+                  label: 'Foo\nBar',
+                  textDirection: TextDirection.ltr,
+                )
+              ],
+            ),
+          ],
         ),
       ],
     ), ignoreRect: true, ignoreId: true, ignoreTransform: true));
@@ -646,8 +659,17 @@ void main() {
     expect(semantics, hasSemantics(new TestSemantics.root(
       children: <TestSemantics>[
         new TestSemantics.rootChild(
-          label: 'Bar',
-          textDirection: TextDirection.ltr,
+          children: <TestSemantics>[
+            new TestSemantics(
+              flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
+              children: <TestSemantics>[
+                new TestSemantics(
+                  label: 'Bar',
+                  textDirection: TextDirection.ltr,
+                )
+              ],
+            ),
+          ],
         ),
       ],
     ), ignoreRect: true, ignoreId: true, ignoreTransform: true));
@@ -655,4 +677,51 @@ void main() {
     semantics.dispose();
   });
 
+  testWidgets('has semantic events', (WidgetTester tester) async {
+    final List<dynamic> semanticEvents = <dynamic>[];
+    SystemChannels.accessibility.setMockMessageHandler((dynamic message) {
+      semanticEvents.add(message);
+    });
+    final SemanticsTester semantics = new SemanticsTester(tester);
+
+    await tester.pumpWidget(
+      new MaterialApp(
+        home: new Center(
+          child: new Tooltip(
+            message: 'Foo',
+            child: new Container(
+              width: 100.0,
+              height: 100.0,
+              color: Colors.green[500],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.longPress(find.byType(Tooltip));
+    final RenderObject object = tester.firstRenderObject(find.byType(Tooltip));
+
+    expect(semanticEvents, unorderedEquals(<dynamic>[
+      <String, dynamic>{
+        'type': 'longPress',
+        'nodeId': findDebugSemantics(object).id,
+        'data': <String, dynamic>{},
+      },
+      <String, dynamic>{
+        'type': 'tooltip',
+        'data': <String, dynamic>{
+          'message': 'Foo',
+        },
+      },
+    ]));
+    semantics.dispose();
+    SystemChannels.accessibility.setMockMessageHandler(null);
+  });
+}
+
+SemanticsNode findDebugSemantics(RenderObject object) {
+  if (object.debugSemantics != null)
+    return object.debugSemantics;
+  return findDebugSemantics(object.parent);
 }

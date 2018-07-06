@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
@@ -68,7 +67,7 @@ class ExpansionPanel {
   ExpansionPanel({
     @required this.headerBuilder,
     @required this.body,
-    this.isExpanded: false
+    this.isExpanded = false
   }) : assert(headerBuilder != null),
        assert(body != null),
        assert(isExpanded != null);
@@ -99,9 +98,9 @@ class ExpansionPanelList extends StatelessWidget {
   /// triggered when an expansion panel expand/collapse button is pushed.
   const ExpansionPanelList({
     Key key,
-    this.children: const <ExpansionPanel>[],
+    this.children = const <ExpansionPanel>[],
     this.expansionCallback,
-    this.animationDuration: kThemeAnimationDuration
+    this.animationDuration = kThemeAnimationDuration
   }) : assert(children != null),
        assert(animationDuration != null),
        super(key: key);
@@ -144,8 +143,8 @@ class ExpansionPanelList extends StatelessWidget {
               duration: animationDuration,
               curve: Curves.fastOutSlowIn,
               margin: _isChildExpanded(index) ? kExpandedEdgeInsets : EdgeInsets.zero,
-              child: new SizedBox(
-                height: _kPanelHeaderCollapsedHeight,
+              child: new ConstrainedBox(
+                constraints: const BoxConstraints(minHeight: _kPanelHeaderCollapsedHeight),
                 child: children[index].headerBuilder(
                   context,
                   children[index].isExpanded,

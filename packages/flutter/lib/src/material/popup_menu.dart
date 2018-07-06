@@ -96,7 +96,7 @@ class PopupMenuDivider extends PopupMenuEntry<Null> {
   /// Creates a horizontal divider for a popup menu.
   ///
   /// By default, the divider has a height of 16 logical pixels.
-  const PopupMenuDivider({ Key key, this.height: _kMenuDividerHeight }) : super(key: key);
+  const PopupMenuDivider({ Key key, this.height = _kMenuDividerHeight }) : super(key: key);
 
   /// The height of the divider entry.
   ///
@@ -163,8 +163,8 @@ class PopupMenuItem<T> extends PopupMenuEntry<T> {
   const PopupMenuItem({
     Key key,
     this.value,
-    this.enabled: true,
-    this.height: _kMenuItemHeight,
+    this.enabled = true,
+    this.height = _kMenuItemHeight,
     @required this.child,
   }) : assert(enabled != null),
        assert(height != null),
@@ -248,7 +248,7 @@ class PopupMenuItemState<T, W extends PopupMenuItem<T>> extends State<W> {
       duration: kThemeChangeDuration,
       child: new Baseline(
         baseline: widget.height - _kBaselineOffsetFromBottom,
-        baselineType: TextBaseline.alphabetic,
+        baselineType: style.textBaseline,
         child: buildChild(),
       )
     );
@@ -262,12 +262,10 @@ class PopupMenuItemState<T, W extends PopupMenuItem<T>> extends State<W> {
 
     return new InkWell(
       onTap: widget.enabled ? handleTap : null,
-      child: new MergeSemantics(
-        child: new Container(
-          height: widget.height,
-          padding: const EdgeInsets.symmetric(horizontal: _kMenuHorizontalPadding),
-          child: item,
-        ),
+      child: new Container(
+        height: widget.height,
+        padding: const EdgeInsets.symmetric(horizontal: _kMenuHorizontalPadding),
+        child: item,
       ),
     );
   }
@@ -343,8 +341,8 @@ class CheckedPopupMenuItem<T> extends PopupMenuItem<T> {
   const CheckedPopupMenuItem({
     Key key,
     T value,
-    this.checked: false,
-    bool enabled: true,
+    this.checked = false,
+    bool enabled = true,
     Widget child,
   }) : assert(checked != null),
        super(
@@ -379,14 +377,14 @@ class CheckedPopupMenuItem<T> extends PopupMenuItem<T> {
 }
 
 class _CheckedPopupMenuItemState<T> extends PopupMenuItemState<T, CheckedPopupMenuItem<T>> with SingleTickerProviderStateMixin {
-  static const Duration _kFadeDuration = const Duration(milliseconds: 150);
+  static const Duration _fadeDuration = const Duration(milliseconds: 150);
   AnimationController _controller;
   Animation<double> get _opacity => _controller.view;
 
   @override
   void initState() {
     super.initState();
-    _controller = new AnimationController(duration: _kFadeDuration, vsync: this)
+    _controller = new AnimationController(duration: _fadeDuration, vsync: this)
       ..value = widget.checked ? 1.0 : 0.0
       ..addListener(() => setState(() { /* animation changed */ }));
   }
@@ -417,10 +415,12 @@ class _CheckedPopupMenuItemState<T> extends PopupMenuItemState<T, CheckedPopupMe
 class _PopupMenu<T> extends StatelessWidget {
   const _PopupMenu({
     Key key,
-    this.route
+    this.route,
+    this.semanticLabel,
   }) : super(key: key);
 
   final _PopupMenuRoute<T> route;
+  final String semanticLabel;
 
   @override
   Widget build(BuildContext context) {
@@ -479,7 +479,13 @@ class _PopupMenu<T> extends StatelessWidget {
               alignment: AlignmentDirectional.topEnd,
               widthFactor: width.evaluate(route.animation),
               heightFactor: height.evaluate(route.animation),
-              child: child,
+              child: new Semantics(
+                scopesRoute: true,
+                namesRoute: true,
+                explicitChildNodes: true,
+                label: semanticLabel,
+                child: child,
+              ),
             ),
           ),
         );
@@ -577,6 +583,7 @@ class _PopupMenuRoute<T> extends PopupRoute<T> {
     this.elevation,
     this.theme,
     this.barrierLabel,
+    this.semanticLabel,
   });
 
   final RelativeRect position;
@@ -584,6 +591,7 @@ class _PopupMenuRoute<T> extends PopupRoute<T> {
   final dynamic initialValue;
   final double elevation;
   final ThemeData theme;
+  final String semanticLabel;
 
   @override
   Animation<double> createAnimation() {
@@ -620,7 +628,7 @@ class _PopupMenuRoute<T> extends PopupRoute<T> {
       }
     }
 
-    Widget menu = new _PopupMenu<T>(route: this);
+    Widget menu = new _PopupMenu<T>(route: this, semanticLabel: semanticLabel);
     if (theme != null)
       menu = new Theme(data: theme, child: menu);
 
@@ -680,7 +688,12 @@ class _PopupMenuRoute<T> extends PopupRoute<T> {
 /// The `context` argument is used to look up the [Navigator] and [Theme] for
 /// the menu. It is only used when the method is called. Its corresponding
 /// widget can be safely removed from the tree before the popup menu is closed.
-///
+/// 
+/// The `semanticLabel` argument is used by accessibility frameworks to 
+/// announce screen transitions when the menu is opened and closed. If this 
+/// label is not provided, it will default to 
+/// [MaterialLocalizations.popupMenuLabel].
+/// 
 /// See also:
 ///
 ///  * [PopupMenuItem], a popup menu entry for a single value.
@@ -688,20 +701,34 @@ class _PopupMenuRoute<T> extends PopupRoute<T> {
 ///  * [CheckedPopupMenuItem], a popup menu item with a checkmark.
 ///  * [PopupMenuButton], which provides an [IconButton] that shows a menu by
 ///    calling this method automatically.
+///  * [SemanticsConfiguration.namesRoute], for a description of edge triggered
+///    semantics.
 Future<T> showMenu<T>({
   @required BuildContext context,
   RelativeRect position,
   @required List<PopupMenuEntry<T>> items,
   T initialValue,
-  double elevation: 8.0,
+  double elevation = 8.0,
+  String semanticLabel,
 }) {
   assert(context != null);
   assert(items != null && items.isNotEmpty);
+  String label = semanticLabel;
+  switch (defaultTargetPlatform) {
+    case TargetPlatform.iOS:
+      label = semanticLabel;
+      break;
+    case TargetPlatform.android:
+    case TargetPlatform.fuchsia:
+      label = semanticLabel ?? MaterialLocalizations.of(context)?.popupMenuLabel;
+  }
+
   return Navigator.push(context, new _PopupMenuRoute<T>(
     position: position,
     items: items,
     initialValue: initialValue,
     elevation: elevation,
+    semanticLabel: label,
     theme: Theme.of(context, shadowThemeOnly: true),
     barrierLabel: MaterialLocalizations.of(context).modalBarrierDismissLabel,
   ));
@@ -787,8 +814,8 @@ class PopupMenuButton<T> extends StatefulWidget {
     this.onSelected,
     this.onCanceled,
     this.tooltip,
-    this.elevation: 8.0,
-    this.padding: const EdgeInsets.all(8.0),
+    this.elevation = 8.0,
+    this.padding = const EdgeInsets.all(8.0),
     this.child,
     this.icon,
   }) : assert(itemBuilder != null),

@@ -27,6 +27,8 @@ void main() {
       crossAxisExtent: 0.0,
       crossAxisDirection: AxisDirection.right,
       viewportMainAxisExtent: 0.0,
+      cacheOrigin: 0.0,
+      remainingCacheExtent: 0.0,
     );
     final SliverConstraints b = a.copyWith();
     expect(a, equals(b));
@@ -55,6 +57,8 @@ void main() {
       crossAxisExtent: 40.0,
       crossAxisDirection: AxisDirection.right,
       viewportMainAxisExtent: 30.0,
+      cacheOrigin: 0.0,
+      remainingCacheExtent: 0.0,
     );
     expect(c, equals(d));
     expect(c.normalizedGrowthDirection, equals(GrowthDirection.forward));

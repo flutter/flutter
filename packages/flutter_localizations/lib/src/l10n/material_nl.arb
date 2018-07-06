@@ -35,8 +35,9 @@
   "hideAccountsLabel": "Accounts verbergen",
   "showAccountsLabel": "Accounts weergeven",
   "modalBarrierDismissLabel": "Sluiten",
-  "drawerLabel": "Navigatie menu",
-  "popupMenuLabel": "Popup menu",
-  "dialogLabel": "Dialoog",
-  "alertDialogLabel": "Alarm"
+  "drawerLabel": "Navigatiemenu",
+  "popupMenuLabel": "Pop-upmenu",
+  "dialogLabel": "Dialoogvenster",
+  "alertDialogLabel": "Alarm",
+  "searchFieldLabel": "Zoeken"
 }

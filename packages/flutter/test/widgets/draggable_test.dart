@@ -586,6 +586,134 @@ void main() {
     events.clear();
   });
 
+  group('Drag and drop - Draggables with a set axis only move along that axis', () {
+    final List<String> events = <String>[];
+
+    Widget build() {
+      return new MaterialApp(
+        home: new ListView(
+          scrollDirection: Axis.horizontal,
+          children: <Widget>[
+            new DragTarget<int>(
+              builder: (BuildContext context, List<int> data, List<dynamic> rejects) {
+                return const Text('Target');
+              },
+              onAccept: (int data) {
+                events.add('drop $data');
+              }
+            ),
+            new Container(width: 400.0),
+            const Draggable<int>(
+              data: 1,
+              child: const Text('H'),
+              feedback: const Text('H'),
+              childWhenDragging: const SizedBox(),
+              axis: Axis.horizontal,
+            ),
+            const Draggable<int>(
+              data: 2,
+              child: const Text('V'),
+              feedback: const Text('V'),
+              childWhenDragging: const SizedBox(),
+              axis: Axis.vertical,
+            ),
+            const Draggable<int>(
+              data: 3,
+              child: const Text('N'),
+              feedback: const Text('N'),
+              childWhenDragging: const SizedBox(),
+            ),
+            new Container(width: 500.0),
+            new Container(width: 500.0),
+            new Container(width: 500.0),
+            new Container(width: 500.0),
+          ],
+        ),
+      );
+    }
+    testWidgets('Null axis draggable moves along all axes', (WidgetTester tester) async {
+      await tester.pumpWidget(build());
+      final Offset firstLocation = tester.getTopLeft(find.text('N'));
+      final Offset secondLocation = firstLocation + const Offset(300.0, 300.0);
+      final Offset thirdLocation = firstLocation + const Offset(-300.0, -300.0);
+      final TestGesture gesture = await tester.startGesture(firstLocation, pointer: 7);
+      await tester.pump();
+      await gesture.moveTo(secondLocation);
+      await tester.pump();
+      expect(tester.getTopLeft(find.text('N')), secondLocation);
+      await gesture.moveTo(thirdLocation);
+      await tester.pump();
+      expect(tester.getTopLeft(find.text('N')), thirdLocation);
+    });
+
+    testWidgets('Horizontal axis draggable moves horizontally', (WidgetTester tester) async {
+      await tester.pumpWidget(build());
+      final Offset firstLocation = tester.getTopLeft(find.text('H'));
+      final Offset secondLocation = firstLocation + const Offset(300.0, 0.0);
+      final Offset thirdLocation = firstLocation + const Offset(-300.0, 0.0);
+      final TestGesture gesture = await tester.startGesture(firstLocation, pointer: 7);
+      await tester.pump();
+      await gesture.moveTo(secondLocation);
+      await tester.pump();
+      expect(tester.getTopLeft(find.text('H')), secondLocation);
+      await gesture.moveTo(thirdLocation);
+      await tester.pump();
+      expect(tester.getTopLeft(find.text('H')), thirdLocation);
+    });
+
+    testWidgets('Horizontal axis draggable does not move vertically', (WidgetTester tester) async {
+      await tester.pumpWidget(build());
+      final Offset firstLocation = tester.getTopLeft(find.text('H'));
+      final Offset secondDragLocation = firstLocation + const Offset(300.0, 200.0);
+      // The horizontal drag widget won't scroll vertically.
+      final Offset secondWidgetLocation = firstLocation + const Offset(300.0, 0.0);
+      final Offset thirdDragLocation = firstLocation + const Offset(-300.0, -200.0);
+      final Offset thirdWidgetLocation = firstLocation + const Offset(-300.0, 0.0);
+      final TestGesture gesture = await tester.startGesture(firstLocation, pointer: 7);
+      await tester.pump();
+      await gesture.moveTo(secondDragLocation);
+      await tester.pump();
+      expect(tester.getTopLeft(find.text('H')), secondWidgetLocation);
+      await gesture.moveTo(thirdDragLocation);
+      await tester.pump();
+      expect(tester.getTopLeft(find.text('H')), thirdWidgetLocation);
+    });
+
+     testWidgets('Vertical axis draggable moves vertically', (WidgetTester tester) async {
+      await tester.pumpWidget(build());
+      final Offset firstLocation = tester.getTopLeft(find.text('V'));
+      final Offset secondLocation = firstLocation + const Offset(0.0, 300.0);
+      final Offset thirdLocation = firstLocation + const Offset(0.0, -300.0);
+      final TestGesture gesture = await tester.startGesture(firstLocation, pointer: 7);
+      await tester.pump();
+      await gesture.moveTo(secondLocation);
+      await tester.pump();
+      expect(tester.getTopLeft(find.text('V')), secondLocation);
+      await gesture.moveTo(thirdLocation);
+      await tester.pump();
+      expect(tester.getTopLeft(find.text('V')), thirdLocation);
+    });
+
+    testWidgets('Vertical axis draggable does not move horizontally', (WidgetTester tester) async {
+      await tester.pumpWidget(build());
+      final Offset firstLocation = tester.getTopLeft(find.text('V'));
+      final Offset secondDragLocation = firstLocation + const Offset(200.0, 300.0);
+      // The vertical drag widget won't scroll horizontally.
+      final Offset secondWidgetLocation = firstLocation + const Offset(0.0, 300.0);
+      final Offset thirdDragLocation = firstLocation + const Offset(-200.0, -300.0);
+      final Offset thirdWidgetLocation = firstLocation + const Offset(0.0, -300.0);
+      final TestGesture gesture = await tester.startGesture(firstLocation, pointer: 7);
+      await tester.pump();
+      await gesture.moveTo(secondDragLocation);
+      await tester.pump();
+      expect(tester.getTopLeft(find.text('V')), secondWidgetLocation);
+      await gesture.moveTo(thirdDragLocation);
+      await tester.pump();
+      expect(tester.getTopLeft(find.text('V')), thirdWidgetLocation);
+    });
+  });
+ 
+
   testWidgets('Drag and drop - onDraggableCanceled not called if dropped on accepting target', (WidgetTester tester) async {
     final List<int> accepted = <int>[];
     bool onDraggableCanceledCalled = false;
@@ -1513,7 +1641,7 @@ void main() {
   });
 }
 
-Future<Null> _testChildAnchorFeedbackPosition({WidgetTester tester, double top: 0.0, double left: 0.0}) async {
+Future<Null> _testChildAnchorFeedbackPosition({WidgetTester tester, double top = 0.0, double left = 0.0}) async {
   final List<int> accepted = <int>[];
   int dragStartedCount = 0;
 

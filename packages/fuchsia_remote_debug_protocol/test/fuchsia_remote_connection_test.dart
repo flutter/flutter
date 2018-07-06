@@ -1,4 +1,4 @@
-// Copyright 2018 The Flutter Authors. All rights reserved.
+// Copyright 2018 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -13,30 +13,22 @@ import 'package:fuchsia_remote_debug_protocol/fuchsia_remote_debug_protocol.dart
 void main() {
   group('FuchsiaRemoteConnection.connect', () {
     MockSshCommandRunner mockRunner;
+    List<MockPortForwarder> forwardedPorts;
+    List<MockPeer> mockPeerConnections;
+    List<Uri> uriConnections;
 
     setUp(() {
       mockRunner = new MockSshCommandRunner();
-    });
-
-    tearDown(() {
-      /// Most tests will mock out the port forwarding and connection
-      /// functions.
-      restoreFuchsiaPortForwardingFunction();
-      restoreVmServiceConnectionFunction();
-    });
-
-    test('end-to-end with three vm connections and flutter view query',
-        () async {
+      // Adds some extra junk to make sure the strings will be cleaned up.
+      when(mockRunner.run(any)).thenAnswer((_) =>
+          new Future<List<String>>.value(
+              <String>['123\n\n\n', '456  ', '789']));
       const String address = 'fe80::8eae:4cff:fef4:9247';
       const String interface = 'eno1';
-      // Adds some extra junk to make sure the strings will be cleaned up.
-      when(mockRunner.run(typed(any)))
-      .thenAnswer((_) => new Future<List<String>>.value(
-          <String>['123\n\n\n', '456  ', '789']));
       when(mockRunner.address).thenReturn(address);
       when(mockRunner.interface).thenReturn(interface);
+      forwardedPorts = <MockPortForwarder>[];
       int port = 0;
-      final List<MockPortForwarder> forwardedPorts = <MockPortForwarder>[];
       Future<PortForwarder> mockPortForwardingFunction(
           String address, int remotePort,
           [String interface = '', String configFile]) {
@@ -49,7 +41,6 @@ void main() {
         });
       }
 
-      int flutterViewIndex = 0;
       final List<Map<String, dynamic>> flutterViewCannedResponses =
           <Map<String, dynamic>>[
         <String, dynamic>{
@@ -92,23 +83,35 @@ void main() {
         },
       ];
 
-      final List<MockPeer> mockPeerConnections = <MockPeer>[];
-      final List<Uri> uriConnections = <Uri>[];
+      mockPeerConnections = <MockPeer>[];
+      uriConnections = <Uri>[];
       Future<json_rpc.Peer> mockVmConnectionFunction(Uri uri) {
         return new Future<json_rpc.Peer>(() async {
           final MockPeer mp = new MockPeer();
           mockPeerConnections.add(mp);
           uriConnections.add(uri);
-          when(mp.sendRequest(typed<String>(any), typed<String>(any)))
+          when(mp.sendRequest(any, any))
+              // The local ports match the desired indices for now, so get the
+              // canned response from the URI port.
               .thenAnswer((_) => new Future<Map<String, dynamic>>(
-                  () => flutterViewCannedResponses[flutterViewIndex++]));
+                  () => flutterViewCannedResponses[uri.port]));
           return mp;
         });
       }
 
       fuchsiaPortForwardingFunction = mockPortForwardingFunction;
       fuchsiaVmServiceConnectionFunction = mockVmConnectionFunction;
+    });
 
+    tearDown(() {
+      /// Most tests will mock out the port forwarding and connection
+      /// functions.
+      restoreFuchsiaPortForwardingFunction();
+      restoreVmServiceConnectionFunction();
+    });
+
+    test('end-to-end with three vm connections and flutter view query',
+        () async {
       final FuchsiaRemoteConnection connection =
           await FuchsiaRemoteConnection.connectWithSshCommandRunner(mockRunner);
 
@@ -140,6 +143,16 @@ void main() {
       verify(forwardedPorts[0].stop());
       verify(forwardedPorts[1].stop());
       verify(forwardedPorts[2].stop());
+    });
+
+    test('env variable test without remote addr', () async {
+      Future<Null> failingFunction() async {
+        await FuchsiaRemoteConnection.connect();
+      }
+
+      // Should fail as no env variable has been passed.
+      expect(failingFunction,
+          throwsA(const isInstanceOf<FuchsiaRemoteConnectionError>()));
     });
   });
 }

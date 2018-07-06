@@ -17,6 +17,17 @@ import 'material.dart';
 import 'slider_theme.dart';
 import 'theme.dart';
 
+// Examples can assume:
+// int _dollars = 0;
+// int _duelCommandment = 1;
+
+/// A callback that formats a numeric value from a [Slider] widget.
+///
+/// See also:
+///
+///   * [Slider.semanticFormatterCallback], which shows an example use case.
+typedef String SemanticFormatterCallback(double value);
+
 /// A Material Design slider.
 ///
 /// Used to select from a range of values.
@@ -47,7 +58,8 @@ import 'theme.dart';
 /// of the slider changes, the widget calls the [onChanged] callback. Most
 /// widgets that use a slider will listen for the [onChanged] callback and
 /// rebuild the slider with a new [value] to update the visual appearance of the
-/// slider.
+/// slider. To know when the value starts to change, or when it is done
+/// changing, set the optional callbacks [onChangeStart] and/or [onChangeEnd].
 ///
 /// By default, a slider will be as wide as possible, centered vertically. When
 /// given unbounded constraints, it will attempt to make the track 144 pixels
@@ -84,7 +96,12 @@ class Slider extends StatefulWidget {
   /// the slider.
   ///
   /// * [value] determines currently selected value for this slider.
-  /// * [onChanged] is called when the user selects a new value for the slider.
+  /// * [onChanged] is called while the user is selecting a new value for the
+  ///   slider.
+  /// * [onChangeStart] is called when the user starts to select a new value for
+  ///   the slider.
+  /// * [onChangeEnd] is called when the user is done selecting a new value for
+  ///   the slider.
   ///
   /// You can override some of the colors with the [activeColor] and
   /// [inactiveColor] properties, although more fine-grained control of the
@@ -93,12 +110,15 @@ class Slider extends StatefulWidget {
     Key key,
     @required this.value,
     @required this.onChanged,
-    this.min: 0.0,
-    this.max: 1.0,
+    this.onChangeStart,
+    this.onChangeEnd,
+    this.min = 0.0,
+    this.max = 1.0,
     this.divisions,
     this.label,
     this.activeColor,
     this.inactiveColor,
+    this.semanticFormatterCallback,
   }) : assert(value != null),
        assert(min != null),
        assert(max != null),
@@ -112,7 +132,8 @@ class Slider extends StatefulWidget {
   /// The slider's thumb is drawn at a position that corresponds to this value.
   final double value;
 
-  /// Called when the user selects a new value for the slider.
+  /// Called during a drag when the user is selecting a new value for the slider
+  /// by dragging.
   ///
   /// The slider passes the new value to the callback but does not actually
   /// change state until the parent widget rebuilds the slider with the new
@@ -123,6 +144,8 @@ class Slider extends StatefulWidget {
   /// The callback provided to onChanged should update the state of the parent
   /// [StatefulWidget] using the [State.setState] method, so that the parent
   /// gets rebuilt; for example:
+  ///
+  /// ## Sample code
   ///
   /// ```dart
   /// new Slider(
@@ -138,7 +161,81 @@ class Slider extends StatefulWidget {
   ///   },
   /// )
   /// ```
+  ///
+  /// See also:
+  ///
+  ///  * [onChangeStart] for a callback that is called when the user starts
+  ///    changing the value.
+  ///  * [onChangeEnd] for a callback that is called when the user stops
+  ///    changing the value.
   final ValueChanged<double> onChanged;
+
+  /// Called when the user starts selecting a new value for the slider.
+  ///
+  /// This callback shouldn't be used to update the slider [value] (use
+  /// [onChanged] for that), but rather to be notified when the user has started
+  /// selecting a new value by starting a drag or with a tap.
+  ///
+  /// The value passed will be the last [value] that the slider had before the
+  /// change began.
+  ///
+  /// ## Sample code
+  ///
+  /// ```dart
+  /// new Slider(
+  ///   value: _duelCommandment.toDouble(),
+  ///   min: 1.0,
+  ///   max: 10.0,
+  ///   divisions: 10,
+  ///   label: '$_duelCommandment',
+  ///   onChanged: (double newValue) {
+  ///     setState(() {
+  ///       _duelCommandment = newValue.round();
+  ///     });
+  ///   },
+  ///   onChangeStart: (double startValue) {
+  ///     print('Started change at $startValue');
+  ///   },
+  /// )
+  /// ```
+  ///
+  /// See also:
+  ///
+  ///  * [onChangeEnd] for a callback that is called when the value change is
+  ///    complete.
+  final ValueChanged<double> onChangeStart;
+
+  /// Called when the user is done selecting a new value for the slider.
+  ///
+  /// This callback shouldn't be used to update the slider [value] (use
+  /// [onChanged] for that), but rather to know when the user has completed
+  /// selecting a new [value] by ending a drag or a click.
+  ///
+  /// ## Sample code
+  ///
+  /// ```dart
+  /// new Slider(
+  ///   value: _duelCommandment.toDouble(),
+  ///   min: 1.0,
+  ///   max: 10.0,
+  ///   divisions: 10,
+  ///   label: '$_duelCommandment',
+  ///   onChanged: (double newValue) {
+  ///     setState(() {
+  ///       _duelCommandment = newValue.round();
+  ///     });
+  ///   },
+  ///   onChangeEnd: (double newValue) {
+  ///     print('Ended change on $newValue');
+  ///   },
+  /// )
+  /// ```
+  ///
+  /// See also:
+  ///
+  ///  * [onChangeStart] for a callback that is called when a value change
+  ///    begins.
+  final ValueChanged<double> onChangeEnd;
 
   /// The minimum value the user can select.
   ///
@@ -199,6 +296,36 @@ class Slider extends StatefulWidget {
   /// Using a [SliderTheme] gives much more fine-grained control over the
   /// appearance of various components of the slider.
   final Color inactiveColor;
+
+  /// The callback used to create a semantic value from a slider value.
+  ///
+  /// Defaults to formatting values as a percentage.
+  ///
+  /// This is used by accessibility frameworks like TalkBack on Android to
+  /// inform users what the currently selected value is with more context.
+  ///
+  /// ## Sample code:
+  ///
+  /// In the example below, a slider for currency values is configured to
+  /// announce a value with a currency label.
+  ///
+  /// ```dart
+  /// new Slider(
+  ///   value: _dollars.toDouble(),
+  ///   min: 20.0,
+  ///   max: 330.0,
+  ///   label: '$_dollars dollars',
+  ///   onChanged: (double newValue) {
+  ///     setState(() {
+  ///       _dollars = newValue.round();
+  ///     });
+  ///   },
+  ///   semanticFormatterCallback: (double newValue) {
+  ///     return '${newValue.round()} dollars';
+  ///   }
+  ///  )
+  /// ```
+  final SemanticFormatterCallback semanticFormatterCallback;
 
   @override
   _SliderState createState() => new _SliderState();
@@ -270,6 +397,16 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
     }
   }
 
+  void _handleDragStart(double value) {
+    assert(widget.onChangeStart != null);
+    widget.onChangeStart(_lerp(value));
+  }
+
+  void _handleDragEnd(double value) {
+    assert(widget.onChangeEnd != null);
+    widget.onChangeEnd(_lerp(value));
+  }
+
   // Returns a number between min and max, proportional to value, which must
   // be between 0.0 and 1.0.
   double _lerp(double value) {
@@ -314,7 +451,10 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
       sliderTheme: sliderTheme,
       mediaQueryData: MediaQuery.of(context),
       onChanged: (widget.onChanged != null) && (widget.max > widget.min) ? _handleChanged : null,
+      onChangeStart: widget.onChangeStart != null ? _handleDragStart : null,
+      onChangeEnd: widget.onChangeEnd != null ? _handleDragEnd : null,
       state: this,
+      semanticFormatterCallback: widget.semanticFormatterCallback,
     );
   }
 }
@@ -328,7 +468,10 @@ class _SliderRenderObjectWidget extends LeafRenderObjectWidget {
     this.sliderTheme,
     this.mediaQueryData,
     this.onChanged,
+    this.onChangeStart,
+    this.onChangeEnd,
     this.state,
+    this.semanticFormatterCallback,
   }) : super(key: key);
 
   final double value;
@@ -337,6 +480,9 @@ class _SliderRenderObjectWidget extends LeafRenderObjectWidget {
   final SliderThemeData sliderTheme;
   final MediaQueryData mediaQueryData;
   final ValueChanged<double> onChanged;
+  final ValueChanged<double> onChangeStart;
+  final ValueChanged<double> onChangeEnd;
+  final SemanticFormatterCallback semanticFormatterCallback;
   final _SliderState state;
 
   @override
@@ -349,8 +495,12 @@ class _SliderRenderObjectWidget extends LeafRenderObjectWidget {
       theme: Theme.of(context),
       mediaQueryData: mediaQueryData,
       onChanged: onChanged,
+      onChangeStart: onChangeStart,
+      onChangeEnd: onChangeEnd,
       state: state,
       textDirection: Directionality.of(context),
+      semanticFormatterCallback: semanticFormatterCallback,
+      platform: Theme.of(context).platform,
     );
   }
 
@@ -364,7 +514,11 @@ class _SliderRenderObjectWidget extends LeafRenderObjectWidget {
       ..theme = Theme.of(context)
       ..mediaQueryData = mediaQueryData
       ..onChanged = onChanged
-      ..textDirection = Directionality.of(context);
+      ..onChangeStart = onChangeStart
+      ..onChangeEnd = onChangeEnd
+      ..textDirection = Directionality.of(context)
+      ..semanticFormatterCallback = semanticFormatterCallback
+      ..platform = Theme.of(context).platform;
     // Ticker provider cannot change since there's a 1:1 relationship between
     // the _SliderRenderObjectWidget object and the _SliderState object.
   }
@@ -378,12 +532,18 @@ class _RenderSlider extends RenderBox {
     SliderThemeData sliderTheme,
     ThemeData theme,
     MediaQueryData mediaQueryData,
+    TargetPlatform platform,
     ValueChanged<double> onChanged,
+    SemanticFormatterCallback semanticFormatterCallback,
+    this.onChangeStart,
+    this.onChangeEnd,
     @required _SliderState state,
     @required TextDirection textDirection,
   }) : assert(value != null && value >= 0.0 && value <= 1.0),
        assert(state != null),
        assert(textDirection != null),
+       _platform = platform,
+       _semanticFormatterCallback = semanticFormatterCallback,
        _label = label,
        _value = value,
        _divisions = divisions,
@@ -427,7 +587,6 @@ class _RenderSlider extends RenderBox {
   static const double _preferredTrackWidth = 144.0;
   static const double _preferredTotalWidth = _preferredTrackWidth + _overlayDiameter;
   static const Duration _minimumInteractionTime = const Duration(milliseconds: 500);
-  static const double _adjustmentUnit = 0.1; // Matches iOS implementation of material slider.
   static final Tween<double> _overlayRadiusTween = new Tween<double>(begin: 0.0, end: _overlayRadius);
 
   _SliderState _state;
@@ -468,6 +627,25 @@ class _RenderSlider extends RenderBox {
     } else {
       _state.positionController.value = convertedValue;
     }
+    markNeedsSemanticsUpdate();
+  }
+
+  TargetPlatform _platform;
+  TargetPlatform get platform => _platform;
+  set platform(TargetPlatform value) {
+    if (_platform == value)
+      return;
+    _platform = value;
+    markNeedsSemanticsUpdate();
+  }
+
+  SemanticFormatterCallback _semanticFormatterCallback;
+  SemanticFormatterCallback get semanticFormatterCallback => _semanticFormatterCallback;
+  set semanticFormatterCallback(SemanticFormatterCallback value) {
+    if (_semanticFormatterCallback == value)
+      return;
+    _semanticFormatterCallback = value;
+    markNeedsSemanticsUpdate();
   }
 
   int get divisions => _divisions;
@@ -541,6 +719,9 @@ class _RenderSlider extends RenderBox {
     }
   }
 
+  ValueChanged<double> onChangeStart;
+  ValueChanged<double> onChangeEnd;
+
   TextDirection get textDirection => _textDirection;
   TextDirection _textDirection;
   set textDirection(TextDirection value) {
@@ -569,6 +750,19 @@ class _RenderSlider extends RenderBox {
         break;
     }
     return showValueIndicator;
+  }
+
+  double get _adjustmentUnit {
+    switch (_platform) {
+      case TargetPlatform.iOS:
+      // Matches iOS implementation of material slider.
+        return 0.1;
+      case TargetPlatform.android:
+      case TargetPlatform.fuchsia:
+      default:
+      // Matches Android implementation of material slider.
+        return 0.05;
+    }
   }
 
   void _updateLabelPainter() {
@@ -634,6 +828,12 @@ class _RenderSlider extends RenderBox {
   void _startInteraction(Offset globalPosition) {
     if (isInteractive) {
       _active = true;
+      // We supply the *current* value as the start location, so that if we have
+      // a tap, it consists of a call to onChangeStart with the previous value and
+      // a call to onChangeEnd with the new value.
+      if (onChangeStart != null) {
+        onChangeStart(_discretize(value));
+      }
       _currentDragValue = _getValueFromGlobalPosition(globalPosition);
       onChanged(_discretize(_currentDragValue));
       _state.overlayController.forward();
@@ -653,6 +853,9 @@ class _RenderSlider extends RenderBox {
 
   void _endInteraction() {
     if (_active && _state.mounted) {
+      if (onChangeEnd != null) {
+        onChangeEnd(_discretize(_currentDragValue));
+      }
       _active = false;
       _currentDragValue = 0.0;
       _state.overlayController.reverse();
@@ -881,8 +1084,18 @@ class _RenderSlider extends RenderBox {
 
     config.isSemanticBoundary = isInteractive;
     if (isInteractive) {
+      config.textDirection = textDirection;
       config.onIncrease = _increaseAction;
       config.onDecrease = _decreaseAction;
+      if (semanticFormatterCallback != null) {
+        config.value = semanticFormatterCallback(_state._lerp(value));
+        config.increasedValue = semanticFormatterCallback(_state._lerp((value + _semanticActionUnit).clamp(0.0, 1.0)));
+        config.decreasedValue = semanticFormatterCallback(_state._lerp((value - _semanticActionUnit).clamp(0.0, 1.0)));
+      } else {
+        config.value = '${(value * 100).round()}%';
+        config.increasedValue = '${((value + _semanticActionUnit).clamp(0.0, 1.0) * 100).round()}%';
+        config.decreasedValue = '${((value - _semanticActionUnit).clamp(0.0, 1.0) * 100).round()}%';
+      }
     }
   }
 

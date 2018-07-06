@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
 import 'button_theme.dart';
@@ -84,8 +83,8 @@ class Step {
     @required this.title,
     this.subtitle,
     @required this.content,
-    this.state: StepState.indexed,
-    this.isActive: false,
+    this.state = StepState.indexed,
+    this.isActive = false,
   }) : assert(title != null),
        assert(content != null),
        assert(state != null);
@@ -136,8 +135,8 @@ class Stepper extends StatefulWidget {
   Stepper({
     Key key,
     @required this.steps,
-    this.type: StepperType.vertical,
-    this.currentStep: 0,
+    this.type = StepperType.vertical,
+    this.currentStep = 0,
     this.onStepTapped,
     this.onStepContinue,
     this.onStepCancel,

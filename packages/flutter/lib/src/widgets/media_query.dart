@@ -37,12 +37,12 @@ class MediaQueryData {
   /// Consider using [MediaQueryData.fromWindow] to create data based on a
   /// [Window].
   const MediaQueryData({
-    this.size: Size.zero,
-    this.devicePixelRatio: 1.0,
-    this.textScaleFactor: 1.0,
-    this.padding: EdgeInsets.zero,
-    this.viewInsets: EdgeInsets.zero,
-    this.alwaysUse24HourFormat: false,
+    this.size = Size.zero,
+    this.devicePixelRatio = 1.0,
+    this.textScaleFactor = 1.0,
+    this.padding = EdgeInsets.zero,
+    this.viewInsets = EdgeInsets.zero,
+    this.alwaysUse24HourFormat = false,
   });
 
   /// Creates data for a media query based on the given window.
@@ -76,6 +76,11 @@ class MediaQueryData {
   ///
   /// For example, if the text scale factor is 1.5, text will be 50% larger than
   /// the specified font size.
+  ///
+  /// See also:
+  ///
+  ///  * [MediaQuery.textScaleFactorOf], a convenience method which returns the
+  ///    textScaleFactor defined for a [BuildContext].
   final double textScaleFactor;
 
   /// The number of physical pixels on each side of the display rectangle into
@@ -93,7 +98,7 @@ class MediaQueryData {
   /// If you consumed this padding (e.g. by building a widget that envelops or
   /// accounts for this padding in its layout in such a way that children are
   /// no longer exposed to this padding), you should remove this padding
-  /// for subsequent descendents in the widget tree by inserting a new
+  /// for subsequent descendants in the widget tree by inserting a new
   /// [MediaQuery] widget using the [MediaQuery.removePadding] factory.
   ///
   /// See also:
@@ -155,10 +160,10 @@ class MediaQueryData {
   ///    adds a [Padding] widget.
   ///  * [removeViewInsets], the same thing but for [viewInsets].
   MediaQueryData removePadding({
-    bool removeLeft: false,
-    bool removeTop: false,
-    bool removeRight: false,
-    bool removeBottom: false,
+    bool removeLeft = false,
+    bool removeTop = false,
+    bool removeRight = false,
+    bool removeBottom = false,
   }) {
     if (!(removeLeft || removeTop || removeRight || removeBottom))
       return this;
@@ -190,10 +195,10 @@ class MediaQueryData {
   ///    padding from the ambient [MediaQuery].
   ///  * [removePadding], the same thing but for [padding].
   MediaQueryData removeViewInsets({
-    bool removeLeft: false,
-    bool removeTop: false,
-    bool removeRight: false,
-    bool removeBottom: false,
+    bool removeLeft = false,
+    bool removeTop = false,
+    bool removeRight = false,
+    bool removeBottom = false,
   }) {
     if (!(removeLeft || removeTop || removeRight || removeBottom))
       return this;
@@ -278,7 +283,7 @@ class MediaQuery extends InheritedWidget {
   ///
   /// This should be inserted into the widget tree when the [MediaQuery] padding
   /// is consumed by a widget in such a way that the padding is no longer
-  /// exposed to the widget's descendents or siblings.
+  /// exposed to the widget's descendants or siblings.
   ///
   /// The [context] argument is required, must not be null, and must have a
   /// [MediaQuery] in scope.
@@ -299,10 +304,10 @@ class MediaQuery extends InheritedWidget {
   factory MediaQuery.removePadding({
     Key key,
     @required BuildContext context,
-    bool removeLeft: false,
-    bool removeTop: false,
-    bool removeRight: false,
-    bool removeBottom: false,
+    bool removeLeft = false,
+    bool removeTop = false,
+    bool removeRight = false,
+    bool removeBottom = false,
     @required Widget child,
   }) {
     return new MediaQuery(
@@ -322,7 +327,7 @@ class MediaQuery extends InheritedWidget {
   ///
   /// This should be inserted into the widget tree when the [MediaQuery] view
   /// insets are consumed by a widget in such a way that the view insets are no
-  /// longer exposed to the widget's descendents or siblings.
+  /// longer exposed to the widget's descendants or siblings.
   ///
   /// The [context] argument is required, must not be null, and must have a
   /// [MediaQuery] in scope.
@@ -341,10 +346,10 @@ class MediaQuery extends InheritedWidget {
   factory MediaQuery.removeViewInsets({
     Key key,
     @required BuildContext context,
-    bool removeLeft: false,
-    bool removeTop: false,
-    bool removeRight: false,
-    bool removeBottom: false,
+    bool removeLeft = false,
+    bool removeTop = false,
+    bool removeRight = false,
+    bool removeBottom = false,
     @required Widget child,
   }) {
     return new MediaQuery(
@@ -383,7 +388,7 @@ class MediaQuery extends InheritedWidget {
   ///
   /// If you use this from a widget (e.g. in its build function), consider
   /// calling [debugCheckHasMediaQuery].
-  static MediaQueryData of(BuildContext context, { bool nullOk: false }) {
+  static MediaQueryData of(BuildContext context, { bool nullOk = false }) {
     assert(context != null);
     assert(nullOk != null);
     final MediaQuery query = context.inheritFromWidgetOfExactType(MediaQuery);
@@ -400,6 +405,12 @@ class MediaQuery extends InheritedWidget {
       'The context used was:\n'
       '  $context'
     );
+  }
+
+  /// Returns textScaleFactor for the nearest MediaQuery ancestor or 1.0, if
+  /// no such ancestor exists.
+  static double textScaleFactorOf(BuildContext context) {
+    return MediaQuery.of(context, nullOk: true)?.textScaleFactor ?? 1.0;
   }
 
   @override

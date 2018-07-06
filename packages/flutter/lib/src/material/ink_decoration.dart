@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
@@ -149,10 +148,10 @@ class Ink extends StatefulWidget {
     @required ImageProvider image,
     ColorFilter colorFilter,
     BoxFit fit,
-    AlignmentGeometry alignment: Alignment.center,
+    AlignmentGeometry alignment = Alignment.center,
     Rect centerSlice,
-    ImageRepeat repeat: ImageRepeat.noRepeat,
-    bool matchTextDirection: false,
+    ImageRepeat repeat = ImageRepeat.noRepeat,
+    bool matchTextDirection = false,
     this.width,
     this.height,
     this.child,

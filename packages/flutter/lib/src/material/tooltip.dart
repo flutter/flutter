@@ -4,7 +4,6 @@
 
 import 'dart:async';
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
@@ -44,11 +43,11 @@ class Tooltip extends StatefulWidget {
   const Tooltip({
     Key key,
     @required this.message,
-    this.height: 32.0,
-    this.padding: const EdgeInsets.symmetric(horizontal: 16.0),
-    this.verticalOffset: 24.0,
-    this.preferBelow: true,
-    this.excludeFromSemantics: false,
+    this.height = 32.0,
+    this.padding = const EdgeInsets.symmetric(horizontal: 16.0),
+    this.verticalOffset = 24.0,
+    this.preferBelow = true,
+    this.excludeFromSemantics = false,
     this.child,
   }) : assert(message != null),
        assert(height != null),
@@ -147,6 +146,7 @@ class _TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
     _entry = new OverlayEntry(builder: (BuildContext context) => overlay);
     Overlay.of(context, debugRequiredFor: widget).insert(_entry);
     GestureBinding.instance.pointerRouter.addGlobalRoute(_handlePointerEvent);
+    SemanticsService.tooltip(widget.message);
     _controller.forward();
     return true;
   }

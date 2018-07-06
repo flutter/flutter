@@ -60,6 +60,13 @@ class TimelineSummary {
     return _maxInMillis(_extractDuration(_extractGpuRasterizerDrawEvents()));
   }
 
+  /// The [p]-th percentile frame rasterization time in milliseconds.
+  ///
+  /// Returns null if no frames were recorded.
+  double computePercentileFrameRasterizerTimeMillis(double p) {
+    return _percentileInMillis(_extractDuration(_extractGpuRasterizerDrawEvents()), p);
+  }
+
   /// The number of frames that missed the [kBuildBudget] on the GPU and
   /// therefore are in the danger of missing frames.
   int computeMissedFrameRasterizerBudgetCount([Duration frameBuildBudget = kBuildBudget]) => _extractGpuRasterizerDrawEvents()
@@ -76,6 +83,8 @@ class TimelineSummary {
       'worst_frame_build_time_millis': computeWorstFrameBuildTimeMillis(),
       'missed_frame_build_budget_count': computeMissedFrameBuildBudgetCount(),
       'average_frame_rasterizer_time_millis': computeAverageFrameRasterizerTimeMillis(),
+      '90th_percentile_frame_rasterizer_time_millis': computePercentileFrameRasterizerTimeMillis(90.0),
+      '99th_percentile_frame_rasterizer_time_millis': computePercentileFrameRasterizerTimeMillis(99.0),
       'worst_frame_rasterizer_time_millis': computeWorstFrameRasterizerTimeMillis(),
       'missed_frame_rasterizer_budget_count': computeMissedFrameRasterizerBudgetCount(),
       'frame_count': countFrames(),
@@ -92,7 +101,7 @@ class TimelineSummary {
   Future<Null> writeTimelineToFile(
     String traceName, {
     String destinationDirectory,
-    bool pretty: false,
+    bool pretty = false,
   }) async {
     destinationDirectory ??= testOutputsDirectory;
     await fs.directory(destinationDirectory).create(recursive: true);
@@ -104,7 +113,7 @@ class TimelineSummary {
   Future<Null> writeSummaryToFile(
     String traceName, {
     String destinationDirectory,
-    bool pretty: false,
+    bool pretty = false,
   }) async {
     destinationDirectory ??= testOutputsDirectory;
     await fs.directory(destinationDirectory).create(recursive: true);
@@ -153,15 +162,26 @@ class TimelineSummary {
 
   double _averageInMillis(Iterable<Duration> durations) {
     if (durations.isEmpty)
-      return null;
+      throw new ArgumentError('durations is empty!');
 
     final int total = durations.fold<int>(0, (int t, Duration duration) => t + duration.inMilliseconds);
     return total / durations.length;
   }
 
+  double _percentileInMillis(Iterable<Duration> durations, double percentile) {
+    if (durations.isEmpty)
+      throw new ArgumentError('durations is empty!');
+
+    assert(percentile >= 0.0 && percentile <= 100.0);
+    final List<double> doubles = durations.map<double>((Duration duration) => duration.inMilliseconds.toDouble()).toList();
+    doubles.sort();
+    return doubles[((doubles.length - 1) * (percentile / 100)).round()];
+
+  }
+
   double _maxInMillis(Iterable<Duration> durations) {
     if (durations.isEmpty)
-      return null;
+      throw new ArgumentError('durations is empty!');
 
     return durations
         .map<double>((Duration duration) => duration.inMilliseconds.toDouble())

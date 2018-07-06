@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:ui' show hashValues;
-import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
 import 'material_localizations.dart';

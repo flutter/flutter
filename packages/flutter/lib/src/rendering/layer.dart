@@ -2,8 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
 import 'dart:collection';
-import 'dart:ui' as ui show ImageFilter, Picture, SceneBuilder;
+import 'dart:ui' as ui show Image, ImageFilter, Picture, Scene, SceneBuilder;
 import 'dart:ui' show Offset;
 
 import 'package:flutter/foundation.dart';
@@ -88,6 +89,19 @@ abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
     assert(!attached);
   }
 
+  /// Returns the value of [S] that corresponds to the point described by
+  /// [regionOffset].
+  ///
+  /// Returns null if no matching region is found.
+  ///
+  /// The main way for a value to be assigned here is by pushing an
+  /// [AnnotatedRegionLayer] into the layer tree.
+  ///
+  /// See also:
+  ///
+  ///   * [AnnotatedRegionLayer], for placing values in the layer tree.
+  S find<S>(Offset regionOffset);
+
   /// Override this method to upload this layer to the engine.
   ///
   /// The `layerOffset` is the accumulated offset of this layer's parent from the
@@ -165,6 +179,9 @@ class PictureLayer extends Layer {
     super.debugFillProperties(properties);
     properties.add(new DiagnosticsProperty<Rect>('paint bounds', canvasBounds));
   }
+
+  @override
+  S find<S>(Offset regionOffset) => null;
 }
 
 /// A composited layer that maps a backend texture to a rectangle.
@@ -217,6 +234,9 @@ class TextureLayer extends Layer {
       height: shiftedRect.height,
     );
   }
+
+  @override
+  S find<S>(Offset regionOffset) => null;
 }
 
 /// A layer that indicates to the compositor that it should display
@@ -279,6 +299,9 @@ class PerformanceOverlayLayer extends Layer {
     builder.setCheckerboardRasterCacheImages(checkerboardRasterCacheImages);
     builder.setCheckerboardOffscreenLayers(checkerboardOffscreenLayers);
   }
+
+  @override
+  S find<S>(Offset regionOffset) => null;
 }
 
 /// A composited layer that has a list of children.
@@ -313,6 +336,19 @@ class ContainerLayer extends Layer {
       assert(child.attached == attached);
     }
     return child == equals;
+  }
+
+  @override
+  S find<S>(Offset regionOffset) {
+    Layer current = lastChild;
+    while (current != null) {
+      final Object value = current.find<S>(regionOffset);
+      if (value != null) {
+        return value;
+      }
+      current = current.previousSibling;
+    }
+    return null;
   }
 
   @override
@@ -494,7 +530,7 @@ class OffsetLayer extends ContainerLayer {
   ///
   /// By default, [offset] is zero. It must be non-null before the compositing
   /// phase of the pipeline.
-  OffsetLayer({ this.offset: Offset.zero });
+  OffsetLayer({ this.offset = Offset.zero });
 
   /// Offset from parent in the parent's coordinate system.
   ///
@@ -506,6 +542,11 @@ class OffsetLayer extends ContainerLayer {
   Offset offset;
 
   @override
+  S find<S>(Offset regionOffset) {
+    return super.find<S>(regionOffset - offset);
+  }
+
+  @override
   void addToScene(ui.SceneBuilder builder, Offset layerOffset) {
     addChildrenToScene(builder, offset + layerOffset);
   }
@@ -515,9 +556,50 @@ class OffsetLayer extends ContainerLayer {
     super.debugFillProperties(properties);
     properties.add(new DiagnosticsProperty<Offset>('offset', offset));
   }
+
+  /// Capture an image of the current state of this layer and its children.
+  ///
+  /// The returned [ui.Image] has uncompressed raw RGBA bytes, will be offset
+  /// by the top-left corner of [bounds], and have dimensions equal to the size
+  /// of [bounds] multiplied by [pixelRatio].
+  ///
+  /// The [pixelRatio] describes the scale between the logical pixels and the
+  /// size of the output image. It is independent of the
+  /// [window.devicePixelRatio] for the device, so specifying 1.0 (the default)
+  /// will give you a 1:1 mapping between logical pixels and the output pixels
+  /// in the image.
+  ///
+  /// See also:
+  ///
+  ///  * [RenderRepaintBoundary.toImage] for a similar API at the render object level.
+  ///  * [dart:ui.Scene.toImage] for more information about the image returned.
+  Future<ui.Image> toImage(Rect bounds, {double pixelRatio = 1.0}) async {
+    assert(bounds != null);
+    assert(pixelRatio != null);
+    final ui.SceneBuilder builder = new ui.SceneBuilder();
+    final Matrix4 transform = new Matrix4.translationValues(bounds.left - offset.dx, bounds.top - offset.dy, 0.0);
+    transform.scale(pixelRatio, pixelRatio);
+    builder.pushTransform(transform.storage);
+    addToScene(builder, Offset.zero);
+    final ui.Scene scene = builder.build();
+    try {
+      // Size is rounded up to the next pixel to make sure we don't clip off
+      // anything.
+      return await scene.toImage(
+        (pixelRatio * bounds.width).ceil(),
+        (pixelRatio * bounds.height).ceil(),
+      );
+    } finally {
+      scene.dispose();
+    }
+  }
 }
 
 /// A composite layer that clips its children using a rectangle.
+///
+/// When debugging, setting [debugDisableClipLayers] to true will cause this
+/// layer to be skipped (directly replaced by its children). This can be helpful
+/// to track down the cause of performance problems.
 class ClipRectLayer extends ContainerLayer {
   /// Creates a layer with a rectangular clip.
   ///
@@ -532,11 +614,23 @@ class ClipRectLayer extends ContainerLayer {
   Rect clipRect;
 
   @override
+  S find<S>(Offset regionOffset) {
+    if (!clipRect.contains(regionOffset))
+      return null;
+    return super.find<S>(regionOffset);
+  }
+
+  @override
   void addToScene(ui.SceneBuilder builder, Offset layerOffset) {
-    if (!debugDisableClipLayers)
+    bool enabled = true;
+    assert(() {
+      enabled = !debugDisableClipLayers;
+      return true;
+    }());
+    if (enabled)
       builder.pushClipRect(clipRect.shift(layerOffset));
     addChildrenToScene(builder, layerOffset);
-    if (!debugDisableClipLayers)
+    if (enabled)
       builder.pop();
   }
 
@@ -548,6 +642,10 @@ class ClipRectLayer extends ContainerLayer {
 }
 
 /// A composite layer that clips its children using a rounded rectangle.
+///
+/// When debugging, setting [debugDisableClipLayers] to true will cause this
+/// layer to be skipped (directly replaced by its children). This can be helpful
+/// to track down the cause of performance problems.
 class ClipRRectLayer extends ContainerLayer {
   /// Creates a layer with a rounded-rectangular clip.
   ///
@@ -562,11 +660,23 @@ class ClipRRectLayer extends ContainerLayer {
   RRect clipRRect;
 
   @override
+  S find<S>(Offset regionOffset) {
+    if (!clipRRect.contains(regionOffset))
+      return null;
+    return super.find<S>(regionOffset);
+  }
+
+  @override
   void addToScene(ui.SceneBuilder builder, Offset layerOffset) {
-    if (!debugDisableClipLayers)
+    bool enabled = true;
+    assert(() {
+      enabled = !debugDisableClipLayers;
+      return true;
+    }());
+    if (enabled)
       builder.pushClipRRect(clipRRect.shift(layerOffset));
     addChildrenToScene(builder, layerOffset);
-    if (!debugDisableClipLayers)
+    if (enabled)
       builder.pop();
   }
 
@@ -578,6 +688,10 @@ class ClipRRectLayer extends ContainerLayer {
 }
 
 /// A composite layer that clips its children using a path.
+///
+/// When debugging, setting [debugDisableClipLayers] to true will cause this
+/// layer to be skipped (directly replaced by its children). This can be helpful
+/// to track down the cause of performance problems.
 class ClipPathLayer extends ContainerLayer {
   /// Creates a layer with a path-based clip.
   ///
@@ -592,11 +706,23 @@ class ClipPathLayer extends ContainerLayer {
   Path clipPath;
 
   @override
+  S find<S>(Offset regionOffset) {
+    if (!clipPath.contains(regionOffset))
+      return null;
+    return super.find<S>(regionOffset);
+  }
+
+  @override
   void addToScene(ui.SceneBuilder builder, Offset layerOffset) {
-    if (!debugDisableClipLayers)
+    bool enabled = true;
+    assert(() {
+      enabled = !debugDisableClipLayers;
+      return true;
+    }());
+    if (enabled)
       builder.pushClipPath(clipPath.shift(layerOffset));
     addChildrenToScene(builder, layerOffset);
-    if (!debugDisableClipLayers)
+    if (enabled)
       builder.pop();
   }
 }
@@ -611,7 +737,9 @@ class TransformLayer extends OffsetLayer {
   ///
   /// The [transform] and [offset] properties must be non-null before the
   /// compositing phase of the pipeline.
-  TransformLayer({ this.transform, Offset offset: Offset.zero }) : super(offset: offset);
+  TransformLayer({ Matrix4 transform, Offset offset = Offset.zero })
+    : _transform = transform,
+      super(offset: offset);
 
   /// The matrix to apply.
   ///
@@ -622,9 +750,18 @@ class TransformLayer extends OffsetLayer {
   ///
   /// The [transform] property must be non-null before the compositing phase of
   /// the pipeline.
-  Matrix4 transform;
+  Matrix4 get transform => _transform;
+  Matrix4 _transform;
+  set transform(Matrix4 value) {
+    if (value == _transform)
+      return;
+    _transform = value;
+    _inverseDirty = true;
+  }
 
   Matrix4 _lastEffectiveTransform;
+  Matrix4 _invertedTransform;
+  bool _inverseDirty = true;
 
   @override
   void addToScene(ui.SceneBuilder builder, Offset layerOffset) {
@@ -637,6 +774,19 @@ class TransformLayer extends OffsetLayer {
     builder.pushTransform(_lastEffectiveTransform.storage);
     addChildrenToScene(builder, Offset.zero);
     builder.pop();
+  }
+
+  @override
+  S find<S>(Offset regionOffset) {
+    if (_inverseDirty) {
+      _invertedTransform = Matrix4.tryInvert(transform);
+      _inverseDirty = false;
+    }
+    if (_invertedTransform == null)
+      return null;
+    final Vector4 vector = new Vector4(regionOffset.dx, regionOffset.dy, 0.0, 1.0);
+    final Vector4 result = _invertedTransform.transform(vector);
+    return super.find<S>(new Offset(result[0], result[1]));
   }
 
   @override
@@ -654,6 +804,10 @@ class TransformLayer extends OffsetLayer {
 }
 
 /// A composited layer that makes its children partially transparent.
+///
+/// When debugging, setting [debugDisableOpacityLayers] to true will cause this
+/// layer to be skipped (directly replaced by its children). This can be helpful
+/// to track down the cause of performance problems.
 class OpacityLayer extends ContainerLayer {
   /// Creates an opacity layer.
   ///
@@ -672,10 +826,15 @@ class OpacityLayer extends ContainerLayer {
 
   @override
   void addToScene(ui.SceneBuilder builder, Offset layerOffset) {
-    if (!debugDisableOpacityLayers)
+    bool enabled = true;
+    assert(() {
+      enabled = !debugDisableOpacityLayers;
+      return true;
+    }());
+    if (enabled)
       builder.pushOpacity(alpha);
     addChildrenToScene(builder, layerOffset);
-    if (!debugDisableOpacityLayers)
+    if (enabled)
       builder.pop();
   }
 
@@ -755,6 +914,10 @@ class BackdropFilterLayer extends ContainerLayer {
 /// For example, the layer casts a shadow according to its geometry and the
 /// relative position of lights and other physically modelled objects in the
 /// scene.
+///
+/// When debugging, setting [debugDisablePhysicalShapeLayers] to true will cause this
+/// layer to be skipped (directly replaced by its children). This can be helpful
+/// to track down the cause of performance problems.
 class PhysicalModelLayer extends ContainerLayer {
   /// Creates a composited layer that uses a physical model to producing
   /// lighting effects.
@@ -780,6 +943,12 @@ class PhysicalModelLayer extends ContainerLayer {
   ///
   /// The scene must be explicitly recomposited after this property is changed
   /// (as described at [Layer]).
+  ///
+  /// In tests, the [debugDisableShadows] flag is set to true by default.
+  /// Several widgets and render objects force all elevations to zero when this
+  /// flag is set. For this reason, this property will often be set to zero in
+  /// tests even if the layer should be raised. To verify the actual value,
+  /// consider setting [debugDisableShadows] to false in your test.
   double elevation;
 
   /// The background color.
@@ -792,16 +961,29 @@ class PhysicalModelLayer extends ContainerLayer {
   Color shadowColor;
 
   @override
+  S find<S>(Offset regionOffset) {
+    if (!clipPath.contains(regionOffset))
+      return null;
+    return super.find<S>(regionOffset);
+  }
+
+  @override
   void addToScene(ui.SceneBuilder builder, Offset layerOffset) {
-    if (!debugDisablePhysicalShapeLayers)
+    bool enabled = true;
+    assert(() {
+      enabled = !debugDisablePhysicalShapeLayers;
+      return true;
+    }());
+    if (enabled) {
       builder.pushPhysicalShape(
         path: clipPath.shift(layerOffset),
         elevation: elevation,
         color: color,
         shadowColor: shadowColor,
       );
+    }
     addChildrenToScene(builder, layerOffset);
-    if (!debugDisablePhysicalShapeLayers)
+    if (enabled)
       builder.pop();
   }
 
@@ -848,7 +1030,7 @@ class LeaderLayer extends ContainerLayer {
   ///
   /// The [offset] property must be non-null before the compositing phase of the
   /// pipeline.
-  LeaderLayer({ @required this.link, this.offset: Offset.zero }) : assert(link != null);
+  LeaderLayer({ @required this.link, this.offset = Offset.zero }) : assert(link != null);
 
   /// The object with which this layer should register.
   ///
@@ -887,6 +1069,11 @@ class LeaderLayer extends ContainerLayer {
   /// catch cases where the follower layer ends up before the leader layer, but
   /// not every case can be detected.
   Offset _lastOffset;
+
+  @override
+  S find<S>(Offset regionOffset) {
+    return super.find(regionOffset - offset);
+  }
 
   @override
   void addToScene(ui.SceneBuilder builder, Offset layerOffset) {
@@ -940,9 +1127,9 @@ class FollowerLayer extends ContainerLayer {
   /// must be non-null before the compositing phase of the pipeline.
   FollowerLayer({
     @required this.link,
-    this.showWhenUnlinked: true,
-    this.unlinkedOffset: Offset.zero,
-    this.linkedOffset: Offset.zero,
+    this.showWhenUnlinked = true,
+    this.unlinkedOffset = Offset.zero,
+    this.linkedOffset = Offset.zero,
   }) : assert(link != null);
 
   /// The link to the [LeaderLayer].
@@ -996,6 +1183,24 @@ class FollowerLayer extends ContainerLayer {
 
   Offset _lastOffset;
   Matrix4 _lastTransform;
+  Matrix4 _invertedTransform;
+  bool _inverseDirty = true;
+
+  @override
+  S find<S>(Offset regionOffset) {
+    if (link.leader == null) {
+      return showWhenUnlinked ? super.find<S>(regionOffset - unlinkedOffset) : null;
+    }
+    if (_inverseDirty) {
+      _invertedTransform = Matrix4.tryInvert(getLastTransform());
+      _inverseDirty = false;
+    }
+    if (_invertedTransform == null)
+      return null;
+    final Vector4 vector = new Vector4(regionOffset.dx, regionOffset.dy, 0.0, 1.0);
+    final Vector4 result = _invertedTransform.transform(vector);
+    return super.find<S>(new Offset(result[0] - linkedOffset.dx, result[1] - linkedOffset.dy));
+  }
 
   /// The transform that was used during the last composition phase.
   ///
@@ -1071,6 +1276,7 @@ class FollowerLayer extends ContainerLayer {
     inverseTransform.multiply(forwardTransform);
     inverseTransform.translate(linkedOffset.dx, linkedOffset.dy);
     _lastTransform = inverseTransform;
+    _inverseDirty = true;
   }
 
   @override
@@ -1080,6 +1286,7 @@ class FollowerLayer extends ContainerLayer {
     if (link.leader == null && !showWhenUnlinked) {
       _lastTransform = null;
       _lastOffset = null;
+      _inverseDirty = true;
       return;
     }
     _establishTransform();
@@ -1092,6 +1299,7 @@ class FollowerLayer extends ContainerLayer {
       _lastOffset = null;
       addChildrenToScene(builder, unlinkedOffset + layerOffset);
     }
+    _inverseDirty = true;
   }
 
   @override
@@ -1107,5 +1315,48 @@ class FollowerLayer extends ContainerLayer {
     super.debugFillProperties(properties);
     properties.add(new DiagnosticsProperty<LayerLink>('link', link));
     properties.add(new TransformProperty('transform', getLastTransform(), defaultValue: null));
+  }
+}
+
+/// A composited layer which annotates its children with a value.
+///
+/// These values can be retrieved using [Layer.find] with a given [Offset]. If
+/// a [Size] is provided to this layer, then find will check if the provided
+/// offset is within the bounds of the layer.
+class AnnotatedRegionLayer<T> extends ContainerLayer {
+  /// Creates a new layer annotated with [value] that clips to [size] if provided.
+  ///
+  /// The value provided cannot be null.
+  AnnotatedRegionLayer(this.value, {this.size}) : assert(value != null);
+
+  /// The value returned by [find] if the offset is contained within this layer.
+  final T value;
+
+  /// The [size] is optionally used to clip the hit-testing of [find].
+  ///
+  /// If not provided, all offsets are considered to be contained within this
+  /// layer, unless an ancestor layer applies a clip.
+  final Size size;
+
+  @override
+  S find<S>(Offset regionOffset) {
+    final S result = super.find<S>(regionOffset);
+    if (result != null)
+      return result;
+    if (size != null && !size.contains(regionOffset))
+      return null;
+    if (T == S) {
+      final Object untypedResult = value;
+      final S typedResult = untypedResult;
+      return typedResult;
+    }
+    return super.find<S>(regionOffset);
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(new DiagnosticsProperty<T>('value', value));
+    properties.add(new DiagnosticsProperty<Size>('size', size, defaultValue: null));
   }
 }

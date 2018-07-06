@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
@@ -81,8 +80,8 @@ class CupertinoPageRoute<T> extends PageRoute<T> {
   CupertinoPageRoute({
     @required this.builder,
     RouteSettings settings,
-    this.maintainState: true,
-    bool fullscreenDialog: false,
+    this.maintainState = true,
+    bool fullscreenDialog = false,
     this.hostRoute,
   }) : assert(builder != null),
        assert(maintainState != null),
@@ -237,7 +236,11 @@ class CupertinoPageRoute<T> extends PageRoute<T> {
 
   @override
   Widget buildPage(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
-    final Widget result = builder(context);
+    final Widget result = new Semantics(
+      scopesRoute: true,
+      explicitChildNodes: true,
+      child: builder(context),
+    );
     assert(() {
       if (result == null) {
         throw new FlutterError(

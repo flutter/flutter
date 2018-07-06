@@ -15,7 +15,6 @@ import '../base/common.dart' show throwToolExit;
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
-import '../base/port_scanner.dart';
 import '../base/process.dart';
 import '../base/process_manager.dart';
 import '../base/utils.dart';
@@ -279,7 +278,7 @@ class AndroidDevice extends Device {
       return false;
 
     final Status status = logger.startProgress('Installing ${apk.apkPath}...', expectSlowOperation: true);
-    final RunResult installResult = await runAsync(adbCommandForDevice(<String>['install', '-r', apk.apkPath]));
+    final RunResult installResult = await runAsync(adbCommandForDevice(<String>['install', '-t', '-r', apk.apkPath]));
     status.stop();
     // Some versions of adb exit with exit code 0 even on failure :(
     // Parsing the output to check for failures.
@@ -352,10 +351,10 @@ class AndroidDevice extends Device {
     String route,
     DebuggingOptions debuggingOptions,
     Map<String, dynamic> platformArgs,
-    bool prebuiltApplication: false,
-    bool applicationNeedsRebuild: false,
-    bool usesTerminalUi: true,
-    bool ipv6: false,
+    bool prebuiltApplication = false,
+    bool applicationNeedsRebuild = false,
+    bool usesTerminalUi = true,
+    bool ipv6 = false,
   }) async {
     if (!await _checkForSupportedAdbVersion() || !await _checkForSupportedAndroidVersion())
       return new LaunchResult.failed();
@@ -510,13 +509,16 @@ class AndroidDevice extends Device {
   bool get supportsScreenshot => true;
 
   @override
-  Future<Null> takeScreenshot(File outputFile) async {
+  Future<void> takeScreenshot(File outputFile) async {
     const String remotePath = '/data/local/tmp/flutter_screenshot.png';
     await runCheckedAsync(adbCommandForDevice(<String>['shell', 'screencap', '-p', remotePath]));
     await runCheckedAsync(adbCommandForDevice(<String>['pull', remotePath, outputFile.path]));
     await runCheckedAsync(adbCommandForDevice(<String>['shell', 'rm', remotePath]));
   }
 
+  // TODO(dantup): discoverApps is no longer used and can possibly be removed.
+  // Waiting for a response here:
+  // https://github.com/flutter/flutter/pull/18873#discussion_r198862179
   @override
   Future<List<DiscoveredApp>> discoverApps() async {
     final RegExp discoverExp = new RegExp(r'DISCOVER: (.*)');
@@ -844,7 +846,7 @@ class _AndroidDevicePortForwarder extends DevicePortForwarder {
         final int devicePort = _extractPort(splitLine[2]);
 
         // Failed, skip.
-        if ((hostPort == null) || (devicePort == null))
+        if (hostPort == null || devicePort == null)
           continue;
 
         ports.add(new ForwardedPort(hostPort, devicePort));
@@ -855,15 +857,29 @@ class _AndroidDevicePortForwarder extends DevicePortForwarder {
   }
 
   @override
-  Future<int> forward(int devicePort, { int hostPort }) async {
-    if ((hostPort == null) || (hostPort == 0)) {
-      // Auto select host port.
-      hostPort = await portScanner.findAvailablePort();
-    }
-
-    await runCheckedAsync(device.adbCommandForDevice(
+  Future<int> forward(int devicePort, {int hostPort}) async {
+    hostPort ??= 0;
+    final RunResult process = await runCheckedAsync(device.adbCommandForDevice(
       <String>['forward', 'tcp:$hostPort', 'tcp:$devicePort']
     ));
+
+    if (process.stderr.isNotEmpty)
+      process.throwException('adb returned error:\n${process.stderr}');
+
+    if (process.exitCode != 0) {
+      if (process.stdout.isNotEmpty)
+        process.throwException('adb returned error:\n${process.stdout}');
+      process.throwException('adb failed without a message');
+    }
+
+    if (hostPort == 0) {
+      if (process.stdout.isEmpty)
+        process.throwException('adb did not report forwarded port');
+      hostPort = int.tryParse(process.stdout) ?? (throw 'adb returned invalid port number:\n${process.stdout}');
+    } else {
+      if (process.stdout.isNotEmpty)
+        process.throwException('adb returned error:\n${process.stdout}');
+    }
 
     return hostPort;
   }

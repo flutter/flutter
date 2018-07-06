@@ -26,6 +26,12 @@ void main() {
           onLongPress: () {
             log.add('long-press');
           },
+          onTapDown: (TapDownDetails details) {
+            log.add('tap-down');
+          },
+          onTapCancel: () {
+            log.add('tap-cancel');
+          },
         ),
       ),
     ));
@@ -36,18 +42,32 @@ void main() {
 
     await tester.pump(const Duration(seconds: 1));
 
-    expect(log, equals(<String>['tap']));
+    expect(log, equals(<String>['tap-down', 'tap']));
     log.clear();
 
     await tester.tap(find.byType(InkWell), pointer: 2);
     await tester.tap(find.byType(InkWell), pointer: 3);
 
-    expect(log, equals(<String>['double-tap']));
+    expect(log, equals(<String>['tap-cancel', 'double-tap']));
     log.clear();
 
     await tester.longPress(find.byType(InkWell), pointer: 4);
 
-    expect(log, equals(<String>['long-press']));
+    expect(log, equals(<String>['tap-down', 'tap-cancel', 'long-press']));
+
+    log.clear();
+    TestGesture gesture = await tester.startGesture(tester.getRect(find.byType(InkWell)).center);
+    await tester.pump(const Duration(milliseconds: 100));
+    expect(log, equals(<String>['tap-down']));
+    await gesture.up();
+    await tester.pump(const Duration(seconds: 1));
+
+    log.clear();
+    gesture = await tester.startGesture(tester.getRect(find.byType(InkWell)).center);
+    await tester.pump(const Duration(milliseconds: 100));
+    await gesture.moveBy(const Offset(0.0, 200.0));
+    await gesture.cancel();
+    expect(log, equals(<String>['tap-down', 'tap-cancel']));
   });
 
   testWidgets('long-press and tap on disabled should not throw', (WidgetTester tester) async {
@@ -140,7 +160,7 @@ void main() {
           ),
         ),
       );
-      expect(tester.renderObject<RenderProxyBox>(find.byType(PhysicalModel)).child, paintsNothing);
+      expect(tester.renderObject<RenderProxyBox>(find.byType(PhysicalModel)).child, isNot(paints..circle()));
       await tester.tap(find.byType(InkWell));
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 10));
@@ -151,7 +171,7 @@ void main() {
       await tester.pump(const Duration(milliseconds: 10));
       expect(
         tester.renderObject<RenderProxyBox>(find.byType(PhysicalModel)).child,
-        keepAlive ? (paints..circle()) : paintsNothing,
+        keepAlive ? (paints..circle()) : isNot(paints..circle()),
       );
     }
     await runTest(true);

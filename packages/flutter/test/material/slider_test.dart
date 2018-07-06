@@ -4,6 +4,7 @@
 
 import 'dart:ui';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
@@ -46,6 +47,8 @@ void main() {
   testWidgets('Slider can move when tapped (LTR)', (WidgetTester tester) async {
     final Key sliderKey = new UniqueKey();
     double value = 0.0;
+    double startValue;
+    double endValue;
 
     await tester.pumpWidget(
       new Directionality(
@@ -64,6 +67,12 @@ void main() {
                         value = newValue;
                       });
                     },
+                    onChangeStart: (double value) {
+                      startValue = value;
+                    },
+                    onChangeEnd: (double value) {
+                      endValue = value;
+                    },
                   ),
                 ),
               ),
@@ -76,6 +85,10 @@ void main() {
     expect(value, equals(0.0));
     await tester.tap(find.byKey(sliderKey));
     expect(value, equals(0.5));
+    expect(startValue, equals(0.0));
+    expect(endValue, equals(0.5));
+    startValue = null;
+    endValue = null;
     await tester.pump(); // No animation should start.
     expect(SchedulerBinding.instance.transientCallbackCount, equals(0));
 
@@ -85,6 +98,8 @@ void main() {
     final Offset target = topLeft + (bottomRight - topLeft) / 4.0;
     await tester.tapAt(target);
     expect(value, closeTo(0.25, 0.05));
+    expect(startValue, equals(0.5));
+    expect(endValue, closeTo(0.25, 0.05));
     await tester.pump(); // No animation should start.
     expect(SchedulerBinding.instance.transientCallbackCount, equals(0));
   });
@@ -138,7 +153,11 @@ void main() {
   testWidgets("Slider doesn't send duplicate change events if tapped on the same value", (WidgetTester tester) async {
     final Key sliderKey = new UniqueKey();
     double value = 0.0;
+    double startValue;
+    double endValue;
     int updates = 0;
+    int startValueUpdates = 0;
+    int endValueUpdates = 0;
 
     await tester.pumpWidget(
       new Directionality(
@@ -158,6 +177,14 @@ void main() {
                         value = newValue;
                       });
                     },
+                    onChangeStart: (double value) {
+                      startValueUpdates++;
+                      startValue = value;
+                    },
+                    onChangeEnd: (double value) {
+                      endValueUpdates++;
+                      endValue = value;
+                    },
                   ),
                 ),
               ),
@@ -170,11 +197,15 @@ void main() {
     expect(value, equals(0.0));
     await tester.tap(find.byKey(sliderKey));
     expect(value, equals(0.5));
+    expect(startValue, equals(0.0));
+    expect(endValue, equals(0.5));
     await tester.pump();
     await tester.tap(find.byKey(sliderKey));
     expect(value, equals(0.5));
     await tester.pump();
     expect(updates, equals(1));
+    expect(startValueUpdates, equals(2));
+    expect(endValueUpdates, equals(2));
   });
 
   testWidgets('Value indicator shows for a bit after being tapped', (WidgetTester tester) async {
@@ -520,7 +551,7 @@ void main() {
       Color activeColor,
       Color inactiveColor,
       int divisions,
-      bool enabled: true,
+      bool enabled = true,
     }) {
       final ValueChanged<double> onChanged = !enabled
           ? null
@@ -853,8 +884,8 @@ void main() {
 
     Widget buildSlider({
       double textScaleFactor,
-      bool isDiscrete: true,
-      ShowValueIndicator show: ShowValueIndicator.onlyForDiscrete,
+      bool isDiscrete = true,
+      ShowValueIndicator show = ShowValueIndicator.onlyForDiscrete,
     }) {
       return new Directionality(
         textDirection: TextDirection.ltr,
@@ -1093,6 +1124,10 @@ void main() {
           new TestSemantics.root(children: <TestSemantics>[
             new TestSemantics.rootChild(
               id: 1,
+              value: '50%',
+              increasedValue: '55%',
+              decreasedValue: '45%',
+              textDirection: TextDirection.ltr,
               actions: SemanticsAction.decrease.index | SemanticsAction.increase.index,
             ),
           ]),
@@ -1125,6 +1160,89 @@ void main() {
     semantics.dispose();
   });
 
+  testWidgets('Slider Semantics - iOS', (WidgetTester tester) async {
+    final SemanticsTester semantics = new SemanticsTester(tester);
+
+    await tester.pumpWidget(
+      new Theme(
+        data: ThemeData.light().copyWith(
+          platform: TargetPlatform.iOS,
+        ),
+        child: new Directionality(
+          textDirection: TextDirection.ltr,
+          child: new MediaQuery(
+            data: new MediaQueryData.fromWindow(window),
+            child: new Material(
+              child: new Slider(
+                value: 100.0,
+                min: 0.0,
+                max: 200.0,
+                onChanged: (double v) {},
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(
+      semantics,
+      hasSemantics(
+        new TestSemantics.root(children: <TestSemantics>[
+          new TestSemantics.rootChild(
+            id: 2,
+            value: '50%',
+            increasedValue: '60%',
+            decreasedValue: '40%',
+            textDirection: TextDirection.ltr,
+            actions: SemanticsAction.decrease.index | SemanticsAction.increase.index,
+          ),
+        ]),
+        ignoreRect: true,
+        ignoreTransform: true,
+      ));
+    semantics.dispose();
+  });
+
+  testWidgets('Slider semantics with custom formatter', (WidgetTester tester) async {
+    final SemanticsTester semantics = new SemanticsTester(tester);
+
+    await tester.pumpWidget(new Directionality(
+      textDirection: TextDirection.ltr,
+      child: new MediaQuery(
+        data: new MediaQueryData.fromWindow(window),
+        child: new Material(
+          child: new Slider(
+            value: 40.0,
+            min: 0.0,
+            max: 200.0,
+            divisions: 10,
+            semanticFormatterCallback: (double value) => value.round().toString(),
+            onChanged: (double v) {},
+          ),
+        ),
+      ),
+    ));
+
+    expect(
+        semantics,
+        hasSemantics(
+          new TestSemantics.root(children: <TestSemantics>[
+            new TestSemantics.rootChild(
+              id: 3,
+              value: '40',
+              increasedValue: '60',
+              decreasedValue: '20',
+              textDirection: TextDirection.ltr,
+              actions: SemanticsAction.decrease.index | SemanticsAction.increase.index,
+            ),
+          ]),
+          ignoreRect: true,
+          ignoreTransform: true,
+        ));
+    semantics.dispose();
+  });
+
   testWidgets('Value indicator appears when it should', (WidgetTester tester) async {
     final ThemeData baseTheme = new ThemeData(
       platform: TargetPlatform.android,
@@ -1132,7 +1250,7 @@ void main() {
     );
     SliderThemeData theme = baseTheme.sliderTheme;
     double value = 0.45;
-    Widget buildApp({SliderThemeData sliderTheme, int divisions, bool enabled: true}) {
+    Widget buildApp({SliderThemeData sliderTheme, int divisions, bool enabled = true}) {
       final ValueChanged<double> onChanged = enabled ? (double d) => value = d : null;
       return new Directionality(
         textDirection: TextDirection.ltr,
@@ -1162,7 +1280,7 @@ void main() {
       bool isVisible,
       SliderThemeData theme,
       int divisions,
-      bool enabled: true,
+      bool enabled = true,
     }) async {
       // Discrete enabled widget.
       await tester.pumpWidget(buildApp(sliderTheme: theme, divisions: divisions, enabled: enabled));

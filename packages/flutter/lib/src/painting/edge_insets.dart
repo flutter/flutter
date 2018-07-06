@@ -44,10 +44,10 @@ abstract class EdgeInsetsGeometry {
         && _bottom >= 0.0;
   }
 
-  /// The total offset in the vertical direction.
+  /// The total offset in the horizontal direction.
   double get horizontal => _left + _right + _start + _end;
 
-  /// The total offset in the horizontal direction.
+  /// The total offset in the vertical direction.
   double get vertical => _top + _bottom;
 
   /// The total offset in the given direction.
@@ -75,7 +75,7 @@ abstract class EdgeInsetsGeometry {
   ///
   ///  * [EdgeInsets.inflateRect], to inflate a [Rect] rather than a [Size] (for
   ///    [EdgeInsetsDirectional], requires first calling [resolve] to establish
-  ///    how the start and and map to the left or right).
+  ///    how the start and end map to the left or right).
   ///  * [deflateSize], to deflate a [Size] rather than inflating it.
   Size inflateSize(Size size) {
     return new Size(size.width + horizontal, size.height + vertical);
@@ -91,7 +91,7 @@ abstract class EdgeInsetsGeometry {
   ///
   ///  * [EdgeInsets.deflateRect], to deflate a [Rect] rather than a [Size]. (for
   ///    [EdgeInsetsDirectional], requires first calling [resolve] to establish
-  ///    how the start and and map to the left or right).
+  ///    how the start and end map to the left or right).
   ///  * [inflateSize], to inflate a [Size] rather than deflating it.
   Size deflateSize(Size size) {
     return new Size(size.width - horizontal, size.height - vertical);
@@ -346,10 +346,10 @@ class EdgeInsets extends EdgeInsetsGeometry {
   /// const EdgeInsets.only(left: 40.0)
   /// ```
   const EdgeInsets.only({
-    this.left: 0.0,
-    this.top: 0.0,
-    this.right: 0.0,
-    this.bottom: 0.0
+    this.left = 0.0,
+    this.top = 0.0,
+    this.right = 0.0,
+    this.bottom = 0.0
   });
 
   /// Creates insets with symmetrical vertical and horizontal offsets.
@@ -361,8 +361,8 @@ class EdgeInsets extends EdgeInsetsGeometry {
   /// ```dart
   /// const EdgeInsets.symmetric(vertical: 8.0)
   /// ```
-  const EdgeInsets.symmetric({ double vertical: 0.0,
-                             double horizontal: 0.0 })
+  const EdgeInsets.symmetric({ double vertical = 0.0,
+                             double horizontal = 0.0 })
     : left = horizontal, top = vertical, right = horizontal, bottom = vertical;
 
   /// Creates insets that match the given window padding.
@@ -628,10 +628,10 @@ class EdgeInsetsDirectional extends EdgeInsetsGeometry {
   /// const EdgeInsetsDirectional.only(start: 40.0)
   /// ```
   const EdgeInsetsDirectional.only({
-    this.start: 0.0,
-    this.top: 0.0,
-    this.end: 0.0,
-    this.bottom: 0.0
+    this.start = 0.0,
+    this.top = 0.0,
+    this.end = 0.0,
+    this.bottom = 0.0
   });
 
   /// An [EdgeInsetsDirectional] with zero offsets in each direction.

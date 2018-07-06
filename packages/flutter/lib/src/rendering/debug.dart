@@ -38,6 +38,11 @@ bool debugPaintLayerBordersEnabled = false;
 bool debugPaintPointersEnabled = false;
 
 /// Overlay a rotating set of colors when repainting layers in checked mode.
+///
+/// See also:
+///
+///  * [RepaintBoundary], which can be used to contain repaints when unchanged
+///    areas are being excessively repainted.
 bool debugRepaintRainbowEnabled = false;
 
 /// Overlay a rotating set of colors when repainting text in checked mode.
@@ -103,33 +108,49 @@ bool debugCheckIntrinsicSizes = false;
 ///
 ///  * [debugPrintLayouts], which does something similar for layout but using
 ///    console output.
-///
 ///  * [debugProfileBuildsEnabled], which does something similar for widgets
 ///    being rebuilt, and [debugPrintRebuildDirtyWidgets], its console
 ///    equivalent.
-///
 ///  * The discussion at [RendererBinding.drawFrame].
+///  * [RepaintBoundary], which can be used to contain repaints when unchanged
+///    areas are being excessively repainted.
 bool debugProfilePaintsEnabled = false;
 
-/// Setting to true will cause all clipping effects from the layer tree to be ignored.
+/// Setting to true will cause all clipping effects from the layer tree to be
+/// ignored.
 ///
 /// Can be used to debug whether objects being clipped are painting excessively
-/// in clipped areas. Can also be used to check whether excessive use of clipping
-/// is affecting performance.
+/// in clipped areas. Can also be used to check whether excessive use of
+/// clipping is affecting performance.
+///
+/// This will not reduce the number of [Layer] objects created; the compositing
+/// strategy is unaffected. It merely causes the clipping layers to be skipped
+/// when building the scene.
 bool debugDisableClipLayers = false;
 
-/// Setting to true will cause all physical modeling effects, such as shadows
-/// from elevations, from the layer tree to be ignored.
+/// Setting to true will cause all physical modeling effects from the layer
+/// tree, such as shadows from elevations, to be ignored.
 ///
 /// Can be used to check whether excessive use of physical models is affecting
 /// performance.
+///
+/// This will not reduce the number of [Layer] objects created; the compositing
+/// strategy is unaffected. It merely causes the physical shape layers to be
+/// skipped when building the scene.
 bool debugDisablePhysicalShapeLayers = false;
 
-/// Setting to true will cause all opacity effects to be ignored.
+/// Setting to true will cause all opacity effects from the layer tree to be
+/// ignored.
 ///
 /// An optimization to not paint the child at all when opacity is 0 will still
-/// remain. Can be used to check whether excessive use of opacity effects is
-/// affecting performance.
+/// remain.
+///
+/// Can be used to check whether excessive use of opacity effects is affecting
+/// performance.
+///
+/// This will not reduce the number of [Layer] objects created; the compositing
+/// strategy is unaffected. It merely causes the opacity layers to be skipped
+/// when building the scene.
 bool debugDisableOpacityLayers = false;
 
 void _debugDrawDoubleRect(Canvas canvas, Rect outerRect, Rect innerRect, Color color) {
@@ -146,7 +167,7 @@ void _debugDrawDoubleRect(Canvas canvas, Rect outerRect, Rect innerRect, Color c
 ///
 /// Called by [RenderPadding.debugPaintSize] when [debugPaintSizeEnabled] is
 /// true.
-void debugPaintPadding(Canvas canvas, Rect outerRect, Rect innerRect, { double outlineWidth: 2.0 }) {
+void debugPaintPadding(Canvas canvas, Rect outerRect, Rect innerRect, { double outlineWidth = 2.0 }) {
   assert(() {
     if (innerRect != null && !innerRect.isEmpty) {
       _debugDrawDoubleRect(canvas, outerRect, innerRect, const Color(0x900090FF));
@@ -171,7 +192,7 @@ void debugPaintPadding(Canvas canvas, Rect outerRect, Rect innerRect, { double o
 /// The `debugCheckIntrinsicSizesOverride` argument can be provided to override
 /// the expected value for [debugCheckIntrinsicSizes]. (This exists because the
 /// test framework itself overrides this value in some cases.)
-bool debugAssertAllRenderVarsUnset(String reason, { bool debugCheckIntrinsicSizesOverride: false }) {
+bool debugAssertAllRenderVarsUnset(String reason, { bool debugCheckIntrinsicSizesOverride = false }) {
   assert(() {
     if (debugPaintSizeEnabled ||
         debugPaintBaselinesEnabled ||

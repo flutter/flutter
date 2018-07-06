@@ -5,7 +5,6 @@
 import 'dart:async';
 import 'dart:convert';
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
@@ -496,7 +495,7 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
         expect(chainNode['node'], isMap);
         final Map<String, Object> jsonNode = chainNode['node'];
         expect(service.toObject(jsonNode['valueId']), equals(element));
-        expect(service.toObject(jsonNode['objectId']), const isInstanceOf<DiagnosticsNode>());
+        expect(service.toObject(jsonNode['objectId']), isInstanceOf<DiagnosticsNode>());
 
         expect(chainNode['children'], isList);
         final List<Object> jsonChildren = chainNode['children'];
@@ -512,7 +511,7 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
           expect(jsonChildren[j], isMap);
           final Map<String, Object> childJson = jsonChildren[j];
           expect(service.toObject(childJson['valueId']), equals(childrenElements[j]));
-          expect(service.toObject(childJson['objectId']), const isInstanceOf<DiagnosticsNode>());
+          expect(service.toObject(childJson['objectId']), isInstanceOf<DiagnosticsNode>());
         }
       }
     });
@@ -529,7 +528,7 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
       for (int i = 0; i < propertiesJson.length; ++i) {
         final Map<String, Object> propertyJson = propertiesJson[i];
         expect(service.toObject(propertyJson['valueId']), equals(properties[i].value));
-        expect(service.toObject(propertyJson['objectId']), const isInstanceOf<DiagnosticsNode>());
+        expect(service.toObject(propertyJson['objectId']), isInstanceOf<DiagnosticsNode>());
       }
     });
 
@@ -558,7 +557,7 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
       for (int i = 0; i < propertiesJson.length; ++i) {
         final Map<String, Object> propertyJson = propertiesJson[i];
         expect(service.toObject(propertyJson['valueId']), equals(children[i].value));
-        expect(service.toObject(propertyJson['objectId']), const isInstanceOf<DiagnosticsNode>());
+        expect(service.toObject(propertyJson['objectId']), isInstanceOf<DiagnosticsNode>());
       }
     });
 
@@ -812,7 +811,7 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
         expect(chainNode['node'], isMap);
         final Map<String, Object> jsonNode = chainNode['node'];
         expect(service.toObject(jsonNode['valueId']), equals(element));
-        expect(service.toObject(jsonNode['objectId']), const isInstanceOf<DiagnosticsNode>());
+        expect(service.toObject(jsonNode['objectId']), isInstanceOf<DiagnosticsNode>());
 
         expect(chainNode['children'], isList);
         final List<Object> jsonChildren = chainNode['children'];
@@ -828,7 +827,7 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
           expect(jsonChildren[j], isMap);
           final Map<String, Object> childJson = jsonChildren[j];
           expect(service.toObject(childJson['valueId']), equals(childrenElements[j]));
-          expect(service.toObject(childJson['objectId']), const isInstanceOf<DiagnosticsNode>());
+          expect(service.toObject(childJson['objectId']), isInstanceOf<DiagnosticsNode>());
         }
       }
     });
@@ -844,7 +843,7 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
       for (int i = 0; i < propertiesJson.length; ++i) {
         final Map<String, Object> propertyJson = propertiesJson[i];
         expect(service.toObject(propertyJson['valueId']), equals(properties[i].value));
-        expect(service.toObject(propertyJson['objectId']), const isInstanceOf<DiagnosticsNode>());
+        expect(service.toObject(propertyJson['objectId']), isInstanceOf<DiagnosticsNode>());
       }
     });
 
@@ -872,9 +871,221 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
       for (int i = 0; i < propertiesJson.length; ++i) {
         final Map<String, Object> propertyJson = propertiesJson[i];
         expect(service.toObject(propertyJson['valueId']), equals(children[i].value));
-        expect(service.toObject(propertyJson['objectId']), const isInstanceOf<DiagnosticsNode>());
+        expect(service.toObject(propertyJson['objectId']), isInstanceOf<DiagnosticsNode>());
       }
     });
+
+    testWidgets('ext.flutter.inspector.getChildrenDetailsSubtree', (WidgetTester tester) async {
+      const String group = 'test-group';
+
+      await tester.pumpWidget(
+        new Directionality(
+          textDirection: TextDirection.ltr,
+          child: new Stack(
+            children: const <Widget>[
+              const Text('a', textDirection: TextDirection.ltr),
+              const Text('b', textDirection: TextDirection.ltr),
+              const Text('c', textDirection: TextDirection.ltr),
+            ],
+          ),
+        ),
+      );
+      final DiagnosticsNode diagnostic = find.byType(Stack).evaluate().first.toDiagnosticsNode();
+      final String id = service.toId(diagnostic, group);
+      final List<Object> childrenJson = await service.testExtension('getChildrenDetailsSubtree', <String, String>{'arg': id, 'objectGroup': group});
+      final List<DiagnosticsNode> children = diagnostic.getChildren();
+      expect(children.length, equals(3));
+      expect(childrenJson.length, equals(children.length));
+      for (int i = 0; i < childrenJson.length; ++i) {
+        final Map<String, Object> childJson = childrenJson[i];
+        expect(service.toObject(childJson['valueId']), equals(children[i].value));
+        expect(service.toObject(childJson['objectId']), isInstanceOf<DiagnosticsNode>());
+        final List<Object> propertiesJson = childJson['properties'];
+        final DiagnosticsNode diagnosticsNode = service.toObject(childJson['objectId']);
+        final List<DiagnosticsNode> expectedProperties = diagnosticsNode.getProperties();
+        for (Map<String, Object> propertyJson in propertiesJson) {
+          final Object property = service.toObject(propertyJson['objectId']);
+          expect(property, isInstanceOf<DiagnosticsNode>());
+          expect(expectedProperties.contains(property), isTrue);
+        }
+      }
+    });
+
+    testWidgets('WidgetInspectorService getDetailsSubtree', (WidgetTester tester) async {
+      const String group = 'test-group';
+
+      await tester.pumpWidget(
+        new Directionality(
+          textDirection: TextDirection.ltr,
+          child: new Stack(
+            children: const <Widget>[
+              const Text('a', textDirection: TextDirection.ltr),
+              const Text('b', textDirection: TextDirection.ltr),
+              const Text('c', textDirection: TextDirection.ltr),
+            ],
+          ),
+        ),
+      );
+      final DiagnosticsNode diagnostic = find.byType(Stack).evaluate().first.toDiagnosticsNode();
+      final String id = service.toId(diagnostic, group);
+      final Map<String, Object> subtreeJson = await service.testExtension('getDetailsSubtree', <String, String>{'arg': id, 'objectGroup': group});
+      expect(subtreeJson['objectId'], equals(id));
+      final List<Object> childrenJson = subtreeJson['children'];
+      final List<DiagnosticsNode> children = diagnostic.getChildren();
+      expect(children.length, equals(3));
+      expect(childrenJson.length, equals(children.length));
+      for (int i = 0; i < childrenJson.length; ++i) {
+        final Map<String, Object> childJson = childrenJson[i];
+        expect(service.toObject(childJson['valueId']), equals(children[i].value));
+        expect(service.toObject(childJson['objectId']), isInstanceOf<DiagnosticsNode>());
+        final List<Object> propertiesJson = childJson['properties'];
+        final DiagnosticsNode diagnosticsNode = service.toObject(childJson['objectId']);
+        final List<DiagnosticsNode> expectedProperties = diagnosticsNode.getProperties();
+        for (Map<String, Object> propertyJson in propertiesJson) {
+          final Object property = service.toObject(propertyJson['objectId']);
+          expect(property, isInstanceOf<DiagnosticsNode>());
+          expect(expectedProperties.contains(property), isTrue);
+        }
+      }
+    });
+
+    testWidgets('ext.flutter.inspector.getRootWidgetSummaryTree', (WidgetTester tester) async {
+      const String group = 'test-group';
+
+      await tester.pumpWidget(
+        new Directionality(
+          textDirection: TextDirection.ltr,
+          child: new Stack(
+            children: const <Widget>[
+              const Text('a', textDirection: TextDirection.ltr),
+              const Text('b', textDirection: TextDirection.ltr),
+              const Text('c', textDirection: TextDirection.ltr),
+            ],
+          ),
+        ),
+      );
+      final Element elementA = find.text('a').evaluate().first;
+
+      service.disposeAllGroups();
+      await service.testExtension('setPubRootDirectories', <String, String>{});
+      service.setSelection(elementA, 'my-group');
+      final Map<String, Object> jsonA = await service.testExtension('getSelectedWidget', <String, String>{'arg': null, 'objectGroup': 'my-group'});
+
+      await service.testExtension('setPubRootDirectories', <String, String>{});
+      Map<String, Object> rootJson = await service.testExtension('getRootWidgetSummaryTree', <String, String>{'objectGroup': group});
+      // We haven't yet properly specified which directories are summary tree
+      // directories so we get an empty tree other than the root that is always
+      // included.
+      final Object rootWidget = service.toObject(rootJson['valueId']);
+      expect(rootWidget, equals(WidgetsBinding.instance?.renderViewElement));
+      List<Object> childrenJson = rootJson['children'];
+      // There are no summary tree children.
+      expect(childrenJson.length, equals(0));
+
+      final Map<String, Object> creationLocation = jsonA['creationLocation'];
+      expect(creationLocation, isNotNull);
+      final String testFile = creationLocation['file'];
+      expect(testFile, endsWith('widget_inspector_test.dart'));
+      final List<String> segments = Uri.parse(testFile).pathSegments;
+      // Strip a couple subdirectories away to generate a plausible pub root
+      // directory.
+      final String pubRootTest = '/' + segments.take(segments.length - 2).join('/');
+      await service.testExtension('setPubRootDirectories', <String, String>{'arg0': pubRootTest});
+
+      rootJson = await service.testExtension('getRootWidgetSummaryTree', <String, String>{'objectGroup': group});
+      childrenJson = rootJson['children'];
+      // The tree of nodes returned contains all widgets created directly by the
+      // test.
+      childrenJson = rootJson['children'];
+      expect(childrenJson.length, equals(1));
+
+      List<Object> alternateChildrenJson = await service.testExtension('getChildrenSummaryTree', <String, String>{'arg': rootJson['objectId'], 'objectGroup': group});
+      expect(alternateChildrenJson.length, equals(1));
+      Map<String, Object> childJson = childrenJson[0];
+      Map<String, Object> alternateChildJson = alternateChildrenJson[0];
+      expect(childJson['description'], startsWith('Directionality'));
+      expect(alternateChildJson['description'], startsWith('Directionality'));
+      expect(alternateChildJson['valueId'], equals(childJson['valueId']));
+
+      childrenJson = childJson['children'];
+      alternateChildrenJson = await service.testExtension('getChildrenSummaryTree', <String, String>{'arg': childJson['objectId'], 'objectGroup': group});
+      expect(alternateChildrenJson.length, equals(1));
+      expect(childrenJson.length, equals(1));
+      alternateChildJson = alternateChildrenJson[0];
+      childJson = childrenJson[0];
+      expect(childJson['description'], startsWith('Stack'));
+      expect(alternateChildJson['description'], startsWith('Stack'));
+      expect(alternateChildJson['valueId'], equals(childJson['valueId']));
+      childrenJson = childJson['children'];
+
+      childrenJson = childJson['children'];
+      alternateChildrenJson = await service.testExtension('getChildrenSummaryTree', <String, String>{'arg': childJson['objectId'], 'objectGroup': group});
+      expect(alternateChildrenJson.length, equals(3));
+      expect(childrenJson.length, equals(3));
+      alternateChildJson = alternateChildrenJson[2];
+      childJson = childrenJson[2];
+      expect(childJson['description'], startsWith('Text'));
+      expect(alternateChildJson['description'], startsWith('Text'));
+      expect(alternateChildJson['valueId'], equals(childJson['valueId']));
+      alternateChildrenJson = await service.testExtension('getChildrenSummaryTree', <String, String>{'arg': childJson['objectId'], 'objectGroup': group});
+      expect(alternateChildrenJson.length , equals(0));
+      expect(childJson['chidlren'], isNull);
+    }, skip: !WidgetInspectorService.instance.isWidgetCreationTracked()); // Test requires --track-widget-creation flag.
+
+    testWidgets('ext.flutter.inspector.getSelectedSummaryWidget', (WidgetTester tester) async {
+      const String group = 'test-group';
+
+      await tester.pumpWidget(
+        new Directionality(
+          textDirection: TextDirection.ltr,
+          child: new Stack(
+            children: const <Widget>[
+              const Text('a', textDirection: TextDirection.ltr),
+              const Text('b', textDirection: TextDirection.ltr),
+              const Text('c', textDirection: TextDirection.ltr),
+            ],
+          ),
+        ),
+      );
+      final Element elementA = find.text('a').evaluate().first;
+
+      final List<DiagnosticsNode> children = elementA.debugDescribeChildren();
+      expect(children.length, equals(1));
+      final DiagnosticsNode richTextDiagnostic = children.first;
+
+      service.disposeAllGroups();
+      await service.testExtension('setPubRootDirectories', <String, String>{});
+      service.setSelection(elementA, 'my-group');
+      final Map<String, Object> jsonA = await service.testExtension('getSelectedWidget', <String, String>{'arg': null, 'objectGroup': 'my-group'});
+      service.setSelection(richTextDiagnostic.value, 'my-group');
+
+      await service.testExtension('setPubRootDirectories', <String, String>{});
+      Map<String, Object> summarySelection = await service.testExtension('getSelectedSummaryWidget', <String, String>{'objectGroup': group});
+      // No summary selection because we haven't set the pub root directories
+      // yet to indicate what directories are in the summary tree.
+      expect(summarySelection, isNull);
+
+      final Map<String, Object> creationLocation = jsonA['creationLocation'];
+      expect(creationLocation, isNotNull);
+      final String testFile = creationLocation['file'];
+      expect(testFile, endsWith('widget_inspector_test.dart'));
+      final List<String> segments = Uri.parse(testFile).pathSegments;
+      // Strip a couple subdirectories away to generate a plausible pub root
+      // directory.
+      final String pubRootTest = '/' + segments.take(segments.length - 2).join('/');
+      await service.testExtension('setPubRootDirectories', <String, String>{'arg0': pubRootTest});
+
+      summarySelection = await service.testExtension('getSelectedSummaryWidget', <String, String>{'objectGroup': group});
+      expect(summarySelection['valueId'], isNotNull);
+      // We got the Text element instead of the selected RichText element
+      // because only the RichText element is part of the summary tree.
+      expect(service.toObject(summarySelection['valueId']), elementA);
+
+      // Verify tha the regular getSelectedWidget method still returns
+      // the RichText object not the Text element.
+      final Map<String, Object> regularSelection = await service.testExtension('getSelectedWidget', <String, String>{'arg': null, 'objectGroup': 'my-group'});
+      expect(service.toObject(regularSelection['valueId']), richTextDiagnostic.value);
+   }, skip: !WidgetInspectorService.instance.isWidgetCreationTracked()); // Test requires --track-widget-creation flag.
 
     testWidgets('ext.flutter.inspector creationLocation', (WidgetTester tester) async {
       await tester.pumpWidget(

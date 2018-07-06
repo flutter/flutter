@@ -27,24 +27,6 @@ import 'theme.dart';
 const FloatingActionButtonLocation _kDefaultFloatingActionButtonLocation = FloatingActionButtonLocation.endFloat;
 const FloatingActionButtonAnimator _kDefaultFloatingActionButtonAnimator = FloatingActionButtonAnimator.scaling;
 
-/// Returns a path for a notch in the outline of a shape.
-///
-/// The path makes a notch in the host shape that can contain the guest shape.
-///
-/// The `host` is the bounding rectangle for the shape into which the notch will
-/// be applied. The `guest` is the bounding rectangle of the shape for which we
-/// are creating a notch in the host.
-///
-/// The `start` and `end` arguments are points on the outline of the host shape
-/// that will be connected by the returned path.
-///
-/// The returned path may pass anywhere, including inside the guest bounds area,
-/// and may contain multiple subpaths. The returned path ends at `end` and does
-/// not end with a [Path.close]. The returned [Path] is built under the
-/// assumption it will be added to an existing path that is at the `start`
-/// coordinates using [Path.addPath].
-typedef Path ComputeNotch(Rect host, Rect guest, Offset start, Offset end);
-
 enum _ScaffoldSlot {
   body,
   appBar,
@@ -203,7 +185,6 @@ class ScaffoldGeometry {
   const ScaffoldGeometry({
     this.bottomNavigationBarTop,
     this.floatingActionButtonArea,
-    this.floatingActionButtonNotch,
   });
 
   /// The distance from the [Scaffold]'s top edge to the top edge of the
@@ -217,12 +198,6 @@ class ScaffoldGeometry {
   /// This is null when there is no floating action button showing.
   final Rect floatingActionButtonArea;
 
-  /// A [ComputeNotch] for the floating action button.
-  ///
-  /// The contract for this [ComputeNotch] is described in [ComputeNotch] and
-  /// [Scaffold.setFloatingActionButtonNotchFor].
-  final ComputeNotch floatingActionButtonNotch;
-
   ScaffoldGeometry _scaleFloatingActionButton(double scaleFactor) {
     if (scaleFactor == 1.0)
       return this;
@@ -230,7 +205,6 @@ class ScaffoldGeometry {
     if (scaleFactor == 0.0) {
       return new ScaffoldGeometry(
         bottomNavigationBarTop: bottomNavigationBarTop,
-        floatingActionButtonNotch: floatingActionButtonNotch,
       );
     }
 
@@ -247,27 +221,11 @@ class ScaffoldGeometry {
   ScaffoldGeometry copyWith({
     double bottomNavigationBarTop,
     Rect floatingActionButtonArea,
-    ComputeNotch floatingActionButtonNotch,
   }) {
     return new ScaffoldGeometry(
       bottomNavigationBarTop: bottomNavigationBarTop ?? this.bottomNavigationBarTop,
       floatingActionButtonArea: floatingActionButtonArea ?? this.floatingActionButtonArea,
-      floatingActionButtonNotch: floatingActionButtonNotch ?? this.floatingActionButtonNotch,
     );
-  }
-}
-
-
-class _Closeable {
-  _Closeable(this.closeCallback) : assert(closeCallback != null);
-
-  VoidCallback closeCallback;
-
-  void close() {
-    if (closeCallback == null)
-      return;
-    closeCallback();
-    closeCallback = null;
   }
 }
 
@@ -278,7 +236,6 @@ class _ScaffoldGeometryNotifier extends ChangeNotifier implements ValueListenabl
   final BuildContext context;
   double floatingActionButtonScale;
   ScaffoldGeometry geometry;
-  _Closeable computeNotchCloseable;
 
   @override
   ScaffoldGeometry get value {
@@ -299,29 +256,11 @@ class _ScaffoldGeometryNotifier extends ChangeNotifier implements ValueListenabl
     double bottomNavigationBarTop,
     Rect floatingActionButtonArea,
     double floatingActionButtonScale,
-    ComputeNotch floatingActionButtonNotch,
   }) {
     this.floatingActionButtonScale = floatingActionButtonScale ?? this.floatingActionButtonScale;
     geometry = geometry.copyWith(
       bottomNavigationBarTop: bottomNavigationBarTop,
       floatingActionButtonArea: floatingActionButtonArea,
-      floatingActionButtonNotch: floatingActionButtonNotch,
-    );
-    notifyListeners();
-  }
-
-  VoidCallback _updateFloatingActionButtonNotch(ComputeNotch fabComputeNotch) {
-    computeNotchCloseable?.close();
-    _setFloatingActionButtonNotchAndNotify(fabComputeNotch);
-    computeNotchCloseable = new _Closeable(() { _setFloatingActionButtonNotchAndNotify(null); });
-    return computeNotchCloseable.close;
-  }
-
-  void _setFloatingActionButtonNotchAndNotify(ComputeNotch fabComputeNotch) {
-    geometry = new ScaffoldGeometry(
-      bottomNavigationBarTop: geometry.bottomNavigationBarTop,
-      floatingActionButtonArea: geometry.floatingActionButtonArea,
-      floatingActionButtonNotch: fabComputeNotch,
     );
     notifyListeners();
   }
@@ -763,9 +702,10 @@ class Scaffold extends StatefulWidget {
     this.drawer,
     this.endDrawer,
     this.bottomNavigationBar,
+    this.bottomSheet,
     this.backgroundColor,
-    this.resizeToAvoidBottomPadding: true,
-    this.primary: true,
+    this.resizeToAvoidBottomPadding = true,
+    this.primary = true,
   }) : assert(primary != null), super(key: key);
 
   /// An app bar to display at the top of the scaffold.
@@ -834,7 +774,7 @@ class Scaffold extends StatefulWidget {
   /// left-to-right ([TextDirection.rtl])
   ///
   /// In the uncommon case that you wish to open the drawer manually, use the
-  /// [ScaffoldState.openDrawer] function.
+  /// [ScaffoldState.openEndDrawer] function.
   ///
   /// Typically a [Drawer].
   final Widget endDrawer;
@@ -852,6 +792,37 @@ class Scaffold extends StatefulWidget {
   /// The [bottomNavigationBar] is rendered below the [persistentFooterButtons]
   /// and the [body].
   final Widget bottomNavigationBar;
+
+  /// The persistent bottom sheet to display.
+  ///
+  /// A persistent bottom sheet shows information that supplements the primary
+  /// content of the app. A persistent bottom sheet remains visible even when
+  /// the user interacts with other parts of the app.
+  ///
+  /// A closely related widget is a modal bottom sheet, which is an alternative
+  /// to a menu or a dialog and prevents the user from interacting with the rest
+  /// of the app. Modal bottom sheets can be created and displayed with the
+  /// [showModalBottomSheet] function.
+  ///
+  /// Unlike the persistent bottom sheet displayed by [showBottomSheet]
+  /// this bottom sheet is not a [LocalHistoryEntry] and cannot be dismissed
+  /// with the scaffold appbar's back button.
+  ///
+  /// If a persistent bottom sheet created with [showBottomSheet] is already
+  /// visible, it must be closed before building the Scaffold with a new
+  /// [bottomSheet].
+  ///
+  /// The value of [bottomSheet] can be any widget at all. It's unlikely to
+  /// actually be a [BottomSheet], which is used by the implementations of
+  /// [showBottomSheet] and [showModalBottomSheet]. Typically it's a widget
+  /// that includes [Material].
+  ///
+  /// See also:
+  ///
+  ///  * [showBottomSheet], which displays a bottom sheet as a route that can
+  ///    be dismissed with the scaffold's back button.
+  ///  * [showModalBottomSheet], which displays a modal bottom sheet.
+  final Widget bottomSheet;
 
   /// Whether the [body] (and other floating widgets) should size themselves to
   /// avoid the window's bottom padding.
@@ -935,7 +906,7 @@ class Scaffold extends StatefulWidget {
   ///
   /// If there is no [Scaffold] in scope, then this will throw an exception.
   /// To return null if there is no [Scaffold], then pass `nullOk: true`.
-  static ScaffoldState of(BuildContext context, { bool nullOk: false }) {
+  static ScaffoldState of(BuildContext context, { bool nullOk = false }) {
     assert(nullOk != null);
     assert(context != null);
     final ScaffoldState result = context.ancestorStateOfType(const TypeMatcher<ScaffoldState>());
@@ -1004,32 +975,6 @@ class Scaffold extends StatefulWidget {
     return scaffoldScope.geometryNotifier;
   }
 
-  /// Sets the [ScaffoldGeometry.floatingActionButtonNotch] for the closest
-  /// [Scaffold] ancestor of the given context, if one exists.
-  ///
-  /// It is guaranteed that `computeNotch` will only be used for making notches
-  /// in the top edge of the [bottomNavigationBar], the start and end offsets given to
-  /// it will always be on the top edge of the [bottomNavigationBar], the start offset
-  /// will be to the left of the floating action button's bounds, and the end
-  /// offset will be to the right of the floating action button's bounds.
-  ///
-  /// Returns null if there was no [Scaffold] ancestor.
-  /// Otherwise, returns a [VoidCallback] that clears the notch maker that was
-  /// set.
-  ///
-  /// Callers must invoke the callback when the notch is no longer required.
-  /// This method is typically called from [State.didChangeDependencies] and the
-  /// callback should then be invoked from [State.deactivate].
-  ///
-  /// If there was a previously set [ScaffoldGeometry.floatingActionButtonNotch]
-  /// it will be overridden.
-  static VoidCallback setFloatingActionButtonNotchFor(BuildContext context, ComputeNotch computeNotch) {
-    final _ScaffoldScope scaffoldScope = context.inheritFromWidgetOfExactType(_ScaffoldScope);
-    if (scaffoldScope == null)
-      return null;
-    return scaffoldScope.geometryNotifier._updateFloatingActionButtonNotch(computeNotch);
-  }
-
   /// Whether the Scaffold that most tightly encloses the given context has a
   /// drawer.
   ///
@@ -1042,7 +987,7 @@ class Scaffold extends StatefulWidget {
   /// See also:
   ///  * [Scaffold.of], which provides access to the [ScaffoldState] object as a
   ///    whole, from which you can show snackbars, bottom sheets, and so forth.
-  static bool hasDrawer(BuildContext context, { bool registerForUpdates: true }) {
+  static bool hasDrawer(BuildContext context, { bool registerForUpdates = true }) {
     assert(registerForUpdates != null);
     assert(context != null);
     if (registerForUpdates) {
@@ -1179,7 +1124,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
   ///
   /// The removed snack bar does not run its normal exit animation. If there are
   /// any queued snack bars, they begin their entrance animation immediately.
-  void removeCurrentSnackBar({ SnackBarClosedReason reason: SnackBarClosedReason.remove }) {
+  void removeCurrentSnackBar({ SnackBarClosedReason reason = SnackBarClosedReason.remove }) {
     assert(reason != null);
     if (_snackBars.isEmpty)
       return;
@@ -1194,7 +1139,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
   /// Removes the current [SnackBar] by running its normal exit animation.
   ///
   /// The closed completer is called after the animation is complete.
-  void hideCurrentSnackBar({ SnackBarClosedReason reason: SnackBarClosedReason.hide }) {
+  void hideCurrentSnackBar({ SnackBarClosedReason reason = SnackBarClosedReason.hide }) {
     assert(reason != null);
     if (_snackBars.isEmpty || _snackBarController.status == AnimationStatus.dismissed)
       return;
@@ -1214,61 +1159,57 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
   final List<_PersistentBottomSheet> _dismissedBottomSheets = <_PersistentBottomSheet>[];
   PersistentBottomSheetController<dynamic> _currentBottomSheet;
 
-  /// Shows a persistent material design bottom sheet.
-  ///
-  /// A persistent bottom sheet shows information that supplements the primary
-  /// content of the app. A persistent bottom sheet remains visible even when
-  /// the user interacts with other parts of the app.
-  ///
-  /// A closely related widget is a modal bottom sheet, which is an alternative
-  /// to a menu or a dialog and prevents the user from interacting with the rest
-  /// of the app. Modal bottom sheets can be created and displayed with the
-  /// [showModalBottomSheet] function.
-  ///
-  /// Returns a controller that can be used to close and otherwise manipulate the
-  /// bottom sheet.
-  ///
-  /// To rebuild the bottom sheet (e.g. if it is stateful), call
-  /// [PersistentBottomSheetController.setState] on the value returned from this
-  /// method.
-  ///
-  /// See also:
-  ///
-  ///  * [BottomSheet], which is the widget typically returned by the `builder`.
-  ///  * [showBottomSheet], which calls this method given a [BuildContext].
-  ///  * [showModalBottomSheet], which can be used to display a modal bottom
-  ///    sheet.
-  ///  * [Scaffold.of], for information about how to obtain the [ScaffoldState].
-  ///  * <https://material.google.com/components/bottom-sheets.html#bottom-sheets-persistent-bottom-sheets>
-  PersistentBottomSheetController<T> showBottomSheet<T>(WidgetBuilder builder) {
+  void _maybeBuildCurrentBottomSheet() {
+    if (widget.bottomSheet != null) {
+      // The new _currentBottomSheet is not a local history entry so a "back" button
+      // will not be added to the Scaffold's appbar and the bottom sheet will not
+      // support drag or swipe to dismiss.
+      _currentBottomSheet = _buildBottomSheet<void>(
+        (BuildContext context) => widget.bottomSheet,
+        BottomSheet.createAnimationController(this) ..value = 1.0,
+        false,
+      );
+    }
+  }
+
+  void _closeCurrentBottomSheet() {
     if (_currentBottomSheet != null) {
       _currentBottomSheet.close();
       assert(_currentBottomSheet == null);
     }
+  }
+
+  PersistentBottomSheetController<T> _buildBottomSheet<T>(WidgetBuilder builder, AnimationController controller, bool isLocalHistoryEntry) {
     final Completer<T> completer = new Completer<T>();
     final GlobalKey<_PersistentBottomSheetState> bottomSheetKey = new GlobalKey<_PersistentBottomSheetState>();
-    final AnimationController controller = BottomSheet.createAnimationController(this)
-      ..forward();
     _PersistentBottomSheet bottomSheet;
-    final LocalHistoryEntry entry = new LocalHistoryEntry(
-      onRemove: () {
-        assert(_currentBottomSheet._widget == bottomSheet);
-        assert(bottomSheetKey.currentState != null);
-        bottomSheetKey.currentState.close();
-        if (controller.status != AnimationStatus.dismissed)
-          _dismissedBottomSheets.add(bottomSheet);
-        setState(() {
-          _currentBottomSheet = null;
-        });
-        completer.complete();
-      }
-    );
+
+    void _removeCurrentBottomSheet() {
+      assert(_currentBottomSheet._widget == bottomSheet);
+      assert(bottomSheetKey.currentState != null);
+      bottomSheetKey.currentState.close();
+      if (controller.status != AnimationStatus.dismissed)
+        _dismissedBottomSheets.add(bottomSheet);
+      setState(() {
+        _currentBottomSheet = null;
+      });
+      completer.complete();
+    }
+
+    final LocalHistoryEntry entry = isLocalHistoryEntry
+      ? new LocalHistoryEntry(onRemove: _removeCurrentBottomSheet)
+      : null;
+
     bottomSheet = new _PersistentBottomSheet(
       key: bottomSheetKey,
       animationController: controller,
+      enableDrag: isLocalHistoryEntry,
       onClosing: () {
         assert(_currentBottomSheet._widget == bottomSheet);
-        entry.remove();
+        if (isLocalHistoryEntry)
+          entry.remove();
+        else
+          _removeCurrentBottomSheet();
       },
       onDismissed: () {
         if (_dismissedBottomSheets.contains(bottomSheet)) {
@@ -1280,14 +1221,59 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
       },
       builder: builder
     );
-    ModalRoute.of(context).addLocalHistoryEntry(entry);
+
+    if (isLocalHistoryEntry)
+      ModalRoute.of(context).addLocalHistoryEntry(entry);
+
+    return new PersistentBottomSheetController<T>._(
+      bottomSheet,
+      completer,
+      isLocalHistoryEntry ? entry.remove : _removeCurrentBottomSheet,
+      (VoidCallback fn) { bottomSheetKey.currentState?.setState(fn); },
+      isLocalHistoryEntry,
+    );
+  }
+
+  /// Shows a persistent material design bottom sheet in the nearest [Scaffold].
+  ///
+  /// Returns a controller that can be used to close and otherwise manipulate the
+  /// bottom sheet.
+  ///
+  /// To rebuild the bottom sheet (e.g. if it is stateful), call
+  /// [PersistentBottomSheetController.setState] on the controller returned by
+  /// this method.
+  ///
+  /// The new bottom sheet becomes a [LocalHistoryEntry] for the enclosing
+  /// [ModalRoute] and a back button is added to the appbar of the [Scaffold]
+  /// that closes the bottom sheet.
+  ///
+  /// To create a persistent bottom sheet that is not a [LocalHistoryEntry] and
+  /// does not add a back button to the enclosing Scaffold's appbar, use the
+  /// [Scaffold.bottomSheet] constructor parameter.
+  ///
+  /// A persistent bottom sheet shows information that supplements the primary
+  /// content of the app. A persistent bottom sheet remains visible even when
+  /// the user interacts with other parts of the app.
+  ///
+  /// A closely related widget is a modal bottom sheet, which is an alternative
+  /// to a menu or a dialog and prevents the user from interacting with the rest
+  /// of the app. Modal bottom sheets can be created and displayed with the
+  /// [showModalBottomSheet] function.
+  ///
+  /// See also:
+  ///
+  ///  * [BottomSheet], which is the widget typically returned by the `builder`.
+  ///  * [showBottomSheet], which calls this method given a [BuildContext].
+  ///  * [showModalBottomSheet], which can be used to display a modal bottom
+  ///    sheet.
+  ///  * [Scaffold.of], for information about how to obtain the [ScaffoldState].
+  ///  * <https://material.google.com/components/bottom-sheets.html#bottom-sheets-persistent-bottom-sheets>
+  PersistentBottomSheetController<T> showBottomSheet<T>(WidgetBuilder builder) {
+    _closeCurrentBottomSheet();
+    final AnimationController controller = BottomSheet.createAnimationController(this)
+      ..forward();
     setState(() {
-      _currentBottomSheet = new PersistentBottomSheetController<T>._(
-        bottomSheet,
-        completer,
-        entry.remove,
-        (VoidCallback fn) { bottomSheetKey.currentState?.setState(fn); }
-      );
+      _currentBottomSheet = _buildBottomSheet<T>(builder, controller, true);
     });
     return _currentBottomSheet;
   }
@@ -1355,6 +1341,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
       value: 1.0,
       duration: kFloatingActionButtonSegue * 2,
     );
+    _maybeBuildCurrentBottomSheet();
   }
 
   @override
@@ -1366,9 +1353,23 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
     if (widget.floatingActionButtonLocation != oldWidget.floatingActionButtonLocation) {
       _moveFloatingActionButton(widget.floatingActionButtonLocation ?? _kDefaultFloatingActionButtonLocation);
     }
+    if (widget.bottomSheet != oldWidget.bottomSheet) {
+      assert(() {
+        if (widget.bottomSheet != null && _currentBottomSheet?._isLocalHistoryEntry == true) {
+          throw new FlutterError(
+            'Scaffold.bottomSheet cannot be specified while a bottom sheet displayed '
+            'with showBottomSheet() is still visible.\n Use the PersistentBottomSheetController '
+            'returned by showBottomSheet() to close the old bottom sheet before creating '
+            'a Scaffold with a (non null) bottomSheet.'
+          );
+        }
+        return true;
+      }());
+      _closeCurrentBottomSheet();
+      _maybeBuildCurrentBottomSheet();
+    }
     super.didUpdateWidget(oldWidget);
   }
-
 
   @override
   void dispose() {
@@ -1659,12 +1660,14 @@ class _PersistentBottomSheet extends StatefulWidget {
   const _PersistentBottomSheet({
     Key key,
     this.animationController,
+    this.enableDrag = true,
     this.onClosing,
     this.onDismissed,
     this.builder
   }) : super(key: key);
 
   final AnimationController animationController; // we control it, but it must be disposed by whoever created it
+  final bool enableDrag;
   final VoidCallback onClosing;
   final VoidCallback onDismissed;
   final WidgetBuilder builder;
@@ -1677,7 +1680,8 @@ class _PersistentBottomSheetState extends State<_PersistentBottomSheet> {
   @override
   void initState() {
     super.initState();
-    assert(widget.animationController.status == AnimationStatus.forward);
+    assert(widget.animationController.status == AnimationStatus.forward
+        || widget.animationController.status == AnimationStatus.completed);
     widget.animationController.addStatusListener(_handleStatusChange);
   }
 
@@ -1711,6 +1715,7 @@ class _PersistentBottomSheetState extends State<_PersistentBottomSheet> {
         container: true,
         child: new BottomSheet(
           animationController: widget.animationController,
+          enableDrag: widget.enableDrag,
           onClosing: widget.onClosing,
           builder: widget.builder
         )
@@ -1728,8 +1733,11 @@ class PersistentBottomSheetController<T> extends ScaffoldFeatureController<_Pers
     _PersistentBottomSheet widget,
     Completer<T> completer,
     VoidCallback close,
-    StateSetter setState
+    StateSetter setState,
+    this._isLocalHistoryEntry,
   ) : super._(widget, completer, close, setState);
+
+  final bool _isLocalHistoryEntry;
 }
 
 class _ScaffoldScope extends InheritedWidget {

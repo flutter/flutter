@@ -37,12 +37,10 @@ void main() {
         children: <TestSemantics>[
           new TestSemantics.rootChild(
             id: 1,
-            nextNodeId: 2,
             rect: TestSemantics.fullScreen,
           ),
           new TestSemantics.rootChild(
             id: 2,
-            previousNodeId: 1,
             label: 'label',
             rect: TestSemantics.fullScreen,
           ),

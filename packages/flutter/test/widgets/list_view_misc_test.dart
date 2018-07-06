@@ -72,7 +72,7 @@ void main() {
     int first = 0;
     int second = 0;
 
-    Widget buildBlock({ bool reverse: false }) {
+    Widget buildBlock({ bool reverse = false }) {
       return new Directionality(
         textDirection: TextDirection.ltr,
         child: new ListView(
@@ -150,7 +150,7 @@ void main() {
       ),
     );
 
-    final SliverMultiBoxAdaptorElement element = tester.element(find.byType(SliverList));
+    final SliverMultiBoxAdaptorElement element = tester.element(find.byType(SliverList, skipOffstage: false));
 
     final double maxScrollOffset = element.estimateMaxScrollOffset(
       null,

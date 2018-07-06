@@ -77,7 +77,7 @@ void main() {
         actualDecoration = actualBox.decoration;
 
         expect(actualDecoration.color, const Color(0xFF7F7F7F));
-        expect(actualDecoration.border, const isInstanceOf<Border>());
+        expect(actualDecoration.border, isInstanceOf<Border>());
         final Border border = actualDecoration.border;
         expect(border.left.width, 2.5);
         expect(border.left.style, BorderStyle.solid);
@@ -133,7 +133,7 @@ void main() {
       // Same as the test above but the values should be much closer to the
       // tween's end values given the easeOut curve.
       expect(actualDecoration.color, const Color(0xFF505050));
-      expect(actualDecoration.border, const isInstanceOf<Border>());
+      expect(actualDecoration.border, isInstanceOf<Border>());
       final Border border = actualDecoration.border;
       expect(border.left.width, closeTo(1.9, 0.1));
       expect(border.left.style, BorderStyle.solid);
@@ -190,5 +190,67 @@ void main() {
 
     expect(actualAlign.widthFactor, 0.3);
     expect(actualAlign.heightFactor, 0.4);
+  });
+
+  testWidgets('SizeTransition clamps negative size factors - vertical axis', (WidgetTester tester) async {
+    final AnimationController controller = new AnimationController(vsync: const TestVSync());
+    final Animation<double> animation = new Tween<double>(begin: -1.0, end: 1.0).animate(controller);
+
+    final Widget widget =  new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new SizeTransition(
+          axis: Axis.vertical,
+          sizeFactor: animation,
+          child: const Text('Ready'),
+        ),
+      );
+
+    await tester.pumpWidget(widget);
+
+    final RenderPositionedBox actualPositionedBox = tester.renderObject(find.byType(Align));
+    expect(actualPositionedBox.heightFactor, 0.0);
+
+    controller.value = 0.0;
+    await tester.pump();
+    expect(actualPositionedBox.heightFactor, 0.0);
+
+    controller.value = 0.75;
+    await tester.pump();
+    expect(actualPositionedBox.heightFactor, 0.5);
+
+    controller.value = 1.0;
+    await tester.pump();
+    expect(actualPositionedBox.heightFactor, 1.0);
+  });
+
+  testWidgets('SizeTransition clamps negative size factors - horizontal axis', (WidgetTester tester) async {
+    final AnimationController controller = new AnimationController(vsync: const TestVSync());
+    final Animation<double> animation = new Tween<double>(begin: -1.0, end: 1.0).animate(controller);
+
+    final Widget widget =  new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new SizeTransition(
+          axis: Axis.horizontal,
+          sizeFactor: animation,
+          child: const Text('Ready'),
+        ),
+      );
+
+    await tester.pumpWidget(widget);
+
+    final RenderPositionedBox actualPositionedBox = tester.renderObject(find.byType(Align));
+    expect(actualPositionedBox.widthFactor, 0.0);
+
+    controller.value = 0.0;
+    await tester.pump();
+    expect(actualPositionedBox.widthFactor, 0.0);
+
+    controller.value = 0.75;
+    await tester.pump();
+    expect(actualPositionedBox.widthFactor, 0.5);
+
+    controller.value = 1.0;
+    await tester.pump();
+    expect(actualPositionedBox.widthFactor, 1.0);
   });
 }

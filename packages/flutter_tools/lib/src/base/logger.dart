@@ -25,13 +25,13 @@ abstract class Logger {
 
   /// Display an error level message to the user. Commands should use this if they
   /// fail in some way.
-  void printError(String message, { StackTrace stackTrace, bool emphasis: false });
+  void printError(String message, { StackTrace stackTrace, bool emphasis = false });
 
   /// Display normal output of the command. This should be used for things like
   /// progress messages, success messages, or just normal command output.
   void printStatus(
     String message,
-    { bool emphasis: false, bool newline: true, String ansiAlternative, int indent }
+    { bool emphasis = false, bool newline = true, String ansiAlternative, int indent }
   );
 
   /// Use this for verbose tracing output. Users can turn this output on in order
@@ -48,8 +48,8 @@ abstract class Logger {
   Status startProgress(
     String message, {
     String progressId,
-    bool expectSlowOperation: false,
-    int progressIndicatorPadding: kDefaultStatusPadding,
+    bool expectSlowOperation = false,
+    int progressIndicatorPadding = kDefaultStatusPadding,
   });
 }
 
@@ -63,7 +63,7 @@ class StdoutLogger extends Logger {
   bool get isVerbose => false;
 
   @override
-  void printError(String message, { StackTrace stackTrace, bool emphasis: false }) {
+  void printError(String message, { StackTrace stackTrace, bool emphasis = false }) {
     _status?.cancel();
     _status = null;
 
@@ -77,7 +77,7 @@ class StdoutLogger extends Logger {
   @override
   void printStatus(
     String message,
-    { bool emphasis: false, bool newline: true, String ansiAlternative, int indent }
+    { bool emphasis = false, bool newline = true, String ansiAlternative, int indent }
   ) {
     _status?.cancel();
     _status = null;
@@ -104,8 +104,8 @@ class StdoutLogger extends Logger {
   Status startProgress(
     String message, {
     String progressId,
-    bool expectSlowOperation: false,
-    int progressIndicatorPadding: 59,
+    bool expectSlowOperation = false,
+    int progressIndicatorPadding = 59,
   }) {
     if (_status != null) {
       // Ignore nested progresses; return a no-op status object.
@@ -154,14 +154,14 @@ class BufferLogger extends Logger {
   String get traceText => _trace.toString();
 
   @override
-  void printError(String message, { StackTrace stackTrace, bool emphasis: false }) {
+  void printError(String message, { StackTrace stackTrace, bool emphasis = false }) {
     _error.writeln(message);
   }
 
   @override
   void printStatus(
     String message,
-    { bool emphasis: false, bool newline: true, String ansiAlternative, int indent }
+    { bool emphasis = false, bool newline = true, String ansiAlternative, int indent }
   ) {
     if (newline)
       _status.writeln(message);
@@ -176,8 +176,8 @@ class BufferLogger extends Logger {
   Status startProgress(
     String message, {
     String progressId,
-    bool expectSlowOperation: false,
-    int progressIndicatorPadding: kDefaultStatusPadding,
+    bool expectSlowOperation = false,
+    int progressIndicatorPadding = kDefaultStatusPadding,
   }) {
     printStatus(message);
     return new Status();
@@ -205,14 +205,14 @@ class VerboseLogger extends Logger {
   bool get isVerbose => true;
 
   @override
-  void printError(String message, { StackTrace stackTrace, bool emphasis: false }) {
+  void printError(String message, { StackTrace stackTrace, bool emphasis = false }) {
     _emit(_LogType.error, message, stackTrace);
   }
 
   @override
   void printStatus(
     String message,
-    { bool emphasis: false, bool newline: true, String ansiAlternative, int indent }
+    { bool emphasis = false, bool newline = true, String ansiAlternative, int indent }
   ) {
     _emit(_LogType.status, message);
   }
@@ -226,8 +226,8 @@ class VerboseLogger extends Logger {
   Status startProgress(
     String message, {
     String progressId,
-    bool expectSlowOperation: false,
-    int progressIndicatorPadding: kDefaultStatusPadding,
+    bool expectSlowOperation = false,
+    int progressIndicatorPadding = kDefaultStatusPadding,
   }) {
     printStatus(message);
     return new Status();

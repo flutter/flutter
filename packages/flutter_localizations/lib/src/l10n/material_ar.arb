@@ -39,8 +39,9 @@
   "hideAccountsLabel": "إخفاء الحسابات",
   "showAccountsLabel": "إظهار الحسابات",
   "modalBarrierDismissLabel": "رفض",
-  "drawerLabel": "قائمة الإبحار",
-  "popupMenuLabel": "القائمة المنبثقة",
-  "dialogLabel": "الحوار",
-  "alertDialogLabel": "مربع حوار التنبيه"
+  "drawerLabel": "قائمة تنقل",
+  "popupMenuLabel": "قائمة منبثقة",
+  "dialogLabel": "مربع حوار",
+  "alertDialogLabel": "مربع حوار التنبيه",
+  "searchFieldLabel": "بحث"
 }

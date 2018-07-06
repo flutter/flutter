@@ -1,4 +1,4 @@
-// Copyright 2018 The Flutter Authors. All rights reserved.
+// Copyright 2018 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -10,7 +10,7 @@ import 'package:web_socket_channel/io.dart';
 
 import '../common/logging.dart';
 
-const Duration _kConnectTimeout = const Duration(seconds: 30);
+const Duration _kConnectTimeout = const Duration(seconds: 9);
 
 const Duration _kReconnectAttemptInterval = const Duration(seconds: 3);
 
@@ -38,10 +38,19 @@ Future<json_rpc.Peer> _waitAndConnect(Uri uri) async {
     WebSocket socket;
     json_rpc.Peer peer;
     try {
-      socket = await WebSocket.connect(uri.toString());
+      socket =
+          await WebSocket.connect(uri.toString()).timeout(_kConnectTimeout);
       peer = new json_rpc.Peer(new IOWebSocketChannel(socket).cast())..listen();
       return peer;
+    } on HttpException catch (e) {
+      // This is a fine warning as this most likely means the port is stale.
+      _log.fine('$e: ${e.message}');
+      await peer?.close();
+      await socket?.close();
+      rethrow;
     } catch (e) {
+      _log.fine('Dart VM connection failed $e: ${e.message}');
+      // Other unknown errors will be handled with reconnects.
       await peer?.close();
       await socket?.close();
       if (timer.elapsed < _kConnectTimeout) {
@@ -49,7 +58,7 @@ Future<json_rpc.Peer> _waitAndConnect(Uri uri) async {
         await new Future<Null>.delayed(_kReconnectAttemptInterval);
         return attemptConnection(uri);
       } else {
-        _log.severe('Connection to Fuchsia\'s Dart VM timed out at '
+        _log.warning('Connection to Fuchsia\'s Dart VM timed out at '
             '${uri.toString()}');
         rethrow;
       }
@@ -86,9 +95,12 @@ class RpcFormatError extends Error {
 /// Either wraps existing RPC calls to the Dart VM service, or runs raw RPC
 /// function calls via [invokeRpc].
 class DartVm {
-  DartVm._(this._peer);
+  DartVm._(this._peer, this.uri);
 
   final json_rpc.Peer _peer;
+
+  /// The URI through which this DartVM instance is connected.
+  final Uri uri;
 
   /// Attempts to connect to the given [Uri].
   ///
@@ -101,7 +113,23 @@ class DartVm {
     if (peer == null) {
       return null;
     }
-    return new DartVm._(peer);
+    return new DartVm._(peer, uri);
+  }
+
+  /// Returns a [List] of [IsolateRef] objects whose name matches `pattern`.
+  ///
+  /// Also checks to make sure it was launched from the `main()` function.
+  Future<List<IsolateRef>> getMainIsolatesByPattern(Pattern pattern) async {
+    final Map<String, dynamic> jsonVmRef =
+        await invokeRpc('getVM', timeout: _kRpcTimeout);
+    final List<IsolateRef> result = <IsolateRef>[];
+    for (Map<String, dynamic> jsonIsolate in jsonVmRef['isolates']) {
+      final String name = jsonIsolate['name'];
+      if (name.contains(pattern) && name.contains(new RegExp(r':main\(\)'))) {
+        result.add(new IsolateRef._fromJson(jsonIsolate, this));
+      }
+    }
+    return result;
   }
 
   /// Invokes a raw JSON RPC command with the VM service.
@@ -112,21 +140,17 @@ class DartVm {
   Future<Map<String, dynamic>> invokeRpc(
     String function, {
     Map<String, dynamic> params,
-    Duration timeout,
+    Duration timeout = _kRpcTimeout,
   }) async {
-    final Future<Map<String, dynamic>> future = _peer.sendRequest(
-      function,
-      params ?? <String, dynamic>{},
-    );
-    if (timeout == null) {
-      return future;
-    }
-    return future.timeout(timeout, onTimeout: () {
+    final Map<String, dynamic> result = await _peer
+        .sendRequest(function, params ?? <String, dynamic>{})
+        .timeout(timeout, onTimeout: () {
       throw new TimeoutException(
         'Peer connection timed out during RPC call',
         timeout,
       );
     });
+    return result;
   }
 
   /// Returns a list of [FlutterView] objects running across all Dart VM's.
@@ -139,8 +163,7 @@ class DartVm {
     final List<FlutterView> views = <FlutterView>[];
     final Map<String, dynamic> rpcResponse =
         await invokeRpc('_flutter.listViews', timeout: _kRpcTimeout);
-    final List<Map<String, dynamic>> flutterViewsJson = rpcResponse['views'];
-    for (Map<String, dynamic> jsonView in flutterViewsJson) {
+    for (Map<String, dynamic> jsonView in rpcResponse['views']) {
       final FlutterView flutterView = new FlutterView._fromJson(jsonView);
       if (flutterView != null) {
         views.add(flutterView);
@@ -200,4 +223,45 @@ class FlutterView {
   ///
   /// May be null if there is no associated isolate.
   String get name => _name;
+}
+
+/// This is a wrapper class for the `@Isolate` RPC object.
+///
+/// See:
+/// https://github.com/dart-lang/sdk/blob/master/runtime/vm/service/service.md#isolate
+///
+/// This class contains information about the Isolate like its name and ID, as
+/// well as a reference to the parent DartVM on which it is running.
+class IsolateRef {
+  IsolateRef._(this.name, this.number, this.dartVm);
+
+  factory IsolateRef._fromJson(Map<String, dynamic> json, DartVm dartVm) {
+    final String number = json['number'];
+    final String name = json['name'];
+    final String type = json['type'];
+    if (type == null) {
+      throw new RpcFormatError('Unable to find type within JSON "$json"');
+    }
+    if (type != '@Isolate') {
+      throw new RpcFormatError('Type "$type" does not match for IsolateRef');
+    }
+    if (number == null) {
+      throw new RpcFormatError(
+          'Unable to find number for isolate ref within JSON "$json"');
+    }
+    if (name == null) {
+      throw new RpcFormatError(
+          'Unable to find name for isolate ref within JSON "$json"');
+    }
+    return new IsolateRef._(name, int.parse(number), dartVm);
+  }
+
+  /// The full name of this Isolate (not guaranteed to be unique).
+  final String name;
+
+  /// The unique number ID of this isolate.
+  final int number;
+
+  /// The parent [DartVm] on which this Isolate lives.
+  final DartVm dartVm;
 }

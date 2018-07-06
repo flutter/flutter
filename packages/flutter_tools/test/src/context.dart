@@ -12,7 +12,6 @@ import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/os.dart';
-import 'package:flutter_tools/src/base/port_scanner.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/context_runner.dart';
 import 'package:flutter_tools/src/device.dart';
@@ -21,6 +20,7 @@ import 'package:flutter_tools/src/ios/simulators.dart';
 import 'package:flutter_tools/src/ios/xcodeproj.dart';
 import 'package:flutter_tools/src/usage.dart';
 import 'package:flutter_tools/src/version.dart';
+import 'package:meta/meta.dart';
 import 'package:mockito/mockito.dart';
 import 'package:quiver/time.dart';
 import 'package:test/test.dart';
@@ -37,10 +37,11 @@ MockDoctor get testDoctor => context[Doctor];
 
 typedef void ContextInitializer(AppContext testContext);
 
+@isTest
 void testUsingContext(String description, dynamic testMethod(), {
   Timeout timeout,
-  Map<Type, Generator> overrides: const <Type, Generator>{},
-  bool initializeFlutterRoot: true,
+  Map<Type, Generator> overrides = const <Type, Generator>{},
+  bool initializeFlutterRoot = true,
   String testOn,
   bool skip, // should default to `false`, but https://github.com/dart-lang/test/issues/545 doesn't allow this
 }) {
@@ -75,7 +76,6 @@ void testUsingContext(String description, dynamic testMethod(), {
           },
           Logger: () => new BufferLogger(),
           OperatingSystemUtils: () => new MockOperatingSystemUtils(),
-          PortScanner: () => new MockPortScanner(),
           SimControl: () => new MockSimControl(),
           Usage: () => new MockUsage(),
           XcodeProjectInterpreter: () => new MockXcodeProjectInterpreter(),
@@ -123,16 +123,6 @@ void _printBufferedErrors(AppContext testContext) {
       print(bufferLogger.errorText);
     bufferLogger.clear();
   }
-}
-
-class MockPortScanner extends PortScanner {
-  static int _nextAvailablePort = 12345;
-
-  @override
-  Future<bool> isPortAvailable(int port) async => true;
-
-  @override
-  Future<int> findAvailablePort() async => _nextAvailablePort++;
 }
 
 class MockDeviceManager implements DeviceManager {

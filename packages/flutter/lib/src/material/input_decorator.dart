@@ -242,6 +242,7 @@ class _HelperError extends StatefulWidget {
     this.helperStyle,
     this.errorText,
     this.errorStyle,
+    this.errorMaxLines,
   }) : super(key: key);
 
   final TextAlign textAlign;
@@ -249,6 +250,7 @@ class _HelperError extends StatefulWidget {
   final TextStyle helperStyle;
   final String errorText;
   final TextStyle errorStyle;
+  final int errorMaxLines;
 
   @override
   _HelperErrorState createState() => new _HelperErrorState();
@@ -343,6 +345,7 @@ class _HelperErrorState extends State<_HelperError> with SingleTickerProviderSta
           style: widget.errorStyle,
           textAlign: widget.textAlign,
           overflow: TextOverflow.ellipsis,
+          maxLines: widget.errorMaxLines,
         ),
       ),
     );
@@ -444,7 +447,7 @@ class _Decoration {
        assert(floatingLabelHeight != null),
        assert(floatingLabelProgress != null);
 
-  final EdgeInsets contentPadding;
+  final EdgeInsetsGeometry contentPadding;
   final bool isCollapsed;
   final double floatingLabelHeight;
   final double floatingLabelProgress;
@@ -534,10 +537,15 @@ class _RenderDecorationLayout {
 // The workhorse: layout and paint a _Decorator widget's _Decoration.
 class _RenderDecoration extends RenderBox {
   _RenderDecoration({
-    _Decoration decoration,
-    TextDirection textDirection,
-  }) : _decoration = decoration,
-       _textDirection = textDirection;
+    @required _Decoration decoration,
+    @required TextDirection textDirection,
+    @required TextBaseline textBaseline,
+  }) : assert(decoration != null),
+       assert(textDirection != null),
+       assert(textBaseline != null),
+       _decoration = decoration,
+       _textDirection = textDirection,
+       _textBaseline = textBaseline;
 
   final Map<_DecorationSlot, RenderBox> slotToChild = <_DecorationSlot, RenderBox>{};
   final Map<RenderBox, _DecorationSlot> childToSlot = <RenderBox, _DecorationSlot>{};
@@ -651,6 +659,7 @@ class _RenderDecoration extends RenderBox {
   _Decoration get decoration => _decoration;
   _Decoration _decoration;
   set decoration(_Decoration value) {
+    assert(value != null);
     if (_decoration == value)
       return;
     _decoration = value;
@@ -660,9 +669,20 @@ class _RenderDecoration extends RenderBox {
   TextDirection get textDirection => _textDirection;
   TextDirection _textDirection;
   set textDirection(TextDirection value) {
+    assert(value != null);
     if (_textDirection == value)
       return;
     _textDirection = value;
+    markNeedsLayout();
+  }
+
+  TextBaseline get textBaseline => _textBaseline;
+  TextBaseline _textBaseline;
+  set textBaseline(TextBaseline value) {
+    assert(value != null);
+    if (_textBaseline == value)
+      return;
+    _textBaseline = value;
     markNeedsLayout();
   }
 
@@ -723,7 +743,7 @@ class _RenderDecoration extends RenderBox {
   }
 
   static double _minHeight(RenderBox box, double width) {
-    return box == null ? 0.0 : box.getMinIntrinsicWidth(width);
+    return box == null ? 0.0 : box.getMinIntrinsicHeight(width);
   }
 
   static Size _boxSize(RenderBox box) => box == null ? Size.zero : box.size;
@@ -745,7 +765,7 @@ class _RenderDecoration extends RenderBox {
       if (box == null)
         return;
       box.layout(boxConstraints, parentUsesSize: true);
-      final double baseline = box.getDistanceToBaseline(TextBaseline.alphabetic);
+      final double baseline = box.getDistanceToBaseline(textBaseline);
       assert(baseline != null && baseline >= 0.0);
       boxToBaseline[box] = baseline;
       aboveBaseline = math.max(baseline, aboveBaseline);
@@ -761,21 +781,21 @@ class _RenderDecoration extends RenderBox {
     if (suffixIcon != null)
       suffixIcon.layout(boxConstraints, parentUsesSize: true);
 
-    final double inputWidth = constraints.maxWidth - (
+    final double inputWidth = math.max(0.0, constraints.maxWidth - (
       _boxSize(icon).width
       + contentPadding.left
       + _boxSize(prefixIcon).width
       + _boxSize(prefix).width
       + _boxSize(suffix).width
       + _boxSize(suffixIcon).width
-      + contentPadding.right);
+      + contentPadding.right));
 
     boxConstraints = boxConstraints.copyWith(maxWidth: inputWidth);
-    layoutLineBox(hint);
     if (label != null) // The label is not baseline aligned.
       label.layout(boxConstraints, parentUsesSize: true);
 
     boxConstraints = boxConstraints.copyWith(minWidth: inputWidth);
+    layoutLineBox(hint);
     layoutLineBox(input);
 
     double inputBaseline = contentPadding.top + aboveBaseline;
@@ -791,6 +811,12 @@ class _RenderDecoration extends RenderBox {
       inputBaseline += decoration.floatingLabelHeight;
     }
 
+    containerHeight = math.max(
+      containerHeight,
+      math.max(
+        _boxSize(suffixIcon).height,
+        _boxSize(prefixIcon).height));
+
     // Inline text within an outline border is centered within the container
     // less 2.0 dps at the top to account for the vertical space occupied
     // by the floating label.
@@ -800,10 +826,21 @@ class _RenderDecoration extends RenderBox {
     double subtextBaseline = 0.0;
     double subtextHeight = 0.0;
     if (helperError != null || counter != null) {
+      boxConstraints = layoutConstraints.loosen();
       aboveBaseline = 0.0;
       belowBaseline = 0.0;
-      layoutLineBox(helperError);
       layoutLineBox(counter);
+
+      // The helper or error text can occupy the full width less the space
+      // occupied by the icon and counter.
+      boxConstraints = boxConstraints.copyWith(
+        maxWidth: math.max(0.0, boxConstraints.maxWidth
+          - _boxSize(icon).width
+          - _boxSize(counter).width
+          - contentPadding.horizontal,
+        ),
+      );
+      layoutLineBox(helperError);
 
       if (aboveBaseline + belowBaseline > 0.0) {
         const double subtextGap = 8.0;
@@ -899,7 +936,15 @@ class _RenderDecoration extends RenderBox {
         width: overallWidth - _boxSize(icon).width,
       );
       container.layout(containerConstraints, parentUsesSize: true);
-      final double x = textDirection == TextDirection.rtl ? 0.0 : _boxSize(icon).width;
+      double x;
+      switch (textDirection) {
+        case TextDirection.rtl:
+          x = 0.0;
+          break;
+        case TextDirection.ltr:
+          x = _boxSize(icon).width;
+          break;
+       }
       _boxParentData(container).offset = new Offset(x, 0.0);
     }
 
@@ -924,7 +969,15 @@ class _RenderDecoration extends RenderBox {
       : layout.outlineBaseline;
 
     if (icon != null) {
-      final double x = textDirection == TextDirection.rtl ? overallWidth - icon.size.width : 0.0;
+      double x;
+      switch (textDirection) {
+        case TextDirection.rtl:
+          x = overallWidth - icon.size.width;
+          break;
+        case TextDirection.ltr:
+          x = 0.0;
+          break;
+       }
       centerLayout(icon, x);
     }
 
@@ -932,8 +985,10 @@ class _RenderDecoration extends RenderBox {
       case TextDirection.rtl: {
         double start = right - _boxSize(icon).width;
         double end = left;
-        if (prefixIcon != null)
+        if (prefixIcon != null) {
+          start += contentPadding.left;
           start -= centerLayout(prefixIcon, start - prefixIcon.size.width);
+        }
         if (label != null)
           centerLayout(label, start - label.size.width);
         if (prefix != null)
@@ -942,8 +997,10 @@ class _RenderDecoration extends RenderBox {
           baselineLayout(input, start - input.size.width);
         if (hint != null)
           baselineLayout(hint, start - hint.size.width);
-        if (suffixIcon != null)
+        if (suffixIcon != null) {
+          end -= contentPadding.left;
           end += centerLayout(suffixIcon, end);
+        }
         if (suffix != null)
           end += baselineLayout(suffix, end);
         break;
@@ -951,8 +1008,10 @@ class _RenderDecoration extends RenderBox {
       case TextDirection.ltr: {
         double start = left + _boxSize(icon).width;
         double end = right;
-        if (prefixIcon != null)
+        if (prefixIcon != null) {
+          start -= contentPadding.left;
           start += centerLayout(prefixIcon, start);
+        }
         if (label != null)
           centerLayout(label, start);
         if (prefix != null)
@@ -961,8 +1020,10 @@ class _RenderDecoration extends RenderBox {
           baselineLayout(input, start);
         if (hint != null)
           baselineLayout(hint, start);
-        if (suffixIcon != null)
+        if (suffixIcon != null) {
+          end += contentPadding.right;
           end -= centerLayout(suffixIcon, end - suffixIcon.size.width);
+        }
         if (suffix != null)
           end -= baselineLayout(suffix, end - suffix.size.width);
         break;
@@ -990,9 +1051,17 @@ class _RenderDecoration extends RenderBox {
     }
 
     if (label != null) {
-      decoration.borderGap.start = textDirection == TextDirection.rtl
-        ? _boxParentData(label).offset.dx + label.size.width
-        : _boxParentData(label).offset.dx;
+      final double labelX = _boxParentData(label).offset.dx;
+      switch (textDirection) {
+        case TextDirection.rtl:
+          decoration.borderGap.start = labelX + label.size.width;
+          break;
+        case TextDirection.ltr:
+          // The value of _InputBorderGap.start is relative to the origin of the
+          // _BorderContainer which is inset by the icon's width.
+          decoration.borderGap.start = labelX - _boxSize(icon).width;
+          break;
+      }
       decoration.borderGap.extent = label.size.width * 0.75;
     } else {
       decoration.borderGap.start = null;
@@ -1025,9 +1094,15 @@ class _RenderDecoration extends RenderBox {
       final bool isOutlineBorder = decoration.border != null && decoration.border.isOutline;
       final double floatingY = isOutlineBorder ? -labelHeight * 0.25 : contentPadding.top;
       final double scale = lerpDouble(1.0, 0.75, t);
-      final double dx = textDirection == TextDirection.rtl
-        ? labelOffset.dx + label.size.width * (1.0 - scale) // origin is on the right
-        : labelOffset.dx; // origin on the left
+      double dx;
+      switch (textDirection) {
+        case TextDirection.rtl:
+          dx = labelOffset.dx + label.size.width * (1.0 - scale); // origin is on the right
+          break;
+        case TextDirection.ltr:
+          dx = labelOffset.dx; // origin on the left
+          break;
+      }
       final double dy = lerpDouble(0.0, floatingY - labelOffset.dy, t);
       _labelTransform = new Matrix4.identity()
         ..translate(dx, labelOffset.dy + dy)
@@ -1223,10 +1298,17 @@ class _RenderDecorationElement extends RenderObjectElement {
 class _Decorator extends RenderObjectWidget {
   const _Decorator({
     Key key,
-    this.decoration,
-  }) : super(key: key);
+    @required this.decoration,
+    @required this.textDirection,
+    @required this.textBaseline,
+  }) : assert(decoration != null),
+       assert(textDirection != null),
+       assert(textBaseline != null),
+       super(key: key);
 
   final _Decoration decoration;
+  final TextDirection textDirection;
+  final TextBaseline textBaseline;
 
   @override
   _RenderDecorationElement createElement() => new _RenderDecorationElement(this);
@@ -1235,7 +1317,8 @@ class _Decorator extends RenderObjectWidget {
   _RenderDecoration createRenderObject(BuildContext context) {
     return new _RenderDecoration(
       decoration: decoration,
-      textDirection: Directionality.of(context),
+      textDirection: textDirection,
+      textBaseline: textBaseline,
     );
   }
 
@@ -1243,7 +1326,8 @@ class _Decorator extends RenderObjectWidget {
   void updateRenderObject(BuildContext context, _RenderDecoration renderObject) {
     renderObject
      ..decoration = decoration
-     ..textDirection = Directionality.of(context);
+     ..textDirection = textDirection
+     ..textBaseline = textBaseline;
   }
 }
 
@@ -1277,8 +1361,8 @@ class InputDecorator extends StatefulWidget {
     this.decoration,
     this.baseStyle,
     this.textAlign,
-    this.isFocused: false,
-    this.isEmpty: false,
+    this.isFocused = false,
+    this.isEmpty = false,
     this.child,
   }) : assert(isFocused != null),
        assert(isEmpty != null),
@@ -1296,6 +1380,9 @@ class InputDecorator extends StatefulWidget {
   ///
   /// If null, `baseStyle` defaults to the `subhead` style from the
   /// current [Theme], see [ThemeData.textTheme].
+  ///
+  /// The [TextStyle.textBaseline] of the [baseStyle] is used to determine
+  /// the baseline used for text alignment.
   final TextStyle baseStyle;
 
   /// How the text in the decoration should be aligned horizontally.
@@ -1525,6 +1612,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
   Widget build(BuildContext context) {
     final ThemeData themeData = Theme.of(context);
     final TextStyle inlineStyle = _getInlineStyle(themeData);
+    final TextBaseline textBaseline = inlineStyle.textBaseline;
 
     final TextStyle hintStyle = inlineStyle.merge(decoration.hintStyle);
     final Widget hint = decoration.hintText == null ? null : new AnimatedOpacity(
@@ -1614,21 +1702,35 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
       );
 
     final Widget prefixIcon = decoration.prefixIcon == null ? null :
-      IconTheme.merge(
-        data: new IconThemeData(
-          color: iconColor,
-          size: iconSize,
+      new Center(
+        widthFactor: 1.0,
+        heightFactor: 1.0,
+        child: new ConstrainedBox(
+          constraints: const BoxConstraints(minWidth: 48.0, minHeight: 48.0),
+          child: IconTheme.merge(
+            data: new IconThemeData(
+              color: iconColor,
+              size: iconSize,
+            ),
+            child: decoration.prefixIcon,
+          ),
         ),
-        child: decoration.prefixIcon,
       );
 
     final Widget suffixIcon = decoration.suffixIcon == null ? null :
-      IconTheme.merge(
-        data: new IconThemeData(
-          color: iconColor,
-          size: iconSize,
+      new Center(
+        widthFactor: 1.0,
+        heightFactor: 1.0,
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(minWidth: 48.0, minHeight: 48.0),
+          child: IconTheme.merge(
+            data: new IconThemeData(
+              color: iconColor,
+              size: iconSize,
+            ),
+            child: decoration.suffixIcon,
+          ),
         ),
-        child: decoration.suffixIcon,
       );
 
     final Widget helperError = new _HelperError(
@@ -1637,43 +1739,47 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
       helperStyle: _getHelperStyle(themeData),
       errorText: decoration.errorText,
       errorStyle: _getErrorStyle(themeData),
+      errorMaxLines: decoration.errorMaxLines,
     );
 
     final Widget counter = decoration.counterText == null ? null :
       new Text(
         decoration.counterText,
         style: _getHelperStyle(themeData).merge(decoration.counterStyle),
-        textAlign: textAlign == TextAlign.end ? TextAlign.start : TextAlign.end,
         overflow: TextOverflow.ellipsis,
       );
+
+    // The _Decoration widget and _RenderDecoration assume that contentPadding
+    // has been resolved to EdgeInsets.
+    final TextDirection textDirection = Directionality.of(context);
+    final EdgeInsets decorationContentPadding = decoration.contentPadding?.resolve(textDirection);
 
     EdgeInsets contentPadding;
     double floatingLabelHeight;
     if (decoration.isCollapsed) {
       floatingLabelHeight = 0.0;
-      contentPadding = decoration.contentPadding ?? EdgeInsets.zero;
+      contentPadding = decorationContentPadding ?? EdgeInsets.zero;
     } else if (!decoration.border.isOutline) {
       // 4.0: the vertical gap between the inline elements and the floating label.
       floatingLabelHeight = 4.0 + 0.75 * inlineLabelStyle.fontSize;
       if (decoration.filled == true) { // filled == null same as filled == false
-        contentPadding = decoration.contentPadding ?? (decorationIsDense
+        contentPadding = decorationContentPadding ?? (decorationIsDense
           ? const EdgeInsets.fromLTRB(12.0, 8.0, 12.0, 8.0)
           : const EdgeInsets.fromLTRB(12.0, 12.0, 12.0, 12.0));
       } else {
         // Not left or right padding for underline borders that aren't filled
         // is a small concession to backwards compatibility. This eliminates
         // the most noticeable layout change introduced by #13734.
-        contentPadding = decoration.contentPadding ?? (decorationIsDense
+        contentPadding = decorationContentPadding ?? (decorationIsDense
           ? const EdgeInsets.fromLTRB(0.0, 8.0, 0.0, 8.0)
           : const EdgeInsets.fromLTRB(0.0, 12.0, 0.0, 12.0));
       }
     } else {
       floatingLabelHeight = 0.0;
-      contentPadding = decoration.contentPadding ?? (decorationIsDense
+      contentPadding = decorationContentPadding ?? (decorationIsDense
         ? const EdgeInsets.fromLTRB(12.0, 20.0, 12.0, 12.0)
         : const EdgeInsets.fromLTRB(12.0, 24.0, 12.0, 16.0));
     }
-
     return new _Decorator(
       decoration: new _Decoration(
         contentPadding: contentPadding,
@@ -1694,6 +1800,8 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
         counter: counter,
         container: container,
       ),
+      textDirection: textDirection,
+      textBaseline: textBaseline,
     );
   }
 }
@@ -1720,8 +1828,9 @@ class InputDecoration {
   ///
   /// Unless specified by [ThemeData.inputDecorationTheme],
   /// [InputDecorator] defaults [isDense] to true, and [filled] to false,
-  /// Similarly, the default border is an instance of [UnderlineInputBorder].
-  /// If [border] is [InputBorder.none] then no border is drawn.
+  /// and [maxLines] to 1. The default border is an instance
+  /// of [UnderlineInputBorder]. If [border] is [InputBorder.none] then
+  /// no border is drawn.
   ///
   /// The [enabled] argument must not be null.
   const InputDecoration({
@@ -1734,6 +1843,7 @@ class InputDecoration {
     this.hintStyle,
     this.errorText,
     this.errorStyle,
+    this.errorMaxLines,
     this.isDense,
     this.contentPadding,
     this.prefixIcon,
@@ -1747,7 +1857,7 @@ class InputDecoration {
     this.filled,
     this.fillColor,
     this.border,
-    this.enabled: true,
+    this.enabled = true,
   }) : assert(enabled != null), isCollapsed = false;
 
   /// Defines an [InputDecorator] that is the same size as the input field.
@@ -1758,10 +1868,10 @@ class InputDecoration {
   const InputDecoration.collapsed({
     @required this.hintText,
     this.hintStyle,
-    this.filled: false,
+    this.filled = false,
     this.fillColor,
-    this.border: InputBorder.none,
-    this.enabled: true,
+    this.border = InputBorder.none,
+    this.enabled = true,
   }) : assert(enabled != null),
        icon = null,
        labelText = null,
@@ -1770,6 +1880,7 @@ class InputDecoration {
        helperStyle = null,
        errorText = null,
        errorStyle = null,
+       errorMaxLines = null,
        isDense = false,
        contentPadding = EdgeInsets.zero,
        isCollapsed = true,
@@ -1861,6 +1972,16 @@ class InputDecoration {
   /// input field and the current [Theme].
   final TextStyle errorStyle;
 
+
+  /// The maximum number of lines the [errorText] can occupy.
+  ///
+  /// Defaults to null, which means that the [errorText] will be limited
+  /// to a single line with [TextOverflow.ellipsis].
+  ///
+  /// This value is passed along to the [Text.maxLines] attribute
+  /// of the [Text] widget used to display the error.
+  final int errorMaxLines;
+
   /// Whether the input [child] is part of a dense form (i.e., uses less vertical
   /// space).
   ///
@@ -1877,7 +1998,7 @@ class InputDecoration {
   /// By default the `contentPadding` reflects [isDense] and the type of the
   /// [border]. If [isCollapsed] is true then `contentPadding` is
   /// [EdgeInsets.zero].
-  final EdgeInsets contentPadding;
+  final EdgeInsetsGeometry contentPadding;
 
   /// Whether the decoration is the same size as the input field.
   ///
@@ -1893,11 +2014,16 @@ class InputDecoration {
   /// [IconTheme] and therefore does not need to be explicitly given in the
   /// icon widget.
   ///
-  /// The prefix icon is not padded. To pad the trailing edge of the prefix icon:
+  /// The prefix icon is constrained with a minimum size of 48px by 48px, but
+  /// can be expanded beyond that. Anything larger than 24px will require
+  /// additional padding to ensure it matches the material spec of 12px padding
+  /// between the left edge of the input and leading edge of the prefix icon.
+  /// To pad the leading edge of the prefix icon:
+  ///
   /// ```dart
   /// prefixIcon: new Padding(
-  ///   padding: const EdgeInsetsDirectional.only(end: 16.0),
-  ///   child: myIcon,
+  ///   padding: const EdgeInsetsDirectional.only(start: 12.0),
+  ///   child: myIcon, // icon is 48px widget.
   /// )
   /// ```
   ///
@@ -1927,11 +2053,16 @@ class InputDecoration {
   /// [IconTheme] and therefore does not need to be explicitly given in the
   /// icon widget.
   ///
-  /// The suffix icon is not padded. To pad the leading edge of the suffix icon:
+  /// The suffix icon is constrained with a minimum size of 48px by 48px, but
+  /// can be expanded beyond that. Anything larger than 24px will require
+  /// additional padding to ensure it matches the material spec of 12px padding
+  /// between the right edge of the input and trailing edge of the prefix icon.
+  /// To pad the trailing edge of the suffix icon:
+  ///
   /// ```dart
   /// suffixIcon: new Padding(
-  ///   padding: const EdgeInsetsDirectional.only(start: 16.0),
-  ///   child: new Icon(Icons.search),
+  ///   padding: const EdgeInsetsDirectional.only(end: 12.0),
+  ///   child: myIcon, // icon is 48px widget.
   /// )
   /// ```
   ///
@@ -2024,8 +2155,9 @@ class InputDecoration {
     TextStyle hintStyle,
     String errorText,
     TextStyle errorStyle,
+    int errorMaxLines,
     bool isDense,
-    EdgeInsets contentPadding,
+    EdgeInsetsGeometry contentPadding,
     Widget prefixIcon,
     String prefixText,
     TextStyle prefixStyle,
@@ -2049,6 +2181,7 @@ class InputDecoration {
       hintStyle: hintStyle ?? this.hintStyle,
       errorText: errorText ?? this.errorText,
       errorStyle: errorStyle ?? this.errorStyle,
+      errorMaxLines: errorMaxLines ?? this.errorMaxLines,
       isDense: isDense ?? this.isDense,
       contentPadding: contentPadding ?? this.contentPadding,
       prefixIcon: prefixIcon ?? this.prefixIcon,
@@ -2077,6 +2210,7 @@ class InputDecoration {
       helperStyle: helperStyle ?? theme.helperStyle,
       hintStyle: hintStyle ?? theme.hintStyle,
       errorStyle: errorStyle ?? theme.errorStyle,
+      errorMaxLines: errorMaxLines ?? theme.errorMaxLines,
       isDense: isDense ?? theme.isDense,
       contentPadding: contentPadding ?? theme.contentPadding,
       prefixStyle: prefixStyle ?? theme.prefixStyle,
@@ -2104,6 +2238,7 @@ class InputDecoration {
         && typedOther.hintStyle == hintStyle
         && typedOther.errorText == errorText
         && typedOther.errorStyle == errorStyle
+        && typedOther.errorMaxLines == errorMaxLines
         && typedOther.isDense == isDense
         && typedOther.contentPadding == contentPadding
         && typedOther.isCollapsed == isCollapsed
@@ -2129,11 +2264,12 @@ class InputDecoration {
       labelStyle,
       helperText,
       helperStyle,
+      hintText,
       hashValues( // Over 20 fields...
-        hintText,
         hintStyle,
         errorText,
         errorStyle,
+        errorMaxLines,
         isDense,
         contentPadding,
         isCollapsed,
@@ -2166,6 +2302,10 @@ class InputDecoration {
       description.add('hintText: "$hintText"');
     if (errorText != null)
       description.add('errorText: "$errorText"');
+    if (errorStyle != null)
+      description.add('errorStyle: "$errorStyle"');
+    if (errorMaxLines != null)
+      description.add('errorMaxLines: "$errorMaxLines"');
     if (isDense ?? false)
       description.add('isDense: $isDense');
     if (contentPadding != null)
@@ -2221,15 +2361,16 @@ class InputDecorationTheme extends Diagnosticable {
     this.helperStyle,
     this.hintStyle,
     this.errorStyle,
-    this.isDense: false,
+    this.errorMaxLines,
+    this.isDense = false,
     this.contentPadding,
-    this.isCollapsed: false,
+    this.isCollapsed = false,
     this.prefixStyle,
     this.suffixStyle,
     this.counterStyle,
-    this.filled: false,
+    this.filled = false,
     this.fillColor,
-    this.border: const UnderlineInputBorder(),
+    this.border = const UnderlineInputBorder(),
   }) : assert(isDense != null),
        assert(isCollapsed != null),
        assert(filled != null),
@@ -2264,6 +2405,15 @@ class InputDecorationTheme extends Diagnosticable {
   /// input field and the current [Theme].
   final TextStyle errorStyle;
 
+  /// The maximum number of lines the [errorText] can occupy.
+  ///
+  /// Defaults to null, which means that the [errorText] will be limited
+  /// to a single line with [TextOverflow.ellipsis].
+  ///
+  /// This value is passed along to the [Text.maxLines] attribute
+  /// of the [Text] widget used to display the error.
+  final int errorMaxLines;
+
   /// Whether the input decorator's child is part of a dense form (i.e., uses
   /// less vertical space).
   ///
@@ -2282,7 +2432,7 @@ class InputDecorationTheme extends Diagnosticable {
   /// By default the `contentPadding` reflects [isDense] and the type of the
   /// [border]. If [isCollapsed] is true then `contentPadding` is
   /// [EdgeInsets.zero].
-  final EdgeInsets contentPadding;
+  final EdgeInsetsGeometry contentPadding;
 
   /// Whether the decoration is the same size as the input field.
   ///
@@ -2355,6 +2505,7 @@ class InputDecorationTheme extends Diagnosticable {
     properties.add(new DiagnosticsProperty<TextStyle>('helperStyle', helperStyle, defaultValue: defaultTheme.helperStyle));
     properties.add(new DiagnosticsProperty<TextStyle>('hintStyle', hintStyle, defaultValue: defaultTheme.hintStyle));
     properties.add(new DiagnosticsProperty<TextStyle>('errorStyle', errorStyle, defaultValue: defaultTheme.errorStyle));
+    properties.add(new DiagnosticsProperty<int>('errorMaxLines', errorMaxLines, defaultValue: defaultTheme.errorMaxLines));
     properties.add(new DiagnosticsProperty<bool>('isDense', isDense, defaultValue: defaultTheme.isDense));
     properties.add(new DiagnosticsProperty<EdgeInsets>('contentPadding', contentPadding, defaultValue: defaultTheme.contentPadding));
     properties.add(new DiagnosticsProperty<bool>('isCollapsed', isCollapsed, defaultValue: defaultTheme.isCollapsed));

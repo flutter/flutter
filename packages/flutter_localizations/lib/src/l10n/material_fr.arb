@@ -36,8 +36,9 @@
   "hideAccountsLabel": "Masquer les comptes",
   "showAccountsLabel": "Afficher les comptes",
   "modalBarrierDismissLabel": "Ignorer",
-  "drawerLabel": "le menu de navigation",
+  "drawerLabel": "Menu de navigation",
   "popupMenuLabel": "Menu contextuel",
-  "dialogLabel": "Dialogue",
-  "alertDialogLabel": "Alerte"
+  "dialogLabel": "Boîte de dialogue",
+  "alertDialogLabel": "Alerte",
+  "searchFieldLabel": "Chercher"
 }

@@ -178,7 +178,7 @@ class FlutterDriverExtension {
     }
   }
 
-  Map<String, dynamic> _makeResponse(dynamic response, {bool isError: false}) {
+  Map<String, dynamic> _makeResponse(dynamic response, {bool isError = false}) {
     return <String, dynamic>{
       'isError': isError,
       'response': response,
@@ -206,6 +206,9 @@ class FlutterDriverExtension {
 
   /// Runs `finder` repeatedly until it finds one or more [Element]s.
   Future<Finder> _waitForElement(Finder finder) async {
+    // TODO(mravn): This method depends on async execution. A refactoring
+    // for sync-async semantics is tracked in https://github.com/flutter/flutter/issues/16801.
+    await new Future<void>.value(null);
     if (_frameSync)
       await _waitUntilFrame(() => SchedulerBinding.instance.transientCallbackCount == 0);
 

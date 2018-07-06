@@ -36,7 +36,7 @@ void main() {
     refreshIndicator = new Container();
 
     when(mockHelper.builder(
-            typed(any), typed(any), typed(any), typed(any), typed(any)))
+            any, any, any, any, any))
         .thenAnswer((Invocation i) {
       final RefreshIndicatorMode refreshState = i.positionalArguments[1];
       final double pulledExtent = i.positionalArguments[2];
@@ -62,6 +62,7 @@ void main() {
     when(mockHelper.refreshTask()).thenAnswer((_) => refreshCompleter.future);
   });
 
+  int testListLength = 10;
   SliverList buildAListOfStuff() {
     return new SliverList(
       delegate: new SliverChildBuilderDelegate(
@@ -71,12 +72,12 @@ void main() {
             child: new Center(child: new Text(index.toString())),
           );
         },
-        childCount: 10,
+        childCount: testListLength,
       ),
     );
   }
 
-  group('UI tests', () {
+  final Function uiTestGroup = () {
     testWidgets("doesn't invoke anything without user interaction", (WidgetTester tester) async {
       debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
 
@@ -128,7 +129,7 @@ void main() {
       // The function is referenced once while passing into CupertinoRefreshControl
       // and is called.
       verify(mockHelper.builder(
-        typed(any),
+        any,
         RefreshIndicatorMode.drag,
         50.0,
         100.0, // Default value.
@@ -204,23 +205,23 @@ void main() {
 
       verifyInOrder(<void>[
         mockHelper.builder(
-          typed(any),
+          any,
           RefreshIndicatorMode.drag,
           50.0,
           100.0, // Default value.
           60.0, // Default value.
         ),
         mockHelper.builder(
-          typed(any),
+          any,
           RefreshIndicatorMode.drag,
-          typed(argThat(moreOrLessEquals(48.36801747187993))),
+          argThat(moreOrLessEquals(48.36801747187993)),
           100.0, // Default value.
           60.0, // Default value.
         ),
         mockHelper.builder(
-          typed(any),
+          any,
           RefreshIndicatorMode.drag,
-          typed(argThat(moreOrLessEquals(44.63031931875867))),
+          argThat(moreOrLessEquals(44.63031931875867)),
           100.0, // Default value.
           60.0, // Default value.
         ),
@@ -270,23 +271,23 @@ void main() {
 
       verifyInOrder(<void>[
         mockHelper.builder(
-          typed(any),
+          any,
           RefreshIndicatorMode.drag,
           99.0,
           100.0, // Default value.
           60.0, // Default value.
         ),
         mockHelper.builder(
-          typed(any),
+          any,
           RefreshIndicatorMode.drag,
-          typed(argThat(moreOrLessEquals(86.78169))),
+          argThat(moreOrLessEquals(86.78169)),
           100.0, // Default value.
           60.0, // Default value.
         ),
         mockHelper.builder(
-          typed(any),
+          any,
           RefreshIndicatorMode.armed,
-          typed(argThat(moreOrLessEquals(105.80452021305739))),
+          argThat(moreOrLessEquals(105.80452021305739)),
           100.0, // Default value.
           60.0, // Default value.
         ),
@@ -329,7 +330,7 @@ void main() {
 
         verifyInOrder(<void>[
           mockHelper.builder(
-            typed(any),
+            any,
             RefreshIndicatorMode.armed,
             150.0,
             100.0, // Default value.
@@ -337,9 +338,9 @@ void main() {
           ),
           mockHelper.refreshTask(),
           mockHelper.builder(
-            typed(any),
+            any,
             RefreshIndicatorMode.armed,
-            typed(argThat(moreOrLessEquals(127.10396988577114))),
+            argThat(moreOrLessEquals(127.10396988577114)),
             100.0, // Default value.
             60.0, // Default value.
           ),
@@ -348,7 +349,7 @@ void main() {
         // Reaches refresh state and sliver's at 60.0 in height after a while.
         await tester.pump(const Duration(seconds: 1));
         verify(mockHelper.builder(
-          typed(any),
+          any,
           RefreshIndicatorMode.refresh,
           60.0,
           100.0, // Default value.
@@ -367,7 +368,7 @@ void main() {
         await tester.pump();
 
         verify(mockHelper.builder(
-          typed(any),
+          any,
           RefreshIndicatorMode.done,
           60.0,
           100.0, // Default value.
@@ -403,7 +404,7 @@ void main() {
       await tester.pump();
 
       verify(mockHelper.builder(
-        typed(any),
+        any,
         RefreshIndicatorMode.armed,
         150.0,
         100.0, // Default value.
@@ -421,7 +422,7 @@ void main() {
 
       // Refresh indicator still being told to layout the same way.
       verify(mockHelper.builder(
-        typed(any),
+        any,
         RefreshIndicatorMode.refresh,
         60.0,
         100.0, // Default value.
@@ -430,11 +431,11 @@ void main() {
 
       // Now the sliver is scrolled off screen.
       expect(
-        tester.getTopLeft(find.widgetWithText(Center, '-1')).dy,
+        tester.getTopLeft(find.widgetWithText(Center, '-1', skipOffstage: false)).dy,
         moreOrLessEquals(-175.38461538461536),
       );
       expect(
-        tester.getBottomLeft(find.widgetWithText(Center, '-1')).dy,
+        tester.getBottomLeft(find.widgetWithText(Center, '-1', skipOffstage: false)).dy,
         moreOrLessEquals(-115.38461538461536),
       );
       expect(
@@ -482,7 +483,7 @@ void main() {
       await tester.drag(find.text('0'), const Offset(0.0, 150.0));
       await tester.pump();
       verify(mockHelper.builder(
-        typed(any),
+        any,
         RefreshIndicatorMode.armed,
         150.0,
         100.0, // Default value.
@@ -499,7 +500,7 @@ void main() {
       // Let it snap back to occupy the indicator's final sliver space only.
       await tester.pump(const Duration(seconds: 2));
       verify(mockHelper.builder(
-        typed(any),
+        any,
         RefreshIndicatorMode.refresh,
         60.0,
         100.0, // Default value.
@@ -517,7 +518,7 @@ void main() {
       refreshCompleter.complete(null);
       await tester.pump();
       verify(mockHelper.builder(
-        typed(any),
+        any,
         RefreshIndicatorMode.done,
         60.0,
         100.0, // Default value.
@@ -563,7 +564,7 @@ void main() {
         refreshCompleter.complete(null);
         await tester.pump();
         verify(mockHelper.builder(
-          typed(any),
+          any,
           RefreshIndicatorMode.done,
           150.0, // Still overscrolled here.
           100.0, // Default value.
@@ -574,7 +575,7 @@ void main() {
         await tester.pump(const Duration(milliseconds: 100));
         // The refresh indicator is still building.
         verify(mockHelper.builder(
-          typed(any),
+          any,
           RefreshIndicatorMode.done,
           91.31180913199277,
           100.0, // Default value.
@@ -593,7 +594,7 @@ void main() {
         // Instead, it's still in the done state because the sliver never
         // fully retracted.
         verify(mockHelper.builder(
-          typed(any),
+          any,
           RefreshIndicatorMode.done,
           147.3772721631821,
           100.0, // Default value.
@@ -612,7 +613,7 @@ void main() {
         await tester.drag(find.text('0'), const Offset(0.0, 40.0));
         await tester.pump();
         verify(mockHelper.builder(
-          typed(any),
+          any,
           RefreshIndicatorMode.drag,
           40.0,
           100.0, // Default value.
@@ -655,7 +656,7 @@ void main() {
         refreshCompleter.complete(null);
         await tester.pump();
         verify(mockHelper.builder(
-          typed(any),
+          any,
           RefreshIndicatorMode.done,
           150.0, // Still overscrolled here.
           100.0, // Default value.
@@ -682,6 +683,11 @@ void main() {
     testWidgets(
       'sliver scrolled away when task completes properly removes itself',
       (WidgetTester tester) async {
+        if (testListLength < 4) {
+          // This test only makes sense when the list is long enough that
+          // the indicator can be scrolled away while refreshing.
+          return;
+        }
         debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
 
         refreshIndicator = const Center(child: const Text('-1'));
@@ -711,7 +717,7 @@ void main() {
 
         // Refresh indicator still being told to layout the same way.
         verify(mockHelper.builder(
-          typed(any),
+          any,
           RefreshIndicatorMode.refresh,
           60.0,
           100.0, // Default value.
@@ -720,11 +726,11 @@ void main() {
 
         // Now the sliver is scrolled off screen.
         expect(
-          tester.getTopLeft(find.widgetWithText(Center, '-1')).dy,
+          tester.getTopLeft(find.widgetWithText(Center, '-1', skipOffstage: false)).dy,
           moreOrLessEquals(-175.38461538461536),
         );
         expect(
-          tester.getBottomLeft(find.widgetWithText(Center, '-1')).dy,
+          tester.getBottomLeft(find.widgetWithText(Center, '-1', skipOffstage: false)).dy,
           moreOrLessEquals(-115.38461538461536),
         );
 
@@ -746,7 +752,7 @@ void main() {
         await tester.pump();
 
         verify(mockHelper.builder(
-          typed(any),
+          any,
           RefreshIndicatorMode.drag,
           4.615384615384642,
           100.0, // Default value.
@@ -823,7 +829,7 @@ void main() {
         await tester.drag(find.text('0'), const Offset(0.0, 150.0));
         await tester.pump();
         verify(mockHelper.builder(
-          typed(any),
+          any,
           RefreshIndicatorMode.armed,
           150.0,
           100.0, // Default value.
@@ -832,7 +838,7 @@ void main() {
 
         await tester.pump(const Duration(milliseconds: 10));
         verify(mockHelper.builder(
-          typed(any),
+          any,
           RefreshIndicatorMode.done, // Goes to done on the next frame.
           148.6463892921364,
           100.0, // Default value.
@@ -849,11 +855,9 @@ void main() {
         debugDefaultTargetPlatformOverride = null;
       }
     );
-  });
+  };
 
-  // Test the internal state machine directly to make sure the UI aren't just
-  // correct by coincidence.
-  group('state machine test', () {
+  final Function stateMachineTestGroup = () {
     testWidgets('starts in inactive state', (WidgetTester tester) async {
       debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
 
@@ -872,7 +876,7 @@ void main() {
       );
 
       expect(
-        CupertinoRefreshControl.state(tester.element(find.byType(LayoutBuilder))),
+        CupertinoRefreshControl.state(tester.element(find.byType(LayoutBuilder, skipOffstage: false))),
         RefreshIndicatorMode.inactive,
       );
 
@@ -907,7 +911,7 @@ void main() {
       await tester.pump(const Duration(seconds: 2));
 
       expect(
-        CupertinoRefreshControl.state(tester.element(find.byType(LayoutBuilder))),
+        CupertinoRefreshControl.state(tester.element(find.byType(LayoutBuilder, skipOffstage: false))),
         RefreshIndicatorMode.inactive,
       );
 
@@ -1147,7 +1151,7 @@ void main() {
           moreOrLessEquals(-145.0332383665717),
         );
         expect(
-          CupertinoRefreshControl.state(tester.element(find.byType(LayoutBuilder))),
+          CupertinoRefreshControl.state(tester.element(find.byType(LayoutBuilder, skipOffstage: false))),
           RefreshIndicatorMode.refresh,
         );
 
@@ -1155,7 +1159,7 @@ void main() {
         // The sliver layout extent is removed on next frame.
         await tester.pump();
         expect(
-          CupertinoRefreshControl.state(tester.element(find.byType(LayoutBuilder))),
+          CupertinoRefreshControl.state(tester.element(find.byType(LayoutBuilder, skipOffstage: false))),
           RefreshIndicatorMode.inactive,
         );
         // Nothing moved.
@@ -1208,7 +1212,7 @@ void main() {
         await tester.pump(const Duration(seconds: 5));
         // In refresh mode but has no UI.
         expect(
-          CupertinoRefreshControl.state(tester.element(find.byType(LayoutBuilder))),
+          CupertinoRefreshControl.state(tester.element(find.byType(LayoutBuilder, skipOffstage: false))),
           RefreshIndicatorMode.refresh,
         );
         expect(
@@ -1221,14 +1225,29 @@ void main() {
         await tester.pump();
         // Goes to inactive right away since the sliver is already collapsed.
         expect(
-          CupertinoRefreshControl.state(tester.element(find.byType(LayoutBuilder))),
+          CupertinoRefreshControl.state(tester.element(find.byType(LayoutBuilder, skipOffstage: false))),
           RefreshIndicatorMode.inactive,
         );
 
         debugDefaultTargetPlatformOverride = null;
       }
     );
-  });
+  };
+
+  group('UI tests long list', uiTestGroup);
+
+  // Test the internal state machine directly to make sure the UI aren't just
+  // correct by coincidence.
+  group('state machine test long list', stateMachineTestGroup);
+
+  // Retest everything and make sure that it still works when the whole list
+  // is smaller than the viewport size.
+  testListLength = 2;
+  group('UI tests short list', uiTestGroup);
+
+  // Test the internal state machine directly to make sure the UI aren't just
+  // correct by coincidence.
+  group('state machine test short list', stateMachineTestGroup);
 }
 
 class MockHelper extends Mock {

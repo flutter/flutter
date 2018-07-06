@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
 import 'list_tile.dart';
@@ -97,11 +96,11 @@ class RadioListTile<T> extends StatelessWidget {
     this.activeColor,
     this.title,
     this.subtitle,
-    this.isThreeLine: false,
+    this.isThreeLine = false,
     this.dense,
     this.secondary,
-    this.selected: false,
-    this.controlAffinity: ListTileControlAffinity.platform,
+    this.selected = false,
+    this.controlAffinity = ListTileControlAffinity.platform,
   }) : assert(isThreeLine != null),
        assert(!isThreeLine || subtitle != null),
        assert(selected != null),

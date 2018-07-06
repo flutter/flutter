@@ -39,6 +39,7 @@
   "modalBarrierDismissLabel": "סגירה",
   "drawerLabel": "תפריט ניווט",
   "popupMenuLabel": "תפריט קופץ",
-  "dialogLabel": "דיאלוג",
-  "alertDialogLabel": "עֵרָנִי"
+  "dialogLabel": "תיבת דו-שיח",
+  "alertDialogLabel": "עֵרָנִי",
+  "searchFieldLabel": "לחפש"
 }

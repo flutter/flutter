@@ -36,7 +36,8 @@
   "hideAccountsLabel": "Sembunyikan akun",
   "showAccountsLabel": "Tampilkan akun",
   "drawerLabel": "Menu navigasi",
-  "popupMenuLabel": "Menu popup",
+  "popupMenuLabel": "Menu pop-up",
   "dialogLabel": "Dialog",
-  "alertDialogLabel": "Waspada"
+  "alertDialogLabel": "Waspada",
+  "searchFieldLabel": "Pencarian"
 }

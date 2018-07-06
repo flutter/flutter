@@ -4,7 +4,7 @@
 
 import 'dart:async';
 import 'dart:typed_data';
-import 'dart:ui' as ui show EncodingFormat, Image;
+import 'dart:ui' as ui show Image, ImageByteFormat;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
@@ -26,7 +26,7 @@ class TestImage implements ui.Image {
   void dispose() { }
 
   @override
-  Future<ByteData> toByteData({ui.EncodingFormat format}) async {
+  Future<ByteData> toByteData({ui.ImageByteFormat format}) async {
     throw new UnsupportedError('Cannot encode test image');
   }
 }
@@ -52,7 +52,7 @@ const String testManifest = '''
 ''';
 
 class TestAssetBundle extends CachingAssetBundle {
-  TestAssetBundle({ this.manifest: testManifest });
+  TestAssetBundle({ this.manifest = testManifest });
 
   final String manifest;
 
@@ -83,7 +83,7 @@ class TestAssetBundle extends CachingAssetBundle {
   }
 
   @override
-  Future<String> loadString(String key, { bool cache: true }) {
+  Future<String> loadString(String key, { bool cache = true }) {
     if (key == 'AssetManifest.json')
       return new SynchronousFuture<String>(manifest);
     return null;

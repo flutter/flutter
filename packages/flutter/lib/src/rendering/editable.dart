@@ -16,7 +16,6 @@ import 'viewport_offset.dart';
 
 const double _kCaretGap = 1.0; // pixels
 const double _kCaretHeightOffset = 2.0; // pixels
-const double _kCaretWidth = 1.0; // pixels
 
 /// Signature for the callback that reports when the user changes the selection
 /// (including the cursor location).
@@ -120,19 +119,22 @@ class RenderEditable extends RenderBox {
   RenderEditable({
     TextSpan text,
     @required TextDirection textDirection,
-    TextAlign textAlign: TextAlign.start,
+    TextAlign textAlign = TextAlign.start,
     Color cursorColor,
     ValueNotifier<bool> showCursor,
     bool hasFocus,
-    int maxLines: 1,
+    int maxLines = 1,
     Color selectionColor,
-    double textScaleFactor: 1.0,
+    double textScaleFactor = 1.0,
     TextSelection selection,
     @required ViewportOffset offset,
     this.onSelectionChanged,
     this.onCaretChanged,
-    this.ignorePointer: false,
-    bool obscureText: false,
+    this.ignorePointer = false,
+    bool obscureText = false,
+    Locale locale,
+    double cursorWidth = 1.0,
+    Radius cursorRadius,
   }) : assert(textAlign != null),
        assert(textDirection != null, 'RenderEditable created without a textDirection.'),
        assert(maxLines == null || maxLines > 0),
@@ -145,6 +147,7 @@ class RenderEditable extends RenderBox {
          textAlign: textAlign,
          textDirection: textDirection,
          textScaleFactor: textScaleFactor,
+         locale: locale,
        ),
        _cursorColor = cursorColor,
        _showCursor = showCursor ?? new ValueNotifier<bool>(false),
@@ -153,6 +156,8 @@ class RenderEditable extends RenderBox {
        _selectionColor = selectionColor,
        _selection = selection,
        _offset = offset,
+       _cursorWidth = cursorWidth,
+       _cursorRadius = cursorRadius,
        _obscureText = obscureText {
     assert(_showCursor != null);
     assert(!_showCursor.value || cursorColor != null);
@@ -247,6 +252,24 @@ class RenderEditable extends RenderBox {
     _textPainter.textDirection = value;
     markNeedsTextLayout();
     markNeedsSemanticsUpdate();
+  }
+
+  /// Used by this renderer's internal [TextPainter] to select a locale-specific
+  /// font.
+  ///
+  /// In some cases the same Unicode character may be rendered differently depending
+  /// on the locale. For example the '骨' character is rendered differently in
+  /// the Chinese and Japanese locales. In these cases the [locale] may be used
+  /// to select a locale-specific font.
+  ///
+  /// If this value is null, a system-dependent algorithm is used to select
+  /// the font.
+  Locale get locale => _textPainter.locale;
+  set locale(Locale value) {
+    if (_textPainter.locale == value)
+      return;
+    _textPainter.locale = value;
+    markNeedsTextLayout();
   }
 
   /// The color to use when painting the cursor.
@@ -360,6 +383,26 @@ class RenderEditable extends RenderBox {
     if (attached)
       _offset.addListener(markNeedsPaint);
     markNeedsLayout();
+  }
+
+  /// How thick the cursor will be.
+  double get cursorWidth => _cursorWidth;
+  double _cursorWidth = 1.0;
+  set cursorWidth(double value) {
+    if (_cursorWidth == value)
+      return;
+    _cursorWidth = value;
+    markNeedsLayout();
+  }
+
+  /// How rounded the corners of the cursor should be.
+  Radius get cursorRadius => _cursorRadius;
+  Radius _cursorRadius;
+  set cursorRadius(Radius value) {
+    if (_cursorRadius == value)
+      return;
+    _cursorRadius = value;
+    markNeedsPaint();
   }
 
   @override
@@ -526,7 +569,7 @@ class RenderEditable extends RenderBox {
     _layoutText(constraints.maxWidth);
     final Offset caretOffset = _textPainter.getOffsetForCaret(caretPosition, _caretPrototype);
     // This rect is the same as _caretPrototype but without the vertical padding.
-    return new Rect.fromLTWH(0.0, 0.0, _kCaretWidth, preferredLineHeight).shift(caretOffset + _paintOffset);
+    return new Rect.fromLTWH(0.0, 0.0, cursorWidth, preferredLineHeight).shift(caretOffset + _paintOffset);
   }
 
   @override
@@ -663,7 +706,7 @@ class RenderEditable extends RenderBox {
     assert(constraintWidth != null);
     if (_textLayoutLastWidth == constraintWidth)
       return;
-    const double caretMargin = _kCaretGap + _kCaretWidth;
+    final double caretMargin = _kCaretGap + cursorWidth;
     final double availableWidth = math.max(0.0, constraintWidth - caretMargin);
     final double maxWidth = _isMultiline ? availableWidth : double.infinity;
     _textPainter.layout(minWidth: availableWidth, maxWidth: maxWidth);
@@ -673,7 +716,7 @@ class RenderEditable extends RenderBox {
   @override
   void performLayout() {
     _layoutText(constraints.maxWidth);
-    _caretPrototype = new Rect.fromLTWH(0.0, _kCaretHeightOffset, _kCaretWidth, preferredLineHeight - 2.0 * _kCaretHeightOffset);
+    _caretPrototype = new Rect.fromLTWH(0.0, _kCaretHeightOffset, cursorWidth, preferredLineHeight - 2.0 * _kCaretHeightOffset);
     _selectionRects = null;
     // We grab _textPainter.size here because assigning to `size` on the next
     // line will trigger us to validate our intrinsic sizes, which will change
@@ -685,7 +728,7 @@ class RenderEditable extends RenderBox {
     // See also RenderParagraph which has a similar issue.
     final Size textPainterSize = _textPainter.size;
     size = new Size(constraints.maxWidth, constraints.constrainHeight(_preferredHeight(constraints.maxWidth)));
-    final Size contentSize = new Size(textPainterSize.width + _kCaretGap + _kCaretWidth, textPainterSize.height);
+    final Size contentSize = new Size(textPainterSize.width + _kCaretGap + cursorWidth, textPainterSize.height);
     final double _maxScrollExtent = _getMaxScrollExtent(contentSize);
     _hasVisualOverflow = _maxScrollExtent > 0.0;
     offset.applyViewportDimension(_viewportExtent);
@@ -695,9 +738,18 @@ class RenderEditable extends RenderBox {
   void _paintCaret(Canvas canvas, Offset effectiveOffset) {
     assert(_textLayoutLastWidth == constraints.maxWidth);
     final Offset caretOffset = _textPainter.getOffsetForCaret(_selection.extent, _caretPrototype);
-    final Paint paint = new Paint()..color = _cursorColor;
+    final Paint paint = new Paint()
+      ..color = _cursorColor;
+
     final Rect caretRect = _caretPrototype.shift(caretOffset + effectiveOffset);
-    canvas.drawRect(caretRect, paint);
+
+    if (cursorRadius == null) {
+      canvas.drawRect(caretRect, paint);
+    } else {
+      final RRect caretRRect = RRect.fromRectAndRadius(caretRect, cursorRadius);
+      canvas.drawRRect(caretRRect, paint);
+    }
+
     if (caretRect != _lastCaretRect) {
       _lastCaretRect = caretRect;
       if (onCaretChanged != null)
@@ -749,6 +801,7 @@ class RenderEditable extends RenderBox {
     properties.add(new IntProperty('maxLines', maxLines));
     properties.add(new DiagnosticsProperty<Color>('selectionColor', selectionColor));
     properties.add(new DoubleProperty('textScaleFactor', textScaleFactor));
+    properties.add(new DiagnosticsProperty<Locale>('locale', locale, defaultValue: null));
     properties.add(new DiagnosticsProperty<TextSelection>('selection', selection));
     properties.add(new DiagnosticsProperty<ViewportOffset>('offset', offset));
   }

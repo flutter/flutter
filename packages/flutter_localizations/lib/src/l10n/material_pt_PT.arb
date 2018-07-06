@@ -36,7 +36,8 @@
   "postMeridiemAbbreviation": "PM",
   "modalBarrierDismissLabel": "Ignorar",
   "drawerLabel": "Menu de navegação",
-  "popupMenuLabel": "Menu popup",
-  "dialogLabel": "Diálogo",
-  "alertDialogLabel": "Alerta"
+  "popupMenuLabel": "Menu pop-up",
+  "dialogLabel": "Caixa de diálogo",
+  "alertDialogLabel": "Alerta",
+  "searchFieldLabel": "Pesquisa"
 }
