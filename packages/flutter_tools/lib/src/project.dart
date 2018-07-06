@@ -197,6 +197,29 @@ class AndroidProject {
 
   AndroidProject(this.directory);
 
+  File get gradleManifestFile {
+    return _gradleManifestFile ??= isUsingGradle()
+        ? fs.file(fs.path.join(directory.path, 'app', 'src', 'main', 'AndroidManifest.xml'))
+        : directory.childFile('AndroidManifest.xml');
+  }
+  File _gradleManifestFile;
+
+
+  File get gradleAppOutV1File {
+    return _gradleAppOutV1File ??= gradleAppOutV1Directory.childFile('app-debug.apk');
+  }
+  File _gradleAppOutV1File;
+
+  Directory get gradleAppOutV1Directory {
+    return _gradleAppOutV1Directory ??= fs.directory(fs.path.join(directory.path, 'app', 'build', 'outputs', 'apk'));
+  }
+  Directory _gradleAppOutV1Directory;
+
+
+  bool isUsingGradle() {
+    return directory.childFile('build.gradle').existsSync();
+  }
+  
   final Directory directory;
 
   Future<String> applicationId() {

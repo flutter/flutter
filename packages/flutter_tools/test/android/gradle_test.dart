@@ -64,7 +64,7 @@ someProperty: someValue
 buildDir: /Users/some/apps/hello/build/app
 someOtherProperty: someOtherValue
       ''');
-      expect(project.apkDirectory, fs.path.normalize('/Users/some/apps/hello/build/app/outputs/apk'));
+      expect(project.apkDirectory.path, fs.path.normalize('/Users/some/apps/hello/build/app/outputs/apk'));
     });
     test('should extract default build variants from app properties', () {
       final GradleProject project = projectFrom('''
@@ -105,27 +105,27 @@ someOtherProperty: someOtherValue
       expect(project.productFlavors, <String>['free', 'paid']);
     });
     test('should provide apk file name for default build types', () {
-      final GradleProject project = new GradleProject(<String>['debug', 'profile', 'release'], <String>[], '/some/dir');
+      final GradleProject project = new GradleProject(<String>['debug', 'profile', 'release'], <String>[], fs.directory('/some/dir'));
       expect(project.apkFileFor(BuildInfo.debug), 'app-debug.apk');
       expect(project.apkFileFor(BuildInfo.profile), 'app-profile.apk');
       expect(project.apkFileFor(BuildInfo.release), 'app-release.apk');
       expect(project.apkFileFor(const BuildInfo(BuildMode.release, 'unknown')), isNull);
     });
     test('should provide apk file name for flavored build types', () {
-      final GradleProject project = new GradleProject(<String>['debug', 'profile', 'release'], <String>['free', 'paid'], '/some/dir');
+      final GradleProject project = new GradleProject(<String>['debug', 'profile', 'release'], <String>['free', 'paid'], fs.directory('/some/dir'));
       expect(project.apkFileFor(const BuildInfo(BuildMode.debug, 'free')), 'app-free-debug.apk');
       expect(project.apkFileFor(const BuildInfo(BuildMode.release, 'paid')), 'app-paid-release.apk');
       expect(project.apkFileFor(const BuildInfo(BuildMode.release, 'unknown')), isNull);
     });
     test('should provide assemble task name for default build types', () {
-      final GradleProject project = new GradleProject(<String>['debug', 'profile', 'release'], <String>[], '/some/dir');
+      final GradleProject project = new GradleProject(<String>['debug', 'profile', 'release'], <String>[], fs.directory('/some/dir'));
       expect(project.assembleTaskFor(BuildInfo.debug), 'assembleDebug');
       expect(project.assembleTaskFor(BuildInfo.profile), 'assembleProfile');
       expect(project.assembleTaskFor(BuildInfo.release), 'assembleRelease');
       expect(project.assembleTaskFor(const BuildInfo(BuildMode.release, 'unknown')), isNull);
     });
     test('should provide assemble task name for flavored build types', () {
-      final GradleProject project = new GradleProject(<String>['debug', 'profile', 'release'], <String>['free', 'paid'], '/some/dir');
+      final GradleProject project = new GradleProject(<String>['debug', 'profile', 'release'], <String>['free', 'paid'], fs.directory('/some/dir'));
       expect(project.assembleTaskFor(const BuildInfo(BuildMode.debug, 'free')), 'assembleFreeDebug');
       expect(project.assembleTaskFor(const BuildInfo(BuildMode.release, 'paid')), 'assemblePaidRelease');
       expect(project.assembleTaskFor(const BuildInfo(BuildMode.release, 'unknown')), isNull);
