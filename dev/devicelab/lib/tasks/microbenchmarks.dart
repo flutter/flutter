@@ -74,8 +74,6 @@ TaskFunction createMicrobenchmarkTask() {
     addDart1Results(await _runMicrobench(
         'lib/stocks/layout_bench.dart', previewDart2: false));
     addDart1Results(await _runMicrobench(
-        'lib/stocks/layout_bench.dart', previewDart2: false));
-    addDart1Results(await _runMicrobench(
         'lib/stocks/build_bench.dart', previewDart2: false));
     addDart1Results(await _runMicrobench(
         'lib/gestures/velocity_tracker_bench.dart', previewDart2: false));
@@ -141,9 +139,11 @@ Future<Map<String, double>> _readJsonResults(Process process) {
       jsonBuf.writeln(line.substring(line.indexOf(jsonPrefix) + jsonPrefix.length));
   });
 
-  process.exitCode.then<int>((int code) {
-    stdoutSub.cancel();
-    stderrSub.cancel();
+  process.exitCode.then<int>((int code) async {
+    await Future.wait<void>(<Future<void>>[
+      stdoutSub.cancel(),
+      stderrSub.cancel(),
+    ]);
     if (!processWasKilledIntentionally && code != 0) {
       completer.completeError('flutter run failed: exit code=$code');
     }

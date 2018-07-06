@@ -804,7 +804,7 @@ void main() {
     await tester.pump(const Duration(milliseconds: 300));
   });
 
-  testWidgets('TabBarView scrolls end very VERY close to a new page', (WidgetTester tester) async {
+  testWidgets('TabBarView scrolls end close to a new page', (WidgetTester tester) async {
     // This is a regression test for https://github.com/flutter/flutter/issues/9375
 
     final TabController tabController = new TabController(
@@ -845,15 +845,23 @@ void main() {
     expect(position.pixels, 400.0);
 
     // Not close enough to switch to page 2
-    pageController.jumpTo(800.0 - 1.25 * position.physics.tolerance.distance);
+    pageController.jumpTo(500.0);
     expect(tabController.index, 1);
 
     // Close enough to switch to page 2
-    pageController.jumpTo(800.0 - 0.75 * position.physics.tolerance.distance);
+    pageController.jumpTo(700.0);
     expect(tabController.index, 2);
+
+    // Same behavior going left: not left enough to get to page 0
+    pageController.jumpTo(300.0);
+    expect(tabController.index, 1);
+
+    // Left enough to get to page 0
+    pageController.jumpTo(100.0);
+    expect(tabController.index, 0);
   });
 
-  testWidgets('TabBarView scrolls end very close to a new page with custom physics', (WidgetTester tester) async {
+  testWidgets('TabBarView scrolls end close to a new page with custom physics', (WidgetTester tester) async {
     final TabController tabController = new TabController(
       vsync: const TestVSync(),
       initialIndex: 1,
@@ -893,12 +901,20 @@ void main() {
     expect(position.pixels, 400.0);
 
     // Not close enough to switch to page 2
-    pageController.jumpTo(800.0 - 1.25 * position.physics.tolerance.distance);
+    pageController.jumpTo(500.0);
     expect(tabController.index, 1);
 
     // Close enough to switch to page 2
-    pageController.jumpTo(800.0 - 0.75 * position.physics.tolerance.distance);
+    pageController.jumpTo(700.0);
     expect(tabController.index, 2);
+
+    // Same behavior going left: not left enough to get to page 0
+    pageController.jumpTo(300.0);
+    expect(tabController.index, 1);
+
+    // Left enough to get to page 0
+    pageController.jumpTo(100.0);
+    expect(tabController.index, 0);
   });
 
   testWidgets('Scrollable TabBar with a non-zero TabController initialIndex', (WidgetTester tester) async {

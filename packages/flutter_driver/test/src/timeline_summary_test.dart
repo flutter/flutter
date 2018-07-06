@@ -31,6 +31,17 @@ void main() {
       'name': 'GPURasterizer::Draw', 'ph': 'E', 'ts': timeStamp
     };
 
+    List<Map<String, dynamic>> rasterizeTimeSequenceInMillis(List<int> sequence) {
+      final List<Map<String, dynamic>> result = <Map<String, dynamic>>[];
+      int t = 0;
+      for (int duration in sequence) {
+        result.add(begin(t));
+        t += duration * 1000;
+        result.add(end(t));
+      }
+      return result;
+    }
+
     group('frame_count', () {
       test('counts frames', () {
         expect(
@@ -44,8 +55,11 @@ void main() {
     });
 
     group('average_frame_build_time_millis', () {
-      test('returns null when there is no data', () {
-        expect(summarize(<Map<String, dynamic>>[]).computeAverageFrameBuildTimeMillis(), isNull);
+      test('throws when there is no data', () {
+        expect(
+          () => summarize(<Map<String, dynamic>>[]).computeAverageFrameBuildTimeMillis(),
+          throwsA(predicate<ArgumentError>((ArgumentError e) => e.message == 'durations is empty!'))
+        );
       });
 
       test('computes average frame build time in milliseconds', () {
@@ -60,8 +74,11 @@ void main() {
     });
 
     group('worst_frame_build_time_millis', () {
-      test('returns null when there is no data', () {
-        expect(summarize(<Map<String, dynamic>>[]).computeWorstFrameBuildTimeMillis(), isNull);
+      test('throws when there is no data', () {
+        expect(
+          () => summarize(<Map<String, dynamic>>[]).computeWorstFrameBuildTimeMillis(),
+          throwsA(predicate<ArgumentError>((ArgumentError e) => e.message == 'durations is empty!'))
+        );
       });
 
       test('computes worst frame build time in milliseconds', () {
@@ -96,8 +113,11 @@ void main() {
     });
 
     group('average_frame_rasterizer_time_millis', () {
-      test('returns null when there is no data', () {
-        expect(summarize(<Map<String, dynamic>>[]).computeAverageFrameRasterizerTimeMillis(), isNull);
+      test('throws when there is no data', () {
+        expect(
+          () => summarize(<Map<String, dynamic>>[]).computeAverageFrameRasterizerTimeMillis(),
+          throwsA(predicate<ArgumentError>((ArgumentError e) => e.message == 'durations is empty!'))
+        );
       });
 
       test('computes average frame rasterizer time in milliseconds', () {
@@ -132,9 +152,13 @@ void main() {
     });
 
     group('worst_frame_rasterizer_time_millis', () {
-      test('returns null when there is no data', () {
-        expect(summarize(<Map<String, dynamic>>[]).computeWorstFrameRasterizerTimeMillis(), isNull);
+      test('throws when there is no data', () {
+        expect(
+          () => summarize(<Map<String, dynamic>>[]).computeWorstFrameRasterizerTimeMillis(),
+          throwsA(predicate<ArgumentError>((ArgumentError e) => e.message == 'durations is empty!'))
+        );
       });
+
 
       test('computes worst frame rasterizer time in milliseconds', () {
         expect(
@@ -174,6 +198,48 @@ void main() {
       });
     });
 
+    group('percentile_frame_rasterizer_time_millis', () {
+      test('throws when there is no data', () {
+        expect(
+          () => summarize(<Map<String, dynamic>>[]).computePercentileFrameRasterizerTimeMillis(90.0),
+          throwsA(predicate<ArgumentError>((ArgumentError e) => e.message == 'durations is empty!'))
+        );
+      });
+
+
+      const List<List<int>> sequences = <List<int>>[
+        <int>[1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+        <int>[1, 2, 3, 4, 5],
+        <int>[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
+      ];
+
+      const List<int> p90s = <int>[
+        9,
+        5,
+        18
+      ];
+
+      test('computes 90th frame rasterizer time in milliseconds', () {
+        for(int i = 0; i < sequences.length; ++i) {
+          expect(
+            summarize(rasterizeTimeSequenceInMillis(sequences[i])).computePercentileFrameRasterizerTimeMillis(90.0),
+            p90s[i]
+          );
+        }
+      });
+
+      test('compute 99th frame rasterizer time in milliseconds', () {
+        final List<int> sequence = <int>[];
+        for(int i = 1; i <= 100; ++i) {
+          sequence.add(i);
+        }
+        expect(
+          summarize(rasterizeTimeSequenceInMillis(sequence)).computePercentileFrameRasterizerTimeMillis(99.0),
+          99
+        );
+      });
+    });
+
     group('computeMissedFrameRasterizerBudgetCount', () {
       test('computes the number of missed rasterizer budgets', () {
         final TimelineSummary summary = summarize(<Map<String, dynamic>>[
@@ -202,6 +268,8 @@ void main() {
             'worst_frame_build_time_millis': 11.0,
             'missed_frame_build_budget_count': 2,
             'average_frame_rasterizer_time_millis': 8.0,
+            '90th_percentile_frame_rasterizer_time_millis': 12.0,
+            '99th_percentile_frame_rasterizer_time_millis': 12.0,
             'worst_frame_rasterizer_time_millis': 12.0,
             'missed_frame_rasterizer_budget_count': 2,
             'frame_count': 3,
@@ -250,6 +318,8 @@ void main() {
           'worst_frame_build_time_millis': 11.0,
           'missed_frame_build_budget_count': 2,
           'average_frame_rasterizer_time_millis': 8.0,
+          '90th_percentile_frame_rasterizer_time_millis': 12.0,
+          '99th_percentile_frame_rasterizer_time_millis': 12.0,
           'worst_frame_rasterizer_time_millis': 12.0,
           'missed_frame_rasterizer_budget_count': 2,
           'frame_count': 3,

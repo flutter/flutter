@@ -518,6 +518,9 @@ class AndroidDevice extends Device {
     await runCheckedAsync(adbCommandForDevice(<String>['shell', 'rm', remotePath]));
   }
 
+  // TODO(dantup): discoverApps is no longer used and can possibly be removed.
+  // Waiting for a response here:
+  // https://github.com/flutter/flutter/pull/18873#discussion_r198862179
   @override
   Future<List<DiscoveredApp>> discoverApps() async {
     final RegExp discoverExp = new RegExp(r'DISCOVER: (.*)');

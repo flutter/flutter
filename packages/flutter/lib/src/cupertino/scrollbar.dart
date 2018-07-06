@@ -16,7 +16,7 @@ const Radius _kScrollbarRadius = const Radius.circular(1.25);
 const Duration _kScrollbarTimeToFade = const Duration(milliseconds: 50);
 const Duration _kScrollbarFadeDuration = const Duration(milliseconds: 250);
 
-/// A iOS style scrollbar.
+/// An iOS style scrollbar.
 ///
 /// A scrollbar indicates which portion of a [Scrollable] widget is actually
 /// visible.

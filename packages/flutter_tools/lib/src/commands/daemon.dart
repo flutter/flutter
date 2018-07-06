@@ -28,7 +28,7 @@ import '../runner/flutter_command.dart';
 import '../tester/flutter_tester.dart';
 import '../vmservice.dart';
 
-const String protocolVersion = '0.3.0';
+const String protocolVersion = '0.4.0';
 
 /// A server process command. This command will start up a long-lived server.
 /// It reads JSON-RPC based commands from stdin, executes them, and returns
@@ -83,7 +83,7 @@ class Daemon {
     this.sendCommand, {
     this.daemonCommand,
     this.notifyingLogger,
-    this.logToStdout = false
+    this.logToStdout = false,
   }) {
     // Set up domains.
     _registerDomain(daemonDomain = new DaemonDomain(this));
@@ -300,11 +300,9 @@ class DaemonDomain extends Domain {
 /// It fires events for application start, stop, and stdout and stderr.
 class AppDomain extends Domain {
   AppDomain(Daemon daemon) : super(daemon, 'app') {
-    registerHandler('start', start);
     registerHandler('restart', restart);
     registerHandler('callServiceExtension', callServiceExtension);
     registerHandler('stop', stop);
-    registerHandler('discover', discover);
   }
 
   static final Uuid _uuidGenerator = new Uuid();
@@ -312,58 +310,6 @@ class AppDomain extends Domain {
   static String _getNewAppId() => _uuidGenerator.generateV4();
 
   final List<AppInstance> _apps = <AppInstance>[];
-
-  Future<Map<String, dynamic>> start(Map<String, dynamic> args) async {
-    final String deviceId = _getStringArg(args, 'deviceId', required: true);
-    final String projectDirectory = _getStringArg(args, 'projectDirectory', required: true);
-    final bool startPaused = _getBoolArg(args, 'startPaused') ?? false;
-    final bool useTestFonts = _getBoolArg(args, 'useTestFonts') ?? false;
-    final String route = _getStringArg(args, 'route');
-    final String mode = _getStringArg(args, 'mode');
-    final String flavor = _getStringArg(args, 'flavor');
-    final String target = _getStringArg(args, 'target');
-    final bool enableHotReload = _getBoolArg(args, 'hot') ?? kHotReloadDefault;
-
-    final Device device = await daemon.deviceDomain._getOrLocateDevice(deviceId);
-    if (device == null)
-      throw "device '$deviceId' not found";
-
-    if (!fs.isDirectorySync(projectDirectory))
-      throw "'$projectDirectory' does not exist";
-
-    final BuildInfo buildInfo = new BuildInfo(
-      getBuildModeForName(mode) ?? BuildMode.debug,
-      flavor,
-      previewDart2: _getBoolArg(args, 'preview-dart-2'),
-    );
-    DebuggingOptions options;
-    if (buildInfo.isRelease) {
-      options = new DebuggingOptions.disabled(buildInfo);
-    } else {
-      options = new DebuggingOptions.enabled(
-        buildInfo,
-        startPaused: startPaused,
-        useTestFonts: useTestFonts,
-      );
-    }
-
-    final AppInstance app = await startApp(
-      device,
-      projectDirectory,
-      target,
-      route,
-      options,
-      enableHotReload,
-      trackWidgetCreation: _getBoolArg(args, 'track-widget-creation'),
-    );
-
-    return <String, dynamic>{
-      'appId': app.id,
-      'deviceId': device.id,
-      'directory': projectDirectory,
-      'supportsRestart': isRestartSupported(enableHotReload, device)
-    };
-  }
 
   Future<AppInstance> startApp(
     Device device, String projectDirectory, String target, String route,
@@ -537,22 +483,6 @@ class AppDomain extends Domain {
     });
   }
 
-  Future<List<Map<String, dynamic>>> discover(Map<String, dynamic> args) async {
-    final String deviceId = _getStringArg(args, 'deviceId', required: true);
-
-    final Device device = await daemon.deviceDomain._getDevice(deviceId);
-    if (device == null)
-      throw "device '$deviceId' not found";
-
-    final List<DiscoveredApp> apps = await device.discoverApps();
-    return apps.map((DiscoveredApp app) {
-      return <String, dynamic>{
-        'id': app.id,
-        'observatoryDevicePort': app.observatoryPort,
-      };
-    }).toList();
-  }
-
   AppInstance _getApp(String id) {
     return _apps.firstWhere((AppInstance app) => app.id == id, orElse: () => null);
   }
@@ -685,25 +615,6 @@ class DeviceDomain extends Domain {
       if (device != null)
         return device;
     }
-    return null;
-  }
-
-  /// Return a known matching device, or scan for devices if no known match is found.
-  Future<Device> _getOrLocateDevice(String deviceId) async {
-    // Look for an already known device.
-    final Device device = await _getDevice(deviceId);
-    if (device != null)
-      return device;
-
-    // Scan the different device providers for a match.
-    for (PollingDeviceDiscovery discoverer in _discoverers) {
-      final List<Device> devices = await discoverer.pollingGetDevices();
-      for (Device device in devices)
-        if (device.id == deviceId)
-          return device;
-    }
-
-    // No match found.
     return null;
   }
 }
@@ -849,6 +760,7 @@ class EmulatorDomain extends Domain {
   EmulatorDomain(Daemon daemon) : super(daemon, 'emulator') {
     registerHandler('getEmulators', getEmulators);
     registerHandler('launch', launch);
+    registerHandler('create', create);
   }
 
   Future<List<Map<String, dynamic>>> getEmulators([Map<String, dynamic> args]) async {
@@ -867,6 +779,16 @@ class EmulatorDomain extends Domain {
     } else {
       await matches.first.launch();
     }
+  }
+
+  Future<Map<String, dynamic>> create(Map<String, dynamic> args) async {
+    final String name = _getStringArg(args, 'name', required: false);
+    final CreateEmulatorResult res = await emulators.createEmulator(name: name);
+    return <String, dynamic>{
+      'success': res.success,
+      'emulatorName': res.emulatorName,
+      'error': res.error,
+    };
   }
 }
 
