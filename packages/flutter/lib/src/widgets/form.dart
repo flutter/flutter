@@ -22,7 +22,7 @@ class Form extends StatefulWidget {
   const Form({
     Key key,
     @required this.child,
-    this.autovalidate = false,
+    this.autovalidate: false,
     this.onWillPop,
     this.onChanged,
   }) : assert(child != null),
@@ -227,6 +227,7 @@ class FormField<T> extends StatefulWidget {
     this.validator,
     this.initialValue,
     this.autovalidate = false,
+    this.enabled: true,
   }) : assert(builder != null),
        super(key: key);
 
@@ -256,6 +257,9 @@ class FormField<T> extends StatefulWidget {
   /// autovalidates, this value will be ignored.
   final bool autovalidate;
 
+  /// If true, indicates that the widget is enabled
+  final bool enabled;
+
   @override
   FormFieldState<T> createState() => FormFieldState<T>();
 }
@@ -279,7 +283,7 @@ class FormFieldState<T> extends State<FormField<T>> {
 
   /// Calls the [FormField]'s onSaved method with the current value.
   void save() {
-    if (widget.onSaved != null)
+    if (widget.onSaved != null && widget.enabled)
       widget.onSaved(value);
   }
 
@@ -301,7 +305,9 @@ class FormFieldState<T> extends State<FormField<T>> {
   }
 
   bool _validate() {
-    if (widget.validator != null)
+    if (!widget.enabled)
+      _errorText = null;
+    else if (widget.validator != null)
       _errorText = widget.validator(_value);
     return !hasError;
   }

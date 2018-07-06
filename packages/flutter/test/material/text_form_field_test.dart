@@ -114,4 +114,28 @@ void main() {
     await tester.pump();
     expect(_validateCalled, 2);
   });
+
+  testWidgets('validate is not called if widget is disabled', (WidgetTester tester) async {
+    int _validateCalled = 0;
+
+    await tester.pumpWidget(
+      new MaterialApp(
+        home: new Material(
+          child: new Center(
+            child: new TextFormField(
+              enabled: false,
+              autovalidate: true,
+              validator: (String value) { _validateCalled++; return null; },
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(_validateCalled, 0);
+    await tester.showKeyboard(find.byType(TextField));
+    await tester.enterText(find.byType(TextField), 'a');
+    await tester.pump();
+    expect(_validateCalled, 0);
+  });
 }
