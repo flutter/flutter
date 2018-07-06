@@ -32,10 +32,10 @@ void main() {
     await tester.tap(find.text('Pesto'));
     await tester.pumpAndSettle();
 
-    await tester.tap(find.text('Pesto Bruschetta'));
+    await tester.tap(find.text('Roasted Chicken'));
     await tester.pumpAndSettle();
 
-    await tester.drag(find.text('Pesto Bruschetta'), const Offset(0.0, -300.0));
+    await tester.drag(find.text('Roasted Chicken'), const Offset(0.0, -300.0));
     await tester.pumpAndSettle();
 
     Navigator.pop(find.byType(Scaffold).evaluate().single);
@@ -53,8 +53,8 @@ void main() {
     await tester.tap(find.text('Pesto'));
     await tester.pumpAndSettle();
 
-    await tester.fling(find.text('Pesto Bruschetta'), const Offset(0.0, -200.0), 10000.0);
+    await tester.fling(find.text('Roasted Chicken'), const Offset(0.0, -200.0), 10000.0);
     await tester.pumpAndSettle(); // start and finish fling
-    expect(find.text('Sicilian-Style sardines'), findsOneWidget);
+    expect(find.text('Spanakopita'), findsOneWidget);
   });
 }
