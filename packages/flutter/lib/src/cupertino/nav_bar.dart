@@ -394,7 +394,7 @@ class _CupertinoPersistentNavigationBar extends StatelessWidget implements Prefe
 
     final Widget styledLeading = leading == null
         ? null
-        : Padding(
+        : new Padding(
           padding: new EdgeInsetsDirectional.only(
             start: padding?.start ?? _kNavBarEdgePadding,
           ),
@@ -404,10 +404,17 @@ class _CupertinoPersistentNavigationBar extends StatelessWidget implements Prefe
           ),
         );
 
-    final Widget styledTrailing = trailing == null ? null : new DefaultTextStyle(
-      style: actionsStyle,
-      child: trailing,
-    );
+    final Widget styledTrailing = trailing == null
+        ? null
+        : Padding(
+          padding: new EdgeInsetsDirectional.only(
+            end: padding?.end ?? _kNavBarEdgePadding,
+          ),
+          child: new DefaultTextStyle(
+            style: actionsStyle,
+            child: trailing,
+          ),
+        );
 
     // Let the middle be black rather than `actionsForegroundColor` in case
     // it's a plain text title.
@@ -453,12 +460,7 @@ class _CupertinoPersistentNavigationBar extends StatelessWidget implements Prefe
     Widget paddedToolbar = new NavigationToolbar(
       leading: styledLeading ?? backOrCloseButton,
       middle: animatedStyledMiddle,
-      trailing: Padding(
-        padding: new EdgeInsetsDirectional.only(
-          end: padding?.end ?? _kNavBarEdgePadding,
-        ),
-        child: styledTrailing,
-      ),
+      trailing: styledTrailing,
       centerMiddle: true,
     );
 
