@@ -26,9 +26,6 @@ const double _kNavBarShowLargeTitleThreshold = 10.0;
 
 const double _kNavBarEdgePadding = 16.0;
 
-// The back chevron has a special padding in iOS.
-const double _kNavBarBackButtonPadding = 0.0;
-
 const double _kNavBarBackButtonTapWidth = 50.0;
 
 /// Title text transfer fade.
@@ -87,6 +84,7 @@ class CupertinoNavigationBar extends StatelessWidget implements ObstructingPrefe
     this.trailing,
     this.border = _kDefaultNavBarBorder,
     this.backgroundColor = _kDefaultNavBarBackgroundColor,
+    this.padding,
     this.actionsForegroundColor = CupertinoColors.activeBlue,
   }) : assert(automaticallyImplyLeading != null),
        super(key: key);
@@ -117,6 +115,19 @@ class CupertinoNavigationBar extends StatelessWidget implements ObstructingPrefe
   /// tab bar will automatically produce a blurring effect to the content
   /// behind it.
   final Color backgroundColor;
+
+  /// Padding for the contents of the navigation bar.
+  ///
+  /// If null, the navigation bar will adopt the following defaults:
+  ///
+  ///  * Vertically, contents will be sized to the same height as the navigation
+  ///    bar itself minus the status bar.
+  ///  * Horizontally, padding will be 16 pixels according to iOS specifications
+  ///    unless the leading widget is an automatically inserted back button, in
+  ///    which case the padding will be 0.
+  ///
+  /// Vertical padding won't change the height of the nav bar.
+  final EdgeInsetsDirectional padding;
 
   /// The border of the navigation bar. By default renders a single pixel bottom border side.
   ///
@@ -149,6 +160,7 @@ class CupertinoNavigationBar extends StatelessWidget implements ObstructingPrefe
         automaticallyImplyLeading: automaticallyImplyLeading,
         middle: new Semantics(child: middle, header: true),
         trailing: trailing,
+        padding: padding,
         actionsForegroundColor: actionsForegroundColor,
       ),
     );
@@ -197,6 +209,7 @@ class CupertinoSliverNavigationBar extends StatelessWidget {
     this.trailing,
     this.border = _kDefaultNavBarBorder,
     this.backgroundColor = _kDefaultNavBarBackgroundColor,
+    this.padding,
     this.actionsForegroundColor = CupertinoColors.activeBlue,
   }) : assert(largeTitle != null),
        assert(automaticallyImplyLeading != null),
@@ -246,6 +259,19 @@ class CupertinoSliverNavigationBar extends StatelessWidget {
   /// This widget is visible in both collapsed and expanded states.
   final Widget trailing;
 
+  /// Padding for the contents of the navigation bar.
+  ///
+  /// If null, the navigation bar will adopt the following defaults:
+  ///
+  ///  * Vertically, contents will be sized to the same height as the navigation
+  ///    bar itself minus the status bar.
+  ///  * Horizontally, padding will be 16 pixels according to iOS specifications
+  ///    unless the leading widget is an automatically inserted back button, in
+  ///    which case the padding will be 0.
+  ///
+  /// Vertical padding won't change the height of the nav bar.
+  final EdgeInsetsDirectional padding;
+
   /// The border of the navigation bar. By default renders a single pixel bottom border side.
   ///
   /// If a border is null, the navigation bar will not display a border.
@@ -277,6 +303,7 @@ class CupertinoSliverNavigationBar extends StatelessWidget {
         automaticallyImplyLeading: automaticallyImplyLeading,
         middle: middle,
         trailing: trailing,
+        padding: padding,
         border: border,
         backgroundColor: backgroundColor,
         actionsForegroundColor: actionsForegroundColor,
@@ -332,6 +359,7 @@ class _CupertinoPersistentNavigationBar extends StatelessWidget implements Prefe
     this.automaticallyImplyLeading,
     this.middle,
     this.trailing,
+    this.padding,
     this.actionsForegroundColor,
     this.middleVisible,
   }) : super(key: key);
@@ -343,6 +371,8 @@ class _CupertinoPersistentNavigationBar extends StatelessWidget implements Prefe
   final Widget middle;
 
   final Widget trailing;
+
+  final EdgeInsetsDirectional padding;
 
   final Color actionsForegroundColor;
 
@@ -362,10 +392,17 @@ class _CupertinoPersistentNavigationBar extends StatelessWidget implements Prefe
       color: actionsForegroundColor,
     );
 
-    final Widget styledLeading = leading == null ? null : new DefaultTextStyle(
-      style: actionsStyle,
-      child: leading,
-    );
+    final Widget styledLeading = leading == null
+        ? null
+        : Padding(
+          padding: new EdgeInsetsDirectional.only(
+            start: padding?.start ?? _kNavBarEdgePadding,
+          ),
+          child: new DefaultTextStyle(
+            style: actionsStyle,
+            child: leading,
+          ),
+        );
 
     final Widget styledTrailing = trailing == null ? null : new DefaultTextStyle(
       style: actionsStyle,
@@ -413,6 +450,28 @@ class _CupertinoPersistentNavigationBar extends StatelessWidget implements Prefe
       }
     }
 
+    Widget paddedToolbar = new NavigationToolbar(
+      leading: styledLeading ?? backOrCloseButton,
+      middle: animatedStyledMiddle,
+      trailing: Padding(
+        padding: new EdgeInsetsDirectional.only(
+          end: padding?.end ?? _kNavBarEdgePadding,
+        ),
+        child: styledTrailing,
+      ),
+      centerMiddle: true,
+    );
+
+    if (padding != null) {
+      paddedToolbar = new Padding(
+        padding: EdgeInsets.only(
+          top: padding.top,
+          bottom: padding.bottom,
+        ),
+        child: paddedToolbar,
+      );
+    }
+
     return new SizedBox(
       height: _kNavBarPersistentHeight + MediaQuery.of(context).padding.top,
       child: IconTheme.merge(
@@ -422,18 +481,7 @@ class _CupertinoPersistentNavigationBar extends StatelessWidget implements Prefe
         ),
         child: new SafeArea(
           bottom: false,
-          child: new Padding(
-            padding: new EdgeInsetsDirectional.only(
-              start: useBackButton ? _kNavBarBackButtonPadding : _kNavBarEdgePadding,
-              end: _kNavBarEdgePadding,
-            ),
-            child: new NavigationToolbar(
-              leading: styledLeading ?? backOrCloseButton,
-              middle: animatedStyledMiddle,
-              trailing: styledTrailing,
-              centerMiddle: true,
-            ),
-          ),
+          child: paddedToolbar,
         ),
       ),
     );
@@ -449,6 +497,7 @@ class _CupertinoLargeTitleNavigationBarSliverDelegate
     this.automaticallyImplyLeading,
     this.middle,
     this.trailing,
+    this.padding,
     this.border,
     this.backgroundColor,
     this.actionsForegroundColor,
@@ -465,6 +514,8 @@ class _CupertinoLargeTitleNavigationBarSliverDelegate
   final Widget middle;
 
   final Widget trailing;
+
+  final EdgeInsetsDirectional padding;
 
   final Color backgroundColor;
 
@@ -491,6 +542,7 @@ class _CupertinoLargeTitleNavigationBarSliverDelegate
       // If middle widget exists, always show it. Otherwise, show title
       // when collapsed.
       middleVisible: middle != null ? null : !showLargeTitle,
+      padding: padding,
       actionsForegroundColor: actionsForegroundColor,
     );
 
