@@ -464,8 +464,9 @@ class DropdownButton<T> extends StatefulWidget {
   /// Creates a dropdown button.
   ///
   /// The [items] must have distinct values and if [value] isn't null it must be among them.
-  /// If [items] is null the button is disabled and shows the optional [disabledHint] and the down arrow is drawn as disabled
-  ///
+  /// If [items] or [onChanged] is null, the button will be disabled, the down arrow will be grayed out, and
+  /// the [disabledHint] will be shown (if provided).
+  /// 
   /// The [elevation] and [iconSize] arguments must not be null (they both have
   /// defaults, so do not need to be specified).
   DropdownButton({
@@ -479,9 +480,8 @@ class DropdownButton<T> extends StatefulWidget {
     this.style,
     this.iconSize = 24.0,
     this.isDense = false,
-  })  : assert(items == null
-      || value == null
-      || items.where((DropdownMenuItem<T> item) => item.value == value).length == 1),
+  })  : assert(items == null || value == null   || 
+               items.where((DropdownMenuItem<T> item) => item.value == value).length == 1),
         super(key: key);
 
   /// The list of possible items to select among.
@@ -624,7 +624,7 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
   }
 
   // just so we don't have to repeat this test and make it easier to understand
-  bool get _enabled => widget.items != null;
+  bool get _enabled => widget.items != null && onChanged != null;
 
   @override
   Widget build(BuildContext context) {
