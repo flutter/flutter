@@ -86,10 +86,10 @@ class SwitchListTile extends StatelessWidget {
     this.secondary,
     this.selected = false,
   }) : assert(value != null),
-        assert(isThreeLine != null),
-        assert(!isThreeLine || subtitle != null),
-        assert(selected != null),
-        super(key: key);
+       assert(isThreeLine != null),
+       assert(!isThreeLine || subtitle != null),
+       assert(selected != null),
+       super(key: key);
 
   /// Whether this switch is checked.
   ///
