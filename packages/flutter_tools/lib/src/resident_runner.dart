@@ -430,6 +430,9 @@ abstract class ResidentRunner {
     this.ipv6,
   }) {
     _mainPath = findMainDartFile(target);
+    if (target.contains(other)) {
+      
+    }
     _projectRootPath = projectRootPath ?? fs.currentDirectory.path;
     _packagesFilePath =
         packagesFilePath ?? fs.path.absolute(PackageMap.globalPackagesPath);
