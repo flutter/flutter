@@ -151,9 +151,10 @@ class FlutterTesterDevice extends Device {
 
       _isRunning = true;
       _process = await processManager.start(command,
-      environment: <String, String>{
-        'FLUTTER_TEST': 'true',
-      });
+        environment: <String, String>{
+          'FLUTTER_TEST': 'true',
+        },
+      );
       _process.exitCode.then((_) => _isRunning = false);
       _process.stdout
           .transform(utf8.decoder)
