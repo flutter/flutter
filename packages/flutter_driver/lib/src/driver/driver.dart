@@ -571,16 +571,17 @@ class FlutterDriver {
     return result.changedState;
   }
 
-  /// Retrieves the semantics node id for the object returned by [finder], or
+  /// Retrieves the semantics node id for the object returned by `finder`, or
   /// the nearest ancestor with a semantics node.
   /// 
-  /// Throws an error if [finder] returns multiple elements or a semantics 
+  /// Throws an error if `finder` returns multiple elements or a semantics
   /// node is not found.
   /// 
   /// Semantics must be enabled to use this method, either using a platform
   /// specific shell command or [setSemantics].
   Future<int> getSemanticsId(SerializableFinder finder, { Duration timeout = _kShortTimeout}) async {
-    final GetSemanticsIdResult result = GetSemanticsIdResult.fromJson(await _sendCommand(new GetSemanticsId(finder, timeout: timeout)));
+    final Map<String, dynamic> jsonResponse = await _sendCommand(new GetSemanticsId(finder, timeout: timeout));
+    final GetSemanticsIdResult result = GetSemanticsIdResult.fromJson(jsonResponse);
     return result.id;
   }
 
