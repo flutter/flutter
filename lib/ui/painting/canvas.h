@@ -60,9 +60,10 @@ class Canvas : public fxl::RefCountedThreadSafe<Canvas>,
                 double top,
                 double right,
                 double bottom,
-                SkClipOp clipOp);
-  void clipRRect(const RRect& rrect);
-  void clipPath(const CanvasPath* path);
+                SkClipOp clipOp,
+                bool doAntiAlias = true);
+  void clipRRect(const RRect& rrect, bool doAntiAlias = true);
+  void clipPath(const CanvasPath* path, bool doAntiAlias = true);
 
   void drawColor(SkColor color, SkBlendMode blend_mode);
   void drawLine(double x1,

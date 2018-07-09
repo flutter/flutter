@@ -1577,16 +1577,16 @@ enum PathFillType {
 }
 
 /// Strategies for combining paths.
-/// 
+///
 /// See also:
-/// 
+///
 /// * [Path.combine], which uses this enum to decide how to combine two paths.
 // Must be kept in sync with SkPathOp
 enum PathOperation {
   /// Subtract the second path from the first path.
   ///
   /// For example, if the two paths are overlapping circles of equal diameter
-  /// but differing centers, the result would be a crescent portion of the 
+  /// but differing centers, the result would be a crescent portion of the
   /// first circle that was not overlapped by the second circle.
   ///
   /// See also:
@@ -1596,33 +1596,33 @@ enum PathOperation {
   difference,
   /// Create a new path that is the intersection of the two paths, leaving the
   /// overlapping pieces of the path.
-  /// 
+  ///
   /// For example, if the two paths are overlapping circles of equal diameter
   /// but differing centers, the result would be only the overlapping portion
   /// of the two circles.
-  /// 
+  ///
   /// See also:
   ///  * [xor], which is the inverse of this operation
   intersect,
   /// Create a new path that is the union (inclusive-or) of the two paths.
-  /// 
+  ///
   /// For example, if the two paths are overlapping circles of equal diameter
-  /// but differing centers, the result would be a figure-eight like shape 
+  /// but differing centers, the result would be a figure-eight like shape
   /// matching the outer boundaries of both circles.
   union,
-  /// Create a new path that is the exclusive-or of the two paths, leaving 
+  /// Create a new path that is the exclusive-or of the two paths, leaving
   /// everything but the overlapping pieces of the path.
-  /// 
+  ///
   /// For example, if the two paths are overlapping circles of equal diameter
   /// but differing centers, the figure-eight like shape less the overlapping parts
-  /// 
+  ///
   /// See also:
   ///  * [intersect], which is the inverse of this operation
   xor,
   /// Subtract the first path from the second path.
   ///
   /// For example, if the two paths are overlapping circles of equal diameter
-  /// but differing centers, the result would be a crescent portion of the 
+  /// but differing centers, the result would be a crescent portion of the
   /// second circle that was not overlapped by the first circle.
   ///
   /// See also:
@@ -1655,8 +1655,8 @@ class Path extends NativeFieldWrapperClass2 {
   void _constructor() native 'Path_constructor';
 
   /// Creates a copy of another [Path].
-  /// 
-  /// This copy is fast and does not require additional memory unless either 
+  ///
+  /// This copy is fast and does not require additional memory unless either
   /// the `source` path or the path returned by this constructor are modified.
   factory Path.from(Path source) {
     return source._clone();
@@ -1862,7 +1862,7 @@ class Path extends NativeFieldWrapperClass2 {
 
   /// Adds a new subpath that consists of the given `path` offset by the given
   /// `offset`.
-  /// 
+  ///
   /// If `matrix4` is specified, the path will be transformed by this matrix
   /// after the matrix is translated by the given offset. The matrix is a 4x4
   /// matrix stored in column major order.
@@ -1878,10 +1878,10 @@ class Path extends NativeFieldWrapperClass2 {
   }
   void _addPath(Path path, double dx, double dy) native 'Path_addPath';
   void _addPathWithMatrix(Path path, double dx, double dy, Float64List matrix) native 'Path_addPathWithMatrix';
-  
+
   /// Adds the given path to this path by extending the current segment of this
   /// path with the the first segment of the given path.
-  /// 
+  ///
   /// If `matrix4` is specified, the path will be transformed by this matrix
   /// after the matrix is translated by the given `offset`.  The matrix is a 4x4
   /// matrix stored in column major order.
@@ -1937,16 +1937,16 @@ class Path extends NativeFieldWrapperClass2 {
   Path _transform(Float64List matrix4) native 'Path_transform';
 
   /// Computes the bounding rectangle for this path.
-  /// 
+  ///
   /// A path containing only axis-aligned points on the same straight line will
   /// have no area, and therefore `Rect.isEmpty` will return true for such a
   /// path. Consider checking `rect.width + rect.height > 0.0` instead, or
   /// using the [computeMetrics] API to check the path length.
-  /// 
+  ///
   /// For many more elaborate paths, the bounds may be inaccurate.  For example,
   /// when a path contains a circle, the points used to compute the bounds are
   /// the circle's implied control points, which form a square around the circle;
-  /// if the circle has a transformation applied using [transform] then that 
+  /// if the circle has a transformation applied using [transform] then that
   /// square is rotated, and the (axis-aligned, non-rotated) bounding box
   /// therefore ends up grossly overestimating the actual area covered by the
   /// circle.
@@ -1957,9 +1957,9 @@ class Path extends NativeFieldWrapperClass2 {
   }
   Float32List _getBounds() native 'Path_getBounds';
 
-  /// Combines the two paths according to the manner specified by the given 
+  /// Combines the two paths according to the manner specified by the given
   /// `operation`.
-  /// 
+  ///
   /// The resulting path will be constructed from non-overlapping contours. The
   /// curve order is reduced where possible so that cubics may be turned into
   /// quadratics, and quadratics maybe turned into lines.
@@ -1969,13 +1969,13 @@ class Path extends NativeFieldWrapperClass2 {
     final Path path = new Path();
     if (path._op(path1, path2, operation.index)) {
       return path;
-    } 
+    }
     throw new StateError('Path.combine() failed.  This may be due an invalid path; in particular, check for NaN values.');
   }
   bool _op(Path path1, Path path2, int operation) native 'Path_op';
 
   /// Creates a [PathMetrics] object for this path.
-  /// 
+  ///
   /// If `forceClosed` is set to true, the contours of the path will be measured
   /// as if they had been closed, even if they were not explicitly closed.
   PathMetrics computeMetrics({bool forceClosed: false}) {
@@ -1984,19 +1984,19 @@ class Path extends NativeFieldWrapperClass2 {
 }
 
 /// The geometric description of a tangent: the angle at a point.
-/// 
+///
 /// See also:
 ///  * [PathMetric.getTangentForOffset], which returns the tangent of an offset along a path.
 class Tangent {
   /// Creates a [Tangent] with the given values.
-  /// 
+  ///
   /// The arguments must not be null.
-  const Tangent(this.position, this.vector) 
-    : assert(position != null), 
+  const Tangent(this.position, this.vector)
+    : assert(position != null),
       assert(vector != null);
 
   /// Creates a [Tangent] based on the angle rather than the vector.
-  /// 
+  ///
   /// The [vector] is computed to be the unit vector at the given angle, interpreted
   /// as clockwise radians from the x axis.
   factory Tangent.fromAngle(Offset position, double angle) {
@@ -2004,43 +2004,43 @@ class Tangent {
   }
 
   /// Position of the tangent.
-  /// 
+  ///
   /// When used with [PathMetric.getTangentForOffset], this represents the precise
   /// position that the given offset along the path corresponds to.
   final Offset position;
 
   /// The vector of the curve at [position].
-  /// 
+  ///
   /// When used with [PathMetric.getTangentForOffset], this is the vector of the
   /// curve that is at the given offset along the path (i.e. the direction of the
   /// curve at [position]).
   final Offset vector;
 
   /// The direction of the curve at [position].
-  /// 
+  ///
   /// When used with [PathMetric.getTangentForOffset], this is the angle of the
   /// curve that is the given offset along the path (i.e. the direction of the
   /// curve at [position]).
-  /// 
-  /// This value is in radians, with 0.0 meaning pointing along the x axis in 
+  ///
+  /// This value is in radians, with 0.0 meaning pointing along the x axis in
   /// the positive x-axis direction, positive numbers pointing downward toward
   /// the negative y-axis, i.e. in a clockwise direction, and negative numbers
-  /// pointing upward toward the positive y-axis, i.e. in a counter-clockwise 
+  /// pointing upward toward the positive y-axis, i.e. in a counter-clockwise
   /// direction.
   // flip the sign to be consistent with [Path.arcTo]'s `sweepAngle`
   double get angle => -math.atan2(vector.dy, vector.dx);
 }
 
 /// An iterable collection of [PathMetric] objects describing a [Path].
-/// 
+///
 /// A [PathMetrics] object is created by using the [Path.computeMetrics] method,
-/// and represents the path as it stood at the time of the call. Subsequent 
+/// and represents the path as it stood at the time of the call. Subsequent
 /// modifications of the path do not affect the [PathMetrics] object.
-/// 
+///
 /// Each path metric corresponds to a segment, or contour, of a path.
-/// 
-/// For example, a path consisting of a [Path.lineTo], a [Path.moveTo], and 
-/// another [Path.lineTo] will contain two contours and thus be represented by 
+///
+/// For example, a path consisting of a [Path.lineTo], a [Path.moveTo], and
+/// another [Path.lineTo] will contain two contours and thus be represented by
 /// two [PathMetric] objects.
 ///
 /// When iterating across a [PathMetrics]' contours, the [PathMetric] objects are only
@@ -2048,7 +2048,7 @@ class Tangent {
 class PathMetrics extends collection.IterableBase<PathMetric> {
   PathMetrics._(Path path, bool forceClosed) :
     _iterator = new PathMetricIterator._(new PathMetric._(path, forceClosed));
-    
+
   final Iterator<PathMetric> _iterator;
 
   @override
@@ -2068,25 +2068,25 @@ class PathMetricIterator implements Iterator<PathMetric> {
   @override
   bool moveNext() {
     // PathMetric isn't a normal iterable - it's already initialized to its
-    // first Path.  Should only call _moveNext when done with the first one. 
+    // first Path.  Should only call _moveNext when done with the first one.
     if (_firstTime == true) {
       _firstTime = false;
       return true;
     } else if (_pathMetric?._moveNext() == true) {
       return true;
-    } 
+    }
     _pathMetric = null;
     return false;
   }
 }
 
 /// Utilities for measuring a [Path] and extracting subpaths.
-/// 
-/// Iterate over the object returned by [Path.computeMetrics] to obtain 
+///
+/// Iterate over the object returned by [Path.computeMetrics] to obtain
 /// [PathMetric] objects.
 ///
 /// Once created, metrics will only be valid while the iterator is at the given
-/// contour. When the next contour's [PathMetric] is obtained, this object 
+/// contour. When the next contour's [PathMetric] is obtained, this object
 /// becomes invalid.
 class PathMetric extends NativeFieldWrapperClass2 {
   /// Create a new empty [Path] object.
@@ -2098,13 +2098,13 @@ class PathMetric extends NativeFieldWrapperClass2 {
 
   /// Computes the position of hte current contour at the given offset, and the
   /// angle of the path at that point.
-  /// 
-  /// For example, calling this method with a distance of 1.41 for a line from 
+  ///
+  /// For example, calling this method with a distance of 1.41 for a line from
   /// 0.0,0.0 to 2.0,2.0 would give a point 1.0,1.0 and the angle 45 degrees
   /// (but in radians).
-  /// 
+  ///
   /// Returns null if the contour has zero [length].
-  /// 
+  ///
   /// The distance is clamped to the [length] of the current contour.
   Tangent getTangentForOffset(double distance) {
     final Float32List posTan = _getPosTan(distance);
@@ -2113,24 +2113,24 @@ class PathMetric extends NativeFieldWrapperClass2 {
       return null;
     } else {
       return new Tangent(
-        new Offset(posTan[1], posTan[2]), 
-        new Offset(posTan[3], posTan[4]) 
+        new Offset(posTan[1], posTan[2]),
+        new Offset(posTan[3], posTan[4])
       );
     }
   }
   Float32List _getPosTan(double distance) native 'PathMeasure_getPosTan';
 
   /// Given a start and stop distance, return the intervening segment(s).
-  /// 
+  ///
   /// `start` and `end` are pinned to legal values (0..[length])
   /// Returns null if the segment is 0 length or `start` > `stop`.
   /// Begin the segment with a moveTo if `startWithMoveTo` is true.
   Path extractPath(double start, double end, {bool startWithMoveTo: true}) native 'PathMeasure_getSegment';
 
   /// Whether the contour is closed.
-  /// 
+  ///
   /// Returns true if the contour ends with a call to [Path.close] (which may
-  /// have been implied when using [Path.addRect]) or if `forceClosed` was 
+  /// have been implied when using [Path.addRect]) or if `forceClosed` was
   /// specified as true in the call to [Path.computeMetrics].  Returns false
   /// otherwise.
   bool get isClosed native 'PathMeasure_isClosed';
@@ -2139,10 +2139,10 @@ class PathMetric extends NativeFieldWrapperClass2 {
   //
   // A path can have a next contour if [Path.moveTo] was called after drawing began.
   // Return true if one exists, or false.
-  // 
+  //
   // This is not exactly congruent with a regular [Iterator.moveNext].
   // Typically, [Iterator.moveNext] should be called before accessing the
-  // [Iterator.current]. In this case, the [PathMetric] is valid before 
+  // [Iterator.current]. In this case, the [PathMetric] is valid before
   // calling `_moveNext` - `_moveNext` should be called after the first
   // iteration is done instead of before.
   bool _moveNext() native 'PathMeasure_nextContour';
@@ -2455,10 +2455,10 @@ class Gradient extends Shader {
   /// If `matrix4` is provided, the gradient fill will be transformed by the
   /// specified 4x4 matrix relative to the local coordinate system. `matrix4` must
   /// be a column-major matrix packed into a list of 16 values.
-  /// 
-  /// If `focal` is provided and not equal to `center` and `focalRadius` is 
+  ///
+  /// If `focal` is provided and not equal to `center` and `focalRadius` is
   /// provided and not equal to 0.0, the generated shader will be a two point
-  /// conical radial gradient, with `focal` being the center of the focal 
+  /// conical radial gradient, with `focal` being the center of the focal
   /// circle and `focalRadius` being the radius of that circle. If `focal` is
   /// provided and not equal to `center`, at least one of the two offsets must
   /// not be equal to [Offset.zero].
@@ -2518,7 +2518,7 @@ class Gradient extends Shader {
   /// or if `colors` or `colorStops` contain null values, this constructor will
   /// throw a [NoSuchMethodError].
   ///
-  /// If `matrix4` is provided, the gradient fill will be transformed by the 
+  /// If `matrix4` is provided, the gradient fill will be transformed by the
   /// specified 4x4 matrix relative to the local coordinate system. `matrix4` must
   /// be a column-major matrix packed into a list of 16 values.
   Gradient.sweep(
@@ -2930,50 +2930,57 @@ class Canvas extends NativeFieldWrapperClass2 {
   /// Reduces the clip region to the intersection of the current clip and the
   /// given rectangle.
   ///
-  /// If the clip is not axis-aligned with the display device, and
-  /// [Paint.isAntiAlias] is true, then the clip will be anti-aliased. If
-  /// multiple draw commands intersect with the clip boundary, this can result
+  /// If [doAntiAlias] is true, then the clip will be anti-aliased.
+  ///
+  /// If multiple draw commands intersect with the clip boundary, this can result
   /// in incorrect blending at the clip boundary. See [saveLayer] for a
   /// discussion of how to address that.
   ///
   /// Use [ClipOp.difference] to subtract the provided rectangle from the
   /// current clip.
-  void clipRect(Rect rect, { ClipOp clipOp: ClipOp.intersect }) {
+  void clipRect(Rect rect, { ClipOp clipOp: ClipOp.intersect, bool doAntiAlias = true }) {
     assert(_rectIsValid(rect));
     assert(clipOp != null);
-    _clipRect(rect.left, rect.top, rect.right, rect.bottom, clipOp.index);
+    assert(doAntiAlias != null);
+    _clipRect(rect.left, rect.top, rect.right, rect.bottom, clipOp.index, doAntiAlias);
   }
   void _clipRect(double left,
                  double top,
                  double right,
                  double bottom,
-                 int clipOp) native 'Canvas_clipRect';
+                 int clipOp,
+                 bool doAntiAlias) native 'Canvas_clipRect';
 
   /// Reduces the clip region to the intersection of the current clip and the
   /// given rounded rectangle.
   ///
-  /// If [Paint.isAntiAlias] is true, then the clip will be anti-aliased. If
-  /// multiple draw commands intersect with the clip boundary, this can result
+  /// If [doAntiAlias] is true, then the clip will be anti-aliased.
+  ///
+  /// If multiple draw commands intersect with the clip boundary, this can result
   /// in incorrect blending at the clip boundary. See [saveLayer] for a
   /// discussion of how to address that and some examples of using [clipRRect].
-  void clipRRect(RRect rrect) {
+  void clipRRect(RRect rrect, {bool doAntiAlias = true}) {
     assert(_rrectIsValid(rrect));
-    _clipRRect(rrect._value);
+    assert(doAntiAlias != null);
+    _clipRRect(rrect._value, doAntiAlias);
   }
-  void _clipRRect(Float32List rrect) native 'Canvas_clipRRect';
+  void _clipRRect(Float32List rrect, bool doAntiAlias) native 'Canvas_clipRRect';
 
   /// Reduces the clip region to the intersection of the current clip and the
   /// given [Path].
   ///
-  /// If [Paint.isAntiAlias] is true, then the clip will be anti-aliased. If
+  /// If [doAntiAlias] is true, then the clip will be anti-aliased.
+  ///
+  /// If multiple draw commands intersect with the clip boundary, this can result
   /// multiple draw commands intersect with the clip boundary, this can result
   /// in incorrect blending at the clip boundary. See [saveLayer] for a
   /// discussion of how to address that.
-  void clipPath(Path path) {
+  void clipPath(Path path, {bool doAntiAlias = true}) {
     assert(path != null); // path is checked on the engine side
-    _clipPath(path);
+    assert(doAntiAlias != null);
+    _clipPath(path, doAntiAlias);
   }
-  void _clipPath(Path path) native 'Canvas_clipPath';
+  void _clipPath(Path path, bool doAntiAlias) native 'Canvas_clipPath';
 
   /// Paints the given [Color] onto the canvas, applying the given
   /// [BlendMode], with the given color being the source and the background
@@ -3453,7 +3460,7 @@ class Picture extends NativeFieldWrapperClass2 {
   void dispose() native 'Picture_dispose';
 
   /// Returns the approximate number of bytes allocated for this object.
-  /// 
+  ///
   /// The actual size of this picture may be larger, particularly if it contains
   /// references to image or other large objects.
   int get approximateBytesUsed native 'Picture_GetAllocationSize';
