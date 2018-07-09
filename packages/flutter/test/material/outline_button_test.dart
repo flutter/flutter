@@ -31,8 +31,7 @@ void main() {
         pressedCount += 1;
       }),
     );
-    expect(
-        tester.widget<OutlineButton>(find.byType(OutlineButton)).enabled, true);
+    expect(tester.widget<OutlineButton>(find.byType(OutlineButton)).enabled, true);
     await tester.tap(find.byType(OutlineButton));
     await tester.pumpAndSettle();
     expect(pressedCount, 1);
@@ -47,8 +46,7 @@ void main() {
     expect(pressedCount, 1);
   });
 
-  testWidgets('OutlineButton shape and border component overrides',
-      (WidgetTester tester) async {
+  testWidgets('OutlineButton shape and border component overrides', (WidgetTester tester) async {
     const Color fillColor = const Color(0xFF00FF00);
     const Color borderColor = const Color(0xFFFF0000);
     const Color highlightedBorderColor = const Color(0xFF0000FF);
@@ -94,12 +92,12 @@ void main() {
     expect(tester.widget<OutlineButton>(disabledOutlineButton).enabled, false);
 
     expect(
-        disabledOutlineButton,
-        paints
-          ..clipPath(
-              pathMatcher: coversSameAreaAs(clipPath,
-                  areaToCompare: clipRect.inflate(10.0)))
-          ..path(color: disabledBorderColor, strokeWidth: borderWidth));
+      disabledOutlineButton,
+      paints
+        ..clipPath(
+          pathMatcher: coversSameAreaAs(clipPath,
+            areaToCompare: clipRect.inflate(10.0)))
+        ..path(color: disabledBorderColor, strokeWidth: borderWidth));
 
 
     // Pump a new widget with no onPressed to make it enabled.
@@ -113,14 +111,14 @@ void main() {
 
     await tester.pump();
     expect(
-        enabledOutlineButton,
-        paints
-          // initially the interior of the button is transparent
-          ..path(color: fillColor.withAlpha(0x00))
-          ..clipPath(
-              pathMatcher: coversSameAreaAs(clipPath,
-                  areaToCompare: clipRect.inflate(10.0)))
-          ..path(color: borderColor, strokeWidth: borderWidth));
+      enabledOutlineButton,
+      paints
+      // initially the interior of the button is transparent
+        ..path(color: fillColor.withAlpha(0x00))
+        ..clipPath(
+          pathMatcher: coversSameAreaAs(clipPath,
+            areaToCompare: clipRect.inflate(10.0)))
+        ..path(color: borderColor, strokeWidth: borderWidth));
 
     final Offset center = tester.getCenter(enabledOutlineButton);
     final TestGesture gesture = await tester.startGesture(center);
@@ -129,29 +127,28 @@ void main() {
     // the fillColor to become opaque.
     await tester.pump(const Duration(milliseconds: 200));
     expect(
-        enabledOutlineButton,
-        paints
-          ..path(color: fillColor.withAlpha(0xFF))
-          ..clipPath(
-              pathMatcher: coversSameAreaAs(clipPath,
-                  areaToCompare: clipRect.inflate(10.0)))
-          ..path(color: highlightedBorderColor, strokeWidth: borderWidth));
+      enabledOutlineButton,
+      paints
+        ..path(color: fillColor.withAlpha(0xFF))
+        ..clipPath(
+          pathMatcher: coversSameAreaAs(clipPath,
+            areaToCompare: clipRect.inflate(10.0)))
+        ..path(color: highlightedBorderColor, strokeWidth: borderWidth));
 
     // Tap gesture completes, button returns to its initial configuration.
     await gesture.up();
     await tester.pumpAndSettle();
     expect(
-        enabledOutlineButton,
-        paints
-          ..path(color: fillColor.withAlpha(0x00))
-          ..clipPath(
-              pathMatcher: coversSameAreaAs(clipPath,
-                  areaToCompare: clipRect.inflate(10.0)))
-          ..path(color: borderColor, strokeWidth: borderWidth));
+      enabledOutlineButton,
+      paints
+        ..path(color: fillColor.withAlpha(0x00))
+        ..clipPath(
+          pathMatcher: coversSameAreaAs(clipPath,
+            areaToCompare: clipRect.inflate(10.0)))
+        ..path(color: borderColor, strokeWidth: borderWidth));
   });
 
-  testWidgets('OutlineButton contributes semantics',
-      (WidgetTester tester) async {
+  testWidgets('OutlineButton contributes semantics', (WidgetTester tester) async {
     final SemanticsTester semantics = new SemanticsTester(tester);
     await tester.pumpWidget(
       new Directionality(
@@ -165,7 +162,6 @@ void main() {
       ),
     );
 
-<<<<<<< HEAD
     expect(semantics, hasSemantics(
       new TestSemantics.root(
         children: <TestSemantics>[
@@ -180,36 +176,17 @@ void main() {
               SemanticsFlag.isButton,
               SemanticsFlag.hasEnabledState,
               SemanticsFlag.isEnabled,
-=======
-    expect(
-        semantics,
-        hasSemantics(
-          new TestSemantics.root(
-            children: <TestSemantics>[
-              new TestSemantics.rootChild(
-                actions: <SemanticsAction>[
-                  SemanticsAction.tap,
-                ],
-                label: 'ABC',
-                rect: new Rect.fromLTRB(0.0, 0.0, 88.0, 36.0),
-                transform: new Matrix4.translationValues(356.0, 282.0, 0.0),
-                flags: <SemanticsFlag>[
-                  SemanticsFlag.isButton,
-                  SemanticsFlag.hasEnabledState,
-                  SemanticsFlag.isEnabled,
-                ],
-              )
->>>>>>> m
             ],
-          ),
-          ignoreId: true,
-        ));
+          )
+        ],
+      ),
+      ignoreId: true,
+    ));
 
     semantics.dispose();
   });
 
-  testWidgets('OutlineButton scales textScaleFactor',
-      (WidgetTester tester) async {
+  testWidgets('OutlineButton scales textScaleFactor', (WidgetTester tester) async {
     await tester.pumpWidget(
       new Directionality(
         textDirection: TextDirection.ltr,
@@ -252,8 +229,7 @@ void main() {
     // Scaled text rendering is different on Linux and Mac by one pixel.
     // TODO(#12357): Update this test when text rendering is fixed.
     expect(tester.getSize(find.byType(Text)).width, isIn(<double>[54.0, 55.0]));
-    expect(
-        tester.getSize(find.byType(Text)).height, isIn(<double>[18.0, 19.0]));
+    expect(tester.getSize(find.byType(Text)).height, isIn(<double>[18.0, 19.0]));
 
     // Set text scale large enough to expand text and button.
     await tester.pumpWidget(
