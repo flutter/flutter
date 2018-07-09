@@ -267,7 +267,7 @@ class FlutterTestDriver {
   }
 
   void _throwErrorResponse(String msg) {
-    throw' $msg\n\n$_lastResponse\n\n${_errorBuffer.toString()}'.trim();
+    throw '$msg\n\n$_lastResponse\n\n${_errorBuffer.toString()}'.trim();
   }
 }
 
