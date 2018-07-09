@@ -237,7 +237,7 @@ void _writeIOSPluginRegistrant(String directory, FlutterManifest manifest, List<
   if (manifest.isModule) {
     // In a module create the GeneratedPluginRegistrant as a pod to be included
     // from a hosting app.
-    final String registryDirectory = fs.path.join(directory, 'FlutterPluginRegistrant');
+    final String registryDirectory = fs.path.join(directory, 'Flutter', 'FlutterPluginRegistrant');
     final String registryClassesDirectory = fs.path.join(registryDirectory, 'Classes');
     _renderTemplateToFile(
       _iosPluginRegistrantPodspecTemplate,
