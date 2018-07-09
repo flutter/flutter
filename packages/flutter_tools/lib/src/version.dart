@@ -388,7 +388,7 @@ class VersionCheckStamp {
     return const VersionCheckStamp();
   }
 
-  static VersionCheckStamp fromJson(Map<String, String> jsonObject) {
+  static VersionCheckStamp fromJson(Map<String, dynamic> jsonObject) {
     DateTime readDateTime(String property) {
       return jsonObject.containsKey(property)
           ? DateTime.parse(jsonObject[property])
