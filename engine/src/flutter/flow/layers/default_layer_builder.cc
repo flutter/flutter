@@ -37,12 +37,13 @@ DefaultLayerBuilder::~DefaultLayerBuilder() = default;
 void DefaultLayerBuilder::PushTransform(const SkMatrix& sk_matrix) {
   SkMatrix inverse_sk_matrix;
   SkRect cullRect;
-  if (sk_matrix.invert(&inverse_sk_matrix)) {
+  // Perspective projections don't produce rectangles that are useful for
+  // culling for some reason.
+  if (!sk_matrix.hasPerspective() && sk_matrix.invert(&inverse_sk_matrix)) {
     inverse_sk_matrix.mapRect(&cullRect, cull_rects_.top());
   } else {
     cullRect = kGiantRect;
   }
-
   auto layer = std::make_unique<flow::TransformLayer>();
   layer->set_transform(sk_matrix);
   PushLayer(std::move(layer), cullRect);
