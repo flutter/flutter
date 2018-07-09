@@ -64,7 +64,10 @@ someProperty: someValue
 buildDir: /Users/some/apps/hello/build/app
 someOtherProperty: someOtherValue
       ''');
-      expect(project.apkDirectory.path, fs.path.normalize('/Users/some/apps/hello/build/app/outputs/apk'));
+      expect(
+        fs.path.normalize(project.apkDirectory.path),
+        fs.path.normalize('/Users/some/apps/hello/build/app/outputs/apk'),
+      );
     });
     test('should extract default build variants from app properties', () {
       final GradleProject project = projectFrom('''
