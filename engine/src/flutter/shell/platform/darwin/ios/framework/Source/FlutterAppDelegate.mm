@@ -129,7 +129,7 @@
 
 - (BOOL)application:(UIApplication*)application
     continueUserActivity:(NSUserActivity*)userActivity
-      restorationHandler:(void (^)(NSArray<id<UIUserActivityRestoring>>*))restorationHandler {
+      restorationHandler:(void (^)(NSArray*))restorationHandler {
   return [_lifeCycleDelegate application:application
                     continueUserActivity:userActivity
                       restorationHandler:restorationHandler];
