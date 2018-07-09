@@ -34,7 +34,7 @@ TargetPlatform get defaultTargetPlatform {
   TargetPlatform result;
   if (Platform.isIOS || Platform.isMacOS) {
     result = TargetPlatform.iOS;
-  } else if (Platform.isAndroid || Platform.isLinux || Platform.isWindows) {
+  } else if (Platform.isAndroid || Platform.isLinux) {
     result = TargetPlatform.android;
   } else if (Platform.operatingSystem == 'fuchsia') {
     result = TargetPlatform.fuchsia;
