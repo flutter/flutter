@@ -269,9 +269,9 @@ void main() {
       child: const Text('Hello'),
     ).debugFillProperties(builder);
     final List<String> description = builder.properties
-      .where((DiagnosticsNode n) => !n.isFiltered(DiagnosticLevel.info))
-      .map((DiagnosticsNode n) => n.toString())
-      .toList();
+        .where((DiagnosticsNode n) => !n.isFiltered(DiagnosticLevel.info))
+        .map((DiagnosticsNode n) => n.toString())
+        .toList();
     expect(description, <String>[
       'textColor: Color(0xff00ff00)',
       'disabledTextColor: Color(0xffff0000)',
