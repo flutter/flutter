@@ -65,16 +65,16 @@ void main() {
     final SemanticsHandle handle = tester.ensureSemantics();
     await tester.pumpWidget(
       new MaterialApp(
-         home: const Material(child: const Text('Home')),
-          routes: <String, WidgetBuilder>{
-            '/next': (BuildContext context) {
-              return const Material(
-                child: const Center(
-                  child: const BackButton(),
-                )
-              );
-            },
+        home: const Material(child: const Text('Home')),
+        routes: <String, WidgetBuilder>{
+          '/next': (BuildContext context) {
+            return const Material(
+              child: const Center(
+                child: const BackButton(),
+              ),
+            );
           },
+        },
       ),
     );
 

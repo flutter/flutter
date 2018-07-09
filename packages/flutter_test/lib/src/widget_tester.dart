@@ -615,12 +615,12 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
     await tap(backButton);
   }
 
-  /// Attempts to find the [SemanticsData] of first result from [finder].
+  /// Attempts to find the [SemanticsData] of first result from `finder`.
   /// 
   /// If the object identified by the finder doesn't own it's semantic node,
-  /// this will return the semantics data of the first ancestor found. The
-  /// ancestor's semantic data will include the childs as well as other nodes
-  /// that have been merged together.
+  /// this will return the semantics data of the first ancestor with semantics
+  /// data. The ancestor's semantic data will include the child's as well as
+  /// other nodes that have been merged together.
   ///
   /// Will throw a [StateError] if the finder returns more than one element or
   /// if no semantics are found or are not enabled.
