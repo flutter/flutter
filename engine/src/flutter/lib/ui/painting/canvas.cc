@@ -160,25 +160,26 @@ void Canvas::clipRect(double left,
                       double top,
                       double right,
                       double bottom,
-                      SkClipOp clipOp) {
+                      SkClipOp clipOp,
+                      bool doAntiAlias) {
   if (!canvas_)
     return;
-  canvas_->clipRect(SkRect::MakeLTRB(left, top, right, bottom), clipOp, true);
+  canvas_->clipRect(SkRect::MakeLTRB(left, top, right, bottom), clipOp, doAntiAlias);
 }
 
-void Canvas::clipRRect(const RRect& rrect) {
+void Canvas::clipRRect(const RRect& rrect, bool doAntiAlias) {
   if (!canvas_)
     return;
-  canvas_->clipRRect(rrect.sk_rrect, true);
+  canvas_->clipRRect(rrect.sk_rrect, doAntiAlias);
 }
 
-void Canvas::clipPath(const CanvasPath* path) {
+void Canvas::clipPath(const CanvasPath* path, bool doAntiAlias) {
   if (!canvas_)
     return;
   if (!path)
     Dart_ThrowException(
         ToDart("Canvas.clipPath called with non-genuine Path."));
-  canvas_->clipPath(path->path(), true);
+  canvas_->clipPath(path->path(), doAntiAlias);
 }
 
 void Canvas::drawColor(SkColor color, SkBlendMode blend_mode) {
