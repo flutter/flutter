@@ -32,102 +32,102 @@ void main() {
         // Don't fail tests if we failed to clean up temp folder.
       }
     });
+
+    Future<VMIsolate> breakInBuildMethod(FlutterTestDriver flutter) async {
+      return _flutter.breakAt(
+          _project.buildMethodBreakpointFile,
+          _project.buildMethodBreakpointLine);
+    }
+
+    Future<VMIsolate> breakInTopLevelFunction(FlutterTestDriver flutter) async {
+      return _flutter.breakAt(
+          _project.topLevelFunctionBreakpointFile,
+          _project.topLevelFunctionBreakpointLine);
+    }
+
+    group('FlutterTesterDevice', () {
+      test('can hot reload', () async {
+        await _flutter.run();
+        await _flutter.hotReload();
+      }, skip: true); // https://github.com/flutter/flutter/issues/17833
+
+      test('can hit breakpoints with file:// prefixes after reload', () async {
+        await _flutter.run(withDebugger: true);
+        
+        // Ensure we hit the breakpoint.
+        final VMIsolate isolate = await _flutter.breakAt(
+          new Uri.file(_project.breakpointFile).toString(),
+          _project.breakpointLine
+        );
+        expect(isolate.pauseEvent, const isInstanceOf<VMPauseBreakpointEvent>());
+      }, skip: true); // https://github.com/flutter/flutter/issues/18441
+
+      Future<void> evaluateTrivialExpressions() async {
+        VMInstanceRef res;
+
+        res = await _flutter.evaluateExpression('"test"');
+        expect(res is VMStringInstanceRef && res.value == 'test', isTrue);
+
+        res = await _flutter.evaluateExpression('1');
+        expect(res is VMIntInstanceRef && res.value == 1, isTrue);
+
+        res = await _flutter.evaluateExpression('true');
+        expect(res is VMBoolInstanceRef && res.value == true, isTrue);
+      }
+
+      Future<void> evaluateComplexExpressions() async {
+        final VMInstanceRef res = await _flutter.evaluateExpression('new DateTime.now().year');
+        expect(res is VMIntInstanceRef && res.value == new DateTime.now().year, isTrue);
+      }
+
+      Future<void> evaluateComplexReturningExpressions() async {
+        final DateTime now = new DateTime.now();
+        final VMInstanceRef resp = await _flutter.evaluateExpression('new DateTime.now()');
+        expect(resp.klass.name, equals('DateTime'));
+        // Ensure we got a reasonable approximation. The more accurate we try to
+        // make this, the more likely it'll fail due to differences in the time
+        // in the remote VM and the local VM at the time the code runs.
+        final VMStringInstanceRef res = await resp.evaluate(r'"$year-$month-$day"');
+        expect(res.value,
+            equals('${now.year}-${now.month}-${now.day}'));
+      }
+
+      test('can evaluate trivial expressions in top level function', () async {
+        await _flutter.run(withDebugger: true);
+        await breakInTopLevelFunction(_flutter);
+        await evaluateTrivialExpressions();
+      });
+
+      test('can evaluate trivial expressions in build method', () async {
+        await _flutter.run(withDebugger: true);
+        await breakInBuildMethod(_flutter);
+        await evaluateTrivialExpressions();
+      });
+
+      test('can evaluate complex expressions in top level function', () async {
+        await _flutter.run(withDebugger: true);
+        await breakInTopLevelFunction(_flutter);
+        await evaluateTrivialExpressions();
+      });
+
+      test('can evaluate complex expressions in build method', () async {
+        await _flutter.run(withDebugger: true);
+        await breakInBuildMethod(_flutter);
+        await evaluateComplexExpressions();
+      });
+
+      test('can evaluate expressions returning complex objects in top level function', () async {
+        await _flutter.run(withDebugger: true);
+        await breakInTopLevelFunction(_flutter);
+        await evaluateComplexReturningExpressions();
+      });
+
+      test('can evaluate expressions returning complex objects in build method', () async {
+        await _flutter.run(withDebugger: true);
+        await breakInBuildMethod(_flutter);
+        await evaluateComplexReturningExpressions();
+      });
+    // https://github.com/flutter/flutter/issues/17833
+    }, timeout: const Timeout.factor(3), skip: platform.isWindows);
   });
-
-  Future<VMIsolate> breakInBuildMethod(FlutterTestDriver flutter) async {
-    return _flutter.breakAt(
-        _project.buildMethodBreakpointFile,
-        _project.buildMethodBreakpointLine);
-  }
-
-  Future<VMIsolate> breakInTopLevelFunction(FlutterTestDriver flutter) async {
-    return _flutter.breakAt(
-        _project.topLevelFunctionBreakpointFile,
-        _project.topLevelFunctionBreakpointLine);
-  }
-
-  group('FlutterTesterDevice', () {
-    test('can hot reload', () async {
-      await _flutter.run();
-      await _flutter.hotReload();
-    }, skip: true); // https://github.com/flutter/flutter/issues/17833
-
-    test('can hit breakpoints with file:// prefixes after reload', () async {
-      await _flutter.run(withDebugger: true);
-      
-      // Ensure we hit the breakpoint.
-      final VMIsolate isolate = await _flutter.breakAt(
-        new Uri.file(_project.breakpointFile).toString(),
-        _project.breakpointLine
-      );
-      expect(isolate.pauseEvent, const isInstanceOf<VMPauseBreakpointEvent>());
-    }, skip: true); // https://github.com/flutter/flutter/issues/18441
-
-    Future<void> evaluateTrivialExpressions() async {
-      VMInstanceRef res;
-
-      res = await _flutter.evaluateExpression('"test"');
-      expect(res is VMStringInstanceRef && res.value == 'test', isTrue);
-
-      res = await _flutter.evaluateExpression('1');
-      expect(res is VMIntInstanceRef && res.value == 1, isTrue);
-
-      res = await _flutter.evaluateExpression('true');
-      expect(res is VMBoolInstanceRef && res.value == true, isTrue);
-    }
-
-    Future<void> evaluateComplexExpressions() async {
-      final VMInstanceRef res = await _flutter.evaluateExpression('new DateTime.now().year');
-      expect(res is VMIntInstanceRef && res.value == new DateTime.now().year, isTrue);
-    }
-
-    Future<void> evaluateComplexReturningExpressions() async {
-      final DateTime now = new DateTime.now();
-      final VMInstanceRef resp = await _flutter.evaluateExpression('new DateTime.now()');
-      expect(resp.klass.name, equals('DateTime'));
-      // Ensure we got a reasonable approximation. The more accurate we try to
-      // make this, the more likely it'll fail due to differences in the time
-      // in the remote VM and the local VM at the time the code runs.
-      final VMStringInstanceRef res = await resp.evaluate(r'"$year-$month-$day"');
-      expect(res.value,
-          equals('${now.year}-${now.month}-${now.day}'));
-    }
-
-    test('can evaluate trivial expressions in top level function', () async {
-      await _flutter.run(withDebugger: true);
-      await breakInTopLevelFunction(_flutter);
-      await evaluateTrivialExpressions();
-    });
-
-    test('can evaluate trivial expressions in build method', () async {
-      await _flutter.run(withDebugger: true);
-      await breakInBuildMethod(_flutter);
-      await evaluateTrivialExpressions();
-    });
-
-    test('can evaluate complex expressions in top level function', () async {
-      await _flutter.run(withDebugger: true);
-      await breakInTopLevelFunction(_flutter);
-      await evaluateTrivialExpressions();
-    });
-
-    test('can evaluate complex expressions in build method', () async {
-      await _flutter.run(withDebugger: true);
-      await breakInBuildMethod(_flutter);
-      await evaluateComplexExpressions();
-    });
-
-    test('can evaluate expressions returning complex objects in top level function', () async {
-      await _flutter.run(withDebugger: true);
-      await breakInTopLevelFunction(_flutter);
-      await evaluateComplexReturningExpressions();
-    });
-
-    test('can evaluate expressions returning complex objects in build method', () async {
-      await _flutter.run(withDebugger: true);
-      await breakInBuildMethod(_flutter);
-      await evaluateComplexReturningExpressions();
-    });
-  // https://github.com/flutter/flutter/issues/17833
-  }, timeout: const Timeout.factor(3), skip: platform.isWindows);
 }
