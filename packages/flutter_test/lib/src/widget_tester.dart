@@ -623,9 +623,18 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
   /// that have been merged together.
   ///
   /// Will throw a [StateError] if the finder returns more than one element or
-  /// if no semantics can be found.
+  /// if no semantics are found or are not enabled.
   SemanticsData getSemanticsData(Finder finder) {
-    final Element element = finder.evaluate().single;
+    if (binding.pipelineOwner.semanticsOwner == null)
+      throw new StateError('Semantics are not enabled.');
+    final Iterable<Element> candidates = finder.evaluate();
+    if (candidates.isEmpty) {
+      throw new StateError('Finder returned no matching elements.');
+    }
+    if (candidates.length > 1) {
+      throw new StateError('Finder returned more than one element.');
+    }
+    final Element element = candidates.single;
     RenderObject renderObject = element.findRenderObject();
     SemanticsNode result = renderObject.debugSemantics;
     while (renderObject != null && result == null) {
@@ -633,7 +642,7 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
       result = renderObject?.debugSemantics;
     }
     if (result == null)
-      throw new StateError('No Semantics found');
+      throw new StateError('No Semantics data found.');
     return result.getSemanticsData();
   }
 

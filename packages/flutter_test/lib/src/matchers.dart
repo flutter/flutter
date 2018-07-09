@@ -369,6 +369,7 @@ Matcher matchesSemanticsData({
     flags.add(SemanticsFlag.scopesRoute);
   if (isHidden)
     flags.add(SemanticsFlag.isHidden);
+
   final List<SemanticsAction> actions = <SemanticsAction>[];
   if (hasTapAction)
     actions.add(SemanticsAction.tap);
@@ -1475,6 +1476,9 @@ class _MatchesSemanticsData extends Matcher {
 
   @override
   bool matches(covariant SemanticsData data, Map<dynamic, dynamic> matchState) {
+    if (data == null)
+      return failWithDescription(matchState, 'No SemanticsData provided. '
+        'Maybe you forgot to enabled semantics?');
     if (label != null && label != data.label)
       return failWithDescription(matchState, 'label was: ${data.label}');
     if (hint != null && hint != data.hint)
