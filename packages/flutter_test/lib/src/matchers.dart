@@ -280,12 +280,12 @@ Matcher matchesGoldenFile(dynamic key) {
 
 /// Asserts that a [SemanticsData] contains the specified information.
 ///
-/// If the either the label, hint, value, textDirection, or rect fields are not
+/// If either the label, hint, value, textDirection, or rect fields are not
 /// provided, then they are not part of the comparison.  All of the boolean
 /// flag and action fields must match, and default to false.
 ///
 /// To retrieve the semantics data of a widget, use [tester.getSemanticsData]
-/// with a [Finder] that returns a single widget.  Semantics must be enabled
+/// with a [Finder] that returns a single widget. Semantics must be enabled
 /// in order to use this method.
 ///
 /// ## Sample code
@@ -322,23 +322,23 @@ Matcher matchesSemanticsData({
   bool scopesRoute = false,
   bool isHidden = false,
   // Actions //
-  bool hasTap = false,
-  bool hasLongPress = false,
-  bool hasScrollLeft = false,
-  bool hasScrollRight = false,
-  bool hasScrollUp = false,
-  bool hasScrollDown = false,
-  bool hasIncrease = false,
-  bool hasDecrease = false,
-  bool hasShowOnScreen = false,
-  bool hasMoveCursorForwardByCharacter = false,
-  bool hasMoveCursorBackwardByCharacter = false,
-  bool hasSetSelection = false,
-  bool hasCopy = false,
-  bool hasCut = false,
-  bool hasPaste = false,
-  bool hasDidGainAccessibilityFocus = false,
-  bool hasDidLoseAccessibilityFocus = false,
+  bool hasTapAction = false,
+  bool hasLongPressAction = false,
+  bool hasScrollLeftAction = false,
+  bool hasScrollRightAction = false,
+  bool hasScrollUpAction = false,
+  bool hasScrollDownAction = false,
+  bool hasIncreaseAction = false,
+  bool hasDecreaseAction = false,
+  bool hasShowOnScreenAction = false,
+  bool hasMoveCursorForwardByCharacterAction = false,
+  bool hasMoveCursorBackwardByCharacterAction = false,
+  bool hasSetSelectionAction = false,
+  bool hasCopyAction = false,
+  bool hasCutAction = false,
+  bool hasPasteAction = false,
+  bool hasDidGainAccessibilityFocusAction = false,
+  bool hasDidLoseAccessibilityFocusAction = false,
 }) {
   final List<SemanticsFlag> flags = <SemanticsFlag>[];
   if (hasCheckedState)
@@ -369,40 +369,41 @@ Matcher matchesSemanticsData({
     flags.add(SemanticsFlag.scopesRoute);
   if (isHidden)
     flags.add(SemanticsFlag.isHidden);
+
   final List<SemanticsAction> actions = <SemanticsAction>[];
-  if (hasTap)
+  if (hasTapAction)
     actions.add(SemanticsAction.tap);
-  if (hasLongPress)
+  if (hasLongPressAction)
     actions.add(SemanticsAction.longPress);
-  if (hasScrollLeft)
+  if (hasScrollLeftAction)
     actions.add(SemanticsAction.scrollLeft);
-  if (hasScrollRight)
+  if (hasScrollRightAction)
     actions.add(SemanticsAction.scrollRight);
-  if (hasScrollUp)
+  if (hasScrollUpAction)
     actions.add(SemanticsAction.scrollUp);
-  if (hasScrollDown)
+  if (hasScrollDownAction)
     actions.add(SemanticsAction.scrollDown);
-  if (hasIncrease)
+  if (hasIncreaseAction)
     actions.add(SemanticsAction.increase);
-  if (hasDecrease)
+  if (hasDecreaseAction)
     actions.add(SemanticsAction.decrease);
-  if (hasShowOnScreen)
+  if (hasShowOnScreenAction)
     actions.add(SemanticsAction.showOnScreen);
-  if (hasMoveCursorForwardByCharacter)
+  if (hasMoveCursorForwardByCharacterAction)
     actions.add(SemanticsAction.moveCursorForwardByCharacter);
-  if (hasMoveCursorBackwardByCharacter)
+  if (hasMoveCursorBackwardByCharacterAction)
     actions.add(SemanticsAction.moveCursorBackwardByCharacter);
-  if (hasSetSelection)
+  if (hasSetSelectionAction)
     actions.add(SemanticsAction.setSelection);
-  if (hasCopy)
+  if (hasCopyAction)
     actions.add(SemanticsAction.copy);
-  if (hasCut)
+  if (hasCutAction)
     actions.add(SemanticsAction.cut);
-  if (hasPaste)
+  if (hasPasteAction)
     actions.add(SemanticsAction.paste);
-  if (hasDidGainAccessibilityFocus)
+  if (hasDidGainAccessibilityFocusAction)
     actions.add(SemanticsAction.didGainAccessibilityFocus);
-  if (hasDidLoseAccessibilityFocus)
+  if (hasDidLoseAccessibilityFocusAction)
     actions.add(SemanticsAction.didLoseAccessibilityFocus);
 
   return new _MatchesSemanticsData(
@@ -1475,6 +1476,9 @@ class _MatchesSemanticsData extends Matcher {
 
   @override
   bool matches(covariant SemanticsData data, Map<dynamic, dynamic> matchState) {
+    if (data == null)
+      return failWithDescription(matchState, 'No SemanticsData provided. '
+        'Maybe you forgot to enabled semantics?');
     if (label != null && label != data.label)
       return failWithDescription(matchState, 'label was: ${data.label}');
     if (hint != null && hint != data.hint)

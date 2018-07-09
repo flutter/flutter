@@ -16,13 +16,38 @@ void main() {
     debugResetSemanticsIdCounter();
   });
 
-  testWidgets('Checkbox size is 40x40', (WidgetTester tester) async {
+  testWidgets('Checkbox size is configurable by ThemeData.materialTapTargetSize', (WidgetTester tester) async {
     await tester.pumpWidget(
-      new Material(
-        child: new Center(
-          child: new Checkbox(
-            value: false,
-            onChanged: (bool newValue) { },
+      new Theme(
+        data: new ThemeData(materialTapTargetSize: MaterialTapTargetSize.padded),
+        child: new Directionality(
+          textDirection: TextDirection.ltr,
+          child: new Material(
+            child: new Center(
+              child: new Checkbox(
+                value: true,
+                onChanged: (bool newValue) {},
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(tester.getSize(find.byType(Checkbox)), const Size(48.0, 48.0));
+
+    await tester.pumpWidget(
+      new Theme(
+        data: new ThemeData(materialTapTargetSize: MaterialTapTargetSize.shrinkWrap),
+        child: new Directionality(
+          textDirection: TextDirection.ltr,
+          child: new Material(
+            child: new Center(
+              child: new Checkbox(
+                value: true,
+                onChanged: (bool newValue) {},
+              ),
+            ),
           ),
         ),
       ),
@@ -45,7 +70,7 @@ void main() {
       hasCheckedState: true,
       hasEnabledState: true,
       isEnabled: true,
-      hasTap: true,
+      hasTapAction: true,
     ));
 
     await tester.pumpWidget(new Material(
@@ -60,7 +85,7 @@ void main() {
       hasEnabledState: true,
       isChecked: true,
       isEnabled: true,
-      hasTap: true,
+      hasTapAction: true,
     ));
 
     await tester.pumpWidget(const Material(
@@ -110,7 +135,7 @@ void main() {
       hasCheckedState: true,
       hasEnabledState: true,
       isEnabled: true,
-      hasTap: true,
+      hasTapAction: true,
     ));
     handle.dispose();
   });

@@ -64,18 +64,18 @@ void main() {
   testWidgets('BackButton semantics', (WidgetTester tester) async {
     final SemanticsHandle handle = tester.ensureSemantics();
     await tester.pumpWidget(
-        new MaterialApp(
-            home: const Material(child: const Text('Home')),
-            routes: <String, WidgetBuilder>{
-              '/next': (BuildContext context) {
-                return const Material(
-                    child: const Center(
-                      child: const BackButton(),
-                    )
-                );
-              },
-            }
-        )
+      new MaterialApp(
+        home: const Material(child: const Text('Home')),
+        routes: <String, WidgetBuilder>{
+          '/next': (BuildContext context) {
+            return const Material(
+              child: const Center(
+                child: const BackButton(),
+              ),
+            );
+          },
+        },
+      ),
     );
 
     tester.state<NavigatorState>(find.byType(Navigator)).pushNamed('/next');
@@ -87,7 +87,7 @@ void main() {
       isButton: true,
       hasEnabledState: true,
       isEnabled: true,
-      hasTap: true,
+      hasTapAction: true,
     ));
     handle.dispose();
   });

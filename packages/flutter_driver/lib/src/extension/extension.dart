@@ -306,12 +306,14 @@ class FlutterDriverExtension {
     final Finder target = await _waitForElement(_createFinder(semanticsCommand.finder));
     final Element element = target.evaluate().single;
     RenderObject renderObject = element.renderObject;
-    SemanticsNode node = renderObject.debugSemantics;
+    SemanticsNode node;
     while (renderObject != null && node == null) {
-      renderObject = renderObject.parent;
       node = renderObject.debugSemantics;
+      renderObject = renderObject.parent;
     }
-    return new GetSemanticsIdResult(node?.id);
+    if (node == null)
+      throw new StateError('No semantics data found');
+    return new GetSemanticsIdResult(node.id);
   }
 
   Future<ScrollResult> _scroll(Command command) async {
