@@ -81,6 +81,7 @@ Future<Null> run(List<String> args) async {
       throwToolExit('Cannot find Flutter shell at $shellPath');
     }
     // Put the tester shell where runTests expects it.
+    // TODO(tvolkert,garymm): Switch to a Fuchsia-specific Artifacts impl.
     final Link testerDestLink =
         fs.link(artifacts.getArtifactPath(Artifact.flutterTester));
     testerDestLink.parent.createSync(recursive: true);
