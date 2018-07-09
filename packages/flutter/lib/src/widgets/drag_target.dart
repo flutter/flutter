@@ -169,10 +169,10 @@ class Draggable<T> extends StatefulWidget {
   /// Whether the semantics of the [feedback] widget is ignored when building
   /// the semantics tree.
   /// 
-  /// If the feedback widget is conceptually the same object as the child of 
-  /// the [Draggable], then the semantics should not be ignored. When used
-  /// with a [GlobalKey], the feedback widget will retain accessibility focus
-  /// when the drag begins and retain it after the drag ends.
+  /// This value should be set to false when the [feedback] widget is intended
+  /// to be the same object as the [child].  Placing a [GlobalKey] on this
+  /// widget will ensure semantic focus is kept on the element as it moves in
+  /// and out of the feedback position.
   ///
   /// Defaults to true.
   final bool ignoringFeedbackSemantics;
