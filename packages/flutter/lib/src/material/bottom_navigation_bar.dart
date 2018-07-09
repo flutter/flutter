@@ -304,7 +304,7 @@ class _BottomNavigationTile extends StatelessWidget {
 
 class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerProviderStateMixin {
   List<AnimationController> _controllers = <AnimationController>[];
-  List<CurvedAnimation> _animations = <CurvedAnimation>[];
+  List<CurvedAnimation> _animations;
 
   // A queue of color splashes currently being animated.
   final Queue<_Circle> _circles = new Queue<_Circle>();
