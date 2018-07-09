@@ -45,7 +45,7 @@ void main() {
       hasCheckedState: true,
       hasEnabledState: true,
       isEnabled: true,
-      hasTap: true,
+      hasTapAction: true,
     ));
 
     await tester.pumpWidget(new Material(
@@ -60,7 +60,7 @@ void main() {
       hasEnabledState: true,
       isChecked: true,
       isEnabled: true,
-      hasTap: true,
+      hasTapAction: true,
     ));
 
     await tester.pumpWidget(const Material(
@@ -110,7 +110,7 @@ void main() {
       hasCheckedState: true,
       hasEnabledState: true,
       isEnabled: true,
-      hasTap: true,
+      hasTapAction: true,
     ));
     handle.dispose();
   });

@@ -87,7 +87,7 @@ void main() {
       isButton: true,
       hasEnabledState: true,
       isEnabled: true,
-      hasTap: true,
+      hasTapAction: true,
     ));
     handle.dispose();
   });
