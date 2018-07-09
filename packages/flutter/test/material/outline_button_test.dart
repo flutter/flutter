@@ -257,8 +257,7 @@ void main() {
     expect(tester.getSize(find.byType(Text)).height, equals(42.0));
   });
 
-  testWidgets('OutlineButton implements debugFillDescription',
-      (WidgetTester tester) async {
+  testWidgets('OutlineButton implements debugFillDescription', (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = new DiagnosticPropertiesBuilder();
     new OutlineButton(
       onPressed: () {},
