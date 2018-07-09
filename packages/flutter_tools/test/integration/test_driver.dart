@@ -47,13 +47,33 @@ class FlutterTestDriver {
       print(truncatedMsg);
     }
     return msg;
-}
+  }
 
   // TODO(dantup): Is there a better way than spawning a proc? This breaks debugging..
   // However, there's a lot of logic inside RunCommand that wouldn't be good
   // to duplicate here.
   Future<void> run({bool withDebugger = false}) async {
-    _proc = await _runFlutter(_projectFolder);
+    await _setupProcess(<String>[
+        'run',
+        '--machine',
+        '-d',
+        'flutter-tester',
+    ], withDebugger: withDebugger);
+  }
+
+  Future<void> _setupProcess(List<String> args, {bool withDebugger = false}) async {
+    final String flutterBin = fs.path.join(getFlutterRoot(), 'bin', 'flutter');
+    _debugPrint('Spawning flutter $args in ${_projectFolder.path}');
+    
+    const ProcessManager _processManager = const LocalProcessManager();
+    _proc = await _processManager.start(
+        <String>[flutterBin]
+            .followedBy(args)
+            .followedBy(withDebugger ? <String>['--start-paused'] : <String>[])
+            .toList(),
+        workingDirectory: _projectFolder.path,
+        environment: <String, String>{'FLUTTER_TEST': 'true'});
+
     _transformToLines(_proc.stdout).listen((String line) => _stdout.add(line));
     _transformToLines(_proc.stderr).listen((String line) => _stderr.add(line));
 
@@ -153,26 +173,6 @@ class FlutterTestDriver {
     _debugPrint('Sending SIGKILL to $_procPid..');
     Process.killPid(_procPid, ProcessSignal.SIGKILL);
     return _proc.exitCode;
-  }
-
-  Future<Process> _runFlutter(Directory projectDir) async {
-    final String flutterBin = fs.path.join(getFlutterRoot(), 'bin', 'flutter');
-    final List<String> command = <String>[
-        flutterBin,
-        'run',
-        '--machine',
-        '-d',
-        'flutter-tester',
-        '--start-paused',
-    ];
-    _debugPrint('Spawning $command in ${projectDir.path}');
-    
-    const ProcessManager _processManager = const LocalProcessManager();
-    return _processManager.start(
-        command,
-        workingDirectory: projectDir.path,
-        environment: <String, String>{'FLUTTER_TEST': 'true'}
-    );
   }
 
   Future<void> addBreakpoint(String path, int line) async {
