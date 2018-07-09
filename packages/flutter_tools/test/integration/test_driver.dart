@@ -23,7 +23,7 @@ const Duration appStartTimeout = const Duration(seconds: 60);
 const Duration quitTimeout = const Duration(seconds: 5);
 
 class FlutterTestDriver {
-  Directory _projectFolder;
+  final Directory _projectFolder;
   Process _proc;
   int _procPid;
   final StreamController<String> _stdout = new StreamController<String>.broadcast();
@@ -32,11 +32,14 @@ class FlutterTestDriver {
   final StringBuffer _errorBuffer = new StringBuffer();
   String _lastResponse;
   String _currentRunningAppId;
+  Uri _vmServiceWsUri;
+  int _vmServicePort;
 
   FlutterTestDriver(this._projectFolder);
 
   VMServiceClient vmService;
   String get lastErrorInfo => _errorBuffer.toString();
+  int get vmServicePort => _vmServicePort;
 
   String _debugPrint(String msg) {
     const int maxLength = 500;
@@ -58,6 +61,17 @@ class FlutterTestDriver {
         '--machine',
         '-d',
         'flutter-tester',
+    ], withDebugger: withDebugger);
+  }
+
+  Future<void> attach(int port, {bool withDebugger = false}) async {
+    await _setupProcess(<String>[
+        'attach',
+        '--machine',
+        '-d',
+        'flutter-tester',
+        '--debug-port',
+        '$port',
     ], withDebugger: withDebugger);
   }
 
@@ -96,14 +110,13 @@ class FlutterTestDriver {
         timeout: appStartTimeout);
 
     if (withDebugger) {
-      final Future<Map<String, dynamic>> debugPort = _waitFor(event: 'app.debugPort',
+      final Map<String, dynamic> debugPort = await _waitFor(event: 'app.debugPort',
           timeout: appStartTimeout);
-      final String wsUriString = (await debugPort)['params']['wsUri'];
-      // Ensure the app is started before we try to connect to it.
-      await started;
-      final Uri uri = Uri.parse(wsUriString);
+      final String wsUriString = debugPort['params']['wsUri'];
+      _vmServiceWsUri = Uri.parse(wsUriString);
+      _vmServicePort = debugPort['params']['port'];
       // Proxy the stream/sink for the VM Client so we can debugPrint it.
-      final StreamChannel<String> channel = new IOWebSocketChannel.connect(uri)
+      final StreamChannel<String> channel = new IOWebSocketChannel.connect(_vmServiceWsUri)
           .cast<String>()
           .changeStream((Stream<String> stream) => stream.map(_debugPrint))
           .changeSink((StreamSink<String> sink) =>
