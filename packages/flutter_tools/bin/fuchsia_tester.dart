@@ -62,8 +62,7 @@ Future<Null> run(List<String> args) async {
   final ArgResults argResults = parser.parse(args);
   if (_kRequiredOptions
       .any((String option) => !argResults.options.contains(option))) {
-    printError('Missing option! All options must be specified.');
-    exit(1);
+    throwToolExit('Missing option! All options must be specified.');
   }
   final Directory tempDirectory =
       fs.systemTempDirectory.createTempSync('fuchsia_tester');
@@ -95,7 +94,7 @@ Future<Null> run(List<String> args) async {
       collector = new CoverageCollector();
     }
 
-    final int result = await runTests(
+    exitCode = await runTests(
       tests,
       workDir: testDirectory,
       watcher: collector,
@@ -110,8 +109,6 @@ Future<Null> run(List<String> args) async {
           collector.collectCoverageData(argResults[_kOptionCoveragePath]))
         throwToolExit('Failed to collect coverage data');
     }
-
-    exit(result);
   } finally {
     tempDirectory.deleteSync(recursive: true);
   }
