@@ -32,12 +32,6 @@ void main() {
         // Don't fail tests if we failed to clean up temp folder.
       }
     });
-
-    Future<VMIsolate> breakInBuildMethod(FlutterTestDriver flutter) async {
-      return _flutter.breakAt(
-          _project.buildMethodBreakpointFile,
-          _project.buildMethodBreakpointLine);
-    }
   });
 
   Future<VMIsolate> breakInBuildMethod(FlutterTestDriver flutter) async {
