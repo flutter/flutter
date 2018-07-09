@@ -253,7 +253,6 @@ class ByType extends SerializableFinder {
   }
 }
 
-
 /// A Flutter driver command that retrieves a semantics id using a specified finder.
 ///
 /// This command requires assertions to be enabled on the device.
@@ -296,4 +295,3 @@ class GetSemanticsIdResult extends Result {
   @override
   Map<String, dynamic> toJson() => <String, dynamic>{'id': id};
 }
-
