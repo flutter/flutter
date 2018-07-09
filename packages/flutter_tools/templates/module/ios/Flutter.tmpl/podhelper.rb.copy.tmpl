@@ -1,8 +1,8 @@
 # This file should be used from the target section of the host-app's Podfile like this:
 # ```
 # target 'host' do
-#     flutter_application_path = /"(.*)\/.ios\/Generated.xcconfig"/.match(File.read("./Flutter/FlutterConfig.xcconfig"))[1]
-#     eval(File.read(File.join(flutter_application_path, '.ios', 'podhelper.rb')))
+#     flutter_application_path = /"(.*)\/.ios\/Flutter\/Generated.xcconfig"/.match(File.read("./Flutter/FlutterConfig.xcconfig"))[1]
+#     eval(File.read(File.join(flutter_application_path, '.ios', 'Flutter', 'podhelper.rb')))
 # end
 # ```
 
@@ -34,7 +34,7 @@ system('rm -rf .symlinks')
 system('mkdir -p .symlinks/plugins')
 
 def flutter_root(f)
-    generated_xcode_build_settings = parse_KV_file(File.join(f, File.join('.ios', 'Generated.xcconfig')))
+    generated_xcode_build_settings = parse_KV_file(File.join(f, File.join('.ios', 'Flutter', 'Generated.xcconfig')))
     if generated_xcode_build_settings.empty?
         puts "Generated.xcconfig must exist. Make sure `flutter packages get` is executed in ${f}."
         exit
@@ -74,4 +74,4 @@ plugin_pods.map { |r|
 symlink = File.join('.symlinks', 'FlutterApp')
 File.symlink(File.absolute_path(flutter_application_path), symlink)
 
-pod 'FlutterPluginRegistrant', :path => File.join(symlink, '.ios', 'FlutterPluginRegistrant')
+pod 'FlutterPluginRegistrant', :path => File.join(symlink, '.ios', 'Flutter','FlutterPluginRegistrant')

@@ -58,18 +58,11 @@ void main() {
     testUsingContext('can hit breakpoints with file:// prefixes after reload', () async {
       await _flutter.run(withDebugger: true);
       
-      // Add the breakpoint using a file:// URI.
-      await _flutter.addBreakpoint(
-          // Test currently passes with a FS path, but not with file:// URI.
-          // fs.path.join(_tempDir.path, 'lib', 'main.dart'),
-          new Uri.file(fs.path.join(_tempDir.path, 'lib', 'main.dart')).toString(),
-          9
-      );
-      
-      await _flutter.hotReload();
-
       // Ensure we hit the breakpoint.
-      final VMIsolate isolate = await _flutter.waitForBreakpointHit();
+      final VMIsolate isolate = await _flutter.breakAt(
+        new Uri.file(fs.path.join(_tempDir.path, 'lib', 'main.dart')).toString(),
+        9
+      );
       expect(isolate.pauseEvent, const isInstanceOf<VMPauseBreakpointEvent>());
     }, skip: true); // https://github.com/flutter/flutter/issues/18441
 
