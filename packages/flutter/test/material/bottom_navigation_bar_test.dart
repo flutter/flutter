@@ -602,6 +602,44 @@ void main() {
     semantics.dispose();
   });
 
+  testWidgets('BottomNavigationBar handles items.length changes', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/10322
+
+    Widget buildFrame(int itemCount) {
+      return new MaterialApp(
+        home: new Scaffold(
+          bottomNavigationBar: new BottomNavigationBar(
+            type: BottomNavigationBarType.fixed,
+            currentIndex: 0,
+            items: new List<BottomNavigationBarItem>.generate(itemCount, (int itemIndex) {
+              return new BottomNavigationBarItem(
+                icon: const Icon(Icons.android),
+                title: new Text('item $itemIndex'),
+              );
+            }),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildFrame(3));
+    expect(find.text('item 0'), findsOneWidget);
+    expect(find.text('item 1'), findsOneWidget);
+    expect(find.text('item 2'), findsOneWidget);
+    expect(find.text('item 3'), findsNothing);
+
+    await tester.pumpWidget(buildFrame(4));
+    expect(find.text('item 0'), findsOneWidget);
+    expect(find.text('item 1'), findsOneWidget);
+    expect(find.text('item 2'), findsOneWidget);
+    expect(find.text('item 3'), findsOneWidget);
+
+    await tester.pumpWidget(buildFrame(2));
+    expect(find.text('item 0'), findsOneWidget);
+    expect(find.text('item 1'), findsOneWidget);
+    expect(find.text('item 2'), findsNothing);
+    expect(find.text('item 3'), findsNothing);
+  });
 }
 
 Widget boilerplate({ Widget bottomNavigationBar, @required TextDirection textDirection }) {
