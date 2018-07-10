@@ -124,21 +124,18 @@ class ActionSheet extends StatelessWidget {
     final List<Widget> columnContents = <Widget>[];
 
     columnContents.add(
-      new ConstrainedBox(
-        constraints: new BoxConstraints(maxHeight: MediaQuery.of(context).size.height),
-        child: new ClipRRect(
-          borderRadius: const BorderRadius.all(const Radius.circular(12.0)),
-          child: new DecoratedBox(
-            decoration: _kCupertinoDialogBackFill,
-            child: new BackdropFilter(
-              filter: new ImageFilter.blur(sigmaX: 10.0, sigmaY: 10.0),
-              child: new Container(
-                decoration: _kCupertinoDialogFrontFillDecoration,
-                child: new Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: content,
-                ),
+      new ClipRRect(
+        borderRadius: const BorderRadius.all(const Radius.circular(12.0)),
+        child: new DecoratedBox(
+          decoration: _kCupertinoDialogBackFill,
+          child: new BackdropFilter(
+            filter: new ImageFilter.blur(sigmaX: 10.0, sigmaY: 10.0),
+            child: new Container(
+              decoration: _kCupertinoDialogFrontFillDecoration,
+              child: new Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: content,
               ),
             ),
           ),
@@ -172,16 +169,13 @@ class ActionSheet extends StatelessWidget {
       );
     }
 
-    return new ConstrainedBox(
-      constraints: new BoxConstraints(maxHeight: MediaQuery.of(context).size.height),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 8.0),
-        child: new Center(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: columnContents,
-          ),
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 8.0),
+      child: new Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: columnContents,
         ),
       ),
     );

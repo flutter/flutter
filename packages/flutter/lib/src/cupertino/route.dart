@@ -813,11 +813,21 @@ class _ModalBottomSheetState<T> extends State<_ModalBottomSheet<T>> {
     return new AnimatedBuilder(
         animation: widget.route.animation,
         builder: (BuildContext context, Widget child) {
-          return new ClipRect(
-              child: new CustomSingleChildLayout(
-                  delegate: new _ModalBottomSheetLayout(widget.route.animation.value),
-                  child: widget.route.builder(context),
-              )
+          return new Stack(
+            children: <Widget>[
+              new Positioned(
+                bottom: 0.0,
+                right: 0.0,
+                left: 0.0,
+                height: MediaQuery.of(context).size.height,
+                child: new ClipRect(
+                  child: new CustomSingleChildLayout(
+                      delegate: new _ModalBottomSheetLayout(widget.route.animation.value),
+                      child: widget.route.builder(context),
+                  )
+            ),
+              ),
+          ],
           );
         }
     );
