@@ -232,14 +232,14 @@ class CupertinoAlertDialog extends StatelessWidget {
             child: new Container(
               decoration: _kCupertinoDialogBlurOverlayDecoration,
               child: new _CupertinoDialogRenderWidget(
-                buttonsAreStacked: actions.length > 2,
+                isStacked: actions.length > 2,
                 children: <Widget>[
-                  new _CupertinoLayoutId(
-                    id: _AlertDialogSection.content,
+                  new BaseLayoutId<_CupertinoDialogRenderWidget, MultiChildLayoutParentData>(
+                    id: _AlertDialogSections.contentSection,
                     child: _buildContent(),
                   ),
-                  new _CupertinoLayoutId(
-                    id: _AlertDialogSection.actions,
+                  new BaseLayoutId<_CupertinoDialogRenderWidget, MultiChildLayoutParentData>(
+                    id: _AlertDialogSections.actionsSection,
                     child: _buildActions(),
                   ),
                 ],
@@ -252,43 +252,66 @@ class CupertinoAlertDialog extends StatelessWidget {
   }
 }
 
-enum _AlertDialogSection {
-  content,
-  actions,
-}
-
+// iOS style layout policy widget for sizing an alert dialog's content section and
+// action button section.
+//
+// The sizing policy is partially determined by whether or not action buttons
+// are stacked vertically, or positioned horizontally. [isStacked] is used to
+// indicate whether or not the buttons should be stacked vertically.
+//
+// See [_CupertinoDialogRenderBox] for specific layout policy details.
 class _CupertinoDialogRenderWidget extends MultiChildRenderObjectWidget {
   _CupertinoDialogRenderWidget({
     Key key,
     @required List<Widget> children,
-    bool buttonsAreStacked = false,
-  }) : _buttonsAreStacked = buttonsAreStacked,
+    bool isStacked = false,
+  }) : _isStacked = isStacked,
        super(key: key, children: children);
 
-  final bool _buttonsAreStacked;
+  final bool _isStacked;
 
   @override
   RenderObject createRenderObject(BuildContext context) {
-    return new _CupertinoDialogRenderBox(buttonsAreStacked: _buttonsAreStacked);
+    return new _CupertinoDialogRenderBox(isStacked: _isStacked);
   }
 }
 
+// iOS style layout policy for sizing an alert dialog's content section and action
+// button section.
+//
+// The policy is as follows:
+//
+// If all content and buttons fit on screen:
+// The content section and action button section are sized intrinsically and centered
+// vertically on screen.
+//
+// If all content and buttons do not fit on screen:
+// A minimum height for the action button section is calculated. The action
+// button section will not be rendered shorter than this minimum.  See
+// [_CupertinoDialogActionsRenderBox] for the minimum height calculation.
+//
+// With the minimum action button section calculated, the content section is
+// laid out as tall as it wants to be, up to the point that it hits the
+// minimum button height at the bottom.
+//
+// After the content section is laid out, the action button section is allowed
+// to take up any remaining space that was not consumed by the content section.
 class _CupertinoDialogRenderBox extends RenderBox
-    with ContainerRenderObjectMixin<RenderBox, _CupertinoDialogRenderBoxParentData>,
-    RenderBoxContainerDefaultsMixin<RenderBox, _CupertinoDialogRenderBoxParentData> {
+    with ContainerRenderObjectMixin<RenderBox, MultiChildLayoutParentData>,
+    RenderBoxContainerDefaultsMixin<RenderBox, MultiChildLayoutParentData> {
   _CupertinoDialogRenderBox({
     List<RenderBox> children,
-    bool buttonsAreStacked = false,
-  }) : _buttonsAreStacked = buttonsAreStacked {
+    bool isStacked = false,
+  }) : _isStacked = isStacked {
     addAll(children);
   }
 
-  final bool _buttonsAreStacked;
+  final bool _isStacked;
 
   @override
   void setupParentData(RenderBox child) {
-    if (child.parentData is! _CupertinoDialogRenderBoxParentData)
-      child.parentData = new _CupertinoDialogRenderBoxParentData();
+    if (child.parentData is! MultiChildLayoutParentData)
+      child.parentData = new MultiChildLayoutParentData();
   }
 
   @override
@@ -333,26 +356,16 @@ class _CupertinoDialogRenderBox extends RenderBox
     final RenderBox content = dialogChildren.content;
     final RenderBox actions = dialogChildren.actions;
 
-    // The minimum height of the action area depends on whether or not we're
-    // stacking buttons vertically.
-//    double minActionSpace = 0.0;
-//    if (_buttonsAreStacked) {
-//      minActionSpace = 1.5 * _kButtonHeight;
-//    } else {
-//      minActionSpace = _kButtonHeight;
-//    }
-    final double minActionSpace = actions.getMinIntrinsicHeight(constraints.maxWidth);
-    print('minActionSpace: $minActionSpace');
+    final double minActionsHeight = actions.getMinIntrinsicHeight(constraints.maxWidth);
 
     final Size maxDialogSize = constraints.biggest;
 
     // Size alert dialog content.
     content.layout(
-      constraints.deflate(new EdgeInsets.only(bottom: minActionSpace)),
+      constraints.deflate(new EdgeInsets.only(bottom: minActionsHeight)),
       parentUsesSize: true,
     );
     final Size contentSize = content.size;
-    print('Content height: ${content.size.height}');
 
     // Size alert dialog actions.
     actions.layout(
@@ -369,8 +382,8 @@ class _CupertinoDialogRenderBox extends RenderBox
 
     // Set the position of the actions box to sit at the bottom of the dialog.
     // The content box defaults to the top left, which is where we want it.
-    assert(actions.parentData is _CupertinoDialogRenderBoxParentData);
-    final _CupertinoDialogRenderBoxParentData actionParentData = actions.parentData;
+    assert(actions.parentData is MultiChildLayoutParentData);
+    final MultiChildLayoutParentData actionParentData = actions.parentData;
     actionParentData.offset = new Offset(0.0, contentSize.height);
   }
 
@@ -379,10 +392,10 @@ class _CupertinoDialogRenderBox extends RenderBox
     RenderBox actions;
     final List<RenderBox> children = getChildrenAsList();
     for (RenderBox child in children) {
-      final _CupertinoDialogRenderBoxParentData parentData = child.parentData;
-      if (parentData.id == _AlertDialogSection.content) {
+      final MultiChildLayoutParentData parentData = child.parentData;
+      if (parentData.id == _AlertDialogSections.contentSection) {
         content = child;
-      } else if (parentData.id == _AlertDialogSection.actions) {
+      } else if (parentData.id == _AlertDialogSections.actionsSection) {
         actions = child;
       }
     }
@@ -406,6 +419,15 @@ class _CupertinoDialogRenderBox extends RenderBox
   }
 }
 
+// Visual components of an alert dialog that need to be explicitly sized and
+// laid out at runtime.
+enum _AlertDialogSections {
+  contentSection,
+  actionsSection,
+}
+
+// Data structure used to pass around references to multiple dialog pieces for
+// layout calculations.
 class _DialogChildren {
   final RenderBox content;
   final RenderBox actions;
@@ -416,154 +438,7 @@ class _DialogChildren {
   });
 }
 
-class _CupertinoDialogRenderBoxParentData extends ContainerBoxParentData<RenderBox> {
-  /// An object representing the identity of this child.
-  Object id;
-
-  @override
-  String toString() => '${super.toString()}; id=$id';
-}
-
-class _CupertinoLayoutId extends ParentDataWidget<_CupertinoDialogRenderWidget> {
-  _CupertinoLayoutId({
-    Key key,
-    @required this.id,
-    @required Widget child
-  }) : assert(child != null),
-        assert(id != null),
-        super(key: key ?? new ValueKey<Object>(id), child: child);
-
-  final Object id;
-
-  @override
-  void applyParentData(RenderObject renderObject) {
-    assert(renderObject.parentData is _CupertinoDialogRenderBoxParentData);
-    final _CupertinoDialogRenderBoxParentData parentData = renderObject.parentData;
-    if (parentData.id != id) {
-      parentData.id = id;
-      final AbstractNode targetParent = renderObject.parent;
-      if (targetParent is RenderObject)
-        targetParent.markNeedsLayout();
-    }
-  }
-
-  @override
-  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
-    super.debugFillProperties(properties);
-    properties.add(new DiagnosticsProperty<Object>('id', id));
-  }
-}
-
-class _CupertinoLayoutId2 extends ParentDataWidget<_CupertinoDialogActionsRenderWidget> {
-  _CupertinoLayoutId2({
-    Key key,
-    @required this.id,
-    @required Widget child
-  }) : assert(child != null),
-        assert(id != null),
-        super(key: key ?? new ValueKey<Object>(id), child: child);
-
-  final Object id;
-
-  @override
-  void applyParentData(RenderObject renderObject) {
-    assert(renderObject.parentData is _CupertinoDialogRenderBoxParentData);
-    final _CupertinoDialogRenderBoxParentData parentData = renderObject.parentData;
-    if (parentData.id != id) {
-      parentData.id = id;
-      final AbstractNode targetParent = renderObject.parent;
-      if (targetParent is RenderObject)
-        targetParent.markNeedsLayout();
-    }
-  }
-
-  @override
-  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
-    super.debugFillProperties(properties);
-    properties.add(new DiagnosticsProperty<Object>('id', id));
-  }
-}
-
-/// A button typically used in a [CupertinoAlertDialog].
-///
-/// See also:
-///
-///  * [CupertinoAlertDialog], a dialog that informs the user about situations
-///    that require acknowledgement
-class CupertinoDialogAction extends StatelessWidget {
-  /// Creates an action for an iOS-style dialog.
-  const CupertinoDialogAction({
-    this.onPressed,
-    this.isDefaultAction = false,
-    this.isDestructiveAction = false,
-    @required this.child,
-  }) : assert(child != null);
-
-  /// The callback that is called when the button is tapped or otherwise
-  /// activated.
-  ///
-  /// If this is set to null, the button will be disabled.
-  final VoidCallback onPressed;
-
-  /// Set to true if button is the default choice in the dialog.
-  ///
-  /// Default buttons are bold.
-  final bool isDefaultAction;
-
-  /// Whether this action destroys an object.
-  ///
-  /// For example, an action that deletes an email is destructive.
-  final bool isDestructiveAction;
-
-  /// The widget below this widget in the tree.
-  ///
-  /// Typically a [Text] widget.
-  final Widget child;
-
-  /// Whether the button is enabled or disabled. Buttons are disabled by
-  /// default. To enable a button, set its [onPressed] property to a non-null
-  /// value.
-  bool get enabled => onPressed != null;
-
-  @override
-  Widget build(BuildContext context) {
-    TextStyle style = _kCupertinoDialogActionStyle;
-
-    if (isDefaultAction) {
-      style = style.copyWith(fontWeight: FontWeight.w600);
-    }
-
-    if (isDestructiveAction) {
-      style = style.copyWith(color: CupertinoColors.destructiveRed);
-    }
-
-    if (!enabled) {
-      style = style.copyWith(color: style.color.withOpacity(0.5));
-    }
-
-    final double textScaleFactor = MediaQuery.textScaleFactorOf(context);
-    return new GestureDetector(
-      onTap: onPressed,
-      behavior: HitTestBehavior.opaque,
-      child: new ConstrainedBox(
-        constraints: const BoxConstraints(
-          minHeight: _kButtonHeight,
-        ),
-        child: new Container(
-          alignment: Alignment.center,
-          padding: new EdgeInsets.all(8.0 * textScaleFactor),
-          child: new DefaultTextStyle(
-            style: style,
-            child: child,
-            textAlign: TextAlign.center,
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-// Constructs a text content section typically used in a CupertinoAlertDialog.
+// The "content section" of a CupertinoAlertDialog.
 //
 // If title is missing, then only content is added.  If content is
 // missing, then only title is added. If both are missing, then it returns
@@ -657,7 +532,86 @@ class _CupertinoAlertTitleSection extends StatelessWidget {
   }
 }
 
-// An Action Items section typically used in a CupertinoAlertDialog.
+/// A button typically used in a [CupertinoAlertDialog].
+///
+/// See also:
+///
+///  * [CupertinoAlertDialog], a dialog that informs the user about situations
+///    that require acknowledgement
+class CupertinoDialogAction extends StatelessWidget {
+  /// Creates an action for an iOS-style dialog.
+  const CupertinoDialogAction({
+    this.onPressed,
+    this.isDefaultAction = false,
+    this.isDestructiveAction = false,
+    @required this.child,
+  }) : assert(child != null);
+
+  /// The callback that is called when the button is tapped or otherwise
+  /// activated.
+  ///
+  /// If this is set to null, the button will be disabled.
+  final VoidCallback onPressed;
+
+  /// Set to true if button is the default choice in the dialog.
+  ///
+  /// Default buttons are bold.
+  final bool isDefaultAction;
+
+  /// Whether this action destroys an object.
+  ///
+  /// For example, an action that deletes an email is destructive.
+  final bool isDestructiveAction;
+
+  /// The widget below this widget in the tree.
+  ///
+  /// Typically a [Text] widget.
+  final Widget child;
+
+  /// Whether the button is enabled or disabled. Buttons are disabled by
+  /// default. To enable a button, set its [onPressed] property to a non-null
+  /// value.
+  bool get enabled => onPressed != null;
+
+  @override
+  Widget build(BuildContext context) {
+    TextStyle style = _kCupertinoDialogActionStyle;
+
+    if (isDefaultAction) {
+      style = style.copyWith(fontWeight: FontWeight.w600);
+    }
+
+    if (isDestructiveAction) {
+      style = style.copyWith(color: CupertinoColors.destructiveRed);
+    }
+
+    if (!enabled) {
+      style = style.copyWith(color: style.color.withOpacity(0.5));
+    }
+
+    final double textScaleFactor = MediaQuery.textScaleFactorOf(context);
+    return new GestureDetector(
+      onTap: onPressed,
+      behavior: HitTestBehavior.opaque,
+      child: new ConstrainedBox(
+        constraints: const BoxConstraints(
+          minHeight: _kButtonHeight,
+        ),
+        child: new Container(
+          alignment: Alignment.center,
+          padding: new EdgeInsets.all(8.0 * textScaleFactor),
+          child: new DefaultTextStyle(
+            style: style,
+            child: child,
+            textAlign: TextAlign.center,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// The "actions section" of a [CupertinoAlertDialog].
 //
 // If _layoutActionsVertically is true, they are laid out vertically
 // in a column; else they are laid out horizontally in a row. If there isn't
@@ -770,56 +724,116 @@ class _CupertinoAlertActionSection extends StatelessWidget {
     if (_layoutActionsVertically) {
       final List<Widget> buttons = _buildVerticalButtons(devicePixelRatio).toList();
 
+      final Widget actionsSection = new CupertinoScrollbar(
+        child: new SingleChildScrollView(
+          controller: scrollController,
+          child: new Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: buttons,
+          ),
+        ),
+      );
+
       return new _CupertinoDialogActionsRenderWidget(
         isStacked: true,
         children: <Widget>[
-          new _CupertinoLayoutId2(
-            id: _AlertDialogSection.actions,
-            child: new CupertinoScrollbar(
-              child: new SingleChildScrollView(
-                controller: scrollController,
-                child: new Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: buttons,
-                ),
-              ),
-            ),
+          new BaseLayoutId<_CupertinoDialogActionsRenderWidget, MultiChildLayoutParentData>(
+            id: _AlertDialogSections.actionsSection,
+            child: actionsSection,
           ),
         ]..addAll(buttons),
       );
     } else {
-      final Widget buttons = _buildHorizontalButtons(devicePixelRatio);
-
       // For a horizontal layout, we don't need the scrollController in most
       // cases, but it still has to be always attached to a scroll view.
-      return _CupertinoDialogActionsRenderWidget(
-        isStacked: false,
-        children: <Widget>[
-          new _CupertinoLayoutId2(
-            id: _AlertDialogSection.actions,
-            child: new CupertinoScrollbar(
-              child: new SingleChildScrollView(
-                controller: scrollController,
-                child: ConstrainedBox(
-                  constraints: new BoxConstraints.loose(
-                    const Size(
-                      _kCupertinoDialogWidth,
-                      double.infinity,
-                    ),
-                  ),
-                  child: buttons,
-                ),
+      final Widget actionsSections = new CupertinoScrollbar(
+        child: new SingleChildScrollView(
+          controller: scrollController,
+          child: ConstrainedBox(
+            constraints: new BoxConstraints.loose(
+              const Size(
+                _kCupertinoDialogWidth,
+                double.infinity,
               ),
             ),
+            child: _buildHorizontalButtons(devicePixelRatio),
           ),
-          buttons,
+        ),
+      );
+
+      return new _CupertinoDialogActionsRenderWidget(
+        isStacked: false,
+        children: <Widget>[
+          new BaseLayoutId<_CupertinoDialogActionsRenderWidget, MultiChildLayoutParentData>(
+            id: _AlertDialogSections.actionsSection,
+            child: actionsSections,
+          ),
+          actionsSections,
         ],
       );
     }
   }
 }
 
+// iOS style layout policy widget for sizing action buttons.
+//
+// The sizing policy is partially determined by whether or not action buttons
+// are stacked vertically, or positioned horizontally. [isStacked] is used to
+// indicate whether or not the buttons should be stacked vertically.
+//
+// See [_CupertinoDialogActionsRenderBox] for specific layout policy details.
+//
+// Usage instructions:
+//
+// When stacked vertically:
+// The entire actions section (all buttons and dividers) should be a single
+// grandchild of this widget, and it should be wrapped with a
+// [BaseLayoutId<_CupertinoDialogActionsRenderWidget, MultiChildLayoutParentData>]
+// whose ID is [_AlertDialogPieces.actionsSection].
+//
+// Also, the entire list of buttons and dividers should also be passed as
+// direct children of this widget in the order they appear: divider, button,
+// divider, button. The order is critical and the layout will break if that
+// exact order is not respected.
+//
+// Vertical example:
+//
+// ```
+// new _CupertinoDialogActionsRenderWidget(
+//   isStacked: true,
+//   children: <Widget>[
+//     new BaseLayoutId<_CupertinoDialogActionsRenderWidget, MultiChildLayoutParentData>(
+//       id: _AlertDialogPieces.actionsSection,
+//       child: actionsSection,
+//     ),
+//   ]..addAll(buttons),
+// );
+// ```
+//
+// When displayed horizontally:
+// The entire actions section (all buttons, dividers, etc) should be a single
+// grandchild of this widget, and it should be wrapped with a
+// [BaseLayoutId<_CupertinoDialogActionsRenderWidget, MultiChildLayoutParentData>]
+// whose ID is [_AlertDialogPieces.actionsSection].
+//
+// Also, the single actions section widget that is a child of [BaseLayoutId] should
+// also be passed to this widget as a direct child. The reason to pass it a 2nd
+// time is to allow this widget to explicitly measure the actions section.
+//
+// Horizontal example:
+//
+// ```
+// new _CupertinoDialogActionsRenderWidget(
+//   isStacked: false,
+//   children: <Widget>[
+//     new BaseLayoutId<_CupertinoDialogActionsRenderWidget, MultiChildLayoutParentData>(
+//       id: _AlertDialogPieces.actionsSection,
+//       child: actionsSection,
+//     actionsSection,
+//   ],
+// );
+// ```
 class _CupertinoDialogActionsRenderWidget extends MultiChildRenderObjectWidget {
   _CupertinoDialogActionsRenderWidget({
     Key key,
@@ -832,16 +846,35 @@ class _CupertinoDialogActionsRenderWidget extends MultiChildRenderObjectWidget {
 
   @override
   RenderObject createRenderObject(BuildContext context) {
-    return new _CupertinoDialogActionsRenderBox2(
+    return new _CupertinoDialogActionsRenderBox(
       isStacked: _isStacked,
     );
   }
 }
 
-class _CupertinoDialogActionsRenderBox2 extends RenderBox
-    with ContainerRenderObjectMixin<RenderBox, _CupertinoDialogRenderBoxParentData>,
-        RenderBoxContainerDefaultsMixin<RenderBox, _CupertinoDialogRenderBoxParentData> {
-  _CupertinoDialogActionsRenderBox2({
+// iOS style layout policy for sizing an alert dialog's action buttons.
+//
+// The policy is as follows:
+//
+// If buttons are stacked (see [isStacked]), a minimum intrinsic height is
+// reported that equals the height of the first button + 50% the height of
+// the second button. The policy, more generally, is 1.5x button height, but
+// it's possible that buttons are of different heights, so this policy measures
+// the first 2 buttons directly. This policy reflects how iOS stacks buttons
+// in an alert dialog. By exposing 50% of the 2nd button, the dialog makes it
+// clear that there are more buttons "below the fold".
+//
+// If buttons are not stacked, then they appear in a horizontal row. In that
+// case the minimum and maximum intrinsic height is set to the height of the
+// button(s) in the row.
+//
+// [_CupertinoDialogActionsRenderBox] has specific usage requirements. See
+// [_CupertinoDialogActionsRenderWidget] for information about the type and
+// order of expected child widgets.
+class _CupertinoDialogActionsRenderBox extends RenderBox
+    with ContainerRenderObjectMixin<RenderBox, MultiChildLayoutParentData>,
+        RenderBoxContainerDefaultsMixin<RenderBox, MultiChildLayoutParentData> {
+  _CupertinoDialogActionsRenderBox({
     List<RenderBox> children,
     bool isStacked = false,
   }) : _isStacked = isStacked {
@@ -852,8 +885,8 @@ class _CupertinoDialogActionsRenderBox2 extends RenderBox
 
   @override
   void setupParentData(RenderBox child) {
-    if (child.parentData is! _CupertinoDialogRenderBoxParentData)
-      child.parentData = new _CupertinoDialogRenderBoxParentData();
+    if (child.parentData is! MultiChildLayoutParentData)
+      child.parentData = new MultiChildLayoutParentData();
   }
 
   @override
@@ -874,19 +907,15 @@ class _CupertinoDialogActionsRenderBox2 extends RenderBox
       // Actions min height is first item height + 50% second item height.
       final RenderBox divider = _findDivider();
       final double dividerHeight = divider.computeMinIntrinsicHeight(width);
-      final List<RenderBox> firstTwoButtons = _findFirstNButtons(2);
+      final List<RenderBox> firstTwoButtons = _findFirstNButtonRows(2);
       final double firstButtonHeight = firstTwoButtons[0].computeMinIntrinsicHeight(width);
       final double secondButtonHeight = firstTwoButtons[1].computeMinIntrinsicHeight(width);
-      print('First button height: $firstButtonHeight, second: $secondButtonHeight, divider: $dividerHeight');
       height = firstButtonHeight + (0.5 * secondButtonHeight) + (dividerHeight * 2);
     } else {
       // Actions min height is first item height (because we are only showing 1 row).
-      final List<RenderBox> firstButton = _findFirstNButtons(1);
+      final List<RenderBox> firstButton = _findFirstNButtonRows(1);
       height = firstButton.first.computeMinIntrinsicHeight(width);
-      print('Single row height: $height');
     }
-
-    print('Min instrinsic height: $height');
 
     if (height.isFinite)
       return height;
@@ -926,8 +955,8 @@ class _CupertinoDialogActionsRenderBox2 extends RenderBox
     RenderBox actions;
     final List<RenderBox> children = getChildrenAsList();
     for (RenderBox child in children) {
-      final _CupertinoDialogRenderBoxParentData parentData = child.parentData;
-      if (parentData.id == _AlertDialogSection.actions) {
+      final MultiChildLayoutParentData parentData = child.parentData;
+      if (parentData.id == _AlertDialogSections.actionsSection) {
         actions = child;
       }
     }
@@ -941,8 +970,8 @@ class _CupertinoDialogActionsRenderBox2 extends RenderBox
     final List<RenderBox> children = getChildrenAsList();
     for (RenderBox child in children) {
       // The first child that isn't "actions" should be a divider.
-      final _CupertinoDialogRenderBoxParentData parentData = child.parentData;
-      if (parentData.id != _AlertDialogSection.actions) {
+      final MultiChildLayoutParentData parentData = child.parentData;
+      if (parentData.id != _AlertDialogSections.actionsSection) {
         divider = child;
       }
     }
@@ -951,7 +980,7 @@ class _CupertinoDialogActionsRenderBox2 extends RenderBox
     return divider;
   }
 
-  List<RenderBox> _findFirstNButtons(int buttonCount) {
+  List<RenderBox> _findFirstNButtonRows(int buttonCount) {
     final List<RenderBox> firstNButtons = <RenderBox>[];
     final List<RenderBox> children = getChildrenAsList();
     for (int i = 0; i < children.length; i += 1) {
@@ -960,8 +989,8 @@ class _CupertinoDialogActionsRenderBox2 extends RenderBox
       }
 
       final RenderBox child = children[i];
-      final _CupertinoDialogRenderBoxParentData parentData = child.parentData;
-      if (parentData.id != _AlertDialogSection.actions) {
+      final MultiChildLayoutParentData parentData = child.parentData;
+      if (parentData.id != _AlertDialogSections.actionsSection) {
         firstNButtons.add(child);
 
         if (firstNButtons.length == buttonCount) {
@@ -979,7 +1008,7 @@ class _CupertinoDialogActionsRenderBox2 extends RenderBox
     // Only paint the actions widget. Do not paint other children because
     // they're only used for layout calculations.
     final RenderBox actions = _findActionsChild();
-    final _CupertinoDialogRenderBoxParentData parentData = actions.parentData;
+    final MultiChildLayoutParentData parentData = actions.parentData;
     context.paintChild(actions, parentData.offset + offset);
   }
 
@@ -988,7 +1017,7 @@ class _CupertinoDialogActionsRenderBox2 extends RenderBox
     // Only hit test the actions widget. Do not hit test other children because
     // they're only used for layout calculations.
     final RenderBox actions = _findActionsChild();
-    final _CupertinoDialogRenderBoxParentData parentData = actions.parentData;
+    final MultiChildLayoutParentData parentData = actions.parentData;
     return actions.hitTest(result, position: position - parentData.offset);
   }
 }
