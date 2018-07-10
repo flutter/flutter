@@ -225,6 +225,9 @@ class CupertinoAlertDialog extends StatelessWidget {
       child: new Container(
         margin: const EdgeInsets.symmetric(vertical: _kEdgePadding),
         width: _kCupertinoDialogWidth,
+        // The following clip is critical. The BackdropFilter needs to have
+        // rounded corners, but SKIA cannot internally create a rounded rect
+        // shape. Therefore, we have no choice but to clip, ourselves.
         child: ClipRRect(
           borderRadius: BorderRadius.circular(_kDialogCornerRadius),
           child: new BackdropFilter(
@@ -259,7 +262,7 @@ class CupertinoAlertDialog extends StatelessWidget {
 // are stacked vertically, or positioned horizontally. [isStacked] is used to
 // indicate whether or not the buttons should be stacked vertically.
 //
-// See [_CupertinoDialogRenderBox] for specific layout policy details.
+// See [_RenderCupertinoDialog] for specific layout policy details.
 class _CupertinoDialogRenderWidget extends MultiChildRenderObjectWidget {
   _CupertinoDialogRenderWidget({
     Key key,
@@ -272,8 +275,15 @@ class _CupertinoDialogRenderWidget extends MultiChildRenderObjectWidget {
 
   @override
   RenderObject createRenderObject(BuildContext context) {
-    return new _CupertinoDialogRenderBox(isStacked: _isStacked);
+    return new _RenderCupertinoDialog(isStacked: _isStacked);
   }
+
+  @override
+  void updateRenderObject(BuildContext context, _RenderCupertinoDialog renderObject) {
+    renderObject.isStacked = _isStacked;
+  }
+
+
 }
 
 // iOS style layout policy for sizing an alert dialog's content section and action
@@ -288,7 +298,7 @@ class _CupertinoDialogRenderWidget extends MultiChildRenderObjectWidget {
 // If all content and buttons do not fit on screen:
 // A minimum height for the action button section is calculated. The action
 // button section will not be rendered shorter than this minimum.  See
-// [_CupertinoDialogActionsRenderBox] for the minimum height calculation.
+// [_RenderCupertinoDialogActions] for the minimum height calculation.
 //
 // With the minimum action button section calculated, the content section is
 // laid out as tall as it wants to be, up to the point that it hits the
@@ -296,17 +306,30 @@ class _CupertinoDialogRenderWidget extends MultiChildRenderObjectWidget {
 //
 // After the content section is laid out, the action button section is allowed
 // to take up any remaining space that was not consumed by the content section.
-class _CupertinoDialogRenderBox extends RenderBox
+class _RenderCupertinoDialog extends RenderBox
     with ContainerRenderObjectMixin<RenderBox, MultiChildLayoutParentData>,
     RenderBoxContainerDefaultsMixin<RenderBox, MultiChildLayoutParentData> {
-  _CupertinoDialogRenderBox({
-    List<RenderBox> children,
+  _RenderCupertinoDialog({
+    RenderBox contentSection,
+    RenderBox actionsSection,
     bool isStacked = false,
   }) : _isStacked = isStacked {
-    addAll(children);
+    add(contentSection);
+    add(actionsSection);
   }
 
-  final bool _isStacked;
+  bool _isStacked;
+
+  bool get isStacked => _isStacked;
+
+  set isStacked(bool newValue) {
+    if (newValue == _isStacked) {
+      return;
+    }
+
+    _isStacked = newValue;
+    markNeedsLayout();
+  }
 
   @override
   void setupParentData(RenderBox child) {
@@ -782,7 +805,7 @@ class _CupertinoAlertActionSection extends StatelessWidget {
 // are stacked vertically, or positioned horizontally. [isStacked] is used to
 // indicate whether or not the buttons should be stacked vertically.
 //
-// See [_CupertinoDialogActionsRenderBox] for specific layout policy details.
+// See [_RenderCupertinoDialogActions] for specific layout policy details.
 //
 // Usage instructions:
 //
@@ -846,10 +869,16 @@ class _CupertinoDialogActionsRenderWidget extends MultiChildRenderObjectWidget {
 
   @override
   RenderObject createRenderObject(BuildContext context) {
-    return new _CupertinoDialogActionsRenderBox(
+    return new _RenderCupertinoDialogActions(
       isStacked: _isStacked,
     );
   }
+
+  @override
+  void updateRenderObject(BuildContext context, _RenderCupertinoDialogActions renderObject) {
+    renderObject.isStacked = _isStacked;
+  }
+  
 }
 
 // iOS style layout policy for sizing an alert dialog's action buttons.
@@ -868,20 +897,31 @@ class _CupertinoDialogActionsRenderWidget extends MultiChildRenderObjectWidget {
 // case the minimum and maximum intrinsic height is set to the height of the
 // button(s) in the row.
 //
-// [_CupertinoDialogActionsRenderBox] has specific usage requirements. See
+// [_RenderCupertinoDialogActions] has specific usage requirements. See
 // [_CupertinoDialogActionsRenderWidget] for information about the type and
 // order of expected child widgets.
-class _CupertinoDialogActionsRenderBox extends RenderBox
+class _RenderCupertinoDialogActions extends RenderBox
     with ContainerRenderObjectMixin<RenderBox, MultiChildLayoutParentData>,
         RenderBoxContainerDefaultsMixin<RenderBox, MultiChildLayoutParentData> {
-  _CupertinoDialogActionsRenderBox({
+  _RenderCupertinoDialogActions({
     List<RenderBox> children,
     bool isStacked = false,
   }) : _isStacked = isStacked {
     addAll(children);
   }
 
-  final bool _isStacked;
+  bool _isStacked;
+
+  bool get isStacked => _isStacked;
+
+  set isStacked(bool newValue) {
+    if (newValue == _isStacked) {
+      return;
+    }
+
+    _isStacked = newValue;
+    markNeedsLayout();
+  }
 
   @override
   void setupParentData(RenderBox child) {
