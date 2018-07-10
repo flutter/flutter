@@ -17,6 +17,7 @@ import 'feedback.dart';
 import 'flat_button.dart';
 import 'material_localizations.dart';
 import 'theme.dart';
+import 'theme_data.dart';
 import 'time.dart';
 import 'typography.dart';
 
@@ -29,11 +30,15 @@ enum _TimePickerMode { hour, minute }
 const double _kTimePickerHeaderPortraitHeight = 96.0;
 const double _kTimePickerHeaderLandscapeWidth = 168.0;
 
+
 const double _kTimePickerWidthPortrait = 328.0;
 const double _kTimePickerWidthLandscape = 512.0;
 
-const double _kTimePickerHeightPortrait = 484.0;
-const double _kTimePickerHeightLandscape = 304.0;
+const double _kTimePickerHeightPortrait = 496.0;
+const double _kTimePickerHeightLandscape = 316.0;
+
+const double _kTimePickerHeightPortraitCollapsed = 484.0;
+const double _kTimePickerHeightLandscapeCollapsed = 304.0;
 
 /// The horizontal gap between the day period fragment and the fragment
 /// positioned next to it horizontally.
@@ -1575,12 +1580,25 @@ class _TimePickerDialogState extends State<_TimePickerDialog> {
             ),
           );
 
+          double timePickerHeightPortrait;
+          double timePickerHeightLandscape;
+          switch (theme.materialTapTargetSize) {
+            case MaterialTapTargetSize.padded:
+              timePickerHeightPortrait = _kTimePickerHeightPortrait;
+              timePickerHeightLandscape = _kTimePickerHeightLandscape;
+              break;
+            case MaterialTapTargetSize.shrinkWrap:
+              timePickerHeightPortrait = _kTimePickerHeightPortraitCollapsed;
+              timePickerHeightLandscape = _kTimePickerHeightLandscapeCollapsed;
+              break;
+          }
+
           assert(orientation != null);
           switch (orientation) {
             case Orientation.portrait:
               return new SizedBox(
                 width: _kTimePickerWidthPortrait,
-                height: _kTimePickerHeightPortrait,
+                height: timePickerHeightPortrait,
                 child: new Column(
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -1595,7 +1613,7 @@ class _TimePickerDialogState extends State<_TimePickerDialog> {
             case Orientation.landscape:
               return new SizedBox(
                 width: _kTimePickerWidthLandscape,
-                height: _kTimePickerHeightLandscape,
+                height: timePickerHeightLandscape,
                 child: new Row(
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.stretch,

@@ -9,6 +9,7 @@ import 'button.dart';
 import 'button_theme.dart';
 import 'colors.dart';
 import 'theme.dart';
+import 'theme_data.dart';
 
 /// A material design "flat button".
 ///
@@ -62,6 +63,7 @@ class FlatButton extends StatelessWidget {
     this.colorBrightness,
     this.padding,
     this.shape,
+    this.materialTapTargetSize,
     @required this.child,
   }) : super(key: key);
 
@@ -85,6 +87,7 @@ class FlatButton extends StatelessWidget {
     this.splashColor,
     this.colorBrightness,
     this.shape,
+    this.materialTapTargetSize,
     @required Widget icon,
     @required Widget label,
   }) : assert(icon != null),
@@ -184,6 +187,15 @@ class FlatButton extends StatelessWidget {
   ///
   /// Defaults to the theme's brightness, [ThemeData.brightness].
   final Brightness colorBrightness;
+
+  /// Configures the minimum size of the tap target.
+  ///
+  /// Defaults to [ThemeData.materialTapTargetSize].
+  ///
+  /// See also:
+  ///
+  ///   * [MaterialTapTargetSize], for a description of how this affects tap targets.
+  final MaterialTapTargetSize materialTapTargetSize;
 
   /// The widget below this widget in the tree.
   ///
@@ -290,6 +302,7 @@ class FlatButton extends StatelessWidget {
       splashColor: _getSplashColor(theme, buttonTheme),
       elevation: 0.0,
       highlightElevation: 0.0,
+      materialTapTargetSize: materialTapTargetSize ?? theme.materialTapTargetSize,
       padding: padding ?? buttonTheme.padding,
       constraints: buttonTheme.constraints,
       shape: shape ?? buttonTheme.shape,
@@ -311,5 +324,6 @@ class FlatButton extends StatelessWidget {
     properties.add(new DiagnosticsProperty<Brightness>('colorBrightness', colorBrightness, defaultValue: null));
     properties.add(new DiagnosticsProperty<EdgeInsetsGeometry>('padding', padding, defaultValue: null));
     properties.add(new DiagnosticsProperty<ShapeBorder>('shape', shape, defaultValue: null));
+    properties.add(new DiagnosticsProperty<MaterialTapTargetSize>('materialTapTargetSize', materialTapTargetSize, defaultValue: null));
   }
 }

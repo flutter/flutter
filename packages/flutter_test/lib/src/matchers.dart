@@ -5,6 +5,7 @@
 import 'dart:async';
 import 'dart:math' as math;
 import 'dart:ui' as ui;
+import 'dart:ui';
 
 import 'package:meta/meta.dart';
 import 'package:test/test.dart' hide TypeMatcher, isInstanceOf;
@@ -275,6 +276,145 @@ Matcher matchesGoldenFile(dynamic key) {
     return new _MatchesGoldenFile.forStringPath(key);
   }
   throw new ArgumentError('Unexpected type for golden file: ${key.runtimeType}');
+}
+
+/// Asserts that a [SemanticsData] contains the specified information.
+///
+/// If either the label, hint, value, textDirection, or rect fields are not
+/// provided, then they are not part of the comparison.  All of the boolean
+/// flag and action fields must match, and default to false.
+///
+/// To retrieve the semantics data of a widget, use [tester.getSemanticsData]
+/// with a [Finder] that returns a single widget. Semantics must be enabled
+/// in order to use this method.
+///
+/// ## Sample code
+///
+/// ```dart
+/// final SemanticsHandle handle = tester.ensureSemantics();
+/// final SemanticsData data = tester.getSemanticsData(find.text('hello'));
+/// expect(data, matchesSemanticsData(label: 'hello'));
+/// handle.dispose();
+/// ```
+///
+/// See also:
+///
+///   * [WidgetTester.getSemanticsData], the tester method which retrieves data.
+Matcher matchesSemanticsData({
+  String label,
+  String hint,
+  String value,
+  TextDirection textDirection,
+  Rect rect,
+  // Flags //
+  bool hasCheckedState = false,
+  bool isChecked = false,
+  bool isSelected = false,
+  bool isButton = false,
+  bool isFocused = false,
+  bool isTextField = false,
+  bool hasEnabledState = false,
+  bool isEnabled = false,
+  bool isInMutuallyExclusiveGroup = false,
+  bool isHeader = false,
+  bool isObscured = false,
+  bool namesRoute = false,
+  bool scopesRoute = false,
+  bool isHidden = false,
+  // Actions //
+  bool hasTapAction = false,
+  bool hasLongPressAction = false,
+  bool hasScrollLeftAction = false,
+  bool hasScrollRightAction = false,
+  bool hasScrollUpAction = false,
+  bool hasScrollDownAction = false,
+  bool hasIncreaseAction = false,
+  bool hasDecreaseAction = false,
+  bool hasShowOnScreenAction = false,
+  bool hasMoveCursorForwardByCharacterAction = false,
+  bool hasMoveCursorBackwardByCharacterAction = false,
+  bool hasSetSelectionAction = false,
+  bool hasCopyAction = false,
+  bool hasCutAction = false,
+  bool hasPasteAction = false,
+  bool hasDidGainAccessibilityFocusAction = false,
+  bool hasDidLoseAccessibilityFocusAction = false,
+}) {
+  final List<SemanticsFlag> flags = <SemanticsFlag>[];
+  if (hasCheckedState)
+    flags.add(SemanticsFlag.hasCheckedState);
+  if (isChecked)
+    flags.add(SemanticsFlag.isChecked);
+  if (isSelected)
+    flags.add(SemanticsFlag.isSelected);
+  if (isButton)
+    flags.add(SemanticsFlag.isButton);
+  if (isTextField)
+    flags.add(SemanticsFlag.isTextField);
+  if (isFocused)
+    flags.add(SemanticsFlag.isFocused);
+  if (hasEnabledState)
+    flags.add(SemanticsFlag.hasEnabledState);
+  if (isEnabled)
+    flags.add(SemanticsFlag.isEnabled);
+  if (isInMutuallyExclusiveGroup)
+    flags.add(SemanticsFlag.isInMutuallyExclusiveGroup);
+  if (isHeader)
+    flags.add(SemanticsFlag.isHeader);
+  if (isObscured)
+    flags.add(SemanticsFlag.isObscured);
+  if (namesRoute)
+    flags.add(SemanticsFlag.namesRoute);
+  if (scopesRoute)
+    flags.add(SemanticsFlag.scopesRoute);
+  if (isHidden)
+    flags.add(SemanticsFlag.isHidden);
+
+  final List<SemanticsAction> actions = <SemanticsAction>[];
+  if (hasTapAction)
+    actions.add(SemanticsAction.tap);
+  if (hasLongPressAction)
+    actions.add(SemanticsAction.longPress);
+  if (hasScrollLeftAction)
+    actions.add(SemanticsAction.scrollLeft);
+  if (hasScrollRightAction)
+    actions.add(SemanticsAction.scrollRight);
+  if (hasScrollUpAction)
+    actions.add(SemanticsAction.scrollUp);
+  if (hasScrollDownAction)
+    actions.add(SemanticsAction.scrollDown);
+  if (hasIncreaseAction)
+    actions.add(SemanticsAction.increase);
+  if (hasDecreaseAction)
+    actions.add(SemanticsAction.decrease);
+  if (hasShowOnScreenAction)
+    actions.add(SemanticsAction.showOnScreen);
+  if (hasMoveCursorForwardByCharacterAction)
+    actions.add(SemanticsAction.moveCursorForwardByCharacter);
+  if (hasMoveCursorBackwardByCharacterAction)
+    actions.add(SemanticsAction.moveCursorBackwardByCharacter);
+  if (hasSetSelectionAction)
+    actions.add(SemanticsAction.setSelection);
+  if (hasCopyAction)
+    actions.add(SemanticsAction.copy);
+  if (hasCutAction)
+    actions.add(SemanticsAction.cut);
+  if (hasPasteAction)
+    actions.add(SemanticsAction.paste);
+  if (hasDidGainAccessibilityFocusAction)
+    actions.add(SemanticsAction.didGainAccessibilityFocus);
+  if (hasDidLoseAccessibilityFocusAction)
+    actions.add(SemanticsAction.didLoseAccessibilityFocus);
+
+  return new _MatchesSemanticsData(
+    label: label,
+    hint: hint,
+    value: value,
+    actions: actions,
+    flags: flags,
+    textDirection: textDirection,
+    rect: rect,
+  );
 }
 
 class _FindsWidgetMatcher extends Matcher {
@@ -1292,4 +1432,105 @@ class _MatchesGoldenFile extends AsyncMatcher {
   @override
   Description describe(Description description) =>
       description.add('one widget whose rasterized image matches golden image "$key"');
+}
+
+class _MatchesSemanticsData extends Matcher {
+  _MatchesSemanticsData({
+    this.label,
+    this.value,
+    this.hint,
+    this.flags,
+    this.actions,
+    this.textDirection,
+    this.rect,
+  });
+
+  final String label;
+  final String value;
+  final String hint;
+  final List<SemanticsAction> actions;
+  final List<SemanticsFlag> flags;
+  final TextDirection textDirection;
+  final Rect rect;
+
+  @override
+  Description describe(Description description) {
+    description.add('has semantics');
+    if (label != null)
+      description.add('with label: $label ');
+    if (value != null)
+      description.add('with value: $value ');
+    if (hint != null)
+      description.add('with hint: $hint ');
+    if (actions != null)
+      description.add('with actions:').addDescriptionOf(actions);
+    if (flags != null)
+      description.add('with flags:').addDescriptionOf(flags);
+    if (textDirection != null)
+      description.add('with textDirection: $textDirection ');
+    if (rect != null)
+      description.add('with rect: $rect');
+    return description;
+  }
+
+
+  @override
+  bool matches(covariant SemanticsData data, Map<dynamic, dynamic> matchState) {
+    if (data == null)
+      return failWithDescription(matchState, 'No SemanticsData provided. '
+        'Maybe you forgot to enabled semantics?');
+    if (label != null && label != data.label)
+      return failWithDescription(matchState, 'label was: ${data.label}');
+    if (hint != null && hint != data.hint)
+      return failWithDescription(matchState, 'hint was: ${data.hint}');
+    if (value != null && value != data.value)
+      return failWithDescription(matchState, 'value was: ${data.value}');
+    if (textDirection != null && textDirection != data.textDirection)
+      return failWithDescription(matchState, 'textDirection was: $textDirection');
+    if (rect != null && rect == data.rect) {
+      return failWithDescription(matchState, 'rect was: $rect');
+    }
+    if (actions != null) {
+      int actionBits = 0;
+      for (SemanticsAction action in actions)
+        actionBits |= action.index;
+      if (actionBits != data.actions) {
+        final List<String> actionSummary = <String>[];
+        for (SemanticsAction action in SemanticsAction.values.values) {
+          if ((data.actions & action.index) != 0)
+            actionSummary.add(describeEnum(action));
+        }
+        return failWithDescription(matchState, 'actions were: $actionSummary');
+      }
+    }
+    if (flags != null) {
+      int flagBits = 0;
+      for (SemanticsFlag flag in flags)
+        flagBits |= flag.index;
+      if (flagBits != data.flags) {
+        final List<String> flagSummary = <String>[];
+        for (SemanticsFlag flag in SemanticsFlag.values.values) {
+          if ((data.flags & flag.index) != 0)
+            flagSummary.add(describeEnum(flag));
+        }
+        return failWithDescription(matchState, 'flags were: $flagSummary');
+      }
+    }
+    return true;
+  }
+
+  bool failWithDescription(Map<dynamic, dynamic> matchState, String description) {
+    matchState['failure'] = description;
+    return false;
+  }
+
+  @override
+  Description describeMismatch(
+      dynamic item,
+      Description mismatchDescription,
+      Map<dynamic, dynamic> matchState,
+      bool verbose
+      ) {
+    return mismatchDescription.add(matchState['failure']);
+  }
 }

@@ -198,6 +198,34 @@ void main() {
 
     semantics.dispose();
   });
+
+  testWidgets('Can specify colors', (WidgetTester tester) async {
+    await tester.pumpWidget(boilerplate(child: new CupertinoButton(
+      child: const Text('Skeuomorph me'),
+      color: const Color(0x0000FF),
+      disabledColor: const Color(0x00FF00),
+      onPressed: () { },
+    )));
+
+    BoxDecoration boxDecoration = tester.widget<DecoratedBox>(
+        find.widgetWithText(DecoratedBox, 'Skeuomorph me')
+      ).decoration;
+
+    expect(boxDecoration.color, const Color(0x0000FF));
+
+    await tester.pumpWidget(boilerplate(child: const CupertinoButton(
+      child: const Text('Skeuomorph me'),
+      color: const Color(0x0000FF),
+      disabledColor: const Color(0x00FF00),
+      onPressed: null,
+    )));
+
+    boxDecoration = tester.widget<DecoratedBox>(
+        find.widgetWithText(DecoratedBox, 'Skeuomorph me')
+      ).decoration;
+
+    expect(boxDecoration.color, const Color(0x00FF00));
+  });
 }
 
 Widget boilerplate({ Widget child }) {
