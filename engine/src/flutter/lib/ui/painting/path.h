@@ -85,14 +85,14 @@ class CanvasPath : public fxl::RefCountedThreadSafe<CanvasPath>,
   void addPolygon(const tonic::Float32List& points, bool close);
   void addRRect(const RRect& rrect);
   void addPath(CanvasPath* path, double dx, double dy);
-  void addPathWithMatrix(CanvasPath* path, 
-                         double dx, 
-                         double dy, 
+  void addPathWithMatrix(CanvasPath* path,
+                         double dx,
+                         double dy,
                          tonic::Float64List& matrix4);
   void extendWithPath(CanvasPath* path, double dx, double dy);
-  void extendWithPathAndMatrix(CanvasPath* path, 
-                               double dx, 
-                               double dy, 
+  void extendWithPathAndMatrix(CanvasPath* path,
+                               double dx,
+                               double dy,
                                tonic::Float64List& matrix4);
   void close();
   void reset();
