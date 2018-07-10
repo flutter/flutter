@@ -320,7 +320,7 @@ void main() {
 Future<void> longPressDrag(WidgetTester tester, Offset start, Offset end) async {
   final TestGesture drag = await tester.startGesture(start);
   await tester.pump(kLongPressTimeout + kPressTimeout);
-  await drag.moveTo(end, timeStamp: const Duration(milliseconds: 500));
+  await drag.moveTo(end);
   await tester.pump(kPressTimeout);
   await drag.up();
 }
