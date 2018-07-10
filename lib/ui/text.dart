@@ -359,7 +359,7 @@ class TextStyle {
     Locale locale,
     Paint background,
     Paint foreground,
-  }) : assert(color == null || foreground == null, 
+  }) : assert(color == null || foreground == null,
          'Cannot provide both a color and a foreground\n'
          'The color argument is just a shorthand for "foreground: new Paint()..color = color".'
        ),

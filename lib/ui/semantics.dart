@@ -441,7 +441,7 @@ class SemanticsUpdateBuilder extends NativeFieldWrapperClass2 {
   /// length and contain the same ids. They may only differ in the order the
   /// ids are listed in. For more information about different child orders, see
   /// [DebugSemanticsDumpOrder].
-  /// 
+  ///
   /// The system retains the nodes that are currently reachable from the root.
   /// A given update need not contain information for nodes that do not change
   /// in the update. If a node is not reachable from the root after an update,
