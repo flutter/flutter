@@ -110,6 +110,7 @@ Future<Map<String, double>> _readJsonResults(Process process) {
       });
 
   bool processWasKilledIntentionally = false;
+  bool resultsHaveBeenParsed = false;
   final StreamSubscription<String> stdoutSub = process.stdout
       .transform(const Utf8Decoder())
       .transform(const LineSplitter())
@@ -122,11 +123,27 @@ Future<Map<String, double>> _readJsonResults(Process process) {
     }
 
     if (line.contains(jsonEnd)) {
+      final String jsonOutput = jsonBuf.toString();
+
+      // If we end up here and have already parsed the results, it suggests that
+      // we have recieved output from another test because our `flutter run`
+      // process did not terminate correctly.
+      // https://github.com/flutter/flutter/issues/19096#issuecomment-402756549
+      if (resultsHaveBeenParsed) {
+        throw 'Additional JSON was received after results has already been '
+            'processed. This suggests the `flutter run` process may have lived '
+            'past the end of our test and collected additional output from the '
+            'next test.\n\n'
+            'The JSON below contains all collected output, including both from '
+            'the original test and what followed.\n\n'
+            '$jsonOutput';
+      }
+
       jsonStarted = false;
       processWasKilledIntentionally = true;
+      resultsHaveBeenParsed = true;
       // ignore: deprecated_member_use
       process.kill(ProcessSignal.SIGINT); // flutter run doesn't quit automatically
-      final String jsonOutput = jsonBuf.toString();
       try {
         completer.complete(json.decode(jsonOutput));
       } catch (ex) {
