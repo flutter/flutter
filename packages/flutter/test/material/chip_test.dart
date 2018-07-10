@@ -1427,4 +1427,19 @@ void main() {
     await tester.pumpAndSettle();
     expect(pressed, true);
   });
+
+  testWidgets('is hitTestable', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      _wrapForChip(
+        child: new InputChip(
+          shape: const RoundedRectangleBorder(borderRadius: const BorderRadius.all(const Radius.circular(0.0))),
+          avatar: const CircleAvatar(child: const Text('A')),
+          label: const Text('Chip A'),
+          onPressed: () {},
+        ),
+      ),
+    );
+
+    expect(find.byType(InputChip).hitTestable(at: Alignment.center), findsOneWidget);
+  });
 }

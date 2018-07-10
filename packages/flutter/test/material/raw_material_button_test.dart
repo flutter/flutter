@@ -112,4 +112,57 @@ void main() {
     expect(box, paints..circle(x: 44.0, y: 0.0, color: splashColor));
     await gesture.up();
   });
+
+  testWidgets('off-center child is hit testable', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      new MaterialApp(
+        home: new Column(
+          children: <Widget>[
+            new RawMaterialButton(
+            materialTapTargetSize: MaterialTapTargetSize.padded,
+            onPressed: () {},
+            child: new Container(
+              width: 400.0,
+              height: 400.0,
+              child: new Column(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: const <Widget>[
+                  const SizedBox(
+                    height: 50.0,
+                    width: 400.0,
+                    child: const Text('Material'),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ]),
+      ),
+    );
+    expect(find.text('Material').hitTestable(), findsOneWidget);
+  });
+
+  testWidgets('smaller child is hit testable', (WidgetTester tester) async {
+    const Key key = const Key('test');
+    await tester.pumpWidget(
+      new MaterialApp(
+        home: new Column(
+          children: <Widget>[
+            new RawMaterialButton(
+              materialTapTargetSize: MaterialTapTargetSize.padded,
+              onPressed: () {},
+              child: new SizedBox(
+                key: key,
+                width: 8.0,
+                height: 8.0,
+                child: new Container(
+                  color: const Color(0xFFAABBCC),
+                ),
+              ),
+            ),
+        ]),
+      ),
+    );
+    expect(find.byKey(key).hitTestable(), findsOneWidget);
+  });
 }
