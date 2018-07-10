@@ -314,8 +314,12 @@ class _RenderCupertinoDialog extends RenderBox
     RenderBox actionsSection,
     bool isStacked = false,
   }) : _isStacked = isStacked {
-    add(contentSection);
-    add(actionsSection);
+    if (null != contentSection) {
+      add(contentSection);
+    }
+    if (null != actionsSection) {
+      add(actionsSection);
+    }
   }
 
   bool _isStacked;
