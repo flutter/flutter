@@ -681,11 +681,13 @@ class _MonthPickerState extends State<MonthPicker> {
     });
   }
 
+  /// Changes the chevron colors to disabled when scrolling starts
   bool _handleScrollStartNotification(BuildContext context) {
     setState(() => _chevronColor = Theme.of(context).disabledColor);
     return false;
   }
 
+  /// Changes the chevron colors to active when scrolling ends
   bool _handleScrollEndNotification(BuildContext context) {
     setState(() => _chevronColor = Theme.of(context).iconTheme.color);
     return false;
