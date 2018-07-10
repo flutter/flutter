@@ -57,7 +57,7 @@ void main() {
   });
 
   testWidgets('CheckBox semantics', (WidgetTester tester) async {
-    final SemanticsTester semantics = new SemanticsTester(tester);
+    final SemanticsHandle handle = tester.ensureSemantics();
 
     await tester.pumpWidget(new Material(
       child: new Checkbox(
@@ -66,21 +66,12 @@ void main() {
       ),
     ));
 
-    expect(semantics, hasSemantics(new TestSemantics.root(
-      children: <TestSemantics>[
-        new TestSemantics.rootChild(
-          id: 1,
-          flags: <SemanticsFlag>[
-            SemanticsFlag.hasCheckedState,
-            SemanticsFlag.hasEnabledState,
-            SemanticsFlag.isEnabled,
-          ],
-          actions: <SemanticsAction>[
-            SemanticsAction.tap,
-          ],
-        ),
-      ],
-    ), ignoreRect: true, ignoreTransform: true));
+    expect(tester.getSemanticsData(find.byType(Checkbox)), matchesSemanticsData(
+      hasCheckedState: true,
+      hasEnabledState: true,
+      isEnabled: true,
+      hasTapAction: true,
+    ));
 
     await tester.pumpWidget(new Material(
       child: new Checkbox(
@@ -89,22 +80,13 @@ void main() {
       ),
     ));
 
-    expect(semantics, hasSemantics(new TestSemantics.root(
-      children: <TestSemantics>[
-        new TestSemantics.rootChild(
-          id: 1,
-          flags: <SemanticsFlag>[
-            SemanticsFlag.hasCheckedState,
-            SemanticsFlag.isChecked,
-            SemanticsFlag.hasEnabledState,
-            SemanticsFlag.isEnabled,
-          ],
-          actions: <SemanticsAction>[
-            SemanticsAction.tap,
-          ],
-        ),
-      ],
-    ), ignoreRect: true, ignoreTransform: true));
+    expect(tester.getSemanticsData(find.byType(Checkbox)), matchesSemanticsData(
+      hasCheckedState: true,
+      hasEnabledState: true,
+      isChecked: true,
+      isEnabled: true,
+      hasTapAction: true,
+    ));
 
     await tester.pumpWidget(const Material(
       child: const Checkbox(
@@ -113,17 +95,10 @@ void main() {
       ),
     ));
 
-    expect(semantics, hasSemantics(new TestSemantics.root(
-      children: <TestSemantics>[
-        new TestSemantics.rootChild(
-          id: 1,
-          flags: <SemanticsFlag>[
-            SemanticsFlag.hasCheckedState,
-            SemanticsFlag.hasEnabledState,
-          ],
-        ),
-      ],
-    ), ignoreRect: true, ignoreTransform: true));
+    expect(tester.getSemanticsData(find.byType(Checkbox)), matchesSemanticsData(
+      hasCheckedState: true,
+      hasEnabledState: true,
+    ));
 
     await tester.pumpWidget(const Material(
       child: const Checkbox(
@@ -132,24 +107,16 @@ void main() {
       ),
     ));
 
-    expect(semantics, hasSemantics(new TestSemantics.root(
-      children: <TestSemantics>[
-        new TestSemantics.rootChild(
-          id: 1,
-          flags: <SemanticsFlag>[
-            SemanticsFlag.hasCheckedState,
-            SemanticsFlag.isChecked,
-            SemanticsFlag.hasEnabledState,
-          ],
-        ),
-      ],
-    ), ignoreRect: true, ignoreTransform: true));
-
-    semantics.dispose();
+    expect(tester.getSemanticsData(find.byType(Checkbox)), matchesSemanticsData(
+      hasCheckedState: true,
+      hasEnabledState: true,
+      isChecked: true,
+    ));
+    handle.dispose();
   });
 
   testWidgets('Can wrap CheckBox with Semantics', (WidgetTester tester) async {
-    final SemanticsTester semantics = new SemanticsTester(tester);
+    final SemanticsHandle handle = tester.ensureSemantics();
 
     await tester.pumpWidget(new Material(
       child: new Semantics(
@@ -162,25 +129,15 @@ void main() {
       ),
     ));
 
-    expect(semantics, hasSemantics(new TestSemantics.root(
-      children: <TestSemantics>[
-        new TestSemantics.rootChild(
-          id: 1,
-          label: 'foo',
-          textDirection: TextDirection.ltr,
-          flags: <SemanticsFlag>[
-            SemanticsFlag.hasCheckedState,
-            SemanticsFlag.hasEnabledState,
-            SemanticsFlag.isEnabled,
-          ],
-          actions: <SemanticsAction>[
-            SemanticsAction.tap,
-          ],
-        ),
-      ],
-    ), ignoreRect: true, ignoreTransform: true));
-
-    semantics.dispose();
+    expect(tester.getSemanticsData(find.byType(Checkbox)), matchesSemanticsData(
+      label: 'foo',
+      textDirection: TextDirection.ltr,
+      hasCheckedState: true,
+      hasEnabledState: true,
+      isEnabled: true,
+      hasTapAction: true,
+    ));
+    handle.dispose();
   });
 
   testWidgets('CheckBox tristate: true', (WidgetTester tester) async {

@@ -395,7 +395,7 @@ Future<XcodeBuildResult> buildXcodeProject({
             '-allowProvisioningUpdates',
             '-allowProvisioningDeviceRegistration',
           ].contains(buildCommand);
-        }),
+        }).toList(),
     workingDirectory: app.appDirectory,
   ));
 
