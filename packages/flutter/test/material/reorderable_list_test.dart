@@ -33,6 +33,7 @@ void main() {
       return new MaterialApp(
         home: new SizedBox(
           height: itemHeight * 10, 
+          width: itemHeight * 10, 
           child: new ReorderableListView(
             header: header,
             children: listItems.map(listItemToWidget).toList(),
@@ -224,6 +225,7 @@ void main() {
           tester.getCenter(find.text('Item 1')),
           tester.getCenter(find.text('Item 4')) + const Offset(itemHeight * 2, 0.0),
         );
+        await tester.pumpAndSettle();
         expect(find.text('Header Text'), findsOneWidget);
         expect(listItems, orderedEquals(<String>['Item 2', 'Item 3', 'Item 4', 'Item 1']));
         
@@ -231,7 +233,7 @@ void main() {
         await longPressDrag(
           tester,
           tester.getCenter(find.text('Item 4')),
-          tester.getCenter(find.text('Item 1')),
+          tester.getCenter(find.text('Item 3')),
         );
         expect(find.text('Header Text'), findsOneWidget);
         expect(listItems, orderedEquals(<String>['Item 2', 'Item 4', 'Item 3', 'Item 1']));
