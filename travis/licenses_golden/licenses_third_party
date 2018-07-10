@@ -1,4 +1,4 @@
-Signature: c34d2115c40cb3fe6d67ff2a2274d002
+Signature: 2fabcb820a598ef9533a60888b88fe93
 
 UNUSED LICENSES:
 
@@ -5640,8 +5640,12 @@ FILE: ../../../third_party/dart/runtime/vm/compiler/backend/code_statistics.cc
 FILE: ../../../third_party/dart/runtime/vm/compiler/backend/code_statistics.h
 FILE: ../../../third_party/dart/runtime/vm/compiler/compiler_pass.cc
 FILE: ../../../third_party/dart/runtime/vm/compiler/compiler_pass.h
+FILE: ../../../third_party/dart/runtime/vm/compiler/frontend/bytecode_reader.cc
+FILE: ../../../third_party/dart/runtime/vm/compiler/frontend/bytecode_reader.h
 FILE: ../../../third_party/dart/runtime/vm/compiler/frontend/kernel_translation_helper.cc
 FILE: ../../../third_party/dart/runtime/vm/compiler/frontend/kernel_translation_helper.h
+FILE: ../../../third_party/dart/runtime/vm/compiler/frontend/scope_builder.cc
+FILE: ../../../third_party/dart/runtime/vm/compiler/frontend/scope_builder.h
 FILE: ../../../third_party/dart/runtime/vm/constants_kbc.h
 FILE: ../../../third_party/dart/runtime/vm/datastream.cc
 FILE: ../../../third_party/dart/runtime/vm/finalizable_data.h
