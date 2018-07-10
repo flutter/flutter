@@ -6,6 +6,7 @@ import 'dart:io';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../widgets/semantics_tester.dart';
@@ -15,19 +16,11 @@ int count = 0;
 void main() {
   testWidgets('Middle still in center with asymmetrical actions', (WidgetTester tester) async {
     await tester.pumpWidget(
-      new WidgetsApp(
-        color: const Color(0xFFFFFFFF),
-        onGenerateRoute: (RouteSettings settings) {
-          return new CupertinoPageRoute<void>(
-            settings: settings,
-            builder: (BuildContext context) {
-              return const CupertinoNavigationBar(
-                leading: const CupertinoButton(child: const Text('Something'), onPressed: null,),
-                middle: const Text('Title'),
-              );
-            },
-          );
-        },
+      new CupertinoApp(
+        home: const CupertinoNavigationBar(
+          leading: const CupertinoButton(child: const Text('Something'), onPressed: null,),
+          middle: const Text('Title'),
+        ),
       ),
     );
 
@@ -35,21 +28,37 @@ void main() {
     expect(tester.getCenter(find.text('Title')).dx, 400.0);
   });
 
+  testWidgets('Middle still in center with back button', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      new CupertinoApp(
+        home: const CupertinoNavigationBar(
+          middle: const Text('Title'),
+        ),
+      ),
+    );
+
+    tester.state<NavigatorState>(find.byType(Navigator)).push(new CupertinoPageRoute<void>(
+      builder: (BuildContext context) {
+        return const CupertinoNavigationBar(
+          middle: const Text('Page 2'),
+        );
+      },
+    ));
+
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 500));
+
+    // Expect the middle of the title to be exactly in the middle of the screen.
+    expect(tester.getCenter(find.text('Page 2')).dx, 400.0);
+  });
+
   testWidgets('Opaque background does not add blur effects', (WidgetTester tester) async {
     await tester.pumpWidget(
-      new WidgetsApp(
-        color: const Color(0xFFFFFFFF),
-        onGenerateRoute: (RouteSettings settings) {
-          return new CupertinoPageRoute<void>(
-            settings: settings,
-            builder: (BuildContext context) {
-              return const CupertinoNavigationBar(
-                middle: const Text('Title'),
-                backgroundColor: const Color(0xFFE5E5E5),
-              );
-            },
-          );
-        },
+      new CupertinoApp(
+        home: const CupertinoNavigationBar(
+          middle: const Text('Title'),
+          backgroundColor: const Color(0xFFE5E5E5),
+        ),
       ),
     );
     expect(find.byType(BackdropFilter), findsNothing);
@@ -57,41 +66,98 @@ void main() {
 
   testWidgets('Non-opaque background adds blur effects', (WidgetTester tester) async {
     await tester.pumpWidget(
-      new WidgetsApp(
-        color: const Color(0xFFFFFFFF),
-        onGenerateRoute: (RouteSettings settings) {
-          return new CupertinoPageRoute<void>(
-            settings: settings,
-            builder: (BuildContext context) {
-              return const CupertinoNavigationBar(
-                middle: const Text('Title'),
-              );
-            },
-          );
-        },
+      new CupertinoApp(
+        home: const CupertinoNavigationBar(
+          middle: const Text('Title'),
+        ),
       ),
     );
     expect(find.byType(BackdropFilter), findsOneWidget);
   });
 
+  testWidgets('Can specify custom padding', (WidgetTester tester) async {
+    final Key middleBox = new GlobalKey();
+    await tester.pumpWidget(
+      new CupertinoApp(
+        home: new Align(
+          alignment: Alignment.topCenter,
+          child: new CupertinoNavigationBar(
+            leading: const CupertinoButton(child: const Text('Cheetah'), onPressed: null),
+            // Let the box take all the vertical space to test vertical padding but let
+            // the nav bar position it horizontally.
+            middle: new Align(
+              key: middleBox,
+              alignment: Alignment.center,
+              widthFactor: 1.0,
+              child: const Text('Title')
+            ),
+            trailing: const CupertinoButton(child: const Text('Puma'), onPressed: null),
+            padding: const EdgeInsetsDirectional.only(
+              start: 10.0,
+              end: 20.0,
+              top: 3.0,
+              bottom: 4.0,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(tester.getRect(find.byKey(middleBox)).top, 3.0);
+    // 44 is the standard height of the nav bar.
+    expect(
+      tester.getRect(find.byKey(middleBox)).bottom,
+      // 44 is the standard height of the nav bar.
+      44.0 - 4.0,
+    );
+
+    expect(tester.getTopLeft(find.widgetWithText(CupertinoButton, 'Cheetah')).dx, 10.0);
+    expect(tester.getTopRight(find.widgetWithText(CupertinoButton, 'Puma')).dx, 800.0 - 20.0);
+
+    // Title is still exactly centered.
+    expect(tester.getCenter(find.text('Title')).dx, 400.0);
+  });
+
+  testWidgets('Padding works in RTL', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      new CupertinoApp(
+        home: const Directionality(
+          textDirection: TextDirection.rtl,
+          child: const Align(
+            alignment: Alignment.topCenter,
+            child: const CupertinoNavigationBar(
+              leading: const CupertinoButton(child: const Text('Cheetah'), onPressed: null),
+              // Let the box take all the vertical space to test vertical padding but let
+              // the nav bar position it horizontally.
+              middle: const Text('Title'),
+              trailing: const CupertinoButton(child: const Text('Puma'), onPressed: null),
+              padding: const EdgeInsetsDirectional.only(
+                start: 10.0,
+                end: 20.0,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(tester.getTopRight(find.widgetWithText(CupertinoButton, 'Cheetah')).dx, 800.0 - 10.0);
+    expect(tester.getTopLeft(find.widgetWithText(CupertinoButton, 'Puma')).dx, 20.0);
+
+    // Title is still exactly centered.
+    expect(tester.getCenter(find.text('Title')).dx, 400.0);
+  });
+
   testWidgets('Verify styles of each slot', (WidgetTester tester) async {
     count = 0x000000;
     await tester.pumpWidget(
-      new WidgetsApp(
-        color: const Color(0xFFFFFFFF),
-        onGenerateRoute: (RouteSettings settings) {
-          return new CupertinoPageRoute<void>(
-            settings: settings,
-            builder: (BuildContext context) {
-              return const CupertinoNavigationBar(
-                leading: const _ExpectStyles(color: const Color(0xFF001122), index: 0x000001),
-                middle: const _ExpectStyles(color: const Color(0xFF000000), letterSpacing: -0.08, index: 0x000100),
-                trailing: const _ExpectStyles(color: const Color(0xFF001122), index: 0x010000),
-                actionsForegroundColor: const Color(0xFF001122),
-              );
-            },
-          );
-        },
+      new CupertinoApp(
+        home: const CupertinoNavigationBar(
+          leading: const _ExpectStyles(color: const Color(0xFF001122), index: 0x000001),
+          middle: const _ExpectStyles(color: const Color(0xFF000000), letterSpacing: -0.08, index: 0x000100),
+          trailing: const _ExpectStyles(color: const Color(0xFF001122), index: 0x010000),
+          actionsForegroundColor: const Color(0xFF001122),
+        ),
       ),
     );
     expect(count, 0x010101);
@@ -99,21 +165,13 @@ void main() {
 
   testWidgets('No slivers with no large titles', (WidgetTester tester) async {
     await tester.pumpWidget(
-      new WidgetsApp(
-        color: const Color(0xFFFFFFFF),
-        onGenerateRoute: (RouteSettings settings) {
-          return new CupertinoPageRoute<void>(
-            settings: settings,
-            builder: (BuildContext context) {
-              return const CupertinoPageScaffold(
-                navigationBar: const CupertinoNavigationBar(
-                  middle: const Text('Title'),
-                ),
-                child: const Center(),
-              );
-            },
-          );
-        },
+      new CupertinoApp(
+        home: const CupertinoPageScaffold(
+          navigationBar: const CupertinoNavigationBar(
+            middle: const Text('Title'),
+          ),
+          child: const Center(),
+        ),
       ),
     );
 
@@ -127,43 +185,35 @@ void main() {
     final Key trailingKey = new GlobalKey();
     final Key titleKey = new GlobalKey();
     await tester.pumpWidget(
-      new WidgetsApp(
-        color: const Color(0xFFFFFFFF),
-        onGenerateRoute: (RouteSettings settings) {
-          return new CupertinoPageRoute<void>(
-            settings: settings,
-            builder: (BuildContext context) {
-              return new MediaQuery(
-                data: const MediaQueryData(
-                  padding: const EdgeInsets.only(
-                    top: 10.0,
-                    left: 20.0,
-                    bottom: 30.0,
-                    right: 40.0,
+      new CupertinoApp(
+        home: new MediaQuery(
+          data: const MediaQueryData(
+            padding: const EdgeInsets.only(
+              top: 10.0,
+              left: 20.0,
+              bottom: 30.0,
+              right: 40.0,
+            ),
+          ),
+          child: new CupertinoPageScaffold(
+            child: new CustomScrollView(
+              controller: scrollController,
+              slivers: <Widget>[
+                new CupertinoSliverNavigationBar(
+                  leading: new Placeholder(key: leadingKey),
+                  middle: new Placeholder(key: middleKey),
+                  largeTitle: new Text('Large Title', key: titleKey),
+                  trailing: new Placeholder(key: trailingKey),
+                ),
+                new SliverToBoxAdapter(
+                  child: new Container(
+                    height: 1200.0,
                   ),
                 ),
-                child: new CupertinoPageScaffold(
-                  child: new CustomScrollView(
-                    controller: scrollController,
-                    slivers: <Widget>[
-                      new CupertinoSliverNavigationBar(
-                        leading: new Placeholder(key: leadingKey),
-                        middle: new Placeholder(key: middleKey),
-                        largeTitle: new Text('Large Title', key: titleKey),
-                        trailing: new Placeholder(key: trailingKey),
-                      ),
-                      new SliverToBoxAdapter(
-                        child: new Container(
-                          height: 1200.0,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              );
-            },
-          );
-        },
+              ],
+            ),
+          ),
+        ),
       ),
     );
 
@@ -179,30 +229,22 @@ void main() {
   testWidgets('Large title nav bar scrolls', (WidgetTester tester) async {
     final ScrollController scrollController = new ScrollController();
     await tester.pumpWidget(
-      new WidgetsApp(
-        color: const Color(0xFFFFFFFF),
-        onGenerateRoute: (RouteSettings settings) {
-          return new CupertinoPageRoute<void>(
-            settings: settings,
-            builder: (BuildContext context) {
-              return new CupertinoPageScaffold(
-                child: new CustomScrollView(
-                  controller: scrollController,
-                  slivers: <Widget>[
-                    const CupertinoSliverNavigationBar(
-                      largeTitle: const Text('Title'),
-                    ),
-                    new SliverToBoxAdapter(
-                      child: new Container(
-                        height: 1200.0,
-                      ),
-                    ),
-                  ],
+      new CupertinoApp(
+        home: new CupertinoPageScaffold(
+          child: new CustomScrollView(
+            controller: scrollController,
+            slivers: <Widget>[
+              const CupertinoSliverNavigationBar(
+                largeTitle: const Text('Title'),
+              ),
+              new SliverToBoxAdapter(
+                child: new Container(
+                  height: 1200.0,
                 ),
-              );
-            },
-          );
-        },
+              ),
+            ],
+          ),
+        ),
       ),
     );
 
@@ -267,31 +309,23 @@ void main() {
   testWidgets('Small title can be overridden', (WidgetTester tester) async {
     final ScrollController scrollController = new ScrollController();
     await tester.pumpWidget(
-      new WidgetsApp(
-        color: const Color(0xFFFFFFFF),
-        onGenerateRoute: (RouteSettings settings) {
-          return new CupertinoPageRoute<void>(
-            settings: settings,
-            builder: (BuildContext context) {
-              return new CupertinoPageScaffold(
-                child: new CustomScrollView(
-                  controller: scrollController,
-                  slivers: <Widget>[
-                    const CupertinoSliverNavigationBar(
-                      middle: const Text('Different title'),
-                      largeTitle: const Text('Title'),
-                    ),
-                    new SliverToBoxAdapter(
-                      child: new Container(
-                        height: 1200.0,
-                      ),
-                    ),
-                  ],
+      new CupertinoApp(
+        home: new CupertinoPageScaffold(
+          child: new CustomScrollView(
+            controller: scrollController,
+            slivers: <Widget>[
+              const CupertinoSliverNavigationBar(
+                middle: const Text('Different title'),
+                largeTitle: const Text('Title'),
+              ),
+              new SliverToBoxAdapter(
+                child: new Container(
+                  height: 1200.0,
                 ),
-              );
-            },
-          );
-        },
+              ),
+            ],
+          ),
+        ),
       ),
     );
 
@@ -338,18 +372,10 @@ void main() {
 
   testWidgets('Auto back/close button', (WidgetTester tester) async {
     await tester.pumpWidget(
-      new WidgetsApp(
-        color: const Color(0xFFFFFFFF),
-        onGenerateRoute: (RouteSettings settings) {
-          return new CupertinoPageRoute<void>(
-            settings: settings,
-            builder: (BuildContext context) {
-              return const CupertinoNavigationBar(
-                middle: const Text('Home page'),
-              );
-            },
-          );
-        },
+      new CupertinoApp(
+        home: const CupertinoNavigationBar(
+          middle: const Text('Home page'),
+        ),
       ),
     );
 
@@ -402,18 +428,10 @@ void main() {
 
   testWidgets('Border should be displayed by default', (WidgetTester tester) async {
     await tester.pumpWidget(
-      new WidgetsApp(
-        color: const Color(0xFFFFFFFF),
-        onGenerateRoute: (RouteSettings settings) {
-          return new CupertinoPageRoute<void>(
-            settings: settings,
-            builder: (BuildContext context) {
-              return const CupertinoNavigationBar(
-                middle: const Text('Title'),
-              );
-            },
-          );
-        },
+      new CupertinoApp(
+        home: const CupertinoNavigationBar(
+          middle: const Text('Title'),
+        ),
       ),
     );
 
@@ -432,24 +450,16 @@ void main() {
 
   testWidgets('Overrides border color', (WidgetTester tester) async {
     await tester.pumpWidget(
-      new WidgetsApp(
-        color: const Color(0xFFFFFFFF),
-        onGenerateRoute: (RouteSettings settings) {
-          return new CupertinoPageRoute<void>(
-            settings: settings,
-            builder: (BuildContext context) {
-              return const CupertinoNavigationBar(
-                middle: const Text('Title'),
-                border: const Border(
-                  bottom: const BorderSide(
-                    color: const Color(0xFFAABBCC),
-                    width: 0.0,
-                  ),
-                ),
-              );
-            },
-          );
-        },
+      new CupertinoApp(
+        home: const CupertinoNavigationBar(
+          middle: const Text('Title'),
+          border: const Border(
+            bottom: const BorderSide(
+              color: const Color(0xFFAABBCC),
+              width: 0.0,
+            ),
+          ),
+        ),
       ),
     );
 
@@ -469,19 +479,11 @@ void main() {
 
   testWidgets('Border should not be displayed when null', (WidgetTester tester) async {
     await tester.pumpWidget(
-      new WidgetsApp(
-        color: const Color(0xFFFFFFFF),
-        onGenerateRoute: (RouteSettings settings) {
-          return new CupertinoPageRoute<void>(
-            settings: settings,
-            builder: (BuildContext context) {
-              return const CupertinoNavigationBar(
-                middle: const Text('Title'),
-                border: null,
-              );
-            },
-          );
-        },
+      new CupertinoApp(
+        home: const CupertinoNavigationBar(
+          middle: const Text('Title'),
+          border: null,
+        ),
       ),
     );
 
@@ -499,24 +501,16 @@ void main() {
       'Border is displayed by default in sliver nav bar',
       (WidgetTester tester) async {
     await tester.pumpWidget(
-      new WidgetsApp(
-        color: const Color(0xFFFFFFFF),
-        onGenerateRoute: (RouteSettings settings) {
-          return new CupertinoPageRoute<void>(
-            settings: settings,
-            builder: (BuildContext context) {
-              return new CupertinoPageScaffold(
-                child: new CustomScrollView(
-                  slivers: const <Widget>[
-                    const CupertinoSliverNavigationBar(
-                      largeTitle: const Text('Large Title'),
-                    ),
-                  ],
-                ),
-              );
-            },
-          );
-        },
+      new CupertinoApp(
+        home: new CupertinoPageScaffold(
+          child: new CustomScrollView(
+            slivers: const <Widget>[
+              const CupertinoSliverNavigationBar(
+                largeTitle: const Text('Large Title'),
+              ),
+            ],
+          ),
+        ),
       ),
     );
 
@@ -537,25 +531,17 @@ void main() {
       'Border is not displayed when null in sliver nav bar',
       (WidgetTester tester) async {
     await tester.pumpWidget(
-      new WidgetsApp(
-        color: const Color(0xFFFFFFFF),
-        onGenerateRoute: (RouteSettings settings) {
-          return new CupertinoPageRoute<void>(
-            settings: settings,
-            builder: (BuildContext context) {
-              return new CupertinoPageScaffold(
-                child: new CustomScrollView(
-                  slivers: const <Widget>[
-                    const CupertinoSliverNavigationBar(
-                      largeTitle: const Text('Large Title'),
-                      border: null,
-                    ),
-                  ],
-                ),
-              );
-            },
-          );
-        },
+      new CupertinoApp(
+        home: new CupertinoPageScaffold(
+          child: new CustomScrollView(
+            slivers: const <Widget>[
+              const CupertinoSliverNavigationBar(
+                largeTitle: const Text('Large Title'),
+                border: null,
+              ),
+            ],
+          ),
+        ),
       ),
     );
 
@@ -572,25 +558,17 @@ void main() {
   testWidgets('CupertinoSliverNavigationBar has semantics', (WidgetTester tester) async {
     final SemanticsTester semantics = new SemanticsTester(tester);
 
-    await tester.pumpWidget(new WidgetsApp(
-        color: const Color(0xFFFFFFFF),
-        onGenerateRoute: (RouteSettings settings) {
-          return new CupertinoPageRoute<void>(
-            settings: settings,
-            builder: (BuildContext context) {
-              return new CupertinoPageScaffold(
-                child: new CustomScrollView(
-                  slivers: const <Widget>[
-                    const CupertinoSliverNavigationBar(
-                      largeTitle: const Text('Large Title'),
-                      border: null,
-                    ),
-                  ],
-                ),
-              );
-            },
-          );
-        }
+    await tester.pumpWidget(new CupertinoApp(
+      home: new CupertinoPageScaffold(
+        child: new CustomScrollView(
+          slivers: const <Widget>[
+            const CupertinoSliverNavigationBar(
+              largeTitle: const Text('Large Title'),
+              border: null,
+            ),
+          ],
+        ),
+      ),
     ));
 
     expect(semantics.nodesWith(
@@ -605,21 +583,13 @@ void main() {
   testWidgets('CupertinoNavigationBar has semantics', (WidgetTester tester) async {
     final SemanticsTester semantics = new SemanticsTester(tester);
 
-    await tester.pumpWidget(new WidgetsApp(
-        color: const Color(0xFFFFFFFF),
-        onGenerateRoute: (RouteSettings settings) {
-          return new CupertinoPageRoute<void>(
-            settings: settings,
-            builder: (BuildContext context) {
-              return new CupertinoPageScaffold(
-                navigationBar: const CupertinoNavigationBar(
-                  middle: const Text('Fixed Title'),
-                ),
-                child: new Container(),
-              );
-            },
-          );
-        }
+    await tester.pumpWidget(new CupertinoApp(
+      home: new CupertinoPageScaffold(
+        navigationBar: const CupertinoNavigationBar(
+          middle: const Text('Fixed Title'),
+        ),
+        child: new Container(),
+      ),
     ));
 
     expect(semantics.nodesWith(
@@ -635,30 +605,22 @@ void main() {
       'Border can be overridden in sliver nav bar',
       (WidgetTester tester) async {
     await tester.pumpWidget(
-      new WidgetsApp(
-        color: const Color(0xFFFFFFFF),
-        onGenerateRoute: (RouteSettings settings) {
-          return new CupertinoPageRoute<void>(
-            settings: settings,
-            builder: (BuildContext context) {
-              return new CupertinoPageScaffold(
-                child: new CustomScrollView(
-                  slivers: const <Widget>[
-                    const CupertinoSliverNavigationBar(
-                      largeTitle: const Text('Large Title'),
-                      border: const Border(
-                        bottom: const BorderSide(
-                          color: const Color(0xFFAABBCC),
-                          width: 0.0,
-                        ),
-                      ),
-                    ),
-                  ],
+      new CupertinoApp(
+        home: new CupertinoPageScaffold(
+          child: new CustomScrollView(
+            slivers: const <Widget>[
+              const CupertinoSliverNavigationBar(
+                largeTitle: const Text('Large Title'),
+                border: const Border(
+                  bottom: const BorderSide(
+                    color: const Color(0xFFAABBCC),
+                    width: 0.0,
+                  ),
                 ),
-              );
-            },
-          );
-        },
+              ),
+            ],
+          ),
+        ),
       ),
     );
 
@@ -683,23 +645,15 @@ void main() {
     'Standard title golden',
     (WidgetTester tester) async {
       await tester.pumpWidget(
-        new WidgetsApp(
-          color: const Color(0xFFFFFFFF),
-          onGenerateRoute: (RouteSettings settings) {
-            return new CupertinoPageRoute<void>(
-              settings: settings,
-              builder: (BuildContext context) {
-                return const RepaintBoundary(
-                  child: const CupertinoPageScaffold(
-                    navigationBar: const CupertinoNavigationBar(
-                      middle: const Text('Bling bling'),
-                    ),
-                    child: const Center(),
-                  ),
-                );
-              },
-            );
-          },
+        new CupertinoApp(
+          home: const RepaintBoundary(
+            child: const CupertinoPageScaffold(
+              navigationBar: const CupertinoNavigationBar(
+                middle: const Text('Bling bling'),
+              ),
+              child: const Center(),
+            ),
+          ),
         ),
       );
 
@@ -717,29 +671,23 @@ void main() {
     'Large title golden',
     (WidgetTester tester) async {
       await tester.pumpWidget(
-        new WidgetsApp(
-          color: const Color(0xFFFFFFFF),
-          onGenerateRoute: (RouteSettings settings) {
-            return new CupertinoPageRoute<void>(
-              settings: settings,
-              builder: (BuildContext context) {
-                return new CupertinoPageScaffold(
-                  child: new CustomScrollView(
-                    slivers: <Widget>[
-                      const CupertinoSliverNavigationBar(
-                        largeTitle: const Text('Bling bling'),
-                      ),
-                      new SliverToBoxAdapter(
-                        child: new Container(
-                          height: 1200.0,
-                        ),
-                      ),
-                    ],
+        new CupertinoApp(
+          home: new RepaintBoundary(
+            child: new CupertinoPageScaffold(
+              child: new CustomScrollView(
+                slivers: <Widget>[
+                  const CupertinoSliverNavigationBar(
+                    largeTitle: const Text('Bling bling'),
                   ),
-                );
-              },
-            );
-          },
+                  new SliverToBoxAdapter(
+                    child: new Container(
+                      height: 1200.0,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
         ),
       );
 
@@ -752,6 +700,47 @@ void main() {
     // is fixed.
     skip: !Platform.isLinux,
    );
+
+
+  testWidgets('NavBar draws a light system bar for a dark background', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      new WidgetsApp(
+        color: const Color(0xFFFFFFFF),
+        onGenerateRoute: (RouteSettings settings) {
+          return new CupertinoPageRoute<void>(
+            settings: settings,
+            builder: (BuildContext context) {
+              return const CupertinoNavigationBar(
+                middle: const Text('Test'),
+                backgroundColor: const Color(0xFF000000),
+              );
+            },
+          );
+        },
+      ),
+    );
+    expect(SystemChrome.latestStyle, SystemUiOverlayStyle.light);
+  });
+
+  testWidgets('NavBar draws a dark system bar for a light background', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      new WidgetsApp(
+        color: const Color(0xFFFFFFFF),
+        onGenerateRoute: (RouteSettings settings) {
+          return new CupertinoPageRoute<void>(
+            settings: settings,
+            builder: (BuildContext context) {
+              return const CupertinoNavigationBar(
+                middle: const Text('Test'),
+                backgroundColor: const Color(0xFFFFFFFF),
+              );
+            },
+          );
+        },
+      ),
+    );
+    expect(SystemChrome.latestStyle, SystemUiOverlayStyle.dark);
+  });
 }
 
 class _ExpectStyles extends StatelessWidget {

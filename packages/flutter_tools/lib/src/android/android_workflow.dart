@@ -169,10 +169,10 @@ class AndroidWorkflow extends DoctorValidator implements Workflow {
   }
 
   Future<LicensesAccepted> get licensesAccepted async {
-    LicensesAccepted status = LicensesAccepted.unknown;
+    LicensesAccepted status;
 
     void _onLine(String line) {
-      if (licenseAccepted.hasMatch(line)) {
+      if (status == null && licenseAccepted.hasMatch(line)) {
         status = LicensesAccepted.all;
       } else if (licenseCounts.hasMatch(line)) {
         final Match match = licenseCounts.firstMatch(line);
@@ -196,22 +196,22 @@ class AndroidWorkflow extends DoctorValidator implements Workflow {
     );
     process.stdin.write('n\n');
     final Future<void> output = process.stdout
-        .transform(const Utf8Decoder(allowMalformed: true))
-        .transform(const LineSplitter())
-        .listen(_onLine)
-        .asFuture<void>(null);
+      .transform(const Utf8Decoder(allowMalformed: true))
+      .transform(const LineSplitter())
+      .listen(_onLine)
+      .asFuture<void>(null);
     final Future<void> errors = process.stderr
-        .transform(const Utf8Decoder(allowMalformed: true))
-        .transform(const LineSplitter())
-        .listen(_onLine)
-        .asFuture<void>(null);
+      .transform(const Utf8Decoder(allowMalformed: true))
+      .transform(const LineSplitter())
+      .listen(_onLine)
+      .asFuture<void>(null);
     try {
       await Future.wait<void>(<Future<void>>[output, errors]).timeout(const Duration(seconds: 30));
     } catch (TimeoutException) {
       printTrace('Intentionally killing ${androidSdk.sdkManagerPath}');
       processManager.killPid(process.pid);
     }
-    return status;
+    return status ?? LicensesAccepted.unknown;
   }
 
   /// Run the Android SDK manager tool in order to accept SDK licenses.

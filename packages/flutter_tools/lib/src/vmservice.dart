@@ -17,6 +17,7 @@ import 'package:web_socket_channel/web_socket_channel.dart';
 import 'base/common.dart';
 import 'base/file_system.dart';
 import 'base/io.dart' as io;
+import 'base/utils.dart';
 import 'globals.dart';
 import 'vmservice_record_replay.dart';
 
@@ -163,7 +164,7 @@ class VMService {
         final List<String> definitions = params['definitions'].asList;
         final List<String> typeDefinitions = params['typeDefinitions'].asList;
         final String libraryUri = params['libraryUri'].asString;
-        final String klass = params['klass'] != null ? params['klass'].asString : null;
+        final String klass = params['klass'].exists ? params['klass'].asString : null;
         final bool isStatic = params['isStatic'].asBoolOr(false);
 
         try {
@@ -256,7 +257,10 @@ class VMService {
 
   /// Whether our connection to the VM service has been closed;
   bool get isClosed => _peer.isClosed;
-  Future<Null> get done => _peer.done;
+
+  Future<Null> get done async {
+    await _peer.done;
+  }
 
   // Events
   Future<Stream<ServiceEvent>> get onDebugEvent => onEvent('Debug');
@@ -284,7 +288,7 @@ class VMService {
     Map<String, dynamic> params,
   ) {
     return Future.any(<Future<Map<String, dynamic>>>[
-      _peer.sendRequest(method, params),
+      _peer.sendRequest(method, params).then<Map<String, dynamic>>(castStringKeyedMap),
       _connectionError.future,
     ]);
   }
@@ -334,8 +338,8 @@ class VMService {
   }
 
   /// Reloads the VM.
-  Future<VM> getVM() {
-    return _vm.reload();
+  Future<VM> getVM() async {
+    return await _vm.reload();
   }
 
   Future<Null> waitForViews({int attempts = 5, int attemptSeconds = 1}) async {
@@ -592,7 +596,7 @@ class ServiceEvent extends ServiceObject {
   String _kind;
   String get kind => _kind;
   DateTime _timestamp;
-  DateTime get timestmap => _timestamp;
+  DateTime get timestamp => _timestamp;
   String _extensionKind;
   String get extensionKind => _extensionKind;
   Map<String, dynamic> _extensionData;
@@ -683,7 +687,7 @@ class VM extends ServiceObjectOwner {
     _embedder = map['_embedder'];
 
     // Remove any isolates which are now dead from the isolate cache.
-    _removeDeadIsolates(map['isolates']);
+    _removeDeadIsolates(map['isolates'].cast<Isolate>());
   }
 
   final Map<String, ServiceObject> _cache = <String,ServiceObject>{};
@@ -851,7 +855,7 @@ class VM extends ServiceObjectOwner {
   }
 
   /// Invoke the RPC and return a [ServiceObject] response.
-  Future<ServiceObject> invokeRpc(String method, {
+  Future<T> invokeRpc<T extends ServiceObject>(String method, {
     Map<String, dynamic> params = const <String, dynamic>{},
     Duration timeout,
   }) async {
@@ -922,13 +926,13 @@ class VM extends ServiceObjectOwner {
                                Uri packages,
                                Uri assetsDirectory) {
     // TODO(goderbauer): Transfer Uri (instead of file path) when remote end supports it.
-    return invokeRpc('_flutter.runInView',
-                    params: <String, dynamic> {
-                      'viewId': viewId,
-                      'mainScript': main.toFilePath(windows: false),
-                      'packagesFile': packages.toFilePath(windows: false),
-                      'assetDirectory': assetsDirectory.toFilePath(windows: false)
-                    });
+    return invokeRpc<ServiceMap>('_flutter.runInView',
+      params: <String, dynamic> {
+        'viewId': viewId,
+        'mainScript': main.toFilePath(windows: false),
+        'packagesFile': packages.toFilePath(windows: false),
+        'assetDirectory': assetsDirectory.toFilePath(windows: false)
+    });
   }
 
   Future<Map<String, dynamic>> clearVMTimeline() {
@@ -1324,7 +1328,7 @@ class Isolate extends ServiceObjectOwner {
   }
 
   Future<String> flutterPlatformOverride([String platform]) async {
-    final Map<String, String> result = await invokeFlutterExtensionRpcRaw(
+    final Map<String, dynamic> result = await invokeFlutterExtensionRpcRaw(
       'ext.flutter.platformOverride',
       params: platform != null ? <String, dynamic>{ 'value': platform } : <String, String>{},
       timeout: const Duration(seconds: 5),
@@ -1400,7 +1404,7 @@ class ServiceMap extends ServiceObject implements Map<String, dynamic> {
   dynamic update(String key, dynamic update(dynamic value), {dynamic ifAbsent()}) => _map.update(key, update, ifAbsent: ifAbsent);
 }
 
-/// Peered to a Android/iOS FlutterView widget on a device.
+/// Peered to an Android/iOS FlutterView widget on a device.
 class FlutterView extends ServiceObject {
   FlutterView._empty(ServiceObjectOwner owner) : super._empty(owner);
 

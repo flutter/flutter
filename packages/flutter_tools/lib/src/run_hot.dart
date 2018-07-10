@@ -27,6 +27,11 @@ class HotRunnerConfig {
   bool computeDartDependencies = true;
   /// Should the hot runner assume that the minimal Dart dependencies do not change?
   bool stableDartDependencies = false;
+  /// A hook for implementations to perform any necessary initialization prior
+  /// to a hot restart. Should return true if the hot restart should continue.
+  Future<bool> setupHotRestart() async {
+    return true;
+  }
 }
 
 HotRunnerConfig get hotRunnerConfig => context[HotRunnerConfig];
@@ -116,12 +121,12 @@ class HotRunner extends ResidentRunner {
         final CompilerOutput compilerOutput =
             await device.generator.compileExpression(expression, definitions,
                 typeDefinitions, libraryUri, klass, isStatic);
-        if (compilerOutput.outputFilename != null) {
+        if (compilerOutput != null && compilerOutput.outputFilename != null) {
           return base64.encode(fs.file(compilerOutput.outputFilename).readAsBytesSync());
         }
       }
     }
-    return null;
+    throw 'Failed to compile $expression';
   }
 
   Future<int> attach({
@@ -477,6 +482,10 @@ class HotRunner extends ResidentRunner {
       );
       try {
         final Stopwatch timer = new Stopwatch()..start();
+        if (!(await hotRunnerConfig.setupHotRestart())) {
+          status.cancel();
+          return new OperationResult(1, 'setupHotRestart failed');
+        }
         await _restartFromSources();
         timer.stop();
         status.cancel();
