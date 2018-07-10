@@ -49,6 +49,7 @@ class _ListDemoState extends State<ReorderableListDemo> {
       _itemType = type;
     });
     _bottomSheet?.setState(() { });
+    _bottomSheet.close();
   }
 
   void _showConfigurationSheet() {
@@ -175,6 +176,11 @@ class _ListDemoState extends State<ReorderableListDemo> {
       ),
       body: new Scrollbar(
         child: new ReorderableListView(
+          header: _itemType != _ReorderableListType.threeLine 
+              ? new Padding(
+                  padding: const EdgeInsets.all(8.0), 
+                  child: new Text('Header of the list', style: Theme.of(context).textTheme.headline)) 
+              : null,
           onReorder: _onReorder,
           scrollDirection: _itemType == _ReorderableListType.horizontalAvatar ? Axis.horizontal : Axis.vertical,
           padding: const EdgeInsets.symmetric(vertical: 8.0),

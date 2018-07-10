@@ -48,8 +48,9 @@ class ReorderableListView extends StatefulWidget {
 
   /// Creates a reorderable list.
   ReorderableListView({
+    this.header,
     @required this.children, 
-    @required this.onReorder, 
+    @required this.onReorder,
     this.scrollDirection = Axis.vertical, 
     this.padding, 
   }): assert(scrollDirection != null),
@@ -59,6 +60,11 @@ class ReorderableListView extends StatefulWidget {
         children.every((Widget w) => w.key != null), 
         'All children of this widget must have a key.',
       );
+
+  /// A non-reorderable header widget to show before the list.
+  ///
+  /// If null, no header will appear before the list.
+  final Widget header;
 
   /// The widgets to display.
   final List<Widget> children;
@@ -107,6 +113,7 @@ class _ReorderableListViewState extends State<ReorderableListView> {
       opaque: true,
       builder: (BuildContext context) {
         return new _ReorderableListContent(
+          header: widget.header,
           children: widget.children,
           scrollDirection: widget.scrollDirection,
           onReorder: widget.onReorder,
@@ -130,12 +137,14 @@ class _ReorderableListViewState extends State<ReorderableListView> {
 // ReorderableListView.
 class _ReorderableListContent extends StatefulWidget {
   const _ReorderableListContent({
+    @required this.header,
     @required this.children,
     @required this.scrollDirection,
     @required this.padding,
     @required this.onReorder,
   });
-        
+
+  final Widget header;
   final List<Widget> children;
   final Axis scrollDirection;
   final EdgeInsets padding;
@@ -436,6 +445,9 @@ class _ReorderableListContentState extends State<_ReorderableListContent> with T
     // We use the layout builder to constrain the cross-axis size of dragging child widgets.
     return new LayoutBuilder(builder: (BuildContext context, BoxConstraints constraints) {
         final List<Widget> wrappedChildren = <Widget>[];
+        if (widget.header != null) {
+          wrappedChildren.add(widget.header);
+        }
         for (int i = 0; i < widget.children.length; i += 1) {
           wrappedChildren.add(_wrap(widget.children[i], i, constraints));
         }

@@ -29,11 +29,12 @@ void main() {
       );
     }
 
-    Widget build({Axis scrollDirection = Axis.vertical}) {
+    Widget build({Widget header, Axis scrollDirection = Axis.vertical}) {
       return new MaterialApp(
         home: new SizedBox(
           height: itemHeight * 10, 
           child: new ReorderableListView(
+            header: header,
             children: listItems.map(listItemToWidget).toList(),
             scrollDirection: scrollDirection,
             onReorder: onReorder,
@@ -91,6 +92,19 @@ void main() {
           tester.getCenter(find.text('Item 2')),
         );
         expect(listItems, orderedEquals(<String>['Item 1', 'Item 3', 'Item 2', 'Item 4']));
+      });
+
+      testWidgets('properly reorders with a header', (WidgetTester tester) async {
+        await tester.pumpWidget(build(header: const Text('Header Text')));
+        expect(find.text('Header Text'), findsOneWidget);
+        expect(listItems, orderedEquals(originalListItems));
+        await longPressDrag(
+          tester,
+          tester.getCenter(find.text('Item 1')),
+          tester.getCenter(find.text('Item 4')) + const Offset(0.0, itemHeight * 2),
+        );
+        expect(find.text('Header Text'), findsOneWidget);
+        expect(listItems, orderedEquals(<String>['Item 2', 'Item 3', 'Item 4', 'Item 1']));
       });
 
       testWidgets('properly determines the vertical drop area extents', (WidgetTester tester) async {
@@ -201,6 +215,28 @@ void main() {
         expect(listItems, orderedEquals(<String>['Item 1', 'Item 3', 'Item 2', 'Item 4']));
       });
 
+      testWidgets('properly reorders with a header', (WidgetTester tester) async {
+        await tester.pumpWidget(build(header: const Text('Header Text'), scrollDirection: Axis.horizontal));
+        expect(find.text('Header Text'), findsOneWidget);
+        expect(listItems, orderedEquals(originalListItems));
+        await longPressDrag(
+          tester,
+          tester.getCenter(find.text('Item 1')),
+          tester.getCenter(find.text('Item 4')) + const Offset(itemHeight * 2, 0.0),
+        );
+        expect(find.text('Header Text'), findsOneWidget);
+        expect(listItems, orderedEquals(<String>['Item 2', 'Item 3', 'Item 4', 'Item 1']));
+        
+        await tester.pumpWidget(build(header: const Text('Header Text'), scrollDirection: Axis.horizontal));
+        await longPressDrag(
+          tester,
+          tester.getCenter(find.text('Item 4')),
+          tester.getCenter(find.text('Item 1')),
+        );
+        expect(find.text('Header Text'), findsOneWidget);
+        expect(listItems, orderedEquals(<String>['Item 2', 'Item 4', 'Item 3', 'Item 1']));
+      });
+
       testWidgets('properly determines the horizontal drop area extents', (WidgetTester tester) async {
         final Widget reorderableListView = new ReorderableListView(
           children: const <Widget>[
@@ -282,7 +318,7 @@ void main() {
 Future<void> longPressDrag(WidgetTester tester, Offset start, Offset end) async {
   final TestGesture drag = await tester.startGesture(start);
   await tester.pump(kLongPressTimeout + kPressTimeout);
-  await drag.moveTo(end);
+  await drag.moveTo(end, timeStamp: const Duration(milliseconds: 500));
   await tester.pump(kPressTimeout);
   await drag.up();
 }
