@@ -239,7 +239,6 @@ void main() {
             changedValue = value;
           },
           cursorWidth: 15.0,
-          debugKeepCursorOn: true,
         ),
       ),
     );
@@ -289,7 +288,6 @@ void main() {
           },
           cursorWidth: 15.0,
           cursorRadius: const Radius.circular(3.0),
-          debugKeepCursorOn: true,
         ),
       ),
     );

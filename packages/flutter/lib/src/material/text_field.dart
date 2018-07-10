@@ -114,6 +114,8 @@ class TextField extends StatefulWidget {
     this.onSubmitted,
     this.inputFormatters,
     this.enabled,
+    this.cursorWidth = 10.0,
+    this.cursorRadius,
   }) : assert(keyboardType != null),
        assert(textAlign != null),
        assert(autofocus != null),
@@ -270,6 +272,10 @@ class TextField extends StatefulWidget {
   /// If non-null this property overrides the [decoration]'s
   /// [Decoration.enabled] property.
   final bool enabled;
+
+  final double cursorWidth;
+
+  final Radius cursorRadius;
 
   @override
   _TextFieldState createState() => new _TextFieldState();
@@ -489,6 +495,8 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
         onSelectionChanged: _handleSelectionChanged,
         inputFormatters: formatters,
         rendererIgnoresPointer: true,
+        cursorWidth: widget.cursorWidth,
+        cursorRadius: widget.cursorRadius,
       ),
     );
 
