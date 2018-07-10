@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
@@ -707,5 +709,127 @@ class _CupertinoEdgeShadowPainter extends BoxPainter {
       ..shader = gradient.createShader(rect, textDirection: textDirection);
 
     canvas.drawRect(rect, paint);
+  }
+}
+
+
+class _CupertinoModalPopupRoute<T> extends PopupRoute<T> {
+  _CupertinoModalPopupRoute({
+    this.builder,
+    this.barrierLabel,
+    RouteSettings settings,
+  }) : super(settings: settings);
+
+  final WidgetBuilder builder;
+
+  @override
+  Duration get transitionDuration => const Duration(milliseconds: 500);
+
+  @override
+  bool get barrierDismissible => true;
+
+  @override
+  final String barrierLabel;
+
+  @override
+  Color get barrierColor => null; //const Color(0xFF8E8E93);
+
+  AnimationController _animationController;
+
+  @override
+  Animation<double> createAnimation() {
+    return new CurvedAnimation(
+        parent: _animationController,
+        curve: Curves.decelerate,
+    );
+  }
+
+  @override
+  AnimationController createAnimationController() {
+    assert(_animationController == null);
+    _animationController = new AnimationController(
+      duration: const Duration(milliseconds: 500),
+      vsync: navigator.overlay,
+    );
+    return _animationController;
+  }
+
+  @override
+  Widget buildPage(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
+    return new _ModalBottomSheet<T>(route: this);
+  }
+}
+
+Future<T> showCupertinoModalPopup<T>({
+  @required BuildContext context,
+  @required WidgetBuilder builder,
+}) {
+  return Navigator.push(context, new _CupertinoModalPopupRoute<T>(
+    builder: builder,
+    barrierLabel: 'ModalPopup',
+  ));
+}
+
+class _ModalBottomSheetLayout extends SingleChildLayoutDelegate {
+  _ModalBottomSheetLayout(this.progress);
+
+  final double progress;
+
+  @override
+  BoxConstraints getConstraintsForChild(BoxConstraints constraints) {
+    return new BoxConstraints(
+        minWidth: constraints.maxWidth,
+        maxWidth: constraints.maxWidth,
+        minHeight: 0.0,
+        maxHeight: constraints.maxHeight,
+    );
+  }
+
+  @override
+  Offset getPositionForChild(Size size, Size childSize) {
+    print(size.height);
+    print(childSize.height);
+    return new Offset(0.0, size.height - childSize.height * progress);
+  }
+
+  @override
+  bool shouldRelayout(_ModalBottomSheetLayout oldDelegate) {
+    return progress != oldDelegate.progress;
+  }
+}
+
+class _ModalBottomSheet<T> extends StatefulWidget {
+  const _ModalBottomSheet({ Key key, this.route }) : super(key: key);
+
+  final _CupertinoModalPopupRoute<T> route;
+
+  @override
+  _ModalBottomSheetState<T> createState() => new _ModalBottomSheetState<T>();
+}
+
+class _ModalBottomSheetState<T> extends State<_ModalBottomSheet<T>> {
+  @override
+  Widget build(BuildContext context) {
+    return new AnimatedBuilder(
+        animation: widget.route.animation,
+        builder: (BuildContext context, Widget child) {
+          return new Stack(
+            children: <Widget>[
+              new Positioned(
+                bottom: 0.0,
+                right: 0.0,
+                left: 0.0,
+                height: MediaQuery.of(context).size.height,
+                child: new ClipRect(
+                  child: new CustomSingleChildLayout(
+                      delegate: new _ModalBottomSheetLayout(widget.route.animation.value),
+                      child: widget.route.builder(context),
+                  )
+            ),
+              ),
+          ],
+          );
+        }
+    );
   }
 }
