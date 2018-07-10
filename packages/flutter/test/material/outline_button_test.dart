@@ -10,8 +10,7 @@ import '../rendering/mock_canvas.dart';
 import '../widgets/semantics_tester.dart';
 
 void main() {
-  testWidgets('Outline button responds to tap when enabled',
-      (WidgetTester tester) async {
+  testWidgets('Outline button responds to tap when enabled', (WidgetTester tester) async {
     int pressedCount = 0;
 
     Widget buildFrame(VoidCallback onPressed) {
@@ -27,9 +26,7 @@ void main() {
     }
 
     await tester.pumpWidget(
-      buildFrame(() {
-        pressedCount += 1;
-      }),
+      buildFrame(() { pressedCount += 1; }),
     );
     expect(tester.widget<OutlineButton>(find.byType(OutlineButton)).enabled, true);
     await tester.tap(find.byType(OutlineButton));
@@ -94,9 +91,7 @@ void main() {
     expect(
       disabledOutlineButton,
       paints
-        ..clipPath(
-          pathMatcher: coversSameAreaAs(clipPath,
-            areaToCompare: clipRect.inflate(10.0)))
+        ..clipPath(pathMatcher: coversSameAreaAs(clipPath, areaToCompare: clipRect.inflate(10.0)))
         ..path(color: disabledBorderColor, strokeWidth: borderWidth));
 
 
@@ -115,9 +110,7 @@ void main() {
       paints
       // initially the interior of the button is transparent
         ..path(color: fillColor.withAlpha(0x00))
-        ..clipPath(
-          pathMatcher: coversSameAreaAs(clipPath,
-            areaToCompare: clipRect.inflate(10.0)))
+        ..clipPath(pathMatcher: coversSameAreaAs(clipPath, areaToCompare: clipRect.inflate(10.0)))
         ..path(color: borderColor, strokeWidth: borderWidth));
 
     final Offset center = tester.getCenter(enabledOutlineButton);
@@ -130,9 +123,7 @@ void main() {
       enabledOutlineButton,
       paints
         ..path(color: fillColor.withAlpha(0xFF))
-        ..clipPath(
-          pathMatcher: coversSameAreaAs(clipPath,
-            areaToCompare: clipRect.inflate(10.0)))
+        ..clipPath(pathMatcher: coversSameAreaAs(clipPath, areaToCompare: clipRect.inflate(10.0)))
         ..path(color: highlightedBorderColor, strokeWidth: borderWidth));
 
     // Tap gesture completes, button returns to its initial configuration.
@@ -142,9 +133,7 @@ void main() {
       enabledOutlineButton,
       paints
         ..path(color: fillColor.withAlpha(0x00))
-        ..clipPath(
-          pathMatcher: coversSameAreaAs(clipPath,
-            areaToCompare: clipRect.inflate(10.0)))
+        ..clipPath(pathMatcher: coversSameAreaAs(clipPath, areaToCompare: clipRect.inflate(10.0)))
         ..path(color: borderColor, strokeWidth: borderWidth));
   });
 
