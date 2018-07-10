@@ -33,13 +33,10 @@ void main() {
     test('can step over statements', () async {
       await _flutter.run(withDebugger: true);
 
-      // Add a breakpoint and reload to stop on it.
-      await _flutter.breakAt(
-          _project.breakpointFile,
-          20,
-          restart: true);
+      // Stop at the initial breakpoint that the expected steps are based on.
+      await _flutter.breakAt(_project.breakpointFile, 20, restart: true);
 
-      // Issue 5 steps, ensuring that we end up on the annotated lines each time
+      // Issue 5 steps, ensuring that we end up on the annotated lines each time.
       for (int i = 1; i <= _project.numberOfSteps; i++) {
         // TODO(dantup): Need to step async properly:
         // https://github.com/dart-lang/vm_service_client/issues/30
