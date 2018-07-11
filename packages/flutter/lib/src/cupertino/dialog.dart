@@ -187,7 +187,7 @@ class CupertinoAlertDialog extends StatelessWidget {
     final List<Widget> children = <Widget>[];
 
     if (title != null || content != null) {
-      final Widget titleSection = new _CupertinoAlertTitleSection(
+      final Widget titleSection = new _CupertinoAlertContentSection(
         title: title,
         content: content,
         scrollController: scrollController,
@@ -198,6 +198,7 @@ class CupertinoAlertDialog extends StatelessWidget {
     }
 
     return new Container(
+      key: const Key('cupertino_alert_dialog_content_section'),
       color: _kDialogColor,
       child: new Column(
         mainAxisSize: MainAxisSize.min,
@@ -208,7 +209,9 @@ class CupertinoAlertDialog extends StatelessWidget {
   }
 
   Widget _buildActions() {
-    Widget actionSection = new Container();
+    Widget actionSection = new Container(
+      height: 0.0,
+    );
     if (actions.isNotEmpty) {
       actionSection = new _CupertinoAlertActionSection(
         children: actions,
@@ -229,6 +232,7 @@ class CupertinoAlertDialog extends StatelessWidget {
         // rounded corners, but SKIA cannot internally create a rounded rect
         // shape. Therefore, we have no choice but to clip, ourselves.
         child: ClipRRect(
+          key: const Key('cupertino_alert_dialog_modal'),
           borderRadius: BorderRadius.circular(_kDialogCornerRadius),
           child: new BackdropFilter(
             filter: new ImageFilter.blur(sigmaX: 10.0, sigmaY: 10.0),
@@ -470,8 +474,8 @@ class _DialogChildren {
 // If title is missing, then only content is added.  If content is
 // missing, then only title is added. If both are missing, then it returns
 // a SingleChildScrollView with a zero-sized Container.
-class _CupertinoAlertTitleSection extends StatelessWidget {
-  const _CupertinoAlertTitleSection({
+class _CupertinoAlertContentSection extends StatelessWidget {
+  const _CupertinoAlertContentSection({
     Key key,
     this.title,
     this.content,
