@@ -209,8 +209,13 @@ class FlutterTestDriver {
     // Capture output to a buffer so if we don't get the repsonse we want we can show
     // the output that did arrive in the timeout error.
     final StringBuffer messages = new StringBuffer();
-    _stdout.stream.listen(messages.writeln);
-    _stderr.stream.listen(messages.writeln);
+    final DateTime start = new DateTime.now();
+    void logMessage(String m) {
+      final int ms = new DateTime.now().difference(start).inMilliseconds;
+      messages.writeln('[+ ${ms.toString().padLeft(5)}] $m');
+    }
+    _stdout.stream.listen(logMessage);
+    _stderr.stream.listen(logMessage);
 
     final Completer<Map<String, dynamic>> response = new Completer<Map<String, dynamic>>();
     final StreamSubscription<String> sub = _stdout.stream.listen((String line) {
