@@ -651,24 +651,26 @@ class RenderListWheelViewport
       return;
     }
 
-    double magnifierTopLinePosition = size.height / 2 - _itemExtent * _magnifyRate / 2;
-    double magnifierBottomLinePosition = size.height / 2 + _itemExtent * _magnifyRate / 2;
+    final double magnifierTopLinePosition =
+        size.height / 2 - _itemExtent * _magnifyRate / 2;
+    final double magnifierBottomLinePosition =
+        size.height / 2 + _itemExtent * _magnifyRate / 2;
 
     // Some part of the child is in the center magnifier.
     if (untransformedPaintingCoordinates.dy
           >= magnifierTopLinePosition - _itemExtent * _magnifyRate
         && untransformedPaintingCoordinates.dy <= magnifierBottomLinePosition) {
-      Rect centerRect = new Rect.fromLTWH(
+      final Rect centerRect = new Rect.fromLTWH(
           0.0,
           magnifierTopLinePosition,
           size.width,
           _itemExtent * _magnifyRate);
-      Rect topHalfRect = new Rect.fromLTWH(
+      final Rect topHalfRect = new Rect.fromLTWH(
           0.0,
           0.0,
           size.width,
           magnifierTopLinePosition);
-      Rect bottomHalfRect = new Rect.fromLTWH(
+      final Rect bottomHalfRect = new Rect.fromLTWH(
           0.0,
           magnifierBottomLinePosition,
           size.width,
@@ -709,7 +711,7 @@ class RenderListWheelViewport
 
   /// Return the Matrix4 transformation that would zoom in the center item.
   Matrix4 _magnifyTransform() {
-    Matrix4 magnify = Matrix4.identity();
+    final Matrix4 magnify = Matrix4.identity();
     magnify.translate(size.width / 2 * (_curveRate + 1), size.height / 2);
     magnify.scale(_magnifyRate, _magnifyRate, _magnifyRate);
     magnify.translate(-size.width / 2 * (_curveRate + 1), -size.height / 2);

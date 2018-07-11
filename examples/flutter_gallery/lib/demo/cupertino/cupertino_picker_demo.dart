@@ -97,8 +97,8 @@ class _CupertinoPickerDemoState extends State<CupertinoPickerDemo> {
   }
 
   Widget _buildAlarmMenu() {
-    String time = _alarmHour.toString().padLeft(2, '0') + ': ' +
-                  _alarmMinute.toString().padLeft(2, '0');
+    final String time = _alarmHour.toString().padLeft(2, '0') + ': ' +
+        _alarmMinute.toString().padLeft(2, '0');
     return new Container(
       decoration: const BoxDecoration(
         color: CupertinoColors.white,
@@ -167,7 +167,7 @@ class _CupertinoPickerDemoState extends State<CupertinoPickerDemo> {
                   children: new List<Widget>.generate(24, (int index) {
                     return new Container(
                       alignment: Alignment.centerRight,
-                      padding: EdgeInsets.only(right: 32.0),
+                      padding: const EdgeInsets.only(right: 32.0),
                       child: new Text(index.toString()),
                     );
                   }),
@@ -189,7 +189,7 @@ class _CupertinoPickerDemoState extends State<CupertinoPickerDemo> {
                   children: new List<Widget>.generate(60, (int index) {
                     return new Container(
                       alignment: Alignment.centerLeft,
-                      padding: EdgeInsets.only(left: 32.0),
+                      padding: const EdgeInsets.only(left: 32.0),
                       child: new Text(index.toString()),
                     );
                   }),
