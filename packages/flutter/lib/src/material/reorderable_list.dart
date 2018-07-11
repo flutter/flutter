@@ -328,9 +328,8 @@ class _ReorderableListContentState extends State<_ReorderableListContent> with T
     // Drops toWrap into the last position it was hovering over.
     void onDragEnded() {
       setState(() {
-        if (_dragStartIndex != _currentIndex) {
+        if (_dragStartIndex != _currentIndex)
           widget.onReorder(_dragStartIndex, _currentIndex);
-        }
         // Animates leftover space in the drop area closed.
         // TODO(djshuckerow): bring the animation in line with the Material
         // specifications.
