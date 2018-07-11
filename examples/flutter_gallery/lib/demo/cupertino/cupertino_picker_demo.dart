@@ -154,7 +154,8 @@ class _CupertinoPickerDemoState extends State<CupertinoPickerDemo> {
                   scrollController: new FixedExtentScrollController(
                                       initialItem: _alarmHour,
                                     ),
-                  centerViewRate: 2.0,
+                  curveRate: 1.0,
+                  useMagnifier: true,
                   magnifyRate: 1.1,
                   itemExtent: _kPickerItemHeight,
                   backgroundColor: CupertinoColors.white,
@@ -175,7 +176,8 @@ class _CupertinoPickerDemoState extends State<CupertinoPickerDemo> {
                   scrollController: new FixedExtentScrollController(
                                       initialItem: _alarmMinute,
                                     ),
-                  centerViewRate: 0.0,
+                  curveRate: -1.0,
+                  useMagnifier: true,
                   magnifyRate: 1.1,
                   itemExtent: _kPickerItemHeight,
                   backgroundColor: CupertinoColors.white,
