@@ -27,6 +27,11 @@ void FlutterViewUpdateSemantics(JNIEnv* env,
                                 jobject buffer,
                                 jobjectArray strings);
 
+void FlutterViewUpdateCustomAccessibilityActions(JNIEnv* env,
+                                                 jobject obj,
+                                                 jobject buffer,
+                                                 jobjectArray strings);
+
 void FlutterViewOnFirstFrame(JNIEnv* env, jobject obj);
 
 void SurfaceTextureAttachToGLContext(JNIEnv* env, jobject obj, jint textureId);

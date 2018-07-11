@@ -15,6 +15,7 @@
 #include "flutter/fml/memory/weak_ptr.h"
 #include "flutter/fml/thread.h"
 #include "flutter/lib/ui/semantics/semantics_node.h"
+#include "flutter/lib/ui/semantics/custom_accessibility_action.h"
 #include "flutter/lib/ui/window/platform_message.h"
 #include "flutter/runtime/service_protocol.h"
 #include "flutter/shell/common/animator.h"
@@ -183,7 +184,8 @@ class Shell final : public PlatformView::Delegate,
 
   // |shell::Engine::Delegate|
   void OnEngineUpdateSemantics(const Engine& engine,
-                               blink::SemanticsNodeUpdates update) override;
+                               blink::SemanticsNodeUpdates update,
+                               blink::CustomAccessibilityActionUpdates actions) override;
 
   // |shell::Engine::Delegate|
   void OnEngineHandlePlatformMessage(

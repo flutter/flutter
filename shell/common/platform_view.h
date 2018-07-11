@@ -11,6 +11,7 @@
 #include "flutter/flow/texture.h"
 #include "flutter/fml/memory/weak_ptr.h"
 #include "flutter/lib/ui/semantics/semantics_node.h"
+#include "flutter/lib/ui/semantics/custom_accessibility_action.h"
 #include "flutter/lib/ui/window/platform_message.h"
 #include "flutter/lib/ui/window/pointer_data_packet.h"
 #include "flutter/lib/ui/window/viewport_metrics.h"
@@ -95,7 +96,8 @@ class PlatformView {
 
   fml::WeakPtr<PlatformView> GetWeakPtr() const;
 
-  virtual void UpdateSemantics(blink::SemanticsNodeUpdates update);
+  virtual void UpdateSemantics(blink::SemanticsNodeUpdates updates,
+                               blink::CustomAccessibilityActionUpdates actions);
 
   virtual void HandlePlatformMessage(
       fxl::RefPtr<blink::PlatformMessage> message);

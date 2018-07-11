@@ -21,17 +21,23 @@ IMPLEMENT_WRAPPERTYPEINFO(ui, SemanticsUpdate);
 DART_BIND_ALL(SemanticsUpdate, FOR_EACH_BINDING)
 
 fxl::RefPtr<SemanticsUpdate> SemanticsUpdate::create(
-    SemanticsNodeUpdates nodes) {
-  return fxl::MakeRefCounted<SemanticsUpdate>(std::move(nodes));
+    SemanticsNodeUpdates nodes,
+    CustomAccessibilityActionUpdates actions) {
+  return fxl::MakeRefCounted<SemanticsUpdate>(std::move(nodes), std::move(actions));
 }
 
-SemanticsUpdate::SemanticsUpdate(SemanticsNodeUpdates nodes)
-    : nodes_(std::move(nodes)) {}
+SemanticsUpdate::SemanticsUpdate(SemanticsNodeUpdates nodes,
+                                 CustomAccessibilityActionUpdates actions)
+    : nodes_(std::move(nodes)), actions_(std::move(actions)) {}
 
 SemanticsUpdate::~SemanticsUpdate() = default;
 
 SemanticsNodeUpdates SemanticsUpdate::takeNodes() {
   return std::move(nodes_);
+}
+
+CustomAccessibilityActionUpdates SemanticsUpdate::takeActions() {
+  return std::move(actions_);
 }
 
 void SemanticsUpdate::dispose() {

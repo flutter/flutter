@@ -26,6 +26,7 @@ class SemanticsAction {
   static const int _kPasteIndex = 1 << 14;
   static const int _kDidGainAccessibilityFocusIndex = 1 << 15;
   static const int _kDidLoseAccessibilityFocusIndex = 1 << 16;
+  static const int _kCustomAction = 1 << 17;
 
   /// The numerical value for this action.
   ///
@@ -146,6 +147,12 @@ class SemanticsAction {
   /// Accessibility focus and input focus can be held by two different nodes!
   static const SemanticsAction didLoseAccessibilityFocus = const SemanticsAction._(_kDidLoseAccessibilityFocusIndex);
 
+  /// Indicates that the user has invoked a custom accessibility action.
+  /// 
+  /// This handler is added automatically whenever a custom accessibility
+  /// action is added to a semantics node.
+  static const SemanticsAction customAction = const SemanticsAction._(_kCustomAction);
+
   /// The possible semantics actions.
   ///
   /// The map's key is the [index] of the action and the value is the action
@@ -168,6 +175,7 @@ class SemanticsAction {
     _kPasteIndex: paste,
     _kDidGainAccessibilityFocusIndex: didGainAccessibilityFocus,
     _kDidLoseAccessibilityFocusIndex: didLoseAccessibilityFocus,
+    _kCustomAction: customAction,
   };
 
   @override
@@ -207,6 +215,8 @@ class SemanticsAction {
         return 'SemanticsAction.didGainAccessibilityFocus';
       case _kDidLoseAccessibilityFocusIndex:
         return 'SemanticsAction.didLoseAccessibilityFocus';
+      case _kCustomAction:
+        return 'SemanticsAction.customAction';
     }
     return null;
   }
@@ -498,6 +508,7 @@ class SemanticsUpdateBuilder extends NativeFieldWrapperClass2 {
     Float64List transform,
     Int32List childrenInTraversalOrder,
     Int32List childrenInHitTestOrder,
+    Int32List customAcccessibilityActions,
   }) {
     if (transform.length != 16)
       throw new ArgumentError('transform argument must have 16 entries.');
@@ -523,6 +534,7 @@ class SemanticsUpdateBuilder extends NativeFieldWrapperClass2 {
       transform,
       childrenInTraversalOrder,
       childrenInHitTestOrder,
+      customAcccessibilityActions,
     );
   }
   void _updateNode(
@@ -547,7 +559,19 @@ class SemanticsUpdateBuilder extends NativeFieldWrapperClass2 {
     Float64List transform,
     Int32List childrenInTraversalOrder,
     Int32List childrenInHitTestOrder,
+    Int32List customAcccessibilityActions,
   ) native 'SemanticsUpdateBuilder_updateNode';
+
+  /// Update the custom accessibility action associated with the given `id`.
+  /// 
+  /// The name of the action exposed to the user is the `label`. The text 
+  /// direction of this label is the same as the global window.
+  void updateCustomAction({int id, String label}) {
+    assert(id != null);
+    assert(label != null && label != '');
+    _updateCustomAction(id, label);
+  }
+  void _updateCustomAction(int id, String label) native 'SemanticsUpdateBuilder_updateAction';
 
   /// Creates a [SemanticsUpdate] object that encapsulates the updates recorded
   /// by this object.

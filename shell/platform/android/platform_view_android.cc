@@ -178,9 +178,11 @@ void PlatformViewAndroid::DispatchSemanticsAction(JNIEnv* env,
 }
 
 // |shell::PlatformView|
-void PlatformViewAndroid::UpdateSemantics(blink::SemanticsNodeUpdates update) {
-  constexpr size_t kBytesPerNode = 35 * sizeof(int32_t);
+void PlatformViewAndroid::UpdateSemantics(blink::SemanticsNodeUpdates update,
+                                          blink::CustomAccessibilityActionUpdates actions) {
+  constexpr size_t kBytesPerNode = 36 * sizeof(int32_t);
   constexpr size_t kBytesPerChild = sizeof(int32_t);
+  constexpr size_t kBytesPerAction = 2 * sizeof(int32_t);
 
   JNIEnv* env = fml::jni::AttachCurrentThread();
   {
@@ -194,6 +196,7 @@ void PlatformViewAndroid::UpdateSemantics(blink::SemanticsNodeUpdates update) {
       num_bytes +=
           value.second.childrenInTraversalOrder.size() * kBytesPerChild;
       num_bytes += value.second.childrenInHitTestOrder.size() * kBytesPerChild;
+      num_bytes += value.second.customAccessibilityActions.size() * kBytesPerChild;
     }
 
     std::vector<uint8_t> buffer(num_bytes);
@@ -259,14 +262,45 @@ void PlatformViewAndroid::UpdateSemantics(blink::SemanticsNodeUpdates update) {
 
       for (int32_t child : node.childrenInHitTestOrder)
         buffer_int32[position++] = child;
+
+      buffer_int32[position++] = node.customAccessibilityActions.size();
+      for (int32_t child : node.customAccessibilityActions)
+        buffer_int32[position++] = child;
     }
+
+    // custom accessibility actions.
+    size_t num_action_bytes = actions.size() * kBytesPerAction;
+    std::vector<uint8_t> actions_buffer(num_action_bytes);
+    int32_t* actions_buffer_int32 = reinterpret_cast<int32_t*>(&actions_buffer[0]);
+
+    std::vector<std::string> action_strings;
+    size_t actions_position = 0;
+    for (const auto& value : actions) {
+      // If you edit this code, make sure you update kBytesPerAction
+      // to match the number of values you are
+      // sending.
+      const blink::CustomAccessibilityAction& action = value.second;
+      actions_buffer_int32[actions_position++] = action.id;
+      if (action.label.empty()) {
+        actions_buffer_int32[actions_position++] = -1;
+      } else {
+        actions_buffer_int32[actions_position++] = action_strings.size();
+        action_strings.push_back(action.label);
+      }
+    }
+
+    fml::jni::ScopedJavaLocalRef<jobject> direct_actions_buffer(
+      env, env->NewDirectByteBuffer(actions_buffer.data(), actions_buffer.size()));
 
     fml::jni::ScopedJavaLocalRef<jobject> direct_buffer(
         env, env->NewDirectByteBuffer(buffer.data(), buffer.size()));
 
+    FlutterViewUpdateCustomAccessibilityActions(
+      env, view.obj(), direct_actions_buffer.obj(),
+      fml::jni::VectorToStringArray(env, action_strings).obj());
     FlutterViewUpdateSemantics(
-        env, view.obj(), direct_buffer.obj(),
-        fml::jni::VectorToStringArray(env, strings).obj());
+      env, view.obj(), direct_buffer.obj(),
+      fml::jni::VectorToStringArray(env, strings).obj());
   }
 }
 

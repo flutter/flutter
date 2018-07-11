@@ -58,6 +58,8 @@ source_set("ui") {
     "semantics/semantics_update.h",
     "semantics/semantics_update_builder.cc",
     "semantics/semantics_update_builder.h",
+    "semantics/custom_accessibility_action.cc",
+    "semantics/custom_accessibility_action.h",
     "text/asset_manager_font_provider.cc",
     "text/asset_manager_font_provider.h",
     "text/font_collection.cc",

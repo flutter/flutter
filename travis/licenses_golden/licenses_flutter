@@ -489,6 +489,8 @@ FILE: ../../../flutter/flutter_kernel_transformers/lib/track_widget_constructor_
 FILE: ../../../flutter/lib/ui/isolate_name_server.dart
 FILE: ../../../flutter/lib/ui/painting/image_encoding.cc
 FILE: ../../../flutter/lib/ui/painting/image_encoding.h
+FILE: ../../../flutter/lib/ui/semantics/custom_accessibility_action.cc
+FILE: ../../../flutter/lib/ui/semantics/custom_accessibility_action.h
 FILE: ../../../flutter/lib/ui/text/asset_manager_font_provider.cc
 FILE: ../../../flutter/lib/ui/text/asset_manager_font_provider.h
 FILE: ../../../flutter/shell/platform/android/apk_asset_provider.h
