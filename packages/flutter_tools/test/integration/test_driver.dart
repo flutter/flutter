@@ -206,17 +206,6 @@ class FlutterTestDriver {
   }
 
   Future<Map<String, dynamic>> _waitFor({String event, int id, Duration timeout}) async {
-    // Capture output to a buffer so if we don't get the repsonse we want we can show
-    // the output that did arrive in the timeout error.
-    final StringBuffer messages = new StringBuffer();
-    final DateTime start = new DateTime.now();
-    void logMessage(String m) {
-      final int ms = new DateTime.now().difference(start).inMilliseconds;
-      messages.writeln('[+ ${ms.toString().padLeft(5)}] $m');
-    }
-    _stdout.stream.listen(logMessage);
-    _stderr.stream.listen(logMessage);
-
     final Completer<Map<String, dynamic>> response = new Completer<Map<String, dynamic>>();
     final StreamSubscription<String> sub = _stdout.stream.listen((String line) {
       final dynamic json = _parseFlutterResponse(line);
@@ -229,12 +218,30 @@ class FlutterTestDriver {
       }
     });
     
-    return response.future.timeout(timeout ?? defaultTimeout, onTimeout: () {
-          if (event != null)
-            throw 'Did not receive expected $event event.\nDid get:\n${messages.toString()}';
-          else if (id != null)
-            throw 'Did not receive response to request "$id".\nDid get:\n${messages.toString()}';
-        }).whenComplete(() => sub.cancel());
+    return _timeoutWithMessages(response.future,
+            timeout: timeout,
+            message: event != null
+                ? 'Did not receive expected $event event.'
+                : 'Did not receive response to request "$id".')
+        .whenComplete(() => sub.cancel());
+  }
+
+  Future<T> _timeoutWithMessages<T>(Future<T> f, {Duration timeout, String message}) {
+    // Capture output to a buffer so if we don't get the response we want we can show
+    // the output that did arrive in the timeout error.
+    final StringBuffer messages = new StringBuffer();
+    final DateTime start = new DateTime.now();
+    void logMessage(String m) {
+      final int ms = new DateTime.now().difference(start).inMilliseconds;
+      messages.writeln('[+ ${ms.toString().padLeft(5)}] $m');
+    }
+    _stdout.stream.listen(logMessage);
+    _stderr.stream.listen(logMessage);
+
+    return f.timeout(timeout ?? defaultTimeout, onTimeout: () {
+      logMessage('<timed out>');
+      throw '$message\nReceived:\n${messages.toString()}';
+    });
   }
 
   Map<String, dynamic> _parseFlutterResponse(String line) {
