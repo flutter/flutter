@@ -170,7 +170,7 @@ class _CupertinoPickerState extends State<CupertinoPicker> {
             ),
           ),
           new Container(
-            decoration: new BoxDecoration(
+            decoration: const BoxDecoration(
               border: const Border(
                 top: const BorderSide(width: 0.0, color: _kHighlighterBorder),
                 bottom: const BorderSide(width: 0.0, color: _kHighlighterBorder),

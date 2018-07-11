@@ -12,7 +12,7 @@ import 'picker.dart';
 /// passing a list of int values for flex.
 /// Customization of CupertinoPicker is implicitly defined in each picker.
 class MultiColumnCupertinoPicker extends StatelessWidget {
-  MultiColumnCupertinoPicker({
+  const MultiColumnCupertinoPicker({
     Key key,
     @required this.children,
     this.flexes,
