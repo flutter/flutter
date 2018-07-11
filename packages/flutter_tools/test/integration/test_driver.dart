@@ -150,8 +150,8 @@ class FlutterTestDriver {
     final VM vm = await vmService.getVM();
     final VMIsolate isolate = await vm.isolates.first.load();
     debugPrint('Waiting for isolate to pause');
-    await isolate.waitUntilPaused()
-        .timeout(defaultTimeout, onTimeout: () => throw 'Isolate did not pause');
+    await _timeoutWithMessages<dynamic>(isolate.waitUntilPaused(),
+        message: 'Isolate did not pause');
     return isolate.load();
   }
 
@@ -164,8 +164,8 @@ class FlutterTestDriver {
     final VM vm = await vmService.getVM();
     final VMIsolate isolate = await vm.isolates.first.load();
     debugPrint('Sending resume ($step)');
-    await isolate.resume(step: step)
-        .timeout(defaultTimeout, onTimeout: () => throw 'Isolate did not respond to resume ($step)');
+    await _timeoutWithMessages<dynamic>(isolate.resume(step: step),
+        message: 'Isolate did not respond to resume ($step)');
     return wait ? waitForPause() : null;
   }
 
@@ -185,8 +185,8 @@ class FlutterTestDriver {
 
   Future<VMInstanceRef> evaluateExpression(String expression) async {
     final VMFrame topFrame = await getTopStackFrame();
-    return topFrame.evaluate(expression)
-        .timeout(defaultTimeout, onTimeout: () => throw 'Timed out evaluating expression ($expression)');
+    return _timeoutWithMessages(topFrame.evaluate(expression),
+        message: 'Timed out evaluating expression ($expression)');
   }
 
   Future<VMFrame> getTopStackFrame() async {
