@@ -35,6 +35,7 @@ enum class SemanticsAction : int32_t {
   kPaste = 1 << 14,
   kDidGainAccessibilityFocus = 1 << 15,
   kDidLoseAccessibilityFocus = 1 << 16,
+  kCustomAction = 1 << 17,
 };
 
 const int kScrollableSemanticsActions =
@@ -87,6 +88,7 @@ struct SemanticsNode {
   SkMatrix44 transform = SkMatrix44(SkMatrix44::kIdentity_Constructor);
   std::vector<int32_t> childrenInTraversalOrder;
   std::vector<int32_t> childrenInHitTestOrder;
+  std::vector<int32_t> customAccessibilityActions;
 };
 
 // Contains semantic nodes that need to be updated.

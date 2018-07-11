@@ -75,7 +75,8 @@ class PlatformViewAndroid final : public PlatformView {
       pending_responses_;
 
   // |shell::PlatformView|
-  void UpdateSemantics(blink::SemanticsNodeUpdates update) override;
+  void UpdateSemantics(blink::SemanticsNodeUpdates update,
+                       blink::CustomAccessibilityActionUpdates actions) override;
 
   // |shell::PlatformView|
   void HandlePlatformMessage(

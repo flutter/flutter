@@ -712,6 +712,17 @@ public class FlutterView extends SurfaceView
         }
     }
 
+    public void updateCustomAccessibilityActions(ByteBuffer buffer, String[] strings) {
+        try {
+            if (mAccessibilityNodeProvider != null) {
+                buffer.order(ByteOrder.LITTLE_ENDIAN);
+                mAccessibilityNodeProvider.updateCustomAccessibilityActions(buffer, strings);
+            }
+        } catch (Exception ex) {
+            Log.e(TAG, "Uncaught exception while updating local context actions", ex);
+        }
+    }
+
     // Called by native to notify first Flutter frame rendered.
     public void onFirstFrame() {
         // Allow listeners to remove themselves when they are called.

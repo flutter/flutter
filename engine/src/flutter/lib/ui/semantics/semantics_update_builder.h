@@ -45,7 +45,11 @@ class SemanticsUpdateBuilder
                   int textDirection,
                   const tonic::Float64List& transform,
                   const tonic::Int32List& childrenInTraversalOrder,
-                  const tonic::Int32List& childrenInHitTestOrder);
+                  const tonic::Int32List& childrenInHitTestOrder,
+                  const tonic::Int32List& customAccessibilityActions);
+
+  void updateCustomAction(int id, 
+                          std::string label);
 
   fxl::RefPtr<SemanticsUpdate> build();
 
@@ -55,6 +59,7 @@ class SemanticsUpdateBuilder
   explicit SemanticsUpdateBuilder();
 
   SemanticsNodeUpdates nodes_;
+  CustomAccessibilityActionUpdates actions_;
 };
 
 }  // namespace blink

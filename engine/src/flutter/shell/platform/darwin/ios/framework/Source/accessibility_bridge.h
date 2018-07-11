@@ -15,6 +15,7 @@
 #include "flutter/fml/memory/weak_ptr.h"
 #include "flutter/fml/platform/darwin/scoped_nsobject.h"
 #include "flutter/lib/ui/semantics/semantics_node.h"
+#include "flutter/lib/ui/semantics/custom_accessibility_action.h"
 #include "flutter/shell/platform/darwin/ios/framework/Headers/FlutterChannels.h"
 #include "flutter/shell/platform/darwin/ios/framework/Source/FlutterTextInputPlugin.h"
 #include "flutter/shell/platform/darwin/ios/framework/Source/FlutterView.h"
@@ -81,6 +82,19 @@ class AccessibilityBridge;
 @end
 
 /**
+ * An implementation of UIAccessibilityCustomAction which also contains the
+ * Flutter uid.
+ */
+@interface FlutterCustomAccessibilityAction : UIAccessibilityCustomAction
+
+/**
+ * The uid of the action defined by the flutter application.
+ */
+@property(nonatomic) int32_t uid;
+
+@end
+
+/**
  * The default implementation of `SemanticsObject` for most accessibility elements
  * in the iOS accessibility tree.
  *
@@ -102,8 +116,10 @@ class AccessibilityBridge final {
   AccessibilityBridge(UIView* view, PlatformViewIOS* platform_view);
   ~AccessibilityBridge();
 
-  void UpdateSemantics(blink::SemanticsNodeUpdates nodes);
+  void UpdateSemantics(blink::SemanticsNodeUpdates nodes, blink::CustomAccessibilityActionUpdates actions);
   void DispatchSemanticsAction(int32_t id, blink::SemanticsAction action);
+  void DispatchSemanticsAction(int32_t id, blink::SemanticsAction action, std::vector<uint8_t> args);
+
   UIView<UITextInput>* textInputView();
 
   UIView* view() const { return view_; }
@@ -123,6 +139,7 @@ class AccessibilityBridge final {
   fml::scoped_nsprotocol<FlutterBasicMessageChannel*> accessibility_channel_;
   fml::WeakPtrFactory<AccessibilityBridge> weak_factory_;
   int32_t previous_route_id_;
+  std::unordered_map<int32_t, blink::CustomAccessibilityAction> actions_;
   std::vector<int32_t> previous_routes_;
 
   FXL_DISALLOW_COPY_AND_ASSIGN(AccessibilityBridge);

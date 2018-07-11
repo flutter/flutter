@@ -183,6 +183,13 @@ public class FlutterNativeView implements BinaryMessenger {
         mFlutterView.updateSemantics(buffer, strings);
     }
 
+    // Called by native to update the custom accessibility actions.
+    private void updateCustomAccessibilityActions(ByteBuffer buffer, String[] strings) {
+        if (mFlutterView == null)
+            return;
+        mFlutterView.updateCustomAccessibilityActions(buffer, strings);
+    }
+
     // Called by native to notify first Flutter frame rendered.
     private void onFirstFrame() {
         if (mFlutterView == null)
