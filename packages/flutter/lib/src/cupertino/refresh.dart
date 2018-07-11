@@ -250,6 +250,10 @@ typedef Future<void> RefreshCallback();
 /// other words, refreshes can't be triggered with lists using
 /// [ClampingScrollPhysics].
 ///
+/// In a typical application, this sliver should be inserted between the app bar
+/// sliver such as [CupertinoSliverNavigationBar] and your main scrollable
+/// content's sliver.
+///
 /// See also:
 ///
 ///  * [CustomScrollView], a typical sliver holding scroll view this control
