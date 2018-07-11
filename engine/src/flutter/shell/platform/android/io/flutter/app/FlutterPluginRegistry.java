@@ -9,6 +9,8 @@ import android.content.Context;
 import android.content.Intent;
 import io.flutter.plugin.common.BinaryMessenger;
 import io.flutter.plugin.common.PluginRegistry;
+import io.flutter.plugin.platform.PlatformViewRegistry;
+import io.flutter.plugin.platform.PlatformViewsController;
 import io.flutter.view.FlutterMain;
 import io.flutter.view.FlutterNativeView;
 import io.flutter.view.FlutterView;
@@ -33,6 +35,7 @@ public class FlutterPluginRegistry
     private FlutterNativeView mNativeView;
     private FlutterView mFlutterView;
 
+    private final PlatformViewsController mPlatformViewsController;
     private final Map<String, Object> mPluginMap = new LinkedHashMap<>(0);
     private final List<RequestPermissionsResultListener> mRequestPermissionsResultListeners = new ArrayList<>(0);
     private final List<ActivityResultListener> mActivityResultListeners = new ArrayList<>(0);
@@ -43,6 +46,7 @@ public class FlutterPluginRegistry
     public FlutterPluginRegistry(FlutterNativeView nativeView, Context context) {
         mNativeView = nativeView;
         mAppContext = context;
+        mPlatformViewsController = new PlatformViewsController();
     }
 
     @Override
@@ -68,9 +72,12 @@ public class FlutterPluginRegistry
     public void attach(FlutterView flutterView, Activity activity) {
         mFlutterView = flutterView;
         mActivity = activity;
+        mPlatformViewsController.attachFlutterView(flutterView);
     }
 
     public void detach() {
+        mPlatformViewsController.detachFlutterView();
+        mPlatformViewsController.onFlutterViewDestroyed();
         mFlutterView = null;
         mActivity = null;
     }
@@ -105,6 +112,11 @@ public class FlutterPluginRegistry
         @Override
         public TextureRegistry textures() {
             return mFlutterView;
+        }
+
+        @Override
+        public PlatformViewRegistry platformViewRegistry() {
+            return mPlatformViewsController.getRegistry();
         }
 
         @Override
@@ -224,5 +236,9 @@ public class FlutterPluginRegistry
             }
         }
         return handled;
+    }
+
+    public void destroy() {
+        mPlatformViewsController.onFlutterViewDestroyed();
     }
 }
