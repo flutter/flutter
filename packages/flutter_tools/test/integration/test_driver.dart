@@ -150,7 +150,7 @@ class FlutterTestDriver {
     final VM vm = await vmService.getVM();
     final VMIsolate isolate = await vm.isolates.first.load();
     debugPrint('Waiting for isolate to pause');
-    await _timeoutWithMessages<dynamic>(isolate.waitUntilPaused(),
+    await _timeoutWithMessages<dynamic>(isolate.waitUntilPaused,
         message: 'Isolate did not pause');
     return isolate.load();
   }
@@ -164,7 +164,7 @@ class FlutterTestDriver {
     final VM vm = await vmService.getVM();
     final VMIsolate isolate = await vm.isolates.first.load();
     debugPrint('Sending resume ($step)');
-    await _timeoutWithMessages<dynamic>(isolate.resume(step: step),
+    await _timeoutWithMessages<dynamic>(() => isolate.resume(step: step),
         message: 'Isolate did not respond to resume ($step)');
     return wait ? waitForPause() : null;
   }
@@ -185,7 +185,7 @@ class FlutterTestDriver {
 
   Future<VMInstanceRef> evaluateExpression(String expression) async {
     final VMFrame topFrame = await getTopStackFrame();
-    return _timeoutWithMessages(topFrame.evaluate(expression),
+    return _timeoutWithMessages(() => topFrame.evaluate(expression),
         message: 'Timed out evaluating expression ($expression)');
   }
 
@@ -218,7 +218,7 @@ class FlutterTestDriver {
       }
     });
     
-    return _timeoutWithMessages(response.future,
+    return _timeoutWithMessages(() => response.future,
             timeout: timeout,
             message: event != null
                 ? 'Did not receive expected $event event.'
@@ -226,7 +226,7 @@ class FlutterTestDriver {
         .whenComplete(() => sub.cancel());
   }
 
-  Future<T> _timeoutWithMessages<T>(Future<T> f, {Duration timeout, String message}) {
+  Future<T> _timeoutWithMessages<T>(Future<T> Function() f, {Duration timeout, String message}) {
     // Capture output to a buffer so if we don't get the response we want we can show
     // the output that did arrive in the timeout error.
     final StringBuffer messages = new StringBuffer();
@@ -238,7 +238,7 @@ class FlutterTestDriver {
     _stdout.stream.listen(logMessage);
     _stderr.stream.listen(logMessage);
 
-    return f.timeout(timeout ?? defaultTimeout, onTimeout: () {
+    return f().timeout(timeout ?? defaultTimeout, onTimeout: () {
       logMessage('<timed out>');
       throw '$message\nReceived:\n${messages.toString()}';
     });
