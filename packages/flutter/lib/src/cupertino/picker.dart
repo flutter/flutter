@@ -42,6 +42,9 @@ class CupertinoPicker extends StatefulWidget {
     Key key,
     this.diameterRatio = _kDefaultDiameterRatio,
     this.backgroundColor = _kDefaultBackground,
+    this.curveRate = 0.0,
+    this.useMagnifier = false,
+    this.magnifyRate = 1.0,
     this.scrollController,
     @required this.itemExtent,
     @required this.onSelectedItemChanged,
@@ -68,6 +71,15 @@ class CupertinoPicker extends StatefulWidget {
   /// This can be set to null to disable the background painting entirely; this
   /// is mildly more efficient than using [Colors.transparent].
   final Color backgroundColor;
+
+  /// {@macro flutter.rendering.wheelList.curveRate}
+  final double curveRate;
+
+  /// {@macro flutter.rendering.wheelList.useMagnifier}
+  final bool useMagnifier;
+
+  /// {@macro flutter.rendering.wheelList.magnifyRate}
+  final double magnifyRate;
 
   /// A [FixedExtentScrollController] to read and control the current item.
   ///
@@ -164,7 +176,9 @@ class _CupertinoPickerState extends State<CupertinoPicker> {
                 bottom: const BorderSide(width: 0.0, color: _kHighlighterBorder),
               )
             ),
-            constraints: new BoxConstraints.expand(height: widget.itemExtent),
+            constraints: new BoxConstraints.expand(
+                height: widget.itemExtent * widget.magnifyRate,
+            ),
           ),
           new Expanded(
             child: new Container(
@@ -185,6 +199,9 @@ class _CupertinoPickerState extends State<CupertinoPicker> {
             controller: widget.scrollController,
             physics: const FixedExtentScrollPhysics(),
             diameterRatio: widget.diameterRatio,
+            curveRate: widget.curveRate,
+            useMagnifier: widget.useMagnifier,
+            magnifyRate: widget.magnifyRate,
             itemExtent: widget.itemExtent,
             onSelectedItemChanged: _handleSelectedItemChanged,
             children: widget.children,
