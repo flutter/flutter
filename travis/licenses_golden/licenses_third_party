@@ -1,4 +1,4 @@
-Signature: 5b8c5ee1df4ba63758477360a16e93ad
+Signature: d154c853619ca972a28b96cd8dfa10f4
 
 UNUSED LICENSES:
 
@@ -16937,6 +16937,7 @@ ORIGIN: ../../../third_party/skia/bench/GrCCGeometryBench.cpp + ../../../third_p
 TYPE: LicenseType.bsd
 FILE: ../../../third_party/skia/bench/GrCCGeometryBench.cpp
 FILE: ../../../third_party/skia/bench/JSONBench.cpp
+FILE: ../../../third_party/skia/bench/PolyUtilsBench.cpp
 FILE: ../../../third_party/skia/bench/ShaderMaskFilterBench.cpp
 FILE: ../../../third_party/skia/fuzz/FuzzCommon.cpp
 FILE: ../../../third_party/skia/fuzz/FuzzPathMeasure.cpp
@@ -18335,8 +18336,6 @@ FILE: ../../../third_party/skia/samplecode/SampleQuadStroker.cpp
 FILE: ../../../third_party/skia/src/codec/SkColorTable.h
 FILE: ../../../third_party/skia/src/core/SkAnnotation.cpp
 FILE: ../../../third_party/skia/src/core/SkBBoxHierarchy.h
-FILE: ../../../third_party/skia/src/core/SkDeviceProfile.cpp
-FILE: ../../../third_party/skia/src/core/SkDeviceProfile.h
 FILE: ../../../third_party/skia/src/core/SkFontDescriptor.cpp
 FILE: ../../../third_party/skia/src/core/SkFontDescriptor.h
 FILE: ../../../third_party/skia/src/core/SkImagePriv.h
@@ -19681,6 +19680,7 @@ ORIGIN: ../../../third_party/skia/experimental/wasm/wasm_main.cpp + ../../../thi
 TYPE: LicenseType.bsd
 FILE: ../../../third_party/skia/experimental/wasm/wasm_main.cpp
 FILE: ../../../third_party/skia/fuzz/FuzzEncoders.cpp
+FILE: ../../../third_party/skia/fuzz/FuzzPolyUtils.cpp
 ----------------------------------------------------------------------------------------------------
 Copyright 2018 Google LLC
 
