@@ -1451,6 +1451,9 @@ class _MockHttpClient implements HttpClient {
   String userAgent;
 
   @override
+  Duration connectionTimeout;
+
+  @override
   void addCredentials(Uri url, String realm, HttpClientCredentials credentials) {}
 
   @override

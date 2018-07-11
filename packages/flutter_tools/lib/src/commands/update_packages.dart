@@ -28,7 +28,8 @@ import '../runner/flutter_command.dart';
 const Map<String, String> _kManuallyPinnedDependencies = const <String, String>{
   // Add pinned packages here.
   'mockito': '3.0.0-beta', // TODO(aam): https://github.com/dart-lang/mockito/issues/110
-  'matcher': '0.12.2', // TODO(ianh): https://github.com/flutter/flutter/issues/18608, https://github.com/dart-lang/matcher/pull/88
+  'matcher': '0.12.2', // TODO(ianh): https://github.com/flutter/flutter/issues/18608, https://github.com/dart-lang/matcher/pull/88,
+  'json_schema':  '1.0.9', // TODO(jonahwilliams), remove once json_schema stable works with dart 2.
 };
 
 class UpdatePackagesCommand extends FlutterCommand {
