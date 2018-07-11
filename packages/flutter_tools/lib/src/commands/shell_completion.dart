@@ -1,4 +1,4 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2018 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -15,7 +15,7 @@ class ShellCompletionCommand extends FlutterCommand {
 
   @override
   final String description =
-    'Outputs command line shell completion setup scripts.\n\n'
+    'Output command line shell completion setup scripts.\n\n'
     'This command prints the flutter command line completion script for Bash and Zsh. To use it,\n'
     'redirect the output into a file and follow the instructions in the output to install it in\n'
     'your shell environment. Once added, your shell will be able to complete flutter commands and\n'
