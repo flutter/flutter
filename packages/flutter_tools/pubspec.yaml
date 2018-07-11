@@ -9,6 +9,7 @@ dependencies:
   archive: 2.0.0
   args: 1.4.3
   cli_util: 0.1.3
+  completion: 0.2.0
   coverage: 0.12.1
   crypto: 2.0.5
   file: 5.0.1
