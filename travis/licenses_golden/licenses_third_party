@@ -1,4 +1,4 @@
-Signature: 1e7a2c73d6034f63fa374cd00dce31b1
+Signature: 5b8c5ee1df4ba63758477360a16e93ad
 
 UNUSED LICENSES:
 
@@ -17274,6 +17274,7 @@ FILE: ../../../third_party/skia/experimental/docs/jsonbaseddoc.htm
 FILE: ../../../third_party/skia/experimental/docs/svgBackend.js
 FILE: ../../../third_party/skia/experimental/docs/svgbaseddoc.htm
 FILE: ../../../third_party/skia/experimental/docs/utilities.js
+FILE: ../../../third_party/skia/experimental/wasm/shell.html
 FILE: ../../../third_party/skia/infra/bots/android_bin.isolate
 FILE: ../../../third_party/skia/infra/bots/assets.isolate
 FILE: ../../../third_party/skia/infra/bots/assets/android_ndk_darwin/VERSION
@@ -18822,7 +18823,6 @@ FILE: ../../../third_party/skia/src/gpu/text/GrTextContext.cpp
 FILE: ../../../third_party/skia/src/gpu/text/GrTextContext.h
 FILE: ../../../third_party/skia/src/gpu/text/GrTextUtils.cpp
 FILE: ../../../third_party/skia/src/gpu/text/GrTextUtils.h
-FILE: ../../../third_party/skia/src/gpu/vk/GrVkBackendContext.cpp
 FILE: ../../../third_party/skia/src/gpu/vk/GrVkBuffer.cpp
 FILE: ../../../third_party/skia/src/gpu/vk/GrVkBuffer.h
 FILE: ../../../third_party/skia/src/gpu/vk/GrVkCaps.cpp
@@ -19677,11 +19677,12 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ====================================================================================================
 LIBRARY: skia
-ORIGIN: ../../../third_party/skia/fuzz/FuzzDrawFunctions.cpp + ../../../third_party/skia/LICENSE
+ORIGIN: ../../../third_party/skia/experimental/wasm/wasm_main.cpp + ../../../third_party/skia/LICENSE
 TYPE: LicenseType.bsd
-FILE: ../../../third_party/skia/fuzz/FuzzDrawFunctions.cpp
+FILE: ../../../third_party/skia/experimental/wasm/wasm_main.cpp
+FILE: ../../../third_party/skia/fuzz/FuzzEncoders.cpp
 ----------------------------------------------------------------------------------------------------
-Copyright 2016 Mozilla Foundation
+Copyright 2018 Google LLC
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are
@@ -19712,11 +19713,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ====================================================================================================
 LIBRARY: skia
-ORIGIN: ../../../third_party/skia/fuzz/FuzzEncoders.cpp + ../../../third_party/skia/LICENSE
+ORIGIN: ../../../third_party/skia/fuzz/FuzzDrawFunctions.cpp + ../../../third_party/skia/LICENSE
 TYPE: LicenseType.bsd
-FILE: ../../../third_party/skia/fuzz/FuzzEncoders.cpp
+FILE: ../../../third_party/skia/fuzz/FuzzDrawFunctions.cpp
 ----------------------------------------------------------------------------------------------------
-Copyright 2018 Google LLC
+Copyright 2016 Mozilla Foundation
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are
