@@ -100,7 +100,8 @@ class RenderListWheelViewport
     @required ViewportOffset offset,
     double diameterRatio = defaultDiameterRatio,
     double perspective = defaultPerspective,
-    double centerViewRate,
+    double curveRate,
+    bool useMagnifier,
     double magnifyRate,
     @required double itemExtent,
     bool clipToSize = true,
@@ -123,7 +124,8 @@ class RenderListWheelViewport
        _offset = offset,
        _diameterRatio = diameterRatio,
        _perspective = perspective,
-       _centerViewRate = centerViewRate ?? 1.0,
+       _useMagnifier = useMagnifier ?? false,
+       _curveRate = curveRate ?? 0.0,
        _magnifyRate = magnifyRate ?? 1.0,
        _itemExtent = itemExtent,
        _clipToSize = clipToSize,
@@ -247,45 +249,61 @@ class RenderListWheelViewport
     _hasScrolled();
   }
 
-  /// Visual effect based on how we see the wheel. Imagine we are at some
-  /// distance away from the screen. The wheel is at the center of the screen.
-  /// If we move our position in the xAxis, we will see the wheel differently.
-  /// -----------
-  /// '         '
-  /// '         '
-  /// A    B    C
-  /// '         '
-  /// '         '
-  /// -----------
-  /// By default, we are at point B (the center). If we are at point A, the
-  /// wheel will curve to the left a little, for example. Similar for point C.
-  /// The centerViewRate is defaulted at 1.0, which is point B. 0.0 will be point A
-  /// and 2.0 will be point C. There's no limit to centerViewRate since we can be
-  /// infinite to the left or right, but a reasonable value would be in the
-  /// range [0.0, 2.0].
-  double get centerViewRate => _centerViewRate;
-  double _centerViewRate = 1.0;
-  set centerViewRate(double value) {
-    if(value == null) {
-      _centerViewRate = 1.0;
+  /// {@template flutter.rendering.wheelList.curveRate}
+  /// Affect how much the wheel is curved to the left, or the right.
+  ///
+  /// curveRate < 0 means curving to the left, curveRate > 0 means curving to
+  /// the right. The curve depends on the x-coordinate of the center of the
+  /// wheel, where that value is calculated by:
+  /// center.dx = (curveRate + 1) * size.width/2
+  /// (dx = 0 is the left border of the viewport)
+  /// For example, particularly, -1.0 means the center is on the left border
+  /// of the viewport, and 1.0 means it is on the right border.
+  ///
+  /// Defaults to 0.0, which means no curving.
+  /// curveRate should be in the range [-1.0, 1.0].
+  /// {@endtemplate}
+  double get curveRate => _curveRate;
+  double _curveRate = 0.0;
+  set curveRate(double value) {
+    assert(value != null);
+    if (value == _curveRate)
       return;
-    }
-    _centerViewRate = value;
+    _curveRate = value;
+    markNeedsPaint();
   }
 
-  /// The zoom-in rate of the magnifier.
+  /// {@template flutter.rendering.wheelList.useMagnifier}
+  /// Whether to use the magnifier for the center item of the wheel.
+  /// {@endtemplate}
+  bool get useMagnifier => _useMagnifier;
+  bool _useMagnifier = false;
+  set useMagnifier(bool value) {
+    assert(value != null);
+    if (value == _useMagnifier)
+      return;
+    _useMagnifier = value;
+    markNeedsPaint();
+  }
+  /// {@template flutter.rendering.wheelList.magnifyRate}
+  /// The zoomed-in rate of the magnifier, if it is used.
   ///
   /// The default value is 1.0, which will not change anything.
   /// If the value is > 1.0, the center item will be zoomed in by that rate, and
   /// it will also be rendered as flat, not cylindrical like the rest of the list.
+  /// The item will be zoomed out if magnifyRate < 1.0.
+  ///
+  /// Must be positive.
+  /// {@endtemplate}
   double get magnifyRate => _magnifyRate;
   double _magnifyRate = 1.0;
   set magnifyRate(double value) {
-    if(value == null) {
-      _magnifyRate = 1.0;
+    assert(value != null);
+    assert(value > 0);
+    if (value == _magnifyRate)
       return;
-    }
     _magnifyRate = value;
+    markNeedsPaint();
   }
 
   /// {@template flutter.rendering.wheelList.itemExtent}
@@ -607,64 +625,7 @@ class RenderListWheelViewport
       perspective: _perspective,
     );
 
-    double magnifierTopLine = size.height / 2 - _itemExtent * _magnifyRate / 2;
-    double magnifierBotLine = size.height / 2 + _itemExtent * _magnifyRate / 2;
-
-    // Some part of the child is in the center magnifier.
-    if(_magnifyRate != 1.0
-       && untransformedPaintingCoordinates.dy >= magnifierTopLine -
-                                              _itemExtent*_magnifyRate
-       && untransformedPaintingCoordinates.dy <= magnifierBotLine)
-    {
-      // Clipping the part in the center.
-      context.pushClipRect(
-        false,
-        offset,
-        new Rect.fromLTWH(0.0, magnifierTopLine,
-                          size.width, _itemExtent * _magnifyRate),
-        (PaintingContext context, Offset offset){
-          context.pushTransform(
-              false,
-              offset,
-              _magnifyTransform(),
-              (PaintingContext context, Offset offset) {
-                context.paintChild(
-                  child,
-                  offset + untransformedPaintingCoordinates);
-          });
-        });
-
-      // Clipping the part in either the top-half wheel or the bottom-half wheel.
-      context.pushClipRect(
-          false,
-          offset,
-          untransformedPaintingCoordinates.dy <= magnifierTopLine
-              ? new Rect.fromLTWH(0.0, 0.0, size.width, magnifierTopLine)
-              : new Rect.fromLTWH(0.0, magnifierBotLine,
-                                  size.width, magnifierTopLine),
-          (PaintingContext context, Offset offset) {
-            context.pushTransform(
-              // Text with TransformLayers and no cullRects currently have an issue rendering
-              // https://github.com/flutter/flutter/issues/14224.
-              false,
-              offset,
-              _centerOriginTransform(transform),
-              // Pre-transform painting function.
-              (PaintingContext context, Offset offset) {
-                context.paintChild(
-                  child,
-                  offset + new Offset(
-                    untransformedPaintingCoordinates.dx,
-                    // Paint everything in the center (e.g. angle = 0), then transform.
-                    -_topScrollMarginExtent,
-                  ),
-                );
-              },
-            );
-          }
-      );
-    }
-    else {
+    void _paintCylindrically(PaintingContext context, Offset offset) {
       context.pushTransform(
         // Text with TransformLayers and no cullRects currently have an issue rendering
         // https://github.com/flutter/flutter/issues/14224.
@@ -684,14 +645,74 @@ class RenderListWheelViewport
         },
       );
     }
+
+    if (!useMagnifier) {
+      _paintCylindrically(context, offset);
+      return;
+    }
+
+    double magnifierTopLinePosition = size.height / 2 - _itemExtent * _magnifyRate / 2;
+    double magnifierBottomLinePosition = size.height / 2 + _itemExtent * _magnifyRate / 2;
+
+    // Some part of the child is in the center magnifier.
+    if (untransformedPaintingCoordinates.dy
+          >= magnifierTopLinePosition - _itemExtent * _magnifyRate
+        && untransformedPaintingCoordinates.dy <= magnifierBottomLinePosition) {
+      Rect centerRect = new Rect.fromLTWH(
+          0.0,
+          magnifierTopLinePosition,
+          size.width,
+          _itemExtent * _magnifyRate);
+      Rect topHalfRect = new Rect.fromLTWH(
+          0.0,
+          0.0,
+          size.width,
+          magnifierTopLinePosition);
+      Rect bottomHalfRect = new Rect.fromLTWH(
+          0.0,
+          magnifierBottomLinePosition,
+          size.width,
+          magnifierTopLinePosition);
+
+      // Clipping the part in the center.
+      context.pushClipRect(
+          false,
+          offset,
+          centerRect,
+          (PaintingContext context, Offset offset) {
+            context.pushTransform(
+                false,
+                offset,
+                _magnifyTransform(),
+                (PaintingContext context, Offset offset) {
+                  context.paintChild(
+                      child,
+                      offset + untransformedPaintingCoordinates);
+                });
+          });
+
+      // Clipping the part in either the top-half or bottom-half of the wheel.
+      context.pushClipRect(
+          false,
+          offset,
+          untransformedPaintingCoordinates.dy <= magnifierTopLinePosition
+              ? topHalfRect
+              : bottomHalfRect,
+          (PaintingContext context, Offset offset) {
+            _paintCylindrically(context, offset);
+          }
+      );
+    }
+    else
+      _paintCylindrically(context, offset);
   }
 
   /// Return the Matrix4 transformation that would zoom in the center item.
   Matrix4 _magnifyTransform() {
     Matrix4 magnify = Matrix4.identity();
-    magnify.translate(size.width / 2 * _centerViewRate, size.height / 2);
+    magnify.translate(size.width / 2 * (_curveRate + 1), size.height / 2);
     magnify.scale(_magnifyRate, _magnifyRate, _magnifyRate);
-    magnify.translate(-size.width / 2 * _centerViewRate, -size.height / 2);
+    magnify.translate(-size.width / 2 * (_curveRate + 1), -size.height / 2);
     return magnify;
   }
 
@@ -700,10 +721,10 @@ class RenderListWheelViewport
   Matrix4 _centerOriginTransform(Matrix4 originalMatrix) {
     final Matrix4 result = new Matrix4.identity();
     final Offset centerOriginTranslation = Alignment.center.alongSize(size);
-    result.translate(centerOriginTranslation.dx * centerViewRate,
+    result.translate(centerOriginTranslation.dx * (curveRate + 1),
                      centerOriginTranslation.dy);
     result.multiply(originalMatrix);
-    result.translate(-centerOriginTranslation.dx * centerViewRate,
+    result.translate(-centerOriginTranslation.dx * (curveRate + 1),
                      -centerOriginTranslation.dy);
     return result;
   }

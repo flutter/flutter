@@ -42,7 +42,8 @@ class CupertinoPicker extends StatefulWidget {
     Key key,
     this.diameterRatio = _kDefaultDiameterRatio,
     this.backgroundColor = _kDefaultBackground,
-    this.centerViewRate = 1.0,
+    this.curveRate = 0.0,
+    this.useMagnifier = false,
     this.magnifyRate = 1.0,
     this.scrollController,
     @required this.itemExtent,
@@ -71,10 +72,13 @@ class CupertinoPicker extends StatefulWidget {
   /// is mildly more efficient than using [Colors.transparent].
   final Color backgroundColor;
 
-  /// See [RenderListWheelViewport.centerViewRate]
-  final double centerViewRate;
+  /// {@macro flutter.rendering.wheelList.curveRate}
+  final double curveRate;
 
-  /// See [RenderListWheelViewport.magnifyRate]
+  /// {@macro flutter.rendering.wheelList.useMagnifier}
+  final bool useMagnifier;
+
+  /// {@macro flutter.rendering.wheelList.magnifyRate}
   final double magnifyRate;
 
   /// A [FixedExtentScrollController] to read and control the current item.
@@ -195,7 +199,8 @@ class _CupertinoPickerState extends State<CupertinoPicker> {
             controller: widget.scrollController,
             physics: const FixedExtentScrollPhysics(),
             diameterRatio: widget.diameterRatio,
-            centerViewRate: widget.centerViewRate,
+            curveRate: widget.curveRate,
+            useMagnifier: widget.useMagnifier,
             magnifyRate: widget.magnifyRate,
             itemExtent: widget.itemExtent,
             onSelectedItemChanged: _handleSelectedItemChanged,
