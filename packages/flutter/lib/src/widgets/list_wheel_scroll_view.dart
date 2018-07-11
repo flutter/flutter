@@ -395,7 +395,8 @@ class ListWheelScrollView extends StatefulWidget {
     this.physics,
     this.diameterRatio = RenderListWheelViewport.defaultDiameterRatio,
     this.perspective = RenderListWheelViewport.defaultPerspective,
-    this.centerViewRate,
+    this.curveRate,
+    this.useMagnifier,
     this.magnifyRate,
     @required this.itemExtent,
     this.onSelectedItemChanged,
@@ -448,10 +449,13 @@ class ListWheelScrollView extends StatefulWidget {
   /// {@macro flutter.rendering.wheelList.perspective}
   final double perspective;
 
-  /// See[RenderListWheelViewport.centerViewRate]
-  final double centerViewRate;
+  /// {@macro flutter.rendering.wheelList.curveRate}
+  final double curveRate;
 
-  /// See [RenderListWheelViewport.magnifyRate]
+  /// {@macro flutter.rendering.wheelList.useMagnifier}
+  final bool useMagnifier;
+
+  /// {@macro RenderListWheelViewport.magnifyRate}
   final double magnifyRate;
 
   /// Size of each child in the main axis. Must not be null and must be
@@ -525,7 +529,8 @@ class _ListWheelScrollViewState extends State<ListWheelScrollView> {
           return new ListWheelViewport(
             diameterRatio: widget.diameterRatio,
             perspective: widget.perspective,
-            centerViewRate: widget.centerViewRate,
+            curveRate: widget.curveRate,
+            useMagnifier: widget.useMagnifier,
             magnifyRate: widget.magnifyRate,
             itemExtent: widget.itemExtent,
             clipToSize: widget.clipToSize,
@@ -570,7 +575,8 @@ class ListWheelViewport extends MultiChildRenderObjectWidget {
     Key key,
     this.diameterRatio = RenderListWheelViewport.defaultDiameterRatio,
     this.perspective = RenderListWheelViewport.defaultPerspective,
-    this.centerViewRate,
+    this.curveRate,
+    this.useMagnifier,
     this.magnifyRate,
     @required this.itemExtent,
     this.clipToSize = true,
@@ -599,10 +605,13 @@ class ListWheelViewport extends MultiChildRenderObjectWidget {
   /// {@macro flutter.rendering.wheelList.perspective}
   final double perspective;
 
-  /// See [RenderListWheelViewport.centerViewRate]
-  final double centerViewRate;
+  /// {@macro flutter.rendering.wheelList.curveRate}
+  final double curveRate;
 
-  /// See [RenderListWheelViewport.magnifyRate]
+  /// {@macro flutter.rendering.wheelList.useMagnifier}
+  final bool useMagnifier;
+
+  /// {@macro flutter.rendering.wheelList.magnifyRate}
   final double magnifyRate;
 
   /// {@macro flutter.rendering.wheelList.itemExtent}
@@ -623,7 +632,8 @@ class ListWheelViewport extends MultiChildRenderObjectWidget {
     return new RenderListWheelViewport(
       diameterRatio: diameterRatio,
       perspective: perspective,
-      centerViewRate: centerViewRate,
+      curveRate: curveRate,
+      useMagnifier: useMagnifier,
       magnifyRate: magnifyRate,
       itemExtent: itemExtent,
       clipToSize: clipToSize,
@@ -637,7 +647,8 @@ class ListWheelViewport extends MultiChildRenderObjectWidget {
     renderObject
       ..diameterRatio = diameterRatio
       ..perspective = perspective
-      ..centerViewRate = centerViewRate
+      ..curveRate = curveRate
+      ..useMagnifier = useMagnifier
       ..magnifyRate = magnifyRate
       ..itemExtent = itemExtent
       ..clipToSize = clipToSize
