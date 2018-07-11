@@ -111,7 +111,7 @@ Future<VMIsolateRef> _connectToRunnerIsolate(int vmServicePort) async {
         throw 'not ready yet';
       return isolate;
     } catch (error) {
-      const Duration connectionTimeout = const Duration(seconds: 10);
+      const Duration connectionTimeout = const Duration(seconds: 2);
       if (new DateTime.now().difference(started) > connectionTimeout) {
         throw new TimeoutException(
           'Failed to connect to the task runner process',

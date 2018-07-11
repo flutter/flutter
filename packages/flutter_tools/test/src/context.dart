@@ -113,8 +113,7 @@ void testUsingContext(String description, dynamic testMethod(), {
         },
       );
     });
-  }, timeout: timeout != null ? timeout : const Timeout(const Duration(seconds: 60)),
-      testOn: testOn, skip: skip);
+  }, timeout: timeout, testOn: testOn, skip: skip);
 }
 
 void _printBufferedErrors(AppContext testContext) {
