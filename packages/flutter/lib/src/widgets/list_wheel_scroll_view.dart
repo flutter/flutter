@@ -395,9 +395,15 @@ class ListWheelScrollView extends StatefulWidget {
     this.physics,
     this.diameterRatio = RenderListWheelViewport.defaultDiameterRatio,
     this.perspective = RenderListWheelViewport.defaultPerspective,
+<<<<<<< HEAD
     this.curveRate = 0.0,
     this.useMagnifier = false,
     this.magnifyRate = 1.0,
+=======
+    this.curveRate,
+    this.useMagnifier,
+    this.magnifyRate,
+>>>>>>> 77b861b89... cleaning code
     @required this.itemExtent,
     this.onSelectedItemChanged,
     this.clipToSize = true,
@@ -575,9 +581,15 @@ class ListWheelViewport extends MultiChildRenderObjectWidget {
     Key key,
     this.diameterRatio = RenderListWheelViewport.defaultDiameterRatio,
     this.perspective = RenderListWheelViewport.defaultPerspective,
+<<<<<<< HEAD
     this.curveRate = 0.0,
     this.useMagnifier = false,
     this.magnifyRate = 1.0,
+=======
+    this.curveRate,
+    this.useMagnifier,
+    this.magnifyRate,
+>>>>>>> 77b861b89... cleaning code
     @required this.itemExtent,
     this.clipToSize = true,
     this.renderChildrenOutsideViewport = false,
