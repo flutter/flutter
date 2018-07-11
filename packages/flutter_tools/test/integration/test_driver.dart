@@ -18,7 +18,7 @@ import '../src/common.dart';
 
 // Set this to true for debugging to get JSON written to stdout.
 const bool _printJsonAndStderr = false;
-const Duration defaultTimeout = const Duration(seconds: 20);
+const Duration defaultTimeout = const Duration(seconds: 60);
 
 String debugPrint(String msg) {
   const int maxLength = 200;
