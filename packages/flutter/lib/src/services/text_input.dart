@@ -7,10 +7,10 @@ import 'dart:io' show Platform;
 import 'dart:ui' show TextAffinity, hashValues;
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/src/services/system_chrome.dart';
 
 import 'message_codec.dart';
 import 'system_channels.dart';
+import 'system_chrome.dart';
 import 'text_editing.dart';
 
 export 'dart:ui' show TextAffinity;
