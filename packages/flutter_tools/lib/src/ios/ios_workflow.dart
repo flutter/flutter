@@ -48,8 +48,6 @@ class IOSWorkflow extends DoctorValidator implements Workflow {
 
   bool get hasHomebrew => os.which('brew') != null;
 
-  bool get hasPythonSixModule => kPythonSix.isInstalled;
-
   Future<String> get macDevMode async => (await runAsync(<String>['DevToolsSecurity', '-status'])).processResult.stdout;
 
   Future<bool> get _iosDeployIsInstalledAndMeetsVersionCheck async {
@@ -67,7 +65,6 @@ class IOSWorkflow extends DoctorValidator implements Workflow {
   Future<ValidationResult> validate() async {
     final List<ValidationMessage> messages = <ValidationMessage>[];
     ValidationType xcodeStatus = ValidationType.missing;
-    ValidationType pythonStatus = ValidationType.missing;
     ValidationType brewStatus = ValidationType.missing;
     String xcodeVersionInfo;
 
@@ -119,14 +116,6 @@ class IOSWorkflow extends DoctorValidator implements Workflow {
             '  sudo xcode-select --switch /Applications/Xcode.app/Contents/Developer'
         ));
       }
-    }
-
-    // Python dependencies installed
-    if (hasPythonSixModule) {
-      pythonStatus = ValidationType.installed;
-    } else {
-      pythonStatus = ValidationType.missing;
-      messages.add(new ValidationMessage.error(kPythonSix.errorMessage));
     }
 
     // brew installed
@@ -221,7 +210,7 @@ class IOSWorkflow extends DoctorValidator implements Workflow {
     }
 
     return new ValidationResult(
-      <ValidationType>[xcodeStatus, pythonStatus, brewStatus].reduce(_mergeValidationTypes),
+      <ValidationType>[xcodeStatus, brewStatus].reduce(_mergeValidationTypes),
       messages,
       statusInfo: xcodeVersionInfo
     );
