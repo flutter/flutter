@@ -636,7 +636,7 @@ abstract class ResidentRunner {
           compileExpression: compileExpression);
       await device.getVMs();
       await device.waitForViews();
-      if (device.views == null)
+      if (device.views.isEmpty)
         printStatus('No Flutter views available on ${device.device.name}');
       else
         viewFound = true;
