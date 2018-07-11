@@ -339,6 +339,7 @@ Matcher matchesSemanticsData({
   bool hasPasteAction = false,
   bool hasDidGainAccessibilityFocusAction = false,
   bool hasDidLoseAccessibilityFocusAction = false,
+  bool hasCustomAction = true,
 }) {
   final List<SemanticsFlag> flags = <SemanticsFlag>[];
   if (hasCheckedState)
@@ -405,6 +406,8 @@ Matcher matchesSemanticsData({
     actions.add(SemanticsAction.didGainAccessibilityFocus);
   if (hasDidLoseAccessibilityFocusAction)
     actions.add(SemanticsAction.didLoseAccessibilityFocus);
+  if (hasCustomAction)
+    actions.add(SemanticsAction.customAction);
 
   return new _MatchesSemanticsData(
     label: label,

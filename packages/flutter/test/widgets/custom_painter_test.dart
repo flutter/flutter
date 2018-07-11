@@ -349,6 +349,7 @@ void _defineTests() {
     ));
 
     final Set<SemanticsAction> allActions = SemanticsAction.values.values.toSet()
+      ..remove(SemanticsAction.customAction) // customAction is non user-exposed.
       ..remove(SemanticsAction.showOnScreen); // showOnScreen is non user-exposed.
 
     const int expectedId = 2;
