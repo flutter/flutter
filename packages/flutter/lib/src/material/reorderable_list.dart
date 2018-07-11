@@ -6,6 +6,7 @@ import 'dart:math';
 
 import 'package:flutter/widgets.dart';
 import 'package:flutter/rendering.dart';
+import 'package:quiver/collection.dart' as quiver;
 
 import 'material.dart';
 
@@ -327,8 +328,9 @@ class _ReorderableListContentState extends State<_ReorderableListContent> with T
     // Drops toWrap into the last position it was hovering over.
     void onDragEnded() {
       setState(() {
-        if (_dragStartIndex != _currentIndex)
+        if (_dragStartIndex != _currentIndex) {
           widget.onReorder(_dragStartIndex, _currentIndex);
+        }
         // Animates leftover space in the drop area closed.
         // TODO(djshuckerow): bring the animation in line with the Material
         // specifications.
@@ -339,12 +341,21 @@ class _ReorderableListContentState extends State<_ReorderableListContent> with T
     }
 
     Widget buildDragTarget(BuildContext context, List<Key> acceptedCandidates, List<dynamic> rejectedCandidates) {
+      // We create a global key based on both the child key and index
+      // so that when we reorder the list, a key doesn't get created twice.
+      final GlobalObjectKey keyIndexGlobalKey = new GlobalObjectKey('${toWrap.key}|$index');
+      // We pass the toWrapWithGlobalKey into the Draggable so that when a list
+      // item gets dragged, the accessibility framework can preserve the selected
+      // state of the dragging item.
+      final Widget toWrapWithGlobalKey = new KeyedSubtree(key: keyIndexGlobalKey, child: toWrap);
+
       // We build the draggable inside of a layout builder so that we can
       // constrain the size of the feedback dragging widget.
       Widget child = new LongPressDraggable<Key>(
         maxSimultaneousDrags: 1,
         axis: widget.scrollDirection,
         data: toWrap.key,
+        ignoringFeedbackSemantics: false,
         feedback: new Container(
           alignment: Alignment.topLeft,
           // These constraints will limit the cross axis of the drawn widget.
@@ -357,11 +368,11 @@ class _ReorderableListContentState extends State<_ReorderableListContent> with T
                   _draggingFeedbackSize = newSize;
                 });
               },
-              child: toWrap,
+              child: toWrapWithGlobalKey,
             ),
           ),
         ),
-        child: _dragging == toWrap.key ? const SizedBox() : toWrap,
+        child: _dragging == toWrap.key ? const SizedBox() : toWrapWithGlobalKey,
         childWhenDragging: const SizedBox(),
         dragAnchor: DragAnchor.child,
         onDragStarted: onDragStarted,
