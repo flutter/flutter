@@ -19,6 +19,7 @@ import '../src/common.dart';
 // Set this to true for debugging to get JSON written to stdout.
 const bool _printJsonAndStderr = false;
 const Duration defaultTimeout = const Duration(seconds: 20);
+const Duration appStartTimeout = const Duration(seconds: 60);
 
 String debugPrint(String msg) {
   const int maxLength = 200;
@@ -59,10 +60,12 @@ class FlutterTestDriver {
 
     // Set this up now, but we don't wait it yet. We want to make sure we don't
     // miss it while waiting for debugPort below.
-    final Future<Map<String, dynamic>> started = _waitFor(event: 'app.started');
+    final Future<Map<String, dynamic>> started = _waitFor(event: 'app.started',
+        timeout: appStartTimeout);
 
     if (withDebugger) {
-      final Future<Map<String, dynamic>> debugPort = _waitFor(event: 'app.debugPort');
+      final Future<Map<String, dynamic>> debugPort = _waitFor(event: 'app.debugPort',
+          timeout: appStartTimeout);
       final String wsUriString = (await debugPort)['params']['wsUri'];
       final Uri uri = Uri.parse(wsUriString);
       // Proxy the stream/sink for the VM Client so we can debugPrint it.
@@ -202,7 +205,7 @@ class FlutterTestDriver {
     return script.sourceLocation(frame.location.token);
   }
 
-  Future<Map<String, dynamic>> _waitFor({String event, int id}) async {
+  Future<Map<String, dynamic>> _waitFor({String event, int id, Duration timeout}) async {
     // Capture output to a buffer so if we don't get the repsonse we want we can show
     // the output that did arrive in the timeout error.
     final StringBuffer messages = new StringBuffer();
@@ -221,7 +224,7 @@ class FlutterTestDriver {
       }
     });
     
-    return response.future.timeout(defaultTimeout, onTimeout: () {
+    return response.future.timeout(timeout ?? defaultTimeout, onTimeout: () {
           if (event != null)
             throw 'Did not receive expected $event event.\nDid get:\n${messages.toString()}';
           else if (id != null)
