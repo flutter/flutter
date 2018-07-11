@@ -45,11 +45,11 @@ class PythonModule {
 
   final String name;
 
-  bool get isInstalled => exitsHappy(<String>['python', '-c', 'import $name']);
+  bool get isInstalled => exitsHappy(<String>['/usr/bin/python', '-c', 'import $name']);
 
   String get errorMessage =>
     'Missing Xcode dependency: Python module "$name".\n'
-    'Install via \'pip install $name\' or \'sudo easy_install $name\'.';
+    'Install via \'sudo /usr/bin/easy_install $name\'.';
 }
 
 class IMobileDevice {

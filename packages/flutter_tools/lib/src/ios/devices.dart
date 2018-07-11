@@ -234,6 +234,17 @@ class IOSDevice extends Device {
 
     final Status installStatus =
         logger.startProgress('Installing and launching...', expectSlowOperation: true);
+
+    // Push /usr/bin to the front of PATH to pick up default system python, package 'six'.
+    //
+    // ios-deploy transitively depends on LLDB.framework, which invokes a
+    // Python script that uses package 'six'. LLDB.framework relies on the
+    // python at the front of the path, which may not include package 'six'.
+    // Ensure that we pick up the system install of python, which does include
+    // it.
+    final Map<String, String> iosDeployEnv = new Map<String, String>.from(platform.environment);
+    iosDeployEnv['PATH'] = '/usr/bin:${iosDeployEnv['PATH']}';
+
     if (!debuggingOptions.debuggingEnabled) {
       // If debugging is not enabled, just launch the application and continue.
       printTrace('Debugging is not enabled');
@@ -241,6 +252,7 @@ class IOSDevice extends Device {
         launchCommand,
         mapFunction: monitorInstallationFailure,
         trace: true,
+        environment: iosDeployEnv,
       );
       installStatus.stop();
     } else {
@@ -262,6 +274,7 @@ class IOSDevice extends Device {
         launchCommand,
         mapFunction: monitorInstallationFailure,
         trace: true,
+        environment: iosDeployEnv,
       );
 
       localObservatoryUri = await launch.then<Uri>((int result) async {
