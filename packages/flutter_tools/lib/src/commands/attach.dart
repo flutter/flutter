@@ -138,7 +138,8 @@ class AttachCommand extends FlutterCommand {
         await hotRunner.attach();
       }
     } finally {
-      device.portForwarder.forwardedPorts.forEach(device.portForwarder.unforward);
+      final List<ForwardedPort> ports = device.portForwarder.forwardedPorts.toList();
+      ports.forEach(device.portForwarder.unforward);
     }
   }
 
