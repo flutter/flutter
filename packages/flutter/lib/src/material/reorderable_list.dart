@@ -6,7 +6,6 @@ import 'dart:math';
 
 import 'package:flutter/widgets.dart';
 import 'package:flutter/rendering.dart';
-import 'package:quiver/collection.dart' as quiver;
 
 import 'material.dart';
 
