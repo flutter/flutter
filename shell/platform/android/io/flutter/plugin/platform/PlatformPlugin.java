@@ -237,11 +237,11 @@ public class PlatformPlugin implements MethodCallHandler, ActivityLifecycleListe
                 if (!message.isNull("systemNavigationBarIconBrightness")) {
                     String systemNavigationBarIconBrightness = message.getString("systemNavigationBarIconBrightness");
                     switch (systemNavigationBarIconBrightness) {
-                        case "Brightness.light":
+                        case "Brightness.dark":
                             //View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR
                             flags |= 0x10;
                             break;
-                        case "Brightness.dark":
+                        case "Brightness.light":
                             flags &= ~0x10;
                             break;
                     }
@@ -255,11 +255,11 @@ public class PlatformPlugin implements MethodCallHandler, ActivityLifecycleListe
                 if (!message.isNull("statusBarIconBrightness")) {
                     String statusBarIconBrightness = message.getString("statusBarIconBrightness");
                     switch (statusBarIconBrightness) {
-                        case "Brightness.light":
+                        case "Brightness.dark":
                             // View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR
                             flags |= 0x2000;
                             break;
-                        case "Brightness.dark":
+                        case "Brightness.light":
                             flags &= ~0x2000;
                             break;
                     }
