@@ -870,10 +870,6 @@ class _AppRunLogger extends Logger {
     bool expectSlowOperation = false,
     int progressIndicatorPadding = 52,
   }) {
-    // Ignore nested progresses; return a no-op status object.
-    if (_status != null)
-      return new Status();
-
     final int id = _nextProgressId++;
 
     _sendProgressEvent(<String, dynamic>{
