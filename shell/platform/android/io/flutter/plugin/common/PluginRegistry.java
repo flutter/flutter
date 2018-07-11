@@ -7,6 +7,7 @@ package io.flutter.plugin.common;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import io.flutter.plugin.platform.PlatformViewRegistry;
 import io.flutter.view.FlutterNativeView;
 import io.flutter.view.FlutterView;
 import io.flutter.view.TextureRegistry;
@@ -98,6 +99,13 @@ public interface PluginRegistry {
          * managing backend textures.
          */
         TextureRegistry textures();
+
+        /**
+         * Returns the application's {@link PlatformViewRegistry}.
+         *
+         * Plugins can use the platform registry to register their view factories.
+         */
+        PlatformViewRegistry platformViewRegistry();
 
         /**
          * Returns the {@link FlutterView} that's instantiated by this plugin's

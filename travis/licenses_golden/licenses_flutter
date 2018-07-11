@@ -494,6 +494,11 @@ FILE: ../../../flutter/lib/ui/semantics/custom_accessibility_action.h
 FILE: ../../../flutter/lib/ui/text/asset_manager_font_provider.cc
 FILE: ../../../flutter/lib/ui/text/asset_manager_font_provider.h
 FILE: ../../../flutter/shell/platform/android/apk_asset_provider.h
+FILE: ../../../flutter/shell/platform/android/io/flutter/plugin/platform/PlatformView.java
+FILE: ../../../flutter/shell/platform/android/io/flutter/plugin/platform/PlatformViewFactory.java
+FILE: ../../../flutter/shell/platform/android/io/flutter/plugin/platform/PlatformViewRegistry.java
+FILE: ../../../flutter/shell/platform/android/io/flutter/plugin/platform/PlatformViewRegistryImpl.java
+FILE: ../../../flutter/shell/platform/android/io/flutter/plugin/platform/PlatformViewsController.java
 FILE: ../../../flutter/shell/platform/darwin/ios/framework/Headers/FlutterPluginAppLifeCycleDelegate.h
 FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/FlutterPluginAppLifeCycleDelegate.mm
 FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/accessibility_text_entry.h

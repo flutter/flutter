@@ -43,6 +43,7 @@ public class FlutterNativeView implements BinaryMessenger {
     }
 
     public void destroy() {
+        mPluginRegistry.destroy();
         mFlutterView = null;
         nativeDestroy(mNativePlatformView);
         mNativePlatformView = 0;
