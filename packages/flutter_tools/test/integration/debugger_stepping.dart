@@ -14,7 +14,7 @@ SteppingProject _project = new SteppingProject();
 FlutterTestDriver _flutter;
 
 void main() {
-  group('debugger stepping', () {
+  group('debugger', () {
     setUp(() async {
       final Directory tempDir = await fs.systemTempDirectory.createTemp('test_app');
       await _project.setUpIn(tempDir);
@@ -38,11 +38,9 @@ void main() {
 
       // Issue 5 steps, ensuring that we end up on the annotated lines each time.
       for (int i = 1; i <= _project.numberOfSteps; i++) {
-        // TODO(dantup): Need to step async properly:
-        // https://github.com/dart-lang/vm_service_client/issues/30
-        // https://github.com/dart-lang/vm_service_client/issues/31
-        // isolate.pauseEvent.atAsyncSuspension ? _flutter.stepOverAsync() : _flutter.stepOver();
-        _flutter.stepOver();
+        // TODO(dantup): Requires an updated version of vm_server_client
+        // that includes https://github.com/dart-lang/vm_service_client/pull/33
+        await _flutter.stepOverOrOverAsyncSuspension();
         final FileLocation location = await _flutter.getSourceLocation();
         final int actualLine = location.line;
         final int expectedLine = _project.lineForStep(i);
