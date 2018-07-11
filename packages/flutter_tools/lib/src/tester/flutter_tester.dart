@@ -44,6 +44,7 @@ class FlutterTesterDevice extends Device {
   FlutterTesterDevice(String deviceId) : super(deviceId);
 
   Process _process;
+  final DevicePortForwarder _portForwarder = new _NoopPortForwarder();
 
   @override
   Future<bool> get isLocalEmulator async => false;
@@ -52,7 +53,7 @@ class FlutterTesterDevice extends Device {
   String get name => 'Flutter test device';
 
   @override
-  DevicePortForwarder get portForwarder => null;
+  DevicePortForwarder get portForwarder => _portForwarder;
 
   @override
   Future<String> get sdkNameAndVersion async {
@@ -232,4 +233,22 @@ class _FlutterTesterDeviceLogReader extends DeviceLogReader {
   String get name => 'flutter tester log reader';
 
   void addLine(String line) => _logLinesController.add(line);
+}
+
+/// A fake port forwarder that doesn't do anything. Used by flutter tester
+/// where the VM is running on the same machine and does not need ports forwarding.
+class _NoopPortForwarder extends DevicePortForwarder {
+  @override
+  Future<int> forward(int devicePort, {int hostPort}) {
+    if (hostPort != null && hostPort != devicePort)
+      throw 'Forwarding to a different port is not supported by flutter tester';
+    return new Future<int>.value(devicePort);
+  }
+
+  // TODO: implement forwardedPorts
+  @override
+  List<ForwardedPort> get forwardedPorts => <ForwardedPort>[];
+
+  @override
+  Future<Null> unforward(ForwardedPort forwardedPort) => null;
 }
