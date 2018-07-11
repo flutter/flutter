@@ -100,6 +100,8 @@ class RenderListWheelViewport
     @required ViewportOffset offset,
     double diameterRatio = defaultDiameterRatio,
     double perspective = defaultPerspective,
+    double centerViewRate,
+    double magnifyRate,
     @required double itemExtent,
     bool clipToSize = true,
     bool renderChildrenOutsideViewport = false,
@@ -121,6 +123,8 @@ class RenderListWheelViewport
        _offset = offset,
        _diameterRatio = diameterRatio,
        _perspective = perspective,
+       _centerViewRate = centerViewRate ?? 1.0,
+       _magnifyRate = magnifyRate ?? 1.0,
        _itemExtent = itemExtent,
        _clipToSize = clipToSize,
        _renderChildrenOutsideViewport = renderChildrenOutsideViewport {
@@ -241,6 +245,47 @@ class RenderListWheelViewport
       return;
     _perspective = value;
     _hasScrolled();
+  }
+
+  /// Visual effect based on how we see the wheel. Imagine we are at some
+  /// distance away from the screen. The wheel is at the center of the screen.
+  /// If we move our position in the xAxis, we will see the wheel differently.
+  /// -----------
+  /// '         '
+  /// '         '
+  /// A    B    C
+  /// '         '
+  /// '         '
+  /// -----------
+  /// By default, we are at point B (the center). If we are at point A, the
+  /// wheel will curve to the left a little, for example. Similar for point C.
+  /// The centerViewRate is defaulted at 1.0, which is point B. 0.0 will be point A
+  /// and 2.0 will be point C. There's no limit to centerViewRate since we can be
+  /// infinite to the left or right, but a reasonable value would be in the
+  /// range [0.0, 2.0].
+  double get centerViewRate => _centerViewRate;
+  double _centerViewRate = 1.0;
+  set centerViewRate(double value) {
+    if(value == null) {
+      _centerViewRate = 1.0;
+      return;
+    }
+    _centerViewRate = value;
+  }
+
+  /// The zoom-in rate of the magnifier.
+  ///
+  /// The default value is 1.0, which will not change anything.
+  /// If the value is > 1.0, the center item will be zoomed in by that rate, and
+  /// it will also be rendered as flat, not cylindrical like the rest of the list.
+  double get magnifyRate => _magnifyRate;
+  double _magnifyRate = 1.0;
+  set magnifyRate(double value) {
+    if(value == null) {
+      _magnifyRate = 1.0;
+      return;
+    }
+    _magnifyRate = value;
   }
 
   /// {@template flutter.rendering.wheelList.itemExtent}
@@ -562,24 +607,92 @@ class RenderListWheelViewport
       perspective: _perspective,
     );
 
-    context.pushTransform(
-      // Text with TransformLayers and no cullRects currently have an issue rendering
-      // https://github.com/flutter/flutter/issues/14224.
-      false,
-      offset,
-      _centerOriginTransform(transform),
-      // Pre-transform painting function.
-      (PaintingContext context, Offset offset) {
-        context.paintChild(
-          child,
-          offset + new Offset(
-            untransformedPaintingCoordinates.dx,
-            // Paint everything in the center (e.g. angle = 0), then transform.
-            -_topScrollMarginExtent,
-          ),
-        );
-      },
-    );
+    double magnifierTopLine = size.height / 2 - _itemExtent * _magnifyRate / 2;
+    double magnifierBotLine = size.height / 2 + _itemExtent * _magnifyRate / 2;
+
+    // Some part of the child is in the center magnifier.
+    if(_magnifyRate != 1.0
+       && untransformedPaintingCoordinates.dy >= magnifierTopLine -
+                                              _itemExtent*_magnifyRate
+       && untransformedPaintingCoordinates.dy <= magnifierBotLine)
+    {
+      // Clipping the part in the center.
+      context.pushClipRect(
+        false,
+        offset,
+        new Rect.fromLTWH(0.0, magnifierTopLine,
+                          size.width, _itemExtent * _magnifyRate),
+        (PaintingContext context, Offset offset){
+          context.pushTransform(
+              false,
+              offset,
+              _magnifyTransform(),
+              (PaintingContext context, Offset offset) {
+                context.paintChild(
+                  child,
+                  offset + untransformedPaintingCoordinates);
+          });
+        });
+
+      // Clipping the part in either the top-half wheel or the bottom-half wheel.
+      context.pushClipRect(
+          false,
+          offset,
+          untransformedPaintingCoordinates.dy <= magnifierTopLine
+              ? new Rect.fromLTWH(0.0, 0.0, size.width, magnifierTopLine)
+              : new Rect.fromLTWH(0.0, magnifierBotLine,
+                                  size.width, magnifierTopLine),
+          (PaintingContext context, Offset offset) {
+            context.pushTransform(
+              // Text with TransformLayers and no cullRects currently have an issue rendering
+              // https://github.com/flutter/flutter/issues/14224.
+              false,
+              offset,
+              _centerOriginTransform(transform),
+              // Pre-transform painting function.
+              (PaintingContext context, Offset offset) {
+                context.paintChild(
+                  child,
+                  offset + new Offset(
+                    untransformedPaintingCoordinates.dx,
+                    // Paint everything in the center (e.g. angle = 0), then transform.
+                    -_topScrollMarginExtent,
+                  ),
+                );
+              },
+            );
+          }
+      );
+    }
+    else {
+      context.pushTransform(
+        // Text with TransformLayers and no cullRects currently have an issue rendering
+        // https://github.com/flutter/flutter/issues/14224.
+        false,
+        offset,
+        _centerOriginTransform(transform),
+        // Pre-transform painting function.
+            (PaintingContext context, Offset offset) {
+          context.paintChild(
+            child,
+            offset + new Offset(
+              untransformedPaintingCoordinates.dx,
+              // Paint everything in the center (e.g. angle = 0), then transform.
+              -_topScrollMarginExtent,
+            ),
+          );
+        },
+      );
+    }
+  }
+
+  /// Return the Matrix4 transformation that would zoom in the center item.
+  Matrix4 _magnifyTransform() {
+    Matrix4 magnify = Matrix4.identity();
+    magnify.translate(size.width / 2 * _centerViewRate, size.height / 2);
+    magnify.scale(_magnifyRate, _magnifyRate, _magnifyRate);
+    magnify.translate(-size.width / 2 * _centerViewRate, -size.height / 2);
+    return magnify;
   }
 
   /// Apply incoming transformation with the transformation's origin at the
@@ -587,9 +700,11 @@ class RenderListWheelViewport
   Matrix4 _centerOriginTransform(Matrix4 originalMatrix) {
     final Matrix4 result = new Matrix4.identity();
     final Offset centerOriginTranslation = Alignment.center.alongSize(size);
-    result.translate(centerOriginTranslation.dx, centerOriginTranslation.dy);
+    result.translate(centerOriginTranslation.dx * centerViewRate,
+                     centerOriginTranslation.dy);
     result.multiply(originalMatrix);
-    result.translate(-centerOriginTranslation.dx, -centerOriginTranslation.dy);
+    result.translate(-centerOriginTranslation.dx * centerViewRate,
+                     -centerOriginTranslation.dy);
     return result;
   }
 
