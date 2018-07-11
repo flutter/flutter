@@ -365,9 +365,9 @@ class RenderParagraph extends RenderBox {
         paint.shader = _overflowShader;
         _textPainter.text = new TextSpan(
           text: _textPainter.text.text,
-          style: new TextStyle(foreground: paint),
+          style: _textPainter.text.style.copyWith(foreground: paint),
         );
-        _textPainter.layout();
+        _layoutTextWithConstraints(constraints);
       }
       canvas.save();
       canvas.clipRect(bounds);
