@@ -24,7 +24,7 @@ void UniqueFDTraits::Free(HANDLE fd) {
 namespace unix {
 
 void UniqueFDTraits::Free(int fd) {
-  FML_IGNORE_EINTR(fd);
+  close(fd);
 }
 
 }  // namespace unix
