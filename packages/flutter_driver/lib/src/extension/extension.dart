@@ -65,7 +65,9 @@ class _DriverBinding extends BindingBase with ServicesBinding, SchedulerBinding,
 /// test calls [FlutterDriver.requestData].
 /// 
 /// `slienceErrors` will prevent exceptions from being logged. This is useful
-/// for tests where exceptions are expected. Defaults to false.
+/// for tests where exceptions are expected. Defaults to false. Any errors
+/// will still be returned in the `response` field of the result json along
+/// with an `isError` boolean.
 void enableFlutterDriverExtension({ DataHandler handler, bool silenceErrors = false }) {
   assert(WidgetsBinding.instance == null);
   new _DriverBinding(handler, silenceErrors);
