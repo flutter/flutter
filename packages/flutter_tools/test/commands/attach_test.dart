@@ -39,7 +39,7 @@ void main() {
       when(device.portForwarder).thenReturn(portForwarder);
       when(portForwarder.forward(devicePort, hostPort: anyNamed('hostPort'))).thenAnswer((_) async => hostPort);
       when(portForwarder.forwardedPorts).thenReturn(<ForwardedPort>[new ForwardedPort(hostPort, devicePort)]);
-      when(portForwarder.unforward).thenReturn((ForwardedPort _) async => null);
+      when(portForwarder.unforward(any)).thenAnswer((_) async => null);
       testDeviceManager.addDevice(device);
 
       final AttachCommand command = new AttachCommand();
@@ -60,7 +60,7 @@ void main() {
       when(device.portForwarder).thenReturn(portForwarder);
       when(portForwarder.forward(devicePort)).thenAnswer((_) async => hostPort);
       when(portForwarder.forwardedPorts).thenReturn(<ForwardedPort>[new ForwardedPort(hostPort, devicePort)]);
-      when(portForwarder.unforward).thenReturn((ForwardedPort _) async => null);
+      when(portForwarder.unforward(any)).thenAnswer((_) async => null);
       testDeviceManager.addDevice(device);
 
       final AttachCommand command = new AttachCommand();
