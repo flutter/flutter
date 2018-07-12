@@ -245,7 +245,6 @@ class _NoopPortForwarder extends DevicePortForwarder {
     return new Future<int>.value(devicePort);
   }
 
-  // TODO: implement forwardedPorts
   @override
   List<ForwardedPort> get forwardedPorts => <ForwardedPort>[];
 
