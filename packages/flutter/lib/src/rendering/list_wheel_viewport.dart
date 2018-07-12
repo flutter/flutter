@@ -113,6 +113,7 @@ class RenderListWheelViewport
        assert(perspective != null),
        assert(perspective > 0),
        assert(perspective <= 0.01, perspectiveTooHighMessage),
+       assert(magnifyRate == null || magnifyRate > 0),
        assert(itemExtent != null),
        assert(itemExtent > 0),
        assert(clipToSize != null),

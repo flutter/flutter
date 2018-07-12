@@ -51,6 +51,7 @@ class CupertinoPicker extends StatefulWidget {
     @required this.children,
   }) : assert(diameterRatio != null),
        assert(diameterRatio > 0.0, RenderListWheelViewport.diameterRatioZeroMessage),
+       assert(magnifyRate > 0),
        assert(itemExtent != null),
        assert(itemExtent > 0),
        super(key: key);

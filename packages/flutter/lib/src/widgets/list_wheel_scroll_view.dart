@@ -408,6 +408,7 @@ class ListWheelScrollView extends StatefulWidget {
        assert(perspective != null),
        assert(perspective > 0),
        assert(perspective <= 0.01, RenderListWheelViewport.perspectiveTooHighMessage),
+       assert(magnifyRate > 0),
        assert(itemExtent != null),
        assert(itemExtent > 0),
        assert(clipToSize != null),

@@ -49,6 +49,21 @@ void main() {
       );
       expect(tester.getSize(find.byType(ListWheelScrollView)), const Size(800.0, 600.0));
     });
+
+
+    testWidgets('ListWheelScrollView needs positive magnifyRate', (WidgetTester tester) async {
+      expect(
+            () {
+          new ListWheelScrollView(
+            useMagnifier: true,
+            magnifyRate: -1.0,
+            itemExtent: 20.0,
+            children: <Widget>[new Container()],
+          );
+        },
+        throwsAssertionError,
+      );
+    });
   });
 
   group('layout', () {
@@ -238,6 +253,30 @@ void main() {
   });
 
   group('viewport transformation', () {
+    testWidgets('Center child is magnified', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        new Directionality(
+          textDirection: TextDirection.ltr,
+          child: new RepaintBoundary(
+            key: const Key('list_wheel_scroll_view'),
+            child: new ListWheelScrollView(
+              useMagnifier: true,
+              magnifyRate: 2.0,
+              itemExtent: 50.0,
+              children: List<Widget>.generate(10, (int index) {
+                return const Placeholder();
+              }),
+            ),
+          ),
+        ),
+      );
+
+      await expectLater(
+        find.byKey(const Key('list_wheel_scroll_view')),
+        matchesGoldenFile('list_wheel_scroll_view.center_child.magnified.png'),
+      );
+    });
+
     testWidgets('Default middle transform', (WidgetTester tester) async {
       await tester.pumpWidget(
         new Directionality(
@@ -265,6 +304,31 @@ void main() {
           moreOrLessEquals(0.0), moreOrLessEquals(0.0), 0.0, moreOrLessEquals(1.0),
         ]),
       ));
+    });
+
+    testWidgets('Curve the wheel to the left', (WidgetTester tester) async {
+      final ScrollController controller = new ScrollController(initialScrollOffset: 300.0);
+      await tester.pumpWidget(
+        new Directionality(
+          textDirection: TextDirection.ltr,
+          child: new RepaintBoundary(
+            key: const Key('list_wheel_scroll_view'),
+            child: new ListWheelScrollView(
+              controller: controller,
+              curveRate: -1.0,
+              itemExtent: 50.0,
+              children: List<Widget>.generate(32, (int index) {
+                return const Placeholder();
+              }),
+          ),
+        ),
+      ),
+      );
+
+      await expectLater(
+        find.byKey(const Key('list_wheel_scroll_view')),
+        matchesGoldenFile('list_wheel_scroll_view.curved_wheel.left.png'),
+      );
     });
 
     testWidgets('Scrolling, diameterRatio, perspective all changes matrix', (WidgetTester tester) async {
