@@ -622,4 +622,72 @@ void _tests() {
 
     semantics.dispose();
   });
+
+
+  testWidgets('chervons animate when scrolling month picker', (WidgetTester tester) async {
+    final Key _datePickerKey = new UniqueKey();
+    DateTime _selectedDate = new DateTime(2016, DateTime.july, 26);
+
+    await tester.pumpWidget(
+      new MaterialApp(
+        home: new StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return new Container(
+              width: 400.0,
+              child: new SingleChildScrollView(
+                child: new Material(
+                  child: new MonthPicker(
+                    firstDate: new DateTime(0),
+                    lastDate: new DateTime(9999),
+                    key: _datePickerKey,
+                    selectedDate: _selectedDate,
+                    onChanged: (DateTime value) {
+                      setState(() {
+                        _selectedDate = value;
+                      });
+                    },
+                  ),
+                ),
+              ),
+            );
+          },
+        ),
+      )
+    );
+
+    // Initial chevron animation state should be dismissed
+    // An AlwaysStoppedAnimation is also found and is ignored
+    find.byType(FadeTransition).evaluate().forEach((Element element) {
+      final ft = element.widget as FadeTransition;
+      if (!(ft.opacity is AlwaysStoppedAnimation)) {
+        expect(ft.opacity.status, equals(AnimationStatus.dismissed));
+        expect(ft.opacity.value, equals(1.0));
+      }
+    });
+
+    // Drag and hold the picker to test for the opacity change
+    final TestGesture gesture = await tester.startGesture(const Offset(100.0, 100.0));
+    await gesture.moveBy(const Offset(50.0, 100.0), );
+    await tester.pumpAndSettle();
+    expect(find.byType(FadeTransition), findsWidgets);
+    find.byType(FadeTransition).evaluate().forEach((Element element) {
+      final ft = element.widget as FadeTransition;
+      if (!(ft.opacity is AlwaysStoppedAnimation)) {
+        expect(ft.opacity.status, equals(AnimationStatus.completed));
+        expect(ft.opacity.value, equals(0.5));
+      }
+    });
+
+    // Release the drag and test for the opacity to return to original value
+    await gesture.up();
+    await tester.pumpAndSettle();
+    expect(find.byType(FadeTransition), findsWidgets);
+    find.byType(FadeTransition).evaluate().forEach((Element element) {
+      final ft = element.widget as FadeTransition;
+      if (!(ft.opacity is AlwaysStoppedAnimation)) {
+        expect(ft.opacity.status, equals(AnimationStatus.dismissed));
+        expect(ft.opacity.value, equals(1.0));
+      }
+    });
+  });
 }
