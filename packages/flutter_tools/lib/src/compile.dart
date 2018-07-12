@@ -442,7 +442,7 @@ class ResidentCompiler {
   /// accepted previously so that next call to [recompile] produces complete
   /// kernel file.
   void reset() {
-    _server.stdin.writeln('reset');
+    _server?.stdin?.writeln('reset');
   }
 
   String _mapFilename(String filename) {
