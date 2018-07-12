@@ -250,6 +250,76 @@ void main() {
     await checkCursorToggle();
   });
 
+  testWidgets('cursor has expected defaults', (WidgetTester tester) async {
+    await tester.pumpWidget(
+        overlay(
+          child: const TextField(
+            cursorRadius: Radius.circular(3.0),
+          ),
+        )
+    );
+
+    final TextField textField =
+    tester.firstWidget(find.byType(TextField));
+    expect(textField.cursorWidth, 10.0);
+    expect(textField.cursorRadius, const Radius.circular(3.0));
+  });
+
+  testWidgets('cursor layout has correct width', (WidgetTester tester) async {
+    final TextEditingController controller = new TextEditingController();
+
+    await tester.pumpWidget(
+        overlay(
+          child: new RepaintBoundary(
+            key: const ValueKey<int>(1),
+            child: new TextField(
+              controller: controller,
+              cursorWidth: 15.0,
+            ),
+          ),
+        )
+    );
+    expect(controller.selection.baseOffset, -1);
+    expect(controller.selection.extentOffset, -1);
+
+    const String testValue = ' ';
+    await tester.enterText(find.byType(TextField), testValue);
+    await skipPastScrollingAnimation(tester);
+
+    await expectLater(
+      find.byKey(const ValueKey<int>(1)),
+      matchesGoldenFile('text_field_test.0.0.png'),
+    );
+  }, skip: !Platform.isMacOS);
+
+  testWidgets('cursor layout has correct radius', (WidgetTester tester) async {
+    final TextEditingController controller = new TextEditingController();
+
+    await tester.pumpWidget(
+        overlay(
+          child: new RepaintBoundary(
+            key: const ValueKey<int>(1),
+            child: new TextField(
+              controller: controller,
+              cursorWidth: 15.0,
+              cursorRadius: const Radius.circular(3.0),
+            ),
+          ),
+        )
+    );
+    expect(controller.selection.baseOffset, -1);
+    expect(controller.selection.extentOffset, -1);
+
+    const String testValue = ' ';
+    await tester.enterText(find.byType(TextField), testValue);
+    await skipPastScrollingAnimation(tester);
+
+    await expectLater(
+      find.byKey(const ValueKey<int>(1)),
+      matchesGoldenFile('text_field_test.1.0.png'),
+    );
+  }, skip: !Platform.isMacOS);
+
   testWidgets('obscureText control test', (WidgetTester tester) async {
     await tester.pumpWidget(
       overlay(
