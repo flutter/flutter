@@ -181,6 +181,10 @@ class FlutterCommandRunner extends CommandRunner<Null> {
   @override
   ArgResults parse(Iterable<String> args) {
     try {
+      // This is where the CommandRunner would call argParser.parse(args). We
+      // override this function so we can call tryArgsCompletion instead, so the
+      // completion package can interrogate the argParser, and as part of that,
+      // it calls argParser.parse(args) itself and returns the result.
       return tryArgsCompletion(args, argParser);
     } on ArgParserException catch (error) {
       if (error.commands.isEmpty) {
