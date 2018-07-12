@@ -210,6 +210,7 @@ class EditableText extends StatefulWidget {
     this.rendererIgnoresPointer = false,
     this.cursorWidth = 1.0,
     this.cursorRadius,
+    this.scrollPadding = const EdgeInsets.all(20.0),
   }) : assert(controller != null),
        assert(focusNode != null),
        assert(obscureText != null),
@@ -220,6 +221,7 @@ class EditableText extends StatefulWidget {
        assert(maxLines == null || maxLines > 0),
        assert(autofocus != null),
        assert(rendererIgnoresPointer != null),
+       assert(scrollPadding != null),
        keyboardType = keyboardType ?? (maxLines == 1 ? TextInputType.text : TextInputType.multiline),
        inputFormatters = maxLines == 1
            ? (
@@ -364,6 +366,15 @@ class EditableText extends StatefulWidget {
   ///
   /// By default, the cursor has a Radius of zero.
   final Radius cursorRadius;
+
+  /// Enlarges the visible area when scrolling into view due to focus gain
+  ///
+  /// When this widget receives focus and is not completely visible (for example scrolled partially off the screen or overlapped by the keyboard)
+  /// then it will attempt to make itself visible by scrolling.
+  /// This value controls how much bigger the visible area after the scroll should be.
+  ///
+  /// Defaults to EdgeInserts.all(20.0)
+  final EdgeInsets scrollPadding;
 
   @override
   EditableTextState createState() => new EditableTextState();
@@ -678,9 +689,11 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
         curve: _caretAnimationCurve,
       );
       final Rect newCaretRect = _getCaretRectAtScrollOffset(_currentCaretRect, scrollOffsetForCaret);
+      final Rect inflatedRect = Rect.fromLTRB(newCaretRect.left - widget.scrollPadding.left, newCaretRect.top - widget.scrollPadding.top,
+          newCaretRect.right + widget.scrollPadding.right, newCaretRect.bottom + widget.scrollPadding.bottom);
       _editableKey.currentContext.findRenderObject().showOnScreen(
-        // Inflate ensures that caret is not positioned directly at the edge.
-        rect: newCaretRect.inflate(20.0),
+        // Creates a new rect which is scrollInsets bigger than the text rect.
+        rect: inflatedRect,
         duration: _caretAnimationDuration,
         curve: _caretAnimationCurve,
       );

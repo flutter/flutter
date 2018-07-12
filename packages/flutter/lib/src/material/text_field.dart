@@ -115,6 +115,7 @@ class TextField extends StatefulWidget {
     this.onSubmitted,
     this.inputFormatters,
     this.enabled,
+    this.scrollPadding = const EdgeInsets.all(20.0),
   }) : assert(keyboardType != null),
        assert(textInputAction != null),
        assert(textAlign != null),
@@ -122,7 +123,8 @@ class TextField extends StatefulWidget {
        assert(obscureText != null),
        assert(autocorrect != null),
        assert(maxLengthEnforced != null),
-       assert(maxLines == null || maxLines > 0),
+        assert(scrollPadding != null),
+      assert(maxLines == null || maxLines > 0),
        assert(maxLength == null || maxLength > 0),
        keyboardType = maxLines == 1 ? keyboardType : TextInputType.multiline,
        super(key: key);
@@ -277,6 +279,15 @@ class TextField extends StatefulWidget {
   /// If non-null this property overrides the [decoration]'s
   /// [Decoration.enabled] property.
   final bool enabled;
+
+  /// Enlarges the visible area when scrolling into view due to focus gain
+  ///
+  /// When this widget receives focus and is not completely visible (for example scrolled partially off the screen or overlapped by the keyboard)
+  /// then it will attempt to make itself visible by scrolling.
+  /// This value controls how much bigger the visible area after the scroll should be.
+  ///
+  /// Defaults to EdgeInserts.all(20.0)
+  final EdgeInsets scrollPadding;
 
   @override
   _TextFieldState createState() => new _TextFieldState();
@@ -497,6 +508,7 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
         onSelectionChanged: _handleSelectionChanged,
         inputFormatters: formatters,
         rendererIgnoresPointer: true,
+        scrollPadding: widget.scrollPadding,
       ),
     );
 

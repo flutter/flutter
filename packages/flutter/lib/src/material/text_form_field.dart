@@ -69,6 +69,7 @@ class TextFormField extends FormField<String> {
     FormFieldValidator<String> validator,
     List<TextInputFormatter> inputFormatters,
     bool enabled,
+    EdgeInsets scrollPadding = const EdgeInsets.all(20.0),
   }) : assert(initialValue == null || controller == null),
        assert(keyboardType != null),
        assert(textAlign != null),
@@ -77,6 +78,7 @@ class TextFormField extends FormField<String> {
        assert(autocorrect != null),
        assert(autovalidate != null),
        assert(maxLengthEnforced != null),
+       assert(scrollPadding != null),
        assert(maxLines == null || maxLines > 0),
        assert(maxLength == null || maxLength > 0),
        super(
@@ -106,6 +108,7 @@ class TextFormField extends FormField<String> {
         onSubmitted: onFieldSubmitted,
         inputFormatters: inputFormatters,
         enabled: enabled,
+        scrollPadding: scrollPadding,
       );
     },
   );
