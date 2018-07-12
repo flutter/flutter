@@ -34,7 +34,7 @@ class Upload {
 
   List<int> largeImage;
   List<int> smallImage;
-  bool largeImageSaved = false;
+  bool largeImageSaved;
   int retryCount = 0;
   bool isComplete = false;
 
