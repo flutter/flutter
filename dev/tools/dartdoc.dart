@@ -293,11 +293,11 @@ void putRedirectInOldIndexLocation() {
 }
 
 List<String> findPackageNames() {
-  return findPackages().map((Directory dir) => path.basename(dir.path)).toList();
+  return findPackages().map((FileSystemEntity file) => path.basename(file.path)).toList();
 }
 
 /// Finds all packages in the Flutter SDK
-List<Directory> findPackages() {
+List<FileSystemEntity> findPackages() {
   return new Directory('packages')
     .listSync()
     .where((FileSystemEntity entity) {

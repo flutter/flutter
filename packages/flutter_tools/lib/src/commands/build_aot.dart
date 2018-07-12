@@ -101,7 +101,7 @@ class BuildAotCommand extends BuildSubCommand {
       // Build AOT snapshot.
       if (platform == TargetPlatform.ios) {
         // Determine which iOS architectures to build for.
-        final Iterable<IOSArch> buildArchs = argResults['ios-arch'].map(getIOSArchForName);
+        final Iterable<IOSArch> buildArchs = argResults['ios-arch'].map<IOSArch>(getIOSArchForName);
         final Map<IOSArch, String> iosBuilds = <IOSArch, String>{};
         for (IOSArch arch in buildArchs)
           iosBuilds[arch] = fs.path.join(outputPath, getNameForIOSArch(arch));
