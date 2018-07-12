@@ -145,7 +145,7 @@ Future<Map<String, double>> _readJsonResults(Process process) {
       // ignore: deprecated_member_use
       process.kill(ProcessSignal.SIGINT); // flutter run doesn't quit automatically
       try {
-        completer.complete(new Map<String, double>.from(json.decode(jsonOutput)));
+        completer.complete(json.decode(jsonOutput));
       } catch (ex) {
         completer.completeError('Decoding JSON failed ($ex). JSON string was: $jsonOutput');
       }
