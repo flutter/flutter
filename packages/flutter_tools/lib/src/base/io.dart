@@ -121,6 +121,7 @@ class ProcessSignal implements io.ProcessSignal {
   static const ProcessSignal SIGUSR1 = const _PosixProcessSignal._(io.ProcessSignal.SIGUSR1); // ignore: deprecated_member_use
   static const ProcessSignal SIGUSR2 = const _PosixProcessSignal._(io.ProcessSignal.SIGUSR2); // ignore: deprecated_member_use
   static const ProcessSignal SIGINT =  const ProcessSignal(io.ProcessSignal.SIGINT); // ignore: deprecated_member_use
+  static const ProcessSignal SIGKILL =  const ProcessSignal(io.ProcessSignal.SIGKILL); // ignore: deprecated_member_use
 
   final io.ProcessSignal _delegate;
 

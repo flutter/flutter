@@ -141,14 +141,14 @@ class FlutterTestDriver {
   Future<int> _killGracefully() async {
     if (_procPid == null)
       return -1;
-    _debugPrint('Sending SIGINT to $_procPid..');
+    _debugPrint('Sending SIGTERM to $_procPid..');
     Process.killPid(_procPid);
     return _proc.exitCode.timeout(quitTimeout, onTimeout: _killForcefully);
   }
 
   Future<int> _killForcefully() {
-    _debugPrint('Sending SIGTERM to $_procPid..');
-    Process.killPid(_procPid, ProcessSignal.SIGTERM);
+    _debugPrint('Sending SIGKILL to $_procPid..');
+    Process.killPid(_procPid, ProcessSignal.SIGKILL);
     return _proc.exitCode;
   }
 
