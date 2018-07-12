@@ -95,6 +95,29 @@ Future<Null> _verifyInternationalizations() async {
   print('Contents of $localizationsFile matches output of gen_localizations.dart script.');
 }
 
+Future<Null> _checkForTrailingSpaces() async {
+  if (!Platform.isWindows) {
+    final List<String> fileTypes = <String>['.dart', '.cxx', '.cpp', '.cc', '.h', '.java']
+      .map<String>((String type) => '--include=*$type').toList();
+    final List<String> excludedDirs = <String>['.pub-cache', 'cache', 'gen', 'build']
+      .map<String>((String type) => '--exclude-dir=$type').toList();
+    print('Checking for trailing whitespace in source files.');
+    await _runCommand('grep', fileTypes + excludedDirs +
+      <String>[
+        '--recursive',
+        '--line-number',
+        '--extended-regexp',
+        r'[[:space:]]+$',
+        flutterRoot,
+      ],
+      workingDirectory: flutterRoot,
+      printOutput: false,
+      expectFailure: true, // Just means a non-zero exit code is expected.
+      expectedExitCode: 1, // Indicates that zero lines were found.
+    );
+  }
+}
+
 Future<Null> _analyzeRepo() async {
   await _verifyGeneratedPluginRegistrants(flutterRoot);
   await _verifyNoBadImportsInFlutter(flutterRoot);
@@ -123,12 +146,7 @@ Future<Null> _analyzeRepo() async {
     options: <String>['--flutter-repo', '--watch', '--benchmark'],
   );
 
-  if (!Platform.isWindows) {
-    await _runCommand('grep',
-      <String>['--exclude-dir', '.pub-cache', '--exclude-dir', 'cache',  path.join(flutterRoot, 'dev', 'tools', 'mega_gallery.dart')],
-      workingDirectory: flutterRoot,
-    );
-  }
+  await _checkForTrailingSpaces();
 
   // Try an analysis against a big version of the gallery.
   await _runCommand(dart,
@@ -338,6 +356,7 @@ Future<Null> _runCommand(String executable, List<String> arguments, {
   String workingDirectory,
   Map<String, String> environment,
   bool expectFailure = false,
+  int expectedExitCode,
   bool printOutput = true,
   bool skip = false,
   Duration timeout = _kLongTimeout,
@@ -370,7 +389,7 @@ Future<Null> _runCommand(String executable, List<String> arguments, {
     stderr.writeln('Process timed out after $timeout');
     return expectFailure ? 0 : 1;
   });
-  if ((exitCode == 0) == expectFailure) {
+  if ((exitCode == 0) == expectFailure || (expectedExitCode != null && exitCode != expectedExitCode)) {
     if (!printOutput) {
       stdout.writeln(utf8.decode((await savedStdout).expand((List<int> ints) => ints).toList()));
       stderr.writeln(utf8.decode((await savedStderr).expand((List<int> ints) => ints).toList()));
