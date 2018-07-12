@@ -1475,9 +1475,6 @@ class _MockHttpClient implements HttpClient {
   Duration idleTimeout;
 
   @override
-  Duration connectionTimeout;
-
-  @override
   int maxConnectionsPerHost;
 
   @override
