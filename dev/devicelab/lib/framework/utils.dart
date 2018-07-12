@@ -362,7 +362,7 @@ Future<String> findJavaHome() async {
   return path.dirname(path.dirname(javaBinary));
 }
 
-Future<dynamic> inDirectory(dynamic directory, Future<dynamic> action()) async {
+Future<T> inDirectory<T>(dynamic directory, Future<T> action()) async {
   final String previousCwd = cwd;
   try {
     cd(directory);
