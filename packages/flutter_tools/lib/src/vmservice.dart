@@ -161,10 +161,8 @@ class VMService {
         if (expression is! String || expression.isEmpty)
           throw new rpc.RpcException.invalidParams(
               'Invalid \'expression\': $expression');
-        final List<String> definitions =
-            new List<String>.from(params['definitions'].asList);
-        final List<String> typeDefinitions =
-            new List<String>.from(params['typeDefinitions'].asList);
+        final List<String> definitions = params['definitions'].asList;
+        final List<String> typeDefinitions = params['typeDefinitions'].asList;
         final String libraryUri = params['libraryUri'].asString;
         final String klass = params['klass'].exists ? params['klass'].asString : null;
         final bool isStatic = params['isStatic'].asBoolOr(false);
@@ -352,7 +350,6 @@ class VMService {
       // If the VM doesn't yet have a view, wait for one to show up.
       printTrace('Waiting for Flutter view');
       await new Future<Null>.delayed(new Duration(seconds: attemptSeconds));
-      await getVM();
       await vm.refreshViews();
     }
   }
