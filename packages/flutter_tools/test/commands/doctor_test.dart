@@ -325,7 +325,7 @@ class VsCodeValidatorTestTargets extends VsCodeValidator {
   static final String validInstall = fs.path.join('test', 'data', 'vscode', 'application');
   static final String validExtensions = fs.path.join('test', 'data', 'vscode', 'extensions');
   static final String missingExtensions = fs.path.join('test', 'data', 'vscode', 'notExtensions');
-  VsCodeValidatorTestTargets._(String installDirectory, String extensionDirectory, {String edition}) 
+  VsCodeValidatorTestTargets._(String installDirectory, String extensionDirectory, {String edition})
     : super(new VsCode.fromDirectory(installDirectory, extensionDirectory, edition: edition));
 
   static VsCodeValidatorTestTargets get installedWithExtension =>

@@ -715,7 +715,7 @@ void main() {
       expect(tester.getTopLeft(find.text('V')), thirdWidgetLocation);
     });
   });
- 
+
 
   testWidgets('Drag and drop - onDraggableCanceled not called if dropped on accepting target', (WidgetTester tester) async {
     final List<int> accepted = <int>[];
@@ -1681,7 +1681,7 @@ void main() {
           ],
         ),
     ));
-    
+
     expect(semantics, hasSemantics(
       new TestSemantics.root(
         children: <TestSemantics>[
@@ -1741,7 +1741,7 @@ void main() {
     await tester.pump();
     await gesture.moveTo(secondLocation);
     await tester.pump();
-    
+
     expect(semantics, hasSemantics(
       new TestSemantics.root(
         children: <TestSemantics>[

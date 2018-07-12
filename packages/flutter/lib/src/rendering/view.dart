@@ -214,7 +214,7 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
     final Offset bottom = new Offset(bounds.center.dx, bounds.center.dy - ui.window.padding.bottom / ui.window.devicePixelRatio);
     final SystemUiOverlayStyle upperOverlayStyle = layer.find<SystemUiOverlayStyle>(top);
     // Only android has a customizable system navigation bar.
-    SystemUiOverlayStyle lowerOverlayStyle; 
+    SystemUiOverlayStyle lowerOverlayStyle;
     switch (defaultTargetPlatform) {
       case TargetPlatform.android:
         lowerOverlayStyle = layer.find<SystemUiOverlayStyle>(bottom);

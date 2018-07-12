@@ -20,7 +20,7 @@ const String noCertificatesInstruction = '''
 ════════════════════════════════════════════════════════════════════════════════
 No valid code signing certificates were found
 You can connect to your Apple Developer account by signing in with your Apple ID
-in Xcode and create an iOS Development Certificate as well as a Provisioning 
+in Xcode and create an iOS Development Certificate as well as a Provisioning
 Profile for your project by:
 $fixWithDevelopmentTeamInstruction
   5- Trust your newly created Development Certificate on your iOS device
@@ -37,12 +37,12 @@ Or run on an iOS simulator without code signing
 /// The user did iOS development but never on this project and/or device.
 const String noProvisioningProfileInstruction = '''
 ════════════════════════════════════════════════════════════════════════════════
-No Provisioning Profile was found for your project's Bundle Identifier or your 
-device. You can create a new Provisioning Profile for your project in Xcode for 
+No Provisioning Profile was found for your project's Bundle Identifier or your
+device. You can create a new Provisioning Profile for your project in Xcode for
 your team by:
 $fixWithDevelopmentTeamInstruction
 
-It's also possible that a previously installed app with the same Bundle 
+It's also possible that a previously installed app with the same Bundle
 Identifier was signed with a different certificate.
 
 For more information, please visit:
@@ -55,7 +55,7 @@ Or run on an iOS simulator without code signing
 /// Couldn't auto sign the app but can likely solved by retracing the signing flow in Xcode.
 const String noDevelopmentTeamInstruction = '''
 ════════════════════════════════════════════════════════════════════════════════
-Building a deployable iOS app requires a selected Development Team with a 
+Building a deployable iOS app requires a selected Development Team with a
 Provisioning Profile. Please ensure that a Development Team is selected by:
 $fixWithDevelopmentTeamInstruction
 
@@ -69,7 +69,7 @@ const String fixWithDevelopmentTeamInstruction = '''
        open ios/Runner.xcworkspace
   2- Select the 'Runner' project in the navigator then the 'Runner' target
      in the project settings
-  3- In the 'General' tab, make sure a 'Development Team' is selected. 
+  3- In the 'General' tab, make sure a 'Development Team' is selected.
      You may need to:
          - Log in with your Apple ID in Xcode first
          - Ensure you have a valid unique Bundle ID
