@@ -1,4 +1,4 @@
-Signature: 101cffae4e0a27ec0916e0a1917e4711
+Signature: 47bd4803aa3d790b1f1eff1b371d53e6
 
 UNUSED LICENSES:
 
@@ -17902,7 +17902,6 @@ FILE: ../../../third_party/skia/src/effects/SkColorMatrix.cpp
 FILE: ../../../third_party/skia/src/effects/SkColorMatrixFilter.cpp
 FILE: ../../../third_party/skia/src/effects/SkLayerDrawLooper.cpp
 FILE: ../../../third_party/skia/src/effects/SkPackBits.cpp
-FILE: ../../../third_party/skia/src/effects/SkPaintFlagsDrawFilter.cpp
 FILE: ../../../third_party/skia/src/effects/SkTableMaskFilter.cpp
 FILE: ../../../third_party/skia/src/gpu/GrContext.cpp
 FILE: ../../../third_party/skia/src/gpu/GrGpu.h
@@ -18556,7 +18555,6 @@ FILE: ../../../third_party/skia/gm/draw_bitmap_rect_skbug4374.cpp
 FILE: ../../../third_party/skia/gm/drawable.cpp
 FILE: ../../../third_party/skia/gm/drawatlas.cpp
 FILE: ../../../third_party/skia/gm/drawatlascolor.cpp
-FILE: ../../../third_party/skia/gm/drawfilter.cpp
 FILE: ../../../third_party/skia/gm/drawminibitmaprect.cpp
 FILE: ../../../third_party/skia/gm/fadefilter.cpp
 FILE: ../../../third_party/skia/gm/fontscalerdistortable.cpp
@@ -20024,9 +20022,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ====================================================================================================
 LIBRARY: skia
-ORIGIN: ../../../third_party/skia/include/core/SkDrawFilter.h + ../../../third_party/skia/LICENSE
+ORIGIN: ../../../third_party/skia/include/core/SkDrawLooper.h + ../../../third_party/skia/LICENSE
 TYPE: LicenseType.bsd
-FILE: ../../../third_party/skia/include/core/SkDrawFilter.h
 FILE: ../../../third_party/skia/include/core/SkDrawLooper.h
 FILE: ../../../third_party/skia/include/effects/SkBlurImageFilter.h
 FILE: ../../../third_party/skia/src/core/SkScan.h
@@ -20073,7 +20070,6 @@ FILE: ../../../third_party/skia/include/core/SkMallocPixelRef.h
 FILE: ../../../third_party/skia/include/core/SkPixelRef.h
 FILE: ../../../third_party/skia/include/core/SkUnPreMultiply.h
 FILE: ../../../third_party/skia/include/effects/SkBlurDrawLooper.h
-FILE: ../../../third_party/skia/include/effects/SkPaintFlagsDrawFilter.h
 FILE: ../../../third_party/skia/include/private/SkFloatBits.h
 FILE: ../../../third_party/skia/src/core/SkBitmap.cpp
 FILE: ../../../third_party/skia/src/core/SkCanvas.cpp
