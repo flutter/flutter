@@ -115,8 +115,9 @@ class TextField extends StatefulWidget {
     this.onSubmitted,
     this.inputFormatters,
     this.enabled,
-    this.cursorWidth = 10.0,
+    this.cursorWidth = 2.0,
     this.cursorRadius,
+    this.cursorColor,
   }) : assert(keyboardType != null),
        assert(textInputAction != null),
        assert(textAlign != null),
@@ -281,12 +282,17 @@ class TextField extends StatefulWidget {
   final bool enabled;
 
   /// How thick the cursor will be.
+  ///
+  /// Defaults to 2.0.
   final double cursorWidth;
 
   /// How rounded the corners of the cursor should be.
   ///
   /// By default, the cursor has a Radius of zero.
   final Radius cursorRadius;
+
+  /// The color to use when painting the cursor.
+  final Color cursorColor;
 
   @override
   _TextFieldState createState() => new _TextFieldState();
@@ -497,7 +503,6 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
         obscureText: widget.obscureText,
         autocorrect: widget.autocorrect,
         maxLines: widget.maxLines,
-        cursorColor: themeData.textSelectionColor,
         selectionColor: themeData.textSelectionColor,
         selectionControls: themeData.platform == TargetPlatform.iOS
             ? cupertinoTextSelectionControls
@@ -509,6 +514,7 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
         rendererIgnoresPointer: true,
         cursorWidth: widget.cursorWidth,
         cursorRadius: widget.cursorRadius,
+        cursorColor: widget.cursorColor != null ? widget.cursorColor : Theme.of(context).textSelectionColor,
       ),
     );
 
