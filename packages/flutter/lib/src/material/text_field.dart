@@ -280,8 +280,12 @@ class TextField extends StatefulWidget {
   /// [Decoration.enabled] property.
   final bool enabled;
 
+  /// How thick the cursor will be.
   final double cursorWidth;
 
+  /// How rounded the corners of the cursor should be.
+  ///
+  /// By default, the cursor has a Radius of zero.
   final Radius cursorRadius;
 
   @override
