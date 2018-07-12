@@ -339,7 +339,7 @@ Matcher matchesSemanticsData({
   bool hasPasteAction = false,
   bool hasDidGainAccessibilityFocusAction = false,
   bool hasDidLoseAccessibilityFocusAction = false,
-  bool hasCustomAction = true,
+  bool hasCustomAction = false,
 }) {
   final List<SemanticsFlag> flags = <SemanticsFlag>[];
   if (hasCheckedState)

@@ -307,6 +307,7 @@ List<Directory> findPackages() {
       // TODO(ianh): Use a real YAML parser here
       return !pubspec.readAsStringSync().contains('nodoc: true');
     })
+    .cast<Directory>()
     .toList();
 }
 
