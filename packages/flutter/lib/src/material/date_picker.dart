@@ -524,7 +524,7 @@ class MonthPicker extends StatefulWidget {
   _MonthPickerState createState() => new _MonthPickerState();
 }
 
-class _MonthPickerState extends State<MonthPicker> {
+class _MonthPickerState extends State<MonthPicker> with SingleTickerProviderStateMixin {
   @override
   void initState() {
     super.initState();
@@ -533,6 +533,13 @@ class _MonthPickerState extends State<MonthPicker> {
     _dayPickerController = new PageController(initialPage: monthPage);
     _handleMonthPageChanged(monthPage);
     _updateCurrentDate();
+
+    // Setup the fade animation for chevrons
+    _chevronOpacityController =
+        new AnimationController(duration: const Duration(milliseconds: 500), vsync: this);
+    final curve =
+        new CurvedAnimation(parent: _chevronOpacityController, curve: Curves.easeInOut);
+    _chevronOpacityAnimation = new Tween(begin: 1.0, end: 0.5).animate(curve);
   }
 
   @override
@@ -559,7 +566,8 @@ class _MonthPickerState extends State<MonthPicker> {
   DateTime _currentDisplayedMonthDate;
   Timer _timer;
   PageController _dayPickerController;
-  Color _chevronColor;
+  AnimationController _chevronOpacityController;
+  Animation<double> _chevronOpacityAnimation;
 
   void _updateCurrentDate() {
     _todayDate = new DateTime.now();
@@ -636,13 +644,13 @@ class _MonthPickerState extends State<MonthPicker> {
 
   /// Changes the chevron colors to disabled when scrolling starts
   bool _handleScrollStartNotification(BuildContext context) {
-    setState(() => _chevronColor = Theme.of(context).disabledColor);
+    _chevronOpacityController.forward();
     return false;
   }
 
   /// Changes the chevron colors to active when scrolling ends
   bool _handleScrollEndNotification(BuildContext context) {
-    setState(() => _chevronColor = Theme.of(context).iconTheme.color);
+    _chevronOpacityController.reverse();
     return false;
   }
 
@@ -675,13 +683,16 @@ class _MonthPickerState extends State<MonthPicker> {
             start: 8.0,
             child: new Semantics(
               sortKey: _MonthPickerSortKey.previousMonth,
-              child: new IconButton(
-                icon: new Icon(Icons.chevron_left, color: _chevronColor),
-                tooltip: _isDisplayingFirstMonth
-                    ? null
-                    : '${localizations.previousMonthTooltip} ${localizations.formatMonthYear(_previousMonthDate)}',
-                onPressed:
-                    _isDisplayingFirstMonth ? null : _handlePreviousMonth,
+              child: new FadeTransition(
+                opacity: _chevronOpacityAnimation,
+                child: new IconButton(
+                  icon: new Icon(Icons.chevron_left),
+                  tooltip: _isDisplayingFirstMonth
+                      ? null
+                      : '${localizations.previousMonthTooltip} ${localizations.formatMonthYear(_previousMonthDate)}',
+                  onPressed:
+                      _isDisplayingFirstMonth ? null : _handlePreviousMonth,
+                ),
               ),
             ),
           ),
@@ -690,12 +701,15 @@ class _MonthPickerState extends State<MonthPicker> {
             end: 8.0,
             child: new Semantics(
               sortKey: _MonthPickerSortKey.nextMonth,
-              child: new IconButton(
-                icon: new Icon(Icons.chevron_right, color: _chevronColor),
-                tooltip: _isDisplayingLastMonth
-                    ? null
-                    : '${localizations.nextMonthTooltip} ${localizations.formatMonthYear(_nextMonthDate)}',
-                onPressed: _isDisplayingLastMonth ? null : _handleNextMonth,
+              child: new FadeTransition(
+                opacity: _chevronOpacityAnimation,
+                child: new IconButton(
+                  icon: new Icon(Icons.chevron_right),
+                  tooltip: _isDisplayingLastMonth
+                      ? null
+                      : '${localizations.nextMonthTooltip} ${localizations.formatMonthYear(_nextMonthDate)}',
+                  onPressed: _isDisplayingLastMonth ? null : _handleNextMonth,
+                ),
               ),
             ),
           ),
