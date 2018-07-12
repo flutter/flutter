@@ -290,7 +290,7 @@ void main() {
       find.byKey(const ValueKey<int>(1)),
       matchesGoldenFile('text_field_test.0.0.png'),
     );
-  }, skip: !Platform.isMacOS);
+  }, skip: !Platform.isLinux);
 
   testWidgets('cursor layout has correct radius', (WidgetTester tester) async {
     final TextEditingController controller = new TextEditingController();
@@ -318,7 +318,7 @@ void main() {
       find.byKey(const ValueKey<int>(1)),
       matchesGoldenFile('text_field_test.1.0.png'),
     );
-  }, skip: !Platform.isMacOS);
+  }, skip: !Platform.isLinux);
 
   testWidgets('obscureText control test', (WidgetTester tester) async {
     await tester.pumpWidget(
