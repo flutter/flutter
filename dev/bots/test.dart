@@ -123,6 +123,13 @@ Future<Null> _analyzeRepo() async {
     options: <String>['--flutter-repo', '--watch', '--benchmark'],
   );
 
+  if (!Platform.isWindows) {
+    await _runCommand('grep',
+      <String>['--exclude-dir', '.pub-cache', '--exclude-dir', 'cache',  path.join(flutterRoot, 'dev', 'tools', 'mega_gallery.dart')],
+      workingDirectory: flutterRoot,
+    );
+  }
+
   // Try an analysis against a big version of the gallery.
   await _runCommand(dart,
     <String>['--preview-dart-2', path.join(flutterRoot, 'dev', 'tools', 'mega_gallery.dart')],
