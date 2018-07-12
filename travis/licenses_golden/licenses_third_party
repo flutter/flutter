@@ -1,4 +1,4 @@
-Signature: f7787a22a0627fe112b9159d9a18f967
+Signature: 1a84a68f9dd53c097cd26fff8e36a45c
 
 UNUSED LICENSES:
 
@@ -16961,6 +16961,7 @@ FILE: ../../../third_party/skia/gm/sharedcorners.cpp
 FILE: ../../../third_party/skia/include/android/SkAnimatedImage.h
 FILE: ../../../third_party/skia/include/core/SkCanvasVirtualEnforcer.h
 FILE: ../../../third_party/skia/include/core/SkCoverageMode.h
+FILE: ../../../third_party/skia/include/core/SkFontParameters.h
 FILE: ../../../third_party/skia/include/effects/SkShaderMaskFilter.h
 FILE: ../../../third_party/skia/include/effects/SkTrimPathEffect.h
 FILE: ../../../third_party/skia/include/gpu/GrDriverBugWorkarounds.h
