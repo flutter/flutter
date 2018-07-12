@@ -37,7 +37,7 @@ class ShellCompletionCommand extends FlutterCommand {
   @override
   bool get shouldUpdateCache => false;
 
-  /// Return null to disable tracking of the `bash-completion` command.
+  /// Return null to disable analytics recording of the `bash-completion` command.
   @override
   Future<String> get usagePath => null;
 
@@ -55,9 +55,10 @@ class ShellCompletionCommand extends FlutterCommand {
     final File outputFile = fs.file(argResults.rest.first);
     if (outputFile.existsSync() && !argResults['overwrite']) {
       throwToolExit(
-          'Output file ${outputFile.path} already exists, will not overwrite. '
-          'Use --overwrite to force overwriting existing output file.',
-          exitCode: 1);
+        'Output file ${outputFile.path} already exists, will not overwrite. '
+            'Use --overwrite to force overwriting existing output file.',
+        exitCode: 1,
+      );
     }
     try {
       outputFile.writeAsStringSync(generateCompletionScript(<String>['flutter']));
