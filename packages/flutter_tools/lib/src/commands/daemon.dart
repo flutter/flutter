@@ -377,11 +377,8 @@ class AppDomain extends Domain {
     
     return launch(
         runner,
-        ({
-          Completer<DebugConnectionInfo> connectionInfoCompleter,
-          Completer<void> appStartedCompleter
-        }) =>
-            runner.run(
+        ({ Completer<DebugConnectionInfo> connectionInfoCompleter,
+            Completer<void> appStartedCompleter }) => runner.run(
                 connectionInfoCompleter: connectionInfoCompleter,
                 appStartedCompleter: appStartedCompleter,
                 route: route),
