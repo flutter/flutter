@@ -14,14 +14,14 @@
 #include "flutter/shell/platform/darwin/ios/framework/Headers/FlutterViewController.h"
 #include "flutter/shell/platform/darwin/ios/framework/Source/FlutterView.h"
 #include "flutter/shell/platform/darwin/ios/framework/Source/accessibility_bridge.h"
-#include "flutter/shell/platform/darwin/ios/framework/Source/platform_message_router.h"
+#include "flutter/shell/platform/darwin/ios/headless_platform_view_ios.h"
 #include "flutter/shell/platform/darwin/ios/ios_surface.h"
 #include "lib/fxl/functional/closure.h"
 #include "lib/fxl/macros.h"
 
 namespace shell {
 
-class PlatformViewIOS final : public PlatformView {
+class PlatformViewIOS final : public HeadlessPlatformViewIOS {
  public:
   explicit PlatformViewIOS(PlatformView::Delegate& delegate,
                            blink::TaskRunners task_runners,
@@ -29,8 +29,6 @@ class PlatformViewIOS final : public PlatformView {
                            FlutterView* owner_view_);
 
   ~PlatformViewIOS() override;
-
-  PlatformMessageRouter& GetPlatformMessageRouter();
 
   FlutterViewController* GetOwnerViewController() const;
 
@@ -59,9 +57,6 @@ class PlatformViewIOS final : public PlatformView {
   // |shell::PlatformView|
   void SetSemanticsEnabled(bool enabled) override;
 
-  // |shell::PlatformView|
-  void HandlePlatformMessage(
-      fxl::RefPtr<blink::PlatformMessage> message) override;
 
   // |shell::PlatformView|
   void UpdateSemantics(blink::SemanticsNodeUpdates update,

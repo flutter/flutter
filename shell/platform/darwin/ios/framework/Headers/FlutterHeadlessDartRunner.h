@@ -7,8 +7,18 @@
 
 #import <Foundation/Foundation.h>
 
+#include "FlutterBinaryMessenger.h"
 #include "FlutterDartProject.h"
 #include "FlutterMacros.h"
+
+/**
+A callback for when FlutterHeadlessDartRunner has attempted to start a Dart
+Isolate in the background.
+
+- Parameter success: YES if the Isolate was started and run successfully, NO
+  otherwise.
+*/
+typedef void (^FlutterHeadlessDartRunnerCallback)(BOOL success);
 
 /**
  The FlutterHeadlessDartRunner runs Flutter Dart code with a null rasterizer,
@@ -16,18 +26,31 @@
  code e.g. in the background from a plugin.
 */
 FLUTTER_EXPORT
-@interface FlutterHeadlessDartRunner : NSObject
+@interface FlutterHeadlessDartRunner : NSObject <FlutterBinaryMessenger>
 
 /**
  Runs a Dart function on an Isolate that is not the main application's Isolate.
- The first call will create a new Isolate. Subsequent calls will reuse that
- Isolate. The Isolate is destroyed when the FlutterHeadlessDartRunner is
- destroyed.
+ The first call will create a new Isolate. Subsequent calls will return
+ immediately.
 
  - Parameter entrypoint: The name of a top-level function from the same Dart
    library that contains the app's main() function.
 */
 - (void)runWithEntrypoint:(NSString*)entrypoint;
+
+/**
+ Runs a Dart function on an Isolate that is not the main application's Isolate.
+ The first call will create a new Isolate. Subsequent calls will return
+ immediately.
+
+ - Parameter entrypoint: The name of a top-level function from a Dart library.
+ - Parameter uri: The URI of the Dart library which contains entrypoint.
+ - Parameter callback: The callback to be invoked when the new Isolate is
+   invoked.
+*/
+- (void)runWithEntrypointAndCallback:(NSString*)entrypoint
+                          libraryUri:(NSString*)uri
+                          completion:(FlutterHeadlessDartRunnerCallback)callback;
 
 @end
 

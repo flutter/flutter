@@ -206,6 +206,7 @@ FILE: ../../../flutter/shell/platform/darwin/desktop/Info.plist
 FILE: ../../../flutter/shell/platform/darwin/ios/framework/Flutter.podspec
 FILE: ../../../flutter/shell/platform/darwin/ios/framework/Info.plist
 FILE: ../../../flutter/shell/platform/darwin/ios/framework/module.modulemap
+FILE: ../../../flutter/shell/platform/darwin/ios/headless_platform_view_ios.mm
 FILE: ../../../flutter/shell/platform/embedder/assets/EmbedderInfo.plist
 FILE: ../../../flutter/shell/platform/embedder/assets/embedder.modulemap
 FILE: ../../../flutter/shell/platform/embedder/fixtures/simple_main.dart
@@ -489,6 +490,7 @@ FILE: ../../../flutter/flutter_kernel_transformers/lib/track_widget_constructor_
 FILE: ../../../flutter/lib/ui/isolate_name_server.dart
 FILE: ../../../flutter/lib/ui/painting/image_encoding.cc
 FILE: ../../../flutter/lib/ui/painting/image_encoding.h
+FILE: ../../../flutter/lib/ui/plugins.dart
 FILE: ../../../flutter/lib/ui/semantics/custom_accessibility_action.cc
 FILE: ../../../flutter/lib/ui/semantics/custom_accessibility_action.h
 FILE: ../../../flutter/lib/ui/text/asset_manager_font_provider.cc
@@ -499,10 +501,13 @@ FILE: ../../../flutter/shell/platform/android/io/flutter/plugin/platform/Platfor
 FILE: ../../../flutter/shell/platform/android/io/flutter/plugin/platform/PlatformViewRegistry.java
 FILE: ../../../flutter/shell/platform/android/io/flutter/plugin/platform/PlatformViewRegistryImpl.java
 FILE: ../../../flutter/shell/platform/android/io/flutter/plugin/platform/PlatformViewsController.java
+FILE: ../../../flutter/shell/platform/darwin/ios/framework/Headers/FlutterCallbackCache.h
 FILE: ../../../flutter/shell/platform/darwin/ios/framework/Headers/FlutterPluginAppLifeCycleDelegate.h
+FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/FlutterCallbackCache.mm
 FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/FlutterPluginAppLifeCycleDelegate.mm
 FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/accessibility_text_entry.h
 FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/accessibility_text_entry.mm
+FILE: ../../../flutter/shell/platform/darwin/ios/headless_platform_view_ios.h
 ----------------------------------------------------------------------------------------------------
 Copyright 2018 The Chromium Authors. All rights reserved.
 
@@ -590,12 +595,15 @@ FILE: ../../../flutter/lib/ui/isolate_name_server/isolate_name_server.cc
 FILE: ../../../flutter/lib/ui/isolate_name_server/isolate_name_server.h
 FILE: ../../../flutter/lib/ui/isolate_name_server/isolate_name_server_natives.cc
 FILE: ../../../flutter/lib/ui/isolate_name_server/isolate_name_server_natives.h
+FILE: ../../../flutter/lib/ui/plugins/callback_cache.cc
+FILE: ../../../flutter/lib/ui/plugins/callback_cache.h
 FILE: ../../../flutter/shell/common/isolate_configuration.cc
 FILE: ../../../flutter/shell/common/isolate_configuration.h
 FILE: ../../../flutter/shell/platform/android/android_shell_holder.cc
 FILE: ../../../flutter/shell/platform/android/android_shell_holder.h
 FILE: ../../../flutter/shell/platform/android/platform_message_response_android.cc
 FILE: ../../../flutter/shell/platform/android/platform_message_response_android.h
+FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/FlutterAppDelegate_Internal.h
 FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/platform_message_response_darwin.h
 FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/platform_message_response_darwin.mm
 ----------------------------------------------------------------------------------------------------

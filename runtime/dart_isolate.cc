@@ -487,6 +487,48 @@ bool DartIsolate::Run(const std::string& entrypoint_name) {
   return true;
 }
 
+FXL_WARN_UNUSED_RESULT
+bool DartIsolate::RunFromLibrary(const std::string& library_name,
+                                 const std::string& entrypoint_name) {
+  TRACE_EVENT0("flutter", "DartIsolate::RunFromLibrary");
+  if (phase_ != Phase::Ready) {
+    return false;
+  }
+
+  tonic::DartState::Scope scope(this);
+
+  Dart_Handle library = Dart_LookupLibrary(tonic::ToDart(library_name.c_str()));
+  if (tonic::LogIfError(library)) {
+    return false;
+  }
+
+  Dart_Handle entrypoint =
+      Dart_GetClosure(library, tonic::ToDart(entrypoint_name.c_str()));
+  if (tonic::LogIfError(entrypoint)) {
+    return false;
+  }
+
+  Dart_Handle isolate_lib = Dart_LookupLibrary(tonic::ToDart("dart:isolate"));
+  if (tonic::LogIfError(isolate_lib)) {
+    return false;
+  }
+
+  Dart_Handle isolate_args[] = {
+      entrypoint,
+      Dart_Null(),
+  };
+
+  if (tonic::LogIfError(Dart_Invoke(
+          isolate_lib, tonic::ToDart("_startMainIsolate"),
+          sizeof(isolate_args) / sizeof(isolate_args[0]), isolate_args))) {
+    return false;
+  }
+
+  phase_ = Phase::Running;
+  FXL_DLOG(INFO) << "New isolate is in the running state.";
+  return true;
+}
+
 bool DartIsolate::Shutdown() {
   TRACE_EVENT0("flutter", "DartIsolate::Shutdown");
   // This call may be re-entrant since Dart_ShutdownIsolate can invoke the

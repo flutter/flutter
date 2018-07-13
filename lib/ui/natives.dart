@@ -48,6 +48,9 @@ dynamic _saveCompilationTrace() native 'SaveCompilationTrace';
 
 void _scheduleMicrotask(void callback()) native 'ScheduleMicrotask';
 
+int _getCallbackHandle(Function closure) native 'GetCallbackHandle';
+Function _getCallbackFromHandle(int handle) native 'GetCallbackFromHandle';
+
 // Required for gen_snapshot to work correctly.
 int _isolateId;
 

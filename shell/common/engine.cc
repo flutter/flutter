@@ -152,9 +152,17 @@ bool Engine::PrepareAndLaunchIsolate(RunConfiguration configuration) {
     return false;
   }
 
-  if (!isolate->Run(configuration.GetEntrypoint())) {
-    FXL_LOG(ERROR) << "Could not run the isolate.";
-    return false;
+  if (configuration.GetEntrypointLibrary().empty()) {
+    if (!isolate->Run(configuration.GetEntrypoint())) {
+      FXL_LOG(ERROR) << "Could not run the isolate.";
+      return false;
+    }
+  } else {
+    if (!isolate->RunFromLibrary(configuration.GetEntrypointLibrary(),
+                                 configuration.GetEntrypoint())) {
+      FXL_LOG(ERROR) << "Could not run the isolate.";
+      return false;
+    }
   }
 
   return true;

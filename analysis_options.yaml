@@ -42,7 +42,7 @@ linter:
     # - avoid_bool_literals_in_conditional_expressions # not yet tested
     # - avoid_catches_without_on_clauses # we do this commonly
     # - avoid_catching_errors # we do this commonly
-    - avoid_classes_with_only_static_members
+    - avoid_classes_with_only_static_members # We want to avoid classes that can be instantiated but only have statics
     - avoid_empty_else
     - avoid_function_literals_in_foreach_calls
     - avoid_init_to_null

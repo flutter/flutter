@@ -60,12 +60,22 @@ void RunConfiguration::SetEntrypoint(std::string entrypoint) {
   entrypoint_ = std::move(entrypoint);
 }
 
+void RunConfiguration::SetEntrypointAndLibrary(std::string entrypoint,
+                                               std::string library) {
+  SetEntrypoint(entrypoint);
+  entrypoint_library_ = std::move(library);
+}
+
 fml::RefPtr<blink::AssetManager> RunConfiguration::GetAssetManager() const {
   return asset_manager_;
 }
 
 const std::string& RunConfiguration::GetEntrypoint() const {
   return entrypoint_;
+}
+
+const std::string& RunConfiguration::GetEntrypointLibrary() const {
+  return entrypoint_library_;
 }
 
 std::unique_ptr<IsolateConfiguration>
