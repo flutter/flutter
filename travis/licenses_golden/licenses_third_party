@@ -1,4 +1,4 @@
-Signature: 1a84a68f9dd53c097cd26fff8e36a45c
+Signature: c757bb5e355f10b554c7c35af53b6c8d
 
 UNUSED LICENSES:
 
@@ -19520,8 +19520,6 @@ FILE: ../../../third_party/skia/src/gpu/vk/GrVkBufferView.cpp
 FILE: ../../../third_party/skia/src/gpu/vk/GrVkBufferView.h
 FILE: ../../../third_party/skia/src/gpu/vk/GrVkSemaphore.cpp
 FILE: ../../../third_party/skia/src/gpu/vk/GrVkSemaphore.h
-FILE: ../../../third_party/skia/src/gpu/vk/GrVkTexelBuffer.cpp
-FILE: ../../../third_party/skia/src/gpu/vk/GrVkTexelBuffer.h
 FILE: ../../../third_party/skia/src/jumper/SkJumper.cpp
 FILE: ../../../third_party/skia/src/jumper/SkJumper.h
 FILE: ../../../third_party/skia/src/jumper/SkJumper_misc.h
