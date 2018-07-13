@@ -14,7 +14,7 @@ void approxExpect(Alignment a, Alignment b) {
 
 void main() {
   test('Alignment control test', () {
-    const Alignment alignment = const Alignment(0.5, 0.25);
+    const Alignment alignment = Alignment(0.5, 0.25);
 
     expect(alignment, hasOneLineDescription);
     expect(alignment.hashCode, equals(const Alignment(0.5, 0.25).hashCode));
@@ -178,8 +178,8 @@ void main() {
   });
 
   test('AlignmentGeometry add/subtract', () {
-    const AlignmentGeometry directional = const AlignmentDirectional(1.0, 2.0);
-    const AlignmentGeometry normal = const Alignment(3.0, 5.0);
+    const AlignmentGeometry directional = AlignmentDirectional(1.0, 2.0);
+    const AlignmentGeometry normal = Alignment(3.0, 5.0);
     expect(directional.add(normal).resolve(TextDirection.ltr), const Alignment(4.0, 7.0));
     expect(directional.add(normal).resolve(TextDirection.rtl), const Alignment(2.0, 7.0));
     expect(normal.add(normal), normal * 2.0);

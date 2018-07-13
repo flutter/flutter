@@ -288,8 +288,8 @@ void main() {
       pointer: 1,
       // Simulate a small synthesized wobble which would have slowed down the
       // horizontal velocity from 1 px/ms and introduced a slight vertical velocity.
-      position: const Offset(51.0, 26.0),
-      timeStamp: const Duration(milliseconds: 60),
+      position: Offset(51.0, 26.0),
+      timeStamp: Duration(milliseconds: 60),
       synthesized: true,
     ));
     tester.route(pointer.up(timeStamp: const Duration(milliseconds: 70)));

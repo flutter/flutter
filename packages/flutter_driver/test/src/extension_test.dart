@@ -106,8 +106,8 @@ void main() {
         new Directionality(
           textDirection: TextDirection.ltr,
           child: new ListView(children: const <Widget>[
-            const SizedBox(width: 100.0, height: 100.0, child: const Text('hello')),
-            const SizedBox(width: 100.0, height: 100.0, child: const Text('hello')),
+            SizedBox(width: 100.0, height: 100.0, child: Text('hello')),
+            SizedBox(width: 100.0, height: 100.0, child: Text('hello')),
           ]),
         ),
       );

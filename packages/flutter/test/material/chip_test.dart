@@ -130,7 +130,7 @@ void main() {
         child: new Column(
           children: <Widget>[
             new Chip(
-              avatar: const CircleAvatar(child: const Text('A')),
+              avatar: const CircleAvatar(child: Text('A')),
               label: const Text('Chip A'),
               onDeleted: () {
                 deletedChipLabels.add('A');
@@ -138,7 +138,7 @@ void main() {
               deleteButtonTooltipMessage: 'Delete chip A',
             ),
             new Chip(
-              avatar: const CircleAvatar(child: const Text('B')),
+              avatar: const CircleAvatar(child: Text('B')),
               label: const Text('Chip B'),
               onDeleted: () {
                 deletedChipLabels.add('B');
@@ -216,7 +216,7 @@ void main() {
       'available space and the avatar is present', (WidgetTester tester) async {
     await _testConstrainedLabel(
       tester,
-      avatar: const CircleAvatar(child: const Text('A')),
+      avatar: const CircleAvatar(child: Text('A')),
     );
   });
 
@@ -234,18 +234,18 @@ void main() {
       'available space and both avatar and delete icons are present', (WidgetTester tester) async {
     await _testConstrainedLabel(
       tester,
-      avatar: const CircleAvatar(child: const Text('A')),
+      avatar: const CircleAvatar(child: Text('A')),
       onDeleted: () {},
     );
   });
 
   testWidgets('Chip in row works ok', (WidgetTester tester) async {
-    const TextStyle style = const TextStyle(fontFamily: 'Ahem', fontSize: 10.0);
+    const TextStyle style = TextStyle(fontFamily: 'Ahem', fontSize: 10.0);
     await tester.pumpWidget(
       _wrapForChip(
         child: new Row(
           children: const <Widget>[
-            const Chip(label: const Text('Test'), labelStyle: style),
+            Chip(label: Text('Test'), labelStyle: style),
           ],
         ),
       ),
@@ -256,7 +256,7 @@ void main() {
       _wrapForChip(
         child: new Row(
           children: const <Widget>[
-            const Flexible(child: const Chip(label: const Text('Test'), labelStyle: style)),
+            Flexible(child: Chip(label: Text('Test'), labelStyle: style)),
           ],
         ),
       ),
@@ -267,7 +267,7 @@ void main() {
       _wrapForChip(
         child: new Row(
           children: const <Widget>[
-            const Expanded(child: const Chip(label: const Text('Test'), labelStyle: style)),
+            Expanded(child: Chip(label: Text('Test'), labelStyle: style)),
           ],
         ),
       ),
@@ -317,13 +317,13 @@ void main() {
       _wrapForChip(
         child: new Column(
           children: const <Widget>[
-            const Chip(
-              avatar: const CircleAvatar(child: const Text('A')),
-              label: const Text('Chip A'),
+            Chip(
+              avatar: CircleAvatar(child: Text('A')),
+              label: Text('Chip A'),
             ),
-            const Chip(
-              avatar: const CircleAvatar(child: const Text('B')),
-              label: const Text('Chip B'),
+            Chip(
+              avatar: CircleAvatar(child: Text('B')),
+              label: Text('Chip B'),
             ),
           ],
         ),
@@ -348,13 +348,13 @@ void main() {
         textScaleFactor: 3.0,
         child: new Column(
           children: const <Widget>[
-            const Chip(
-              avatar: const CircleAvatar(child: const Text('A')),
-              label: const Text('Chip A'),
+            Chip(
+              avatar: CircleAvatar(child: Text('A')),
+              label: Text('Chip A'),
             ),
-            const Chip(
-              avatar: const CircleAvatar(child: const Text('B')),
-              label: const Text('Chip B'),
+            Chip(
+              avatar: CircleAvatar(child: Text('B')),
+              label: Text('Chip B'),
             ),
           ],
         ),
@@ -375,13 +375,13 @@ void main() {
       _wrapForChip(
         child: new Column(
           children: const <Widget>[
-            const Chip(
-              avatar: const CircleAvatar(child: const Text('A')),
-              label: const Text('Chip A', textScaleFactor: 3.0),
+            Chip(
+              avatar: CircleAvatar(child: Text('A')),
+              label: Text('Chip A', textScaleFactor: 3.0),
             ),
-            const Chip(
-              avatar: const CircleAvatar(child: const Text('B')),
-              label: const Text('Chip B'),
+            Chip(
+              avatar: CircleAvatar(child: Text('B')),
+              label: Text('Chip B'),
             ),
           ],
         ),
@@ -405,11 +405,11 @@ void main() {
         child: new Column(
           children: <Widget>[
             new Chip(
-              avatar: const CircleAvatar(child: const Text('A')),
+              avatar: const CircleAvatar(child: Text('A')),
               label: new Text('Chip A', key: keyA),
             ),
             new Chip(
-              avatar: const CircleAvatar(child: const Text('B')),
+              avatar: const CircleAvatar(child: Text('B')),
               label: new Container(key: keyB, width: 10.0, height: 10.0),
             ),
           ],
@@ -1001,7 +1001,7 @@ void main() {
         child: new Theme(
           data: theme,
           child: const InputChip(
-            label: const Text('Label'),
+            label: Text('Label'),
           ),
         ),
       );
@@ -1135,10 +1135,10 @@ void main() {
     expect(labelStyle.style.color, equals(Colors.black.withAlpha(0xde)));
 
     // Apply a custom theme.
-    const Color customColor1 = const Color(0xcafefeed);
-    const Color customColor2 = const Color(0xdeadbeef);
-    const Color customColor3 = const Color(0xbeefcafe);
-    const Color customColor4 = const Color(0xaddedabe);
+    const Color customColor1 = Color(0xcafefeed);
+    const Color customColor2 = Color(0xdeadbeef);
+    const Color customColor3 = Color(0xbeefcafe);
+    const Color customColor4 = Color(0xaddedabe);
     final ChipThemeData customTheme = defaultChipTheme.copyWith(
       brightness: Brightness.dark,
       backgroundColor: customColor1,
@@ -1183,8 +1183,8 @@ void main() {
 
       await tester.pumpWidget(new MaterialApp(
         home: const Material(
-          child: const RawChip(
-            label: const Text('test'),
+          child: RawChip(
+            label: Text('test'),
           ),
         ),
       ));
@@ -1385,8 +1385,8 @@ void main() {
           children: <Widget>[
             new Chip(
               materialTapTargetSize: MaterialTapTargetSize.padded,
-              shape: const RoundedRectangleBorder(borderRadius: const BorderRadius.all(const Radius.circular(0.0))),
-              avatar: const CircleAvatar(child: const Text('A')),
+              shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(0.0))),
+              avatar: const CircleAvatar(child: Text('A')),
               label: const Text('Chip A'),
               onDeleted: () {
                 deleted = true;
@@ -1411,8 +1411,8 @@ void main() {
           children: <Widget>[
             new InputChip(
               materialTapTargetSize: MaterialTapTargetSize.padded,
-              shape: const RoundedRectangleBorder(borderRadius: const BorderRadius.all(const Radius.circular(0.0))),
-              avatar: const CircleAvatar(child: const Text('A')),
+              shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(0.0))),
+              avatar: const CircleAvatar(child: Text('A')),
               label: const Text('Chip A'),
               onPressed: () {
                 pressed = true;
@@ -1432,8 +1432,8 @@ void main() {
     await tester.pumpWidget(
       _wrapForChip(
         child: new InputChip(
-          shape: const RoundedRectangleBorder(borderRadius: const BorderRadius.all(const Radius.circular(0.0))),
-          avatar: const CircleAvatar(child: const Text('A')),
+          shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(0.0))),
+          avatar: const CircleAvatar(child: Text('A')),
           label: const Text('Chip A'),
           onPressed: () {},
         ),

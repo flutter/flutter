@@ -155,7 +155,7 @@ TestImage getTestImage(WidgetTester tester, Key key) {
 }
 
 Future<Null> pumpTreeToLayout(WidgetTester tester, Widget widget) {
-  const Duration pumpDuration = const Duration(milliseconds: 0);
+  const Duration pumpDuration = Duration(milliseconds: 0);
   const EnginePhase pumpPhase = EnginePhase.layout;
   return tester.pumpWidget(widget, pumpDuration, pumpPhase);
 }

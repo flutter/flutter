@@ -69,7 +69,7 @@ class GestureDemoState extends State<GestureDemo> {
   double _previousZoom;
   double _zoom = 1.0;
 
-  static const List<MaterialColor> kSwatches = const <MaterialColor>[
+  static const List<MaterialColor> kSwatches = <MaterialColor>[
     Colors.red,
     Colors.pink,
     Colors.purple,

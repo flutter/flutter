@@ -113,7 +113,7 @@ TaskFunction createBasicMaterialCompileTest() {
 
 /// Measure application startup performance.
 class StartupTest {
-  static const Duration _startupTimeout = const Duration(minutes: 5);
+  static const Duration _startupTimeout = Duration(minutes: 5);
 
   const StartupTest(this.testDirectory, { this.reportMetrics = true });
 
@@ -350,7 +350,7 @@ class CompileTest {
     };
   }
 
-  static const Map<String, String> _kSdkNameToMetricNameMapping = const <String, String> {
+  static const Map<String, String> _kSdkNameToMetricNameMapping = <String, String> {
     'VMIsolate': 'aot_snapshot_size_vmisolate',
     'Isolate': 'aot_snapshot_size_isolate',
     'ReadOnlyData': 'aot_snapshot_size_rodata',

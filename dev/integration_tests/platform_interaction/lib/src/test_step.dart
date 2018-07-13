@@ -13,8 +13,8 @@ typedef Future<TestStepResult> TestStep();
 const String nothing = '-';
 
 class TestStepResult {
-  static const TextStyle bold = const TextStyle(fontWeight: FontWeight.bold);
-  static const TestStepResult complete = const TestStepResult(
+  static const TextStyle bold = TextStyle(fontWeight: FontWeight.bold);
+  static const TestStepResult complete = TestStepResult(
     'Test complete',
     nothing,
     TestStatus.complete,
