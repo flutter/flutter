@@ -176,7 +176,7 @@ sk_sp<SkData> EncodeImage(sk_sp<SkImage> p_image,
       return CopyImageByteData(raster_image, kRGBA_8888_SkColorType);
     } break;
     case kRawUnmodified: {
-      return CopyImageByteData(raster_image, kN32_SkColorType);
+      return CopyImageByteData(raster_image, raster_image->colorType());
     } break;
   }
 
