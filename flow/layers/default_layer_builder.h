@@ -24,13 +24,13 @@ class DefaultLayerBuilder final : public LayerBuilder {
   void PushTransform(const SkMatrix& matrix) override;
 
   // |flow::LayerBuilder|
-  void PushClipRect(const SkRect& rect) override;
+  void PushClipRect(const SkRect& rect, ClipMode clip_mode = ClipMode::antiAlias) override;
 
   // |flow::LayerBuilder|
-  void PushClipRoundedRect(const SkRRect& rect) override;
+  void PushClipRoundedRect(const SkRRect& rect, ClipMode clip_mode = ClipMode::antiAlias) override;
 
   // |flow::LayerBuilder|
-  void PushClipPath(const SkPath& path) override;
+  void PushClipPath(const SkPath& path, ClipMode clip_mode = ClipMode::antiAlias) override;
 
   // |flow::LayerBuilder|
   void PushOpacity(int alpha) override;
@@ -51,7 +51,8 @@ class DefaultLayerBuilder final : public LayerBuilder {
                          double elevation,
                          SkColor color,
                          SkColor shadow_color,
-                         SkScalar device_pixel_ratio) override;
+                         SkScalar device_pixel_ratio,
+                         ClipMode clip_mode) override;
 
   // |flow::LayerBuilder|
   void PushPerformanceOverlay(uint64_t enabled_options,

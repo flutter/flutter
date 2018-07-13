@@ -62,16 +62,17 @@ void SceneBuilder::pushTransform(const tonic::Float64List& matrix4) {
 void SceneBuilder::pushClipRect(double left,
                                 double right,
                                 double top,
-                                double bottom) {
-  layer_builder_->PushClipRect(SkRect::MakeLTRB(left, top, right, bottom));
+                                double bottom,
+                                int clipMode) {
+  layer_builder_->PushClipRect(SkRect::MakeLTRB(left, top, right, bottom), static_cast<flow::ClipMode>(clipMode));
 }
 
-void SceneBuilder::pushClipRRect(const RRect& rrect) {
-  layer_builder_->PushClipRoundedRect(rrect.sk_rrect);
+void SceneBuilder::pushClipRRect(const RRect& rrect, int clipMode) {
+  layer_builder_->PushClipRoundedRect(rrect.sk_rrect, static_cast<flow::ClipMode>(clipMode));
 }
 
-void SceneBuilder::pushClipPath(const CanvasPath* path) {
-  layer_builder_->PushClipPath(path->path());
+void SceneBuilder::pushClipPath(const CanvasPath* path, int clipMode) {
+  layer_builder_->PushClipPath(path->path(), static_cast<flow::ClipMode>(clipMode));
 }
 
 void SceneBuilder::pushOpacity(int alpha) {
@@ -103,13 +104,15 @@ void SceneBuilder::pushShaderMask(Shader* shader,
 void SceneBuilder::pushPhysicalShape(const CanvasPath* path,
                                      double elevation,
                                      int color,
-                                     int shadow_color) {
+                                     int shadow_color,
+                                     int clip_mode) {
   layer_builder_->PushPhysicalShape(
       path->path(),                 //
       elevation,                    //
       static_cast<SkColor>(color),  //
       static_cast<SkColor>(shadow_color),
-      UIDartState::Current()->window()->viewport_metrics().device_pixel_ratio);
+      UIDartState::Current()->window()->viewport_metrics().device_pixel_ratio,
+      static_cast<flow::ClipMode>(clip_mode));
 }
 
 void SceneBuilder::pop() {
