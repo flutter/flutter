@@ -7,6 +7,7 @@
 #include "flutter/fml/message_loop.h"
 #include "flutter/lib/ui/window/window.h"
 #include "lib/tonic/converter/dart_converter.h"
+#include "lib/tonic/dart_message_handler.h"
 
 using tonic::ToDart;
 
@@ -104,6 +105,14 @@ fml::WeakPtr<GrContext> UIDartState::GetResourceContext() const {
 
 IsolateNameServer* UIDartState::GetIsolateNameServer() {
   return isolate_name_server_;
+}
+
+tonic::DartErrorHandleType UIDartState::GetLastError() {
+  tonic::DartErrorHandleType error = message_handler().isolate_last_error();
+  if (error == tonic::kNoError) {
+    error = microtask_queue_.GetLastError();
+  }
+  return error;
 }
 
 }  // namespace blink

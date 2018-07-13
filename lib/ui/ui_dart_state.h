@@ -49,6 +49,8 @@ class UIDartState : public tonic::DartState {
 
   IsolateNameServer* GetIsolateNameServer();
 
+  tonic::DartErrorHandleType GetLastError();
+
   template <class T>
   static flow::SkiaGPUObject<T> CreateGPUObject(sk_sp<T> object) {
     if (!object) {

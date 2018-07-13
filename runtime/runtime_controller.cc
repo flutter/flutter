@@ -270,8 +270,7 @@ bool RuntimeController::HasLivePorts() {
 }
 
 tonic::DartErrorHandleType RuntimeController::GetLastError() {
-  return root_isolate_ ? root_isolate_->message_handler().isolate_last_error()
-                       : tonic::kNoError;
+  return root_isolate_ ? root_isolate_->GetLastError() : tonic::kNoError;
 }
 
 fml::WeakPtr<DartIsolate> RuntimeController::GetRootIsolate() {
