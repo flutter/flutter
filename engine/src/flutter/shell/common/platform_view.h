@@ -58,9 +58,6 @@ class PlatformView {
     virtual void OnPlatformViewSetSemanticsEnabled(const PlatformView& view,
                                                    bool enabled) = 0;
 
-    virtual void OnPlatformViewSetAssistiveTechnologyEnabled(const PlatformView& view,
-                                                             bool enabled) = 0;
-
     virtual void OnPlatformViewRegisterTexture(
         const PlatformView& view,
         std::shared_ptr<flow::Texture> texture) = 0;
@@ -86,8 +83,6 @@ class PlatformView {
                                std::vector<uint8_t> args);
 
   virtual void SetSemanticsEnabled(bool enabled);
-
-  virtual void SetAssistiveTechnologyEnabled(bool enabled);
 
   void SetViewportMetrics(const blink::ViewportMetrics& metrics);
 

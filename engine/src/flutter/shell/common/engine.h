@@ -99,8 +99,6 @@ class Engine final : public blink::RuntimeDelegate {
 
   void SetSemanticsEnabled(bool enabled);
 
-  void SetAssistiveTechnologyEnabled(bool enabled);
-
   void ScheduleFrame(bool regenerate_layer_tree = true) override;
 
   // |blink::RuntimeDelegate|

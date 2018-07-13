@@ -669,9 +669,6 @@ public class FlutterView extends SurfaceView
 
     private static native void nativeSetSemanticsEnabled(long nativePlatformViewAndroid,
         boolean enabled);
-    
-    private static native void nativeSetAssistiveTechnologyEnabled(long nativePlatformViewAndroid,
-        boolean enabled);
 
     private static native boolean nativeGetIsSoftwareRenderingEnabled();
 
@@ -815,13 +812,11 @@ public class FlutterView extends SurfaceView
             if (enabled) {
                 mTouchExplorationEnabled = true;
                 ensureAccessibilityEnabled();
-                nativeSetAssistiveTechnologyEnabled(mNativeView.get(), true);
             } else {
                 mTouchExplorationEnabled = false;
                 if (mAccessibilityNodeProvider != null) {
                     mAccessibilityNodeProvider.handleTouchExplorationExit();
                 }
-                nativeSetAssistiveTechnologyEnabled(mNativeView.get(), false);
             }
             resetWillNotDraw();
         }
