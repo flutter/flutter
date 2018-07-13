@@ -66,29 +66,44 @@ class SceneBuilder extends NativeFieldWrapperClass2 {
   ///
   /// Rasterization outside the given rectangle is discarded.
   ///
-  /// See [pop] for details about the operation stack.
-  void pushClipRect(Rect rect) {
-    _pushClipRect(rect.left, rect.right, rect.top, rect.bottom);
+  /// See [pop] for details about the operation stack, and [Clip] for different clip modes.
+  /// By default, the clip will be anti-aliased (clip = [Clip.antiAlias]).
+  void pushClipRect(Rect rect, {Clip clip = Clip.antiAlias}) {
+    assert(clip != null);
+    assert(clip != Clip.none);
+    _pushClipRect(rect.left, rect.right, rect.top, rect.bottom, clip.index);
   }
   void _pushClipRect(double left,
                      double right,
                      double top,
-                     double bottom) native 'SceneBuilder_pushClipRect';
+                     double bottom,
+                     int clipMode) native 'SceneBuilder_pushClipRect';
 
   /// Pushes a rounded-rectangular clip operation onto the operation stack.
   ///
   /// Rasterization outside the given rounded rectangle is discarded.
   ///
-  /// See [pop] for details about the operation stack.
-  void pushClipRRect(RRect rrect) => _pushClipRRect(rrect._value);
-  void _pushClipRRect(Float32List rrect) native 'SceneBuilder_pushClipRRect';
+  /// See [pop] for details about the operation stack, and [Clip] for different clip modes.
+  /// By default, the clip will be anti-aliased (clip = [Clip.antiAlias]).
+  void pushClipRRect(RRect rrect, {Clip clip = Clip.antiAlias}) {
+    assert(clip != null);
+    assert(clip != Clip.none);
+    _pushClipRRect(rrect._value, clip.index);
+  }
+  void _pushClipRRect(Float32List rrect, int clipMode) native 'SceneBuilder_pushClipRRect';
 
   /// Pushes a path clip operation onto the operation stack.
   ///
   /// Rasterization outside the given path is discarded.
   ///
-  /// See [pop] for details about the operation stack.
-  void pushClipPath(Path path) native 'SceneBuilder_pushClipPath';
+  /// See [pop] for details about the operation stack. See [Clip] for different clip modes.
+  /// By default, the clip will be anti-aliased (clip = [Clip.antiAlias]).
+  void pushClipPath(Path path, {Clip clip = Clip.antiAlias}) {
+    assert(clip != null);
+    assert(clip != Clip.none);
+    _pushClipPath(path, clip.index);
+  }
+  void _pushClipPath(Path path, int clipMode) native 'SceneBuilder_pushClipPath';
 
   /// Pushes an opacity operation onto the operation stack.
   ///
@@ -143,16 +158,20 @@ class SceneBuilder extends NativeFieldWrapperClass2 {
   /// Pushes a physical layer operation for an arbitrary shape onto the
   /// operation stack.
   ///
-  /// Rasterization will be clipped to the given shape defined by [path]. If
-  /// [elevation] is greater than 0.0, then a shadow is drawn around the layer.
+  /// By default, the layer's content will not be clipped (clip = [Clip.none]).
+  /// If clip equals [Clip.hardEdge], [Clip.antiAlias], or [Clip.antiAliasWithSaveLayer],
+  /// then the content is clipped to the given shape defined by [path].
+  ///
+  /// If [elevation] is greater than 0.0, then a shadow is drawn around the layer.
   /// [shadowColor] defines the color of the shadow if present and [color] defines the
   /// color of the layer background.
   ///
-  /// See [pop] for details about the operation stack.
-  void pushPhysicalShape({ Path path, double elevation, Color color, Color shadowColor}) {
-    _pushPhysicalShape(path, elevation, color.value, shadowColor?.value ?? 0xFF000000);
+  /// See [pop] for details about the operation stack, and [Clip] for different clip modes.
+  // ignore: deprecated_member_use
+  void pushPhysicalShape({ Path path, double elevation, Color color, Color shadowColor, Clip clip = defaultClipBehavior}) {
+    _pushPhysicalShape(path, elevation, color.value, shadowColor?.value ?? 0xFF000000, clip.index);
   }
-  void _pushPhysicalShape(Path path, double elevation, int color, int shadowColor) native
+  void _pushPhysicalShape(Path path, double elevation, int color, int shadowColor, int clipMode) native
     'SceneBuilder_pushPhysicalShape';
 
   /// Ends the effect of the most recently pushed operation.

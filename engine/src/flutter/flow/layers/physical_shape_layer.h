@@ -11,7 +11,7 @@ namespace flow {
 
 class PhysicalShapeLayer : public ContainerLayer {
  public:
-  PhysicalShapeLayer();
+  PhysicalShapeLayer(ClipMode clip_mode);
   ~PhysicalShapeLayer() override;
 
   void set_path(const SkPath& path);
@@ -44,6 +44,7 @@ class PhysicalShapeLayer : public ContainerLayer {
   SkPath path_;
   bool isRect_;
   SkRRect frameRRect_;
+  ClipMode clip_mode_;
 };
 
 }  // namespace flow

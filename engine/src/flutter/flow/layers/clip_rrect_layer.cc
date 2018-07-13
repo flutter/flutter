@@ -6,7 +6,7 @@
 
 namespace flow {
 
-ClipRRectLayer::ClipRRectLayer() = default;
+ClipRRectLayer::ClipRRectLayer(ClipMode clip_mode) : clip_mode_(clip_mode) {}
 
 ClipRRectLayer::~ClipRRectLayer() = default;
 
@@ -36,6 +36,7 @@ void ClipRRectLayer::UpdateScene(SceneUpdateContext& context) {
       clip_rrect_.radii(SkRRect::kLowerLeft_Corner).x()  //  bottom_left_radius
   );
 
+  // TODO(liyuqian): respect clip_mode_
   SceneUpdateContext::Clip clip(context, shape, clip_rrect_.getBounds());
   UpdateSceneChildren(context);
 }
@@ -47,8 +48,14 @@ void ClipRRectLayer::Paint(PaintContext& context) const {
   FXL_DCHECK(needs_painting());
 
   SkAutoCanvasRestore save(&context.canvas, true);
-  context.canvas.clipRRect(clip_rrect_, true);
+  context.canvas.clipRRect(clip_rrect_, clip_mode_ != ClipMode::hardEdge);
+  if (clip_mode_ == ClipMode::antiAliasWithSaveLayer) {
+    context.canvas.saveLayer(paint_bounds(), nullptr);
+  }
   PaintChildren(context);
+  if (clip_mode_ == ClipMode::antiAliasWithSaveLayer) {
+    context.canvas.restore();
+  }
 }
 
 }  // namespace flow
