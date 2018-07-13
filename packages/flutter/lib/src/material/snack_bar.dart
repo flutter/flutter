@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
 import 'button_theme.dart';
@@ -184,6 +185,7 @@ class SnackBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final bool removeAnimation = RendererBinding.instance.assistiveTechnologyEnabled;
     assert(animation != null);
     final ThemeData theme = Theme.of(context);
     final ThemeData darkTheme = new ThemeData(
@@ -214,8 +216,37 @@ class SnackBar extends StatelessWidget {
     }
     final CurvedAnimation heightAnimation = new CurvedAnimation(parent: animation, curve: _snackBarHeightCurve);
     final CurvedAnimation fadeAnimation = new CurvedAnimation(parent: animation, curve: _snackBarFadeCurve, reverseCurve: const Threshold(0.0));
+    Widget snackbar = new SafeArea(
+      top: false,
+      child: new Row(
+        children: children,
+        crossAxisAlignment: CrossAxisAlignment.center,
+      ),
+    );
+    snackbar = new Semantics(
+      container: true,
+      child: new Dismissible(
+        key: const Key('dismissible'),
+        direction: DismissDirection.down,
+        resizeDuration: null,
+        onDismissed: (DismissDirection direction) {
+          Scaffold.of(context).removeCurrentSnackBar(reason: SnackBarClosedReason.swipe);
+        },
+        child: new Material(
+          elevation: 6.0,
+          color: backgroundColor ?? _kSnackBackground,
+          child: new Theme(
+            data: darkTheme,
+            child: removeAnimation ? snackbar : new FadeTransition(
+              opacity: fadeAnimation,
+              child: snackbar,
+            ),
+          ),
+        ),
+      ),
+    );
     return new ClipRect(
-      child: new AnimatedBuilder(
+      child: removeAnimation ? snackbar : new AnimatedBuilder(
         animation: heightAnimation,
         builder: (BuildContext context, Widget child) {
           return new Align(
@@ -224,34 +255,7 @@ class SnackBar extends StatelessWidget {
             child: child,
           );
         },
-        child: new Semantics(
-          container: true,
-          child: new Dismissible(
-            key: const Key('dismissible'),
-            direction: DismissDirection.down,
-            resizeDuration: null,
-            onDismissed: (DismissDirection direction) {
-              Scaffold.of(context).removeCurrentSnackBar(reason: SnackBarClosedReason.swipe);
-            },
-            child: new Material(
-              elevation: 6.0,
-              color: backgroundColor ?? _kSnackBackground,
-              child: new Theme(
-                data: darkTheme,
-                child: new FadeTransition(
-                  opacity: fadeAnimation,
-                  child: new SafeArea(
-                    top: false,
-                    child: new Row(
-                      children: children,
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          ),
-        ),
+        child: snackbar,
       ),
     );
   }
