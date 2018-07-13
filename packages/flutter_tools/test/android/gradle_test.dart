@@ -189,7 +189,10 @@ someOtherProperty: someOtherValue
       writeSchemaFile(fs, schemaData);
 
       try {
-        await updateLocalProperties(projectPath: 'path/to/project', buildInfo: buildInfo);
+        await updateLocalProperties(
+          project: new FlutterProject.fromPath('path/to/project'),
+          buildInfo: buildInfo,
+        );
 
         final File localPropertiesFile = fs.file('path/to/project/android/local.properties');
         expect(propertyFor('flutter.versionName', localPropertiesFile), expectedBuildName);

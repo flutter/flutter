@@ -404,11 +404,8 @@ Information about project "Runner":
       const String schemaData = '{}';
       writeSchemaFile(fs, schemaData);
 
-      final FlutterManifest manifest =
-          await new FlutterProject.fromPath('path/to/project').manifest;
       updateGeneratedXcodeProperties(
-        projectPath: 'path/to/project',
-        manifest: manifest,
+        project: new FlutterProject.fromPath('path/to/project'),
         buildInfo: buildInfo,
         previewDart2: false,
       );
