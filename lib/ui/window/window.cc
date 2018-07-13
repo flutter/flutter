@@ -199,6 +199,16 @@ void Window::UpdateSemanticsEnabled(bool enabled) {
                   {ToDart(enabled)});
 }
 
+void Window::UpdateAssistiveTechnologyEnabled(bool enabled) {
+  tonic::DartState* dart_state = library_.dart_state().get();
+  if (!dart_state)
+    return;
+  tonic::DartState::Scope scope(dart_state);
+
+  DartInvokeField(library_.value(), "_updateAssistiveTechnologyEnabled",
+                   {ToDart(enabled)});
+}
+
 void Window::DispatchPlatformMessage(fxl::RefPtr<PlatformMessage> message) {
   tonic::DartState* dart_state = library_.dart_state().get();
   if (!dart_state)

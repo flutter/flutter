@@ -637,6 +637,30 @@ class Window {
   bool get semanticsEnabled => _semanticsEnabled;
   bool _semanticsEnabled = false;
 
+  /// Whether the user is using assitive technologies to interact with the
+  /// application.
+  /// 
+  /// This includes screen readers such as TalkBack on Android and VoiceOVer
+  /// on iOS, as well as hardware switches, and more.
+  /// 
+  /// The [onAssistiveTechnologyEnabled] callback is called whenever this value
+  /// changes.
+  bool get assistiveTechnologyEnabled => _assistiveTechnologyEnabled;
+  bool _assistiveTechnologyEnabled = false;
+
+  /// A callback that is invoked when the value of [assistiveTechnologyEnabled]
+  /// changes.
+  /// 
+  /// The framework invokes this callback in the same zone in which the callback
+  /// was set.
+  VoidCallback get onAssistiveTechnologyEnabled => _onAssistiveTechnologyEnabled;
+  VoidCallback _onAssistiveTechnologyEnabled;
+  Zone _onAssistiveTechnologyEnabledZone;
+  set onAssistiveTechnologyEnabled(VoidCallback callback) {
+     _onAssistiveTechnologyEnabled = callback;
+    _onAssistiveTechnologyEnabledZone = Zone.current;
+  }
+
   /// A callback that is invoked when the value of [semanticsEnabled] changes.
   ///
   /// The framework invokes this callback in the same zone in which the

@@ -70,6 +70,11 @@ void _updateSemanticsEnabled(bool enabled) {
   _invoke(window.onSemanticsEnabledChanged, window._onSemanticsEnabledChangedZone);
 }
 
+void _updateAssistiveTechnologyEnabled(bool enabled) {
+  window._assistiveTechnologyEnabled = enabled;
+  _invoke(window._onAssistiveTechnologyEnabled, window._onAssistiveTechnologyEnabledZone);
+}
+
 void _dispatchPlatformMessage(String name, ByteData data, int responseId) {
   if (window.onPlatformMessage != null) {
     _invoke3<String, ByteData, PlatformMessageResponseCallback>(
