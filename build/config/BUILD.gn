@@ -5,6 +5,7 @@
 import("//build/config/allocator.gni")
 import("//build/config/crypto.gni")
 import("//build/config/features.gni")
+import("//build/config/profiler.gni")
 import("//build/config/ui.gni")
 
 declare_args() {
@@ -219,5 +220,39 @@ config("precompiled_headers") {
 
     # Force include the header.
     cflags = [ "/FI$precompiled_header" ]
+  }
+}
+
+# This config causes functions not to be automatically exported from shared
+# libraries. By default, all symbols are exported but this means there are
+# lots of exports that slow everything down. In general we explicitly mark
+# which functiosn we want to export from components.
+#
+# Some third_party code assumes all functions are exported so this is separated
+# into its own config so such libraries can remove this config to make symbols
+# public again.
+#
+# See http://gcc.gnu.org/wiki/Visibility
+config("symbol_visibility_hidden") {
+  # Note that -fvisibility-inlines-hidden is set globally in the compiler
+  # config since that can almost always be applied.
+  if (!enable_profiling) {
+    cflags = [ "-fvisibility=hidden" ]
+  }
+}
+
+# Allows turning Run-Time Type Identification on or off.
+config("rtti") {
+  if (is_win) {
+    cflags_cc = [ "/GR" ]
+  }
+}
+config("no_rtti") {
+  if (is_win) {
+    cflags_cc = [ "/GR-" ]
+  } else {
+    rtti_flags = [ "-fno-rtti" ]
+    cflags_cc = rtti_flags
+    cflags_objcc = rtti_flags
   }
 }

@@ -4,24 +4,6 @@
 
 import("//build/config/profiler.gni")
 
-# This config causes functions not to be automatically exported from shared
-# libraries. By default, all symbols are exported but this means there are
-# lots of exports that slow everything down. In general we explicitly mark
-# which functiosn we want to export from components.
-#
-# Some third_party code assumes all functions are exported so this is separated
-# into its own config so such libraries can remove this config to make symbols
-# public again.
-#
-# See http://gcc.gnu.org/wiki/Visibility
-config("symbol_visibility_hidden") {
-  # Note that -fvisibility-inlines-hidden is set globally in the compiler
-  # config since that can almost always be applied.
-  if (!enable_profiling) {
-    cflags = [ "-fvisibility=hidden" ]
-  }
-}
-
 # Settings for executables and shared libraries.
 config("executable_ldconfig") {
   if (is_android) {
