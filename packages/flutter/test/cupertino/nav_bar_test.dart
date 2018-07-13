@@ -28,6 +28,30 @@ void main() {
     expect(tester.getCenter(find.text('Title')).dx, 400.0);
   });
 
+  testWidgets('Middle still in center with back button', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      new CupertinoApp(
+        home: const CupertinoNavigationBar(
+          middle: const Text('Title'),
+        ),
+      ),
+    );
+
+    tester.state<NavigatorState>(find.byType(Navigator)).push(new CupertinoPageRoute<void>(
+      builder: (BuildContext context) {
+        return const CupertinoNavigationBar(
+          middle: const Text('Page 2'),
+        );
+      },
+    ));
+
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 500));
+
+    // Expect the middle of the title to be exactly in the middle of the screen.
+    expect(tester.getCenter(find.text('Page 2')).dx, 400.0);
+  });
+
   testWidgets('Opaque background does not add blur effects', (WidgetTester tester) async {
     await tester.pumpWidget(
       new CupertinoApp(
@@ -49,6 +73,79 @@ void main() {
       ),
     );
     expect(find.byType(BackdropFilter), findsOneWidget);
+  });
+
+  testWidgets('Can specify custom padding', (WidgetTester tester) async {
+    final Key middleBox = new GlobalKey();
+    await tester.pumpWidget(
+      new CupertinoApp(
+        home: new Align(
+          alignment: Alignment.topCenter,
+          child: new CupertinoNavigationBar(
+            leading: const CupertinoButton(child: const Text('Cheetah'), onPressed: null),
+            // Let the box take all the vertical space to test vertical padding but let
+            // the nav bar position it horizontally.
+            middle: new Align(
+              key: middleBox,
+              alignment: Alignment.center,
+              widthFactor: 1.0,
+              child: const Text('Title')
+            ),
+            trailing: const CupertinoButton(child: const Text('Puma'), onPressed: null),
+            padding: const EdgeInsetsDirectional.only(
+              start: 10.0,
+              end: 20.0,
+              top: 3.0,
+              bottom: 4.0,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(tester.getRect(find.byKey(middleBox)).top, 3.0);
+    // 44 is the standard height of the nav bar.
+    expect(
+      tester.getRect(find.byKey(middleBox)).bottom,
+      // 44 is the standard height of the nav bar.
+      44.0 - 4.0,
+    );
+
+    expect(tester.getTopLeft(find.widgetWithText(CupertinoButton, 'Cheetah')).dx, 10.0);
+    expect(tester.getTopRight(find.widgetWithText(CupertinoButton, 'Puma')).dx, 800.0 - 20.0);
+
+    // Title is still exactly centered.
+    expect(tester.getCenter(find.text('Title')).dx, 400.0);
+  });
+
+  testWidgets('Padding works in RTL', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      new CupertinoApp(
+        home: const Directionality(
+          textDirection: TextDirection.rtl,
+          child: const Align(
+            alignment: Alignment.topCenter,
+            child: const CupertinoNavigationBar(
+              leading: const CupertinoButton(child: const Text('Cheetah'), onPressed: null),
+              // Let the box take all the vertical space to test vertical padding but let
+              // the nav bar position it horizontally.
+              middle: const Text('Title'),
+              trailing: const CupertinoButton(child: const Text('Puma'), onPressed: null),
+              padding: const EdgeInsetsDirectional.only(
+                start: 10.0,
+                end: 20.0,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(tester.getTopRight(find.widgetWithText(CupertinoButton, 'Cheetah')).dx, 800.0 - 10.0);
+    expect(tester.getTopLeft(find.widgetWithText(CupertinoButton, 'Puma')).dx, 20.0);
+
+    // Title is still exactly centered.
+    expect(tester.getCenter(find.text('Title')).dx, 400.0);
   });
 
   testWidgets('Verify styles of each slot', (WidgetTester tester) async {

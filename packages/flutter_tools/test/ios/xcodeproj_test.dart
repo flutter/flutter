@@ -9,10 +9,9 @@ import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/build_info.dart';
-import 'package:flutter_tools/src/bundle.dart' as bundle;
-import 'package:flutter_tools/src/cache.dart';
-import 'package:flutter_tools/src/project.dart';
+import 'package:flutter_tools/src/flutter_manifest.dart';
 import 'package:flutter_tools/src/ios/xcodeproj.dart';
+import 'package:flutter_tools/src/project.dart';
 import 'package:mockito/mockito.dart';
 import 'package:platform/platform.dart';
 import 'package:process/process.dart';
@@ -368,28 +367,6 @@ Information about project "Runner":
       final String contents = config.readAsStringSync();
       expect(contents.contains('ARCHS=arm64'), isTrue);
     });
-  });
-
-  group('Xcode Generated.xcconfig', () {
-    Directory temp;
-
-    setUp(() {
-      Cache.disableLocking();
-      temp = fs.systemTempDirectory.createTempSync('flutter_tools');
-    });
-
-    tearDown(() {
-      temp.deleteSync(recursive: true);
-    });
-
-    FlutterProject createMinimalProject(String manifest) {
-      final Directory directory = temp.childDirectory('ios_project');
-      final File manifestFile = directory.childFile('pubspec.yaml');
-      manifestFile.createSync(recursive: true);
-      manifestFile.writeAsStringSync(manifest);
-
-      return new FlutterProject(directory);
-    }
 
     String propertyFor(String key, File file) {
       final List<String> properties = file
@@ -400,29 +377,48 @@ Information about project "Runner":
       return properties.isEmpty ? null : properties.first;
     }
 
+    void writeSchemaFile(FileSystem filesystem, String schemaData) {
+      final String schemaPath = buildSchemaPath(filesystem);
+      final File schemaFile = filesystem.file(schemaPath);
+
+      final String schemaDir = buildSchemaDir(filesystem);
+
+      filesystem.directory(schemaDir).createSync(recursive: true);
+      filesystem.file(schemaFile).writeAsStringSync(schemaData);
+    }
+
     Future<void> checkBuildVersion({
       String manifestString,
       BuildInfo buildInfo,
       String expectedBuildName,
       String expectedBuildNumber,
     }) async {
-      final FlutterProject project = createMinimalProject(manifestString);
+      when(mockArtifacts.getArtifactPath(Artifact.flutterFramework, TargetPlatform.ios, any)).thenReturn('engine');
+      when(mockArtifacts.engineOutPath).thenReturn(fs.path.join('out', 'ios'));
 
-      await updateGeneratedXcodeProperties(
-        project: project,
+      final File manifestFile = fs.file('path/to/project/pubspec.yaml');
+      manifestFile.createSync(recursive: true);
+      manifestFile.writeAsStringSync(manifestString);
+
+      // write schemaData otherwise pubspec.yaml file can't be loaded
+      const String schemaData = '{}';
+      writeSchemaFile(fs, schemaData);
+
+      final FlutterManifest manifest =
+          await new FlutterProject.fromPath('path/to/project').manifest;
+      updateGeneratedXcodeProperties(
+        projectPath: 'path/to/project',
+        manifest: manifest,
         buildInfo: buildInfo,
-        targetOverride: bundle.defaultMainPath,
         previewDart2: false,
       );
 
-      final String propertiesPath = fs.path.join(project.directory.path, 'ios', 'Flutter', 'Generated.xcconfig');
-      final File localPropertiesFile = fs.file(propertiesPath);
-
+      final File localPropertiesFile = fs.file('path/to/project/ios/Flutter/Generated.xcconfig');
       expect(propertyFor('FLUTTER_BUILD_NAME', localPropertiesFile), expectedBuildName);
       expect(propertyFor('FLUTTER_BUILD_NUMBER', localPropertiesFile), expectedBuildNumber);
     }
 
-    testUsingContext('extract build name and number from pubspec.yaml', () async {
+    testUsingOsxContext('extract build name and number from pubspec.yaml', () async {
       const String manifest = '''
 name: test
 version: 1.0.0+1
@@ -441,7 +437,7 @@ flutter:
       );
     });
 
-    testUsingContext('extract build name from pubspec.yaml', () async {
+    testUsingOsxContext('extract build name from pubspec.yaml', () async {
       const String manifest = '''
 name: test
 version: 1.0.0
@@ -459,7 +455,7 @@ flutter:
       );
     });
 
-    testUsingContext('allow build info to override build name', () async {
+    testUsingOsxContext('allow build info to override build name', () async {
       const String manifest = '''
 name: test
 version: 1.0.0+1
@@ -477,7 +473,7 @@ flutter:
       );
     });
 
-    testUsingContext('allow build info to override build number', () async {
+    testUsingOsxContext('allow build info to override build number', () async {
       const String manifest = '''
 name: test
 version: 1.0.0+1
@@ -495,7 +491,7 @@ flutter:
       );
     });
 
-    testUsingContext('allow build info to override build name and number', () async {
+    testUsingOsxContext('allow build info to override build name and number', () async {
       const String manifest = '''
 name: test
 version: 1.0.0+1
@@ -513,7 +509,7 @@ flutter:
       );
     });
 
-    testUsingContext('allow build info to override build name and set number', () async {
+    testUsingOsxContext('allow build info to override build name and set number', () async {
       const String manifest = '''
 name: test
 version: 1.0.0
@@ -531,7 +527,7 @@ flutter:
       );
     });
 
-    testUsingContext('allow build info to set build name and number', () async {
+    testUsingOsxContext('allow build info to set build name and number', () async {
       const String manifest = '''
 name: test
 dependencies:

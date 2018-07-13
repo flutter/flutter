@@ -341,10 +341,10 @@ void main() {
     final Offset snackBarBottomRight = snackBarBox.localToGlobal(snackBarBox.size.bottomRight(Offset.zero));
 
     expect(textBottomLeft.dx - snackBarBottomLeft.dx, 24.0 + 10.0); // margin + left padding
-    expect(snackBarBottomLeft.dy - textBottomLeft.dy, 14.0 + 40.0); // margin + bottom padding
+    expect(snackBarBottomLeft.dy - textBottomLeft.dy, 17.0 + 40.0); // margin + bottom padding
     expect(actionTextBottomLeft.dx - textBottomRight.dx, 24.0);
     expect(snackBarBottomRight.dx - actionTextBottomRight.dx, 24.0 + 30.0); // margin + right padding
-    expect(snackBarBottomRight.dy - actionTextBottomRight.dy, 14.0 + 40.0); // margin + bottom padding
+    expect(snackBarBottomRight.dy - actionTextBottomRight.dy, 17.0 + 40.0); // margin + bottom padding
   });
 
   testWidgets('SnackBar is positioned above BottomNavigationBar', (WidgetTester tester) async {
@@ -398,10 +398,10 @@ void main() {
     final Offset snackBarBottomRight = snackBarBox.localToGlobal(snackBarBox.size.bottomRight(Offset.zero));
 
     expect(textBottomLeft.dx - snackBarBottomLeft.dx, 24.0 + 10.0); // margin + left padding
-    expect(snackBarBottomLeft.dy - textBottomLeft.dy, 14.0); // margin (with no bottom padding)
+    expect(snackBarBottomLeft.dy - textBottomLeft.dy, 17.0); // margin (with no bottom padding)
     expect(actionTextBottomLeft.dx - textBottomRight.dx, 24.0);
     expect(snackBarBottomRight.dx - actionTextBottomRight.dx, 24.0 + 30.0); // margin + right padding
-    expect(snackBarBottomRight.dy - actionTextBottomRight.dy, 14.0); // margin (with no bottom padding)
+    expect(snackBarBottomRight.dy - actionTextBottomRight.dy, 17.0); // margin (with no bottom padding)
   });
 
   testWidgets('SnackBarClosedReason', (WidgetTester tester) async {

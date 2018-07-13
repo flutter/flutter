@@ -5,6 +5,7 @@
 import 'dart:typed_data';
 import 'dart:ui';
 
+import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -380,6 +381,98 @@ void main() {
       expect(comparator.imageBytes, hasLength(greaterThan(0)));
       expect(comparator.golden, Uri.parse('foo.png'));
       autoUpdateGoldenFiles = false;
+    });
+  });
+
+  group('matchesSemanticsData', () {
+    testWidgets('matches SemanticsData', (WidgetTester tester) async {
+      final SemanticsHandle handle = tester.ensureSemantics();
+      const Key key = const Key('semantics');
+      await tester.pumpWidget(new Semantics(
+        key: key,
+        namesRoute: true,
+        header: true,
+        button: true,
+        onTap: () {},
+        label: 'foo',
+        hint: 'bar',
+        value: 'baz',
+        textDirection: TextDirection.rtl,
+      ));
+
+      expect(tester.getSemanticsData(find.byKey(key)),
+        matchesSemanticsData(
+          label: 'foo',
+          hint: 'bar',
+          value: 'baz',
+          textDirection: TextDirection.rtl,
+          hasTapAction: true,
+          isButton: true,
+          isHeader: true,
+          namesRoute: true,
+        ),
+      );
+      handle.dispose();
+    });
+
+    testWidgets('Can match all semantics flags and actions', (WidgetTester tester) async {
+      int actions = 0;
+      int flags = 0;
+      for (int index in SemanticsAction.values.keys)
+        actions |= index;
+      for (int index in SemanticsFlag.values.keys)
+        flags |= index;
+      final SemanticsData data = new SemanticsData(
+        flags: flags,
+        actions: actions,
+        label: '',
+        increasedValue: '',
+        value: '',
+        decreasedValue: '',
+        hint: '',
+        textDirection: TextDirection.ltr,
+        rect: Rect.fromLTRB(0.0, 0.0, 10.0, 10.0),
+        textSelection: null,
+        scrollPosition: null,
+        scrollExtentMax: null,
+        scrollExtentMin: null,
+      );
+
+      expect(data, matchesSemanticsData(
+         /* Flags */
+         hasCheckedState: true,
+         isChecked: true,
+         isSelected: true,
+         isButton: true,
+         isTextField: true,
+         hasEnabledState: true,
+         isFocused: true,
+         isEnabled: true,
+         isInMutuallyExclusiveGroup: true,
+         isHeader: true,
+         isObscured: true,
+         namesRoute: true,
+         scopesRoute: true,
+         isHidden: true,
+         /* Actions */
+         hasTapAction: true,
+         hasLongPressAction: true,
+         hasScrollLeftAction: true,
+         hasScrollRightAction: true,
+         hasScrollUpAction: true,
+         hasScrollDownAction: true,
+         hasIncreaseAction: true,
+         hasDecreaseAction: true,
+         hasShowOnScreenAction: true,
+         hasMoveCursorForwardByCharacterAction: true,
+         hasMoveCursorBackwardByCharacterAction: true,
+         hasSetSelectionAction: true,
+         hasCopyAction: true,
+         hasCutAction: true,
+         hasPasteAction: true,
+         hasDidGainAccessibilityFocusAction: true,
+         hasDidLoseAccessibilityFocusAction: true,
+      ));
     });
   });
 }
