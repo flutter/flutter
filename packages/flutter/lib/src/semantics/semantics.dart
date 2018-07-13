@@ -2037,7 +2037,7 @@ class SemanticsOwner extends ChangeNotifier {
     }
     _dirtyNodes.clear();
     for (CustomAccessibilityAction action in customAccessibilityActions)
-      builder.updateAction(id: CustomAccessibilityAction._getIdentifier(action), label: action.label);
+      builder.updateCustomAction(id: CustomAccessibilityAction._getIdentifier(action), label: action.label);
     ui.window.updateSemantics(builder.build());
     notifyListeners();
   }

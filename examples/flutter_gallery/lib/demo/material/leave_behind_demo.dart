@@ -5,6 +5,7 @@
 import 'package:collection/collection.dart' show lowerBound;
 
 import 'package:flutter/material.dart';
+import 'package:flutter/semantics.dart';
 
 enum LeaveBehindDemoAction {
   reset,
@@ -85,47 +86,76 @@ class LeaveBehindDemoState extends State<LeaveBehindDemo> {
     });
   }
 
+
   Widget buildItem(LeaveBehindItem item) {
     final ThemeData theme = Theme.of(context);
-    return new Dismissible(
-      key: new ObjectKey(item),
-      direction: _dismissDirection,
-      onDismissed: (DismissDirection direction) {
-        setState(() {
-          leaveBehindItems.remove(item);
-        });
-        final String action = (direction == DismissDirection.endToStart) ? 'archived' : 'deleted';
-        _scaffoldKey.currentState.showSnackBar(new SnackBar(
-          content: new Text('You $action item ${item.index}'),
-          action: new SnackBarAction(
-            label: 'UNDO',
-            onPressed: () { handleUndo(item); }
-          )
-        ));
+    return new Semantics(
+      customAccessibilityActions: <CustomAccessibilityAction, VoidCallback>{
+        const CustomAccessibilityAction(label: 'Archive'): () {
+          setState(() {
+            leaveBehindItems.remove(item);
+          });
+          _scaffoldKey.currentState.showSnackBar(new SnackBar(
+              content: new Text('You archived item ${item.index}'),
+              action: new SnackBarAction(
+                  label: 'UNDO',
+                  onPressed: () { handleUndo(item); }
+              )
+          ));
+        },
+        const CustomAccessibilityAction(label: 'Delete'): () {
+          setState(() {
+            leaveBehindItems.remove(item);
+          });
+          _scaffoldKey.currentState.showSnackBar(new SnackBar(
+              content: new Text('You deleted item ${item.index}'),
+              action: new SnackBarAction(
+                  label: 'UNDO',
+                  onPressed: () { handleUndo(item); }
+              )
+          ));
+        },
       },
-      background: new Container(
-        color: theme.primaryColor,
-        child: const ListTile(
-          leading: const Icon(Icons.delete, color: Colors.white, size: 36.0)
-        )
-      ),
-      secondaryBackground: new Container(
-        color: theme.primaryColor,
-        child: const ListTile(
-          trailing: const Icon(Icons.archive, color: Colors.white, size: 36.0)
-        )
-      ),
-      child: new Container(
-        decoration: new BoxDecoration(
-          color: theme.canvasColor,
-          border: new Border(bottom: new BorderSide(color: theme.dividerColor))
+      child: new Dismissible(
+        key: new ObjectKey(item),
+        direction: _dismissDirection,
+        onDismissed: (DismissDirection direction) {
+          setState(() {
+            leaveBehindItems.remove(item);
+          });
+          final String action = (direction == DismissDirection.endToStart) ? 'archived' : 'deleted';
+          _scaffoldKey.currentState.showSnackBar(new SnackBar(
+            content: new Text('You $action item ${item.index}'),
+            action: new SnackBarAction(
+              label: 'UNDO',
+              onPressed: () { handleUndo(item); }
+            )
+          ));
+        },
+        background: new Container(
+          color: theme.primaryColor,
+          child: const ListTile(
+            leading: const Icon(Icons.delete, color: Colors.white, size: 36.0)
+          )
         ),
-        child: new ListTile(
-          title: new Text(item.name),
-          subtitle: new Text('${item.subject}\n${item.body}'),
-          isThreeLine: true
+        secondaryBackground: new Container(
+          color: theme.primaryColor,
+          child: const ListTile(
+            trailing: const Icon(Icons.archive, color: Colors.white, size: 36.0)
+          )
+        ),
+        child: new Container(
+          decoration: new BoxDecoration(
+            color: theme.canvasColor,
+            border: new Border(bottom: new BorderSide(color: theme.dividerColor))
+          ),
+          child: new ListTile(
+            title: new Text(item.name),
+            subtitle: new Text('${item.subject}\n${item.body}'),
+            isThreeLine: true
+          )
         )
-      )
+        ),
     );
   }
 
