@@ -538,8 +538,12 @@ class _MonthPickerState extends State<MonthPicker> with SingleTickerProviderStat
     _chevronOpacityController = new AnimationController(
       duration: const Duration(milliseconds: 500), vsync: this
     );
-    final curve = new CurvedAnimation(parent: _chevronOpacityController, curve: Curves.easeInOut);
-    _chevronOpacityAnimation = new Tween(begin: 1.0, end: 0.5).animate(curve);
+    _chevronOpacityAnimation = new Tween(begin: 1.0, end: 0.5).animate(
+      new CurvedAnimation(
+        parent: _chevronOpacityController,
+        curve: Curves.easeInOut,
+      )
+    );
   }
 
   @override
@@ -642,18 +646,6 @@ class _MonthPickerState extends State<MonthPicker> with SingleTickerProviderStat
     });
   }
 
-  /// Changes the chevron colors to disabled when scrolling starts
-  bool _handleScrollStartNotification(BuildContext context) {
-    _chevronOpacityController.forward();
-    return false;
-  }
-
-  /// Changes the chevron colors to active when scrolling ends
-  bool _handleScrollEndNotification(BuildContext context) {
-    _chevronOpacityController.reverse();
-    return false;
-  }
-
   @override
   Widget build(BuildContext context) {
     return new SizedBox(
@@ -664,9 +656,15 @@ class _MonthPickerState extends State<MonthPicker> with SingleTickerProviderStat
           new Semantics(
             sortKey: _MonthPickerSortKey.calendar,
             child: new NotificationListener<ScrollStartNotification>(
-              onNotification: (_) => _handleScrollStartNotification(context),
+              onNotification: (_) {
+                _chevronOpacityController.forward();
+                return false;
+              },
               child: new NotificationListener<ScrollEndNotification>(
-                onNotification: (_) => _handleScrollEndNotification(context),
+                onNotification: (_) {
+                  _chevronOpacityController.reverse();
+                  return false;
+                },
                 child: new PageView.builder(
                   key: new ValueKey<DateTime>(widget.selectedDate),
                   controller: _dayPickerController,
@@ -687,9 +685,7 @@ class _MonthPickerState extends State<MonthPicker> with SingleTickerProviderStat
                 opacity: _chevronOpacityAnimation,
                 child: new IconButton(
                   icon: new Icon(Icons.chevron_left),
-                  tooltip: _isDisplayingFirstMonth
-                      ? null
-                      : '${localizations.previousMonthTooltip} ${localizations.formatMonthYear(_previousMonthDate)}',
+                  tooltip: _isDisplayingFirstMonth ? null : '${localizations.previousMonthTooltip} ${localizations.formatMonthYear(_previousMonthDate)}',
                   onPressed: _isDisplayingFirstMonth ? null : _handlePreviousMonth,
                 ),
               ),
@@ -704,9 +700,7 @@ class _MonthPickerState extends State<MonthPicker> with SingleTickerProviderStat
                 opacity: _chevronOpacityAnimation,
                 child: new IconButton(
                   icon: new Icon(Icons.chevron_right),
-                  tooltip: _isDisplayingLastMonth
-                      ? null
-                      : '${localizations.nextMonthTooltip} ${localizations.formatMonthYear(_nextMonthDate)}',
+                  tooltip: _isDisplayingLastMonth ? null : '${localizations.nextMonthTooltip} ${localizations.formatMonthYear(_nextMonthDate)}',
                   onPressed: _isDisplayingLastMonth ? null : _handleNextMonth,
                 ),
               ),
