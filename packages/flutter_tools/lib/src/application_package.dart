@@ -73,12 +73,12 @@ class AndroidApk extends ApplicationPackage {
         .parseFromXmlDump(runCheckedSync(aaptArgs));
 
     if (data == null) {
-      printError('Unable to read manifest info from $apk.');
+      printError('Unable to read manifest info from ${apk.path}.');
       return null;
     }
 
     if (data.packageName == null || data.launchableActivityName == null) {
-      printError('Unable to read manifest info from $apk.');
+      printError('Unable to read manifest info from ${apk.path}.');
       return null;
     }
 
