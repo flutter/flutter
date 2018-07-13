@@ -52,6 +52,8 @@ source_set("ui") {
     "painting/shader.h",
     "painting/vertices.cc",
     "painting/vertices.h",
+    "plugins/callback_cache.cc",
+    "plugins/callback_cache.h",
     "semantics/semantics_node.cc",
     "semantics/semantics_node.h",
     "semantics/semantics_update.cc",

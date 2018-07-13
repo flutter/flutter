@@ -80,6 +80,10 @@ class DartIsolate : public UIDartState {
   bool Run(const std::string& entrypoint);
 
   FXL_WARN_UNUSED_RESULT
+  bool RunFromLibrary(const std::string& library_name,
+                      const std::string& entrypoint);
+
+  FXL_WARN_UNUSED_RESULT
   bool Shutdown();
 
   void AddIsolateShutdownCallback(fxl::Closure closure);

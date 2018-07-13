@@ -21,7 +21,7 @@ PlatformViewIOS::PlatformViewIOS(PlatformView::Delegate& delegate,
                                  blink::TaskRunners task_runners,
                                  FlutterViewController* owner_controller,
                                  FlutterView* owner_view)
-    : PlatformView(delegate, std::move(task_runners)),
+    : HeadlessPlatformViewIOS(delegate, std::move(task_runners)),
       owner_controller_(owner_controller),
       owner_view_(owner_view),
       ios_surface_(owner_view_.createSurface) {
@@ -34,10 +34,6 @@ PlatformViewIOS::~PlatformViewIOS() = default;
 
 FlutterViewController* PlatformViewIOS::GetOwnerViewController() const {
   return owner_controller_;
-}
-
-PlatformMessageRouter& PlatformViewIOS::GetPlatformMessageRouter() {
-  return platform_message_router_;
 }
 
 void PlatformViewIOS::RegisterExternalTexture(int64_t texture_id,
@@ -77,11 +73,6 @@ void PlatformViewIOS::UpdateSemantics(blink::SemanticsNodeUpdates update,
   if (accessibility_bridge_) {
     accessibility_bridge_->UpdateSemantics(std::move(update), std::move(actions));
   }
-}
-
-// |shell::PlatformView|
-void PlatformViewIOS::HandlePlatformMessage(fxl::RefPtr<blink::PlatformMessage> message) {
-  platform_message_router_.HandlePlatformMessage(std::move(message));
 }
 
 // |shell::PlatformView|

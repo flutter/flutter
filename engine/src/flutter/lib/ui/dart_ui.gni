@@ -11,6 +11,7 @@ dart_ui_files = [
   "$flutter_root/lib/ui/lerp.dart",
   "$flutter_root/lib/ui/natives.dart",
   "$flutter_root/lib/ui/painting.dart",
+  "$flutter_root/lib/ui/plugins.dart",
   "$flutter_root/lib/ui/pointer.dart",
   "$flutter_root/lib/ui/semantics.dart",
   "$flutter_root/lib/ui/text.dart",

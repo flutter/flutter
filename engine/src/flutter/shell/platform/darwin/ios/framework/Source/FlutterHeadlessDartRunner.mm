@@ -8,6 +8,7 @@
 
 #include <functional>
 #include <memory>
+#include <sstream>
 
 #include "flutter/fml/message_loop.h"
 #include "flutter/shell/common/engine.h"
@@ -17,15 +18,28 @@
 #include "flutter/shell/common/switches.h"
 #include "flutter/shell/common/thread_host.h"
 #include "flutter/shell/platform/darwin/common/command_line.h"
+#include "flutter/shell/platform/darwin/ios/framework/Headers/FlutterPlugin.h"
 #include "flutter/shell/platform/darwin/ios/framework/Source/FlutterDartProject_Internal.h"
+#include "flutter/shell/platform/darwin/ios/framework/Source/platform_message_response_darwin.h"
+#include "flutter/shell/platform/darwin/ios/headless_platform_view_ios.h"
+#include "flutter/shell/platform/darwin/ios/platform_view_ios.h"
 #include "lib/fxl/functional/make_copyable.h"
 
-static std::unique_ptr<shell::PlatformView> CreateHeadlessPlatformView(shell::Shell& shell) {
-  return std::make_unique<shell::PlatformView>(shell, shell.GetTaskRunners());
+static std::unique_ptr<shell::HeadlessPlatformViewIOS> CreateHeadlessPlatformView(
+    shell::Shell& shell) {
+  return std::make_unique<shell::HeadlessPlatformViewIOS>(shell, shell.GetTaskRunners());
 }
 
 static std::unique_ptr<shell::Rasterizer> CreateHeadlessRasterizer(shell::Shell& shell) {
   return std::make_unique<shell::Rasterizer>(shell.GetTaskRunners());
+}
+
+static std::string CreateShellLabel() {
+  static size_t count = 1;
+  std::stringstream stream;
+  stream << "io.flutter.headless.";
+  stream << count++;
+  return stream.str();
 }
 
 @implementation FlutterHeadlessDartRunner {
@@ -33,13 +47,15 @@ static std::unique_ptr<shell::Rasterizer> CreateHeadlessRasterizer(shell::Shell&
   std::unique_ptr<shell::Shell> _shell;
 }
 
-- (void)runWithEntrypoint:(NSString*)entrypoint {
+- (void)runWithEntrypointAndCallback:(NSString*)entrypoint
+                          libraryUri:(NSString*)uri
+                          completion:(FlutterHeadlessDartRunnerCallback)callback {
   if (_shell != nullptr || entrypoint.length == 0) {
     FXL_LOG(ERROR) << "This headless dart runner was already used to run some code.";
     return;
   }
 
-  const auto label = "io.flutter.headless";
+  const auto label = CreateShellLabel();
 
   // Create the threads to run the shell on.
   _threadHost = {
@@ -59,6 +75,10 @@ static std::unique_ptr<shell::Rasterizer> CreateHeadlessRasterizer(shell::Shell&
 
   auto settings = shell::SettingsFromCommandLine(shell::CommandLineFromNSProcessInfo());
 
+  // These values set the name of the isolate for debugging.
+  settings.advisory_script_entrypoint = entrypoint.UTF8String;
+  settings.advisory_script_uri = uri.UTF8String;
+
   // Create the shell. This is a blocking operation.
   _shell = shell::Shell::Create(
       std::move(task_runners),                                        // task runners
@@ -77,16 +97,61 @@ static std::unique_ptr<shell::Rasterizer> CreateHeadlessRasterizer(shell::Shell&
       [[[FlutterDartProject alloc] initFromDefaultSourceForConfiguration] autorelease];
 
   auto config = project.runConfiguration;
-
-  config.SetEntrypoint(entrypoint.UTF8String);
+  config.SetEntrypointAndLibrary(entrypoint.UTF8String, uri.UTF8String);
 
   // Override the default run configuration with the specified entrypoint.
   _shell->GetTaskRunners().GetUITaskRunner()->PostTask(
-      fxl::MakeCopyable([engine = _shell->GetEngine(), config = std::move(config)]() mutable {
+      fxl::MakeCopyable([engine = _shell->GetEngine(), config = std::move(config),
+                         callback = Block_copy(callback)]() mutable {
+        BOOL success = NO;
+        FXL_LOG(INFO) << "Attempting to launch background engine configuration...";
         if (!engine || !engine->Run(std::move(config))) {
           FXL_LOG(ERROR) << "Could not launch engine with configuration.";
+        } else {
+          FXL_LOG(INFO) << "Background Isolate successfully started and run.";
+          success = YES;
+        }
+        if (callback != nil) {
+          callback(success);
+          Block_release(callback);
         }
       }));
+}
+
+- (void)runWithEntrypoint:(NSString*)entrypoint {
+  [self runWithEntrypointAndCallback:entrypoint libraryUri:nil completion:nil];
+}
+
+#pragma mark - FlutterBinaryMessenger
+
+- (void)sendOnChannel:(NSString*)channel message:(NSData*)message {
+  [self sendOnChannel:channel message:message binaryReply:nil];
+}
+
+- (void)sendOnChannel:(NSString*)channel
+              message:(NSData*)message
+          binaryReply:(FlutterBinaryReply)callback {
+  NSAssert(channel, @"The channel must not be null");
+  fxl::RefPtr<shell::PlatformMessageResponseDarwin> response =
+      (callback == nil) ? nullptr
+                        : fxl::MakeRefCounted<shell::PlatformMessageResponseDarwin>(
+                              ^(NSData* reply) {
+                                callback(reply);
+                              },
+                              _shell->GetTaskRunners().GetPlatformTaskRunner());
+  fxl::RefPtr<blink::PlatformMessage> platformMessage =
+      (message == nil) ? fxl::MakeRefCounted<blink::PlatformMessage>(channel.UTF8String, response)
+                       : fxl::MakeRefCounted<blink::PlatformMessage>(
+                             channel.UTF8String, shell::GetVectorFromNSData(message), response);
+
+  _shell->GetPlatformView()->DispatchPlatformMessage(platformMessage);
+}
+
+- (void)setMessageHandlerOnChannel:(NSString*)channel
+              binaryMessageHandler:(FlutterBinaryMessageHandler)handler {
+  reinterpret_cast<shell::HeadlessPlatformViewIOS*>(_shell->GetPlatformView().get())
+      ->GetPlatformMessageRouter()
+      .SetMessageHandler(channel.UTF8String, handler);
 }
 
 @end

@@ -37,9 +37,13 @@ class RunConfiguration {
 
   void SetEntrypoint(std::string entrypoint);
 
+  void SetEntrypointAndLibrary(std::string entrypoint, std::string library);
+
   fml::RefPtr<blink::AssetManager> GetAssetManager() const;
 
   const std::string& GetEntrypoint() const;
+
+  const std::string& GetEntrypointLibrary() const;
 
   std::unique_ptr<IsolateConfiguration> TakeIsolateConfiguration();
 
@@ -47,6 +51,7 @@ class RunConfiguration {
   std::unique_ptr<IsolateConfiguration> isolate_configuration_;
   fml::RefPtr<blink::AssetManager> asset_manager_;
   std::string entrypoint_ = "main";
+  std::string entrypoint_library_ = "";
 
   FXL_DISALLOW_COPY_AND_ASSIGN(RunConfiguration);
 };
