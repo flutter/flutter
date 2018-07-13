@@ -154,9 +154,9 @@ class _CupertinoPickerDemoState extends State<CupertinoPickerDemo> {
                   scrollController: new FixedExtentScrollController(
                                       initialItem: _alarmHour,
                                     ),
-                  curveRate: 1.0,
+                  offAxisFraction: -0.5,
                   useMagnifier: true,
-                  magnifyRate: 1.1,
+                  magnificationRate: 1.1,
                   itemExtent: _kPickerItemHeight,
                   backgroundColor: CupertinoColors.white,
                   onSelectedItemChanged: (int index) {
@@ -176,9 +176,9 @@ class _CupertinoPickerDemoState extends State<CupertinoPickerDemo> {
                   scrollController: new FixedExtentScrollController(
                                       initialItem: _alarmMinute,
                                     ),
-                  curveRate: -1.0,
+                  offAxisFraction: 0.5,
                   useMagnifier: true,
-                  magnifyRate: 1.1,
+                  magnificationRate: 1.1,
                   itemExtent: _kPickerItemHeight,
                   backgroundColor: CupertinoColors.white,
                   onSelectedItemChanged: (int index) {

@@ -42,16 +42,16 @@ class CupertinoPicker extends StatefulWidget {
     Key key,
     this.diameterRatio = _kDefaultDiameterRatio,
     this.backgroundColor = _kDefaultBackground,
-    this.curveRate = 0.0,
+    this.offAxisFraction = 0.0,
     this.useMagnifier = false,
-    this.magnifyRate = 1.0,
+    this.magnificationRate = 1.0,
     this.scrollController,
     @required this.itemExtent,
     @required this.onSelectedItemChanged,
     @required this.children,
   }) : assert(diameterRatio != null),
        assert(diameterRatio > 0.0, RenderListWheelViewport.diameterRatioZeroMessage),
-       assert(magnifyRate > 0),
+       assert(magnificationRate > 0),
        assert(itemExtent != null),
        assert(itemExtent > 0),
        super(key: key);
@@ -73,14 +73,14 @@ class CupertinoPicker extends StatefulWidget {
   /// is mildly more efficient than using [Colors.transparent].
   final Color backgroundColor;
 
-  /// {@macro flutter.rendering.wheelList.curveRate}
-  final double curveRate;
+  /// {@macro flutter.rendering.wheelList.offAxisFraction}
+  final double offAxisFraction;
 
   /// {@macro flutter.rendering.wheelList.useMagnifier}
   final bool useMagnifier;
 
-  /// {@macro flutter.rendering.wheelList.magnifyRate}
-  final double magnifyRate;
+  /// {@macro flutter.rendering.wheelList.magnificationRate}
+  final double magnificationRate;
 
   /// A [FixedExtentScrollController] to read and control the current item.
   ///
@@ -178,7 +178,7 @@ class _CupertinoPickerState extends State<CupertinoPicker> {
               )
             ),
             constraints: new BoxConstraints.expand(
-                height: widget.itemExtent * widget.magnifyRate,
+                height: widget.itemExtent * widget.magnificationRate,
             ),
           ),
           new Expanded(
@@ -200,9 +200,9 @@ class _CupertinoPickerState extends State<CupertinoPicker> {
             controller: widget.scrollController,
             physics: const FixedExtentScrollPhysics(),
             diameterRatio: widget.diameterRatio,
-            curveRate: widget.curveRate,
+            offAxisFraction: widget.offAxisFraction,
             useMagnifier: widget.useMagnifier,
-            magnifyRate: widget.magnifyRate,
+            magnificationRate: widget.magnificationRate,
             itemExtent: widget.itemExtent,
             onSelectedItemChanged: _handleSelectedItemChanged,
             children: widget.children,

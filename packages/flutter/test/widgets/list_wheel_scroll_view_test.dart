@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:io';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
@@ -51,12 +53,12 @@ void main() {
     });
 
 
-    testWidgets('ListWheelScrollView needs positive magnifyRate', (WidgetTester tester) async {
+    testWidgets('ListWheelScrollView needs positive magnificationRate', (WidgetTester tester) async {
       expect(
             () {
           new ListWheelScrollView(
             useMagnifier: true,
-            magnifyRate: -1.0,
+            magnificationRate: -1.0,
             itemExtent: 20.0,
             children: <Widget>[new Container()],
           );
@@ -261,7 +263,7 @@ void main() {
             key: const Key('list_wheel_scroll_view'),
             child: new ListWheelScrollView(
               useMagnifier: true,
-              magnifyRate: 2.0,
+              magnificationRate: 2.0,
               itemExtent: 50.0,
               children: List<Widget>.generate(10, (int index) {
                 return const Placeholder();
@@ -274,6 +276,7 @@ void main() {
       await expectLater(
         find.byKey(const Key('list_wheel_scroll_view')),
         matchesGoldenFile('list_wheel_scroll_view.center_child.magnified.png'),
+        skip: !Platform.isLinux,
       );
     });
 
@@ -315,7 +318,7 @@ void main() {
             key: const Key('list_wheel_scroll_view'),
             child: new ListWheelScrollView(
               controller: controller,
-              curveRate: -1.0,
+              offAxisFraction: 0.5,
               itemExtent: 50.0,
               children: List<Widget>.generate(32, (int index) {
                 return const Placeholder();
@@ -328,6 +331,7 @@ void main() {
       await expectLater(
         find.byKey(const Key('list_wheel_scroll_view')),
         matchesGoldenFile('list_wheel_scroll_view.curved_wheel.left.png'),
+        skip: !Platform.isLinux,
       );
     });
 
