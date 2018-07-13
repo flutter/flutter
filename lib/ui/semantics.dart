@@ -571,7 +571,7 @@ class SemanticsUpdateBuilder extends NativeFieldWrapperClass2 {
     assert(label != null && label != '');
     _updateCustomAction(id, label);
   }
-  void _updateCustomAction(int id, String label) native 'SemanticsUpdateBuilder_updateAction';
+  void _updateCustomAction(int id, String label) native 'SemanticsUpdateBuilder_updateCustomAction';
 
   /// Creates a [SemanticsUpdate] object that encapsulates the updates recorded
   /// by this object.
