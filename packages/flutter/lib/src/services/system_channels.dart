@@ -216,4 +216,12 @@ class SystemChannels {
     const StandardMessageCodec(),
   );
 
+  /// A [MethodChannel] for controlling platform views.
+  ///
+  /// See also: [PlatformViewsService] for the available operations on this channel.
+  static const MethodChannel platform_views = const MethodChannel(
+    'flutter/platform_views',
+    const StandardMethodCodec(),
+  );
+
 }
