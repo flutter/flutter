@@ -52,7 +52,7 @@ class PlatformViewsService {
   /// factory for this view type must have been registered on the platform side.
   /// Platform view factories are typically registered by plugin code.
   /// Plugins can register a platform view factory with
-  /// [PlatformViewRegistry#registerViewFactory](/javadoc/javadoc/io/flutter/plugin/platform/PlatformViewRegistry.html#registerViewFactory-java.lang.String-io.flutter.plugin.platform.PlatformViewFactory-).
+  /// [PlatformViewRegistry#registerViewFactory](/javadoc/io/flutter/plugin/platform/PlatformViewRegistry.html#registerViewFactory-java.lang.String-io.flutter.plugin.platform.PlatformViewFactory-).
   ///
   /// `size` is the initial size for the view in logical pixels.
   static Future<AndroidViewController> initAndroidView({
