@@ -8,6 +8,7 @@ import '../base/common.dart';
 import '../base/io.dart';
 import '../cache.dart';
 import '../device.dart';
+import '../globals.dart';
 import '../protocol_discovery.dart';
 import '../resident_runner.dart';
 import '../run_hot.dart';
@@ -70,6 +71,8 @@ class AttachCommand extends FlutterCommand {
     await _validateArguments();
 
     final Device device = await findTargetDevice();
+    if (device == null)
+      throwToolExit(null);
     final int devicePort = observatoryPort;
     Uri observatoryUri;
     if (devicePort == null) {
@@ -77,7 +80,7 @@ class AttachCommand extends FlutterCommand {
       try {
         observatoryDiscovery = new ProtocolDiscovery.observatory(
             device.getLogReader(), portForwarder: device.portForwarder);
-        print('Listening.');
+        printStatus('Listening.');
         observatoryUri = await observatoryDiscovery.uri;
       } finally {
         await observatoryDiscovery?.cancel();

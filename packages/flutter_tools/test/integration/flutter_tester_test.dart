@@ -12,7 +12,7 @@ import 'package:flutter_tools/src/tester/flutter_tester.dart';
 import 'package:test/test.dart';
 
 import '../src/context.dart';
-import 'util.dart';
+import 'test_utils.dart';
 
 void main() {
   Directory tempDir;
@@ -42,10 +42,13 @@ void main() {
     });
 
     Future<LaunchResult> start(String mainPath) async {
-      return await device.startApp(null,
-          mainPath: mainPath,
-          debuggingOptions: new DebuggingOptions.enabled(
-              const BuildInfo(BuildMode.debug, null)));
+      return await device.startApp(
+        null,
+        mainPath: mainPath,
+        debuggingOptions: new DebuggingOptions.enabled(
+          const BuildInfo(BuildMode.debug, null),
+        ),
+      );
     }
 
     testUsingContext('start', () async {
@@ -71,38 +74,5 @@ void main() {
 
       expect(await device.stopApp(null), isTrue);
     });
-
-    testUsingContext('keeps running', () async {
-      writePubspec(tempDir.path);
-      writePackages(tempDir.path);
-      await getPackages(tempDir.path);
-
-      final String mainPath = fs.path.join('lib', 'main.dart');
-      writeFile(mainPath, r'''
-import 'package:flutter/material.dart';
-
-void main() => runApp(new MyApp());
-
-class MyApp extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return new MaterialApp(
-      title: 'Flutter Demo',
-      home: new Container(),
-    );
-  }
-}
-''');
-
-      final LaunchResult result = await start(mainPath);
-
-      expect(result.started, isTrue);
-      expect(result.observatoryUri, isNotNull);
-
-      await new Future<void>.delayed(const Duration(seconds: 3));
-      expect(device.isRunning, true);
-
-      expect(await device.stopApp(null), isTrue);
-    }, skip: true);
   });
 }

@@ -218,7 +218,8 @@ class RenderConstrainedBox extends RenderProxyBox {
     if (_additionalConstraints.hasBoundedWidth && _additionalConstraints.hasTightWidth)
       return _additionalConstraints.minWidth;
     final double width = super.computeMinIntrinsicWidth(height);
-    if (_additionalConstraints.hasBoundedWidth)
+    assert(width.isFinite);
+    if (!_additionalConstraints.hasInfiniteWidth)
       return _additionalConstraints.constrainWidth(width);
     return width;
   }
@@ -228,7 +229,8 @@ class RenderConstrainedBox extends RenderProxyBox {
     if (_additionalConstraints.hasBoundedWidth && _additionalConstraints.hasTightWidth)
       return _additionalConstraints.minWidth;
     final double width = super.computeMaxIntrinsicWidth(height);
-    if (_additionalConstraints.hasBoundedWidth)
+    assert(width.isFinite);
+    if (!_additionalConstraints.hasInfiniteWidth)
       return _additionalConstraints.constrainWidth(width);
     return width;
   }
@@ -238,7 +240,8 @@ class RenderConstrainedBox extends RenderProxyBox {
     if (_additionalConstraints.hasBoundedHeight && _additionalConstraints.hasTightHeight)
       return _additionalConstraints.minHeight;
     final double height = super.computeMinIntrinsicHeight(width);
-    if (_additionalConstraints.hasBoundedHeight)
+    assert(height.isFinite);
+    if (!_additionalConstraints.hasInfiniteHeight)
       return _additionalConstraints.constrainHeight(height);
     return height;
   }
@@ -248,7 +251,8 @@ class RenderConstrainedBox extends RenderProxyBox {
     if (_additionalConstraints.hasBoundedHeight && _additionalConstraints.hasTightHeight)
       return _additionalConstraints.minHeight;
     final double height = super.computeMaxIntrinsicHeight(width);
-    if (_additionalConstraints.hasBoundedHeight)
+    assert(height.isFinite);
+    if (!_additionalConstraints.hasInfiniteHeight)
       return _additionalConstraints.constrainHeight(height);
     return height;
   }

@@ -4,7 +4,6 @@
 
 import 'package:test/test.dart';
 
-import 'package:flutter_tools/src/base/port_scanner.dart';
 import 'package:flutter_tools/src/vmservice.dart';
 
 import 'src/common.dart';
@@ -13,9 +12,8 @@ import 'src/context.dart';
 void main() {
   group('VMService', () {
     testUsingContext('fails connection eagerly in the connect() method', () async {
-      final int port = await const HostPortScanner().findAvailablePort();
       expect(
-        VMService.connect(Uri.parse('http://localhost:$port')),
+        VMService.connect(Uri.parse('http://host.invalid:9999/')),
         throwsToolExit(),
       );
     });

@@ -6,13 +6,7 @@ import 'dart:async';
 
 import '../base/common.dart';
 import '../base/file_system.dart';
-import '../base/io.dart';
-import '../base/logger.dart';
-import '../base/os.dart';
-import '../base/platform.dart';
-import '../base/process_manager.dart';
 import '../cache.dart';
-import '../globals.dart';
 import '../runner/flutter_command.dart';
 import '../test/coverage_collector.dart';
 import '../test/event_printer.dart';
@@ -92,65 +86,6 @@ class TestCommand extends FlutterCommand {
   @override
   String get description => 'Run Flutter unit tests for the current project.';
 
-  Future<bool> _collectCoverageData(CoverageCollector collector, { bool mergeCoverageData = false }) async {
-    final Status status = logger.startProgress('Collecting coverage information...');
-    final String coverageData = await collector.finalizeCoverage(
-      timeout: const Duration(seconds: 30),
-    );
-    status.stop();
-    printTrace('coverage information collection complete');
-    if (coverageData == null)
-      return false;
-
-    final String coveragePath = argResults['coverage-path'];
-    final File coverageFile = fs.file(coveragePath)
-      ..createSync(recursive: true)
-      ..writeAsStringSync(coverageData, flush: true);
-    printTrace('wrote coverage data to $coveragePath (size=${coverageData.length})');
-
-    const String baseCoverageData = 'coverage/lcov.base.info';
-    if (mergeCoverageData) {
-      if (!platform.isLinux) {
-        printError(
-          'Merging coverage data is supported only on Linux because it '
-          'requires the "lcov" tool.'
-        );
-        return false;
-      }
-
-      if (!fs.isFileSync(baseCoverageData)) {
-        printError('Missing "$baseCoverageData". Unable to merge coverage data.');
-        return false;
-      }
-
-      if (os.which('lcov') == null) {
-        String installMessage = 'Please install lcov.';
-        if (platform.isLinux)
-          installMessage = 'Consider running "sudo apt-get install lcov".';
-        else if (platform.isMacOS)
-          installMessage = 'Consider running "brew install lcov".';
-        printError('Missing "lcov" tool. Unable to merge coverage data.\n$installMessage');
-        return false;
-      }
-
-      final Directory tempDir = fs.systemTempDirectory.createTempSync('flutter_tools');
-      try {
-        final File sourceFile = coverageFile.copySync(fs.path.join(tempDir.path, 'lcov.source.info'));
-        final ProcessResult result = processManager.runSync(<String>[
-          'lcov',
-          '--add-tracefile', baseCoverageData,
-          '--add-tracefile', sourceFile.path,
-          '--output-file', coverageFile.path,
-        ]);
-        if (result.exitCode != 0)
-          return false;
-      } finally {
-        tempDir.deleteSync(recursive: true);
-      }
-    }
-    return true;
-  }
-
   @override
   Future<Null> validateCommand() async {
     await super.validateCommand();
@@ -229,7 +164,8 @@ class TestCommand extends FlutterCommand {
     );
 
     if (collector != null) {
-      if (!await _collectCoverageData(collector, mergeCoverageData: argResults['merge-coverage']))
+      if (!await collector.collectCoverageData(
+          argResults['coverage-path'], mergeCoverageData: argResults['merge-coverage']))
         throwToolExit(null);
     }
 
