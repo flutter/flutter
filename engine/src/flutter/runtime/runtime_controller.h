@@ -47,6 +47,8 @@ class RuntimeController final : public WindowClient {
 
   bool SetSemanticsEnabled(bool enabled);
 
+  bool SetAssistiveTechnologyEnabled(bool enabled);
+
   bool BeginFrame(fxl::TimePoint frame_time);
 
   bool NotifyIdle(int64_t deadline);
@@ -80,6 +82,7 @@ class RuntimeController final : public WindowClient {
     std::string country_code;
     std::string user_settings_data = "{}";
     bool semantics_enabled = false;
+    bool assistive_technology_enabled = false;
   };
 
   RuntimeDelegate& client_;

@@ -429,6 +429,13 @@ static void SetSemanticsEnabled(JNIEnv* env,
   ANDROID_SHELL_HOLDER->GetPlatformView()->SetSemanticsEnabled(enabled);
 }
 
+static void SetAssistiveTechnologyEnabled(JNIEnv* env,
+                                          jobject jcaller,
+                                          jlong shell_holder,
+                                          jboolean enabled) {
+  ANDROID_SHELL_HOLDER->GetPlatformView()->SetAssistiveTechnologyEnabled(enabled);
+}
+
 static jboolean GetIsSoftwareRendering(JNIEnv* env, jobject jcaller) {
   return FlutterMain::Get().GetSettings().enable_software_rendering;
 }
@@ -599,6 +606,11 @@ bool PlatformViewAndroid::Register(JNIEnv* env) {
           .name = "nativeSetSemanticsEnabled",
           .signature = "(JZ)V",
           .fnPtr = reinterpret_cast<void*>(&shell::SetSemanticsEnabled),
+      },
+      {
+          .name = "nativeSetAssistiveTechnologyEnabled",
+          .signature = "(JZ)V",
+          .fnPtr = reinterpret_cast<void*>(&shell::SetAssistiveTechnologyEnabled),
       },
       {
           .name = "nativeGetIsSoftwareRenderingEnabled",

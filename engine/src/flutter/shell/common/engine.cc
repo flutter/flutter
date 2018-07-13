@@ -339,6 +339,10 @@ void Engine::SetSemanticsEnabled(bool enabled) {
   runtime_controller_->SetSemanticsEnabled(enabled);
 }
 
+void Engine::SetAssistiveTechnologyEnabled(bool enabled) {
+  runtime_controller_->SetAssistiveTechnologyEnabled(enabled);
+}
+
 void Engine::StopAnimator() {
   animator_->Stop();
 }
