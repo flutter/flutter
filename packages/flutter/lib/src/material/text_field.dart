@@ -17,7 +17,7 @@ import 'material.dart';
 import 'text_selection.dart';
 import 'theme.dart';
 
-export 'package:flutter/services.dart' show TextInputType;
+export 'package:flutter/services.dart' show TextInputType, TextInputAction;
 
 /// A material design text field.
 ///
@@ -102,6 +102,7 @@ class TextField extends StatefulWidget {
     this.focusNode,
     this.decoration = const InputDecoration(),
     TextInputType keyboardType = TextInputType.text,
+    this.textInputAction = TextInputAction.done,
     this.style,
     this.textAlign = TextAlign.start,
     this.autofocus = false,
@@ -115,6 +116,7 @@ class TextField extends StatefulWidget {
     this.inputFormatters,
     this.enabled,
   }) : assert(keyboardType != null),
+       assert(textInputAction != null),
        assert(textAlign != null),
        assert(autofocus != null),
        assert(obscureText != null),
@@ -150,6 +152,11 @@ class TextField extends StatefulWidget {
   /// [maxLines] is not one, then [keyboardType] is ignored, and the
   /// [TextInputType.multiline] keyboard type is used.
   final TextInputType keyboardType;
+
+  /// The type of action button to use for the keyboard.
+  ///
+  /// Defaults to [TextInputAction.done]. Must not be null.
+  final TextInputAction textInputAction;
 
   /// The style to use for the text being edited.
   ///
@@ -473,6 +480,7 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
         controller: controller,
         focusNode: focusNode,
         keyboardType: widget.keyboardType,
+        textInputAction: widget.textInputAction,
         style: style,
         textAlign: widget.textAlign,
         autofocus: widget.autofocus,
@@ -493,8 +501,9 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
     );
 
     if (widget.decoration != null) {
+      final Listenable listenable = new Listenable.merge(<Listenable>[focusNode, controller]);
       child = new AnimatedBuilder(
-        animation: new Listenable.merge(<Listenable>[ focusNode, controller ]),
+        animation: listenable,
         builder: (BuildContext context, Widget child) {
           return new InputDecorator(
             decoration: _getEffectiveDecoration(),

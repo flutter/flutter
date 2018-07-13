@@ -2687,7 +2687,8 @@ class SemanticsConfiguration {
   }
 
   /// If this node has Boolean state that can be controlled by the user, whether
-  /// that state is on or off, corresponding to true and false, respectively.
+  /// that state is checked or unchecked, corresponding to true and false,
+  /// respectively.
   ///
   /// Do not call the setter for this field if the owning [RenderObject] doesn't
   /// have checked/unchecked state that can be controlled by the user.
@@ -2698,6 +2699,20 @@ class SemanticsConfiguration {
   set isChecked(bool value) {
     _setFlag(SemanticsFlag.hasCheckedState, true);
     _setFlag(SemanticsFlag.isChecked, value);
+  }
+
+  /// If this node has Boolean state that can be controlled by the user, whether
+  /// that state is on or off, corresponding to true and false, respectively.
+  /// 
+  /// Do not call the setter for this field if the owning [RenderObject] doesn't
+  /// have on/off state that can be controlled by the user.
+  /// 
+  /// The getter returns null if the owning [RenderObject] does not have
+  /// on/off state.
+  bool get isToggled => _hasFlag(SemanticsFlag.hasToggledState) ? _hasFlag(SemanticsFlag.isToggled) : null;
+  set isToggled(bool value) {
+    _setFlag(SemanticsFlag.hasToggledState, true);
+    _setFlag(SemanticsFlag.isToggled, value);
   }
 
   /// Whether the owning RenderObject corresponds to UI that allows the user to

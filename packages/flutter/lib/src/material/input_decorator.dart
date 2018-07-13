@@ -1620,7 +1620,8 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
       duration: _kTransitionDuration,
       curve: _kTransitionCurve,
       child: new Semantics(
-        liveRegion: true,
+        container: true,
+        liveRegion: widget.isFocused,
         child: new Text(
           decoration.hintText,
           style: hintStyle,

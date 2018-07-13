@@ -16,6 +16,7 @@ void main() {
     'es', // Spanish
     'fa', // Farsi (Persian)
     'fr', // French
+    'gsw', // Swiss German
     'he', // Hebrew
     'id', // Indonesian
     'it', // Italian

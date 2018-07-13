@@ -134,9 +134,9 @@ class TapSemanticEvent extends SemanticsEvent {
   Map<String, dynamic> getDataMap() => const <String, dynamic>{};
 }
 
-class UpdateLiveRegion extends SemanticsEvent {
+class LiveRegionEvent extends SemanticsEvent {
 
-  const UpdateLiveRegion() : super('updateLiveRegion');
+  const LiveRegionEvent() : super('liveRegionUpdate');
 
   @override
   Map<String, dynamic> getDataMap() => const <String, dynamic>{};

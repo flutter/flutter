@@ -143,8 +143,12 @@ class Daemon {
         throw 'no domain for method: $method';
 
       _domainMap[prefix].handleCommand(name, id, request['params'] ?? const <String, dynamic>{});
-    } catch (error) {
-      _send(<String, dynamic>{'id': id, 'error': _toJsonable(error)});
+    } catch (error, trace) {
+      _send(<String, dynamic>{
+        'id': id,
+        'error': _toJsonable(error),
+        'trace': '$trace',
+      });
     }
   }
 
@@ -184,14 +188,18 @@ abstract class Domain {
       if (_handlers.containsKey(command))
         return _handlers[command](args);
       throw 'command not understood: $name.$command';
-    }).then<Null>((dynamic result) {
+    }).then<dynamic>((dynamic result) {
       if (result == null) {
         _send(<String, dynamic>{'id': id});
       } else {
         _send(<String, dynamic>{'id': id, 'result': _toJsonable(result)});
       }
     }).catchError((dynamic error, dynamic trace) {
-      _send(<String, dynamic>{'id': id, 'error': _toJsonable(error)});
+      _send(<String, dynamic>{
+        'id': id,
+        'error': _toJsonable(error),
+        'trace': '$trace',
+      });
     });
   }
 
@@ -393,7 +401,7 @@ class AppDomain extends Domain {
       _sendAppEvent(app, 'started');
     });
 
-    await app._runInZone(this, () async {
+    await app._runInZone<Null>(this, () async {
       try {
         await runner.run(
           connectionInfoCompleter: connectionInfoCompleter,
@@ -401,8 +409,11 @@ class AppDomain extends Domain {
           route: route,
         );
         _sendAppEvent(app, 'stop');
-      } catch (error) {
-        _sendAppEvent(app, 'stop', <String, dynamic>{'error': _toJsonable(error)});
+      } catch (error, trace) {
+        _sendAppEvent(app, 'stop', <String, dynamic>{
+          'error': _toJsonable(error),
+          'trace': '$trace',
+        });
       } finally {
         fs.currentDirectory = cwd;
         _apps.remove(app);
@@ -429,7 +440,7 @@ class AppDomain extends Domain {
     if (_inProgressHotReload != null)
       throw 'hot restart already in progress';
 
-    _inProgressHotReload = app._runInZone(this, () {
+    _inProgressHotReload = app._runInZone<OperationResult>(this, () {
       return app.restart(fullRestart: fullRestart, pauseAfterRestart: pauseAfterRestart);
     });
     return _inProgressHotReload.whenComplete(() {
@@ -449,7 +460,7 @@ class AppDomain extends Domain {
   Future<Map<String, dynamic>> callServiceExtension(Map<String, dynamic> args) async {
     final String appId = _getStringArg(args, 'appId', required: true);
     final String methodName = _getStringArg(args, 'methodName');
-    final Map<String, String> params = args['params'] ?? <String, String>{};
+    final Map<String, dynamic> params = args['params'] == null ? <String, dynamic>{} : castStringKeyedMap(args['params']);
 
     final AppInstance app = _getApp(appId);
     if (app == null)
@@ -741,10 +752,10 @@ class AppInstance {
     _logger.close();
   }
 
-  dynamic _runInZone(AppDomain domain, dynamic method()) {
+  Future<T> _runInZone<T>(AppDomain domain, dynamic method()) {
     _logger ??= new _AppRunLogger(domain, this, parent: logToStdout ? logger : null);
 
-    return context.run<dynamic>(
+    return context.run<T>(
       body: method,
       overrides: <Type, Generator>{
         Logger: () => _logger,

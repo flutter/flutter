@@ -4,6 +4,7 @@
 
 import 'package:flutter/semantics.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter/semantics.dart';
 
 import 'button_theme.dart';
 import 'flat_button.dart';
