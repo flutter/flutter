@@ -535,10 +535,10 @@ class _MonthPickerState extends State<MonthPicker> with SingleTickerProviderStat
     _updateCurrentDate();
 
     // Setup the fade animation for chevrons
-    _chevronOpacityController =
-        new AnimationController(duration: const Duration(milliseconds: 500), vsync: this);
-    final curve =
-        new CurvedAnimation(parent: _chevronOpacityController, curve: Curves.easeInOut);
+    _chevronOpacityController = new AnimationController(
+      duration: const Duration(milliseconds: 500), vsync: this
+    );
+    final curve = new CurvedAnimation(parent: _chevronOpacityController, curve: Curves.easeInOut);
     _chevronOpacityAnimation = new Tween(begin: 1.0, end: 0.5).animate(curve);
   }
 
@@ -690,8 +690,7 @@ class _MonthPickerState extends State<MonthPicker> with SingleTickerProviderStat
                   tooltip: _isDisplayingFirstMonth
                       ? null
                       : '${localizations.previousMonthTooltip} ${localizations.formatMonthYear(_previousMonthDate)}',
-                  onPressed:
-                      _isDisplayingFirstMonth ? null : _handlePreviousMonth,
+                  onPressed: _isDisplayingFirstMonth ? null : _handlePreviousMonth,
                 ),
               ),
             ),

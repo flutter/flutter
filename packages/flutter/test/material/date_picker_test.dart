@@ -655,39 +655,44 @@ void _tests() {
       )
     );
 
+
+    for(Element element in find.byType(IconButton).evaluate()) {
+      final RenderAnimatedOpacity ft = element.ancestorRenderObjectOfType(
+        const TypeMatcher<RenderAnimatedOpacity>());
+      expect(ft.opacity.value, equals(1.0));
+      expect(ft.opacity.status, equals(AnimationStatus.dismissed));
+    }
+
+
+
     // Initial chevron animation state should be dismissed
     // An AlwaysStoppedAnimation is also found and is ignored
-    find.byType(FadeTransition).evaluate().forEach((Element element) {
-      final ft = element.widget as FadeTransition;
-      if (!(ft.opacity is AlwaysStoppedAnimation)) {
-        expect(ft.opacity.status, equals(AnimationStatus.dismissed));
-        expect(ft.opacity.value, equals(1.0));
-      }
-    });
+    for(Element element in find.byType(IconButton).evaluate()) {
+      final RenderAnimatedOpacity ft = element.ancestorRenderObjectOfType(
+        const TypeMatcher<RenderAnimatedOpacity>());
+      expect(ft.opacity.value, equals(1.0));
+      expect(ft.opacity.status, equals(AnimationStatus.dismissed));
+    }
 
     // Drag and hold the picker to test for the opacity change
     final TestGesture gesture = await tester.startGesture(const Offset(100.0, 100.0));
-    await gesture.moveBy(const Offset(50.0, 100.0), );
+    await gesture.moveBy(const Offset(50.0, 100.0));
     await tester.pumpAndSettle();
-    expect(find.byType(FadeTransition), findsWidgets);
-    find.byType(FadeTransition).evaluate().forEach((Element element) {
-      final ft = element.widget as FadeTransition;
-      if (!(ft.opacity is AlwaysStoppedAnimation)) {
-        expect(ft.opacity.status, equals(AnimationStatus.completed));
-        expect(ft.opacity.value, equals(0.5));
-      }
-    });
+    for(Element element in find.byType(IconButton).evaluate()) {
+      final RenderAnimatedOpacity ft = element.ancestorRenderObjectOfType(
+        const TypeMatcher<RenderAnimatedOpacity>());
+      expect(ft.opacity.value, equals(0.5));
+      expect(ft.opacity.status, equals(AnimationStatus.completed));
+    }
 
     // Release the drag and test for the opacity to return to original value
     await gesture.up();
     await tester.pumpAndSettle();
-    expect(find.byType(FadeTransition), findsWidgets);
-    find.byType(FadeTransition).evaluate().forEach((Element element) {
-      final ft = element.widget as FadeTransition;
-      if (!(ft.opacity is AlwaysStoppedAnimation)) {
-        expect(ft.opacity.status, equals(AnimationStatus.dismissed));
-        expect(ft.opacity.value, equals(1.0));
-      }
-    });
+    for(Element element in find.byType(IconButton).evaluate()) {
+      final RenderAnimatedOpacity ft = element.ancestorRenderObjectOfType(
+        const TypeMatcher<RenderAnimatedOpacity>());
+      expect(ft.opacity.value, equals(1.0));
+      expect(ft.opacity.status, equals(AnimationStatus.dismissed));
+    }
   });
 }
