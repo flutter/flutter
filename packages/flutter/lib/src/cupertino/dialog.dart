@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:math';
 import 'dart:ui' show ImageFilter;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
@@ -272,22 +273,17 @@ class _CupertinoDialogRenderWidget extends MultiChildRenderObjectWidget {
     Key key,
     @required List<Widget> children,
     bool isStacked = false,
-  }) : _isStacked = isStacked,
-       super(key: key, children: children);
-
-  final bool _isStacked;
+  }) : super(key: key, children: children);
 
   @override
   RenderObject createRenderObject(BuildContext context) {
-    return new _RenderCupertinoDialog(isStacked: _isStacked);
+    return new _RenderCupertinoDialog();
   }
 
   @override
   void updateRenderObject(BuildContext context, _RenderCupertinoDialog renderObject) {
-    renderObject.isStacked = _isStacked;
+    // NO-OP
   }
-
-
 }
 
 // iOS style layout policy for sizing an alert dialog's content section and action
@@ -317,26 +313,13 @@ class _RenderCupertinoDialog extends RenderBox
     RenderBox contentSection,
     RenderBox actionsSection,
     bool isStacked = false,
-  }) : _isStacked = isStacked {
+  }) {
     if (null != contentSection) {
       add(contentSection);
     }
     if (null != actionsSection) {
       add(actionsSection);
     }
-  }
-
-  bool _isStacked;
-
-  bool get isStacked => _isStacked;
-
-  set isStacked(bool newValue) {
-    if (newValue == _isStacked) {
-      return;
-    }
-
-    _isStacked = newValue;
-    markNeedsLayout();
   }
 
   @override
@@ -357,15 +340,25 @@ class _RenderCupertinoDialog extends RenderBox
 
   @override
   double computeMinIntrinsicHeight(double width) {
-    return _computeIntrinsicHeight(width);
+    print('Dialog computeMinIntrinsicHeight(width: $width)');
+    // Obtain references to the specific children we need lay out.
+    final _DialogChildren dialogChildren = _findDialogChildren();
+    final RenderBox content = dialogChildren.content;
+    final RenderBox actions = dialogChildren.actions;
+
+    final double contentHeight = content.getMinIntrinsicHeight(width);
+    final double actionsHeight = actions.getMinIntrinsicHeight(width);
+    final double height = contentHeight + actionsHeight;
+    print('Computing overall dialog heights. Content: $contentHeight, Actions: $actionsHeight, Height: $height');
+
+    if (height.isFinite)
+      return height;
+    return 0.0;
   }
 
   @override
   double computeMaxIntrinsicHeight(double width) {
-    return _computeIntrinsicHeight(width);
-  }
-
-  double _computeIntrinsicHeight(double width) {
+    print('Dialog computeMaxIntrinsicHeight(width: $width)');
     // Obtain references to the specific children we need lay out.
     final _DialogChildren dialogChildren = _findDialogChildren();
     final RenderBox content = dialogChildren.content;
@@ -374,6 +367,7 @@ class _RenderCupertinoDialog extends RenderBox
     final double contentHeight = content.getMaxIntrinsicHeight(width);
     final double actionsHeight = actions.getMaxIntrinsicHeight(width);
     final double height = contentHeight + actionsHeight;
+    print('Computing overall dialog heights. Content: $contentHeight, Actions: $actionsHeight, Height: $height');
 
     if (height.isFinite)
       return height;
@@ -665,73 +659,6 @@ class _CupertinoAlertActionSection extends StatelessWidget {
   // don't have many actions.
   final ScrollController scrollController;
 
-  bool get _layoutActionsVertically => children.length > 2;
-
-  Widget _buildHorizontalDivider(double devicePixelRatio) {
-    return new Container(
-      height: 1.0 / devicePixelRatio,
-      color: _kButtonDividerColor,
-    );
-  }
-
-  Widget _buildVerticalDivider(double devicePixelRatio) {
-    return new Container(
-      width: 1.0 / devicePixelRatio,
-      color: _kButtonDividerColor,
-    );
-  }
-
-  Widget _buildHorizontalButtons(double devicePixelRatio) {
-    assert(
-      children.length <= 2,
-      'Horizontal dialog buttons can only be constructed with 2 or fewer '
-      'buttons. Actual button count: ${children.length}',
-    );
-
-    if (children.length == 1) {
-      return Column(
-        children: <Widget>[
-          _buildHorizontalDivider(devicePixelRatio),
-          Row(
-            children: <Widget>[
-              new Expanded(
-                child: _buildDialogButton(children.single),
-              ),
-            ],
-          ),
-        ],
-      );
-    } else {
-      // TODO(abarth): Hide the divider when one of the adjacent buttons is highlighted
-      return Column(
-        children: <Widget>[
-          _buildHorizontalDivider(devicePixelRatio),
-          IntrinsicHeight(
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: <Widget>[
-                new Expanded(
-                  child: _buildDialogButton(children[0]),
-                ),
-                _buildVerticalDivider(devicePixelRatio),
-                new Expanded(
-                  child: _buildDialogButton(children[1]),
-                ),
-              ],
-            ),
-          ),
-        ],
-      );
-    }
-  }
-
-  Iterable<Widget> _buildVerticalButtons(double devicePixelRatio) sync* {
-    for (Widget child in children) {
-      yield _buildHorizontalDivider(devicePixelRatio);
-      yield _buildDialogButton(child);
-    }
-  }
-
   Widget _buildDialogButton(Widget buttonContent) {
     return Container(
       color: _kDialogColor,
@@ -743,67 +670,19 @@ class _CupertinoAlertActionSection extends StatelessWidget {
   Widget build(BuildContext context) {
     final double devicePixelRatio = MediaQuery.of(context).devicePixelRatio;
 
-    if (children.isEmpty) {
-      return new SingleChildScrollView(
+    final List<Widget> buttons = children.map((Widget buttonContent) {
+      return _buildDialogButton(buttonContent);
+    }).toList();
+
+    return new CupertinoScrollbar(
+      child: new SingleChildScrollView(
         controller: scrollController,
-        child: new Container(width: 0.0, height: 0.0),
-      );
-    }
-
-    // TODO(abarth): Listen for the buttons being highlighted.
-
-    if (_layoutActionsVertically) {
-      final List<Widget> buttons = _buildVerticalButtons(devicePixelRatio).toList();
-
-      final Widget actionsSection = new CupertinoScrollbar(
-        child: new SingleChildScrollView(
-          controller: scrollController,
-          child: new Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: buttons,
-          ),
+        child: new _CupertinoDialogActionsRenderWidget(
+          dividerWidth: 1.0 / devicePixelRatio,
+          children: buttons,
         ),
-      );
-
-      return new _CupertinoDialogActionsRenderWidget(
-        isStacked: true,
-        children: <Widget>[
-          new BaseLayoutId<_CupertinoDialogActionsRenderWidget, MultiChildLayoutParentData>(
-            id: _AlertDialogSections.actionsSection,
-            child: actionsSection,
-          ),
-        ]..addAll(buttons),
-      );
-    } else {
-      // For a horizontal layout, we don't need the scrollController in most
-      // cases, but it still has to be always attached to a scroll view.
-      final Widget actionsSections = new CupertinoScrollbar(
-        child: new SingleChildScrollView(
-          controller: scrollController,
-          child: ConstrainedBox(
-            constraints: new BoxConstraints.loose(
-              const Size(
-                _kCupertinoDialogWidth,
-                double.infinity,
-              ),
-            ),
-            child: _buildHorizontalButtons(devicePixelRatio),
-          ),
-        ),
-      );
-
-      return new _CupertinoDialogActionsRenderWidget(
-        isStacked: false,
-        children: <Widget>[
-          new BaseLayoutId<_CupertinoDialogActionsRenderWidget, MultiChildLayoutParentData>(
-            id: _AlertDialogSections.actionsSection,
-            child: actionsSections,
-          ),
-          actionsSections,
-        ],
-      );
-    }
+      ),
+    );
   }
 }
 
@@ -869,22 +748,22 @@ class _CupertinoDialogActionsRenderWidget extends MultiChildRenderObjectWidget {
   _CupertinoDialogActionsRenderWidget({
     Key key,
     @required List<Widget> children,
-    bool isStacked = false,
-  }) : _isStacked = isStacked,
+    double dividerWidth = 0.0,
+  }) : _dividerWidth = dividerWidth,
         super(key: key, children: children);
 
-  final bool _isStacked;
+  final double _dividerWidth;
 
   @override
   RenderObject createRenderObject(BuildContext context) {
     return new _RenderCupertinoDialogActions(
-      isStacked: _isStacked,
+      dividerWidth: _dividerWidth,
     );
   }
 
   @override
   void updateRenderObject(BuildContext context, _RenderCupertinoDialogActions renderObject) {
-    renderObject.isStacked = _isStacked;
+    renderObject.dividerWidth = _dividerWidth;
   }
   
 }
@@ -913,21 +792,21 @@ class _RenderCupertinoDialogActions extends RenderBox
         RenderBoxContainerDefaultsMixin<RenderBox, MultiChildLayoutParentData> {
   _RenderCupertinoDialogActions({
     List<RenderBox> children,
-    bool isStacked = false,
-  }) : _isStacked = isStacked {
+    double dividerWidth = 0.0,
+  }) : _dividerWidth = dividerWidth {
     addAll(children);
   }
 
-  bool _isStacked;
+  double _dividerWidth;
 
-  bool get isStacked => _isStacked;
+  double get dividerWidth => _dividerWidth;
 
-  set isStacked(bool newValue) {
-    if (newValue == _isStacked) {
+  set dividerWidth(double newValue) {
+    if (newValue == _dividerWidth) {
       return;
     }
 
-    _isStacked = newValue;
+    _dividerWidth = newValue;
     markNeedsLayout();
   }
 
@@ -949,123 +828,242 @@ class _RenderCupertinoDialogActions extends RenderBox
 
   @override
   double computeMinIntrinsicHeight(double width) {
-    double height = 0.0;
-
-    if (_isStacked) {
-      // Actions min height is first item height + 50% second item height.
-      final RenderBox divider = _findDivider();
-      final double dividerHeight = divider.computeMinIntrinsicHeight(width);
-      final List<RenderBox> firstTwoButtons = _findFirstNButtonRows(2);
-      final double firstButtonHeight = firstTwoButtons[0].computeMinIntrinsicHeight(width);
-      final double secondButtonHeight = firstTwoButtons[1].computeMinIntrinsicHeight(width);
-      height = firstButtonHeight + (0.5 * secondButtonHeight) + (dividerHeight * 2);
+    print('Dialog Actions: computeMinIntrinsicHeight(width: $width)');
+    if (childCount == 0) {
+      print(' - No children. Height: 0.0');
+      return 0.0;
+    } else if (childCount == 1) {
+      // If only 1 child
+      print(' - 1 child. Height: ${_computeMinIntrinsicHeightSideBySide(width)}');
+      return _computeMinIntrinsicHeightSideBySide(width);
     } else {
-      // Actions min height is first item height (because we are only showing 1 row).
-      final List<RenderBox> firstButton = _findFirstNButtonRows(1);
-      height = firstButton.first.computeMinIntrinsicHeight(width);
-    }
+      final List<RenderBox> children = getChildrenAsList();
 
-    if (height.isFinite)
-      return height;
-    return 0.0;
+      if (children.length == 2) {
+        if (_isSingleButtonRow(width)) {
+          // The first 2 buttons fit side-by-side. Display them horizontally.
+          print(' - 2 children that fit side-by-side. Height: ${_computeMinIntrinsicHeightSideBySide(width)}');
+          return _computeMinIntrinsicHeightSideBySide(width);
+        } else {
+          // The first 2 buttons do not fit side-by-side. Display them stacked.
+          // The minimum height for 2 buttons when stacked is the minimum height
+          // of both buttons + dividers (no scrolling for 2 buttons).
+          print(' - 2 children that need to stack. Height: ${_computeMinIntrinsicHeightForTwoStackedButtons(width)}');
+          return _computeMinIntrinsicHeightForTwoStackedButtons(width);
+        }
+      } else {
+        // 3+ buttons are always stacked. The minimum height when stacked is
+        // 1.5 buttons tall.
+        print(' - 3+ children. Height: ${_computeMinIntrinsicHeightStacked(width)}');
+        return _computeMinIntrinsicHeightStacked(width);
+      }
+    }
+  }
+
+  double _computeMinIntrinsicHeightSideBySide(double width) {
+    assert(childCount <= 2);
+
+    // Min intrinsic height is the larger of the button min intrinsic heights +
+    // the width of a divider that appears above all buttons.
+    if (childCount == 1) {
+      return firstChild.computeMinIntrinsicHeight(width) + dividerWidth;
+    } else {
+      final double perButtonWidth = (width - dividerWidth) / 2.0;
+      return max(
+        firstChild.computeMinIntrinsicHeight(perButtonWidth) + dividerWidth,
+        lastChild.computeMinIntrinsicHeight(perButtonWidth) + dividerWidth,
+      );
+    }
+  }
+
+  double _computeMinIntrinsicHeightForTwoStackedButtons(double width) {
+    assert(childCount == 2);
+
+    return (2 * dividerWidth)
+        + firstChild.computeMinIntrinsicHeight(width)
+        + lastChild.computeMinIntrinsicHeight(width);
+  }
+
+  double _computeMinIntrinsicHeightStacked(double width) {
+    assert(childCount >= 3);
+
+    final List<RenderBox> children = getChildrenAsList();
+    return (2 * dividerWidth)
+        + children[0].computeMinIntrinsicHeight(width)
+        + (0.5 * children[1].computeMinIntrinsicHeight(width));
   }
 
   @override
   double computeMaxIntrinsicHeight(double width) {
-    return _findActionsChild().computeMaxIntrinsicHeight(width);
+    print('Dialog Actions: computeMaxIntrinsicHeight(width: $width)');
+    if (childCount == 0) {
+      // No buttons. Zero height.
+      print(' - No children. Height: 0.0');
+      return 0.0;
+    } else if (childCount == 1) {
+      // One button. Our max intrinsic height is equal to the button's.
+      print(' - 1 child. Height: ${firstChild.computeMaxIntrinsicHeight(width)}');
+      return firstChild.computeMaxIntrinsicHeight(width) + dividerWidth;
+    } else if (childCount == 2) {
+      // Two buttons...
+      if (_isSingleButtonRow(width)) {
+        // The 2 buttons fit side by side so our max intrinsic height is equal
+        // to the taller of the 2 buttons.
+        final double perButtonWidth = (width - dividerWidth) / 2.0;
+        print(' - 2 children that fit side-by-side. Height: ${max(
+          firstChild.computeMaxIntrinsicHeight(perButtonWidth),
+          lastChild.computeMaxIntrinsicHeight(perButtonWidth),
+        )}');
+        return max(
+          firstChild.computeMaxIntrinsicHeight(perButtonWidth),
+          lastChild.computeMaxIntrinsicHeight(perButtonWidth),
+        ) + dividerWidth;
+      } else {
+        // The 2 buttons do not fit side by side. Measure total height as a
+        // vertical stack.
+        print(' - 2 children that need to stack. Height: ${_computeMaxIntrinsicHeightStacked(width)}');
+        return _computeMaxIntrinsicHeightStacked(width);
+      }
+    } else {
+      // Three+ buttons. Stack the buttons vertically with dividers and measure
+      // the overall height.
+      print(' - 3+ children. Height: ${_computeMaxIntrinsicHeightStacked(width)}');
+      return _computeMaxIntrinsicHeightStacked(width);
+    }
+  }
+
+  double _computeMaxIntrinsicHeightStacked(double width) {
+    assert(childCount >= 2);
+
+    final double allDividersHeight = childCount * dividerWidth;
+    return getChildrenAsList().fold(allDividersHeight, (double heightAccum, RenderBox button) {
+      return heightAccum + button.computeMaxIntrinsicHeight(width);
+    });
+  }
+
+  bool _isSingleButtonRow(double width) {
+    if (childCount == 1) {
+      return true;
+    } else if (childCount == 2) {
+      // There are 2 buttons. If they can fit side-by-side then that's what
+      // we want to do. Otherwise, stack them vertically.
+      final double sideBySideWidth = firstChild.computeMaxIntrinsicWidth(double.infinity)
+          + dividerWidth
+          + lastChild.computeMaxIntrinsicWidth(double.infinity);
+      return sideBySideWidth <= width;
+    } else {
+      return false;
+    }
   }
 
   @override
   void performLayout() {
-    // First, layout all children at size zero because if we fail to call
-    // layout() on a child then we'll get an error.
-    final List<RenderBox> children = getChildrenAsList();
-    for (RenderBox child in children) {
-      child.layout(
-        new BoxConstraints.tight(const Size(0.0, 0.0)),
-        parentUsesSize: false,
+    if (_isSingleButtonRow(_kCupertinoDialogWidth)) {
+      if (childCount == 1) {
+        // We have 1 button. Our size is
+        firstChild.layout(
+          constraints,
+          parentUsesSize: true,
+        );
+
+        size = new Size(_kCupertinoDialogWidth, firstChild.size.height + dividerWidth);
+      } else {
+        // Each button gets half the available width, minus a single divider.
+        final BoxConstraints perButtonConstraints = constraints.copyWith(
+          minWidth: (constraints.minWidth - dividerWidth) / 2.0,
+          maxWidth: (constraints.maxWidth - dividerWidth) / 2.0,
+        );
+
+        // Layout the 2 buttons.
+        for(RenderBox button in getChildrenAsList()) {
+          button.layout(
+            perButtonConstraints,
+            parentUsesSize: true,
+          );
+        }
+
+        // The 2nd button needs to be offset to the right.
+        assert(lastChild.parentData is MultiChildLayoutParentData);
+        final MultiChildLayoutParentData secondButtonParentData = lastChild.parentData;
+        secondButtonParentData.offset = new Offset(firstChild.size.width + dividerWidth, 0.0);
+
+        // Calculate our size based on the button sizes.
+        size = new Size(
+          _kCupertinoDialogWidth,
+          max(
+            firstChild.size.height,
+            lastChild.size.height,
+          ) + dividerWidth,
+        );
+      }
+    } else {
+      // We need to stack buttons vertically, plus dividers above each button.
+      final BoxConstraints perButtonConstraints = constraints.copyWith(
+        minHeight: 0.0,
+        maxHeight: (constraints.maxHeight - (dividerWidth * childCount)) / childCount,
       );
-    }
 
-    // Layout the one child we actually care about, which is the dialog "actions".
-    final RenderBox actions = _findActionsChild();
-    actions.layout(
-      constraints,
-      parentUsesSize: true,
-    );
+      final List<RenderBox> children = getChildrenAsList();
+      double verticalOffset = dividerWidth;
+      print('Laying out buttons vertically.');
+      for (int i = 0; i < children.length; ++i) {
+        print(' - verticalOffset: $verticalOffset');
+        final RenderBox child = children[i];
 
-    // Set our size to be as wide as we want, and as tall as the "actions" we
-    // measured.
-    size = new Size(constraints.biggest.width, actions.size.height);
-  }
+        child.layout(
+          perButtonConstraints,
+          parentUsesSize: true,
+        );
 
-  RenderBox _findActionsChild() {
-    RenderBox actions;
-    final List<RenderBox> children = getChildrenAsList();
-    for (RenderBox child in children) {
-      final MultiChildLayoutParentData parentData = child.parentData;
-      if (parentData.id == _AlertDialogSections.actionsSection) {
-        actions = child;
-      }
-    }
-    assert(actions != null);
+        assert(child.parentData is MultiChildLayoutParentData);
+        final MultiChildLayoutParentData parentData = child.parentData;
+        parentData.offset = new Offset(0.0, verticalOffset);
+        print(' - button height: ${child.size.height}');
 
-    return actions;
-  }
-
-  RenderBox _findDivider() {
-    RenderBox divider;
-    final List<RenderBox> children = getChildrenAsList();
-    for (RenderBox child in children) {
-      // The first child that isn't "actions" should be a divider.
-      final MultiChildLayoutParentData parentData = child.parentData;
-      if (parentData.id != _AlertDialogSections.actionsSection) {
-        divider = child;
-      }
-    }
-    assert(divider != null);
-
-    return divider;
-  }
-
-  List<RenderBox> _findFirstNButtonRows(int buttonCount) {
-    final List<RenderBox> firstNButtons = <RenderBox>[];
-    final List<RenderBox> children = getChildrenAsList();
-    for (int i = 0; i < children.length; i += 1) {
-      if (i % 2 == 0) {
-        continue;
-      }
-
-      final RenderBox child = children[i];
-      final MultiChildLayoutParentData parentData = child.parentData;
-      if (parentData.id != _AlertDialogSections.actionsSection) {
-        firstNButtons.add(child);
-
-        if (firstNButtons.length == buttonCount) {
-          break;
+        verticalOffset += child.size.height;
+        if (i < children.length - 1) {
+          // Add a gap for the next divider.
+          verticalOffset += dividerWidth;
         }
       }
-    }
-    assert(firstNButtons.length == buttonCount);
 
-    return firstNButtons;
+      // Our height is the accumulated height of all buttons and dividers.
+      size = new Size(_kCupertinoDialogWidth, verticalOffset);
+    }
   }
 
   @override
   void paint(PaintingContext context, Offset offset) {
-    // Only paint the actions widget. Do not paint other children because
-    // they're only used for layout calculations.
-    final RenderBox actions = _findActionsChild();
-    final MultiChildLayoutParentData parentData = actions.parentData;
-    context.paintChild(actions, parentData.offset + offset);
+    Offset changingOffset = offset;
+    final Offset dividerOffset = new Offset(0.0, dividerWidth);
+    final Paint dividerPaint = new Paint()
+      ..color = _kButtonDividerColor
+      ..strokeWidth = dividerWidth
+      ..style = PaintingStyle.fill
+    ..strokeCap = StrokeCap.round;
+    for (RenderBox child in getChildrenAsList()) {
+      print(' - Divider offset y: ${changingOffset.dy}');
+      final Canvas canvas = context.canvas;
+      canvas.drawRect(
+        new Rect.fromLTWH(
+          changingOffset.dx,
+          changingOffset.dy,
+          size.width,
+          dividerWidth,
+        ),
+        dividerPaint,
+      );
+
+      final MultiChildLayoutParentData childParentData = child.parentData;
+      context.paintChild(child, childParentData.offset + offset);
+      print(' - Painted button at y: ${childParentData.offset.dy + offset.dy}, height: ${child.size.height}');
+
+      changingOffset += dividerOffset + new Offset(0.0, child.size.height);
+    }
   }
 
   @override
   bool hitTestChildren(HitTestResult result, { Offset position }) {
-    // Only hit test the actions widget. Do not hit test other children because
-    // they're only used for layout calculations.
-    final RenderBox actions = _findActionsChild();
-    final MultiChildLayoutParentData parentData = actions.parentData;
-    return actions.hitTest(result, position: position - parentData.offset);
+    return defaultHitTestChildren(result, position: position);
   }
 }
