@@ -636,15 +636,34 @@ class RenderListWheelViewport
       perspective: _perspective,
     );
 
-    final Offset childOffset = new Offset(
+    // Offset that helps painting everything in the center (e.g. angle = 0).
+    final Offset customOffset = new Offset(
         untransformedPaintingCoordinates.dx,
         -_topScrollMarginExtent);
 
-    if (!useMagnifier) {
-      _paintCylindrically(context, offset, child, transform, childOffset);
-      return;
-    }
+    if (!useMagnifier)
+      _paintChildCylindrically(context, offset, child, transform, customOffset);
+    else
+      _paintChildWithMagnifier(
+        context,
+        offset,
+        child,
+        transform,
+        customOffset,
+        untransformedPaintingCoordinates,
+      );
+  }
 
+  /// Paint child with the magnifier active - the child will be rendered
+  /// differently if it intersects with the magnifier.
+  void _paintChildWithMagnifier(
+      PaintingContext context,
+      Offset offset,
+      RenderBox child,
+      Matrix4 cylindricalTransform,
+      Offset customOffset,
+      Offset untransformedPaintingCoordinates,
+  ) {
     final double magnifierTopLinePosition =
         size.height / 2 - _itemExtent * _magnificationRate / 2;
     final double magnifierBottomLinePosition =
@@ -680,14 +699,14 @@ class RenderListWheelViewport
           centerRect,
           (PaintingContext context, Offset offset) {
             context.pushTransform(
-                false,
-                offset,
-                _magnifyTransform(),
-                (PaintingContext context, Offset offset) {
-                  context.paintChild(
-                      child,
-                      offset + untransformedPaintingCoordinates);
-                });
+              false,
+              offset,
+              _magnifyTransform(),
+              (PaintingContext context, Offset offset) {
+                context.paintChild(
+                  child,
+                  offset + untransformedPaintingCoordinates);
+              });
           });
 
       // Clipping the part in either the top-half or bottom-half of the wheel.
@@ -695,19 +714,29 @@ class RenderListWheelViewport
           false,
           offset,
           untransformedPaintingCoordinates.dy <= magnifierTopLinePosition
-              ? topHalfRect
-              : bottomHalfRect,
+            ? topHalfRect
+            : bottomHalfRect,
           (PaintingContext context, Offset offset) {
-            _paintCylindrically(context, offset, child, transform, childOffset);
+            _paintChildCylindrically(
+              context,
+              offset,
+              child,
+              cylindricalTransform,
+              customOffset);
           }
       );
     } else {
-      _paintCylindrically(context, offset, child, transform, childOffset);
+      _paintChildCylindrically(
+        context,
+        offset,
+        child,
+        cylindricalTransform,
+        customOffset);
     }
   }
 
   // / Paint the child cylindrically at given offset.
-  void _paintCylindrically(
+  void _paintChildCylindrically(
       PaintingContext context,
       Offset offset,
       RenderBox child,
@@ -724,6 +753,7 @@ class RenderListWheelViewport
       (PaintingContext context, Offset offset) {
         context.paintChild(
           child,
+          // Paint everything in the center (e.g. angle = 0), then transform.
           offset + customOffset,
         );
       },
