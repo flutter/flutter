@@ -44,7 +44,6 @@ class PlatformViewRegistry {
 class PlatformViewsService {
   PlatformViewsService._();
 
-  // TODO(amirh): add a link to the javadoc for registerViewFactory once available.
   /// Creates a new Android view.
   ///
   /// `id` is an unused unique identifier generated with [platformViewsRegistry].
@@ -53,7 +52,7 @@ class PlatformViewsService {
   /// factory for this view type must have been registered on the platform side.
   /// Platform view factories are typically registered by plugin code.
   /// Plugins can register a platform view factory with
-  /// PlatformViewRegistry#registerViewFactory from Java/Kotlin code.
+  /// [PlatformViewRegistry#registerViewFactory](/javadoc/javadoc/io/flutter/plugin/platform/PlatformViewRegistry.html#registerViewFactory-java.lang.String-io.flutter.plugin.platform.PlatformViewFactory-).
   ///
   /// `size` is the initial size for the view in logical pixels.
   static Future<AndroidViewController> initAndroidView({
