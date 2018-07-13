@@ -131,12 +131,12 @@ Future<Map<String, double>> _readJsonResults(Process process) {
       // https://github.com/flutter/flutter/issues/19096#issuecomment-402756549
       if (resultsHaveBeenParsed) {
         throw 'Additional JSON was received after results has already been '
-            'processed. This suggests the `flutter run` process may have lived '
-            'past the end of our test and collected additional output from the '
-            'next test.\n\n'
-            'The JSON below contains all collected output, including both from '
-            'the original test and what followed.\n\n'
-            '$jsonOutput';
+              'processed. This suggests the `flutter run` process may have lived '
+              'past the end of our test and collected additional output from the '
+              'next test.\n\n'
+              'The JSON below contains all collected output, including both from '
+              'the original test and what followed.\n\n'
+              '$jsonOutput';
       }
 
       jsonStarted = false;
@@ -145,7 +145,7 @@ Future<Map<String, double>> _readJsonResults(Process process) {
       // ignore: deprecated_member_use
       process.kill(ProcessSignal.SIGINT); // flutter run doesn't quit automatically
       try {
-        completer.complete(json.decode(jsonOutput));
+        completer.complete(new Map<String, double>.from(json.decode(jsonOutput)));
       } catch (ex) {
         completer.completeError('Decoding JSON failed ($ex). JSON string was: $jsonOutput');
       }
