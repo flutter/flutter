@@ -40,16 +40,16 @@ abstract class ApplicationPackage {
 
 class AndroidApk extends ApplicationPackage {
   /// Path to the actual apk file.
-  final File apk;
+  final File file;
 
   /// The path to the activity that should be launched.
   final String launchActivity;
 
   AndroidApk({
     String id,
-    @required this.apk,
+    @required this.file,
     @required this.launchActivity
-  }) : assert(apk != null),
+  }) : assert(file != null),
        assert(launchActivity != null),
        super(id: id);
 
@@ -84,14 +84,13 @@ class AndroidApk extends ApplicationPackage {
 
     return new AndroidApk(
       id: data.packageName,
-      apk: apk,
+      file: apk,
       launchActivity: '${data.packageName}/${data.launchableActivityName}'
     );
   }
 
   /// Creates a new AndroidApk based on the information in the Android manifest.
   static Future<AndroidApk> fromAndroidProject(AndroidProject androidProject) async {
-    File manifest;
     File apkFile;
 
     if (androidProject.isUsingGradle()) {
@@ -104,16 +103,16 @@ class AndroidApk extends ApplicationPackage {
       // The .apk hasn't been built yet, so we work with what we have. The run
       // command will grab a new AndroidApk after building, to get the updated
       // IDs.
-      manifest = androidProject.gradleManifestFile;
     } else {
-      manifest = androidProject.gradleManifestFile;
       apkFile = fs.file(fs.path.join(getAndroidBuildDirectory(), 'app.apk'));
     }
+
+    final File manifest = androidProject.gradleManifestFile;
 
     if (!manifest.existsSync())
       return null;
 
-    final String manifestString = fs.file(manifest).readAsStringSync();
+    final String manifestString = manifest.readAsStringSync();
     final xml.XmlDocument document = xml.parse(manifestString);
 
     final Iterable<xml.XmlElement> manifests = document.findElements('manifest');
@@ -139,16 +138,16 @@ class AndroidApk extends ApplicationPackage {
 
     return new AndroidApk(
       id: packageId,
-      apk: apkFile,
+      file: apkFile,
       launchActivity: launchActivity
     );
   }
 
   @override
-  File get packagesFile => apk;
+  File get packagesFile => file;
 
   @override
-  String get name => apk.basename;
+  String get name => file.basename;
 }
 
 /// Tests whether a [FileSystemEntity] is an iOS bundle directory
@@ -159,21 +158,21 @@ abstract class IOSApp extends ApplicationPackage {
   IOSApp({@required String projectBundleId}) : super(id: projectBundleId);
 
   /// Creates a new IOSApp from an existing app bundle or IPA.
-  factory IOSApp.fromPrebuiltApp(File apk) {
-    final FileSystemEntityType entityType = fs.typeSync(apk.path);
+  factory IOSApp.fromPrebuiltApp(File applicationBinary) {
+    final FileSystemEntityType entityType = fs.typeSync(applicationBinary.path);
     if (entityType == FileSystemEntityType.notFound) {
       printError(
-          'File "${apk.path}" does not exist. Use an app bundle or an ipa.');
+          'File "${applicationBinary.path}" does not exist. Use an app bundle or an ipa.');
       return null;
     }
     Directory bundleDir;
     if (entityType == FileSystemEntityType.directory) {
-      final Directory directory = fs.directory(apk);
+      final Directory directory = fs.directory(applicationBinary);
       if (!_isBundleDirectory(directory)) {
-        printError('Folder "${apk.path}" is not an app bundle.');
+        printError('Folder "${applicationBinary.path}" is not an app bundle.');
         return null;
       }
-      bundleDir = fs.directory(apk);
+      bundleDir = fs.directory(applicationBinary);
     } else {
       // Try to unpack as an ipa.
       final Directory tempDir = fs.systemTempDirectory.createTempSync(
@@ -181,7 +180,7 @@ abstract class IOSApp extends ApplicationPackage {
       addShutdownHook(() async {
         await tempDir.delete(recursive: true);
       }, ShutdownStage.STILL_RECORDING);
-      os.unzip(fs.file(apk), tempDir);
+      os.unzip(fs.file(applicationBinary), tempDir);
       final Directory payloadDir = fs.directory(
         fs.path.join(tempDir.path, 'Payload'),
       );
@@ -306,21 +305,21 @@ class PrebuiltIOSApp extends IOSApp {
   String get _bundlePath => bundleDir.path;
 }
 
-Future<ApplicationPackage> getApplicationPackageForPlatform(TargetPlatform platform, {
-  File apk
-}) async {
+Future<ApplicationPackage> getApplicationPackageForPlatform(
+    TargetPlatform platform,
+    {File applicationBinary}) async {
   switch (platform) {
     case TargetPlatform.android_arm:
     case TargetPlatform.android_arm64:
     case TargetPlatform.android_x64:
     case TargetPlatform.android_x86:
-      return apk == null
+      return applicationBinary == null
           ? await AndroidApk.fromAndroidProject(new FlutterProject(fs.currentDirectory).android)
-          : new AndroidApk.fromApk(apk);
+          : new AndroidApk.fromApk(applicationBinary);
     case TargetPlatform.ios:
-      return apk == null
+      return applicationBinary == null
           ? new IOSApp.fromCurrentDirectory()
-          : new IOSApp.fromPrebuiltApp(apk);
+          : new IOSApp.fromPrebuiltApp(applicationBinary);
     case TargetPlatform.tester:
       return new FlutterTesterApp.fromCurrentDirectory();
     case TargetPlatform.darwin_x64:

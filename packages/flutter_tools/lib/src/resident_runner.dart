@@ -271,7 +271,7 @@ class FlutterDevice {
     final TargetPlatform targetPlatform = await device.targetPlatform;
     package = await getApplicationPackageForPlatform(
       targetPlatform,
-      apk: hotRunner.applicationBinary
+      applicationBinary: hotRunner.applicationBinary
     );
 
     if (package == null) {
@@ -321,7 +321,7 @@ class FlutterDevice {
     final TargetPlatform targetPlatform = await device.targetPlatform;
     package = await getApplicationPackageForPlatform(
       targetPlatform,
-      apk: coldRunner.applicationBinary
+      applicationBinary: coldRunner.applicationBinary
     );
 
     final String modeName = coldRunner.debuggingOptions.buildInfo.modeName;

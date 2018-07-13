@@ -25,7 +25,7 @@ class MockApplicationPackageStore extends ApplicationPackageStore {
   MockApplicationPackageStore() : super(
     android: new AndroidApk(
       id: 'io.flutter.android.mock',
-      apk: fs.file('/mock/path/to/android/SkyShell.apk'),
+      file: fs.file('/mock/path/to/android/SkyShell.apk'),
       launchActivity: 'io.flutter.android.mock.MockActivity'
     ),
     iOS: new BuildableIOSApp(

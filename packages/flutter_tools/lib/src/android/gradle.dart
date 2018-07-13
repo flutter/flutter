@@ -23,7 +23,6 @@ import '../project.dart';
 import 'android_sdk.dart';
 import 'android_studio.dart';
 
-
 const String gradleVersion = '4.1';
 final RegExp _assembleTaskPattern = new RegExp(r'assemble([^:]+): task ');
 
