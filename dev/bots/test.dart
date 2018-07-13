@@ -97,24 +97,32 @@ Future<Null> _verifyInternationalizations() async {
 
 Future<Null> _checkForTrailingSpaces() async {
   if (!Platform.isWindows) {
-    final List<String> fileTypes = <String>['.dart', '.cxx', '.cpp', '.cc', '.h', '.java']
-      .map<String>((String type) => '--include=*$type').toList();
-    final List<String> excludedDirs = <String>['.pub-cache', 'cache', 'gen', 'build']
-      .map<String>((String type) => '--exclude-dir=$type').toList();
     print('Checking for trailing whitespace in source files.');
-    await _runCommand('grep', fileTypes + excludedDirs +
-      <String>[
-        '--recursive',
-        '--line-number',
-        '--extended-regexp',
-        r'[[:space:]]+$',
-        flutterRoot,
-      ],
+    final List<String> fileTypes = <String>[
+      '*.dart', '*.cxx', '*.cpp', '*.cc', '*.c', '*.C', '*.h', '*.java', '*.mm', '*.m',
+    ];
+    final EvalResult changedFilesResult = await _evalCommand(
+      'git', <String>['diff', '-U0', '--no-color', '--name-only', 'master', '--'] + fileTypes,
       workingDirectory: flutterRoot,
-      printOutput: false,
-      expectFailure: true, // Just means a non-zero exit code is expected.
-      expectedExitCode: 1, // Indicates that zero lines were found.
     );
+    if (changedFilesResult.stdout == null) {
+      print('No Results for whitespace check.');
+      return;
+    }
+    final List<String> changedFiles = changedFilesResult.stdout.trim().split('\n');
+    if (changedFiles.isNotEmpty) {
+      await _runCommand('grep',
+        <String>[
+          '--line-number',
+          '--extended-regexp',
+          r'[[:space:]]+$',
+        ] + changedFiles,
+        workingDirectory: flutterRoot,
+        printOutput: false,
+        expectFailure: true, // Just means a non-zero exit code is expected.
+        expectedExitCode: 1, // Indicates that zero lines were found.
+      );
+    }
   }
 }
 
