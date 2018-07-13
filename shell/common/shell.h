@@ -150,10 +150,6 @@ class Shell final : public PlatformView::Delegate,
                                          bool enabled) override;
 
   // |shell::PlatformView::Delegate|
-  void OnPlatformViewSetAssistiveTechnologyEnabled(const PlatformView& view,
-                                                   bool enabled) override;
-
-  // |shell::PlatformView::Delegate|
   void OnPlatformViewRegisterTexture(
       const PlatformView& view,
       std::shared_ptr<flow::Texture> texture) override;

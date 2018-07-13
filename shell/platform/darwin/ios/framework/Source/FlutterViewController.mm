@@ -792,18 +792,16 @@ static inline blink::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* to
 #pragma mark - Accessibility
 
 - (void)onAccessibilityStatusChanged:(NSNotification*)notification {
-  auto platformView =  _shell->GetPlatformView();
 #if TARGET_OS_SIMULATOR
   // There doesn't appear to be any way to determine whether the accessibility
   // inspector is enabled on the simulator. We conservatively always turn on the
-  // accessibility bridge in the simulator, but never assistive technology.
-  platformView->SetSemanticsEnabled(true);
-  platformView->SetAssistiveTechnologyEnabled(false);
+  // accessibility bridge in the simulator.
+  bool enabled = true;
 #else
-  bool enabled = UIAccessibilityIsVoiceOverRunning() || UIAccessibilityIsSwitchControlRunning();
-  platformView->SetSemanticsEnabled(enabled || UIAccessibilityIsSpeakScreenEnabled());
-  platformView->SetAssistiveTechnologyEnabled(enabled);
+  bool enabled = UIAccessibilityIsVoiceOverRunning() || UIAccessibilityIsSwitchControlRunning() ||
+                 UIAccessibilityIsSpeakScreenEnabled();
 #endif
+  _shell->GetPlatformView()->SetSemanticsEnabled(enabled);
 }
 
 #pragma mark - Memory Notifications

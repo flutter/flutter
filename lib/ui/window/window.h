@@ -54,7 +54,6 @@ class Window final {
                     const std::string& country_code);
   void UpdateUserSettingsData(const std::string& data);
   void UpdateSemanticsEnabled(bool enabled);
-  void UpdateAssistiveTechnologyEnabled(bool enabled);
   void DispatchPlatformMessage(fxl::RefPtr<PlatformMessage> message);
   void DispatchPointerDataPacket(const PointerDataPacket& packet);
   void DispatchSemanticsAction(int32_t id,
