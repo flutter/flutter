@@ -114,7 +114,7 @@ abstract class License implements Comparable<License> {
       if (result is! UniqueLicense || result.type != type)
         throw 'tried to add a UniqueLicense $type, but it was a duplicate of a ${result.runtimeType} ${result.type}';
       return true;
-    });
+    }());
     return result;
   }
 
@@ -126,7 +126,7 @@ abstract class License implements Comparable<License> {
       if (result is! TemplateLicense || result.type != type)
         throw 'tried to add a TemplateLicense $type, but it was a duplicate of a ${result.runtimeType} ${result.type}';
       return true;
-    });
+    }());
     return result;
   }
 
@@ -138,7 +138,7 @@ abstract class License implements Comparable<License> {
       if (result is! MessageLicense || result.type != type)
         throw 'tried to add a MessageLicense $type, but it was a duplicate of a ${result.runtimeType} ${result.type}';
       return true;
-    });
+    }());
     return result;
   }
 
@@ -148,7 +148,7 @@ abstract class License implements Comparable<License> {
       if (result is! BlankLicense || result.type != type)
         throw 'tried to add a BlankLicense $type, but it was a duplicate of a ${result.runtimeType} ${result.type}';
       return true;
-    });
+    }());
     return result;
   }
 
@@ -310,7 +310,7 @@ abstract class License implements Comparable<License> {
         throw 'incorrectly created a $runtimeType for a $type';
       }
       return true;
-    });
+    }());
     final LicenseType detectedType = convertBodyToType(body);
     if (detectedType != LicenseType.unknown && detectedType != type && !yesWeKnowWhatItLooksLikeButItIsNot)
       throw 'Created a license of type $type but it looks like $detectedType\.';
@@ -789,7 +789,7 @@ Iterable<_LicenseMatch> _tryReferenceByType(String body, RegExp pattern, License
       String copyrights = _reformat(match.getCopyrights());
       assert(needsCopyright && copyrights.isNotEmpty || !needsCopyright && copyrights.isEmpty);
       return true;
-    });
+    }());
     if (needsCopyright)
       yield* _expand(template, match.getCopyrights(), match.getEntireLicense(), match.start, match.end, debug: '_tryReferenceByType', origin: origin);
     else
