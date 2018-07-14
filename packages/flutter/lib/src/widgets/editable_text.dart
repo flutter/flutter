@@ -202,6 +202,7 @@ class EditableText extends StatefulWidget {
     this.selectionControls,
     TextInputType keyboardType,
     this.textInputAction = TextInputAction.done,
+    this.textCapitalization = TextCapitalization.none,
     this.onChanged,
     this.onEditingComplete,
     this.onSubmitted,
@@ -267,6 +268,19 @@ class EditableText extends StatefulWidget {
   ///
   /// Defaults to the ambient [Directionality], if any.
   final TextDirection textDirection;
+
+  /// Specifies how platforms may automatically capitialize text entered by the
+  /// user.
+  /// 
+  /// Only supported by text keyboard types, unsupported keyboards will ignore
+  /// this value.
+  ///
+  /// Defaults to [TextCapitalization.none]. Must not be null.
+  /// 
+  /// See also:
+  /// 
+  ///   * [TextCapitalization], for a description of each capitalization behavior.
+  final TextCapitalization textCapitalization;
 
   /// Used to select a font when the same Unicode character can
   /// be rendered differently, depending on the locale.
@@ -560,6 +574,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
               inputAction: widget.keyboardType == TextInputType.multiline
                   ? TextInputAction.newline
                   : widget.textInputAction,
+              textCapitalization: widget.textCapitalization,
           )
       )..setEditingState(localValue);
     }

@@ -313,6 +313,25 @@ enum TextInputAction {
   newline,
 }
 
+/// Configures how the platform may automatically capitialize text entered by
+/// the user.
+///
+/// Only supports text keyboards, other keyboard types will ignore this
+/// configuration.
+enum TextCapitalization {
+  /// Attempts to capitalize the first letter of each word.
+  words,
+
+  /// Attempts to capitalize the first letter of each sentence.
+  sentences,
+
+  /// Attempts to capitalize each character.
+  characters,
+
+  /// Applies no automatic capitalization.
+  none,
+}
+
 /// Controls the visual appearance of the text input control.
 ///
 /// Many [TextInputAction]s are common between Android and iOS. However, if an
@@ -341,10 +360,12 @@ class TextInputConfiguration {
     this.autocorrect = true,
     this.actionLabel,
     this.inputAction = TextInputAction.done,
+    this.textCapitalization = TextCapitalization.none,
   }) : assert(inputType != null),
        assert(obscureText != null),
        assert(autocorrect != null),
-       assert(inputAction != null);
+       assert(inputAction != null),
+       assert(textCapitalization != null);
 
   /// The type of information for which to optimize the text input control.
   final TextInputType inputType;
@@ -365,6 +386,16 @@ class TextInputConfiguration {
   /// What kind of action to request for the action button on the IME.
   final TextInputAction inputAction;
 
+  /// Specifies how platforms may automatically capitialize text entered by the
+  /// user.
+  /// 
+  /// Defaults to [TextCapitalization.none].
+  /// 
+  /// See also:
+  /// 
+  ///   * [TextCapitalization], for a description of each capitalization behavior.
+  final TextCapitalization textCapitalization;
+
   /// Returns a representation of this object as a JSON object.
   Map<String, dynamic> toJSON() {
     return <String, dynamic>{
@@ -373,6 +404,7 @@ class TextInputConfiguration {
       'autocorrect': autocorrect,
       'actionLabel': actionLabel,
       'inputAction': inputAction.toString(),
+      'textCapitalization': textCapitalization.toString(),
     };
   }
 }

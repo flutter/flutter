@@ -13,6 +13,7 @@ void main() {
       expect(configuration.obscureText, false);
       expect(configuration.autocorrect, true);
       expect(configuration.actionLabel, null);
+      expect(configuration.textCapitalization, TextCapitalization.none);
     });
 
     test('text serializes to JSON', () async {

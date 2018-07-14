@@ -103,6 +103,7 @@ class TextField extends StatefulWidget {
     this.decoration = const InputDecoration(),
     TextInputType keyboardType = TextInputType.text,
     this.textInputAction = TextInputAction.done,
+    this.textCapitalization = TextCapitalization.none,
     this.style,
     this.textAlign = TextAlign.start,
     this.autofocus = false,
@@ -157,6 +158,19 @@ class TextField extends StatefulWidget {
   ///
   /// Defaults to [TextInputAction.done]. Must not be null.
   final TextInputAction textInputAction;
+
+  /// Specifies how platforms may automatically capitialize text entered by the
+  /// user.
+  /// 
+  /// Only supported by text keyboard types, unsupported keyboards will ignore
+  /// this value.
+  ///
+  /// Defaults to [TextCapitalization.none]. Must not be null.
+  /// 
+  /// See also:
+  /// 
+  ///   * [TextCapitalization], for a description of each capitalization behavior.
+  final TextCapitalization textCapitalization;
 
   /// The style to use for the text being edited.
   ///
@@ -481,6 +495,7 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
         focusNode: focusNode,
         keyboardType: widget.keyboardType,
         textInputAction: widget.textInputAction,
+        textCapitalization: widget.textCapitalization,
         style: style,
         textAlign: widget.textAlign,
         autofocus: widget.autofocus,
