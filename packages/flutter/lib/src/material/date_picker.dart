@@ -538,7 +538,7 @@ class _MonthPickerState extends State<MonthPicker> with SingleTickerProviderStat
     _chevronOpacityController = new AnimationController(
       duration: const Duration(milliseconds: 500), vsync: this
     );
-    _chevronOpacityAnimation = new Tween(begin: 1.0, end: 0.5).animate(
+    _chevronOpacityAnimation = new Tween<double>(begin: 1.0, end: 0.5).animate(
       new CurvedAnimation(
         parent: _chevronOpacityController,
         curve: Curves.easeInOut,
