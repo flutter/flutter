@@ -1469,6 +1469,9 @@ class _MockHttpClient implements HttpClient {
   bool autoUncompress;
 
   @override
+  Duration connectionTimeout;
+
+  @override
   Duration idleTimeout;
 
   @override

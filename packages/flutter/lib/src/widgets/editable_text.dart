@@ -211,6 +211,7 @@ class EditableText extends StatefulWidget {
     this.cursorWidth = 1.0,
     this.cursorRadius,
     this.scrollPadding = const EdgeInsets.all(20.0),
+    this.keyboardAppearance = Brightness.light,
   }) : assert(controller != null),
        assert(focusNode != null),
        assert(obscureText != null),
@@ -366,6 +367,13 @@ class EditableText extends StatefulWidget {
   ///
   /// By default, the cursor has a Radius of zero.
   final Radius cursorRadius;
+
+  /// The appearance of the keyboard.
+  ///
+  /// This setting is only honored on iOS devices.
+  ///
+  /// Defaults to [Brightness.light].
+  final Brightness keyboardAppearance;
 
   /// Enlarges the visible area when scrolling into view due to focus gain
   ///

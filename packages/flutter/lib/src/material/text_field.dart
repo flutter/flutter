@@ -115,6 +115,7 @@ class TextField extends StatefulWidget {
     this.onSubmitted,
     this.inputFormatters,
     this.enabled,
+    this.keyboardAppearance,
     this.scrollPadding = const EdgeInsets.all(20.0),
   }) : assert(keyboardType != null),
        assert(textInputAction != null),
@@ -279,6 +280,13 @@ class TextField extends StatefulWidget {
   /// If non-null this property overrides the [decoration]'s
   /// [Decoration.enabled] property.
   final bool enabled;
+
+  /// The appearance of the keyboard.
+  ///
+  /// This setting is only honored on iOS devices.
+  ///
+  /// If unset, defaults to the brightness of [ThemeData.primaryColorBrightness].
+  final Brightness keyboardAppearance;
 
   /// Enlarges the visible area when scrolling into view due to focus gain
   ///
@@ -479,6 +487,7 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
     assert(debugCheckHasMaterial(context));
     final ThemeData themeData = Theme.of(context);
     final TextStyle style = widget.style ?? themeData.textTheme.subhead;
+    final Brightness keyboardAppearance = widget.keyboardAppearance ?? themeData.primaryColorBrightness;
     final TextEditingController controller = _effectiveController;
     final FocusNode focusNode = _effectiveFocusNode;
     final List<TextInputFormatter> formatters = widget.inputFormatters ?? <TextInputFormatter>[];
@@ -509,6 +518,7 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
         inputFormatters: formatters,
         rendererIgnoresPointer: true,
         scrollPadding: widget.scrollPadding,
+        keyboardAppearance: keyboardAppearance,
       ),
     );
 

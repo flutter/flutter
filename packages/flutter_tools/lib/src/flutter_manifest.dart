@@ -102,7 +102,7 @@ class FlutterManifest {
 
   /// Properties defining how to expose this Flutter project as a module
   /// for integration into an unspecified host app.
-  Map<String, dynamic> get moduleDescriptor {
+  YamlMap get moduleDescriptor {
     return _flutterDescriptor.containsKey('module')
         ? _flutterDescriptor['module'] ?? const <String, dynamic>{}
         : null;

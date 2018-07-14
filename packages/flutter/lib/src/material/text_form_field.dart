@@ -69,6 +69,7 @@ class TextFormField extends FormField<String> {
     FormFieldValidator<String> validator,
     List<TextInputFormatter> inputFormatters,
     bool enabled,
+    Brightness keyboardAppearance,
     EdgeInsets scrollPadding = const EdgeInsets.all(20.0),
   }) : assert(initialValue == null || controller == null),
        assert(keyboardType != null),
@@ -109,6 +110,7 @@ class TextFormField extends FormField<String> {
         inputFormatters: inputFormatters,
         enabled: enabled,
         scrollPadding: scrollPadding,
+        keyboardAppearance: keyboardAppearance,
       );
     },
   );
