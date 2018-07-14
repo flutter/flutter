@@ -210,6 +210,7 @@ class EditableText extends StatefulWidget {
     this.rendererIgnoresPointer = false,
     this.cursorWidth = 1.0,
     this.cursorRadius,
+    this.keyboardAppearance = Brightness.light,
   }) : assert(controller != null),
        assert(focusNode != null),
        assert(obscureText != null),
@@ -364,6 +365,13 @@ class EditableText extends StatefulWidget {
   ///
   /// By default, the cursor has a Radius of zero.
   final Radius cursorRadius;
+
+  /// The appearance of the keyboard.
+  /// 
+  /// This setting is only honored on iOS devices.
+  /// 
+  /// Defaults to [Brightness.light].
+  final Brightness keyboardAppearance;
 
   @override
   EditableTextState createState() => new EditableTextState();
@@ -557,6 +565,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
               inputType: widget.keyboardType,
               obscureText: widget.obscureText,
               autocorrect: widget.autocorrect,
+              keyboardAppearance: widget.keyboardAppearance,
               inputAction: widget.keyboardType == TextInputType.multiline
                   ? TextInputAction.newline
                   : widget.textInputAction,
