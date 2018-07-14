@@ -956,7 +956,7 @@ class RepositoryDirectory extends RepositoryEntry implements LicenseSource {
     }
   }
 
-  int get count => _files.length + _subdirectories.fold(0, (int count, RepositoryDirectory child) => count + child.count);
+  int get count => _files.length + _subdirectories.fold<int>(0, (int count, RepositoryDirectory child) => count + child.count);
 
   @override
   List<License> nearestLicensesFor(String name) {
