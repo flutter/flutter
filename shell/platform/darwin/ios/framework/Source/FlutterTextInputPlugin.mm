@@ -687,9 +687,17 @@ static UITextAutocapitalizationType ToUITextAutocapitalizationType(NSString* inp
 
 - (void)setTextInputClient:(int)client withConfiguration:(NSDictionary*)configuration {
   NSDictionary* inputType = configuration[@"inputType"];
+  NSString* keyboardAppearance = configuration[@"keyboardAppearance"];
   _view.keyboardType = ToUIKeyboardType(inputType);
   _view.returnKeyType = ToUIReturnKeyType(configuration[@"inputAction"]);
   _view.autocapitalizationType = ToUITextAutocapitalizationType(inputType[@"name"]);
+  if ([keyboardAppearance isEqualToString:@"Brightness.dark"]) {
+    _view.keyboardAppearance = UIKeyboardAppearanceDark;
+  } else if ([keyboardAppearance isEqualToString:@"Brightness.light"]) { 
+    _view.keyboardAppearance = UIKeyboardAppearanceLight;
+  } else {
+    _view.keyboardAppearance = UIKeyboardAppearanceDefault;
+  }
   _view.secureTextEntry = [configuration[@"obscureText"] boolValue];
   NSString* autocorrect = configuration[@"autocorrect"];
   _view.autocorrectionType = autocorrect && ![autocorrect boolValue]
