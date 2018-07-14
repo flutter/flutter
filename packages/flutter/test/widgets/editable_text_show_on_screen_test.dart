@@ -30,7 +30,6 @@ void main() {
                 focusNode: focusNode,
                 style: textStyle,
                 cursorColor: cursorColor,
-
               ),
               new Container(
                 height: 350.0,
@@ -73,7 +72,6 @@ void main() {
                 focusNode: focusNode,
                 style: textStyle,
                 cursorColor: cursorColor,
-
               ),
               new Container(
                 height: 850.0,
@@ -83,7 +81,6 @@ void main() {
         ),
       ),
     ));
-
 
     // Scroll the EditableText half off screen.
     final RenderBox render = tester.renderObject(find.byType(EditableText));
@@ -98,7 +95,6 @@ void main() {
     expect(scrollController.offset, lessThan(200.0 - 50.0 + 5.0));
     expect(scrollController.offset, greaterThan(200.0 - 50.0 - 5.0));
   });
-
 
   testWidgets('editable comes back on screen when entering text while it is off-screen', (WidgetTester tester) async {
     final ScrollController scrollController = new ScrollController(initialScrollOffset: 100.0);
@@ -145,7 +141,6 @@ void main() {
     expect(scrollController.offset, greaterThan(0.0));
     expect(find.byType(EditableText), findsOneWidget);
   });
-
 
   testWidgets('focused multi-line editable scrolls caret back into view when typing', (WidgetTester tester) async {
     final ScrollController scrollController = new ScrollController();
@@ -221,7 +216,6 @@ void main() {
                 focusNode: focusNode,
                 style: textStyle,
                 cursorColor: cursorColor,
-
               ),
               new Container(
                 height: 400.0,
@@ -232,9 +226,7 @@ void main() {
       ),
     ));
 
-
     expect(scrollController.offset, 0.0);
-
 
     await tester.showKeyboard(find.byType(EditableText));
     await tester.pumpAndSettle();

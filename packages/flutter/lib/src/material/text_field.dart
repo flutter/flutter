@@ -288,11 +288,12 @@ class TextField extends StatefulWidget {
   /// If unset, defaults to the brightness of [ThemeData.primaryColorBrightness].
   final Brightness keyboardAppearance;
 
-  /// Enlarges the visible area when scrolling into view due to focus gain
+  /// Configures padding to edges surrounding a [Scrollable] when the Textfield scrolls into view
   ///
-  /// When this widget receives focus and is not completely visible (for example scrolled partially off the screen or overlapped by the keyboard)
-  /// then it will attempt to make itself visible by scrolling.
-  /// This value controls how much bigger the visible area after the scroll should be.
+  /// When this widget receives focus and is not completely visible (for example scrolled partially
+  /// off the screen or overlapped by the keyboard)
+  /// then it will attempt to make itself visible by scrolling a surrounding [Scrollable], if one is present.
+  /// This value controls how far from the edges of a [Scrollable] the TextField will be positioned after the scroll.
   ///
   /// Defaults to EdgeInserts.all(20.0)
   final EdgeInsets scrollPadding;
