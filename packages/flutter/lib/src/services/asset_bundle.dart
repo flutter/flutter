@@ -67,8 +67,8 @@ abstract class AssetBundle {
     final ByteData data = await load(key);
     if (data == null)
       throw new FlutterError('Unable to load asset: $key');
-    if (data.lengthInBytes < 20 * 1024) {
-      // 20KB takes about 6ms to parse on a Pixel 2 XL.
+    if (data.lengthInBytes < 10 * 1024) {
+      // 10KB takes about 3ms to parse on a Pixel 2 XL.
       // See: https://github.com/dart-lang/sdk/issues/31954
       return utf8.decode(data.buffer.asUint8List());
     }

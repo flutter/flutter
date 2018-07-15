@@ -64,23 +64,50 @@ void main() {
     expect(log, isEmpty);
   });
 
-  testWidgets('Radio size is 40x40', (WidgetTester tester) async {
-    final Key key = new UniqueKey();
-
+  testWidgets('Radio size is configurable by ThemeData.materialTapTargetSize', (WidgetTester tester) async {
+    final Key key1 = new UniqueKey();
     await tester.pumpWidget(
-      new Material(
-        child: new Center(
-          child: new Radio<int>(
-            key: key,
-            value: 1,
-            groupValue: 2,
-            onChanged: (int newValue) { },
+      new Theme(
+        data: new ThemeData(materialTapTargetSize: MaterialTapTargetSize.padded),
+        child: new Directionality(
+          textDirection: TextDirection.ltr,
+          child: new Material(
+            child: new Center(
+              child: new Radio<bool>(
+                key: key1,
+                groupValue: true,
+                value: true,
+                onChanged: (bool newValue) {},
+              ),
+            ),
           ),
         ),
       ),
     );
 
-    expect(tester.getSize(find.byKey(key)), const Size(40.0, 40.0));
+    expect(tester.getSize(find.byKey(key1)), const Size(48.0, 48.0));
+
+    final Key key2 = new UniqueKey();
+    await tester.pumpWidget(
+      new Theme(
+        data: new ThemeData(materialTapTargetSize: MaterialTapTargetSize.shrinkWrap),
+        child: new Directionality(
+          textDirection: TextDirection.ltr,
+          child: new Material(
+            child: new Center(
+              child: new Radio<bool>(
+                key: key2,
+                groupValue: true,
+                value: true,
+                onChanged: (bool newValue) {},
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(tester.getSize(find.byKey(key2)), const Size(40.0, 40.0));
   });
 
 

@@ -31,26 +31,9 @@ import 'xcodeproj.dart';
 const int kXcodeRequiredVersionMajor = 9;
 const int kXcodeRequiredVersionMinor = 0;
 
-// The Python `six` module is a dependency for Xcode builds, and installed by
-// default, but may not be present in custom Python installs; e.g., via
-// Homebrew.
-const PythonModule kPythonSix = const PythonModule('six');
-
 IMobileDevice get iMobileDevice => context[IMobileDevice];
 
 Xcode get xcode => context[Xcode];
-
-class PythonModule {
-  const PythonModule(this.name);
-
-  final String name;
-
-  bool get isInstalled => exitsHappy(<String>['python', '-c', 'import $name']);
-
-  String get errorMessage =>
-    'Missing Xcode dependency: Python module "$name".\n'
-    'Install via \'pip install $name\' or \'sudo easy_install $name\'.';
-}
 
 class IMobileDevice {
   const IMobileDevice();
@@ -199,11 +182,6 @@ Future<XcodeBuildResult> buildXcodeProject({
 
   if (!_checkXcodeVersion())
     return new XcodeBuildResult(success: false);
-
-  if (!kPythonSix.isInstalled) {
-    printError(kPythonSix.errorMessage);
-    return new XcodeBuildResult(success: false);
-  }
 
   final XcodeProjectInfo projectInfo = xcodeProjectInterpreter.getInfo(app.appDirectory);
   if (!projectInfo.targets.contains('Runner')) {
@@ -395,7 +373,7 @@ Future<XcodeBuildResult> buildXcodeProject({
             '-allowProvisioningUpdates',
             '-allowProvisioningDeviceRegistration',
           ].contains(buildCommand);
-        }),
+        }).toList(),
     workingDirectory: app.appDirectory,
   ));
 
