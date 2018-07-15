@@ -80,7 +80,7 @@ class _AutomaticKeepAliveState extends State<AutomaticKeepAlive> {
     handle.addListener(_handles[handle]);
     if (!_keepingAlive) {
       _keepingAlive = true;
-      final ParentDataElement<SliverMultiBoxAdaptorWidget> childElement = _getChildElement();
+      final ParentDataElement<SliverMultiKeepAliveBoxAdaptorWidget> childElement = _getChildElement();
       if (childElement != null) {
         // If the child already exists, update it synchronously.
         _updateParentDataOfChild(childElement);
@@ -89,7 +89,7 @@ class _AutomaticKeepAliveState extends State<AutomaticKeepAlive> {
         // build of this subtree. Wait until the end of the frame to update
         // the child when the child is guaranteed to be present.
         SchedulerBinding.instance.addPostFrameCallback((Duration timeStamp) {
-          final ParentDataElement<SliverMultiBoxAdaptorWidget> childElement = _getChildElement();
+          final ParentDataElement<SliverMultiKeepAliveBoxAdaptorWidget> childElement = _getChildElement();
           assert(childElement != null);
           _updateParentDataOfChild(childElement);
         });
@@ -102,7 +102,7 @@ class _AutomaticKeepAliveState extends State<AutomaticKeepAlive> {
   ///
   /// While this widget is guaranteed to have a child, this may return null if
   /// the first build of that child has not completed yet.
-  ParentDataElement<SliverMultiBoxAdaptorWidget> _getChildElement() {
+  ParentDataElement<SliverMultiKeepAliveBoxAdaptorWidget> _getChildElement() {
     final Element element = context;
     Element childElement;
     // We use Element.visitChildren rather than context.visitChildElements
@@ -127,11 +127,11 @@ class _AutomaticKeepAliveState extends State<AutomaticKeepAlive> {
     element.visitChildren((Element child) {
       childElement = child;
     });
-    assert(childElement == null || childElement is ParentDataElement<SliverMultiBoxAdaptorWidget>);
+    assert(childElement == null || childElement is ParentDataElement<SliverMultiKeepAliveBoxAdaptorWidget>);
     return childElement;
   }
 
-  void _updateParentDataOfChild(ParentDataElement<SliverMultiBoxAdaptorWidget> childElement) {
+  void _updateParentDataOfChild(ParentDataElement<SliverMultiKeepAliveBoxAdaptorWidget> childElement) {
     childElement.applyWidgetOutOfTurn(build(context));
   }
 

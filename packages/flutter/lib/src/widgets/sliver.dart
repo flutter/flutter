@@ -305,16 +305,16 @@ class SliverChildListDelegate extends SliverChildDelegate {
   }
 }
 
-/// A base class for sliver that have multiple box children.
+/// A base class for sliver that have multiple box children that can be kept alive.
 ///
 /// Helps subclasses build their children lazily using a [SliverChildDelegate].
-abstract class SliverMultiBoxAdaptorWidget extends RenderObjectWidget {
+abstract class SliverMultiKeepAliveBoxAdaptorWidget extends RenderObjectWidget {
   /// Initializes fields for subclasses.
-  const SliverMultiBoxAdaptorWidget({
+  const SliverMultiKeepAliveBoxAdaptorWidget({
     Key key,
     @required this.delegate,
   }) : assert(delegate != null),
-       super(key: key);
+        super(key: key);
 
   /// The delegate that provides the children for this widget.
   ///
@@ -329,10 +329,10 @@ abstract class SliverMultiBoxAdaptorWidget extends RenderObjectWidget {
   final SliverChildDelegate delegate;
 
   @override
-  SliverMultiBoxAdaptorElement createElement() => new SliverMultiBoxAdaptorElement(this);
+  SliverMultiKeepAliveBoxAdaptorElement createElement();
 
   @override
-  RenderSliverMultiBoxAdaptor createRenderObject(BuildContext context);
+  RenderSliverMultiKeepAliveBoxAdaptor createRenderObject(BuildContext context);
 
   /// Returns an estimate of the max scroll extent for all the children.
   ///
@@ -345,12 +345,12 @@ abstract class SliverMultiBoxAdaptorWidget extends RenderObjectWidget {
   /// The default implementation defers to [delegate] via its
   /// [SliverChildDelegate.estimateMaxScrollOffset] method.
   double estimateMaxScrollOffset(
-    SliverConstraints constraints,
-    int firstIndex,
-    int lastIndex,
-    double leadingScrollOffset,
-    double trailingScrollOffset,
-  ) {
+      SliverConstraints constraints,
+      int firstIndex,
+      int lastIndex,
+      double leadingScrollOffset,
+      double trailingScrollOffset,
+      ) {
     assert(lastIndex >= firstIndex);
     return delegate.estimateMaxScrollOffset(
       firstIndex,
@@ -365,6 +365,23 @@ abstract class SliverMultiBoxAdaptorWidget extends RenderObjectWidget {
     super.debugFillProperties(properties);
     properties.add(new DiagnosticsProperty<SliverChildDelegate>('delegate', delegate));
   }
+}
+
+/// A base class for sliver that have multiple box children.
+///
+/// Helps subclasses build their children lazily using a [SliverChildDelegate].
+abstract class SliverMultiBoxAdaptorWidget extends SliverMultiKeepAliveBoxAdaptorWidget {
+  /// Initializes fields for subclasses.
+  const SliverMultiBoxAdaptorWidget({
+    Key key,
+    @required SliverChildDelegate delegate,
+  }) :  super(key: key, delegate : delegate);
+
+  @override
+  SliverMultiBoxAdaptorElement createElement() => new SliverMultiBoxAdaptorElement(this);
+
+  @override
+  RenderSliverMultiBoxAdaptor createRenderObject(BuildContext context);
 }
 
 /// A sliver that places multiple box children in a linear array along the main
@@ -646,11 +663,33 @@ class SliverFillViewport extends SliverMultiBoxAdaptorWidget {
   }
 }
 
+abstract class SliverMultiKeepAliveBoxAdaptorElement extends RenderObjectElement{
+  /// Creates an element that lazily builds children for the given widget.
+  SliverMultiKeepAliveBoxAdaptorElement(SliverMultiKeepAliveBoxAdaptorWidget widget) : super(widget);
+
+  @override
+  SliverMultiKeepAliveBoxAdaptorWidget get widget => super.widget;
+
+  @override
+  RenderSliverMultiKeepAliveBoxAdaptor get renderObject => super.renderObject;
+
+  @override
+  void update(covariant SliverMultiKeepAliveBoxAdaptorWidget newWidget) {
+    final SliverMultiKeepAliveBoxAdaptorWidget oldWidget = widget;
+    super.update(newWidget);
+    final SliverChildDelegate newDelegate = newWidget.delegate;
+    final SliverChildDelegate oldDelegate = oldWidget.delegate;
+    if (newDelegate != oldDelegate &&
+        (newDelegate.runtimeType != oldDelegate.runtimeType || newDelegate.shouldRebuild(oldDelegate)))
+      performRebuild();
+  }
+}
+
 /// An element that lazily builds children for a [SliverMultiBoxAdaptorWidget].
 ///
 /// Implements [RenderSliverBoxChildManager], which lets this element manage
 /// the children of subclasses of [RenderSliverMultiBoxAdaptor].
-class SliverMultiBoxAdaptorElement extends RenderObjectElement implements RenderSliverBoxChildManager {
+class SliverMultiBoxAdaptorElement extends SliverMultiKeepAliveBoxAdaptorElement implements RenderSliverBoxChildManager {
   /// Creates an element that lazily builds children for the given widget.
   SliverMultiBoxAdaptorElement(SliverMultiBoxAdaptorWidget widget) : super(widget);
 
@@ -659,17 +698,6 @@ class SliverMultiBoxAdaptorElement extends RenderObjectElement implements Render
 
   @override
   RenderSliverMultiBoxAdaptor get renderObject => super.renderObject;
-
-  @override
-  void update(covariant SliverMultiBoxAdaptorWidget newWidget) {
-    final SliverMultiBoxAdaptorWidget oldWidget = widget;
-    super.update(newWidget);
-    final SliverChildDelegate newDelegate = newWidget.delegate;
-    final SliverChildDelegate oldDelegate = oldWidget.delegate;
-    if (newDelegate != oldDelegate &&
-        (newDelegate.runtimeType != oldDelegate.runtimeType || newDelegate.shouldRebuild(oldDelegate)))
-      performRebuild();
-  }
 
   // We inflate widgets at two different times:
   //  1. When we ourselves are told to rebuild (see performRebuild).
@@ -940,9 +968,9 @@ class SliverFillRemaining extends SingleChildRenderObjectWidget {
 /// Mark a child as needing to stay alive even when it's in a lazy list that
 /// would otherwise remove it.
 ///
-/// This widget is for use in [SliverMultiBoxAdaptorWidget]s, such as
+/// This widget is for use in [SliverMultiKeepAliveBoxAdaptorWidget]s, such as
 /// [SliverGrid] or [SliverList].
-class KeepAlive extends ParentDataWidget<SliverMultiBoxAdaptorWidget> {
+class KeepAlive extends ParentDataWidget<SliverMultiKeepAliveBoxAdaptorWidget> {
   /// Marks a child as needing to remain alive.
   ///
   /// The [child] and [keepAlive] arguments must not be null.
@@ -961,8 +989,8 @@ class KeepAlive extends ParentDataWidget<SliverMultiBoxAdaptorWidget> {
 
   @override
   void applyParentData(RenderObject renderObject) {
-    assert(renderObject.parentData is SliverMultiBoxAdaptorParentData);
-    final SliverMultiBoxAdaptorParentData parentData = renderObject.parentData;
+    assert(renderObject.parentData is SliverMultiKeepAliveBoxAdaptorParentData);
+    final SliverMultiKeepAliveBoxAdaptorParentData parentData = renderObject.parentData;
     if (parentData.keepAlive != keepAlive) {
       parentData.keepAlive = keepAlive;
       final AbstractNode targetParent = renderObject.parent;

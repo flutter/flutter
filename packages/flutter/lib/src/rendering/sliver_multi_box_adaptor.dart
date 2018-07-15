@@ -122,20 +122,36 @@ abstract class RenderSliverBoxChildManager {
   bool debugAssertChildListLocked() => true;
 }
 
-/// Parent data structure used by [RenderSliverMultiBoxAdaptor].
-class SliverMultiBoxAdaptorParentData extends SliverLogicalParentData with ContainerParentDataMixin<RenderBox> {
-  /// The index of this child according to the [RenderSliverBoxChildManager].
-  int index;
-
+/// Parent data structure used by [RenderSliverMultiKeepAliveBoxAdaptor].
+class SliverMultiKeepAliveBoxAdaptorParentData extends SliverLogicalParentData  {
   /// Whether to keep the child alive even when it is no longer visible.
   bool keepAlive = false;
+
+  @override
+  String toString() => '${keepAlive == true ? "keepAlive; " : ""}${super.toString()}';
+}
+
+/// Parent data structure used by [RenderSliverMultiBoxAdaptor].
+class SliverMultiBoxAdaptorParentData extends SliverMultiKeepAliveBoxAdaptorParentData with ContainerParentDataMixin<RenderBox> {
+  /// The index of this child according to the [RenderSliverBoxChildManager].
+  int index;
 
   /// Whether the widget is currently in the
   /// [RenderSliverMultiBoxAdaptor._keepAliveBucket].
   bool _keptAlive = false;
 
   @override
-  String toString() => 'index=$index; ${keepAlive == true ? "keepAlive; " : ""}${super.toString()}';
+  String toString() => 'index=$index; ${super.toString()}';
+}
+
+/// A sliver with multiple box children that can be kept alive.
+abstract class RenderSliverMultiKeepAliveBoxAdaptor extends RenderSliver{
+
+  @override
+  void setupParentData(RenderObject child) {
+    if (child.parentData is! SliverMultiKeepAliveBoxAdaptorParentData)
+      child.parentData = new SliverMultiKeepAliveBoxAdaptorParentData();
+  }
 }
 
 /// A sliver with multiple box children.
@@ -163,7 +179,7 @@ class SliverMultiBoxAdaptorParentData extends SliverLogicalParentData with Conta
 ///  * [RenderSliverFixedExtentList], which places its children in a linear
 ///    array with a fixed extent in the main axis.
 ///  * [RenderSliverGrid], which places its children in arbitrary positions.
-abstract class RenderSliverMultiBoxAdaptor extends RenderSliver
+abstract class RenderSliverMultiBoxAdaptor extends RenderSliverMultiKeepAliveBoxAdaptor
   with ContainerRenderObjectMixin<RenderBox, SliverMultiBoxAdaptorParentData>,
        RenderSliverHelpers {
 
