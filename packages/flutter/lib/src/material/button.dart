@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:math' as math;
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
@@ -205,11 +207,8 @@ class _RawMaterialButtonState extends State<RawMaterialButton> {
     }
     result = new _ButtonRedirectingHitDetectionWidget(
       constraints: constraints,
-      child: new Center(
-        child: result,
-        widthFactor: 1.0,
-        heightFactor: 1.0,
-      ),
+      child: result,
+      childConstraints: widget.constraints,
     );
 
     return new Semantics(
@@ -455,24 +454,68 @@ class _ButtonRedirectingHitDetectionWidget extends SingleChildRenderObjectWidget
   const _ButtonRedirectingHitDetectionWidget({
     Key key,
     Widget child,
-    this.constraints
+    this.constraints,
+    this.childConstraints,
   }) : super(key: key, child: child);
 
   final BoxConstraints constraints;
+  final BoxConstraints childConstraints;
 
   @override
   RenderObject createRenderObject(BuildContext context) {
-    return new _RenderButtonRedirectingHitDetection(constraints);
+    return new _RenderButtonRedirectingHitDetection(constraints, childConstraints);
   }
 
   @override
   void updateRenderObject(BuildContext context, covariant _RenderButtonRedirectingHitDetection renderObject) {
-    renderObject.additionalConstraints = constraints;
+    renderObject
+      ..additionalConstraints = constraints
+      ..childConstraints = childConstraints;
   }
 }
 
 class _RenderButtonRedirectingHitDetection extends RenderConstrainedBox {
-  _RenderButtonRedirectingHitDetection (BoxConstraints additionalConstraints) : super(additionalConstraints: additionalConstraints);
+  _RenderButtonRedirectingHitDetection(BoxConstraints additionalConstraints, this._childConstraints) : super(additionalConstraints: additionalConstraints);
+
+  BoxConstraints get childConstraints => _childConstraints;
+  BoxConstraints _childConstraints;
+  set childConstraints(BoxConstraints value) {
+    if (_childConstraints == value)
+      return;
+    _childConstraints = value;
+    markNeedsLayout();
+  }
+
+  @override
+  void performLayout() {
+    final BoxConstraints selectedConstraints = new BoxConstraints(
+      maxWidth: additionalConstraints.maxWidth,
+      minWidth: additionalConstraints.minWidth,
+      maxHeight: additionalConstraints.maxHeight,
+      minHeight: math.min(additionalConstraints.minHeight, childConstraints.minHeight),
+    );
+    if (child != null) {
+      child.layout(selectedConstraints.enforce(constraints), parentUsesSize: true);
+      final double constrainedHeight = constraints.constrainHeight(math.max(child.size.height, additionalConstraints.minHeight));
+      assert(constrainedHeight >= child.size.height);
+      size = new Size(child.size.width, constraints.constrainHeight(constrainedHeight));
+      final BoxParentData childParentData = child.parentData;
+      childParentData.offset = Alignment.center.alongOffset(size - child.size);
+    } else {
+      size = additionalConstraints.enforce(constraints).constrain(Size.zero);
+    }
+  }
+
+  @override
+  void paint(PaintingContext context, Offset offset) {
+    if (child != null)
+      context.paintChild(child, offset + Alignment.center.alongOffset(size - child.size));
+  }
+
+  @override
+  void setupParentData(covariant RenderObject child) {
+    child.parentData ??= new BoxParentData();
+  }
 
   @override
   bool hitTest(HitTestResult result, {Offset position}) {

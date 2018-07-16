@@ -66,14 +66,16 @@ void main() {
     const Color fillColor = const Color(0xFFEF5350);
 
     await tester.pumpWidget(
-      new RawMaterialButton(
-        materialTapTargetSize: MaterialTapTargetSize.padded,
-        onPressed: () {},
-        fillColor: fillColor,
-        highlightColor: highlightColor,
-        splashColor: splashColor,
-        child: const SizedBox(),
-      )
+      new Center(
+        child: new RawMaterialButton(
+          materialTapTargetSize: MaterialTapTargetSize.padded,
+          onPressed: () {},
+          fillColor: fillColor,
+          highlightColor: highlightColor,
+          splashColor: splashColor,
+          child: const SizedBox(),
+        ),
+      ),
     );
 
     final Offset center = tester.getCenter(find.byType(InkWell));
@@ -93,14 +95,16 @@ void main() {
     const Color fillColor = const Color(0xFFEF5350);
 
     await tester.pumpWidget(
-      new RawMaterialButton(
-        materialTapTargetSize: MaterialTapTargetSize.padded,
-        onPressed: () {},
-        fillColor: fillColor,
-        highlightColor: highlightColor,
-        splashColor: splashColor,
-        child: const SizedBox(),
-      )
+      new Center(
+        child: new RawMaterialButton(
+          materialTapTargetSize: MaterialTapTargetSize.padded,
+          onPressed: () {},
+          fillColor: fillColor,
+          highlightColor: highlightColor,
+          splashColor: splashColor,
+          child: const SizedBox(),
+        ),
+      ),
     );
 
     final Offset top = tester.getRect(find.byType(InkWell)).topCenter;
@@ -117,6 +121,7 @@ void main() {
     await tester.pumpWidget(
       new MaterialApp(
         home: new Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: <Widget>[
             new RawMaterialButton(
             materialTapTargetSize: MaterialTapTargetSize.padded,
@@ -164,5 +169,25 @@ void main() {
       ),
     );
     expect(find.byKey(key).hitTestable(), findsOneWidget);
+  });
+  
+  testWidgets('RawMaterialButton can be expanded by parent constraints', (WidgetTester tester) async {
+    const Key key = const Key('test');
+    await tester.pumpWidget(
+      new MaterialApp(
+        home: new Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: <Widget>[
+            new RawMaterialButton(
+              key: key,
+              onPressed: () {},
+              child: const SizedBox(),
+            )
+          ],
+        ),
+      ),
+    );
+
+    expect(tester.getSize(find.byKey(key)), const Size(800.0, 48.0));
   });
 }
