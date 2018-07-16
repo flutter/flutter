@@ -18,6 +18,10 @@
 
 namespace blink {
 
+void UniqueUnzipperTraits::Free(void* file) {
+  unzClose(file);
+}
+
 ZipAssetStore::ZipAssetStore(std::string file_path)
     : file_path_(std::move(file_path)) {
   BuildStatCache();
@@ -25,8 +29,8 @@ ZipAssetStore::ZipAssetStore(std::string file_path)
 
 ZipAssetStore::~ZipAssetStore() = default;
 
-zip::UniqueUnzipper ZipAssetStore::CreateUnzipper() const {
-  return zip::UniqueUnzipper{::unzOpen2(file_path_.c_str(), nullptr)};
+UniqueUnzipper ZipAssetStore::CreateUnzipper() const {
+  return UniqueUnzipper{::unzOpen2(file_path_.c_str(), nullptr)};
 }
 
 // |blink::AssetResolver|
