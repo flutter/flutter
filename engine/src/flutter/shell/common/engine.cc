@@ -339,6 +339,10 @@ void Engine::SetSemanticsEnabled(bool enabled) {
   runtime_controller_->SetSemanticsEnabled(enabled);
 }
 
+void Engine::SetAssistiveTechnologyEnabled(bool enabled) {
+  runtime_controller_->SetAssistiveTechnologyEnabled(enabled);
+}
+
 void Engine::StopAnimator() {
   animator_->Stop();
 }
@@ -374,7 +378,8 @@ void Engine::Render(std::unique_ptr<flow::LayerTree> layer_tree) {
 
 void Engine::UpdateSemantics(blink::SemanticsNodeUpdates update,
                              blink::CustomAccessibilityActionUpdates actions) {
-  delegate_.OnEngineUpdateSemantics(*this, std::move(update), std::move(actions));
+  delegate_.OnEngineUpdateSemantics(*this, std::move(update),
+                                    std::move(actions));
 }
 
 void Engine::HandlePlatformMessage(

@@ -52,6 +52,10 @@ void PlatformView::SetSemanticsEnabled(bool enabled) {
   delegate_.OnPlatformViewSetSemanticsEnabled(*this, enabled);
 }
 
+void PlatformView::SetAssistiveTechnologyEnabled(bool enabled) {
+  delegate_.OnPlatformViewSetAssistiveTechnologyEnabled(*this, enabled);
+}
+
 void PlatformView::SetViewportMetrics(const blink::ViewportMetrics& metrics) {
   delegate_.OnPlatformViewSetViewportMetrics(*this, metrics);
 }
@@ -74,8 +78,9 @@ fml::WeakPtr<PlatformView> PlatformView::GetWeakPtr() const {
   return weak_factory_.GetWeakPtr();
 }
 
-void PlatformView::UpdateSemantics(blink::SemanticsNodeUpdates update,
-                                   blink::CustomAccessibilityActionUpdates actions) {}
+void PlatformView::UpdateSemantics(
+    blink::SemanticsNodeUpdates update,
+    blink::CustomAccessibilityActionUpdates actions) {}
 
 void PlatformView::HandlePlatformMessage(
     fxl::RefPtr<blink::PlatformMessage> message) {

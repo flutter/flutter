@@ -122,7 +122,9 @@ std::unique_ptr<RuntimeController> RuntimeController::Clone() const {
 bool RuntimeController::FlushRuntimeStateToIsolate() {
   return SetViewportMetrics(window_data_.viewport_metrics) &&
          SetLocale(window_data_.language_code, window_data_.country_code) &&
-         SetSemanticsEnabled(window_data_.semantics_enabled);
+         SetSemanticsEnabled(window_data_.semantics_enabled) &&
+         SetAssistiveTechnologyEnabled(
+             window_data_.assistive_technology_enabled);
 }
 
 bool RuntimeController::SetViewportMetrics(const ViewportMetrics& metrics) {
@@ -164,6 +166,17 @@ bool RuntimeController::SetSemanticsEnabled(bool enabled) {
 
   if (auto window = GetWindowIfAvailable()) {
     window->UpdateSemanticsEnabled(window_data_.semantics_enabled);
+    return true;
+  }
+
+  return false;
+}
+
+bool RuntimeController::SetAssistiveTechnologyEnabled(bool enabled) {
+  window_data_.assistive_technology_enabled = enabled;
+  if (auto window = GetWindowIfAvailable()) {
+    window->UpdateAssistiveTechnologyEnabled(
+        window_data_.assistive_technology_enabled);
     return true;
   }
 
