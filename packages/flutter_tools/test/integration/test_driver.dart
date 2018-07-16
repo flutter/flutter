@@ -18,8 +18,8 @@ import '../src/common.dart';
 
 // Set this to true for debugging to get JSON written to stdout.
 const bool _printJsonAndStderr = false;
-const Duration defaultTimeout = const Duration(seconds: 20);
-const Duration appStartTimeout = const Duration(seconds: 60);
+const Duration defaultTimeout = Duration(seconds: 20);
+const Duration appStartTimeout = Duration(seconds: 60);
 
 class FlutterTestDriver {
   Directory _projectFolder;
@@ -137,7 +137,7 @@ class FlutterTestDriver {
     ];
     _debugPrint('Spawning $command in ${projectDir.path}');
     
-    const ProcessManager _processManager = const LocalProcessManager();
+    const ProcessManager _processManager = LocalProcessManager();
     return _processManager.start(
         command,
         workingDirectory: projectDir.path,

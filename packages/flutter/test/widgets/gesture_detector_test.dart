@@ -33,14 +33,14 @@ void main() {
     expect(updatedDragDelta, isNull);
     expect(didEndDrag, isFalse);
 
-    const Offset firstLocation = const Offset(10.0, 10.0);
+    const Offset firstLocation = Offset(10.0, 10.0);
     final TestGesture gesture = await tester.startGesture(firstLocation, pointer: 7);
     expect(didStartDrag, isTrue);
     didStartDrag = false;
     expect(updatedDragDelta, isNull);
     expect(didEndDrag, isFalse);
 
-    const Offset secondLocation = const Offset(10.0, 9.0);
+    const Offset secondLocation = Offset(10.0, 9.0);
     await gesture.moveTo(secondLocation);
     expect(didStartDrag, isFalse);
     expect(updatedDragDelta, -1.0);
@@ -60,8 +60,8 @@ void main() {
     int gestureCount = 0;
     double dragDistance = 0.0;
 
-    const Offset downLocation = const Offset(10.0, 10.0);
-    const Offset upLocation = const Offset(10.0, 50.0); // must be far enough to be more than kTouchSlop
+    const Offset downLocation = Offset(10.0, 10.0);
+    const Offset upLocation = Offset(10.0, 50.0); // must be far enough to be more than kTouchSlop
 
     final Widget widget = new GestureDetector(
       onVerticalDragUpdate: (DragUpdateDetails details) { dragDistance += details.primaryDelta; },

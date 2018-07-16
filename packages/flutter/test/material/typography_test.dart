@@ -24,17 +24,17 @@ void main() {
   });
 
   test('TextTheme merges properly in the presence of null fields.', () {
-    const TextTheme partialTheme = const TextTheme(title: const TextStyle(color: const Color(0xcafefeed)));
+    const TextTheme partialTheme = TextTheme(title: TextStyle(color: Color(0xcafefeed)));
     final TextTheme fullTheme = ThemeData.fallback().textTheme.merge(partialTheme);
     expect(fullTheme.title.color, equals(partialTheme.title.color));
 
-    const TextTheme onlyHeadlineAndTitle = const TextTheme(
-      headline: const TextStyle(color: const Color(0xcafefeed)),
-      title: const TextStyle(color: const Color(0xbeefcafe)),
+    const TextTheme onlyHeadlineAndTitle = TextTheme(
+      headline: TextStyle(color: Color(0xcafefeed)),
+      title: TextStyle(color: Color(0xbeefcafe)),
     );
-    const TextTheme onlyBody1AndTitle = const TextTheme(
-      body1: const TextStyle(color: const Color(0xfeedfeed)),
-      title: const TextStyle(color: const Color(0xdeadcafe)),
+    const TextTheme onlyBody1AndTitle = TextTheme(
+      body1: TextStyle(color: Color(0xfeedfeed)),
+      title: TextStyle(color: Color(0xdeadcafe)),
     );
     TextTheme merged = onlyHeadlineAndTitle.merge(onlyBody1AndTitle);
     expect(merged.body2, isNull);

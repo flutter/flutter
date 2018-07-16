@@ -14,13 +14,13 @@ void main() {
       ));
       expect(find.text('test'), findsOneWidget);
     });
-  
+
     testWidgets('finds Text.rich widgets', (WidgetTester tester) async {
       await tester.pumpWidget(_boilerplate(
         const Text.rich(
           TextSpan(text: 't', children: <TextSpan>[
-            const TextSpan(text: 'e'),
-            const TextSpan(text: 'st'),
+            TextSpan(text: 'e'),
+            TextSpan(text: 'st'),
           ]
         ),
       )));

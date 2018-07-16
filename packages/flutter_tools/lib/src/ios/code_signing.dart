@@ -118,7 +118,7 @@ Future<Map<String, String>> getCodeSigningIdentityDevelopmentTeam({
     return null;
 
   const List<String> findIdentityCommand =
-      const <String>['security', 'find-identity', '-p', 'codesigning', '-v'];
+      <String>['security', 'find-identity', '-p', 'codesigning', '-v'];
   final List<String> validCodeSigningIdentities = runCheckedSync(findIdentityCommand)
       .split('\n')
       .map<String>((String outputLine) {

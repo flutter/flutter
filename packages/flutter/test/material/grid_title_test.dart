@@ -41,7 +41,7 @@ void main() {
     await tester.pumpWidget(
       const Directionality(
         textDirection: TextDirection.ltr,
-        child: const GridTile(child: const Text('Simple')),
+        child: GridTile(child: Text('Simple')),
       ),
     );
 
