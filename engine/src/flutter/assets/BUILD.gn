@@ -18,7 +18,6 @@ source_set("assets") {
     "$flutter_root/fml",
     "$flutter_root/glue",
     "//garnet/public/lib/fxl",
-    "//garnet/public/lib/zip",
   ]
 
   public_deps = [
