@@ -26,20 +26,20 @@
                                                           action:@selector(onNewFlutterWindow:)
                                                    keyEquivalent:@""] autorelease];
   newEngineItem.keyEquivalent = @"n";
-  newEngineItem.keyEquivalentModifierMask = NSCommandKeyMask;
+  newEngineItem.keyEquivalentModifierMask = NSEventModifierFlagCommand;
 
   NSMenuItem* shutdownEngineItem =
       [[[NSMenuItem alloc] initWithTitle:@"Shutdown Engine"
                                   action:@selector(onShutdownFlutterWindow:)
                            keyEquivalent:@""] autorelease];
   shutdownEngineItem.keyEquivalent = @"w";
-  shutdownEngineItem.keyEquivalentModifierMask = NSCommandKeyMask;
+  shutdownEngineItem.keyEquivalentModifierMask = NSEventModifierFlagCommand;
 
   NSMenuItem* quitItem = [[[NSMenuItem alloc] initWithTitle:@"Quit"
                                                      action:@selector(onQuitFlutterApplication:)
                                               keyEquivalent:@""] autorelease];
   quitItem.keyEquivalent = @"q";
-  quitItem.keyEquivalentModifierMask = NSCommandKeyMask;
+  quitItem.keyEquivalentModifierMask = NSEventModifierFlagCommand;
 
   [mainMenu addItem:engineItem];
   [engineItem setSubmenu:engineMenu];
