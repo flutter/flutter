@@ -272,7 +272,8 @@ class RenderListWheelViewport
   /// the wheel's size's left edge.
   ///
   /// Defaults to 0.0, which means looking at the wheel head-on.
-  /// The visual effect can be weird if it's too far from the range [-1.0, 1.0].
+  /// The visual effect can be unaesthetic if this value is too far from the
+  /// range [-0.5, 0.5].
   /// {@endtemplate}
   double get offAxisFraction => _offAxisFraction;
   double _offAxisFraction = 0.0;
@@ -637,19 +638,19 @@ class RenderListWheelViewport
     );
 
     // Offset that helps painting everything in the center (e.g. angle = 0).
-    final Offset customOffset = new Offset(
+    final Offset offsetToCenter = new Offset(
         untransformedPaintingCoordinates.dx,
         -_topScrollMarginExtent);
 
     if (!useMagnifier)
-      _paintChildCylindrically(context, offset, child, transform, customOffset);
+      _paintChildCylindrically(context, offset, child, transform, offsetToCenter);
     else
       _paintChildWithMagnifier(
         context,
         offset,
         child,
         transform,
-        customOffset,
+        offsetToCenter,
         untransformedPaintingCoordinates,
       );
   }
@@ -661,7 +662,7 @@ class RenderListWheelViewport
       Offset offset,
       RenderBox child,
       Matrix4 cylindricalTransform,
-      Offset customOffset,
+      Offset offsetToCenter,
       Offset untransformedPaintingCoordinates,
   ) {
     final double magnifierTopLinePosition =
@@ -722,7 +723,7 @@ class RenderListWheelViewport
               offset,
               child,
               cylindricalTransform,
-              customOffset);
+              offsetToCenter);
           }
       );
     } else {
@@ -731,7 +732,7 @@ class RenderListWheelViewport
         offset,
         child,
         cylindricalTransform,
-        customOffset);
+        offsetToCenter);
     }
   }
 
@@ -741,7 +742,7 @@ class RenderListWheelViewport
       Offset offset,
       RenderBox child,
       Matrix4 cylindricalTransform,
-      Offset customOffset,
+      Offset offsetToCenter,
   ) {
     context.pushTransform(
       // Text with TransformLayers and no cullRects currently have an issue rendering
@@ -754,7 +755,7 @@ class RenderListWheelViewport
         context.paintChild(
           child,
           // Paint everything in the center (e.g. angle = 0), then transform.
-          offset + customOffset,
+          offset + offsetToCenter,
         );
       },
     );

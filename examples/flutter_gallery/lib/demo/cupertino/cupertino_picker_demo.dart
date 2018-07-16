@@ -17,12 +17,12 @@ class CupertinoPickerDemo extends StatefulWidget {
 }
 
 class _CupertinoPickerDemoState extends State<CupertinoPickerDemo> {
-  int _selectedItemIndex = 0;
+  int _selectedColorIndex = 0;
 
-  int _alarmHour = 0;
-  int _alarmMinute = 0;
+  int _selectedHour = 0;
+  int _selectedMinute = 0;
 
-  Widget _buildMenu() {
+  Widget _buildMenu(List<Widget> children) {
     return new Container(
       decoration: const BoxDecoration(
         color: CupertinoColors.white,
@@ -45,13 +45,7 @@ class _CupertinoPickerDemoState extends State<CupertinoPickerDemo> {
             ),
             child: new Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: <Widget>[
-                const Text('Favorite Color'),
-                new Text(
-                  coolColorNames[_selectedItemIndex],
-                  style: const TextStyle(color: CupertinoColors.inactiveGray),
-                ),
-              ],
+              children: children,
             ),
           ),
         ),
@@ -59,10 +53,78 @@ class _CupertinoPickerDemoState extends State<CupertinoPickerDemo> {
     );
   }
 
-  Widget _buildBottomPicker() {
+  Widget _buildColorPicker() {
     final FixedExtentScrollController scrollController =
-        new FixedExtentScrollController(initialItem: _selectedItemIndex);
+      new FixedExtentScrollController(initialItem: _selectedColorIndex);
+    return new CupertinoPicker(
+      scrollController: scrollController,
+      itemExtent: _kPickerItemHeight,
+      backgroundColor: CupertinoColors.white,
+      onSelectedItemChanged: (int index) {
+        setState(() {
+          _selectedColorIndex = index;
+        });
+      },
+      children: new List<Widget>.generate(coolColorNames.length, (int index) {
+        return new Center(child:
+        new Text(coolColorNames[index]),
+        );
+      }),
+    );
+  }
 
+  Widget _buildAlarmPicker() {
+    return new MultiColumnCupertinoPicker(
+      children: <CupertinoPicker>[
+        new CupertinoPicker(
+          scrollController: new FixedExtentScrollController(
+            initialItem: _selectedHour,
+          ),
+          offAxisFraction: -0.5,
+          useMagnifier: true,
+          magnificationRate: 1.1,
+          itemExtent: _kPickerItemHeight,
+          backgroundColor: CupertinoColors.white,
+          onSelectedItemChanged: (int index) {
+            setState(() {
+              _selectedHour = index;
+            });
+          },
+          children: new List<Widget>.generate(24, (int index) {
+            return new Container(
+              alignment: Alignment.centerRight,
+              padding: const EdgeInsets.only(right: 32.0),
+              child: new Text(index.toString()),
+            );
+          }),
+        ),
+        new CupertinoPicker(
+          scrollController: new FixedExtentScrollController(
+            initialItem: _selectedMinute,
+          ),
+          offAxisFraction: 0.5,
+          useMagnifier: true,
+          magnificationRate: 1.1,
+          itemExtent: _kPickerItemHeight,
+          backgroundColor: CupertinoColors.white,
+          onSelectedItemChanged: (int index) {
+            setState(() {
+              _selectedMinute = index;
+            });
+          },
+          children: new List<Widget>.generate(60, (int index) {
+            return new Container(
+              alignment: Alignment.centerLeft,
+              padding: const EdgeInsets.only(left: 32.0),
+              child: new Text(index.toString()),
+            );
+          }),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildBottomPicker(Widget picker) {
     return new Container(
       height: _kPickerSheetHeight,
       color: CupertinoColors.white,
@@ -75,126 +137,7 @@ class _CupertinoPickerDemoState extends State<CupertinoPickerDemo> {
           // Blocks taps from propagating to the modal sheet and popping.
           onTap: () {},
           child: new SafeArea(
-            child: new CupertinoPicker(
-              scrollController: scrollController,
-              itemExtent: _kPickerItemHeight,
-              backgroundColor: CupertinoColors.white,
-              onSelectedItemChanged: (int index) {
-                setState(() {
-                  _selectedItemIndex = index;
-                });
-              },
-              children: new List<Widget>.generate(coolColorNames.length, (int index) {
-                return new Center(child:
-                  new Text(coolColorNames[index]),
-                );
-              }),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildAlarmMenu() {
-    final String time = _alarmHour.toString().padLeft(2, '0') + ': ' +
-        _alarmMinute.toString().padLeft(2, '0');
-    return new Container(
-      decoration: const BoxDecoration(
-        color: CupertinoColors.white,
-        border: const Border(
-          top: const BorderSide(color: const Color(0xFFBCBBC1), width: 0.0),
-          bottom: const BorderSide(color: const Color(0xFFBCBBC1), width: 0.0),
-        ),
-      ),
-      height: 44.0,
-      child: new Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16.0),
-        child: new SafeArea(
-          top: false,
-          bottom: false,
-          child: new DefaultTextStyle(
-            style: const TextStyle(
-              letterSpacing: -0.24,
-              fontSize: 17.0,
-              color: CupertinoColors.black,
-            ),
-            child: new Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: <Widget>[
-                const Text('Alarm'),
-                new Text(
-                  time,
-                  style: const TextStyle(color: CupertinoColors.inactiveGray),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildAlarmBottomPicker() {
-    return new Container(
-      height: _kPickerSheetHeight,
-      color: CupertinoColors.white,
-      child: new DefaultTextStyle(
-        style: const TextStyle(
-          color: CupertinoColors.black,
-          fontSize: 22.0,
-        ),
-        child: new GestureDetector(
-          // Blocks taps from propagating to the modal sheet and popping.
-          onTap: () {},
-          child: new SafeArea(
-            child: new MultiColumnCupertinoPicker(
-              children: <CupertinoPicker>[
-                new CupertinoPicker(
-                  scrollController: new FixedExtentScrollController(
-                                      initialItem: _alarmHour,
-                                    ),
-                  offAxisFraction: -0.5,
-                  useMagnifier: true,
-                  magnificationRate: 1.1,
-                  itemExtent: _kPickerItemHeight,
-                  backgroundColor: CupertinoColors.white,
-                  onSelectedItemChanged: (int index) {
-                    setState(() {
-                      _alarmHour = index;
-                    });
-                  },
-                  children: new List<Widget>.generate(24, (int index) {
-                    return new Container(
-                      alignment: Alignment.centerRight,
-                      padding: const EdgeInsets.only(right: 32.0),
-                      child: new Text(index.toString()),
-                    );
-                  }),
-                ),
-                new CupertinoPicker(
-                  scrollController: new FixedExtentScrollController(
-                                      initialItem: _alarmMinute,
-                                    ),
-                  offAxisFraction: 0.5,
-                  useMagnifier: true,
-                  magnificationRate: 1.1,
-                  itemExtent: _kPickerItemHeight,
-                  backgroundColor: CupertinoColors.white,
-                  onSelectedItemChanged: (int index) {
-                    setState(() {
-                      _alarmMinute = index;
-                    });
-                  },
-                  children: new List<Widget>.generate(60, (int index) {
-                    return new Container(
-                      alignment: Alignment.centerLeft,
-                      padding: const EdgeInsets.only(left: 32.0),
-                      child: new Text(index.toString()),
-                    );
-                  }),
-                ),
-                ]),
+            child: picker,
           ),
         ),
       ),
@@ -203,6 +146,8 @@ class _CupertinoPickerDemoState extends State<CupertinoPickerDemo> {
 
   @override
   Widget build(BuildContext context) {
+    final String time = _selectedHour.toString().padLeft(2, '0') + ': ' +
+        _selectedMinute.toString().padLeft(2, '0');
     return new Scaffold(
       appBar: new AppBar(
         title: const Text('Cupertino Picker'),
@@ -223,23 +168,42 @@ class _CupertinoPickerDemoState extends State<CupertinoPickerDemo> {
                   await showModalBottomSheet<void>(
                     context: context,
                     builder: (BuildContext context) {
-                      return _buildBottomPicker();
+                      return _buildBottomPicker(_buildColorPicker());
                     },
                   );
                 },
-                child: _buildMenu(),
+                child: _buildMenu(
+                  <Widget>[
+                    const Text('Favorite Color'),
+                    new Text(
+                      coolColorNames[_selectedColorIndex],
+                      style: const TextStyle(
+                        color: CupertinoColors.inactiveGray
+                      ),
+                    ),
+                  ]
+                ),
               ),
-              const Padding(padding: const EdgeInsets.only(top: 4.0)),
               new GestureDetector(
                 onTap: () async {
                   await showModalBottomSheet<void>(
                     context: context,
                     builder: (BuildContext context) {
-                      return _buildAlarmBottomPicker();
+                      return _buildBottomPicker(_buildAlarmPicker());
                     },
                   );
                 },
-                child: _buildAlarmMenu(),
+                child: _buildMenu(
+                  <Widget>[
+                    const Text('Alarm'),
+                    new Text(
+                      time,
+                      style: const TextStyle(
+                        color: CupertinoColors.inactiveGray
+                      ),
+                    ),
+                  ]
+                ),
               ),
             ],
           ),
