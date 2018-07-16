@@ -452,13 +452,13 @@ enum _AlertDialogSections {
 // Data structure used to pass around references to multiple dialog pieces for
 // layout calculations.
 class _DialogChildren {
-  final RenderBox content;
-  final RenderBox actions;
-
   _DialogChildren({
     this.content,
     this.actions,
   });
+
+  final RenderBox content;
+  final RenderBox actions;
 }
 
 // The "content section" of a CupertinoAlertDialog.
