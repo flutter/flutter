@@ -44,7 +44,7 @@ class PlatformViewRegistry {
 class PlatformViewsService {
   PlatformViewsService._();
 
-  /// Creates a new Android view.
+  /// Creates a controller for a new Android view.
   ///
   /// `id` is an unused unique identifier generated with [platformViewsRegistry].
   ///
@@ -54,37 +54,51 @@ class PlatformViewsService {
   /// Plugins can register a platform view factory with
   /// [PlatformViewRegistry#registerViewFactory](/javadoc/io/flutter/plugin/platform/PlatformViewRegistry.html#registerViewFactory-java.lang.String-io.flutter.plugin.platform.PlatformViewFactory-).
   ///
-  /// `size` is the initial size for the view in logical pixels.
-  static Future<AndroidViewController> initAndroidView({
+  /// The Android view will only be created after [AndroidViewController.setSize] is called for the
+  /// first time.
+  static AndroidViewController initAndroidView({
     @required int id,
     @required String viewType,
-    @required Size size,
-  }) async {
-     assert(size != null);
-     final int textureId = await SystemChannels.platform_views.invokeMethod('create', <String, dynamic> {
-      'id':  id,
-      'viewType': viewType,
-      'width': size.width,
-      'height': size.height,
-    });
-    return new AndroidViewController._(id: id, textureId: textureId);
+  }) {
+    return new AndroidViewController._(id: id, viewType: viewType);
   }
+}
+
+enum _AndroidViewState {
+  WAITING_FOR_SIZE,
+  CREATING,
+  CREATED,
+  CREATE_FAILED,
+  DISPOSED,
 }
 
 /// Controls an Android view.
 ///
 /// Typically created with [PlatformViewsService.initAndroidView].
 class AndroidViewController {
-  const AndroidViewController._({
+  AndroidViewController._({
     @required this.id,
-    this.textureId,
-  }) : assert(id != null);
+    @required String viewType,
+  }) : assert(id != null),
+       assert(viewType != null),
+       _viewType = viewType,
+       _state = _AndroidViewState.WAITING_FOR_SIZE;
 
   /// The unique identifier of the Android view controlled by this controller.
   final int id;
 
+  final String _viewType;
+
   /// The texture entry id into which the Android view is rendered.
-  final int textureId;
+  int _textureId;
+
+  /// Returns the texture entry id that the Android view is rendering into.
+  ///
+  /// Returns null if the Android view has not been successfully created, or if it has been
+  /// disposed.
+  int get textureId => _textureId;
+
+  _AndroidViewState _state;
 
   /// Disposes the Android view.
   ///
@@ -92,17 +106,39 @@ class AndroidViewController {
   /// The identifier of the platform view cannot be reused after the view is
   /// disposed.
   Future<Null> dispose() async {
-    await SystemChannels.platform_views.invokeMethod('dispose', id);
+    if (_state == _AndroidViewState.CREATING || _state == _AndroidViewState.CREATED)
+      await SystemChannels.platform_views.invokeMethod('dispose', id);
+    _state = _AndroidViewState.DISPOSED;
   }
 
-  /// Resizes the Android View.
+  /// Sizes the Android View.
   ///
-  /// `size` is the view's new size in logical pixel.
-  Future<Null> resize(Size size) async {
+  /// `size` is the view's new size in logical pixel, and must not be null.
+  ///
+  /// The first time a size is set triggers the creation of the Android view.
+  Future<Null> setSize(Size size) async {
+    if (_state == _AndroidViewState.DISPOSED)
+      throw new FlutterError('trying to size a disposed Android View. View id: $id');
+
+    assert(size != null);
+
+    if (_state == _AndroidViewState.WAITING_FOR_SIZE)
+      return _create(size);
+
     await SystemChannels.platform_views.invokeMethod('resize', <String, dynamic> {
       'id': id,
       'width': size.width,
       'height': size.height,
     });
+  }
+
+  Future<Null> _create(Size size) async {
+    _textureId = await SystemChannels.platform_views.invokeMethod('create', <String, dynamic> {
+      'id':  id,
+      'viewType': _viewType,
+      'width': size.width,
+      'height': size.height,
+    });
+    _state = _AndroidViewState.CREATED;
   }
 }

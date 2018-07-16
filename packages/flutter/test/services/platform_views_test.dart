@@ -20,16 +20,16 @@ void main() {
     test('create Android view of unregistered type', () async {
       expect(
           () => PlatformViewsService.initAndroidView(
-              id: 0, viewType: 'web', size: const Size(100.0, 100.0)),
+              id: 0, viewType: 'web').setSize(const Size(100.0, 100.0)),
           throwsA(const isInstanceOf<PlatformException>()));
     });
 
     test('create Android views', () async {
       viewsController.registerViewType('webview');
       await PlatformViewsService.initAndroidView(
-          id: 0, viewType: 'webview', size: const Size(100.0, 100.0));
+          id: 0, viewType: 'webview').setSize(const Size(100.0, 100.0));
       await PlatformViewsService.initAndroidView(
-          id: 1, viewType: 'webview', size: const Size(200.0, 300.0));
+          id: 1, viewType: 'webview').setSize(const Size(200.0, 300.0));
       expect(
           viewsController.views,
           unorderedEquals(<FakePlatformView>[
@@ -41,20 +41,20 @@ void main() {
     test('reuse Android view id', () async {
       viewsController.registerViewType('webview');
       await PlatformViewsService.initAndroidView(
-          id: 0, viewType: 'webview', size: const Size(100.0, 100.0));
+          id: 0, viewType: 'webview').setSize(const Size(100.0, 100.0));
       expect(
           () => PlatformViewsService.initAndroidView(
-              id: 0, viewType: 'web', size: const Size(100.0, 100.0)),
+              id: 0, viewType: 'web').setSize(const Size(100.0, 100.0)),
           throwsA(const isInstanceOf<PlatformException>()));
     });
 
     test('dispose Android view', () async {
       viewsController.registerViewType('webview');
       await PlatformViewsService.initAndroidView(
-          id: 0, viewType: 'webview', size: const Size(100.0, 100.0));
+          id: 0, viewType: 'webview').setSize(const Size(100.0, 100.0));
       final AndroidViewController viewController =
-          await PlatformViewsService.initAndroidView(
-              id: 1, viewType: 'webview', size: const Size(200.0, 300.0));
+          PlatformViewsService.initAndroidView(id: 1, viewType: 'webview');
+      await viewController.setSize(const Size(200.0, 300.0));
 
       viewController.dispose();
       expect(
@@ -67,26 +67,22 @@ void main() {
     test('dispose inexisting Android view', () async {
       viewsController.registerViewType('webview');
       await PlatformViewsService.initAndroidView(
-          id: 0, viewType: 'webview', size: const Size(100.0, 100.0));
+          id: 0, viewType: 'webview').setSize(const Size(100.0, 100.0));
       final AndroidViewController viewController =
-          await PlatformViewsService.initAndroidView(
-              id: 1, viewType: 'webview', size: const Size(200.0, 300.0));
-
-      viewController.dispose();
-
-      expect(() => viewController.dispose(),
-          throwsA(const isInstanceOf<PlatformException>()));
+          PlatformViewsService.initAndroidView(id: 1, viewType: 'webview');
+      await viewController.setSize(const Size(200.0, 300.0));
+      await viewController.dispose();
+      await viewController.dispose();
     });
 
     test('resize Android view', () async {
       viewsController.registerViewType('webview');
       await PlatformViewsService.initAndroidView(
-          id: 0, viewType: 'webview', size: const Size(100.0, 100.0));
+          id: 0, viewType: 'webview').setSize(const Size(100.0, 100.0));
       final AndroidViewController viewController =
-          await PlatformViewsService.initAndroidView(
-              id: 1, viewType: 'webview', size: const Size(200.0, 300.0));
-
-      viewController.resize(const Size(500.0, 500.0));
+          PlatformViewsService.initAndroidView(id: 1, viewType: 'webview');
+      await viewController.setSize(const Size(200.0, 300.0));
+      await viewController.setSize(const Size(500.0, 500.0));
       expect(
           viewsController.views,
           unorderedEquals(<FakePlatformView>[
