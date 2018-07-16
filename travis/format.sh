@@ -32,7 +32,12 @@ $CLANG_FORMAT --version
 # Compute the diffs.
 FILETYPES="*.c *.cc *.cpp *.h *.m *.mm"
 DIFF_OPTS="-U0 --no-color --name-only"
-FILES_TO_CHECK="$(git diff $DIFF_OPTS master -- $FILETYPES)"
+if git remote get-url upstream >/dev/null 2>&1; then
+  UPSTREAM=upstream/master
+else
+  UPSTREAM=master
+fi;
+FILES_TO_CHECK="$(git diff $DIFF_OPTS $UPSTREAM -- $FILETYPES)"
 
 FAILED_CHECKS=0
 for f in $FILES_TO_CHECK; do
