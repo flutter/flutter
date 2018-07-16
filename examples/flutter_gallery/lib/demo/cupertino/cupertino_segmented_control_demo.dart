@@ -56,7 +56,7 @@ class _CupertinoSegmentedControlDemoState extends State<CupertinoSegmentedContro
   Widget build(BuildContext context) {
     return new Scaffold(
       appBar: new AppBar(
-        title: const Text('Cupertino Segmented Control'),
+        title: const Text('Segmented Control'),
       ),
       body: new Column(
         children: <Widget>[
