@@ -64,7 +64,7 @@ class FlutterTestDriver {
     _stdout.stream.listen(_debugPrint);
     _stderr.stream.listen(_debugPrint);
 
-    // Stash the PID so that we can terminate the VM more reliable than using
+    // Stash the PID so that we can terminate the VM more reliably than using
     // _proc.kill() (because _proc is a shell, because `flutter` is a shell
     // script).
     final Map<String, dynamic> connected = await _waitFor(event: 'daemon.connected');
