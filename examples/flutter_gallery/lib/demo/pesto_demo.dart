@@ -269,8 +269,8 @@ class RecipeCard extends StatelessWidget {
             new Hero(
               tag: 'packages/$_kGalleryAssetsPackage/${recipe.imagePath}',
               child: AspectRatio(
-                aspectRatio: 4.0/3.0,
-                child: new Image.asset(
+                aspectRatio: 4.0 / 3.0,
+                child: Image.asset(
                   recipe.imagePath,
                   package: recipe.imagePackage,
                   fit: BoxFit.cover,
@@ -601,7 +601,7 @@ const List<Recipe> kPestoRecipes = <Recipe>[
     imagePath: 'food/chopped_beet_leaves.png',
     imagePackage: _kGalleryAssetsPackage,
     ingredients: <RecipeIngredient>[
-       RecipeIngredient(amount: '7', description: 'Beets, just the leaves'),
+       RecipeIngredient(amount: '3 cups', description: 'Beet greens'),
     ],
     steps: <RecipeStep>[
       RecipeStep(duration: '5 min', description: 'Chop'),
@@ -612,7 +612,7 @@ const List<Recipe> kPestoRecipes = <Recipe>[
     author: 'Ali Connors',
     ingredientsImagePath: 'food/icons/main.png',
     ingredientsImagePackage: _kGalleryAssetsPackage,
-    description: 'With this pesto recipe, you can quickly whip up a meal to satisfy your savory needs. And if you\'re feeling fancy, you can add bacon to taste.',
+    description: 'With this pesto recipe, you can quickly whip up a meal to satisfy your savory needs. And if you\'re feeling festive, you can add bacon to taste.',
     imagePath: 'food/pesto_pasta.png',
     imagePackage: _kGalleryAssetsPackage,
     ingredients: <RecipeIngredient>[
@@ -636,7 +636,7 @@ const List<Recipe> kPestoRecipes = <Recipe>[
     author: 'Sandra Adams',
     ingredientsImagePath: 'food/icons/main.png',
     ingredientsImagePackage: _kGalleryAssetsPackage,
-    description: 'Sometimes when you\'re craving some cheer in your life you can jumpstart your day with some cherry pie. Dessert for breakfast is perfectly viable.',
+    description: 'Sometimes when you\'re craving some cheer in your life you can jumpstart your day with some cherry pie. Dessert for breakfast is perfectly acceptable.',
     imagePath: 'food/cherry_pie.png',
     imagePackage: _kGalleryAssetsPackage,
     ingredients: <RecipeIngredient>[
