@@ -16,8 +16,6 @@
 
 namespace shell {
 
-static jlong CreatePendingCallback(VsyncWaiter::Callback callback);
-
 static void ConsumePendingCallback(jlong java_baton,
                                    fxl::TimePoint frame_start_time,
                                    fxl::TimePoint frame_target_time);
@@ -32,12 +30,9 @@ VsyncWaiterAndroid::~VsyncWaiterAndroid() = default;
 
 // |shell::VsyncWaiter|
 void VsyncWaiterAndroid::AwaitVSync() {
-  auto java_baton =
-      CreatePendingCallback(std::bind(&VsyncWaiterAndroid::FireCallback,  //
-                                      this,                               //
-                                      std::placeholders::_1,              //
-                                      std::placeholders::_2               //
-                                      ));
+  std::weak_ptr<VsyncWaiter>* weak_this =
+      new std::weak_ptr<VsyncWaiter>(shared_from_this());
+  jlong java_baton = reinterpret_cast<jlong>(weak_this);
 
   task_runners_.GetPlatformTaskRunner()->PostTask([java_baton]() {
     JNIEnv* env = fml::jni::AttachCurrentThread();
@@ -86,27 +81,16 @@ bool VsyncWaiterAndroid::Register(JNIEnv* env) {
   return env->RegisterNatives(clazz, methods, arraysize(methods)) == 0;
 }
 
-struct PendingCallbackData {
-  VsyncWaiter::Callback callback;
-
-  PendingCallbackData(VsyncWaiter::Callback p_callback)
-      : callback(std::move(p_callback)) {
-    FXL_DCHECK(callback);
-  }
-};
-
-static jlong CreatePendingCallback(VsyncWaiter::Callback callback) {
-  // This delete for this new is balanced in the consume call.
-  auto data = new PendingCallbackData(std::move(callback));
-  return reinterpret_cast<jlong>(data);
-}
-
 static void ConsumePendingCallback(jlong java_baton,
                                    fxl::TimePoint frame_start_time,
                                    fxl::TimePoint frame_target_time) {
-  auto data = reinterpret_cast<PendingCallbackData*>(java_baton);
-  data->callback(frame_start_time, frame_target_time);
-  delete data;
+  auto weak_this = reinterpret_cast<std::weak_ptr<VsyncWaiter>*>(java_baton);
+  auto shared_this = weak_this->lock();
+  delete weak_this;
+
+  if (shared_this) {
+    shared_this->FireCallback(frame_start_time, frame_target_time);
+  }
 }
 
 }  // namespace shell
