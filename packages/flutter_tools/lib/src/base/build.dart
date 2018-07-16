@@ -51,6 +51,7 @@ class GenSnapshot {
     final List<String> args = <String>[
       '--await_is_keyword',
       '--causal_async_stacks',
+      '--sync_async',
       '--packages=$packagesPath',
     ]..addAll(additionalArgs);
 
