@@ -126,6 +126,7 @@ class KernelCompiler {
       sdkRoot,
       '--strong',
       '--target=flutter',
+      '--no-sync-async',
     ];
     if (trackWidgetCreation)
       command.add('--track-widget-creation');
@@ -340,6 +341,7 @@ class ResidentCompiler {
       '--incremental',
       '--strong',
       '--target=flutter',
+      '--no-sync-async',
       '--initialize-from-dill=foo' // TODO(aam): remove once dartbug.com/33087 fixed
     ];
     if (outputPath != null) {
