@@ -63,14 +63,17 @@ void main() {
 
 
   testWidgets('Text Foreground', (WidgetTester tester) async {
-    const Color black = const Color(0xFF000000);
-    const Color red = const Color(0xFFFF0000);
-    const Color blue = const Color(0xFF0000FF);
-    final Shader linearGradient = const LinearGradient(colors: <Color>[red, blue]).createShader(new Rect.fromLTWH(0.0, 0.0, 50.0, 20.0));
+    const Color black = Color(0xFF000000);
+    const Color red = Color(0xFFFF0000);
+    const Color blue = Color(0xFF0000FF);
+    final Shader linearGradient = const LinearGradient(
+      colors: const <Color>[red, blue]
+    ).createShader(new Rect.fromLTWH(0.0, 0.0, 50.0, 20.0));
 
     await tester.pumpWidget(
-      new RepaintBoundary(
-        child: new Center(
+      new Align(
+        alignment: Alignment.topLeft,
+        child: new RepaintBoundary(
           child: new Text('Hello',
             textDirection: TextDirection.ltr,
             style: new TextStyle(
@@ -86,16 +89,15 @@ void main() {
     await expectLater(
       find.byType(RepaintBoundary),
       matchesGoldenFile('text_golden.Foreground.gradient.png'),
-      // this was generated on MacOS and will fail on Linux
-      // change to !Platform.isLinux once they're properly generated
-      skip: true, // !Platform.isLinux,
+      skip: !Platform.isLinux,
     );
 
     await tester.pumpWidget(
-      new RepaintBoundary(
-        child: new Center(
-          child: new Text('Hello', 
-            textDirection: TextDirection.ltr,          
+      new Align(
+        alignment: Alignment.topLeft,
+        child: new RepaintBoundary(
+          child: new Text('Hello',
+            textDirection: TextDirection.ltr,
             style: new TextStyle(
               foreground: new Paint()
                 ..color = black
@@ -110,16 +112,15 @@ void main() {
     await expectLater(
       find.byType(RepaintBoundary),
       matchesGoldenFile('text_golden.Foreground.stroke.png'),
-      // this was generated on MacOS and will fail on Linux
-      // change to !Platform.isLinux once they're properly generated
-      skip: true, // !Platform.isLinux,
+      skip: !Platform.isLinux,
     );
 
     await tester.pumpWidget(
-      new RepaintBoundary(
-        child: new Center(
-          child: new Text('Hello', 
-            textDirection: TextDirection.ltr,          
+      new Align(
+        alignment: Alignment.topLeft,
+        child: new RepaintBoundary(
+          child: new Text('Hello',
+            textDirection: TextDirection.ltr,
             style: new TextStyle(
               foreground: new Paint()
                 ..color = black
@@ -135,9 +136,7 @@ void main() {
     await expectLater(
       find.byType(RepaintBoundary),
       matchesGoldenFile('text_golden.Foreground.stroke_and_gradient.png'),
-      // this was generated on MacOS and will fail on Linux
-      // change to !Platform.isLinux once they're properly generated
-      skip: true, // !Platform.isLinux,
+      skip: !Platform.isLinux,
     );
   });
 
