@@ -90,5 +90,26 @@ void main() {
             new FakePlatformView(1, 'webview', const Size(500.0, 500.0)),
           ]));
     });
+
+    test('OnPlatformViewCreated callback', () async {
+      viewsController.registerViewType('webview');
+      final List<int> createdViews = <int>[];
+      final OnPlatformViewCreated callback = (int id) { createdViews.add(id); };
+
+      final AndroidViewController controller1 = PlatformViewsService.initAndroidView(
+          id: 0, viewType: 'webview', onPlatformViewCreated:  callback);
+      expect(createdViews, isEmpty);
+
+      await controller1.setSize(const Size(100.0, 100.0));
+      expect(createdViews, orderedEquals(<int>[0]));
+
+      final AndroidViewController controller2 = PlatformViewsService.initAndroidView(
+          id: 5, viewType: 'webview', onPlatformViewCreated:  callback);
+      expect(createdViews, orderedEquals(<int>[0]));
+
+      await controller2.setSize(const Size(100.0, 200.0));
+      expect(createdViews, orderedEquals(<int>[0, 5]));
+
+    });
   });
 }

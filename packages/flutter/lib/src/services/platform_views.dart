@@ -36,6 +36,11 @@ class PlatformViewRegistry {
   int getNextPlatformViewId() => _nextPlatformViewId++;
 }
 
+/// Callback signature for when a platform view was created.
+///
+/// `id` is the platform view's unique identifier.
+typedef void OnPlatformViewCreated(int id);
+
 /// Provides access to the platform views service.
 ///
 /// This service allows creating and controlling Android views.
@@ -59,8 +64,13 @@ class PlatformViewsService {
   static AndroidViewController initAndroidView({
     @required int id,
     @required String viewType,
+    OnPlatformViewCreated onPlatformViewCreated,
   }) {
-    return new AndroidViewController._(id: id, viewType: viewType);
+    return new AndroidViewController._(
+        id: id,
+        viewType: viewType,
+        onPlatformViewCreated: onPlatformViewCreated
+    );
   }
 }
 
@@ -79,15 +89,19 @@ class AndroidViewController {
   AndroidViewController._({
     @required this.id,
     @required String viewType,
+    OnPlatformViewCreated onPlatformViewCreated,
   }) : assert(id != null),
        assert(viewType != null),
        _viewType = viewType,
+        _onPlatformViewCreated = onPlatformViewCreated,
        _state = _AndroidViewState.WAITING_FOR_SIZE;
 
   /// The unique identifier of the Android view controlled by this controller.
   final int id;
 
   final String _viewType;
+
+  final OnPlatformViewCreated _onPlatformViewCreated;
 
   /// The texture entry id into which the Android view is rendered.
   int _textureId;
@@ -139,6 +153,8 @@ class AndroidViewController {
       'width': size.width,
       'height': size.height,
     });
+    if (_onPlatformViewCreated != null)
+      _onPlatformViewCreated(id);
     _state = _AndroidViewState.CREATED;
   }
 }
