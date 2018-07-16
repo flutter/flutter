@@ -7,6 +7,7 @@ import 'dart:async';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter/material.dart';
 
 const double _kBackGestureWidth = 20.0;
 const double _kMinFlingVelocity = 1.0; // Screen widths per second.
@@ -723,7 +724,7 @@ class _CupertinoModalPopupRoute<T> extends PopupRoute<T> {
   final WidgetBuilder builder;
 
   @override
-  Duration get transitionDuration => const Duration(milliseconds: 500);
+  Duration get transitionDuration => const Duration(milliseconds: 333);
 
   @override
   bool get barrierDismissible => true;
@@ -732,7 +733,7 @@ class _CupertinoModalPopupRoute<T> extends PopupRoute<T> {
   final String barrierLabel;
 
   @override
-  Color get barrierColor => null; //const Color(0xFF8E8E93);
+  Color get barrierColor => const Color(0x8A000000);
 
   AnimationController _animationController;
 
@@ -748,7 +749,7 @@ class _CupertinoModalPopupRoute<T> extends PopupRoute<T> {
   AnimationController createAnimationController() {
     assert(_animationController == null);
     _animationController = new AnimationController(
-      duration: const Duration(milliseconds: 500),
+      duration: const Duration(milliseconds: 333),
       vsync: navigator.overlay,
     );
     return _animationController;
@@ -756,7 +757,12 @@ class _CupertinoModalPopupRoute<T> extends PopupRoute<T> {
 
   @override
   Widget buildPage(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
-    return new _ModalBottomSheet<T>(route: this);
+    return new FractionalTranslation(
+        translation: new Offset(0.0, _animationController.value),
+        child: builder(context),
+    );
+
+   // return new _ModalBottomSheet<T>(route: this);
   }
 }
 
@@ -787,8 +793,7 @@ class _ModalBottomSheetLayout extends SingleChildLayoutDelegate {
 
   @override
   Offset getPositionForChild(Size size, Size childSize) {
-    print(size.height);
-    print(childSize.height);
+    print(progress);
     return new Offset(0.0, size.height - childSize.height * progress);
   }
 
@@ -813,21 +818,11 @@ class _ModalBottomSheetState<T> extends State<_ModalBottomSheet<T>> {
     return new AnimatedBuilder(
         animation: widget.route.animation,
         builder: (BuildContext context, Widget child) {
-          return new Stack(
-            children: <Widget>[
-              new Positioned(
-                bottom: 0.0,
-                right: 0.0,
-                left: 0.0,
-                height: MediaQuery.of(context).size.height,
-                child: new ClipRect(
-                  child: new CustomSingleChildLayout(
-                      delegate: new _ModalBottomSheetLayout(widget.route.animation.value),
-                      child: widget.route.builder(context),
-                  )
-            ),
-              ),
-          ],
+          return new ClipRect(
+            child: new CustomSingleChildLayout(
+                delegate: new _ModalBottomSheetLayout(widget.route.animation.value),
+                child: widget.route.builder(context),
+            )
           );
         }
     );

@@ -113,13 +113,15 @@ class ActionSheet extends StatelessWidget {
         message: message,
         messageScrollController: messageScrollController,
       );
-      content.add(new Flexible(child: titleSection));
+      content.add(new Flexible(flex: 2, child: titleSection));
     }
 
-    content.add(new Flexible(child: new _CupertinoActionSheetActionSection(
-      children: actions,
-      actionScrollController: actionScrollController,
-    )));
+    content.add(new Flexible(flex: 1,
+      child: new _CupertinoActionSheetActionSection(
+        children: actions,
+        actionScrollController: actionScrollController,
+      ),
+    ));
 
     final List<Widget> columnContents = <Widget>[];
 
@@ -128,8 +130,8 @@ class ActionSheet extends StatelessWidget {
         borderRadius: const BorderRadius.all(const Radius.circular(12.0)),
         child: new DecoratedBox(
           decoration: _kCupertinoDialogBackFill,
-          child: new BackdropFilter(
-            filter: new ImageFilter.blur(sigmaX: 10.0, sigmaY: 10.0),
+      //    child: new BackdropFilter(
+       //     filter: new ImageFilter.blur(sigmaX: 10.0, sigmaY: 10.0),
             child: new Container(
               decoration: _kCupertinoDialogFrontFillDecoration,
               child: new Column(
@@ -138,12 +140,12 @@ class ActionSheet extends StatelessWidget {
                 children: content,
               ),
             ),
-          ),
+     //     ),
         ),
       ),
     );
 
-    if (cancelCallback != null) {
+    if (cancelCallback != null) { //CANCEL BUTTON SHOULD NOT BE TRANSPARENT
       columnContents.add(const Padding(
         padding: const EdgeInsets.only(top: 8.0),
       ));
@@ -152,8 +154,8 @@ class ActionSheet extends StatelessWidget {
           borderRadius: const BorderRadius.all(const Radius.circular(12.0)),
           child: new DecoratedBox(
             decoration: _kCupertinoDialogBackFill,
-            child: new BackdropFilter(
-              filter: new ImageFilter.blur(sigmaX: 10.0, sigmaY: 10.0),
+         //   child: new BackdropFilter(
+         //     filter: new ImageFilter.blur(sigmaX: 10.0, sigmaY: 10.0),
               child: new Container(
                 height: _kButtonHeight,
                 decoration: _kCupertinoDialogFrontFillDecoration,
@@ -163,20 +165,18 @@ class ActionSheet extends StatelessWidget {
                   isDefaultAction: true,
                 ),
               ),
-            ),
+       //     ),
           ),
         ),
       );
     }
 
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 8.0),
-      child: new Center(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: columnContents,
-        ),
+      padding: const EdgeInsets.all(8.0),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: columnContents,
       ),
     );
   }
@@ -255,9 +255,10 @@ class _CupertinoActionSheetTitleSection extends StatelessWidget {
       child: new CupertinoScrollbar(
         child: new SingleChildScrollView(
           controller: messageScrollController,
-          child: new Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
+          child: new ListBody(
+            mainAxis: Axis.vertical,
+            //mainAxisSize: MainAxisSize.min,
+            //crossAxisAlignment: CrossAxisAlignment.stretch,
             children: titleSection,
           ),
         ),
@@ -301,9 +302,10 @@ class _CupertinoActionSheetActionSection extends StatelessWidget {
     return new CupertinoScrollbar(
       child: new SingleChildScrollView(
         controller: actionScrollController,
-        child: new Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
+        child: new ListBody(
+          mainAxis: Axis.vertical,
+          //mainAxisSize: MainAxisSize.min,
+          //crossAxisAlignment: CrossAxisAlignment.stretch,
           children: buttons,
         ),
       ),
