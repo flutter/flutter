@@ -74,51 +74,55 @@ class _CupertinoPickerDemoState extends State<CupertinoPickerDemo> {
   }
 
   Widget _buildAlarmPicker() {
-    return new MultiColumnCupertinoPicker(
-      children: <CupertinoPicker>[
-        new CupertinoPicker(
-          scrollController: new FixedExtentScrollController(
-            initialItem: _selectedHour,
+    return new Row(
+      children: <Widget>[
+        new Expanded(
+          child: new CupertinoPicker(
+            scrollController: new FixedExtentScrollController(
+              initialItem: _selectedHour,
+            ),
+            offAxisFraction: -0.5,
+            useMagnifier: true,
+            magnificationRate: 1.1,
+            itemExtent: _kPickerItemHeight,
+            backgroundColor: CupertinoColors.white,
+            onSelectedItemChanged: (int index) {
+              setState(() {
+                _selectedHour = index;
+              });
+            },
+            children: new List<Widget>.generate(24, (int index) {
+              return new Container(
+                alignment: Alignment.centerRight,
+                padding: const EdgeInsets.only(right: 32.0),
+                child: new Text(index.toString()),
+              );
+            }),
           ),
-          offAxisFraction: -0.5,
-          useMagnifier: true,
-          magnificationRate: 1.1,
-          itemExtent: _kPickerItemHeight,
-          backgroundColor: CupertinoColors.white,
-          onSelectedItemChanged: (int index) {
-            setState(() {
-              _selectedHour = index;
-            });
-          },
-          children: new List<Widget>.generate(24, (int index) {
-            return new Container(
-              alignment: Alignment.centerRight,
-              padding: const EdgeInsets.only(right: 32.0),
-              child: new Text(index.toString()),
-            );
-          }),
         ),
-        new CupertinoPicker(
-          scrollController: new FixedExtentScrollController(
-            initialItem: _selectedMinute,
+        new Expanded(
+          child: new CupertinoPicker(
+            scrollController: new FixedExtentScrollController(
+              initialItem: _selectedMinute,
+            ),
+            offAxisFraction: 0.5,
+            useMagnifier: true,
+            magnificationRate: 1.1,
+            itemExtent: _kPickerItemHeight,
+            backgroundColor: CupertinoColors.white,
+            onSelectedItemChanged: (int index) {
+              setState(() {
+                _selectedMinute = index;
+              });
+            },
+            children: new List<Widget>.generate(60, (int index) {
+              return new Container(
+                alignment: Alignment.centerLeft,
+                padding: const EdgeInsets.only(left: 32.0),
+                child: new Text(index.toString()),
+              );
+            }),
           ),
-          offAxisFraction: 0.5,
-          useMagnifier: true,
-          magnificationRate: 1.1,
-          itemExtent: _kPickerItemHeight,
-          backgroundColor: CupertinoColors.white,
-          onSelectedItemChanged: (int index) {
-            setState(() {
-              _selectedMinute = index;
-            });
-          },
-          children: new List<Widget>.generate(60, (int index) {
-            return new Container(
-              alignment: Alignment.centerLeft,
-              padding: const EdgeInsets.only(left: 32.0),
-              child: new Text(index.toString()),
-            );
-          }),
         ),
       ],
     );
