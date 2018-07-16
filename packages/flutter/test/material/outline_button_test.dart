@@ -46,9 +46,9 @@ void main() {
 
   testWidgets('Outline shape and border overrides', (WidgetTester tester) async {
     debugDisableShadows = false;
-    const Color fillColor = Color(0xFF00FF00);
-    const Color borderColor = Color(0xFFFF0000);
-    const Color highlightedBorderColor = Color(0xFF0000FF);
+    const Color fillColor = const Color(0xFF00FF00);
+    const Color borderColor = const Color(0xFFFF0000);
+    const Color highlightedBorderColor = const Color(0xFF0000FF);
     const double borderWidth = 4.0;
 
     await tester.pumpWidget(

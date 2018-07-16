@@ -8,7 +8,7 @@ import 'package:flutter/widgets.dart';
 import 'ink_well.dart' show InteractiveInkFeature;
 import 'material.dart';
 
-const Duration _kHighlightFadeDuration = Duration(milliseconds: 200);
+const Duration _kHighlightFadeDuration = const Duration(milliseconds: 200);
 
 /// A visual emphasis on a part of a [Material] receiving user interaction.
 ///

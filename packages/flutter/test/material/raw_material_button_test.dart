@@ -61,9 +61,9 @@ void main() {
   });
 
   testWidgets('Ink splash from center tap originates in correct location', (WidgetTester tester) async {
-    const Color highlightColor = Color(0xAAFF0000);
-    const Color splashColor = Color(0xAA0000FF);
-    const Color fillColor = Color(0xFFEF5350);
+    const Color highlightColor = const Color(0xAAFF0000);
+    const Color splashColor = const Color(0xAA0000FF);
+    const Color fillColor = const Color(0xFFEF5350);
 
     await tester.pumpWidget(
       new RawMaterialButton(
@@ -88,9 +88,9 @@ void main() {
   });
 
   testWidgets('Ink splash from tap above material originates in correct location', (WidgetTester tester) async {
-    const Color highlightColor = Color(0xAAFF0000);
-    const Color splashColor = Color(0xAA0000FF);
-    const Color fillColor = Color(0xFFEF5350);
+    const Color highlightColor = const Color(0xAAFF0000);
+    const Color splashColor = const Color(0xAA0000FF);
+    const Color fillColor = const Color(0xFFEF5350);
 
     await tester.pumpWidget(
       new RawMaterialButton(
@@ -127,10 +127,10 @@ void main() {
               child: new Column(
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: const <Widget>[
-                  SizedBox(
+                  const SizedBox(
                     height: 50.0,
                     width: 400.0,
-                    child: Text('Material'),
+                    child: const Text('Material'),
                   ),
                 ],
               ),
@@ -143,7 +143,7 @@ void main() {
   });
 
   testWidgets('smaller child is hit testable', (WidgetTester tester) async {
-    const Key key = Key('test');
+    const Key key = const Key('test');
     await tester.pumpWidget(
       new MaterialApp(
         home: new Column(

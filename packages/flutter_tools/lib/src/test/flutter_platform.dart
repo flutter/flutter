@@ -25,12 +25,12 @@ import 'watcher.dart';
 
 /// The timeout we give the test process to connect to the test harness
 /// once the process has entered its main method.
-const Duration _kTestStartupTimeout = Duration(minutes: 1);
+const Duration _kTestStartupTimeout = const Duration(minutes: 1);
 
 /// The timeout we give the test process to start executing Dart code. When the
 /// CPU is under severe load, this can take a while, but it's not indicative of
 /// any problem with Flutter, so we give it a large timeout.
-const Duration _kTestProcessTimeout = Duration(minutes: 5);
+const Duration _kTestProcessTimeout = const Duration(minutes: 5);
 
 /// Message logged by the test process to signal that its main method has begun
 /// execution.

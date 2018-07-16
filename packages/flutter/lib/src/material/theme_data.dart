@@ -24,17 +24,17 @@ export 'package:flutter/services.dart' show Brightness;
 // spec show that buttons have a composited highlight of #E1E1E1 on a background
 // of #FAFAFA. Assuming that the highlight really has an opacity of 0x66, we can
 // solve for the actual color of the highlight:
-const Color _kLightThemeHighlightColor = Color(0x66BCBCBC);
+const Color _kLightThemeHighlightColor = const Color(0x66BCBCBC);
 
 // The same video shows the splash compositing to #D7D7D7 on a background of
 // #E1E1E1. Again, assuming the splash has an opacity of 0x66, we can solve for
 // the actual color of the splash:
-const Color _kLightThemeSplashColor = Color(0x66C8C8C8);
+const Color _kLightThemeSplashColor = const Color(0x66C8C8C8);
 
 // Unfortunately, a similar video isn't available for the dark theme, which
 // means we assume the values in the spec are actually correct.
-const Color _kDarkThemeHighlightColor = Color(0x40CCCCCC);
-const Color _kDarkThemeSplashColor = Color(0x40CCCCCC);
+const Color _kDarkThemeHighlightColor = const Color(0x40CCCCCC);
+const Color _kDarkThemeSplashColor = const Color(0x40CCCCCC);
 
 /// Configures the tap target and layout size of certain Material widgets.
 ///
