@@ -10,8 +10,8 @@
 
 #include "flutter/assets/asset_manager.h"
 #include "flutter/common/task_runners.h"
-#include "flutter/lib/ui/semantics/semantics_node.h"
 #include "flutter/lib/ui/semantics/custom_accessibility_action.h"
+#include "flutter/lib/ui/semantics/semantics_node.h"
 #include "flutter/lib/ui/text/font_collection.h"
 #include "flutter/lib/ui/window/platform_message.h"
 #include "flutter/lib/ui/window/viewport_metrics.h"
@@ -99,6 +99,8 @@ class Engine final : public blink::RuntimeDelegate {
 
   void SetSemanticsEnabled(bool enabled);
 
+  void SetAssistiveTechnologyEnabled(bool enabled);
+
   void ScheduleFrame(bool regenerate_layer_tree = true) override;
 
   // |blink::RuntimeDelegate|
@@ -125,8 +127,9 @@ class Engine final : public blink::RuntimeDelegate {
   void Render(std::unique_ptr<flow::LayerTree> layer_tree) override;
 
   // |blink::RuntimeDelegate|
-  void UpdateSemantics(blink::SemanticsNodeUpdates update, 
-                       blink::CustomAccessibilityActionUpdates actions) override;
+  void UpdateSemantics(
+      blink::SemanticsNodeUpdates update,
+      blink::CustomAccessibilityActionUpdates actions) override;
 
   // |blink::RuntimeDelegate|
   void HandlePlatformMessage(

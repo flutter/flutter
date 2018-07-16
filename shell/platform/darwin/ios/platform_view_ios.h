@@ -57,10 +57,13 @@ class PlatformViewIOS final : public HeadlessPlatformViewIOS {
   // |shell::PlatformView|
   void SetSemanticsEnabled(bool enabled) override;
 
+  // |shell::PlatformView|
+  void SetAssistiveTechnologyEnabled(bool enabled) override;
 
   // |shell::PlatformView|
-  void UpdateSemantics(blink::SemanticsNodeUpdates update,
-                       blink::CustomAccessibilityActionUpdates actions) override;
+  void UpdateSemantics(
+      blink::SemanticsNodeUpdates update,
+      blink::CustomAccessibilityActionUpdates actions) override;
 
   // |shell::PlatformView|
   std::unique_ptr<VsyncWaiter> CreateVSyncWaiter() override;
