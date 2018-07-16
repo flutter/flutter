@@ -95,6 +95,37 @@ Future<Null> _verifyInternationalizations() async {
   print('Contents of $localizationsFile matches output of gen_localizations.dart script.');
 }
 
+Future<Null> _checkForTrailingSpaces() async {
+  if (!Platform.isWindows) {
+    print('Checking for trailing whitespace in source files.');
+    final List<String> fileTypes = <String>[
+      '*.dart', '*.cxx', '*.cpp', '*.cc', '*.c', '*.C', '*.h', '*.java', '*.mm', '*.m',
+    ];
+    final EvalResult changedFilesResult = await _evalCommand(
+      'git', <String>['diff', '-U0', '--no-color', '--name-only', 'master', '--'] + fileTypes,
+      workingDirectory: flutterRoot,
+    );
+    if (changedFilesResult.stdout == null) {
+      print('No Results for whitespace check.');
+      return;
+    }
+    final List<String> changedFiles = changedFilesResult.stdout.trim().split('\n');
+    if (changedFiles.isNotEmpty) {
+      await _runCommand('grep',
+        <String>[
+          '--line-number',
+          '--extended-regexp',
+          r'[[:space:]]+$',
+        ] + changedFiles,
+        workingDirectory: flutterRoot,
+        printOutput: false,
+        expectFailure: true, // Just means a non-zero exit code is expected.
+        expectedExitCode: 1, // Indicates that zero lines were found.
+      );
+    }
+  }
+}
+
 Future<Null> _analyzeRepo() async {
   await _verifyGeneratedPluginRegistrants(flutterRoot);
   await _verifyNoBadImportsInFlutter(flutterRoot);
@@ -122,6 +153,8 @@ Future<Null> _analyzeRepo() async {
   await _runFlutterAnalyze(flutterRoot,
     options: <String>['--flutter-repo', '--watch', '--benchmark'],
   );
+
+  await _checkForTrailingSpaces();
 
   // Try an analysis against a big version of the gallery.
   await _runCommand(dart,
@@ -331,6 +364,7 @@ Future<Null> _runCommand(String executable, List<String> arguments, {
   String workingDirectory,
   Map<String, String> environment,
   bool expectFailure = false,
+  int expectedExitCode,
   bool printOutput = true,
   bool skip = false,
   Duration timeout = _kLongTimeout,
@@ -363,7 +397,7 @@ Future<Null> _runCommand(String executable, List<String> arguments, {
     stderr.writeln('Process timed out after $timeout');
     return expectFailure ? 0 : 1;
   });
-  if ((exitCode == 0) == expectFailure) {
+  if ((exitCode == 0) == expectFailure || (expectedExitCode != null && exitCode != expectedExitCode)) {
     if (!printOutput) {
       stdout.writeln(utf8.decode((await savedStdout).expand((List<int> ints) => ints).toList()));
       stderr.writeln(utf8.decode((await savedStderr).expand((List<int> ints) => ints).toList()));
