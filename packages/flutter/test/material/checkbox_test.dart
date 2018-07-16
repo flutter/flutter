@@ -89,7 +89,7 @@ void main() {
     ));
 
     await tester.pumpWidget(const Material(
-      child: Checkbox(
+      child: const Checkbox(
         value: false,
         onChanged: null,
       ),
@@ -101,7 +101,7 @@ void main() {
     ));
 
     await tester.pumpWidget(const Material(
-      child: Checkbox(
+      child: const Checkbox(
         value: true,
         onChanged: null,
       ),

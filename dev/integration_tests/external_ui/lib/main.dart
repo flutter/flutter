@@ -19,7 +19,7 @@ class MyApp extends StatefulWidget {
   State createState() => new MyAppState();
 }
 
-const MethodChannel channel = MethodChannel('texture');
+const MethodChannel channel = const MethodChannel('texture');
 
 enum FrameState { initial, slow, afterSlow, fast, afterFast }
 

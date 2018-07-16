@@ -89,7 +89,7 @@ void main() {
   testWidgets('AnimatedSwitcher handles null children.', (WidgetTester tester) async {
     await tester.pumpWidget(
       const AnimatedSwitcher(
-        duration: Duration(milliseconds: 100),
+        duration: const Duration(milliseconds: 100),
         child: null,
         switchInCurve: Curves.linear,
         switchOutCurve: Curves.linear,
@@ -127,7 +127,7 @@ void main() {
 
     await tester.pumpWidget(
       const AnimatedSwitcher(
-        duration: Duration(milliseconds: 100),
+        duration: const Duration(milliseconds: 100),
         child: null,
         switchInCurve: Curves.linear,
         switchOutCurve: Curves.linear,
@@ -140,7 +140,7 @@ void main() {
 
     await tester.pumpWidget(
       const AnimatedSwitcher(
-        duration: Duration(milliseconds: 100),
+        duration: const Duration(milliseconds: 100),
         child: null,
         switchInCurve: Curves.linear,
         switchOutCurve: Curves.linear,

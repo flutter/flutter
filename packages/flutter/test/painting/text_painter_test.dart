@@ -45,7 +45,7 @@ void main() {
     final TextPainter painter = new TextPainter(
       text: const TextSpan(
         text: 'X',
-        style: TextStyle(
+        style: const TextStyle(
           inherit: false,
           fontFamily: 'Ahem',
           fontSize: 123.0,
@@ -61,7 +61,7 @@ void main() {
     final TextPainter painter = new TextPainter(
       text: const TextSpan(
         text: 'X',
-        style: TextStyle(
+        style: const TextStyle(
           inherit: false,
           fontFamily: 'Ahem',
           fontSize: 10.0,
@@ -86,7 +86,7 @@ void main() {
 
   test('TextPainter sets paragraph size from root', () {
     final TextPainter painter = new TextPainter(
-      text: const TextSpan(text: 'x', style: TextStyle(fontSize: 100.0)),
+      text: const TextSpan(text: 'x', style: const TextStyle(fontSize: 100.0)),
       textDirection: TextDirection.ltr,
     );
     painter.layout();
@@ -95,7 +95,7 @@ void main() {
   });
 
   test('TextPainter intrinsic dimensions', () {
-    const TextStyle style = TextStyle(
+    const TextStyle style = const TextStyle(
       inherit: false,
       fontFamily: 'Ahem',
       fontSize: 10.0,

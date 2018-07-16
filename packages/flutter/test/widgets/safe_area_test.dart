@@ -11,10 +11,10 @@ void main() {
     testWidgets('SafeArea - basic', (WidgetTester tester) async {
       await tester.pumpWidget(
         const MediaQuery(
-          data: MediaQueryData(padding: EdgeInsets.all(20.0)),
-          child: SafeArea(
+          data: const MediaQueryData(padding: const EdgeInsets.all(20.0)),
+          child: const SafeArea(
             left: false,
-            child: Placeholder(),
+            child: const Placeholder(),
           ),
         ),
       );
@@ -25,11 +25,11 @@ void main() {
     testWidgets('SafeArea - with minimums', (WidgetTester tester) async {
       await tester.pumpWidget(
         const MediaQuery(
-          data: MediaQueryData(padding: EdgeInsets.all(20.0)),
-          child: SafeArea(
+          data: const MediaQueryData(padding: const EdgeInsets.all(20.0)),
+          child: const SafeArea(
             top: false,
-            minimum: EdgeInsets.fromLTRB(0.0, 10.0, 20.0, 30.0),
-            child: Placeholder(),
+            minimum: const EdgeInsets.fromLTRB(0.0, 10.0, 20.0, 30.0),
+            child: const Placeholder(),
           ),
         ),
       );
@@ -40,12 +40,12 @@ void main() {
     testWidgets('SafeArea - nested', (WidgetTester tester) async {
       await tester.pumpWidget(
         const MediaQuery(
-          data: MediaQueryData(padding: EdgeInsets.all(20.0)),
-          child: SafeArea(
+          data: const MediaQueryData(padding: const EdgeInsets.all(20.0)),
+          child: const SafeArea(
             top: false,
-            child: SafeArea(
+            child: const SafeArea(
               right: false,
-              child: Placeholder(),
+              child: const Placeholder(),
             ),
           ),
         ),
@@ -55,17 +55,17 @@ void main() {
     });
 
     testWidgets('SafeArea - changing', (WidgetTester tester) async {
-      const Widget child = SafeArea(
+      const Widget child = const SafeArea(
         bottom: false,
-        child: SafeArea(
+        child: const SafeArea(
           left: false,
           bottom: false,
-          child: Placeholder(),
+          child: const Placeholder(),
         ),
       );
       await tester.pumpWidget(
         const MediaQuery(
-          data: MediaQueryData(padding: EdgeInsets.all(20.0)),
+          data: const MediaQueryData(padding: const EdgeInsets.all(20.0)),
           child: child,
         ),
       );
@@ -73,7 +73,7 @@ void main() {
       expect(tester.getBottomRight(find.byType(Placeholder)), const Offset(780.0, 600.0));
       await tester.pumpWidget(
         const MediaQuery(
-          data: MediaQueryData(padding: EdgeInsets.only(
+          data: const MediaQueryData(padding: const EdgeInsets.only(
             left: 100.0,
             top: 30.0,
             right: 0.0,
@@ -97,9 +97,9 @@ void main() {
             offset: new ViewportOffset.fixed(0.0),
             axisDirection: AxisDirection.down,
             slivers: <Widget>[
-              const SliverToBoxAdapter(child: SizedBox(width: 800.0, height: 100.0, child: Text('before'))),
+              const SliverToBoxAdapter(child: const SizedBox(width: 800.0, height: 100.0, child: const Text('before'))),
               sliver,
-              const SliverToBoxAdapter(child: SizedBox(width: 800.0, height: 100.0, child: Text('after'))),
+              const SliverToBoxAdapter(child: const SizedBox(width: 800.0, height: 100.0, child: const Text('after'))),
             ],
           ),
         ),
@@ -123,7 +123,7 @@ void main() {
           const EdgeInsets.all(20.0),
           const SliverSafeArea(
             left: false,
-            sliver: SliverToBoxAdapter(child: SizedBox(width: 800.0, height: 100.0, child: Text('padded'))),
+            sliver: const SliverToBoxAdapter(child: const SizedBox(width: 800.0, height: 100.0, child: const Text('padded'))),
           ),
         ),
       );
@@ -140,8 +140,8 @@ void main() {
           const EdgeInsets.all(20.0),
           const SliverSafeArea(
             top: false,
-            minimum: EdgeInsets.fromLTRB(0.0, 10.0, 20.0, 30.0),
-            sliver: SliverToBoxAdapter(child: SizedBox(width: 800.0, height: 100.0, child: Text('padded'))),
+            minimum: const EdgeInsets.fromLTRB(0.0, 10.0, 20.0, 30.0),
+            sliver: const SliverToBoxAdapter(child: const SizedBox(width: 800.0, height: 100.0, child: const Text('padded'))),
           ),
         ),
       );
@@ -158,9 +158,9 @@ void main() {
           const EdgeInsets.all(20.0),
           const SliverSafeArea(
             top: false,
-            sliver: SliverSafeArea(
+            sliver: const SliverSafeArea(
               right: false,
-              sliver: SliverToBoxAdapter(child: SizedBox(width: 800.0, height: 100.0, child: Text('padded'))),
+              sliver: const SliverToBoxAdapter(child: const SizedBox(width: 800.0, height: 100.0, child: const Text('padded'))),
             ),
           ),
         ),
@@ -173,12 +173,12 @@ void main() {
     });
 
     testWidgets('SliverSafeArea - changing', (WidgetTester tester) async {
-      const Widget sliver = SliverSafeArea(
+      const Widget sliver = const SliverSafeArea(
         bottom: false,
-        sliver: SliverSafeArea(
+        sliver: const SliverSafeArea(
           left: false,
           bottom: false,
-          sliver: SliverToBoxAdapter(child: SizedBox(width: 800.0, height: 100.0, child: Text('padded'))),
+          sliver: const SliverToBoxAdapter(child: const SizedBox(width: 800.0, height: 100.0, child: const Text('padded'))),
         ),
       );
       await tester.pumpWidget(

@@ -10,9 +10,9 @@ void main() {
   testWidgets('Sliver in a box', (WidgetTester tester) async {
     await tester.pumpWidget(
       const DecoratedBox(
-        decoration: BoxDecoration(),
-        child: SliverList(
-          delegate: SliverChildListDelegate(<Widget>[]),
+        decoration: const BoxDecoration(),
+        child: const SliverList(
+          delegate: const SliverChildListDelegate(const <Widget>[]),
         ),
       ),
     );
@@ -22,8 +22,8 @@ void main() {
     await tester.pumpWidget(
       new Row(
         children: const <Widget>[
-          SliverList(
-            delegate: SliverChildListDelegate(<Widget>[]),
+          const SliverList(
+            delegate: const SliverChildListDelegate(const <Widget>[]),
           ),
         ],
       ),
@@ -38,7 +38,7 @@ void main() {
         crossAxisDirection: AxisDirection.right,
         offset: new ViewportOffset.zero(),
         slivers: const <Widget>[
-          SizedBox(),
+          const SizedBox(),
         ],
       ),
     );
@@ -50,9 +50,9 @@ void main() {
         crossAxisDirection: AxisDirection.right,
         offset: new ViewportOffset.zero(),
         slivers: const <Widget>[
-          SliverPadding(
+          const SliverPadding(
             padding: EdgeInsets.zero,
-            sliver: SizedBox(),
+            sliver: const SizedBox(),
           ),
         ],
       ),

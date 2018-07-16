@@ -208,7 +208,7 @@ class _CheckboxRenderObjectWidget extends LeafRenderObjectWidget {
 }
 
 const double _kEdgeSize = Checkbox.width;
-const Radius _kEdgeRadius = Radius.circular(1.0);
+const Radius _kEdgeRadius = const Radius.circular(1.0);
 const double _kStrokeWidth = 2.0;
 
 class _RenderCheckbox extends RenderToggleable {
@@ -282,9 +282,9 @@ class _RenderCheckbox extends RenderToggleable {
     // As t goes from 0.0 to 1.0, animate the two check mark strokes from the
     // short side to the long side.
     final Path path = new Path();
-    const Offset start = Offset(_kEdgeSize * 0.15, _kEdgeSize * 0.45);
-    const Offset mid = Offset(_kEdgeSize * 0.4, _kEdgeSize * 0.7);
-    const Offset end = Offset(_kEdgeSize * 0.85, _kEdgeSize * 0.25);
+    const Offset start = const Offset(_kEdgeSize * 0.15, _kEdgeSize * 0.45);
+    const Offset mid = const Offset(_kEdgeSize * 0.4, _kEdgeSize * 0.7);
+    const Offset end = const Offset(_kEdgeSize * 0.85, _kEdgeSize * 0.25);
     if (t < 0.5) {
       final double strokeT = t * 2.0;
       final Offset drawMid = Offset.lerp(start, mid, strokeT);
@@ -304,9 +304,9 @@ class _RenderCheckbox extends RenderToggleable {
     assert(t >= 0.0 && t <= 1.0);
     // As t goes from 0.0 to 1.0, animate the horizontal line from the
     // mid point outwards.
-    const Offset start = Offset(_kEdgeSize * 0.2, _kEdgeSize * 0.5);
-    const Offset mid = Offset(_kEdgeSize * 0.5, _kEdgeSize * 0.5);
-    const Offset end = Offset(_kEdgeSize * 0.8, _kEdgeSize * 0.5);
+    const Offset start = const Offset(_kEdgeSize * 0.2, _kEdgeSize * 0.5);
+    const Offset mid = const Offset(_kEdgeSize * 0.5, _kEdgeSize * 0.5);
+    const Offset end = const Offset(_kEdgeSize * 0.8, _kEdgeSize * 0.5);
     final Offset drawStart = Offset.lerp(start, mid, 1.0 - t);
     final Offset drawEnd = Offset.lerp(mid, end, t);
     canvas.drawLine(origin + drawStart, origin + drawEnd, paint);

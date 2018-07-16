@@ -18,9 +18,9 @@ void main() {
       await tester.pumpWidget(
         new MaterialApp(
           supportedLocales: const <Locale>[
-            Locale('en', 'US'),
-            Locale('ja'),
-            Locale('zh'),
+            const Locale('en', 'US'),
+            const Locale('ja'),
+            const Locale('zh'),
           ],
           home: new Builder(
             builder: (BuildContext context) {
@@ -64,9 +64,9 @@ void main() {
       await tester.pumpWidget(
         new MaterialApp(
           supportedLocales: const <Locale>[
-            Locale('en', 'US'),
-            Locale('ja'),
-            Locale('zh'),
+            const Locale('en', 'US'),
+            const Locale('ja'),
+            const Locale('zh'),
           ],
           home: new Builder(
             builder: (BuildContext context) {
@@ -117,9 +117,9 @@ void main() {
       await tester.pumpWidget(
         new MaterialApp(
           supportedLocales: const <Locale>[
-            Locale('en', 'US'),
-            Locale('ja'),
-            Locale('zh'),
+            const Locale('en', 'US'),
+            const Locale('ja'),
+            const Locale('zh'),
           ],
           home: new Builder(
             builder: (BuildContext context) {

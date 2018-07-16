@@ -11,8 +11,8 @@ import 'colors.dart';
 // Standard iOS 10 tab bar height.
 const double _kTabBarHeight = 50.0;
 
-const Color _kDefaultTabBarBackgroundColor = Color(0xCCF8F8F8);
-const Color _kDefaultTabBarBorderColor = Color(0x4C000000);
+const Color _kDefaultTabBarBackgroundColor = const Color(0xCCF8F8F8);
+const Color _kDefaultTabBarBorderColor = const Color(0x4C000000);
 
 /// An iOS-styled bottom navigation tab bar.
 ///
@@ -102,7 +102,7 @@ class CupertinoTabBar extends StatelessWidget implements PreferredSizeWidget {
     Widget result = new DecoratedBox(
       decoration: new BoxDecoration(
         border: const Border(
-          top: BorderSide(
+          top: const BorderSide(
             color: _kDefaultTabBarBorderColor,
             width: 0.0, // One physical pixel.
             style: BorderStyle.solid,

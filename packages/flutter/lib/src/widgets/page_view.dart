@@ -379,7 +379,7 @@ class PageScrollPhysics extends ScrollPhysics {
 // a large list of scroll positions. As long as you don't try to actually
 // control the scroll positions, everything should be fine.
 final PageController _defaultPageController = new PageController();
-const PageScrollPhysics _kPagePhysics = PageScrollPhysics();
+const PageScrollPhysics _kPagePhysics = const PageScrollPhysics();
 
 /// A scrollable list that works page by page.
 ///

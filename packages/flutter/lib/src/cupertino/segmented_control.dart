@@ -13,7 +13,7 @@ import 'colors.dart';
 
 // Minimum padding from horizontal edges of segmented control to edges of
 // encompassing widget.
-const EdgeInsets _kHorizontalItemPadding = EdgeInsets.symmetric(horizontal: 16.0);
+const EdgeInsets _kHorizontalItemPadding = const EdgeInsets.symmetric(horizontal: 16.0);
 
 // Minimum height of the segmented control.
 const double _kMinSegmentedControlHeight = 28.0;
@@ -21,11 +21,11 @@ const double _kMinSegmentedControlHeight = 28.0;
 // Light, partially-transparent blue color. Used to fill the background of
 // a child option the user is temporarily interacting with through a long
 // press or drag.
-const Color _kPressedBackground = Color(0x33007aff);
+const Color _kPressedBackground = const Color(0x33007aff);
 
 // The duration of the fade animation used to transition when a new widget
 // is selected.
-const Duration _kFadeDuration = Duration(milliseconds: 165);
+const Duration _kFadeDuration = const Duration(milliseconds: 165);
 
 /// An iOS-style segmented control.
 ///
