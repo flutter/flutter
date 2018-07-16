@@ -33,7 +33,7 @@ void main() {
 
       final FlutterTesterApp app = new FlutterTesterApp.fromCurrentDirectory();
       expect(app.name, 'my_project');
-      expect(app.packagesFile.path, fs.path.join(projectPath, '.packages'));
+      expect(app.packagePath, fs.path.join(projectPath, '.packages'));
     }, overrides: <Type, Generator>{
       FileSystem: () => fs,
     });
