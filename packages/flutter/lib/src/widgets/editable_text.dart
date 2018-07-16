@@ -367,9 +367,9 @@ class EditableText extends StatefulWidget {
   final Radius cursorRadius;
 
   /// The appearance of the keyboard.
-  /// 
+  ///
   /// This setting is only honored on iOS devices.
-  /// 
+  ///
   /// Defaults to [Brightness.light].
   final Brightness keyboardAppearance;
 
