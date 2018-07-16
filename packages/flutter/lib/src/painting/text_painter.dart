@@ -429,7 +429,7 @@ class TextPainter {
     final int nextCodeUnit = _text.codeUnitAt(offset - 1);
     if (nextCodeUnit == null)
       return null;
-    final int nextRuneOffset = _isUtf16Surrogate(nextCodeUnit) ? offset + 2 : offset + 1;
+    final int nextRuneOffset = _isUtf16Surrogate(nextCodeUnit) ? offset + 1 : offset;
     final List<TextBox> boxes = _paragraph.getBoxesForRange(offset, nextRuneOffset);
     if (boxes.isEmpty)
       return null;
