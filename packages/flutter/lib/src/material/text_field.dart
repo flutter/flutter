@@ -118,6 +118,7 @@ class TextField extends StatefulWidget {
     this.cursorWidth = 2.0,
     this.cursorRadius,
     this.cursorColor,
+    this.keyboardAppearance,
   }) : assert(keyboardType != null),
        assert(textInputAction != null),
        assert(textAlign != null),
@@ -293,6 +294,13 @@ class TextField extends StatefulWidget {
 
   /// The color to use when painting the cursor.
   final Color cursorColor;
+
+  /// The appearance of the keyboard.
+  /// 
+  /// This setting is only honored on iOS devices.
+  /// 
+  /// If unset, defaults to the brightness of [ThemeData.primaryColorBrightness].
+  final Brightness keyboardAppearance;
 
   @override
   _TextFieldState createState() => new _TextFieldState();
@@ -484,6 +492,7 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
     assert(debugCheckHasMaterial(context));
     final ThemeData themeData = Theme.of(context);
     final TextStyle style = widget.style ?? themeData.textTheme.subhead;
+    final Brightness keyboardAppearance = widget.keyboardAppearance ?? themeData.primaryColorBrightness;
     final TextEditingController controller = _effectiveController;
     final FocusNode focusNode = _effectiveFocusNode;
     final List<TextInputFormatter> formatters = widget.inputFormatters ?? <TextInputFormatter>[];
@@ -515,6 +524,7 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
         cursorWidth: widget.cursorWidth,
         cursorRadius: widget.cursorRadius,
         cursorColor: widget.cursorColor != null ? widget.cursorColor : Theme.of(context).textSelectionColor,
+        keyboardAppearance: keyboardAppearance,
       ),
     );
 

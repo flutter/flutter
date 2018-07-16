@@ -259,13 +259,13 @@ void main() {
 CupertinoTabBar _buildTabBar({ int selectedTab = 0 }) {
   return new CupertinoTabBar(
     items: const <BottomNavigationBarItem>[
-      const BottomNavigationBarItem(
-        icon: const ImageIcon(const TestImageProvider(24, 24)),
-        title: const Text('Tab 1'),
+      BottomNavigationBarItem(
+        icon: ImageIcon(TestImageProvider(24, 24)),
+        title: Text('Tab 1'),
       ),
-      const BottomNavigationBarItem(
-        icon: const ImageIcon(const TestImageProvider(24, 24)),
-        title: const Text('Tab 2'),
+      BottomNavigationBarItem(
+        icon: ImageIcon(TestImageProvider(24, 24)),
+        title: Text('Tab 2'),
       ),
     ],
     backgroundColor: CupertinoColors.white,

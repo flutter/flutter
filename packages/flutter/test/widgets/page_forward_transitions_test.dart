@@ -50,8 +50,8 @@ class TestRoute<T> extends PageRoute<T> {
 }
 
 void main() {
-  const Duration kTwoTenthsOfTheTransitionDuration = const Duration(milliseconds: 30);
-  const Duration kFourTenthsOfTheTransitionDuration = const Duration(milliseconds: 60);
+  const Duration kTwoTenthsOfTheTransitionDuration = Duration(milliseconds: 30);
+  const Duration kFourTenthsOfTheTransitionDuration = Duration(milliseconds: 60);
 
   testWidgets('Check onstage/offstage handling around transitions', (WidgetTester tester) async {
 

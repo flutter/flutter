@@ -232,7 +232,7 @@ void main() {
       home: new Material(
         child: new ListView(
           children: <Widget>[
-            const Hero(tag: 'a', child: const Text('foo')),
+            const Hero(tag: 'a', child: Text('foo')),
             new Builder(builder: (BuildContext context) {
               return new FlatButton(child: const Text('two'), onPressed: () => Navigator.push(context, route));
             })
@@ -258,7 +258,7 @@ void main() {
     // Expect the height of the secondKey Hero to vary from 100 to 150
     // over duration and according to curve.
 
-    const Duration duration = const Duration(milliseconds: 300);
+    const Duration duration = Duration(milliseconds: 300);
     const Curve curve = Curves.fastOutSlowIn;
     final double initialHeight = tester.getSize(find.byKey(firstKey, skipOffstage: false)).height;
     final double finalHeight = tester.getSize(find.byKey(secondKey, skipOffstage: false)).height;
@@ -425,8 +425,8 @@ void main() {
       home: new Material(
         child: new ListView(
           children: <Widget>[
-            const Hero(tag: 'a', child: const Text('a')),
-            const Hero(tag: 'a', child: const Text('a too')),
+            const Hero(tag: 'a', child: Text('a')),
+            const Hero(tag: 'a', child: Text('a too')),
             new Builder(
               builder: (BuildContext context) {
                 return new FlatButton(
@@ -587,8 +587,8 @@ void main() {
   });
 
   testWidgets('Destination hero disappears mid-flight', (WidgetTester tester) async {
-    const Key homeHeroKey = const Key('home hero');
-    const Key routeHeroKey = const Key('route hero');
+    const Key homeHeroKey = Key('home hero');
+    const Key routeHeroKey = Key('route hero');
     bool routeIncludesHero = true;
     StateSetter heroCardSetState;
 
@@ -690,9 +690,9 @@ void main() {
   });
 
   testWidgets('Destination hero scrolls mid-flight', (WidgetTester tester) async {
-    const Key homeHeroKey = const Key('home hero');
-    const Key routeHeroKey = const Key('route hero');
-    const Key routeContainerKey = const Key('route hero container');
+    const Key homeHeroKey = Key('home hero');
+    const Key routeHeroKey = Key('route hero');
+    const Key routeContainerKey = Key('route hero container');
 
     // Show a 200x200 Hero tagged 'H', with key routeHeroKey
     final MaterialPageRoute<void> route = new MaterialPageRoute<void>(
@@ -772,9 +772,9 @@ void main() {
   });
 
   testWidgets('Destination hero scrolls out of view mid-flight', (WidgetTester tester) async {
-    const Key homeHeroKey = const Key('home hero');
-    const Key routeHeroKey = const Key('route hero');
-    const Key routeContainerKey = const Key('route hero container');
+    const Key homeHeroKey = Key('home hero');
+    const Key routeHeroKey = Key('route hero');
+    const Key routeContainerKey = Key('route hero container');
 
     // Show a 200x200 Hero tagged 'H', with key routeHeroKey
     final MaterialPageRoute<void> route = new MaterialPageRoute<void>(
@@ -852,8 +852,8 @@ void main() {
 
   testWidgets('Aborted flight', (WidgetTester tester) async {
     // See https://github.com/flutter/flutter/issues/5798
-    const Key heroABKey = const Key('AB hero');
-    const Key heroBCKey = const Key('BC hero');
+    const Key heroABKey = Key('AB hero');
+    const Key heroBCKey = Key('BC hero');
 
     // Show a 150x150 Hero tagged 'BC'
     final MaterialPageRoute<void> routeC = new MaterialPageRoute<void>(
@@ -963,11 +963,11 @@ void main() {
           child: new ListView(
             children: <Widget>[
               const Card(
-                child: const Hero(
+                child: Hero(
                   tag: 'H',
-                  child: const SizedBox(
+                  child: SizedBox(
                     height: 200.0,
-                    child: const MyStatefulWidget(value: '456'),
+                    child: MyStatefulWidget(value: '456'),
                   ),
                 ),
               ),
@@ -989,11 +989,11 @@ void main() {
               return new ListView(
                 children: <Widget> [
                   const Card(
-                    child: const Hero(
+                    child: Hero(
                       tag: 'H',
-                      child: const SizedBox(
+                      child: SizedBox(
                         height: 100.0,
-                        child: const MyStatefulWidget(value: '456'),
+                        child: MyStatefulWidget(value: '456'),
                       ),
                     ),
                   ),
@@ -1086,7 +1086,7 @@ void main() {
     expect(tester.getCenter(find.byKey(firstKey)), const Offset(50.0, 50.0));
 
     const double epsilon = 0.001;
-    const Duration duration = const Duration(milliseconds: 300);
+    const Duration duration = Duration(milliseconds: 300);
     const Curve curve = Curves.fastOutSlowIn;
     final MaterialPointArcTween pushCenterTween = new MaterialPointArcTween(
       begin: const Offset(50.0, 50.0),
@@ -1158,7 +1158,7 @@ void main() {
     await tester.pump(); // begin navigation from / to /twoInset.
 
     const double epsilon = 0.001;
-    const Duration duration = const Duration(milliseconds: 300);
+    const Duration duration = Duration(milliseconds: 300);
 
     await tester.pump();
     final double x0 = tester.getTopLeft(find.byKey(secondKey)).dx;

@@ -29,7 +29,7 @@ export 'package:flutter/rendering.dart' show SelectionChangedCause;
 /// (including the cursor location).
 typedef void SelectionChangedCallback(TextSelection selection, SelectionChangedCause cause);
 
-const Duration _kCursorBlinkHalfPeriod = const Duration(milliseconds: 500);
+const Duration _kCursorBlinkHalfPeriod = Duration(milliseconds: 500);
 
 // Number of cursor ticks during which the most recently entered character
 // is shown in an obscured text field.
@@ -210,6 +210,7 @@ class EditableText extends StatefulWidget {
     this.rendererIgnoresPointer = false,
     this.cursorWidth = 2.0,
     this.cursorRadius,
+    this.keyboardAppearance = Brightness.light,
   }) : assert(controller != null),
        assert(focusNode != null),
        assert(obscureText != null),
@@ -364,6 +365,13 @@ class EditableText extends StatefulWidget {
   ///
   /// By default, the cursor has a Radius of zero.
   final Radius cursorRadius;
+
+  /// The appearance of the keyboard.
+  /// 
+  /// This setting is only honored on iOS devices.
+  /// 
+  /// Defaults to [Brightness.light].
+  final Brightness keyboardAppearance;
 
   @override
   EditableTextState createState() => new EditableTextState();
@@ -557,6 +565,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
               inputType: widget.keyboardType,
               obscureText: widget.obscureText,
               autocorrect: widget.autocorrect,
+              keyboardAppearance: widget.keyboardAppearance,
               inputAction: widget.keyboardType == TextInputType.multiline
                   ? TextInputAction.newline
                   : widget.textInputAction,
@@ -656,7 +665,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   }
 
   // Animation configuration for scrolling the caret back on screen.
-  static const Duration _caretAnimationDuration = const Duration(milliseconds: 100);
+  static const Duration _caretAnimationDuration = Duration(milliseconds: 100);
   static const Curve _caretAnimationCurve = Curves.fastOutSlowIn;
 
   bool _showCaretOnScreenScheduled = false;

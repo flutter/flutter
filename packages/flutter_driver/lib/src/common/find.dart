@@ -7,7 +7,7 @@ import 'package:meta/meta.dart';
 import 'error.dart';
 import 'message.dart';
 
-const List<Type> _supportedKeyValueTypes = const <Type>[String, int];
+const List<Type> _supportedKeyValueTypes = <Type>[String, int];
 
 DriverError _createInvalidKeyValueTypeError(String invalidType) {
   return new DriverError('Unsupported key value type $invalidType. Flutter Driver only supports ${_supportedKeyValueTypes.join(", ")}');

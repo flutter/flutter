@@ -23,8 +23,8 @@ void main() {
   test('BeveledRectangleBorder BorderRadius.zero', () {
     final Rect rect1 = new Rect.fromLTRB(10.0, 20.0, 30.0, 40.0);
     final Matcher looksLikeRect1 = isPathThat(
-      includes: const <Offset>[ const Offset(10.0, 20.0), const Offset(20.0, 30.0) ],
-      excludes: const <Offset>[ const Offset(9.0, 19.0), const Offset(31.0, 41.0) ],
+      includes: const <Offset>[ Offset(10.0, 20.0), Offset(20.0, 30.0) ],
+      excludes: const <Offset>[ Offset(9.0, 19.0), Offset(31.0, 41.0) ],
     );
 
     // Default border radius and border side are zero, i.e. just a rectangle.
@@ -35,11 +35,11 @@ void main() {
     // Represents the inner path when borderSide.width = 4, which is just rect1
     // inset by 4 on all sides.
     final Matcher looksLikeInnerPath = isPathThat(
-      includes: const <Offset>[ const Offset(14.0, 24.0), const Offset(16.0, 26.0) ],
-      excludes: const <Offset>[ const Offset(9.0, 23.0), const Offset(27.0, 37.0) ],
+      includes: const <Offset>[ Offset(14.0, 24.0), Offset(16.0, 26.0) ],
+      excludes: const <Offset>[ Offset(9.0, 23.0), Offset(27.0, 37.0) ],
     );
 
-    const BorderSide side = const BorderSide(width: 4.0);
+    const BorderSide side = BorderSide(width: 4.0);
     expect(const BeveledRectangleBorder(side: side).getOuterPath(rect1), looksLikeRect1);
     expect(const BeveledRectangleBorder(side: side).getInnerPath(rect1), looksLikeInnerPath);
   });
@@ -47,11 +47,11 @@ void main() {
   test('BeveledRectangleBorder non-zero BorderRadius', () {
     final Rect rect = new Rect.fromLTRB(10.0, 20.0, 30.0, 40.0);
     final Matcher looksLikeRect = isPathThat(
-      includes: const <Offset>[ const Offset(15.0, 25.0), const Offset(20.0, 30.0) ],
-      excludes: const <Offset>[ const Offset(10.0, 20.0), const Offset(30.0, 40.0) ],
+      includes: const <Offset>[ Offset(15.0, 25.0), Offset(20.0, 30.0) ],
+      excludes: const <Offset>[ Offset(10.0, 20.0), Offset(30.0, 40.0) ],
     );
-    const BeveledRectangleBorder border = const BeveledRectangleBorder(
-      borderRadius: const BorderRadius.all(const Radius.circular(5.0))
+    const BeveledRectangleBorder border = BeveledRectangleBorder(
+      borderRadius: BorderRadius.all(Radius.circular(5.0))
     );
     expect(border.getOuterPath(rect), looksLikeRect);
     expect(border.getInnerPath(rect), looksLikeRect);

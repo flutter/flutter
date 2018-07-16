@@ -29,7 +29,7 @@ class Cache {
     }
   }
 
-  static const List<String> _hostsBlockedInChina = const <String> [
+  static const List<String> _hostsBlockedInChina = <String> [
     'storage.googleapis.com',
   ];
 

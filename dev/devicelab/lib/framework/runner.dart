@@ -12,7 +12,7 @@ import 'package:flutter_devicelab/framework/utils.dart';
 
 /// Slightly longer than task timeout that gives the task runner a chance to
 /// clean-up before forcefully quitting it.
-const Duration taskTimeoutWithGracePeriod = const Duration(minutes: 26);
+const Duration taskTimeoutWithGracePeriod = Duration(minutes: 26);
 
 /// Runs a task in a separate Dart VM and collects the result using the VM
 /// service protocol.
@@ -111,7 +111,7 @@ Future<VMIsolateRef> _connectToRunnerIsolate(int vmServicePort) async {
         throw 'not ready yet';
       return isolate;
     } catch (error) {
-      const Duration connectionTimeout = const Duration(seconds: 10);
+      const Duration connectionTimeout = Duration(seconds: 10);
       if (new DateTime.now().difference(started) > connectionTimeout) {
         throw new TimeoutException(
           'Failed to connect to the task runner process',
@@ -119,7 +119,7 @@ Future<VMIsolateRef> _connectToRunnerIsolate(int vmServicePort) async {
         );
       }
       print('VM service not ready yet: $error');
-      const Duration pauseBetweenRetries = const Duration(milliseconds: 200);
+      const Duration pauseBetweenRetries = Duration(milliseconds: 200);
       print('Will retry in $pauseBetweenRetries.');
       await new Future<Null>.delayed(pauseBetweenRetries);
     }

@@ -57,13 +57,13 @@ enum TimelineStream {
   vm,
 }
 
-const List<TimelineStream> _defaultStreams = const <TimelineStream>[TimelineStream.all];
+const List<TimelineStream> _defaultStreams = <TimelineStream>[TimelineStream.all];
 
 /// Default timeout for short-running RPCs.
-const Duration _kShortTimeout = const Duration(seconds: 5);
+const Duration _kShortTimeout = Duration(seconds: 5);
 
 /// Default timeout for awaiting an Isolate to become runnable.
-const Duration _kIsolateLoadRunnableTimeout = const Duration(minutes: 1);
+const Duration _kIsolateLoadRunnableTimeout = Duration(minutes: 1);
 
 /// Default timeout for long-running RPCs.
 final Duration _kLongTimeout = _kShortTimeout * 6;
@@ -104,7 +104,7 @@ final Logger _log = new Logger('FlutterDriver');
 ///
 ///     driver.tap(find.text('Save'));
 ///     driver.scroll(find.byValueKey(42));
-const CommonFinders find = const CommonFinders._();
+const CommonFinders find = CommonFinders._();
 
 /// Computes a value.
 ///

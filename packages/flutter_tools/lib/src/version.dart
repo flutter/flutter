@@ -206,20 +206,20 @@ class FlutterVersion {
   /// The amount of time we wait before pinging the server to check for the
   /// availability of a newer version of Flutter.
   @visibleForTesting
-  static const Duration kCheckAgeConsideredUpToDate = const Duration(days: 3);
+  static const Duration kCheckAgeConsideredUpToDate = Duration(days: 3);
 
   /// We warn the user if the age of their Flutter installation is greater than
   /// this duration.
   ///
   /// This is set to 5 weeks because releases are currently around every 4 weeks.
   @visibleForTesting
-  static const Duration kVersionAgeConsideredUpToDate = const Duration(days: 35);
+  static const Duration kVersionAgeConsideredUpToDate = Duration(days: 35);
 
   /// The amount of time we wait between issuing a warning.
   ///
   /// This is to avoid annoying users who are unable to upgrade right away.
   @visibleForTesting
-  static const Duration kMaxTimeSinceLastWarning = const Duration(days: 1);
+  static const Duration kMaxTimeSinceLastWarning = Duration(days: 1);
 
   /// The amount of time we pause for to let the user read the message about
   /// outdated Flutter installation.
@@ -418,7 +418,7 @@ class VersionCheckStamp {
     if (newTimeWarningWasPrinted != null)
       jsonData['lastTimeWarningWasPrinted'] = '$newTimeWarningWasPrinted';
 
-    const JsonEncoder kPrettyJsonEncoder = const JsonEncoder.withIndent('  ');
+    const JsonEncoder kPrettyJsonEncoder = JsonEncoder.withIndent('  ');
     Cache.instance.setStampFor(kFlutterVersionCheckStampFile, kPrettyJsonEncoder.convert(jsonData));
   }
 

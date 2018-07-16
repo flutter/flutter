@@ -12,7 +12,7 @@ import 'tab_view.dart';
 
 // Based on specs from https://developer.apple.com/design/resources/ for
 // iOS 12.
-const TextStyle _kDefaultTextStyle = const TextStyle(
+const TextStyle _kDefaultTextStyle = TextStyle(
   fontFamily: '.SF Pro Text',
   fontSize: 17.0,
   letterSpacing: -0.38,
@@ -41,6 +41,9 @@ const TextStyle _kDefaultTextStyle = const TextStyle(
 ///
 /// If [home], [routes], [onGenerateRoute], and [onUnknownRoute] are all null,
 /// and [builder] is not null, then no [Navigator] is created.
+///
+/// This widget also configures the observer of the top-level [Navigator] (if
+/// any) to perform [Hero] animations.
 ///
 /// Using this widget with caution on Android since it may produce behaviors
 /// Android users are not expecting such as:
@@ -86,7 +89,7 @@ class CupertinoApp extends StatefulWidget {
     this.locale,
     this.localizationsDelegates,
     this.localeResolutionCallback,
-    this.supportedLocales = const <Locale>[const Locale('en', 'US')],
+    this.supportedLocales = const <Locale>[Locale('en', 'US')],
     this.showPerformanceOverlay = false,
     this.checkerboardRasterCacheImages = false,
     this.checkerboardOffscreenLayers = false,
@@ -171,7 +174,7 @@ class CupertinoApp extends StatefulWidget {
   /// When a named route is pushed with [Navigator.pushNamed], the route name is
   /// looked up in this map. If the name is present, the associated
   /// [WidgetBuilder] is used to construct a [CupertinoPageRoute] that performs
-  /// an appropriate transition to the new route.
+  /// an appropriate transition, including [Hero] animations, to the new route.
   ///
   /// If the app only has one page, then you can specify it using [home] instead.
   ///
@@ -246,8 +249,8 @@ class CupertinoApp extends StatefulWidget {
   ///
   /// Unless a [Navigator] is provided, either implicitly from [builder] being
   /// null, or by a [builder] including its `child` argument, or by a [builder]
-  /// explicitly providing a [Navigator] of its own, APIs such as
-  /// [Navigator.push] and [Navigator.pop], will not function.
+  /// explicitly providing a [Navigator] of its own, widgets and APIs such as
+  /// [Hero], [Navigator.push] and [Navigator.pop], will not function.
   final TransitionBuilder builder;
 
   /// {@macro flutter.widgets.widgetsApp.title}
@@ -317,9 +320,13 @@ class _AlwaysCupertinoScrollBehavior extends ScrollBehavior {
 }
 
 class _CupertinoAppState extends State<CupertinoApp> {
+  HeroController _heroController;
+  List<NavigatorObserver> _navigatorObservers;
+
   @override
   void initState() {
     super.initState();
+    _heroController = new HeroController(); // Linear tweening.
     _updateNavigator();
   }
 
@@ -335,6 +342,9 @@ class _CupertinoAppState extends State<CupertinoApp> {
                      widget.routes.isNotEmpty ||
                      widget.onGenerateRoute != null ||
                      widget.onUnknownRoute != null;
+    _navigatorObservers =
+        new List<NavigatorObserver>.from(widget.navigatorObservers)
+          ..add(_heroController);
   }
 
   Widget defaultBuilder(BuildContext context, Widget child) {
@@ -351,7 +361,7 @@ class _CupertinoAppState extends State<CupertinoApp> {
         routes: widget.routes,
         onGenerateRoute: widget.onGenerateRoute,
         onUnknownRoute: widget.onUnknownRoute,
-        navigatorObservers: widget.navigatorObservers,
+        navigatorObservers: _navigatorObservers,
       );
       if (widget.builder != null) {
         return widget.builder(context, navigator);

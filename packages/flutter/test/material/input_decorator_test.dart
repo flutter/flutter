@@ -19,7 +19,7 @@ Widget buildInputDecorator({
   TextStyle baseStyle,
   Widget child = const Text(
     'text',
-    style: const TextStyle(fontFamily: 'Ahem', fontSize: 16.0),
+    style: TextStyle(fontFamily: 'Ahem', fontSize: 16.0),
   ),
 }) {
   return new MaterialApp(
@@ -719,7 +719,7 @@ void main() {
         decoration: const InputDecoration(
           prefixText: 'p',
           suffixText: 's',
-          icon: const Icon(Icons.android),
+          icon: Icon(Icons.android),
           filled: true,
         ),
       ),
@@ -756,14 +756,14 @@ void main() {
         // isEmpty: false (default)
         // isFocused: false (default)
         decoration: const InputDecoration(
-          prefixIcon: const Icon(Icons.pages),
-          suffixIcon: const Icon(Icons.satellite),
+          prefixIcon: Icon(Icons.pages),
+          suffixIcon: Icon(Icons.satellite),
           filled: true,
         ),
       ),
     );
 
-    // Overall height for this InputDecorator is 48dps because the prefix icon's minimum size 
+    // Overall height for this InputDecorator is 48dps because the prefix icon's minimum size
     // is 48x48 and the rest of the elements only require 40dps:
      //   12 - top padding
      //   16 - input text (ahem font size 16dps)
@@ -786,20 +786,20 @@ void main() {
   });
 
   testWidgets('prefix/suffix icons are centered when smaller than 48 by 48', (WidgetTester tester) async {
-    const Key prefixKey = const Key('prefix');
+    const Key prefixKey = Key('prefix');
     await tester.pumpWidget(
       buildInputDecorator(
         decoration: const InputDecoration(
-          prefixIcon: const Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: const SizedBox(width: 8.0, height: 8.0, key: prefixKey),
+          prefixIcon: Padding(
+            padding: EdgeInsets.all(16.0),
+            child: SizedBox(width: 8.0, height: 8.0, key: prefixKey),
           ),
           filled: true,
         ),
       ),
     );
 
-    // Overall height for this InputDecorator is 48dps because the prefix icon's minimum size 
+    // Overall height for this InputDecorator is 48dps because the prefix icon's minimum size
      // is 48x48 and the rest of the elements only require 40dps:
      //   12 - top padding
      //   16 - input text (ahem font size 16dps)
@@ -811,17 +811,17 @@ void main() {
   });
 
   testWidgets('prefix/suffix icons increase height of decoration when larger than 48 by 48', (WidgetTester tester) async {
-    const Key prefixKey = const Key('prefix');
+    const Key prefixKey = Key('prefix');
     await tester.pumpWidget(
       buildInputDecorator(
         decoration: const InputDecoration(
-          prefixIcon: const SizedBox(width: 100.0, height: 100.0, key: prefixKey),
+          prefixIcon: SizedBox(width: 100.0, height: 100.0, key: prefixKey),
           filled: true,
         ),
       ),
     );
 
-    // Overall height for this InputDecorator is 100dps because the prefix icon's  size 
+    // Overall height for this InputDecorator is 100dps because the prefix icon's  size
     // is 100x100 and the rest of the elements only require 40dps:
      //   12 - top padding
      //   16 - input text (ahem font size 16dps)
@@ -864,7 +864,7 @@ void main() {
         ),
       ),
     );
-    
+
     // Margin for text decoration is 12 when filled and top left offset is (0, 0)
     // 0 + 12 = 12.
     expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, 60.0));
@@ -904,7 +904,7 @@ void main() {
         ),
       ),
     );
-    
+
     // Margin for text decoration is 12 when filled and top left offset is (0, 0)
     // 0 + 12 = 12.
     expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, 52.0));
@@ -1007,7 +1007,7 @@ void main() {
         // isFocused: false (default)
         textDirection: TextDirection.ltr,
         decoration: const InputDecoration(
-          contentPadding: const EdgeInsetsDirectional.only(start: 40.0, top: 12.0, bottom: 12.0),
+          contentPadding: EdgeInsetsDirectional.only(start: 40.0, top: 12.0, bottom: 12.0),
           labelText: 'label',
           hintText: 'hint',
           filled: true,
@@ -1026,7 +1026,7 @@ void main() {
         isFocused: true, // label is floating, still adjusted for contentPadding
         textDirection: TextDirection.rtl,
         decoration: const InputDecoration(
-          contentPadding: const EdgeInsetsDirectional.only(start: 40.0, top: 12.0, bottom: 12.0),
+          contentPadding: EdgeInsetsDirectional.only(start: 40.0, top: 12.0, bottom: 12.0),
           labelText: 'label',
           hintText: 'hint',
           filled: true,
@@ -1137,7 +1137,7 @@ void main() {
   testWidgets('InputDecorator with baseStyle', (WidgetTester tester) async {
     // Setting the baseStyle of the InputDecoration and the style of the input
     // text child to a smaller font reduces the InputDecoration's vertical size.
-    const TextStyle style = const TextStyle(fontFamily: 'Ahem', fontSize: 10.0);
+    const TextStyle style = TextStyle(fontFamily: 'Ahem', fontSize: 10.0);
     await tester.pumpWidget(
       buildInputDecorator(
         isEmpty: true,
@@ -1186,10 +1186,10 @@ void main() {
           hintText: 'hint',
           helperText: 'helper',
           counterText: 'counter',
-          labelStyle: const TextStyle(),
-          hintStyle: const TextStyle(),
-          errorStyle: const TextStyle(),
-          helperStyle: const TextStyle(),
+          labelStyle: TextStyle(),
+          hintStyle: TextStyle(),
+          errorStyle: TextStyle(),
+          helperStyle: TextStyle(),
           filled: true,
         ),
       ),
@@ -1223,7 +1223,7 @@ void main() {
         isEmpty: true, // label appears, vertically centered
         // isFocused: false (default)
         inputDecorationTheme: const InputDecorationTheme(
-          border: const OutlineInputBorder(),
+          border: OutlineInputBorder(),
         ),
         decoration: const InputDecoration(
           labelText: 'label',
@@ -1248,7 +1248,7 @@ void main() {
         isEmpty: true, // label appears, vertically centered
         // isFocused: false (default)
         inputDecorationTheme: const InputDecorationTheme(
-          border: const OutlineInputBorder(),
+          border: OutlineInputBorder(),
           isDense: true,
         ),
         decoration: const InputDecoration(
@@ -1270,13 +1270,13 @@ void main() {
   });
 
   testWidgets('InputDecorationTheme style overrides', (WidgetTester tester) async {
-    const TextStyle style16 = const TextStyle(fontFamily: 'Ahem', fontSize: 16.0);
+    const TextStyle style16 = TextStyle(fontFamily: 'Ahem', fontSize: 16.0);
     final TextStyle labelStyle = style16.merge(const TextStyle(color: Colors.red));
     final TextStyle hintStyle = style16.merge(const TextStyle(color: Colors.green));
     final TextStyle prefixStyle = style16.merge(const TextStyle(color: Colors.blue));
     final TextStyle suffixStyle = style16.merge(const TextStyle(color: Colors.purple));
 
-    const TextStyle style12 = const TextStyle(fontFamily: 'Ahem', fontSize: 12.0);
+    const TextStyle style12 = TextStyle(fontFamily: 'Ahem', fontSize: 12.0);
     final TextStyle helperStyle = style12.merge(const TextStyle(color: Colors.orange));
     final TextStyle counterStyle = style12.merge(const TextStyle(color: Colors.orange));
 
@@ -1343,14 +1343,14 @@ void main() {
   });
 
   testWidgets('InputDecorator.toString()', (WidgetTester tester) async {
-    const Widget child = const InputDecorator(
-      key: const Key('key'),
-      decoration: const InputDecoration(),
-      baseStyle: const TextStyle(),
+    const Widget child = InputDecorator(
+      key: Key('key'),
+      decoration: InputDecoration(),
+      baseStyle: TextStyle(),
       textAlign: TextAlign.center,
       isFocused: false,
       isEmpty: false,
-      child: const Placeholder(),
+      child: Placeholder(),
     );
     expect(
       child.toString(),
@@ -1362,13 +1362,13 @@ void main() {
     await tester.pumpWidget(
       buildInputDecorator(
         decoration: const InputDecoration(
-          icon: const Text('icon'),
+          icon: Text('icon'),
           labelText: 'label',
           hintText: 'hint',
           prefixText: 'prefix',
           suffixText: 'suffix',
-          prefixIcon: const Text('prefixIcon'),
-          suffixIcon: const Text('suffixIcon'),
+          prefixIcon: Text('prefixIcon'),
+          suffixIcon: Text('suffixIcon'),
           helperText: 'helper',
           counterText: 'counter',
         ),
@@ -1419,8 +1419,8 @@ void main() {
   });
 
   testWidgets('InputDecorationTheme.inputDecoration', (WidgetTester tester) async {
-    const TextStyle themeStyle = const TextStyle(color: Colors.green);
-    const TextStyle decorationStyle = const TextStyle(color: Colors.blue);
+    const TextStyle themeStyle = TextStyle(color: Colors.green);
+    const TextStyle decorationStyle = TextStyle(color: Colors.blue);
 
     // InputDecorationTheme arguments define InputDecoration properties.
     InputDecoration decoration = const InputDecoration().applyDefaults(
@@ -1430,7 +1430,7 @@ void main() {
         hintStyle: themeStyle,
         errorStyle: themeStyle,
         isDense: true,
-        contentPadding: const EdgeInsets.all(1.0),
+        contentPadding: EdgeInsets.all(1.0),
         prefixStyle: themeStyle,
         suffixStyle: themeStyle,
         counterStyle: themeStyle,
@@ -1460,13 +1460,13 @@ void main() {
       hintStyle: decorationStyle,
       errorStyle: decorationStyle,
       isDense: false,
-      contentPadding: const EdgeInsets.all(4.0),
+      contentPadding: EdgeInsets.all(4.0),
       prefixStyle: decorationStyle,
       suffixStyle: decorationStyle,
       counterStyle: decorationStyle,
       filled: false,
       fillColor: Colors.blue,
-      border: const OutlineInputBorder(),
+      border: OutlineInputBorder(),
     ).applyDefaults(
       const InputDecorationTheme(
         labelStyle: themeStyle,
@@ -1475,7 +1475,7 @@ void main() {
         errorStyle: themeStyle,
         errorMaxLines: 4,
         isDense: true,
-        contentPadding: const EdgeInsets.all(1.0),
+        contentPadding: EdgeInsets.all(1.0),
         prefixStyle: themeStyle,
         suffixStyle: themeStyle,
         counterStyle: themeStyle,
@@ -1547,11 +1547,11 @@ void main() {
         // isFocused: false (default)
         decoration: const InputDecoration(
           filled: true,
-          fillColor: const Color(0xFF00FF00),
-          border: const UnderlineInputBorder(
-            borderRadius: const BorderRadius.only(
-              bottomLeft: const Radius.circular(12.0),
-              bottomRight: const Radius.circular(12.0),
+          fillColor: Color(0xFF00FF00),
+          border: UnderlineInputBorder(
+            borderRadius: BorderRadius.only(
+              bottomLeft: Radius.circular(12.0),
+              bottomRight: Radius.circular(12.0),
             ),
           ),
         ),
@@ -1581,9 +1581,9 @@ void main() {
           child: new UnconstrainedBox(child: new ConstrainedBox(
             constraints: new BoxConstraints.tight(Size.zero),
             child: const InputDecorator(
-              decoration: const InputDecoration(
+              decoration: InputDecoration(
                 labelText: 'XP',
-                border: const OutlineInputBorder(),
+                border: OutlineInputBorder(),
               ),
             ),
           )),
@@ -1606,14 +1606,14 @@ void main() {
               child: new Directionality(
                 textDirection: textDirection,
                 child: const RepaintBoundary(
-                  child: const InputDecorator(
+                  child: InputDecorator(
                     isFocused: true,
                     isEmpty: true,
-                    decoration: const InputDecoration(
-                      icon: const Icon(Icons.insert_link),
+                    decoration: InputDecoration(
+                      icon: Icon(Icons.insert_link),
                       labelText: 'primaryLink',
                       hintText: 'Primary link to story',
-                      border: const OutlineInputBorder(),
+                      border: OutlineInputBorder(),
                     ),
                   ),
                 ),
@@ -1639,4 +1639,15 @@ void main() {
     },
     skip: !Platform.isLinux,
   );
+
+  testWidgets('InputDecorationTheme.toString()', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/19305
+
+    expect(
+      const InputDecorationTheme(
+        contentPadding: EdgeInsetsDirectional.only(start: 5.0),
+      ).toString(),
+      contains('contentPadding: EdgeInsetsDirectional(5.0, 0.0, 0.0, 0.0)'),
+    );
+  });
 }
