@@ -472,7 +472,6 @@ void main() {
          hasPasteAction: true,
          hasDidGainAccessibilityFocusAction: true,
          hasDidLoseAccessibilityFocusAction: true,
-         hasCustomAction: true,
       ));
     });
   });
