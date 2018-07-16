@@ -6,6 +6,7 @@
 #define SHELL_PLATFORM_ANDROID_VSYNC_WAITER_ANDROID_H_
 
 #include <jni.h>
+#include <memory>
 #include "flutter/fml/memory/weak_ptr.h"
 #include "flutter/shell/common/vsync_waiter.h"
 #include "lib/fxl/macros.h"

@@ -125,7 +125,6 @@ class PlatformView {
  protected:
   PlatformView::Delegate& delegate_;
   const blink::TaskRunners task_runners_;
-  std::unique_ptr<VsyncWaiter> vsync_waiter_;
 
   SkISize size_;
   fml::WeakPtrFactory<PlatformView> weak_factory_;

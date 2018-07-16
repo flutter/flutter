@@ -64,7 +64,7 @@ class Animator final {
 
   Delegate& delegate_;
   blink::TaskRunners task_runners_;
-  std::unique_ptr<VsyncWaiter> waiter_;
+  std::shared_ptr<VsyncWaiter> waiter_;
 
   fxl::TimePoint last_begin_frame_time_;
   int64_t dart_frame_deadline_;
