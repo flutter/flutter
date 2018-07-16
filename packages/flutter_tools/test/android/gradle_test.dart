@@ -205,7 +205,7 @@ dependencies:
 flutter:
 ''';
 
-      const BuildInfo buildInfo = const BuildInfo(BuildMode.release, null);
+      const BuildInfo buildInfo = BuildInfo(BuildMode.release, null);
       await checkBuildVersion(
         manifest: manifest,
         buildInfo: buildInfo,
@@ -223,7 +223,7 @@ dependencies:
     sdk: flutter
 flutter:
 ''';
-      const BuildInfo buildInfo = const BuildInfo(BuildMode.release, null);
+      const BuildInfo buildInfo = BuildInfo(BuildMode.release, null);
       await checkBuildVersion(
         manifest: manifest,
         buildInfo: buildInfo,
@@ -241,7 +241,7 @@ dependencies:
     sdk: flutter
 flutter:
 ''';
-      const BuildInfo buildInfo = const BuildInfo(BuildMode.release, null, buildName: '1.0.2');
+      const BuildInfo buildInfo = BuildInfo(BuildMode.release, null, buildName: '1.0.2');
       await checkBuildVersion(
         manifest: manifest,
         buildInfo: buildInfo,
@@ -259,7 +259,7 @@ dependencies:
     sdk: flutter
 flutter:
 ''';
-      const BuildInfo buildInfo = const BuildInfo(BuildMode.release, null, buildNumber: 3);
+      const BuildInfo buildInfo = BuildInfo(BuildMode.release, null, buildNumber: 3);
       await checkBuildVersion(
         manifest: manifest,
         buildInfo: buildInfo,
@@ -277,7 +277,7 @@ dependencies:
     sdk: flutter
 flutter:
 ''';
-      const BuildInfo buildInfo = const BuildInfo(BuildMode.release, null, buildName: '1.0.2', buildNumber: 3);
+      const BuildInfo buildInfo = BuildInfo(BuildMode.release, null, buildName: '1.0.2', buildNumber: 3);
       await checkBuildVersion(
         manifest: manifest,
         buildInfo: buildInfo,
@@ -295,7 +295,7 @@ dependencies:
     sdk: flutter
 flutter:
 ''';
-      const BuildInfo buildInfo = const BuildInfo(BuildMode.release, null, buildName: '1.0.2', buildNumber: 3);
+      const BuildInfo buildInfo = BuildInfo(BuildMode.release, null, buildName: '1.0.2', buildNumber: 3);
       await checkBuildVersion(
         manifest: manifest,
         buildInfo: buildInfo,
@@ -312,7 +312,7 @@ dependencies:
     sdk: flutter
 flutter:
 ''';
-      const BuildInfo buildInfo = const BuildInfo(BuildMode.release, null, buildName: '1.0.2', buildNumber: 3);
+      const BuildInfo buildInfo = BuildInfo(BuildMode.release, null, buildName: '1.0.2', buildNumber: 3);
       await checkBuildVersion(
         manifest: manifest,
         buildInfo: buildInfo,

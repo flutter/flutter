@@ -182,7 +182,7 @@ class _Heading extends StatelessWidget {
                 child: const Icon(
                   Icons.info_outline,
                   size: 24.0,
-                  color: const Color(0xFFFFE0E0),
+                  color: Color(0xFFFFE0E0),
                 ),
               ),
               new LayoutId(

@@ -107,31 +107,31 @@ class FractionalOffset extends Alignment {
   double get dy => (y + 1.0) / 2.0;
 
   /// The top left corner.
-  static const FractionalOffset topLeft = const FractionalOffset(0.0, 0.0);
+  static const FractionalOffset topLeft = FractionalOffset(0.0, 0.0);
 
   /// The center point along the top edge.
-  static const FractionalOffset topCenter = const FractionalOffset(0.5, 0.0);
+  static const FractionalOffset topCenter = FractionalOffset(0.5, 0.0);
 
   /// The top right corner.
-  static const FractionalOffset topRight = const FractionalOffset(1.0, 0.0);
+  static const FractionalOffset topRight = FractionalOffset(1.0, 0.0);
 
   /// The center point along the left edge.
-  static const FractionalOffset centerLeft = const FractionalOffset(0.0, 0.5);
+  static const FractionalOffset centerLeft = FractionalOffset(0.0, 0.5);
 
   /// The center point, both horizontally and vertically.
-  static const FractionalOffset center = const FractionalOffset(0.5, 0.5);
+  static const FractionalOffset center = FractionalOffset(0.5, 0.5);
 
   /// The center point along the right edge.
-  static const FractionalOffset centerRight = const FractionalOffset(1.0, 0.5);
+  static const FractionalOffset centerRight = FractionalOffset(1.0, 0.5);
 
   /// The bottom left corner.
-  static const FractionalOffset bottomLeft = const FractionalOffset(0.0, 1.0);
+  static const FractionalOffset bottomLeft = FractionalOffset(0.0, 1.0);
 
   /// The center point along the bottom edge.
-  static const FractionalOffset bottomCenter = const FractionalOffset(0.5, 1.0);
+  static const FractionalOffset bottomCenter = FractionalOffset(0.5, 1.0);
 
   /// The bottom right corner.
-  static const FractionalOffset bottomRight = const FractionalOffset(1.0, 1.0);
+  static const FractionalOffset bottomRight = FractionalOffset(1.0, 1.0);
 
   @override
   Alignment operator -(Alignment other) {

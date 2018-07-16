@@ -46,11 +46,11 @@ Widget buildTest({ ScrollController controller, String title ='TTTTTTTT' }) {
                     expandedHeight: 200.0,
                     forceElevated: innerBoxIsScrolled,
                     bottom: const TabBar(
-                      tabs: const <Tab>[
-                        const Tab(text: 'AA'),
-                        const Tab(text: 'BB'),
-                        const Tab(text: 'CC'),
-                        const Tab(text: 'DD'),
+                      tabs: <Tab>[
+                        Tab(text: 'AA'),
+                        Tab(text: 'BB'),
+                        Tab(text: 'CC'),
+                        Tab(text: 'DD'),
                       ],
                     ),
                   ),
@@ -87,7 +87,7 @@ Widget buildTest({ ScrollController controller, String title ='TTTTTTTT' }) {
                     ],
                   ),
                   new Container(
-                    child: const Center(child: const Text('ccc1')),
+                    child: const Center(child: Text('ccc1')),
                   ),
                   new ListView(
                     children: <Widget>[
@@ -326,7 +326,7 @@ void main() {
             return <Widget>[
               const SliverAppBar(
                 floating: true,
-                title: const Text('AA'),
+                title: Text('AA'),
               ),
             ];
           },
@@ -345,7 +345,7 @@ void main() {
 
   testWidgets('NestedScrollView and internal scrolling', (WidgetTester tester) async {
     debugDisableShadows = false;
-    const List<String> _tabs = const <String>['Hello', 'World'];
+    const List<String> _tabs = <String>['Hello', 'World'];
     int buildCount = 0;
     await tester.pumpWidget(
       new MaterialApp(home: new Material(child:
@@ -575,8 +575,8 @@ void main() {
     // it also makes sure that if you scroll back the other way, the scroll
     // positions of the inner and outer list don't have a discontinuity.
     debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
-    const Key key1 = const ValueKey<int>(1);
-    const Key key2 = const ValueKey<int>(2);
+    const Key key1 = ValueKey<int>(1);
+    const Key key2 = ValueKey<int>(2);
     await tester.pumpWidget(
       new MaterialApp(
         home: new Material(
@@ -586,7 +586,7 @@ void main() {
               headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
                 return <Widget>[
                   const SliverPersistentHeader(
-                    delegate: const TestHeader(key: key1),
+                    delegate: TestHeader(key: key1),
                   ),
                 ];
               },

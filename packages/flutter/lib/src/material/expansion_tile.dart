@@ -10,7 +10,7 @@ import 'list_tile.dart';
 import 'theme.dart';
 import 'theme_data.dart';
 
-const Duration _kExpand = const Duration(milliseconds: 200);
+const Duration _kExpand = Duration(milliseconds: 200);
 
 /// A single-line [ListTile] with a trailing button that expands or collapses
 /// the tile to reveal or hide the [children].

@@ -13,9 +13,9 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:test/test.dart' as test_package;
 import 'package:test/src/frontend/async_matcher.dart' show AsyncMatcher;
 
-const List<Widget> fooBarTexts = const <Text>[
-  const Text('foo', textDirection: TextDirection.ltr),
-  const Text('bar', textDirection: TextDirection.ltr),
+const List<Widget> fooBarTexts = <Text>[
+  Text('foo', textDirection: TextDirection.ltr),
+  Text('bar', textDirection: TextDirection.ltr),
 ];
 
 void main() {
@@ -214,7 +214,7 @@ void main() {
       await tester.pumpWidget(new Row(
         textDirection: TextDirection.ltr,
         children: <Widget>[
-          new Column(children: const <Text>[const Text('foo', textDirection: TextDirection.ltr)]),
+          new Column(children: const <Text>[Text('foo', textDirection: TextDirection.ltr)]),
           const Text('bar', textDirection: TextDirection.ltr),
         ],
       ));
@@ -276,7 +276,7 @@ void main() {
       await tester.pumpWidget(new Row(
         textDirection: TextDirection.ltr,
         children: <Widget>[
-          new Column(children: const <Text>[const Text('foo', textDirection: TextDirection.ltr)]),
+          new Column(children: const <Text>[Text('foo', textDirection: TextDirection.ltr)]),
           const Text('bar', textDirection: TextDirection.ltr),
         ],
       ));
@@ -391,7 +391,7 @@ void main() {
                       builder: (BuildContext context) {
                         return new CupertinoPageScaffold(
                           navigationBar: const CupertinoNavigationBar(
-                            middle: const Text('Page 2'),
+                            middle: Text('Page 2'),
                           ),
                           child: new Container(),
                         );
@@ -535,7 +535,7 @@ void main() {
       await tester.pumpWidget(
         new MaterialApp(
           home: const Scaffold(
-            body: const Text('hello'),
+            body: Text('hello'),
           ),
         ),
       );
@@ -552,8 +552,8 @@ void main() {
           home: new Scaffold(
             body: new Row(
               children: const <Widget>[
-                const Text('hello'),
-                const Text('hello'),
+                Text('hello'),
+                Text('hello'),
               ],
             ),
           ),
@@ -590,7 +590,7 @@ void main() {
 
     testWidgets('Returns merged SemanticsData', (WidgetTester tester) async {
       final SemanticsHandle semanticsHandle = tester.ensureSemantics();
-      const Key key = const Key('test');
+      const Key key = Key('test');
       await tester.pumpWidget(
         new MaterialApp(
           home: new Scaffold(

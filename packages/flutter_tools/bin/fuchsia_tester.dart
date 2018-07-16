@@ -23,7 +23,7 @@ import 'package:flutter_tools/src/usage.dart';
 const String _kOptionPackages = 'packages';
 const String _kOptionShell = 'shell';
 const String _kOptionTestDirectory = 'test-directory';
-const List<String> _kRequiredOptions = const <String>[
+const List<String> _kRequiredOptions = <String>[
   _kOptionPackages,
   _kOptionShell,
   _kOptionTestDirectory,

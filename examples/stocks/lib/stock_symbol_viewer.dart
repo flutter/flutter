@@ -51,8 +51,8 @@ class _StockSymbolView extends StatelessWidget {
               style: DefaultTextStyle.of(context).style.merge(const TextStyle(fontSize: 8.0)),
               text: 'Prices may be delayed by ',
               children: const <TextSpan>[
-                const TextSpan(text: 'several', style: const TextStyle(fontStyle: FontStyle.italic)),
-                const TextSpan(text: ' years.'),
+                TextSpan(text: 'several', style: TextStyle(fontStyle: FontStyle.italic)),
+                TextSpan(text: ' years.'),
               ]
             )
           ),
@@ -86,8 +86,8 @@ class StockSymbolPage extends StatelessWidget {
                 child: new AnimatedCrossFade(
                   duration: const Duration(milliseconds: 300),
                   firstChild: const Padding(
-                    padding: const EdgeInsets.all(20.0),
-                    child: const Center(child: const CircularProgressIndicator()),
+                    padding: EdgeInsets.all(20.0),
+                    child: Center(child: CircularProgressIndicator()),
                   ),
                   secondChild: stock != null
                     ? new _StockSymbolView(
@@ -121,7 +121,7 @@ class StockSymbolBottomSheet extends StatelessWidget {
     return new Container(
       padding: const EdgeInsets.all(10.0),
       decoration: const BoxDecoration(
-        border: const Border(top: const BorderSide(color: Colors.black26))
+        border: Border(top: BorderSide(color: Colors.black26))
       ),
       child: new _StockSymbolView(
         stock: stock,

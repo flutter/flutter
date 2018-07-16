@@ -11,8 +11,8 @@ void main() {
   testWidgets('overflow indicator is not shown when not overflowing', (WidgetTester tester) async {
     await tester.pumpWidget(
       const Center(
-        child: const UnconstrainedBox(
-          child: const SizedBox(width: 200.0, height: 200.0),
+        child: UnconstrainedBox(
+          child: SizedBox(width: 200.0, height: 200.0),
         ),
       ),
     );
@@ -21,12 +21,12 @@ void main() {
   });
 
   testWidgets('overflow indicator is shown when overflowing', (WidgetTester tester) async {
-    const UnconstrainedBox box = const UnconstrainedBox(
-      child: const SizedBox(width: 200.0, height: 200.0),
+    const UnconstrainedBox box = UnconstrainedBox(
+      child: SizedBox(width: 200.0, height: 200.0),
     );
     await tester.pumpWidget(
       const Center(
-        child: const SizedBox(
+        child: SizedBox(
           height: 100.0,
           child: box,
         ),
@@ -38,7 +38,7 @@ void main() {
 
     await tester.pumpWidget(
       const Center(
-        child: const SizedBox(
+        child: SizedBox(
           height: 100.0,
           child: box,
         ),
@@ -54,10 +54,10 @@ void main() {
   testWidgets('overflow indicator is not shown when constraint size is zero.', (WidgetTester tester) async {
     await tester.pumpWidget(
       const Center(
-        child: const SizedBox(
+        child: SizedBox(
           height: 0.0,
-          child: const UnconstrainedBox(
-            child: const SizedBox(width: 200.0, height: 200.0),
+          child: UnconstrainedBox(
+            child: SizedBox(width: 200.0, height: 200.0),
           ),
         ),
       ),
