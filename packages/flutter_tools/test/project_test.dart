@@ -129,6 +129,13 @@ void testInMemory(String description, Future<Null> testMethod()) {
   );
 }
 
+void addPubPackages(Directory directory) {
+  directory.childFile('pubspec.yaml')
+    ..createSync(recursive: true);
+  directory.childFile('.packages')
+    ..createSync(recursive: true);
+}
+
 void addIosWithBundleId(Directory directory, String id) {
   directory
       .childDirectory('ios')

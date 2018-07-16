@@ -64,7 +64,7 @@ class HotRunner extends ResidentRunner {
              ipv6: ipv6);
 
   final bool benchmarkMode;
-  final File applicationBinary;
+  final String applicationBinary;
   final bool hostIsIde;
   Set<String> _dartDependencies;
   final String dillOutputPath;
