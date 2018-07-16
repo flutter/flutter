@@ -21,6 +21,7 @@ import '../base/utils.dart';
 import '../build_info.dart';
 import '../device.dart';
 import '../globals.dart';
+import '../project.dart';
 import '../protocol_discovery.dart';
 
 import 'adb.dart';
@@ -241,7 +242,7 @@ class AndroidDevice extends Device {
 
   String _getSourceSha1(ApplicationPackage app) {
     final AndroidApk apk = app;
-    final File shaFile = fs.file('${apk.apkPath}.sha1');
+    final File shaFile = fs.file('${apk.file.path}.sha1');
     return shaFile.existsSync() ? shaFile.readAsStringSync() : '';
   }
 
@@ -269,16 +270,16 @@ class AndroidDevice extends Device {
   @override
   Future<bool> installApp(ApplicationPackage app) async {
     final AndroidApk apk = app;
-    if (!fs.isFileSync(apk.apkPath)) {
-      printError('"${apk.apkPath}" does not exist.');
+    if (!apk.file.existsSync()) {
+      printError('"${apk.file.path}" does not exist.');
       return false;
     }
 
     if (!await _checkForSupportedAdbVersion() || !await _checkForSupportedAndroidVersion())
       return false;
 
-    final Status status = logger.startProgress('Installing ${apk.apkPath}...', expectSlowOperation: true);
-    final RunResult installResult = await runAsync(adbCommandForDevice(<String>['install', '-t', '-r', apk.apkPath]));
+    final Status status = logger.startProgress('Installing ${apk.file.path}...', expectSlowOperation: true);
+    final RunResult installResult = await runAsync(adbCommandForDevice(<String>['install', '-t', '-r', apk.file.path]));
     status.stop();
     // Some versions of adb exit with exit code 0 even on failure :(
     // Parsing the output to check for failures.
@@ -374,12 +375,13 @@ class AndroidDevice extends Device {
     if (!prebuiltApplication) {
       printTrace('Building APK');
       await buildApk(
+          project: new FlutterProject(fs.currentDirectory),
           target: mainPath,
           buildInfo: buildInfo,
       );
       // Package has been built, so we can get the updated application ID and
       // activity name from the .apk.
-      package = await AndroidApk.fromCurrentDirectory();
+      package = await AndroidApk.fromAndroidProject(new FlutterProject(fs.currentDirectory).android);
     }
 
     printTrace("Stopping app '${package.name}' on $name.");
