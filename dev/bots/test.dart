@@ -97,19 +97,23 @@ Future<Null> _verifyInternationalizations() async {
 
 Future<Null> _checkForTrailingSpaces() async {
   if (!Platform.isWindows) {
+    final String commitRange = Platform.environment.containsKey('TEST_COMMIT_RANGE')
+        ? Platform.environment['TEST_COMMIT_RANGE']
+        : 'master..HEAD';
     print('Checking for trailing whitespace in source files.');
     final List<String> fileTypes = <String>[
       '*.dart', '*.cxx', '*.cpp', '*.cc', '*.c', '*.C', '*.h', '*.java', '*.mm', '*.m',
     ];
     final EvalResult changedFilesResult = await _evalCommand(
-      'git', <String>['diff', '-U0', '--no-color', '--name-only', 'master', '--'] + fileTypes,
+      'git', <String>['diff', '-U0', '--no-color', '--name-only', commitRange, '--'] + fileTypes,
       workingDirectory: flutterRoot,
     );
     if (changedFilesResult.stdout == null) {
       print('No Results for whitespace check.');
       return;
     }
-    final List<String> changedFiles = changedFilesResult.stdout.trim().split('\n');
+    final List<String> changedFiles = changedFilesResult.stdout.trim().split('\n')
+        .where((String item) => item.trim().isNotEmpty).toList();
     if (changedFiles.isNotEmpty) {
       await _runCommand('grep',
         <String>[
