@@ -48,7 +48,7 @@ void main() {
       final AssetImage assetImage = new AssetImage(
           mainAssetPath,
           bundle: new TestAssetBundle(assetBundleMap));
-      const ImageConfiguration configuration = ImageConfiguration();
+      const ImageConfiguration configuration = const ImageConfiguration();
 
       assetImage.obtainKey(configuration)
           .then(expectAsync1((AssetBundleImageKey bundleKey) {

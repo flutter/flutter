@@ -436,7 +436,7 @@ class GlobalMaterialLocalizations implements MaterialLocalizations {
   /// Most internationalized apps will use [GlobalMaterialLocalizations.delegates]
   /// as the value of [MaterialApp.localizationsDelegates] to include
   /// the localizations for both the material and widget libraries.
-  static const LocalizationsDelegate<MaterialLocalizations> delegate = _MaterialLocalizationsDelegate();
+  static const LocalizationsDelegate<MaterialLocalizations> delegate = const _MaterialLocalizationsDelegate();
 
   /// A value for [MaterialApp.localizationsDelegates] that's typically used by
   /// internationalized apps.
@@ -457,13 +457,13 @@ class GlobalMaterialLocalizations implements MaterialLocalizations {
   ///   // ...
   /// )
   /// ```
-  static const List<LocalizationsDelegate<dynamic>> delegates = <LocalizationsDelegate<dynamic>>[
+  static const List<LocalizationsDelegate<dynamic>> delegates = const <LocalizationsDelegate<dynamic>>[
     GlobalMaterialLocalizations.delegate,
     GlobalWidgetsLocalizations.delegate,
   ];
 }
 
-const Map<String, TimeOfDayFormat> _icuTimeOfDayToEnum = <String, TimeOfDayFormat>{
+const Map<String, TimeOfDayFormat> _icuTimeOfDayToEnum = const <String, TimeOfDayFormat>{
   'HH:mm': TimeOfDayFormat.HH_colon_mm,
   'HH.mm': TimeOfDayFormat.HH_dot_mm,
   "HH 'h' mm": TimeOfDayFormat.frenchCanadian,
@@ -518,7 +518,7 @@ class _MaterialLocalizationsDelegate extends LocalizationsDelegate<MaterialLocal
 
   // Watch out: this list must match the one in the GlobalMaterialLocalizations
   // class doc and the list we test, see test/translations_test.dart.
-  static const List<String> _supportedLanguages = <String>[
+  static const List<String> _supportedLanguages = const <String>[
     'ar', // Arabic
     'de', // German
     'en', // English

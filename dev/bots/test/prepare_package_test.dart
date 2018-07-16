@@ -313,7 +313,7 @@ void main() {
           new DateTime.now().difference(DateTime.parse(releases[0]['release_date'])),
           lessThan(const Duration(minutes: 1)),
         );
-        const JsonEncoder encoder = JsonEncoder.withIndent('  ');
+        const JsonEncoder encoder = const JsonEncoder.withIndent('  ');
         expect(contents, equals(encoder.convert(jsonData)));
       });
     });

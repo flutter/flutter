@@ -15,7 +15,7 @@ typedef bool WidgetPredicate(Widget widget);
 typedef bool ElementPredicate(Element element);
 
 /// Some frequently used widget [Finder]s.
-const CommonFinders find = CommonFinders._();
+const CommonFinders find = const CommonFinders._();
 
 /// Provides lightweight syntax for getting frequently used widget [Finder]s.
 ///

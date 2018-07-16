@@ -23,9 +23,9 @@ class _CupertinoPickerDemoState extends State<CupertinoPickerDemo> {
     return new Container(
       decoration: const BoxDecoration(
         color: CupertinoColors.white,
-        border: Border(
-          top: BorderSide(color: Color(0xFFBCBBC1), width: 0.0),
-          bottom: BorderSide(color: Color(0xFFBCBBC1), width: 0.0),
+        border: const Border(
+          top: const BorderSide(color: const Color(0xFFBCBBC1), width: 0.0),
+          bottom: const BorderSide(color: const Color(0xFFBCBBC1), width: 0.0),
         ),
       ),
       height: 44.0,
@@ -106,10 +106,10 @@ class _CupertinoPickerDemoState extends State<CupertinoPickerDemo> {
           color: CupertinoColors.black,
         ),
         child: new DecoratedBox(
-          decoration: const BoxDecoration(color: Color(0xFFEFEFF4)),
+          decoration: const BoxDecoration(color: const Color(0xFFEFEFF4)),
           child: new ListView(
             children: <Widget>[
-              const Padding(padding: EdgeInsets.only(top: 32.0)),
+              const Padding(padding: const EdgeInsets.only(top: 32.0)),
               new GestureDetector(
                 onTap: () async {
                   await showModalBottomSheet<void>(

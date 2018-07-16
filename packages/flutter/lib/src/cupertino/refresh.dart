@@ -358,7 +358,7 @@ class CupertinoSliverRefreshControl extends StatefulWidget {
     double refreshTriggerPullDistance,
     double refreshIndicatorExtent,
   ) {
-    const Curve opacityCurve = Interval(0.4, 0.8, curve: Curves.easeInOut);
+    const Curve opacityCurve = const Interval(0.4, 0.8, curve: Curves.easeInOut);
     return new Align(
       alignment: Alignment.bottomCenter,
       child: new Padding(

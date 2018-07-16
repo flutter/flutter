@@ -1525,9 +1525,9 @@ class _InspectorOverlayRenderState {
 }
 
 const int _kMaxTooltipLines = 5;
-const Color _kTooltipBackgroundColor = Color.fromARGB(230, 60, 60, 60);
-const Color _kHighlightedRenderObjectFillColor = Color.fromARGB(128, 128, 128, 255);
-const Color _kHighlightedRenderObjectBorderColor = Color.fromARGB(128, 64, 64, 128);
+const Color _kTooltipBackgroundColor = const Color.fromARGB(230, 60, 60, 60);
+const Color _kHighlightedRenderObjectFillColor = const Color.fromARGB(128, 128, 128, 255);
+const Color _kHighlightedRenderObjectBorderColor = const Color.fromARGB(128, 64, 64, 128);
 
 /// A layer that outlines the selected [RenderObject] and candidate render
 /// objects that also match the last pointer location.
@@ -1716,8 +1716,8 @@ const double _kInspectButtonMargin = 10.0;
 /// pointer is moving off the device.
 const double _kOffScreenMargin = 1.0;
 
-const TextStyle _messageStyle = TextStyle(
-  color: Color(0xFFFFFFFF),
+const TextStyle _messageStyle = const TextStyle(
+  color: const Color(0xFFFFFFFF),
   fontSize: 10.0,
   height: 1.2,
 );

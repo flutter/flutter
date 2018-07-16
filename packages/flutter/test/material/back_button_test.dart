@@ -10,12 +10,12 @@ void main() {
   testWidgets('BackButton control test', (WidgetTester tester) async {
     await tester.pumpWidget(
       new MaterialApp(
-        home: const Material(child: Text('Home')),
+        home: const Material(child: const Text('Home')),
         routes: <String, WidgetBuilder>{
           '/next': (BuildContext context) {
             return const Material(
-              child: Center(
-                child: BackButton(),
+              child: const Center(
+                child: const BackButton(),
               )
             );
           },
@@ -65,12 +65,12 @@ void main() {
     final SemanticsHandle handle = tester.ensureSemantics();
     await tester.pumpWidget(
       new MaterialApp(
-        home: const Material(child: Text('Home')),
+        home: const Material(child: const Text('Home')),
         routes: <String, WidgetBuilder>{
           '/next': (BuildContext context) {
             return const Material(
-              child: Center(
-                child: BackButton(),
+              child: const Center(
+                child: const BackButton(),
               ),
             );
           },

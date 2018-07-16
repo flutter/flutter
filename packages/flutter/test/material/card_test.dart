@@ -67,7 +67,7 @@ void main() {
   });
 
   testWidgets('Card margin', (WidgetTester tester) async {
-    const Key contentsKey = ValueKey<String>('contents');
+    const Key contentsKey = const ValueKey<String>('contents');
 
     await tester.pumpWidget(
       new Container(

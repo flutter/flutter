@@ -116,8 +116,8 @@ void main() {
               const SliverAppBar(
                 pinned: true,
                 expandedHeight: kExpandedAppBarHeight,
-                flexibleSpace: FlexibleSpaceBar(
-                  title: Text('App Bar'),
+                flexibleSpace: const FlexibleSpaceBar(
+                  title: const Text('App Bar'),
                 ),
               ),
               new SliverList(
@@ -178,8 +178,8 @@ void main() {
                 const SliverAppBar(
                   pinned: true,
                   expandedHeight: kExpandedAppBarHeight,
-                  flexibleSpace: FlexibleSpaceBar(
-                    title: Text('App Bar'),
+                  flexibleSpace: const FlexibleSpaceBar(
+                    title: const Text('App Bar'),
                   ),
                 ),
               ]..addAll(slivers),
