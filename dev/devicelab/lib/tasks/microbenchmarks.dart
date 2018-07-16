@@ -96,7 +96,7 @@ Future<Map<String, double>> _readJsonResults(Process process) {
   final StreamSubscription<String> stdoutSub = process.stdout
       .transform(const Utf8Decoder())
       .transform(const LineSplitter())
-      .listen((String line) {
+      .listen((String line) async {
     print(line);
 
     if (line.contains(jsonStart)) {
@@ -124,7 +124,13 @@ Future<Map<String, double>> _readJsonResults(Process process) {
       jsonStarted = false;
       processWasKilledIntentionally = true;
       resultsHaveBeenParsed = true;
-
+      // Sending a SIGINT/SIGTERM to the process here isn't reliable because [process] is
+      // the shell (flutter is a shell script) and doesn't pass the signal on.
+      // Sending a `q` is an instruction to quit using the console runner.
+      // See https://github.com/flutter/flutter/issues/19208
+      process.stdin.write('q');
+      await process.stdin.flush();
+      // ignore: deprecated_member_use
       process.kill(ProcessSignal.sigint); // flutter run doesn't quit automatically
       try {
         completer.complete(new Map<String, double>.from(json.decode(jsonOutput)));
