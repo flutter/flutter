@@ -95,8 +95,7 @@ static const char* kDartStrongModeArgs[] = {
     // clang-format off
     "--strong",
     "--reify_generic_functions",
-    // TODO(bkonyi): uncomment when sync-async is enabled in flutter/flutter.
-    // "--sync_async",
+    "--sync_async",
     // clang-format on
 };
 
