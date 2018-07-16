@@ -75,7 +75,7 @@ void main() {
     );
     expect(
       const Border(left: magenta3) + const Border(left: yellow2),
-      isNot(const isInstanceOf<Border>()), // see shape_border_test.dart for better tests of this case
+      isNot(isInstanceOf<Border>()), // see shape_border_test.dart for better tests of this case
     );
     const Border b3 = const Border(top: magenta3);
     const Border b6 = const Border(top: magenta6);

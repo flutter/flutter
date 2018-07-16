@@ -9,7 +9,7 @@ import 'recognizer.dart';
 
 /// Signature for when a pointer has remained in contact with the screen at the
 /// same location for a long period of time.
-typedef GestureLongPressCallback = void Function();
+typedef void GestureLongPressCallback();
 
 /// Recognizes when the user has pressed down at the same location for a long
 /// period of time.

@@ -26,10 +26,10 @@ abstract class RenderToggleable extends RenderConstrainedBox {
   RenderToggleable({
     @required bool value,
     bool tristate = false,
-    Size size,
     @required Color activeColor,
     @required Color inactiveColor,
     ValueChanged<bool> onChanged,
+    BoxConstraints additionalConstraints,
     @required TickerProvider vsync,
   }) : assert(tristate != null),
        assert(tristate || value != null),
@@ -42,7 +42,7 @@ abstract class RenderToggleable extends RenderConstrainedBox {
        _inactiveColor = inactiveColor,
        _onChanged = onChanged,
        _vsync = vsync,
-       super(additionalConstraints: new BoxConstraints.tight(size)) {
+       super(additionalConstraints: additionalConstraints) {
     _tap = new TapGestureRecognizer()
       ..onTapDown = _handleTapDown
       ..onTap = _handleTap
@@ -339,7 +339,7 @@ abstract class RenderToggleable extends RenderConstrainedBox {
     config.isEnabled = isInteractive;
     if (isInteractive)
       config.onTap = _handleTap;
-    config.isChecked = _value != false;
+    config.isChecked = _value == true;
   }
 
   @override

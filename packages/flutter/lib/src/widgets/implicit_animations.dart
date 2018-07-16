@@ -4,6 +4,7 @@
 
 import 'package:flutter/animation.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/rendering.dart';
 import 'package:vector_math/vector_math_64.dart';
 
 import 'basic.dart';
@@ -12,6 +13,7 @@ import 'debug.dart';
 import 'framework.dart';
 import 'text.dart';
 import 'ticker_provider.dart';
+import 'transitions.dart';
 
 /// An interpolation between two [BoxConstraints].
 ///
@@ -223,10 +225,10 @@ abstract class ImplicitlyAnimatedWidget extends StatefulWidget {
 ///
 /// This is the type of one of the arguments of [TweenVisitor], the signature
 /// used by [AnimatedWidgetBaseState.forEachTween].
-typedef TweenConstructor<T> = Tween<T> Function(T targetValue);
+typedef Tween<T> TweenConstructor<T>(T targetValue);
 
 /// Signature for callbacks passed to [AnimatedWidgetBaseState.forEachTween].
-typedef TweenVisitor<T> = Tween<T> Function(Tween<T> tween, T targetValue, TweenConstructor<T> constructor);
+typedef Tween<T> TweenVisitor<T>(Tween<T> tween, T targetValue, TweenConstructor<T> constructor);
 
 /// A base class for widgets with implicit animations.
 ///
@@ -257,6 +259,7 @@ abstract class ImplicitlyAnimatedWidgetState<T extends ImplicitlyAnimatedWidget>
     );
     _updateCurve();
     _constructTweens();
+    didUpdateTweens();
   }
 
   @override
@@ -273,6 +276,7 @@ abstract class ImplicitlyAnimatedWidgetState<T extends ImplicitlyAnimatedWidget>
       _controller
         ..value = 0.0
         ..forward();
+      didUpdateTweens();
     }
   }
 
@@ -329,9 +333,23 @@ abstract class ImplicitlyAnimatedWidgetState<T extends ImplicitlyAnimatedWidget>
   /// as the begin value.
   ///
   /// 2. Take the value returned from the callback, and store it. This is the
-  /// value to use as the current value the next time that the forEachTween()
+  /// value to use as the current value the next time that the [forEachTween]
   /// method is called.
+  ///
+  /// Subclasses that contain properties based on tweens created by
+  /// [forEachTween] should override [didUpdateTweens] to update those
+  /// properties. Dependent properties should not be updated within
+  /// [forEachTween].
+  @protected
   void forEachTween(TweenVisitor<dynamic> visitor);
+
+  /// Optional hook for subclasses that runs after all tweens have been updated
+  /// via [forEachTween].
+  ///
+  /// Any properties that depend upon tweens created by [forEachTween] should be
+  /// updated within [didUpdateTweens], not within [forEachTween].
+  @protected
+  void didUpdateTweens() {}
 }
 
 /// A base class for widgets with implicit animations that need to rebuild their
@@ -943,7 +961,7 @@ class _AnimatedPositionedDirectionalState extends AnimatedWidgetBaseState<Animat
 /// class LogoFadeState extends State<LogoFade> {
 ///   double opacityLevel = 1.0;
 ///
-///   _changeOpacity() {
+///   void _changeOpacity() {
 ///     setState(() => opacityLevel = opacityLevel == 0 ? 1.0 : 0.0);
 ///   }
 ///
@@ -1003,8 +1021,9 @@ class AnimatedOpacity extends ImplicitlyAnimatedWidget {
   }
 }
 
-class _AnimatedOpacityState extends AnimatedWidgetBaseState<AnimatedOpacity> {
+class _AnimatedOpacityState extends ImplicitlyAnimatedWidgetState<AnimatedOpacity> {
   Tween<double> _opacity;
+  Animation<double> _opacityAnimation;
 
   @override
   void forEachTween(TweenVisitor<dynamic> visitor) {
@@ -1012,9 +1031,14 @@ class _AnimatedOpacityState extends AnimatedWidgetBaseState<AnimatedOpacity> {
   }
 
   @override
+  void didUpdateTweens() {
+    _opacityAnimation = _opacity.animate(controller);
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return new Opacity(
-      opacity: _opacity.evaluate(animation),
+    return new FadeTransition(
+      opacity: _opacityAnimation,
       child: widget.child
     );
   }

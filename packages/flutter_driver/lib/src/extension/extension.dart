@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import 'package:flutter/semantics.dart';
 import 'package:meta/meta.dart';
 
 import 'package:flutter/foundation.dart';
@@ -33,17 +34,18 @@ const String _extensionMethod = 'ext.flutter.$_extensionMethodName';
 ///
 /// Messages are described in string form and should return a [Future] which
 /// eventually completes to a string response.
-typedef DataHandler = Future<String> Function(String message);
+typedef Future<String> DataHandler(String message);
 
 class _DriverBinding extends BindingBase with ServicesBinding, SchedulerBinding, GestureBinding, PaintingBinding, RendererBinding, WidgetsBinding {
-  _DriverBinding(this._handler);
+  _DriverBinding(this._handler, this._silenceErrors);
 
   final DataHandler _handler;
+  final bool _silenceErrors;
 
   @override
   void initServiceExtensions() {
     super.initServiceExtensions();
-    final FlutterDriverExtension extension = new FlutterDriverExtension(_handler);
+    final FlutterDriverExtension extension = new FlutterDriverExtension(_handler, _silenceErrors);
     registerServiceExtension(
       name: _extensionMethodName,
       callback: extension.call,
@@ -61,21 +63,26 @@ class _DriverBinding extends BindingBase with ServicesBinding, SchedulerBinding,
 ///
 /// Optionally you can pass a [DataHandler] callback. It will be called if the
 /// test calls [FlutterDriver.requestData].
-void enableFlutterDriverExtension({ DataHandler handler }) {
+/// 
+/// `slienceErrors` will prevent exceptions from being logged. This is useful
+/// for tests where exceptions are expected. Defaults to false. Any errors
+/// will still be returned in the `response` field of the result json along
+/// with an `isError` boolean.
+void enableFlutterDriverExtension({ DataHandler handler, bool silenceErrors = false }) {
   assert(WidgetsBinding.instance == null);
-  new _DriverBinding(handler);
+  new _DriverBinding(handler, silenceErrors);
   assert(WidgetsBinding.instance is _DriverBinding);
 }
 
 /// Signature for functions that handle a command and return a result.
-typedef CommandHandlerCallback = Future<Result> Function(Command c);
+typedef Future<Result> CommandHandlerCallback(Command c);
 
 /// Signature for functions that deserialize a JSON map to a command object.
-typedef CommandDeserializerCallback = Command Function(Map<String, String> params);
+typedef Command CommandDeserializerCallback(Map<String, String> params);
 
 /// Signature for functions that run the given finder and return the [Element]
 /// found, if any, or null otherwise.
-typedef FinderConstructor = Finder Function(SerializableFinder finder);
+typedef Finder FinderConstructor(SerializableFinder finder);
 
 /// The class that manages communication between a Flutter Driver test and the
 /// application being remote-controlled, on the application side.
@@ -87,7 +94,7 @@ class FlutterDriverExtension {
   final TestTextInput _testTextInput = new TestTextInput();
 
   /// Creates an object to manage a Flutter Driver connection.
-  FlutterDriverExtension(this._requestDataHandler) {
+  FlutterDriverExtension(this._requestDataHandler, this._silenceErrors) {
     _testTextInput.register();
 
     _commandHandlers.addAll(<String, CommandHandlerCallback>{
@@ -105,6 +112,7 @@ class FlutterDriverExtension {
       'waitFor': _waitFor,
       'waitForAbsent': _waitForAbsent,
       'waitUntilNoTransientCallbacks': _waitUntilNoTransientCallbacks,
+      'get_semantics_id': _getSemanticsId,
     });
 
     _commandDeserializers.addAll(<String, CommandDeserializerCallback>{
@@ -122,6 +130,7 @@ class FlutterDriverExtension {
       'waitFor': (Map<String, String> params) => new WaitFor.deserialize(params),
       'waitForAbsent': (Map<String, String> params) => new WaitForAbsent.deserialize(params),
       'waitUntilNoTransientCallbacks': (Map<String, String> params) => new WaitUntilNoTransientCallbacks.deserialize(params),
+      'get_semantics_id': (Map<String, String> params) => new GetSemanticsId.deserialize(params),
     });
 
     _finders.addAll(<String, FinderConstructor>{
@@ -133,6 +142,7 @@ class FlutterDriverExtension {
   }
 
   final DataHandler _requestDataHandler;
+  final bool _silenceErrors;
 
   static final Logger _log = new Logger('FlutterDriverExtension');
 
@@ -173,7 +183,8 @@ class FlutterDriverExtension {
       return _makeResponse(msg, isError: true);
     } catch (error, stackTrace) {
       final String msg = 'Uncaught extension error while executing $commandKind: $error\n$stackTrace';
-      _log.error(msg);
+      if (!_silenceErrors)
+        _log.error(msg);
       return _makeResponse(msg, isError: true);
     }
   }
@@ -296,6 +307,21 @@ class FlutterDriverExtension {
   Future<Null> _waitUntilNoTransientCallbacks(Command command) async {
     if (SchedulerBinding.instance.transientCallbackCount != 0)
       await _waitUntilFrame(() => SchedulerBinding.instance.transientCallbackCount == 0);
+  }
+
+  Future<GetSemanticsIdResult> _getSemanticsId(Command command) async {
+    final GetSemanticsId semanticsCommand = command;
+    final Finder target = await _waitForElement(_createFinder(semanticsCommand.finder));
+    final Element element = target.evaluate().single;
+    RenderObject renderObject = element.renderObject;
+    SemanticsNode node;
+    while (renderObject != null && node == null) {
+      node = renderObject.debugSemantics;
+      renderObject = renderObject.parent;
+    }
+    if (node == null)
+      throw new StateError('No semantics data found');
+    return new GetSemanticsIdResult(node.id);
   }
 
   Future<ScrollResult> _scroll(Command command) async {

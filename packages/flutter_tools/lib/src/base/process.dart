@@ -11,10 +11,10 @@ import 'io.dart';
 import 'process_manager.dart';
 import 'utils.dart';
 
-typedef StringConverter = String Function(String string);
+typedef String StringConverter(String string);
 
 /// A function that will be run before the VM exits.
-typedef ShutdownHook = Future<dynamic> Function();
+typedef Future<dynamic> ShutdownHook();
 
 // TODO(ianh): We have way too many ways to run subprocesses in this project.
 // Convert most of these into one or more lightweight wrappers around the
@@ -229,7 +229,7 @@ Future<RunResult> runAsync(List<String> cmd, {
     workingDirectory: workingDirectory,
     environment: _environment(allowReentrantFlutter, environment),
   );
-  final RunResult runResults = new RunResult(results);
+  final RunResult runResults = new RunResult(results, cmd);
   printTrace(runResults.toString());
   return runResults;
 }
@@ -240,10 +240,10 @@ Future<RunResult> runCheckedAsync(List<String> cmd, {
   Map<String, String> environment
 }) async {
   final RunResult result = await runAsync(
-      cmd,
-      workingDirectory: workingDirectory,
-      allowReentrantFlutter: allowReentrantFlutter,
-      environment: environment
+    cmd,
+    workingDirectory: workingDirectory,
+    allowReentrantFlutter: allowReentrantFlutter,
+    environment: environment,
   );
   if (result.exitCode != 0)
     throw 'Exit code ${result.exitCode} from: ${cmd.join(' ')}:\n$result';
@@ -364,9 +364,11 @@ class ProcessExit implements Exception {
 }
 
 class RunResult {
-  RunResult(this.processResult);
+  RunResult(this.processResult, this._command) : assert(_command != null), assert(_command.isNotEmpty);
 
   final ProcessResult processResult;
+
+  final List<String> _command;
 
   int get exitCode => processResult.exitCode;
   String get stdout => processResult.stdout;
@@ -380,5 +382,15 @@ class RunResult {
     if (processResult.stderr.isNotEmpty)
       out.writeln(processResult.stderr);
     return out.toString().trimRight();
+  }
+
+ /// Throws a [ProcessException] with the given `message`.
+ void throwException(String message) {
+    throw new ProcessException(
+      _command.first,
+      _command.skip(1).toList(),
+      message,
+      exitCode,
+    );
   }
 }

@@ -12,10 +12,10 @@ import 'package:mockito/mockito.dart';
 void main() {
   MockHelper mockHelper;
 
-  /// Completer that holds the future given to the CupertinoRefreshControl.
+  /// Completer that holds the future given to the CupertinoSliverRefreshControl.
   Completer<void> refreshCompleter;
 
-  /// The widget that the indicator builder given to the CupertinoRefreshControl
+  /// The widget that the indicator builder given to the CupertinoSliverRefreshControl
   /// returns.
   Widget refreshIndicator;
 
@@ -36,7 +36,7 @@ void main() {
     refreshIndicator = new Container();
 
     when(mockHelper.builder(
-            typed(any), typed(any), typed(any), typed(any), typed(any)))
+            any, any, any, any, any))
         .thenAnswer((Invocation i) {
       final RefreshIndicatorMode refreshState = i.positionalArguments[1];
       final double pulledExtent = i.positionalArguments[2];
@@ -86,7 +86,7 @@ void main() {
           textDirection: TextDirection.ltr,
           child: new CustomScrollView(
             slivers: <Widget>[
-              new CupertinoRefreshControl(
+              new CupertinoSliverRefreshControl(
                 builder: builder,
               ),
               buildAListOfStuff(),
@@ -113,7 +113,7 @@ void main() {
           textDirection: TextDirection.ltr,
           child: new CustomScrollView(
             slivers: <Widget>[
-              new CupertinoRefreshControl(
+              new CupertinoSliverRefreshControl(
                 builder: builder,
               ),
               buildAListOfStuff(),
@@ -126,10 +126,10 @@ void main() {
       await tester.drag(find.text('0'), const Offset(0.0, 50.0));
       await tester.pump();
 
-      // The function is referenced once while passing into CupertinoRefreshControl
+      // The function is referenced once while passing into CupertinoSliverRefreshControl
       // and is called.
       verify(mockHelper.builder(
-        typed(any),
+        any,
         RefreshIndicatorMode.drag,
         50.0,
         100.0, // Default value.
@@ -155,7 +155,7 @@ void main() {
             textDirection: TextDirection.ltr,
             child: new CustomScrollView(
               slivers: <Widget>[
-                new CupertinoRefreshControl(
+                new CupertinoSliverRefreshControl(
                   builder: builder,
                 ),
                 buildAListOfStuff(),
@@ -187,7 +187,7 @@ void main() {
           textDirection: TextDirection.ltr,
           child: new CustomScrollView(
             slivers: <Widget>[
-              new CupertinoRefreshControl(
+              new CupertinoSliverRefreshControl(
                 builder: builder,
               ),
               buildAListOfStuff(),
@@ -205,23 +205,23 @@ void main() {
 
       verifyInOrder(<void>[
         mockHelper.builder(
-          typed(any),
+          any,
           RefreshIndicatorMode.drag,
           50.0,
           100.0, // Default value.
           60.0, // Default value.
         ),
         mockHelper.builder(
-          typed(any),
+          any,
           RefreshIndicatorMode.drag,
-          typed(argThat(moreOrLessEquals(48.36801747187993))),
+          argThat(moreOrLessEquals(48.36801747187993)),
           100.0, // Default value.
           60.0, // Default value.
         ),
         mockHelper.builder(
-          typed(any),
+          any,
           RefreshIndicatorMode.drag,
-          typed(argThat(moreOrLessEquals(44.63031931875867))),
+          argThat(moreOrLessEquals(44.63031931875867)),
           100.0, // Default value.
           60.0, // Default value.
         ),
@@ -251,7 +251,7 @@ void main() {
           textDirection: TextDirection.ltr,
           child: new CustomScrollView(
             slivers: <Widget>[
-              new CupertinoRefreshControl(
+              new CupertinoSliverRefreshControl(
                 builder: builder,
                 onRefresh: onRefresh,
               ),
@@ -271,23 +271,23 @@ void main() {
 
       verifyInOrder(<void>[
         mockHelper.builder(
-          typed(any),
+          any,
           RefreshIndicatorMode.drag,
           99.0,
           100.0, // Default value.
           60.0, // Default value.
         ),
         mockHelper.builder(
-          typed(any),
+          any,
           RefreshIndicatorMode.drag,
-          typed(argThat(moreOrLessEquals(86.78169))),
+          argThat(moreOrLessEquals(86.78169)),
           100.0, // Default value.
           60.0, // Default value.
         ),
         mockHelper.builder(
-          typed(any),
+          any,
           RefreshIndicatorMode.armed,
-          typed(argThat(moreOrLessEquals(105.80452021305739))),
+          argThat(moreOrLessEquals(105.80452021305739)),
           100.0, // Default value.
           60.0, // Default value.
         ),
@@ -313,7 +313,7 @@ void main() {
             textDirection: TextDirection.ltr,
             child: new CustomScrollView(
               slivers: <Widget>[
-                new CupertinoRefreshControl(
+                new CupertinoSliverRefreshControl(
                   builder: builder,
                   onRefresh: onRefresh,
                 ),
@@ -330,7 +330,7 @@ void main() {
 
         verifyInOrder(<void>[
           mockHelper.builder(
-            typed(any),
+            any,
             RefreshIndicatorMode.armed,
             150.0,
             100.0, // Default value.
@@ -338,9 +338,9 @@ void main() {
           ),
           mockHelper.refreshTask(),
           mockHelper.builder(
-            typed(any),
+            any,
             RefreshIndicatorMode.armed,
-            typed(argThat(moreOrLessEquals(127.10396988577114))),
+            argThat(moreOrLessEquals(127.10396988577114)),
             100.0, // Default value.
             60.0, // Default value.
           ),
@@ -349,7 +349,7 @@ void main() {
         // Reaches refresh state and sliver's at 60.0 in height after a while.
         await tester.pump(const Duration(seconds: 1));
         verify(mockHelper.builder(
-          typed(any),
+          any,
           RefreshIndicatorMode.refresh,
           60.0,
           100.0, // Default value.
@@ -368,7 +368,7 @@ void main() {
         await tester.pump();
 
         verify(mockHelper.builder(
-          typed(any),
+          any,
           RefreshIndicatorMode.done,
           60.0,
           100.0, // Default value.
@@ -390,7 +390,7 @@ void main() {
           textDirection: TextDirection.ltr,
           child: new CustomScrollView(
             slivers: <Widget>[
-              new CupertinoRefreshControl(
+              new CupertinoSliverRefreshControl(
                 builder: builder,
                 onRefresh: onRefresh,
               ),
@@ -404,7 +404,7 @@ void main() {
       await tester.pump();
 
       verify(mockHelper.builder(
-        typed(any),
+        any,
         RefreshIndicatorMode.armed,
         150.0,
         100.0, // Default value.
@@ -422,7 +422,7 @@ void main() {
 
       // Refresh indicator still being told to layout the same way.
       verify(mockHelper.builder(
-        typed(any),
+        any,
         RefreshIndicatorMode.refresh,
         60.0,
         100.0, // Default value.
@@ -470,7 +470,7 @@ void main() {
           textDirection: TextDirection.ltr,
           child: new CustomScrollView(
             slivers: <Widget>[
-              new CupertinoRefreshControl(
+              new CupertinoSliverRefreshControl(
                 builder: builder,
                 onRefresh: onRefresh,
               ),
@@ -483,7 +483,7 @@ void main() {
       await tester.drag(find.text('0'), const Offset(0.0, 150.0));
       await tester.pump();
       verify(mockHelper.builder(
-        typed(any),
+        any,
         RefreshIndicatorMode.armed,
         150.0,
         100.0, // Default value.
@@ -500,7 +500,7 @@ void main() {
       // Let it snap back to occupy the indicator's final sliver space only.
       await tester.pump(const Duration(seconds: 2));
       verify(mockHelper.builder(
-        typed(any),
+        any,
         RefreshIndicatorMode.refresh,
         60.0,
         100.0, // Default value.
@@ -518,7 +518,7 @@ void main() {
       refreshCompleter.complete(null);
       await tester.pump();
       verify(mockHelper.builder(
-        typed(any),
+        any,
         RefreshIndicatorMode.done,
         60.0,
         100.0, // Default value.
@@ -547,7 +547,7 @@ void main() {
             textDirection: TextDirection.ltr,
             child: new CustomScrollView(
               slivers: <Widget>[
-                new CupertinoRefreshControl(
+                new CupertinoSliverRefreshControl(
                   builder: builder,
                   onRefresh: onRefresh,
                 ),
@@ -564,7 +564,7 @@ void main() {
         refreshCompleter.complete(null);
         await tester.pump();
         verify(mockHelper.builder(
-          typed(any),
+          any,
           RefreshIndicatorMode.done,
           150.0, // Still overscrolled here.
           100.0, // Default value.
@@ -575,7 +575,7 @@ void main() {
         await tester.pump(const Duration(milliseconds: 100));
         // The refresh indicator is still building.
         verify(mockHelper.builder(
-          typed(any),
+          any,
           RefreshIndicatorMode.done,
           91.31180913199277,
           100.0, // Default value.
@@ -594,7 +594,7 @@ void main() {
         // Instead, it's still in the done state because the sliver never
         // fully retracted.
         verify(mockHelper.builder(
-          typed(any),
+          any,
           RefreshIndicatorMode.done,
           147.3772721631821,
           100.0, // Default value.
@@ -613,7 +613,7 @@ void main() {
         await tester.drag(find.text('0'), const Offset(0.0, 40.0));
         await tester.pump();
         verify(mockHelper.builder(
-          typed(any),
+          any,
           RefreshIndicatorMode.drag,
           40.0,
           100.0, // Default value.
@@ -636,7 +636,7 @@ void main() {
             textDirection: TextDirection.ltr,
             child: new CustomScrollView(
               slivers: <Widget>[
-                new CupertinoRefreshControl(
+                new CupertinoSliverRefreshControl(
                   builder: builder,
                   onRefresh: onRefresh,
                 ),
@@ -656,7 +656,7 @@ void main() {
         refreshCompleter.complete(null);
         await tester.pump();
         verify(mockHelper.builder(
-          typed(any),
+          any,
           RefreshIndicatorMode.done,
           150.0, // Still overscrolled here.
           100.0, // Default value.
@@ -697,7 +697,7 @@ void main() {
             textDirection: TextDirection.ltr,
             child: new CustomScrollView(
               slivers: <Widget>[
-                new CupertinoRefreshControl(
+                new CupertinoSliverRefreshControl(
                   builder: builder,
                   onRefresh: onRefresh,
                 ),
@@ -717,7 +717,7 @@ void main() {
 
         // Refresh indicator still being told to layout the same way.
         verify(mockHelper.builder(
-          typed(any),
+          any,
           RefreshIndicatorMode.refresh,
           60.0,
           100.0, // Default value.
@@ -752,7 +752,7 @@ void main() {
         await tester.pump();
 
         verify(mockHelper.builder(
-          typed(any),
+          any,
           RefreshIndicatorMode.drag,
           4.615384615384642,
           100.0, // Default value.
@@ -785,7 +785,7 @@ void main() {
             child: new CustomScrollView(
               slivers: <Widget>[
                 buildAListOfStuff(),
-                new CupertinoRefreshControl( // it's in the middle now.
+                new CupertinoSliverRefreshControl( // it's in the middle now.
                   builder: builder,
                   onRefresh: onRefresh,
                 ),
@@ -817,7 +817,7 @@ void main() {
             textDirection: TextDirection.ltr,
             child: new CustomScrollView(
               slivers: <Widget>[
-                new CupertinoRefreshControl(
+                new CupertinoSliverRefreshControl(
                   builder: builder,
                 ),
                 buildAListOfStuff(),
@@ -829,7 +829,7 @@ void main() {
         await tester.drag(find.text('0'), const Offset(0.0, 150.0));
         await tester.pump();
         verify(mockHelper.builder(
-          typed(any),
+          any,
           RefreshIndicatorMode.armed,
           150.0,
           100.0, // Default value.
@@ -838,7 +838,7 @@ void main() {
 
         await tester.pump(const Duration(milliseconds: 10));
         verify(mockHelper.builder(
-          typed(any),
+          any,
           RefreshIndicatorMode.done, // Goes to done on the next frame.
           148.6463892921364,
           100.0, // Default value.
@@ -866,7 +866,7 @@ void main() {
           textDirection: TextDirection.ltr,
           child: new CustomScrollView(
             slivers: <Widget>[
-              new CupertinoRefreshControl(
+              new CupertinoSliverRefreshControl(
                 builder: builder,
               ),
               buildAListOfStuff(),
@@ -876,7 +876,7 @@ void main() {
       );
 
       expect(
-        CupertinoRefreshControl.state(tester.element(find.byType(LayoutBuilder, skipOffstage: false))),
+        CupertinoSliverRefreshControl.state(tester.element(find.byType(LayoutBuilder, skipOffstage: false))),
         RefreshIndicatorMode.inactive,
       );
 
@@ -891,7 +891,7 @@ void main() {
           textDirection: TextDirection.ltr,
           child: new CustomScrollView(
             slivers: <Widget>[
-              new CupertinoRefreshControl(
+              new CupertinoSliverRefreshControl(
                 builder: builder,
               ),
               buildAListOfStuff(),
@@ -904,14 +904,14 @@ void main() {
       await tester.pump();
 
       expect(
-        CupertinoRefreshControl.state(tester.element(find.byType(LayoutBuilder))),
+        CupertinoSliverRefreshControl.state(tester.element(find.byType(LayoutBuilder))),
         RefreshIndicatorMode.drag,
       );
 
       await tester.pump(const Duration(seconds: 2));
 
       expect(
-        CupertinoRefreshControl.state(tester.element(find.byType(LayoutBuilder, skipOffstage: false))),
+        CupertinoSliverRefreshControl.state(tester.element(find.byType(LayoutBuilder, skipOffstage: false))),
         RefreshIndicatorMode.inactive,
       );
 
@@ -926,7 +926,7 @@ void main() {
           textDirection: TextDirection.ltr,
           child: new CustomScrollView(
             slivers: <Widget>[
-              new CupertinoRefreshControl(
+              new CupertinoSliverRefreshControl(
                 builder: builder,
                 refreshTriggerPullDistance: 80.0,
               ),
@@ -940,14 +940,14 @@ void main() {
       await gesture.moveBy(const Offset(0.0, 79.0));
       await tester.pump();
       expect(
-        CupertinoRefreshControl.state(tester.element(find.byType(LayoutBuilder))),
+        CupertinoSliverRefreshControl.state(tester.element(find.byType(LayoutBuilder))),
         RefreshIndicatorMode.drag,
       );
 
       await gesture.moveBy(const Offset(0.0, 3.0)); // Overscrolling, need to move more than 1px.
       await tester.pump();
       expect(
-        CupertinoRefreshControl.state(tester.element(find.byType(LayoutBuilder))),
+        CupertinoSliverRefreshControl.state(tester.element(find.byType(LayoutBuilder))),
         RefreshIndicatorMode.armed,
       );
 
@@ -964,7 +964,7 @@ void main() {
             textDirection: TextDirection.ltr,
             child: new CustomScrollView(
               slivers: <Widget>[
-                new CupertinoRefreshControl(
+                new CupertinoSliverRefreshControl(
                   builder: builder,
                   onRefresh: onRefresh,
                   refreshTriggerPullDistance: 90.0,
@@ -980,7 +980,7 @@ void main() {
         await gesture.moveBy(const Offset(0.0, 90.0)); // Arm it.
         await tester.pump();
         expect(
-          CupertinoRefreshControl.state(tester.element(find.byType(LayoutBuilder))),
+          CupertinoSliverRefreshControl.state(tester.element(find.byType(LayoutBuilder))),
           RefreshIndicatorMode.armed,
         );
 
@@ -991,7 +991,7 @@ void main() {
           moreOrLessEquals(49.775111111111116), // Below 50 now.
         );
         expect(
-          CupertinoRefreshControl.state(tester.element(find.byType(LayoutBuilder))),
+          CupertinoSliverRefreshControl.state(tester.element(find.byType(LayoutBuilder))),
           RefreshIndicatorMode.refresh,
         );
 
@@ -1009,7 +1009,7 @@ void main() {
             textDirection: TextDirection.ltr,
             child: new CustomScrollView(
               slivers: <Widget>[
-                new CupertinoRefreshControl(
+                new CupertinoSliverRefreshControl(
                   builder: builder,
                   onRefresh: onRefresh,
                 ),
@@ -1022,7 +1022,7 @@ void main() {
         await tester.drag(find.text('0'), const Offset(0.0, 100.0));
         await tester.pump();
         expect(
-          CupertinoRefreshControl.state(tester.element(find.byType(LayoutBuilder))),
+          CupertinoSliverRefreshControl.state(tester.element(find.byType(LayoutBuilder))),
           RefreshIndicatorMode.armed,
         );
         // The sliver scroll offset correction is applied on the next frame.
@@ -1030,7 +1030,7 @@ void main() {
 
         await tester.pump(const Duration(seconds: 2));
         expect(
-          CupertinoRefreshControl.state(tester.element(find.byType(LayoutBuilder))),
+          CupertinoSliverRefreshControl.state(tester.element(find.byType(LayoutBuilder))),
           RefreshIndicatorMode.refresh,
         );
         expect(
@@ -1043,7 +1043,7 @@ void main() {
         // right away even though the sliver gets a new offset correction the
         // next frame.
         expect(
-          CupertinoRefreshControl.state(tester.element(find.byType(LayoutBuilder))),
+          CupertinoSliverRefreshControl.state(tester.element(find.byType(LayoutBuilder))),
           RefreshIndicatorMode.done,
         );
 
@@ -1061,7 +1061,7 @@ void main() {
             textDirection: TextDirection.ltr,
             child: new CustomScrollView(
               slivers: <Widget>[
-                new CupertinoRefreshControl(
+                new CupertinoSliverRefreshControl(
                   builder: builder,
                   onRefresh: onRefresh,
                 ),
@@ -1075,13 +1075,13 @@ void main() {
         await gesture.moveBy(const Offset(0.0, 150.0));
         await tester.pump();
         expect(
-          CupertinoRefreshControl.state(tester.element(find.byType(LayoutBuilder))),
+          CupertinoSliverRefreshControl.state(tester.element(find.byType(LayoutBuilder))),
           RefreshIndicatorMode.armed,
         );
 
         refreshCompleter.complete(null);
         expect(
-          CupertinoRefreshControl.state(tester.element(find.byType(LayoutBuilder))),
+          CupertinoSliverRefreshControl.state(tester.element(find.byType(LayoutBuilder))),
           RefreshIndicatorMode.done,
         );
         await tester.pump();
@@ -1095,7 +1095,7 @@ void main() {
         );
         // Need to bring it to 100 * 0.1 to reset to inactive.
         expect(
-          CupertinoRefreshControl.state(tester.element(find.byType(LayoutBuilder))),
+          CupertinoSliverRefreshControl.state(tester.element(find.byType(LayoutBuilder))),
           RefreshIndicatorMode.done,
         );
 
@@ -1106,7 +1106,7 @@ void main() {
           moreOrLessEquals(9.313890708161875),
         );
         expect(
-          CupertinoRefreshControl.state(tester.element(find.byType(LayoutBuilder))),
+          CupertinoSliverRefreshControl.state(tester.element(find.byType(LayoutBuilder))),
           RefreshIndicatorMode.inactive,
         );
 
@@ -1124,7 +1124,7 @@ void main() {
             textDirection: TextDirection.ltr,
             child: new CustomScrollView(
               slivers: <Widget>[
-                new CupertinoRefreshControl(
+                new CupertinoSliverRefreshControl(
                   builder: builder,
                   onRefresh: onRefresh,
                 ),
@@ -1138,7 +1138,7 @@ void main() {
         await gesture.moveBy(const Offset(0.0, 150.0));
         await tester.pump();
         expect(
-          CupertinoRefreshControl.state(tester.element(find.byType(LayoutBuilder))),
+          CupertinoSliverRefreshControl.state(tester.element(find.byType(LayoutBuilder))),
           RefreshIndicatorMode.armed,
         );
         await tester.pump(); // Sliver scroll offset correction is applied one frame later.
@@ -1151,7 +1151,7 @@ void main() {
           moreOrLessEquals(-145.0332383665717),
         );
         expect(
-          CupertinoRefreshControl.state(tester.element(find.byType(LayoutBuilder, skipOffstage: false))),
+          CupertinoSliverRefreshControl.state(tester.element(find.byType(LayoutBuilder, skipOffstage: false))),
           RefreshIndicatorMode.refresh,
         );
 
@@ -1159,7 +1159,7 @@ void main() {
         // The sliver layout extent is removed on next frame.
         await tester.pump();
         expect(
-          CupertinoRefreshControl.state(tester.element(find.byType(LayoutBuilder, skipOffstage: false))),
+          CupertinoSliverRefreshControl.state(tester.element(find.byType(LayoutBuilder, skipOffstage: false))),
           RefreshIndicatorMode.inactive,
         );
         // Nothing moved.
@@ -1190,7 +1190,7 @@ void main() {
             textDirection: TextDirection.ltr,
             child: new CustomScrollView(
               slivers: <Widget>[
-                new CupertinoRefreshControl(
+                new CupertinoSliverRefreshControl(
                   builder: null,
                   onRefresh: onRefresh,
                   refreshIndicatorExtent: 0.0,
@@ -1204,7 +1204,7 @@ void main() {
         await tester.drag(find.text('0'), const Offset(0.0, 150.0));
         await tester.pump();
         expect(
-          CupertinoRefreshControl.state(tester.element(find.byType(LayoutBuilder))),
+          CupertinoSliverRefreshControl.state(tester.element(find.byType(LayoutBuilder))),
           RefreshIndicatorMode.armed,
         );
 
@@ -1212,7 +1212,7 @@ void main() {
         await tester.pump(const Duration(seconds: 5));
         // In refresh mode but has no UI.
         expect(
-          CupertinoRefreshControl.state(tester.element(find.byType(LayoutBuilder, skipOffstage: false))),
+          CupertinoSliverRefreshControl.state(tester.element(find.byType(LayoutBuilder, skipOffstage: false))),
           RefreshIndicatorMode.refresh,
         );
         expect(
@@ -1225,7 +1225,7 @@ void main() {
         await tester.pump();
         // Goes to inactive right away since the sliver is already collapsed.
         expect(
-          CupertinoRefreshControl.state(tester.element(find.byType(LayoutBuilder, skipOffstage: false))),
+          CupertinoSliverRefreshControl.state(tester.element(find.byType(LayoutBuilder, skipOffstage: false))),
           RefreshIndicatorMode.inactive,
         );
 

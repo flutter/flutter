@@ -9,10 +9,10 @@ import 'package:meta/meta.dart';
 import 'all_elements.dart';
 
 /// Signature for [CommonFinders.byWidgetPredicate].
-typedef WidgetPredicate = bool Function(Widget widget);
+typedef bool WidgetPredicate(Widget widget);
 
 /// Signature for [CommonFinders.byElementPredicate].
-typedef ElementPredicate = bool Function(Element element);
+typedef bool ElementPredicate(Element element);
 
 /// Some frequently used widget [Finder]s.
 const CommonFinders find = const CommonFinders._();
@@ -476,7 +476,9 @@ class _TextFinder extends MatchFinder {
   bool matches(Element candidate) {
     if (candidate.widget is Text) {
       final Text textWidget = candidate.widget;
-      return textWidget.data == text;
+      if (textWidget.data != null)
+        return textWidget.data == text;
+      return textWidget.textSpan.toPlainText() == text;
     } else if (candidate.widget is EditableText) {
       final EditableText editable = candidate.widget;
       return editable.controller.text == text;

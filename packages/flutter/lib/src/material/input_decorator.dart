@@ -811,6 +811,12 @@ class _RenderDecoration extends RenderBox {
       inputBaseline += decoration.floatingLabelHeight;
     }
 
+    containerHeight = math.max(
+      containerHeight,
+      math.max(
+        _boxSize(suffixIcon).height,
+        _boxSize(prefixIcon).height));
+
     // Inline text within an outline border is centered within the container
     // less 2.0 dps at the top to account for the vertical space occupied
     // by the floating label.
@@ -979,8 +985,10 @@ class _RenderDecoration extends RenderBox {
       case TextDirection.rtl: {
         double start = right - _boxSize(icon).width;
         double end = left;
-        if (prefixIcon != null)
+        if (prefixIcon != null) {
+          start += contentPadding.left;
           start -= centerLayout(prefixIcon, start - prefixIcon.size.width);
+        }
         if (label != null)
           centerLayout(label, start - label.size.width);
         if (prefix != null)
@@ -989,8 +997,10 @@ class _RenderDecoration extends RenderBox {
           baselineLayout(input, start - input.size.width);
         if (hint != null)
           baselineLayout(hint, start - hint.size.width);
-        if (suffixIcon != null)
+        if (suffixIcon != null) {
+          end -= contentPadding.left;
           end += centerLayout(suffixIcon, end);
+        }
         if (suffix != null)
           end += baselineLayout(suffix, end);
         break;
@@ -998,8 +1008,10 @@ class _RenderDecoration extends RenderBox {
       case TextDirection.ltr: {
         double start = left + _boxSize(icon).width;
         double end = right;
-        if (prefixIcon != null)
+        if (prefixIcon != null) {
+          start -= contentPadding.left;
           start += centerLayout(prefixIcon, start);
+        }
         if (label != null)
           centerLayout(label, start);
         if (prefix != null)
@@ -1008,8 +1020,10 @@ class _RenderDecoration extends RenderBox {
           baselineLayout(input, start);
         if (hint != null)
           baselineLayout(hint, start);
-        if (suffixIcon != null)
+        if (suffixIcon != null) {
+          end += contentPadding.right;
           end -= centerLayout(suffixIcon, end - suffixIcon.size.width);
+        }
         if (suffix != null)
           end -= baselineLayout(suffix, end - suffix.size.width);
         break;
@@ -1688,21 +1702,35 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
       );
 
     final Widget prefixIcon = decoration.prefixIcon == null ? null :
-      IconTheme.merge(
-        data: new IconThemeData(
-          color: iconColor,
-          size: iconSize,
+      new Center(
+        widthFactor: 1.0,
+        heightFactor: 1.0,
+        child: new ConstrainedBox(
+          constraints: const BoxConstraints(minWidth: 48.0, minHeight: 48.0),
+          child: IconTheme.merge(
+            data: new IconThemeData(
+              color: iconColor,
+              size: iconSize,
+            ),
+            child: decoration.prefixIcon,
+          ),
         ),
-        child: decoration.prefixIcon,
       );
 
     final Widget suffixIcon = decoration.suffixIcon == null ? null :
-      IconTheme.merge(
-        data: new IconThemeData(
-          color: iconColor,
-          size: iconSize,
+      new Center(
+        widthFactor: 1.0,
+        heightFactor: 1.0,
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(minWidth: 48.0, minHeight: 48.0),
+          child: IconTheme.merge(
+            data: new IconThemeData(
+              color: iconColor,
+              size: iconSize,
+            ),
+            child: decoration.suffixIcon,
+          ),
         ),
-        child: decoration.suffixIcon,
       );
 
     final Widget helperError = new _HelperError(
@@ -1752,7 +1780,6 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
         ? const EdgeInsets.fromLTRB(12.0, 20.0, 12.0, 12.0)
         : const EdgeInsets.fromLTRB(12.0, 24.0, 12.0, 16.0));
     }
-
     return new _Decorator(
       decoration: new _Decoration(
         contentPadding: contentPadding,
@@ -1987,11 +2014,16 @@ class InputDecoration {
   /// [IconTheme] and therefore does not need to be explicitly given in the
   /// icon widget.
   ///
-  /// The prefix icon is not padded. To pad the trailing edge of the prefix icon:
+  /// The prefix icon is constrained with a minimum size of 48px by 48px, but
+  /// can be expanded beyond that. Anything larger than 24px will require
+  /// additional padding to ensure it matches the material spec of 12px padding
+  /// between the left edge of the input and leading edge of the prefix icon.
+  /// To pad the leading edge of the prefix icon:
+  ///
   /// ```dart
   /// prefixIcon: new Padding(
-  ///   padding: const EdgeInsetsDirectional.only(end: 16.0),
-  ///   child: myIcon,
+  ///   padding: const EdgeInsetsDirectional.only(start: 12.0),
+  ///   child: myIcon, // icon is 48px widget.
   /// )
   /// ```
   ///
@@ -2021,11 +2053,16 @@ class InputDecoration {
   /// [IconTheme] and therefore does not need to be explicitly given in the
   /// icon widget.
   ///
-  /// The suffix icon is not padded. To pad the leading edge of the suffix icon:
+  /// The suffix icon is constrained with a minimum size of 48px by 48px, but
+  /// can be expanded beyond that. Anything larger than 24px will require
+  /// additional padding to ensure it matches the material spec of 12px padding
+  /// between the right edge of the input and trailing edge of the prefix icon.
+  /// To pad the trailing edge of the suffix icon:
+  ///
   /// ```dart
   /// suffixIcon: new Padding(
-  ///   padding: const EdgeInsetsDirectional.only(start: 16.0),
-  ///   child: new Icon(Icons.search),
+  ///   padding: const EdgeInsetsDirectional.only(end: 12.0),
+  ///   child: myIcon, // icon is 48px widget.
   /// )
   /// ```
   ///
@@ -2470,7 +2507,7 @@ class InputDecorationTheme extends Diagnosticable {
     properties.add(new DiagnosticsProperty<TextStyle>('errorStyle', errorStyle, defaultValue: defaultTheme.errorStyle));
     properties.add(new DiagnosticsProperty<int>('errorMaxLines', errorMaxLines, defaultValue: defaultTheme.errorMaxLines));
     properties.add(new DiagnosticsProperty<bool>('isDense', isDense, defaultValue: defaultTheme.isDense));
-    properties.add(new DiagnosticsProperty<EdgeInsets>('contentPadding', contentPadding, defaultValue: defaultTheme.contentPadding));
+    properties.add(new DiagnosticsProperty<EdgeInsetsDirectional>('contentPadding', contentPadding, defaultValue: defaultTheme.contentPadding));
     properties.add(new DiagnosticsProperty<bool>('isCollapsed', isCollapsed, defaultValue: defaultTheme.isCollapsed));
     properties.add(new DiagnosticsProperty<TextStyle>('prefixStyle', prefixStyle, defaultValue: defaultTheme.prefixStyle));
     properties.add(new DiagnosticsProperty<TextStyle>('suffixStyle', suffixStyle, defaultValue: defaultTheme.suffixStyle));

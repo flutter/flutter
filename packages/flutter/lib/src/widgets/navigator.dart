@@ -23,16 +23,16 @@ import 'ticker_provider.dart';
 /// Creates a route for the given route settings.
 ///
 /// Used by [Navigator.onGenerateRoute] and [Navigator.onUnknownRoute].
-typedef RouteFactory = Route<dynamic> Function(RouteSettings settings);
+typedef Route<dynamic> RouteFactory(RouteSettings settings);
 
 /// Signature for the [Navigator.popUntil] predicate argument.
-typedef RoutePredicate = bool Function(Route<dynamic> route);
+typedef bool RoutePredicate(Route<dynamic> route);
 
 /// Signature for a callback that verifies that it's OK to call [Navigator.pop].
 ///
 /// Used by [Form.onWillPop], [ModalRoute.addScopedWillPopCallback],
 /// [ModalRoute.removeScopedWillPopCallback], and [WillPopScope].
-typedef WillPopCallback = Future<bool> Function();
+typedef Future<bool> WillPopCallback();
 
 /// Indicates whether the current route should be popped.
 ///
@@ -944,7 +944,8 @@ class Navigator extends StatefulWidget {
   ///
   /// ```dart
   /// void _completeLogin() {
-  ///   Navigator.pushReplacement(context, new MaterialPageRoute(builder: (BuildContext context) => new MyHomePage()));
+  ///   Navigator.pushReplacement(
+  ///       context, new MaterialPageRoute(builder: (BuildContext context) => new MyHomePage()));
   /// }
   /// ```
   @optionalTypeArgs
@@ -1559,7 +1560,8 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
   ///
   /// ```dart
   /// void _doOpenPage() {
-  ///   navigator.pushReplacement(new MaterialPageRoute(builder: (BuildContext context) => new MyHomePage()));
+  ///   navigator.pushReplacement(
+  ///       new MaterialPageRoute(builder: (BuildContext context) => new MyHomePage()));
   /// }
   /// ```
   @optionalTypeArgs

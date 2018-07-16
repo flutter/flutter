@@ -8,7 +8,7 @@ import 'dart:io';
 
 import 'package:path/path.dart' as path;
 
-typedef ShardRunner = Future<Null> Function();
+typedef Future<Null> ShardRunner();
 
 final String flutterRoot = path.dirname(path.dirname(path.dirname(path.fromUri(Platform.script))));
 final String flutter = path.join(flutterRoot, 'bin', Platform.isWindows ? 'flutter.bat' : 'flutter');
@@ -26,10 +26,11 @@ final String cyan = hasColor ? '\x1B[36m' : '';
 final String reset = hasColor ? '\x1B[0m' : '';
 
 const Map<String, ShardRunner> _kShards = const <String, ShardRunner>{
-  'docs': _generateDocs,
   'analyze': _analyzeRepo,
   'tests': _runTests,
   'coverage': _runCoverage,
+  // 'docs': handled by travis_script.sh and docs.sh
+  // 'build_and_deploy_gallery': handled by travis_script.sh
 };
 
 const Duration _kLongTimeout = const Duration(minutes: 45);
@@ -66,13 +67,13 @@ Future<Null> main(List<String> args) async {
   }
 }
 
-Future<Null> _generateDocs() async {
-  print('${bold}DONE: test.dart does nothing in the docs shard.$reset');
-}
-
 Future<Null> _verifyInternationalizations() async {
-  final EvalResult genResult = await _evalCommand(dart,
-    <String>[ '--preview-dart-2', path.join('dev', 'tools', 'gen_localizations.dart'), ],
+  final EvalResult genResult = await _evalCommand(
+    dart,
+    <String>[
+      '--preview-dart-2',
+      path.join('dev', 'tools', 'gen_localizations.dart'),
+    ],
     workingDirectory: flutterRoot,
   );
 
@@ -234,15 +235,6 @@ Future<Null> _runTests() async {
 }
 
 Future<Null> _runCoverage() async {
-  if (Platform.environment['TRAVIS'] != null) {
-    print('${bold}DONE: test.dart does not run coverage in Travis$reset');
-    return;
-  }
-  if (Platform.isWindows) {
-    print('${bold}DONE: test.dart does not run coverage on Windows$reset');
-    return;
-  }
-
   final File coverageFile = new File(path.join(flutterRoot, 'packages', 'flutter', 'coverage', 'lcov.info'));
   if (!coverageFile.existsSync()) {
     print('${red}Coverage file not found.$reset');

@@ -13,7 +13,7 @@ import '../globals.dart';
 import '../version.dart';
 import 'file_system.dart';
 
-typedef FingerprintPathFilter = bool Function(String path);
+typedef bool FingerprintPathFilter(String path);
 
 /// A tool that can be used to compute, compare, and write [Fingerprint]s for a
 /// set of input files and associated build settings.
@@ -75,7 +75,7 @@ class Fingerprinter {
   Future<void> writeFingerprint() async {
     try {
       final Fingerprint fingerprint = await buildFingerprint();
-      return fs.file(fingerprintPath).writeAsStringSync(fingerprint.toJson());
+      fs.file(fingerprintPath).writeAsStringSync(fingerprint.toJson());
     } catch (e) {
       // Log exception and continue, fingerprinting is only a performance improvement.
       printTrace('Fingerprint write error: $e');

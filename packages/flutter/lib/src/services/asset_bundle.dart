@@ -67,8 +67,8 @@ abstract class AssetBundle {
     final ByteData data = await load(key);
     if (data == null)
       throw new FlutterError('Unable to load asset: $key');
-    if (data.lengthInBytes < 20 * 1024) {
-      // 20KB takes about 6ms to parse on a Pixel 2 XL.
+    if (data.lengthInBytes < 10 * 1024) {
+      // 10KB takes about 3ms to parse on a Pixel 2 XL.
       // See: https://github.com/dart-lang/sdk/issues/31954
       return utf8.decode(data.buffer.asUint8List());
     }
@@ -115,7 +115,7 @@ class NetworkAssetBundle extends AssetBundle {
   Future<ByteData> load(String key) async {
     final HttpClientRequest request = await _httpClient.getUrl(_urlFromKey(key));
     final HttpClientResponse response = await request.close();
-    if (response.statusCode != HttpStatus.OK)
+    if (response.statusCode != HttpStatus.ok)
       throw new FlutterError(
         'Unable to load asset: $key\n'
         'HTTP status code: ${response.statusCode}'

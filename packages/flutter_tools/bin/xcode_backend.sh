@@ -83,10 +83,20 @@ BuildApp() {
   RunCommand mkdir -p -- "$derived_dir"
   AssertExists "$derived_dir"
 
-  RunCommand rm -rf -- "${derived_dir}/Flutter.framework"
   RunCommand rm -rf -- "${derived_dir}/App.framework"
-  RunCommand cp -r -- "${framework_path}/Flutter.framework" "${derived_dir}"
-  RunCommand find "${derived_dir}/Flutter.framework" -type f -exec chmod a-w "{}" \;
+
+  if [[ -e "${project_path}/.ios" ]]; then
+    RunCommand rm -rf -- "${derived_dir}/engine"
+    mkdir "${derived_dir}/engine"
+    RunCommand cp -r -- "${framework_path}/Flutter.podspec" "${derived_dir}/engine"
+    RunCommand cp -r -- "${framework_path}/Flutter.framework" "${derived_dir}/engine"
+    RunCommand find "${derived_dir}/engine/Flutter.framework" -type f -exec chmod a-w "{}" \;
+  else
+    RunCommand rm -rf -- "${derived_dir}/Flutter.framework"
+    RunCommand cp -r -- "${framework_path}/Flutter.framework" "${derived_dir}"
+    RunCommand find "${derived_dir}/Flutter.framework" -type f -exec chmod a-w "{}" \;
+  fi
+
   RunCommand pushd "${project_path}" > /dev/null
 
   AssertExists "${target_path}"
@@ -100,6 +110,13 @@ BuildApp() {
   local local_engine_flag=""
   if [[ -n "$LOCAL_ENGINE" ]]; then
     local_engine_flag="--local-engine=$LOCAL_ENGINE"
+  fi
+
+  local preview_dart_2_flag=""
+  if [[ -n "$PREVIEW_DART_2" ]]; then
+    preview_dart_2_flag="--preview-dart-2"
+  else
+    preview_dart_2_flag="--no-preview-dart-2"
   fi
 
   local track_widget_creation_flag=""
@@ -120,6 +137,7 @@ BuildApp() {
       --${build_mode}                                                       \
       --ios-arch="${archs}"                                                 \
       ${local_engine_flag}                                                  \
+      ${preview_dart_2_flag}                                                \
       ${track_widget_creation_flag}
 
     if [[ $? -ne 0 ]]; then
@@ -147,7 +165,13 @@ BuildApp() {
         -install_name '@rpath/App.framework/App' \
         -o "${derived_dir}/App.framework/App" -)"
   fi
-  RunCommand cp -- "${derived_dir}/AppFrameworkInfo.plist" "${derived_dir}/App.framework/Info.plist"
+
+  local plistPath="${project_path}/ios/Flutter/AppFrameworkInfo.plist"
+  if [[ -e "${project_path}/.ios" ]]; then
+    plistPath="${project_path}/.ios/Flutter/AppFrameworkInfo.plist"
+  fi
+
+  RunCommand cp -- "$plistPath" "${derived_dir}/App.framework/Info.plist"
 
   local precompilation_flag=""
   if [[ "$CURRENT_ARCH" != "x86_64" ]] && [[ "$build_mode" != "debug" ]]; then
@@ -158,11 +182,15 @@ BuildApp() {
   RunCommand "${FLUTTER_ROOT}/bin/flutter" --suppress-analytics             \
     ${verbose_flag}                                                         \
     build bundle                                                            \
+    --target-platform=ios                                                   \
     --target="${target_path}"                                               \
+    --snapshot="${build_dir}/snapshot_blob.bin"                             \
+    --${build_mode}                                                         \
     --depfile="${build_dir}/snapshot_blob.bin.d"                            \
     --asset-dir="${derived_dir}/flutter_assets"                             \
     ${precompilation_flag}                                                  \
     ${local_engine_flag}                                                    \
+    ${preview_dart_2_flag}                                                  \
     ${track_widget_creation_flag}
 
   if [[ $? -ne 0 ]]; then

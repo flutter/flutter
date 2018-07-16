@@ -53,6 +53,10 @@ class FuchsiaReloadCommand extends FlutterCommand {
     argParser.addOption('name-override',
       abbr: 'n',
       help: 'On-device name of the application binary.');
+    argParser.addFlag('preview-dart-2',
+      abbr: '2',
+      defaultsTo: false,
+      help: 'Preview Dart 2.0 functionality.');
     argParser.addOption('target',
       abbr: 't',
       defaultsTo: bundle.defaultMainPath,
@@ -128,8 +132,13 @@ class FuchsiaReloadCommand extends FlutterCommand {
       final List<Uri> observatoryUris = fullAddresses.map(
         (String a) => Uri.parse('http://$a')
       ).toList();
-      final FuchsiaDevice device = new FuchsiaDevice(fullAddresses[0], name: _address);
-      final FlutterDevice flutterDevice = new FlutterDevice(device, trackWidgetCreation: false);
+      final FuchsiaDevice device = new FuchsiaDevice(
+          fullAddresses[0], name: _address);
+      final FlutterDevice flutterDevice = new FlutterDevice(
+        device,
+        trackWidgetCreation: false,
+        previewDart2: false,
+      );
       flutterDevice.observatoryUris = observatoryUris;
       final HotRunner hotRunner = new HotRunner(
         <FlutterDevice>[flutterDevice],
@@ -317,17 +326,19 @@ class FuchsiaReloadCommand extends FlutterCommand {
     if (!_fileExists(_target))
       throwToolExit('Couldn\'t find application entry point at $_target.');
 
-    final String packagesFileName = '${_projectName}_dart_library.packages';
-    _dotPackagesPath = '$_buildDir/dartlang/gen/$_projectRoot/$packagesFileName';
-    if (!_fileExists(_dotPackagesPath))
-      throwToolExit('Couldn\'t find .packages file at $_dotPackagesPath.');
-
     final String nameOverride = argResults['name-override'];
     if (nameOverride == null) {
       _binaryName = _projectName;
     } else {
       _binaryName = nameOverride;
     }
+
+    // When there's an override of the on-device binary name, use that name
+    // to locate the .packages file.
+    final String packagesFileName = '${_binaryName}_dart_library.packages';
+    _dotPackagesPath = '$_buildDir/dartlang/gen/$_projectRoot/$packagesFileName';
+    if (!_fileExists(_dotPackagesPath))
+      throwToolExit('Couldn\'t find .packages file at $_dotPackagesPath.');
 
     final String isolateNumber = argResults['isolate-number'];
     if (isolateNumber == null) {

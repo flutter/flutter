@@ -13,7 +13,7 @@ A new mobile app SDK to help developers and designers build modern mobile apps f
 
 Flutter's <em>hot reload</em> helps you quickly
 and easily experiment, build UIs, add features, and fix
-bugs faster. Experience sub-second reload times,
+bugs. Experience sub-second reload times,
 without losing state, on
 emulators, simulators, and hardware for iOS
 and Android.

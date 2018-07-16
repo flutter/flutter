@@ -55,8 +55,7 @@ abstract class RunCommandBase extends FlutterCommand {
   void usesPortOptions() {
     argParser.addOption('observatory-port',
         help: 'Listen to the given port for an observatory debugger connection.\n'
-              'Specifying port 0 will find a random free port.\n'
-              'Defaults to the first available port after $kDefaultObservatoryPort.'
+              'Specifying port 0 (the default) will find a random free port.'
     );
   }
 
@@ -119,6 +118,17 @@ class RunCommand extends RunCommandBase {
       ..addOption('use-application-binary',
         hide: !verboseHelp,
         help: 'Specify a pre-built application binary to use when running.',
+      )
+      ..addFlag('preview-dart-2',
+        defaultsTo: true,
+        hide: !verboseHelp,
+        help: 'Preview Dart 2.0 functionality.',
+      )
+      ..addFlag('build-snapshot',
+        hide: !verboseHelp,
+        defaultsTo: false,
+        help: 'Build and use application-specific VM snapshot instead of\n'
+              'prebuilt one provided by the engine.',
       )
       ..addFlag('track-widget-creation',
         hide: !verboseHelp,
@@ -342,6 +352,7 @@ class RunCommand extends RunCommandBase {
     final List<FlutterDevice> flutterDevices = devices.map((Device device) {
       return new FlutterDevice(
         device,
+        previewDart2: argResults['preview-dart-2'],
         trackWidgetCreation: argResults['track-widget-creation'],
         dillOutputPath: argResults['output-dill'],
         fileSystemRoots: argResults['filesystem-root'],

@@ -106,7 +106,7 @@ void main() {
       verify(mockClock.now()).called(2);
 
       expect(
-        verify(mockUsage.sendTiming(captureAny, captureAny, captureAny, label: captureAny)).captured,
+        verify(mockUsage.sendTiming(captureAny, captureAny, captureAny, label: captureAnyNamed('label'))).captured,
         <dynamic>['flutter', 'doctor', const Duration(milliseconds: 1000), 'success']
       );
     }, overrides: <Type, Generator>{
@@ -125,7 +125,7 @@ void main() {
       verify(mockClock.now()).called(2);
 
       expect(
-        verify(mockUsage.sendTiming(captureAny, captureAny, captureAny, label: captureAny)).captured,
+        verify(mockUsage.sendTiming(captureAny, captureAny, captureAny, label: captureAnyNamed('label'))).captured,
         <dynamic>['flutter', 'doctor', const Duration(milliseconds: 1000), 'warning']
       );
     }, overrides: <Type, Generator>{

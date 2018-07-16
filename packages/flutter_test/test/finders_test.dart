@@ -7,6 +7,28 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  group('text', () {
+    testWidgets('finds Text widgets', (WidgetTester tester) async {
+      await tester.pumpWidget(_boilerplate(
+        const Text('test'),
+      ));
+      expect(find.text('test'), findsOneWidget);
+    });
+  
+    testWidgets('finds Text.rich widgets', (WidgetTester tester) async {
+      await tester.pumpWidget(_boilerplate(
+        const Text.rich(
+          TextSpan(text: 't', children: <TextSpan>[
+            const TextSpan(text: 'e'),
+            const TextSpan(text: 'st'),
+          ]
+        ),
+      )));
+
+      expect(find.text('test'), findsOneWidget);
+    });
+  });
+
   group('hitTestable', () {
     testWidgets('excludes non-hit-testable widgets', (WidgetTester tester) async {
       await tester.pumpWidget(

@@ -57,7 +57,7 @@ enum CrossFadeState {
 ///   );
 /// }
 /// ```
-typedef AnimatedCrossFadeBuilder = Widget Function(Widget topChild, Key topChildKey, Widget bottomChild, Key bottomChildKey);
+typedef Widget AnimatedCrossFadeBuilder(Widget topChild, Key topChildKey, Widget bottomChild, Key bottomChildKey);
 
 /// A widget that cross-fades between two given children and animates itself
 /// between their sizes.

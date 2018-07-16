@@ -18,7 +18,7 @@ import 'profile.dart';
 /// of classes, not closures or instance methods of objects.
 ///
 /// {@macro flutter.foundation.compute.limitations}
-typedef ComputeCallback<Q, R> = R Function(Q message);
+typedef R ComputeCallback<Q, R>(Q message);
 
 /// Spawn an isolate, run `callback` on that isolate, passing it `message`, and
 /// (eventually) return the value returned by `callback`.

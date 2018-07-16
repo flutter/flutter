@@ -14,12 +14,12 @@ import 'overlay.dart';
 /// Signature for determining whether the given data will be accepted by a [DragTarget].
 ///
 /// Used by [DragTarget.onWillAccept].
-typedef DragTargetWillAccept<T> = bool Function(T data);
+typedef bool DragTargetWillAccept<T>(T data);
 
 /// Signature for causing a [DragTarget] to accept the given data.
 ///
 /// Used by [DragTarget.onAccept].
-typedef DragTargetAccept<T> = void Function(T data);
+typedef void DragTargetAccept<T>(T data);
 
 /// Signature for building children of a [DragTarget].
 ///
@@ -29,17 +29,17 @@ typedef DragTargetAccept<T> = void Function(T data);
 /// this [DragTarget] and that will not be accepted by the [DragTarget].
 ///
 /// Used by [DragTarget.builder].
-typedef DragTargetBuilder<T> = Widget Function(BuildContext context, List<T> candidateData, List<dynamic> rejectedData);
+typedef Widget DragTargetBuilder<T>(BuildContext context, List<T> candidateData, List<dynamic> rejectedData);
 
 /// Signature for when a [Draggable] is dropped without being accepted by a [DragTarget].
 ///
 /// Used by [Draggable.onDraggableCanceled].
-typedef DraggableCanceledCallback = void Function(Velocity velocity, Offset offset);
+typedef void DraggableCanceledCallback(Velocity velocity, Offset offset);
 
 /// Signature for when a [Draggable] leaves a [DragTarget].
 ///
 /// Used by [DragTarget.onLeave].
-typedef DragTargetLeave<T> = void Function(T data);
+typedef void DragTargetLeave<T>(T data);
 
 /// Where the [Draggable] should be anchored during a drag.
 enum DragAnchor {
@@ -101,8 +101,10 @@ class Draggable<T> extends StatefulWidget {
     this.onDragStarted,
     this.onDraggableCanceled,
     this.onDragCompleted,
+    this.ignoringFeedbackSemantics = true,
   }) : assert(child != null),
        assert(feedback != null),
+       assert(ignoringFeedbackSemantics != null),
        assert(maxSimultaneousDrags == null || maxSimultaneousDrags >= 0),
        super(key: key);
 
@@ -163,6 +165,17 @@ class Draggable<T> extends StatefulWidget {
 
   /// Where this widget should be anchored during a drag.
   final DragAnchor dragAnchor;
+
+  /// Whether the semantics of the [feedback] widget is ignored when building
+  /// the semantics tree.
+  /// 
+  /// This value should be set to false when the [feedback] widget is intended
+  /// to be the same object as the [child].  Placing a [GlobalKey] on this
+  /// widget will ensure semantic focus is kept on the element as it moves in
+  /// and out of the feedback position.
+  ///
+  /// Defaults to true.
+  final bool ignoringFeedbackSemantics;
 
   /// Controls how this widget competes with other gestures to initiate a drag.
   ///
@@ -253,7 +266,8 @@ class LongPressDraggable<T> extends Draggable<T> {
     int maxSimultaneousDrags,
     VoidCallback onDragStarted,
     DraggableCanceledCallback onDraggableCanceled,
-    VoidCallback onDragCompleted
+    VoidCallback onDragCompleted,
+    bool ignoringFeedbackSemantics = true,
   }) : super(
     key: key,
     child: child,
@@ -266,7 +280,8 @@ class LongPressDraggable<T> extends Draggable<T> {
     maxSimultaneousDrags: maxSimultaneousDrags,
     onDragStarted: onDragStarted,
     onDraggableCanceled: onDraggableCanceled,
-    onDragCompleted: onDragCompleted
+    onDragCompleted: onDragCompleted,
+    ignoringFeedbackSemantics: ignoringFeedbackSemantics,
   );
 
   @override
@@ -343,6 +358,7 @@ class _DraggableState<T> extends State<Draggable<T>> {
       dragStartPoint: dragStartPoint,
       feedback: widget.feedback,
       feedbackOffset: widget.feedbackOffset,
+      ignoringFeedbackSemantics: widget.ignoringFeedbackSemantics,
       onDragEnd: (Velocity velocity, Offset offset, bool wasAccepted) {
         if (mounted) {
           setState(() {
@@ -481,7 +497,7 @@ class _DragTargetState<T> extends State<DragTarget<T>> {
 }
 
 enum _DragEndKind { dropped, canceled }
-typedef _OnDragEnd = void Function(Velocity velocity, Offset offset, bool wasAccepted);
+typedef void _OnDragEnd(Velocity velocity, Offset offset, bool wasAccepted);
 
 // The lifetime of this object is a little dubious right now. Specifically, it
 // lives as long as the pointer is down. Arguably it should self-immolate if the
@@ -496,8 +512,10 @@ class _DragAvatar<T> extends Drag {
     this.dragStartPoint = Offset.zero,
     this.feedback,
     this.feedbackOffset = Offset.zero,
-    this.onDragEnd
+    this.onDragEnd,
+    @required this.ignoringFeedbackSemantics,
   }) : assert(overlayState != null),
+       assert(ignoringFeedbackSemantics != null),
        assert(dragStartPoint != null),
        assert(feedbackOffset != null) {
     _entry = new OverlayEntry(builder: _build);
@@ -513,6 +531,7 @@ class _DragAvatar<T> extends Drag {
   final Offset feedbackOffset;
   final _OnDragEnd onDragEnd;
   final OverlayState overlayState;
+  final bool ignoringFeedbackSemantics;
 
   _DragTargetState<T> _activeTarget;
   final List<_DragTargetState<T>> _enteredTargets = <_DragTargetState<T>>[];
@@ -619,7 +638,8 @@ class _DragAvatar<T> extends Drag {
       left: _lastOffset.dx - overlayTopLeft.dx,
       top: _lastOffset.dy - overlayTopLeft.dy,
       child: new IgnorePointer(
-        child: feedback
+        child: feedback,
+        ignoringSemantics: ignoringFeedbackSemantics,
       )
     );
   }

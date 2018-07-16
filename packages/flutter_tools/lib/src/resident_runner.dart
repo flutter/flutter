@@ -34,7 +34,7 @@ class FlutterDevice {
   List<VMService> vmServices;
   DevFS devFS;
   ApplicationPackage package;
-  final ResidentCompiler generator;
+  ResidentCompiler generator;
   String dillOutputPath;
   List<String> fileSystemRoots;
   String fileSystemScheme;
@@ -42,15 +42,20 @@ class FlutterDevice {
   StreamSubscription<String> _loggingSubscription;
 
   FlutterDevice(this.device, {
+    @required bool previewDart2,
     @required bool trackWidgetCreation,
     this.dillOutputPath,
     this.fileSystemRoots,
     this.fileSystemScheme,
-  }) : generator = new ResidentCompiler(
-      artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath),
-      trackWidgetCreation: trackWidgetCreation,
-      fileSystemRoots: fileSystemRoots,
-      fileSystemScheme: fileSystemScheme);
+  }) {
+    if (previewDart2) {
+      generator = new ResidentCompiler(
+        artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath),
+        trackWidgetCreation: trackWidgetCreation,
+        fileSystemRoots: fileSystemRoots, fileSystemScheme: fileSystemScheme
+      );
+    }
+  }
 
   String viewFilter;
 
@@ -376,6 +381,7 @@ class FlutterDevice {
     Set<String> fileFilter,
     bool fullRestart = false,
     String projectRootPath,
+    String pathToReload,
   }) async {
     final Status devFSStatus = logger.startProgress(
       'Syncing files to device ${device.name}...',
@@ -395,6 +401,7 @@ class FlutterDevice {
         fullRestart: fullRestart,
         dillOutputPath: dillOutputPath,
         projectRootPath: projectRootPath,
+        pathToReload: pathToReload
       );
     } on DevFSException {
       devFSStatus.cancel();
@@ -407,9 +414,9 @@ class FlutterDevice {
 
   void updateReloadStatus(bool wasReloadSuccessful) {
     if (wasReloadSuccessful)
-      generator.accept();
+      generator?.accept();
     else
-      generator.reject();
+      generator?.reject();
   }
 }
 
@@ -445,6 +452,10 @@ abstract class ResidentRunner {
   String get projectRootPath => _projectRootPath;
   String _mainPath;
   String get mainPath => _mainPath;
+  String getReloadPath({bool fullRestart}) =>
+      debuggingOptions.buildInfo.previewDart2
+          ? mainPath + (fullRestart? '' : '.incremental') + '.dill'
+          : mainPath;
   AssetBundle _assetBundle;
   AssetBundle get assetBundle => _assetBundle;
 
@@ -631,7 +642,7 @@ abstract class ResidentRunner {
           compileExpression: compileExpression);
       await device.getVMs();
       await device.waitForViews();
-      if (device.views == null)
+      if (device.views.isEmpty)
         printStatus('No Flutter views available on ${device.device.name}');
       else
         viewFound = true;
@@ -840,8 +851,9 @@ abstract class ResidentRunner {
       }
       printStatus('To display the performance overlay (WidgetsApp.showPerformanceOverlay), press "P".');
     }
-    if (flutterDevices.any((FlutterDevice d) => d.device.supportsScreenshot))
+    if (flutterDevices.any((FlutterDevice d) => d.device.supportsScreenshot)) {
       printStatus('To save a screenshot to flutter.png, press "s".');
+    }
   }
 
   /// Called when a signal has requested we exit.

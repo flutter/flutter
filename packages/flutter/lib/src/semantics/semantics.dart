@@ -23,19 +23,19 @@ export 'semantics_event.dart';
 /// Return false to stop visiting nodes.
 ///
 /// Used by [SemanticsNode.visitChildren].
-typedef SemanticsNodeVisitor = bool Function(SemanticsNode node);
+typedef bool SemanticsNodeVisitor(SemanticsNode node);
 
 /// Signature for [SemanticsAction]s that move the cursor.
 ///
 /// If `extendSelection` is set to true the cursor movement should extend the
 /// current selection or (if nothing is currently selected) start a selection.
-typedef MoveCursorHandler = void Function(bool extendSelection);
+typedef void MoveCursorHandler(bool extendSelection);
 
 /// Signature for the [SemanticsAction.setSelection] handlers to change the
 /// text selection (or re-position the cursor) to `selection`.
-typedef SetSelectionHandler = void Function(TextSelection selection);
+typedef void SetSelectionHandler(TextSelection selection);
 
-typedef _SemanticsActionHandler = void Function(dynamic args);
+typedef void _SemanticsActionHandler(dynamic args);
 
 /// A tag for a [SemanticsNode].
 ///
@@ -1362,7 +1362,7 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
       // order.
       childrenInHitTestOrder = new Int32List(childCount);
       for (int i = childCount - 1; i >= 0; i -= 1) {
-        childrenInHitTestOrder[i] = _children[i].id;
+        childrenInHitTestOrder[i] = _children[childCount - i - 1].id;
       }
     }
     builder.updateNode(

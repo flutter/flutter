@@ -8,8 +8,17 @@ import 'package:yaml/yaml.dart';
 
 import 'base/file_system.dart';
 import 'dart/package_map.dart';
+import 'flutter_manifest.dart';
 import 'globals.dart';
 import 'ios/cocoapods.dart';
+
+void _renderTemplateToFile(String template, dynamic context, String filePath) {
+  final String renderedTemplate =
+     new mustache.Template(template).renderString(context);
+  final File file = fs.file(filePath);
+  file.createSync(recursive: true);
+  file.writeAsStringSync(renderedTemplate);
+}
 
 class Plugin {
   final String name;
@@ -60,7 +69,7 @@ Plugin _pluginFromPubspec(String name, Uri packageRoot) {
   return new Plugin.fromYaml(name, packageRootPath, flutterConfig['plugin']);
 }
 
-List<Plugin> _findPlugins(String directory) {
+List<Plugin> findPlugins(String directory) {
   final List<Plugin> plugins = <Plugin>[];
   Map<String, Uri> packages;
   try {
@@ -146,14 +155,9 @@ void _writeAndroidPluginRegistrant(String directory, List<Plugin> plugins) {
     'plugins': androidPlugins,
   };
 
-  final String pluginRegistry =
-      new mustache.Template(_androidPluginRegistryTemplate).renderString(context);
-  final String javaSourcePath = fs.path.join(directory, 'android', 'app', 'src', 'main', 'java');
-  final Directory registryDirectory =
-      fs.directory(fs.path.join(javaSourcePath, 'io', 'flutter', 'plugins'));
-  registryDirectory.createSync(recursive: true);
-  final File registryFile = registryDirectory.childFile('GeneratedPluginRegistrant.java');
-  registryFile.writeAsStringSync(pluginRegistry);
+  final String javaSourcePath = fs.path.join(directory, 'src', 'main', 'java');
+  final String registryPath = fs.path.join(javaSourcePath, 'io', 'flutter', 'plugins', 'GeneratedPluginRegistrant.java');
+  _renderTemplateToFile(_androidPluginRegistryTemplate, context, registryPath);
 }
 
 const String _iosPluginRegistryHeaderTemplate = '''//
@@ -192,7 +196,32 @@ const String _iosPluginRegistryImplementationTemplate = '''//
 @end
 ''';
 
-void _writeIOSPluginRegistrant(String directory, List<Plugin> plugins) {
+const String _iosPluginRegistrantPodspecTemplate = '''
+#
+# Generated file, do not edit.
+#
+
+Pod::Spec.new do |s|
+  s.name             = 'FlutterPluginRegistrant'
+  s.version          = '0.0.1'
+  s.summary          = 'Registers plugins with your flutter app'
+  s.description      = <<-DESC
+Depends on all your plugins, and provides a function to register them.
+                       DESC
+  s.homepage         = 'https://flutter.io'
+  s.license          = { :type => 'BSD' }
+  s.author           = { 'Flutter Dev Team' => 'flutter-dev@googlegroups.com' }
+  s.ios.deployment_target = '7.0'
+  s.source_files =  "Classes", "Classes/**/*.{h,m}"
+  s.source           = { :path => '.' }
+  s.public_header_files = './Classes/**/*.h'
+  {{#plugins}}
+  s.dependency '{{name}}'
+  {{/plugins}}
+end
+''';
+
+void _writeIOSPluginRegistrant(String directory, FlutterManifest manifest, List<Plugin> plugins) {
   final List<Map<String, dynamic>> iosPlugins = plugins
       .where((Plugin p) => p.pluginClass != null)
       .map((Plugin p) => <String, dynamic>{
@@ -205,16 +234,41 @@ void _writeIOSPluginRegistrant(String directory, List<Plugin> plugins) {
     'plugins': iosPlugins,
   };
 
-  final String pluginRegistryHeader =
-      new mustache.Template(_iosPluginRegistryHeaderTemplate).renderString(context);
-  final String pluginRegistryImplementation =
-      new mustache.Template(_iosPluginRegistryImplementationTemplate).renderString(context);
-  final Directory registryDirectory = fs.directory(fs.path.join(directory, 'ios', 'Runner'));
-  registryDirectory.createSync(recursive: true);
-  final File registryHeaderFile = registryDirectory.childFile('GeneratedPluginRegistrant.h');
-  registryHeaderFile.writeAsStringSync(pluginRegistryHeader);
-  final File registryImplementationFile = registryDirectory.childFile('GeneratedPluginRegistrant.m');
-  registryImplementationFile.writeAsStringSync(pluginRegistryImplementation);
+  if (manifest.isModule) {
+    // In a module create the GeneratedPluginRegistrant as a pod to be included
+    // from a hosting app.
+    final String registryDirectory = fs.path.join(directory, 'Flutter', 'FlutterPluginRegistrant');
+    final String registryClassesDirectory = fs.path.join(registryDirectory, 'Classes');
+    _renderTemplateToFile(
+      _iosPluginRegistrantPodspecTemplate,
+      context,
+      fs.path.join(registryDirectory, 'FlutterPluginRegistrant.podspec'),
+    );
+    _renderTemplateToFile(
+      _iosPluginRegistryHeaderTemplate,
+      context,
+      fs.path.join(registryClassesDirectory, 'GeneratedPluginRegistrant.h'),
+    );
+    _renderTemplateToFile(
+      _iosPluginRegistryImplementationTemplate,
+      context,
+      fs.path.join(registryClassesDirectory, 'GeneratedPluginRegistrant.m'),
+    );
+  } else {
+    // For a non-module create the GeneratedPluginRegistrant as source files
+    // directly in the ios project.
+    final String runnerDirectory = fs.path.join(directory, 'Runner');
+    _renderTemplateToFile(
+      _iosPluginRegistryHeaderTemplate,
+      context,
+      fs.path.join(runnerDirectory, 'GeneratedPluginRegistrant.h'),
+    );
+    _renderTemplateToFile(
+      _iosPluginRegistryImplementationTemplate,
+      context,
+      fs.path.join(runnerDirectory, 'GeneratedPluginRegistrant.m'),
+    );
+  }
 }
 
 class InjectPluginsResult{
@@ -229,20 +283,23 @@ class InjectPluginsResult{
 }
 
 /// Injects plugins found in `pubspec.yaml` into the platform-specific projects.
-void injectPlugins({String directory}) {
-  directory ??= fs.currentDirectory.path;
-  final List<Plugin> plugins = _findPlugins(directory);
-  final bool changed = _writeFlutterPluginsList(directory, plugins);
-
-  if (fs.isDirectorySync(fs.path.join(directory, 'android')))
-    _writeAndroidPluginRegistrant(directory, plugins);
-  if (fs.isDirectorySync(fs.path.join(directory, 'ios'))) {
-    _writeIOSPluginRegistrant(directory, plugins);
+void injectPlugins({@required String projectPath, @required FlutterManifest manifest}) {
+  final List<Plugin> plugins = findPlugins(projectPath);
+  final bool changed = _writeFlutterPluginsList(projectPath, plugins);
+  if (manifest.isModule) {
+    _writeAndroidPluginRegistrant(fs.path.join(projectPath, '.android', 'Flutter'), plugins);
+  } else if (fs.isDirectorySync(fs.path.join(projectPath, 'android', 'app'))) {
+    _writeAndroidPluginRegistrant(fs.path.join(projectPath, 'android', 'app'), plugins);
+  }
+  if (manifest.isModule) {
+    _writeIOSPluginRegistrant(fs.path.join(projectPath, '.ios'), manifest, plugins);
+  } else if (fs.isDirectorySync(fs.path.join(projectPath, 'ios'))) {
+    _writeIOSPluginRegistrant(fs.path.join(projectPath, 'ios'), manifest, plugins);
     final CocoaPods cocoaPods = new CocoaPods();
     if (plugins.isNotEmpty)
-      cocoaPods.setupPodfile(directory);
+      cocoaPods.setupPodfile(projectPath, manifest);
     if (changed)
-      cocoaPods.invalidatePodInstallOutput(directory);
+      cocoaPods.invalidatePodInstallOutput(projectPath);
   }
 }
 

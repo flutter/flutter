@@ -4,7 +4,7 @@
 
 import 'package:flutter/material.dart';
 
-typedef _TextTransformer = Widget Function(String name, String text);
+typedef Widget _TextTransformer(String name, String text);
 
 // From https://en.wikiquote.org/wiki/2001:_A_Space_Odyssey_(film)
 const String _kDialogText = '''

@@ -2,12 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
-
 import 'package:meta/meta.dart';
 
 import '../artifacts.dart';
-import '../base/common.dart';
 import '../base/context.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
@@ -28,20 +25,30 @@ String flutterFrameworkDir(BuildMode mode) {
   return fs.path.normalize(fs.path.dirname(artifacts.getArtifactPath(Artifact.flutterFramework, TargetPlatform.ios, mode)));
 }
 
-String _generatedXcodePropertiesPath(String projectPath) {
-  return fs.path.join(projectPath, 'ios', 'Flutter', 'Generated.xcconfig');
+String _generatedXcodePropertiesPath({@required String projectPath, @required FlutterManifest manifest}) {
+  if (manifest.isModule) {
+    return fs.path.join(projectPath, '.ios', 'Flutter', 'Generated.xcconfig');
+  } else {
+    return fs.path.join(projectPath, 'ios', 'Flutter', 'Generated.xcconfig');
+  }
 }
 
 /// Writes default Xcode properties files in the Flutter project at [projectPath],
-/// if project is an iOS project and such files do not already exist.
-Future<void> generateXcodeProperties(String projectPath) async {
-  if (fs.isDirectorySync(fs.path.join(projectPath, 'ios'))) {
-    if (fs.file(_generatedXcodePropertiesPath(projectPath)).existsSync())
+/// if project is an iOS project and such files are out of date or do not
+/// already exist.
+void generateXcodeProperties({String projectPath, FlutterManifest manifest}) {
+  if (manifest.isModule || fs.isDirectorySync(fs.path.join(projectPath, 'ios'))) {
+    final File propertiesFile = fs.file(_generatedXcodePropertiesPath(projectPath: projectPath, manifest: manifest));
+    if (!Cache.instance.fileOlderThanToolsStamp(propertiesFile)) {
       return;
-    await updateGeneratedXcodeProperties(
+    }
+
+    updateGeneratedXcodeProperties(
       projectPath: projectPath,
+      manifest: manifest,
       buildInfo: BuildInfo.debug,
       targetOverride: bundle.defaultMainPath,
+      previewDart2: true,
     );
   }
 }
@@ -50,11 +57,13 @@ Future<void> generateXcodeProperties(String projectPath) async {
 ///
 /// targetOverride: Optional parameter, if null or unspecified the default value
 /// from xcode_backend.sh is used 'lib/main.dart'.
-Future<void> updateGeneratedXcodeProperties({
+void updateGeneratedXcodeProperties({
   @required String projectPath,
+  @required FlutterManifest manifest,
   @required BuildInfo buildInfo,
   String targetOverride,
-}) async {
+  @required bool previewDart2,
+}) {
   final StringBuffer localsBuffer = new StringBuffer();
 
   localsBuffer.writeln('// This is a generated file; do not edit or check into version control.');
@@ -77,14 +86,11 @@ Future<void> updateGeneratedXcodeProperties({
 
   localsBuffer.writeln('SYMROOT=\${SOURCE_ROOT}/../${getIosBuildDirectory()}');
 
-  localsBuffer.writeln('FLUTTER_FRAMEWORK_DIR=${flutterFrameworkDir(buildInfo.mode)}');
-
-  final String flutterManifest = fs.path.join(projectPath, bundle.defaultManifestPath);
-  FlutterManifest manifest;
-  try {
-    manifest = await FlutterManifest.createFromPath(flutterManifest);
-  } catch (error) {
-    throwToolExit('Failed to load pubspec.yaml: $error');
+  if (!manifest.isModule) {
+    // For module projects we do not want to write the FLUTTER_FRAMEWORK_DIR
+    // explicitly. Rather we rely on the xcode backend script and the Podfile
+    // logic to derive it from FLUTTER_ROOT and FLUTTER_BUILD_MODE.
+    localsBuffer.writeln('FLUTTER_FRAMEWORK_DIR=${flutterFrameworkDir(buildInfo.mode)}');
   }
 
   final String buildName = buildInfo?.buildName ?? manifest.buildName;
@@ -111,11 +117,15 @@ Future<void> updateGeneratedXcodeProperties({
     localsBuffer.writeln('ARCHS=$arch');
   }
 
+  if (previewDart2) {
+    localsBuffer.writeln('PREVIEW_DART_2=true');
+  }
+
   if (buildInfo.trackWidgetCreation) {
     localsBuffer.writeln('TRACK_WIDGET_CREATION=true');
   }
 
-  final File localsFile = fs.file(_generatedXcodePropertiesPath(projectPath));
+  final File localsFile = fs.file(_generatedXcodePropertiesPath(projectPath: projectPath, manifest: manifest));
   localsFile.createSync(recursive: true);
   localsFile.writeAsStringSync(localsBuffer.toString());
 }

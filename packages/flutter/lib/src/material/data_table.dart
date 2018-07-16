@@ -21,7 +21,7 @@ import 'theme_data.dart';
 import 'tooltip.dart';
 
 /// Signature for [DataColumn.onSort] callback.
-typedef DataColumnSortCallback = void Function(int columnIndex, bool ascending);
+typedef void DataColumnSortCallback(int columnIndex, bool ascending);
 
 /// Column configuration for a [DataTable].
 ///

@@ -10,7 +10,7 @@ flutter daemon
 
 It runs a persistent, JSON-RPC based server to communicate with devices. IDEs and other tools can start the flutter tool in this mode and get device addition and removal notifications, as well as being able to programmatically start and stop apps on those devices.
 
-A subset of the `flutter daemon` commands/events are also exposed via `flutter run --machine` which allows IDEs and tools to launch flutter applications and interact to send commands like Hot Reload. Which commands/events are available in this mode is documented at the bottom of this document.
+A set of `flutter daemon` commands/events are also exposed via `flutter run --machine` which allows IDEs and tools to launch flutter applications and interact to send commands like Hot Reload. The command and events that are available in this mode are documented at the bottom of this document.
 
 ## Protocol
 
@@ -65,34 +65,16 @@ The `daemon.connected` event is sent when the daemon starts. The `params` field 
 
 #### daemon.logMessage
 
-The `daemon.logMessage` event is sent whenever a log message is created - either a status level message or an error. The JSON message will contains an `event` field with the value `daemon.logMessage`, and an `params` field containing a map with `level`, `message`, and (optionally) `stackTrace` fields.
+The `daemon.logMessage` event is sent whenever a log message is created - either a status level message or an error. The JSON message will contain an `event` field with the value `daemon.logMessage`, and an `params` field containing a map with `level`, `message`, and (optionally) `stackTrace` fields.
 
 
 #### daemon.showMessage
 
-The `daemon.showMessage` event is sent by the daemon when some if would be useful to show a message to the user. This could be an error notification or a notification that some development tools are not configured or not installed. The JSON message will contains an `event` field with the value `daemon.showMessage`, and an `params` field containing a map with `level`, `title`, and `message` fields. The valid options for `level` are `info`, `warning`, and `error`.
+The `daemon.showMessage` event is sent by the daemon when some if would be useful to show a message to the user. This could be an error notification or a notification that some development tools are not configured or not installed. The JSON message will contain an `event` field with the value `daemon.showMessage`, and an `params` field containing a map with `level`, `title`, and `message` fields. The valid options for `level` are `info`, `warning`, and `error`.
 
 It is up to the client to decide how best to display the message; for some clients, it may map well to a toast style notification. There is an implicit contract that the daemon will not send too many messages over some reasonable period of time.
 
 ### app domain
-
-#### app.start
-
-The `start()` command is used to start applications.
-
-- `deviceId`: The device to launch the app on; this is required.
-- `projectDirectory`: The project directory; this is required. It is used to determine the application to start.
-- `startPaused`: Start the VM in a paused mode.
-- `route`: A string; the route to use when restoring the application.
-- `mode`: One of either `debug`, `profile`, or `release`.
-- `target`: Optional; the target file to start.
-- `hot`: Optional; whether to start the application using `--hot` mode
-
-On success, returns a map with the fields:
-- `appId`: this is is used when sending app events, and can be used by clients to stop the app (`app.stop`).
-- `deviceId`
-- `directory`
-- `supportsRestart`
 
 #### app.restart
 
@@ -116,10 +98,6 @@ The `stop()` command takes one parameter, `appId`. It returns a `bool` to indica
 
 - `appId`: the id of a previously started app; this is required.
 
-#### app.discover
-
-The `discover()` command takes one parameter, a `deviceId`. It returns a list of applications discovered on the device. Each application is represented by a map with two fields, an `id` - an Android or iOS application id - and an `observatoryDevicePort`. The `observatoryDevicePort` is the device port to connect to to debug the application. The port may first have to be made accessable via `device.forward`.
-
 #### Events
 
 #### app.start
@@ -128,7 +106,7 @@ This is sent when an app is starting. The `params` field will be a map with the 
 
 #### app.debugPort
 
-This is sent when an observatory port is available for a started app. The `params` field will be a map with the fields `appId`, `port`, and `wsUri`. Clients should prefer using the `wsUri` field in preference to synthesizing a uri using the `port` field (`port` will be removed in a future version of the protocol). An optional field, `baseUri`, is populated if a path prefix is required for setting breakpoints on the target device.
+This is sent when an observatory port is available for a started app. The `params` field will be a map with the fields `appId`, `port`, and `wsUri`. Clients should prefer using the `wsUri` field in preference to synthesizing a uri using the `port` field. An optional field, `baseUri`, is populated if a path prefix is required for setting breakpoints on the target device.
 
 #### app.started
 
@@ -188,9 +166,21 @@ Return a list of all available emulators. The `params` field will be a List; eac
 
 #### emulator.launch
 
-The `launch()` command takes allows launching an emulator/simulator by its `id`.
+The `launch()` command allows launching an emulator/simulator by its `id`.
 
 - `emulatorId`: the id of an emulator as returned by `getEmulators`.
+
+#### emulator.create
+
+The `create()` command creates a new Android emulator with an optional `name`.
+
+- `name`: an optional name for this emulator
+
+The returned `params` will contain:
+
+- `success` - whether the emulator was successfully created
+- `emulatorName` - the name of the emulator created; this will have been auto-generated if you did not supply one
+- `error` - when `success`=`false`, a message explaining why the creation of the emulator failed
 
 ## Flutter Run --machine
 
@@ -205,7 +195,7 @@ The following subset of the daemon domain is available in `flutter run --machine
   - [`shutdown`](#daemonshutdown)
 - Events
   - [`connected`](#daemonconnected)
-  - [`logMessage`](#daemonlogMessage)
+  - [`logMessage`](#daemonlogmessage)
 
 ### app domain
 
@@ -213,11 +203,11 @@ The following subset of the app domain is available in `flutter run --machine`. 
 
 - Commands
   - [`restart`](#apprestart)
-  - [`callServiceExtension`](#appcallServiceExtension)
+  - [`callServiceExtension`](#appcallserviceextension)
   - [`stop`](#appstop)
 - Events
   - [`start`](#appstart)
-  - [`debugPort`](#appdebugPort)
+  - [`debugPort`](#appdebugport)
   - [`started`](#appstarted)
   - [`log`](#applog)
   - [`progress`](#appprogress)
@@ -229,4 +219,5 @@ See the [source](https://github.com/flutter/flutter/blob/master/packages/flutter
 
 ## Changelog
 
+- 0.4.0: Added `emulator.create` command
 - 0.3.0: Added `daemon.connected` event at startup

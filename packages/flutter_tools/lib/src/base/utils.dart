@@ -21,26 +21,26 @@ class BotDetector {
   const BotDetector();
 
   bool get isRunningOnBot {
-    return
-      platform.environment['BOT'] == 'true' ||
+    return platform.environment['BOT'] != 'false'
+       && (platform.environment['BOT'] == 'true'
 
-          // https://docs.travis-ci.com/user/environment-variables/#Default-Environment-Variables
-          platform.environment['TRAVIS'] == 'true' ||
-          platform.environment['CONTINUOUS_INTEGRATION'] == 'true' ||
-          platform.environment.containsKey('CI') || // Travis and AppVeyor
+           // https://docs.travis-ci.com/user/environment-variables/#Default-Environment-Variables
+        || platform.environment['TRAVIS'] == 'true'
+        || platform.environment['CONTINUOUS_INTEGRATION'] == 'true'
+        || platform.environment.containsKey('CI') // Travis and AppVeyor
 
-          // https://www.appveyor.com/docs/environment-variables/
-          platform.environment.containsKey('APPVEYOR') ||
+           // https://www.appveyor.com/docs/environment-variables/
+        || platform.environment.containsKey('APPVEYOR')
 
-          // https://docs.aws.amazon.com/codebuild/latest/userguide/build-env-ref-env-vars.html
-          (platform.environment.containsKey('AWS_REGION') && platform.environment.containsKey('CODEBUILD_INITIATOR')) ||
+           // https://docs.aws.amazon.com/codebuild/latest/userguide/build-env-ref-env-vars.html
+        || (platform.environment.containsKey('AWS_REGION') && platform.environment.containsKey('CODEBUILD_INITIATOR'))
 
-          // https://wiki.jenkins.io/display/JENKINS/Building+a+software+project#Buildingasoftwareproject-belowJenkinsSetEnvironmentVariables
-          platform.environment.containsKey('JENKINS_URL') ||
+           // https://wiki.jenkins.io/display/JENKINS/Building+a+software+project#Buildingasoftwareproject-belowJenkinsSetEnvironmentVariables
+        || platform.environment.containsKey('JENKINS_URL')
 
-          // Properties on Flutter's Chrome Infra bots.
-          platform.environment['CHROME_HEADLESS'] == '1' ||
-          platform.environment.containsKey('BUILDBOT_BUILDERNAME');
+           // Properties on Flutter's Chrome Infra bots.
+        || platform.environment['CHROME_HEADLESS'] == '1'
+        || platform.environment.containsKey('BUILDBOT_BUILDERNAME'));
   }
 }
 
@@ -231,9 +231,16 @@ class Uuid {
       value.toRadixString(16).padLeft(count, '0');
 }
 
+/// Given a data structure which is a Map of String to dynamic values, return
+/// the same structure (`Map<String, dynamic>`) with the correct runtime types.
+Map<String, dynamic> castStringKeyedMap(dynamic untyped) {
+  final Map<dynamic, dynamic> map = untyped;
+  return map.cast<String, dynamic>();
+}
+
 Clock get clock => context[Clock];
 
-typedef AsyncCallback = Future<Null> Function();
+typedef Future<Null> AsyncCallback();
 
 /// A [Timer] inspired class that:
 ///   - has a different initial value for the first callback delay

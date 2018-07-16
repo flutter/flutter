@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:math' as math;
+
 import 'package:flutter/rendering.dart';
 
 import 'basic.dart';
@@ -450,7 +452,7 @@ abstract class BoxScrollView extends ScrollView {
 /// machinery can make use of the foreknowledge of the children's extent to save
 /// work, for example when the scroll position changes drastically.
 ///
-/// There are three options for constructing a [ListView]:
+/// There are four options for constructing a [ListView]:
 ///
 ///  1. The default constructor takes an explicit [List<Widget>] of children. This
 ///     constructor is appropriate for list views with a small number of
@@ -458,18 +460,27 @@ abstract class BoxScrollView extends ScrollView {
 ///     child that could possibly be displayed in the list view instead of just
 ///     those children that are actually visible.
 ///
-///  2. The [ListView.builder] takes an [IndexedWidgetBuilder], which builds the
-///     children on demand. This constructor is appropriate for list views with
-///     a large (or infinite) number of children because the builder is called
+///  2. The [ListView.builder] constructor takes an [IndexedWidgetBuilder], which
+///     builds the children on demand. This constructor is appropriate for list views
+///     with a large (or infinite) number of children because the builder is called
 ///     only for those children that are actually visible.
 ///
-///  3. The [ListView.custom] takes a [SliverChildDelegate], which provides the
-///     ability to customize additional aspects of the child model. For example,
+///  3. The [ListView.separated] constructor takes two [IndexedWidgetBuilder]s:
+///     `itemBuilder` builds child items on demand, and `separatorBuilder`
+///     similarly builds separator children which appear in between the child items.
+///     This constructor is appropriate for list views with a fixed number of children.
+///
+///  4. The [ListView.custom] constructor takes a [SliverChildDelegate], which provides
+///     the ability to customize additional aspects of the child model. For example,
 ///     a [SliverChildDelegate] can control the algorithm used to estimate the
 ///     size of children that are not actually visible.
 ///
 /// To control the initial scroll offset of the scroll view, provide a
 /// [controller] with its [ScrollController.initialScrollOffset] property set.
+///
+/// By default, [ListView] will automatically pad the list's scrollable
+/// extremities to avoid partial obstructions indicated by [MediaQuery]'s
+/// padding. To avoid this behavior, override with a zero [padding] property.
 ///
 /// ## Sample code
 ///
@@ -515,9 +526,9 @@ abstract class BoxScrollView extends ScrollView {
 /// [CustomScrollView.slivers] property instead of the list itself, and having
 /// the [SliverList] instead be a child of the [SliverPadding].
 ///
-/// By default, [ListView] will automatically pad the list's scrollable
-/// extremities to avoid partial obstructions indicated by [MediaQuery]'s
-/// padding. To avoid this behavior, override with a zero [padding] property.
+/// [CustomScrollView]s don't automatically avoid obstructions from [MediaQuery]
+/// like [ListView]s do. To reproduce the behavior, wrap the slivers in
+/// [SliverSafeArea]s.
 ///
 /// Once code has been ported to use [CustomScrollView], other slivers, such as
 /// [SliverGrid] or [SliverAppBar], can be put in the [CustomScrollView.slivers]
@@ -663,6 +674,91 @@ class ListView extends BoxScrollView {
   }) : childrenDelegate = new SliverChildBuilderDelegate(
          itemBuilder,
          childCount: itemCount,
+         addAutomaticKeepAlives: addAutomaticKeepAlives,
+         addRepaintBoundaries: addRepaintBoundaries,
+       ), super(
+    key: key,
+    scrollDirection: scrollDirection,
+    reverse: reverse,
+    controller: controller,
+    primary: primary,
+    physics: physics,
+    shrinkWrap: shrinkWrap,
+    padding: padding,
+    cacheExtent: cacheExtent
+  );
+
+  /// Creates a fixed-length scrollable linear array of list "items" separated
+  /// by list item "separators".
+  ///
+  /// This constructor is appropriate for list views with a large number of
+  /// item and separator children because the builders are only called for
+  /// the children that are actually visible.
+  ///
+  /// The `itemBuilder` callback will be called with indices greater than
+  /// or equal to zero and less than `itemCount`.
+  ///
+  /// Separators only appear between list items: separator 0 appears after item
+  /// 0 and the last separator appears before the last item.
+  ///
+  /// The `separatorBuilder` callback will be called with indices greater than
+  /// or equal to zero and less than `itemCount - 1`.
+  ///
+  /// The `itemBuilder` and `separatorBuilder` callbacks should actually create
+  /// widget instances when called. Avoid using a builder that returns a
+  /// previously-constructed widget; if the list view's children are created in
+  /// advance, or all at once when the [ListView] itself is created, it is more
+  /// efficient to use [new ListView].
+  ///
+  /// ## Sample code
+  ///
+  /// This example shows how to create [ListView] whose [ListTile] list items
+  /// are separated by [Divider]s.
+  ///
+  /// ```dart
+  /// new ListView.separated(
+  ///   itemCount: 25,
+  ///   separatorBuilder: (BuildContext context, int index) => new Divider(),
+  ///   itemBuilder: (BuildContext context, int index) {
+  ///     return new ListTile(
+  ///       title: new Text('item $index'),
+  ///     );
+  ///   },
+  /// )
+  /// ```
+  ///
+  /// The `addAutomaticKeepAlives` argument corresponds to the
+  /// [SliverChildBuilderDelegate.addAutomaticKeepAlives] property. The
+  /// `addRepaintBoundaries` argument corresponds to the
+  /// [SliverChildBuilderDelegate.addRepaintBoundaries] property. Both must not
+  /// be null.
+  ListView.separated({
+    Key key,
+    Axis scrollDirection = Axis.vertical,
+    bool reverse = false,
+    ScrollController controller,
+    bool primary,
+    ScrollPhysics physics,
+    bool shrinkWrap = false,
+    EdgeInsetsGeometry padding,
+    @required IndexedWidgetBuilder itemBuilder,
+    @required IndexedWidgetBuilder separatorBuilder,
+    @required int itemCount,
+    bool addAutomaticKeepAlives = true,
+    bool addRepaintBoundaries = true,
+    double cacheExtent,
+  }) : assert(itemBuilder != null),
+       assert(separatorBuilder != null),
+       assert(itemCount != null && itemCount >= 0),
+       itemExtent = null,
+       childrenDelegate = new SliverChildBuilderDelegate(
+         (BuildContext context, int index) {
+           final int itemIndex = index ~/ 2;
+           return index.isEven
+             ? itemBuilder(context, itemIndex)
+             : separatorBuilder(context, itemIndex);
+         },
+         childCount: math.max(0, itemCount * 2 - 1),
          addAutomaticKeepAlives: addAutomaticKeepAlives,
          addRepaintBoundaries: addRepaintBoundaries,
        ), super(

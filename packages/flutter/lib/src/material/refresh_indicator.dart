@@ -32,7 +32,7 @@ const Duration _kIndicatorScaleDuration = const Duration(milliseconds: 200);
 /// finished.
 ///
 /// Used by [RefreshIndicator.onRefresh].
-typedef RefreshCallback = Future<Null> Function();
+typedef Future<Null> RefreshCallback();
 
 // The state machine moves through these modes only when the scrollable
 // identified by scrollableKey has been scrolled to its min or max limit.
@@ -75,7 +75,7 @@ enum _RefreshIndicatorMode {
 ///  * [RefreshIndicatorState], can be used to programmatically show the refresh indicator.
 ///  * [RefreshProgressIndicator], widget used by [RefreshIndicator] to show
 ///    the inner circular progress spinner during refreshes.
-///  * [CupertinoRefreshControl], an iOS equivalent of the pull-to-refresh pattern.
+///  * [CupertinoSliverRefreshControl], an iOS equivalent of the pull-to-refresh pattern.
 ///    Must be used as a sliver inside a [CustomScrollView] instead of wrapping
 ///    around a [ScrollView] because it's a part of the scrollable instead of
 ///    being overlaid on top of it.

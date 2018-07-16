@@ -100,11 +100,11 @@ class SystemUiOverlayStyle {
   /// System overlays should be drawn with a light color. Intended for
   /// applications with a dark background.
   static const SystemUiOverlayStyle light = const SystemUiOverlayStyle(
-    systemNavigationBarColor: const Color(0xFFFFFFFF),
+    systemNavigationBarColor: const Color(0xFF000000),
     systemNavigationBarDividerColor: null,
     statusBarColor: null,
-    systemNavigationBarIconBrightness: Brightness.dark,
-    statusBarIconBrightness: Brightness.dark,
+    systemNavigationBarIconBrightness: Brightness.light,
+    statusBarIconBrightness: Brightness.light,
     statusBarBrightness: Brightness.dark,
   );
 
@@ -115,7 +115,7 @@ class SystemUiOverlayStyle {
     systemNavigationBarDividerColor: null,
     statusBarColor: null,
     systemNavigationBarIconBrightness: Brightness.light,
-    statusBarIconBrightness: Brightness.light,
+    statusBarIconBrightness: Brightness.dark,
     statusBarBrightness: Brightness.light,
   );
 
@@ -151,7 +151,7 @@ class SystemUiOverlayStyle {
 
   /// The brightness of top status bar.
   /// 
-  /// Only honored in iOS .
+  /// Only honored in iOS.
   final Brightness statusBarBrightness;
 
   /// The brightness of the top status bar icons.
@@ -170,6 +170,9 @@ class SystemUiOverlayStyle {
       'systemNavigationBarIconBrightness': systemNavigationBarIconBrightness?.toString(),
     };
   }
+
+  @override
+  String toString() => _toMap().toString();
 
   /// Creates a copy of this theme with the given fields replaced with new values.
   SystemUiOverlayStyle copyWith({
@@ -302,19 +305,16 @@ class SystemChrome {
   /// ```
   static void setSystemUIOverlayStyle(SystemUiOverlayStyle style) {
     assert(style != null);
-
     if (_pendingStyle != null) {
       // The microtask has already been queued; just update the pending value.
       _pendingStyle = style;
       return;
     }
-
     if (style == _latestStyle) {
       // Trivial success: no microtask has been queued and the given style is
       // already in effect, so no need to queue a microtask.
       return;
     }
-
     _pendingStyle = style;
     scheduleMicrotask(() {
       assert(_pendingStyle != null);
@@ -330,5 +330,9 @@ class SystemChrome {
   }
 
   static SystemUiOverlayStyle _pendingStyle;
+
+  /// The last style that was set using [SystemChrome.setSystemUIOverlayStyle].
+  @visibleForTesting
+  static SystemUiOverlayStyle get latestStyle => _latestStyle;
   static SystemUiOverlayStyle _latestStyle;
 }

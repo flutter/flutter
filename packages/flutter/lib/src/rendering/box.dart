@@ -75,6 +75,10 @@ class _DebugSize extends Size {
 /// _expanding_ if it is tightly infinite (its minimum and maximum constraints
 /// are both infinite). See: [new BoxConstraints.expand].
 ///
+/// An axis whose _minimum_ constraint is infinite is just said to be _infinite_
+/// (since by definition the maximum constraint must also be infinite in that
+/// case). See: [hasInfiniteWidth], [hasInfiniteHeight].
+///
 /// A size is _constrained_ when it satisfies a [BoxConstraints] description.
 /// See: [constrain], [constrainWidth], [constrainHeight],
 /// [constrainDimensions], [constrainSizeAndAttemptToPreserveAspectRatio],
@@ -346,10 +350,52 @@ class BoxConstraints extends Constraints {
   bool get isTight => hasTightWidth && hasTightHeight;
 
   /// Whether there is an upper bound on the maximum width.
+  ///
+  /// See also:
+  ///
+  ///  * [hasBoundedHeight], the equivalent for the vertical axis.
+  ///  * [hasInfiniteWidth], which describes whether the minimum width
+  ///    constraint is infinite.
   bool get hasBoundedWidth => maxWidth < double.infinity;
 
   /// Whether there is an upper bound on the maximum height.
+  ///
+  /// See also:
+  ///
+  ///  * [hasBoundedWidth], the equivalent for the horizontal axis.
+  ///  * [hasInfiniteHeight], which describes whether the minimum height
+  ///    constraint is infinite.
   bool get hasBoundedHeight => maxHeight < double.infinity;
+
+  /// Whether the width constraint is infinite.
+  ///
+  /// Such a constraint is used to indicate that a box should grow as large as
+  /// some other constraint (in this case, horizontally). If constraints are
+  /// infinite, then they must have other (non-infinite) constraints [enforce]d
+  /// upon them, or must be [tighten]ed, before they can be used to derive a
+  /// [Size] for a [RenderBox.size].
+  ///
+  /// See also:
+  ///
+  ///  * [hasInfiniteHeight], the equivalent for the vertical axis.
+  ///  * [hasBoundedWidth], which describes whether the maximum width
+  ///    constraint is finite.
+  bool get hasInfiniteWidth => minWidth >= double.infinity;
+
+  /// Whether the height constraint is infinite.
+  ///
+  /// Such a constraint is used to indicate that a box should grow as large as
+  /// some other constraint (in this case, vertically). If constraints are
+  /// infinite, then they must have other (non-infinite) constraints [enforce]d
+  /// upon them, or must be [tighten]ed, before they can be used to derive a
+  /// [Size] for a [RenderBox.size].
+  ///
+  /// See also:
+  ///
+  ///  * [hasInfiniteWidth], the equivalent for the horizontal axis.
+  ///  * [hasBoundedHeight], which describes whether the maximum height
+  ///    constraint is finite.
+  bool get hasInfiniteHeight => minHeight >= double.infinity;
 
   /// Whether the given size satisfies the constraints.
   bool isSatisfiedBy(Size size) {
@@ -1464,10 +1510,10 @@ abstract class RenderBox extends RenderObject {
     return _size;
   }
   Size _size;
-  @protected
   /// Setting the size, in checked mode, triggers some analysis of the render box,
   /// as implemented by [debugAssertDoesMeetConstraints], including calling the intrinsic
   /// sizing methods and checking that they meet certain invariants.
+  @protected
   set size(Size value) {
     assert(!(debugDoingThisResize && debugDoingThisLayout));
     assert(sizedByParent || !debugDoingThisResize);

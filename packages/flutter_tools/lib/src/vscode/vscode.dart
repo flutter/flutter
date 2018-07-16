@@ -30,12 +30,13 @@ class VsCode {
     }
 
     // Check for presence of extension.
+    final String extensionIdentifierLower = extensionIdentifier.toLowerCase();
     final Iterable<FileSystemEntity> extensionDirs = fs
         .directory(extensionDirectory)
         .listSync()
         .where((FileSystemEntity d) => d is Directory)
         .where(
-            (FileSystemEntity d) => d.basename.startsWith(extensionIdentifier));
+            (FileSystemEntity d) => d.basename.toLowerCase().startsWith(extensionIdentifierLower));
 
     if (extensionDirs.isNotEmpty) {
       final FileSystemEntity extensionDir = extensionDirs.first;
@@ -181,7 +182,7 @@ class VsCode {
     if (!fs.isFileSync(packageJsonPath))
       return null;
     final String jsonString = fs.file(packageJsonPath).readAsStringSync();
-    final Map<String, String> jsonObject = json.decode(jsonString);
+    final Map<String, dynamic> jsonObject = json.decode(jsonString);
     return jsonObject['version'];
   }
 }

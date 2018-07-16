@@ -10,6 +10,7 @@ import 'package:meta/meta.dart';
 import 'package:yaml/yaml.dart';
 
 import 'base/file_system.dart';
+import 'base/utils.dart';
 import 'cache.dart';
 import 'globals.dart';
 
@@ -33,13 +34,25 @@ class FlutterManifest {
     return _createFromYaml(loadYaml(manifest));
   }
 
-  static Future<FlutterManifest> _createFromYaml(Object yamlDocument) async {
+  static Future<FlutterManifest> _createFromYaml(dynamic yamlDocument) async {
     final FlutterManifest pubspec = new FlutterManifest._();
     if (yamlDocument != null && !await _validate(yamlDocument))
       return null;
 
-    pubspec._descriptor = yamlDocument ?? <String, dynamic>{};
-    pubspec._flutterDescriptor = pubspec._descriptor['flutter'] ?? <String, dynamic>{};
+    final Map<dynamic, dynamic> yamlMap = yamlDocument;
+    if (yamlMap != null) {
+      pubspec._descriptor = yamlMap.cast<String, dynamic>();
+    } else {
+      pubspec._descriptor = <String, dynamic>{};
+    }
+
+    final Map<dynamic, dynamic> flutterMap = pubspec._descriptor['flutter'];
+    if (flutterMap != null) {
+      pubspec._flutterDescriptor = flutterMap.cast<String, dynamic>();
+    } else {
+      pubspec._flutterDescriptor = <String, dynamic>{};
+    }
+
     return pubspec;
   }
 
@@ -87,12 +100,40 @@ class FlutterManifest {
     return _flutterDescriptor['uses-material-design'] ?? false;
   }
 
+  /// Properties defining how to expose this Flutter project as a module
+  /// for integration into an unspecified host app.
+  YamlMap get moduleDescriptor {
+    return _flutterDescriptor.containsKey('module')
+        ? _flutterDescriptor['module'] ?? const <String, dynamic>{}
+        : null;
+  }
+
+  /// True if this manifest declares a Flutter module project.
+  ///
+  /// A Flutter project is considered a module when it has a `module:`
+  /// descriptor. A Flutter module project supports integration into an
+  /// existing host app.
+  ///
+  /// Such a project can be created using `flutter create -t module`.
+  bool get isModule => moduleDescriptor != null;
+
   List<Map<String, dynamic>> get fontsDescriptor {
-   return _flutterDescriptor['fonts'] ?? const <Map<String, dynamic>>[];
+    final List<dynamic> fontList = _flutterDescriptor['fonts'];
+    return fontList == null
+        ? const <Map<String, dynamic>>[]
+        : fontList.map<Map<String, dynamic>>(castStringKeyedMap).toList();
   }
 
   List<Uri> get assets {
-    return _flutterDescriptor['assets']?.map(Uri.encodeFull)?.map(Uri.parse)?.toList() ?? const <Uri>[];
+    final List<dynamic> assets = _flutterDescriptor['assets'];
+    if (assets == null) {
+      return const <Uri>[];
+    }
+    return assets
+        .cast<String>()
+        .map<String>(Uri.encodeFull)
+        ?.map<Uri>(Uri.parse)
+        ?.toList();
   }
 
   List<Font> _fonts;
@@ -107,8 +148,8 @@ class FlutterManifest {
       return <Font>[];
 
     final List<Font> fonts = <Font>[];
-    for (Map<String, dynamic> fontFamily in _flutterDescriptor['fonts']) {
-      final List<Map<String, dynamic>> fontFiles = fontFamily['fonts'];
+    for (Map<String, dynamic> fontFamily in fontsDescriptor) {
+      final List<dynamic> fontFiles = fontFamily['fonts'];
       final String familyName = fontFamily['family'];
       if (familyName == null) {
         printError('Warning: Missing family name for font.', emphasis: true);
@@ -120,7 +161,7 @@ class FlutterManifest {
       }
 
       final List<FontAsset> fontAssets = <FontAsset>[];
-      for (Map<String, dynamic> fontFile in fontFiles) {
+      for (Map<dynamic, dynamic> fontFile in fontFiles) {
         final String asset = fontFile['asset'];
         if (asset == null) {
           printError('Warning: Missing asset in fonts for $familyName', emphasis: true);
@@ -199,7 +240,7 @@ String buildSchemaPath(FileSystem fs) {
   );
 }
 
-Future<bool> _validate(Object manifest) async {
+Future<bool> _validate(dynamic manifest) async {
   final String schemaPath = buildSchemaPath(fs);
 
   final String schemaData = fs.file(schemaPath).readAsStringSync();

@@ -396,7 +396,7 @@ class _RectangleDemoState extends State<_RectangleDemo> {
   }
 }
 
-typedef _DemoBuilder = Widget Function(_ArcDemo demo);
+typedef Widget _DemoBuilder(_ArcDemo demo);
 
 class _ArcDemo {
   _ArcDemo(this.title, this.builder, TickerProvider vsync)

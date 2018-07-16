@@ -152,7 +152,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   void initInstances() {
     timeDilation = 1.0; // just in case the developer has artificially changed it for development
     HttpOverrides.global = new _MockHttpOverrides();
-    _testTextInput = new TestTextInput()..register();
+    _testTextInput = new TestTextInput(onCleared: _resetFocusedEditable)..register();
     super.initInstances();
   }
 
@@ -235,6 +235,33 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
     });
   }
 
+  Size _surfaceSize;
+
+  /// Artificially changes the surface size to `size` on the Widget binding,
+  /// then flushes microtasks.
+  ///
+  /// Set to null to use the default surface size.
+  Future<Null> setSurfaceSize(Size size) {
+    return TestAsyncUtils.guard(() async {
+      assert(inTest);
+      if (_surfaceSize == size)
+        return null;
+      _surfaceSize = size;
+      handleMetricsChanged();
+      return null;
+    });
+  }
+
+  @override
+  ViewConfiguration createViewConfiguration() {
+    final double devicePixelRatio = ui.window.devicePixelRatio;
+    final Size size = _surfaceSize ?? ui.window.physicalSize / devicePixelRatio;
+    return new ViewConfiguration(
+      size: size,
+      devicePixelRatio: devicePixelRatio,
+    );
+  }
+
   /// Acts as if the application went idle.
   ///
   /// Runs all remaining microtasks, including those scheduled as a result of
@@ -280,10 +307,20 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   /// The current client of the onscreen keyboard. Callers must pump
   /// an additional frame after setting this property to complete the
   /// the focus change.
+  ///
+  /// Instead of setting this directly, consider using
+  /// [WidgetTester.showKeyboard].
   EditableTextState get focusedEditable => _focusedEditable;
   EditableTextState _focusedEditable;
   set focusedEditable(EditableTextState value) {
-    _focusedEditable = value..requestKeyboard();
+    if (_focusedEditable != value) {
+      _focusedEditable = value;
+      value?.requestKeyboard();
+    }
+  }
+
+  void _resetFocusedEditable() {
+    _focusedEditable = null;
   }
 
   /// Returns the exception most recently caught by the Flutter framework.
@@ -502,7 +539,6 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
     testZone.runBinary(_runTestBody, testBody, invariantTester)
       .whenComplete(testCompletionHandler);
     timeout?.catchError(handleUncaughtError);
-    asyncBarrier(); // When using AutomatedTestWidgetsFlutterBinding, this flushes the microtasks.
     return testCompleter.future;
   }
 
@@ -532,6 +568,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
     }
 
     assert(inTest);
+    asyncBarrier(); // When using AutomatedTestWidgetsFlutterBinding, this flushes the microtasks.
     return null;
   }
 
@@ -848,22 +885,23 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
     });
 
     return new Future<Null>.microtask(() async {
+      // testBodyResult is a Future that was created in the Zone of the
+      // fakeAsync. This means that if we await it here, it will register a
+      // microtask to handle the future _in the fake async zone_. We avoid this
+      // by calling '.then' in the current zone. While flushing the microtasks
+      // of the fake-zone below, the new future will be completed and can then
+      // be used without fakeAsync.
+      final Future<Null> resultFuture = testBodyResult.then<Null>((_) {
+        // Do nothing.
+      });
+
       // Resolve interplay between fake async and real async calls.
       fakeAsync.flushMicrotasks();
       while (_pendingAsyncTasks != null) {
         await _pendingAsyncTasks.future;
         fakeAsync.flushMicrotasks();
       }
-
-      // If we get here and fakeAsync != _currentFakeAsync, then the test
-      // probably timed out.
-
-      // testBodyResult is a Future that was created in the Zone of the
-      // fakeAsync. This means that if we await it here, it will register a
-      // microtask to handle the future _in the fake async zone_. We avoid this
-      // by returning the wrapped microtask future that we've created _outside_
-      // the fake async zone.
-      return testBodyResult;
+      return resultFuture;
     });
   }
 
@@ -1239,7 +1277,7 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
 
   @override
   ViewConfiguration createViewConfiguration() {
-    return new TestViewConfiguration();
+    return new TestViewConfiguration(size: _surfaceSize ?? _kDefaultTestViewportSize);
   }
 
   @override
@@ -1429,6 +1467,9 @@ class _MockHttpOverrides extends HttpOverrides {
 class _MockHttpClient implements HttpClient {
   @override
   bool autoUncompress;
+
+  @override
+  Duration connectionTimeout;
 
   @override
   Duration idleTimeout;

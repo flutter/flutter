@@ -42,7 +42,7 @@ class SecondWidgetState extends State<SecondWidget> {
   }
 }
 
-typedef ExceptionCallback = void Function(dynamic exception);
+typedef void ExceptionCallback(dynamic exception);
 
 class ThirdWidget extends StatelessWidget {
   const ThirdWidget({ this.targetKey, this.onException });
@@ -89,7 +89,7 @@ class OnTapPage extends StatelessWidget {
   }
 }
 
-typedef OnObservation = void Function(Route<dynamic> route, Route<dynamic> previousRoute);
+typedef void OnObservation(Route<dynamic> route, Route<dynamic> previousRoute);
 
 class TestObserver extends NavigatorObserver {
   OnObservation onPushed;
@@ -186,7 +186,7 @@ void main() {
     );
     await tester.pumpWidget(widget);
     await tester.tap(find.byKey(targetKey));
-    expect(exception, const isInstanceOf<FlutterError>());
+    expect(exception, isInstanceOf<FlutterError>());
     expect('$exception', startsWith('Navigator operation requested with a context'));
   });
 

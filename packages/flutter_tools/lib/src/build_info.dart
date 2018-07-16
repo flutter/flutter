@@ -11,7 +11,9 @@ import 'globals.dart';
 /// Information about a build to be performed or used.
 class BuildInfo {
   const BuildInfo(this.mode, this.flavor, {
+    this.previewDart2 = false,
     this.trackWidgetCreation = false,
+    this.buildSnapshot = false,
     this.extraFrontEndOptions,
     this.extraGenSnapshotOptions,
     this.buildSharedLibrary,
@@ -32,11 +34,17 @@ class BuildInfo {
   /// Mode-Flavor (e.g. Release-Paid).
   final String flavor;
 
+  /// Whether build should be done using Dart2 Frontend parser.
+  final bool previewDart2;
+
   final List<String> fileSystemRoots;
   final String fileSystemScheme;
 
   /// Whether the build should track widget creation locations.
   final bool trackWidgetCreation;
+
+  /// Whether the build should create VM snapshot instead of using prebuilt one from engine.
+  final bool buildSnapshot;
 
   /// Extra command-line options for front-end.
   final String extraFrontEndOptions;
@@ -89,7 +97,9 @@ class BuildInfo {
 
   BuildInfo withTargetPlatform(TargetPlatform targetPlatform) =>
       new BuildInfo(mode, flavor,
+          previewDart2: previewDart2,
           trackWidgetCreation: trackWidgetCreation,
+          buildSnapshot: buildSnapshot,
           extraFrontEndOptions: extraFrontEndOptions,
           extraGenSnapshotOptions: extraGenSnapshotOptions,
           buildSharedLibrary: buildSharedLibrary,

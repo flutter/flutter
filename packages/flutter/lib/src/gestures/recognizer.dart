@@ -22,7 +22,7 @@ export 'pointer_router.dart' show PointerRouter;
 /// [GestureRecognizer.invokeCallback]. This allows the
 /// [GestureRecognizer.invokeCallback] mechanism to be generically used with
 /// anonymous functions that return objects of particular types.
-typedef RecognizerCallback<T> = T Function();
+typedef T RecognizerCallback<T>();
 
 /// The base class that all gesture recognizers inherit from.
 ///

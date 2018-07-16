@@ -28,7 +28,7 @@ import '../runner/flutter_command.dart';
 import '../tester/flutter_tester.dart';
 import '../vmservice.dart';
 
-const String protocolVersion = '0.3.0';
+const String protocolVersion = '0.4.0';
 
 /// A server process command. This command will start up a long-lived server.
 /// It reads JSON-RPC based commands from stdin, executes them, and returns
@@ -73,9 +73,9 @@ class DaemonCommand extends FlutterCommand {
   }
 }
 
-typedef DispatchCommand = void Function(Map<String, dynamic> command);
+typedef void DispatchCommand(Map<String, dynamic> command);
 
-typedef CommandHandler = Future<dynamic> Function(Map<String, dynamic> args);
+typedef Future<dynamic> CommandHandler(Map<String, dynamic> args);
 
 class Daemon {
   Daemon(
@@ -83,7 +83,7 @@ class Daemon {
     this.sendCommand, {
     this.daemonCommand,
     this.notifyingLogger,
-    this.logToStdout = false
+    this.logToStdout = false,
   }) {
     // Set up domains.
     _registerDomain(daemonDomain = new DaemonDomain(this));
@@ -143,8 +143,12 @@ class Daemon {
         throw 'no domain for method: $method';
 
       _domainMap[prefix].handleCommand(name, id, request['params'] ?? const <String, dynamic>{});
-    } catch (error) {
-      _send(<String, dynamic>{'id': id, 'error': _toJsonable(error)});
+    } catch (error, trace) {
+      _send(<String, dynamic>{
+        'id': id,
+        'error': _toJsonable(error),
+        'trace': '$trace',
+      });
     }
   }
 
@@ -184,14 +188,18 @@ abstract class Domain {
       if (_handlers.containsKey(command))
         return _handlers[command](args);
       throw 'command not understood: $name.$command';
-    }).then<Null>((dynamic result) {
+    }).then<dynamic>((dynamic result) {
       if (result == null) {
         _send(<String, dynamic>{'id': id});
       } else {
         _send(<String, dynamic>{'id': id, 'result': _toJsonable(result)});
       }
     }).catchError((dynamic error, dynamic trace) {
-      _send(<String, dynamic>{'id': id, 'error': _toJsonable(error)});
+      _send(<String, dynamic>{
+        'id': id,
+        'error': _toJsonable(error),
+        'trace': '$trace',
+      });
     });
   }
 
@@ -300,11 +308,9 @@ class DaemonDomain extends Domain {
 /// It fires events for application start, stop, and stdout and stderr.
 class AppDomain extends Domain {
   AppDomain(Daemon daemon) : super(daemon, 'app') {
-    registerHandler('start', start);
     registerHandler('restart', restart);
     registerHandler('callServiceExtension', callServiceExtension);
     registerHandler('stop', stop);
-    registerHandler('discover', discover);
   }
 
   static final Uuid _uuidGenerator = new Uuid();
@@ -312,57 +318,6 @@ class AppDomain extends Domain {
   static String _getNewAppId() => _uuidGenerator.generateV4();
 
   final List<AppInstance> _apps = <AppInstance>[];
-
-  Future<Map<String, dynamic>> start(Map<String, dynamic> args) async {
-    final String deviceId = _getStringArg(args, 'deviceId', required: true);
-    final String projectDirectory = _getStringArg(args, 'projectDirectory', required: true);
-    final bool startPaused = _getBoolArg(args, 'startPaused') ?? false;
-    final bool useTestFonts = _getBoolArg(args, 'useTestFonts') ?? false;
-    final String route = _getStringArg(args, 'route');
-    final String mode = _getStringArg(args, 'mode');
-    final String flavor = _getStringArg(args, 'flavor');
-    final String target = _getStringArg(args, 'target');
-    final bool enableHotReload = _getBoolArg(args, 'hot') ?? kHotReloadDefault;
-
-    final Device device = await daemon.deviceDomain._getOrLocateDevice(deviceId);
-    if (device == null)
-      throw "device '$deviceId' not found";
-
-    if (!fs.isDirectorySync(projectDirectory))
-      throw "'$projectDirectory' does not exist";
-
-    final BuildInfo buildInfo = new BuildInfo(
-      getBuildModeForName(mode) ?? BuildMode.debug,
-      flavor,
-    );
-    DebuggingOptions options;
-    if (buildInfo.isRelease) {
-      options = new DebuggingOptions.disabled(buildInfo);
-    } else {
-      options = new DebuggingOptions.enabled(
-        buildInfo,
-        startPaused: startPaused,
-        useTestFonts: useTestFonts,
-      );
-    }
-
-    final AppInstance app = await startApp(
-      device,
-      projectDirectory,
-      target,
-      route,
-      options,
-      enableHotReload,
-      trackWidgetCreation: _getBoolArg(args, 'track-widget-creation'),
-    );
-
-    return <String, dynamic>{
-      'appId': app.id,
-      'deviceId': device.id,
-      'directory': projectDirectory,
-      'supportsRestart': isRestartSupported(enableHotReload, device)
-    };
-  }
 
   Future<AppInstance> startApp(
     Device device, String projectDirectory, String target, String route,
@@ -384,6 +339,7 @@ class AppDomain extends Domain {
 
     final FlutterDevice flutterDevice = new FlutterDevice(
       device,
+      previewDart2: options.buildInfo.previewDart2,
       trackWidgetCreation: trackWidgetCreation,
       dillOutputPath: dillOutputPath,
     );
@@ -445,7 +401,7 @@ class AppDomain extends Domain {
       _sendAppEvent(app, 'started');
     });
 
-    await app._runInZone(this, () async {
+    await app._runInZone<Null>(this, () async {
       try {
         await runner.run(
           connectionInfoCompleter: connectionInfoCompleter,
@@ -453,8 +409,11 @@ class AppDomain extends Domain {
           route: route,
         );
         _sendAppEvent(app, 'stop');
-      } catch (error) {
-        _sendAppEvent(app, 'stop', <String, dynamic>{'error': _toJsonable(error)});
+      } catch (error, trace) {
+        _sendAppEvent(app, 'stop', <String, dynamic>{
+          'error': _toJsonable(error),
+          'trace': '$trace',
+        });
       } finally {
         fs.currentDirectory = cwd;
         _apps.remove(app);
@@ -481,7 +440,7 @@ class AppDomain extends Domain {
     if (_inProgressHotReload != null)
       throw 'hot restart already in progress';
 
-    _inProgressHotReload = app._runInZone(this, () {
+    _inProgressHotReload = app._runInZone<OperationResult>(this, () {
       return app.restart(fullRestart: fullRestart, pauseAfterRestart: pauseAfterRestart);
     });
     return _inProgressHotReload.whenComplete(() {
@@ -501,7 +460,7 @@ class AppDomain extends Domain {
   Future<Map<String, dynamic>> callServiceExtension(Map<String, dynamic> args) async {
     final String appId = _getStringArg(args, 'appId', required: true);
     final String methodName = _getStringArg(args, 'methodName');
-    final Map<String, String> params = args['params'] ?? <String, String>{};
+    final Map<String, dynamic> params = args['params'] == null ? <String, dynamic>{} : castStringKeyedMap(args['params']);
 
     final AppInstance app = _getApp(appId);
     if (app == null)
@@ -535,22 +494,6 @@ class AppDomain extends Domain {
     });
   }
 
-  Future<List<Map<String, dynamic>>> discover(Map<String, dynamic> args) async {
-    final String deviceId = _getStringArg(args, 'deviceId', required: true);
-
-    final Device device = await daemon.deviceDomain._getDevice(deviceId);
-    if (device == null)
-      throw "device '$deviceId' not found";
-
-    final List<DiscoveredApp> apps = await device.discoverApps();
-    return apps.map((DiscoveredApp app) {
-      return <String, dynamic>{
-        'id': app.id,
-        'observatoryDevicePort': app.observatoryPort,
-      };
-    }).toList();
-  }
-
   AppInstance _getApp(String id) {
     return _apps.firstWhere((AppInstance app) => app.id == id, orElse: () => null);
   }
@@ -563,7 +506,7 @@ class AppDomain extends Domain {
   }
 }
 
-typedef _DeviceEventHandler = void Function(Device device);
+typedef void _DeviceEventHandler(Device device);
 
 /// This domain lets callers list and monitor connected devices.
 ///
@@ -683,25 +626,6 @@ class DeviceDomain extends Domain {
       if (device != null)
         return device;
     }
-    return null;
-  }
-
-  /// Return a known matching device, or scan for devices if no known match is found.
-  Future<Device> _getOrLocateDevice(String deviceId) async {
-    // Look for an already known device.
-    final Device device = await _getDevice(deviceId);
-    if (device != null)
-      return device;
-
-    // Scan the different device providers for a match.
-    for (PollingDeviceDiscovery discoverer in _discoverers) {
-      final List<Device> devices = await discoverer.pollingGetDevices();
-      for (Device device in devices)
-        if (device.id == deviceId)
-          return device;
-    }
-
-    // No match found.
     return null;
   }
 }
@@ -828,10 +752,10 @@ class AppInstance {
     _logger.close();
   }
 
-  dynamic _runInZone(AppDomain domain, dynamic method()) {
+  Future<T> _runInZone<T>(AppDomain domain, dynamic method()) {
     _logger ??= new _AppRunLogger(domain, this, parent: logToStdout ? logger : null);
 
-    return context.run<dynamic>(
+    return context.run<T>(
       body: method,
       overrides: <Type, Generator>{
         Logger: () => _logger,
@@ -847,6 +771,7 @@ class EmulatorDomain extends Domain {
   EmulatorDomain(Daemon daemon) : super(daemon, 'emulator') {
     registerHandler('getEmulators', getEmulators);
     registerHandler('launch', launch);
+    registerHandler('create', create);
   }
 
   Future<List<Map<String, dynamic>>> getEmulators([Map<String, dynamic> args]) async {
@@ -865,6 +790,16 @@ class EmulatorDomain extends Domain {
     } else {
       await matches.first.launch();
     }
+  }
+
+  Future<Map<String, dynamic>> create(Map<String, dynamic> args) async {
+    final String name = _getStringArg(args, 'name', required: false);
+    final CreateEmulatorResult res = await emulators.createEmulator(name: name);
+    return <String, dynamic>{
+      'success': res.success,
+      'emulatorName': res.emulatorName,
+      'error': res.error,
+    };
   }
 }
 
@@ -935,10 +870,6 @@ class _AppRunLogger extends Logger {
     bool expectSlowOperation = false,
     int progressIndicatorPadding = 52,
   }) {
-    // Ignore nested progresses; return a no-op status object.
-    if (_status != null)
-      return new Status();
-
     final int id = _nextProgressId++;
 
     _sendProgressEvent(<String, dynamic>{
