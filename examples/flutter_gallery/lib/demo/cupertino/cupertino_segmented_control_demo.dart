@@ -79,35 +79,36 @@ class _CupertinoSegmentedControlDemoState extends State<CupertinoSegmentedContro
                 horizontal: 16.0,
               ),
               child: new Container(
-                  padding: const EdgeInsets.symmetric(
-                    vertical: 64.0,
-                    horizontal: 16.0,
-                  ),
-                  decoration: new BoxDecoration(
-                    color: CupertinoColors.white,
-                    borderRadius: new BorderRadius.circular(3.0),
-                    boxShadow: const <BoxShadow>[
-                      const BoxShadow(
-                        offset: const Offset(0.0, 3.0),
-                        blurRadius: 5.0,
-                        spreadRadius: -1.0,
-                        color: _kKeyUmbraOpacity,
-                      ),
-                      const BoxShadow(
-                        offset: const Offset(0.0, 6.0),
-                        blurRadius: 10.0,
-                        spreadRadius: 0.0,
-                        color: _kKeyPenumbraOpacity,
-                      ),
-                      const BoxShadow(
-                        offset: const Offset(0.0, 1.0),
-                        blurRadius: 18.0,
-                        spreadRadius: 0.0,
-                        color: _kAmbientShadowOpacity,
-                      ),
-                    ],
-                  ),
-                  child: icons[sharedValue]),
+                padding: const EdgeInsets.symmetric(
+                  vertical: 64.0,
+                  horizontal: 16.0,
+                ),
+                decoration: new BoxDecoration(
+                  color: CupertinoColors.white,
+                  borderRadius: new BorderRadius.circular(3.0),
+                  boxShadow: const <BoxShadow>[
+                    const BoxShadow(
+                      offset: const Offset(0.0, 3.0),
+                      blurRadius: 5.0,
+                      spreadRadius: -1.0,
+                      color: _kKeyUmbraOpacity,
+                    ),
+                    const BoxShadow(
+                      offset: const Offset(0.0, 6.0),
+                      blurRadius: 10.0,
+                      spreadRadius: 0.0,
+                      color: _kKeyPenumbraOpacity,
+                    ),
+                    const BoxShadow(
+                      offset: const Offset(0.0, 1.0),
+                      blurRadius: 18.0,
+                      spreadRadius: 0.0,
+                      color: _kAmbientShadowOpacity,
+                    ),
+                  ],
+                ),
+                child: icons[sharedValue],
+              ),
             ),
           ),
         ],
