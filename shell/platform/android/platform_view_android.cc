@@ -178,8 +178,9 @@ void PlatformViewAndroid::DispatchSemanticsAction(JNIEnv* env,
 }
 
 // |shell::PlatformView|
-void PlatformViewAndroid::UpdateSemantics(blink::SemanticsNodeUpdates update,
-                                          blink::CustomAccessibilityActionUpdates actions) {
+void PlatformViewAndroid::UpdateSemantics(
+    blink::SemanticsNodeUpdates update,
+    blink::CustomAccessibilityActionUpdates actions) {
   constexpr size_t kBytesPerNode = 36 * sizeof(int32_t);
   constexpr size_t kBytesPerChild = sizeof(int32_t);
   constexpr size_t kBytesPerAction = 2 * sizeof(int32_t);
@@ -196,7 +197,8 @@ void PlatformViewAndroid::UpdateSemantics(blink::SemanticsNodeUpdates update,
       num_bytes +=
           value.second.childrenInTraversalOrder.size() * kBytesPerChild;
       num_bytes += value.second.childrenInHitTestOrder.size() * kBytesPerChild;
-      num_bytes += value.second.customAccessibilityActions.size() * kBytesPerChild;
+      num_bytes +=
+          value.second.customAccessibilityActions.size() * kBytesPerChild;
     }
 
     std::vector<uint8_t> buffer(num_bytes);
@@ -271,7 +273,8 @@ void PlatformViewAndroid::UpdateSemantics(blink::SemanticsNodeUpdates update,
     // custom accessibility actions.
     size_t num_action_bytes = actions.size() * kBytesPerAction;
     std::vector<uint8_t> actions_buffer(num_action_bytes);
-    int32_t* actions_buffer_int32 = reinterpret_cast<int32_t*>(&actions_buffer[0]);
+    int32_t* actions_buffer_int32 =
+        reinterpret_cast<int32_t*>(&actions_buffer[0]);
 
     std::vector<std::string> action_strings;
     size_t actions_position = 0;
@@ -289,18 +292,24 @@ void PlatformViewAndroid::UpdateSemantics(blink::SemanticsNodeUpdates update,
       }
     }
 
-    fml::jni::ScopedJavaLocalRef<jobject> direct_actions_buffer(
-      env, env->NewDirectByteBuffer(actions_buffer.data(), actions_buffer.size()));
+    // Calling NewDirectByteBuffer in API level 22 and below with a size of zero
+    // will cause a JNI crash.
+    if (actions_buffer.size() > 0) {
+      fml::jni::ScopedJavaLocalRef<jobject> direct_actions_buffer(
+          env, env->NewDirectByteBuffer(actions_buffer.data(),
+                                        actions_buffer.size()));
+      FlutterViewUpdateCustomAccessibilityActions(
+          env, view.obj(), direct_actions_buffer.obj(),
+          fml::jni::VectorToStringArray(env, action_strings).obj());
+    }
 
-    fml::jni::ScopedJavaLocalRef<jobject> direct_buffer(
-        env, env->NewDirectByteBuffer(buffer.data(), buffer.size()));
-
-    FlutterViewUpdateCustomAccessibilityActions(
-      env, view.obj(), direct_actions_buffer.obj(),
-      fml::jni::VectorToStringArray(env, action_strings).obj());
-    FlutterViewUpdateSemantics(
-      env, view.obj(), direct_buffer.obj(),
-      fml::jni::VectorToStringArray(env, strings).obj());
+    if (buffer.size() > 0) {
+      fml::jni::ScopedJavaLocalRef<jobject> direct_buffer(
+          env, env->NewDirectByteBuffer(buffer.data(), buffer.size()));
+      FlutterViewUpdateSemantics(
+          env, view.obj(), direct_buffer.obj(),
+          fml::jni::VectorToStringArray(env, strings).obj());
+    }
   }
 }
 
