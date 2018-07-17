@@ -40,7 +40,8 @@ class IOSEmulator extends Emulator {
     Future<bool> launchSimulator(List<String> additionalArgs) async {
       final List<String> args = <String>['open']
           .followedBy(additionalArgs)
-          .followedBy(<String>['-a', getSimulatorPath()]);
+          .followedBy(<String>['-a', getSimulatorPath()])
+          .toList();
 
       final RunResult launchResult = await runAsync(args);
       if (launchResult.exitCode != 0) {
