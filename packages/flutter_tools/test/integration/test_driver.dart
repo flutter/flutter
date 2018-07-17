@@ -54,9 +54,6 @@ class FlutterTestDriver {
     return msg;
   }
 
-  // TODO(dantup): Is there a better way than spawning a proc? This breaks debugging..
-  // However, there's a lot of logic inside RunCommand that wouldn't be good
-  // to duplicate here.
   Future<void> run({bool withDebugger = false, bool pauseOnExceptions = false}) async {
     await _setupProcess(<String>[
         'run',
