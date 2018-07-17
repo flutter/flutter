@@ -453,6 +453,99 @@ void main() {
         ]),
       ));
     });
+
+    testWidgets('offAxisFraction, magnificationRate changes matrix', (WidgetTester tester) async {
+      final ScrollController controller = new ScrollController(
+          initialScrollOffset: 200.0);
+
+      await tester.pumpWidget(
+        new Directionality(
+          textDirection: TextDirection.ltr,
+          child: new ListWheelScrollView(
+            controller: controller,
+            itemExtent: 100.0,
+            offAxisFraction: 0.5,
+            children: <Widget>[
+              new Container(
+                width: 200.0,
+                child: const Center(
+                  child: const Text('blah'),
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+
+      final RenderListWheelViewport viewport = tester.firstRenderObject(find.byType(Container)).parent;
+      expect(viewport, paints
+        ..transform(
+          matrix4: equals(<dynamic>[
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            moreOrLessEquals(0.6318744917928063),
+            moreOrLessEquals(0.3420201433256688),
+            moreOrLessEquals(-0.0010260604299770066),
+            0.0,
+            moreOrLessEquals(-1.1877435020329863),
+            moreOrLessEquals(0.9396926207859083),
+            moreOrLessEquals(-0.002819077862357725),
+            0.0,
+            moreOrLessEquals(-62.20844875763376),
+            moreOrLessEquals(-138.79047052615562),
+            moreOrLessEquals(1.4163714115784667),
+          ]),
+        ));
+
+      controller.jumpTo(0.0);
+
+      await tester.pumpWidget(
+        new Directionality(
+          textDirection: TextDirection.ltr,
+          child: new ListWheelScrollView(
+            controller: controller,
+            itemExtent: 100.0,
+            offAxisFraction: 0.5,
+            useMagnifier: true,
+            magnificationRate: 1.5,
+            children: <Widget>[
+              new Container(
+                width: 200.0,
+                child: const Center(
+                  child: const Text('blah'),
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+
+      expect(viewport, paints
+        ..transform(
+          matrix4: equals(<dynamic>[
+            1.5,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            1.5,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            1.5,
+            0.0,
+            0.0,
+            -150.0,
+            0.0,
+            1.0,
+          ]),
+        ));
+
+    });
   });
 
   group('scroll notifications', () {
