@@ -12,7 +12,7 @@ import 'package:flutter_tools/src/tester/flutter_tester.dart';
 import 'package:test/test.dart';
 
 import '../src/context.dart';
-import 'util.dart';
+import 'test_utils.dart';
 
 void main() {
   Directory tempDir;
