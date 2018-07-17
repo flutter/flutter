@@ -259,8 +259,7 @@ void main() {
         )
     );
 
-    final TextField textField =
-    tester.firstWidget(find.byType(TextField));
+    final TextField textField = tester.firstWidget(find.byType(TextField));
     expect(textField.cursorWidth, 2.0);
     expect(textField.cursorRadius, const Radius.circular(3.0));
   });

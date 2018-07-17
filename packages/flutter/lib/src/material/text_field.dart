@@ -523,7 +523,7 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
         rendererIgnoresPointer: true,
         cursorWidth: widget.cursorWidth,
         cursorRadius: widget.cursorRadius,
-        cursorColor: widget.cursorColor != null ? widget.cursorColor : Theme.of(context).textSelectionColor,
+        cursorColor: widget.cursorColor ?? Theme.of(context).textSelectionColor,
         keyboardAppearance: keyboardAppearance,
       ),
     );
