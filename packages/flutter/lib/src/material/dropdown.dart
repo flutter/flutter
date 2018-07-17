@@ -646,10 +646,12 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
           children: <Widget>[
             // If value is null (then _selectedIndex is null) then we display
             // the hint or nothing at all.
-            new IndexedStack(
-              index: _selectedIndex ?? hintIndex,
-              alignment: AlignmentDirectional.centerStart,
-              children: items,
+            new Expanded(
+              child: new IndexedStack(
+                index: _selectedIndex ?? hintIndex,
+                alignment: AlignmentDirectional.centerStart,
+                children: items,
+              ),
             ),
             new Icon(Icons.arrow_drop_down,
               size: widget.iconSize,
