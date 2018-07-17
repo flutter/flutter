@@ -64,7 +64,7 @@ class ActionSheet extends StatelessWidget {
     this.actionScrollController,
     this.cancelCallback,
   })  : assert(actions != null),
-        assert(actions.length >= 2),
+        //assert(actions.length >= 2),allow for cancel button
         super(key: key);
 
   /// The optional title of the action sheet, which is displayed in a larger
