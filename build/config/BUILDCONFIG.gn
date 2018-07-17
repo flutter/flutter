@@ -413,6 +413,7 @@ _native_compiler_configs = [
   "//build/config/compiler:default_include_dirs",
   "//build/config/compiler:runtime_library",
   "//build/config:no_rtti",
+  "//build/config:symbol_visibility_hidden",
 ]
 if (is_win) {
   _native_compiler_configs += [
@@ -426,7 +427,6 @@ if (is_win) {
 if (is_posix) {
   _native_compiler_configs += [
     "//build/config/gcc:no_exceptions",
-    "//build/config:symbol_visibility_hidden",
   ]
 }
 
