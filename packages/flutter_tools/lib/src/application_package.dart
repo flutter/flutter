@@ -158,7 +158,7 @@ abstract class IOSApp extends ApplicationPackage {
   IOSApp({@required String projectBundleId}) : super(id: projectBundleId);
 
   /// Creates a new IOSApp from an existing app bundle or IPA.
-  factory IOSApp.fromPrebuiltApp(File applicationBinary) {
+  factory IOSApp.fromPrebuiltApp(FileSystemEntity applicationBinary) {
     final FileSystemEntityType entityType = fs.typeSync(applicationBinary.path);
     if (entityType == FileSystemEntityType.notFound) {
       printError(
