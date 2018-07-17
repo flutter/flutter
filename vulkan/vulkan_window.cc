@@ -13,7 +13,6 @@
 #include "flutter/vulkan/vulkan_surface.h"
 #include "flutter/vulkan/vulkan_swapchain.h"
 #include "third_party/skia/include/gpu/GrContext.h"
-#include "third_party/skia/include/gpu/vk/GrVkInterface.h"
 
 namespace vulkan {
 
@@ -117,9 +116,9 @@ bool VulkanWindow::CreateSkiaGrContext() {
 }
 
 bool VulkanWindow::CreateSkiaBackendContext(GrVkBackendContext* context) {
-  auto interface = vk->CreateSkiaInterface();
+  auto getProc = vk->CreateSkiaGetProc();
 
-  if (interface == nullptr || !interface->validate(0)) {
+  if (getProc == nullptr) {
     return false;
   }
 
@@ -138,7 +137,7 @@ bool VulkanWindow::CreateSkiaBackendContext(GrVkBackendContext* context) {
                          kKHR_swapchain_GrVkExtensionFlag |
                          surface_->GetNativeSurface().GetSkiaExtensionName();
   context->fFeatures = skia_features;
-  context->fInterface.reset(interface.release());
+  context->fGetProc = std::move(getProc);
   context->fOwnsInstanceAndDevice = false;
   return true;
 }
