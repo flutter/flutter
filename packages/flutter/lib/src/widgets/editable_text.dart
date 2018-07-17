@@ -375,14 +375,14 @@ class EditableText extends StatefulWidget {
   /// Defaults to [Brightness.light].
   final Brightness keyboardAppearance;
 
-  /// Configures padding to edges surrounding a [Scrollable] when the Textfield scrolls into view
+  /// Configures padding to edges surrounding a [Scrollable] when the Textfield scrolls into view.
   ///
   /// When this widget receives focus and is not completely visible (for example scrolled partially
   /// off the screen or overlapped by the keyboard)
   /// then it will attempt to make itself visible by scrolling a surrounding [Scrollable], if one is present.
   /// This value controls how far from the edges of a [Scrollable] the TextField will be positioned after the scroll.
   ///
-  /// Defaults to EdgeInserts.all(20.0)
+  /// Defaults to EdgeInserts.all(20.0).
   final EdgeInsets scrollPadding;
 
   @override
