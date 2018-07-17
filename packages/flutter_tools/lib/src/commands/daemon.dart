@@ -322,7 +322,7 @@ class AppDomain extends Domain {
   Future<AppInstance> startApp(
     Device device, String projectDirectory, String target, String route,
     DebuggingOptions options, bool enableHotReload, {
-    String applicationBinary,
+    File applicationBinary,
     @required bool trackWidgetCreation,
     String projectRootPath,
     String packagesFilePath,

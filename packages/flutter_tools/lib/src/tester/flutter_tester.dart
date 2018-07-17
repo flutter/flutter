@@ -22,21 +22,21 @@ import '../protocol_discovery.dart';
 import '../version.dart';
 
 class FlutterTesterApp extends ApplicationPackage {
-  final String _directory;
+  final Directory _directory;
 
   factory FlutterTesterApp.fromCurrentDirectory() {
-    return new FlutterTesterApp._(fs.currentDirectory.path);
+    return new FlutterTesterApp._(fs.currentDirectory);
   }
 
-  FlutterTesterApp._(String directory)
+  FlutterTesterApp._(Directory directory)
       : _directory = directory,
-        super(id: directory);
+        super(id: directory.path);
 
   @override
-  String get name => fs.path.basename(_directory);
+  String get name => _directory.basename;
 
   @override
-  String get packagePath => fs.path.join(_directory, '.packages');
+  File get packagesFile => _directory.childFile('.packages');
 }
 
 // TODO(scheglov): This device does not currently work with full restarts.
