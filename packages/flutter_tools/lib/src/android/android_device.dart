@@ -271,14 +271,14 @@ class AndroidDevice extends Device {
   Future<bool> installApp(ApplicationPackage app) async {
     final AndroidApk apk = app;
     if (!apk.file.existsSync()) {
-      printError('"${apk.file.path}" does not exist.');
+      printError('"${fs.path.relative(apk.file.path)}" does not exist.');
       return false;
     }
 
     if (!await _checkForSupportedAdbVersion() || !await _checkForSupportedAndroidVersion())
       return false;
 
-    final Status status = logger.startProgress('Installing ${apk.file.path}...', expectSlowOperation: true);
+    final Status status = logger.startProgress('Installing ${fs.path.relative(apk.file.path)}...', expectSlowOperation: true);
     final RunResult installResult = await runAsync(adbCommandForDevice(<String>['install', '-t', '-r', apk.file.path]));
     status.stop();
     // Some versions of adb exit with exit code 0 even on failure :(
