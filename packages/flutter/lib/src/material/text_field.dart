@@ -289,7 +289,7 @@ class TextField extends StatefulWidget {
 
   /// How rounded the corners of the cursor should be.
   ///
-  /// By default, the cursor has a Radius of zero.
+  /// By default, the cursor has a null Radius
   final Radius cursorRadius;
 
   /// The color to use when painting the cursor.

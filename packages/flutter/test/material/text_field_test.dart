@@ -254,6 +254,19 @@ void main() {
     await tester.pumpWidget(
         overlay(
           child: const TextField(
+          ),
+        )
+    );
+
+    final TextField textField = tester.firstWidget(find.byType(TextField));
+    expect(textField.cursorWidth, 2.0);
+    expect(textField.cursorRadius, null);
+  });
+
+  testWidgets('cursor has expected radius value', (WidgetTester tester) async {
+    await tester.pumpWidget(
+        overlay(
+          child: const TextField(
             cursorRadius: Radius.circular(3.0),
           ),
         )
@@ -265,56 +278,40 @@ void main() {
   });
 
   testWidgets('cursor layout has correct width', (WidgetTester tester) async {
-    final TextEditingController controller = new TextEditingController();
-
     await tester.pumpWidget(
         overlay(
-          child: new RepaintBoundary(
-            key: const ValueKey<int>(1),
-            child: new TextField(
-              controller: controller,
+          child: const RepaintBoundary(
+            child: TextField(
               cursorWidth: 15.0,
             ),
           ),
         )
     );
-    expect(controller.selection.baseOffset, -1);
-    expect(controller.selection.extentOffset, -1);
-
-    const String testValue = ' ';
-    await tester.enterText(find.byType(TextField), testValue);
+    await tester.enterText(find.byType(TextField), ' ');
     await skipPastScrollingAnimation(tester);
 
     await expectLater(
-      find.byKey(const ValueKey<int>(1)),
+      find.byType(TextField),
       matchesGoldenFile('text_field_test.0.0.png'),
     );
   }, skip: !Platform.isLinux);
 
   testWidgets('cursor layout has correct radius', (WidgetTester tester) async {
-    final TextEditingController controller = new TextEditingController();
-
     await tester.pumpWidget(
         overlay(
-          child: new RepaintBoundary(
-            key: const ValueKey<int>(1),
-            child: new TextField(
-              controller: controller,
+          child: const RepaintBoundary(
+            child: TextField(
               cursorWidth: 15.0,
-              cursorRadius: const Radius.circular(3.0),
+              cursorRadius: Radius.circular(3.0),
             ),
           ),
         )
     );
-    expect(controller.selection.baseOffset, -1);
-    expect(controller.selection.extentOffset, -1);
-
-    const String testValue = ' ';
-    await tester.enterText(find.byType(TextField), testValue);
+    await tester.enterText(find.byType(TextField), ' ');
     await skipPastScrollingAnimation(tester);
 
     await expectLater(
-      find.byKey(const ValueKey<int>(1)),
+      find.byType(TextField),
       matchesGoldenFile('text_field_test.1.0.png'),
     );
   }, skip: !Platform.isLinux);
