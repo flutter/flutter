@@ -1,4 +1,4 @@
-Signature: a4330b4cc2f8fcb33366c1679747b4e7
+Signature: fe8f50abcc4fc21f3470cd0689b18a6b
 
 UNUSED LICENSES:
 
@@ -16958,6 +16958,7 @@ FILE: ../../../third_party/skia/gm/polygonoffset.cpp
 FILE: ../../../third_party/skia/gm/scaledemoji.cpp
 FILE: ../../../third_party/skia/gm/shadermaskfilter.cpp
 FILE: ../../../third_party/skia/gm/sharedcorners.cpp
+FILE: ../../../third_party/skia/gm/skinning.cpp
 FILE: ../../../third_party/skia/include/android/SkAnimatedImage.h
 FILE: ../../../third_party/skia/include/core/SkCanvasVirtualEnforcer.h
 FILE: ../../../third_party/skia/include/core/SkCoverageMode.h
