@@ -1,4 +1,4 @@
-Signature: bb7381dffd960bd66a62e4cccd5bc44e
+Signature: 9d07cf4ed9f6c4ece22105db33c2e6f4
 
 UNUSED LICENSES:
 
@@ -14397,18 +14397,28 @@ FILE: ../../../third_party/skia/src/compute/common/macros.h
 FILE: ../../../third_party/skia/src/compute/common/util.c
 FILE: ../../../third_party/skia/src/compute/common/util.h
 FILE: ../../../third_party/skia/src/compute/hs/cl/bench/main.c
-FILE: ../../../third_party/skia/src/compute/hs/cl/gen9/hs_cl.cl
-FILE: ../../../third_party/skia/src/compute/hs/cl/gen9/hs_cl.h
-FILE: ../../../third_party/skia/src/compute/hs/cl/gen9/hs_cl_macros.h
 FILE: ../../../third_party/skia/src/compute/hs/cl/hs_cl_launcher.c
 FILE: ../../../third_party/skia/src/compute/hs/cl/hs_cl_launcher.h
+FILE: ../../../third_party/skia/src/compute/hs/cl/hs_cl_target.h
+FILE: ../../../third_party/skia/src/compute/hs/cl/intel/gen8/u64/hs_cl.cl
+FILE: ../../../third_party/skia/src/compute/hs/cl/intel/gen8/u64/hs_cl.h
+FILE: ../../../third_party/skia/src/compute/hs/cl/intel/gen8/u64/hs_cl_macros.h
+FILE: ../../../third_party/skia/src/compute/hs/cl/intel/gen8/u64/hs_target.h
 FILE: ../../../third_party/skia/src/compute/hs/gen/gen.h
 FILE: ../../../third_party/skia/src/compute/hs/gen/main.c
 FILE: ../../../third_party/skia/src/compute/hs/gen/networks.h
 FILE: ../../../third_party/skia/src/compute/hs/gen/networks_merging.c
 FILE: ../../../third_party/skia/src/compute/hs/gen/networks_sorting.c
-FILE: ../../../third_party/skia/src/compute/hs/gen/target_cuda_sm3x.c
-FILE: ../../../third_party/skia/src/compute/hs/gen/target_igp_genx.c
+FILE: ../../../third_party/skia/src/compute/hs/gen/target_cuda.c
+FILE: ../../../third_party/skia/src/compute/hs/gen/target_glsl.c
+FILE: ../../../third_party/skia/src/compute/hs/gen/target_opencl.c
+FILE: ../../../third_party/skia/src/compute/hs/vk/hs_spirv_target.h
+FILE: ../../../third_party/skia/src/compute/hs/vk/hs_vk_launcher.c
+FILE: ../../../third_party/skia/src/compute/hs/vk/hs_vk_launcher.h
+FILE: ../../../third_party/skia/src/compute/hs/vk/intel/gen8/u64/hs_glsl.h
+FILE: ../../../third_party/skia/src/compute/hs/vk/intel/gen8/u64/hs_glsl_macros.h
+FILE: ../../../third_party/skia/src/compute/hs/vk/intel/gen8/u64/hs_kernels.h
+FILE: ../../../third_party/skia/src/compute/hs/vk/intel/gen8/u64/hs_target.h
 FILE: ../../../third_party/skia/src/compute/sk/SkContext_Compute.cpp
 FILE: ../../../third_party/skia/src/compute/sk/SkContext_Compute.h
 FILE: ../../../third_party/skia/src/compute/sk/SkDevice_Compute.cpp
@@ -17012,6 +17022,7 @@ FILE: ../../../third_party/skia/src/android/SkAnimatedImage.cpp
 FILE: ../../../third_party/skia/src/compute/common/cl/find_cl.c
 FILE: ../../../third_party/skia/src/compute/common/cl/find_cl.h
 FILE: ../../../third_party/skia/src/compute/hs/cl/bench/sort.cpp
+FILE: ../../../third_party/skia/src/compute/hs/gen/target_debug.c
 FILE: ../../../third_party/skia/src/compute/hs/gen/transpose.c
 FILE: ../../../third_party/skia/src/compute/hs/gen/transpose.h
 FILE: ../../../third_party/skia/src/compute/skc/allocator_host.c
@@ -17050,6 +17061,7 @@ FILE: ../../../third_party/skia/src/core/SkRemoteGlyphCache.h
 FILE: ../../../third_party/skia/src/core/SkSafeRange.h
 FILE: ../../../third_party/skia/src/core/SkStrikeCache.cpp
 FILE: ../../../third_party/skia/src/core/SkSurfaceCharacterization.cpp
+FILE: ../../../third_party/skia/src/core/SkTextBlobPriv.h
 FILE: ../../../third_party/skia/src/core/SkTypeface_remote.cpp
 FILE: ../../../third_party/skia/src/core/SkTypeface_remote.h
 FILE: ../../../third_party/skia/src/effects/SkShaderMaskFilter.cpp
