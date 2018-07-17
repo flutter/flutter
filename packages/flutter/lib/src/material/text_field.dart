@@ -288,7 +288,6 @@ class TextField extends StatefulWidget {
   final double cursorWidth;
 
   /// How rounded the corners of the cursor should be.
-  ///
   /// By default, the cursor has a null Radius
   final Radius cursorRadius;
 
@@ -523,7 +522,7 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
         rendererIgnoresPointer: true,
         cursorWidth: widget.cursorWidth,
         cursorRadius: widget.cursorRadius,
-        cursorColor: widget.cursorColor ?? Theme.of(context).textSelectionColor,
+        cursorColor: widget.cursorColor ?? Theme.of(context).cursorColor,
         keyboardAppearance: keyboardAppearance,
       ),
     );
