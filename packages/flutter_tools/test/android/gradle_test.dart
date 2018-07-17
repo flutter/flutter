@@ -4,10 +4,16 @@
 
 import 'dart:async';
 
+import 'package:file/memory.dart';
 import 'package:flutter_tools/src/android/gradle.dart';
+import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/build_info.dart';
-import 'package:flutter_tools/src/cache.dart';
+import 'package:flutter_tools/src/flutter_manifest.dart';
+import 'package:flutter_tools/src/ios/xcodeproj.dart';
+import 'package:mockito/mockito.dart';
+import 'package:platform/platform.dart';
+import 'package:process/process.dart';
 import 'package:test/test.dart';
 
 import '../src/common.dart';
@@ -132,24 +138,25 @@ someOtherProperty: someOtherValue
   });
 
   group('Gradle local.properties', () {
-    Directory temp;
+    MockLocalEngineArtifacts mockArtifacts;
+    MockProcessManager mockProcessManager;
+    FakePlatform android;
+    FileSystem fs;
 
     setUp(() {
-      Cache.disableLocking();
-      temp = fs.systemTempDirectory.createTempSync('flutter_tools');
+      fs = new MemoryFileSystem();
+      mockArtifacts = new MockLocalEngineArtifacts();
+      mockProcessManager = new MockProcessManager();
+      android = fakePlatform('android');
     });
 
-    tearDown(() {
-      temp.deleteSync(recursive: true);
-    });
-
-    Future<String> createMinimalProject(String manifest) async {
-      final Directory directory = temp.childDirectory('android_project');
-      final File manifestFile = directory.childFile('pubspec.yaml');
-      manifestFile.createSync(recursive: true);
-      manifestFile.writeAsStringSync(manifest);
-
-      return directory.path;
+    void testUsingAndroidContext(String description, dynamic testMethod()) {
+      testUsingContext(description, testMethod, overrides: <Type, Generator>{
+        Artifacts: () => mockArtifacts,
+        ProcessManager: () => mockProcessManager,
+        Platform: () => android,
+        FileSystem: () => fs,
+      });
     }
 
     String propertyFor(String key, File file) {
@@ -166,14 +173,21 @@ someOtherProperty: someOtherValue
       String expectedBuildName,
       String expectedBuildNumber,
     }) async {
-      final String projectPath = await createMinimalProject(manifest);
+      when(mockArtifacts.getArtifactPath(Artifact.flutterFramework, TargetPlatform.android_arm, any)).thenReturn('engine');
+      when(mockArtifacts.engineOutPath).thenReturn(fs.path.join('out', 'android_arm'));
+
+      final File manifestFile = fs.file('path/to/project/pubspec.yaml');
+      manifestFile.createSync(recursive: true);
+      manifestFile.writeAsStringSync(manifest);
+
+      // write schemaData otherwise pubspec.yaml file can't be loaded
+      const String schemaData = '{}';
+      writeSchemaFile(fs, schemaData);
 
       try {
-        await updateLocalProperties(projectPath: projectPath, buildInfo: buildInfo);
+        await updateLocalProperties(projectPath: 'path/to/project', buildInfo: buildInfo);
 
-        final String propertiesPath = fs.path.join(projectPath, 'android', 'local.properties');
-        final File localPropertiesFile = fs.file(propertiesPath);
-
+        final File localPropertiesFile = fs.file('path/to/project/android/local.properties');
         expect(propertyFor('flutter.versionName', localPropertiesFile), expectedBuildName);
         expect(propertyFor('flutter.versionCode', localPropertiesFile), expectedBuildNumber);
       } on Exception {
@@ -181,7 +195,7 @@ someOtherProperty: someOtherValue
       }
     }
 
-    testUsingContext('extract build name and number from pubspec.yaml', () async {
+    testUsingAndroidContext('extract build name and number from pubspec.yaml', () async {
       const String manifest = '''
 name: test
 version: 1.0.0+1
@@ -200,7 +214,7 @@ flutter:
       );
     });
 
-    testUsingContext('extract build name from pubspec.yaml', () async {
+    testUsingAndroidContext('extract build name from pubspec.yaml', () async {
       const String manifest = '''
 name: test
 version: 1.0.0
@@ -218,7 +232,7 @@ flutter:
       );
     });
 
-    testUsingContext('allow build info to override build name', () async {
+    testUsingAndroidContext('allow build info to override build name', () async {
       const String manifest = '''
 name: test
 version: 1.0.0+1
@@ -236,7 +250,7 @@ flutter:
       );
     });
 
-    testUsingContext('allow build info to override build number', () async {
+    testUsingAndroidContext('allow build info to override build number', () async {
       const String manifest = '''
 name: test
 version: 1.0.0+1
@@ -254,7 +268,7 @@ flutter:
       );
     });
 
-    testUsingContext('allow build info to override build name and number', () async {
+    testUsingAndroidContext('allow build info to override build name and number', () async {
       const String manifest = '''
 name: test
 version: 1.0.0+1
@@ -272,7 +286,7 @@ flutter:
       );
     });
 
-    testUsingContext('allow build info to override build name and set number', () async {
+    testUsingAndroidContext('allow build info to override build name and set number', () async {
       const String manifest = '''
 name: test
 version: 1.0.0
@@ -290,7 +304,7 @@ flutter:
       );
     });
 
-    testUsingContext('allow build info to set build name and number', () async {
+    testUsingAndroidContext('allow build info to set build name and number', () async {
       const String manifest = '''
 name: test
 dependencies:
@@ -308,3 +322,21 @@ flutter:
     });
   });
 }
+
+void writeSchemaFile(FileSystem filesystem, String schemaData) {
+  final String schemaPath = buildSchemaPath(filesystem);
+  final File schemaFile = filesystem.file(schemaPath);
+
+  final String schemaDir = buildSchemaDir(filesystem);
+
+  filesystem.directory(schemaDir).createSync(recursive: true);
+  filesystem.file(schemaFile).writeAsStringSync(schemaData);
+}
+
+Platform fakePlatform(String name) {
+  return new FakePlatform.fromPlatform(const LocalPlatform())..operatingSystem = name;
+}
+
+class MockLocalEngineArtifacts extends Mock implements LocalEngineArtifacts {}
+class MockProcessManager extends Mock implements ProcessManager {}
+class MockXcodeProjectInterpreter extends Mock implements XcodeProjectInterpreter {}

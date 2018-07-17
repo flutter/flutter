@@ -43,6 +43,46 @@ void main() {
     expect(value, isTrue);
   });
 
+  testWidgets('Switch size is configurable by ThemeData.materialTapTargetSize', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      new Theme(
+        data: new ThemeData(materialTapTargetSize: MaterialTapTargetSize.padded),
+        child: new Directionality(
+          textDirection: TextDirection.ltr,
+          child: new Material(
+            child: new Center(
+              child: new Switch(
+                value: true,
+                onChanged: (bool newValue) {},
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(tester.getSize(find.byType(Switch)), const Size(59.0, 48.0));
+
+    await tester.pumpWidget(
+      new Theme(
+        data: new ThemeData(materialTapTargetSize: MaterialTapTargetSize.shrinkWrap),
+        child: new Directionality(
+          textDirection: TextDirection.ltr,
+          child: new Material(
+            child: new Center(
+              child: new Switch(
+                value: true,
+                onChanged: (bool newValue) {},
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(tester.getSize(find.byType(Switch)), const Size(59.0, 40.0));
+  });
+
   testWidgets('Switch can drag (LTR)', (WidgetTester tester) async {
     bool value = false;
 

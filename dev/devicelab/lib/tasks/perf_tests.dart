@@ -190,7 +190,8 @@ class PerfTest {
         'missed_frame_build_budget_count',
         'average_frame_rasterizer_time_millis',
         'worst_frame_rasterizer_time_millis',
-        'missed_frame_rasterizer_budget_count',
+        '90th_percentile_frame_rasterizer_time_millis',
+        '99th_percentile_frame_rasterizer_time_millis',
       ]);
     });
   }
@@ -441,8 +442,6 @@ class MemoryTest {
       if (deviceOperatingSystem == DeviceOperatingSystem.ios)
         await prepareProvisioningCertificates(testDirectory);
 
-      final int observatoryPort = await findAvailablePort();
-
       final List<String> runOptions = <String>[
         '-v',
         '--profile',
@@ -450,11 +449,14 @@ class MemoryTest {
         '-d',
         deviceId,
         '--observatory-port',
-        observatoryPort.toString(),
+        '0',
       ];
       if (testTarget != null)
         runOptions.addAll(<String>['-t', testTarget]);
-      await flutter('run', options: runOptions);
+      final String output = await evalFlutter('run', options: runOptions);
+      final int observatoryPort = parseServicePort(output, prefix: 'Successfully connected to service protocol: ', multiLine: true);
+      if (observatoryPort == null)
+        throw new Exception('Could not find observatory port in "flutter run" output.');
 
       final Map<String, dynamic> startData = await device.getMemoryStats(packageName);
 

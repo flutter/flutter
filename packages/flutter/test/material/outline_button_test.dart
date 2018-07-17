@@ -55,7 +55,7 @@ void main() {
       new Directionality(
         textDirection: TextDirection.ltr,
         child: new Theme(
-          data: new ThemeData(),
+          data: new ThemeData(materialTapTargetSize: MaterialTapTargetSize.shrinkWrap),
           child: new Container(
             alignment: Alignment.topLeft,
             child: new OutlineButton(
@@ -140,8 +140,8 @@ void main() {
               SemanticsAction.tap,
             ],
             label: 'ABC',
-            rect: new Rect.fromLTRB(0.0, 0.0, 88.0, 36.0),
-            transform: new Matrix4.translationValues(356.0, 282.0, 0.0),
+            rect: new Rect.fromLTRB(0.0, 0.0, 88.0, 48.0),
+            transform: new Matrix4.translationValues(356.0, 276.0, 0.0),
             flags: <SemanticsFlag>[
               SemanticsFlag.isButton,
               SemanticsFlag.hasEnabledState,
@@ -175,7 +175,7 @@ void main() {
       ),
     );
 
-    expect(tester.getSize(find.byType(OutlineButton)), equals(const Size(88.0, 36.0)));
+    expect(tester.getSize(find.byType(OutlineButton)), equals(const Size(88.0, 48.0)));
     expect(tester.getSize(find.byType(Text)), equals(const Size(42.0, 14.0)));
 
     // textScaleFactor expands text, but not button.
@@ -196,7 +196,7 @@ void main() {
       ),
     );
 
-    expect(tester.getSize(find.byType(FlatButton)), equals(const Size(88.0, 36.0)));
+    expect(tester.getSize(find.byType(FlatButton)), equals(const Size(88.0, 48.0)));
     // Scaled text rendering is different on Linux and Mac by one pixel.
     // TODO(#12357): Update this test when text rendering is fixed.
     expect(tester.getSize(find.byType(Text)).width, isIn(<double>[54.0, 55.0]));
@@ -224,7 +224,7 @@ void main() {
     // Scaled text rendering is different on Linux and Mac by one pixel.
     // TODO(#12357): Update this test when text rendering is fixed.
     expect(tester.getSize(find.byType(FlatButton)).width, isIn(<double>[158.0, 159.0]));
-    expect(tester.getSize(find.byType(FlatButton)).height, equals(42.0));
+    expect(tester.getSize(find.byType(FlatButton)).height, equals(48.0));
     expect(tester.getSize(find.byType(Text)).width, isIn(<double>[126.0, 127.0]));
     expect(tester.getSize(find.byType(Text)).height, equals(42.0));
   });
