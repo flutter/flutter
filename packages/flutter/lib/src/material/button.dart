@@ -475,7 +475,8 @@ class _ButtonRedirectingHitDetectionWidget extends SingleChildRenderObjectWidget
 }
 
 class _RenderButtonRedirectingHitDetection extends RenderConstrainedBox {
-  _RenderButtonRedirectingHitDetection(BoxConstraints additionalConstraints, this._childConstraints) : super(additionalConstraints: additionalConstraints);
+  _RenderButtonRedirectingHitDetection(BoxConstraints additionalConstraints, this._childConstraints) 
+    : super(additionalConstraints: additionalConstraints);
 
   BoxConstraints get childConstraints => _childConstraints;
   BoxConstraints _childConstraints;
@@ -485,6 +486,8 @@ class _RenderButtonRedirectingHitDetection extends RenderConstrainedBox {
     _childConstraints = value;
     markNeedsLayout();
   }
+
+  Offset _childOffset;
 
   @override
   void performLayout() {
@@ -499,8 +502,7 @@ class _RenderButtonRedirectingHitDetection extends RenderConstrainedBox {
       final double constrainedHeight = constraints.constrainHeight(math.max(child.size.height, additionalConstraints.minHeight));
       assert(constrainedHeight >= child.size.height);
       size = new Size(child.size.width, constraints.constrainHeight(constrainedHeight));
-      final BoxParentData childParentData = child.parentData;
-      childParentData.offset = Alignment.center.alongOffset(size - child.size);
+      _childOffset = Alignment.center.alongOffset(size - child.size);
     } else {
       size = additionalConstraints.enforce(constraints).constrain(Size.zero);
     }
@@ -509,20 +511,15 @@ class _RenderButtonRedirectingHitDetection extends RenderConstrainedBox {
   @override
   void paint(PaintingContext context, Offset offset) {
     if (child != null)
-      context.paintChild(child, offset + Alignment.center.alongOffset(size - child.size));
-  }
-
-  @override
-  void setupParentData(covariant RenderObject child) {
-    child.parentData ??= new BoxParentData();
+      context.paintChild(child, offset + _childOffset);
   }
 
   @override
   bool hitTest(HitTestResult result, {Offset position}) {
-    if (!size.contains(position))
+    if (!size.contains(position) || child == null)
       return false;
-    if (child.hitTest(result, position: position))
+    if (child.hitTest(result, position: position + _childOffset))
       return true;
-    return child.hitTest(result, position: size.center(Offset.zero));
+    return child.hitTest(result, position: child.size.center(Offset.zero));
   }
 }
