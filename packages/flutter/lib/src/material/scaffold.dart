@@ -1144,11 +1144,16 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
     if (_snackBars.isEmpty || _snackBarController.status == AnimationStatus.dismissed)
       return;
     final Completer<SnackBarClosedReason> completer = _snackBars.first._completer;
-    _snackBarController.reverse().then<void>((Null _) {
-      assert(mounted);
-      if (!completer.isCompleted)
-        completer.complete(reason);
-    });
+    if (RendererBinding.instance.assistiveTechnologyEnabled) {
+      _snackBarController.value = 0.0;
+      completer.complete(reason);
+    } else {
+      _snackBarController.reverse().then<void>((Null _) {
+        assert(mounted);
+        if (!completer.isCompleted)
+          completer.complete(reason);
+      });
+    }
     _snackBarTimer?.cancel();
     _snackBarTimer = null;
   }
@@ -1420,15 +1425,11 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
       final ModalRoute<dynamic> route = ModalRoute.of(context);
       if (route == null || route.isCurrent) {
         if (_snackBarController.isCompleted && _snackBarTimer == null) {
-          final bool assistiveTechnologyEnabled = RendererBinding.instance.assistiveTechnologyEnabled;
           final SnackBar snackBar = _snackBars.first._widget;
-          final Duration duration = (snackBar.action == null 
-            && assistiveTechnologyEnabled
-            && snackBar.duration < const Duration(seconds: 10)) ? const Duration(seconds: 10) : snackBar.duration;
-          _snackBarTimer = new Timer(duration, () {
+          _snackBarTimer = new Timer(snackBar.duration, () {
             assert(_snackBarController.status == AnimationStatus.forward ||
                    _snackBarController.status == AnimationStatus.completed);
-            if (assistiveTechnologyEnabled && snackBar.action != null)
+            if (RendererBinding.instance.assistiveTechnologyEnabled && snackBar.action != null)
               return;
             hideCurrentSnackBar(reason: SnackBarClosedReason.timeout);
           });

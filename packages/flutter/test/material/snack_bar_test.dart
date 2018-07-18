@@ -482,4 +482,44 @@ void main() {
     expect(closedReason, equals(SnackBarClosedReason.timeout));
   });
 
+  testWidgets('assistiveTechnologyEnabled behavior with action', (WidgetTester tester) async {
+      final TestWidgetsFlutterBinding binding = tester.binding;
+      final GlobalKey<ScaffoldState> scaffoldKey = new GlobalKey<ScaffoldState>();
+      binding.assistiveTechnologyEnabled = true;
+
+      await tester.pumpWidget(new MaterialApp(
+        home: new Scaffold(
+          key: scaffoldKey,
+          body: new Builder(
+            builder: (BuildContext context) {
+              return new GestureDetector(
+                onTap: () {
+                  Scaffold.of(context).showSnackBar(new SnackBar(
+                    content: const Text('snack'),
+                    duration: const Duration(seconds: 1),
+                    action: new SnackBarAction(
+                      label: 'ACTION',
+                      onPressed: () {}
+                    ),
+                  ));
+                },
+                child: const Text('X')
+              );
+            },
+          )
+        )
+      ));
+      await tester.tap(find.text('X'));
+      await tester.pump();
+      // Find action immediately
+      expect(find.text('ACTION'), findsOneWidget);
+      // Snackbar doesn't close
+      await tester.pump(const Duration(seconds: 10));
+      expect(find.text('ACTION'), findsOneWidget);
+      await tester.tap(find.text('ACTION'));
+      await tester.pump();
+      // Snackbar closes immediately
+      expect(find.text('ACTION'), findsNothing);
+      binding.assistiveTechnologyEnabled = false;
+  });
 }

@@ -127,6 +127,9 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   @protected
   bool get checkIntrinsicSizes => false;
 
+  @override
+  bool assistiveTechnologyEnabled = false;
+
   /// Creates and initializes the binding. This function is
   /// idempotent; calling it a second time will just return the
   /// previously-created instance.
