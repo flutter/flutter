@@ -132,7 +132,7 @@ void main() {
   testUsingContext('force select dart 2 snapshot', () async {
     const String contents = "StringBuffer bar = StringBuffer('baz');";
     tempDir.childFile('main.dart').writeAsStringSync(contents);
-    server = new AnalysisServer('dartSdkPath',
+    server = new AnalysisServer(dartSdkPath,
       <String>[tempDir.path],
       forceDart2Snapshot: true
     );
