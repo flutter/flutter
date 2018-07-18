@@ -99,8 +99,8 @@ enum Brightness {
 class SystemUiOverlayStyle {
   /// System overlays should be drawn with a light color. Intended for
   /// applications with a dark background.
-  static const SystemUiOverlayStyle light = SystemUiOverlayStyle(
-    systemNavigationBarColor: Color(0xFF000000),
+  static const SystemUiOverlayStyle light = const SystemUiOverlayStyle(
+    systemNavigationBarColor: const Color(0xFF000000),
     systemNavigationBarDividerColor: null,
     statusBarColor: null,
     systemNavigationBarIconBrightness: Brightness.light,
@@ -110,8 +110,8 @@ class SystemUiOverlayStyle {
 
   /// System overlays should be drawn with a dark color. Intended for
   /// applications with a light background.
-  static const SystemUiOverlayStyle dark = SystemUiOverlayStyle(
-    systemNavigationBarColor: Color(0xFF000000),
+  static const SystemUiOverlayStyle dark = const SystemUiOverlayStyle(
+    systemNavigationBarColor: const Color(0xFF000000),
     systemNavigationBarDividerColor: null,
     statusBarColor: null,
     systemNavigationBarIconBrightness: Brightness.light,

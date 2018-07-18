@@ -340,8 +340,8 @@ class Slider extends StatefulWidget {
 }
 
 class _SliderState extends State<Slider> with TickerProviderStateMixin {
-  static const Duration enableAnimationDuration = Duration(milliseconds: 75);
-  static const Duration valueIndicatorAnimationDuration = Duration(milliseconds: 100);
+  static const Duration enableAnimationDuration = const Duration(milliseconds: 75);
+  static const Duration valueIndicatorAnimationDuration = const Duration(milliseconds: 100);
 
   // Animation controller that is run when the overlay (a.k.a radial reaction)
   // is shown in response to user interaction.
@@ -580,13 +580,13 @@ class _RenderSlider extends RenderBox {
     );
   }
 
-  static const Duration _positionAnimationDuration = Duration(milliseconds: 75);
+  static const Duration _positionAnimationDuration = const Duration(milliseconds: 75);
   static const double _overlayRadius = 16.0;
   static const double _overlayDiameter = _overlayRadius * 2.0;
   static const double _trackHeight = 2.0;
   static const double _preferredTrackWidth = 144.0;
   static const double _preferredTotalWidth = _preferredTrackWidth + _overlayDiameter;
-  static const Duration _minimumInteractionTime = Duration(milliseconds: 500);
+  static const Duration _minimumInteractionTime = const Duration(milliseconds: 500);
   static final Tween<double> _overlayRadiusTween = new Tween<double>(begin: 0.0, end: _overlayRadius);
 
   _SliderState _state;

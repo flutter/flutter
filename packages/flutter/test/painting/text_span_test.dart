@@ -29,20 +29,20 @@ void main() {
   });
 
   test('TextSpan toStringDeep', () {
-    const TextSpan test = TextSpan(
+    const TextSpan test = const TextSpan(
       text: 'a',
-      style: TextStyle(
+      style: const TextStyle(
         fontSize: 10.0,
       ),
-      children: <TextSpan>[
-        TextSpan(
+      children: const <TextSpan>[
+        const TextSpan(
           text: 'b',
-          children: <TextSpan>[
-            TextSpan(),
+          children: const <TextSpan>[
+            const TextSpan(),
           ],
         ),
         null,
-        TextSpan(
+        const TextSpan(
           text: 'c',
         ),
       ],

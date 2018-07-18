@@ -106,13 +106,13 @@ class LeaveBehindDemoState extends State<LeaveBehindDemo> {
       background: new Container(
         color: theme.primaryColor,
         child: const ListTile(
-          leading: Icon(Icons.delete, color: Colors.white, size: 36.0)
+          leading: const Icon(Icons.delete, color: Colors.white, size: 36.0)
         )
       ),
       secondaryBackground: new Container(
         color: theme.primaryColor,
         child: const ListTile(
-          trailing: Icon(Icons.archive, color: Colors.white, size: 36.0)
+          trailing: const Icon(Icons.archive, color: Colors.white, size: 36.0)
         )
       ),
       child: new Container(
@@ -141,7 +141,7 @@ class LeaveBehindDemoState extends State<LeaveBehindDemo> {
             itemBuilder: (BuildContext context) => <PopupMenuEntry<LeaveBehindDemoAction>>[
               const PopupMenuItem<LeaveBehindDemoAction>(
                 value: LeaveBehindDemoAction.reset,
-                child: Text('Reset the list')
+                child: const Text('Reset the list')
               ),
               const PopupMenuDivider(), // ignore: list_element_type_not_assignable, https://github.com/flutter/flutter/issues/5771
               new CheckedPopupMenuItem<LeaveBehindDemoAction>(

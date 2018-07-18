@@ -133,43 +133,43 @@ class TopBarMenu extends StatelessWidget {
       itemBuilder: (BuildContext context) => <PopupMenuItem<String>>[
         const PopupMenuItem<String>(
           value: 'Friends',
-          child: MenuItemWithIcon(Icons.people, 'Friends', '5 new')
+          child: const MenuItemWithIcon(Icons.people, 'Friends', '5 new')
         ),
         const PopupMenuItem<String>(
           value: 'Events',
-          child: MenuItemWithIcon(Icons.event, 'Events', '12 upcoming')
+          child: const MenuItemWithIcon(Icons.event, 'Events', '12 upcoming')
         ),
         const PopupMenuItem<String>(
           value: 'Events',
-          child: MenuItemWithIcon(Icons.group, 'Groups', '14')
+          child: const MenuItemWithIcon(Icons.group, 'Groups', '14')
         ),
         const PopupMenuItem<String>(
           value: 'Events',
-          child: MenuItemWithIcon(Icons.image, 'Pictures', '12')
+          child: const MenuItemWithIcon(Icons.image, 'Pictures', '12')
         ),
         const PopupMenuItem<String>(
           value: 'Events',
-          child: MenuItemWithIcon(Icons.near_me, 'Nearby', '33')
+          child: const MenuItemWithIcon(Icons.near_me, 'Nearby', '33')
         ),
         const PopupMenuItem<String>(
           value: 'Friends',
-          child: MenuItemWithIcon(Icons.people, 'Friends', '5')
+          child: const MenuItemWithIcon(Icons.people, 'Friends', '5')
         ),
         const PopupMenuItem<String>(
           value: 'Events',
-          child: MenuItemWithIcon(Icons.event, 'Events', '12')
+          child: const MenuItemWithIcon(Icons.event, 'Events', '12')
         ),
         const PopupMenuItem<String>(
           value: 'Events',
-          child: MenuItemWithIcon(Icons.group, 'Groups', '14')
+          child: const MenuItemWithIcon(Icons.group, 'Groups', '14')
         ),
         const PopupMenuItem<String>(
           value: 'Events',
-          child: MenuItemWithIcon(Icons.image, 'Pictures', '12')
+          child: const MenuItemWithIcon(Icons.image, 'Pictures', '12')
         ),
         const PopupMenuItem<String>(
           value: 'Events',
-          child: MenuItemWithIcon(Icons.near_me, 'Nearby', '33')
+          child: const MenuItemWithIcon(Icons.near_me, 'Nearby', '33')
         )
       ]
     );
@@ -212,8 +212,8 @@ class FancyImageItem extends StatelessWidget {
         new ItemImageBox(),
         new InfoBar(),
         const Padding(
-          padding: EdgeInsets.symmetric(horizontal: 8.0),
-          child: Divider()
+          padding: const EdgeInsets.symmetric(horizontal: 8.0),
+          child: const Divider()
         ),
         new IconBar(),
         new FatDivider()
@@ -234,8 +234,8 @@ class FancyGalleryItem extends StatelessWidget {
         new ItemGalleryBox(index),
         new InfoBar(),
         const Padding(
-          padding: EdgeInsets.symmetric(horizontal: 8.0),
-          child: Divider()
+          padding: const EdgeInsets.symmetric(horizontal: 8.0),
+          child: const Divider()
         ),
         new IconBar(),
         new FatDivider()
@@ -268,9 +268,9 @@ class IconBar extends StatelessWidget {
       child: new Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: const <Widget>[
-          IconWithText(Icons.thumb_up, 'Like'),
-          IconWithText(Icons.comment, 'Comment'),
-          IconWithText(Icons.share, 'Share'),
+          const IconWithText(Icons.thumb_up, 'Like'),
+          const IconWithText(Icons.comment, 'Comment'),
+          const IconWithText(Icons.share, 'Share'),
         ]
       )
     );
@@ -350,9 +350,9 @@ class UserHeader extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
           const Padding(
-            padding: EdgeInsets.only(right: 8.0),
-            child: Image(
-              image: AssetImage('packages/flutter_gallery_assets/people/square/ali.png'),
+            padding: const EdgeInsets.only(right: 8.0),
+            child: const Image(
+              image: const AssetImage('packages/flutter_gallery_assets/people/square/ali.png'),
               width: 32.0,
               height: 32.0
             )
@@ -367,7 +367,7 @@ class UserHeader extends StatelessWidget {
                   children: <TextSpan>[
                     new TextSpan(text: userName, style: const TextStyle(fontWeight: FontWeight.bold)),
                     const TextSpan(text: ' shared a new '),
-                    const TextSpan(text: 'photo', style: TextStyle(fontWeight: FontWeight.bold))
+                    const TextSpan(text: 'photo', style: const TextStyle(fontWeight: FontWeight.bold))
                   ]
                 )),
                 new Row(
@@ -390,8 +390,8 @@ class ItemDescription extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return const Padding(
-      padding: EdgeInsets.all(8.0),
-      child: Text('Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.')
+      padding: const EdgeInsets.all(8.0),
+      child: const Text('Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.')
     );
   }
 }
@@ -409,8 +409,8 @@ class ItemImageBox extends StatelessWidget {
               children: <Widget>[
                 const SizedBox(
                   height: 230.0,
-                  child: Image(
-                    image: AssetImage('packages/flutter_gallery_assets/places/india_chettinad_silk_maker.png')
+                  child: const Image(
+                    image: const AssetImage('packages/flutter_gallery_assets/places/india_chettinad_silk_maker.png')
                   )
                 ),
                 new Theme(
@@ -439,14 +439,14 @@ class ItemImageBox extends StatelessWidget {
                     ),
                     padding: const EdgeInsets.all(4.0),
                     child: const RichText(
-                      text: TextSpan(
-                        style: TextStyle(color: Colors.white),
-                        children: <TextSpan>[
-                          TextSpan(
+                      text: const TextSpan(
+                        style: const TextStyle(color: Colors.white),
+                        children: const <TextSpan>[
+                          const TextSpan(
                             text: 'Photo by '
                           ),
-                          TextSpan(
-                            style: TextStyle(fontWeight: FontWeight.bold),
+                          const TextSpan(
+                            style: const TextStyle(fontWeight: FontWeight.bold),
                             text: 'Chris Godley'
                           )
                         ]
@@ -561,11 +561,11 @@ class BottomBar extends StatelessWidget {
       child: new Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: const <Widget>[
-          BottomBarButton(Icons.new_releases, 'News'),
-          BottomBarButton(Icons.people, 'Requests'),
-          BottomBarButton(Icons.chat, 'Messenger'),
-          BottomBarButton(Icons.bookmark, 'Bookmark'),
-          BottomBarButton(Icons.alarm, 'Alarm'),
+          const BottomBarButton(Icons.new_releases, 'News'),
+          const BottomBarButton(Icons.people, 'Requests'),
+          const BottomBarButton(Icons.chat, 'Messenger'),
+          const BottomBarButton(Icons.bookmark, 'Bookmark'),
+          const BottomBarButton(Icons.alarm, 'Alarm'),
         ],
       ),
     );
@@ -670,7 +670,7 @@ class FancyDrawerHeader extends StatelessWidget {
       height: 200.0,
       child: const SafeArea(
         bottom: false,
-        child: Placeholder(),
+        child: const Placeholder(),
       ),
     );
   }

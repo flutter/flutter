@@ -29,20 +29,20 @@ const double _kNavBarEdgePadding = 16.0;
 const double _kNavBarBackButtonTapWidth = 50.0;
 
 /// Title text transfer fade.
-const Duration _kNavBarTitleFadeDuration = Duration(milliseconds: 150);
+const Duration _kNavBarTitleFadeDuration = const Duration(milliseconds: 150);
 
-const Color _kDefaultNavBarBackgroundColor = Color(0xCCF8F8F8);
-const Color _kDefaultNavBarBorderColor = Color(0x4C000000);
+const Color _kDefaultNavBarBackgroundColor = const Color(0xCCF8F8F8);
+const Color _kDefaultNavBarBorderColor = const Color(0x4C000000);
 
-const Border _kDefaultNavBarBorder = Border(
-  bottom: BorderSide(
+const Border _kDefaultNavBarBorder = const Border(
+  bottom: const BorderSide(
     color: _kDefaultNavBarBorderColor,
     width: 0.0, // One physical pixel.
     style: BorderStyle.solid,
   ),
 );
 
-const TextStyle _kLargeTitleTextStyle = TextStyle(
+const TextStyle _kLargeTitleTextStyle = const TextStyle(
   fontFamily: '.SF Pro Display',
   fontSize: 34.0,
   fontWeight: FontWeight.w700,

@@ -10,8 +10,8 @@ import '../rendering/mock_canvas.dart';
 
 void main() {
   testWidgets('The InkWell widget renders an ink splash', (WidgetTester tester) async {
-    const Color highlightColor = Color(0xAAFF0000);
-    const Color splashColor = Color(0xAA0000FF);
+    const Color highlightColor = const Color(0xAAFF0000);
+    const Color splashColor = const Color(0xAA0000FF);
     final BorderRadius borderRadius = new BorderRadius.circular(6.0);
 
     await tester.pumpWidget(
@@ -52,8 +52,8 @@ void main() {
   });
 
   testWidgets('The InkWell widget renders an ink ripple', (WidgetTester tester) async {
-    const Color highlightColor = Color(0xAAFF0000);
-    const Color splashColor = Color(0xB40000FF);
+    const Color highlightColor = const Color(0xAAFF0000);
+    const Color splashColor = const Color(0xB40000FF);
     final BorderRadius borderRadius = new BorderRadius.circular(6.0);
 
     await tester.pumpWidget(
@@ -280,8 +280,8 @@ void main() {
   });
 
   testWidgets('Cancel an InkRipple that was disposed when its animation ended', (WidgetTester tester) async {
-    const Color highlightColor = Color(0xAAFF0000);
-    const Color splashColor = Color(0xB40000FF);
+    const Color highlightColor = const Color(0xAAFF0000);
+    const Color splashColor = const Color(0xB40000FF);
 
     // Regression test for https://github.com/flutter/flutter/issues/14391
     await tester.pumpWidget(

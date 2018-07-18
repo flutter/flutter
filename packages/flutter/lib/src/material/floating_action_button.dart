@@ -11,17 +11,17 @@ import 'theme.dart';
 import 'theme_data.dart';
 import 'tooltip.dart';
 
-const BoxConstraints _kSizeConstraints = BoxConstraints.tightFor(
+const BoxConstraints _kSizeConstraints = const BoxConstraints.tightFor(
   width: 56.0,
   height: 56.0,
 );
 
-const BoxConstraints _kMiniSizeConstraints = BoxConstraints.tightFor(
+const BoxConstraints _kMiniSizeConstraints = const BoxConstraints.tightFor(
   width: 40.0,
   height: 40.0,
 );
 
-const BoxConstraints _kExtendedSizeConstraints = BoxConstraints(
+const BoxConstraints _kExtendedSizeConstraints = const BoxConstraints(
   minHeight: 48.0,
   maxHeight: 48.0,
 );

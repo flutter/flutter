@@ -111,15 +111,15 @@ class StockHomeState extends State<StockHome> {
     return new Drawer(
       child: new ListView(
         children: <Widget>[
-          const DrawerHeader(child: Center(child: Text('Stocks'))),
+          const DrawerHeader(child: const Center(child: const Text('Stocks'))),
           const ListTile(
-            leading: Icon(Icons.assessment),
-            title: Text('Stock List'),
+            leading: const Icon(Icons.assessment),
+            title: const Text('Stock List'),
             selected: true,
           ),
           const ListTile(
-            leading: Icon(Icons.account_balance),
-            title: Text('Account Balance'),
+            leading: const Icon(Icons.account_balance),
+            title: const Text('Account Balance'),
             enabled: false,
           ),
           new ListTile(
@@ -205,15 +205,15 @@ class StockHomeState extends State<StockHome> {
             ),
             const PopupMenuItem<_StockMenuItem>(
               value: _StockMenuItem.refresh,
-              child: Text('Refresh'),
+              child: const Text('Refresh'),
             ),
             const PopupMenuItem<_StockMenuItem>(
               value: _StockMenuItem.speedUp,
-              child: Text('Increase animation speed'),
+              child: const Text('Increase animation speed'),
             ),
             const PopupMenuItem<_StockMenuItem>(
               value: _StockMenuItem.speedDown,
-              child: Text('Decrease animation speed'),
+              child: const Text('Decrease animation speed'),
             ),
           ],
         ),
@@ -278,7 +278,7 @@ class StockHomeState extends State<StockHome> {
     );
   }
 
-  static const List<String> portfolioSymbols = <String>['AAPL','FIZZ', 'FIVE', 'FLAT', 'ZINC', 'ZNGA'];
+  static const List<String> portfolioSymbols = const <String>['AAPL','FIZZ', 'FIVE', 'FLAT', 'ZINC', 'ZNGA'];
 
   Widget buildSearchBar() {
     return new AppBar(
@@ -337,13 +337,13 @@ class _CreateCompanySheet extends StatelessWidget {
   Widget build(BuildContext context) {
     return new Column(
       children: const <Widget>[
-        TextField(
+        const TextField(
           autofocus: true,
-          decoration: InputDecoration(
+          decoration: const InputDecoration(
             hintText: 'Company Name',
           ),
         ),
-        Text('(This demo is not yet complete.)'),
+        const Text('(This demo is not yet complete.)'),
         // For example, we could add a button that actually updates the list
         // and then contacts the server, etc.
       ],

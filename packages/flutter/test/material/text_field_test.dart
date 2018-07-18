@@ -61,7 +61,7 @@ Widget overlay({ Widget child }) {
     child: new Directionality(
       textDirection: TextDirection.ltr,
       child: new MediaQuery(
-        data: const MediaQueryData(size: Size(800.0, 600.0)),
+        data: const MediaQueryData(size: const Size(800.0, 600.0)),
         child: new Overlay(
           initialEntries: <OverlayEntry>[
             new OverlayEntry(
@@ -88,7 +88,7 @@ Widget boilerplate({ Widget child }) {
     child: new Directionality(
       textDirection: TextDirection.ltr,
       child: new MediaQuery(
-        data: const MediaQueryData(size: Size(800.0, 600.0)),
+        data: const MediaQueryData(size: const Size(800.0, 600.0)),
         child: new Center(
           child: new Material(
             child: child,
@@ -214,7 +214,7 @@ void main() {
     await tester.pumpWidget(
       overlay(
         child: const TextField(
-          decoration: InputDecoration(
+          decoration: const InputDecoration(
             hintText: 'Placeholder',
           ),
         ),
@@ -245,7 +245,7 @@ void main() {
     // Try the test again with a nonempty EditableText.
     tester.testTextInput.updateEditingValue(const TextEditingValue(
       text: 'X',
-      selection: TextSelection.collapsed(offset: 1),
+      selection: const TextSelection.collapsed(offset: 1),
     ));
     await checkCursorToggle();
   });
@@ -321,7 +321,7 @@ void main() {
       overlay(
         child: const TextField(
           obscureText: true,
-          decoration: InputDecoration(
+          decoration: const InputDecoration(
             hintText: 'Placeholder',
           ),
         ),
@@ -332,7 +332,7 @@ void main() {
     const String testValue = 'ABC';
     tester.testTextInput.updateEditingValue(const TextEditingValue(
       text: testValue,
-      selection: TextSelection.collapsed(offset: testValue.length),
+      selection: const TextSelection.collapsed(offset: testValue.length),
     ));
 
     await tester.pump();
@@ -342,7 +342,7 @@ void main() {
     const String newChar = 'X';
     tester.testTextInput.updateEditingValue(const TextEditingValue(
       text: testValue + newChar,
-      selection: TextSelection.collapsed(offset: testValue.length + 1),
+      selection: const TextSelection.collapsed(offset: testValue.length + 1),
     ));
 
     await tester.pump();
@@ -867,7 +867,7 @@ void main() {
     await tester.pumpWidget(
       overlay(
         child: const TextField(
-          decoration: InputDecoration(
+          decoration: const InputDecoration(
             errorText: 'error text',
             helperText: 'helper text',
           ),
@@ -885,7 +885,7 @@ void main() {
         child: new Theme(
           data: themeData,
           child: const TextField(
-            decoration: InputDecoration(
+            decoration: const InputDecoration(
               helperText: 'helper text',
             ),
           ),
@@ -1020,7 +1020,7 @@ void main() {
         child: new Column(
           children: <Widget>[
             const TextField(
-              decoration: InputDecoration(
+              decoration: const InputDecoration(
                 labelText: 'First',
               ),
             ),
@@ -1069,7 +1069,7 @@ void main() {
         child: new Column(
           children: <Widget>[
             const TextField(
-              decoration: InputDecoration(
+              decoration: const InputDecoration(
                 labelText: 'First',
               ),
             ),
@@ -1133,7 +1133,7 @@ void main() {
         child: new Column(
           children: <Widget>[
             const TextField(
-              decoration: InputDecoration(
+              decoration: const InputDecoration(
                 labelText: 'First',
               ),
             ),
@@ -1188,7 +1188,7 @@ void main() {
         child: new Column(
           children: <Widget>[
             const TextField(
-              decoration: InputDecoration(
+              decoration: const InputDecoration(
                 labelText: 'First',
               ),
             ),
@@ -1225,8 +1225,8 @@ void main() {
     await tester.pumpWidget(
       overlay(
         child: const TextField(
-          decoration: InputDecoration(
-            icon: Icon(Icons.phone),
+          decoration: const InputDecoration(
+            icon: const Icon(Icons.phone),
             labelText: 'label',
             filled: true,
           ),
@@ -1246,7 +1246,7 @@ void main() {
     await tester.pumpWidget(
       overlay(
         child: const TextField(
-          decoration: InputDecoration.collapsed(
+          decoration: const InputDecoration.collapsed(
             hintText: 'hint',
           ),
         ),
@@ -1292,7 +1292,7 @@ void main() {
         child: new Container(
           width: 300.0,
           child: const Center(
-            child: TextField(
+            child: const TextField(
               textAlign: TextAlign.center,
               decoration: null,
             ),
@@ -1671,7 +1671,7 @@ void main() {
 
   testWidgets('maxLength shows warning when maxLengthEnforced is false.', (WidgetTester tester) async {
     final TextEditingController textController = new TextEditingController();
-    const TextStyle testStyle = TextStyle(color: Colors.deepPurpleAccent);
+    const TextStyle testStyle = const TextStyle(color: Colors.deepPurpleAccent);
 
     await tester.pumpWidget(boilerplate(
       child: new TextField(
@@ -1702,10 +1702,10 @@ void main() {
   testWidgets('setting maxLength shows counter', (WidgetTester tester) async {
     await tester.pumpWidget(new MaterialApp(
       home: const Material(
-        child: DefaultTextStyle(
-          style: TextStyle(fontFamily: 'Ahem', fontSize: 10.0),
-          child: Center(
-            child: TextField(
+        child: const DefaultTextStyle(
+          style: const TextStyle(fontFamily: 'Ahem', fontSize: 10.0),
+          child: const Center(
+            child: const TextField(
               maxLength: 10,
             ),
           ),
@@ -1727,10 +1727,10 @@ void main() {
     await tester.pumpWidget(
       new MaterialApp(
         home: const Material(
-          child: DefaultTextStyle(
-            style: TextStyle(fontFamily: 'Ahem', fontSize: 10.0),
-            child: Center(
-              child: TextField(
+          child: const DefaultTextStyle(
+            style: const TextStyle(fontFamily: 'Ahem', fontSize: 10.0),
+            child: const Center(
+              child: const TextField(
                 maxLength: 10,
               ),
             ),
@@ -1792,7 +1792,7 @@ void main() {
             ),
             const Text(
               'abc',
-              style: TextStyle(fontSize: 20.0),
+              style: const TextStyle(fontSize: 20.0),
             ),
             new Expanded(
               child: new TextField(
@@ -2196,7 +2196,7 @@ void main() {
   });
 
   testWidgets('TextField throws when not descended from a Material widget', (WidgetTester tester) async {
-    const Widget textField = TextField();
+    const Widget textField = const TextField();
     await tester.pumpWidget(textField);
     final dynamic exception = tester.takeException();
     expect(exception, isFlutterError);

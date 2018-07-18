@@ -68,15 +68,15 @@ class _SearchDemoState extends State<SearchDemo> {
                   new Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: const <Widget>[
-                      Text('Press the '),
-                      Tooltip(
+                      const Text('Press the '),
+                      const Tooltip(
                         message: 'search',
-                        child: Icon(
+                        child: const Icon(
                           Icons.search,
                           size: 18.0,
                         ),
                       ),
-                      Text(' icon in the AppBar'),
+                      const Text(' icon in the AppBar'),
                     ],
                   ),
                   const Text('and search for an integer between 0 and 100,000.'),
@@ -100,10 +100,10 @@ class _SearchDemoState extends State<SearchDemo> {
         child: new Column(
           children: <Widget>[
             const UserAccountsDrawerHeader(
-              accountName: Text('Peter Widget'),
-              accountEmail: Text('peter.widget@example.com'),
-              currentAccountPicture: CircleAvatar(
-                backgroundImage: AssetImage(
+              accountName: const Text('Peter Widget'),
+              accountEmail: const Text('peter.widget@example.com'),
+              currentAccountPicture: const CircleAvatar(
+                backgroundImage: const AssetImage(
                   'people/square/peter.png',
                   package: 'flutter_gallery_assets',
                 ),
@@ -115,8 +115,8 @@ class _SearchDemoState extends State<SearchDemo> {
               // DrawerHeader consumes top MediaQuery padding.
               removeTop: true,
               child: const ListTile(
-                leading: Icon(Icons.payment),
-                title: Text('Placeholder'),
+                leading: const Icon(Icons.payment),
+                title: const Text('Placeholder'),
               ),
             ),
           ],

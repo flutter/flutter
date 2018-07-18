@@ -11,7 +11,7 @@ import 'package:flutter_driver/flutter_driver.dart';
 import 'package:path/path.dart' as path;
 import 'package:test/test.dart';
 
-const FileSystem _fs = LocalFileSystem();
+const FileSystem _fs = const LocalFileSystem();
 
 // Demos for which timeline data will be collected using
 // FlutterDriver.traceAction().
@@ -23,7 +23,7 @@ const FileSystem _fs = LocalFileSystem();
 //
 // These names must match GalleryItem titles from kAllGalleryDemos
 // in examples/flutter_gallery/lib/gallery/demos.dart
-const List<String> kProfiledDemos = <String>[
+const List<String> kProfiledDemos = const <String>[
   'Shrine@Studies',
   'Contact profile@Studies',
   'Animation@Studies',
@@ -39,13 +39,13 @@ const List<String> kProfiledDemos = <String>[
 //
 // These names must match GalleryItem titles from kAllGalleryDemos
 // in examples/flutter_gallery/lib/gallery/demos.dart
-const List<String> kUnsynchronizedDemos = <String>[
+const List<String> kUnsynchronizedDemos = const <String>[
   'Progress indicators@Material',
   'Activity Indicator@Cupertino',
   'Video@Media',
 ];
 
-const List<String> kSkippedDemos = <String>[
+const List<String> kSkippedDemos = const <String>[
   'Pull to refresh@Cupertino', // The back button lacks a tooltip.
 ];
 
@@ -220,6 +220,6 @@ void main([List<String> args = const <String>[]]) {
       final Set<String> unprofiledDemos = new Set<String>.from(_allDemos)..removeAll(kProfiledDemos);
       await runDemos(unprofiledDemos.toList(), driver);
 
-    }, timeout: const Timeout(Duration(minutes: 5)));
+    }, timeout: const Timeout(const Duration(minutes: 5)));
   });
 }

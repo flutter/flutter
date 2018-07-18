@@ -1176,8 +1176,8 @@ abstract class _RenderCustomClip<T> extends RenderProxyBox {
       _debugText ??= new TextPainter(
         text: const TextSpan(
           text: '✂',
-          style: TextStyle(
-            color: Color(0xFFFF00FF),
+          style: const TextStyle(
+            color: const Color(0xFFFF00FF),
               fontSize: 14.0,
             ),
           ),

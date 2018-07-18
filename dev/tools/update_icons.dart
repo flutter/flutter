@@ -21,7 +21,7 @@ const String kDefaultIconsPath = 'packages/flutter/lib/src/material/icons.dart';
 const String kBeginGeneratedMark = '// BEGIN GENERATED';
 const String kEndGeneratedMark = '// END GENERATED';
 
-const Map<String, String> kIdentifierRewrites = <String, String>{
+const Map<String, String> kIdentifierRewrites = const <String, String>{
   '360': 'threesixty',
   '3d_rotation': 'threed_rotation',
   '4k': 'four_k',
