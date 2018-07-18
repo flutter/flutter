@@ -204,4 +204,82 @@ void main() {
     expect(tester.getRect(find.byType(AnimatedSize).at(1)), new Rect.fromLTWH(0.0, 56.0 + 1.0 + 56.0, 800.0, 0.0));
     expect(tester.getRect(find.byType(AnimatedSize).at(2)), new Rect.fromLTWH(0.0, 56.0 + 1.0 + 56.0 + 16.0 + 16.0 + 48.0 + 16.0, 800.0, 100.0));
   });
+
+  testWidgets('Single Panel Open Test',  (WidgetTester tester) async {
+    await tester.pumpWidget(
+      new MaterialApp(
+        home: new SingleChildScrollView(
+          child: new ExpansionPanelList(
+            children: <ExpansionPanel>[
+              new ExpansionPanel(
+                headerBuilder: (BuildContext context, bool isExpanded) {
+                  return new Text(isExpanded ? 'B' : 'A');
+                },
+                body: const SizedBox(height: 100.0),
+              ),
+              new ExpansionPanel(
+                headerBuilder: (BuildContext context, bool isExpanded) {
+                  return new Text(isExpanded ? 'D' : 'C');
+                },
+                body: const SizedBox(height: 100.0),
+              ),
+              new ExpansionPanel(
+                headerBuilder: (BuildContext context, bool isExpanded) {
+                  return new Text(isExpanded ? 'F' : 'E');
+                },
+                body: const SizedBox(height: 100.0),
+              ),
+            ],
+            allowMultiplePanelsOpen: false,
+          ),
+        ),
+      ),
+    );
+
+    expect(find.text('A'), findsOneWidget);
+    expect(find.text('B'), findsNothing);
+    expect(find.text('C'), findsOneWidget);
+    expect(find.text('D'), findsNothing);
+    expect(find.text('E'), findsOneWidget);
+    expect(find.text('F'), findsNothing);
+
+
+    RenderBox box = tester.renderObject(find.byType(ExpansionPanelList));
+    double oldHeight = box.size.height;
+
+    expect(find.byType(ExpandIcon), findsNWidgets(3));
+
+    await tester.tap(find.byType(ExpandIcon).at(0));
+
+    box = tester.renderObject(find.byType(ExpansionPanelList));
+    expect(box.size.height, equals(oldHeight));
+
+    await tester.pump(const Duration(milliseconds: 200));
+    await tester.pumpAndSettle();
+    expect(find.text('A'), findsNothing);
+    expect(find.text('B'), findsOneWidget);
+    expect(find.text('C'), findsOneWidget);
+    expect(find.text('D'), findsNothing);
+    expect(find.text('E'), findsOneWidget);
+    expect(find.text('F'), findsNothing);
+
+    box = tester.renderObject(find.byType(ExpansionPanelList));
+    expect(box.size.height - oldHeight, greaterThanOrEqualTo(100.0)); // 100 + some margin
+
+    await tester.tap(find.byType(ExpandIcon).at(1));
+
+    box = tester.renderObject(find.byType(ExpansionPanelList));
+    oldHeight = box.size.height;
+
+    await tester.pump(const Duration(milliseconds: 200));
+
+    expect(find.text('A'), findsOneWidget);
+    expect(find.text('B'), findsNothing);
+    expect(find.text('C'), findsNothing);
+    expect(find.text('D'), findsOneWidget);
+    expect(find.text('E'), findsOneWidget);
+    expect(find.text('F'), findsNothing);
+
+    expect(box.size.height, greaterThanOrEqualTo(oldHeight));
+  });
 }

@@ -69,8 +69,8 @@ class ExpansionPanel {
     @required this.body,
     this.isExpanded = false
   }) : assert(headerBuilder != null),
-       assert(body != null),
-       assert(isExpanded != null);
+        assert(body != null),
+        assert(isExpanded != null);
 
   /// The widget builder that builds the expansion panels' header.
   final ExpansionPanelHeaderBuilder headerBuilder;
@@ -93,17 +93,20 @@ class ExpansionPanel {
 ///
 ///  * [ExpansionPanel]
 ///  * <https://material.google.com/components/expansion-panels.html>
-class ExpansionPanelList extends StatelessWidget {
-  /// Creates an expansion panel list widget. The [expansionCallback] is
-  /// triggered when an expansion panel expand/collapse button is pushed.
+
+class ExpansionPanelList extends StatefulWidget {
+
+  ///Expansion Panel List
   const ExpansionPanelList({
     Key key,
     this.children = const <ExpansionPanel>[],
     this.expansionCallback,
-    this.animationDuration = kThemeAnimationDuration
-  }) : assert(children != null),
-       assert(animationDuration != null),
-       super(key: key);
+    this.animationDuration = kThemeAnimationDuration,
+    this.allowMultiplePanelsOpen = true
+  })
+      : assert(children != null),
+        assert(animationDuration != null),
+        super(key: key);
 
   /// The children of the expansion panel list. They are laid out in a similar
   /// fashion to [ListBody].
@@ -121,18 +124,47 @@ class ExpansionPanelList extends StatelessWidget {
   /// The duration of the expansion animation.
   final Duration animationDuration;
 
+  /// Whether the Expansion Panel List can have multiple panels open
+  /// simultaneously or at most one.
+  ///
+  /// If set to false and a closed panel is opened, all other opened panels will
+  /// be closed. In this state there can be exactly one or zero panels open.
+
+  final bool allowMultiplePanelsOpen;
+
+  @override
+  State<StatefulWidget> createState() => new _ExpansionPanelListState();
+}
+
+class _ExpansionPanelListState extends State<ExpansionPanelList> {
+
+  /// Creates an expansion panel list widget. The [expansionCallback] is
+  /// triggered when an expansion panel expand/collapse button is pushed.
+  List<bool> widgetOpenValue;
+
+  @override
+  void initState() {
+    super.initState();
+    widgetOpenValue = new List<bool>(widget.children.length);
+
+    for(int i = 0; i < widget.children.length; i++)
+      widgetOpenValue[i] = false;
+  }
   bool _isChildExpanded(int index) {
-    return children[index].isExpanded;
+    return widget.allowMultiplePanelsOpen ? widget.children[index].isExpanded :
+    widgetOpenValue[index];
   }
 
   @override
   Widget build(BuildContext context) {
     final List<MergeableMaterialItem> items = <MergeableMaterialItem>[];
+
+
     const EdgeInsets kExpandedEdgeInsets = const EdgeInsets.symmetric(
-      vertical: _kPanelHeaderExpandedHeight - _kPanelHeaderCollapsedHeight
+        vertical: _kPanelHeaderExpandedHeight - _kPanelHeaderCollapsedHeight
     );
 
-    for (int index = 0; index < children.length; index += 1) {
+    for (int index = 0; index < widget.children.length; index += 1) {
       if (_isChildExpanded(index) && index != 0 && !_isChildExpanded(index - 1))
         items.add(new MaterialGap(key: new _SaltedKey<BuildContext, int>(context, index * 2 - 1)));
 
@@ -140,14 +172,15 @@ class ExpansionPanelList extends StatelessWidget {
         children: <Widget>[
           new Expanded(
             child: new AnimatedContainer(
-              duration: animationDuration,
+              duration: widget.animationDuration,
               curve: Curves.fastOutSlowIn,
               margin: _isChildExpanded(index) ? kExpandedEdgeInsets : EdgeInsets.zero,
               child: new ConstrainedBox(
                 constraints: const BoxConstraints(minHeight: _kPanelHeaderCollapsedHeight),
-                child: children[index].headerBuilder(
+                child: widget.children[index].headerBuilder(
                   context,
-                  children[index].isExpanded,
+                  widget.allowMultiplePanelsOpen ? widget.children[index].isExpanded :
+                  widgetOpenValue[index],
                 ),
               ),
             ),
@@ -158,8 +191,21 @@ class ExpansionPanelList extends StatelessWidget {
               isExpanded: _isChildExpanded(index),
               padding: const EdgeInsets.all(16.0),
               onPressed: (bool isExpanded) {
-                if (expansionCallback != null)
-                  expansionCallback(index, isExpanded);
+                if (widget.expansionCallback != null)
+                  widget.expansionCallback(index, isExpanded);
+
+                setState(() {
+                  if(!widget.allowMultiplePanelsOpen) {
+                    for (int cIndex = 0; cIndex < widget.children.length; cIndex++) {
+                      if (cIndex != index && !widget.children[cIndex].isExpanded) {
+                        if (widget.expansionCallback != null)
+                          widget.expansionCallback(cIndex, false);
+                        widgetOpenValue[cIndex] = false;
+                      }
+                    }
+                    widgetOpenValue[index] =!isExpanded;
+                  }
+                });
               },
             ),
           ),
@@ -174,19 +220,19 @@ class ExpansionPanelList extends StatelessWidget {
               header,
               new AnimatedCrossFade(
                 firstChild: new Container(height: 0.0),
-                secondChild: children[index].body,
+                secondChild: widget.children[index].body,
                 firstCurve: const Interval(0.0, 0.6, curve: Curves.fastOutSlowIn),
                 secondCurve: const Interval(0.4, 1.0, curve: Curves.fastOutSlowIn),
                 sizeCurve: Curves.fastOutSlowIn,
                 crossFadeState: _isChildExpanded(index) ? CrossFadeState.showSecond : CrossFadeState.showFirst,
-                duration: animationDuration,
+                duration: widget.animationDuration,
               ),
             ],
           ),
         ),
       );
 
-      if (_isChildExpanded(index) && index != children.length - 1)
+      if (_isChildExpanded(index) && index != widget.children.length - 1)
         items.add(new MaterialGap(key: new _SaltedKey<BuildContext, int>(context, index * 2 + 1)));
     }
 
