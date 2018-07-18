@@ -1,4 +1,4 @@
-Signature: 9d07cf4ed9f6c4ece22105db33c2e6f4
+Signature: 8ab62fe95c1ef8d1c186d49def733f8e
 
 UNUSED LICENSES:
 
@@ -4480,7 +4480,6 @@ FILE: ../../../third_party/dart/client/idea/.idea/.name
 FILE: ../../../third_party/dart/client/idea/.idea/inspectionProfiles/Project_Default.xml
 FILE: ../../../third_party/dart/client/idea/.idea/vcs.xml
 FILE: ../../../third_party/dart/runtime/CPPLINT.cfg
-FILE: ../../../third_party/dart/runtime/observatory/.analysis_options
 FILE: ../../../third_party/dart/runtime/observatory/lib/elements.dart
 FILE: ../../../third_party/dart/runtime/observatory/lib/src/elements/img/chromium_icon.png
 FILE: ../../../third_party/dart/runtime/observatory/lib/src/elements/img/dart_icon.png
@@ -4490,8 +4489,6 @@ FILE: ../../../third_party/dart/runtime/observatory/web/index.html
 FILE: ../../../third_party/dart/runtime/observatory/web/third_party/trace_viewer_full.html
 FILE: ../../../third_party/dart/runtime/observatory/web/timeline.html
 FILE: ../../../third_party/dart/runtime/vm/snapshot_test_in.dat
-FILE: ../../../third_party/dart/samples/build_dart/test.foo
-FILE: ../../../third_party/dart/samples/build_dart_simple/test.foo
 FILE: ../../../third_party/dart/sdk/lib/html/html_common/conversions_dart2js.dart
 FILE: ../../../third_party/dart/sdk/lib/html/html_common/html_common.dart
 FILE: ../../../third_party/dart/sdk/lib/libraries.json
@@ -4884,10 +4881,6 @@ FILE: ../../../third_party/dart/runtime/vm/virtual_memory_win.cc
 FILE: ../../../third_party/dart/runtime/vm/zone.cc
 FILE: ../../../third_party/dart/runtime/vm/zone.h
 FILE: ../../../third_party/dart/runtime/vm/zone_test.cc
-FILE: ../../../third_party/dart/samples/build_dart/bin/test.dart
-FILE: ../../../third_party/dart/samples/build_dart/build.dart
-FILE: ../../../third_party/dart/samples/build_dart_simple/build.dart
-FILE: ../../../third_party/dart/samples/build_dart_simple/test.dart
 FILE: ../../../third_party/dart/samples/sample_extension/sample_asynchronous_extension.dart
 FILE: ../../../third_party/dart/samples/sample_extension/sample_extension.cc
 FILE: ../../../third_party/dart/samples/sample_extension/sample_extension_dllmain_win.cc
@@ -5642,6 +5635,10 @@ FILE: ../../../third_party/dart/runtime/vm/compiler/compiler_pass.cc
 FILE: ../../../third_party/dart/runtime/vm/compiler/compiler_pass.h
 FILE: ../../../third_party/dart/runtime/vm/compiler/frontend/bytecode_reader.cc
 FILE: ../../../third_party/dart/runtime/vm/compiler/frontend/bytecode_reader.h
+FILE: ../../../third_party/dart/runtime/vm/compiler/frontend/constant_evaluator.cc
+FILE: ../../../third_party/dart/runtime/vm/compiler/frontend/constant_evaluator.h
+FILE: ../../../third_party/dart/runtime/vm/compiler/frontend/kernel_fingerprints.cc
+FILE: ../../../third_party/dart/runtime/vm/compiler/frontend/kernel_fingerprints.h
 FILE: ../../../third_party/dart/runtime/vm/compiler/frontend/kernel_translation_helper.cc
 FILE: ../../../third_party/dart/runtime/vm/compiler/frontend/kernel_translation_helper.h
 FILE: ../../../third_party/dart/runtime/vm/compiler/frontend/scope_builder.cc
