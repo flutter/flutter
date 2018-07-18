@@ -287,17 +287,12 @@ class _FloatingActionButtonState extends State<FloatingActionButton> {
 class _ChildOverflowBox extends SingleChildRenderObjectWidget {
   const _ChildOverflowBox({
     Key key,
-    this.alignment = Alignment.center,
     Widget child,
-  }) : assert(alignment != null),
-       super(key: key, child: child);
-
-  final AlignmentGeometry alignment;
+  }) : super(key: key, child: child);
 
   @override
   _RenderChildOverflowBox createRenderObject(BuildContext context) {
     return new _RenderChildOverflowBox(
-      alignment: alignment,
       textDirection: Directionality.of(context),
     );
   }
@@ -305,23 +300,15 @@ class _ChildOverflowBox extends SingleChildRenderObjectWidget {
   @override
   void updateRenderObject(BuildContext context, _RenderChildOverflowBox renderObject) {
     renderObject
-      ..alignment = alignment
       ..textDirection = Directionality.of(context);
-  }
-
-  @override
-  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
-    super.debugFillProperties(properties);
-    properties.add(new DiagnosticsProperty<AlignmentGeometry>('alignment', alignment));
   }
 }
 
 class _RenderChildOverflowBox extends RenderAligningShiftedBox {
   _RenderChildOverflowBox({
     RenderBox child,
-    AlignmentGeometry alignment = Alignment.center,
     TextDirection textDirection,
-  }) : super(child: child, alignment: alignment, textDirection: textDirection);
+  }) : super(child: child, alignment: Alignment.center, textDirection: textDirection);
 
   @override
   double computeMinIntrinsicWidth(double height) => 0.0;
