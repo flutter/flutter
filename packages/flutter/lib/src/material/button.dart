@@ -196,26 +196,28 @@ class _RawMaterialButtonState extends State<RawMaterialButton> {
         ),
       ),
     );
-    BoxConstraints constraints;
+    double minWidth;
+    double minHeight;
     switch (widget.materialTapTargetSize) {
       case MaterialTapTargetSize.padded:
-        constraints = const BoxConstraints(minWidth: 48.0, minHeight: 48.0);
+        minWidth = 48.0;
+        minHeight = 48.0;
         break;
       case MaterialTapTargetSize.shrinkWrap:
-        constraints = const BoxConstraints();
+        minWidth = 0.0;
+        minHeight = 0.0;
         break;
     }
-    result = new _ButtonRedirectingHitDetectionWidget(
-      constraints: constraints,
-      child: result,
-      childConstraints: widget.constraints,
-    );
 
     return new Semantics(
       container: true,
       button: true,
       enabled: widget.enabled,
-      child: result,
+      child: new _ButtonPadding(
+        minWidth: minWidth,
+        minHeight: minHeight,
+        child: result,
+      ),
     );
   }
 }
@@ -450,75 +452,110 @@ class MaterialButton extends StatelessWidget {
 ///
 /// The primary purpose of this widget is to allow padding around [Material] widgets
 /// to trigger the child ink feature without increasing the size of the material.
-class _ButtonRedirectingHitDetectionWidget extends SingleChildRenderObjectWidget {
-  const _ButtonRedirectingHitDetectionWidget({
+class _ButtonPadding extends SingleChildRenderObjectWidget {
+  const _ButtonPadding({
     Key key,
     Widget child,
-    this.constraints,
-    this.childConstraints,
+    this.minHeight,
+    this.minWidth,
   }) : super(key: key, child: child);
 
-  final BoxConstraints constraints;
-  final BoxConstraints childConstraints;
+  final double minWidth;
+  final double minHeight;
 
   @override
   RenderObject createRenderObject(BuildContext context) {
-    return new _RenderButtonRedirectingHitDetection(constraints, childConstraints);
+    return new _RenderButtonPadding(minWidth, minHeight);
   }
 
   @override
-  void updateRenderObject(BuildContext context, covariant _RenderButtonRedirectingHitDetection renderObject) {
+  void updateRenderObject(BuildContext context, covariant _RenderButtonPadding renderObject) {
     renderObject
-      ..additionalConstraints = constraints
-      ..childConstraints = childConstraints;
+      ..minHeight = minHeight
+      ..minWidth = minWidth;
   }
 }
 
-class _RenderButtonRedirectingHitDetection extends RenderConstrainedBox {
-  _RenderButtonRedirectingHitDetection(BoxConstraints additionalConstraints, this._childConstraints) 
-    : super(additionalConstraints: additionalConstraints);
+class _RenderButtonPadding extends RenderProxyBox {
+  _RenderButtonPadding(this._minWidth, this._minHeight);
 
-  BoxConstraints get childConstraints => _childConstraints;
-  BoxConstraints _childConstraints;
-  set childConstraints(BoxConstraints value) {
-    if (_childConstraints == value)
+  double get minWidth => _minWidth;
+  double _minWidth;
+  set minWidth(double value) {
+    if (_minWidth == value)
       return;
-    _childConstraints = value;
+    _minWidth = value;
     markNeedsLayout();
   }
 
-  Offset _childOffset;
+  double get minHeight => _minHeight;
+  double _minHeight;
+  set minHeight(double value) {
+    if (_minHeight == value)
+      return;
+    _minHeight = value;
+    markNeedsLayout();
+  }
+
+  @override
+  double computeMinIntrinsicWidth(double height) {
+    if (child != null)
+      return math.max(child.computeMinIntrinsicWidth(height), minWidth);
+    return minWidth;
+  }
+
+  @override
+  double computeMinIntrinsicHeight(double width) {
+    if (child != null)
+      return math.max(child.computeMaxIntrinsicHeight(width), minHeight);
+    return minHeight;
+  }
+
+  @override
+  double computeMaxIntrinsicWidth(double height) {
+    if (child != null)
+      return math.max(child.computeMinIntrinsicWidth(height), minWidth);
+    return minWidth;
+  }
+
+  @override
+  double computeMaxIntrinsicHeight(double width) {
+    if (child != null)
+      return math.max(child.computeMaxIntrinsicHeight(width), minHeight);
+    return minHeight;
+  }
 
   @override
   void performLayout() {
-    final BoxConstraints selectedConstraints = new BoxConstraints(
-      maxWidth: additionalConstraints.maxWidth,
-      minWidth: additionalConstraints.minWidth,
-      maxHeight: additionalConstraints.maxHeight,
-      minHeight: math.min(additionalConstraints.minHeight, childConstraints.minHeight),
-    );
     if (child != null) {
-      child.layout(selectedConstraints.enforce(constraints), parentUsesSize: true);
-      final double constrainedHeight = constraints.constrainHeight(math.max(child.size.height, additionalConstraints.minHeight));
-      assert(constrainedHeight >= child.size.height);
-      size = new Size(child.size.width, constraints.constrainHeight(constrainedHeight));
-      _childOffset = Alignment.center.alongOffset(size - child.size);
+      child.layout(constraints, parentUsesSize: true);
+      size = new Size(math.max(child.size.width, minWidth), math.max(child.size.height, minHeight));
+      final BoxParentData childParentData = child.parentData;
+      childParentData.offset = Alignment.center.alongOffset(size - child.size);
     } else {
-      size = additionalConstraints.enforce(constraints).constrain(Size.zero);
+      size = new Size(minHeight, minWidth);
     }
   }
 
   @override
   void paint(PaintingContext context, Offset offset) {
-    if (child != null)
-      context.paintChild(child, offset + _childOffset);
+    if (child != null) {
+      final BoxParentData childParentData = child.parentData;
+      context.paintChild(child, offset + childParentData.offset);
+    }
+  }
+
+  @override
+  void setupParentData(RenderObject child) {
+    child.parentData = new BoxParentData();
   }
 
   @override
   bool hitTest(HitTestResult result, {Offset position}) {
     if (!size.contains(position) || child == null)
       return false;
-    if (child.hitTest(result, position: position + _childOffset))
+    final BoxParentData childParentData = child.parentData;
+    if (child.hitTest(result, position: position - childParentData.offset))
       return true;
     return child.hitTest(result, position: child.size.center(Offset.zero));
   }
