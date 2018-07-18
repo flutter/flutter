@@ -7,6 +7,7 @@ import 'dart:convert';
 
 import 'package:args/args.dart';
 import 'package:args/command_runner.dart';
+import 'package:completion/completion.dart';
 import 'package:file/file.dart';
 import 'package:platform/platform.dart';
 import 'package:process/process.dart';
@@ -175,6 +176,29 @@ class FlutterCommandRunner extends CommandRunner<Null> {
       print('Unable to locate flutter root: $error');
     }
     return '.';
+  }
+
+  @override
+  ArgResults parse(Iterable<String> args) {
+    try {
+      // This is where the CommandRunner would call argParser.parse(args). We
+      // override this function so we can call tryArgsCompletion instead, so the
+      // completion package can interrogate the argParser, and as part of that,
+      // it calls argParser.parse(args) itself and returns the result.
+      return tryArgsCompletion(args, argParser);
+    } on ArgParserException catch (error) {
+      if (error.commands.isEmpty) {
+        usageException(error.message);
+      }
+
+      Command<Null> command = commands[error.commands.first];
+      for (String commandName in error.commands.skip(1)) {
+        command = command.subcommands[commandName];
+      }
+
+      command.usageException(error.message);
+      return null;
+    }
   }
 
   @override
