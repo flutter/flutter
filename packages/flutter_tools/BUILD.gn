@@ -19,6 +19,7 @@ dart_library("flutter_tools") {
     "//third_party/dart-pkg/pub/archive",
     "//third_party/dart-pkg/pub/args",
     "//third_party/dart-pkg/pub/collection",
+    "//third_party/dart-pkg/pub/completion",
     "//third_party/dart-pkg/pub/coverage",
     "//third_party/dart-pkg/pub/crypto",
     "//third_party/dart-pkg/pub/file",
