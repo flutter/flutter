@@ -111,9 +111,7 @@ void main() {
   testUsingContext('auto selects dart 1 snapshot', () async {
     const String contents = "StringBuffer bar = StringBuffer('baz');";
     tempDir.childFile('main.dart').writeAsStringSync(contents);
-    server = new AnalysisServer(
-        '/Users/devoncarew/projects/workspace/sdk/xcodebuild/ReleaseX64/dart-sdk',  //dartSdkPath,
-        <String>[tempDir.path]);
+    server = new AnalysisServer(dartSdkPath, <String>[tempDir.path]);
 
     int errorCount = 0;
     final Future<bool> onDone = server.onAnalyzing.where((bool analyzing) => analyzing == false).first;
@@ -134,10 +132,9 @@ void main() {
   testUsingContext('force select dart 2 snapshot', () async {
     const String contents = "StringBuffer bar = StringBuffer('baz');";
     tempDir.childFile('main.dart').writeAsStringSync(contents);
-    server = new AnalysisServer(
-        '/Users/devoncarew/projects/workspace/sdk/xcodebuild/ReleaseX64/dart-sdk',  //dartSdkPath,
-        <String>[tempDir.path],
-        forceDart2Snapshot: true
+    server = new AnalysisServer('dartSdkPath',
+      <String>[tempDir.path],
+      forceDart2Snapshot: true
     );
 
     int errorCount = 0;
