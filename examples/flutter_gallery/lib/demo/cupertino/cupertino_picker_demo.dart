@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
 import 'cupertino_navigation_demo.dart' show coolColorNames;
 
@@ -83,7 +84,7 @@ class _CupertinoPickerDemoState extends State<CupertinoPickerDemo> {
             ),
             offAxisFraction: -0.5,
             useMagnifier: true,
-            magnificationRate: 1.1,
+            magnification: 1.1,
             itemExtent: _kPickerItemHeight,
             backgroundColor: CupertinoColors.white,
             onSelectedItemChanged: (int index) {
@@ -107,7 +108,7 @@ class _CupertinoPickerDemoState extends State<CupertinoPickerDemo> {
             ),
             offAxisFraction: 0.5,
             useMagnifier: true,
-            magnificationRate: 1.1,
+            magnification: 1.1,
             itemExtent: _kPickerItemHeight,
             backgroundColor: CupertinoColors.white,
             onSelectedItemChanged: (int index) {
@@ -150,8 +151,7 @@ class _CupertinoPickerDemoState extends State<CupertinoPickerDemo> {
 
   @override
   Widget build(BuildContext context) {
-    final String time = _selectedHour.toString().padLeft(2, '0') + ': ' +
-        _selectedMinute.toString().padLeft(2, '0');
+    final String time = new DateFormat.Hm().format(new DateTime(2018, 1, 1, _selectedHour, _selectedMinute));
     return new Scaffold(
       appBar: new AppBar(
         title: const Text('Cupertino Picker'),

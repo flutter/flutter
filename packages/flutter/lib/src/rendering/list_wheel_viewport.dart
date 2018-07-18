@@ -102,7 +102,7 @@ class RenderListWheelViewport
     double perspective = defaultPerspective,
     double offAxisFraction = 0.0,
     bool useMagnifier = false,
-    double magnificationRate = 1.0,
+    double magnification = 1.0,
     @required double itemExtent,
     bool clipToSize = true,
     bool renderChildrenOutsideViewport = false,
@@ -115,8 +115,8 @@ class RenderListWheelViewport
        assert(perspective <= 0.01, perspectiveTooHighMessage),
        assert(offAxisFraction != null),
        assert(useMagnifier != null),
-       assert(magnificationRate != null),
-       assert(magnificationRate > 0),
+       assert(magnification != null),
+       assert(magnification > 0),
        assert(itemExtent != null),
        assert(itemExtent > 0),
        assert(clipToSize != null),
@@ -130,7 +130,7 @@ class RenderListWheelViewport
        _perspective = perspective,
        _offAxisFraction = offAxisFraction,
        _useMagnifier = useMagnifier,
-       _magnificationRate = magnificationRate,
+       _magnification = magnification,
        _itemExtent = itemExtent,
        _clipToSize = clipToSize,
        _renderChildrenOutsideViewport = renderChildrenOutsideViewport {
@@ -300,24 +300,24 @@ class RenderListWheelViewport
     _useMagnifier = value;
     markNeedsPaint();
   }
-  /// {@template flutter.rendering.wheelList.magnificationRate}
+  /// {@template flutter.rendering.wheelList.magnification}
   /// The zoomed-in rate of the magnifier, if it is used.
   ///
   /// The default value is 1.0, which will not change anything.
   /// If the value is > 1.0, the center item will be zoomed in by that rate, and
   /// it will also be rendered as flat, not cylindrical like the rest of the list.
-  /// The item will be zoomed out if magnificationRate < 1.0.
+  /// The item will be zoomed out if magnification < 1.0.
   ///
   /// Must be positive.
   /// {@endtemplate}
-  double get magnificationRate => _magnificationRate;
-  double _magnificationRate = 1.0;
-  set magnificationRate(double value) {
+  double get magnification => _magnification;
+  double _magnification = 1.0;
+  set magnification(double value) {
     assert(value != null);
     assert(value > 0);
-    if (value == _magnificationRate)
+    if (value == _magnification)
       return;
-    _magnificationRate = value;
+    _magnification = value;
     markNeedsPaint();
   }
 
@@ -669,12 +669,12 @@ class RenderListWheelViewport
       Offset untransformedPaintingCoordinates,
   ) {
     final double magnifierTopLinePosition =
-        size.height / 2 - _itemExtent * _magnificationRate / 2;
+        size.height / 2 - _itemExtent * _magnification / 2;
     final double magnifierBottomLinePosition =
-        size.height / 2 + _itemExtent * _magnificationRate / 2;
+        size.height / 2 + _itemExtent * _magnification / 2;
 
     final bool isAfterMagnifierTopLine = untransformedPaintingCoordinates.dy
-        >= magnifierTopLinePosition - _itemExtent * _magnificationRate;
+        >= magnifierTopLinePosition - _itemExtent * _magnification;
     final bool isBeforeMagnifierBottomLine = untransformedPaintingCoordinates.dy
         <= magnifierBottomLinePosition;
 
@@ -684,7 +684,7 @@ class RenderListWheelViewport
           0.0,
           magnifierTopLinePosition,
           size.width,
-          _itemExtent * _magnificationRate);
+          _itemExtent * _magnification);
       final Rect topHalfRect = new Rect.fromLTWH(
           0.0,
           0.0,
@@ -769,7 +769,7 @@ class RenderListWheelViewport
   Matrix4 _magnifyTransform() {
     final Matrix4 magnify = Matrix4.identity();
     magnify.translate(size.width * (-_offAxisFraction + 0.5), size.height / 2);
-    magnify.scale(_magnificationRate, _magnificationRate, _magnificationRate);
+    magnify.scale(_magnification, _magnification, _magnification);
     magnify.translate(-size.width * (-_offAxisFraction + 0.5), -size.height / 2);
     return magnify;
   }

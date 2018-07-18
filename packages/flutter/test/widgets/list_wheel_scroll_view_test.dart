@@ -53,12 +53,12 @@ void main() {
     });
 
 
-    testWidgets('ListWheelScrollView needs positive magnificationRate', (WidgetTester tester) async {
+    testWidgets('ListWheelScrollView needs positive magnification', (WidgetTester tester) async {
       expect(
             () {
           new ListWheelScrollView(
             useMagnifier: true,
-            magnificationRate: -1.0,
+            magnification: -1.0,
             itemExtent: 20.0,
             children: <Widget>[new Container()],
           );
@@ -263,7 +263,7 @@ void main() {
             key: const Key('list_wheel_scroll_view'),
             child: new ListWheelScrollView(
               useMagnifier: true,
-              magnificationRate: 2.0,
+              magnification: 2.0,
               itemExtent: 50.0,
               children: List<Widget>.generate(10, (int index) {
                 return const Placeholder();
@@ -454,7 +454,7 @@ void main() {
       ));
     });
 
-    testWidgets('offAxisFraction, magnificationRate changes matrix', (WidgetTester tester) async {
+    testWidgets('offAxisFraction, magnification changes matrix', (WidgetTester tester) async {
       final ScrollController controller = new ScrollController(
           initialScrollOffset: 200.0);
 
@@ -510,7 +510,7 @@ void main() {
             itemExtent: 100.0,
             offAxisFraction: 0.5,
             useMagnifier: true,
-            magnificationRate: 1.5,
+            magnification: 1.5,
             children: <Widget>[
               new Container(
                 width: 200.0,

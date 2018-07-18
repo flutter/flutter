@@ -44,14 +44,14 @@ class CupertinoPicker extends StatefulWidget {
     this.backgroundColor = _kDefaultBackground,
     this.offAxisFraction = 0.0,
     this.useMagnifier = false,
-    this.magnificationRate = 1.0,
+    this.magnification = 1.0,
     this.scrollController,
     @required this.itemExtent,
     @required this.onSelectedItemChanged,
     @required this.children,
   }) : assert(diameterRatio != null),
        assert(diameterRatio > 0.0, RenderListWheelViewport.diameterRatioZeroMessage),
-       assert(magnificationRate > 0),
+       assert(magnification > 0),
        assert(itemExtent != null),
        assert(itemExtent > 0),
        super(key: key);
@@ -79,8 +79,8 @@ class CupertinoPicker extends StatefulWidget {
   /// {@macro flutter.rendering.wheelList.useMagnifier}
   final bool useMagnifier;
 
-  /// {@macro flutter.rendering.wheelList.magnificationRate}
-  final double magnificationRate;
+  /// {@macro flutter.rendering.wheelList.magnification}
+  final double magnification;
 
   /// A [FixedExtentScrollController] to read and control the current item.
   ///
@@ -178,7 +178,7 @@ class _CupertinoPickerState extends State<CupertinoPicker> {
               )
             ),
             constraints: new BoxConstraints.expand(
-                height: widget.itemExtent * widget.magnificationRate,
+                height: widget.itemExtent * widget.magnification,
             ),
           ),
           new Expanded(
@@ -202,7 +202,7 @@ class _CupertinoPickerState extends State<CupertinoPicker> {
             diameterRatio: widget.diameterRatio,
             offAxisFraction: widget.offAxisFraction,
             useMagnifier: widget.useMagnifier,
-            magnificationRate: widget.magnificationRate,
+            magnification: widget.magnification,
             itemExtent: widget.itemExtent,
             onSelectedItemChanged: _handleSelectedItemChanged,
             children: widget.children,
