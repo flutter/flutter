@@ -107,6 +107,54 @@ void main() {
   }, overrides: <Type, Generator>{
     OperatingSystemUtils: () => os
   });
+
+  testUsingContext('auto selects dart 1 snapshot', () async {
+    const String contents = "StringBuffer bar = StringBuffer('baz');";
+    tempDir.childFile('main.dart').writeAsStringSync(contents);
+    server = new AnalysisServer(
+        '/Users/devoncarew/projects/workspace/sdk/xcodebuild/ReleaseX64/dart-sdk',  //dartSdkPath,
+        <String>[tempDir.path]);
+
+    int errorCount = 0;
+    final Future<bool> onDone = server.onAnalyzing.where((bool analyzing) => analyzing == false).first;
+    server.onErrors.listen((FileAnalysisErrors errors) {
+      errorCount += errors.errors.length;
+    });
+
+    await server.start();
+    expect(server.snapshotName, 'analysis_server_dart1.dart.snapshot');
+
+    await onDone;
+
+    expect(errorCount, 0);
+  }, overrides: <Type, Generator>{
+    OperatingSystemUtils: () => os
+  });
+
+  testUsingContext('force select dart 2 snapshot', () async {
+    const String contents = "StringBuffer bar = StringBuffer('baz');";
+    tempDir.childFile('main.dart').writeAsStringSync(contents);
+    server = new AnalysisServer(
+        '/Users/devoncarew/projects/workspace/sdk/xcodebuild/ReleaseX64/dart-sdk',  //dartSdkPath,
+        <String>[tempDir.path],
+        forceDart2Snapshot: true
+    );
+
+    int errorCount = 0;
+    final Future<bool> onDone = server.onAnalyzing.where((bool analyzing) => analyzing == false).first;
+    server.onErrors.listen((FileAnalysisErrors errors) {
+      errorCount += errors.errors.length;
+    });
+
+    await server.start();
+    expect(server.snapshotName, 'analysis_server.dart.snapshot');
+
+    await onDone;
+
+    expect(errorCount, 0);
+  }, overrides: <Type, Generator>{
+    OperatingSystemUtils: () => os
+  });
 }
 
 void _createSampleProject(Directory directory, { bool brokenCode = false }) {

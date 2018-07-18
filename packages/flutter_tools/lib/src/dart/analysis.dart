@@ -14,38 +14,65 @@ import '../base/utils.dart';
 import '../globals.dart';
 
 class AnalysisServer {
-  AnalysisServer(this.sdkPath, this.directories, {this.previewDart2 = false});
+  static const bool preferDart1Snapshot = true;
+
+  AnalysisServer(this.sdkPath, this.directories, {
+    this.previewDart2 = true,
+    this.forceDart2Snapshot = false,
+  });
 
   final String sdkPath;
   final List<String> directories;
   final bool previewDart2;
 
+  /// Force the selection of the Dart 2 snapshot; else, we'll attempt to use a Dart 1
+  /// snapshot (a Dart 2 snapshot, but using the Dart 1 JIT and front end).
+  final bool forceDart2Snapshot;
+
   Process _process;
+
   final StreamController<bool> _analyzingController =
       new StreamController<bool>.broadcast();
   final StreamController<FileAnalysisErrors> _errorsController =
       new StreamController<FileAnalysisErrors>.broadcast();
 
   int _id = 0;
+  String _snapshotPath;
 
   Future<Null> start() async {
-    final String snapshot =
-        fs.path.join(sdkPath, 'bin/snapshots/analysis_server.dart.snapshot');
-    final List<String> command = <String>[
-      fs.path.join(sdkPath, 'bin', 'dart'),
-      snapshot,
-      '--sdk',
-      sdkPath,
-    ];
+    bool usingDart1Snapshot = false;
 
-    if (previewDart2) {
-      command.add('--preview-dart-2');
-    } else {
-      command.add('--no-preview-dart-2');
+    if (!forceDart2Snapshot) {
+      _snapshotPath = fs.path.join(sdkPath, 'bin/snapshots/analysis_server_dart1.dart.snapshot');
+      if (fs.isFileSync(_snapshotPath)) {
+        usingDart1Snapshot = true;
+      } else {
+        _snapshotPath = null;
+      }
     }
 
-    printTrace('dart ${command.skip(1).join(' ')}');
-    _process = await processManager.start(command);
+    _snapshotPath ??= fs.path.join(sdkPath, 'bin/snapshots/analysis_server.dart.snapshot');
+
+    final List<String> commands = <String>[
+      fs.path.join(sdkPath, 'bin', 'dart'),
+    ];
+    if (usingDart1Snapshot) {
+      commands.add('--no-preview-dart-2');
+    }
+    commands.addAll(<String>[
+      _snapshotPath,
+      '--sdk',
+      sdkPath,
+    ]);
+
+    if (previewDart2) {
+      commands.add('--preview-dart-2');
+    } else {
+      commands.add('--no-preview-dart-2');
+    }
+
+    printTrace('dart ${commands.skip(1).join(' ')}');
+    _process = await processManager.start(commands);
     // This callback hookup can't throw.
     _process.exitCode
         .whenComplete(() => _process = null); // ignore: unawaited_futures
@@ -69,9 +96,13 @@ class AnalysisServer {
       'subscriptions': <String>['STATUS']
     });
 
-    _sendCommand('analysis.setAnalysisRoots',
-        <String, dynamic>{'included': directories, 'excluded': <String>[]});
+    _sendCommand('analysis.setAnalysisRoots', <String, dynamic>{
+      'included': directories, 'excluded': <String>[]
+    });
   }
+
+  /// Get the name of the analysis server snapshot that was selected.
+  String get snapshotName => fs.path.basename(_snapshotPath);
 
   Stream<bool> get onAnalyzing => _analyzingController.stream;
   Stream<FileAnalysisErrors> get onErrors => _errorsController.stream;
