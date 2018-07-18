@@ -3,53 +3,42 @@
 // found in the LICENSE file.
 
 import 'dart:io';
+import 'dart:math';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../rendering/mock_canvas.dart';
+
 void main() {
   testWidgets('Alert dialog control test', (WidgetTester tester) async {
     bool didDelete = false;
 
-    await tester.pumpWidget(new MaterialApp(
-      home: new Material(
-        child: new Center(
-          child: new Builder(
-            builder: (BuildContext context) {
-              return new RaisedButton(
+    await tester.pumpWidget(
+      createAppWithButtonThatLaunchesDialog(
+        dialogBuilder: (BuildContext context) {
+          return new CupertinoAlertDialog(
+            title: const Text('The title'),
+            content: const Text('The content'),
+            actions: <Widget>[
+              const CupertinoDialogAction(
+                child: const Text('Cancel'),
+              ),
+              new CupertinoDialogAction(
+                isDestructiveAction: true,
                 onPressed: () {
-                  showDialog<void>(
-                    context: context,
-                    builder: (BuildContext context) {
-                      return new CupertinoAlertDialog(
-                        title: const Text('The title'),
-                        content: const Text('The content'),
-                        actions: <Widget>[
-                          const CupertinoDialogAction(
-                            child: const Text('Cancel'),
-                          ),
-                          new CupertinoDialogAction(
-                            isDestructiveAction: true,
-                            onPressed: () {
-                              didDelete = true;
-                              Navigator.pop(context);
-                            },
-                            child: const Text('Delete'),
-                          ),
-                        ],
-                      );
-                    },
-                  );
+                  didDelete = true;
+                  Navigator.pop(context);
                 },
-                child: const Text('Go'),
-              );
-            },
-          ),
-        ),
+                child: const Text('Delete'),
+              ),
+            ],
+          );
+        },
       ),
-    ));
+    );
 
     await tester.tap(find.text('Go'));
 
@@ -112,39 +101,27 @@ void main() {
       (WidgetTester tester) async {
     final ScrollController scrollController = new ScrollController();
     await tester.pumpWidget(
-      new MaterialApp(home: new Material(
-        child: new Center(
-          child: new Builder(builder: (BuildContext context) {
-            return new RaisedButton(
-              onPressed: () {
-                showDialog<void>(
-                  context: context,
-                  builder: (BuildContext context) {
-                    return new MediaQuery(
-                      data: MediaQuery.of(context).copyWith(textScaleFactor: 3.0),
-                      child: new CupertinoAlertDialog(
-                        title: const Text('The Title'),
-                        content: new Text('Very long content ' * 20),
-                        actions: const <Widget>[
-                          const CupertinoDialogAction(
-                            child: const Text('Cancel'),
-                          ),
-                          const CupertinoDialogAction(
-                            isDestructiveAction: true,
-                            child: const Text('OK'),
-                          ),
-                        ],
-                        scrollController: scrollController,
-                      ),
-                    );
-                  },
-                );
-              },
-              child: const Text('Go'),
-            );
-          }),
-        ),
-      )),
+      createAppWithButtonThatLaunchesDialog(
+        dialogBuilder: (BuildContext context) {
+          return new MediaQuery(
+            data: MediaQuery.of(context).copyWith(textScaleFactor: 3.0),
+            child: new CupertinoAlertDialog(
+              title: const Text('The Title'),
+              content: new Text('Very long content ' * 20),
+              actions: const <Widget>[
+                const CupertinoDialogAction(
+                  child: const Text('Cancel'),
+                ),
+                const CupertinoDialogAction(
+                  isDestructiveAction: true,
+                  child: const Text('OK'),
+                ),
+              ],
+              scrollController: scrollController,
+            ),
+          );
+        }
+      )
     );
 
     await tester.tap(find.text('Go'));
@@ -181,48 +158,36 @@ void main() {
     const double textScaleFactor = 3.0;
     final ScrollController actionScrollController = new ScrollController(keepScrollOffset: true);
     await tester.pumpWidget(
-      new MaterialApp(home: new Material(
-        child: new Center(
-          child: new Builder(builder: (BuildContext context) {
-            return new RaisedButton(
-              onPressed: () {
-                showDialog<Null>(
-                  context: context,
-                  builder: (BuildContext context) {
-                    return new MediaQuery(
-                      data: MediaQuery.of(context).copyWith(textScaleFactor: textScaleFactor),
-                      child: new CupertinoAlertDialog(
-                        title: const Text('The title'),
-                        content: const Text('The content.'),
-                        actions: const <Widget>[
-                          const CupertinoDialogAction(
-                            child: const Text('One'),
-                          ),
-                          const CupertinoDialogAction(
-                            child: const Text('Two'),
-                          ),
-                          const CupertinoDialogAction(
-                            child: const Text('Three'),
-                          ),
-                          const CupertinoDialogAction(
-                            child: const Text('Chocolate Brownies'),
-                          ),
-                          const CupertinoDialogAction(
-                            isDestructiveAction: true,
-                            child: const Text('Cancel'),
-                          ),
-                        ],
-                        actionScrollController: actionScrollController,
-                      ),
-                    );
-                  },
-                );
-              },
-              child: const Text('Go'),
-            );
-          }),
-        ),
-      )),
+      createAppWithButtonThatLaunchesDialog(
+        dialogBuilder: (BuildContext context) {
+          return new MediaQuery(
+            data: MediaQuery.of(context).copyWith(textScaleFactor: textScaleFactor),
+            child: new CupertinoAlertDialog(
+              title: const Text('The title'),
+              content: const Text('The content.'),
+              actions: const <Widget>[
+                const CupertinoDialogAction(
+                  child: const Text('One'),
+                ),
+                const CupertinoDialogAction(
+                  child: const Text('Two'),
+                ),
+                const CupertinoDialogAction(
+                  child: const Text('Three'),
+                ),
+                const CupertinoDialogAction(
+                  child: const Text('Chocolate Brownies'),
+                ),
+                const CupertinoDialogAction(
+                  isDestructiveAction: true,
+                  child: const Text('Cancel'),
+                ),
+              ],
+              actionScrollController: actionScrollController,
+            ),
+          );
+        }
+      )
     );
 
     await tester.tap(find.text('Go'));
@@ -256,36 +221,24 @@ void main() {
     const double textScaleFactor = 1.0;
     final ScrollController actionScrollController = new ScrollController();
     await tester.pumpWidget(
-      new MaterialApp(home: new Material(
-        child: new Center(
-          child: new Builder(builder: (BuildContext context) {
-            return new RaisedButton(
-              onPressed: () {
-                showDialog<Null>(
-                  context: context,
-                  builder: (BuildContext context) {
-                    return new MediaQuery(
-                      data: MediaQuery.of(context).copyWith(textScaleFactor: textScaleFactor),
-                      child: new CupertinoAlertDialog(
-                        actions: const <Widget>[
-                          const CupertinoDialogAction(
-                            child: const Text('One'),
-                          ),
-                          const CupertinoDialogAction(
-                            child: const Text('Two'),
-                          ),
-                        ],
-                        actionScrollController: actionScrollController,
-                      ),
-                    );
-                  },
-                );
-              },
-              child: const Text('Go'),
-            );
-          }),
-        ),
-      )),
+      createAppWithButtonThatLaunchesDialog(
+        dialogBuilder: (BuildContext context) {
+          return new MediaQuery(
+            data: MediaQuery.of(context).copyWith(textScaleFactor: textScaleFactor),
+            child: new CupertinoAlertDialog(
+              actions: const <Widget>[
+                const CupertinoDialogAction(
+                  child: const Text('One'),
+                ),
+                const CupertinoDialogAction(
+                  child: const Text('Two'),
+                ),
+              ],
+              actionScrollController: actionScrollController,
+            ),
+          );
+        }
+      ),
     );
 
     await tester.tap(find.text('Go'));
@@ -307,30 +260,18 @@ void main() {
     const double textScaleFactor = 1.0;
     final ScrollController scrollController = new ScrollController(keepScrollOffset: true);
     await tester.pumpWidget(
-      new MaterialApp(home: new Material(
-        child: new Center(
-          child: new Builder(builder: (BuildContext context) {
-            return new RaisedButton(
-              onPressed: () {
-                showDialog<Null>(
-                  context: context,
-                  builder: (BuildContext context) {
-                    return new MediaQuery(
-                      data: MediaQuery.of(context).copyWith(textScaleFactor: textScaleFactor),
-                      child: new CupertinoAlertDialog(
-                        title: const Text('The title'),
-                        content: const Text('The content.'),
-                        scrollController: scrollController,
-                      ),
-                    );
-                  },
-                );
-              },
-              child: const Text('Go'),
-            );
-          }),
-        ),
-      )),
+      createAppWithButtonThatLaunchesDialog(
+        dialogBuilder: (BuildContext context) {
+          return new MediaQuery(
+            data: MediaQuery.of(context).copyWith(textScaleFactor: textScaleFactor),
+            child: new CupertinoAlertDialog(
+              title: const Text('The title'),
+              content: const Text('The content.'),
+              scrollController: scrollController,
+            ),
+          );
+        },
+      ),
     );
 
     await tester.tap(find.text('Go'));
@@ -350,6 +291,378 @@ void main() {
       tester.getSize(find.byKey(const Key('cupertino_alert_dialog_modal'))),
     );
   });
+
+  testWidgets('Actions section height for 1 button is height of button.',
+          (WidgetTester tester) async {
+    final double dividerWidth = 1.0 / 3.0; // TODO
+
+    final ScrollController scrollController = new ScrollController();
+    await tester.pumpWidget(
+      createAppWithButtonThatLaunchesDialog(
+        dialogBuilder: (BuildContext context) {
+          return new CupertinoAlertDialog(
+            title: const Text('The Title'),
+            content: const Text('The message'),
+            actions: const <Widget>[
+              const CupertinoDialogAction(
+                child: const Text('OK'),
+              ),
+            ],
+            scrollController: scrollController,
+          );
+        },
+      ),
+    );
+
+    await tester.tap(find.text('Go'));
+
+    await tester.pump();
+
+    final RenderBox okButtonBox = findActionButtonRenderBoxByTitle(tester, 'OK');
+    final RenderBox actionsSectionBox = findActionsSectionRenderBox(tester);
+
+    expect(okButtonBox.size.width, actionsSectionBox.size.width);
+    expect(okButtonBox.size.height + dividerWidth, actionsSectionBox.size.height);
+  });
+
+  testWidgets('Actions section height for 2 side-by-side buttons is height of tallest button.',
+          (WidgetTester tester) async {
+    final double dividerWidth = 1.0 / 3.0; // TODO
+
+    final ScrollController scrollController = new ScrollController();
+    await tester.pumpWidget(
+      createAppWithButtonThatLaunchesDialog(
+        dialogBuilder: (BuildContext context) {
+          return new CupertinoAlertDialog(
+            title: const Text('The Title'),
+            content: const Text('The message'),
+            actions: const <Widget>[
+              const CupertinoDialogAction(
+                child: const Text('OK'),
+              ),
+              const CupertinoDialogAction(
+                isDestructiveAction: true,
+                child: const Text('Cancel'),
+              ),
+            ],
+            scrollController: scrollController,
+          );
+        },
+      ),
+    );
+
+    await tester.tap(find.text('Go'));
+
+    await tester.pump();
+
+    final RenderBox okButtonBox = findActionButtonRenderBoxByTitle(tester, 'OK');
+    final RenderBox cancelButtonBox = findActionButtonRenderBoxByTitle(tester, 'Cancel');
+    final RenderBox actionsSectionBox = findActionsSectionRenderBox(tester);
+
+    expect(okButtonBox.size.width, cancelButtonBox.size.width);
+
+    expect(
+      actionsSectionBox.size.width,
+      okButtonBox.size.width + cancelButtonBox.size.width + dividerWidth,
+    );
+
+    expect(
+      actionsSectionBox.size.height,
+      max(okButtonBox.size.height, cancelButtonBox.size.height) + dividerWidth,
+    );
+  });
+
+  testWidgets('Actions section height for 2 stacked buttons is height of both buttons.',
+          (WidgetTester tester) async {
+    final double dividerWidth = 1.0 / 3.0; // TODO
+
+    final ScrollController scrollController = new ScrollController();
+    await tester.pumpWidget(
+      createAppWithButtonThatLaunchesDialog(
+        dialogBuilder: (BuildContext context) {
+          return new CupertinoAlertDialog(
+            title: const Text('The Title'),
+            content: const Text('The message'),
+            actions: const <Widget>[
+              const CupertinoDialogAction(
+                child: const Text('OK'),
+              ),
+              const CupertinoDialogAction(
+                isDestructiveAction: true,
+                child: const Text('This is too long to fit'),
+              ),
+            ],
+            scrollController: scrollController,
+          );
+        },
+      ),
+    );
+
+    await tester.tap(find.text('Go'));
+
+    await tester.pump();
+
+    final RenderBox okButtonBox = findActionButtonRenderBoxByTitle(tester, 'OK');
+    final RenderBox longButtonBox = findActionButtonRenderBoxByTitle(tester, 'This is too long to fit');
+    final RenderBox actionsSectionBox = findActionsSectionRenderBox(tester);
+
+    expect(okButtonBox.size.width, longButtonBox.size.width);
+
+    expect(okButtonBox.size.width, actionsSectionBox.size.width);
+
+    expect(
+      okButtonBox.size.height + longButtonBox.size.height + (2.0 * dividerWidth),
+      actionsSectionBox.size.height,
+    );
+  });
+
+  testWidgets('Actions section height for 3 buttons is 1.5 buttons tall.',
+          (WidgetTester tester) async {
+    final double dividerWidth = 1.0 / 3.0; // TODO
+
+    final ScrollController scrollController = new ScrollController();
+    await tester.pumpWidget(
+      createAppWithButtonThatLaunchesDialog(
+        dialogBuilder: (BuildContext context) {
+          return new CupertinoAlertDialog(
+            title: const Text('The Title'),
+            content: const Text('The message'),
+            actions: const <Widget>[
+              const CupertinoDialogAction(
+                child: const Text('Option 1'),
+              ),
+              const CupertinoDialogAction(
+                child: const Text('Option 2'),
+              ),
+              const CupertinoDialogAction(
+                child: const Text('Option 3'),
+              ),
+            ],
+            scrollController: scrollController,
+          );
+        },
+      ),
+    );
+
+    await tester.tap(find.text('Go'));
+
+    await tester.pump();
+
+    final RenderBox option1ButtonBox = findActionButtonRenderBoxByTitle(tester, 'Option 1');
+    final RenderBox option2ButtonBox = findActionButtonRenderBoxByTitle(tester, 'Option 2');
+    final RenderBox option3ButtonBox = findActionButtonRenderBoxByTitle(tester, 'Option 3');
+    final RenderBox actionsSectionBox = findActionsSectionRenderBox(tester);
+
+    expect(option1ButtonBox.size.width, option2ButtonBox.size.width);
+    expect(option2ButtonBox.size.width, option3ButtonBox.size.width);
+    expect(option1ButtonBox.size.width, actionsSectionBox.size.width);
+
+    final double expectedHeight = option1ButtonBox.size.height
+        + option2ButtonBox.size.height
+        + option3ButtonBox.size.height
+        + (3 * dividerWidth);
+    expect(
+      expectedHeight,
+      actionsSectionBox.size.height,
+    );
+  });
+
+  testWidgets('Actions section overscroll is painted white.', (WidgetTester tester) async {
+    final ScrollController scrollController = new ScrollController();
+    await tester.pumpWidget(
+      createAppWithButtonThatLaunchesDialog(
+        dialogBuilder: (BuildContext context) {
+          return new CupertinoAlertDialog(
+            title: const Text('The Title'),
+            content: const Text('The message'),
+            actions: const <Widget>[
+              const CupertinoDialogAction(
+                child: const Text('Option 1'),
+              ),
+              const CupertinoDialogAction(
+                child: const Text('Option 2'),
+              ),
+              const CupertinoDialogAction(
+                child: const Text('Option 3'),
+              ),
+            ],
+            scrollController: scrollController,
+          );
+        },
+      ),
+    );
+
+    await tester.tap(find.text('Go'));
+    await tester.pump();
+
+    final RenderBox actionsSectionBox = findActionsSectionRenderBox(tester);
+
+    // The way that overscroll white is accomplished in a scrollable action
+    // section is that the custom RenderBox that lays out the buttons and draws
+    // the dividers also paints a white background the size of Rect.largest.
+    // That background ends up being clipped by the containing ScrollView.
+    //
+    // Here we test that the largest Rect is contained within the painted Path.
+    // We don't test for exclusion because for some reason the Path is reporting
+    // that even points beyond Rect.largest are within the Path. That's not an
+    // issue for our use-case, so we don't worry about it.
+    expect(actionsSectionBox, paints..path(
+      includes: <Offset>[
+        new Offset(Rect.largest.left, Rect.largest.top),
+        new Offset(Rect.largest.right, Rect.largest.bottom),
+      ],
+    ));
+  });
+
+  testWidgets('Pressed button changes appearance and dividers disappear.', (WidgetTester tester) async {
+    final ScrollController scrollController = new ScrollController();
+    await tester.pumpWidget(
+      createAppWithButtonThatLaunchesDialog(
+        dialogBuilder: (BuildContext context) {
+          return new CupertinoAlertDialog(
+            title: const Text('The Title'),
+            content: const Text('The message'),
+            actions: const <Widget>[
+              const CupertinoDialogAction(
+                child: const Text('Option 1'),
+              ),
+              const CupertinoDialogAction(
+                child: const Text('Option 2'),
+              ),
+              const CupertinoDialogAction(
+                child: const Text('Option 3'),
+              ),
+            ],
+            scrollController: scrollController,
+          );
+        },
+      ),
+    );
+
+    await tester.tap(find.text('Go'));
+    await tester.pump();
+
+    const Color normalButtonBackgroundColor = const Color(0xc0ffffff);
+    const Color pressedButtonBackgroundColor = const Color(0x70ffffff);
+    final double dividerWidth = 1.0 / 3.0; // TODO:
+    final RenderBox firstButtonBox = findActionButtonRenderBoxByTitle(tester, 'Option 1');
+    final RenderBox secondButtonBox = findActionButtonRenderBoxByTitle(tester, 'Option 2');
+    final RenderBox actionsSectionBox = findActionsSectionRenderBox(tester);
+
+    final Offset pressedButtonCenter = new Offset(
+      secondButtonBox.size.width / 2.0,
+      (2 * dividerWidth) + firstButtonBox.size.height + (secondButtonBox.size.height / 2.0),
+    );
+    final Offset topDividerCenter = new Offset(
+      secondButtonBox.size.width / 2.0,
+      dividerWidth + firstButtonBox.size.height + (0.5 * dividerWidth),
+    );
+    final Offset bottomDividerCenter = new Offset(
+      secondButtonBox.size.width / 2.0,
+      (2 * dividerWidth)
+          + firstButtonBox.size.height
+          + secondButtonBox.size.height
+          + (0.5 * dividerWidth),
+    );
+
+    // Before pressing the button, verify following expectations:
+    // - Background includes the button that will be pressed
+    // - Background excludes the divider above and below the button that will be pressed
+    // - Pressed button background does NOT include the button that will be pressed
+    expect(actionsSectionBox, paints
+      ..path(
+        color: normalButtonBackgroundColor,
+        includes: <Offset>[
+          pressedButtonCenter,
+        ],
+        excludes: <Offset>[
+          topDividerCenter,
+          bottomDividerCenter,
+        ],
+      )
+      ..path(
+        color: pressedButtonBackgroundColor,
+        excludes: <Offset>[
+          pressedButtonCenter,
+        ],
+      ),
+    );
+
+    // Press down on the button.
+    final TestGesture gesture = await tester.press(find.widgetWithText(CupertinoDialogAction, 'Option 2'));
+    await tester.pump();
+
+    // While pressing the button, verify following expectations:
+    // - Background excludes the pressed button
+    // - Background includes the divider above and below the pressed button
+    // - Pressed button background includes the pressed
+    expect(actionsSectionBox, paints
+      ..path(
+        color: normalButtonBackgroundColor,
+        // The background should contain the divider above and below the pressed
+        // button. While pressed, surrounding dividers disappear, which means
+        // they become part of the background.
+        includes: <Offset>[
+          topDividerCenter,
+          bottomDividerCenter,
+        ],
+        // The background path should not include the tapped button background...
+        excludes: <Offset>[
+          pressedButtonCenter,
+        ],
+      )
+      // For a pressed button, a dedicated path is painted with a pressed button
+      // background color...
+      ..path(
+        color: pressedButtonBackgroundColor,
+        includes: <Offset>[
+          pressedButtonCenter,
+        ],
+      ),
+    );
+
+    // We must explicitly cause an "up" gesture to avoid a crash.
+    // todo(mattcarroll) remove this call when #19540 is fixed
+    await gesture.up();
+  });
+}
+
+RenderBox findActionButtonRenderBoxByTitle(WidgetTester tester, String title) {
+  final RenderObject buttonBox = tester.renderObject(find.widgetWithText(CupertinoDialogAction, title));
+  assert(buttonBox is RenderBox);
+  return buttonBox;
+}
+
+RenderBox findActionsSectionRenderBox(WidgetTester tester) {
+  final RenderObject actionsSection = tester.renderObject(find.byElementPredicate(
+    (Element element) {
+      return element.renderObject is RenderCupertinoDialogActions;
+    }),
+  );
+  assert(actionsSection is RenderBox);
+  return actionsSection;
+}
+
+Widget createAppWithButtonThatLaunchesDialog({Function(BuildContext) dialogBuilder}) {
+  return new MaterialApp(
+    home: new Material(
+      child: new Center(
+        child: new Builder(builder: (BuildContext context) {
+          return new RaisedButton(
+            onPressed: () {
+              showDialog<void>(
+                context: context,
+                builder: (BuildContext context) {
+                  return dialogBuilder(context);
+                },
+              );
+            },
+            child: const Text('Go'),
+          );
+        }),
+      ),
+    ),
+  );
 }
 
 Widget boilerplate(Widget child) {

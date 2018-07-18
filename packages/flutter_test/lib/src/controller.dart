@@ -269,6 +269,17 @@ class WidgetController {
     });
   }
 
+  /// Dispatch a pointer down at the center of the given widget, assuming it is
+  /// exposed.
+  ///
+  /// If the center of the widget is not exposed, this might send events to
+  /// another object.
+  Future<TestGesture> press(Finder finder, { int pointer }) {
+    return TestAsyncUtils.guard<TestGesture>(() {
+      return startGesture(getCenter(finder), pointer: pointer);
+    });
+  }
+
   /// Dispatch a pointer down / pointer up sequence (with a delay of
   /// [kLongPressTimeout] + [kPressTimeout] between the two events) at the
   /// center of the given widget, assuming it is exposed.

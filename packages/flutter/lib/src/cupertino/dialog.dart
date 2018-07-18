@@ -771,57 +771,61 @@ class _CupertinoDialogActionsRenderWidget extends MultiChildRenderObjectWidget {
 
   @override
   RenderObject createRenderObject(BuildContext context) {
-    return new _RenderCupertinoDialogActions(
+    return new RenderCupertinoDialogActions(
       pressedButtons: _pressedButtons,
       dividerWidth: _dividerWidth,
     );
   }
 
   @override
-  void updateRenderObject(BuildContext context, _RenderCupertinoDialogActions renderObject) {
+  void updateRenderObject(BuildContext context, RenderCupertinoDialogActions renderObject) {
     renderObject.pressedButtons = _pressedButtons;
     renderObject.dividerWidth = _dividerWidth;
   }
 }
 
-// iOS style layout policy for sizing and positioning an alert dialog's action
-// buttons.
-//
-// The policy is as follows:
-//
-// If a single action button is provided, or if 2 action buttons are provided
-// that can fit side-by-side, then action buttons are sized and laid out in a
-// single horizontal row. The row is exactly as wide as the dialog, and the row
-// is as tall as the tallest action button. A horizontal divider is drawn above
-// the button row. If 2 action buttons are provided, a vertical divider is
-// drawn between them. The thickness of the divider is set by [dividerWidth].
-//
-// If 2 action buttons are provided but they cannot fit side-by-side, then the
-// 2 buttons are stacked vertically. A horizontal divider is drawn above each
-// button. The thickness of the divider is set by [dividerWidth]. The minimum
-// height of this [RenderBox] in the case of 2 stacked buttons is as tall as
-// the 2 buttons stacked. This is different than the 3+ button case where the
-// minimum height is only 1.5 buttons tall. See the 3+ button explanation for
-// more info.
-//
-// If 3+ action buttons are provided then they are all stacked vertically. A
-// horizontal divider is drawn above each button. The thickness of the divider
-// is set by [dividerWidth]. The minimum height of this [RenderBox] in the case
-// of 3+ stacked buttons is as tall as the 1st button + 50% the height of the
-// 2nd button. In other words, the minimum height is 1.5 buttons tall. This
-// minimum height of 1.5 buttons is expected to work in tandem with a surrounding
-// [ScrollView] to match the iOS dialog behavior.
-//
-// A [Set] of [pressedButtons] are required because the divider rendering policy
-// is based on whether or not a given button is pressed. If a button is pressed,
-// then the divider above and below that pressed button are not drawn - instead
-// they are filled with the standard white dialog background color. The one
-// exception is the very 1st divider which is always rendered. This policy comes
-// from observation of native iOS dialogs.
-class _RenderCupertinoDialogActions extends RenderBox
+/// iOS style layout policy for sizing and positioning an alert dialog's action
+/// buttons.
+///
+/// The policy is as follows:
+///
+/// If a single action button is provided, or if 2 action buttons are provided
+/// that can fit side-by-side, then action buttons are sized and laid out in a
+/// single horizontal row. The row is exactly as wide as the dialog, and the row
+/// is as tall as the tallest action button. A horizontal divider is drawn above
+/// the button row. If 2 action buttons are provided, a vertical divider is
+/// drawn between them. The thickness of the divider is set by [dividerWidth].
+///
+/// If 2 action buttons are provided but they cannot fit side-by-side, then the
+/// 2 buttons are stacked vertically. A horizontal divider is drawn above each
+/// button. The thickness of the divider is set by [dividerWidth]. The minimum
+/// height of this [RenderBox] in the case of 2 stacked buttons is as tall as
+/// the 2 buttons stacked. This is different than the 3+ button case where the
+/// minimum height is only 1.5 buttons tall. See the 3+ button explanation for
+/// more info.
+///
+/// If 3+ action buttons are provided then they are all stacked vertically. A
+/// horizontal divider is drawn above each button. The thickness of the divider
+/// is set by [dividerWidth]. The minimum height of this [RenderBox] in the case
+/// of 3+ stacked buttons is as tall as the 1st button + 50% the height of the
+/// 2nd button. In other words, the minimum height is 1.5 buttons tall. This
+/// minimum height of 1.5 buttons is expected to work in tandem with a surrounding
+/// [ScrollView] to match the iOS dialog behavior.
+///
+/// A [Set] of [pressedButtons] are required because the divider rendering policy
+/// is based on whether or not a given button is pressed. If a button is pressed,
+/// then the divider above and below that pressed button are not drawn - instead
+/// they are filled with the standard white dialog background color. The one
+/// exception is the very 1st divider which is always rendered. This policy comes
+/// from observation of native iOS dialogs.
+@visibleForTesting
+class RenderCupertinoDialogActions extends RenderBox
     with ContainerRenderObjectMixin<RenderBox, MultiChildLayoutParentData>,
         RenderBoxContainerDefaultsMixin<RenderBox, MultiChildLayoutParentData> {
-  _RenderCupertinoDialogActions({
+  /// Creates an iOS dialog actions section layout policy.
+  ///
+  /// [pressedButtons] must not be null.
+  RenderCupertinoDialogActions({
     List<RenderBox> children,
     @required Set<int> pressedButtons,
     double dividerWidth = 0.0,
@@ -833,6 +837,7 @@ class _RenderCupertinoDialogActions extends RenderBox
 
   Set<int> _pressedButtons;
 
+  /// The buttons which are currently pressed by the user.
   Set<int> get pressedButtons => _pressedButtons;
 
   set pressedButtons(Set<int> newValue) {
@@ -847,6 +852,7 @@ class _RenderCupertinoDialogActions extends RenderBox
 
   double _dividerWidth;
 
+  /// The thickness of the divider between buttons.
   double get dividerWidth => _dividerWidth;
 
   set dividerWidth(double newValue) {
