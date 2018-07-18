@@ -9,18 +9,18 @@ import 'package:flutter/foundation.dart';
 
 import 'system_channels.dart';
 
-/// The [PlatformViewRegistry] responsible for generating unique identifiers for platform views.
-final PlatformViewRegistry platformViewRegistry = PlatformViewRegistry._instance();
+/// The [PlatformViewsRegistry] responsible for generating unique identifiers for platform views.
+final PlatformViewsRegistry platformViewsRegistry = PlatformViewsRegistry._instance();
 
 /// A registry responsible for generating unique identifier for platform views.
 ///
-/// A Flutter application has a single [PlatformViewRegistry] which can be accesses
-/// through the [platformViewRegistry] getter.
+/// A Flutter application has a single [PlatformViewsRegistry] which can be accesses
+/// through the [platformViewsRegistry] getter.
 ///
 /// See also:
 ///   * [PlatformView], a widget that shows a platform view.
-class PlatformViewRegistry {
-  PlatformViewRegistry._instance();
+class PlatformViewsRegistry {
+  PlatformViewsRegistry._instance();
 
   int _nextPlatformViewId = 0;
 
@@ -64,10 +64,12 @@ class PlatformViewsService {
     @required String viewType,
     OnPlatformViewCreated onPlatformViewCreated,
   }) {
+    assert(id != null);
+    assert(viewType != null);
     return new AndroidViewController._(
-        id: id,
-        viewType: viewType,
-        onPlatformViewCreated: onPlatformViewCreated
+        id,
+        viewType,
+        onPlatformViewCreated
     );
   }
 }
@@ -84,15 +86,15 @@ enum _AndroidViewState {
 ///
 /// Typically created with [PlatformViewsService.initAndroidView].
 class AndroidViewController {
-  AndroidViewController._({
-    @required this.id,
-    @required String viewType,
+  AndroidViewController._(
+    this.id,
+    String viewType,
     OnPlatformViewCreated onPlatformViewCreated,
-  }) : assert(id != null),
-       assert(viewType != null),
-       _viewType = viewType,
-        _onPlatformViewCreated = onPlatformViewCreated,
-       _state = _AndroidViewState.waitingForSize;
+  ) : assert(id != null),
+      assert(viewType != null),
+      _viewType = viewType,
+      _onPlatformViewCreated = onPlatformViewCreated,
+      _state = _AndroidViewState.waitingForSize;
 
   /// The unique identifier of the Android view controlled by this controller.
   final int id;
