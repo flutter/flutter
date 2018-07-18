@@ -168,7 +168,7 @@ class _RawMaterialButtonState extends State<RawMaterialButton> {
       ? (_highlight ? widget.highlightElevation : widget.elevation)
       : widget.disabledElevation;
 
-    Widget result = new ConstrainedBox(
+    final Widget result = new ConstrainedBox(
       constraints: widget.constraints,
       child: new Material(
         elevation: elevation,
