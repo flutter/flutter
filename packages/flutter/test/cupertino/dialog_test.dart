@@ -294,12 +294,12 @@ void main() {
 
   testWidgets('Actions section height for 1 button is height of button.',
           (WidgetTester tester) async {
-    final double dividerWidth = 1.0 / 3.0; // TODO
-
     final ScrollController scrollController = new ScrollController();
+    double dividerWidth; // Will be set when the dialog builder runs. Needs a BuildContext.
     await tester.pumpWidget(
       createAppWithButtonThatLaunchesDialog(
         dialogBuilder: (BuildContext context) {
+          dividerWidth = 1.0 / MediaQuery.of(context).devicePixelRatio;
           return new CupertinoAlertDialog(
             title: const Text('The Title'),
             content: const Text('The message'),
@@ -327,12 +327,12 @@ void main() {
 
   testWidgets('Actions section height for 2 side-by-side buttons is height of tallest button.',
           (WidgetTester tester) async {
-    final double dividerWidth = 1.0 / 3.0; // TODO
-
     final ScrollController scrollController = new ScrollController();
+    double dividerWidth; // Will be set when the dialog builder runs. Needs a BuildContext.
     await tester.pumpWidget(
       createAppWithButtonThatLaunchesDialog(
         dialogBuilder: (BuildContext context) {
+          dividerWidth = 1.0 / MediaQuery.of(context).devicePixelRatio;
           return new CupertinoAlertDialog(
             title: const Text('The Title'),
             content: const Text('The message'),
@@ -374,12 +374,12 @@ void main() {
 
   testWidgets('Actions section height for 2 stacked buttons is height of both buttons.',
           (WidgetTester tester) async {
-    final double dividerWidth = 1.0 / 3.0; // TODO
-
     final ScrollController scrollController = new ScrollController();
+    double dividerWidth; // Will be set when the dialog builder runs. Needs a BuildContext.
     await tester.pumpWidget(
       createAppWithButtonThatLaunchesDialog(
         dialogBuilder: (BuildContext context) {
+          dividerWidth = 1.0 / MediaQuery.of(context).devicePixelRatio;
           return new CupertinoAlertDialog(
             title: const Text('The Title'),
             content: const Text('The message'),
@@ -418,12 +418,12 @@ void main() {
 
   testWidgets('Actions section height for 3 buttons is 1.5 buttons tall.',
           (WidgetTester tester) async {
-    final double dividerWidth = 1.0 / 3.0; // TODO
-
     final ScrollController scrollController = new ScrollController();
+    double dividerWidth; // Will be set when the dialog builder runs. Needs a BuildContext.
     await tester.pumpWidget(
       createAppWithButtonThatLaunchesDialog(
         dialogBuilder: (BuildContext context) {
+          dividerWidth = 1.0 / MediaQuery.of(context).devicePixelRatio;
           return new CupertinoAlertDialog(
             title: const Text('The Title'),
             content: const Text('The message'),
@@ -516,9 +516,11 @@ void main() {
 
   testWidgets('Pressed button changes appearance and dividers disappear.', (WidgetTester tester) async {
     final ScrollController scrollController = new ScrollController();
+    double dividerWidth; // Will be set when the dialog builder runs. Needs a BuildContext.
     await tester.pumpWidget(
       createAppWithButtonThatLaunchesDialog(
         dialogBuilder: (BuildContext context) {
+          dividerWidth = 1.0 / MediaQuery.of(context).devicePixelRatio;
           return new CupertinoAlertDialog(
             title: const Text('The Title'),
             content: const Text('The message'),
@@ -544,7 +546,6 @@ void main() {
 
     const Color normalButtonBackgroundColor = const Color(0xc0ffffff);
     const Color pressedButtonBackgroundColor = const Color(0x70ffffff);
-    final double dividerWidth = 1.0 / 3.0; // TODO:
     final RenderBox firstButtonBox = findActionButtonRenderBoxByTitle(tester, 'Option 1');
     final RenderBox secondButtonBox = findActionButtonRenderBoxByTitle(tester, 'Option 2');
     final RenderBox actionsSectionBox = findActionsSectionRenderBox(tester);
