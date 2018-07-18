@@ -476,8 +476,8 @@ class _ButtonPadding extends SingleChildRenderObjectWidget {
   }
 }
 
-class _RenderButtonPadding extends RenderProxyBox {
-  _RenderButtonPadding(this._minWidth, this._minHeight);
+class _RenderButtonPadding extends RenderShiftedBox {
+  _RenderButtonPadding(this._minWidth, this._minHeight, [RenderBox child]) : super(child) ;
 
   double get minWidth => _minWidth;
   double _minWidth;
@@ -501,39 +501,39 @@ class _RenderButtonPadding extends RenderProxyBox {
   double computeMinIntrinsicWidth(double height) {
     if (child != null)
       return math.max(child.computeMinIntrinsicWidth(height), minWidth);
-    return minWidth;
+    return 0.0;
   }
 
   @override
   double computeMinIntrinsicHeight(double width) {
     if (child != null)
       return math.max(child.computeMaxIntrinsicHeight(width), minHeight);
-    return minHeight;
+    return 0.0;
   }
 
   @override
   double computeMaxIntrinsicWidth(double height) {
     if (child != null)
       return math.max(child.computeMinIntrinsicWidth(height), minWidth);
-    return minWidth;
+    return 0.0;
   }
 
   @override
   double computeMaxIntrinsicHeight(double width) {
     if (child != null)
       return math.max(child.computeMaxIntrinsicHeight(width), minHeight);
-    return minHeight;
+    return 0.0;
   }
 
   @override
   void performLayout() {
     if (child != null) {
       child.layout(constraints, parentUsesSize: true);
-      size = new Size(math.max(child.size.width, minWidth), math.max(child.size.height, minHeight));
+      size = constraints.constrain(new Size(math.max(child.size.width, minWidth), math.max(child.size.height, minHeight)));
       final BoxParentData childParentData = child.parentData;
       childParentData.offset = Alignment.center.alongOffset(size - child.size);
     } else {
-      size = new Size(minHeight, minWidth);
+      size = Size.zero;
     }
   }
 
