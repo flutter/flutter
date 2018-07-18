@@ -11,5 +11,7 @@ cache:
 build: off
 
 test_script:
+- cmd: set SHARD=tool_tests
+- cmd: bin\cache\dart-sdk\bin\dart.exe -c dev\bots\test.dart
 - cmd: set SHARD=tests
 - cmd: bin\cache\dart-sdk\bin\dart.exe -c dev\bots\test.dart
