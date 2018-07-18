@@ -120,7 +120,9 @@ void main() {
     });
 
     await server.start();
-    expect(server.snapshotName, 'analysis_server_dart1.dart.snapshot');
+    // TODO(devoncarew): Once we roll to a newer Dart SDK, we should expect to
+    // find 'analysis_server_dart1.dart.snapshot' here.
+    expect(server.snapshotName, isNot(equals('analysis_server_dart1.dart.snapshot')));
 
     await onDone;
 
