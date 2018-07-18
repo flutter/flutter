@@ -337,6 +337,7 @@ void main() {
       '   mergeAllDescendantsIntoThisNode: false\n'
       '   Rect.fromLTRB(0.0, 0.0, 0.0, 0.0)\n'
       '   actions: []\n'
+      '   customActions: []\n'
       '   flags: []\n'
       '   invisible\n'
       '   isHidden: false\n'
@@ -406,6 +407,7 @@ void main() {
 
   test('SemanticsConfiguration getter/setter', () {
     final SemanticsConfiguration config = new SemanticsConfiguration();
+    const CustomAccessibilityAction customAction = const CustomAccessibilityAction(label: 'test');
 
     expect(config.isSemanticBoundary, isFalse);
     expect(config.isButton, isFalse);
@@ -428,6 +430,7 @@ void main() {
     expect(config.onMoveCursorForwardByCharacter, isNull);
     expect(config.onMoveCursorBackwardByCharacter, isNull);
     expect(config.onTap, isNull);
+    expect(config.customAccessibilityActions[customAction], isNull);
 
     config.isSemanticBoundary = true;
     config.isButton = true;
@@ -450,6 +453,7 @@ void main() {
     final MoveCursorHandler onMoveCursorForwardByCharacter = (bool _) { };
     final MoveCursorHandler onMoveCursorBackwardByCharacter = (bool _) { };
     final VoidCallback onTap = () { };
+    final VoidCallback onCustomAction = () {};
 
     config.onShowOnScreen = onShowOnScreen;
     config.onScrollDown = onScrollDown;
@@ -462,6 +466,7 @@ void main() {
     config.onMoveCursorForwardByCharacter = onMoveCursorForwardByCharacter;
     config.onMoveCursorBackwardByCharacter = onMoveCursorBackwardByCharacter;
     config.onTap = onTap;
+    config.customAccessibilityActions[customAction] = onCustomAction;
 
     expect(config.isSemanticBoundary, isTrue);
     expect(config.isButton, isTrue);
@@ -484,6 +489,7 @@ void main() {
     expect(config.onMoveCursorForwardByCharacter, same(onMoveCursorForwardByCharacter));
     expect(config.onMoveCursorBackwardByCharacter, same(onMoveCursorBackwardByCharacter));
     expect(config.onTap, same(onTap));
+    expect(config.customAccessibilityActions[customAction], same(onCustomAction));
   });
 }
 

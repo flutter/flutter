@@ -108,7 +108,9 @@ class CustomAccessibilityAction {
   static final Map<int, CustomAccessibilityAction> _actions = <int, CustomAccessibilityAction>{};
   static final Map<CustomAccessibilityAction, int> _ids = <CustomAccessibilityAction, int>{};
 
-  static int _getIdentifier(CustomAccessibilityAction action) {
+  /// Get the identifier for a given `action`.
+  @visibleForTesting
+  static int getIdentifier(CustomAccessibilityAction action) {
     int result = _ids[action];
     if (result == null) {
       result =_nextId++;
@@ -118,7 +120,9 @@ class CustomAccessibilityAction {
     return result;
   }
 
-  static CustomAccessibilityAction _getAction(int id) {
+  /// Get the `action` for a given identifier.
+  @visibleForTesting
+  static CustomAccessibilityAction getAction(int id) {
     return _actions[id];
   }
 }
@@ -1460,7 +1464,7 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
       int index = 0;
       for (CustomAccessibilityAction action in data.customAccessibilityActions) {
         localContextActions.add(action);
-        customAcccessibilityActionIds[index] = CustomAccessibilityAction._getIdentifier(action);
+        customAcccessibilityActionIds[index] = CustomAccessibilityAction.getIdentifier(action);
         index++;
       }
     }
@@ -2037,7 +2041,7 @@ class SemanticsOwner extends ChangeNotifier {
     }
     _dirtyNodes.clear();
     for (CustomAccessibilityAction action in customAccessibilityActions)
-      builder.updateCustomAction(id: CustomAccessibilityAction._getIdentifier(action), label: action.label);
+      builder.updateCustomAction(id: CustomAccessibilityAction.getIdentifier(action), label: action.label);
     ui.window.updateSemantics(builder.build());
     notifyListeners();
   }
@@ -2608,7 +2612,7 @@ class SemanticsConfiguration {
   }
 
   void _onCustomAccessibilityAction(dynamic args) {
-    final CustomAccessibilityAction action = CustomAccessibilityAction._getAction(args);
+    final CustomAccessibilityAction action = CustomAccessibilityAction.getAction(args);
     if (action == null)
       return;
     final VoidCallback callback = _customAccessibilityActions[action];
