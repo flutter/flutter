@@ -671,7 +671,7 @@ void _tests() {
     await gesture.moveBy(const Offset(50.0, 100.0));
     await tester.pumpAndSettle();
     for(RenderAnimatedOpacity renderer in chevronRenderers) {
-      expect(renderer.opacity.value, equals(0.5));
+      expect(renderer.opacity.value, equals(0.0));
       expect(renderer.opacity.status, equals(AnimationStatus.completed));
     }
 
