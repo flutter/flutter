@@ -179,4 +179,59 @@ void main() {
     expect(painter.minIntrinsicWidth, 90.0);
     expect(painter.maxIntrinsicWidth, 180.0);
   }, skip: true); // https://github.com/flutter/flutter/issues/13512
+
+  test('TextPainter moves to newline correctly', () {
+    final TextPainter painter = new TextPainter()
+      ..textDirection = TextDirection.ltr;
+
+    String text = 'aaa';
+    painter.text = new TextSpan(text: text);
+    painter.layout();
+
+    Offset caretOffset = painter.getOffsetForCaret(const ui.TextPosition(offset: 0), ui.Rect.zero);
+    expect(caretOffset.dx, 0);
+    caretOffset = painter.getOffsetForCaret(new ui.TextPosition(offset: text.length), ui.Rect.zero);
+    expect(caretOffset.dx, painter.width);
+    expect(caretOffset.dy, 0.0);
+
+    // Check that getOffsetForCaret handles a trailing newline when affinity is downstream.
+    text = 'aaa\n';
+    painter.text = new TextSpan(text: text);
+    painter.layout();
+    caretOffset = painter.getOffsetForCaret(new ui.TextPosition(offset: text.length), ui.Rect.zero);
+    expect(caretOffset.dx, 0);
+    expect(caretOffset.dy, 14.0);
+
+    // Correctly moves through second line.
+    text = 'aaa\naaa';
+    painter.text = new TextSpan(text: text);
+    painter.layout();
+    caretOffset = painter.getOffsetForCaret(new ui.TextPosition(offset: text.length), ui.Rect.zero);
+    expect(caretOffset.dx, painter.width);
+    expect(caretOffset.dy, 14.0);
+
+    // Correctly handles multiple newlines.
+    text = 'aaa\n\n\n';
+    painter.text = new TextSpan(text: text);
+    painter.layout();
+    caretOffset = painter.getOffsetForCaret(new ui.TextPosition(offset: text.length), ui.Rect.zero);
+    expect(caretOffset.dx, 0);
+    expect(caretOffset.dy, 42.0);
+
+    /// Correctly handles character after newline.
+    text = 'aaa\n\n\na';
+    painter.text = new TextSpan(text: text);
+    painter.layout();
+    caretOffset = painter.getOffsetForCaret(new ui.TextPosition(offset: text.length), ui.Rect.zero);
+    expect(caretOffset.dx, painter.width / 3);
+    expect(caretOffset.dy, 42.0);
+
+    /// Moves back to first line when affinity is upstream.
+    text = 'aaa\n';
+    painter.text = new TextSpan(text: text);
+    painter.layout();
+    caretOffset = painter.getOffsetForCaret(new ui.TextPosition(offset: text.length, affinity: TextAffinity.upstream), ui.Rect.zero);
+    expect(caretOffset.dx, painter.width);
+    expect(caretOffset.dy, 0.0);
+  });
 }
