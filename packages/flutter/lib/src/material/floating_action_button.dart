@@ -2,7 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:math' as math;
+
 import 'package:flutter/painting.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
 import 'button.dart';
@@ -103,15 +106,17 @@ class FloatingActionButton extends StatefulWidget {
         assert(isExtended != null),
         _sizeConstraints = _kExtendedSizeConstraints,
         mini = false,
-        child = new Row(
-          mainAxisSize: MainAxisSize.min,
-          children: <Widget>[
-            const SizedBox(width: 16.0),
-            icon,
-            const SizedBox(width: 8.0),
-            label,
-            const SizedBox(width: 20.0),
-          ],
+        child = new _ChildOverflowBox(
+          child: new Row(
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              const SizedBox(width: 16.0),
+              icon,
+              const SizedBox(width: 8.0),
+              label,
+              const SizedBox(width: 20.0),
+            ],
+          ),
         ),
         super(key: key);
 
@@ -271,5 +276,70 @@ class _FloatingActionButtonState extends State<FloatingActionButton> {
     }
 
     return result;
+  }
+}
+
+// This widget's size matches its child's size unless its constraints
+// force it to be larger or smaller. The child is centered.
+//
+// Used to encapsulate extended FABs whose size is fixed, using Row
+// and MainAxisSize.min, to be as wide as their label and icon.
+class _ChildOverflowBox extends SingleChildRenderObjectWidget {
+  const _ChildOverflowBox({
+    Key key,
+    this.alignment = Alignment.center,
+    Widget child,
+  }) : assert(alignment != null),
+       super(key: key, child: child);
+
+  final AlignmentGeometry alignment;
+
+  @override
+  _RenderChildOverflowBox createRenderObject(BuildContext context) {
+    return new _RenderChildOverflowBox(
+      alignment: alignment,
+      textDirection: Directionality.of(context),
+    );
+  }
+
+  @override
+  void updateRenderObject(BuildContext context, _RenderChildOverflowBox renderObject) {
+    renderObject
+      ..alignment = alignment
+      ..textDirection = Directionality.of(context);
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(new DiagnosticsProperty<AlignmentGeometry>('alignment', alignment));
+  }
+}
+
+class _RenderChildOverflowBox extends RenderAligningShiftedBox {
+  _RenderChildOverflowBox({
+    RenderBox child,
+    AlignmentGeometry alignment = Alignment.center,
+    TextDirection textDirection,
+  }) : super(child: child, alignment: alignment, textDirection: textDirection);
+
+  @override
+  double computeMinIntrinsicWidth(double height) => 0.0;
+
+  @override
+  double computeMinIntrinsicHeight(double width) => 0.0;
+
+  @override
+  void performLayout() {
+    if (child != null) {
+      child.layout(const BoxConstraints(), parentUsesSize: true);
+      size = new Size(
+        math.max(constraints.minWidth, math.min(constraints.maxWidth, child.size.width)),
+        math.max(constraints.minHeight, math.min(constraints.maxHeight, child.size.height)),
+      );
+      alignChild();
+    } else {
+      size = constraints.biggest;
+    }
   }
 }
