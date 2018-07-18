@@ -7,7 +7,7 @@ import 'dart:convert' show json;
 import 'dart:io';
 
 import 'package:meta/meta.dart';
-import 'package:path/path.dart' as p;
+import 'package:path/path.dart' as path;
 
 import '../framework/adb.dart';
 import '../framework/framework.dart';
@@ -27,14 +27,6 @@ TaskFunction createTilesScrollPerfTest() {
     '${flutterDirectory.path}/dev/benchmarks/complex_layout',
     'test_driver/scroll_perf.dart',
     'tiles_scroll_perf',
-  ).run;
-}
-
-TaskFunction createComplexLayoutScrollMemoryTest() {
-  return new MemoryTest(
-    '${flutterDirectory.path}/dev/benchmarks/complex_layout',
-    'com.yourcompany.complexLayout',
-    testTarget: 'test_driver/scroll_perf.dart',
   ).run;
 }
 
@@ -60,29 +52,6 @@ TaskFunction createHelloWorldCompileTest() {
 
 TaskFunction createComplexLayoutCompileTest() {
   return new CompileTest('${flutterDirectory.path}/dev/benchmarks/complex_layout').run;
-}
-
-TaskFunction createHelloWorldMemoryTest() {
-  return new MemoryTest(
-    '${flutterDirectory.path}/examples/hello_world',
-    'io.flutter.examples.hello_world',
-  ).run;
-}
-
-TaskFunction createGalleryNavigationMemoryTest() {
-  return new MemoryTest(
-    '${flutterDirectory.path}/examples/flutter_gallery',
-    'io.flutter.demo.gallery',
-    testTarget: 'test_driver/memory_nav.dart',
-  ).run;
-}
-
-TaskFunction createGalleryBackButtonMemoryTest() {
-  return new AndroidBackButtonMemoryTest(
-    '${flutterDirectory.path}/examples/flutter_gallery',
-    'io.flutter.demo.gallery',
-    'io.flutter.demo.gallery.MainActivity',
-  ).run;
 }
 
 TaskFunction createFlutterViewStartupTest() {
@@ -366,15 +335,15 @@ class CompileTest {
 
   static Future<Map<String, dynamic>> getSizesFromIosApp(String appPath) async {
     // Thin the binary to only contain one architecture.
-    final String xcodeBackend = p.join(flutterDirectory.path, 'packages', 'flutter_tools', 'bin', 'xcode_backend.sh');
+    final String xcodeBackend = path.join(flutterDirectory.path, 'packages', 'flutter_tools', 'bin', 'xcode_backend.sh');
     await exec(xcodeBackend, <String>['thin'], environment: <String, String>{
       'ARCHS': 'arm64',
-      'WRAPPER_NAME': p.basename(appPath),
-      'TARGET_BUILD_DIR': p.dirname(appPath),
+      'WRAPPER_NAME': path.basename(appPath),
+      'TARGET_BUILD_DIR': path.dirname(appPath),
     });
 
-    final File appFramework = new File(p.join(appPath, 'Frameworks', 'App.framework', 'App'));
-    final File flutterFramework = new File(p.join(appPath, 'Frameworks', 'Flutter.framework', 'Flutter'));
+    final File appFramework = new File(path.join(appPath, 'Frameworks', 'App.framework', 'App'));
+    final File flutterFramework = new File(path.join(appPath, 'Frameworks', 'Flutter.framework', 'Flutter'));
 
     return <String, dynamic>{
       'app_framework_uncompressed_bytes': await appFramework.length(),
@@ -420,123 +389,167 @@ class CompileTest {
 
 /// Measure application memory usage.
 class MemoryTest {
-  const MemoryTest(this.testDirectory, this.packageName, { this.testTarget });
+  MemoryTest(this.project, this.test, this.package);
 
-  final String testDirectory;
-  final String packageName;
+  final String project;
+  final String test;
+  final String package;
 
-  /// Path to a flutter driver script that will run after starting the app.
-  ///
-  /// If not specified, then the test will start the app, gather statistics, and then exit.
-  final String testTarget;
+  /// Completes when the log line specified in the last call to
+  /// [prepareForNextMessage] is seen by `adb logcat`.
+  Future<void> get receivedNextMessage => _receivedNextMessage?.future;
+  Completer<void> _receivedNextMessage;
+  String _nextMessage;
+
+  /// Prepares the [receivedNextMessage] future such that it will complete
+  /// when `adb logcat` sees a log line with the given `message`.
+  void prepareForNextMessage(String message) {
+    _nextMessage = message;
+    _receivedNextMessage = new Completer<void>();
+  }
+
+  int get iterationCount => 15;
+
+  Device get device => _device;
+  Device _device;
 
   Future<TaskResult> run() {
-    return inDirectory(testDirectory, () async {
-      final Device device = await devices.workingDevice;
+    return inDirectory(project, () async {
+      // This test currently only works on Android, because device.logcat,
+      // device.getMemoryStats, etc, aren't implemented for iOS.
+
+      _device = await devices.workingDevice;
       await device.unlock();
-      final String deviceId = device.deviceId;
       await flutter('packages', options: <String>['get']);
 
       if (deviceOperatingSystem == DeviceOperatingSystem.ios)
-        await prepareProvisioningCertificates(testDirectory);
+        await prepareProvisioningCertificates(project);
 
-      final List<String> runOptions = <String>[
-        '-v',
-        '--profile',
-        '--trace-startup', // wait for the first frame to render
-        '-d',
-        deviceId,
-        '--observatory-port',
-        '0',
-      ];
-      if (testTarget != null)
-        runOptions.addAll(<String>['-t', testTarget]);
-      final String output = await evalFlutter('run', options: runOptions);
-      final int observatoryPort = parseServicePort(output, prefix: 'Successfully connected to service protocol: ', multiLine: true);
-      if (observatoryPort == null)
-        throw new Exception('Could not find observatory port in "flutter run" output.');
+      final StreamSubscription<String> adb = device.logcat.listen(
+        (String data) {
+          if (data.contains('==== MEMORY BENCHMARK ==== $_nextMessage ===='))
+            _receivedNextMessage.complete();
+        },
+      );
 
-      final Map<String, dynamic> startData = await device.getMemoryStats(packageName);
-
-      final Map<String, dynamic> data = <String, dynamic>{
-         'start_total_kb': startData['total_kb'],
-      };
-
-      if (testTarget != null) {
-        await flutter('drive', options: <String>[
-          '-v',
-          '-t',
-          testTarget,
-          '-d',
-          deviceId,
-          '--use-existing-app=http://localhost:$observatoryPort',
-        ]);
-
-        final Map<String, dynamic> endData = await device.getMemoryStats(packageName);
-        data['end_total_kb'] = endData['total_kb'];
-        data['diff_total_kb'] = endData['total_kb'] - startData['total_kb'];
+      for (int iteration = 0; iteration < iterationCount; iteration += 1) {
+        print('running memory test iteration $iteration...');
+        _startMemoryUsage = null;
+        await useMemory();
+        assert(_startMemoryUsage != null);
+        assert(_startMemory.length == iteration + 1);
+        assert(_endMemory.length == iteration + 1);
+        assert(_diffMemory.length == iteration + 1);
+        print('terminating...');
+        await device.stop(package);
+        await new Future<void>.delayed(const Duration(milliseconds: 10));
       }
 
-      await device.stop(packageName);
+      await adb.cancel();
 
-      return new TaskResult.success(data, benchmarkScoreKeys: data.keys.toList());
+      final ListStatistics startMemoryStatistics = new ListStatistics(_startMemory);
+      final ListStatistics endMemoryStatistics = new ListStatistics(_endMemory);
+      final ListStatistics diffMemoryStatistics = new ListStatistics(_diffMemory);
+
+      final Map<String, dynamic> memoryUsage = <String, dynamic>{};
+      memoryUsage.addAll(startMemoryStatistics.asMap('start'));
+      memoryUsage.addAll(endMemoryStatistics.asMap('end'));
+      memoryUsage.addAll(diffMemoryStatistics.asMap('diff'));
+
+      _device = null;
+      _startMemory.clear();
+      _endMemory.clear();
+      _diffMemory.clear();
+
+      return new TaskResult.success(memoryUsage, benchmarkScoreKeys: memoryUsage.keys.toList());
     });
+  }
+
+  /// Starts the app specified by [test] on the [device].
+  ///
+  /// The [run] method will terminate it by its package name ([package]).
+  Future<void> launchApp() async {
+    prepareForNextMessage('READY');
+    print('launching $project$test on device...');
+    await flutter('run', options: <String>[
+      '--verbose',
+      '--release',
+      '--no-resident',
+      '-d', device.deviceId,
+      test,
+    ]);
+    print('awaiting "ready" message...');
+    await receivedNextMessage;
+  }
+
+  /// To change the behaviour of the test, override this.
+  ///
+  /// Make sure to call recordStart() and recordEnd() once each in that order.
+  ///
+  /// By default it just launches the app, records memory usage, taps the device,
+  /// awaits a DONE notification, and records memory usage again.
+  Future<void> useMemory() async {
+    await launchApp();
+    await recordStart();
+
+    prepareForNextMessage('DONE');
+    print('tapping device...');
+    await device.tap(100, 100);
+    print('awaiting "done" message...');
+    await receivedNextMessage;
+
+    await recordEnd();
+  }
+
+  final List<int> _startMemory = <int>[];
+  final List<int> _endMemory = <int>[];
+  final List<int> _diffMemory = <int>[];
+
+  Map<String, dynamic> _startMemoryUsage;
+
+  @protected
+  Future<void> recordStart() async {
+    assert(_startMemoryUsage == null);
+    print('snapshotting memory usage...');
+    _startMemoryUsage = await device.getMemoryStats(package);
+  }
+
+  @protected
+  Future<void> recordEnd() async {
+    assert(_startMemoryUsage != null);
+    print('snapshotting memory usage...');
+    final Map<String, dynamic> endMemoryUsage = await device.getMemoryStats(package);
+    _startMemory.add(_startMemoryUsage['total_kb']);
+    _endMemory.add(endMemoryUsage['total_kb']);
+    _diffMemory.add(endMemoryUsage['total_kb'] - _startMemoryUsage['total_kb']);
   }
 }
 
-/// Measure application memory usage after pausing and resuming the app
-/// with the Android back button.
-class AndroidBackButtonMemoryTest {
-  const AndroidBackButtonMemoryTest(this.testDirectory, this.packageName, this.activityName);
+/// Holds simple statistics of an odd-lengthed list of integers.
+class ListStatistics {
+  factory ListStatistics(Iterable<int> data) {
+    assert(data.isNotEmpty);
+    assert(data.length % 2 == 1);
+    final List<int> sortedData = data.toList()..sort();
+    return new ListStatistics._(
+      sortedData.first,
+      sortedData.last,
+      sortedData[(sortedData.length - 1) ~/ 2],
+    );
+  }
 
-  final String testDirectory;
-  final String packageName;
-  final String activityName;
+  const ListStatistics._(this.min, this.max, this.median);
 
-  Future<TaskResult> run() {
-    return inDirectory(testDirectory, () async {
-      if (deviceOperatingSystem != DeviceOperatingSystem.android) {
-        throw 'This test is only supported on Android';
-      }
+  final int min;
+  final int max;
+  final int median;
 
-      final AndroidDevice device = await devices.workingDevice;
-      await device.unlock();
-      final String deviceId = device.deviceId;
-      await flutter('packages', options: <String>['get']);
-
-      await flutter('run', options: <String>[
-        '-v',
-        '--profile',
-        '--trace-startup', // wait for the first frame to render
-        '-d',
-        deviceId,
-      ]);
-
-      final Map<String, dynamic> startData = await device.getMemoryStats(packageName);
-
-      final Map<String, dynamic> data = <String, dynamic>{
-         'start_total_kb': startData['total_kb'],
-      };
-
-      // Perform a series of back button suspend and resume cycles.
-      for (int i = 0; i < 10; i++) {
-        await device.shellExec('input', <String>['keyevent', 'KEYCODE_BACK']);
-        await new Future<Null>.delayed(const Duration(milliseconds: 1000));
-        final String output = await device.shellEval('am', <String>['start', '-n', '$packageName/$activityName']);
-        print(output);
-        if (output.contains('Error'))
-          return new TaskResult.failure('unable to launch activity');
-        await new Future<Null>.delayed(const Duration(milliseconds: 1000));
-      }
-
-      final Map<String, dynamic> endData = await device.getMemoryStats(packageName);
-      data['end_total_kb'] = endData['total_kb'];
-      data['diff_total_kb'] = endData['total_kb'] - startData['total_kb'];
-
-      await device.stop(packageName);
-
-      return new TaskResult.success(data, benchmarkScoreKeys: data.keys.toList());
-    });
+  Map<String, int> asMap(String prefix) {
+    return <String, int>{
+      '$prefix-min': min,
+      '$prefix-max': max,
+      '$prefix-median': median,
+    };
   }
 }
 

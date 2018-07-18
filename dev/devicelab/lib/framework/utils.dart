@@ -244,7 +244,7 @@ Future<Null> forceQuitRunningProcesses() async {
 
   // Whatever's left, kill it.
   for (ProcessInfo p in _runningProcesses) {
-    print('Force quitting process:\n$p');
+    print('Force-quitting process:\n$p');
     if (!p.process.kill()) {
       print('Failed to force quit process');
     }
@@ -528,8 +528,6 @@ int parseServicePort(String line, {
   // e.g. "An Observatory debugger and profiler on ... is available at: http://127.0.0.1:8100/"
   final RegExp pattern = new RegExp('$prefix(\\S+:(\\d+)/\\S*)\$', multiLine: multiLine);
   final Match match = pattern.firstMatch(line);
-  print(pattern);
-  print(match);
   return match == null ? null : int.parse(match.group(2));
 }
 
