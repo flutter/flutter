@@ -5,9 +5,10 @@
 package io.flutter.plugin.platform;
 
 import android.annotation.TargetApi;
-import android.content.Context;
 import android.os.Build;
 import android.util.Log;
+import android.view.MotionEvent;
+import android.view.View;
 import io.flutter.plugin.common.MethodCall;
 import io.flutter.plugin.common.MethodChannel;
 import io.flutter.plugin.common.StandardMethodCodec;
@@ -15,6 +16,7 @@ import io.flutter.view.FlutterView;
 import io.flutter.view.TextureRegistry;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -85,6 +87,9 @@ public class PlatformViewsController implements MethodChannel.MethodCallHandler 
                 return;
             case "resize":
                 resizePlatformView(call, result);
+                return;
+            case "touch":
+                onTouch(call, result);
                 return;
         }
         result.notImplemented();
@@ -180,6 +185,54 @@ public class PlatformViewsController implements MethodChannel.MethodCallHandler 
                 toPhysicalPixels(width),
                 toPhysicalPixels(height)
         );
+        result.success(null);
+    }
+
+    private void onTouch(MethodCall call, MethodChannel.Result result) {
+        List<Object> args = call.arguments();
+
+        int id = (int) args.get(0);
+        int downTime = (int) args.get(1);
+        int eventTime = (int) args.get(2);
+        int action = (int) args.get(3);
+        double x = (double) args.get(4);
+        double y = (double) args.get(5);
+        double pressure = (double) args.get(6);
+        double size = (double) args.get(7);
+        int metaState = (int) args.get(8);
+        double xPrecision = (double) args.get(9);
+        double yPrecision = (double) args.get(10);
+        int deviceId = (int) args.get(11);
+        int edgeFlags = (int) args.get(12);
+
+        View view = vdControllers.get(id).getView();
+        if (view == null) {
+            result.error(
+                    "error",
+                    "Sending touch to an unknown view with id: " + id,
+                    null
+            );
+            return;
+        }
+
+        float density = mFlutterView.getContext().getResources().getDisplayMetrics().density;
+
+        MotionEvent event = MotionEvent.obtain(
+                downTime,
+                eventTime,
+                action,
+                (float) x * density,
+                (float) y * density,
+                (float) pressure,
+                (float) size,
+                metaState,
+                (float) xPrecision,
+                (float) yPrecision,
+                deviceId,
+                edgeFlags
+        );
+
+        view.onTouchEvent(event);
         result.success(null);
     }
 
