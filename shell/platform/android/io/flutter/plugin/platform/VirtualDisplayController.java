@@ -99,4 +99,10 @@ class VirtualDisplayController {
         mPresentation.detachView().dispose();
         mVirtualDisplay.release();
     }
+
+    public View getView() {
+        if (mPresentation == null)
+            return null;
+        return mPresentation.getView();
+    }
 }

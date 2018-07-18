@@ -10,6 +10,7 @@ import android.content.Context;
 import android.os.Build;
 import android.os.Bundle;
 import android.view.Display;
+import android.view.View;
 import android.widget.FrameLayout;
 
 @TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
@@ -60,5 +61,11 @@ class SingleViewPresentation extends Presentation {
     public PlatformView detachView() {
         mContainer.removeView(mView.getView());
         return mView;
+    }
+
+    public View getView() {
+        if (mView == null)
+            return null;
+        return mView.getView();
     }
 }
