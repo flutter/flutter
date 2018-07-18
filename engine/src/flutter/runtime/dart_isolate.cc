@@ -720,16 +720,6 @@ DartIsolate::CreateDartVMAndEmbedderObjectPair(
     );
   }
 
-  // TODO(rmacnak): This flag setting business preserves a side effect of using
-  // Dart_CreateIsolateFromKernel. It should be removed when some of the
-  // internal logic in reload no longer uses this flag.
-  Dart_IsolateFlags nonnull_flags;
-  if (flags == nullptr) {
-    Dart_IsolateFlagsInitialize(&nonnull_flags);
-    flags = &nonnull_flags;
-  }
-  flags->use_dart_frontend = true;
-
   // Create the Dart VM isolate and give it the embedder object as the baton.
   Dart_Isolate isolate =
       (vm->GetPlatformKernel().GetSize() > 0)
