@@ -115,6 +115,7 @@ class TextField extends StatefulWidget {
     this.onSubmitted,
     this.inputFormatters,
     this.enabled,
+    this.keyboardAppearance,
   }) : assert(keyboardType != null),
        assert(textInputAction != null),
        assert(textAlign != null),
@@ -277,6 +278,13 @@ class TextField extends StatefulWidget {
   /// If non-null this property overrides the [decoration]'s
   /// [Decoration.enabled] property.
   final bool enabled;
+
+  /// The appearance of the keyboard.
+  /// 
+  /// This setting is only honored on iOS devices.
+  /// 
+  /// If unset, defaults to the brightness of [ThemeData.primaryColorBrightness].
+  final Brightness keyboardAppearance;
 
   @override
   _TextFieldState createState() => new _TextFieldState();
@@ -468,6 +476,7 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
     assert(debugCheckHasMaterial(context));
     final ThemeData themeData = Theme.of(context);
     final TextStyle style = widget.style ?? themeData.textTheme.subhead;
+    final Brightness keyboardAppearance = widget.keyboardAppearance ?? themeData.primaryColorBrightness;
     final TextEditingController controller = _effectiveController;
     final FocusNode focusNode = _effectiveFocusNode;
     final List<TextInputFormatter> formatters = widget.inputFormatters ?? <TextInputFormatter>[];
@@ -497,6 +506,7 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
         onSelectionChanged: _handleSelectionChanged,
         inputFormatters: formatters,
         rendererIgnoresPointer: true,
+        keyboardAppearance: keyboardAppearance,
       ),
     );
 
