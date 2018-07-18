@@ -4,7 +4,6 @@
 
 import 'dart:async';
 
-import '../base/file_system.dart';
 import '../base/platform.dart';
 import '../base/process.dart';
 import '../emulator.dart';
