@@ -42,12 +42,16 @@ class CupertinoPicker extends StatefulWidget {
     Key key,
     this.diameterRatio = _kDefaultDiameterRatio,
     this.backgroundColor = _kDefaultBackground,
+    this.offAxisFraction = 0.0,
+    this.useMagnifier = false,
+    this.magnification = 1.0,
     this.scrollController,
     @required this.itemExtent,
     @required this.onSelectedItemChanged,
     @required this.children,
   }) : assert(diameterRatio != null),
        assert(diameterRatio > 0.0, RenderListWheelViewport.diameterRatioZeroMessage),
+       assert(magnification > 0),
        assert(itemExtent != null),
        assert(itemExtent > 0),
        super(key: key);
@@ -68,6 +72,15 @@ class CupertinoPicker extends StatefulWidget {
   /// This can be set to null to disable the background painting entirely; this
   /// is mildly more efficient than using [Colors.transparent].
   final Color backgroundColor;
+
+  /// {@macro flutter.rendering.wheelList.offAxisFraction}
+  final double offAxisFraction;
+
+  /// {@macro flutter.rendering.wheelList.useMagnifier}
+  final bool useMagnifier;
+
+  /// {@macro flutter.rendering.wheelList.magnification}
+  final double magnification;
 
   /// A [FixedExtentScrollController] to read and control the current item.
   ///
@@ -164,7 +177,9 @@ class _CupertinoPickerState extends State<CupertinoPicker> {
                 bottom: const BorderSide(width: 0.0, color: _kHighlighterBorder),
               )
             ),
-            constraints: new BoxConstraints.expand(height: widget.itemExtent),
+            constraints: new BoxConstraints.expand(
+                height: widget.itemExtent * widget.magnification,
+            ),
           ),
           new Expanded(
             child: new Container(
@@ -185,6 +200,9 @@ class _CupertinoPickerState extends State<CupertinoPicker> {
             controller: widget.scrollController,
             physics: const FixedExtentScrollPhysics(),
             diameterRatio: widget.diameterRatio,
+            offAxisFraction: widget.offAxisFraction,
+            useMagnifier: widget.useMagnifier,
+            magnification: widget.magnification,
             itemExtent: widget.itemExtent,
             onSelectedItemChanged: _handleSelectedItemChanged,
             children: widget.children,
