@@ -314,22 +314,31 @@ enum TextInputAction {
   newline,
 }
 
-/// Configures how the platform may automatically capitialize text entered by
-/// the user.
+/// Configures how the platform keyboard will select an uppercase or 
+/// lowercase keyboard.
 ///
 /// Only supports text keyboards, other keyboard types will ignore this
-/// configuration.
+/// configuration. Capitalization is locale-aware.
 enum TextCapitalization {
-  /// Attempts to capitalize the first letter of each word.
+  /// Defaults to an uppercase keyboard for the first letter of each word.
+  /// 
+  /// Corresponds to `InputType.TYPE_TEXT_FLAG_CAP_WORDS` on Android, and
+  /// `UITextAutocapitalizationTypeWords` on iOS.
   words,
 
-  /// Attempts to capitalize the first letter of each sentence.
+  /// Defaults to an uppercase keyboard for the first letter of each sentence.
+  /// 
+  /// Corresponds to `InputType.TYPE_TEXT_FLAG_CAP_SENTENCES` on Android, and
+  /// `UITextAutocapitalizationTypeSentences` on iOS.
   sentences,
 
-  /// Attempts to capitalize each character.
+  /// Defaults to an uppercase keyboard for each character.
+  /// 
+  /// Corresponds to `InputType.TYPE_TEXT_FLAG_CAP_CHARACTERS` on Android, and
+  /// `UITextAutocapitalizationTypeAllCharacters` on iOS.
   characters,
 
-  /// Applies no automatic capitalization.
+  /// Defaults to a lowercase keyboard.
   none,
 }
 

@@ -270,12 +270,12 @@ class EditableText extends StatefulWidget {
   /// Defaults to the ambient [Directionality], if any.
   final TextDirection textDirection;
 
-  /// Specifies how platforms may automatically capitialize text entered by the
-  /// user.
-  /// 
-  /// Only supported by text keyboard types, unsupported keyboards will ignore
-  /// this value.
+  /// Configures how the platform keyboard will select an uppercase or 
+  /// lowercase keyboard.
   ///
+  /// Only supports text keyboards, other keyboard types will ignore this
+  /// configuration. Capitalization is locale-aware.
+  /// 
   /// Defaults to [TextCapitalization.none]. Must not be null.
   /// 
   /// See also:
