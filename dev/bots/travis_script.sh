@@ -59,5 +59,9 @@ elif [ "$SHARD" = "docs" ]; then
     ./dev/bots/docs.sh
   fi
 else
-  dart ./dev/bots/test.dart
+  if [ "$SHARD" = "flutter_build_test" ]; then
+    ./dev/bots/flutter_build_test.sh
+  else
+    dart ./dev/bots/test.dart
+  fi
 fi

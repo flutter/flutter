@@ -8,6 +8,7 @@ env:
   - SHARD=tests
   - SHARD=docs
   - SHARD=build_and_deploy_gallery
+  - SHARD=flutter_build_test
 matrix:
   exclude:
   - os: osx
