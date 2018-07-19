@@ -183,7 +183,7 @@ void main([List<String> args = const <String>[]]) {
       }
 
       // See _handleMessages() in transitions_perf.dart.
-      _allDemos = const JsonDecoder().convert(await driver.requestData('demoNames'));
+      _allDemos = new List<String>.from(const JsonDecoder().convert(await driver.requestData('demoNames')));
       if (_allDemos.isEmpty)
         throw 'no demo names found';
     });
@@ -212,7 +212,9 @@ void main([List<String> args = const <String>[]]) {
       final TimelineSummary summary = new TimelineSummary.summarize(timeline);
       await summary.writeSummaryToFile('transitions', pretty: true);
       final String histogramPath = path.join(testOutputsDirectory, 'transition_durations.timeline.json');
-      await saveDurationsHistogram(timeline.json['traceEvents'], histogramPath);
+      await saveDurationsHistogram(
+          new List<Map<String, dynamic>>.from(timeline.json['traceEvents']),
+          histogramPath);
 
       // Execute the remaining tests.
       final Set<String> unprofiledDemos = new Set<String>.from(_allDemos)..removeAll(kProfiledDemos);

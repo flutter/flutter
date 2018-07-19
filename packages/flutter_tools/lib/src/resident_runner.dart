@@ -381,6 +381,7 @@ class FlutterDevice {
     Set<String> fileFilter,
     bool fullRestart = false,
     String projectRootPath,
+    String pathToReload,
   }) async {
     final Status devFSStatus = logger.startProgress(
       'Syncing files to device ${device.name}...',
@@ -400,6 +401,7 @@ class FlutterDevice {
         fullRestart: fullRestart,
         dillOutputPath: dillOutputPath,
         projectRootPath: projectRootPath,
+        pathToReload: pathToReload
       );
     } on DevFSException {
       devFSStatus.cancel();
@@ -450,6 +452,10 @@ abstract class ResidentRunner {
   String get projectRootPath => _projectRootPath;
   String _mainPath;
   String get mainPath => _mainPath;
+  String getReloadPath({bool fullRestart}) =>
+      debuggingOptions.buildInfo.previewDart2
+          ? mainPath + (fullRestart? '' : '.incremental') + '.dill'
+          : mainPath;
   AssetBundle _assetBundle;
   AssetBundle get assetBundle => _assetBundle;
 
@@ -461,7 +467,7 @@ abstract class ResidentRunner {
   /// Start the app and keep the process running during its lifetime.
   Future<int> run({
     Completer<DebugConnectionInfo> connectionInfoCompleter,
-    Completer<Null> appStartedCompleter,
+    Completer<void> appStartedCompleter,
     String route,
     bool shouldBuild = true
   });
