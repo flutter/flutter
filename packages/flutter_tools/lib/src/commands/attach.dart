@@ -5,8 +5,10 @@
 import 'dart:async';
 
 import '../base/common.dart';
+import '../base/file_system.dart';
 import '../base/io.dart';
 import '../cache.dart';
+import '../commands/daemon.dart';
 import '../device.dart';
 import '../globals.dart';
 import '../protocol_discovery.dart';
@@ -35,16 +37,22 @@ final String ipv4Loopback = InternetAddress.loopbackIPv4.address;
 class AttachCommand extends FlutterCommand {
   AttachCommand({bool verboseHelp = false}) {
     addBuildModeFlags(defaultToRelease: false);
-    argParser.addOption(
+    argParser
+      ..addOption(
         'debug-port',
         help: 'Local port where the observatory is listening.',
-    );
-    argParser.addFlag(
-      'preview-dart-2',
-      defaultsTo: true,
-      hide: !verboseHelp,
-      help: 'Preview Dart 2.0 functionality.',
-    );
+      )
+      ..addFlag(
+        'preview-dart-2',
+        defaultsTo: true,
+        hide: !verboseHelp,
+        help: 'Preview Dart 2.0 functionality.',
+      )..addFlag('machine',
+          hide: !verboseHelp,
+          negatable: false,
+          help: 'Handle machine structured JSON command input and provide output\n'
+                'and progress in machine friendly format.',
+      );
   }
 
   @override
@@ -65,23 +73,38 @@ class AttachCommand extends FlutterCommand {
   }
 
   @override
+  Future<Null> validateCommand() async {
+    super.validateCommand();
+    if (await findTargetDevice() == null)
+      throwToolExit(null);
+    observatoryPort;
+  }
+
+  @override
   Future<Null> runCommand() async {
     Cache.releaseLockEarly();
 
     await _validateArguments();
 
     final Device device = await findTargetDevice();
-    if (device == null)
-      throwToolExit(null);
     final int devicePort = observatoryPort;
+
+    final Daemon daemon = argResults['machine']
+      ? new Daemon(stdinCommandStream, stdoutCommandResponse,
+            notifyingLogger: new NotifyingLogger(), logToStdout: true)
+      : null;
+
     Uri observatoryUri;
     if (devicePort == null) {
       ProtocolDiscovery observatoryDiscovery;
       try {
         observatoryDiscovery = new ProtocolDiscovery.observatory(
-            device.getLogReader(), portForwarder: device.portForwarder);
-        printStatus('Listening.');
+          device.getLogReader(),
+          portForwarder: device.portForwarder,
+        );
+        printStatus('Waiting for a connection from Flutter on ${device.name}...');
         observatoryUri = await observatoryDiscovery.uri;
+        printStatus('Done.');
       } finally {
         await observatoryDiscovery?.cancel();
       }
@@ -90,17 +113,33 @@ class AttachCommand extends FlutterCommand {
       observatoryUri = Uri.parse('http://$ipv4Loopback:$localPort/');
     }
     try {
-      final FlutterDevice flutterDevice =
-          new FlutterDevice(device, trackWidgetCreation: false, previewDart2: argResults['preview-dart-2']);
+      final FlutterDevice flutterDevice = new FlutterDevice(device,
+          trackWidgetCreation: false, previewDart2: argResults['preview-dart-2']);
       flutterDevice.observatoryUris = <Uri>[ observatoryUri ];
       final HotRunner hotRunner = new HotRunner(
         <FlutterDevice>[flutterDevice],
         debuggingOptions: new DebuggingOptions.enabled(getBuildInfo()),
         packagesFilePath: globalResults['packages'],
+        usesTerminalUI: daemon == null,
       );
-      await hotRunner.attach();
+
+      if (daemon != null) {
+        AppInstance app;
+        try {
+          app = await daemon.appDomain.launch(hotRunner, hotRunner.attach,
+              device, null, true, fs.currentDirectory);
+        } catch (error) {
+          throwToolExit(error.toString());
+        }
+        final int result = await app.runner.waitForAppToFinish();
+        if (result != 0)
+          throwToolExit(null, exitCode: result);
+      } else {
+        await hotRunner.attach();
+      }
     } finally {
-      device.portForwarder.forwardedPorts.forEach(device.portForwarder.unforward);
+      final List<ForwardedPort> ports = device.portForwarder.forwardedPorts.toList();
+      ports.forEach(device.portForwarder.unforward);
     }
   }
 

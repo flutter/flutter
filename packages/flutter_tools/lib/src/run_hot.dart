@@ -149,7 +149,7 @@ class HotRunner extends ResidentRunner {
 
   Future<int> attach({
     Completer<DebugConnectionInfo> connectionInfoCompleter,
-    Completer<Null> appStartedCompleter,
+    Completer<void> appStartedCompleter,
     String viewFilter,
   }) async {
     try {
@@ -235,7 +235,7 @@ class HotRunner extends ResidentRunner {
   @override
   Future<int> run({
     Completer<DebugConnectionInfo> connectionInfoCompleter,
-    Completer<Null> appStartedCompleter,
+    Completer<void> appStartedCompleter,
     String route,
     bool shouldBuild = true
   }) async {

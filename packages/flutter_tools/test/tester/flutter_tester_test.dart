@@ -79,7 +79,7 @@ void main() {
       expect(device.id, 'flutter-tester');
       expect(await device.isLocalEmulator, isFalse);
       expect(device.name, 'Flutter test device');
-      expect(device.portForwarder, isNull);
+      expect(device.portForwarder, isNot(isNull));
       expect(await device.targetPlatform, TargetPlatform.tester);
 
       expect(await device.installApp(null), isTrue);
