@@ -3781,12 +3781,11 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
       markNeedsSemanticsUpdate();
   }
 
-  /// A map from each supported [CustomAccessibilityAction] to a provided handler.
+  /// The handlers and supported [CustomAccessibilityAction] for this node.
   /// 
-  /// The handler associated with each custom action is invoked whenever a
-  /// semantics event of type [SemanticsEvent.customEvent] is recieved. The
-  /// provided argument will be an identifier used to retrieve an instance of
-  /// a custom action which can then retrieve the correct handler from this map.
+  /// These handlers are called whenever the user performs the associated
+  /// custom accessibility action from a special platfrom menu. Providing any
+  /// custom actions here also adds [SemanticsAction.customAction] to the node.
   /// 
   /// See also:
   /// 
@@ -3881,9 +3880,8 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
       config.onDidGainAccessibilityFocus = _performDidGainAccessibilityFocus;
     if (onDidLoseAccessibilityFocus != null)
       config.onDidLoseAccessibilityFocus = _performDidLoseAccessibilityFocus;
-    if (customAccessibilityActions != null) {
+    if (customAccessibilityActions != null)
       config.customAccessibilityActions = _customAccessibilityActions;
-    }
   }
 
   void _performTap() {
