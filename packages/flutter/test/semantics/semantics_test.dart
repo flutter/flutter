@@ -407,7 +407,7 @@ void main() {
 
   test('SemanticsConfiguration getter/setter', () {
     final SemanticsConfiguration config = new SemanticsConfiguration();
-    const CustomAccessibilityAction customAction = const CustomAccessibilityAction(label: 'test');
+    const CustomSemanticsAction customAction = const CustomSemanticsAction(label: 'test');
 
     expect(config.isSemanticBoundary, isFalse);
     expect(config.isButton, isFalse);
@@ -430,7 +430,7 @@ void main() {
     expect(config.onMoveCursorForwardByCharacter, isNull);
     expect(config.onMoveCursorBackwardByCharacter, isNull);
     expect(config.onTap, isNull);
-    expect(config.customAccessibilityActions[customAction], isNull);
+    expect(config.customSemanticsActions[customAction], isNull);
 
     config.isSemanticBoundary = true;
     config.isButton = true;
@@ -466,7 +466,7 @@ void main() {
     config.onMoveCursorForwardByCharacter = onMoveCursorForwardByCharacter;
     config.onMoveCursorBackwardByCharacter = onMoveCursorBackwardByCharacter;
     config.onTap = onTap;
-    config.customAccessibilityActions[customAction] = onCustomAction;
+    config.customSemanticsActions[customAction] = onCustomAction;
 
     expect(config.isSemanticBoundary, isTrue);
     expect(config.isButton, isTrue);
@@ -489,7 +489,7 @@ void main() {
     expect(config.onMoveCursorForwardByCharacter, same(onMoveCursorForwardByCharacter));
     expect(config.onMoveCursorBackwardByCharacter, same(onMoveCursorBackwardByCharacter));
     expect(config.onTap, same(onTap));
-    expect(config.customAccessibilityActions[customAction], same(onCustomAction));
+    expect(config.customSemanticsActions[customAction], same(onCustomAction));
   });
 }
 
