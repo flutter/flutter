@@ -12,6 +12,7 @@ import 'button.dart';
 import 'colors.dart';
 import 'icons.dart';
 import 'page_scaffold.dart';
+import 'route.dart';
 
 /// Standard iOS navigation bar height without the status bar.
 const double _kNavBarPersistentHeight = 44.0;
@@ -80,6 +81,7 @@ class CupertinoNavigationBar extends StatelessWidget implements ObstructingPrefe
     Key key,
     this.leading,
     this.automaticallyImplyLeading = true,
+    this.automaticallyImplyMiddle = true,
     this.middle,
     this.trailing,
     this.border = _kDefaultNavBarBorder,
@@ -87,6 +89,7 @@ class CupertinoNavigationBar extends StatelessWidget implements ObstructingPrefe
     this.padding,
     this.actionsForegroundColor = CupertinoColors.activeBlue,
   }) : assert(automaticallyImplyLeading != null),
+       assert(automaticallyImplyMiddle != null),
        super(key: key);
 
   /// Widget to place at the start of the navigation bar. Normally a back button
@@ -100,6 +103,8 @@ class CupertinoNavigationBar extends StatelessWidget implements ObstructingPrefe
   ///
   /// This value cannot be null.
   final bool automaticallyImplyLeading;
+
+  final bool automaticallyImplyMiddle;
 
   /// Widget to place in the middle of the navigation bar. Normally a title or
   /// a segmented control.
@@ -152,13 +157,19 @@ class CupertinoNavigationBar extends StatelessWidget implements ObstructingPrefe
 
   @override
   Widget build(BuildContext context) {
+    final Widget effectiveMiddle = _effectiveTitle(
+      title: middle,
+      automaticallyImplyMiddle: automaticallyImplyMiddle,
+      currentRoute: ModalRoute.of(context),
+    );
+
     return _wrapWithBackground(
       border: border,
       backgroundColor: backgroundColor,
       child: new _CupertinoPersistentNavigationBar(
         leading: leading,
         automaticallyImplyLeading: automaticallyImplyLeading,
-        middle: new Semantics(child: middle, header: true),
+        middle: effectiveMiddle,
         trailing: trailing,
         padding: padding,
         actionsForegroundColor: actionsForegroundColor,
@@ -202,17 +213,18 @@ class CupertinoSliverNavigationBar extends StatelessWidget {
   /// The [largeTitle] argument is required and must not be null.
   const CupertinoSliverNavigationBar({
     Key key,
-    @required this.largeTitle,
+    this.largeTitle,
     this.leading,
     this.automaticallyImplyLeading = true,
+    this.automaticallyImplyMiddle = true,
     this.middle,
     this.trailing,
     this.border = _kDefaultNavBarBorder,
     this.backgroundColor = _kDefaultNavBarBackgroundColor,
     this.padding,
     this.actionsForegroundColor = CupertinoColors.activeBlue,
-  }) : assert(largeTitle != null),
-       assert(automaticallyImplyLeading != null),
+  }) : assert(automaticallyImplyLeading != null),
+       assert(automaticallyImplyMiddle != null),
        super(key: key);
 
   /// The navigation bar's title.
@@ -244,6 +256,8 @@ class CupertinoSliverNavigationBar extends StatelessWidget {
   ///
   /// This value cannot be null.
   final bool automaticallyImplyLeading;
+
+  final bool automaticallyImplyMiddle;
 
   /// A widget to place in the middle of the static navigation bar instead of
   /// the [largeTitle].
@@ -294,11 +308,17 @@ class CupertinoSliverNavigationBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final Widget effectiveTitle = _effectiveTitle(
+      title: largeTitle,
+      automaticallyImplyMiddle: automaticallyImplyMiddle,
+      currentRoute: ModalRoute.of(context),
+    );
+
     return new SliverPersistentHeader(
       pinned: true, // iOS navigation bars are always pinned.
       delegate: new _CupertinoLargeTitleNavigationBarSliverDelegate(
         persistentHeight: _kNavBarPersistentHeight + MediaQuery.of(context).padding.top,
-        title: largeTitle,
+        largeTitle: effectiveTitle,
         leading: leading,
         automaticallyImplyLeading: automaticallyImplyLeading,
         middle: middle,
@@ -347,6 +367,22 @@ Widget _wrapWithBackground({
   );
 }
 
+Widget _effectiveTitle({
+  Widget title,
+  bool automaticallyImplyMiddle,
+  ModalRoute<dynamic> currentRoute,
+}) {
+  // Auto use the CupertinoPageRoute's title if middle not provided.
+  if (title == null
+      && automaticallyImplyMiddle
+      && currentRoute is CupertinoPageRoute
+      && currentRoute.title?.isNotEmpty == true) {
+    return new Text(currentRoute.title);
+  } else {
+    return title;
+  }
+}
+
 /// The top part of the navigation bar that's never scrolled away.
 ///
 /// Consists of the entire navigation bar without background and border when used
@@ -385,6 +421,29 @@ class _CupertinoPersistentNavigationBar extends StatelessWidget implements Prefe
 
   @override
   Widget build(BuildContext context) {
+    final ModalRoute<dynamic> currentRoute = ModalRoute.of(context);
+
+    // Auto add back button if leading not provided.
+    Widget effectiveLeading = leading;
+    if (effectiveLeading == null
+        && automaticallyImplyLeading
+        && currentRoute?.canPop == true) {
+      final bool useCloseButton =
+          currentRoute is PageRoute && currentRoute?.fullscreenDialog == true;
+      effectiveLeading = new CupertinoButton(
+        child: useCloseButton
+            ? const Text('Close')
+            : new Container(
+              height: _kNavBarPersistentHeight,
+              width: _kNavBarBackButtonTapWidth,
+              alignment: AlignmentDirectional.centerStart,
+              child: const Icon(CupertinoIcons.back, size: 34.0,)
+            ),
+        padding: EdgeInsets.zero,
+        onPressed: () { Navigator.maybePop(context); },
+      );
+    }
+
     final TextStyle actionsStyle = new TextStyle(
       fontFamily: '.SF UI Text',
       fontSize: 17.0,
@@ -392,7 +451,7 @@ class _CupertinoPersistentNavigationBar extends StatelessWidget implements Prefe
       color: actionsForegroundColor,
     );
 
-    final Widget styledLeading = leading == null
+    final Widget styledLeading = effectiveLeading == null
         ? null
         : new Padding(
           padding: new EdgeInsetsDirectional.only(
@@ -418,14 +477,16 @@ class _CupertinoPersistentNavigationBar extends StatelessWidget implements Prefe
 
     // Let the middle be black rather than `actionsForegroundColor` in case
     // it's a plain text title.
-    final Widget styledMiddle = middle == null ? null : new DefaultTextStyle(
-      style: actionsStyle.copyWith(
-        fontWeight: FontWeight.w600,
-        letterSpacing: -0.08,
-        color: CupertinoColors.black,
-      ),
-      child: middle,
-    );
+    final Widget styledMiddle = middle == null
+        ? null
+        : new DefaultTextStyle(
+          style: actionsStyle.copyWith(
+            fontWeight: FontWeight.w600,
+            letterSpacing: -0.08,
+            color: CupertinoColors.black,
+          ),
+          child: new Semantics(child: middle, header: true),
+        );
 
     final Widget animatedStyledMiddle = middleVisible == null
       ? styledMiddle
@@ -435,30 +496,8 @@ class _CupertinoPersistentNavigationBar extends StatelessWidget implements Prefe
         child: styledMiddle,
       );
 
-    // Auto add back button if leading not provided.
-    Widget backOrCloseButton;
-    bool useBackButton = false;
-    if (styledLeading == null && automaticallyImplyLeading) {
-      final ModalRoute<dynamic> currentRoute = ModalRoute.of(context);
-      if (currentRoute?.canPop == true) {
-        useBackButton = !(currentRoute is PageRoute && currentRoute?.fullscreenDialog == true);
-        backOrCloseButton = new CupertinoButton(
-          child: useBackButton
-              ? new Container(
-                height: _kNavBarPersistentHeight,
-                width: _kNavBarBackButtonTapWidth,
-                alignment: AlignmentDirectional.centerStart,
-                child: const Icon(CupertinoIcons.back, size: 34.0,)
-              )
-              : const Text('Close'),
-          padding: EdgeInsets.zero,
-          onPressed: () { Navigator.maybePop(context); },
-        );
-      }
-    }
-
     Widget paddedToolbar = new NavigationToolbar(
-      leading: styledLeading ?? backOrCloseButton,
+      leading: styledLeading,
       middle: animatedStyledMiddle,
       trailing: styledTrailing,
       centerMiddle: true,
@@ -494,7 +533,7 @@ class _CupertinoLargeTitleNavigationBarSliverDelegate
     extends SliverPersistentHeaderDelegate with DiagnosticableTreeMixin {
   _CupertinoLargeTitleNavigationBarSliverDelegate({
     @required this.persistentHeight,
-    @required this.title,
+    @required this.largeTitle,
     this.leading,
     this.automaticallyImplyLeading,
     this.middle,
@@ -507,7 +546,7 @@ class _CupertinoLargeTitleNavigationBarSliverDelegate
 
   final double persistentHeight;
 
-  final Widget title;
+  final Widget largeTitle;
 
   final Widget leading;
 
@@ -539,7 +578,7 @@ class _CupertinoLargeTitleNavigationBarSliverDelegate
         new _CupertinoPersistentNavigationBar(
       leading: leading,
       automaticallyImplyLeading: automaticallyImplyLeading,
-      middle: new Semantics(child: middle ?? title, header: true),
+      middle: middle ?? largeTitle,
       trailing: trailing,
       // If middle widget exists, always show it. Otherwise, show title
       // when collapsed.
@@ -584,7 +623,7 @@ class _CupertinoLargeTitleNavigationBarSliverDelegate
                         bottom: false,
                         child: new Semantics(
                           header: true,
-                          child: title,
+                          child: largeTitle,
                         ),
                       ),
                     ),
@@ -607,7 +646,7 @@ class _CupertinoLargeTitleNavigationBarSliverDelegate
   @override
   bool shouldRebuild(_CupertinoLargeTitleNavigationBarSliverDelegate oldDelegate) {
     return persistentHeight != oldDelegate.persistentHeight
-        || title != oldDelegate.title
+        || largeTitle != oldDelegate.largeTitle
         || leading != oldDelegate.leading
         || middle != oldDelegate.middle
         || trailing != oldDelegate.trailing

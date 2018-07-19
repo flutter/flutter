@@ -5,6 +5,7 @@
 import 'package:flutter/widgets.dart';
 
 import 'colors.dart';
+import 'route.dart';
 
 /// Implements a single iOS application page's layout.
 ///
@@ -16,12 +17,13 @@ import 'colors.dart';
 ///  * [CupertinoTabScaffold], a similar widget for tabbed applications.
 ///  * [CupertinoPageRoute], a modal page route that typically hosts a
 ///    [CupertinoPageScaffold] with support for iOS-style page transitions.
-class CupertinoPageScaffold extends StatelessWidget {
+class CupertinoPageScaffold extends StatefulWidget {
   /// Creates a layout for pages with a navigation bar at the top.
   const CupertinoPageScaffold({
     Key key,
     this.navigationBar,
     this.backgroundColor = CupertinoColors.white,
+    this.title,
     @required this.child,
   }) : assert(child != null),
        super(key: key);
@@ -49,26 +51,56 @@ class CupertinoPageScaffold extends StatelessWidget {
   /// By default uses [CupertinoColors.white] color.
   final Color backgroundColor;
 
+  final String title;
+
+  @override
+  _CupertinoPageScaffoldState createState() {
+    return new _CupertinoPageScaffoldState();
+  }
+}
+
+class _CupertinoPageScaffoldState extends State<CupertinoPageScaffold> implements CupertinoPageTitleProvider {
+  CupertinoPageRoute<dynamic> currentRoute;
+
+  @override
+  void didChangeDependencies() {
+    final ModalRoute<dynamic> route = ModalRoute.of(context);
+    if (route is CupertinoPageRoute) {
+      currentRoute = route;
+      currentRoute.titleProvider = this;
+    }
+    super.didChangeDependencies();
+  }
+
+  @override
+  void dispose() {
+    currentRoute?.titleProvider = null;
+    super.dispose();
+  }
+
+  @override
+  String get title => widget.title;
+
   @override
   Widget build(BuildContext context) {
     final List<Widget> stacked = <Widget>[];
 
-    Widget paddedContent = child;
-    if (navigationBar != null) {
+    Widget paddedContent = widget.child;
+    if (widget.navigationBar != null) {
       final MediaQueryData existingMediaQuery = MediaQuery.of(context);
 
       // TODO(xster): Use real size after partial layout instead of preferred size.
       // https://github.com/flutter/flutter/issues/12912
-      final double topPadding = navigationBar.preferredSize.height
+      final double topPadding = widget.navigationBar.preferredSize.height
           + existingMediaQuery.padding.top;
 
       // If navigation bar is opaquely obstructing, directly shift the main content
       // down. If translucent, let main content draw behind navigation bar but hint the
       // obstructed area.
-      if (navigationBar.fullObstruction) {
+      if (widget.navigationBar.fullObstruction) {
         paddedContent = new Padding(
           padding: new EdgeInsets.only(top: topPadding),
-          child: child,
+          child: widget.child,
         );
       } else {
         paddedContent = new MediaQuery(
@@ -77,7 +109,7 @@ class CupertinoPageScaffold extends StatelessWidget {
               top: topPadding,
             ),
           ),
-          child: child,
+          child: widget.child,
         );
       }
     }
@@ -85,17 +117,17 @@ class CupertinoPageScaffold extends StatelessWidget {
     // The main content being at the bottom is added to the stack first.
     stacked.add(paddedContent);
 
-    if (navigationBar != null) {
+    if (widget.navigationBar != null) {
       stacked.add(new Positioned(
         top: 0.0,
         left: 0.0,
         right: 0.0,
-        child: navigationBar,
+        child: widget.navigationBar,
       ));
     }
 
     return new DecoratedBox(
-      decoration: new BoxDecoration(color: backgroundColor),
+      decoration: new BoxDecoration(color: widget.backgroundColor),
       child: new Stack(
         children: stacked,
       ),
