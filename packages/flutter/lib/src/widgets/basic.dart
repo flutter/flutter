@@ -5089,7 +5089,7 @@ class Semantics extends SingleChildRenderObjectWidget {
     SetSelectionHandler onSetSelection,
     VoidCallback onDidGainAccessibilityFocus,
     VoidCallback onDidLoseAccessibilityFocus,
-    Map<CustomAccessibilityAction, VoidCallback> customAccessibilityActions,
+    Map<CustomSemanticsAction, VoidCallback> customSemanticsActions,
   }) : this.fromProperties(
     key: key,
     child: child,
@@ -5130,7 +5130,7 @@ class Semantics extends SingleChildRenderObjectWidget {
       onMoveCursorBackwardByCharacter: onMoveCursorBackwardByCharacter,
       onDidGainAccessibilityFocus: onDidGainAccessibilityFocus,
       onDidLoseAccessibilityFocus: onDidLoseAccessibilityFocus,
-      customAccessibilityActions: customAccessibilityActions,
+      customSemanticsActions: customSemanticsActions,
     onSetSelection: onSetSelection,),
   );
 
@@ -5218,7 +5218,7 @@ class Semantics extends SingleChildRenderObjectWidget {
       onSetSelection: properties.onSetSelection,
       onDidGainAccessibilityFocus: properties.onDidGainAccessibilityFocus,
       onDidLoseAccessibilityFocus: properties.onDidLoseAccessibilityFocus,
-      customAccessibilityActions: properties.customAccessibilityActions,
+      customSemanticsActions: properties.customSemanticsActions,
     );
   }
 
@@ -5274,7 +5274,7 @@ class Semantics extends SingleChildRenderObjectWidget {
       ..onSetSelection = properties.onSetSelection
       ..onDidGainAccessibilityFocus = properties.onDidGainAccessibilityFocus
       ..onDidLoseAccessibilityFocus = properties.onDidLoseAccessibilityFocus
-      ..customAccessibilityActions = properties.customAccessibilityActions;
+      ..customSemanticsActions = properties.customSemanticsActions;
   }
 
   @override

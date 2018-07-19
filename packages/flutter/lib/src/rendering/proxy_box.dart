@@ -3159,7 +3159,7 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     SetSelectionHandler onSetSelection,
     VoidCallback onDidGainAccessibilityFocus,
     VoidCallback onDidLoseAccessibilityFocus,
-    Map<CustomAccessibilityAction, VoidCallback> customAccessibilityActions,
+    Map<CustomSemanticsAction, VoidCallback> customSemanticsActions,
   }) : assert(container != null),
        _container = container,
        _explicitChildNodes = explicitChildNodes,
@@ -3198,7 +3198,7 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
        _onSetSelection = onSetSelection,
        _onDidGainAccessibilityFocus = onDidGainAccessibilityFocus,
        _onDidLoseAccessibilityFocus = onDidLoseAccessibilityFocus,
-       _customAccessibilityActions = customAccessibilityActions,
+       _customSemanticsActions = customSemanticsActions,
        super(child);
 
   /// If 'container' is true, this [RenderObject] will introduce a new
@@ -3781,7 +3781,7 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
       markNeedsSemanticsUpdate();
   }
 
-  /// The handlers and supported [CustomAccessibilityAction]s for this node.
+  /// The handlers and supported [CustomSemanticsAction]s for this node.
   /// 
   /// These handlers are called whenever the user performs the associated
   /// custom accessibility action from a special platform menu. Providing any
@@ -3789,13 +3789,13 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
   /// 
   /// See also:
   /// 
-  ///   * [CustomAccessibilityAction], for an explaination of custom actions.
-  Map<CustomAccessibilityAction, VoidCallback> get customAccessibilityActions => _customAccessibilityActions;
-  Map<CustomAccessibilityAction, VoidCallback> _customAccessibilityActions;
-  set customAccessibilityActions(Map<CustomAccessibilityAction, VoidCallback> value) {
-    if (_customAccessibilityActions == value)
+  ///   * [CustomSemanticsAction], for an explaination of custom actions.
+  Map<CustomSemanticsAction, VoidCallback> get customSemanticsActions => _customSemanticsActions;
+  Map<CustomSemanticsAction, VoidCallback> _customSemanticsActions;
+  set customSemanticsActions(Map<CustomSemanticsAction, VoidCallback> value) {
+    if (_customSemanticsActions == value)
       return;
-    _customAccessibilityActions = value;
+    _customSemanticsActions = value;
     markNeedsSemanticsUpdate();
   }
 
@@ -3880,8 +3880,8 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
       config.onDidGainAccessibilityFocus = _performDidGainAccessibilityFocus;
     if (onDidLoseAccessibilityFocus != null)
       config.onDidLoseAccessibilityFocus = _performDidLoseAccessibilityFocus;
-    if (customAccessibilityActions != null)
-      config.customAccessibilityActions = _customAccessibilityActions;
+    if (customSemanticsActions != null)
+      config.customSemanticsActions = _customSemanticsActions;
   }
 
   void _performTap() {

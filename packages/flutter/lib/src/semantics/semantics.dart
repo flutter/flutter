@@ -69,9 +69,9 @@ class SemanticsTag {
   String toString() => '$runtimeType($name)';
 }
 
-/// An identifier of a custom accessibility action.
+/// An identifier of a custom semantics action.
 /// 
-/// Custom accessibility actions can be provided to make complex user
+/// Custom semantics actions can be provided to make complex user
 /// interactions more accessible. For instance, if an application has a 
 /// drag-and-drop list that requires the user to press and hold an item
 /// to move it, users interacting with the application using a hardware
@@ -92,11 +92,11 @@ class SemanticsTag {
 /// 
 ///   * [SemanticsProperties], where the handler for a custom action is provided.
 @immutable
-class CustomAccessibilityAction {
-  /// Creates a new [CustomAccessibilityAction].
+class CustomSemanticsAction {
+  /// Creates a new [CustomSemanticsAction].
   /// 
   /// The [label] must not be null or the empty string.
-  const CustomAccessibilityAction({@required this.label}) 
+  const CustomSemanticsAction({@required this.label}) 
     : assert(label != null),
       assert(label != '');
 
@@ -110,19 +110,19 @@ class CustomAccessibilityAction {
   bool operator ==(dynamic other) {
     if (other.runtimeType != runtimeType)
       return false;
-    final CustomAccessibilityAction typedOther = other;
+    final CustomSemanticsAction typedOther = other;
     return typedOther.label == label;
   }
 
-  // Logic to assign a unique id to each accessibility action without requiring
+  // Logic to assign a unique id to each custom action without requiring
   // user specification. 
   static int _nextId = 0;
-  static final Map<int, CustomAccessibilityAction> _actions = <int, CustomAccessibilityAction>{};
-  static final Map<CustomAccessibilityAction, int> _ids = <CustomAccessibilityAction, int>{};
+  static final Map<int, CustomSemanticsAction> _actions = <int, CustomSemanticsAction>{};
+  static final Map<CustomSemanticsAction, int> _ids = <CustomSemanticsAction, int>{};
 
   /// Get the identifier for a given `action`.
   @visibleForTesting
-  static int getIdentifier(CustomAccessibilityAction action) {
+  static int getIdentifier(CustomSemanticsAction action) {
     int result = _ids[action];
     if (result == null) {
       result = _nextId++;
@@ -134,7 +134,7 @@ class CustomAccessibilityAction {
 
   /// Get the `action` for a given identifier.
   @visibleForTesting
-  static CustomAccessibilityAction getAction(int id) {
+  static CustomSemanticsAction getAction(int id) {
     return _actions[id];
   }
 }
@@ -170,7 +170,7 @@ class SemanticsData extends Diagnosticable {
     @required this.scrollExtentMin,
     this.tags,
     this.transform,
-    this.customAccessibilityActionIds,
+    this.customSemanticsActionIds,
   }) : assert(flags != null),
        assert(actions != null),
        assert(label != null),
@@ -271,14 +271,14 @@ class SemanticsData extends Diagnosticable {
   /// parent).
   final Matrix4 transform;
 
-  /// The identifiers for the custom accessibility action defined for this node.
+  /// The identifiers for the custom semantics action defined for this node.
   /// 
   /// The list must be sorted in increasing order.
   /// 
   /// See also:
   /// 
-  ///   * [CustomAccessibilityAction], for an explanation of custom actions.
-  final List<int> customAccessibilityActionIds;
+  ///   * [CustomSemanticsAction], for an explanation of custom actions.
+  final List<int> customSemanticsActionIds;
 
   /// Whether [flags] contains the given flag.
   bool hasFlag(SemanticsFlag flag) => (flags & flag.index) != 0;
@@ -299,11 +299,11 @@ class SemanticsData extends Diagnosticable {
       if ((actions & action.index) != 0)
         actionSummary.add(describeEnum(action));
     }
-    final List<String> customAccessibilityActionSummary = customAccessibilityActionIds
-      .map<String>((int actionId) => CustomAccessibilityAction.getAction(actionId).label)
+    final List<String> customSemanticsActionSummary = customSemanticsActionIds
+      .map<String>((int actionId) => CustomSemanticsAction.getAction(actionId).label)
       .toList();
     properties.add(new IterableProperty<String>('actions', actionSummary, ifEmpty: null));
-    properties.add(new IterableProperty<String>('customActions', customAccessibilityActionSummary, ifEmpty: null));
+    properties.add(new IterableProperty<String>('customActions', customSemanticsActionSummary, ifEmpty: null));
 
     final List<String> flagSummary = <String>[];
     for (SemanticsFlag flag in SemanticsFlag.values.values) {
@@ -344,11 +344,11 @@ class SemanticsData extends Diagnosticable {
         && typedOther.scrollExtentMax == scrollExtentMax
         && typedOther.scrollExtentMin == scrollExtentMin
         && typedOther.transform == transform
-        && _sortedListsEqual(typedOther.customAccessibilityActionIds, customAccessibilityActionIds);
+        && _sortedListsEqual(typedOther.customSemanticsActionIds, customSemanticsActionIds);
   }
 
   @override
-  int get hashCode => ui.hashValues(flags, actions, label, value, increasedValue, decreasedValue, hint, textDirection, rect, tags, textSelection, scrollPosition, scrollExtentMax, scrollExtentMin, transform, customAccessibilityActionIds);
+  int get hashCode => ui.hashValues(flags, actions, label, value, increasedValue, decreasedValue, hint, textDirection, rect, tags, textSelection, scrollPosition, scrollExtentMax, scrollExtentMin, transform, customSemanticsActionIds);
 
   static bool _sortedListsEqual(List<int> left, List<int> right) {
     if (left == null && right == null)
@@ -432,7 +432,7 @@ class SemanticsProperties extends DiagnosticableTree {
     this.onSetSelection,
     this.onDidGainAccessibilityFocus,
     this.onDidLoseAccessibilityFocus,
-    this.customAccessibilityActions,
+    this.customSemanticsActions,
   });
 
   /// If non-null, indicates that this subtree represents something that can be
@@ -796,7 +796,7 @@ class SemanticsProperties extends DiagnosticableTree {
   ///  * [FocusNode], [FocusScope], [FocusManager], which manage the input focus
   final VoidCallback onDidLoseAccessibilityFocus;
 
-  /// A map from each supported [CustomAccessibilityAction] to a provided handler.
+  /// A map from each supported [CustomSemanticsAction] to a provided handler.
   /// 
   /// The handler associated with each custom action is called whenever a
   /// semantics event of type [SemanticsEvent.customEvent] is received. The
@@ -805,8 +805,8 @@ class SemanticsProperties extends DiagnosticableTree {
   /// 
   /// See also:
   /// 
-  ///   * [CustomAccessibilityAction], for an explanation of custom actions.
-  final Map<CustomAccessibilityAction, VoidCallback> customAccessibilityActions;
+  ///   * [CustomSemanticsAction], for an explanation of custom actions.
+  final Map<CustomSemanticsAction, VoidCallback> customSemanticsActions;
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
@@ -1215,7 +1215,7 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
   // TAGS, LABELS, ACTIONS
 
   Map<SemanticsAction, _SemanticsActionHandler> _actions = _kEmptyConfig._actions;
-  Map<CustomAccessibilityAction, VoidCallback> _customAccessibilityActions = _kEmptyConfig._customAccessibilityActions;
+  Map<CustomSemanticsAction, VoidCallback> _customSemanticsActions = _kEmptyConfig._customSemanticsActions;
 
   int _actionsAsBits = _kEmptyConfig._actionsAsBits;
 
@@ -1355,7 +1355,7 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
     _textDirection = config.textDirection;
     _sortKey = config.sortKey;
     _actions = new Map<SemanticsAction, _SemanticsActionHandler>.from(config._actions);
-    _customAccessibilityActions = new Map<CustomAccessibilityAction, VoidCallback>.from(config._customAccessibilityActions);
+    _customSemanticsActions = new Map<CustomSemanticsAction, VoidCallback>.from(config._customSemanticsActions);
     _actionsAsBits = config._actionsAsBits;
     _textSelection = config._textSelection;
     _scrollPosition = config._scrollPosition;
@@ -1395,8 +1395,8 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
     double scrollExtentMax = _scrollExtentMax;
     double scrollExtentMin = _scrollExtentMin;
     final Set<int> customAccessibilityActionIds = new Set<int>();
-    for (CustomAccessibilityAction action in _customAccessibilityActions.keys)
-      customAccessibilityActionIds.add(CustomAccessibilityAction.getIdentifier(action));
+    for (CustomSemanticsAction action in _customSemanticsActions.keys)
+      customAccessibilityActionIds.add(CustomSemanticsAction.getIdentifier(action));
 
     if (mergeAllDescendantsIntoThisNode) {
       _visitDescendants((SemanticsNode node) {
@@ -1418,9 +1418,9 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
           mergedTags ??= new Set<SemanticsTag>();
           mergedTags.addAll(node.tags);
         }
-        if (node._customAccessibilityActions != null) {
-          for (CustomAccessibilityAction action in _customAccessibilityActions.keys)
-            customAccessibilityActionIds.add(CustomAccessibilityAction.getIdentifier(action));
+        if (node._customSemanticsActions != null) {
+          for (CustomSemanticsAction action in _customSemanticsActions.keys)
+            customAccessibilityActionIds.add(CustomSemanticsAction.getIdentifier(action));
         }
         label = _concatStrings(
           thisString: label,
@@ -1454,7 +1454,7 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
       scrollPosition: scrollPosition,
       scrollExtentMax: scrollExtentMax,
       scrollExtentMin: scrollExtentMin,
-      customAccessibilityActionIds: customAccessibilityActionIds.toList()..sort(),
+      customSemanticsActionIds: customAccessibilityActionIds.toList()..sort(),
     );
   }
 
@@ -1489,11 +1489,11 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
       }
     }
     Int32List customAcccessibilityActionIds;
-    if (data.customAccessibilityActionIds?.isNotEmpty == true) {
-      customAcccessibilityActionIds = new Int32List(data.customAccessibilityActionIds.length);
-      for (int i = 0; i < data.customAccessibilityActionIds.length; i++) {
-        customAcccessibilityActionIds[i] = data.customAccessibilityActionIds[i];
-        customAccessibilityActionIdsUpdate.add(data.customAccessibilityActionIds[i]);
+    if (data.customSemanticsActionIds?.isNotEmpty == true) {
+      customAcccessibilityActionIds = new Int32List(data.customSemanticsActionIds.length);
+      for (int i = 0; i < data.customSemanticsActionIds.length; i++) {
+        customAcccessibilityActionIds[i] = data.customSemanticsActionIds[i];
+        customAccessibilityActionIdsUpdate.add(data.customSemanticsActionIds[i]);
       }
     }
     builder.updateNode(
@@ -1627,8 +1627,8 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
       properties.add(new DiagnosticsProperty<Rect>('rect', rect, description: description, showName: false));
     }
     final List<String> actions = _actions.keys.map((SemanticsAction action) => describeEnum(action)).toList()..sort();
-    final List<String> customAccessibilityActions = _customAccessibilityActions.keys
-      .map<String>((CustomAccessibilityAction action) => action.label)
+    final List<String> customAccessibilityActions = _customSemanticsActions.keys
+      .map<String>((CustomSemanticsAction action) => action.label)
       .toList();
     properties.add(new IterableProperty<String>('actions', actions, ifEmpty: null));
     properties.add(new IterableProperty<String>('customActions', customAccessibilityActions, ifEmpty: null));
@@ -2012,7 +2012,7 @@ class SemanticsOwner extends ChangeNotifier {
   final Set<SemanticsNode> _dirtyNodes = new Set<SemanticsNode>();
   final Map<int, SemanticsNode> _nodes = <int, SemanticsNode>{};
   final Set<SemanticsNode> _detachedNodes = new Set<SemanticsNode>();
-  final Map<int, CustomAccessibilityAction> _actions = <int, CustomAccessibilityAction>{};
+  final Map<int, CustomSemanticsAction> _actions = <int, CustomSemanticsAction>{};
 
   /// The root node of the semantics tree, if any.
   ///
@@ -2069,7 +2069,7 @@ class SemanticsOwner extends ChangeNotifier {
     }
     _dirtyNodes.clear();
     for (int actionId in customAccessibilityActionIds)
-      builder.updateCustomAction(id: actionId, label: CustomAccessibilityAction.getAction(actionId).label);
+      builder.updateCustomAction(id: actionId, label: CustomSemanticsAction.getAction(actionId).label);
     ui.window.updateSemantics(builder.build());
     notifyListeners();
   }
@@ -2624,26 +2624,26 @@ class SemanticsConfiguration {
     _hasBeenAnnotated = true;
   }
 
-  /// The handlers for each supported [CustomAccessibilityAction].
+  /// The handlers for each supported [CustomSemanticsAction].
   /// 
   /// Whenever a custom accessibility action is added to a node, the action
   /// [SemanticAction.customAction] is automatically added. A handler is 
   /// created which uses the passed argument to lookup the custom action
   /// handler from this map and invoke it, if present.
-  Map<CustomAccessibilityAction, VoidCallback> get customAccessibilityActions => _customAccessibilityActions;
-  Map<CustomAccessibilityAction, VoidCallback> _customAccessibilityActions = <CustomAccessibilityAction, VoidCallback>{};
-  set customAccessibilityActions(Map<CustomAccessibilityAction, VoidCallback> value) {
+  Map<CustomSemanticsAction, VoidCallback> get customSemanticsActions => _customSemanticsActions;
+  Map<CustomSemanticsAction, VoidCallback> _customSemanticsActions = <CustomSemanticsAction, VoidCallback>{};
+  set customSemanticsActions(Map<CustomSemanticsAction, VoidCallback> value) {
     _hasBeenAnnotated = true;
     _actionsAsBits |= SemanticsAction.customAction.index;
-    _customAccessibilityActions = value;
+    _customSemanticsActions = value;
     _actions[SemanticsAction.customAction] = _onCustomAccessibilityAction;
   }
 
   void _onCustomAccessibilityAction(dynamic args) {
-    final CustomAccessibilityAction action = CustomAccessibilityAction.getAction(args);
+    final CustomSemanticsAction action = CustomSemanticsAction.getAction(args);
     if (action == null)
       return;
-    final VoidCallback callback = _customAccessibilityActions[action];
+    final VoidCallback callback = _customSemanticsActions[action];
     if (callback != null)
       callback();
   }
@@ -3003,7 +3003,7 @@ class SemanticsConfiguration {
       return;
 
     _actions.addAll(other._actions);
-    _customAccessibilityActions.addAll(other._customAccessibilityActions);
+    _customSemanticsActions.addAll(other._customSemanticsActions);
     _actionsAsBits |= other._actionsAsBits;
     _flags |= other._flags;
     _textSelection ??= other._textSelection;
@@ -3058,7 +3058,7 @@ class SemanticsConfiguration {
       .._scrollExtentMin = _scrollExtentMin
       .._actionsAsBits = _actionsAsBits
       .._actions.addAll(_actions)
-      .._customAccessibilityActions.addAll(_customAccessibilityActions);
+      .._customSemanticsActions.addAll(_customSemanticsActions);
   }
 }
 

@@ -198,9 +198,9 @@ class _LeaveBehindListItem extends StatelessWidget {
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
     return new Semantics(
-      customAccessibilityActions: <CustomAccessibilityAction, VoidCallback>{
-        const CustomAccessibilityAction(label: 'Archive'): _handleArchive,
-        const CustomAccessibilityAction(label: 'Delete'): _handleDelete,
+      customSemanticsActions: <CustomSemanticsAction, VoidCallback>{
+        const CustomSemanticsAction(label: 'Archive'): _handleArchive,
+        const CustomSemanticsAction(label: 'Delete'): _handleDelete,
       },
       child: new Dismissible(
         key: new ObjectKey(item),
