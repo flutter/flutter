@@ -230,7 +230,7 @@ void main() {
                 body: const SizedBox(height: 100.0),
               ),
             ],
-            allowMultiplePanelsOpen: false,
+            _allowMultiplePanelsOpen: false,
           ),
         ),
       ),

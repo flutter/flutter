@@ -185,21 +185,19 @@ class _ExpansionPanelListState extends State<ExpansionPanelList> {
       _widgetOpenMap = new HashMap<int, bool>();
 
       for (int i = 0; i < widget.children.length; i += 1) {
-
         assert(widget.children[i] is ExpansionPanelRadio,
-                'All children of ExpansionPanel.radio need to be of type ExpansionPanelRadio');
+               'All children of ExpansionPanel.radio need to be of type ExpansionPanelRadio');
         final ExpansionPanelRadio _widgetChild = widget.children[i];
         _widgetOpenMap[_widgetChild.value] = _widgetChild.initializesExpanded;
       }
 
       assert(_noneOrOneChildExpanded(_widgetOpenMap),
-            'This expansion panel widget initialized with more than one panel open');
+             'This expansion panel widget initialized with more than one panel open');
     }
   }
 
   @override
-  void didUpdateWidget(ExpansionPanelList oldWidget)
-  {
+  void didUpdateWidget(ExpansionPanelList oldWidget) {
     super.didUpdateWidget(oldWidget);
 
     if (!widget._allowMultiplePanelsOpen) {
@@ -207,10 +205,8 @@ class _ExpansionPanelListState extends State<ExpansionPanelList> {
 
       for (int i = 0; i < widget.children.length; i += 1) {
         final ExpansionPanelRadio _widgetChild = widget.children[i];
-        if (_widgetOpenMap[_widgetChild.value] != null)
-          _newMap[_widgetChild.value] = _widgetOpenMap[_widgetChild.value];
-        else
-          _newMap[_widgetChild.value] = _widgetChild.initializesExpanded;
+        _newMap[_widgetChild.value] = _widgetOpenMap[_widgetChild.value] != null ?
+                                      _widgetOpenMap[_widgetChild.value] :_widgetChild.initializesExpanded;
 
         assert(widget.children[i] is ExpansionPanelRadio,
         'All children of ExpansionPanel.radio need to be of type ExpansionPanelRadio');
@@ -221,8 +217,7 @@ class _ExpansionPanelListState extends State<ExpansionPanelList> {
     }
   }
 
-  bool _noneOrOneChildExpanded(HashMap<int, bool> childExpansionValues)
-  {
+  bool _noneOrOneChildExpanded(HashMap<int, bool> childExpansionValues) {
     int _valuesTrue = 0;
     childExpansionValues.forEach((int key, bool value) => _valuesTrue += value ? 1 : 0);
 

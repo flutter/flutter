@@ -147,11 +147,13 @@ class DemoItem<T> {
     this.value,
     this.hint,
     this.builder,
+    this.id,
     this.valueToString
   }) : textController = new TextEditingController(text: valueToString(value));
 
   final String name;
   final String hint;
+  final int id;
   final TextEditingController textController;
   final DemoItemBodyBuilder<T> builder;
   final ValueToString<T> valueToString;
@@ -181,13 +183,169 @@ class ExpansionPanelsDemo extends StatefulWidget {
 
 class _ExpansionPanelsDemoState extends State<ExpansionPanelsDemo> {
   List<DemoItem<dynamic>> _demoItems;
+  List<DemoItem<dynamic>> _demoItems2;
+  List<DemoItem<dynamic>> _currentList;
+
+  bool isDemoItems;
 
   @override
   void initState() {
     super.initState();
 
+    _demoItems2 = <DemoItem<dynamic>>[
+
+      new DemoItem<_Location>(
+          id: 1,
+          name: 'Location',
+          value: _Location.Bahamas,
+          hint: 'Select location',
+          valueToString: (_Location location) => location.toString().split('.')[1],
+          builder: (DemoItem<_Location> item) {
+            void close() {
+              setState(() {
+                item.isExpanded = false;
+              });
+            }
+            return new Form(
+                child: new Builder(
+                    builder: (BuildContext context) {
+                      return new CollapsibleBody(
+                        onSave: () { Form.of(context).save(); close(); },
+                        onCancel: () { Form.of(context).reset(); close(); },
+                        child: new FormField<_Location>(
+                            initialValue: item.value,
+                            onSaved: (_Location result) { item.value = result; },
+                            builder: (FormFieldState<_Location> field) {
+                              return new Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: <Widget>[
+                                    new Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: <Widget>[
+                                          new Radio<_Location>(
+                                            value: _Location.Bahamas,
+                                            groupValue: field.value,
+                                            onChanged: field.didChange,
+                                          ),
+                                          const Text('Bahamas')
+                                        ]
+                                    ),
+                                    new Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: <Widget>[
+                                          new Radio<_Location>(
+                                            value: _Location.Barbados,
+                                            groupValue: field.value,
+                                            onChanged: field.didChange,
+                                          ),
+                                          const Text('Barbados')
+                                        ]
+                                    ),
+                                    new Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: <Widget>[
+                                          new Radio<_Location>(
+                                            value: _Location.Bermuda,
+                                            groupValue: field.value,
+                                            onChanged: field.didChange,
+                                          ),
+                                          const Text('Bermuda')
+                                        ]
+                                    )
+                                  ]
+                              );
+                            }
+                        ),
+                      );
+                    }
+                )
+            );
+          }
+      ),
+      new DemoItem<String>(
+        id: 0,
+        name: 'Trip',
+        value: 'Caribbean cruise',
+        hint: 'Change trip name',
+        valueToString: (String value) => value,
+        builder: (DemoItem<String> item) {
+          void close() {
+            setState(() {
+              item.isExpanded = false;
+            });
+          }
+
+          return new Form(
+            child: new Builder(
+              builder: (BuildContext context) {
+                return new CollapsibleBody(
+                  margin: const EdgeInsets.symmetric(horizontal: 16.0),
+                  onSave: () { Form.of(context).save(); close(); },
+                  onCancel: () { Form.of(context).reset(); close(); },
+                  child: new Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                    child: new TextFormField(
+                      controller: item.textController,
+                      decoration: new InputDecoration(
+                        hintText: item.hint,
+                        labelText: item.name,
+                      ),
+                      onSaved: (String value) { item.value = value; },
+                    ),
+                  ),
+                );
+              },
+            ),
+          );
+        },
+      ),
+      new DemoItem<double>(
+          id: 2,
+          name: 'Sun',
+          value: 80.0,
+          hint: 'Select sun level',
+          valueToString: (double amount) => '${amount.round()}',
+          builder: (DemoItem<double> item) {
+            void close() {
+              setState(() {
+                item.isExpanded = false;
+              });
+            }
+
+            return new Form(
+                child: new Builder(
+                    builder: (BuildContext context) {
+                      return new CollapsibleBody(
+                        onSave: () { Form.of(context).save(); close(); },
+                        onCancel: () { Form.of(context).reset(); close(); },
+                        child: new FormField<double>(
+                          initialValue: item.value,
+                          onSaved: (double value) { item.value = value; },
+                          builder: (FormFieldState<double> field) {
+                            return new Slider(
+                              min: 0.0,
+                              max: 100.0,
+                              divisions: 5,
+                              activeColor: Colors.orange[100 + (field.value * 5.0).round()],
+                              label: '${field.value.round()}',
+                              value: field.value,
+                              onChanged: field.didChange,
+                            );
+                          },
+                        ),
+                      );
+                    }
+                )
+            );
+          }
+      )
+    ];
+
+
     _demoItems = <DemoItem<dynamic>>[
       new DemoItem<String>(
+        id: 0,
         name: 'Trip',
         value: 'Caribbean cruise',
         hint: 'Change trip name',
@@ -224,6 +382,7 @@ class _ExpansionPanelsDemoState extends State<ExpansionPanelsDemo> {
         },
       ),
       new DemoItem<_Location>(
+        id: 1,
         name: 'Location',
         value: _Location.Bahamas,
         hint: 'Select location',
@@ -292,6 +451,7 @@ class _ExpansionPanelsDemoState extends State<ExpansionPanelsDemo> {
         }
       ),
       new DemoItem<double>(
+        id: 2,
         name: 'Sun',
         value: 80.0,
         hint: 'Select sun level',
@@ -331,35 +491,55 @@ class _ExpansionPanelsDemoState extends State<ExpansionPanelsDemo> {
         }
       )
     ];
+    _currentList = _demoItems;
+    isDemoItems = true;
   }
 
   @override
   Widget build(BuildContext context) {
-    return new Scaffold(
-      appBar: new AppBar(title: const Text('Expansion panels')),
-      body: new SingleChildScrollView(
-        child: new SafeArea(
-          top: false,
-          bottom: false,
-          child: new Container(
-            margin: const EdgeInsets.all(24.0),
-            child: new ExpansionPanelList(
-              expansionCallback: (int index, bool isExpanded) {
-                setState(() {
-                  _demoItems[index].isExpanded = !isExpanded;
-                });
-              },
-              children: _demoItems.map((DemoItem<dynamic> item) {
-                return new ExpansionPanel(
-                  isExpanded: item.isExpanded,
-                  headerBuilder: item.headerBuilder,
-                  body: item.build()
-                );
-              }).toList()
-            ),
-          ),
-        ),
-      ),
+    return new StatefulBuilder (
+        builder: (BuildContext context, StateSetter setState) {
+          return new Scaffold(
+              appBar: new AppBar(title: const Text('Expansion panels')),
+              body: new SingleChildScrollView(
+                child: new SafeArea(
+                  top: false,
+                  bottom: false,
+                  child: new Container(
+                    margin: const EdgeInsets.all(24.0),
+                    child: new ExpansionPanelList.radio(
+                        expansionCallback: (int index, bool isExpanded) {
+                          setState(() {
+                            _demoItems[index].isExpanded = !isExpanded;
+                          });
+                        },
+                        children: _currentList.map((DemoItem<dynamic> item) {
+                          return new ExpansionPanelRadio(
+                            initializesExpanded: false,
+                            headerBuilder: item.headerBuilder,
+                            body: item.build(),
+                            value: item.id,
+                          );
+                        }).toList()
+                    ),
+                  ),
+                ),
+              ),
+              bottomSheet:
+                new ExpandIcon(
+                  onPressed: (void item) {
+                    setState(() {
+                      _currentList.removeAt(0);
+//                      if(isDemoItems)
+//                      _currentList = _demoItems2;
+//                      else
+//                        _currentList = _demoItems;
+//                      isDemoItems = !isDemoItems;
+                    });
+                  }
+                )
+          );
+        }
     );
   }
 }
