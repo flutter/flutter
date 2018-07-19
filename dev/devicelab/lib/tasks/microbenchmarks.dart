@@ -130,8 +130,8 @@ Future<Map<String, double>> _readJsonResults(Process process) {
       // See https://github.com/flutter/flutter/issues/19208
       process.stdin.write('q');
       await process.stdin.flush();
-      // ignore: deprecated_member_use
-      process.kill(ProcessSignal.sigint); // flutter run doesn't quit automatically
+      // Also send a kill signal in case the `q` above didn't work.
+      process.kill(ProcessSignal.sigint); // ignore: deprecated_member_use
       try {
         completer.complete(new Map<String, double>.from(json.decode(jsonOutput)));
       } catch (ex) {
