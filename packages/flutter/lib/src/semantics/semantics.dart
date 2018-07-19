@@ -266,11 +266,11 @@ class SemanticsData extends Diagnosticable {
 
   /// The identifiers for the custom accessibility action defined for this node.
   /// 
-  /// The identifiers must be sorted in increasing order.
+  /// The list must be sorted in increasing order.
   /// 
   /// See also:
   /// 
-  ///   * [CustomAccessibilityAction], for an explaination
+  ///   * [CustomAccessibilityAction], for an explanation of custom actions.
   final List<int> customAccessibilityActionIds;
 
   /// Whether [flags] contains the given flag.
