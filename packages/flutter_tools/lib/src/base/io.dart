@@ -41,7 +41,7 @@ export 'dart:io'
         exitCode,
         // File              NO! Use `file_system.dart`
         // FileSystemEntity  NO! Use `file_system.dart`
-        GZIP, // ignore: deprecated_member_use
+        gzip, 
         HandshakeException,
         HttpClient,
         HttpClientRequest,
@@ -71,7 +71,7 @@ export 'dart:io'
         // stdout,           NO! Use `io.dart`
         Socket,
         SocketException,
-        SYSTEM_ENCODING, // ignore: deprecated_member_use
+        systemEncoding, 
         WebSocket,
         WebSocketException,
         WebSocketTransformer;

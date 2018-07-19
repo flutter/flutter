@@ -74,7 +74,7 @@ class Cache {
     if (!_lockEnabled)
       return null;
     assert(_lock == null);
-    _lock = await fs.file(fs.path.join(flutterRoot, 'bin', 'cache', 'lockfile')).open(mode: FileMode.WRITE); // ignore: deprecated_member_use
+    _lock = await fs.file(fs.path.join(flutterRoot, 'bin', 'cache', 'lockfile')).open(mode: FileMode.write); 
     bool locked = false;
     bool printed = false;
     while (!locked) {

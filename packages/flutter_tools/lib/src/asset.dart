@@ -80,7 +80,7 @@ class _ManifestAssetBundle implements AssetBundle {
       return true;
 
     final FileStat stat = fs.file(manifestPath).statSync();
-    if (stat.type == FileSystemEntityType.NOT_FOUND) // ignore: deprecated_member_use
+    if (stat.type == FileSystemEntityType.notFound) 
       return true;
 
     return stat.modified.isAfter(_lastBuildTimestamp);

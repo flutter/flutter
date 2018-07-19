@@ -818,7 +818,7 @@ abstract class ResidentRunner {
     if (path == null)
       return true;
     final FileStat stat = fs.file(path).statSync();
-    if (stat.type != FileSystemEntityType.FILE) // ignore: deprecated_member_use
+    if (stat.type != FileSystemEntityType.file) 
       return true;
     if (!fs.file(path).existsSync())
       return true;

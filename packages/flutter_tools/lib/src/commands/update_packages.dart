@@ -785,8 +785,8 @@ class PubspecChecksum extends PubspecLine {
     if (twoLines.length != 2) {
       return new PubspecChecksum(-1, line);
     }
-    // ignore: deprecated_member_use
-    final int value = int.parse(twoLines.last.trim(), radix: 16, onError: (String _) => -1);
+    
+    final int value = int.tryParse(twoLines.last.trim(), radix: 16) ?? -1;
     return new PubspecChecksum(value, line);
   }
 }
