@@ -14,6 +14,7 @@ config("libwebp_defines") {
     # This makes WebP decode to BGR_565 when we ask for RGB_565.
     # (It also swaps the color order for 4444, but we don't care today.)
     "WEBP_SWAP_16BIT_CSP",
+    "WEBP_EXTERN(x)=x",
   ]
 }
 
@@ -46,6 +47,7 @@ source_set("libwebp_avx2") {
 
 source_set("libwebp") {
   public_configs = [":libwebp_config"]
+  configs += [ ":libwebp_defines" ]
   deps = [
     ":libwebp_avx2",
     ":libwebp_sse41",
