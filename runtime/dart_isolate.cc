@@ -257,10 +257,6 @@ bool DartIsolate::PrepareForRunningFromPrecompiledCode() {
     return false;
   }
 
-  if (!DartVM::IsRunningPrecompiledCode()) {
-    return false;
-  }
-
   tonic::DartState::Scope scope(this);
 
   if (Dart_IsNull(Dart_RootLibrary())) {
@@ -342,9 +338,8 @@ bool DartIsolate::PrepareForRunningFromSnapshot(
 
   tonic::DartState::Scope scope(this);
 
-  if (!Dart_IsNull(Dart_RootLibrary())) {
-    return false;
-  }
+  // Use root library provided by kernel in favor of one provided by snapshot.
+  Dart_SetRootLibrary(Dart_Null());
 
   if (!LoadSnapshot(mapping, last_piece)) {
     return false;

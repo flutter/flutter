@@ -24,7 +24,7 @@ class IsolateConfiguration {
       const blink::Settings& settings,
       fml::RefPtr<blink::AssetManager> asset_manager);
 
-  static std::unique_ptr<IsolateConfiguration> CreateForPrecompiledCode();
+  static std::unique_ptr<IsolateConfiguration> CreateForAppSnapshot();
 
   static std::unique_ptr<IsolateConfiguration> CreateForSnapshot(
       std::unique_ptr<fml::Mapping> snapshot);

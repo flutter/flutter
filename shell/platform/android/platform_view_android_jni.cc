@@ -178,7 +178,7 @@ static void SurfaceDestroyed(JNIEnv* env, jobject jcaller, jlong shell_holder) {
 std::unique_ptr<IsolateConfiguration> CreateIsolateConfiguration(
     const blink::AssetManager& asset_manager) {
   if (blink::DartVM::IsRunningPrecompiledCode()) {
-    return IsolateConfiguration::CreateForPrecompiledCode();
+    return IsolateConfiguration::CreateForAppSnapshot();
   }
 
   const auto configuration_from_blob =
@@ -200,7 +200,8 @@ std::unique_ptr<IsolateConfiguration> CreateIsolateConfiguration(
     return script;
   }
 
-  return nullptr;
+  // This happens when starting isolate directly from CoreJIT snapshot.
+  return IsolateConfiguration::CreateForAppSnapshot();
 }
 
 static void RunBundleAndSnapshot(
