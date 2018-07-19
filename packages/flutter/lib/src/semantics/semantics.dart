@@ -69,21 +69,28 @@ class SemanticsTag {
   String toString() => '$runtimeType($name)';
 }
 
-/// An identifier for defining a custom accessibility action.
+/// An identifier of a custom accessibility action.
 /// 
 /// Custom accessibility actions can be provided to make complex user
 /// interactions more accessible. For instance, if an application has a 
 /// drag-and-drop list that requires the user to press and hold an item
 /// to move it, users interacting with the application using a hardware
-/// switch may have difficulty. In Android, these actions are presented
-/// in the local context menu. In iOS, these are presented in the radial
-/// context menu.
+/// switch may have difficulty. This can be made accessible by creating custom
+/// actions and pairing them with handlers that move a list item up or down in
+/// the list.
+/// 
+/// In Android, these actions are presented in the local context menu. In iOS,
+/// these are presented in the radial context menu. 
 /// 
 /// Localization and text direction do not automatically apply to the provided
 /// label.
 /// 
 /// Instances of this class should either be instantiated with const or
 /// new instances cached in static fields.
+/// 
+/// See also:
+/// 
+///   * [SemanticsProperties], where the handler for a custom action is provided.
 @immutable
 class CustomAccessibilityAction {
   /// Creates a new [CustomAccessibilityAction].
