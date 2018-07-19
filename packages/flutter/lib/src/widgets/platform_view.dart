@@ -10,7 +10,8 @@ import 'framework.dart';
 
 /// Embeds an Android view in the Widget hierarchy.
 ///
-/// Embedding Android views is an expensive operation and should be avoided when possible.
+/// Embedding Android views is an expensive operation and should be avoided when a Flutter
+/// equivalent is possible.
 ///
 /// The Android view object is created using a [PlatformViewFactory](/javadoc/io/flutter/plugin/platform/PlatformViewFactory.html).
 /// Plugins can register platform view factories with [PlatformViewRegistry#registerViewFactory](/javadoc/io/flutter/plugin/platform/PlatformViewRegistry.html#registerViewFactory-java.lang.String-io.flutter.plugin.platform.PlatformViewFactory-).
@@ -33,7 +34,8 @@ class AndroidView extends StatefulWidget {
     Key key,
     @required this.viewType,
     this.onPlatformViewCreated
-  }) : super(key: key);
+  }) : assert(viewType != null),
+       super(key: key);
 
   /// The unique identifier for Android view type to be embedded by this widget.
   /// A [PlatformViewFactory](/javadoc/io/flutter/plugin/platform/PlatformViewFactory.html)
@@ -52,7 +54,6 @@ class AndroidView extends StatefulWidget {
 }
 
 class _AndroidViewState extends State<AndroidView> {
-
   int id;
   AndroidViewController controller;
 

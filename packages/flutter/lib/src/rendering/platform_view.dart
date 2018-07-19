@@ -14,9 +14,9 @@ import 'object.dart';
 
 
 enum _PlatformViewState {
-  UNINITIALIZED,
-  RESIZING,
-  READY,
+  uninitialized,
+  resizing,
+  ready,
 }
 
 /// A render object for an Android view.
@@ -34,7 +34,7 @@ class RenderAndroidView extends RenderBox {
   }) : assert(viewController != null),
        _viewController = viewController;
 
-  _PlatformViewState _state = _PlatformViewState.UNINITIALIZED;
+  _PlatformViewState _state = _PlatformViewState.uninitialized;
 
   /// The Android view controller for the Android view associated with this render object.
   AndroidViewController get viewcontroller => _viewController;
@@ -64,11 +64,11 @@ class RenderAndroidView extends RenderBox {
   }
 
   Future<Null> _sizePlatformView() async {
-    if (_state == _PlatformViewState.RESIZING) {
+    if (_state == _PlatformViewState.resizing) {
       return;
     }
 
-    _state = _PlatformViewState.RESIZING;
+    _state = _PlatformViewState.resizing;
 
     Size targetSize;
     do {
@@ -79,7 +79,7 @@ class RenderAndroidView extends RenderBox {
       // In that case we will re-iterate to resize the platform view again.
     } while (size != targetSize);
 
-    _state = _PlatformViewState.READY;
+    _state = _PlatformViewState.ready;
     markNeedsPaint();
   }
 
