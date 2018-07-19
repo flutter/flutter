@@ -367,7 +367,7 @@ class _FlutterPlatform extends PlatformPlugin {
     _testCount += 1;
     final StreamController<dynamic> localController = new StreamController<dynamic>();
     final StreamController<dynamic> remoteController = new StreamController<dynamic>();
-    final Completer<Null> testCompleteCompleter = new Completer<Null>();
+    final Completer<dynamic> testCompleteCompleter = new Completer<dynamic>();
     final _FlutterPlatformStreamSinkWrapper<dynamic> remoteSink = new _FlutterPlatformStreamSinkWrapper<dynamic>(
       remoteController.sink,
       testCompleteCompleter.future,
@@ -384,7 +384,7 @@ class _FlutterPlatform extends PlatformPlugin {
     return remoteChannel;
   }
 
-  Future<Null> _startTest(
+  Future<dynamic> _startTest(
     String testPath,
     StreamChannel<dynamic> controller,
     int ourTestCount) async {
@@ -659,7 +659,7 @@ class _FlutterPlatform extends PlatformPlugin {
     assert(controllerSinkClosed);
     if (outOfBandError != null) {
       printTrace('test $ourTestCount: finished with out-of-band failure');
-      throw outOfBandError;
+      return outOfBandError;
     }
     printTrace('test $ourTestCount: finished');
     return null;
@@ -905,24 +905,40 @@ class _FlutterPlatform extends PlatformPlugin {
 class _FlutterPlatformStreamSinkWrapper<S> implements StreamSink<S> {
   _FlutterPlatformStreamSinkWrapper(this._parent, this._shellProcessClosed);
   final StreamSink<S> _parent;
-  final Future<void> _shellProcessClosed;
+  final Future<dynamic> _shellProcessClosed;
 
+  /// This object is created within [_FlutterPlatform.loadChannel], which is
+  /// called from a guard zone set up by the the test framework.  However,
+  /// [close] is called by the framework during the suite shutdown process,
+  /// which runs in a different zone.
+  ///
+  /// If the [done] future is allocated in the first zone, then Dart will not
+  /// allow [close] to complete that future with an error during a call from
+  /// the second zone.  To work around this, [close] allocates its own future, and
+  /// [done] is not supported.
   @override
-  Future<void> get done => _done.future;
-  final Completer<void> _done = new Completer<void>();
+  Future<void> get done {
+    throw new UnsupportedError('done is not supported');
+  }
 
   @override
   Future<dynamic> close() {
+   final Completer<Null> completer = new Completer<Null>();
    Future.wait<dynamic>(<Future<dynamic>>[
       _parent.close(),
       _shellProcessClosed,
     ]).then<void>(
       (List<dynamic> value) {
-        _done.complete();
+        final dynamic outOfBandError = value[1];
+        if (outOfBandError != null) {
+          completer.completeError(outOfBandError);
+        } else {
+          completer.complete();
+        }
       },
-      onError: _done.completeError,
+      onError: completer.completeError,
     );
-    return done;
+    return completer.future;
   }
 
   @override
