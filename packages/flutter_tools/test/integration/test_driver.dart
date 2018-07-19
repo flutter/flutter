@@ -121,11 +121,13 @@ class FlutterTestDriver {
 
   Future<int> stop() async {
     if (vmService != null) {
+      _debugPrint('Closing VM service');
       await vmService.close()
           .timeout(quitTimeout,
               onTimeout: () => _debugPrint('VM Service did not quit within $quitTimeout'));
     }
     if (_currentRunningAppId != null) {
+      _debugPrint('Stopping app');
       await _sendRequest(
         'app.stop',
         <String, dynamic>{'appId': _currentRunningAppId}
@@ -135,6 +137,7 @@ class FlutterTestDriver {
       );
       _currentRunningAppId = null;
     }
+    _debugPrint('Waiting for process to end');
     return _proc.exitCode.timeout(quitTimeout, onTimeout: _killGracefully);
   }
 
