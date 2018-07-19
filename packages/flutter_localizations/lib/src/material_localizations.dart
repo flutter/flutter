@@ -40,17 +40,31 @@ import 'widgets_localizations.dart';
 /// This class supports locales with the following [Locale.languageCode]s:
 ///
 ///   * ar - Arabic
+///   * bg - Bulgarian
+///   * bs - Bosnian
+///   * ca - Catalan
+///   * cs - Czech
+///   * da - Danish
 ///   * de - German
+///   * el - Greek
 ///   * en - English
 ///   * es - Spanish
+///   * et - Estonian
 ///   * fa - Farsi
+///   * fi - Finnish
+///   * fil - Fillipino
 ///   * fr - French
 ///   * gsw - Swiss German
+///   * hi - Hindi
 ///   * he - Hebrew
+///   * hr - Croatian
+///   * hu - Hungarian
 ///   * id - Indonesian
 ///   * it - Italian
 ///   * ja - Japanese
 ///   * ko - Korean
+///   * lv - Latvian
+///   * lt - Lithuanian
 ///   * ms - Malay
 ///   * nl - Dutch
 ///   * nb - Norwegian
@@ -59,8 +73,14 @@ import 'widgets_localizations.dart';
 ///   * pt - Portuguese
 ///   * ro - Romanian
 ///   * ru - Russian
+///   * sk - Slovak
+///   * sl - Slovenian
+///   * sr - Serbian
+///   * sv - Swedish
+///   * tl - Tagalog
 ///   * th - Thai
 ///   * tr - Turkish
+///   * uk - Ukranian
 ///   * ur - Urdu
 ///   * vi - Vietnamese
 ///   * zh - Simplified Chinese
@@ -520,17 +540,31 @@ class _MaterialLocalizationsDelegate extends LocalizationsDelegate<MaterialLocal
   // class doc and the list we test, see test/translations_test.dart.
   static const List<String> _supportedLanguages = const <String>[
     'ar', // Arabic
+    'bg', // Bulgarian
+    'bs', // Bosnian
+    'ca', // Catalan
+    'cs', // Czech
+    'da', // Danish
     'de', // German
+    'el', // Greek
     'en', // English
     'es', // Spanish
+    'et', // Estonian
     'fa', // Farsi (Persian)
+    'fi', // Finnish
+    'fil', //  Fillipino
     'fr', // French
     'gsw', // Swiss German
     'he', // Hebrew
+    'hi', // Hindi
+    'hr', // Croatian
+    'hu', // Hungarian
     'id', // Indonesian
     'it', // Italian
     'ja', // Japanese
     'ko', // Korean
+    'lv', // Latvian
+    'lt', // Lithuanian
     'ms', // Malay
     'nl', // Dutch
     'nb', // Norwegian
@@ -539,8 +573,14 @@ class _MaterialLocalizationsDelegate extends LocalizationsDelegate<MaterialLocal
     'pt', // Portugese
     'ro', // Romanian
     'ru', // Russian
+    'sr', // Serbian
+    'sk', // Slovak
+    'sl', // Slovenian
     'th', // Thai
+    'sv', // Swedish
+    'tl', // Tagalog
     'tr', // Turkish
+    'uk', // Ukranian
     'ur', // Urdu
     'vi', // Vietnamese
     'zh', // Chinese (simplified)
