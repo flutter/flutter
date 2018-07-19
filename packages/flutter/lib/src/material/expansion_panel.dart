@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:collection';
+
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
@@ -69,8 +71,8 @@ class ExpansionPanel {
     @required this.body,
     this.isExpanded = false
   }) : assert(headerBuilder != null),
-        assert(body != null),
-        assert(isExpanded != null);
+       assert(body != null),
+       assert(isExpanded != null);
 
   /// The widget builder that builds the expansion panels' header.
   final ExpansionPanelHeaderBuilder headerBuilder;
@@ -84,6 +86,28 @@ class ExpansionPanel {
   ///
   /// Defaults to false.
   final bool isExpanded;
+
+}
+
+///An extension of the expansion panel class that allows for radio functionality
+class ExpansionPanelRadio extends ExpansionPanel {
+
+  ///A subclass of expansion panel that allows for radio functionality.
+  ///A key must be passed into the constructor.
+  ExpansionPanelRadio({
+    this.initializesExpanded = false,
+    @required this.value,
+    @required ExpansionPanelHeaderBuilder headerBuilder,
+    @required Widget body,
+  }) : assert(initializesExpanded != null),
+       assert(value != null),
+       super(body: body, headerBuilder: headerBuilder);
+
+  ///Whether this panel initializes expanded or not.
+  final bool initializesExpanded;
+
+  ///User assigned identifier that corresponds to this specific object.
+  final int value;
 }
 
 /// A material expansion panel list that lays out its children and animates
@@ -93,20 +117,29 @@ class ExpansionPanel {
 ///
 ///  * [ExpansionPanel]
 ///  * <https://material.google.com/components/expansion-panels.html>
-
 class ExpansionPanelList extends StatefulWidget {
-
-  ///Expansion Panel List
+  /// Creates an expansion panel list widget. The [expansionCallback] is
+  /// triggered when an expansion panel expand/collapse button is pushed.
+  ///
+  /// The [children], [animationDuration], and [allowMultiplePanelsOpen] arguments must not be null.
   const ExpansionPanelList({
     Key key,
     this.children = const <ExpansionPanel>[],
     this.expansionCallback,
     this.animationDuration = kThemeAnimationDuration,
-    this.allowMultiplePanelsOpen = true
-  })
-      : assert(children != null),
-        assert(animationDuration != null),
-        super(key: key);
+  }) : assert(children != null),
+       assert(animationDuration != null),
+       super(key: key);
+
+  ///radio constructor
+  const ExpansionPanelList.radio({
+    Key key,
+    this.children = const <ExpansionPanelRadio>[],
+    this.expansionCallback,
+    this.animationDuration = kThemeAnimationDuration,
+  }) : assert(children != null),
+       assert(animationDuration != null),
+       super(key: key);
 
   /// The children of the expansion panel list. They are laid out in a similar
   /// fashion to [ListBody].
@@ -124,12 +157,11 @@ class ExpansionPanelList extends StatefulWidget {
   /// The duration of the expansion animation.
   final Duration animationDuration;
 
-  /// Whether the Expansion Panel List can have multiple panels open
+  /// Whether the expansion panel list can have multiple panels open
   /// simultaneously or at most one.
   ///
   /// If set to false and a closed panel is opened, all other opened panels will
   /// be closed. In this state there can be exactly one or zero panels open.
-
   final bool allowMultiplePanelsOpen;
 
   @override
@@ -137,31 +169,71 @@ class ExpansionPanelList extends StatefulWidget {
 }
 
 class _ExpansionPanelListState extends State<ExpansionPanelList> {
-
-  /// Creates an expansion panel list widget. The [expansionCallback] is
-  /// triggered when an expansion panel expand/collapse button is pushed.
-  List<bool> widgetOpenValue;
+  HashMap<int, bool> _widgetOpenMap;
 
   @override
   void initState() {
     super.initState();
-    widgetOpenValue = new List<bool>(widget.children.length);
 
-    for(int i = 0; i < widget.children.length; i++)
-      widgetOpenValue[i] = false;
+    if (widget.allowMultiplePanelsOpen) {
+      _widgetOpenMap = new HashMap<int, bool>();
+
+      for (int i = 0; i < widget.children.length; i += 1) {
+        //Better way of doing this?
+        assert(widget.children[i] is ExpansionPanelRadio);
+        final ExpansionPanelRadio _widgetChild = widget.children[i];
+        _widgetOpenMap[_widgetChild.value] = _widgetChild.initializesExpanded;
+      }
+
+      assert(_noneOrOneChildExpanded(_widgetOpenMap));
+    }
   }
+
+  @override
+  void didUpdateWidget(ExpansionPanelList oldWidget)
+  {
+    super.didUpdateWidget(oldWidget);
+
+    final HashMap<int, bool> _newMap = new HashMap<int, bool>();
+
+    for (int i = 0; i < widget.children.length; i += 1)
+    {
+      final ExpansionPanelRadio _widgetChild = widget.children[i];
+      if (_widgetOpenMap[_widgetChild.value] != null)
+        _newMap[_widgetChild.value] = _widgetOpenMap[_widgetChild.value];
+      else
+        _newMap[_widgetChild.value] = _widgetChild.initializesExpanded;
+    }
+    _widgetOpenMap = _newMap;
+    assert(_noneOrOneChildExpanded(_widgetOpenMap));
+  }
+
+  bool _noneOrOneChildExpanded(HashMap<int, bool> childExpansionValues)
+  {
+    int _valuesTrue = 0;
+    childExpansionValues.forEach((int key, bool value) => _valuesTrue += value ? 1 : 0);
+
+    if (_valuesTrue > 1)
+      return false;
+
+    return true;
+  }
+
   bool _isChildExpanded(int index) {
-    return widget.allowMultiplePanelsOpen ? widget.children[index].isExpanded :
-    widgetOpenValue[index];
+    if (widget.allowMultiplePanelsOpen)
+      {
+        final ExpansionPanelRadio radioWidget = widget.children[index];
+        return _widgetOpenMap[radioWidget.value];
+      }
+
+    return widget.children[index].isExpanded;
   }
 
   @override
   Widget build(BuildContext context) {
     final List<MergeableMaterialItem> items = <MergeableMaterialItem>[];
-
-
     const EdgeInsets kExpandedEdgeInsets = const EdgeInsets.symmetric(
-        vertical: _kPanelHeaderExpandedHeight - _kPanelHeaderCollapsedHeight
+      vertical: _kPanelHeaderExpandedHeight - _kPanelHeaderCollapsedHeight
     );
 
     for (int index = 0; index < widget.children.length; index += 1) {
@@ -179,8 +251,7 @@ class _ExpansionPanelListState extends State<ExpansionPanelList> {
                 constraints: const BoxConstraints(minHeight: _kPanelHeaderCollapsedHeight),
                 child: widget.children[index].headerBuilder(
                   context,
-                  widget.allowMultiplePanelsOpen ? widget.children[index].isExpanded :
-                  widgetOpenValue[index],
+                  widget.children[index].isExpanded,
                 ),
               ),
             ),
@@ -194,16 +265,23 @@ class _ExpansionPanelListState extends State<ExpansionPanelList> {
                 if (widget.expansionCallback != null)
                   widget.expansionCallback(index, isExpanded);
 
-                setState(() {
-                  if(!widget.allowMultiplePanelsOpen) {
-                    for (int cIndex = 0; cIndex < widget.children.length; cIndex++) {
-                      if (cIndex != index && !widget.children[cIndex].isExpanded) {
+                setState(()
+                {
+                  if (!widget.allowMultiplePanelsOpen)
+                  {
+                    final ExpansionPanelRadio _pressedChild = widget.children[index];
+                    for (int childIndex = 0; childIndex < widget.children.length; childIndex += 1)
+                    {
+                      final ExpansionPanelRadio _widgetChild = widget.children[childIndex];
+
+                      if (childIndex != index && !widget.children[childIndex].isExpanded)
+                      {
                         if (widget.expansionCallback != null)
-                          widget.expansionCallback(cIndex, false);
-                        widgetOpenValue[cIndex] = false;
+                          widget.expansionCallback(childIndex, false);
+                        _widgetOpenMap[_widgetChild.value] = false;
                       }
                     }
-                    widgetOpenValue[index] =!isExpanded;
+                    _widgetOpenMap[_pressedChild.value] = !isExpanded;
                   }
                 });
               },
@@ -211,6 +289,8 @@ class _ExpansionPanelListState extends State<ExpansionPanelList> {
           ),
         ],
       );
+
+
 
       items.add(
         new MaterialSlice(
