@@ -348,8 +348,27 @@ class SemanticsData extends Diagnosticable {
   }
 
   @override
-  int get hashCode => ui.hashValues(flags, actions, label, value, increasedValue, decreasedValue, hint, textDirection, rect, tags, textSelection, scrollPosition, scrollExtentMax, scrollExtentMin, transform, customSemanticsActionIds);
-
+  int get hashCode {
+    return ui.hashValues(
+      flags,
+      actions,
+      label,
+      value,
+      increasedValue,
+      decreasedValue,
+      hint,
+      textDirection,
+      rect,
+      tags,
+      textSelection,
+      scrollPosition,
+      scrollExtentMax,
+      scrollExtentMin,
+      transform,
+      customSemanticsActionIds,
+    );
+  }
+  
   static bool _sortedListsEqual(List<int> left, List<int> right) {
     if (left == null && right == null)
       return true;

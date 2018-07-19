@@ -405,6 +405,46 @@ void main() {
     );
   });
 
+  test('Custom actions debug properties', () {
+    final SemanticsConfiguration configuration = new SemanticsConfiguration();
+    const CustomSemanticsAction action1 = const CustomSemanticsAction(label: 'action1');
+    const CustomSemanticsAction action2 = const CustomSemanticsAction(label: 'action2');
+    const CustomSemanticsAction action3 = const CustomSemanticsAction(label: 'action3');
+    configuration.customSemanticsActions = <CustomSemanticsAction, VoidCallback>{
+      action1: () {},
+      action2: () {},
+      action3: () {},
+    };
+    final SemanticsNode actionNode = new SemanticsNode();
+    actionNode.updateWith(config: configuration);
+
+    expect(
+      actionNode.toStringDeep(minLevel: DiagnosticLevel.hidden),
+      'SemanticsNode#1\n'
+      '   STALE\n'
+      '   owner: null\n'
+      '   isMergedIntoParent: false\n'
+      '   mergeAllDescendantsIntoThisNode: false\n'
+      '   Rect.fromLTRB(0.0, 0.0, 0.0, 0.0)\n'
+      '   actions: customAction\n'
+      '   customActions: action1, action2, action3\n'
+      '   flags: []\n'
+      '   invisible\n'
+      '   isHidden: false\n'
+      '   label: ""\n'
+      '   value: ""\n'
+      '   increasedValue: ""\n'
+      '   decreasedValue: ""\n'
+      '   hint: ""\n'
+      '   textDirection: null\n'
+      '   sortKey: null\n'
+      '   scrollExtentMin: null\n'
+      '   scrollPosition: null\n'
+      '   scrollExtentMax: null\n'
+    );
+
+  });
+
   test('SemanticsConfiguration getter/setter', () {
     final SemanticsConfiguration config = new SemanticsConfiguration();
     const CustomSemanticsAction customAction = const CustomSemanticsAction(label: 'test');
