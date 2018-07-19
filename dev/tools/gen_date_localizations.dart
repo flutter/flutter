@@ -18,11 +18,11 @@
 /// dart dev/tools/gen_date_localizations.dart
 /// ```
 ///
-/// If the data looks good, use the `-w` option to overwrite the
+/// If the data looks good, use the `--overwrite` option to overwrite the
 /// lib/src/l10n/date_localizations.dart file:
 ///
 /// ```
-/// dart dev/tools/gen_date_localizations.dart -w
+/// dart dev/tools/gen_date_localizations.dart --overwrite
 /// ```
 
 import 'dart:async';
