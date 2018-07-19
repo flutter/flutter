@@ -524,7 +524,7 @@ class MonthPicker extends StatefulWidget {
   _MonthPickerState createState() => new _MonthPickerState();
 }
 
-class _MonthPickerState extends State<MonthPicker> {
+class _MonthPickerState extends State<MonthPicker> with SingleTickerProviderStateMixin {
   @override
   void initState() {
     super.initState();
@@ -533,6 +533,17 @@ class _MonthPickerState extends State<MonthPicker> {
     _dayPickerController = new PageController(initialPage: monthPage);
     _handleMonthPageChanged(monthPage);
     _updateCurrentDate();
+
+    // Setup the fade animation for chevrons
+    _chevronOpacityController = new AnimationController(
+      duration: const Duration(milliseconds: 250), vsync: this
+    );
+    _chevronOpacityAnimation = new Tween<double>(begin: 1.0, end: 0.0).animate(
+      new CurvedAnimation(
+        parent: _chevronOpacityController,
+        curve: Curves.easeInOut,
+      )
+    );
   }
 
   @override
@@ -559,6 +570,8 @@ class _MonthPickerState extends State<MonthPicker> {
   DateTime _currentDisplayedMonthDate;
   Timer _timer;
   PageController _dayPickerController;
+  AnimationController _chevronOpacityController;
+  Animation<double> _chevronOpacityAnimation;
 
   void _updateCurrentDate() {
     _todayDate = new DateTime.now();
@@ -642,13 +655,25 @@ class _MonthPickerState extends State<MonthPicker> {
         children: <Widget>[
           new Semantics(
             sortKey: _MonthPickerSortKey.calendar,
-            child: new PageView.builder(
-              key: new ValueKey<DateTime>(widget.selectedDate),
-              controller: _dayPickerController,
-              scrollDirection: Axis.horizontal,
-              itemCount: _monthDelta(widget.firstDate, widget.lastDate) + 1,
-              itemBuilder: _buildItems,
-              onPageChanged: _handleMonthPageChanged,
+            child: new NotificationListener<ScrollStartNotification>(
+              onNotification: (_) {
+                _chevronOpacityController.forward();
+                return false;
+              },
+              child: new NotificationListener<ScrollEndNotification>(
+                onNotification: (_) {
+                  _chevronOpacityController.reverse();
+                  return false;
+                },
+                child: new PageView.builder(
+                  key: new ValueKey<DateTime>(widget.selectedDate),
+                  controller: _dayPickerController,
+                  scrollDirection: Axis.horizontal,
+                  itemCount: _monthDelta(widget.firstDate, widget.lastDate) + 1,
+                  itemBuilder: _buildItems,
+                  onPageChanged: _handleMonthPageChanged,
+                ),
+              ),
             ),
           ),
           new PositionedDirectional(
@@ -656,10 +681,13 @@ class _MonthPickerState extends State<MonthPicker> {
             start: 8.0,
             child: new Semantics(
               sortKey: _MonthPickerSortKey.previousMonth,
-              child: new IconButton(
-                icon: const Icon(Icons.chevron_left),
-                tooltip: _isDisplayingFirstMonth ? null : '${localizations.previousMonthTooltip} ${localizations.formatMonthYear(_previousMonthDate)}',
-                onPressed: _isDisplayingFirstMonth ? null : _handlePreviousMonth,
+              child: new FadeTransition(
+                opacity: _chevronOpacityAnimation,
+                child: new IconButton(
+                  icon: const Icon(Icons.chevron_left),
+                  tooltip: _isDisplayingFirstMonth ? null : '${localizations.previousMonthTooltip} ${localizations.formatMonthYear(_previousMonthDate)}',
+                  onPressed: _isDisplayingFirstMonth ? null : _handlePreviousMonth,
+                ),
               ),
             ),
           ),
@@ -668,10 +696,13 @@ class _MonthPickerState extends State<MonthPicker> {
             end: 8.0,
             child: new Semantics(
               sortKey: _MonthPickerSortKey.nextMonth,
-              child: new IconButton(
-                icon: const Icon(Icons.chevron_right),
-                tooltip: _isDisplayingLastMonth ? null : '${localizations.nextMonthTooltip} ${localizations.formatMonthYear(_nextMonthDate)}',
-                onPressed: _isDisplayingLastMonth ? null : _handleNextMonth,
+              child: new FadeTransition(
+                opacity: _chevronOpacityAnimation,
+                child: new IconButton(
+                  icon: const Icon(Icons.chevron_right),
+                  tooltip: _isDisplayingLastMonth ? null : '${localizations.nextMonthTooltip} ${localizations.formatMonthYear(_nextMonthDate)}',
+                  onPressed: _isDisplayingLastMonth ? null : _handleNextMonth,
+                ),
               ),
             ),
           ),

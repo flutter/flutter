@@ -344,5 +344,68 @@ void main() {
     semantics.dispose();
   });
 
+  testWidgets('extended FAB hero transitions succeed', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/18782
 
+    await tester.pumpWidget(
+      new MaterialApp(
+        home: new Scaffold(
+          floatingActionButton: new Builder(
+            builder: (BuildContext context) { // define context of Navigator.push()
+              return new FloatingActionButton.extended(
+                icon: const Icon(Icons.add),
+                label: const Text('A long FAB label'),
+                onPressed: () {
+                  Navigator.push(context, new MaterialPageRoute<void>(
+                    builder: (BuildContext context) {
+                      return new Scaffold(
+                        floatingActionButton: new FloatingActionButton.extended(
+                          icon: const Icon(Icons.add),
+                          label: const Text('X'),
+                          onPressed: () { },
+                        ),
+                        body: new Center(
+                          child: new RaisedButton(
+                            child: const Text('POP'),
+                            onPressed: () {
+                              Navigator.pop(context);
+                            },
+                          ),
+                        ),
+                      );
+                    },
+                  ));
+                },
+              );
+            },
+          ),
+          body: const Center(
+            child: const Text('Hello World'),
+          ),
+        ),
+      ),
+    );
+
+    final Finder longFAB = find.text('A long FAB label');
+    final Finder shortFAB = find.text('X');
+    final Finder helloWorld = find.text('Hello World');
+
+    expect(longFAB, findsOneWidget);
+    expect(shortFAB, findsNothing);
+    expect(helloWorld, findsOneWidget);
+
+    await tester.tap(longFAB);
+    await tester.pumpAndSettle();
+
+    expect(shortFAB, findsOneWidget);
+    expect(longFAB, findsNothing);
+
+    // Trigger a hero transition from shortFAB to longFAB.
+    await tester.tap(find.text('POP'));
+    await tester.pumpAndSettle();
+
+    expect(longFAB, findsOneWidget);
+    expect(shortFAB, findsNothing);
+    expect(helloWorld, findsOneWidget);
+  });
 }

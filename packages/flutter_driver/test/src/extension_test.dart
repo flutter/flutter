@@ -19,7 +19,7 @@ void main() {
 
     setUp(() {
       result = null;
-      extension = new FlutterDriverExtension((String message) async { log.add(message); return (messageId += 1).toString(); });
+      extension = new FlutterDriverExtension((String message) async { log.add(message); return (messageId += 1).toString(); }, false);
     });
 
     testWidgets('returns immediately when transient callback queue is empty', (WidgetTester tester) async {
@@ -74,7 +74,7 @@ void main() {
   group('getSemanticsId', () {
     FlutterDriverExtension extension;
     setUp(() {
-       extension = new FlutterDriverExtension((String arg) async {});
+      extension = new FlutterDriverExtension((String arg) async {}, true);
     });
 
     testWidgets('works when semantics are enabled', (WidgetTester tester) async {

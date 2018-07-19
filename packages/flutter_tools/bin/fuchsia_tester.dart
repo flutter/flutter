@@ -31,8 +31,8 @@ const List<String> _kRequiredOptions = const <String>[
 const String _kOptionCoverage = 'coverage';
 const String _kOptionCoveragePath = 'coverage-path';
 
-Future<Null> main(List<String> args) {
-  return runInContext<Null>(() => run(args), overrides: <Type, dynamic>{
+void main(List<String> args) {
+  runInContext<Null>(() => run(args), overrides: <Type, dynamic>{
     Usage: new DisabledUsage(),
   });
 }
@@ -113,4 +113,6 @@ Future<Null> run(List<String> args) async {
   } finally {
     tempDirectory.deleteSync(recursive: true);
   }
+  // Not sure why this is needed, but main() doesn't seem to exit on its own.
+  exit(exitCode);
 }

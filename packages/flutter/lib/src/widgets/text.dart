@@ -159,14 +159,10 @@ class DefaultTextStyle extends InheritedWidget {
 ///
 /// The [style] argument is optional. When omitted, the text will use the style
 /// from the closest enclosing [DefaultTextStyle]. If the given style's
-/// [TextStyle.inherit] property is true, the given style will be merged with
-/// the closest enclosing [DefaultTextStyle]. This merging behavior is useful,
-/// for example, to make the text bold while using the default font family and
-/// size.
-///
-/// Using the [new Text.rich] constructor, the [Text] widget can also be
-/// created with a [TextSpan] to display text that use multiple styles
-/// (e.g., a paragraph with some bold words).
+/// [TextStyle.inherit] property is true (the default), the given style will
+/// be merged with the closest enclosing [DefaultTextStyle]. This merging
+/// behavior is useful, for example, to make the text bold while using the
+/// default font family and size.
 ///
 /// ## Sample code
 ///
@@ -177,6 +173,25 @@ class DefaultTextStyle extends InheritedWidget {
 ///   overflow: TextOverflow.ellipsis,
 ///   style: new TextStyle(fontWeight: FontWeight.bold),
 /// )
+/// ```
+///
+/// Using the [Text.rich] constructor, the [Text] widget can
+/// display a paragraph with differently styled [TextSpan]s. The sample
+/// that follows displays "Hello beautiful world" with different styles
+/// for each word.
+///
+/// ## Sample code
+///
+/// ```dart
+/// const Text.rich(
+///   const TextSpan(
+///     text: 'Hello', // default text style
+///     children: const <TextSpan>[
+///       const TextSpan(text: ' beautiful ', style: const TextStyle(fontStyle: FontStyle.italic)),
+///       const TextSpan(text: 'world', style: const TextStyle(fontWeight: FontWeight.bold)),
+///     ],
+///   ),
+/// ),
 /// ```
 ///
 /// ## Interactivity

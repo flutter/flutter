@@ -64,7 +64,7 @@ class ScreenshotCommand extends FlutterCommand {
   Device device;
 
   @override
-  Future<Null> verifyThenRunCommand() async {
+  Future<FlutterCommandResult> verifyThenRunCommand() async {
     device = await findTargetDevice();
     if (device == null)
       throwToolExit('Must have a connected device');
