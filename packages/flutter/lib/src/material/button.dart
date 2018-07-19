@@ -196,16 +196,13 @@ class _RawMaterialButtonState extends State<RawMaterialButton> {
         ),
       ),
     );
-    double minWidth;
-    double minHeight;
+    Size minSize;
     switch (widget.materialTapTargetSize) {
       case MaterialTapTargetSize.padded:
-        minWidth = 48.0;
-        minHeight = 48.0;
+        minSize = const Size(48.0, 48.0);
         break;
       case MaterialTapTargetSize.shrinkWrap:
-        minWidth = 0.0;
-        minHeight = 0.0;
+        minSize = Size.zero;
         break;
     }
 
@@ -213,9 +210,8 @@ class _RawMaterialButtonState extends State<RawMaterialButton> {
       container: true,
       button: true,
       enabled: widget.enabled,
-      child: new _ButtonPadding(
-        minWidth: minWidth,
-        minHeight: minHeight,
+      child: new _InputPadding(
+        minSize: minSize,
         child: result,
       ),
     );
@@ -447,81 +443,68 @@ class MaterialButton extends StatelessWidget {
   }
 }
 
-/// Redirects the position passed to [RenderBox.hitTest] to the center of the
-/// widget if the child hit test would have failed otherwise.
-///
-/// The primary purpose of this widget is to allow padding around [Material] widgets
-/// to trigger the child ink feature without increasing the size of the material.
-class _ButtonPadding extends SingleChildRenderObjectWidget {
-  const _ButtonPadding({
+/// A widget to pad the area around a [MaterialButton]'s inner [Material].
+/// 
+/// Redirect taps that occur in the padded area around the child to the center 
+/// of the child. This increases the size of the button and the button's 
+/// "tap target", but not its material or its ink splashes.
+class _InputPadding extends SingleChildRenderObjectWidget {
+  const _InputPadding({
     Key key,
     Widget child,
-    this.minHeight,
-    this.minWidth,
+    this.minSize,
   }) : super(key: key, child: child);
 
-  final double minWidth;
-  final double minHeight;
+  final Size minSize;
 
   @override
   RenderObject createRenderObject(BuildContext context) {
-    return new _RenderButtonPadding(minWidth, minHeight);
+    return new _RenderInputPadding(minSize);
   }
 
   @override
-  void updateRenderObject(BuildContext context, covariant _RenderButtonPadding renderObject) {
-    renderObject
-      ..minHeight = minHeight
-      ..minWidth = minWidth;
+  void updateRenderObject(BuildContext context, covariant _RenderInputPadding renderObject) {
+    renderObject.minSize = minSize;
   }
 }
 
-class _RenderButtonPadding extends RenderShiftedBox {
-  _RenderButtonPadding(this._minWidth, this._minHeight, [RenderBox child]) : super(child) ;
+class _RenderInputPadding extends RenderShiftedBox {
+  _RenderInputPadding(this._minSize, [RenderBox child]) : super(child) ;
 
-  double get minWidth => _minWidth;
-  double _minWidth;
-  set minWidth(double value) {
-    if (_minWidth == value)
+  Size get minSize => _minSize;
+  Size _minSize;
+  set minSize(Size value) {
+    if (_minSize == value)
       return;
-    _minWidth = value;
-    markNeedsLayout();
-  }
-
-  double get minHeight => _minHeight;
-  double _minHeight;
-  set minHeight(double value) {
-    if (_minHeight == value)
-      return;
-    _minHeight = value;
+    _minSize = value;
     markNeedsLayout();
   }
 
   @override
   double computeMinIntrinsicWidth(double height) {
     if (child != null)
-      return math.max(child.computeMinIntrinsicWidth(height), minWidth);
+      return math.max(child.computeMinIntrinsicWidth(height), minSize.width);
     return 0.0;
   }
 
   @override
   double computeMinIntrinsicHeight(double width) {
     if (child != null)
-      return math.max(child.computeMaxIntrinsicHeight(width), minHeight);
+      return math.max(child.computeMinIntrinsicHeight(width), minSize.height);
     return 0.0;
   }
 
   @override
   double computeMaxIntrinsicWidth(double height) {
     if (child != null)
-      return math.max(child.computeMinIntrinsicWidth(height), minWidth);
+      return math.max(child.computeMaxIntrinsicWidth(height), minSize.width);
     return 0.0;
   }
 
   @override
   double computeMaxIntrinsicHeight(double width) {
     if (child != null)
-      return math.max(child.computeMaxIntrinsicHeight(width), minHeight);
+      return math.max(child.computeMaxIntrinsicHeight(width), minSize.height);
     return 0.0;
   }
 
@@ -529,7 +512,9 @@ class _RenderButtonPadding extends RenderShiftedBox {
   void performLayout() {
     if (child != null) {
       child.layout(constraints, parentUsesSize: true);
-      size = constraints.constrain(new Size(math.max(child.size.width, minWidth), math.max(child.size.height, minHeight)));
+      final double height = math.max(child.size.width, minSize.width);
+      final double width = math.max(child.size.height, minSize.height);
+      size = constraints.constrain(new Size(height, width));
       final BoxParentData childParentData = child.parentData;
       childParentData.offset = Alignment.center.alongOffset(size - child.size);
     } else {
@@ -538,25 +523,8 @@ class _RenderButtonPadding extends RenderShiftedBox {
   }
 
   @override
-  void paint(PaintingContext context, Offset offset) {
-    if (child != null) {
-      final BoxParentData childParentData = child.parentData;
-      context.paintChild(child, offset + childParentData.offset);
-    }
-  }
-
-  @override
-  void setupParentData(RenderObject child) {
-    child.parentData = new BoxParentData();
-  }
-
-  @override
   bool hitTest(HitTestResult result, {Offset position}) {
-    if (!size.contains(position) || child == null)
-      return false;
-    final BoxParentData childParentData = child.parentData;
-    if (child.hitTest(result, position: position - childParentData.offset))
-      return true;
-    return child.hitTest(result, position: child.size.center(Offset.zero));
+    return super.hitTest(result, position: position) || 
+      child.hitTest(result, position: child.size.center(Offset.zero));
   }
 }
