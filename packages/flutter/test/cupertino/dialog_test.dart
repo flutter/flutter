@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:io';
 import 'dart:math';
 
 import 'package:flutter/cupertino.dart';
@@ -41,22 +40,14 @@ void main() {
     );
 
     await tester.tap(find.text('Go'));
-
     await tester.pump();
-    await tester.pump(const Duration(seconds: 1));
 
     expect(didDelete, isFalse);
 
-    // The Render Object that lays out the action buttons contains a duplicate
-    // copy of those action buttons for layout calculations. Therefore, we need
-    // to specify that we want the first 'Delete' text we find.
     await tester.tap(find.text('Delete'));
+    await tester.pump();
 
     expect(didDelete, isTrue);
-
-    await tester.pump();
-    await tester.pump(const Duration(seconds: 1));
-
     expect(find.text('Delete'), findsNothing);
   });
 
@@ -70,7 +61,6 @@ void main() {
 
     expect(widget.style.color.red, greaterThan(widget.style.color.blue));
     expect(widget.style.color.alpha, lessThan(255));
-    sleep(const Duration(seconds: 5));
   });
 
   testWidgets('Dialog default action styles', (WidgetTester tester) async {
@@ -125,9 +115,7 @@ void main() {
     );
 
     await tester.tap(find.text('Go'));
-
     await tester.pump();
-    await tester.pump(const Duration(seconds: 1));
 
     expect(scrollController.offset, 0.0);
     scrollController.jumpTo(100.0);
@@ -135,7 +123,7 @@ void main() {
     // Set the scroll position back to zero.
     scrollController.jumpTo(0.0);
 
-    // Find the actual dialog box. The first decorated box is the popup barrier.
+    // Expect the modal dialog box to take all available height.
     expect(
       tester.getSize(
         find.byKey(const Key('cupertino_alert_dialog_modal'))
@@ -155,13 +143,12 @@ void main() {
 
   testWidgets('Button list is scrollable, has correct position with large text sizes.',
       (WidgetTester tester) async {
-    const double textScaleFactor = 3.0;
-    final ScrollController actionScrollController = new ScrollController(keepScrollOffset: true);
+    final ScrollController actionScrollController = new ScrollController();
     await tester.pumpWidget(
       createAppWithButtonThatLaunchesDialog(
         dialogBuilder: (BuildContext context) {
           return new MediaQuery(
-            data: MediaQuery.of(context).copyWith(textScaleFactor: textScaleFactor),
+            data: MediaQuery.of(context).copyWith(textScaleFactor: 3.0),
             child: new CupertinoAlertDialog(
               title: const Text('The title'),
               content: const Text('The content.'),
@@ -248,17 +235,17 @@ void main() {
 
     // Check that the title/message section is not displayed
     expect(actionScrollController.offset, 0.0);
-    expect(tester.getTopLeft(find.widgetWithText(CupertinoDialogAction, 'One').first).dy, equals(277.3333333333333));
+    expect(tester.getTopLeft(find.widgetWithText(CupertinoDialogAction, 'One')).dy, equals(277.3333333333333));
 
     // Check that the button's vertical size is the same.
-    expect(tester.getSize(find.widgetWithText(CupertinoDialogAction, 'One').first).height,
-        equals(tester.getSize(find.widgetWithText(CupertinoDialogAction, 'Two').first).height));
+    expect(tester.getSize(find.widgetWithText(CupertinoDialogAction, 'One')).height,
+        equals(tester.getSize(find.widgetWithText(CupertinoDialogAction, 'Two')).height));
   });
 
   testWidgets('Button section is empty, Title section is not empty.',
       (WidgetTester tester) async {
     const double textScaleFactor = 1.0;
-    final ScrollController scrollController = new ScrollController(keepScrollOffset: true);
+    final ScrollController scrollController = new ScrollController();
     await tester.pumpWidget(
       createAppWithButtonThatLaunchesDialog(
         dialogBuilder: (BuildContext context) {
@@ -315,7 +302,6 @@ void main() {
     );
 
     await tester.tap(find.text('Go'));
-
     await tester.pump();
 
     final RenderBox okButtonBox = findActionButtonRenderBoxByTitle(tester, 'OK');
@@ -352,7 +338,6 @@ void main() {
     );
 
     await tester.tap(find.text('Go'));
-
     await tester.pump();
 
     final RenderBox okButtonBox = findActionButtonRenderBoxByTitle(tester, 'OK');
@@ -399,7 +384,6 @@ void main() {
     );
 
     await tester.tap(find.text('Go'));
-
     await tester.pump();
 
     final RenderBox okButtonBox = findActionButtonRenderBoxByTitle(tester, 'OK');
@@ -445,7 +429,6 @@ void main() {
     );
 
     await tester.tap(find.text('Go'));
-
     await tester.pump();
 
     final RenderBox option1ButtonBox = findActionButtonRenderBoxByTitle(tester, 'Option 1');

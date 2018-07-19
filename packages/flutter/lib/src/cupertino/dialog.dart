@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:math';
+import 'dart:math' as math;
 import 'dart:ui' show ImageFilter;
 
 import 'package:flutter/foundation.dart';
@@ -57,13 +57,21 @@ const BoxDecoration _kCupertinoDialogBlurOverlayDecoration = const BoxDecoration
 );
 
 const double _kEdgePadding = 20.0;
-const double _kButtonHeight = 45.0;
+const double _kMinButtonHeight = 45.0;
 const double _kDialogCornerRadius = 12.0;
+const double _kDividerWidth = 1.0;
 
-// _kDialogColor is a translucent white that is painted on top of the blurred
-// backdrop.
+// Translucent white that is painted on top of the blurred backdrop as the
+// dialog's background color.
 const Color _kDialogColor = const Color(0xC0FFFFFF);
+
+// Translucent white that is painted on top of the blurred backdrop as the
+// background color of a pressed button.
 const Color _kDialogPressedColor = const Color(0x70FFFFFF);
+
+// Translucent white that is painted on top of the blurred backdrop in the
+// gap areas between the content section and actions section, as well as between
+// buttons.
 const Color _kButtonDividerColor = const Color(0x40FFFFFF);
 
 /// An iOS-style dialog.
@@ -242,7 +250,6 @@ class CupertinoAlertDialog extends StatelessWidget {
             child: new Container(
               decoration: _kCupertinoDialogBlurOverlayDecoration,
               child: new _CupertinoDialogRenderWidget(
-                isStacked: actions.length > 2,
                 children: <Widget>[
                   new BaseLayoutId<_CupertinoDialogRenderWidget, MultiChildLayoutParentData>(
                     id: _AlertDialogSections.actionsSection,
@@ -265,16 +272,11 @@ class CupertinoAlertDialog extends StatelessWidget {
 // iOS style layout policy widget for sizing an alert dialog's content section and
 // action button section.
 //
-// The sizing policy is partially determined by whether or not action buttons
-// are stacked vertically, or positioned horizontally. [isStacked] is used to
-// indicate whether or not the buttons should be stacked vertically.
-//
 // See [_RenderCupertinoDialog] for specific layout policy details.
 class _CupertinoDialogRenderWidget extends MultiChildRenderObjectWidget {
   _CupertinoDialogRenderWidget({
     Key key,
     @required List<Widget> children,
-    bool isStacked = false,
   }) : super(key: key, children: children);
 
   @override
@@ -314,7 +316,6 @@ class _RenderCupertinoDialog extends RenderBox
   _RenderCupertinoDialog({
     RenderBox contentSection,
     RenderBox actionsSection,
-    bool isStacked = false,
   }) {
     if (null != contentSection) {
       add(contentSection);
@@ -381,8 +382,6 @@ class _RenderCupertinoDialog extends RenderBox
 
     final double minActionsHeight = actions.getMinIntrinsicHeight(constraints.maxWidth);
 
-    final Size maxDialogSize = constraints.biggest;
-
     // Size alert dialog content.
     content.layout(
       constraints.deflate(new EdgeInsets.only(bottom: minActionsHeight)),
@@ -401,7 +400,7 @@ class _RenderCupertinoDialog extends RenderBox
     final double dialogHeight = contentSize.height + actionsSize.height;
 
     // Set our size now that layout calculations are complete.
-    size = new Size(maxDialogSize.width, dialogHeight);
+    size = new Size(_kCupertinoDialogWidth, dialogHeight);
 
     // Set the position of the actions box to sit at the bottom of the dialog.
     // The content box defaults to the top left, which is where we want it.
@@ -589,14 +588,14 @@ class _CupertinoAlertActionSectionState extends State<_CupertinoAlertActionSecti
     );
   }
 
-  Set<int> pressedButtons = new Set<int>();
+  final Set<int> _pressedButtons = new Set<int>();
 
   void onButtonDown(int index) {
-    setState(() => pressedButtons.add(index));
+    setState(() => _pressedButtons.add(index));
   }
 
   void onButtonUp(int index) {
-    setState(() => pressedButtons.remove(index));
+    setState(() => _pressedButtons.remove(index));
   }
 
   @override
@@ -618,8 +617,8 @@ class _CupertinoAlertActionSectionState extends State<_CupertinoAlertActionSecti
         controller: widget.scrollController,
         child: new _CupertinoDialogActionsRenderWidget(
           actionButtons: interactiveButtons,
-          pressedButtons: new Set<int>.from(pressedButtons),
-          dividerWidth: 1.0 / devicePixelRatio,
+          pressedButtons: new Set<int>.from(_pressedButtons),
+          dividerWidth: _kDividerWidth / devicePixelRatio,
         ),
       ),
     );
@@ -728,7 +727,7 @@ class CupertinoDialogAction extends StatelessWidget {
       behavior: HitTestBehavior.opaque,
       child: new ConstrainedBox(
         constraints: const BoxConstraints(
-          minHeight: _kButtonHeight,
+          minHeight: _kMinButtonHeight,
         ),
         child: new Container(
           alignment: Alignment.center,
@@ -929,7 +928,7 @@ class RenderCupertinoDialogActions extends RenderBox
       return firstChild.computeMinIntrinsicHeight(width) + dividerWidth;
     } else {
       final double perButtonWidth = (width - dividerWidth) / 2.0;
-      return max(
+      return math.max(
         firstChild.computeMinIntrinsicHeight(perButtonWidth) + dividerWidth,
         lastChild.computeMinIntrinsicHeight(perButtonWidth) + dividerWidth,
       );
@@ -971,7 +970,7 @@ class RenderCupertinoDialogActions extends RenderBox
         // The 2 buttons fit side by side so our max intrinsic height is equal
         // to the taller of the 2 buttons.
         final double perButtonWidth = (width - dividerWidth) / 2.0;
-        return max(
+        return math.max(
           firstChild.computeMaxIntrinsicHeight(perButtonWidth),
           lastChild.computeMaxIntrinsicHeight(perButtonWidth),
         ) + dividerWidth;
@@ -1048,7 +1047,7 @@ class RenderCupertinoDialogActions extends RenderBox
         // Calculate our size based on the button sizes.
         size = new Size(
           _kCupertinoDialogWidth,
-          max(
+          math.max(
             firstChild.size.height,
             lastChild.size.height,
           ) + dividerWidth,
@@ -1119,7 +1118,7 @@ class RenderCupertinoDialogActions extends RenderBox
           offset.dx + firstChild.size.width,
           offset.dy + horizontalDivider.height,
           dividerWidth,
-          max(
+          math.max(
             firstChild.size.height,
             lastChild.size.height,
           ),
