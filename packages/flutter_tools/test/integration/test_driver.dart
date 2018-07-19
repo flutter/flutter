@@ -20,10 +20,12 @@ import '../src/common.dart';
 const bool _printJsonAndStderr = false;
 const Duration defaultTimeout = const Duration(seconds: 20);
 const Duration appStartTimeout = const Duration(seconds: 60);
+const Duration quitTimeout = const Duration(seconds: 5);
 
 class FlutterTestDriver {
   Directory _projectFolder;
   Process _proc;
+  int _procPid;
   final StreamController<String> _stdout = new StreamController<String>.broadcast();
   final StreamController<String> _stderr = new StreamController<String>.broadcast();
   final StreamController<String> _allMessages = new StreamController<String>.broadcast();
@@ -62,6 +64,12 @@ class FlutterTestDriver {
     _stdout.stream.listen(_debugPrint);
     _stderr.stream.listen(_debugPrint);
 
+    // Stash the PID so that we can terminate the VM more reliably than using
+    // _proc.kill() (because _proc is a shell, because `flutter` is a shell
+    // script).
+    final Map<String, dynamic> connected = await _waitFor(event: 'daemon.connected');
+    _procPid = connected['params']['pid'];
+    
     // Set this up now, but we don't wait it yet. We want to make sure we don't
     // miss it while waiting for debugPort below.
     final Future<Map<String, dynamic>> started = _waitFor(event: 'app.started',
@@ -113,15 +121,37 @@ class FlutterTestDriver {
 
   Future<int> stop() async {
     if (vmService != null) {
-      await vmService.close();
+      _debugPrint('Closing VM service');
+      await vmService.close()
+          .timeout(quitTimeout,
+              onTimeout: () { _debugPrint('VM Service did not quit within $quitTimeout'); });
     }
     if (_currentRunningAppId != null) {
+      _debugPrint('Stopping app');
       await _sendRequest(
-          'app.stop',
-          <String, dynamic>{'appId': _currentRunningAppId}
+        'app.stop',
+        <String, dynamic>{'appId': _currentRunningAppId}
+      ).timeout(
+        quitTimeout,
+        onTimeout: () { _debugPrint('app.stop did not return within $quitTimeout'); }
       );
+      _currentRunningAppId = null;
     }
-    _currentRunningAppId = null;
+    _debugPrint('Waiting for process to end');
+    return _proc.exitCode.timeout(quitTimeout, onTimeout: _killGracefully);
+  }
+
+  Future<int> _killGracefully() async {
+    if (_procPid == null)
+      return -1;
+    _debugPrint('Sending SIGTERM to $_procPid..');
+    Process.killPid(_procPid);
+    return _proc.exitCode.timeout(quitTimeout, onTimeout: _killForcefully);
+  }
+
+  Future<int> _killForcefully() {
+    _debugPrint('Sending SIGKILL to $_procPid..');
+    Process.killPid(_procPid, ProcessSignal.SIGKILL);
     return _proc.exitCode;
   }
 
