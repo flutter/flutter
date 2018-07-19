@@ -3781,7 +3781,7 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
       markNeedsSemanticsUpdate();
   }
 
-  /// The handlers and supported [CustomAccessibilityAction] for this node.
+  /// The handlers and supported [CustomAccessibilityAction]s for this node.
   /// 
   /// These handlers are called whenever the user performs the associated
   /// custom accessibility action from a special platform menu. Providing any
