@@ -158,7 +158,7 @@ class FlutterDevice {
 
   Future<Null> resetAssetDirectory() async {
     final Uri deviceAssetsDirectoryUri = devFS.baseUri.resolveUri(
-        fs.path.toUri(getAssetBuildDirectory()));
+        fs.path.toUri(getAssetBuildDirectory(device.id)));
     assert(deviceAssetsDirectoryUri != null);
     await Future.wait(views.map(
       (FlutterView view) => view.setAssetDirectory(deviceAssetsDirectoryUri)
@@ -271,6 +271,7 @@ class FlutterDevice {
     final TargetPlatform targetPlatform = await device.targetPlatform;
     package = await getApplicationPackageForPlatform(
       targetPlatform,
+      device.id,
       applicationBinary: hotRunner.applicationBinary
     );
 
@@ -321,6 +322,7 @@ class FlutterDevice {
     final TargetPlatform targetPlatform = await device.targetPlatform;
     package = await getApplicationPackageForPlatform(
       targetPlatform,
+      device.id,
       applicationBinary: coldRunner.applicationBinary
     );
 
@@ -390,6 +392,7 @@ class FlutterDevice {
     int bytes = 0;
     try {
       bytes = await devFS.update(
+        device.id,
         mainPath: mainPath,
         target: target,
         bundle: bundle,

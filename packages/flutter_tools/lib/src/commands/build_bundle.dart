@@ -21,9 +21,9 @@ class BuildBundleCommand extends BuildSubCommand {
       ..addOption('asset-base', help: 'Ignored. Will be removed.', hide: !verboseHelp)
       ..addOption('manifest', defaultsTo: defaultManifestPath)
       ..addOption('private-key', defaultsTo: defaultPrivateKeyPath)
-      ..addOption('snapshot', defaultsTo: defaultSnapshotPath)
-      ..addOption('depfile', defaultsTo: defaultDepfilePath)
-      ..addOption('kernel-file', defaultsTo: defaultApplicationKernelPath)
+      ..addOption('snapshot', defaultsTo: getDefaultSnapshotPath(/* deviceId??? */))
+      ..addOption('depfile', defaultsTo: getDefaultDepfilePath(/* deviceId??? */))
+      ..addOption('kernel-file', defaultsTo: getDefaultApplicationKernelPath(/* deviceId??? */))
       ..addFlag('preview-dart-2',
         defaultsTo: true,
         hide: !verboseHelp,
@@ -51,7 +51,7 @@ class BuildBundleCommand extends BuildSubCommand {
         splitCommas: true,
         hide: true,
       )
-      ..addOption('asset-dir', defaultsTo: getAssetBuildDirectory())
+      ..addOption('asset-dir', defaultsTo: getAssetBuildDirectory(null))
       ..addFlag('report-licensed-packages',
         help: 'Whether to report the names of all the packages that are included '
               'in the application\'s LICENSE file.',

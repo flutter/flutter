@@ -262,11 +262,14 @@ HostPlatform getCurrentHostPlatform() {
 }
 
 /// Returns the top-level build output directory.
-String getBuildDirectory() {
+/// null is a valid device ID for the parent folder, but it's positional
+/// so that you have to explicitly pass it to avoid accidentally getting
+/// the global folder.
+String getBuildDirectory(String deviceId) {
   // TODO(johnmccutchan): Stop calling this function as part of setting
   // up command line argument processing.
   if (context == null || config == null)
-    return 'build';
+    return deviceId == null ? 'build' : fs.path.join('build', deviceId);
 
   final String buildDir = config.getValue('build-dir') ?? 'build';
   if (fs.path.isAbsolute(buildDir)) {
@@ -277,28 +280,28 @@ String getBuildDirectory() {
 }
 
 /// Returns the Android build output directory.
-String getAndroidBuildDirectory() {
+String getAndroidBuildDirectory(String deviceId) {
   // TODO(cbracken) move to android subdir.
-  return getBuildDirectory();
+  return getBuildDirectory(deviceId);
 }
 
 /// Returns the AOT build output directory.
 String getAotBuildDirectory() {
-  return fs.path.join(getBuildDirectory(), 'aot');
+  return fs.path.join(getBuildDirectory(null), 'aot');
 }
 
 /// Returns the asset build output directory.
-String getAssetBuildDirectory() {
-  return fs.path.join(getBuildDirectory(), 'flutter_assets');
+String getAssetBuildDirectory(String deviceId) {
+  return fs.path.join(getBuildDirectory(deviceId), 'flutter_assets');
 }
 
 /// Returns the iOS build output directory.
-String getIosBuildDirectory() {
-  return fs.path.join(getBuildDirectory(), 'ios');
+String getIosBuildDirectory(String deviceId) {
+  return fs.path.join(getBuildDirectory(deviceId), 'ios');
 }
 
 /// Returns directory used by incremental compiler (IKG - incremental kernel
 /// generator) to store cached intermediate state.
-String getIncrementalCompilerByteStoreDirectory() {
-  return fs.path.join(getBuildDirectory(), 'ikg_byte_store');
+String getIncrementalCompilerByteStoreDirectory(String deviceId) {
+  return fs.path.join(getBuildDirectory(deviceId), 'ikg_byte_store');
 }

@@ -34,7 +34,7 @@ class InstallCommand extends FlutterCommand {
 
   @override
   Future<Null> runCommand() async {
-    final ApplicationPackage package = await applicationPackages.getPackageForPlatform(await device.targetPlatform);
+    final ApplicationPackage package = await applicationPackages.getPackageForPlatform(await device.targetPlatform, device.id);
 
     Cache.releaseLockEarly();
 

@@ -249,7 +249,7 @@ Future<XcodeBuildResult> buildXcodeProject({
     // If the Xcode project, Podfile, or Generated.xcconfig have changed since
     // last run, pods should be updated.
     final Fingerprinter fingerprinter = new Fingerprinter(
-      fingerprintPath: fs.path.join(getIosBuildDirectory(), 'pod_inputs.fingerprint'),
+      fingerprintPath: fs.path.join(getIosBuildDirectory(/* deviceId??? */), 'pod_inputs.fingerprint'),
       paths: <String>[
         _getPbxProjPath(app.appDirectory),
         fs.path.join(iosPath, 'Podfile'),
@@ -297,7 +297,7 @@ Future<XcodeBuildResult> buildXcodeProject({
       buildCommands.addAll(<String>[
         '-workspace', fs.path.basename(entity.path),
         '-scheme', scheme,
-        'BUILD_DIR=${fs.path.absolute(getIosBuildDirectory())}',
+        'BUILD_DIR=${fs.path.absolute(getIosBuildDirectory(/* deviceId??? */))}',
       ]);
       break;
     }

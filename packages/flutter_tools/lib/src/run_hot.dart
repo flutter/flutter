@@ -383,7 +383,7 @@ class HotRunner extends ResidentRunner {
         fs.path.toUri(entryUri));
       final Uri devicePackagesUri = device.devFS.baseUri.resolve('.packages');
       final Uri deviceAssetsDirectoryUri = device.devFS.baseUri.resolveUri(
-        fs.path.toUri(getAssetBuildDirectory()));
+        fs.path.toUri(getAssetBuildDirectory(device.device.id)));
       await _launchInView(device,
                           deviceEntryUri,
                           devicePackagesUri,

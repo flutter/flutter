@@ -220,7 +220,7 @@ class IOSSimulator extends Device {
   Future<bool> installApp(ApplicationPackage app) async {
     try {
       final IOSApp iosApp = app;
-      await SimControl.instance.install(id, iosApp.simulatorBundlePath);
+      await SimControl.instance.install(id, iosApp.getSimulatorBundlePath(id));
       return true;
     } catch (e) {
       return false;
@@ -376,7 +376,7 @@ class IOSSimulator extends Device {
 
     // Step 2: Assert that the Xcode project was successfully built.
     final IOSApp iosApp = app;
-    final Directory bundle = fs.directory(iosApp.simulatorBundlePath);
+    final Directory bundle = fs.directory(iosApp.getSimulatorBundlePath(id));
     final bool bundleExists = bundle.existsSync();
     if (!bundleExists)
       throwToolExit('Could not find the built application bundle at ${bundle.path}.');

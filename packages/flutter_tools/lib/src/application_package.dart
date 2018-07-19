@@ -89,7 +89,7 @@ class AndroidApk extends ApplicationPackage {
   }
 
   /// Creates a new AndroidApk based on the information in the Android manifest.
-  static Future<AndroidApk> fromCurrentDirectory() async {
+  static Future<AndroidApk> fromCurrentDirectory(String deviceId) async {
     String manifestPath;
     String apkPath;
 
@@ -106,7 +106,7 @@ class AndroidApk extends ApplicationPackage {
       manifestPath = gradleManifestPath;
     } else {
       manifestPath = fs.path.join('android', 'AndroidManifest.xml');
-      apkPath = fs.path.join(getAndroidBuildDirectory(), 'app.apk');
+      apkPath = fs.path.join(getAndroidBuildDirectory(deviceId), 'app.apk');
     }
 
     if (!fs.isFileSync(manifestPath))
@@ -243,9 +243,9 @@ abstract class IOSApp extends ApplicationPackage {
   @override
   String get displayName => id;
 
-  String get simulatorBundlePath;
+  String getSimulatorBundlePath(String deviceId);
 
-  String get deviceBundlePath;
+  String getDeviceBundlePath(String deviceId);
 }
 
 class BuildableIOSApp extends IOSApp {
@@ -270,16 +270,16 @@ class BuildableIOSApp extends IOSApp {
   String get name => kBundleName;
 
   @override
-  String get simulatorBundlePath => _buildAppPath('iphonesimulator');
+  String getSimulatorBundlePath(String deviceId) => _buildAppPath('iphonesimulator', deviceId);
 
   @override
-  String get deviceBundlePath => _buildAppPath('iphoneos');
+  String getDeviceBundlePath(String deviceId) => _buildAppPath('iphoneos', deviceId);
 
   /// True if the app is built from a Swift project. Null if unknown.
   bool get isSwift => buildSettings?.containsKey('SWIFT_VERSION');
 
-  String _buildAppPath(String type) {
-    return fs.path.join(getIosBuildDirectory(), type, kBundleName);
+  String _buildAppPath(String type, String deviceId) {
+    return fs.path.join(getIosBuildDirectory(deviceId), type, kBundleName);
   }
 }
 
@@ -297,15 +297,16 @@ class PrebuiltIOSApp extends IOSApp {
   String get name => bundleName;
 
   @override
-  String get simulatorBundlePath => _bundlePath;
+  String getSimulatorBundlePath(String deviceId) => _bundlePath deviceId /*** !!! Didn't use deviceId !!! ***/;
 
   @override
-  String get deviceBundlePath => _bundlePath;
+  String getDeviceBundlePath(String deviceId) => _bundlePath deviceId /*** !!! Didn't use deviceId !!! ***/;
 
   String get _bundlePath => bundleDir.path;
 }
 
-Future<ApplicationPackage> getApplicationPackageForPlatform(TargetPlatform platform, {
+Future<ApplicationPackage> getApplicationPackageForPlatform(TargetPlatform platform,
+  String deviceId, {
   String applicationBinary
 }) async {
   switch (platform) {
@@ -314,7 +315,7 @@ Future<ApplicationPackage> getApplicationPackageForPlatform(TargetPlatform platf
     case TargetPlatform.android_x64:
     case TargetPlatform.android_x86:
       return applicationBinary == null
-          ? await AndroidApk.fromCurrentDirectory()
+          ? await AndroidApk.fromCurrentDirectory(deviceId)
           : new AndroidApk.fromApk(applicationBinary);
     case TargetPlatform.ios:
       return applicationBinary == null
@@ -338,13 +339,13 @@ class ApplicationPackageStore {
 
   ApplicationPackageStore({ this.android, this.iOS });
 
-  Future<ApplicationPackage> getPackageForPlatform(TargetPlatform platform) async {
+  Future<ApplicationPackage> getPackageForPlatform(TargetPlatform platform, String deviceId) async {
     switch (platform) {
       case TargetPlatform.android_arm:
       case TargetPlatform.android_arm64:
       case TargetPlatform.android_x64:
       case TargetPlatform.android_x86:
-        android ??= await AndroidApk.fromCurrentDirectory();
+        android ??= await AndroidApk.fromCurrentDirectory(deviceId);
         return android;
       case TargetPlatform.ios:
         iOS ??= new IOSApp.fromCurrentDirectory();
