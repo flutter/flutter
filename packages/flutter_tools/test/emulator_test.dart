@@ -10,6 +10,8 @@ import 'package:flutter_tools/src/android/android_sdk.dart';
 import 'package:flutter_tools/src/base/config.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/emulator.dart';
+import 'package:flutter_tools/src/ios/ios_emulators.dart';
+import 'package:flutter_tools/src/ios/mac.dart';
 import 'package:mockito/mockito.dart';
 import 'package:process/process.dart';
 import 'package:test/test.dart';
@@ -21,11 +23,13 @@ void main() {
   MockProcessManager mockProcessManager;
   MockConfig mockConfig;
   MockAndroidSdk mockSdk;
+  MockXcode mockXcode;
 
   setUp(() {
     mockProcessManager = new MockProcessManager();
     mockConfig = new MockConfig();
     mockSdk = new MockAndroidSdk();
+    mockXcode = new MockXcode();
 
     when(mockSdk.avdManagerPath).thenReturn('avdmanager');
     when(mockSdk.emulatorPath).thenReturn('emulator');
@@ -119,6 +123,30 @@ void main() {
       ProcessManager: () => mockProcessManager,
       Config: () => mockConfig,
       AndroidSdk: () => mockSdk,
+    });
+  });
+
+  group('ios_emulators', () {
+    bool didAttemptToRunSimulator = false;
+    setUp(() {
+      when(mockXcode.xcodeSelectPath).thenReturn('/fake/Xcode.app/Contents/Developer');
+      when(mockXcode.getSimulatorPath()).thenAnswer((_) => '/fake/simulator.app');
+      when(mockProcessManager.run(any)).thenAnswer((Invocation invocation) async {
+        final List<String> args = invocation.positionalArguments[0];
+        if (args.length >= 3 && args[0] == 'open' && args[1] == '-a' && args[2] == '/fake/simulator.app') {
+          didAttemptToRunSimulator = true;
+        }
+        return new ProcessResult(101, 0, '', '');
+      });
+    });
+    testUsingContext('runs correct launch commands', () async {
+      final Emulator emulator = new IOSEmulator('ios');
+      await emulator.launch();
+      expect(didAttemptToRunSimulator, equals(true));
+    }, overrides: <Type, Generator>{
+      ProcessManager: () => mockProcessManager,
+      Config: () => mockConfig,
+      Xcode: () => mockXcode,
     });
   });
 }
@@ -230,3 +258,5 @@ class MockProcessManager extends Mock implements ProcessManager {
     throw new ProcessException('emulator', args);
   }
 }
+
+class MockXcode extends Mock implements Xcode {}

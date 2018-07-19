@@ -168,6 +168,26 @@ void main() {
     debugResetSemanticsIdCounter();
   });
 
+  testWidgets('TextField passes onEditingComplete to EditableText', (WidgetTester tester) async {
+    final VoidCallback onEditingComplete = () {};
+
+    await tester.pumpWidget(
+      new MaterialApp(
+        home: new Material(
+          child: new TextField(
+            onEditingComplete: onEditingComplete,
+          ),
+        ),
+      ),
+    );
+
+    final Finder editableTextFinder = find.byType(EditableText);
+    expect(editableTextFinder, findsOneWidget);
+
+    final EditableText editableTextWidget = tester.widget(editableTextFinder);
+    expect(editableTextWidget.onEditingComplete, onEditingComplete);
+  });
+
   testWidgets('TextField has consistent size', (WidgetTester tester) async {
     final Key textFieldKey = new UniqueKey();
     String textFieldValue;
