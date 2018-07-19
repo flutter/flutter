@@ -354,6 +354,13 @@ class _ReorderableListContentState extends State<_ReorderableListContent> with T
         axis: widget.scrollDirection,
         data: toWrap.key,
         ignoringFeedbackSemantics: false,
+        // Treat the center of the child widget as the point to test in each
+        // DragTarget. This makes the reorder operation happen when two list
+        // items overlap instead of when one is below the other.
+        feedbackOffset: new Offset(
+          widget.scrollDirection == Axis.horizontal ? _dropAreaExtent / 2.0 : 0.0,
+          widget.scrollDirection == Axis.vertical ? _dropAreaExtent / 2.0 : 0.0,
+        ),
         feedback: new Container(
           alignment: Alignment.topLeft,
           // These constraints will limit the cross axis of the drawn widget.
