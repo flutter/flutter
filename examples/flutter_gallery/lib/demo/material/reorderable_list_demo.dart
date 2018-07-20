@@ -55,52 +55,50 @@ class _ListDemoState extends State<ReorderableListDemo> {
   }
 
   void _showConfigurationSheet() {
-    final PersistentBottomSheetController<Null> bottomSheet = scaffoldKey.currentState.showBottomSheet((BuildContext bottomSheetContext) {
-      return new DecoratedBox(
-        decoration: const BoxDecoration(
-          border: const Border(top: const BorderSide(color: Colors.black26)),
-        ),
-        child: new ListView(
-          shrinkWrap: true,
-          primary: false,
-          children: <Widget>[
-            new RadioListTile<_ReorderableListType>(
-              dense: true,
-              title: const Text('Horizontal Avatars'),
-              value:_ReorderableListType.horizontalAvatar,
-              groupValue: _itemType,
-              onChanged: changeItemType,
-            ),
-            new RadioListTile<_ReorderableListType>(
-              dense: true,
-              title: const Text('Vertical Avatars'),
-              value: _ReorderableListType.verticalAvatar,
-              groupValue: _itemType,
-              onChanged: changeItemType,
-            ),
-            new RadioListTile<_ReorderableListType>(
-              dense: true,
-              title: const Text('Three-line'),
-              value: _ReorderableListType.threeLine,
-              groupValue: _itemType,
-              onChanged: changeItemType,
-            ),
-          ],
-        ),
-      );
-    });
-
     setState(() {
-      _bottomSheet = bottomSheet;
-    });
+      _bottomSheet = scaffoldKey.currentState.showBottomSheet((BuildContext bottomSheetContext) {
+        return new DecoratedBox(
+          decoration: const BoxDecoration(
+            border: const Border(top: const BorderSide(color: Colors.black26)),
+          ),
+          child: new ListView(
+            shrinkWrap: true,
+            primary: false,
+            children: <Widget>[
+              new RadioListTile<_ReorderableListType>(
+                dense: true,
+                title: const Text('Horizontal Avatars'),
+                value: _ReorderableListType.horizontalAvatar,
+                groupValue: _itemType,
+                onChanged: changeItemType,
+              ),
+              new RadioListTile<_ReorderableListType>(
+                dense: true,
+                title: const Text('Vertical Avatars'),
+                value: _ReorderableListType.verticalAvatar,
+                groupValue: _itemType,
+                onChanged: changeItemType,
+              ),
+              new RadioListTile<_ReorderableListType>(
+                dense: true,
+                title: const Text('Three-line'),
+                value: _ReorderableListType.threeLine,
+                groupValue: _itemType,
+                onChanged: changeItemType,
+              ),
+            ],
+          ),
+        );
+      });
 
-    // Garbage collect the bottom sheet when it closes.
-    bottomSheet.closed.whenComplete(() {
-      if (mounted) {
-        setState(() {
-          _bottomSheet = null;
-        });
-      }
+      // Garbage collect the bottom sheet when it closes.
+      _bottomSheet.closed.whenComplete(() {
+        if (mounted) {
+          setState(() {
+            _bottomSheet = null;
+          });
+        }
+      });
     });
   }
 
