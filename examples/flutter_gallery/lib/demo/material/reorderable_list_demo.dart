@@ -48,8 +48,10 @@ class _ListDemoState extends State<ReorderableListDemo> {
     setState(() {
       _itemType = type;
     });
+    // Rebuild the bottom sheet to reflect the selected list view.
     _bottomSheet?.setState(() { });
-    _bottomSheet.close();
+    // Close the bottom sheet to give the user a clear view of the list.
+    _bottomSheet?.close();
   }
 
   void _showConfigurationSheet() {
