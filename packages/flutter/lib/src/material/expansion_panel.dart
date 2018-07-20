@@ -89,17 +89,18 @@ class ExpansionPanel {
 
 }
 
-///An extension of the expansion panel class that allows for radio functionality.
+/// An expansion panel that allows for radio-like functionality.
 ///
-///This type of panel will automatically handle closing and opening itself, so
-///setting the [isExpanded] value on these panels will have no effect. A unique
-///identifier [value] must be assigned to each panel.
+/// This type of panel will automatically handle closing and opening itself,
+/// set the [initializesExpanded] value to true on a panel if you want it to begin
+/// opened when the expansion panel list is created. A unique identifier [value]
+/// must be assigned to each panel.
 class ExpansionPanelRadio extends ExpansionPanel {
 
-  ///A subclass of expansion panel that allows for radio functionality.
+  /// A subclass of expansion panel that allows for radio functionality.
   ///
-  ///A key must be passed into the constructor. The [headerBuilder], [body],
-  /// and [isExpanded] arguments must not be null.
+  /// A unique identifier [value] must be passed into the constructor. The
+  /// [headerBuilder], [body], [value], and [initializesExpanded] arguments must not be null.
   ExpansionPanelRadio({
     this.initializesExpanded = false,
     @required this.value,
@@ -109,10 +110,10 @@ class ExpansionPanelRadio extends ExpansionPanel {
        assert(value != null),
        super(body: body, headerBuilder: headerBuilder);
 
-  ///Whether this panel initializes expanded or not.
+  /// Whether this panel initializes expanded or not.
   final bool initializesExpanded;
 
-  ///Identifier that corresponds to this specific object.
+  /// Identifier that corresponds to this specific object.
   final int value;
 }
 
@@ -138,12 +139,13 @@ class ExpansionPanelList extends StatefulWidget {
        _allowMultiplePanelsOpen = true,
        super(key: key);
 
-  /// Creates a radio expansion panel list widget. This widget allows for at most
-  /// one panel in the list to be open. The expansion panel callback is
-  /// triggered when an expansion panel expand/collapse button is pushed.
+  /// Creates a radio expansion panel list widget.
   ///
-  /// The [children] and [animationDuration] arguments must not be null. The
-  /// [children] objects also must of type [ExpansionPanelRadio].
+  /// This widget allows for at most one panel in the list to be open.
+  /// The expansion panel callback is triggered when an expansion panel
+  /// expand/collapse button is pushed. The [children] and [animationDuration]
+  /// arguments must not be null. The [children] objects also must of type
+  /// [ExpansionPanelRadio].
   const ExpansionPanelList.radio({
     Key key,
     this.children = const <ExpansionPanelRadio>[],
@@ -178,23 +180,20 @@ class ExpansionPanelList extends StatefulWidget {
 }
 
 class _ExpansionPanelListState extends State<ExpansionPanelList> {
-  Map<int, bool> _widgetOpenMap;
+  Map<int, bool> _openPanels = <int, bool>{};
 
   @override
   void initState() {
     super.initState();
-
     if (!widget._allowMultiplePanelsOpen) {
-      _widgetOpenMap = <int, bool>{};
-
       for (int i = 0; i < widget.children.length; i += 1) {
         assert(widget.children[i] is ExpansionPanelRadio,
                'All children of ExpansionPanel.radio need to be of type ExpansionPanelRadio');
         final ExpansionPanelRadio _widgetChild = widget.children[i];
-        _widgetOpenMap[_widgetChild.value] = _widgetChild.initializesExpanded;
+        _openPanels[_widgetChild.value] = _widgetChild.initializesExpanded;
       }
 
-      assert(_debugCheckExpandLimit(_widgetOpenMap),
+      assert(_debugCheckExpandLimit(),
              'This expansion panel widget initialized with more than one panel open');
     }
   }
@@ -208,22 +207,23 @@ class _ExpansionPanelListState extends State<ExpansionPanelList> {
       for (int i = 0; i < widget.children.length; i += 1) {
         final ExpansionPanelRadio child = widget.children[i];
         final int childKey = child.value;
-        newMap[childKey] = _widgetOpenMap[childKey] ?? child.initializesExpanded;
+        newMap[childKey] = _openPanels[childKey] ?? child.initializesExpanded;
 
         assert(widget.children[i] is ExpansionPanelRadio,
         'All children of ExpansionPanel.radio need to be of type ExpansionPanelRadio');
       }
-      _widgetOpenMap = newMap;
-      assert(_debugCheckExpandLimit(_widgetOpenMap),
+      _openPanels = newMap;
+      assert(_debugCheckExpandLimit(),
              'This expansion panel widget initialized with more than one panel open');
     }
   }
 
-  //Used for initializing the radio type list.
-  //Checks whether more than one panel is set to expanded.
-  bool _debugCheckExpandLimit(Map<int, bool> childExpansionValues) {
+  // Used for initializing the radio type list.
+  // Checks whether more than one panel is set to expanded when the radio expansion
+  // panel is used.
+  bool _debugCheckExpandLimit() {
     int openPanels = 0;
-    for (bool value in childExpansionValues.values) {
+    for (bool value in _openPanels.values) {
       if (value)
         openPanels += 1;
     }
@@ -233,9 +233,8 @@ class _ExpansionPanelListState extends State<ExpansionPanelList> {
   bool _isChildExpanded(int index) {
     if (!widget._allowMultiplePanelsOpen) {
       final ExpansionPanelRadio radioWidget = widget.children[index];
-      return _widgetOpenMap[radioWidget.value];
+      return _openPanels[radioWidget.value];
     }
-
     return widget.children[index].isExpanded;
   }
 
@@ -252,10 +251,10 @@ class _ExpansionPanelListState extends State<ExpansionPanelList> {
           if (childIndex != index && !child.isExpanded) {
             if (widget.expansionCallback != null)
               widget.expansionCallback(childIndex, false);
-            _widgetOpenMap[child.value] = false;
+            _openPanels[child.value] = false;
           }
         }
-        _widgetOpenMap[pressedChild.value] = !isExpanded;
+        _openPanels[pressedChild.value] = !isExpanded;
       }
     setState((){});
   }
@@ -286,7 +285,7 @@ class _ExpansionPanelListState extends State<ExpansionPanelList> {
                 child: widget.children[index].headerBuilder(
                   context,
                   widget._allowMultiplePanelsOpen ? widget.children[index].isExpanded :
-                                                   _widgetOpenMap[_widgetChild.value],
+                                                   _openPanels[_widgetChild.value],
                 ),
               ),
             ),
