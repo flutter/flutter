@@ -77,8 +77,6 @@ source_set("fml") {
       "platform/darwin/paths_darwin.mm",
       "platform/darwin/platform_version.h",
       "platform/darwin/platform_version.mm",
-      "platform/darwin/resource_mapping_darwin.h",
-      "platform/darwin/resource_mapping_darwin.mm",
       "platform/darwin/scoped_block.h",
       "platform/darwin/scoped_block.mm",
       "platform/darwin/scoped_nsobject.h",

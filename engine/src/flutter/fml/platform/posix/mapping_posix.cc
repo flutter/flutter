@@ -15,30 +15,11 @@
 #include "flutter/fml/eintr_wrapper.h"
 #include "flutter/fml/unique_fd.h"
 
-#if OS_MACOSX
-
-#include "flutter/fml/platform/darwin/resource_mapping_darwin.h"
-using PlatformResourceMapping = fml::ResourceMappingDarwin;
-
-#else
-
-using PlatformResourceMapping = fml::FileMapping;
-
-#endif
-
 namespace fml {
 
 Mapping::Mapping() = default;
 
 Mapping::~Mapping() = default;
-
-bool PlatformHasResourcesBundle() {
-  return !std::is_same<PlatformResourceMapping, FileMapping>::value;
-}
-
-std::unique_ptr<Mapping> GetResourceMapping(const std::string& resource_name) {
-  return std::make_unique<PlatformResourceMapping>(resource_name);
-}
 
 FileMapping::FileMapping(const std::string& path, bool executable)
     : FileMapping(

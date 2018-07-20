@@ -13,21 +13,11 @@
 #include "flutter/fml/file.h"
 #include "flutter/fml/platform/win/wstring_conversion.h"
 
-using PlatformResourceMapping = fml::FileMapping;
-
 namespace fml {
 
 Mapping::Mapping() = default;
 
 Mapping::~Mapping() = default;
-
-bool PlatformHasResourcesBundle() {
-  return !std::is_same<PlatformResourceMapping, FileMapping>::value;
-}
-
-std::unique_ptr<Mapping> GetResourceMapping(const std::string& resource_name) {
-  return std::make_unique<PlatformResourceMapping>(resource_name);
-}
 
 FileMapping::FileMapping(const std::string& path, bool executable)
     : FileMapping(OpenFile(path.c_str(),
