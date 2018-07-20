@@ -13,8 +13,15 @@ import 'framework.dart';
 /// Embedding Android views is an expensive operation and should be avoided when a Flutter
 /// equivalent is possible.
 ///
+/// The embedded Android view is painted just like any other Flutter widget and transformations
+/// apply to it as well.
+///
+/// The widget fill all available space, the parent of this object must provide bounded layout
+/// constraints.
+///
 /// The Android view object is created using a [PlatformViewFactory](/javadoc/io/flutter/plugin/platform/PlatformViewFactory.html).
 /// Plugins can register platform view factories with [PlatformViewRegistry#registerViewFactory](/javadoc/io/flutter/plugin/platform/PlatformViewRegistry.html#registerViewFactory-java.lang.String-io.flutter.plugin.platform.PlatformViewFactory-).
+///
 /// Registration is typically done in the plugin's registerWith method, e.g:
 ///
 /// ```java
@@ -23,9 +30,12 @@ import 'framework.dart';
 ///   }
 /// ```
 ///
-/// The Android view lifetime is the same as the lifetime of the [State] object for this widget.
+/// The Android view's lifetime is the same as the lifetime of the [State] object for this widget.
 /// When the [State] is disposed the platform view (and auxiliary resources) are lazily
 /// released (some resources are immediately released and some by platform garbage collector).
+/// A stateful widget's state is disposed the the widget is removed from the tree or when it is
+/// moved within the tree. If the stateful widget has a key and it's only moved relative to its siblings,
+/// or it has a [GlobalKey] and it's moved within the tree, it will not be disposed.
 class AndroidView extends StatefulWidget {
   /// Creates a widget that embeds an Android view.
   ///
@@ -54,12 +64,12 @@ class AndroidView extends StatefulWidget {
 }
 
 class _AndroidViewState extends State<AndroidView> {
-  int id;
-  AndroidViewController controller;
+  int _id;
+  AndroidViewController _controller;
 
   @override
   Widget build(BuildContext context) {
-    return new _AndroidPlatformView(controller: controller);
+    return new _AndroidPlatformView(controller: _controller);
   }
 
   @override
@@ -73,20 +83,20 @@ class _AndroidViewState extends State<AndroidView> {
     super.didUpdateWidget(oldWidget);
     if (widget.viewType == oldWidget.viewType)
       return;
-    controller.dispose();
+    _controller.dispose();
     _createNewAndroidView();
   }
 
   @override
   void dispose() {
-    controller.dispose();
+    _controller.dispose();
     super.dispose();
   }
 
   void _createNewAndroidView() {
-    id = platformViewsRegistry.getNextPlatformViewId();
-    controller = PlatformViewsService.initAndroidView(
-        id: id,
+    _id = platformViewsRegistry.getNextPlatformViewId();
+    _controller = PlatformViewsService.initAndroidView(
+        id: _id,
         viewType: widget.viewType,
         onPlatformViewCreated: widget.onPlatformViewCreated
     );

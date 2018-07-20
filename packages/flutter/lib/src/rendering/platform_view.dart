@@ -21,10 +21,13 @@ enum _PlatformViewState {
 
 /// A render object for an Android view.
 ///
-/// [RenderAndroidView] is responsible for sizing and displaying the Android view.
+/// [RenderAndroidView] is responsible for sizing and displaying an Android [View](https://developer.android.com/reference/android/view/View).
+///
+/// The render object's layout behavior is to fill all available space, the parent of this object must
+/// provide bounded layout constraints
 ///
 /// See also:
-///  * [AndroidView] which is a widget that is typically used to show an Android view.
+///  * [AndroidView] which is a widget that is used to show an Android view.
 ///  * [PlatformViewsService] which is a service for controlling platform views.
 class RenderAndroidView extends RenderBox {
 
@@ -76,7 +79,7 @@ class RenderAndroidView extends RenderBox {
       await _viewController.setSize(size);
       // We've resized the platform view to targetSize, but it is possible that
       // while we were resizing the render object's size was changed again.
-      // In that case we will re-iterate to resize the platform view again.
+      // In that case we will resize the platform view again.
     } while (size != targetSize);
 
     _state = _PlatformViewState.ready;
@@ -89,7 +92,7 @@ class RenderAndroidView extends RenderBox {
       return;
 
     context.addLayer(new TextureLayer(
-      rect: new Rect.fromLTWH(offset.dx, offset.dy, size.width, size.height),
+      rect: offset & size,
       textureId: _viewController.textureId,
     ));
   }
