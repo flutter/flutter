@@ -13,6 +13,7 @@
 #include "flutter/flow/texture.h"
 #include "flutter/fml/memory/thread_checker.h"
 #include "flutter/fml/memory/weak_ptr.h"
+#include "flutter/fml/synchronization/waitable_event.h"
 #include "flutter/fml/thread.h"
 #include "flutter/lib/ui/semantics/custom_accessibility_action.h"
 #include "flutter/lib/ui/semantics/semantics_node.h"
@@ -31,7 +32,6 @@
 #include "lib/fxl/strings/string_view.h"
 #include "lib/fxl/synchronization/thread_annotations.h"
 #include "lib/fxl/synchronization/thread_checker.h"
-#include "lib/fxl/synchronization/waitable_event.h"
 
 namespace shell {
 

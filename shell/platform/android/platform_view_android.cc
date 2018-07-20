@@ -7,13 +7,13 @@
 #include <memory>
 #include <utility>
 
+#include "flutter/fml/synchronization/waitable_event.h"
 #include "flutter/shell/common/io_manager.h"
 #include "flutter/shell/platform/android/android_external_texture_gl.h"
 #include "flutter/shell/platform/android/android_surface_gl.h"
 #include "flutter/shell/platform/android/platform_message_response_android.h"
 #include "flutter/shell/platform/android/platform_view_android_jni.h"
 #include "flutter/shell/platform/android/vsync_waiter_android.h"
-#include "lib/fxl/synchronization/waitable_event.h"
 
 namespace shell {
 
@@ -45,7 +45,7 @@ void PlatformViewAndroid::NotifyDestroyed() {
 }
 
 void PlatformViewAndroid::NotifyChanged(const SkISize& size) {
-  fxl::AutoResetWaitableEvent latch;
+  fml::AutoResetWaitableEvent latch;
   fml::TaskRunner::RunNowOrPostTask(
       task_runners_.GetGPUTaskRunner(),  //
       [&latch, surface = android_surface_.get(), size]() {

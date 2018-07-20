@@ -9,11 +9,11 @@
 #include <utility>
 
 #include "flutter/common/task_runners.h"
+#include "flutter/fml/synchronization/waitable_event.h"
 #include "flutter/fml/trace_event.h"
 #include "flutter/shell/common/io_manager.h"
 #include "flutter/shell/platform/darwin/ios/framework/Source/vsync_waiter_ios.h"
 #include "flutter/shell/platform/darwin/ios/ios_external_texture_gl.h"
-#include "lib/fxl/synchronization/waitable_event.h"
 
 namespace shell {
 

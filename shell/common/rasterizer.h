@@ -11,10 +11,10 @@
 #include "flutter/flow/compositor_context.h"
 #include "flutter/flow/layers/layer_tree.h"
 #include "flutter/fml/memory/weak_ptr.h"
+#include "flutter/fml/synchronization/waitable_event.h"
 #include "flutter/shell/common/surface.h"
 #include "flutter/synchronization/pipeline.h"
 #include "lib/fxl/functional/closure.h"
-#include "lib/fxl/synchronization/waitable_event.h"
 
 namespace shell {
 
