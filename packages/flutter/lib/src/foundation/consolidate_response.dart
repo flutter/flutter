@@ -7,7 +7,7 @@ import 'dart:io';
 import 'dart:typed_data';
 
 /// Efficiently converts the response body of an [HttpClientResponse] into a [Uint8List].
-/// 
+///
 /// The future returned will forward all errors emitted by [response].
 Future<Uint8List> consolidateHttpClientResponseBytes(HttpClientResponse response) {
   // response.contentLength is not trustworthy when GZIP is involved
@@ -28,6 +28,6 @@ Future<Uint8List> consolidateHttpClientResponseBytes(HttpClientResponse response
     }
     completer.complete(bytes);
   }, onError: completer.completeError, cancelOnError: true);
-  
+
   return completer.future;
 }

@@ -39,8 +39,8 @@ void main() {
               SemanticsAction.tap,
             ],
             label: 'ABC',
-            rect: new Rect.fromLTRB(0.0, 0.0, 88.0, 36.0),
-            transform: new Matrix4.translationValues(356.0, 282.0, 0.0),
+            rect: new Rect.fromLTRB(0.0, 0.0, 88.0, 48.0),
+            transform: new Matrix4.translationValues(356.0, 276.0, 0.0),
             flags: <SemanticsFlag>[
               SemanticsFlag.isButton,
               SemanticsFlag.hasEnabledState,
@@ -79,8 +79,8 @@ void main() {
               SemanticsAction.tap,
             ],
             label: 'ABC',
-            rect: new Rect.fromLTRB(0.0, 0.0, 88.0, 36.0),
-            transform: new Matrix4.translationValues(356.0, 282.0, 0.0),
+            rect: new Rect.fromLTRB(0.0, 0.0, 88.0, 48.0),
+            transform: new Matrix4.translationValues(356.0, 276.0, 0.0),
             flags: <SemanticsFlag>[
               SemanticsFlag.isButton,
               SemanticsFlag.hasEnabledState,
@@ -113,7 +113,7 @@ void main() {
       ),
     );
 
-    expect(tester.getSize(find.byType(FlatButton)), equals(const Size(88.0, 36.0)));
+    expect(tester.getSize(find.byType(FlatButton)), equals(const Size(88.0, 48.0)));
     expect(tester.getSize(find.byType(Text)), equals(const Size(42.0, 14.0)));
 
     // textScaleFactor expands text, but not button.
@@ -134,7 +134,7 @@ void main() {
       ),
     );
 
-    expect(tester.getSize(find.byType(FlatButton)), equals(const Size(88.0, 36.0)));
+    expect(tester.getSize(find.byType(FlatButton)), equals(const Size(88.0, 48.0)));
     // Scaled text rendering is different on Linux and Mac by one pixel.
     // TODO(#12357): Update this test when text rendering is fixed.
     expect(tester.getSize(find.byType(Text)).width, isIn(<double>[54.0, 55.0]));
@@ -162,7 +162,7 @@ void main() {
     // Scaled text rendering is different on Linux and Mac by one pixel.
     // TODO(#12357): Update this test when text rendering is fixed.
     expect(tester.getSize(find.byType(FlatButton)).width, isIn(<double>[158.0, 159.0]));
-    expect(tester.getSize(find.byType(FlatButton)).height, equals(42.0));
+    expect(tester.getSize(find.byType(FlatButton)).height, equals(48.0));
     expect(tester.getSize(find.byType(Text)).width, isIn(<double>[126.0, 127.0]));
     expect(tester.getSize(find.byType(Text)).height, equals(42.0));
   });
@@ -187,7 +187,9 @@ void main() {
       new Directionality(
         textDirection: TextDirection.ltr,
         child: new Theme(
-          data: new ThemeData(),
+          data: new ThemeData(
+            materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+          ),
           child: buttonWidget,
         ),
       ),
@@ -233,6 +235,7 @@ void main() {
           data: new ThemeData(
             highlightColor: themeHighlightColor1,
             splashColor: themeSplashColor1,
+            materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
           ),
           child: buttonWidget,
         ),
@@ -260,6 +263,7 @@ void main() {
           data: new ThemeData(
             highlightColor: themeHighlightColor2,
             splashColor: themeSplashColor2,
+            materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
           ),
           child: buttonWidget, // same widget, so does not get updated because of us
         ),
@@ -279,7 +283,7 @@ void main() {
   testWidgets('Disabled MaterialButton has same semantic size as enabled and exposes disabled semantics', (WidgetTester tester) async {
     final SemanticsTester semantics = new SemanticsTester(tester);
 
-    final Rect expectedButtonSize = new Rect.fromLTRB(0.0, 0.0, 116.0, 36.0);
+    final Rect expectedButtonSize = new Rect.fromLTRB(0.0, 0.0, 116.0, 48.0);
     // Button is in center of screen
     final Matrix4 expectedButtonTransform = new Matrix4.identity()
       ..translate(
@@ -353,5 +357,137 @@ void main() {
 
 
     semantics.dispose();
+  });
+
+  testWidgets('MaterialButton size is configurable by ThemeData.materialTapTargetSize', (WidgetTester tester) async {
+    final Key key1 = new UniqueKey();
+    await tester.pumpWidget(
+      new Theme(
+        data: new ThemeData(materialTapTargetSize: MaterialTapTargetSize.padded),
+        child: new Directionality(
+          textDirection: TextDirection.ltr,
+          child: new Material(
+            child: new Center(
+              child: new MaterialButton(
+                key: key1,
+                child: const SizedBox(width: 50.0, height: 8.0),
+                onPressed: () {},
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(tester.getSize(find.byKey(key1)), const Size(88.0, 48.0));
+
+    final Key key2 = new UniqueKey();
+    await tester.pumpWidget(
+      new Theme(
+        data: new ThemeData(materialTapTargetSize: MaterialTapTargetSize.shrinkWrap),
+        child: new Directionality(
+          textDirection: TextDirection.ltr,
+          child: new Material(
+            child: new Center(
+              child: new MaterialButton(
+                key: key2,
+                child: const SizedBox(width: 50.0, height: 8.0),
+                onPressed: () {},
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(tester.getSize(find.byKey(key2)), const Size(88.0, 36.0));
+  });
+
+  testWidgets('FlatButton size is configurable by ThemeData.materialTapTargetSize', (WidgetTester tester) async {
+    final Key key1 = new UniqueKey();
+    await tester.pumpWidget(
+      new Theme(
+        data: new ThemeData(materialTapTargetSize: MaterialTapTargetSize.padded),
+        child: new Directionality(
+          textDirection: TextDirection.ltr,
+          child: new Material(
+            child: new Center(
+              child: new FlatButton(
+                key: key1,
+                child: const SizedBox(width: 50.0, height: 8.0),
+                onPressed: () {},
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(tester.getSize(find.byKey(key1)), const Size(88.0, 48.0));
+
+    final Key key2 = new UniqueKey();
+    await tester.pumpWidget(
+      new Theme(
+        data: new ThemeData(materialTapTargetSize: MaterialTapTargetSize.shrinkWrap),
+        child: new Directionality(
+          textDirection: TextDirection.ltr,
+          child: new Material(
+            child: new Center(
+              child: new FlatButton(
+                key: key2,
+                child: const SizedBox(width: 50.0, height: 8.0),
+                onPressed: () {},
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(tester.getSize(find.byKey(key2)), const Size(88.0, 36.0));
+  });
+
+  testWidgets('RaisedButton size is configurable by ThemeData.materialTapTargetSize', (WidgetTester tester) async {
+    final Key key1 = new UniqueKey();
+    await tester.pumpWidget(
+      new Theme(
+        data: new ThemeData(materialTapTargetSize: MaterialTapTargetSize.padded),
+        child: new Directionality(
+          textDirection: TextDirection.ltr,
+          child: new Material(
+            child: new Center(
+              child: new RaisedButton(
+                key: key1,
+                child: const SizedBox(width: 50.0, height: 8.0),
+                onPressed: () {},
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(tester.getSize(find.byKey(key1)), const Size(88.0, 48.0));
+
+    final Key key2 = new UniqueKey();
+    await tester.pumpWidget(
+      new Theme(
+        data: new ThemeData(materialTapTargetSize: MaterialTapTargetSize.shrinkWrap),
+        child: new Directionality(
+          textDirection: TextDirection.ltr,
+          child: new Material(
+            child: new Center(
+              child: new RaisedButton(
+                key: key2,
+                child: const SizedBox(width: 50.0, height: 8.0),
+                onPressed: () {},
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(tester.getSize(find.byKey(key2)), const Size(88.0, 36.0));
   });
 }

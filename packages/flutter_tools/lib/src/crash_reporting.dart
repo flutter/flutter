@@ -37,9 +37,9 @@ const String _kStackTraceFileField = 'DartError';
 const String _kStackTraceFilename = 'stacktrace_file';
 
 /// Sends crash reports to Google.
-/// 
+///
 /// There are two ways to override the behavior of this class:
-/// 
+///
 /// * Define a `FLUTTER_CRASH_SERVER_BASE_URL` environment variable that points
 ///   to a custom crash reporting server. This is useful if your development
 ///   environment is behind a firewall and unable to send crash reports to

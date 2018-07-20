@@ -70,7 +70,7 @@ String getEmulatorPath([AndroidSdk existingSdk]) {
 
 /// Locate the path for storing AVD emulator images. Returns null if none found.
 String getAvdPath() {
-  
+
   final List<String> searchPaths = <String>[
     platform.environment['ANDROID_AVD_HOME']
   ];

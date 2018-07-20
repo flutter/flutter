@@ -11,16 +11,31 @@ void main() {
   // GlobalMaterialLocalizations.
   final List<String> languages = <String>[
     'ar', // Arabic
+    'bg', // Bulgarian
+    'bs', // Bosnian
+    'ca', // Catalan
+    'cs', // Czech
+    'da', // Danish
     'de', // German
+    'el', // Greek
     'en', // English
     'es', // Spanish
+    'et', // Estonian
     'fa', // Farsi (Persian)
+    'fi', // Finnish
+    'fil', //  Fillipino
     'fr', // French
+    'gsw', // Swiss German
     'he', // Hebrew
+    'hi', // Hindi
+    'hr', // Croatian
+    'hu', // Hungarian
     'id', // Indonesian
     'it', // Italian
     'ja', // Japanese
     'ko', // Korean
+    'lv', // Latvian
+    'lt', // Lithuanian
     'ms', // Malay
     'nl', // Dutch
     'nb', // Norwegian
@@ -29,8 +44,14 @@ void main() {
     'pt', // Portugese
     'ro', // Romanian
     'ru', // Russian
+    'sr', // Serbian
+    'sk', // Slovak
+    'sl', // Slovenian
+    'sv', // Swedish
     'th', // Thai
+    'tl', // Tagalog
     'tr', // Turkish
+    'uk', // Ukranian
     'ur', // Urdu
     'vi', // Vietnamese
     'zh', // Chinese (simplified)

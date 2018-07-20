@@ -6,6 +6,7 @@ osx_image: xcode9.2
 env:
   - SHARD=analyze
   - SHARD=tests
+  - SHARD=tool_tests
   - SHARD=docs
   - SHARD=build_and_deploy_gallery
 matrix:
@@ -29,7 +30,7 @@ addons:
       - fonts-droid
 language: node_js
 node_js:
-  - "6"
+  - "8.1"
 git:
   # We rely on git tags for determining the version.
   depth: false

@@ -67,6 +67,44 @@ void main() {
     expect(find.byType(Text), findsOneWidget);
   });
 
+  testWidgets('FlatActionButton mini size is configurable by ThemeData.materialTapTargetSize', (WidgetTester tester) async {
+    final Key key1 = new UniqueKey();
+    await tester.pumpWidget(
+      new MaterialApp(
+        home: new Theme(
+          data: new ThemeData(materialTapTargetSize: MaterialTapTargetSize.padded),
+          child: new Scaffold(
+            floatingActionButton: new FloatingActionButton(
+              key: key1,
+              mini: true,
+              onPressed: null,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(tester.getSize(find.byKey(key1)), const Size(48.0, 48.0));
+
+    final Key key2 = new UniqueKey();
+    await tester.pumpWidget(
+      new MaterialApp(
+        home: new Theme(
+          data: new ThemeData(materialTapTargetSize: MaterialTapTargetSize.shrinkWrap),
+          child: new Scaffold(
+            floatingActionButton: new FloatingActionButton(
+              key: key2,
+              mini: true,
+              onPressed: null,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(tester.getSize(find.byKey(key2)), const Size(40.0, 40.0));
+  });
+
   testWidgets('FloatingActionButton.isExtended', (WidgetTester tester) async {
     await tester.pumpWidget(
       new MaterialApp(
@@ -306,5 +344,68 @@ void main() {
     semantics.dispose();
   });
 
+  testWidgets('extended FAB hero transitions succeed', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/18782
 
+    await tester.pumpWidget(
+      new MaterialApp(
+        home: new Scaffold(
+          floatingActionButton: new Builder(
+            builder: (BuildContext context) { // define context of Navigator.push()
+              return new FloatingActionButton.extended(
+                icon: const Icon(Icons.add),
+                label: const Text('A long FAB label'),
+                onPressed: () {
+                  Navigator.push(context, new MaterialPageRoute<void>(
+                    builder: (BuildContext context) {
+                      return new Scaffold(
+                        floatingActionButton: new FloatingActionButton.extended(
+                          icon: const Icon(Icons.add),
+                          label: const Text('X'),
+                          onPressed: () { },
+                        ),
+                        body: new Center(
+                          child: new RaisedButton(
+                            child: const Text('POP'),
+                            onPressed: () {
+                              Navigator.pop(context);
+                            },
+                          ),
+                        ),
+                      );
+                    },
+                  ));
+                },
+              );
+            },
+          ),
+          body: const Center(
+            child: const Text('Hello World'),
+          ),
+        ),
+      ),
+    );
+
+    final Finder longFAB = find.text('A long FAB label');
+    final Finder shortFAB = find.text('X');
+    final Finder helloWorld = find.text('Hello World');
+
+    expect(longFAB, findsOneWidget);
+    expect(shortFAB, findsNothing);
+    expect(helloWorld, findsOneWidget);
+
+    await tester.tap(longFAB);
+    await tester.pumpAndSettle();
+
+    expect(shortFAB, findsOneWidget);
+    expect(longFAB, findsNothing);
+
+    // Trigger a hero transition from shortFAB to longFAB.
+    await tester.tap(find.text('POP'));
+    await tester.pumpAndSettle();
+
+    expect(longFAB, findsOneWidget);
+    expect(shortFAB, findsNothing);
+    expect(helloWorld, findsOneWidget);
+  });
 }

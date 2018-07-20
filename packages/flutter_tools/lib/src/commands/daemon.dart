@@ -28,7 +28,7 @@ import '../runner/flutter_command.dart';
 import '../tester/flutter_tester.dart';
 import '../vmservice.dart';
 
-const String protocolVersion = '0.4.0';
+const String protocolVersion = '0.4.1';
 
 /// A server process command. This command will start up a long-lived server.
 /// It reads JSON-RPC based commands from stdin, executes them, and returns
@@ -143,8 +143,12 @@ class Daemon {
         throw 'no domain for method: $method';
 
       _domainMap[prefix].handleCommand(name, id, request['params'] ?? const <String, dynamic>{});
-    } catch (error) {
-      _send(<String, dynamic>{'id': id, 'error': _toJsonable(error)});
+    } catch (error, trace) {
+      _send(<String, dynamic>{
+        'id': id,
+        'error': _toJsonable(error),
+        'trace': '$trace',
+      });
     }
   }
 
@@ -184,14 +188,18 @@ abstract class Domain {
       if (_handlers.containsKey(command))
         return _handlers[command](args);
       throw 'command not understood: $name.$command';
-    }).then<Null>((dynamic result) {
+    }).then<dynamic>((dynamic result) {
       if (result == null) {
         _send(<String, dynamic>{'id': id});
       } else {
         _send(<String, dynamic>{'id': id, 'result': _toJsonable(result)});
       }
     }).catchError((dynamic error, dynamic trace) {
-      _send(<String, dynamic>{'id': id, 'error': _toJsonable(error)});
+      _send(<String, dynamic>{
+        'id': id,
+        'error': _toJsonable(error),
+        'trace': '$trace',
+      });
     });
   }
 
@@ -295,6 +303,11 @@ class DaemonDomain extends Domain {
   }
 }
 
+typedef Future<void> _RunOrAttach({
+  Completer<DebugConnectionInfo> connectionInfoCompleter,
+  Completer<void> appStartedCompleter
+});
+
 /// This domain responds to methods like [start] and [stop].
 ///
 /// It fires events for application start, stop, and stdout and stderr.
@@ -314,7 +327,7 @@ class AppDomain extends Domain {
   Future<AppInstance> startApp(
     Device device, String projectDirectory, String target, String route,
     DebuggingOptions options, bool enableHotReload, {
-    String applicationBinary,
+    File applicationBinary,
     @required bool trackWidgetCreation,
     String projectRootPath,
     String packagesFilePath,
@@ -362,7 +375,28 @@ class AppDomain extends Domain {
       );
     }
 
-    final AppInstance app = new AppInstance(_getNewAppId(), runner: runner, logToStdout: daemon.logToStdout);
+    return launch(
+        runner,
+        ({ Completer<DebugConnectionInfo> connectionInfoCompleter,
+            Completer<void> appStartedCompleter }) => runner.run(
+                connectionInfoCompleter: connectionInfoCompleter,
+                appStartedCompleter: appStartedCompleter,
+                route: route),
+        device,
+        projectDirectory,
+        enableHotReload,
+        cwd);
+  }
+
+  Future<AppInstance> launch(
+      ResidentRunner runner,
+      _RunOrAttach runOrAttach,
+      Device device,
+      String projectDirectory,
+      bool enableHotReload,
+      Directory cwd) async {
+    final AppInstance app = new AppInstance(_getNewAppId(),
+        runner: runner, logToStdout: daemon.logToStdout);
     _apps.add(app);
     _sendAppEvent(app, 'start', <String, dynamic>{
       'deviceId': device.id,
@@ -372,7 +406,7 @@ class AppDomain extends Domain {
 
     Completer<DebugConnectionInfo> connectionInfoCompleter;
 
-    if (options.debuggingEnabled) {
+    if (runner.debuggingOptions.debuggingEnabled) {
       connectionInfoCompleter = new Completer<DebugConnectionInfo>();
       // We don't want to wait for this future to complete and callbacks won't fail.
       // As it just writes to stdout.
@@ -386,29 +420,29 @@ class AppDomain extends Domain {
         _sendAppEvent(app, 'debugPort', params);
       });
     }
-    final Completer<Null> appStartedCompleter = new Completer<Null>();
+    final Completer<void> appStartedCompleter = new Completer<void>();
     // We don't want to wait for this future to complete and callbacks won't fail.
     // As it just writes to stdout.
-    appStartedCompleter.future.then<Null>((Null value) { // ignore: unawaited_futures
+    appStartedCompleter.future.then<void>((_) { // ignore: unawaited_futures
       _sendAppEvent(app, 'started');
     });
 
-    await app._runInZone(this, () async {
+    await app._runInZone<Null>(this, () async {
       try {
-        await runner.run(
-          connectionInfoCompleter: connectionInfoCompleter,
-          appStartedCompleter: appStartedCompleter,
-          route: route,
-        );
+        await runOrAttach(
+            connectionInfoCompleter: connectionInfoCompleter,
+            appStartedCompleter: appStartedCompleter);
         _sendAppEvent(app, 'stop');
-      } catch (error) {
-        _sendAppEvent(app, 'stop', <String, dynamic>{'error': _toJsonable(error)});
+      } catch (error, trace) {
+        _sendAppEvent(app, 'stop', <String, dynamic>{
+          'error': _toJsonable(error),
+          'trace': '$trace',
+        });
       } finally {
         fs.currentDirectory = cwd;
         _apps.remove(app);
       }
     });
-
     return app;
   }
 
@@ -429,7 +463,7 @@ class AppDomain extends Domain {
     if (_inProgressHotReload != null)
       throw 'hot restart already in progress';
 
-    _inProgressHotReload = app._runInZone(this, () {
+    _inProgressHotReload = app._runInZone<OperationResult>(this, () {
       return app.restart(fullRestart: fullRestart, pauseAfterRestart: pauseAfterRestart);
     });
     return _inProgressHotReload.whenComplete(() {
@@ -449,7 +483,7 @@ class AppDomain extends Domain {
   Future<Map<String, dynamic>> callServiceExtension(Map<String, dynamic> args) async {
     final String appId = _getStringArg(args, 'appId', required: true);
     final String methodName = _getStringArg(args, 'methodName');
-    final Map<String, String> params = args['params'] ?? <String, String>{};
+    final Map<String, dynamic> params = args['params'] == null ? <String, dynamic>{} : castStringKeyedMap(args['params']);
 
     final AppInstance app = _getApp(appId);
     if (app == null)
@@ -741,10 +775,10 @@ class AppInstance {
     _logger.close();
   }
 
-  dynamic _runInZone(AppDomain domain, dynamic method()) {
+  Future<T> _runInZone<T>(AppDomain domain, dynamic method()) {
     _logger ??= new _AppRunLogger(domain, this, parent: logToStdout ? logger : null);
 
-    return context.run<dynamic>(
+    return context.run<T>(
       body: method,
       overrides: <Type, Generator>{
         Logger: () => _logger,
@@ -859,10 +893,6 @@ class _AppRunLogger extends Logger {
     bool expectSlowOperation = false,
     int progressIndicatorPadding = 52,
   }) {
-    // Ignore nested progresses; return a no-op status object.
-    if (_status != null)
-      return new Status();
-
     final int id = _nextProgressId++;
 
     _sendProgressEvent(<String, dynamic>{

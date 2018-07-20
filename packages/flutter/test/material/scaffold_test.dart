@@ -133,7 +133,7 @@ void main() {
     expect(tester.binding.transientCallbackCount, 0);
 
     await tester.pumpWidget(new MaterialApp(home: const Scaffold()));
-    
+
     expect(tester.binding.transientCallbackCount, 0);
 
     await tester.pumpWidget(new MaterialApp(home: const Scaffold(
@@ -542,7 +542,7 @@ void main() {
           ),
         ),
       ));
-      expect(tester.element(find.byKey(testKey)).size, const Size(88.0, 36.0));
+      expect(tester.element(find.byKey(testKey)).size, const Size(88.0, 48.0));
       expect(tester.renderObject<RenderBox>(find.byKey(testKey)).localToGlobal(Offset.zero), const Offset(0.0, 0.0));
     });
   });

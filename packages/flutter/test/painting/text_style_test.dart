@@ -252,7 +252,7 @@ void main() {
     expect(TextStyle.lerp(redTextStyle, bluePaintTextStyle, .25).color, isNull);
     expect(TextStyle.lerp(redTextStyle, bluePaintTextStyle, .25).foreground.color, red);
     expect(TextStyle.lerp(redTextStyle, bluePaintTextStyle, .75).foreground.color, blue);
-    
+
     expect(TextStyle.lerp(redPaintTextStyle, bluePaintTextStyle, .25).color, isNull);
     expect(TextStyle.lerp(redPaintTextStyle, bluePaintTextStyle, .25).foreground.color, red);
     expect(TextStyle.lerp(redPaintTextStyle, bluePaintTextStyle, .75).foreground.color, blue);

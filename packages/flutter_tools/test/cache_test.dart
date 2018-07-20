@@ -115,7 +115,7 @@ void main() {
 
 class MockFileSystem extends ForwardingFileSystem {
   MockFileSystem() : super(new MemoryFileSystem());
-    
+
   @override
   File file(dynamic path) {
     return new MockFile();

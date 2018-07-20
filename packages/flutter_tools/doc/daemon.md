@@ -10,7 +10,7 @@ flutter daemon
 
 It runs a persistent, JSON-RPC based server to communicate with devices. IDEs and other tools can start the flutter tool in this mode and get device addition and removal notifications, as well as being able to programmatically start and stop apps on those devices.
 
-A set of `flutter daemon` commands/events are also exposed via `flutter run --machine` which allows IDEs and tools to launch flutter applications and interact to send commands like Hot Reload. The command and events that are available in this mode are documented at the bottom of this document.
+A set of `flutter daemon` commands/events are also exposed via `flutter run --machine` and `flutter attach --machine` which allow IDEs and tools to launch and attach to flutter applications and interact to send commands like Hot Reload. The command and events that are available in these modes are documented at the bottom of this document.
 
 ## Protocol
 
@@ -106,7 +106,7 @@ This is sent when an app is starting. The `params` field will be a map with the 
 
 #### app.debugPort
 
-This is sent when an observatory port is available for a started app. The `params` field will be a map with the fields `appId`, `port`, and `wsUri`. Clients should prefer using the `wsUri` field in preference to synthesizing a uri using the `port` field (`port` will be removed in a future version of the protocol). An optional field, `baseUri`, is populated if a path prefix is required for setting breakpoints on the target device.
+This is sent when an observatory port is available for a started app. The `params` field will be a map with the fields `appId`, `port`, and `wsUri`. Clients should prefer using the `wsUri` field in preference to synthesizing a uri using the `port` field. An optional field, `baseUri`, is populated if a path prefix is required for setting breakpoints on the target device.
 
 #### app.started
 
@@ -182,9 +182,9 @@ The returned `params` will contain:
 - `emulatorName` - the name of the emulator created; this will have been auto-generated if you did not supply one
 - `error` - when `success`=`false`, a message explaining why the creation of the emulator failed
 
-## Flutter Run --machine
+## 'flutter run --machine' and 'flutter attach --machine' 
 
-When running `flutter run --machine` the following subset of the daemon is available:
+When running `flutter run --machine` or `flutter attach --machine` the following subset of the daemon is available:
 
 ### daemon domain
 
@@ -219,5 +219,6 @@ See the [source](https://github.com/flutter/flutter/blob/master/packages/flutter
 
 ## Changelog
 
+- 0.4.1: Added `flutter attach --machine`
 - 0.4.0: Added `emulator.create` command
 - 0.3.0: Added `daemon.connected` event at startup

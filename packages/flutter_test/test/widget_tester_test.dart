@@ -4,9 +4,11 @@
 
 import 'dart:async';
 import 'dart:io';
+import 'dart:ui';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:test/test.dart' as test_package;
 import 'package:test/src/frontend/async_matcher.dart' show AsyncMatcher;
@@ -526,6 +528,91 @@ void main() {
     await tester.showKeyboard(find.byType(TextField));
     await tester.showKeyboard(find.byType(TextField));
     await tester.pump();
+  });
+
+  group('getSemanticsData', () {
+    testWidgets('throws when there are no semantics', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        new MaterialApp(
+          home: const Scaffold(
+            body: const Text('hello'),
+          ),
+        ),
+      );
+
+      expect(() => tester.getSemanticsData(find.text('hello')),
+        throwsA(isInstanceOf<StateError>()));
+    });
+
+    testWidgets('throws when there are multiple results from the finder', (WidgetTester tester) async {
+      final SemanticsHandle semanticsHandle = tester.ensureSemantics();
+
+      await tester.pumpWidget(
+        new MaterialApp(
+          home: new Scaffold(
+            body: new Row(
+              children: const <Widget>[
+                const Text('hello'),
+                const Text('hello'),
+              ],
+            ),
+          ),
+        ),
+      );
+
+      expect(() => tester.getSemanticsData(find.text('hello')),
+          throwsA(isInstanceOf<StateError>()));
+      semanticsHandle.dispose();
+    });
+
+    testWidgets('Returns the correct SemanticsData', (WidgetTester tester) async {
+      final SemanticsHandle semanticsHandle = tester.ensureSemantics();
+
+      await tester.pumpWidget(
+        new MaterialApp(
+          home: new Scaffold(
+            body: new Container(
+              child: new OutlineButton(
+                  onPressed: () {},
+                  child: const Text('hello')
+              ),
+            ),
+          ),
+        ),
+      );
+
+      final SemanticsData semantics = tester.getSemanticsData(find.text('hello'));
+      expect(semantics.label, 'hello');
+      expect(semantics.hasAction(SemanticsAction.tap), true);
+      expect(semantics.hasFlag(SemanticsFlag.isButton), true);
+      semanticsHandle.dispose();
+    });
+
+    testWidgets('Returns merged SemanticsData', (WidgetTester tester) async {
+      final SemanticsHandle semanticsHandle = tester.ensureSemantics();
+      const Key key = const Key('test');
+      await tester.pumpWidget(
+        new MaterialApp(
+          home: new Scaffold(
+            body: new Semantics(
+              label: 'A',
+              child: new Semantics(
+                label: 'B',
+                child: new Semantics(
+                  key: key,
+                  label: 'C',
+                  child: new Container(),
+                ),
+              ),
+            )
+          ),
+        ),
+      );
+
+      final SemanticsData semantics = tester.getSemanticsData(find.byKey(key));
+      expect(semantics.label, 'A\nB\nC');
+      semanticsHandle.dispose();
+    });
   });
 }
 

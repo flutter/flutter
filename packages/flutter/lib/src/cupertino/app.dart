@@ -45,7 +45,7 @@ const TextStyle _kDefaultTextStyle = const TextStyle(
 /// This widget also configures the observer of the top-level [Navigator] (if
 /// any) to perform [Hero] animations.
 ///
-/// Using this widget with caution on Android since it may produce behaviors
+/// Use this widget with caution on Android since it may produce behaviors
 /// Android users are not expecting such as:
 ///
 ///  * Pages will be dismissible via a back swipe.

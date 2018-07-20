@@ -22,21 +22,21 @@ import '../protocol_discovery.dart';
 import '../version.dart';
 
 class FlutterTesterApp extends ApplicationPackage {
-  final String _directory;
+  final Directory _directory;
 
   factory FlutterTesterApp.fromCurrentDirectory() {
-    return new FlutterTesterApp._(fs.currentDirectory.path);
+    return new FlutterTesterApp._(fs.currentDirectory);
   }
 
-  FlutterTesterApp._(String directory)
+  FlutterTesterApp._(Directory directory)
       : _directory = directory,
-        super(id: directory);
+        super(id: directory.path);
 
   @override
-  String get name => fs.path.basename(_directory);
+  String get name => _directory.basename;
 
   @override
-  String get packagePath => fs.path.join(_directory, '.packages');
+  File get packagesFile => _directory.childFile('.packages');
 }
 
 // TODO(scheglov): This device does not currently work with full restarts.
@@ -44,6 +44,7 @@ class FlutterTesterDevice extends Device {
   FlutterTesterDevice(String deviceId) : super(deviceId);
 
   Process _process;
+  final DevicePortForwarder _portForwarder = new _NoopPortForwarder();
 
   @override
   Future<bool> get isLocalEmulator async => false;
@@ -52,7 +53,7 @@ class FlutterTesterDevice extends Device {
   String get name => 'Flutter test device';
 
   @override
-  DevicePortForwarder get portForwarder => null;
+  DevicePortForwarder get portForwarder => _portForwarder;
 
   @override
   Future<String> get sdkNameAndVersion async {
@@ -151,9 +152,10 @@ class FlutterTesterDevice extends Device {
 
       _isRunning = true;
       _process = await processManager.start(command,
-      environment: <String, String>{
-        'FLUTTER_TEST': 'true',
-      });
+        environment: <String, String>{
+          'FLUTTER_TEST': 'true',
+        },
+      );
       _process.exitCode.then((_) => _isRunning = false);
       _process.stdout
           .transform(utf8.decoder)
@@ -231,4 +233,21 @@ class _FlutterTesterDeviceLogReader extends DeviceLogReader {
   String get name => 'flutter tester log reader';
 
   void addLine(String line) => _logLinesController.add(line);
+}
+
+/// A fake port forwarder that doesn't do anything. Used by flutter tester
+/// where the VM is running on the same machine and does not need ports forwarding.
+class _NoopPortForwarder extends DevicePortForwarder {
+  @override
+  Future<int> forward(int devicePort, {int hostPort}) {
+    if (hostPort != null && hostPort != devicePort)
+      throw 'Forwarding to a different port is not supported by flutter tester';
+    return new Future<int>.value(devicePort);
+  }
+
+  @override
+  List<ForwardedPort> get forwardedPorts => <ForwardedPort>[];
+
+  @override
+  Future<Null> unforward(ForwardedPort forwardedPort) => null;
 }
