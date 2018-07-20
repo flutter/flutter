@@ -314,6 +314,34 @@ enum TextInputAction {
   newline,
 }
 
+/// Configures how the platform keyboard will select an uppercase or 
+/// lowercase keyboard.
+///
+/// Only supports text keyboards, other keyboard types will ignore this
+/// configuration. Capitalization is locale-aware.
+enum TextCapitalization {
+  /// Defaults to an uppercase keyboard for the first letter of each word.
+  /// 
+  /// Corresponds to `InputType.TYPE_TEXT_FLAG_CAP_WORDS` on Android, and
+  /// `UITextAutocapitalizationTypeWords` on iOS.
+  words,
+
+  /// Defaults to an uppercase keyboard for the first letter of each sentence.
+  /// 
+  /// Corresponds to `InputType.TYPE_TEXT_FLAG_CAP_SENTENCES` on Android, and
+  /// `UITextAutocapitalizationTypeSentences` on iOS.
+  sentences,
+
+  /// Defaults to an uppercase keyboard for each character.
+  /// 
+  /// Corresponds to `InputType.TYPE_TEXT_FLAG_CAP_CHARACTERS` on Android, and
+  /// `UITextAutocapitalizationTypeAllCharacters` on iOS.
+  characters,
+
+  /// Defaults to a lowercase keyboard.
+  none,
+}
+
 /// Controls the visual appearance of the text input control.
 ///
 /// Many [TextInputAction]s are common between Android and iOS. However, if an
@@ -343,11 +371,13 @@ class TextInputConfiguration {
     this.actionLabel,
     this.inputAction = TextInputAction.done,
     this.keyboardAppearance = Brightness.light,
+    this.textCapitalization = TextCapitalization.none,
   }) : assert(inputType != null),
        assert(obscureText != null),
        assert(autocorrect != null),
        assert(keyboardAppearance != null),
-       assert(inputAction != null);
+       assert(inputAction != null),
+       assert(textCapitalization != null);
 
   /// The type of information for which to optimize the text input control.
   final TextInputType inputType;
@@ -368,6 +398,16 @@ class TextInputConfiguration {
   /// What kind of action to request for the action button on the IME.
   final TextInputAction inputAction;
 
+  /// Specifies how platforms may automatically capitialize text entered by the
+  /// user.
+  /// 
+  /// Defaults to [TextCapitalization.none].
+  /// 
+  /// See also:
+  /// 
+  ///   * [TextCapitalization], for a description of each capitalization behavior.
+  final TextCapitalization textCapitalization;
+  
   /// The appearance of the keyboard.
   /// 
   /// This setting is only honored on iOS devices.
@@ -383,6 +423,7 @@ class TextInputConfiguration {
       'autocorrect': autocorrect,
       'actionLabel': actionLabel,
       'inputAction': inputAction.toString(),
+      'textCapitalization': textCapitalization.toString(),
       'keyboardAppearance': keyboardAppearance.toString(),
     };
   }
