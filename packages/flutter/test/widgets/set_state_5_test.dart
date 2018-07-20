@@ -17,7 +17,7 @@ class BadWidgetState extends State<BadWidget> {
      _count = 1;
     });
   }
-  
+
   int _count = 0;
 
   @override

@@ -113,10 +113,10 @@ class TextTheme extends Diagnosticable {
   /// /// descendants, while leaving other ambient theme attributes alone.
   /// class TitleColorThemeCopy extends StatelessWidget {
   ///   TitleColorThemeCopy({Key key, this.child, this.titleColor}) : super(key: key);
-  /// 
+  ///
   ///   final Color titleColor;
   ///   final Widget child;
-  /// 
+  ///
   ///   @override
   ///   Widget build(BuildContext context) {
   ///     final ThemeData theme = Theme.of(context);
@@ -192,10 +192,10 @@ class TextTheme extends Diagnosticable {
   /// /// descendants, while leaving other ambient theme attributes alone.
   /// class TitleColorTheme extends StatelessWidget {
   ///   TitleColorTheme({Key key, this.child, this.titleColor}) : super(key: key);
-  /// 
+  ///
   ///   final Color titleColor;
   ///   final Widget child;
-  /// 
+  ///
   ///   @override
   ///   Widget build(BuildContext context) {
   ///     ThemeData theme = Theme.of(context);

@@ -73,7 +73,7 @@ class FakePlatformViewsController {
         code: 'error',
         message: 'Trying to dispose a platform view with unknown id: $id',
       );
-    
+
     _views.remove(id);
     return new Future<Null>.sync(() => null);
   }
