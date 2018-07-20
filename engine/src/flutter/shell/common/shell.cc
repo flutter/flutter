@@ -67,7 +67,7 @@ std::unique_ptr<Shell> Shell::CreateShellOnPlatformThread(
   // first because it has state that the other subsystems depend on. It must
   // first be booted and the necessary references obtained to initialize the
   // other subsystems.
-  fxl::AutoResetWaitableEvent io_latch;
+  fml::AutoResetWaitableEvent io_latch;
   std::unique_ptr<IOManager> io_manager;
   fml::WeakPtr<GrContext> resource_context;
   fxl::RefPtr<flow::SkiaUnrefQueue> unref_queue;
@@ -90,7 +90,7 @@ std::unique_ptr<Shell> Shell::CreateShellOnPlatformThread(
   io_latch.Wait();
 
   // Create the rasterizer on the GPU thread.
-  fxl::AutoResetWaitableEvent gpu_latch;
+  fml::AutoResetWaitableEvent gpu_latch;
   std::unique_ptr<Rasterizer> rasterizer;
   fml::TaskRunner::RunNowOrPostTask(
       task_runners.GetGPUTaskRunner(), [&gpu_latch,            //
@@ -105,7 +105,7 @@ std::unique_ptr<Shell> Shell::CreateShellOnPlatformThread(
       });
 
   // Create the engine on the UI thread.
-  fxl::AutoResetWaitableEvent ui_latch;
+  fml::AutoResetWaitableEvent ui_latch;
   std::unique_ptr<Engine> engine;
   fml::TaskRunner::RunNowOrPostTask(
       shell->GetTaskRunners().GetUITaskRunner(),
@@ -237,7 +237,7 @@ std::unique_ptr<Shell> Shell::Create(
     return nullptr;
   }
 
-  fxl::AutoResetWaitableEvent latch;
+  fml::AutoResetWaitableEvent latch;
   std::unique_ptr<Shell> shell;
   fml::TaskRunner::RunNowOrPostTask(
       task_runners.GetPlatformTaskRunner(),
@@ -304,7 +304,7 @@ Shell::~Shell() {
     vm->GetServiceProtocol().RemoveHandler(this);
   }
 
-  fxl::AutoResetWaitableEvent ui_latch, gpu_latch, platform_latch, io_latch;
+  fml::AutoResetWaitableEvent ui_latch, gpu_latch, platform_latch, io_latch;
 
   fml::TaskRunner::RunNowOrPostTask(
       task_runners_.GetUITaskRunner(),
@@ -415,7 +415,7 @@ void Shell::OnPlatformViewCreated(const PlatformView& view,
   // setup/suspension of all activities that may be interacting with the GPU in
   // a synchronous fashion.
 
-  fxl::AutoResetWaitableEvent latch;
+  fml::AutoResetWaitableEvent latch;
   auto gpu_task = fxl::MakeCopyable([rasterizer = rasterizer_->GetWeakPtr(),  //
                                      surface = std::move(surface),            //
                                      &latch]() mutable {
@@ -456,7 +456,7 @@ void Shell::OnPlatformViewDestroyed(const PlatformView& view) {
   // setup/suspension of all activities that may be interacting with the GPU in
   // a synchronous fashion.
 
-  fxl::AutoResetWaitableEvent latch;
+  fml::AutoResetWaitableEvent latch;
 
   auto io_task = [io_manager = io_manager_.get(), &latch]() {
     // Execute any pending Skia object deletions while GPU access is still
@@ -974,7 +974,7 @@ Rasterizer::Screenshot Shell::Screenshot(
     Rasterizer::ScreenshotType screenshot_type,
     bool base64_encode) {
   TRACE_EVENT0("flutter", "Shell::Screenshot");
-  fxl::AutoResetWaitableEvent latch;
+  fml::AutoResetWaitableEvent latch;
   Rasterizer::Screenshot screenshot;
   fml::TaskRunner::RunNowOrPostTask(
       task_runners_.GetGPUTaskRunner(), [&latch,                        //

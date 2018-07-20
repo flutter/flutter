@@ -7,7 +7,8 @@
 
 #include <map>
 
-#include "lib/fxl/synchronization/waitable_event.h"
+#include "flutter/fml/synchronization/waitable_event.h"
+#include "lib/fxl/macros.h"
 #include "third_party/skia/include/core/SkCanvas.h"
 
 namespace flow {

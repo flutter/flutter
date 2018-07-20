@@ -9,12 +9,12 @@
 #include <memory>
 
 #include "flutter/fml/message_loop.h"
+#include "flutter/fml/synchronization/waitable_event.h"
 #include "flutter/shell/common/platform_view.h"
 #include "flutter/shell/common/rasterizer.h"
 #include "flutter/shell/common/shell.h"
 #include "flutter/shell/common/thread_host.h"
 #include "gtest/gtest.h"
-#include "lib/fxl/synchronization/waitable_event.h"
 
 #define CURRENT_TEST_NAME                                           \
   std::string {                                                     \

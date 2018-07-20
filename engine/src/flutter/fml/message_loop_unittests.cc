@@ -7,9 +7,9 @@
 #include <thread>
 
 #include "flutter/fml/message_loop.h"
+#include "flutter/fml/synchronization/waitable_event.h"
 #include "flutter/fml/task_runner.h"
 #include "gtest/gtest.h"
-#include "lib/fxl/synchronization/waitable_event.h"
 
 #define TIME_SENSITIVE(x) TimeSensitiveTest_##x
 #if OS_WIN
@@ -28,8 +28,8 @@ TEST(MessageLoop, GetCurrent) {
 
 TEST(MessageLoop, DifferentThreadsHaveDifferentLoops) {
   fml::MessageLoop* loop1 = nullptr;
-  fxl::AutoResetWaitableEvent latch1;
-  fxl::AutoResetWaitableEvent term1;
+  fml::AutoResetWaitableEvent latch1;
+  fml::AutoResetWaitableEvent term1;
   std::thread thread1([&loop1, &latch1, &term1]() {
     fml::MessageLoop::EnsureInitializedForCurrentThread();
     loop1 = &fml::MessageLoop::GetCurrent();
@@ -38,8 +38,8 @@ TEST(MessageLoop, DifferentThreadsHaveDifferentLoops) {
   });
 
   fml::MessageLoop* loop2 = nullptr;
-  fxl::AutoResetWaitableEvent latch2;
-  fxl::AutoResetWaitableEvent term2;
+  fml::AutoResetWaitableEvent latch2;
+  fml::AutoResetWaitableEvent term2;
   std::thread thread2([&loop2, &latch2, &term2]() {
     fml::MessageLoop::EnsureInitializedForCurrentThread();
     loop2 = &fml::MessageLoop::GetCurrent();
@@ -135,7 +135,7 @@ TEST(MessageLoop, DelayedTasksAtSameTimeAreRunInOrder) {
 
 TEST(MessageLoop, CheckRunsTaskOnCurrentThread) {
   fxl::RefPtr<fxl::TaskRunner> runner;
-  fxl::AutoResetWaitableEvent latch;
+  fml::AutoResetWaitableEvent latch;
   std::thread thread([&runner, &latch]() {
     fml::MessageLoop::EnsureInitializedForCurrentThread();
     auto& loop = fml::MessageLoop::GetCurrent();

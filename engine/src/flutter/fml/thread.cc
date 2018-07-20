@@ -18,12 +18,12 @@
 #include <string>
 
 #include "flutter/fml/message_loop.h"
-#include "lib/fxl/synchronization/waitable_event.h"
+#include "flutter/fml/synchronization/waitable_event.h"
 
 namespace fml {
 
 Thread::Thread(const std::string& name) : joined_(false) {
-  fxl::AutoResetWaitableEvent latch;
+  fml::AutoResetWaitableEvent latch;
   fxl::RefPtr<fml::TaskRunner> runner;
   thread_ = std::make_unique<std::thread>([&latch, &runner, name]() -> void {
     SetCurrentThreadName(name);

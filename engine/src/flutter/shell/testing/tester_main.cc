@@ -11,6 +11,7 @@
 #include "flutter/fml/file.h"
 #include "flutter/fml/message_loop.h"
 #include "flutter/fml/paths.h"
+#include "flutter/fml/synchronization/waitable_event.h"
 #include "flutter/fml/task_runner.h"
 #include "flutter/shell/common/platform_view.h"
 #include "flutter/shell/common/rasterizer.h"
@@ -19,7 +20,6 @@
 #include "flutter/shell/common/thread_host.h"
 #include "lib/fxl/files/path.h"
 #include "lib/fxl/functional/make_copyable.h"
-#include "lib/fxl/synchronization/waitable_event.h"
 #include "third_party/dart/runtime/bin/embedded_dart_io.h"
 
 #ifdef ERROR
@@ -177,7 +177,7 @@ int RunTester(const blink::Settings& settings, bool run_forever) {
 
   bool engine_did_run = false;
 
-  fxl::AutoResetWaitableEvent sync_run_latch;
+  fml::AutoResetWaitableEvent sync_run_latch;
   fml::TaskRunner::RunNowOrPostTask(
       shell->GetTaskRunners().GetUITaskRunner(),
       fxl::MakeCopyable([&sync_run_latch, &completion_observer,
@@ -208,7 +208,7 @@ int RunTester(const blink::Settings& settings, bool run_forever) {
 
   // Cleanup the completion observer synchronously as it is living on the
   // stack.
-  fxl::AutoResetWaitableEvent latch;
+  fml::AutoResetWaitableEvent latch;
   fml::TaskRunner::RunNowOrPostTask(
       shell->GetTaskRunners().GetUITaskRunner(),
       [&latch, &completion_observer] {
