@@ -25,10 +25,10 @@ final List<List<String>> _kNameLines = _kDialogText
 
 final TextStyle _kDaveStyle = new TextStyle(color: Colors.indigo.shade400, height: 1.8);
 final TextStyle _kHalStyle = new TextStyle(color: Colors.red.shade400, fontFamily: 'monospace');
-const TextStyle _kBold = const TextStyle(fontWeight: FontWeight.bold);
-const TextStyle _kUnderline = const TextStyle(
+const TextStyle _kBold = TextStyle(fontWeight: FontWeight.bold);
+const TextStyle _kUnderline = TextStyle(
   decoration: TextDecoration.underline,
-  decorationColor: const Color(0xFF000000),
+  decorationColor: Color(0xFF000000),
   decorationStyle: TextDecorationStyle.wavy
 );
 
@@ -64,8 +64,8 @@ class SpeakerSeparator extends StatelessWidget {
       constraints: const BoxConstraints.expand(height: 0.0),
       margin: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 64.0),
       decoration: const BoxDecoration(
-        border: const Border(
-          bottom: const BorderSide(color: const Color.fromARGB(24, 0, 0, 0))
+        border: Border(
+          bottom: BorderSide(color: Color.fromARGB(24, 0, 0, 0))
         )
       )
     );

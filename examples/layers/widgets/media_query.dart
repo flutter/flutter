@@ -48,7 +48,7 @@ class AdaptedGridItem extends StatelessWidget {
                   child: new Text(name)
                 ),
                 const IconButton(
-                  icon: const Icon(Icons.more_vert),
+                  icon: Icon(Icons.more_vert),
                   onPressed: null
                 )
               ]

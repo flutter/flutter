@@ -17,10 +17,10 @@ void main() {
     await tester.pumpWidget(
       const Directionality(
         textDirection: TextDirection.ltr,
-        child: const Center(
-          child: const SizedBox(
+        child: Center(
+          child: SizedBox(
             width: 200.0,
-            child: const LinearProgressIndicator(value: 0.0),
+            child: LinearProgressIndicator(value: 0.0),
           ),
         ),
       ),
@@ -31,10 +31,10 @@ void main() {
     await tester.pumpWidget(
       const Directionality(
         textDirection: TextDirection.rtl,
-        child: const Center(
-          child: const SizedBox(
+        child: Center(
+          child: SizedBox(
             width: 200.0,
-            child: const LinearProgressIndicator(value: null),
+            child: LinearProgressIndicator(value: null),
           ),
         ),
       ),
@@ -45,10 +45,10 @@ void main() {
     await tester.pumpWidget(
       const Directionality(
         textDirection: TextDirection.ltr,
-        child: const Center(
-          child: const SizedBox(
+        child: Center(
+          child: SizedBox(
             width: 200.0,
-            child: const LinearProgressIndicator(value: 0.25),
+            child: LinearProgressIndicator(value: 0.25),
           ),
         ),
       ),
@@ -68,10 +68,10 @@ void main() {
     await tester.pumpWidget(
       const Directionality(
         textDirection: TextDirection.rtl,
-        child: const Center(
-          child: const SizedBox(
+        child: Center(
+          child: SizedBox(
             width: 200.0,
-            child: const LinearProgressIndicator(value: 0.25),
+            child: LinearProgressIndicator(value: 0.25),
           ),
         ),
       ),
@@ -91,17 +91,17 @@ void main() {
     await tester.pumpWidget(
       const Directionality(
         textDirection: TextDirection.ltr,
-        child: const Center(
-          child: const SizedBox(
+        child: Center(
+          child: SizedBox(
             width: 200.0,
-            child: const LinearProgressIndicator(),
+            child: LinearProgressIndicator(),
           ),
         ),
       ),
     );
 
     await tester.pump(const Duration(milliseconds: 300));
-    final double animationValue = const Interval(0.0, 750.0 / 1800.0, curve: const Cubic(0.2, 0.0, 0.8, 1.0))
+    final double animationValue = const Interval(0.0, 750.0 / 1800.0, curve: Cubic(0.2, 0.0, 0.8, 1.0))
       .transform(300.0 / 1800.0);
 
     expect(
@@ -118,17 +118,17 @@ void main() {
     await tester.pumpWidget(
       const Directionality(
         textDirection: TextDirection.rtl,
-        child: const Center(
-          child: const SizedBox(
+        child: Center(
+          child: SizedBox(
             width: 200.0,
-            child: const LinearProgressIndicator(),
+            child: LinearProgressIndicator(),
           ),
         ),
       ),
     );
 
     await tester.pump(const Duration(milliseconds: 300));
-    final double animationValue = const Interval(0.0, 750.0 / 1800.0, curve: const Cubic(0.2, 0.0, 0.8, 1.0))
+    final double animationValue = const Interval(0.0, 750.0 / 1800.0, curve: Cubic(0.2, 0.0, 0.8, 1.0))
       .transform(300.0 / 1800.0);
 
     expect(
@@ -145,12 +145,12 @@ void main() {
     await tester.pumpWidget(
       const Directionality(
         textDirection: TextDirection.ltr,
-        child: const Center(
-          child: const SizedBox(
+        child: Center(
+          child: SizedBox(
             width: 200.0,
-            child: const LinearProgressIndicator(
+            child: LinearProgressIndicator(
               value: 0.25,
-              valueColor: const AlwaysStoppedAnimation<Color>(Colors.white),
+              valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
               backgroundColor: Colors.black,
             ),
           ),
@@ -169,7 +169,7 @@ void main() {
   testWidgets('CircularProgressIndicator(value: 0.0) can be constructed', (WidgetTester tester) async {
     await tester.pumpWidget(
       const Center(
-        child: const CircularProgressIndicator(value: 0.0)
+        child: CircularProgressIndicator(value: 0.0)
       )
     );
   });
@@ -177,7 +177,7 @@ void main() {
   testWidgets('CircularProgressIndicator(value: null) can be constructed', (WidgetTester tester) async {
     await tester.pumpWidget(
       const Center(
-        child: const CircularProgressIndicator(value: null)
+        child: CircularProgressIndicator(value: null)
       )
     );
   });
@@ -185,12 +185,12 @@ void main() {
   testWidgets('LinearProgressIndicator causes a repaint when it changes', (WidgetTester tester) async {
     await tester.pumpWidget(new Directionality(
       textDirection: TextDirection.ltr,
-      child: new ListView(children: const <Widget>[const LinearProgressIndicator(value: 0.0)]),
+      child: new ListView(children: const <Widget>[LinearProgressIndicator(value: 0.0)]),
     ));
     final List<Layer> layers1 = tester.layers;
     await tester.pumpWidget(new Directionality(
       textDirection: TextDirection.ltr,
-      child: new ListView(children: const <Widget>[const LinearProgressIndicator(value: 0.5)])),
+      child: new ListView(children: const <Widget>[LinearProgressIndicator(value: 0.5)])),
     );
     final List<Layer> layers2 = tester.layers;
     expect(layers1, isNot(equals(layers2)));
@@ -212,10 +212,10 @@ void main() {
     await tester.pumpWidget(
       const Directionality(
         textDirection: TextDirection.ltr,
-        child: const Center(
-          child: const SizedBox(
+        child: Center(
+          child: SizedBox(
             width: 200.0,
-            child: const RefreshProgressIndicator(),
+            child: RefreshProgressIndicator(),
           ),
         ),
       ),

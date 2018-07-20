@@ -345,15 +345,15 @@ class GridListDemoState extends State<GridListDemo> {
             itemBuilder: (BuildContext context) => <PopupMenuItem<GridDemoTileStyle>>[
               const PopupMenuItem<GridDemoTileStyle>(
                 value: GridDemoTileStyle.imageOnly,
-                child: const Text('Image only'),
+                child: Text('Image only'),
               ),
               const PopupMenuItem<GridDemoTileStyle>(
                 value: GridDemoTileStyle.oneLine,
-                child: const Text('One line'),
+                child: Text('One line'),
               ),
               const PopupMenuItem<GridDemoTileStyle>(
                 value: GridDemoTileStyle.twoLine,
-                child: const Text('Two line'),
+                child: Text('Two line'),
               ),
             ],
           ),

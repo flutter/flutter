@@ -538,7 +538,7 @@ void main() {
 
     await tester.pumpWidget(buildTest());
     final Offset location = tester.getTopLeft(find.text('0'));
-    const Offset offset = const Offset(0.0, 5.0);
+    const Offset offset = Offset(0.0, 5.0);
     final TestGesture gesture = await tester.startGesture(location, pointer: 5);
     await gesture.moveBy(offset);
     await tester.pumpWidget(buildTest());
@@ -567,8 +567,8 @@ void main() {
             height: 1000.0,
             child: new Column(
               children: const <Widget>[
-                const Test1215DismissibleWidget('1'),
-                const Test1215DismissibleWidget('2'),
+                Test1215DismissibleWidget('1'),
+                Test1215DismissibleWidget('2'),
               ],
             ),
           ),

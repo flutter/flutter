@@ -47,7 +47,7 @@ void main() {
      });
 
      test('Image cache resizing based on size', () async {
-       const TestImage testImage = const TestImage(width: 8, height: 8); // 256 B.
+       const TestImage testImage = TestImage(width: 8, height: 8); // 256 B.
        imageCache.maximumSizeBytes = 256 * 2;
 
        final TestImageInfo a = await extractOneFrame(const TestImageProvider(1, 1, image: testImage).resolve(ImageConfiguration.empty));

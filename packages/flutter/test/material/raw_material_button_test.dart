@@ -61,9 +61,9 @@ void main() {
   });
 
   testWidgets('Ink splash from center tap originates in correct location', (WidgetTester tester) async {
-    const Color highlightColor = const Color(0xAAFF0000);
-    const Color splashColor = const Color(0xAA0000FF);
-    const Color fillColor = const Color(0xFFEF5350);
+    const Color highlightColor = Color(0xAAFF0000);
+    const Color splashColor = Color(0xAA0000FF);
+    const Color fillColor = Color(0xFFEF5350);
 
     await tester.pumpWidget(
       new Center(
@@ -90,9 +90,9 @@ void main() {
   });
 
   testWidgets('Ink splash from tap above material originates in correct location', (WidgetTester tester) async {
-    const Color highlightColor = const Color(0xAAFF0000);
-    const Color splashColor = const Color(0xAA0000FF);
-    const Color fillColor = const Color(0xFFEF5350);
+    const Color highlightColor = Color(0xAAFF0000);
+    const Color splashColor = Color(0xAA0000FF);
+    const Color fillColor = Color(0xFFEF5350);
 
     await tester.pumpWidget(
       new Center(
@@ -132,10 +132,10 @@ void main() {
               child: new Column(
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: const <Widget>[
-                  const SizedBox(
+                  SizedBox(
                     height: 50.0,
                     width: 400.0,
-                    child: const Text('Material'),
+                    child: Text('Material'),
                   ),
                 ],
               ),
@@ -148,7 +148,7 @@ void main() {
   });
 
   testWidgets('smaller child is hit testable', (WidgetTester tester) async {
-    const Key key = const Key('test');
+    const Key key = Key('test');
     await tester.pumpWidget(
       new MaterialApp(
         home: new Column(
@@ -172,7 +172,7 @@ void main() {
   });
   
   testWidgets('RawMaterialButton can be expanded by parent constraints', (WidgetTester tester) async {
-    const Key key = const Key('test');
+    const Key key = Key('test');
     await tester.pumpWidget(
       new MaterialApp(
         home: new Column(

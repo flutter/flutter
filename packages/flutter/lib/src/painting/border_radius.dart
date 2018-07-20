@@ -337,7 +337,7 @@ class BorderRadius extends BorderRadiusGeometry {
   });
 
   /// A border radius with all zero radii.
-  static const BorderRadius zero = const BorderRadius.all(Radius.zero);
+  static const BorderRadius zero = BorderRadius.all(Radius.zero);
 
   /// The top-left [Radius].
   final Radius topLeft;
@@ -575,7 +575,7 @@ class BorderRadiusDirectional extends BorderRadiusGeometry {
   ///
   /// Consider using [EdgeInsets.zero] instead, since that object has the same
   /// effect, but will be cheaper to [resolve].
-  static const BorderRadiusDirectional zero = const BorderRadiusDirectional.all(Radius.zero);
+  static const BorderRadiusDirectional zero = BorderRadiusDirectional.all(Radius.zero);
 
   /// The top-start [Radius].
   final Radius topStart;

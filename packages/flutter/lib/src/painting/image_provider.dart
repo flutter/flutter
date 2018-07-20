@@ -86,7 +86,7 @@ class ImageConfiguration {
   /// An image configuration that provides no additional information.
   ///
   /// Useful when resolving an [ImageProvider] without any context.
-  static const ImageConfiguration empty = const ImageConfiguration();
+  static const ImageConfiguration empty = ImageConfiguration();
 
   @override
   bool operator ==(dynamic other) {

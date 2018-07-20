@@ -10,7 +10,7 @@ import 'package:flutter/widgets.dart';
 import 'semantics_tester.dart';
 import 'states.dart';
 
-const Duration _frameDuration = const Duration(milliseconds: 100);
+const Duration _frameDuration = Duration(milliseconds: 100);
 
 void main() {
   testWidgets('PageView control test', (WidgetTester tester) async {
@@ -612,9 +612,9 @@ void main() {
           key: const PageStorageKey<String>('PageView'),
           controller: controller,
           children: const <Widget>[
-            const Placeholder(),
-            const Placeholder(),
-            const Placeholder(),
+            Placeholder(),
+            Placeholder(),
+            Placeholder(),
           ],
         ),
       ),
@@ -646,9 +646,9 @@ void main() {
           key: const PageStorageKey<String>('PageView'),
           controller: controller,
           children: const <Widget>[
-            const Placeholder(),
-            const Placeholder(),
-            const Placeholder(),
+            Placeholder(),
+            Placeholder(),
+            Placeholder(),
           ],
         ),
       ),
@@ -664,9 +664,9 @@ void main() {
           key: const PageStorageKey<String>('Check it again against your list and see consistency!'),
           controller: controller2,
           children: const <Widget>[
-            const Placeholder(),
-            const Placeholder(),
-            const Placeholder(),
+            Placeholder(),
+            Placeholder(),
+            Placeholder(),
           ],
         ),
       ),

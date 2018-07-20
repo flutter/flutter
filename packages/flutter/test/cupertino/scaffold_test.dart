@@ -14,10 +14,10 @@ void main() {
       new CupertinoApp(
         home: const CupertinoPageScaffold(
           // Default nav bar is translucent.
-          navigationBar: const CupertinoNavigationBar(
-            middle: const Text('Title'),
+          navigationBar: CupertinoNavigationBar(
+            middle: Text('Title'),
           ),
-          child: const Center(),
+          child: Center(),
         ),
       ),
     );
@@ -26,7 +26,7 @@ void main() {
   });
 
   testWidgets('Contents are between opaque bars', (WidgetTester tester) async {
-    const Center page1Center = const Center();
+    const Center page1Center = Center();
 
     await tester.pumpWidget(
       new CupertinoApp(
@@ -34,22 +34,22 @@ void main() {
           tabBar: new CupertinoTabBar(
             backgroundColor: CupertinoColors.white,
             items: const <BottomNavigationBarItem>[
-              const BottomNavigationBarItem(
-                icon: const ImageIcon(const TestImageProvider(24, 24)),
-                title: const Text('Tab 1'),
+              BottomNavigationBarItem(
+                icon: ImageIcon(TestImageProvider(24, 24)),
+                title: Text('Tab 1'),
               ),
-              const BottomNavigationBarItem(
-                icon: const ImageIcon(const TestImageProvider(24, 24)),
-                title: const Text('Tab 2'),
+              BottomNavigationBarItem(
+                icon: ImageIcon(TestImageProvider(24, 24)),
+                title: Text('Tab 2'),
               ),
             ],
           ),
           tabBuilder: (BuildContext context, int index) {
             return index == 0
                 ? const CupertinoPageScaffold(
-                  navigationBar: const CupertinoNavigationBar(
+                  navigationBar: CupertinoNavigationBar(
                     backgroundColor: CupertinoColors.white,
-                    middle: const Text('Title'),
+                    middle: Text('Title'),
                   ),
                   child: page1Center,
                 )
@@ -69,18 +69,18 @@ void main() {
       new CupertinoApp(
         home: new MediaQuery(
           data: const MediaQueryData(
-            padding: const EdgeInsets.symmetric(vertical: 20.0),
+            padding: EdgeInsets.symmetric(vertical: 20.0),
           ),
           child: new CupertinoTabScaffold(
             tabBar: new CupertinoTabBar(
               items: const <BottomNavigationBarItem>[
-                const BottomNavigationBarItem(
-                  icon: const ImageIcon(const TestImageProvider(24, 24)),
-                  title: const Text('Tab 1'),
+                BottomNavigationBarItem(
+                  icon: ImageIcon(TestImageProvider(24, 24)),
+                  title: Text('Tab 1'),
                 ),
-                const BottomNavigationBarItem(
-                  icon: const ImageIcon(const TestImageProvider(24, 24)),
-                  title: const Text('Tab 2'),
+                BottomNavigationBarItem(
+                  icon: ImageIcon(TestImageProvider(24, 24)),
+                  title: Text('Tab 2'),
                 ),
               ],
             ),
@@ -88,7 +88,7 @@ void main() {
               return index == 0
                   ? new CupertinoPageScaffold(
                     navigationBar: const CupertinoNavigationBar(
-                      middle: const Text('Title'),
+                      middle: Text('Title'),
                     ),
                     child: new ListView(
                       children: <Widget>[
@@ -124,13 +124,13 @@ void main() {
         home: new CupertinoTabScaffold(
           tabBar: new CupertinoTabBar(
             items: const <BottomNavigationBarItem>[
-              const BottomNavigationBarItem(
-                icon: const ImageIcon(const TestImageProvider(24, 24)),
-                title: const Text('Tab 1'),
+              BottomNavigationBarItem(
+                icon: ImageIcon(TestImageProvider(24, 24)),
+                title: Text('Tab 1'),
               ),
-              const BottomNavigationBarItem(
-                icon: const ImageIcon(const TestImageProvider(24, 24)),
-                title: const Text('Tab 2'),
+              BottomNavigationBarItem(
+                icon: ImageIcon(TestImageProvider(24, 24)),
+                title: Text('Tab 2'),
               ),
             ],
           ),
@@ -229,7 +229,7 @@ void main() {
     await tester.pumpWidget(
       new CupertinoApp(
         home: const CupertinoPageScaffold(
-          child: const Center(),
+          child: Center(),
         ),
       ),
     );
@@ -245,8 +245,8 @@ void main() {
     await tester.pumpWidget(
       new CupertinoApp(
         home: const CupertinoPageScaffold(
-          child: const Center(),
-          backgroundColor: const Color(0xFF010203),
+          child: Center(),
+          backgroundColor: Color(0xFF010203),
         ),
       ),
     );

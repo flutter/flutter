@@ -142,6 +142,7 @@ linter:
     - type_init_formals
     # - unawaited_futures # https://github.com/flutter/flutter/issues/5793
     - unnecessary_brace_in_string_interps
+    - unnecessary_const
     - unnecessary_getters_setters
     # - unnecessary_lambdas # https://github.com/dart-lang/linter/issues/498
     - unnecessary_null_aware_assignments

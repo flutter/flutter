@@ -150,8 +150,8 @@ void main() {
   });
 
   testWidgets('ChipThemeData generates correct opacities for defaults', (WidgetTester tester) async {
-    const Color customColor1 = const Color(0xcafefeed);
-    const Color customColor2 = const Color(0xdeadbeef);
+    const Color customColor1 = Color(0xcafefeed);
+    const Color customColor2 = Color(0xdeadbeef);
     final TextStyle customStyle = new ThemeData.fallback().accentTextTheme.body2.copyWith(color: customColor2);
 
     final ChipThemeData lightTheme = new ChipThemeData.fromDefaults(
@@ -221,7 +221,7 @@ void main() {
       labelStyle: new ThemeData.fallback().accentTextTheme.body2.copyWith(color: Colors.white),
     ).copyWith(padding: const EdgeInsets.all(2.0), labelPadding: const EdgeInsets.only(top: 8.0, bottom: 8.0));
     final ChipThemeData lerp = ChipThemeData.lerp(chipThemeBlack, chipThemeWhite, 0.5);
-    const Color middleGrey = const Color(0xff7f7f7f);
+    const Color middleGrey = Color(0xff7f7f7f);
     expect(lerp.backgroundColor, equals(middleGrey.withAlpha(0x1f)));
     expect(lerp.deleteIconColor, equals(middleGrey.withAlpha(0xde)));
     expect(lerp.disabledColor, equals(middleGrey.withAlpha(0x0c)));
