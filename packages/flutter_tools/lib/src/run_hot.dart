@@ -9,7 +9,6 @@ import 'package:json_rpc_2/error_code.dart' as rpc_error_code;
 import 'package:json_rpc_2/json_rpc_2.dart' as rpc;
 import 'package:meta/meta.dart';
 
-import 'base/common.dart';
 import 'base/context.dart';
 import 'base/file_system.dart';
 import 'base/logger.dart';
@@ -17,7 +16,6 @@ import 'base/utils.dart';
 import 'build_info.dart';
 import 'compile.dart';
 import 'dart/dependencies.dart';
-import 'dart/pub.dart';
 import 'device.dart';
 import 'globals.dart';
 import 'resident_runner.dart';
@@ -29,11 +27,6 @@ class HotRunnerConfig {
   bool computeDartDependencies = true;
   /// Should the hot runner assume that the minimal Dart dependencies do not change?
   bool stableDartDependencies = false;
-  /// A hook for implementations to perform any necessary initialization prior
-  /// to a hot restart. Should return true if the hot restart should continue.
-  Future<bool> setupHotRestart() async {
-    return true;
-  }
 }
 
 HotRunnerConfig get hotRunnerConfig => context[HotRunnerConfig];
@@ -79,7 +72,7 @@ class HotRunner extends ResidentRunner {
     benchmarkData[name].add(value);
   }
 
-  Future<bool> _refreshDartDependencies() async {
+  bool _refreshDartDependencies() {
     if (!hotRunnerConfig.computeDartDependencies) {
       // Disabled.
       return true;
@@ -88,22 +81,6 @@ class HotRunner extends ResidentRunner {
       // Already computed.
       return true;
     }
-
-    try {
-      // Will return immediately if pubspec.yaml is up-to-date.
-      await pubGet(
-        context: PubContext.pubGet,
-        directory: projectRootPath,
-      );
-    } on ToolExit catch (error) {
-      printError(
-        'Unable to reload your application because "flutter packages get" failed to update '
-        'package dependencies.\n'
-        '$error'
-      );
-      return false;
-    }
-
     final DartDependencySetBuilder dartDependencySetBuilder =
         new DartDependencySetBuilder(mainPath, packagesFilePath);
     try {
@@ -180,7 +157,7 @@ class HotRunner extends ResidentRunner {
       return 3;
     }
     final Stopwatch initialUpdateDevFSsTimer = new Stopwatch()..start();
-    final bool devfsResult = await _updateDevFS(fullRestart: true);
+    final bool devfsResult = await _updateDevFS();
     _addBenchmarkData('hotReloadInitialDevFSSyncMilliseconds',
         initialUpdateDevFSsTimer.elapsed.inMilliseconds);
     if (!devfsResult)
@@ -248,7 +225,7 @@ class HotRunner extends ResidentRunner {
     }
 
     // Determine the Dart dependencies eagerly.
-    if (!await _refreshDartDependencies()) {
+    if (!_refreshDartDependencies()) {
       // Some kind of source level error or missing file in the Dart code.
       return 1;
     }
@@ -300,7 +277,7 @@ class HotRunner extends ResidentRunner {
   }
 
   Future<bool> _updateDevFS({ bool fullRestart = false }) async {
-    if (!await _refreshDartDependencies()) {
+    if (!_refreshDartDependencies()) {
       // Did not update DevFS because of a Dart source error.
       return false;
     }
@@ -324,7 +301,6 @@ class HotRunner extends ResidentRunner {
         fileFilter: _dartDependencies,
         fullRestart: fullRestart,
         projectRootPath: projectRootPath,
-        pathToReload: getReloadPath(fullRestart: fullRestart),
       );
       if (!result)
         return false;
@@ -501,10 +477,6 @@ class HotRunner extends ResidentRunner {
       );
       try {
         final Stopwatch timer = new Stopwatch()..start();
-        if (!(await hotRunnerConfig.setupHotRestart())) {
-          status.cancel();
-          return new OperationResult(1, 'setupHotRestart failed');
-        }
         await _restartFromSources();
         timer.stop();
         status.cancel();
@@ -580,7 +552,7 @@ class HotRunner extends ResidentRunner {
     final Stopwatch vmReloadTimer = new Stopwatch()..start();
     try {
       final String entryPath = fs.path.relative(
-        getReloadPath(fullRestart: false),
+        debuggingOptions.buildInfo.previewDart2 ? mainPath + '.dill' : mainPath,
         from: projectRootPath,
       );
       final Completer<Map<String, dynamic>> retrieveFirstReloadReport = new Completer<Map<String, dynamic>>();

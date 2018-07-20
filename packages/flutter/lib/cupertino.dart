@@ -8,7 +8,6 @@
 library cupertino;
 
 export 'src/cupertino/activity_indicator.dart';
-export 'src/cupertino/app.dart';
 export 'src/cupertino/bottom_tab_bar.dart';
 export 'src/cupertino/button.dart';
 export 'src/cupertino/colors.dart';

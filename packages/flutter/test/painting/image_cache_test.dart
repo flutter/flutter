@@ -118,15 +118,5 @@ void main() {
       expect(imageCache.currentSize, 1);
       expect(imageCache.currentSizeBytes, 256);
     });
-
-    test('Increases cache size if an image is loaded that is larger then the maximum size', () async {
-      const TestImage testImage = const TestImage(width: 8, height: 8);
-
-      imageCache.maximumSizeBytes = 1;
-      await extractOneFrame(const TestImageProvider(1, 1, image: testImage).resolve(ImageConfiguration.empty));
-      expect(imageCache.currentSize, 1);
-      expect(imageCache.currentSizeBytes, 256);
-      expect(imageCache.maximumSizeBytes, 256 + 1000);
-    });
   });
 }

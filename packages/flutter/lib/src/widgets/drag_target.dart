@@ -101,10 +101,8 @@ class Draggable<T> extends StatefulWidget {
     this.onDragStarted,
     this.onDraggableCanceled,
     this.onDragCompleted,
-    this.ignoringFeedbackSemantics = true,
   }) : assert(child != null),
        assert(feedback != null),
-       assert(ignoringFeedbackSemantics != null),
        assert(maxSimultaneousDrags == null || maxSimultaneousDrags >= 0),
        super(key: key);
 
@@ -165,17 +163,6 @@ class Draggable<T> extends StatefulWidget {
 
   /// Where this widget should be anchored during a drag.
   final DragAnchor dragAnchor;
-
-  /// Whether the semantics of the [feedback] widget is ignored when building
-  /// the semantics tree.
-  /// 
-  /// This value should be set to false when the [feedback] widget is intended
-  /// to be the same object as the [child].  Placing a [GlobalKey] on this
-  /// widget will ensure semantic focus is kept on the element as it moves in
-  /// and out of the feedback position.
-  ///
-  /// Defaults to true.
-  final bool ignoringFeedbackSemantics;
 
   /// Controls how this widget competes with other gestures to initiate a drag.
   ///
@@ -266,8 +253,7 @@ class LongPressDraggable<T> extends Draggable<T> {
     int maxSimultaneousDrags,
     VoidCallback onDragStarted,
     DraggableCanceledCallback onDraggableCanceled,
-    VoidCallback onDragCompleted,
-    bool ignoringFeedbackSemantics = true,
+    VoidCallback onDragCompleted
   }) : super(
     key: key,
     child: child,
@@ -280,8 +266,7 @@ class LongPressDraggable<T> extends Draggable<T> {
     maxSimultaneousDrags: maxSimultaneousDrags,
     onDragStarted: onDragStarted,
     onDraggableCanceled: onDraggableCanceled,
-    onDragCompleted: onDragCompleted,
-    ignoringFeedbackSemantics: ignoringFeedbackSemantics,
+    onDragCompleted: onDragCompleted
   );
 
   @override
@@ -358,7 +343,6 @@ class _DraggableState<T> extends State<Draggable<T>> {
       dragStartPoint: dragStartPoint,
       feedback: widget.feedback,
       feedbackOffset: widget.feedbackOffset,
-      ignoringFeedbackSemantics: widget.ignoringFeedbackSemantics,
       onDragEnd: (Velocity velocity, Offset offset, bool wasAccepted) {
         if (mounted) {
           setState(() {
@@ -512,10 +496,8 @@ class _DragAvatar<T> extends Drag {
     this.dragStartPoint = Offset.zero,
     this.feedback,
     this.feedbackOffset = Offset.zero,
-    this.onDragEnd,
-    @required this.ignoringFeedbackSemantics,
+    this.onDragEnd
   }) : assert(overlayState != null),
-       assert(ignoringFeedbackSemantics != null),
        assert(dragStartPoint != null),
        assert(feedbackOffset != null) {
     _entry = new OverlayEntry(builder: _build);
@@ -531,7 +513,6 @@ class _DragAvatar<T> extends Drag {
   final Offset feedbackOffset;
   final _OnDragEnd onDragEnd;
   final OverlayState overlayState;
-  final bool ignoringFeedbackSemantics;
 
   _DragTargetState<T> _activeTarget;
   final List<_DragTargetState<T>> _enteredTargets = <_DragTargetState<T>>[];
@@ -638,8 +619,7 @@ class _DragAvatar<T> extends Drag {
       left: _lastOffset.dx - overlayTopLeft.dx,
       top: _lastOffset.dy - overlayTopLeft.dy,
       child: new IgnorePointer(
-        child: feedback,
-        ignoringSemantics: ignoringFeedbackSemantics,
+        child: feedback
       )
     );
   }

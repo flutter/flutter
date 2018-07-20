@@ -5,8 +5,6 @@
 import 'dart:async';
 import 'dart:convert';
 
-import 'package:meta/meta.dart';
-
 import '../application_package.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
@@ -27,77 +25,6 @@ const String _kIdeviceinstallerInstructions =
     'brew install ideviceinstaller.';
 
 const Duration kPortForwardTimeout = const Duration(seconds: 10);
-
-class IOSDeploy {
-  const IOSDeploy();
-
-  /// Installs and runs the specified app bundle using ios-deploy, then returns
-  /// the exit code.
-  Future<int> runApp({
-    @required String deviceId,
-    @required String bundlePath,
-    @required List<String> launchArguments,
-  }) async {
-    final List<String> launchCommand = <String>[
-      '/usr/bin/env',
-      'ios-deploy',
-      '--id',
-      deviceId,
-      '--bundle',
-      bundlePath,
-      '--no-wifi',
-      '--justlaunch',
-    ];
-    if (launchArguments.isNotEmpty) {
-      launchCommand.add('--args');
-      launchCommand.add('${launchArguments.join(" ")}');
-    }
-
-    // Push /usr/bin to the front of PATH to pick up default system python, package 'six'.
-    //
-    // ios-deploy transitively depends on LLDB.framework, which invokes a
-    // Python script that uses package 'six'. LLDB.framework relies on the
-    // python at the front of the path, which may not include package 'six'.
-    // Ensure that we pick up the system install of python, which does include
-    // it.
-    final Map<String, String> iosDeployEnv = new Map<String, String>.from(platform.environment);
-    iosDeployEnv['PATH'] = '/usr/bin:${iosDeployEnv['PATH']}';
-
-    return await runCommandAndStreamOutput(
-      launchCommand,
-      mapFunction: _monitorInstallationFailure,
-      trace: true,
-      environment: iosDeployEnv,
-    );
-  }
-
-  // Maps stdout line stream. Must return original line.
-  String _monitorInstallationFailure(String stdout) {
-    // Installation issues.
-    if (stdout.contains('Error 0xe8008015') || stdout.contains('Error 0xe8000067')) {
-      printError(noProvisioningProfileInstruction, emphasis: true);
-
-    // Launch issues.
-    } else if (stdout.contains('e80000e2')) {
-      printError('''
-═══════════════════════════════════════════════════════════════════════════════════
-Your device is locked. Unlock your device first before running.
-═══════════════════════════════════════════════════════════════════════════════════''',
-      emphasis: true);
-    } else if (stdout.contains('Error 0xe8000022')) {
-      printError('''
-═══════════════════════════════════════════════════════════════════════════════════
-Error launching app. Try launching from within Xcode via:
-    open ios/Runner.xcworkspace
-
-Your Xcode version may be too old for your iOS version.
-═══════════════════════════════════════════════════════════════════════════════════''',
-      emphasis: true);
-    }
-
-    return stdout;
-  }
-}
 
 class IOSDevices extends PollingDeviceDiscovery {
   IOSDevices() : super('iOS devices');
@@ -286,18 +213,34 @@ class IOSDevice extends Device {
     if (platformArgs['trace-startup'] ?? false)
       launchArguments.add('--trace-startup');
 
+    final List<String> launchCommand = <String>[
+      '/usr/bin/env',
+      'ios-deploy',
+      '--id',
+      id,
+      '--bundle',
+      bundle.path,
+      '--no-wifi',
+      '--justlaunch',
+    ];
+
+    if (launchArguments.isNotEmpty) {
+      launchCommand.add('--args');
+      launchCommand.add('${launchArguments.join(" ")}');
+    }
+
     int installationResult = -1;
     Uri localObservatoryUri;
 
-    final Status installStatus = logger.startProgress('Installing and launching...', expectSlowOperation: true);
-
+    final Status installStatus =
+        logger.startProgress('Installing and launching...', expectSlowOperation: true);
     if (!debuggingOptions.debuggingEnabled) {
       // If debugging is not enabled, just launch the application and continue.
       printTrace('Debugging is not enabled');
-      installationResult = await const IOSDeploy().runApp(
-        deviceId: id,
-        bundlePath: bundle.path,
-        launchArguments: launchArguments,
+      installationResult = await runCommandAndStreamOutput(
+        launchCommand,
+        mapFunction: monitorInstallationFailure,
+        trace: true,
       );
       installStatus.stop();
     } else {
@@ -315,10 +258,10 @@ class IOSDevice extends Device {
 
       final Future<Uri> forwardObservatoryUri = observatoryDiscovery.uri;
 
-      final Future<int> launch = const IOSDeploy().runApp(
-        deviceId: id,
-        bundlePath: bundle.path,
-        launchArguments: launchArguments,
+      final Future<int> launch = runCommandAndStreamOutput(
+        launchCommand,
+        mapFunction: monitorInstallationFailure,
+        trace: true,
       );
 
       localObservatoryUri = await launch.then<Uri>((int result) async {
@@ -378,6 +321,33 @@ class IOSDevice extends Device {
 
   @override
   Future<Null> takeScreenshot(File outputFile) => iMobileDevice.takeScreenshot(outputFile);
+
+  // Maps stdout line stream. Must return original line.
+  String monitorInstallationFailure(String stdout) {
+    // Installation issues.
+    if (stdout.contains('Error 0xe8008015') || stdout.contains('Error 0xe8000067')) {
+      printError(noProvisioningProfileInstruction, emphasis: true);
+
+    // Launch issues.
+    } else if (stdout.contains('e80000e2')) {
+      printError('''
+═══════════════════════════════════════════════════════════════════════════════════
+Your device is locked. Unlock your device first before running.
+═══════════════════════════════════════════════════════════════════════════════════''',
+      emphasis: true);
+    } else if (stdout.contains('Error 0xe8000022')) {
+      printError('''
+═══════════════════════════════════════════════════════════════════════════════════
+Error launching app. Try launching from within Xcode via:
+    open ios/Runner.xcworkspace
+
+Your Xcode version may be too old for your iOS version.
+═══════════════════════════════════════════════════════════════════════════════════''',
+      emphasis: true);
+    }
+
+    return stdout;
+  }
 }
 
 /// Decodes an encoded syslog string to a UTF-8 representation.

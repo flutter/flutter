@@ -69,7 +69,6 @@ class TextFormField extends FormField<String> {
     FormFieldValidator<String> validator,
     List<TextInputFormatter> inputFormatters,
     bool enabled,
-    Brightness keyboardAppearance,
   }) : assert(initialValue == null || controller == null),
        assert(keyboardType != null),
        assert(textAlign != null),
@@ -107,7 +106,6 @@ class TextFormField extends FormField<String> {
         onSubmitted: onFieldSubmitted,
         inputFormatters: inputFormatters,
         enabled: enabled,
-        keyboardAppearance: keyboardAppearance,
       );
     },
   );

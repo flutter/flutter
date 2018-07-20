@@ -75,7 +75,7 @@ abstract class EdgeInsetsGeometry {
   ///
   ///  * [EdgeInsets.inflateRect], to inflate a [Rect] rather than a [Size] (for
   ///    [EdgeInsetsDirectional], requires first calling [resolve] to establish
-  ///    how the start and end map to the left or right).
+  ///    how the start and and map to the left or right).
   ///  * [deflateSize], to deflate a [Size] rather than inflating it.
   Size inflateSize(Size size) {
     return new Size(size.width + horizontal, size.height + vertical);
@@ -91,7 +91,7 @@ abstract class EdgeInsetsGeometry {
   ///
   ///  * [EdgeInsets.deflateRect], to deflate a [Rect] rather than a [Size]. (for
   ///    [EdgeInsetsDirectional], requires first calling [resolve] to establish
-  ///    how the start and end map to the left or right).
+  ///    how the start and and map to the left or right).
   ///  * [inflateSize], to inflate a [Size] rather than deflating it.
   Size deflateSize(Size size) {
     return new Size(size.width - horizontal, size.height - vertical);

@@ -452,7 +452,7 @@ abstract class BoxScrollView extends ScrollView {
 /// machinery can make use of the foreknowledge of the children's extent to save
 /// work, for example when the scroll position changes drastically.
 ///
-/// There are four options for constructing a [ListView]:
+/// There are three options for constructing a [ListView]:
 ///
 ///  1. The default constructor takes an explicit [List<Widget>] of children. This
 ///     constructor is appropriate for list views with a small number of
@@ -460,18 +460,13 @@ abstract class BoxScrollView extends ScrollView {
 ///     child that could possibly be displayed in the list view instead of just
 ///     those children that are actually visible.
 ///
-///  2. The [ListView.builder] constructor takes an [IndexedWidgetBuilder], which
-///     builds the children on demand. This constructor is appropriate for list views
-///     with a large (or infinite) number of children because the builder is called
+///  2. The [ListView.builder] takes an [IndexedWidgetBuilder], which builds the
+///     children on demand. This constructor is appropriate for list views with
+///     a large (or infinite) number of children because the builder is called
 ///     only for those children that are actually visible.
 ///
-///  3. The [ListView.separated] constructor takes two [IndexedWidgetBuilder]s:
-///     `itemBuilder` builds child items on demand, and `separatorBuilder`
-///     similarly builds separator children which appear in between the child items.
-///     This constructor is appropriate for list views with a fixed number of children.
-///
-///  4. The [ListView.custom] constructor takes a [SliverChildDelegate], which provides
-///     the ability to customize additional aspects of the child model. For example,
+///  3. The [ListView.custom] takes a [SliverChildDelegate], which provides the
+///     ability to customize additional aspects of the child model. For example,
 ///     a [SliverChildDelegate] can control the algorithm used to estimate the
 ///     size of children that are not actually visible.
 ///
@@ -754,7 +749,7 @@ class ListView extends BoxScrollView {
        childrenDelegate = new SliverChildBuilderDelegate(
          (BuildContext context, int index) {
            final int itemIndex = index ~/ 2;
-           return index.isEven
+           return (index == 0 || index.isEven)
              ? itemBuilder(context, itemIndex)
              : separatorBuilder(context, itemIndex);
          },

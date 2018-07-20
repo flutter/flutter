@@ -10,7 +10,6 @@ import 'package:yaml/yaml.dart';
 import 'base/context.dart';
 import 'base/file_system.dart';
 import 'base/platform.dart';
-import 'base/utils.dart';
 import 'build_info.dart';
 import 'cache.dart';
 import 'dart/package_map.dart';
@@ -269,21 +268,20 @@ Map<String, dynamic> _readMaterialFontsManifest() {
   final String fontsPath = fs.path.join(fs.path.absolute(Cache.flutterRoot),
       'packages', 'flutter_tools', 'schema', 'material_fonts.yaml');
 
-  return castStringKeyedMap(loadYaml(fs.file(fontsPath).readAsStringSync()));
+  return loadYaml(fs.file(fontsPath).readAsStringSync());
 }
 
 final Map<String, dynamic> _materialFontsManifest = _readMaterialFontsManifest();
 
 List<Map<String, dynamic>> _getMaterialFonts(String fontSet) {
-  final List<dynamic> fontsList = _materialFontsManifest[fontSet];
-  return fontsList?.map<Map<String, dynamic>>(castStringKeyedMap)?.toList();
+  return _materialFontsManifest[fontSet];
 }
 
 List<_Asset> _getMaterialAssets(String fontSet) {
   final List<_Asset> result = <_Asset>[];
 
   for (Map<String, dynamic> family in _getMaterialFonts(fontSet)) {
-    for (Map<dynamic, dynamic> font in family['fonts']) {
+    for (Map<String, dynamic> font in family['fonts']) {
       final Uri entryUri = fs.path.toUri(font['asset']);
       result.add(new _Asset(
         baseDir: fs.path.join(Cache.flutterRoot, 'bin', 'cache', 'artifacts', 'material_fonts'),

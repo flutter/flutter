@@ -208,9 +208,6 @@ class EditableText extends StatefulWidget {
     this.onSelectionChanged,
     List<TextInputFormatter> inputFormatters,
     this.rendererIgnoresPointer = false,
-    this.cursorWidth = 1.0,
-    this.cursorRadius,
-    this.keyboardAppearance = Brightness.light,
   }) : assert(controller != null),
        assert(focusNode != null),
        assert(obscureText != null),
@@ -355,23 +352,6 @@ class EditableText extends StatefulWidget {
   ///
   /// This property is false by default.
   final bool rendererIgnoresPointer;
-
-  /// How thick the cursor will be.
-  ///
-  /// Defaults to 1.0
-  final double cursorWidth;
-
-  /// How rounded the corners of the cursor should be.
-  ///
-  /// By default, the cursor has a Radius of zero.
-  final Radius cursorRadius;
-
-  /// The appearance of the keyboard.
-  /// 
-  /// This setting is only honored on iOS devices.
-  /// 
-  /// Defaults to [Brightness.light].
-  final Brightness keyboardAppearance;
 
   @override
   EditableTextState createState() => new EditableTextState();
@@ -565,7 +545,6 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
               inputType: widget.keyboardType,
               obscureText: widget.obscureText,
               autocorrect: widget.autocorrect,
-              keyboardAppearance: widget.keyboardAppearance,
               inputAction: widget.keyboardType == TextInputType.multiline
                   ? TextInputAction.newline
                   : widget.textInputAction,
@@ -831,7 +810,6 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     FocusScope.of(context).reparentIfNeeded(widget.focusNode);
     super.build(context); // See AutomaticKeepAliveClientMixin.
     final TextSelectionControls controls = widget.selectionControls;
-
     return new Scrollable(
       excludeFromSemantics: true,
       axisDirection: _isMultiline ? AxisDirection.down : AxisDirection.right,
@@ -863,8 +841,6 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
               onSelectionChanged: _handleSelectionChanged,
               onCaretChanged: _handleCaretChanged,
               rendererIgnoresPointer: widget.rendererIgnoresPointer,
-              cursorWidth: widget.cursorWidth,
-              cursorRadius: widget.cursorRadius,
             ),
           ),
         );
@@ -926,8 +902,6 @@ class _Editable extends LeafRenderObjectWidget {
     this.onSelectionChanged,
     this.onCaretChanged,
     this.rendererIgnoresPointer = false,
-    this.cursorWidth,
-    this.cursorRadius,
   }) : assert(textDirection != null),
        assert(rendererIgnoresPointer != null),
        super(key: key);
@@ -949,8 +923,6 @@ class _Editable extends LeafRenderObjectWidget {
   final SelectionChangedHandler onSelectionChanged;
   final CaretChangedHandler onCaretChanged;
   final bool rendererIgnoresPointer;
-  final double cursorWidth;
-  final Radius cursorRadius;
 
   @override
   RenderEditable createRenderObject(BuildContext context) {
@@ -971,8 +943,6 @@ class _Editable extends LeafRenderObjectWidget {
       onCaretChanged: onCaretChanged,
       ignorePointer: rendererIgnoresPointer,
       obscureText: obscureText,
-      cursorWidth: cursorWidth,
-      cursorRadius: cursorRadius,
     );
   }
 
@@ -994,8 +964,6 @@ class _Editable extends LeafRenderObjectWidget {
       ..onSelectionChanged = onSelectionChanged
       ..onCaretChanged = onCaretChanged
       ..ignorePointer = rendererIgnoresPointer
-      ..obscureText = obscureText
-      ..cursorWidth = cursorWidth
-      ..cursorRadius = cursorRadius;
+      ..obscureText = obscureText;
   }
 }

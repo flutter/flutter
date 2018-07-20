@@ -763,7 +763,7 @@ void main() {
       ),
     );
 
-    // Overall height for this InputDecorator is 48dps because the prefix icon's minimum size
+    // Overall height for this InputDecorator is 48dps because the prefix icon's minimum size 
     // is 48x48 and the rest of the elements only require 40dps:
      //   12 - top padding
      //   16 - input text (ahem font size 16dps)
@@ -799,7 +799,7 @@ void main() {
       ),
     );
 
-    // Overall height for this InputDecorator is 48dps because the prefix icon's minimum size
+    // Overall height for this InputDecorator is 48dps because the prefix icon's minimum size 
      // is 48x48 and the rest of the elements only require 40dps:
      //   12 - top padding
      //   16 - input text (ahem font size 16dps)
@@ -821,7 +821,7 @@ void main() {
       ),
     );
 
-    // Overall height for this InputDecorator is 100dps because the prefix icon's  size
+    // Overall height for this InputDecorator is 100dps because the prefix icon's  size 
     // is 100x100 and the rest of the elements only require 40dps:
      //   12 - top padding
      //   16 - input text (ahem font size 16dps)
@@ -864,7 +864,7 @@ void main() {
         ),
       ),
     );
-
+    
     // Margin for text decoration is 12 when filled and top left offset is (0, 0)
     // 0 + 12 = 12.
     expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, 60.0));
@@ -904,7 +904,7 @@ void main() {
         ),
       ),
     );
-
+    
     // Margin for text decoration is 12 when filled and top left offset is (0, 0)
     // 0 + 12 = 12.
     expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, 52.0));
@@ -1639,15 +1639,4 @@ void main() {
     },
     skip: !Platform.isLinux,
   );
-
-  testWidgets('InputDecorationTheme.toString()', (WidgetTester tester) async {
-    // Regression test for https://github.com/flutter/flutter/issues/19305
-
-    expect(
-      const InputDecorationTheme(
-        contentPadding: const EdgeInsetsDirectional.only(start: 5.0),
-      ).toString(),
-      contains('contentPadding: EdgeInsetsDirectional(5.0, 0.0, 0.0, 0.0)'),
-    );
-  });
 }

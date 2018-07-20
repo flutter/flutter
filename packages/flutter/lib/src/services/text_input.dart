@@ -10,7 +10,6 @@ import 'package:flutter/foundation.dart';
 
 import 'message_codec.dart';
 import 'system_channels.dart';
-import 'system_chrome.dart';
 import 'text_editing.dart';
 
 export 'dart:ui' show TextAffinity;
@@ -105,7 +104,7 @@ class TextInputType {
   String get _name => 'TextInputType.${_names[index]}';
 
   /// Returns a representation of this object as a JSON object.
-  Map<String, dynamic> toJson() {
+  Map<String, dynamic> toJSON() {
     return <String, dynamic>{
       'name': _name,
       'signed': signed,
@@ -342,11 +341,9 @@ class TextInputConfiguration {
     this.autocorrect = true,
     this.actionLabel,
     this.inputAction = TextInputAction.done,
-    this.keyboardAppearance = Brightness.light,
   }) : assert(inputType != null),
        assert(obscureText != null),
        assert(autocorrect != null),
-       assert(keyboardAppearance != null),
        assert(inputAction != null);
 
   /// The type of information for which to optimize the text input control.
@@ -368,22 +365,14 @@ class TextInputConfiguration {
   /// What kind of action to request for the action button on the IME.
   final TextInputAction inputAction;
 
-  /// The appearance of the keyboard.
-  /// 
-  /// This setting is only honored on iOS devices.
-  /// 
-  /// Defaults to [Brightness.light].
-  final Brightness keyboardAppearance;
-
   /// Returns a representation of this object as a JSON object.
-  Map<String, dynamic> toJson() {
+  Map<String, dynamic> toJSON() {
     return <String, dynamic>{
-      'inputType': inputType.toJson(),
+      'inputType': inputType.toJSON(),
       'obscureText': obscureText,
       'autocorrect': autocorrect,
       'actionLabel': actionLabel,
       'inputAction': inputAction.toString(),
-      'keyboardAppearance': keyboardAppearance.toString(),
     };
   }
 }
@@ -686,7 +675,7 @@ class TextInput {
     _clientHandler._currentConnection = connection;
     SystemChannels.textInput.invokeMethod(
       'TextInput.setClient',
-      <dynamic>[ connection._id, configuration.toJson() ],
+      <dynamic>[ connection._id, configuration.toJSON() ],
     );
     return connection;
   }

@@ -45,7 +45,6 @@ import 'widgets_localizations.dart';
 ///   * es - Spanish
 ///   * fa - Farsi
 ///   * fr - French
-///   * gsw - Swiss German
 ///   * he - Hebrew
 ///   * id - Indonesian
 ///   * it - Italian
@@ -525,7 +524,6 @@ class _MaterialLocalizationsDelegate extends LocalizationsDelegate<MaterialLocal
     'es', // Spanish
     'fa', // Farsi (Persian)
     'fr', // French
-    'gsw', // Swiss German
     'he', // Hebrew
     'id', // Indonesian
     'it', // Italian

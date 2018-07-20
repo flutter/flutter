@@ -21,9 +21,6 @@ import 'matchers.dart';
 import 'test_async_utils.dart';
 import 'test_text_input.dart';
 
-/// Keep users from needing multiple imports to test semantics.
-export 'package:flutter/rendering.dart' show SemanticsHandle;
-
 export 'package:test/test.dart' hide
   expect, // we have our own wrapper below
   TypeMatcher, // matcher's TypeMatcher conflicts with the one in the Flutter framework
@@ -613,44 +610,6 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
     expect(backButton, findsOneWidget, reason: 'One back button expected on screen');
 
     await tap(backButton);
-  }
-
-  /// Attempts to find the [SemanticsData] of first result from `finder`.
-  /// 
-  /// If the object identified by the finder doesn't own it's semantic node,
-  /// this will return the semantics data of the first ancestor with semantics
-  /// data. The ancestor's semantic data will include the child's as well as
-  /// other nodes that have been merged together.
-  ///
-  /// Will throw a [StateError] if the finder returns more than one element or
-  /// if no semantics are found or are not enabled.
-  SemanticsData getSemanticsData(Finder finder) {
-    if (binding.pipelineOwner.semanticsOwner == null)
-      throw new StateError('Semantics are not enabled.');
-    final Iterable<Element> candidates = finder.evaluate();
-    if (candidates.isEmpty) {
-      throw new StateError('Finder returned no matching elements.');
-    }
-    if (candidates.length > 1) {
-      throw new StateError('Finder returned more than one element.');
-    }
-    final Element element = candidates.single;
-    RenderObject renderObject = element.findRenderObject();
-    SemanticsNode result = renderObject.debugSemantics;
-    while (renderObject != null && result == null) {
-      renderObject = renderObject?.parent;
-      result = renderObject?.debugSemantics;
-    }
-    if (result == null)
-      throw new StateError('No Semantics data found.');
-    return result.getSemanticsData();
-  }
-
-  /// Enable semantics in a test by creating a [SemanticsHandle].
-  ///
-  /// The handle must be disposed at the end of the test.
-  SemanticsHandle ensureSemantics() {
-    return binding.pipelineOwner.ensureSemantics();
   }
 }
 

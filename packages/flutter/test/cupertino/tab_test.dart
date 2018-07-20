@@ -8,10 +8,18 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   testWidgets('Use home', (WidgetTester tester) async {
     await tester.pumpWidget(
-      new CupertinoApp(
-        home: new CupertinoTabView(
-          builder: (BuildContext context) => const Text('home'),
-        ),
+      new WidgetsApp(
+        color: const Color(0xFFFFFFFF),
+        onGenerateRoute: (RouteSettings settings) {
+          return new CupertinoPageRoute<void>(
+            settings: settings,
+            builder: (BuildContext context) {
+              return new CupertinoTabView(
+                builder: (BuildContext context) => const Text('home'),
+              );
+            },
+          );
+        },
       ),
     );
 
@@ -20,12 +28,20 @@ void main() {
 
   testWidgets('Use routes', (WidgetTester tester) async {
     await tester.pumpWidget(
-      new CupertinoApp(
-        home: new CupertinoTabView(
-          routes: <String, WidgetBuilder>{
-            '/': (BuildContext context) => const Text('first route'),
-          },
-        ),
+      new WidgetsApp(
+        color: const Color(0xFFFFFFFF),
+        onGenerateRoute: (RouteSettings settings) {
+          return new CupertinoPageRoute<void>(
+            settings: settings,
+            builder: (BuildContext context) {
+              return new CupertinoTabView(
+                routes: <String, WidgetBuilder>{
+                  '/': (BuildContext context) => const Text('first route'),
+                },
+              );
+            },
+          );
+        },
       ),
     );
 
@@ -34,20 +50,28 @@ void main() {
 
   testWidgets('Use home and named routes', (WidgetTester tester) async {
     await tester.pumpWidget(
-      new CupertinoApp(
-        home: new CupertinoTabView(
-          builder: (BuildContext context) {
-            return new CupertinoButton(
-              child: const Text('go to second page'),
-              onPressed: () {
-                Navigator.of(context).pushNamed('/2');
-              },
-            );
-          },
-          routes: <String, WidgetBuilder>{
-            '/2': (BuildContext context) => const Text('second named route'),
-          },
-        ),
+      new WidgetsApp(
+        color: const Color(0xFFFFFFFF),
+        onGenerateRoute: (RouteSettings settings) {
+          return new CupertinoPageRoute<void>(
+            settings: settings,
+            builder: (BuildContext context) {
+              return new CupertinoTabView(
+                builder: (BuildContext context) {
+                  return new CupertinoButton(
+                    child: const Text('go to second page'),
+                    onPressed: () {
+                      Navigator.of(context).pushNamed('/2');
+                    },
+                  );
+                },
+                routes: <String, WidgetBuilder>{
+                  '/2': (BuildContext context) => const Text('second named route'),
+                },
+              );
+            },
+          );
+        },
       ),
     );
 
@@ -60,19 +84,27 @@ void main() {
 
   testWidgets('Use onGenerateRoute', (WidgetTester tester) async {
     await tester.pumpWidget(
-      new CupertinoApp(
-        home: new CupertinoTabView(
-          onGenerateRoute: (RouteSettings settings) {
-            if (settings.name == Navigator.defaultRouteName) {
-              return new CupertinoPageRoute<void>(
-                settings: settings,
-                builder: (BuildContext context) {
-                  return const Text('generated home');
-                }
+      new WidgetsApp(
+        color: const Color(0xFFFFFFFF),
+        onGenerateRoute: (RouteSettings settings) {
+          return new CupertinoPageRoute<void>(
+            settings: settings,
+            builder: (BuildContext context) {
+              return new CupertinoTabView(
+                onGenerateRoute: (RouteSettings settings) {
+                  if (settings.name == Navigator.defaultRouteName) {
+                    return new CupertinoPageRoute<void>(
+                      settings: settings,
+                      builder: (BuildContext context) {
+                        return const Text('generated home');
+                      }
+                    );
+                  }
+                },
               );
-            }
-          },
-        ),
+            },
+          );
+        },
       ),
     );
 
@@ -82,12 +114,20 @@ void main() {
   testWidgets('Use onUnknownRoute', (WidgetTester tester) async {
     String unknownForRouteCalled;
     await tester.pumpWidget(
-      new CupertinoApp(
-        home: new CupertinoTabView(
-          onUnknownRoute: (RouteSettings settings) {
-            unknownForRouteCalled = settings.name;
-          },
-        ),
+      new WidgetsApp(
+        color: const Color(0xFFFFFFFF),
+        onGenerateRoute: (RouteSettings settings) {
+          return new CupertinoPageRoute<void>(
+            settings: settings,
+            builder: (BuildContext context) {
+              return new CupertinoTabView(
+                onUnknownRoute: (RouteSettings settings) {
+                  unknownForRouteCalled = settings.name;
+                },
+              );
+            },
+          );
+        },
       ),
     );
 

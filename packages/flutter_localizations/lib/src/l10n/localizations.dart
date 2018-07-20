@@ -637,16 +637,16 @@ class _Bundle_ms extends TranslationBundle {
   @override String get openAppDrawerTooltip => r'Buka menu navigasi';
   @override String get backButtonTooltip => r'Kembali';
   @override String get closeButtonTooltip => r'Tutup';
-  @override String get deleteButtonTooltip => r'Padam';
-  @override String get nextMonthTooltip => r'Bulan depan';
+  @override String get deleteButtonTooltip => r'Buang';
+  @override String get nextMonthTooltip => r'Bulan seterusnya';
   @override String get previousMonthTooltip => r'Bulan sebelumnya';
   @override String get nextPageTooltip => r'Halaman seterusnya';
   @override String get previousPageTooltip => r'Halaman sebelumnya';
-  @override String get showMenuTooltip => r'Tunjukkan menu';
-  @override String get aboutListTileTitle => r'Perihal $applicationName';
+  @override String get showMenuTooltip => r'Tunjuk menu';
+  @override String get aboutListTileTitle => r'Tentang $applicationName';
   @override String get licensesPageTitle => r'Lesen';
   @override String get pageRowsInfoTitle => r'$firstRow–$lastRow dari $rowCount';
-  @override String get pageRowsInfoTitleApproximate => r'$firstRow–$lastRow dari kira-kira $rowCount';
+  @override String get pageRowsInfoTitleApproximate => r'$firstRow–$lastRow dari lebih kurang $rowCount';
   @override String get rowsPerPageTitle => r'Baris setiap halaman:';
   @override String get tabLabel => r'Tab $tabIndex dari $tabCount';
   @override String get selectedRowCountTitleZero => r'Tiada item dipilih';
@@ -665,10 +665,10 @@ class _Bundle_ms extends TranslationBundle {
   @override String get postMeridiemAbbreviation => r'PTG';
   @override String get timePickerHourModeAnnouncement => r'Pilih jam';
   @override String get timePickerMinuteModeAnnouncement => r'Pilih minit';
-  @override String get modalBarrierDismissLabel => r'Tolak';
-  @override String get signedInLabel => r'Dilog masuk';
-  @override String get hideAccountsLabel => r'Sembunyikan akaun';
-  @override String get showAccountsLabel => r'Tunjukkan akaun';
+  @override String get modalBarrierDismissLabel => r'Abai';
+  @override String get signedInLabel => r'Telah daftar masuk';
+  @override String get hideAccountsLabel => r'Sembunyi akaun';
+  @override String get showAccountsLabel => r'Tunjuk akaun';
   @override String get drawerLabel => r'Menu navigasi';
   @override String get popupMenuLabel => r'Menu pop timbul';
   @override String get dialogLabel => r'Dialog';
@@ -1135,7 +1135,7 @@ class _Bundle_ur extends TranslationBundle {
   @override String get modalBarrierDismissLabel => r'برخاست کریں';
   @override String get drawerLabel => r'نیویگیشن مینو';
   @override String get popupMenuLabel => r'پاپ اپ مینو';
-  @override String get dialogLabel => r'ڈائلاگ';
+  @override String get dialogLabel => r'ڈائیلاگ';
   @override String get alertDialogLabel => r'انتباہ';
   @override String get searchFieldLabel => r'تلاش کریں';
 }

@@ -293,11 +293,11 @@ void putRedirectInOldIndexLocation() {
 }
 
 List<String> findPackageNames() {
-  return findPackages().map((FileSystemEntity file) => path.basename(file.path)).toList();
+  return findPackages().map((Directory dir) => path.basename(dir.path)).toList();
 }
 
 /// Finds all packages in the Flutter SDK
-List<FileSystemEntity> findPackages() {
+List<Directory> findPackages() {
   return new Directory('packages')
     .listSync()
     .where((FileSystemEntity entity) {
@@ -307,7 +307,6 @@ List<FileSystemEntity> findPackages() {
       // TODO(ianh): Use a real YAML parser here
       return !pubspec.readAsStringSync().contains('nodoc: true');
     })
-    .cast<Directory>()
     .toList();
 }
 

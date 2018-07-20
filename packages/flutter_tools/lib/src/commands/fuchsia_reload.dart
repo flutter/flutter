@@ -326,19 +326,17 @@ class FuchsiaReloadCommand extends FlutterCommand {
     if (!_fileExists(_target))
       throwToolExit('Couldn\'t find application entry point at $_target.');
 
+    final String packagesFileName = '${_projectName}_dart_library.packages';
+    _dotPackagesPath = '$_buildDir/dartlang/gen/$_projectRoot/$packagesFileName';
+    if (!_fileExists(_dotPackagesPath))
+      throwToolExit('Couldn\'t find .packages file at $_dotPackagesPath.');
+
     final String nameOverride = argResults['name-override'];
     if (nameOverride == null) {
       _binaryName = _projectName;
     } else {
       _binaryName = nameOverride;
     }
-
-    // When there's an override of the on-device binary name, use that name
-    // to locate the .packages file.
-    final String packagesFileName = '${_binaryName}_dart_library.packages';
-    _dotPackagesPath = '$_buildDir/dartlang/gen/$_projectRoot/$packagesFileName';
-    if (!_fileExists(_dotPackagesPath))
-      throwToolExit('Couldn\'t find .packages file at $_dotPackagesPath.');
 
     final String isolateNumber = argResults['isolate-number'];
     if (isolateNumber == null) {

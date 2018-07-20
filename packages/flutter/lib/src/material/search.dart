@@ -412,11 +412,11 @@ class _SearchPageState<T> extends State<_SearchPage<T>> {
         textTheme: theme.primaryTextTheme,
         brightness: theme.primaryColorBrightness,
         leading: widget.delegate.buildLeading(context),
+        // TODO(goderbauer): Show the search key (instead of enter) on keyboard, https://github.com/flutter/flutter/issues/17525
         title: new TextField(
           controller: queryTextController,
           focusNode: widget.delegate._focusNode,
           style: theme.textTheme.title,
-          textInputAction: TextInputAction.search,
           onSubmitted: (String _) {
             widget.delegate.showResults(context);
           },

@@ -20,18 +20,26 @@ void main() {
     final List<int> tabsPainted = <int>[];
 
     await tester.pumpWidget(
-      new CupertinoApp(
-        home: new CupertinoTabScaffold(
-          tabBar: _buildTabBar(),
-          tabBuilder: (BuildContext context, int index) {
-            return new CustomPaint(
-              child: new Text('Page ${index + 1}'),
-              painter: new TestCallbackPainter(
-                onPaint: () { tabsPainted.add(index); }
-              )
-            );
-          },
-        ),
+      new WidgetsApp(
+        color: const Color(0xFFFFFFFF),
+        onGenerateRoute: (RouteSettings settings) {
+          return new CupertinoPageRoute<void>(
+            settings: settings,
+            builder: (BuildContext context) {
+              return new CupertinoTabScaffold(
+                tabBar: _buildTabBar(),
+                tabBuilder: (BuildContext context, int index) {
+                  return new CustomPaint(
+                    child: new Text('Page ${index + 1}'),
+                    painter: new TestCallbackPainter(
+                      onPaint: () { tabsPainted.add(index); }
+                    )
+                  );
+                },
+              );
+            },
+          );
+        },
       ),
     );
 
@@ -74,14 +82,22 @@ void main() {
     final List<int> tabsBuilt = <int>[];
 
     await tester.pumpWidget(
-      new CupertinoApp(
-        home: new CupertinoTabScaffold(
-          tabBar: _buildTabBar(),
-          tabBuilder: (BuildContext context, int index) {
-            tabsBuilt.add(index);
-            return new Text('Page ${index + 1}');
-          },
-        ),
+      new WidgetsApp(
+        color: const Color(0xFFFFFFFF),
+        onGenerateRoute: (RouteSettings settings) {
+          return new CupertinoPageRoute<void>(
+            settings: settings,
+            builder: (BuildContext context) {
+              return new CupertinoTabScaffold(
+                tabBar: _buildTabBar(),
+                tabBuilder: (BuildContext context, int index) {
+                  tabsBuilt.add(index);
+                  return new Text('Page ${index + 1}');
+                },
+              );
+            },
+          );
+        },
       ),
     );
 
@@ -110,18 +126,26 @@ void main() {
     final List<FocusNode> focusNodes = <FocusNode>[new FocusNode(), new FocusNode()];
 
     await tester.pumpWidget(
-      new CupertinoApp(
-        home: new Material(
-          child: new CupertinoTabScaffold(
-            tabBar: _buildTabBar(),
-            tabBuilder: (BuildContext context, int index) {
-              return new TextField(
-                focusNode: focusNodes[index],
-                autofocus: true,
+      new WidgetsApp(
+        color: const Color(0xFFFFFFFF),
+        onGenerateRoute: (RouteSettings settings) {
+          return new CupertinoPageRoute<void>(
+            settings: settings,
+            builder: (BuildContext context) {
+              return new Material(
+                child: new CupertinoTabScaffold(
+                  tabBar: _buildTabBar(),
+                  tabBuilder: (BuildContext context, int index) {
+                    return new TextField(
+                      focusNode: focusNodes[index],
+                      autofocus: true,
+                    );
+                  },
+                ),
               );
             },
-          ),
-        ),
+          );
+        },
       ),
     );
 
@@ -146,30 +170,38 @@ void main() {
     ];
 
     await tester.pumpWidget(
-      new CupertinoApp(
-        home: new Material(
-          child: new CupertinoTabScaffold(
-            tabBar: _buildTabBar(),
-            tabBuilder: (BuildContext context, int index) {
-              return new Column(
-                children: <Widget>[
-                  new TextField(
-                    focusNode: focusNodes[index * 2],
-                    decoration: const InputDecoration(
-                      hintText: 'TextField 1',
-                    ),
-                  ),
-                  new TextField(
-                    focusNode: focusNodes[index * 2 + 1],
-                    decoration: const InputDecoration(
-                      hintText: 'TextField 2',
-                    ),
-                  ),
-                ],
+      new WidgetsApp(
+        color: const Color(0xFFFFFFFF),
+        onGenerateRoute: (RouteSettings settings) {
+          return new CupertinoPageRoute<void>(
+            settings: settings,
+            builder: (BuildContext context) {
+              return new Material(
+                child: new CupertinoTabScaffold(
+                  tabBar: _buildTabBar(),
+                  tabBuilder: (BuildContext context, int index) {
+                    return new Column(
+                      children: <Widget>[
+                        new TextField(
+                          focusNode: focusNodes[index * 2],
+                          decoration: const InputDecoration(
+                            hintText: 'TextField 1',
+                          ),
+                        ),
+                        new TextField(
+                          focusNode: focusNodes[index * 2 + 1],
+                          decoration: const InputDecoration(
+                            hintText: 'TextField 2',
+                          ),
+                        ),
+                      ],
+                    );
+                  },
+                ),
               );
             },
-          ),
-        ),
+          );
+        },
       ),
     );
 
@@ -210,36 +242,42 @@ void main() {
     final List<int> tabsPainted = <int>[];
 
     await tester.pumpWidget(
-      new CupertinoApp(
-        home: new CupertinoTabScaffold(
-          tabBar: _buildTabBar(),
-          tabBuilder: (BuildContext context, int index) {
-            return new CustomPaint(
-              child: new Text('Page ${index + 1}'),
-              painter: new TestCallbackPainter(
-                onPaint: () { tabsPainted.add(index); }
-              )
-            );
-          },
-        ),
+      new WidgetsApp(
+        color: const Color(0xFFFFFFFF),
+        builder: (BuildContext context, Widget child) {
+          return new CupertinoTabScaffold(
+            tabBar: _buildTabBar(),
+            tabBuilder: (BuildContext context, int index) {
+              return new CustomPaint(
+                child: new Text('Page ${index + 1}'),
+                painter: new TestCallbackPainter(
+                  onPaint: () { tabsPainted.add(index); }
+                )
+              );
+            },
+          );
+        },
       ),
     );
 
     expect(tabsPainted, <int>[0]);
 
     await tester.pumpWidget(
-      new CupertinoApp(
-        home: new CupertinoTabScaffold(
-          tabBar: _buildTabBar(selectedTab: 1), // Programmatically change the tab now.
-          tabBuilder: (BuildContext context, int index) {
-            return new CustomPaint(
-              child: new Text('Page ${index + 1}'),
-              painter: new TestCallbackPainter(
-                onPaint: () { tabsPainted.add(index); }
-              )
-            );
-          },
-        ),
+      new WidgetsApp(
+        color: const Color(0xFFFFFFFF),
+        builder: (BuildContext context, Widget child) {
+          return new CupertinoTabScaffold(
+            tabBar: _buildTabBar(selectedTab: 1), // Programmatically change the tab now.
+            tabBuilder: (BuildContext context, int index) {
+              return new CustomPaint(
+                child: new Text('Page ${index + 1}'),
+                painter: new TestCallbackPainter(
+                  onPaint: () { tabsPainted.add(index); }
+                )
+              );
+            },
+          );
+        },
       ),
     );
 

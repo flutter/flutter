@@ -235,33 +235,6 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
     });
   }
 
-  Size _surfaceSize;
-
-  /// Artificially changes the surface size to `size` on the Widget binding,
-  /// then flushes microtasks.
-  ///
-  /// Set to null to use the default surface size.
-  Future<Null> setSurfaceSize(Size size) {
-    return TestAsyncUtils.guard(() async {
-      assert(inTest);
-      if (_surfaceSize == size)
-        return null;
-      _surfaceSize = size;
-      handleMetricsChanged();
-      return null;
-    });
-  }
-
-  @override
-  ViewConfiguration createViewConfiguration() {
-    final double devicePixelRatio = ui.window.devicePixelRatio;
-    final Size size = _surfaceSize ?? ui.window.physicalSize / devicePixelRatio;
-    return new ViewConfiguration(
-      size: size,
-      devicePixelRatio: devicePixelRatio,
-    );
-  }
-
   /// Acts as if the application went idle.
   ///
   /// Runs all remaining microtasks, including those scheduled as a result of
@@ -1277,7 +1250,7 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
 
   @override
   ViewConfiguration createViewConfiguration() {
-    return new TestViewConfiguration(size: _surfaceSize ?? _kDefaultTestViewportSize);
+    return new TestViewConfiguration();
   }
 
   @override
@@ -1467,9 +1440,6 @@ class _MockHttpOverrides extends HttpOverrides {
 class _MockHttpClient implements HttpClient {
   @override
   bool autoUncompress;
-
-  @override
-  Duration connectionTimeout;
 
   @override
   Duration idleTimeout;

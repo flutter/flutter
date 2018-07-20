@@ -412,7 +412,6 @@ class DevFS {
     String dillOutputPath,
     bool fullRestart = false,
     String projectRootPath,
-    String pathToReload,
   }) async {
     // Mark all entries as possibly deleted.
     for (DevFSContent content in _entries.values) {
@@ -511,12 +510,13 @@ class DevFS {
               packagesFilePath : _packagesFilePath);
       final String compiledBinary = compilerOutput?.outputFilename;
       if (compiledBinary != null && compiledBinary.isNotEmpty) {
-        final Uri entryUri = fs.path.toUri(projectRootPath != null ?
-            fs.path.relative(pathToReload, from: projectRootPath):
-            pathToReload);
-        if (!dirtyEntries.containsKey(entryUri)) {
+        final String entryUri = projectRootPath != null ?
+            fs.path.relative(mainPath, from: projectRootPath):
+            mainPath;
+        final Uri kernelUri = fs.path.toUri(entryUri + '.dill');
+        if (!dirtyEntries.containsKey(kernelUri)) {
           final DevFSFileContent content = new DevFSFileContent(fs.file(compiledBinary));
-          dirtyEntries[entryUri] = content;
+          dirtyEntries[kernelUri] = content;
           numBytes += content.size;
         }
       }

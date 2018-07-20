@@ -27,7 +27,6 @@ import 'src/commands/packages.dart';
 import 'src/commands/precache.dart';
 import 'src/commands/run.dart';
 import 'src/commands/screenshot.dart';
-import 'src/commands/shell_completion.dart';
 import 'src/commands/stop.dart';
 import 'src/commands/test.dart';
 import 'src/commands/trace.dart';
@@ -54,6 +53,7 @@ Future<Null> main(List<String> args) async {
     new BuildCommand(verboseHelp: verboseHelp),
     new ChannelCommand(verboseHelp: verboseHelp),
     new CleanCommand(),
+    new InjectPluginsCommand(hidden: !verboseHelp),
     new ConfigCommand(verboseHelp: verboseHelp),
     new CreateCommand(),
     new DaemonCommand(hidden: !verboseHelp),
@@ -64,14 +64,12 @@ Future<Null> main(List<String> args) async {
     new FormatCommand(),
     new FuchsiaReloadCommand(),
     new IdeConfigCommand(hidden: !verboseHelp),
-    new InjectPluginsCommand(hidden: !verboseHelp),
     new InstallCommand(),
     new LogsCommand(),
     new PackagesCommand(),
     new PrecacheCommand(),
     new RunCommand(verboseHelp: verboseHelp),
     new ScreenshotCommand(),
-    new ShellCompletionCommand(verboseHelp: verboseHelp),
     new StopCommand(),
     new TestCommand(verboseHelp: verboseHelp),
     new TraceCommand(),

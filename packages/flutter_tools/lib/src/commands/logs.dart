@@ -29,7 +29,7 @@ class LogsCommand extends FlutterCommand {
   Device device;
 
   @override
-  Future<FlutterCommandResult> verifyThenRunCommand() async {
+  Future<Null> verifyThenRunCommand() async {
     device = await findTargetDevice();
     if (device == null)
       throwToolExit(null);

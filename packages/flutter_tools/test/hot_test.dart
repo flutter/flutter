@@ -2,13 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
-
-import 'package:flutter_tools/src/device.dart';
-import 'package:flutter_tools/src/resident_runner.dart';
 import 'package:flutter_tools/src/run_hot.dart';
-import 'package:meta/meta.dart';
-import 'package:mockito/mockito.dart';
 import 'package:test/test.dart';
 
 import 'src/context.dart';
@@ -89,49 +83,4 @@ void main() {
       }), true);
     });
   });
-
-  group('hotRestart', () {
-    final List<FlutterDevice> devices = <FlutterDevice>[];
-
-    setUp(() {
-      devices.add(new FlutterDevice(new MockDevice(),
-          previewDart2: false, trackWidgetCreation: false));
-    });
-
-    testUsingContext('no setup', () async {
-      expect((await new HotRunner(devices).restart(fullRestart: true)).isOk,
-          true);
-    });
-
-    testUsingContext('setup function succeeds', () async {
-      expect((await new HotRunner(devices).restart(fullRestart: true)).isOk,
-          true);
-    }, overrides: <Type, Generator>{
-      HotRunnerConfig: () => new TestHotRunnerConfig(successfulSetup: true),
-    });
-
-    testUsingContext('setup function fails', () async {
-      expect((await new HotRunner(devices).restart(fullRestart: true)).isOk,
-          false);
-    }, overrides: <Type, Generator>{
-      HotRunnerConfig: () => new TestHotRunnerConfig(successfulSetup: false),
-    });
-  });
-}
-
-class MockDevice extends Mock implements Device {
-  MockDevice() {
-    when(isSupported()).thenReturn(true);
-  }
-}
-
-class TestHotRunnerConfig extends HotRunnerConfig {
-  bool successfulSetup;
-
-  TestHotRunnerConfig({@required this.successfulSetup});
-
-  @override
-  Future<bool> setupHotRestart() async {
-    return successfulSetup;
-  }
 }

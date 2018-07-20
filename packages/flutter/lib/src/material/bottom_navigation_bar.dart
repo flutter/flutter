@@ -303,7 +303,7 @@ class _BottomNavigationTile extends StatelessWidget {
 }
 
 class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerProviderStateMixin {
-  List<AnimationController> _controllers = <AnimationController>[];
+  List<AnimationController> _controllers;
   List<CurvedAnimation> _animations;
 
   // A queue of color splashes currently being animated.
@@ -315,13 +315,9 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
 
   static final Tween<double> _flexTween = new Tween<double>(begin: 1.0, end: 1.5);
 
-  void _resetState() {
-    for (AnimationController controller in _controllers)
-      controller.dispose();
-    for (_Circle circle in _circles)
-      circle.dispose();
-    _circles.clear();
-
+  @override
+  void initState() {
+    super.initState();
     _controllers = new List<AnimationController>.generate(widget.items.length, (int index) {
       return new AnimationController(
         duration: kThemeAnimationDuration,
@@ -337,12 +333,6 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
     });
     _controllers[widget.currentIndex].value = 1.0;
     _backgroundColor = widget.items[widget.currentIndex].backgroundColor;
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    _resetState();
   }
 
   void _rebuild() {
@@ -395,13 +385,6 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
   @override
   void didUpdateWidget(BottomNavigationBar oldWidget) {
     super.didUpdateWidget(oldWidget);
-
-    // No animated segue if the length of the items list changes.
-    if (widget.items.length != oldWidget.items.length) {
-      _resetState();
-      return;
-    }
-
     if (widget.currentIndex != oldWidget.currentIndex) {
       switch (widget.type) {
         case BottomNavigationBarType.fixed:

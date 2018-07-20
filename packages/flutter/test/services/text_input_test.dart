@@ -13,7 +13,6 @@ void main() {
       expect(configuration.obscureText, false);
       expect(configuration.autocorrect, true);
       expect(configuration.actionLabel, null);
-      expect(configuration.keyboardAppearance, Brightness.light);
     });
 
     test('text serializes to JSON', () async {
@@ -23,7 +22,7 @@ void main() {
         autocorrect: false,
         actionLabel: 'xyzzy',
       );
-      final Map<String, dynamic> json = configuration.toJson();
+      final Map<String, dynamic> json = configuration.toJSON();
       expect(json['inputType'], <String, dynamic>{
         'name': 'TextInputType.text', 'signed': null, 'decimal': null
       });
@@ -39,7 +38,7 @@ void main() {
         autocorrect: false,
         actionLabel: 'xyzzy',
       );
-      final Map<String, dynamic> json = configuration.toJson();
+      final Map<String, dynamic> json = configuration.toJSON();
       expect(json['inputType'], <String, dynamic>{
         'name': 'TextInputType.number', 'signed': false, 'decimal': true
       });

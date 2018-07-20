@@ -415,8 +415,7 @@ void main() {
     );
 
     final Set<SemanticsAction> allActions = SemanticsAction.values.values.toSet()
-      ..remove(SemanticsAction.customAction) // customAction is not user-exposed.
-      ..remove(SemanticsAction.showOnScreen); // showOnScreen is not user-exposed.
+      ..remove(SemanticsAction.showOnScreen); // showOnScreen is non user-exposed.
 
     const int expectedId = 1;
     final TestSemantics expectedSemantics = new TestSemantics.root(

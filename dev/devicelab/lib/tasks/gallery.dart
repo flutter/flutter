@@ -50,13 +50,12 @@ class GalleryTransitionTest {
 
     // Route paths contains slashes, which Firebase doesn't accept in keys, so we
     // remove them.
-    final Map<String, dynamic> original = Map<String, dynamic>.from(
-        json.decode(
-            file('${galleryDirectory.path}/build/transition_durations.timeline.json').readAsStringSync()
-        ));
+    final Map<String, List<int>> original = json.decode(file(
+            '${galleryDirectory.path}/build/transition_durations.timeline.json')
+        .readAsStringSync());
     final Map<String, List<int>> transitions = <String, List<int>>{};
     for (String key in original.keys) {
-      transitions[key.replaceAll('/', '')] = List<int>.from(original[key]);
+      transitions[key.replaceAll('/', '')] = original[key];
     }
 
     final Map<String, dynamic> summary = json.decode(file('${galleryDirectory.path}/build/transitions.timeline_summary.json').readAsStringSync());

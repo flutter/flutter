@@ -231,13 +231,6 @@ class Uuid {
       value.toRadixString(16).padLeft(count, '0');
 }
 
-/// Given a data structure which is a Map of String to dynamic values, return
-/// the same structure (`Map<String, dynamic>`) with the correct runtime types.
-Map<String, dynamic> castStringKeyedMap(dynamic untyped) {
-  final Map<dynamic, dynamic> map = untyped;
-  return map.cast<String, dynamic>();
-}
-
 Clock get clock => context[Clock];
 
 typedef Future<Null> AsyncCallback();

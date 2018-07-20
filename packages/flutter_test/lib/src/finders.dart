@@ -476,9 +476,7 @@ class _TextFinder extends MatchFinder {
   bool matches(Element candidate) {
     if (candidate.widget is Text) {
       final Text textWidget = candidate.widget;
-      if (textWidget.data != null)
-        return textWidget.data == text;
-      return textWidget.textSpan.toPlainText() == text;
+      return textWidget.data == text;
     } else if (candidate.widget is EditableText) {
       final EditableText editable = candidate.widget;
       return editable.controller.text == text;

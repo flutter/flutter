@@ -197,12 +197,12 @@
   },
 
   "alertDialogLabel": "Alert",
-  "@alertDialogLabel": {
+  "@dialogLabel": {
     "description": "The audio announcement made when an AlertDialog is opened."
   },
 
   "searchFieldLabel": "Search",
-  "@searchFieldLabel": {
-    "description": "Label indicating that a text field is a search field. This will be used as a hint text in the text field."
-  }
+    "@dialogLabel": {
+      "description": "Label indicating that a text field is a search field. This will be used as a hint text in the text field."
+    }
 }

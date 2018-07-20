@@ -69,10 +69,8 @@ void main() {
       stdout.removeAt(0);
       if (stdout.first == 'Installing build/app/outputs/apk/app.apk...')
         stdout.removeAt(0);
-      if (stdout.join('\n') != '\nTo quit, press "q".\n\nApplication finished.') {
-        throw 'flutter run --release had unexpected output after third line:\n'
-            '${stdout.join('\n')}';
-      }
+      if (stdout.join('\n') != '\nTo quit, press "q".\n\nApplication finished.')
+        throw 'flutter run --release had unexpected output after third line';
     });
     return new TaskResult.success(null);
   });
