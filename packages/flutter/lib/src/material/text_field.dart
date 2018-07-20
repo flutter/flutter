@@ -103,6 +103,7 @@ class TextField extends StatefulWidget {
     this.decoration = const InputDecoration(),
     TextInputType keyboardType = TextInputType.text,
     this.textInputAction = TextInputAction.done,
+    this.textCapitalization = TextCapitalization.none,
     this.style,
     this.textAlign = TextAlign.start,
     this.autofocus = false,
@@ -112,6 +113,7 @@ class TextField extends StatefulWidget {
     this.maxLength,
     this.maxLengthEnforced = true,
     this.onChanged,
+    this.onEditingComplete,
     this.onSubmitted,
     this.inputFormatters,
     this.enabled,
@@ -158,6 +160,19 @@ class TextField extends StatefulWidget {
   ///
   /// Defaults to [TextInputAction.done]. Must not be null.
   final TextInputAction textInputAction;
+
+  /// Configures how the platform keyboard will select an uppercase or 
+  /// lowercase keyboard.
+  ///
+  /// Only supports text keyboards, other keyboard types will ignore this
+  /// configuration. Capitalization is locale-aware.
+  ///
+  /// Defaults to [TextCapitalization.none]. Must not be null.
+  /// 
+  /// See also:
+  /// 
+  ///   * [TextCapitalization], for a description of each capitalization behavior.
+  final TextCapitalization textCapitalization;
 
   /// The style to use for the text being edited.
   ///
@@ -262,6 +277,24 @@ class TextField extends StatefulWidget {
 
   /// Called when the text being edited changes.
   final ValueChanged<String> onChanged;
+
+  /// Called when the user submits editable content (e.g., user presses the "done"
+  /// button on the keyboard).
+  ///
+  /// The default implementation of [onEditingComplete] executes 2 different
+  /// behaviors based on the situation:
+  ///
+  ///  - When a completion action is pressed, such as "done", "go", "send", or
+  ///    "search", the user's content is submitted to the [controller] and then
+  ///    focus is given up.
+  ///
+  ///  - When a non-completion action is pressed, such as "next" or "previous",
+  ///    the user's content is submitted to the [controller], but focus is not
+  ///    given up because developers may want to immediately move focus to
+  ///    another input widget within [onSubmitted].
+  ///
+  /// Providing [onEditingComplete] prevents the aforementioned default behavior.
+  final VoidCallback onEditingComplete;
 
   /// Called when the user indicates that they are done editing the text in the
   /// field.
@@ -490,6 +523,7 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
         focusNode: focusNode,
         keyboardType: widget.keyboardType,
         textInputAction: widget.textInputAction,
+        textCapitalization: widget.textCapitalization,
         style: style,
         textAlign: widget.textAlign,
         autofocus: widget.autofocus,
@@ -502,6 +536,7 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
             ? cupertinoTextSelectionControls
             : materialTextSelectionControls,
         onChanged: widget.onChanged,
+        onEditingComplete: widget.onEditingComplete,
         onSubmitted: widget.onSubmitted,
         onSelectionChanged: _handleSelectionChanged,
         inputFormatters: formatters,

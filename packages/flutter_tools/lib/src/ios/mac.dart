@@ -167,6 +167,18 @@ class Xcode {
   Future<RunResult> clang(List<String> args) {
     return runCheckedAsync(<String>['xcrun', 'clang']..addAll(args));
   }
+
+  String getSimulatorPath() {
+    if (xcodeSelectPath == null)
+      return null;
+    final List<String> searchPaths = <String>[
+      fs.path.join(xcodeSelectPath, 'Applications', 'Simulator.app'),
+    ];
+    return searchPaths.where((String p) => p != null).firstWhere(
+      (String p) => fs.directory(p).existsSync(),
+      orElse: () => null,
+    );
+  }
 }
 
 Future<XcodeBuildResult> buildXcodeProject({

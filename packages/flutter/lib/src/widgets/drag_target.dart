@@ -267,6 +267,7 @@ class LongPressDraggable<T> extends Draggable<T> {
     VoidCallback onDragStarted,
     DraggableCanceledCallback onDraggableCanceled,
     VoidCallback onDragCompleted,
+    this.hapticFeedbackOnStart = true,
     bool ignoringFeedbackSemantics = true,
   }) : super(
     key: key,
@@ -284,12 +285,15 @@ class LongPressDraggable<T> extends Draggable<T> {
     ignoringFeedbackSemantics: ignoringFeedbackSemantics,
   );
 
+  /// Whether haptic feedback should be triggered on drag start.
+  final bool hapticFeedbackOnStart;
+
   @override
   DelayedMultiDragGestureRecognizer createRecognizer(GestureMultiDragStartCallback onStart) {
     return new DelayedMultiDragGestureRecognizer()
       ..onStart = (Offset position) {
         final Drag result = onStart(position);
-        if (result != null)
+        if (result != null && hapticFeedbackOnStart)
           HapticFeedback.vibrate();
         return result;
       };

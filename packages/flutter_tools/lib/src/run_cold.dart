@@ -35,7 +35,7 @@ class ColdRunner extends ResidentRunner {
   @override
   Future<int> run({
     Completer<DebugConnectionInfo> connectionInfoCompleter,
-    Completer<Null> appStartedCompleter,
+    Completer<void> appStartedCompleter,
     String route,
     bool shouldBuild = true
   }) async {
