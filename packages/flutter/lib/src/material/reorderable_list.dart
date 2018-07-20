@@ -360,16 +360,30 @@ class _ReorderableListContentState extends State<_ReorderableListContent> with T
       void moveBefore() => reorder(index, index - 1);
       void moveAfter() => reorder(index, index + 1);
 
+      final MaterialLocalizations localizations = MaterialLocalizations.of(context);
+
       // If the item can move to before its current position in the list.
       if (index > 0) {
-        semanticsActions[new CustomSemanticsAction(label: 'move to start')] = moveToStart;
-        semanticsActions[new CustomSemanticsAction(label: 'move up')] = moveBefore;
+        semanticsActions[new CustomSemanticsAction(label: localizations.reorderItemToStart)] = moveToStart;
+        String reorderItemBefore = localizations.reorderItemUp;
+        if (widget.scrollDirection == Axis.horizontal) {
+          reorderItemBefore = Directionality.of(context) == TextDirection.ltr
+              ? localizations.reorderItemLeft
+              : localizations.reorderItemRight;
+        }
+        semanticsActions[new CustomSemanticsAction(label: reorderItemBefore)] = moveBefore;
       }
 
       // If the item can move to after its current position in the list.
       if (index < widget.children.length) {
-        semanticsActions[new CustomSemanticsAction(label: 'move to end')] = moveToEnd;
-        semanticsActions[new CustomSemanticsAction(label: 'move down')] = moveAfter;
+        semanticsActions[new CustomSemanticsAction(label: localizations.reorderItemToEnd)] = moveToEnd;
+        String reorderItemAfter = localizations.reorderItemDown;
+        if (widget.scrollDirection == Axis.horizontal) {
+          reorderItemAfter = Directionality.of(context) == TextDirection.ltr
+              ? localizations.reorderItemRight
+              : localizations.reorderItemLeft;
+        }
+        semanticsActions[new CustomSemanticsAction(label: reorderItemAfter)] = moveAfter;
       }
 
       // We pass toWrap with a GlobalKey into the Draggable so that when a list
