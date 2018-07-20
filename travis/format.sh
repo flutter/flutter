@@ -32,12 +32,17 @@ $CLANG_FORMAT --version
 # Compute the diffs.
 FILETYPES="*.c *.cc *.cpp *.h *.m *.mm"
 DIFF_OPTS="-U0 --no-color --name-only"
+
 if git remote get-url upstream >/dev/null 2>&1; then
-  UPSTREAM=upstream/master
+  UPSTREAM=upstream
 else
-  UPSTREAM=master
+  UPSTREAM=origin
 fi;
-FILES_TO_CHECK="$(git diff $DIFF_OPTS $UPSTREAM -- $FILETYPES)"
+
+
+BASE_SHA="$(git fetch $UPSTREAM master > /dev/null 2>&1 && \
+           (git merge-base --fork-point FETCH_HEAD HEAD || git merge-base FETCH_HEAD HEAD))"
+FILES_TO_CHECK="$(git diff $DIFF_OPTS $BASE_SHA..HEAD -- $FILETYPES)"
 
 FAILED_CHECKS=0
 for f in $FILES_TO_CHECK; do
@@ -59,7 +64,7 @@ fi
 FILETYPES="*.c *.cc *.cpp *.h *.m *.mm *.dart"
 
 set +e
-TRAILING_SPACES=$(git diff $DIFF_OPTS master -- $FILETYPES | xargs grep --line-number --with-filename '\s\+$')
+TRAILING_SPACES=$(git diff $DIFF_OPTS $BASE_SHA..HEAD -- $FILETYPES | xargs grep --line-number --with-filename '\s\+$')
 set -e
 
 if [[ ! -z "$TRAILING_SPACES" ]]; then
