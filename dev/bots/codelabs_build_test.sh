@@ -27,18 +27,18 @@ echo "$build_command"
 $build_command 2>&1 | tee "$log_file"
 
 if [ ${PIPESTATUS[0]} -eq 0 ] || is_expected_failure "$log_file"; then
-    rm "$log_file"
+  rm "$log_file"
 else
-    all_builds_ok=0
-    echo
-    echo "Log left in $log_file."
-    echo
+  all_builds_ok=0
+  echo
+  echo "Log left in $log_file."
+  echo
 fi
 
 # If any build failed, exit with a failure exit status so continuous integration
 # tools can react appropriately.
 if [ "$all_builds_ok" -eq 1 ]; then
-    exit 0
+  exit 0
 else
-    exit 1
+  exit 1
 fi
