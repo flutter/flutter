@@ -331,7 +331,7 @@ class _ReorderableListContentState extends State<_ReorderableListContent> with T
       });
     }
 
-    // Places the value from startIndex at endIndex.
+    // Places the value from startIndex one space before the element at endIndex.
     void reorder(int startIndex, int endIndex) {
       setState(() {
         if (startIndex != endIndex)
@@ -358,7 +358,9 @@ class _ReorderableListContentState extends State<_ReorderableListContent> with T
       void moveToStart() => reorder(index, 0);
       void moveToEnd() => reorder(index, widget.children.length);
       void moveBefore() => reorder(index, index - 1);
-      void moveAfter() => reorder(index, index + 1);
+      // To move after, we go to index+2 because we are moving it to the space
+      // before index+2, which is after the space at index+1.
+      void moveAfter() => reorder(index, index + 2);
 
       final MaterialLocalizations localizations = MaterialLocalizations.of(context);
 
@@ -376,7 +378,6 @@ class _ReorderableListContentState extends State<_ReorderableListContent> with T
 
       // If the item can move to after its current position in the list.
       if (index < widget.children.length) {
-        semanticsActions[new CustomSemanticsAction(label: localizations.reorderItemToEnd)] = moveToEnd;
         String reorderItemAfter = localizations.reorderItemDown;
         if (widget.scrollDirection == Axis.horizontal) {
           reorderItemAfter = Directionality.of(context) == TextDirection.ltr
@@ -384,6 +385,7 @@ class _ReorderableListContentState extends State<_ReorderableListContent> with T
               : localizations.reorderItemLeft;
         }
         semanticsActions[new CustomSemanticsAction(label: reorderItemAfter)] = moveAfter;
+        semanticsActions[new CustomSemanticsAction(label: localizations.reorderItemToEnd)] = moveToEnd;
       }
 
       // We pass toWrap with a GlobalKey into the Draggable so that when a list
