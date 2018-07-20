@@ -627,7 +627,7 @@ RenderBox findActionsSectionRenderBox(WidgetTester tester) {
   return actionsSection;
 }
 
-Widget createAppWithButtonThatLaunchesDialog({Function(BuildContext) dialogBuilder}) {
+Widget createAppWithButtonThatLaunchesDialog({WidgetBuilder dialogBuilder}) {
   return new MaterialApp(
     home: new Material(
       child: new Center(

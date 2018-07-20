@@ -59,7 +59,7 @@ const BoxDecoration _kCupertinoDialogBlurOverlayDecoration = const BoxDecoration
 const double _kEdgePadding = 20.0;
 const double _kMinButtonHeight = 45.0;
 const double _kDialogCornerRadius = 12.0;
-const double _kDividerWidth = 1.0;
+const double _kDividerThickness = 1.0;
 
 // Translucent white that is painted on top of the blurred backdrop as the
 // dialog's background color.
@@ -252,12 +252,12 @@ class CupertinoAlertDialog extends StatelessWidget {
               child: new _CupertinoDialogRenderWidget(
                 children: <Widget>[
                   new BaseLayoutId<_CupertinoDialogRenderWidget, MultiChildLayoutParentData>(
-                    id: _AlertDialogSections.actionsSection,
-                    child: _buildActions(),
-                  ),
-                  new BaseLayoutId<_CupertinoDialogRenderWidget, MultiChildLayoutParentData>(
                     id: _AlertDialogSections.contentSection,
                     child: _buildContent(),
+                  ),
+                  new BaseLayoutId<_CupertinoDialogRenderWidget, MultiChildLayoutParentData>(
+                    id: _AlertDialogSections.actionsSection,
+                    child: _buildActions(),
                   ),
                 ],
               ),
@@ -605,10 +605,22 @@ class _CupertinoAlertActionSectionState extends State<_CupertinoAlertActionSecti
     final List<Widget> interactiveButtons = <Widget>[];
     for (int i = 0; i < widget.children.length; i += 1) {
       interactiveButtons.add(
-        new _ButtonInteraction(
-          buttonIndex: i,
+        new GestureDetector(
+          onTapDown: (TapDownDetails details) {
+            onButtonDown(i);
+          },
+          onTapUp: (TapUpDetails details) {
+            onButtonUp(i);
+          },
+          onTapCancel: () {
+            onButtonUp(i);
+          },
           child: widget.children[i],
         ),
+//        new _ButtonInteraction(
+//          buttonIndex: i,
+//          child: widget.children[i],
+//        ),
       );
     }
 
@@ -618,7 +630,7 @@ class _CupertinoAlertActionSectionState extends State<_CupertinoAlertActionSecti
         child: new _CupertinoDialogActionsRenderWidget(
           actionButtons: interactiveButtons,
           pressedButtons: new Set<int>.from(_pressedButtons),
-          dividerWidth: _kDividerWidth / devicePixelRatio,
+          dividerThickness: _kDividerThickness / devicePixelRatio,
         ),
       ),
     );
@@ -637,32 +649,32 @@ class _CupertinoAlertActionSectionState extends State<_CupertinoAlertActionSecti
 //
 // See [_CupertinoAlertActionSectionState] for more information about this
 // tap information flow.
-class _ButtonInteraction extends StatelessWidget {
-  const _ButtonInteraction({
-    @required int buttonIndex,
-    this.child,
-  }) : assert(buttonIndex != null),
-        _buttonIndex = buttonIndex;
-
-  final int _buttonIndex;
-  final Widget child;
-
-  @override
-  Widget build(BuildContext context) {
-    return new GestureDetector(
-      onTapDown: (TapDownDetails details) {
-        _CupertinoAlertActionSectionState.of(context).onButtonDown(_buttonIndex);
-      },
-      onTapUp: (TapUpDetails details) {
-        _CupertinoAlertActionSectionState.of(context).onButtonUp(_buttonIndex);
-      },
-      onTapCancel: () {
-        _CupertinoAlertActionSectionState.of(context).onButtonUp(_buttonIndex);
-      },
-      child: child,
-    );
-  }
-}
+//class _ButtonInteraction extends StatelessWidget {
+//  const _ButtonInteraction({
+//    @required int buttonIndex,
+//    this.child,
+//  }) : assert(buttonIndex != null),
+//        _buttonIndex = buttonIndex;
+//
+//  final int _buttonIndex;
+//  final Widget child;
+//
+//  @override
+//  Widget build(BuildContext context) {
+//    return new GestureDetector(
+//      onTapDown: (TapDownDetails details) {
+//        _CupertinoAlertActionSectionState.of(context).onButtonDown(_buttonIndex);
+//      },
+//      onTapUp: (TapUpDetails details) {
+//        _CupertinoAlertActionSectionState.of(context).onButtonUp(_buttonIndex);
+//      },
+//      onTapCancel: () {
+//        _CupertinoAlertActionSectionState.of(context).onButtonUp(_buttonIndex);
+//      },
+//      child: child,
+//    );
+//  }
+//}
 
 /// A button typically used in a [CupertinoAlertDialog].
 ///
@@ -759,27 +771,27 @@ class _CupertinoDialogActionsRenderWidget extends MultiChildRenderObjectWidget {
     Key key,
     @required List<Widget> actionButtons,
     @required Set<int> pressedButtons,
-    double dividerWidth = 0.0,
+    double dividerThickness = 0.0,
   }) : assert(pressedButtons != null),
         _pressedButtons = pressedButtons,
-        _dividerWidth = dividerWidth,
+        _dividerThickness = dividerThickness,
         super(key: key, children: actionButtons);
 
   final Set<int> _pressedButtons;
-  final double _dividerWidth;
+  final double _dividerThickness;
 
   @override
   RenderObject createRenderObject(BuildContext context) {
     return new RenderCupertinoDialogActions(
       pressedButtons: _pressedButtons,
-      dividerWidth: _dividerWidth,
+      dividerThickness: _dividerThickness,
     );
   }
 
   @override
   void updateRenderObject(BuildContext context, RenderCupertinoDialogActions renderObject) {
     renderObject.pressedButtons = _pressedButtons;
-    renderObject.dividerWidth = _dividerWidth;
+    renderObject.dividerThickness = _dividerThickness;
   }
 }
 
@@ -793,11 +805,11 @@ class _CupertinoDialogActionsRenderWidget extends MultiChildRenderObjectWidget {
 /// single horizontal row. The row is exactly as wide as the dialog, and the row
 /// is as tall as the tallest action button. A horizontal divider is drawn above
 /// the button row. If 2 action buttons are provided, a vertical divider is
-/// drawn between them. The thickness of the divider is set by [dividerWidth].
+/// drawn between them. The thickness of the divider is set by [dividerThickness].
 ///
 /// If 2 action buttons are provided but they cannot fit side-by-side, then the
 /// 2 buttons are stacked vertically. A horizontal divider is drawn above each
-/// button. The thickness of the divider is set by [dividerWidth]. The minimum
+/// button. The thickness of the divider is set by [dividerThickness]. The minimum
 /// height of this [RenderBox] in the case of 2 stacked buttons is as tall as
 /// the 2 buttons stacked. This is different than the 3+ button case where the
 /// minimum height is only 1.5 buttons tall. See the 3+ button explanation for
@@ -805,7 +817,7 @@ class _CupertinoDialogActionsRenderWidget extends MultiChildRenderObjectWidget {
 ///
 /// If 3+ action buttons are provided then they are all stacked vertically. A
 /// horizontal divider is drawn above each button. The thickness of the divider
-/// is set by [dividerWidth]. The minimum height of this [RenderBox] in the case
+/// is set by [dividerThickness]. The minimum height of this [RenderBox] in the case
 /// of 3+ stacked buttons is as tall as the 1st button + 50% the height of the
 /// 2nd button. In other words, the minimum height is 1.5 buttons tall. This
 /// minimum height of 1.5 buttons is expected to work in tandem with a surrounding
@@ -827,9 +839,9 @@ class RenderCupertinoDialogActions extends RenderBox
   RenderCupertinoDialogActions({
     List<RenderBox> children,
     @required Set<int> pressedButtons,
-    double dividerWidth = 0.0,
+    double dividerThickness = 0.0,
   }) : assert(pressedButtons != null),
-        _dividerWidth = dividerWidth,
+        _dividerThickness = dividerThickness,
         _pressedButtons = pressedButtons {
     addAll(children);
   }
@@ -849,17 +861,17 @@ class RenderCupertinoDialogActions extends RenderBox
     markNeedsPaint();
   }
 
-  double _dividerWidth;
+  double _dividerThickness;
 
   /// The thickness of the divider between buttons.
-  double get dividerWidth => _dividerWidth;
+  double get dividerThickness => _dividerThickness;
 
-  set dividerWidth(double newValue) {
-    if (newValue == _dividerWidth) {
+  set dividerThickness(double newValue) {
+    if (newValue == _dividerThickness) {
       return;
     }
 
-    _dividerWidth = newValue;
+    _dividerThickness = newValue;
     markNeedsLayout();
   }
 
@@ -925,12 +937,12 @@ class RenderCupertinoDialogActions extends RenderBox
     assert(childCount <= 2);
 
     if (childCount == 1) {
-      return firstChild.computeMinIntrinsicHeight(width) + dividerWidth;
+      return firstChild.computeMinIntrinsicHeight(width) + dividerThickness;
     } else {
-      final double perButtonWidth = (width - dividerWidth) / 2.0;
+      final double perButtonWidth = (width - dividerThickness) / 2.0;
       return math.max(
-        firstChild.computeMinIntrinsicHeight(perButtonWidth) + dividerWidth,
-        lastChild.computeMinIntrinsicHeight(perButtonWidth) + dividerWidth,
+        firstChild.computeMinIntrinsicHeight(perButtonWidth) + dividerThickness,
+        lastChild.computeMinIntrinsicHeight(perButtonWidth) + dividerThickness,
       );
     }
   }
@@ -940,7 +952,7 @@ class RenderCupertinoDialogActions extends RenderBox
   double _computeMinIntrinsicHeightForTwoStackedButtons(double width) {
     assert(childCount == 2);
 
-    return (2 * dividerWidth)
+    return (2 * dividerThickness)
         + firstChild.computeMinIntrinsicHeight(width)
         + lastChild.computeMinIntrinsicHeight(width);
   }
@@ -951,7 +963,7 @@ class RenderCupertinoDialogActions extends RenderBox
     assert(childCount >= 3);
 
     final List<RenderBox> children = getChildrenAsList();
-    return (2 * dividerWidth)
+    return (2 * dividerThickness)
         + children[0].computeMinIntrinsicHeight(width)
         + (0.5 * children[1].computeMinIntrinsicHeight(width));
   }
@@ -963,17 +975,17 @@ class RenderCupertinoDialogActions extends RenderBox
       return 0.0;
     } else if (childCount == 1) {
       // One button. Our max intrinsic height is equal to the button's.
-      return firstChild.computeMaxIntrinsicHeight(width) + dividerWidth;
+      return firstChild.computeMaxIntrinsicHeight(width) + dividerThickness;
     } else if (childCount == 2) {
       // Two buttons...
       if (_isSingleButtonRow(width)) {
         // The 2 buttons fit side by side so our max intrinsic height is equal
         // to the taller of the 2 buttons.
-        final double perButtonWidth = (width - dividerWidth) / 2.0;
+        final double perButtonWidth = (width - dividerThickness) / 2.0;
         return math.max(
           firstChild.computeMaxIntrinsicHeight(perButtonWidth),
           lastChild.computeMaxIntrinsicHeight(perButtonWidth),
-        ) + dividerWidth;
+        ) + dividerThickness;
       } else {
         // The 2 buttons do not fit side by side. Measure total height as a
         // vertical stack.
@@ -991,7 +1003,7 @@ class RenderCupertinoDialogActions extends RenderBox
   double _computeMaxIntrinsicHeightStacked(double width) {
     assert(childCount >= 2);
 
-    final double allDividersHeight = childCount * dividerWidth;
+    final double allDividersHeight = childCount * dividerThickness;
     return getChildrenAsList().fold(allDividersHeight, (double heightAccum, RenderBox button) {
       return heightAccum + button.computeMaxIntrinsicHeight(width);
     });
@@ -1004,7 +1016,7 @@ class RenderCupertinoDialogActions extends RenderBox
       // There are 2 buttons. If they can fit side-by-side then that's what
       // we want to do. Otherwise, stack them vertically.
       final double sideBySideWidth = firstChild.computeMaxIntrinsicWidth(double.infinity)
-          + dividerWidth
+          + dividerThickness
           + lastChild.computeMaxIntrinsicWidth(double.infinity);
       return sideBySideWidth <= width;
     } else {
@@ -1023,12 +1035,12 @@ class RenderCupertinoDialogActions extends RenderBox
           parentUsesSize: true,
         );
 
-        size = new Size(_kCupertinoDialogWidth, firstChild.size.height + dividerWidth);
+        size = new Size(_kCupertinoDialogWidth, firstChild.size.height + dividerThickness);
       } else {
         // Each button gets half the available width, minus a single divider.
         final BoxConstraints perButtonConstraints = constraints.copyWith(
-          minWidth: (constraints.minWidth - dividerWidth) / 2.0,
-          maxWidth: (constraints.maxWidth - dividerWidth) / 2.0,
+          minWidth: (constraints.minWidth - dividerThickness) / 2.0,
+          maxWidth: (constraints.maxWidth - dividerThickness) / 2.0,
         );
 
         // Layout the 2 buttons.
@@ -1042,7 +1054,7 @@ class RenderCupertinoDialogActions extends RenderBox
         // The 2nd button needs to be offset to the right.
         assert(lastChild.parentData is MultiChildLayoutParentData);
         final MultiChildLayoutParentData secondButtonParentData = lastChild.parentData;
-        secondButtonParentData.offset = new Offset(firstChild.size.width + dividerWidth, 0.0);
+        secondButtonParentData.offset = new Offset(firstChild.size.width + dividerThickness, 0.0);
 
         // Calculate our size based on the button sizes.
         size = new Size(
@@ -1050,18 +1062,18 @@ class RenderCupertinoDialogActions extends RenderBox
           math.max(
             firstChild.size.height,
             lastChild.size.height,
-          ) + dividerWidth,
+          ) + dividerThickness,
         );
       }
     } else {
       // We need to stack buttons vertically, plus dividers above each button.
       final BoxConstraints perButtonConstraints = constraints.copyWith(
         minHeight: 0.0,
-        maxHeight: (constraints.maxHeight - (dividerWidth * childCount)) / childCount,
+        maxHeight: (constraints.maxHeight - (dividerThickness * childCount)) / childCount,
       );
 
       final List<RenderBox> children = getChildrenAsList();
-      double verticalOffset = dividerWidth;
+      double verticalOffset = dividerThickness;
       for (int i = 0; i < children.length; ++i) {
         final RenderBox child = children[i];
 
@@ -1077,7 +1089,7 @@ class RenderCupertinoDialogActions extends RenderBox
         verticalOffset += child.size.height;
         if (i < children.length - 1) {
           // Add a gap for the next divider.
-          verticalOffset += dividerWidth;
+          verticalOffset += dividerThickness;
         }
       }
 
@@ -1106,7 +1118,7 @@ class RenderCupertinoDialogActions extends RenderBox
       offset.dx,
       offset.dy,
       size.width,
-      dividerWidth,
+      dividerThickness,
     );
 
     // The vertical divider sits between the left button and right button (if
@@ -1117,7 +1129,7 @@ class RenderCupertinoDialogActions extends RenderBox
       ? new Rect.fromLTWH(
           offset.dx + firstChild.size.width,
           offset.dy + horizontalDivider.height,
-          dividerWidth,
+          dividerThickness,
           math.max(
             firstChild.size.height,
             lastChild.size.height,
@@ -1132,7 +1144,7 @@ class RenderCupertinoDialogActions extends RenderBox
 
       return new Rect.fromLTWH(
         offset.dx + buttonParentData.offset.dx,
-        offset.dy + buttonParentData.offset.dy + dividerWidth,
+        offset.dy + buttonParentData.offset.dy + dividerThickness,
         pressedButton.size.width,
         pressedButton.size.height,
       );
@@ -1177,7 +1189,7 @@ class RenderCupertinoDialogActions extends RenderBox
   }
 
   void _drawButtonBackgroundsAndDividersStacked(Canvas canvas, Offset offset) {
-    final Offset dividerOffset = new Offset(0.0, dividerWidth);
+    final Offset dividerOffset = new Offset(0.0, dividerThickness);
 
     final Path bkFillPath = new Path()
       ..fillType = PathFillType.evenOdd
@@ -1199,12 +1211,12 @@ class RenderCupertinoDialogActions extends RenderBox
         accumulatingOffset.dx,
         accumulatingOffset.dy,
         size.width,
-        dividerWidth,
+        dividerThickness,
       );
 
       final Rect buttonBkRect = new Rect.fromLTWH(
         accumulatingOffset.dx,
-        accumulatingOffset.dy + dividerWidth,
+        accumulatingOffset.dy + dividerThickness,
         size.width,
         children[i].size.height,
       );
