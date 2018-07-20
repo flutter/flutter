@@ -8,6 +8,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter/rendering.dart';
 
 import 'material.dart';
+import 'material_localizations.dart';
 
 /// The callback used by [ReorderableListView] to move an item to a new
 /// position in a list.
@@ -330,11 +331,11 @@ class _ReorderableListContentState extends State<_ReorderableListContent> with T
       });
     }
 
-    // Drops toWrap into the last position it was hovering over.
-    void onDragEnded() {
+    // Places the value from startIndex at endIndex.
+    void reorder(int startIndex, int endIndex) {
       setState(() {
-        if (_dragStartIndex != _currentIndex)
-          widget.onReorder(_dragStartIndex, _currentIndex);
+        if (startIndex != endIndex)
+          widget.onReorder(startIndex, endIndex);
         // Animates leftover space in the drop area closed.
         // TODO(djshuckerow): bring the animation in line with the Material
         // specifications.
@@ -344,11 +345,47 @@ class _ReorderableListContentState extends State<_ReorderableListContent> with T
       });
     }
 
-    Widget buildDragTarget(BuildContext context, List<Key> acceptedCandidates, List<dynamic> rejectedCandidates) {
-      // We pass the toWrapWithGlobalKey into the Draggable so that when a list
+    // Drops toWrap into the last position it was hovering over.
+    void onDragEnded() {
+      reorder(_dragStartIndex, _currentIndex);
+    }
+
+    Widget wrapWithSemantics() {
+      // First, determine which semantics actions apply.
+      Map<CustomSemanticsAction, VoidCallback> semanticsActions = <CustomSemanticsAction, VoidCallback>{};
+
+      // Create the appropriate semantics actions.
+      void moveToStart() => reorder(index, 0);
+      void moveToEnd() => reorder(index, widget.children.length);
+      void moveBefore() => reorder(index, index - 1);
+      void moveAfter() => reorder(index, index + 1);
+
+      // If the item can move to before its current position in the list.
+      if (index > 0) {
+        semanticsActions[new CustomSemanticsAction(label: 'move to start')] = moveToStart;
+        semanticsActions[new CustomSemanticsAction(label: 'move up')] = moveBefore;
+      }
+
+      // If the item can move to after its current position in the list.
+      if (index < widget.children.length) {
+        semanticsActions[new CustomSemanticsAction(label: 'move to end')] = moveToEnd;
+        semanticsActions[new CustomSemanticsAction(label: 'move down')] = moveAfter;
+      }
+
+      // We pass toWrap with a GlobalKey into the Draggable so that when a list
       // item gets dragged, the accessibility framework can preserve the selected
       // state of the dragging item.
-      final Widget toWrapWithGlobalKey = new KeyedSubtree(key: keyIndexGlobalKey, child: toWrap);
+      //
+      // We also apply the relevant custom accessibility actions for moving the item
+      // up, down, to the start, and to the end of the list.
+      return new KeyedSubtree(key: keyIndexGlobalKey, child: new Semantics(
+        customSemanticsActions: semanticsActions,
+        child: toWrap,
+      ));
+    }
+
+    Widget buildDragTarget(BuildContext context, List<Key> acceptedCandidates, List<dynamic> rejectedCandidates) {
+      final Widget toWrapWithSemantics = wrapWithSemantics();
       
       // We build the draggable inside of a layout builder so that we can
       // constrain the size of the feedback dragging widget.
@@ -363,10 +400,10 @@ class _ReorderableListContentState extends State<_ReorderableListContent> with T
           constraints: constraints,
           child: new Material(
             elevation: 6.0,
-            child: toWrapWithGlobalKey,
+            child: toWrapWithSemantics,
           ),
         ),
-        child: _dragging == toWrap.key ? const SizedBox() : toWrapWithGlobalKey,
+        child: _dragging == toWrap.key ? const SizedBox() : toWrapWithSemantics,
         childWhenDragging: const SizedBox(),
         dragAnchor: DragAnchor.child,
         onDragStarted: onDragStarted,
