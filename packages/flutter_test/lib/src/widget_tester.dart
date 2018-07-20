@@ -616,7 +616,7 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
   }
 
   /// Attempts to find the [SemanticsData] of first result from `finder`.
-  /// 
+  ///
   /// If the object identified by the finder doesn't own it's semantic node,
   /// this will return the semantics data of the first ancestor with semantics
   /// data. The ancestor's semantic data will include the child's as well as

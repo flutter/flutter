@@ -52,7 +52,7 @@ void main() {
     expect(spacer4Rect.size.width, spacer3Rect.size.width * 2.0);
     expect(spacer4Rect.left, closeTo(10.0, 0.1));
   });
-  
+
   testWidgets('Spacer takes up space.', (WidgetTester tester) async {
     await tester.pumpWidget(new UnconstrainedBox(
       constrainedAxis: Axis.vertical,

@@ -89,7 +89,7 @@ void main() {
     test('can evaluate complex expressions in top level function', () async {
       await _flutter.run(withDebugger: true);
       await breakInTopLevelFunction(_flutter);
-      await evaluateTrivialExpressions();
+      await evaluateComplexExpressions();
     });
 
     test('can evaluate complex expressions in build method', () async {

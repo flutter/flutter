@@ -17,6 +17,7 @@ task:
     # run pub get in all the repo packages
     ./bin/flutter update-packages
 
+    git fetch origin master
   matrix:
     - name: docs
       env:
@@ -25,11 +26,15 @@ task:
     - name: analyze
       env:
         SHARD: analyze
-      test_script: dart ./dev/bots/test.dart
+      test_script: |
+        export TEST_COMMIT_RANGE="$(git merge-base --fork-point FETCH_HEAD HEAD)..HEAD"
+        dart ./dev/bots/test.dart
     - name: tests-linux
       env:
         SHARD: tests
-      test_script: dart ./dev/bots/test.dart
+      test_script: |
+        export TEST_COMMIT_RANGE="$(git merge-base --fork-point FETCH_HEAD HEAD)..HEAD"
+        dart ./dev/bots/test.dart
       container:
         cpu: 4
         memory: 8G
@@ -48,8 +53,10 @@ task:
   setup_script:
     - bin\flutter.bat config --no-analytics
     - bin\flutter.bat update-packages
-  test_all_script:
-    - bin\cache\dart-sdk\bin\dart.exe -c dev\bots\test.dart
+    - git fetch origin master
+  test_all_script: |
+    export TEST_COMMIT_RANGE="$(git merge-base --fork-point FETCH_HEAD HEAD)..HEAD"
+    bin\cache\dart-sdk\bin\dart.exe -c dev\bots\test.dart
 
 task:
   name: tests-macos
@@ -61,6 +68,7 @@ task:
   setup_script:
     - bin/flutter config --no-analytics
     - bin/flutter update-packages
-  test_all_script:
-    - ulimit -S -n 2048 # https://github.com/flutter/flutter/issues/2976
-    - bin/cache/dart-sdk/bin/dart -c dev/bots/test.dart
+  test_all_script: |
+    ulimit -S -n 2048 # https://github.com/flutter/flutter/issues/2976
+    export TEST_COMMIT_RANGE="$(git merge-base --fork-point FETCH_HEAD HEAD)..HEAD"
+    bin/cache/dart-sdk/bin/dart -c dev/bots/test.dart

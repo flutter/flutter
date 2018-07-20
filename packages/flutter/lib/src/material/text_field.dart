@@ -103,6 +103,7 @@ class TextField extends StatefulWidget {
     this.decoration = const InputDecoration(),
     TextInputType keyboardType = TextInputType.text,
     this.textInputAction = TextInputAction.done,
+    this.textCapitalization = TextCapitalization.none,
     this.style,
     this.textAlign = TextAlign.start,
     this.autofocus = false,
@@ -112,10 +113,12 @@ class TextField extends StatefulWidget {
     this.maxLength,
     this.maxLengthEnforced = true,
     this.onChanged,
+    this.onEditingComplete,
     this.onSubmitted,
     this.inputFormatters,
     this.enabled,
     this.keyboardAppearance,
+    this.scrollPadding = const EdgeInsets.all(20.0),
   }) : assert(keyboardType != null),
        assert(textInputAction != null),
        assert(textAlign != null),
@@ -123,6 +126,7 @@ class TextField extends StatefulWidget {
        assert(obscureText != null),
        assert(autocorrect != null),
        assert(maxLengthEnforced != null),
+       assert(scrollPadding != null),
        assert(maxLines == null || maxLines > 0),
        assert(maxLength == null || maxLength > 0),
        keyboardType = maxLines == 1 ? keyboardType : TextInputType.multiline,
@@ -158,6 +162,19 @@ class TextField extends StatefulWidget {
   ///
   /// Defaults to [TextInputAction.done]. Must not be null.
   final TextInputAction textInputAction;
+
+  /// Configures how the platform keyboard will select an uppercase or 
+  /// lowercase keyboard.
+  ///
+  /// Only supports text keyboards, other keyboard types will ignore this
+  /// configuration. Capitalization is locale-aware.
+  ///
+  /// Defaults to [TextCapitalization.none]. Must not be null.
+  /// 
+  /// See also:
+  /// 
+  ///   * [TextCapitalization], for a description of each capitalization behavior.
+  final TextCapitalization textCapitalization;
 
   /// The style to use for the text being edited.
   ///
@@ -263,6 +280,24 @@ class TextField extends StatefulWidget {
   /// Called when the text being edited changes.
   final ValueChanged<String> onChanged;
 
+  /// Called when the user submits editable content (e.g., user presses the "done"
+  /// button on the keyboard).
+  ///
+  /// The default implementation of [onEditingComplete] executes 2 different
+  /// behaviors based on the situation:
+  ///
+  ///  - When a completion action is pressed, such as "done", "go", "send", or
+  ///    "search", the user's content is submitted to the [controller] and then
+  ///    focus is given up.
+  ///
+  ///  - When a non-completion action is pressed, such as "next" or "previous",
+  ///    the user's content is submitted to the [controller], but focus is not
+  ///    given up because developers may want to immediately move focus to
+  ///    another input widget within [onSubmitted].
+  ///
+  /// Providing [onEditingComplete] prevents the aforementioned default behavior.
+  final VoidCallback onEditingComplete;
+
   /// Called when the user indicates that they are done editing the text in the
   /// field.
   final ValueChanged<String> onSubmitted;
@@ -280,11 +315,21 @@ class TextField extends StatefulWidget {
   final bool enabled;
 
   /// The appearance of the keyboard.
-  /// 
+  ///
   /// This setting is only honored on iOS devices.
-  /// 
+  ///
   /// If unset, defaults to the brightness of [ThemeData.primaryColorBrightness].
   final Brightness keyboardAppearance;
+
+  /// Configures padding to edges surrounding a [Scrollable] when the Textfield scrolls into view.
+  ///
+  /// When this widget receives focus and is not completely visible (for example scrolled partially
+  /// off the screen or overlapped by the keyboard)
+  /// then it will attempt to make itself visible by scrolling a surrounding [Scrollable], if one is present.
+  /// This value controls how far from the edges of a [Scrollable] the TextField will be positioned after the scroll.
+  ///
+  /// Defaults to EdgeInserts.all(20.0).
+  final EdgeInsets scrollPadding;
 
   @override
   _TextFieldState createState() => new _TextFieldState();
@@ -490,6 +535,7 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
         focusNode: focusNode,
         keyboardType: widget.keyboardType,
         textInputAction: widget.textInputAction,
+        textCapitalization: widget.textCapitalization,
         style: style,
         textAlign: widget.textAlign,
         autofocus: widget.autofocus,
@@ -502,10 +548,12 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
             ? cupertinoTextSelectionControls
             : materialTextSelectionControls,
         onChanged: widget.onChanged,
+        onEditingComplete: widget.onEditingComplete,
         onSubmitted: widget.onSubmitted,
         onSelectionChanged: _handleSelectionChanged,
         inputFormatters: formatters,
         rendererIgnoresPointer: true,
+        scrollPadding: widget.scrollPadding,
         keyboardAppearance: keyboardAppearance,
       ),
     );

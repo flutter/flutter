@@ -14,7 +14,7 @@ void main() {
       ));
       expect(find.text('test'), findsOneWidget);
     });
-  
+
     testWidgets('finds Text.rich widgets', (WidgetTester tester) async {
       await tester.pumpWidget(_boilerplate(
         const Text.rich(

@@ -289,11 +289,9 @@ Information about project "Runner":
         previewDart2: true,
         targetPlatform: TargetPlatform.ios,
       );
-      final FlutterManifest manifest =
-        await new FlutterProject.fromPath('path/to/project').manifest;
-      updateGeneratedXcodeProperties(
-        projectPath: 'path/to/project',
-        manifest: manifest,
+      final FlutterProject project = new FlutterProject.fromPath('path/to/project');
+      await updateGeneratedXcodeProperties(
+        project: project,
         buildInfo: buildInfo,
         previewDart2: true,
       );
@@ -313,11 +311,9 @@ Information about project "Runner":
         trackWidgetCreation: true,
         targetPlatform: TargetPlatform.ios,
       );
-      final FlutterManifest manifest =
-          await new FlutterProject.fromPath('path/to/project').manifest;
-      updateGeneratedXcodeProperties(
-        projectPath: 'path/to/project',
-        manifest: manifest,
+      final FlutterProject project = new FlutterProject.fromPath('path/to/project');
+      await updateGeneratedXcodeProperties(
+        project: project,
         buildInfo: buildInfo,
         previewDart2: true,
       );
@@ -336,11 +332,9 @@ Information about project "Runner":
         previewDart2: true,
         targetPlatform: TargetPlatform.ios,
       );
-      final FlutterManifest manifest =
-          await new FlutterProject.fromPath('path/to/project').manifest;
-      updateGeneratedXcodeProperties(
-        projectPath: 'path/to/project',
-        manifest: manifest,
+      final FlutterProject project = new FlutterProject.fromPath('path/to/project');
+      await updateGeneratedXcodeProperties(
+        project: project,
         buildInfo: buildInfo,
         previewDart2: true,
       );
@@ -360,11 +354,9 @@ Information about project "Runner":
         targetPlatform: TargetPlatform.ios,
       );
 
-      final FlutterManifest manifest =
-          await new FlutterProject.fromPath('path/to/project').manifest;
-      updateGeneratedXcodeProperties(
-        projectPath: 'path/to/project',
-        manifest: manifest,
+      final FlutterProject project = new FlutterProject.fromPath('path/to/project');
+      await updateGeneratedXcodeProperties(
+        project: project,
         buildInfo: buildInfo,
         previewDart2: true,
       );
@@ -412,11 +404,8 @@ Information about project "Runner":
       const String schemaData = '{}';
       writeSchemaFile(fs, schemaData);
 
-      final FlutterManifest manifest =
-          await new FlutterProject.fromPath('path/to/project').manifest;
-      updateGeneratedXcodeProperties(
-        projectPath: 'path/to/project',
-        manifest: manifest,
+      await updateGeneratedXcodeProperties(
+        project: new FlutterProject.fromPath('path/to/project'),
         buildInfo: buildInfo,
         previewDart2: false,
       );
