@@ -22,8 +22,8 @@ void main() {
 
     Widget listItemToWidget(String listItem) {
       return new SizedBox(
-        key: new Key(listItem), 
-        height: itemHeight, 
+        key: new Key(listItem),
+        height: itemHeight,
         width: itemHeight,
         child: new Text(listItem),
       );
@@ -32,8 +32,8 @@ void main() {
     Widget build({Widget header, Axis scrollDirection = Axis.vertical}) {
       return new MaterialApp(
         home: new SizedBox(
-          height: itemHeight * 10, 
-          width: itemHeight * 10, 
+          height: itemHeight * 10,
+          width: itemHeight * 10,
           child: new ReorderableListView(
             header: header,
             children: listItems.map(listItemToWidget).toList(),
@@ -132,7 +132,7 @@ void main() {
         );
         await tester.pumpWidget(new MaterialApp(
           home: new SizedBox(
-            height: itemHeight * 10, 
+            height: itemHeight * 10,
             child: reorderableListView,
           ),
         ));
@@ -169,7 +169,7 @@ void main() {
         await tester.pump(kLongPressTimeout + kPressTimeout);
         await tester.pumpAndSettle();
         expect(getContentElement().size.height, kDraggingListHeight);
-        
+
         // Move it
         await drag.moveTo(tester.getCenter(find.text('Last item')));
         await tester.pumpAndSettle();
@@ -228,7 +228,7 @@ void main() {
         await tester.pumpAndSettle();
         expect(find.text('Header Text'), findsOneWidget);
         expect(listItems, orderedEquals(<String>['Item 2', 'Item 3', 'Item 4', 'Item 1']));
-        
+
         await tester.pumpWidget(build(header: const Text('Header Text'), scrollDirection: Axis.horizontal));
         await longPressDrag(
           tester,
@@ -263,7 +263,7 @@ void main() {
         );
         await tester.pumpWidget(new MaterialApp(
           home: new SizedBox(
-            width: itemHeight * 10, 
+            width: itemHeight * 10,
             child: reorderableListView,
           ),
         ));
@@ -300,7 +300,7 @@ void main() {
         await tester.pump(kLongPressTimeout + kPressTimeout);
         await tester.pumpAndSettle();
         expect(getContentElement().size.width, kDraggingListWidth);
-        
+
         // Move it
         await drag.moveTo(tester.getCenter(find.text('Last item')));
         await tester.pumpAndSettle();

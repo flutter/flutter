@@ -11,20 +11,20 @@ import 'material.dart';
 
 /// The callback used by [ReorderableListView] to move an item to a new
 /// position in a list.
-/// 
+///
 /// Implementations should remove the corresponding list item at [oldIndex]
 /// and reinsert it at [newIndex].
-/// 
+///
 /// Note that if [oldIndex] is before [newIndex], removing the item at [oldIndex]
 /// from the list will reduce the list's length by one. Implementations used
 /// by [ReorderableListView] will need to account for this when inserting before
 /// [newIndex].
-/// 
+///
 /// Example implementation:
-/// 
+///
 /// ```dart
 /// final List<MyDataObject> backingList = <MyDataObject>[/* ... */];
-/// 
+///
 /// void onReorder(int oldIndex, int newIndex) {
 ///   if (oldIndex < newIndex) {
 ///     // removing the item at oldIndex will shorten the list by 1.
@@ -37,7 +37,7 @@ import 'material.dart';
 typedef void OnReorderCallback(int oldIndex, int newIndex);
 
 /// A list whose items the user can interactively reorder by dragging.
-/// 
+///
 /// This class is appropriate for views with a small number of
 /// children because constructing the [List] requires doing work for every
 /// child that could possibly be displayed in the list view instead of just
@@ -49,15 +49,15 @@ class ReorderableListView extends StatefulWidget {
   /// Creates a reorderable list.
   ReorderableListView({
     this.header,
-    @required this.children, 
+    @required this.children,
     @required this.onReorder,
-    this.scrollDirection = Axis.vertical, 
-    this.padding, 
+    this.scrollDirection = Axis.vertical,
+    this.padding,
   }): assert(scrollDirection != null),
       assert(onReorder != null),
       assert(children != null),
       assert(
-        children.every((Widget w) => w.key != null), 
+        children.every((Widget w) => w.key != null),
         'All children of this widget must have a key.',
       );
 
@@ -70,7 +70,7 @@ class ReorderableListView extends StatefulWidget {
   final List<Widget> children;
 
   /// The [Axis] along which the list scrolls.
-  /// 
+  ///
   /// List [children] can only drag along this [Axis].
   final Axis scrollDirection;
 
@@ -79,11 +79,11 @@ class ReorderableListView extends StatefulWidget {
 
   /// Called when a list child is dropped into a new position to shuffle the
   /// underlying list.
-  /// 
+  ///
   /// This [ReorderableListView] calls [onReorder] after a list child is dropped
   /// into a new position.
   final OnReorderCallback onReorder;
-  
+
   @override
   State<StatefulWidget> createState() {
     return new _ReorderableListViewState();
@@ -106,7 +106,7 @@ class _ReorderableListViewState extends State<ReorderableListView> {
   // This entry contains the scrolling list itself.
   OverlayEntry _listOverlayEntry;
 
-  @override 
+  @override
   void initState() {
     super.initState();
     _listOverlayEntry = new OverlayEntry(
@@ -223,7 +223,7 @@ class _ReorderableListContentState extends State<_ReorderableListContent> with T
     return dropAreaWithoutMargin + _dropAreaMargin;
   }
 
-  @override 
+  @override
   void initState() {
     super.initState();
     _entranceController = new AnimationController(vsync: this, duration: _reorderAnimationDuration);
@@ -262,7 +262,7 @@ class _ReorderableListContentState extends State<_ReorderableListContent> with T
 
   // Scrolls to a target context if that context is not on the screen.
   void _scrollTo(BuildContext context) {
-    if (_scrolling) 
+    if (_scrolling)
       return;
     final RenderObject contextObject = context.findRenderObject();
     final RenderAbstractViewport viewport = RenderAbstractViewport.of(contextObject);
@@ -273,7 +273,7 @@ class _ReorderableListContentState extends State<_ReorderableListContent> with T
     final double margin = _dropAreaExtent;
     final double scrollOffset = _scrollController.offset;
     final double topOffset = max(
-      _scrollController.position.minScrollExtent, 
+      _scrollController.position.minScrollExtent,
       viewport.getOffsetToReveal(contextObject, 0.0).offset - margin,
     );
     final double bottomOffset = min(
@@ -285,8 +285,8 @@ class _ReorderableListContentState extends State<_ReorderableListContent> with T
     if (!onScreen) {
       _scrolling = true;
       _scrollController.position.animateTo(
-        scrollOffset < bottomOffset ? bottomOffset : topOffset, 
-        duration: _scrollAnimationDuration, 
+        scrollOffset < bottomOffset ? bottomOffset : topOffset,
+        duration: _scrollAnimationDuration,
         curve: Curves.easeInOut,
       ).then((Null none) {
         setState(() {
@@ -401,7 +401,7 @@ class _ReorderableListContentState extends State<_ReorderableListContent> with T
       if (_currentIndex == index) {
         return _buildContainerForScrollDirection(children: <Widget>[
           new SizeTransition(
-            sizeFactor: _entranceController, 
+            sizeFactor: _entranceController,
             axis: widget.scrollDirection,
             child: spacing
           ),
@@ -413,7 +413,7 @@ class _ReorderableListContentState extends State<_ReorderableListContent> with T
       if (_ghostIndex == index) {
         return _buildContainerForScrollDirection(children: <Widget>[
           new SizeTransition(
-            sizeFactor: _ghostController, 
+            sizeFactor: _ghostController,
             axis: widget.scrollDirection,
             child: spacing,
           ),
@@ -480,7 +480,7 @@ class _ReorderableListContentState extends State<_ReorderableListContent> with T
         return new SingleChildScrollView(
           scrollDirection: widget.scrollDirection,
           child: _buildContainerForScrollDirection(children: wrappedChildren),
-          padding: widget.padding, 
+          padding: widget.padding,
           controller: _scrollController,
         );
     });
