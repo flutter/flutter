@@ -105,6 +105,6 @@ File generateServiceDefinitions(
 
   final Map<String, dynamic> jsonObject = <String, dynamic>{ 'services': services };
   final File servicesFile = fs.file(fs.path.join(dir, 'services.json'));
-  servicesFile.writeAsStringSync(json.encode(jsonObject), mode: FileMode.write, flush: true); 
+  servicesFile.writeAsStringSync(json.encode(jsonObject), mode: FileMode.write, flush: true);
   return servicesFile;
 }

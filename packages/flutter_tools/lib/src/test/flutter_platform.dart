@@ -52,8 +52,8 @@ const String _kProjectRootSentinel = 'pubspec.yaml';
 /// The address at which our WebSocket server resides and at which the sky_shell
 /// processes will host the Observatory server.
 final Map<InternetAddressType, InternetAddress> _kHosts = <InternetAddressType, InternetAddress>{
-  InternetAddressType.IPv4: InternetAddress.loopbackIPv4, 
-  InternetAddressType.IPv6: InternetAddress.loopbackIPv6, 
+  InternetAddressType.IPv4: InternetAddress.loopbackIPv4,
+  InternetAddressType.IPv6: InternetAddress.loopbackIPv6,
 };
 
 /// Configure the `test` package to work with Flutter.
@@ -73,7 +73,7 @@ void installHook({
   bool trackWidgetCreation = false,
   bool updateGoldens = false,
   int observatoryPort,
-  InternetAddressType serverType = InternetAddressType.IPv4, 
+  InternetAddressType serverType = InternetAddressType.IPv4,
 }) {
   assert(!enableObservatory || (!startPaused && observatoryPort == null));
   hack.registerPlatformPlugin(
@@ -120,7 +120,7 @@ String generateTestBootstrap({
   assert(host != null);
   assert(updateGoldens != null);
 
-  final String websocketUrl = host.type == InternetAddressType.IPv4 
+  final String websocketUrl = host.type == InternetAddressType.IPv4
       ? 'ws://${host.address}'
       : 'ws://[${host.address}]';
   final String encodedWebsocketUrl = Uri.encodeComponent(websocketUrl);
@@ -796,7 +796,7 @@ class _FlutterPlatform extends PlatformPlugin {
     } else {
       command.add('--disable-observatory');
     }
-    if (host.type == InternetAddressType.IPv6) 
+    if (host.type == InternetAddressType.IPv6)
       command.add('--ipv6');
     if (bundlePath != null) {
       command.add('--flutter-assets-dir=$bundlePath');

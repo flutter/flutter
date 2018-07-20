@@ -8,5 +8,5 @@ import 'dart:io' as system;
 // see //flutter/dev/bots/test.dart
 
 void main() {
-  system.Process.killPid(system.pid, system.ProcessSignal.sigsegv); 
+  system.Process.killPid(system.pid, system.ProcessSignal.sigsegv);
 }

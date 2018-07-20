@@ -104,15 +104,15 @@ void copyDirectorySync(Directory srcDir, Directory destDir, [void onFileCopied(F
 Directory getRecordingSink(String dirname, String basename) {
   final String location = _kLocalFs.path.join(dirname, basename);
   switch (_kLocalFs.typeSync(location, followLinks: false)) {
-    case FileSystemEntityType.file: 
-    case FileSystemEntityType.link: 
+    case FileSystemEntityType.file:
+    case FileSystemEntityType.link:
       throwToolExit('Invalid record-to location: $dirname ("$basename" exists as non-directory)');
       break;
-    case FileSystemEntityType.directory: 
+    case FileSystemEntityType.directory:
       if (_kLocalFs.directory(location).listSync(followLinks: false).isNotEmpty)
         throwToolExit('Invalid record-to location: $dirname ("$basename" is not empty)');
       break;
-    case FileSystemEntityType.notFound: 
+    case FileSystemEntityType.notFound:
       _kLocalFs.directory(location).createSync(recursive: true);
   }
   return _kLocalFs.directory(location);

@@ -563,7 +563,7 @@ class LoggingProcessManager extends LocalProcessManager {
       Map<String, String> environment,
       bool includeParentEnvironment = true,
       bool runInShell = false,
-      ProcessStartMode mode = ProcessStartMode.normal, 
+      ProcessStartMode mode = ProcessStartMode.normal,
     }) {
     commands.add(command);
     return super.start(

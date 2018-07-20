@@ -236,8 +236,8 @@ class GoldensClient {
   Future<void> _obtainLock() async {
     final File lockFile = flutterRoot.childFile(fs.path.join('bin', 'cache', 'goldens.lockfile'));
     await lockFile.create(recursive: true);
-    _lock = await lockFile.open(mode: io.FileMode.write); 
-    await _lock.lock(io.FileLock.blockingExclusive); 
+    _lock = await lockFile.open(mode: io.FileMode.write);
+    await _lock.lock(io.FileLock.blockingExclusive);
   }
 
   Future<void> _releaseLock() async {

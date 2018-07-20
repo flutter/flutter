@@ -26,7 +26,7 @@ void main() {
     });
 
     testUsingContext('toString() works', () async {
-      expect(io.ProcessSignal.sigint.toString(), ProcessSignal.SIGINT.toString()); 
+      expect(io.ProcessSignal.sigint.toString(), ProcessSignal.SIGINT.toString());
     });
   });
 }

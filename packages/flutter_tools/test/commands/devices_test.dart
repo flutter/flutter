@@ -48,8 +48,8 @@ class MockProcessManager extends Mock implements ProcessManager {
         Map<String, String> environment,
         bool includeParentEnvironment = true,
         bool runInShell = false,
-        Encoding stdoutEncoding = systemEncoding, 
-        Encoding stderrEncoding = systemEncoding, 
+        Encoding stdoutEncoding = systemEncoding,
+        Encoding stderrEncoding = systemEncoding,
       }) async {
     return new ProcessResult(0, 0, '', '');
   }
@@ -61,8 +61,8 @@ class MockProcessManager extends Mock implements ProcessManager {
         Map<String, String> environment,
         bool includeParentEnvironment = true,
         bool runInShell = false,
-        Encoding stdoutEncoding = systemEncoding, 
-        Encoding stderrEncoding = systemEncoding, 
+        Encoding stdoutEncoding = systemEncoding,
+        Encoding stderrEncoding = systemEncoding,
       }) {
     return new ProcessResult(0, 0, '', '');
   }

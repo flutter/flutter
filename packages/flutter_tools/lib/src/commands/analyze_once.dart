@@ -47,9 +47,9 @@ class AnalyzeOnce extends AnalyzeBase {
       for (String directory in directories) {
         final FileSystemEntityType type = fs.typeSync(directory);
 
-        if (type == FileSystemEntityType.notFound) { 
+        if (type == FileSystemEntityType.notFound) {
           throwToolExit("'$directory' does not exist");
-        } else if (type != FileSystemEntityType.directory) { 
+        } else if (type != FileSystemEntityType.directory) {
           throwToolExit("'$directory' is not a directory");
         }
       }

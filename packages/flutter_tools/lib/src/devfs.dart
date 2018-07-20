@@ -46,7 +46,7 @@ abstract class DevFSContent {
   Stream<List<int>> contentsAsStream();
 
   Stream<List<int>> contentsAsCompressedStream() {
-    return contentsAsStream().transform(gzip.encoder); 
+    return contentsAsStream().transform(gzip.encoder);
   }
 
   /// Return the list of files this content depends on.
@@ -86,7 +86,7 @@ class DevFSFileContent extends DevFSContent {
       return;
     }
     _fileStat = file.statSync();
-    if (_fileStat.type == FileSystemEntityType.link) { 
+    if (_fileStat.type == FileSystemEntityType.link) {
       // Resolve, stat, and maybe cache the symlink target.
       final String resolved = file.resolveSymbolicLinksSync();
       final FileSystemEntity linkTarget = fs.file(resolved);
@@ -666,7 +666,7 @@ class DevFS {
           try {
             final FileSystemEntityType linkType =
                 fs.statSync(file.resolveSymbolicLinksSync()).type;
-            if (linkType == FileSystemEntityType.directory) 
+            if (linkType == FileSystemEntityType.directory)
               continue;
           } on FileSystemException catch (e) {
             _printScanDirectoryError(file.path, e);

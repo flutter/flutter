@@ -785,7 +785,7 @@ class PubspecChecksum extends PubspecLine {
     if (twoLines.length != 2) {
       return new PubspecChecksum(-1, line);
     }
-    
+
     final int value = int.tryParse(twoLines.last.trim(), radix: 16) ?? -1;
     return new PubspecChecksum(value, line);
   }

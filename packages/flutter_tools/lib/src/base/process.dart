@@ -213,7 +213,7 @@ Future<Process> runDetached(List<String> cmd) {
   _traceCommand(cmd);
   final Future<Process> proc = processManager.start(
     cmd,
-    mode: ProcessStartMode.detached, 
+    mode: ProcessStartMode.detached,
   );
   return proc;
 }

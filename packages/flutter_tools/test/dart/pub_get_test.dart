@@ -164,7 +164,7 @@ class MockProcessManager implements ProcessManager {
     Map<String, String> environment,
     bool includeParentEnvironment = true,
     bool runInShell = false,
-    ProcessStartMode mode = ProcessStartMode.normal, 
+    ProcessStartMode mode = ProcessStartMode.normal,
   }) {
     lastPubEnvironment = environment['PUB_ENVIRONMENT'];
     lastPubCache = environment['PUB_CACHE'];
@@ -237,7 +237,7 @@ class MockFileSystem extends ForwardingFileSystem {
 
 class MockFile implements File {
   @override
-  Future<RandomAccessFile> open({FileMode mode = FileMode.read}) async { 
+  Future<RandomAccessFile> open({FileMode mode = FileMode.read}) async {
     return new MockRandomAccessFile();
   }
 

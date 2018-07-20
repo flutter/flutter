@@ -582,7 +582,7 @@ void _copyServiceDefinitionsManifest(List<Map<String, String>> services, File ma
     'framework': fs.path.basenameWithoutExtension(service['ios-framework'])
   }).toList();
   final Map<String, dynamic> jsonObject = <String, dynamic>{ 'services' : jsonServices };
-  manifest.writeAsStringSync(json.encode(jsonObject), mode: FileMode.write, flush: true); 
+  manifest.writeAsStringSync(json.encode(jsonObject), mode: FileMode.write, flush: true);
 }
 
 Future<bool> upgradePbxProjWithFlutterAssets(String app, String appPath) async {

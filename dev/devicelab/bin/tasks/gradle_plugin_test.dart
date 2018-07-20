@@ -176,7 +176,7 @@ class FlutterProject {
     final File buildScript = new File(
       path.join(androidPath, 'app', 'build.gradle'),
     );
-    
+
     buildScript.openWrite(mode: FileMode.append).write('''
 
 android {
@@ -193,7 +193,7 @@ android {
     final File buildScript = new File(
       path.join(androidPath, 'app', 'build.gradle'),
     );
-    
+
     buildScript.openWrite(mode: FileMode.append).write('''
 
 android {

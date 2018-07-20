@@ -240,9 +240,9 @@ dependencies:
           throw 'failed to parse error message: $error';
         }
         final String column = error.substring(colon2 + kColon.length, bullet2);
-        
+
         final int lineNumber = int.tryParse(line, radix: 10);
-        
+
         final int columnNumber = int.tryParse(column, radix: 10);
         if (lineNumber == null) {
           throw 'failed to parse error message: $error';

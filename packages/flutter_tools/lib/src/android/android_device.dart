@@ -210,7 +210,7 @@ class AndroidDevice extends Device {
       // Sample output: '22'
       final String sdkVersion = await _getProperty('ro.build.version.sdk');
 
-      
+
       final int sdkVersionParsed = int.tryParse(sdkVersion);
       if (sdkVersionParsed == null) {
         printError('Unexpected response from getprop: "$sdkVersion"');
@@ -822,7 +822,7 @@ class _AndroidDevicePortForwarder extends DevicePortForwarder {
   final AndroidDevice device;
 
   static int _extractPort(String portString) {
-    
+
     return int.tryParse(portString.trim());
   }
 
