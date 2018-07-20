@@ -207,9 +207,7 @@ void main() {
 
   testWidgets('Single Panel Open Test',  (WidgetTester tester) async {
 
-    List<ExpansionPanel> _demoItems;
-
-    _demoItems = <ExpansionPanel>[
+    final List<ExpansionPanel> _demoItems = <ExpansionPanel>[
       new ExpansionPanelRadio(
         headerBuilder: (BuildContext context, bool isExpanded) {
           return new Text(isExpanded ? 'B' : 'A');
