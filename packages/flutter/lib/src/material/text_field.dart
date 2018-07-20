@@ -163,16 +163,16 @@ class TextField extends StatefulWidget {
   /// Defaults to [TextInputAction.done]. Must not be null.
   final TextInputAction textInputAction;
 
-  /// Configures how the platform keyboard will select an uppercase or 
+  /// Configures how the platform keyboard will select an uppercase or
   /// lowercase keyboard.
   ///
   /// Only supports text keyboards, other keyboard types will ignore this
   /// configuration. Capitalization is locale-aware.
   ///
   /// Defaults to [TextCapitalization.none]. Must not be null.
-  /// 
+  ///
   /// See also:
-  /// 
+  ///
   ///   * [TextCapitalization], for a description of each capitalization behavior.
   final TextCapitalization textCapitalization;
 
