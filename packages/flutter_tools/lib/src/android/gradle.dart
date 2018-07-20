@@ -45,8 +45,9 @@ final RegExp ndkMessageFilter = new RegExp(r'^(?!NDK is missing a ".*" directory
 
 
 
-FlutterPluginVersion get flutterPluginVersion {
-  final File plugin = fs.file('android/buildSrc/src/main/groovy/FlutterPlugin.groovy');
+FlutterPluginVersion getFlutterPluginVersion(AndroidProject project) {
+  final File plugin = project.directory.childFile(
+      fs.path.join('buildSrc', 'src', 'main', 'groovy', 'FlutterPlugin.groovy'));
   if (plugin.existsSync()) {
     final String packageLine = plugin.readAsLinesSync().skip(4).first;
     if (packageLine == 'package io.flutter.gradle') {
@@ -54,7 +55,8 @@ FlutterPluginVersion get flutterPluginVersion {
     }
     return FlutterPluginVersion.v1;
   }
-  final File appGradle = fs.file('android/app/build.gradle');
+  final File appGradle = project.directory.childFile(
+      fs.path.join('app','build.gradle'));
   if (appGradle.existsSync()) {
     for (String line in appGradle.readAsLinesSync()) {
       if (line.contains(new RegExp(r'apply from: .*/flutter.gradle'))) {
@@ -67,7 +69,7 @@ FlutterPluginVersion get flutterPluginVersion {
 
 /// Returns the apk file created by [buildGradleProject]
 Future<File> getGradleAppOut(AndroidProject androidProject) async {
-  switch (flutterPluginVersion) {
+  switch (getFlutterPluginVersion(androidProject)) {
     case FlutterPluginVersion.none:
       // Fall through. Pretend we're v1, and just go with it.
     case FlutterPluginVersion.v1:
@@ -88,8 +90,8 @@ Future<GradleProject> _gradleProject() async {
 // Note: Dependencies are resolved and possibly downloaded as a side-effect
 // of calculating the app properties using Gradle. This may take minutes.
 Future<GradleProject> _readGradleProject() async {
-  final String gradle = await _ensureGradle();
   final FlutterProject flutterProject =  new FlutterProject(fs.currentDirectory);
+  final String gradle = await _ensureGradle(flutterProject);
   await updateLocalProperties(project: flutterProject);
   try {
     final Status status = logger.startProgress('Resolving dependencies...', expectSlowOperation: true);
@@ -103,7 +105,7 @@ Future<GradleProject> _readGradleProject() async {
     status.stop();
     return project;
   } catch (e) {
-    if (flutterPluginVersion == FlutterPluginVersion.managed) {
+    if (getFlutterPluginVersion(flutterProject.android) == FlutterPluginVersion.managed) {
       // Handle known exceptions. This will exit if handled.
       handleKnownGradleExceptions(e);
 
@@ -150,15 +152,15 @@ String _locateGradlewExecutable(Directory directory) {
   }
 }
 
-Future<String> _ensureGradle() async {
-  _cachedGradleExecutable ??= await _initializeGradle();
+Future<String> _ensureGradle(FlutterProject project) async {
+  _cachedGradleExecutable ??= await _initializeGradle(project);
   return _cachedGradleExecutable;
 }
 
 // Note: Gradle may be bootstrapped and possibly downloaded as a side-effect
 // of validating the Gradle executable. This may take several seconds.
-Future<String> _initializeGradle() async {
-  final Directory android = fs.directory('android');
+Future<String> _initializeGradle(FlutterProject project) async {
+  final Directory android = project.android.directory;
   final Status status = logger.startProgress('Initializing gradle...', expectSlowOperation: true);
   String gradle = _locateGradlewExecutable(android);
   if (gradle == null) {
@@ -258,9 +260,9 @@ Future<Null> buildGradleProject({
   // from the local.properties file.
   await updateLocalProperties(project: project, buildInfo: buildInfo);
 
-  final String gradle = await _ensureGradle();
+  final String gradle = await _ensureGradle(project);
 
-  switch (flutterPluginVersion) {
+  switch (getFlutterPluginVersion(project.android)) {
     case FlutterPluginVersion.none:
       // Fall through. Pretend it's v1, and just go for it.
     case FlutterPluginVersion.v1:
@@ -268,7 +270,7 @@ Future<Null> buildGradleProject({
     case FlutterPluginVersion.managed:
       // Fall through. Managed plugin builds the same way as plugin v2.
     case FlutterPluginVersion.v2:
-      return _buildGradleProjectV2(gradle, buildInfo, target);
+      return _buildGradleProjectV2(project, gradle, buildInfo, target);
   }
 }
 
@@ -277,7 +279,7 @@ Future<Null> _buildGradleProjectV1(FlutterProject project, String gradle) async 
   final Status status = logger.startProgress('Running \'gradlew build\'...', expectSlowOperation: true);
   final int exitCode = await runCommandAndStreamOutput(
     <String>[fs.file(gradle).absolute.path, 'build'],
-    workingDirectory: 'android',
+    workingDirectory: project.android.directory.path,
     allowReentrantFlutter: true,
     environment: _gradleEnv,
   );
@@ -289,7 +291,11 @@ Future<Null> _buildGradleProjectV1(FlutterProject project, String gradle) async 
   printStatus('Built ${fs.path.relative(project.android.gradleAppOutV1File.path)}.');
 }
 
-Future<Null> _buildGradleProjectV2(String gradle, BuildInfo buildInfo, String target) async {
+Future<Null> _buildGradleProjectV2(
+    FlutterProject flutterProject,
+    String gradle,
+    BuildInfo buildInfo,
+    String target) async {
   final GradleProject project = await _gradleProject();
   final String assembleTask = project.assembleTaskFor(buildInfo);
   if (assembleTask == null) {
@@ -350,7 +356,7 @@ Future<Null> _buildGradleProjectV2(String gradle, BuildInfo buildInfo, String ta
   command.add(assembleTask);
   final int exitCode = await runCommandAndStreamOutput(
       command,
-      workingDirectory: 'android',
+      workingDirectory: flutterProject.android.directory.path,
       allowReentrantFlutter: true,
       environment: _gradleEnv,
       filter: logger.isVerbose ? null : ndkMessageFilter,
