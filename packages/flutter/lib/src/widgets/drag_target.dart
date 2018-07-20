@@ -168,7 +168,7 @@ class Draggable<T> extends StatefulWidget {
 
   /// Whether the semantics of the [feedback] widget is ignored when building
   /// the semantics tree.
-  /// 
+  ///
   /// This value should be set to false when the [feedback] widget is intended
   /// to be the same object as the [child].  Placing a [GlobalKey] on this
   /// widget will ensure semantic focus is kept on the element as it moves in
@@ -660,7 +660,7 @@ class _DragAvatar<T> extends Drag {
   Offset _restrictAxis(Offset offset) {
     if (axis == null) {
       return offset;
-    } 
+    }
     if (axis == Axis.horizontal) {
       return new Offset(offset.dx, 0.0);
     }

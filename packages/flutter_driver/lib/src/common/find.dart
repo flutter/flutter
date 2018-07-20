@@ -259,7 +259,7 @@ class ByType extends SerializableFinder {
 ///
 /// If the object returned by the finder does not have its own semantics node,
 /// then the semantics node of the first ancestor is returned instead.
-/// 
+///
 /// Throws an error if a finder returns multiple objects or if there are no
 /// semantics nodes.
 ///

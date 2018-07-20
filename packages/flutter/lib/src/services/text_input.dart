@@ -409,9 +409,9 @@ class TextInputConfiguration {
   final TextCapitalization textCapitalization;
   
   /// The appearance of the keyboard.
-  /// 
+  ///
   /// This setting is only honored on iOS devices.
-  /// 
+  ///
   /// Defaults to [Brightness.light].
   final Brightness keyboardAppearance;
 

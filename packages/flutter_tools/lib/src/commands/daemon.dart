@@ -374,7 +374,7 @@ class AppDomain extends Domain {
         ipv6: ipv6,
       );
     }
-    
+
     return launch(
         runner,
         ({ Completer<DebugConnectionInfo> connectionInfoCompleter,

@@ -36,7 +36,7 @@ void main() {
     testUsingContext('can hot reload', () async {
       await _flutterRun.run(withDebugger: true);
       await _flutterAttach.attach(_flutterRun.vmServicePort);
-      
+
       await _flutterAttach.hotReload();
     });
   }, timeout: const Timeout.factor(3));
