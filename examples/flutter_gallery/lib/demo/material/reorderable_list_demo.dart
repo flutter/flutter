@@ -112,7 +112,7 @@ class _ListDemoState extends State<ReorderableListDemo> {
         listTile = new CheckboxListTile(
           key: new Key(item.value),
           isThreeLine: true,
-          value: item.checkState ?? false, 
+          value: item.checkState ?? false,
           onChanged: (bool newValue) {
             setState(() {
               item.checkState = newValue;
@@ -127,15 +127,15 @@ class _ListDemoState extends State<ReorderableListDemo> {
       case _ReorderableListType.verticalAvatar:
         listTile = new Container(
           key: new Key(item.value),
-          height: 100.0, 
-          width: 100.0, 
-          child: new CircleAvatar(child: new Text(item.value), 
+          height: 100.0,
+          width: 100.0,
+          child: new CircleAvatar(child: new Text(item.value),
             backgroundColor: Colors.green,
           ),
         );
         break;
     }
-    
+
     return listTile;
   }
 
@@ -176,10 +176,10 @@ class _ListDemoState extends State<ReorderableListDemo> {
       ),
       body: new Scrollbar(
         child: new ReorderableListView(
-          header: _itemType != _ReorderableListType.threeLine 
+          header: _itemType != _ReorderableListType.threeLine
               ? new Padding(
-                  padding: const EdgeInsets.all(8.0), 
-                  child: new Text('Header of the list', style: Theme.of(context).textTheme.headline)) 
+                  padding: const EdgeInsets.all(8.0),
+                  child: new Text('Header of the list', style: Theme.of(context).textTheme.headline))
               : null,
           onReorder: _onReorder,
           scrollDirection: _itemType == _ReorderableListType.horizontalAvatar ? Axis.horizontal : Axis.vertical,
