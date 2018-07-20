@@ -11,7 +11,7 @@ import 'scaffold.dart';
 import 'theme.dart';
 import 'theme_data.dart';
 
-// https://material.google.com/components/snackbars-toasts.html
+// https://material.io/design/components/snackbars.html
 
 const double _kSnackBarPadding = 24.0;
 const double _kSingleLineVerticalPadding = 14.0;
