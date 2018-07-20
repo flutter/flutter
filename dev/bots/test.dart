@@ -381,7 +381,7 @@ Future<EvalResult> _evalCommand(String executable, List<String> arguments, {
 }
 
 String elapsedTime(DateTime start) {
-  return new DateTime.now().difference(start).toString().toString();
+  return new DateTime.now().difference(start).toString();
 }
 
 Future<Null> _runCommand(String executable, List<String> arguments, {
@@ -630,7 +630,6 @@ Future<Null> _verifyNoBadImportsInFlutterTools(String workingDirectory) async {
 }
 
 void _printProgress(String action, String workingDir, String command) {
-
   print('$arrow $action: cd $cyan$workingDir$reset; $yellow$command$reset');
 }
 
