@@ -314,11 +314,9 @@ class _ReorderableListContentState extends State<_ReorderableListContent> with T
     assert(toWrap.key != null);
     // We create a global key based on both the child key and index
     // so that when we reorder the list, a key doesn't get created twice.
+    //
+    // We also use this to measure the size of the dragging widget when we first pick it up.
     final GlobalObjectKey keyIndexGlobalKey = new GlobalObjectKey('${toWrap.key}|$index');
-    // We pass the toWrapWithGlobalKey into the Draggable so that when a list
-    // item gets dragged, the accessibility framework can preserve the selected
-    // state of the dragging item.
-    final Widget toWrapWithGlobalKey = new KeyedSubtree(key: keyIndexGlobalKey, child: toWrap);
 
     // Starts dragging toWrap.
     void onDragStarted() {
@@ -347,6 +345,11 @@ class _ReorderableListContentState extends State<_ReorderableListContent> with T
     }
 
     Widget buildDragTarget(BuildContext context, List<Key> acceptedCandidates, List<dynamic> rejectedCandidates) {
+      // We pass the toWrapWithGlobalKey into the Draggable so that when a list
+      // item gets dragged, the accessibility framework can preserve the selected
+      // state of the dragging item.
+      final Widget toWrapWithGlobalKey = new KeyedSubtree(key: keyIndexGlobalKey, child: toWrap);
+      
       // We build the draggable inside of a layout builder so that we can
       // constrain the size of the feedback dragging widget.
       Widget child = new LongPressDraggable<Key>(
