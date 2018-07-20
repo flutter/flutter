@@ -375,7 +375,7 @@ Matcher matchesSemanticsData({
     flags.add(SemanticsFlag.scopesRoute);
   if (isHidden)
     flags.add(SemanticsFlag.isHidden);
-  if (isImage) 
+  if (isImage)
     flags.add(SemanticsFlag.isImage);
   if (isLiveRegion)
     flags.add(SemanticsFlag.isLiveRegion);
