@@ -170,7 +170,7 @@ void main() {
     );
     expect(find.byKey(key).hitTestable(), findsOneWidget);
   });
-  
+
   testWidgets('RawMaterialButton can be expanded by parent constraints', (WidgetTester tester) async {
     const Key key = Key('test');
     await tester.pumpWidget(
