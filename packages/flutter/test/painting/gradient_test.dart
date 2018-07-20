@@ -251,9 +251,9 @@ void main() {
     );
 
     final RadialGradient actual = RadialGradient.lerp(testGradient1, testGradient2, 0.5);
-    
+
     expect(actual.focal, isNull);
-    
+
     expect(actual, const RadialGradient(
       center: const Alignment(0.0, -1.0),
       radius: 15.0,
@@ -322,7 +322,7 @@ void main() {
       ],
     ));
   });
-  
+
   test('SweepGradient lerp test', () {
     const SweepGradient testGradient1 = const SweepGradient(
       center: Alignment.topLeft,
@@ -409,9 +409,9 @@ void main() {
         const Color(0xff666666),
       ],
     );
-    
+
     final SweepGradient actual = testGradient.scale(0.5);
-    
+
     expect(actual, const SweepGradient(
       center: Alignment.topLeft,
       startAngle: 0.0,
