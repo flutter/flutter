@@ -29,10 +29,6 @@ class Mapping {
   FML_DISALLOW_COPY_AND_ASSIGN(Mapping);
 };
 
-bool PlatformHasResourcesBundle();
-
-std::unique_ptr<Mapping> GetResourceMapping(const std::string& resource_name);
-
 class FileMapping : public Mapping {
  public:
   FileMapping(const std::string& path, bool executable = false);

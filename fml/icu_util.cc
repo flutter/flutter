@@ -38,15 +38,6 @@ class ICUContext {
       return true;
     }
 
-    // Check to see if the mapping is in the resources bundle.
-    if (PlatformHasResourcesBundle()) {
-      auto resource = GetResourceMapping(icu_data_path);
-      if (resource != nullptr && resource->GetSize() != 0) {
-        mapping_ = std::move(resource);
-        return true;
-      }
-    }
-
     // Check if the mapping can by directly accessed via a file path. In this
     // case, the data file needs to be next to the executable.
     auto directory = fml::paths::GetExecutableDirectoryPath();
