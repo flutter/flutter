@@ -180,6 +180,7 @@ class TextFormFieldDemoState extends State<TextFormFieldDemo> {
               children: <Widget>[
                 const SizedBox(height: 24.0),
                 new TextFormField(
+                  textCapitalization: TextCapitalization.words,
                   decoration: const InputDecoration(
                     border: const UnderlineInputBorder(),
                     filled: true,
