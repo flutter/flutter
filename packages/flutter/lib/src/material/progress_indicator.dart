@@ -235,7 +235,7 @@ class _LinearProgressIndicatorState extends State<LinearProgressIndicator> with 
       _previousUpdateValue = widget.value;
       _previousUpdateTime = now;
       final RenderObject renderObject = context.findRenderObject();
-      renderObject.sendSemanticsEvent(const LiveRegionEvent());
+      renderObject.sendSemanticsEvent(const UpdateLiveRegionEvent());
     }
   }
 

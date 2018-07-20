@@ -139,7 +139,7 @@ class _SnackBarActionState extends State<SnackBarAction> {
 ///  * [SnackBarAction], which is used to specify an [action] button to show
 ///    on the snack bar.
 ///  * <https://material.google.com/components/snackbars-toasts.html>
-class SnackBar extends StatefulWidget {
+class SnackBar extends StatelessWidget {
   /// Creates a snack bar.
   ///
   /// The [content] argument must be non-null.
@@ -185,7 +185,79 @@ class SnackBar extends StatefulWidget {
   final Animation<double> animation;
 
   @override
-  State<SnackBar> createState() => new _SnackBarState();
+  Widget build(BuildContext context) {
+    assert(animation != null);
+    final ThemeData theme = Theme.of(context);
+    final ThemeData darkTheme = new ThemeData(
+      brightness: Brightness.dark,
+      accentColor: theme.accentColor,
+      accentColorBrightness: theme.accentColorBrightness,
+    );
+    final List<Widget> children = <Widget>[
+      const SizedBox(width: _kSnackBarPadding),
+      new Expanded(
+        child: new Container(
+          padding: const EdgeInsets.symmetric(vertical: _kSingleLineVerticalPadding),
+          child: new DefaultTextStyle(
+            style: darkTheme.textTheme.subhead,
+            child: content,
+          ),
+        ),
+      ),
+    ];
+    if (action != null) {
+      children.add(new ButtonTheme.bar(
+        padding: const EdgeInsets.symmetric(horizontal: _kSnackBarPadding),
+        textTheme: ButtonTextTheme.accent,
+        child: action,
+      ));
+    } else {
+      children.add(const SizedBox(width: _kSnackBarPadding));
+    }
+    final CurvedAnimation heightAnimation = new CurvedAnimation(parent: animation, curve: _snackBarHeightCurve);
+    final CurvedAnimation fadeAnimation = new CurvedAnimation(parent: animation, curve: _snackBarFadeCurve, reverseCurve: const Threshold(0.0));
+    return new ClipRect(
+      child: new AnimatedBuilder(
+        animation: heightAnimation,
+        builder: (BuildContext context, Widget child) {
+          return new Align(
+            alignment: AlignmentDirectional.topStart,
+            heightFactor: heightAnimation.value,
+            child: child,
+          );
+        },
+        child: new Semantics(
+          liveRegion: true,
+          container: true,
+          child: new Dismissible(
+            key: const Key('dismissible'),
+            direction: DismissDirection.down,
+            resizeDuration: null,
+            onDismissed: (DismissDirection direction) {
+              Scaffold.of(context).removeCurrentSnackBar(reason: SnackBarClosedReason.swipe);
+            },
+            child: new Material(
+              elevation: 6.0,
+              color: backgroundColor ?? _kSnackBackground,
+              child: new Theme(
+                data: darkTheme,
+                child: new FadeTransition(
+                  opacity: fadeAnimation,
+                  child: new SafeArea(
+                    top: false,
+                    child: new Row(
+                      children: children,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
 
   // API for Scaffold.addSnackBar():
 
@@ -210,92 +282,6 @@ class SnackBar extends StatefulWidget {
       action: action,
       duration: duration,
       animation: newAnimation,
-    );
-  }
-}
-
-class _SnackBarState extends State<SnackBar> {
-  @override
-  void initState() {
-    WidgetsBinding.instance.addPostFrameCallback((Duration _) {
-      final RenderBox renderBox = context.findRenderObject();
-      renderBox.sendSemanticsEvent(const UpdateLiveRegion());
-    });
-    super.initState();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    assert(widget.animation != null);
-    final ThemeData theme = Theme.of(context);
-    final ThemeData darkTheme = new ThemeData(
-      brightness: Brightness.dark,
-      accentColor: theme.accentColor,
-      accentColorBrightness: theme.accentColorBrightness,
-    );
-    final List<Widget> children = <Widget>[
-      const SizedBox(width: _kSnackBarPadding),
-      new Expanded(
-        child: new Container(
-          padding: const EdgeInsets.symmetric(vertical: _kSingleLineVerticalPadding),
-          child: new DefaultTextStyle(
-            style: darkTheme.textTheme.subhead,
-            child: widget.content,
-          ),
-        ),
-      ),
-    ];
-    if (widget.action != null) {
-      children.add(new ButtonTheme.bar(
-        padding: const EdgeInsets.symmetric(horizontal: _kSnackBarPadding),
-        textTheme: ButtonTextTheme.accent,
-        child: widget.action,
-      ));
-    } else {
-      children.add(const SizedBox(width: _kSnackBarPadding));
-    }
-    final CurvedAnimation heightAnimation = new CurvedAnimation(parent: widget.animation, curve: _snackBarHeightCurve);
-    final CurvedAnimation fadeAnimation = new CurvedAnimation(parent: widget.animation, curve: _snackBarFadeCurve, reverseCurve: const Threshold(0.0));
-    return new ClipRect(
-      child: new AnimatedBuilder(
-        animation: heightAnimation,
-        builder: (BuildContext context, Widget child) {
-          return new Align(
-            alignment: AlignmentDirectional.topStart,
-            heightFactor: heightAnimation.value,
-            child: child,
-          );
-        },
-        child: new Semantics(
-          liveRegion: true,
-          container: true,
-          child: new Dismissible(
-            key: const Key('dismissible'),
-            direction: DismissDirection.down,
-            resizeDuration: null,
-            onDismissed: (DismissDirection direction) {
-              Scaffold.of(context).removeCurrentSnackBar(reason: SnackBarClosedReason.swipe);
-            },
-            child: new Material(
-              elevation: 6.0,
-              color: widget.backgroundColor ?? _kSnackBackground,
-              child: new Theme(
-                data: darkTheme,
-                child: new FadeTransition(
-                  opacity: fadeAnimation,
-                  child: new SafeArea(
-                    top: false,
-                    child: new Row(
-                      children: children,
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          ),
-        ),
-      ),
     );
   }
 }

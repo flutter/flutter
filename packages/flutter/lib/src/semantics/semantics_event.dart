@@ -134,9 +134,17 @@ class TapSemanticEvent extends SemanticsEvent {
   Map<String, dynamic> getDataMap() => const <String, dynamic>{};
 }
 
-class LiveRegionEvent extends SemanticsEvent {
-
-  const LiveRegionEvent() : super('liveRegionUpdate');
+/// An event which triggers an announcement of a live region.
+///
+/// This requires that the semantics node has already been marked as a live
+/// region. Only Android (TalkBack) will make a verbal announcement.
+///
+/// See also:
+///
+///  * [SemanticsFlag.liveRegion], for a description of live regions.   
+class UpdateLiveRegionEvent extends SemanticsEvent {
+  /// Creates a new [UpdateLiveRegionEvent].
+  const UpdateLiveRegionEvent() : super('updateLiveRegion');
 
   @override
   Map<String, dynamic> getDataMap() => const <String, dynamic>{};
