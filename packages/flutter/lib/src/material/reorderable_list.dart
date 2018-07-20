@@ -312,6 +312,13 @@ class _ReorderableListContentState extends State<_ReorderableListContent> with T
   // Handles up the logic for dragging and reordering items in the list.
   Widget _wrap(Widget toWrap, int index, BoxConstraints constraints) {
     assert(toWrap.key != null);
+    // We create a global key based on both the child key and index
+    // so that when we reorder the list, a key doesn't get created twice.
+    final GlobalObjectKey keyIndexGlobalKey = new GlobalObjectKey('${toWrap.key}|$index');
+    // We pass the toWrapWithGlobalKey into the Draggable so that when a list
+    // item gets dragged, the accessibility framework can preserve the selected
+    // state of the dragging item.
+    final Widget toWrapWithGlobalKey = new KeyedSubtree(key: keyIndexGlobalKey, child: toWrap);
 
     // Starts dragging toWrap.
     void onDragStarted() {
@@ -321,6 +328,7 @@ class _ReorderableListContentState extends State<_ReorderableListContent> with T
         _ghostIndex = index;
         _currentIndex = index;
         _entranceController.value = 1.0;
+        _draggingFeedbackSize = keyIndexGlobalKey.currentContext.size;
       });
     }
 
@@ -339,14 +347,6 @@ class _ReorderableListContentState extends State<_ReorderableListContent> with T
     }
 
     Widget buildDragTarget(BuildContext context, List<Key> acceptedCandidates, List<dynamic> rejectedCandidates) {
-      // We create a global key based on both the child key and index
-      // so that when we reorder the list, a key doesn't get created twice.
-      final GlobalObjectKey keyIndexGlobalKey = new GlobalObjectKey('${toWrap.key}|$index');
-      // We pass the toWrapWithGlobalKey into the Draggable so that when a list
-      // item gets dragged, the accessibility framework can preserve the selected
-      // state of the dragging item.
-      final Widget toWrapWithGlobalKey = new KeyedSubtree(key: keyIndexGlobalKey, child: toWrap);
-
       // We build the draggable inside of a layout builder so that we can
       // constrain the size of the feedback dragging widget.
       Widget child = new LongPressDraggable<Key>(
@@ -357,24 +357,17 @@ class _ReorderableListContentState extends State<_ReorderableListContent> with T
         // Treat the center of the child widget as the point to test in each
         // DragTarget. This makes the reorder operation happen when two list
         // items overlap instead of when one is below the other.
-        feedbackOffset: new Offset(
-          widget.scrollDirection == Axis.horizontal ? _dropAreaExtent / 2.0 : 0.0,
-          widget.scrollDirection == Axis.vertical ? _dropAreaExtent / 2.0 : 0.0,
-        ),
+        // feedbackOffset: new Offset(
+        //   widget.scrollDirection == Axis.horizontal ? _dropAreaExtent / 2.0 : 0.0,
+        //   widget.scrollDirection == Axis.vertical ? _dropAreaExtent / 2.0 : 0.0,
+        // ),
         feedback: new Container(
           alignment: Alignment.topLeft,
           // These constraints will limit the cross axis of the drawn widget.
           constraints: constraints,
           child: new Material(
             elevation: 6.0,
-            child: new _FeedbackWrapper(
-              onUpdateSize: (Size newSize) {
-                setState(() {
-                  _draggingFeedbackSize = newSize;
-                });
-              },
-              child: toWrapWithGlobalKey,
-            ),
+            child: toWrapWithGlobalKey,
           ),
         ),
         child: _dragging == toWrap.key ? const SizedBox() : toWrapWithGlobalKey,
@@ -498,48 +491,5 @@ class _ReorderableListContentState extends State<_ReorderableListContent> with T
           controller: _scrollController,
         );
     });
-  }
-}
-
-// Wrapper around the dragging feedback in a _ReorderableListContent.
-//
-// Calls onUpdateSize when the child's size changes.
-class _FeedbackWrapper extends StatefulWidget {
-  const _FeedbackWrapper({Key key, this.child, this.onUpdateSize}) : super(key: key);
-
-  final void Function(Size newSize) onUpdateSize;
-  final Widget child;
-
-  @override
-  _FeedbackWrapperState createState() => new _FeedbackWrapperState();
-}
-
-class _FeedbackWrapperState extends State<_FeedbackWrapper> {
-  @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addPostFrameCallback(_computeSize);
-  }
-
-  @override
-  void dispose() {
-    super.dispose();
-  }
-
-  @override
-  void didUpdateWidget(_FeedbackWrapper oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    WidgetsBinding.instance.addPostFrameCallback(_computeSize);
-  }
-
-  // Computes the widget's size as a post-frame callback.
-  void _computeSize([Duration duration]) {
-    final RenderBox box = context.findRenderObject();
-    widget.onUpdateSize(box.size);
-  }
-
-  @override
-  Widget build(BuildContext context) {
-     return widget.child;
   }
 }
