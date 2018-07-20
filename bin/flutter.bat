@@ -113,11 +113,12 @@ GOTO :after_subroutine
   :do_snapshot
     IF EXIST "%FLUTTER_ROOT%\version" DEL "%FLUTTER_ROOT%\version"
     ECHO: > "%cache_dir%\.dartignore"
-    ECHO Updating flutter tool...
+    ECHO Building flutter tool...
     PUSHD "%flutter_tools_dir%"
 
     REM Makes changes to PUB_ENVIRONMENT only visible to commands within SETLOCAL/ENDLOCAL
     SETLOCAL
+      SET VERBOSITY=--verbosity=error
       IF "%TRAVIS%" == "true" GOTO on_bot
       IF "%BOT%" == "true" GOTO on_bot
       IF "%CONTINUOUS_INTEGRATION%" == "true" GOTO on_bot
@@ -127,13 +128,14 @@ GOTO :after_subroutine
       GOTO not_on_bot
       :on_bot
         SET PUB_ENVIRONMENT=%PUB_ENVIRONMENT%:flutter_bot
+        SET VERBOSITY=--verbosity=all
       :not_on_bot
       SET PUB_ENVIRONMENT=%PUB_ENVIRONMENT%:flutter_install
       IF "%PUB_CACHE%" == "" (
-       IF EXIST "%pub_cache_path%" SET PUB_CACHE=%pub_cache_path%
+        IF EXIST "%pub_cache_path%" SET PUB_CACHE=%pub_cache_path%
       )
       :retry_pub_upgrade
-      CALL "%pub%" upgrade --verbosity=error --no-packages-dir
+      CALL "%pub%" upgrade %VERBOSITY% --no-packages-dir
       IF "%ERRORLEVEL%" NEQ "0" (
         ECHO Error: Unable to 'pub upgrade' flutter tool. Retrying in five seconds...
         timeout /t 5 /nobreak
