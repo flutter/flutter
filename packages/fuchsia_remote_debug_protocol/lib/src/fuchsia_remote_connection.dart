@@ -477,8 +477,8 @@ class FuchsiaRemoteConnection {
       final int lastSpace = trimmed.lastIndexOf(' ');
       final String lastWord = trimmed.substring(lastSpace + 1);
       if ((lastWord != '.') && (lastWord != '..')) {
-        // ignore: deprecated_member_use
-        final int value = int.parse(lastWord, onError: (_) => null);
+
+        final int value = int.tryParse(lastWord);
         if (value != null) {
           ports.add(value);
         }
