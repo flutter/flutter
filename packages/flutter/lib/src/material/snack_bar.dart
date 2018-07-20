@@ -72,7 +72,7 @@ enum SnackBarClosedReason {
 /// See also:
 ///
 ///  * [SnackBar]
-///  * <https://material.google.com/components/snackbars-toasts.html>
+///  * <https://material.io/design/components/snackbars.html>
 class SnackBarAction extends StatefulWidget {
   /// Creates an action for a [SnackBar].
   ///
@@ -137,7 +137,7 @@ class _SnackBarActionState extends State<SnackBarAction> {
 ///    displayed snack bar, if any, and allows the next to be displayed.
 ///  * [SnackBarAction], which is used to specify an [action] button to show
 ///    on the snack bar.
-///  * <https://material.google.com/components/snackbars-toasts.html>
+///  * <https://material.io/design/components/snackbars.html>
 class SnackBar extends StatelessWidget {
   /// Creates a snack bar.
   ///
@@ -177,7 +177,7 @@ class SnackBar extends StatelessWidget {
   ///  * [ScaffoldState.removeCurrentSnackBar], which abruptly hides the
   ///    currently displayed snack bar, if any, and allows the next to be
   ///    displayed.
-  ///  * <https://material.google.com/components/snackbars-toasts.html>
+  ///  * <https://material.io/design/components/snackbars.html>
   final Duration duration;
 
   /// The animation driving the entrance and exit of the snack bar.
