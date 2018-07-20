@@ -4,6 +4,7 @@
 
 import 'package:flutter/semantics.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/gestures.dart';
 
@@ -715,7 +716,7 @@ void main() {
       expect(tester.getTopLeft(find.text('V')), thirdWidgetLocation);
     });
   });
- 
+
 
   testWidgets('Drag and drop - onDraggableCanceled not called if dropped on accepting target', (WidgetTester tester) async {
     final List<int> accepted = <int>[];
@@ -1635,6 +1636,14 @@ void main() {
     expect(onDragStartedCalled, isTrue);
   });
 
+  testWidgets('long-press draggable calls Haptic Feedback onStart', (WidgetTester tester) async {
+    await _testLongPressDraggableHapticFeedback(tester: tester, hapticFeedbackOnStart: true, expectedHapticFeedbackCount: 1);
+  });
+
+  testWidgets('long-press draggable can disable Haptic Feedback', (WidgetTester tester) async {
+    await _testLongPressDraggableHapticFeedback(tester: tester, hapticFeedbackOnStart: false, expectedHapticFeedbackCount: 0);
+  });
+
   testWidgets('Drag feedback with child anchor positions correctly', (WidgetTester tester) async {
     await _testChildAnchorFeedbackPosition(tester: tester);
   });
@@ -1681,7 +1690,7 @@ void main() {
           ],
         ),
     ));
-    
+
     expect(semantics, hasSemantics(
       new TestSemantics.root(
         children: <TestSemantics>[
@@ -1741,7 +1750,7 @@ void main() {
     await tester.pump();
     await gesture.moveTo(secondLocation);
     await tester.pump();
-    
+
     expect(semantics, hasSemantics(
       new TestSemantics.root(
         children: <TestSemantics>[
@@ -1791,6 +1800,48 @@ void main() {
     semantics.dispose();
   });
 
+}
+
+Future<Null> _testLongPressDraggableHapticFeedback({WidgetTester tester, bool hapticFeedbackOnStart, int expectedHapticFeedbackCount}) async {
+  bool onDragStartedCalled = false;
+
+  int hapticFeedbackCalls = 0;
+  SystemChannels.platform.setMockMethodCallHandler((MethodCall methodCall) async {
+    if (methodCall.method == 'HapticFeedback.vibrate') {
+      hapticFeedbackCalls++;
+    }
+  });
+
+  await tester.pumpWidget(new MaterialApp(
+    home: new LongPressDraggable<int>(
+      data: 1,
+      child: const Text('Source'),
+      feedback: const Text('Dragging'),
+      hapticFeedbackOnStart: hapticFeedbackOnStart,
+      onDragStarted: () {
+        onDragStartedCalled = true;
+      },
+    ),
+  ));
+
+  expect(find.text('Source'), findsOneWidget);
+  expect(find.text('Dragging'), findsNothing);
+  expect(onDragStartedCalled, isFalse);
+
+  final Offset firstLocation = tester.getCenter(find.text('Source'));
+  await tester.startGesture(firstLocation, pointer: 7);
+  await tester.pump();
+
+  expect(find.text('Source'), findsOneWidget);
+  expect(find.text('Dragging'), findsNothing);
+  expect(onDragStartedCalled, isFalse);
+
+  await tester.pump(kLongPressTimeout);
+
+  expect(find.text('Source'), findsOneWidget);
+  expect(find.text('Dragging'), findsOneWidget);
+  expect(onDragStartedCalled, isTrue);
+  expect(hapticFeedbackCalls, expectedHapticFeedbackCount);
 }
 
 Future<Null> _testChildAnchorFeedbackPosition({WidgetTester tester, double top = 0.0, double left = 0.0}) async {

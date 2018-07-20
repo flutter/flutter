@@ -587,7 +587,7 @@ class _MaterialAppState extends State<MaterialApp> {
         },
       )
     );
-    
+
     assert(() {
       if (widget.debugShowMaterialGrid) {
         result = new GridPaper(
