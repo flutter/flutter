@@ -206,38 +206,31 @@ void main() {
   });
 
   testWidgets('Single Panel Open Test',  (WidgetTester tester) async {
-
-    List<ExpansionPanel> _demoItems;
-
-    _demoItems = <ExpansionPanel>[
-      new ExpansionPanelRadio(
-        headerBuilder: (BuildContext context, bool isExpanded) {
-          return new Text(isExpanded ? 'B' : 'A');
-        },
-        body: const SizedBox(height: 100.0),
-        value: 0,
-      ),
-      new ExpansionPanelRadio(
-        headerBuilder: (BuildContext context, bool isExpanded) {
-          return new Text(isExpanded ? 'D' : 'C');
-        },
-        body: const SizedBox(height: 100.0),
-        value: 1,
-      ),
-      new ExpansionPanelRadio(
-        headerBuilder: (BuildContext context, bool isExpanded) {
-          return new Text(isExpanded ? 'F' : 'E');
-        },
-        body: const SizedBox(height: 100.0),
-        value: 2,
-      ),
-    ];
-
     await tester.pumpWidget(
       new MaterialApp(
         home: new SingleChildScrollView(
-          child: new ExpansionPanelList.radio(
-            children: _demoItems,
+          child: new ExpansionPanelList(
+            children: <ExpansionPanel>[
+              new ExpansionPanel(
+                headerBuilder: (BuildContext context, bool isExpanded) {
+                  return new Text(isExpanded ? 'B' : 'A');
+                },
+                body: const SizedBox(height: 100.0),
+              ),
+              new ExpansionPanel(
+                headerBuilder: (BuildContext context, bool isExpanded) {
+                  return new Text(isExpanded ? 'D' : 'C');
+                },
+                body: const SizedBox(height: 100.0),
+              ),
+              new ExpansionPanel(
+                headerBuilder: (BuildContext context, bool isExpanded) {
+                  return new Text(isExpanded ? 'F' : 'E');
+                },
+                body: const SizedBox(height: 100.0),
+              ),
+            ],
+            _allowMultiplePanelsOpen: false,
           ),
         ),
       ),
@@ -249,6 +242,7 @@ void main() {
     expect(find.text('D'), findsNothing);
     expect(find.text('E'), findsOneWidget);
     expect(find.text('F'), findsNothing);
+
 
     RenderBox box = tester.renderObject(find.byType(ExpansionPanelList));
     double oldHeight = box.size.height;
@@ -287,13 +281,5 @@ void main() {
     expect(find.text('F'), findsNothing);
 
     expect(box.size.height, greaterThanOrEqualTo(oldHeight));
-
-    _demoItems.removeAt(0);
-
-    await tester.pumpAndSettle();
-    expect(find.text('C'), findsNothing);
-    expect(find.text('D'), findsOneWidget);
-    expect(find.text('E'), findsOneWidget);
-    expect(find.text('F'), findsNothing);
   });
 }
