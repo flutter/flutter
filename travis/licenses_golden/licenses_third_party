@@ -1,4 +1,4 @@
-Signature: b27955c580f9ae994990c5643b3c06fb
+Signature: 67c5a75ba172abdd242905ffaed7810f
 
 UNUSED LICENSES:
 
@@ -14245,6 +14245,7 @@ FILE: ../../../third_party/skia/bench/SkRasterPipelineBench.cpp
 FILE: ../../../third_party/skia/bench/StreamBench.cpp
 FILE: ../../../third_party/skia/bench/SwizzleBench.cpp
 FILE: ../../../third_party/skia/bench/TileImageFilterBench.cpp
+FILE: ../../../third_party/skia/bench/VertexColorSpaceBench.cpp
 FILE: ../../../third_party/skia/experimental/svg/model/SkPEG.h
 FILE: ../../../third_party/skia/experimental/svg/model/SkSVGAttribute.cpp
 FILE: ../../../third_party/skia/experimental/svg/model/SkSVGAttribute.h
