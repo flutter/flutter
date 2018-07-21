@@ -528,12 +528,28 @@ class _CupertinoPersistentNavigationBar extends StatelessWidget implements Prefe
             const Padding(padding: EdgeInsetsDirectional.only(start: 5.0)),
           ];
 
+          String title;
           if (previousPageTitle?.isNotEmpty == true) {
-            backButtonContent.add(new Text(previousPageTitle));
+            title = previousPageTitle;
           }
           else if (currentRoute is CupertinoPageRoute
               && currentRoute.previousTitle?.isNotEmpty == true) {
-            backButtonContent.add(new Text(currentRoute.previousTitle));
+            title = currentRoute.previousTitle;
+          }
+
+          if (title?.isNotEmpty == true) {
+            if (title.length > 10) {
+              title = 'Back';
+            }
+            backButtonContent.add(
+              // Make it finite inside the Row.
+              new Flexible(
+                child: new Text(
+                  title,
+                  maxLines: 1,
+                ),
+              ),
+            );
           }
 
           backOrCloseButtonContent = ConstrainedBox(
