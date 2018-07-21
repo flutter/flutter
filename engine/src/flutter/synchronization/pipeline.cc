@@ -3,3 +3,12 @@
 // found in the LICENSE file.
 
 #include "flutter/synchronization/pipeline.h"
+
+namespace flutter {
+
+size_t GetNextPipelineTraceID() {
+  static std::atomic_size_t PipelineLastTraceID = {0};
+  return ++PipelineLastTraceID;
+}
+
+}  // namespace flutter
