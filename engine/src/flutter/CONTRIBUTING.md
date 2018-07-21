@@ -45,7 +45,7 @@ Getting the code and configuring your environment
 -------------------------------------------------
 
  * Ensure all the dependencies described in the previous section, in particular git, ssh, depot_tools, python, and curl, are installed.
- * Fork `https://github.com/flutter/engine` into your own GitHub account. If you already have a fork, and are now installing a development environment on a new machine, make sure you've updated your fork so that you don't use stale configuration options from long ago.
+ * Fork `https://github.com/flutter/engine` into your own GitHub account. If you already have a fork, and are now installing a development environment on a new machine, make sure you've updated your fork so that you don't use stale configuration options from long ago. Do not use `git clone` to check out this repository; `gclient` will do it for you.
  * If you haven't configured your machine with an SSH key that's known to github then
    follow the directions here: https://help.github.com/articles/generating-ssh-keys/.
  * Create an empty directory for your copy of the repository. For best results, call it `engine`: some of the tools assume this name when working across repositories. (They can be configured to use other names too, so this isn't a strict requirement.)
@@ -66,7 +66,7 @@ solutions = [
 ```
 
  * `cd engine` (Change to the directory in which you put the `.gclient` file.)
- * `gclient sync` This will fetch all the source code that Flutter depends on. Avoid interrupting this script, it can leave your repository in an inconsistent state that is tedious to clean up.
+ * `gclient sync` This will fetch all the source code that Flutter depends on. Avoid interrupting this script, it can leave your repository in an inconsistent state that is tedious to clean up. (This step automatically runs `git clone`, among other things.)
  * `cd src/flutter` (Change to the `flutter` directory of the `src` directory that `gclient sync` created in your `engine` directory.)
  * `git remote add upstream git@github.com:flutter/engine.git` (So that you fetch from the master `flutter/engine` repository, not your clone, when running `git fetch` et al.)
  * `cd ..` (Return to the `src` directory that `gclient sync` created in your `engine` directory.)
