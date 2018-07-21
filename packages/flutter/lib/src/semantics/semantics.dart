@@ -575,9 +575,22 @@ class SemanticsProperties extends DiagnosticableTree {
 
   /// If non-null, whether the node should be considered a live region.
   /// 
+  /// On Android, when a live region semantics node is first created TalkBack
+  /// will make a polite announcement of the current value. This announcement
+  /// occurs even if the node is not focused. Subsequent polite announcements
+  /// can be made by sending a [UpdateLiveRegionEvent] semanitcs event. The
+  /// announcement will only be made if the node's label has changed since the
+  /// last update.
+  /// 
+  /// An example of a live region is the [Snackbar] widget. When it appears
+  /// on the screen it may be difficult to focus to read the value. A live
+  /// region causes an initial polite announcement to be generated 
+  /// automatically.
+  /// 
   /// See also:
   ///   * [SemanticsFlag.liveRegion], the semantics flag this setting controls.
   ///   * [SemanticsConfiguration.liveRegion], for a full description of a live region.
+  ///   * [UpdateLiveRegionEvent], to trigger a polite announcement of a live region.
   final bool liveRegion;
 
   /// Provides a textual description of the widget.
@@ -844,10 +857,11 @@ class SemanticsProperties extends DiagnosticableTree {
 
   /// The handler for [SemanticsAction.dismiss].
   ///
-  /// This handler is invoked when the user indicates they want to dismiss this
-  /// node. TalkBack users on Android can trigger this action in the local
-  /// context menu, and VoiceOver users on iOS can trigger this action with a
-  /// standard gesture or menu option.
+  /// This is a request to dismiss the currently focused node.
+  /// 
+  /// TalkBack users on Android can trigger this action in the local context 
+  /// menu, and VoiceOver users on iOS can trigger this action with a standard
+  /// gesture or menu option.
   final VoidCallback onDismiss;
 
   /// A map from each supported [CustomSemanticsAction] to a provided handler.
@@ -2383,10 +2397,11 @@ class SemanticsConfiguration {
 
   /// The handler for [SemanticsAction.dismiss].
   ///
-  /// This is a request to dismiss the current node, such as a modal or
-  /// snackbar.  TalkBack users on Android can trigger this action in the local
-  /// context menu, and VoiceOver users on iOS can trigger this action with a
-  /// standard gesture or menu option.
+  /// This is a request to dismiss the currently focused node.
+  /// 
+  /// TalkBack users on Android can trigger this action in the local context 
+  /// menu, and VoiceOver users on iOS can trigger this action with a standard
+  /// gesture or menu option.
   VoidCallback get onDismiss => _onDismiss;
   VoidCallback _onDismiss;
   set onDismiss(VoidCallback value) {
@@ -2827,17 +2842,17 @@ class SemanticsConfiguration {
 
   /// Whether the semantics node is a live region.
   /// 
-  /// A live region indicates that updates to semantics node are important.
-  /// Platforms are free to use this information to make polite updates to the
-  /// user to inform them of this.
-  /// 
-  /// On Android, TalkBack will make a polite announcement of the first and
-  /// subsequent updates to the label of this node. This flag is not currently
-  /// supported on iOS.
+  /// On Android, when a live region semantics node is first created TalkBack
+  /// will make a polite announcement of the current value. This announcement
+  /// occurs even if the node is not focused. Subsequent polite announcements
+  /// can be made by sending a [UpdateLiveRegionEvent] semanitcs event. The
+  /// announcement will only be made if the node's label has changed since the
+  /// last update.
   /// 
   /// An example of a live region is the [Snackbar] widget. When it appears
   /// on the screen it may be difficult to focus to read the value. A live
-  /// region causes a polite announcement to be generated automatically.
+  /// region causes an initial polite announcement to be generated 
+  /// automatically.
   /// 
   /// See also:
   ///

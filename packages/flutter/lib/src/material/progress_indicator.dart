@@ -5,7 +5,6 @@
 import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/semantics.dart';
 import 'package:flutter/widgets.dart';
 
 import 'material.dart';
@@ -193,8 +192,6 @@ class LinearProgressIndicator extends ProgressIndicator {
 
 class _LinearProgressIndicatorState extends State<LinearProgressIndicator> with SingleTickerProviderStateMixin {
   AnimationController _controller;
-  double _previousUpdateValue;
-  int _previousUpdateTime = new DateTime.now().millisecondsSinceEpoch;
 
   @override
   void initState() {
@@ -212,11 +209,8 @@ class _LinearProgressIndicatorState extends State<LinearProgressIndicator> with 
     super.didUpdateWidget(oldWidget);
     if (widget.value == null && !_controller.isAnimating)
       _controller.repeat();
-    else if (widget.value != null)  {
-      _handleLiveRegionUpdate();
-      if (_controller.isAnimating)
-        _controller.stop();
-    } 
+    else if (widget.value != null && _controller.isAnimating)
+      _controller.stop();
   }
 
   @override
@@ -225,38 +219,19 @@ class _LinearProgressIndicatorState extends State<LinearProgressIndicator> with 
     super.dispose();
   }
 
-  void _handleLiveRegionUpdate() {
-    if (_previousUpdateValue == null) {
-      _previousUpdateValue = widget.value;
-      return;
-    }
-    final int now = DateTime.now().millisecondsSinceEpoch;
-    if ((_previousUpdateTime - now).abs() > 5000) {
-      _previousUpdateValue = widget.value;
-      _previousUpdateTime = now;
-      final RenderObject renderObject = context.findRenderObject();
-      renderObject.sendSemanticsEvent(const UpdateLiveRegionEvent());
-    }
-  }
-
   Widget _buildIndicator(BuildContext context, double animationValue, TextDirection textDirection) {
-    return new Semantics(
-      container: true,
-      liveRegion: widget.value != null ? true : null,
-      label: widget.value != null ? '${(widget.value * 100).toStringAsFixed(0)}%': null,
-      child: new Container(
-        constraints: const BoxConstraints.tightFor(
-          width: double.infinity,
-          height: _kLinearProgressIndicatorHeight,
-        ),
-        child: new CustomPaint(
-          painter: new _LinearProgressIndicatorPainter(
-            backgroundColor: widget._getBackgroundColor(context),
-            valueColor: widget._getValueColor(context),
-            value: widget.value, // may be null
-            animationValue: animationValue, // ignored if widget.value is not null
-            textDirection: textDirection,
-          ),
+    return new Container(
+      constraints: const BoxConstraints.tightFor(
+        width: double.infinity,
+        height: _kLinearProgressIndicatorHeight,
+      ),
+      child: new CustomPaint(
+        painter: new _LinearProgressIndicatorPainter(
+          backgroundColor: widget._getBackgroundColor(context),
+          valueColor: widget._getValueColor(context),
+          value: widget.value, // may be null
+          animationValue: animationValue, // ignored if widget.value is not null
+          textDirection: textDirection,
         ),
       ),
     );

@@ -55,7 +55,7 @@ class _SelectionControlsDemoState extends State<SelectionControlsDemo> {
         description: _switchText,
         demoWidget: buildSwitch(),
         exampleCodeTag: _switchCode
-      ),
+      )
     ];
 
     return new TabbedComponentDemoScaffold(

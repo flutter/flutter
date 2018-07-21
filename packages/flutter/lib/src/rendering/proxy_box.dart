@@ -3517,10 +3517,11 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
 
   /// The handler for [SemanticsAction.dismiss].
   ///
-  /// This is a request to dismiss the current node, such as a modal or
-  /// snackbar.  TalkBack users on Android can trigger this action in the local
-  /// context menu, and VoiceOver users on iOS can trigger this action with a
-  /// standard gesture or menu option.
+  /// This is a request to dismiss the currently focused node.
+  /// 
+  /// TalkBack users on Android can trigger this action in the local context 
+  /// menu, and VoiceOver users on iOS can trigger this action with a standard
+  /// gesture or menu option.
   VoidCallback get onDismiss => _onDismiss;
   VoidCallback _onDismiss;
   set onDismiss(VoidCallback handler) {
