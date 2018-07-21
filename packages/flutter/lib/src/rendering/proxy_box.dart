@@ -3396,7 +3396,7 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     markNeedsSemanticsUpdate();
   }
 
-  /// If non-null, sets the [SemanticsNode.isToggled] semantic to the given 
+  /// If non-null, sets the [SemanticsNode.isToggled] semantic to the given
   /// value.
   bool get toggled => _toggled;
   bool _toggled;
@@ -3518,8 +3518,8 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
   /// The handler for [SemanticsAction.dismiss].
   ///
   /// This is a request to dismiss the currently focused node.
-  /// 
-  /// TalkBack users on Android can trigger this action in the local context 
+  ///
+  /// TalkBack users on Android can trigger this action in the local context
   /// menu, and VoiceOver users on iOS can trigger this action with a standard
   /// gesture or menu option.
   VoidCallback get onDismiss => _onDismiss;
@@ -3841,13 +3841,13 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
   }
 
   /// The handlers and supported [CustomSemanticsAction]s for this node.
-  /// 
+  ///
   /// These handlers are called whenever the user performs the associated
   /// custom accessibility action from a special platform menu. Providing any
   /// custom actions here also adds [SemanticsAction.customAction] to the node.
-  /// 
+  ///
   /// See also:
-  /// 
+  ///
   ///   * [CustomSemanticsAction], for an explaination of custom actions.
   Map<CustomSemanticsAction, VoidCallback> get customSemanticsActions => _customSemanticsActions;
   Map<CustomSemanticsAction, VoidCallback> _customSemanticsActions;

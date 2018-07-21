@@ -120,7 +120,7 @@ class Image extends StatefulWidget {
   /// widget should be placed in a context that sets tight layout constraints.
   /// Otherwise, the image dimensions will change as the image is loaded, which
   /// will result in ugly layout changes.
-  /// 
+  ///
   /// If [excludeFromSemantics] is true, then [semanticLabel] will be ignored.
   const Image({
     Key key,
@@ -156,7 +156,7 @@ class Image extends StatefulWidget {
   ///
   /// An optional [headers] argument can be used to send custom HTTP headers
   /// with the image request.
-  /// 
+  ///
   /// If [excludeFromSemantics] is true, then [semanticLabel] will be ignored.
   Image.network(String src, {
     Key key,
@@ -191,7 +191,7 @@ class Image extends StatefulWidget {
   ///
   /// On Android, this may require the
   /// `android.permission.READ_EXTERNAL_STORAGE` permission.
-  /// 
+  ///
   /// If [excludeFromSemantics] is true, then [semanticLabel] will be ignored.
   Image.file(File file, {
     Key key,
@@ -229,7 +229,7 @@ class Image extends StatefulWidget {
   ///
   /// * If the `scale` argument is provided and is not null, then the exact
   /// asset specified will be used.
-  /// 
+  ///
   /// If [excludeFromSemantics] is true, then [semanticLabel] will be ignored.
   //
   // TODO(ianh): Implement the following (see ../services/image_resolution.dart):
@@ -363,7 +363,7 @@ class Image extends StatefulWidget {
   /// widget should be placed in a context that sets tight layout constraints.
   /// Otherwise, the image dimensions will change as the image is loaded, which
   /// will result in ugly layout changes.
-  /// 
+  ///
   /// If [excludeFromSemantics] is true, then [semanticLabel] will be ignored.
   Image.memory(Uint8List bytes, {
     Key key,
@@ -493,14 +493,14 @@ class Image extends StatefulWidget {
   final bool gaplessPlayback;
 
   /// A Semantic description of the image.
-  /// 
+  ///
   /// Used to provide a description of the image to TalkBack on Andoid, and
   /// VoiceOver on iOS.
   final String semanticLabel;
 
   /// Whether to exclude this image from semantics.
-  /// 
-  /// Useful for images which do not contribute meaningful information to an 
+  ///
+  /// Useful for images which do not contribute meaningful information to an
   /// application.
   final bool excludeFromSemantics;
 

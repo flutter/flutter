@@ -473,7 +473,7 @@ void main() {
       ]
     ), ignoreTransform: true));
     semantics.dispose();
-  }); 
+  });
 
   testWidgets('Image can exclude semantics', (WidgetTester tester) async {
     final SemanticsTester semantics = new SemanticsTester(tester);

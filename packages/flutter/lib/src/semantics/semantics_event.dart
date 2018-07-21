@@ -143,7 +143,7 @@ class TapSemanticEvent extends SemanticsEvent {
 ///
 /// See also:
 ///
-///  * [SemanticsFlag.liveRegion], for a description of live regions.   
+///  * [SemanticsFlag.liveRegion], for a description of live regions.
 class UpdateLiveRegionEvent extends SemanticsEvent {
   /// Creates a new [UpdateLiveRegionEvent].
   const UpdateLiveRegionEvent() : super('updateLiveRegion');
