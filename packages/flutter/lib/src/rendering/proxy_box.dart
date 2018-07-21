@@ -3124,7 +3124,7 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     RenderBox child,
     bool container = false,
     bool explicitChildNodes,
-    bool excludeSemantics,
+    bool excludeSemantics = false,
     bool enabled,
     bool checked,
     bool selected,
