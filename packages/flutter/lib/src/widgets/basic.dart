@@ -5054,6 +5054,7 @@ class Semantics extends SingleChildRenderObjectWidget {
     Widget child,
     bool container = false,
     bool explicitChildNodes = false,
+    bool excludeSemantics = false,
     bool enabled,
     bool checked,
     bool selected,
@@ -5095,6 +5096,7 @@ class Semantics extends SingleChildRenderObjectWidget {
     child: child,
     container: container,
     explicitChildNodes: explicitChildNodes,
+    excludeSemantics: excludeSemantics,
     properties: new SemanticsProperties(
       enabled: enabled,
       checked: checked,
@@ -5142,6 +5144,7 @@ class Semantics extends SingleChildRenderObjectWidget {
     Widget child,
     this.container = false,
     this.explicitChildNodes = false,
+    this.excludeSemantics = false,
     @required this.properties,
   }) : assert(container != null),
        assert(properties != null),
@@ -5178,11 +5181,21 @@ class Semantics extends SingleChildRenderObjectWidget {
   /// to create semantic boundaries that are either writable or not for children.
   final bool explicitChildNodes;
 
+  /// Whether to replace all child semantics with this node.
+  ///
+  /// Defaults to false.
+  ///
+  /// When this flag is set to true, all child semantics nodes are ignored.
+  /// This can be used as a convenience for cases where a child is wrapped in
+  /// an [ExcludeSemantics] widget and then another [Semantics] widget.
+  final bool excludeSemantics;
+
   @override
   RenderSemanticsAnnotations createRenderObject(BuildContext context) {
     return new RenderSemanticsAnnotations(
       container: container,
       explicitChildNodes: explicitChildNodes,
+      excludeSemantics: excludeSemantics,
       enabled: properties.enabled,
       checked: properties.checked,
       selected: properties.selected,
@@ -5240,6 +5253,7 @@ class Semantics extends SingleChildRenderObjectWidget {
       ..container = container
       ..scopesRoute = properties.scopesRoute
       ..explicitChildNodes = explicitChildNodes
+      ..excludeSemantics = excludeSemantics
       ..enabled = properties.enabled
       ..checked = properties.checked
       ..selected = properties.selected
