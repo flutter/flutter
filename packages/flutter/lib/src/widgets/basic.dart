@@ -5251,8 +5251,8 @@ class Semantics extends SingleChildRenderObjectWidget {
   void updateRenderObject(BuildContext context, RenderSemanticsAnnotations renderObject) {
     renderObject
       ..container = container
-      ..scopesRoute = properties.scopesRoute
       ..explicitChildNodes = explicitChildNodes
+      ..scopesRoute = properties.scopesRoute
       ..enabled = properties.enabled
       ..checked = properties.checked
       ..toggled = properties.toggled

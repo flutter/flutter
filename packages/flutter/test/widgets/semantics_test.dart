@@ -462,6 +462,7 @@ void main() {
     // Note: checked state and toggled state are mutually exclusive.
     await tester.pumpWidget(
         new Semantics(
+          key: const Key('a'),
           container: true,
           explicitChildNodes: true,
           // flags
@@ -481,7 +482,7 @@ void main() {
           liveRegion: true,
         )
     );
-    List<SemanticsFlag> flags = SemanticsFlag.values.values.toList();
+    final List<SemanticsFlag> flags = SemanticsFlag.values.values.toList();
     flags
       ..remove(SemanticsFlag.hasToggledState)
       ..remove(SemanticsFlag.isToggled);
@@ -497,7 +498,9 @@ void main() {
     expect(semantics, hasSemantics(expectedSemantics, ignoreId: true));
 
     await tester.pumpWidget(new Semantics(
+      key: const Key('b'),
       container: true,
+      scopesRoute: false,
     ));
     expectedSemantics = new TestSemantics.root(
       children: <TestSemantics>[
@@ -510,36 +513,20 @@ void main() {
     expect(semantics, hasSemantics(expectedSemantics, ignoreId: true));
 
     await tester.pumpWidget(
-        new Semantics(
-          container: true,
-          explicitChildNodes: true,
-          // flags
-          enabled: true,
-          hidden: true,
-          toggled: true,
-          selected: true,
-          button: true,
-          textField: true,
-          focused: true,
-          inMutuallyExclusiveGroup: true,
-          header: true,
-          obscured: true,
-          scopesRoute: true,
-          namesRoute: true,
-          image: true,
-          liveRegion: true,
-        )
+      new Semantics(
+        key: const Key('c'),
+        toggled: true,
+      ),
     );
 
-    flags = SemanticsFlag.values.values.toList();
-    flags
-      ..remove(SemanticsFlag.hasCheckedState)
-      ..remove(SemanticsFlag.isChecked);
     expectedSemantics = new TestSemantics.root(
       children: <TestSemantics>[
         new TestSemantics.rootChild(
           rect: TestSemantics.fullScreen,
-          flags: flags,
+          flags: <SemanticsFlag>[
+            SemanticsFlag.hasToggledState,
+            SemanticsFlag.isToggled,
+          ],
         ),
       ],
     );

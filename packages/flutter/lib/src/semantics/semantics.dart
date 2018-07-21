@@ -96,7 +96,7 @@ class CustomSemanticsAction {
   /// Creates a new [CustomSemanticsAction].
   ///
   /// The [label] must not be null or the empty string.
-  const CustomSemanticsAction({@required this.label}) 
+  const CustomSemanticsAction({@required this.label})
     : assert(label != null),
       assert(label != '');
 
@@ -456,7 +456,7 @@ class SemanticsProperties extends DiagnosticableTree {
     this.onDidLoseAccessibilityFocus,
     this.onDismiss,
     this.customSemanticsActions,
-  }) : assert(!(toggled == true && checked == true), 'A semantics node cannot be both toggled and checked');
+  });
 
   /// If non-null, indicates that this subtree represents something that can be
   /// in an enabled or disabled state.
@@ -584,7 +584,7 @@ class SemanticsProperties extends DiagnosticableTree {
   ///
   /// An example of a live region is the [Snackbar] widget. When it appears
   /// on the screen it may be difficult to focus to read the label. A live
-  /// region causes an initial polite announcement to be generated 
+  /// region causes an initial polite announcement to be generated
   /// automatically.
   ///
   /// See also:
@@ -2707,9 +2707,9 @@ class SemanticsConfiguration {
   }
 
   /// The handlers for each supported [CustomSemanticsAction].
-  /// 
+  ///
   /// Whenever a custom accessibility action is added to a node, the action
-  /// [SemanticAction.customAction] is automatically added. A handler is 
+  /// [SemanticAction.customAction] is automatically added. A handler is
   /// created which uses the passed argument to lookup the custom action
   /// handler from this map and invoke it, if present.
   Map<CustomSemanticsAction, VoidCallback> get customSemanticsActions => _customSemanticsActions;
