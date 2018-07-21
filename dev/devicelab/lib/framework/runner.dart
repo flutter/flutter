@@ -73,14 +73,14 @@ Future<Map<String, dynamic>> runTask(String taskName, { bool silent = false }) a
     await runner.exitCode.timeout(const Duration(seconds: 1));
     return taskResult;
   } on TimeoutException catch (timeout) {
-    runner.kill(ProcessSignal.SIGINT); // ignore: deprecated_member_use
+    runner.kill(ProcessSignal.sigint);
     return <String, dynamic>{
       'success': false,
       'reason': 'Timeout waiting for $waitingFor: ${timeout.message}',
     };
   } finally {
     if (!runnerFinished)
-      runner.kill(ProcessSignal.SIGKILL); // ignore: deprecated_member_use
+      runner.kill(ProcessSignal.sigkill);
     await stdoutSub.cancel();
     await stderrSub.cancel();
   }

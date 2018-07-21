@@ -245,6 +245,9 @@ class _DemosPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // When overriding ListView.padding, it's necessary to manually handle
+    // safe areas.
+    final double windowBottomPadding = MediaQuery.of(context).padding.bottom;
     return new KeyedSubtree(
       key: const ValueKey<String>('GalleryDemoList'), // So the tests can find this ListView
       child: new Semantics(
@@ -254,7 +257,7 @@ class _DemosPage extends StatelessWidget {
         explicitChildNodes: true,
         child: new ListView(
           key: new PageStorageKey<String>(category.name),
-          padding: const EdgeInsets.only(top: 8.0),
+          padding: new EdgeInsets.only(top: 8.0, bottom: windowBottomPadding),
           children: kGalleryCategoryToDemos[category].map<Widget>((GalleryDemo demo) {
             return new _DemoItem(demo: demo);
           }).toList(),

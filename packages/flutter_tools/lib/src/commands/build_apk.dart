@@ -5,6 +5,8 @@
 import 'dart:async';
 
 import '../android/apk.dart';
+import '../base/file_system.dart';
+import '../project.dart';
 import 'build.dart';
 
 class BuildApkCommand extends BuildSubCommand {
@@ -44,6 +46,6 @@ class BuildApkCommand extends BuildSubCommand {
   @override
   Future<Null> runCommand() async {
     await super.runCommand();
-    await buildApk(buildInfo: getBuildInfo(), target: targetFile);
+    await buildApk(project: new FlutterProject(fs.currentDirectory),target: targetFile, buildInfo: getBuildInfo());
   }
 }

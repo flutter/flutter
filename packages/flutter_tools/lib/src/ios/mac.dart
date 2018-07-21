@@ -20,9 +20,9 @@ import '../base/process.dart';
 import '../base/process_manager.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
-import '../flutter_manifest.dart';
 import '../globals.dart';
 import '../plugins.dart';
+import '../project.dart';
 import '../services.dart';
 import 'cocoapods.dart';
 import 'code_signing.dart';
@@ -167,6 +167,18 @@ class Xcode {
   Future<RunResult> clang(List<String> args) {
     return runCheckedAsync(<String>['xcrun', 'clang']..addAll(args));
   }
+
+  String getSimulatorPath() {
+    if (xcodeSelectPath == null)
+      return null;
+    final List<String> searchPaths = <String>[
+      fs.path.join(xcodeSelectPath, 'Applications', 'Simulator.app'),
+    ];
+    return searchPaths.where((String p) => p != null).firstWhere(
+      (String p) => fs.directory(p).existsSync(),
+      orElse: () => null,
+    );
+  }
 }
 
 Future<XcodeBuildResult> buildXcodeProject({
@@ -221,18 +233,15 @@ Future<XcodeBuildResult> buildXcodeProject({
   final Directory appDirectory = fs.directory(app.appDirectory);
   await _addServicesToBundle(appDirectory);
 
-  final FlutterManifest manifest = await FlutterManifest.createFromPath(
-    fs.currentDirectory.childFile('pubspec.yaml').path,
-  );
-  updateGeneratedXcodeProperties(
-    projectPath: fs.currentDirectory.path,
-    buildInfo: buildInfo,
+  final FlutterProject project = new FlutterProject(fs.currentDirectory);
+  await updateGeneratedXcodeProperties(
+    project: project,
     targetOverride: targetOverride,
     previewDart2: buildInfo.previewDart2,
-    manifest: manifest,
+    buildInfo: buildInfo,
   );
 
-  if (hasPlugins()) {
+  if (hasPlugins(project)) {
     final String iosPath = fs.path.join(fs.currentDirectory.path, app.appDirectory);
     // If the Xcode project, Podfile, or Generated.xcconfig have changed since
     // last run, pods should be updated.
@@ -246,7 +255,7 @@ Future<XcodeBuildResult> buildXcodeProject({
       properties: <String, String>{},
     );
     final bool didPodInstall = await cocoaPods.processPods(
-      appIosDirectory: appDirectory,
+      iosProject: project.ios,
       iosEngineDir: flutterFrameworkDir(buildInfo.mode),
       isSwift: app.isSwift,
       dependenciesChanged: !await fingerprinter.doesFingerprintMatch()
@@ -573,7 +582,7 @@ void _copyServiceDefinitionsManifest(List<Map<String, String>> services, File ma
     'framework': fs.path.basenameWithoutExtension(service['ios-framework'])
   }).toList();
   final Map<String, dynamic> jsonObject = <String, dynamic>{ 'services' : jsonServices };
-  manifest.writeAsStringSync(json.encode(jsonObject), mode: FileMode.WRITE, flush: true); // ignore: deprecated_member_use
+  manifest.writeAsStringSync(json.encode(jsonObject), mode: FileMode.write, flush: true);
 }
 
 Future<bool> upgradePbxProjWithFlutterAssets(String app, String appPath) async {

@@ -90,7 +90,7 @@ class AnnounceSemanticsEvent extends SemanticsEvent {
 }
 
 /// An event for a semantic announcement of a tooltip.
-/// 
+///
 /// This is only used by Android to announce tooltip values.
 class TooltipSemanticsEvent extends SemanticsEvent {
 

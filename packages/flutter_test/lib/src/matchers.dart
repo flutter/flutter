@@ -321,6 +321,10 @@ Matcher matchesSemanticsData({
   bool namesRoute = false,
   bool scopesRoute = false,
   bool isHidden = false,
+  bool isImage = false,
+  bool isLiveRegion = false,
+  bool hasToggledState = false,
+  bool isToggled = false,
   // Actions //
   bool hasTapAction = false,
   bool hasLongPressAction = false,
@@ -340,6 +344,7 @@ Matcher matchesSemanticsData({
   bool hasDidGainAccessibilityFocusAction = false,
   bool hasDidLoseAccessibilityFocusAction = false,
   bool hasCustomAction = false,
+  bool hasDismissAction = false,
 }) {
   final List<SemanticsFlag> flags = <SemanticsFlag>[];
   if (hasCheckedState)
@@ -370,6 +375,14 @@ Matcher matchesSemanticsData({
     flags.add(SemanticsFlag.scopesRoute);
   if (isHidden)
     flags.add(SemanticsFlag.isHidden);
+  if (isImage)
+    flags.add(SemanticsFlag.isImage);
+  if (isLiveRegion)
+    flags.add(SemanticsFlag.isLiveRegion);
+  if (hasToggledState)
+    flags.add(SemanticsFlag.hasToggledState);
+  if (isToggled)
+    flags.add(SemanticsFlag.isToggled);
 
   final List<SemanticsAction> actions = <SemanticsAction>[];
   if (hasTapAction)
@@ -408,6 +421,8 @@ Matcher matchesSemanticsData({
     actions.add(SemanticsAction.didLoseAccessibilityFocus);
   if (hasCustomAction)
     actions.add(SemanticsAction.customAction);
+  if (hasDismissAction)
+    actions.add(SemanticsAction.dismiss);
 
   return new _MatchesSemanticsData(
     label: label,
