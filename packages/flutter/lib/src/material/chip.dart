@@ -1483,6 +1483,7 @@ class _RawChipState extends State<RawChip> with TickerProviderStateMixin<RawChip
       selected: widget.selected,
       enabled: canTap ? widget.isEnabled : null,
       child: result,
+      onTapHint: canTap ? 'to delete' : null,
     );
   }
 }

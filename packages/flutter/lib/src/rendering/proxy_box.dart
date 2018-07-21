@@ -3141,6 +3141,8 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     String increasedValue,
     String decreasedValue,
     String hint,
+    String onTapHint,
+    String onLongPressHint,
     TextDirection textDirection,
     SemanticsSortKey sortKey,
     VoidCallback onTap,
@@ -3180,6 +3182,8 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
        _increasedValue = increasedValue,
        _decreasedValue = decreasedValue,
        _hint = hint,
+       _onTapHint = onTapHint,
+       _onLongPressHint = onLongPressHint,
        _textDirection = textDirection,
        _sortKey = sortKey,
        _onTap = onTap,
@@ -3425,6 +3429,24 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     if (_hint == value)
       return;
     _hint = value;
+    markNeedsSemanticsUpdate();
+  }
+
+  String get onTapHint => _onTapHint;
+  String _onTapHint;
+  set onTapHint(String value) {
+    if (_onTapHint == value)
+      return;
+    _onTapHint = value;
+    markNeedsSemanticsUpdate();
+  }
+
+  String get onLongPressHint => _onLongPressHint;
+  String _onLongPressHint;
+  set onLongPressHint(String value) {
+    if (onLongPressHint == value)
+      return;
+    _onLongPressHint = value;
     markNeedsSemanticsUpdate();
   }
 
@@ -3837,6 +3859,10 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
       config.decreasedValue = decreasedValue;
     if (hint != null)
       config.hint = hint;
+    if (onTapHint != null)
+      config.onTapHint = onTapHint;
+    if (onLongPressHint != null)
+      config.onLongPressHint = onLongPressHint;
     if (scopesRoute != null)
       config.scopesRoute = scopesRoute;
     if (namesRoute != null)

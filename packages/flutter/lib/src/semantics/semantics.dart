@@ -98,20 +98,39 @@ class CustomSemanticsAction {
   /// The [label] must not be null or the empty string.
   const CustomSemanticsAction({@required this.label}) 
     : assert(label != null),
-      assert(label != '');
+      assert(label != ''),
+      hint = null,
+      action = null;
 
-  /// The user readable name of this custom accessibility action.
+  /// Creates a new [CustomSemanticsAction] that shadows a standard semantics action.
+  /// 
+  /// The [hint] must not be null or the empty string.
+  const CustomSemanticsAction.standard({@required this.hint, @required this.action})
+    : assert(hint != null),
+      assert(hint != ''),
+      assert(action != null),
+      label = null;
+
+  /// The user readable name of this custom semantics action.
   final String label;
 
+  /// The hint description of this custom semantics action.
+  final String hint;
+
+  /// The standard semantics action this action replaces.
+  final SemanticsAction action;
+
   @override
-  int get hashCode => label.hashCode;
+  int get hashCode => ui.hashValues(label, hint, action);
 
   @override
   bool operator ==(dynamic other) {
     if (other.runtimeType != runtimeType)
       return false;
     final CustomSemanticsAction typedOther = other;
-    return typedOther.label == label;
+    return typedOther.label == label
+      && typedOther.hint == hint
+      && typedOther.action == action;
   }
 
   // Logic to assign a unique id to each custom action without requiring
@@ -433,6 +452,8 @@ class SemanticsProperties extends DiagnosticableTree {
     this.increasedValue,
     this.decreasedValue,
     this.hint,
+    this.onTapHint,
+    this.onLongPressHint,
     this.textDirection,
     this.sortKey,
     this.onTap,
@@ -612,6 +633,10 @@ class SemanticsProperties extends DiagnosticableTree {
   ///  * [SemanticsConfiguration.hint] for a description of how this is exposed
   ///    in TalkBack and VoiceOver.
   final String hint;
+
+  final String onTapHint;
+
+  final String onLongPressHint;
 
   /// The reading direction of the [label], [value], [hint], [increasedValue],
   /// and [decreasedValue].
@@ -1289,6 +1314,12 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
   String get hint => _hint;
   String _hint = _kEmptyConfig.hint;
 
+  String get onLongPressHint => _onLongPressHint;
+  String _onLongPressHint;
+
+  String get onTapHint => _onTapHint;
+  String _onTapHint;
+
   /// The reading direction for [label], [value], [hint], [increasedValue], and
   /// [decreasedValue].
   TextDirection get textDirection => _textDirection;
@@ -1382,6 +1413,14 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
     _scrollExtentMin = config._scrollExtentMin;
     _mergeAllDescendantsIntoThisNode = config.isMergingSemanticsOfDescendants;
     _replaceChildren(childrenInInversePaintOrder ?? const <SemanticsNode>[]);
+    if (config.onTapHint != null) {
+      assert(_actions.containsKey(SemanticsAction.tap), 'onTapHint was provided to a node that doesn\'t have a tap handler');
+      _onTapHint = config.onTapHint;
+    }
+    if (config.onLongPressHint != null) {
+      assert(_actions.containsKey(SemanticsAction.longPress), 'onLongPressHint was provded to a node that doesn\'t have a long press handler');
+      _onLongPressHint = config.onLongPressHint;
+    }
 
     assert(
       !_canPerformAction(SemanticsAction.increase) || (_value == '') == (_increasedValue == ''),
@@ -1416,6 +1455,14 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
     final Set<int> customSemanticsActionIds = new Set<int>();
     for (CustomSemanticsAction action in _customSemanticsActions.keys)
       customSemanticsActionIds.add(CustomSemanticsAction.getIdentifier(action));
+    if (onTapHint != null) {
+      final CustomSemanticsAction action = new CustomSemanticsAction.standard(hint: onTapHint, action: SemanticsAction.tap);
+      customSemanticsActionIds.add(CustomSemanticsAction.getIdentifier(action));
+    }
+    if (onLongPressHint != null) {
+      final CustomSemanticsAction action = new CustomSemanticsAction.standard(hint: onLongPressHint, action: SemanticsAction.longPress);
+      customSemanticsActionIds.add(CustomSemanticsAction.getIdentifier(action));
+    }
 
     if (mergeAllDescendantsIntoThisNode) {
       _visitDescendants((SemanticsNode node) {
@@ -1440,6 +1487,14 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
         if (node._customSemanticsActions != null) {
           for (CustomSemanticsAction action in _customSemanticsActions.keys)
             customSemanticsActionIds.add(CustomSemanticsAction.getIdentifier(action));
+        }
+        if (node.onTapHint != null) {
+          final CustomSemanticsAction action = new CustomSemanticsAction.standard(hint: onTapHint, action: SemanticsAction.tap);
+          customSemanticsActionIds.add(CustomSemanticsAction.getIdentifier(action));
+        }
+        if (node.onLongPressHint != null) {
+          final CustomSemanticsAction action = new CustomSemanticsAction.standard(hint: onLongPressHint, action: SemanticsAction.longPress);
+          customSemanticsActionIds.add(CustomSemanticsAction.getIdentifier(action));
         }
         label = _concatStrings(
           thisString: label,
@@ -1534,7 +1589,7 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
       transform: data.transform?.storage ?? _kIdentityTransform,
       childrenInTraversalOrder: childrenInTraversalOrder,
       childrenInHitTestOrder: childrenInHitTestOrder,
-      customAcccessibilityActions: customSemanticsActionIds ?? _kEmptyCustomSemanticsActionsList,
+      additionalActions: customSemanticsActionIds ?? _kEmptyCustomSemanticsActionsList,
     );
     _dirty = false;
   }
@@ -2087,8 +2142,10 @@ class SemanticsOwner extends ChangeNotifier {
         node._addToUpdate(builder, customSemanticsActionIds);
     }
     _dirtyNodes.clear();
-    for (int actionId in customSemanticsActionIds)
-      builder.updateCustomAction(id: actionId, label: CustomSemanticsAction.getAction(actionId).label);
+    for (int actionId in customSemanticsActionIds) {
+      final CustomSemanticsAction action = CustomSemanticsAction.getAction(actionId);
+      builder.updateCustomAction(id: actionId, label: action.label, hint: action.hint, overrideId: action.action?.index);
+    }
     ui.window.updateSemantics(builder.build());
     notifyListeners();
   }
@@ -2752,6 +2809,24 @@ class SemanticsConfiguration {
     _hasBeenAnnotated = true;
   }
 
+  String get onLongPressHint => _onLongPressHint;
+  String _onLongPressHint;
+  set onLongPressHint(String value) {
+    if (value == null)
+      return;
+    _onLongPressHint = value;
+    _hasBeenAnnotated = true;
+  }
+
+  String get onTapHint => _onTapHint;
+  String _onTapHint;
+  set onTapHint(String value) {
+    if (value == null)
+      return;
+    _onTapHint = value;
+    _hasBeenAnnotated = true;
+  }
+
   /// Whether the semantics node is the root of a subtree for which values
   /// should be announced.
   /// 
@@ -3029,6 +3104,8 @@ class SemanticsConfiguration {
     _scrollPosition ??= other._scrollPosition;
     _scrollExtentMax ??= other._scrollExtentMax;
     _scrollExtentMin ??= other._scrollExtentMin;
+    _onTapHint ??= other._onTapHint;
+    _onLongPressHint ??= other._onLongPressHint;
 
     textDirection ??= other.textDirection;
     _sortKey ??= other._sortKey;
@@ -3069,6 +3146,8 @@ class SemanticsConfiguration {
       .._value = _value
       .._decreasedValue = _decreasedValue
       .._hint = _hint
+      .._onLongPressHint = _onLongPressHint
+      .._onTapHint = _onTapHint
       .._flags = _flags
       .._tagsForChildren = _tagsForChildren
       .._textSelection = _textSelection
