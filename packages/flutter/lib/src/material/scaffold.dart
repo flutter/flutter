@@ -1713,6 +1713,7 @@ class _PersistentBottomSheetState extends State<_PersistentBottomSheet> {
       },
       child: new Semantics(
         container: true,
+        onDismiss: close,
         child: new BottomSheet(
           animationController: widget.animationController,
           enableDrag: widget.enableDrag,

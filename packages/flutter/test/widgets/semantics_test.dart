@@ -531,6 +531,7 @@ void main() {
         )
     );
 
+    flags = SemanticsFlag.values.values.toList();
     flags
       ..remove(SemanticsFlag.hasCheckedState)
       ..remove(SemanticsFlag.isChecked);
