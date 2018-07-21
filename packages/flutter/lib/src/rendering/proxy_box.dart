@@ -3126,6 +3126,7 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     bool explicitChildNodes,
     bool enabled,
     bool checked,
+    bool toggled,
     bool selected,
     bool button,
     bool header,
@@ -3169,6 +3170,7 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
        _explicitChildNodes = explicitChildNodes,
        _enabled = enabled,
        _checked = checked,
+       _toggled = toggled,
        _selected = selected,
        _button = button,
        _header = header,
@@ -3391,6 +3393,17 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     if (_liveRegion == value)
       return;
     _liveRegion = value;
+    markNeedsSemanticsUpdate();
+  }
+
+  /// If non-null, sets the [SemanticsNode.isToggled] semantic to the given 
+  /// value.
+  bool get toggled => _toggled;
+  bool _toggled;
+  set toggled(bool value) {
+    if (_toggled == value)
+      return;
+    _toggled = value;
     markNeedsSemanticsUpdate();
   }
 
@@ -3851,11 +3864,15 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     config.explicitChildNodes = explicitChildNodes;
     assert((scopesRoute == true && explicitChildNodes == true) || scopesRoute != true,
       'explicitChildNodes must be set to true if scopes route is true');
+    assert(!(toggled == true && checked == true),
+      'A semantics node cannot be toggled and checked at the same time');
 
     if (enabled != null)
       config.isEnabled = enabled;
     if (checked != null)
       config.isChecked = checked;
+    if (toggled != null)
+      config.isToggled = toggled;
     if (selected != null)
       config.isSelected = selected;
     if (button != null)

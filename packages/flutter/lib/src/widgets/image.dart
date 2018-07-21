@@ -120,6 +120,8 @@ class Image extends StatefulWidget {
   /// widget should be placed in a context that sets tight layout constraints.
   /// Otherwise, the image dimensions will change as the image is loaded, which
   /// will result in ugly layout changes.
+  /// 
+  /// If [excludeFromSemantics] is true, then [semanticLabel] will be ignored.
   const Image({
     Key key,
     @required this.image,
@@ -139,7 +141,6 @@ class Image extends StatefulWidget {
        assert(alignment != null),
        assert(repeat != null),
        assert(matchTextDirection != null),
-              assert((excludeFromSemantics && semanticLabel == null) || !excludeFromSemantics),
        super(key: key);
 
   /// Creates a widget that displays an [ImageStream] obtained from the network.
@@ -155,6 +156,8 @@ class Image extends StatefulWidget {
   ///
   /// An optional [headers] argument can be used to send custom HTTP headers
   /// with the image request.
+  /// 
+  /// If [excludeFromSemantics] is true, then [semanticLabel] will be ignored.
   Image.network(String src, {
     Key key,
     double scale = 1.0,
@@ -175,7 +178,6 @@ class Image extends StatefulWidget {
        assert(alignment != null),
        assert(repeat != null),
        assert(matchTextDirection != null),
-              assert((excludeFromSemantics && semanticLabel == null) || !excludeFromSemantics),
        super(key: key);
 
   /// Creates a widget that displays an [ImageStream] obtained from a [File].
@@ -189,6 +191,8 @@ class Image extends StatefulWidget {
   ///
   /// On Android, this may require the
   /// `android.permission.READ_EXTERNAL_STORAGE` permission.
+  /// 
+  /// If [excludeFromSemantics] is true, then [semanticLabel] will be ignored.
   Image.file(File file, {
     Key key,
     double scale = 1.0,
@@ -208,7 +212,6 @@ class Image extends StatefulWidget {
        assert(alignment != null),
        assert(repeat != null),
        assert(matchTextDirection != null),
-       assert((excludeFromSemantics && semanticLabel == null) || !excludeFromSemantics),
        super(key: key);
 
   /// Creates a widget that displays an [ImageStream] obtained from an asset
@@ -226,6 +229,8 @@ class Image extends StatefulWidget {
   ///
   /// * If the `scale` argument is provided and is not null, then the exact
   /// asset specified will be used.
+  /// 
+  /// If [excludeFromSemantics] is true, then [semanticLabel] will be ignored.
   //
   // TODO(ianh): Implement the following (see ../services/image_resolution.dart):
   // ///
@@ -348,7 +353,6 @@ class Image extends StatefulWidget {
        assert(alignment != null),
        assert(repeat != null),
        assert(matchTextDirection != null),
-              assert((excludeFromSemantics && semanticLabel == null) || !excludeFromSemantics),
        super(key: key);
 
   /// Creates a widget that displays an [ImageStream] obtained from a [Uint8List].
@@ -359,6 +363,8 @@ class Image extends StatefulWidget {
   /// widget should be placed in a context that sets tight layout constraints.
   /// Otherwise, the image dimensions will change as the image is loaded, which
   /// will result in ugly layout changes.
+  /// 
+  /// If [excludeFromSemantics] is true, then [semanticLabel] will be ignored.
   Image.memory(Uint8List bytes, {
     Key key,
     double scale = 1.0,
@@ -378,7 +384,6 @@ class Image extends StatefulWidget {
        assert(alignment != null),
        assert(repeat != null),
        assert(matchTextDirection != null),
-       assert((excludeFromSemantics && semanticLabel == null) || !excludeFromSemantics),
        super(key: key);
 
   /// The image to display.
@@ -489,14 +494,14 @@ class Image extends StatefulWidget {
 
   /// A Semantic description of the image.
   /// 
-  /// Used for accessibility features like screen reader to announce to users in
-  /// accessibility mode.
+  /// Used to provide a description of the image to TalkBack on Andoid, and
+  /// VoiceOver on iOS.
   final String semanticLabel;
 
   /// Whether to exclude this image from semantics.
   /// 
-  /// This should not be set at the same time as [semanticLabel]. Useful for
-  /// images which do not contribute meaningful semantics to an application.
+  /// Useful for images which do not contribute meaningful information to an 
+  /// application.
   final bool excludeFromSemantics;
 
   @override

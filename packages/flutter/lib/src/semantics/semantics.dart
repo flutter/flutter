@@ -419,6 +419,7 @@ class SemanticsProperties extends DiagnosticableTree {
     this.enabled,
     this.checked,
     this.selected,
+    this.toggled,
     this.button,
     this.header,
     this.textField,
@@ -453,12 +454,9 @@ class SemanticsProperties extends DiagnosticableTree {
     this.onSetSelection,
     this.onDidGainAccessibilityFocus,
     this.onDidLoseAccessibilityFocus,
-<<<<<<< HEAD
     this.onDismiss,
-=======
     this.customSemanticsActions,
->>>>>>> e154298e0ba9144ab5763659725586f0bd24e5f5
-  });
+  }) : assert(!(toggled == true && checked == true), 'A semantics node cannot be both toggled and checked');
 
   /// If non-null, indicates that this subtree represents something that can be
   /// in an enabled or disabled state.
@@ -471,7 +469,16 @@ class SemanticsProperties extends DiagnosticableTree {
   /// If non-null, indicates that this subtree represents a checkbox
   /// or similar widget with a "checked" state, and what its current
   /// state is.
+  /// 
+  /// This is mutually exclusive with [toggled].
   final bool checked;
+  
+  /// If non-null, indicates that this subtree represents a toggle switch
+  /// or similar widget with an "on" state, and what its current
+  /// state is.
+  /// 
+  /// This is mutually exclusive with [checked].
+  final bool toggled;
 
   /// If non-null indicates that this subtree represents something that can be
   /// in a selected or unselected state, and what its current state is.
@@ -835,7 +842,6 @@ class SemanticsProperties extends DiagnosticableTree {
   ///  * [FocusNode], [FocusScope], [FocusManager], which manage the input focus
   final VoidCallback onDidLoseAccessibilityFocus;
 
-<<<<<<< HEAD
   /// The handler for [SemanticsAction.dismiss].
   ///
   /// This handler is invoked when the user indicates they want to dismiss this
@@ -843,7 +849,7 @@ class SemanticsProperties extends DiagnosticableTree {
   /// context menu, and VoiceOver users on iOS can trigger this action with a
   /// standard gesture or menu option.
   final VoidCallback onDismiss;
-=======
+
   /// A map from each supported [CustomSemanticsAction] to a provided handler.
   /// 
   /// The handler associated with each custom action is called whenever a
@@ -855,7 +861,6 @@ class SemanticsProperties extends DiagnosticableTree {
   /// 
   ///   * [CustomSemanticsAction], for an explanation of custom actions.
   final Map<CustomSemanticsAction, VoidCallback> customSemanticsActions;
->>>>>>> e154298e0ba9144ab5763659725586f0bd24e5f5
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {

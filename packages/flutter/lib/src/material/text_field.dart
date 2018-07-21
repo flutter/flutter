@@ -559,9 +559,8 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
     );
 
     if (widget.decoration != null) {
-      final Listenable listenable = new Listenable.merge(<Listenable>[focusNode, controller]);
       child = new AnimatedBuilder(
-        animation: listenable,
+        animation: new Listenable.merge(<Listenable>[ focusNode, controller ]),
         builder: (BuildContext context, Widget child) {
           return new InputDecorator(
             decoration: _getEffectiveDecoration(),

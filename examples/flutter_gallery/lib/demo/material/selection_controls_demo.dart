@@ -39,12 +39,6 @@ class _SelectionControlsDemoState extends State<SelectionControlsDemo> {
   Widget build(BuildContext context) {
     final List<ComponentDemoTabData> demos = <ComponentDemoTabData>[
       new ComponentDemoTabData(
-        tabName: 'SWITCH',
-        description: _switchText,
-        demoWidget: buildSwitch(),
-        exampleCodeTag: _switchCode
-      ),
-      new ComponentDemoTabData(
         tabName: 'CHECKBOX',
         description: _checkboxText,
         demoWidget: buildCheckbox(),
@@ -55,6 +49,12 @@ class _SelectionControlsDemoState extends State<SelectionControlsDemo> {
         description: _radioText,
         demoWidget: buildRadio(),
         exampleCodeTag: _radioCode
+      ),
+      new ComponentDemoTabData(
+        tabName: 'SWITCH',
+        description: _switchText,
+        demoWidget: buildSwitch(),
+        exampleCodeTag: _switchCode
       ),
     ];
 

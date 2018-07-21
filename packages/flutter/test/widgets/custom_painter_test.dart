@@ -327,6 +327,7 @@ void _defineTests() {
           key: const ValueKey<int>(1),
           rect: new Rect.fromLTRB(1.0, 2.0, 3.0, 4.0),
           properties: new SemanticsProperties(
+            onDismiss: () => performedActions.add(SemanticsAction.dismiss),
             onTap: () => performedActions.add(SemanticsAction.tap),
             onLongPress: () => performedActions.add(SemanticsAction.longPress),
             onScrollLeft: () => performedActions.add(SemanticsAction.scrollLeft),
@@ -349,8 +350,7 @@ void _defineTests() {
     ));
     final Set<SemanticsAction> allActions = SemanticsAction.values.values.toSet()
       ..remove(SemanticsAction.customAction) // customAction is not user-exposed.
-      ..remove(SemanticsAction.showOnScreen) // showOnScreen is not user-exposed
-      ..remove(SemanticsAction.dismiss); // TODO(jonahwilliams): update when dismiss is exposed.
+      ..remove(SemanticsAction.showOnScreen); // showOnScreen is not user-exposed
 
     const int expectedId = 2;
     final TestSemantics expectedSemantics = new TestSemantics.root(
@@ -397,7 +397,7 @@ void _defineTests() {
 
   testWidgets('Supports all flags', (WidgetTester tester) async {
     final SemanticsTester semantics = new SemanticsTester(tester);
-
+    // checked state and toggled state are mutually exclusive.
     await tester.pumpWidget(new CustomPaint(
       painter: new _PainterWithSemantics(
         semantics: new CustomPainterSemantics(
@@ -416,17 +416,16 @@ void _defineTests() {
             obscured: true,
             scopesRoute: true,
             namesRoute: true,
+            image: true,
+            liveRegion: true,
           ),
         ),
       ),
     ));
-    // TODO(jonahwilliams): update when the following semantics flags are added.
     final List<SemanticsFlag> flags = SemanticsFlag.values.values.toList();
     flags
-      ..remove(SemanticsFlag.isImage)
       ..remove(SemanticsFlag.hasToggledState)
-      ..remove(SemanticsFlag.isToggled)
-      ..remove(SemanticsFlag.isLiveRegion);
+      ..remove(SemanticsFlag.isToggled);
     final TestSemantics expectedSemantics = new TestSemantics.root(
       children: <TestSemantics>[
         new TestSemantics.rootChild(

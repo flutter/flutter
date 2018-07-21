@@ -137,7 +137,9 @@ class TapSemanticEvent extends SemanticsEvent {
 /// An event which triggers an announcement of a live region.
 ///
 /// This requires that the semantics node has already been marked as a live
-/// region. Only Android (TalkBack) will make a verbal announcement.
+/// region. Only Android (TalkBack) will make a verbal announcement, as long as
+/// the label of the semantics node has changed since the last live region
+/// update.
 ///
 /// See also:
 ///

@@ -5057,6 +5057,7 @@ class Semantics extends SingleChildRenderObjectWidget {
     bool enabled,
     bool checked,
     bool selected,
+    bool toggled,
     bool button,
     bool header,
     bool textField,
@@ -5101,6 +5102,7 @@ class Semantics extends SingleChildRenderObjectWidget {
     properties: new SemanticsProperties(
       enabled: enabled,
       checked: checked,
+      toggled: toggled,
       selected: selected,
       button: button,
       header: header,
@@ -5135,13 +5137,10 @@ class Semantics extends SingleChildRenderObjectWidget {
       onMoveCursorBackwardByCharacter: onMoveCursorBackwardByCharacter,
       onDidGainAccessibilityFocus: onDidGainAccessibilityFocus,
       onDidLoseAccessibilityFocus: onDidLoseAccessibilityFocus,
-<<<<<<< HEAD
       onDismiss: onDismiss,
-      onSetSelection: onSetSelection,),
-=======
+      onSetSelection: onSetSelection,
       customSemanticsActions: customSemanticsActions,
-    onSetSelection: onSetSelection,),
->>>>>>> e154298e0ba9144ab5763659725586f0bd24e5f5
+    ),
   );
 
   /// Creates a semantic annotation using [SemanticsProperties].
@@ -5195,6 +5194,7 @@ class Semantics extends SingleChildRenderObjectWidget {
       explicitChildNodes: explicitChildNodes,
       enabled: properties.enabled,
       checked: properties.checked,
+      toggled: properties.toggled,
       selected: properties.selected,
       button: properties.button,
       header: properties.header,
@@ -5255,6 +5255,7 @@ class Semantics extends SingleChildRenderObjectWidget {
       ..explicitChildNodes = explicitChildNodes
       ..enabled = properties.enabled
       ..checked = properties.checked
+      ..toggled = properties.toggled
       ..selected = properties.selected
       ..button = properties.button
       ..header = properties.header

@@ -2,9 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/semantics.dart';
 import 'package:flutter/widgets.dart';
-import 'package:flutter/semantics.dart';
 
 import 'button_theme.dart';
 import 'flat_button.dart';
@@ -24,11 +22,7 @@ const Color _kSnackBackground = const Color(0xFF323232);
 // TODO(ianh): Implement the Tablet version of snackbar if we're "on a tablet".
 
 const Duration _kSnackBarTransitionDuration = const Duration(milliseconds: 250);
-<<<<<<< HEAD
-const Duration _kSnackBarDisplayDuration = const Duration(milliseconds: 15000);
-=======
 const Duration _kSnackBarDisplayDuration = const Duration(milliseconds: 4000);
->>>>>>> e154298e0ba9144ab5763659725586f0bd24e5f5
 const Curve _snackBarHeightCurve = Curves.fastOutSlowIn;
 const Curve _snackBarFadeCurve = const Interval(0.72, 1.0, curve: Curves.fastOutSlowIn);
 
@@ -232,6 +226,9 @@ class SnackBar extends StatelessWidget {
         child: new Semantics(
           liveRegion: true,
           container: true,
+          onDismiss: () {
+            Scaffold.of(context).removeCurrentSnackBar(reason: SnackBarClosedReason.swipe);
+          },
           child: new Dismissible(
             key: const Key('dismissible'),
             direction: DismissDirection.down,
