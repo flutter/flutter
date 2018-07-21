@@ -534,10 +534,7 @@ class GitTagVersion {
       printTrace('Could not interpret results of "git describe": $version');
       return const GitTagVersion.unknown();
     }
-    final List<int> parsedParts = parts.take(4).map<int>(
-      // ignore: deprecated_member_use
-      (String value) => int.parse(value, onError: (String value) => null),
-    ).toList();
+    final List<int> parsedParts = parts.take(4).map<int>(int.tryParse).toList();
     return new GitTagVersion(parsedParts[0], parsedParts[1], parsedParts[2], parsedParts[3], parts[4]);
   }
 
