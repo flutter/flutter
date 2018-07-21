@@ -24,6 +24,8 @@ enum class PipelineConsumeResult {
   MoreAvailable,
 };
 
+size_t GetNextPipelineTraceID();
+
 template <class R>
 class Pipeline : public fxl::RefCountedThreadSafe<Pipeline<R>> {
  public:
@@ -84,8 +86,7 @@ class Pipeline : public fxl::RefCountedThreadSafe<Pipeline<R>> {
     FXL_DISALLOW_COPY_AND_ASSIGN(ProducerContinuation);
   };
 
-  explicit Pipeline(uint32_t depth)
-      : empty_(depth), available_(0), last_trace_id_(0) {}
+  explicit Pipeline(uint32_t depth) : empty_(depth), available_(0) {}
 
   ~Pipeline() = default;
 
@@ -99,7 +100,7 @@ class Pipeline : public fxl::RefCountedThreadSafe<Pipeline<R>> {
     return ProducerContinuation{
         std::bind(&Pipeline::ProducerCommit, this, std::placeholders::_1,
                   std::placeholders::_2),  // continuation
-        ++last_trace_id_};                 // trace id
+        GetNextPipelineTraceID()};         // trace id
   }
 
   using Consumer = std::function<void(ResourcePtr)>;
@@ -143,7 +144,6 @@ class Pipeline : public fxl::RefCountedThreadSafe<Pipeline<R>> {
   Semaphore available_;
   std::mutex queue_mutex_;
   std::queue<std::pair<ResourcePtr, size_t>> queue_;
-  std::atomic_size_t last_trace_id_;
 
   void ProducerCommit(ResourcePtr resource, size_t trace_id) {
     {
