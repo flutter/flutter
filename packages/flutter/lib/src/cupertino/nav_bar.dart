@@ -82,6 +82,7 @@ class CupertinoNavigationBar extends StatelessWidget implements ObstructingPrefe
     this.leading,
     this.automaticallyImplyLeading = true,
     this.automaticallyImplyMiddle = true,
+    this.previousPageTitle,
     this.middle,
     this.trailing,
     this.border = _kDefaultNavBarBorder,
@@ -105,6 +106,8 @@ class CupertinoNavigationBar extends StatelessWidget implements ObstructingPrefe
   final bool automaticallyImplyLeading;
 
   final bool automaticallyImplyMiddle;
+
+  final String previousPageTitle;
 
   /// Widget to place in the middle of the navigation bar. Normally a title or
   /// a segmented control.
@@ -217,6 +220,7 @@ class CupertinoSliverNavigationBar extends StatelessWidget {
     this.leading,
     this.automaticallyImplyLeading = true,
     this.automaticallyImplyMiddle = true,
+    this.previousPageTitle,
     this.middle,
     this.trailing,
     this.border = _kDefaultNavBarBorder,
@@ -258,6 +262,8 @@ class CupertinoSliverNavigationBar extends StatelessWidget {
   final bool automaticallyImplyLeading;
 
   final bool automaticallyImplyMiddle;
+
+  final String previousPageTitle;
 
   /// A widget to place in the middle of the static navigation bar instead of
   /// the [largeTitle].
@@ -321,6 +327,7 @@ class CupertinoSliverNavigationBar extends StatelessWidget {
         largeTitle: effectiveTitle,
         leading: leading,
         automaticallyImplyLeading: automaticallyImplyLeading,
+        previousPageTitle: previousPageTitle,
         middle: middle,
         trailing: trailing,
         padding: padding,
@@ -393,6 +400,7 @@ class _CupertinoPersistentNavigationBar extends StatelessWidget implements Prefe
     Key key,
     this.leading,
     this.automaticallyImplyLeading,
+    this.previousPageTitle,
     this.middle,
     this.trailing,
     this.padding,
@@ -403,6 +411,8 @@ class _CupertinoPersistentNavigationBar extends StatelessWidget implements Prefe
   final Widget leading;
 
   final bool automaticallyImplyLeading;
+
+  final String previousPageTitle;
 
   final Widget middle;
 
@@ -518,7 +528,10 @@ class _CupertinoPersistentNavigationBar extends StatelessWidget implements Prefe
             const Padding(padding: EdgeInsetsDirectional.only(start: 5.0)),
           ];
 
-          if (currentRoute is CupertinoPageRoute
+          if (previousPageTitle?.isNotEmpty == true) {
+            backButtonContent.add(new Text(previousPageTitle));
+          }
+          else if (currentRoute is CupertinoPageRoute
               && currentRoute.previousTitle?.isNotEmpty == true) {
             backButtonContent.add(new Text(currentRoute.previousTitle));
           }
@@ -581,6 +594,7 @@ class _CupertinoLargeTitleNavigationBarSliverDelegate
     @required this.largeTitle,
     this.leading,
     this.automaticallyImplyLeading,
+    this.previousPageTitle,
     this.middle,
     this.trailing,
     this.padding,
@@ -596,6 +610,8 @@ class _CupertinoLargeTitleNavigationBarSliverDelegate
   final Widget leading;
 
   final bool automaticallyImplyLeading;
+
+  final String previousPageTitle;
 
   final Widget middle;
 
@@ -623,6 +639,7 @@ class _CupertinoLargeTitleNavigationBarSliverDelegate
         new _CupertinoPersistentNavigationBar(
       leading: leading,
       automaticallyImplyLeading: automaticallyImplyLeading,
+      previousPageTitle: previousPageTitle,
       middle: middle ?? largeTitle,
       trailing: trailing,
       // If middle widget exists, always show it. Otherwise, show title
