@@ -481,8 +481,7 @@ void main() {
           liveRegion: true,
         )
     );
-    // TODO(jonahwilliams): update when the following semantics flags are added.
-    final List<SemanticsFlag> flags = SemanticsFlag.values.values.toList();
+    List<SemanticsFlag> flags = SemanticsFlag.values.values.toList();
     flags
       ..remove(SemanticsFlag.hasToggledState)
       ..remove(SemanticsFlag.isToggled);
@@ -510,6 +509,41 @@ void main() {
     );
     expect(semantics, hasSemantics(expectedSemantics, ignoreId: true));
 
+    await tester.pumpWidget(
+        new Semantics(
+          container: true,
+          explicitChildNodes: true,
+          // flags
+          enabled: true,
+          hidden: true,
+          toggled: true,
+          selected: true,
+          button: true,
+          textField: true,
+          focused: true,
+          inMutuallyExclusiveGroup: true,
+          header: true,
+          obscured: true,
+          scopesRoute: true,
+          namesRoute: true,
+          image: true,
+          liveRegion: true,
+        )
+    );
+
+    flags
+      ..remove(SemanticsFlag.hasCheckedState)
+      ..remove(SemanticsFlag.isChecked);
+    expectedSemantics = new TestSemantics.root(
+      children: <TestSemantics>[
+        new TestSemantics.rootChild(
+          rect: TestSemantics.fullScreen,
+          flags: flags,
+        ),
+      ],
+    );
+
+    expect(semantics, hasSemantics(expectedSemantics, ignoreId: true));
     semantics.dispose();
   });
 

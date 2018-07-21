@@ -422,11 +422,11 @@ void _defineTests() {
         ),
       ),
     ));
-    final List<SemanticsFlag> flags = SemanticsFlag.values.values.toList();
+    List<SemanticsFlag> flags = SemanticsFlag.values.values.toList();
     flags
       ..remove(SemanticsFlag.hasToggledState)
       ..remove(SemanticsFlag.isToggled);
-    final TestSemantics expectedSemantics = new TestSemantics.root(
+    TestSemantics expectedSemantics = new TestSemantics.root(
       children: <TestSemantics>[
         new TestSemantics.rootChild(
             id: 1,
@@ -442,6 +442,50 @@ void _defineTests() {
     );
     expect(semantics, hasSemantics(expectedSemantics, ignoreRect: true, ignoreTransform: true));
 
+    await tester.pumpWidget(new CustomPaint(
+      painter: new _PainterWithSemantics(
+        semantics: new CustomPainterSemantics(
+          key: const ValueKey<int>(1),
+          rect: new Rect.fromLTRB(1.0, 2.0, 3.0, 4.0),
+          properties: const SemanticsProperties(
+            enabled: true,
+            toggled: true,
+            selected: true,
+            hidden: true,
+            button: true,
+            textField: true,
+            focused: true,
+            inMutuallyExclusiveGroup: true,
+            header: true,
+            obscured: true,
+            scopesRoute: true,
+            namesRoute: true,
+            image: true,
+            liveRegion: true,
+          ),
+        ),
+      ),
+    ));
+    flags = SemanticsFlag.values.values.toList();
+    flags
+      ..remove(SemanticsFlag.hasCheckedState)
+      ..remove(SemanticsFlag.isChecked);
+
+    expectedSemantics = new TestSemantics.root(
+      children: <TestSemantics>[
+        new TestSemantics.rootChild(
+            id: 1,
+            children: <TestSemantics>[
+              new TestSemantics.rootChild(
+                id: 2,
+                rect: TestSemantics.fullScreen,
+                flags: flags,
+              ),
+            ]
+        ),
+      ],
+    );
+    expect(semantics, hasSemantics(expectedSemantics, ignoreRect: true, ignoreTransform: true));
     semantics.dispose();
   });
 
