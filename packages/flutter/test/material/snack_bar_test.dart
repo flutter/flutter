@@ -484,7 +484,7 @@ void main() {
 
   testWidgets('SnackBar default display duration test', (WidgetTester tester) async {
     const String helloSnackBar = 'Hello SnackBar';
-    const Key tapTarget = const Key('tap-target');
+    const Key tapTarget = Key('tap-target');
     await tester.pumpWidget(new MaterialApp(
         home: new Scaffold(
             body: new Builder(
@@ -492,7 +492,7 @@ void main() {
                   return new GestureDetector(
                       onTap: () {
                         Scaffold.of(context).showSnackBar(const SnackBar(
-                            content: const Text(helloSnackBar)
+                            content: Text(helloSnackBar)
                         ));
                       },
                       behavior: HitTestBehavior.opaque,

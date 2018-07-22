@@ -196,7 +196,7 @@ void main() {
     final TextEditingController controller = new TextEditingController();
     final FocusNode focusNode = new FocusNode();
 
-    const Key container = const Key('container');
+    const Key container = Key('container');
 
     await tester.pumpWidget(new MaterialApp(
       home: new Align(
