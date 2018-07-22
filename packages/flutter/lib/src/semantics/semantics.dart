@@ -78,10 +78,10 @@ class SemanticsTag {
 /// switch may have difficulty. This can be made accessible by creating custom
 /// actions and pairing them with handlers that move a list item up or down in
 /// the list.
-/// 
+///
 /// In Android, these actions are presented in the local context menu. In iOS,
-/// these are presented in the radial context menu. 
-/// 
+/// these are presented in the radial context menu.
+///
 /// Localization and text direction do not automatically apply to the provided
 /// label.
 /// 
@@ -387,7 +387,7 @@ class SemanticsData extends Diagnosticable {
       customSemanticsActionIds,
     );
   }
-  
+
   static bool _sortedListsEqual(List<int> left, List<int> right) {
     if (left == null && right == null)
       return true;
@@ -426,6 +426,68 @@ class _SemanticsDiagnosticableNode extends DiagnosticableNode<SemanticsNode> {
   }
 }
 
+/// Provides hint values which override the default hints on supported
+/// platforms.
+///
+/// On Android, If no hint overrides are used then the semantic node's `hint`
+/// will be combined with the `label`. Otherwise, `hint` will be ignored as long
+/// as there as at least one non-null hint override.
+///
+/// On iOS, these are always ignored and the default `hint` is used instead.
+@immutable
+class SemanticsHintOverrides extends DiagnosticableTree {
+  /// Creates a semantics hint overrides.
+  const SemanticsHintOverrides({
+    this.onTapHint,
+    this.onLongPressHint,
+  }) : assert(onTapHint != ''),
+       assert(onLongPressHint != '');
+
+  /// The hint text for a tap action.
+  ///
+  /// If null, the standard hint is used instead.
+  ///
+  /// The hint should describe what happens when a tap occurs, not the
+  /// manner in which a tap is accomplished.
+  ///
+  /// Bad: 'Double tap to show movies'.
+  /// Good: 'show movies'.
+  final String onTapHint;
+
+  /// The hint text for a long press action.
+  ///
+  /// If null, the standard hint is used instead.
+  ///
+  /// The hint should describe what happens when a long press occurs, not
+  /// the manner in which the long press is accomplished.
+  ///
+  /// Bad: 'Double tap and hold to show tooltip'.
+  /// Good: 'show tooltip'.
+  final String onLongPressHint;
+
+  /// Whether there are any non-null hint values.
+  bool get isNotEmpty => onTapHint != null || onLongPressHint != null;
+
+  @override
+  int get hashCode => ui.hashValues(onTapHint, onLongPressHint);
+
+  @override
+  bool operator ==(dynamic other) {
+    if (other.runtimeType != runtimeType)
+      return false;
+    final SemanticsHintOverrides typedOther = other;
+    return typedOther.onTapHint == onTapHint
+      && typedOther.onLongPressHint == onLongPressHint;
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(new StringProperty('onTapHint', onTapHint, defaultValue: null));
+    properties.add(new StringProperty('onLongPressHint', onLongPressHint, defaultValue: null));
+  }
+}
+
 /// Contains properties used by assistive technologies to make the application
 /// more accessible.
 ///
@@ -452,8 +514,7 @@ class SemanticsProperties extends DiagnosticableTree {
     this.increasedValue,
     this.decreasedValue,
     this.hint,
-    this.onTapHint,
-    this.onLongPressHint,
+    this.hintOverrides,
     this.textDirection,
     this.sortKey,
     this.onTap,
@@ -557,7 +618,7 @@ class SemanticsProperties extends DiagnosticableTree {
 
   /// If non-null, whether the node corresponds to the root of a subtree for
   /// which a route name should be announced.
-  /// 
+  ///
   /// Generally, this is set in combination with [explicitChildNodes], since 
   /// nodes with this flag are not considered focusable by Android or iOS.
   ///
@@ -570,7 +631,7 @@ class SemanticsProperties extends DiagnosticableTree {
   /// If non-null, whether the node contains the semantic label for a route.
   ///
   /// See also:
-  /// 
+  ///
   ///  * [SemanticsFlag.namesRoute] for a description of how the name is used.
   final bool namesRoute;
 
@@ -634,9 +695,15 @@ class SemanticsProperties extends DiagnosticableTree {
   ///    in TalkBack and VoiceOver.
   final String hint;
 
-  final String onTapHint;
-
-  final String onLongPressHint;
+  /// Provides hint values which override the default hints on supported
+  /// platforms.
+  ///
+  /// On Android, If no hint overrides are used then default [hint] will be
+  /// combined with the [label]. Otherwise, the [hint] will be ignored as long
+  /// as there as at least one non-null hint override.
+  ///
+  /// On iOS, these are always ignored and the default [hint] is used instead.
+  final SemanticsHintOverrides hintOverrides;
 
   /// The reading direction of the [label], [value], [hint], [increasedValue],
   /// and [decreasedValue].
@@ -841,14 +908,14 @@ class SemanticsProperties extends DiagnosticableTree {
   final VoidCallback onDidLoseAccessibilityFocus;
 
   /// A map from each supported [CustomSemanticsAction] to a provided handler.
-  /// 
+  ///
   /// The handler associated with each custom action is called whenever a
   /// semantics event of type [SemanticsEvent.customEvent] is received. The
   /// provided argument will be an identifier used to retrieve an instance of
   /// a custom action which can then retrieve the correct handler from this map.
-  /// 
+  ///
   /// See also:
-  /// 
+  ///
   ///   * [CustomSemanticsAction], for an explanation of custom actions.
   final Map<CustomSemanticsAction, VoidCallback> customSemanticsActions;
 
@@ -862,6 +929,7 @@ class SemanticsProperties extends DiagnosticableTree {
     properties.add(new StringProperty('hint', hint));
     properties.add(new EnumProperty<TextDirection>('textDirection', textDirection, defaultValue: null));
     properties.add(new DiagnosticsProperty<SemanticsSortKey>('sortKey', sortKey, defaultValue: null));
+    properties.add(new DiagnosticsProperty<SemanticsHintOverrides>('hintOverrides', hintOverrides));
   }
 
   @override
@@ -1314,11 +1382,10 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
   String get hint => _hint;
   String _hint = _kEmptyConfig.hint;
 
-  String get onLongPressHint => _onLongPressHint;
-  String _onLongPressHint;
-
-  String get onTapHint => _onTapHint;
-  String _onTapHint;
+  /// Provides hint values which override the default hints on supported
+  /// platforms.
+  SemanticsHintOverrides get hintOverrides => _hintOverrides;
+  SemanticsHintOverrides _hintOverrides;
 
   /// The reading direction for [label], [value], [hint], [increasedValue], and
   /// [decreasedValue].
@@ -1401,6 +1468,7 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
     _value = config.value;
     _increasedValue = config.increasedValue;
     _hint = config.hint;
+    _hintOverrides = config.hintOverrides;
     _flags = config._flags;
     _textDirection = config.textDirection;
     _sortKey = config.sortKey;
@@ -1413,18 +1481,10 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
     _scrollExtentMin = config._scrollExtentMin;
     _mergeAllDescendantsIntoThisNode = config.isMergingSemanticsOfDescendants;
     _replaceChildren(childrenInInversePaintOrder ?? const <SemanticsNode>[]);
-    if (config.onTapHint != null) {
-      assert(_actions.containsKey(SemanticsAction.tap), 'onTapHint was provided to a node that doesn\'t have a tap handler');
-      _onTapHint = config.onTapHint;
-    }
-    if (config.onLongPressHint != null) {
-      assert(_actions.containsKey(SemanticsAction.longPress), 'onLongPressHint was provded to a node that doesn\'t have a long press handler');
-      _onLongPressHint = config.onLongPressHint;
-    }
 
     assert(
       !_canPerformAction(SemanticsAction.increase) || (_value == '') == (_increasedValue == ''),
-      'A SemanticsNode with action "increase" needs to be annotated with either both "value" and "increasedValue" or neither',
+      'A SemanticsNode with actixon "increase" needs to be annotated with either both "value" and "increasedValue" or neither',
     );
     assert(
       !_canPerformAction(SemanticsAction.decrease) || (_value == '') == (_decreasedValue == ''),
@@ -1455,13 +1515,21 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
     final Set<int> customSemanticsActionIds = new Set<int>();
     for (CustomSemanticsAction action in _customSemanticsActions.keys)
       customSemanticsActionIds.add(CustomSemanticsAction.getIdentifier(action));
-    if (onTapHint != null) {
-      final CustomSemanticsAction action = new CustomSemanticsAction.standard(hint: onTapHint, action: SemanticsAction.tap);
-      customSemanticsActionIds.add(CustomSemanticsAction.getIdentifier(action));
-    }
-    if (onLongPressHint != null) {
-      final CustomSemanticsAction action = new CustomSemanticsAction.standard(hint: onLongPressHint, action: SemanticsAction.longPress);
-      customSemanticsActionIds.add(CustomSemanticsAction.getIdentifier(action));
+    if (hintOverrides != null) {
+      if (hintOverrides.onTapHint != null) {
+        final CustomSemanticsAction action = new CustomSemanticsAction.standard(
+          hint: hintOverrides.onTapHint,
+          action: SemanticsAction.tap,
+        );
+        customSemanticsActionIds.add(CustomSemanticsAction.getIdentifier(action));
+      }
+      if (hintOverrides.onLongPressHint != null) {
+        final CustomSemanticsAction action = new CustomSemanticsAction.standard(
+          hint: hintOverrides.onLongPressHint,
+          action: SemanticsAction.longPress,
+        );
+        customSemanticsActionIds.add(CustomSemanticsAction.getIdentifier(action));
+      }
     }
 
     if (mergeAllDescendantsIntoThisNode) {
@@ -1488,13 +1556,21 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
           for (CustomSemanticsAction action in _customSemanticsActions.keys)
             customSemanticsActionIds.add(CustomSemanticsAction.getIdentifier(action));
         }
-        if (node.onTapHint != null) {
-          final CustomSemanticsAction action = new CustomSemanticsAction.standard(hint: onTapHint, action: SemanticsAction.tap);
-          customSemanticsActionIds.add(CustomSemanticsAction.getIdentifier(action));
-        }
-        if (node.onLongPressHint != null) {
-          final CustomSemanticsAction action = new CustomSemanticsAction.standard(hint: onLongPressHint, action: SemanticsAction.longPress);
-          customSemanticsActionIds.add(CustomSemanticsAction.getIdentifier(action));
+        if (node.hintOverrides != null) {
+          if (node.hintOverrides.onTapHint != null) {
+            final CustomSemanticsAction action = new CustomSemanticsAction.standard(
+              hint: node.hintOverrides.onTapHint,
+              action: SemanticsAction.tap,
+            );
+            customSemanticsActionIds.add(CustomSemanticsAction.getIdentifier(action));
+          }
+          if (node.hintOverrides.onLongPressHint != null) {
+            final CustomSemanticsAction action = new CustomSemanticsAction.standard(
+              hint: node.hintOverrides.onLongPressHint,
+              action: SemanticsAction.longPress,
+            );
+            customSemanticsActionIds.add(CustomSemanticsAction.getIdentifier(action));
+          }
         }
         label = _concatStrings(
           thisString: label,
@@ -2809,27 +2885,20 @@ class SemanticsConfiguration {
     _hasBeenAnnotated = true;
   }
 
-  String get onLongPressHint => _onLongPressHint;
-  String _onLongPressHint;
-  set onLongPressHint(String value) {
+  /// Provides hint values which override the default hints on supported
+  /// platforms.
+  SemanticsHintOverrides get hintOverrides => _hintOverrides;
+  SemanticsHintOverrides _hintOverrides;
+  set hintOverrides(SemanticsHintOverrides value) {
     if (value == null)
       return;
-    _onLongPressHint = value;
-    _hasBeenAnnotated = true;
-  }
-
-  String get onTapHint => _onTapHint;
-  String _onTapHint;
-  set onTapHint(String value) {
-    if (value == null)
-      return;
-    _onTapHint = value;
+    _hintOverrides = value;
     _hasBeenAnnotated = true;
   }
 
   /// Whether the semantics node is the root of a subtree for which values
   /// should be announced.
-  /// 
+  ///
   /// See also:
   ///  * [SemanticsFlag.scopesRoute], for a full description of route scoping.
   bool get scopesRoute => _hasFlag(SemanticsFlag.scopesRoute);
@@ -2838,7 +2907,7 @@ class SemanticsConfiguration {
   }
 
   /// Whether the semantics node contains the label of a route.
-  /// 
+  ///
   /// See also:
   ///  * [SemanticsFlag.namesRoute], for a full description of route naming.
   bool get namesRoute => _hasFlag(SemanticsFlag.namesRoute);
@@ -3104,8 +3173,7 @@ class SemanticsConfiguration {
     _scrollPosition ??= other._scrollPosition;
     _scrollExtentMax ??= other._scrollExtentMax;
     _scrollExtentMin ??= other._scrollExtentMin;
-    _onTapHint ??= other._onTapHint;
-    _onLongPressHint ??= other._onLongPressHint;
+    _hintOverrides ??= other._hintOverrides;
 
     textDirection ??= other.textDirection;
     _sortKey ??= other._sortKey;
@@ -3146,8 +3214,7 @@ class SemanticsConfiguration {
       .._value = _value
       .._decreasedValue = _decreasedValue
       .._hint = _hint
-      .._onLongPressHint = _onLongPressHint
-      .._onTapHint = _onTapHint
+      .._hintOverrides = _hintOverrides
       .._flags = _flags
       .._tagsForChildren = _tagsForChildren
       .._textSelection = _textSelection

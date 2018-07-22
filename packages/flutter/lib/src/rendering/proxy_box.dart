@@ -3141,8 +3141,7 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     String increasedValue,
     String decreasedValue,
     String hint,
-    String onTapHint,
-    String onLongPressHint,
+    SemanticsHintOverrides hintOverrides,
     TextDirection textDirection,
     SemanticsSortKey sortKey,
     VoidCallback onTap,
@@ -3182,8 +3181,7 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
        _increasedValue = increasedValue,
        _decreasedValue = decreasedValue,
        _hint = hint,
-       _onTapHint = onTapHint,
-       _onLongPressHint = onLongPressHint,
+       _hintOverrides = hintOverrides,
        _textDirection = textDirection,
        _sortKey = sortKey,
        _onTap = onTap,
@@ -3432,21 +3430,13 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     markNeedsSemanticsUpdate();
   }
 
-  String get onTapHint => _onTapHint;
-  String _onTapHint;
-  set onTapHint(String value) {
-    if (_onTapHint == value)
+  /// If non-null, sets the [SemanticsNode.hintOverride] to the given value.
+  SemanticsHintOverrides get hintOverrides => _hintOverrides;
+  SemanticsHintOverrides _hintOverrides;
+  set hintOverrides(SemanticsHintOverrides value) {
+    if (_hintOverrides == value)
       return;
-    _onTapHint = value;
-    markNeedsSemanticsUpdate();
-  }
-
-  String get onLongPressHint => _onLongPressHint;
-  String _onLongPressHint;
-  set onLongPressHint(String value) {
-    if (onLongPressHint == value)
-      return;
-    _onLongPressHint = value;
+    _hintOverrides = value;
     markNeedsSemanticsUpdate();
   }
 
@@ -3804,13 +3794,13 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
   }
 
   /// The handlers and supported [CustomSemanticsAction]s for this node.
-  /// 
+  ///
   /// These handlers are called whenever the user performs the associated
   /// custom accessibility action from a special platform menu. Providing any
   /// custom actions here also adds [SemanticsAction.customAction] to the node.
-  /// 
+  ///
   /// See also:
-  /// 
+  ///
   ///   * [CustomSemanticsAction], for an explaination of custom actions.
   Map<CustomSemanticsAction, VoidCallback> get customSemanticsActions => _customSemanticsActions;
   Map<CustomSemanticsAction, VoidCallback> _customSemanticsActions;
@@ -3859,10 +3849,8 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
       config.decreasedValue = decreasedValue;
     if (hint != null)
       config.hint = hint;
-    if (onTapHint != null)
-      config.onTapHint = onTapHint;
-    if (onLongPressHint != null)
-      config.onLongPressHint = onLongPressHint;
+    if (hintOverrides != null && hintOverrides.isNotEmpty)
+      config.hintOverrides = hintOverrides;
     if (scopesRoute != null)
       config.scopesRoute = scopesRoute;
     if (namesRoute != null)

@@ -5115,8 +5115,6 @@ class Semantics extends SingleChildRenderObjectWidget {
       increasedValue: increasedValue,
       decreasedValue: decreasedValue,
       hint: hint,
-      onTapHint: onTapHint,
-      onLongPressHint: onLongPressHint,
       textDirection: textDirection,
       sortKey: sortKey,
       onTap: onTap,
@@ -5135,6 +5133,11 @@ class Semantics extends SingleChildRenderObjectWidget {
       onDidGainAccessibilityFocus: onDidGainAccessibilityFocus,
       onDidLoseAccessibilityFocus: onDidLoseAccessibilityFocus,
       customSemanticsActions: customSemanticsActions,
+      hintOverrides: onTapHint != null || onLongPressHint != null ?
+        SemanticsHintOverrides(
+         onTapHint: onTapHint,
+         onLongPressHint: onLongPressHint,
+        ) : null,
     onSetSelection: onSetSelection,),
   );
 
@@ -5204,8 +5207,7 @@ class Semantics extends SingleChildRenderObjectWidget {
       increasedValue: properties.increasedValue,
       decreasedValue: properties.decreasedValue,
       hint: properties.hint,
-      onTapHint: properties.onTapHint,
-      onLongPressHint: properties.onLongPressHint,
+      hintOverrides: properties.hintOverrides,
       textDirection: _getTextDirection(context),
       sortKey: properties.sortKey,
       onTap: properties.onTap,
@@ -5258,11 +5260,10 @@ class Semantics extends SingleChildRenderObjectWidget {
       ..hidden = properties.hidden
       ..label = properties.label
       ..value = properties.value
-      ..onTapHint = properties.onTapHint
-      ..onLongPressHint = properties.onLongPressHint
       ..increasedValue = properties.increasedValue
       ..decreasedValue = properties.decreasedValue
       ..hint = properties.hint
+      ..hintOverrides = properties.hintOverrides
       ..namesRoute = properties.namesRoute
       ..textDirection = _getTextDirection(context)
       ..sortKey = properties.sortKey
