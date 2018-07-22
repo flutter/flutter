@@ -413,6 +413,12 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
       _controllers[oldWidget.currentIndex].reverse();
       _controllers[widget.currentIndex].forward();
     }
+
+    if (widget.items[widget.currentIndex].backgroundColor != _backgroundColor) {
+      setState(() {
+        _backgroundColor = widget.items[widget.currentIndex].backgroundColor;
+      });
+    }
   }
 
   List<Widget> _createTiles() {
