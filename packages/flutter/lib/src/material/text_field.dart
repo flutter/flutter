@@ -559,17 +559,16 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
     );
 
     if (widget.decoration != null) {
-      final Listenable listenable = new Listenable.merge(<Listenable>[focusNode, controller]);
-      child = AnimatedBuilder(
-        animation: listenable,
+      child = new AnimatedBuilder(
+        animation: new Listenable.merge(<Listenable>[ focusNode, controller ]),
         builder: (BuildContext context, Widget child) {
           return new InputDecorator(
-              decoration: _getEffectiveDecoration(),
-              baseStyle: widget.style,
-              textAlign: widget.textAlign,
-              isFocused: focusNode.hasFocus,
-              isEmpty: controller.value.text.isEmpty,
-              child: child,
+            decoration: _getEffectiveDecoration(),
+            baseStyle: widget.style,
+            textAlign: widget.textAlign,
+            isFocused: focusNode.hasFocus,
+            isEmpty: controller.value.text.isEmpty,
+            child: child,
           );
         },
         child: child,
