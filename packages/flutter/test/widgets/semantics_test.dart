@@ -416,7 +416,8 @@ void main() {
 
     final Set<SemanticsAction> allActions = SemanticsAction.values.values.toSet()
       ..remove(SemanticsAction.customAction) // customAction is not user-exposed.
-      ..remove(SemanticsAction.showOnScreen); // showOnScreen is not user-exposed.
+      ..remove(SemanticsAction.showOnScreen) // showOnScreen is not user-exposed
+      ..remove(SemanticsAction.dismiss); // TODO(jonahwilliams): remove when dismiss action is exposed.
 
     const int expectedId = 1;
     final TestSemantics expectedSemantics = new TestSemantics.root(
@@ -478,12 +479,19 @@ void main() {
           namesRoute: true,
         )
     );
+    // TODO(jonahwilliams): update when the following semantics flags are added.
+    final List<SemanticsFlag> flags = SemanticsFlag.values.values.toList();
+    flags
+      ..remove(SemanticsFlag.isImage)
+      ..remove(SemanticsFlag.hasToggledState)
+      ..remove(SemanticsFlag.isToggled)
+      ..remove(SemanticsFlag.isLiveRegion);
 
     TestSemantics expectedSemantics = new TestSemantics.root(
       children: <TestSemantics>[
         new TestSemantics.rootChild(
           rect: TestSemantics.fullScreen,
-          flags: SemanticsFlag.values.values.toList(),
+          flags: flags,
         ),
       ],
     );

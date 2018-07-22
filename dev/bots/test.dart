@@ -24,10 +24,13 @@ final String green = hasColor ? '\x1B[32m' : '';
 final String yellow = hasColor ? '\x1B[33m' : '';
 final String cyan = hasColor ? '\x1B[36m' : '';
 final String reset = hasColor ? '\x1B[0m' : '';
+const String arrow = '⏩';
+const String clock = '🕐';
 
 const Map<String, ShardRunner> _kShards = const <String, ShardRunner>{
   'analyze': _analyzeRepo,
   'tests': _runTests,
+  'tool_tests': _runToolTests,
   'coverage': _runCoverage,
   // 'docs': handled by travis_script.sh and docs.sh
   // 'build_and_deploy_gallery': handled by travis_script.sh
@@ -95,6 +98,41 @@ Future<Null> _verifyInternationalizations() async {
   print('Contents of $localizationsFile matches output of gen_localizations.dart script.');
 }
 
+Future<Null> _checkForTrailingSpaces() async {
+  if (!Platform.isWindows) {
+    final String commitRange = Platform.environment.containsKey('TEST_COMMIT_RANGE')
+        ? Platform.environment['TEST_COMMIT_RANGE']
+        : 'master..HEAD';
+    print('Checking for trailing whitespace in source files.');
+    final List<String> fileTypes = <String>[
+      '*.dart', '*.cxx', '*.cpp', '*.cc', '*.c', '*.C', '*.h', '*.java', '*.mm', '*.m',
+    ];
+    final EvalResult changedFilesResult = await _evalCommand(
+      'git', <String>['diff', '-U0', '--no-color', '--name-only', commitRange, '--'] + fileTypes,
+      workingDirectory: flutterRoot,
+    );
+    if (changedFilesResult.stdout == null) {
+      print('No Results for whitespace check.');
+      return;
+    }
+    final List<String> changedFiles = changedFilesResult.stdout.trim().split('\n')
+        .where((String item) => item.trim().isNotEmpty).toList();
+    if (changedFiles.isNotEmpty) {
+      await _runCommand('grep',
+        <String>[
+          '--line-number',
+          '--extended-regexp',
+          r'[[:space:]]+$',
+        ] + changedFiles,
+        workingDirectory: flutterRoot,
+        printOutput: false,
+        expectFailure: true, // Just means a non-zero exit code is expected.
+        expectedExitCode: 1, // Indicates that zero lines were found.
+      );
+    }
+  }
+}
+
 Future<Null> _analyzeRepo() async {
   await _verifyGeneratedPluginRegistrants(flutterRoot);
   await _verifyNoBadImportsInFlutter(flutterRoot);
@@ -123,6 +161,8 @@ Future<Null> _analyzeRepo() async {
     options: <String>['--flutter-repo', '--watch', '--benchmark'],
   );
 
+  await _checkForTrailingSpaces();
+
   // Try an analysis against a big version of the gallery.
   await _runCommand(dart,
     <String>['--preview-dart-2', path.join(flutterRoot, 'dev', 'tools', 'mega_gallery.dart')],
@@ -135,7 +175,7 @@ Future<Null> _analyzeRepo() async {
   print('${bold}DONE: Analysis successful.$reset');
 }
 
-Future<Null> _runTests() async {
+Future<Null> _runSmokeTests() async {
   // Verify that the tests actually return failure on failure and success on
   // success.
   final String automatedTests = path.join(flutterRoot, 'dev', 'automated_tests');
@@ -213,14 +253,24 @@ Future<Null> _runTests() async {
 
   // Verify that we correctly generated the version file.
   await _verifyVersion(path.join(flutterRoot, 'version'));
+}
 
-  // Run tests.
+Future<Null> _runToolTests() async {
+  await _runSmokeTests();
+
+  await _pubRunTest(path.join(flutterRoot, 'packages', 'flutter_tools'));
+
+  print('${bold}DONE: All tests successful.$reset');
+}
+
+Future<Null> _runTests() async {
+  await _runSmokeTests();
+
   await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter'));
   await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter_localizations'));
   await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter_driver'));
   await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter_test'));
   await _runFlutterTest(path.join(flutterRoot, 'packages', 'fuchsia_remote_debug_protocol'));
-  await _pubRunTest(path.join(flutterRoot, 'packages', 'flutter_tools'));
   await _pubRunTest(path.join(flutterRoot, 'dev', 'bots'));
   await _pubRunTest(path.join(flutterRoot, 'dev', 'devicelab'));
   await _runFlutterTest(path.join(flutterRoot, 'dev', 'manual_tests'));
@@ -299,6 +349,7 @@ Future<EvalResult> _evalCommand(String executable, List<String> arguments, {
   }
   _printProgress('RUNNING', relativeWorkingDir, commandDescription);
 
+  final DateTime start = new DateTime.now();
   final Process process = await Process.start(executable, arguments,
     workingDirectory: workingDirectory,
     environment: environment,
@@ -311,6 +362,8 @@ Future<EvalResult> _evalCommand(String executable, List<String> arguments, {
     stdout: utf8.decode((await savedStdout).expand((List<int> ints) => ints).toList()),
     stderr: utf8.decode((await savedStderr).expand((List<int> ints) => ints).toList()),
   );
+
+  print('$clock ELAPSED TIME: $bold${elapsedTime(start)}$reset for $commandDescription in $relativeWorkingDir: ');
 
   if (exitCode != 0) {
     stderr.write(result.stderr);
@@ -327,10 +380,15 @@ Future<EvalResult> _evalCommand(String executable, List<String> arguments, {
   return result;
 }
 
+String elapsedTime(DateTime start) {
+  return new DateTime.now().difference(start).toString();
+}
+
 Future<Null> _runCommand(String executable, List<String> arguments, {
   String workingDirectory,
   Map<String, String> environment,
   bool expectFailure = false,
+  int expectedExitCode,
   bool printOutput = true,
   bool skip = false,
   Duration timeout = _kLongTimeout,
@@ -343,6 +401,7 @@ Future<Null> _runCommand(String executable, List<String> arguments, {
   }
   _printProgress('RUNNING', relativeWorkingDir, commandDescription);
 
+  final DateTime start = new DateTime.now();
   final Process process = await Process.start(executable, arguments,
     workingDirectory: workingDirectory,
     environment: environment,
@@ -363,7 +422,8 @@ Future<Null> _runCommand(String executable, List<String> arguments, {
     stderr.writeln('Process timed out after $timeout');
     return expectFailure ? 0 : 1;
   });
-  if ((exitCode == 0) == expectFailure) {
+  print('$clock ELAPSED TIME: $bold${elapsedTime(start)}$reset for $commandDescription in $relativeWorkingDir: ');
+  if ((exitCode == 0) == expectFailure || (expectedExitCode != null && exitCode != expectedExitCode)) {
     if (!printOutput) {
       stdout.writeln(utf8.decode((await savedStdout).expand((List<int> ints) => ints).toList()));
       stderr.writeln(utf8.decode((await savedStderr).expand((List<int> ints) => ints).toList()));
@@ -371,6 +431,8 @@ Future<Null> _runCommand(String executable, List<String> arguments, {
     print(
       '$red━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━$reset\n'
       '${bold}ERROR:$red Last command exited with $exitCode (expected: ${expectFailure ? 'non-zero' : 'zero'}).$reset\n'
+      '${bold}Command:$cyan $commandDescription$reset\n'
+      '${bold}Relative working directory:$red $relativeWorkingDir$reset\n'
       '$red━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━$reset'
     );
     exit(1);
@@ -568,7 +630,6 @@ Future<Null> _verifyNoBadImportsInFlutterTools(String workingDirectory) async {
 }
 
 void _printProgress(String action, String workingDir, String command) {
-  const String arrow = '⏩';
   print('$arrow $action: cd $cyan$workingDir$reset; $yellow$command$reset');
 }
 
@@ -628,9 +689,10 @@ String _getPackageFor(File entity, Directory flutterRootDir) {
 
 bool _isGeneratedPluginRegistrant(File file) {
   final String filename = path.basename(file.path);
-  return filename == 'GeneratedPluginRegistrant.java' ||
-      filename == 'GeneratedPluginRegistrant.h' ||
-      filename == 'GeneratedPluginRegistrant.m';
+  return !file.path.contains('.pub-cache')
+      && (filename == 'GeneratedPluginRegistrant.java' ||
+          filename == 'GeneratedPluginRegistrant.h' ||
+          filename == 'GeneratedPluginRegistrant.m');
 }
 
 Future<Null> _verifyVersion(String filename) async {

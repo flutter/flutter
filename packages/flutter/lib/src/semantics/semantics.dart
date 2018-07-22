@@ -619,7 +619,7 @@ class SemanticsProperties extends DiagnosticableTree {
   /// If non-null, whether the node corresponds to the root of a subtree for
   /// which a route name should be announced.
   ///
-  /// Generally, this is set in combination with [explicitChildNodes], since 
+  /// Generally, this is set in combination with [explicitChildNodes], since
   /// nodes with this flag are not considered focusable by Android or iOS.
   ///
   /// See also:

@@ -11,7 +11,6 @@ import 'scaffold.dart';
 import 'theme.dart';
 import 'theme_data.dart';
 
-// https://material.google.com/components/snackbars-toasts.html#snackbars-toasts-specs
 const double _kSnackBarPadding = 24.0;
 const double _kSingleLineVerticalPadding = 14.0;
 const Color _kSnackBackground = const Color(0xFF323232);
@@ -23,7 +22,7 @@ const Color _kSnackBackground = const Color(0xFF323232);
 // TODO(ianh): Implement the Tablet version of snackbar if we're "on a tablet".
 
 const Duration _kSnackBarTransitionDuration = const Duration(milliseconds: 250);
-const Duration _kSnackBarDisplayDuration = const Duration(milliseconds: 1500);
+const Duration _kSnackBarDisplayDuration = const Duration(milliseconds: 4000);
 const Curve _snackBarHeightCurve = Curves.fastOutSlowIn;
 const Curve _snackBarFadeCurve = const Interval(0.72, 1.0, curve: Curves.fastOutSlowIn);
 
@@ -71,7 +70,7 @@ enum SnackBarClosedReason {
 /// See also:
 ///
 ///  * [SnackBar]
-///  * <https://material.google.com/components/snackbars-toasts.html>
+///  * <https://material.io/design/components/snackbars.html>
 class SnackBarAction extends StatefulWidget {
   /// Creates an action for a [SnackBar].
   ///
@@ -136,7 +135,7 @@ class _SnackBarActionState extends State<SnackBarAction> {
 ///    displayed snack bar, if any, and allows the next to be displayed.
 ///  * [SnackBarAction], which is used to specify an [action] button to show
 ///    on the snack bar.
-///  * <https://material.google.com/components/snackbars-toasts.html>
+///  * <https://material.io/design/components/snackbars.html>
 class SnackBar extends StatelessWidget {
   /// Creates a snack bar.
   ///
@@ -169,14 +168,14 @@ class SnackBar extends StatelessWidget {
 
   /// The amount of time the snack bar should be displayed.
   ///
-  /// Defaults to 1.5s.
+  /// Defaults to 4.0s.
   ///
   /// See also:
   ///
   ///  * [ScaffoldState.removeCurrentSnackBar], which abruptly hides the
   ///    currently displayed snack bar, if any, and allows the next to be
   ///    displayed.
-  ///  * <https://material.google.com/components/snackbars-toasts.html>
+  ///  * <https://material.io/design/components/snackbars.html>
   final Duration duration;
 
   /// The animation driving the entrance and exit of the snack bar.

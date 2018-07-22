@@ -17,6 +17,7 @@ task:
     # run pub get in all the repo packages
     ./bin/flutter update-packages
 
+    git fetch origin master
   matrix:
     - name: docs
       env:
@@ -25,11 +26,24 @@ task:
     - name: analyze
       env:
         SHARD: analyze
-      test_script: dart ./dev/bots/test.dart
+      test_script: |
+        export TEST_COMMIT_RANGE="$(git merge-base --fork-point FETCH_HEAD HEAD)..HEAD"
+        dart ./dev/bots/test.dart
     - name: tests-linux
       env:
         SHARD: tests
-      test_script: dart ./dev/bots/test.dart
+      test_script: |
+        export TEST_COMMIT_RANGE="$(git merge-base --fork-point FETCH_HEAD HEAD)..HEAD"
+        dart ./dev/bots/test.dart
+      container:
+        cpu: 4
+        memory: 8G
+    - name: tool_tests-linux
+      env:
+        SHARD: tool_tests
+      test_script: |
+        export TEST_COMMIT_RANGE="$(git merge-base --fork-point FETCH_HEAD HEAD)..HEAD"
+        dart ./dev/bots/test.dart
       container:
         cpu: 4
         memory: 8G
@@ -48,8 +62,29 @@ task:
   setup_script:
     - bin\flutter.bat config --no-analytics
     - bin\flutter.bat update-packages
-  test_all_script:
-    - bin\cache\dart-sdk\bin\dart.exe -c dev\bots\test.dart
+    - git fetch origin master
+  test_all_script: |
+    export TEST_COMMIT_RANGE="$(git merge-base --fork-point FETCH_HEAD HEAD)..HEAD"
+    bin\cache\dart-sdk\bin\dart.exe -c dev\bots\test.dart
+
+task:
+  name: tool_tests-windows
+  env:
+    SHARD: tool_tests
+  windows_container:
+    image: cirrusci/windowsservercore:2016
+    os_version: 2016
+    cpu: 4
+  env:
+    CIRRUS_WORKING_DIR: "C:\\Windows\\Temp\\flutter sdk"
+  git_fetch_script: git fetch origin
+  setup_script:
+    - bin\flutter.bat config --no-analytics
+    - bin\flutter.bat update-packages
+    - git fetch origin master
+  test_all_script: |
+    export TEST_COMMIT_RANGE="$(git merge-base --fork-point FETCH_HEAD HEAD)..HEAD"
+    bin\cache\dart-sdk\bin\dart.exe -c dev\bots\test.dart
 
 task:
   name: tests-macos
@@ -61,6 +96,22 @@ task:
   setup_script:
     - bin/flutter config --no-analytics
     - bin/flutter update-packages
-  test_all_script:
-    - ulimit -S -n 2048 # https://github.com/flutter/flutter/issues/2976
-    - bin/cache/dart-sdk/bin/dart -c dev/bots/test.dart
+  test_all_script: |
+    ulimit -S -n 2048 # https://github.com/flutter/flutter/issues/2976
+    export TEST_COMMIT_RANGE="$(git merge-base --fork-point FETCH_HEAD HEAD)..HEAD"
+    bin/cache/dart-sdk/bin/dart -c dev/bots/test.dart
+
+task:
+  name: tool_tests-macos
+  env:
+    SHARD: tool_tests
+  osx_instance:
+    image: high-sierra-xcode-9.4.1
+  git_fetch_script: git fetch origin
+  setup_script:
+    - bin/flutter config --no-analytics
+    - bin/flutter update-packages
+  test_all_script: |
+    ulimit -S -n 2048 # https://github.com/flutter/flutter/issues/2976
+    export TEST_COMMIT_RANGE="$(git merge-base --fork-point FETCH_HEAD HEAD)..HEAD"
+    bin/cache/dart-sdk/bin/dart -c dev/bots/test.dart

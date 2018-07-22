@@ -26,7 +26,7 @@ void main() {
     });
 
     testUsingContext('toString() works', () async {
-      expect(io.ProcessSignal.SIGINT.toString(), ProcessSignal.SIGINT.toString()); // ignore: deprecated_member_use
+      expect(io.ProcessSignal.sigint.toString(), ProcessSignal.SIGINT.toString());
     });
   });
 }
