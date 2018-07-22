@@ -121,18 +121,25 @@ abstract class RenderSliverBoxChildManager {
   /// true without making any assertions.
   bool debugAssertChildListLocked() => true;
 }
+/// Parent data structure used by [RenderSliverWithKeepAliveMixin].
+abstract class KeepAliveParentDataMixin extends ParentData {
+  // This class is intended to be used as a mixin, and should not be
+  // extended directly.
+  factory KeepAliveParentDataMixin._() => null;
 
-/// Parent data structure used by [RenderSliverMultiKeepAliveBoxAdaptor].
-class SliverMultiKeepAliveBoxAdaptorParentData extends SliverLogicalParentData  {
   /// Whether to keep the child alive even when it is no longer visible.
   bool keepAlive = false;
+}
 
-  @override
-  String toString() => '${keepAlive == true ? "keepAlive; " : ""}${super.toString()}';
+// This class exists to dissociate [KeepAlive] from [RenderSliverMultiBoxAdaptor].
+abstract class RenderSliverWithKeepAliveMixin extends RenderSliver{
+  // This class is intended to be used as a mixin, and should not be
+  // extended directly.
+  factory RenderSliverWithKeepAliveMixin._() => null;
 }
 
 /// Parent data structure used by [RenderSliverMultiBoxAdaptor].
-class SliverMultiBoxAdaptorParentData extends SliverMultiKeepAliveBoxAdaptorParentData with ContainerParentDataMixin<RenderBox> {
+class SliverMultiBoxAdaptorParentData extends SliverLogicalParentData with ContainerParentDataMixin<RenderBox>, KeepAliveParentDataMixin {
   /// The index of this child according to the [RenderSliverBoxChildManager].
   int index;
 
@@ -141,17 +148,7 @@ class SliverMultiBoxAdaptorParentData extends SliverMultiKeepAliveBoxAdaptorPare
   bool _keptAlive = false;
 
   @override
-  String toString() => 'index=$index; ${super.toString()}';
-}
-
-/// A sliver with multiple box children that can be kept alive.
-abstract class RenderSliverMultiKeepAliveBoxAdaptor extends RenderSliver{
-
-  @override
-  void setupParentData(RenderObject child) {
-    if (child.parentData is! SliverMultiKeepAliveBoxAdaptorParentData)
-      child.parentData = new SliverMultiKeepAliveBoxAdaptorParentData();
-  }
+  String toString() => 'index=$index; ${keepAlive == true ? "keepAlive; " : ""}${super.toString()}';
 }
 
 /// A sliver with multiple box children.
@@ -179,9 +176,10 @@ abstract class RenderSliverMultiKeepAliveBoxAdaptor extends RenderSliver{
 ///  * [RenderSliverFixedExtentList], which places its children in a linear
 ///    array with a fixed extent in the main axis.
 ///  * [RenderSliverGrid], which places its children in arbitrary positions.
-abstract class RenderSliverMultiBoxAdaptor extends RenderSliverMultiKeepAliveBoxAdaptor
-  with ContainerRenderObjectMixin<RenderBox, SliverMultiBoxAdaptorParentData>,
-       RenderSliverHelpers {
+abstract class RenderSliverMultiBoxAdaptor extends RenderSliver
+    with ContainerRenderObjectMixin<RenderBox, SliverMultiBoxAdaptorParentData>,
+        RenderSliverWithKeepAliveMixin,
+        RenderSliverHelpers {
 
   /// Creates a sliver with multiple box children.
   ///
@@ -189,7 +187,7 @@ abstract class RenderSliverMultiBoxAdaptor extends RenderSliverMultiKeepAliveBox
   RenderSliverMultiBoxAdaptor({
     @required RenderSliverBoxChildManager childManager
   }) : assert(childManager != null),
-       _childManager = childManager;
+        _childManager = childManager;
 
   @override
   void setupParentData(RenderObject child) {
