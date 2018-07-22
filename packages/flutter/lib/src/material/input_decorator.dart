@@ -710,6 +710,26 @@ class _RenderDecoration extends RenderBox {
     _children.forEach(visitor);
   }
 
+  // Do not visit the hint, helper, counter, or error text for semantics.
+  // Instead we add them in a semantics node ancestor.
+  @override
+  void visitChildrenForSemantics(RenderObjectVisitor visitor) {
+    if (icon != null)
+      visitor(icon);
+    if (input != null)
+      visitor(input);
+    if (prefixIcon != null)
+      visitor(prefixIcon);
+    if (suffixIcon != null)
+      visitor(suffixIcon);
+    if (prefix != null)
+      visitor(prefix);
+    if (suffix != null)
+      visitor(suffix);
+    if (container != null)
+      visitor(container);
+  }
+
   @override
   List<DiagnosticsNode> debugDescribeChildren() {
     final List<DiagnosticsNode> value = <DiagnosticsNode>[];
@@ -1608,6 +1628,25 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
       : themeData.errorColor;
   }
 
+  String _getSemanticLabel() {
+    final StringBuffer buffer = new StringBuffer();
+    if (widget.isFocused && widget.decoration.hintText != null)
+      buffer.write(widget.decoration.hintText);
+    else if (!widget.isFocused  && widget.decoration.helperText != null)
+      buffer.write(widget.decoration.helperText);
+    if (widget.decoration.errorText != null) {
+      if (buffer.isNotEmpty)
+        buffer.write(' ');
+      buffer.write(widget.decoration.errorText);
+    }
+    if (widget.decoration.counterText != null) {
+      if (buffer.isNotEmpty)
+        buffer.write(' ');
+      buffer.write(widget.decoration.counterText);
+    }
+    return buffer.toString();
+  }
+
   @override
   Widget build(BuildContext context) {
     final ThemeData themeData = Theme.of(context);
@@ -1780,28 +1819,31 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
         ? const EdgeInsets.fromLTRB(12.0, 20.0, 12.0, 12.0)
         : const EdgeInsets.fromLTRB(12.0, 24.0, 12.0, 16.0));
     }
-    return new _Decorator(
-      decoration: new _Decoration(
-        contentPadding: contentPadding,
-        isCollapsed: decoration.isCollapsed,
-        floatingLabelHeight: floatingLabelHeight,
-        floatingLabelProgress: _floatingLabelController.value,
-        border: decoration.border,
-        borderGap: _borderGap,
-        icon: icon,
-        input: widget.child,
-        label: label,
-        hint: hint,
-        prefix: prefix,
-        suffix: suffix,
-        prefixIcon: prefixIcon,
-        suffixIcon: suffixIcon,
-        helperError: helperError,
-        counter: counter,
-        container: container,
+    return new Semantics(
+      label: _getSemanticLabel(),
+      child: new _Decorator(
+        decoration: new _Decoration(
+          contentPadding: contentPadding,
+          isCollapsed: decoration.isCollapsed,
+          floatingLabelHeight: floatingLabelHeight,
+          floatingLabelProgress: _floatingLabelController.value,
+          border: decoration.border,
+          borderGap: _borderGap,
+          icon: icon,
+          input: widget.child,
+          label: label,
+          hint: hint,
+          prefix: prefix,
+          suffix: suffix,
+          prefixIcon: prefixIcon,
+          suffixIcon: suffixIcon,
+          helperError: helperError,
+          counter: counter,
+          container: container,
+        ),
+        textDirection: textDirection,
+        textBaseline: textBaseline,
       ),
-      textDirection: textDirection,
-      textBaseline: textBaseline,
     );
   }
 }
