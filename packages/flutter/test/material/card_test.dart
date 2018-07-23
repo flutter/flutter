@@ -39,22 +39,25 @@ void main() {
         children: <TestSemantics>[
           new TestSemantics.rootChild(
             id: 1,
-            label: 'I am text!\nMoar text!!1',
+            label: 'I am text!',
             textDirection: TextDirection.ltr,
-            children: <TestSemantics>[
-              new TestSemantics(
-                id: 2,
-                label: 'Button',
-                textDirection: TextDirection.ltr,
-                actions: <SemanticsAction>[
-                  SemanticsAction.tap,
-                ],
-                flags: <SemanticsFlag>[
-                  SemanticsFlag.isButton,
-                  SemanticsFlag.hasEnabledState,
-                  SemanticsFlag.isEnabled,
-                ],
-              ),
+          ),
+          new TestSemantics.rootChild(
+            id: 2,
+            label: 'Moar text!!1',
+             textDirection: TextDirection.ltr,
+          ),
+          new TestSemantics.rootChild(
+            id: 3,
+            label: 'Button',
+            textDirection: TextDirection.ltr,
+            actions: <SemanticsAction>[
+              SemanticsAction.tap,
+            ],
+            flags: <SemanticsFlag>[
+              SemanticsFlag.isButton,
+              SemanticsFlag.hasEnabledState,
+              SemanticsFlag.isEnabled,
             ],
           ),
         ],

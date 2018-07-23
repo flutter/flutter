@@ -108,7 +108,7 @@ class Card extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return new Semantics(
-      container: true,
+      explicitChildNodes: true,
       child: new Container(
         margin: margin ?? const EdgeInsets.all(4.0),
         child: new Material(
