@@ -119,7 +119,7 @@ class TestRecordingPaintingContext implements PaintingContext {
 
   @override
   void pushClipPath(bool needsCompositing, Offset offset, Rect bounds, Path clipPath, Clip clip, PaintingContextCallback painter) {
-    RenderObject.clipAndPaint(canvas, clip, clipPath, bounds, () => painter(this, offset));
+    RenderObject.clipAndPaint(canvas, clip, clipPath.shift(offset), bounds.shift(offset), () => painter(this, offset));
   }
 
   @override
