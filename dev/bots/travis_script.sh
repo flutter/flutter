@@ -59,8 +59,8 @@ elif [ "$SHARD" = "docs" ]; then
     ./dev/bots/docs.sh
   fi
 else
-  if [ "$SHARD" = "flutter_build_test" ]; then
-    ./dev/bots/flutter_build_test.sh
+  if [ "$SHARD" = "codelabs_build_test" ]; then
+    ./dev/bots/codelabs_build_test.sh
   else
     TEST_COMMIT_RANGE="${TRAVIS_COMMIT_RANGE}" dart ./dev/bots/test.dart
   fi
