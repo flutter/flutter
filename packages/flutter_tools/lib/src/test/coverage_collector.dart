@@ -121,14 +121,6 @@ class CoverageCollector extends TestWatcher {
 
     const String baseCoverageData = 'coverage/lcov.base.info';
     if (mergeCoverageData) {
-      if (!platform.isLinux) {
-        printError(
-          'Merging coverage data is supported only on Linux because it '
-          'requires the "lcov" tool.'
-        );
-        return false;
-      }
-
       if (!fs.isFileSync(baseCoverageData)) {
         printError('Missing "$baseCoverageData". Unable to merge coverage data.');
         return false;
