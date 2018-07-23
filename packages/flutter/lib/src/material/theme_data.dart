@@ -470,7 +470,7 @@ class ThemeData extends Diagnosticable {
 
   /// The color of text selections in text fields, such as [TextField].
   final Color textSelectionColor;
-  
+
   /// The color of cursors in Material-style text fields, such as [TextField].
   final Color cursorColor;
 
