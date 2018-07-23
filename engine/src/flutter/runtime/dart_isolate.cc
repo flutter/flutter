@@ -728,7 +728,8 @@ DartIsolate::CreateDartVMAndEmbedderObjectPair(
     flags = &nonnull_flags;
   }
   bool dart2 = (vm->GetPlatformKernel().GetSize() > 0) ||
-               Dart_IsDart2Snapshot(embedder_isolate->GetIsolateSnapshot()
+               Dart_IsDart2Snapshot((*embedder_isolate)
+                                        ->GetIsolateSnapshot()
                                         ->GetData()
                                         ->GetSnapshotPointer());
   flags->use_dart_frontend = dart2;
