@@ -497,23 +497,20 @@ class HotRunner extends ResidentRunner {
     if (fullRestart) {
       final Status status = logger.startProgress(
         'Performing hot restart...',
-        progressId: 'hot.restart'
+        progressId: 'hot.restart',
       );
       try {
-        final Stopwatch timer = new Stopwatch()..start();
         if (!(await hotRunnerConfig.setupHotRestart())) {
           status.cancel();
           return new OperationResult(1, 'setupHotRestart failed');
         }
         await _restartFromSources();
-        timer.stop();
-        status.cancel();
-        printStatus('Restarted app in ${getElapsedAsMilliseconds(timer.elapsed)}.');
-        return OperationResult.ok;
       } catch (error) {
         status.cancel();
         rethrow;
       }
+      status.stop(); // Prints timing information.
+      return OperationResult.ok;
     } else {
       final bool reloadOnTopOfSnapshot = _runningFromSnapshot;
       final String progressPrefix = reloadOnTopOfSnapshot ? 'Initializing' : 'Performing';
@@ -521,20 +518,21 @@ class HotRunner extends ResidentRunner {
         '$progressPrefix hot reload...',
         progressId: 'hot.reload'
       );
+      final Stopwatch timer = new Stopwatch()..start();
+      OperationResult result;
       try {
-        final Stopwatch timer = new Stopwatch()..start();
-        final OperationResult result = await _reloadSources(pause: pauseAfterRestart);
-        timer.stop();
-        status.cancel();
-        if (result.isOk)
-          printStatus('${result.message} in ${getElapsedAsMilliseconds(timer.elapsed)}.');
-        if (result.hintMessage != null)
-          printStatus('\n${result.hintMessage}');
-        return result;
+        result = await _reloadSources(pause: pauseAfterRestart);
       } catch (error) {
-        status.cancel();
+        status?.cancel();
         rethrow;
       }
+      timer.stop();
+      status.cancel(); // Do not show summary information, since we show it in more detail below.
+      if (result.isOk)
+        printStatus('${result.message} in ${getElapsedAsMilliseconds(timer.elapsed)}.');
+      if (result.hintMessage != null)
+        printStatus('\n${result.hintMessage}');
+      return result;
     }
   }
 
