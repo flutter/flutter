@@ -17,7 +17,7 @@ import 'plist_utils.dart' as plist;
 IOSWorkflow get iosWorkflow => context[IOSWorkflow];
 
 class IOSWorkflow extends DoctorValidator implements Workflow {
-  const IOSWorkflow() : super('iOS toolchain - develop for iOS devices');
+  const IOSWorkflow() : super('iOS toolchain');
 
   @override
   bool get appliesToHostPlatform => platform.isMacOS;

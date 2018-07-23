@@ -31,7 +31,7 @@ final RegExp licenseNotAccepted = new RegExp(r'licenses? not accepted', caseSens
 final RegExp licenseAccepted = new RegExp(r'All SDK package licenses accepted.');
 
 class AndroidWorkflow extends DoctorValidator implements Workflow {
-  AndroidWorkflow() : super('Android toolchain - develop for Android devices');
+  AndroidWorkflow() : super('Android toolchain');
 
   @override
   bool get appliesToHostPlatform => true;
@@ -91,7 +91,7 @@ class AndroidWorkflow extends DoctorValidator implements Workflow {
           'Install Android Studio from: https://developer.android.com/studio/index.html\n'
           'On first launch it will assist you in installing the Android SDK components.\n'
           '(or visit https://flutter.io/setup/#android-setup for detailed instructions).\n'
-          'If Android SDK has been installed to a custom location, set \$$kAndroidHome to that location.'
+          'If Android SDK has been installed to a custom location, set \$$kAndroidHome to that location and add it to your PATH.'
         ));
       }
 
