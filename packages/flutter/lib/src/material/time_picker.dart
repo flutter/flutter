@@ -17,23 +17,28 @@ import 'feedback.dart';
 import 'flat_button.dart';
 import 'material_localizations.dart';
 import 'theme.dart';
+import 'theme_data.dart';
 import 'time.dart';
 import 'typography.dart';
 
-const Duration _kDialAnimateDuration = const Duration(milliseconds: 200);
+const Duration _kDialAnimateDuration = Duration(milliseconds: 200);
 const double _kTwoPi = 2 * math.pi;
-const Duration _kVibrateCommitDelay = const Duration(milliseconds: 100);
+const Duration _kVibrateCommitDelay = Duration(milliseconds: 100);
 
 enum _TimePickerMode { hour, minute }
 
 const double _kTimePickerHeaderPortraitHeight = 96.0;
 const double _kTimePickerHeaderLandscapeWidth = 168.0;
 
+
 const double _kTimePickerWidthPortrait = 328.0;
 const double _kTimePickerWidthLandscape = 512.0;
 
-const double _kTimePickerHeightPortrait = 484.0;
-const double _kTimePickerHeightLandscape = 304.0;
+const double _kTimePickerHeightPortrait = 496.0;
+const double _kTimePickerHeightLandscape = 316.0;
+
+const double _kTimePickerHeightPortraitCollapsed = 484.0;
+const double _kTimePickerHeightLandscapeCollapsed = 304.0;
 
 /// The horizontal gap between the day period fragment and the fragment
 /// positioned next to it horizontally.
@@ -952,7 +957,7 @@ class _DialPainter extends CustomPainter {
           ),
           tags: new Set<SemanticsTag>.from(const <SemanticsTag>[
             // Used by tests to find this node.
-            const SemanticsTag('dial-label'),
+            SemanticsTag('dial-label'),
           ]),
         );
 
@@ -1214,34 +1219,34 @@ class _DialState extends State<_Dial> with SingleTickerProviderStateMixin {
     _notifyOnChangedIfNeeded();
   }
 
-  static const List<TimeOfDay> _amHours = const <TimeOfDay>[
-    const TimeOfDay(hour: 12, minute: 0),
-    const TimeOfDay(hour: 1, minute: 0),
-    const TimeOfDay(hour: 2, minute: 0),
-    const TimeOfDay(hour: 3, minute: 0),
-    const TimeOfDay(hour: 4, minute: 0),
-    const TimeOfDay(hour: 5, minute: 0),
-    const TimeOfDay(hour: 6, minute: 0),
-    const TimeOfDay(hour: 7, minute: 0),
-    const TimeOfDay(hour: 8, minute: 0),
-    const TimeOfDay(hour: 9, minute: 0),
-    const TimeOfDay(hour: 10, minute: 0),
-    const TimeOfDay(hour: 11, minute: 0),
+  static const List<TimeOfDay> _amHours = <TimeOfDay>[
+    TimeOfDay(hour: 12, minute: 0),
+    TimeOfDay(hour: 1, minute: 0),
+    TimeOfDay(hour: 2, minute: 0),
+    TimeOfDay(hour: 3, minute: 0),
+    TimeOfDay(hour: 4, minute: 0),
+    TimeOfDay(hour: 5, minute: 0),
+    TimeOfDay(hour: 6, minute: 0),
+    TimeOfDay(hour: 7, minute: 0),
+    TimeOfDay(hour: 8, minute: 0),
+    TimeOfDay(hour: 9, minute: 0),
+    TimeOfDay(hour: 10, minute: 0),
+    TimeOfDay(hour: 11, minute: 0),
   ];
 
-  static const List<TimeOfDay> _pmHours = const <TimeOfDay>[
-    const TimeOfDay(hour: 0, minute: 0),
-    const TimeOfDay(hour: 13, minute: 0),
-    const TimeOfDay(hour: 14, minute: 0),
-    const TimeOfDay(hour: 15, minute: 0),
-    const TimeOfDay(hour: 16, minute: 0),
-    const TimeOfDay(hour: 17, minute: 0),
-    const TimeOfDay(hour: 18, minute: 0),
-    const TimeOfDay(hour: 19, minute: 0),
-    const TimeOfDay(hour: 20, minute: 0),
-    const TimeOfDay(hour: 21, minute: 0),
-    const TimeOfDay(hour: 22, minute: 0),
-    const TimeOfDay(hour: 23, minute: 0),
+  static const List<TimeOfDay> _pmHours = <TimeOfDay>[
+    TimeOfDay(hour: 0, minute: 0),
+    TimeOfDay(hour: 13, minute: 0),
+    TimeOfDay(hour: 14, minute: 0),
+    TimeOfDay(hour: 15, minute: 0),
+    TimeOfDay(hour: 16, minute: 0),
+    TimeOfDay(hour: 17, minute: 0),
+    TimeOfDay(hour: 18, minute: 0),
+    TimeOfDay(hour: 19, minute: 0),
+    TimeOfDay(hour: 20, minute: 0),
+    TimeOfDay(hour: 21, minute: 0),
+    TimeOfDay(hour: 22, minute: 0),
+    TimeOfDay(hour: 23, minute: 0),
   ];
 
   _TappableLabel _buildTappableLabel(TextTheme textTheme, int value, String label, VoidCallback onTap) {
@@ -1304,19 +1309,19 @@ class _DialState extends State<_Dial> with SingleTickerProviderStateMixin {
   }
 
   List<_TappableLabel> _buildMinutes(TextTheme textTheme) {
-    const List<TimeOfDay> _minuteMarkerValues = const <TimeOfDay>[
-      const TimeOfDay(hour: 0, minute: 0),
-      const TimeOfDay(hour: 0, minute: 5),
-      const TimeOfDay(hour: 0, minute: 10),
-      const TimeOfDay(hour: 0, minute: 15),
-      const TimeOfDay(hour: 0, minute: 20),
-      const TimeOfDay(hour: 0, minute: 25),
-      const TimeOfDay(hour: 0, minute: 30),
-      const TimeOfDay(hour: 0, minute: 35),
-      const TimeOfDay(hour: 0, minute: 40),
-      const TimeOfDay(hour: 0, minute: 45),
-      const TimeOfDay(hour: 0, minute: 50),
-      const TimeOfDay(hour: 0, minute: 55),
+    const List<TimeOfDay> _minuteMarkerValues = <TimeOfDay>[
+      TimeOfDay(hour: 0, minute: 0),
+      TimeOfDay(hour: 0, minute: 5),
+      TimeOfDay(hour: 0, minute: 10),
+      TimeOfDay(hour: 0, minute: 15),
+      TimeOfDay(hour: 0, minute: 20),
+      TimeOfDay(hour: 0, minute: 25),
+      TimeOfDay(hour: 0, minute: 30),
+      TimeOfDay(hour: 0, minute: 35),
+      TimeOfDay(hour: 0, minute: 40),
+      TimeOfDay(hour: 0, minute: 45),
+      TimeOfDay(hour: 0, minute: 50),
+      TimeOfDay(hour: 0, minute: 55),
     ];
 
     final List<_TappableLabel> labels = <_TappableLabel>[];
@@ -1575,12 +1580,25 @@ class _TimePickerDialogState extends State<_TimePickerDialog> {
             ),
           );
 
+          double timePickerHeightPortrait;
+          double timePickerHeightLandscape;
+          switch (theme.materialTapTargetSize) {
+            case MaterialTapTargetSize.padded:
+              timePickerHeightPortrait = _kTimePickerHeightPortrait;
+              timePickerHeightLandscape = _kTimePickerHeightLandscape;
+              break;
+            case MaterialTapTargetSize.shrinkWrap:
+              timePickerHeightPortrait = _kTimePickerHeightPortraitCollapsed;
+              timePickerHeightLandscape = _kTimePickerHeightLandscapeCollapsed;
+              break;
+          }
+
           assert(orientation != null);
           switch (orientation) {
             case Orientation.portrait:
               return new SizedBox(
                 width: _kTimePickerWidthPortrait,
-                height: _kTimePickerHeightPortrait,
+                height: timePickerHeightPortrait,
                 child: new Column(
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -1595,7 +1613,7 @@ class _TimePickerDialogState extends State<_TimePickerDialog> {
             case Orientation.landscape:
               return new SizedBox(
                 width: _kTimePickerWidthLandscape,
-                height: _kTimePickerHeightLandscape,
+                height: timePickerHeightLandscape,
                 child: new Row(
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.stretch,

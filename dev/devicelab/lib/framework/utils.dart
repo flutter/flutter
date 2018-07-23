@@ -362,7 +362,7 @@ Future<String> findJavaHome() async {
   return path.dirname(path.dirname(javaBinary));
 }
 
-Future<dynamic> inDirectory(dynamic directory, Future<dynamic> action()) async {
+Future<T> inDirectory<T>(dynamic directory, Future<T> action()) async {
   final String previousCwd = cwd;
   try {
     cd(directory);
@@ -541,7 +541,7 @@ void setLocalEngineOptionIfNecessary(List<String> options, [String flavor]) {
       // If engine flavor was not specified explicitly then scan options looking
       // for flags that specify the engine flavor (--release, --profile or
       // --debug). Default flavor to debug if no flags were found.
-      const Map<String, String> optionToFlavor = const <String, String>{
+      const Map<String, String> optionToFlavor = <String, String>{
         '--release': 'release',
         '--debug': 'debug',
         '--profile': 'profile',
@@ -557,7 +557,7 @@ void setLocalEngineOptionIfNecessary(List<String> options, [String flavor]) {
       flavor ??= 'debug';
     }
 
-    const Map<DeviceOperatingSystem, String> osNames = const <DeviceOperatingSystem, String>{
+    const Map<DeviceOperatingSystem, String> osNames = <DeviceOperatingSystem, String>{
       DeviceOperatingSystem.ios: 'ios',
       DeviceOperatingSystem.android: 'android',
     };

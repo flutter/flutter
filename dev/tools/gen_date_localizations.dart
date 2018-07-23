@@ -18,11 +18,11 @@
 /// dart dev/tools/gen_date_localizations.dart
 /// ```
 ///
-/// If the data looks good, use the `-w` option to overwrite the
+/// If the data looks good, use the `--overwrite` option to overwrite the
 /// lib/src/l10n/date_localizations.dart file:
 ///
 /// ```
-/// dart dev/tools/gen_date_localizations.dart -w
+/// dart dev/tools/gen_date_localizations.dart --overwrite
 /// ```
 
 import 'dart:async';
@@ -76,7 +76,7 @@ Future<Null> main(List<String> rawArgs) async {
 // found in the LICENSE file.
 
 // This file has been automatically generated. Please do not edit it manually.
-// To regenerate run (omit -w to print to console instead of the file):
+// To regenerate run (omit --overwrite to print to console instead of the file):
 // dart --enable-asserts dev/tools/gen_date_localizations.dart --overwrite
 
 // ignore_for_file: public_member_api_docs

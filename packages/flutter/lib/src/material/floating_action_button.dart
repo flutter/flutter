@@ -2,25 +2,29 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:math' as math;
+
 import 'package:flutter/painting.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
 import 'button.dart';
 import 'scaffold.dart';
 import 'theme.dart';
+import 'theme_data.dart';
 import 'tooltip.dart';
 
-const BoxConstraints _kSizeConstraints = const BoxConstraints.tightFor(
+const BoxConstraints _kSizeConstraints = BoxConstraints.tightFor(
   width: 56.0,
   height: 56.0,
 );
 
-const BoxConstraints _kMiniSizeConstraints = const BoxConstraints.tightFor(
+const BoxConstraints _kMiniSizeConstraints = BoxConstraints.tightFor(
   width: 40.0,
   height: 40.0,
 );
 
-const BoxConstraints _kExtendedSizeConstraints = const BoxConstraints(
+const BoxConstraints _kExtendedSizeConstraints = BoxConstraints(
   minHeight: 48.0,
   maxHeight: 48.0,
 );
@@ -67,6 +71,7 @@ class FloatingActionButton extends StatefulWidget {
     @required this.onPressed,
     this.mini = false,
     this.shape = const CircleBorder(),
+    this.materialTapTargetSize,
     this.isExtended = false,
   }) :  assert(elevation != null),
         assert(highlightElevation != null),
@@ -92,6 +97,7 @@ class FloatingActionButton extends StatefulWidget {
     @required this.onPressed,
     this.shape = const StadiumBorder(),
     this.isExtended = true,
+    this.materialTapTargetSize,
     @required Widget icon,
     @required Widget label,
   }) :  assert(elevation != null),
@@ -100,15 +106,17 @@ class FloatingActionButton extends StatefulWidget {
         assert(isExtended != null),
         _sizeConstraints = _kExtendedSizeConstraints,
         mini = false,
-        child = new Row(
-          mainAxisSize: MainAxisSize.min,
-          children: <Widget>[
-            const SizedBox(width: 16.0),
-            icon,
-            const SizedBox(width: 8.0),
-            label,
-            const SizedBox(width: 20.0),
-          ],
+        child = new _ChildOverflowBox(
+          child: new Row(
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              const SizedBox(width: 16.0),
+              icon,
+              const SizedBox(width: 8.0),
+              label,
+              const SizedBox(width: 20.0),
+            ],
+          ),
         ),
         super(key: key);
 
@@ -196,6 +204,15 @@ class FloatingActionButton extends StatefulWidget {
   /// floating action buttons are scaled and faded in.
   final bool isExtended;
 
+  /// Configures the minimum size of the tap target.
+  ///
+  /// Defaults to [ThemeData.materialTapTargetSize].
+  ///
+  /// See also:
+  ///
+  ///   * [MaterialTapTargetSize], for a description of how this affects tap targets.
+  final MaterialTapTargetSize materialTapTargetSize;
+
   final BoxConstraints _sizeConstraints;
 
   @override
@@ -241,7 +258,7 @@ class _FloatingActionButtonState extends State<FloatingActionButton> {
       onHighlightChanged: _handleHighlightChanged,
       elevation: _highlight ? widget.highlightElevation : widget.elevation,
       constraints: widget._sizeConstraints,
-      outerPadding: widget.mini ? const EdgeInsets.all(4.0) : null,
+      materialTapTargetSize: widget.materialTapTargetSize ?? theme.materialTapTargetSize,
       fillColor: widget.backgroundColor ?? theme.accentColor,
       textStyle: theme.accentTextTheme.button.copyWith(
         color: foregroundColor,
@@ -259,5 +276,57 @@ class _FloatingActionButtonState extends State<FloatingActionButton> {
     }
 
     return result;
+  }
+}
+
+// This widget's size matches its child's size unless its constraints
+// force it to be larger or smaller. The child is centered.
+//
+// Used to encapsulate extended FABs whose size is fixed, using Row
+// and MainAxisSize.min, to be as wide as their label and icon.
+class _ChildOverflowBox extends SingleChildRenderObjectWidget {
+  const _ChildOverflowBox({
+    Key key,
+    Widget child,
+  }) : super(key: key, child: child);
+
+  @override
+  _RenderChildOverflowBox createRenderObject(BuildContext context) {
+    return new _RenderChildOverflowBox(
+      textDirection: Directionality.of(context),
+    );
+  }
+
+  @override
+  void updateRenderObject(BuildContext context, _RenderChildOverflowBox renderObject) {
+    renderObject
+      ..textDirection = Directionality.of(context);
+  }
+}
+
+class _RenderChildOverflowBox extends RenderAligningShiftedBox {
+  _RenderChildOverflowBox({
+    RenderBox child,
+    TextDirection textDirection,
+  }) : super(child: child, alignment: Alignment.center, textDirection: textDirection);
+
+  @override
+  double computeMinIntrinsicWidth(double height) => 0.0;
+
+  @override
+  double computeMinIntrinsicHeight(double width) => 0.0;
+
+  @override
+  void performLayout() {
+    if (child != null) {
+      child.layout(const BoxConstraints(), parentUsesSize: true);
+      size = new Size(
+        math.max(constraints.minWidth, math.min(constraints.maxWidth, child.size.width)),
+        math.max(constraints.minHeight, math.min(constraints.maxHeight, child.size.height)),
+      );
+      alignChild();
+    } else {
+      size = constraints.biggest;
+    }
   }
 }

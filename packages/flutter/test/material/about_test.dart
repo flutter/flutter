@@ -20,12 +20,12 @@ void main() {
           drawer: new Drawer(
             child: new ListView(
               children: const <Widget>[
-                const AboutListTile(
+                AboutListTile(
                   applicationVersion: '0.1.2',
-                  applicationIcon: const FlutterLogo(),
+                  applicationIcon: FlutterLogo(),
                   applicationLegalese: 'I am the very model of a modern major general.',
-                  aboutBoxChildren: const <Widget>[
-                    const Text('About box'),
+                  aboutBoxChildren: <Widget>[
+                    Text('About box'),
                   ]
                 ),
               ],
@@ -55,7 +55,7 @@ void main() {
 
     LicenseRegistry.addLicense(() {
       return new Stream<LicenseEntry>.fromIterable(<LicenseEntry>[
-        const LicenseEntryWithLineBreaks(const <String>[ 'Pirate package '], 'Pirate license')
+        const LicenseEntryWithLineBreaks(<String>[ 'Pirate package '], 'Pirate license')
       ]);
     });
 
@@ -69,7 +69,7 @@ void main() {
     await tester.pumpWidget(
       new MaterialApp(
         title: 'flutter_tester',
-        home: const Material(child: const AboutListTile()),
+        home: const Material(child: AboutListTile()),
       ),
     );
     expect(find.text('About flutter_tester'), findsOneWidget);
@@ -78,20 +78,20 @@ void main() {
   testWidgets('AboutListTile control test', (WidgetTester tester) async {
     LicenseRegistry.addLicense(() {
       return new Stream<LicenseEntry>.fromIterable(<LicenseEntry>[
-        const LicenseEntryWithLineBreaks(const <String>['AAA'], 'BBB')
+        const LicenseEntryWithLineBreaks(<String>['AAA'], 'BBB')
       ]);
     });
 
     LicenseRegistry.addLicense(() {
       return new Stream<LicenseEntry>.fromIterable(<LicenseEntry>[
-        const LicenseEntryWithLineBreaks(const <String>['Another package'], 'Another license')
+        const LicenseEntryWithLineBreaks(<String>['Another package'], 'Another license')
       ]);
     });
 
     await tester.pumpWidget(
       new MaterialApp(
         home: const Center(
-          child: const LicensePage(),
+          child: LicensePage(),
         ),
       ),
     );

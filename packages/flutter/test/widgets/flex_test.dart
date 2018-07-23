@@ -30,7 +30,7 @@ void main() {
                         width: 100.0,
                         height: 100.0,
                         child: const Center(
-                          child: const Text('X', textDirection: TextDirection.ltr),
+                          child: Text('X', textDirection: TextDirection.ltr),
                         ),
                       ),
                     ),
@@ -52,7 +52,7 @@ void main() {
       new Row(
         textDirection: TextDirection.ltr,
         children: const <Widget>[
-          const Flexible(child: const SizedBox(width: 100.0, height: 200.0)),
+          Flexible(child: SizedBox(width: 100.0, height: 200.0)),
         ],
       ),
     );
@@ -66,8 +66,8 @@ void main() {
       new Row(
         textDirection: TextDirection.ltr,
         children: const <Widget>[
-          const Expanded(flex: null, child: const Text('one', textDirection: TextDirection.ltr)),
-          const Flexible(flex: null, child: const Text('two', textDirection: TextDirection.ltr)),
+          Expanded(flex: null, child: Text('one', textDirection: TextDirection.ltr)),
+          Flexible(flex: null, child: Text('two', textDirection: TextDirection.ltr)),
         ],
       ),
     );

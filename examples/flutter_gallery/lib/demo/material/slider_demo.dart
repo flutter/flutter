@@ -157,8 +157,8 @@ class _SliderDemoState extends State<SliderDemo> {
             new Column(
               mainAxisSize: MainAxisSize.min,
               children: const <Widget>[
-                const Slider(value: 0.25, onChanged: null),
-                const Text('Disabled'),
+                Slider(value: 0.25, onChanged: null),
+                Text('Disabled'),
               ],
             ),
             new Column(

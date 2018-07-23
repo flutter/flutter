@@ -113,10 +113,10 @@ class TextTheme extends Diagnosticable {
   /// /// descendants, while leaving other ambient theme attributes alone.
   /// class TitleColorThemeCopy extends StatelessWidget {
   ///   TitleColorThemeCopy({Key key, this.child, this.titleColor}) : super(key: key);
-  /// 
+  ///
   ///   final Color titleColor;
   ///   final Widget child;
-  /// 
+  ///
   ///   @override
   ///   Widget build(BuildContext context) {
   ///     final ThemeData theme = Theme.of(context);
@@ -192,10 +192,10 @@ class TextTheme extends Diagnosticable {
   /// /// descendants, while leaving other ambient theme attributes alone.
   /// class TitleColorTheme extends StatelessWidget {
   ///   TitleColorTheme({Key key, this.child, this.titleColor}) : super(key: key);
-  /// 
+  ///
   ///   final Color titleColor;
   ///   final Widget child;
-  /// 
+  ///
   ///   @override
   ///   Widget build(BuildContext context) {
   ///     ThemeData theme = Theme.of(context);
@@ -432,28 +432,17 @@ class TextTheme extends Diagnosticable {
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     final TextTheme defaultTheme = new Typography(platform: defaultTargetPlatform).black;
-    properties.add(new DiagnosticsProperty<TextStyle>('display4', display4,
-        defaultValue: defaultTheme.display4));
-    properties.add(new DiagnosticsProperty<TextStyle>('display3', display3,
-        defaultValue: defaultTheme.display3));
-    properties.add(new DiagnosticsProperty<TextStyle>('display2', display2,
-        defaultValue: defaultTheme.display2));
-    properties.add(new DiagnosticsProperty<TextStyle>('display1', display1,
-        defaultValue: defaultTheme.display1));
-    properties.add(new DiagnosticsProperty<TextStyle>('headline', headline,
-        defaultValue: defaultTheme.headline));
-    properties
-        .add(new DiagnosticsProperty<TextStyle>('title', title, defaultValue: defaultTheme.title));
-    properties.add(
-        new DiagnosticsProperty<TextStyle>('subhead', subhead, defaultValue: defaultTheme.subhead));
-    properties
-        .add(new DiagnosticsProperty<TextStyle>('body2', body2, defaultValue: defaultTheme.body2));
-    properties
-        .add(new DiagnosticsProperty<TextStyle>('body1', body1, defaultValue: defaultTheme.body1));
-    properties.add(
-        new DiagnosticsProperty<TextStyle>('caption', caption, defaultValue: defaultTheme.caption));
-    properties.add(
-        new DiagnosticsProperty<TextStyle>('button', button, defaultValue: defaultTheme.button));
+    properties.add(new DiagnosticsProperty<TextStyle>('display4', display4, defaultValue: defaultTheme.display4));
+    properties.add(new DiagnosticsProperty<TextStyle>('display3', display3, defaultValue: defaultTheme.display3));
+    properties.add(new DiagnosticsProperty<TextStyle>('display2', display2, defaultValue: defaultTheme.display2));
+    properties.add(new DiagnosticsProperty<TextStyle>('display1', display1, defaultValue: defaultTheme.display1));
+    properties.add(new DiagnosticsProperty<TextStyle>('headline', headline, defaultValue: defaultTheme.headline));
+    properties.add(new DiagnosticsProperty<TextStyle>('title', title, defaultValue: defaultTheme.title));
+    properties.add(new DiagnosticsProperty<TextStyle>('subhead', subhead, defaultValue: defaultTheme.subhead));
+    properties.add(new DiagnosticsProperty<TextStyle>('body2', body2, defaultValue: defaultTheme.body2));
+    properties.add(new DiagnosticsProperty<TextStyle>('body1', body1, defaultValue: defaultTheme.body1));
+    properties.add(new DiagnosticsProperty<TextStyle>('caption', caption, defaultValue: defaultTheme.caption));
+    properties.add(new DiagnosticsProperty<TextStyle>('button', button, defaultValue: defaultTheme.button));
   }
 }
 
@@ -512,60 +501,60 @@ class Typography {
 /// See also: https://material.io/go/design-typography
 // TODO(yjbanov): implement font fallback (see "Font stack" at https://material.io/go/design-typography)
 class _MaterialTextColorThemes {
-  static const TextTheme blackMountainView = const TextTheme(
-    display4: const TextStyle(debugLabel: 'blackMountainView display4', fontFamily: 'Roboto',         inherit: true, color: Colors.black54, decoration: TextDecoration.none),
-    display3: const TextStyle(debugLabel: 'blackMountainView display3', fontFamily: 'Roboto',         inherit: true, color: Colors.black54, decoration: TextDecoration.none),
-    display2: const TextStyle(debugLabel: 'blackMountainView display2', fontFamily: 'Roboto',         inherit: true, color: Colors.black54, decoration: TextDecoration.none),
-    display1: const TextStyle(debugLabel: 'blackMountainView display1', fontFamily: 'Roboto',         inherit: true, color: Colors.black54, decoration: TextDecoration.none),
-    headline: const TextStyle(debugLabel: 'blackMountainView headline', fontFamily: 'Roboto',         inherit: true, color: Colors.black87, decoration: TextDecoration.none),
-    title   : const TextStyle(debugLabel: 'blackMountainView title',    fontFamily: 'Roboto',         inherit: true, color: Colors.black87, decoration: TextDecoration.none),
-    subhead : const TextStyle(debugLabel: 'blackMountainView subhead',  fontFamily: 'Roboto',         inherit: true, color: Colors.black87, decoration: TextDecoration.none),
-    body2   : const TextStyle(debugLabel: 'blackMountainView body2',    fontFamily: 'Roboto',         inherit: true, color: Colors.black87, decoration: TextDecoration.none),
-    body1   : const TextStyle(debugLabel: 'blackMountainView body1',    fontFamily: 'Roboto',         inherit: true, color: Colors.black87, decoration: TextDecoration.none),
-    caption : const TextStyle(debugLabel: 'blackMountainView caption',  fontFamily: 'Roboto',         inherit: true, color: Colors.black54, decoration: TextDecoration.none),
-    button  : const TextStyle(debugLabel: 'blackMountainView button',   fontFamily: 'Roboto',         inherit: true, color: Colors.black87, decoration: TextDecoration.none),
+  static const TextTheme blackMountainView = TextTheme(
+    display4: TextStyle(debugLabel: 'blackMountainView display4', fontFamily: 'Roboto',         inherit: true, color: Colors.black54, decoration: TextDecoration.none),
+    display3: TextStyle(debugLabel: 'blackMountainView display3', fontFamily: 'Roboto',         inherit: true, color: Colors.black54, decoration: TextDecoration.none),
+    display2: TextStyle(debugLabel: 'blackMountainView display2', fontFamily: 'Roboto',         inherit: true, color: Colors.black54, decoration: TextDecoration.none),
+    display1: TextStyle(debugLabel: 'blackMountainView display1', fontFamily: 'Roboto',         inherit: true, color: Colors.black54, decoration: TextDecoration.none),
+    headline: TextStyle(debugLabel: 'blackMountainView headline', fontFamily: 'Roboto',         inherit: true, color: Colors.black87, decoration: TextDecoration.none),
+    title   : TextStyle(debugLabel: 'blackMountainView title',    fontFamily: 'Roboto',         inherit: true, color: Colors.black87, decoration: TextDecoration.none),
+    subhead : TextStyle(debugLabel: 'blackMountainView subhead',  fontFamily: 'Roboto',         inherit: true, color: Colors.black87, decoration: TextDecoration.none),
+    body2   : TextStyle(debugLabel: 'blackMountainView body2',    fontFamily: 'Roboto',         inherit: true, color: Colors.black87, decoration: TextDecoration.none),
+    body1   : TextStyle(debugLabel: 'blackMountainView body1',    fontFamily: 'Roboto',         inherit: true, color: Colors.black87, decoration: TextDecoration.none),
+    caption : TextStyle(debugLabel: 'blackMountainView caption',  fontFamily: 'Roboto',         inherit: true, color: Colors.black54, decoration: TextDecoration.none),
+    button  : TextStyle(debugLabel: 'blackMountainView button',   fontFamily: 'Roboto',         inherit: true, color: Colors.black87, decoration: TextDecoration.none),
   );
 
-  static const TextTheme whiteMountainView = const TextTheme(
-    display4: const TextStyle(debugLabel: 'whiteMountainView display4', fontFamily: 'Roboto',         inherit: true, color: Colors.white70, decoration: TextDecoration.none),
-    display3: const TextStyle(debugLabel: 'whiteMountainView display3', fontFamily: 'Roboto',         inherit: true, color: Colors.white70, decoration: TextDecoration.none),
-    display2: const TextStyle(debugLabel: 'whiteMountainView display2', fontFamily: 'Roboto',         inherit: true, color: Colors.white70, decoration: TextDecoration.none),
-    display1: const TextStyle(debugLabel: 'whiteMountainView display1', fontFamily: 'Roboto',         inherit: true, color: Colors.white70, decoration: TextDecoration.none),
-    headline: const TextStyle(debugLabel: 'whiteMountainView headline', fontFamily: 'Roboto',         inherit: true, color: Colors.white,   decoration: TextDecoration.none),
-    title   : const TextStyle(debugLabel: 'whiteMountainView title',    fontFamily: 'Roboto',         inherit: true, color: Colors.white,   decoration: TextDecoration.none),
-    subhead : const TextStyle(debugLabel: 'whiteMountainView subhead',  fontFamily: 'Roboto',         inherit: true, color: Colors.white,   decoration: TextDecoration.none),
-    body2   : const TextStyle(debugLabel: 'whiteMountainView body2',    fontFamily: 'Roboto',         inherit: true, color: Colors.white,   decoration: TextDecoration.none),
-    body1   : const TextStyle(debugLabel: 'whiteMountainView body1',    fontFamily: 'Roboto',         inherit: true, color: Colors.white,   decoration: TextDecoration.none),
-    caption : const TextStyle(debugLabel: 'whiteMountainView caption',  fontFamily: 'Roboto',         inherit: true, color: Colors.white70, decoration: TextDecoration.none),
-    button  : const TextStyle(debugLabel: 'whiteMountainView button',   fontFamily: 'Roboto',         inherit: true, color: Colors.white,   decoration: TextDecoration.none),
+  static const TextTheme whiteMountainView = TextTheme(
+    display4: TextStyle(debugLabel: 'whiteMountainView display4', fontFamily: 'Roboto',         inherit: true, color: Colors.white70, decoration: TextDecoration.none),
+    display3: TextStyle(debugLabel: 'whiteMountainView display3', fontFamily: 'Roboto',         inherit: true, color: Colors.white70, decoration: TextDecoration.none),
+    display2: TextStyle(debugLabel: 'whiteMountainView display2', fontFamily: 'Roboto',         inherit: true, color: Colors.white70, decoration: TextDecoration.none),
+    display1: TextStyle(debugLabel: 'whiteMountainView display1', fontFamily: 'Roboto',         inherit: true, color: Colors.white70, decoration: TextDecoration.none),
+    headline: TextStyle(debugLabel: 'whiteMountainView headline', fontFamily: 'Roboto',         inherit: true, color: Colors.white,   decoration: TextDecoration.none),
+    title   : TextStyle(debugLabel: 'whiteMountainView title',    fontFamily: 'Roboto',         inherit: true, color: Colors.white,   decoration: TextDecoration.none),
+    subhead : TextStyle(debugLabel: 'whiteMountainView subhead',  fontFamily: 'Roboto',         inherit: true, color: Colors.white,   decoration: TextDecoration.none),
+    body2   : TextStyle(debugLabel: 'whiteMountainView body2',    fontFamily: 'Roboto',         inherit: true, color: Colors.white,   decoration: TextDecoration.none),
+    body1   : TextStyle(debugLabel: 'whiteMountainView body1',    fontFamily: 'Roboto',         inherit: true, color: Colors.white,   decoration: TextDecoration.none),
+    caption : TextStyle(debugLabel: 'whiteMountainView caption',  fontFamily: 'Roboto',         inherit: true, color: Colors.white70, decoration: TextDecoration.none),
+    button  : TextStyle(debugLabel: 'whiteMountainView button',   fontFamily: 'Roboto',         inherit: true, color: Colors.white,   decoration: TextDecoration.none),
   );
 
-  static const TextTheme blackCupertino = const TextTheme(
-    display4: const TextStyle(debugLabel: 'blackCupertino display4', fontFamily: '.SF UI Display', inherit: true, color: Colors.black54, decoration: TextDecoration.none),
-    display3: const TextStyle(debugLabel: 'blackCupertino display3', fontFamily: '.SF UI Display', inherit: true, color: Colors.black54, decoration: TextDecoration.none),
-    display2: const TextStyle(debugLabel: 'blackCupertino display2', fontFamily: '.SF UI Display', inherit: true, color: Colors.black54, decoration: TextDecoration.none),
-    display1: const TextStyle(debugLabel: 'blackCupertino display1', fontFamily: '.SF UI Display', inherit: true, color: Colors.black54, decoration: TextDecoration.none),
-    headline: const TextStyle(debugLabel: 'blackCupertino headline', fontFamily: '.SF UI Display', inherit: true, color: Colors.black87, decoration: TextDecoration.none),
-    title   : const TextStyle(debugLabel: 'blackCupertino title',    fontFamily: '.SF UI Display', inherit: true, color: Colors.black87, decoration: TextDecoration.none),
-    subhead : const TextStyle(debugLabel: 'blackCupertino subhead',  fontFamily: '.SF UI Text',    inherit: true, color: Colors.black87, decoration: TextDecoration.none),
-    body2   : const TextStyle(debugLabel: 'blackCupertino body2',    fontFamily: '.SF UI Text',    inherit: true, color: Colors.black87, decoration: TextDecoration.none),
-    body1   : const TextStyle(debugLabel: 'blackCupertino body1',    fontFamily: '.SF UI Text',    inherit: true, color: Colors.black87, decoration: TextDecoration.none),
-    caption : const TextStyle(debugLabel: 'blackCupertino caption',  fontFamily: '.SF UI Text',    inherit: true, color: Colors.black54, decoration: TextDecoration.none),
-    button  : const TextStyle(debugLabel: 'blackCupertino button',   fontFamily: '.SF UI Text',    inherit: true, color: Colors.black87, decoration: TextDecoration.none),
+  static const TextTheme blackCupertino = TextTheme(
+    display4: TextStyle(debugLabel: 'blackCupertino display4', fontFamily: '.SF UI Display', inherit: true, color: Colors.black54, decoration: TextDecoration.none),
+    display3: TextStyle(debugLabel: 'blackCupertino display3', fontFamily: '.SF UI Display', inherit: true, color: Colors.black54, decoration: TextDecoration.none),
+    display2: TextStyle(debugLabel: 'blackCupertino display2', fontFamily: '.SF UI Display', inherit: true, color: Colors.black54, decoration: TextDecoration.none),
+    display1: TextStyle(debugLabel: 'blackCupertino display1', fontFamily: '.SF UI Display', inherit: true, color: Colors.black54, decoration: TextDecoration.none),
+    headline: TextStyle(debugLabel: 'blackCupertino headline', fontFamily: '.SF UI Display', inherit: true, color: Colors.black87, decoration: TextDecoration.none),
+    title   : TextStyle(debugLabel: 'blackCupertino title',    fontFamily: '.SF UI Display', inherit: true, color: Colors.black87, decoration: TextDecoration.none),
+    subhead : TextStyle(debugLabel: 'blackCupertino subhead',  fontFamily: '.SF UI Text',    inherit: true, color: Colors.black87, decoration: TextDecoration.none),
+    body2   : TextStyle(debugLabel: 'blackCupertino body2',    fontFamily: '.SF UI Text',    inherit: true, color: Colors.black87, decoration: TextDecoration.none),
+    body1   : TextStyle(debugLabel: 'blackCupertino body1',    fontFamily: '.SF UI Text',    inherit: true, color: Colors.black87, decoration: TextDecoration.none),
+    caption : TextStyle(debugLabel: 'blackCupertino caption',  fontFamily: '.SF UI Text',    inherit: true, color: Colors.black54, decoration: TextDecoration.none),
+    button  : TextStyle(debugLabel: 'blackCupertino button',   fontFamily: '.SF UI Text',    inherit: true, color: Colors.black87, decoration: TextDecoration.none),
   );
 
-  static const TextTheme whiteCupertino = const TextTheme(
-    display4: const TextStyle(debugLabel: 'whiteCupertino display4', fontFamily: '.SF UI Display', inherit: true, color: Colors.white70, decoration: TextDecoration.none),
-    display3: const TextStyle(debugLabel: 'whiteCupertino display3', fontFamily: '.SF UI Display', inherit: true, color: Colors.white70, decoration: TextDecoration.none),
-    display2: const TextStyle(debugLabel: 'whiteCupertino display2', fontFamily: '.SF UI Display', inherit: true, color: Colors.white70, decoration: TextDecoration.none),
-    display1: const TextStyle(debugLabel: 'whiteCupertino display1', fontFamily: '.SF UI Display', inherit: true, color: Colors.white70, decoration: TextDecoration.none),
-    headline: const TextStyle(debugLabel: 'whiteCupertino headline', fontFamily: '.SF UI Display', inherit: true, color: Colors.white,   decoration: TextDecoration.none),
-    title   : const TextStyle(debugLabel: 'whiteCupertino title',    fontFamily: '.SF UI Display', inherit: true, color: Colors.white,   decoration: TextDecoration.none),
-    subhead : const TextStyle(debugLabel: 'whiteCupertino subhead',  fontFamily: '.SF UI Text',    inherit: true, color: Colors.white,   decoration: TextDecoration.none),
-    body2   : const TextStyle(debugLabel: 'whiteCupertino body2',    fontFamily: '.SF UI Text',    inherit: true, color: Colors.white,   decoration: TextDecoration.none),
-    body1   : const TextStyle(debugLabel: 'whiteCupertino body1',    fontFamily: '.SF UI Text',    inherit: true, color: Colors.white,   decoration: TextDecoration.none),
-    caption : const TextStyle(debugLabel: 'whiteCupertino caption',  fontFamily: '.SF UI Text',    inherit: true, color: Colors.white70, decoration: TextDecoration.none),
-    button  : const TextStyle(debugLabel: 'whiteCupertino button',   fontFamily: '.SF UI Text',    inherit: true, color: Colors.white,   decoration: TextDecoration.none),
+  static const TextTheme whiteCupertino = TextTheme(
+    display4: TextStyle(debugLabel: 'whiteCupertino display4', fontFamily: '.SF UI Display', inherit: true, color: Colors.white70, decoration: TextDecoration.none),
+    display3: TextStyle(debugLabel: 'whiteCupertino display3', fontFamily: '.SF UI Display', inherit: true, color: Colors.white70, decoration: TextDecoration.none),
+    display2: TextStyle(debugLabel: 'whiteCupertino display2', fontFamily: '.SF UI Display', inherit: true, color: Colors.white70, decoration: TextDecoration.none),
+    display1: TextStyle(debugLabel: 'whiteCupertino display1', fontFamily: '.SF UI Display', inherit: true, color: Colors.white70, decoration: TextDecoration.none),
+    headline: TextStyle(debugLabel: 'whiteCupertino headline', fontFamily: '.SF UI Display', inherit: true, color: Colors.white,   decoration: TextDecoration.none),
+    title   : TextStyle(debugLabel: 'whiteCupertino title',    fontFamily: '.SF UI Display', inherit: true, color: Colors.white,   decoration: TextDecoration.none),
+    subhead : TextStyle(debugLabel: 'whiteCupertino subhead',  fontFamily: '.SF UI Text',    inherit: true, color: Colors.white,   decoration: TextDecoration.none),
+    body2   : TextStyle(debugLabel: 'whiteCupertino body2',    fontFamily: '.SF UI Text',    inherit: true, color: Colors.white,   decoration: TextDecoration.none),
+    body1   : TextStyle(debugLabel: 'whiteCupertino body1',    fontFamily: '.SF UI Text',    inherit: true, color: Colors.white,   decoration: TextDecoration.none),
+    caption : TextStyle(debugLabel: 'whiteCupertino caption',  fontFamily: '.SF UI Text',    inherit: true, color: Colors.white70, decoration: TextDecoration.none),
+    button  : TextStyle(debugLabel: 'whiteCupertino button',   fontFamily: '.SF UI Text',    inherit: true, color: Colors.white,   decoration: TextDecoration.none),
   );
 }
 
@@ -582,7 +571,7 @@ class MaterialTextGeometry {
   static const String tallCategory = 'tall';
 
   /// The mapping from script category names to text themes.
-  static const Map<String, TextTheme> _categoryToTextTheme = const <String, TextTheme>{
+  static const Map<String, TextTheme> _categoryToTextTheme = <String, TextTheme>{
     englishLikeCategory: englishLike,
     denseCategory: dense,
     tallCategory: tall,
@@ -603,47 +592,47 @@ class MaterialTextGeometry {
   static TextTheme forScriptCategory(String scriptCategoryName) => _categoryToTextTheme[scriptCategoryName];
 
   /// Defines text geometry for English-like scripts, such as English, French, Russian, etc.
-  static const TextTheme englishLike = const TextTheme(
-    display4: const TextStyle(debugLabel: 'englishLike display4', inherit: false, fontSize: 112.0, fontWeight: FontWeight.w100, textBaseline: TextBaseline.alphabetic),
-    display3: const TextStyle(debugLabel: 'englishLike display3', inherit: false, fontSize:  56.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.alphabetic),
-    display2: const TextStyle(debugLabel: 'englishLike display2', inherit: false, fontSize:  45.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.alphabetic),
-    display1: const TextStyle(debugLabel: 'englishLike display1', inherit: false, fontSize:  34.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.alphabetic),
-    headline: const TextStyle(debugLabel: 'englishLike headline', inherit: false, fontSize:  24.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.alphabetic),
-    title   : const TextStyle(debugLabel: 'englishLike title',    inherit: false, fontSize:  20.0, fontWeight: FontWeight.w500, textBaseline: TextBaseline.alphabetic),
-    subhead : const TextStyle(debugLabel: 'englishLike subhead',  inherit: false, fontSize:  16.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.alphabetic),
-    body2   : const TextStyle(debugLabel: 'englishLike body2',    inherit: false, fontSize:  14.0, fontWeight: FontWeight.w500, textBaseline: TextBaseline.alphabetic),
-    body1   : const TextStyle(debugLabel: 'englishLike body1',    inherit: false, fontSize:  14.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.alphabetic),
-    caption : const TextStyle(debugLabel: 'englishLike caption',  inherit: false, fontSize:  12.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.alphabetic),
-    button  : const TextStyle(debugLabel: 'englishLike button',   inherit: false, fontSize:  14.0, fontWeight: FontWeight.w500, textBaseline: TextBaseline.alphabetic),
+  static const TextTheme englishLike = TextTheme(
+    display4: TextStyle(debugLabel: 'englishLike display4', inherit: false, fontSize: 112.0, fontWeight: FontWeight.w100, textBaseline: TextBaseline.alphabetic),
+    display3: TextStyle(debugLabel: 'englishLike display3', inherit: false, fontSize:  56.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.alphabetic),
+    display2: TextStyle(debugLabel: 'englishLike display2', inherit: false, fontSize:  45.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.alphabetic),
+    display1: TextStyle(debugLabel: 'englishLike display1', inherit: false, fontSize:  34.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.alphabetic),
+    headline: TextStyle(debugLabel: 'englishLike headline', inherit: false, fontSize:  24.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.alphabetic),
+    title   : TextStyle(debugLabel: 'englishLike title',    inherit: false, fontSize:  20.0, fontWeight: FontWeight.w500, textBaseline: TextBaseline.alphabetic),
+    subhead : TextStyle(debugLabel: 'englishLike subhead',  inherit: false, fontSize:  16.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.alphabetic),
+    body2   : TextStyle(debugLabel: 'englishLike body2',    inherit: false, fontSize:  14.0, fontWeight: FontWeight.w500, textBaseline: TextBaseline.alphabetic),
+    body1   : TextStyle(debugLabel: 'englishLike body1',    inherit: false, fontSize:  14.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.alphabetic),
+    caption : TextStyle(debugLabel: 'englishLike caption',  inherit: false, fontSize:  12.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.alphabetic),
+    button  : TextStyle(debugLabel: 'englishLike button',   inherit: false, fontSize:  14.0, fontWeight: FontWeight.w500, textBaseline: TextBaseline.alphabetic),
   );
 
   /// Defines text geometry for dense scripts, such as Chinese, Japanese, Korean, etc.
-  static const TextTheme dense = const TextTheme(
-    display4: const TextStyle(debugLabel: 'dense display4', inherit: false, fontSize: 112.0, fontWeight: FontWeight.w100, textBaseline: TextBaseline.ideographic),
-    display3: const TextStyle(debugLabel: 'dense display3', inherit: false, fontSize:  56.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.ideographic),
-    display2: const TextStyle(debugLabel: 'dense display2', inherit: false, fontSize:  45.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.ideographic),
-    display1: const TextStyle(debugLabel: 'dense display1', inherit: false, fontSize:  34.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.ideographic),
-    headline: const TextStyle(debugLabel: 'dense headline', inherit: false, fontSize:  24.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.ideographic),
-    title   : const TextStyle(debugLabel: 'dense title',    inherit: false, fontSize:  21.0, fontWeight: FontWeight.w500, textBaseline: TextBaseline.ideographic),
-    subhead : const TextStyle(debugLabel: 'dense subhead',  inherit: false, fontSize:  17.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.ideographic),
-    body2   : const TextStyle(debugLabel: 'dense body2',    inherit: false, fontSize:  15.0, fontWeight: FontWeight.w500, textBaseline: TextBaseline.ideographic),
-    body1   : const TextStyle(debugLabel: 'dense body1',    inherit: false, fontSize:  15.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.ideographic),
-    caption : const TextStyle(debugLabel: 'dense caption',  inherit: false, fontSize:  13.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.ideographic),
-    button  : const TextStyle(debugLabel: 'dense button',   inherit: false, fontSize:  15.0, fontWeight: FontWeight.w500, textBaseline: TextBaseline.ideographic),
+  static const TextTheme dense = TextTheme(
+    display4: TextStyle(debugLabel: 'dense display4', inherit: false, fontSize: 112.0, fontWeight: FontWeight.w100, textBaseline: TextBaseline.ideographic),
+    display3: TextStyle(debugLabel: 'dense display3', inherit: false, fontSize:  56.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.ideographic),
+    display2: TextStyle(debugLabel: 'dense display2', inherit: false, fontSize:  45.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.ideographic),
+    display1: TextStyle(debugLabel: 'dense display1', inherit: false, fontSize:  34.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.ideographic),
+    headline: TextStyle(debugLabel: 'dense headline', inherit: false, fontSize:  24.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.ideographic),
+    title   : TextStyle(debugLabel: 'dense title',    inherit: false, fontSize:  21.0, fontWeight: FontWeight.w500, textBaseline: TextBaseline.ideographic),
+    subhead : TextStyle(debugLabel: 'dense subhead',  inherit: false, fontSize:  17.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.ideographic),
+    body2   : TextStyle(debugLabel: 'dense body2',    inherit: false, fontSize:  15.0, fontWeight: FontWeight.w500, textBaseline: TextBaseline.ideographic),
+    body1   : TextStyle(debugLabel: 'dense body1',    inherit: false, fontSize:  15.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.ideographic),
+    caption : TextStyle(debugLabel: 'dense caption',  inherit: false, fontSize:  13.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.ideographic),
+    button  : TextStyle(debugLabel: 'dense button',   inherit: false, fontSize:  15.0, fontWeight: FontWeight.w500, textBaseline: TextBaseline.ideographic),
   );
 
   /// Defines text geometry for tall scripts, such as Farsi, Hindi, Thai, etc.
-  static const TextTheme tall = const TextTheme(
-    display4: const TextStyle(debugLabel: 'tall display4', inherit: false, fontSize: 112.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.alphabetic),
-    display3: const TextStyle(debugLabel: 'tall display3', inherit: false, fontSize:  56.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.alphabetic),
-    display2: const TextStyle(debugLabel: 'tall display2', inherit: false, fontSize:  45.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.alphabetic),
-    display1: const TextStyle(debugLabel: 'tall display1', inherit: false, fontSize:  34.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.alphabetic),
-    headline: const TextStyle(debugLabel: 'tall headline', inherit: false, fontSize:  24.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.alphabetic),
-    title   : const TextStyle(debugLabel: 'tall title',    inherit: false, fontSize:  21.0, fontWeight: FontWeight.w700, textBaseline: TextBaseline.alphabetic),
-    subhead : const TextStyle(debugLabel: 'tall subhead',  inherit: false, fontSize:  17.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.alphabetic),
-    body2   : const TextStyle(debugLabel: 'tall body2',    inherit: false, fontSize:  15.0, fontWeight: FontWeight.w700, textBaseline: TextBaseline.alphabetic),
-    body1   : const TextStyle(debugLabel: 'tall body1',    inherit: false, fontSize:  15.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.alphabetic),
-    caption : const TextStyle(debugLabel: 'tall caption',  inherit: false, fontSize:  13.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.alphabetic),
-    button  : const TextStyle(debugLabel: 'tall button',   inherit: false, fontSize:  15.0, fontWeight: FontWeight.w700, textBaseline: TextBaseline.alphabetic),
+  static const TextTheme tall = TextTheme(
+    display4: TextStyle(debugLabel: 'tall display4', inherit: false, fontSize: 112.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.alphabetic),
+    display3: TextStyle(debugLabel: 'tall display3', inherit: false, fontSize:  56.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.alphabetic),
+    display2: TextStyle(debugLabel: 'tall display2', inherit: false, fontSize:  45.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.alphabetic),
+    display1: TextStyle(debugLabel: 'tall display1', inherit: false, fontSize:  34.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.alphabetic),
+    headline: TextStyle(debugLabel: 'tall headline', inherit: false, fontSize:  24.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.alphabetic),
+    title   : TextStyle(debugLabel: 'tall title',    inherit: false, fontSize:  21.0, fontWeight: FontWeight.w700, textBaseline: TextBaseline.alphabetic),
+    subhead : TextStyle(debugLabel: 'tall subhead',  inherit: false, fontSize:  17.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.alphabetic),
+    body2   : TextStyle(debugLabel: 'tall body2',    inherit: false, fontSize:  15.0, fontWeight: FontWeight.w700, textBaseline: TextBaseline.alphabetic),
+    body1   : TextStyle(debugLabel: 'tall body1',    inherit: false, fontSize:  15.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.alphabetic),
+    caption : TextStyle(debugLabel: 'tall caption',  inherit: false, fontSize:  13.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.alphabetic),
+    button  : TextStyle(debugLabel: 'tall button',   inherit: false, fontSize:  15.0, fontWeight: FontWeight.w700, textBaseline: TextBaseline.alphabetic),
   );
 }

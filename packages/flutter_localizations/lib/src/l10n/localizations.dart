@@ -118,6 +118,239 @@ class _Bundle_ar extends TranslationBundle {
 }
 
 // ignore: camel_case_types
+class _Bundle_bg extends TranslationBundle {
+  const _Bundle_bg() : super(null);
+  @override String get scriptCategory => r'English-like';
+  @override String get timeOfDayFormat => r'HH:mm';
+  @override String get openAppDrawerTooltip => r'Отваряне на менюто за навигация';
+  @override String get backButtonTooltip => r'Назад';
+  @override String get closeButtonTooltip => r'Затваряне';
+  @override String get deleteButtonTooltip => r'Изтриване';
+  @override String get nextMonthTooltip => r'Следващият месец';
+  @override String get previousMonthTooltip => r'Предишният месец';
+  @override String get nextPageTooltip => r'Следващата страница';
+  @override String get previousPageTooltip => r'Предишната страница';
+  @override String get showMenuTooltip => r'Показване на менюто';
+  @override String get aboutListTileTitle => r'Всичко за $applicationName';
+  @override String get licensesPageTitle => r'Лицензи';
+  @override String get pageRowsInfoTitle => r'$firstRow – $lastRow от $rowCount';
+  @override String get pageRowsInfoTitleApproximate => r'$firstRow – $lastRow от около $rowCount';
+  @override String get rowsPerPageTitle => r'Редове на страница:';
+  @override String get tabLabel => r'Раздел $tabIndex от $tabCount';
+  @override String get selectedRowCountTitleOne => r'Избран е 1 елемент';
+  @override String get selectedRowCountTitleOther => r'Избрани са $selectedRowCount елемента';
+  @override String get cancelButtonLabel => r'ОТКАЗ';
+  @override String get closeButtonLabel => r'ЗАТВАРЯНЕ';
+  @override String get continueButtonLabel => r'НАПРЕД';
+  @override String get copyButtonLabel => r'КОПИРАНЕ';
+  @override String get cutButtonLabel => r'ИЗРЯЗВАНЕ';
+  @override String get okButtonLabel => r'OK';
+  @override String get pasteButtonLabel => r'ПОСТАВЯНЕ';
+  @override String get selectAllButtonLabel => r'ИЗБИРАНЕ НА ВСИЧКО';
+  @override String get viewLicensesButtonLabel => r'ПРЕГЛЕД НА ЛИЦЕНЗИТЕ';
+  @override String get anteMeridiemAbbreviation => r'AM';
+  @override String get postMeridiemAbbreviation => r'PM';
+  @override String get timePickerHourModeAnnouncement => r'Избиране на часове';
+  @override String get timePickerMinuteModeAnnouncement => r'Избиране на минути';
+  @override String get modalBarrierDismissLabel => r'Отхвърляне';
+  @override String get signedInLabel => r'В профила си сте';
+  @override String get hideAccountsLabel => r'Скриване на профилите';
+  @override String get showAccountsLabel => r'Показване на профилите';
+  @override String get drawerLabel => r'Меню за навигация';
+  @override String get popupMenuLabel => r'Изскачащо меню';
+  @override String get dialogLabel => r'Диалогов прозорец';
+  @override String get alertDialogLabel => r'TBD';
+  @override String get searchFieldLabel => r'TBD';
+}
+
+// ignore: camel_case_types
+class _Bundle_bs extends TranslationBundle {
+  const _Bundle_bs() : super(null);
+  @override String get scriptCategory => r'English-like';
+  @override String get timeOfDayFormat => r'HH:mm';
+  @override String get selectedRowCountTitleFew => r'Odabrane su $selectedRowCount stavke';
+  @override String get openAppDrawerTooltip => r'Otvaranje izbornika za navigaciju';
+  @override String get backButtonTooltip => r'Natrag';
+  @override String get closeButtonTooltip => r'Zatvaranje';
+  @override String get deleteButtonTooltip => r'Brisanje';
+  @override String get nextMonthTooltip => r'Sljedeći mjesec';
+  @override String get previousMonthTooltip => r'Prethodni mjesec';
+  @override String get nextPageTooltip => r'Sljedeća stranica';
+  @override String get previousPageTooltip => r'Prethodna stranica';
+  @override String get showMenuTooltip => r'Prikaz izbornika';
+  @override String get aboutListTileTitle => r'O aplikaciji $applicationName';
+  @override String get licensesPageTitle => r'Licence';
+  @override String get pageRowsInfoTitle => r'$firstRow – $lastRow od $rowCount';
+  @override String get pageRowsInfoTitleApproximate => r'$firstRow – $lastRow od otprilike $rowCount';
+  @override String get rowsPerPageTitle => r'Redaka po stranici:';
+  @override String get tabLabel => r'Kartica $tabIndex od $tabCount';
+  @override String get selectedRowCountTitleOne => r'Odabrana je jedna stavka';
+  @override String get selectedRowCountTitleOther => r'Odabrano je $selectedRowCount stavki';
+  @override String get cancelButtonLabel => r'ODUSTANI';
+  @override String get closeButtonLabel => r'ZATVORI';
+  @override String get continueButtonLabel => r'NASTAVI';
+  @override String get copyButtonLabel => r'KOPIRAJ';
+  @override String get cutButtonLabel => r'IZREŽI';
+  @override String get okButtonLabel => r'U REDU';
+  @override String get pasteButtonLabel => r'ZALIJEPI';
+  @override String get selectAllButtonLabel => r'ODABERI SVE';
+  @override String get viewLicensesButtonLabel => r'PRIKAŽI LICENCE';
+  @override String get anteMeridiemAbbreviation => r'prijepodne';
+  @override String get postMeridiemAbbreviation => r'popodne';
+  @override String get timePickerHourModeAnnouncement => r'Odaberite sate';
+  @override String get timePickerMinuteModeAnnouncement => r'Odaberite minute';
+  @override String get modalBarrierDismissLabel => r'Odbaci';
+  @override String get signedInLabel => r'Prijavljeni korisnik';
+  @override String get hideAccountsLabel => r'Sakrijte račune';
+  @override String get showAccountsLabel => r'Prikažite račune';
+  @override String get drawerLabel => r'Navigacijski izbornik';
+  @override String get popupMenuLabel => r'Skočni izbornik';
+  @override String get dialogLabel => r'Dijalog';
+  @override String get alertDialogLabel => r'TBD';
+  @override String get searchFieldLabel => r'TBD';
+}
+
+// ignore: camel_case_types
+class _Bundle_ca extends TranslationBundle {
+  const _Bundle_ca() : super(null);
+  @override String get scriptCategory => r'English-like';
+  @override String get timeOfDayFormat => r'HH:mm';
+  @override String get openAppDrawerTooltip => r'Obre el menú de navegació';
+  @override String get backButtonTooltip => r'Enrere';
+  @override String get closeButtonTooltip => r'Tanca';
+  @override String get deleteButtonTooltip => r'Suprimeix';
+  @override String get nextMonthTooltip => r'Mes següent';
+  @override String get previousMonthTooltip => r'Mes anterior';
+  @override String get nextPageTooltip => r'Pàgina següent';
+  @override String get previousPageTooltip => r'Pàgina anterior';
+  @override String get showMenuTooltip => r'Mostra el menú';
+  @override String get aboutListTileTitle => r'Sobre $applicationName';
+  @override String get licensesPageTitle => r'Llicències';
+  @override String get pageRowsInfoTitle => r'$firstRow-$lastRow de $rowCount';
+  @override String get pageRowsInfoTitleApproximate => r'$firstRow-$lastRow d' "'" r'aproximadament $rowCount';
+  @override String get rowsPerPageTitle => r'Files per pàgina:';
+  @override String get tabLabel => r'Pestanya $tabIndex de $tabCount';
+  @override String get selectedRowCountTitleOne => r'S' "'" r'ha seleccionat 1 element';
+  @override String get selectedRowCountTitleOther => r'S' "'" r'han seleccionat $selectedRowCount elements';
+  @override String get cancelButtonLabel => r'CANCEL·LA';
+  @override String get closeButtonLabel => r'TANCA';
+  @override String get continueButtonLabel => r'CONTINUA';
+  @override String get copyButtonLabel => r'COPIA';
+  @override String get cutButtonLabel => r'RETALLA';
+  @override String get okButtonLabel => r'D' "'" r'ACORD';
+  @override String get pasteButtonLabel => r'ENGANXA';
+  @override String get selectAllButtonLabel => r'SELECCIONA-HO TOT';
+  @override String get viewLicensesButtonLabel => r'MOSTRA LES LLICÈNCIES';
+  @override String get anteMeridiemAbbreviation => r'AM';
+  @override String get postMeridiemAbbreviation => r'PM';
+  @override String get timePickerHourModeAnnouncement => r'Selecciona les hores';
+  @override String get timePickerMinuteModeAnnouncement => r'Selecciona els minuts';
+  @override String get modalBarrierDismissLabel => r'Ignora';
+  @override String get signedInLabel => r'Sessió iniciada';
+  @override String get hideAccountsLabel => r'Amaga els comptes';
+  @override String get showAccountsLabel => r'Mostra els comptes';
+  @override String get drawerLabel => r'Menú de navegació';
+  @override String get popupMenuLabel => r'Menú emergent';
+  @override String get dialogLabel => r'Diàleg';
+  @override String get alertDialogLabel => r'TBD';
+  @override String get searchFieldLabel => r'TBD';
+}
+
+// ignore: camel_case_types
+class _Bundle_cs extends TranslationBundle {
+  const _Bundle_cs() : super(null);
+  @override String get scriptCategory => r'English-like';
+  @override String get timeOfDayFormat => r'HH:mm';
+  @override String get selectedRowCountTitleFew => r'Jsou vybrány $selectedRowCount položky';
+  @override String get selectedRowCountTitleMany => r'Je vybráno $selectedRowCount položky';
+  @override String get openAppDrawerTooltip => r'Otevřít navigační nabídku';
+  @override String get backButtonTooltip => r'Zpět';
+  @override String get closeButtonTooltip => r'Zavřít';
+  @override String get deleteButtonTooltip => r'Smazat';
+  @override String get nextMonthTooltip => r'Další měsíc';
+  @override String get previousMonthTooltip => r'Předchozí měsíc';
+  @override String get nextPageTooltip => r'Další stránka';
+  @override String get previousPageTooltip => r'Předchozí stránka';
+  @override String get showMenuTooltip => r'Zobrazit nabídku';
+  @override String get aboutListTileTitle => r'O aplikaci $applicationName';
+  @override String get licensesPageTitle => r'Licence';
+  @override String get pageRowsInfoTitle => r'$firstRow–$lastRow z $rowCount';
+  @override String get pageRowsInfoTitleApproximate => r'$firstRow–$lastRow z asi $rowCount';
+  @override String get rowsPerPageTitle => r'Počet řádků na stránku:';
+  @override String get tabLabel => r'Karta $tabIndex z $tabCount';
+  @override String get selectedRowCountTitleOne => r'Je vybrána 1 položka';
+  @override String get selectedRowCountTitleOther => r'Je vybráno $selectedRowCount položek';
+  @override String get cancelButtonLabel => r'ZRUŠIT';
+  @override String get closeButtonLabel => r'ZAVŘÍT';
+  @override String get continueButtonLabel => r'POKRAČOVAT';
+  @override String get copyButtonLabel => r'KOPÍROVAT';
+  @override String get cutButtonLabel => r'VYJMOUT';
+  @override String get okButtonLabel => r'OK';
+  @override String get pasteButtonLabel => r'VLOŽIT';
+  @override String get selectAllButtonLabel => r'VYBRAT VŠE';
+  @override String get viewLicensesButtonLabel => r'ZOBRAZIT LICENCE';
+  @override String get anteMeridiemAbbreviation => r'AM';
+  @override String get postMeridiemAbbreviation => r'PM';
+  @override String get timePickerHourModeAnnouncement => r'Vyberte hodiny';
+  @override String get timePickerMinuteModeAnnouncement => r'Vyberte minuty';
+  @override String get modalBarrierDismissLabel => r'Zavřít';
+  @override String get signedInLabel => r'Uživatel přihlášen';
+  @override String get hideAccountsLabel => r'Skrýt účty';
+  @override String get showAccountsLabel => r'Zobrazit účty';
+  @override String get drawerLabel => r'Navigační nabídka';
+  @override String get popupMenuLabel => r'Vyskakovací nabídka';
+  @override String get dialogLabel => r'Dialogové okno';
+  @override String get alertDialogLabel => r'TBD';
+  @override String get searchFieldLabel => r'TBD';
+}
+
+// ignore: camel_case_types
+class _Bundle_da extends TranslationBundle {
+  const _Bundle_da() : super(null);
+  @override String get scriptCategory => r'English-like';
+  @override String get timeOfDayFormat => r'HH:mm';
+  @override String get openAppDrawerTooltip => r'Åbn navigationsmenuen';
+  @override String get backButtonTooltip => r'Tilbage';
+  @override String get closeButtonTooltip => r'Luk';
+  @override String get deleteButtonTooltip => r'Slet';
+  @override String get nextMonthTooltip => r'Næste måned';
+  @override String get previousMonthTooltip => r'Forrige måned';
+  @override String get nextPageTooltip => r'Næste side';
+  @override String get previousPageTooltip => r'Forrige side';
+  @override String get showMenuTooltip => r'Vis menu';
+  @override String get aboutListTileTitle => r'Om $applicationName';
+  @override String get licensesPageTitle => r'Licenser';
+  @override String get pageRowsInfoTitle => r'$firstRow-$lastRow af $rowCount';
+  @override String get pageRowsInfoTitleApproximate => r'$firstRow-$lastRow af ca. $rowCount';
+  @override String get rowsPerPageTitle => r'Rækker pr. side:';
+  @override String get tabLabel => r'Fane $tabIndex af $tabCount';
+  @override String get selectedRowCountTitleOne => r'1 element er valgt';
+  @override String get selectedRowCountTitleOther => r'$selectedRowCount elementer er valgt';
+  @override String get cancelButtonLabel => r'ANNULLER';
+  @override String get closeButtonLabel => r'LUK';
+  @override String get continueButtonLabel => r'FORTSÆT';
+  @override String get copyButtonLabel => r'KOPIÉR';
+  @override String get cutButtonLabel => r'KLIP';
+  @override String get okButtonLabel => r'OK';
+  @override String get pasteButtonLabel => r'SÆT IND';
+  @override String get selectAllButtonLabel => r'VÆLG ALLE';
+  @override String get viewLicensesButtonLabel => r'SE LICENSER';
+  @override String get anteMeridiemAbbreviation => r'AM';
+  @override String get postMeridiemAbbreviation => r'PM';
+  @override String get timePickerHourModeAnnouncement => r'Vælg timer';
+  @override String get timePickerMinuteModeAnnouncement => r'Vælg minutter';
+  @override String get modalBarrierDismissLabel => r'Afvis';
+  @override String get signedInLabel => r'Logget ind';
+  @override String get hideAccountsLabel => r'Skjul konti';
+  @override String get showAccountsLabel => r'Vis konti';
+  @override String get drawerLabel => r'Navigationsmenu';
+  @override String get popupMenuLabel => r'Pop op-menu';
+  @override String get dialogLabel => r'Dialogboks';
+  @override String get alertDialogLabel => r'TBD';
+  @override String get searchFieldLabel => r'TBD';
+}
+
+// ignore: camel_case_types
 class _Bundle_de extends TranslationBundle {
   const _Bundle_de() : super(null);
   @override String get scriptCategory => r'English-like';
@@ -162,6 +395,52 @@ class _Bundle_de extends TranslationBundle {
   @override String get dialogLabel => r'Dialogfeld';
   @override String get alertDialogLabel => r'Aufmerksam';
   @override String get searchFieldLabel => r'Suchen';
+}
+
+// ignore: camel_case_types
+class _Bundle_el extends TranslationBundle {
+  const _Bundle_el() : super(null);
+  @override String get scriptCategory => r'English-like';
+  @override String get timeOfDayFormat => r'HH:mm';
+  @override String get openAppDrawerTooltip => r'Άνοιγμα μενού πλοήγησης';
+  @override String get backButtonTooltip => r'Πίσω';
+  @override String get closeButtonTooltip => r'Κλείσιμο';
+  @override String get deleteButtonTooltip => r'Διαγραφή';
+  @override String get nextMonthTooltip => r'Επόμενος μήνας';
+  @override String get previousMonthTooltip => r'Προηγούμενος μήνας';
+  @override String get nextPageTooltip => r'Επόμενη σελίδα';
+  @override String get previousPageTooltip => r'Προηγούμενη σελίδα';
+  @override String get showMenuTooltip => r'Εμφάνιση μενού';
+  @override String get aboutListTileTitle => r'Σχετικά με την εφαρμογή $applicationName';
+  @override String get licensesPageTitle => r'Άδειες';
+  @override String get pageRowsInfoTitle => r'$firstRow-$lastRow από $rowCount';
+  @override String get pageRowsInfoTitleApproximate => r'$firstRow-$lastRow από περίπου $rowCount';
+  @override String get rowsPerPageTitle => r'Σειρές ανά σελίδα:';
+  @override String get tabLabel => r'Καρτέλα $tabIndex από $tabCount';
+  @override String get selectedRowCountTitleOne => r'Επιλέχθηκε 1 στοιχείο';
+  @override String get selectedRowCountTitleOther => r'Επιλέχθηκαν $selectedRowCount στοιχεία';
+  @override String get cancelButtonLabel => r'ΑΚΥΡΩΣΗ';
+  @override String get closeButtonLabel => r'ΚΛΕΙΣΙΜΟ';
+  @override String get continueButtonLabel => r'ΣΥΝΕΧΕΙΑ';
+  @override String get copyButtonLabel => r'ΑΝΤΙΓΡΑΦΗ';
+  @override String get cutButtonLabel => r'ΑΠΟΚΟΠΗ';
+  @override String get okButtonLabel => r'ΟΚ';
+  @override String get pasteButtonLabel => r'ΕΠΙΚΟΛΛΗΣΗ';
+  @override String get selectAllButtonLabel => r'ΕΠΙΛΟΓΗ ΟΛΩΝ';
+  @override String get viewLicensesButtonLabel => r'ΠΡΟΒΟΛΗ ΑΔΕΙΩΝ';
+  @override String get anteMeridiemAbbreviation => r'π.μ.';
+  @override String get postMeridiemAbbreviation => r'μ.μ.';
+  @override String get timePickerHourModeAnnouncement => r'Επιλογή ωρών';
+  @override String get timePickerMinuteModeAnnouncement => r'Επιλογή λεπτών';
+  @override String get modalBarrierDismissLabel => r'Παράβλεψη';
+  @override String get signedInLabel => r'Σε σύνδεση';
+  @override String get hideAccountsLabel => r'Απόκρυψη λογαριασμών';
+  @override String get showAccountsLabel => r'Εμφάνιση λογαριασμών';
+  @override String get drawerLabel => r'Μενού πλοήγησης';
+  @override String get popupMenuLabel => r'Αναδυόμενο μενού';
+  @override String get dialogLabel => r'Παράθυρο διαλόγου';
+  @override String get alertDialogLabel => r'TBD';
+  @override String get searchFieldLabel => r'TBD';
 }
 
 // ignore: camel_case_types
@@ -259,6 +538,52 @@ class _Bundle_es extends TranslationBundle {
 }
 
 // ignore: camel_case_types
+class _Bundle_et extends TranslationBundle {
+  const _Bundle_et() : super(null);
+  @override String get scriptCategory => r'English-like';
+  @override String get timeOfDayFormat => r'HH:mm';
+  @override String get openAppDrawerTooltip => r'Ava navigeerimismenüü';
+  @override String get backButtonTooltip => r'Tagasi';
+  @override String get closeButtonTooltip => r'Sule';
+  @override String get deleteButtonTooltip => r'Kustuta';
+  @override String get nextMonthTooltip => r'Järgmine kuu';
+  @override String get previousMonthTooltip => r'Eelmine kuu';
+  @override String get nextPageTooltip => r'Järgmine leht';
+  @override String get previousPageTooltip => r'Eelmine leht';
+  @override String get showMenuTooltip => r'Kuva menüü';
+  @override String get aboutListTileTitle => r'Teave rakenduse $applicationName kohta';
+  @override String get licensesPageTitle => r'Litsentsid';
+  @override String get pageRowsInfoTitle => r'$firstRow–$lastRow $rowCount-st';
+  @override String get pageRowsInfoTitleApproximate => r'$firstRow–$lastRow umbes $rowCount-st';
+  @override String get rowsPerPageTitle => r'Ridu lehe kohta:';
+  @override String get tabLabel => r'$tabIndex. vahekaart $tabCount-st';
+  @override String get selectedRowCountTitleOne => r'Valitud on 1 üksus';
+  @override String get selectedRowCountTitleOther => r'Valitud on $selectedRowCount üksust';
+  @override String get cancelButtonLabel => r'TÜHISTA';
+  @override String get closeButtonLabel => r'SULE';
+  @override String get continueButtonLabel => r'JÄTKA';
+  @override String get copyButtonLabel => r'KOPEERI';
+  @override String get cutButtonLabel => r'LÕIKA';
+  @override String get okButtonLabel => r'OK';
+  @override String get pasteButtonLabel => r'KLEEBI';
+  @override String get selectAllButtonLabel => r'VALI KÕIK';
+  @override String get viewLicensesButtonLabel => r'KUVA LITSENTSID';
+  @override String get anteMeridiemAbbreviation => r'AM';
+  @override String get postMeridiemAbbreviation => r'PM';
+  @override String get timePickerHourModeAnnouncement => r'Tundide valimine';
+  @override String get timePickerMinuteModeAnnouncement => r'Minutite valimine';
+  @override String get modalBarrierDismissLabel => r'Loobu';
+  @override String get signedInLabel => r'Sisse logitud';
+  @override String get hideAccountsLabel => r'Peida kontod';
+  @override String get showAccountsLabel => r'Kuva kontod';
+  @override String get drawerLabel => r'Navigeerimismenüü';
+  @override String get popupMenuLabel => r'Hüpikmenüü';
+  @override String get dialogLabel => r'Dialoog';
+  @override String get alertDialogLabel => r'TBD';
+  @override String get searchFieldLabel => r'TBD';
+}
+
+// ignore: camel_case_types
 class _Bundle_fa extends TranslationBundle {
   const _Bundle_fa() : super(null);
   @override String get scriptCategory => r'tall';
@@ -302,6 +627,98 @@ class _Bundle_fa extends TranslationBundle {
   @override String get dialogLabel => r'کادر گفتگو';
   @override String get alertDialogLabel => r'هشدار';
   @override String get searchFieldLabel => r'جستجو کردن';
+}
+
+// ignore: camel_case_types
+class _Bundle_fi extends TranslationBundle {
+  const _Bundle_fi() : super(null);
+  @override String get scriptCategory => r'English-like';
+  @override String get timeOfDayFormat => r'HH:mm';
+  @override String get openAppDrawerTooltip => r'Avaa navigointivalikko';
+  @override String get backButtonTooltip => r'Takaisin';
+  @override String get closeButtonTooltip => r'Sulje';
+  @override String get deleteButtonTooltip => r'Poista';
+  @override String get nextMonthTooltip => r'Seuraava kuukausi';
+  @override String get previousMonthTooltip => r'Edellinen kuukausi';
+  @override String get nextPageTooltip => r'Seuraava sivu';
+  @override String get previousPageTooltip => r'Edellinen sivu';
+  @override String get showMenuTooltip => r'Näytä valikko';
+  @override String get aboutListTileTitle => r'Tietoja sovelluksesta $applicationName';
+  @override String get licensesPageTitle => r'Lisenssit';
+  @override String get pageRowsInfoTitle => r'$firstRow–$lastRow/$rowCount';
+  @override String get pageRowsInfoTitleApproximate => r'$firstRow–$lastRow/~$rowCount';
+  @override String get rowsPerPageTitle => r'Riviä/sivu:';
+  @override String get tabLabel => r'Välilehti $tabIndex/$tabCount';
+  @override String get selectedRowCountTitleOne => r'1 kohde valittu';
+  @override String get selectedRowCountTitleOther => r'$selectedRowCount kohdetta valittu';
+  @override String get cancelButtonLabel => r'PERUUTA';
+  @override String get closeButtonLabel => r'SULJE';
+  @override String get continueButtonLabel => r'JATKA';
+  @override String get copyButtonLabel => r'COPY';
+  @override String get cutButtonLabel => r'LEIKKAA';
+  @override String get okButtonLabel => r'OK';
+  @override String get pasteButtonLabel => r'LIITÄ';
+  @override String get selectAllButtonLabel => r'VALITSE KAIKKI';
+  @override String get viewLicensesButtonLabel => r'NÄYTÄ KÄYTTÖOIKEUDET';
+  @override String get anteMeridiemAbbreviation => r'ap';
+  @override String get postMeridiemAbbreviation => r'ip';
+  @override String get timePickerHourModeAnnouncement => r'Valitse tunnit';
+  @override String get timePickerMinuteModeAnnouncement => r'Valitse minuutit';
+  @override String get modalBarrierDismissLabel => r'Ohita';
+  @override String get signedInLabel => r'Kirjautunut sisään';
+  @override String get hideAccountsLabel => r'Piilota tilit';
+  @override String get showAccountsLabel => r'Näytä tilit';
+  @override String get drawerLabel => r'Navigointivalikko';
+  @override String get popupMenuLabel => r'Ponnahdusvalikko';
+  @override String get dialogLabel => r'Valintaikkuna';
+  @override String get alertDialogLabel => r'TBD';
+  @override String get searchFieldLabel => r'TBD';
+}
+
+// ignore: camel_case_types
+class _Bundle_fil extends TranslationBundle {
+  const _Bundle_fil() : super(null);
+  @override String get scriptCategory => r'English-like';
+  @override String get timeOfDayFormat => r'HH:mm';
+  @override String get openAppDrawerTooltip => r'Buksan ang menu ng navigation';
+  @override String get backButtonTooltip => r'Bumalik';
+  @override String get closeButtonTooltip => r'Isara';
+  @override String get deleteButtonTooltip => r'I-delete';
+  @override String get nextMonthTooltip => r'Susunod na buwan';
+  @override String get previousMonthTooltip => r'Nakaraang buwan';
+  @override String get nextPageTooltip => r'Susunod na page';
+  @override String get previousPageTooltip => r'Nakaraang page';
+  @override String get showMenuTooltip => r'Ipakita ang menu';
+  @override String get aboutListTileTitle => r'Tungkol sa $applicationName';
+  @override String get licensesPageTitle => r'Mga Lisensya';
+  @override String get pageRowsInfoTitle => r'$firstRow–$lastRow ng $rowCount';
+  @override String get pageRowsInfoTitleApproximate => r'$firstRow–$lastRow ng humigit kumulang $rowCount';
+  @override String get rowsPerPageTitle => r'Mga row bawat page:';
+  @override String get tabLabel => r'Tab $tabIndex ng $tabCount';
+  @override String get selectedRowCountTitleOne => r'1 item ang napili';
+  @override String get selectedRowCountTitleOther => r'$selectedRowCount na item ang napili';
+  @override String get cancelButtonLabel => r'KANSELAHIN';
+  @override String get closeButtonLabel => r'ISARA';
+  @override String get continueButtonLabel => r'MAGPATULOY';
+  @override String get copyButtonLabel => r'KOPYAHIN';
+  @override String get cutButtonLabel => r'I-CUT';
+  @override String get okButtonLabel => r'OK';
+  @override String get pasteButtonLabel => r'I-PASTE';
+  @override String get selectAllButtonLabel => r'PILIIN LAHAT';
+  @override String get viewLicensesButtonLabel => r'TINGNAN ANG MGA LISENSYA';
+  @override String get anteMeridiemAbbreviation => r'AM';
+  @override String get postMeridiemAbbreviation => r'PM';
+  @override String get timePickerHourModeAnnouncement => r'Pumili ng mga oras';
+  @override String get timePickerMinuteModeAnnouncement => r'Pumili ng mga minuto';
+  @override String get modalBarrierDismissLabel => r'I-dismiss';
+  @override String get signedInLabel => r'Naka-sign in';
+  @override String get hideAccountsLabel => r'Itago ang mga account';
+  @override String get showAccountsLabel => r'Ipakita ang mga account';
+  @override String get drawerLabel => r'Menu ng navigation';
+  @override String get popupMenuLabel => r'Popup na menu';
+  @override String get dialogLabel => r'Dialog';
+  @override String get alertDialogLabel => r'TBD';
+  @override String get searchFieldLabel => r'TBD';
 }
 
 // ignore: camel_case_types
@@ -443,6 +860,145 @@ class _Bundle_he extends TranslationBundle {
   @override String get dialogLabel => r'תיבת דו-שיח';
   @override String get alertDialogLabel => r'עֵרָנִי';
   @override String get searchFieldLabel => r'לחפש';
+}
+
+// ignore: camel_case_types
+class _Bundle_hi extends TranslationBundle {
+  const _Bundle_hi() : super(null);
+  @override String get scriptCategory => r'dense';
+  @override String get timeOfDayFormat => r'ah:mm';
+  @override String get openAppDrawerTooltip => r'नेविगेशन मेन्यू खोलें';
+  @override String get backButtonTooltip => r'वापस जाएं';
+  @override String get closeButtonTooltip => r'बंद करें';
+  @override String get deleteButtonTooltip => r'मिटाएं';
+  @override String get nextMonthTooltip => r'अगला महीना';
+  @override String get previousMonthTooltip => r'पिछला महीना';
+  @override String get nextPageTooltip => r'अगला पेज';
+  @override String get previousPageTooltip => r'पिछला पेज';
+  @override String get showMenuTooltip => r'मेन्यू दिखाएं';
+  @override String get aboutListTileTitle => r'$applicationName के बारे में जानकारी';
+  @override String get licensesPageTitle => r'लाइसेंस';
+  @override String get pageRowsInfoTitle => r'$rowCount का $firstRow–$lastRow';
+  @override String get pageRowsInfoTitleApproximate => r'$rowCount में से करीब $firstRow–$lastRow';
+  @override String get rowsPerPageTitle => r'हर पेज में पंक्तियों की संख्या:';
+  @override String get tabLabel => r'$tabCount का टैब $tabIndex';
+  @override String get selectedRowCountTitleOne => r'1 चीज़ चुनी गई';
+  @override String get selectedRowCountTitleOther => r'$selectedRowCount चीज़ें चुनी गईं';
+  @override String get cancelButtonLabel => r'रद्द करें';
+  @override String get closeButtonLabel => r'बंद करें';
+  @override String get continueButtonLabel => r'जारी रखें';
+  @override String get copyButtonLabel => r'कॉपी करें';
+  @override String get cutButtonLabel => r'कट करें';
+  @override String get okButtonLabel => r'ठीक है';
+  @override String get pasteButtonLabel => r'चिपकाएं';
+  @override String get selectAllButtonLabel => r'सभी चुनें';
+  @override String get viewLicensesButtonLabel => r'लाइसेंस देखें';
+  @override String get anteMeridiemAbbreviation => r'AM';
+  @override String get postMeridiemAbbreviation => r'PM';
+  @override String get timePickerHourModeAnnouncement => r'घंटे के हिसाब से समय चुनें';
+  @override String get timePickerMinuteModeAnnouncement => r'मिनट के हिसाब से समय चुनें';
+  @override String get modalBarrierDismissLabel => r'खारिज करें';
+  @override String get signedInLabel => r'साइन इन किया हुआ है';
+  @override String get hideAccountsLabel => r'खाते छिपाएं';
+  @override String get showAccountsLabel => r'खाते दिखाएं';
+  @override String get drawerLabel => r'नेविगेशन मेन्यू';
+  @override String get popupMenuLabel => r'पॉपअप मेन्यू';
+  @override String get dialogLabel => r'संवाद';
+  @override String get alertDialogLabel => r'TBD';
+  @override String get searchFieldLabel => r'TBD';
+}
+
+// ignore: camel_case_types
+class _Bundle_hr extends TranslationBundle {
+  const _Bundle_hr() : super(null);
+  @override String get scriptCategory => r'English-like';
+  @override String get timeOfDayFormat => r'HH:mm';
+  @override String get selectedRowCountTitleFew => r'Odabrane su $selectedRowCount stavke';
+  @override String get openAppDrawerTooltip => r'Otvaranje izbornika za navigaciju';
+  @override String get backButtonTooltip => r'Natrag';
+  @override String get closeButtonTooltip => r'Zatvaranje';
+  @override String get deleteButtonTooltip => r'Brisanje';
+  @override String get nextMonthTooltip => r'Sljedeći mjesec';
+  @override String get previousMonthTooltip => r'Prethodni mjesec';
+  @override String get nextPageTooltip => r'Sljedeća stranica';
+  @override String get previousPageTooltip => r'Prethodna stranica';
+  @override String get showMenuTooltip => r'Prikaz izbornika';
+  @override String get aboutListTileTitle => r'O aplikaciji $applicationName';
+  @override String get licensesPageTitle => r'Licence';
+  @override String get pageRowsInfoTitle => r'$firstRow – $lastRow od $rowCount';
+  @override String get pageRowsInfoTitleApproximate => r'$firstRow – $lastRow od otprilike $rowCount';
+  @override String get rowsPerPageTitle => r'Redaka po stranici:';
+  @override String get tabLabel => r'Kartica $tabIndex od $tabCount';
+  @override String get selectedRowCountTitleOne => r'Odabrana je jedna stavka';
+  @override String get selectedRowCountTitleOther => r'Odabrano je $selectedRowCount stavki';
+  @override String get cancelButtonLabel => r'ODUSTANI';
+  @override String get closeButtonLabel => r'ZATVORI';
+  @override String get continueButtonLabel => r'NASTAVI';
+  @override String get copyButtonLabel => r'KOPIRAJ';
+  @override String get cutButtonLabel => r'IZREŽI';
+  @override String get okButtonLabel => r'U REDU';
+  @override String get pasteButtonLabel => r'ZALIJEPI';
+  @override String get selectAllButtonLabel => r'ODABERI SVE';
+  @override String get viewLicensesButtonLabel => r'PRIKAŽI LICENCE';
+  @override String get anteMeridiemAbbreviation => r'prijepodne';
+  @override String get postMeridiemAbbreviation => r'popodne';
+  @override String get timePickerHourModeAnnouncement => r'Odaberite sate';
+  @override String get timePickerMinuteModeAnnouncement => r'Odaberite minute';
+  @override String get modalBarrierDismissLabel => r'Odbaci';
+  @override String get signedInLabel => r'Prijavljeni korisnik';
+  @override String get hideAccountsLabel => r'Sakrijte račune';
+  @override String get showAccountsLabel => r'Prikažite račune';
+  @override String get drawerLabel => r'Navigacijski izbornik';
+  @override String get popupMenuLabel => r'Skočni izbornik';
+  @override String get dialogLabel => r'Dijalog';
+  @override String get alertDialogLabel => r'TBD';
+  @override String get searchFieldLabel => r'TBD';
+}
+
+// ignore: camel_case_types
+class _Bundle_hu extends TranslationBundle {
+  const _Bundle_hu() : super(null);
+  @override String get scriptCategory => r'English-like';
+  @override String get timeOfDayFormat => r'HH:mm';
+  @override String get openAppDrawerTooltip => r'Navigációs menü megnyitása';
+  @override String get backButtonTooltip => r'Vissza';
+  @override String get closeButtonTooltip => r'Bezárás';
+  @override String get deleteButtonTooltip => r'Törlés';
+  @override String get nextMonthTooltip => r'Következő hónap';
+  @override String get previousMonthTooltip => r'Előző hónap';
+  @override String get nextPageTooltip => r'Következő oldal';
+  @override String get previousPageTooltip => r'Előző oldal';
+  @override String get showMenuTooltip => r'Menü megjelenítése';
+  @override String get aboutListTileTitle => r'A(z) $applicationName névjegye';
+  @override String get licensesPageTitle => r'Licencek';
+  @override String get pageRowsInfoTitle => r'$rowCount/$firstRow–$lastRow.';
+  @override String get pageRowsInfoTitleApproximate => r'Körülbelül $rowCount/$firstRow–$lastRow.';
+  @override String get rowsPerPageTitle => r'Oldalankénti sorszám:';
+  @override String get tabLabel => r'$tabCount/$tabIndex. lap';
+  @override String get selectedRowCountTitleOne => r'1 elem kiválasztva';
+  @override String get selectedRowCountTitleOther => r'$selectedRowCount elem kiválasztva';
+  @override String get cancelButtonLabel => r'MÉGSE';
+  @override String get closeButtonLabel => r'BEZÁRÁS';
+  @override String get continueButtonLabel => r'TOVÁBB';
+  @override String get copyButtonLabel => r'MÁSOLÁS';
+  @override String get cutButtonLabel => r'KIVÁGÁS';
+  @override String get okButtonLabel => r'OK';
+  @override String get pasteButtonLabel => r'BEILLESZTÉS';
+  @override String get selectAllButtonLabel => r'AZ ÖSSZES KIJELÖLÉSE';
+  @override String get viewLicensesButtonLabel => r'LICENCEK MEGTEKINTÉSE';
+  @override String get anteMeridiemAbbreviation => r'de.';
+  @override String get postMeridiemAbbreviation => r'du.';
+  @override String get timePickerHourModeAnnouncement => r'Óra kiválasztása';
+  @override String get timePickerMinuteModeAnnouncement => r'Perc kiválasztása';
+  @override String get modalBarrierDismissLabel => r'Elvetés';
+  @override String get signedInLabel => r'Bejelentkezve';
+  @override String get hideAccountsLabel => r'Fiókok elrejtése';
+  @override String get showAccountsLabel => r'Fiókok megjelenítése';
+  @override String get drawerLabel => r'Navigációs menü';
+  @override String get popupMenuLabel => r'Előugró menü';
+  @override String get dialogLabel => r'Párbeszédablak';
+  @override String get alertDialogLabel => r'TBD';
+  @override String get searchFieldLabel => r'TBD';
 }
 
 // ignore: camel_case_types
@@ -630,6 +1186,101 @@ class _Bundle_ko extends TranslationBundle {
 }
 
 // ignore: camel_case_types
+class _Bundle_lt extends TranslationBundle {
+  const _Bundle_lt() : super(null);
+  @override String get scriptCategory => r'English-like';
+  @override String get timeOfDayFormat => r'HH:mm';
+  @override String get selectedRowCountTitleFew => r'Pasirinkti $selectedRowCount elementai';
+  @override String get selectedRowCountTitleMany => r'Pasirinkta $selectedRowCount elemento';
+  @override String get openAppDrawerTooltip => r'Atidaryti naršymo meniu';
+  @override String get backButtonTooltip => r'Atgal';
+  @override String get closeButtonTooltip => r'Uždaryti';
+  @override String get deleteButtonTooltip => r'Ištrinti';
+  @override String get nextMonthTooltip => r'Kitas mėnuo';
+  @override String get previousMonthTooltip => r'Ankstesnis mėnuo';
+  @override String get nextPageTooltip => r'Kitas puslapis';
+  @override String get previousPageTooltip => r'Ankstesnis puslapis';
+  @override String get showMenuTooltip => r'Rodyti meniu';
+  @override String get aboutListTileTitle => r'Apie „$applicationName“';
+  @override String get licensesPageTitle => r'Licencijos';
+  @override String get pageRowsInfoTitle => r'$firstRow–$lastRow iš $rowCount';
+  @override String get pageRowsInfoTitleApproximate => r'$firstRow–$lastRow iš maždaug $rowCount';
+  @override String get rowsPerPageTitle => r'Eilučių puslapyje:';
+  @override String get tabLabel => r'$tabIndex skirtukas iš $tabCount';
+  @override String get selectedRowCountTitleOne => r'Pasirinktas 1 elementas';
+  @override String get selectedRowCountTitleOther => r'Pasirinkta $selectedRowCount elementų';
+  @override String get cancelButtonLabel => r'ATŠAUKTI';
+  @override String get closeButtonLabel => r'UŽDARYTI';
+  @override String get continueButtonLabel => r'TĘSTI';
+  @override String get copyButtonLabel => r'KOPIJUOTI';
+  @override String get cutButtonLabel => r'IŠKIRPTI';
+  @override String get okButtonLabel => r'GERAI';
+  @override String get pasteButtonLabel => r'ĮKLIJUOTI';
+  @override String get selectAllButtonLabel => r'PASIRINKTI VISKĄ';
+  @override String get viewLicensesButtonLabel => r'PERŽIŪRĖTI LICENCIJAS';
+  @override String get anteMeridiemAbbreviation => r'priešpiet';
+  @override String get postMeridiemAbbreviation => r'popiet';
+  @override String get timePickerHourModeAnnouncement => r'Pasirinkite valandas';
+  @override String get timePickerMinuteModeAnnouncement => r'Pasirinkite minutes';
+  @override String get modalBarrierDismissLabel => r'Atsisakyti';
+  @override String get signedInLabel => r'Prisijungta';
+  @override String get hideAccountsLabel => r'Slėpti paskyras';
+  @override String get showAccountsLabel => r'Rodyti paskyras';
+  @override String get drawerLabel => r'Naršymo meniu';
+  @override String get popupMenuLabel => r'Iššokantysis meniu';
+  @override String get dialogLabel => r'Dialogo langas';
+  @override String get alertDialogLabel => r'TBD';
+  @override String get searchFieldLabel => r'TBD';
+}
+
+// ignore: camel_case_types
+class _Bundle_lv extends TranslationBundle {
+  const _Bundle_lv() : super(null);
+  @override String get scriptCategory => r'English-like';
+  @override String get timeOfDayFormat => r'HH:mm';
+  @override String get openAppDrawerTooltip => r'Atvērt navigācijas izvēlni';
+  @override String get backButtonTooltip => r'Atpakaļ';
+  @override String get closeButtonTooltip => r'Aizvērt';
+  @override String get deleteButtonTooltip => r'Dzēst';
+  @override String get nextMonthTooltip => r'Nākamais mēnesis';
+  @override String get previousMonthTooltip => r'Iepriekšējais mēnesis';
+  @override String get nextPageTooltip => r'Nākamā lapa';
+  @override String get previousPageTooltip => r'Iepriekšējā lapa';
+  @override String get showMenuTooltip => r'Rādīt izvēlni';
+  @override String get aboutListTileTitle => r'Par $applicationName';
+  @override String get licensesPageTitle => r'Licences';
+  @override String get pageRowsInfoTitle => r'$firstRow.–$lastRow. no $rowCount';
+  @override String get pageRowsInfoTitleApproximate => r'$firstRow.–$lastRow. no aptuveni $rowCount';
+  @override String get rowsPerPageTitle => r'Rindas lapā:';
+  @override String get tabLabel => r'$tabIndex. cilne no $tabCount';
+  @override String get selectedRowCountTitleZero => r'Nav atlasītu vienumu';
+  @override String get selectedRowCountTitleOne => r'Atlasīts 1 vienums';
+  @override String get selectedRowCountTitleOther => r'Atlasīti $selectedRowCount vienumi';
+  @override String get cancelButtonLabel => r'ATCELT';
+  @override String get closeButtonLabel => r'AIZVĒRT';
+  @override String get continueButtonLabel => r'TURPINĀT';
+  @override String get copyButtonLabel => r'KOPĒT';
+  @override String get cutButtonLabel => r'IZGRIEZT';
+  @override String get okButtonLabel => r'LABI';
+  @override String get pasteButtonLabel => r'IELĪMĒT';
+  @override String get selectAllButtonLabel => r'ATLASĪT VISU';
+  @override String get viewLicensesButtonLabel => r'SKATĪT LICENCES';
+  @override String get anteMeridiemAbbreviation => r'priekšpusdienā';
+  @override String get postMeridiemAbbreviation => r'pēcpusdienā';
+  @override String get timePickerHourModeAnnouncement => r'Atlasiet stundas';
+  @override String get timePickerMinuteModeAnnouncement => r'Atlasiet minūtes';
+  @override String get modalBarrierDismissLabel => r'Nerādīt';
+  @override String get signedInLabel => r'Esat pierakstījies';
+  @override String get hideAccountsLabel => r'Slēpt kontus';
+  @override String get showAccountsLabel => r'Rādīt kontus';
+  @override String get drawerLabel => r'Navigācijas izvēlne';
+  @override String get popupMenuLabel => r'Uznirstošā izvēlne';
+  @override String get dialogLabel => r'Dialoglodziņš';
+  @override String get alertDialogLabel => r'TBD';
+  @override String get searchFieldLabel => r'TBD';
+}
+
+// ignore: camel_case_types
 class _Bundle_ms extends TranslationBundle {
   const _Bundle_ms() : super(null);
   @override String get scriptCategory => r'English-like';
@@ -637,16 +1288,16 @@ class _Bundle_ms extends TranslationBundle {
   @override String get openAppDrawerTooltip => r'Buka menu navigasi';
   @override String get backButtonTooltip => r'Kembali';
   @override String get closeButtonTooltip => r'Tutup';
-  @override String get deleteButtonTooltip => r'Buang';
-  @override String get nextMonthTooltip => r'Bulan seterusnya';
+  @override String get deleteButtonTooltip => r'Padam';
+  @override String get nextMonthTooltip => r'Bulan depan';
   @override String get previousMonthTooltip => r'Bulan sebelumnya';
   @override String get nextPageTooltip => r'Halaman seterusnya';
   @override String get previousPageTooltip => r'Halaman sebelumnya';
-  @override String get showMenuTooltip => r'Tunjuk menu';
-  @override String get aboutListTileTitle => r'Tentang $applicationName';
+  @override String get showMenuTooltip => r'Tunjukkan menu';
+  @override String get aboutListTileTitle => r'Perihal $applicationName';
   @override String get licensesPageTitle => r'Lesen';
   @override String get pageRowsInfoTitle => r'$firstRow–$lastRow dari $rowCount';
-  @override String get pageRowsInfoTitleApproximate => r'$firstRow–$lastRow dari lebih kurang $rowCount';
+  @override String get pageRowsInfoTitleApproximate => r'$firstRow–$lastRow dari kira-kira $rowCount';
   @override String get rowsPerPageTitle => r'Baris setiap halaman:';
   @override String get tabLabel => r'Tab $tabIndex dari $tabCount';
   @override String get selectedRowCountTitleZero => r'Tiada item dipilih';
@@ -665,10 +1316,10 @@ class _Bundle_ms extends TranslationBundle {
   @override String get postMeridiemAbbreviation => r'PTG';
   @override String get timePickerHourModeAnnouncement => r'Pilih jam';
   @override String get timePickerMinuteModeAnnouncement => r'Pilih minit';
-  @override String get modalBarrierDismissLabel => r'Abai';
-  @override String get signedInLabel => r'Telah daftar masuk';
-  @override String get hideAccountsLabel => r'Sembunyi akaun';
-  @override String get showAccountsLabel => r'Tunjuk akaun';
+  @override String get modalBarrierDismissLabel => r'Tolak';
+  @override String get signedInLabel => r'Dilog masuk';
+  @override String get hideAccountsLabel => r'Sembunyikan akaun';
+  @override String get showAccountsLabel => r'Tunjukkan akaun';
   @override String get drawerLabel => r'Menu navigasi';
   @override String get popupMenuLabel => r'Menu pop timbul';
   @override String get dialogLabel => r'Dialog';
@@ -1003,6 +1654,195 @@ class _Bundle_ru extends TranslationBundle {
 }
 
 // ignore: camel_case_types
+class _Bundle_sk extends TranslationBundle {
+  const _Bundle_sk() : super(null);
+  @override String get scriptCategory => r'English-like';
+  @override String get timeOfDayFormat => r'HH:mm';
+  @override String get selectedRowCountTitleFew => r'$selectedRowCount vybraté položky';
+  @override String get selectedRowCountTitleMany => r'$selectedRowCount items selected';
+  @override String get openAppDrawerTooltip => r'Otvoriť navigačnú ponuku';
+  @override String get backButtonTooltip => r'Späť';
+  @override String get closeButtonTooltip => r'Zavrieť';
+  @override String get deleteButtonTooltip => r'Odstrániť';
+  @override String get nextMonthTooltip => r'Budúci mesiac';
+  @override String get previousMonthTooltip => r'Predošlý mesiac';
+  @override String get nextPageTooltip => r'Ďalšia strana';
+  @override String get previousPageTooltip => r'Predchádzajúca stránka';
+  @override String get showMenuTooltip => r'Zobraziť ponuku';
+  @override String get aboutListTileTitle => r'$applicationName – informácie';
+  @override String get licensesPageTitle => r'Licencie';
+  @override String get pageRowsInfoTitle => r'$firstRow – $lastRow z $rowCount';
+  @override String get pageRowsInfoTitleApproximate => r'$firstRow – $lastRow z približne $rowCount';
+  @override String get rowsPerPageTitle => r'Počet riadkov na stránku:';
+  @override String get tabLabel => r'Karta $tabIndex z $tabCount';
+  @override String get selectedRowCountTitleOne => r'1 vybratá položka';
+  @override String get selectedRowCountTitleOther => r'$selectedRowCount vybratých položiek';
+  @override String get cancelButtonLabel => r'ZRUŠIŤ';
+  @override String get closeButtonLabel => r'ZAVRIEŤ';
+  @override String get continueButtonLabel => r'POKRAČOVAŤ';
+  @override String get copyButtonLabel => r'KOPÍROVAŤ';
+  @override String get cutButtonLabel => r'VYSTRIHNÚŤ';
+  @override String get okButtonLabel => r'OK';
+  @override String get pasteButtonLabel => r'PRILEPIŤ';
+  @override String get selectAllButtonLabel => r'VYBRAŤ VŠETKO';
+  @override String get viewLicensesButtonLabel => r'ZOBRAZIŤ LICENCIE';
+  @override String get anteMeridiemAbbreviation => r'AM';
+  @override String get postMeridiemAbbreviation => r'PM';
+  @override String get timePickerHourModeAnnouncement => r'Vybrať hodiny';
+  @override String get timePickerMinuteModeAnnouncement => r'Vybrať minúty';
+  @override String get modalBarrierDismissLabel => r'Odmietnuť';
+  @override String get signedInLabel => r'Prihlásili ste sa';
+  @override String get hideAccountsLabel => r'Skryť účty';
+  @override String get showAccountsLabel => r'Zobraziť účty';
+  @override String get drawerLabel => r'Navigačná ponuka';
+  @override String get popupMenuLabel => r'Kontextová ponuka';
+  @override String get dialogLabel => r'Dialógové okno';
+  @override String get alertDialogLabel => r'TBD';
+  @override String get searchFieldLabel => r'TBD';
+}
+
+// ignore: camel_case_types
+class _Bundle_sl extends TranslationBundle {
+  const _Bundle_sl() : super(null);
+  @override String get scriptCategory => r'English-like';
+  @override String get timeOfDayFormat => r'HH:mm';
+  @override String get selectedRowCountTitleTwo => r'Izbrana sta $selectedRowCount elementa';
+  @override String get selectedRowCountTitleFew => r'Izbrani so $selectedRowCount elementi';
+  @override String get openAppDrawerTooltip => r'Odpiranje menija za krmarjenje';
+  @override String get backButtonTooltip => r'Nazaj';
+  @override String get closeButtonTooltip => r'Zapiranje';
+  @override String get deleteButtonTooltip => r'Brisanje';
+  @override String get nextMonthTooltip => r'Naslednji mesec';
+  @override String get previousMonthTooltip => r'Prejšnji mesec';
+  @override String get nextPageTooltip => r'Naslednja stran';
+  @override String get previousPageTooltip => r'Prejšnja stran';
+  @override String get showMenuTooltip => r'Prikaz menija';
+  @override String get aboutListTileTitle => r'O aplikaciji $applicationName';
+  @override String get licensesPageTitle => r'Licence';
+  @override String get pageRowsInfoTitle => r'$firstRow–$lastRow od $rowCount';
+  @override String get pageRowsInfoTitleApproximate => r'$firstRow–$lastRow od približno $rowCount';
+  @override String get rowsPerPageTitle => r'Vrstice na stran:';
+  @override String get tabLabel => r'Zavihek $tabIndex od $tabCount';
+  @override String get selectedRowCountTitleOne => r'Izbran je 1 element';
+  @override String get selectedRowCountTitleOther => r'Izbranih je $selectedRowCount elementov';
+  @override String get cancelButtonLabel => r'PREKLIČI';
+  @override String get closeButtonLabel => r'ZAPRI';
+  @override String get continueButtonLabel => r'NAPREJ';
+  @override String get copyButtonLabel => r'KOPIRAJ';
+  @override String get cutButtonLabel => r'IZREŽI';
+  @override String get okButtonLabel => r'V REDU';
+  @override String get pasteButtonLabel => r'PRILEPI';
+  @override String get selectAllButtonLabel => r'IZBERI VSE';
+  @override String get viewLicensesButtonLabel => r'PRIKAŽI LICENCE';
+  @override String get anteMeridiemAbbreviation => r'DOP.';
+  @override String get postMeridiemAbbreviation => r'POP.';
+  @override String get timePickerHourModeAnnouncement => r'Izberite ure';
+  @override String get timePickerMinuteModeAnnouncement => r'Izberite minute';
+  @override String get modalBarrierDismissLabel => r'Opusti';
+  @override String get signedInLabel => r'Prijavljen';
+  @override String get hideAccountsLabel => r'Skrivanje računov';
+  @override String get showAccountsLabel => r'Prikaz računov';
+  @override String get drawerLabel => r'Meni za krmarjenje';
+  @override String get popupMenuLabel => r'Pojavni meni';
+  @override String get dialogLabel => r'Pogovorno okno';
+  @override String get alertDialogLabel => r'TBD';
+  @override String get searchFieldLabel => r'TBD';
+}
+
+// ignore: camel_case_types
+class _Bundle_sr extends TranslationBundle {
+  const _Bundle_sr() : super(null);
+  @override String get scriptCategory => r'English-like';
+  @override String get timeOfDayFormat => r'HH:mm';
+  @override String get selectedRowCountTitleFew => r'Изабране су $selectedRowCount ставке';
+  @override String get openAppDrawerTooltip => r'Отворите мени за навигацију';
+  @override String get backButtonTooltip => r'Назад';
+  @override String get closeButtonTooltip => r'Затворите';
+  @override String get deleteButtonTooltip => r'Избришите';
+  @override String get nextMonthTooltip => r'Следећи месец';
+  @override String get previousMonthTooltip => r'Претходни месец';
+  @override String get nextPageTooltip => r'Следећа страница';
+  @override String get previousPageTooltip => r'Претходна страница';
+  @override String get showMenuTooltip => r'Прикажи мени';
+  @override String get aboutListTileTitle => r'О апликацији $applicationName';
+  @override String get licensesPageTitle => r'Лиценце';
+  @override String get pageRowsInfoTitle => r'$firstRow – $lastRow oд $rowCount';
+  @override String get pageRowsInfoTitleApproximate => r'$firstRow – $lastRow oд приближно $rowCount';
+  @override String get rowsPerPageTitle => r'Редова по страници:';
+  @override String get tabLabel => r'$tabIndex. картица од $tabCount';
+  @override String get selectedRowCountTitleOne => r'Изабрана је 1 ставка';
+  @override String get selectedRowCountTitleOther => r'Изабрано је $selectedRowCount ставки';
+  @override String get cancelButtonLabel => r'ОТКАЖИ';
+  @override String get closeButtonLabel => r'ЗАТВОРИ';
+  @override String get continueButtonLabel => r'НАСТАВИ';
+  @override String get copyButtonLabel => r'КОПИРАЈ';
+  @override String get cutButtonLabel => r'ИСЕЦИ';
+  @override String get okButtonLabel => r'Потврди';
+  @override String get pasteButtonLabel => r'НАЛЕПИ';
+  @override String get selectAllButtonLabel => r'ИЗАБЕРИ СВЕ';
+  @override String get viewLicensesButtonLabel => r'ПРИКАЖИ ЛИЦЕНЦЕ';
+  @override String get anteMeridiemAbbreviation => r'пре подне';
+  @override String get postMeridiemAbbreviation => r'по подне';
+  @override String get timePickerHourModeAnnouncement => r'Изаберите сате';
+  @override String get timePickerMinuteModeAnnouncement => r'Изаберите минуте';
+  @override String get modalBarrierDismissLabel => r'Одбаци';
+  @override String get signedInLabel => r'Пријављени сте';
+  @override String get hideAccountsLabel => r'Сакриј налоге';
+  @override String get showAccountsLabel => r'Прикажи налоге';
+  @override String get drawerLabel => r'Мени за навигацију';
+  @override String get popupMenuLabel => r'Искачући мени';
+  @override String get dialogLabel => r'Дијалог';
+  @override String get alertDialogLabel => r'TBD';
+  @override String get searchFieldLabel => r'TBD';
+}
+
+// ignore: camel_case_types
+class _Bundle_sv extends TranslationBundle {
+  const _Bundle_sv() : super(null);
+  @override String get scriptCategory => r'English-like';
+  @override String get timeOfDayFormat => r'HH:mm';
+  @override String get openAppDrawerTooltip => r'Öppna navigeringsmenyn';
+  @override String get backButtonTooltip => r'Tillbaka';
+  @override String get closeButtonTooltip => r'Stäng';
+  @override String get deleteButtonTooltip => r'Radera';
+  @override String get nextMonthTooltip => r'Nästa månad';
+  @override String get previousMonthTooltip => r'Föregående månad';
+  @override String get nextPageTooltip => r'Nästa sida';
+  @override String get previousPageTooltip => r'Föregående sida';
+  @override String get showMenuTooltip => r'Visa meny';
+  @override String get aboutListTileTitle => r'Om $applicationName';
+  @override String get licensesPageTitle => r'Licenser';
+  @override String get pageRowsInfoTitle => r'$firstRow–$lastRow av $rowCount';
+  @override String get pageRowsInfoTitleApproximate => r'$firstRow–$lastRow av ungefär $rowCount';
+  @override String get rowsPerPageTitle => r'Rader per sida:';
+  @override String get tabLabel => r'Flik $tabIndex av $tabCount';
+  @override String get selectedRowCountTitleOne => r'1 objekt har markerats';
+  @override String get selectedRowCountTitleOther => r'$selectedRowCount objekt har markerats';
+  @override String get cancelButtonLabel => r'AVBRYT';
+  @override String get closeButtonLabel => r'STÄNG';
+  @override String get continueButtonLabel => r'FORTSÄTT';
+  @override String get copyButtonLabel => r'KOPIERA';
+  @override String get cutButtonLabel => r'KLIPP UT';
+  @override String get okButtonLabel => r'OK';
+  @override String get pasteButtonLabel => r'KLISTRA IN';
+  @override String get selectAllButtonLabel => r'MARKERA ALLA';
+  @override String get viewLicensesButtonLabel => r'VISA LICENSER';
+  @override String get anteMeridiemAbbreviation => r'FM';
+  @override String get postMeridiemAbbreviation => r'EM';
+  @override String get timePickerHourModeAnnouncement => r'Välj timmar';
+  @override String get timePickerMinuteModeAnnouncement => r'Välj minuter';
+  @override String get modalBarrierDismissLabel => r'Stäng';
+  @override String get signedInLabel => r'Inloggad';
+  @override String get hideAccountsLabel => r'Dölj konton';
+  @override String get showAccountsLabel => r'Visa konton';
+  @override String get drawerLabel => r'Navigeringsmeny';
+  @override String get popupMenuLabel => r'Popup-meny';
+  @override String get dialogLabel => r'Dialogruta';
+  @override String get alertDialogLabel => r'TBD';
+  @override String get searchFieldLabel => r'TBD';
+}
+
+// ignore: camel_case_types
 class _Bundle_th extends TranslationBundle {
   const _Bundle_th() : super(null);
   @override String get scriptCategory => r'tall';
@@ -1046,6 +1886,52 @@ class _Bundle_th extends TranslationBundle {
   @override String get dialogLabel => r'กล่องโต้ตอบ';
   @override String get alertDialogLabel => r'เตือนภัย';
   @override String get searchFieldLabel => r'ค้นหา';
+}
+
+// ignore: camel_case_types
+class _Bundle_tl extends TranslationBundle {
+  const _Bundle_tl() : super(null);
+  @override String get scriptCategory => r'English-like';
+  @override String get timeOfDayFormat => r'HH:mm';
+  @override String get openAppDrawerTooltip => r'Buksan ang menu ng navigation';
+  @override String get backButtonTooltip => r'Bumalik';
+  @override String get closeButtonTooltip => r'Isara';
+  @override String get deleteButtonTooltip => r'I-delete';
+  @override String get nextMonthTooltip => r'Susunod na buwan';
+  @override String get previousMonthTooltip => r'Nakaraang buwan';
+  @override String get nextPageTooltip => r'Susunod na page';
+  @override String get previousPageTooltip => r'Nakaraang page';
+  @override String get showMenuTooltip => r'Ipakita ang menu';
+  @override String get aboutListTileTitle => r'Tungkol sa $applicationName';
+  @override String get licensesPageTitle => r'Mga Lisensya';
+  @override String get pageRowsInfoTitle => r'$firstRow–$lastRow ng $rowCount';
+  @override String get pageRowsInfoTitleApproximate => r'$firstRow–$lastRow ng humigit kumulang $rowCount';
+  @override String get rowsPerPageTitle => r'Mga row bawat page:';
+  @override String get tabLabel => r'Tab $tabIndex ng $tabCount';
+  @override String get selectedRowCountTitleOne => r'1 item ang napili';
+  @override String get selectedRowCountTitleOther => r'$selectedRowCount na item ang napili';
+  @override String get cancelButtonLabel => r'KANSELAHIN';
+  @override String get closeButtonLabel => r'ISARA';
+  @override String get continueButtonLabel => r'MAGPATULOY';
+  @override String get copyButtonLabel => r'KOPYAHIN';
+  @override String get cutButtonLabel => r'I-CUT';
+  @override String get okButtonLabel => r'OK';
+  @override String get pasteButtonLabel => r'I-PASTE';
+  @override String get selectAllButtonLabel => r'PILIIN LAHAT';
+  @override String get viewLicensesButtonLabel => r'TINGNAN ANG MGA LISENSYA';
+  @override String get anteMeridiemAbbreviation => r'AM';
+  @override String get postMeridiemAbbreviation => r'PM';
+  @override String get timePickerHourModeAnnouncement => r'Pumili ng mga oras';
+  @override String get timePickerMinuteModeAnnouncement => r'Pumili ng mga minuto';
+  @override String get modalBarrierDismissLabel => r'I-dismiss';
+  @override String get signedInLabel => r'Naka-sign in';
+  @override String get hideAccountsLabel => r'Itago ang mga account';
+  @override String get showAccountsLabel => r'Ipakita ang mga account';
+  @override String get drawerLabel => r'Menu ng navigation';
+  @override String get popupMenuLabel => r'Popup na menu';
+  @override String get dialogLabel => r'Dialog';
+  @override String get alertDialogLabel => r'TBD';
+  @override String get searchFieldLabel => r'TBD';
 }
 
 // ignore: camel_case_types
@@ -1095,6 +1981,54 @@ class _Bundle_tr extends TranslationBundle {
 }
 
 // ignore: camel_case_types
+class _Bundle_uk extends TranslationBundle {
+  const _Bundle_uk() : super(null);
+  @override String get scriptCategory => r'English-like';
+  @override String get timeOfDayFormat => r'HH:mm';
+  @override String get selectedRowCountTitleFew => r'Вибрано $selectedRowCount елементи';
+  @override String get selectedRowCountTitleMany => r'Вибрано $selectedRowCount елементів';
+  @override String get openAppDrawerTooltip => r'Відкрити меню навігації';
+  @override String get backButtonTooltip => r'Назад';
+  @override String get closeButtonTooltip => r'Закрити';
+  @override String get deleteButtonTooltip => r'Видалити';
+  @override String get nextMonthTooltip => r'Наступний місяць';
+  @override String get previousMonthTooltip => r'Попередній місяць';
+  @override String get nextPageTooltip => r'Наступна сторінка';
+  @override String get previousPageTooltip => r'Попередня сторінка';
+  @override String get showMenuTooltip => r'Показати меню';
+  @override String get aboutListTileTitle => r'Про додаток $applicationName';
+  @override String get licensesPageTitle => r'Ліцензії';
+  @override String get pageRowsInfoTitle => r'$firstRow–$lastRow з $rowCount';
+  @override String get pageRowsInfoTitleApproximate => r'$firstRow–$lastRow з приблизно $rowCount';
+  @override String get rowsPerPageTitle => r'Рядків на сторінці:';
+  @override String get tabLabel => r'Вкладка $tabIndex з $tabCount';
+  @override String get selectedRowCountTitleOne => r'Вибрано 1 елемент';
+  @override String get selectedRowCountTitleOther => r'Вибрано $selectedRowCount елемента';
+  @override String get cancelButtonLabel => r'СКАСУВАТИ';
+  @override String get closeButtonLabel => r'ЗАКРИТИ';
+  @override String get continueButtonLabel => r'ПРОДОВЖИТИ';
+  @override String get copyButtonLabel => r'КОПІЮВАТИ';
+  @override String get cutButtonLabel => r'ВИРІЗАТИ';
+  @override String get okButtonLabel => r'OK';
+  @override String get pasteButtonLabel => r'ВСТАВИТИ';
+  @override String get selectAllButtonLabel => r'ВИБРАТИ ВСІ';
+  @override String get viewLicensesButtonLabel => r'ПЕРЕГЛЯНУТИ ЛІЦЕНЗІЇ';
+  @override String get anteMeridiemAbbreviation => r'дп';
+  @override String get postMeridiemAbbreviation => r'пп';
+  @override String get timePickerHourModeAnnouncement => r'Виберіть години';
+  @override String get timePickerMinuteModeAnnouncement => r'Виберіть хвилини';
+  @override String get modalBarrierDismissLabel => r'Усунути';
+  @override String get signedInLabel => r'Ви ввійшли';
+  @override String get hideAccountsLabel => r'Сховати облікові записи';
+  @override String get showAccountsLabel => r'Показати облікові записи';
+  @override String get drawerLabel => r'Меню навігації';
+  @override String get popupMenuLabel => r'Спливаюче меню';
+  @override String get dialogLabel => r'Вікно';
+  @override String get alertDialogLabel => r'TBD';
+  @override String get searchFieldLabel => r'TBD';
+}
+
+// ignore: camel_case_types
 class _Bundle_ur extends TranslationBundle {
   const _Bundle_ur() : super(null);
   @override String get scriptCategory => r'tall';
@@ -1135,7 +2069,7 @@ class _Bundle_ur extends TranslationBundle {
   @override String get modalBarrierDismissLabel => r'برخاست کریں';
   @override String get drawerLabel => r'نیویگیشن مینو';
   @override String get popupMenuLabel => r'پاپ اپ مینو';
-  @override String get dialogLabel => r'ڈائیلاگ';
+  @override String get dialogLabel => r'ڈائلاگ';
   @override String get alertDialogLabel => r'انتباہ';
   @override String get searchFieldLabel => r'تلاش کریں';
 }
@@ -1713,6 +2647,49 @@ class _Bundle_pt_PT extends TranslationBundle {
 }
 
 // ignore: camel_case_types
+class _Bundle_sr_Latn extends TranslationBundle {
+  const _Bundle_sr_Latn() : super(const _Bundle_sr());
+  @override String get selectedRowCountTitleFew => r'Izabrane su $selectedRowCount stavke';
+  @override String get openAppDrawerTooltip => r'Otvorite meni za navigaciju';
+  @override String get backButtonTooltip => r'Nazad';
+  @override String get closeButtonTooltip => r'Zatvorite';
+  @override String get deleteButtonTooltip => r'Izbrišite';
+  @override String get nextMonthTooltip => r'Sledeći mesec';
+  @override String get previousMonthTooltip => r'Prethodni mesec';
+  @override String get nextPageTooltip => r'Sledeća stranica';
+  @override String get previousPageTooltip => r'Prethodna stranica';
+  @override String get showMenuTooltip => r'Prikaži meni';
+  @override String get aboutListTileTitle => r'O aplikaciji $applicationName';
+  @override String get licensesPageTitle => r'Licence';
+  @override String get pageRowsInfoTitle => r'$firstRow – $lastRow od $rowCount';
+  @override String get pageRowsInfoTitleApproximate => r'$firstRow – $lastRow od približno $rowCount';
+  @override String get rowsPerPageTitle => r'Redova po stranici:';
+  @override String get tabLabel => r'$tabIndex. kartica od $tabCount';
+  @override String get selectedRowCountTitleOne => r'Izabrana je 1 stavka';
+  @override String get selectedRowCountTitleOther => r'Izabrano je $selectedRowCount stavki';
+  @override String get cancelButtonLabel => r'OTKAŽI';
+  @override String get closeButtonLabel => r'ZATVORI';
+  @override String get continueButtonLabel => r'NASTAVI';
+  @override String get copyButtonLabel => r'KOPIRAJ';
+  @override String get cutButtonLabel => r'ISECI';
+  @override String get okButtonLabel => r'Potvrdi';
+  @override String get pasteButtonLabel => r'NALEPI';
+  @override String get selectAllButtonLabel => r'IZABERI SVE';
+  @override String get viewLicensesButtonLabel => r'PRIKAŽI LICENCE';
+  @override String get anteMeridiemAbbreviation => r'pre podne';
+  @override String get postMeridiemAbbreviation => r'po podne';
+  @override String get timePickerHourModeAnnouncement => r'Izaberite sate';
+  @override String get timePickerMinuteModeAnnouncement => r'Izaberite minute';
+  @override String get modalBarrierDismissLabel => r'Odbaci';
+  @override String get signedInLabel => r'Prijavljeni ste';
+  @override String get hideAccountsLabel => r'Sakrij naloge';
+  @override String get showAccountsLabel => r'Prikaži naloge';
+  @override String get drawerLabel => r'Meni za navigaciju';
+  @override String get popupMenuLabel => r'Iskačući meni';
+  @override String get dialogLabel => r'Dijalog';
+}
+
+// ignore: camel_case_types
 class _Bundle_zh_HK extends TranslationBundle {
   const _Bundle_zh_HK() : super(const _Bundle_zh());
   @override String get tabLabel => r'第 $tabIndex 個分頁 (共 $tabCount 個)';
@@ -1792,6 +2769,16 @@ TranslationBundle translationBundleForLocale(Locale locale) {
   switch (locale.languageCode) {
     case 'ar':
       return const _Bundle_ar();
+    case 'bg':
+      return const _Bundle_bg();
+    case 'bs':
+      return const _Bundle_bs();
+    case 'ca':
+      return const _Bundle_ca();
+    case 'cs':
+      return const _Bundle_cs();
+    case 'da':
+      return const _Bundle_da();
     case 'de': {
       switch (locale.toString()) {
         case 'de_CH':
@@ -1799,6 +2786,8 @@ TranslationBundle translationBundleForLocale(Locale locale) {
       }
       return const _Bundle_de();
     }
+    case 'el':
+      return const _Bundle_el();
     case 'en': {
       switch (locale.toString()) {
         case 'en_AU':
@@ -1863,8 +2852,14 @@ TranslationBundle translationBundleForLocale(Locale locale) {
       }
       return const _Bundle_es();
     }
+    case 'et':
+      return const _Bundle_et();
     case 'fa':
       return const _Bundle_fa();
+    case 'fi':
+      return const _Bundle_fi();
+    case 'fil':
+      return const _Bundle_fil();
     case 'fr': {
       switch (locale.toString()) {
         case 'fr_CA':
@@ -1876,6 +2871,12 @@ TranslationBundle translationBundleForLocale(Locale locale) {
       return const _Bundle_gsw();
     case 'he':
       return const _Bundle_he();
+    case 'hi':
+      return const _Bundle_hi();
+    case 'hr':
+      return const _Bundle_hr();
+    case 'hu':
+      return const _Bundle_hu();
     case 'id':
       return const _Bundle_id();
     case 'it':
@@ -1884,6 +2885,10 @@ TranslationBundle translationBundleForLocale(Locale locale) {
       return const _Bundle_ja();
     case 'ko':
       return const _Bundle_ko();
+    case 'lt':
+      return const _Bundle_lt();
+    case 'lv':
+      return const _Bundle_lv();
     case 'ms':
       return const _Bundle_ms();
     case 'nb':
@@ -1905,10 +2910,27 @@ TranslationBundle translationBundleForLocale(Locale locale) {
       return const _Bundle_ro();
     case 'ru':
       return const _Bundle_ru();
+    case 'sk':
+      return const _Bundle_sk();
+    case 'sl':
+      return const _Bundle_sl();
+    case 'sr': {
+      switch (locale.toString()) {
+        case 'sr_Latn':
+          return const _Bundle_sr_Latn();
+      }
+      return const _Bundle_sr();
+    }
+    case 'sv':
+      return const _Bundle_sv();
     case 'th':
       return const _Bundle_th();
+    case 'tl':
+      return const _Bundle_tl();
     case 'tr':
       return const _Bundle_tr();
+    case 'uk':
+      return const _Bundle_uk();
     case 'ur':
       return const _Bundle_ur();
     case 'vi':

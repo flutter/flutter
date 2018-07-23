@@ -12,11 +12,11 @@ import 'package:path/path.dart' as path;
 import 'common.dart';
 import 'timeline.dart';
 
-const JsonEncoder _prettyEncoder = const JsonEncoder.withIndent('  ');
+const JsonEncoder _prettyEncoder = JsonEncoder.withIndent('  ');
 
 /// The maximum amount of time considered safe to spend for a frame's build
 /// phase. Anything past that is in the danger of missing the frame as 60FPS.
-const Duration kBuildBudget = const Duration(milliseconds: 8);
+const Duration kBuildBudget = Duration(milliseconds: 8);
 
 /// Extracts statistics from a [Timeline].
 class TimelineSummary {
@@ -162,7 +162,7 @@ class TimelineSummary {
 
   double _averageInMillis(Iterable<Duration> durations) {
     if (durations.isEmpty)
-      return null;
+      throw new ArgumentError('durations is empty!');
 
     final int total = durations.fold<int>(0, (int t, Duration duration) => t + duration.inMilliseconds);
     return total / durations.length;
@@ -170,7 +170,7 @@ class TimelineSummary {
 
   double _percentileInMillis(Iterable<Duration> durations, double percentile) {
     if (durations.isEmpty)
-      return null;
+      throw new ArgumentError('durations is empty!');
 
     assert(percentile >= 0.0 && percentile <= 100.0);
     final List<double> doubles = durations.map<double>((Duration duration) => duration.inMilliseconds.toDouble()).toList();
@@ -181,7 +181,7 @@ class TimelineSummary {
 
   double _maxInMillis(Iterable<Duration> durations) {
     if (durations.isEmpty)
-      return null;
+      throw new ArgumentError('durations is empty!');
 
     return durations
         .map<double>((Duration duration) => duration.inMilliseconds.toDouble())

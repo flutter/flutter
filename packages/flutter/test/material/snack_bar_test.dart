@@ -8,7 +8,7 @@ import 'package:flutter/material.dart';
 void main() {
   testWidgets('SnackBar control test', (WidgetTester tester) async {
     const String helloSnackBar = 'Hello SnackBar';
-    const Key tapTarget = const Key('tap-target');
+    const Key tapTarget = Key('tap-target');
     await tester.pumpWidget(new MaterialApp(
       home: new Scaffold(
         body: new Builder(
@@ -16,8 +16,8 @@ void main() {
             return new GestureDetector(
               onTap: () {
                 Scaffold.of(context).showSnackBar(const SnackBar(
-                  content: const Text(helloSnackBar),
-                  duration: const Duration(seconds: 2)
+                  content: Text(helloSnackBar),
+                  duration: Duration(seconds: 2)
                 ));
               },
               behavior: HitTestBehavior.opaque,
@@ -53,7 +53,7 @@ void main() {
 
   testWidgets('SnackBar twice test', (WidgetTester tester) async {
     int snackBarCount = 0;
-    const Key tapTarget = const Key('tap-target');
+    const Key tapTarget = Key('tap-target');
     await tester.pumpWidget(new MaterialApp(
       home: new Scaffold(
         body: new Builder(
@@ -128,7 +128,7 @@ void main() {
 
   testWidgets('SnackBar cancel test', (WidgetTester tester) async {
     int snackBarCount = 0;
-    const Key tapTarget = const Key('tap-target');
+    const Key tapTarget = Key('tap-target');
     int time;
     ScaffoldFeatureController<SnackBar, SnackBarClosedReason> lastController;
     await tester.pumpWidget(new MaterialApp(
@@ -214,7 +214,7 @@ void main() {
 
   testWidgets('SnackBar dismiss test', (WidgetTester tester) async {
     int snackBarCount = 0;
-    const Key tapTarget = const Key('tap-target');
+    const Key tapTarget = Key('tap-target');
     await tester.pumpWidget(new MaterialApp(
       home: new Scaffold(
         body: new Builder(
@@ -300,7 +300,7 @@ void main() {
     await tester.pumpWidget(new MaterialApp(
       home: new MediaQuery(
         data: const MediaQueryData(
-          padding: const EdgeInsets.only(
+          padding: EdgeInsets.only(
             left: 10.0,
             top: 20.0,
             right: 30.0,
@@ -341,17 +341,17 @@ void main() {
     final Offset snackBarBottomRight = snackBarBox.localToGlobal(snackBarBox.size.bottomRight(Offset.zero));
 
     expect(textBottomLeft.dx - snackBarBottomLeft.dx, 24.0 + 10.0); // margin + left padding
-    expect(snackBarBottomLeft.dy - textBottomLeft.dy, 14.0 + 40.0); // margin + bottom padding
+    expect(snackBarBottomLeft.dy - textBottomLeft.dy, 17.0 + 40.0); // margin + bottom padding
     expect(actionTextBottomLeft.dx - textBottomRight.dx, 24.0);
     expect(snackBarBottomRight.dx - actionTextBottomRight.dx, 24.0 + 30.0); // margin + right padding
-    expect(snackBarBottomRight.dy - actionTextBottomRight.dy, 14.0 + 40.0); // margin + bottom padding
+    expect(snackBarBottomRight.dy - actionTextBottomRight.dy, 17.0 + 40.0); // margin + bottom padding
   });
 
   testWidgets('SnackBar is positioned above BottomNavigationBar', (WidgetTester tester) async {
     await tester.pumpWidget(new MaterialApp(
       home: new MediaQuery(
         data: const MediaQueryData(
-          padding: const EdgeInsets.only(
+          padding: EdgeInsets.only(
             left: 10.0,
             top: 20.0,
             right: 30.0,
@@ -361,8 +361,8 @@ void main() {
         child: new Scaffold(
           bottomNavigationBar: new BottomNavigationBar(
             items: const <BottomNavigationBarItem>[
-              const BottomNavigationBarItem(icon: const Icon(Icons.favorite), title: const Text('Animutation')),
-              const BottomNavigationBarItem(icon: const Icon(Icons.block), title: const Text('Zombo.com')),
+              BottomNavigationBarItem(icon: Icon(Icons.favorite), title: Text('Animutation')),
+              BottomNavigationBarItem(icon: Icon(Icons.block), title: Text('Zombo.com')),
             ],
           ),
           body: new Builder(
@@ -398,10 +398,10 @@ void main() {
     final Offset snackBarBottomRight = snackBarBox.localToGlobal(snackBarBox.size.bottomRight(Offset.zero));
 
     expect(textBottomLeft.dx - snackBarBottomLeft.dx, 24.0 + 10.0); // margin + left padding
-    expect(snackBarBottomLeft.dy - textBottomLeft.dy, 14.0); // margin (with no bottom padding)
+    expect(snackBarBottomLeft.dy - textBottomLeft.dy, 17.0); // margin (with no bottom padding)
     expect(actionTextBottomLeft.dx - textBottomRight.dx, 24.0);
     expect(snackBarBottomRight.dx - actionTextBottomRight.dx, 24.0 + 30.0); // margin + right padding
-    expect(snackBarBottomRight.dy - actionTextBottomRight.dy, 14.0); // margin (with no bottom padding)
+    expect(snackBarBottomRight.dy - actionTextBottomRight.dy, 17.0); // margin (with no bottom padding)
   });
 
   testWidgets('SnackBarClosedReason', (WidgetTester tester) async {
@@ -480,6 +480,54 @@ void main() {
     await tester.pump(); // begin animation
     await tester.pumpAndSettle(const Duration(seconds: 1));
     expect(closedReason, equals(SnackBarClosedReason.timeout));
+  });
+
+  testWidgets('SnackBar default display duration test', (WidgetTester tester) async {
+    const String helloSnackBar = 'Hello SnackBar';
+    const Key tapTarget = Key('tap-target');
+    await tester.pumpWidget(new MaterialApp(
+        home: new Scaffold(
+            body: new Builder(
+                builder: (BuildContext context) {
+                  return new GestureDetector(
+                      onTap: () {
+                        Scaffold.of(context).showSnackBar(const SnackBar(
+                            content: Text(helloSnackBar)
+                        ));
+                      },
+                      behavior: HitTestBehavior.opaque,
+                      child: new Container(
+                          height: 100.0,
+                          width: 100.0,
+                          key: tapTarget
+                      )
+                  );
+                }
+            )
+        )
+    ));
+    expect(find.text(helloSnackBar), findsNothing);
+    await tester.tap(find.byKey(tapTarget));
+    expect(find.text(helloSnackBar), findsNothing);
+    await tester.pump(); // schedule animation
+    expect(find.text(helloSnackBar), findsOneWidget);
+    await tester.pump(); // begin animation
+    expect(find.text(helloSnackBar), findsOneWidget);
+    await tester.pump(const Duration(milliseconds: 750)); // 0.75s // animation last frame; four second timer starts here
+    expect(find.text(helloSnackBar), findsOneWidget);
+    await tester.pump(const Duration(milliseconds: 750)); // 1.50s
+    expect(find.text(helloSnackBar), findsOneWidget);
+    await tester.pump(const Duration(milliseconds: 750)); // 2.25s
+    expect(find.text(helloSnackBar), findsOneWidget);
+    await tester.pump(const Duration(milliseconds: 750)); // 3.00s
+    expect(find.text(helloSnackBar), findsOneWidget);
+    await tester.pump(const Duration(milliseconds: 750)); // 3.75s
+    expect(find.text(helloSnackBar), findsOneWidget);
+    await tester.pump(const Duration(milliseconds: 1000)); // 4.75s // timer triggers to dismiss snackbar, reverse animation is scheduled
+    await tester.pump(); // begin animation
+    expect(find.text(helloSnackBar), findsOneWidget); // frame 0 of dismiss animation
+    await tester.pump(const Duration(milliseconds: 750)); // 5.50s // last frame of animation, snackbar removed from build
+    expect(find.text(helloSnackBar), findsNothing);
   });
 
 }

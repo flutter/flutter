@@ -10,6 +10,7 @@ import 'package:flutter/widgets.dart';
 import 'constants.dart';
 import 'debug.dart';
 import 'theme.dart';
+import 'theme_data.dart';
 import 'toggleable.dart';
 
 /// A material design checkbox.
@@ -58,6 +59,7 @@ class Checkbox extends StatefulWidget {
     this.tristate = false,
     @required this.onChanged,
     this.activeColor,
+    this.materialTapTargetSize,
   }) : assert(tristate != null),
        assert(tristate || value != null),
        super(key: key);
@@ -113,6 +115,15 @@ class Checkbox extends StatefulWidget {
   /// If tristate is false (the default), [value] must not be null.
   final bool tristate;
 
+  /// Configures the minimum size of the tap target.
+  ///
+  /// Defaults to [ThemeData.materialTapTargetSize].
+  ///
+  /// See also:
+  ///
+  ///   * [MaterialTapTargetSize], for a description of how this affects tap targets.
+  final MaterialTapTargetSize materialTapTargetSize;
+
   /// The width of a checkbox widget.
   static const double width = 18.0;
 
@@ -125,12 +136,23 @@ class _CheckboxState extends State<Checkbox> with TickerProviderStateMixin {
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterial(context));
     final ThemeData themeData = Theme.of(context);
+    Size size;
+    switch (widget.materialTapTargetSize ?? themeData.materialTapTargetSize) {
+      case MaterialTapTargetSize.padded:
+        size = const Size(2 * kRadialReactionRadius + 8.0, 2 * kRadialReactionRadius + 8.0);
+        break;
+      case MaterialTapTargetSize.shrinkWrap:
+        size = const Size(2 * kRadialReactionRadius, 2 * kRadialReactionRadius);
+        break;
+    }
+    final BoxConstraints additionalConstraints = new BoxConstraints.tight(size);
     return new _CheckboxRenderObjectWidget(
       value: widget.value,
       tristate: widget.tristate,
       activeColor: widget.activeColor ?? themeData.toggleableActiveColor,
       inactiveColor: widget.onChanged != null ? themeData.unselectedWidgetColor : themeData.disabledColor,
       onChanged: widget.onChanged,
+      additionalConstraints: additionalConstraints,
       vsync: this,
     );
   }
@@ -145,6 +167,7 @@ class _CheckboxRenderObjectWidget extends LeafRenderObjectWidget {
     @required this.inactiveColor,
     @required this.onChanged,
     @required this.vsync,
+    @required this.additionalConstraints,
   }) : assert(tristate != null),
        assert(tristate || value != null),
        assert(activeColor != null),
@@ -158,6 +181,7 @@ class _CheckboxRenderObjectWidget extends LeafRenderObjectWidget {
   final Color inactiveColor;
   final ValueChanged<bool> onChanged;
   final TickerProvider vsync;
+  final BoxConstraints additionalConstraints;
 
   @override
   _RenderCheckbox createRenderObject(BuildContext context) => new _RenderCheckbox(
@@ -167,6 +191,7 @@ class _CheckboxRenderObjectWidget extends LeafRenderObjectWidget {
     inactiveColor: inactiveColor,
     onChanged: onChanged,
     vsync: vsync,
+    additionalConstraints: additionalConstraints,
   );
 
   @override
@@ -177,12 +202,13 @@ class _CheckboxRenderObjectWidget extends LeafRenderObjectWidget {
       ..activeColor = activeColor
       ..inactiveColor = inactiveColor
       ..onChanged = onChanged
+      ..additionalConstraints = additionalConstraints
       ..vsync = vsync;
   }
 }
 
 const double _kEdgeSize = Checkbox.width;
-const Radius _kEdgeRadius = const Radius.circular(1.0);
+const Radius _kEdgeRadius = Radius.circular(1.0);
 const double _kStrokeWidth = 2.0;
 
 class _RenderCheckbox extends RenderToggleable {
@@ -191,6 +217,7 @@ class _RenderCheckbox extends RenderToggleable {
     bool tristate,
     Color activeColor,
     Color inactiveColor,
+    BoxConstraints additionalConstraints,
     ValueChanged<bool> onChanged,
     @required TickerProvider vsync,
   }): _oldValue = value,
@@ -200,7 +227,7 @@ class _RenderCheckbox extends RenderToggleable {
         activeColor: activeColor,
         inactiveColor: inactiveColor,
         onChanged: onChanged,
-        size: const Size(2 * kRadialReactionRadius, 2 * kRadialReactionRadius),
+        additionalConstraints: additionalConstraints,
         vsync: vsync,
       );
 
@@ -255,9 +282,9 @@ class _RenderCheckbox extends RenderToggleable {
     // As t goes from 0.0 to 1.0, animate the two check mark strokes from the
     // short side to the long side.
     final Path path = new Path();
-    const Offset start = const Offset(_kEdgeSize * 0.15, _kEdgeSize * 0.45);
-    const Offset mid = const Offset(_kEdgeSize * 0.4, _kEdgeSize * 0.7);
-    const Offset end = const Offset(_kEdgeSize * 0.85, _kEdgeSize * 0.25);
+    const Offset start = Offset(_kEdgeSize * 0.15, _kEdgeSize * 0.45);
+    const Offset mid = Offset(_kEdgeSize * 0.4, _kEdgeSize * 0.7);
+    const Offset end = Offset(_kEdgeSize * 0.85, _kEdgeSize * 0.25);
     if (t < 0.5) {
       final double strokeT = t * 2.0;
       final Offset drawMid = Offset.lerp(start, mid, strokeT);
@@ -277,9 +304,9 @@ class _RenderCheckbox extends RenderToggleable {
     assert(t >= 0.0 && t <= 1.0);
     // As t goes from 0.0 to 1.0, animate the horizontal line from the
     // mid point outwards.
-    const Offset start = const Offset(_kEdgeSize * 0.2, _kEdgeSize * 0.5);
-    const Offset mid = const Offset(_kEdgeSize * 0.5, _kEdgeSize * 0.5);
-    const Offset end = const Offset(_kEdgeSize * 0.8, _kEdgeSize * 0.5);
+    const Offset start = Offset(_kEdgeSize * 0.2, _kEdgeSize * 0.5);
+    const Offset mid = Offset(_kEdgeSize * 0.5, _kEdgeSize * 0.5);
+    const Offset end = Offset(_kEdgeSize * 0.8, _kEdgeSize * 0.5);
     final Offset drawStart = Offset.lerp(start, mid, 1.0 - t);
     final Offset drawEnd = Offset.lerp(mid, end, t);
     canvas.drawLine(origin + drawStart, origin + drawEnd, paint);

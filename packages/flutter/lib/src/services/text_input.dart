@@ -10,6 +10,7 @@ import 'package:flutter/foundation.dart';
 
 import 'message_codec.dart';
 import 'system_channels.dart';
+import 'system_chrome.dart';
 import 'text_editing.dart';
 
 export 'dart:ui' show TextAffinity;
@@ -51,26 +52,26 @@ class TextInputType {
   /// Optimize for textual information.
   ///
   /// Requests the default platform keyboard.
-  static const TextInputType text = const TextInputType._(0);
+  static const TextInputType text = TextInputType._(0);
 
   /// Optimize for multi-line textual information.
   ///
   /// Requests the default platform keyboard, but accepts newlines when the
   /// enter key is pressed. This is the input type used for all multi-line text
   /// fields.
-  static const TextInputType multiline = const TextInputType._(1);
+  static const TextInputType multiline = TextInputType._(1);
 
   /// Optimize for unsigned numerical information without a decimal point.
   ///
   /// Requests a default keyboard with ready access to the number keys.
   /// Additional options, such as decimal point and/or positive/negative
   /// signs, can be requested using [new TextInputType.numberWithOptions].
-  static const TextInputType number = const TextInputType.numberWithOptions();
+  static const TextInputType number = TextInputType.numberWithOptions();
 
   /// Optimize for telephone numbers.
   ///
   /// Requests a keyboard with ready access to the number keys, "*", and "#".
-  static const TextInputType phone = const TextInputType._(3);
+  static const TextInputType phone = TextInputType._(3);
 
   /// Optimize for date and time information.
   ///
@@ -78,25 +79,25 @@ class TextInputType {
   ///
   /// On Android, requests a keyboard with ready access to the number keys,
   /// ":", and "-".
-  static const TextInputType datetime = const TextInputType._(4);
+  static const TextInputType datetime = TextInputType._(4);
 
   /// Optimize for email addresses.
   ///
   /// Requests a keyboard with ready access to the "@" and "." keys.
-  static const TextInputType emailAddress = const TextInputType._(5);
+  static const TextInputType emailAddress = TextInputType._(5);
 
   /// Optimize for URLs.
   ///
   /// Requests a keyboard with ready access to the "/" and "." keys.
-  static const TextInputType url = const TextInputType._(6);
+  static const TextInputType url = TextInputType._(6);
 
   /// All possible enum values.
-  static const List<TextInputType> values = const <TextInputType>[
+  static const List<TextInputType> values = <TextInputType>[
     text, multiline, number, phone, datetime, emailAddress, url,
   ];
 
   // Corresponding string name for each of the [values].
-  static const List<String> _names = const <String>[
+  static const List<String> _names = <String>[
     'text', 'multiline', 'number', 'phone', 'datetime', 'emailAddress', 'url',
   ];
 
@@ -104,7 +105,7 @@ class TextInputType {
   String get _name => 'TextInputType.${_names[index]}';
 
   /// Returns a representation of this object as a JSON object.
-  Map<String, dynamic> toJSON() {
+  Map<String, dynamic> toJson() {
     return <String, dynamic>{
       'name': _name,
       'signed': signed,
@@ -313,6 +314,34 @@ enum TextInputAction {
   newline,
 }
 
+/// Configures how the platform keyboard will select an uppercase or
+/// lowercase keyboard.
+///
+/// Only supports text keyboards, other keyboard types will ignore this
+/// configuration. Capitalization is locale-aware.
+enum TextCapitalization {
+  /// Defaults to an uppercase keyboard for the first letter of each word.
+  ///
+  /// Corresponds to `InputType.TYPE_TEXT_FLAG_CAP_WORDS` on Android, and
+  /// `UITextAutocapitalizationTypeWords` on iOS.
+  words,
+
+  /// Defaults to an uppercase keyboard for the first letter of each sentence.
+  ///
+  /// Corresponds to `InputType.TYPE_TEXT_FLAG_CAP_SENTENCES` on Android, and
+  /// `UITextAutocapitalizationTypeSentences` on iOS.
+  sentences,
+
+  /// Defaults to an uppercase keyboard for each character.
+  ///
+  /// Corresponds to `InputType.TYPE_TEXT_FLAG_CAP_CHARACTERS` on Android, and
+  /// `UITextAutocapitalizationTypeAllCharacters` on iOS.
+  characters,
+
+  /// Defaults to a lowercase keyboard.
+  none,
+}
+
 /// Controls the visual appearance of the text input control.
 ///
 /// Many [TextInputAction]s are common between Android and iOS. However, if an
@@ -341,10 +370,14 @@ class TextInputConfiguration {
     this.autocorrect = true,
     this.actionLabel,
     this.inputAction = TextInputAction.done,
+    this.keyboardAppearance = Brightness.light,
+    this.textCapitalization = TextCapitalization.none,
   }) : assert(inputType != null),
        assert(obscureText != null),
        assert(autocorrect != null),
-       assert(inputAction != null);
+       assert(keyboardAppearance != null),
+       assert(inputAction != null),
+       assert(textCapitalization != null);
 
   /// The type of information for which to optimize the text input control.
   final TextInputType inputType;
@@ -365,14 +398,33 @@ class TextInputConfiguration {
   /// What kind of action to request for the action button on the IME.
   final TextInputAction inputAction;
 
+  /// Specifies how platforms may automatically capitialize text entered by the
+  /// user.
+  ///
+  /// Defaults to [TextCapitalization.none].
+  ///
+  /// See also:
+  ///
+  ///   * [TextCapitalization], for a description of each capitalization behavior.
+  final TextCapitalization textCapitalization;
+
+  /// The appearance of the keyboard.
+  ///
+  /// This setting is only honored on iOS devices.
+  ///
+  /// Defaults to [Brightness.light].
+  final Brightness keyboardAppearance;
+
   /// Returns a representation of this object as a JSON object.
-  Map<String, dynamic> toJSON() {
+  Map<String, dynamic> toJson() {
     return <String, dynamic>{
-      'inputType': inputType.toJSON(),
+      'inputType': inputType.toJson(),
       'obscureText': obscureText,
       'autocorrect': autocorrect,
       'actionLabel': actionLabel,
       'inputAction': inputAction.toString(),
+      'textCapitalization': textCapitalization.toString(),
+      'keyboardAppearance': keyboardAppearance.toString(),
     };
   }
 }
@@ -444,7 +496,7 @@ class TextEditingValue {
   final TextRange composing;
 
   /// A value that corresponds to the empty string with no selection and no composing range.
-  static const TextEditingValue empty = const TextEditingValue();
+  static const TextEditingValue empty = TextEditingValue();
 
   /// Creates a copy of this value but with the given fields replaced with the new values.
   TextEditingValue copyWith({
@@ -675,7 +727,7 @@ class TextInput {
     _clientHandler._currentConnection = connection;
     SystemChannels.textInput.invokeMethod(
       'TextInput.setClient',
-      <dynamic>[ connection._id, configuration.toJSON() ],
+      <dynamic>[ connection._id, configuration.toJson() ],
     );
     return connection;
   }

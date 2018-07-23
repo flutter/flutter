@@ -57,13 +57,13 @@ enum TimelineStream {
   vm,
 }
 
-const List<TimelineStream> _defaultStreams = const <TimelineStream>[TimelineStream.all];
+const List<TimelineStream> _defaultStreams = <TimelineStream>[TimelineStream.all];
 
 /// Default timeout for short-running RPCs.
-const Duration _kShortTimeout = const Duration(seconds: 5);
+const Duration _kShortTimeout = Duration(seconds: 5);
 
 /// Default timeout for awaiting an Isolate to become runnable.
-const Duration _kIsolateLoadRunnableTimeout = const Duration(minutes: 1);
+const Duration _kIsolateLoadRunnableTimeout = Duration(minutes: 1);
 
 /// Default timeout for long-running RPCs.
 final Duration _kLongTimeout = _kShortTimeout * 6;
@@ -104,7 +104,7 @@ final Logger _log = new Logger('FlutterDriver');
 ///
 ///     driver.tap(find.text('Save'));
 ///     driver.scroll(find.byValueKey(42));
-const CommonFinders find = const CommonFinders._();
+const CommonFinders find = CommonFinders._();
 
 /// Computes a value.
 ///
@@ -373,7 +373,7 @@ class FlutterDriver {
     if (_logCommunicationToFile) {
       final f.File file = fs.file(p.join(testOutputsDirectory, 'flutter_driver_commands_$_driverId.log'));
       file.createSync(recursive: true); // no-op if file exists
-      file.writeAsStringSync('${new DateTime.now()} $message\n', mode: f.FileMode.APPEND, flush: true); // ignore: deprecated_member_use
+      file.writeAsStringSync('${new DateTime.now()} $message\n', mode: f.FileMode.append, flush: true);
     }
   }
 
@@ -571,8 +571,22 @@ class FlutterDriver {
     return result.changedState;
   }
 
+<<<<<<< HEAD
   Future<int> getSemanticsId(SerializableFinder finder, { Duration timeout = _kShortTimeout}) async {
     final GetSemanticsIdResult result = GetSemanticsIdResult.fromJson(await _sendCommand(new GetSemanticsId(finder, timeout: timeout)));
+=======
+  /// Retrieves the semantics node id for the object returned by `finder`, or
+  /// the nearest ancestor with a semantics node.
+  ///
+  /// Throws an error if `finder` returns multiple elements or a semantics
+  /// node is not found.
+  ///
+  /// Semantics must be enabled to use this method, either using a platform
+  /// specific shell command or [setSemantics].
+  Future<int> getSemanticsId(SerializableFinder finder, { Duration timeout = _kShortTimeout}) async {
+    final Map<String, dynamic> jsonResponse = await _sendCommand(new GetSemanticsId(finder, timeout: timeout));
+    final GetSemanticsIdResult result = GetSemanticsIdResult.fromJson(jsonResponse);
+>>>>>>> f44f625c0641e888e19e1a1419d943f949cdcc4c
     return result.id;
   }
 

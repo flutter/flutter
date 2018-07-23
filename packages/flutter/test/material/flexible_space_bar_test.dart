@@ -13,7 +13,7 @@ void main() {
         home: new Scaffold(
           appBar: new AppBar(
             flexibleSpace: const FlexibleSpaceBar(
-              title: const Text('X')
+              title: Text('X')
             )
           )
         )
@@ -34,7 +34,7 @@ void main() {
         home: new Scaffold(
           appBar: new AppBar(
             flexibleSpace: const FlexibleSpaceBar(
-              title: const Text('X')
+              title: Text('X')
             )
           )
         )

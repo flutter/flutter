@@ -29,7 +29,7 @@ export 'package:flutter/rendering.dart' show SelectionChangedCause;
 /// (including the cursor location).
 typedef void SelectionChangedCallback(TextSelection selection, SelectionChangedCause cause);
 
-const Duration _kCursorBlinkHalfPeriod = const Duration(milliseconds: 500);
+const Duration _kCursorBlinkHalfPeriod = Duration(milliseconds: 500);
 
 // Number of cursor ticks during which the most recently entered character
 // is shown in an obscured text field.
@@ -202,12 +202,17 @@ class EditableText extends StatefulWidget {
     this.selectionControls,
     TextInputType keyboardType,
     this.textInputAction = TextInputAction.done,
+    this.textCapitalization = TextCapitalization.none,
     this.onChanged,
     this.onEditingComplete,
     this.onSubmitted,
     this.onSelectionChanged,
     List<TextInputFormatter> inputFormatters,
     this.rendererIgnoresPointer = false,
+    this.cursorWidth = 1.0,
+    this.cursorRadius,
+    this.scrollPadding = const EdgeInsets.all(20.0),
+    this.keyboardAppearance = Brightness.light,
   }) : assert(controller != null),
        assert(focusNode != null),
        assert(obscureText != null),
@@ -218,6 +223,7 @@ class EditableText extends StatefulWidget {
        assert(maxLines == null || maxLines > 0),
        assert(autofocus != null),
        assert(rendererIgnoresPointer != null),
+       assert(scrollPadding != null),
        keyboardType = keyboardType ?? (maxLines == 1 ? TextInputType.text : TextInputType.multiline),
        inputFormatters = maxLines == 1
            ? (
@@ -265,6 +271,19 @@ class EditableText extends StatefulWidget {
   ///
   /// Defaults to the ambient [Directionality], if any.
   final TextDirection textDirection;
+
+  /// Configures how the platform keyboard will select an uppercase or
+  /// lowercase keyboard.
+  ///
+  /// Only supports text keyboards, other keyboard types will ignore this
+  /// configuration. Capitalization is locale-aware.
+  ///
+  /// Defaults to [TextCapitalization.none]. Must not be null.
+  ///
+  /// See also:
+  ///
+  ///   * [TextCapitalization], for a description of each capitalization behavior.
+  final TextCapitalization textCapitalization;
 
   /// Used to select a font when the same Unicode character can
   /// be rendered differently, depending on the locale.
@@ -352,6 +371,33 @@ class EditableText extends StatefulWidget {
   ///
   /// This property is false by default.
   final bool rendererIgnoresPointer;
+
+  /// How thick the cursor will be.
+  ///
+  /// Defaults to 1.0
+  final double cursorWidth;
+
+  /// How rounded the corners of the cursor should be.
+  ///
+  /// By default, the cursor has a Radius of zero.
+  final Radius cursorRadius;
+
+  /// The appearance of the keyboard.
+  ///
+  /// This setting is only honored on iOS devices.
+  ///
+  /// Defaults to [Brightness.light].
+  final Brightness keyboardAppearance;
+
+  /// Configures padding to edges surrounding a [Scrollable] when the Textfield scrolls into view.
+  ///
+  /// When this widget receives focus and is not completely visible (for example scrolled partially
+  /// off the screen or overlapped by the keyboard)
+  /// then it will attempt to make itself visible by scrolling a surrounding [Scrollable], if one is present.
+  /// This value controls how far from the edges of a [Scrollable] the TextField will be positioned after the scroll.
+  ///
+  /// Defaults to EdgeInserts.all(20.0).
+  final EdgeInsets scrollPadding;
 
   @override
   EditableTextState createState() => new EditableTextState();
@@ -548,6 +594,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
               inputAction: widget.keyboardType == TextInputType.multiline
                   ? TextInputAction.newline
                   : widget.textInputAction,
+              textCapitalization: widget.textCapitalization,
           )
       )..setEditingState(localValue);
     }
@@ -644,7 +691,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   }
 
   // Animation configuration for scrolling the caret back on screen.
-  static const Duration _caretAnimationDuration = const Duration(milliseconds: 100);
+  static const Duration _caretAnimationDuration = Duration(milliseconds: 100);
   static const Curve _caretAnimationCurve = Curves.fastOutSlowIn;
 
   bool _showCaretOnScreenScheduled = false;
@@ -666,9 +713,15 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
         curve: _caretAnimationCurve,
       );
       final Rect newCaretRect = _getCaretRectAtScrollOffset(_currentCaretRect, scrollOffsetForCaret);
+      // Enlarge newCaretRect by scrollPadding to ensure that caret is not positioned directly at the edge after scrolling.
+      final Rect inflatedRect = Rect.fromLTRB(
+          newCaretRect.left - widget.scrollPadding.left,
+          newCaretRect.top - widget.scrollPadding.top,
+          newCaretRect.right + widget.scrollPadding.right,
+          newCaretRect.bottom + widget.scrollPadding.bottom
+      );
       _editableKey.currentContext.findRenderObject().showOnScreen(
-        // Inflate ensures that caret is not positioned directly at the edge.
-        rect: newCaretRect.inflate(20.0),
+        rect: inflatedRect,
         duration: _caretAnimationDuration,
         curve: _caretAnimationCurve,
       );
@@ -810,6 +863,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     FocusScope.of(context).reparentIfNeeded(widget.focusNode);
     super.build(context); // See AutomaticKeepAliveClientMixin.
     final TextSelectionControls controls = widget.selectionControls;
+
     return new Scrollable(
       excludeFromSemantics: true,
       axisDirection: _isMultiline ? AxisDirection.down : AxisDirection.right,
@@ -841,6 +895,8 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
               onSelectionChanged: _handleSelectionChanged,
               onCaretChanged: _handleCaretChanged,
               rendererIgnoresPointer: widget.rendererIgnoresPointer,
+              cursorWidth: widget.cursorWidth,
+              cursorRadius: widget.cursorRadius,
             ),
           ),
         );
@@ -902,6 +958,8 @@ class _Editable extends LeafRenderObjectWidget {
     this.onSelectionChanged,
     this.onCaretChanged,
     this.rendererIgnoresPointer = false,
+    this.cursorWidth,
+    this.cursorRadius,
   }) : assert(textDirection != null),
        assert(rendererIgnoresPointer != null),
        super(key: key);
@@ -923,6 +981,8 @@ class _Editable extends LeafRenderObjectWidget {
   final SelectionChangedHandler onSelectionChanged;
   final CaretChangedHandler onCaretChanged;
   final bool rendererIgnoresPointer;
+  final double cursorWidth;
+  final Radius cursorRadius;
 
   @override
   RenderEditable createRenderObject(BuildContext context) {
@@ -943,6 +1003,8 @@ class _Editable extends LeafRenderObjectWidget {
       onCaretChanged: onCaretChanged,
       ignorePointer: rendererIgnoresPointer,
       obscureText: obscureText,
+      cursorWidth: cursorWidth,
+      cursorRadius: cursorRadius,
     );
   }
 
@@ -964,6 +1026,8 @@ class _Editable extends LeafRenderObjectWidget {
       ..onSelectionChanged = onSelectionChanged
       ..onCaretChanged = onCaretChanged
       ..ignorePointer = rendererIgnoresPointer
-      ..obscureText = obscureText;
+      ..obscureText = obscureText
+      ..cursorWidth = cursorWidth
+      ..cursorRadius = cursorRadius;
   }
 }

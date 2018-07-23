@@ -121,9 +121,9 @@ Widget buildLeftRightApp({ List<String> tabs, String value }) {
           ),
         ),
         body: const TabBarView(
-          children: const <Widget>[
-            const Center(child: const Text('LEFT CHILD')),
-            const Center(child: const Text('RIGHT CHILD'))
+          children: <Widget>[
+            Center(child: Text('LEFT CHILD')),
+            Center(child: Text('RIGHT CHILD'))
           ]
         )
       )
@@ -231,7 +231,7 @@ void main() {
 
   testWidgets('Scrollable TabBar tap centers selected tab', (WidgetTester tester) async {
     final List<String> tabs = <String>['AAAAAA', 'BBBBBB', 'CCCCCC', 'DDDDDD', 'EEEEEE', 'FFFFFF', 'GGGGGG', 'HHHHHH', 'IIIIII', 'JJJJJJ', 'KKKKKK', 'LLLLLL'];
-    const Key tabBarKey = const Key('TabBar');
+    const Key tabBarKey = Key('TabBar');
     await tester.pumpWidget(buildFrame(tabs: tabs, value: 'AAAAAA', isScrollable: true, tabBarKey: tabBarKey));
     final TabController controller = DefaultTabController.of(tester.element(find.text('AAAAAA')));
     expect(controller, isNotNull);
@@ -251,7 +251,7 @@ void main() {
 
   testWidgets('TabBar can be scrolled independent of the selection', (WidgetTester tester) async {
     final List<String> tabs = <String>['AAAA', 'BBBB', 'CCCC', 'DDDD', 'EEEE', 'FFFF', 'GGGG', 'HHHH', 'IIII', 'JJJJ', 'KKKK', 'LLLL'];
-    const Key tabBarKey = const Key('TabBar');
+    const Key tabBarKey = Key('TabBar');
     await tester.pumpWidget(buildFrame(tabs: tabs, value: 'AAAA', isScrollable: true, tabBarKey: tabBarKey));
     final TabController controller = DefaultTabController.of(tester.element(find.text('AAAA')));
     expect(controller, isNotNull);
@@ -539,8 +539,8 @@ void main() {
           body: new TabBarView(
             controller: controller,
             children: const <Widget>[
-              const Center(child: const Text('LEFT CHILD')),
-              const Center(child: const Text('RIGHT CHILD'))
+              Center(child: Text('LEFT CHILD')),
+              Center(child: Text('RIGHT CHILD'))
             ]
           ),
         ),
@@ -598,9 +598,9 @@ void main() {
           body: new TabBarView(
             controller: controller,
             children: const <Widget>[
-              const Center(child: const Text('CHILD A')),
-              const Center(child: const Text('CHILD B')),
-              const Center(child: const Text('CHILD C')),
+              Center(child: Text('CHILD A')),
+              Center(child: Text('CHILD B')),
+              Center(child: Text('CHILD C')),
             ]
           ),
         ),
@@ -690,7 +690,7 @@ void main() {
       boilerplate(
         child: new TabBarView(
           controller: controller,
-          children: const <Widget>[ const Text('First'), const Text('Second') ],
+          children: const <Widget>[ Text('First'), Text('Second') ],
         ),
       ),
     );
@@ -745,7 +745,7 @@ void main() {
 
     final List<String> tabs = <String>['A', 'B'];
 
-    const Color indicatorColor = const Color(0xFFFF0000);
+    const Color indicatorColor = Color(0xFFFF0000);
     await tester.pumpWidget(buildFrame(tabs: tabs, value: 'A', indicatorColor: indicatorColor));
 
     final RenderBox box = tester.renderObject(find.byType(TabBar));
@@ -789,7 +789,7 @@ void main() {
         child: new TabBar(
           key: new UniqueKey(),
           controller: controller,
-          tabs: const <Widget>[ const Text('A'), const Text('B') ],
+          tabs: const <Widget>[ Text('A'), Text('B') ],
         ),
       );
     }
@@ -804,7 +804,7 @@ void main() {
     await tester.pump(const Duration(milliseconds: 300));
   });
 
-  testWidgets('TabBarView scrolls end very VERY close to a new page', (WidgetTester tester) async {
+  testWidgets('TabBarView scrolls end close to a new page', (WidgetTester tester) async {
     // This is a regression test for https://github.com/flutter/flutter/issues/9375
 
     final TabController tabController = new TabController(
@@ -823,9 +823,9 @@ void main() {
             child: new TabBarView(
               controller: tabController,
               children: const <Widget>[
-                const Center(child: const Text('0')),
-                const Center(child: const Text('1')),
-                const Center(child: const Text('2')),
+                Center(child: Text('0')),
+                Center(child: Text('1')),
+                Center(child: Text('2')),
               ],
             ),
           ),
@@ -845,15 +845,23 @@ void main() {
     expect(position.pixels, 400.0);
 
     // Not close enough to switch to page 2
-    pageController.jumpTo(800.0 - 1.25 * position.physics.tolerance.distance);
+    pageController.jumpTo(500.0);
     expect(tabController.index, 1);
 
     // Close enough to switch to page 2
-    pageController.jumpTo(800.0 - 0.75 * position.physics.tolerance.distance);
+    pageController.jumpTo(700.0);
     expect(tabController.index, 2);
+
+    // Same behavior going left: not left enough to get to page 0
+    pageController.jumpTo(300.0);
+    expect(tabController.index, 1);
+
+    // Left enough to get to page 0
+    pageController.jumpTo(100.0);
+    expect(tabController.index, 0);
   });
 
-  testWidgets('TabBarView scrolls end very close to a new page with custom physics', (WidgetTester tester) async {
+  testWidgets('TabBarView scrolls end close to a new page with custom physics', (WidgetTester tester) async {
     final TabController tabController = new TabController(
       vsync: const TestVSync(),
       initialIndex: 1,
@@ -871,9 +879,9 @@ void main() {
               controller: tabController,
               physics: const TestScrollPhysics(),
               children: const <Widget>[
-                const Center(child: const Text('0')),
-                const Center(child: const Text('1')),
-                const Center(child: const Text('2')),
+                Center(child: Text('0')),
+                Center(child: Text('1')),
+                Center(child: Text('2')),
               ],
             ),
           ),
@@ -893,12 +901,20 @@ void main() {
     expect(position.pixels, 400.0);
 
     // Not close enough to switch to page 2
-    pageController.jumpTo(800.0 - 1.25 * position.physics.tolerance.distance);
+    pageController.jumpTo(500.0);
     expect(tabController.index, 1);
 
     // Close enough to switch to page 2
-    pageController.jumpTo(800.0 - 0.75 * position.physics.tolerance.distance);
+    pageController.jumpTo(700.0);
     expect(tabController.index, 2);
+
+    // Same behavior going left: not left enough to get to page 0
+    pageController.jumpTo(300.0);
+    expect(tabController.index, 1);
+
+    // Left enough to get to page 0
+    pageController.jumpTo(100.0);
+    expect(tabController.index, 0);
   });
 
   testWidgets('Scrollable TabBar with a non-zero TabController initialIndex', (WidgetTester tester) async {
@@ -935,7 +951,7 @@ void main() {
   });
 
   testWidgets('TabBar with indicatorWeight, indicatorPadding (LTR)', (WidgetTester tester) async {
-    const Color indicatorColor = const Color(0xFF00FF00);
+    const Color indicatorColor = Color(0xFF00FF00);
     const double indicatorWeight = 8.0;
     const double padLeft = 8.0;
     const double padRight = 4.0;
@@ -994,7 +1010,7 @@ void main() {
   });
 
   testWidgets('TabBar with indicatorWeight, indicatorPadding (RTL)', (WidgetTester tester) async {
-    const Color indicatorColor = const Color(0xFF00FF00);
+    const Color indicatorColor = Color(0xFF00FF00);
     const double indicatorWeight = 8.0;
     const double padLeft = 8.0;
     const double padRight = 4.0;
@@ -1499,12 +1515,12 @@ void main() {
           children: <Widget>[
             new TabBar(
               controller: controller,
-              tabs: const <Widget>[const Tab(text: 'TAB')],
+              tabs: const <Widget>[Tab(text: 'TAB')],
             ),
             new Flexible(
               child: new TabBarView(
                 controller: controller,
-                children: const <Widget>[const Text('PAGE')],
+                children: const <Widget>[Text('PAGE')],
               ),
             ),
           ],
@@ -1556,12 +1572,12 @@ void main() {
             new TabBar(
               controller: controller,
               indicatorWeight: 30.0,
-              tabs: const <Widget>[const Tab(text: 'TAB1'), const Tab(text: 'TAB2')],
+              tabs: const <Widget>[Tab(text: 'TAB1'), Tab(text: 'TAB2')],
             ),
             new Flexible(
               child: new TabBarView(
                 controller: controller,
-                children: const <Widget>[const Text('PAGE1'), const Text('PAGE2')],
+                children: const <Widget>[Text('PAGE1'), Text('PAGE2')],
               ),
             ),
           ],
@@ -1672,8 +1688,8 @@ void main() {
           child: new TabBar(
             controller: controller,
             tabs: const <Tab>[
-              const Tab(text: 'LEFT'),
-              const Tab(text: 'RIGHT'),
+              Tab(text: 'LEFT'),
+              Tab(text: 'RIGHT'),
             ],
           ),
         ),

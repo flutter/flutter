@@ -51,7 +51,7 @@ class CupertinoSwitch extends StatefulWidget {
     Key key,
     @required this.value,
     @required this.onChanged,
-    this.activeColor = CupertinoColors.activeGreen,
+    this.activeColor,
   }) : super(key: key);
 
   /// Whether this switch is on or off.
@@ -82,6 +82,8 @@ class CupertinoSwitch extends StatefulWidget {
   final ValueChanged<bool> onChanged;
 
   /// The color to use when this switch is on.
+  ///
+  /// Defaults to [CupertinoColors.activeGreen].
   final Color activeColor;
 
   @override
@@ -100,7 +102,7 @@ class _CupertinoSwitchState extends State<CupertinoSwitch> with TickerProviderSt
   Widget build(BuildContext context) {
     return new _CupertinoSwitchRenderObjectWidget(
       value: widget.value,
-      activeColor: widget.activeColor,
+      activeColor: widget.activeColor ?? CupertinoColors.activeGreen,
       onChanged: widget.onChanged,
       vsync: this,
     );
@@ -153,8 +155,8 @@ const double _kSwitchWidth = 59.0;
 const double _kSwitchHeight = 39.0;
 
 const Color _kTrackColor = CupertinoColors.lightBackgroundGray;
-const Duration _kReactionDuration = const Duration(milliseconds: 300);
-const Duration _kToggleDuration = const Duration(milliseconds: 200);
+const Duration _kReactionDuration = Duration(milliseconds: 300);
+const Duration _kToggleDuration = Duration(milliseconds: 200);
 
 class _RenderCupertinoSwitch extends RenderConstrainedBox {
   _RenderCupertinoSwitch({

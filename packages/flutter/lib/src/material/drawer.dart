@@ -41,7 +41,7 @@ enum DrawerAlignment {
 const double _kWidth = 304.0;
 const double _kEdgeDragWidth = 20.0;
 const double _kMinFlingVelocity = 365.0;
-const Duration _kBaseSettleDuration = const Duration(milliseconds: 246);
+const Duration _kBaseSettleDuration = Duration(milliseconds: 246);
 
 /// A material design panel that slides in horizontally from the edge of a
 /// [Scaffold] to show navigation links in an application.
@@ -102,14 +102,14 @@ class Drawer extends StatelessWidget {
   /// {@macro flutter.widgets.child}
   final Widget child;
 
-  /// The semantic label of the dialog used by accessibility frameworks to 
+  /// The semantic label of the dialog used by accessibility frameworks to
   /// announce screen transitions when the drawer is opened and closed.
-  /// 
+  ///
   /// If this label is not provided, it will default to
   /// [MaterialLocalizations.drawerLabel].
-  /// 
+  ///
   /// See also:
-  /// 
+  ///
   ///  * [SemanticsConfiguration.namesRoute], for a description of how this
   ///    value is used.
   final String semanticLabel;

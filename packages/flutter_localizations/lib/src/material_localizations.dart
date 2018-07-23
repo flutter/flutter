@@ -40,16 +40,31 @@ import 'widgets_localizations.dart';
 /// This class supports locales with the following [Locale.languageCode]s:
 ///
 ///   * ar - Arabic
+///   * bg - Bulgarian
+///   * bs - Bosnian
+///   * ca - Catalan
+///   * cs - Czech
+///   * da - Danish
 ///   * de - German
+///   * el - Greek
 ///   * en - English
 ///   * es - Spanish
+///   * et - Estonian
 ///   * fa - Farsi
+///   * fi - Finnish
+///   * fil - Fillipino
 ///   * fr - French
+///   * gsw - Swiss German
+///   * hi - Hindi
 ///   * he - Hebrew
+///   * hr - Croatian
+///   * hu - Hungarian
 ///   * id - Indonesian
 ///   * it - Italian
 ///   * ja - Japanese
 ///   * ko - Korean
+///   * lv - Latvian
+///   * lt - Lithuanian
 ///   * ms - Malay
 ///   * nl - Dutch
 ///   * nb - Norwegian
@@ -58,8 +73,14 @@ import 'widgets_localizations.dart';
 ///   * pt - Portuguese
 ///   * ro - Romanian
 ///   * ru - Russian
+///   * sk - Slovak
+///   * sl - Slovenian
+///   * sr - Serbian
+///   * sv - Swedish
+///   * tl - Tagalog
 ///   * th - Thai
 ///   * tr - Turkish
+///   * uk - Ukranian
 ///   * ur - Urdu
 ///   * vi - Vietnamese
 ///   * zh - Simplified Chinese
@@ -435,7 +456,7 @@ class GlobalMaterialLocalizations implements MaterialLocalizations {
   /// Most internationalized apps will use [GlobalMaterialLocalizations.delegates]
   /// as the value of [MaterialApp.localizationsDelegates] to include
   /// the localizations for both the material and widget libraries.
-  static const LocalizationsDelegate<MaterialLocalizations> delegate = const _MaterialLocalizationsDelegate();
+  static const LocalizationsDelegate<MaterialLocalizations> delegate = _MaterialLocalizationsDelegate();
 
   /// A value for [MaterialApp.localizationsDelegates] that's typically used by
   /// internationalized apps.
@@ -456,13 +477,13 @@ class GlobalMaterialLocalizations implements MaterialLocalizations {
   ///   // ...
   /// )
   /// ```
-  static const List<LocalizationsDelegate<dynamic>> delegates = const <LocalizationsDelegate<dynamic>>[
+  static const List<LocalizationsDelegate<dynamic>> delegates = <LocalizationsDelegate<dynamic>>[
     GlobalMaterialLocalizations.delegate,
     GlobalWidgetsLocalizations.delegate,
   ];
 }
 
-const Map<String, TimeOfDayFormat> _icuTimeOfDayToEnum = const <String, TimeOfDayFormat>{
+const Map<String, TimeOfDayFormat> _icuTimeOfDayToEnum = <String, TimeOfDayFormat>{
   'HH:mm': TimeOfDayFormat.HH_colon_mm,
   'HH.mm': TimeOfDayFormat.HH_dot_mm,
   "HH 'h' mm": TimeOfDayFormat.frenchCanadian,
@@ -517,18 +538,33 @@ class _MaterialLocalizationsDelegate extends LocalizationsDelegate<MaterialLocal
 
   // Watch out: this list must match the one in the GlobalMaterialLocalizations
   // class doc and the list we test, see test/translations_test.dart.
-  static const List<String> _supportedLanguages = const <String>[
+  static const List<String> _supportedLanguages = <String>[
     'ar', // Arabic
+    'bg', // Bulgarian
+    'bs', // Bosnian
+    'ca', // Catalan
+    'cs', // Czech
+    'da', // Danish
     'de', // German
+    'el', // Greek
     'en', // English
     'es', // Spanish
+    'et', // Estonian
     'fa', // Farsi (Persian)
+    'fi', // Finnish
+    'fil', //  Fillipino
     'fr', // French
+    'gsw', // Swiss German
     'he', // Hebrew
+    'hi', // Hindi
+    'hr', // Croatian
+    'hu', // Hungarian
     'id', // Indonesian
     'it', // Italian
     'ja', // Japanese
     'ko', // Korean
+    'lv', // Latvian
+    'lt', // Lithuanian
     'ms', // Malay
     'nl', // Dutch
     'nb', // Norwegian
@@ -537,8 +573,14 @@ class _MaterialLocalizationsDelegate extends LocalizationsDelegate<MaterialLocal
     'pt', // Portugese
     'ro', // Romanian
     'ru', // Russian
+    'sr', // Serbian
+    'sk', // Slovak
+    'sl', // Slovenian
     'th', // Thai
+    'sv', // Swedish
+    'tl', // Tagalog
     'tr', // Turkish
+    'uk', // Ukranian
     'ur', // Urdu
     'vi', // Vietnamese
     'zh', // Chinese (simplified)

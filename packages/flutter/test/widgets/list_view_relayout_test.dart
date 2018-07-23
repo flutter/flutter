@@ -17,17 +17,17 @@ void main() {
             new ListView(
               shrinkWrap: true,
               children: const <Widget>[
-                const Text('1'),
-                const Text('2'),
-                const Text('3'),
+                Text('1'),
+                Text('2'),
+                Text('3'),
               ],
             ),
             new ListView(
               shrinkWrap: true,
               children: const <Widget>[
-                const Text('4'),
-                const Text('5'),
-                const Text('6'),
+                Text('4'),
+                Text('5'),
+                Text('6'),
               ],
             ),
           ],
@@ -44,7 +44,7 @@ void main() {
         textDirection: TextDirection.ltr,
         child: new ListView(
           children: const <Widget>[
-            const SizedBox(height: 100.0, child: const Text('100')),
+            SizedBox(height: 100.0, child: Text('100')),
           ],
         ),
       ),
@@ -55,8 +55,8 @@ void main() {
         textDirection: TextDirection.ltr,
         child: new ListView(
           children: const <Widget>[
-            const SizedBox(height: 100.0, child: const Text('100')),
-            const SizedBox(height: 200.0, child: const Text('200')),
+            SizedBox(height: 100.0, child: Text('100')),
+            SizedBox(height: 200.0, child: Text('200')),
           ],
         ),
       ),
@@ -71,7 +71,7 @@ void main() {
         textDirection: TextDirection.ltr,
         child: new ListView(
           children: const <Widget>[
-            const SizedBox(height: 100.0, child: const Text('100')),
+            SizedBox(height: 100.0, child: Text('100')),
           ],
         ),
       ),
@@ -85,8 +85,8 @@ void main() {
         textDirection: TextDirection.ltr,
         child: new ListView(
           children: const <Widget>[
-            const SizedBox(height: 100.0, child: const Text('100')),
-            const SizedBox(height: 200.0, child: const Text('200')),
+            SizedBox(height: 100.0, child: Text('100')),
+            SizedBox(height: 200.0, child: Text('200')),
           ],
         ),
       ),
@@ -110,8 +110,8 @@ void main() {
         textDirection: TextDirection.ltr,
         child: new ListView(
           children: const <Widget>[
-            const SizedBox(height: 300.0, child: const Text('300')),
-            const SizedBox(height: 400.0, child: const Text('400')),
+            SizedBox(height: 300.0, child: Text('300')),
+            SizedBox(height: 400.0, child: Text('400')),
           ],
         ),
       ),
@@ -125,7 +125,7 @@ void main() {
         textDirection: TextDirection.ltr,
         child: new ListView(
           children: const <Widget>[
-            const SizedBox(height: 300.0, child: const Text('300')),
+            SizedBox(height: 300.0, child: Text('300')),
           ],
         ),
       ),
@@ -153,8 +153,8 @@ void main() {
         textDirection: TextDirection.ltr,
         child: new ListView(
           children: const <Widget>[
-            const SizedBox(height: 300.0, child: const Text('300')),
-            const SizedBox(height: 400.0, child: const Text('400')),
+            SizedBox(height: 300.0, child: Text('300')),
+            SizedBox(height: 400.0, child: Text('400')),
           ],
         ),
       ),
@@ -168,9 +168,9 @@ void main() {
         textDirection: TextDirection.ltr,
         child: new ListView(
           children: const <Widget>[
-            const SizedBox(height: 300.0, child: const Text('300')),
-            const SizedBox(height: 400.0, child: const Text('400')),
-            const SizedBox(height: 100.0, child: const Text('100')),
+            SizedBox(height: 300.0, child: Text('300')),
+            SizedBox(height: 400.0, child: Text('400')),
+            SizedBox(height: 100.0, child: Text('100')),
           ],
         ),
       ),
@@ -192,7 +192,7 @@ void main() {
         textDirection: TextDirection.ltr,
         child: new ListView(
           children: const <Widget>[
-            const SizedBox(height: 100.0, child: const Text('100')),
+            SizedBox(height: 100.0, child: Text('100')),
           ],
         ),
       ),
@@ -206,9 +206,9 @@ void main() {
         textDirection: TextDirection.ltr,
         child: new ListView(
           children: const <Widget>[
-            const SizedBox(height: 100.0, child: const Text('100')),
-            const SizedBox(height: 200.0, child: const Text('200')),
-            const SizedBox(height: 400.0, child: const Text('400')),
+            SizedBox(height: 100.0, child: Text('100')),
+            SizedBox(height: 200.0, child: Text('200')),
+            SizedBox(height: 400.0, child: Text('400')),
           ],
         ),
       ),

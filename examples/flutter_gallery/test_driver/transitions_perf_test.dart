@@ -11,7 +11,7 @@ import 'package:flutter_driver/flutter_driver.dart';
 import 'package:path/path.dart' as path;
 import 'package:test/test.dart';
 
-const FileSystem _fs = const LocalFileSystem();
+const FileSystem _fs = LocalFileSystem();
 
 // Demos for which timeline data will be collected using
 // FlutterDriver.traceAction().
@@ -23,7 +23,7 @@ const FileSystem _fs = const LocalFileSystem();
 //
 // These names must match GalleryItem titles from kAllGalleryDemos
 // in examples/flutter_gallery/lib/gallery/demos.dart
-const List<String> kProfiledDemos = const <String>[
+const List<String> kProfiledDemos = <String>[
   'Shrine@Studies',
   'Contact profile@Studies',
   'Animation@Studies',
@@ -39,13 +39,13 @@ const List<String> kProfiledDemos = const <String>[
 //
 // These names must match GalleryItem titles from kAllGalleryDemos
 // in examples/flutter_gallery/lib/gallery/demos.dart
-const List<String> kUnsynchronizedDemos = const <String>[
+const List<String> kUnsynchronizedDemos = <String>[
   'Progress indicators@Material',
   'Activity Indicator@Cupertino',
   'Video@Media',
 ];
 
-const List<String> kSkippedDemos = const <String>[
+const List<String> kSkippedDemos = <String>[
   'Pull to refresh@Cupertino', // The back button lacks a tooltip.
 ];
 
@@ -183,7 +183,7 @@ void main([List<String> args = const <String>[]]) {
       }
 
       // See _handleMessages() in transitions_perf.dart.
-      _allDemos = const JsonDecoder().convert(await driver.requestData('demoNames'));
+      _allDemos = new List<String>.from(const JsonDecoder().convert(await driver.requestData('demoNames')));
       if (_allDemos.isEmpty)
         throw 'no demo names found';
     });
@@ -212,12 +212,14 @@ void main([List<String> args = const <String>[]]) {
       final TimelineSummary summary = new TimelineSummary.summarize(timeline);
       await summary.writeSummaryToFile('transitions', pretty: true);
       final String histogramPath = path.join(testOutputsDirectory, 'transition_durations.timeline.json');
-      await saveDurationsHistogram(timeline.json['traceEvents'], histogramPath);
+      await saveDurationsHistogram(
+          new List<Map<String, dynamic>>.from(timeline.json['traceEvents']),
+          histogramPath);
 
       // Execute the remaining tests.
       final Set<String> unprofiledDemos = new Set<String>.from(_allDemos)..removeAll(kProfiledDemos);
       await runDemos(unprofiledDemos.toList(), driver);
 
-    }, timeout: const Timeout(const Duration(minutes: 5)));
+    }, timeout: const Timeout(Duration(minutes: 5)));
   });
 }

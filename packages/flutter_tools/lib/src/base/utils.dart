@@ -15,7 +15,7 @@ import 'context.dart';
 import 'file_system.dart';
 import 'platform.dart';
 
-const BotDetector _kBotDetector = const BotDetector();
+const BotDetector _kBotDetector = BotDetector();
 
 class BotDetector {
   const BotDetector();
@@ -229,6 +229,13 @@ class Uuid {
 
   String _printDigits(int value, int count) =>
       value.toRadixString(16).padLeft(count, '0');
+}
+
+/// Given a data structure which is a Map of String to dynamic values, return
+/// the same structure (`Map<String, dynamic>`) with the correct runtime types.
+Map<String, dynamic> castStringKeyedMap(dynamic untyped) {
+  final Map<dynamic, dynamic> map = untyped;
+  return map.cast<String, dynamic>();
 }
 
 Clock get clock => context[Clock];

@@ -91,14 +91,14 @@ abstract class DebugOverflowIndicatorMixin extends RenderObject {
   // extended directly.
   factory DebugOverflowIndicatorMixin._() => null;
 
-  static const Color _black = const Color(0xBF000000);
-  static const Color _yellow = const Color(0xBFFFFF00);
+  static const Color _black = Color(0xBF000000);
+  static const Color _yellow = Color(0xBFFFFF00);
   // The fraction of the container that the indicator covers.
   static const double _indicatorFraction = 0.1;
   static const double _indicatorFontSizePixels = 7.5;
   static const double _indicatorLabelPaddingPixels = 1.0;
-  static const TextStyle _indicatorTextStyle = const TextStyle(
-    color: const Color(0xFF900000),
+  static const TextStyle _indicatorTextStyle = TextStyle(
+    color: Color(0xFF900000),
     fontSize: _indicatorFontSizePixels,
     fontWeight: FontWeight.w800,
   );

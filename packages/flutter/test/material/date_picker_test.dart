@@ -307,7 +307,7 @@ void _tests() {
   });
 
   group('haptic feedback', () {
-    const Duration kHapticFeedbackInterval = const Duration(milliseconds: 10);
+    const Duration kHapticFeedbackInterval = Duration(milliseconds: 10);
     FeedbackTester feedback;
 
     setUp(() {
@@ -621,5 +621,66 @@ void _tests() {
     });
 
     semantics.dispose();
+  });
+
+  testWidgets('chervons animate when scrolling month picker', (WidgetTester tester) async {
+    final Key _datePickerKey = new UniqueKey();
+    DateTime _selectedDate = new DateTime(2016, DateTime.july, 26);
+
+    await tester.pumpWidget(
+      new MaterialApp(
+        home: new StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return new Container(
+              width: 400.0,
+              child: new SingleChildScrollView(
+                child: new Material(
+                  child: new MonthPicker(
+                    firstDate: new DateTime(0),
+                    lastDate: new DateTime(9999),
+                    key: _datePickerKey,
+                    selectedDate: _selectedDate,
+                    onChanged: (DateTime value) {
+                      setState(() {
+                        _selectedDate = value;
+                      });
+                    },
+                  ),
+                ),
+              ),
+            );
+          },
+        ),
+      )
+    );
+
+    final Finder chevronFinder = find.byType(IconButton);
+    final List<RenderAnimatedOpacity> chevronRenderers = chevronFinder.evaluate().map(
+      (Element element) => element.ancestorRenderObjectOfType(
+        const TypeMatcher<RenderAnimatedOpacity>())).cast<RenderAnimatedOpacity>().toList();
+
+    // Initial chevron animation state should be dismissed
+    // An AlwaysStoppedAnimation is also found and is ignored
+    for(RenderAnimatedOpacity renderer in chevronRenderers) {
+      expect(renderer.opacity.value, equals(1.0));
+      expect(renderer.opacity.status, equals(AnimationStatus.dismissed));
+    }
+
+    // Drag and hold the picker to test for the opacity change
+    final TestGesture gesture = await tester.startGesture(const Offset(100.0, 100.0));
+    await gesture.moveBy(const Offset(50.0, 100.0));
+    await tester.pumpAndSettle();
+    for(RenderAnimatedOpacity renderer in chevronRenderers) {
+      expect(renderer.opacity.value, equals(0.0));
+      expect(renderer.opacity.status, equals(AnimationStatus.completed));
+    }
+
+    // Release the drag and test for the opacity to return to original value
+    await gesture.up();
+    await tester.pumpAndSettle();
+    for(RenderAnimatedOpacity renderer in chevronRenderers) {
+      expect(renderer.opacity.value, equals(1.0));
+      expect(renderer.opacity.status, equals(AnimationStatus.dismissed));
+    }
   });
 }

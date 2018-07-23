@@ -2,7 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:math' as math;
+
 import 'package:flutter/foundation.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
 import 'button_theme.dart';
@@ -11,6 +14,7 @@ import 'constants.dart';
 import 'ink_well.dart';
 import 'material.dart';
 import 'theme.dart';
+import 'theme_data.dart';
 
 /// Creates a button based on [Semantics], [Material], and [InkWell]
 /// widgets.
@@ -38,13 +42,14 @@ class RawMaterialButton extends StatefulWidget {
     this.elevation = 2.0,
     this.highlightElevation = 8.0,
     this.disabledElevation = 0.0,
-    this.outerPadding,
     this.padding = EdgeInsets.zero,
     this.constraints = const BoxConstraints(minWidth: 88.0, minHeight: 36.0),
     this.shape = const RoundedRectangleBorder(),
     this.animationDuration = kThemeChangeDuration,
+    MaterialTapTargetSize materialTapTargetSize,
     this.child,
-  }) : assert(shape != null),
+  }) : this.materialTapTargetSize = materialTapTargetSize ?? MaterialTapTargetSize.padded,
+       assert(shape != null),
        assert(elevation != null),
        assert(highlightElevation != null),
        assert(disabledElevation != null),
@@ -57,10 +62,6 @@ class RawMaterialButton extends StatefulWidget {
   ///
   /// If this is set to null, the button will be disabled, see [enabled].
   final VoidCallback onPressed;
-
-  /// Padding to increase the size of the gesture detector which doesn't
-  /// increase the visible material of the button.
-  final EdgeInsets outerPadding;
 
   /// Called by the underlying [InkWell] widget's [InkWell.onHighlightChanged]
   /// callback.
@@ -138,6 +139,15 @@ class RawMaterialButton extends StatefulWidget {
   /// property to a non-null value.
   bool get enabled => onPressed != null;
 
+  /// Configures the minimum size of the tap target.
+  ///
+  /// Defaults to [MaterialTapTargetSize.padded].
+  ///
+  /// See also:
+  ///
+  ///   * [MaterialTapTargetSize], for a description of how this affects tap targets.
+  final MaterialTapTargetSize materialTapTargetSize;
+
   @override
   _RawMaterialButtonState createState() => new _RawMaterialButtonState();
 }
@@ -158,7 +168,7 @@ class _RawMaterialButtonState extends State<RawMaterialButton> {
       ? (_highlight ? widget.highlightElevation : widget.elevation)
       : widget.disabledElevation;
 
-    Widget result = new ConstrainedBox(
+    final Widget result = new ConstrainedBox(
       constraints: widget.constraints,
       child: new Material(
         elevation: elevation,
@@ -186,24 +196,24 @@ class _RawMaterialButtonState extends State<RawMaterialButton> {
         ),
       ),
     );
-
-    if (widget.outerPadding != null) {
-      result = new GestureDetector(
-        behavior: HitTestBehavior.translucent,
-        excludeFromSemantics: true,
-        onTap: widget.onPressed,
-        child: new Padding(
-          padding: widget.outerPadding,
-          child: result
-        ),
-      );
+    Size minSize;
+    switch (widget.materialTapTargetSize) {
+      case MaterialTapTargetSize.padded:
+        minSize = const Size(48.0, 48.0);
+        break;
+      case MaterialTapTargetSize.shrinkWrap:
+        minSize = Size.zero;
+        break;
     }
 
     return new Semantics(
       container: true,
       button: true,
       enabled: widget.enabled,
-      child: result,
+      child: new _InputPadding(
+        minSize: minSize,
+        child: result,
+      ),
     );
   }
 }
@@ -248,6 +258,7 @@ class MaterialButton extends StatelessWidget {
     this.minWidth,
     this.height,
     this.padding,
+    this.materialTapTargetSize,
     @required this.onPressed,
     this.child
   }) : super(key: key);
@@ -353,6 +364,15 @@ class MaterialButton extends StatelessWidget {
   /// {@macro flutter.widgets.child}
   final Widget child;
 
+  /// Configures the minimum size of the tap target.
+  ///
+  /// Defaults to [ThemeData.materialTapTargetSize].
+  ///
+  /// See also:
+  ///
+  ///   * [MaterialTapTargetSize], for a description of how this affects tap targets.
+  final MaterialTapTargetSize materialTapTargetSize;
+
   /// Whether the button is enabled or disabled. Buttons are disabled by default. To
   /// enable a button, set its [onPressed] property to a non-null value.
   bool get enabled => onPressed != null;
@@ -412,6 +432,7 @@ class MaterialButton extends StatelessWidget {
       ),
       shape: buttonTheme.shape,
       child: child,
+      materialTapTargetSize: materialTapTargetSize ?? theme.materialTapTargetSize,
     );
   }
 
@@ -419,5 +440,91 @@ class MaterialButton extends StatelessWidget {
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(new FlagProperty('enabled', value: enabled, ifFalse: 'disabled'));
+  }
+}
+
+/// A widget to pad the area around a [MaterialButton]'s inner [Material].
+///
+/// Redirect taps that occur in the padded area around the child to the center
+/// of the child. This increases the size of the button and the button's
+/// "tap target", but not its material or its ink splashes.
+class _InputPadding extends SingleChildRenderObjectWidget {
+  const _InputPadding({
+    Key key,
+    Widget child,
+    this.minSize,
+  }) : super(key: key, child: child);
+
+  final Size minSize;
+
+  @override
+  RenderObject createRenderObject(BuildContext context) {
+    return new _RenderInputPadding(minSize);
+  }
+
+  @override
+  void updateRenderObject(BuildContext context, covariant _RenderInputPadding renderObject) {
+    renderObject.minSize = minSize;
+  }
+}
+
+class _RenderInputPadding extends RenderShiftedBox {
+  _RenderInputPadding(this._minSize, [RenderBox child]) : super(child) ;
+
+  Size get minSize => _minSize;
+  Size _minSize;
+  set minSize(Size value) {
+    if (_minSize == value)
+      return;
+    _minSize = value;
+    markNeedsLayout();
+  }
+
+  @override
+  double computeMinIntrinsicWidth(double height) {
+    if (child != null)
+      return math.max(child.computeMinIntrinsicWidth(height), minSize.width);
+    return 0.0;
+  }
+
+  @override
+  double computeMinIntrinsicHeight(double width) {
+    if (child != null)
+      return math.max(child.computeMinIntrinsicHeight(width), minSize.height);
+    return 0.0;
+  }
+
+  @override
+  double computeMaxIntrinsicWidth(double height) {
+    if (child != null)
+      return math.max(child.computeMaxIntrinsicWidth(height), minSize.width);
+    return 0.0;
+  }
+
+  @override
+  double computeMaxIntrinsicHeight(double width) {
+    if (child != null)
+      return math.max(child.computeMaxIntrinsicHeight(width), minSize.height);
+    return 0.0;
+  }
+
+  @override
+  void performLayout() {
+    if (child != null) {
+      child.layout(constraints, parentUsesSize: true);
+      final double height = math.max(child.size.width, minSize.width);
+      final double width = math.max(child.size.height, minSize.height);
+      size = constraints.constrain(new Size(height, width));
+      final BoxParentData childParentData = child.parentData;
+      childParentData.offset = Alignment.center.alongOffset(size - child.size);
+    } else {
+      size = Size.zero;
+    }
+  }
+
+  @override
+  bool hitTest(HitTestResult result, {Offset position}) {
+    return super.hitTest(result, position: position) ||
+      child.hitTest(result, position: child.size.center(Offset.zero));
   }
 }

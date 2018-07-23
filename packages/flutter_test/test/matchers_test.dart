@@ -359,7 +359,7 @@ void main() {
 
       testWidgets('if finder finds multiple widgets', (WidgetTester tester) async {
         await tester.pumpWidget(boilerplate(new Column(
-          children: const <Widget>[const Text('hello'), const Text('world')],
+          children: const <Widget>[Text('hello'), Text('world')],
         )));
         final Finder finder = find.byType(Text);
         try {
@@ -387,7 +387,11 @@ void main() {
   group('matchesSemanticsData', () {
     testWidgets('matches SemanticsData', (WidgetTester tester) async {
       final SemanticsHandle handle = tester.ensureSemantics();
+<<<<<<< HEAD
       const Key key = const Key('semantics');
+=======
+      const Key key = Key('semantics');
+>>>>>>> f44f625c0641e888e19e1a1419d943f949cdcc4c
       await tester.pumpWidget(new Semantics(
         key: key,
         namesRoute: true,
@@ -406,7 +410,11 @@ void main() {
           hint: 'bar',
           value: 'baz',
           textDirection: TextDirection.rtl,
+<<<<<<< HEAD
           hasTap: true,
+=======
+          hasTapAction: true,
+>>>>>>> f44f625c0641e888e19e1a1419d943f949cdcc4c
           isButton: true,
           isHeader: true,
           namesRoute: true,
@@ -454,6 +462,7 @@ void main() {
          namesRoute: true,
          scopesRoute: true,
          isHidden: true,
+<<<<<<< HEAD
          /* Actions */
          hasTap: true,
          hasLongPress: true,
@@ -472,6 +481,32 @@ void main() {
          hasPaste: true,
          hasDidGainAccessibilityFocus: true,
          hasDidLoseAccessibilityFocus: true,
+=======
+         isImage: true,
+         isLiveRegion: true,
+         hasToggledState: true,
+         isToggled: true,
+         /* Actions */
+         hasTapAction: true,
+         hasLongPressAction: true,
+         hasScrollLeftAction: true,
+         hasScrollRightAction: true,
+         hasScrollUpAction: true,
+         hasScrollDownAction: true,
+         hasIncreaseAction: true,
+         hasDecreaseAction: true,
+         hasShowOnScreenAction: true,
+         hasMoveCursorForwardByCharacterAction: true,
+         hasMoveCursorBackwardByCharacterAction: true,
+         hasSetSelectionAction: true,
+         hasCopyAction: true,
+         hasCutAction: true,
+         hasPasteAction: true,
+         hasDidGainAccessibilityFocusAction: true,
+         hasDidLoseAccessibilityFocusAction: true,
+         hasCustomAction: true,
+         hasDismissAction: true,
+>>>>>>> f44f625c0641e888e19e1a1419d943f949cdcc4c
       ));
     });
   });

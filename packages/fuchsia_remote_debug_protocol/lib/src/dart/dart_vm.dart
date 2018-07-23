@@ -10,11 +10,11 @@ import 'package:web_socket_channel/io.dart';
 
 import '../common/logging.dart';
 
-const Duration _kConnectTimeout = const Duration(seconds: 9);
+const Duration _kConnectTimeout = Duration(seconds: 9);
 
-const Duration _kReconnectAttemptInterval = const Duration(seconds: 3);
+const Duration _kReconnectAttemptInterval = Duration(seconds: 3);
 
-const Duration _kRpcTimeout = const Duration(seconds: 5);
+const Duration _kRpcTimeout = Duration(seconds: 5);
 
 final Logger _log = new Logger('DartVm');
 
@@ -58,7 +58,7 @@ Future<json_rpc.Peer> _waitAndConnect(Uri uri) async {
         await new Future<Null>.delayed(_kReconnectAttemptInterval);
         return attemptConnection(uri);
       } else {
-        _log.severe('Connection to Fuchsia\'s Dart VM timed out at '
+        _log.warning('Connection to Fuchsia\'s Dart VM timed out at '
             '${uri.toString()}');
         rethrow;
       }
