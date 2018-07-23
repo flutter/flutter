@@ -28,11 +28,11 @@ class TestScrollPhysics extends ScrollPhysics {
 
 void main() {
   test('ScrollPhysics applyTo()', () {
-    const ScrollPhysics a = const TestScrollPhysics(name: 'a');
-    const ScrollPhysics b = const TestScrollPhysics(name: 'b');
-    const ScrollPhysics c = const TestScrollPhysics(name: 'c');
-    const ScrollPhysics d = const TestScrollPhysics(name: 'd');
-    const ScrollPhysics e = const TestScrollPhysics(name: 'e');
+    const ScrollPhysics a = TestScrollPhysics(name: 'a');
+    const ScrollPhysics b = TestScrollPhysics(name: 'b');
+    const ScrollPhysics c = TestScrollPhysics(name: 'c');
+    const ScrollPhysics d = TestScrollPhysics(name: 'd');
+    const ScrollPhysics e = TestScrollPhysics(name: 'e');
 
     expect(a.parent, null);
     expect(b.parent, null);
@@ -52,11 +52,11 @@ void main() {
   });
 
   test('ScrollPhysics subclasses applyTo()', () {
-    const ScrollPhysics bounce = const BouncingScrollPhysics();
-    const ScrollPhysics clamp = const ClampingScrollPhysics();
-    const ScrollPhysics never = const NeverScrollableScrollPhysics();
-    const ScrollPhysics always = const AlwaysScrollableScrollPhysics();
-    const ScrollPhysics page = const PageScrollPhysics();
+    const ScrollPhysics bounce = BouncingScrollPhysics();
+    const ScrollPhysics clamp = ClampingScrollPhysics();
+    const ScrollPhysics never = NeverScrollableScrollPhysics();
+    const ScrollPhysics always = AlwaysScrollableScrollPhysics();
+    const ScrollPhysics page = PageScrollPhysics();
 
     String types(ScrollPhysics s) => s.parent == null ? '${s.runtimeType}' : '${s.runtimeType} ${types(s.parent)}';
 

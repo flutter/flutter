@@ -7,7 +7,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   test('IconThemeData control test', () {
-    const IconThemeData data = const IconThemeData(color: const Color(0xAAAAAAAA), opacity: 0.5, size: 16.0);
+    const IconThemeData data = IconThemeData(color: Color(0xAAAAAAAA), opacity: 0.5, size: 16.0);
 
     expect(data, hasOneLineDescription);
     expect(data, equals(data.copyWith()));

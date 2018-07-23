@@ -99,8 +99,8 @@ void main() {
     await tester.pumpWidget(new MaterialApp(
       locale: const Locale('en', 'US'),
       supportedLocales: const <Locale>[
-        const Locale('en', 'US'),
-        const Locale('fr', 'CA'),
+        Locale('en', 'US'),
+        Locale('fr', 'CA'),
       ],
       localizationsDelegates: GlobalMaterialLocalizations.delegates,
       home: new Material(
@@ -144,7 +144,7 @@ void main() {
     await tester.pumpWidget(new MaterialApp(
       locale: const Locale('en', 'US'),
       supportedLocales: const <Locale>[
-        const Locale('en', 'US'),
+        Locale('en', 'US'),
       ],
       home: new Material(
         child: new Builder(
@@ -182,8 +182,8 @@ void main() {
     await tester.pumpWidget(new MaterialApp(
       locale: const Locale('en', 'US'),
       supportedLocales: const <Locale>[
-        const Locale('en', 'US'),
-        const Locale('fr', 'CA'),
+        Locale('en', 'US'),
+        Locale('fr', 'CA'),
       ],
       localizationsDelegates: GlobalMaterialLocalizations.delegates,
       home: new Material(

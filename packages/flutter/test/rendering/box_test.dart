@@ -32,7 +32,7 @@ void main() {
     );
     final RenderBox inner = new RenderDecoratedBox(
       decoration: const BoxDecoration(
-        color: const Color(0xFF00FF00),
+        color: Color(0xFF00FF00),
       ),
       child: size,
     );
@@ -47,7 +47,7 @@ void main() {
     );
     final RenderBox outer = new RenderDecoratedBox(
       decoration: const BoxDecoration(
-        color: const Color(0xFF0000FF),
+        color: Color(0xFF0000FF),
       ),
       child: flex,
     );
@@ -167,7 +167,7 @@ void main() {
       ),
       alignment: Alignment.center,
     );
-    const BoxConstraints viewport = const BoxConstraints(maxHeight: 100.0, maxWidth: 100.0);
+    const BoxConstraints viewport = BoxConstraints(maxHeight: 100.0, maxWidth: 100.0);
     layout(unconstrained, constraints: viewport);
     expect(unconstrained.getMinIntrinsicHeight(100.0), equals(200.0));
     expect(unconstrained.getMaxIntrinsicHeight(100.0), equals(200.0));
@@ -183,7 +183,7 @@ void main() {
       ),
       alignment: Alignment.center,
     );
-    const BoxConstraints viewport = const BoxConstraints(maxHeight: 100.0, maxWidth: 100.0);
+    const BoxConstraints viewport = BoxConstraints(maxHeight: 100.0, maxWidth: 100.0);
     layout(unconstrained, constraints: viewport);
     expect(unconstrained.getMinIntrinsicHeight(100.0), equals(0.0));
     expect(unconstrained.getMaxIntrinsicHeight(100.0), equals(0.0));
@@ -228,7 +228,7 @@ void main() {
     flexParentData.flex = 1;
     flexParentData.fit = FlexFit.tight;
 
-    const BoxConstraints viewport = const BoxConstraints(maxWidth: 100.0);
+    const BoxConstraints viewport = BoxConstraints(maxWidth: 100.0);
     layout(unconstrained, constraints: viewport);
 
     expect(unconstrained.size.width, equals(100.0), reason: 'constrained width');
@@ -252,7 +252,7 @@ void main() {
     flexParentData.flex = 1;
     flexParentData.fit = FlexFit.tight;
 
-    const BoxConstraints viewport = const BoxConstraints(maxHeight: 100.0);
+    const BoxConstraints viewport = BoxConstraints(maxHeight: 100.0);
     layout(unconstrained, constraints: viewport);
 
     expect(unconstrained.size.width, equals(200.0), reason: 'unconstrained width');

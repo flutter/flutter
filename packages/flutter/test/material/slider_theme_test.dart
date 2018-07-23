@@ -101,10 +101,10 @@ void main() {
   });
 
   testWidgets('SliderThemeData generates correct opacities for fromPrimaryColors', (WidgetTester tester) async {
-    const Color customColor1 = const Color(0xcafefeed);
-    const Color customColor2 = const Color(0xdeadbeef);
-    const Color customColor3 = const Color(0xdecaface);
-    const Color customColor4 = const Color(0xfeedcafe);
+    const Color customColor1 = Color(0xcafefeed);
+    const Color customColor2 = Color(0xdeadbeef);
+    const Color customColor3 = Color(0xdecaface);
+    const Color customColor4 = Color(0xfeedcafe);
 
     final SliderThemeData sliderTheme = new SliderThemeData.fromPrimaryColors(
       primaryColor: customColor1,
@@ -145,7 +145,7 @@ void main() {
       valueIndicatorTextStyle: new ThemeData.fallback().accentTextTheme.body2.copyWith(color: Colors.white),
     );
     final SliderThemeData lerp = SliderThemeData.lerp(sliderThemeBlack, sliderThemeWhite, 0.5);
-    const Color middleGrey = const Color(0xff7f7f7f);
+    const Color middleGrey = Color(0xff7f7f7f);
     expect(lerp.activeTrackColor, equals(middleGrey.withAlpha(0xff)));
     expect(lerp.inactiveTrackColor, equals(middleGrey.withAlpha(0x3d)));
     expect(lerp.disabledActiveTrackColor, equals(middleGrey.withAlpha(0x52)));

@@ -12,8 +12,8 @@ import 'feedback.dart';
 import 'theme.dart';
 import 'theme_data.dart';
 
-const Duration _kFadeDuration = const Duration(milliseconds: 200);
-const Duration _kShowDuration = const Duration(milliseconds: 1500);
+const Duration _kFadeDuration = Duration(milliseconds: 200);
+const Duration _kShowDuration = Duration(milliseconds: 1500);
 
 /// A material design tooltip.
 ///

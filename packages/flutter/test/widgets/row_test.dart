@@ -30,10 +30,10 @@ void main() {
 
   testWidgets('Row with one Flexible child - no textDirection', (WidgetTester tester) async {
     OrderPainter.log.clear();
-    const Key rowKey = const Key('row');
-    const Key child0Key = const Key('child0');
-    const Key child1Key = const Key('child1');
-    const Key child2Key = const Key('child2');
+    const Key rowKey = Key('row');
+    const Key child0Key = Key('child0');
+    const Key child1Key = Key('child1');
+    const Key child2Key = Key('child2');
 
     final FlutterExceptionHandler oldHandler = FlutterError.onError;
     dynamic exception;
@@ -61,10 +61,10 @@ void main() {
 
   testWidgets('Row with default main axis parameters - no textDirection', (WidgetTester tester) async {
     OrderPainter.log.clear();
-    const Key rowKey = const Key('row');
-    const Key child0Key = const Key('child0');
-    const Key child1Key = const Key('child1');
-    const Key child2Key = const Key('child2');
+    const Key rowKey = Key('row');
+    const Key child0Key = Key('child0');
+    const Key child1Key = Key('child1');
+    const Key child2Key = Key('child2');
 
     final FlutterExceptionHandler oldHandler = FlutterError.onError;
     dynamic exception;
@@ -92,9 +92,9 @@ void main() {
 
   testWidgets('Row with MainAxisAlignment.center - no textDirection', (WidgetTester tester) async {
     OrderPainter.log.clear();
-    const Key rowKey = const Key('row');
-    const Key child0Key = const Key('child0');
-    const Key child1Key = const Key('child1');
+    const Key rowKey = Key('row');
+    const Key child0Key = Key('child0');
+    const Key child1Key = Key('child1');
 
     final FlutterExceptionHandler oldHandler = FlutterError.onError;
     dynamic exception;
@@ -122,10 +122,10 @@ void main() {
 
   testWidgets('Row with MainAxisAlignment.end - no textDirection', (WidgetTester tester) async {
     OrderPainter.log.clear();
-    const Key rowKey = const Key('row');
-    const Key child0Key = const Key('child0');
-    const Key child1Key = const Key('child1');
-    const Key child2Key = const Key('child2');
+    const Key rowKey = Key('row');
+    const Key child0Key = Key('child0');
+    const Key child1Key = Key('child1');
+    const Key child2Key = Key('child2');
 
     final FlutterExceptionHandler oldHandler = FlutterError.onError;
     dynamic exception;
@@ -154,10 +154,10 @@ void main() {
 
   testWidgets('Row with MainAxisAlignment.spaceBetween - no textDirection', (WidgetTester tester) async {
     OrderPainter.log.clear();
-    const Key rowKey = const Key('row');
-    const Key child0Key = const Key('child0');
-    const Key child1Key = const Key('child1');
-    const Key child2Key = const Key('child2');
+    const Key rowKey = Key('row');
+    const Key child0Key = Key('child0');
+    const Key child1Key = Key('child1');
+    const Key child2Key = Key('child2');
 
     final FlutterExceptionHandler oldHandler = FlutterError.onError;
     dynamic exception;
@@ -186,11 +186,11 @@ void main() {
 
   testWidgets('Row with MainAxisAlignment.spaceAround - no textDirection', (WidgetTester tester) async {
     OrderPainter.log.clear();
-    const Key rowKey = const Key('row');
-    const Key child0Key = const Key('child0');
-    const Key child1Key = const Key('child1');
-    const Key child2Key = const Key('child2');
-    const Key child3Key = const Key('child3');
+    const Key rowKey = Key('row');
+    const Key child0Key = Key('child0');
+    const Key child1Key = Key('child1');
+    const Key child2Key = Key('child2');
+    const Key child3Key = Key('child3');
 
     final FlutterExceptionHandler oldHandler = FlutterError.onError;
     dynamic exception;
@@ -220,10 +220,10 @@ void main() {
 
   testWidgets('Row with MainAxisAlignment.spaceEvenly - no textDirection', (WidgetTester tester) async {
     OrderPainter.log.clear();
-    const Key rowKey = const Key('row');
-    const Key child0Key = const Key('child0');
-    const Key child1Key = const Key('child1');
-    const Key child2Key = const Key('child2');
+    const Key rowKey = Key('row');
+    const Key child0Key = Key('child0');
+    const Key child1Key = Key('child1');
+    const Key child2Key = Key('child2');
 
     final FlutterExceptionHandler oldHandler = FlutterError.onError;
     dynamic exception;
@@ -252,9 +252,9 @@ void main() {
 
   testWidgets('Row and MainAxisSize.min - no textDirection', (WidgetTester tester) async {
     OrderPainter.log.clear();
-    const Key rowKey = const Key('rowKey');
-    const Key child0Key = const Key('child0');
-    const Key child1Key = const Key('child1');
+    const Key rowKey = Key('rowKey');
+    const Key child0Key = Key('child0');
+    const Key child1Key = Key('child1');
 
     final FlutterExceptionHandler oldHandler = FlutterError.onError;
     dynamic exception;
@@ -282,7 +282,7 @@ void main() {
 
   testWidgets('Row MainAxisSize.min layout at zero size - no textDirection', (WidgetTester tester) async {
     OrderPainter.log.clear();
-    const Key childKey = const Key('childKey');
+    const Key childKey = Key('childKey');
 
     await tester.pumpWidget(new Center(
       child: new Container(
@@ -312,10 +312,10 @@ void main() {
 
   testWidgets('Row with one Flexible child - LTR', (WidgetTester tester) async {
     OrderPainter.log.clear();
-    const Key rowKey = const Key('row');
-    const Key child0Key = const Key('child0');
-    const Key child1Key = const Key('child1');
-    const Key child2Key = const Key('child2');
+    const Key rowKey = Key('row');
+    const Key child0Key = Key('child0');
+    const Key child1Key = Key('child1');
+    const Key child2Key = Key('child2');
 
     // Default is MainAxisSize.max so the Row should be as wide as the test: 800.
     // Default is MainAxisAlignment.start so children so the children's
@@ -362,10 +362,10 @@ void main() {
 
   testWidgets('Row with default main axis parameters - LTR', (WidgetTester tester) async {
     OrderPainter.log.clear();
-    const Key rowKey = const Key('row');
-    const Key child0Key = const Key('child0');
-    const Key child1Key = const Key('child1');
-    const Key child2Key = const Key('child2');
+    const Key rowKey = Key('row');
+    const Key child0Key = Key('child0');
+    const Key child1Key = Key('child1');
+    const Key child2Key = Key('child2');
 
     // Default is MainAxisSize.max so the Row should be as wide as the test: 800.
     // Default is MainAxisAlignment.start so children so the children's
@@ -412,9 +412,9 @@ void main() {
 
   testWidgets('Row with MainAxisAlignment.center - LTR', (WidgetTester tester) async {
     OrderPainter.log.clear();
-    const Key rowKey = const Key('row');
-    const Key child0Key = const Key('child0');
-    const Key child1Key = const Key('child1');
+    const Key rowKey = Key('row');
+    const Key child0Key = Key('child0');
+    const Key child1Key = Key('child1');
 
     // Default is MainAxisSize.max so the Row should be as wide as the test: 800.
     // The 100x100 children's left edges should be at 300, 400
@@ -454,10 +454,10 @@ void main() {
 
   testWidgets('Row with MainAxisAlignment.end - LTR', (WidgetTester tester) async {
     OrderPainter.log.clear();
-    const Key rowKey = const Key('row');
-    const Key child0Key = const Key('child0');
-    const Key child1Key = const Key('child1');
-    const Key child2Key = const Key('child2');
+    const Key rowKey = Key('row');
+    const Key child0Key = Key('child0');
+    const Key child1Key = Key('child1');
+    const Key child2Key = Key('child2');
 
     // Default is MainAxisSize.max so the Row should be as wide as the test: 800.
     // The 100x100 children's left edges should be at 500, 600, 700.
@@ -504,10 +504,10 @@ void main() {
 
   testWidgets('Row with MainAxisAlignment.spaceBetween - LTR', (WidgetTester tester) async {
     OrderPainter.log.clear();
-    const Key rowKey = const Key('row');
-    const Key child0Key = const Key('child0');
-    const Key child1Key = const Key('child1');
-    const Key child2Key = const Key('child2');
+    const Key rowKey = Key('row');
+    const Key child0Key = Key('child0');
+    const Key child1Key = Key('child1');
+    const Key child2Key = Key('child2');
 
     // Default is MainAxisSize.max so the Row should be as wide as the test: 800.
     // The 100x100 children's left edges should be at 0, 350, 700
@@ -554,11 +554,11 @@ void main() {
 
   testWidgets('Row with MainAxisAlignment.spaceAround - LTR', (WidgetTester tester) async {
     OrderPainter.log.clear();
-    const Key rowKey = const Key('row');
-    const Key child0Key = const Key('child0');
-    const Key child1Key = const Key('child1');
-    const Key child2Key = const Key('child2');
-    const Key child3Key = const Key('child3');
+    const Key rowKey = Key('row');
+    const Key child0Key = Key('child0');
+    const Key child1Key = Key('child1');
+    const Key child2Key = Key('child2');
+    const Key child3Key = Key('child3');
 
     // Default is MainAxisSize.max so the Row should be as wide as the test: 800.
     // The 100x100 children's left edges should be at 50, 250, 450, 650
@@ -612,10 +612,10 @@ void main() {
 
   testWidgets('Row with MainAxisAlignment.spaceEvenly - LTR', (WidgetTester tester) async {
     OrderPainter.log.clear();
-    const Key rowKey = const Key('row');
-    const Key child0Key = const Key('child0');
-    const Key child1Key = const Key('child1');
-    const Key child2Key = const Key('child2');
+    const Key rowKey = Key('row');
+    const Key child0Key = Key('child0');
+    const Key child1Key = Key('child1');
+    const Key child2Key = Key('child2');
 
     // Default is MainAxisSize.max so the Row should be as wide as the test: 800.
     // The 200x100 children's left edges should be at 50, 300, 550
@@ -662,9 +662,9 @@ void main() {
 
   testWidgets('Row and MainAxisSize.min - LTR', (WidgetTester tester) async {
     OrderPainter.log.clear();
-    const Key rowKey = const Key('rowKey');
-    const Key child0Key = const Key('child0');
-    const Key child1Key = const Key('child1');
+    const Key rowKey = Key('rowKey');
+    const Key child0Key = Key('child0');
+    const Key child1Key = Key('child1');
 
     // Row with MainAxisSize.min without flexible children shrink wraps.
     // Row's width should be 250, children should be at 0, 100.
@@ -704,7 +704,7 @@ void main() {
 
   testWidgets('Row MainAxisSize.min layout at zero size - LTR', (WidgetTester tester) async {
     OrderPainter.log.clear();
-    const Key childKey = const Key('childKey');
+    const Key childKey = Key('childKey');
 
     await tester.pumpWidget(new Center(
       child: new Container(
@@ -735,10 +735,10 @@ void main() {
 
   testWidgets('Row with one Flexible child - RTL', (WidgetTester tester) async {
     OrderPainter.log.clear();
-    const Key rowKey = const Key('row');
-    const Key child0Key = const Key('child0');
-    const Key child1Key = const Key('child1');
-    const Key child2Key = const Key('child2');
+    const Key rowKey = Key('row');
+    const Key child0Key = Key('child0');
+    const Key child1Key = Key('child1');
+    const Key child2Key = Key('child2');
 
     // Default is MainAxisSize.max so the Row should be as wide as the test: 800.
     // Default is MainAxisAlignment.start so children so the children's
@@ -785,10 +785,10 @@ void main() {
 
   testWidgets('Row with default main axis parameters - RTL', (WidgetTester tester) async {
     OrderPainter.log.clear();
-    const Key rowKey = const Key('row');
-    const Key child0Key = const Key('child0');
-    const Key child1Key = const Key('child1');
-    const Key child2Key = const Key('child2');
+    const Key rowKey = Key('row');
+    const Key child0Key = Key('child0');
+    const Key child1Key = Key('child1');
+    const Key child2Key = Key('child2');
 
     // Default is MainAxisSize.max so the Row should be as wide as the test: 800.
     // Default is MainAxisAlignment.start so children so the children's
@@ -835,9 +835,9 @@ void main() {
 
   testWidgets('Row with MainAxisAlignment.center - RTL', (WidgetTester tester) async {
     OrderPainter.log.clear();
-    const Key rowKey = const Key('row');
-    const Key child0Key = const Key('child0');
-    const Key child1Key = const Key('child1');
+    const Key rowKey = Key('row');
+    const Key child0Key = Key('child0');
+    const Key child1Key = Key('child1');
 
     // Default is MainAxisSize.max so the Row should be as wide as the test: 800.
     // The 100x100 children's right edges should be at 300, 400 from the right
@@ -877,10 +877,10 @@ void main() {
 
   testWidgets('Row with MainAxisAlignment.end - RTL', (WidgetTester tester) async {
     OrderPainter.log.clear();
-    const Key rowKey = const Key('row');
-    const Key child0Key = const Key('child0');
-    const Key child1Key = const Key('child1');
-    const Key child2Key = const Key('child2');
+    const Key rowKey = Key('row');
+    const Key child0Key = Key('child0');
+    const Key child1Key = Key('child1');
+    const Key child2Key = Key('child2');
 
     // Default is MainAxisSize.max so the Row should be as wide as the test: 800.
     // The 100x100 children's right edges should be at 500, 600, 700 from the right.
@@ -927,10 +927,10 @@ void main() {
 
   testWidgets('Row with MainAxisAlignment.spaceBetween - RTL', (WidgetTester tester) async {
     OrderPainter.log.clear();
-    const Key rowKey = const Key('row');
-    const Key child0Key = const Key('child0');
-    const Key child1Key = const Key('child1');
-    const Key child2Key = const Key('child2');
+    const Key rowKey = Key('row');
+    const Key child0Key = Key('child0');
+    const Key child1Key = Key('child1');
+    const Key child2Key = Key('child2');
 
     // Default is MainAxisSize.max so the Row should be as wide as the test: 800.
     // The 100x100 children's right edges should be at 0, 350, 700 from the right
@@ -977,11 +977,11 @@ void main() {
 
   testWidgets('Row with MainAxisAlignment.spaceAround - RTL', (WidgetTester tester) async {
     OrderPainter.log.clear();
-    const Key rowKey = const Key('row');
-    const Key child0Key = const Key('child0');
-    const Key child1Key = const Key('child1');
-    const Key child2Key = const Key('child2');
-    const Key child3Key = const Key('child3');
+    const Key rowKey = Key('row');
+    const Key child0Key = Key('child0');
+    const Key child1Key = Key('child1');
+    const Key child2Key = Key('child2');
+    const Key child3Key = Key('child3');
 
     // Default is MainAxisSize.max so the Row should be as wide as the test: 800.
     // The 100x100 children's right edges should be at 50, 250, 450, 650 from the right
@@ -1035,10 +1035,10 @@ void main() {
 
   testWidgets('Row with MainAxisAlignment.spaceEvenly - RTL', (WidgetTester tester) async {
     OrderPainter.log.clear();
-    const Key rowKey = const Key('row');
-    const Key child0Key = const Key('child0');
-    const Key child1Key = const Key('child1');
-    const Key child2Key = const Key('child2');
+    const Key rowKey = Key('row');
+    const Key child0Key = Key('child0');
+    const Key child1Key = Key('child1');
+    const Key child2Key = Key('child2');
 
     // Default is MainAxisSize.max so the Row should be as wide as the test: 800.
     // The 200x100 children's right edges should be at 50, 300, 550 from the right
@@ -1085,9 +1085,9 @@ void main() {
 
   testWidgets('Row and MainAxisSize.min - RTL', (WidgetTester tester) async {
     OrderPainter.log.clear();
-    const Key rowKey = const Key('rowKey');
-    const Key child0Key = const Key('child0');
-    const Key child1Key = const Key('child1');
+    const Key rowKey = Key('rowKey');
+    const Key child0Key = Key('child0');
+    const Key child1Key = Key('child1');
 
     // Row with MainAxisSize.min without flexible children shrink wraps.
     // Row's width should be 250, children should be at 0, 100 from right.
@@ -1127,7 +1127,7 @@ void main() {
 
   testWidgets('Row MainAxisSize.min layout at zero size - RTL', (WidgetTester tester) async {
     OrderPainter.log.clear();
-    const Key childKey = const Key('childKey');
+    const Key childKey = Key('childKey');
 
     await tester.pumpWidget(new Center(
       child: new Container(

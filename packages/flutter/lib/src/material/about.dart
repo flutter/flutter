@@ -393,15 +393,15 @@ class _LicensePageState extends State<LicensePage> {
         );
       setState(() {
         _licenses.add(const Padding(
-          padding: const EdgeInsets.symmetric(vertical: 18.0),
-          child: const Text(
+          padding: EdgeInsets.symmetric(vertical: 18.0),
+          child: Text(
             '🍀‬', // That's U+1F340. Could also use U+2766 (❦) if U+1F340 doesn't work everywhere.
             textAlign: TextAlign.center
           )
         ));
         _licenses.add(new Container(
           decoration: const BoxDecoration(
-            border: const Border(bottom: const BorderSide(width: 0.0))
+            border: Border(bottom: BorderSide(width: 0.0))
           ),
           child: new Text(
             license.packages.join(', '),
@@ -452,9 +452,9 @@ class _LicensePageState extends State<LicensePage> {
     contents.addAll(_licenses);
     if (!_loaded) {
       contents.add(const Padding(
-        padding: const EdgeInsets.symmetric(vertical: 24.0),
-        child: const Center(
-          child: const CircularProgressIndicator()
+        padding: EdgeInsets.symmetric(vertical: 24.0),
+        child: Center(
+          child: CircularProgressIndicator()
         )
       ));
     }
