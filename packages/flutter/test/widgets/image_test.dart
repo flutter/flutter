@@ -407,6 +407,94 @@ void main() {
     expect(capturedStackTrace, testStack);
   });
 
+  testWidgets('Duplicate listener registration does not affect error listeners', (WidgetTester tester) async {
+    dynamic capturedException;
+    StackTrace capturedStackTrace;
+    ImageInfo capturedImage;
+    final ImageErrorListener errorListener = (dynamic exception, StackTrace stackTrace) {
+      capturedException = exception;
+      capturedStackTrace = stackTrace;
+    };
+    final ImageListener listener = (ImageInfo info, bool synchronous) {
+      capturedImage = info;
+    };
+
+    final Exception testException = new Exception('cannot resolve host');
+    final StackTrace testStack = StackTrace.current;
+    final TestImageProvider imageProvider = new TestImageProvider();
+    imageProvider._streamCompleter.addListener(listener, onError: errorListener);
+    // Add the exact same listener a second time without the errorListener.
+    imageProvider._streamCompleter.addListener(listener);
+    ImageConfiguration configuration;
+    await tester.pumpWidget(
+      new Builder(
+        builder: (BuildContext context) {
+          configuration = createLocalImageConfiguration(context);
+          return new Container();
+        },
+      ),
+    );
+    imageProvider.resolve(configuration);
+    imageProvider.fail(testException, testStack);
+
+    expect(tester.binding.microtaskCount, 1);
+    await tester.idle(); // Let the failed completer's future hit the stream completer.
+    expect(tester.binding.microtaskCount, 0);
+
+    expect(capturedImage, isNull); // The image stream listeners should never be called.
+    // The image stream error handler should have the original exception.
+    expect(capturedException, testException);
+    expect(capturedStackTrace, testStack);
+    // If there is an error listener, there should be no FlutterError reported.
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('Duplicate error listener is called once', (WidgetTester tester) async {
+    dynamic capturedException;
+    StackTrace capturedStackTrace;
+    ImageInfo capturedImage;
+    int errorListenerCalled = 0;
+    final ImageErrorListener errorListener = (dynamic exception, StackTrace stackTrace) {
+      capturedException = exception;
+      capturedStackTrace = stackTrace;
+      errorListenerCalled++;
+    };
+    final ImageListener listener = (ImageInfo info, bool synchronous) {
+      capturedImage = info;
+    };
+
+    final Exception testException = new Exception('cannot resolve host');
+    final StackTrace testStack = StackTrace.current;
+    final TestImageProvider imageProvider = new TestImageProvider();
+    imageProvider._streamCompleter.addListener(listener, onError: errorListener);
+    // Add the exact same errorListener a second time.
+    imageProvider._streamCompleter.addListener(null, onError: errorListener);
+    ImageConfiguration configuration;
+    await tester.pumpWidget(
+      new Builder(
+        builder: (BuildContext context) {
+          configuration = createLocalImageConfiguration(context);
+          return new Container();
+        },
+      ),
+    );
+    imageProvider.resolve(configuration);
+    imageProvider.fail(testException, testStack);
+
+    expect(tester.binding.microtaskCount, 1);
+    await tester.idle(); // Let the failed completer's future hit the stream completer.
+    expect(tester.binding.microtaskCount, 0);
+
+    expect(capturedImage, isNull); // The image stream listeners should never be called.
+    // The image stream error handler should have the original exception.
+    expect(capturedException, testException);
+    expect(capturedStackTrace, testStack);
+    // Error listener registered twice but should be called once.
+    expect(errorListenerCalled, 1);
+    // If there is an error listener, there should be no FlutterError reported.
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets('Error listeners are removed along with listeners', (WidgetTester tester) async {
     bool errorListenerCalled = false;
     dynamic reportedException;
@@ -428,6 +516,55 @@ void main() {
     final TestImageProvider imageProvider = new TestImageProvider();
     imageProvider._streamCompleter.addListener(listener, onError: errorListener);
     // Now remove the listener the error listener is attached to.
+    // Don't explicitly remove the error listener.
+    imageProvider._streamCompleter.removeListener(listener);
+    ImageConfiguration configuration;
+    await tester.pumpWidget(
+      new Builder(
+        builder: (BuildContext context) {
+          configuration = createLocalImageConfiguration(context);
+          return new Container();
+        },
+      ),
+    );
+    imageProvider.resolve(configuration);
+
+    imageProvider.fail(testException, testStack);
+
+    expect(tester.binding.microtaskCount, 1);
+    await tester.idle(); // Let the failed completer's future hit the stream completer.
+    expect(tester.binding.microtaskCount, 0);
+
+    expect(errorListenerCalled, false);
+    // Since the error listener is removed, bubble up to FlutterError.
+    expect(reportedException, testException);
+    expect(reportedStackTrace, testStack);
+    expect(capturedImage, isNull); // The image stream listeners should never be called.
+  });
+
+  testWidgets('Removing duplicate listeners removes error listeners', (WidgetTester tester) async {
+    bool errorListenerCalled = false;
+    dynamic reportedException;
+    StackTrace reportedStackTrace;
+    ImageInfo capturedImage;
+    final ImageErrorListener errorListener = (dynamic exception, StackTrace stackTrace) {
+      errorListenerCalled = true;
+    };
+    final ImageListener listener = (ImageInfo info, bool synchronous) {
+      capturedImage = info;
+    };
+    FlutterError.onError = (FlutterErrorDetails flutterError) {
+      reportedException = flutterError.exception;
+      reportedStackTrace = flutterError.stack;
+    };
+
+    final Exception testException = new Exception('cannot resolve host');
+    final StackTrace testStack = StackTrace.current;
+    final TestImageProvider imageProvider = new TestImageProvider();
+    imageProvider._streamCompleter.addListener(listener, onError: errorListener);
+    // Duplicates the same set of listener and errorListener.
+    imageProvider._streamCompleter.addListener(listener, onError: errorListener);
+    // Now remove all specified listeners and associated error listeners.
     // Don't explicitly remove the error listener.
     imageProvider._streamCompleter.removeListener(listener);
     ImageConfiguration configuration;
