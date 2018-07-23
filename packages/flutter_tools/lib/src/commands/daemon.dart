@@ -28,7 +28,7 @@ import '../runner/flutter_command.dart';
 import '../tester/flutter_tester.dart';
 import '../vmservice.dart';
 
-const String protocolVersion = '0.4.0';
+const String protocolVersion = '0.4.1';
 
 /// A server process command. This command will start up a long-lived server.
 /// It reads JSON-RPC based commands from stdin, executes them, and returns
@@ -303,6 +303,11 @@ class DaemonDomain extends Domain {
   }
 }
 
+typedef Future<void> _RunOrAttach({
+  Completer<DebugConnectionInfo> connectionInfoCompleter,
+  Completer<void> appStartedCompleter
+});
+
 /// This domain responds to methods like [start] and [stop].
 ///
 /// It fires events for application start, stop, and stdout and stderr.
@@ -322,7 +327,7 @@ class AppDomain extends Domain {
   Future<AppInstance> startApp(
     Device device, String projectDirectory, String target, String route,
     DebuggingOptions options, bool enableHotReload, {
-    String applicationBinary,
+    File applicationBinary,
     @required bool trackWidgetCreation,
     String projectRootPath,
     String packagesFilePath,
@@ -370,7 +375,28 @@ class AppDomain extends Domain {
       );
     }
 
-    final AppInstance app = new AppInstance(_getNewAppId(), runner: runner, logToStdout: daemon.logToStdout);
+    return launch(
+        runner,
+        ({ Completer<DebugConnectionInfo> connectionInfoCompleter,
+            Completer<void> appStartedCompleter }) => runner.run(
+                connectionInfoCompleter: connectionInfoCompleter,
+                appStartedCompleter: appStartedCompleter,
+                route: route),
+        device,
+        projectDirectory,
+        enableHotReload,
+        cwd);
+  }
+
+  Future<AppInstance> launch(
+      ResidentRunner runner,
+      _RunOrAttach runOrAttach,
+      Device device,
+      String projectDirectory,
+      bool enableHotReload,
+      Directory cwd) async {
+    final AppInstance app = new AppInstance(_getNewAppId(),
+        runner: runner, logToStdout: daemon.logToStdout);
     _apps.add(app);
     _sendAppEvent(app, 'start', <String, dynamic>{
       'deviceId': device.id,
@@ -380,7 +406,7 @@ class AppDomain extends Domain {
 
     Completer<DebugConnectionInfo> connectionInfoCompleter;
 
-    if (options.debuggingEnabled) {
+    if (runner.debuggingOptions.debuggingEnabled) {
       connectionInfoCompleter = new Completer<DebugConnectionInfo>();
       // We don't want to wait for this future to complete and callbacks won't fail.
       // As it just writes to stdout.
@@ -394,20 +420,18 @@ class AppDomain extends Domain {
         _sendAppEvent(app, 'debugPort', params);
       });
     }
-    final Completer<Null> appStartedCompleter = new Completer<Null>();
+    final Completer<void> appStartedCompleter = new Completer<void>();
     // We don't want to wait for this future to complete and callbacks won't fail.
     // As it just writes to stdout.
-    appStartedCompleter.future.then<Null>((Null value) { // ignore: unawaited_futures
+    appStartedCompleter.future.then<void>((_) { // ignore: unawaited_futures
       _sendAppEvent(app, 'started');
     });
 
     await app._runInZone<Null>(this, () async {
       try {
-        await runner.run(
-          connectionInfoCompleter: connectionInfoCompleter,
-          appStartedCompleter: appStartedCompleter,
-          route: route,
-        );
+        await runOrAttach(
+            connectionInfoCompleter: connectionInfoCompleter,
+            appStartedCompleter: appStartedCompleter);
         _sendAppEvent(app, 'stop');
       } catch (error, trace) {
         _sendAppEvent(app, 'stop', <String, dynamic>{
@@ -419,7 +443,6 @@ class AppDomain extends Domain {
         _apps.remove(app);
       }
     });
-
     return app;
   }
 

@@ -69,6 +69,76 @@ class SemanticsTag {
   String toString() => '$runtimeType($name)';
 }
 
+/// An identifier of a custom semantics action.
+/// 
+/// Custom semantics actions can be provided to make complex user
+/// interactions more accessible. For instance, if an application has a 
+/// drag-and-drop list that requires the user to press and hold an item
+/// to move it, users interacting with the application using a hardware
+/// switch may have difficulty. This can be made accessible by creating custom
+/// actions and pairing them with handlers that move a list item up or down in
+/// the list.
+/// 
+/// In Android, these actions are presented in the local context menu. In iOS,
+/// these are presented in the radial context menu. 
+/// 
+/// Localization and text direction do not automatically apply to the provided
+/// label.
+/// 
+/// Instances of this class should either be instantiated with const or
+/// new instances cached in static fields.
+/// 
+/// See also:
+/// 
+///   * [SemanticsProperties], where the handler for a custom action is provided.
+@immutable
+class CustomSemanticsAction {
+  /// Creates a new [CustomSemanticsAction].
+  /// 
+  /// The [label] must not be null or the empty string.
+  const CustomSemanticsAction({@required this.label}) 
+    : assert(label != null),
+      assert(label != '');
+
+  /// The user readable name of this custom accessibility action.
+  final String label;
+
+  @override
+  int get hashCode => label.hashCode;
+
+  @override
+  bool operator ==(dynamic other) {
+    if (other.runtimeType != runtimeType)
+      return false;
+    final CustomSemanticsAction typedOther = other;
+    return typedOther.label == label;
+  }
+
+  // Logic to assign a unique id to each custom action without requiring
+  // user specification. 
+  static int _nextId = 0;
+  static final Map<int, CustomSemanticsAction> _actions = <int, CustomSemanticsAction>{};
+  static final Map<CustomSemanticsAction, int> _ids = <CustomSemanticsAction, int>{};
+
+  /// Get the identifier for a given `action`.
+  @visibleForTesting
+  static int getIdentifier(CustomSemanticsAction action) {
+    int result = _ids[action];
+    if (result == null) {
+      result = _nextId++;
+      _ids[action] = result;
+      _actions[result] = action;
+    }
+    return result;
+  }
+
+  /// Get the `action` for a given identifier.
+  @visibleForTesting
+  static CustomSemanticsAction getAction(int id) {
+    return _actions[id];
+  }
+}
+
 /// Summary information about a [SemanticsNode] object.
 ///
 /// A semantics node might [SemanticsNode.mergeAllDescendantsIntoThisNode],
@@ -100,6 +170,7 @@ class SemanticsData extends Diagnosticable {
     @required this.scrollExtentMin,
     this.tags,
     this.transform,
+    this.customSemanticsActionIds,
   }) : assert(flags != null),
        assert(actions != null),
        assert(label != null),
@@ -200,6 +271,15 @@ class SemanticsData extends Diagnosticable {
   /// parent).
   final Matrix4 transform;
 
+  /// The identifiers for the custom semantics action defined for this node.
+  /// 
+  /// The list must be sorted in increasing order.
+  /// 
+  /// See also:
+  /// 
+  ///   * [CustomSemanticsAction], for an explanation of custom actions.
+  final List<int> customSemanticsActionIds;
+
   /// Whether [flags] contains the given flag.
   bool hasFlag(SemanticsFlag flag) => (flags & flag.index) != 0;
 
@@ -219,7 +299,11 @@ class SemanticsData extends Diagnosticable {
       if ((actions & action.index) != 0)
         actionSummary.add(describeEnum(action));
     }
+    final List<String> customSemanticsActionSummary = customSemanticsActionIds
+      .map<String>((int actionId) => CustomSemanticsAction.getAction(actionId).label)
+      .toList();
     properties.add(new IterableProperty<String>('actions', actionSummary, ifEmpty: null));
+    properties.add(new IterableProperty<String>('customActions', customSemanticsActionSummary, ifEmpty: null));
 
     final List<String> flagSummary = <String>[];
     for (SemanticsFlag flag in SemanticsFlag.values.values) {
@@ -259,11 +343,45 @@ class SemanticsData extends Diagnosticable {
         && typedOther.scrollPosition == scrollPosition
         && typedOther.scrollExtentMax == scrollExtentMax
         && typedOther.scrollExtentMin == scrollExtentMin
-        && typedOther.transform == transform;
+        && typedOther.transform == transform
+        && _sortedListsEqual(typedOther.customSemanticsActionIds, customSemanticsActionIds);
   }
 
   @override
-  int get hashCode => ui.hashValues(flags, actions, label, value, increasedValue, decreasedValue, hint, textDirection, rect, tags, textSelection, scrollPosition, scrollExtentMax, scrollExtentMin, transform);
+  int get hashCode {
+    return ui.hashValues(
+      flags,
+      actions,
+      label,
+      value,
+      increasedValue,
+      decreasedValue,
+      hint,
+      textDirection,
+      rect,
+      tags,
+      textSelection,
+      scrollPosition,
+      scrollExtentMax,
+      scrollExtentMin,
+      transform,
+      customSemanticsActionIds,
+    );
+  }
+  
+  static bool _sortedListsEqual(List<int> left, List<int> right) {
+    if (left == null && right == null)
+      return true;
+    if (left != null && right != null) {
+      if (left.length != right.length)
+        return false;
+      for (int i = 0; i < left.length; i++)
+        if (left[i] != right[i])
+          return false;
+      return true;
+    }
+    return false;
+  }
 }
 
 class _SemanticsDiagnosticableNode extends DiagnosticableNode<SemanticsNode> {
@@ -333,6 +451,7 @@ class SemanticsProperties extends DiagnosticableTree {
     this.onSetSelection,
     this.onDidGainAccessibilityFocus,
     this.onDidLoseAccessibilityFocus,
+    this.customSemanticsActions,
   });
 
   /// If non-null, indicates that this subtree represents something that can be
@@ -417,8 +536,8 @@ class SemanticsProperties extends DiagnosticableTree {
 
   /// If non-null, whether the node corresponds to the root of a subtree for
   /// which a route name should be announced.
-  /// 
-  /// Generally, this is set in combination with [explicitChildNodes], since 
+  ///
+  /// Generally, this is set in combination with [explicitChildNodes], since
   /// nodes with this flag are not considered focusable by Android or iOS.
   ///
   /// See also:
@@ -430,7 +549,7 @@ class SemanticsProperties extends DiagnosticableTree {
   /// If non-null, whether the node contains the semantic label for a route.
   ///
   /// See also:
-  /// 
+  ///
   ///  * [SemanticsFlag.namesRoute] for a description of how the name is used.
   final bool namesRoute;
 
@@ -695,6 +814,18 @@ class SemanticsProperties extends DiagnosticableTree {
   ///    accessibility focus
   ///  * [FocusNode], [FocusScope], [FocusManager], which manage the input focus
   final VoidCallback onDidLoseAccessibilityFocus;
+
+  /// A map from each supported [CustomSemanticsAction] to a provided handler.
+  /// 
+  /// The handler associated with each custom action is called whenever a
+  /// semantics event of type [SemanticsEvent.customEvent] is received. The
+  /// provided argument will be an identifier used to retrieve an instance of
+  /// a custom action which can then retrieve the correct handler from this map.
+  /// 
+  /// See also:
+  /// 
+  ///   * [CustomSemanticsAction], for an explanation of custom actions.
+  final Map<CustomSemanticsAction, VoidCallback> customSemanticsActions;
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
@@ -1103,6 +1234,7 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
   // TAGS, LABELS, ACTIONS
 
   Map<SemanticsAction, _SemanticsActionHandler> _actions = _kEmptyConfig._actions;
+  Map<CustomSemanticsAction, VoidCallback> _customSemanticsActions = _kEmptyConfig._customSemanticsActions;
 
   int _actionsAsBits = _kEmptyConfig._actionsAsBits;
 
@@ -1242,6 +1374,7 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
     _textDirection = config.textDirection;
     _sortKey = config.sortKey;
     _actions = new Map<SemanticsAction, _SemanticsActionHandler>.from(config._actions);
+    _customSemanticsActions = new Map<CustomSemanticsAction, VoidCallback>.from(config._customSemanticsActions);
     _actionsAsBits = config._actionsAsBits;
     _textSelection = config._textSelection;
     _scrollPosition = config._scrollPosition;
@@ -1280,6 +1413,9 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
     double scrollPosition = _scrollPosition;
     double scrollExtentMax = _scrollExtentMax;
     double scrollExtentMin = _scrollExtentMin;
+    final Set<int> customSemanticsActionIds = new Set<int>();
+    for (CustomSemanticsAction action in _customSemanticsActions.keys)
+      customSemanticsActionIds.add(CustomSemanticsAction.getIdentifier(action));
 
     if (mergeAllDescendantsIntoThisNode) {
       _visitDescendants((SemanticsNode node) {
@@ -1300,6 +1436,10 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
         if (node.tags != null) {
           mergedTags ??= new Set<SemanticsTag>();
           mergedTags.addAll(node.tags);
+        }
+        if (node._customSemanticsActions != null) {
+          for (CustomSemanticsAction action in _customSemanticsActions.keys)
+            customSemanticsActionIds.add(CustomSemanticsAction.getIdentifier(action));
         }
         label = _concatStrings(
           thisString: label,
@@ -1333,6 +1473,7 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
       scrollPosition: scrollPosition,
       scrollExtentMax: scrollExtentMax,
       scrollExtentMin: scrollExtentMin,
+      customSemanticsActionIds: customSemanticsActionIds.toList()..sort(),
     );
   }
 
@@ -1341,9 +1482,10 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
   }
 
   static final Int32List _kEmptyChildList = new Int32List(0);
+  static final Int32List _kEmptyCustomSemanticsActionsList = new Int32List(0);
   static final Float64List _kIdentityTransform = _initIdentityTransform();
 
-  void _addToUpdate(ui.SemanticsUpdateBuilder builder) {
+  void _addToUpdate(ui.SemanticsUpdateBuilder builder, Set<int> customSemanticsActionIdsUpdate) {
     assert(_dirty);
     final SemanticsData data = getSemanticsData();
     Int32List childrenInTraversalOrder;
@@ -1365,6 +1507,14 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
         childrenInHitTestOrder[i] = _children[childCount - i - 1].id;
       }
     }
+    Int32List customSemanticsActionIds;
+    if (data.customSemanticsActionIds?.isNotEmpty == true) {
+      customSemanticsActionIds = new Int32List(data.customSemanticsActionIds.length);
+      for (int i = 0; i < data.customSemanticsActionIds.length; i++) {
+        customSemanticsActionIds[i] = data.customSemanticsActionIds[i];
+        customSemanticsActionIdsUpdate.add(data.customSemanticsActionIds[i]);
+      }
+    }
     builder.updateNode(
       id: id,
       flags: data.flags,
@@ -1384,6 +1534,7 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
       transform: data.transform?.storage ?? _kIdentityTransform,
       childrenInTraversalOrder: childrenInTraversalOrder,
       childrenInHitTestOrder: childrenInHitTestOrder,
+      customAcccessibilityActions: customSemanticsActionIds ?? _kEmptyCustomSemanticsActionsList,
     );
     _dirty = false;
   }
@@ -1495,7 +1646,11 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
       properties.add(new DiagnosticsProperty<Rect>('rect', rect, description: description, showName: false));
     }
     final List<String> actions = _actions.keys.map((SemanticsAction action) => describeEnum(action)).toList()..sort();
+    final List<String> customSemanticsActions = _customSemanticsActions.keys
+      .map<String>((CustomSemanticsAction action) => action.label)
+      .toList();
     properties.add(new IterableProperty<String>('actions', actions, ifEmpty: null));
+    properties.add(new IterableProperty<String>('customActions', customSemanticsActions, ifEmpty: null));
     final List<String> flags = SemanticsFlag.values.values.where((SemanticsFlag flag) => _hasFlag(flag)).map((SemanticsFlag flag) => flag.toString().substring('SemanticsFlag.'.length)).toList();
     properties.add(new IterableProperty<String>('flags', flags, ifEmpty: null));
     properties.add(new FlagProperty('isInvisible', value: isInvisible, ifTrue: 'invisible'));
@@ -1876,6 +2031,7 @@ class SemanticsOwner extends ChangeNotifier {
   final Set<SemanticsNode> _dirtyNodes = new Set<SemanticsNode>();
   final Map<int, SemanticsNode> _nodes = <int, SemanticsNode>{};
   final Set<SemanticsNode> _detachedNodes = new Set<SemanticsNode>();
+  final Map<int, CustomSemanticsAction> _actions = <int, CustomSemanticsAction>{};
 
   /// The root node of the semantics tree, if any.
   ///
@@ -1894,6 +2050,7 @@ class SemanticsOwner extends ChangeNotifier {
   void sendSemanticsUpdate() {
     if (_dirtyNodes.isEmpty)
       return;
+    final Set<int> customSemanticsActionIds = new Set<int>();
     final List<SemanticsNode> visitedNodes = <SemanticsNode>[];
     while (_dirtyNodes.isNotEmpty) {
       final List<SemanticsNode> localDirtyNodes = _dirtyNodes.where((SemanticsNode node) => !_detachedNodes.contains(node)).toList();
@@ -1927,9 +2084,11 @@ class SemanticsOwner extends ChangeNotifier {
       // which happens e.g. when the node is no longer contributing
       // semantics).
       if (node._dirty && node.attached)
-        node._addToUpdate(builder);
+        node._addToUpdate(builder, customSemanticsActionIds);
     }
     _dirtyNodes.clear();
+    for (int actionId in customSemanticsActionIds)
+      builder.updateCustomAction(id: actionId, label: CustomSemanticsAction.getAction(actionId).label);
     ui.window.updateSemantics(builder.build());
     notifyListeners();
   }
@@ -2484,6 +2643,30 @@ class SemanticsConfiguration {
     _hasBeenAnnotated = true;
   }
 
+  /// The handlers for each supported [CustomSemanticsAction].
+  /// 
+  /// Whenever a custom accessibility action is added to a node, the action
+  /// [SemanticAction.customAction] is automatically added. A handler is 
+  /// created which uses the passed argument to lookup the custom action
+  /// handler from this map and invoke it, if present.
+  Map<CustomSemanticsAction, VoidCallback> get customSemanticsActions => _customSemanticsActions;
+  Map<CustomSemanticsAction, VoidCallback> _customSemanticsActions = <CustomSemanticsAction, VoidCallback>{};
+  set customSemanticsActions(Map<CustomSemanticsAction, VoidCallback> value) {
+    _hasBeenAnnotated = true;
+    _actionsAsBits |= SemanticsAction.customAction.index;
+    _customSemanticsActions = value;
+    _actions[SemanticsAction.customAction] = _onCustomSemanticsAction;
+  }
+
+  void _onCustomSemanticsAction(dynamic args) {
+    final CustomSemanticsAction action = CustomSemanticsAction.getAction(args);
+    if (action == null)
+      return;
+    final VoidCallback callback = _customSemanticsActions[action];
+    if (callback != null)
+      callback();
+  }
+
   /// A textual description of the owning [RenderObject].
   ///
   /// On iOS this is used for the `accessibilityLabel` property defined in the
@@ -2571,7 +2754,7 @@ class SemanticsConfiguration {
 
   /// Whether the semantics node is the root of a subtree for which values
   /// should be announced.
-  /// 
+  ///
   /// See also:
   ///  * [SemanticsFlag.scopesRoute], for a full description of route scoping.
   bool get scopesRoute => _hasFlag(SemanticsFlag.scopesRoute);
@@ -2580,7 +2763,7 @@ class SemanticsConfiguration {
   }
 
   /// Whether the semantics node contains the label of a route.
-  /// 
+  ///
   /// See also:
   ///  * [SemanticsFlag.namesRoute], for a full description of route naming.
   bool get namesRoute => _hasFlag(SemanticsFlag.namesRoute);
@@ -2839,6 +3022,7 @@ class SemanticsConfiguration {
       return;
 
     _actions.addAll(other._actions);
+    _customSemanticsActions.addAll(other._customSemanticsActions);
     _actionsAsBits |= other._actionsAsBits;
     _flags |= other._flags;
     _textSelection ??= other._textSelection;
@@ -2892,7 +3076,8 @@ class SemanticsConfiguration {
       .._scrollExtentMax = _scrollExtentMax
       .._scrollExtentMin = _scrollExtentMin
       .._actionsAsBits = _actionsAsBits
-      .._actions.addAll(_actions);
+      .._actions.addAll(_actions)
+      .._customSemanticsActions.addAll(_customSemanticsActions);
   }
 }
 

@@ -61,24 +61,6 @@ TaskFunction createMicrobenchmarkTask() {
     allResults.addAll(await _runMicrobench('lib/gestures/velocity_tracker_bench.dart'));
     allResults.addAll(await _runMicrobench('lib/stocks/animation_bench.dart'));
 
-    // Run micro-benchmarks once again in --no-preview-dart-2 mode.
-    // Append "_dart1" suffix to the result keys to distinguish them from
-    // the original results.
-
-    void addDart1Results(Map<String, double> benchmarkResults) {
-      benchmarkResults.forEach((String key, double result) {
-        allResults[key + '_dart1'] = result;
-      });
-    }
-
-    addDart1Results(await _runMicrobench(
-        'lib/stocks/layout_bench.dart', previewDart2: false));
-    addDart1Results(await _runMicrobench(
-        'lib/stocks/build_bench.dart', previewDart2: false));
-    addDart1Results(await _runMicrobench(
-        'lib/gestures/velocity_tracker_bench.dart', previewDart2: false));
-    addDart1Results(await _runMicrobench(
-        'lib/stocks/animation_bench.dart', previewDart2: false));
     return new TaskResult.success(allResults, benchmarkScoreKeys: allResults.keys.toList());
   };
 }
@@ -142,8 +124,8 @@ Future<Map<String, double>> _readJsonResults(Process process) {
       jsonStarted = false;
       processWasKilledIntentionally = true;
       resultsHaveBeenParsed = true;
-      // ignore: deprecated_member_use
-      process.kill(ProcessSignal.SIGINT); // flutter run doesn't quit automatically
+
+      process.kill(ProcessSignal.sigint); // flutter run doesn't quit automatically
       try {
         completer.complete(new Map<String, double>.from(json.decode(jsonOutput)));
       } catch (ex) {
