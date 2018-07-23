@@ -356,23 +356,24 @@ class RenderParagraph extends RenderBox {
     if (_hasVisualOverflow) {
       final Rect bounds = offset & size;
       if (_overflowShader != null) {
-        // This layer limits what the shader below blends with to be just the text
-        // (as opposed to the text and its background).
-        canvas.saveLayer(bounds, new Paint());
-      } else {
-        canvas.save();
+        Paint paint;
+        if (_textPainter.text.style.foreground != null) {
+          paint = _textPainter.text.style.foreground;
+        } else {
+          paint = new Paint()..color = _textPainter.text.style.color;
+        }
+        paint.shader = _overflowShader;
+        _textPainter.text = new TextSpan(
+          text: _textPainter.text.text,
+          style: _textPainter.text.style.copyWith(foreground: paint),
+        );
+        _layoutTextWithConstraints(constraints);
       }
+      canvas.save();
       canvas.clipRect(bounds);
     }
     _textPainter.paint(canvas, offset);
     if (_hasVisualOverflow) {
-      if (_overflowShader != null) {
-        canvas.translate(offset.dx, offset.dy);
-        final Paint paint = new Paint()
-          ..blendMode = BlendMode.modulate
-          ..shader = _overflowShader;
-        canvas.drawRect(Offset.zero & size, paint);
-      }
       canvas.restore();
     }
   }
