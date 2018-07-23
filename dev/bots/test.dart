@@ -104,7 +104,7 @@ Future<Null> _checkForTrailingSpaces() async {
         ? Platform.environment['TEST_COMMIT_RANGE']
         : 'master..HEAD';
     final List<String> fileTypes = <String>[
-      '*.dart', '*.cxx', '*.cpp', '*.cc', '*.c', '*.C', '*.h', '*.java', '*.mm', '*.m',
+      '*.dart', '*.cxx', '*.cpp', '*.cc', '*.c', '*.C', '*.h', '*.java', '*.mm', '*.m', '.yml',
     ];
     final EvalResult changedFilesResult = await _evalCommand(
       'git', <String>['diff', '-U0', '--no-color', '--name-only', commitRange, '--'] + fileTypes,
@@ -116,9 +116,8 @@ Future<Null> _checkForTrailingSpaces() async {
     }
     // Only include files that actually exist, so that we don't try and grep for
     // nonexistent files (can occur when files are deleted or moved).
-    final List<String> changedFiles = changedFilesResult.stdout.trim().split('\n')
-        .where((String filename) {
-          return filename.trim().isNotEmpty && new File(filename).existsSync();
+    final List<String> changedFiles = changedFilesResult.stdout.split('\n').where((String filename) {
+      return new File(filename).existsSync();
     }).toList();
     if (changedFiles.isNotEmpty) {
       await _runCommand('grep',
