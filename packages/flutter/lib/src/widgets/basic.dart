@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:ui' as ui show Image, ImageFilter;
+import 'dart:ui' show Clip, defaultClipBehavior; // ignore: deprecated_member_use
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
@@ -677,7 +678,7 @@ class PhysicalModel extends SingleChildRenderObjectWidget {
   const PhysicalModel({
     Key key,
     this.shape = BoxShape.rectangle,
-    this.clip = defaultClipBehavior,
+    this.clip = defaultClipBehavior, // ignore: deprecated_member_use
     this.borderRadius,
     this.elevation = 0.0,
     @required this.color,

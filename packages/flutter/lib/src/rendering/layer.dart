@@ -5,7 +5,7 @@
 import 'dart:async';
 import 'dart:collection';
 import 'dart:ui' as ui show Image, ImageFilter, Picture, Scene, SceneBuilder;
-import 'dart:ui' show Offset;
+import 'dart:ui' show Clip, Offset, defaultClipBehavior; // ignore: deprecated_member_use
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
@@ -677,7 +677,7 @@ class ClipRRectLayer extends ContainerLayer {
       return true;
     }());
     if (enabled)
-      builder.pushClipRRect(clipRRect.shift(layerOffset), clip.index);
+      builder.pushClipRRect(clipRRect.shift(layerOffset), clip: clip);
     addChildrenToScene(builder, layerOffset);
     if (enabled)
       builder.pop();
@@ -727,7 +727,7 @@ class ClipPathLayer extends ContainerLayer {
     }());
     if (enabled)
       // TODO(liyuqian): respect Clip
-      builder.pushClipPath(clipPath.shift(layerOffset), clip.index);
+      builder.pushClipPath(clipPath.shift(layerOffset), clip: clip);
     addChildrenToScene(builder, layerOffset);
     if (enabled)
       builder.pop();
@@ -932,7 +932,7 @@ class PhysicalModelLayer extends ContainerLayer {
   /// The [clipPath], [elevation], and [color] arguments must not be null.
   PhysicalModelLayer({
     @required this.clipPath,
-    this.clip = defaultClipBehavior,
+    this.clip = defaultClipBehavior, // ignore: deprecated_member_use
     @required this.elevation,
     @required this.color,
     @required this.shadowColor,
@@ -994,7 +994,7 @@ class PhysicalModelLayer extends ContainerLayer {
         elevation: elevation,
         color: color,
         shadowColor: shadowColor,
-        clipMode: clip.index,
+        clip: clip,
       );
     }
     addChildrenToScene(builder, layerOffset);

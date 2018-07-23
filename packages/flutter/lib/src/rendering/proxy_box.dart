@@ -5,6 +5,7 @@
 import 'dart:async';
 
 import 'dart:ui' as ui show ImageFilter, Gradient, Image;
+import 'dart:ui' show Clip, defaultClipBehavior; // ignore: deprecated_member_use
 
 import 'package:flutter/animation.dart';
 import 'package:flutter/foundation.dart';
@@ -1089,7 +1090,7 @@ class ShapeBorderClipper extends CustomClipper<Path> {
   /// the border will not need the text direction to paint itself.
   const ShapeBorderClipper({
     @required this.shape,
-    Clip clip = defaultClipBehavior,
+    Clip clip = defaultClipBehavior, // ignore: deprecated_member_use
     this.textDirection,
   }) : assert(shape != null), assert(clip != null), super(clip: clip);
 
@@ -1120,7 +1121,7 @@ class ShapeBorderClipper extends CustomClipper<Path> {
 abstract class _RenderCustomClip<T> extends RenderProxyBox {
   _RenderCustomClip({
     RenderBox child,
-    this.initialClip = defaultClipBehavior,
+    this.initialClip = defaultClipBehavior, // ignore: deprecated_member_use
     CustomClipper<T> clipper // this would override _clip and initialClip
   }) : _clipper = clipper, super(child);
 
@@ -1471,7 +1472,7 @@ abstract class _RenderPhysicalModelBase<T> extends _RenderCustomClip<T> {
     @required double elevation,
     @required Color color,
     @required Color shadowColor,
-    Clip clip = defaultClipBehavior,
+    Clip clip = defaultClipBehavior, // ignore: deprecated_member_use
     CustomClipper<T> clipper,
   }) : assert(elevation != null),
        assert(color != null),
@@ -1550,7 +1551,7 @@ class RenderPhysicalModel extends _RenderPhysicalModelBase<RRect> {
   RenderPhysicalModel({
     RenderBox child,
     BoxShape shape = BoxShape.rectangle,
-    Clip clip = defaultClipBehavior,
+    Clip clip = defaultClipBehavior, // ignore: deprecated_member_use
     BorderRadius borderRadius,
     double elevation = 0.0,
     @required Color color,
@@ -1791,11 +1792,8 @@ class RenderPhysicalShape extends _RenderPhysicalModelBase<Path> {
             color.alpha != 0xFF,
           );
         }
-        // TODO(liyuqian): respect Clip
         canvas.drawPath(offsetPath, new Paint()..color = color..style = PaintingStyle.fill);
-        int saveCount = RenderObject.optionallyClipPath(canvas, clip, offsetPath, offsetBounds);
-        super.paint(context, offset);
-        canvas.restoreToCount(saveCount);
+        RenderObject.clipAndPaint(canvas, clip, offsetPath, offsetBounds, () => super.paint(context, offset));
         assert(context.canvas == canvas, 'canvas changed even though needsCompositing was false');
       }
     }

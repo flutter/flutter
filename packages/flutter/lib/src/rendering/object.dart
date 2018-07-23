@@ -4,6 +4,7 @@
 
 import 'dart:developer';
 import 'dart:ui' as ui show PictureRecorder;
+import 'dart:ui' show Clip;
 
 import 'package:flutter/animation.dart';
 import 'package:flutter/foundation.dart';
@@ -347,9 +348,7 @@ class PaintingContext {
     if (needsCompositing) {
       pushLayer(new ClipRRectLayer(clipRRect: offsetClipRRect, clip: clip), painter, offset, childPaintBounds: offsetBounds);
     } else {
-      int saveCount = RenderObject.optionallyClipRRect(canvas, clip, offsetClipRRect, offsetBounds);
-      painter(this, offset);
-      canvas.restoreToCount(saveCount);
+      RenderObject.clipAndPaint(canvas, clip, offsetClipRRect, offsetBounds, () => painter(this, offset));
     }
   }
 
@@ -371,9 +370,7 @@ class PaintingContext {
     if (needsCompositing) {
       pushLayer(new ClipPathLayer(clipPath: offsetClipPath, clip: clip), painter, offset, childPaintBounds: offsetBounds);
     } else {
-      int saveCount = RenderObject.optionallyClipPath(canvas, clip, offsetClipPath, offsetBounds);
-      painter(this, offset);
-      canvas.restoreToCount(saveCount);
+      RenderObject.clipAndPaint(canvas, clip, offsetClipPath, offsetBounds, () => painter(this, offset));
     }
   }
 
@@ -2601,50 +2598,38 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   }
 
 
-  /// Optionally clip the canvas with path according to [Clip]. Return the
-  /// save count for [Canvas.restoreToCount]. The bounds is only used for
-  /// [Clip.antiAliasWithSaveLayer].
-  @protected
-  static int optionallyClipPath(Canvas canvas, Clip clip, Path path, Rect bounds) {
+  /// Clip [Canvas] with [T] ([Path], [RRect], or [Rect]) according to [Clip]
+  /// and then paint. [Canvas] is restored to the pre-clip status afterwards.
+  static void clipAndPaint<T>(Canvas canvas, Clip clip, T t, Rect bounds, void painter()) {
+    void Function(bool doAA) canvasClipCall;
+    if (t is Path) {
+      canvasClipCall = (bool doAA) => canvas.clipPath(t, doAntiAlias: doAA);
+    } else if (t is RRect) {
+      canvasClipCall = (bool doAA) => canvas.clipRRect(t, doAntiAlias: doAA);
+    } else if (t is Rect) {
+      canvasClipCall = (bool doAA) => canvas.clipRect(t, doAntiAlias: doAA);
+    }
+    assert(canvasClipCall != null); // t should be one of Path, RRect, Rect
     canvas.save();
-    int saveCount = canvas.getSaveCount();
     switch (clip) {
       case Clip.none:
         break;
       case Clip.hardEdge:
-        canvas.clipPath(path, false);
+        canvasClipCall(false);
         break;
       case Clip.antiAlias:
-        canvas.clipPath(path, true);
+        canvasClipCall(true);
         break;
       case Clip.antiAliasWithSaveLayer:
-        canvas..clipPath(path, true)..saveLayer(bounds, new Paint());
+        canvasClipCall(true);
+        canvas.saveLayer(bounds, new Paint());
         break;
     }
-    return saveCount;
-  }
-
-  /// Optionally clip the canvas with rrect according to [Clip]. Return the
-  /// save count for [Canvas.restoreToCount]. The bounds is only used for
-  /// [Clip.antiAliasWithSaveLayer].
-  @protected
-  static int optionallyClipRRect(Canvas canvas, Clip clip, RRect rrect, Rect bounds) {
-    canvas.save();
-    int saveCount = canvas.getSaveCount();
-    switch (clip) {
-      case Clip.none:
-        break;
-      case Clip.hardEdge:
-        canvas.clipRRect(rrect, false);
-        break;
-      case Clip.antiAlias:
-        canvas.clipRRect(rrect, true);
-        break;
-      case Clip.antiAliasWithSaveLayer:
-        canvas..clipRRect(rrect, true)..saveLayer(bounds, new Paint());
-        break;
+    painter();
+    if (clip == Clip.antiAliasWithSaveLayer) {
+      canvas.restore();
     }
-    return saveCount;
+    canvas.restore();
   }
 }
 

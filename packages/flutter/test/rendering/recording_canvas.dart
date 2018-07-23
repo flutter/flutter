@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:ui' show Clip;
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 
@@ -112,16 +114,12 @@ class TestRecordingPaintingContext implements PaintingContext {
 
   @override
   void pushClipRRect(bool needsCompositing, Offset offset, Rect bounds, RRect clipRRect, Clip clip, PaintingContextCallback painter) {
-    int saveCount = RenderObject.optionallyClipRRect(canvas, clip, clipRRect.shift(offset), bounds.shift(offset));
-    painter(this, offset);
-    canvas.restoreToCount(saveCount);
+    RenderObject.clipAndPaint(canvas, clip, clipRRect.shift(offset), bounds.shift(offset), () => painter(this, offset));
   }
 
   @override
   void pushClipPath(bool needsCompositing, Offset offset, Rect bounds, Path clipPath, Clip clip, PaintingContextCallback painter) {
-    int saveCount = RenderObject.optionallyClipPath(canvas, clip, clipPath, bounds);
-    painter(this, offset);
-    canvas.restoreToCount(saveCount);
+    RenderObject.clipAndPaint(canvas, clip, clipPath, bounds, () => painter(this, offset));
   }
 
   @override
