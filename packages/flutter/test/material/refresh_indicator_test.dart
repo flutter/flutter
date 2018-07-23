@@ -100,9 +100,9 @@ void main() {
             reverse: true,
             physics: const AlwaysScrollableScrollPhysics(),
             children: const <Widget>[
-              const SizedBox(
+              SizedBox(
                 height: 200.0,
-                child: const Text('X'),
+                child: Text('X'),
               ),
             ],
           ),
@@ -127,9 +127,9 @@ void main() {
           child: new ListView(
             physics: const AlwaysScrollableScrollPhysics(),
             children: const <Widget>[
-              const SizedBox(
+              SizedBox(
                 height: 200.0,
-                child: const Text('X'),
+                child: Text('X'),
               ),
             ],
           ),
@@ -154,9 +154,9 @@ void main() {
             reverse: true,
             physics: const AlwaysScrollableScrollPhysics(),
             children: const <Widget>[
-              const SizedBox(
+              SizedBox(
                 height: 200.0,
-                child: const Text('X'),
+                child: Text('X'),
               ),
             ],
           ),
@@ -180,9 +180,9 @@ void main() {
           child: new ListView(
             physics: const AlwaysScrollableScrollPhysics(),
             children: const <Widget>[
-              const SizedBox(
+              SizedBox(
                 height: 200.0,
-                child: const Text('X'),
+                child: Text('X'),
               ),
             ],
           ),
@@ -208,9 +208,9 @@ void main() {
           child: new ListView(
             physics: const AlwaysScrollableScrollPhysics(),
             children: const <Widget>[
-              const SizedBox(
+              SizedBox(
                 height: 200.0,
-                child: const Text('X'),
+                child: Text('X'),
               ),
             ],
           ),
@@ -235,9 +235,9 @@ void main() {
           child: new ListView(
             physics: const AlwaysScrollableScrollPhysics(),
             children: const <Widget>[
-              const SizedBox(
+              SizedBox(
                 height: 200.0,
-                child: const Text('X'),
+                child: Text('X'),
               ),
             ],
           ),
@@ -278,9 +278,9 @@ void main() {
           child: new ListView(
             physics: const AlwaysScrollableScrollPhysics(),
             children: const <Widget>[
-              const SizedBox(
+              SizedBox(
                 height: 200.0,
-                child: const Text('X'),
+                child: Text('X'),
               ),
             ],
           ),
@@ -322,9 +322,9 @@ void main() {
           child: new ListView(
             physics: const AlwaysScrollableScrollPhysics(),
             children: const <Widget>[
-              const SizedBox(
+              SizedBox(
                 height: 200.0,
-                child: const Text('X'),
+                child: Text('X'),
               ),
             ],
           ),

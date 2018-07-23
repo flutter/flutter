@@ -29,15 +29,15 @@ const int _kDisabledAlpha = 0x61; // 38%
 const double _kCheckmarkStrokeWidth = 2.0;
 const double _kPressElevation = 8.0;
 
-const Duration _kSelectDuration = const Duration(milliseconds: 195);
-const Duration _kCheckmarkDuration = const Duration(milliseconds: 150);
-const Duration _kCheckmarkReverseDuration = const Duration(milliseconds: 50);
-const Duration _kDrawerDuration = const Duration(milliseconds: 150);
-const Duration _kReverseDrawerDuration = const Duration(milliseconds: 100);
-const Duration _kDisableDuration = const Duration(milliseconds: 75);
+const Duration _kSelectDuration = Duration(milliseconds: 195);
+const Duration _kCheckmarkDuration = Duration(milliseconds: 150);
+const Duration _kCheckmarkReverseDuration = Duration(milliseconds: 50);
+const Duration _kDrawerDuration = Duration(milliseconds: 150);
+const Duration _kReverseDrawerDuration = Duration(milliseconds: 100);
+const Duration _kDisableDuration = Duration(milliseconds: 75);
 
-const Color _kSelectScrimColor = const Color(0x60191919);
-const Icon _kDefaultDeleteIcon = const Icon(Icons.cancel, size: _kDeleteIconSize);
+const Color _kSelectScrimColor = Color(0x60191919);
+const Icon _kDefaultDeleteIcon = Icon(Icons.cancel, size: _kDeleteIconSize);
 
 /// An interface defining the base attributes for a material design chip.
 ///
@@ -1174,7 +1174,7 @@ class RawChip extends StatefulWidget
 }
 
 class _RawChipState extends State<RawChip> with TickerProviderStateMixin<RawChip> {
-  static const Duration pressedAnimationDuration = const Duration(milliseconds: 75);
+  static const Duration pressedAnimationDuration = Duration(milliseconds: 75);
 
   AnimationController selectController;
   AnimationController avatarDrawerController;

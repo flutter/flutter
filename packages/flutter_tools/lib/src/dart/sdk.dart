@@ -12,7 +12,7 @@ String get dartSdkPath {
 }
 
 /// The required Dart language flags
-const List<String> dartVmFlags = const <String>[];
+const List<String> dartVmFlags = <String>[];
 
 /// Return the platform specific name for the given Dart SDK binary. So, `pub`
 /// ==> `pub.bat`. The default SDK location can be overridden with a specified

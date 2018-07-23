@@ -13,8 +13,8 @@ import 'package:flutter/rendering.dart';
 import 'sections.dart';
 import 'widgets.dart';
 
-const Color _kAppBackgroundColor = const Color(0xFF353662);
-const Duration _kScrollDuration = const Duration(milliseconds: 400);
+const Color _kAppBackgroundColor = Color(0xFF353662);
+const Duration _kScrollDuration = Duration(milliseconds: 400);
 const Curve _kScrollCurve = Curves.fastOutSlowIn;
 
 // This app's contents start out at _kHeadingMaxHeight and they function like

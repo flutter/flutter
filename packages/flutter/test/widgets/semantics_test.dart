@@ -795,9 +795,9 @@ void main() {
             const Text('Label 2'),
             new Row(
               children: const <Widget>[
-                const Text('Label 3'),
-                const Text('Label 4'),
-                const Text('Label 5'),
+                Text('Label 3'),
+                Text('Label 4'),
+                Text('Label 5'),
               ],
             ),
           ],
@@ -855,9 +855,9 @@ void main() {
               angle: pi / 2.0,
               child: new Row(
                 children: const <Widget>[
-                  const Text('Label 3'),
-                  const Text('Label 4'),
-                  const Text('Label 5'),
+                  Text('Label 3'),
+                  Text('Label 4'),
+                  Text('Label 5'),
                 ],
               ),
             ),

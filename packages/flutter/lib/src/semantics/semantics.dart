@@ -70,33 +70,33 @@ class SemanticsTag {
 }
 
 /// An identifier of a custom semantics action.
-/// 
+///
 /// Custom semantics actions can be provided to make complex user
-/// interactions more accessible. For instance, if an application has a 
+/// interactions more accessible. For instance, if an application has a
 /// drag-and-drop list that requires the user to press and hold an item
 /// to move it, users interacting with the application using a hardware
 /// switch may have difficulty. This can be made accessible by creating custom
 /// actions and pairing them with handlers that move a list item up or down in
 /// the list.
-/// 
+///
 /// In Android, these actions are presented in the local context menu. In iOS,
-/// these are presented in the radial context menu. 
-/// 
+/// these are presented in the radial context menu.
+///
 /// Localization and text direction do not automatically apply to the provided
 /// label.
-/// 
+///
 /// Instances of this class should either be instantiated with const or
 /// new instances cached in static fields.
-/// 
+///
 /// See also:
-/// 
+///
 ///   * [SemanticsProperties], where the handler for a custom action is provided.
 @immutable
 class CustomSemanticsAction {
   /// Creates a new [CustomSemanticsAction].
-  /// 
+  ///
   /// The [label] must not be null or the empty string.
-  const CustomSemanticsAction({@required this.label}) 
+  const CustomSemanticsAction({@required this.label})
     : assert(label != null),
       assert(label != '');
 
@@ -115,7 +115,7 @@ class CustomSemanticsAction {
   }
 
   // Logic to assign a unique id to each custom action without requiring
-  // user specification. 
+  // user specification.
   static int _nextId = 0;
   static final Map<int, CustomSemanticsAction> _actions = <int, CustomSemanticsAction>{};
   static final Map<CustomSemanticsAction, int> _ids = <CustomSemanticsAction, int>{};
@@ -272,11 +272,11 @@ class SemanticsData extends Diagnosticable {
   final Matrix4 transform;
 
   /// The identifiers for the custom semantics action defined for this node.
-  /// 
+  ///
   /// The list must be sorted in increasing order.
-  /// 
+  ///
   /// See also:
-  /// 
+  ///
   ///   * [CustomSemanticsAction], for an explanation of custom actions.
   final List<int> customSemanticsActionIds;
 
@@ -368,7 +368,7 @@ class SemanticsData extends Diagnosticable {
       customSemanticsActionIds,
     );
   }
-  
+
   static bool _sortedListsEqual(List<int> left, List<int> right) {
     if (left == null && right == null)
       return true;
@@ -816,14 +816,14 @@ class SemanticsProperties extends DiagnosticableTree {
   final VoidCallback onDidLoseAccessibilityFocus;
 
   /// A map from each supported [CustomSemanticsAction] to a provided handler.
-  /// 
+  ///
   /// The handler associated with each custom action is called whenever a
   /// semantics event of type [SemanticsEvent.customEvent] is received. The
   /// provided argument will be an identifier used to retrieve an instance of
   /// a custom action which can then retrieve the correct handler from this map.
-  /// 
+  ///
   /// See also:
-  /// 
+  ///
   ///   * [CustomSemanticsAction], for an explanation of custom actions.
   final Map<CustomSemanticsAction, VoidCallback> customSemanticsActions;
 
@@ -2644,9 +2644,9 @@ class SemanticsConfiguration {
   }
 
   /// The handlers for each supported [CustomSemanticsAction].
-  /// 
+  ///
   /// Whenever a custom accessibility action is added to a node, the action
-  /// [SemanticAction.customAction] is automatically added. A handler is 
+  /// [SemanticAction.customAction] is automatically added. A handler is
   /// created which uses the passed argument to lookup the custom action
   /// handler from this map and invoke it, if present.
   Map<CustomSemanticsAction, VoidCallback> get customSemanticsActions => _customSemanticsActions;

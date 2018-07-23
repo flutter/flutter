@@ -8,9 +8,9 @@ import 'package:flutter/widgets.dart';
 
 void main() {
   testWidgets('toString control test', (WidgetTester tester) async {
-    const Widget widget = const FadeTransition(
+    const Widget widget = FadeTransition(
       opacity: kAlwaysCompleteAnimation,
-      child: const Text('Ready', textDirection: TextDirection.ltr),
+      child: Text('Ready', textDirection: TextDirection.ltr),
     );
     expect(widget.toString, isNot(throwsException));
   });
@@ -26,8 +26,8 @@ void main() {
         ),
         borderRadius: BorderRadius.zero,
         shape: BoxShape.rectangle,
-        boxShadow: const <BoxShadow> [const BoxShadow(
-          color: const Color(0x66000000),
+        boxShadow: const <BoxShadow> [BoxShadow(
+          color: Color(0x66000000),
           blurRadius: 10.0,
           spreadRadius: 4.0,
         )],

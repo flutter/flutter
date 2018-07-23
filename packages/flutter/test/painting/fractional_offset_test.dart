@@ -7,8 +7,8 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   test('FractionalOffset control test', () {
-    const FractionalOffset a = const FractionalOffset(0.5, 0.25);
-    const FractionalOffset b = const FractionalOffset(1.25, 0.75);
+    const FractionalOffset a = FractionalOffset(0.5, 0.25);
+    const FractionalOffset b = FractionalOffset(1.25, 0.75);
 
     expect(a, hasOneLineDescription);
     expect(a.hashCode, equals(const FractionalOffset(0.5, 0.25).hashCode));

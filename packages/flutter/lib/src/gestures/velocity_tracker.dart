@@ -20,7 +20,7 @@ class Velocity {
   }) : assert(pixelsPerSecond != null);
 
   /// A velocity that isn't moving at all.
-  static const Velocity zero = const Velocity(pixelsPerSecond: Offset.zero);
+  static const Velocity zero = Velocity(pixelsPerSecond: Offset.zero);
 
   /// The number of pixels per second of velocity in the x and y directions.
   final Offset pixelsPerSecond;

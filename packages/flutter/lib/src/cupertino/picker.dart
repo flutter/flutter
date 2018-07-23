@@ -8,8 +8,8 @@ import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
 /// Color of the 'magnifier' lens border.
-const Color _kHighlighterBorder = const Color(0xFF7F7F7F);
-const Color _kDefaultBackground = const Color(0xFFD2D4DB);
+const Color _kHighlighterBorder = Color(0xFF7F7F7F);
+const Color _kDefaultBackground = Color(0xFFD2D4DB);
 /// Eyeballed value comparing with a native picker.
 const double _kDefaultDiameterRatio = 1.1;
 /// Opacity fraction value that hides the wheel above and below the 'magnifier'
@@ -132,18 +132,18 @@ class _CupertinoPickerState extends State<CupertinoPicker> {
       child: new IgnorePointer(
         child: new Container(
           decoration: const BoxDecoration(
-            gradient: const LinearGradient(
-              colors: const <Color>[
-                const Color(0xFFFFFFFF),
-                const Color(0xF2FFFFFF),
-                const Color(0xDDFFFFFF),
-                const Color(0x00FFFFFF),
-                const Color(0x00FFFFFF),
-                const Color(0xDDFFFFFF),
-                const Color(0xF2FFFFFF),
-                const Color(0xFFFFFFFF),
+            gradient: LinearGradient(
+              colors: <Color>[
+                Color(0xFFFFFFFF),
+                Color(0xF2FFFFFF),
+                Color(0xDDFFFFFF),
+                Color(0x00FFFFFF),
+                Color(0x00FFFFFF),
+                Color(0xDDFFFFFF),
+                Color(0xF2FFFFFF),
+                Color(0xFFFFFFFF),
               ],
-              stops: const <double>[
+              stops: <double>[
                 0.0, 0.05, 0.09, 0.22, 0.78, 0.91, 0.95, 1.0,
               ],
               begin: Alignment.topCenter,
@@ -172,9 +172,9 @@ class _CupertinoPickerState extends State<CupertinoPicker> {
           ),
           new Container(
             decoration: const BoxDecoration(
-              border: const Border(
-                top: const BorderSide(width: 0.0, color: _kHighlighterBorder),
-                bottom: const BorderSide(width: 0.0, color: _kHighlighterBorder),
+              border: Border(
+                top: BorderSide(width: 0.0, color: _kHighlighterBorder),
+                bottom: BorderSide(width: 0.0, color: _kHighlighterBorder),
               )
             ),
             constraints: new BoxConstraints.expand(

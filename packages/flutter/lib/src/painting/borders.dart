@@ -114,7 +114,7 @@ class BorderSide {
   final BorderStyle style;
 
   /// A hairline black border that is not rendered.
-  static const BorderSide none = const BorderSide(width: 0.0, style: BorderStyle.none);
+  static const BorderSide none = BorderSide(width: 0.0, style: BorderStyle.none);
 
   /// Creates a copy of this border but with the given fields replaced with the new values.
   BorderSide copyWith({

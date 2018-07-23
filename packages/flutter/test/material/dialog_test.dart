@@ -77,9 +77,9 @@ void main() {
                       context: context,
                       builder: (BuildContext context) {
                         return const AlertDialog(
-                          title: const Text('Title'),
-                          content: const Text('Y'),
-                          actions: const <Widget>[ ],
+                          title: Text('Title'),
+                          content: Text('Y'),
+                          actions: <Widget>[ ],
                         );
                       },
                     );
@@ -108,10 +108,10 @@ void main() {
     await tester.pumpWidget(
       new MaterialApp(
         home: const Material(
-          child: const Center(
-            child: const RaisedButton(
+          child: Center(
+            child: RaisedButton(
               onPressed: null,
-              child: const Text('Go'),
+              child: Text('Go'),
             ),
           ),
         ),
@@ -133,7 +133,7 @@ void main() {
               child: const Text('First option'),
             ),
             const SimpleDialogOption(
-              child: const Text('Second option'),
+              child: Text('Second option'),
             ),
           ],
         );
@@ -151,10 +151,10 @@ void main() {
     await tester.pumpWidget(
       new MaterialApp(
         home: const Material(
-          child: const Center(
-            child: const RaisedButton(
+          child: Center(
+            child: RaisedButton(
               onPressed: null,
-              child: const Text('Go'),
+              child: Text('Go'),
             ),
           ),
         ),
@@ -214,10 +214,10 @@ void main() {
     await tester.pumpWidget(
       new MaterialApp(
         home: const Material(
-          child: const Center(
-            child: const RaisedButton(
+          child: Center(
+            child: RaisedButton(
               onPressed: null,
-              child: const Text(buttonText),
+              child: Text(buttonText),
             ),
           ),
         ),
@@ -232,7 +232,7 @@ void main() {
     showDialog<void>(
       context: context,
       builder: (BuildContext context) {
-        return const AlertDialog(title: const Text(alertText));
+        return const AlertDialog(title: Text(alertText));
       },
     );
 
@@ -257,8 +257,8 @@ void main() {
       ],
       child: new MediaQuery(
         data: const MediaQueryData(
-          padding: const EdgeInsets.all(50.0),
-          viewInsets: const EdgeInsets.only(left: 25.0, bottom: 75.0),
+          padding: EdgeInsets.all(50.0),
+          viewInsets: EdgeInsets.only(left: 25.0, bottom: 75.0),
         ),
         child: new Navigator(
           onGenerateRoute: (_) {
@@ -302,11 +302,11 @@ void main() {
   testWidgets('Dialog widget insets by viewInsets', (WidgetTester tester) async {
     await tester.pumpWidget(
       const MediaQuery(
-        data: const MediaQueryData(
-          viewInsets: const EdgeInsets.fromLTRB(10.0, 20.0, 30.0, 40.0),
+        data: MediaQueryData(
+          viewInsets: EdgeInsets.fromLTRB(10.0, 20.0, 30.0, 40.0),
         ),
-        child: const Dialog(
-          child: const Placeholder(),
+        child: Dialog(
+          child: Placeholder(),
         ),
       ),
     );
@@ -316,11 +316,11 @@ void main() {
     );
     await tester.pumpWidget(
       const MediaQuery(
-        data: const MediaQueryData(
-          viewInsets: const EdgeInsets.fromLTRB(0.0, 0.0, 0.0, 0.0),
+        data: MediaQueryData(
+          viewInsets: EdgeInsets.fromLTRB(0.0, 0.0, 0.0, 0.0),
         ),
-        child: const Dialog(
-          child: const Placeholder(),
+        child: Dialog(
+          child: Placeholder(),
         ),
       ),
     );
@@ -350,9 +350,9 @@ void main() {
                       context: context,
                       builder: (BuildContext context) {
                         return const AlertDialog(
-                          title: const Text('Title'),
-                          content: const Text('Y'),
-                          actions: const <Widget>[],
+                          title: Text('Title'),
+                          content: Text('Y'),
+                          actions: <Widget>[],
                         );
                       },
                     );
