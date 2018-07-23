@@ -654,30 +654,6 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
   SemanticsHandle ensureSemantics() {
     return binding.pipelineOwner.ensureSemantics();
   }
-
-  /// Attempts to find the [SemanticsData] of first result from [finder].
-  ///
-  /// Will throw a [StateError] if the finder returns more than one element or
-  /// if no semantics can be found.
-  SemanticsData getSemanticsData(Finder finder) {
-    final Element element = finder.evaluate().single;
-    RenderObject renderObject = element.findRenderObject();
-    SemanticsNode result = renderObject.debugSemantics;
-    while (renderObject != null && result == null) {
-      renderObject = renderObject?.parent;
-      result = renderObject?.debugSemantics;
-    }
-    if (result == null)
-      throw new StateError('No Semantics found');
-    return result.getSemanticsData();
-  }
-
-  /// Enable semantics in a test by creating a [SemanticsHandle].
-  ///
-  /// The handle must be disposed at the end of the test.
-  SemanticsHandle ensureSemantics() {
-    return binding.pipelineOwner.ensureSemantics();
-  }
 }
 
 typedef void _TickerDisposeCallback(_TestTicker ticker);

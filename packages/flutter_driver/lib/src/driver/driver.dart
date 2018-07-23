@@ -571,10 +571,6 @@ class FlutterDriver {
     return result.changedState;
   }
 
-<<<<<<< HEAD
-  Future<int> getSemanticsId(SerializableFinder finder, { Duration timeout = _kShortTimeout}) async {
-    final GetSemanticsIdResult result = GetSemanticsIdResult.fromJson(await _sendCommand(new GetSemanticsId(finder, timeout: timeout)));
-=======
   /// Retrieves the semantics node id for the object returned by `finder`, or
   /// the nearest ancestor with a semantics node.
   ///
@@ -586,7 +582,6 @@ class FlutterDriver {
   Future<int> getSemanticsId(SerializableFinder finder, { Duration timeout = _kShortTimeout}) async {
     final Map<String, dynamic> jsonResponse = await _sendCommand(new GetSemanticsId(finder, timeout: timeout));
     final GetSemanticsIdResult result = GetSemanticsIdResult.fromJson(jsonResponse);
->>>>>>> f44f625c0641e888e19e1a1419d943f949cdcc4c
     return result.id;
   }
 

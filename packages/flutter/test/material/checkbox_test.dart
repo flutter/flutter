@@ -135,11 +135,7 @@ void main() {
       hasCheckedState: true,
       hasEnabledState: true,
       isEnabled: true,
-<<<<<<< HEAD
-      hasTap: true,
-=======
       hasTapAction: true,
->>>>>>> f44f625c0641e888e19e1a1419d943f949cdcc4c
     ));
     handle.dispose();
   });

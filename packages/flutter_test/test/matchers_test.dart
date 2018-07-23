@@ -387,11 +387,7 @@ void main() {
   group('matchesSemanticsData', () {
     testWidgets('matches SemanticsData', (WidgetTester tester) async {
       final SemanticsHandle handle = tester.ensureSemantics();
-<<<<<<< HEAD
-      const Key key = const Key('semantics');
-=======
       const Key key = Key('semantics');
->>>>>>> f44f625c0641e888e19e1a1419d943f949cdcc4c
       await tester.pumpWidget(new Semantics(
         key: key,
         namesRoute: true,
@@ -410,11 +406,7 @@ void main() {
           hint: 'bar',
           value: 'baz',
           textDirection: TextDirection.rtl,
-<<<<<<< HEAD
-          hasTap: true,
-=======
           hasTapAction: true,
->>>>>>> f44f625c0641e888e19e1a1419d943f949cdcc4c
           isButton: true,
           isHeader: true,
           namesRoute: true,
@@ -462,26 +454,6 @@ void main() {
          namesRoute: true,
          scopesRoute: true,
          isHidden: true,
-<<<<<<< HEAD
-         /* Actions */
-         hasTap: true,
-         hasLongPress: true,
-         hasScrollLeft: true,
-         hasScrollRight: true,
-         hasScrollUp: true,
-         hasScrollDown: true,
-         hasIncrease: true,
-         hasDecrease: true,
-         hasShowOnScreen: true,
-         hasMoveCursorForwardByCharacter: true,
-         hasMoveCursorBackwardByCharacter: true,
-         hasSetSelection: true,
-         hasCopy: true,
-         hasCut: true,
-         hasPaste: true,
-         hasDidGainAccessibilityFocus: true,
-         hasDidLoseAccessibilityFocus: true,
-=======
          isImage: true,
          isLiveRegion: true,
          hasToggledState: true,
@@ -506,7 +478,6 @@ void main() {
          hasDidLoseAccessibilityFocusAction: true,
          hasCustomAction: true,
          hasDismissAction: true,
->>>>>>> f44f625c0641e888e19e1a1419d943f949cdcc4c
       ));
     });
   });
