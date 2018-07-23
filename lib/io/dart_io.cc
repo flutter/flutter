@@ -4,10 +4,10 @@
 
 #include "flutter/lib/io/dart_io.h"
 
-#include "lib/tonic/converter/dart_converter.h"
 #include "third_party/dart/runtime/bin/crypto.h"
 #include "third_party/dart/runtime/bin/io_natives.h"
 #include "third_party/dart/runtime/include/dart_api.h"
+#include "third_party/tonic/converter/dart_converter.h"
 
 using tonic::ToDart;
 

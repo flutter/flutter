@@ -6,8 +6,8 @@
 #define FLUTTER_LIB_UI_PAINTING_IMAGE_H_
 
 #include "flutter/flow/skia_gpu_object.h"
+#include "flutter/lib/ui/dart_wrapper.h"
 #include "flutter/lib/ui/ui_dart_state.h"
-#include "lib/tonic/dart_wrappable.h"
 #include "third_party/skia/include/core/SkImage.h"
 
 namespace tonic {
@@ -16,8 +16,7 @@ class DartLibraryNatives;
 
 namespace blink {
 
-class CanvasImage final : public fxl::RefCountedThreadSafe<CanvasImage>,
-                          public tonic::DartWrappable {
+class CanvasImage final : public RefCountedDartWrappable<CanvasImage> {
   DEFINE_WRAPPERTYPEINFO();
   FRIEND_MAKE_REF_COUNTED(CanvasImage);
 

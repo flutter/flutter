@@ -10,7 +10,7 @@
 #include "flutter/lib/ui/ui_dart_state.h"
 #include "flutter/lib/ui/window/window.h"
 #include "flutter/runtime/runtime_delegate.h"
-#include "lib/tonic/dart_message_handler.h"
+#include "third_party/tonic/dart_message_handler.h"
 
 #ifdef ERROR
 #undef ERROR
@@ -70,11 +70,12 @@ RuntimeController::RuntimeController(
                                          unref_queue_,
                                          p_advisory_script_uri,
                                          p_advisory_script_entrypoint)) {
-  root_isolate_->SetReturnCodeCallback([this](uint32_t code) {
+  std::shared_ptr<DartIsolate> root_isolate = root_isolate_.lock();
+  root_isolate->SetReturnCodeCallback([this](uint32_t code) {
     root_isolate_return_code_ = {true, code};
   });
   if (auto window = GetWindowIfAvailable()) {
-    tonic::DartState::Scope scope(root_isolate_.get());
+    tonic::DartState::Scope scope(root_isolate);
     window->DidCreateIsolate();
     if (!FlushRuntimeStateToIsolate()) {
       FXL_DLOG(ERROR) << "Could not setup intial isolate state.";
@@ -87,9 +88,10 @@ RuntimeController::RuntimeController(
 
 RuntimeController::~RuntimeController() {
   FXL_DCHECK(Dart_CurrentIsolate() == nullptr);
-  if (root_isolate_) {
-    root_isolate_->SetReturnCodeCallback(nullptr);
-    auto result = root_isolate_->Shutdown();
+  std::shared_ptr<DartIsolate> root_isolate = root_isolate_.lock();
+  if (root_isolate) {
+    root_isolate->SetReturnCodeCallback(nullptr);
+    auto result = root_isolate->Shutdown();
     if (!result) {
       FXL_DLOG(ERROR) << "Could not shutdown the root isolate.";
     }
@@ -98,8 +100,9 @@ RuntimeController::~RuntimeController() {
 }
 
 bool RuntimeController::IsRootIsolateRunning() const {
-  if (root_isolate_) {
-    return root_isolate_->GetPhase() == DartIsolate::Phase::Running;
+  std::shared_ptr<DartIsolate> root_isolate = root_isolate_.lock();
+  if (root_isolate) {
+    return root_isolate->GetPhase() == DartIsolate::Phase::Running;
   }
   return false;
 }
@@ -192,11 +195,12 @@ bool RuntimeController::BeginFrame(fxl::TimePoint frame_time) {
 }
 
 bool RuntimeController::NotifyIdle(int64_t deadline) {
-  if (!root_isolate_) {
+  std::shared_ptr<DartIsolate> root_isolate = root_isolate_.lock();
+  if (!root_isolate) {
     return false;
   }
 
-  tonic::DartState::Scope scope(root_isolate_.get());
+  tonic::DartState::Scope scope(root_isolate);
   Dart_NotifyIdle(deadline);
   return true;
 }
@@ -236,7 +240,8 @@ bool RuntimeController::DispatchSemanticsAction(int32_t id,
 }
 
 Window* RuntimeController::GetWindowIfAvailable() {
-  return root_isolate_ ? root_isolate_->window() : nullptr;
+  std::shared_ptr<DartIsolate> root_isolate = root_isolate_.lock();
+  return root_isolate ? root_isolate->window() : nullptr;
 }
 
 std::string RuntimeController::DefaultRouteName() {
@@ -267,26 +272,30 @@ FontCollection& RuntimeController::GetFontCollection() {
 }
 
 Dart_Port RuntimeController::GetMainPort() {
-  return root_isolate_ ? root_isolate_->main_port() : ILLEGAL_PORT;
+  std::shared_ptr<DartIsolate> root_isolate = root_isolate_.lock();
+  return root_isolate ? root_isolate->main_port() : ILLEGAL_PORT;
 }
 
 std::string RuntimeController::GetIsolateName() {
-  return root_isolate_ ? root_isolate_->debug_name() : "";
+  std::shared_ptr<DartIsolate> root_isolate = root_isolate_.lock();
+  return root_isolate ? root_isolate->debug_name() : "";
 }
 
 bool RuntimeController::HasLivePorts() {
-  if (!root_isolate_) {
+  std::shared_ptr<DartIsolate> root_isolate = root_isolate_.lock();
+  if (!root_isolate) {
     return false;
   }
-  tonic::DartState::Scope scope(root_isolate_.get());
+  tonic::DartState::Scope scope(root_isolate);
   return Dart_HasLivePorts();
 }
 
 tonic::DartErrorHandleType RuntimeController::GetLastError() {
-  return root_isolate_ ? root_isolate_->GetLastError() : tonic::kNoError;
+  std::shared_ptr<DartIsolate> root_isolate = root_isolate_.lock();
+  return root_isolate ? root_isolate->GetLastError() : tonic::kNoError;
 }
 
-fml::WeakPtr<DartIsolate> RuntimeController::GetRootIsolate() {
+std::weak_ptr<DartIsolate> RuntimeController::GetRootIsolate() {
   return root_isolate_;
 }
 

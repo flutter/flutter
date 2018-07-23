@@ -12,13 +12,13 @@
 #include "flutter/lib/ui/painting/matrix.h"
 #include "flutter/lib/ui/ui_dart_state.h"
 #include "flutter/lib/ui/window/window.h"
-#include "lib/tonic/converter/dart_converter.h"
-#include "lib/tonic/dart_args.h"
-#include "lib/tonic/dart_binding_macros.h"
-#include "lib/tonic/dart_library_natives.h"
 #include "third_party/skia/include/core/SkBitmap.h"
 #include "third_party/skia/include/core/SkCanvas.h"
 #include "third_party/skia/include/core/SkRSXform.h"
+#include "third_party/tonic/converter/dart_converter.h"
+#include "third_party/tonic/dart_args.h"
+#include "third_party/tonic/dart_binding_macros.h"
+#include "third_party/tonic/dart_library_natives.h"
 
 using tonic::ToDart;
 
@@ -164,7 +164,8 @@ void Canvas::clipRect(double left,
                       bool doAntiAlias) {
   if (!canvas_)
     return;
-  canvas_->clipRect(SkRect::MakeLTRB(left, top, right, bottom), clipOp, doAntiAlias);
+  canvas_->clipRect(SkRect::MakeLTRB(left, top, right, bottom), clipOp,
+                    doAntiAlias);
 }
 
 void Canvas::clipRRect(const RRect& rrect, bool doAntiAlias) {

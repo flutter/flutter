@@ -5,16 +5,15 @@
 #ifndef FLUTTER_LIB_UI_SEMANTICS_SEMANTICS_UPDATE_BUILDER_H_
 #define FLUTTER_LIB_UI_SEMANTICS_SEMANTICS_UPDATE_BUILDER_H_
 
+#include "flutter/lib/ui/dart_wrapper.h"
 #include "flutter/lib/ui/semantics/semantics_update.h"
-#include "lib/tonic/dart_wrappable.h"
-#include "lib/tonic/typed_data/float64_list.h"
-#include "lib/tonic/typed_data/int32_list.h"
+#include "third_party/tonic/typed_data/float64_list.h"
+#include "third_party/tonic/typed_data/int32_list.h"
 
 namespace blink {
 
 class SemanticsUpdateBuilder
-    : public fxl::RefCountedThreadSafe<SemanticsUpdateBuilder>,
-      public tonic::DartWrappable {
+    : public RefCountedDartWrappable<SemanticsUpdateBuilder> {
   DEFINE_WRAPPERTYPEINFO();
   FRIEND_MAKE_REF_COUNTED(SemanticsUpdateBuilder);
 

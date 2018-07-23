@@ -8,10 +8,10 @@
 #include <math.h>
 
 #include "flutter/lib/ui/painting/matrix.h"
-#include "lib/tonic/converter/dart_converter.h"
-#include "lib/tonic/dart_args.h"
-#include "lib/tonic/dart_binding_macros.h"
-#include "lib/tonic/dart_library_natives.h"
+#include "third_party/tonic/converter/dart_converter.h"
+#include "third_party/tonic/dart_args.h"
+#include "third_party/tonic/dart_binding_macros.h"
+#include "third_party/tonic/dart_library_natives.h"
 
 using tonic::ToDart;
 
@@ -213,9 +213,14 @@ void CanvasPath::addPath(CanvasPath* path, double dx, double dy) {
   path_.addPath(path->path(), dx, dy, SkPath::kAppend_AddPathMode);
 }
 
-void CanvasPath::addPathWithMatrix(CanvasPath* path, double dx, double dy, tonic::Float64List& matrix4) {
-  if (!path)
-    Dart_ThrowException(ToDart("Path.addPathWithMatrix called with non-genuine Path."));
+void CanvasPath::addPathWithMatrix(CanvasPath* path,
+                                   double dx,
+                                   double dy,
+                                   tonic::Float64List& matrix4) {
+  if (!path) {
+    Dart_ThrowException(
+        ToDart("Path.addPathWithMatrix called with non-genuine Path."));
+  }
 
   SkMatrix matrix = ToSkMatrix(matrix4);
   matrix.setTranslateX(matrix.getTranslateX() + dx);
@@ -231,9 +236,14 @@ void CanvasPath::extendWithPath(CanvasPath* path, double dx, double dy) {
   path_.addPath(path->path(), dx, dy, SkPath::kExtend_AddPathMode);
 }
 
-void CanvasPath::extendWithPathAndMatrix(CanvasPath* path, double dx, double dy, tonic::Float64List& matrix4) {
-  if (!path)
-    Dart_ThrowException(ToDart("Path.addPathWithMatrix called with non-genuine Path."));
+void CanvasPath::extendWithPathAndMatrix(CanvasPath* path,
+                                         double dx,
+                                         double dy,
+                                         tonic::Float64List& matrix4) {
+  if (!path) {
+    Dart_ThrowException(
+        ToDart("Path.addPathWithMatrix called with non-genuine Path."));
+  }
 
   SkMatrix matrix = ToSkMatrix(matrix4);
   matrix.setTranslateX(matrix.getTranslateX() + dx);
@@ -276,7 +286,6 @@ tonic::Float32List CanvasPath::getBounds() {
   rect[3] = bounds.bottom();
   return rect;
 }
-
 
 bool CanvasPath::op(CanvasPath* path1, CanvasPath* path2, int operation) {
   return Op(path1->path(), path2->path(), (SkPathOp)operation, &path_);

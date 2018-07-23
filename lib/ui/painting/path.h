@@ -5,12 +5,12 @@
 #ifndef FLUTTER_LIB_UI_PAINTING_PATH_H_
 #define FLUTTER_LIB_UI_PAINTING_PATH_H_
 
+#include "flutter/lib/ui/dart_wrapper.h"
 #include "flutter/lib/ui/painting/rrect.h"
-#include "lib/tonic/dart_wrappable.h"
-#include "lib/tonic/typed_data/float32_list.h"
-#include "lib/tonic/typed_data/float64_list.h"
 #include "third_party/skia/include/core/SkPath.h"
 #include "third_party/skia/include/pathops/SkPathOps.h"
+#include "third_party/tonic/typed_data/float32_list.h"
+#include "third_party/tonic/typed_data/float64_list.h"
 
 namespace tonic {
 class DartLibraryNatives;
@@ -18,8 +18,7 @@ class DartLibraryNatives;
 
 namespace blink {
 
-class CanvasPath : public fxl::RefCountedThreadSafe<CanvasPath>,
-                   public tonic::DartWrappable {
+class CanvasPath : public RefCountedDartWrappable<CanvasPath> {
   DEFINE_WRAPPERTYPEINFO();
   FRIEND_MAKE_REF_COUNTED(CanvasPath);
 

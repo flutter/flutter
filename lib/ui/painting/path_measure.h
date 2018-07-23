@@ -5,11 +5,11 @@
 #ifndef FLUTTER_LIB_UI_PAINTING_PATH_MEASURE_H_
 #define FLUTTER_LIB_UI_PAINTING_PATH_MEASURE_H_
 
+#include "flutter/lib/ui/dart_wrapper.h"
 #include "flutter/lib/ui/painting/path.h"
-#include "lib/tonic/dart_wrappable.h"
-#include "lib/tonic/typed_data/float64_list.h"
 #include "third_party/skia/include/core/SkPath.h"
 #include "third_party/skia/include/core/SkPathMeasure.h"
+#include "third_party/tonic/typed_data/float64_list.h"
 
 namespace tonic {
 class DartLibraryNatives;
@@ -20,19 +20,21 @@ class DartLibraryNatives;
 
 namespace blink {
 
-class CanvasPathMeasure : public fxl::RefCountedThreadSafe<CanvasPathMeasure>,
-                   public tonic::DartWrappable {
+class CanvasPathMeasure : public RefCountedDartWrappable<CanvasPathMeasure> {
   DEFINE_WRAPPERTYPEINFO();
   FRIEND_MAKE_REF_COUNTED(CanvasPathMeasure);
 
  public:
   ~CanvasPathMeasure() override;
-  static fxl::RefPtr<CanvasPathMeasure> Create(const CanvasPath* path, bool forceClosed);
+  static fxl::RefPtr<CanvasPathMeasure> Create(const CanvasPath* path,
+                                               bool forceClosed);
 
   void setPath(const CanvasPath* path, bool isClosed);
   float getLength();
   tonic::Float32List getPosTan(float distance);
-  fxl::RefPtr<CanvasPath> getSegment(float startD, float stopD, bool startWithMoveTo);
+  fxl::RefPtr<CanvasPath> getSegment(float startD,
+                                     float stopD,
+                                     bool startWithMoveTo);
   bool isClosed();
   bool nextContour();
 

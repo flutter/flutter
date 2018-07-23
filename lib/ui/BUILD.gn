@@ -14,6 +14,7 @@ source_set("ui") {
     "dart_runtime_hooks.h",
     "dart_ui.cc",
     "dart_ui.h",
+    "dart_wrapper.h",
     "isolate_name_server/isolate_name_server.cc",
     "isolate_name_server/isolate_name_server.h",
     "isolate_name_server/isolate_name_server_natives.cc",
@@ -102,12 +103,13 @@ source_set("ui") {
     "$flutter_root/fml",
     "$flutter_root/glue",
     "$flutter_root/runtime:test_font",
+    "//garnet/public/lib/fxl",
     "//third_party/dart/runtime/bin:embedded_dart_io",
     "//third_party/rapidjson",
     "//third_party/skia",
     "//third_party/skia:effects",
     "//third_party/skia:gpu",
-    "//topaz/lib/tonic",
+    "//third_party/tonic",
   ]
   if (is_fuchsia) {
     deps += [ "//topaz/public/dart-pkg/zircon" ]

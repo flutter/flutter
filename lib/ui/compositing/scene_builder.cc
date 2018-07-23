@@ -9,11 +9,11 @@
 #include "flutter/lib/ui/ui_dart_state.h"
 #include "flutter/lib/ui/window/window.h"
 #include "lib/fxl/build_config.h"
-#include "lib/tonic/converter/dart_converter.h"
-#include "lib/tonic/dart_args.h"
-#include "lib/tonic/dart_binding_macros.h"
-#include "lib/tonic/dart_library_natives.h"
 #include "third_party/skia/include/core/SkColorFilter.h"
+#include "third_party/tonic/converter/dart_converter.h"
+#include "third_party/tonic/dart_args.h"
+#include "third_party/tonic/dart_binding_macros.h"
+#include "third_party/tonic/dart_library_natives.h"
 
 namespace blink {
 
@@ -64,15 +64,18 @@ void SceneBuilder::pushClipRect(double left,
                                 double top,
                                 double bottom,
                                 int clipMode) {
-  layer_builder_->PushClipRect(SkRect::MakeLTRB(left, top, right, bottom), static_cast<flow::ClipMode>(clipMode));
+  layer_builder_->PushClipRect(SkRect::MakeLTRB(left, top, right, bottom),
+                               static_cast<flow::ClipMode>(clipMode));
 }
 
 void SceneBuilder::pushClipRRect(const RRect& rrect, int clipMode) {
-  layer_builder_->PushClipRoundedRect(rrect.sk_rrect, static_cast<flow::ClipMode>(clipMode));
+  layer_builder_->PushClipRoundedRect(rrect.sk_rrect,
+                                      static_cast<flow::ClipMode>(clipMode));
 }
 
 void SceneBuilder::pushClipPath(const CanvasPath* path, int clipMode) {
-  layer_builder_->PushClipPath(path->path(), static_cast<flow::ClipMode>(clipMode));
+  layer_builder_->PushClipPath(path->path(),
+                               static_cast<flow::ClipMode>(clipMode));
 }
 
 void SceneBuilder::pushOpacity(int alpha) {

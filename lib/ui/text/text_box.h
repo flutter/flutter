@@ -5,9 +5,9 @@
 #ifndef FLUTTER_LIB_UI_TEXT_TEXT_BOX_H_
 #define FLUTTER_LIB_UI_TEXT_TEXT_BOX_H_
 
-#include "lib/tonic/converter/dart_converter.h"
 #include "third_party/dart/runtime/include/dart_api.h"
 #include "third_party/skia/include/core/SkRect.h"
+#include "third_party/tonic/converter/dart_converter.h"
 
 namespace blink {
 

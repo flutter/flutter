@@ -13,13 +13,13 @@
 #include "flutter/lib/ui/ui_dart_state.h"
 #include "lib/fxl/build_config.h"
 #include "lib/fxl/functional/make_copyable.h"
-#include "lib/tonic/dart_persistent_value.h"
-#include "lib/tonic/logging/dart_invoke.h"
-#include "lib/tonic/typed_data/uint8_list.h"
 #include "third_party/skia/include/core/SkCanvas.h"
 #include "third_party/skia/include/core/SkEncodedImageFormat.h"
 #include "third_party/skia/include/core/SkImage.h"
 #include "third_party/skia/include/core/SkSurface.h"
+#include "third_party/tonic/dart_persistent_value.h"
+#include "third_party/tonic/logging/dart_invoke.h"
+#include "third_party/tonic/typed_data/uint8_list.h"
 
 using tonic::DartInvoke;
 using tonic::DartPersistentValue;
@@ -41,7 +41,7 @@ enum ImageByteFormat {
 
 void InvokeDataCallback(std::unique_ptr<DartPersistentValue> callback,
                         sk_sp<SkData> buffer) {
-  tonic::DartState* dart_state = callback->dart_state().get();
+  std::shared_ptr<tonic::DartState> dart_state = callback->dart_state().lock();
   if (!dart_state) {
     return;
   }

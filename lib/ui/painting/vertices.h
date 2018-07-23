@@ -5,10 +5,10 @@
 #ifndef FLUTTER_LIB_UI_PAINTING_VERTICES_H_
 #define FLUTTER_LIB_UI_PAINTING_VERTICES_H_
 
-#include "lib/tonic/dart_wrappable.h"
-#include "lib/tonic/typed_data/float32_list.h"
-#include "lib/tonic/typed_data/int32_list.h"
+#include "flutter/lib/ui/dart_wrapper.h"
 #include "third_party/skia/include/core/SkVertices.h"
+#include "third_party/tonic/typed_data/float32_list.h"
+#include "third_party/tonic/typed_data/int32_list.h"
 
 namespace tonic {
 class DartLibraryNatives;
@@ -16,8 +16,7 @@ class DartLibraryNatives;
 
 namespace blink {
 
-class Vertices : public fxl::RefCountedThreadSafe<Vertices>,
-                 public tonic::DartWrappable {
+class Vertices : public RefCountedDartWrappable<Vertices> {
   DEFINE_WRAPPERTYPEINFO();
   FRIEND_MAKE_REF_COUNTED(Vertices);
 

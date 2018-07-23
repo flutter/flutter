@@ -7,7 +7,7 @@
 
 #include <stdint.h>
 
-#include "lib/tonic/dart_wrappable.h"
+#include "flutter/lib/ui/dart_wrapper.h"
 
 #if defined(OS_FUCHSIA)
 #include "flutter/flow/export_node.h"
@@ -19,8 +19,7 @@ class DartLibraryNatives;
 
 namespace blink {
 
-class SceneHost : public fxl::RefCountedThreadSafe<SceneHost>,
-                  public tonic::DartWrappable {
+class SceneHost : public RefCountedDartWrappable<SceneHost> {
   DEFINE_WRAPPERTYPEINFO();
   FRIEND_MAKE_REF_COUNTED(SceneHost);
 

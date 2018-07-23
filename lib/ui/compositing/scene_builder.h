@@ -12,18 +12,17 @@
 #include "flutter/flow/layers/layer_builder.h"
 #include "flutter/lib/ui/compositing/scene.h"
 #include "flutter/lib/ui/compositing/scene_host.h"
+#include "flutter/lib/ui/dart_wrapper.h"
 #include "flutter/lib/ui/painting/image_filter.h"
 #include "flutter/lib/ui/painting/path.h"
 #include "flutter/lib/ui/painting/picture.h"
 #include "flutter/lib/ui/painting/rrect.h"
 #include "flutter/lib/ui/painting/shader.h"
-#include "lib/tonic/dart_wrappable.h"
-#include "lib/tonic/typed_data/float64_list.h"
+#include "third_party/tonic/typed_data/float64_list.h"
 
 namespace blink {
 
-class SceneBuilder : public fxl::RefCountedThreadSafe<SceneBuilder>,
-                     public tonic::DartWrappable {
+class SceneBuilder : public RefCountedDartWrappable<SceneBuilder> {
   DEFINE_WRAPPERTYPEINFO();
   FRIEND_MAKE_REF_COUNTED(SceneBuilder);
 
@@ -35,7 +34,11 @@ class SceneBuilder : public fxl::RefCountedThreadSafe<SceneBuilder>,
   ~SceneBuilder() override;
 
   void pushTransform(const tonic::Float64List& matrix4);
-  void pushClipRect(double left, double right, double top, double bottom, int clipMode);
+  void pushClipRect(double left,
+                    double right,
+                    double top,
+                    double bottom,
+                    int clipMode);
   void pushClipRRect(const RRect& rrect, int clipMode);
   void pushClipPath(const CanvasPath* path, int clipMode);
   void pushOpacity(int alpha);
@@ -47,7 +50,11 @@ class SceneBuilder : public fxl::RefCountedThreadSafe<SceneBuilder>,
                       double maskRectTop,
                       double maskRectBottom,
                       int blendMode);
-  void pushPhysicalShape(const CanvasPath* path, double elevation, int color, int shadowColor, int clipMode);
+  void pushPhysicalShape(const CanvasPath* path,
+                         double elevation,
+                         int color,
+                         int shadowColor,
+                         int clipMode);
 
   void pop();
 

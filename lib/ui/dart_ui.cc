@@ -26,8 +26,8 @@
 #include "flutter/lib/ui/text/paragraph_builder.h"
 #include "flutter/lib/ui/window/window.h"
 #include "lib/fxl/build_config.h"
-#include "lib/tonic/converter/dart_converter.h"
-#include "lib/tonic/logging/dart_error.h"
+#include "third_party/tonic/converter/dart_converter.h"
+#include "third_party/tonic/logging/dart_error.h"
 
 using tonic::ToDart;
 

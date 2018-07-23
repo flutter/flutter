@@ -99,7 +99,7 @@ source_set("runtime") {
     "//third_party/dart/runtime/bin:embedded_dart_io",
     "//third_party/rapidjson",
     "//third_party/skia",
-    "//topaz/lib/tonic",
+    "//third_party/tonic",
   ]
 
   public_configs = [ "$flutter_root:config" ]
@@ -134,7 +134,7 @@ executable("runtime_unittests") {
     "//garnet/public/lib/fxl",
     "//third_party/dart/runtime:libdart_jit",
     "//third_party/skia",
-    "//topaz/lib/tonic",
+    "//third_party/tonic",
   ]
 
   if (is_linux) {

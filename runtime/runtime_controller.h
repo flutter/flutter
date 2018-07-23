@@ -71,7 +71,7 @@ class RuntimeController final : public WindowClient {
 
   tonic::DartErrorHandleType GetLastError();
 
-  fml::WeakPtr<DartIsolate> GetRootIsolate();
+  std::weak_ptr<DartIsolate> GetRootIsolate();
 
   std::pair<bool, uint32_t> GetRootIsolateReturnCode();
 
@@ -95,7 +95,7 @@ class RuntimeController final : public WindowClient {
   std::string advisory_script_uri_;
   std::string advisory_script_entrypoint_;
   WindowData window_data_;
-  fml::WeakPtr<DartIsolate> root_isolate_;
+  std::weak_ptr<DartIsolate> root_isolate_;
   std::pair<bool, uint32_t> root_isolate_return_code_ = {false, 0};
 
   RuntimeController(RuntimeDelegate& client,

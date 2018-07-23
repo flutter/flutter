@@ -12,7 +12,7 @@ source_set("io") {
     "//third_party/dart/runtime:dart_api",
     "//third_party/dart/runtime/bin:embedded_dart_io",
     "//garnet/public/lib/fxl",
-    "//topaz/lib/tonic/converter",
+    "//third_party/tonic",
   ]
 
   configs += [

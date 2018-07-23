@@ -16,19 +16,14 @@ IsolateConfiguration::IsolateConfiguration() = default;
 
 IsolateConfiguration::~IsolateConfiguration() = default;
 
-bool IsolateConfiguration::PrepareIsolate(
-    fml::WeakPtr<blink::DartIsolate> isolate) {
-  if (!isolate) {
-    return false;
-  }
-
-  if (isolate->GetPhase() != blink::DartIsolate::Phase::LibrariesSetup) {
+bool IsolateConfiguration::PrepareIsolate(blink::DartIsolate& isolate) {
+  if (isolate.GetPhase() != blink::DartIsolate::Phase::LibrariesSetup) {
     FXL_DLOG(ERROR)
         << "Isolate was in incorrect phase to be prepared for running.";
     return false;
   }
 
-  return DoPrepareIsolate(*isolate);
+  return DoPrepareIsolate(isolate);
 }
 
 class AppSnapshotIsolateConfiguration final : public IsolateConfiguration {

@@ -5,7 +5,7 @@
 #ifndef FLUTTER_LIB_UI_PAINTING_IMAGE_ENCODING_H_
 #define FLUTTER_LIB_UI_PAINTING_IMAGE_ENCODING_H_
 
-#include "lib/tonic/dart_library_natives.h"
+#include "third_party/tonic/dart_library_natives.h"
 
 namespace blink {
 

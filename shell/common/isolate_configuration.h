@@ -40,7 +40,7 @@ class IsolateConfiguration {
 
   virtual ~IsolateConfiguration();
 
-  bool PrepareIsolate(fml::WeakPtr<blink::DartIsolate> isolate);
+  bool PrepareIsolate(blink::DartIsolate& isolate);
 
  protected:
   virtual bool DoPrepareIsolate(blink::DartIsolate& isolate) = 0;

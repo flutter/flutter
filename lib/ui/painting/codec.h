@@ -5,8 +5,8 @@
 #ifndef FLUTTER_LIB_UI_PAINTING_CODEC_H_
 #define FLUTTER_LIB_UI_PAINTING_CODEC_H_
 
+#include "flutter/lib/ui/dart_wrapper.h"
 #include "flutter/lib/ui/painting/frame_info.h"
-#include "lib/tonic/dart_wrappable.h"
 #include "third_party/skia/include/codec/SkCodec.h"
 #include "third_party/skia/include/core/SkBitmap.h"
 #include "third_party/skia/include/core/SkImage.h"
@@ -22,8 +22,7 @@ namespace blink {
 // A handle to an SkCodec object.
 //
 // Doesn't mirror SkCodec's API but provides a simple sequential access API.
-class Codec : public fxl::RefCountedThreadSafe<Codec>,
-              public tonic::DartWrappable {
+class Codec : public RefCountedDartWrappable<Codec> {
   DEFINE_WRAPPERTYPEINFO();
 
  public:
