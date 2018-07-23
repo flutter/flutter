@@ -143,4 +143,76 @@ class CupertinoIcons {
 
   /// Two right-facing intertwined arrows.
   static const IconData shuffle_thick = IconData(0xf221, fontFamily: iconFont, fontPackage: iconFontPackage);
+
+  /// Symbolizes a photo camera
+  static const IconData photo_camera = IconData(0xf3f5, fontFamily: iconFont, fontPackage: iconFontPackage);
+
+  /// Solid [photo_camera]
+  static const IconData photo_camera_solid = IconData(0xf3f6, fontFamily: iconFont, fontPackage: iconFontPackage);
+
+  /// Symbolizes a video camera
+  static const IconData video_camera = IconData(0xf4cc, fontFamily: iconFont, fontPackage: iconFontPackage);
+
+  /// Solid [video_camera]
+  static const IconData video_camera_solid = IconData(0xf4cd, fontFamily: iconFont, fontPackage: iconFontPackage);
+
+  /// Camera filled with two circular arrows, which indicate switching
+  static const IconData switch_camera = IconData(0xf49e, fontFamily: iconFont, fontPackage: iconFontPackage);
+
+  /// Solid [switch_camera]
+  static const IconData switch_camera_solid = IconData(0xf49f, fontFamily: iconFont, fontPackage: iconFontPackage);
+
+  /// Envelopes stacked facing forwards
+  static const IconData collections = IconData(0xf3c9, fontFamily: iconFont, fontPackage: iconFontPackage);
+
+  /// Solid [collections]
+  static const IconData collections_solid = IconData(0xf3ca, fontFamily: iconFont, fontPackage: iconFontPackage);
+
+  /// Single envelope, i.e. a folder
+  static const IconData folder = IconData(0xf434, fontFamily: iconFont, fontPackage: iconFontPackage);
+
+  /// Solid [folder]
+  static const IconData folder_solid = IconData(0xf435, fontFamily: iconFont, fontPackage: iconFontPackage);
+
+  /// Old version of [folder]
+  static const IconData folder_open = IconData(0xf38a, fontFamily: iconFont, fontPackage: iconFontPackage);
+
+  /// Trash can
+  static const IconData delete = IconData(0xf4c4, fontFamily: iconFont, fontPackage: iconFontPackage);
+
+  /// Solid [delete]
+  static const IconData delete_solid = IconData(0xf4c5, fontFamily: iconFont, fontPackage: iconFontPackage);
+
+  /// Old version of [delete]
+  static const IconData delete_old = IconData(0xf37f, fontFamily: iconFont, fontPackage: iconFontPackage);
+
+  /// A pen (pencil [create_simple])
+  static const IconData create = IconData(0xf2bf, fontFamily: iconFont, fontPackage: iconFontPackage);
+
+  /// A pencil (pen [create]), simple because the pencil has less detail, i.e. a more minimal design
+  static const IconData create_simple = IconData(0xf37e, fontFamily: iconFont, fontPackage: iconFontPackage);
+
+  /// Arrow on a circular path, its end pointing towards its start
+  static const IconData refresh = IconData(0xf49a, fontFamily: iconFont, fontPackage: iconFontPackage);
+
+  /// [refresh] in a circle
+  static const IconData refresh_circled = IconData(0xf49b, fontFamily: iconFont, fontPackage: iconFontPackage);
+
+  /// Solid [refresh_circle]
+  static const IconData refresh_circled_solid = IconData(0xf49c, fontFamily: iconFont, fontPackage: iconFontPackage);
+
+  /// A thinner version of [refresh], where start and end are also closer together
+  static const IconData refresh_thin = IconData(0xf49d, fontFamily: iconFont, fontPackage: iconFontPackage);
+
+  /// Cross (two diagonal lines from edge to edge crossing in an angle of 90 degrees)
+  static const IconData clear = IconData(0xf2d7, fontFamily: iconFont, fontPackage: iconFontPackage);
+
+  /// Thinner (iOS 7) version of [clear]
+  static const IconData clear_thin = IconData(0xf404, fontFamily: iconFont, fontPackage: iconFontPackage);
+
+  /// [clear_thin] in a circle
+  static const IconData clear_circled = IconData(0xf405, fontFamily: iconFont, fontPackage: iconFontPackage);
+
+  /// Solid [clear_circled]
+  static const IconData clear_circled_solid = IconData(0xf406, fontFamily: iconFont, fontPackage: iconFontPackage);
 }
