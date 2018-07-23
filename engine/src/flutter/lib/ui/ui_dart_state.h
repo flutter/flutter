@@ -15,11 +15,11 @@
 #include "flutter/fml/memory/weak_ptr.h"
 #include "flutter/lib/ui/isolate_name_server/isolate_name_server.h"
 #include "lib/fxl/build_config.h"
-#include "lib/tonic/dart_microtask_queue.h"
-#include "lib/tonic/dart_persistent_value.h"
-#include "lib/tonic/dart_state.h"
 #include "third_party/dart/runtime/include/dart_api.h"
 #include "third_party/skia/include/gpu/GrContext.h"
+#include "third_party/tonic/dart_microtask_queue.h"
+#include "third_party/tonic/dart_persistent_value.h"
+#include "third_party/tonic/dart_state.h"
 
 namespace blink {
 class FontSelector;

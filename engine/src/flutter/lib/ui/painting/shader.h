@@ -6,14 +6,13 @@
 #define FLUTTER_LIB_UI_PAINTING_SHADER_H_
 
 #include "flutter/flow/skia_gpu_object.h"
+#include "flutter/lib/ui/dart_wrapper.h"
 #include "flutter/lib/ui/ui_dart_state.h"
-#include "lib/tonic/dart_wrappable.h"
 #include "third_party/skia/include/core/SkShader.h"
 
 namespace blink {
 
-class Shader : public fxl::RefCountedThreadSafe<Shader>,
-               public tonic::DartWrappable {
+class Shader : public RefCountedDartWrappable<Shader> {
   DEFINE_WRAPPERTYPEINFO();
   FRIEND_MAKE_REF_COUNTED(Shader);
 

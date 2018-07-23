@@ -8,10 +8,10 @@
 
 #include "flutter/runtime/embedder_resources.h"
 #include "lib/fxl/logging.h"
-#include "lib/tonic/converter/dart_converter.h"
-#include "lib/tonic/dart_library_natives.h"
-#include "lib/tonic/logging/dart_error.h"
 #include "third_party/dart/runtime/include/dart_api.h"
+#include "third_party/tonic/converter/dart_converter.h"
+#include "third_party/tonic/dart_library_natives.h"
+#include "third_party/tonic/logging/dart_error.h"
 
 #define RETURN_ERROR_HANDLE(handle) \
   if (Dart_IsError(handle)) {       \

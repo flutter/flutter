@@ -4,7 +4,7 @@
 
 #include "flutter/lib/ui/plugins/callback_cache.h"
 #include "lib/fxl/logging.h"
-#include "lib/tonic/converter/dart_converter.h"
+#include "third_party/tonic/converter/dart_converter.h"
 
 using tonic::ToDart;
 

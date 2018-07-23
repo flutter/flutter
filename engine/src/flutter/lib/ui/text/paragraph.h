@@ -6,12 +6,12 @@
 #define FLUTTER_LIB_UI_TEXT_PARAGRAPH_H_
 
 #include "flutter/fml/message_loop.h"
+#include "flutter/lib/ui/dart_wrapper.h"
 #include "flutter/lib/ui/painting/canvas.h"
 #include "flutter/lib/ui/text/paragraph_impl.h"
 #include "flutter/lib/ui/text/paragraph_impl_txt.h"
 #include "flutter/lib/ui/text/text_box.h"
 #include "flutter/third_party/txt/src/txt/paragraph.h"
-#include "lib/tonic/dart_wrappable.h"
 
 namespace tonic {
 class DartLibraryNatives;
@@ -19,8 +19,7 @@ class DartLibraryNatives;
 
 namespace blink {
 
-class Paragraph : public fxl::RefCountedThreadSafe<Paragraph>,
-                  public tonic::DartWrappable {
+class Paragraph : public RefCountedDartWrappable<Paragraph> {
   DEFINE_WRAPPERTYPEINFO();
   FRIEND_MAKE_REF_COUNTED(Paragraph);
 

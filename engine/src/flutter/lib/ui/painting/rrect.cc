@@ -5,8 +5,8 @@
 #include "flutter/lib/ui/painting/rrect.h"
 
 #include "lib/fxl/logging.h"
-#include "lib/tonic/logging/dart_error.h"
-#include "lib/tonic/typed_data/float32_list.h"
+#include "third_party/tonic/logging/dart_error.h"
+#include "third_party/tonic/typed_data/float32_list.h"
 
 using namespace blink;
 

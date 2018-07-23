@@ -5,9 +5,9 @@
 #include "flutter/lib/ui/text/text_box.h"
 
 #include "lib/fxl/logging.h"
-#include "lib/tonic/dart_class_library.h"
-#include "lib/tonic/dart_state.h"
-#include "lib/tonic/logging/dart_error.h"
+#include "third_party/tonic/dart_class_library.h"
+#include "third_party/tonic/dart_state.h"
+#include "third_party/tonic/logging/dart_error.h"
 
 using namespace blink;
 

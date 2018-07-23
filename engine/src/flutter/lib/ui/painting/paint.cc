@@ -6,11 +6,11 @@
 
 #include "flutter/lib/ui/painting/shader.h"
 #include "lib/fxl/logging.h"
-#include "lib/tonic/typed_data/dart_byte_data.h"
 #include "third_party/skia/include/core/SkColorFilter.h"
 #include "third_party/skia/include/core/SkMaskFilter.h"
 #include "third_party/skia/include/core/SkShader.h"
 #include "third_party/skia/include/core/SkString.h"
+#include "third_party/tonic/typed_data/dart_byte_data.h"
 
 namespace blink {
 
@@ -140,7 +140,9 @@ Paint::Paint(Dart_Handle paint_objects, Dart_Handle paint_data) {
 namespace tonic {
 
 blink::Paint DartConverter<blink::Paint>::FromArguments(
-    Dart_NativeArguments args, int index, Dart_Handle& exception) {
+    Dart_NativeArguments args,
+    int index,
+    Dart_Handle& exception) {
   Dart_Handle paint_objects = Dart_GetNativeArgument(args, index);
   FXL_DCHECK(!LogIfError(paint_objects));
 
@@ -151,7 +153,9 @@ blink::Paint DartConverter<blink::Paint>::FromArguments(
 }
 
 blink::PaintData DartConverter<blink::PaintData>::FromArguments(
-    Dart_NativeArguments args, int index, Dart_Handle& exception) {
+    Dart_NativeArguments args,
+    int index,
+    Dart_Handle& exception) {
   return blink::PaintData();
 }
 

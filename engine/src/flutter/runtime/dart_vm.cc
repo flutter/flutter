@@ -22,15 +22,15 @@
 #include "lib/fxl/files/file.h"
 #include "lib/fxl/logging.h"
 #include "lib/fxl/time/time_delta.h"
-#include "lib/tonic/converter/dart_converter.h"
-#include "lib/tonic/dart_class_library.h"
-#include "lib/tonic/dart_class_provider.h"
-#include "lib/tonic/dart_sticky_error.h"
-#include "lib/tonic/file_loader/file_loader.h"
-#include "lib/tonic/logging/dart_error.h"
-#include "lib/tonic/scopes/dart_api_scope.h"
-#include "lib/tonic/typed_data/uint8_list.h"
 #include "third_party/dart/runtime/bin/embedded_dart_io.h"
+#include "third_party/tonic/converter/dart_converter.h"
+#include "third_party/tonic/dart_class_library.h"
+#include "third_party/tonic/dart_class_provider.h"
+#include "third_party/tonic/dart_sticky_error.h"
+#include "third_party/tonic/file_loader/file_loader.h"
+#include "third_party/tonic/logging/dart_error.h"
+#include "third_party/tonic/scopes/dart_api_scope.h"
+#include "third_party/tonic/typed_data/uint8_list.h"
 
 #ifdef ERROR
 #undef ERROR

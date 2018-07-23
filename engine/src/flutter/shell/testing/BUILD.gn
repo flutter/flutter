@@ -23,7 +23,7 @@ executable("testing") {
     "//third_party/dart/runtime:libdart_jit",
     "//third_party/dart/runtime/bin:embedded_dart_io",
     "//third_party/skia",
-    "//topaz/lib/tonic",
+    "//third_party/tonic",
   ]
 
   if (is_fuchsia) {

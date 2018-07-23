@@ -6,8 +6,8 @@
 
 #include "flutter/fml/message_loop.h"
 #include "flutter/lib/ui/window/window.h"
-#include "lib/tonic/converter/dart_converter.h"
-#include "lib/tonic/dart_message_handler.h"
+#include "third_party/tonic/converter/dart_converter.h"
+#include "third_party/tonic/dart_message_handler.h"
 
 using tonic::ToDart;
 

@@ -9,13 +9,13 @@
 #include "flutter/lib/ui/painting/frame_info.h"
 #include "lib/fxl/functional/make_copyable.h"
 #include "lib/fxl/logging.h"
-#include "lib/tonic/dart_binding_macros.h"
-#include "lib/tonic/dart_library_natives.h"
-#include "lib/tonic/dart_state.h"
-#include "lib/tonic/logging/dart_invoke.h"
-#include "lib/tonic/typed_data/uint8_list.h"
 #include "third_party/skia/include/codec/SkCodec.h"
 #include "third_party/skia/include/core/SkPixelRef.h"
+#include "third_party/tonic/dart_binding_macros.h"
+#include "third_party/tonic/dart_library_natives.h"
+#include "third_party/tonic/dart_state.h"
+#include "third_party/tonic/logging/dart_invoke.h"
+#include "third_party/tonic/typed_data/uint8_list.h"
 
 #ifdef ERROR
 #undef ERROR
@@ -46,7 +46,7 @@ struct ImageInfo {
 static void InvokeCodecCallback(fxl::RefPtr<Codec> codec,
                                 std::unique_ptr<DartPersistentValue> callback,
                                 size_t trace_id) {
-  tonic::DartState* dart_state = callback->dart_state().get();
+  std::shared_ptr<tonic::DartState> dart_state = callback->dart_state().lock();
   if (!dart_state) {
     TRACE_FLOW_END("flutter", kInitCodecTraceTag, trace_id);
     return;
@@ -328,7 +328,7 @@ bool copy_to(SkBitmap* dst, SkColorType dstColorType, const SkBitmap& src) {
 void InvokeNextFrameCallback(fxl::RefPtr<FrameInfo> frameInfo,
                              std::unique_ptr<DartPersistentValue> callback,
                              size_t trace_id) {
-  tonic::DartState* dart_state = callback->dart_state().get();
+  std::shared_ptr<tonic::DartState> dart_state = callback->dart_state().lock();
   if (!dart_state) {
     TRACE_FLOW_END("flutter", kCodecNextFrameTraceTag, trace_id);
     return;
@@ -473,7 +473,7 @@ Dart_Handle SingleFrameCodec::getNextFrame(Dart_Handle callback_handle) {
 
   auto callback = std::make_unique<DartPersistentValue>(
       tonic::DartState::Current(), callback_handle);
-  tonic::DartState* dart_state = callback->dart_state().get();
+  std::shared_ptr<tonic::DartState> dart_state = callback->dart_state().lock();
   if (!dart_state) {
     return ToDart("Invalid dart state");
   }

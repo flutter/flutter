@@ -5,10 +5,10 @@
 #ifndef FLUTTER_LIB_UI_SEMANTICS_CUSTOM_ACCESSIBILITY_ACTION_H_
 #define FLUTTER_LIB_UI_SEMANTICS_CUSTOM_ACCESSIBILITY_ACTION_H_
 
-#include "lib/tonic/dart_library_natives.h"
-#include "lib/tonic/dart_wrappable.h"
-#include "lib/tonic/typed_data/float64_list.h"
-#include "lib/tonic/typed_data/int32_list.h"
+#include "third_party/tonic/dart_library_natives.h"
+#include "third_party/tonic/dart_wrappable.h"
+#include "third_party/tonic/typed_data/float64_list.h"
+#include "third_party/tonic/typed_data/int32_list.h"
 
 namespace blink {
 

@@ -109,7 +109,7 @@ source_set("common") {
 
   public_deps = [
     "$flutter_root/third_party/txt",
-    "//topaz/lib/tonic",
+    "//third_party/tonic",
   ]
 
   public_configs = [ "$flutter_root:config" ]
@@ -129,7 +129,7 @@ executable("shell_unittests") {
     "//garnet/public/lib/fxl",
     "//third_party/dart/runtime:libdart_jit",
     "//third_party/skia",
-    "//topaz/lib/tonic",
+    "//third_party/tonic",
   ]
   if (is_linux) {
     ldflags = [ "-rdynamic" ]

@@ -5,16 +5,15 @@
 #ifndef FLUTTER_LIB_UI_PAINTING_IMAGE_FILTER_H_
 #define FLUTTER_LIB_UI_PAINTING_IMAGE_FILTER_H_
 
+#include "flutter/lib/ui/dart_wrapper.h"
 #include "flutter/lib/ui/painting/image.h"
 #include "flutter/lib/ui/painting/picture.h"
-#include "lib/tonic/dart_wrappable.h"
-#include "lib/tonic/typed_data/float64_list.h"
 #include "third_party/skia/include/core/SkImageFilter.h"
+#include "third_party/tonic/typed_data/float64_list.h"
 
 namespace blink {
 
-class ImageFilter : public fxl::RefCountedThreadSafe<ImageFilter>,
-                    public tonic::DartWrappable {
+class ImageFilter : public RefCountedDartWrappable<ImageFilter> {
   DEFINE_WRAPPERTYPEINFO();
   FRIEND_MAKE_REF_COUNTED(ImageFilter);
 

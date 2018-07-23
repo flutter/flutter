@@ -7,7 +7,7 @@
 
 #include "flutter/fml/message_loop.h"
 #include "flutter/lib/ui/window/platform_message_response.h"
-#include "lib/tonic/dart_persistent_value.h"
+#include "third_party/tonic/dart_persistent_value.h"
 
 namespace blink {
 

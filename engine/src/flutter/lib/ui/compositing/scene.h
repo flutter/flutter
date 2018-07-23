@@ -9,7 +9,7 @@
 #include <memory>
 
 #include "flutter/flow/layers/layer_tree.h"
-#include "lib/tonic/dart_wrappable.h"
+#include "flutter/lib/ui/dart_wrapper.h"
 #include "third_party/skia/include/core/SkPicture.h"
 
 namespace tonic {
@@ -18,8 +18,7 @@ class DartLibraryNatives;
 
 namespace blink {
 
-class Scene : public fxl::RefCountedThreadSafe<Scene>,
-              public tonic::DartWrappable {
+class Scene : public RefCountedDartWrappable<Scene> {
   DEFINE_WRAPPERTYPEINFO();
   FRIEND_MAKE_REF_COUNTED(Scene);
 

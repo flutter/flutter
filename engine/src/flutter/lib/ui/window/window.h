@@ -12,8 +12,8 @@
 #include "flutter/lib/ui/window/pointer_data_packet.h"
 #include "flutter/lib/ui/window/viewport_metrics.h"
 #include "lib/fxl/time/time_point.h"
-#include "lib/tonic/dart_persistent_value.h"
 #include "third_party/skia/include/gpu/GrContext.h"
+#include "third_party/tonic/dart_persistent_value.h"
 
 namespace tonic {
 class DartLibraryNatives;

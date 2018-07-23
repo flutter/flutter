@@ -5,8 +5,8 @@
 #ifndef FLUTTER_LIB_UI_PAINTING_MATRIX_H_
 #define FLUTTER_LIB_UI_PAINTING_MATRIX_H_
 
-#include "lib/tonic/typed_data/float64_list.h"
 #include "third_party/skia/include/core/SkMatrix.h"
+#include "third_party/tonic/typed_data/float64_list.h"
 
 namespace blink {
 

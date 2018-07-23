@@ -5,7 +5,7 @@
 #ifndef FLUTTER_LIB_UI_PAINTING_PICTURE_RECORDER_H_
 #define FLUTTER_LIB_UI_PAINTING_PICTURE_RECORDER_H_
 
-#include "lib/tonic/dart_wrappable.h"
+#include "flutter/lib/ui/dart_wrapper.h"
 #include "third_party/skia/include/core/SkPictureRecorder.h"
 
 namespace tonic {
@@ -16,8 +16,7 @@ namespace blink {
 class Canvas;
 class Picture;
 
-class PictureRecorder : public fxl::RefCountedThreadSafe<PictureRecorder>,
-                        public tonic::DartWrappable {
+class PictureRecorder : public RefCountedDartWrappable<PictureRecorder> {
   DEFINE_WRAPPERTYPEINFO();
   FRIEND_MAKE_REF_COUNTED(PictureRecorder);
 

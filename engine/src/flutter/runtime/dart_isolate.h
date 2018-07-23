@@ -15,8 +15,8 @@
 #include "flutter/runtime/dart_snapshot.h"
 #include "lib/fxl/compiler_specific.h"
 #include "lib/fxl/macros.h"
-#include "lib/tonic/dart_state.h"
 #include "third_party/dart/runtime/include/dart_api.h"
+#include "third_party/tonic/dart_state.h"
 
 namespace blink {
 class DartVM;
@@ -38,7 +38,7 @@ class DartIsolate : public UIDartState {
   // The root isolate of a Flutter application is special because it gets Window
   // bindings. From the VM's perspective, this isolate is not special in any
   // way.
-  static fml::WeakPtr<DartIsolate> CreateRootIsolate(
+  static std::weak_ptr<DartIsolate> CreateRootIsolate(
       DartVM* vm,
       fxl::RefPtr<DartSnapshot> isolate_snapshot,
       fxl::RefPtr<DartSnapshot> shared_snapshot,
@@ -93,7 +93,7 @@ class DartIsolate : public UIDartState {
   fxl::RefPtr<DartSnapshot> GetIsolateSnapshot() const;
   fxl::RefPtr<DartSnapshot> GetSharedSnapshot() const;
 
-  fml::WeakPtr<DartIsolate> GetWeakIsolatePtr() const;
+  std::weak_ptr<DartIsolate> GetWeakIsolatePtr();
 
  private:
   bool LoadScriptSnapshot(std::shared_ptr<const fml::Mapping> mapping,
@@ -125,7 +125,6 @@ class DartIsolate : public UIDartState {
   std::vector<std::shared_ptr<const fml::Mapping>> kernel_buffers_;
   std::vector<std::unique_ptr<AutoFireClosure>> shutdown_callbacks_;
   ChildIsolatePreparer child_isolate_preparer_;
-  std::unique_ptr<fml::WeakPtrFactory<DartIsolate>> weak_factory_;
 
   FXL_WARN_UNUSED_RESULT
   bool Initialize(Dart_Isolate isolate, bool is_root_isolate);
@@ -138,8 +137,6 @@ class DartIsolate : public UIDartState {
   FXL_WARN_UNUSED_RESULT
   bool MarkIsolateRunnable();
 
-  void ResetWeakPtrFactory();
-
   // |Dart_IsolateCreateCallback|
   static Dart_Isolate DartIsolateCreateCallback(
       const char* advisory_script_uri,
@@ -147,7 +144,7 @@ class DartIsolate : public UIDartState {
       const char* package_root,
       const char* package_config,
       Dart_IsolateFlags* flags,
-      DartIsolate* embedder_isolate,
+      std::shared_ptr<DartIsolate>* embedder_isolate,
       char** error);
 
   static Dart_Isolate DartCreateAndStartServiceIsolate(
@@ -159,21 +156,24 @@ class DartIsolate : public UIDartState {
       char** error);
 
   static std::pair<Dart_Isolate /* vm */,
-                   fml::WeakPtr<DartIsolate> /* embedder */>
-  CreateDartVMAndEmbedderObjectPair(const char* advisory_script_uri,
-                                    const char* advisory_script_entrypoint,
-                                    const char* package_root,
-                                    const char* package_config,
-                                    Dart_IsolateFlags* flags,
-                                    DartIsolate* parent_embedder_isolate,
-                                    bool is_root_isolate,
-                                    char** error);
+                   std::weak_ptr<DartIsolate> /* embedder */>
+  CreateDartVMAndEmbedderObjectPair(
+      const char* advisory_script_uri,
+      const char* advisory_script_entrypoint,
+      const char* package_root,
+      const char* package_config,
+      Dart_IsolateFlags* flags,
+      std::shared_ptr<DartIsolate>* parent_embedder_isolate,
+      bool is_root_isolate,
+      char** error);
 
   // |Dart_IsolateShutdownCallback|
-  static void DartIsolateShutdownCallback(DartIsolate* embedder_isolate);
+  static void DartIsolateShutdownCallback(
+      std::shared_ptr<DartIsolate>* embedder_isolate);
 
   // |Dart_IsolateCleanupCallback|
-  static void DartIsolateCleanupCallback(DartIsolate* embedder_isolate);
+  static void DartIsolateCleanupCallback(
+      std::shared_ptr<DartIsolate>* embedder_isolate);
 
   FXL_DISALLOW_COPY_AND_ASSIGN(DartIsolate);
 };

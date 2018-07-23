@@ -117,7 +117,8 @@ bool Engine::Run(RunConfiguration configuration) {
     return false;
   }
 
-  auto isolate = runtime_controller_->GetRootIsolate();
+  std::shared_ptr<blink::DartIsolate> isolate =
+      runtime_controller_->GetRootIsolate().lock();
 
   bool isolate_running =
       isolate && isolate->GetPhase() == blink::DartIsolate::Phase::Running;
@@ -145,9 +146,14 @@ bool Engine::PrepareAndLaunchIsolate(RunConfiguration configuration) {
 
   auto isolate_configuration = configuration.TakeIsolateConfiguration();
 
-  auto isolate = runtime_controller_->GetRootIsolate();
+  std::shared_ptr<blink::DartIsolate> isolate =
+      runtime_controller_->GetRootIsolate().lock();
 
-  if (!isolate_configuration->PrepareIsolate(isolate)) {
+  if (!isolate) {
+    return false;
+  }
+
+  if (!isolate_configuration->PrepareIsolate(*isolate)) {
     FXL_LOG(ERROR) << "Could not prepare to run the isolate.";
     return false;
   }

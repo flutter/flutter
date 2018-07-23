@@ -9,8 +9,8 @@
 #include "flutter/common/task_runners.h"
 #include "flutter/lib/ui/window/window.h"
 #include "lib/fxl/functional/make_copyable.h"
-#include "lib/tonic/dart_state.h"
-#include "lib/tonic/logging/dart_invoke.h"
+#include "third_party/tonic/dart_state.h"
+#include "third_party/tonic/logging/dart_invoke.h"
 
 namespace blink {
 
@@ -55,10 +55,8 @@ PlatformMessageResponseDart::PlatformMessageResponseDart(
 
 PlatformMessageResponseDart::~PlatformMessageResponseDart() {
   if (!callback_.is_empty()) {
-    ui_task_runner_->PostTask(
-        fxl::MakeCopyable([callback = std::move(callback_)]() mutable {
-          callback.Clear();
-        }));
+    ui_task_runner_->PostTask(fxl::MakeCopyable(
+        [callback = std::move(callback_)]() mutable { callback.Clear(); }));
   }
 }
 
@@ -68,8 +66,9 @@ void PlatformMessageResponseDart::Complete(std::unique_ptr<fml::Mapping> data) {
   FXL_DCHECK(!is_complete_);
   is_complete_ = true;
   ui_task_runner_->PostTask(fxl::MakeCopyable(
-      [ callback = std::move(callback_), data = std::move(data) ]() mutable {
-        tonic::DartState* dart_state = callback.dart_state().get();
+      [callback = std::move(callback_), data = std::move(data)]() mutable {
+        std::shared_ptr<tonic::DartState> dart_state =
+            callback.dart_state().lock();
         if (!dart_state)
           return;
         tonic::DartState::Scope scope(dart_state);
@@ -86,7 +85,8 @@ void PlatformMessageResponseDart::CompleteEmpty() {
   is_complete_ = true;
   ui_task_runner_->PostTask(
       fxl::MakeCopyable([callback = std::move(callback_)]() mutable {
-        tonic::DartState* dart_state = callback.dart_state().get();
+        std::shared_ptr<tonic::DartState> dart_state =
+            callback.dart_state().lock();
         if (!dart_state)
           return;
         tonic::DartState::Scope scope(dart_state);
