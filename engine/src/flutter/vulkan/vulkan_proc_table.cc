@@ -206,27 +206,6 @@ PFN_vkVoidFunction VulkanProcTable::AcquireProc(
   return GetDeviceProcAddr(device, proc_name);
 }
 
-sk_sp<GrVkInterface> VulkanProcTable::CreateSkiaInterface() const {
-  if (!IsValid()) {
-    return nullptr;
-  }
-
-  GrVkInterface::GetProc proc = [this](const char* proc_name,
-                                       VkInstance instance, VkDevice device) {
-    if (device != VK_NULL_HANDLE) {
-      auto result = AcquireProc(proc_name, {device, nullptr});
-      if (result != nullptr) {
-        return result;
-      }
-    }
-
-    return AcquireProc(proc_name, {instance, nullptr});
-  };
-
-  return sk_make_sp<GrVkInterface>(proc, instance_, device_,
-                                   0 /* extensions */);
-}
-
 GrVkGetProc VulkanProcTable::CreateSkiaGetProc() const {
   if (!IsValid()) {
     return nullptr;
