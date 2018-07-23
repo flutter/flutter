@@ -62,7 +62,7 @@ double getBorderBottom(WidgetTester tester) {
   return box.size.height;
 }
 
-BorderSide getBorderSide(WidgetTester tester) {
+InputBorder getBorder(WidgetTester tester) {
   if (!tester.any(findBorderPainter()))
     return null;
   final CustomPaint customPaint = tester.widget(findBorderPainter());
@@ -70,7 +70,11 @@ BorderSide getBorderSide(WidgetTester tester) {
   final dynamic/*_InputBorderTween */ inputBorderTween = inputBorderPainter.border;
   final Animation<double> animation = inputBorderPainter.borderAnimation;
   final dynamic/*_InputBorder */ border = inputBorderTween.evaluate(animation);
-  return border.borderSide;
+  return border;
+}
+
+BorderSide getBorderSide(WidgetTester tester) {
+  return getBorder(tester)?.borderSide;
 }
 
 double getBorderWeight(WidgetTester tester) => getBorderSide(tester)?.width;
@@ -1649,5 +1653,141 @@ void main() {
       ).toString(),
       contains('contentPadding: EdgeInsetsDirectional(5.0, 0.0, 0.0, 0.0)'),
     );
+  });
+
+  testWidgets('InputDecoration borders', (WidgetTester tester) async {
+    const InputBorder errorBorder = OutlineInputBorder(
+      borderSide: BorderSide(color: Colors.red, width: 1.5),
+    );
+    const InputBorder focusedBorder = OutlineInputBorder(
+      borderSide: BorderSide(color: Colors.green, width: 4.0),
+    );
+    const InputBorder focusedErrorBorder = OutlineInputBorder(
+      borderSide: BorderSide(color: Colors.teal, width: 5.0),
+    );
+    const InputBorder disabledBorder = OutlineInputBorder(
+      borderSide: BorderSide(color: Colors.grey, width: 0.0),
+    );
+    const InputBorder enabledBorder = OutlineInputBorder(
+      borderSide: BorderSide(color: Colors.blue, width: 2.5),
+    );
+
+    await tester.pumpWidget(
+      buildInputDecorator(
+        // isFocused: false (default)
+        decoration: const InputDecoration(
+          // errorText: null (default)
+          // enabled: true (default)
+          errorBorder: errorBorder,
+          focusedBorder: focusedBorder,
+          focusedErrorBorder: focusedErrorBorder,
+          disabledBorder: disabledBorder,
+          enabledBorder: enabledBorder,
+        ),
+      ),
+    );
+    expect(getBorder(tester), enabledBorder);
+
+    await tester.pumpWidget(
+      buildInputDecorator(
+        isFocused: true,
+        decoration: const InputDecoration(
+          // errorText: null (default)
+          // enabled: true (default)
+          errorBorder: errorBorder,
+          focusedBorder: focusedBorder,
+          focusedErrorBorder: focusedErrorBorder,
+          disabledBorder: disabledBorder,
+          enabledBorder: enabledBorder,
+        ),
+      ),
+    );
+    await tester.pumpAndSettle(); // border changes are animated
+    expect(getBorder(tester), focusedBorder);
+
+    await tester.pumpWidget(
+      buildInputDecorator(
+        isFocused: true,
+        decoration: const InputDecoration(
+          errorText: 'error',
+          // enabled: true (default)
+          errorBorder: errorBorder,
+          focusedBorder: focusedBorder,
+          focusedErrorBorder: focusedErrorBorder,
+          disabledBorder: disabledBorder,
+          enabledBorder: enabledBorder,
+        ),
+      ),
+    );
+    await tester.pumpAndSettle(); // border changes are animated
+    expect(getBorder(tester), focusedErrorBorder);
+
+    await tester.pumpWidget(
+      buildInputDecorator(
+        // isFocused: false (default)
+        decoration: const InputDecoration(
+          errorText: 'error',
+          // enabled: true (default)
+          errorBorder: errorBorder,
+          focusedBorder: focusedBorder,
+          focusedErrorBorder: focusedErrorBorder,
+          disabledBorder: disabledBorder,
+          enabledBorder: enabledBorder,
+        ),
+      ),
+    );
+    await tester.pumpAndSettle(); // border changes are animated
+    expect(getBorder(tester), errorBorder);
+
+    await tester.pumpWidget(
+      buildInputDecorator(
+        // isFocused: false (default)
+        decoration: const InputDecoration(
+          errorText: 'error',
+          enabled: false,
+          errorBorder: errorBorder,
+          focusedBorder: focusedBorder,
+          focusedErrorBorder: focusedErrorBorder,
+          disabledBorder: disabledBorder,
+          enabledBorder: enabledBorder,
+        ),
+      ),
+    );
+    await tester.pumpAndSettle(); // border changes are animated
+    expect(getBorder(tester), errorBorder);
+
+    await tester.pumpWidget(
+      buildInputDecorator(
+        // isFocused: false (default)
+        decoration: const InputDecoration(
+          // errorText: false (default)
+          enabled: false,
+          errorBorder: errorBorder,
+          focusedBorder: focusedBorder,
+          focusedErrorBorder: focusedErrorBorder,
+          disabledBorder: disabledBorder,
+          enabledBorder: enabledBorder,
+        ),
+      ),
+    );
+    await tester.pumpAndSettle(); // border changes are animated
+    expect(getBorder(tester), disabledBorder);
+
+    await tester.pumpWidget(
+      buildInputDecorator(
+        isFocused: true,
+        decoration: const InputDecoration(
+          // errorText: null (default)
+          enabled: false,
+          errorBorder: errorBorder,
+          focusedBorder: focusedBorder,
+          focusedErrorBorder: focusedErrorBorder,
+          disabledBorder: disabledBorder,
+          enabledBorder: enabledBorder,
+        ),
+      ),
+    );
+    await tester.pumpAndSettle(); // border changes are animated
+    expect(getBorder(tester), disabledBorder);
   });
 }
