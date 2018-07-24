@@ -582,6 +582,9 @@ class SemanticsProperties extends DiagnosticableTree {
   /// announcement will only be made if the node's label has changed since the
   /// last update.
   ///
+  /// On iOS, no announcements are made but the node is marked as
+  /// `UIAccessibilityTraitUpdatesFrequently`.
+  ///
   /// An example of a live region is the [Snackbar] widget. When it appears
   /// on the screen it may be difficult to focus to read the label. A live
   /// region causes an initial polite announcement to be generated
@@ -733,7 +736,7 @@ class SemanticsProperties extends DiagnosticableTree {
   /// vertically scrollable.
   ///
   /// VoiceOver users on iOS can trigger this action by swiping down with three
-  /// fingers. TalkBack users on  Android can trigger this action by swiping
+  /// fingers. TalkBack users on Android can trigger this action by swiping
   /// left and then right in one motion path. On Android, [onScrollDown] and
   /// [onScrollRight] share the same gesture. Therefore, only on of them should
   /// be provided.

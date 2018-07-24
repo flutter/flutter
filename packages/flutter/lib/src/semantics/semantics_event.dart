@@ -134,12 +134,12 @@ class TapSemanticEvent extends SemanticsEvent {
   Map<String, dynamic> getDataMap() => const <String, dynamic>{};
 }
 
-/// An event which triggers an announcement of a live region.
+/// An event which triggers a polite announcement of a live region.
 ///
 /// This requires that the semantics node has already been marked as a live
-/// region. Only Android (TalkBack) will make a verbal announcement, as long as
+/// region. On Android, TalkBack will make a verbal announcement, as long as
 /// the label of the semantics node has changed since the last live region
-/// update.
+/// update. iOS does not currently support this event.
 ///
 /// See also:
 ///
