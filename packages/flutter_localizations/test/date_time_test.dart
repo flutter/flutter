@@ -10,19 +10,20 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   group(GlobalMaterialLocalizations, () {
-    test('uses exact locale when exists', () {
-      final GlobalMaterialLocalizations localizations = new GlobalMaterialLocalizations(const Locale('pt', 'PT'));
+    test('uses exact locale when exists', () async {
+      final GlobalMaterialLocalizations localizations = await GlobalMaterialLocalizations.delegate.load(const Locale('pt', 'PT'));
       expect(localizations.formatDecimal(10000), '10\u00A0000');
     });
 
-    test('falls back to language code when exact locale is missing', () {
-      final GlobalMaterialLocalizations localizations = new GlobalMaterialLocalizations(const Locale('pt', 'XX'));
+    test('falls back to language code when exact locale is missing', () async {
+      final GlobalMaterialLocalizations localizations = await GlobalMaterialLocalizations.delegate.load(const Locale('pt', 'XX'));
       expect(localizations.formatDecimal(10000), '10.000');
     });
 
-    test('falls back to default format when neither language code nor exact locale are available', () {
-      final GlobalMaterialLocalizations localizations = new GlobalMaterialLocalizations(const Locale('xx', 'XX'));
-      expect(localizations.formatDecimal(10000), '10,000');
+    test('fails when neither language code nor exact locale are available', () async {
+      await expectLater(() async {
+        await GlobalMaterialLocalizations.delegate.load(const Locale('xx', 'XX'));
+      }, throwsAssertionError);
     });
 
     group('formatHour', () {
@@ -65,8 +66,8 @@ void main() {
     });
 
     group('formatMinute', () {
-      test('formats English', () {
-        final GlobalMaterialLocalizations localizations = new GlobalMaterialLocalizations(const Locale('en', 'US'));
+      test('formats English', () async {
+        final GlobalMaterialLocalizations localizations = await GlobalMaterialLocalizations.delegate.load(const Locale('en', 'US'));
         expect(localizations.formatMinute(const TimeOfDay(hour: 1, minute: 32)), '32');
       });
     });
