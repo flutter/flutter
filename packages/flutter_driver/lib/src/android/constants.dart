@@ -153,7 +153,7 @@ class AndroidSemanticsAction {
   /// Creates a new [AndroidSemanticsAction] from an integer [value].
   ///
   /// Throws [UnsupportedError] if the id is not a known Android accessibility
-  /// action.s
+  /// action.
   static AndroidSemanticsAction deserialize(int value) {
     final AndroidSemanticsAction action = new AndroidSemanticsAction._(value);
     action.toString();
