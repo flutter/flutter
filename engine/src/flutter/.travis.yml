@@ -5,7 +5,6 @@ sudo: false
 before_script:
   - ./travis/setup.sh
 script:
-  - ./travis/check_roll.sh
   - ./travis/format.sh
   - ./travis/build.sh
   - ./travis/test.sh
