@@ -1677,12 +1677,8 @@ class RenderPhysicalModel extends _RenderPhysicalModelBase<RRect> {
             color.alpha != 0xFF,
           );
         }
-        // TODO(liyuqian): respect Clip
         canvas.drawRRect(offsetRRect, new Paint()..color = color);
-        canvas.save();
-        canvas.clipRRect(offsetRRect); // TODO(liyquian): respect Clip
-        super.paint(context, offset);
-        canvas.restore();
+        RenderObject.clipAndPaint(canvas, clip, offsetRRect, offsetBounds, () => super.paint(context, offset));
         assert(context.canvas == canvas, 'canvas changed even though needsCompositing was false');
       }
     }

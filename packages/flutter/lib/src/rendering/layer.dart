@@ -726,7 +726,6 @@ class ClipPathLayer extends ContainerLayer {
       return true;
     }());
     if (enabled)
-      // TODO(liyuqian): respect Clip
       builder.pushClipPath(clipPath.shift(layerOffset), clip: clip);
     addChildrenToScene(builder, layerOffset);
     if (enabled)
@@ -988,7 +987,6 @@ class PhysicalModelLayer extends ContainerLayer {
       return true;
     }());
     if (enabled) {
-      // TODO(liyuqian): respect Clip
       builder.pushPhysicalShape(
         path: clipPath.shift(layerOffset),
         elevation: elevation,
