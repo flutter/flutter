@@ -178,7 +178,6 @@ class CupertinoIcons {
   ///  * [photo_camera], which is similar, but not filled in.
   ///  * [video_camera_solid], for the moving picture equivalent.
   static const IconData photo_camera = IconData(0xf3f5, fontFamily: iconFont, fontPackage: iconFontPackage);
-
   /// A camera for still photographs. This icon is not filled in.
   ///
   /// See also:
