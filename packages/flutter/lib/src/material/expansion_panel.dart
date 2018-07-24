@@ -8,6 +8,7 @@ import 'package:flutter/widgets.dart';
 import 'expand_icon.dart';
 import 'mergeable_material.dart';
 import 'theme.dart';
+import 'dart:developer';
 
 const double _kPanelHeaderCollapsedHeight = 48.0;
 const double _kPanelHeaderExpandedHeight = 64.0;
@@ -105,8 +106,8 @@ class ExpansionPanelRadio extends ExpansionPanel {
     @required ExpansionPanelHeaderBuilder headerBuilder,
     @required Widget body,
   }) : assert(initializesExpanded != null),
-        assert(value != null),
-        super(body: body, headerBuilder: headerBuilder);
+       assert(value != null),
+       super(body: body, headerBuilder: headerBuilder);
 
   /// Whether this panel initializes expanded or not.
   final bool initializesExpanded;
@@ -122,6 +123,8 @@ class ExpansionPanelRadio extends ExpansionPanel {
 ///
 ///  * [ExpansionPanel]
 ///  * <https://material.google.com/components/expansion-panels.html>
+///  * Switching between the normal expansion panel list and the radio style
+///    list at runtime is not supported.
 class ExpansionPanelList extends StatefulWidget {
   /// Creates an expansion panel list widget. The [expansionCallback] is
   /// triggered when an expansion panel expand/collapse button is pushed.
@@ -183,11 +186,10 @@ class _ExpansionPanelListState extends State<ExpansionPanelList> {
   @override
   void initState() {
     super.initState();
+    debugPrint('Init: ' + widget._allowOnlyOnePanelOpen.toString());
     if (widget._allowOnlyOnePanelOpen) {
-      for (int i = 0; i < widget.children.length; i += 1) {
-        assert(widget.children[i] is ExpansionPanelRadio,
-          'All children of ExpansionPanel.radio need to be of type ExpansionPanelRadio');
-        final ExpansionPanelRadio widgetChild = widget.children[i];
+      for (ExpansionPanelRadio child in widget.children) {
+        final ExpansionPanelRadio widgetChild = child;
         final bool expansionPanelValid = _currentOpenPanel == null && widgetChild.initializesExpanded ||
                                          !widgetChild.initializesExpanded;
         assert(expansionPanelValid, 'Trying to initialize radio panel list with more than two open panels!');
@@ -200,18 +202,16 @@ class _ExpansionPanelListState extends State<ExpansionPanelList> {
   @override
   void didUpdateWidget(ExpansionPanelList oldWidget) {
     super.didUpdateWidget(oldWidget);
+    debugPrint('Update: ' + widget._allowOnlyOnePanelOpen.toString());
 
     if (widget._allowOnlyOnePanelOpen) {
       bool panelExpanded = false;
-      for (int i = 0; i < widget.children.length; i += 1) {
-        assert(widget.children[i] is ExpansionPanelRadio,
-        'All children of ExpansionPanel.radio need to be of type ExpansionPanelRadio');
-
-        final ExpansionPanelRadio child = widget.children[i];
+      for (ExpansionPanelRadio newChild in widget.children) {
+        final ExpansionPanelRadio child = newChild;
         final int childKey = child.value;
         final bool panelWillBeExpanded = child.initializesExpanded || (childKey == _currentOpenPanel?.value);
         assert(!panelExpanded && panelWillBeExpanded || panelExpanded && !panelWillBeExpanded,
-               'Trying to initialize radio panel list with more than two open panels!');
+          'Trying to initialize radio panel list with more than two open panels!');
         panelExpanded = panelWillBeExpanded;
 
         _currentOpenPanel = childKey == _currentOpenPanel?.value ? child : _currentOpenPanel;
@@ -260,7 +260,8 @@ class _ExpansionPanelListState extends State<ExpansionPanelList> {
         items.add(new MaterialGap(key: new _SaltedKey<BuildContext, int>(context, index * 2 - 1)));
 
       final ExpansionPanelRadio _widgetChild = widget._allowOnlyOnePanelOpen ? widget.children[index] : null;
-
+      debugger(when: !widget._allowOnlyOnePanelOpen);
+      //tests
       final Row header = new Row(
         children: <Widget>[
           new Expanded(
@@ -288,7 +289,7 @@ class _ExpansionPanelListState extends State<ExpansionPanelList> {
           ),
         ],
       );
-
+//s
       items.add(
         new MaterialSlice(
           key: new _SaltedKey<BuildContext, int>(context, index * 2),
