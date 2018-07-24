@@ -2,12 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-/// WARNING: These APIs are only supported internally for testing the flutter
-/// framework.
-@experimental
+/// This library provides constants and matchers for testing the Android
+/// accessibility implementation in a flutter driver environment.
 library android_testing;
-
-import 'package:meta/meta.dart';
 
 export 'src/android/common.dart';
 export 'src/android/constants.dart';

@@ -3,7 +3,7 @@ import 'package:flutter_driver/android_testing.dart';
 
 import 'package:test/test.dart';
 
-// JSON matching and serialized Android AccessibilityNodeInfo.
+// JSON matching a serialized Android AccessibilityNodeInfo.
 const String source = r'''
 {
   "id": 23,
