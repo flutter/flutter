@@ -724,7 +724,7 @@ class _BackLabel extends StatelessWidget {
   final String specifiedPreviousTitle;
   final ModalRoute<dynamic> route;
 
-  Widget _buildPreviousTitleWidget(String previousTitle) {
+  Widget _buildPreviousTitleWidget(BuildContext context, String previousTitle, Widget child) {
     if (previousTitle?.isNotEmpty == true) {
       if (previousTitle.length > 10) {
         return const Text('Back');
@@ -739,7 +739,7 @@ class _BackLabel extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (specifiedPreviousTitle?.isNotEmpty == true) {
-      return _buildPreviousTitleWidget(specifiedPreviousTitle);
+      return _buildPreviousTitleWidget(context, specifiedPreviousTitle, null);
     } else if (route is CupertinoPageRoute<dynamic>) {
       final CupertinoPageRoute<dynamic> cupertinoRoute = route;
       return new ValueListenableBuilder<String>(
@@ -752,17 +752,19 @@ class _BackLabel extends StatelessWidget {
   }
 }
 
-typedef Widget ValueWidgetBuilder<T>(T value);
+typedef Widget ValueWidgetBuilder<T>(BuildContext context, T value, Widget child);
 
 class ValueListenableBuilder<T> extends StatefulWidget {
   const ValueListenableBuilder({
     @required this.valueListenable,
     @required this.valueWidgetBuilder,
+    this.child,
   }) : assert(valueListenable != null),
        assert(valueWidgetBuilder != null);
 
   final ValueListenable<T> valueListenable;
   final ValueWidgetBuilder<T> valueWidgetBuilder;
+  final Widget child;
 
   @override
   State<StatefulWidget> createState() => new _ValueListenableBuilderState<T>();
@@ -802,5 +804,7 @@ class _ValueListenableBuilderState<T> extends State<ValueListenableBuilder<T>> {
   }
 
   @override
-  Widget build(BuildContext context) => widget.valueWidgetBuilder(value);
+  Widget build(BuildContext context) {
+    return widget.valueWidgetBuilder(context, value, widget.child);
+  }
 }
