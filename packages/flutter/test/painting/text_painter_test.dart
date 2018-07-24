@@ -250,7 +250,7 @@ void main() {
     caretOffset = painter.getOffsetForCaret(const ui.TextPosition(offset: 4, affinity: TextAffinity.upstream), ui.Rect.zero);
     expect(caretOffset.dx, closeTo(42.0, 0.0001));
     expect(caretOffset.dy, closeTo(0.0, 0.0001));
-    
+
     caretOffset = painter.getOffsetForCaret(const ui.TextPosition(offset: 3, affinity: TextAffinity.upstream), ui.Rect.zero);
     expect(caretOffset.dx, closeTo(42.0, 0.0001));
     expect(caretOffset.dy, closeTo(0.0, 0.0001));
