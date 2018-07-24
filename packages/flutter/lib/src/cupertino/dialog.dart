@@ -466,7 +466,7 @@ class _CupertinoAlertContentSection extends StatelessWidget {
     this.title,
     this.content,
     this.scrollController,
-  }) : super(key: const Key('this_is_the_root'));
+  }) : super(key: key);
 
   // The (optional) title of the dialog is displayed in a large font at the top
   // of the dialog.
