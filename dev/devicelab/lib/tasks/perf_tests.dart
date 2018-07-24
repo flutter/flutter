@@ -113,7 +113,7 @@ TaskFunction createBasicMaterialCompileTest() {
 
 /// Measure application startup performance.
 class StartupTest {
-  static const Duration _startupTimeout = const Duration(minutes: 5);
+  static const Duration _startupTimeout = Duration(minutes: 5);
 
   const StartupTest(this.testDirectory, { this.reportMetrics = true });
 
@@ -214,20 +214,10 @@ class CompileTest {
       final Map<String, dynamic> metrics = <String, dynamic>{}
         ..addAll(await _compileAot())
         ..addAll(await _compileApp(reportPackageContentSizes: reportPackageContentSizes))
-        ..addAll(await _compileDebug())
-        ..addAll(_suffix(await _compileAot(previewDart2: false), '__dart1'))
-        ..addAll(_suffix(await _compileApp(previewDart2: false), '__dart1'))
-        ..addAll(_suffix(await _compileDebug(previewDart2: false), '__dart1'));
+        ..addAll(await _compileDebug());
 
       return new TaskResult.success(metrics, benchmarkScoreKeys: metrics.keys.toList());
     });
-  }
-
-  static Map<String, dynamic> _suffix(Map<String, dynamic> map, String suffix) {
-    return new Map<String, dynamic>.fromIterables(
-      map.keys.map<String>((String key) => '$key$suffix'),
-      map.values,
-    );
   }
 
   static Future<Map<String, dynamic>> _compileAot({ bool previewDart2 = true }) async {
@@ -350,7 +340,7 @@ class CompileTest {
     };
   }
 
-  static const Map<String, String> _kSdkNameToMetricNameMapping = const <String, String> {
+  static const Map<String, String> _kSdkNameToMetricNameMapping = <String, String> {
     'VMIsolate': 'aot_snapshot_size_vmisolate',
     'Isolate': 'aot_snapshot_size_isolate',
     'ReadOnlyData': 'aot_snapshot_size_rodata',

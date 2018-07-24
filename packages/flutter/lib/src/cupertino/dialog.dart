@@ -14,7 +14,7 @@ import 'scrollbar.dart';
 
 // TODO(abarth): These constants probably belong somewhere more general.
 
-const TextStyle _kCupertinoDialogTitleStyle = const TextStyle(
+const TextStyle _kCupertinoDialogTitleStyle = TextStyle(
   fontFamily: '.SF UI Display',
   inherit: false,
   fontSize: 18.0,
@@ -25,7 +25,7 @@ const TextStyle _kCupertinoDialogTitleStyle = const TextStyle(
   textBaseline: TextBaseline.alphabetic,
 );
 
-const TextStyle _kCupertinoDialogContentStyle = const TextStyle(
+const TextStyle _kCupertinoDialogContentStyle = TextStyle(
   fontFamily: '.SF UI Text',
   inherit: false,
   fontSize: 13.4,
@@ -35,7 +35,7 @@ const TextStyle _kCupertinoDialogContentStyle = const TextStyle(
   textBaseline: TextBaseline.alphabetic,
 );
 
-const TextStyle _kCupertinoDialogActionStyle = const TextStyle(
+const TextStyle _kCupertinoDialogActionStyle = TextStyle(
   fontFamily: '.SF UI Text',
   inherit: false,
   fontSize: 16.8,
@@ -51,7 +51,7 @@ const double _kCupertinoDialogWidth = 270.0;
 // barrier that appears behind the dialog. The overlay blend mode does the
 // brightening. The white color doesn't paint any white, it's just the basis
 // for the overlay blend mode.
-const BoxDecoration _kCupertinoDialogBlurOverlayDecoration = const BoxDecoration(
+const BoxDecoration _kCupertinoDialogBlurOverlayDecoration = BoxDecoration(
   color: CupertinoColors.white,
   backgroundBlendMode: BlendMode.overlay,
 );
@@ -63,16 +63,16 @@ const double _kDividerThickness = 1.0;
 
 // Translucent white that is painted on top of the blurred backdrop as the
 // dialog's background color.
-const Color _kDialogColor = const Color(0xC0FFFFFF);
+const Color _kDialogColor = Color(0xC0FFFFFF);
 
 // Translucent white that is painted on top of the blurred backdrop as the
 // background color of a pressed button.
-const Color _kDialogPressedColor = const Color(0x70FFFFFF);
+const Color _kDialogPressedColor = Color(0x70FFFFFF);
 
 // Translucent white that is painted on top of the blurred backdrop in the
 // gap areas between the content section and actions section, as well as between
 // buttons.
-const Color _kButtonDividerColor = const Color(0x40FFFFFF);
+const Color _kButtonDividerColor = Color(0x40FFFFFF);
 
 /// An iOS-style dialog.
 ///
@@ -206,7 +206,7 @@ class CupertinoAlertDialog extends StatelessWidget {
       children.add(new Flexible(flex: 3, child: titleSection));
       if (actions.isNotEmpty) {
         // If both sections have content, place padding between them.
-        children.add(const Padding(padding: const EdgeInsets.only(top: 8.0)));
+        children.add(const Padding(padding: EdgeInsets.only(top: 8.0)));
       }
     }
 
@@ -533,7 +533,7 @@ class _CupertinoAlertContentSection extends StatelessWidget {
 
     // Add padding between the widgets if necessary.
     if (titleContentGroup.length > 1) {
-      titleContentGroup.insert(1, const Padding(padding: const EdgeInsets.only(top: 8.0)));
+      titleContentGroup.insert(1, const Padding(padding: EdgeInsets.only(top: 8.0)));
     }
 
     return new CupertinoScrollbar(

@@ -23,7 +23,7 @@ TextTheme _buildTextTheme(TextTheme base) {
 }
 
 ThemeData _buildDarkTheme() {
-  const Color primaryColor = const Color(0xFF0175c2);
+  const Color primaryColor = Color(0xFF0175c2);
   final ThemeData base = new ThemeData.dark();
   return base.copyWith(
     primaryColor: primaryColor,
@@ -44,7 +44,7 @@ ThemeData _buildDarkTheme() {
 }
 
 ThemeData _buildLightTheme() {
-  const Color primaryColor = const Color(0xFF0175c2);
+  const Color primaryColor = Color(0xFF0175c2);
   final ThemeData base = new ThemeData.light();
   return base.copyWith(
     primaryColor: primaryColor,

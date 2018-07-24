@@ -1176,8 +1176,8 @@ abstract class _RenderCustomClip<T> extends RenderProxyBox {
       _debugText ??= new TextPainter(
         text: const TextSpan(
           text: '✂',
-          style: const TextStyle(
-            color: const Color(0xFFFF00FF),
+          style: TextStyle(
+            color: Color(0xFFFF00FF),
               fontSize: 14.0,
             ),
           ),
@@ -2881,8 +2881,11 @@ class RenderAbsorbPointer extends RenderProxyBox {
   /// The [absorbing] argument must not be null.
   RenderAbsorbPointer({
     RenderBox child,
-    this.absorbing = true
+    bool absorbing = true,
+    bool ignoringSemantics,
   }) : assert(absorbing != null),
+       _absorbing = absorbing,
+       _ignoringSemantics = ignoringSemantics,
        super(child);
 
   /// Whether this render object absorbs pointers during hit testing.
@@ -2890,7 +2893,33 @@ class RenderAbsorbPointer extends RenderProxyBox {
   /// Regardless of whether this render object absorbs pointers during hit
   /// testing, it will still consume space during layout and be visible during
   /// painting.
-  bool absorbing;
+  bool get absorbing => _absorbing;
+  bool _absorbing;
+  set absorbing(bool value) {
+    if (_absorbing == value)
+      return;
+    _absorbing = value;
+    if (ignoringSemantics == null)
+      markNeedsSemanticsUpdate();
+  }
+
+  /// Whether the semantics of this render object is ignored when compiling the semantics tree.
+  ///
+  /// If null, defaults to value of [absorbing].
+  ///
+  /// See [SemanticsNode] for additional information about the semantics tree.
+  bool get ignoringSemantics => _ignoringSemantics;
+  bool _ignoringSemantics;
+  set ignoringSemantics(bool value) {
+    if (value == _ignoringSemantics)
+      return;
+    final bool oldEffectiveValue = _effectiveIgnoringSemantics;
+    _ignoringSemantics = value;
+    if (oldEffectiveValue != _effectiveIgnoringSemantics)
+      markNeedsSemanticsUpdate();
+  }
+
+  bool get _effectiveIgnoringSemantics => ignoringSemantics == null ? absorbing : ignoringSemantics;
 
   @override
   bool hitTest(HitTestResult result, { Offset position }) {
@@ -2900,9 +2929,22 @@ class RenderAbsorbPointer extends RenderProxyBox {
   }
 
   @override
+  void visitChildrenForSemantics(RenderObjectVisitor visitor) {
+    if (child != null && !_effectiveIgnoringSemantics)
+      visitor(child);
+  }
+
+  @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(new DiagnosticsProperty<bool>('absorbing', absorbing));
+    properties.add(
+      new DiagnosticsProperty<bool>(
+        'ignoringSemantics',
+        _effectiveIgnoringSemantics,
+        description: ignoringSemantics == null ? 'implicitly $_effectiveIgnoringSemantics' : null,
+      ),
+    );
   }
 }
 
@@ -3159,6 +3201,7 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     SetSelectionHandler onSetSelection,
     VoidCallback onDidGainAccessibilityFocus,
     VoidCallback onDidLoseAccessibilityFocus,
+    Map<CustomSemanticsAction, VoidCallback> customSemanticsActions,
   }) : assert(container != null),
        _container = container,
        _explicitChildNodes = explicitChildNodes,
@@ -3197,6 +3240,7 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
        _onSetSelection = onSetSelection,
        _onDidGainAccessibilityFocus = onDidGainAccessibilityFocus,
        _onDidLoseAccessibilityFocus = onDidLoseAccessibilityFocus,
+       _customSemanticsActions = customSemanticsActions,
        super(child);
 
   /// If 'container' is true, this [RenderObject] will introduce a new
@@ -3779,6 +3823,24 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
       markNeedsSemanticsUpdate();
   }
 
+  /// The handlers and supported [CustomSemanticsAction]s for this node.
+  ///
+  /// These handlers are called whenever the user performs the associated
+  /// custom accessibility action from a special platform menu. Providing any
+  /// custom actions here also adds [SemanticsAction.customAction] to the node.
+  ///
+  /// See also:
+  ///
+  ///   * [CustomSemanticsAction], for an explaination of custom actions.
+  Map<CustomSemanticsAction, VoidCallback> get customSemanticsActions => _customSemanticsActions;
+  Map<CustomSemanticsAction, VoidCallback> _customSemanticsActions;
+  set customSemanticsActions(Map<CustomSemanticsAction, VoidCallback> value) {
+    if (_customSemanticsActions == value)
+      return;
+    _customSemanticsActions = value;
+    markNeedsSemanticsUpdate();
+  }
+
   @override
   void describeSemanticsConfiguration(SemanticsConfiguration config) {
     super.describeSemanticsConfiguration(config);
@@ -3860,6 +3922,8 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
       config.onDidGainAccessibilityFocus = _performDidGainAccessibilityFocus;
     if (onDidLoseAccessibilityFocus != null)
       config.onDidLoseAccessibilityFocus = _performDidLoseAccessibilityFocus;
+    if (customSemanticsActions != null)
+      config.customSemanticsActions = _customSemanticsActions;
   }
 
   void _performTap() {

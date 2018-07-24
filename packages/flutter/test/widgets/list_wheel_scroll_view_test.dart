@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:io';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
@@ -41,13 +43,28 @@ void main() {
       await tester.pumpWidget(
         const Directionality(
           textDirection: TextDirection.ltr,
-          child: const ListWheelScrollView(
+          child: ListWheelScrollView(
             itemExtent: 50.0,
-            children: const <Widget>[],
+            children: <Widget>[],
           ),
         ),
       );
       expect(tester.getSize(find.byType(ListWheelScrollView)), const Size(800.0, 600.0));
+    });
+
+
+    testWidgets('ListWheelScrollView needs positive magnification', (WidgetTester tester) async {
+      expect(
+            () {
+          new ListWheelScrollView(
+            useMagnifier: true,
+            magnification: -1.0,
+            itemExtent: 20.0,
+            children: <Widget>[new Container()],
+          );
+        },
+        throwsAssertionError,
+      );
     });
   });
 
@@ -98,14 +115,14 @@ void main() {
       await tester.pumpWidget(
         const Directionality(
           textDirection: TextDirection.ltr,
-          child: const ListWheelScrollView(
+          child: ListWheelScrollView(
             itemExtent: 50.0,
-            children: const <Widget>[
-              const SizedBox(
+            children: <Widget>[
+              SizedBox(
                 height: 200.0,
                 width: 200.0,
-                child: const Center(
-                  child: const Text('blah'),
+                child: Center(
+                  child: Text('blah'),
                 ),
               ),
             ],
@@ -238,6 +255,31 @@ void main() {
   });
 
   group('viewport transformation', () {
+    testWidgets('Center child is magnified', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        new Directionality(
+          textDirection: TextDirection.ltr,
+          child: new RepaintBoundary(
+            key: const Key('list_wheel_scroll_view'),
+            child: new ListWheelScrollView(
+              useMagnifier: true,
+              magnification: 2.0,
+              itemExtent: 50.0,
+              children: List<Widget>.generate(10, (int index) {
+                return const Placeholder();
+              }),
+            ),
+          ),
+        ),
+      );
+
+      await expectLater(
+        find.byKey(const Key('list_wheel_scroll_view')),
+        matchesGoldenFile('list_wheel_scroll_view.center_child.magnified.png'),
+        skip: !Platform.isLinux,
+      );
+    });
+
     testWidgets('Default middle transform', (WidgetTester tester) async {
       await tester.pumpWidget(
         new Directionality(
@@ -248,7 +290,7 @@ void main() {
               new Container(
                 width: 200.0,
                 child: const Center(
-                  child: const Text('blah'),
+                  child: Text('blah'),
                 ),
               ),
             ],
@@ -267,6 +309,32 @@ void main() {
       ));
     });
 
+    testWidgets('Curve the wheel to the left', (WidgetTester tester) async {
+      final ScrollController controller = new ScrollController(initialScrollOffset: 300.0);
+      await tester.pumpWidget(
+        new Directionality(
+          textDirection: TextDirection.ltr,
+          child: new RepaintBoundary(
+            key: const Key('list_wheel_scroll_view'),
+            child: new ListWheelScrollView(
+              controller: controller,
+              offAxisFraction: 0.5,
+              itemExtent: 50.0,
+              children: List<Widget>.generate(32, (int index) {
+                return const Placeholder();
+              }),
+          ),
+        ),
+      ),
+      );
+
+      await expectLater(
+        find.byKey(const Key('list_wheel_scroll_view')),
+        matchesGoldenFile('list_wheel_scroll_view.curved_wheel.left.png'),
+        skip: !Platform.isLinux,
+      );
+    });
+
     testWidgets('Scrolling, diameterRatio, perspective all changes matrix', (WidgetTester tester) async {
       final ScrollController controller = new ScrollController(initialScrollOffset: 200.0);
 
@@ -280,7 +348,7 @@ void main() {
               new Container(
                 width: 200.0,
                 child: const Center(
-                  child: const Text('blah'),
+                  child: Text('blah'),
                 ),
               ),
             ],
@@ -310,7 +378,7 @@ void main() {
               new Container(
                 width: 200.0,
                 child: const Center(
-                  child: const Text('blah'),
+                  child: Text('blah'),
                 ),
               ),
             ],
@@ -339,7 +407,7 @@ void main() {
               new Container(
                 width: 200.0,
                 child: const Center(
-                  child: const Text('blah'),
+                  child: Text('blah'),
                 ),
               ),
             ],
@@ -368,7 +436,7 @@ void main() {
               new Container(
                 width: 200.0,
                 child: const Center(
-                  child: const Text('blah'),
+                  child: Text('blah'),
                 ),
               ),
             ],
@@ -384,6 +452,99 @@ void main() {
           moreOrLessEquals(276.46170927520404), moreOrLessEquals(-52.46133917892857), moreOrLessEquals(-230.38475772933677), moreOrLessEquals(1.69115427318801),
         ]),
       ));
+    });
+
+    testWidgets('offAxisFraction, magnification changes matrix', (WidgetTester tester) async {
+      final ScrollController controller = new ScrollController(
+          initialScrollOffset: 200.0);
+
+      await tester.pumpWidget(
+        new Directionality(
+          textDirection: TextDirection.ltr,
+          child: new ListWheelScrollView(
+            controller: controller,
+            itemExtent: 100.0,
+            offAxisFraction: 0.5,
+            children: <Widget>[
+              new Container(
+                width: 200.0,
+                child: const Center(
+                  child: Text('blah'),
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+
+      final RenderListWheelViewport viewport = tester.firstRenderObject(find.byType(Container)).parent;
+      expect(viewport, paints
+        ..transform(
+          matrix4: equals(<dynamic>[
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            moreOrLessEquals(0.6318744917928063),
+            moreOrLessEquals(0.3420201433256688),
+            moreOrLessEquals(-0.0010260604299770066),
+            0.0,
+            moreOrLessEquals(-1.1877435020329863),
+            moreOrLessEquals(0.9396926207859083),
+            moreOrLessEquals(-0.002819077862357725),
+            0.0,
+            moreOrLessEquals(-62.20844875763376),
+            moreOrLessEquals(-138.79047052615562),
+            moreOrLessEquals(1.4163714115784667),
+          ]),
+        ));
+
+      controller.jumpTo(0.0);
+
+      await tester.pumpWidget(
+        new Directionality(
+          textDirection: TextDirection.ltr,
+          child: new ListWheelScrollView(
+            controller: controller,
+            itemExtent: 100.0,
+            offAxisFraction: 0.5,
+            useMagnifier: true,
+            magnification: 1.5,
+            children: <Widget>[
+              new Container(
+                width: 200.0,
+                child: const Center(
+                  child: Text('blah'),
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+
+      expect(viewport, paints
+        ..transform(
+          matrix4: equals(<dynamic>[
+            1.5,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            1.5,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            1.5,
+            0.0,
+            0.0,
+            -150.0,
+            0.0,
+            1.0,
+          ]),
+        ));
+
     });
   });
 
@@ -402,7 +563,7 @@ void main() {
               new Container(
                 width: 200.0,
                 child: const Center(
-                  child: const Text('blah'),
+                  child: Text('blah'),
                 ),
               ),
             ],

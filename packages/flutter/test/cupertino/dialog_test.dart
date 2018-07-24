@@ -23,7 +23,7 @@ void main() {
             content: const Text('The content'),
             actions: <Widget>[
               const CupertinoDialogAction(
-                child: const Text('Cancel'),
+                child: Text('Cancel'),
               ),
               new CupertinoDialogAction(
                 isDestructiveAction: true,
@@ -54,7 +54,7 @@ void main() {
   testWidgets('Dialog destructive action styles', (WidgetTester tester) async {
     await tester.pumpWidget(boilerplate(const CupertinoDialogAction(
       isDestructiveAction: true,
-      child: const Text('Ok'),
+      child: Text('Ok'),
     )));
 
     final DefaultTextStyle widget = tester.widget(find.byType(DefaultTextStyle));
@@ -66,7 +66,7 @@ void main() {
   testWidgets('Dialog default action styles', (WidgetTester tester) async {
     await tester.pumpWidget(boilerplate(const CupertinoDialogAction(
       isDefaultAction: true,
-      child: const Text('Ok'),
+      child: Text('Ok'),
     )));
 
     final DefaultTextStyle widget = tester.widget(find.byType(DefaultTextStyle));
@@ -78,7 +78,7 @@ void main() {
     await tester.pumpWidget(boilerplate(const CupertinoDialogAction(
       isDefaultAction: true,
       isDestructiveAction: true,
-      child: const Text('Ok'),
+      child: Text('Ok'),
     )));
 
     final DefaultTextStyle widget = tester.widget(find.byType(DefaultTextStyle));
@@ -99,12 +99,12 @@ void main() {
               title: const Text('The Title'),
               content: new Text('Very long content ' * 20),
               actions: const <Widget>[
-                const CupertinoDialogAction(
-                  child: const Text('Cancel'),
+                CupertinoDialogAction(
+                  child: Text('Cancel'),
                 ),
-                const CupertinoDialogAction(
+                CupertinoDialogAction(
                   isDestructiveAction: true,
-                  child: const Text('OK'),
+                  child: Text('OK'),
                 ),
               ],
               scrollController: scrollController,
@@ -153,21 +153,21 @@ void main() {
               title: const Text('The title'),
               content: const Text('The content.'),
               actions: const <Widget>[
-                const CupertinoDialogAction(
-                  child: const Text('One'),
+                CupertinoDialogAction(
+                  child: Text('One'),
                 ),
-                const CupertinoDialogAction(
-                  child: const Text('Two'),
+                CupertinoDialogAction(
+                  child: Text('Two'),
                 ),
-                const CupertinoDialogAction(
-                  child: const Text('Three'),
+                CupertinoDialogAction(
+                  child: Text('Three'),
                 ),
-                const CupertinoDialogAction(
-                  child: const Text('Chocolate Brownies'),
+                CupertinoDialogAction(
+                  child: Text('Chocolate Brownies'),
                 ),
-                const CupertinoDialogAction(
+                CupertinoDialogAction(
                   isDestructiveAction: true,
-                  child: const Text('Cancel'),
+                  child: Text('Cancel'),
                 ),
               ],
               actionScrollController: actionScrollController,
@@ -214,11 +214,11 @@ void main() {
             data: MediaQuery.of(context).copyWith(textScaleFactor: textScaleFactor),
             child: new CupertinoAlertDialog(
               actions: const <Widget>[
-                const CupertinoDialogAction(
-                  child: const Text('One'),
+                CupertinoDialogAction(
+                  child: Text('One'),
                 ),
-                const CupertinoDialogAction(
-                  child: const Text('Two'),
+                CupertinoDialogAction(
+                  child: Text('Two'),
                 ),
               ],
               actionScrollController: actionScrollController,
@@ -311,8 +311,8 @@ void main() {
             title: const Text('The Title'),
             content: const Text('The message'),
             actions: const <Widget>[
-              const CupertinoDialogAction(
-                child: const Text('OK'),
+              CupertinoDialogAction(
+                child: Text('OK'),
               ),
             ],
             scrollController: scrollController,
@@ -343,12 +343,12 @@ void main() {
             title: const Text('The Title'),
             content: const Text('The message'),
             actions: const <Widget>[
-              const CupertinoDialogAction(
-                child: const Text('OK'),
+              CupertinoDialogAction(
+                child: Text('OK'),
               ),
-              const CupertinoDialogAction(
+              CupertinoDialogAction(
                 isDestructiveAction: true,
-                child: const Text('Cancel'),
+                child: Text('Cancel'),
               ),
             ],
             scrollController: scrollController,
@@ -389,12 +389,12 @@ void main() {
             title: const Text('The Title'),
             content: const Text('The message'),
             actions: const <Widget>[
-              const CupertinoDialogAction(
-                child: const Text('OK'),
+              CupertinoDialogAction(
+                child: Text('OK'),
               ),
-              const CupertinoDialogAction(
+              CupertinoDialogAction(
                 isDestructiveAction: true,
-                child: const Text('This is too long to fit'),
+                child: Text('This is too long to fit'),
               ),
             ],
             scrollController: scrollController,
@@ -432,14 +432,14 @@ void main() {
             title: const Text('The Title'),
             content: const Text('The message'),
             actions: const <Widget>[
-              const CupertinoDialogAction(
-                child: const Text('Option 1'),
+              CupertinoDialogAction(
+                child: Text('Option 1'),
               ),
-              const CupertinoDialogAction(
-                child: const Text('Option 2'),
+              CupertinoDialogAction(
+                child: Text('Option 2'),
               ),
-              const CupertinoDialogAction(
-                child: const Text('Option 3'),
+              CupertinoDialogAction(
+                child: Text('Option 3'),
               ),
             ],
             scrollController: scrollController,
@@ -479,14 +479,14 @@ void main() {
             title: const Text('The Title'),
             content: const Text('The message'),
             actions: const <Widget>[
-              const CupertinoDialogAction(
-                child: const Text('Option 1'),
+              CupertinoDialogAction(
+                child: Text('Option 1'),
               ),
-              const CupertinoDialogAction(
-                child: const Text('Option 2'),
+              CupertinoDialogAction(
+                child: Text('Option 2'),
               ),
-              const CupertinoDialogAction(
-                child: const Text('Option 3'),
+              CupertinoDialogAction(
+                child: Text('Option 3'),
               ),
             ],
             scrollController: scrollController,
@@ -528,14 +528,14 @@ void main() {
             title: const Text('The Title'),
             content: const Text('The message'),
             actions: const <Widget>[
-              const CupertinoDialogAction(
-                child: const Text('Option 1'),
+              CupertinoDialogAction(
+                child: Text('Option 1'),
               ),
-              const CupertinoDialogAction(
-                child: const Text('Option 2'),
+              CupertinoDialogAction(
+                child: Text('Option 2'),
               ),
-              const CupertinoDialogAction(
-                child: const Text('Option 3'),
+              CupertinoDialogAction(
+                child: Text('Option 3'),
               ),
             ],
             scrollController: scrollController,
@@ -547,8 +547,8 @@ void main() {
     await tester.tap(find.text('Go'));
     await tester.pump();
 
-    const Color normalButtonBackgroundColor = const Color(0xc0ffffff);
-    const Color pressedButtonBackgroundColor = const Color(0x70ffffff);
+    const Color normalButtonBackgroundColor = Color(0xc0ffffff);
+    const Color pressedButtonBackgroundColor = Color(0x70ffffff);
     final RenderBox firstButtonBox = findActionButtonRenderBoxByTitle(tester, 'Option 1');
     final RenderBox secondButtonBox = findActionButtonRenderBoxByTitle(tester, 'Option 2');
     final RenderBox actionsSectionBox = findActionsSectionRenderBox(tester);

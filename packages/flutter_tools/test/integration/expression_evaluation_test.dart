@@ -6,7 +6,6 @@ import 'dart:async';
 
 import 'package:file/file.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
-import 'package:flutter_tools/src/base/platform.dart';
 import 'package:test/test.dart';
 import 'package:vm_service_client/vm_service_client.dart';
 
@@ -90,7 +89,7 @@ void main() {
     test('can evaluate complex expressions in top level function', () async {
       await _flutter.run(withDebugger: true);
       await breakInTopLevelFunction(_flutter);
-      await evaluateTrivialExpressions();
+      await evaluateComplexExpressions();
     });
 
     test('can evaluate complex expressions in build method', () async {
@@ -110,6 +109,8 @@ void main() {
       await breakInBuildMethod(_flutter);
       await evaluateComplexReturningExpressions();
     });
-  // https://github.com/flutter/flutter/issues/17833
-  }, timeout: const Timeout.factor(3), skip: platform.isWindows);
+    // https://github.com/flutter/flutter/issues/17833
+    // The test appears to be flaky and time out some times, skipping while
+    // investigation is ongoing: https://github.com/flutter/flutter/issues/19542
+  }, timeout: const Timeout.factor(3), skip: true);
 }
