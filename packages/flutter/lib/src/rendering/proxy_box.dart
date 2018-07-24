@@ -42,8 +42,7 @@ class RenderProxyBox extends RenderBox with RenderObjectWithChildMixin<RenderBox
   /// Proxy render boxes are rarely created directly because they simply proxy
   /// the render box protocol to [child]. Instead, consider using one of the
   /// subclasses.
-  // TODO(a14n): Remove ignore once https://github.com/dart-lang/sdk/issues/30328 is fixed
-  RenderProxyBox([RenderBox child = null]) { //ignore: avoid_init_to_null
+  RenderProxyBox([RenderBox child]) {
     this.child = child;
   }
 }
