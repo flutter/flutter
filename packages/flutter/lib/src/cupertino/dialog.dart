@@ -612,10 +612,6 @@ class _CupertinoAlertActionSectionState extends State<_CupertinoAlertActionSecti
           },
           child: widget.children[i],
         ),
-//        new _ButtonInteraction(
-//          buttonIndex: i,
-//          child: widget.children[i],
-//        ),
       );
     }
 
