@@ -134,7 +134,7 @@ class _BottomAppBarClipper extends CustomClipper<Path> {
   final double notchMargin;
 
   @override
-  Path getClipShape(Size size) {
+  Path getClip(Size size) {
     final Rect appBar = Offset.zero & size;
     if (geometry.value.floatingActionButtonArea == null) {
       return new Path()..addRect(appBar);

@@ -4,7 +4,7 @@
 
 import 'dart:developer';
 import 'dart:ui' as ui show PictureRecorder;
-import 'dart:ui' show Clip;
+import 'dart:ui' show Clip, defaultClipBehavior; // ignore: deprecated_member_use
 
 import 'package:flutter/animation.dart';
 import 'package:flutter/foundation.dart';
@@ -342,13 +342,16 @@ class PaintingContext {
   ///   to use to clip the painting done by `painter`.
   /// * `painter` is a callback that will paint with the `clipRRect` applied. This
   ///   function calls the `painter` synchronously.
-  void pushClipRRect(bool needsCompositing, Offset offset, Rect bounds, RRect clipRRect, Clip clip, PaintingContextCallback painter) {
+  /// * `clip` controls how the rounded rectangle is clipped.
+  // ignore: deprecated_member_use
+  void pushClipRRect(bool needsCompositing, Offset offset, Rect bounds, RRect clipRRect, PaintingContextCallback painter, {Clip clip = defaultClipBehavior}) {
+    assert(clip != null);
     final Rect offsetBounds = bounds.shift(offset);
     final RRect offsetClipRRect = clipRRect.shift(offset);
     if (needsCompositing) {
       pushLayer(new ClipRRectLayer(clipRRect: offsetClipRRect, clip: clip), painter, offset, childPaintBounds: offsetBounds);
     } else {
-      RenderObject.clipAndPaint(canvas, clip, offsetClipRRect, offsetBounds, () => painter(this, offset));
+      Layer.clipRRectAndPaint(canvas, clip, offsetClipRRect, offsetBounds, () => painter(this, offset));
     }
   }
 
@@ -364,13 +367,15 @@ class PaintingContext {
   ///   clip the painting done by `painter`.
   /// * `painter` is a callback that will paint with the `clipPath` applied. This
   ///   function calls the `painter` synchronously.
-  void pushClipPath(bool needsCompositing, Offset offset, Rect bounds, Path clipPath, Clip clip, PaintingContextCallback painter) {
+  // ignore: deprecated_member_use
+  void pushClipPath(bool needsCompositing, Offset offset, Rect bounds, Path clipPath, PaintingContextCallback painter, {Clip clip = defaultClipBehavior}) {
+    assert(clip != null);
     final Rect offsetBounds = bounds.shift(offset);
     final Path offsetClipPath = clipPath.shift(offset);
     if (needsCompositing) {
       pushLayer(new ClipPathLayer(clipPath: offsetClipPath, clip: clip), painter, offset, childPaintBounds: offsetBounds);
     } else {
-      RenderObject.clipAndPaint(canvas, clip, offsetClipPath, offsetBounds, () => painter(this, offset));
+      Layer.clipPathAndPaint(canvas, clip, offsetClipPath, offsetBounds, () => painter(this, offset));
     }
   }
 
@@ -2595,41 +2600,6 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
         curve: curve,
       );
     }
-  }
-
-
-  /// Clip [Canvas] with [T] ([Path], [RRect], or [Rect]) according to [Clip]
-  /// and then paint. [Canvas] is restored to the pre-clip status afterwards.
-  static void clipAndPaint<T>(Canvas canvas, Clip clip, T t, Rect bounds, void painter()) {
-    void Function(bool doAA) canvasClipCall;
-    if (t is Path) {
-      canvasClipCall = (bool doAA) => canvas.clipPath(t, doAntiAlias: doAA);
-    } else if (t is RRect) {
-      canvasClipCall = (bool doAA) => canvas.clipRRect(t, doAntiAlias: doAA);
-    } else if (t is Rect) {
-      canvasClipCall = (bool doAA) => canvas.clipRect(t, doAntiAlias: doAA);
-    }
-    assert(canvasClipCall != null); // t should be one of Path, RRect, Rect
-    canvas.save();
-    switch (clip) {
-      case Clip.none:
-        break;
-      case Clip.hardEdge:
-        canvasClipCall(false);
-        break;
-      case Clip.antiAlias:
-        canvasClipCall(true);
-        break;
-      case Clip.antiAliasWithSaveLayer:
-        canvasClipCall(true);
-        canvas.saveLayer(bounds, new Paint());
-        break;
-    }
-    painter();
-    if (clip == Clip.antiAliasWithSaveLayer) {
-      canvas.restore();
-    }
-    canvas.restore();
   }
 }
 

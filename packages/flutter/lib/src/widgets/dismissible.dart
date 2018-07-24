@@ -158,7 +158,7 @@ class _DismissibleClipper extends CustomClipper<Rect> {
   final Animation<Offset> moveAnimation;
 
   @override
-  Rect getClipShape(Size size) {
+  Rect getClip(Size size) {
     assert(axis != null);
     switch (axis) {
       case Axis.horizontal:
@@ -176,7 +176,7 @@ class _DismissibleClipper extends CustomClipper<Rect> {
   }
 
   @override
-  Rect getApproximateClipRect(Size size) => getClipShape(size);
+  Rect getApproximateClipRect(Size size) => getClip(size);
 
   @override
   bool shouldReclip(_DismissibleClipper oldClipper) {

@@ -94,9 +94,9 @@ abstract class MaterialInkController {
 /// 2. Ink effects: Material shows ink effects implemented by [InkFeature]s
 ///    like [InkSplash] and [InkHighlight] below its children.
 ///
-/// By default, [clip] is [Clip.none] and no clipping is performed. You
-/// may override it to other [Clip] enums to explicitly clip its widget
-/// sub-tree to the shape specified by [shape], [type], and [borderRadius].
+/// By default, [clip] is [Clip.none] and no clipping is performed. It can be
+/// overridden to other [Clip] enums to explicitly clip its widget sub-tree to
+/// the shape specified by [shape], [type], and [borderRadius].
 ///
 /// ## The Material Metaphor
 ///
@@ -377,7 +377,7 @@ class _MaterialState extends State<Material> with TickerProviderStateMixin {
       ),
       clipper: new ShapeBorderClipper(
         shape: shape,
-        clip: clip
+        clip: clip,
       ),
     );
   }

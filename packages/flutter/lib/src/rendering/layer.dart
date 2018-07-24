@@ -123,6 +123,56 @@ abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
     properties.add(new DiagnosticsProperty<Object>('owner', owner, level: parent != null ? DiagnosticLevel.hidden : DiagnosticLevel.info, defaultValue: null));
     properties.add(new DiagnosticsProperty<dynamic>('creator', debugCreator, defaultValue: null, level: DiagnosticLevel.debug));
   }
+
+  static void _clipAndPaint<T>(Canvas canvas, Clip clip, T t, Rect bounds, void painter()) {
+    void Function(bool doAA) canvasClipCall;
+    if (t is Path) {
+      canvasClipCall = (bool doAA) => canvas.clipPath(t, doAntiAlias: doAA);
+    } else if (t is RRect) {
+      canvasClipCall = (bool doAA) => canvas.clipRRect(t, doAntiAlias: doAA);
+    } else if (t is Rect) {
+      canvasClipCall = (bool doAA) => canvas.clipRect(t, doAntiAlias: doAA);
+    }
+    assert(canvasClipCall != null); // t should be one of Path, RRect, Rect
+    canvas.save();
+    switch (clip) {
+      case Clip.none:
+        break;
+      case Clip.hardEdge:
+        canvasClipCall(false);
+        break;
+      case Clip.antiAlias:
+        canvasClipCall(true);
+        break;
+      case Clip.antiAliasWithSaveLayer:
+        canvasClipCall(true);
+        canvas.saveLayer(bounds, new Paint());
+        break;
+    }
+    painter();
+    if (clip == Clip.antiAliasWithSaveLayer) {
+      canvas.restore();
+    }
+    canvas.restore();
+  }
+
+  /// Clip [Canvas] with [Path] according to [Clip] and then paint. [Canvas] is
+  /// restored to the pre-clip status afterwards.
+  static void clipPathAndPaint(Canvas canvas, Clip clip, Path path, Rect bounds, void painter()) {
+    _clipAndPaint(canvas, clip, path, bounds, painter);
+  }
+
+  /// Clip [Canvas] with [Path] according to [RRect] and then paint. [Canvas] is
+  /// restored to the pre-clip status afterwards.
+  static void clipRRectAndPaint(Canvas canvas, Clip clip, RRect rrect, Rect bounds, void painter()) {
+    _clipAndPaint(canvas, clip, rrect, bounds, painter);
+  }
+
+  /// Clip [Canvas] with [Path] according to [Rect] and then paint. [Canvas] is
+  /// restored to the pre-clip status afterwards.
+  static void clipRectAndPaint(Canvas canvas, Clip clip, Rect rect, Rect bounds, void painter()) {
+    _clipAndPaint(canvas, clip, rect, bounds, painter);
+  }
 }
 
 /// A composited layer containing a [Picture].
@@ -671,9 +721,9 @@ class ClipRRectLayer extends ContainerLayer {
 
   @override
   void addToScene(ui.SceneBuilder builder, Offset layerOffset) {
-    bool enabled = true;
+    bool enabled = clip != Clip.none;
     assert(() {
-      enabled = !debugDisableClipLayers && clip != Clip.none;
+      enabled = enabled && !debugDisableClipLayers;
       return true;
     }());
     if (enabled)
@@ -720,9 +770,9 @@ class ClipPathLayer extends ContainerLayer {
 
   @override
   void addToScene(ui.SceneBuilder builder, Offset layerOffset) {
-    bool enabled = true;
+    bool enabled = clip != Clip.none;
     assert(() {
-      enabled = !debugDisableClipLayers && clip != Clip.none;
+      enabled = enabled && !debugDisableClipLayers;
       return true;
     }());
     if (enabled)
@@ -937,7 +987,6 @@ class PhysicalModelLayer extends ContainerLayer {
     @required this.shadowColor,
   }) : assert(clipPath != null),
        assert(clip != null),
-       assert(clip != null),
        assert(elevation != null),
        assert(color != null),
        assert(shadowColor != null);
@@ -948,7 +997,7 @@ class PhysicalModelLayer extends ContainerLayer {
   /// (as described at [Layer]).
   Path clipPath;
 
-  /// Whether and how to clip its children.
+  /// {@macro flutter.widgets.Clip}
   Clip clip;
 
   /// The z-coordinate at which to place this physical object.

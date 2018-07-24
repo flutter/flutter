@@ -1015,7 +1015,7 @@ class RenderBackdropFilter extends RenderProxyBox {
 /// This class is used by a number of clip widgets (e.g., [ClipRect] and
 /// [ClipPath]).
 ///
-/// The [getClipShape] method is called whenever the custom clip needs to be updated.
+/// The [getClip] method is called whenever the custom clip needs to be updated.
 ///
 /// The [shouldReclip] method is called when a new instance of the class
 /// is provided, to check if the new instance actually represents different
@@ -1036,18 +1036,18 @@ abstract class CustomClipper<T> {
   /// Creates a custom clipper.
   ///
   /// The clipper will update its clip whenever [reclip] notifies its listeners.
-  const CustomClipper({ Listenable reclip, this.clip = Clip.antiAlias }) : _reclip = reclip;
+  const CustomClipper({ Listenable reclip, this.clip = Clip.antiAlias }) : _reclip = reclip, assert(clip != null);
 
   final Listenable _reclip;
 
   /// Returns a description of the clip given that the render object being
   /// clipped is of the given size.
-  T getClipShape(Size size);
+  T getClip(Size size);
 
-  /// How to clip.
+  /// {@macro flutter.widgets.Clip}
   final Clip clip;
 
-  /// Returns an approximation of the clip returned by [getClipShape], as
+  /// Returns an approximation of the clip returned by [getClip], as
   /// an axis-aligned Rect. This is used by the semantics layer to
   /// determine whether widgets should be excluded.
   ///
@@ -1066,10 +1066,10 @@ abstract class CustomClipper<T> {
   /// instance, then the method should return true, otherwise it should return
   /// false.
   ///
-  /// If the method returns false, then the [getClipShape] call might be optimized
+  /// If the method returns false, then the [getClip] call might be optimized
   /// away.
   ///
-  /// It's possible that the [getClipShape] method will get called even if
+  /// It's possible that the [getClip] method will get called even if
   /// [shouldReclip] returns false or if the [shouldReclip] method is never
   /// called at all (e.g. if the box changes size).
   bool shouldReclip(covariant CustomClipper<T> oldClipper);
@@ -1092,7 +1092,7 @@ class ShapeBorderClipper extends CustomClipper<Path> {
     @required this.shape,
     Clip clip = defaultClipBehavior, // ignore: deprecated_member_use
     this.textDirection,
-  }) : assert(shape != null), assert(clip != null), super(clip: clip);
+  }) : assert(shape != null), super(clip: clip);
 
   /// The shape border whose outer path this clipper clips to.
   final ShapeBorder shape;
@@ -1105,7 +1105,7 @@ class ShapeBorderClipper extends CustomClipper<Path> {
 
   /// Returns the outer path of [shape] as the clip.
   @override
-  Path getClipShape(Size size) {
+  Path getClip(Size size) {
     return shape.getOuterPath(Offset.zero & size, textDirection: textDirection);
   }
 
@@ -1121,7 +1121,7 @@ class ShapeBorderClipper extends CustomClipper<Path> {
 abstract class _RenderCustomClip<T> extends RenderProxyBox {
   _RenderCustomClip({
     RenderBox child,
-    this.initialClip = defaultClipBehavior, // ignore: deprecated_member_use
+    this.defaultClip = defaultClipBehavior, // ignore: deprecated_member_use
     CustomClipper<T> clipper // this would override _clip and initialClip
   }) : _clipper = clipper, super(child);
 
@@ -1166,9 +1166,9 @@ abstract class _RenderCustomClip<T> extends RenderProxyBox {
   T get _defaultClipShape;
   T _clipShape;
 
-  final Clip initialClip; // May be overridden by clipper.
+  final Clip defaultClip; // May be overridden by clipper.
 
-  Clip get clip => clipper == null ? initialClip : clipper.clip;
+  Clip get clip => clipper == null ? defaultClip : clipper.clip;
 
   @override
   void performLayout() {
@@ -1179,7 +1179,7 @@ abstract class _RenderCustomClip<T> extends RenderProxyBox {
   }
 
   void _updateClip() {
-    _clipShape ??= _clipper?.getClipShape(size) ?? _defaultClipShape;
+    _clipShape ??= _clipper?.getClip(size) ?? _defaultClipShape;
   }
 
   @override
@@ -1322,7 +1322,7 @@ class RenderClipRRect extends _RenderCustomClip<RRect> {
   void paint(PaintingContext context, Offset offset) {
     if (child != null) {
       _updateClip();
-      context.pushClipRRect(needsCompositing, offset, _clipShape.outerRect, _clipShape, clip, super.paint);
+      context.pushClipRRect(needsCompositing, offset, _clipShape.outerRect, _clipShape, super.paint, clip: clip);
     }
   }
 
@@ -1386,7 +1386,7 @@ class RenderClipOval extends _RenderCustomClip<Rect> {
   void paint(PaintingContext context, Offset offset) {
     if (child != null) {
       _updateClip();
-      context.pushClipPath(needsCompositing, offset, _clipShape, _getClipPath(_clipShape), clip, super.paint);
+      context.pushClipPath(needsCompositing, offset, _clipShape, _getClipPath(_clipShape), super.paint, clip: clip);
     }
   }
 
@@ -1444,7 +1444,7 @@ class RenderClipPath extends _RenderCustomClip<Path> {
   void paint(PaintingContext context, Offset offset) {
     if (child != null) {
       _updateClip();
-      context.pushClipPath(needsCompositing, offset, Offset.zero & size, _clipShape, clip, super.paint);
+      context.pushClipPath(needsCompositing, offset, Offset.zero & size, _clipShape, super.paint, clip: clip);
     }
   }
 
@@ -1481,7 +1481,7 @@ abstract class _RenderPhysicalModelBase<T> extends _RenderCustomClip<T> {
        _elevation = elevation,
        _color = color,
        _shadowColor = shadowColor,
-       super(child: child, initialClip: clip, clipper: clipper);
+       super(child: child, defaultClip: clip, clipper: clipper);
 
   /// The z-coordinate at which to place this material.
   ///
@@ -1678,7 +1678,7 @@ class RenderPhysicalModel extends _RenderPhysicalModelBase<RRect> {
           );
         }
         canvas.drawRRect(offsetRRect, new Paint()..color = color);
-        RenderObject.clipAndPaint(canvas, clip, offsetRRect, offsetBounds, () => super.paint(context, offset));
+        Layer.clipRRectAndPaint(canvas, clip, offsetRRect, offsetBounds, () => super.paint(context, offset));
         assert(context.canvas == canvas, 'canvas changed even though needsCompositing was false');
       }
     }
@@ -1789,7 +1789,7 @@ class RenderPhysicalShape extends _RenderPhysicalModelBase<Path> {
           );
         }
         canvas.drawPath(offsetPath, new Paint()..color = color..style = PaintingStyle.fill);
-        RenderObject.clipAndPaint(canvas, clip, offsetPath, offsetBounds, () => super.paint(context, offset));
+        Layer.clipPathAndPaint(canvas, clip, offsetPath, offsetBounds, () => super.paint(context, offset));
         assert(context.canvas == canvas, 'canvas changed even though needsCompositing was false');
       }
     }
