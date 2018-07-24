@@ -180,7 +180,6 @@ void main() {
     await tester.tap(find.text('Go'));
 
     await tester.pump();
-    await tester.pump(const Duration(seconds: 1));
 
     // Check that the action buttons list is scrollable.
     expect(actionScrollController.offset, 0.0);
@@ -231,7 +230,6 @@ void main() {
     await tester.tap(find.text('Go'));
 
     await tester.pump();
-    await tester.pump(const Duration(seconds: 1));
 
     // Check that the dialog size is the same as the actions section size. This
     // ensures that an empty content section doesn't accidentally render some
@@ -278,7 +276,6 @@ void main() {
     await tester.tap(find.text('Go'));
 
     await tester.pump();
-    await tester.pump(const Duration(seconds: 1));
 
     // Check that there's no button action section.
     expect(scrollController.offset, 0.0);
