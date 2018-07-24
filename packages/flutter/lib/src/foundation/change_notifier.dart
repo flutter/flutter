@@ -83,6 +83,7 @@ class ChangeNotifier extends Listenable {
   /// [notifyListeners]; and similarly, by overriding [removeListener], checking
   /// if [hasListeners] is false after calling `super.removeListener()`, and if
   /// so, stopping that same work.
+  @visibleForTesting
   @protected
   bool get hasListeners {
     assert(_debugAssertNotDisposed());
