@@ -1,4 +1,4 @@
-Signature: af1324c973cac6d6a9db224502ab1ddf
+Signature: 283abf2ccdd240a0a917afb4e1429f48
 
 UNUSED LICENSES:
 
@@ -21128,7 +21128,6 @@ FILE: ../../../third_party/tonic/file_loader/file_loader_posix.cc
 FILE: ../../../third_party/tonic/file_loader/file_loader_win.cc
 FILE: ../../../third_party/tonic/filesystem/filesystem/path_win.cc
 FILE: ../../../third_party/tonic/filesystem/filesystem/portable_unistd.h
-FILE: ../../../third_party/tonic/filesystem/filesystem/symlink_win.cc
 FILE: ../../../third_party/tonic/platform/platform_utils.h
 FILE: ../../../third_party/tonic/platform/platform_utils_posix.cc
 FILE: ../../../third_party/tonic/platform/platform_utils_win.cc
@@ -21177,20 +21176,11 @@ FILE: ../../../third_party/tonic/dart_sticky_error.cc
 FILE: ../../../third_party/tonic/dart_sticky_error.h
 FILE: ../../../third_party/tonic/file_loader/file_loader.cc
 FILE: ../../../third_party/tonic/file_loader/file_loader.h
-FILE: ../../../third_party/tonic/filesystem/filesystem/build_config.h
-FILE: ../../../third_party/tonic/filesystem/filesystem/directory.cc
-FILE: ../../../third_party/tonic/filesystem/filesystem/directory.h
 FILE: ../../../third_party/tonic/filesystem/filesystem/eintr_wrapper.h
 FILE: ../../../third_party/tonic/filesystem/filesystem/file.cc
 FILE: ../../../third_party/tonic/filesystem/filesystem/file.h
-FILE: ../../../third_party/tonic/filesystem/filesystem/file_descriptor.cc
-FILE: ../../../third_party/tonic/filesystem/filesystem/file_descriptor.h
 FILE: ../../../third_party/tonic/filesystem/filesystem/path.h
 FILE: ../../../third_party/tonic/filesystem/filesystem/path_posix.cc
-FILE: ../../../third_party/tonic/filesystem/filesystem/scoped_temp_dir.cc
-FILE: ../../../third_party/tonic/filesystem/filesystem/scoped_temp_dir.h
-FILE: ../../../third_party/tonic/filesystem/filesystem/symlink.h
-FILE: ../../../third_party/tonic/filesystem/filesystem/symlink_posix.cc
 FILE: ../../../third_party/tonic/logging/dart_error.cc
 FILE: ../../../third_party/tonic/logging/dart_error.h
 FILE: ../../../third_party/tonic/logging/dart_invoke.cc
