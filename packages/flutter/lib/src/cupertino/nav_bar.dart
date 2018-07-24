@@ -339,6 +339,137 @@ class CupertinoSliverNavigationBar extends StatelessWidget {
   }
 }
 
+class _CupertinoLargeTitleNavigationBarSliverDelegate
+    extends SliverPersistentHeaderDelegate with DiagnosticableTreeMixin {
+  _CupertinoLargeTitleNavigationBarSliverDelegate({
+    @required this.persistentHeight,
+    @required this.largeTitle,
+    this.leading,
+    this.automaticallyImplyLeading,
+    this.previousPageTitle,
+    this.middle,
+    this.trailing,
+    this.padding,
+    this.border,
+    this.backgroundColor,
+    this.actionsForegroundColor,
+  }) : assert(persistentHeight != null);
+
+  final double persistentHeight;
+
+  final Widget largeTitle;
+
+  final Widget leading;
+
+  final bool automaticallyImplyLeading;
+
+  final String previousPageTitle;
+
+  final Widget middle;
+
+  final Widget trailing;
+
+  final EdgeInsetsDirectional padding;
+
+  final Color backgroundColor;
+
+  final Border border;
+
+  final Color actionsForegroundColor;
+
+  @override
+  double get minExtent => persistentHeight;
+
+  @override
+  double get maxExtent => persistentHeight + _kNavBarLargeTitleHeightExtension;
+
+  @override
+  Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) {
+    final bool showLargeTitle = shrinkOffset < maxExtent - minExtent - _kNavBarShowLargeTitleThreshold;
+
+    final _CupertinoPersistentNavigationBar persistentNavigationBar =
+        new _CupertinoPersistentNavigationBar(
+      leading: leading,
+      automaticallyImplyLeading: automaticallyImplyLeading,
+      previousPageTitle: previousPageTitle,
+      middle: middle ?? largeTitle,
+      trailing: trailing,
+      // If middle widget exists, always show it. Otherwise, show title
+      // when collapsed.
+      middleVisible: middle != null ? null : !showLargeTitle,
+      padding: padding,
+      actionsForegroundColor: actionsForegroundColor,
+    );
+
+    return _wrapWithBackground(
+      border: border,
+      backgroundColor: backgroundColor,
+      child: new Stack(
+        fit: StackFit.expand,
+        children: <Widget>[
+          new Positioned(
+            top: persistentHeight,
+            left: 0.0,
+            right: 0.0,
+            bottom: 0.0,
+            child: new ClipRect(
+              // The large title starts at the persistent bar.
+              // It's aligned with the bottom of the sliver and expands clipped
+              // and behind the persistent bar.
+              child: new OverflowBox(
+                minHeight: 0.0,
+                maxHeight: double.infinity,
+                alignment: AlignmentDirectional.bottomStart,
+                child: new Padding(
+                  padding: const EdgeInsetsDirectional.only(
+                    start: _kNavBarEdgePadding,
+                    bottom: 8.0, // Bottom has a different padding.
+                  ),
+                  child: new DefaultTextStyle(
+                    style: _kLargeTitleTextStyle,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    child: new AnimatedOpacity(
+                      opacity: showLargeTitle ? 1.0 : 0.0,
+                      duration: _kNavBarTitleFadeDuration,
+                      child: new SafeArea(
+                        top: false,
+                        bottom: false,
+                        child: new Semantics(
+                          header: true,
+                          child: largeTitle,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+          new Positioned(
+            left: 0.0,
+            right: 0.0,
+            top: 0.0,
+            child: persistentNavigationBar,
+          ),
+        ],
+      ),
+    );
+  }
+
+  @override
+  bool shouldRebuild(_CupertinoLargeTitleNavigationBarSliverDelegate oldDelegate) {
+    return persistentHeight != oldDelegate.persistentHeight
+        || largeTitle != oldDelegate.largeTitle
+        || leading != oldDelegate.leading
+        || middle != oldDelegate.middle
+        || trailing != oldDelegate.trailing
+        || border != oldDelegate.border
+        || backgroundColor != oldDelegate.backgroundColor
+        || actionsForegroundColor != oldDelegate.actionsForegroundColor;
+  }
+}
+
 /// Returns `child` wrapped with background and a bottom border if background color
 /// is opaque. Otherwise, also blur with [BackdropFilter].
 Widget _wrapWithBackground({
@@ -522,45 +653,26 @@ class _CupertinoPersistentNavigationBar extends StatelessWidget implements Prefe
               break;
           }
 
-          final List<Widget> backButtonContent = <Widget>[
-            const Padding(padding: EdgeInsetsDirectional.only(start: 9.0)),
-            iconWidget,
-            const Padding(padding: EdgeInsetsDirectional.only(start: 5.0)),
-          ];
-
-          String title;
-          if (previousPageTitle?.isNotEmpty == true) {
-            title = previousPageTitle;
-          }
-          else if (currentRoute is CupertinoPageRoute
-              && currentRoute.previousTitle?.isNotEmpty == true) {
-            title = currentRoute.previousTitle;
-          }
-
-          if (title?.isNotEmpty == true) {
-            if (title.length > 10) {
-              title = 'Back';
-            }
-            backButtonContent.add(
-              // Make it finite inside the Row.
-              new Flexible(
-                child: new Text(
-                  title,
-                  maxLines: 1,
-                ),
-              ),
-            );
-          }
-
           backOrCloseButtonContent = ConstrainedBox(
             constraints: const BoxConstraints(minWidth: _kNavBarBackButtonTapWidth),
             child: new Row(
               mainAxisSize: MainAxisSize.min,
               mainAxisAlignment: MainAxisAlignment.start,
-              children: backButtonContent,
+              children: <Widget>[
+                const Padding(padding: EdgeInsetsDirectional.only(start: 8.0)),
+                iconWidget,
+                const Padding(padding: EdgeInsetsDirectional.only(start: 6.0)),
+                new Flexible(
+                  child: new _BackLabel(
+                    specifiedPreviousTitle: previousPageTitle,
+                    route: currentRoute,
+                  ),
+                ),
+              ],
             ),
           );
         }
+
         backOrCloseButton = new CupertinoButton(
           child: backOrCloseButtonContent,
           padding: EdgeInsets.zero,
@@ -603,133 +715,92 @@ class _CupertinoPersistentNavigationBar extends StatelessWidget implements Prefe
   }
 }
 
-class _CupertinoLargeTitleNavigationBarSliverDelegate
-    extends SliverPersistentHeaderDelegate with DiagnosticableTreeMixin {
-  _CupertinoLargeTitleNavigationBarSliverDelegate({
-    @required this.persistentHeight,
-    @required this.largeTitle,
-    this.leading,
-    this.automaticallyImplyLeading,
-    this.previousPageTitle,
-    this.middle,
-    this.trailing,
-    this.padding,
-    this.border,
-    this.backgroundColor,
-    this.actionsForegroundColor,
-  }) : assert(persistentHeight != null);
+class _BackLabel extends StatelessWidget {
+  const _BackLabel({
+    @required this.specifiedPreviousTitle,
+    @required this.route,
+  }) : assert(route != null);
 
-  final double persistentHeight;
+  final String specifiedPreviousTitle;
+  final ModalRoute<dynamic> route;
 
-  final Widget largeTitle;
-
-  final Widget leading;
-
-  final bool automaticallyImplyLeading;
-
-  final String previousPageTitle;
-
-  final Widget middle;
-
-  final Widget trailing;
-
-  final EdgeInsetsDirectional padding;
-
-  final Color backgroundColor;
-
-  final Border border;
-
-  final Color actionsForegroundColor;
-
-  @override
-  double get minExtent => persistentHeight;
-
-  @override
-  double get maxExtent => persistentHeight + _kNavBarLargeTitleHeightExtension;
-
-  @override
-  Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) {
-    final bool showLargeTitle = shrinkOffset < maxExtent - minExtent - _kNavBarShowLargeTitleThreshold;
-
-    final _CupertinoPersistentNavigationBar persistentNavigationBar =
-        new _CupertinoPersistentNavigationBar(
-      leading: leading,
-      automaticallyImplyLeading: automaticallyImplyLeading,
-      previousPageTitle: previousPageTitle,
-      middle: middle ?? largeTitle,
-      trailing: trailing,
-      // If middle widget exists, always show it. Otherwise, show title
-      // when collapsed.
-      middleVisible: middle != null ? null : !showLargeTitle,
-      padding: padding,
-      actionsForegroundColor: actionsForegroundColor,
-    );
-
-    return _wrapWithBackground(
-      border: border,
-      backgroundColor: backgroundColor,
-      child: new Stack(
-        fit: StackFit.expand,
-        children: <Widget>[
-          new Positioned(
-            top: persistentHeight,
-            left: 0.0,
-            right: 0.0,
-            bottom: 0.0,
-            child: new ClipRect(
-              // The large title starts at the persistent bar.
-              // It's aligned with the bottom of the sliver and expands clipped
-              // and behind the persistent bar.
-              child: new OverflowBox(
-                minHeight: 0.0,
-                maxHeight: double.infinity,
-                alignment: AlignmentDirectional.bottomStart,
-                child: new Padding(
-                  padding: const EdgeInsetsDirectional.only(
-                    start: _kNavBarEdgePadding,
-                    bottom: 8.0, // Bottom has a different padding.
-                  ),
-                  child: new DefaultTextStyle(
-                    style: _kLargeTitleTextStyle,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    child: new AnimatedOpacity(
-                      opacity: showLargeTitle ? 1.0 : 0.0,
-                      duration: _kNavBarTitleFadeDuration,
-                      child: new SafeArea(
-                        top: false,
-                        bottom: false,
-                        child: new Semantics(
-                          header: true,
-                          child: largeTitle,
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          ),
-          new Positioned(
-            left: 0.0,
-            right: 0.0,
-            top: 0.0,
-            child: persistentNavigationBar,
-          ),
-        ],
-      ),
-    );
+  Widget _buildPreviousTitleWidget(String previousTitle) {
+    if (previousTitle?.isNotEmpty == true) {
+      if (previousTitle.length > 10) {
+        return const Text('Back');
+      } else {
+        return new Text(previousTitle, maxLines: 1);
+      }
+    } else {
+      return new Container();
+    }
   }
 
   @override
-  bool shouldRebuild(_CupertinoLargeTitleNavigationBarSliverDelegate oldDelegate) {
-    return persistentHeight != oldDelegate.persistentHeight
-        || largeTitle != oldDelegate.largeTitle
-        || leading != oldDelegate.leading
-        || middle != oldDelegate.middle
-        || trailing != oldDelegate.trailing
-        || border != oldDelegate.border
-        || backgroundColor != oldDelegate.backgroundColor
-        || actionsForegroundColor != oldDelegate.actionsForegroundColor;
+  Widget build(BuildContext context) {
+    if (specifiedPreviousTitle?.isNotEmpty == true) {
+      return _buildPreviousTitleWidget(specifiedPreviousTitle);
+    } else if (route is CupertinoPageRoute<dynamic>) {
+      final CupertinoPageRoute<dynamic> cupertinoRoute = route;
+      return new ValueListenableBuilder<String>(
+        valueListenable: cupertinoRoute.previousTitle,
+        valueWidgetBuilder: _buildPreviousTitleWidget,
+      );
+    } else {
+      return new Container();
+    }
   }
+}
+
+typedef Widget ValueWidgetBuilder<T>(T value);
+
+class ValueListenableBuilder<T> extends StatefulWidget {
+  const ValueListenableBuilder({
+    @required this.valueListenable,
+    @required this.valueWidgetBuilder,
+  }) : assert(valueListenable != null),
+       assert(valueWidgetBuilder != null);
+
+  final ValueListenable<T> valueListenable;
+  final ValueWidgetBuilder<T> valueWidgetBuilder;
+
+  @override
+  State<StatefulWidget> createState() => new _ValueListenableBuilderState<T>();
+}
+
+class _ValueListenableBuilderState<T> extends State<ValueListenableBuilder<T>> {
+  T value;
+
+  @override
+  void initState() {
+    _updateValue();
+    super.initState();
+  }
+
+  @override
+  void didUpdateWidget(ValueListenableBuilder<T> oldWidget) {
+    if (oldWidget.valueListenable != widget.valueListenable) {
+      oldWidget.valueListenable.removeListener(_valueChanged);
+    }
+    _updateValue();
+    super.didUpdateWidget(oldWidget);
+  }
+
+  @override
+  void dispose() {
+    widget.valueListenable.removeListener(_valueChanged);
+    super.dispose();
+  }
+
+  void _valueChanged() {
+    setState(() { value = widget.valueListenable.value; });
+  }
+
+  void _updateValue() {
+    value = widget.valueListenable.value;
+    widget.valueListenable.addListener(_valueChanged);
+  }
+
+  @override
+  Widget build(BuildContext context) => widget.valueWidgetBuilder(value);
 }

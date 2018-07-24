@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
@@ -105,13 +106,24 @@ class CupertinoPageRoute<T> extends PageRoute<T> {
 
   final String title;
 
-  CupertinoPageRoute<dynamic> _previousRoute;
-  String get previousTitle => _previousRoute?.title;
+  ValueNotifier<String> _previousTitle;
+  ValueListenable<String> get previousTitle {
+    assert(
+      _previousTitle != null,
+      'Cannot read the previousTitle for a route that has not yet been installed',
+    );
+    return _previousTitle;
+  }
 
   @override
   void didChangePrevious(Route<dynamic> previousRoute) {
-    if (previousRoute is CupertinoPageRoute)
-      _previousRoute = previousRoute;
+    if (previousRoute is CupertinoPageRoute) {
+      if (_previousTitle == null) {
+        _previousTitle = new ValueNotifier<String>(previousRoute.title);
+      } else {
+        _previousTitle.value = previousRoute.title;
+      }
+    }
     super.didChangePrevious(previousRoute);
   }
 

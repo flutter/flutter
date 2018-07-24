@@ -1686,8 +1686,10 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
     } else {
       newRoute.didChangeNext(null);
     }
-    if (index > 0)
+    if (index > 0) {
       _history[index - 1].didChangeNext(newRoute);
+      newRoute.didChangePrevious(_history[index - 1]);
+    }
     for (NavigatorObserver observer in widget.observers)
       observer.didReplace(newRoute: newRoute, oldRoute: oldRoute);
     oldRoute.dispose();
