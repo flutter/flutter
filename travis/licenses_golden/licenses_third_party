@@ -1,4 +1,4 @@
-Signature: 283abf2ccdd240a0a917afb4e1429f48
+Signature: 0bab67b709b7fe3f4d0d1d6d1fc984a6
 
 UNUSED LICENSES:
 
@@ -510,6 +510,12 @@ FILE: ../../../third_party/dart/third_party/observatory_pub_packages/packages/qu
 FILE: ../../../third_party/skia/src/images/SkWebpEncoder.cpp
 FILE: ../../../third_party/skia/third_party/vulkan/vulkan/vk_platform.h
 FILE: ../../../third_party/skia/third_party/vulkan/vulkan/vulkan.h
+FILE: ../../../third_party/skia/third_party/vulkan/vulkan/vulkan_android.h
+FILE: ../../../third_party/skia/third_party/vulkan/vulkan/vulkan_core.h
+FILE: ../../../third_party/skia/third_party/vulkan/vulkan/vulkan_ios.h
+FILE: ../../../third_party/skia/third_party/vulkan/vulkan/vulkan_macos.h
+FILE: ../../../third_party/skia/third_party/vulkan/vulkan/vulkan_win32.h
+FILE: ../../../third_party/skia/third_party/vulkan/vulkan/vulkan_xcb.h
 FILE: ../../../third_party/vulkan/src/vulkan/vk_platform.h
 FILE: ../../../third_party/vulkan/src/vulkan/vulkan.h
 ----------------------------------------------------------------------------------------------------
@@ -17554,6 +17560,7 @@ FILE: ../../../third_party/skia/infra/bots/recipes/test.expected/Test-Debian9-Cl
 FILE: ../../../third_party/skia/infra/bots/recipes/test.expected/Test-Debian9-Clang-NUC7i5BNK-GPU-IntelIris640-x86_64-Debug-All-Vulkan.json
 FILE: ../../../third_party/skia/infra/bots/recipes/test.expected/Test-Mac-Clang-MacBook10.1-GPU-IntelHD615-x86_64-Release-All-NativeFonts.json
 FILE: ../../../third_party/skia/infra/bots/recipes/test.expected/Test-Mac-Clang-MacBookAir7.2-GPU-IntelHD6000-x86_64-Debug-All.json
+FILE: ../../../third_party/skia/infra/bots/recipes/test.expected/Test-Mac-Clang-MacBookPro11.5-GPU-RadeonHD8870M-x86_64-Debug-All-Metal.json
 FILE: ../../../third_party/skia/infra/bots/recipes/test.expected/Test-Mac-Clang-MacBookPro11.5-GPU-RadeonHD8870M-x86_64-Release-All-MoltenVK_Vulkan.json
 FILE: ../../../third_party/skia/infra/bots/recipes/test.expected/Test-Mac-Clang-MacMini7.1-CPU-AVX-x86_64-Release-All.json
 FILE: ../../../third_party/skia/infra/bots/recipes/test.expected/Test-Mac-Clang-MacMini7.1-GPU-IntelIris5100-x86_64-Debug-All-CommandBuffer.json
@@ -17677,7 +17684,6 @@ FILE: ../../../third_party/skia/site/user/sample/gradient_correct.png
 FILE: ../../../third_party/skia/site/user/sample/gradient_wrong.png
 FILE: ../../../third_party/skia/site/user/sample/transfer_fn.png
 FILE: ../../../third_party/skia/src/core/SkOrderedReadBuffer.h
-FILE: ../../../third_party/skia/src/sksl/lex/layout.lex
 FILE: ../../../third_party/skia/src/sksl/lex/sksl.lex
 FILE: ../../../third_party/skia/src/sksl/sksl.inc
 FILE: ../../../third_party/skia/src/sksl/sksl_cpu.inc
@@ -19573,8 +19579,6 @@ FILE: ../../../third_party/skia/src/sksl/SkSLCPP.h
 FILE: ../../../third_party/skia/src/sksl/SkSLCPPCodeGenerator.h
 FILE: ../../../third_party/skia/src/sksl/SkSLFileOutputStream.h
 FILE: ../../../third_party/skia/src/sksl/SkSLHCodeGenerator.h
-FILE: ../../../third_party/skia/src/sksl/SkSLLayoutLexer.cpp
-FILE: ../../../third_party/skia/src/sksl/SkSLLayoutLexer.h
 FILE: ../../../third_party/skia/src/sksl/SkSLLexer.cpp
 FILE: ../../../third_party/skia/src/sksl/SkSLLexer.h
 FILE: ../../../third_party/skia/src/sksl/SkSLOutputStream.h
