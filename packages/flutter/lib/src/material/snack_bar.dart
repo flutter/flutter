@@ -224,7 +224,11 @@ class SnackBar extends StatelessWidget {
           );
         },
         child: new Semantics(
+          liveRegion: true,
           container: true,
+          onDismiss: () {
+            Scaffold.of(context).removeCurrentSnackBar(reason: SnackBarClosedReason.swipe);
+          },
           child: new Dismissible(
             key: const Key('dismissible'),
             direction: DismissDirection.down,

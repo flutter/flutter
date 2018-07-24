@@ -236,6 +236,8 @@ class _RenderRadio extends RenderToggleable {
   @override
   void describeSemanticsConfiguration(SemanticsConfiguration config) {
     super.describeSemanticsConfiguration(config);
-    config.isInMutuallyExclusiveGroup = true;
+    config
+      ..isInMutuallyExclusiveGroup = true
+      ..isChecked = value == true;
   }
 }
