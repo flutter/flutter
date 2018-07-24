@@ -19,7 +19,7 @@ class DrawerDemo extends StatefulWidget {
 class _DrawerDemoState extends State<DrawerDemo> with TickerProviderStateMixin {
   final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
 
-  static const List<String> _drawerContents = const <String>[
+  static const List<String> _drawerContents = <String>[
     'A', 'B', 'C', 'D', 'E',
   ];
 
@@ -69,7 +69,7 @@ class _DrawerDemoState extends State<DrawerDemo> with TickerProviderStateMixin {
   void _showNotImplementedMessage() {
     Navigator.pop(context); // Dismiss the drawer.
     _scaffoldKey.currentState.showSnackBar(const SnackBar(
-      content: const Text("The drawer's items don't do anything")
+      content: Text("The drawer's items don't do anything")
     ));
   }
 
@@ -95,7 +95,7 @@ class _DrawerDemoState extends State<DrawerDemo> with TickerProviderStateMixin {
               accountName: const Text('Trevor Widget'),
               accountEmail: const Text('trevor.widget@example.com'),
               currentAccountPicture: const CircleAvatar(
-                backgroundImage: const AssetImage(
+                backgroundImage: AssetImage(
                   _kAsset0,
                   package: _kGalleryAssetsPackage,
                 ),
@@ -108,7 +108,7 @@ class _DrawerDemoState extends State<DrawerDemo> with TickerProviderStateMixin {
                   child: new Semantics(
                     label: 'Switch to Account B',
                     child: const CircleAvatar(
-                      backgroundImage: const AssetImage(
+                      backgroundImage: AssetImage(
                         _kAsset1,
                         package: _kGalleryAssetsPackage,
                       ),
@@ -122,7 +122,7 @@ class _DrawerDemoState extends State<DrawerDemo> with TickerProviderStateMixin {
                   child: new Semantics(
                     label: 'Switch to Account C',
                     child: const CircleAvatar(
-                      backgroundImage: const AssetImage(
+                      backgroundImage: AssetImage(
                         _kAsset2,
                         package: _kGalleryAssetsPackage,
                       ),
@@ -209,8 +209,8 @@ class _DrawerDemoState extends State<DrawerDemo> with TickerProviderStateMixin {
                 height: 100.0,
                 decoration: const BoxDecoration(
                   shape: BoxShape.circle,
-                  image: const DecorationImage(
-                    image: const AssetImage(
+                  image: DecorationImage(
+                    image: AssetImage(
                       _kAsset0,
                       package: _kGalleryAssetsPackage,
                     ),

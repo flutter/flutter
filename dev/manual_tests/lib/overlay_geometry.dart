@@ -101,7 +101,7 @@ class CardBuilder extends SliverChildDelegate {
   final CardTapCallback onTapUp;
 
   static const TextStyle cardLabelStyle =
-    const TextStyle(color: Colors.white, fontSize: 18.0, fontWeight: FontWeight.bold);
+    TextStyle(color: Colors.white, fontSize: 18.0, fontWeight: FontWeight.bold);
 
   @override
   Widget build(BuildContext context, int index) {

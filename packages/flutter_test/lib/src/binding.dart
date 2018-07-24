@@ -74,7 +74,7 @@ enum TestBindingEventSource {
   device,
 }
 
-const Size _kDefaultTestViewportSize = const Size(800.0, 600.0);
+const Size _kDefaultTestViewportSize = Size(800.0, 600.0);
 
 /// Base class for bindings used by widgets library tests.
 ///
@@ -349,21 +349,21 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   FlutterExceptionHandler _oldExceptionHandler;
   FlutterErrorDetails _pendingExceptionDetails;
 
-  static const TextStyle _messageStyle = const TextStyle(
-    color: const Color(0xFF917FFF),
+  static const TextStyle _messageStyle = TextStyle(
+    color: Color(0xFF917FFF),
     fontSize: 40.0,
   );
 
-  static const Widget _preTestMessage = const Center(
-    child: const Text(
+  static const Widget _preTestMessage = Center(
+    child: Text(
       'Test starting...',
       style: _messageStyle,
       textDirection: TextDirection.ltr,
     )
   );
 
-  static const Widget _postTestMessage = const Center(
-    child: const Text(
+  static const Widget _postTestMessage = Center(
+    child: Text(
       'Test finished.',
       style: _messageStyle,
       textDirection: TextDirection.ltr,
@@ -681,7 +681,7 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
   // The timeout here is absurdly high because we do our own timeout logic and
   // this is just a backstop.
   @override
-  test_package.Timeout get defaultTestTimeout => const test_package.Timeout(const Duration(minutes: 5));
+  test_package.Timeout get defaultTestTimeout => const test_package.Timeout(Duration(minutes: 5));
 
   @override
   bool get inTest => _currentFakeAsync != null;
@@ -1383,7 +1383,7 @@ class _LiveTestRenderView extends RenderView {
   final Map<int, _LiveTestPointerRecord> _pointers = <int, _LiveTestPointerRecord>{};
 
   TextPainter _label;
-  static const TextStyle _labelStyle = const TextStyle(
+  static const TextStyle _labelStyle = TextStyle(
     fontFamily: 'sans-serif',
     fontSize: 10.0,
   );

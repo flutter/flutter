@@ -12,7 +12,7 @@ import 'package:flutter_devicelab/framework/utils.dart';
 
 /// Slightly longer than task timeout that gives the task runner a chance to
 /// clean-up before forcefully quitting it.
-const Duration taskTimeoutWithGracePeriod = const Duration(minutes: 26);
+const Duration taskTimeoutWithGracePeriod = Duration(minutes: 26);
 
 /// Runs a task in a separate Dart VM and collects the result using the VM
 /// service protocol.
@@ -73,14 +73,14 @@ Future<Map<String, dynamic>> runTask(String taskName, { bool silent = false }) a
     await runner.exitCode.timeout(const Duration(seconds: 1));
     return taskResult;
   } on TimeoutException catch (timeout) {
-    runner.kill(ProcessSignal.SIGINT); // ignore: deprecated_member_use
+    runner.kill(ProcessSignal.sigint);
     return <String, dynamic>{
       'success': false,
       'reason': 'Timeout waiting for $waitingFor: ${timeout.message}',
     };
   } finally {
     if (!runnerFinished)
-      runner.kill(ProcessSignal.SIGKILL); // ignore: deprecated_member_use
+      runner.kill(ProcessSignal.sigkill);
     await stdoutSub.cancel();
     await stderrSub.cancel();
   }
@@ -111,7 +111,7 @@ Future<VMIsolateRef> _connectToRunnerIsolate(int vmServicePort) async {
         throw 'not ready yet';
       return isolate;
     } catch (error) {
-      const Duration connectionTimeout = const Duration(seconds: 10);
+      const Duration connectionTimeout = Duration(seconds: 10);
       if (new DateTime.now().difference(started) > connectionTimeout) {
         throw new TimeoutException(
           'Failed to connect to the task runner process',
@@ -119,7 +119,7 @@ Future<VMIsolateRef> _connectToRunnerIsolate(int vmServicePort) async {
         );
       }
       print('VM service not ready yet: $error');
-      const Duration pauseBetweenRetries = const Duration(milliseconds: 200);
+      const Duration pauseBetweenRetries = Duration(milliseconds: 200);
       print('Will retry in $pauseBetweenRetries.');
       await new Future<Null>.delayed(pauseBetweenRetries);
     }

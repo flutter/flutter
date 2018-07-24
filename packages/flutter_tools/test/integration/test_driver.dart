@@ -18,9 +18,9 @@ import '../src/common.dart';
 
 // Set this to true for debugging to get JSON written to stdout.
 const bool _printJsonAndStderr = false;
-const Duration defaultTimeout = const Duration(seconds: 20);
-const Duration appStartTimeout = const Duration(seconds: 60);
-const Duration quitTimeout = const Duration(seconds: 5);
+const Duration defaultTimeout = Duration(seconds: 20);
+const Duration appStartTimeout = Duration(seconds: 60);
+const Duration quitTimeout = Duration(seconds: 5);
 
 class FlutterTestDriver {
   final Directory _projectFolder;
@@ -78,8 +78,8 @@ class FlutterTestDriver {
   Future<void> _setupProcess(List<String> args, {bool withDebugger = false}) async {
     final String flutterBin = fs.path.join(getFlutterRoot(), 'bin', 'flutter');
     _debugPrint('Spawning flutter $args in ${_projectFolder.path}');
-    
-    const ProcessManager _processManager = const LocalProcessManager();
+
+    const ProcessManager _processManager = LocalProcessManager();
     _proc = await _processManager.start(
         <String>[flutterBin]
             .followedBy(args)
@@ -103,7 +103,7 @@ class FlutterTestDriver {
     // script).
     final Map<String, dynamic> connected = await _waitFor(event: 'daemon.connected');
     _procPid = connected['params']['pid'];
-    
+
     // Set this up now, but we don't wait it yet. We want to make sure we don't
     // miss it while waiting for debugPort below.
     final Future<Map<String, dynamic>> started = _waitFor(event: 'app.started',
@@ -126,7 +126,7 @@ class FlutterTestDriver {
 
       // Because we start paused, resume so the app is in a "running" state as
       // expected by tests. Tests will reload/restart as required if they need
-      // to hit breakpoints, etc. 
+      // to hit breakpoints, etc.
       await waitForPause();
       await resume(wait: false);
     }
@@ -266,7 +266,7 @@ class FlutterTestDriver {
         response.complete(json);
       }
     });
-    
+
     return _timeoutWithMessages(() => response.future,
             timeout: timeout,
             message: event != null
@@ -285,7 +285,7 @@ class FlutterTestDriver {
       messages.writeln('[+ ${ms.toString().padLeft(5)}] $m');
     }
     final StreamSubscription<String> sub = _allMessages.stream.listen(logMessage);
-    
+
     return f().timeout(timeout ?? defaultTimeout, onTimeout: () {
       logMessage('<timed out>');
       throw '$message\nReceived:\n${messages.toString()}';

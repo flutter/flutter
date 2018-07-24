@@ -33,7 +33,7 @@ void main() {
     await tester.pumpWidget(new Directionality(
       textDirection: TextDirection.ltr,
       child: new MediaQuery(
-        data: const MediaQueryData(viewInsets: const EdgeInsets.only(bottom: 100.0)),
+        data: const MediaQueryData(viewInsets: EdgeInsets.only(bottom: 100.0)),
         child: new Scaffold(
           appBar: new AppBar(title: const Text('Title')),
           body: new Container(key: bodyKey),
@@ -47,7 +47,7 @@ void main() {
     await tester.pumpWidget(new Directionality(
       textDirection: TextDirection.ltr,
       child: new MediaQuery(
-        data: const MediaQueryData(viewInsets: const EdgeInsets.only(bottom: 100.0)),
+        data: const MediaQueryData(viewInsets: EdgeInsets.only(bottom: 100.0)),
         child: new Scaffold(
           appBar: new AppBar(title: const Text('Title')),
           body: new Container(key: bodyKey),
@@ -66,7 +66,7 @@ void main() {
       textDirection: TextDirection.ltr,
       child: new MediaQuery(
         data: const MediaQueryData(
-          viewInsets: const EdgeInsets.only(bottom: 700.0),
+          viewInsets: EdgeInsets.only(bottom: 700.0),
         ),
         child: new Scaffold(
           body: new Container(key: bodyKey),
@@ -81,7 +81,7 @@ void main() {
       textDirection: TextDirection.ltr,
       child: new MediaQuery(
         data: const MediaQueryData(
-          viewInsets: const EdgeInsets.only(bottom: 500.0),
+          viewInsets: EdgeInsets.only(bottom: 500.0),
         ),
         child: new Scaffold(
           body: new Container(key: bodyKey),
@@ -95,7 +95,7 @@ void main() {
       textDirection: TextDirection.ltr,
       child: new MediaQuery(
         data: const MediaQueryData(
-          viewInsets: const EdgeInsets.only(bottom: 580.0),
+          viewInsets: EdgeInsets.only(bottom: 580.0),
         ),
         child: new Scaffold(
           appBar: new AppBar(
@@ -111,20 +111,20 @@ void main() {
 
   testWidgets('Floating action entrance/exit animation', (WidgetTester tester) async {
     await tester.pumpWidget(new MaterialApp(home: const Scaffold(
-      floatingActionButton: const FloatingActionButton(
-        key: const Key('one'),
+      floatingActionButton: FloatingActionButton(
+        key: Key('one'),
         onPressed: null,
-        child: const Text('1'),
+        child: Text('1'),
       ),
     )));
 
     expect(tester.binding.transientCallbackCount, 0);
 
     await tester.pumpWidget(new MaterialApp(home: const Scaffold(
-      floatingActionButton: const FloatingActionButton(
-        key: const Key('two'),
+      floatingActionButton: FloatingActionButton(
+        key: Key('two'),
         onPressed: null,
-        child: const Text('2'),
+        child: Text('2'),
       ),
     )));
 
@@ -133,14 +133,14 @@ void main() {
     expect(tester.binding.transientCallbackCount, 0);
 
     await tester.pumpWidget(new MaterialApp(home: const Scaffold()));
-    
+
     expect(tester.binding.transientCallbackCount, 0);
 
     await tester.pumpWidget(new MaterialApp(home: const Scaffold(
-      floatingActionButton: const FloatingActionButton(
-        key: const Key('one'),
+      floatingActionButton: FloatingActionButton(
+        key: Key('one'),
         onPressed: null,
-        child: const Text('1'),
+        child: Text('1'),
       ),
     )));
 
@@ -152,13 +152,13 @@ void main() {
       return new Directionality(
         textDirection: textDirection,
         child: const MediaQuery(
-          data: const MediaQueryData(
-            viewInsets: const EdgeInsets.only(bottom: 200.0),
+          data: MediaQueryData(
+            viewInsets: EdgeInsets.only(bottom: 200.0),
           ),
-          child: const Scaffold(
-            floatingActionButton: const FloatingActionButton(
+          child: Scaffold(
+            floatingActionButton: FloatingActionButton(
               onPressed: null,
-              child: const Text('1'),
+              child: Text('1'),
             ),
           ),
         ),
@@ -198,8 +198,8 @@ void main() {
               const SliverAppBar(
                 pinned: true,
                 expandedHeight: appBarHeight,
-                title: const Text('Title'),
-                flexibleSpace: const FlexibleSpaceBar(title: const Text('Title')),
+                title: Text('Title'),
+                flexibleSpace: FlexibleSpaceBar(title: Text('Title')),
               ),
               new SliverPadding(
                 padding: const EdgeInsets.only(top: appBarHeight),
@@ -237,13 +237,13 @@ void main() {
     return new MaterialApp(
       theme: new ThemeData(platform: platform),
       home: new MediaQuery(
-        data: const MediaQueryData(padding: const EdgeInsets.only(top: 25.0)), // status bar
+        data: const MediaQueryData(padding: EdgeInsets.only(top: 25.0)), // status bar
         child: new Scaffold(
           body: new CustomScrollView(
             primary: true,
             slivers: <Widget>[
               const SliverAppBar(
-                title: const Text('Title')
+                title: Text('Title')
               ),
               new SliverList(
                 delegate: new SliverChildListDelegate(new List<Widget>.generate(
@@ -356,7 +356,7 @@ void main() {
         textDirection: TextDirection.ltr,
         child: new MediaQuery(
           data: const MediaQueryData(
-            padding: const EdgeInsets.fromLTRB(10.0, 20.0, 30.0, 40.0),
+            padding: EdgeInsets.fromLTRB(10.0, 20.0, 30.0, 40.0),
           ),
           child: new Scaffold(
             body: new SingleChildScrollView(
@@ -366,7 +366,7 @@ void main() {
                 child: const Text('body'),
               ),
             ),
-            persistentFooterButtons: const <Widget>[const Placeholder()],
+            persistentFooterButtons: const <Widget>[Placeholder()],
           ),
         ),
       ),
@@ -556,11 +556,11 @@ void main() {
 
     final SemanticsTester semantics = new SemanticsTester(tester);
     await tester.pumpWidget(new MaterialApp(home: const Scaffold(
-      body: const Text(bodyLabel),
-      persistentFooterButtons: const <Widget>[const Text(persistentFooterButtonLabel)],
-      bottomNavigationBar: const Text(bottomNavigationBarLabel),
-      floatingActionButton: const Text(floatingActionButtonLabel),
-      drawer: const Drawer(child: const Text(drawerLabel)),
+      body: Text(bodyLabel),
+      persistentFooterButtons: <Widget>[Text(persistentFooterButtonLabel)],
+      bottomNavigationBar: Text(bottomNavigationBarLabel),
+      floatingActionButton: Text(floatingActionButtonLabel),
+      drawer: Drawer(child: Text(drawerLabel)),
     )));
 
     expect(semantics, includesNodeWith(label: bodyLabel));
@@ -601,13 +601,13 @@ void main() {
         textDirection: TextDirection.rtl,
         child: new MediaQuery(
           data: const MediaQueryData(
-            padding: const EdgeInsets.only(
+            padding: EdgeInsets.only(
               left: 20.0,
               top: 30.0,
               right: 50.0,
               bottom: 60.0,
             ),
-            viewInsets: const EdgeInsets.only(bottom: 200.0),
+            viewInsets: EdgeInsets.only(bottom: 200.0),
           ),
           child: new Scaffold(
             appBar: new PreferredSize(
@@ -696,13 +696,13 @@ void main() {
         textDirection: TextDirection.rtl,
         child: new MediaQuery(
           data: const MediaQueryData(
-            padding: const EdgeInsets.only(
+            padding: EdgeInsets.only(
               left: 20.0,
               top: 30.0,
               right: 50.0,
               bottom: 60.0,
             ),
-            viewInsets: const EdgeInsets.only(bottom: 200.0),
+            viewInsets: EdgeInsets.only(bottom: 200.0),
           ),
           child: new Scaffold(
             appBar: new PreferredSize(
@@ -773,9 +773,9 @@ void main() {
 
     final SemanticsTester semantics = new SemanticsTester(tester);
     await tester.pumpWidget(new MaterialApp(home: const Scaffold(
-      body: const Text(bodyLabel),
-      drawer: const Drawer(child: const Text(drawerLabel)),
-      endDrawer: const Drawer(child: const Text(endDrawerLabel)),
+      body: Text(bodyLabel),
+      drawer: Drawer(child: Text(drawerLabel)),
+      endDrawer: Drawer(child: Text(endDrawerLabel)),
     )));
 
     expect(semantics, includesNodeWith(label: bodyLabel));

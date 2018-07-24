@@ -117,7 +117,11 @@ class TextField extends StatefulWidget {
     this.onSubmitted,
     this.inputFormatters,
     this.enabled,
+    this.cursorWidth = 2.0,
+    this.cursorRadius,
+    this.cursorColor,
     this.keyboardAppearance,
+    this.scrollPadding = const EdgeInsets.all(20.0),
   }) : assert(keyboardType != null),
        assert(textInputAction != null),
        assert(textAlign != null),
@@ -125,6 +129,7 @@ class TextField extends StatefulWidget {
        assert(obscureText != null),
        assert(autocorrect != null),
        assert(maxLengthEnforced != null),
+       assert(scrollPadding != null),
        assert(maxLines == null || maxLines > 0),
        assert(maxLength == null || maxLength > 0),
        keyboardType = maxLines == 1 ? keyboardType : TextInputType.multiline,
@@ -161,16 +166,16 @@ class TextField extends StatefulWidget {
   /// Defaults to [TextInputAction.done]. Must not be null.
   final TextInputAction textInputAction;
 
-  /// Configures how the platform keyboard will select an uppercase or 
+  /// Configures how the platform keyboard will select an uppercase or
   /// lowercase keyboard.
   ///
   /// Only supports text keyboards, other keyboard types will ignore this
   /// configuration. Capitalization is locale-aware.
   ///
   /// Defaults to [TextCapitalization.none]. Must not be null.
-  /// 
+  ///
   /// See also:
-  /// 
+  ///
   ///   * [TextCapitalization], for a description of each capitalization behavior.
   final TextCapitalization textCapitalization;
 
@@ -312,12 +317,34 @@ class TextField extends StatefulWidget {
   /// [Decoration.enabled] property.
   final bool enabled;
 
+  /// How thick the cursor will be.
+  ///
+  /// Defaults to 2.0.
+  final double cursorWidth;
+
+  /// How rounded the corners of the cursor should be.
+  /// By default, the cursor has a null Radius
+  final Radius cursorRadius;
+
+  /// The color to use when painting the cursor.
+  final Color cursorColor;
+
   /// The appearance of the keyboard.
-  /// 
+  ///
   /// This setting is only honored on iOS devices.
-  /// 
+  ///
   /// If unset, defaults to the brightness of [ThemeData.primaryColorBrightness].
   final Brightness keyboardAppearance;
+
+  /// Configures padding to edges surrounding a [Scrollable] when the Textfield scrolls into view.
+  ///
+  /// When this widget receives focus and is not completely visible (for example scrolled partially
+  /// off the screen or overlapped by the keyboard)
+  /// then it will attempt to make itself visible by scrolling a surrounding [Scrollable], if one is present.
+  /// This value controls how far from the edges of a [Scrollable] the TextField will be positioned after the scroll.
+  ///
+  /// Defaults to EdgeInserts.all(20.0).
+  final EdgeInsets scrollPadding;
 
   @override
   _TextFieldState createState() => new _TextFieldState();
@@ -530,7 +557,6 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
         obscureText: widget.obscureText,
         autocorrect: widget.autocorrect,
         maxLines: widget.maxLines,
-        cursorColor: themeData.textSelectionColor,
         selectionColor: themeData.textSelectionColor,
         selectionControls: themeData.platform == TargetPlatform.iOS
             ? cupertinoTextSelectionControls
@@ -541,6 +567,10 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
         onSelectionChanged: _handleSelectionChanged,
         inputFormatters: formatters,
         rendererIgnoresPointer: true,
+        cursorWidth: widget.cursorWidth,
+        cursorRadius: widget.cursorRadius,
+        cursorColor: widget.cursorColor ?? Theme.of(context).cursorColor,
+        scrollPadding: widget.scrollPadding,
         keyboardAppearance: keyboardAppearance,
       ),
     );

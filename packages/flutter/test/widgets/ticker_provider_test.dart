@@ -7,9 +7,9 @@ import 'package:flutter/material.dart';
 
 void main() {
   testWidgets('TickerMode', (WidgetTester tester) async {
-    const Widget widget = const TickerMode(
+    const Widget widget = TickerMode(
       enabled: false,
-      child: const CircularProgressIndicator()
+      child: CircularProgressIndicator()
     );
     expect(widget.toString, isNot(throwsException));
 
@@ -19,14 +19,14 @@ void main() {
 
     await tester.pumpWidget(const TickerMode(
       enabled: true,
-      child: const CircularProgressIndicator()
+      child: CircularProgressIndicator()
     ));
 
     expect(tester.binding.transientCallbackCount, 1);
 
     await tester.pumpWidget(const TickerMode(
       enabled: false,
-      child: const CircularProgressIndicator()
+      child: CircularProgressIndicator()
     ));
 
     expect(tester.binding.transientCallbackCount, 0);

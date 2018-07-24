@@ -43,7 +43,7 @@ void attachWidgetTreeToRenderTree(RenderProxyBox container) {
         height: 300.0,
         child: new Column(
           children: <Widget>[
-            const Rectangle(const Color(0xFF00FFFF)),
+            const Rectangle(Color(0xFF00FFFF)),
             new Material(
               child: new Container(
                 padding: const EdgeInsets.all(10.0),
@@ -68,7 +68,7 @@ void attachWidgetTreeToRenderTree(RenderProxyBox container) {
                 ),
               ),
             ),
-            const Rectangle(const Color(0xFFFFFF00)),
+            const Rectangle(Color(0xFFFFFF00)),
           ],
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
         ),

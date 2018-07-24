@@ -10,8 +10,8 @@ void main() {
   testWidgets('AnimatedContainer.debugFillProperties', (WidgetTester tester) async {
     final AnimatedContainer container = new AnimatedContainer(
       constraints: const BoxConstraints.tightFor(width: 17.0, height: 23.0),
-      decoration: const BoxDecoration(color: const Color(0xFF00FF00)),
-      foregroundDecoration: const BoxDecoration(color: const Color(0x7F0000FF)),
+      decoration: const BoxDecoration(color: Color(0xFF00FF00)),
+      foregroundDecoration: const BoxDecoration(color: Color(0x7F0000FF)),
       margin: const EdgeInsets.all(10.0),
       padding: const EdgeInsets.all(7.0),
       transform: new Matrix4.translationValues(4.0, 3.0, 0.0),
@@ -27,12 +27,12 @@ void main() {
   testWidgets('AnimatedContainer control test', (WidgetTester tester) async {
     final GlobalKey key = new GlobalKey();
 
-    const BoxDecoration decorationA = const BoxDecoration(
-      color: const Color(0xFF00FF00),
+    const BoxDecoration decorationA = BoxDecoration(
+      color: Color(0xFF00FF00),
     );
 
-    const BoxDecoration decorationB = const BoxDecoration(
-      color: const Color(0xFF0000FF),
+    const BoxDecoration decorationB = BoxDecoration(
+      color: Color(0xFF0000FF),
     );
 
     BoxDecoration actualDecoration;

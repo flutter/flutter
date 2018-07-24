@@ -21,7 +21,7 @@ const String _kOptionPackages = 'packages';
 const String _kOptionAsset = 'asset-dir';
 const String _kOptionManifest = 'manifest';
 const String _kOptionAssetManifestOut = 'asset-manifest-out';
-const List<String> _kRequiredOptions = const <String>[
+const List<String> _kRequiredOptions = <String>[
   _kOptionPackages,
   _kOptionAsset,
   _kOptionAssetManifestOut,

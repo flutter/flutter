@@ -104,7 +104,7 @@ class _BottomAppBarState extends State<BottomAppBar> {
         shape: widget.shape,
         notchMargin: widget.notchMargin,
       )
-      : const ShapeBorderClipper(shape: const RoundedRectangleBorder());
+      : const ShapeBorderClipper(shape: RoundedRectangleBorder());
     return new PhysicalShape(
       clipper: clipper,
       elevation: widget.elevation,

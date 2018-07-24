@@ -11,7 +11,7 @@ void main() {
       new Material(
         child: new RaisedButton(
           onPressed: () {
-            runApp(const Center(child: const Text('Done', textDirection: TextDirection.ltr)));
+            runApp(const Center(child: Text('Done', textDirection: TextDirection.ltr)));
           },
           child: const Text('GO', textDirection: TextDirection.ltr)
         )

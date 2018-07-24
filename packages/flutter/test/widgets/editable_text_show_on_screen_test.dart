@@ -10,8 +10,8 @@ import 'package:flutter/services.dart';
 
 
 void main() {
-  const TextStyle textStyle = const TextStyle();
-  const Color cursorColor = const Color.fromARGB(0xFF, 0xFF, 0x00, 0x00);
+  const TextStyle textStyle = TextStyle();
+  const Color cursorColor = Color.fromARGB(0xFF, 0xFF, 0x00, 0x00);
 
   testWidgets('tapping on a partly visible editable brings it fully on screen', (WidgetTester tester) async {
     final ScrollController scrollController = new ScrollController();
@@ -49,6 +49,51 @@ void main() {
     await tester.showKeyboard(find.byType(EditableText));
     await tester.pumpAndSettle();
     expect(scrollController.offset, 0.0);
+  });
+
+  testWidgets('tapping on a partly visible editable brings it fully on screen with scrollInsets', (WidgetTester tester) async {
+    final ScrollController scrollController = new ScrollController();
+    final TextEditingController controller = new TextEditingController();
+    final FocusNode focusNode = new FocusNode();
+
+    await tester.pumpWidget(new MaterialApp(
+      home: new Center(
+        child: new Container(
+          height: 300.0,
+          child: new ListView(
+            controller: scrollController,
+            children: <Widget>[
+              new Container(
+                height: 200.0,
+              ),
+              new EditableText(
+                scrollPadding: const EdgeInsets.all(50.0),
+                controller: controller,
+                focusNode: focusNode,
+                style: textStyle,
+                cursorColor: cursorColor,
+              ),
+              new Container(
+                height: 850.0,
+              ),
+            ],
+          ),
+        ),
+      ),
+    ));
+
+    // Scroll the EditableText half off screen.
+    final RenderBox render = tester.renderObject(find.byType(EditableText));
+    scrollController.jumpTo(200 + render.size.height / 2);
+    await tester.pumpAndSettle();
+    expect(scrollController.offset, 200 + render.size.height / 2);
+
+    await tester.showKeyboard(find.byType(EditableText));
+    await tester.pumpAndSettle();
+    // Container above the text is 200 in height, the scrollInsets are 50
+    // Tolerance of 5 units (The actual value was 152.0 in the current tests instead of 150.0)
+    expect(scrollController.offset, lessThan(200.0 - 50.0 + 5.0));
+    expect(scrollController.offset, greaterThan(200.0 - 50.0 - 5.0));
   });
 
   testWidgets('editable comes back on screen when entering text while it is off-screen', (WidgetTester tester) async {
@@ -144,5 +189,48 @@ void main() {
     expect(find.byType(EditableText), findsOneWidget);
     expect(render.size.height, greaterThan(500.0));
     expect(scrollController.offset, greaterThan(0.0));
+  });
+
+  testWidgets('scrolls into view with scrollInserts after the keyboard pops up', (WidgetTester tester) async {
+    final ScrollController scrollController = new ScrollController();
+    final TextEditingController controller = new TextEditingController();
+    final FocusNode focusNode = new FocusNode();
+
+    const Key container = Key('container');
+
+    await tester.pumpWidget(new MaterialApp(
+      home: new Align(
+        alignment: Alignment.bottomCenter,
+        child: new Container(
+          height: 300.0,
+          child: new ListView(
+            controller: scrollController,
+            children: <Widget>[
+              new Container(
+                key: container,
+                height: 200.0,
+              ),
+              new EditableText(
+                scrollPadding: const EdgeInsets.only(bottom: 300.0),
+                controller: controller,
+                focusNode: focusNode,
+                style: textStyle,
+                cursorColor: cursorColor,
+              ),
+              new Container(
+                height: 400.0,
+              ),
+            ],
+          ),
+        ),
+      ),
+    ));
+
+    expect(scrollController.offset, 0.0);
+
+    await tester.showKeyboard(find.byType(EditableText));
+    await tester.pumpAndSettle();
+    expect(scrollController.offset, greaterThan(0.0));
+    expect(find.byKey(container), findsNothing);
   });
 }

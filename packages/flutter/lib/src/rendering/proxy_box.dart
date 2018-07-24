@@ -1176,8 +1176,8 @@ abstract class _RenderCustomClip<T> extends RenderProxyBox {
       _debugText ??= new TextPainter(
         text: const TextSpan(
           text: '✂',
-          style: const TextStyle(
-            color: const Color(0xFFFF00FF),
+          style: TextStyle(
+            color: Color(0xFFFF00FF),
               fontSize: 14.0,
             ),
           ),
@@ -2881,8 +2881,11 @@ class RenderAbsorbPointer extends RenderProxyBox {
   /// The [absorbing] argument must not be null.
   RenderAbsorbPointer({
     RenderBox child,
-    this.absorbing = true
+    bool absorbing = true,
+    bool ignoringSemantics,
   }) : assert(absorbing != null),
+       _absorbing = absorbing,
+       _ignoringSemantics = ignoringSemantics,
        super(child);
 
   /// Whether this render object absorbs pointers during hit testing.
@@ -2890,7 +2893,33 @@ class RenderAbsorbPointer extends RenderProxyBox {
   /// Regardless of whether this render object absorbs pointers during hit
   /// testing, it will still consume space during layout and be visible during
   /// painting.
-  bool absorbing;
+  bool get absorbing => _absorbing;
+  bool _absorbing;
+  set absorbing(bool value) {
+    if (_absorbing == value)
+      return;
+    _absorbing = value;
+    if (ignoringSemantics == null)
+      markNeedsSemanticsUpdate();
+  }
+
+  /// Whether the semantics of this render object is ignored when compiling the semantics tree.
+  ///
+  /// If null, defaults to value of [absorbing].
+  ///
+  /// See [SemanticsNode] for additional information about the semantics tree.
+  bool get ignoringSemantics => _ignoringSemantics;
+  bool _ignoringSemantics;
+  set ignoringSemantics(bool value) {
+    if (value == _ignoringSemantics)
+      return;
+    final bool oldEffectiveValue = _effectiveIgnoringSemantics;
+    _ignoringSemantics = value;
+    if (oldEffectiveValue != _effectiveIgnoringSemantics)
+      markNeedsSemanticsUpdate();
+  }
+
+  bool get _effectiveIgnoringSemantics => ignoringSemantics == null ? absorbing : ignoringSemantics;
 
   @override
   bool hitTest(HitTestResult result, { Offset position }) {
@@ -2900,9 +2929,22 @@ class RenderAbsorbPointer extends RenderProxyBox {
   }
 
   @override
+  void visitChildrenForSemantics(RenderObjectVisitor visitor) {
+    if (child != null && !_effectiveIgnoringSemantics)
+      visitor(child);
+  }
+
+  @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(new DiagnosticsProperty<bool>('absorbing', absorbing));
+    properties.add(
+      new DiagnosticsProperty<bool>(
+        'ignoringSemantics',
+        _effectiveIgnoringSemantics,
+        description: ignoringSemantics == null ? 'implicitly $_effectiveIgnoringSemantics' : null,
+      ),
+    );
   }
 }
 
@@ -3126,6 +3168,7 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     bool explicitChildNodes,
     bool enabled,
     bool checked,
+    bool toggled,
     bool selected,
     bool button,
     bool header,
@@ -3136,6 +3179,9 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     bool scopesRoute,
     bool namesRoute,
     bool hidden,
+    bool image,
+    bool liveRegion,
+    bool isSwitch,
     String label,
     String value,
     String increasedValue,
@@ -3144,6 +3190,7 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     TextDirection textDirection,
     SemanticsSortKey sortKey,
     VoidCallback onTap,
+    VoidCallback onDismiss,
     VoidCallback onLongPress,
     VoidCallback onScrollLeft,
     VoidCallback onScrollRight,
@@ -3165,6 +3212,7 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
        _explicitChildNodes = explicitChildNodes,
        _enabled = enabled,
        _checked = checked,
+       _toggled = toggled,
        _selected = selected,
        _button = button,
        _header = header,
@@ -3174,7 +3222,10 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
        _obscured = obscured,
        _scopesRoute = scopesRoute,
        _namesRoute = namesRoute,
+       _liveRegion = liveRegion,
        _hidden = hidden,
+       _image = image,
+       _onDismiss = onDismiss,
        _label = label,
        _value = value,
        _increasedValue = increasedValue,
@@ -3366,6 +3417,38 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     markNeedsSemanticsUpdate();
   }
 
+  /// If non-null, sets the [SemanticsNode.isImage] semantic to the given
+  /// value.
+  bool get image => _image;
+  bool _image;
+  set image(bool value) {
+    if (_image == value)
+      return;
+    _image = value;
+  }
+
+  /// If non-null, sets the [SemanticsNode.isLiveRegion] semantic to the given
+  /// value.
+  bool get liveRegion => _liveRegion;
+  bool _liveRegion;
+  set liveRegion(bool value) {
+    if (_liveRegion == value)
+      return;
+    _liveRegion = value;
+    markNeedsSemanticsUpdate();
+  }
+
+  /// If non-null, sets the [SemanticsNode.isToggled] semantic to the given
+  /// value.
+  bool get toggled => _toggled;
+  bool _toggled;
+  set toggled(bool value) {
+    if (_toggled == value)
+      return;
+    _toggled = value;
+    markNeedsSemanticsUpdate();
+  }
+
   /// If non-null, sets the [SemanticsNode.label] semantic to the given value.
   ///
   /// The reading direction is given by [textDirection].
@@ -3470,6 +3553,24 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
       return;
     final bool hadValue = _onTap != null;
     _onTap = handler;
+    if ((handler != null) == hadValue)
+      markNeedsSemanticsUpdate();
+  }
+
+  /// The handler for [SemanticsAction.dismiss].
+  ///
+  /// This is a request to dismiss the currently focused node.
+  ///
+  /// TalkBack users on Android can trigger this action in the local context
+  /// menu, and VoiceOver users on iOS can trigger this action with a standard
+  /// gesture or menu option.
+  VoidCallback get onDismiss => _onDismiss;
+  VoidCallback _onDismiss;
+  set onDismiss(VoidCallback handler) {
+    if (_onDismiss == handler)
+      return;
+    final bool hadValue = _onDismiss != null;
+    _onDismiss = handler;
     if ((handler != null) == hadValue)
       markNeedsSemanticsUpdate();
   }
@@ -3782,13 +3883,13 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
   }
 
   /// The handlers and supported [CustomSemanticsAction]s for this node.
-  /// 
+  ///
   /// These handlers are called whenever the user performs the associated
   /// custom accessibility action from a special platform menu. Providing any
   /// custom actions here also adds [SemanticsAction.customAction] to the node.
-  /// 
+  ///
   /// See also:
-  /// 
+  ///
   ///   * [CustomSemanticsAction], for an explaination of custom actions.
   Map<CustomSemanticsAction, VoidCallback> get customSemanticsActions => _customSemanticsActions;
   Map<CustomSemanticsAction, VoidCallback> _customSemanticsActions;
@@ -3806,11 +3907,15 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     config.explicitChildNodes = explicitChildNodes;
     assert((scopesRoute == true && explicitChildNodes == true) || scopesRoute != true,
       'explicitChildNodes must be set to true if scopes route is true');
+    assert(!(toggled == true && checked == true),
+      'A semantics node cannot be toggled and checked at the same time');
 
     if (enabled != null)
       config.isEnabled = enabled;
     if (checked != null)
       config.isChecked = checked;
+    if (toggled != null)
+      config.isToggled = toggled;
     if (selected != null)
       config.isSelected = selected;
     if (button != null)
@@ -3827,6 +3932,8 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
       config.isObscured = obscured;
     if (hidden != null)
       config.isHidden = hidden;
+    if (image != null)
+      config.isImage = image;
     if (label != null)
       config.label = label;
     if (value != null)
@@ -3841,6 +3948,8 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
       config.scopesRoute = scopesRoute;
     if (namesRoute != null)
       config.namesRoute = namesRoute;
+    if (liveRegion != null)
+      config.liveRegion = liveRegion;
     if (textDirection != null)
       config.textDirection = textDirection;
     if (sortKey != null)
@@ -3852,6 +3961,8 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
       config.onTap = _performTap;
     if (onLongPress != null)
       config.onLongPress = _performLongPress;
+    if (onDismiss != null)
+      config.onDismiss = _performDismiss;
     if (onScrollLeft != null)
       config.onScrollLeft = _performScrollLeft;
     if (onScrollRight != null)
@@ -3892,6 +4003,11 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
   void _performLongPress() {
     if (onLongPress != null)
       onLongPress();
+  }
+
+  void _performDismiss() {
+    if (onDismiss != null)
+      onDismiss();
   }
 
   void _performScrollLeft() {
