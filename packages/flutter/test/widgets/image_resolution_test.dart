@@ -133,10 +133,12 @@ Widget buildImageAtRatio(String image, Key key, double ratio, bool inferSize, [A
         child: inferSize ?
           new Image(
             key: key,
+            excludeFromSemantics: true,
             image: new TestAssetImage(image)
           ) :
           new Image(
             key: key,
+            excludeFromSemantics: true,
             image: new TestAssetImage(image),
             height: imageSize,
             width: imageSize,
