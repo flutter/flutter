@@ -54,5 +54,5 @@ class SteppingProject extends TestProject {
 
   int lineForStep(int i) => lineContaining(main, '// STEP $i');
 
-  final int numberOfSteps = 7; 
+  final int numberOfSteps = 7;
 }
