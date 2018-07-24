@@ -4,7 +4,6 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'dart:developer';
 
 void main() {
   testWidgets('ExpansionPanelList test', (WidgetTester tester) async {
@@ -283,7 +282,7 @@ void main() {
 
     await tester.pump(const Duration(milliseconds: 200));
 
-    //Now the first panel is closed and the second should be opened
+    // Now the first panel is closed and the second should be opened
     expect(find.text('A'), findsOneWidget);
     expect(find.text('B'), findsNothing);
     expect(find.text('C'), findsNothing);
@@ -297,7 +296,7 @@ void main() {
 
     await tester.pumpAndSettle();
 
-    //Now the first panel should be opened
+    // Now the first panel should be opened
     expect(find.text('C'), findsNothing);
     expect(find.text('D'), findsOneWidget);
     expect(find.text('E'), findsOneWidget);
@@ -339,56 +338,13 @@ void main() {
         ),
       ),
     );
-    await tester.pump(const Duration(milliseconds: 200));
 
-    //We've reinitialized with a regular expansion panel so they should all be closed again
+    // We've reinitialized with a regular expansion panel so they should all be closed again
     expect(find.text('A'), findsOneWidget);
     expect(find.text('B'), findsNothing);
     expect(find.text('C'), findsOneWidget);
     expect(find.text('D'), findsNothing);
     expect(find.text('E'), findsOneWidget);
     expect(find.text('F'), findsNothing);
-
-//    box = tester.renderObject(find.byType(ExpansionPanelList));
-//    oldHeight = box.size.height;
-//
-//    expect(find.byType(ExpandIcon), findsNWidgets(3));
-//
-//    await tester.tap(find.byType(ExpandIcon).at(0));
-//
-//    box = tester.renderObject(find.byType(ExpansionPanelList));
-//    expect(box.size.height, equals(oldHeight));
-//
-//    await tester.pump(const Duration(milliseconds: 200));
-//    await tester.pumpAndSettle();
-//
-//    // Now the first panel is open
-//    expect(find.text('A'), findsNothing);
-//    expect(find.text('B'), findsOneWidget);
-//    expect(find.text('C'), findsOneWidget);
-//    expect(find.text('D'), findsNothing);
-//    expect(find.text('E'), findsOneWidget);
-//    expect(find.text('F'), findsNothing);
-//
-//    box = tester.renderObject(find.byType(ExpansionPanelList));
-//    expect(box.size.height - oldHeight, greaterThanOrEqualTo(100.0)); // 100 + some margin
-//
-//    await tester.tap(find.byType(ExpandIcon).at(1));
-//
-//    box = tester.renderObject(find.byType(ExpansionPanelList));
-//    oldHeight = box.size.height;
-//
-//    await tester.pump(const Duration(milliseconds: 200));
-//
-//    //Now the first and second panel should be open
-//    expect(find.text('A'), findsNothing);
-//    expect(find.text('B'), findsOneWidget);
-//    expect(find.text('C'), findsNothing);
-//    expect(find.text('D'), findsOneWidget);
-//    expect(find.text('E'), findsOneWidget);
-//    expect(find.text('F'), findsNothing);
-//
-//    box = tester.renderObject(find.byType(ExpansionPanelList));
-//    expect(box.size.height - oldHeight, greaterThanOrEqualTo(100.0)); // 100 + some margin
   });
 }

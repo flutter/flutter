@@ -8,7 +8,6 @@ import 'package:flutter/widgets.dart';
 import 'expand_icon.dart';
 import 'mergeable_material.dart';
 import 'theme.dart';
-import 'dart:developer';
 
 const double _kPanelHeaderCollapsedHeight = 48.0;
 const double _kPanelHeaderExpandedHeight = 64.0;
@@ -69,7 +68,7 @@ class ExpansionPanel {
     @required this.headerBuilder,
     @required this.body,
     this.isExpanded = false
-  }) : assert(headerBuilder != null),
+  }) :  assert(headerBuilder != null),
         assert(body != null),
         assert(isExpanded != null);
 
@@ -105,9 +104,9 @@ class ExpansionPanelRadio extends ExpansionPanel {
     @required this.value,
     @required ExpansionPanelHeaderBuilder headerBuilder,
     @required Widget body,
-  }) : assert(initializesExpanded != null),
-       assert(value != null),
-       super(body: body, headerBuilder: headerBuilder);
+  }) :  assert(initializesExpanded != null),
+        assert(value != null),
+        super(body: body, headerBuilder: headerBuilder);
 
   /// Whether this panel initializes expanded or not.
   final bool initializesExpanded;
@@ -135,7 +134,7 @@ class ExpansionPanelList extends StatefulWidget {
     this.children = const <ExpansionPanel>[],
     this.expansionCallback,
     this.animationDuration = kThemeAnimationDuration,
-  }) : assert(children != null),
+  }) :  assert(children != null),
         assert(animationDuration != null),
         _allowOnlyOnePanelOpen = false,
         super(key: key);
@@ -152,7 +151,7 @@ class ExpansionPanelList extends StatefulWidget {
     this.children = const <ExpansionPanelRadio>[],
     this.expansionCallback,
     this.animationDuration = kThemeAnimationDuration,
-  }) : assert(children != null),
+  }) :  assert(children != null),
         assert(animationDuration != null),
         _allowOnlyOnePanelOpen = true,
         super(key: key);
@@ -186,7 +185,6 @@ class _ExpansionPanelListState extends State<ExpansionPanelList> {
   @override
   void initState() {
     super.initState();
-    debugPrint('Init: ' + widget._allowOnlyOnePanelOpen.toString());
     if (widget._allowOnlyOnePanelOpen) {
       for (ExpansionPanelRadio child in widget.children) {
         final ExpansionPanelRadio widgetChild = child;
@@ -202,8 +200,6 @@ class _ExpansionPanelListState extends State<ExpansionPanelList> {
   @override
   void didUpdateWidget(ExpansionPanelList oldWidget) {
     super.didUpdateWidget(oldWidget);
-    debugPrint('Update: ' + widget._allowOnlyOnePanelOpen.toString());
-
     if (widget._allowOnlyOnePanelOpen) {
       bool panelExpanded = false;
       for (ExpansionPanelRadio newChild in widget.children) {
@@ -218,6 +214,9 @@ class _ExpansionPanelListState extends State<ExpansionPanelList> {
         if (_currentOpenPanel == null && child.initializesExpanded)
           _currentOpenPanel = child;
       }
+    }
+    else if(oldWidget._allowOnlyOnePanelOpen) {
+      setState((){});
     }
   }
 
@@ -260,8 +259,6 @@ class _ExpansionPanelListState extends State<ExpansionPanelList> {
         items.add(new MaterialGap(key: new _SaltedKey<BuildContext, int>(context, index * 2 - 1)));
 
       final ExpansionPanelRadio _widgetChild = widget._allowOnlyOnePanelOpen ? widget.children[index] : null;
-      debugger(when: !widget._allowOnlyOnePanelOpen);
-      //tests
       final Row header = new Row(
         children: <Widget>[
           new Expanded(
@@ -289,7 +286,7 @@ class _ExpansionPanelListState extends State<ExpansionPanelList> {
           ),
         ],
       );
-//s
+
       items.add(
         new MaterialSlice(
           key: new _SaltedKey<BuildContext, int>(context, index * 2),
