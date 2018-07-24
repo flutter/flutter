@@ -50,6 +50,6 @@ void main() {
       // but
       // TODO(dantup): test may need tweaking once that's fixed because I'm
       // unable to run it to completion.
-    }, skip: true);
+    });
   }, timeout: const Timeout.factor(3));
 }
