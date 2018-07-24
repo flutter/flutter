@@ -420,6 +420,12 @@ class _RenderSwitch extends RenderToggleable {
   }
 
   @override
+  void describeSemanticsConfiguration(SemanticsConfiguration config) {
+    super.describeSemanticsConfiguration(config);
+    config.isToggled = value == true;
+  }
+
+  @override
   void paint(PaintingContext context, Offset offset) {
     final Canvas canvas = context.canvas;
 
