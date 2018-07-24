@@ -37,17 +37,17 @@ void main() {
     expect(semantics, hasSemantics(
       new TestSemantics.root(
         children: <TestSemantics>[
-          new TestSemantics.rootChild(
+          new TestSemantics(
             id: 1,
             label: 'I am text!',
             textDirection: TextDirection.ltr,
           ),
-          new TestSemantics.rootChild(
+          new TestSemantics(
             id: 2,
             label: 'Moar text!!1',
              textDirection: TextDirection.ltr,
           ),
-          new TestSemantics.rootChild(
+          new TestSemantics(
             id: 3,
             label: 'Button',
             textDirection: TextDirection.ltr,
@@ -59,6 +59,44 @@ void main() {
               SemanticsFlag.hasEnabledState,
               SemanticsFlag.isEnabled,
             ],
+          ),
+        ],
+      ),
+      ignoreTransform: true,
+      ignoreRect: true,
+    ));
+
+    semantics.dispose();
+  });
+
+  testWidgets('Card can take semantics from a single child', (WidgetTester tester) async {
+    final SemanticsTester semantics = new SemanticsTester(tester);
+    debugResetSemanticsIdCounter();
+
+    await tester.pumpWidget(
+      new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new Material(
+          child: new Center(
+            child: new Card(
+              child: new Column(
+                children: const <Widget>[
+                  Text('Only child'),
+                ],
+              )
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(semantics, hasSemantics(
+      new TestSemantics.root(
+        children: <TestSemantics>[
+          new TestSemantics(
+            id: 1,
+            label: 'Only child',
+            textDirection: TextDirection.ltr,
           ),
         ],
       ),
