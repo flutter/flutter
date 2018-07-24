@@ -26,7 +26,7 @@ class BasicProject extends TestProject {
     @override
     Widget build(BuildContext context) {
       topLevelFunction();
-      return new MaterialApp(
+      return new MaterialApp( // BREAKPOINT
         title: 'Flutter Demo',
         home: new Container(),
       );
@@ -34,18 +34,13 @@ class BasicProject extends TestProject {
   }
 
   topLevelFunction() {
-    print("test");
+    print("topLevelFunction"); // 2 BREAKPOINT
   }
   ''';
 
-  @override
-  String get breakpointFile => buildMethodBreakpointFile;
-  @override
-  int get breakpointLine => buildMethodBreakpointLine;
-
-  String get buildMethodBreakpointFile => fs.path.join(dir.path, 'lib', 'main.dart');
-  int get buildMethodBreakpointLine => 9;
+  String get buildMethodBreakpointFile => breakpointFile;
+  int get buildMethodBreakpointLine => breakpointLine;
 
   String get topLevelFunctionBreakpointFile => fs.path.join(dir.path, 'lib', 'main.dart');
-  int get topLevelFunctionBreakpointLine => 17;
+  int get topLevelFunctionBreakpointLine => lineContaining(main, '// 2 BREAKPOINT');
 }
