@@ -246,14 +246,14 @@ class RotationTransition extends AnimatedWidget {
 
 /// Animates its own size and clips and aligns the child.
 ///
-/// `SizeTransition` acts as a clip region that animates either its width or
+/// [SizeTransition] acts as a [ClipRect] that animates either its width or its
 /// height, depending upon the value of [axis]. The alignment of the child along
 /// the [axis] is specified by the [axisAlignment].
 ///
-/// Like most widgets, `SizeTransition` will conform to the constraints it is
+/// Like most widgets, [SizeTransition] will conform to the constraints it is
 /// given, so be sure to put it in a context where it can change size. For
 /// instance, if you place it into a [Container] with a fixed size, then the
-/// `SizeTransition` will not be able to change size, and will appear to do
+/// [SizeTransition] will not be able to change size, and will appear to do
 /// nothing.
 ///
 /// See also:
@@ -265,9 +265,10 @@ class RotationTransition extends AnimatedWidget {
 class SizeTransition extends AnimatedWidget {
   /// Creates a size transition.
   ///
-  /// The [sizeFactor] argument must not be null. The [axis] argument defaults
-  /// to [Axis.vertical]. The [axisAlignment] defaults to 0.0, which centers the
-  /// child along the main axis during the transition.
+  /// The [axis], [sizeFactor], and [axisAlignment] arguments must not be null.
+  /// The [axis] argument defaults to [Axis.vertical]. The [axisAlignment]
+  /// defaults to 0.0, which centers the child along the main axis during the
+  /// transition.
   const SizeTransition({
     Key key,
     this.axis = Axis.vertical,
@@ -275,6 +276,8 @@ class SizeTransition extends AnimatedWidget {
     this.axisAlignment = 0.0,
     this.child,
   }) : assert(axis != null),
+       assert(sizeFactor != null),
+       assert(axisAlignment != null),
        super(key: key, listenable: sizeFactor);
 
   /// [Axis.horizontal] if [sizeFactor] modifies the width, otherwise
@@ -284,10 +287,10 @@ class SizeTransition extends AnimatedWidget {
   /// The animation that controls the (clipped) size of the child.
   ///
   /// The width or height (depending on the [axis] value) of this widget will be
-  /// its intrinsic width or height multiplied by `sizeFactor`'s value at the
+  /// its intrinsic width or height multiplied by [sizeFactor]'s value at the
   /// current point in the animation.
   ///
-  /// If the value of `sizeFactor` is less than one, the child will be clipped
+  /// If the value of [sizeFactor] is less than one, the child will be clipped
   /// in the appropriate axis.
   Animation<double> get sizeFactor => listenable;
 
