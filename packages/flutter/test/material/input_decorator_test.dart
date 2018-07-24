@@ -1242,6 +1242,27 @@ void main() {
     expect(getBorderWeight(tester), 1.0);
   });
 
+
+  testWidgets('InputDecoration InputBorder borderSide color and width', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      buildInputDecorator(
+        isEmpty: true, // label appears, vertically centered
+        // isFocused: false (default)
+        inputDecorationTheme: const InputDecorationTheme(
+          border: const OutlineInputBorder(borderSide:const BorderSide(color: Colors.red,width: 5.0) ),
+        ),
+      ),
+    );
+
+    // Overall height for this InputDecorator is 56dps. Layout is:
+    //   20 - top padding
+    //   16 - label (ahem font size 16dps)
+    //   20 - bottom padding
+    expect(getBorderWeight(tester), 5.0);
+    expect(getBorderColor(tester), Colors.red);
+  });
+
+
   testWidgets('InputDecorationTheme outline border, dense layout', (WidgetTester tester) async {
     await tester.pumpWidget(
       buildInputDecorator(
