@@ -393,4 +393,28 @@ class CupertinoIcons {
   ///
   ///  * [clear_circled], which is similar, but not filled in.
   static const IconData clear_circled_solid = IconData(0xf406, fontFamily: iconFont, fontPackage: iconFontPackage);
+
+  /// Two straight lines, one horizontal and one vertical, meeting in the middle, which is the equivalent of a plus sign.
+  ///
+  /// See also:
+  ///
+  ///  * [plus_circled], which is the pre-iOS 7 version of this icon with a thicker cross.
+  ///  * [add_circled], which consists of the plus and a circle around it.
+  static const IconData add = IconData(0xf489, fontFamily: iconFont, fontPackage: iconFontPackage);
+
+  /// Two straight lines, one horizontal and one vertical, meeting in the middle, which is the equivalent of a plus sign, surrounded by a circle. This icon is not filled in.
+  ///
+  /// See also:
+  ///
+  ///  * [plus_circled], which is the pre-iOS 7 version of this icon with a thicker cross and a filled in circle.
+  ///  * [add_circled_solid], which is similar, but filled in.
+  static const IconData add_circled = IconData(0xf489, fontFamily: iconFont, fontPackage: iconFontPackage);
+
+  /// Two straight lines, one horizontal and one vertical, meeting in the middle, which is the equivalent of a plus sign, surrounded by a circle. This icon is not filled in.
+  ///
+  /// See also:
+  ///
+  ///  * [plus_circled], which is the pre-iOS 7 version of this icon with a thicker cross.
+  ///  * [add_circled], which is similar, but not filled in.
+  static const IconData add_circled_solid = IconData(0xf489, fontFamily: iconFont, fontPackage: iconFontPackage);
 }
