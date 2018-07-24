@@ -14,12 +14,12 @@ Future<Null> test(WidgetTester tester, double offset, EdgeInsetsGeometry padding
         offset: new ViewportOffset.fixed(offset),
         axisDirection: axisDirection,
         slivers: <Widget>[
-          const SliverToBoxAdapter(child: const SizedBox(width: 400.0, height: 400.0, child: const Text('before'))),
+          const SliverToBoxAdapter(child: SizedBox(width: 400.0, height: 400.0, child: Text('before'))),
           new SliverPadding(
             padding: padding,
-            sliver: const SliverToBoxAdapter(child: const SizedBox(width: 400.0, height: 400.0, child: const Text('padded'))),
+            sliver: const SliverToBoxAdapter(child: SizedBox(width: 400.0, height: 400.0, child: Text('padded'))),
           ),
-          const SliverToBoxAdapter(child: const SizedBox(width: 400.0, height: 400.0, child: const Text('after'))),
+          const SliverToBoxAdapter(child: SizedBox(width: 400.0, height: 400.0, child: Text('after'))),
         ],
       ),
     ),
@@ -39,7 +39,7 @@ void verify(WidgetTester tester, List<Rect> answerKey) {
 
 void main() {
   testWidgets('Viewport+SliverPadding basic test (VISUAL)', (WidgetTester tester) async {
-    const EdgeInsets padding = const EdgeInsets.fromLTRB(25.0, 20.0, 15.0, 35.0);
+    const EdgeInsets padding = EdgeInsets.fromLTRB(25.0, 20.0, 15.0, 35.0);
     await test(tester, 0.0, padding, AxisDirection.down, TextDirection.ltr);
     expect(tester.renderObject<RenderBox>(find.byType(Viewport)).size, equals(const Size(800.0, 600.0)));
     verify(tester, <Rect>[
@@ -78,7 +78,7 @@ void main() {
   });
 
   testWidgets('Viewport+SliverPadding basic test (LTR)', (WidgetTester tester) async {
-    const EdgeInsetsDirectional padding = const EdgeInsetsDirectional.fromSTEB(25.0, 20.0, 15.0, 35.0);
+    const EdgeInsetsDirectional padding = EdgeInsetsDirectional.fromSTEB(25.0, 20.0, 15.0, 35.0);
     await test(tester, 0.0, padding, AxisDirection.down, TextDirection.ltr);
     expect(tester.renderObject<RenderBox>(find.byType(Viewport)).size, equals(const Size(800.0, 600.0)));
     verify(tester, <Rect>[
@@ -117,7 +117,7 @@ void main() {
   });
 
   testWidgets('Viewport+SliverPadding basic test (RTL)', (WidgetTester tester) async {
-    const EdgeInsetsDirectional padding = const EdgeInsetsDirectional.fromSTEB(25.0, 20.0, 15.0, 35.0);
+    const EdgeInsetsDirectional padding = EdgeInsetsDirectional.fromSTEB(25.0, 20.0, 15.0, 35.0);
     await test(tester, 0.0, padding, AxisDirection.down, TextDirection.rtl);
     expect(tester.renderObject<RenderBox>(find.byType(Viewport)).size, equals(const Size(800.0, 600.0)));
     verify(tester, <Rect>[
@@ -156,7 +156,7 @@ void main() {
   });
 
   testWidgets('Viewport+SliverPadding hit testing', (WidgetTester tester) async {
-    const EdgeInsets padding = const EdgeInsets.all(30.0);
+    const EdgeInsets padding = EdgeInsets.all(30.0);
     await test(tester, 350.0, padding, AxisDirection.down, TextDirection.ltr);
     expect(tester.renderObject<RenderBox>(find.byType(Viewport)).size, equals(const Size(800.0, 600.0)));
     verify(tester, <Rect>[
@@ -178,7 +178,7 @@ void main() {
   });
 
   testWidgets('Viewport+SliverPadding hit testing up', (WidgetTester tester) async {
-    const EdgeInsets padding = const EdgeInsets.all(30.0);
+    const EdgeInsets padding = EdgeInsets.all(30.0);
     await test(tester, 350.0, padding, AxisDirection.up, TextDirection.ltr);
     expect(tester.renderObject<RenderBox>(find.byType(Viewport)).size, equals(const Size(800.0, 600.0)));
     verify(tester, <Rect>[
@@ -200,7 +200,7 @@ void main() {
   });
 
   testWidgets('Viewport+SliverPadding hit testing left', (WidgetTester tester) async {
-    const EdgeInsets padding = const EdgeInsets.all(30.0);
+    const EdgeInsets padding = EdgeInsets.all(30.0);
     await test(tester, 350.0, padding, AxisDirection.left, TextDirection.ltr);
     expect(tester.renderObject<RenderBox>(find.byType(Viewport)).size, equals(const Size(800.0, 600.0)));
     verify(tester, <Rect>[
@@ -222,7 +222,7 @@ void main() {
   });
 
   testWidgets('Viewport+SliverPadding hit testing right', (WidgetTester tester) async {
-    const EdgeInsets padding = const EdgeInsets.all(30.0);
+    const EdgeInsets padding = EdgeInsets.all(30.0);
     await test(tester, 350.0, padding, AxisDirection.right, TextDirection.ltr);
     expect(tester.renderObject<RenderBox>(find.byType(Viewport)).size, equals(const Size(800.0, 600.0)));
     verify(tester, <Rect>[
@@ -250,8 +250,8 @@ void main() {
         child: new Viewport(
           offset: new ViewportOffset.fixed(0.0),
           slivers: const <Widget>[
-            const SliverPadding(padding: const EdgeInsets.all(100.0)),
-            const SliverToBoxAdapter(child: const SizedBox(width: 400.0, height: 400.0, child: const Text('x'))),
+            SliverPadding(padding: EdgeInsets.all(100.0)),
+            SliverToBoxAdapter(child: SizedBox(width: 400.0, height: 400.0, child: Text('x'))),
           ],
         ),
       ),
@@ -267,8 +267,8 @@ void main() {
           axisDirection: AxisDirection.left,
           offset: new ViewportOffset.fixed(0.0),
           slivers: const <Widget>[
-            const SliverPadding(padding: const EdgeInsets.fromLTRB(90.0, 1.0, 110.0, 2.0)),
-            const SliverToBoxAdapter(child: const SizedBox(width: 201.0, child: const Text('x'))),
+            SliverPadding(padding: EdgeInsets.fromLTRB(90.0, 1.0, 110.0, 2.0)),
+            SliverToBoxAdapter(child: SizedBox(width: 201.0, child: Text('x'))),
           ],
         ),
       ),
@@ -281,8 +281,8 @@ void main() {
           axisDirection: AxisDirection.left,
           offset: new ViewportOffset.fixed(0.0),
           slivers: const <Widget>[
-            const SliverPadding(padding: const EdgeInsets.fromLTRB(110.0, 1.0, 80.0, 2.0)),
-            const SliverToBoxAdapter(child: const SizedBox(width: 201.0, child: const Text('x'))),
+            SliverPadding(padding: EdgeInsets.fromLTRB(110.0, 1.0, 80.0, 2.0)),
+            SliverToBoxAdapter(child: SizedBox(width: 201.0, child: Text('x'))),
           ],
         ),
       ),
@@ -298,7 +298,7 @@ void main() {
           axisDirection: AxisDirection.up,
           offset: new ViewportOffset.fixed(0.0),
           slivers: const <Widget>[
-            const SliverPadding(padding: const EdgeInsets.fromLTRB(1.0, 2.0, 4.0, 8.0)),
+            SliverPadding(padding: EdgeInsets.fromLTRB(1.0, 2.0, 4.0, 8.0)),
           ],
         ),
       ),
@@ -311,7 +311,7 @@ void main() {
           axisDirection: AxisDirection.down,
           offset: new ViewportOffset.fixed(0.0),
           slivers: const <Widget>[
-            const SliverPadding(padding: const EdgeInsets.fromLTRB(1.0, 2.0, 4.0, 8.0)),
+            SliverPadding(padding: EdgeInsets.fromLTRB(1.0, 2.0, 4.0, 8.0)),
           ],
         ),
       ),
@@ -324,7 +324,7 @@ void main() {
           axisDirection: AxisDirection.right,
           offset: new ViewportOffset.fixed(0.0),
           slivers: const <Widget>[
-            const SliverPadding(padding: const EdgeInsets.fromLTRB(1.0, 2.0, 4.0, 8.0)),
+            SliverPadding(padding: EdgeInsets.fromLTRB(1.0, 2.0, 4.0, 8.0)),
           ],
         ),
       ),
@@ -337,7 +337,7 @@ void main() {
           axisDirection: AxisDirection.left,
           offset: new ViewportOffset.fixed(0.0),
           slivers: const <Widget>[
-            const SliverPadding(padding: const EdgeInsets.fromLTRB(1.0, 2.0, 4.0, 8.0)),
+            SliverPadding(padding: EdgeInsets.fromLTRB(1.0, 2.0, 4.0, 8.0)),
           ],
         ),
       ),
@@ -350,7 +350,7 @@ void main() {
           axisDirection: AxisDirection.left,
           offset: new ViewportOffset.fixed(99999.9),
           slivers: const <Widget>[
-            const SliverPadding(padding: const EdgeInsets.fromLTRB(1.0, 2.0, 4.0, 8.0)),
+            SliverPadding(padding: EdgeInsets.fromLTRB(1.0, 2.0, 4.0, 8.0)),
           ],
         ),
       ),

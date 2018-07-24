@@ -34,7 +34,7 @@ public final class Flutter {
    * @param applicationContext the application's {@link Context}
    */
   public static void startInitialization(@NonNull Context applicationContext) {
-    FlutterMain.startInitialization(applicationContext, null);
+    FlutterMain.startInitialization(applicationContext);
   }
 
   /**

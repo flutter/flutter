@@ -26,7 +26,7 @@ void main() {
   });
 
   test('Threshold has a threshold', () {
-    const Curve step = const Threshold(0.25);
+    const Curve step = Threshold(0.25);
     expect(step.transform(0.0), 0.0);
     expect(step.transform(0.24), 0.0);
     expect(step.transform(0.25), 1.0);

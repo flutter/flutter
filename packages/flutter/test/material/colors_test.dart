@@ -6,24 +6,24 @@ import 'package:test/test.dart';
 
 import 'package:flutter/material.dart';
 
-const List<int> primaryKeys = const <int>[50, 100, 200, 300, 400, 500, 600, 700, 800, 900];
-const List<int> accentKeys = const <int>[100, 200, 400, 700];
+const List<int> primaryKeys = <int>[50, 100, 200, 300, 400, 500, 600, 700, 800, 900];
+const List<int> accentKeys = <int>[100, 200, 400, 700];
 
 void main() {
   test('MaterialColor basic functionality', () {
-    const MaterialColor color = const MaterialColor(
+    const MaterialColor color = MaterialColor(
       500,
-      const <int, Color>{
-         50: const Color(50),
-        100: const Color(100),
-        200: const Color(200),
-        300: const Color(300),
-        400: const Color(400),
-        500: const Color(500),
-        600: const Color(600),
-        700: const Color(700),
-        800: const Color(800),
-        900: const Color(900),
+      <int, Color>{
+         50: Color(50),
+        100: Color(100),
+        200: Color(200),
+        300: Color(300),
+        400: Color(400),
+        500: Color(500),
+        600: Color(600),
+        700: Color(700),
+        800: Color(800),
+        900: Color(900),
       },
     );
 

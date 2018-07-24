@@ -34,7 +34,7 @@ void main() {
     );
     final FlexParentData flexParentData = flexible.parentData;
     flexParentData.flex = 1;
-    const BoxConstraints viewport = const BoxConstraints(maxHeight: 100.0, maxWidth: 100.0);
+    const BoxConstraints viewport = BoxConstraints(maxHeight: 100.0, maxWidth: 100.0);
     layout(flex, constraints: viewport);
     expect(flexible.size.height, equals(0.0));
     expect(flex.getMinIntrinsicHeight(100.0), equals(200.0));
@@ -57,7 +57,7 @@ void main() {
     );
     final FlexParentData flexParentData = flexible.parentData;
     flexParentData.flex = 1;
-    const BoxConstraints viewport = const BoxConstraints(maxHeight: 100.0, maxWidth: 100.0);
+    const BoxConstraints viewport = BoxConstraints(maxHeight: 100.0, maxWidth: 100.0);
     layout(flex, constraints: viewport);
     expect(flexible.size.width, equals(0.0));
     expect(flex.getMinIntrinsicHeight(100.0), equals(0.0));
@@ -74,7 +74,7 @@ void main() {
         new RenderAspectRatio(aspectRatio: 1.0),
       ]
     );
-    const BoxConstraints viewport = const BoxConstraints(maxHeight: 200.0, maxWidth: 1000.0);
+    const BoxConstraints viewport = BoxConstraints(maxHeight: 200.0, maxWidth: 1000.0);
     layout(flex, constraints: viewport);
     expect(flex.getMaxIntrinsicWidth(200.0), equals(0.0));
   });
@@ -292,7 +292,7 @@ void main() {
 
   test('MainAxisSize.min inside unconstrained', () {
     FlutterError.onError = (FlutterErrorDetails details) => throw details.exception;
-    const BoxConstraints square = const BoxConstraints.tightFor(width: 100.0, height: 100.0);
+    const BoxConstraints square = BoxConstraints.tightFor(width: 100.0, height: 100.0);
     final RenderConstrainedBox box1 = new RenderConstrainedBox(additionalConstraints: square);
     final RenderConstrainedBox box2 = new RenderConstrainedBox(additionalConstraints: square);
     final RenderConstrainedBox box3 = new RenderConstrainedBox(additionalConstraints: square);
@@ -337,7 +337,7 @@ void main() {
     FlutterError.onError = (FlutterErrorDetails details) {
       exceptions.add(details.exception);
     };
-    const BoxConstraints square = const BoxConstraints.tightFor(width: 100.0, height: 100.0);
+    const BoxConstraints square = BoxConstraints.tightFor(width: 100.0, height: 100.0);
     final RenderConstrainedBox box1 = new RenderConstrainedBox(additionalConstraints: square);
     final RenderConstrainedBox box2 = new RenderConstrainedBox(additionalConstraints: square);
     final RenderConstrainedBox box3 = new RenderConstrainedBox(additionalConstraints: square);
@@ -366,7 +366,7 @@ void main() {
     FlutterError.onError = (FlutterErrorDetails details) {
       exceptions.add(details.exception);
     };
-    const BoxConstraints square = const BoxConstraints.tightFor(width: 100.0, height: 100.0);
+    const BoxConstraints square = BoxConstraints.tightFor(width: 100.0, height: 100.0);
     final RenderConstrainedBox box1 = new RenderConstrainedBox(additionalConstraints: square);
     final RenderConstrainedBox box2 = new RenderConstrainedBox(additionalConstraints: square);
     final RenderConstrainedBox box3 = new RenderConstrainedBox(additionalConstraints: square);
@@ -392,7 +392,7 @@ void main() {
   });
 
   test('MainAxisSize.min inside tightly constrained', () {
-    const BoxConstraints square = const BoxConstraints.tightFor(width: 100.0, height: 100.0);
+    const BoxConstraints square = BoxConstraints.tightFor(width: 100.0, height: 100.0);
     final RenderConstrainedBox box1 = new RenderConstrainedBox(additionalConstraints: square);
     final RenderConstrainedBox box2 = new RenderConstrainedBox(additionalConstraints: square);
     final RenderConstrainedBox box3 = new RenderConstrainedBox(additionalConstraints: square);
@@ -412,7 +412,7 @@ void main() {
   });
 
   test('Flex RTL', () {
-    const BoxConstraints square = const BoxConstraints.tightFor(width: 100.0, height: 100.0);
+    const BoxConstraints square = BoxConstraints.tightFor(width: 100.0, height: 100.0);
     final RenderConstrainedBox box1 = new RenderConstrainedBox(additionalConstraints: square);
     final RenderConstrainedBox box2 = new RenderConstrainedBox(additionalConstraints: square);
     final RenderConstrainedBox box3 = new RenderConstrainedBox(additionalConstraints: square);

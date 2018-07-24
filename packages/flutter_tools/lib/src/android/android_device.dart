@@ -31,7 +31,7 @@ import 'android_sdk.dart';
 enum _HardwareType { emulator, physical }
 
 /// Map to help our `isLocalEmulator` detection.
-const Map<String, _HardwareType> _knownHardware = const <String, _HardwareType>{
+const Map<String, _HardwareType> _knownHardware = <String, _HardwareType>{
   'goldfish': _HardwareType.emulator,
   'qcom': _HardwareType.physical,
   'ranchu': _HardwareType.emulator,
@@ -697,7 +697,7 @@ class _AdbLogReader extends DeviceLogReader {
         _timeOrigin = null;
     runCommand(device.adbCommandForDevice(args)).then<Null>((Process process) {
       _process = process;
-      const Utf8Decoder decoder = const Utf8Decoder(allowMalformed: true);
+      const Utf8Decoder decoder = Utf8Decoder(allowMalformed: true);
       _process.stdout.transform(decoder).transform(const LineSplitter()).listen(_onLine);
       _process.stderr.transform(decoder).transform(const LineSplitter()).listen(_onLine);
       _process.exitCode.whenComplete(() {

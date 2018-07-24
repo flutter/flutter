@@ -53,8 +53,8 @@ class ShrinePageState extends State<ShrinePage> {
     showModalBottomSheet<void>(context: context, builder: (BuildContext context) {
       if (widget.shoppingCart.isEmpty) {
         return const Padding(
-          padding: const EdgeInsets.all(24.0),
-          child: const Text('The shopping cart is empty')
+          padding: EdgeInsets.all(24.0),
+          child: Text('The shopping cart is empty')
         );
       }
       return new ListView(
@@ -80,7 +80,7 @@ class ShrinePageState extends State<ShrinePage> {
 
   void _emptyCart() {
     widget.shoppingCart.clear();
-    widget.scaffoldKey.currentState.showSnackBar(const SnackBar(content: const Text('Shopping cart is empty')));
+    widget.scaffoldKey.currentState.showSnackBar(const SnackBar(content: Text('Shopping cart is empty')));
   }
 
   @override
@@ -112,15 +112,15 @@ class ShrinePageState extends State<ShrinePage> {
             itemBuilder: (BuildContext context) => <PopupMenuItem<ShrineAction>>[
               const PopupMenuItem<ShrineAction>(
                 value: ShrineAction.sortByPrice,
-                child: const Text('Sort by price')
+                child: Text('Sort by price')
               ),
               const PopupMenuItem<ShrineAction>(
                 value: ShrineAction.sortByProduct,
-                child: const Text('Sort by product')
+                child: Text('Sort by product')
               ),
               const PopupMenuItem<ShrineAction>(
                 value: ShrineAction.emptyCart,
-                child: const Text('Empty shopping cart')
+                child: Text('Empty shopping cart')
               )
             ],
             onSelected: (ShrineAction action) {

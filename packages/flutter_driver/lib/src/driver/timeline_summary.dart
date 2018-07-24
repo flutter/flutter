@@ -12,11 +12,11 @@ import 'package:path/path.dart' as path;
 import 'common.dart';
 import 'timeline.dart';
 
-const JsonEncoder _prettyEncoder = const JsonEncoder.withIndent('  ');
+const JsonEncoder _prettyEncoder = JsonEncoder.withIndent('  ');
 
 /// The maximum amount of time considered safe to spend for a frame's build
 /// phase. Anything past that is in the danger of missing the frame as 60FPS.
-const Duration kBuildBudget = const Duration(milliseconds: 8);
+const Duration kBuildBudget = Duration(milliseconds: 8);
 
 /// Extracts statistics from a [Timeline].
 class TimelineSummary {

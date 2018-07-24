@@ -27,7 +27,7 @@ final String reset = hasColor ? '\x1B[0m' : '';
 const String arrow = '⏩';
 const String clock = '🕐';
 
-const Map<String, ShardRunner> _kShards = const <String, ShardRunner>{
+const Map<String, ShardRunner> _kShards = <String, ShardRunner>{
   'analyze': _analyzeRepo,
   'tests': _runTests,
   'tool_tests': _runToolTests,
@@ -36,8 +36,8 @@ const Map<String, ShardRunner> _kShards = const <String, ShardRunner>{
   // 'build_and_deploy_gallery': handled by travis_script.sh
 };
 
-const Duration _kLongTimeout = const Duration(minutes: 45);
-const Duration _kShortTimeout = const Duration(minutes: 5);
+const Duration _kLongTimeout = Duration(minutes: 45);
+const Duration _kShortTimeout = Duration(minutes: 5);
 
 /// When you call this, you can pass additional arguments to pass custom
 /// arguments to flutter test. For example, you might want to call this
@@ -103,9 +103,8 @@ Future<Null> _checkForTrailingSpaces() async {
     final String commitRange = Platform.environment.containsKey('TEST_COMMIT_RANGE')
         ? Platform.environment['TEST_COMMIT_RANGE']
         : 'master..HEAD';
-    print('Checking for trailing whitespace in source files.');
     final List<String> fileTypes = <String>[
-      '*.dart', '*.cxx', '*.cpp', '*.cc', '*.c', '*.C', '*.h', '*.java', '*.mm', '*.m',
+      '*.dart', '*.cxx', '*.cpp', '*.cc', '*.c', '*.C', '*.h', '*.java', '*.mm', '*.m', '.yml',
     ];
     final EvalResult changedFilesResult = await _evalCommand(
       'git', <String>['diff', '-U0', '--no-color', '--name-only', commitRange, '--'] + fileTypes,
@@ -115,8 +114,11 @@ Future<Null> _checkForTrailingSpaces() async {
       print('No Results for whitespace check.');
       return;
     }
-    final List<String> changedFiles = changedFilesResult.stdout.trim().split('\n')
-        .where((String item) => item.trim().isNotEmpty).toList();
+    // Only include files that actually exist, so that we don't try and grep for
+    // nonexistent files (can occur when files are deleted or moved).
+    final List<String> changedFiles = changedFilesResult.stdout.split('\n').where((String filename) {
+      return new File(filename).existsSync();
+    }).toList();
     if (changedFiles.isNotEmpty) {
       await _runCommand('grep',
         <String>[
@@ -125,8 +127,8 @@ Future<Null> _checkForTrailingSpaces() async {
           r'[[:space:]]+$',
         ] + changedFiles,
         workingDirectory: flutterRoot,
-        printOutput: false,
-        expectFailure: true, // Just means a non-zero exit code is expected.
+        failureMessage: '${red}Whitespace detected at the end of source code lines.$reset\nPlease remove:',
+        expectNonZeroExit: true, // Just means a non-zero exit code is expected.
         expectedExitCode: 1, // Indicates that zero lines were found.
       );
     }
@@ -244,7 +246,7 @@ Future<Null> _runSmokeTests() async {
       _runCommand(flutter,
         <String>['drive', '--use-existing-app', '-t', path.join('test_driver', 'failure.dart')],
         workingDirectory: path.join(flutterRoot, 'packages', 'flutter_driver'),
-        expectFailure: true,
+        expectNonZeroExit: true,
         printOutput: false,
         timeout: _kShortTimeout,
       ),
@@ -387,8 +389,9 @@ String elapsedTime(DateTime start) {
 Future<Null> _runCommand(String executable, List<String> arguments, {
   String workingDirectory,
   Map<String, String> environment,
-  bool expectFailure = false,
+  bool expectNonZeroExit = false,
   int expectedExitCode,
+  String failureMessage,
   bool printOutput = true,
   bool skip = false,
   Duration timeout = _kLongTimeout,
@@ -420,17 +423,20 @@ Future<Null> _runCommand(String executable, List<String> arguments, {
 
   final int exitCode = await process.exitCode.timeout(timeout, onTimeout: () {
     stderr.writeln('Process timed out after $timeout');
-    return expectFailure ? 0 : 1;
+    return expectNonZeroExit ? 0 : 1;
   });
   print('$clock ELAPSED TIME: $bold${elapsedTime(start)}$reset for $commandDescription in $relativeWorkingDir: ');
-  if ((exitCode == 0) == expectFailure || (expectedExitCode != null && exitCode != expectedExitCode)) {
+  if ((exitCode == 0) == expectNonZeroExit || (expectedExitCode != null && exitCode != expectedExitCode)) {
+    if (failureMessage != null) {
+      print(failureMessage);
+    }
     if (!printOutput) {
       stdout.writeln(utf8.decode((await savedStdout).expand((List<int> ints) => ints).toList()));
       stderr.writeln(utf8.decode((await savedStderr).expand((List<int> ints) => ints).toList()));
     }
     print(
       '$red━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━$reset\n'
-      '${bold}ERROR:$red Last command exited with $exitCode (expected: ${expectFailure ? 'non-zero' : 'zero'}).$reset\n'
+      '${bold}ERROR:$red Last command exited with $exitCode (expected: ${expectNonZeroExit ? (expectedExitCode ?? 'non-zero') : 'zero'}).$reset\n'
       '${bold}Command:$cyan $commandDescription$reset\n'
       '${bold}Relative working directory:$red $relativeWorkingDir$reset\n'
       '$red━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━$reset'
@@ -466,7 +472,7 @@ Future<Null> _runFlutterTest(String workingDirectory, {
   }
   return _runCommand(flutter, args,
     workingDirectory: workingDirectory,
-    expectFailure: expectFailure,
+    expectNonZeroExit: expectFailure,
     printOutput: printOutput,
     skip: skip,
     timeout: timeout,

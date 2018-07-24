@@ -23,7 +23,7 @@ void main() {
       child: const SizedBox(
         width: 10.0,
         height: 10.0,
-        child: const Text('target', textDirection: TextDirection.ltr)
+        child: Text('target', textDirection: TextDirection.ltr)
       )
     );
   });
@@ -101,7 +101,7 @@ void main() {
     final SemanticsTester semantics = new SemanticsTester(tester);
     await tester.pumpWidget(const Directionality(
       textDirection: TextDirection.ltr,
-      child: const ModalBarrier(
+      child: ModalBarrier(
         dismissible: true,
         semanticsLabel: 'Dismiss',
       ),
@@ -152,7 +152,7 @@ class SecondWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
   return const ModalBarrier(
-    key: const ValueKey<String>('barrier'),
+    key: ValueKey<String>('barrier'),
     dismissible: true
   );
   }

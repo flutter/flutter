@@ -140,13 +140,13 @@ void main() {
     expect(built, 0);
 
     await tester.pumpWidget(new MediaQuery(
-      data: const MediaQueryData(size: const Size(400.0, 300.0)),
+      data: const MediaQueryData(size: Size(400.0, 300.0)),
       child: target
     ));
     expect(built, 1);
 
     await tester.pumpWidget(new MediaQuery(
-      data: const MediaQueryData(size: const Size(300.0, 400.0)),
+      data: const MediaQueryData(size: Size(300.0, 400.0)),
       child: target
     ));
     expect(built, 1);
@@ -164,13 +164,13 @@ void main() {
     expect(built, 0);
 
     await tester.pumpWidget(new MediaQuery(
-      data: const MediaQueryData(size: const Size(400.0, 300.0)),
+      data: const MediaQueryData(size: Size(400.0, 300.0)),
       child: target
     ));
     expect(built, 1);
 
     await tester.pumpWidget(new MediaQuery(
-      data: const MediaQueryData(size: const Size(300.0, 400.0)),
+      data: const MediaQueryData(size: Size(300.0, 400.0)),
       child: target
     ));
     expect(built, 2);

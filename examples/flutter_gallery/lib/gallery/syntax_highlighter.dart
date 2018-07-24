@@ -19,27 +19,27 @@ class SyntaxHighlighterStyle {
 
   static SyntaxHighlighterStyle lightThemeStyle() {
     return new SyntaxHighlighterStyle(
-      baseStyle: const TextStyle(color: const Color(0xFF000000)),
-      numberStyle: const TextStyle(color: const Color(0xFF1565C0)),
-      commentStyle: const TextStyle(color: const Color(0xFF9E9E9E)),
-      keywordStyle: const TextStyle(color: const Color(0xFF9C27B0)),
-      stringStyle: const TextStyle(color: const Color(0xFF43A047)),
-      punctuationStyle: const TextStyle(color: const Color(0xFF000000)),
-      classStyle: const TextStyle(color: const Color(0xFF512DA8)),
-      constantStyle: const TextStyle(color: const Color(0xFF795548))
+      baseStyle: const TextStyle(color: Color(0xFF000000)),
+      numberStyle: const TextStyle(color: Color(0xFF1565C0)),
+      commentStyle: const TextStyle(color: Color(0xFF9E9E9E)),
+      keywordStyle: const TextStyle(color: Color(0xFF9C27B0)),
+      stringStyle: const TextStyle(color: Color(0xFF43A047)),
+      punctuationStyle: const TextStyle(color: Color(0xFF000000)),
+      classStyle: const TextStyle(color: Color(0xFF512DA8)),
+      constantStyle: const TextStyle(color: Color(0xFF795548))
     );
   }
 
   static SyntaxHighlighterStyle darkThemeStyle() {
     return new SyntaxHighlighterStyle(
-      baseStyle: const TextStyle(color: const Color(0xFFFFFFFF)),
-      numberStyle: const TextStyle(color: const Color(0xFF1565C0)),
-      commentStyle: const TextStyle(color: const Color(0xFF9E9E9E)),
-      keywordStyle: const TextStyle(color: const Color(0xFF80CBC4)),
-      stringStyle: const TextStyle(color: const Color(0xFF009688)),
-      punctuationStyle: const TextStyle(color: const Color(0xFFFFFFFF)),
-      classStyle: const TextStyle(color: const Color(0xFF009688)),
-      constantStyle: const TextStyle(color: const Color(0xFF795548))
+      baseStyle: const TextStyle(color: Color(0xFFFFFFFF)),
+      numberStyle: const TextStyle(color: Color(0xFF1565C0)),
+      commentStyle: const TextStyle(color: Color(0xFF9E9E9E)),
+      keywordStyle: const TextStyle(color: Color(0xFF80CBC4)),
+      stringStyle: const TextStyle(color: Color(0xFF009688)),
+      punctuationStyle: const TextStyle(color: Color(0xFFFFFFFF)),
+      classStyle: const TextStyle(color: Color(0xFF009688)),
+      constantStyle: const TextStyle(color: Color(0xFF795548))
     );
   }
 
@@ -65,7 +65,7 @@ class DartSyntaxHighlighter extends SyntaxHighlighter {
 
   SyntaxHighlighterStyle _style;
 
-  static const List<String> _keywords = const <String>[
+  static const List<String> _keywords = <String>[
     'abstract', 'as', 'assert', 'async', 'await', 'break', 'case', 'catch',
     'class', 'const', 'continue', 'default', 'deferred', 'do', 'dynamic', 'else',
     'enum', 'export', 'external', 'extends', 'factory', 'false', 'final',
@@ -75,7 +75,7 @@ class DartSyntaxHighlighter extends SyntaxHighlighter {
     'void', 'while', 'with', 'yield'
   ];
 
-  static const List<String> _builtInTypes = const <String>[
+  static const List<String> _builtInTypes = <String>[
     'int', 'double', 'num', 'bool'
   ];
 

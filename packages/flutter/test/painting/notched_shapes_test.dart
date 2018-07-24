@@ -10,7 +10,7 @@ import 'package:flutter/painting.dart';
 void main() {
   group('CircularNotchedRectangle', () {
     test('guest and host don\'t overlap', () {
-      const CircularNotchedRectangle shape = const CircularNotchedRectangle();
+      const CircularNotchedRectangle shape = CircularNotchedRectangle();
       final Rect host = new Rect.fromLTRB(0.0, 100.0, 300.0, 300.0);
       final Rect guest = new Rect.fromLTWH(50.0, 50.0, 10.0, 10.0);
 
@@ -28,7 +28,7 @@ void main() {
     });
 
     test('guest center above host', () {
-      const CircularNotchedRectangle shape = const CircularNotchedRectangle();
+      const CircularNotchedRectangle shape = CircularNotchedRectangle();
       final Rect host = new Rect.fromLTRB(0.0, 100.0, 300.0, 300.0);
       final Rect guest = new Rect.fromLTRB(190.0, 85.0, 210.0, 105.0);
 
@@ -38,7 +38,7 @@ void main() {
     });
 
     test('guest center below host', () {
-      const CircularNotchedRectangle shape = const CircularNotchedRectangle();
+      const CircularNotchedRectangle shape = CircularNotchedRectangle();
       final Rect host = new Rect.fromLTRB(0.0, 100.0, 300.0, 300.0);
       final Rect guest = new Rect.fromLTRB(190.0, 95.0, 210.0, 115.0);
 

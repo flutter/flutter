@@ -29,7 +29,7 @@ export 'package:flutter/rendering.dart' show SelectionChangedCause;
 /// (including the cursor location).
 typedef void SelectionChangedCallback(TextSelection selection, SelectionChangedCause cause);
 
-const Duration _kCursorBlinkHalfPeriod = const Duration(milliseconds: 500);
+const Duration _kCursorBlinkHalfPeriod = Duration(milliseconds: 500);
 
 // Number of cursor ticks during which the most recently entered character
 // is shown in an obscured text field.
@@ -209,7 +209,7 @@ class EditableText extends StatefulWidget {
     this.onSelectionChanged,
     List<TextInputFormatter> inputFormatters,
     this.rendererIgnoresPointer = false,
-    this.cursorWidth = 1.0,
+    this.cursorWidth = 2.0,
     this.cursorRadius,
     this.scrollPadding = const EdgeInsets.all(20.0),
     this.keyboardAppearance = Brightness.light,
@@ -374,7 +374,7 @@ class EditableText extends StatefulWidget {
 
   /// How thick the cursor will be.
   ///
-  /// Defaults to 1.0
+  /// Defaults to 2.0
   final double cursorWidth;
 
   /// How rounded the corners of the cursor should be.
@@ -691,7 +691,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   }
 
   // Animation configuration for scrolling the caret back on screen.
-  static const Duration _caretAnimationDuration = const Duration(milliseconds: 100);
+  static const Duration _caretAnimationDuration = Duration(milliseconds: 100);
   static const Curve _caretAnimationCurve = Curves.fastOutSlowIn;
 
   bool _showCaretOnScreenScheduled = false;

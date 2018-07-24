@@ -395,6 +395,7 @@ void main() {
     await tester.pumpWidget(
       new Semantics(
         container: true,
+        onDismiss: () => performedActions.add(SemanticsAction.dismiss),
         onTap: () => performedActions.add(SemanticsAction.tap),
         onLongPress: () => performedActions.add(SemanticsAction.longPress),
         onScrollLeft: () => performedActions.add(SemanticsAction.scrollLeft),
@@ -416,8 +417,7 @@ void main() {
 
     final Set<SemanticsAction> allActions = SemanticsAction.values.values.toSet()
       ..remove(SemanticsAction.customAction) // customAction is not user-exposed.
-      ..remove(SemanticsAction.showOnScreen) // showOnScreen is not user-exposed
-      ..remove(SemanticsAction.dismiss); // TODO(jonahwilliams): remove when dismiss action is exposed.
+      ..remove(SemanticsAction.showOnScreen); // showOnScreen is not user-exposed
 
     const int expectedId = 1;
     final TestSemantics expectedSemantics = new TestSemantics.root(
@@ -459,9 +459,10 @@ void main() {
 
   testWidgets('Semantics widget supports all flags', (WidgetTester tester) async {
     final SemanticsTester semantics = new SemanticsTester(tester);
-
+    // Note: checked state and toggled state are mutually exclusive.
     await tester.pumpWidget(
         new Semantics(
+          key: const Key('a'),
           container: true,
           explicitChildNodes: true,
           // flags
@@ -477,15 +478,14 @@ void main() {
           obscured: true,
           scopesRoute: true,
           namesRoute: true,
+          image: true,
+          liveRegion: true,
         )
     );
-    // TODO(jonahwilliams): update when the following semantics flags are added.
     final List<SemanticsFlag> flags = SemanticsFlag.values.values.toList();
     flags
-      ..remove(SemanticsFlag.isImage)
       ..remove(SemanticsFlag.hasToggledState)
-      ..remove(SemanticsFlag.isToggled)
-      ..remove(SemanticsFlag.isLiveRegion);
+      ..remove(SemanticsFlag.isToggled);
 
     TestSemantics expectedSemantics = new TestSemantics.root(
       children: <TestSemantics>[
@@ -498,7 +498,9 @@ void main() {
     expect(semantics, hasSemantics(expectedSemantics, ignoreId: true));
 
     await tester.pumpWidget(new Semantics(
+      key: const Key('b'),
       container: true,
+      scopesRoute: false,
     ));
     expectedSemantics = new TestSemantics.root(
       children: <TestSemantics>[
@@ -510,6 +512,26 @@ void main() {
     );
     expect(semantics, hasSemantics(expectedSemantics, ignoreId: true));
 
+    await tester.pumpWidget(
+      new Semantics(
+        key: const Key('c'),
+        toggled: true,
+      ),
+    );
+
+    expectedSemantics = new TestSemantics.root(
+      children: <TestSemantics>[
+        new TestSemantics.rootChild(
+          rect: TestSemantics.fullScreen,
+          flags: <SemanticsFlag>[
+            SemanticsFlag.hasToggledState,
+            SemanticsFlag.isToggled,
+          ],
+        ),
+      ],
+    );
+
+    expect(semantics, hasSemantics(expectedSemantics, ignoreId: true));
     semantics.dispose();
   });
 
@@ -795,9 +817,9 @@ void main() {
             const Text('Label 2'),
             new Row(
               children: const <Widget>[
-                const Text('Label 3'),
-                const Text('Label 4'),
-                const Text('Label 5'),
+                Text('Label 3'),
+                Text('Label 4'),
+                Text('Label 5'),
               ],
             ),
           ],
@@ -855,9 +877,9 @@ void main() {
               angle: pi / 2.0,
               child: new Row(
                 children: const <Widget>[
-                  const Text('Label 3'),
-                  const Text('Label 4'),
-                  const Text('Label 5'),
+                  Text('Label 3'),
+                  Text('Label 4'),
+                  Text('Label 5'),
                 ],
               ),
             ),

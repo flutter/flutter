@@ -22,12 +22,12 @@ class PageViewAppState extends State<PageViewApp> {
   @override
   void initState() {
     super.initState();
-    const List<Size> cardSizes = const <Size>[
-      const Size(100.0, 300.0),
-      const Size(300.0, 100.0),
-      const Size(200.0, 400.0),
-      const Size(400.0, 400.0),
-      const Size(300.0, 400.0),
+    const List<Size> cardSizes = <Size>[
+      Size(100.0, 300.0),
+      Size(300.0, 100.0),
+      Size(200.0, 400.0),
+      Size(400.0, 400.0),
+      Size(300.0, 400.0),
     ];
 
     cardModels = new List<CardModel>.generate(cardSizes.length, (int i) {
@@ -37,7 +37,7 @@ class PageViewAppState extends State<PageViewApp> {
   }
 
   static const TextStyle cardLabelStyle =
-    const TextStyle(color: Colors.white, fontSize: 18.0, fontWeight: FontWeight.bold);
+    TextStyle(color: Colors.white, fontSize: 18.0, fontWeight: FontWeight.bold);
 
   List<CardModel> cardModels;
   Size pageSize = const Size(200.0, 200.0);
@@ -84,7 +84,7 @@ class PageViewAppState extends State<PageViewApp> {
     return new Drawer(
       child: new ListView(
         children: <Widget>[
-          const DrawerHeader(child: const Center(child: const Text('Options'))),
+          const DrawerHeader(child: Center(child: Text('Options'))),
           new ListTile(
             leading: const Icon(Icons.more_horiz),
             selected: scrollDirection == Axis.horizontal,

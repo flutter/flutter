@@ -12,7 +12,7 @@ import 'typography.dart';
 export 'theme_data.dart' show Brightness, ThemeData;
 
 /// The duration over which theme changes animate by default.
-const Duration kThemeAnimationDuration = const Duration(milliseconds: 200);
+const Duration kThemeAnimationDuration = Duration(milliseconds: 200);
 
 /// Applies a theme to descendant widgets.
 ///

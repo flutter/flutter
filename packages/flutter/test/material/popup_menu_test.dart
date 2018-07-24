@@ -32,7 +32,7 @@ void main() {
                     return <PopupMenuItem<int>>[
                       const PopupMenuItem<int>(
                         value: 1,
-                        child: const Text('One')
+                        child: Text('One')
                       ),
                     ];
                   },
@@ -77,7 +77,7 @@ void main() {
                   return <PopupMenuEntry<int>>[
                     const PopupMenuItem<int>(
                       value: 1,
-                      child: const Text('Tap me please!'),
+                      child: Text('Tap me please!'),
                     ),
                   ];
                 },
@@ -90,7 +90,7 @@ void main() {
                   return <PopupMenuEntry<int>>[
                     const PopupMenuItem<int>(
                       value: 1,
-                      child: const Text('Tap me, too!'),
+                      child: Text('Tap me, too!'),
                     ),
                   ];
                 },
@@ -138,7 +138,7 @@ void main() {
                   return <PopupMenuItem<int>>[
                     const PopupMenuItem<int>(
                       value: 1,
-                      child: const Text('One')
+                      child: Text('One')
                     ),
                   ];
                 },
@@ -167,7 +167,7 @@ void main() {
       return <PopupMenuItem<int>>[
         const PopupMenuItem<int>(
             value: 1,
-            child: const Text('1'),
+            child: Text('1'),
         ),
       ];
     }
@@ -206,15 +206,15 @@ void main() {
     final Widget testButton = new PopupMenuButton<int>(
       itemBuilder: (BuildContext context) {
         return <PopupMenuItem<int>>[
-          const PopupMenuItem<int>(value: 1, child: const Text('AAA')),
-          const PopupMenuItem<int>(value: 2, child: const Text('BBB')),
-          const PopupMenuItem<int>(value: 3, child: const Text('CCC')),
+          const PopupMenuItem<int>(value: 1, child: Text('AAA')),
+          const PopupMenuItem<int>(value: 2, child: Text('BBB')),
+          const PopupMenuItem<int>(value: 3, child: Text('CCC')),
         ];
       },
       child: const SizedBox(
         height: 100.0,
         width: 100.0,
-        child: const Text('XXX'),
+        child: Text('XXX'),
       ),
     );
     final WidgetPredicate popupMenu = (Widget widget) {
@@ -395,7 +395,7 @@ void main() {
     await tester.pumpWidget(new MaterialApp(
       home: new MediaQuery(
         data: const MediaQueryData(
-          padding: const EdgeInsets.all(50.0),
+          padding: EdgeInsets.all(50.0),
         ),
         child: new Material(
           child: new PopupMenuButton<int>(
@@ -416,7 +416,7 @@ void main() {
             child: const SizedBox(
               height: 100.0,
               width: 100.0,
-              child: const Text('XXX'),
+              child: Text('XXX'),
             ),
           ),
         ),
@@ -437,17 +437,17 @@ void main() {
         child: new PopupMenuButton<int>(
           itemBuilder: (BuildContext context) {
             return <PopupMenuItem<int>>[
-              const PopupMenuItem<int>(value: 1, child: const Text('1')),
-              const PopupMenuItem<int>(value: 2, child: const Text('2')),
-              const PopupMenuItem<int>(value: 3, child: const Text('3')),
-              const PopupMenuItem<int>(value: 4, child: const Text('4')),
-              const PopupMenuItem<int>(value: 5, child: const Text('5')),
+              const PopupMenuItem<int>(value: 1, child: Text('1')),
+              const PopupMenuItem<int>(value: 2, child: Text('2')),
+              const PopupMenuItem<int>(value: 3, child: Text('3')),
+              const PopupMenuItem<int>(value: 4, child: Text('4')),
+              const PopupMenuItem<int>(value: 5, child: Text('5')),
             ];
           },
           child: const SizedBox(
             height: 100.0,
             width: 100.0,
-            child: const Text('XXX'),
+            child: Text('XXX'),
           ),
         ),
       ),
