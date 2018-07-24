@@ -126,7 +126,7 @@ void main() {
     // Expect the modal dialog box to take all available height.
     expect(
       tester.getSize(
-        find.byKey(const Key('cupertino_alert_dialog_modal'))
+        find.byType(ClipRRect)
       ),
       equals(const Size(270.0, 560.0)),
     );
@@ -233,6 +233,20 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(seconds: 1));
 
+    // Check that the dialog size is the same as the actions section size. This
+    // ensures that an empty content section doesn't accidentally render some
+    // empty space in the dialog.
+    final Finder contentSectionFinder = find.byElementPredicate((Element element) {
+      return element.widget.runtimeType.toString() == '_CupertinoAlertActionSection';
+    });
+
+    final Finder modalBoundaryFinder = find.byType(ClipRRect);
+
+    expect(
+      tester.getSize(contentSectionFinder),
+      tester.getSize(modalBoundaryFinder),
+    );
+
     // Check that the title/message section is not displayed
     expect(actionScrollController.offset, 0.0);
     expect(tester.getTopLeft(find.widgetWithText(CupertinoDialogAction, 'One')).dy, equals(277.3333333333333));
@@ -273,9 +287,15 @@ void main() {
     // Check that the dialog size is the same as the content section size. This
     // ensures that an empty button section doesn't accidentally render some
     // empty space in the dialog.
+    final Finder contentSectionFinder = find.byElementPredicate((Element element) {
+      return element.widget.runtimeType.toString() == '_CupertinoAlertContentSection';
+    });
+
+    final Finder modalBoundaryFinder = find.byType(ClipRRect);
+
     expect(
-      tester.getSize(find.byKey(const Key('cupertino_alert_dialog_content_section'))),
-      tester.getSize(find.byKey(const Key('cupertino_alert_dialog_modal'))),
+      tester.getSize(contentSectionFinder),
+      tester.getSize(modalBoundaryFinder),
     );
   });
 
@@ -636,9 +656,7 @@ Widget createAppWithButtonThatLaunchesDialog({WidgetBuilder dialogBuilder}) {
             onPressed: () {
               showDialog<void>(
                 context: context,
-                builder: (BuildContext context) {
-                  return dialogBuilder(context);
-                },
+                builder: dialogBuilder,
               );
             },
             child: const Text('Go'),

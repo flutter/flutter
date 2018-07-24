@@ -204,12 +204,13 @@ class CupertinoAlertDialog extends StatelessWidget {
         scrollController: scrollController,
       );
       children.add(new Flexible(flex: 3, child: titleSection));
-      // Add padding between the sections.
-      children.add(const Padding(padding: const EdgeInsets.only(top: 8.0)));
+      if (actions.isNotEmpty) {
+        // If both sections have content, place padding between them.
+        children.add(const Padding(padding: const EdgeInsets.only(top: 8.0)));
+      }
     }
 
     return new Container(
-      key: const Key('cupertino_alert_dialog_content_section'),
       color: _kDialogColor,
       child: new Column(
         mainAxisSize: MainAxisSize.min,
@@ -240,10 +241,9 @@ class CupertinoAlertDialog extends StatelessWidget {
         margin: const EdgeInsets.symmetric(vertical: _kEdgePadding),
         width: _kCupertinoDialogWidth,
         // The following clip is critical. The BackdropFilter needs to have
-        // rounded corners, but SKIA cannot internally create a rounded rect
-        // shape. Therefore, we have no choice but to clip, ourselves.
+        // rounded corners, but Skia cannot internally create a blurred rounded
+        // rect. Therefore, we have no choice but to clip, ourselves.
         child: ClipRRect(
-          key: const Key('cupertino_alert_dialog_modal'),
           borderRadius: BorderRadius.circular(_kDialogCornerRadius),
           child: new BackdropFilter(
             filter: new ImageFilter.blur(sigmaX: 10.0, sigmaY: 10.0),
@@ -283,11 +283,6 @@ class _CupertinoDialogRenderWidget extends MultiChildRenderObjectWidget {
   RenderObject createRenderObject(BuildContext context) {
     return new _RenderCupertinoDialog();
   }
-
-  @override
-  void updateRenderObject(BuildContext context, _RenderCupertinoDialog renderObject) {
-    // NO-OP
-  }
 }
 
 // iOS style layout policy for sizing an alert dialog's content section and action
@@ -304,8 +299,8 @@ class _CupertinoDialogRenderWidget extends MultiChildRenderObjectWidget {
 // button section will not be rendered shorter than this minimum.  See
 // [_RenderCupertinoDialogActions] for the minimum height calculation.
 //
-// With the minimum action button section calculated, the content section is
-// laid out as tall as it wants to be, up to the point that it hits the
+// With the minimum action button section calculated, the content section can
+// take up as much space as is available, up to the point that it hits the
 // minimum button height at the bottom.
 //
 // After the content section is laid out, the action button section is allowed
@@ -471,7 +466,7 @@ class _CupertinoAlertContentSection extends StatelessWidget {
     this.title,
     this.content,
     this.scrollController,
-  }) : super(key: key);
+  }) : super(key: const Key('this_is_the_root'));
 
   // The (optional) title of the dialog is displayed in a large font at the top
   // of the dialog.
