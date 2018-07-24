@@ -2155,6 +2155,7 @@ class InputDecoration {
   ///  * [enabledBorder], displayed when [InputDecoration.enabled] is true
   ///    and [InputDecoration.errorText] is null.
   final InputBorder errorBorder;
+
   /// The border to display when the [InputDecorator] has the focus and is not
   /// showing an error.
   ///
