@@ -114,15 +114,15 @@ class TestRecordingPaintingContext implements PaintingContext {
 
   @override
   // ignore: deprecated_member_use
-  void pushClipRRect(bool needsCompositing, Offset offset, Rect bounds, RRect clipRRect, PaintingContextCallback painter, {Clip clip = defaultClipBehavior}) {
-    assert(clip != null);
-    Layer.clipRRectAndPaint(canvas, clip, clipRRect.shift(offset), bounds.shift(offset), () => painter(this, offset));
+  void pushClipRRect(bool needsCompositing, Offset offset, Rect bounds, RRect clipRRect, PaintingContextCallback painter, {Clip clipBehavior = defaultClipBehavior}) {
+    assert(clipBehavior != null);
+    Layer.clipRRectAndPaint(canvas, clipBehavior, clipRRect.shift(offset), bounds.shift(offset), () => painter(this, offset));
   }
 
   @override
   // ignore: deprecated_member_use
-  void pushClipPath(bool needsCompositing, Offset offset, Rect bounds, Path clipPath, PaintingContextCallback painter, {Clip clip = defaultClipBehavior}) {
-    Layer.clipPathAndPaint(canvas, clip, clipPath.shift(offset), bounds.shift(offset), () => painter(this, offset));
+  void pushClipPath(bool needsCompositing, Offset offset, Rect bounds, Path clipPath, PaintingContextCallback painter, {Clip clipBehavior = defaultClipBehavior}) {
+    Layer.clipPathAndPaint(canvas, clipBehavior, clipPath.shift(offset), bounds.shift(offset), () => painter(this, offset));
   }
 
   @override

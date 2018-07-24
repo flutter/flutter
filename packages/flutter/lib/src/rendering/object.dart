@@ -344,14 +344,14 @@ class PaintingContext {
   ///   function calls the `painter` synchronously.
   /// * `clip` controls how the rounded rectangle is clipped.
   // ignore: deprecated_member_use
-  void pushClipRRect(bool needsCompositing, Offset offset, Rect bounds, RRect clipRRect, PaintingContextCallback painter, {Clip clip = defaultClipBehavior}) {
-    assert(clip != null);
+  void pushClipRRect(bool needsCompositing, Offset offset, Rect bounds, RRect clipRRect, PaintingContextCallback painter, {Clip clipBehavior = defaultClipBehavior}) {
+    assert(clipBehavior != null);
     final Rect offsetBounds = bounds.shift(offset);
     final RRect offsetClipRRect = clipRRect.shift(offset);
     if (needsCompositing) {
-      pushLayer(new ClipRRectLayer(clipRRect: offsetClipRRect, clip: clip), painter, offset, childPaintBounds: offsetBounds);
+      pushLayer(new ClipRRectLayer(clipRRect: offsetClipRRect, clipBehavior: clipBehavior), painter, offset, childPaintBounds: offsetBounds);
     } else {
-      Layer.clipRRectAndPaint(canvas, clip, offsetClipRRect, offsetBounds, () => painter(this, offset));
+      Layer.clipRRectAndPaint(canvas, clipBehavior, offsetClipRRect, offsetBounds, () => painter(this, offset));
     }
   }
 
@@ -368,14 +368,14 @@ class PaintingContext {
   /// * `painter` is a callback that will paint with the `clipPath` applied. This
   ///   function calls the `painter` synchronously.
   // ignore: deprecated_member_use
-  void pushClipPath(bool needsCompositing, Offset offset, Rect bounds, Path clipPath, PaintingContextCallback painter, {Clip clip = defaultClipBehavior}) {
-    assert(clip != null);
+  void pushClipPath(bool needsCompositing, Offset offset, Rect bounds, Path clipPath, PaintingContextCallback painter, {Clip clipBehavior = defaultClipBehavior}) {
+    assert(clipBehavior != null);
     final Rect offsetBounds = bounds.shift(offset);
     final Path offsetClipPath = clipPath.shift(offset);
     if (needsCompositing) {
-      pushLayer(new ClipPathLayer(clipPath: offsetClipPath, clip: clip), painter, offset, childPaintBounds: offsetBounds);
+      pushLayer(new ClipPathLayer(clipPath: offsetClipPath, clipBehavior: clipBehavior), painter, offset, childPaintBounds: offsetBounds);
     } else {
-      Layer.clipPathAndPaint(canvas, clip, offsetClipPath, offsetBounds, () => painter(this, offset));
+      Layer.clipPathAndPaint(canvas, clipBehavior, offsetClipPath, offsetBounds, () => painter(this, offset));
     }
   }
 

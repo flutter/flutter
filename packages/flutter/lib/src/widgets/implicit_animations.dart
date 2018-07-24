@@ -1183,7 +1183,7 @@ class AnimatedPhysicalModel extends ImplicitlyAnimatedWidget {
     Key key,
     @required this.child,
     @required this.shape,
-    this.clip = defaultClipBehavior, // ignore: deprecated_member_use
+    this.clipBehavior = defaultClipBehavior, // ignore: deprecated_member_use
     this.borderRadius = BorderRadius.zero,
     @required this.elevation,
     @required this.color,
@@ -1194,7 +1194,7 @@ class AnimatedPhysicalModel extends ImplicitlyAnimatedWidget {
     @required Duration duration,
   }) : assert(child != null),
        assert(shape != null),
-       assert(clip != null),
+       assert(clipBehavior != null),
        assert(borderRadius != null),
        assert(elevation != null),
        assert(color != null),
@@ -1214,7 +1214,7 @@ class AnimatedPhysicalModel extends ImplicitlyAnimatedWidget {
   final BoxShape shape;
 
   /// {@macro flutter.widgets.Clip}
-  final Clip clip;
+  final Clip clipBehavior;
 
   /// The target border radius of the rounded corners for a rectangle shape.
   final BorderRadius borderRadius;
@@ -1269,7 +1269,7 @@ class _AnimatedPhysicalModelState extends AnimatedWidgetBaseState<AnimatedPhysic
     return new PhysicalModel(
       child: widget.child,
       shape: widget.shape,
-      clip: widget.clip,
+      clipBehavior: widget.clipBehavior,
       borderRadius: _borderRadius.evaluate(animation),
       elevation: _elevation.evaluate(animation),
       color: widget.animateColor ? _color.evaluate(animation) : widget.color,

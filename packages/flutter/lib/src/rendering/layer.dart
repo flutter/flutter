@@ -124,7 +124,7 @@ abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
     properties.add(new DiagnosticsProperty<dynamic>('creator', debugCreator, defaultValue: null, level: DiagnosticLevel.debug));
   }
 
-  static void _clipAndPaint<T>(Canvas canvas, Clip clip, T t, Rect bounds, void painter()) {
+  static void _clipAndPaint<T>(Canvas canvas, Clip clipBehavior, T t, Rect bounds, void painter()) {
     void Function(bool doAA) canvasClipCall;
     if (t is Path) {
       canvasClipCall = (bool doAA) => canvas.clipPath(t, doAntiAlias: doAA);
@@ -135,7 +135,7 @@ abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
     }
     assert(canvasClipCall != null); // t should be one of Path, RRect, Rect
     canvas.save();
-    switch (clip) {
+    switch (clipBehavior) {
       case Clip.none:
         break;
       case Clip.hardEdge:
@@ -150,7 +150,7 @@ abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
         break;
     }
     painter();
-    if (clip == Clip.antiAliasWithSaveLayer) {
+    if (clipBehavior == Clip.antiAliasWithSaveLayer) {
       canvas.restore();
     }
     canvas.restore();
@@ -158,20 +158,20 @@ abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
 
   /// Clip [Canvas] with [Path] according to [Clip] and then paint. [Canvas] is
   /// restored to the pre-clip status afterwards.
-  static void clipPathAndPaint(Canvas canvas, Clip clip, Path path, Rect bounds, void painter()) {
-    _clipAndPaint(canvas, clip, path, bounds, painter);
+  static void clipPathAndPaint(Canvas canvas, Clip clipBehavior, Path path, Rect bounds, void painter()) {
+    _clipAndPaint(canvas, clipBehavior, path, bounds, painter);
   }
 
   /// Clip [Canvas] with [Path] according to [RRect] and then paint. [Canvas] is
   /// restored to the pre-clip status afterwards.
-  static void clipRRectAndPaint(Canvas canvas, Clip clip, RRect rrect, Rect bounds, void painter()) {
-    _clipAndPaint(canvas, clip, rrect, bounds, painter);
+  static void clipRRectAndPaint(Canvas canvas, Clip clipBehavior, RRect rrect, Rect bounds, void painter()) {
+    _clipAndPaint(canvas, clipBehavior, rrect, bounds, painter);
   }
 
   /// Clip [Canvas] with [Path] according to [Rect] and then paint. [Canvas] is
   /// restored to the pre-clip status afterwards.
-  static void clipRectAndPaint(Canvas canvas, Clip clip, Rect rect, Rect bounds, void painter()) {
-    _clipAndPaint(canvas, clip, rect, bounds, painter);
+  static void clipRectAndPaint(Canvas canvas, Clip clipBehavior, Rect rect, Rect bounds, void painter()) {
+    _clipAndPaint(canvas, clipBehavior, rect, bounds, painter);
   }
 }
 
@@ -701,7 +701,7 @@ class ClipRRectLayer extends ContainerLayer {
   ///
   /// The [clipRRect] property must be non-null before the compositing phase of
   /// the pipeline.
-  ClipRRectLayer({ this.clipRRect, this.clip });
+  ClipRRectLayer({ this.clipRRect, this.clipBehavior });
 
   /// The rounded-rect to clip in the parent's coordinate system.
   ///
@@ -710,7 +710,7 @@ class ClipRRectLayer extends ContainerLayer {
   RRect clipRRect;
 
   /// {@macro flutter.widgets.Clip}
-  Clip clip;
+  Clip clipBehavior;
 
   @override
   S find<S>(Offset regionOffset) {
@@ -721,13 +721,13 @@ class ClipRRectLayer extends ContainerLayer {
 
   @override
   void addToScene(ui.SceneBuilder builder, Offset layerOffset) {
-    bool enabled = clip != Clip.none;
+    bool enabled = clipBehavior != Clip.none;
     assert(() {
       enabled = enabled && !debugDisableClipLayers;
       return true;
     }());
     if (enabled)
-      builder.pushClipRRect(clipRRect.shift(layerOffset), clip: clip);
+      builder.pushClipRRect(clipRRect.shift(layerOffset), clip: clipBehavior);
     addChildrenToScene(builder, layerOffset);
     if (enabled)
       builder.pop();
@@ -750,7 +750,7 @@ class ClipPathLayer extends ContainerLayer {
   ///
   /// The [clipPath] property must be non-null before the compositing phase of
   /// the pipeline.
-  ClipPathLayer({ this.clipPath, this.clip });
+  ClipPathLayer({ this.clipPath, this.clipBehavior });
 
   /// The path to clip in the parent's coordinate system.
   ///
@@ -759,7 +759,7 @@ class ClipPathLayer extends ContainerLayer {
   Path clipPath;
 
   /// Whether and how to clip.
-  Clip clip;
+  Clip clipBehavior;
 
   @override
   S find<S>(Offset regionOffset) {
@@ -770,13 +770,13 @@ class ClipPathLayer extends ContainerLayer {
 
   @override
   void addToScene(ui.SceneBuilder builder, Offset layerOffset) {
-    bool enabled = clip != Clip.none;
+    bool enabled = clipBehavior != Clip.none;
     assert(() {
       enabled = enabled && !debugDisableClipLayers;
       return true;
     }());
     if (enabled)
-      builder.pushClipPath(clipPath.shift(layerOffset), clip: clip);
+      builder.pushClipPath(clipPath.shift(layerOffset), clip: clipBehavior);
     addChildrenToScene(builder, layerOffset);
     if (enabled)
       builder.pop();
@@ -981,12 +981,12 @@ class PhysicalModelLayer extends ContainerLayer {
   /// The [clipPath], [elevation], and [color] arguments must not be null.
   PhysicalModelLayer({
     @required this.clipPath,
-    this.clip = defaultClipBehavior, // ignore: deprecated_member_use
+    this.clipBehavior = defaultClipBehavior, // ignore: deprecated_member_use
     @required this.elevation,
     @required this.color,
     @required this.shadowColor,
   }) : assert(clipPath != null),
-       assert(clip != null),
+       assert(clipBehavior != null),
        assert(elevation != null),
        assert(color != null),
        assert(shadowColor != null);
@@ -998,7 +998,7 @@ class PhysicalModelLayer extends ContainerLayer {
   Path clipPath;
 
   /// {@macro flutter.widgets.Clip}
-  Clip clip;
+  Clip clipBehavior;
 
   /// The z-coordinate at which to place this physical object.
   ///
@@ -1041,7 +1041,7 @@ class PhysicalModelLayer extends ContainerLayer {
         elevation: elevation,
         color: color,
         shadowColor: shadowColor,
-        clip: clip,
+        clip: clipBehavior,
       );
     }
     addChildrenToScene(builder, layerOffset);
