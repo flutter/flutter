@@ -122,8 +122,6 @@ class ExpansionPanelRadio extends ExpansionPanel {
 ///
 ///  * [ExpansionPanel]
 ///  * <https://material.google.com/components/expansion-panels.html>
-///  * Switching between the normal expansion panel list and the radio style
-///    list at runtime is not supported.
 class ExpansionPanelList extends StatefulWidget {
   /// Creates an expansion panel list widget. The [expansionCallback] is
   /// triggered when an expansion panel expand/collapse button is pushed.
@@ -206,7 +204,7 @@ class _ExpansionPanelListState extends State<ExpansionPanelList> {
         final ExpansionPanelRadio child = newChild;
         final int childKey = child.value;
         final bool panelWillBeExpanded = child.initializesExpanded || (childKey == _currentOpenPanel?.value);
-        assert(!panelExpanded && panelWillBeExpanded || panelExpanded && !panelWillBeExpanded,
+        assert(!(panelExpanded && panelWillBeExpanded),
           'Trying to initialize radio panel list with more than two open panels!');
         panelExpanded = panelWillBeExpanded;
 
@@ -216,6 +214,7 @@ class _ExpansionPanelListState extends State<ExpansionPanelList> {
       }
     }
     else if(oldWidget._allowOnlyOnePanelOpen) {
+      _currentOpenPanel = null;
       setState((){});
     }
   }
