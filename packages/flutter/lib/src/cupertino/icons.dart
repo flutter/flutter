@@ -89,24 +89,24 @@ class CupertinoIcons {
   static const IconData search = IconData(0xf4a5, fontFamily: iconFont, fontPackage: iconFontPackage);
 
   /// A checkmark.
-  /// 
+  ///
   /// See also:
-  /// 
+  ///
   ///  * [check_mark_circled], which consists of this check mark and a circle surrounding it.
   static const IconData check_mark = IconData(0xf3fd, fontFamily: iconFont, fontPackage: iconFontPackage);
 
   /// A checkmark in a circle. The circle is not filled in.
-  /// 
+  ///
   /// See also:
-  /// 
+  ///
   ///  * [check_mark_circled_solid], which is similar, but filled in.
   ///  * [check_mark], which is the check mark without a circle.
   static const IconData check_mark_circled = IconData(0xf3fe, fontFamily: iconFont, fontPackage: iconFontPackage);
 
   /// A checkmark in a circle. The circle is filled in.
-  /// 
+  ///
   /// See also:
-  /// 
+  ///
   ///  * [check_mark_circled], which is similar, but not filled in.
   static const IconData check_mark_circled_solid = IconData(0xf3ff, fontFamily: iconFont, fontPackage: iconFontPackage);
 
