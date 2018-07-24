@@ -628,45 +628,6 @@ class _CupertinoAlertActionSectionState extends State<_CupertinoAlertActionSecti
   }
 }
 
-// User tap detector that reports to [_CupertinoAlertActionSectionState].
-//
-// Dialog action down/up taps play a role in overall rendering of dividers.
-// Therefore, we need a way to hook into that gesture information per button
-// and pass that information to the divider renderer.
-//
-// This widget is responsible for recognizing the down/up tap events and
-// reporting those events to the [_CupertinoAlertActionSectionState] which
-// forwards the information as desired.
-//
-// See [_CupertinoAlertActionSectionState] for more information about this
-// tap information flow.
-//class _ButtonInteraction extends StatelessWidget {
-//  const _ButtonInteraction({
-//    @required int buttonIndex,
-//    this.child,
-//  }) : assert(buttonIndex != null),
-//        _buttonIndex = buttonIndex;
-//
-//  final int _buttonIndex;
-//  final Widget child;
-//
-//  @override
-//  Widget build(BuildContext context) {
-//    return new GestureDetector(
-//      onTapDown: (TapDownDetails details) {
-//        _CupertinoAlertActionSectionState.of(context).onButtonDown(_buttonIndex);
-//      },
-//      onTapUp: (TapUpDetails details) {
-//        _CupertinoAlertActionSectionState.of(context).onButtonUp(_buttonIndex);
-//      },
-//      onTapCancel: () {
-//        _CupertinoAlertActionSectionState.of(context).onButtonUp(_buttonIndex);
-//      },
-//      child: child,
-//    );
-//  }
-//}
-
 /// A button typically used in a [CupertinoAlertDialog].
 ///
 /// See also:
