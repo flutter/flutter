@@ -46,7 +46,6 @@ template("shell_gpu_configuration") {
       "$flutter_root/common",
       "$flutter_root/flow",
       "$flutter_root/fml",
-      "$flutter_root/glue",
       "$flutter_root/shell/common",
       "$flutter_root/synchronization",
       "//garnet/public/lib/fxl",

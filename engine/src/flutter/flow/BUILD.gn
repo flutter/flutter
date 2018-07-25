@@ -67,7 +67,6 @@ source_set("flow") {
   deps = [
     "$flutter_root/common",
     "$flutter_root/fml",
-    "$flutter_root/glue",
     "$flutter_root/synchronization",
     "//third_party/skia",
     "//third_party/skia:gpu",

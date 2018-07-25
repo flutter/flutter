@@ -14,7 +14,7 @@
 #include <string>
 #include <utility>
 
-#include "flutter/glue/trace_event.h"
+#include "flutter/fml/trace_event.h"
 
 namespace blink {
 

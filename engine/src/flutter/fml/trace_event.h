@@ -5,6 +5,22 @@
 #ifndef FLUTTER_FML_TRACE_EVENT_H_
 #define FLUTTER_FML_TRACE_EVENT_H_
 
+#if defined(__Fuchsia__)
+
+// Forward to the system tracing mechanism on Fuchsia.
+
+#include <trace/event.h>
+
+#define TRACE_EVENT0(a, b) TRACE_DURATION(a, b)
+#define TRACE_EVENT1(a, b, c, d) TRACE_DURATION(a, b, c, d)
+#define TRACE_EVENT2(a, b, c, d, e, f) TRACE_DURATION(a, b, c, d, e, f)
+#define TRACE_EVENT_ASYNC_BEGIN0(a, b, c) TRACE_ASYNC_BEGIN(a, b, c)
+#define TRACE_EVENT_ASYNC_END0(a, b, c) TRACE_ASYNC_END(a, b, c)
+#define TRACE_EVENT_ASYNC_BEGIN1(a, b, c, d, e) TRACE_ASYNC_BEGIN(a, b, c, d, e)
+#define TRACE_EVENT_ASYNC_END1(a, b, c, d, e) TRACE_ASYNC_END(a, b, c, d, e)
+
+#else  // defined(__Fuchsia__)
+
 #include <cstddef>
 #include <cstdint>
 #include <string>
@@ -120,5 +136,7 @@ class ScopedInstantEnd {
 
 }  // namespace tracing
 }  // namespace fml
+
+#endif  // defined(__Fuchsia__)
 
 #endif  // FLUTTER_FML_TRACE_EVENT_H_

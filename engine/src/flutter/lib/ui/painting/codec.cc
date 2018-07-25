@@ -5,7 +5,7 @@
 #include "flutter/lib/ui/painting/codec.h"
 
 #include "flutter/common/task_runners.h"
-#include "flutter/glue/trace_event.h"
+#include "flutter/fml/trace_event.h"
 #include "flutter/lib/ui/painting/frame_info.h"
 #include "lib/fxl/functional/make_copyable.h"
 #include "lib/fxl/logging.h"

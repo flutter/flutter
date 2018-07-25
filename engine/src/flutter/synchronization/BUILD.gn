@@ -13,7 +13,7 @@ source_set("synchronization") {
   public_configs = [ "$flutter_root:config" ]
 
   public_deps = [
-    "$flutter_root/glue",
+    "$flutter_root/fml",
     "//garnet/public/lib/fxl",
   ]
 }

@@ -7,7 +7,7 @@
 #include "flutter/flow/export_node.h"
 #include "flutter/flow/layers/layer.h"
 #include "flutter/flow/matrix_decomposition.h"
-#include "flutter/glue/trace_event.h"
+#include "flutter/fml/trace_event.h"
 
 namespace flow {
 
@@ -94,7 +94,7 @@ void SceneUpdateContext::CreateFrame(scenic::EntityNode& entity_node,
     SetShapeColor(shape_node, color);
 
     scenic::Rectangle inner_shape(session_, inner_bounds.width(),
-                                      inner_bounds.height());
+                                  inner_bounds.height());
     scenic::ShapeNode inner_node(session_);
     inner_node.SetShape(inner_shape);
     inner_node.SetTranslation(inner_bounds.width() * 0.5f + inner_bounds.left(),
