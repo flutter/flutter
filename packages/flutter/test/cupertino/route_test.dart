@@ -134,7 +134,6 @@ void main() {
 
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 500));
-    debugDumpApp();
 
     expect(find.widgetWithText(CupertinoNavigationBar, 'A Phone'), findsOneWidget);
     expect(tester.getCenter(find.text('A Phone')).dx, 400.0);

@@ -57,6 +57,7 @@ class CupertinoTabView extends StatelessWidget {
   /// as [builder] takes its place.
   final WidgetBuilder builder;
 
+  /// The title of the default route.
   final String defaultTitle;
 
   /// This tab view's routing table.

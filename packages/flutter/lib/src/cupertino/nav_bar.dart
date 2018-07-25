@@ -63,6 +63,10 @@ const TextStyle _kLargeTitleTextStyle = TextStyle(
 /// close button in case of a fullscreen dialog) to pop the current route if none
 /// is provided and [automaticallyImplyLeading] is true (true by default).
 ///
+/// The [middle] widget will automatically be a title text from the current
+/// route if none is provided and [automaticallyImplyMiddle] is true (true by
+/// default).
+///
 /// It should be placed at top of the screen and automatically accounts for
 /// the OS's status bar.
 ///
@@ -95,6 +99,9 @@ class CupertinoNavigationBar extends StatelessWidget implements ObstructingPrefe
 
   /// Widget to place at the start of the navigation bar. Normally a back button
   /// for a normal page or a cancel button for full page dialogs.
+  ///
+  /// If null and [automaticallyImplyLeading] is true, an appropriate button
+  /// will be automatically created.
   final Widget leading;
 
   /// Controls whether we should try to imply the leading widget if null.
@@ -102,15 +109,44 @@ class CupertinoNavigationBar extends StatelessWidget implements ObstructingPrefe
   /// If true and [leading] is null, automatically try to deduce what the [leading]
   /// widget should be. If [leading] widget is not null, this parameter has no effect.
   ///
+  /// Specifically [CupertinoNavigationBar] would:
+  ///
+  /// 1. Show a 'Close' button if the current route is a `fullscreenDialog`.
+  /// 2. Show a back chevron with [previousPageTitle] if [previousPageTitle] is
+  ///    not null.
+  /// 3. If the current route is a [CupertinoPageRoute] and the previous route
+  ///    is also a [CupertinoPageRoute], show a back chevron with the previous
+  ///    route's `title`.
+  ///
   /// This value cannot be null.
   final bool automaticallyImplyLeading;
 
+  /// Controls whether we should try to imply the middle widget if null.
+  ///
+  /// If true and [middle] is null, automatically fill in a [Text] widget with
+  /// the current route's `title` if the route is a [CupertinoPageRoute].
+  /// If [middle] widget is not null, this parameter has no effect.
+  ///
+  /// This value cannot be null.
   final bool automaticallyImplyMiddle;
 
+  /// Manually specify the previous route's title when automatically implying
+  /// the leading back button.
+  ///
+  /// Overrides the text shown with the back chevron instead of automatically
+  /// showing the previous [CupertinoPageRoute]'s `title` when
+  /// [automaticallyImplyLeading] is true.
+  ///
+  /// Has no effect when [leading] is not null or if [automaticallyImplyLeading]
+  /// is false.
   final String previousPageTitle;
 
   /// Widget to place in the middle of the navigation bar. Normally a title or
   /// a segmented control.
+  ///
+  /// If null and [automaticallyImplyMiddle] is true, an appropriate [Text]
+  /// title will be created if the current route is a [CupertinoPageRoute] and
+  /// has a `title`.
   final Widget middle;
 
   /// Widget to place at the end of the navigation bar. Normally additional actions
@@ -162,7 +198,7 @@ class CupertinoNavigationBar extends StatelessWidget implements ObstructingPrefe
   Widget build(BuildContext context) {
     final Widget effectiveMiddle = _effectiveTitle(
       title: middle,
-      automaticallyImplyMiddle: automaticallyImplyMiddle,
+      automaticallyImplyTitle: automaticallyImplyMiddle,
       currentRoute: ModalRoute.of(context),
     );
 
@@ -172,6 +208,7 @@ class CupertinoNavigationBar extends StatelessWidget implements ObstructingPrefe
       child: new _CupertinoPersistentNavigationBar(
         leading: leading,
         automaticallyImplyLeading: automaticallyImplyLeading,
+        previousPageTitle: previousPageTitle,
         middle: effectiveMiddle,
         trailing: trailing,
         padding: padding,
@@ -206,6 +243,10 @@ class CupertinoNavigationBar extends StatelessWidget implements ObstructingPrefe
 /// close button in case of a fullscreen dialog) to pop the current route if none
 /// is provided and [automaticallyImplyLeading] is true (true by default).
 ///
+/// The [largeTitle] widget will automatically be a title text from the current
+/// route if none is provided and [automaticallyImplyTitle] is true (true by
+/// default).
+///
 /// See also:
 ///
 ///  * [CupertinoNavigationBar], an iOS navigation bar for use on non-scrolling
@@ -219,7 +260,7 @@ class CupertinoSliverNavigationBar extends StatelessWidget {
     this.largeTitle,
     this.leading,
     this.automaticallyImplyLeading = true,
-    this.automaticallyImplyMiddle = true,
+    this.automaticallyImplyTitle = true,
     this.previousPageTitle,
     this.middle,
     this.trailing,
@@ -228,7 +269,7 @@ class CupertinoSliverNavigationBar extends StatelessWidget {
     this.padding,
     this.actionsForegroundColor = CupertinoColors.activeBlue,
   }) : assert(automaticallyImplyLeading != null),
-       assert(automaticallyImplyMiddle != null),
+       assert(automaticallyImplyTitle != null),
        super(key: key);
 
   /// The navigation bar's title.
@@ -245,12 +286,19 @@ class CupertinoSliverNavigationBar extends StatelessWidget {
   /// any [GlobalKey]s, and that it not rely on maintaining state (for example,
   /// animations will not survive the transition from one location to the other,
   /// and may in fact be visible in two places at once during the transition).
+  ///
+  /// If null and [automaticallyImplyTitle] is true, an appropriate [Text]
+  /// title will be created if the current route is a [CupertinoPageRoute] and
+  /// has a `title`.
   final Widget largeTitle;
 
   /// Widget to place at the start of the static navigation bar. Normally a back button
   /// for a normal page or a cancel button for full page dialogs.
   ///
   /// This widget is visible in both collapsed and expanded states.
+  ///
+  /// If null and [automaticallyImplyLeading] is true, an appropriate button
+  /// will be automatically created.
   final Widget leading;
 
   /// Controls whether we should try to imply the leading widget if null.
@@ -258,11 +306,36 @@ class CupertinoSliverNavigationBar extends StatelessWidget {
   /// If true and [leading] is null, automatically try to deduce what the [leading]
   /// widget should be. If [leading] widget is not null, this parameter has no effect.
   ///
+  /// Specifically [CupertinoSliverNavigationBar] would:
+  ///
+  /// 1. Show a 'Close' button if the current route is a `fullscreenDialog`.
+  /// 2. Show a back chevron with [previousPageTitle] if [previousPageTitle] is
+  ///    not null.
+  /// 3. If the current route is a [CupertinoPageRoute] and the previous route
+  ///    is also a [CupertinoPageRoute], show a back chevron with the previous
+  ///    route's `title`.
+  ///
   /// This value cannot be null.
   final bool automaticallyImplyLeading;
 
-  final bool automaticallyImplyMiddle;
+  /// Controls whether we should try to imply the [largeTitle] widget if null.
+  ///
+  /// If true and [largeTitle] is null, automatically fill in a [Text] widget
+  /// with the current route's `title` if the route is a [CupertinoPageRoute].
+  /// If [largeTitle] widget is not null, this parameter has no effect.
+  ///
+  /// This value cannot be null.
+  final bool automaticallyImplyTitle;
 
+  /// Manually specify the previous route's title when automatically implying
+  /// the leading back button.
+  ///
+  /// Overrides the text shown with the back chevron instead of automatically
+  /// showing the previous [CupertinoPageRoute]'s `title` when
+  /// [automaticallyImplyLeading] is true.
+  ///
+  /// Has no effect when [leading] is not null or if [automaticallyImplyLeading]
+  /// is false.
   final String previousPageTitle;
 
   /// A widget to place in the middle of the static navigation bar instead of
@@ -316,7 +389,7 @@ class CupertinoSliverNavigationBar extends StatelessWidget {
   Widget build(BuildContext context) {
     final Widget effectiveTitle = _effectiveTitle(
       title: largeTitle,
-      automaticallyImplyMiddle: automaticallyImplyMiddle,
+      automaticallyImplyTitle: automaticallyImplyTitle,
       currentRoute: ModalRoute.of(context),
     );
 
@@ -507,12 +580,12 @@ Widget _wrapWithBackground({
 
 Widget _effectiveTitle({
   Widget title,
-  bool automaticallyImplyMiddle,
+  bool automaticallyImplyTitle,
   ModalRoute<dynamic> currentRoute,
 }) {
   // Auto use the CupertinoPageRoute's title if middle not provided.
   if (title == null
-      && automaticallyImplyMiddle
+      && automaticallyImplyTitle
       && currentRoute is CupertinoPageRoute
       && currentRoute.title?.isNotEmpty == true) {
     return new Text(currentRoute.title);
@@ -621,15 +694,19 @@ class _CupertinoPersistentNavigationBar extends StatelessWidget implements Prefe
       if (currentRoute?.canPop == true) {
         Widget backOrCloseButtonContent;
         if (currentRoute is PageRoute && currentRoute?.fullscreenDialog == true) {
-          backOrCloseButtonContent = const Text('Close');
+          backOrCloseButtonContent = const Padding(
+            padding: EdgeInsetsDirectional.only(
+              start: _kNavBarEdgePadding,
+            ),
+            child: Text('Close'),
+          );
         } else {
           final TextDirection textDirection = Directionality.of(context);
 
           // Replicate the Icon logic here to get a tightly sized icon and add
           // custom non-square padding.
-          Widget iconWidget = new RichText(
-            textDirection: textDirection,
-            text: new TextSpan(
+          Widget iconWidget = new Text.rich(
+            new TextSpan(
               text: new String.fromCharCode(CupertinoIcons.back.codePoint),
               style: new TextStyle(
                 inherit: false,
@@ -715,6 +792,8 @@ class _CupertinoPersistentNavigationBar extends StatelessWidget implements Prefe
   }
 }
 
+/// A widget that shows next to the back chevron when `automaticallyImplyLeading`
+/// is true.
 class _BackLabel extends StatelessWidget {
   const _BackLabel({
     @required this.specifiedPreviousTitle,
@@ -724,6 +803,8 @@ class _BackLabel extends StatelessWidget {
   final String specifiedPreviousTitle;
   final ModalRoute<dynamic> route;
 
+  // `child` is never passed in into ValueListenableBuilder so it's always
+  // null here and unused.
   Widget _buildPreviousTitleWidget(BuildContext context, String previousTitle, Widget child) {
     if (previousTitle?.isNotEmpty == true) {
       if (previousTitle.length > 10) {
@@ -732,7 +813,7 @@ class _BackLabel extends StatelessWidget {
         return new Text(previousTitle, maxLines: 1);
       }
     } else {
-      return new Container();
+      return const SizedBox(height: 0.0, width: 0.0);
     }
   }
 
@@ -744,67 +825,10 @@ class _BackLabel extends StatelessWidget {
       final CupertinoPageRoute<dynamic> cupertinoRoute = route;
       return new ValueListenableBuilder<String>(
         valueListenable: cupertinoRoute.previousTitle,
-        valueWidgetBuilder: _buildPreviousTitleWidget,
+        builder: _buildPreviousTitleWidget,
       );
     } else {
-      return new Container();
+      return const SizedBox(height: 0.0, width: 0.0);
     }
-  }
-}
-
-typedef Widget ValueWidgetBuilder<T>(BuildContext context, T value, Widget child);
-
-class ValueListenableBuilder<T> extends StatefulWidget {
-  const ValueListenableBuilder({
-    @required this.valueListenable,
-    @required this.valueWidgetBuilder,
-    this.child,
-  }) : assert(valueListenable != null),
-       assert(valueWidgetBuilder != null);
-
-  final ValueListenable<T> valueListenable;
-  final ValueWidgetBuilder<T> valueWidgetBuilder;
-  final Widget child;
-
-  @override
-  State<StatefulWidget> createState() => new _ValueListenableBuilderState<T>();
-}
-
-class _ValueListenableBuilderState<T> extends State<ValueListenableBuilder<T>> {
-  T value;
-
-  @override
-  void initState() {
-    _updateValue();
-    super.initState();
-  }
-
-  @override
-  void didUpdateWidget(ValueListenableBuilder<T> oldWidget) {
-    if (oldWidget.valueListenable != widget.valueListenable) {
-      oldWidget.valueListenable.removeListener(_valueChanged);
-    }
-    _updateValue();
-    super.didUpdateWidget(oldWidget);
-  }
-
-  @override
-  void dispose() {
-    widget.valueListenable.removeListener(_valueChanged);
-    super.dispose();
-  }
-
-  void _valueChanged() {
-    setState(() { value = widget.valueListenable.value; });
-  }
-
-  void _updateValue() {
-    value = widget.valueListenable.value;
-    widget.valueListenable.addListener(_valueChanged);
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return widget.valueWidgetBuilder(context, value, widget.child);
   }
 }

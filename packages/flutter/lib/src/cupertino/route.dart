@@ -104,9 +104,29 @@ class CupertinoPageRoute<T> extends PageRoute<T> {
   /// Builds the primary contents of the route.
   final WidgetBuilder builder;
 
+  /// A title string for this route.
+  ///
+  /// Used to autopopulate [CupertinoNavigationBar] and
+  /// [CupertinoSliverNavigationBar]'s `middle`/`largeTitle` widgets when
+  /// one is not manually supplied.
   final String title;
 
   ValueNotifier<String> _previousTitle;
+
+  /// The title string of the previous [CupertinoPageRoute].
+  ///
+  /// The [ValueListenable]'s value is readable after the route is installed
+  /// onto a [Navigator]. The [ValueListenable] will also notify its listeners
+  /// if the value changes (such as by replacing the previous route).
+  ///
+  /// The [ValueListenable] itself will be null before the route is installed.
+  /// Its content value will be null if the previous route has no title or
+  /// is not a [CupertinoPageRoute].
+  ///
+  /// See also:
+  ///
+  ///  * [ValueListenableBuilder], which can be used to listen and rebuild
+  ///    widgets based on a ValueListenable.
   ValueListenable<String> get previousTitle {
     assert(
       _previousTitle != null,
@@ -117,12 +137,13 @@ class CupertinoPageRoute<T> extends PageRoute<T> {
 
   @override
   void didChangePrevious(Route<dynamic> previousRoute) {
-    if (previousRoute is CupertinoPageRoute) {
-      if (_previousTitle == null) {
-        _previousTitle = new ValueNotifier<String>(previousRoute.title);
-      } else {
-        _previousTitle.value = previousRoute.title;
-      }
+    final String previousTitleString = previousRoute is CupertinoPageRoute
+        ? previousRoute.title
+        : null;
+    if (_previousTitle == null) {
+      _previousTitle = new ValueNotifier<String>(previousTitleString);
+    } else {
+      _previousTitle.value = previousTitleString;
     }
     super.didChangePrevious(previousRoute);
   }

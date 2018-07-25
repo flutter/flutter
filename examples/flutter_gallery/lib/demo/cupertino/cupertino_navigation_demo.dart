@@ -91,7 +91,7 @@ class CupertinoNavigationDemo extends StatelessWidget {
                 break;
               case 2:
                 return new CupertinoTabView(
-                  builder: (BuildContext context) => CupertinoDemoTab2(),
+                  builder: (BuildContext context) => CupertinoDemoTab3(),
                   defaultTitle: 'Account',
                 );
                 break;
@@ -293,7 +293,7 @@ class Tab1ItemPageState extends State<Tab1ItemPage> {
   Widget build(BuildContext context) {
     return new CupertinoPageScaffold(
       navigationBar: const CupertinoNavigationBar(
-        trailing: const ExitButton(),
+        trailing: ExitButton(),
       ),
       child: new SafeArea(
         top: false,
