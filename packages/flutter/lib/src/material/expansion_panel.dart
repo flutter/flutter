@@ -142,7 +142,7 @@ class ExpansionPanelList extends StatefulWidget {
     this.expansionCallback,
     this.animationDuration = kThemeAnimationDuration,
     this.initialOpenPanelValue,
-  }) : children = children, //ignore:
+  }) : children = children,
        assert(children != null),
        assert(animationDuration != null),
        _allowOnlyOnePanelOpen = true,
@@ -167,8 +167,8 @@ class ExpansionPanelList extends StatefulWidget {
   // Whether multiple panels can be open simultaneously
   final bool _allowOnlyOnePanelOpen;
 
-  /// The value of the panel that initially begins open. (This value is only
-  /// used when initializing with the radio constructor.)
+  /// The value of the panel that initially begins open. (This value is
+  /// only used when initializing with the radio constructor.)
   final Object initialOpenPanelValue;
 
   @override
@@ -182,6 +182,7 @@ class _ExpansionPanelListState extends State<ExpansionPanelList> {
   void initState() {
     super.initState();
     if (widget._allowOnlyOnePanelOpen) {
+      assert(_allIdentifiersUnique(), 'All object identifiers are not unique!');
       for (ExpansionPanelRadio child in widget.children) {
         if (widget.initialOpenPanelValue != null &&
             child.value == widget.initialOpenPanelValue)
@@ -194,6 +195,7 @@ class _ExpansionPanelListState extends State<ExpansionPanelList> {
   void didUpdateWidget(ExpansionPanelList oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget._allowOnlyOnePanelOpen) {
+      assert(_allIdentifiersUnique(), 'All object identifiers are not unique!');
       for (ExpansionPanelRadio newChild in widget.children) {
         if (widget.initialOpenPanelValue != null &&
             newChild.value == widget.initialOpenPanelValue)
@@ -204,13 +206,13 @@ class _ExpansionPanelListState extends State<ExpansionPanelList> {
     }
   }
 
-//  bool _allIdentifiersUnique() {
-//
-//    for(ExpansionPanelRadio child in widget.children)
-//      {
-//
-//      }
-//  }
+  bool _allIdentifiersUnique() {
+    Map<Object, bool> identifierMap = Map<Object, bool>();
+    for (ExpansionPanelRadio child in widget.children) {
+      identifierMap[child.value] = true;
+    }
+    return identifierMap.length == widget.children.length;
+  }
 
   bool _isChildExpanded(int index) {
     if (widget._allowOnlyOnePanelOpen) {
