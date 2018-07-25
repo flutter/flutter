@@ -655,13 +655,16 @@ class ClipRectLayer extends ContainerLayer {
   ///
   /// The [clipRect] property must be non-null before the compositing phase of
   /// the pipeline.
-  ClipRectLayer({ this.clipRect });
+  ClipRectLayer({ this.clipRect, this.clipBehavior = Clip.antiAlias }) : assert(clipBehavior != null && clipBehavior != Clip.none);
 
   /// The rectangle to clip in the parent's coordinate system.
   ///
   /// The scene must be explicitly recomposited after this property is changed
   /// (as described at [Layer]).
   Rect clipRect;
+
+  /// {@macro flutter.layer.clipBehavior}
+  Clip clipBehavior;
 
   @override
   S find<S>(Offset regionOffset) {
@@ -678,7 +681,7 @@ class ClipRectLayer extends ContainerLayer {
       return true;
     }());
     if (enabled)
-      builder.pushClipRect(clipRect.shift(layerOffset));
+      builder.pushClipRect(clipRect.shift(layerOffset), clip: clipBehavior);
     addChildrenToScene(builder, layerOffset);
     if (enabled)
       builder.pop();
@@ -701,7 +704,7 @@ class ClipRRectLayer extends ContainerLayer {
   ///
   /// The [clipRRect] property must be non-null before the compositing phase of
   /// the pipeline.
-  ClipRRectLayer({ this.clipRRect, this.clipBehavior });
+  ClipRRectLayer({ this.clipRRect, this.clipBehavior = Clip.antiAlias });
 
   /// The rounded-rect to clip in the parent's coordinate system.
   ///
@@ -709,7 +712,7 @@ class ClipRRectLayer extends ContainerLayer {
   /// (as described at [Layer]).
   RRect clipRRect;
 
-  /// {@macro flutter.widgets.Clip}
+  /// {@macro flutter.layer.clipBehavior}
   Clip clipBehavior;
 
   @override
@@ -750,7 +753,7 @@ class ClipPathLayer extends ContainerLayer {
   ///
   /// The [clipPath] property must be non-null before the compositing phase of
   /// the pipeline.
-  ClipPathLayer({ this.clipPath, this.clipBehavior });
+  ClipPathLayer({ this.clipPath, this.clipBehavior = Clip.antiAlias }) : assert(clipBehavior != null && clipBehavior != Clip.none);
 
   /// The path to clip in the parent's coordinate system.
   ///
@@ -758,7 +761,10 @@ class ClipPathLayer extends ContainerLayer {
   /// (as described at [Layer]).
   Path clipPath;
 
-  /// Whether and how to clip.
+  /// {@template flutter.layer.clipBehavior}
+  /// Controls how to clip (default to [Clip.antiAlias]). [Clip.none] is not
+  /// allowed here.
+  /// {@endtemplate}
   Clip clipBehavior;
 
   @override

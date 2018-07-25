@@ -1123,7 +1123,9 @@ abstract class _RenderCustomClip<T> extends RenderProxyBox {
     RenderBox child,
     Clip clipBehavior = defaultClipBehavior, // ignore: deprecated_member_use
     CustomClipper<T> clipper // this would override _clip and initialClip
-  }) : _clipper = clipper, _defaultClipBehavior = clipBehavior, super(child);
+  }) : _clipper = clipper, _clipBehavior = clipBehavior, super(child) {
+    assert(_clipper != null || _clipBehavior != null && _clipBehavior != Clip.none);
+  }
 
   /// If non-null, determines which clip to use on the child.
   CustomClipper<T> get clipper => _clipper;
@@ -1166,9 +1168,15 @@ abstract class _RenderCustomClip<T> extends RenderProxyBox {
   T get _defaultClip;
   T _clip;
 
-  final Clip _defaultClipBehavior; // May be overridden by clipper.
+  /// {@template flutter.widget.clipper.clipBehavior}
+  /// Controls how to clip when clipper is null. Otherwise, clipper controls the
+  /// clip behavior.
+  ///
+  /// Default to [Clip.antiAlias]. [Clip.none] is not allowed here.
+  /// {@endtemplate}
+  Clip _clipBehavior;
 
-  Clip get clipBehavior => clipper == null ? _defaultClipBehavior : clipper.clipBehavior;
+  Clip get clipBehavior => clipper == null ? _clipBehavior : clipper.clipBehavior;
 
   @override
   void performLayout() {
@@ -1230,8 +1238,9 @@ class RenderClipRect extends _RenderCustomClip<Rect> {
   /// the child.
   RenderClipRect({
     RenderBox child,
-    CustomClipper<Rect> clipper
-  }) : super(child: child, clipper: clipper);
+    CustomClipper<Rect> clipper,
+    Clip clipBehavior = Clip.antiAlias,
+  }) : super(child: child, clipper: clipper, clipBehavior: clipBehavior);
 
   @override
   Rect get _defaultClip => Offset.zero & size;
@@ -1251,7 +1260,7 @@ class RenderClipRect extends _RenderCustomClip<Rect> {
   void paint(PaintingContext context, Offset offset) {
     if (child != null) {
       _updateClip();
-      context.pushClipRect(needsCompositing, offset, _clip, super.paint);
+      context.pushClipRect(needsCompositing, offset, _clip, super.paint, clipBehavior: clipBehavior);
     }
   }
 
@@ -1284,7 +1293,8 @@ class RenderClipRRect extends _RenderCustomClip<RRect> {
     RenderBox child,
     BorderRadius borderRadius = BorderRadius.zero,
     CustomClipper<RRect> clipper,
-  }) : _borderRadius = borderRadius, super(child: child, clipper: clipper) {
+    Clip clipBehavior = Clip.antiAlias,
+  }) : _borderRadius = borderRadius, super(child: child, clipper: clipper, clipBehavior: clipBehavior) {
     assert(_borderRadius != null || clipper != null);
   }
 
@@ -1351,8 +1361,9 @@ class RenderClipOval extends _RenderCustomClip<Rect> {
   /// position of the child.
   RenderClipOval({
     RenderBox child,
-    CustomClipper<Rect> clipper
-  }) : super(child: child, clipper: clipper);
+    CustomClipper<Rect> clipper,
+    Clip clipBehavior = Clip.antiAlias,
+  }) : super(child: child, clipper: clipper, clipBehavior: clipBehavior);
 
   Rect _cachedRect;
   Path _cachedPath;
@@ -1423,8 +1434,9 @@ class RenderClipPath extends _RenderCustomClip<Path> {
   /// efficiently.
   RenderClipPath({
     RenderBox child,
-    CustomClipper<Path> clipper
-  }) : super(child: child, clipper: clipper);
+    CustomClipper<Path> clipper,
+    Clip clipBehavior = Clip.antiAlias,
+  }) : super(child: child, clipper: clipper, clipBehavior: clipBehavior);
 
   @override
   Path get _defaultClip => new Path()..addRect(Offset.zero & size);
