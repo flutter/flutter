@@ -6,6 +6,7 @@ import 'basic_types.dart';
 import 'print.dart';
 
 /// Signature for [FlutterError.onError] handler.
+// TESTING
 typedef void FlutterExceptionHandler(FlutterErrorDetails details);
 
 /// Signature for [FlutterErrorDetails.informationCollector] callback
