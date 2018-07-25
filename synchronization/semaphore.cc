@@ -4,8 +4,8 @@
 
 #include "flutter/synchronization/semaphore.h"
 
-#include "lib/fxl/build_config.h"
-#include "lib/fxl/logging.h"
+#include "flutter/fml/build_config.h"
+#include "flutter/fml/logging.h"
 
 #if OS_MACOSX
 #include <dispatch/dispatch.h>
@@ -47,7 +47,7 @@ class PlatformSemaphore {
   dispatch_semaphore_t _sem;
   const uint32_t _initial;
 
-  FXL_DISALLOW_COPY_AND_ASSIGN(PlatformSemaphore);
+  FML_DISALLOW_COPY_AND_ASSIGN(PlatformSemaphore);
 };
 
 }  // namespace flutter
@@ -88,14 +88,14 @@ class PlatformSemaphore {
  private:
   HANDLE _sem;
 
-  FXL_DISALLOW_COPY_AND_ASSIGN(PlatformSemaphore);
+  FML_DISALLOW_COPY_AND_ASSIGN(PlatformSemaphore);
 };
 
 }  // namespace flutter
 
 #else
 #include <semaphore.h>
-#include "lib/fxl/files/eintr_wrapper.h"
+#include "flutter/fml/eintr_wrapper.h"
 
 namespace flutter {
 
@@ -109,7 +109,7 @@ class PlatformSemaphore {
       int result = ::sem_destroy(&sem_);
       // Can only be EINVAL which should not be possible since we checked for
       // validity.
-      FXL_DCHECK(result == 0);
+      FML_DCHECK(result == 0);
     }
   }
 
@@ -120,7 +120,7 @@ class PlatformSemaphore {
       return false;
     }
 
-    return HANDLE_EINTR(::sem_trywait(&sem_)) == 0;
+    return FML_HANDLE_EINTR(::sem_trywait(&sem_)) == 0;
   }
 
   void Signal() {
@@ -137,7 +137,7 @@ class PlatformSemaphore {
   bool valid_;
   sem_t sem_;
 
-  FXL_DISALLOW_COPY_AND_ASSIGN(PlatformSemaphore);
+  FML_DISALLOW_COPY_AND_ASSIGN(PlatformSemaphore);
 };
 
 }  // namespace flutter

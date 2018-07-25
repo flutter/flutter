@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 #include "flutter/assets/zip_asset_store.h"
-#include "lib/fxl/build_config.h"
+#include "flutter/fml/build_config.h"
 
 #include <fcntl.h>
 
@@ -58,13 +58,13 @@ std::unique_ptr<fml::Mapping> ZipAssetStore::GetAsMapping(
 
   result = unzGoToFilePos(unzipper.get(), &(found->second.file_pos));
   if (result != UNZ_OK) {
-    FXL_LOG(WARNING) << "unzGetCurrentFileInfo failed, error=" << result;
+    FML_LOG(WARNING) << "unzGetCurrentFileInfo failed, error=" << result;
     return nullptr;
   }
 
   result = unzOpenCurrentFile(unzipper.get());
   if (result != UNZ_OK) {
-    FXL_LOG(WARNING) << "unzOpenCurrentFile failed, error=" << result;
+    FML_LOG(WARNING) << "unzOpenCurrentFile failed, error=" << result;
     return nullptr;
   }
 
