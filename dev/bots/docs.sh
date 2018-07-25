@@ -8,8 +8,6 @@ echo "Running docs.sh"
 export FLUTTER_ROOT="$PWD"
 export PATH="$PWD/bin:$PATH"
 
-# This is called from travis_upload.sh on Travis.
-
 # Make sure dart is installed
 bin/flutter --version
 
@@ -33,13 +31,13 @@ bin/cache/dart-sdk/bin/dart dev/tools/java_and_objc_doc.dart
 # Ensure google webmaster tools can verify our site.
 cp dev/docs/google2ed1af765c529f57.html dev/docs/doc
 
-# Upload new API docs when on Travis
-if [ "$TRAVIS_PULL_REQUEST" == "false" ]; then
-  echo "This is not a pull request; considering whether to upload docs... (branch=$TRAVIS_BRANCH)"
-  if [ "$TRAVIS_BRANCH" == "master" -o "$TRAVIS_BRANCH" == "beta" ]; then
+# Upload new API docs when on Cirrus
+if [[ -n "$CIRRUS_CI" && -z "$CIRRUS_PR" ]]; then
+  echo "This is not a pull request; considering whether to upload docs... (branch=$CIRRUS_BRANCH)"
+  if [[ "$CIRRUS_BRANCH" == "master" || "$CIRRUS_BRANCH" == "beta" ]]; then
     cd dev/docs
 
-    if [ "$TRAVIS_BRANCH" == "master" ]; then
+    if [[ "$CIRRUS_BRANCH" == "master" ]]; then
       echo "Updating master docs: https://master-docs-flutter-io.firebaseapp.com/"
       echo -e "User-agent: *\nDisallow: /" > doc/robots.txt
       while : ; do
@@ -49,7 +47,7 @@ if [ "$TRAVIS_PULL_REQUEST" == "false" ]; then
       done
     fi
 
-    if [ "$TRAVIS_BRANCH" == "beta" ]; then
+    if [[ "$CIRRUS_BRANCH" == "beta" ]]; then
       echo "Updating beta docs: https://docs.flutter.io/"
       while : ; do
         firebase deploy --project docs-flutter-io && break
