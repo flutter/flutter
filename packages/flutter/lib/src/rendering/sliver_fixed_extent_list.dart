@@ -155,8 +155,6 @@ abstract class RenderSliverFixedExtentBoxAdaptor extends RenderSliverMultiBoxAda
     final int targetLastIndex = targetEndScrollOffset.isFinite ?
         getMaxChildIndexForScrollOffset(targetEndScrollOffset, itemExtent) : null;
 
-    print("Sliver from: " + firstIndex.toString() + " " + targetLastIndex.toString());
-
     if (firstChild != null) {
       final int oldFirstIndex = indexOf(firstChild);
       final int oldLastIndex = indexOf(lastChild);

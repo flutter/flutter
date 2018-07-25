@@ -512,7 +512,7 @@ class ListWheelScrollView extends StatefulWidget {
   /// {@macro flutter.rendering.wheelList.renderChildrenOutsideViewport}
   final bool renderChildrenOutsideViewport;
 
-  /// Builder to help lazily instantiate child.
+  /// A delegate that helps lazily instantiating child.
   final SliverChildDelegate childDelegate;
 
   @override
@@ -599,7 +599,7 @@ class ListWheelElement extends RenderObjectElement {
   /// A cache of widgets so that we don't have to rebuild every time.
   final Map<int, Widget> _childWidgets = new HashMap<int, Widget>();
 
-  /// The map containing all the active child elements.
+  /// The map containing all active child elements.
   final SplayTreeMap<int, Element> _childElements = new SplayTreeMap<int, Element>();
 
   @override
@@ -613,6 +613,8 @@ class ListWheelElement extends RenderObjectElement {
       performRebuild();
   }
 
+  /// The number of children that will be provided. Be null if number of
+  /// children is infinite.
   int get childCount => widget.childDelegate.estimatedChildCount;
 
   @override
@@ -654,7 +656,7 @@ class ListWheelElement extends RenderObjectElement {
     });
   }
 
-  /// RRemove the child element corresponding with the given RenderBox.
+  /// Remove the child element corresponding with the given RenderBox.
   void removeChild(RenderBox child) {
     final int index = renderObject.indexOf(child);
     owner.buildScope(this, () {
@@ -751,7 +753,8 @@ class ListWheelViewport extends RenderObjectWidget {
     this.renderChildrenOutsideViewport = false,
     @required this.offset,
     @required this.childDelegate,
-  }) : assert(offset != null),
+  }) : assert(childDelegate != null),
+       assert(offset != null),
        assert(diameterRatio != null),
        assert(diameterRatio > 0, RenderListWheelViewport.diameterRatioZeroMessage),
        assert(perspective != null),
