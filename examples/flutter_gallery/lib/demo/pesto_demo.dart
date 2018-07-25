@@ -588,7 +588,7 @@ const List<Recipe> kPestoRecipes = <Recipe>[
       RecipeIngredient(amount: '1 tsp', description: 'Salt'),
     ],
     steps: <RecipeStep>[
-      RecipeStep(description: 'Put in oven'),
+      RecipeStep(duration: '1 min', description: 'Put in oven'),
       RecipeStep(duration: '1hr 45 min', description: 'Cook'),
     ],
   ),
