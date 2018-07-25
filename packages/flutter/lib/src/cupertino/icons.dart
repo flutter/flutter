@@ -133,6 +133,9 @@ class CupertinoIcons {
 
   /// A solid down arrow.
   static const IconData down_arrow = IconData(0xf35d, fontFamily: iconFont, fontPackage: iconFontPackage);
+  
+  /// A solid up arrow.
+  static const IconData up_arrow = IconData(0xf366, fontFamily: iconFont, fontPackage: iconFontPackage);
 
   /// A charging battery.
   static const IconData battery_charging = IconData(0xf111, fontFamily: iconFont, fontPackage: iconFontPackage);
