@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -ex
+
 readonly SCRIPTS_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 readonly ROOT_DIR="$SCRIPTS_DIR/.."
 
@@ -8,19 +10,13 @@ function is_expected_failure() {
   grep --quiet "is not configured for Running" "$1"
 }
 
-clone_flutter_codelabs="git clone https://github.com/material-components/material-components-flutter-codelabs.git"
-checkout_shrine_complete="git checkout 104-complete"
 log_file="build_log_for_104_complete.txt"
 build_command="flutter build bundle"
 
 # Attempt to build 104-complete Shrine app from the Flutter codelabs
-echo "$clone_flutter_codelabs"
-$clone_flutter_codelabs
-
+git clone https://github.com/material-components/material-components-flutter-codelabs.git
 cd material-components-flutter-codelabs/mdc_100_series/
-
-echo "$checkout_shrine_complete"
-$checkout_shrine_complete
+git checkout 104-complete
 
 all_builds_ok=1
 echo "$build_command"
