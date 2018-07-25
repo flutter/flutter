@@ -7,6 +7,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:path/path.dart' as path;
+import 'package:meta/meta.dart';
 
 typedef Future<Null> ShardRunner();
 
@@ -98,11 +99,34 @@ Future<Null> _verifyInternationalizations() async {
   print('Contents of $localizationsFile matches output of gen_localizations.dart script.');
 }
 
+Future<String> _getCommitRange() async {
+  // Using --fork-point is more conservative, and will result in the correct
+  // fork point, but when running locally, it may return nothing. Git is
+  // guaranteed to return a (reasonable, but maybe not optimal) result when not
+  // using --fork-point, so we fall back to that if we can't get a definitive
+  // fork point. See "git merge-base" documentation for more info.
+  EvalResult result = await _evalCommand(
+    'git',
+    <String>['merge-base', '--fork-point', 'FETCH_HEAD', 'HEAD'],
+    workingDirectory: flutterRoot,
+    allowNonZeroExit: true,
+  );
+  if (result.exitCode != 0) {
+    result = await _evalCommand(
+      'git',
+      <String>['merge-base', 'FETCH_HEAD', 'HEAD'],
+      workingDirectory: flutterRoot,
+    );
+  }
+  return result.stdout.trim();
+}
+
+
 Future<Null> _checkForTrailingSpaces() async {
   if (!Platform.isWindows) {
     final String commitRange = Platform.environment.containsKey('TEST_COMMIT_RANGE')
         ? Platform.environment['TEST_COMMIT_RANGE']
-        : 'master..HEAD';
+        : await _getCommitRange();
     final List<String> fileTypes = <String>[
       '*.dart', '*.cxx', '*.cpp', '*.cc', '*.c', '*.C', '*.h', '*.java', '*.mm', '*.m', '.yml',
     ];
@@ -332,16 +356,19 @@ class EvalResult {
   EvalResult({
     this.stdout,
     this.stderr,
+    this.exitCode = 0,
   });
 
   final String stdout;
   final String stderr;
+  final int exitCode;
 }
 
 Future<EvalResult> _evalCommand(String executable, List<String> arguments, {
-  String workingDirectory,
+  @required String workingDirectory,
   Map<String, String> environment,
   bool skip = false,
+  bool allowNonZeroExit = false,
 }) async {
   final String commandDescription = '${path.relative(executable, from: workingDirectory)} ${arguments.join(' ')}';
   final String relativeWorkingDir = path.relative(workingDirectory);
@@ -363,11 +390,12 @@ Future<EvalResult> _evalCommand(String executable, List<String> arguments, {
   final EvalResult result = new EvalResult(
     stdout: utf8.decode((await savedStdout).expand((List<int> ints) => ints).toList()),
     stderr: utf8.decode((await savedStderr).expand((List<int> ints) => ints).toList()),
+    exitCode: exitCode,
   );
 
   print('$clock ELAPSED TIME: $bold${elapsedTime(start)}$reset for $commandDescription in $relativeWorkingDir: ');
 
-  if (exitCode != 0) {
+  if (exitCode != 0 && !allowNonZeroExit) {
     stderr.write(result.stderr);
     print(
       '$red━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━$reset\n'
