@@ -183,7 +183,7 @@ void PlatformViewAndroid::UpdateSemantics(
     blink::CustomAccessibilityActionUpdates actions) {
   constexpr size_t kBytesPerNode = 36 * sizeof(int32_t);
   constexpr size_t kBytesPerChild = sizeof(int32_t);
-  constexpr size_t kBytesPerAction = 2 * sizeof(int32_t);
+  constexpr size_t kBytesPerAction = 4 * sizeof(int32_t);
 
   JNIEnv* env = fml::jni::AttachCurrentThread();
   {
@@ -284,11 +284,18 @@ void PlatformViewAndroid::UpdateSemantics(
       // sending.
       const blink::CustomAccessibilityAction& action = value.second;
       actions_buffer_int32[actions_position++] = action.id;
+      actions_buffer_int32[actions_position++] = action.overrideId;
       if (action.label.empty()) {
         actions_buffer_int32[actions_position++] = -1;
       } else {
         actions_buffer_int32[actions_position++] = action_strings.size();
         action_strings.push_back(action.label);
+      }
+      if (action.hint.empty()) {
+        actions_buffer_int32[actions_position++] = -1;
+      } else {
+        actions_buffer_int32[actions_position++] = action_strings.size();
+        action_strings.push_back(action.hint);
       }
     }
 

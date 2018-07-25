@@ -20,7 +20,9 @@ struct CustomAccessibilityAction {
   ~CustomAccessibilityAction();
 
   int32_t id = 0;
+  int32_t overrideId = -1;
   std::string label;
+  std::string hint;
 };
 
 // Contains custom accessibility actions that need to be updated.

@@ -542,6 +542,11 @@ void AccessibilityBridge::UpdateSemantics(blink::SemanticsNodeUpdates nodes,
           [[[NSMutableArray alloc] init] autorelease];
       for (int32_t action_id : node.customAccessibilityActions) {
         blink::CustomAccessibilityAction& action = actions_[action_id];
+        if (action.overrideId != -1) {
+          // iOS does not support overriding standard actions, so we ignore any
+          // custom actions that have an override id provided.
+          continue;
+        }
         NSString* label = @(action.label.data());
         SEL selector = @selector(onCustomAccessibilityAction:);
         FlutterCustomAccessibilityAction* customAction =
