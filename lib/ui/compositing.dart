@@ -68,10 +68,10 @@ class SceneBuilder extends NativeFieldWrapperClass2 {
   ///
   /// See [pop] for details about the operation stack, and [Clip] for different clip modes.
   /// By default, the clip will be anti-aliased (clip = [Clip.antiAlias]).
-  void pushClipRect(Rect rect, {Clip clip = Clip.antiAlias}) {
-    assert(clip != null);
-    assert(clip != Clip.none);
-    _pushClipRect(rect.left, rect.right, rect.top, rect.bottom, clip.index);
+  void pushClipRect(Rect rect, {Clip clipBehavior = Clip.antiAlias}) {
+    assert(clipBehavior != null);
+    assert(clipBehavior != Clip.none);
+    _pushClipRect(rect.left, rect.right, rect.top, rect.bottom, clipBehavior.index);
   }
   void _pushClipRect(double left,
                      double right,
@@ -85,10 +85,10 @@ class SceneBuilder extends NativeFieldWrapperClass2 {
   ///
   /// See [pop] for details about the operation stack, and [Clip] for different clip modes.
   /// By default, the clip will be anti-aliased (clip = [Clip.antiAlias]).
-  void pushClipRRect(RRect rrect, {Clip clip = Clip.antiAlias}) {
-    assert(clip != null);
-    assert(clip != Clip.none);
-    _pushClipRRect(rrect._value, clip.index);
+  void pushClipRRect(RRect rrect, {Clip clipBehavior = Clip.antiAlias}) {
+    assert(clipBehavior != null);
+    assert(clipBehavior != Clip.none);
+    _pushClipRRect(rrect._value, clipBehavior.index);
   }
   void _pushClipRRect(Float32List rrect, int clipMode) native 'SceneBuilder_pushClipRRect';
 
@@ -98,10 +98,10 @@ class SceneBuilder extends NativeFieldWrapperClass2 {
   ///
   /// See [pop] for details about the operation stack. See [Clip] for different clip modes.
   /// By default, the clip will be anti-aliased (clip = [Clip.antiAlias]).
-  void pushClipPath(Path path, {Clip clip = Clip.antiAlias}) {
-    assert(clip != null);
-    assert(clip != Clip.none);
-    _pushClipPath(path, clip.index);
+  void pushClipPath(Path path, {Clip clipBehavior = Clip.antiAlias}) {
+    assert(clipBehavior != null);
+    assert(clipBehavior != Clip.none);
+    _pushClipPath(path, clipBehavior.index);
   }
   void _pushClipPath(Path path, int clipMode) native 'SceneBuilder_pushClipPath';
 
@@ -168,8 +168,8 @@ class SceneBuilder extends NativeFieldWrapperClass2 {
   ///
   /// See [pop] for details about the operation stack, and [Clip] for different clip modes.
   // ignore: deprecated_member_use
-  void pushPhysicalShape({ Path path, double elevation, Color color, Color shadowColor, Clip clip = defaultClipBehavior}) {
-    _pushPhysicalShape(path, elevation, color.value, shadowColor?.value ?? 0xFF000000, clip.index);
+  void pushPhysicalShape({ Path path, double elevation, Color color, Color shadowColor, Clip clipBehavior = defaultClipBehavior}) {
+    _pushPhysicalShape(path, elevation, color.value, shadowColor?.value ?? 0xFF000000, clipBehavior.index);
   }
   void _pushPhysicalShape(Path path, double elevation, int color, int shadowColor, int clipMode) native
     'SceneBuilder_pushPhysicalShape';
