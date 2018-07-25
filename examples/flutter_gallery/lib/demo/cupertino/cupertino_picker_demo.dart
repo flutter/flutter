@@ -75,36 +75,13 @@ class _CupertinoPickerDemoState extends State<CupertinoPickerDemo> {
   }
 
   Widget _buildAlarmPicker() {
-    final FixedExtentScrollController hourController = new FixedExtentScrollController(initialItem: _selectedHour);
     return new Row(
       children: <Widget>[
-//        new Expanded(
-//          child: new CupertinoPicker(
-//            scrollController: new FixedExtentScrollController(
-//              initialItem: _selectedHour,
-//            ),
-//            offAxisFraction: -0.5,
-//            useMagnifier: true,
-//            magnification: 1.1,
-//            itemExtent: _kPickerItemHeight,
-//            backgroundColor: CupertinoColors.white,
-//            onSelectedItemChanged: (int index) {
-//              setState(() {
-//                _selectedHour = index;
-//              });
-//            },
-//            children: new List<Widget>.generate(24, (int index) {
-//              return new Container(
-//                alignment: Alignment.centerRight,
-//                padding: const EdgeInsets.only(right: 32.0),
-//                child: new Text(index.toString()),
-//              );
-//            }),
-//          ),
-//        ),
         new Expanded(
           child: new CupertinoPicker.builder(
-            scrollController: hourController,
+            scrollController: new FixedExtentScrollController(
+              initialItem: _selectedHour,
+            ),
             offAxisFraction: -0.5,
             useMagnifier: true,
             magnification: 1.1,
@@ -112,11 +89,11 @@ class _CupertinoPickerDemoState extends State<CupertinoPickerDemo> {
             backgroundColor: CupertinoColors.white,
             onSelectedItemChanged: (int index) {
               setState(() {
-                _selectedHour = index;
+                _selectedHour = index % 24;
               });
             },
             itemBuilder: (BuildContext context, int index) {
-              int modIndex = index%24;
+              final int modIndex = index % 24;
               return new Container(
                 alignment: Alignment.centerRight,
                 padding: const EdgeInsets.only(right: 32.0),
@@ -137,11 +114,11 @@ class _CupertinoPickerDemoState extends State<CupertinoPickerDemo> {
             backgroundColor: CupertinoColors.white,
             onSelectedItemChanged: (int index) {
               setState(() {
-                _selectedMinute = index;
+                _selectedMinute = index % 60;
               });
             },
             itemBuilder: (BuildContext context, int index) {
-              int modIndex = index%60;
+              final int modIndex = index % 60;
               return new Container(
                 alignment: Alignment.centerLeft,
                 padding: const EdgeInsets.only(left: 32.0),
@@ -234,27 +211,6 @@ class _CupertinoPickerDemoState extends State<CupertinoPickerDemo> {
                   ]
                 ),
               ),
-              new GestureDetector(
-                onTap: () async {
-                  await showModalBottomSheet<void>(
-                    context: context,
-                    builder: (BuildContext context) {
-                      return new ListView.builder(
-                        itemExtent: 16.0,
-                        itemBuilder: (BuildContext context, int index) {
-                          return new Text('Entry $index');
-                        },
-                      );
-                    },
-                  );
-                },
-                child: _buildMenu(
-                    <Widget>[
-                      const Text('Normal ListView'),
-                    ]
-                ),
-              ),
-
             ],
           ),
         ),

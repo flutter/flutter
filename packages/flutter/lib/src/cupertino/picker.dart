@@ -55,7 +55,7 @@ class CupertinoPicker extends StatefulWidget {
         assert(magnification > 0),
         assert(itemExtent != null),
         assert(itemExtent > 0),
-        childDelegate = new SliverChildListDelegate(children, addRepaintBoundaries:false, addAutomaticKeepAlives: false),
+        childDelegate = new SliverChildListDelegate(children, addRepaintBoundaries: false, addAutomaticKeepAlives: false),
         super(key: key);
 
   /// Create picker from a lazy builder.
@@ -77,7 +77,7 @@ class CupertinoPicker extends StatefulWidget {
         assert(magnification > 0),
         assert(itemExtent != null),
         assert(itemExtent > 0),
-        childDelegate = new SliverChildBuilderDelegate(itemBuilder, childCount: childCount, addRepaintBoundaries: false, addAutomaticKeepAlives: false),
+        childDelegate = new NegativeIndexChildBuilderDelegate(itemBuilder, childCount: childCount),
         super(key: key);
 
   /// Relative ratio between this picker's height and the simulated cylinder's diameter.
