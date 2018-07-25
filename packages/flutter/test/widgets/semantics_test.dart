@@ -1020,6 +1020,31 @@ void main() {
     handle.dispose();
     semantics.dispose();
   });
+
+  testWidgets('Semantics excludeSemantics ignores children', (WidgetTester tester) async {
+    final SemanticsTester semantics = new SemanticsTester(tester);
+    await tester.pumpWidget(new Semantics(
+      label: 'label',
+      excludeSemantics: true,
+      textDirection: TextDirection.ltr,
+      child: new Semantics(
+        label: 'other label',
+        textDirection: TextDirection.ltr,
+      ),
+    ));
+
+    expect(semantics, hasSemantics(
+      new TestSemantics(
+        children: <TestSemantics>[
+          new TestSemantics(
+            label: 'label',
+            textDirection: TextDirection.ltr,
+          ),
+        ],
+      ), ignoreId: true, ignoreRect: true, ignoreTransform: true)
+    );
+    semantics.dispose();
+  });
 }
 
 class CustomSortKey extends OrdinalSortKey {
