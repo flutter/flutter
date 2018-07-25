@@ -255,7 +255,7 @@ class _ExpansionPanelListState extends State<ExpansionPanelList> {
       if (_isChildExpanded(index) && index != 0 && !_isChildExpanded(index - 1))
         items.add(new MaterialGap(key: new _SaltedKey<BuildContext, int>(context, index * 2 - 1)));
 
-      final ExpansionPanelRadio child = widget.children[index];
+      final ExpansionPanel child = widget.children[index];
       final Row header = new Row(
         children: <Widget>[
           new Expanded(
