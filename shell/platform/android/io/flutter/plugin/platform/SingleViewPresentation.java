@@ -11,6 +11,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.view.Display;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.FrameLayout;
 
 @TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
@@ -32,6 +33,10 @@ class SingleViewPresentation extends Presentation {
         super(outerContext, display);
         mViewFactory = viewFactory;
         mViewId = viewId;
+        getWindow().setFlags(
+                WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
+                WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
+        );
     }
 
     /**
@@ -45,6 +50,10 @@ class SingleViewPresentation extends Presentation {
         super(outerContext, display);
         mViewFactory = null;
         mView = view;
+        getWindow().setFlags(
+                WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
+                WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
+        );
     }
 
     @Override
