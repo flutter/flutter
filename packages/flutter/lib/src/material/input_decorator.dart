@@ -540,12 +540,14 @@ class _RenderDecoration extends RenderBox {
     @required _Decoration decoration,
     @required TextDirection textDirection,
     @required TextBaseline textBaseline,
+    @required bool isFocused,
   }) : assert(decoration != null),
        assert(textDirection != null),
        assert(textBaseline != null),
        _decoration = decoration,
        _textDirection = textDirection,
-       _textBaseline = textBaseline;
+       _textBaseline = textBaseline,
+       _isFocused = isFocused;
 
   final Map<_DecorationSlot, RenderBox> slotToChild = <_DecorationSlot, RenderBox>{};
   final Map<RenderBox, _DecorationSlot> childToSlot = <RenderBox, _DecorationSlot>{};
@@ -686,6 +688,16 @@ class _RenderDecoration extends RenderBox {
     markNeedsLayout();
   }
 
+  bool get isFocused => _isFocused;
+  bool _isFocused;
+  set isFocused(bool value) {
+    assert(value != null);
+    if (_isFocused == value)
+      return;
+    _isFocused = value;
+    markNeedsSemanticsUpdate();
+  }
+
   @override
   void attach(PipelineOwner owner) {
     super.attach(owner);
@@ -710,24 +722,33 @@ class _RenderDecoration extends RenderBox {
     _children.forEach(visitor);
   }
 
-  // Do not visit the hint, helper, counter, or error text for semantics.
-  // Instead we add them in a semantics node ancestor.
   @override
   void visitChildrenForSemantics(RenderObjectVisitor visitor) {
     if (icon != null)
       visitor(icon);
-    if (input != null)
-      visitor(input);
-    if (prefixIcon != null)
-      visitor(prefixIcon);
-    if (suffixIcon != null)
-      visitor(suffixIcon);
     if (prefix != null)
       visitor(prefix);
+    if (prefixIcon != null)
+      visitor(prefixIcon);
+    if (isFocused && hint != null) {
+      // Bypass opacity to always read hint when focused. This prevents the
+      // label from changing when text is entered.
+      final RenderProxyBox typedHint = hint;
+      visitor(typedHint.child);
+    } else if (!isFocused && label != null)
+      visitor(label);
+    if (input != null)
+      visitor(input);
+    if (suffixIcon != null)
+      visitor(suffixIcon);
     if (suffix != null)
       visitor(suffix);
     if (container != null)
       visitor(container);
+    if (helperError != null)
+      visitor(helperError);
+    if (counter != null)
+      visitor(counter);
   }
 
   @override
@@ -1321,6 +1342,7 @@ class _Decorator extends RenderObjectWidget {
     @required this.decoration,
     @required this.textDirection,
     @required this.textBaseline,
+    @required this.isFocused,
   }) : assert(decoration != null),
        assert(textDirection != null),
        assert(textBaseline != null),
@@ -1329,6 +1351,7 @@ class _Decorator extends RenderObjectWidget {
   final _Decoration decoration;
   final TextDirection textDirection;
   final TextBaseline textBaseline;
+  final bool isFocused;
 
   @override
   _RenderDecorationElement createElement() => new _RenderDecorationElement(this);
@@ -1339,6 +1362,7 @@ class _Decorator extends RenderObjectWidget {
       decoration: decoration,
       textDirection: textDirection,
       textBaseline: textBaseline,
+      isFocused: isFocused,
     );
   }
 
@@ -1347,7 +1371,8 @@ class _Decorator extends RenderObjectWidget {
     renderObject
      ..decoration = decoration
      ..textDirection = textDirection
-     ..textBaseline = textBaseline;
+     ..textBaseline = textBaseline
+     ..isFocused = isFocused;
   }
 }
 
@@ -1633,25 +1658,6 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
     return border.copyWith(borderSide: new BorderSide(color: borderColor, width: borderWeight));
   }
 
-  String _getSemanticLabel() {
-    final StringBuffer buffer = new StringBuffer();
-    if (widget.isFocused && widget.decoration.hintText != null)
-      buffer.write(widget.decoration.hintText);
-    else if (!widget.isFocused  && widget.decoration.helperText != null)
-      buffer.write(widget.decoration.helperText);
-    if (widget.decoration.errorText != null) {
-      if (buffer.isNotEmpty)
-        buffer.write(' ');
-      buffer.write(widget.decoration.errorText);
-    }
-    if (widget.decoration.counterText != null) {
-      if (buffer.isNotEmpty)
-        buffer.write(' ');
-      buffer.write(widget.decoration.counterText);
-    }
-    return buffer.toString();
-  }
-
   @override
   Widget build(BuildContext context) {
     final ThemeData themeData = Theme.of(context);
@@ -1824,31 +1830,30 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
         : const EdgeInsets.fromLTRB(12.0, 24.0, 12.0, 16.0));
     }
 
-    return new Semantics(
-      label: _getSemanticLabel(),
-      child: new _Decorator(
-        decoration: new _Decoration(
-          contentPadding: contentPadding,
-          isCollapsed: decoration.isCollapsed,
-          floatingLabelHeight: floatingLabelHeight,
-          floatingLabelProgress: _floatingLabelController.value,
-          border: border,
-          borderGap: _borderGap,
-          icon: icon,
-          input: widget.child,
-          label: label,
-          hint: hint,
-          prefix: prefix,
-          suffix: suffix,
-          prefixIcon: prefixIcon,
-          suffixIcon: suffixIcon,
-          helperError: helperError,
-          counter: counter,
-          container: container,
-      ),
-      textDirection: textDirection,
-      textBaseline: textBaseline,
-    ));
+    return new _Decorator(
+      decoration: new _Decoration(
+        contentPadding: contentPadding,
+        isCollapsed: decoration.isCollapsed,
+        floatingLabelHeight: floatingLabelHeight,
+        floatingLabelProgress: _floatingLabelController.value,
+        border: border,
+        borderGap: _borderGap,
+        icon: icon,
+        input: widget.child,
+        label: label,
+        hint: hint,
+        prefix: prefix,
+        suffix: suffix,
+        prefixIcon: prefixIcon,
+        suffixIcon: suffixIcon,
+        helperError: helperError,
+        counter: counter,
+        container: container,
+    ),
+    textDirection: textDirection,
+    textBaseline: textBaseline,
+    isFocused: isFocused,
+    );
   }
 }
 
