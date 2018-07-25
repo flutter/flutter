@@ -22,6 +22,44 @@ import 'scroll_position.dart';
 import 'scroll_position_with_single_context.dart';
 import 'scrollable.dart';
 
+/// A delegate that supplies children with negative index by using builder
+/// callback.
+class NegativeIndexChildBuilderDelegate extends SliverChildBuilderDelegate {
+  /// Construct a delegate that lazily instantiate children using the given
+  /// builder callback.
+  ///
+  /// If childCount is null, then the list is infinite and the builder must not
+  /// return null. Otherwise, the builder will support children in index range
+  /// [0, childCount - 1].
+  NegativeIndexChildBuilderDelegate(
+    IndexedWidgetBuilder builder, {
+    int childCount,
+    bool addRepaintBoundaries = false,
+    bool addAutomaticKeepAlives = false,
+  }) :  assert(builder != null),
+        super(
+          builder,
+          childCount: childCount,
+          addRepaintBoundaries: addRepaintBoundaries,
+          addAutomaticKeepAlives: addAutomaticKeepAlives,
+        );
+
+  @override
+  Widget build(BuildContext context, int index) {
+    assert(builder != null);
+    if (childCount != null && index >= childCount)
+      return null;
+    Widget child = builder(context, index);
+    if (child == null)
+      return null;
+    if (addRepaintBoundaries)
+      child = new RepaintBoundary.wrap(child, index);
+    if (addAutomaticKeepAlives)
+      child = new AutomaticKeepAlive(child: child);
+    return child;
+  }
+}
+
 /// A controller for scroll views whose items have the same size.
 ///
 /// Similar to a standard [ScrollController] but with the added convenience
@@ -547,12 +585,10 @@ class _ListWheelScrollViewState extends State<ListWheelScrollView> {
   }
 }
 
-/// Element that support building children lazily.
-///
-/// The corresponding widget has a delegate that will build child widget as demand.
-class ListWheelViewportElement extends RenderObjectElement {
-  /// Creates an element that uses the given widget as its configuration.
-  ListWheelViewportElement(ListWheelViewport widget) : super(widget);
+/// Element that supports building children lazily for [ListWheelViewport].
+class ListWheelElement extends RenderObjectElement {
+  /// Creates an element that lazily builds children for the given widget.
+  ListWheelElement(ListWheelViewport widget) : super(widget);
 
   @override
   ListWheelViewport get widget => super.widget;
@@ -581,15 +617,13 @@ class ListWheelViewportElement extends RenderObjectElement {
 
   @override
   void performRebuild() {
-    _childWidgets.clear(); // Reset the cache, as described above.
+    _childWidgets.clear();
     super.performRebuild();
     if(_childElements.isEmpty)
       return;
 
-    int firstIndex = _childElements.firstKey();
-    int lastIndex = _childElements.lastKey();
-
-    print(firstIndex.toString() + " " + lastIndex.toString());
+    final int firstIndex = _childElements.firstKey();
+    final int lastIndex = _childElements.lastKey();
 
     for (int index = firstIndex; index <= lastIndex; ++index) {
       final Element newChild = updateChild(_childElements[index], _build(index), index);
@@ -605,7 +639,7 @@ class ListWheelViewportElement extends RenderObjectElement {
     return _childWidgets.putIfAbsent(index, () => widget.childDelegate.build(this, index));
   }
 
-  @override
+  /// Create and insert a new child at the given index.
   void createChild(int index, { @required RenderBox after }) {
     owner.buildScope(this, () {
       final bool insertFirst = after == null;
@@ -617,6 +651,18 @@ class ListWheelViewportElement extends RenderObjectElement {
       } else {
         _childElements.remove(index);
       }
+    });
+  }
+
+  /// RRemove the child element corresponding with the given RenderBox.
+  void removeChild(RenderBox child) {
+    final int index = renderObject.indexOf(child);
+    owner.buildScope(this, () {
+      assert(_childElements.containsKey(index));
+      final Element result = updateChild(_childElements[index], null, index);
+      assert(result == null);
+      _childElements.remove(index);
+      assert(!_childElements.containsKey(index));
     });
   }
 
@@ -641,23 +687,22 @@ class ListWheelViewportElement extends RenderObjectElement {
 
   @override
   void moveChildRenderObject(RenderObject child, dynamic slot) {
-    /// Currently we maintain the list in increasing order, so this is disabled.
+    /// Currently we maintain the list in contiguous increasing order, so
+    /// shuffling the list is disabled.
     assert(false);
   }
 
   @override
   void removeChildRenderObject(RenderObject child) {
-    final RenderListWheelViewport renderObject = this.renderObject;
     assert(child.parent == renderObject);
     renderObject.remove(child);
-    assert(renderObject == this.renderObject);
   }
 
   @override
   void visitChildren(ElementVisitor visitor) {
-    for (Element child in _childElements.values) {
+    _childElements.forEach((int key, Element child) {
       visitor(child);
-    }
+    });
   }
 
   @override
@@ -694,7 +739,7 @@ class ListWheelViewport extends RenderObjectWidget {
   /// not be null.
   ///
   /// The [offset] argument must be provided and must not be null.
-  ListWheelViewport({
+  const ListWheelViewport({
     Key key,
     this.diameterRatio = RenderListWheelViewport.defaultDiameterRatio,
     this.perspective = RenderListWheelViewport.defaultPerspective,
@@ -754,12 +799,13 @@ class ListWheelViewport extends RenderObjectWidget {
   final SliverChildDelegate childDelegate;
 
   @override
-  ListWheelViewportElement createElement() => new ListWheelViewportElement(this);
+  ListWheelElement createElement() => new ListWheelElement(this);
 
   @override
   RenderListWheelViewport createRenderObject(BuildContext context) {
-    final ListWheelViewportElement childManager = context;
     return new RenderListWheelViewport(
+      childManager: context,
+      offset: offset,
       diameterRatio: diameterRatio,
       perspective: perspective,
       offAxisFraction: offAxisFraction,
@@ -768,8 +814,6 @@ class ListWheelViewport extends RenderObjectWidget {
       itemExtent: itemExtent,
       clipToSize: clipToSize,
       renderChildrenOutsideViewport: renderChildrenOutsideViewport,
-      offset: offset,
-      childManager: childManager,
     );
   }
 
