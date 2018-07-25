@@ -34,7 +34,7 @@ class BasicProject extends TestProject {
   }
 
   topLevelFunction() {
-    print("topLevelFunction"); // 2 BREAKPOINT
+    print("topLevelFunction"); // TOP LEVEL BREAKPOINT
   }
   ''';
 
@@ -42,5 +42,5 @@ class BasicProject extends TestProject {
   int get buildMethodBreakpointLine => breakpointLine;
 
   String get topLevelFunctionBreakpointFile => fs.path.join(dir.path, 'lib', 'main.dart');
-  int get topLevelFunctionBreakpointLine => lineContaining(main, '// 2 BREAKPOINT');
+  int get topLevelFunctionBreakpointLine => lineContaining(main, '// TOP LEVEL BREAKPOINT');
 }
