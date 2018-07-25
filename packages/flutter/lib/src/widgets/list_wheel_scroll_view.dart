@@ -2,9 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 import 'dart:async';
+import 'dart:collection';
 import 'dart:math' as math;
 
 import 'package:flutter/animation.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/physics.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
@@ -402,7 +404,7 @@ class ListWheelScrollView extends StatefulWidget {
     this.onSelectedItemChanged,
     this.clipToSize = true,
     this.renderChildrenOutsideViewport = false,
-    @required this.children,
+    @required this.childDelegate,
   }) : assert(diameterRatio != null),
        assert(diameterRatio > 0.0, RenderListWheelViewport.diameterRatioZeroMessage),
        assert(perspective != null),
@@ -472,8 +474,8 @@ class ListWheelScrollView extends StatefulWidget {
   /// {@macro flutter.rendering.wheelList.renderChildrenOutsideViewport}
   final bool renderChildrenOutsideViewport;
 
-  /// List of children to scroll on top of the cylinder.
-  final List<Widget> children;
+  /// Builder to help lazily instantiate child.
+  final SliverChildDelegate childDelegate;
 
   @override
   _ListWheelScrollViewState createState() => new _ListWheelScrollViewState();
@@ -537,12 +539,132 @@ class _ListWheelScrollViewState extends State<ListWheelScrollView> {
             clipToSize: widget.clipToSize,
             renderChildrenOutsideViewport: widget.renderChildrenOutsideViewport,
             offset: offset,
-            children: widget.children,
+            childDelegate: widget.childDelegate,
           );
         },
       ),
     );
   }
+}
+
+/// Element that support building children lazily.
+///
+/// The corresponding widget has a delegate that will build child widget as demand.
+class ListWheelViewportElement extends RenderObjectElement {
+  /// Creates an element that uses the given widget as its configuration.
+  ListWheelViewportElement(ListWheelViewport widget) : super(widget);
+
+  @override
+  ListWheelViewport get widget => super.widget;
+
+  @override
+  RenderListWheelViewport get renderObject => super.renderObject;
+
+  /// A cache of widgets so that we don't have to rebuild every time.
+  final Map<int, Widget> _childWidgets = new HashMap<int, Widget>();
+
+  /// The map containing all the active child elements.
+  final SplayTreeMap<int, Element> _childElements = new SplayTreeMap<int, Element>();
+
+  @override
+  void update(covariant ListWheelViewport newWidget) {
+    final ListWheelViewport oldWidget = widget;
+    super.update(newWidget);
+    final SliverChildDelegate newDelegate = newWidget.childDelegate;
+    final SliverChildDelegate oldDelegate = oldWidget.childDelegate;
+    if (newDelegate != oldDelegate &&
+        (newDelegate.runtimeType != oldDelegate.runtimeType || newDelegate.shouldRebuild(oldDelegate)))
+      performRebuild();
+  }
+
+  int get childCount => widget.childDelegate.estimatedChildCount;
+
+  @override
+  void performRebuild() {
+    _childWidgets.clear(); // Reset the cache, as described above.
+    super.performRebuild();
+    if(_childElements.isEmpty)
+      return;
+
+    int firstIndex = _childElements.firstKey();
+    int lastIndex = _childElements.lastKey();
+
+    print(firstIndex.toString() + " " + lastIndex.toString());
+
+    for (int index = firstIndex; index <= lastIndex; ++index) {
+      final Element newChild = updateChild(_childElements[index], _build(index), index);
+      if (newChild != null) {
+        _childElements[index] = newChild;
+      } else {
+        _childElements.remove(index);
+      }
+    }
+  }
+
+  Widget _build(int index) {
+    return _childWidgets.putIfAbsent(index, () => widget.childDelegate.build(this, index));
+  }
+
+  @override
+  void createChild(int index, { @required RenderBox after }) {
+    owner.buildScope(this, () {
+      final bool insertFirst = after == null;
+      assert(insertFirst || _childElements[index-1] != null);
+      Element newChild;
+      newChild = updateChild(_childElements[index], _build(index), index);
+      if (newChild != null) {
+        _childElements[index] = newChild;
+      } else {
+        _childElements.remove(index);
+      }
+    });
+  }
+
+  @override
+  Element updateChild(Element child, Widget newWidget, dynamic newSlot) {
+    final Element newChild = super.updateChild(child, newWidget, newSlot);
+    final ListWheelParentData newParentData = newChild?.renderObject?.parentData;
+    if(newParentData != null) {
+      newParentData.index = newSlot;
+    }
+
+    return newChild;
+  }
+
+  @override
+  void insertChildRenderObject(RenderObject child, int slot) {
+    final RenderListWheelViewport renderObject = this.renderObject;
+    assert(renderObject.debugValidateChild(child));
+    renderObject.insert(child, after: _childElements[slot - 1]?.renderObject);
+    assert(renderObject == this.renderObject);
+  }
+
+  @override
+  void moveChildRenderObject(RenderObject child, dynamic slot) {
+    /// Currently we maintain the list in increasing order, so this is disabled.
+    assert(false);
+  }
+
+  @override
+  void removeChildRenderObject(RenderObject child) {
+    final RenderListWheelViewport renderObject = this.renderObject;
+    assert(child.parent == renderObject);
+    renderObject.remove(child);
+    assert(renderObject == this.renderObject);
+  }
+
+  @override
+  void visitChildren(ElementVisitor visitor) {
+    for (Element child in _childElements.values) {
+      visitor(child);
+    }
+  }
+
+  @override
+  void forgetChild(Element child) {
+    _childElements.remove(child.slot);
+  }
+
 }
 
 /// A viewport showing a subset of children on a wheel.
@@ -557,7 +679,7 @@ class _ListWheelScrollViewState extends State<ListWheelScrollView> {
 ///  * [ListWheelScrollView], widget that combines this viewport with a scrollable.
 ///  * [RenderListWheelViewport], the render object that renders the children
 ///    on a wheel.
-class ListWheelViewport extends MultiChildRenderObjectWidget {
+class ListWheelViewport extends RenderObjectWidget {
   /// Create a viewport where children are rendered onto a wheel.
   ///
   /// The [diameterRatio] argument defaults to 2.0 and must not be null.
@@ -583,7 +705,7 @@ class ListWheelViewport extends MultiChildRenderObjectWidget {
     this.clipToSize = true,
     this.renderChildrenOutsideViewport = false,
     @required this.offset,
-    List<Widget> children,
+    @required this.childDelegate,
   }) : assert(offset != null),
        assert(diameterRatio != null),
        assert(diameterRatio > 0, RenderListWheelViewport.diameterRatioZeroMessage),
@@ -598,7 +720,7 @@ class ListWheelViewport extends MultiChildRenderObjectWidget {
          !renderChildrenOutsideViewport || !clipToSize,
          RenderListWheelViewport.clipToSizeAndRenderChildrenOutsideViewportConflict,
        ),
-       super(key: key, children: children);
+       super(key: key);
 
   /// {@macro flutter.rendering.wheelList.diameterRatio}
   final double diameterRatio;
@@ -628,8 +750,15 @@ class ListWheelViewport extends MultiChildRenderObjectWidget {
   /// in the viewport.
   final ViewportOffset offset;
 
+  /// Builder to help lazily instantiate child.
+  final SliverChildDelegate childDelegate;
+
+  @override
+  ListWheelViewportElement createElement() => new ListWheelViewportElement(this);
+
   @override
   RenderListWheelViewport createRenderObject(BuildContext context) {
+    final ListWheelViewportElement childManager = context;
     return new RenderListWheelViewport(
       diameterRatio: diameterRatio,
       perspective: perspective,
@@ -640,6 +769,7 @@ class ListWheelViewport extends MultiChildRenderObjectWidget {
       clipToSize: clipToSize,
       renderChildrenOutsideViewport: renderChildrenOutsideViewport,
       offset: offset,
+      childManager: childManager,
     );
   }
 
