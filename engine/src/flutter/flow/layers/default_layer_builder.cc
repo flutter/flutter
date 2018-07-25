@@ -26,7 +26,7 @@
 
 namespace flow {
 
-static const SkRect kGiantRect = SkRect::MakeLTRB( -1E9F, -1E9F, 1E9F, 1E9F );
+static const SkRect kGiantRect = SkRect::MakeLTRB(-1E9F, -1E9F, 1E9F, 1E9F);
 
 DefaultLayerBuilder::DefaultLayerBuilder() {
   cull_rects_.push(kGiantRect);
@@ -49,33 +49,35 @@ void DefaultLayerBuilder::PushTransform(const SkMatrix& sk_matrix) {
   PushLayer(std::move(layer), cullRect);
 }
 
-void DefaultLayerBuilder::PushClipRect(const SkRect& clipRect, ClipMode clip_mode) {
+void DefaultLayerBuilder::PushClipRect(const SkRect& clipRect,
+                                       Clip clip_behavior) {
   SkRect cullRect;
   if (!cullRect.intersect(clipRect, cull_rects_.top())) {
     cullRect = SkRect::MakeEmpty();
   }
-  auto layer = std::make_unique<flow::ClipRectLayer>(clip_mode);
+  auto layer = std::make_unique<flow::ClipRectLayer>(clip_behavior);
   layer->set_clip_rect(clipRect);
   PushLayer(std::move(layer), cullRect);
 }
 
-void DefaultLayerBuilder::PushClipRoundedRect(const SkRRect& rrect, ClipMode clip_mode) {
+void DefaultLayerBuilder::PushClipRoundedRect(const SkRRect& rrect,
+                                              Clip clip_behavior) {
   SkRect cullRect;
   if (!cullRect.intersect(rrect.rect(), cull_rects_.top())) {
     cullRect = SkRect::MakeEmpty();
   }
-  auto layer = std::make_unique<flow::ClipRRectLayer>(clip_mode);
+  auto layer = std::make_unique<flow::ClipRRectLayer>(clip_behavior);
   layer->set_clip_rrect(rrect);
   PushLayer(std::move(layer), cullRect);
 }
 
-void DefaultLayerBuilder::PushClipPath(const SkPath& path, ClipMode clip_mode) {
-  FXL_DCHECK(clip_mode != ClipMode::none);
+void DefaultLayerBuilder::PushClipPath(const SkPath& path, Clip clip_behavior) {
+  FXL_DCHECK(clip_behavior != Clip::none);
   SkRect cullRect;
   if (!cullRect.intersect(path.getBounds(), cull_rects_.top())) {
     cullRect = SkRect::MakeEmpty();
   }
-  auto layer = std::make_unique<flow::ClipPathLayer>(clip_mode);
+  auto layer = std::make_unique<flow::ClipPathLayer>(clip_behavior);
   layer->set_clip_path(path);
   PushLayer(std::move(layer), cullRect);
 }
@@ -115,12 +117,12 @@ void DefaultLayerBuilder::PushPhysicalShape(const SkPath& sk_path,
                                             SkColor color,
                                             SkColor shadow_color,
                                             SkScalar device_pixel_ratio,
-                                            ClipMode clip_mode) {
+                                            Clip clip_behavior) {
   SkRect cullRect;
   if (!cullRect.intersect(sk_path.getBounds(), cull_rects_.top())) {
     cullRect = SkRect::MakeEmpty();
   }
-  auto layer = std::make_unique<flow::PhysicalShapeLayer>(clip_mode);
+  auto layer = std::make_unique<flow::PhysicalShapeLayer>(clip_behavior);
   layer->set_path(sk_path);
   layer->set_elevation(elevation);
   layer->set_color(color);

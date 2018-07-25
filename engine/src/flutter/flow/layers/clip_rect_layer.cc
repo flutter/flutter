@@ -6,7 +6,8 @@
 
 namespace flow {
 
-ClipRectLayer::ClipRectLayer(ClipMode clip_mode) : clip_mode_(clip_mode) {}
+ClipRectLayer::ClipRectLayer(Clip clip_behavior)
+    : clip_behavior_(clip_behavior) {}
 
 ClipRectLayer::~ClipRectLayer() = default;
 
@@ -25,11 +26,11 @@ void ClipRectLayer::UpdateScene(SceneUpdateContext& context) {
   FXL_DCHECK(needs_system_composite());
 
   scenic::Rectangle shape(context.session(),   // session
-                              clip_rect_.width(),  //  width
-                              clip_rect_.height()  //  height
+                          clip_rect_.width(),  //  width
+                          clip_rect_.height()  //  height
   );
 
-  // TODO(liyuqian): respect clip_mode_
+  // TODO(liyuqian): respect clip_behavior_
   SceneUpdateContext::Clip clip(context, shape, clip_rect_);
   UpdateSceneChildren(context);
 }
@@ -40,13 +41,13 @@ void ClipRectLayer::Paint(PaintContext& context) const {
   TRACE_EVENT0("flutter", "ClipRectLayer::Paint");
   FXL_DCHECK(needs_painting());
 
-  SkAutoCanvasRestore save(&context.canvas, clip_mode_ != ClipMode::hardEdge);
+  SkAutoCanvasRestore save(&context.canvas, clip_behavior_ != Clip::hardEdge);
   context.canvas.clipRect(paint_bounds());
-  if (clip_mode_ == ClipMode::antiAliasWithSaveLayer) {
+  if (clip_behavior_ == Clip::antiAliasWithSaveLayer) {
     context.canvas.saveLayer(paint_bounds(), nullptr);
   }
   PaintChildren(context);
-  if (clip_mode_ == ClipMode::antiAliasWithSaveLayer) {
+  if (clip_behavior_ == Clip::antiAliasWithSaveLayer) {
     context.canvas.restore();
   }
 }

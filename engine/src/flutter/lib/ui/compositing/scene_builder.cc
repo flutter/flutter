@@ -63,19 +63,19 @@ void SceneBuilder::pushClipRect(double left,
                                 double right,
                                 double top,
                                 double bottom,
-                                int clipMode) {
+                                int clipBehavior) {
   layer_builder_->PushClipRect(SkRect::MakeLTRB(left, top, right, bottom),
-                               static_cast<flow::ClipMode>(clipMode));
+                               static_cast<flow::Clip>(clipBehavior));
 }
 
-void SceneBuilder::pushClipRRect(const RRect& rrect, int clipMode) {
+void SceneBuilder::pushClipRRect(const RRect& rrect, int clipBehavior) {
   layer_builder_->PushClipRoundedRect(rrect.sk_rrect,
-                                      static_cast<flow::ClipMode>(clipMode));
+                                      static_cast<flow::Clip>(clipBehavior));
 }
 
-void SceneBuilder::pushClipPath(const CanvasPath* path, int clipMode) {
+void SceneBuilder::pushClipPath(const CanvasPath* path, int clipBehavior) {
   layer_builder_->PushClipPath(path->path(),
-                               static_cast<flow::ClipMode>(clipMode));
+                               static_cast<flow::Clip>(clipBehavior));
 }
 
 void SceneBuilder::pushOpacity(int alpha) {
@@ -108,14 +108,14 @@ void SceneBuilder::pushPhysicalShape(const CanvasPath* path,
                                      double elevation,
                                      int color,
                                      int shadow_color,
-                                     int clip_mode) {
+                                     int clip_behavior) {
   layer_builder_->PushPhysicalShape(
       path->path(),                 //
       elevation,                    //
       static_cast<SkColor>(color),  //
       static_cast<SkColor>(shadow_color),
       UIDartState::Current()->window()->viewport_metrics().device_pixel_ratio,
-      static_cast<flow::ClipMode>(clip_mode));
+      static_cast<flow::Clip>(clip_behavior));
 }
 
 void SceneBuilder::pop() {
