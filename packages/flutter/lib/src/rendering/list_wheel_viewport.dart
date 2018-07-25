@@ -5,6 +5,7 @@
 import 'dart:math' as math;
 
 import 'package:flutter/animation.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:vector_math/vector_math_64.dart' show Matrix4;
 
@@ -16,7 +17,9 @@ import 'viewport_offset.dart';
 typedef double _ChildSizingFunction(RenderBox child);
 
 /// [ParentData] for use with [RenderListWheelViewport].
-class ListWheelParentData extends ContainerBoxParentData<RenderBox> { }
+class ListWheelParentData extends ContainerBoxParentData<RenderBox> {
+  int index;
+}
 
 /// Render, onto a wheel, a bigger sequential set of objects inside this viewport.
 ///
@@ -97,6 +100,7 @@ class RenderListWheelViewport
   ///
   /// All arguments must not be null. Optional arguments have reasonable defaults.
   RenderListWheelViewport({
+    @required this.childManager,
     @required ViewportOffset offset,
     double diameterRatio = defaultDiameterRatio,
     double perspective = defaultPerspective,
@@ -107,7 +111,8 @@ class RenderListWheelViewport
     bool clipToSize = true,
     bool renderChildrenOutsideViewport = false,
     List<RenderBox> children,
-  }) : assert(offset != null),
+  }) : assert(childManager != null),
+       assert(offset != null),
        assert(diameterRatio != null),
        assert(diameterRatio > 0, diameterRatioZeroMessage),
        assert(perspective != null),
@@ -158,6 +163,8 @@ class RenderListWheelViewport
   static const String clipToSizeAndRenderChildrenOutsideViewportConflict =
       'Cannot renderChildrenOutsideViewport and clipToSize since children '
       'rendered outside will be clipped anyway.';
+
+  final ListWheelViewportElement childManager;
 
   /// The associated ViewportOffset object for the viewport describing the part
   /// of the content inside that's visible.
@@ -385,6 +392,7 @@ class RenderListWheelViewport
   }
 
   void _hasScrolled() {
+    markNeedsLayout();
     markNeedsPaint();
     markNeedsSemanticsUpdate();
   }
@@ -420,6 +428,8 @@ class RenderListWheelViewport
   /// the first item in the center.
   double get _minScrollExtent {
     assert(hasSize);
+    if(childManager.childCount == null)
+      return double.negativeInfinity;
     return 0.0;
   }
 
@@ -427,10 +437,10 @@ class RenderListWheelViewport
   /// the last item in the center.
   double get _maxScrollExtent {
     assert(hasSize);
-    if (!(childCount > 0))
-      return 0.0;
+    if(childManager.childCount == null)
+      return double.infinity;
 
-    return math.max(0.0, (childCount - 1) * _itemExtent);
+    return math.max(0.0, (childManager.childCount - 1) * _itemExtent);
   }
 
   /// Scroll extent distance in the untransformed plane between the center
@@ -441,7 +451,7 @@ class RenderListWheelViewport
   double get _topScrollMarginExtent {
     assert(hasSize);
     // Consider adding alignment options other than center.
-    return _minScrollExtent - size.height / 2.0 + _itemExtent / 2.0;
+    return -size.height / 2.0 + _itemExtent / 2.0;
   }
 
   /// Transforms a **scrollable layout coordinates**' y position to the
@@ -457,7 +467,7 @@ class RenderListWheelViewport
     assert(hasSize);
     if (_renderChildrenOutsideViewport)
       return double.negativeInfinity;
-    return _minScrollExtent - size.height / 2.0 - _itemExtent / 2.0 + offset.pixels;
+    return -size.height / 2.0 - _itemExtent / 2.0 + offset.pixels;
   }
 
   /// Children with offsets smaller than this value in the **scrollable layout
@@ -466,7 +476,7 @@ class RenderListWheelViewport
     assert(hasSize);
     if (_renderChildrenOutsideViewport)
       return double.infinity;
-    return _minScrollExtent + size.height / 2.0 + _itemExtent / 2.0 + offset.pixels;
+    return size.height / 2.0 + _itemExtent / 2.0 + offset.pixels;
   }
 
   /// Given the _diameterRatio, return the largest absolute angle of the item
@@ -529,25 +539,84 @@ class RenderListWheelViewport
     size = constraints.biggest;
   }
 
+  int indexOf(RenderBox child) {
+    assert(child != null);
+    final ListWheelParentData childParentData = child.parentData;
+    assert(childParentData.index != null);
+    return childParentData.index;
+  }
+
+  int offsetToIndex(double offset) => offset ~/ itemExtent;
+  double indexToOffset(int index) => index * itemExtent;
+
+  void _createOrObtainChild(int index, {RenderBox after}) {
+    invokeLayoutCallback<BoxConstraints>((BoxConstraints constraints) {
+      assert(constraints == this.constraints);
+      childManager.createChild(index, after: after);
+    });
+  }
+
   @override
   void performLayout() {
-    double currentOffset = 0.0;
-    RenderBox child = firstChild;
     final BoxConstraints innerConstraints =
-        constraints.copyWith(
-          minHeight: _itemExtent,
-          maxHeight: _itemExtent,
-          minWidth: 0.0,
-        );
-    while (child != null) {
+    constraints.copyWith(
+      minHeight: _itemExtent,
+      maxHeight: _itemExtent,
+      minWidth: 0.0,
+    );
+
+    int targetFirstIndex = offsetToIndex(offset.pixels - size.height);
+    int targetLastIndex = offsetToIndex(offset.pixels + size.height);
+
+    if(childManager.childCount != null) {
+      targetFirstIndex = targetFirstIndex.clamp(0, childManager.childCount - 1);
+      targetLastIndex = targetLastIndex.clamp(0, childManager.childCount - 1);
+    }
+
+//    print(offset.pixels.toString());
+//    print("Target from: " + targetFirstIndex.toString() + " " + targetLastIndex.toString());
+
+    if(firstChild == null) {
+      _createOrObtainChild(targetFirstIndex, after: null);
+      RenderBox child = firstChild;
       child.layout(innerConstraints, parentUsesSize: true);
       final ListWheelParentData childParentData = child.parentData;
-      // Centers the child in the cross axis. Consider making it configurable.
       final double crossPosition = size.width / 2.0 - child.size.width / 2.0;
-      childParentData.offset = new Offset(crossPosition, currentOffset);
-      currentOffset += _itemExtent;
-      child = childAfter(child);
+      childParentData.offset = new Offset(crossPosition, indexToOffset(targetFirstIndex));
     }
+
+    int currentFirstIndex = indexOf(firstChild);
+    int currentLastIndex = indexOf(lastChild);
+
+    while(currentFirstIndex > targetFirstIndex) {
+      _createOrObtainChild(--currentFirstIndex, after: null);
+      RenderBox child = firstChild;
+      child.layout(innerConstraints, parentUsesSize: true);
+      final ListWheelParentData childParentData = child.parentData;
+      final double crossPosition = size.width / 2.0 - child.size.width / 2.0;
+      childParentData.offset = new Offset(crossPosition, indexToOffset(currentFirstIndex));
+    }
+    while(currentLastIndex < targetLastIndex) {
+      _createOrObtainChild(++currentLastIndex, after: lastChild);
+      RenderBox child = lastChild;
+      child.layout(innerConstraints, parentUsesSize: true);
+      final ListWheelParentData childParentData = child.parentData;
+      final double crossPosition = size.width / 2.0 - child.size.width / 2.0;
+      childParentData.offset = new Offset(crossPosition, indexToOffset(currentLastIndex));
+    }
+
+//    double currentOffset = 0.0;
+//    RenderBox child = firstChild;
+//    while (child != null) {
+//      child.layout(innerConstraints, parentUsesSize: true);
+//      final ListWheelParentData childParentData = child.parentData;
+////      print("Index of child: " + childParentData.index.toString());
+//      // Centers the child in the cross axis. Consider making it configurable.
+//      final double crossPosition = size.width / 2.0 - child.size.width / 2.0;
+//      childParentData.offset = new Offset(crossPosition, currentOffset);
+//      currentOffset += _itemExtent;
+//      child = childAfter(child);
+//    }
 
     offset.applyViewportDimension(_viewportExtent);
     offset.applyContentDimensions(_minScrollExtent, _maxScrollExtent);
@@ -579,6 +648,7 @@ class RenderListWheelViewport
   /// Visits all the children until one is partially visible in the viewport.
   RenderBox _getFirstVisibleChild() {
     assert(childCount > 0);
+    return firstChild;
     final double firstVisibleLayoutOffset = _firstVisibleLayoutOffset;
 
     RenderBox child = firstChild;

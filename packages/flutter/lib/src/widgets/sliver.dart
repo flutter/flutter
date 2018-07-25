@@ -192,7 +192,7 @@ class SliverChildBuilderDelegate extends SliverChildDelegate {
   @override
   Widget build(BuildContext context, int index) {
     assert(builder != null);
-    if (index < 0 || (childCount != null && index >= childCount))
+    if ((childCount != null && index >= childCount))
       return null;
     Widget child = builder(context, index);
     if (child == null)
