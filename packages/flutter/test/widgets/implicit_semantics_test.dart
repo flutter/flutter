@@ -21,8 +21,8 @@ void main() {
           explicitChildNodes: false,
           child: new Column(
             children: const <Widget>[
-              const Text('Michael Goderbauer'),
-              const Text('goderbauer@google.com'),
+              Text('Michael Goderbauer'),
+              Text('goderbauer@google.com'),
             ],
           ),
         ),
@@ -55,8 +55,8 @@ void main() {
           explicitChildNodes: true,
           child: new Column(
             children: const <Widget>[
-              const Text('Michael Goderbauer'),
-              const Text('goderbauer@google.com'),
+              Text('Michael Goderbauer'),
+              Text('goderbauer@google.com'),
             ],
           ),
         ),
@@ -102,8 +102,8 @@ void main() {
             label: 'Signed in as',
             child: new Column(
               children: const <Widget>[
-                const Text('Michael Goderbauer'),
-                const Text('goderbauer@google.com'),
+                Text('Michael Goderbauer'),
+                Text('goderbauer@google.com'),
               ],
             ),
           ),
@@ -145,8 +145,8 @@ void main() {
             label: 'Signed in as',
             child: new Column(
               children: const <Widget>[
-                const Text('Michael Goderbauer'),
-                const Text('goderbauer@google.com'),
+                Text('Michael Goderbauer'),
+                Text('goderbauer@google.com'),
               ],
             ),
           ),

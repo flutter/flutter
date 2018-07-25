@@ -152,12 +152,12 @@ void main() {
             child: new ListView(
               children: <Widget>[
                 const TextField(
-                  decoration: const InputDecoration(
+                  decoration: InputDecoration(
                     labelText: 'label1',
                   ),
                 ),
                 const TextField(
-                  decoration: const InputDecoration(
+                  decoration: InputDecoration(
                     labelText: 'label2',
                   ),
                 ),

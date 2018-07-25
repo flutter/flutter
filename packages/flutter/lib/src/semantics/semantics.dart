@@ -70,33 +70,33 @@ class SemanticsTag {
 }
 
 /// An identifier of a custom semantics action.
-/// 
+///
 /// Custom semantics actions can be provided to make complex user
-/// interactions more accessible. For instance, if an application has a 
+/// interactions more accessible. For instance, if an application has a
 /// drag-and-drop list that requires the user to press and hold an item
 /// to move it, users interacting with the application using a hardware
 /// switch may have difficulty. This can be made accessible by creating custom
 /// actions and pairing them with handlers that move a list item up or down in
 /// the list.
-/// 
+///
 /// In Android, these actions are presented in the local context menu. In iOS,
-/// these are presented in the radial context menu. 
-/// 
+/// these are presented in the radial context menu.
+///
 /// Localization and text direction do not automatically apply to the provided
 /// label.
-/// 
+///
 /// Instances of this class should either be instantiated with const or
 /// new instances cached in static fields.
-/// 
+///
 /// See also:
-/// 
+///
 ///   * [SemanticsProperties], where the handler for a custom action is provided.
 @immutable
 class CustomSemanticsAction {
   /// Creates a new [CustomSemanticsAction].
-  /// 
+  ///
   /// The [label] must not be null or the empty string.
-  const CustomSemanticsAction({@required this.label}) 
+  const CustomSemanticsAction({@required this.label})
     : assert(label != null),
       assert(label != '');
 
@@ -115,7 +115,7 @@ class CustomSemanticsAction {
   }
 
   // Logic to assign a unique id to each custom action without requiring
-  // user specification. 
+  // user specification.
   static int _nextId = 0;
   static final Map<int, CustomSemanticsAction> _actions = <int, CustomSemanticsAction>{};
   static final Map<CustomSemanticsAction, int> _ids = <CustomSemanticsAction, int>{};
@@ -272,11 +272,11 @@ class SemanticsData extends Diagnosticable {
   final Matrix4 transform;
 
   /// The identifiers for the custom semantics action defined for this node.
-  /// 
+  ///
   /// The list must be sorted in increasing order.
-  /// 
+  ///
   /// See also:
-  /// 
+  ///
   ///   * [CustomSemanticsAction], for an explanation of custom actions.
   final List<int> customSemanticsActionIds;
 
@@ -368,7 +368,7 @@ class SemanticsData extends Diagnosticable {
       customSemanticsActionIds,
     );
   }
-  
+
   static bool _sortedListsEqual(List<int> left, List<int> right) {
     if (left == null && right == null)
       return true;
@@ -419,6 +419,7 @@ class SemanticsProperties extends DiagnosticableTree {
     this.enabled,
     this.checked,
     this.selected,
+    this.toggled,
     this.button,
     this.header,
     this.textField,
@@ -428,6 +429,8 @@ class SemanticsProperties extends DiagnosticableTree {
     this.obscured,
     this.scopesRoute,
     this.namesRoute,
+    this.image,
+    this.liveRegion,
     this.label,
     this.value,
     this.increasedValue,
@@ -451,6 +454,7 @@ class SemanticsProperties extends DiagnosticableTree {
     this.onSetSelection,
     this.onDidGainAccessibilityFocus,
     this.onDidLoseAccessibilityFocus,
+    this.onDismiss,
     this.customSemanticsActions,
   });
 
@@ -465,7 +469,16 @@ class SemanticsProperties extends DiagnosticableTree {
   /// If non-null, indicates that this subtree represents a checkbox
   /// or similar widget with a "checked" state, and what its current
   /// state is.
+  ///
+  /// This is mutually exclusive with [toggled].
   final bool checked;
+
+  /// If non-null, indicates that this subtree represents a toggle switch
+  /// or similar widget with an "on" state, and what its current
+  /// state is.
+  ///
+  /// This is mutually exclusive with [checked].
+  final bool toggled;
 
   /// If non-null indicates that this subtree represents something that can be
   /// in a selected or unselected state, and what its current state is.
@@ -552,6 +565,36 @@ class SemanticsProperties extends DiagnosticableTree {
   ///
   ///  * [SemanticsFlag.namesRoute] for a description of how the name is used.
   final bool namesRoute;
+
+  /// If non-null, whether the node represents an image.
+  ///
+  /// See also:
+  ///
+  ///   * [SemanticsFlag.image], for the flag this setting controls.
+  final bool image;
+
+  /// If non-null, whether the node should be considered a live region.
+  ///
+  /// On Android, when a live region semantics node is first created TalkBack
+  /// will make a polite announcement of the current label. This announcement
+  /// occurs even if the node is not focused. Subsequent polite announcements
+  /// can be made by sending a [UpdateLiveRegionEvent] semantics event. The
+  /// announcement will only be made if the node's label has changed since the
+  /// last update.
+  ///
+  /// On iOS, no announcements are made but the node is marked as
+  /// `UIAccessibilityTraitUpdatesFrequently`.
+  ///
+  /// An example of a live region is the [Snackbar] widget. When it appears
+  /// on the screen it may be difficult to focus to read the label. A live
+  /// region causes an initial polite announcement to be generated
+  /// automatically.
+  ///
+  /// See also:
+  ///   * [SemanticsFlag.liveRegion], the semantics flag this setting controls.
+  ///   * [SemanticsConfiguration.liveRegion], for a full description of a live region.
+  ///   * [UpdateLiveRegionEvent], to trigger a polite announcement of a live region.
+  final bool liveRegion;
 
   /// Provides a textual description of the widget.
   ///
@@ -815,15 +858,24 @@ class SemanticsProperties extends DiagnosticableTree {
   ///  * [FocusNode], [FocusScope], [FocusManager], which manage the input focus
   final VoidCallback onDidLoseAccessibilityFocus;
 
+  /// The handler for [SemanticsAction.dismiss].
+  ///
+  /// This is a request to dismiss the currently focused node.
+  ///
+  /// TalkBack users on Android can trigger this action in the local context
+  /// menu, and VoiceOver users on iOS can trigger this action with a standard
+  /// gesture or menu option.
+  final VoidCallback onDismiss;
+
   /// A map from each supported [CustomSemanticsAction] to a provided handler.
-  /// 
+  ///
   /// The handler associated with each custom action is called whenever a
   /// semantics event of type [SemanticsEvent.customEvent] is received. The
   /// provided argument will be an identifier used to retrieve an instance of
   /// a custom action which can then retrieve the correct handler from this map.
-  /// 
+  ///
   /// See also:
-  /// 
+  ///
   ///   * [CustomSemanticsAction], for an explanation of custom actions.
   final Map<CustomSemanticsAction, VoidCallback> customSemanticsActions;
 
@@ -2346,6 +2398,20 @@ class SemanticsConfiguration {
     _onScrollLeft = value;
   }
 
+  /// The handler for [SemanticsAction.dismiss].
+  ///
+  /// This is a request to dismiss the currently focused node.
+  ///
+  /// TalkBack users on Android can trigger this action in the local context
+  /// menu, and VoiceOver users on iOS can trigger this action with a standard
+  /// gesture or menu option.
+  VoidCallback get onDismiss => _onDismiss;
+  VoidCallback _onDismiss;
+  set onDismiss(VoidCallback value) {
+    _addArgumentlessAction(SemanticsAction.dismiss, value);
+    _onDismiss = value;
+  }
+
   /// The handler for [SemanticsAction.scrollRight].
   ///
   /// This is the semantic equivalent of a user moving their finger across the
@@ -2644,9 +2710,9 @@ class SemanticsConfiguration {
   }
 
   /// The handlers for each supported [CustomSemanticsAction].
-  /// 
+  ///
   /// Whenever a custom accessibility action is added to a node, the action
-  /// [SemanticAction.customAction] is automatically added. A handler is 
+  /// [SemanticAction.customAction] is automatically added. A handler is
   /// created which uses the passed argument to lookup the custom action
   /// handler from this map and invoke it, if present.
   Map<CustomSemanticsAction, VoidCallback> get customSemanticsActions => _customSemanticsActions;
@@ -2771,6 +2837,34 @@ class SemanticsConfiguration {
     _setFlag(SemanticsFlag.namesRoute, value);
   }
 
+  /// Whether the semantics node represents an image.
+  bool get isImage => _hasFlag(SemanticsFlag.isImage);
+  set isImage(bool value) {
+    _setFlag(SemanticsFlag.isImage, value);
+  }
+
+  /// Whether the semantics node is a live region.
+  ///
+  /// On Android, when a live region semantics node is first created TalkBack
+  /// will make a polite announcement of the current label. This announcement
+  /// occurs even if the node is not focused. Subsequent polite announcements
+  /// can be made by sending a [UpdateLiveRegionEvent] semantics event. The
+  /// announcement will only be made if the node's label has changed since the
+  /// last update.
+  ///
+  /// An example of a live region is the [Snackbar] widget. When it appears
+  /// on the screen it may be difficult to focus to read the label. A live
+  /// region causes an initial polite announcement to be generated
+  /// automatically.
+  ///
+  /// See also:
+  ///
+  ///   * [SemanticsFlag.isLiveRegion], the semantics flag that this setting controls.
+  bool get liveRegion => _hasFlag(SemanticsFlag.isLiveRegion);
+  set liveRegion(bool value) {
+    _setFlag(SemanticsFlag.isLiveRegion, value);
+  }
+
   /// The reading direction for the text in [label], [value], [hint],
   /// [increasedValue], and [decreasedValue].
   TextDirection get textDirection => _textDirection;
@@ -2804,7 +2898,8 @@ class SemanticsConfiguration {
   }
 
   /// If this node has Boolean state that can be controlled by the user, whether
-  /// that state is on or off, corresponding to true and false, respectively.
+  /// that state is checked or unchecked, corresponding to true and false,
+  /// respectively.
   ///
   /// Do not call the setter for this field if the owning [RenderObject] doesn't
   /// have checked/unchecked state that can be controlled by the user.
@@ -2815,6 +2910,20 @@ class SemanticsConfiguration {
   set isChecked(bool value) {
     _setFlag(SemanticsFlag.hasCheckedState, true);
     _setFlag(SemanticsFlag.isChecked, value);
+  }
+
+  /// If this node has Boolean state that can be controlled by the user, whether
+  /// that state is on or off, corresponding to true and false, respectively.
+  ///
+  /// Do not call the setter for this field if the owning [RenderObject] doesn't
+  /// have on/off state that can be controlled by the user.
+  ///
+  /// The getter returns null if the owning [RenderObject] does not have
+  /// on/off state.
+  bool get isToggled => _hasFlag(SemanticsFlag.hasToggledState) ? _hasFlag(SemanticsFlag.isToggled) : null;
+  set isToggled(bool value) {
+    _setFlag(SemanticsFlag.hasToggledState, true);
+    _setFlag(SemanticsFlag.isToggled, value);
   }
 
   /// Whether the owning RenderObject corresponds to UI that allows the user to

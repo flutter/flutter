@@ -13,7 +13,7 @@ import 'colors.dart';
 import 'input_border.dart';
 import 'theme.dart';
 
-const Duration _kTransitionDuration = const Duration(milliseconds: 200);
+const Duration _kTransitionDuration = Duration(milliseconds: 200);
 const Curve _kTransitionCurve = Curves.fastOutSlowIn;
 
 // Defines the gap in the InputDecorator's outline border where the
@@ -259,7 +259,7 @@ class _HelperError extends StatefulWidget {
 class _HelperErrorState extends State<_HelperError> with SingleTickerProviderStateMixin {
   // If the height of this widget and the counter are zero ("empty") at
   // layout time, no space is allocated for the subtext.
-  static const Widget empty = const SizedBox();
+  static const Widget empty = SizedBox();
 
   AnimationController _controller;
   Widget _helper;
@@ -1551,10 +1551,10 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
 
     // dark theme: 10% white (enabled), 5% white (disabled)
     // light theme: 4% black (enabled), 2% black (disabled)
-    const Color darkEnabled = const Color(0x1AFFFFFF);
-    const Color darkDisabled = const Color(0x0DFFFFFF);
-    const Color lightEnabled = const Color(0x0A000000);
-    const Color lightDisabled = const Color(0x05000000);
+    const Color darkEnabled = Color(0x1AFFFFFF);
+    const Color darkDisabled = Color(0x0DFFFFFF);
+    const Color lightEnabled = Color(0x0A000000);
+    const Color lightDisabled = Color(0x05000000);
 
     switch (themeData.brightness) {
       case Brightness.dark:
@@ -1611,21 +1611,26 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
     return themeData.textTheme.caption.copyWith(color: color).merge(decoration.errorStyle);
   }
 
-  double get _borderWeight {
-    if (decoration.isCollapsed || decoration.border == InputBorder.none || !decoration.enabled)
-      return 0.0;
-    return isFocused ? 2.0 : 1.0;
-  }
-
-  Color _getBorderColor(ThemeData themeData) {
-    if (!decoration.enabled) {
-      if (decoration.filled == true && !decoration.border.isOutline)
-        return Colors.transparent;
-      return themeData.disabledColor;
+  InputBorder _getDefaultBorder(ThemeData themeData) {
+    Color borderColor;
+    if (decoration.enabled) {
+      borderColor = decoration.errorText == null
+        ? _getActiveColor(themeData)
+        : themeData.errorColor;
+    } else {
+      borderColor = (decoration.filled == true && decoration.border?.isOutline != true)
+        ? Colors.transparent
+        : themeData.disabledColor;
     }
-    return decoration.errorText == null
-      ? _getActiveColor(themeData)
-      : themeData.errorColor;
+
+    double borderWeight;
+    if (decoration.isCollapsed || decoration?.border == InputBorder.none || !decoration.enabled)
+      borderWeight = 0.0;
+    else
+      borderWeight = isFocused ? 2.0 : 1.0;
+
+    final InputBorder border = decoration.border ?? const UnderlineInputBorder();
+    return border.copyWith(borderSide: new BorderSide(color: borderColor, width: borderWeight));
   }
 
   String _getSemanticLabel() {
@@ -1666,23 +1671,22 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
       ),
     );
 
-    final InputBorder border = decoration.border.copyWith(
-      borderSide: new BorderSide(
-        color: _getBorderColor(themeData),
-        width: _borderWeight,
-      ),
-    );
+    final bool isError = decoration.errorText != null;
+    InputBorder border;
+    if (!decoration.enabled)
+      border = isError ? decoration.errorBorder : decoration.disabledBorder;
+    else if (isFocused)
+      border = isError ? decoration.focusedErrorBorder : decoration.focusedBorder;
+    else
+      border = isError ? decoration.errorBorder : decoration.enabledBorder;
+    border ??= _getDefaultBorder(themeData);
 
-    final Widget container = border == null
-      ? new DecoratedBox(
-          decoration: new BoxDecoration(color: _getFillColor(themeData))
-        )
-      : new _BorderContainer(
-          border: border,
-          gap: _borderGap,
-          gapAnimation: _floatingLabelController.view,
-          fillColor: _getFillColor(themeData),
-        );
+    final Widget container = new _BorderContainer(
+      border: border,
+      gap: _borderGap,
+      gapAnimation: _floatingLabelController.view,
+      fillColor: _getFillColor(themeData),
+    );
 
     final TextStyle inlineLabelStyle = inlineStyle.merge(decoration.labelStyle);
     final Widget label = decoration.labelText == null ? null : new _Shaker(
@@ -1798,7 +1802,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
     if (decoration.isCollapsed) {
       floatingLabelHeight = 0.0;
       contentPadding = decorationContentPadding ?? EdgeInsets.zero;
-    } else if (!decoration.border.isOutline) {
+    } else if (!border.isOutline) {
       // 4.0: the vertical gap between the inline elements and the floating label.
       floatingLabelHeight = 4.0 + 0.75 * inlineLabelStyle.fontSize;
       if (decoration.filled == true) { // filled == null same as filled == false
@@ -1819,6 +1823,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
         ? const EdgeInsets.fromLTRB(12.0, 20.0, 12.0, 12.0)
         : const EdgeInsets.fromLTRB(12.0, 24.0, 12.0, 16.0));
     }
+
     return new Semantics(
       label: _getSemanticLabel(),
       child: new _Decorator(
@@ -1827,7 +1832,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
           isCollapsed: decoration.isCollapsed,
           floatingLabelHeight: floatingLabelHeight,
           floatingLabelProgress: _floatingLabelController.value,
-          border: decoration.border,
+          border: border,
           borderGap: _borderGap,
           icon: icon,
           input: widget.child,
@@ -1840,11 +1845,10 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
           helperError: helperError,
           counter: counter,
           container: container,
-        ),
-        textDirection: textDirection,
-        textBaseline: textBaseline,
       ),
-    );
+      textDirection: textDirection,
+      textBaseline: textBaseline,
+    ));
   }
 }
 
@@ -1898,6 +1902,11 @@ class InputDecoration {
     this.counterStyle,
     this.filled,
     this.fillColor,
+    this.errorBorder,
+    this.focusedBorder,
+    this.focusedErrorBorder,
+    this.disabledBorder,
+    this.enabledBorder,
     this.border,
     this.enabled = true,
   }) : assert(enabled != null), isCollapsed = false;
@@ -1933,7 +1942,12 @@ class InputDecoration {
        suffixText = null,
        suffixStyle = null,
        counterText = null,
-       counterStyle = null;
+       counterStyle = null,
+       errorBorder = null,
+       focusedBorder = null,
+       focusedErrorBorder = null,
+       disabledBorder = null,
+       enabledBorder = null;
 
   /// An icon to show before the input field and outside of the decoration's
   /// container.
@@ -2161,16 +2175,147 @@ class InputDecoration {
   /// [errorText], and [counterText].
   final Color fillColor;
 
-  /// The border to draw around the decoration's container.
+  /// The border to display when the [InputDecorator] does not have the focus and
+  /// is showing an error.
+  ///
+  /// See also:
+  ///  * [InputDecorator.isFocused], which is true if the [InputDecorator]'s child
+  ///    has the focus.
+  ///  * [InputDecoration.errorText], the error shown by the [InputDecorator], if non-null.
+  ///  * [border], for a description of where the [InputDecorator] border appears.
+  ///  * [UnderlineInputBorder], an [InputDecorator] border which draws a horizontal
+  ///    line at the bottom of the input decorator's container.
+  ///  * [OutlineInputBorder], an [InputDecorator] border which draws a
+  ///    rounded rectangle around the input decorator's container.
+  ///  * [InputBorder.none], which doesn't draw a border.
+  ///  * [focusedBorder], displayed when [InputDecorator.isFocused] is true
+  ///    and [InputDecoration.errorText] is null.
+  ///  * [focusedErrorBorder], displayed when [InputDecorator.isFocused] is true
+  ///    and [InputDecoration.errorText] is non-null.
+  ///  * [disabledBorder], displayed when [InputDecoration.enabled] is false
+  ///    and [InputDecoration.errorText] is null.
+  ///  * [enabledBorder], displayed when [InputDecoration.enabled] is true
+  ///    and [InputDecoration.errorText] is null.
+  final InputBorder errorBorder;
+
+  /// The border to display when the [InputDecorator] has the focus and is not
+  /// showing an error.
+  ///
+  /// See also:
+  ///
+  ///  * [InputDecorator.isFocused], which is true if the [InputDecorator]'s child
+  ///    has the focus.
+  ///  * [InputDecoration.errorText], the error shown by the [InputDecorator], if non-null.
+  ///  * [border], for a description of where the [InputDecorator] border appears.
+  ///  * [UnderlineInputBorder], an [InputDecorator] border which draws a horizontal
+  ///    line at the bottom of the input decorator's container.
+  ///  * [OutlineInputBorder], an [InputDecorator] border which draws a
+  ///    rounded rectangle around the input decorator's container.
+  ///  * [InputBorder.none], which doesn't draw a border.
+  ///  * [errorBorder], displayed when [InputDecorator.isFocused] is false
+  ///    and [InputDecoration.errorText] is non-null.
+  ///  * [focusedErrorBorder], displayed when [InputDecorator.isFocused] is true
+  ///    and [InputDecoration.errorText] is non-null.
+  ///  * [disabledBorder], displayed when [InputDecoration.enabled] is false
+  ///    and [InputDecoration.errorText] is null.
+  ///  * [enabledBorder], displayed when [InputDecoration.enabled] is true
+  ///    and [InputDecoration.errorText] is null.
+  final InputBorder focusedBorder;
+
+  /// The border to display when the [InputDecorator] has the focus and is
+  /// showing an error.
+  ///
+  /// See also:
+  ///
+  ///  * [InputDecorator.isFocused], which is true if the [InputDecorator]'s child
+  ///    has the focus.
+  ///  * [InputDecoration.errorText], the error shown by the [InputDecorator], if non-null.
+  ///  * [border], for a description of where the [InputDecorator] border appears.
+  ///  * [UnderlineInputBorder], an [InputDecorator] border which draws a horizontal
+  ///    line at the bottom of the input decorator's container.
+  ///  * [OutlineInputBorder], an [InputDecorator] border which draws a
+  ///    rounded rectangle around the input decorator's container.
+  ///  * [InputBorder.none], which doesn't draw a border.
+  ///  * [errorBorder], displayed when [InputDecorator.isFocused] is false
+  ///    and [InputDecoration.errorText] is non-null.
+  ///  * [focusedBorder], displayed when [InputDecorator.isFocused] is true
+  ///    and [InputDecoration.errorText] is null.
+  ///  * [disabledBorder], displayed when [InputDecoration.enabled] is false
+  ///    and [InputDecoration.errorText] is null.
+  ///  * [enabledBorder], displayed when [InputDecoration.enabled] is true
+  ///    and [InputDecoration.errorText] is null.
+  final InputBorder focusedErrorBorder;
+
+  /// The border to display when the [InputDecorator] is disabled and is not
+  /// showing an error.
+  ///
+  /// See also:
+  ///
+  ///  * [InputDecoration.enabled], which is false if the [InputDecorator] is disabled.
+  ///  * [InputDecoration.errorText], the error shown by the [InputDecorator], if non-null.
+  ///  * [border], for a description of where the [InputDecorator] border appears.
+  ///  * [UnderlineInputBorder], an [InputDecorator] border which draws a horizontal
+  ///    line at the bottom of the input decorator's container.
+  ///  * [OutlineInputBorder], an [InputDecorator] border which draws a
+  ///    rounded rectangle around the input decorator's container.
+  ///  * [InputBorder.none], which doesn't draw a border.
+  ///  * [errorBorder], displayed when [InputDecorator.isFocused] is false
+  ///    and [InputDecoration.errorText] is non-null.
+  ///  * [focusedBorder], displayed when [InputDecorator.isFocused] is true
+  ///    and [InputDecoration.errorText] is null.
+  ///  * [focusedErrorBorder], displayed when [InputDecorator.isFocused] is true
+  ///    and [InputDecoration.errorText] is non-null.
+  ///  * [enabledBorder], displayed when [InputDecoration.enabled] is true
+  ///    and [InputDecoration.errorText] is null.
+  final InputBorder disabledBorder;
+
+  /// The border to display when the [InputDecorator] is enabled and is not
+  /// showing an error.
+  ///
+  /// See also:
+  ///
+  ///  * [InputDecoration.enabled], which is false if the [InputDecorator] is disabled.
+  ///  * [InputDecoration.errorText], the error shown by the [InputDecorator], if non-null.
+  ///  * [border], for a description of where the [InputDecorator] border appears.
+  ///  * [UnderlineInputBorder], an [InputDecorator] border which draws a horizontal
+  ///    line at the bottom of the input decorator's container.
+  ///  * [OutlineInputBorder], an [InputDecorator] border which draws a
+  ///    rounded rectangle around the input decorator's container.
+  ///  * [InputBorder.none], which doesn't draw a border.
+  ///  * [errorBorder], displayed when [InputDecorator.isFocused] is false
+  ///    and [InputDecoration.errorText] is non-null.
+  ///  * [focusedBorder], displayed when [InputDecorator.isFocused] is true
+  ///    and [InputDecoration.errorText] is null.
+  ///  * [focusedErrorBorder], displayed when [InputDecorator.isFocused] is true
+  ///    and [InputDecoration.errorText] is non-null.
+  ///  * [disabledBorder], displayed when [InputDecoration.enabled] is false
+  ///    and [InputDecoration.errorText] is null.
+  final InputBorder enabledBorder;
+
+  /// The shape of the border to draw around the decoration's container.
   ///
   /// The decoration's container is the area which is filled if [isFilled] is
   /// true and bordered per the [border]. It's the area adjacent to
-  /// [decoration.icon] and above the widgets that contain [helperText],
-  /// [errorText], and [counterText].
+  /// [InputDecoration.icon] and above the widgets that contain
+  /// [InputDecoration.helperText], [InputDecoration.errorText], and
+  /// [InputDecoration.counterText].
   ///
-  /// The default value of this property is `const UnderlineInputBorder()`.
+  /// The border's bounds, i.e. the value of `border.getOuterPath()`, define
+  /// the area to be filled.
+  ///
+  /// This property is only used when the appropriate one of [errorBorder],
+  /// [focusedBorder], [focusedErrorBorder], [disabledBorder], or [enabledBorder]
+  /// is not specified. This border's [InputBorder.borderSide] property is
+  /// configured by the InputDecorator, depending on the values of
+  /// [InputDecoration.errorText], [InputDecoration.enabled],
+  /// [InputDecorator.isFocused and the current [Theme].
+  ///
+  /// Typically one of [UnderlineInputBorder] or [OutlineInputBorder].
+  /// If null, InputDecorator's default is `const UnderlineInputBorder()`.
   ///
   /// See also:
+  ///
+  ///  * [InputBorder.none], which doesn't draw a border.
   ///  * [UnderlineInputBorder], which draws a horizontal line at the
   ///    bottom of the input decorator's container.
   ///  * [OutlineInputBorder], an [InputDecorator] border which draws a
@@ -2210,6 +2355,11 @@ class InputDecoration {
     TextStyle counterStyle,
     bool filled,
     Color fillColor,
+    InputBorder errorBorder,
+    InputBorder focusedBorder,
+    InputBorder focusedErrorBorder,
+    InputBorder disabledBorder,
+    InputBorder enabledBorder,
     InputBorder border,
     bool enabled,
   }) {
@@ -2236,6 +2386,11 @@ class InputDecoration {
       counterStyle: counterStyle ?? this.counterStyle,
       filled: filled ?? this.filled,
       fillColor: fillColor ?? this.fillColor,
+      errorBorder: errorBorder ?? this.errorBorder,
+      focusedBorder: focusedBorder ?? this.focusedBorder,
+      focusedErrorBorder: focusedErrorBorder ?? this.focusedErrorBorder,
+      disabledBorder: disabledBorder ?? this.disabledBorder,
+      enabledBorder: enabledBorder ?? this.enabledBorder,
       border: border ?? this.border,
       enabled: enabled ?? this.enabled,
     );
@@ -2260,6 +2415,11 @@ class InputDecoration {
       counterStyle: counterStyle ?? theme.counterStyle,
       filled: filled ?? theme.filled,
       fillColor: fillColor ?? theme.fillColor,
+      errorBorder: errorBorder ?? theme.errorBorder,
+      focusedBorder: focusedBorder ?? theme.focusedBorder,
+      focusedErrorBorder: focusedErrorBorder ?? theme.focusedErrorBorder,
+      disabledBorder: disabledBorder ?? theme.disabledBorder,
+      enabledBorder: enabledBorder ?? theme.enabledBorder,
       border: border ?? theme.border,
     );
   }
@@ -2294,6 +2454,11 @@ class InputDecoration {
         && typedOther.counterStyle == counterStyle
         && typedOther.filled == filled
         && typedOther.fillColor == fillColor
+        && typedOther.errorBorder == errorBorder
+        && typedOther.focusedBorder == focusedBorder
+        && typedOther.focusedErrorBorder == focusedErrorBorder
+        && typedOther.disabledBorder == disabledBorder
+        && typedOther.enabledBorder == enabledBorder
         && typedOther.border == border
         && typedOther.enabled == enabled;
   }
@@ -2307,12 +2472,12 @@ class InputDecoration {
       helperText,
       helperStyle,
       hintText,
+      hintStyle,
+      errorText,
+      errorStyle,
+      errorMaxLines,
+      isDense,
       hashValues( // Over 20 fields...
-        hintStyle,
-        errorText,
-        errorStyle,
-        errorMaxLines,
-        isDense,
         contentPadding,
         isCollapsed,
         prefixIcon,
@@ -2325,6 +2490,11 @@ class InputDecoration {
         counterStyle,
         filled,
         fillColor,
+        errorBorder,
+        focusedBorder,
+        focusedErrorBorder,
+        disabledBorder,
+        enabledBorder,
         border,
         enabled,
       ),
@@ -2374,6 +2544,16 @@ class InputDecoration {
       description.add('filled: true');
     if (fillColor != null)
       description.add('fillColor: $fillColor');
+    if (errorBorder != null)
+      description.add('errorBorder: $errorBorder');
+    if (focusedBorder != null)
+      description.add('focusedBorder: $focusedBorder');
+    if (focusedErrorBorder != null)
+      description.add('focusedErrorBorder: $focusedErrorBorder');
+    if (disabledBorder != null)
+      description.add('disabledBorder: $disabledBorder');
+    if (enabledBorder != null)
+      description.add('enabledBorder: $enabledBorder');
     if (border != null)
       description.add('border: $border');
     if (!enabled)
@@ -2412,11 +2592,15 @@ class InputDecorationTheme extends Diagnosticable {
     this.counterStyle,
     this.filled = false,
     this.fillColor,
-    this.border = const UnderlineInputBorder(),
+    this.errorBorder,
+    this.focusedBorder,
+    this.focusedErrorBorder,
+    this.disabledBorder,
+    this.enabledBorder,
+    this.border,
   }) : assert(isDense != null),
        assert(isCollapsed != null),
-       assert(filled != null),
-       assert(border != null);
+      assert(filled != null);
 
   /// The style to use for [InputDecoration.labelText] when the label is
   /// above (i.e., vertically adjacent to) the input field.
@@ -2518,7 +2702,124 @@ class InputDecorationTheme extends Diagnosticable {
   /// true and bordered per the [border].
   final Color fillColor;
 
-  /// The border to draw around the decoration's container.
+  /// The border to display when the [InputDecorator] does not have the focus and
+  /// is showing an error.
+  ///
+  /// See also:
+  ///  * [InputDecorator.isFocused], which is true if the [InputDecorator]'s child
+  ///    has the focus.
+  ///  * [InputDecoration.errorText], the error shown by the [InputDecorator], if non-null.
+  ///  * [border], for a description of where the [InputDecorator] border appears.
+  ///  * [UnderlineInputBorder], an [InputDecorator] border which draws a horizontal
+  ///    line at the bottom of the input decorator's container.
+  ///  * [OutlineInputBorder], an [InputDecorator] border which draws a
+  ///    rounded rectangle around the input decorator's container.
+  ///  * [InputBorder.none], which doesn't draw a border.
+  ///  * [focusedBorder], displayed when [InputDecorator.isFocused] is true
+  ///    and [InputDecoration.errorText] is null.
+  ///  * [focusedErrorBorder], displayed when [InputDecorator.isFocused] is true
+  ///    and [InputDecoration.errorText] is non-null.
+  ///  * [disabledBorder], displayed when [InputDecoration.enabled] is false
+  ///    and [InputDecoration.errorText] is null.
+  ///  * [enabledBorder], displayed when [InputDecoration.enabled] is true
+  ///    and [InputDecoration.errorText] is null.
+  final InputBorder errorBorder;
+
+  /// The border to display when the [InputDecorator] has the focus and is not
+  /// showing an error.
+  ///
+  /// See also:
+  ///
+  ///  * [InputDecorator.isFocused], which is true if the [InputDecorator]'s child
+  ///    has the focus.
+  ///  * [InputDecoration.errorText], the error shown by the [InputDecorator], if non-null.
+  ///  * [border], for a description of where the [InputDecorator] border appears.
+  ///  * [UnderlineInputBorder], an [InputDecorator] border which draws a horizontal
+  ///    line at the bottom of the input decorator's container.
+  ///  * [OutlineInputBorder], an [InputDecorator] border which draws a
+  ///    rounded rectangle around the input decorator's container.
+  ///  * [InputBorder.none], which doesn't draw a border.
+  ///  * [errorBorder], displayed when [InputDecorator.isFocused] is false
+  ///    and [InputDecoration.errorText] is non-null.
+  ///  * [focusedErrorBorder], displayed when [InputDecorator.isFocused] is true
+  ///    and [InputDecoration.errorText] is non-null.
+  ///  * [disabledBorder], displayed when [InputDecoration.enabled] is false
+  ///    and [InputDecoration.errorText] is null.
+  ///  * [enabledBorder], displayed when [InputDecoration.enabled] is true
+  ///    and [InputDecoration.errorText] is null.
+  final InputBorder focusedBorder;
+
+  /// The border to display when the [InputDecorator] has the focus and is
+  /// showing an error.
+  ///
+  /// See also:
+  ///
+  ///  * [InputDecorator.isFocused], which is true if the [InputDecorator]'s child
+  ///    has the focus.
+  ///  * [InputDecoration.errorText], the error shown by the [InputDecorator], if non-null.
+ ///  * [border], for a description of where the [InputDecorator] border appears.
+  ///  * [UnderlineInputBorder], an [InputDecorator] border which draws a horizontal
+  ///    line at the bottom of the input decorator's container.
+  ///  * [OutlineInputBorder], an [InputDecorator] border which draws a
+  ///    rounded rectangle around the input decorator's container.
+  ///  * [InputBorder.none], which doesn't draw a border.
+  ///  * [errorBorder], displayed when [InputDecorator.isFocused] is false
+  ///    and [InputDecoration.errorText] is non-null.
+  ///  * [focusedBorder], displayed when [InputDecorator.isFocused] is true
+  ///    and [InputDecoration.errorText] is null.
+  ///  * [disabledBorder], displayed when [InputDecoration.enabled] is false
+  ///    and [InputDecoration.errorText] is null.
+  ///  * [enabledBorder], displayed when [InputDecoration.enabled] is true
+  ///    and [InputDecoration.errorText] is null.
+  final InputBorder focusedErrorBorder;
+
+   /// The border to display when the [InputDecorator] is disabled and is not
+  /// showing an error.
+  ///
+  /// See also:
+  ///
+  ///  * [InputDecoration.enabled], which is false if the [InputDecorator] is disabled.
+  ///  * [InputDecoration.errorText], the error shown by the [InputDecorator], if non-null.
+  ///  * [border], for a description of where the [InputDecorator] border appears.
+  ///  * [UnderlineInputBorder], an [InputDecorator] border which draws a horizontal
+  ///    line at the bottom of the input decorator's container.
+  ///  * [OutlineInputBorder], an [InputDecorator] border which draws a
+  ///    rounded rectangle around the input decorator's container.
+  ///  * [InputBorder.none], which doesn't draw a border.
+  ///  * [errorBorder], displayed when [InputDecorator.isFocused] is false
+  ///    and [InputDecoration.errorText] is non-null.
+  ///  * [focusedBorder], displayed when [InputDecorator.isFocused] is true
+  ///    and [InputDecoration.errorText] is null.
+  ///  * [focusedErrorBorder], displayed when [InputDecorator.isFocused] is true
+  ///    and [InputDecoration.errorText] is non-null.
+  ///  * [enabledBorder], displayed when [InputDecoration.enabled] is true
+  ///    and [InputDecoration.errorText] is null.
+  final InputBorder disabledBorder;
+
+  /// The border to display when the [InputDecorator] is enabled and is not
+  /// showing an error.
+  ///
+  /// See also:
+  ///
+  ///  * [InputDecoration.enabled], which is false if the [InputDecorator] is disabled.
+  ///  * [InputDecoration.errorText], the error shown by the [InputDecorator], if non-null.
+  ///  * [border], for a description of where the [InputDecorator] border appears.
+  ///  * [UnderlineInputBorder], an [InputDecorator] border which draws a horizontal
+  ///    line at the bottom of the input decorator's container.
+  ///  * [OutlineInputBorder], an [InputDecorator] border which draws a
+  ///    rounded rectangle around the input decorator's container.
+  ///  * [InputBorder.none], which doesn't draw a border.
+  ///  * [errorBorder], displayed when [InputDecorator.isFocused] is false
+  ///    and [InputDecoration.errorText] is non-null.
+  ///  * [focusedBorder], displayed when [InputDecorator.isFocused] is true
+  ///    and [InputDecoration.errorText] is null.
+  ///  * [focusedErrorBorder], displayed when [InputDecorator.isFocused] is true
+  ///    and [InputDecoration.errorText] is non-null.
+  ///  * [disabledBorder], displayed when [InputDecoration.enabled] is false
+  ///    and [InputDecoration.errorText] is null.
+  final InputBorder enabledBorder;
+
+  /// The shape of the border to draw around the decoration's container.
   ///
   /// The decoration's container is the area which is filled if [isFilled] is
   /// true and bordered per the [border]. It's the area adjacent to
@@ -2526,12 +2827,21 @@ class InputDecorationTheme extends Diagnosticable {
   /// [InputDecoration.helperText], [InputDecoration.errorText], and
   /// [InputDecoration.counterText].
   ///
-  /// The default value of this property is `const UnderlineInputBorder()`.
-  ///
-  /// The border's bounds, i.e. the value of `border.getOuterPath()`, defines
+  /// The border's bounds, i.e. the value of `border.getOuterPath()`, define
   /// the area to be filled.
   ///
+  /// This property is only used when the appropriate one of [errorBorder],
+  /// [focusedBorder], [focusedErrorBorder], [disabledBorder], or [enabledBorder]
+  /// is not specified. This border's [InputBorder.borderSide] property is
+  /// configured by the InputDecorator, depending on the values of
+  /// [InputDecoration.errorText], [InputDecoration.enabled],
+  /// [InputDecorator.isFocused and the current [Theme].
+  ///
+  /// Typically one of [UnderlineInputBorder] or [OutlineInputBorder].
+  /// If null, InputDecorator's default is `const UnderlineInputBorder()`.
+  ///
   /// See also:
+  ///
   ///  * [InputBorder.none], which doesn't draw a border.
   ///  * [UnderlineInputBorder], which draws a horizontal line at the
   ///    bottom of the input decorator's container.
@@ -2542,7 +2852,7 @@ class InputDecorationTheme extends Diagnosticable {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    const InputDecorationTheme defaultTheme = const InputDecorationTheme();
+    const InputDecorationTheme defaultTheme = InputDecorationTheme();
     properties.add(new DiagnosticsProperty<TextStyle>('labelStyle', labelStyle, defaultValue: defaultTheme.labelStyle));
     properties.add(new DiagnosticsProperty<TextStyle>('helperStyle', helperStyle, defaultValue: defaultTheme.helperStyle));
     properties.add(new DiagnosticsProperty<TextStyle>('hintStyle', hintStyle, defaultValue: defaultTheme.hintStyle));
@@ -2556,6 +2866,11 @@ class InputDecorationTheme extends Diagnosticable {
     properties.add(new DiagnosticsProperty<TextStyle>('counterStyle', counterStyle, defaultValue: defaultTheme.counterStyle));
     properties.add(new DiagnosticsProperty<bool>('filled', filled, defaultValue: defaultTheme.filled));
     properties.add(new DiagnosticsProperty<Color>('fillColor', fillColor, defaultValue: defaultTheme.fillColor));
+    properties.add(new DiagnosticsProperty<InputBorder>('errorBorder', errorBorder, defaultValue: defaultTheme.errorBorder));
+    properties.add(new DiagnosticsProperty<InputBorder>('focusedBorder', focusedBorder, defaultValue: defaultTheme.focusedErrorBorder));
+    properties.add(new DiagnosticsProperty<InputBorder>('focusedErrorborder', focusedErrorBorder, defaultValue: defaultTheme.focusedErrorBorder));
+    properties.add(new DiagnosticsProperty<InputBorder>('disabledBorder', disabledBorder, defaultValue: defaultTheme.disabledBorder));
+    properties.add(new DiagnosticsProperty<InputBorder>('enabledBorder', enabledBorder, defaultValue: defaultTheme.enabledBorder));
     properties.add(new DiagnosticsProperty<InputBorder>('border', border, defaultValue: defaultTheme.border));
   }
 }

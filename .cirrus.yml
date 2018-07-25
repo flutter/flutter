@@ -64,7 +64,7 @@ task:
     - bin\flutter.bat update-packages
     - git fetch origin master
   test_all_script: |
-    export TEST_COMMIT_RANGE="$(git merge-base --fork-point FETCH_HEAD HEAD)..HEAD"
+    export TEST_COMMIT_RANGE="$(git merge-base --fork-point FETCH_HEAD HEAD || git merge-base FETCH_HEAD HEAD)..HEAD"
     bin\cache\dart-sdk\bin\dart.exe -c dev\bots\test.dart
 
 task:
@@ -83,7 +83,7 @@ task:
     - bin\flutter.bat update-packages
     - git fetch origin master
   test_all_script: |
-    export TEST_COMMIT_RANGE="$(git merge-base --fork-point FETCH_HEAD HEAD)..HEAD"
+    export TEST_COMMIT_RANGE="$(git merge-base --fork-point FETCH_HEAD HEAD || git merge-base FETCH_HEAD HEAD)..HEAD"
     bin\cache\dart-sdk\bin\dart.exe -c dev\bots\test.dart
 
 task:
@@ -98,7 +98,7 @@ task:
     - bin/flutter update-packages
   test_all_script: |
     ulimit -S -n 2048 # https://github.com/flutter/flutter/issues/2976
-    export TEST_COMMIT_RANGE="$(git merge-base --fork-point FETCH_HEAD HEAD)..HEAD"
+    export TEST_COMMIT_RANGE="$(git merge-base --fork-point FETCH_HEAD HEAD || git merge-base FETCH_HEAD HEAD)..HEAD"
     bin/cache/dart-sdk/bin/dart -c dev/bots/test.dart
 
 task:
@@ -113,5 +113,5 @@ task:
     - bin/flutter update-packages
   test_all_script: |
     ulimit -S -n 2048 # https://github.com/flutter/flutter/issues/2976
-    export TEST_COMMIT_RANGE="$(git merge-base --fork-point FETCH_HEAD HEAD)..HEAD"
+    export TEST_COMMIT_RANGE="$(git merge-base --fork-point FETCH_HEAD HEAD || git merge-base FETCH_HEAD HEAD)..HEAD"
     bin/cache/dart-sdk/bin/dart -c dev/bots/test.dart

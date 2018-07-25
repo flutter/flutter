@@ -105,7 +105,7 @@ void main() {
         child: new Theme(
           data: theme,
           child: const CircleAvatar(
-            child: const Text('Z'),
+            child: Text('Z'),
           ),
         ),
       ),
@@ -130,7 +130,7 @@ void main() {
         child: new Theme(
           data: theme,
           child: const CircleAvatar(
-            child: const Text('Z'),
+            child: Text('Z'),
           ),
         ),
       ),
@@ -163,9 +163,9 @@ void main() {
         child: new MediaQuery(
           data: const MediaQueryData(
             textScaleFactor: 2.0,
-            size: const Size(111.0, 111.0),
+            size: Size(111.0, 111.0),
             devicePixelRatio: 1.1,
-            padding: const EdgeInsets.all(11.0)),
+            padding: EdgeInsets.all(11.0)),
           child: new CircleAvatar(
             child: new Builder(
               builder: (BuildContext context) {

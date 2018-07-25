@@ -101,8 +101,8 @@ void main() {
           rect: new Rect.fromLTWH(0.0, 0.0, 800.0, 56.0),
           transform: null,
           flags: <SemanticsFlag>[
-            SemanticsFlag.hasCheckedState,
-            SemanticsFlag.isChecked,
+            SemanticsFlag.hasToggledState,
+            SemanticsFlag.isToggled,
             SemanticsFlag.hasEnabledState,
             SemanticsFlag.isEnabled
           ],

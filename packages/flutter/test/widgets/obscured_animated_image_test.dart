@@ -21,7 +21,7 @@ Future<Null> main() async {
     final GlobalKey imageKey = new GlobalKey();
     await tester.pumpWidget(
       new MaterialApp(
-        home: new Image(image: fakeImageProvider, key: imageKey),
+        home: new Image(image: fakeImageProvider, excludeFromSemantics: true, key: imageKey),
         routes: <String, WidgetBuilder> {
           '/page': (BuildContext context) => new Container()
         }

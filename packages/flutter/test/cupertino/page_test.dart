@@ -77,7 +77,7 @@ void main() {
     await tester.pumpWidget(
       new CupertinoApp(
         localizationsDelegates: const <LocalizationsDelegate<dynamic>>[
-          const RtlOverrideWidgetsDelegate(),
+          RtlOverrideWidgetsDelegate(),
         ],
         onGenerateRoute: (RouteSettings settings) {
           return new CupertinoPageRoute<void>(
@@ -147,7 +147,7 @@ void main() {
   testWidgets('test iOS fullscreen dialog transition', (WidgetTester tester) async {
     await tester.pumpWidget(
       new CupertinoApp(
-        home: const Center(child: const Text('Page 1')),
+        home: const Center(child: Text('Page 1')),
       ),
     );
 
@@ -155,7 +155,7 @@ void main() {
 
     tester.state<NavigatorState>(find.byType(Navigator)).push(new CupertinoPageRoute<void>(
       builder: (BuildContext context) {
-        return const Center(child: const Text('Page 2'));
+        return const Center(child: Text('Page 2'));
       },
       fullscreenDialog: true,
     ));
@@ -269,7 +269,7 @@ void main() {
     await tester.pumpWidget(
       new CupertinoApp(
         localizationsDelegates: const <LocalizationsDelegate<dynamic>>[
-          const RtlOverrideWidgetsDelegate(),
+          RtlOverrideWidgetsDelegate(),
         ],
         onGenerateRoute: (RouteSettings settings) {
           return new CupertinoPageRoute<void>(

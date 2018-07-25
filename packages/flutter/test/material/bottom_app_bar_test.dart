@@ -11,12 +11,12 @@ void main() {
     await tester.pumpWidget(
       new MaterialApp(
         home: const Scaffold(
-          floatingActionButton: const FloatingActionButton(
+          floatingActionButton: FloatingActionButton(
             onPressed: null,
           ),
-          bottomNavigationBar: const ShapeListener(
-            const BottomAppBar(
-              child: const SizedBox(height: 100.0),
+          bottomNavigationBar: ShapeListener(
+            BottomAppBar(
+              child: SizedBox(height: 100.0),
             )
           ),
         ),
@@ -46,10 +46,10 @@ void main() {
             return new Theme(
               data: Theme.of(context).copyWith(bottomAppBarColor: const Color(0xffffff00)),
               child: const Scaffold(
-                floatingActionButton: const FloatingActionButton(
+                floatingActionButton: FloatingActionButton(
                   onPressed: null,
                 ),
-                bottomNavigationBar: const BottomAppBar(),
+                bottomNavigationBar: BottomAppBar(),
               ),
             );
           }
@@ -71,11 +71,11 @@ void main() {
             return new Theme(
               data: Theme.of(context).copyWith(bottomAppBarColor: const Color(0xffffff00)),
               child: const Scaffold(
-                floatingActionButton: const FloatingActionButton(
+                floatingActionButton: FloatingActionButton(
                   onPressed: null,
                 ),
-                bottomNavigationBar: const BottomAppBar(
-                  color: const Color(0xff0000ff)
+                bottomNavigationBar: BottomAppBar(
+                  color: Color(0xff0000ff)
                 ),
               ),
             );
@@ -97,8 +97,8 @@ void main() {
     await tester.pumpWidget(
       new MaterialApp(
         home: const Scaffold(
-          bottomNavigationBar: const BottomAppBar(
-            shape: const RectangularNotch(),
+          bottomNavigationBar: BottomAppBar(
+            shape: RectangularNotch(),
           ),
         ),
       ),
@@ -107,7 +107,7 @@ void main() {
     await tester.pumpWidget(
       new MaterialApp(
         home: const Scaffold(
-          bottomNavigationBar: const BottomAppBar(
+          bottomNavigationBar: BottomAppBar(
             shape: null,
           ),
         ),
@@ -117,8 +117,8 @@ void main() {
     await tester.pumpWidget(
       new MaterialApp(
         home: const Scaffold(
-          bottomNavigationBar: const BottomAppBar(
-            shape: const RectangularNotch(),
+          bottomNavigationBar: BottomAppBar(
+            shape: RectangularNotch(),
           ),
         ),
       ),
@@ -129,12 +129,12 @@ void main() {
     await tester.pumpWidget(
       new MaterialApp(
         home: const Scaffold(
-          bottomNavigationBar: const ShapeListener(const BottomAppBar(
+          bottomNavigationBar: ShapeListener(BottomAppBar(
             shape: null,
           )),
-          floatingActionButton: const FloatingActionButton(
+          floatingActionButton: FloatingActionButton(
             onPressed: null,
-            child: const Icon(Icons.add),
+            child: Icon(Icons.add),
           ),
           floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
         ),
@@ -161,16 +161,16 @@ void main() {
     await tester.pumpWidget(
       new MaterialApp(
         home: const Scaffold(
-          bottomNavigationBar: const ShapeListener(
-            const BottomAppBar(
-              child: const SizedBox(height: 100.0),
-              shape: const RectangularNotch(),
+          bottomNavigationBar: ShapeListener(
+            BottomAppBar(
+              child: SizedBox(height: 100.0),
+              shape: RectangularNotch(),
               notchMargin: 0.0,
             )
           ),
-          floatingActionButton: const FloatingActionButton(
+          floatingActionButton: FloatingActionButton(
             onPressed: null,
-            child: const Icon(Icons.add),
+            child: Icon(Icons.add),
           ),
           floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
         ),
@@ -213,16 +213,16 @@ void main() {
     await tester.pumpWidget(
       new MaterialApp(
         home: const Scaffold(
-          bottomNavigationBar: const ShapeListener(
-            const BottomAppBar(
-              child: const SizedBox(height: 100.0),
-              shape: const RectangularNotch(),
+          bottomNavigationBar: ShapeListener(
+            BottomAppBar(
+              child: SizedBox(height: 100.0),
+              shape: RectangularNotch(),
               notchMargin: 6.0,
             )
           ),
-          floatingActionButton: const FloatingActionButton(
+          floatingActionButton: FloatingActionButton(
             onPressed: null,
-            child: const Icon(Icons.add),
+            child: Icon(Icons.add),
           ),
           floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
         ),
@@ -265,13 +265,13 @@ void main() {
     await tester.pumpWidget(
       new MaterialApp(
         home: const MediaQuery(
-          data: const MediaQueryData(
-            padding: const EdgeInsets.all(50.0),
+          data: MediaQueryData(
+            padding: EdgeInsets.all(50.0),
           ),
-          child: const Scaffold(
-            bottomNavigationBar: const BottomAppBar(
-              child: const Center(
-                child: const Text('safe'),
+          child: Scaffold(
+            bottomNavigationBar: BottomAppBar(
+              child: Center(
+                child: Text('safe'),
               ),
             ),
           ),

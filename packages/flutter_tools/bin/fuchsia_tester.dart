@@ -6,6 +6,7 @@ import 'dart:async';
 
 import 'package:args/args.dart';
 import 'package:flutter_tools/src/base/common.dart';
+import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/cache.dart';
@@ -23,7 +24,7 @@ import 'package:flutter_tools/src/usage.dart';
 const String _kOptionPackages = 'packages';
 const String _kOptionShell = 'shell';
 const String _kOptionTestDirectory = 'test-directory';
-const List<String> _kRequiredOptions = const <String>[
+const List<String> _kRequiredOptions = <String>[
   _kOptionPackages,
   _kOptionShell,
   _kOptionTestDirectory,
@@ -32,8 +33,8 @@ const String _kOptionCoverage = 'coverage';
 const String _kOptionCoveragePath = 'coverage-path';
 
 void main(List<String> args) {
-  runInContext<Null>(() => run(args), overrides: <Type, dynamic>{
-    Usage: new DisabledUsage(),
+  runInContext<Null>(() => run(args), overrides: <Type, Generator>{
+    Usage: () => new DisabledUsage(),
   });
 }
 
