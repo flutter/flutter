@@ -92,9 +92,9 @@ class ExpansionPanel {
 /// A unique identifier [value] must be assigned to each panel.
 class ExpansionPanelRadio extends ExpansionPanel {
 
-  /// A subclass of expansion panel that allows for radio functionality.
+  /// An expansion panel that allows for radio functionality.
   ///
-  /// A unique identifier [value] must be passed into the constructor. The
+  /// A unique [value] must be passed into the constructor. The
   /// [headerBuilder], [body], [value] must not be null.
   ExpansionPanelRadio({
     @required this.value,
@@ -103,7 +103,8 @@ class ExpansionPanelRadio extends ExpansionPanel {
   }) : assert(value != null),
        super(body: body, headerBuilder: headerBuilder);
 
-  /// The value that uniquely identifies a radio panel.
+  /// The value that uniquely identifies a radio panel so that the currently
+  /// selected radio panel can be identified.
   final Object value;
 }
 
@@ -135,8 +136,8 @@ class ExpansionPanelList extends StatefulWidget {
   /// This widget allows for at most one panel in the list to be open.
   /// The expansion panel callback is triggered when an expansion panel
   /// expand/collapse button is pushed. The [children] and [animationDuration]
-  /// arguments must not be null. The [children] objects also must of type
-  /// [ExpansionPanelRadio].
+  /// arguments must not be null. The [children] objects must be instances
+  /// of [ExpansionPanelRadio].
   const ExpansionPanelList.radio({
     Key key,
     List<ExpansionPanelRadio> children = const <ExpansionPanelRadio>[],
@@ -169,7 +170,8 @@ class ExpansionPanelList extends StatefulWidget {
   final bool _allowOnlyOnePanelOpen;
 
   /// The value of the panel that initially begins open. (This value is
-  /// only used when initializing with the radio constructor.)
+  /// only used when initializing with the [ExpansionPanelList.radio]
+  /// constructor.)
   final Object initialOpenPanelValue;
 
   @override
@@ -253,6 +255,7 @@ class _ExpansionPanelListState extends State<ExpansionPanelList> {
       if (_isChildExpanded(index) && index != 0 && !_isChildExpanded(index - 1))
         items.add(new MaterialGap(key: new _SaltedKey<BuildContext, int>(context, index * 2 - 1)));
 
+      final ExpansionPanelRadio child = widget.children[index];
       final Row header = new Row(
         children: <Widget>[
           new Expanded(
@@ -262,7 +265,7 @@ class _ExpansionPanelListState extends State<ExpansionPanelList> {
               margin: _isChildExpanded(index) ? kExpandedEdgeInsets : EdgeInsets.zero,
               child: new ConstrainedBox(
                 constraints: const BoxConstraints(minHeight: _kPanelHeaderCollapsedHeight),
-                child: widget.children[index].headerBuilder(
+                child: child.headerBuilder(
                   context,
                   _isChildExpanded(index),
                 ),
@@ -288,7 +291,7 @@ class _ExpansionPanelListState extends State<ExpansionPanelList> {
               header,
               new AnimatedCrossFade(
                 firstChild: new Container(height: 0.0),
-                secondChild: widget.children[index].body,
+                secondChild: child.body,
                 firstCurve: const Interval(0.0, 0.6, curve: Curves.fastOutSlowIn),
                 secondCurve: const Interval(0.4, 1.0, curve: Curves.fastOutSlowIn),
                 sizeCurve: Curves.fastOutSlowIn,
