@@ -127,6 +127,7 @@ class ExpansionPanelList extends StatefulWidget {
   }) : assert(children != null),
        assert(animationDuration != null),
        _allowOnlyOnePanelOpen = false,
+       this.initialOpenPanelValue = null,
        super(key: key);
 
   /// Creates a radio expansion panel list widget.
@@ -142,7 +143,7 @@ class ExpansionPanelList extends StatefulWidget {
     this.expansionCallback,
     this.animationDuration = kThemeAnimationDuration,
     this.initialOpenPanelValue,
-  }) : children = children,
+  }) : children = children, //ignore:prefer_initializing_formals
        assert(children != null),
        assert(animationDuration != null),
        _allowOnlyOnePanelOpen = true,
@@ -207,7 +208,7 @@ class _ExpansionPanelListState extends State<ExpansionPanelList> {
   }
 
   bool _allIdentifiersUnique() {
-    Map<Object, bool> identifierMap = Map<Object, bool>();
+    final Map<Object, bool> identifierMap = <Object, bool>{};
     for (ExpansionPanelRadio child in widget.children) {
       identifierMap[child.value] = true;
     }
