@@ -681,6 +681,25 @@ config("no_chromium_code") {
   cflags_cc += default_warning_flags_cc
 }
 
+# rtti ------------------------------------------------------------------------
+#
+# Allows turning Run-Time Type Identification on or off.
+
+config("rtti") {
+  if (is_win) {
+    cflags_cc = [ "/GR" ]
+  }
+}
+config("no_rtti") {
+  if (is_win) {
+    cflags_cc = [ "/GR-" ]
+  } else {
+    rtti_flags = [ "-fno-rtti" ]
+    cflags_cc = rtti_flags
+    cflags_objcc = rtti_flags
+  }
+}
+
 # Warnings ---------------------------------------------------------------------
 
 # This will generate warnings when using Clang if code generates exit-time

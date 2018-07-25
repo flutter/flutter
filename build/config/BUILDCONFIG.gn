@@ -411,9 +411,8 @@ _native_compiler_configs = [
   "//build/config/compiler:compiler_arm_fpu",
   "//build/config/compiler:chromium_code",
   "//build/config/compiler:default_include_dirs",
+  "//build/config/compiler:no_rtti",
   "//build/config/compiler:runtime_library",
-  "//build/config:no_rtti",
-  "//build/config:symbol_visibility_hidden",
 ]
 if (is_win) {
   _native_compiler_configs += [
@@ -427,6 +426,7 @@ if (is_win) {
 if (is_posix) {
   _native_compiler_configs += [
     "//build/config/gcc:no_exceptions",
+    "//build/config/gcc:symbol_visibility_hidden",
   ]
 }
 
@@ -559,14 +559,6 @@ set_defaults("test") {
   } else {
     configs = _executable_configs
   }
-}
-
-# Some library targets may be built as different type depending on the target
-# platform. This variable specifies the default library type for each target.
-if (is_fuchsia) {
-  default_library_type = "shared_library"
-} else {
-  default_library_type = "static_library"
 }
 
 # ==============================================================================
