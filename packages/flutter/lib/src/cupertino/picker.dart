@@ -126,7 +126,7 @@ class CupertinoPicker extends StatefulWidget {
   /// listen for [ScrollEndNotification] and read its [FixedExtentMetrics].
   final ValueChanged<int> onSelectedItemChanged;
 
-  /// Builder to help lazily instantiate child.
+  /// A delegate that helps lazily instantiating child.
   final SliverChildDelegate childDelegate;
 
   @override
