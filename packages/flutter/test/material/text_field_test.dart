@@ -2261,10 +2261,10 @@ void main() {
           key: key,
           controller: controller,
           decoration: const InputDecoration(
+            labelText: 'label',
             hintText: 'hint',
             helperText: 'helper',
             counterText: 'counter',
-            errorText: 'error',
           ),
         ),
       ),
@@ -2273,7 +2273,7 @@ void main() {
     expect(semantics, hasSemantics(new TestSemantics.root(
       children: <TestSemantics>[
         new TestSemantics.rootChild(
-          label: 'helper error counter',
+          label: 'label\nhelper\ncounter',
           id: 1,
           textDirection: TextDirection.ltr,
           actions: <SemanticsAction>[
@@ -2292,7 +2292,7 @@ void main() {
     expect(semantics, hasSemantics(new TestSemantics.root(
       children: <TestSemantics>[
         new TestSemantics.rootChild(
-          label: 'hint error counter',
+          label: 'hint\nhelper\ncounter',
           id: 1,
           textDirection: TextDirection.ltr,
           textSelection: const TextSelection(baseOffset: 0, extentOffset: 0),
