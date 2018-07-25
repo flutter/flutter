@@ -63,6 +63,10 @@ class PointerEventConverter {
   static Iterable<PointerEvent> expand(Iterable<ui.PointerData> data, double devicePixelRatio) sync* {
     for (ui.PointerData datum in data) {
       final Offset position = new Offset(datum.physicalX, datum.physicalY) / devicePixelRatio;
+      final double radiusMinor = _toLogicalPixels(datum.radiusMinor, devicePixelRatio);
+      final double radiusMajor = _toLogicalPixels(datum.radiusMajor, devicePixelRatio);
+      final double radiusMin = _toLogicalPixels(datum.radiusMin, devicePixelRatio);
+      final double radiusMax = _toLogicalPixels(datum.radiusMax, devicePixelRatio);
       final Duration timeStamp = datum.timeStamp;
       final PointerDeviceKind kind = datum.kind;
       assert(datum.change != null);
@@ -81,8 +85,8 @@ class PointerEventConverter {
             pressureMax: datum.pressureMax,
             distance: datum.distance,
             distanceMax: datum.distanceMax,
-            radiusMin: datum.radiusMin,
-            radiusMax: datum.radiusMax,
+            radiusMin: radiusMin,
+            radiusMax: radiusMax,
             orientation: datum.orientation,
             tilt: datum.tilt
           );
@@ -103,8 +107,8 @@ class PointerEventConverter {
               pressureMax: datum.pressureMax,
               distance: datum.distance,
               distanceMax: datum.distanceMax,
-              radiusMin: datum.radiusMin,
-              radiusMax: datum.radiusMax,
+              radiusMin: radiusMin,
+              radiusMax: radiusMax,
               orientation: datum.orientation,
               tilt: datum.tilt
             );
@@ -123,10 +127,10 @@ class PointerEventConverter {
             pressureMax: datum.pressureMax,
             distance: datum.distance,
             distanceMax: datum.distanceMax,
-            radiusMajor: datum.radiusMajor,
-            radiusMinor: datum.radiusMajor,
-            radiusMin: datum.radiusMin,
-            radiusMax: datum.radiusMax,
+            radiusMajor: radiusMajor,
+            radiusMinor: radiusMinor,
+            radiusMin: radiusMin,
+            radiusMax: radiusMax,
             orientation: datum.orientation,
             tilt: datum.tilt
           );
@@ -148,8 +152,8 @@ class PointerEventConverter {
               pressureMax: datum.pressureMax,
               distance: datum.distance,
               distanceMax: datum.distanceMax,
-              radiusMin: datum.radiusMin,
-              radiusMax: datum.radiusMax,
+              radiusMin: radiusMin,
+              radiusMax: radiusMax,
               orientation: datum.orientation,
               tilt: datum.tilt
             );
@@ -172,10 +176,10 @@ class PointerEventConverter {
               pressureMax: datum.pressureMax,
               distance: datum.distance,
               distanceMax: datum.distanceMax,
-              radiusMajor: datum.radiusMajor,
-              radiusMinor: datum.radiusMajor,
-              radiusMin: datum.radiusMin,
-              radiusMax: datum.radiusMax,
+              radiusMajor: radiusMajor,
+              radiusMinor: radiusMinor,
+              radiusMin: radiusMin,
+              radiusMax: radiusMax,
               orientation: datum.orientation,
               tilt: datum.tilt,
               synthesized: true,
@@ -196,10 +200,10 @@ class PointerEventConverter {
             pressureMin: datum.pressureMin,
             pressureMax: datum.pressureMax,
             distanceMax: datum.distanceMax,
-            radiusMajor: datum.radiusMajor,
-            radiusMinor: datum.radiusMajor,
-            radiusMin: datum.radiusMin,
-            radiusMax: datum.radiusMax,
+            radiusMajor: radiusMajor,
+            radiusMinor: radiusMinor,
+            radiusMin: radiusMin,
+            radiusMax: radiusMax,
             orientation: datum.orientation,
             tilt: datum.tilt
           );
@@ -226,10 +230,10 @@ class PointerEventConverter {
             pressureMin: datum.pressureMin,
             pressureMax: datum.pressureMax,
             distanceMax: datum.distanceMax,
-            radiusMajor: datum.radiusMajor,
-            radiusMinor: datum.radiusMajor,
-            radiusMin: datum.radiusMin,
-            radiusMax: datum.radiusMax,
+            radiusMajor: radiusMajor,
+            radiusMinor: radiusMinor,
+            radiusMin: radiusMin,
+            radiusMax: radiusMax,
             orientation: datum.orientation,
             tilt: datum.tilt
           );
@@ -260,10 +264,10 @@ class PointerEventConverter {
               pressureMin: datum.pressureMin,
               pressureMax: datum.pressureMax,
               distanceMax: datum.distanceMax,
-              radiusMajor: datum.radiusMajor,
-              radiusMinor: datum.radiusMajor,
-              radiusMin: datum.radiusMin,
-              radiusMax: datum.radiusMax,
+              radiusMajor: radiusMajor,
+              radiusMinor: radiusMinor,
+              radiusMin: radiusMin,
+              radiusMax: radiusMax,
               orientation: datum.orientation,
               tilt: datum.tilt,
               synthesized: true,
@@ -281,11 +285,15 @@ class PointerEventConverter {
               position: position,
               buttons: datum.buttons,
               obscured: datum.obscured,
+              pressure: datum.pressure,
+              pressureMin: datum.pressureMin,
               pressureMax: datum.pressureMax,
               distance: datum.distance,
               distanceMax: datum.distanceMax,
-              radiusMin: datum.radiusMin,
-              radiusMax: datum.radiusMax,
+              radiusMajor: radiusMajor,
+              radiusMinor: radiusMinor,
+              radiusMin: radiusMin,
+              radiusMax: radiusMax,
               orientation: datum.orientation,
               tilt: datum.tilt
             );
@@ -302,8 +310,10 @@ class PointerEventConverter {
               pressureMax: datum.pressureMax,
               distance: datum.distance,
               distanceMax: datum.distanceMax,
-              radiusMin: datum.radiusMin,
-              radiusMax: datum.radiusMax,
+              radiusMajor: radiusMajor,
+              radiusMinor: radiusMinor,
+              radiusMin: radiusMin,
+              radiusMax: radiusMax,
               orientation: datum.orientation,
               tilt: datum.tilt
             );
@@ -325,8 +335,10 @@ class PointerEventConverter {
               pressureMax: datum.pressureMax,
               distance: datum.distance,
               distanceMax: datum.distanceMax,
-              radiusMin: datum.radiusMin,
-              radiusMax: datum.radiusMax,
+              radiusMajor: radiusMajor,
+              radiusMinor: radiusMinor,
+              radiusMin: radiusMin,
+              radiusMax: radiusMax,
               orientation: datum.orientation,
               tilt: datum.tilt
             );
@@ -340,11 +352,14 @@ class PointerEventConverter {
             pressureMin: datum.pressureMin,
             pressureMax: datum.pressureMax,
             distanceMax: datum.distanceMax,
-            radiusMin: datum.radiusMin,
-            radiusMax: datum.radiusMax
+            radiusMin: radiusMin,
+            radiusMax: radiusMax
           );
           break;
       }
     }
   }
+
+  static double _toLogicalPixels(double physicalPixels, double devicePixelRatio) =>
+      physicalPixels == null ? null : physicalPixels / devicePixelRatio;
 }
