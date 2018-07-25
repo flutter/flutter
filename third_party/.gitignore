@@ -1,0 +1,16 @@
+# Ignore everything new by default except the libraries already present as they
+# will be pulled in by DEPS.
+
+
+################################################################################
+# NOTICE:
+# New managed dependencies should live in //flutter/third_party/ instead of this
+# directory. Please reconsider editing this file.
+################################################################################
+*
+!.gitignore
+!expat/
+!libpng/
+!libxml/
+!zlib/
+!.dartignore
