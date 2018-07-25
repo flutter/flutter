@@ -61,7 +61,7 @@ void Rasterizer::DrawLastLayerTree() {
 }
 
 void Rasterizer::Draw(
-    fxl::RefPtr<flutter::Pipeline<flow::LayerTree>> pipeline) {
+    fml::RefPtr<flutter::Pipeline<flow::LayerTree>> pipeline) {
   TRACE_EVENT0("flutter", "GPURasterizer::Draw");
 
   flutter::Pipeline<flow::LayerTree>::Consumer consumer =

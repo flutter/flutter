@@ -8,8 +8,7 @@
 #include <map>
 
 #include "flutter/assets/asset_resolver.h"
-#include "lib/fxl/macros.h"
-#include "lib/fxl/memory/ref_counted.h"
+#include "flutter/fml/macros.h"
 #include "third_party/zlib/contrib/minizip/unzip.h"
 
 namespace blink {
@@ -50,7 +49,7 @@ class ZipAssetStore final : public AssetResolver {
 
   UniqueUnzipper CreateUnzipper() const;
 
-  FXL_DISALLOW_COPY_AND_ASSIGN(ZipAssetStore);
+  FML_DISALLOW_COPY_AND_ASSIGN(ZipAssetStore);
 };
 
 }  // namespace blink

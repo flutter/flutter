@@ -695,7 +695,7 @@ void Shell::OnAnimatorNotifyIdle(const Animator& animator, int64_t deadline) {
 // |shell::Animator::Delegate|
 void Shell::OnAnimatorDraw(
     const Animator& animator,
-    fxl::RefPtr<flutter::Pipeline<flow::LayerTree>> pipeline) {
+    fml::RefPtr<flutter::Pipeline<flow::LayerTree>> pipeline) {
   FXL_DCHECK(is_setup_);
 
   task_runners_.GetGPUTaskRunner()->PostTask(

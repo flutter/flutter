@@ -39,7 +39,7 @@ class Rasterizer final {
 
   flow::TextureRegistry* GetTextureRegistry();
 
-  void Draw(fxl::RefPtr<flutter::Pipeline<flow::LayerTree>> pipeline);
+  void Draw(fml::RefPtr<flutter::Pipeline<flow::LayerTree>> pipeline);
 
   enum class ScreenshotType {
     SkiaPicture,

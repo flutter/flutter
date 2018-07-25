@@ -14,7 +14,6 @@ source_set("synchronization") {
 
   public_deps = [
     "$flutter_root/fml",
-    "//garnet/public/lib/fxl",
   ]
 }
 

@@ -16,7 +16,6 @@ source_set("assets") {
   deps = [
     "$flutter_root/common",
     "$flutter_root/fml",
-    "//garnet/public/lib/fxl",
   ]
 
   public_deps = [

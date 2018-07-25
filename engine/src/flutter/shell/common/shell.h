@@ -181,7 +181,7 @@ class Shell final : public PlatformView::Delegate,
   // |shell::Animator::Delegate|
   void OnAnimatorDraw(
       const Animator& animator,
-      fxl::RefPtr<flutter::Pipeline<flow::LayerTree>> pipeline) override;
+      fml::RefPtr<flutter::Pipeline<flow::LayerTree>> pipeline) override;
 
   // |shell::Animator::Delegate|
   void OnAnimatorDrawLastLayerTree(const Animator& animator) override;
