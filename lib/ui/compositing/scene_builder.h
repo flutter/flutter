@@ -38,9 +38,9 @@ class SceneBuilder : public RefCountedDartWrappable<SceneBuilder> {
                     double right,
                     double top,
                     double bottom,
-                    int clipMode);
-  void pushClipRRect(const RRect& rrect, int clipMode);
-  void pushClipPath(const CanvasPath* path, int clipMode);
+                    int clipBehavior);
+  void pushClipRRect(const RRect& rrect, int clipBehavior);
+  void pushClipPath(const CanvasPath* path, int clipBehavior);
   void pushOpacity(int alpha);
   void pushColorFilter(int color, int blendMode);
   void pushBackdropFilter(ImageFilter* filter);
@@ -54,7 +54,7 @@ class SceneBuilder : public RefCountedDartWrappable<SceneBuilder> {
                          double elevation,
                          int color,
                          int shadowColor,
-                         int clipMode);
+                         int clipBehavior);
 
   void pop();
 

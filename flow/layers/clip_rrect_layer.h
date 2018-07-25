@@ -11,7 +11,7 @@ namespace flow {
 
 class ClipRRectLayer : public ContainerLayer {
  public:
-  ClipRRectLayer(ClipMode clip_mode);
+  ClipRRectLayer(Clip clip_behavior);
   ~ClipRRectLayer() override;
 
   void set_clip_rrect(const SkRRect& clip_rrect) { clip_rrect_ = clip_rrect; }
@@ -26,7 +26,7 @@ class ClipRRectLayer : public ContainerLayer {
 
  private:
   SkRRect clip_rrect_;
-  ClipMode clip_mode_;
+  Clip clip_behavior_;
 
   FXL_DISALLOW_COPY_AND_ASSIGN(ClipRRectLayer);
 };
