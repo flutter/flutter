@@ -11,7 +11,7 @@
 #include "flutter/flow/instrumentation.h"
 #include "flutter/flow/raster_cache.h"
 #include "flutter/flow/texture.h"
-#include "flutter/glue/trace_event.h"
+#include "flutter/fml/trace_event.h"
 #include "lib/fxl/build_config.h"
 #include "lib/fxl/logging.h"
 #include "lib/fxl/macros.h"

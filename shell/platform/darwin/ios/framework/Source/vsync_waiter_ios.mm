@@ -11,7 +11,7 @@
 #include <mach/mach_time.h>
 
 #include "flutter/common/task_runners.h"
-#include "flutter/glue/trace_event.h"
+#include "flutter/fml/trace_event.h"
 #include "lib/fxl/logging.h"
 
 @interface VSyncClient : NSObject

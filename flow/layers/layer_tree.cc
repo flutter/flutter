@@ -5,7 +5,7 @@
 #include "flutter/flow/layers/layer_tree.h"
 
 #include "flutter/flow/layers/layer.h"
-#include "flutter/glue/trace_event.h"
+#include "flutter/fml/trace_event.h"
 #include "third_party/skia/include/core/SkPictureRecorder.h"
 
 namespace flow {

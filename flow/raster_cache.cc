@@ -7,7 +7,7 @@
 #include <vector>
 
 #include "flutter/flow/paint_utils.h"
-#include "flutter/glue/trace_event.h"
+#include "flutter/fml/trace_event.h"
 #include "lib/fxl/logging.h"
 #include "third_party/skia/include/core/SkCanvas.h"
 #include "third_party/skia/include/core/SkColorSpaceXformCanvas.h"

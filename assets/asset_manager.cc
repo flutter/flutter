@@ -5,7 +5,7 @@
 #include "flutter/assets/asset_manager.h"
 
 #include "flutter/assets/directory_asset_bundle.h"
-#include "flutter/glue/trace_event.h"
+#include "flutter/fml/trace_event.h"
 
 #ifdef ERROR
 #undef ERROR

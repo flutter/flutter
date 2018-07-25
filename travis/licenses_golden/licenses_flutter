@@ -332,10 +332,6 @@ FILE: ../../../flutter/flow/raster_cache.cc
 FILE: ../../../flutter/flow/raster_cache.h
 FILE: ../../../flutter/flow/scene_update_context.cc
 FILE: ../../../flutter/flow/scene_update_context.h
-FILE: ../../../flutter/glue/stack_trace.h
-FILE: ../../../flutter/glue/stack_trace_base.cc
-FILE: ../../../flutter/glue/stack_trace_fuchsia.cc
-FILE: ../../../flutter/glue/trace_event.h
 FILE: ../../../flutter/lib/ui/painting/image_filter.cc
 FILE: ../../../flutter/lib/ui/painting/image_filter.h
 FILE: ../../../flutter/lib/ui/semantics.dart

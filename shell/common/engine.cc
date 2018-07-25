@@ -8,7 +8,7 @@
 #include <utility>
 
 #include "flutter/common/settings.h"
-#include "flutter/glue/trace_event.h"
+#include "flutter/fml/trace_event.h"
 #include "flutter/lib/snapshot/snapshot.h"
 #include "flutter/lib/ui/text/font_collection.h"
 #include "flutter/shell/common/animator.h"

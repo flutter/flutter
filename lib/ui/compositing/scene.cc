@@ -4,7 +4,7 @@
 
 #include "flutter/lib/ui/compositing/scene.h"
 
-#include "flutter/glue/trace_event.h"
+#include "flutter/fml/trace_event.h"
 #include "flutter/lib/ui/painting/image.h"
 #include "lib/fxl/functional/make_copyable.h"
 #include "third_party/skia/include/core/SkImageInfo.h"

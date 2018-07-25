@@ -99,7 +99,6 @@ shared_library("create_flutter_framework_dylib") {
     "$flutter_root/common",
     "$flutter_root/flow",
     "$flutter_root/fml",
-    "$flutter_root/glue",
     "$flutter_root/lib/ui",
     "$flutter_root/runtime",
     "$flutter_root/shell/common",

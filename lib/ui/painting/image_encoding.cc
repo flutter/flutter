@@ -8,7 +8,7 @@
 #include <utility>
 
 #include "flutter/common/task_runners.h"
-#include "flutter/glue/trace_event.h"
+#include "flutter/fml/trace_event.h"
 #include "flutter/lib/ui/painting/image.h"
 #include "flutter/lib/ui/ui_dart_state.h"
 #include "lib/fxl/build_config.h"

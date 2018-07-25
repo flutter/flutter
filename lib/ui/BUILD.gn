@@ -55,14 +55,14 @@ source_set("ui") {
     "painting/vertices.h",
     "plugins/callback_cache.cc",
     "plugins/callback_cache.h",
+    "semantics/custom_accessibility_action.cc",
+    "semantics/custom_accessibility_action.h",
     "semantics/semantics_node.cc",
     "semantics/semantics_node.h",
     "semantics/semantics_update.cc",
     "semantics/semantics_update.h",
     "semantics/semantics_update_builder.cc",
     "semantics/semantics_update_builder.h",
-    "semantics/custom_accessibility_action.cc",
-    "semantics/custom_accessibility_action.h",
     "text/asset_manager_font_provider.cc",
     "text/asset_manager_font_provider.h",
     "text/font_collection.cc",
@@ -101,7 +101,6 @@ source_set("ui") {
     "$flutter_root/common",
     "$flutter_root/flow",
     "$flutter_root/fml",
-    "$flutter_root/glue",
     "$flutter_root/runtime:test_font",
     "//garnet/public/lib/fxl",
     "//third_party/dart/runtime/bin:embedded_dart_io",
@@ -115,5 +114,7 @@ source_set("ui") {
     deps += [ "//topaz/public/dart-pkg/zircon" ]
   }
 
-  public_deps = ["$flutter_root/third_party/txt"]
+  public_deps = [
+    "$flutter_root/third_party/txt",
+  ]
 }

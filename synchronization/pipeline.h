@@ -5,7 +5,7 @@
 #ifndef SYNCHRONIZATION_PIPELINE_H_
 #define SYNCHRONIZATION_PIPELINE_H_
 
-#include "flutter/glue/trace_event.h"
+#include "flutter/fml/trace_event.h"
 #include "flutter/synchronization/pipeline.h"
 #include "flutter/synchronization/semaphore.h"
 #include "lib/fxl/functional/closure.h"

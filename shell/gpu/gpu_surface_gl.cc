@@ -4,7 +4,7 @@
 
 #include "gpu_surface_gl.h"
 
-#include "flutter/glue/trace_event.h"
+#include "flutter/fml/trace_event.h"
 #include "lib/fxl/arraysize.h"
 #include "lib/fxl/logging.h"
 #include "third_party/skia/include/core/SkColorFilter.h"
