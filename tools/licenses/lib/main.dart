@@ -910,7 +910,16 @@ class RepositoryDirectory extends RepositoryEntry implements LicenseSource {
         }
       }
     }
+
+    for (RepositoryDirectory child in virtualSubdirectories) {
+      _subdirectories.add(child);
+      _childrenByName[child.name] = child;
+    }
   }
+
+  // Override this to add additional child directories that do not represent a
+  // direct child of this directory's filesystem node.
+  List<RepositoryDirectory> get virtualSubdirectories => <RepositoryDirectory>[];
 
   bool shouldRecurse(fs.IoNode entry) {
     return entry.name != '.cipd' &&
@@ -1913,6 +1922,7 @@ class RepositoryRootThirdPartyDirectory extends RepositoryGenericThirdPartyDirec
         && entry.name != 'instrumented_libraries' // unused according to chinmay
         && entry.name != 'android_tools' // excluded on advice
         && entry.name != 'googletest' // only used by tests
+        && entry.name != 'skia' // treated as a separate component
         && super.shouldRecurse(entry);
   }
 
@@ -1946,8 +1956,6 @@ class RepositoryRootThirdPartyDirectory extends RepositoryGenericThirdPartyDirec
       return new RepositoryLibWebpDirectory(this, entry);
     if (entry.name == 'pkg')
       return new RepositoryPkgDirectory(this, entry);
-    if (entry.name == 'skia')
-      return new RepositorySkiaDirectory(this, entry);
     if (entry.name == 'vulkan')
       return new RepositoryVulkanDirectory(this, entry);
     return super.createSubdirectory(entry);
@@ -2391,6 +2399,15 @@ class RepositoryRoot extends RepositoryDirectory {
     if (entry.name == 'topaz')
       return new RepositoryTopazDirectory(this, entry);
     return super.createSubdirectory(entry);
+  }
+
+  @override
+  List<RepositoryDirectory> get virtualSubdirectories {
+    // Skia is updated more frequently than other third party libraries and
+    // is therefore represented as a separate top-level component.
+    fs.Directory thirdPartyNode = io.walk.firstWhere((fs.IoNode node) => node.name == 'third_party');
+    fs.IoNode skiaNode = thirdPartyNode.walk.firstWhere((fs.IoNode node) => node.name == 'skia');
+    return <RepositoryDirectory>[new RepositorySkiaDirectory(this, skiaNode)];
   }
 }
 
