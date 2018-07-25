@@ -192,6 +192,8 @@ class FlutterTestDriver {
   }
 
   Future<VMIsolate> getFlutterIsolate() async {
+    // Currently these tests only have a single isolate. If this
+    // ceases to be the case, this code will need changing.
     final VM vm = await vmService.getVM();
     return await vm.isolates.first.load();
   }

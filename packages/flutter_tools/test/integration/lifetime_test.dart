@@ -14,6 +14,9 @@ import 'test_driver.dart';
 BasicProject _project = new BasicProject();
 FlutterTestDriver _flutter;
 
+/// This duration is arbitrary but is ideally:
+/// a) long enough to ensure that if the app is crashing at startup, we notice
+/// b) as short as possible, to avoid inflating build times
 const Duration requiredLifespan = Duration(seconds: 5);
 
 void main() {
@@ -25,18 +28,8 @@ void main() {
     });
 
     tearDown(() async {
-      try {
-        await _flutter.stop();
-        _project.cleanup();
-      } catch (e) {
-        // Don't fail tests if we failed to clean up temp folder.
-      }
-    });
-
-    test('does not terminate', () async {
-      await _flutter.run();
-      await new Future<void>.delayed(requiredLifespan);
-      expect(_flutter.hasExited, equals(false));
+      await _flutter.stop();
+      _project.cleanup();
     });
 
     test('does not terminate when a debugger is attached', () async {
