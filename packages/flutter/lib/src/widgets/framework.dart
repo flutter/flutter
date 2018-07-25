@@ -45,6 +45,9 @@ export 'package:flutter/rendering.dart' show RenderObject, RenderBox, debugDumpR
 /// `children` property, and then provide the children to that widget.
 /// {@endtemplate}
 
+// TODO(hansmuller) - const UnmodifiableSetView<dynamic>.empty();
+final Set<dynamic> _kEmptySet = new HashSet<dynamic>();
+
 // KEYS
 
 /// A key that is only equal to itself.
@@ -1569,6 +1572,9 @@ abstract class InheritedWidget extends ProxyWidget {
   /// object.
   @protected
   bool updateShouldNotify(covariant InheritedWidget oldWidget);
+
+  @protected
+  Set<dynamic> getUpdateScope(covariant InheritedWidget oldWidget) => _kEmptySet;
 }
 
 /// RenderObjectWidgets provide the configuration for [RenderObjectElement]s,
@@ -1904,7 +1910,7 @@ abstract class BuildContext {
   /// called, whenever changes occur relating to that widget until the next time
   /// the widget or one of its ancestors is moved (for example, because an
   /// ancestor is added or removed).
-  InheritedWidget inheritFromWidgetOfExactType(Type targetType);
+  InheritedWidget inheritFromWidgetOfExactType(Type targetType, { dynamic scope });
 
   /// Obtains the element corresponding to the nearest widget of the given type,
   /// which must be the type of a concrete [InheritedWidget] subclass.
@@ -3226,14 +3232,22 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   }
 
   @override
-  InheritedWidget inheritFromWidgetOfExactType(Type targetType) {
+  InheritedWidget inheritFromWidgetOfExactType(Type targetType, { dynamic scope }) {
     assert(_debugCheckStateIsActiveForAncestorLookup());
     final InheritedElement ancestor = _inheritedWidgets == null ? null : _inheritedWidgets[targetType];
     if (ancestor != null) {
       assert(ancestor is InheritedElement);
       _dependencies ??= new HashSet<InheritedElement>();
       _dependencies.add(ancestor);
-      ancestor._dependents.add(this);
+      // If we're ever called with scope == null (the common case) then
+      // InheritedElement.notifyClients will unconditionally rebuild all dependents.
+      if (scope == null) {
+        ancestor._dependents[this] = _kEmptySet;
+      } else if (ancestor._dependents[this] == null) {
+        ancestor._dependents[this] = new HashSet<dynamic>.of(<dynamic>[scope]);
+      } else if (ancestor._dependents[this].isNotEmpty) {
+        ancestor._dependents[this].add(scope);
+      }
       return ancestor.widget;
     }
     _hadUnsatisfiedDependencies = true;
@@ -3845,7 +3859,7 @@ class StatefulElement extends ComponentElement {
   }
 
   @override
-  InheritedWidget inheritFromWidgetOfExactType(Type targetType) {
+  InheritedWidget inheritFromWidgetOfExactType(Type targetType, { dynamic scope }) {
     assert(() {
       if (state._debugLifecycleState == _StateLifecycle.created) {
         throw new FlutterError(
@@ -3882,7 +3896,7 @@ class StatefulElement extends ComponentElement {
       }
       return true;
     }());
-    return super.inheritFromWidgetOfExactType(targetType);
+    return super.inheritFromWidgetOfExactType(targetType, scope: scope);
   }
 
   @override
@@ -4032,7 +4046,7 @@ class InheritedElement extends ProxyElement {
   @override
   InheritedWidget get widget => super.widget;
 
-  final Set<Element> _dependents = new HashSet<Element>();
+  final Map<Element, Set<dynamic>> _dependents = <Element, Set<dynamic>>{};
 
   @override
   void _updateInheritance() {
@@ -4054,6 +4068,15 @@ class InheritedElement extends ProxyElement {
     super.debugDeactivated();
   }
 
+  // True if the two sets intersect.
+  bool _scopesIntersect(Set<dynamic> widgetScope, Set<dynamic> dependentScope) {
+    for (dynamic value in dependentScope) {
+      if (widgetScope.contains(value))
+        return true;
+    }
+    return false;
+  }
+
   /// Calls [Element.didChangeDependencies] of all dependent elements, if
   /// [InheritedWidget.updateShouldNotify] returns true.
   ///
@@ -4070,7 +4093,8 @@ class InheritedElement extends ProxyElement {
     if (!widget.updateShouldNotify(oldWidget))
       return;
     assert(_debugCheckOwnerBuildTargetExists('notifyClients'));
-    for (Element dependent in _dependents) {
+    final Set<dynamic> scope = widget.getUpdateScope(oldWidget);
+    for (Element dependent in _dependents.keys) {
       assert(() {
         // check that it really is our descendant
         Element ancestor = dependent._parent;
@@ -4080,7 +4104,10 @@ class InheritedElement extends ProxyElement {
       }());
       // check that it really depends on us
       assert(dependent._dependencies.contains(this));
-      dependent.didChangeDependencies();
+      if (scope.isEmpty || _dependents[dependent].isEmpty)
+        dependent.didChangeDependencies();
+      else if (_scopesIntersect(scope, _dependents[dependent]))
+        dependent.didChangeDependencies();
     }
   }
 }
