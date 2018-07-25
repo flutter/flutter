@@ -38,7 +38,7 @@ class CupertinoPicker extends StatefulWidget {
   /// The [backgroundColor] defaults to light gray. It can be set to null to
   /// disable the background painting entirely; this is mildly more efficient
   /// than using [Colors.transparent].
-  const CupertinoPicker({
+  CupertinoPicker({
     Key key,
     this.diameterRatio = _kDefaultDiameterRatio,
     this.backgroundColor = _kDefaultBackground,
@@ -48,13 +48,37 @@ class CupertinoPicker extends StatefulWidget {
     this.scrollController,
     @required this.itemExtent,
     @required this.onSelectedItemChanged,
-    @required this.children,
-  }) : assert(diameterRatio != null),
-       assert(diameterRatio > 0.0, RenderListWheelViewport.diameterRatioZeroMessage),
-       assert(magnification > 0),
-       assert(itemExtent != null),
-       assert(itemExtent > 0),
-       super(key: key);
+    @required List<Widget> children,
+  }) :  assert(children != null),
+        assert(diameterRatio != null),
+        assert(diameterRatio > 0.0, RenderListWheelViewport.diameterRatioZeroMessage),
+        assert(magnification > 0),
+        assert(itemExtent != null),
+        assert(itemExtent > 0),
+        childDelegate = new SliverChildListDelegate(children, addRepaintBoundaries:false, addAutomaticKeepAlives: false),
+        super(key: key);
+
+  /// Create picker from a lazy builder.
+  CupertinoPicker.builder({
+    Key key,
+    this.diameterRatio = _kDefaultDiameterRatio,
+    this.backgroundColor = _kDefaultBackground,
+    this.offAxisFraction = 0.0,
+    this.useMagnifier = false,
+    this.magnification = 1.0,
+    this.scrollController,
+    @required this.itemExtent,
+    @required this.onSelectedItemChanged,
+    @required IndexedWidgetBuilder itemBuilder,
+    int childCount,
+  }) :  assert(itemBuilder != null),
+        assert(diameterRatio != null),
+        assert(diameterRatio > 0.0, RenderListWheelViewport.diameterRatioZeroMessage),
+        assert(magnification > 0),
+        assert(itemExtent != null),
+        assert(itemExtent > 0),
+        childDelegate = new SliverChildBuilderDelegate(itemBuilder, childCount: childCount, addRepaintBoundaries: false, addAutomaticKeepAlives: false),
+        super(key: key);
 
   /// Relative ratio between this picker's height and the simulated cylinder's diameter.
   ///
@@ -102,8 +126,8 @@ class CupertinoPicker extends StatefulWidget {
   /// listen for [ScrollEndNotification] and read its [FixedExtentMetrics].
   final ValueChanged<int> onSelectedItemChanged;
 
-  /// [Widget]s in the picker's scroll wheel.
-  final List<Widget> children;
+  /// Builder to help lazily instantiate child.
+  final SliverChildDelegate childDelegate;
 
   @override
   State<StatefulWidget> createState() => new _CupertinoPickerState();
@@ -205,7 +229,7 @@ class _CupertinoPickerState extends State<CupertinoPicker> {
             magnification: widget.magnification,
             itemExtent: widget.itemExtent,
             onSelectedItemChanged: _handleSelectedItemChanged,
-            children: widget.children,
+            childDelegate: widget.childDelegate,
           ),
         ),
         _buildGradientScreen(),
