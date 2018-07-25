@@ -43,6 +43,7 @@ void main() {
     expect(data, hasOneLineDescription);
     expect(data.hashCode, equals(data.copyWith().hashCode));
     expect(data.size, equals(ui.window.physicalSize / ui.window.devicePixelRatio));
+    expect(data.assistiveTechnologyEnabled, ui.window.assistiveTechnologyEnabled);
   });
 
   testWidgets('MediaQueryData.copyWith defaults to source', (WidgetTester tester) async {
@@ -54,6 +55,7 @@ void main() {
     expect(copied.padding, data.padding);
     expect(copied.viewInsets, data.viewInsets);
     expect(copied.alwaysUse24HourFormat, data.alwaysUse24HourFormat);
+    expect(copied.assistiveTechnologyEnabled, ui.window.assistiveTechnologyEnabled);
   });
 
   testWidgets('MediaQuery.copyWith copies specified values', (WidgetTester tester) async {
@@ -65,6 +67,7 @@ void main() {
       padding: const EdgeInsets.all(9.10938),
       viewInsets: const EdgeInsets.all(1.67262),
       alwaysUse24HourFormat: true,
+      assistiveTechnologyEnabled: true,
     );
     expect(copied.size, const Size(3.14, 2.72));
     expect(copied.devicePixelRatio, 1.41);
@@ -72,6 +75,7 @@ void main() {
     expect(copied.padding, const EdgeInsets.all(9.10938));
     expect(copied.viewInsets, const EdgeInsets.all(1.67262));
     expect(copied.alwaysUse24HourFormat, true);
+    expect(copied.assistiveTechnologyEnabled, true);
   });
 
  testWidgets('MediaQuery.removePadding removes specified padding', (WidgetTester tester) async {
@@ -91,6 +95,7 @@ void main() {
          padding: padding,
          viewInsets: viewInsets,
          alwaysUse24HourFormat: true,
+         assistiveTechnologyEnabled: true,
        ),
        child: new Builder(
          builder: (BuildContext context) {
@@ -118,6 +123,7 @@ void main() {
    expect(unpadded.padding, EdgeInsets.zero);
    expect(unpadded.viewInsets, viewInsets);
    expect(unpadded.alwaysUse24HourFormat, true);
+   expect(unpadded.assistiveTechnologyEnabled, true);
   });
 
   testWidgets('MediaQuery.removeViewInsets removes specified viewInsets', (WidgetTester tester) async {
@@ -137,6 +143,7 @@ void main() {
           padding: padding,
           viewInsets: viewInsets,
           alwaysUse24HourFormat: true,
+          assistiveTechnologyEnabled: true,
         ),
         child: new Builder(
           builder: (BuildContext context) {
@@ -164,6 +171,7 @@ void main() {
     expect(unpadded.padding, padding);
     expect(unpadded.viewInsets, EdgeInsets.zero);
     expect(unpadded.alwaysUse24HourFormat, true);
+    expect(unpadded.assistiveTechnologyEnabled, true);
   });
 
  testWidgets('MediaQuery.textScaleFactorOf', (WidgetTester tester) async {
