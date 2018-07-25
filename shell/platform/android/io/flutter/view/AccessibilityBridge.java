@@ -223,12 +223,24 @@ class AccessibilityBridge
                 !object.hasFlag(Flag.HAS_ENABLED_STATE) || object.hasFlag(Flag.IS_ENABLED));
 
         if (object.hasAction(Action.TAP)) {
-            result.addAction(AccessibilityNodeInfo.ACTION_CLICK);
-            result.setClickable(true);
+            if (Build.VERSION.SDK_INT >= 21 && object.onTapOverride != null) {
+                result.addAction(new AccessibilityNodeInfo.AccessibilityAction(
+                    AccessibilityNodeInfo.ACTION_CLICK, object.onTapOverride.hint));
+                result.setClickable(true);
+            } else {
+                result.addAction(AccessibilityNodeInfo.ACTION_CLICK);
+                result.setClickable(true);
+            }
         }
         if (object.hasAction(Action.LONG_PRESS)) {
-            result.addAction(AccessibilityNodeInfo.ACTION_LONG_CLICK);
-            result.setLongClickable(true);
+            if (Build.VERSION.SDK_INT >= 21 && object.onLongPressOverride != null) {
+                result.addAction(new AccessibilityNodeInfo.AccessibilityAction(AccessibilityNodeInfo.ACTION_LONG_CLICK,
+                    object.onLongPressOverride.hint));
+                result.setLongClickable(true);
+            } else {
+                result.addAction(AccessibilityNodeInfo.ACTION_LONG_CLICK);
+                result.setLongClickable(true);
+            }
         }
         if (object.hasAction(Action.SCROLL_LEFT) || object.hasAction(Action.SCROLL_UP)
                 || object.hasAction(Action.SCROLL_RIGHT) || object.hasAction(Action.SCROLL_DOWN)) {
@@ -288,8 +300,8 @@ class AccessibilityBridge
 
         // Actions on the local context menu
         if (Build.VERSION.SDK_INT >= 21) {
-            if (object.customAccessibilityAction != null) {
-                for (CustomAccessibilityAction action : object.customAccessibilityAction) {
+            if (object.customAccessibilityActions != null) {
+                for (CustomAccessibilityAction action : object.customAccessibilityActions) {
                     result.addAction(new AccessibilityNodeInfo.AccessibilityAction(
                             action.resourceId, action.label));
                 }
@@ -547,8 +559,11 @@ class AccessibilityBridge
         while (buffer.hasRemaining()) {
             int id = buffer.getInt();
             CustomAccessibilityAction action = getOrCreateAction(id);
+            action.overrideId = buffer.getInt();
             int stringIndex = buffer.getInt();
             action.label = stringIndex == -1 ? null : strings[stringIndex];
+            stringIndex = buffer.getInt();
+            action.hint = stringIndex == -1 ? null : strings[stringIndex];
         }
     }
 
@@ -851,9 +866,17 @@ class AccessibilityBridge
         /// does not collide with existing Android accessibility actions.
         int resourceId = -1;
         int id = -1;
+        int overrideId = -1;
 
         /// The label is the user presented value which is displayed in the local context menu.
         String label;
+
+        /// The hint is the text used in overriden standard actions.
+        String hint;
+
+        boolean isStandardAction() {
+            return overrideId != -1;
+        }
     }
     /// Value is derived from ACTION_TYPE_MASK in AccessibilityNodeInfo.java
     static int firstResourceId = 267386881;
@@ -897,7 +920,9 @@ class AccessibilityBridge
         SemanticsObject parent;
         List<SemanticsObject> childrenInTraversalOrder;
         List<SemanticsObject> childrenInHitTestOrder;
-        List<CustomAccessibilityAction> customAccessibilityAction;
+        List<CustomAccessibilityAction> customAccessibilityActions;
+        CustomAccessibilityAction onTapOverride;
+        CustomAccessibilityAction onLongPressOverride;
 
         private boolean inverseTransformDirty = true;
         private float[] inverseTransform;
@@ -1030,17 +1055,27 @@ class AccessibilityBridge
             }
             final int actionCount = buffer.getInt();
             if (actionCount == 0) {
-                customAccessibilityAction = null;
+                customAccessibilityActions = null;
             } else {
-                if (customAccessibilityAction == null)
-                    customAccessibilityAction =
+                if (customAccessibilityActions == null)
+                    customAccessibilityActions =
                             new ArrayList<CustomAccessibilityAction>(actionCount);
                 else
-                    customAccessibilityAction.clear();
+                    customAccessibilityActions.clear();
 
                 for (int i = 0; i < actionCount; i++) {
                     CustomAccessibilityAction action = getOrCreateAction(buffer.getInt());
-                    customAccessibilityAction.add(action);
+                    if (action.overrideId == Action.TAP.value) {
+                        onTapOverride = action;
+                    } else if (action.overrideId == Action.LONG_PRESS.value) {
+                        onLongPressOverride = action;
+                    } else {
+                        // If we recieve a different overrideId it means that we were passed
+                        // a standard action to override that we don't yet support.
+                        assert action.overrideId == -1;
+                        customAccessibilityActions.add(action);
+                    }
+                    customAccessibilityActions.add(action);
                 }
             }
         }
