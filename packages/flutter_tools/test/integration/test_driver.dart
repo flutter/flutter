@@ -34,12 +34,14 @@ class FlutterTestDriver {
   String _currentRunningAppId;
   Uri _vmServiceWsUri;
   int _vmServicePort;
+  bool _hasExited = false;
 
   FlutterTestDriver(this._projectFolder);
 
   VMServiceClient vmService;
   String get lastErrorInfo => _errorBuffer.toString();
   int get vmServicePort => _vmServicePort;
+  bool get hasExited => _hasExited;
 
   String _debugPrint(String msg) {
     const int maxLength = 500;
@@ -52,19 +54,16 @@ class FlutterTestDriver {
     return msg;
   }
 
-  // TODO(dantup): Is there a better way than spawning a proc? This breaks debugging..
-  // However, there's a lot of logic inside RunCommand that wouldn't be good
-  // to duplicate here.
-  Future<void> run({bool withDebugger = false}) async {
+  Future<void> run({bool withDebugger = false, bool pauseOnExceptions = false}) async {
     await _setupProcess(<String>[
         'run',
         '--machine',
         '-d',
         'flutter-tester',
-    ], withDebugger: withDebugger);
+    ], withDebugger: withDebugger, pauseOnExceptions: pauseOnExceptions);
   }
 
-  Future<void> attach(int port, {bool withDebugger = false}) async {
+  Future<void> attach(int port, {bool withDebugger = false, bool pauseOnExceptions = false}) async {
     await _setupProcess(<String>[
         'attach',
         '--machine',
@@ -72,10 +71,10 @@ class FlutterTestDriver {
         'flutter-tester',
         '--debug-port',
         '$port',
-    ], withDebugger: withDebugger);
+    ], withDebugger: withDebugger, pauseOnExceptions: pauseOnExceptions);
   }
 
-  Future<void> _setupProcess(List<String> args, {bool withDebugger = false}) async {
+  Future<void> _setupProcess(List<String> args, {bool withDebugger = false, bool pauseOnExceptions = false}) async {
     final String flutterBin = fs.path.join(getFlutterRoot(), 'bin', 'flutter');
     _debugPrint('Spawning flutter $args in ${_projectFolder.path}');
 
@@ -88,6 +87,7 @@ class FlutterTestDriver {
         workingDirectory: _projectFolder.path,
         environment: <String, String>{'FLUTTER_TEST': 'true'});
 
+    _proc.exitCode.then((_) => _hasExited = true);
     _transformToLines(_proc.stdout).listen((String line) => _stdout.add(line));
     _transformToLines(_proc.stderr).listen((String line) => _stderr.add(line));
 
@@ -128,6 +128,9 @@ class FlutterTestDriver {
       // expected by tests. Tests will reload/restart as required if they need
       // to hit breakpoints, etc.
       await waitForPause();
+      if (pauseOnExceptions) {
+        await (await getFlutterIsolate()).setExceptionPauseMode(VMExceptionPauseMode.unhandled);
+      }
       await resume(wait: false);
     }
 
@@ -188,9 +191,15 @@ class FlutterTestDriver {
     return _proc.exitCode;
   }
 
-  Future<void> addBreakpoint(String path, int line) async {
+  Future<VMIsolate> getFlutterIsolate() async {
+    // Currently these tests only have a single isolate. If this
+    // ceases to be the case, this code will need changing.
     final VM vm = await vmService.getVM();
-    final VMIsolate isolate = await vm.isolates.first.load();
+    return await vm.isolates.first.load();
+  }
+
+  Future<void> addBreakpoint(String path, int line) async {
+    final VMIsolate isolate = await getFlutterIsolate();
     _debugPrint('Sending breakpoint for $path:$line');
     await isolate.addBreakpoint(path, line);
   }
