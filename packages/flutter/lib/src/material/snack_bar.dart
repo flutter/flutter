@@ -184,7 +184,7 @@ class SnackBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final bool removeAnimation = RendererBinding.instance.assistiveTechnologyEnabled;
+    final MediaQueryData mediaQueryData = MediaQuery.of(context);
     assert(animation != null);
     final ThemeData theme = Theme.of(context);
     final ThemeData darkTheme = new ThemeData(
@@ -240,7 +240,7 @@ class SnackBar extends StatelessWidget {
           color: backgroundColor ?? _kSnackBackground,
           child: new Theme(
             data: darkTheme,
-            child: removeAnimation ? snackbar : new FadeTransition(
+            child: mediaQueryData.assistiveTechnologyEnabled ? snackbar : new FadeTransition(
               opacity: fadeAnimation,
               child: snackbar,
             ),
@@ -249,7 +249,7 @@ class SnackBar extends StatelessWidget {
       ),
     );
     return new ClipRect(
-      child: removeAnimation ? snackbar : new AnimatedBuilder(
+      child: mediaQueryData.assistiveTechnologyEnabled ? snackbar : new AnimatedBuilder(
         animation: heightAnimation,
         builder: (BuildContext context, Widget child) {
           return new Align(

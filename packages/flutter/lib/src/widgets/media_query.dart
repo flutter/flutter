@@ -43,6 +43,7 @@ class MediaQueryData {
     this.padding = EdgeInsets.zero,
     this.viewInsets = EdgeInsets.zero,
     this.alwaysUse24HourFormat = false,
+    this.assistiveTechnologyEnabled = false,
   });
 
   /// Creates data for a media query based on the given window.
@@ -57,6 +58,7 @@ class MediaQueryData {
       textScaleFactor = window.textScaleFactor,
       padding = new EdgeInsets.fromWindowPadding(window.padding, window.devicePixelRatio),
       viewInsets = new EdgeInsets.fromWindowPadding(window.viewInsets, window.devicePixelRatio),
+      assistiveTechnologyEnabled = window.assistiveTechnologyEnabled,
       alwaysUse24HourFormat = window.alwaysUse24HourFormat;
 
   /// The size of the media in logical pixel (e.g, the size of the screen).
@@ -120,6 +122,17 @@ class MediaQueryData {
   ///   formatting.
   final bool alwaysUse24HourFormat;
 
+  /// Whether the user is using assitive technologies to interact with the
+  /// application.
+  ///
+  /// This includes screen readers such as TalkBack on Android and VoiceOVer
+  /// on iOS, as well as hardware switches, and more.
+  ///
+  /// See also:
+  ///
+  ///  * [Window.assistiveTechnologyEnabled], for the flag on the window.
+  final bool assistiveTechnologyEnabled;
+
   /// The orientation of the media (e.g., whether the device is in landscape or portrait mode).
   Orientation get orientation {
     return size.width > size.height ? Orientation.landscape : Orientation.portrait;
@@ -134,6 +147,7 @@ class MediaQueryData {
     EdgeInsets padding,
     EdgeInsets viewInsets,
     bool alwaysUse24HourFormat,
+    bool assistiveTechnologyEnabled,
   }) {
     return new MediaQueryData(
       size: size ?? this.size,
@@ -142,6 +156,7 @@ class MediaQueryData {
       padding: padding ?? this.padding,
       viewInsets: viewInsets ?? this.viewInsets,
       alwaysUse24HourFormat: alwaysUse24HourFormat ?? this.alwaysUse24HourFormat,
+      assistiveTechnologyEnabled: assistiveTechnologyEnabled ?? this.assistiveTechnologyEnabled,
     );
   }
 
@@ -179,6 +194,7 @@ class MediaQueryData {
       ),
       viewInsets: viewInsets,
       alwaysUse24HourFormat: alwaysUse24HourFormat,
+      assistiveTechnologyEnabled: assistiveTechnologyEnabled,
     );
   }
 
@@ -214,6 +230,7 @@ class MediaQueryData {
         bottom: removeBottom ? 0.0 : null,
       ),
       alwaysUse24HourFormat: alwaysUse24HourFormat,
+      assistiveTechnologyEnabled: assistiveTechnologyEnabled,
     );
   }
 
@@ -227,11 +244,12 @@ class MediaQueryData {
         && typedOther.textScaleFactor == textScaleFactor
         && typedOther.padding == padding
         && typedOther.viewInsets == viewInsets
-        && typedOther.alwaysUse24HourFormat == alwaysUse24HourFormat;
+        && typedOther.alwaysUse24HourFormat == alwaysUse24HourFormat
+        && typedOther.assistiveTechnologyEnabled == assistiveTechnologyEnabled;
   }
 
   @override
-  int get hashCode => hashValues(size, devicePixelRatio, textScaleFactor, padding, viewInsets, alwaysUse24HourFormat);
+  int get hashCode => hashValues(size, devicePixelRatio, textScaleFactor, padding, viewInsets, alwaysUse24HourFormat, assistiveTechnologyEnabled);
 
   @override
   String toString() {
@@ -241,7 +259,8 @@ class MediaQueryData {
              'textScaleFactor: $textScaleFactor, '
              'padding: $padding, '
              'viewInsets: $viewInsets, '
-             'alwaysUse24HourFormat: $alwaysUse24HourFormat'
+             'alwaysUse24HourFormat: $alwaysUse24HourFormat, '
+             'assistiveTechnologyEnabled: $assistiveTechnologyEnabled'
            ')';
   }
 }

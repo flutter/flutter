@@ -39,8 +39,7 @@ abstract class RendererBinding extends BindingBase with ServicesBinding, Schedul
       ..onMetricsChanged = handleMetricsChanged
       ..onTextScaleFactorChanged = handleTextScaleFactorChanged
       ..onSemanticsEnabledChanged = _handleSemanticsEnabledChanged
-      ..onSemanticsAction = _handleSemanticsAction
-      ..onAssistiveTechnologyEnabled = _handleAssistiveTechnologyEnabledChanged;
+      ..onSemanticsAction = _handleSemanticsAction;
     initRenderView();
     _handleSemanticsEnabledChanged();
     assert(renderView != null);
@@ -129,10 +128,6 @@ abstract class RendererBinding extends BindingBase with ServicesBinding, Schedul
   PipelineOwner get pipelineOwner => _pipelineOwner;
   PipelineOwner _pipelineOwner;
 
-  /// Whether the user is using any assistive technologies such as Talkback on
-  /// Android or VoiceOver on iOS.
-  bool get assistiveTechnologyEnabled => ui.window.assistiveTechnologyEnabled;
-
   /// The render tree that's attached to the output surface.
   RenderView get renderView => _pipelineOwner.rootNode;
   /// Sets the given [RenderView] object (which must not be null), and its tree, to
@@ -179,10 +174,6 @@ abstract class RendererBinding extends BindingBase with ServicesBinding, Schedul
   SemanticsHandle _semanticsHandle;
 
   void _handleSemanticsEnabledChanged() {
-    setSemanticsEnabled(ui.window.semanticsEnabled);
-  }
-
-  void _handleAssistiveTechnologyEnabledChanged() {
     setSemanticsEnabled(ui.window.semanticsEnabled);
   }
 
