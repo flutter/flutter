@@ -11,7 +11,6 @@ import 'constants.dart';
 import 'theme.dart';
 
 /// The collapsing effect while the space bar expands or collapses.
-///
 enum CollapseMode {
   /// The background widget will scroll in a parallax fashion.
   parallax,
@@ -49,7 +48,8 @@ class FlexibleSpaceBar extends StatefulWidget {
     this.background,
     this.centerTitle,
     this.collapseMode = CollapseMode.parallax
-  }) : super(key: key);
+  }) : assert(collapseMode != null),
+       super(key: key);
 
   /// The primary contents of the flexible space bar when expanded.
   ///
@@ -68,7 +68,7 @@ class FlexibleSpaceBar extends StatefulWidget {
 
   /// Collapse effect while scrolling.
   ///
-  /// Defaults to Parallax mode.
+  /// Defaults to [CollapseMode.parallax].
   final CollapseMode collapseMode;
 
   /// Wraps a widget that contains an [AppBar] to convey sizing information down
@@ -125,16 +125,14 @@ class _FlexibleSpaceBarState extends State<FlexibleSpaceBar> {
     return null;
   }
 
-  double _getCollapsePadding(double t, _FlexibleSpaceBarSettings settings){
-    final double deltaExtent = settings.maxExtent - settings.minExtent;
-
-    switch(widget.collapseMode){
+  double _getCollapsePadding(double t, _FlexibleSpaceBarSettings settings) {
+    switch (widget.collapseMode) {
       case CollapseMode.pin:
         return -(settings.maxExtent - settings.currentExtent);
       case CollapseMode.none:
         return 0.0;
       case CollapseMode.parallax:
-      default:
+        final double deltaExtent = settings.maxExtent - settings.minExtent;
         return -new Tween<double>(begin: 0.0, end: deltaExtent / 4.0).lerp(t);
     }
   }
