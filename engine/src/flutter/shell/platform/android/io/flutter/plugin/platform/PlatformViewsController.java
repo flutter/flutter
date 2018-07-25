@@ -243,7 +243,7 @@ public class PlatformViewsController implements MethodChannel.MethodCallHandler 
                 flags
         );
 
-        view.onTouchEvent(event);
+        view.dispatchTouchEvent(event);
         result.success(null);
     }
 
