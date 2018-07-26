@@ -233,8 +233,8 @@ void main() {
   testWidgets('Cursor blinks', (WidgetTester tester) async {
     await tester.pumpWidget(
       overlay(
-        child: const TextField(
-          decoration: InputDecoration(
+        child: new TextField(
+          decoration: const InputDecoration(
             hintText: 'Placeholder',
           ),
         ),
@@ -273,7 +273,7 @@ void main() {
   testWidgets('cursor has expected defaults', (WidgetTester tester) async {
     await tester.pumpWidget(
         overlay(
-          child: const TextField(
+          child: TextField(
           ),
         )
     );
@@ -286,8 +286,8 @@ void main() {
   testWidgets('cursor has expected radius value', (WidgetTester tester) async {
     await tester.pumpWidget(
         overlay(
-          child: const TextField(
-            cursorRadius: Radius.circular(3.0),
+          child: new TextField(
+            cursorRadius: const Radius.circular(3.0),
           ),
         )
     );
@@ -300,8 +300,8 @@ void main() {
   testWidgets('cursor layout has correct width', (WidgetTester tester) async {
     await tester.pumpWidget(
         overlay(
-          child: const RepaintBoundary(
-            child: TextField(
+          child: new RepaintBoundary(
+            child: new TextField(
               cursorWidth: 15.0,
             ),
           ),
@@ -319,10 +319,10 @@ void main() {
   testWidgets('cursor layout has correct radius', (WidgetTester tester) async {
     await tester.pumpWidget(
         overlay(
-          child: const RepaintBoundary(
-            child: TextField(
+          child: new RepaintBoundary(
+            child: new TextField(
               cursorWidth: 15.0,
-              cursorRadius: Radius.circular(3.0),
+              cursorRadius: const Radius.circular(3.0),
             ),
           ),
         )
@@ -339,9 +339,9 @@ void main() {
   testWidgets('obscureText control test', (WidgetTester tester) async {
     await tester.pumpWidget(
       overlay(
-        child: const TextField(
+        child: new TextField(
           obscureText: true,
-          decoration: InputDecoration(
+          decoration: const InputDecoration(
             hintText: 'Placeholder',
           ),
         ),
@@ -886,8 +886,8 @@ void main() {
   testWidgets('TextField errorText trumps helperText', (WidgetTester tester) async {
     await tester.pumpWidget(
       overlay(
-        child: const TextField(
-          decoration: InputDecoration(
+        child: new TextField(
+          decoration: const InputDecoration(
             errorText: 'error text',
             helperText: 'helper text',
           ),
@@ -904,8 +904,8 @@ void main() {
       overlay(
         child: new Theme(
           data: themeData,
-          child: const TextField(
-            decoration: InputDecoration(
+          child: new TextField(
+            decoration: const InputDecoration(
               helperText: 'helper text',
             ),
           ),
@@ -1039,8 +1039,8 @@ void main() {
       overlay(
         child: new Column(
           children: <Widget>[
-            const TextField(
-              decoration: InputDecoration(
+            new TextField(
+              decoration: const InputDecoration(
                 labelText: 'First',
               ),
             ),
@@ -1088,8 +1088,8 @@ void main() {
       overlay(
         child: new Column(
           children: <Widget>[
-            const TextField(
-              decoration: InputDecoration(
+            new TextField(
+              decoration: const InputDecoration(
                 labelText: 'First',
               ),
             ),
@@ -1152,8 +1152,8 @@ void main() {
       overlay(
         child: new Column(
           children: <Widget>[
-            const TextField(
-              decoration: InputDecoration(
+            new TextField(
+              decoration: const InputDecoration(
                 labelText: 'First',
               ),
             ),
@@ -1207,8 +1207,8 @@ void main() {
       overlay(
         child: new Column(
           children: <Widget>[
-            const TextField(
-              decoration: InputDecoration(
+            new TextField(
+              decoration: const InputDecoration(
                 labelText: 'First',
               ),
             ),
@@ -1244,8 +1244,8 @@ void main() {
   testWidgets('Icon is separated from input/label by 16+12', (WidgetTester tester) async {
     await tester.pumpWidget(
       overlay(
-        child: const TextField(
-          decoration: InputDecoration(
+        child: new TextField(
+          decoration: const InputDecoration(
             icon: Icon(Icons.phone),
             labelText: 'label',
             filled: true,
@@ -1265,8 +1265,8 @@ void main() {
   testWidgets('Collapsed hint text placement', (WidgetTester tester) async {
     await tester.pumpWidget(
       overlay(
-        child: const TextField(
-          decoration: InputDecoration.collapsed(
+        child: new TextField(
+          decoration: const InputDecoration.collapsed(
             hintText: 'hint',
           ),
         ),
@@ -1281,7 +1281,7 @@ void main() {
       overlay(
         child: new Container(
           width: 300.0,
-          child: const TextField(
+          child: new TextField(
             textAlign: TextAlign.center,
             decoration: null,
           ),
@@ -1311,8 +1311,8 @@ void main() {
       overlay(
         child: new Container(
           width: 300.0,
-          child: const Center(
-            child: TextField(
+          child: new Center(
+            child: new TextField(
               textAlign: TextAlign.center,
               decoration: null,
             ),
@@ -1721,11 +1721,11 @@ void main() {
 
   testWidgets('setting maxLength shows counter', (WidgetTester tester) async {
     await tester.pumpWidget(new MaterialApp(
-      home: const Material(
-        child: DefaultTextStyle(
-          style: TextStyle(fontFamily: 'Ahem', fontSize: 10.0),
-          child: Center(
-            child: TextField(
+      home: new Material(
+        child: new DefaultTextStyle(
+          style: const TextStyle(fontFamily: 'Ahem', fontSize: 10.0),
+          child: new Center(
+            child: new TextField(
               maxLength: 10,
             ),
           ),
@@ -1746,11 +1746,11 @@ void main() {
 
     await tester.pumpWidget(
       new MaterialApp(
-        home: const Material(
-          child: DefaultTextStyle(
-            style: TextStyle(fontFamily: 'Ahem', fontSize: 10.0),
-            child: Center(
-              child: TextField(
+        home: new Material(
+          child: new DefaultTextStyle(
+            style: const TextStyle(fontFamily: 'Ahem', fontSize: 10.0),
+            child: new Center(
+              child: new TextField(
                 maxLength: 10,
               ),
             ),
@@ -2216,7 +2216,7 @@ void main() {
   });
 
   testWidgets('TextField throws when not descended from a Material widget', (WidgetTester tester) async {
-    const Widget textField = TextField();
+    final Widget textField = new TextField();
     await tester.pumpWidget(textField);
     final dynamic exception = tester.takeException();
     expect(exception, isFlutterError);
@@ -2250,4 +2250,24 @@ void main() {
     expect(focusNode.hasFocus, isFalse);
   });
 
+  testWidgets('TextField.autocorrect defaults to false for an email address keyboard', (WidgetTester tester) async {
+    final TestTextInput testTextInput = tester.testTextInput;
+    await tester.pumpWidget(
+      boilerplate(child: new TextField(
+        keyboardType: TextInputType.emailAddress,
+      ))
+    );
+    await tester.showKeyboard(find.byType(TextField));
+    expect(testTextInput.setClientArgs['autocorrect'], false);
+    testTextInput.hide();
+
+    await tester.pumpWidget(
+      boilerplate(child: new TextField(
+        key: new UniqueKey(),
+        keyboardType: TextInputType.text,
+      ))
+    );
+    await tester.showKeyboard(find.byType(TextField));
+    expect(testTextInput.setClientArgs['autocorrect'], true);
+  });
 }
