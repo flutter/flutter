@@ -545,7 +545,7 @@ void main() {
     await tester.pump();
 
     const Color normalButtonBackgroundColor = Color(0xc0ffffff);
-    const Color pressedButtonBackgroundColor = Color(0x70ffffff);
+    const Color pressedButtonBackgroundColor = Color(0x90ffffff);
     final RenderBox firstButtonBox = findActionButtonRenderBoxByTitle(tester, 'Option 1');
     final RenderBox secondButtonBox = findActionButtonRenderBoxByTitle(tester, 'Option 2');
     final RenderBox actionsSectionBox = findActionsSectionRenderBox(tester);
@@ -637,7 +637,7 @@ RenderBox findActionButtonRenderBoxByTitle(WidgetTester tester, String title) {
 RenderBox findActionsSectionRenderBox(WidgetTester tester) {
   final RenderObject actionsSection = tester.renderObject(find.byElementPredicate(
     (Element element) {
-      return element.renderObject is RenderCupertinoDialogActions;
+      return element.renderObject.runtimeType.toString() == '_RenderCupertinoDialogActions';
     }),
   );
   assert(actionsSection is RenderBox);

@@ -56,6 +56,7 @@ const BoxDecoration _kCupertinoDialogBlurOverlayDecoration = BoxDecoration(
   backgroundBlendMode: BlendMode.overlay,
 );
 
+const double _kBlurAmount = 20.0;
 const double _kEdgePadding = 20.0;
 const double _kMinButtonHeight = 45.0;
 const double _kDialogCornerRadius = 12.0;
@@ -67,7 +68,7 @@ const Color _kDialogColor = Color(0xC0FFFFFF);
 
 // Translucent white that is painted on top of the blurred backdrop as the
 // background color of a pressed button.
-const Color _kDialogPressedColor = Color(0x70FFFFFF);
+const Color _kDialogPressedColor = Color(0x90FFFFFF);
 
 // Translucent white that is painted on top of the blurred backdrop in the
 // gap areas between the content section and actions section, as well as between
@@ -104,7 +105,7 @@ class CupertinoDialog extends StatelessWidget {
       child: new ClipRRect(
         borderRadius: BorderRadius.circular(_kDialogCornerRadius),
         child: new BackdropFilter(
-          filter: new ImageFilter.blur(sigmaX: 10.0, sigmaY: 10.0),
+          filter: new ImageFilter.blur(sigmaX: _kBlurAmount, sigmaY: _kBlurAmount),
           child: new Container(
             width: _kCupertinoDialogWidth,
             decoration: _kCupertinoDialogBlurOverlayDecoration,
@@ -246,7 +247,7 @@ class CupertinoAlertDialog extends StatelessWidget {
         child: ClipRRect(
           borderRadius: BorderRadius.circular(_kDialogCornerRadius),
           child: new BackdropFilter(
-            filter: new ImageFilter.blur(sigmaX: 10.0, sigmaY: 10.0),
+            filter: new ImageFilter.blur(sigmaX: _kBlurAmount, sigmaY: _kBlurAmount),
             child: new Container(
               decoration: _kCupertinoDialogBlurOverlayDecoration,
               child: new _CupertinoDialogRenderWidget(
@@ -312,10 +313,10 @@ class _RenderCupertinoDialog extends RenderBox
     RenderBox contentSection,
     RenderBox actionsSection,
   }) {
-    if (null != contentSection) {
+    if (contentSection != null) {
       add(contentSection);
     }
-    if (null != actionsSection) {
+    if (actionsSection != null) {
       add(actionsSection);
     }
   }
@@ -571,28 +572,10 @@ class _CupertinoAlertActionSection extends StatefulWidget {
   final ScrollController scrollController;
 
   @override
-  _CupertinoAlertActionSectionState createState() {
-    return new _CupertinoAlertActionSectionState();
-  }
+  _CupertinoAlertActionSectionState createState() => new _CupertinoAlertActionSectionState();
 }
 
 class _CupertinoAlertActionSectionState extends State<_CupertinoAlertActionSection> {
-  static _CupertinoAlertActionSectionState of(BuildContext context) {
-    return context.ancestorStateOfType(
-      const TypeMatcher<_CupertinoAlertActionSectionState>(),
-    );
-  }
-
-  final Set<int> _pressedButtons = new Set<int>();
-
-  void onButtonDown(int index) {
-    setState(() => _pressedButtons.add(index));
-  }
-
-  void onButtonUp(int index) {
-    setState(() => _pressedButtons.remove(index));
-  }
-
   @override
   Widget build(BuildContext context) {
     final double devicePixelRatio = MediaQuery.of(context).devicePixelRatio;
@@ -600,16 +583,7 @@ class _CupertinoAlertActionSectionState extends State<_CupertinoAlertActionSecti
     final List<Widget> interactiveButtons = <Widget>[];
     for (int i = 0; i < widget.children.length; i += 1) {
       interactiveButtons.add(
-        new GestureDetector(
-          onTapDown: (TapDownDetails details) {
-            onButtonDown(i);
-          },
-          onTapUp: (TapUpDetails details) {
-            onButtonUp(i);
-          },
-          onTapCancel: () {
-            onButtonUp(i);
-          },
+        new _PressableActionButton(
           child: widget.children[i],
         ),
       );
@@ -620,12 +594,88 @@ class _CupertinoAlertActionSectionState extends State<_CupertinoAlertActionSecti
         controller: widget.scrollController,
         child: new _CupertinoDialogActionsRenderWidget(
           actionButtons: interactiveButtons,
-          pressedButtons: new Set<int>.from(_pressedButtons),
           dividerThickness: _kDividerThickness / devicePixelRatio,
         ),
       ),
     );
   }
+}
+
+// Button that updates its render state when pressed.
+//
+// The pressed state is forwarded to an _ActionButtonParentDataWidget. The
+// corresponding _ActionButtonParentData is then interpreted and rendered
+// appropriately by _RenderCupertinoDialogActions.
+class _PressableActionButton extends StatefulWidget {
+  const _PressableActionButton({
+    @required this.child,
+  });
+
+  final Widget child;
+
+  @override
+  _PressableActionButtonState createState() => new _PressableActionButtonState();
+}
+
+class _PressableActionButtonState extends State<_PressableActionButton> {
+  bool _isPressed = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return new _ActionButtonParentDataWidget(
+      isPressed: _isPressed,
+      // TODO:(mattcarroll): Button press dynamics need overhaul for iOS: https://github.com/flutter/flutter/issues/19786
+      child: new GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTapDown: (TapDownDetails details) => setState(() => _isPressed = true),
+        onTapUp: (TapUpDetails details) => setState(() => _isPressed = false),
+        // TODO(mattcarroll): Cancel is currently triggered when user moves past slop instead of off button: https://github.com/flutter/flutter/issues/19783
+        onTapCancel: () => setState(() => _isPressed = false),
+        child: widget.child,
+      ),
+    );
+  }
+}
+
+// ParentDataWidget that updates _ActionButtonParentData for an action button.
+//
+// Each action button requires knowledge of whether or not it is pressed so that
+// the dialog can correctly render the button. The pressed state is held within
+// _ActionButtonParentData. _ActionButtonParentDataWidget is responsible for
+// updating the pressed state of an _ActionButtonParentData based on the
+// incoming [isPressed] property.
+class _ActionButtonParentDataWidget extends ParentDataWidget<_CupertinoDialogActionsRenderWidget> {
+  const _ActionButtonParentDataWidget({
+    Key key,
+    this.isPressed,
+    @required Widget child,
+  }) : super(key: key, child: child);
+
+  final bool isPressed;
+
+  @override
+  void applyParentData(RenderObject renderObject) {
+    assert(renderObject.parentData is _ActionButtonParentData);
+    final _ActionButtonParentData parentData = renderObject.parentData;
+    if (parentData.isPressed != isPressed) {
+      parentData.isPressed = isPressed;
+
+      // Force a repaint.
+      final AbstractNode targetParent = renderObject.parent;
+      if (targetParent is RenderObject)
+        targetParent.markNeedsPaint();
+    }
+  }
+}
+
+// ParentData applied to individual action buttons that report whether or not
+// that button is currently pressed by the user.
+class _ActionButtonParentData extends MultiChildLayoutParentData {
+  _ActionButtonParentData({
+    this.isPressed = false,
+  });
+
+  bool isPressed;
 }
 
 /// A button typically used in a [CupertinoAlertDialog].
@@ -713,111 +763,77 @@ class CupertinoDialogAction extends StatelessWidget {
 // behavior for its buttons. It only handles the sizing and layout of buttons.
 // Scrolling behavior can be composed on top of this widget, if desired.
 //
-// [_CupertinoDialogActionsRenderWidget] requires an ancestor of type
-// [_DialogInteractionInheritedWidget] so that the rendering of dividers can
-// depend on a user's interaction.
-//
 // See [_RenderCupertinoDialogActions] for specific layout policy details.
 class _CupertinoDialogActionsRenderWidget extends MultiChildRenderObjectWidget {
   _CupertinoDialogActionsRenderWidget({
     Key key,
     @required List<Widget> actionButtons,
-    @required Set<int> pressedButtons,
     double dividerThickness = 0.0,
-  }) : assert(pressedButtons != null),
-        _pressedButtons = pressedButtons,
-        _dividerThickness = dividerThickness,
-        super(key: key, children: actionButtons);
+  }) : _dividerThickness = dividerThickness,
+       super(key: key, children: actionButtons);
 
-  final Set<int> _pressedButtons;
   final double _dividerThickness;
 
   @override
   RenderObject createRenderObject(BuildContext context) {
-    return new RenderCupertinoDialogActions(
-      pressedButtons: _pressedButtons,
+    return new _RenderCupertinoDialogActions(
       dividerThickness: _dividerThickness,
     );
   }
 
   @override
-  void updateRenderObject(BuildContext context, RenderCupertinoDialogActions renderObject) {
-    renderObject.pressedButtons = _pressedButtons;
+  void updateRenderObject(BuildContext context, _RenderCupertinoDialogActions renderObject) {
     renderObject.dividerThickness = _dividerThickness;
   }
 }
 
-/// iOS style layout policy for sizing and positioning an alert dialog's action
-/// buttons.
-///
-/// The policy is as follows:
-///
-/// If a single action button is provided, or if 2 action buttons are provided
-/// that can fit side-by-side, then action buttons are sized and laid out in a
-/// single horizontal row. The row is exactly as wide as the dialog, and the row
-/// is as tall as the tallest action button. A horizontal divider is drawn above
-/// the button row. If 2 action buttons are provided, a vertical divider is
-/// drawn between them. The thickness of the divider is set by [dividerThickness].
-///
-/// If 2 action buttons are provided but they cannot fit side-by-side, then the
-/// 2 buttons are stacked vertically. A horizontal divider is drawn above each
-/// button. The thickness of the divider is set by [dividerThickness]. The minimum
-/// height of this [RenderBox] in the case of 2 stacked buttons is as tall as
-/// the 2 buttons stacked. This is different than the 3+ button case where the
-/// minimum height is only 1.5 buttons tall. See the 3+ button explanation for
-/// more info.
-///
-/// If 3+ action buttons are provided then they are all stacked vertically. A
-/// horizontal divider is drawn above each button. The thickness of the divider
-/// is set by [dividerThickness]. The minimum height of this [RenderBox] in the case
-/// of 3+ stacked buttons is as tall as the 1st button + 50% the height of the
-/// 2nd button. In other words, the minimum height is 1.5 buttons tall. This
-/// minimum height of 1.5 buttons is expected to work in tandem with a surrounding
-/// [ScrollView] to match the iOS dialog behavior.
-///
-/// A [Set] of [pressedButtons] are required because the divider rendering policy
-/// is based on whether or not a given button is pressed. If a button is pressed,
-/// then the divider above and below that pressed button are not drawn - instead
-/// they are filled with the standard white dialog background color. The one
-/// exception is the very 1st divider which is always rendered. This policy comes
-/// from observation of native iOS dialogs.
-@visibleForTesting
-class RenderCupertinoDialogActions extends RenderBox
+// iOS style layout policy for sizing and positioning an alert dialog's action
+// buttons.
+//
+// The policy is as follows:
+//
+// If a single action button is provided, or if 2 action buttons are provided
+// that can fit side-by-side, then action buttons are sized and laid out in a
+// single horizontal row. The row is exactly as wide as the dialog, and the row
+// is as tall as the tallest action button. A horizontal divider is drawn above
+// the button row. If 2 action buttons are provided, a vertical divider is
+// drawn between them. The thickness of the divider is set by [dividerThickness].
+//
+// If 2 action buttons are provided but they cannot fit side-by-side, then the
+// 2 buttons are stacked vertically. A horizontal divider is drawn above each
+// button. The thickness of the divider is set by [dividerThickness]. The minimum
+// height of this [RenderBox] in the case of 2 stacked buttons is as tall as
+// the 2 buttons stacked. This is different than the 3+ button case where the
+// minimum height is only 1.5 buttons tall. See the 3+ button explanation for
+// more info.
+//
+// If 3+ action buttons are provided then they are all stacked vertically. A
+// horizontal divider is drawn above each button. The thickness of the divider
+// is set by [dividerThickness]. The minimum height of this [RenderBox] in the case
+// of 3+ stacked buttons is as tall as the 1st button + 50% the height of the
+// 2nd button. In other words, the minimum height is 1.5 buttons tall. This
+// minimum height of 1.5 buttons is expected to work in tandem with a surrounding
+// [ScrollView] to match the iOS dialog behavior.
+//
+// Each button is expected to have an _ActionButtonParentData which reports
+// whether or not that button is currently pressed. If a button is pressed,
+// then the dividers above and below that pressed button are not drawn - instead
+// they are filled with the standard white dialog background color. The one
+// exception is the very 1st divider which is always rendered. This policy comes
+// from observation of native iOS dialogs.
+class _RenderCupertinoDialogActions extends RenderBox
     with ContainerRenderObjectMixin<RenderBox, MultiChildLayoutParentData>,
         RenderBoxContainerDefaultsMixin<RenderBox, MultiChildLayoutParentData> {
-  /// Creates an iOS dialog actions section layout policy.
-  ///
-  /// [pressedButtons] must not be null.
-  RenderCupertinoDialogActions({
+  _RenderCupertinoDialogActions({
     List<RenderBox> children,
-    @required Set<int> pressedButtons,
     double dividerThickness = 0.0,
-  }) : assert(pressedButtons != null),
-        _dividerThickness = dividerThickness,
-        _pressedButtons = pressedButtons {
+  }) : _dividerThickness = dividerThickness {
     addAll(children);
   }
 
-  Set<int> _pressedButtons;
-
-  /// The buttons which are currently pressed by the user.
-  Set<int> get pressedButtons => _pressedButtons;
-
-  set pressedButtons(Set<int> newValue) {
-    if (_pressedButtons.containsAll(newValue)
-        && newValue.containsAll(_pressedButtons)) {
-      return;
-    }
-
-    _pressedButtons = newValue;
-    markNeedsPaint();
-  }
-
-  double _dividerThickness;
-
-  /// The thickness of the divider between buttons.
+  // The thickness of the divider between buttons.
   double get dividerThickness => _dividerThickness;
-
+  double _dividerThickness;
   set dividerThickness(double newValue) {
     if (newValue == _dividerThickness) {
       return;
@@ -827,11 +843,11 @@ class RenderCupertinoDialogActions extends RenderBox
     markNeedsLayout();
   }
 
-  final Paint _buttonBkPaint = new Paint()
+  final Paint _buttonBackgroundPaint = new Paint()
     ..color = _kDialogColor
     ..style = PaintingStyle.fill;
 
-  final Paint _pressedButtonBkPaint = new Paint()
+  final Paint _pressedButtonBackgroundPaint = new Paint()
     ..color = _kDialogPressedColor
     ..style = PaintingStyle.fill;
 
@@ -839,10 +855,35 @@ class RenderCupertinoDialogActions extends RenderBox
     ..color = _kButtonDividerColor
     ..style = PaintingStyle.fill;
 
+  Iterable<RenderBox> get _pressedButtons sync* {
+    RenderBox currentChild = firstChild;
+    while (currentChild != null) {
+      assert(currentChild.parentData is _ActionButtonParentData);
+      final _ActionButtonParentData parentData = currentChild.parentData;
+      if (parentData.isPressed) {
+        yield currentChild;
+      }
+      currentChild = childAfter(currentChild);
+    }
+  }
+
+  bool get _isButtonPressed {
+    RenderBox currentChild = firstChild;
+    while (currentChild != null) {
+      assert(currentChild.parentData is _ActionButtonParentData);
+      final _ActionButtonParentData parentData = currentChild.parentData;
+      if (parentData.isPressed) {
+        return true;
+      }
+      currentChild = childAfter(currentChild);
+    }
+    return false;
+  }
+
   @override
   void setupParentData(RenderBox child) {
-    if (child.parentData is! MultiChildLayoutParentData)
-      child.parentData = new MultiChildLayoutParentData();
+    if (child.parentData is! _ActionButtonParentData)
+      child.parentData = new _ActionButtonParentData();
   }
 
   @override
@@ -857,46 +898,48 @@ class RenderCupertinoDialogActions extends RenderBox
 
   @override
   double computeMinIntrinsicHeight(double width) {
+    double minHeight;
     if (childCount == 0) {
-      return 0.0;
+      minHeight = 0.0;
     } else if (childCount == 1) {
       // If only 1 child
-      return _computeMinIntrinsicHeightSideBySide(width);
+      minHeight = _computeMinIntrinsicHeightSideBySide(width);
     } else {
-      final List<RenderBox> children = getChildrenAsList();
-
-      if (children.length == 2) {
+      if (childCount == 2) {
         if (_isSingleButtonRow(width)) {
           // The first 2 buttons fit side-by-side. Display them horizontally.
-          return _computeMinIntrinsicHeightSideBySide(width);
+          minHeight = _computeMinIntrinsicHeightSideBySide(width);
         } else {
           // The first 2 buttons do not fit side-by-side. Display them stacked.
           // The minimum height for 2 buttons when stacked is the minimum height
           // of both buttons + dividers (no scrolling for 2 buttons).
-          return _computeMinIntrinsicHeightForTwoStackedButtons(width);
+          minHeight = _computeMinIntrinsicHeightForTwoStackedButtons(width);
         }
       } else {
         // 3+ buttons are always stacked. The minimum height when stacked is
         // 1.5 buttons tall.
-        return _computeMinIntrinsicHeightStacked(width);
+        minHeight = _computeMinIntrinsicHeightStacked(width);
       }
     }
+    return minHeight;
   }
 
   // The minimum height for a single row of buttons is the larger of the buttons'
   // min intrinsic heights + the width of a divider
   double _computeMinIntrinsicHeightSideBySide(double width) {
-    assert(childCount <= 2);
+    assert(childCount >= 1 && childCount <= 2);
 
+    double minHeight;
     if (childCount == 1) {
-      return firstChild.computeMinIntrinsicHeight(width) + dividerThickness;
+      minHeight = firstChild.getMinIntrinsicHeight(width) + dividerThickness;
     } else {
       final double perButtonWidth = (width - dividerThickness) / 2.0;
-      return math.max(
-        firstChild.computeMinIntrinsicHeight(perButtonWidth) + dividerThickness,
-        lastChild.computeMinIntrinsicHeight(perButtonWidth) + dividerThickness,
+      minHeight = math.max(
+        firstChild.getMinIntrinsicHeight(perButtonWidth) + dividerThickness,
+        lastChild.getMinIntrinsicHeight(perButtonWidth) + dividerThickness,
       );
     }
+    return minHeight;
   }
 
   // The minimum height for 2 stacked buttons is the height of both
@@ -905,8 +948,8 @@ class RenderCupertinoDialogActions extends RenderBox
     assert(childCount == 2);
 
     return (2 * dividerThickness)
-        + firstChild.computeMinIntrinsicHeight(width)
-        + lastChild.computeMinIntrinsicHeight(width);
+        + firstChild.getMinIntrinsicHeight(width)
+        + lastChild.getMinIntrinsicHeight(width);
   }
 
   // The minimum height for 3+ stacked buttons is the height of the 1st button
@@ -914,40 +957,41 @@ class RenderCupertinoDialogActions extends RenderBox
   double _computeMinIntrinsicHeightStacked(double width) {
     assert(childCount >= 3);
 
-    final List<RenderBox> children = getChildrenAsList();
     return (2 * dividerThickness)
-        + children[0].computeMinIntrinsicHeight(width)
-        + (0.5 * children[1].computeMinIntrinsicHeight(width));
+      + firstChild.getMinIntrinsicHeight(width)
+      + (0.5 * childAfter(firstChild).getMinIntrinsicHeight(width));
   }
 
   @override
   double computeMaxIntrinsicHeight(double width) {
+    double maxHeight;
     if (childCount == 0) {
       // No buttons. Zero height.
-      return 0.0;
+      maxHeight = 0.0;
     } else if (childCount == 1) {
       // One button. Our max intrinsic height is equal to the button's.
-      return firstChild.computeMaxIntrinsicHeight(width) + dividerThickness;
+      maxHeight = firstChild.getMaxIntrinsicHeight(width) + dividerThickness;
     } else if (childCount == 2) {
       // Two buttons...
       if (_isSingleButtonRow(width)) {
         // The 2 buttons fit side by side so our max intrinsic height is equal
         // to the taller of the 2 buttons.
         final double perButtonWidth = (width - dividerThickness) / 2.0;
-        return math.max(
-          firstChild.computeMaxIntrinsicHeight(perButtonWidth),
-          lastChild.computeMaxIntrinsicHeight(perButtonWidth),
-        ) + dividerThickness;
+        maxHeight = math.max(
+          firstChild.getMaxIntrinsicHeight(perButtonWidth) + dividerThickness,
+          lastChild.getMaxIntrinsicHeight(perButtonWidth) + dividerThickness,
+        );
       } else {
         // The 2 buttons do not fit side by side. Measure total height as a
         // vertical stack.
-        return _computeMaxIntrinsicHeightStacked(width);
+        maxHeight = _computeMaxIntrinsicHeightStacked(width);
       }
     } else {
       // Three+ buttons. Stack the buttons vertically with dividers and measure
       // the overall height.
-      return _computeMaxIntrinsicHeightStacked(width);
+      maxHeight = _computeMaxIntrinsicHeightStacked(width);
     }
+    return maxHeight;
   }
 
   // Max height of a stack of buttons is the sum of all button heights + a
@@ -956,24 +1000,26 @@ class RenderCupertinoDialogActions extends RenderBox
     assert(childCount >= 2);
 
     final double allDividersHeight = childCount * dividerThickness;
-    return getChildrenAsList().fold(allDividersHeight, (double heightAccum, RenderBox button) {
-      return heightAccum + button.computeMaxIntrinsicHeight(width);
+    return getChildrenAsList().fold(allDividersHeight, (double heightAccumulation, RenderBox button) {
+      return heightAccumulation + button.getMaxIntrinsicHeight(width);
     });
   }
 
   bool _isSingleButtonRow(double width) {
+    bool isSingleButtonRow;
     if (childCount == 1) {
-      return true;
+      isSingleButtonRow = true;
     } else if (childCount == 2) {
       // There are 2 buttons. If they can fit side-by-side then that's what
       // we want to do. Otherwise, stack them vertically.
-      final double sideBySideWidth = firstChild.computeMaxIntrinsicWidth(double.infinity)
+      final double sideBySideWidth = firstChild.getMaxIntrinsicWidth(double.infinity)
           + dividerThickness
-          + lastChild.computeMaxIntrinsicWidth(double.infinity);
-      return sideBySideWidth <= width;
+          + lastChild.getMaxIntrinsicWidth(double.infinity);
+      isSingleButtonRow = sideBySideWidth <= width;
     } else {
-      return false;
+      isSingleButtonRow = false;
     }
+    return isSingleButtonRow;
   }
 
   @override
@@ -996,7 +1042,7 @@ class RenderCupertinoDialogActions extends RenderBox
         );
 
         // Layout the 2 buttons.
-        for(RenderBox button in getChildrenAsList()) {
+        for (RenderBox button in getChildrenAsList()) {
           button.layout(
             perButtonConstraints,
             parentUsesSize: true,
@@ -1077,7 +1123,7 @@ class RenderCupertinoDialogActions extends RenderBox
     // the dialog has 2 buttons), and it starts just beneath the horizontal
     // divider and goes to the bottom of the single row of buttons. The
     // vertical divider is hidden if either the left or right button is pressed.
-    final Rect verticalDivider = childCount == 2 && pressedButtons.isEmpty
+    final Rect verticalDivider = childCount == 2 && !_isButtonPressed
       ? new Rect.fromLTWH(
           offset.dx + firstChild.size.width,
           offset.dy + horizontalDivider.height,
@@ -1089,9 +1135,7 @@ class RenderCupertinoDialogActions extends RenderBox
         )
       : Rect.zero;
 
-    final List<RenderBox> children = getChildrenAsList();
-    final List<Rect> pressedButtonRects = pressedButtons.map((int pressedIndex) {
-      final RenderBox pressedButton = children[pressedIndex];
+    final List<Rect> pressedButtonRects = _pressedButtons.map((RenderBox pressedButton) {
       final MultiChildLayoutParentData buttonParentData = pressedButton.parentData;
 
       return new Rect.fromLTWH(
@@ -1103,30 +1147,30 @@ class RenderCupertinoDialogActions extends RenderBox
     }).toList();
 
     // Create the button backgrounds path and paint it.
-    final Path bkFillPath = new Path()
+    final Path backgroundFillPath = new Path()
       ..fillType = PathFillType.evenOdd
       ..addRect(Rect.largest)
       ..addRect(horizontalDivider)
       ..addRect(verticalDivider);
 
     for (int i = 0; i < pressedButtonRects.length; i += 1) {
-      bkFillPath.addRect(pressedButtonRects[i]);
+      backgroundFillPath.addRect(pressedButtonRects[i]);
     }
 
     canvas.drawPath(
-      bkFillPath,
-      _buttonBkPaint,
+      backgroundFillPath,
+      _buttonBackgroundPaint,
     );
 
     // Create the pressed buttons background path and paint it.
-    final Path pressedBkFillPath = new Path();
+    final Path pressedBackgroundFillPath = new Path();
     for (int i = 0; i < pressedButtonRects.length; i += 1) {
-      pressedBkFillPath.addRect(pressedButtonRects[i]);
+      pressedBackgroundFillPath.addRect(pressedButtonRects[i]);
     }
 
     canvas.drawPath(
-      pressedBkFillPath,
-      _pressedButtonBkPaint,
+      pressedBackgroundFillPath,
+      _pressedButtonBackgroundPaint,
     );
 
     // Create the dividers path and paint it.
@@ -1143,11 +1187,11 @@ class RenderCupertinoDialogActions extends RenderBox
   void _drawButtonBackgroundsAndDividersStacked(Canvas canvas, Offset offset) {
     final Offset dividerOffset = new Offset(0.0, dividerThickness);
 
-    final Path bkFillPath = new Path()
+    final Path backgroundFillPath = new Path()
       ..fillType = PathFillType.evenOdd
       ..addRect(Rect.largest);
 
-    final Path pressedBkFillPath = new Path();
+    final Path pressedBackgroundFillPath = new Path();
 
     final Path dividersPath = new Path();
 
@@ -1155,8 +1199,18 @@ class RenderCupertinoDialogActions extends RenderBox
 
     final List<RenderBox> children = getChildrenAsList();
     for (int i = 0; i < children.length; i += 1) {
-      final bool isButtonPressed = pressedButtons.contains(i);
-      final bool isPrevButtonPressed = pressedButtons.contains(i - 1);
+      assert(children[i].parentData is _ActionButtonParentData);
+      final _ActionButtonParentData currentButtonParentData = children[i].parentData;
+      final bool isButtonPressed = currentButtonParentData.isPressed;
+
+      bool isPrevButtonPressed = false;
+      if (i > 0) {
+        assert(children[i - 1].parentData is _ActionButtonParentData);
+        final _ActionButtonParentData previousButtonParentData = children[i - 1]
+            .parentData;
+        isPrevButtonPressed = previousButtonParentData.isPressed;
+      }
+
       final bool dividerNeeded = i == 0 || !(isButtonPressed || isPrevButtonPressed);
 
       final Rect dividerRect = new Rect.fromLTWH(
@@ -1166,7 +1220,7 @@ class RenderCupertinoDialogActions extends RenderBox
         dividerThickness,
       );
 
-      final Rect buttonBkRect = new Rect.fromLTWH(
+      final Rect buttonBackgroundRect = new Rect.fromLTWH(
         accumulatingOffset.dx,
         accumulatingOffset.dy + dividerThickness,
         size.width,
@@ -1176,38 +1230,24 @@ class RenderCupertinoDialogActions extends RenderBox
       // If this button is pressed, then we don't want a white background to be
       // painted, so we erase this button from the background path.
       if (isButtonPressed) {
-        bkFillPath.addRect(buttonBkRect);
-        pressedBkFillPath.addRect(buttonBkRect);
+        backgroundFillPath.addRect(buttonBackgroundRect);
+        pressedBackgroundFillPath.addRect(buttonBackgroundRect);
       }
 
       // If this divider is needed, then we erase the divider area from the
       // background path, and on top of that we paint a translucent gray to
       // darken the divider area.
       if (dividerNeeded) {
-        bkFillPath.addRect(dividerRect);
+        backgroundFillPath.addRect(dividerRect);
         dividersPath.addRect(dividerRect);
       }
 
       accumulatingOffset += dividerOffset + new Offset(0.0, children[i].size.height);
     }
 
-    // Draw all of the button backgrounds.
-    canvas.drawPath(
-      bkFillPath,
-      _buttonBkPaint,
-    );
-
-    // Draw the pressed button backgrounds.
-    canvas.drawPath(
-      pressedBkFillPath,
-      _pressedButtonBkPaint,
-    );
-
-    // Draw all of the dividers.
-    canvas.drawPath(
-      dividersPath,
-      _dividerPaint,
-    );
+    canvas.drawPath(backgroundFillPath, _buttonBackgroundPaint);
+    canvas.drawPath(pressedBackgroundFillPath, _pressedButtonBackgroundPaint);
+    canvas.drawPath(dividersPath, _dividerPaint);
   }
 
   void _drawButtons(PaintingContext context, Offset offset) {

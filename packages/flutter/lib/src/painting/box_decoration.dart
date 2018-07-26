@@ -83,10 +83,10 @@ class BoxDecoration extends Decoration {
     this.backgroundBlendMode,
     this.shape = BoxShape.rectangle,
   }) : assert(shape != null),
-       // TODO(mattcarroll): Use "backgroundBlendMode == null" when Dart #31140 is in.
+       // TODO(mattcarroll): Use "backgroundBlendMode == null" when https://github.com/dart-lang/sdk/issues/31140 is in.
        assert(
          identical(backgroundBlendMode, null) || color != null || gradient != null,
-         'backgroundBlendMode applies to BoxDecoration\'s background color or'
+         'backgroundBlendMode applies to BoxDecoration\'s background color or '
          'gradient, but no color or gradient were provided.'
        );
 
@@ -149,7 +149,7 @@ class BoxDecoration extends Decoration {
   /// If no [backgroundBlendMode] is provided then the default painting blend
   /// mode is used.
   ///
-  /// If no [color] or [gradient] is provided then blend mode has no impact.
+  /// If no [color] or [gradient] is provided then the blend mode has no impact.
   final BlendMode backgroundBlendMode;
 
   /// The shape to fill the background [color], [gradient], and [image] into and
