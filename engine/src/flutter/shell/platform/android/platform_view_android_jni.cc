@@ -184,10 +184,19 @@ std::unique_ptr<IsolateConfiguration> CreateIsolateConfiguration(
   const auto configuration_from_blob =
       [&asset_manager](const std::string& snapshot_name)
       -> std::unique_ptr<IsolateConfiguration> {
-    std::unique_ptr<fml::Mapping> blob =
-        asset_manager.GetAsMapping(snapshot_name);
+    auto blob = asset_manager.GetAsMapping(snapshot_name);
+    auto delta = asset_manager.GetAsMapping("kernel_delta.bin");
+    if (blob && delta) {
+      std::vector<std::unique_ptr<fml::Mapping>> kernels;
+      kernels.emplace_back(std::move(blob));
+      kernels.emplace_back(std::move(delta));
+      return IsolateConfiguration::CreateForKernelList(std::move(kernels));
+    }
     if (blob) {
       return IsolateConfiguration::CreateForSnapshot(std::move(blob));
+    }
+    if (delta) {
+      return IsolateConfiguration::CreateForSnapshot(std::move(delta));
     }
     return nullptr;
   };
@@ -195,7 +204,6 @@ std::unique_ptr<IsolateConfiguration> CreateIsolateConfiguration(
   if (auto kernel = configuration_from_blob("kernel_blob.bin")) {
     return kernel;
   }
-
   if (auto script = configuration_from_blob("snapshot_blob.bin")) {
     return script;
   }
@@ -209,14 +217,13 @@ static void RunBundleAndSnapshot(
     jobject jcaller,
     jlong shell_holder,
     jstring jbundlepath,
-    jstring /* snapshot override (unused) */,
+    jstring jsnapshotOverride,
     jstring jEntrypoint,
     jboolean /* reuse runtime controller (unused) */,
     jobject jAssetManager) {
   auto asset_manager = fml::MakeRefCounted<blink::AssetManager>();
 
   const auto bundlepath = fml::jni::JavaStringToString(env, jbundlepath);
-
   if (bundlepath.size() > 0) {
     // If we got a bundle path, attempt to use that as a directory asset
     // bundle or a zip asset bundle.
@@ -244,8 +251,13 @@ static void RunBundleAndSnapshot(
     }
   }
 
-  auto isolate_configuration = CreateIsolateConfiguration(*asset_manager);
+  const auto defaultpath = fml::jni::JavaStringToString(env, jsnapshotOverride);
+  if (defaultpath.size() > 0) {
+    asset_manager->PushBack(std::make_unique<blink::DirectoryAssetBundle>(
+        fml::OpenFile(defaultpath.c_str(), fml::OpenPermission::kRead, true)));
+  }
 
+  auto isolate_configuration = CreateIsolateConfiguration(*asset_manager);
   if (!isolate_configuration) {
     FXL_DLOG(ERROR)
         << "Isolate configuration could not be determined for engine launch.";
