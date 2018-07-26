@@ -61,10 +61,10 @@ if [[ $FAILED_CHECKS -ne 0 ]]; then
   exit 1
 fi
 
-FILETYPES="*.c *.cc *.cpp *.h *.m *.mm *.dart"
+FILETYPES="*.dart"
 
 set +e
-TRAILING_SPACES=$(git diff $DIFF_OPTS $BASE_SHA..HEAD -- $FILETYPES | xargs grep --line-number --with-filename '\s\+$')
+TRAILING_SPACES=$(git diff $DIFF_OPTS $BASE_SHA..HEAD -- $FILETYPES | xargs grep --line-number --with-filename '[[:blank:]]\+$')
 set -e
 
 if [[ ! -z "$TRAILING_SPACES" ]]; then
