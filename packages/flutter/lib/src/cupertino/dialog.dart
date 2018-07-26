@@ -251,14 +251,8 @@ class CupertinoAlertDialog extends StatelessWidget {
             child: new Container(
               decoration: _kCupertinoDialogBlurOverlayDecoration,
               child: new _CupertinoDialogRenderWidget(
-                contentSection: new BaseLayoutId<_CupertinoDialogRenderWidget, MultiChildLayoutParentData>(
-                  id: _AlertDialogSections.contentSection,
-                  child: _buildContent(),
-                ),
-                actionsSection: new BaseLayoutId<_CupertinoDialogRenderWidget, MultiChildLayoutParentData>(
-                  id: _AlertDialogSections.actionsSection,
-                  child: _buildActions(),
-                ),
+                contentSection: _buildContent(),
+                actionsSection: _buildActions(),
               ),
             ),
           ),
@@ -307,23 +301,23 @@ class _CupertinoDialogRenderElement extends RenderObjectElement {
 
   @override
   void visitChildren(ElementVisitor visitor) {
-    if (_contentElement != null)
+    if (_contentElement != null) {
       visitor(_contentElement);
-    if (_actionsElement != null)
+    }
+    if (_actionsElement != null) {
       visitor(_actionsElement);
+    }
   }
 
   @override
   void mount(Element parent, dynamic newSlot) {
     super.mount(parent, newSlot);
-    print('Mounting dialog element.');
     _contentElement = updateChild(_contentElement, widget.contentSection, _AlertDialogSections.contentSection);
     _actionsElement = updateChild(_actionsElement, widget.actionsSection, _AlertDialogSections.actionsSection);
   }
 
   @override
   void insertChildRenderObject(RenderObject child, _AlertDialogSections slot) {
-    print('Inserting child $child in slot $slot');
     _placeChildInSlot(child, slot);
   }
 
@@ -334,9 +328,7 @@ class _CupertinoDialogRenderElement extends RenderObjectElement {
 
   @override
   void update(RenderObjectWidget newWidget) {
-    print('Updating widget for this element: $newWidget');
     super.update(newWidget);
-    assert(widget == newWidget);
     _contentElement = updateChild(_contentElement, widget.contentSection, _AlertDialogSections.contentSection);
     _actionsElement = updateChild(_actionsElement, widget.actionsSection, _AlertDialogSections.actionsSection);
   }
@@ -395,8 +387,6 @@ class _CupertinoDialogRenderElement extends RenderObjectElement {
 // After the content section is laid out, the action button section is allowed
 // to take up any remaining space that was not consumed by the content section.
 class _RenderCupertinoDialog extends RenderBox {
-//    with ContainerRenderObjectMixin<RenderBox, MultiChildLayoutParentData>,
-//    RenderBoxContainerDefaultsMixin<RenderBox, MultiChildLayoutParentData> {
   _RenderCupertinoDialog({
     RenderBox contentSection,
     RenderBox actionsSection,
@@ -407,9 +397,13 @@ class _RenderCupertinoDialog extends RenderBox {
   RenderBox _contentSection;
   set contentSection(RenderBox newContentSection) {
     if (newContentSection != _contentSection) {
+      if (null != _contentSection) {
+        dropChild(_contentSection);
+      }
       _contentSection = newContentSection;
-      setupParentData(_contentSection);
-      markNeedsLayout();
+      if (null != _contentSection) {
+        adoptChild(_contentSection);
+      }
     }
   }
 
@@ -417,16 +411,75 @@ class _RenderCupertinoDialog extends RenderBox {
   RenderBox _actionsSection;
   set actionsSection(RenderBox newActionsSection) {
     if (newActionsSection != _actionsSection) {
+      if (null != _actionsSection) {
+        dropChild(_actionsSection);
+      }
       _actionsSection = newActionsSection;
-      setupParentData(_actionsSection);
-      markNeedsLayout();
+      if (null != _actionsSection) {
+        adoptChild(_actionsSection);
+      }
+    }
+  }
+
+  @override
+  void attach(PipelineOwner owner) {
+    super.attach(owner);
+    if (null != contentSection) {
+      contentSection.attach(owner);
+    }
+    if (null != actionsSection) {
+      actionsSection.attach(owner);
+    }
+  }
+
+  @override
+  void detach() {
+    super.detach();
+    if (null != contentSection) {
+      contentSection.detach();
+    }
+    if (null != actionsSection) {
+      actionsSection.detach();
+    }
+  }
+
+  @override
+  void redepthChildren() {
+    if (null != contentSection) {
+      redepthChild(contentSection);
+    }
+    if (null != actionsSection) {
+      redepthChild(actionsSection);
     }
   }
 
   @override
   void setupParentData(RenderBox child) {
-    if (child.parentData is! MultiChildLayoutParentData)
+    if (child.parentData is! MultiChildLayoutParentData) {
       child.parentData = new MultiChildLayoutParentData();
+    }
+  }
+
+  @override
+  void visitChildren(RenderObjectVisitor visitor) {
+    if (contentSection != null) {
+      visitor(contentSection);
+    }
+    if (actionsSection != null) {
+      visitor(actionsSection);
+    }
+  }
+
+  @override
+  List<DiagnosticsNode> debugDescribeChildren() {
+    final List<DiagnosticsNode> value = <DiagnosticsNode>[];
+    if (contentSection != null) {
+      value.add(contentSection.toDiagnosticsNode(name: 'content'));
+    }
+    if (actionsSection != null) {
+      value.add(actionsSection.toDiagnosticsNode(name: 'actions'));
+    }
+    return value;
   }
 
   @override
@@ -492,41 +545,22 @@ class _RenderCupertinoDialog extends RenderBox {
     actionParentData.offset = new Offset(0.0, contentSize.height);
   }
 
-//  _DialogChildren _findDialogChildren() {
-//    RenderBox content;
-//    RenderBox actions;
-//    final List<RenderBox> children = getChildrenAsList();
-//    for (RenderBox child in children) {
-//      final MultiChildLayoutParentData parentData = child.parentData;
-//      if (parentData.id == _AlertDialogSections.contentSection) {
-//        content = child;
-//      } else if (parentData.id == _AlertDialogSections.actionsSection) {
-//        actions = child;
-//      }
-//    }
-//    assert(content != null);
-//    assert(actions != null);
-//
-//    return new _DialogChildren(
-//      content: content,
-//      actions: actions,
-//    );
-//  }
-
   @override
   void paint(PaintingContext context, Offset offset) {
-//    defaultPaint(context, offset);
-    contentSection.paint(context, offset);
-    actionsSection.paint(context, offset);
+    final MultiChildLayoutParentData contentParentData = contentSection.parentData;
+    contentSection.paint(context, offset + contentParentData.offset);
+    final MultiChildLayoutParentData actionsParentData = actionsSection.parentData;
+    actionsSection.paint(context, offset + actionsParentData.offset);
   }
 
   @override
   bool hitTestChildren(HitTestResult result, { Offset position }) {
-//    return defaultHitTestChildren(result, position: position);
     bool isHit = false;
-    if (contentSection.hitTest(result, position: position)) {
+    final MultiChildLayoutParentData contentSectionParentData = contentSection.parentData;
+    final MultiChildLayoutParentData actionsSectionParentData = actionsSection.parentData;
+    if (contentSection.hitTest(result, position: position - contentSectionParentData.offset)) {
       isHit = true;
-    } else if (actionsSection.hitTest(result, position: position)) {
+    } else if (actionsSection.hitTest(result, position: position - actionsSectionParentData.offset)) {
       isHit = true;
     }
     return isHit;
@@ -539,18 +573,6 @@ enum _AlertDialogSections {
   contentSection,
   actionsSection,
 }
-
-// Data structure used to pass around references to multiple dialog pieces for
-// layout calculations.
-//class _DialogChildren {
-//  _DialogChildren({
-//    this.content,
-//    this.actions,
-//  });
-//
-//  final RenderBox content;
-//  final RenderBox actions;
-//}
 
 // The "content section" of a CupertinoAlertDialog.
 //
