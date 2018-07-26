@@ -18,7 +18,7 @@ std::pair<bool, std::string> GetExecutableDirectoryPath() {
   if (read_size == -1) {
     return {false, ""};
   }
-  return {true, files::GetDirectoryName(
+  return {true, fml::paths::GetDirectoryName(
                     std::string{path, static_cast<size_t>(read_size)})};
 }
 
