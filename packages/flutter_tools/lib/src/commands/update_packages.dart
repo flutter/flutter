@@ -28,7 +28,7 @@ import '../runner/flutter_command.dart';
 const Map<String, String> _kManuallyPinnedDependencies = <String, String>{
   // Add pinned packages here.
   'mockito': '3.0.0-beta', // TODO(aam): https://github.com/dart-lang/mockito/issues/110
-  'matcher': '0.12.2', // TODO(ianh): https://github.com/flutter/flutter/issues/18608, https://github.com/dart-lang/matcher/pull/88
+  'matcher': '0.12.2+1', // TODO(ianh): https://github.com/flutter/flutter/issues/18608, https://github.com/dart-lang/matcher/pull/88
   'flutter_gallery_assets': '0.1.4', // See //examples/flutter_gallery/pubspec.yaml
 };
 
@@ -84,7 +84,10 @@ class UpdatePackagesCommand extends FlutterCommand {
   final bool hidden;
 
   Future<Null> _downloadCoverageData() async {
-    final Status status = logger.startProgress('Downloading lcov data for package:flutter...', expectSlowOperation: true);
+    final Status status = logger.startProgress(
+      'Downloading lcov data for package:flutter...',
+      expectSlowOperation: true,
+    );
     final String urlBase = platform.environment['FLUTTER_STORAGE_BASE_URL'] ?? 'https://storage.googleapis.com';
     final List<int> data = await fetchUrl(Uri.parse('$urlBase/flutter_infra/flutter/coverage/lcov.info'));
     final String coverageDir = fs.path.join(Cache.flutterRoot, 'packages/flutter/coverage');

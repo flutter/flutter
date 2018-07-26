@@ -3166,6 +3166,7 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     RenderBox child,
     bool container = false,
     bool explicitChildNodes,
+    bool excludeSemantics = false,
     bool enabled,
     bool checked,
     bool toggled,
@@ -3210,6 +3211,7 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
   }) : assert(container != null),
        _container = container,
        _explicitChildNodes = explicitChildNodes,
+       _excludeSemantics = excludeSemantics,
        _enabled = enabled,
        _checked = checked,
        _toggled = toggled,
@@ -3288,6 +3290,22 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     if (_explicitChildNodes == value)
       return;
     _explicitChildNodes = value;
+    markNeedsSemanticsUpdate();
+  }
+
+  /// Whether decendants of this [RenderObject] should have their semantic
+  /// information ignored.
+  ///
+  /// When this flag is set to true, all child semantics nodes are ignored.
+  /// This can be used as a convenience for cases where a child is wrapped in
+  /// an [ExcludeSemantics] widget and then another [Semantics] widget.
+  bool get excludeSemantics => _excludeSemantics;
+  bool _excludeSemantics;
+  set excludeSemantics(bool value) {
+    assert(value != null);
+    if (_excludeSemantics == value)
+      return;
+    _excludeSemantics = value;
     markNeedsSemanticsUpdate();
   }
 
@@ -3899,6 +3917,14 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     _customSemanticsActions = value;
     markNeedsSemanticsUpdate();
   }
+
+  @override
+  void visitChildrenForSemantics(RenderObjectVisitor visitor) {
+    if (excludeSemantics)
+      return;
+    super.visitChildrenForSemantics(visitor);
+  }
+
 
   @override
   void describeSemanticsConfiguration(SemanticsConfiguration config) {
