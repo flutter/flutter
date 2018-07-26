@@ -322,25 +322,25 @@ abstract class License implements Comparable<License> {
       throw 'incomplete license detected:\n---\n$body\n---';
     // if (type == LicenseType.unknown)
     //   print('need detector for:\n----\n$body\n----');
-    bool isUTF8 = true;
+    bool isutf8 = true;
     List<int> latin1Encoded;
     try {
-      latin1Encoded = LATIN1.encode(body);
-      isUTF8 = false;
+      latin1Encoded = latin1.encode(body);
+      isutf8 = false;
     } on ArgumentError { }
-    if (!isUTF8) {
+    if (!isutf8) {
       bool isAscii = false;
       try {
-        ASCII.decode(latin1Encoded);
+        ascii.decode(latin1Encoded);
         isAscii = true;
       } on FormatException { }
       if (isAscii)
         return;
       try {
-        UTF8.decode(latin1Encoded);
-        isUTF8 = true;
+        utf8.decode(latin1Encoded);
+        isutf8 = true;
       } on FormatException { }
-      if (isUTF8)
+      if (isutf8)
         throw 'tried to create a License object with text that appears to have been misdecoded as Latin1 instead of as UTF-8:\n$body';
     }
   }
