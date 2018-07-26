@@ -214,12 +214,23 @@ void SaveCompilationTrace(Dart_NativeArguments args) {
     return;
   }
 
-  result = Dart_NewExternalTypedData(Dart_TypedData_kUint8, buffer, length);
+  result = Dart_NewTypedData(Dart_TypedData_kUint8, length);
   if (Dart_IsError(result)) {
     Dart_SetReturnValue(args, result);
     return;
   }
 
+  Dart_TypedData_Type type;
+  void* data = nullptr;
+  intptr_t size = 0;
+  Dart_Handle status = Dart_TypedDataAcquireData(result, &type, &data, &size);
+  if (Dart_IsError(status)) {
+    Dart_SetReturnValue(args, status);
+    return;
+  }
+
+  memcpy(data, buffer, length);
+  Dart_TypedDataReleaseData(result);
   Dart_SetReturnValue(args, result);
 }
 
