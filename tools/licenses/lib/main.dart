@@ -92,7 +92,7 @@ class RepositorySourceFile extends RepositoryLicensedFile {
     try {
       contents = io.readString();
     } on FormatException {
-      print('non-utf8 data in $io');
+      print('non-UTF8 data in $io');
       system.exit(2);
     }
     _licenses = determineLicensesFor(contents, name, parent, origin: '$this');
@@ -736,33 +736,33 @@ class RepositoryMultiLicenseNoticesForFilesFile extends RepositoryLicenseFile {
     // "Notices for files contained in the"
     // ...then have a second line which is 60 "=" characters
     final List<List<int>> contents = splitIntList(io.readBytes(), 0x0A).toList();
-    if (!ascii.decode(contents[0]).startsWith('Notices for files contained in') ||
-        ascii.decode(contents[1]) != '============================================================\n')
+    if (!ASCII.decode(contents[0]).startsWith('Notices for files contained in') ||
+        ASCII.decode(contents[1]) != '============================================================\n')
       throw 'unrecognised syntax: ${io.fullName}';
     int index = 2;
     while (index < contents.length) {
-      if (ascii.decode(contents[index]) != 'Notices for file(s):\n')
+      if (ASCII.decode(contents[index]) != 'Notices for file(s):\n')
         throw 'unrecognised syntax on line ${index + 1}: ${io.fullName}';
       index += 1;
       final List<String> names = <String>[];
       do {
-        names.add(ascii.decode(contents[index]));
+        names.add(ASCII.decode(contents[index]));
         index += 1;
-      } while (ascii.decode(contents[index]) != '------------------------------------------------------------\n');
+      } while (ASCII.decode(contents[index]) != '------------------------------------------------------------\n');
       index += 1;
       final List<List<int>> body = <List<int>>[];
       do {
         body.add(contents[index]);
         index += 1;
       } while (index < contents.length &&
-               ascii.decode(contents[index], allowInvalid: true) != '============================================================\n');
+               ASCII.decode(contents[index], allowInvalid: true) != '============================================================\n');
       index += 1;
       final List<int> bodyBytes = body.expand((List<int> line) => line).toList();
       String bodyText;
       try {
-        bodyText = utf8.decode(bodyBytes);
+        bodyText = UTF8.decode(bodyBytes);
       } on FormatException {
-        bodyText = latin1.decode(bodyBytes);
+        bodyText = LATIN1.decode(bodyBytes);
       }
       License license = new License.unique(bodyText, LicenseType.unknown, origin: io.fullName);
       for (String name in names) {
@@ -2545,7 +2545,7 @@ Future<Null> main(List<String> arguments) async {
           system.File goldenFile = new system.File(
               path.join(argResults['golden'], 'licenses_${component.io.name}'));
           String goldenSignature = await goldenFile.openRead()
-              .transform(utf8.decoder).transform(new LineSplitter()).first;
+              .transform(UTF8.decoder).transform(new LineSplitter()).first;
           Match goldenMatch = signaturePattern.matchAsPrefix(goldenSignature);
           if (goldenMatch != null && goldenMatch.group(1) == signature) {
             system.stderr.writeln('    Skipping this component - no change in signature');

@@ -1,4 +1,4 @@
-Signature: 41552c06fa23e14a905292ca7a566ea8
+Signature: 4cffaa132f0dd7025b2e5a04444af676
 
 UNUSED LICENSES:
 
@@ -7,38 +7,6 @@ ORIGIN: ../../../third_party/dart/runtime/third_party/double-conversion/COPYING
 TYPE: LicenseType.bsd
 ----------------------------------------------------------------------------------------------------
 Copyright 2006-2011, the V8 project authors. All rights reserved.
-Redistribution and use in source and binary forms, with or without
-modification, are permitted provided that the following conditions are
-met:
-
-    * Redistributions of source code must retain the above copyright
-      notice, this list of conditions and the following disclaimer.
-    * Redistributions in binary form must reproduce the above
-      copyright notice, this list of conditions and the following
-      disclaimer in the documentation and/or other materials provided
-      with the distribution.
-    * Neither the name of Google Inc. nor the names of its
-      contributors may be used to endorse or promote products derived
-      from this software without specific prior written permission.
-
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
-OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
-LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
-THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
-OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-====================================================================================================
-
-====================================================================================================
-ORIGIN: ../../../third_party/dart/third_party/observatory_pub_packages/packages/dart_internal/LICENSE
-TYPE: LicenseType.bsd
-----------------------------------------------------------------------------------------------------
-Copyright 2017, the Dart project authors. All rights reserved.
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are
 met:
@@ -5478,76 +5446,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ====================================================================================================
 LIBRARY: dart
-ORIGIN: ../../../third_party/dart/runtime/bin/dart_embedder_api_impl.cc + ../../../third_party/dart/LICENSE
-TYPE: LicenseType.bsd
-FILE: ../../../third_party/dart/runtime/bin/dart_embedder_api_impl.cc
-FILE: ../../../third_party/dart/runtime/bin/typed_data_utils.cc
-FILE: ../../../third_party/dart/runtime/bin/typed_data_utils.h
-FILE: ../../../third_party/dart/runtime/include/dart_embedder_api.h
-FILE: ../../../third_party/dart/runtime/vm/base64.cc
-FILE: ../../../third_party/dart/runtime/vm/base64.h
-FILE: ../../../third_party/dart/runtime/vm/base64_test.cc
-FILE: ../../../third_party/dart/runtime/vm/compiler/assembler/disassembler_kbc.cc
-FILE: ../../../third_party/dart/runtime/vm/compiler/assembler/disassembler_kbc.h
-FILE: ../../../third_party/dart/runtime/vm/compiler/backend/code_statistics.cc
-FILE: ../../../third_party/dart/runtime/vm/compiler/backend/code_statistics.h
-FILE: ../../../third_party/dart/runtime/vm/compiler/compiler_pass.cc
-FILE: ../../../third_party/dart/runtime/vm/compiler/compiler_pass.h
-FILE: ../../../third_party/dart/runtime/vm/compiler/frontend/bytecode_reader.cc
-FILE: ../../../third_party/dart/runtime/vm/compiler/frontend/bytecode_reader.h
-FILE: ../../../third_party/dart/runtime/vm/compiler/frontend/constant_evaluator.cc
-FILE: ../../../third_party/dart/runtime/vm/compiler/frontend/constant_evaluator.h
-FILE: ../../../third_party/dart/runtime/vm/compiler/frontend/kernel_fingerprints.cc
-FILE: ../../../third_party/dart/runtime/vm/compiler/frontend/kernel_fingerprints.h
-FILE: ../../../third_party/dart/runtime/vm/compiler/frontend/kernel_translation_helper.cc
-FILE: ../../../third_party/dart/runtime/vm/compiler/frontend/kernel_translation_helper.h
-FILE: ../../../third_party/dart/runtime/vm/compiler/frontend/scope_builder.cc
-FILE: ../../../third_party/dart/runtime/vm/compiler/frontend/scope_builder.h
-FILE: ../../../third_party/dart/runtime/vm/constants.h
-FILE: ../../../third_party/dart/runtime/vm/constants_kbc.h
-FILE: ../../../third_party/dart/runtime/vm/datastream.cc
-FILE: ../../../third_party/dart/runtime/vm/finalizable_data.h
-FILE: ../../../third_party/dart/runtime/vm/hash.h
-FILE: ../../../third_party/dart/runtime/vm/interpreter.cc
-FILE: ../../../third_party/dart/runtime/vm/interpreter.h
-FILE: ../../../third_party/dart/runtime/vm/stack_frame_kbc.h
-FILE: ../../../third_party/dart/runtime/vm/type_testing_stubs.cc
-FILE: ../../../third_party/dart/runtime/vm/type_testing_stubs.h
-FILE: ../../../third_party/dart/sdk/lib/js/_js.dart
-FILE: ../../../third_party/dart/sdk/lib/js/_js_client.dart
-FILE: ../../../third_party/dart/sdk/lib/js/_js_server.dart
-FILE: ../../../third_party/dart/sdk/lib/typed_data/unmodifiable_typed_data.dart
-----------------------------------------------------------------------------------------------------
-Copyright (c) 2018, the Dart project authors.  Please see the AUTHORS file
-for details. All rights reserved.
-
-Redistribution and use in source and binary forms, with or without
-modification, are permitted provided that the following conditions are
-met:
-    * Redistributions of source code must retain the above copyright
-      notice, this list of conditions and the following disclaimer.
-    * Redistributions in binary form must reproduce the above
-      copyright notice, this list of conditions and the following
-      disclaimer in the documentation and/or other materials provided
-      with the distribution.
-    * Neither the name of Google Inc. nor the names of its
-      contributors may be used to endorse or promote products derived
-      from this software without specific prior written permission.
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
-OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
-LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
-THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
-OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-====================================================================================================
-
-====================================================================================================
-LIBRARY: dart
 ORIGIN: ../../../third_party/dart/runtime/bin/process_test.cc + ../../../third_party/dart/LICENSE
 TYPE: LicenseType.bsd
 FILE: ../../../third_party/dart/runtime/bin/process_test.cc
@@ -5649,6 +5547,73 @@ FILE: ../../../third_party/dart/sdk/lib/internal/sort.dart
 FILE: ../../../third_party/dart/utils/peg/pegparser.dart
 ----------------------------------------------------------------------------------------------------
 Copyright (c) 2011, the Dart project authors.  Please see the AUTHORS file
+for details. All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are
+met:
+    * Redistributions of source code must retain the above copyright
+      notice, this list of conditions and the following disclaimer.
+    * Redistributions in binary form must reproduce the above
+      copyright notice, this list of conditions and the following
+      disclaimer in the documentation and/or other materials provided
+      with the distribution.
+    * Neither the name of Google Inc. nor the names of its
+      contributors may be used to endorse or promote products derived
+      from this software without specific prior written permission.
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+====================================================================================================
+
+====================================================================================================
+LIBRARY: dart
+ORIGIN: ../../../third_party/dart/runtime/bin/typed_data_utils.cc + ../../../third_party/dart/LICENSE
+TYPE: LicenseType.bsd
+FILE: ../../../third_party/dart/runtime/bin/typed_data_utils.cc
+FILE: ../../../third_party/dart/runtime/bin/typed_data_utils.h
+FILE: ../../../third_party/dart/runtime/vm/base64.cc
+FILE: ../../../third_party/dart/runtime/vm/base64.h
+FILE: ../../../third_party/dart/runtime/vm/base64_test.cc
+FILE: ../../../third_party/dart/runtime/vm/compiler/assembler/disassembler_kbc.cc
+FILE: ../../../third_party/dart/runtime/vm/compiler/assembler/disassembler_kbc.h
+FILE: ../../../third_party/dart/runtime/vm/compiler/backend/code_statistics.cc
+FILE: ../../../third_party/dart/runtime/vm/compiler/backend/code_statistics.h
+FILE: ../../../third_party/dart/runtime/vm/compiler/compiler_pass.cc
+FILE: ../../../third_party/dart/runtime/vm/compiler/compiler_pass.h
+FILE: ../../../third_party/dart/runtime/vm/compiler/frontend/bytecode_reader.cc
+FILE: ../../../third_party/dart/runtime/vm/compiler/frontend/bytecode_reader.h
+FILE: ../../../third_party/dart/runtime/vm/compiler/frontend/constant_evaluator.cc
+FILE: ../../../third_party/dart/runtime/vm/compiler/frontend/constant_evaluator.h
+FILE: ../../../third_party/dart/runtime/vm/compiler/frontend/kernel_fingerprints.cc
+FILE: ../../../third_party/dart/runtime/vm/compiler/frontend/kernel_fingerprints.h
+FILE: ../../../third_party/dart/runtime/vm/compiler/frontend/kernel_translation_helper.cc
+FILE: ../../../third_party/dart/runtime/vm/compiler/frontend/kernel_translation_helper.h
+FILE: ../../../third_party/dart/runtime/vm/compiler/frontend/scope_builder.cc
+FILE: ../../../third_party/dart/runtime/vm/compiler/frontend/scope_builder.h
+FILE: ../../../third_party/dart/runtime/vm/constants_kbc.h
+FILE: ../../../third_party/dart/runtime/vm/datastream.cc
+FILE: ../../../third_party/dart/runtime/vm/finalizable_data.h
+FILE: ../../../third_party/dart/runtime/vm/hash.h
+FILE: ../../../third_party/dart/runtime/vm/interpreter.cc
+FILE: ../../../third_party/dart/runtime/vm/interpreter.h
+FILE: ../../../third_party/dart/runtime/vm/stack_frame_kbc.h
+FILE: ../../../third_party/dart/runtime/vm/type_testing_stubs.cc
+FILE: ../../../third_party/dart/runtime/vm/type_testing_stubs.h
+FILE: ../../../third_party/dart/sdk/lib/js/_js.dart
+FILE: ../../../third_party/dart/sdk/lib/js/_js_client.dart
+FILE: ../../../third_party/dart/sdk/lib/js/_js_server.dart
+FILE: ../../../third_party/dart/sdk/lib/typed_data/unmodifiable_typed_data.dart
+----------------------------------------------------------------------------------------------------
+Copyright (c) 2018, the Dart project authors.  Please see the AUTHORS file
 for details. All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -14609,7 +14574,6 @@ TYPE: LicenseType.bsd
 FILE: ../../../third_party/dart/third_party/observatory_pub_packages/packages/collection/lib/src/combined_wrappers/combined_iterable.dart
 FILE: ../../../third_party/dart/third_party/observatory_pub_packages/packages/collection/lib/src/combined_wrappers/combined_list.dart
 FILE: ../../../third_party/dart/third_party/observatory_pub_packages/packages/collection/lib/src/combined_wrappers/combined_map.dart
-FILE: ../../../third_party/dart/third_party/observatory_pub_packages/packages/dart_internal/lib/extract_type_arguments.dart
 FILE: ../../../third_party/dart/third_party/observatory_pub_packages/packages/meta/lib/dart2js.dart
 FILE: ../../../third_party/dart/third_party/observatory_pub_packages/packages/stack_trace/lib/src/lazy_chain.dart
 ----------------------------------------------------------------------------------------------------
@@ -14651,6 +14615,7 @@ FILE: ../../../third_party/dart/third_party/observatory_pub_packages/packages/co
 FILE: ../../../third_party/dart/third_party/observatory_pub_packages/packages/collection/lib/src/equality_map.dart
 FILE: ../../../third_party/dart/third_party/observatory_pub_packages/packages/collection/lib/src/equality_set.dart
 FILE: ../../../third_party/dart/third_party/observatory_pub_packages/packages/collection/lib/src/functions.dart
+FILE: ../../../third_party/dart/third_party/observatory_pub_packages/packages/collection/lib/src/typed_wrappers.dart
 FILE: ../../../third_party/dart/third_party/observatory_pub_packages/packages/collection/lib/src/union_set.dart
 FILE: ../../../third_party/dart/third_party/observatory_pub_packages/packages/collection/lib/src/union_set_controller.dart
 FILE: ../../../third_party/dart/third_party/observatory_pub_packages/packages/intl/lib/src/intl/compact_number_format.dart
@@ -14658,17 +14623,12 @@ FILE: ../../../third_party/dart/third_party/observatory_pub_packages/packages/in
 FILE: ../../../third_party/dart/third_party/observatory_pub_packages/packages/matcher/lib/src/order_matchers.dart
 FILE: ../../../third_party/dart/third_party/observatory_pub_packages/packages/meta/lib/meta.dart
 FILE: ../../../third_party/dart/third_party/observatory_pub_packages/packages/observable/lib/observable.dart
-FILE: ../../../third_party/dart/third_party/observatory_pub_packages/packages/observable/lib/src/differs.dart
-FILE: ../../../third_party/dart/third_party/observatory_pub_packages/packages/observable/lib/src/differs/list_differ.dart
-FILE: ../../../third_party/dart/third_party/observatory_pub_packages/packages/observable/lib/src/differs/map_differ.dart
-FILE: ../../../third_party/dart/third_party/observatory_pub_packages/packages/observable/lib/src/internal.dart
+FILE: ../../../third_party/dart/third_party/observatory_pub_packages/packages/observable/lib/src/change_record.dart
+FILE: ../../../third_party/dart/third_party/observatory_pub_packages/packages/observable/lib/src/list_diff.dart
 FILE: ../../../third_party/dart/third_party/observatory_pub_packages/packages/observable/lib/src/observable.dart
 FILE: ../../../third_party/dart/third_party/observatory_pub_packages/packages/observable/lib/src/observable_list.dart
 FILE: ../../../third_party/dart/third_party/observatory_pub_packages/packages/observable/lib/src/observable_map.dart
-FILE: ../../../third_party/dart/third_party/observatory_pub_packages/packages/observable/lib/src/records.dart
-FILE: ../../../third_party/dart/third_party/observatory_pub_packages/packages/observable/lib/src/records/list_change_record.dart
-FILE: ../../../third_party/dart/third_party/observatory_pub_packages/packages/observable/lib/src/records/map_change_record.dart
-FILE: ../../../third_party/dart/third_party/observatory_pub_packages/packages/observable/lib/src/records/property_change_record.dart
+FILE: ../../../third_party/dart/third_party/observatory_pub_packages/packages/observable/lib/src/property_change_record.dart
 FILE: ../../../third_party/dart/third_party/observatory_pub_packages/packages/observable/lib/src/to_observable.dart
 ----------------------------------------------------------------------------------------------------
 Copyright (c) 2016, the Dart project authors.  Please see the AUTHORS file
@@ -15065,7 +15025,6 @@ FILE: ../../../third_party/dart/third_party/observatory_pub_packages/packages/in
 FILE: ../../../third_party/dart/third_party/observatory_pub_packages/packages/intl/tool/generate_locale_data_files.dart
 FILE: ../../../third_party/dart/third_party/observatory_pub_packages/packages/logging/lib/logging.dart
 FILE: ../../../third_party/dart/third_party/observatory_pub_packages/packages/matcher/lib/src/core_matchers.dart
-FILE: ../../../third_party/dart/third_party/observatory_pub_packages/packages/matcher/lib/src/custom_matcher.dart
 FILE: ../../../third_party/dart/third_party/observatory_pub_packages/packages/matcher/lib/src/description.dart
 FILE: ../../../third_party/dart/third_party/observatory_pub_packages/packages/matcher/lib/src/error_matchers.dart
 FILE: ../../../third_party/dart/third_party/observatory_pub_packages/packages/matcher/lib/src/interfaces.dart
@@ -15119,50 +15078,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ====================================================================================================
 LIBRARY: observatory_pub_packages
-ORIGIN: ../../../third_party/dart/third_party/observatory_pub_packages/packages/matcher/lib/src/equals_matcher.dart + ../../../third_party/dart/third_party/observatory_pub_packages/packages/browser/LICENSE
-TYPE: LicenseType.bsd
-FILE: ../../../third_party/dart/third_party/observatory_pub_packages/packages/matcher/lib/src/equals_matcher.dart
-FILE: ../../../third_party/dart/third_party/observatory_pub_packages/packages/matcher/lib/src/feature_matcher.dart
-FILE: ../../../third_party/dart/third_party/observatory_pub_packages/packages/matcher/lib/src/having_matcher.dart
-FILE: ../../../third_party/dart/third_party/observatory_pub_packages/packages/matcher/lib/src/type_matcher.dart
-FILE: ../../../third_party/dart/third_party/observatory_pub_packages/packages/path/lib/src/path_map.dart
-FILE: ../../../third_party/dart/third_party/observatory_pub_packages/packages/path/lib/src/path_set.dart
-----------------------------------------------------------------------------------------------------
-Copyright (c) 2018, the Dart project authors.  Please see the AUTHORS file
-for details. All rights reserved.
-
-Redistribution and use in source and binary forms, with or without
-modification, are permitted provided that the following conditions are
-met:
-
-    * Redistributions of source code must retain the above copyright
-      notice, this list of conditions and the following disclaimer.
-    * Redistributions in binary form must reproduce the above
-      copyright notice, this list of conditions and the following
-      disclaimer in the documentation and/or other materials provided
-      with the distribution.
-    * Neither the name of Google Inc. nor the names of its
-      contributors may be used to endorse or promote products derived
-      from this software without specific prior written permission.
-
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
-OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
-LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
-THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
-OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-====================================================================================================
-
-====================================================================================================
-LIBRARY: observatory_pub_packages
 ORIGIN: ../../../third_party/dart/third_party/observatory_pub_packages/packages/meta/LICENSE
 TYPE: LicenseType.bsd
-FILE: ../../../third_party/dart/third_party/observatory_pub_packages/packages/observable/lib/src/change_notifier.dart
+FILE: ../../../third_party/dart/third_party/observatory_pub_packages/packages/observable/.analysis_options
 ----------------------------------------------------------------------------------------------------
 Copyright 2016, the Dart project authors. All rights reserved.
 Redistribution and use in source and binary forms, with or without
@@ -16877,4 +16795,4 @@ freely, subject to the following restrictions:
    misrepresented as being the original software.
 3. This notice may not be removed or altered from any source distribution.
 ====================================================================================================
-Total license count: 281
+Total license count: 279
