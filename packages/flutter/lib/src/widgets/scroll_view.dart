@@ -499,12 +499,14 @@ abstract class BoxScrollView extends ScrollView {
 /// ## Children's lifecycle
 ///
 /// ### Creation
+///
 /// Depending on the scroll position when laying out the list, children's
 /// elements, states and render objects will be created lazily based on
 /// existing widgets (such as when using the default constructor) or lazily
 /// provided ones (such as when using the [ListView.builder] constructor).
 ///
 /// ### Destruction
+///
 /// When a child is scrolled out of view, the associated element subtree,
 /// states and render objects are destroyed. A new child at the same position
 /// in the list will be lazily recreated along with new elements, states and
@@ -515,14 +517,23 @@ abstract class BoxScrollView extends ScrollView {
 /// In order to preserve state as children are scrolled in and out of view, the
 /// following options are possible:
 ///
-/// 1. Letting [KeepAlive] be the root widget of the list child that needs
+/// 1. By moving the ownership of non-trivial UI-state-driving business logic
+///    out of the list child subtree. For instance, if a list contains posts
+///    with their number of upvotes coming from a cached network response, store
+///    the list of posts and upvote number in a data model outside the list. Let
+///    the list child UI subtree be easily recreate-able from the
+///    source-of-truth model object. Use [StatefulWidget]s in the child subtree
+///    to store instantaneous UI state only.
+///
+/// 2. Letting [KeepAlive] be the root widget of the list child that needs
 ///    to be preserved. The [KeepAlive] widget marks the child subtree's top
 ///    render object child for keep-alive. When the associated top render object
 ///    is scrolled out of view, the list keeps the child's render object (and
 ///    by extension, its associated elements and states) in a cache list instead
 ///    of destroying them. When scrolled back into view, the render object
 ///    is repainted as-is (if it wasn't marked dirty in the interim).
-/// 2. By using [AutomaticKeepAlive] widgets (inserted by default when
+///
+/// 3. By using [AutomaticKeepAlive] widgets (inserted by default when
 ///    [addAutomaticKeepAlives] is true). Instead of unconditionally caching the
 ///    child subtree when scrolling off-screen like [KeepAlive],
 ///    [AutomaticKeepAlive] can let whether to cache the subtree be determined
@@ -537,13 +548,7 @@ abstract class BoxScrollView extends ScrollView {
 ///    [AutomaticKeepAlive] descendants typically signal it to be kept alive
 ///    by using the [AutomaticKeepAliveClientMixin], then implementing the
 ///    [wantKeepAlive] getter and calling [updateKeepAlive].
-/// 3. By moving the ownership of non-trivial UI-state-driving business logic
-///    out of the list child subtree. For instance, if a list contains posts
-///    with their number of upvotes coming from a cached network response, store
-///    the list of posts and upvote number in a data model outside the list. Let
-///    the list child UI subtree be easily recreate-able from the
-///    source-of-truth model object. Use [StatefulWidget]s in the child subtree
-///    to store instantaneous UI state only.
+///
 ///
 /// ## Transitioning to [CustomScrollView]
 ///
