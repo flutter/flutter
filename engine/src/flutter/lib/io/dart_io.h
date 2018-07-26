@@ -7,7 +7,7 @@
 
 #include <cstdint>
 
-#include "lib/fxl/macros.h"
+#include "flutter/fml/macros.h"
 
 namespace blink {
 
@@ -17,7 +17,7 @@ class DartIO {
   static bool EntropySource(uint8_t* buffer, intptr_t length);
 
  private:
-  FXL_DISALLOW_IMPLICIT_CONSTRUCTORS(DartIO);
+  FML_DISALLOW_IMPLICIT_CONSTRUCTORS(DartIO);
 };
 
 }  // namespace blink

@@ -100,7 +100,7 @@ void SemanticsUpdateBuilder::updateCustomAction(int id,
   actions_[id] = action;
 }
 
-fxl::RefPtr<SemanticsUpdate> SemanticsUpdateBuilder::build() {
+fml::RefPtr<SemanticsUpdate> SemanticsUpdateBuilder::build() {
   return SemanticsUpdate::create(std::move(nodes_), std::move(actions_));
 }
 

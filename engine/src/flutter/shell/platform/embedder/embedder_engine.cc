@@ -4,7 +4,7 @@
 
 #include "flutter/shell/platform/embedder/embedder_engine.h"
 
-#include "lib/fxl/functional/make_copyable.h"
+#include "flutter/fml/make_copyable.h"
 
 #ifdef ERROR
 #undef ERROR
@@ -56,13 +56,13 @@ bool EmbedderEngine::Run(RunConfiguration run_configuration) {
   }
 
   shell_->GetTaskRunners().GetUITaskRunner()->PostTask(
-      fxl::MakeCopyable([engine = shell_->GetEngine(),          // engine
+      fml::MakeCopyable([engine = shell_->GetEngine(),          // engine
                          config = std::move(run_configuration)  // config
   ]() mutable {
         if (engine) {
           auto result = engine->Run(std::move(config));
           if (!result) {
-            FXL_LOG(ERROR) << "Could not launch the engine with configuration.";
+            FML_LOG(ERROR) << "Could not launch the engine with configuration.";
           }
         }
       }));
@@ -90,7 +90,7 @@ bool EmbedderEngine::DispatchPointerDataPacket(
     return false;
   }
 
-  shell_->GetTaskRunners().GetUITaskRunner()->PostTask(fxl::MakeCopyable(
+  shell_->GetTaskRunners().GetUITaskRunner()->PostTask(fml::MakeCopyable(
       [engine = shell_->GetEngine(), packet = std::move(packet)] {
         if (engine) {
           engine->DispatchPointerDataPacket(*packet);
@@ -101,7 +101,7 @@ bool EmbedderEngine::DispatchPointerDataPacket(
 }
 
 bool EmbedderEngine::SendPlatformMessage(
-    fxl::RefPtr<blink::PlatformMessage> message) {
+    fml::RefPtr<blink::PlatformMessage> message) {
   if (!IsValid() || !message) {
     return false;
   }

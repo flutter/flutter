@@ -7,8 +7,8 @@
 #include <utility>
 
 #include "flutter/common/task_runners.h"
+#include "flutter/fml/make_copyable.h"
 #include "flutter/lib/ui/window/window.h"
-#include "lib/fxl/functional/make_copyable.h"
 #include "third_party/tonic/dart_state.h"
 #include "third_party/tonic/logging/dart_invoke.h"
 
@@ -49,13 +49,13 @@ Dart_Handle WrapByteData(std::unique_ptr<fml::Mapping> mapping) {
 
 PlatformMessageResponseDart::PlatformMessageResponseDart(
     tonic::DartPersistentValue callback,
-    fxl::RefPtr<fxl::TaskRunner> ui_task_runner)
+    fml::RefPtr<fml::TaskRunner> ui_task_runner)
     : callback_(std::move(callback)),
       ui_task_runner_(std::move(ui_task_runner)) {}
 
 PlatformMessageResponseDart::~PlatformMessageResponseDart() {
   if (!callback_.is_empty()) {
-    ui_task_runner_->PostTask(fxl::MakeCopyable(
+    ui_task_runner_->PostTask(fml::MakeCopyable(
         [callback = std::move(callback_)]() mutable { callback.Clear(); }));
   }
 }
@@ -63,9 +63,9 @@ PlatformMessageResponseDart::~PlatformMessageResponseDart() {
 void PlatformMessageResponseDart::Complete(std::unique_ptr<fml::Mapping> data) {
   if (callback_.is_empty())
     return;
-  FXL_DCHECK(!is_complete_);
+  FML_DCHECK(!is_complete_);
   is_complete_ = true;
-  ui_task_runner_->PostTask(fxl::MakeCopyable(
+  ui_task_runner_->PostTask(fml::MakeCopyable(
       [callback = std::move(callback_), data = std::move(data)]() mutable {
         std::shared_ptr<tonic::DartState> dart_state =
             callback.dart_state().lock();
@@ -81,10 +81,10 @@ void PlatformMessageResponseDart::Complete(std::unique_ptr<fml::Mapping> data) {
 void PlatformMessageResponseDart::CompleteEmpty() {
   if (callback_.is_empty())
     return;
-  FXL_DCHECK(!is_complete_);
+  FML_DCHECK(!is_complete_);
   is_complete_ = true;
   ui_task_runner_->PostTask(
-      fxl::MakeCopyable([callback = std::move(callback_)]() mutable {
+      fml::MakeCopyable([callback = std::move(callback_)]() mutable {
         std::shared_ptr<tonic::DartState> dart_state =
             callback.dart_state().lock();
         if (!dart_state)

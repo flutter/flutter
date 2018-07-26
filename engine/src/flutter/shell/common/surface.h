@@ -8,7 +8,7 @@
 #include <memory>
 
 #include "flutter/flow/compositor_context.h"
-#include "lib/fxl/macros.h"
+#include "flutter/fml/macros.h"
 #include "third_party/skia/include/core/SkCanvas.h"
 
 namespace shell {
@@ -38,7 +38,7 @@ class SurfaceFrame {
 
   bool PerformSubmit();
 
-  FXL_DISALLOW_COPY_AND_ASSIGN(SurfaceFrame);
+  FML_DISALLOW_COPY_AND_ASSIGN(SurfaceFrame);
 };
 
 class Surface {
@@ -54,7 +54,7 @@ class Surface {
   virtual GrContext* GetContext() = 0;
 
  private:
-  FXL_DISALLOW_COPY_AND_ASSIGN(Surface);
+  FML_DISALLOW_COPY_AND_ASSIGN(Surface);
 };
 
 }  // namespace shell

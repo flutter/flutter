@@ -5,8 +5,8 @@
 #ifndef FLUTTER_VULKAN_VULKAN_NATIVE_SURFACE_MAGMA_H_
 #define FLUTTER_VULKAN_VULKAN_NATIVE_SURFACE_MAGMA_H_
 
+#include "flutter/fml/macros.h"
 #include "flutter/vulkan/vulkan_native_surface.h"
-#include "lib/fxl/macros.h"
 
 namespace vulkan {
 
@@ -35,7 +35,7 @@ class VulkanNativeSurfaceMagma : public vulkan::VulkanNativeSurface {
 
  private:
   SkISize size_;
-  FXL_DISALLOW_COPY_AND_ASSIGN(VulkanNativeSurfaceMagma);
+  FML_DISALLOW_COPY_AND_ASSIGN(VulkanNativeSurfaceMagma);
 };
 
 }  // namespace vulkan

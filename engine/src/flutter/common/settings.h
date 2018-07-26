@@ -12,13 +12,13 @@
 #include <string>
 #include <vector>
 
+#include "flutter/fml/closure.h"
 #include "flutter/fml/unique_fd.h"
-#include "lib/fxl/functional/closure.h"
 
 namespace blink {
 
 using TaskObserverAdd =
-    std::function<void(intptr_t /* key */, fxl::Closure /* callback */)>;
+    std::function<void(intptr_t /* key */, fml::closure /* callback */)>;
 using TaskObserverRemove = std::function<void(intptr_t /* key */)>;
 
 struct Settings {
@@ -70,10 +70,10 @@ struct Settings {
   TaskObserverRemove task_observer_remove;
   // The main isolate is current when this callback is made. This is a good spot
   // to perform native Dart bindings for libraries not built in.
-  fxl::Closure root_isolate_create_callback;
+  fml::closure root_isolate_create_callback;
   // The isolate is not current and may have already been destroyed when this
   // call is made.
-  fxl::Closure root_isolate_shutdown_callback;
+  fml::closure root_isolate_shutdown_callback;
   bool enable_software_rendering = false;
   bool skia_deterministic_rendering_on_cpu = false;
   bool verbose_logging = false;

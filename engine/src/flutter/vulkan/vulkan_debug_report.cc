@@ -7,15 +7,16 @@
 #include <iomanip>
 #include <vector>
 
+#include "flutter/fml/compiler_specific.h"
 #include "flutter/vulkan/vulkan_utilities.h"
 
 namespace vulkan {
 
-static const VkDebugReportFlagsEXT kVulkanErrorFlags FXL_ALLOW_UNUSED_TYPE =
+static const VkDebugReportFlagsEXT kVulkanErrorFlags FML_ALLOW_UNUSED_TYPE =
     VK_DEBUG_REPORT_WARNING_BIT_EXT |
     VK_DEBUG_REPORT_PERFORMANCE_WARNING_BIT_EXT | VK_DEBUG_REPORT_ERROR_BIT_EXT;
 
-static const VkDebugReportFlagsEXT kVulkanInfoFlags FXL_ALLOW_UNUSED_TYPE =
+static const VkDebugReportFlagsEXT kVulkanInfoFlags FML_ALLOW_UNUSED_TYPE =
     VK_DEBUG_REPORT_INFORMATION_BIT_EXT | VK_DEBUG_REPORT_DEBUG_BIT_EXT;
 
 std::string VulkanDebugReport::DebugExtensionName() {
@@ -164,12 +165,12 @@ OnVulkanDebugReportCallback(VkDebugReportFlagsEXT flags,
 
   if (flags & kVulkanErrorFlags) {
     if (ValidationErrorsFatal()) {
-      FXL_DCHECK(false) << stream.str();
+      FML_DCHECK(false) << stream.str();
     } else {
-      FXL_LOG(ERROR) << stream.str();
+      FML_LOG(ERROR) << stream.str();
     }
   } else {
-    FXL_LOG(INFO) << stream.str();
+    FML_LOG(INFO) << stream.str();
   }
 
   // Returning false tells the layer not to stop when the event occurs, so

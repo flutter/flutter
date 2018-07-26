@@ -41,10 +41,10 @@ void CanvasPathMeasure::RegisterNatives(tonic::DartLibraryNatives* natives) {
        FOR_EACH_BINDING(DART_REGISTER_NATIVE)});
 }
 
-fxl::RefPtr<CanvasPathMeasure> CanvasPathMeasure::Create(const CanvasPath* path,
+fml::RefPtr<CanvasPathMeasure> CanvasPathMeasure::Create(const CanvasPath* path,
                                                          bool forceClosed) {
-  fxl::RefPtr<CanvasPathMeasure> pathMeasure =
-      fxl::MakeRefCounted<CanvasPathMeasure>();
+  fml::RefPtr<CanvasPathMeasure> pathMeasure =
+      fml::MakeRefCounted<CanvasPathMeasure>();
   if (path) {
     const SkPath skPath = path->path();
     SkScalar resScale = 1;
@@ -88,7 +88,7 @@ tonic::Float32List CanvasPathMeasure::getPosTan(float distance) {
   return posTan;
 }
 
-fxl::RefPtr<CanvasPath> CanvasPathMeasure::getSegment(float startD,
+fml::RefPtr<CanvasPath> CanvasPathMeasure::getSegment(float startD,
                                                       float stopD,
                                                       bool startWithMoveTo) {
   SkPath dst;

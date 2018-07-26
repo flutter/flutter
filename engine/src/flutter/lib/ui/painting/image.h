@@ -18,12 +18,12 @@ namespace blink {
 
 class CanvasImage final : public RefCountedDartWrappable<CanvasImage> {
   DEFINE_WRAPPERTYPEINFO();
-  FRIEND_MAKE_REF_COUNTED(CanvasImage);
+  FML_FRIEND_MAKE_REF_COUNTED(CanvasImage);
 
  public:
   ~CanvasImage() override;
-  static fxl::RefPtr<CanvasImage> Create() {
-    return fxl::MakeRefCounted<CanvasImage>();
+  static fml::RefPtr<CanvasImage> Create() {
+    return fml::MakeRefCounted<CanvasImage>();
   }
 
   int width() { return image_.get()->width(); }

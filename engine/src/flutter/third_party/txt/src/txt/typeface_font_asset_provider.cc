@@ -16,7 +16,7 @@
 
 #include "txt/typeface_font_asset_provider.h"
 
-#include "lib/fxl/logging.h"
+#include "flutter/fml/logging.h"
 #include "third_party/skia/include/core/SkString.h"
 #include "third_party/skia/include/core/SkTypeface.h"
 
@@ -93,7 +93,7 @@ int TypefaceFontStyleSet::count() {
 }
 
 void TypefaceFontStyleSet::getStyle(int index, SkFontStyle*, SkString* style) {
-  FXL_DCHECK(false);
+  FML_DCHECK(false);
 }
 
 SkTypeface* TypefaceFontStyleSet::createTypeface(int i) {

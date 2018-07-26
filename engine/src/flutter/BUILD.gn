@@ -48,7 +48,6 @@ group("flutter") {
       "$flutter_root/shell/platform/embedder:flutter_engine",
       "$flutter_root/synchronization:synchronization_unittests",
       "$flutter_root/third_party/txt:txt_unittests",
-      "//garnet/public/lib/fxl:fxl_unittests",
     ]
   }
 }

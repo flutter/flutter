@@ -20,20 +20,20 @@ class FrameInfo final : public RefCountedDartWrappable<FrameInfo> {
 
  public:
   int durationMillis() { return durationMillis_; }
-  fxl::RefPtr<CanvasImage> image() { return image_; }
+  fml::RefPtr<CanvasImage> image() { return image_; }
 
   static void RegisterNatives(tonic::DartLibraryNatives* natives);
 
  private:
-  FrameInfo(fxl::RefPtr<CanvasImage> image, int durationMillis)
+  FrameInfo(fml::RefPtr<CanvasImage> image, int durationMillis)
       : image_(std::move(image)), durationMillis_(durationMillis) {}
   ~FrameInfo(){};
 
-  const fxl::RefPtr<CanvasImage> image_;
+  const fml::RefPtr<CanvasImage> image_;
   const int durationMillis_;
 
-  FRIEND_MAKE_REF_COUNTED(FrameInfo);
-  FRIEND_REF_COUNTED_THREAD_SAFE(FrameInfo);
+  FML_FRIEND_MAKE_REF_COUNTED(FrameInfo);
+  FML_FRIEND_REF_COUNTED_THREAD_SAFE(FrameInfo);
 };
 
 }  // namespace blink

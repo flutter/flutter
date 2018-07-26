@@ -4,9 +4,9 @@
 
 #include "flutter/lib/ui/compositing/scene.h"
 
+#include "flutter/fml/make_copyable.h"
 #include "flutter/fml/trace_event.h"
 #include "flutter/lib/ui/painting/image.h"
-#include "lib/fxl/functional/make_copyable.h"
 #include "third_party/skia/include/core/SkImageInfo.h"
 #include "third_party/skia/include/core/SkSurface.h"
 #include "third_party/tonic/converter/dart_converter.h"
@@ -26,11 +26,11 @@ IMPLEMENT_WRAPPERTYPEINFO(ui, Scene);
 
 DART_BIND_ALL(Scene, FOR_EACH_BINDING)
 
-fxl::RefPtr<Scene> Scene::create(std::unique_ptr<flow::Layer> rootLayer,
+fml::RefPtr<Scene> Scene::create(std::unique_ptr<flow::Layer> rootLayer,
                                  uint32_t rasterizerTracingThreshold,
                                  bool checkerboardRasterCacheImages,
                                  bool checkerboardOffscreenLayers) {
-  return fxl::MakeRefCounted<Scene>(
+  return fml::MakeRefCounted<Scene>(
       std::move(rootLayer), rasterizerTracingThreshold,
       checkerboardRasterCacheImages, checkerboardOffscreenLayers);
 }
@@ -132,7 +132,7 @@ Dart_Handle Scene::toImage(uint32_t width,
 
   // The picture has been prepared on the UI thread.
   dart_state->GetTaskRunners().GetIOTaskRunner()->PostTask(
-      fxl::MakeCopyable([picture = std::move(picture),                    //
+      fml::MakeCopyable([picture = std::move(picture),                    //
                          bounds_size,                                     //
                          resource_context = std::move(resource_context),  //
                          ui_task_runner = std::move(ui_task_runner),      //
@@ -147,7 +147,7 @@ Dart_Handle Scene::toImage(uint32_t width,
         // Send the image back to the UI thread for submission back to the
         // framework.
         ui_task_runner->PostTask(
-            fxl::MakeCopyable([image = std::move(image),                    //
+            fml::MakeCopyable([image = std::move(image),                    //
                                image_callback = std::move(image_callback),  //
                                unref_queue = std::move(unref_queue)         //
         ]() mutable {

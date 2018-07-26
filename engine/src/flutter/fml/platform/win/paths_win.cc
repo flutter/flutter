@@ -6,10 +6,47 @@
 
 #include <windows.h>
 
-#include "lib/fxl/files/path.h"
+#include "flutter/fml/paths.h"
 
 namespace fml {
 namespace paths {
+
+namespace {
+
+size_t RootLength(const std::string& path) {
+  if (path.size() == 0)
+    return 0;
+  if (path[0] == '/')
+    return 1;
+  if (path[0] == '\\') {
+    if (path.size() < 2 || path[1] != '\\')
+      return 1;
+    // The path is a network share. Search for up to two '\'s, as they are
+    // the server and share - and part of the root part.
+    size_t index = path.find('\\', 2);
+    if (index > 0) {
+      index = path.find('\\', index + 1);
+      if (index > 0)
+        return index;
+    }
+    return path.size();
+  }
+  // If the path is of the form 'C:/' or 'C:\', with C being any letter, it's
+  // a root part.
+  if (path.length() >= 2 && path[1] == ':' &&
+      (path[2] == '/' || path[2] == '\\') &&
+      ((path[0] >= 'A' && path[0] <= 'Z') ||
+       (path[0] >= 'a' && path[0] <= 'z'))) {
+    return 3;
+  }
+  return 0;
+}
+
+size_t LastSeparator(const std::string& path) {
+  return path.find_last_of("/\\");
+}
+
+}  // namespace
 
 std::pair<bool, std::string> GetExecutableDirectoryPath() {
   HMODULE module = GetModuleHandle(NULL);
@@ -21,7 +58,23 @@ std::pair<bool, std::string> GetExecutableDirectoryPath() {
   if (read_size == 0 || read_size == MAX_PATH) {
     return {false, ""};
   }
-  return {true, files::GetDirectoryName(std::string{path, read_size})};
+  return {true, GetDirectoryName(std::string{path, read_size})};
+}
+
+std::string AbsolutePath(const std::string& path) {
+  char absPath[MAX_PATH];
+  _fullpath(absPath, path.c_str(), MAX_PATH);
+  return std::string(absPath);
+}
+
+std::string GetDirectoryName(const std::string& path) {
+  size_t rootLength = RootLength(path);
+  size_t separator = LastSeparator(path);
+  if (separator < rootLength)
+    separator = rootLength;
+  if (separator == std::string::npos)
+    return std::string();
+  return path.substr(0, separator);
 }
 
 }  // namespace paths

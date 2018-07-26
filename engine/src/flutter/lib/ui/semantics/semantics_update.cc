@@ -20,10 +20,10 @@ IMPLEMENT_WRAPPERTYPEINFO(ui, SemanticsUpdate);
 
 DART_BIND_ALL(SemanticsUpdate, FOR_EACH_BINDING)
 
-fxl::RefPtr<SemanticsUpdate> SemanticsUpdate::create(
+fml::RefPtr<SemanticsUpdate> SemanticsUpdate::create(
     SemanticsNodeUpdates nodes,
     CustomAccessibilityActionUpdates actions) {
-  return fxl::MakeRefCounted<SemanticsUpdate>(std::move(nodes),
+  return fml::MakeRefCounted<SemanticsUpdate>(std::move(nodes),
                                               std::move(actions));
 }
 

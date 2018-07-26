@@ -48,7 +48,6 @@ template("shell_gpu_configuration") {
       "$flutter_root/fml",
       "$flutter_root/shell/common",
       "$flutter_root/synchronization",
-      "//garnet/public/lib/fxl",
       "//third_party/skia",
     ]
 

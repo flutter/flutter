@@ -15,7 +15,7 @@
  */
 
 #include "txt/test_font_manager.h"
-#include "lib/fxl/logging.h"
+#include "flutter/fml/logging.h"
 
 namespace txt {
 

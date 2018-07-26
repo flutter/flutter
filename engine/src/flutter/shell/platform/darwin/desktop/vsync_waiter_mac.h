@@ -5,8 +5,8 @@
 #ifndef FLUTTER_SHELL_PLATFORM_DARWIN_DESKTOP_VSYNC_WAITER_MAC_H_
 #define FLUTTER_SHELL_PLATFORM_DARWIN_DESKTOP_VSYNC_WAITER_MAC_H_
 
+#include "flutter/fml/macros.h"
 #include "flutter/shell/common/vsync_waiter.h"
-#include "lib/fxl/macros.h"
 
 namespace shell {
 
@@ -25,7 +25,7 @@ class VsyncWaiterMac final : public VsyncWaiter {
 
   void OnDisplayLink();
 
-  FXL_DISALLOW_COPY_AND_ASSIGN(VsyncWaiterMac);
+  FML_DISALLOW_COPY_AND_ASSIGN(VsyncWaiterMac);
 };
 
 }  // namespace shell

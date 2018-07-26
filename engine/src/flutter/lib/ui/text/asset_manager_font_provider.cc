@@ -4,7 +4,7 @@
 
 #include "flutter/lib/ui/text/asset_manager_font_provider.h"
 
-#include "lib/fxl/logging.h"
+#include "flutter/fml/logging.h"
 #include "third_party/skia/include/core/SkData.h"
 #include "third_party/skia/include/core/SkStream.h"
 #include "third_party/skia/include/core/SkString.h"
@@ -33,7 +33,7 @@ size_t AssetManagerFontProvider::GetFamilyCount() const {
 
 // |FontAssetProvider|
 std::string AssetManagerFontProvider::GetFamilyName(int index) const {
-  FXL_DCHECK(index >= 0 && static_cast<size_t>(index) < family_names_.size());
+  FML_DCHECK(index >= 0 && static_cast<size_t>(index) < family_names_.size());
   return family_names_[index];
 }
 
@@ -80,7 +80,7 @@ int AssetManagerFontStyleSet::count() {
 void AssetManagerFontStyleSet::getStyle(int index,
                                         SkFontStyle*,
                                         SkString* style) {
-  FXL_DCHECK(false);
+  FML_DCHECK(false);
 }
 
 SkTypeface* AssetManagerFontStyleSet::createTypeface(int i) {

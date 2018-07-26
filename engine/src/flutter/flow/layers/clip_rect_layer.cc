@@ -23,7 +23,7 @@ void ClipRectLayer::Preroll(PrerollContext* context, const SkMatrix& matrix) {
 #if defined(OS_FUCHSIA)
 
 void ClipRectLayer::UpdateScene(SceneUpdateContext& context) {
-  FXL_DCHECK(needs_system_composite());
+  FML_DCHECK(needs_system_composite());
 
   scenic::Rectangle shape(context.session(),   // session
                           clip_rect_.width(),  //  width
@@ -39,7 +39,7 @@ void ClipRectLayer::UpdateScene(SceneUpdateContext& context) {
 
 void ClipRectLayer::Paint(PaintContext& context) const {
   TRACE_EVENT0("flutter", "ClipRectLayer::Paint");
-  FXL_DCHECK(needs_painting());
+  FML_DCHECK(needs_painting());
 
   SkAutoCanvasRestore save(&context.canvas, clip_behavior_ != Clip::hardEdge);
   context.canvas.clipRect(paint_bounds());

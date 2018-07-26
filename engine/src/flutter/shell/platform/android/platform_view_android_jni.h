@@ -6,8 +6,8 @@
 #define FLUTTER_SHELL_PLATFORM_ANDROID_PLATFORM_VIEW_ANDROID_JNI_H_
 
 #include <jni.h>
+#include "flutter/fml/macros.h"
 #include "flutter/shell/platform/android/platform_view_android.h"
-#include "lib/fxl/macros.h"
 
 namespace shell {
 

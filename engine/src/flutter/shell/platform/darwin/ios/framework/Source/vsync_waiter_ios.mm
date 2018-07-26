@@ -11,12 +11,12 @@
 #include <mach/mach_time.h>
 
 #include "flutter/common/task_runners.h"
+#include "flutter/fml/logging.h"
 #include "flutter/fml/trace_event.h"
-#include "lib/fxl/logging.h"
 
 @interface VSyncClient : NSObject
 
-- (instancetype)initWithTaskRunner:(fxl::RefPtr<fxl::TaskRunner>)task_runner
+- (instancetype)initWithTaskRunner:(fml::RefPtr<fml::TaskRunner>)task_runner
                           callback:(shell::VsyncWaiter::Callback)callback;
 
 - (void)await;
@@ -52,7 +52,7 @@ void VsyncWaiterIOS::AwaitVSync() {
   fml::scoped_nsobject<CADisplayLink> display_link_;
 }
 
-- (instancetype)initWithTaskRunner:(fxl::RefPtr<fxl::TaskRunner>)task_runner
+- (instancetype)initWithTaskRunner:(fml::RefPtr<fml::TaskRunner>)task_runner
                           callback:(shell::VsyncWaiter::Callback)callback {
   self = [super init];
 
@@ -78,8 +78,8 @@ void VsyncWaiterIOS::AwaitVSync() {
 }
 
 - (void)onDisplayLink:(CADisplayLink*)link {
-  fxl::TimePoint frame_start_time = fxl::TimePoint::Now();
-  fxl::TimePoint frame_target_time = frame_start_time + fxl::TimeDelta::FromSecondsF(link.duration);
+  fml::TimePoint frame_start_time = fml::TimePoint::Now();
+  fml::TimePoint frame_target_time = frame_start_time + fml::TimeDelta::FromSecondsF(link.duration);
 
   display_link_.get().paused = YES;
 

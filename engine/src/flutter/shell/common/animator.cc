@@ -5,7 +5,6 @@
 #include "flutter/shell/common/animator.h"
 
 #include "flutter/fml/trace_event.h"
-#include "lib/fxl/time/stopwatch.h"
 #include "third_party/dart/runtime/include/dart_tools_api.h"
 
 namespace shell {
@@ -54,14 +53,14 @@ const char* Animator::FrameParity() {
   return (frame_number_ % 2) ? "even" : "odd";
 }
 
-static int64_t FxlToDartOrEarlier(fxl::TimePoint time) {
+static int64_t FxlToDartOrEarlier(fml::TimePoint time) {
   int64_t dart_now = Dart_TimelineGetMicros();
-  fxl::TimePoint fxl_now = fxl::TimePoint::Now();
+  fml::TimePoint fxl_now = fml::TimePoint::Now();
   return (time - fxl_now).ToMicroseconds() + dart_now;
 }
 
-void Animator::BeginFrame(fxl::TimePoint frame_start_time,
-                          fxl::TimePoint frame_target_time) {
+void Animator::BeginFrame(fml::TimePoint frame_start_time,
+                          fml::TimePoint frame_target_time) {
   TRACE_EVENT_ASYNC_END0("flutter", "Frame Request Pending", frame_number_++);
 
   frame_scheduled_ = false;
@@ -85,7 +84,7 @@ void Animator::BeginFrame(fxl::TimePoint frame_start_time,
 
   // We have acquired a valid continuation from the pipeline and are ready
   // to service potential frame.
-  FXL_DCHECK(producer_continuation_);
+  FML_DCHECK(producer_continuation_);
 
   last_begin_frame_time_ = frame_start_time;
   dart_frame_deadline_ = FxlToDartOrEarlier(frame_target_time);
@@ -111,7 +110,7 @@ void Animator::Render(std::unique_ptr<flow::LayerTree> layer_tree) {
 
   if (layer_tree) {
     // Note the frame time for instrumentation.
-    layer_tree->set_construction_time(fxl::TimePoint::Now() -
+    layer_tree->set_construction_time(fml::TimePoint::Now() -
                                       last_begin_frame_time_);
   }
 
@@ -164,8 +163,8 @@ void Animator::RequestFrame(bool regenerate_layer_tree) {
 
 void Animator::AwaitVSync() {
   waiter_->AsyncWaitForVsync(
-      [self = weak_factory_.GetWeakPtr()](fxl::TimePoint frame_start_time,
-                                          fxl::TimePoint frame_target_time) {
+      [self = weak_factory_.GetWeakPtr()](fml::TimePoint frame_start_time,
+                                          fml::TimePoint frame_target_time) {
         if (self) {
           if (self->CanReuseLastLayerTree()) {
             self->DrawLastLayerTree();

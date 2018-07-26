@@ -8,8 +8,8 @@
 
 namespace flow {
 
-SkiaUnrefQueue::SkiaUnrefQueue(fxl::RefPtr<fxl::TaskRunner> task_runner,
-                               fxl::TimeDelta delay)
+SkiaUnrefQueue::SkiaUnrefQueue(fml::RefPtr<fml::TaskRunner> task_runner,
+                               fml::TimeDelta delay)
     : task_runner_(std::move(task_runner)),
       drain_delay_(delay),
       drain_pending_(false) {}
@@ -24,7 +24,7 @@ void SkiaUnrefQueue::Unref(SkRefCnt* object) {
   if (!drain_pending_) {
     drain_pending_ = true;
     task_runner_->PostDelayedTask(
-        [strong = fxl::Ref(this)]() { strong->Drain(); }, drain_delay_);
+        [strong = fml::Ref(this)]() { strong->Drain(); }, drain_delay_);
   }
 }
 

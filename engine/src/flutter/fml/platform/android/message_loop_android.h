@@ -12,7 +12,6 @@
 #include "flutter/fml/macros.h"
 #include "flutter/fml/message_loop_impl.h"
 #include "flutter/fml/unique_fd.h"
-#include "lib/fxl/memory/unique_object.h"
 
 namespace fml {
 
@@ -36,12 +35,12 @@ class MessageLoopAndroid : public MessageLoopImpl {
 
   void Terminate() override;
 
-  void WakeUp(fxl::TimePoint time_point) override;
+  void WakeUp(fml::TimePoint time_point) override;
 
   void OnEventFired();
 
-  FRIEND_MAKE_REF_COUNTED(MessageLoopAndroid);
-  FRIEND_REF_COUNTED_THREAD_SAFE(MessageLoopAndroid);
+  FML_FRIEND_MAKE_REF_COUNTED(MessageLoopAndroid);
+  FML_FRIEND_REF_COUNTED_THREAD_SAFE(MessageLoopAndroid);
   FML_DISALLOW_COPY_AND_ASSIGN(MessageLoopAndroid);
 };
 

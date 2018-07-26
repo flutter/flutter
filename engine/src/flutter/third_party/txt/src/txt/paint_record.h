@@ -17,8 +17,8 @@
 #ifndef LIB_TXT_SRC_PAINT_RECORD_H_
 #define LIB_TXT_SRC_PAINT_RECORD_H_
 
-#include "lib/fxl/logging.h"
-#include "lib/fxl/macros.h"
+#include "flutter/fml/logging.h"
+#include "flutter/fml/macros.h"
 #include "text_style.h"
 #include "third_party/skia/include/core/SkPaint.h"
 #include "third_party/skia/include/core/SkTextBlob.h"
@@ -76,7 +76,7 @@ class PaintRecord {
   size_t line_;
   double run_width_ = 0.0f;
 
-  FXL_DISALLOW_COPY_AND_ASSIGN(PaintRecord);
+  FML_DISALLOW_COPY_AND_ASSIGN(PaintRecord);
 };
 
 }  // namespace txt

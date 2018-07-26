@@ -103,7 +103,6 @@ shared_library("create_flutter_framework_dylib") {
     "$flutter_root/runtime",
     "$flutter_root/shell/common",
     "$flutter_root/shell/platform/darwin/common",
-    "//garnet/public/lib/fxl",
     "//third_party/skia",
     "//third_party/skia:gpu",
   ]

@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "lib/fxl/build_config.h"
+#include "flutter/fml/build_config.h"
 
 #if defined(OS_WIN)
 #define _USE_MATH_DEFINES

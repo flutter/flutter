@@ -19,7 +19,7 @@ void ChildSceneLayer::Paint(PaintContext& context) const {
 }
 
 void ChildSceneLayer::UpdateScene(SceneUpdateContext& context) {
-  FXL_DCHECK(needs_system_composite());
+  FML_DCHECK(needs_system_composite());
 
   // TODO(MZ-191): Set clip.
   // It's worth asking whether all children should be clipped implicitly

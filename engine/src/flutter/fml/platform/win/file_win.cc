@@ -5,11 +5,19 @@
 #include "flutter/fml/file.h"
 
 #include <Shlwapi.h>
+#include <fcntl.h>
+#include <limits.h>
+#include <sys/stat.h>
 
 #include <algorithm>
 #include <sstream>
 
+#include "flutter/fml/build_config.h"
 #include "flutter/fml/platform/win/wstring_conversion.h"
+
+#if defined(OS_WIN)
+#define S_ISREG(m) (((m)&S_IFMT) == S_IFREG)
+#endif
 
 namespace fml {
 
@@ -122,6 +130,13 @@ bool IsDirectory(const fml::UniqueFD& directory) {
     return false;
   }
   return info.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY;
+}
+
+bool IsFile(const std::string& path) {
+  struct stat buf;
+  if (stat(path.c_str(), &buf) != 0)
+    return false;
+  return S_ISREG(buf.st_mode);
 }
 
 }  // namespace fml

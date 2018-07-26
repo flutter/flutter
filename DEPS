@@ -122,9 +122,6 @@ deps = {
    # build. Eventually, we'll manage these dependencies together with Fuchsia
    # and not have to specific specific hashes.
 
-  'src/garnet':
-   Var('fuchsia_git') + '/garnet' + '@' + 'b7492b5f34e32248b164eb48ae8e67995aebda67',
-
   'src/third_party/tonic':
    Var('fuchsia_git') + '/tonic' + '@' + '57d508b12462db686573edcbc97891d90cf92f90',
 

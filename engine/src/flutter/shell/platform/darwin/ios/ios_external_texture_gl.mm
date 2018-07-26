@@ -19,7 +19,7 @@ namespace shell {
 IOSExternalTextureGL::IOSExternalTextureGL(int64_t textureId,
                                            NSObject<FlutterTexture>* externalTexture)
     : Texture(textureId), external_texture_(externalTexture) {
-  FXL_DCHECK(external_texture_);
+  FML_DCHECK(external_texture_);
 }
 
 IOSExternalTextureGL::~IOSExternalTextureGL() = default;
@@ -32,7 +32,7 @@ void IOSExternalTextureGL::Paint(SkCanvas& canvas, const SkRect& bounds) {
     if (err == noErr) {
       cache_ref_.Reset(cache);
     } else {
-      FXL_LOG(WARNING) << "Failed to create GLES texture cache: " << err;
+      FML_LOG(WARNING) << "Failed to create GLES texture cache: " << err;
       return;
     }
   }
@@ -47,7 +47,7 @@ void IOSExternalTextureGL::Paint(SkCanvas& canvas, const SkRect& bounds) {
         &texture);
     texture_ref_.Reset(texture);
     if (err != noErr) {
-      FXL_LOG(WARNING) << "Could not create texture from pixel buffer: " << err;
+      FML_LOG(WARNING) << "Could not create texture from pixel buffer: " << err;
       return;
     }
   }

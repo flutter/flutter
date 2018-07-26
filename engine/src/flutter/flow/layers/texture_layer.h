@@ -31,7 +31,7 @@ class TextureLayer : public Layer {
   SkSize size_;
   int64_t texture_id_;
 
-  FXL_DISALLOW_COPY_AND_ASSIGN(TextureLayer);
+  FML_DISALLOW_COPY_AND_ASSIGN(TextureLayer);
 };
 
 }  // namespace flow

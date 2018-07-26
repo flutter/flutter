@@ -10,7 +10,7 @@
 #include <string>
 
 #include "flutter/fml/paths.h"
-#include "lib/fxl/strings/string_view.h"
+#include "flutter/fml/string_view.h"
 
 // Include once for the default enum definition.
 #include "flutter/shell/common/switches.h"
@@ -19,7 +19,7 @@
 
 struct SwitchDesc {
   shell::Switch sw;
-  const fxl::StringView flag;
+  const fml::StringView flag;
   const char* help;
 };
 
@@ -83,17 +83,17 @@ void PrintUsage(const std::string& executable_name) {
   std::cerr << std::string(column_width, '-') << std::endl;
 }
 
-const fxl::StringView FlagForSwitch(Switch swtch) {
+const fml::StringView FlagForSwitch(Switch swtch) {
   for (uint32_t i = 0; i < static_cast<uint32_t>(Switch::Sentinel); i++) {
     if (gSwitchDescs[i].sw == swtch) {
       return gSwitchDescs[i].flag;
     }
   }
-  return fxl::StringView();
+  return fml::StringView();
 }
 
 template <typename T>
-static bool GetSwitchValue(const fxl::CommandLine& command_line,
+static bool GetSwitchValue(const fml::CommandLine& command_line,
                            shell::Switch sw,
                            T* result) {
   std::string switch_string;
@@ -112,7 +112,7 @@ static bool GetSwitchValue(const fxl::CommandLine& command_line,
   return false;
 }
 
-blink::Settings SettingsFromCommandLine(const fxl::CommandLine& command_line) {
+blink::Settings SettingsFromCommandLine(const fml::CommandLine& command_line) {
   blink::Settings settings = {};
 
   // Enable Observatory
@@ -123,7 +123,7 @@ blink::Settings SettingsFromCommandLine(const fxl::CommandLine& command_line) {
   if (command_line.HasOption(FlagForSwitch(Switch::DeviceObservatoryPort))) {
     if (!GetSwitchValue(command_line, Switch::DeviceObservatoryPort,
                         &settings.observatory_port)) {
-      FXL_LOG(INFO)
+      FML_LOG(INFO)
           << "Observatory port specified was malformed. Will default to "
           << settings.observatory_port;
     }

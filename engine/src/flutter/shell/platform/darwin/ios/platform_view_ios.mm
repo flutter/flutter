@@ -25,9 +25,9 @@ PlatformViewIOS::PlatformViewIOS(PlatformView::Delegate& delegate,
       owner_controller_(owner_controller),
       owner_view_(owner_view),
       ios_surface_(owner_view_.createSurface) {
-  FXL_DCHECK(ios_surface_ != nullptr);
-  FXL_DCHECK(owner_controller_ != nullptr);
-  FXL_DCHECK(owner_view_ != nullptr);
+  FML_DCHECK(ios_surface_ != nullptr);
+  FML_DCHECK(owner_controller_ != nullptr);
+  FML_DCHECK(owner_view_ != nullptr);
 }
 
 PlatformViewIOS::~PlatformViewIOS() = default;
@@ -49,7 +49,7 @@ std::unique_ptr<Surface> PlatformViewIOS::CreateRenderingSurface() {
 // |shell::PlatformView|
 sk_sp<GrContext> PlatformViewIOS::CreateResourceContext() const {
   if (!ios_surface_->ResourceContextMakeCurrent()) {
-    FXL_DLOG(INFO) << "Could not make resource context current on IO thread. Async texture uploads "
+    FML_DLOG(INFO) << "Could not make resource context current on IO thread. Async texture uploads "
                       "will be disabled.";
     return nullptr;
   }

@@ -18,7 +18,7 @@ VulkanSurface::VulkanSurface(
       native_surface_(std::move(native_surface)),
       valid_(false) {
   if (native_surface_ == nullptr || !native_surface_->IsValid()) {
-    FXL_DLOG(INFO) << "Native surface was invalid.";
+    FML_DLOG(INFO) << "Native surface was invalid.";
     return;
   }
 
@@ -26,7 +26,7 @@ VulkanSurface::VulkanSurface(
       native_surface_->CreateSurfaceHandle(vk, application.GetInstance());
 
   if (surface == VK_NULL_HANDLE) {
-    FXL_DLOG(INFO) << "Could not create the surface handle.";
+    FML_DLOG(INFO) << "Could not create the surface handle.";
     return;
   }
 

@@ -7,10 +7,10 @@
 
 #include <array>
 
+#include "flutter/fml/compiler_specific.h"
+#include "flutter/fml/macros.h"
 #include "flutter/vulkan/vulkan_command_buffer.h"
 #include "flutter/vulkan/vulkan_handle.h"
-#include "lib/fxl/compiler_specific.h"
-#include "lib/fxl/macros.h"
 #include "third_party/skia/include/core/SkSize.h"
 #include "third_party/skia/include/core/SkSurface.h"
 
@@ -26,10 +26,10 @@ class VulkanBackbuffer {
 
   bool IsValid() const;
 
-  FXL_WARN_UNUSED_RESULT
+  FML_WARN_UNUSED_RESULT
   bool WaitFences();
 
-  FXL_WARN_UNUSED_RESULT
+  FML_WARN_UNUSED_RESULT
   bool ResetFences();
 
   const VulkanHandle<VkFence>& GetUsageFence() const;
@@ -57,7 +57,7 @@ class VulkanBackbuffer {
 
   bool CreateFences();
 
-  FXL_DISALLOW_COPY_AND_ASSIGN(VulkanBackbuffer);
+  FML_DISALLOW_COPY_AND_ASSIGN(VulkanBackbuffer);
 };
 
 }  // namespace vulkan

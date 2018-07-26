@@ -22,10 +22,10 @@ class Paragraph;
 
 class ParagraphBuilder : public RefCountedDartWrappable<ParagraphBuilder> {
   DEFINE_WRAPPERTYPEINFO();
-  FRIEND_MAKE_REF_COUNTED(ParagraphBuilder);
+  FML_FRIEND_MAKE_REF_COUNTED(ParagraphBuilder);
 
  public:
-  static fxl::RefPtr<ParagraphBuilder> create(tonic::Int32List& encoded,
+  static fml::RefPtr<ParagraphBuilder> create(tonic::Int32List& encoded,
                                               const std::string& fontFamily,
                                               double fontSize,
                                               double lineHeight,
@@ -50,7 +50,7 @@ class ParagraphBuilder : public RefCountedDartWrappable<ParagraphBuilder> {
 
   Dart_Handle addText(const std::u16string& text);
 
-  fxl::RefPtr<Paragraph> build();
+  fml::RefPtr<Paragraph> build();
 
   static void RegisterNatives(tonic::DartLibraryNatives* natives);
 

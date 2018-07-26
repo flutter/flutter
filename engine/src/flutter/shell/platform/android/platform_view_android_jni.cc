@@ -11,6 +11,7 @@
 #include "flutter/assets/directory_asset_bundle.h"
 #include "flutter/assets/zip_asset_store.h"
 #include "flutter/common/settings.h"
+#include "flutter/fml/arraysize.h"
 #include "flutter/fml/file.h"
 #include "flutter/fml/platform/android/jni_util.h"
 #include "flutter/fml/platform/android/jni_weak_ref.h"
@@ -21,7 +22,6 @@
 #include "flutter/shell/platform/android/android_shell_holder.h"
 #include "flutter/shell/platform/android/apk_asset_provider.h"
 #include "flutter/shell/platform/android/flutter_main.h"
-#include "lib/fxl/arraysize.h"
 
 #define ANDROID_SHELL_HOLDER \
   (reinterpret_cast<shell::AndroidShellHolder*>(shell_holder))
@@ -36,7 +36,7 @@ bool CheckException(JNIEnv* env) {
 
   jthrowable exception = env->ExceptionOccurred();
   env->ExceptionClear();
-  FXL_LOG(INFO) << fml::jni::GetJavaExceptionInfo(env, exception);
+  FML_LOG(INFO) << fml::jni::GetJavaExceptionInfo(env, exception);
   env->DeleteLocalRef(exception);
   return false;
 }
@@ -58,7 +58,7 @@ void FlutterViewHandlePlatformMessage(JNIEnv* env,
                                       jint responseId) {
   env->CallVoidMethod(obj, g_handle_platform_message_method, channel, message,
                       responseId);
-  FXL_CHECK(CheckException(env));
+  FML_CHECK(CheckException(env));
 }
 
 static jmethodID g_handle_platform_message_response_method = nullptr;
@@ -68,7 +68,7 @@ void FlutterViewHandlePlatformMessageResponse(JNIEnv* env,
                                               jobject response) {
   env->CallVoidMethod(obj, g_handle_platform_message_response_method,
                       responseId, response);
-  FXL_CHECK(CheckException(env));
+  FML_CHECK(CheckException(env));
 }
 
 static jmethodID g_update_semantics_method = nullptr;
@@ -77,7 +77,7 @@ void FlutterViewUpdateSemantics(JNIEnv* env,
                                 jobject buffer,
                                 jobjectArray strings) {
   env->CallVoidMethod(obj, g_update_semantics_method, buffer, strings);
-  FXL_CHECK(CheckException(env));
+  FML_CHECK(CheckException(env));
 }
 
 static jmethodID g_update_custom_accessibility_actions_method = nullptr;
@@ -87,25 +87,25 @@ void FlutterViewUpdateCustomAccessibilityActions(JNIEnv* env,
                                                  jobjectArray strings) {
   env->CallVoidMethod(obj, g_update_custom_accessibility_actions_method, buffer,
                       strings);
-  FXL_CHECK(CheckException(env));
+  FML_CHECK(CheckException(env));
 }
 
 static jmethodID g_on_first_frame_method = nullptr;
 void FlutterViewOnFirstFrame(JNIEnv* env, jobject obj) {
   env->CallVoidMethod(obj, g_on_first_frame_method);
-  FXL_CHECK(CheckException(env));
+  FML_CHECK(CheckException(env));
 }
 
 static jmethodID g_attach_to_gl_context_method = nullptr;
 void SurfaceTextureAttachToGLContext(JNIEnv* env, jobject obj, jint textureId) {
   env->CallVoidMethod(obj, g_attach_to_gl_context_method, textureId);
-  FXL_CHECK(CheckException(env));
+  FML_CHECK(CheckException(env));
 }
 
 static jmethodID g_update_tex_image_method = nullptr;
 void SurfaceTextureUpdateTexImage(JNIEnv* env, jobject obj) {
   env->CallVoidMethod(obj, g_update_tex_image_method);
-  FXL_CHECK(CheckException(env));
+  FML_CHECK(CheckException(env));
 }
 
 static jmethodID g_get_transform_matrix_method = nullptr;
@@ -113,13 +113,13 @@ void SurfaceTextureGetTransformMatrix(JNIEnv* env,
                                       jobject obj,
                                       jfloatArray result) {
   env->CallVoidMethod(obj, g_get_transform_matrix_method, result);
-  FXL_CHECK(CheckException(env));
+  FML_CHECK(CheckException(env));
 }
 
 static jmethodID g_detach_from_gl_context_method = nullptr;
 void SurfaceTextureDetachFromGLContext(JNIEnv* env, jobject obj) {
   env->CallVoidMethod(obj, g_detach_from_gl_context_method);
-  FXL_CHECK(CheckException(env));
+  FML_CHECK(CheckException(env));
 }
 
 // Called By Java
@@ -157,7 +157,7 @@ static void SurfaceCreated(JNIEnv* env,
   // ANativeWindow_fromSurface are released immediately. This is needed as a
   // workaround for https://code.google.com/p/android/issues/detail?id=68174
   fml::jni::ScopedJavaLocalFrame scoped_local_reference_frame(env);
-  auto window = fxl::MakeRefCounted<AndroidNativeWindow>(
+  auto window = fml::MakeRefCounted<AndroidNativeWindow>(
       ANativeWindow_fromSurface(env, jsurface));
   ANDROID_SHELL_HOLDER->GetPlatformView()->NotifyCreated(std::move(window));
 }
@@ -259,7 +259,7 @@ static void RunBundleAndSnapshot(
 
   auto isolate_configuration = CreateIsolateConfiguration(*asset_manager);
   if (!isolate_configuration) {
-    FXL_DLOG(ERROR)
+    FML_DLOG(ERROR)
         << "Isolate configuration could not be determined for engine launch.";
     return;
   }

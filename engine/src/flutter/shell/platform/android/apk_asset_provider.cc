@@ -2,8 +2,8 @@
 #include <algorithm>
 #include <sstream>
 
+#include "flutter/fml/logging.h"
 #include "flutter/shell/platform/android/apk_asset_provider.h"
-#include "lib/fxl/logging.h"
 
 namespace blink {
 

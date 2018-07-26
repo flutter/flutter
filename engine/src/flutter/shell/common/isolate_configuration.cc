@@ -18,7 +18,7 @@ IsolateConfiguration::~IsolateConfiguration() = default;
 
 bool IsolateConfiguration::PrepareIsolate(blink::DartIsolate& isolate) {
   if (isolate.GetPhase() != blink::DartIsolate::Phase::LibrariesSetup) {
-    FXL_DLOG(ERROR)
+    FML_DLOG(ERROR)
         << "Isolate was in incorrect phase to be prepared for running.";
     return false;
   }
@@ -36,7 +36,7 @@ class AppSnapshotIsolateConfiguration final : public IsolateConfiguration {
   }
 
  private:
-  FXL_DISALLOW_COPY_AND_ASSIGN(AppSnapshotIsolateConfiguration);
+  FML_DISALLOW_COPY_AND_ASSIGN(AppSnapshotIsolateConfiguration);
 };
 
 class SnapshotIsolateConfiguration : public IsolateConfiguration {
@@ -55,7 +55,7 @@ class SnapshotIsolateConfiguration : public IsolateConfiguration {
  private:
   std::unique_ptr<fml::Mapping> snapshot_;
 
-  FXL_DISALLOW_COPY_AND_ASSIGN(SnapshotIsolateConfiguration);
+  FML_DISALLOW_COPY_AND_ASSIGN(SnapshotIsolateConfiguration);
 };
 
 class SourceIsolateConfiguration final : public IsolateConfiguration {
@@ -77,7 +77,7 @@ class SourceIsolateConfiguration final : public IsolateConfiguration {
   std::string main_path_;
   std::string packages_path_;
 
-  FXL_DISALLOW_COPY_AND_ASSIGN(SourceIsolateConfiguration);
+  FML_DISALLOW_COPY_AND_ASSIGN(SourceIsolateConfiguration);
 };
 
 class KernelListIsolateConfiguration final : public IsolateConfiguration {
@@ -106,7 +106,7 @@ class KernelListIsolateConfiguration final : public IsolateConfiguration {
  private:
   std::vector<std::unique_ptr<fml::Mapping>> kernel_pieces_;
 
-  FXL_DISALLOW_COPY_AND_ASSIGN(KernelListIsolateConfiguration);
+  FML_DISALLOW_COPY_AND_ASSIGN(KernelListIsolateConfiguration);
 };
 
 std::unique_ptr<IsolateConfiguration> IsolateConfiguration::InferFromSettings(
@@ -169,7 +169,7 @@ std::unique_ptr<IsolateConfiguration> IsolateConfiguration::InferFromSettings(
         std::unique_ptr<fml::Mapping> piece =
             asset_manager->GetAsMapping(piece_path);
         if (piece == nullptr) {
-          FXL_LOG(ERROR) << "Failed to load: " << piece_path;
+          FML_LOG(ERROR) << "Failed to load: " << piece_path;
           return nullptr;
         }
 

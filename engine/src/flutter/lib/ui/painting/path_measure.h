@@ -22,17 +22,17 @@ namespace blink {
 
 class CanvasPathMeasure : public RefCountedDartWrappable<CanvasPathMeasure> {
   DEFINE_WRAPPERTYPEINFO();
-  FRIEND_MAKE_REF_COUNTED(CanvasPathMeasure);
+  FML_FRIEND_MAKE_REF_COUNTED(CanvasPathMeasure);
 
  public:
   ~CanvasPathMeasure() override;
-  static fxl::RefPtr<CanvasPathMeasure> Create(const CanvasPath* path,
+  static fml::RefPtr<CanvasPathMeasure> Create(const CanvasPath* path,
                                                bool forceClosed);
 
   void setPath(const CanvasPath* path, bool isClosed);
   float getLength();
   tonic::Float32List getPosTan(float distance);
-  fxl::RefPtr<CanvasPath> getSegment(float startD,
+  fml::RefPtr<CanvasPath> getSegment(float startD,
                                      float stopD,
                                      bool startWithMoveTo);
   bool isClosed();

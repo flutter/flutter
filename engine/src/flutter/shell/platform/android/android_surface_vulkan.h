@@ -7,10 +7,10 @@
 
 #include <jni.h>
 #include <memory>
+#include "flutter/fml/macros.h"
 #include "flutter/shell/platform/android/android_native_window.h"
 #include "flutter/shell/platform/android/android_surface.h"
 #include "flutter/vulkan/vulkan_window.h"
-#include "lib/fxl/macros.h"
 
 namespace shell {
 
@@ -36,13 +36,13 @@ class AndroidSurfaceVulkan : public AndroidSurface {
   bool ResourceContextMakeCurrent() override;
 
   // |shell::AndroidSurface|
-  bool SetNativeWindow(fxl::RefPtr<AndroidNativeWindow> window) override;
+  bool SetNativeWindow(fml::RefPtr<AndroidNativeWindow> window) override;
 
  private:
-  fxl::RefPtr<vulkan::VulkanProcTable> proc_table_;
-  fxl::RefPtr<AndroidNativeWindow> native_window_;
+  fml::RefPtr<vulkan::VulkanProcTable> proc_table_;
+  fml::RefPtr<AndroidNativeWindow> native_window_;
 
-  FXL_DISALLOW_COPY_AND_ASSIGN(AndroidSurfaceVulkan);
+  FML_DISALLOW_COPY_AND_ASSIGN(AndroidSurfaceVulkan);
 };
 
 }  // namespace shell

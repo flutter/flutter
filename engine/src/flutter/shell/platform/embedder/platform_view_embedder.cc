@@ -33,7 +33,7 @@ intptr_t PlatformViewEmbedder::GLContextFBO() const {
 }
 
 void PlatformViewEmbedder::HandlePlatformMessage(
-    fxl::RefPtr<blink::PlatformMessage> message) {
+    fml::RefPtr<blink::PlatformMessage> message) {
   if (!message) {
     return;
   }

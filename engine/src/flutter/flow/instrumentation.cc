@@ -14,28 +14,28 @@ namespace flow {
 static const size_t kMaxSamples = 120;
 static const size_t kMaxFrameMarkers = 8;
 
-Stopwatch::Stopwatch() : start_(fxl::TimePoint::Now()), current_sample_(0) {
-  const fxl::TimeDelta delta = fxl::TimeDelta::Zero();
+Stopwatch::Stopwatch() : start_(fml::TimePoint::Now()), current_sample_(0) {
+  const fml::TimeDelta delta = fml::TimeDelta::Zero();
   laps_.resize(kMaxSamples, delta);
 }
 
 Stopwatch::~Stopwatch() = default;
 
 void Stopwatch::Start() {
-  start_ = fxl::TimePoint::Now();
+  start_ = fml::TimePoint::Now();
   current_sample_ = (current_sample_ + 1) % kMaxSamples;
 }
 
 void Stopwatch::Stop() {
-  laps_[current_sample_] = fxl::TimePoint::Now() - start_;
+  laps_[current_sample_] = fml::TimePoint::Now() - start_;
 }
 
-void Stopwatch::SetLapTime(const fxl::TimeDelta& delta) {
+void Stopwatch::SetLapTime(const fml::TimeDelta& delta) {
   current_sample_ = (current_sample_ + 1) % kMaxSamples;
   laps_[current_sample_] = delta;
 }
 
-const fxl::TimeDelta& Stopwatch::LastLap() const {
+const fml::TimeDelta& Stopwatch::LastLap() const {
   return laps_[(current_sample_ - 1) % kMaxSamples];
 }
 
@@ -51,8 +51,8 @@ static inline double UnitHeight(double frame_time_ms,
   return unitHeight;
 }
 
-fxl::TimeDelta Stopwatch::MaxDelta() const {
-  fxl::TimeDelta max_delta;
+fml::TimeDelta Stopwatch::MaxDelta() const {
+  fml::TimeDelta max_delta;
   for (size_t i = 0; i < kMaxSamples; i++) {
     if (laps_[i] > max_delta)
       max_delta = laps_[i];
@@ -148,8 +148,7 @@ void Stopwatch::Visualize(SkCanvas& canvas, const SkRect& rect) const {
       x + width * (static_cast<double>(current_sample_) / kMaxSamples);
 
   const auto marker_rect = SkRect::MakeLTRB(
-      sample_x, y,
-      sample_x + width * sample_unit_width, bottom);
+      sample_x, y, sample_x + width * sample_unit_width, bottom);
   canvas.drawRect(marker_rect, paint);
 }
 

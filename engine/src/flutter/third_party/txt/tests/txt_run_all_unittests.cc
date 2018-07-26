@@ -14,27 +14,27 @@
  * limitations under the License.
  */
 
+#include "flutter/fml/command_line.h"
 #include "flutter/fml/icu_util.h"
+#include "flutter/fml/logging.h"
 #include "gtest/gtest.h"
-#include "lib/fxl/command_line.h"
-#include "lib/fxl/logging.h"
 #include "third_party/skia/include/core/SkGraphics.h"
 #include "txt_test_utils.h"
 
 #include <cassert>
 
 int main(int argc, char** argv) {
-  fxl::CommandLine cmd = fxl::CommandLineFromArgcArgv(argc, argv);
+  fml::CommandLine cmd = fml::CommandLineFromArgcArgv(argc, argv);
   txt::SetCommandLine(cmd);
   std::string dir = txt::GetCommandLineForProcess().GetOptionValueWithDefault(
       "font-directory", "");
   txt::SetFontDir(dir);
   if (txt::GetFontDir().length() <= 0) {
-    FXL_LOG(ERROR) << "Font directory must be specified with "
+    FML_LOG(ERROR) << "Font directory must be specified with "
                       "--font-directory=\"<directory>\" to run this test.";
     return EXIT_FAILURE;
   }
-  FXL_DCHECK(txt::GetFontDir().length() > 0);
+  FML_DCHECK(txt::GetFontDir().length() > 0);
 
   fml::icu::InitializeICU("icudtl.dat");
   SkGraphics::Init();

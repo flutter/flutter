@@ -22,11 +22,11 @@ namespace blink {
 
 class ImageShader : public Shader {
   DEFINE_WRAPPERTYPEINFO();
-  FRIEND_MAKE_REF_COUNTED(ImageShader);
+  FML_FRIEND_MAKE_REF_COUNTED(ImageShader);
 
  public:
   ~ImageShader() override;
-  static fxl::RefPtr<ImageShader> Create();
+  static fml::RefPtr<ImageShader> Create();
 
   void initWithImage(CanvasImage* image,
                      SkShader::TileMode tmx,

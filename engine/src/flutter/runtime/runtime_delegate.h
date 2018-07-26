@@ -9,8 +9,8 @@
 #include <vector>
 
 #include "flutter/flow/layers/layer_tree.h"
-#include "flutter/lib/ui/semantics/semantics_node.h"
 #include "flutter/lib/ui/semantics/custom_accessibility_action.h"
+#include "flutter/lib/ui/semantics/semantics_node.h"
 #include "flutter/lib/ui/text/font_collection.h"
 #include "flutter/lib/ui/window/platform_message.h"
 #include "third_party/dart/runtime/include/dart_api.h"
@@ -25,10 +25,11 @@ class RuntimeDelegate {
 
   virtual void Render(std::unique_ptr<flow::LayerTree> layer_tree) = 0;
 
-  virtual void UpdateSemantics(blink::SemanticsNodeUpdates update,
-                               blink::CustomAccessibilityActionUpdates actions) = 0;
+  virtual void UpdateSemantics(
+      blink::SemanticsNodeUpdates update,
+      blink::CustomAccessibilityActionUpdates actions) = 0;
 
-  virtual void HandlePlatformMessage(fxl::RefPtr<PlatformMessage> message) = 0;
+  virtual void HandlePlatformMessage(fml::RefPtr<PlatformMessage> message) = 0;
 
   virtual FontCollection& GetFontCollection() = 0;
 

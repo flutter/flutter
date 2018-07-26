@@ -35,7 +35,6 @@ source_set("mac_desktop_platform") {
     "$flutter_root/shell/common",
     "$flutter_root/shell/platform/darwin/common",
     "$flutter_root/synchronization",
-    "//garnet/public/lib/fxl",
     "//third_party/dart/runtime:libdart_jit",
     "//third_party/skia",
     "//third_party/skia:gpu",

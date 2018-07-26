@@ -24,7 +24,7 @@ namespace fml {
 
 Thread::Thread(const std::string& name) : joined_(false) {
   fml::AutoResetWaitableEvent latch;
-  fxl::RefPtr<fml::TaskRunner> runner;
+  fml::RefPtr<fml::TaskRunner> runner;
   thread_ = std::make_unique<std::thread>([&latch, &runner, name]() -> void {
     SetCurrentThreadName(name);
     fml::MessageLoop::EnsureInitializedForCurrentThread();
@@ -41,7 +41,7 @@ Thread::~Thread() {
   Join();
 }
 
-fxl::RefPtr<fml::TaskRunner> Thread::GetTaskRunner() const {
+fml::RefPtr<fml::TaskRunner> Thread::GetTaskRunner() const {
   return task_runner_;
 }
 
@@ -86,7 +86,7 @@ void Thread::SetCurrentThreadName(const std::string& name) {
   } __except (EXCEPTION_CONTINUE_EXECUTION) {
   }
 #else
-  FXL_DLOG(INFO) << "Could not set the thread name to '" << name
+  FML_DLOG(INFO) << "Could not set the thread name to '" << name
                  << "' on this platform.";
 #endif
 }

@@ -8,37 +8,37 @@
 #include <string>
 #include <vector>
 
+#include "flutter/fml/memory/ref_counted.h"
+#include "flutter/fml/memory/ref_ptr.h"
 #include "flutter/lib/ui/window/platform_message_response.h"
-#include "lib/fxl/memory/ref_counted.h"
-#include "lib/fxl/memory/ref_ptr.h"
 
 namespace blink {
 
-class PlatformMessage : public fxl::RefCountedThreadSafe<PlatformMessage> {
-  FRIEND_REF_COUNTED_THREAD_SAFE(PlatformMessage);
-  FRIEND_MAKE_REF_COUNTED(PlatformMessage);
+class PlatformMessage : public fml::RefCountedThreadSafe<PlatformMessage> {
+  FML_FRIEND_REF_COUNTED_THREAD_SAFE(PlatformMessage);
+  FML_FRIEND_MAKE_REF_COUNTED(PlatformMessage);
 
  public:
   const std::string& channel() const { return channel_; }
   const std::vector<uint8_t>& data() const { return data_; }
   bool hasData() { return hasData_; }
 
-  const fxl::RefPtr<PlatformMessageResponse>& response() const {
+  const fml::RefPtr<PlatformMessageResponse>& response() const {
     return response_;
   }
 
  private:
   PlatformMessage(std::string name,
                   std::vector<uint8_t> data,
-                  fxl::RefPtr<PlatformMessageResponse> response);
+                  fml::RefPtr<PlatformMessageResponse> response);
   PlatformMessage(std::string name,
-                  fxl::RefPtr<PlatformMessageResponse> response);
+                  fml::RefPtr<PlatformMessageResponse> response);
   ~PlatformMessage();
 
   std::string channel_;
   std::vector<uint8_t> data_;
   bool hasData_;
-  fxl::RefPtr<PlatformMessageResponse> response_;
+  fml::RefPtr<PlatformMessageResponse> response_;
 };
 
 }  // namespace blink

@@ -8,7 +8,7 @@
 #include <jni.h>
 
 #include "flutter/common/settings.h"
-#include "lib/fxl/macros.h"
+#include "flutter/fml/macros.h"
 
 namespace shell {
 
@@ -33,7 +33,7 @@ class FlutterMain {
                    jobjectArray jargs,
                    jstring bundlePath);
 
-  FXL_DISALLOW_COPY_AND_ASSIGN(FlutterMain);
+  FML_DISALLOW_COPY_AND_ASSIGN(FlutterMain);
 };
 
 }  // namespace shell

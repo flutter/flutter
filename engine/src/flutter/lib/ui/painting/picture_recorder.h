@@ -18,18 +18,18 @@ class Picture;
 
 class PictureRecorder : public RefCountedDartWrappable<PictureRecorder> {
   DEFINE_WRAPPERTYPEINFO();
-  FRIEND_MAKE_REF_COUNTED(PictureRecorder);
+  FML_FRIEND_MAKE_REF_COUNTED(PictureRecorder);
 
  public:
-  static fxl::RefPtr<PictureRecorder> Create();
+  static fml::RefPtr<PictureRecorder> Create();
 
   ~PictureRecorder();
 
   SkCanvas* BeginRecording(SkRect bounds);
-  fxl::RefPtr<Picture> endRecording();
+  fml::RefPtr<Picture> endRecording();
   bool isRecording();
 
-  void set_canvas(fxl::RefPtr<Canvas> canvas) { canvas_ = std::move(canvas); }
+  void set_canvas(fml::RefPtr<Canvas> canvas) { canvas_ = std::move(canvas); }
 
   static void RegisterNatives(tonic::DartLibraryNatives* natives);
 
@@ -38,7 +38,7 @@ class PictureRecorder : public RefCountedDartWrappable<PictureRecorder> {
 
   SkRTreeFactory rtree_factory_;
   SkPictureRecorder picture_recorder_;
-  fxl::RefPtr<Canvas> canvas_;
+  fml::RefPtr<Canvas> canvas_;
 };
 
 }  // namespace blink

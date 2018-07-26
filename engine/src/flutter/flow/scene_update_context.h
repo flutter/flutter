@@ -10,9 +10,9 @@
 #include <vector>
 
 #include "flutter/flow/compositor_context.h"
-#include "lib/fxl/build_config.h"
-#include "lib/fxl/logging.h"
-#include "lib/fxl/macros.h"
+#include "flutter/fml/build_config.h"
+#include "flutter/fml/logging.h"
+#include "flutter/fml/macros.h"
 #include "lib/ui/scenic/cpp/resources.h"
 #include "third_party/skia/include/core/SkRect.h"
 #include "third_party/skia/include/core/SkSurface.h"
@@ -142,7 +142,7 @@ class SceneUpdateContext {
   // CPU wait. Once Vulkan semaphores are available, this method must return
   // void and the implementation must submit surfaces on its own as soon as the
   // specific canvas operations are done.
-  FXL_WARN_UNUSED_RESULT
+  FML_WARN_UNUSED_RESULT
   std::vector<std::unique_ptr<SurfaceProducerSurface>> ExecutePaintTasks(
       CompositorContext::ScopedFrame& frame);
 
@@ -170,10 +170,10 @@ class SceneUpdateContext {
                               std::vector<Layer*> paint_layers);
   void SetShapeColor(scenic::ShapeNode& shape_node, SkColor color);
   scenic::Image* GenerateImageIfNeeded(SkColor color,
-                                           SkScalar scale_x,
-                                           SkScalar scale_y,
-                                           const SkRect& paint_bounds,
-                                           std::vector<Layer*> paint_layers);
+                                       SkScalar scale_x,
+                                       SkScalar scale_y,
+                                       const SkRect& paint_bounds,
+                                       std::vector<Layer*> paint_layers);
 
   Entity* top_entity_ = nullptr;
   float top_scale_x_ = 1.f;
@@ -189,7 +189,7 @@ class SceneUpdateContext {
   // Save ExportNodes so we can dispose them in our destructor.
   std::set<ExportNode*> export_nodes_;
 
-  FXL_DISALLOW_COPY_AND_ASSIGN(SceneUpdateContext);
+  FML_DISALLOW_COPY_AND_ASSIGN(SceneUpdateContext);
 };
 
 }  // namespace flow

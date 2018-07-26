@@ -72,7 +72,7 @@ void DefaultLayerBuilder::PushClipRoundedRect(const SkRRect& rrect,
 }
 
 void DefaultLayerBuilder::PushClipPath(const SkPath& path, Clip clip_behavior) {
-  FXL_DCHECK(clip_behavior != Clip::none);
+  FML_DCHECK(clip_behavior != Clip::none);
   SkRect cullRect;
   if (!cullRect.intersect(path.getBounds(), cull_rects_.top())) {
     cullRect = SkRect::MakeEmpty();
@@ -178,7 +178,7 @@ void DefaultLayerBuilder::PushTexture(const SkPoint& offset,
 void DefaultLayerBuilder::PushChildScene(
     const SkPoint& offset,
     const SkSize& size,
-    fxl::RefPtr<flow::ExportNodeHolder> export_token_holder,
+    fml::RefPtr<flow::ExportNodeHolder> export_token_holder,
     bool hit_testable) {
   if (!current_layer_) {
     return;
@@ -211,7 +211,7 @@ std::unique_ptr<flow::Layer> DefaultLayerBuilder::TakeLayer() {
 
 void DefaultLayerBuilder::PushLayer(std::unique_ptr<flow::ContainerLayer> layer,
                                     const SkRect& cullRect) {
-  FXL_DCHECK(layer);
+  FML_DCHECK(layer);
 
   cull_rects_.push(cullRect);
 

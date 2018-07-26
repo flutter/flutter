@@ -7,9 +7,9 @@
 
 #include <vector>
 
-#include "lib/fxl/macros.h"
-#include "lib/fxl/time/time_delta.h"
-#include "lib/fxl/time/time_point.h"
+#include "flutter/fml/macros.h"
+#include "flutter/fml/time/time_delta.h"
+#include "flutter/fml/time/time_point.h"
 #include "third_party/skia/include/core/SkCanvas.h"
 
 namespace flow {
@@ -22,11 +22,11 @@ class Stopwatch {
 
   ~Stopwatch();
 
-  const fxl::TimeDelta& LastLap() const;
+  const fml::TimeDelta& LastLap() const;
 
-  fxl::TimeDelta CurrentLap() const { return fxl::TimePoint::Now() - start_; }
+  fml::TimeDelta CurrentLap() const { return fml::TimePoint::Now() - start_; }
 
-  fxl::TimeDelta MaxDelta() const;
+  fml::TimeDelta MaxDelta() const;
 
   void Visualize(SkCanvas& canvas, const SkRect& rect) const;
 
@@ -34,14 +34,14 @@ class Stopwatch {
 
   void Stop();
 
-  void SetLapTime(const fxl::TimeDelta& delta);
+  void SetLapTime(const fml::TimeDelta& delta);
 
  private:
-  fxl::TimePoint start_;
-  std::vector<fxl::TimeDelta> laps_;
+  fml::TimePoint start_;
+  std::vector<fml::TimeDelta> laps_;
   size_t current_sample_;
 
-  FXL_DISALLOW_COPY_AND_ASSIGN(Stopwatch);
+  FML_DISALLOW_COPY_AND_ASSIGN(Stopwatch);
 };
 
 class Counter {
@@ -57,7 +57,7 @@ class Counter {
  private:
   size_t count_;
 
-  FXL_DISALLOW_COPY_AND_ASSIGN(Counter);
+  FML_DISALLOW_COPY_AND_ASSIGN(Counter);
 };
 
 class CounterValues {
@@ -80,7 +80,7 @@ class CounterValues {
   std::vector<int64_t> values_;
   size_t current_sample_;
 
-  FXL_DISALLOW_COPY_AND_ASSIGN(CounterValues);
+  FML_DISALLOW_COPY_AND_ASSIGN(CounterValues);
 };
 
 }  // namespace flow

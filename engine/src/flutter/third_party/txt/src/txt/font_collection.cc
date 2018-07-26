@@ -23,8 +23,8 @@
 #include <string>
 #include <unordered_map>
 #include <vector>
+#include "flutter/fml/logging.h"
 #include "font_skia.h"
-#include "lib/fxl/logging.h"
 #include "txt/platform.h"
 #include "txt/text_style.h"
 

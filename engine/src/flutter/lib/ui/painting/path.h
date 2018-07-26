@@ -20,16 +20,16 @@ namespace blink {
 
 class CanvasPath : public RefCountedDartWrappable<CanvasPath> {
   DEFINE_WRAPPERTYPEINFO();
-  FRIEND_MAKE_REF_COUNTED(CanvasPath);
+  FML_FRIEND_MAKE_REF_COUNTED(CanvasPath);
 
  public:
   ~CanvasPath() override;
-  static fxl::RefPtr<CanvasPath> Create() {
-    return fxl::MakeRefCounted<CanvasPath>();
+  static fml::RefPtr<CanvasPath> Create() {
+    return fml::MakeRefCounted<CanvasPath>();
   }
 
-  static fxl::RefPtr<CanvasPath> CreateFrom(const SkPath& src) {
-    fxl::RefPtr<CanvasPath> path = CanvasPath::Create();
+  static fml::RefPtr<CanvasPath> CreateFrom(const SkPath& src) {
+    fml::RefPtr<CanvasPath> path = CanvasPath::Create();
     path->path_ = src;
     return path;
   }
@@ -96,11 +96,11 @@ class CanvasPath : public RefCountedDartWrappable<CanvasPath> {
   void close();
   void reset();
   bool contains(double x, double y);
-  fxl::RefPtr<CanvasPath> shift(double dx, double dy);
-  fxl::RefPtr<CanvasPath> transform(tonic::Float64List& matrix4);
+  fml::RefPtr<CanvasPath> shift(double dx, double dy);
+  fml::RefPtr<CanvasPath> transform(tonic::Float64List& matrix4);
   tonic::Float32List getBounds();
   bool op(CanvasPath* path1, CanvasPath* path2, int operation);
-  fxl::RefPtr<CanvasPath> clone();
+  fml::RefPtr<CanvasPath> clone();
 
   const SkPath& path() const { return path_; }
 

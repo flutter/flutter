@@ -26,12 +26,12 @@ void MessageLoopWin::Run() {
 
 void MessageLoopWin::Terminate() {
   running_ = false;
-  WakeUp(fxl::TimePoint::Now());
+  WakeUp(fml::TimePoint::Now());
 }
 
-void MessageLoopWin::WakeUp(fxl::TimePoint time_point) {
+void MessageLoopWin::WakeUp(fml::TimePoint time_point) {
   LARGE_INTEGER due_time = {0};
-  fxl::TimePoint now = fxl::TimePoint::Now();
+  fml::TimePoint now = fml::TimePoint::Now();
   if (time_point > now) {
     due_time.QuadPart = (time_point - now).ToNanoseconds() / -100;
   }

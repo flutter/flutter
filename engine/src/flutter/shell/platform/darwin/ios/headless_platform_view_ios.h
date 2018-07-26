@@ -7,12 +7,12 @@
 
 #include <memory>
 
+#include "flutter/fml/closure.h"
+#include "flutter/fml/macros.h"
 #include "flutter/fml/memory/weak_ptr.h"
 #include "flutter/fml/platform/darwin/scoped_nsobject.h"
 #include "flutter/shell/common/platform_view.h"
 #include "flutter/shell/platform/darwin/ios/framework/Source/platform_message_router.h"
-#include "lib/fxl/functional/closure.h"
-#include "lib/fxl/macros.h"
 
 namespace shell {
 
@@ -28,9 +28,9 @@ class HeadlessPlatformViewIOS : public PlatformView {
   PlatformMessageRouter platform_message_router_;
 
   // |shell::PlatformView|
-  void HandlePlatformMessage(fxl::RefPtr<blink::PlatformMessage> message);
+  void HandlePlatformMessage(fml::RefPtr<blink::PlatformMessage> message);
 
-  FXL_DISALLOW_COPY_AND_ASSIGN(HeadlessPlatformViewIOS);
+  FML_DISALLOW_COPY_AND_ASSIGN(HeadlessPlatformViewIOS);
 };
 
 }  // namespace shell

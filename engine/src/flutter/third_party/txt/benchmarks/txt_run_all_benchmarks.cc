@@ -17,23 +17,23 @@
 #include "third_party/benchmark/include/benchmark/benchmark_api.h"
 
 #include "flutter/fml/icu_util.h"
+#include "flutter/fml/logging.h"
 #include "flutter/third_party/txt/tests/txt_test_utils.h"
-#include "lib/fxl/logging.h"
 
 // We will use a custom main to allow custom font directories for consistency.
 int main(int argc, char** argv) {
   ::benchmark::Initialize(&argc, argv);
-  fxl::CommandLine cmd = fxl::CommandLineFromArgcArgv(argc, argv);
+  fml::CommandLine cmd = fml::CommandLineFromArgcArgv(argc, argv);
   txt::SetCommandLine(cmd);
   std::string dir = txt::GetCommandLineForProcess().GetOptionValueWithDefault(
       "font-directory", "");
   txt::SetFontDir(dir);
   if (txt::GetFontDir().length() <= 0) {
-    FXL_LOG(ERROR) << "Font directory must be specified with "
+    FML_LOG(ERROR) << "Font directory must be specified with "
                       "--font-directory=\"<directory>\" to run this test.";
     return EXIT_FAILURE;
   }
-  FXL_DCHECK(txt::GetFontDir().length() > 0);
+  FML_DCHECK(txt::GetFontDir().length() > 0);
 
   fml::icu::InitializeICU("icudtl.dat");
 

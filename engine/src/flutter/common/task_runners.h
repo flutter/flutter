@@ -7,40 +7,41 @@
 
 #include <string>
 
-#include "lib/fxl/macros.h"
-#include "lib/fxl/tasks/task_runner.h"
+#include "flutter/fml/macros.h"
+#include "flutter/fml/task_runner.h"
 
 namespace blink {
 
 class TaskRunners {
  public:
   TaskRunners(std::string label,
-              fxl::RefPtr<fxl::TaskRunner> platform,
-              fxl::RefPtr<fxl::TaskRunner> gpu,
-              fxl::RefPtr<fxl::TaskRunner> ui,
-              fxl::RefPtr<fxl::TaskRunner> io);
+              fml::RefPtr<fml::TaskRunner> platform,
+              fml::RefPtr<fml::TaskRunner> gpu,
+              fml::RefPtr<fml::TaskRunner> ui,
+              fml::RefPtr<fml::TaskRunner> io);
 
   ~TaskRunners();
 
   const std::string& GetLabel() const;
 
-  fxl::RefPtr<fxl::TaskRunner> GetPlatformTaskRunner() const;
+  fml::RefPtr<fml::TaskRunner> GetPlatformTaskRunner() const;
 
-  fxl::RefPtr<fxl::TaskRunner> GetUITaskRunner() const;
+  fml::RefPtr<fml::TaskRunner> GetUITaskRunner() const;
 
-  fxl::RefPtr<fxl::TaskRunner> GetIOTaskRunner() const;
+  fml::RefPtr<fml::TaskRunner> GetIOTaskRunner() const;
 
-  fxl::RefPtr<fxl::TaskRunner> GetGPUTaskRunner() const;
+  fml::RefPtr<fml::TaskRunner> GetGPUTaskRunner() const;
 
   bool IsValid() const;
 
  private:
   const std::string label_;
-  fxl::RefPtr<fxl::TaskRunner> platform_;
-  fxl::RefPtr<fxl::TaskRunner> gpu_;
-  fxl::RefPtr<fxl::TaskRunner> ui_;
-  fxl::RefPtr<fxl::TaskRunner> io_;
+  fml::RefPtr<fml::TaskRunner> platform_;
+  fml::RefPtr<fml::TaskRunner> gpu_;
+  fml::RefPtr<fml::TaskRunner> ui_;
+  fml::RefPtr<fml::TaskRunner> io_;
 };
+
 }  // namespace blink
 
 #endif  // FLUTTER_COMMON_TASK_RUNNERS_H_

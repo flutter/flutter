@@ -10,8 +10,8 @@
 #include <mutex>
 #include <string>
 
+#include "flutter/fml/macros.h"
 #include "flutter/fml/synchronization/thread_annotations.h"
-#include "lib/fxl/macros.h"
 #include "third_party/dart/runtime/include/dart_api.h"
 
 #define DART_CALLBACK_INVALID_HANDLE -1
@@ -47,7 +47,7 @@ class DartCallbackCache {
   static std::map<int64_t, DartCallbackRepresentation> cache_
       FML_GUARDED_BY(mutex_);
 
-  FXL_DISALLOW_IMPLICIT_CONSTRUCTORS(DartCallbackCache);
+  FML_DISALLOW_IMPLICIT_CONSTRUCTORS(DartCallbackCache);
 };
 
 }  // namespace blink

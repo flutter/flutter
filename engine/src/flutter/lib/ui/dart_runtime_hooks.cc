@@ -12,10 +12,10 @@
 #include <sstream>
 
 #include "flutter/common/settings.h"
+#include "flutter/fml/build_config.h"
+#include "flutter/fml/logging.h"
 #include "flutter/lib/ui/plugins/callback_cache.h"
 #include "flutter/lib/ui/ui_dart_state.h"
-#include "lib/fxl/build_config.h"
-#include "lib/fxl/logging.h"
 #include "third_party/dart/runtime/bin/embedded_dart_io.h"
 #include "third_party/dart/runtime/include/dart_api.h"
 #include "third_party/dart/runtime/include/dart_tools_api.h"

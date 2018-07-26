@@ -5,7 +5,7 @@
 #ifndef FLUTTER_LIB_UI_DART_RUNTIME_HOOKS_H_
 #define FLUTTER_LIB_UI_DART_RUNTIME_HOOKS_H_
 
-#include "lib/fxl/macros.h"
+#include "flutter/fml/macros.h"
 #include "third_party/dart/runtime/include/dart_api.h"
 #include "third_party/tonic/dart_library_natives.h"
 
@@ -17,7 +17,7 @@ class DartRuntimeHooks {
   static void RegisterNatives(tonic::DartLibraryNatives* natives);
 
  private:
-  FXL_DISALLOW_IMPLICIT_CONSTRUCTORS(DartRuntimeHooks);
+  FML_DISALLOW_IMPLICIT_CONSTRUCTORS(DartRuntimeHooks);
 };
 
 }  // namespace blink

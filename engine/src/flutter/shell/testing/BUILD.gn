@@ -19,7 +19,6 @@ executable("testing") {
     "$flutter_root/fml",
     "$flutter_root/lib/snapshot",
     "$flutter_root/shell/common",
-    "//garnet/public/lib/fxl",
     "//third_party/dart/runtime:libdart_jit",
     "//third_party/dart/runtime/bin:embedded_dart_io",
     "//third_party/skia",

@@ -7,11 +7,11 @@
 
 #include <unordered_map>
 
+#include "flutter/fml/time/time_point.h"
 #include "flutter/lib/ui/semantics/semantics_update.h"
 #include "flutter/lib/ui/window/platform_message.h"
 #include "flutter/lib/ui/window/pointer_data_packet.h"
 #include "flutter/lib/ui/window/viewport_metrics.h"
-#include "lib/fxl/time/time_point.h"
 #include "third_party/skia/include/gpu/GrContext.h"
 #include "third_party/tonic/dart_persistent_value.h"
 
@@ -31,7 +31,7 @@ class WindowClient {
   virtual void ScheduleFrame() = 0;
   virtual void Render(Scene* scene) = 0;
   virtual void UpdateSemantics(SemanticsUpdate* update) = 0;
-  virtual void HandlePlatformMessage(fxl::RefPtr<PlatformMessage> message) = 0;
+  virtual void HandlePlatformMessage(fml::RefPtr<PlatformMessage> message) = 0;
   virtual FontCollection& GetFontCollection() = 0;
 
  protected:
@@ -55,12 +55,12 @@ class Window final {
   void UpdateUserSettingsData(const std::string& data);
   void UpdateSemanticsEnabled(bool enabled);
   void UpdateAssistiveTechnologyEnabled(bool enabled);
-  void DispatchPlatformMessage(fxl::RefPtr<PlatformMessage> message);
+  void DispatchPlatformMessage(fml::RefPtr<PlatformMessage> message);
   void DispatchPointerDataPacket(const PointerDataPacket& packet);
   void DispatchSemanticsAction(int32_t id,
                                SemanticsAction action,
                                std::vector<uint8_t> args);
-  void BeginFrame(fxl::TimePoint frameTime);
+  void BeginFrame(fml::TimePoint frameTime);
 
   void CompletePlatformMessageResponse(int response_id,
                                        std::vector<uint8_t> data);
@@ -75,7 +75,7 @@ class Window final {
 
   // We use id 0 to mean that no response is expected.
   int next_response_id_ = 1;
-  std::unordered_map<int, fxl::RefPtr<blink::PlatformMessageResponse>>
+  std::unordered_map<int, fml::RefPtr<blink::PlatformMessageResponse>>
       pending_responses_;
 };
 

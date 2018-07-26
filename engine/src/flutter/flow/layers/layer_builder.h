@@ -9,7 +9,7 @@
 
 #include "flutter/flow/layers/layer.h"
 #include "flutter/flow/skia_gpu_object.h"
-#include "garnet/public/lib/fxl/macros.h"
+#include "flutter/fml/macros.h"
 #include "third_party/skia/include/core/SkBlendMode.h"
 #include "third_party/skia/include/core/SkColor.h"
 #include "third_party/skia/include/core/SkImageFilter.h"
@@ -74,7 +74,7 @@ class LayerBuilder {
   virtual void PushChildScene(
       const SkPoint& offset,
       const SkSize& size,
-      fxl::RefPtr<flow::ExportNodeHolder> export_token_holder,
+      fml::RefPtr<flow::ExportNodeHolder> export_token_holder,
       bool hit_testable) = 0;
 #endif  // defined(OS_FUCHSIA)
 
@@ -99,7 +99,7 @@ class LayerBuilder {
   bool checkerboard_raster_cache_images_ = false;
   bool checkerboard_offscreen_layers_ = false;
 
-  FXL_DISALLOW_COPY_AND_ASSIGN(LayerBuilder);
+  FML_DISALLOW_COPY_AND_ASSIGN(LayerBuilder);
 };
 
 }  // namespace flow

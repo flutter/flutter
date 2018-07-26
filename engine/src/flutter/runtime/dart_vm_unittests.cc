@@ -9,7 +9,7 @@ namespace blink {
 
 TEST(DartVM, SimpleInitialization) {
   Settings settings = {};
-  settings.task_observer_add = [](intptr_t, fxl::Closure) {};
+  settings.task_observer_add = [](intptr_t, fml::closure) {};
   settings.task_observer_remove = [](intptr_t) {};
   auto vm = DartVM::ForProcess(settings);
   ASSERT_TRUE(vm);
@@ -20,7 +20,7 @@ TEST(DartVM, SimpleInitialization) {
 
 TEST(DartVM, SimpleIsolateNameServer) {
   Settings settings = {};
-  settings.task_observer_add = [](intptr_t, fxl::Closure) {};
+  settings.task_observer_add = [](intptr_t, fml::closure) {};
   settings.task_observer_remove = [](intptr_t) {};
   auto vm = DartVM::ForProcess(settings);
   auto ns = vm->GetIsolateNameServer();

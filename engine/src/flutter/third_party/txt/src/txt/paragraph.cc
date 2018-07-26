@@ -25,9 +25,9 @@
 #include <vector>
 
 #include <minikin/Layout.h>
+#include "flutter/fml/logging.h"
 #include "font_collection.h"
 #include "font_skia.h"
-#include "lib/fxl/logging.h"
 #include "minikin/FontLanguageListCache.h"
 #include "minikin/GraphemeBreak.h"
 #include "minikin/HbFontCache.h"
@@ -283,7 +283,7 @@ bool Paragraph::ComputeLineBreaks() {
       std::shared_ptr<minikin::FontCollection> collection =
           GetMinikinFontCollectionForStyle(run.style);
       if (collection == nullptr) {
-        FXL_LOG(INFO) << "Could not find font collection for family \""
+        FML_LOG(INFO) << "Could not find font collection for family \""
                       << run.style.font_family << "\".";
         return false;
       }

@@ -6,7 +6,7 @@
 
 #include <unistd.h>
 
-#include "lib/fxl/files/path.h"
+#include "flutter/fml/paths.h"
 
 namespace fml {
 namespace paths {

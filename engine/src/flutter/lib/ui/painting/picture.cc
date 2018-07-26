@@ -23,8 +23,8 @@ IMPLEMENT_WRAPPERTYPEINFO(ui, Picture);
 
 DART_BIND_ALL(Picture, FOR_EACH_BINDING)
 
-fxl::RefPtr<Picture> Picture::Create(flow::SkiaGPUObject<SkPicture> picture) {
-  return fxl::MakeRefCounted<Picture>(std::move(picture));
+fml::RefPtr<Picture> Picture::Create(flow::SkiaGPUObject<SkPicture> picture) {
+  return fml::MakeRefCounted<Picture>(std::move(picture));
 }
 
 Picture::Picture(flow::SkiaGPUObject<SkPicture> picture)
@@ -32,8 +32,8 @@ Picture::Picture(flow::SkiaGPUObject<SkPicture> picture)
 
 Picture::~Picture() = default;
 
-fxl::RefPtr<CanvasImage> Picture::toImage(int width, int height) {
-  fxl::RefPtr<CanvasImage> image = CanvasImage::Create();
+fml::RefPtr<CanvasImage> Picture::toImage(int width, int height) {
+  fml::RefPtr<CanvasImage> image = CanvasImage::Create();
   image->set_image(UIDartState::CreateGPUObject(SkImage::MakeFromPicture(
       picture_.get(), SkISize::Make(width, height), nullptr, nullptr,
       SkImage::BitDepth::kU8, SkColorSpace::MakeSRGB())));

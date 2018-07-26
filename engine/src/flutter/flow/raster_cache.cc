@@ -7,8 +7,8 @@
 #include <vector>
 
 #include "flutter/flow/paint_utils.h"
+#include "flutter/fml/logging.h"
 #include "flutter/fml/trace_event.h"
-#include "lib/fxl/logging.h"
 #include "third_party/skia/include/core/SkCanvas.h"
 #include "third_party/skia/include/core/SkColorSpaceXformCanvas.h"
 #include "third_party/skia/include/core/SkImage.h"
@@ -21,7 +21,7 @@ void RasterCacheResult::draw(SkCanvas& canvas) const {
   SkAutoCanvasRestore auto_restore(&canvas, true);
   SkIRect bounds =
       RasterCache::GetDeviceBounds(logical_rect_, canvas.getTotalMatrix());
-  FXL_DCHECK(bounds.size() == image_->dimensions());
+  FML_DCHECK(bounds.size() == image_->dimensions());
   canvas.resetMatrix();
   canvas.drawImage(image_, bounds.fLeft, bounds.fTop);
 }

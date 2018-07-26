@@ -18,7 +18,6 @@ source_set("common") {
 
   deps = [
     "$flutter_root/fml",
-    "//garnet/public/lib/fxl",
   ]
 
   public_configs = [

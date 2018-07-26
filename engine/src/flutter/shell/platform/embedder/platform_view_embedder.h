@@ -5,10 +5,10 @@
 #ifndef FLUTTER_SHELL_PLATFORM_EMBEDDER_PLATFORM_VIEW_EMBEDDER_H_
 #define FLUTTER_SHELL_PLATFORM_EMBEDDER_PLATFORM_VIEW_EMBEDDER_H_
 
+#include "flutter/fml/macros.h"
 #include "flutter/shell/common/platform_view.h"
 #include "flutter/shell/gpu/gpu_surface_gl.h"
 #include "flutter/shell/platform/embedder/embedder.h"
-#include "lib/fxl/macros.h"
 
 namespace shell {
 
@@ -16,7 +16,7 @@ class PlatformViewEmbedder final : public PlatformView,
                                    public GPUSurfaceGLDelegate {
  public:
   using PlatformMessageResponseCallback =
-      std::function<void(fxl::RefPtr<blink::PlatformMessage>)>;
+      std::function<void(fml::RefPtr<blink::PlatformMessage>)>;
   struct DispatchTable {
     std::function<bool(void)> gl_make_current_callback;   // required
     std::function<bool(void)> gl_clear_current_callback;  // required
@@ -47,7 +47,7 @@ class PlatformViewEmbedder final : public PlatformView,
 
   // |shell::PlatformView|
   void HandlePlatformMessage(
-      fxl::RefPtr<blink::PlatformMessage> message) override;
+      fml::RefPtr<blink::PlatformMessage> message) override;
 
  private:
   DispatchTable dispatch_table_;
@@ -58,7 +58,7 @@ class PlatformViewEmbedder final : public PlatformView,
   // |shell::PlatformView|
   sk_sp<GrContext> CreateResourceContext() const override;
 
-  FXL_DISALLOW_COPY_AND_ASSIGN(PlatformViewEmbedder);
+  FML_DISALLOW_COPY_AND_ASSIGN(PlatformViewEmbedder);
 };
 
 }  // namespace shell

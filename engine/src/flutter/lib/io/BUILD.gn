@@ -11,15 +11,10 @@ source_set("io") {
   deps = [
     "//third_party/dart/runtime:dart_api",
     "//third_party/dart/runtime/bin:embedded_dart_io",
-    "//garnet/public/lib/fxl",
     "//third_party/tonic",
   ]
 
-  configs += [
-    "//third_party/dart/runtime:dart_config",
-  ]
+  configs += [ "//third_party/dart/runtime:dart_config" ]
 
-  public_configs = [
-    "$flutter_root:config",
-  ]
+  public_configs = [ "$flutter_root:config" ]
 }

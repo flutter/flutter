@@ -31,7 +31,7 @@ class IOSExternalTextureGL : public flow::Texture {
   NSObject<FlutterTexture>* external_texture_;
   fml::CFRef<CVOpenGLESTextureCacheRef> cache_ref_;
   fml::CFRef<CVOpenGLESTextureRef> texture_ref_;
-  FXL_DISALLOW_COPY_AND_ASSIGN(IOSExternalTextureGL);
+  FML_DISALLOW_COPY_AND_ASSIGN(IOSExternalTextureGL);
 };
 
 }  // namespace shell

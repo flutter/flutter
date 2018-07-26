@@ -58,10 +58,6 @@ source_set("flow") {
     "texture.h",
   ]
 
-  public_deps = [
-    "//garnet/public/lib/fxl",
-  ]
-
   public_configs = [ "$flutter_root:config" ]
 
   deps = [

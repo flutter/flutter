@@ -7,11 +7,11 @@
 #include <memory>
 #include <vector>
 
+#include "flutter/fml/logging.h"
 #include "flutter/fml/platform/android/jni_weak_ref.h"
 #include "flutter/fml/platform/android/scoped_java_ref.h"
 #include "flutter/fml/trace_event.h"
 #include "flutter/shell/platform/android/platform_view_android_jni.h"
-#include "lib/fxl/logging.h"
 
 namespace shell {
 
@@ -136,7 +136,7 @@ bool AndroidSurfaceSoftware::OnScreenSurfaceResize(const SkISize& size) const {
 }
 
 bool AndroidSurfaceSoftware::SetNativeWindow(
-    fxl::RefPtr<AndroidNativeWindow> window) {
+    fml::RefPtr<AndroidNativeWindow> window) {
   native_window_ = std::move(window);
   if (!(native_window_ && native_window_->IsValid()))
     return false;

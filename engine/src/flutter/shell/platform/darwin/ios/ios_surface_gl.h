@@ -5,11 +5,11 @@
 #ifndef FLUTTER_SHELL_PLATFORM_DARWIN_IOS_IOS_SURFACE_GL_H_
 #define FLUTTER_SHELL_PLATFORM_DARWIN_IOS_IOS_SURFACE_GL_H_
 
+#include "flutter/fml/macros.h"
 #include "flutter/fml/platform/darwin/scoped_nsobject.h"
 #include "flutter/shell/gpu/gpu_surface_gl.h"
 #include "flutter/shell/platform/darwin/ios/ios_gl_context.h"
 #include "flutter/shell/platform/darwin/ios/ios_surface.h"
-#include "lib/fxl/macros.h"
 
 @class CAEAGLLayer;
 
@@ -42,7 +42,7 @@ class IOSSurfaceGL : public IOSSurface, public GPUSurfaceGLDelegate {
  private:
   IOSGLContext context_;
 
-  FXL_DISALLOW_COPY_AND_ASSIGN(IOSSurfaceGL);
+  FML_DISALLOW_COPY_AND_ASSIGN(IOSSurfaceGL);
 };
 
 }  // namespace shell

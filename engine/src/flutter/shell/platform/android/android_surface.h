@@ -7,12 +7,12 @@
 
 #include <memory>
 
+#include "flutter/fml/macros.h"
 #include "flutter/fml/platform/android/jni_util.h"
 #include "flutter/fml/platform/android/jni_weak_ref.h"
 #include "flutter/shell/common/platform_view.h"
 #include "flutter/shell/common/surface.h"
 #include "flutter/shell/platform/android/android_native_window.h"
-#include "lib/fxl/macros.h"
 #include "third_party/skia/include/core/SkSize.h"
 
 namespace shell {
@@ -33,7 +33,7 @@ class AndroidSurface {
 
   virtual bool ResourceContextMakeCurrent() = 0;
 
-  virtual bool SetNativeWindow(fxl::RefPtr<AndroidNativeWindow> window) = 0;
+  virtual bool SetNativeWindow(fml::RefPtr<AndroidNativeWindow> window) = 0;
 };
 
 }  // namespace shell

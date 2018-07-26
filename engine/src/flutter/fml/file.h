@@ -30,6 +30,9 @@ fml::UniqueFD Duplicate(fml::UniqueFD::element_type descriptor);
 
 bool IsDirectory(const fml::UniqueFD& directory);
 
+// Returns whether the given path is a file.
+bool IsFile(const std::string& path);
+
 }  // namespace fml
 
 #endif  // FLUTTER_FML_FILE_H_

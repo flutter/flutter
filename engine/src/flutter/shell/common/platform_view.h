@@ -9,6 +9,7 @@
 
 #include "flutter/common/task_runners.h"
 #include "flutter/flow/texture.h"
+#include "flutter/fml/macros.h"
 #include "flutter/fml/memory/weak_ptr.h"
 #include "flutter/lib/ui/semantics/custom_accessibility_action.h"
 #include "flutter/lib/ui/semantics/semantics_node.h"
@@ -17,7 +18,6 @@
 #include "flutter/lib/ui/window/viewport_metrics.h"
 #include "flutter/shell/common/surface.h"
 #include "flutter/shell/common/vsync_waiter.h"
-#include "lib/fxl/macros.h"
 #include "third_party/skia/include/core/SkSize.h"
 #include "third_party/skia/include/gpu/GrContext.h"
 
@@ -35,7 +35,7 @@ class PlatformView {
     virtual void OnPlatformViewDestroyed(const PlatformView& view) = 0;
 
     virtual void OnPlatformViewSetNextFrameCallback(const PlatformView& view,
-                                                    fxl::Closure closure) = 0;
+                                                    fml::closure closure) = 0;
 
     virtual void OnPlatformViewSetViewportMetrics(
         const PlatformView& view,
@@ -43,7 +43,7 @@ class PlatformView {
 
     virtual void OnPlatformViewDispatchPlatformMessage(
         const PlatformView& view,
-        fxl::RefPtr<blink::PlatformMessage> message) = 0;
+        fml::RefPtr<blink::PlatformMessage> message) = 0;
 
     virtual void OnPlatformViewDispatchPointerDataPacket(
         const PlatformView& view,
@@ -80,7 +80,7 @@ class PlatformView {
 
   virtual std::unique_ptr<VsyncWaiter> CreateVSyncWaiter();
 
-  void DispatchPlatformMessage(fxl::RefPtr<blink::PlatformMessage> message);
+  void DispatchPlatformMessage(fml::RefPtr<blink::PlatformMessage> message);
 
   void DispatchSemanticsAction(int32_t id,
                                blink::SemanticsAction action,
@@ -106,9 +106,9 @@ class PlatformView {
                                blink::CustomAccessibilityActionUpdates actions);
 
   virtual void HandlePlatformMessage(
-      fxl::RefPtr<blink::PlatformMessage> message);
+      fml::RefPtr<blink::PlatformMessage> message);
 
-  void SetNextFrameCallback(fxl::Closure closure);
+  void SetNextFrameCallback(fml::closure closure);
 
   void DispatchPointerDataPacket(
       std::unique_ptr<blink::PointerDataPacket> packet);
@@ -132,7 +132,7 @@ class PlatformView {
   virtual std::unique_ptr<Surface> CreateRenderingSurface();
 
  private:
-  FXL_DISALLOW_COPY_AND_ASSIGN(PlatformView);
+  FML_DISALLOW_COPY_AND_ASSIGN(PlatformView);
 };
 
 }  // namespace shell

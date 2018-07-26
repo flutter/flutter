@@ -27,10 +27,10 @@ class CanvasImage;
 
 class Canvas : public RefCountedDartWrappable<Canvas> {
   DEFINE_WRAPPERTYPEINFO();
-  FRIEND_MAKE_REF_COUNTED(Canvas);
+  FML_FRIEND_MAKE_REF_COUNTED(Canvas);
 
  public:
-  static fxl::RefPtr<Canvas> Create(PictureRecorder* recorder,
+  static fml::RefPtr<Canvas> Create(PictureRecorder* recorder,
                                     double left,
                                     double top,
                                     double right,

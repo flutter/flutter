@@ -25,7 +25,7 @@ static blink::Settings DefaultSettingsForProcess() {
   // Settings passed in explicitly via command line arguments take priority.
   auto settings = shell::SettingsFromCommandLine(command_line);
 
-  settings.task_observer_add = [](intptr_t key, fxl::Closure callback) {
+  settings.task_observer_add = [](intptr_t key, fml::closure callback) {
     fml::MessageLoop::GetCurrent().AddTaskObserver(key, std::move(callback));
   };
 

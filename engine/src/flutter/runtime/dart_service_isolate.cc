@@ -6,8 +6,8 @@
 
 #include <string.h>
 
+#include "flutter/fml/logging.h"
 #include "flutter/runtime/embedder_resources.h"
-#include "lib/fxl/logging.h"
 #include "third_party/dart/runtime/include/dart_api.h"
 #include "third_party/tonic/converter/dart_converter.h"
 #include "third_party/tonic/dart_library_natives.h"
@@ -46,12 +46,12 @@ static std::string observatory_uri_;
 Dart_NativeFunction GetNativeFunction(Dart_Handle name,
                                       int argument_count,
                                       bool* auto_setup_scope) {
-  FXL_CHECK(g_natives);
+  FML_CHECK(g_natives);
   return g_natives->GetNativeFunction(name, argument_count, auto_setup_scope);
 }
 
 const uint8_t* GetSymbol(Dart_NativeFunction native_function) {
-  FXL_CHECK(g_natives);
+  FML_CHECK(g_natives);
   return g_natives->GetSymbol(native_function);
 }
 
@@ -59,9 +59,9 @@ const uint8_t* GetSymbol(Dart_NativeFunction native_function) {
 
 void DartServiceIsolate::TriggerResourceLoad(Dart_NativeArguments args) {
   Dart_Handle library = Dart_RootLibrary();
-  FXL_DCHECK(!Dart_IsError(library));
+  FML_DCHECK(!Dart_IsError(library));
   Dart_Handle result = LoadResources(library);
-  FXL_DCHECK(!Dart_IsError(result));
+  FML_DCHECK(!Dart_IsError(result));
 }
 
 void DartServiceIsolate::NotifyServerState(Dart_NativeArguments args) {
@@ -88,11 +88,11 @@ bool DartServiceIsolate::Startup(std::string server_ip,
                                  bool disable_origin_check,
                                  char** error) {
   Dart_Isolate isolate = Dart_CurrentIsolate();
-  FXL_CHECK(isolate);
+  FML_CHECK(isolate);
 
   // Remember the embedder's library tag handler.
   g_embedder_tag_handler = embedder_tag_handler;
-  FXL_CHECK(g_embedder_tag_handler);
+  FML_CHECK(g_embedder_tag_handler);
 
   // Setup native entries.
   if (!g_natives) {
@@ -115,7 +115,7 @@ bool DartServiceIsolate::Startup(std::string server_ip,
     Dart_SetLibraryTagHandler(DartServiceIsolate::LibraryTagHandler);
     // Load main script.
     Dart_Handle library = LoadScript(kServiceIsolateScript);
-    FXL_DCHECK(library != Dart_Null());
+    FML_DCHECK(library != Dart_Null());
     SHUTDOWN_ON_ERROR(library);
     // Setup native entry resolution.
     result = Dart_SetNativeResolver(library, GetNativeFunction, GetSymbol);
@@ -181,7 +181,7 @@ Dart_Handle DartServiceIsolate::GetSource(const char* name) {
            name);
   const char* vmservice_source = NULL;
   int r = g_resources->ResourceLookup(buffer, &vmservice_source);
-  FXL_DCHECK(r != EmbedderResources::kNoSuchInstance);
+  FML_DCHECK(r != EmbedderResources::kNoSuchInstance);
   return Dart_NewStringFromCString(vmservice_source);
 }
 
@@ -206,7 +206,7 @@ Dart_Handle DartServiceIsolate::LoadResource(Dart_Handle library,
   const char* data_buffer = NULL;
   int data_buffer_length =
       g_resources->ResourceLookup(resource_name, &data_buffer);
-  FXL_DCHECK(data_buffer_length != EmbedderResources::kNoSuchInstance);
+  FML_DCHECK(data_buffer_length != EmbedderResources::kNoSuchInstance);
   Dart_Handle data_list =
       Dart_NewTypedData(Dart_TypedData_kUint8, data_buffer_length);
   RETURN_ERROR_HANDLE(data_list);
@@ -216,9 +216,9 @@ Dart_Handle DartServiceIsolate::LoadResource(Dart_Handle library,
   Dart_Handle result = Dart_TypedDataAcquireData(
       data_list, &type, &data_list_buffer, &data_list_buffer_length);
   RETURN_ERROR_HANDLE(result);
-  FXL_DCHECK(data_buffer_length == data_list_buffer_length);
-  FXL_DCHECK(data_list_buffer != NULL);
-  FXL_DCHECK(type = Dart_TypedData_kUint8);
+  FML_DCHECK(data_buffer_length == data_list_buffer_length);
+  FML_DCHECK(data_list_buffer != NULL);
+  FML_DCHECK(type = Dart_TypedData_kUint8);
   memmove(data_list_buffer, &data_buffer[0], data_buffer_length);
   result = Dart_TypedDataReleaseData(data_list);
   RETURN_ERROR_HANDLE(result);
@@ -272,7 +272,7 @@ Dart_Handle DartServiceIsolate::LibraryTagHandler(Dart_LibraryTag tag,
     // Embedder handles all requests for external libraries.
     return g_embedder_tag_handler(tag, library, url);
   }
-  FXL_DCHECK((tag == Dart_kSourceTag) || (tag == Dart_kCanonicalizeUrl));
+  FML_DCHECK((tag == Dart_kSourceTag) || (tag == Dart_kCanonicalizeUrl));
   if (tag == Dart_kCanonicalizeUrl) {
     // url is already canonicalized.
     return url;

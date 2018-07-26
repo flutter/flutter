@@ -24,11 +24,11 @@ static_assert(SkShader::kTileModeCount >= 3, "Need to update tile mode enum");
 
 class CanvasGradient : public Shader {
   DEFINE_WRAPPERTYPEINFO();
-  FRIEND_MAKE_REF_COUNTED(CanvasGradient);
+  FML_FRIEND_MAKE_REF_COUNTED(CanvasGradient);
 
  public:
   ~CanvasGradient() override;
-  static fxl::RefPtr<CanvasGradient> Create();
+  static fml::RefPtr<CanvasGradient> Create();
 
   void initLinear(const tonic::Float32List& end_points,
                   const tonic::Int32List& colors,
