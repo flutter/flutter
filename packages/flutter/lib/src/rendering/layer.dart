@@ -681,7 +681,7 @@ class ClipRectLayer extends ContainerLayer {
       return true;
     }());
     if (enabled)
-      builder.pushClipRect(clipRect.shift(layerOffset), clip: clipBehavior);
+      builder.pushClipRect(clipRect.shift(layerOffset), clipBehavior: clipBehavior);
     addChildrenToScene(builder, layerOffset);
     if (enabled)
       builder.pop();
@@ -730,7 +730,7 @@ class ClipRRectLayer extends ContainerLayer {
       return true;
     }());
     if (enabled)
-      builder.pushClipRRect(clipRRect.shift(layerOffset), clip: clipBehavior);
+      builder.pushClipRRect(clipRRect.shift(layerOffset), clipBehavior: clipBehavior);
     addChildrenToScene(builder, layerOffset);
     if (enabled)
       builder.pop();
@@ -782,7 +782,7 @@ class ClipPathLayer extends ContainerLayer {
       return true;
     }());
     if (enabled)
-      builder.pushClipPath(clipPath.shift(layerOffset), clip: clipBehavior);
+      builder.pushClipPath(clipPath.shift(layerOffset), clipBehavior: clipBehavior);
     addChildrenToScene(builder, layerOffset);
     if (enabled)
       builder.pop();
@@ -1047,7 +1047,7 @@ class PhysicalModelLayer extends ContainerLayer {
         elevation: elevation,
         color: color,
         shadowColor: shadowColor,
-        clip: clipBehavior,
+        clipBehavior: clipBehavior,
       );
     }
     addChildrenToScene(builder, layerOffset);

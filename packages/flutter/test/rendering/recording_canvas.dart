@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' show Clip, defaultClipBehavior; // ignore: deprecated_member_use
+import 'dart:ui' show Clip;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
@@ -105,23 +105,18 @@ class TestRecordingPaintingContext implements PaintingContext {
   }
 
   @override
-  void pushClipRect(bool needsCompositing, Offset offset, Rect clipRect, PaintingContextCallback painter) {
-    canvas.save();
-    canvas.clipRect(clipRect.shift(offset));
-    painter(this, offset);
-    canvas.restore();
+  void pushClipRect(bool needsCompositing, Offset offset, Rect clipRect, PaintingContextCallback painter, {Clip clipBehavior = Clip.antiAlias}) {
+    Layer.clipRectAndPaint(canvas, clipBehavior, clipRect.shift(offset), clipRect.shift(offset), () => painter(this, offset));
   }
 
   @override
-  // ignore: deprecated_member_use
-  void pushClipRRect(bool needsCompositing, Offset offset, Rect bounds, RRect clipRRect, PaintingContextCallback painter, {Clip clipBehavior = defaultClipBehavior}) {
+  void pushClipRRect(bool needsCompositing, Offset offset, Rect bounds, RRect clipRRect, PaintingContextCallback painter, {Clip clipBehavior = Clip.antiAlias}) {
     assert(clipBehavior != null);
     Layer.clipRRectAndPaint(canvas, clipBehavior, clipRRect.shift(offset), bounds.shift(offset), () => painter(this, offset));
   }
 
   @override
-  // ignore: deprecated_member_use
-  void pushClipPath(bool needsCompositing, Offset offset, Rect bounds, Path clipPath, PaintingContextCallback painter, {Clip clipBehavior = defaultClipBehavior}) {
+  void pushClipPath(bool needsCompositing, Offset offset, Rect bounds, Path clipPath, PaintingContextCallback painter, {Clip clipBehavior = Clip.antiAlias}) {
     Layer.clipPathAndPaint(canvas, clipBehavior, clipPath.shift(offset), bounds.shift(offset), () => painter(this, offset));
   }
 

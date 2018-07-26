@@ -321,12 +321,7 @@ class PaintingContext {
     if (needsCompositing) {
       pushLayer(new ClipRectLayer(clipRect: offsetClipRect, clipBehavior: clipBehavior), painter, offset, childPaintBounds: offsetClipRect);
     } else {
-      canvas
-        ..save()
-        ..clipRect(offsetClipRect);
-      painter(this, offset);
-      canvas
-        ..restore();
+      Layer.clipRectAndPaint(canvas, clipBehavior, offsetClipRect, offsetClipRect, () => painter(this, offset));
     }
   }
 

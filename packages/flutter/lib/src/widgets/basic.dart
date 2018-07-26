@@ -583,7 +583,7 @@ class ClipOval extends SingleChildRenderObjectWidget {
   ///
   /// If [clipper] is null, the oval will be inscribed into the layout size and
   /// position of the child.
-  const ClipOval({ Key key, this.clipper, this.clipBehavior, Widget child }) : super(key: key, child: child);
+  const ClipOval({ Key key, this.clipper, this.clipBehavior = Clip.antiAlias, Widget child }) : super(key: key, child: child);
 
   /// If non-null, determines which clip to use.
   ///
@@ -638,7 +638,7 @@ class ClipPath extends SingleChildRenderObjectWidget {
   /// size and location of the child. However, rather than use this default,
   /// consider using a [ClipRect], which can achieve the same effect more
   /// efficiently.
-  const ClipPath({ Key key, this.clipper, this.clipBehavior, Widget child }) : super(key: key, child: child);
+  const ClipPath({ Key key, this.clipper, this.clipBehavior = Clip.antiAlias, Widget child }) : super(key: key, child: child);
 
   /// If non-null, determines which clip to use.
   ///

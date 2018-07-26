@@ -1123,9 +1123,9 @@ abstract class _RenderCustomClip<T> extends RenderProxyBox {
     RenderBox child,
     Clip clipBehavior = defaultClipBehavior, // ignore: deprecated_member_use
     CustomClipper<T> clipper // this would override _clip and initialClip
-  }) : _clipper = clipper, _clipBehavior = clipBehavior, super(child) {
-    assert(_clipper != null || _clipBehavior != null && _clipBehavior != Clip.none);
-  }
+  }) : _clipper = clipper, _clipBehavior = clipBehavior,
+        assert(_clipper != null || _clipBehavior != null && _clipBehavior != Clip.none),
+        super(child);
 
   /// If non-null, determines which clip to use on the child.
   CustomClipper<T> get clipper => _clipper;
