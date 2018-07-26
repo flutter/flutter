@@ -168,7 +168,7 @@ class Draggable<T> extends StatefulWidget {
 
   /// Whether the semantics of the [feedback] widget is ignored when building
   /// the semantics tree.
-  /// 
+  ///
   /// This value should be set to false when the [feedback] widget is intended
   /// to be the same object as the [child].  Placing a [GlobalKey] on this
   /// widget will ensure semantic focus is kept on the element as it moves in
@@ -267,6 +267,7 @@ class LongPressDraggable<T> extends Draggable<T> {
     VoidCallback onDragStarted,
     DraggableCanceledCallback onDraggableCanceled,
     VoidCallback onDragCompleted,
+    this.hapticFeedbackOnStart = true,
     bool ignoringFeedbackSemantics = true,
   }) : super(
     key: key,
@@ -284,12 +285,15 @@ class LongPressDraggable<T> extends Draggable<T> {
     ignoringFeedbackSemantics: ignoringFeedbackSemantics,
   );
 
+  /// Whether haptic feedback should be triggered on drag start.
+  final bool hapticFeedbackOnStart;
+
   @override
   DelayedMultiDragGestureRecognizer createRecognizer(GestureMultiDragStartCallback onStart) {
     return new DelayedMultiDragGestureRecognizer()
       ..onStart = (Offset position) {
         final Drag result = onStart(position);
-        if (result != null)
+        if (result != null && hapticFeedbackOnStart)
           HapticFeedback.selectionClick();
         return result;
       };
@@ -656,7 +660,7 @@ class _DragAvatar<T> extends Drag {
   Offset _restrictAxis(Offset offset) {
     if (axis == null) {
       return offset;
-    } 
+    }
     if (axis == Axis.horizontal) {
       return new Offset(offset.dx, 0.0);
     }

@@ -11,11 +11,11 @@ void main() {
     await tester.pumpWidget(new MaterialApp( // Creates the outer Localizations widget.
       home: new ListView(
         children: <Widget>[
-          const LocalizationTracker(key: const ValueKey<String>('outer')),
+          const LocalizationTracker(key: ValueKey<String>('outer')),
           new Localizations(
             locale: const Locale('zh', 'CN'),
             delegates: GlobalMaterialLocalizations.delegates,
-            child: const LocalizationTracker(key: const ValueKey<String>('inner')),
+            child: const LocalizationTracker(key: ValueKey<String>('inner')),
           ),
         ],
       ),
@@ -32,8 +32,8 @@ void main() {
     await tester.pumpWidget(
       new MaterialApp(
         supportedLocales: const <Locale>[
-          const Locale('en', 'US'),
-          const Locale('es', 'ES'),
+          Locale('en', 'US'),
+          Locale('es', 'ES'),
         ],
         localizationsDelegates: <LocalizationsDelegate<dynamic>>[
           new _DummyLocalizationsDelegate(),
@@ -56,8 +56,8 @@ void main() {
           GlobalMaterialLocalizations.delegate,
         ],
         supportedLocales: const <Locale>[
-          const Locale('es', 'ES'),
-          const Locale('zh'),
+          Locale('es', 'ES'),
+          Locale('zh'),
         ],
         home: new Container(),
       )

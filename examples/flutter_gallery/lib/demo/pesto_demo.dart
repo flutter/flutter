@@ -86,7 +86,7 @@ class _RecipeGridPageState extends State<RecipeGridPage> {
           child: const Icon(Icons.edit),
           onPressed: () {
             scaffoldKey.currentState.showSnackBar(const SnackBar(
-              content: const Text('Not supported.'),
+              content: Text('Not supported.'),
             ));
           },
         ),
@@ -110,7 +110,7 @@ class _RecipeGridPageState extends State<RecipeGridPage> {
           tooltip: 'Search',
           onPressed: () {
             scaffoldKey.currentState.showSnackBar(const SnackBar(
-              content: const Text('Not supported.'),
+              content: Text('Not supported.'),
             ));
           },
         ),
@@ -272,6 +272,7 @@ class RecipeCard extends StatelessWidget {
                 recipe.imagePath,
                 package: recipe.imagePackage,
                 fit: BoxFit.contain,
+                semanticLabel: recipe.name,
               ),
             ),
             new Expanded(
@@ -366,12 +367,12 @@ class _RecipePageState extends State<RecipePage> {
                   ),
                 ],
                 flexibleSpace: const FlexibleSpaceBar(
-                  background: const DecoratedBox(
-                    decoration: const BoxDecoration(
-                      gradient: const LinearGradient(
-                        begin: const Alignment(0.0, -1.0),
-                        end: const Alignment(0.0, -0.2),
-                        colors: const<Color>[const Color(0x60000000), const Color(0x00000000)],
+                  background: DecoratedBox(
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment(0.0, -1.0),
+                        end: Alignment(0.0, -0.2),
+                        colors: <Color>[Color(0x60000000), Color(0x00000000)],
                       ),
                     ),
                   ),
@@ -448,7 +449,7 @@ class RecipeSheet extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 40.0),
           child: new Table(
             columnWidths: const <int, TableColumnWidth>{
-              0: const FixedColumnWidth(64.0)
+              0: FixedColumnWidth(64.0)
             },
             children: <TableRow>[
               new TableRow(
@@ -567,8 +568,8 @@ class RecipeStep {
   final String description;
 }
 
-const List<Recipe> kPestoRecipes = const <Recipe>[
-  const Recipe(
+const List<Recipe> kPestoRecipes = <Recipe>[
+  Recipe(
     name: 'Pesto Bruschetta',
     author: 'Peter Carlsson',
     ingredientsImagePath: 'food/icons/quick.png',
@@ -576,19 +577,19 @@ const List<Recipe> kPestoRecipes = const <Recipe>[
     description: 'Bask in greens this season by trying this delightful take on traditional bruschetta. Top with a dollop of homemade pesto, and season with freshly ground sea salt and pepper.',
     imagePath: 'food/image1.jpg',
     imagePackage: _kGalleryAssetsPackage,
-    ingredients: const<RecipeIngredient>[
-      const RecipeIngredient(amount: '6 pieces', description: 'Mozzarella cheese'),
-      const RecipeIngredient(amount: '6 pieces', description: 'Toasts'),
-      const RecipeIngredient(amount: '⅔ cup', description: 'Homemade pesto'),
-      const RecipeIngredient(amount: '1tbsp', description: 'Freshly ground pepper'),
-      const RecipeIngredient(amount: '1 tsp', description: 'Salt'),
+    ingredients: <RecipeIngredient>[
+      RecipeIngredient(amount: '6 pieces', description: 'Mozzarella cheese'),
+      RecipeIngredient(amount: '6 pieces', description: 'Toasts'),
+      RecipeIngredient(amount: '⅔ cup', description: 'Homemade pesto'),
+      RecipeIngredient(amount: '1tbsp', description: 'Freshly ground pepper'),
+      RecipeIngredient(amount: '1 tsp', description: 'Salt'),
     ],
-    steps: const<RecipeStep>[
-      const RecipeStep(description: 'Put in oven'),
-      const RecipeStep(duration: '45 min', description: 'Cook'),
+    steps: <RecipeStep>[
+      RecipeStep(description: 'Put in oven'),
+      RecipeStep(duration: '45 min', description: 'Cook'),
     ],
   ),
-  const Recipe(
+  Recipe(
     name: 'Rustic purple mash',
     author: 'Trevor Hansen',
     ingredientsImagePath: 'food/icons/veggie.png',
@@ -596,19 +597,19 @@ const List<Recipe> kPestoRecipes = const <Recipe>[
     description: 'Abundant in color, and healthy, delicious goodness, cooking with these South American purple potatoes is a treat. Boil, mash, bake, or roast them. For taste cook with chicken stock, and a dash of extra virgin olive oil.',
     imagePath: 'food/image2.jpg',
     imagePackage: _kGalleryAssetsPackage,
-    ingredients: const<RecipeIngredient>[
-      const RecipeIngredient(amount: '2 lbs', description: 'Purple potatoes, skin on'),
-      const RecipeIngredient(amount: '1 tsp', description: 'Salt'),
-      const RecipeIngredient(amount: '2 tsp', description: 'Lemon'),
-      const RecipeIngredient(amount: '4 cups', description: 'Chicken stock'),
-      const RecipeIngredient(amount: '1tbsp', description: 'Extra virgin olive oil')
+    ingredients: <RecipeIngredient>[
+      RecipeIngredient(amount: '2 lbs', description: 'Purple potatoes, skin on'),
+      RecipeIngredient(amount: '1 tsp', description: 'Salt'),
+      RecipeIngredient(amount: '2 tsp', description: 'Lemon'),
+      RecipeIngredient(amount: '4 cups', description: 'Chicken stock'),
+      RecipeIngredient(amount: '1tbsp', description: 'Extra virgin olive oil')
     ],
-    steps: const<RecipeStep>[
-      const RecipeStep(duration: '3 min', description: 'Stir'),
-      const RecipeStep(duration: '45 min', description: 'Cook'),
+    steps: <RecipeStep>[
+      RecipeStep(duration: '3 min', description: 'Stir'),
+      RecipeStep(duration: '45 min', description: 'Cook'),
     ],
   ),
-  const Recipe(
+  Recipe(
     name: 'Bacon Sprouts',
     author: 'Ali Connors',
     ingredientsImagePath: 'food/icons/main.png',
@@ -616,20 +617,20 @@ const List<Recipe> kPestoRecipes = const <Recipe>[
     description: 'This beautiful sprouts recipe is the most glorious side dish on a cold winter’s night. Construct it with bacon or fake-on, but always make sure the sprouts are deliciously seasoned and appropriately sautéed.',
     imagePath: 'food/image3.jpg',
     imagePackage: _kGalleryAssetsPackage,
-    ingredients: const<RecipeIngredient>[
-      const RecipeIngredient(amount: '2 lbs', description: 'Brussel sprouts'),
-      const RecipeIngredient(amount: '3 lbs', description: 'Bacon'),
-      const RecipeIngredient(amount: '⅔ cup', description: 'Shaved parmesan cheese'),
-      const RecipeIngredient(amount: '1tbsp', description: 'Extra virgin olive oil'),
-      const RecipeIngredient(amount: '1 tsp', description: 'Lemon juice'),
-      const RecipeIngredient(amount: '1/2 cup', description: 'Sun dried tomatoes'),
+    ingredients: <RecipeIngredient>[
+      RecipeIngredient(amount: '2 lbs', description: 'Brussel sprouts'),
+      RecipeIngredient(amount: '3 lbs', description: 'Bacon'),
+      RecipeIngredient(amount: '⅔ cup', description: 'Shaved parmesan cheese'),
+      RecipeIngredient(amount: '1tbsp', description: 'Extra virgin olive oil'),
+      RecipeIngredient(amount: '1 tsp', description: 'Lemon juice'),
+      RecipeIngredient(amount: '1/2 cup', description: 'Sun dried tomatoes'),
     ],
-    steps: const<RecipeStep>[
-      const RecipeStep(duration: '3 min', description: 'Stir'),
-      const RecipeStep(duration: '45 min', description: 'Cook'),
+    steps: <RecipeStep>[
+      RecipeStep(duration: '3 min', description: 'Stir'),
+      RecipeStep(duration: '45 min', description: 'Cook'),
     ],
   ),
-  const Recipe(
+  Recipe(
     name: 'Oven Sausage',
     author: 'Sandra Adams',
     ingredientsImagePath: 'food/icons/meat.png',
@@ -637,16 +638,16 @@ const List<Recipe> kPestoRecipes = const <Recipe>[
     description: 'Robust cuts of portuguese sausage add layers of flavour. Bake or fry until sausages are slightly browned and with a crispy skin. Serve warm and with cuts of pineapple for a delightful mix of sweet and savory flavour. This is the perfect dish after a swim in the sea.',
     imagePath: 'food/image4.jpg',
     imagePackage: _kGalleryAssetsPackage,
-    ingredients: const<RecipeIngredient>[
-      const RecipeIngredient(amount: '1 1/2 lbs', description: 'Linguisa'),
-      const RecipeIngredient(amount: '1 lbs', description: 'Pineapple or other fresh citrus fruit'),
+    ingredients: <RecipeIngredient>[
+      RecipeIngredient(amount: '1 1/2 lbs', description: 'Linguisa'),
+      RecipeIngredient(amount: '1 lbs', description: 'Pineapple or other fresh citrus fruit'),
     ],
-    steps: const<RecipeStep>[
-      const RecipeStep(duration: '3 min', description: 'Stir'),
-      const RecipeStep(duration: '45 min', description: 'Cook'),
+    steps: <RecipeStep>[
+      RecipeStep(duration: '3 min', description: 'Stir'),
+      RecipeStep(duration: '45 min', description: 'Cook'),
     ],
   ),
-  const Recipe(
+  Recipe(
     name: 'Chicken tostadas',
     author: 'Peter Carlsson',
     ingredientsImagePath: 'food/icons/spicy.png',
@@ -654,18 +655,18 @@ const List<Recipe> kPestoRecipes = const <Recipe>[
     description: 'Crisp flavours and a bit of spice make this roasted chicken dish an easy go to when cooking for large groups. Top with Baja sauce for an extra kick of spice.',
     imagePath: 'food/image5.jpg',
     imagePackage: _kGalleryAssetsPackage,
-    ingredients: const<RecipeIngredient>[
-      const RecipeIngredient(amount: '4-6', description: 'Small corn tortillas'),
-      const RecipeIngredient(amount: '½ cup', description: 'Chopped onion'),
-      const RecipeIngredient(amount: '⅔', description: 'Cream'),
-      const RecipeIngredient(amount: '3-4oz', description: 'Roasted, shredded chicken breast'),
+    ingredients: <RecipeIngredient>[
+      RecipeIngredient(amount: '4-6', description: 'Small corn tortillas'),
+      RecipeIngredient(amount: '½ cup', description: 'Chopped onion'),
+      RecipeIngredient(amount: '⅔', description: 'Cream'),
+      RecipeIngredient(amount: '3-4oz', description: 'Roasted, shredded chicken breast'),
     ],
-    steps: const<RecipeStep>[
-      const RecipeStep(duration: '3 min', description: 'Stir'),
-      const RecipeStep(duration: '45 min', description: 'Cook'),
+    steps: <RecipeStep>[
+      RecipeStep(duration: '3 min', description: 'Stir'),
+      RecipeStep(duration: '45 min', description: 'Cook'),
     ],
   ),
-  const Recipe(
+  Recipe(
     name: 'Coconut rice',
     author: 'Ali Connors',
     ingredientsImagePath: 'food/icons/healthy.png',
@@ -673,19 +674,19 @@ const List<Recipe> kPestoRecipes = const <Recipe>[
     description: 'This dish is a terrific pairing to almost any main. Bonus- it’s quick, easy to make, and turns even the simplest of dishes into a delicacy. Sweet coconut cream will leave your mouth watering, with yummy caramelized flecks of rice adding an extra bit of taste. Fluff with fork before serving for best results.',
     imagePath: 'food/image6.jpg',
     imagePackage: _kGalleryAssetsPackage,
-    ingredients: const<RecipeIngredient>[
-      const RecipeIngredient(amount: '2 cups', description: 'Jasmine rice'),
-      const RecipeIngredient(amount: '1 1/2 cups', description: 'Water'),
-      const RecipeIngredient(amount: '1 cup', description: 'Coconut milk'),
-      const RecipeIngredient(amount: '1 1/2 tbsp', description: 'Sugar'),
-      const RecipeIngredient(amount: '1tsp', description: 'Salt'),
+    ingredients: <RecipeIngredient>[
+      RecipeIngredient(amount: '2 cups', description: 'Jasmine rice'),
+      RecipeIngredient(amount: '1 1/2 cups', description: 'Water'),
+      RecipeIngredient(amount: '1 cup', description: 'Coconut milk'),
+      RecipeIngredient(amount: '1 1/2 tbsp', description: 'Sugar'),
+      RecipeIngredient(amount: '1tsp', description: 'Salt'),
     ],
-    steps: const<RecipeStep>[
-      const RecipeStep(duration: '3 min', description: 'Stir'),
-      const RecipeStep(duration: '45 min', description: 'Cook')
+    steps: <RecipeStep>[
+      RecipeStep(duration: '3 min', description: 'Stir'),
+      RecipeStep(duration: '45 min', description: 'Cook')
     ],
   ),
-  const Recipe(
+  Recipe(
     name: 'Gin basil cocktail',
     author: 'Trevor Hansen',
     ingredientsImagePath: 'food/icons/quick.png',
@@ -693,18 +694,18 @@ const List<Recipe> kPestoRecipes = const <Recipe>[
     description: 'This mellow and herb filled blending of simple ingredients is easy enough to mix that a novice host will feel like a seasoned bartender. Top with crushed basil, shake or stir.',
     imagePath: 'food/image7.jpg',
     imagePackage: _kGalleryAssetsPackage,
-    ingredients: const<RecipeIngredient>[
-      const RecipeIngredient(amount: '3 parts', description: 'Gin'),
-      const RecipeIngredient(amount: '1 part', description: 'Fresh lemon juice'),
-      const RecipeIngredient(amount: '½ part', description: 'Simple syrup'),
-      const RecipeIngredient(amount: '5', description: 'Basil leaves, crushed'),
+    ingredients: <RecipeIngredient>[
+      RecipeIngredient(amount: '3 parts', description: 'Gin'),
+      RecipeIngredient(amount: '1 part', description: 'Fresh lemon juice'),
+      RecipeIngredient(amount: '½ part', description: 'Simple syrup'),
+      RecipeIngredient(amount: '5', description: 'Basil leaves, crushed'),
     ],
-    steps: const<RecipeStep>[
-      const RecipeStep(duration: '3 min', description: 'Stir'),
-      const RecipeStep(duration: '45 min', description: 'Cook'),
+    steps: <RecipeStep>[
+      RecipeStep(duration: '3 min', description: 'Stir'),
+      RecipeStep(duration: '45 min', description: 'Cook'),
     ],
   ),
-  const Recipe(
+  Recipe(
     name: 'Seared sesame fish',
     author: 'Ali Connors',
     ingredientsImagePath: 'food/icons/fish.png',
@@ -712,20 +713,20 @@ const List<Recipe> kPestoRecipes = const <Recipe>[
     description: 'Cuts of fish like this are perfect for simple searing with bright flavours. Try Sesame seeds on these fillets for crusty skin filled with crunch. For added flavour try dipping in a homemade ponzu sauce - delicious.',
     imagePath: 'food/image8.jpg',
     imagePackage: _kGalleryAssetsPackage,
-    ingredients: const<RecipeIngredient>[
-      const RecipeIngredient(amount: '1 ½ lbs', description: 'Thin fish fillets'),
-      const RecipeIngredient(amount: '1 lb', description: 'Salt and black pepper to taste'),
-      const RecipeIngredient(amount: '3/4 cup', description: 'Sesame seeds'),
-      const RecipeIngredient(amount: '2tbsp', description: 'Sesame oil'),
-      const RecipeIngredient(amount: '1tbsp', description: 'Lime juice'),
-      const RecipeIngredient(amount: '2 tbsp', description: 'Soy sauce'),
+    ingredients: <RecipeIngredient>[
+      RecipeIngredient(amount: '1 ½ lbs', description: 'Thin fish fillets'),
+      RecipeIngredient(amount: '1 lb', description: 'Salt and black pepper to taste'),
+      RecipeIngredient(amount: '3/4 cup', description: 'Sesame seeds'),
+      RecipeIngredient(amount: '2tbsp', description: 'Sesame oil'),
+      RecipeIngredient(amount: '1tbsp', description: 'Lime juice'),
+      RecipeIngredient(amount: '2 tbsp', description: 'Soy sauce'),
     ],
-    steps: const<RecipeStep>[
-      const RecipeStep(duration: '3 min', description: 'Stir'),
-      const RecipeStep(duration: '45 min', description: 'Cook'),
+    steps: <RecipeStep>[
+      RecipeStep(duration: '3 min', description: 'Stir'),
+      RecipeStep(duration: '45 min', description: 'Cook'),
     ],
   ),
-  const Recipe(
+  Recipe(
     name: 'Herb artichoke',
     author: 'Sandra Adams',
     ingredientsImagePath: 'food/icons/healthy.png',
@@ -733,20 +734,20 @@ const List<Recipe> kPestoRecipes = const <Recipe>[
     description: 'This tasty and healthy veggie is a favorite. Artichoke like this can be paired with a hearty main or works well as a small meal with some white wine on the side. Simple and fresh, all foodies love tasty artichoke.',
     imagePath: 'food/image9.jpg',
     imagePackage: _kGalleryAssetsPackage,
-    ingredients: const<RecipeIngredient>[
-      const RecipeIngredient(amount: '1', description: 'Small garlic clove, peeled'),
-      const RecipeIngredient(amount: '2', description: 'Whole artichokes'),
-      const RecipeIngredient(amount: '4 tbsp', description: 'Fresh lemon juice'),
-      const RecipeIngredient(amount: '4 tbsp', description: 'Unsalted butter'),
-      const RecipeIngredient(amount: '2 tbsp', description: 'Extra-virgin olive oil'),
-      const RecipeIngredient(amount: '1⁄4 tsp', description: 'Freshly ground black pepper'),
+    ingredients: <RecipeIngredient>[
+      RecipeIngredient(amount: '1', description: 'Small garlic clove, peeled'),
+      RecipeIngredient(amount: '2', description: 'Whole artichokes'),
+      RecipeIngredient(amount: '4 tbsp', description: 'Fresh lemon juice'),
+      RecipeIngredient(amount: '4 tbsp', description: 'Unsalted butter'),
+      RecipeIngredient(amount: '2 tbsp', description: 'Extra-virgin olive oil'),
+      RecipeIngredient(amount: '1⁄4 tsp', description: 'Freshly ground black pepper'),
     ],
-    steps: const<RecipeStep>[
-      const RecipeStep(duration: '3 min', description: 'Stir'),
-      const RecipeStep(duration: '45 min', description: 'Cook'),
+    steps: <RecipeStep>[
+      RecipeStep(duration: '3 min', description: 'Stir'),
+      RecipeStep(duration: '45 min', description: 'Cook'),
     ],
   ),
-  const Recipe(
+  Recipe(
     name: 'Pesto bruschetta',
     author: 'Trevor Hansen',
     ingredientsImagePath: 'food/icons/veggie.png',
@@ -754,22 +755,22 @@ const List<Recipe> kPestoRecipes = const <Recipe>[
     description: 'Life is good when you add amazingly warm bread, fresh pesto sauce, and roasted tomatoes to the table. This a classic starter to break out in a pinch. It’s easy to make and extra tasty.',
     imagePath: 'food/image10.jpg',
     imagePackage: _kGalleryAssetsPackage,
-    ingredients: const<RecipeIngredient>[
-      const RecipeIngredient(amount: '1 loaf', description: 'Sliced French bread'),
-      const RecipeIngredient(amount: '½ cup', description: 'Cheese'),
-      const RecipeIngredient(amount: '1 cup', description: 'Heirloom tomatoes'),
-      const RecipeIngredient(amount: '1 cup', description: 'Fresh basil'),
-      const RecipeIngredient(amount: '1 clove', description: 'Garlic '),
-      const RecipeIngredient(amount: '½ tbsp', description: 'Olive oil'),
-      const RecipeIngredient(amount: '3tsp', description: 'White wine vinegar'),
-      const RecipeIngredient(amount: '¼ tsp', description: 'Sea salt'),
+    ingredients: <RecipeIngredient>[
+      RecipeIngredient(amount: '1 loaf', description: 'Sliced French bread'),
+      RecipeIngredient(amount: '½ cup', description: 'Cheese'),
+      RecipeIngredient(amount: '1 cup', description: 'Heirloom tomatoes'),
+      RecipeIngredient(amount: '1 cup', description: 'Fresh basil'),
+      RecipeIngredient(amount: '1 clove', description: 'Garlic '),
+      RecipeIngredient(amount: '½ tbsp', description: 'Olive oil'),
+      RecipeIngredient(amount: '3tsp', description: 'White wine vinegar'),
+      RecipeIngredient(amount: '¼ tsp', description: 'Sea salt'),
     ],
-    steps: const<RecipeStep>[
-      const RecipeStep(duration: '3 min', description: 'Stir'),
-      const RecipeStep(duration: '45 min', description: 'Cook'),
+    steps: <RecipeStep>[
+      RecipeStep(duration: '3 min', description: 'Stir'),
+      RecipeStep(duration: '45 min', description: 'Cook'),
     ],
   ),
-  const Recipe(
+  Recipe(
     name: 'Garlic bok choy',
     author: 'Sandra Adams',
     ingredientsImagePath: 'food/icons/spicy.png',
@@ -777,19 +778,19 @@ const List<Recipe> kPestoRecipes = const <Recipe>[
     description: 'Great stir-fried bok choy starts at the market. For me, nothing says tasty like garlic and baby bok choy. Choose fresh, crisp greens. Once home, wash, chop, and then ready for the wok. No family style spread is complete without these greens.',
     imagePath: 'food/image11.jpg',
     imagePackage: _kGalleryAssetsPackage,
-    ingredients: const<RecipeIngredient>[
-      const RecipeIngredient(amount: '1/2 cup', description: 'Chick broth'),
-      const RecipeIngredient(amount: '1 tbsp', description: 'Soy sauce'),
-      const RecipeIngredient(amount: '¼ cup', description: 'Sliced garlic'),
-      const RecipeIngredient(amount: '2-3 lbs', description: 'Bok choy'),
-      const RecipeIngredient(amount: '2 tsp', description: 'Sesame oil'),
+    ingredients: <RecipeIngredient>[
+      RecipeIngredient(amount: '1/2 cup', description: 'Chick broth'),
+      RecipeIngredient(amount: '1 tbsp', description: 'Soy sauce'),
+      RecipeIngredient(amount: '¼ cup', description: 'Sliced garlic'),
+      RecipeIngredient(amount: '2-3 lbs', description: 'Bok choy'),
+      RecipeIngredient(amount: '2 tsp', description: 'Sesame oil'),
     ],
-    steps: const<RecipeStep>[
-      const RecipeStep(duration: '3 min', description: 'Stir'),
-      const RecipeStep(duration: '45 min', description: 'Cook'),
+    steps: <RecipeStep>[
+      RecipeStep(duration: '3 min', description: 'Stir'),
+      RecipeStep(duration: '45 min', description: 'Cook'),
     ],
   ),
-  const Recipe(
+  Recipe(
     name: 'Fresh Fettuccine',
     author: 'Ali Connors',
     ingredientsImagePath: 'food/icons/main.png',
@@ -797,20 +798,20 @@ const List<Recipe> kPestoRecipes = const <Recipe>[
     description: 'Satisfy a need for rich, creamy homemade goodness with this classic. Creamy fettuccine alfredo will have you hitting the gym the next day, but it’s so good it’s worth it.',
     imagePath: 'food/image12.jpg',
     imagePackage: _kGalleryAssetsPackage,
-    ingredients: const<RecipeIngredient>[
-      const RecipeIngredient(amount: '¾ cup', description: 'Milk'),
-      const RecipeIngredient(amount: '1 ½ tsp', description: 'Salt'),
-      const RecipeIngredient(amount: '1 tbsp', description: 'Olive oil'),
-      const RecipeIngredient(amount: '8oz', description: 'Fettuccine'),
-      const RecipeIngredient(amount: '½ cup', description: 'Fresh basil'),
-      const RecipeIngredient(amount: '½ cup', description: 'Fresh ground pepper'),
+    ingredients: <RecipeIngredient>[
+      RecipeIngredient(amount: '¾ cup', description: 'Milk'),
+      RecipeIngredient(amount: '1 ½ tsp', description: 'Salt'),
+      RecipeIngredient(amount: '1 tbsp', description: 'Olive oil'),
+      RecipeIngredient(amount: '8oz', description: 'Fettuccine'),
+      RecipeIngredient(amount: '½ cup', description: 'Fresh basil'),
+      RecipeIngredient(amount: '½ cup', description: 'Fresh ground pepper'),
     ],
-    steps: const<RecipeStep>[
-      const RecipeStep(duration: '3 min', description: 'Stir'),
-      const RecipeStep(duration: '45 min', description: 'Cook'),
+    steps: <RecipeStep>[
+      RecipeStep(duration: '3 min', description: 'Stir'),
+      RecipeStep(duration: '45 min', description: 'Cook'),
     ],
   ),
-  const Recipe(
+  Recipe(
     name: 'Sicilian-Style sardines',
     author: 'Peter Carlsson',
     ingredientsImagePath: 'food/icons/quick.png',
@@ -818,17 +819,17 @@ const List<Recipe> kPestoRecipes = const <Recipe>[
     description: 'My go to way to eat sardines is with a splash of tangy lemon and fresh fennel drizzled on top. The best thing about this dish is the flavour it packs. Prepaid with wild caught sardines or canned.',
     imagePath: 'food/image13.jpg',
     imagePackage: _kGalleryAssetsPackage,
-    ingredients: const<RecipeIngredient>[
-      const RecipeIngredient(amount: '1/4 cup', description: 'Dry white wine'),
-      const RecipeIngredient(amount: '1', description: 'Finely chopped shallot'),
-      const RecipeIngredient(amount: '2 tbsp', description: 'Fresh lemon juice'),
-      const RecipeIngredient(amount: '1 tbsp', description: 'Fennel seeds, crushed'),
-      const RecipeIngredient(amount: '4 tbsp', description: 'Extra virgin olive oil, to taste'),
-      const RecipeIngredient(amount: '2 cans', description: 'Sardines in oil, drained'),
+    ingredients: <RecipeIngredient>[
+      RecipeIngredient(amount: '1/4 cup', description: 'Dry white wine'),
+      RecipeIngredient(amount: '1', description: 'Finely chopped shallot'),
+      RecipeIngredient(amount: '2 tbsp', description: 'Fresh lemon juice'),
+      RecipeIngredient(amount: '1 tbsp', description: 'Fennel seeds, crushed'),
+      RecipeIngredient(amount: '4 tbsp', description: 'Extra virgin olive oil, to taste'),
+      RecipeIngredient(amount: '2 cans', description: 'Sardines in oil, drained'),
     ],
-    steps: const<RecipeStep>[
-      const RecipeStep(duration: '3 min', description: 'Stir'),
-      const RecipeStep(duration: '45 min', description: 'Cook'),
+    steps: <RecipeStep>[
+      RecipeStep(duration: '3 min', description: 'Stir'),
+      RecipeStep(duration: '45 min', description: 'Cook'),
     ],
   ),
 ];

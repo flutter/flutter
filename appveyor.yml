@@ -1,3 +1,8 @@
+environment:
+  matrix:
+    - SHARD: tests
+    - SHARD: tool_tests
+
 install:
 - cmd: cd ..
 - cmd: move flutter "flutter sdk"
@@ -11,5 +16,4 @@ cache:
 build: off
 
 test_script:
-- cmd: set SHARD=tests
 - cmd: bin\cache\dart-sdk\bin\dart.exe -c dev\bots\test.dart

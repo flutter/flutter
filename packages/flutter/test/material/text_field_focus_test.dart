@@ -39,8 +39,8 @@ void main() {
     await tester.pumpWidget(
       new MaterialApp(
         home: const Material(
-          child: const Center(
-            child: const TextField(
+          child: Center(
+            child: TextField(
               autofocus: true,
             ),
           ),
@@ -61,8 +61,8 @@ void main() {
     await tester.pumpWidget(
       new MaterialApp(
         home: const Material(
-          child: const Center(
-            child: const TextField(),
+          child: Center(
+            child: TextField(),
           ),
         ),
       ),
@@ -95,8 +95,8 @@ void main() {
     await tester.pumpWidget(
       new MaterialApp(
         home: const Material(
-          child: const Center(
-            child: const TextField(
+          child: Center(
+            child: TextField(
               autofocus: true,
             ),
           ),
@@ -110,7 +110,7 @@ void main() {
 
     showDialog<void>(
       context: context,
-      builder: (BuildContext context) => const SimpleDialog(title: const Text('Dialog')),
+      builder: (BuildContext context) => const SimpleDialog(title: Text('Dialog')),
     );
 
     await tester.pump();
@@ -213,8 +213,8 @@ void main() {
     await tester.pumpWidget(
       new MaterialApp(
         home: const Material(
-          child: const Center(
-            child: const TextField(
+          child: Center(
+            child: TextField(
               decoration: null
             ),
           ),

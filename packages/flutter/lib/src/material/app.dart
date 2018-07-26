@@ -20,13 +20,13 @@ import 'theme.dart';
 /// which sets a specific [DefaultTextStyle]. If you're seeing text that uses
 /// this text style, consider putting your text in a [Material] widget (or
 /// another widget that sets a [DefaultTextStyle]).
-const TextStyle _errorTextStyle = const TextStyle(
-  color: const Color(0xD0FF0000),
+const TextStyle _errorTextStyle = TextStyle(
+  color: Color(0xD0FF0000),
   fontFamily: 'monospace',
   fontSize: 48.0,
   fontWeight: FontWeight.w900,
   decoration: TextDecoration.underline,
-  decorationColor: const Color(0xFFFFFF00),
+  decorationColor: Color(0xFFFFFF00),
   decorationStyle: TextDecorationStyle.double,
   debugLabel: 'fallback style; consider putting your text in a Material',
 );
@@ -96,7 +96,7 @@ class MaterialApp extends StatefulWidget {
     this.locale,
     this.localizationsDelegates,
     this.localeResolutionCallback,
-    this.supportedLocales = const <Locale>[const Locale('en', 'US')],
+    this.supportedLocales = const <Locale>[Locale('en', 'US')],
     this.debugShowMaterialGrid = false,
     this.showPerformanceOverlay = false,
     this.checkerboardRasterCacheImages = false,
@@ -587,7 +587,7 @@ class _MaterialAppState extends State<MaterialApp> {
         },
       )
     );
-    
+
     assert(() {
       if (widget.debugShowMaterialGrid) {
         result = new GridPaper(

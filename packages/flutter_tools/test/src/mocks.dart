@@ -25,7 +25,7 @@ class MockApplicationPackageStore extends ApplicationPackageStore {
   MockApplicationPackageStore() : super(
     android: new AndroidApk(
       id: 'io.flutter.android.mock',
-      apkPath: '/mock/path/to/android/SkyShell.apk',
+      file: fs.file('/mock/path/to/android/SkyShell.apk'),
       launchActivity: 'io.flutter.android.mock.MockActivity'
     ),
     iOS: new BuildableIOSApp(
@@ -122,7 +122,7 @@ class MockProcessManager implements ProcessManager {
     Map<String, String> environment,
     bool includeParentEnvironment = true,
     bool runInShell = false,
-    ProcessStartMode mode = ProcessStartMode.NORMAL, // ignore: deprecated_member_use
+    ProcessStartMode mode = ProcessStartMode.normal,
   }) {
     if (!succeed) {
       final String executable = command[0];

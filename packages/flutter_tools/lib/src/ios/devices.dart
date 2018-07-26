@@ -26,7 +26,7 @@ const String _kIdeviceinstallerInstructions =
     'To work with iOS devices, please install ideviceinstaller. To install, run:\n'
     'brew install ideviceinstaller.';
 
-const Duration kPortForwardTimeout = const Duration(seconds: 10);
+const Duration kPortForwardTimeout = Duration(seconds: 10);
 
 class IOSDeploy {
   const IOSDeploy();
@@ -299,7 +299,6 @@ class IOSDevice extends Device {
         bundlePath: bundle.path,
         launchArguments: launchArguments,
       );
-      installStatus.stop();
     } else {
       // Debugging is enabled, look for the observatory server port post launch.
       printTrace('Debugging is enabled, connecting to observatory');
@@ -531,7 +530,7 @@ class _IOSDevicePortForwarder extends DevicePortForwarder {
   @override
   List<ForwardedPort> get forwardedPorts => _forwardedPorts;
 
-  static const Duration _kiProxyPortForwardTimeout = const Duration(seconds: 1);
+  static const Duration _kiProxyPortForwardTimeout = Duration(seconds: 1);
 
   @override
   Future<int> forward(int devicePort, {int hostPort}) async {

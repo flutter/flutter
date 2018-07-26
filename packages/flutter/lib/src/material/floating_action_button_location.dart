@@ -20,7 +20,7 @@ const double kFloatingActionButtonMargin = 16.0;
 ///
 /// The [Scaffold] uses this to set the duration of [FloatingActionButton]
 /// motion, entrance, and exit animations.
-const Duration kFloatingActionButtonSegue = const Duration(milliseconds: 200);
+const Duration kFloatingActionButtonSegue = Duration(milliseconds: 200);
 
 /// The fraction of a circle the [FloatingActionButton] should turn when it enters.
 ///
@@ -51,10 +51,10 @@ abstract class FloatingActionButtonLocation {
   /// End-aligned [FloatingActionButton], floating at the bottom of the screen.
   ///
   /// This is the default alignment of [FloatingActionButton]s in Material applications.
-  static const FloatingActionButtonLocation endFloat = const _EndFloatFabLocation();
+  static const FloatingActionButtonLocation endFloat = _EndFloatFabLocation();
 
   /// Centered [FloatingActionButton], floating at the bottom of the screen.
-  static const FloatingActionButtonLocation centerFloat = const _CenterFloatFabLocation();
+  static const FloatingActionButtonLocation centerFloat = _CenterFloatFabLocation();
 
   /// End-aligned [FloatingActionButton], floating over the
   /// [Scaffold.bottomNavigationBar] so that the center of the floating
@@ -66,7 +66,7 @@ abstract class FloatingActionButtonLocation {
   ///
   /// This is unlikely to be a useful location for apps that lack a bottom
   /// navigation bar.
-  static const FloatingActionButtonLocation endDocked = const _EndDockedFloatingActionButtonLocation();
+  static const FloatingActionButtonLocation endDocked = _EndDockedFloatingActionButtonLocation();
 
   /// Center-aligned [FloatingActionButton], floating over the
   /// [Scaffold.bottomNavigationBar] so that the center of the floating
@@ -78,7 +78,7 @@ abstract class FloatingActionButtonLocation {
   ///
   /// This is unlikely to be a useful location for apps that lack a bottom
   /// navigation bar.
-  static const FloatingActionButtonLocation centerDocked = const _CenterDockedFloatingActionButtonLocation();
+  static const FloatingActionButtonLocation centerDocked = _CenterDockedFloatingActionButtonLocation();
 
   /// Places the [FloatingActionButton] based on the [Scaffold]'s layout.
   ///
@@ -243,7 +243,7 @@ abstract class FloatingActionButtonAnimator {
   /// grows it back to full size at its new [FloatingActionButtonLocation].
   ///
   /// This is the default [FloatingActionButton] motion animation.
-  static const FloatingActionButtonAnimator scaling = const _ScalingFabMotionAnimator();
+  static const FloatingActionButtonAnimator scaling = _ScalingFabMotionAnimator();
 
   /// Gets the [FloatingActionButton]'s position relative to the origin of the
   /// [Scaffold] based on [progress].
@@ -330,7 +330,7 @@ class _ScalingFabMotionAnimator extends FloatingActionButtonAnimator {
   Animation<double> getScaleAnimation({Animation<double> parent}) {
     // Animate the scale down from 1 to 0 in the first half of the animation
     // then from 0 back to 1 in the second half.
-    const Curve curve = const Interval(0.5, 1.0, curve: Curves.ease);
+    const Curve curve = Interval(0.5, 1.0, curve: Curves.ease);
     return new _AnimationSwap<double>(
       new ReverseAnimation(new CurveTween(curve: curve.flipped).animate(parent)),
       new CurveTween(curve: curve).animate(parent),

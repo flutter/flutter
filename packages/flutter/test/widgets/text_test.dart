@@ -10,9 +10,9 @@ import 'semantics_tester.dart';
 void main() {
   testWidgets('Text respects media query', (WidgetTester tester) async {
     await tester.pumpWidget(const MediaQuery(
-      data: const MediaQueryData(textScaleFactor: 1.3),
-      child: const Center(
-        child: const Text('Hello', textDirection: TextDirection.ltr)
+      data: MediaQueryData(textScaleFactor: 1.3),
+      child: Center(
+        child: Text('Hello', textDirection: TextDirection.ltr)
       )
     ));
 
@@ -21,7 +21,7 @@ void main() {
     expect(text.textScaleFactor, 1.3);
 
     await tester.pumpWidget(const Center(
-      child: const Text('Hello', textDirection: TextDirection.ltr)
+      child: Text('Hello', textDirection: TextDirection.ltr)
     ));
 
     text = tester.firstWidget(find.byType(RichText));
@@ -31,7 +31,7 @@ void main() {
 
   testWidgets('Text respects textScaleFactor with default font size', (WidgetTester tester) async {
     await tester.pumpWidget(
-      const Center(child: const Text('Hello', textDirection: TextDirection.ltr))
+      const Center(child: Text('Hello', textDirection: TextDirection.ltr))
     );
 
     RichText text = tester.firstWidget(find.byType(RichText));
@@ -42,7 +42,7 @@ void main() {
     expect(baseSize.height, equals(14.0));
 
     await tester.pumpWidget(const Center(
-      child: const Text('Hello', textScaleFactor: 1.5, textDirection: TextDirection.ltr)
+      child: Text('Hello', textScaleFactor: 1.5, textDirection: TextDirection.ltr)
     ));
 
     text = tester.firstWidget(find.byType(RichText));
@@ -55,8 +55,8 @@ void main() {
 
   testWidgets('Text respects textScaleFactor with explicit font size', (WidgetTester tester) async {
     await tester.pumpWidget(const Center(
-      child: const Text('Hello',
-        style: const TextStyle(fontSize: 20.0), textDirection: TextDirection.ltr)
+      child: Text('Hello',
+        style: TextStyle(fontSize: 20.0), textDirection: TextDirection.ltr)
     ));
 
     RichText text = tester.firstWidget(find.byType(RichText));
@@ -67,8 +67,8 @@ void main() {
     expect(baseSize.height, equals(20.0));
 
     await tester.pumpWidget(const Center(
-      child: const Text('Hello',
-        style: const TextStyle(fontSize: 20.0),
+      child: Text('Hello',
+        style: TextStyle(fontSize: 20.0),
         textScaleFactor: 1.3,
         textDirection: TextDirection.ltr)
     ));
@@ -91,15 +91,15 @@ void main() {
   testWidgets('Text can be created from TextSpans and uses defaultTextStyle', (WidgetTester tester) async {
     await tester.pumpWidget(
       const DefaultTextStyle(
-        style: const TextStyle(
+        style: TextStyle(
           fontSize: 20.0,
         ),
-        child: const Text.rich(
-          const TextSpan(
+        child: Text.rich(
+          TextSpan(
             text: 'Hello',
-            children: const <TextSpan>[
-              const TextSpan(text: ' beautiful ', style: const TextStyle(fontStyle: FontStyle.italic)),
-              const TextSpan(text: 'world', style: const TextStyle(fontWeight: FontWeight.bold)),
+            children: <TextSpan>[
+              TextSpan(text: ' beautiful ', style: TextStyle(fontStyle: FontStyle.italic)),
+              TextSpan(text: 'world', style: TextStyle(fontWeight: FontWeight.bold)),
             ],
           ),
           textDirection: TextDirection.ltr,
@@ -130,7 +130,7 @@ void main() {
     await tester.pumpWidget(
       const Directionality(
         textDirection: TextDirection.ltr,
-        child: const Text('\$\$', semanticsLabel: 'Double dollars')),
+        child: Text('\$\$', semanticsLabel: 'Double dollars')),
     );
 
     expect(semantics, hasSemantics(expectedSemantics, ignoreTransform: true, ignoreId: true, ignoreRect: true));

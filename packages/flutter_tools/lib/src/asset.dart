@@ -18,7 +18,7 @@ import 'devfs.dart';
 import 'flutter_manifest.dart';
 import 'globals.dart';
 
-const AssetBundleFactory _kManifestFactory = const _ManifestAssetBundleFactory();
+const AssetBundleFactory _kManifestFactory = _ManifestAssetBundleFactory();
 
 /// Injected factory class for spawning [AssetBundle] instances.
 abstract class AssetBundleFactory {
@@ -80,7 +80,7 @@ class _ManifestAssetBundle implements AssetBundle {
       return true;
 
     final FileStat stat = fs.file(manifestPath).statSync();
-    if (stat.type == FileSystemEntityType.NOT_FOUND) // ignore: deprecated_member_use
+    if (stat.type == FileSystemEntityType.notFound)
       return true;
 
     return stat.modified.isAfter(_lastBuildTimestamp);

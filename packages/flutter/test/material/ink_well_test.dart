@@ -72,8 +72,8 @@ void main() {
 
   testWidgets('long-press and tap on disabled should not throw', (WidgetTester tester) async {
     await tester.pumpWidget(const Material(
-      child: const Center(
-        child: const InkWell(),
+      child: Center(
+        child: InkWell(),
       ),
     ));
     await tester.tap(find.byType(InkWell), pointer: 1);

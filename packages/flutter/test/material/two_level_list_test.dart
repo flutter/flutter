@@ -23,8 +23,8 @@ void main() {
                   key: sublistKey,
                   title: const Text('Sublist'),
                   children: const <Widget>[
-                    const ListTile(title: const Text('0')),
-                    const ListTile(title: const Text('1'))
+                    ListTile(title: Text('0')),
+                    ListTile(title: Text('1'))
                   ]
                 ),
                 new ListTile(title: const Text('Bottom'), key: bottomKey)
@@ -82,8 +82,8 @@ void main() {
                     didChangeOpen = opened;
                   },
                   children: const <Widget>[
-                    const ListTile(title: const Text('0')),
-                    const ListTile(title: const Text('1'))
+                    ListTile(title: Text('0')),
+                    ListTile(title: Text('1'))
                   ]
                 ),
               ]
@@ -111,16 +111,16 @@ void main() {
           child: new SingleChildScrollView(
             child: new Column(
               children: const <Widget>[
-                const ListTile(title: const Text('Top')),
-                const ExpansionTile(
-                  title: const Text('Sublist'),
-                  children: const <Widget>[
-                    const ListTile(title: const Text('0')),
-                    const ListTile(title: const Text('1'))
+                ListTile(title: Text('Top')),
+                ExpansionTile(
+                  title: Text('Sublist'),
+                  children: <Widget>[
+                    ListTile(title: Text('0')),
+                    ListTile(title: Text('1'))
                   ],
-                  trailing: const Icon(Icons.inbox),
+                  trailing: Icon(Icons.inbox),
                 ),
-                const ListTile(title: const Text('Bottom'))
+                ListTile(title: Text('Bottom'))
               ]
             )
           )

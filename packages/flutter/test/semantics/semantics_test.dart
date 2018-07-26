@@ -16,9 +16,9 @@ void main() {
   });
 
   group('SemanticsNode', () {
-    const SemanticsTag tag1 = const SemanticsTag('Tag One');
-    const SemanticsTag tag2 = const SemanticsTag('Tag Two');
-    const SemanticsTag tag3 = const SemanticsTag('Tag Three');
+    const SemanticsTag tag1 = SemanticsTag('Tag One');
+    const SemanticsTag tag2 = SemanticsTag('Tag Two');
+    const SemanticsTag tag3 = SemanticsTag('Tag Three');
 
     test('tagging', () {
       final SemanticsNode node = new SemanticsNode();
@@ -156,11 +156,11 @@ void main() {
   });
 
   test('OrdinalSortKey compares correctly', () {
-    const List<List<SemanticsSortKey>> tests = const <List<SemanticsSortKey>>[
-      const <SemanticsSortKey>[const OrdinalSortKey(0.0), const OrdinalSortKey(0.0)],
-      const <SemanticsSortKey>[const OrdinalSortKey(0.0), const OrdinalSortKey(1.0)],
-      const <SemanticsSortKey>[const OrdinalSortKey(1.0), const OrdinalSortKey(0.0)],
-      const <SemanticsSortKey>[const OrdinalSortKey(1.0), const OrdinalSortKey(1.0)],
+    const List<List<SemanticsSortKey>> tests = <List<SemanticsSortKey>>[
+      <SemanticsSortKey>[OrdinalSortKey(0.0), OrdinalSortKey(0.0)],
+      <SemanticsSortKey>[OrdinalSortKey(0.0), OrdinalSortKey(1.0)],
+      <SemanticsSortKey>[OrdinalSortKey(1.0), OrdinalSortKey(0.0)],
+      <SemanticsSortKey>[OrdinalSortKey(1.0), OrdinalSortKey(1.0)],
     ];
     final List<int> expectedResults = <int>[0, -1, 1, 0];
     assert(tests.length == expectedResults.length);
@@ -172,11 +172,11 @@ void main() {
   });
 
   test('OrdinalSortKey compares correctly', () {
-    const List<List<SemanticsSortKey>> tests = const <List<SemanticsSortKey>>[
-      const <SemanticsSortKey>[const OrdinalSortKey(0.0), const OrdinalSortKey(0.0)],
-      const <SemanticsSortKey>[const OrdinalSortKey(0.0), const OrdinalSortKey(1.0)],
-      const <SemanticsSortKey>[const OrdinalSortKey(1.0), const OrdinalSortKey(0.0)],
-      const <SemanticsSortKey>[const OrdinalSortKey(1.0), const OrdinalSortKey(1.0)],
+    const List<List<SemanticsSortKey>> tests = <List<SemanticsSortKey>>[
+      <SemanticsSortKey>[OrdinalSortKey(0.0), OrdinalSortKey(0.0)],
+      <SemanticsSortKey>[OrdinalSortKey(0.0), OrdinalSortKey(1.0)],
+      <SemanticsSortKey>[OrdinalSortKey(1.0), OrdinalSortKey(0.0)],
+      <SemanticsSortKey>[OrdinalSortKey(1.0), OrdinalSortKey(1.0)],
     ];
     final List<int> expectedResults = <int>[0, -1, 1, 0];
     assert(tests.length == expectedResults.length);
@@ -337,6 +337,7 @@ void main() {
       '   mergeAllDescendantsIntoThisNode: false\n'
       '   Rect.fromLTRB(0.0, 0.0, 0.0, 0.0)\n'
       '   actions: []\n'
+      '   customActions: []\n'
       '   flags: []\n'
       '   invisible\n'
       '   isHidden: false\n'
@@ -404,8 +405,49 @@ void main() {
     );
   });
 
+  test('Custom actions debug properties', () {
+    final SemanticsConfiguration configuration = new SemanticsConfiguration();
+    const CustomSemanticsAction action1 = CustomSemanticsAction(label: 'action1');
+    const CustomSemanticsAction action2 = CustomSemanticsAction(label: 'action2');
+    const CustomSemanticsAction action3 = CustomSemanticsAction(label: 'action3');
+    configuration.customSemanticsActions = <CustomSemanticsAction, VoidCallback>{
+      action1: () {},
+      action2: () {},
+      action3: () {},
+    };
+    final SemanticsNode actionNode = new SemanticsNode();
+    actionNode.updateWith(config: configuration);
+
+    expect(
+      actionNode.toStringDeep(minLevel: DiagnosticLevel.hidden),
+      'SemanticsNode#1\n'
+      '   STALE\n'
+      '   owner: null\n'
+      '   isMergedIntoParent: false\n'
+      '   mergeAllDescendantsIntoThisNode: false\n'
+      '   Rect.fromLTRB(0.0, 0.0, 0.0, 0.0)\n'
+      '   actions: customAction\n'
+      '   customActions: action1, action2, action3\n'
+      '   flags: []\n'
+      '   invisible\n'
+      '   isHidden: false\n'
+      '   label: ""\n'
+      '   value: ""\n'
+      '   increasedValue: ""\n'
+      '   decreasedValue: ""\n'
+      '   hint: ""\n'
+      '   textDirection: null\n'
+      '   sortKey: null\n'
+      '   scrollExtentMin: null\n'
+      '   scrollPosition: null\n'
+      '   scrollExtentMax: null\n'
+    );
+
+  });
+
   test('SemanticsConfiguration getter/setter', () {
     final SemanticsConfiguration config = new SemanticsConfiguration();
+    const CustomSemanticsAction customAction = CustomSemanticsAction(label: 'test');
 
     expect(config.isSemanticBoundary, isFalse);
     expect(config.isButton, isFalse);
@@ -428,6 +470,7 @@ void main() {
     expect(config.onMoveCursorForwardByCharacter, isNull);
     expect(config.onMoveCursorBackwardByCharacter, isNull);
     expect(config.onTap, isNull);
+    expect(config.customSemanticsActions[customAction], isNull);
 
     config.isSemanticBoundary = true;
     config.isButton = true;
@@ -450,6 +493,7 @@ void main() {
     final MoveCursorHandler onMoveCursorForwardByCharacter = (bool _) { };
     final MoveCursorHandler onMoveCursorBackwardByCharacter = (bool _) { };
     final VoidCallback onTap = () { };
+    final VoidCallback onCustomAction = () {};
 
     config.onShowOnScreen = onShowOnScreen;
     config.onScrollDown = onScrollDown;
@@ -462,6 +506,7 @@ void main() {
     config.onMoveCursorForwardByCharacter = onMoveCursorForwardByCharacter;
     config.onMoveCursorBackwardByCharacter = onMoveCursorBackwardByCharacter;
     config.onTap = onTap;
+    config.customSemanticsActions[customAction] = onCustomAction;
 
     expect(config.isSemanticBoundary, isTrue);
     expect(config.isButton, isTrue);
@@ -484,6 +529,7 @@ void main() {
     expect(config.onMoveCursorForwardByCharacter, same(onMoveCursorForwardByCharacter));
     expect(config.onMoveCursorBackwardByCharacter, same(onMoveCursorBackwardByCharacter));
     expect(config.onTap, same(onTap));
+    expect(config.customSemanticsActions[customAction], same(onCustomAction));
   });
 }
 
