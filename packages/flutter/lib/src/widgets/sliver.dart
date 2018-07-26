@@ -28,57 +28,63 @@ export 'package:flutter/rendering.dart' show
 /// explicit child lists.
 ///
 /// {@template flutter.widgets.sliverChildDelegate.lifecycle}
-/// ## Children's lifecycle
+/// ## Child elements' lifecycle
 ///
 /// ### Creation
 ///
-/// Depending on the scroll position when laying out the sliver, children's
-/// elements, states and render objects will be created lazily based on
-/// existing widgets (such as in the case of [SliverChildListDelegate]) or
-/// lazily provided ones (such as in the case of [SliverChildListDelegate]).
+/// While laying out the list, visible children's elements, states and render
+/// objects will be created lazily based on existing widgets (such as in the
+/// case of [SliverChildListDelegate]) or lazily provided ones (such as in the
+/// case of [SliverChildListDelegate]).
 ///
 /// ### Destruction
 ///
-/// When a child is scrolled out of view, the associated element subtree,
-/// states and render objects are destroyed. A new child at the same position
-/// in the sliver will be lazily recreated along with new elements, states and
-/// render objects when it is scrolled back.
+/// When a child is scrolled out of view, the associated element subtree, states
+/// and render objects are destroyed. A new child at the same position in the
+/// sliver will be lazily recreated along with new elements, states and render
+/// objects when it is scrolled back.
 ///
 /// ### Destruction mitigation
 ///
-/// In order to preserve state as children are scrolled in and out of view, the
-/// following options are possible:
+/// In order to preserve state as child elements are scrolled in and out of
+/// view, the following options are possible:
 ///
 /// 1. By moving the ownership of non-trivial UI-state-driving business logic
 ///    out of the sliver child subtree. For instance, if a list contains posts
 ///    with their number of upvotes coming from a cached network response, store
 ///    the list of posts and upvote number in a data model outside the list. Let
 ///    the sliver child UI subtree be easily recreate-able from the
-///    source-of-truth model object. Use [StatefulWidget]s in the child subtree
-///    to store instantaneous UI state only.
+///    source-of-truth model object. Use [StatefulWidget]s in the child widget
+///    subtree to store instantaneous UI state only.
 ///
-/// 2. Letting [KeepAlive] be the root widget of the sliver child that needs
-///    to be preserved. The [KeepAlive] widget marks the child subtree's top
-///    render object child for keep-alive. When the associated top render object
-///    is scrolled out of view, the sliver keeps the child's render object (and
-///    by extension, its associated elements and states) in a cache list instead
-///    of destroying them. When scrolled back into view, the render object
-///    is repainted as-is (if it wasn't marked dirty in the interim).
+/// 2. Letting [KeepAlive] be the root widget of the sliver child widget subtree
+///    that needs to be preserved. The [KeepAlive] widget marks the child
+///    subtree's top render object child for keep-alive. When the associated top
+///    render object is scrolled out of view, the sliver keeps the child's
+///    render object (and by extension, its associated elements and states) in a
+///    cache list instead of destroying them. When scrolled back into view, the
+///    render object is repainted as-is (if it wasn't marked dirty in the
+///    interim).
+///
+///    This only works if the [SliverChildDelegate] subclasses don't wrap the
+///    child widget subtree with other widgets such as [AutomaticKeepAlive] and
+///    [RepaintBoundary] via `addAutomaticKeepAlives` and
+///    `addRepaintBoundaries`.
 ///
 /// 3. By using [AutomaticKeepAlive] widgets (inserted by default in
 ///    [SliverChildListDelegate] or [SliverChildListDelegate]). Instead of
-///    unconditionally caching the child subtree when scrolling off-screen like
-///    [KeepAlive], [AutomaticKeepAlive] can let whether to cache the subtree
-///    be determined by descendant logic in the subtree.
+///    unconditionally caching the child element subtree when scrolling
+///    off-screen like [KeepAlive], [AutomaticKeepAlive] can let whether to
+///    cache the subtree be determined by descendant logic in the subtree.
 ///
-///    As an example, the [EditableText] widget signals its sliver child subtree
-///    to stay alive while its text field has input focus. If it doesn't have
-///    focus and no other descendants signaled for keep-alive via a
-///    [KeepAliveNotification], the sliver child subtree will be destroyed
-///    when scrolled away.
+///    As an example, the [EditableText] widget signals its sliver child element
+///    subtree to stay alive while its text field has input focus. If it doesn't
+///    have focus and no other descendants signaled for keep-alive via a
+///    [KeepAliveNotification], the sliver child element subtree will be
+///    destroyed when scrolled away.
 ///
-///    [AutomaticKeepAlive] descendants typically signal it to be kept alive
-///    by using the [AutomaticKeepAliveClientMixin], then implementing the
+///    [AutomaticKeepAlive] descendants typically signal it to be kept alive by
+///    using the [AutomaticKeepAliveClientMixin], then implementing the
 ///    [wantKeepAlive] getter and calling [updateKeepAlive].
 /// {@endtemplate}
 ///
