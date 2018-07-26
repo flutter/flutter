@@ -12,14 +12,14 @@
 
 #import <UIKit/UIKit.h>
 
+#include "flutter/fml/macros.h"
 #include "flutter/fml/memory/weak_ptr.h"
 #include "flutter/fml/platform/darwin/scoped_nsobject.h"
-#include "flutter/lib/ui/semantics/semantics_node.h"
 #include "flutter/lib/ui/semantics/custom_accessibility_action.h"
+#include "flutter/lib/ui/semantics/semantics_node.h"
 #include "flutter/shell/platform/darwin/ios/framework/Headers/FlutterChannels.h"
 #include "flutter/shell/platform/darwin/ios/framework/Source/FlutterTextInputPlugin.h"
 #include "flutter/shell/platform/darwin/ios/framework/Source/FlutterView.h"
-#include "lib/fxl/macros.h"
 #include "third_party/skia/include/core/SkMatrix44.h"
 #include "third_party/skia/include/core/SkRect.h"
 
@@ -116,9 +116,12 @@ class AccessibilityBridge final {
   AccessibilityBridge(UIView* view, PlatformViewIOS* platform_view);
   ~AccessibilityBridge();
 
-  void UpdateSemantics(blink::SemanticsNodeUpdates nodes, blink::CustomAccessibilityActionUpdates actions);
+  void UpdateSemantics(blink::SemanticsNodeUpdates nodes,
+                       blink::CustomAccessibilityActionUpdates actions);
   void DispatchSemanticsAction(int32_t id, blink::SemanticsAction action);
-  void DispatchSemanticsAction(int32_t id, blink::SemanticsAction action, std::vector<uint8_t> args);
+  void DispatchSemanticsAction(int32_t id,
+                               blink::SemanticsAction action,
+                               std::vector<uint8_t> args);
 
   UIView<UITextInput>* textInputView();
 
@@ -142,7 +145,7 @@ class AccessibilityBridge final {
   std::unordered_map<int32_t, blink::CustomAccessibilityAction> actions_;
   std::vector<int32_t> previous_routes_;
 
-  FXL_DISALLOW_COPY_AND_ASSIGN(AccessibilityBridge);
+  FML_DISALLOW_COPY_AND_ASSIGN(AccessibilityBridge);
 };
 
 }  // namespace shell

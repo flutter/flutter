@@ -4,15 +4,15 @@
 
 #include "flutter/shell/platform/android/platform_message_response_android.h"
 
+#include "flutter/fml/make_copyable.h"
 #include "flutter/shell/platform/android/platform_view_android_jni.h"
-#include "lib/fxl/functional/make_copyable.h"
 
 namespace shell {
 
 PlatformMessageResponseAndroid::PlatformMessageResponseAndroid(
     int response_id,
     fml::jni::JavaObjectWeakGlobalRef weak_java_object,
-    fxl::RefPtr<fxl::TaskRunner> platform_task_runner)
+    fml::RefPtr<fml::TaskRunner> platform_task_runner)
     : response_id_(response_id),
       weak_java_object_(weak_java_object),
       platform_task_runner_(std::move(platform_task_runner)) {}
@@ -21,7 +21,7 @@ PlatformMessageResponseAndroid::PlatformMessageResponseAndroid(
 void PlatformMessageResponseAndroid::Complete(
     std::unique_ptr<fml::Mapping> data) {
   platform_task_runner_->PostTask(
-      fxl::MakeCopyable([response = response_id_,               //
+      fml::MakeCopyable([response = response_id_,               //
                          weak_java_object = weak_java_object_,  //
                          data = std::move(data)                 //
   ]() {
@@ -52,7 +52,7 @@ void PlatformMessageResponseAndroid::Complete(
 // |blink::PlatformMessageResponse|
 void PlatformMessageResponseAndroid::CompleteEmpty() {
   platform_task_runner_->PostTask(
-      fxl::MakeCopyable([response = response_id_,              //
+      fml::MakeCopyable([response = response_id_,              //
                          weak_java_object = weak_java_object_  //
   ]() {
         // We are on the platform thread. Attempt to get the strong reference to

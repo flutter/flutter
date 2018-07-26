@@ -14,7 +14,7 @@ PlatformMessageRouter& HeadlessPlatformViewIOS::GetPlatformMessageRouter() {
 }
 
 // |shell::PlatformView|
-void HeadlessPlatformViewIOS::HandlePlatformMessage(fxl::RefPtr<blink::PlatformMessage> message) {
+void HeadlessPlatformViewIOS::HandlePlatformMessage(fml::RefPtr<blink::PlatformMessage> message) {
   platform_message_router_.HandlePlatformMessage(std::move(message));
 }
 }

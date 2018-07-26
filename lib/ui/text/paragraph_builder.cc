@@ -6,6 +6,7 @@
 
 #include "flutter/common/settings.h"
 #include "flutter/common/task_runners.h"
+#include "flutter/fml/task_runner.h"
 #include "flutter/lib/ui/text/font_collection.h"
 #include "flutter/lib/ui/ui_dart_state.h"
 #include "flutter/lib/ui/window/window.h"
@@ -14,7 +15,6 @@
 #include "flutter/third_party/txt/src/txt/paragraph_style.h"
 #include "flutter/third_party/txt/src/txt/text_decoration.h"
 #include "flutter/third_party/txt/src/txt/text_style.h"
-#include "lib/fxl/tasks/task_runner.h"
 #include "third_party/icu/source/common/unicode/ustring.h"
 #include "third_party/tonic/converter/dart_converter.h"
 #include "third_party/tonic/dart_args.h"
@@ -104,14 +104,14 @@ void ParagraphBuilder::RegisterNatives(tonic::DartLibraryNatives* natives) {
        FOR_EACH_BINDING(DART_REGISTER_NATIVE)});
 }
 
-fxl::RefPtr<ParagraphBuilder> ParagraphBuilder::create(
+fml::RefPtr<ParagraphBuilder> ParagraphBuilder::create(
     tonic::Int32List& encoded,
     const std::string& fontFamily,
     double fontSize,
     double lineHeight,
     const std::u16string& ellipsis,
     const std::string& locale) {
-  return fxl::MakeRefCounted<ParagraphBuilder>(encoded, fontFamily, fontSize,
+  return fml::MakeRefCounted<ParagraphBuilder>(encoded, fontFamily, fontSize,
                                                lineHeight, ellipsis, locale);
 }
 
@@ -175,7 +175,7 @@ void ParagraphBuilder::pushStyle(tonic::Int32List& encoded,
                                  Dart_Handle background_data,
                                  Dart_Handle foreground_objects,
                                  Dart_Handle foreground_data) {
-  FXL_DCHECK(encoded.num_elements() == 8);
+  FML_DCHECK(encoded.num_elements() == 8);
 
   int32_t mask = encoded[0];
 
@@ -274,7 +274,7 @@ Dart_Handle ParagraphBuilder::addText(const std::u16string& text) {
   return Dart_Null();
 }
 
-fxl::RefPtr<Paragraph> ParagraphBuilder::build() {
+fml::RefPtr<Paragraph> ParagraphBuilder::build() {
   return Paragraph::Create(m_paragraphBuilder->Build());
 }
 

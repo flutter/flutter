@@ -8,9 +8,8 @@
 #include <memory>
 
 #include "flutter/flow/skia_gpu_object.h"
+#include "flutter/fml/macros.h"
 #include "flutter/fml/memory/weak_ptr.h"
-#include "lib/fxl/macros.h"
-#include "lib/fxl/memory/weak_ptr.h"
 #include "third_party/skia/include/gpu/GrContext.h"
 
 namespace shell {
@@ -24,13 +23,13 @@ class IOManager {
       GrBackend backend);
 
   IOManager(sk_sp<GrContext> resource_context,
-            fxl::RefPtr<fxl::TaskRunner> unref_queue_task_runner);
+            fml::RefPtr<fml::TaskRunner> unref_queue_task_runner);
 
   ~IOManager();
 
   fml::WeakPtr<GrContext> GetResourceContext() const;
 
-  fxl::RefPtr<flow::SkiaUnrefQueue> GetSkiaUnrefQueue() const;
+  fml::RefPtr<flow::SkiaUnrefQueue> GetSkiaUnrefQueue() const;
 
  private:
   // Resource context management.
@@ -39,11 +38,11 @@ class IOManager {
       resource_context_weak_factory_;
 
   // Unref queue management.
-  fxl::RefPtr<flow::SkiaUnrefQueue> unref_queue_;
+  fml::RefPtr<flow::SkiaUnrefQueue> unref_queue_;
 
   fml::WeakPtrFactory<IOManager> weak_factory_;
 
-  FXL_DISALLOW_COPY_AND_ASSIGN(IOManager);
+  FML_DISALLOW_COPY_AND_ASSIGN(IOManager);
 };
 
 }  // namespace shell

@@ -21,7 +21,7 @@
 #include <unordered_map>
 #include <vector>
 
-#include "lib/fxl/macros.h"
+#include "flutter/fml/macros.h"
 #include "third_party/skia/include/core/SkFontMgr.h"
 #include "txt/font_asset_provider.h"
 
@@ -50,7 +50,7 @@ class TypefaceFontStyleSet : public SkFontStyleSet {
  private:
   std::vector<sk_sp<SkTypeface>> typefaces_;
 
-  FXL_DISALLOW_COPY_AND_ASSIGN(TypefaceFontStyleSet);
+  FML_DISALLOW_COPY_AND_ASSIGN(TypefaceFontStyleSet);
 };
 
 class TypefaceFontAssetProvider : public FontAssetProvider {
@@ -76,7 +76,7 @@ class TypefaceFontAssetProvider : public FontAssetProvider {
   std::unordered_map<std::string, TypefaceFontStyleSet> registered_families_;
   std::vector<std::string> family_names_;
 
-  FXL_DISALLOW_COPY_AND_ASSIGN(TypefaceFontAssetProvider);
+  FML_DISALLOW_COPY_AND_ASSIGN(TypefaceFontAssetProvider);
 };
 
 }  // namespace txt

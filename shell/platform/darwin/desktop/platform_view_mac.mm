@@ -7,13 +7,13 @@
 #include <AppKit/AppKit.h>
 #include <Foundation/Foundation.h>
 
+#include "flutter/fml/command_line.h"
 #include "flutter/fml/synchronization/waitable_event.h"
 #include "flutter/fml/trace_event.h"
 #include "flutter/shell/common/io_manager.h"
 #include "flutter/shell/common/rasterizer.h"
 #include "flutter/shell/common/switches.h"
 #include "flutter/shell/platform/darwin/desktop/vsync_waiter_mac.h"
-#include "lib/fxl/command_line.h"
 
 namespace shell {
 

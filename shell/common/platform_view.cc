@@ -6,11 +6,11 @@
 
 #include <utility>
 
+#include "flutter/fml/make_copyable.h"
 #include "flutter/fml/synchronization/waitable_event.h"
 #include "flutter/shell/common/rasterizer.h"
 #include "flutter/shell/common/shell.h"
 #include "flutter/shell/common/vsync_waiter_fallback.h"
-#include "lib/fxl/functional/make_copyable.h"
 #include "third_party/skia/include/gpu/GrContextOptions.h"
 #include "third_party/skia/include/gpu/gl/GrGLInterface.h"
 
@@ -25,14 +25,14 @@ PlatformView::PlatformView(Delegate& delegate, blink::TaskRunners task_runners)
 PlatformView::~PlatformView() = default;
 
 std::unique_ptr<VsyncWaiter> PlatformView::CreateVSyncWaiter() {
-  FXL_DLOG(WARNING)
+  FML_DLOG(WARNING)
       << "This platform does not provide a Vsync waiter implementation. A "
          "simple timer based fallback is being used.";
   return std::make_unique<VsyncWaiterFallback>(task_runners_);
 }
 
 void PlatformView::DispatchPlatformMessage(
-    fxl::RefPtr<blink::PlatformMessage> message) {
+    fml::RefPtr<blink::PlatformMessage> message) {
   delegate_.OnPlatformViewDispatchPlatformMessage(*this, std::move(message));
 }
 
@@ -69,7 +69,7 @@ void PlatformView::NotifyDestroyed() {
 }
 
 sk_sp<GrContext> PlatformView::CreateResourceContext() const {
-  FXL_DLOG(WARNING) << "This platform does not setup the resource "
+  FML_DLOG(WARNING) << "This platform does not setup the resource "
                        "context on the IO thread for async texture uploads.";
   return nullptr;
 }
@@ -83,7 +83,7 @@ void PlatformView::UpdateSemantics(
     blink::CustomAccessibilityActionUpdates actions) {}
 
 void PlatformView::HandlePlatformMessage(
-    fxl::RefPtr<blink::PlatformMessage> message) {
+    fml::RefPtr<blink::PlatformMessage> message) {
   if (auto response = message->response())
     response->CompleteEmpty();
 }
@@ -103,12 +103,12 @@ void PlatformView::MarkTextureFrameAvailable(int64_t texture_id) {
 std::unique_ptr<Surface> PlatformView::CreateRenderingSurface() {
   // We have a default implementation because tests create a platform view but
   // never a rendering surface.
-  FXL_DCHECK(false) << "This platform does not provide a rendering surface but "
+  FML_DCHECK(false) << "This platform does not provide a rendering surface but "
                        "it was notified of surface rendering surface creation.";
   return nullptr;
 }
 
-void PlatformView::SetNextFrameCallback(fxl::Closure closure) {
+void PlatformView::SetNextFrameCallback(fml::closure closure) {
   if (!closure) {
     return;
   }

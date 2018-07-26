@@ -21,12 +21,12 @@ namespace blink {
 
 class Paragraph : public RefCountedDartWrappable<Paragraph> {
   DEFINE_WRAPPERTYPEINFO();
-  FRIEND_MAKE_REF_COUNTED(Paragraph);
+  FML_FRIEND_MAKE_REF_COUNTED(Paragraph);
 
  public:
-  static fxl::RefPtr<Paragraph> Create(
+  static fml::RefPtr<Paragraph> Create(
       std::unique_ptr<txt::Paragraph> paragraph) {
-    return fxl::MakeRefCounted<Paragraph>(std::move(paragraph));
+    return fml::MakeRefCounted<Paragraph>(std::move(paragraph));
   }
 
   ~Paragraph() override;

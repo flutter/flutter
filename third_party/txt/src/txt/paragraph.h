@@ -21,9 +21,9 @@
 #include <utility>
 #include <vector>
 
+#include "flutter/fml/compiler_specific.h"
+#include "flutter/fml/macros.h"
 #include "font_collection.h"
-#include "lib/fxl/compiler_specific.h"
-#include "lib/fxl/macros.h"
 #include "minikin/LineBreaker.h"
 #include "paint_record.h"
 #include "paragraph_style.h"
@@ -334,7 +334,7 @@ class Paragraph {
   // Get a default SkTypeface for a text style.
   sk_sp<SkTypeface> GetDefaultSkiaTypeface(const TextStyle& style);
 
-  FXL_DISALLOW_COPY_AND_ASSIGN(Paragraph);
+  FML_DISALLOW_COPY_AND_ASSIGN(Paragraph);
 };
 
 }  // namespace txt

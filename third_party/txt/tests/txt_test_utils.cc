@@ -28,7 +28,7 @@
 namespace txt {
 
 static std::string gFontDir;
-static fxl::CommandLine gCommandLine;
+static fml::CommandLine gCommandLine;
 
 const std::string& GetFontDir() {
   return gFontDir;
@@ -38,11 +38,11 @@ void SetFontDir(const std::string& dir) {
   gFontDir = dir;
 }
 
-const fxl::CommandLine& GetCommandLineForProcess() {
+const fml::CommandLine& GetCommandLineForProcess() {
   return gCommandLine;
 }
 
-void SetCommandLine(fxl::CommandLine cmd) {
+void SetCommandLine(fml::CommandLine cmd) {
   gCommandLine = std::move(cmd);
 }
 

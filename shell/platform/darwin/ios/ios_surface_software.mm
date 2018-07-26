@@ -8,9 +8,9 @@
 
 #include <memory>
 
+#include "flutter/fml/logging.h"
 #include "flutter/fml/platform/darwin/cf_utils.h"
 #include "flutter/fml/trace_event.h"
-#include "lib/fxl/logging.h"
 #include "third_party/skia/include/utils/mac/SkCGUtils.h"
 
 namespace shell {

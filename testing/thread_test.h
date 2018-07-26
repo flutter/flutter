@@ -7,19 +7,19 @@
 
 #include <memory>
 
+#include "flutter/fml/macros.h"
 #include "flutter/fml/message_loop.h"
 #include "flutter/fml/task_runner.h"
 #include "flutter/fml/thread.h"
 #include "gtest/gtest.h"
-#include "lib/fxl/macros.h"
 
 namespace testing {
 
 class ThreadTest : public Test {
  public:
-  fxl::RefPtr<fml::TaskRunner> GetCurrentTaskRunner();
+  fml::RefPtr<fml::TaskRunner> GetCurrentTaskRunner();
 
-  fxl::RefPtr<fml::TaskRunner> GetThreadTaskRunner();
+  fml::RefPtr<fml::TaskRunner> GetThreadTaskRunner();
 
  protected:
   void SetUp() override;
@@ -28,8 +28,8 @@ class ThreadTest : public Test {
 
  private:
   std::unique_ptr<fml::Thread> thread_;
-  fxl::RefPtr<fml::TaskRunner> thread_task_runner_;
-  fxl::RefPtr<fml::TaskRunner> current_task_runner_;
+  fml::RefPtr<fml::TaskRunner> thread_task_runner_;
+  fml::RefPtr<fml::TaskRunner> current_task_runner_;
 };
 
 }  // namespace testing

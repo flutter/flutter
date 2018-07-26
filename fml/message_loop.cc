@@ -6,11 +6,11 @@
 
 #include <utility>
 
+#include "flutter/fml/memory/ref_counted.h"
+#include "flutter/fml/memory/ref_ptr.h"
 #include "flutter/fml/message_loop_impl.h"
 #include "flutter/fml/task_runner.h"
 #include "flutter/fml/thread_local.h"
-#include "lib/fxl/memory/ref_counted.h"
-#include "lib/fxl/memory/ref_ptr.h"
 
 namespace fml {
 
@@ -40,7 +40,7 @@ bool MessageLoop::IsInitializedForCurrentThread() {
 
 MessageLoop::MessageLoop()
     : loop_(MessageLoopImpl::Create()),
-      task_runner_(fxl::MakeRefCounted<fml::TaskRunner>(loop_)) {
+      task_runner_(fml::MakeRefCounted<fml::TaskRunner>(loop_)) {
   FML_CHECK(loop_);
   FML_CHECK(task_runner_);
 }
@@ -55,15 +55,15 @@ void MessageLoop::Terminate() {
   loop_->DoTerminate();
 }
 
-fxl::RefPtr<fml::TaskRunner> MessageLoop::GetTaskRunner() const {
+fml::RefPtr<fml::TaskRunner> MessageLoop::GetTaskRunner() const {
   return task_runner_;
 }
 
-fxl::RefPtr<MessageLoopImpl> MessageLoop::GetLoopImpl() const {
+fml::RefPtr<MessageLoopImpl> MessageLoop::GetLoopImpl() const {
   return loop_;
 }
 
-void MessageLoop::AddTaskObserver(intptr_t key, fxl::Closure callback) {
+void MessageLoop::AddTaskObserver(intptr_t key, fml::closure callback) {
   loop_->AddTaskObserver(key, callback);
 }
 

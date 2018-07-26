@@ -24,11 +24,11 @@ namespace blink {
 
 class SceneBuilder : public RefCountedDartWrappable<SceneBuilder> {
   DEFINE_WRAPPERTYPEINFO();
-  FRIEND_MAKE_REF_COUNTED(SceneBuilder);
+  FML_FRIEND_MAKE_REF_COUNTED(SceneBuilder);
 
  public:
-  static fxl::RefPtr<SceneBuilder> create() {
-    return fxl::MakeRefCounted<SceneBuilder>();
+  static fml::RefPtr<SceneBuilder> create() {
+    return fml::MakeRefCounted<SceneBuilder>();
   }
 
   ~SceneBuilder() override;
@@ -84,7 +84,7 @@ class SceneBuilder : public RefCountedDartWrappable<SceneBuilder> {
   void setCheckerboardRasterCacheImages(bool checkerboard);
   void setCheckerboardOffscreenLayers(bool checkerboard);
 
-  fxl::RefPtr<Scene> build();
+  fml::RefPtr<Scene> build();
 
   static void RegisterNatives(tonic::DartLibraryNatives* natives);
 

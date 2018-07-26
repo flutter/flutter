@@ -25,7 +25,7 @@ Rasterizer::Rasterizer(
     : task_runners_(std::move(task_runners)),
       compositor_context_(std::move(compositor_context)),
       weak_factory_(this) {
-  FXL_DCHECK(compositor_context_);
+  FML_DCHECK(compositor_context_);
 }
 
 Rasterizer::~Rasterizer() = default;
@@ -95,7 +95,7 @@ void Rasterizer::DoDraw(std::unique_ptr<flow::LayerTree> layer_tree) {
 }
 
 bool Rasterizer::DrawToSurface(flow::LayerTree& layer_tree) {
-  FXL_DCHECK(surface_);
+  FML_DCHECK(surface_);
 
   auto frame = surface_->AcquireFrame(layer_tree.frame_size());
 
@@ -129,7 +129,7 @@ bool Rasterizer::DrawToSurface(flow::LayerTree& layer_tree) {
 static sk_sp<SkPicture> ScreenshotLayerTreeAsPicture(
     flow::LayerTree* tree,
     flow::CompositorContext& compositor_context) {
-  FXL_DCHECK(tree != nullptr);
+  FML_DCHECK(tree != nullptr);
   SkPictureRecorder recorder;
   recorder.beginRecording(
       SkRect::MakeWH(tree->frame_size().width(), tree->frame_size().height()));
@@ -211,7 +211,7 @@ Rasterizer::Screenshot Rasterizer::ScreenshotLastLayerTree(
     bool base64_encode) {
   auto layer_tree = GetLastLayerTree();
   if (layer_tree == nullptr) {
-    FXL_DLOG(INFO) << "Last layer tree was null when screenshotting.";
+    FML_DLOG(INFO) << "Last layer tree was null when screenshotting.";
     return {};
   }
 
@@ -235,7 +235,7 @@ Rasterizer::Screenshot Rasterizer::ScreenshotLastLayerTree(
   }
 
   if (data == nullptr) {
-    FXL_DLOG(INFO) << "Sceenshot data was null.";
+    FML_DLOG(INFO) << "Sceenshot data was null.";
     return {};
   }
 
@@ -249,7 +249,7 @@ Rasterizer::Screenshot Rasterizer::ScreenshotLastLayerTree(
   return Rasterizer::Screenshot{data, layer_tree->frame_size()};
 }
 
-void Rasterizer::SetNextFrameCallback(fxl::Closure callback) {
+void Rasterizer::SetNextFrameCallback(fml::closure callback) {
   next_frame_callback_ = callback;
 }
 

@@ -105,17 +105,17 @@
 }
 
 - (shell::Shell&)shell {
-  FXL_DCHECK(_shell);
+  FML_DCHECK(_shell);
   return *_shell;
 }
 
 - (fml::WeakPtr<shell::PlatformViewIOS>)iosPlatformView {
-  FXL_DCHECK(_shell);
+  FML_DCHECK(_shell);
   return _shell->GetPlatformView();
 }
 
 - (BOOL)setupShell {
-  FXL_DCHECK(_shell == nullptr);
+  FML_DCHECK(_shell == nullptr);
 
   static size_t shell_count = 1;
 
@@ -163,7 +163,7 @@
   );
 
   if (!_shell) {
-    FXL_LOG(ERROR) << "Could not setup a shell to run the Dart application.";
+    FML_LOG(ERROR) << "Could not setup a shell to run the Dart application.";
     return false;
   }
 
@@ -389,13 +389,13 @@
 
   // Launch the Dart application with the inferred run configuration.
   _shell->GetTaskRunners().GetUITaskRunner()->PostTask(
-      fxl::MakeCopyable([engine = _shell->GetEngine(),                   //
+      fml::MakeCopyable([engine = _shell->GetEngine(),                   //
                          config = [_dartProject.get() runConfiguration]  //
   ]() mutable {
         if (engine) {
           auto result = engine->Run(std::move(config));
           if (!result) {
-            FXL_LOG(ERROR) << "Could not launch engine with configuration.";
+            FML_LOG(ERROR) << "Could not launch engine with configuration.";
           }
         }
       }));
@@ -534,7 +534,7 @@ static inline blink::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* to
         break;
     }
 
-    FXL_DCHECK(device_id != 0);
+    FML_DCHECK(device_id != 0);
     CGPoint windowCoordinates = [touch locationInView:self.view];
 
     blink::PointerData pointer_data;
@@ -609,7 +609,7 @@ static inline blink::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* to
   }
 
   _shell->GetTaskRunners().GetUITaskRunner()->PostTask(
-      fxl::MakeCopyable([engine = _shell->GetEngine(), packet = std::move(packet)] {
+      fml::MakeCopyable([engine = _shell->GetEngine(), packet = std::move(packet)] {
         if (engine) {
           engine->DispatchPointerDataPacket(*packet);
         }
@@ -969,16 +969,16 @@ constexpr CGFloat kStandardStatusBarHeight = 20.0;
               message:(NSData*)message
           binaryReply:(FlutterBinaryReply)callback {
   NSAssert(channel, @"The channel must not be null");
-  fxl::RefPtr<shell::PlatformMessageResponseDarwin> response =
+  fml::RefPtr<shell::PlatformMessageResponseDarwin> response =
       (callback == nil) ? nullptr
-                        : fxl::MakeRefCounted<shell::PlatformMessageResponseDarwin>(
+                        : fml::MakeRefCounted<shell::PlatformMessageResponseDarwin>(
                               ^(NSData* reply) {
                                 callback(reply);
                               },
                               _shell->GetTaskRunners().GetPlatformTaskRunner());
-  fxl::RefPtr<blink::PlatformMessage> platformMessage =
-      (message == nil) ? fxl::MakeRefCounted<blink::PlatformMessage>(channel.UTF8String, response)
-                       : fxl::MakeRefCounted<blink::PlatformMessage>(
+  fml::RefPtr<blink::PlatformMessage> platformMessage =
+      (message == nil) ? fml::MakeRefCounted<blink::PlatformMessage>(channel.UTF8String, response)
+                       : fml::MakeRefCounted<blink::PlatformMessage>(
                              channel.UTF8String, shell::GetVectorFromNSData(message), response);
 
   _shell->GetPlatformView()->DispatchPlatformMessage(platformMessage);

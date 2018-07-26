@@ -25,7 +25,7 @@ PlatformViewAndroid::PlatformViewAndroid(
     : PlatformView(delegate, std::move(task_runners)),
       java_object_(java_object),
       android_surface_(AndroidSurface::Create(use_software_rendering)) {
-  FXL_CHECK(android_surface_)
+  FML_CHECK(android_surface_)
       << "Could not create an OpenGL, Vulkan or Software surface to setup "
          "rendering.";
 }
@@ -33,7 +33,7 @@ PlatformViewAndroid::PlatformViewAndroid(
 PlatformViewAndroid::~PlatformViewAndroid() = default;
 
 void PlatformViewAndroid::NotifyCreated(
-    fxl::RefPtr<AndroidNativeWindow> native_window) {
+    fml::RefPtr<AndroidNativeWindow> native_window) {
   InstallFirstFrameCallback();
   android_surface_->SetNativeWindow(native_window);
   PlatformView::NotifyCreated();
@@ -65,28 +65,28 @@ void PlatformViewAndroid::DispatchPlatformMessage(JNIEnv* env,
   std::vector<uint8_t> message =
       std::vector<uint8_t>(message_data, message_data + java_message_position);
 
-  fxl::RefPtr<blink::PlatformMessageResponse> response;
+  fml::RefPtr<blink::PlatformMessageResponse> response;
   if (response_id) {
-    response = fxl::MakeRefCounted<PlatformMessageResponseAndroid>(
+    response = fml::MakeRefCounted<PlatformMessageResponseAndroid>(
         response_id, java_object_, task_runners_.GetPlatformTaskRunner());
   }
 
   PlatformView::DispatchPlatformMessage(
-      fxl::MakeRefCounted<blink::PlatformMessage>(
+      fml::MakeRefCounted<blink::PlatformMessage>(
           std::move(name), std::move(message), std::move(response)));
 }
 
 void PlatformViewAndroid::DispatchEmptyPlatformMessage(JNIEnv* env,
                                                        std::string name,
                                                        jint response_id) {
-  fxl::RefPtr<blink::PlatformMessageResponse> response;
+  fml::RefPtr<blink::PlatformMessageResponse> response;
   if (response_id) {
-    response = fxl::MakeRefCounted<PlatformMessageResponseAndroid>(
+    response = fml::MakeRefCounted<PlatformMessageResponseAndroid>(
         response_id, java_object_, task_runners_.GetPlatformTaskRunner());
   }
 
   PlatformView::DispatchPlatformMessage(
-      fxl::MakeRefCounted<blink::PlatformMessage>(std::move(name),
+      fml::MakeRefCounted<blink::PlatformMessage>(std::move(name),
                                                   std::move(response)));
 }
 
@@ -125,7 +125,7 @@ void PlatformViewAndroid::InvokePlatformMessageEmptyResponseCallback(
 
 // |shell::PlatformView|
 void PlatformViewAndroid::HandlePlatformMessage(
-    fxl::RefPtr<blink::PlatformMessage> message) {
+    fml::RefPtr<blink::PlatformMessage> message) {
   JNIEnv* env = fml::jni::AttachCurrentThread();
   fml::jni::ScopedJavaLocalRef<jobject> view = java_object_.get(env);
   if (view.is_null())
@@ -347,7 +347,7 @@ sk_sp<GrContext> PlatformViewAndroid::CreateResourceContext() const {
     resource_context = IOManager::CreateCompatibleResourceLoadingContext(
         GrBackend::kOpenGL_GrBackend);
   } else {
-    FXL_DLOG(ERROR) << "Could not make the resource context current.";
+    FML_DLOG(ERROR) << "Could not make the resource context current.";
   }
 
   return resource_context;

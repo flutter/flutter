@@ -29,34 +29,34 @@ IOSGLContext::IOSGLContext(fml::scoped_nsobject<CAEAGLLayer> layer)
                                                   sharegroup:context_.get().sharegroup]);
   }
 
-  FXL_DCHECK(layer_ != nullptr);
-  FXL_DCHECK(context_ != nullptr);
-  FXL_DCHECK(resource_context_ != nullptr);
+  FML_DCHECK(layer_ != nullptr);
+  FML_DCHECK(context_ != nullptr);
+  FML_DCHECK(resource_context_ != nullptr);
 
   bool context_current = [EAGLContext setCurrentContext:context_];
 
-  FXL_DCHECK(context_current);
-  FXL_DCHECK(glGetError() == GL_NO_ERROR);
+  FML_DCHECK(context_current);
+  FML_DCHECK(glGetError() == GL_NO_ERROR);
 
   // Generate the framebuffer
 
   glGenFramebuffers(1, &framebuffer_);
-  FXL_DCHECK(glGetError() == GL_NO_ERROR);
-  FXL_DCHECK(framebuffer_ != GL_NONE);
+  FML_DCHECK(glGetError() == GL_NO_ERROR);
+  FML_DCHECK(framebuffer_ != GL_NONE);
 
   glBindFramebuffer(GL_FRAMEBUFFER, framebuffer_);
-  FXL_DCHECK(glGetError() == GL_NO_ERROR);
+  FML_DCHECK(glGetError() == GL_NO_ERROR);
 
   // Setup color attachment
 
   glGenRenderbuffers(1, &colorbuffer_);
-  FXL_DCHECK(colorbuffer_ != GL_NONE);
+  FML_DCHECK(colorbuffer_ != GL_NONE);
 
   glBindRenderbuffer(GL_RENDERBUFFER, colorbuffer_);
-  FXL_DCHECK(glGetError() == GL_NO_ERROR);
+  FML_DCHECK(glGetError() == GL_NO_ERROR);
 
   glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, colorbuffer_);
-  FXL_DCHECK(glGetError() == GL_NO_ERROR);
+  FML_DCHECK(glGetError() == GL_NO_ERROR);
 
   // TODO:
   // iOS displays are more variable than just P3 or sRGB.  Reading the display
@@ -89,13 +89,13 @@ IOSGLContext::IOSGLContext(fml::scoped_nsobject<CAEAGLLayer> layer)
 }
 
 IOSGLContext::~IOSGLContext() {
-  FXL_DCHECK(glGetError() == GL_NO_ERROR);
+  FML_DCHECK(glGetError() == GL_NO_ERROR);
 
   // Deletes on GL_NONEs are ignored
   glDeleteFramebuffers(1, &framebuffer_);
   glDeleteRenderbuffers(1, &colorbuffer_);
 
-  FXL_DCHECK(glGetError() == GL_NO_ERROR);
+  FML_DCHECK(glGetError() == GL_NO_ERROR);
 }
 
 bool IOSGLContext::IsValid() const {
@@ -125,18 +125,18 @@ bool IOSGLContext::UpdateStorageSizeIfNecessary() {
     return true;
   }
   TRACE_EVENT_INSTANT0("flutter", "IOSGLContext::UpdateStorageSizeIfNecessary");
-  FXL_DLOG(INFO) << "Updating render buffer storage size.";
+  FML_DLOG(INFO) << "Updating render buffer storage size.";
 
   if (![EAGLContext setCurrentContext:context_]) {
     return false;
   }
 
-  FXL_DCHECK(glGetError() == GL_NO_ERROR);
+  FML_DCHECK(glGetError() == GL_NO_ERROR);
 
   glBindFramebuffer(GL_FRAMEBUFFER, framebuffer_);
 
   glBindRenderbuffer(GL_RENDERBUFFER, colorbuffer_);
-  FXL_DCHECK(glGetError() == GL_NO_ERROR);
+  FML_DCHECK(glGetError() == GL_NO_ERROR);
 
   if (![context_.get() renderbufferStorage:GL_RENDERBUFFER fromDrawable:layer_.get()]) {
     return false;
@@ -144,12 +144,12 @@ bool IOSGLContext::UpdateStorageSizeIfNecessary() {
 
   // Fetch the dimensions of the color buffer whose backing was just updated.
   glGetRenderbufferParameteriv(GL_RENDERBUFFER, GL_RENDERBUFFER_WIDTH, &storage_size_width_);
-  FXL_DCHECK(glGetError() == GL_NO_ERROR);
+  FML_DCHECK(glGetError() == GL_NO_ERROR);
 
   glGetRenderbufferParameteriv(GL_RENDERBUFFER, GL_RENDERBUFFER_HEIGHT, &storage_size_height_);
-  FXL_DCHECK(glGetError() == GL_NO_ERROR);
+  FML_DCHECK(glGetError() == GL_NO_ERROR);
 
-  FXL_DCHECK(glCheckFramebufferStatus(GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE);
+  FML_DCHECK(glCheckFramebufferStatus(GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE);
 
   return true;
 }

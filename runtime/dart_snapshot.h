@@ -9,26 +9,26 @@
 #include <string>
 
 #include "flutter/common/settings.h"
+#include "flutter/fml/macros.h"
+#include "flutter/fml/memory/ref_counted.h"
 #include "flutter/runtime/dart_snapshot_buffer.h"
-#include "lib/fxl/macros.h"
-#include "lib/fxl/memory/ref_counted.h"
 
 namespace blink {
 
-class DartSnapshot : public fxl::RefCountedThreadSafe<DartSnapshot> {
+class DartSnapshot : public fml::RefCountedThreadSafe<DartSnapshot> {
  public:
   static const char* kVMDataSymbol;
   static const char* kVMInstructionsSymbol;
   static const char* kIsolateDataSymbol;
   static const char* kIsolateInstructionsSymbol;
 
-  static fxl::RefPtr<DartSnapshot> VMSnapshotFromSettings(
+  static fml::RefPtr<DartSnapshot> VMSnapshotFromSettings(
       const Settings& settings);
 
-  static fxl::RefPtr<DartSnapshot> IsolateSnapshotFromSettings(
+  static fml::RefPtr<DartSnapshot> IsolateSnapshotFromSettings(
       const Settings& settings);
 
-  static fxl::RefPtr<DartSnapshot> Empty();
+  static fml::RefPtr<DartSnapshot> Empty();
 
   bool IsValid() const;
 
@@ -51,9 +51,9 @@ class DartSnapshot : public fxl::RefCountedThreadSafe<DartSnapshot> {
 
   ~DartSnapshot();
 
-  FRIEND_REF_COUNTED_THREAD_SAFE(DartSnapshot);
-  FRIEND_MAKE_REF_COUNTED(DartSnapshot);
-  FXL_DISALLOW_COPY_AND_ASSIGN(DartSnapshot);
+  FML_FRIEND_REF_COUNTED_THREAD_SAFE(DartSnapshot);
+  FML_FRIEND_MAKE_REF_COUNTED(DartSnapshot);
+  FML_DISALLOW_COPY_AND_ASSIGN(DartSnapshot);
 };
 
 }  // namespace blink

@@ -20,7 +20,7 @@
 #include <memory>
 #include <string>
 
-#include "lib/fxl/macros.h"
+#include "flutter/fml/macros.h"
 #include "third_party/skia/include/core/SkFontMgr.h"
 #include "txt/asset_font_manager.h"
 #include "txt/font_asset_provider.h"
@@ -41,7 +41,7 @@ class TestFontManager : public AssetFontManager {
 
   SkFontStyleSet* onMatchFamily(const char family_name[]) const override;
 
-  FXL_DISALLOW_COPY_AND_ASSIGN(TestFontManager);
+  FML_DISALLOW_COPY_AND_ASSIGN(TestFontManager);
 };
 
 }  // namespace txt

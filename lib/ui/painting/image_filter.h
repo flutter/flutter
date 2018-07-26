@@ -15,11 +15,11 @@ namespace blink {
 
 class ImageFilter : public RefCountedDartWrappable<ImageFilter> {
   DEFINE_WRAPPERTYPEINFO();
-  FRIEND_MAKE_REF_COUNTED(ImageFilter);
+  FML_FRIEND_MAKE_REF_COUNTED(ImageFilter);
 
  public:
   ~ImageFilter() override;
-  static fxl::RefPtr<ImageFilter> Create();
+  static fml::RefPtr<ImageFilter> Create();
 
   void initImage(CanvasImage* image);
   void initPicture(Picture*);

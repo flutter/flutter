@@ -9,7 +9,7 @@
 
 #include "flutter/flow/layers/container_layer.h"
 #include "flutter/flow/layers/layer_builder.h"
-#include "garnet/public/lib/fxl/macros.h"
+#include "flutter/fml/macros.h"
 
 namespace flow {
 
@@ -76,7 +76,7 @@ class DefaultLayerBuilder final : public LayerBuilder {
   // |flow::LayerBuilder|
   void PushChildScene(const SkPoint& offset,
                       const SkSize& size,
-                      fxl::RefPtr<flow::ExportNodeHolder> export_token_holder,
+                      fml::RefPtr<flow::ExportNodeHolder> export_token_holder,
                       bool hit_testable) override;
 #endif  // defined(OS_FUCHSIA)
 
@@ -95,7 +95,7 @@ class DefaultLayerBuilder final : public LayerBuilder {
   void PushLayer(std::unique_ptr<flow::ContainerLayer> layer,
                  const SkRect& cullRect);
 
-  FXL_DISALLOW_COPY_AND_ASSIGN(DefaultLayerBuilder);
+  FML_DISALLOW_COPY_AND_ASSIGN(DefaultLayerBuilder);
 };
 
 }  // namespace flow

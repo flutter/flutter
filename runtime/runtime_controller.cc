@@ -21,11 +21,11 @@ namespace blink {
 RuntimeController::RuntimeController(
     RuntimeDelegate& p_client,
     DartVM* p_vm,
-    fxl::RefPtr<DartSnapshot> p_isolate_snapshot,
-    fxl::RefPtr<DartSnapshot> p_shared_snapshot,
+    fml::RefPtr<DartSnapshot> p_isolate_snapshot,
+    fml::RefPtr<DartSnapshot> p_shared_snapshot,
     TaskRunners p_task_runners,
     fml::WeakPtr<GrContext> p_resource_context,
-    fxl::RefPtr<flow::SkiaUnrefQueue> p_unref_queue,
+    fml::RefPtr<flow::SkiaUnrefQueue> p_unref_queue,
     std::string p_advisory_script_uri,
     std::string p_advisory_script_entrypoint)
     : RuntimeController(p_client,
@@ -42,11 +42,11 @@ RuntimeController::RuntimeController(
 RuntimeController::RuntimeController(
     RuntimeDelegate& p_client,
     DartVM* p_vm,
-    fxl::RefPtr<DartSnapshot> p_isolate_snapshot,
-    fxl::RefPtr<DartSnapshot> p_shared_snapshot,
+    fml::RefPtr<DartSnapshot> p_isolate_snapshot,
+    fml::RefPtr<DartSnapshot> p_shared_snapshot,
     TaskRunners p_task_runners,
     fml::WeakPtr<GrContext> p_resource_context,
-    fxl::RefPtr<flow::SkiaUnrefQueue> p_unref_queue,
+    fml::RefPtr<flow::SkiaUnrefQueue> p_unref_queue,
     std::string p_advisory_script_uri,
     std::string p_advisory_script_entrypoint,
     WindowData p_window_data)
@@ -78,22 +78,22 @@ RuntimeController::RuntimeController(
     tonic::DartState::Scope scope(root_isolate);
     window->DidCreateIsolate();
     if (!FlushRuntimeStateToIsolate()) {
-      FXL_DLOG(ERROR) << "Could not setup intial isolate state.";
+      FML_DLOG(ERROR) << "Could not setup intial isolate state.";
     }
   } else {
-    FXL_DCHECK(false) << "RuntimeController created without window binding.";
+    FML_DCHECK(false) << "RuntimeController created without window binding.";
   }
-  FXL_DCHECK(Dart_CurrentIsolate() == nullptr);
+  FML_DCHECK(Dart_CurrentIsolate() == nullptr);
 }
 
 RuntimeController::~RuntimeController() {
-  FXL_DCHECK(Dart_CurrentIsolate() == nullptr);
+  FML_DCHECK(Dart_CurrentIsolate() == nullptr);
   std::shared_ptr<DartIsolate> root_isolate = root_isolate_.lock();
   if (root_isolate) {
     root_isolate->SetReturnCodeCallback(nullptr);
     auto result = root_isolate->Shutdown();
     if (!result) {
-      FXL_DLOG(ERROR) << "Could not shutdown the root isolate.";
+      FML_DLOG(ERROR) << "Could not shutdown the root isolate.";
     }
     root_isolate_ = {};
   }
@@ -186,7 +186,7 @@ bool RuntimeController::SetAssistiveTechnologyEnabled(bool enabled) {
   return false;
 }
 
-bool RuntimeController::BeginFrame(fxl::TimePoint frame_time) {
+bool RuntimeController::BeginFrame(fml::TimePoint frame_time) {
   if (auto window = GetWindowIfAvailable()) {
     window->BeginFrame(frame_time);
     return true;
@@ -206,7 +206,7 @@ bool RuntimeController::NotifyIdle(int64_t deadline) {
 }
 
 bool RuntimeController::DispatchPlatformMessage(
-    fxl::RefPtr<PlatformMessage> message) {
+    fml::RefPtr<PlatformMessage> message) {
   if (auto window = GetWindowIfAvailable()) {
     TRACE_EVENT1("flutter", "RuntimeController::DispatchPlatformMessage",
                  "mode", "basic");
@@ -263,7 +263,7 @@ void RuntimeController::UpdateSemantics(SemanticsUpdate* update) {
 }
 
 void RuntimeController::HandlePlatformMessage(
-    fxl::RefPtr<PlatformMessage> message) {
+    fml::RefPtr<PlatformMessage> message) {
   client_.HandlePlatformMessage(std::move(message));
 }
 

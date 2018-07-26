@@ -8,16 +8,16 @@
 #include <mutex>
 #include <queue>
 
+#include "flutter/fml/memory/ref_counted.h"
 #include "flutter/fml/memory/weak_ptr.h"
 #include "flutter/fml/task_runner.h"
-#include "lib/fxl/memory/ref_ptr.h"
 #include "third_party/skia/include/core/SkRefCnt.h"
 
 namespace flow {
 
 // A queue that holds Skia objects that must be destructed on the the given task
 // runner.
-class SkiaUnrefQueue : public fxl::RefCountedThreadSafe<SkiaUnrefQueue> {
+class SkiaUnrefQueue : public fml::RefCountedThreadSafe<SkiaUnrefQueue> {
  public:
   void Unref(SkRefCnt* object);
 
@@ -29,20 +29,20 @@ class SkiaUnrefQueue : public fxl::RefCountedThreadSafe<SkiaUnrefQueue> {
   void Drain();
 
  private:
-  const fxl::RefPtr<fxl::TaskRunner> task_runner_;
-  const fxl::TimeDelta drain_delay_;
+  const fml::RefPtr<fml::TaskRunner> task_runner_;
+  const fml::TimeDelta drain_delay_;
   std::mutex mutex_;
   std::deque<SkRefCnt*> objects_;
   bool drain_pending_;
 
-  SkiaUnrefQueue(fxl::RefPtr<fxl::TaskRunner> task_runner,
-                 fxl::TimeDelta delay);
+  SkiaUnrefQueue(fml::RefPtr<fml::TaskRunner> task_runner,
+                 fml::TimeDelta delay);
 
   ~SkiaUnrefQueue();
 
-  FRIEND_REF_COUNTED_THREAD_SAFE(SkiaUnrefQueue);
-  FRIEND_MAKE_REF_COUNTED(SkiaUnrefQueue);
-  FXL_DISALLOW_COPY_AND_ASSIGN(SkiaUnrefQueue);
+  FML_FRIEND_REF_COUNTED_THREAD_SAFE(SkiaUnrefQueue);
+  FML_FRIEND_MAKE_REF_COUNTED(SkiaUnrefQueue);
+  FML_DISALLOW_COPY_AND_ASSIGN(SkiaUnrefQueue);
 };
 
 /// An object whose deallocation needs to be performed on an specific unref
@@ -55,9 +55,9 @@ class SkiaGPUObject {
 
   SkiaGPUObject() = default;
 
-  SkiaGPUObject(sk_sp<SkiaObjectType> object, fxl::RefPtr<SkiaUnrefQueue> queue)
+  SkiaGPUObject(sk_sp<SkiaObjectType> object, fml::RefPtr<SkiaUnrefQueue> queue)
       : object_(std::move(object)), queue_(std::move(queue)) {
-    FXL_DCHECK(queue_ && object_);
+    FML_DCHECK(queue_ && object_);
   }
 
   SkiaGPUObject(SkiaGPUObject&&) = default;
@@ -73,14 +73,14 @@ class SkiaGPUObject {
       queue_->Unref(object_.release());
     }
     queue_ = nullptr;
-    FXL_DCHECK(object_ == nullptr);
+    FML_DCHECK(object_ == nullptr);
   }
 
  private:
   sk_sp<SkiaObjectType> object_;
-  fxl::RefPtr<SkiaUnrefQueue> queue_;
+  fml::RefPtr<SkiaUnrefQueue> queue_;
 
-  FXL_DISALLOW_COPY_AND_ASSIGN(SkiaGPUObject);
+  FML_DISALLOW_COPY_AND_ASSIGN(SkiaGPUObject);
 };
 
 }  // namespace flow

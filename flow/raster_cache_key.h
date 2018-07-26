@@ -7,8 +7,8 @@
 
 #include <unordered_map>
 #include "flutter/flow/matrix_decomposition.h"
-#include "lib/fxl/logging.h"
-#include "lib/fxl/macros.h"
+#include "flutter/fml/logging.h"
+#include "flutter/fml/macros.h"
 #include "third_party/skia/include/core/SkImage.h"
 #include "third_party/skia/include/core/SkPicture.h"
 
@@ -21,7 +21,7 @@ class RasterCacheKey {
     matrix_[SkMatrix::kMTransX] = SkScalarFraction(ctm.getTranslateX());
     matrix_[SkMatrix::kMTransY] = SkScalarFraction(ctm.getTranslateY());
 #ifndef SUPPORT_FRACTIONAL_TRANSLATION
-    FXL_DCHECK(matrix_.getTranslateX() == 0 && matrix_.getTranslateY() == 0);
+    FML_DCHECK(matrix_.getTranslateX() == 0 && matrix_.getTranslateY() == 0);
 #endif
   }
 

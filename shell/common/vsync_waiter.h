@@ -10,21 +10,21 @@
 #include <mutex>
 
 #include "flutter/common/task_runners.h"
-#include "lib/fxl/time/time_point.h"
+#include "flutter/fml/time/time_point.h"
 
 namespace shell {
 
 class VsyncWaiter : public std::enable_shared_from_this<VsyncWaiter> {
  public:
-  using Callback = std::function<void(fxl::TimePoint frame_start_time,
-                                      fxl::TimePoint frame_target_time)>;
+  using Callback = std::function<void(fml::TimePoint frame_start_time,
+                                      fml::TimePoint frame_target_time)>;
 
   virtual ~VsyncWaiter();
 
   void AsyncWaitForVsync(Callback callback);
 
-  void FireCallback(fxl::TimePoint frame_start_time,
-                    fxl::TimePoint frame_target_time);
+  void FireCallback(fml::TimePoint frame_start_time,
+                    fml::TimePoint frame_target_time);
 
  protected:
   const blink::TaskRunners task_runners_;
@@ -35,7 +35,7 @@ class VsyncWaiter : public std::enable_shared_from_this<VsyncWaiter> {
 
   virtual void AwaitVSync() = 0;
 
-  FXL_DISALLOW_COPY_AND_ASSIGN(VsyncWaiter);
+  FML_DISALLOW_COPY_AND_ASSIGN(VsyncWaiter);
 };
 
 }  // namespace shell

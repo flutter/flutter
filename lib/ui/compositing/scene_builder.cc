@@ -4,11 +4,11 @@
 
 #include "flutter/lib/ui/compositing/scene_builder.h"
 
+#include "flutter/fml/build_config.h"
 #include "flutter/lib/ui/painting/matrix.h"
 #include "flutter/lib/ui/painting/shader.h"
 #include "flutter/lib/ui/ui_dart_state.h"
 #include "flutter/lib/ui/window/window.h"
-#include "lib/fxl/build_config.h"
 #include "third_party/skia/include/core/SkColorFilter.h"
 #include "third_party/tonic/converter/dart_converter.h"
 #include "third_party/tonic/dart_args.h"
@@ -178,8 +178,8 @@ void SceneBuilder::setCheckerboardOffscreenLayers(bool checkerboard) {
   layer_builder_->SetCheckerboardOffscreenLayers(checkerboard);
 }
 
-fxl::RefPtr<Scene> SceneBuilder::build() {
-  fxl::RefPtr<Scene> scene =
+fml::RefPtr<Scene> SceneBuilder::build() {
+  fml::RefPtr<Scene> scene =
       Scene::create(layer_builder_->TakeLayer(),
                     layer_builder_->GetRasterizerTracingThreshold(),
                     layer_builder_->GetCheckerboardRasterCacheImages(),

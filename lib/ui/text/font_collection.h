@@ -9,8 +9,8 @@
 #include <vector>
 
 #include "flutter/assets/asset_manager.h"
-#include "lib/fxl/macros.h"
-#include "lib/fxl/memory/ref_ptr.h"
+#include "flutter/fml/macros.h"
+#include "flutter/fml/memory/ref_ptr.h"
 #include "txt/font_collection.h"
 
 namespace blink {
@@ -30,7 +30,7 @@ class FontCollection {
  private:
   std::shared_ptr<txt::FontCollection> collection_;
 
-  FXL_DISALLOW_COPY_AND_ASSIGN(FontCollection);
+  FML_DISALLOW_COPY_AND_ASSIGN(FontCollection);
 };
 
 }  // namespace blink

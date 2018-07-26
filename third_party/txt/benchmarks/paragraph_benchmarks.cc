@@ -17,9 +17,9 @@
 #include "third_party/benchmark/include/benchmark/benchmark_api.h"
 
 #include <minikin/Layout.h>
+#include "flutter/fml/command_line.h"
+#include "flutter/fml/logging.h"
 #include "flutter/third_party/txt/tests/txt_test_utils.h"
-#include "lib/fxl/command_line.h"
-#include "lib/fxl/logging.h"
 #include "minikin/LayoutUtils.h"
 #include "third_party/icu/source/common/unicode/unistr.h"
 #include "third_party/skia/include/core/SkBitmap.h"

@@ -25,15 +25,15 @@
 
 namespace fml {
 
-fxl::RefPtr<MessageLoopImpl> MessageLoopImpl::Create() {
+fml::RefPtr<MessageLoopImpl> MessageLoopImpl::Create() {
 #if OS_MACOSX
-  return fxl::MakeRefCounted<MessageLoopDarwin>();
+  return fml::MakeRefCounted<MessageLoopDarwin>();
 #elif OS_ANDROID
-  return fxl::MakeRefCounted<MessageLoopAndroid>();
+  return fml::MakeRefCounted<MessageLoopAndroid>();
 #elif OS_LINUX
-  return fxl::MakeRefCounted<MessageLoopLinux>();
+  return fml::MakeRefCounted<MessageLoopLinux>();
 #elif OS_WIN
-  return fxl::MakeRefCounted<MessageLoopWin>();
+  return fml::MakeRefCounted<MessageLoopWin>();
 #else
   return nullptr;
 #endif
@@ -43,7 +43,7 @@ MessageLoopImpl::MessageLoopImpl() : order_(0), terminated_(false) {}
 
 MessageLoopImpl::~MessageLoopImpl() = default;
 
-void MessageLoopImpl::PostTask(fxl::Closure task, fxl::TimePoint target_time) {
+void MessageLoopImpl::PostTask(fml::closure task, fml::TimePoint target_time) {
   FML_DCHECK(task != nullptr);
   RegisterTask(task, target_time);
 }
@@ -52,7 +52,7 @@ void MessageLoopImpl::RunExpiredTasksNow() {
   RunExpiredTasks();
 }
 
-void MessageLoopImpl::AddTaskObserver(intptr_t key, fxl::Closure callback) {
+void MessageLoopImpl::AddTaskObserver(intptr_t key, fml::closure callback) {
   FML_DCHECK(callback != nullptr);
   FML_DCHECK(MessageLoop::GetCurrent().GetLoopImpl().get() == this)
       << "Message loop task observer must be added on the same thread as the "
@@ -99,8 +99,8 @@ void MessageLoopImpl::DoTerminate() {
   Terminate();
 }
 
-void MessageLoopImpl::RegisterTask(fxl::Closure task,
-                                   fxl::TimePoint target_time) {
+void MessageLoopImpl::RegisterTask(fml::closure task,
+                                   fml::TimePoint target_time) {
   FML_DCHECK(task != nullptr);
   if (terminated_) {
     // If the message loop has already been terminated, PostTask should destruct
@@ -114,7 +114,7 @@ void MessageLoopImpl::RegisterTask(fxl::Closure task,
 
 void MessageLoopImpl::RunExpiredTasks() {
   TRACE_EVENT0("fml", "MessageLoop::RunExpiredTasks");
-  std::vector<fxl::Closure> invocations;
+  std::vector<fml::closure> invocations;
 
   {
     std::lock_guard<std::mutex> lock(delayed_tasks_mutex_);
@@ -123,7 +123,7 @@ void MessageLoopImpl::RunExpiredTasks() {
       return;
     }
 
-    auto now = fxl::TimePoint::Now();
+    auto now = fml::TimePoint::Now();
     while (!delayed_tasks_.empty()) {
       const auto& top = delayed_tasks_.top();
       if (top.target_time > now) {
@@ -133,7 +133,7 @@ void MessageLoopImpl::RunExpiredTasks() {
       delayed_tasks_.pop();
     }
 
-    WakeUp(delayed_tasks_.empty() ? fxl::TimePoint::Max()
+    WakeUp(delayed_tasks_.empty() ? fml::TimePoint::Max()
                                   : delayed_tasks_.top().target_time);
   }
 

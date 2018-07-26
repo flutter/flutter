@@ -33,7 +33,7 @@ namespace fml {
 #define NSEC_PER_SEC 1000000000
 #endif
 
-bool TimerRearm(int fd, fxl::TimePoint time_point) {
+bool TimerRearm(int fd, fml::TimePoint time_point) {
   const uint64_t nano_secs = time_point.ToEpochDelta().ToNanoseconds();
 
   struct itimerspec spec = {};

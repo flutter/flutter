@@ -10,7 +10,7 @@
 #include <vector>
 
 #include "flutter/assets/asset_manager.h"
-#include "lib/fxl/macros.h"
+#include "flutter/fml/macros.h"
 #include "third_party/skia/include/core/SkFontMgr.h"
 #include "txt/font_asset_provider.h"
 
@@ -46,7 +46,7 @@ class AssetManagerFontStyleSet : public SkFontStyleSet {
   };
   std::vector<TypefaceAsset> assets_;
 
-  FXL_DISALLOW_COPY_AND_ASSIGN(AssetManagerFontStyleSet);
+  FML_DISALLOW_COPY_AND_ASSIGN(AssetManagerFontStyleSet);
 };
 
 class AssetManagerFontProvider : public txt::FontAssetProvider {
@@ -71,7 +71,7 @@ class AssetManagerFontProvider : public txt::FontAssetProvider {
       registered_families_;
   std::vector<std::string> family_names_;
 
-  FXL_DISALLOW_COPY_AND_ASSIGN(AssetManagerFontProvider);
+  FML_DISALLOW_COPY_AND_ASSIGN(AssetManagerFontProvider);
 };
 
 }  // namespace blink

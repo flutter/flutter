@@ -6,8 +6,8 @@
 
 #include "flutter/common/settings.h"
 #include "flutter/common/task_runners.h"
-#include "lib/fxl/logging.h"
-#include "lib/fxl/tasks/task_runner.h"
+#include "flutter/fml/logging.h"
+#include "flutter/fml/task_runner.h"
 #include "third_party/tonic/converter/dart_converter.h"
 #include "third_party/tonic/dart_args.h"
 #include "third_party/tonic/dart_binding_macros.h"

@@ -12,17 +12,17 @@
 #include <queue>
 #include <utility>
 
+#include "flutter/fml/closure.h"
 #include "flutter/fml/macros.h"
+#include "flutter/fml/memory/ref_counted.h"
 #include "flutter/fml/message_loop.h"
-#include "lib/fxl/functional/closure.h"
-#include "lib/fxl/memory/ref_counted.h"
-#include "lib/fxl/time/time_point.h"
+#include "flutter/fml/time/time_point.h"
 
 namespace fml {
 
-class MessageLoopImpl : public fxl::RefCountedThreadSafe<MessageLoopImpl> {
+class MessageLoopImpl : public fml::RefCountedThreadSafe<MessageLoopImpl> {
  public:
-  static fxl::RefPtr<MessageLoopImpl> Create();
+  static fml::RefPtr<MessageLoopImpl> Create();
 
   virtual ~MessageLoopImpl();
 
@@ -30,11 +30,11 @@ class MessageLoopImpl : public fxl::RefCountedThreadSafe<MessageLoopImpl> {
 
   virtual void Terminate() = 0;
 
-  virtual void WakeUp(fxl::TimePoint time_point) = 0;
+  virtual void WakeUp(fml::TimePoint time_point) = 0;
 
-  void PostTask(fxl::Closure task, fxl::TimePoint target_time);
+  void PostTask(fml::closure task, fml::TimePoint target_time);
 
-  void AddTaskObserver(intptr_t key, fxl::Closure callback);
+  void AddTaskObserver(intptr_t key, fml::closure callback);
 
   void RemoveTaskObserver(intptr_t key);
 
@@ -52,12 +52,12 @@ class MessageLoopImpl : public fxl::RefCountedThreadSafe<MessageLoopImpl> {
  private:
   struct DelayedTask {
     size_t order;
-    fxl::Closure task;
-    fxl::TimePoint target_time;
+    fml::closure task;
+    fml::TimePoint target_time;
 
     DelayedTask(size_t p_order,
-                fxl::Closure p_task,
-                fxl::TimePoint p_target_time)
+                fml::closure p_task,
+                fml::TimePoint p_target_time)
         : order(p_order), task(std::move(p_task)), target_time(p_target_time) {}
   };
 
@@ -71,13 +71,13 @@ class MessageLoopImpl : public fxl::RefCountedThreadSafe<MessageLoopImpl> {
   using DelayedTaskQueue = std::
       priority_queue<DelayedTask, std::deque<DelayedTask>, DelayedTaskCompare>;
 
-  std::map<intptr_t, fxl::Closure> task_observers_;
+  std::map<intptr_t, fml::closure> task_observers_;
   std::mutex delayed_tasks_mutex_;
   DelayedTaskQueue delayed_tasks_;
   size_t order_;
   std::atomic_bool terminated_;
 
-  void RegisterTask(fxl::Closure task, fxl::TimePoint target_time);
+  void RegisterTask(fml::closure task, fml::TimePoint target_time);
 
   void RunExpiredTasks();
 

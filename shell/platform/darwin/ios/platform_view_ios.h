@@ -7,6 +7,8 @@
 
 #include <memory>
 
+#include "flutter/fml/closure.h"
+#include "flutter/fml/macros.h"
 #include "flutter/fml/memory/weak_ptr.h"
 #include "flutter/fml/platform/darwin/scoped_nsobject.h"
 #include "flutter/shell/common/platform_view.h"
@@ -16,8 +18,6 @@
 #include "flutter/shell/platform/darwin/ios/framework/Source/accessibility_bridge.h"
 #include "flutter/shell/platform/darwin/ios/headless_platform_view_ios.h"
 #include "flutter/shell/platform/darwin/ios/ios_surface.h"
-#include "lib/fxl/functional/closure.h"
-#include "lib/fxl/macros.h"
 
 namespace shell {
 
@@ -46,7 +46,7 @@ class PlatformViewIOS final : public HeadlessPlatformViewIOS {
   PlatformMessageRouter platform_message_router_;
   std::unique_ptr<AccessibilityBridge> accessibility_bridge_;
   fml::scoped_nsprotocol<FlutterTextInputPlugin*> text_input_plugin_;
-  fxl::Closure firstFrameCallback_;
+  fml::closure firstFrameCallback_;
 
   // |shell::PlatformView|
   std::unique_ptr<Surface> CreateRenderingSurface() override;
@@ -68,7 +68,7 @@ class PlatformViewIOS final : public HeadlessPlatformViewIOS {
   // |shell::PlatformView|
   std::unique_ptr<VsyncWaiter> CreateVSyncWaiter() override;
 
-  FXL_DISALLOW_COPY_AND_ASSIGN(PlatformViewIOS);
+  FML_DISALLOW_COPY_AND_ASSIGN(PlatformViewIOS);
 };
 
 }  // namespace shell

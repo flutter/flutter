@@ -6,11 +6,11 @@
 
 #include <dlfcn.h>
 
-#include "lib/fxl/logging.h"
+#include "flutter/fml/logging.h"
 
 #define ACQUIRE_PROC(name, context)                          \
   if (!(name = AcquireProc("vk" #name, context))) {          \
-    FXL_DLOG(INFO) << "Could not acquire proc: vk" << #name; \
+    FML_DLOG(INFO) << "Could not acquire proc: vk" << #name; \
     return false;                                            \
   }
 
@@ -56,7 +56,7 @@ bool VulkanProcTable::SetupLoaderProcAddresses() {
 #endif  // VULKAN_LINK_STATICALLY
 
   if (!GetInstanceProcAddr) {
-    FXL_DLOG(WARNING) << "Could not acquire vkGetInstanceProcAddr.";
+    FML_DLOG(WARNING) << "Could not acquire vkGetInstanceProcAddr.";
     return false;
   }
 
@@ -160,7 +160,7 @@ bool VulkanProcTable::OpenLibraryHandle() {
   dlerror();  // clear existing errors on thread.
   handle_ = dlopen("libvulkan.so", RTLD_NOW | RTLD_LOCAL);
   if (handle_ == nullptr) {
-    FXL_DLOG(WARNING) << "Could not open the vulkan library: " << dlerror();
+    FML_DLOG(WARNING) << "Could not open the vulkan library: " << dlerror();
     return false;
   }
   return true;
@@ -175,9 +175,9 @@ bool VulkanProcTable::CloseLibraryHandle() {
   if (handle_ != nullptr) {
     dlerror();  // clear existing errors on thread.
     if (dlclose(handle_) != 0) {
-      FXL_DLOG(ERROR) << "Could not close the vulkan library handle. This "
+      FML_DLOG(ERROR) << "Could not close the vulkan library handle. This "
                          "indicates a leak.";
-      FXL_DLOG(ERROR) << dlerror();
+      FML_DLOG(ERROR) << dlerror();
     }
     handle_ = nullptr;
   }

@@ -18,7 +18,7 @@
 
 #include <memory>
 
-#include "lib/fxl/logging.h"
+#include "flutter/fml/logging.h"
 #include "third_party/skia/include/core/SkString.h"
 #include "third_party/skia/include/core/SkTypeface.h"
 
@@ -27,7 +27,7 @@ namespace txt {
 AssetFontManager::AssetFontManager(
     std::unique_ptr<FontAssetProvider> font_provider)
     : font_provider_(std::move(font_provider)) {
-  FXL_DCHECK(font_provider_ != nullptr);
+  FML_DCHECK(font_provider_ != nullptr);
 }
 
 AssetFontManager::~AssetFontManager() = default;
@@ -41,7 +41,7 @@ void AssetFontManager::onGetFamilyName(int index, SkString* familyName) const {
 }
 
 SkFontStyleSet* AssetFontManager::onCreateStyleSet(int index) const {
-  FXL_DCHECK(false);
+  FML_DCHECK(false);
   return nullptr;
 }
 
@@ -72,40 +72,40 @@ SkTypeface* AssetFontManager::onMatchFamilyStyleCharacter(
 
 SkTypeface* AssetFontManager::onMatchFaceStyle(const SkTypeface*,
                                                const SkFontStyle&) const {
-  FXL_DCHECK(false);
+  FML_DCHECK(false);
   return nullptr;
 }
 
 sk_sp<SkTypeface> AssetFontManager::onMakeFromData(sk_sp<SkData>,
                                                    int ttcIndex) const {
-  FXL_DCHECK(false);
+  FML_DCHECK(false);
   return nullptr;
 }
 
 sk_sp<SkTypeface> AssetFontManager::onMakeFromStreamIndex(
     std::unique_ptr<SkStreamAsset>,
     int ttcIndex) const {
-  FXL_DCHECK(false);
+  FML_DCHECK(false);
   return nullptr;
 }
 
 sk_sp<SkTypeface> AssetFontManager::onMakeFromStreamArgs(
     std::unique_ptr<SkStreamAsset>,
     const SkFontArguments&) const {
-  FXL_DCHECK(false);
+  FML_DCHECK(false);
   return nullptr;
 }
 
 sk_sp<SkTypeface> AssetFontManager::onMakeFromFile(const char path[],
                                                    int ttcIndex) const {
-  FXL_DCHECK(false);
+  FML_DCHECK(false);
   return nullptr;
 }
 
 sk_sp<SkTypeface> AssetFontManager::onLegacyMakeTypeface(
     const char familyName[],
     SkFontStyle) const {
-  FXL_DCHECK(false);
+  FML_DCHECK(false);
   return nullptr;
 }
 

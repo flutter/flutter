@@ -8,9 +8,9 @@
 #include <memory>
 #include <string>
 #include <vector>
+#include "flutter/fml/macros.h"
 #include "flutter/vulkan/vulkan_debug_report.h"
 #include "flutter/vulkan/vulkan_handle.h"
-#include "lib/fxl/macros.h"
 
 namespace vulkan {
 
@@ -56,7 +56,7 @@ class VulkanApplication {
       const std::vector<VkExtensionProperties>& supported_extensions,
       std::string extension_name);
 
-  FXL_DISALLOW_COPY_AND_ASSIGN(VulkanApplication);
+  FML_DISALLOW_COPY_AND_ASSIGN(VulkanApplication);
 };
 
 }  // namespace vulkan

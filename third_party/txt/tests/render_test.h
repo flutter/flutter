@@ -16,8 +16,8 @@
 
 #include <memory>
 #include <string>
+#include "flutter/fml/macros.h"
 #include "gtest/gtest.h"
-#include "lib/fxl/macros.h"
 #include "third_party/skia/include/core/SkBitmap.h"
 #include "third_party/skia/include/core/SkCanvas.h"
 #include "txt/font_collection.h"
@@ -53,7 +53,7 @@ class RenderTest : public ::testing::Test {
 
   std::string GetNextSnapshotName();
 
-  FXL_DISALLOW_COPY_AND_ASSIGN(RenderTest);
+  FML_DISALLOW_COPY_AND_ASSIGN(RenderTest);
 };
 
 }  // namespace txt

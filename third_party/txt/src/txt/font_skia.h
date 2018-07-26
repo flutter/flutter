@@ -17,7 +17,7 @@
 #include <SkPaint.h>
 #include <SkTypeface.h>
 #include <minikin/MinikinFont.h>
-#include "lib/fxl/macros.h"
+#include "flutter/fml/macros.h"
 
 namespace txt {
 
@@ -44,7 +44,7 @@ class FontSkia : public minikin::MinikinFont {
   sk_sp<SkTypeface> typeface_;
   std::vector<minikin::FontVariation> variations_;
 
-  FXL_DISALLOW_COPY_AND_ASSIGN(FontSkia);
+  FML_DISALLOW_COPY_AND_ASSIGN(FontSkia);
 };
 
 }  // namespace txt

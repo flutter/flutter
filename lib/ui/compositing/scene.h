@@ -20,11 +20,11 @@ namespace blink {
 
 class Scene : public RefCountedDartWrappable<Scene> {
   DEFINE_WRAPPERTYPEINFO();
-  FRIEND_MAKE_REF_COUNTED(Scene);
+  FML_FRIEND_MAKE_REF_COUNTED(Scene);
 
  public:
   ~Scene() override;
-  static fxl::RefPtr<Scene> create(std::unique_ptr<flow::Layer> rootLayer,
+  static fml::RefPtr<Scene> create(std::unique_ptr<flow::Layer> rootLayer,
                                    uint32_t rasterizerTracingThreshold,
                                    bool checkerboardRasterCacheImages,
                                    bool checkerboardOffscreenLayers);

@@ -16,7 +16,7 @@
 
 #include <string>
 
-#include "lib/fxl/command_line.h"
+#include "flutter/fml/command_line.h"
 #include "txt/font_collection.h"
 
 namespace txt {
@@ -25,9 +25,9 @@ const std::string& GetFontDir();
 
 void SetFontDir(const std::string& dir);
 
-const fxl::CommandLine& GetCommandLineForProcess();
+const fml::CommandLine& GetCommandLineForProcess();
 
-void SetCommandLine(fxl::CommandLine cmd);
+void SetCommandLine(fml::CommandLine cmd);
 
 std::shared_ptr<FontCollection> GetTestFontCollection();
 

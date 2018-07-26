@@ -11,10 +11,10 @@
 #include "flutter/flow/instrumentation.h"
 #include "flutter/flow/raster_cache.h"
 #include "flutter/flow/texture.h"
+#include "flutter/fml/build_config.h"
+#include "flutter/fml/logging.h"
+#include "flutter/fml/macros.h"
 #include "flutter/fml/trace_event.h"
-#include "lib/fxl/build_config.h"
-#include "lib/fxl/logging.h"
-#include "lib/fxl/macros.h"
 #include "third_party/skia/include/core/SkCanvas.h"
 #include "third_party/skia/include/core/SkColor.h"
 #include "third_party/skia/include/core/SkColorFilter.h"
@@ -112,7 +112,7 @@ class Layer {
   bool needs_system_composite_;
   SkRect paint_bounds_;
 
-  FXL_DISALLOW_COPY_AND_ASSIGN(Layer);
+  FML_DISALLOW_COPY_AND_ASSIGN(Layer);
 };
 
 }  // namespace flow

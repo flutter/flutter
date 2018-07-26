@@ -25,7 +25,7 @@ namespace shell {
 
 TEST(ShellTest, InitializeWithInvalidThreads) {
   blink::Settings settings = {};
-  settings.task_observer_add = [](intptr_t, fxl::Closure) {};
+  settings.task_observer_add = [](intptr_t, fml::closure) {};
   settings.task_observer_remove = [](intptr_t) {};
   blink::TaskRunners task_runners("test", nullptr, nullptr, nullptr, nullptr);
   auto shell = Shell::Create(
@@ -41,7 +41,7 @@ TEST(ShellTest, InitializeWithInvalidThreads) {
 
 TEST(ShellTest, InitializeWithDifferentThreads) {
   blink::Settings settings = {};
-  settings.task_observer_add = [](intptr_t, fxl::Closure) {};
+  settings.task_observer_add = [](intptr_t, fml::closure) {};
   settings.task_observer_remove = [](intptr_t) {};
   ThreadHost thread_host("io.flutter.test." + CURRENT_TEST_NAME + ".",
                          ThreadHost::Type::Platform | ThreadHost::Type::GPU |
@@ -64,7 +64,7 @@ TEST(ShellTest, InitializeWithDifferentThreads) {
 
 TEST(ShellTest, InitializeWithSingleThread) {
   blink::Settings settings = {};
-  settings.task_observer_add = [](intptr_t, fxl::Closure) {};
+  settings.task_observer_add = [](intptr_t, fml::closure) {};
   settings.task_observer_remove = [](intptr_t) {};
   ThreadHost thread_host("io.flutter.test." + CURRENT_TEST_NAME + ".",
                          ThreadHost::Type::Platform);
@@ -84,7 +84,7 @@ TEST(ShellTest, InitializeWithSingleThread) {
 
 TEST(ShellTest, InitializeWithSingleThreadWhichIsTheCallingThread) {
   blink::Settings settings = {};
-  settings.task_observer_add = [](intptr_t, fxl::Closure) {};
+  settings.task_observer_add = [](intptr_t, fml::closure) {};
   settings.task_observer_remove = [](intptr_t) {};
   fml::MessageLoop::EnsureInitializedForCurrentThread();
   auto task_runner = fml::MessageLoop::GetCurrent().GetTaskRunner();
@@ -103,7 +103,7 @@ TEST(ShellTest, InitializeWithSingleThreadWhichIsTheCallingThread) {
 
 TEST(ShellTest, InitializeWithMultipleThreadButCallingThreadAsPlatformThread) {
   blink::Settings settings = {};
-  settings.task_observer_add = [](intptr_t, fxl::Closure) {};
+  settings.task_observer_add = [](intptr_t, fml::closure) {};
   settings.task_observer_remove = [](intptr_t) {};
   ThreadHost thread_host(
       "io.flutter.test." + CURRENT_TEST_NAME + ".",

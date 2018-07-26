@@ -5,12 +5,12 @@
 #ifndef FLUTTER_SHELL_PLATFORM_DARWIN_COMMON_COMMAND_LINE_H_
 #define FLUTTER_SHELL_PLATFORM_DARWIN_COMMON_COMMAND_LINE_H_
 
-#include "lib/fxl/command_line.h"
-#include "lib/fxl/macros.h"
+#include "flutter/fml/command_line.h"
+#include "flutter/fml/macros.h"
 
 namespace shell {
 
-fxl::CommandLine CommandLineFromNSProcessInfo();
+fml::CommandLine CommandLineFromNSProcessInfo();
 
 }  // namespace shell
 

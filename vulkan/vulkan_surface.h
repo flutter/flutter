@@ -5,8 +5,8 @@
 #ifndef FLUTTER_VULKAN_VULKAN_SURFACE_H_
 #define FLUTTER_VULKAN_VULKAN_SURFACE_H_
 
+#include "flutter/fml/macros.h"
 #include "flutter/vulkan/vulkan_handle.h"
-#include "lib/fxl/macros.h"
 #include "third_party/skia/include/core/SkSize.h"
 
 namespace vulkan {
@@ -39,7 +39,7 @@ class VulkanSurface {
   VulkanHandle<VkSurfaceKHR> surface_;
   bool valid_;
 
-  FXL_DISALLOW_COPY_AND_ASSIGN(VulkanSurface);
+  FML_DISALLOW_COPY_AND_ASSIGN(VulkanSurface);
 };
 
 }  // namespace vulkan

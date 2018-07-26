@@ -15,7 +15,6 @@ source_set("testing") {
 
   public_deps = [
     "$flutter_root/fml",
-    "//garnet/public/lib/fxl",
     "//third_party/googletest:gtest",
   ]
 

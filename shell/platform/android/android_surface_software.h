@@ -5,11 +5,11 @@
 #ifndef FLUTTER_SHELL_PLATFORM_ANDROID_ANDROID_SURFACE_SOFTWARE_H_
 #define FLUTTER_SHELL_PLATFORM_ANDROID_ANDROID_SURFACE_SOFTWARE_H_
 
+#include "flutter/fml/macros.h"
 #include "flutter/fml/platform/android/jni_weak_ref.h"
 #include "flutter/fml/platform/android/scoped_java_ref.h"
 #include "flutter/shell/gpu/gpu_surface_software.h"
 #include "flutter/shell/platform/android/android_surface.h"
-#include "lib/fxl/macros.h"
 
 namespace shell {
 
@@ -36,7 +36,7 @@ class AndroidSurfaceSoftware final : public AndroidSurface,
   bool OnScreenSurfaceResize(const SkISize& size) const override;
 
   // |shell::AndroidSurface|
-  bool SetNativeWindow(fxl::RefPtr<AndroidNativeWindow> window) override;
+  bool SetNativeWindow(fml::RefPtr<AndroidNativeWindow> window) override;
 
   // |shell::GPUSurfaceSoftwareDelegate|
   sk_sp<SkSurface> AcquireBackingStore(const SkISize& size) override;
@@ -46,11 +46,11 @@ class AndroidSurfaceSoftware final : public AndroidSurface,
 
  private:
   sk_sp<SkSurface> sk_surface_;
-  fxl::RefPtr<AndroidNativeWindow> native_window_;
+  fml::RefPtr<AndroidNativeWindow> native_window_;
   SkColorType target_color_type_;
   SkAlphaType target_alpha_type_;
 
-  FXL_DISALLOW_COPY_AND_ASSIGN(AndroidSurfaceSoftware);
+  FML_DISALLOW_COPY_AND_ASSIGN(AndroidSurfaceSoftware);
 };
 
 }  // namespace shell

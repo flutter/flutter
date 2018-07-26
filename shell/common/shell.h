@@ -11,8 +11,13 @@
 #include "flutter/common/settings.h"
 #include "flutter/common/task_runners.h"
 #include "flutter/flow/texture.h"
+#include "flutter/fml/closure.h"
+#include "flutter/fml/macros.h"
+#include "flutter/fml/memory/ref_ptr.h"
 #include "flutter/fml/memory/thread_checker.h"
 #include "flutter/fml/memory/weak_ptr.h"
+#include "flutter/fml/string_view.h"
+#include "flutter/fml/synchronization/thread_annotations.h"
 #include "flutter/fml/synchronization/waitable_event.h"
 #include "flutter/fml/thread.h"
 #include "flutter/lib/ui/semantics/custom_accessibility_action.h"
@@ -25,13 +30,6 @@
 #include "flutter/shell/common/platform_view.h"
 #include "flutter/shell/common/rasterizer.h"
 #include "flutter/shell/common/surface.h"
-#include "lib/fxl/functional/closure.h"
-#include "lib/fxl/macros.h"
-#include "lib/fxl/memory/ref_ptr.h"
-#include "lib/fxl/memory/weak_ptr.h"
-#include "lib/fxl/strings/string_view.h"
-#include "lib/fxl/synchronization/thread_annotations.h"
-#include "lib/fxl/synchronization/thread_checker.h"
 
 namespace shell {
 
@@ -56,8 +54,8 @@ class Shell final : public PlatformView::Delegate,
   static std::unique_ptr<Shell> Create(
       blink::TaskRunners task_runners,
       blink::Settings settings,
-      fxl::RefPtr<blink::DartSnapshot> isolate_snapshot,
-      fxl::RefPtr<blink::DartSnapshot> shared_snapshot,
+      fml::RefPtr<blink::DartSnapshot> isolate_snapshot,
+      fml::RefPtr<blink::DartSnapshot> shared_snapshot,
       CreateCallback<PlatformView> on_create_platform_view,
       CreateCallback<Rasterizer> on_create_rasterizer);
 
@@ -87,14 +85,14 @@ class Shell final : public PlatformView::Delegate,
 
   const blink::TaskRunners task_runners_;
   const blink::Settings settings_;
-  fxl::RefPtr<blink::DartVM> vm_;
+  fml::RefPtr<blink::DartVM> vm_;
   std::unique_ptr<PlatformView> platform_view_;  // on platform task runner
   std::unique_ptr<Engine> engine_;               // on UI task runner
   std::unique_ptr<Rasterizer> rasterizer_;       // on GPU task runner
   std::unique_ptr<IOManager> io_manager_;        // on IO task runner
 
   std::unordered_map<std::string,  // method
-                     std::pair<fxl::RefPtr<fxl::TaskRunner>,
+                     std::pair<fml::RefPtr<fml::TaskRunner>,
                                ServiceProtocolHandler>  // task-runner/function
                                                         // pair
                      >
@@ -106,8 +104,8 @@ class Shell final : public PlatformView::Delegate,
   static std::unique_ptr<Shell> CreateShellOnPlatformThread(
       blink::TaskRunners task_runners,
       blink::Settings settings,
-      fxl::RefPtr<blink::DartSnapshot> isolate_snapshot,
-      fxl::RefPtr<blink::DartSnapshot> shared_snapshot,
+      fml::RefPtr<blink::DartSnapshot> isolate_snapshot,
+      fml::RefPtr<blink::DartSnapshot> shared_snapshot,
       Shell::CreateCallback<PlatformView> on_create_platform_view,
       Shell::CreateCallback<Rasterizer> on_create_rasterizer);
 
@@ -131,7 +129,7 @@ class Shell final : public PlatformView::Delegate,
   // |shell::PlatformView::Delegate|
   void OnPlatformViewDispatchPlatformMessage(
       const PlatformView& view,
-      fxl::RefPtr<blink::PlatformMessage> message) override;
+      fml::RefPtr<blink::PlatformMessage> message) override;
 
   // |shell::PlatformView::Delegate|
   void OnPlatformViewDispatchPointerDataPacket(
@@ -168,11 +166,11 @@ class Shell final : public PlatformView::Delegate,
 
   // |shell::PlatformView::Delegate|
   void OnPlatformViewSetNextFrameCallback(const PlatformView& view,
-                                          fxl::Closure closure) override;
+                                          fml::closure closure) override;
 
   // |shell::Animator::Delegate|
   void OnAnimatorBeginFrame(const Animator& animator,
-                            fxl::TimePoint frame_time) override;
+                            fml::TimePoint frame_time) override;
 
   // |shell::Animator::Delegate|
   void OnAnimatorNotifyIdle(const Animator& animator,
@@ -195,15 +193,15 @@ class Shell final : public PlatformView::Delegate,
   // |shell::Engine::Delegate|
   void OnEngineHandlePlatformMessage(
       const Engine& engine,
-      fxl::RefPtr<blink::PlatformMessage> message) override;
+      fml::RefPtr<blink::PlatformMessage> message) override;
 
   // |blink::ServiceProtocol::Handler|
-  fxl::RefPtr<fxl::TaskRunner> GetServiceProtocolHandlerTaskRunner(
-      fxl::StringView method) const override;
+  fml::RefPtr<fml::TaskRunner> GetServiceProtocolHandlerTaskRunner(
+      fml::StringView method) const override;
 
   // |blink::ServiceProtocol::Handler|
   bool HandleServiceProtocolMessage(
-      fxl::StringView method,  // one if the extension names specified above.
+      fml::StringView method,  // one if the extension names specified above.
       const ServiceProtocolMap& params,
       rapidjson::Document& response) override;
 
@@ -236,7 +234,7 @@ class Shell final : public PlatformView::Delegate,
       const blink::ServiceProtocol::Handler::ServiceProtocolMap& params,
       rapidjson::Document& response);
 
-  FXL_DISALLOW_COPY_AND_ASSIGN(Shell);
+  FML_DISALLOW_COPY_AND_ASSIGN(Shell);
 };
 
 }  // namespace shell

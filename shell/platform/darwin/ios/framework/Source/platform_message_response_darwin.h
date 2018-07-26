@@ -7,12 +7,12 @@
 
 #include <Foundation/Foundation.h>
 
+#include "flutter/fml/macros.h"
+#include "flutter/fml/make_copyable.h"
 #include "flutter/fml/platform/darwin/scoped_block.h"
 #include "flutter/fml/task_runner.h"
 #include "flutter/lib/ui/window/platform_message_response.h"
 #include "flutter/shell/platform/darwin/common/buffer_conversions.h"
-#include "lib/fxl/functional/make_copyable.h"
-#include "lib/fxl/macros.h"
 
 typedef void (^PlatformMessageResponseCallback)(NSData*);
 
@@ -21,28 +21,28 @@ namespace shell {
 class PlatformMessageResponseDarwin : public blink::PlatformMessageResponse {
  public:
   void Complete(std::unique_ptr<fml::Mapping> data) override {
-    fxl::RefPtr<PlatformMessageResponseDarwin> self(this);
-    platform_task_runner_->PostTask(fxl::MakeCopyable([self, data = std::move(data)]() mutable {
+    fml::RefPtr<PlatformMessageResponseDarwin> self(this);
+    platform_task_runner_->PostTask(fml::MakeCopyable([self, data = std::move(data)]() mutable {
       self->callback_.get()(shell::GetNSDataFromMapping(std::move(data)));
     }));
   }
 
   void CompleteEmpty() override {
-    fxl::RefPtr<PlatformMessageResponseDarwin> self(this);
+    fml::RefPtr<PlatformMessageResponseDarwin> self(this);
     platform_task_runner_->PostTask(
-        fxl::MakeCopyable([self]() mutable { self->callback_.get()(nil); }));
+        fml::MakeCopyable([self]() mutable { self->callback_.get()(nil); }));
   }
 
  private:
   explicit PlatformMessageResponseDarwin(PlatformMessageResponseCallback callback,
-                                         fxl::RefPtr<fxl::TaskRunner> platform_task_runner)
+                                         fml::RefPtr<fml::TaskRunner> platform_task_runner)
       : callback_(callback, fml::OwnershipPolicy::Retain),
         platform_task_runner_(std::move(platform_task_runner)) {}
 
   fml::ScopedBlock<PlatformMessageResponseCallback> callback_;
-  fxl::RefPtr<fxl::TaskRunner> platform_task_runner_;
+  fml::RefPtr<fml::TaskRunner> platform_task_runner_;
 
-  FRIEND_MAKE_REF_COUNTED(PlatformMessageResponseDarwin);
+  FML_FRIEND_MAKE_REF_COUNTED(PlatformMessageResponseDarwin);
 };
 
 }  // namespace shell

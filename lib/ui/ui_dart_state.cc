@@ -17,7 +17,7 @@ UIDartState::UIDartState(TaskRunners task_runners,
                          TaskObserverAdd add_callback,
                          TaskObserverRemove remove_callback,
                          fml::WeakPtr<GrContext> resource_context,
-                         fxl::RefPtr<flow::SkiaUnrefQueue> skia_unref_queue,
+                         fml::RefPtr<flow::SkiaUnrefQueue> skia_unref_queue,
                          std::string advisory_script_uri,
                          std::string advisory_script_entrypoint,
                          std::string logger_prefix,
@@ -67,7 +67,7 @@ const TaskRunners& UIDartState::GetTaskRunners() const {
   return task_runners_;
 }
 
-fxl::RefPtr<flow::SkiaUnrefQueue> UIDartState::GetSkiaUnrefQueue() const {
+fml::RefPtr<flow::SkiaUnrefQueue> UIDartState::GetSkiaUnrefQueue() const {
   return skia_unref_queue_;
 }
 
@@ -90,7 +90,7 @@ void UIDartState::AddOrRemoveTaskObserver(bool add) {
     // the service isolate).
     return;
   }
-  FXL_DCHECK(add_callback_ && remove_callback_);
+  FML_DCHECK(add_callback_ && remove_callback_);
   if (add) {
     add_callback_(reinterpret_cast<intptr_t>(this),
                   [this]() { this->FlushMicrotasksNow(); });

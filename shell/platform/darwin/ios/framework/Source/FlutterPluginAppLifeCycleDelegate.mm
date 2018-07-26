@@ -3,8 +3,8 @@
 // found in the LICENSE file.
 
 #include "flutter/shell/platform/darwin/ios/framework/Headers/FlutterPluginAppLifeCycleDelegate.h"
+#include "flutter/fml/logging.h"
 #include "flutter/shell/platform/darwin/ios/framework/Headers/FlutterViewController.h"
-#include "lib/fxl/logging.h"
 
 @implementation FlutterPluginAppLifeCycleDelegate {
   UIBackgroundTaskIdentifier _debugBackgroundTask;
@@ -71,7 +71,7 @@ static BOOL isPowerOfTwo(NSUInteger x) {
   _debugBackgroundTask = [application
       beginBackgroundTaskWithName:@"Flutter debug task"
                 expirationHandler:^{
-                  FXL_LOG(WARNING)
+                  FML_LOG(WARNING)
                       << "\nThe OS has terminated the Flutter debug connection for being "
                          "inactive in the background for too long.\n\n"
                          "There are no errors with your Flutter application.\n\n"

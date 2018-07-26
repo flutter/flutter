@@ -68,4 +68,11 @@ bool IsDirectory(const fml::UniqueFD& directory) {
   return S_ISDIR(stat_result.st_mode);
 }
 
+bool IsFile(const std::string& path) {
+  struct stat buf;
+  if (stat(path.c_str(), &buf) != 0)
+    return false;
+  return S_ISREG(buf.st_mode);
+}
+
 }  // namespace fml

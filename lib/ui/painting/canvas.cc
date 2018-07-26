@@ -70,7 +70,7 @@ void Canvas::RegisterNatives(tonic::DartLibraryNatives* natives) {
                      FOR_EACH_BINDING(DART_REGISTER_NATIVE)});
 }
 
-fxl::RefPtr<Canvas> Canvas::Create(PictureRecorder* recorder,
+fml::RefPtr<Canvas> Canvas::Create(PictureRecorder* recorder,
                                    double left,
                                    double top,
                                    double right,
@@ -78,8 +78,8 @@ fxl::RefPtr<Canvas> Canvas::Create(PictureRecorder* recorder,
   if (!recorder)
     Dart_ThrowException(
         ToDart("Canvas constructor called with non-genuine PictureRecorder."));
-  FXL_DCHECK(!recorder->isRecording());  // verified by Dart code
-  fxl::RefPtr<Canvas> canvas = fxl::MakeRefCounted<Canvas>(
+  FML_DCHECK(!recorder->isRecording());  // verified by Dart code
+  fml::RefPtr<Canvas> canvas = fml::MakeRefCounted<Canvas>(
       recorder->BeginRecording(SkRect::MakeLTRB(left, top, right, bottom)));
   recorder->set_canvas(canvas);
   return canvas;

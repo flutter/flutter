@@ -4,7 +4,7 @@
 
 #include "flutter/flow/layers/picture_layer.h"
 
-#include "lib/fxl/logging.h"
+#include "flutter/fml/logging.h"
 
 namespace flow {
 
@@ -34,8 +34,8 @@ void PictureLayer::Preroll(PrerollContext* context, const SkMatrix& matrix) {
 
 void PictureLayer::Paint(PaintContext& context) const {
   TRACE_EVENT0("flutter", "PictureLayer::Paint");
-  FXL_DCHECK(picture_.get());
-  FXL_DCHECK(needs_painting());
+  FML_DCHECK(picture_.get());
+  FML_DCHECK(needs_painting());
 
   SkAutoCanvasRestore save(&context.canvas, true);
   context.canvas.translate(offset_.x(), offset_.y());

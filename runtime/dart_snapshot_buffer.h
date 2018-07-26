@@ -7,15 +7,15 @@
 
 #include <memory>
 
+#include "flutter/fml/macros.h"
 #include "flutter/fml/native_library.h"
-#include "lib/fxl/macros.h"
 
 namespace blink {
 
 class DartSnapshotBuffer {
  public:
   static std::unique_ptr<DartSnapshotBuffer> CreateWithSymbolInLibrary(
-      fxl::RefPtr<fml::NativeLibrary> library,
+      fml::RefPtr<fml::NativeLibrary> library,
       const char* symbol_name);
 
   static std::unique_ptr<DartSnapshotBuffer> CreateWithContentsOfFile(

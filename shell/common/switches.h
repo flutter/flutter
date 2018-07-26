@@ -3,8 +3,8 @@
 // found in the LICENSE file.
 
 #include "flutter/common/settings.h"
-#include "lib/fxl/command_line.h"
-#include "lib/fxl/strings/string_view.h"
+#include "flutter/fml/command_line.h"
+#include "flutter/fml/string_view.h"
 
 #ifndef SHELL_COMMON_SWITCHES_H_
 #define SHELL_COMMON_SWITCHES_H_
@@ -133,9 +133,9 @@ DEF_SWITCHES_END
 
 void PrintUsage(const std::string& executable_name);
 
-const fxl::StringView FlagForSwitch(Switch swtch);
+const fml::StringView FlagForSwitch(Switch swtch);
 
-blink::Settings SettingsFromCommandLine(const fxl::CommandLine& command_line);
+blink::Settings SettingsFromCommandLine(const fml::CommandLine& command_line);
 
 }  // namespace shell
 

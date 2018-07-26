@@ -10,9 +10,9 @@
 #import <OpenGLES/ES2/glext.h>
 #import <QuartzCore/CAEAGLLayer.h>
 
+#include "flutter/fml/macros.h"
 #include "flutter/fml/platform/darwin/scoped_nsobject.h"
 #include "flutter/shell/common/platform_view.h"
-#include "lib/fxl/macros.h"
 
 namespace shell {
 
@@ -47,7 +47,7 @@ class IOSGLContext {
   sk_sp<SkColorSpace> color_space_;
   bool valid_;
 
-  FXL_DISALLOW_COPY_AND_ASSIGN(IOSGLContext);
+  FML_DISALLOW_COPY_AND_ASSIGN(IOSGLContext);
 };
 
 }  // namespace shell

@@ -5,10 +5,10 @@
 #ifndef FLUTTER_SHELL_PLATFORM_DARWIN_IOS_IOS_SURFACE_SOFTWARE_H_
 #define FLUTTER_SHELL_PLATFORM_DARWIN_IOS_IOS_SURFACE_SOFTWARE_H_
 
+#include "flutter/fml/macros.h"
 #include "flutter/fml/platform/darwin/scoped_nsobject.h"
 #include "flutter/shell/gpu/gpu_surface_software.h"
 #include "flutter/shell/platform/darwin/ios/ios_surface.h"
-#include "lib/fxl/macros.h"
 
 @class CALayer;
 
@@ -37,7 +37,7 @@ class IOSSurfaceSoftware final : public IOSSurface,
   fml::scoped_nsobject<CALayer> layer_;
   sk_sp<SkSurface> sk_surface_;
 
-  FXL_DISALLOW_COPY_AND_ASSIGN(IOSSurfaceSoftware);
+  FML_DISALLOW_COPY_AND_ASSIGN(IOSSurfaceSoftware);
 };
 
 }  // namespace shell

@@ -27,7 +27,7 @@ class ClipRectLayer : public ContainerLayer {
   SkRect clip_rect_;
   Clip clip_behavior_;
 
-  FXL_DISALLOW_COPY_AND_ASSIGN(ClipRectLayer);
+  FML_DISALLOW_COPY_AND_ASSIGN(ClipRectLayer);
 };
 
 }  // namespace flow

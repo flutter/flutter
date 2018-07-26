@@ -27,14 +27,14 @@ class MessageLoopLinux : public MessageLoopImpl {
 
   void Terminate() override;
 
-  void WakeUp(fxl::TimePoint time_point) override;
+  void WakeUp(fml::TimePoint time_point) override;
 
   void OnEventFired();
 
   bool AddOrRemoveTimerSource(bool add);
 
-  FRIEND_MAKE_REF_COUNTED(MessageLoopLinux);
-  FRIEND_REF_COUNTED_THREAD_SAFE(MessageLoopLinux);
+  FML_FRIEND_MAKE_REF_COUNTED(MessageLoopLinux);
+  FML_FRIEND_REF_COUNTED_THREAD_SAFE(MessageLoopLinux);
   FML_DISALLOW_COPY_AND_ASSIGN(MessageLoopLinux);
 };
 

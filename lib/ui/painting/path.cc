@@ -264,14 +264,14 @@ bool CanvasPath::contains(double x, double y) {
   return path_.contains(x, y);
 }
 
-fxl::RefPtr<CanvasPath> CanvasPath::shift(double dx, double dy) {
-  fxl::RefPtr<CanvasPath> path = CanvasPath::Create();
+fml::RefPtr<CanvasPath> CanvasPath::shift(double dx, double dy) {
+  fml::RefPtr<CanvasPath> path = CanvasPath::Create();
   path_.offset(dx, dy, &path->path_);
   return path;
 }
 
-fxl::RefPtr<CanvasPath> CanvasPath::transform(tonic::Float64List& matrix4) {
-  fxl::RefPtr<CanvasPath> path = CanvasPath::Create();
+fml::RefPtr<CanvasPath> CanvasPath::transform(tonic::Float64List& matrix4) {
+  fml::RefPtr<CanvasPath> path = CanvasPath::Create();
   path_.transform(ToSkMatrix(matrix4), &path->path_);
   matrix4.Release();
   return path;
@@ -291,8 +291,8 @@ bool CanvasPath::op(CanvasPath* path1, CanvasPath* path2, int operation) {
   return Op(path1->path(), path2->path(), (SkPathOp)operation, &path_);
 }
 
-fxl::RefPtr<CanvasPath> CanvasPath::clone() {
-  fxl::RefPtr<CanvasPath> path = CanvasPath::Create();
+fml::RefPtr<CanvasPath> CanvasPath::clone() {
+  fml::RefPtr<CanvasPath> path = CanvasPath::Create();
   // per Skia docs, this will create a fast copy
   // data is shared until the source path or dest path are mutated
   path->path_ = path_;

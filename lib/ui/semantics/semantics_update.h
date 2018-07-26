@@ -17,11 +17,11 @@ namespace blink {
 
 class SemanticsUpdate : public RefCountedDartWrappable<SemanticsUpdate> {
   DEFINE_WRAPPERTYPEINFO();
-  FRIEND_MAKE_REF_COUNTED(SemanticsUpdate);
+  FML_FRIEND_MAKE_REF_COUNTED(SemanticsUpdate);
 
  public:
   ~SemanticsUpdate() override;
-  static fxl::RefPtr<SemanticsUpdate> create(
+  static fml::RefPtr<SemanticsUpdate> create(
       SemanticsNodeUpdates nodes,
       CustomAccessibilityActionUpdates actions);
 

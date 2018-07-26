@@ -9,6 +9,7 @@
 #include <sstream>
 
 #include "flutter/common/task_runners.h"
+#include "flutter/fml/make_copyable.h"
 #include "flutter/fml/message_loop.h"
 #include "flutter/shell/common/rasterizer.h"
 #include "flutter/shell/common/switches.h"
@@ -16,7 +17,6 @@
 #include "flutter/shell/gpu/gpu_surface_gl.h"
 #include "flutter/shell/platform/darwin/common/command_line.h"
 #include "flutter/shell/platform/darwin/desktop/platform_view_mac.h"
-#include "lib/fxl/functional/make_copyable.h"
 
 @interface FlutterWindow () <NSWindowDelegate>
 
@@ -90,7 +90,7 @@ static std::string CreateThreadLabel() {
 }
 
 - (void)setupShell {
-  FXL_DCHECK(!_shell) << "The shell must not already be set.";
+  FML_DCHECK(!_shell) << "The shell must not already be set.";
 
   auto thread_label = CreateThreadLabel();
 
@@ -115,7 +115,7 @@ static std::string CreateThreadLabel() {
         [[NSBundle mainBundle] pathForResource:@"icudtl.dat" ofType:@""].UTF8String;
   }
 
-  settings.task_observer_add = [](intptr_t key, fxl::Closure callback) {
+  settings.task_observer_add = [](intptr_t key, fml::closure callback) {
     fml::MessageLoop::GetCurrent().AddTaskObserver(key, std::move(callback));
   };
 
@@ -138,13 +138,13 @@ static std::string CreateThreadLabel() {
                                 on_create_rasterizer);
 
   // Launch the engine with the inferred run configuration.
-  _shell->GetTaskRunners().GetUITaskRunner()->PostTask(fxl::MakeCopyable(
+  _shell->GetTaskRunners().GetUITaskRunner()->PostTask(fml::MakeCopyable(
       [engine = _shell->GetEngine(),
        config = shell::RunConfiguration::InferFromSettings(_shell->GetSettings())]() mutable {
         if (engine) {
           auto result = engine->Run(std::move(config));
           if (!result) {
-            FXL_LOG(ERROR) << "Could not launch the engine with configuration.";
+            FML_LOG(ERROR) << "Could not launch the engine with configuration.";
           }
         }
       }));
@@ -227,7 +227,7 @@ static std::string CreateThreadLabel() {
     case blink::PointerData::Change::kAdd:
     case blink::PointerData::Change::kRemove:
     case blink::PointerData::Change::kHover:
-      FXL_DCHECK(!_mouseIsDown);
+      FML_DCHECK(!_mouseIsDown);
       break;
   }
 

@@ -4,8 +4,11 @@
 
 source_set("fml") {
   sources = [
+    "arraysize.h",
     "build_config.h",
     "closure.h",
+    "command_line.cc",
+    "command_line.h",
     "compiler_specific.h",
     "eintr_wrapper.h",
     "export.h",
@@ -18,6 +21,7 @@ source_set("fml") {
     "log_settings_state.cc",
     "logging.cc",
     "logging.h",
+    "make_copyable.h",
     "mapping.cc",
     "mapping.h",
     "memory/ref_counted.h",
@@ -35,6 +39,8 @@ source_set("fml") {
     "native_library.h",
     "paths.cc",
     "paths.h",
+    "string_view.cc",
+    "string_view.h",
     "synchronization/thread_annotations.h",
     "synchronization/thread_checker.h",
     "synchronization/waitable_event.cc",
@@ -55,7 +61,6 @@ source_set("fml") {
   ]
 
   deps = [
-    "//garnet/public/lib/fxl",
     "//third_party/dart/runtime:dart_api",
 
     # These need to be in sync with the Fuchsia buildroot.
@@ -141,6 +146,7 @@ source_set("fml") {
       "platform/posix/file_posix.cc",
       "platform/posix/mapping_posix.cc",
       "platform/posix/native_library_posix.cc",
+      "platform/posix/paths_posix.cc",
     ]
   }
 }
@@ -149,9 +155,11 @@ executable("fml_unittests") {
   testonly = true
 
   sources = [
+    "command_line_unittest.cc",
     "memory/ref_counted_unittest.cc",
     "memory/weak_ptr_unittest.cc",
     "message_loop_unittests.cc",
+    "string_view_unittest.cc",
     "synchronization/thread_annotations_unittest.cc",
     "synchronization/thread_checker_unittest.cc",
     "synchronization/waitable_event_unittest.cc",
@@ -165,7 +173,6 @@ executable("fml_unittests") {
   deps = [
     "$flutter_root/fml",
     "$flutter_root/testing",
-    "//garnet/public/lib/fxl",
     "//third_party/dart/runtime:libdart_jit",
   ]
 }

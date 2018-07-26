@@ -64,7 +64,7 @@ void PhysicalShapeLayer::Preroll(PrerollContext* context,
 #if defined(OS_FUCHSIA)
 
 void PhysicalShapeLayer::UpdateScene(SceneUpdateContext& context) {
-  FXL_DCHECK(needs_system_composite());
+  FML_DCHECK(needs_system_composite());
 
   SceneUpdateContext::Frame frame(context, frameRRect_, color_, elevation_);
   for (auto& layer : layers()) {
@@ -80,7 +80,7 @@ void PhysicalShapeLayer::UpdateScene(SceneUpdateContext& context) {
 
 void PhysicalShapeLayer::Paint(PaintContext& context) const {
   TRACE_EVENT0("flutter", "PhysicalShapeLayer::Paint");
-  FXL_DCHECK(needs_painting());
+  FML_DCHECK(needs_painting());
 
   if (elevation_ != 0) {
     DrawShadow(&context.canvas, path_, shadow_color_, elevation_,

@@ -4,7 +4,7 @@
 
 #define FML_USED_ON_EMBEDDER
 
-#include "lib/fxl/build_config.h"
+#include "flutter/fml/build_config.h"
 
 #if OS_WIN
 #define FLUTTER_EXPORT __declspec(dllexport)
@@ -18,7 +18,9 @@
 
 #include "flutter/assets/directory_asset_bundle.h"
 #include "flutter/common/task_runners.h"
+#include "flutter/fml/command_line.h"
 #include "flutter/fml/file.h"
+#include "flutter/fml/make_copyable.h"
 #include "flutter/fml/message_loop.h"
 #include "flutter/fml/paths.h"
 #include "flutter/shell/common/rasterizer.h"
@@ -26,9 +28,6 @@
 #include "flutter/shell/platform/embedder/embedder.h"
 #include "flutter/shell/platform/embedder/embedder_engine.h"
 #include "flutter/shell/platform/embedder/platform_view_embedder.h"
-#include "lib/fxl/command_line.h"
-#include "lib/fxl/files/file.h"
-#include "lib/fxl/functional/make_copyable.h"
 
 #define SAFE_ACCESS(pointer, member, default_value)                      \
   ([=]() {                                                               \
@@ -58,7 +57,7 @@ bool IsRendererValid(const FlutterRendererConfig* config) {
 }
 
 struct _FlutterPlatformMessageResponseHandle {
-  fxl::RefPtr<blink::PlatformMessage> message;
+  fml::RefPtr<blink::PlatformMessage> message;
 };
 
 FlutterResult FlutterEngineRun(size_t version,
@@ -107,7 +106,7 @@ FlutterResult FlutterEngineRun(size_t version,
   if (SAFE_ACCESS(args, platform_message_callback, nullptr) != nullptr) {
     platform_message_response_callback =
         [ptr = args->platform_message_callback,
-         user_data](fxl::RefPtr<blink::PlatformMessage> message) {
+         user_data](fml::RefPtr<blink::PlatformMessage> message) {
           auto handle = new FlutterPlatformMessageResponseHandle();
           const FlutterPlatformMessage incoming_message = {
               sizeof(FlutterPlatformMessage),  // struct_size
@@ -134,10 +133,10 @@ FlutterResult FlutterEngineRun(size_t version,
     icu_data_path = SAFE_ACCESS(args, icu_data_path, nullptr);
   }
 
-  fxl::CommandLine command_line;
+  fml::CommandLine command_line;
   if (SAFE_ACCESS(args, command_line_argc, 0) != 0 &&
       SAFE_ACCESS(args, command_line_argv, nullptr) != nullptr) {
-    command_line = fxl::CommandLineFromArgcArgv(
+    command_line = fml::CommandLineFromArgcArgv(
         SAFE_ACCESS(args, command_line_argc, 0),
         SAFE_ACCESS(args, command_line_argv, nullptr));
   }
@@ -152,10 +151,10 @@ FlutterResult FlutterEngineRun(size_t version,
       fml::paths::JoinPaths({settings.assets_path, "platform.dill"});
   std::string application_kernel_path = fml::paths::JoinPaths(
       {settings.assets_path, kApplicationKernelSnapshotFileName});
-  if (files::IsFile(application_kernel_path)) {
+  if (fml::IsFile(application_kernel_path)) {
     // Run from a kernel snapshot.
     settings.platform_kernel_path = platform_kernel_path;
-    if (files::IsFile(platform_kernel_path)) {
+    if (fml::IsFile(platform_kernel_path)) {
       settings.application_kernel_asset = kApplicationKernelSnapshotFileName;
     }
   } else {
@@ -164,7 +163,7 @@ FlutterResult FlutterEngineRun(size_t version,
     settings.packages_file_path = args->packages_path;
   }
 
-  settings.task_observer_add = [](intptr_t key, fxl::Closure callback) {
+  settings.task_observer_add = [](intptr_t key, fml::closure callback) {
     fml::MessageLoop::GetCurrent().AddTaskObserver(key, std::move(callback));
   };
   settings.task_observer_remove = [](intptr_t key) {
@@ -333,7 +332,7 @@ FlutterResult FlutterEngineSendPlatformMessage(
     return kInvalidArguments;
   }
 
-  auto message = fxl::MakeRefCounted<blink::PlatformMessage>(
+  auto message = fml::MakeRefCounted<blink::PlatformMessage>(
       flutter_message->channel,
       std::vector<uint8_t>(
           flutter_message->message,

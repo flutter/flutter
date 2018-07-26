@@ -61,12 +61,12 @@ void MessageLoopDarwin::Terminate() {
   CFRunLoopStop(loop_);
 }
 
-void MessageLoopDarwin::WakeUp(fxl::TimePoint time_point) {
+void MessageLoopDarwin::WakeUp(fml::TimePoint time_point) {
   // Rearm the timer. The time bases used by CoreFoundation and FXL are
   // different and must be accounted for.
   CFRunLoopTimerSetNextFireDate(
       delayed_wake_timer_,
-      CFAbsoluteTimeGetCurrent() + (time_point - fxl::TimePoint::Now()).ToSecondsF());
+      CFAbsoluteTimeGetCurrent() + (time_point - fml::TimePoint::Now()).ToSecondsF());
 }
 
 void MessageLoopDarwin::OnTimerFire(CFRunLoopTimerRef timer, MessageLoopDarwin* loop) {

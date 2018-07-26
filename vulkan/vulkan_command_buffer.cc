@@ -25,7 +25,7 @@ VulkanCommandBuffer::VulkanCommandBuffer(
 
   if (VK_CALL_LOG_ERROR(vk.AllocateCommandBuffers(device_, &allocate_info,
                                                   &buffer)) != VK_SUCCESS) {
-    FXL_DLOG(INFO) << "Could not allocate command buffers.";
+    FML_DLOG(INFO) << "Could not allocate command buffers.";
     return;
   }
 

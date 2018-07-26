@@ -7,9 +7,9 @@
 
 #include <vector>
 
+#include "flutter/fml/compiler_specific.h"
+#include "flutter/fml/macros.h"
 #include "flutter/vulkan/vulkan_handle.h"
-#include "lib/fxl/compiler_specific.h"
-#include "lib/fxl/macros.h"
 
 namespace vulkan {
 
@@ -37,34 +37,34 @@ class VulkanDevice {
 
   void ReleaseDeviceOwnership();
 
-  FXL_WARN_UNUSED_RESULT
+  FML_WARN_UNUSED_RESULT
   bool GetSurfaceCapabilities(const VulkanSurface& surface,
                               VkSurfaceCapabilitiesKHR* capabilities) const;
 
-  FXL_WARN_UNUSED_RESULT
+  FML_WARN_UNUSED_RESULT
   bool GetPhysicalDeviceFeatures(VkPhysicalDeviceFeatures* features) const;
 
-  FXL_WARN_UNUSED_RESULT
+  FML_WARN_UNUSED_RESULT
   bool GetPhysicalDeviceFeaturesSkia(
       uint32_t* /* mask of GrVkFeatureFlags */ features) const;
 
-  FXL_WARN_UNUSED_RESULT
+  FML_WARN_UNUSED_RESULT
   int ChooseSurfaceFormat(const VulkanSurface& surface,
                           std::vector<VkFormat> desired_formats,
                           VkSurfaceFormatKHR* format) const;
 
-  FXL_WARN_UNUSED_RESULT
+  FML_WARN_UNUSED_RESULT
   bool ChoosePresentMode(const VulkanSurface& surface,
                          VkPresentModeKHR* present_mode) const;
 
-  FXL_WARN_UNUSED_RESULT
+  FML_WARN_UNUSED_RESULT
   bool QueueSubmit(std::vector<VkPipelineStageFlags> wait_dest_pipeline_stages,
                    const std::vector<VkSemaphore>& wait_semaphores,
                    const std::vector<VkSemaphore>& signal_semaphores,
                    const std::vector<VkCommandBuffer>& command_buffers,
                    const VulkanHandle<VkFence>& fence) const;
 
-  FXL_WARN_UNUSED_RESULT
+  FML_WARN_UNUSED_RESULT
   bool WaitIdle() const;
 
  private:
@@ -78,7 +78,7 @@ class VulkanDevice {
 
   std::vector<VkQueueFamilyProperties> GetQueueFamilyProperties() const;
 
-  FXL_DISALLOW_COPY_AND_ASSIGN(VulkanDevice);
+  FML_DISALLOW_COPY_AND_ASSIGN(VulkanDevice);
 };
 
 }  // namespace vulkan

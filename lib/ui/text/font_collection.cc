@@ -38,7 +38,7 @@ void FontCollection::RegisterFonts(fml::RefPtr<AssetManager> asset_manager) {
   std::unique_ptr<fml::Mapping> manifest_mapping =
       asset_manager->GetAsMapping("FontManifest.json");
   if (manifest_mapping == nullptr) {
-    FXL_DLOG(WARNING) << "Could not find the font manifest in the asset store.";
+    FML_DLOG(WARNING) << "Could not find the font manifest in the asset store.";
     return;
   }
 
@@ -49,7 +49,7 @@ void FontCollection::RegisterFonts(fml::RefPtr<AssetManager> asset_manager) {
                  manifest_mapping->GetSize());
 
   if (document.HasParseError()) {
-    FXL_DLOG(WARNING) << "Error parsing the font manifest in the asset store.";
+    FML_DLOG(WARNING) << "Error parsing the font manifest in the asset store.";
     return;
   }
 

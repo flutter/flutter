@@ -20,7 +20,6 @@ source_set("common") {
     "$flutter_root/fml",
     "$flutter_root/runtime",
     "$flutter_root/shell/common",
-    "//garnet/public/lib/fxl",
     "//third_party/dart/runtime:dart_api",
     "//third_party/skia",
   ]

@@ -7,10 +7,10 @@
 
 #include <unordered_map>
 
+#include "flutter/fml/memory/weak_ptr.h"
 #include "flutter/fml/platform/darwin/scoped_block.h"
 #include "flutter/lib/ui/window/platform_message.h"
 #include "flutter/shell/platform/darwin/ios/framework/Headers/FlutterBinaryMessenger.h"
-#include "lib/fxl/memory/weak_ptr.h"
 
 namespace shell {
 
@@ -19,7 +19,7 @@ class PlatformMessageRouter {
   PlatformMessageRouter();
   ~PlatformMessageRouter();
 
-  void HandlePlatformMessage(fxl::RefPtr<blink::PlatformMessage> message) const;
+  void HandlePlatformMessage(fml::RefPtr<blink::PlatformMessage> message) const;
 
   void SetMessageHandler(const std::string& channel,
                          FlutterBinaryMessageHandler handler);
@@ -28,7 +28,7 @@ class PlatformMessageRouter {
   std::unordered_map<std::string, fml::ScopedBlock<FlutterBinaryMessageHandler>>
       message_handlers_;
 
-  FXL_DISALLOW_COPY_AND_ASSIGN(PlatformMessageRouter);
+  FML_DISALLOW_COPY_AND_ASSIGN(PlatformMessageRouter);
 };
 
 }  // namespace shell

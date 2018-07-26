@@ -103,7 +103,7 @@ source_set("txt") {
   public_configs = [ ":txt_config" ]
 
   public_deps = [
-    "//garnet/public/lib/fxl",
+    "$flutter_root/fml",
     "//third_party/harfbuzz",
     "//third_party/icu",
     "//third_party/skia",
@@ -138,7 +138,7 @@ source_set("txt_test_utils") {
 
   deps = [
     ":txt",
-    "//garnet/public/lib/fxl",
+    "$flutter_root/fml",
     "//third_party/skia",
   ]
 }

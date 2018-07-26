@@ -49,9 +49,9 @@ class MultiFrameCodec : public Codec {
 
   void GetNextFrameAndInvokeCallback(
       std::unique_ptr<DartPersistentValue> callback,
-      fxl::RefPtr<fxl::TaskRunner> ui_task_runner,
+      fml::RefPtr<fml::TaskRunner> ui_task_runner,
       fml::WeakPtr<GrContext> resourceContext,
-      fxl::RefPtr<flow::SkiaUnrefQueue> unref_queue,
+      fml::RefPtr<flow::SkiaUnrefQueue> unref_queue,
       size_t trace_id);
 
   const std::unique_ptr<SkCodec> codec_;
@@ -61,8 +61,8 @@ class MultiFrameCodec : public Codec {
   std::vector<SkCodec::FrameInfo> frameInfos_;
   std::vector<SkBitmap> frameBitmaps_;
 
-  FRIEND_MAKE_REF_COUNTED(MultiFrameCodec);
-  FRIEND_REF_COUNTED_THREAD_SAFE(MultiFrameCodec);
+  FML_FRIEND_MAKE_REF_COUNTED(MultiFrameCodec);
+  FML_FRIEND_REF_COUNTED_THREAD_SAFE(MultiFrameCodec);
 };
 
 class SingleFrameCodec : public Codec {
@@ -72,13 +72,13 @@ class SingleFrameCodec : public Codec {
   Dart_Handle getNextFrame(Dart_Handle args);
 
  private:
-  SingleFrameCodec(fxl::RefPtr<FrameInfo> frame) : frame_(std::move(frame)) {}
+  SingleFrameCodec(fml::RefPtr<FrameInfo> frame) : frame_(std::move(frame)) {}
   ~SingleFrameCodec() {}
 
-  fxl::RefPtr<FrameInfo> frame_;
+  fml::RefPtr<FrameInfo> frame_;
 
-  FRIEND_MAKE_REF_COUNTED(SingleFrameCodec);
-  FRIEND_REF_COUNTED_THREAD_SAFE(SingleFrameCodec);
+  FML_FRIEND_MAKE_REF_COUNTED(SingleFrameCodec);
+  FML_FRIEND_REF_COUNTED_THREAD_SAFE(SingleFrameCodec);
 };
 
 }  // namespace blink

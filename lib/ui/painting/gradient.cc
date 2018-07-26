@@ -35,16 +35,16 @@ void CanvasGradient::RegisterNatives(tonic::DartLibraryNatives* natives) {
                      FOR_EACH_BINDING(DART_REGISTER_NATIVE)});
 }
 
-fxl::RefPtr<CanvasGradient> CanvasGradient::Create() {
-  return fxl::MakeRefCounted<CanvasGradient>();
+fml::RefPtr<CanvasGradient> CanvasGradient::Create() {
+  return fml::MakeRefCounted<CanvasGradient>();
 }
 
 void CanvasGradient::initLinear(const tonic::Float32List& end_points,
                                 const tonic::Int32List& colors,
                                 const tonic::Float32List& color_stops,
                                 SkShader::TileMode tile_mode) {
-  FXL_DCHECK(end_points.num_elements() == 4);
-  FXL_DCHECK(colors.num_elements() == color_stops.num_elements() ||
+  FML_DCHECK(end_points.num_elements() == 4);
+  FML_DCHECK(colors.num_elements() == color_stops.num_elements() ||
              color_stops.data() == nullptr);
 
   static_assert(sizeof(SkPoint) == sizeof(float) * 2,
@@ -65,7 +65,7 @@ void CanvasGradient::initRadial(double center_x,
                                 const tonic::Float32List& color_stops,
                                 SkShader::TileMode tile_mode,
                                 const tonic::Float64List& matrix4) {
-  FXL_DCHECK(colors.num_elements() == color_stops.num_elements() ||
+  FML_DCHECK(colors.num_elements() == color_stops.num_elements() ||
              color_stops.data() == nullptr);
 
   static_assert(sizeof(SkColor) == sizeof(int32_t),
@@ -91,7 +91,7 @@ void CanvasGradient::initSweep(double center_x,
                                double start_angle,
                                double end_angle,
                                const tonic::Float64List& matrix4) {
-  FXL_DCHECK(colors.num_elements() == color_stops.num_elements() ||
+  FML_DCHECK(colors.num_elements() == color_stops.num_elements() ||
              color_stops.data() == nullptr);
 
   static_assert(sizeof(SkColor) == sizeof(int32_t),
@@ -120,7 +120,7 @@ void CanvasGradient::initTwoPointConical(double start_x,
                                          const tonic::Float32List& color_stops,
                                          SkShader::TileMode tile_mode,
                                          const tonic::Float64List& matrix4) {
-  FXL_DCHECK(colors.num_elements() == color_stops.num_elements() ||
+  FML_DCHECK(colors.num_elements() == color_stops.num_elements() ||
              color_stops.data() == nullptr);
 
   static_assert(sizeof(SkColor) == sizeof(int32_t),

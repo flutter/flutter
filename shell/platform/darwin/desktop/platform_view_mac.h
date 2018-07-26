@@ -5,11 +5,11 @@
 #ifndef SHELL_PLATFORM_MAC_PLATFORM_VIEW_MAC_H_
 #define SHELL_PLATFORM_MAC_PLATFORM_VIEW_MAC_H_
 
+#include "flutter/fml/memory/weak_ptr.h"
 #include "flutter/fml/platform/darwin/scoped_nsobject.h"
 #include "flutter/shell/common/platform_view.h"
 #include "flutter/shell/common/shell.h"
 #include "flutter/shell/gpu/gpu_surface_gl.h"
-#include "lib/fxl/memory/weak_ptr.h"
 
 @class NSOpenGLView;
 @class NSOpenGLContext;
@@ -44,7 +44,7 @@ class PlatformViewMac final : public PlatformView, public GPUSurfaceGLDelegate {
   // |shell::PlatformView|
   sk_sp<GrContext> CreateResourceContext() const override;
 
-  FXL_DISALLOW_COPY_AND_ASSIGN(PlatformViewMac);
+  FML_DISALLOW_COPY_AND_ASSIGN(PlatformViewMac);
 };
 
 }  // namespace shell

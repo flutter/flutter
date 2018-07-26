@@ -15,11 +15,11 @@ namespace blink {
 class SemanticsUpdateBuilder
     : public RefCountedDartWrappable<SemanticsUpdateBuilder> {
   DEFINE_WRAPPERTYPEINFO();
-  FRIEND_MAKE_REF_COUNTED(SemanticsUpdateBuilder);
+  FML_FRIEND_MAKE_REF_COUNTED(SemanticsUpdateBuilder);
 
  public:
-  static fxl::RefPtr<SemanticsUpdateBuilder> create() {
-    return fxl::MakeRefCounted<SemanticsUpdateBuilder>();
+  static fml::RefPtr<SemanticsUpdateBuilder> create() {
+    return fml::MakeRefCounted<SemanticsUpdateBuilder>();
   }
 
   ~SemanticsUpdateBuilder() override;
@@ -52,7 +52,7 @@ class SemanticsUpdateBuilder
                           std::string hint,
                           int overrideId);
 
-  fxl::RefPtr<SemanticsUpdate> build();
+  fml::RefPtr<SemanticsUpdate> build();
 
   static void RegisterNatives(tonic::DartLibraryNatives* natives);
 

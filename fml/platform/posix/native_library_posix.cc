@@ -13,7 +13,7 @@ NativeLibrary::NativeLibrary(const char* path) {
   ::dlerror();
   handle_ = ::dlopen(path, RTLD_NOW);
   if (handle_ == nullptr) {
-    FXL_LOG(ERROR) << "Could not open library '" << path << "' due to error '"
+    FML_LOG(ERROR) << "Could not open library '" << path << "' due to error '"
                    << ::dlerror() << "'.";
   }
 }
@@ -30,7 +30,7 @@ NativeLibrary::~NativeLibrary() {
     ::dlerror();
     if (::dlclose(handle_) != 0) {
       handle_ = nullptr;
-      FXL_LOG(ERROR) << "Could not close library due to error '" << ::dlerror()
+      FML_LOG(ERROR) << "Could not close library due to error '" << ::dlerror()
                      << "'.";
     }
   }
@@ -40,27 +40,27 @@ NativeLibrary::Handle NativeLibrary::GetHandle() const {
   return handle_;
 }
 
-fxl::RefPtr<NativeLibrary> NativeLibrary::Create(const char* path) {
-  auto library = fxl::AdoptRef(new NativeLibrary(path));
+fml::RefPtr<NativeLibrary> NativeLibrary::Create(const char* path) {
+  auto library = fml::AdoptRef(new NativeLibrary(path));
   return library->GetHandle() != nullptr ? library : nullptr;
 }
 
-fxl::RefPtr<NativeLibrary> NativeLibrary::CreateWithHandle(
+fml::RefPtr<NativeLibrary> NativeLibrary::CreateWithHandle(
     Handle handle,
     bool close_handle_when_done) {
   auto library =
-      fxl::AdoptRef(new NativeLibrary(handle, close_handle_when_done));
+      fml::AdoptRef(new NativeLibrary(handle, close_handle_when_done));
   return library->GetHandle() != nullptr ? library : nullptr;
 }
 
-fxl::RefPtr<NativeLibrary> NativeLibrary::CreateForCurrentProcess() {
-  return fxl::AdoptRef(new NativeLibrary(RTLD_DEFAULT, false));
+fml::RefPtr<NativeLibrary> NativeLibrary::CreateForCurrentProcess() {
+  return fml::AdoptRef(new NativeLibrary(RTLD_DEFAULT, false));
 }
 
 const uint8_t* NativeLibrary::ResolveSymbol(const char* symbol) {
   auto resolved_symbol = static_cast<const uint8_t*>(::dlsym(handle_, symbol));
   if (resolved_symbol == nullptr) {
-    FXL_DLOG(INFO) << "Could not resolve symbol in library: " << symbol;
+    FML_DLOG(INFO) << "Could not resolve symbol in library: " << symbol;
   }
   return resolved_symbol;
 }

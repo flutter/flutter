@@ -6,7 +6,7 @@
 
 #include <CoreVideo/CoreVideo.h>
 
-#include "lib/fxl/logging.h"
+#include "flutter/fml/logging.h"
 
 namespace shell {
 
@@ -40,10 +40,10 @@ void VsyncWaiterMac::OnDisplayLink(void* context) {
 }
 
 void VsyncWaiterMac::OnDisplayLink() {
-  fxl::TimePoint frame_start_time = fxl::TimePoint::Now();
-  fxl::TimePoint frame_target_time =
+  fml::TimePoint frame_start_time = fml::TimePoint::Now();
+  fml::TimePoint frame_target_time =
       frame_start_time +
-      fxl::TimeDelta::FromSecondsF(
+      fml::TimeDelta::FromSecondsF(
           CVDisplayLinkGetActualOutputVideoRefreshPeriod(link_));
 
   CVDisplayLinkStop(link_);

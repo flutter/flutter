@@ -10,8 +10,8 @@
 
 #include "flutter/flow/instrumentation.h"
 #include "flutter/flow/raster_cache_key.h"
-#include "lib/fxl/macros.h"
-#include "lib/fxl/memory/weak_ptr.h"
+#include "flutter/fml/macros.h"
+#include "flutter/fml/memory/weak_ptr.h"
 #include "third_party/skia/include/core/SkImage.h"
 #include "third_party/skia/include/core/SkSize.h"
 
@@ -79,9 +79,9 @@ class RasterCache {
   const size_t threshold_;
   RasterCacheKey::Map<Entry> cache_;
   bool checkerboard_images_;
-  fxl::WeakPtrFactory<RasterCache> weak_factory_;
+  fml::WeakPtrFactory<RasterCache> weak_factory_;
 
-  FXL_DISALLOW_COPY_AND_ASSIGN(RasterCache);
+  FML_DISALLOW_COPY_AND_ASSIGN(RasterCache);
 };
 
 }  // namespace flow

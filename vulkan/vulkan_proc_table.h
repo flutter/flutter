@@ -5,19 +5,19 @@
 #ifndef FLUTTER_VULKAN_VULKAN_PROC_TABLE_H_
 #define FLUTTER_VULKAN_VULKAN_PROC_TABLE_H_
 
+#include "flutter/fml/macros.h"
+#include "flutter/fml/memory/ref_counted.h"
+#include "flutter/fml/memory/ref_ptr.h"
 #include "flutter/vulkan/vulkan_handle.h"
 #include "flutter/vulkan/vulkan_interface.h"
-#include "lib/fxl/macros.h"
-#include "lib/fxl/memory/ref_counted.h"
-#include "lib/fxl/memory/ref_ptr.h"
 #include "third_party/skia/include/core/SkRefCnt.h"
 #include "third_party/skia/include/gpu/vk/GrVkBackendContext.h"
 
 namespace vulkan {
 
-class VulkanProcTable : public fxl::RefCountedThreadSafe<VulkanProcTable> {
-  FRIEND_REF_COUNTED_THREAD_SAFE(VulkanProcTable);
-  FRIEND_MAKE_REF_COUNTED(VulkanProcTable);
+class VulkanProcTable : public fml::RefCountedThreadSafe<VulkanProcTable> {
+  FML_FRIEND_REF_COUNTED_THREAD_SAFE(VulkanProcTable);
+  FML_FRIEND_MAKE_REF_COUNTED(VulkanProcTable);
 
  public:
   template <class T>
@@ -140,7 +140,7 @@ class VulkanProcTable : public fxl::RefCountedThreadSafe<VulkanProcTable> {
   PFN_vkVoidFunction AcquireProc(const char* proc_name,
                                  const VulkanHandle<VkDevice>& device) const;
 
-  FXL_DISALLOW_COPY_AND_ASSIGN(VulkanProcTable);
+  FML_DISALLOW_COPY_AND_ASSIGN(VulkanProcTable);
 };
 
 }  // namespace vulkan

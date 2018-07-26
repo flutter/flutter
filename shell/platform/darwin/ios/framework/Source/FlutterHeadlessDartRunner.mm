@@ -10,6 +10,7 @@
 #include <memory>
 #include <sstream>
 
+#include "flutter/fml/make_copyable.h"
 #include "flutter/fml/message_loop.h"
 #include "flutter/shell/common/engine.h"
 #include "flutter/shell/common/rasterizer.h"
@@ -23,7 +24,6 @@
 #include "flutter/shell/platform/darwin/ios/framework/Source/platform_message_response_darwin.h"
 #include "flutter/shell/platform/darwin/ios/headless_platform_view_ios.h"
 #include "flutter/shell/platform/darwin/ios/platform_view_ios.h"
-#include "lib/fxl/functional/make_copyable.h"
 
 static std::unique_ptr<shell::HeadlessPlatformViewIOS> CreateHeadlessPlatformView(
     shell::Shell& shell) {
@@ -51,7 +51,7 @@ static std::string CreateShellLabel() {
                           libraryUri:(NSString*)uri
                           completion:(FlutterHeadlessDartRunnerCallback)callback {
   if (_shell != nullptr || entrypoint.length == 0) {
-    FXL_LOG(ERROR) << "This headless dart runner was already used to run some code.";
+    FML_LOG(ERROR) << "This headless dart runner was already used to run some code.";
     return;
   }
 
@@ -88,7 +88,7 @@ static std::string CreateShellLabel() {
   );
 
   if (_shell == nullptr) {
-    FXL_LOG(ERROR) << "Could not start a shell for the headless dart runner with entrypoint: "
+    FML_LOG(ERROR) << "Could not start a shell for the headless dart runner with entrypoint: "
                    << entrypoint.UTF8String;
     return;
   }
@@ -101,14 +101,14 @@ static std::string CreateShellLabel() {
 
   // Override the default run configuration with the specified entrypoint.
   _shell->GetTaskRunners().GetUITaskRunner()->PostTask(
-      fxl::MakeCopyable([engine = _shell->GetEngine(), config = std::move(config),
+      fml::MakeCopyable([engine = _shell->GetEngine(), config = std::move(config),
                          callback = Block_copy(callback)]() mutable {
         BOOL success = NO;
-        FXL_LOG(INFO) << "Attempting to launch background engine configuration...";
+        FML_LOG(INFO) << "Attempting to launch background engine configuration...";
         if (!engine || !engine->Run(std::move(config))) {
-          FXL_LOG(ERROR) << "Could not launch engine with configuration.";
+          FML_LOG(ERROR) << "Could not launch engine with configuration.";
         } else {
-          FXL_LOG(INFO) << "Background Isolate successfully started and run.";
+          FML_LOG(INFO) << "Background Isolate successfully started and run.";
           success = YES;
         }
         if (callback != nil) {
@@ -132,16 +132,16 @@ static std::string CreateShellLabel() {
               message:(NSData*)message
           binaryReply:(FlutterBinaryReply)callback {
   NSAssert(channel, @"The channel must not be null");
-  fxl::RefPtr<shell::PlatformMessageResponseDarwin> response =
+  fml::RefPtr<shell::PlatformMessageResponseDarwin> response =
       (callback == nil) ? nullptr
-                        : fxl::MakeRefCounted<shell::PlatformMessageResponseDarwin>(
+                        : fml::MakeRefCounted<shell::PlatformMessageResponseDarwin>(
                               ^(NSData* reply) {
                                 callback(reply);
                               },
                               _shell->GetTaskRunners().GetPlatformTaskRunner());
-  fxl::RefPtr<blink::PlatformMessage> platformMessage =
-      (message == nil) ? fxl::MakeRefCounted<blink::PlatformMessage>(channel.UTF8String, response)
-                       : fxl::MakeRefCounted<blink::PlatformMessage>(
+  fml::RefPtr<blink::PlatformMessage> platformMessage =
+      (message == nil) ? fml::MakeRefCounted<blink::PlatformMessage>(channel.UTF8String, response)
+                       : fml::MakeRefCounted<blink::PlatformMessage>(
                              channel.UTF8String, shell::GetVectorFromNSData(message), response);
 
   _shell->GetPlatformView()->DispatchPlatformMessage(platformMessage);

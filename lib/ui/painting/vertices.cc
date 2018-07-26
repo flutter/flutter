@@ -43,8 +43,8 @@ void Vertices::RegisterNatives(tonic::DartLibraryNatives* natives) {
                      FOR_EACH_BINDING(DART_REGISTER_NATIVE)});
 }
 
-fxl::RefPtr<Vertices> Vertices::Create() {
-  return fxl::MakeRefCounted<Vertices>();
+fml::RefPtr<Vertices> Vertices::Create() {
+  return fml::MakeRefCounted<Vertices>();
 }
 
 void Vertices::init(SkVertices::VertexMode vertex_mode,
@@ -62,18 +62,18 @@ void Vertices::init(SkVertices::VertexMode vertex_mode,
                               indices.num_elements(), builderFlags);
 
   // positions are required for SkVertices::Builder
-  FXL_DCHECK(positions.data());
+  FML_DCHECK(positions.data());
   if (positions.data())
     DecodePoints(positions, builder.positions());
 
   if (texture_coordinates.data()) {
     // SkVertices::Builder assumes equal numbers of elements
-    FXL_DCHECK(positions.num_elements() == texture_coordinates.num_elements());
+    FML_DCHECK(positions.num_elements() == texture_coordinates.num_elements());
     DecodePoints(texture_coordinates, builder.texCoords());
   }
   if (colors.data()) {
     // SkVertices::Builder assumes equal numbers of elements
-    FXL_DCHECK(positions.num_elements() == colors.num_elements());
+    FML_DCHECK(positions.num_elements() == colors.num_elements());
     DecodeInts<SkColor>(colors, builder.colors());
   }
 

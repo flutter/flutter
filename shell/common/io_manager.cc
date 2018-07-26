@@ -38,18 +38,18 @@ sk_sp<GrContext> IOManager::CreateCompatibleResourceLoadingContext(
 }
 
 IOManager::IOManager(sk_sp<GrContext> resource_context,
-                     fxl::RefPtr<fxl::TaskRunner> unref_queue_task_runner)
+                     fml::RefPtr<fml::TaskRunner> unref_queue_task_runner)
     : resource_context_(std::move(resource_context)),
       resource_context_weak_factory_(
           resource_context_ ? std::make_unique<fml::WeakPtrFactory<GrContext>>(
                                   resource_context_.get())
                             : nullptr),
-      unref_queue_(fxl::MakeRefCounted<flow::SkiaUnrefQueue>(
+      unref_queue_(fml::MakeRefCounted<flow::SkiaUnrefQueue>(
           std::move(unref_queue_task_runner),
-          fxl::TimeDelta::FromMilliseconds(250))),
+          fml::TimeDelta::FromMilliseconds(250))),
       weak_factory_(this) {
   if (!resource_context_) {
-    FXL_DLOG(WARNING) << "The IO manager was initialized without a resource "
+    FML_DLOG(WARNING) << "The IO manager was initialized without a resource "
                          "context. Async texture uploads will be disabled. "
                          "Expect performance degradation.";
   }
@@ -67,7 +67,7 @@ fml::WeakPtr<GrContext> IOManager::GetResourceContext() const {
              : fml::WeakPtr<GrContext>();
 }
 
-fxl::RefPtr<flow::SkiaUnrefQueue> IOManager::GetSkiaUnrefQueue() const {
+fml::RefPtr<flow::SkiaUnrefQueue> IOManager::GetSkiaUnrefQueue() const {
   return unref_queue_;
 }
 

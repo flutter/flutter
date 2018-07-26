@@ -8,6 +8,10 @@
 
 #include <vector>
 
+#include "flutter/fml/arraysize.h"
+#include "flutter/fml/command_line.h"
+#include "flutter/fml/file.h"
+#include "flutter/fml/macros.h"
 #include "flutter/fml/message_loop.h"
 #include "flutter/fml/paths.h"
 #include "flutter/fml/platform/android/jni_util.h"
@@ -15,10 +19,6 @@
 #include "flutter/runtime/start_up.h"
 #include "flutter/shell/common/shell.h"
 #include "flutter/shell/common/switches.h"
-#include "lib/fxl/arraysize.h"
-#include "lib/fxl/command_line.h"
-#include "lib/fxl/files/file.h"
-#include "lib/fxl/macros.h"
 #include "third_party/dart/runtime/include/dart_tools_api.h"
 
 namespace shell {
@@ -31,7 +31,7 @@ FlutterMain::~FlutterMain() = default;
 static std::unique_ptr<FlutterMain> g_flutter_main;
 
 FlutterMain& FlutterMain::Get() {
-  FXL_CHECK(g_flutter_main) << "ensureInitializationComplete must have already "
+  FML_CHECK(g_flutter_main) << "ensureInitializationComplete must have already "
                                "been called.";
   return *g_flutter_main;
 }
@@ -50,7 +50,7 @@ void FlutterMain::Init(JNIEnv* env,
   for (auto& arg : fml::jni::StringArrayToVector(env, jargs)) {
     args.push_back(std::move(arg));
   }
-  auto command_line = fxl::CommandLineFromIterators(args.begin(), args.end());
+  auto command_line = fml::CommandLineFromIterators(args.begin(), args.end());
 
   auto settings = SettingsFromCommandLine(command_line);
 
@@ -64,15 +64,15 @@ void FlutterMain::Init(JNIEnv* env,
     auto application_kernel_path =
         fml::paths::JoinPaths({settings.assets_path, "kernel_blob.bin"});
 
-    if (files::IsFile(application_kernel_path)) {
+    if (fml::IsFile(application_kernel_path)) {
       settings.application_kernel_asset = application_kernel_path;
-      if (files::IsFile(platform_kernel_path)) {
+      if (fml::IsFile(platform_kernel_path)) {
         settings.platform_kernel_path = platform_kernel_path;
       }
     }
   }
 
-  settings.task_observer_add = [](intptr_t key, fxl::Closure callback) {
+  settings.task_observer_add = [](intptr_t key, fml::closure callback) {
     fml::MessageLoop::GetCurrent().AddTaskObserver(key, std::move(callback));
   };
 

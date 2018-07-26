@@ -6,12 +6,12 @@
 
 #include <iostream>
 
+#include "flutter/fml/command_line.h"
+#include "flutter/fml/logging.h"
 #include "flutter/fml/message_loop.h"
 #include "flutter/shell/common/shell.h"
 #include "flutter/shell/common/switches.h"
 #include "flutter/shell/platform/darwin/desktop/flutter_application_delegate.h"
-#include "lib/fxl/command_line.h"
-#include "lib/fxl/logging.h"
 
 int main(int argc, const char* argv[]) {
   std::vector<std::string> args_vector;
@@ -20,7 +20,7 @@ int main(int argc, const char* argv[]) {
     args_vector.emplace_back(arg.UTF8String);
   }
 
-  auto command_line = fxl::CommandLineFromIterators(args_vector.begin(), args_vector.end());
+  auto command_line = fml::CommandLineFromIterators(args_vector.begin(), args_vector.end());
 
   // Print help.
   if (command_line.HasOption(shell::FlagForSwitch(shell::Switch::Help))) {

@@ -20,8 +20,8 @@
 #include <memory>
 #include <string>
 
+#include "flutter/fml/macros.h"
 #include "font_collection.h"
-#include "lib/fxl/macros.h"
 #include "paragraph.h"
 #include "paragraph_style.h"
 #include "styled_runs.h"
@@ -82,7 +82,7 @@ class ParagraphBuilder {
 
   size_t PeekStyleIndex() const;
 
-  FXL_DISALLOW_COPY_AND_ASSIGN(ParagraphBuilder);
+  FML_DISALLOW_COPY_AND_ASSIGN(ParagraphBuilder);
 };
 
 }  // namespace txt

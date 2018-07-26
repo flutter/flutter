@@ -9,10 +9,10 @@
 namespace blink {
 
 TaskRunners::TaskRunners(std::string label,
-                         fxl::RefPtr<fxl::TaskRunner> platform,
-                         fxl::RefPtr<fxl::TaskRunner> gpu,
-                         fxl::RefPtr<fxl::TaskRunner> ui,
-                         fxl::RefPtr<fxl::TaskRunner> io)
+                         fml::RefPtr<fml::TaskRunner> platform,
+                         fml::RefPtr<fml::TaskRunner> gpu,
+                         fml::RefPtr<fml::TaskRunner> ui,
+                         fml::RefPtr<fml::TaskRunner> io)
     : label_(std::move(label)),
       platform_(std::move(platform)),
       gpu_(std::move(gpu)),
@@ -25,19 +25,19 @@ const std::string& TaskRunners::GetLabel() const {
   return label_;
 }
 
-fxl::RefPtr<fxl::TaskRunner> TaskRunners::GetPlatformTaskRunner() const {
+fml::RefPtr<fml::TaskRunner> TaskRunners::GetPlatformTaskRunner() const {
   return platform_;
 }
 
-fxl::RefPtr<fxl::TaskRunner> TaskRunners::GetUITaskRunner() const {
+fml::RefPtr<fml::TaskRunner> TaskRunners::GetUITaskRunner() const {
   return ui_;
 }
 
-fxl::RefPtr<fxl::TaskRunner> TaskRunners::GetIOTaskRunner() const {
+fml::RefPtr<fml::TaskRunner> TaskRunners::GetIOTaskRunner() const {
   return io_;
 }
 
-fxl::RefPtr<fxl::TaskRunner> TaskRunners::GetGPUTaskRunner() const {
+fml::RefPtr<fml::TaskRunner> TaskRunners::GetGPUTaskRunner() const {
   return gpu_;
 }
 

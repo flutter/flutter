@@ -24,7 +24,7 @@ class OpacityLayer : public ContainerLayer {
  private:
   int alpha_;
 
-  FXL_DISALLOW_COPY_AND_ASSIGN(OpacityLayer);
+  FML_DISALLOW_COPY_AND_ASSIGN(OpacityLayer);
 };
 
 }  // namespace flow

@@ -7,9 +7,9 @@
 
 #include <memory>
 
+#include "flutter/fml/macros.h"
 #include "flutter/fml/platform/darwin/scoped_nsobject.h"
 #include "flutter/shell/common/surface.h"
-#include "lib/fxl/macros.h"
 
 namespace shell {
 
@@ -28,7 +28,7 @@ class IOSSurface {
   virtual std::unique_ptr<Surface> CreateGPUSurface() = 0;
 
  public:
-  FXL_DISALLOW_COPY_AND_ASSIGN(IOSSurface);
+  FML_DISALLOW_COPY_AND_ASSIGN(IOSSurface);
 };
 
 }  // namespace shell

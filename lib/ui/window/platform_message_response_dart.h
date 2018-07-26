@@ -12,7 +12,7 @@
 namespace blink {
 
 class PlatformMessageResponseDart : public PlatformMessageResponse {
-  FRIEND_MAKE_REF_COUNTED(PlatformMessageResponseDart);
+  FML_FRIEND_MAKE_REF_COUNTED(PlatformMessageResponseDart);
 
  public:
   // Callable on any thread.
@@ -22,11 +22,11 @@ class PlatformMessageResponseDart : public PlatformMessageResponse {
  protected:
   explicit PlatformMessageResponseDart(
       tonic::DartPersistentValue callback,
-      fxl::RefPtr<fxl::TaskRunner> ui_task_runner);
+      fml::RefPtr<fml::TaskRunner> ui_task_runner);
   ~PlatformMessageResponseDart() override;
 
   tonic::DartPersistentValue callback_;
-  fxl::RefPtr<fxl::TaskRunner> ui_task_runner_;
+  fml::RefPtr<fml::TaskRunner> ui_task_runner_;
 };
 
 }  // namespace blink

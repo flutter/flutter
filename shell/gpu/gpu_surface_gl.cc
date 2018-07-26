@@ -4,9 +4,9 @@
 
 #include "gpu_surface_gl.h"
 
+#include "flutter/fml/arraysize.h"
+#include "flutter/fml/logging.h"
 #include "flutter/fml/trace_event.h"
-#include "lib/fxl/arraysize.h"
-#include "lib/fxl/logging.h"
 #include "third_party/skia/include/core/SkColorFilter.h"
 #include "third_party/skia/include/core/SkSurface.h"
 #include "third_party/skia/include/gpu/GrBackendSurface.h"
@@ -21,6 +21,10 @@
 #define GPU_GL_RGBA4 0x8056
 #define GPU_GL_RGB565 0x8D62
 
+#ifdef ERROR
+#undef ERROR
+#endif
+
 namespace shell {
 
 // Default maximum number of budgeted resources in the cache.
@@ -33,7 +37,7 @@ static const size_t kGrCacheMaxByteSize = 512 * (1 << 20);
 GPUSurfaceGL::GPUSurfaceGL(GPUSurfaceGLDelegate* delegate)
     : delegate_(delegate), weak_factory_(this) {
   if (!delegate_->GLContextMakeCurrent()) {
-    FXL_LOG(ERROR)
+    FML_LOG(ERROR)
         << "Could not make the context current to setup the gr context.";
     return;
   }
@@ -48,7 +52,7 @@ GPUSurfaceGL::GPUSurfaceGL(GPUSurfaceGLDelegate* delegate)
   auto context = GrContext::MakeGL(GrGLMakeNativeInterface(), options);
 
   if (context == nullptr) {
-    FXL_LOG(ERROR) << "Failed to setup Skia Gr context.";
+    FML_LOG(ERROR) << "Failed to setup Skia Gr context.";
     return;
   }
 
@@ -67,7 +71,7 @@ GPUSurfaceGL::~GPUSurfaceGL() {
   }
 
   if (!delegate_->GLContextMakeCurrent()) {
-    FXL_LOG(ERROR) << "Could not make the context current to destroy the "
+    FML_LOG(ERROR) << "Could not make the context current to destroy the "
                       "GrContext resources.";
     return;
   }
@@ -157,7 +161,7 @@ bool GPUSurfaceGL::CreateOrUpdateSurfaces(const SkISize& size) {
   offscreen_surface_ = nullptr;
 
   if (size.isEmpty()) {
-    FXL_LOG(ERROR) << "Cannot create surfaces of empty size.";
+    FML_LOG(ERROR) << "Cannot create surfaces of empty size.";
     return false;
   }
 
@@ -169,14 +173,14 @@ bool GPUSurfaceGL::CreateOrUpdateSurfaces(const SkISize& size) {
   if (onscreen_surface == nullptr) {
     // If the onscreen surface could not be wrapped. There is absolutely no
     // point in moving forward.
-    FXL_LOG(ERROR) << "Could not wrap onscreen surface.";
+    FML_LOG(ERROR) << "Could not wrap onscreen surface.";
     return false;
   }
 
   if (delegate_->UseOffscreenSurface()) {
     offscreen_surface = CreateOffscreenSurface(context_.get(), size);
     if (offscreen_surface == nullptr) {
-      FXL_LOG(ERROR) << "Could not create offscreen surface.";
+      FML_LOG(ERROR) << "Could not create offscreen surface.";
       return false;
     }
   }
@@ -193,7 +197,7 @@ std::unique_ptr<SurfaceFrame> GPUSurfaceGL::AcquireFrame(const SkISize& size) {
   }
 
   if (!delegate_->GLContextMakeCurrent()) {
-    FXL_LOG(ERROR)
+    FML_LOG(ERROR)
         << "Could not make the context current to acquire the frame.";
     return nullptr;
   }

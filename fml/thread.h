@@ -20,13 +20,13 @@ class Thread {
 
   ~Thread();
 
-  fxl::RefPtr<fml::TaskRunner> GetTaskRunner() const;
+  fml::RefPtr<fml::TaskRunner> GetTaskRunner() const;
 
   void Join();
 
  private:
   std::unique_ptr<std::thread> thread_;
-  fxl::RefPtr<fml::TaskRunner> task_runner_;
+  fml::RefPtr<fml::TaskRunner> task_runner_;
   std::atomic_bool joined_;
 
   static void SetCurrentThreadName(const std::string& name);

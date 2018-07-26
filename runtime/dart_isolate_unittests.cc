@@ -19,7 +19,7 @@ using DartIsolateTest = ::testing::ThreadTest;
 
 TEST_F(DartIsolateTest, RootIsolateCreationAndShutdown) {
   Settings settings = {};
-  settings.task_observer_add = [](intptr_t, fxl::Closure) {};
+  settings.task_observer_add = [](intptr_t, fml::closure) {};
   settings.task_observer_remove = [](intptr_t) {};
   auto vm = DartVM::ForProcess(settings);
   ASSERT_TRUE(vm);
@@ -48,7 +48,7 @@ TEST_F(DartIsolateTest, RootIsolateCreationAndShutdown) {
 
 TEST_F(DartIsolateTest, IsolateCanAssociateSnapshot) {
   Settings settings = {};
-  settings.task_observer_add = [](intptr_t, fxl::Closure) {};
+  settings.task_observer_add = [](intptr_t, fml::closure) {};
   settings.task_observer_remove = [](intptr_t) {};
   auto vm = DartVM::ForProcess(settings);
   ASSERT_TRUE(vm);
@@ -80,7 +80,7 @@ TEST_F(DartIsolateTest, IsolateCanAssociateSnapshot) {
 
 TEST_F(DartIsolateTest, CanResolveAndInvokeMethod) {
   Settings settings = {};
-  settings.task_observer_add = [](intptr_t, fxl::Closure) {};
+  settings.task_observer_add = [](intptr_t, fml::closure) {};
   settings.task_observer_remove = [](intptr_t) {};
   auto vm = DartVM::ForProcess(settings);
   ASSERT_TRUE(vm);

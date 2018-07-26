@@ -9,9 +9,9 @@
 #include <utility>
 #include <vector>
 
+#include "flutter/fml/compiler_specific.h"
+#include "flutter/fml/macros.h"
 #include "flutter/vulkan/vulkan_handle.h"
-#include "lib/fxl/compiler_specific.h"
-#include "lib/fxl/macros.h"
 #include "third_party/skia/include/core/SkSize.h"
 #include "third_party/skia/include/core/SkSurface.h"
 
@@ -56,7 +56,7 @@ class VulkanSwapchain {
 
   /// Submit a previously acquired. There must not be consecutive calls to
   /// |Submit| without and interleaving |AcquireFrame|.
-  FXL_WARN_UNUSED_RESULT
+  FML_WARN_UNUSED_RESULT
   bool Submit();
 
   SkISize GetSize() const;
@@ -89,7 +89,7 @@ class VulkanSwapchain {
 
   VulkanBackbuffer* GetNextBackbuffer();
 
-  FXL_DISALLOW_COPY_AND_ASSIGN(VulkanSwapchain);
+  FML_DISALLOW_COPY_AND_ASSIGN(VulkanSwapchain);
 };
 
 }  // namespace vulkan

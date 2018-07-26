@@ -48,7 +48,7 @@ class AndroidExternalTextureGL : public flow::Texture {
 
   SkMatrix transform;
 
-  FXL_DISALLOW_COPY_AND_ASSIGN(AndroidExternalTextureGL);
+  FML_DISALLOW_COPY_AND_ASSIGN(AndroidExternalTextureGL);
 };
 
 }  // namespace shell

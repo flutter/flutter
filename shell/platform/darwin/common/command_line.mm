@@ -8,14 +8,14 @@
 
 namespace shell {
 
-fxl::CommandLine CommandLineFromNSProcessInfo() {
+fml::CommandLine CommandLineFromNSProcessInfo() {
   std::vector<std::string> args_vector;
 
   for (NSString* arg in [NSProcessInfo processInfo].arguments) {
     args_vector.emplace_back(arg.UTF8String);
   }
 
-  return fxl::CommandLineFromIterators(args_vector.begin(), args_vector.end());
+  return fml::CommandLineFromIterators(args_vector.begin(), args_vector.end());
 }
 
 }  // namespace shell

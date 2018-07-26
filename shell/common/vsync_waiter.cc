@@ -22,8 +22,8 @@ void VsyncWaiter::AsyncWaitForVsync(Callback callback) {
   AwaitVSync();
 }
 
-void VsyncWaiter::FireCallback(fxl::TimePoint frame_start_time,
-                               fxl::TimePoint frame_target_time) {
+void VsyncWaiter::FireCallback(fml::TimePoint frame_start_time,
+                               fml::TimePoint frame_target_time) {
   Callback callback;
 
   {

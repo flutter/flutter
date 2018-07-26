@@ -18,14 +18,14 @@ namespace blink {
 
 class Vertices : public RefCountedDartWrappable<Vertices> {
   DEFINE_WRAPPERTYPEINFO();
-  FRIEND_MAKE_REF_COUNTED(Vertices);
+  FML_FRIEND_MAKE_REF_COUNTED(Vertices);
 
  public:
   ~Vertices() override;
 
   static void RegisterNatives(tonic::DartLibraryNatives* natives);
 
-  static fxl::RefPtr<Vertices> Create();
+  static fml::RefPtr<Vertices> Create();
 
   void init(SkVertices::VertexMode vertex_mode,
             const tonic::Float32List& positions,
