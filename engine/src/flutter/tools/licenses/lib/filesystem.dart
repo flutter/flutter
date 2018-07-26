@@ -26,7 +26,7 @@ enum FileType {
 typedef Reader = List<int> Function();
 
 class BytesOf extends Key { BytesOf(dynamic value) : super(value); }
-class utf8Of extends Key { utf8Of(dynamic value) : super(value); }
+class UTF8Of extends Key { UTF8Of(dynamic value) : super(value); }
 class Latin1Of extends Key { Latin1Of(dynamic value) : super(value); }
 
 bool matchesSignature(List<int> bytes, List<int> signature) {
@@ -59,7 +59,7 @@ const String kMultiLicenseFileHeader = 'Notices for files contained in';
 
 bool isMultiLicenseNotice(Reader reader) {
   List<int> bytes = reader();
-  return (ascii.decode(bytes.take(kMultiLicenseFileHeader.length).toList(), allowInvalid: true) == kMultiLicenseFileHeader);
+  return (ASCII.decode(bytes.take(kMultiLicenseFileHeader.length).toList(), allowInvalid: true) == kMultiLicenseFileHeader);
 }
 
 FileType identifyFile(String name, Reader reader) {
@@ -114,7 +114,7 @@ FileType identifyFile(String name, Reader reader) {
     case 'tzdata': return FileType.binary;
     case 'compressed_atrace_data.txt': return FileType.binary;
     // Source files that don't use UTF-8
-    case 'Messages_de_DE.properties': // has a few non-ascii characters they forgot to escape (from gnu-libstdc++)
+    case 'Messages_de_DE.properties': // has a few non-ASCII characters they forgot to escape (from gnu-libstdc++)
     case 'mmx_blendtmp.h': // author name in comment contains latin1 (mesa)
     case 'calling_convention.txt': // contains a soft hyphen instead of a real hyphen for some reason (mesa)
     // Character encoding data files
@@ -310,11 +310,11 @@ abstract class TextFile extends File {
 }
 
 // mixin
-abstract class utf8TextFile extends TextFile {
+abstract class UTF8TextFile extends TextFile {
   @override
   String readString() {
     try {
-      return cache(new utf8Of(this), () => utf8.decode(readBytes()));
+      return cache(new UTF8Of(this), () => UTF8.decode(readBytes()));
     } on FormatException {
       print(fullName);
       rethrow;
@@ -330,15 +330,15 @@ abstract class Latin1TextFile extends TextFile {
       final List<int> bytes = readBytes();
       if (bytes.any((int byte) => byte == 0x00))
         throw '$fullName contains a U+0000 NULL and is probably not actually encoded as Win1252';
-      bool isutf8 = false;
+      bool isUTF8 = false;
       try {
-        cache(new utf8Of(this), () => utf8.decode(readBytes()));
-        isutf8 = true;
+        cache(new UTF8Of(this), () => UTF8.decode(readBytes()));
+        isUTF8 = true;
       } on FormatException {
       }
-      if (isutf8)
+      if (isUTF8)
         throw '$fullName contains valid UTF-8 and is probably not actually encoded as Win1252';
-      return latin1.decode(bytes);
+      return LATIN1.decode(bytes);
     });
   }
 }
@@ -460,7 +460,7 @@ class FileSystemDirectory extends IoNode implements Directory {
             case FileType.tar: yield new FileSystemTarFile(fileEntity); break;
             case FileType.gz: yield new FileSystemGZipFile(fileEntity); break;
             case FileType.bzip2: yield new FileSystemBZip2File(fileEntity); break;
-            case FileType.text: yield new FileSystemutf8TextFile(fileEntity); break;
+            case FileType.text: yield new FileSystemUTF8TextFile(fileEntity); break;
             case FileType.latin1Text: yield new FileSystemLatin1TextFile(fileEntity); break;
             case FileType.metadata: break; // ignore this file
           }
@@ -499,8 +499,8 @@ class FileSystemFile extends IoNode implements File {
   }
 }
 
-class FileSystemutf8TextFile extends FileSystemFile with utf8TextFile {
-  FileSystemutf8TextFile(io.File file) : super(file);
+class FileSystemUTF8TextFile extends FileSystemFile with UTF8TextFile {
+  FileSystemUTF8TextFile(io.File file) : super(file);
 }
 
 class FileSystemLatin1TextFile extends FileSystemFile with Latin1TextFile {
@@ -554,7 +554,7 @@ class ArchiveDirectory extends IoNode implements Directory {
           case FileType.tar: _files.add(new ArchiveTarFile(entryFullName, entry)); break;
           case FileType.gz: _files.add(new ArchiveGZipFile(entryFullName, entry)); break;
           case FileType.bzip2: _files.add(new ArchiveBZip2File(entryFullName, entry)); break;
-          case FileType.text: _files.add(new Archiveutf8TextFile(entryFullName, entry)); break;
+          case FileType.text: _files.add(new ArchiveUTF8TextFile(entryFullName, entry)); break;
           case FileType.latin1Text: _files.add(new ArchiveLatin1TextFile(entryFullName, entry)); break;
           case FileType.metadata: break; // ignore this file
         }
@@ -595,8 +595,8 @@ class ArchiveFile extends IoNode implements File {
   }
 }
 
-class Archiveutf8TextFile extends ArchiveFile with utf8TextFile {
-  Archiveutf8TextFile(String fullName, a.ArchiveFile file) : super(fullName, file);
+class ArchiveUTF8TextFile extends ArchiveFile with UTF8TextFile {
+  ArchiveUTF8TextFile(String fullName, a.ArchiveFile file) : super(fullName, file);
 }
 
 class ArchiveLatin1TextFile extends ArchiveFile with Latin1TextFile {
@@ -634,7 +634,7 @@ class InMemoryFile extends IoNode implements File {
       case FileType.tar: return new InMemoryTarFile(fullName, bytes); break;
       case FileType.gz: return new InMemoryGZipFile(fullName, bytes); break;
       case FileType.bzip2: return new InMemoryBZip2File(fullName, bytes); break;
-      case FileType.text: return new InMemoryutf8TextFile(fullName, bytes); break;
+      case FileType.text: return new InMemoryUTF8TextFile(fullName, bytes); break;
       case FileType.latin1Text: return new InMemoryLatin1TextFile(fullName, bytes); break;
       case FileType.metadata: break; // ignore this file
     }
@@ -654,8 +654,8 @@ class InMemoryFile extends IoNode implements File {
   List<int> readBytes() => _bytes;
 }
 
-class InMemoryutf8TextFile extends InMemoryFile with utf8TextFile {
-  InMemoryutf8TextFile(String fullName, List<int> file) : super(fullName, file);
+class InMemoryUTF8TextFile extends InMemoryFile with UTF8TextFile {
+  InMemoryUTF8TextFile(String fullName, List<int> file) : super(fullName, file);
 }
 
 class InMemoryLatin1TextFile extends InMemoryFile with Latin1TextFile {
