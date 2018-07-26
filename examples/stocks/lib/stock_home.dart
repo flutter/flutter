@@ -336,14 +336,14 @@ class _CreateCompanySheet extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return new Column(
-      children: const <Widget>[
-        TextField(
+      children: <Widget>[
+        new TextField(
           autofocus: true,
-          decoration: InputDecoration(
+          decoration: const InputDecoration(
             hintText: 'Company Name',
           ),
         ),
-        Text('(This demo is not yet complete.)'),
+        const Text('(This demo is not yet complete.)'),
         // For example, we could add a button that actually updates the list
         // and then contacts the server, etc.
       ],

@@ -11,8 +11,8 @@ void main() {
           (WidgetTester tester) async {
     // Setup a widget that can receive focus so that we can open the keyboard.
     final Widget widget = new MaterialApp(
-      home: const Material(
-        child: TextField(),
+      home: new Material(
+        child: new TextField(),
       ),
     );
     await tester.pumpWidget(widget);
