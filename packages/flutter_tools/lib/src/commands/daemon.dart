@@ -901,14 +901,7 @@ class _AppRunLogger extends Logger {
       'message': message,
     });
 
-    _status = new Status(onFinish: () {
-      _status = null;
-      _sendProgressEvent(<String, dynamic>{
-        'id': id.toString(),
-        'progressId': progressId,
-        'finished': true
-      });
-    });
+    _status = new _AppLoggerStatus(this, id, progressId);
     return _status;
   }
 
@@ -928,6 +921,37 @@ class _AppRunLogger extends Logger {
       printStatus('event sent after app closed: $event');
     else
       domain._sendAppEvent(app, 'progress', event);
+  }
+}
+
+class _AppLoggerStatus extends Status {
+  _AppLoggerStatus(this.logger, this.id, this.progressId);
+
+  final _AppRunLogger logger;
+  final int id;
+  final String progressId;
+
+  @override
+  void start() {}
+
+  @override
+  void stop() {
+    logger._status = null;
+    _sendFinished();
+  }
+
+  @override
+  void cancel() {
+    logger._status = null;
+    _sendFinished();
+  }
+
+  void _sendFinished() {
+    logger._sendProgressEvent(<String, dynamic>{
+      'id': id.toString(),
+      'progressId': progressId,
+      'finished': true
+    });
   }
 }
 

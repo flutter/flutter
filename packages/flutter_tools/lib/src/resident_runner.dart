@@ -385,7 +385,7 @@ class FlutterDevice {
   }) async {
     final Status devFSStatus = logger.startProgress(
       'Syncing files to device ${device.name}...',
-      expectSlowOperation: true,
+      expectSlowOperation: true
     );
     int bytes = 0;
     try {
@@ -554,9 +554,8 @@ abstract class ResidentRunner {
           for (FlutterView view in device.views)
             await view.uiIsolate.flutterDebugAllowBanner(false);
         } catch (error) {
-          status.cancel();
+          status.stop();
           printError('Error communicating with Flutter on the device: $error');
-          return;
         }
       }
       try {
@@ -567,9 +566,8 @@ abstract class ResidentRunner {
             for (FlutterView view in device.views)
               await view.uiIsolate.flutterDebugAllowBanner(true);
           } catch (error) {
-            status.cancel();
+            status.stop();
             printError('Error communicating with Flutter on the device: $error');
-            return;
           }
         }
       }
@@ -577,7 +575,7 @@ abstract class ResidentRunner {
       status.stop();
       printStatus('Screenshot written to ${fs.path.relative(outputFile.path)} (${sizeKB}kB).');
     } catch (error) {
-      status.cancel();
+      status.stop();
       printError('Error taking screenshot: $error');
     }
   }
