@@ -295,11 +295,15 @@ abstract class CachedArtifact {
     return _withDownloadFile('${flattenNameSubdirs(url)}', (File tempFile) async {
       if (!verifier(tempFile)) {
         final Status status = logger.startProgress(message, expectSlowOperation: true);
-        await _downloadFile(url, tempFile).then<Null>((_) {
+        try {
+          await _downloadFile(url, tempFile);
           status.stop();
-        }).whenComplete(status.cancel);
+        } catch (exception) {
+          status.cancel();
+          rethrow;
+        }
       } else {
-        logger.printStatus('$message(cached)');
+        logger.printTrace('$message (cached)');
       }
       _ensureExists(location);
       extractor(tempFile, location);
