@@ -18,6 +18,7 @@ void main() {
         child: new Material(
           child: new Center(
             child: new Card(
+              semanticContainer: false,
               child: new Column(
                 children: <Widget>[
                   const Text('I am text!'),
@@ -69,7 +70,7 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgets('Card can take semantics from a single child', (WidgetTester tester) async {
+  testWidgets('Card merges children when it is a semanticContainer', (WidgetTester tester) async {
     final SemanticsTester semantics = new SemanticsTester(tester);
     debugResetSemanticsIdCounter();
 
@@ -79,9 +80,11 @@ void main() {
         child: new Material(
           child: new Center(
             child: new Card(
+              semanticContainer: true,
               child: new Column(
                 children: const <Widget>[
-                  Text('Only child'),
+                  Text('First child'),
+                  Text('Second child')
                 ],
               )
             ),
@@ -95,7 +98,7 @@ void main() {
         children: <TestSemantics>[
           new TestSemantics(
             id: 1,
-            label: 'Only child',
+            label: 'First child\nSecond child',
             textDirection: TextDirection.ltr,
           ),
         ],
