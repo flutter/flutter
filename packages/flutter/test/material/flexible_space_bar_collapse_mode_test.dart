@@ -5,7 +5,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-const Key blockKey = const Key('test');
+final Key blockKey = new UniqueKey();
 const double expandedAppbarHeight = 250.0;
 final Key appbarContainerKey = new UniqueKey();
 
