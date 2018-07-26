@@ -574,20 +574,29 @@ void main() {
               children: <TestSemantics>[
                 new TestSemantics(
                   id: 3,
-                  flags: <SemanticsFlag>[SemanticsFlag.isSelected],
+                  flags: <SemanticsFlag>[
+                    SemanticsFlag.isSelected,
+                    SemanticsFlag.isHeader,
+                  ],
                   actions: <SemanticsAction>[SemanticsAction.tap],
                   label: 'AC\nTab 1 of 3',
                   textDirection: TextDirection.ltr,
                 ),
                 new TestSemantics(
                   id: 4,
-                  actions: <SemanticsAction>[SemanticsAction.tap],
+                  flags: <SemanticsFlag>[
+                    SemanticsFlag.isSelected,
+                    SemanticsFlag.isHeader,
+                  ],
                   label: 'Alarm\nTab 2 of 3',
                   textDirection: TextDirection.ltr,
                 ),
                 new TestSemantics(
                   id: 5,
-                  actions: <SemanticsAction>[SemanticsAction.tap],
+                  flags: <SemanticsFlag>[
+                    SemanticsFlag.isSelected,
+                    SemanticsFlag.isHeader,
+                  ],
                   label: 'Hot Tub\nTab 3 of 3',
                   textDirection: TextDirection.ltr,
                 ),

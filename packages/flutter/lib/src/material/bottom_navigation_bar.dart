@@ -277,6 +277,7 @@ class _BottomNavigationTile extends StatelessWidget {
       flex: size,
       child: new Semantics(
         container: true,
+        header: true,
         selected: selected,
         child: new Stack(
           children: <Widget>[
