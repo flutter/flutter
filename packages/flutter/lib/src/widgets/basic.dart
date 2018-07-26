@@ -1581,7 +1581,7 @@ class BaseLayoutId<ParentType extends RenderObjectWidget, ParentDataType extends
 
   @override
   void applyParentData(RenderObject renderObject) {
-    assert(renderObject.parentData is ParentDataType);
+    assert(renderObject.parentData is ParentDataType, 'Wrong parent data. Expected $ParentDataType, actually was ${renderObject.parentData}');
     final ParentDataType parentData = renderObject.parentData;
     if (parentData.id != id) {
       parentData.id = id;
