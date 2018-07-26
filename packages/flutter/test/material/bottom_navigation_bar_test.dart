@@ -585,18 +585,18 @@ void main() {
                 new TestSemantics(
                   id: 4,
                   flags: <SemanticsFlag>[
-                    SemanticsFlag.isSelected,
                     SemanticsFlag.isHeader,
                   ],
+                  actions: <SemanticsAction>[SemanticsAction.tap],
                   label: 'Alarm\nTab 2 of 3',
                   textDirection: TextDirection.ltr,
                 ),
                 new TestSemantics(
                   id: 5,
                   flags: <SemanticsFlag>[
-                    SemanticsFlag.isSelected,
                     SemanticsFlag.isHeader,
                   ],
+                  actions: <SemanticsAction>[SemanticsAction.tap],
                   label: 'Hot Tub\nTab 3 of 3',
                   textDirection: TextDirection.ltr,
                 ),
