@@ -85,9 +85,8 @@ class ReorderableListView extends StatefulWidget {
   final OnReorderCallback onReorder;
 
   @override
-  State<StatefulWidget> createState() {
-    return new _ReorderableListViewState();
-  }
+  _ReorderableListViewState createState() => new _ReorderableListViewState();
+  
 }
 
 // This top-level state manages an Overlay that contains the list and
@@ -314,7 +313,7 @@ class _ReorderableListContentState extends State<_ReorderableListContent> with T
     assert(toWrap.key != null);
     // We create a global key based on both the child key and index
     // so that when we reorder the list, a key doesn't get created twice.
-    final GlobalObjectKey keyIndexGlobalKey = new GlobalObjectKey('${toWrap.key}|$index');
+    final GlobalObjectKey keyIndexGlobalKey = new GlobalObjectKey(toWrap.key);
     // We pass the toWrapWithGlobalKey into the Draggable so that when a list
     // item gets dragged, the accessibility framework can preserve the selected
     // state of the dragging item.
@@ -424,22 +423,25 @@ class _ReorderableListContentState extends State<_ReorderableListContent> with T
     }
 
     // We wrap the drag target in a Builder so that we can scroll to its specific context.
-    return new Builder(builder: (BuildContext context) {
-      return new DragTarget<Key>(
-        builder: buildDragTarget,
-        onWillAccept: (Key toAccept) {
-          setState(() {
-            _nextIndex = index;
-            _requestAnimationToNextIndex();
-          });
-          _scrollTo(context);
-          // If the target is not the original starting point, then we will accept the drop.
-          return _dragging == toAccept && toAccept != toWrap.key;
-        },
-        onAccept: (Key accepted) {},
-        onLeave: (Key leaving) {},
-      );
-    });
+    return new KeyedSubtree(
+      key: new Key('#$ReorderableListView|KeyedSubtree|${toWrap.key}'),
+      child:new Builder(builder: (BuildContext context) {
+        return new DragTarget<Key>(
+          builder: buildDragTarget,
+          onWillAccept: (Key toAccept) {
+            setState(() {
+              _nextIndex = index;
+              _requestAnimationToNextIndex();
+            });
+            _scrollTo(context);
+            // If the target is not the original starting point, then we will accept the drop.
+            return _dragging == toAccept && toAccept != toWrap.key;
+          },
+          onAccept: (Key accepted) {},
+          onLeave: (Key leaving) {},
+        );
+      }),
+    );
   }
 
   @override

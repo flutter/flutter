@@ -180,6 +180,46 @@ void main() {
         await tester.pumpAndSettle();
         expect(getContentElement().size.height, kNonDraggingListHeight);
       });
+
+      testWidgets('Preserves children states when the list parent changes the order', (WidgetTester tester) async {
+        _StatefulState findState(Key key) {
+          return find.byElementPredicate((Element element) => element.ancestorWidgetOfExactType(_Stateful)?.key == key)
+              .evaluate()
+              .first
+              .ancestorStateOfType(const TypeMatcher<_StatefulState>());
+        }
+        await tester.pumpWidget(new MaterialApp(
+          home: new ReorderableListView(
+            children: <Widget>[
+              new _Stateful(key: const Key('A')),
+              new _Stateful(key: const Key('B')),
+              new _Stateful(key: const Key('C')),
+            ],
+            onReorder: (int oldIndex, int newIndex) {},
+          ),
+        ));
+        await tester.tap(find.byKey(const Key('A')));
+        await tester.pumpAndSettle();
+        // Only the 'A' widget should be checked.
+        expect(findState(const Key('A')).checked, true);
+        expect(findState(const Key('B')).checked, false);
+        expect(findState(const Key('C')).checked, false);
+
+        await tester.pumpWidget(new MaterialApp(
+          home: new ReorderableListView(
+            children: <Widget>[
+              new _Stateful(key: const Key('B')),
+              new _Stateful(key: const Key('C')),
+              new _Stateful(key: const Key('A')),
+            ],
+            onReorder: (int oldIndex, int newIndex) {},
+          ),
+        ));
+        // Only the 'A' widget should be checked.
+        expect(findState(const Key('B')).checked, false);
+        expect(findState(const Key('C')).checked, false);
+        expect(findState(const Key('A')).checked, true);
+      });
     });
 
     group('in horizontal mode', () {
@@ -311,6 +351,49 @@ void main() {
         await tester.pumpAndSettle();
         expect(getContentElement().size.width, kNonDraggingListWidth);
       });
+
+
+      testWidgets('Preserves children states when the list parent changes the order', (WidgetTester tester) async {
+        _StatefulState findState(Key key) {
+          return find.byElementPredicate((Element element) => element.ancestorWidgetOfExactType(_Stateful)?.key == key)
+              .evaluate()
+              .first
+              .ancestorStateOfType(const TypeMatcher<_StatefulState>());
+        }
+        await tester.pumpWidget(new MaterialApp(
+          home: new ReorderableListView(
+            children: <Widget>[
+              new _Stateful(key: const Key('A')),
+              new _Stateful(key: const Key('B')),
+              new _Stateful(key: const Key('C')),
+            ],
+            onReorder: (int oldIndex, int newIndex) {},
+            scrollDirection: Axis.horizontal,
+          ),
+        ));
+        await tester.tap(find.byKey(const Key('A')));
+        await tester.pumpAndSettle();
+        // Only the 'A' widget should be checked.
+        expect(findState(const Key('A')).checked, true);
+        expect(findState(const Key('B')).checked, false);
+        expect(findState(const Key('C')).checked, false);
+
+        await tester.pumpWidget(new MaterialApp(
+          home: new ReorderableListView(
+            children: <Widget>[
+              new _Stateful(key: const Key('B')),
+              new _Stateful(key: const Key('C')),
+              new _Stateful(key: const Key('A')),
+            ],
+            onReorder: (int oldIndex, int newIndex) {},
+            scrollDirection: Axis.horizontal,
+          ),
+        ));
+        // Only the 'A' widget should be checked.
+        expect(findState(const Key('B')).checked, false);
+        expect(findState(const Key('C')).checked, false);
+        expect(findState(const Key('A')).checked, true);
+      });
     });
 
     // TODO(djshuckerow): figure out how to write a test for scrolling the list.
@@ -323,4 +406,32 @@ Future<void> longPressDrag(WidgetTester tester, Offset start, Offset end) async 
   await drag.moveTo(end);
   await tester.pump(kPressTimeout);
   await drag.up();
+}
+
+class _Stateful extends StatefulWidget {
+  // Ignoring the preference for const constructors because we want to test with regular non-const instances.
+  // ignore:prefer_const_constructors
+  // ignore:prefer_const_constructors_in_immutables
+  _Stateful({Key key}) : super(key: key);
+
+  @override
+  State<StatefulWidget> createState() => new _StatefulState();
+}
+
+class _StatefulState extends State<_Stateful> {
+  bool checked = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return new Container(
+      width: 48.0,
+      height: 48.0,
+      child: new Material(
+        child: new Checkbox(
+          value: checked, 
+          onChanged: (bool newValue) => checked = newValue,
+        ),
+      ),
+    );
+  }
 }
