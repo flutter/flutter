@@ -34,7 +34,7 @@ class IdeConfigCommand extends FlutterCommand {
       negatable: true,
       defaultsTo: true,
       help: 'Also create module that corresponds to the root of Flutter tree. '
-          'This makes the entire Flutter tree browseable and searchable in IDE. '
+          'This makes the entire Flutter tree browsable and searchable in IDE. '
           'Without this flag, only the child modules will be visible in IDE.',
     );
   }
