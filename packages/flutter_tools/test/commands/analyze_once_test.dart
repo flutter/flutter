@@ -170,7 +170,7 @@ void bar() {
 
     testUsingContext('--preview-dart-2', () async {
       const String contents = '''
-StringBuffer bar = new StringBuffer('baz');
+StringBuffer bar = StringBuffer('baz');
 ''';
 
       final Directory tempDir = fs.systemTempDirectory.createTempSync();
@@ -189,7 +189,7 @@ StringBuffer bar = new StringBuffer('baz');
 
     testUsingContext('no --preview-dart-2 shows errors', () async {
       const String contents = '''
-StringBuffer bar = new StringBuffer('baz');
+StringBuffer bar = StringBuffer('baz');
 ''';
 
       final Directory tempDir = fs.systemTempDirectory.createTempSync();
