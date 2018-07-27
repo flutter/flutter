@@ -299,6 +299,7 @@ class IOSDevice extends Device {
         bundlePath: bundle.path,
         launchArguments: launchArguments,
       );
+      installStatus.stop();
     } else {
       // Debugging is enabled, look for the observatory server port post launch.
       printTrace('Debugging is enabled, connecting to observatory');
