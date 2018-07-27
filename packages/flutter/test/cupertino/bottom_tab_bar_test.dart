@@ -6,6 +6,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../painting/mocks_for_image_cache.dart';
+import '../widgets/semantics_tester.dart';
 
 Future<Null> pumpWidgetWithBoilerplate(WidgetTester tester, Widget widget) async {
   await tester.pumpWidget(
@@ -168,5 +169,41 @@ void main() {
 
     await tester.tap(find.text('Tab 1'));
     expect(callbackTab, 0);
+  });
+
+  testWidgets('tabs announce semantics', (WidgetTester tester) async {
+    final SemanticsTester semantics = new SemanticsTester(tester);
+
+    await pumpWidgetWithBoilerplate(tester, new MediaQuery(
+      data: const MediaQueryData(),
+      child: new CupertinoTabBar(
+        items: const <BottomNavigationBarItem>[
+          const BottomNavigationBarItem(
+            icon: const ImageIcon(const TestImageProvider(24, 24)),
+            title: const Text('Tab 1'),
+          ),
+          const BottomNavigationBarItem(
+            icon: const ImageIcon(const TestImageProvider(24, 24)),
+            title: const Text('Tab 2'),
+          ),
+        ],
+      ),
+    ));
+
+    expect(semantics, includesNodeWith(
+      label: 'Tab 1',
+      hint: 'tab, 1 of 2',
+      flags: <SemanticsFlag>[SemanticsFlag.isSelected, SemanticsFlag.isImage],
+      textDirection: TextDirection.ltr,
+    ));
+
+    expect(semantics, includesNodeWith(
+      label: 'Tab 2',
+      hint: 'tab, 2 of 2',
+      flags: <SemanticsFlag>[SemanticsFlag.isImage],
+      textDirection: TextDirection.ltr,
+    ));
+
+    semantics.dispose();
   });
 }
