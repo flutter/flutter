@@ -62,7 +62,7 @@ class ProtocolDiscovery {
     Uri uri;
     RegExp regExp = new RegExp(r"[a-z]+:\/\/[^ \n]*");
     Match match = regExp.firstMatch(line);
-    if (match.length > 0) {
+    if (match != null) {
       try {
         uri = Uri.parse(match[0]);
       } catch (error) {
