@@ -78,6 +78,21 @@ class PlatformViewsService {
 ///
 /// A Dart version of Android's [MotionEvent.PointerProperties](https://developer.android.com/reference/android/view/MotionEvent.PointerProperties).
 class AndroidPointerProperties {
+  /// Value for `toolType` when the tool type is unknown.
+  static const int kToolTypeUnknown = 0;
+
+  /// Value for `toolType` when the tool type is a finger.
+  static const int kToolTypeFinger = 1;
+
+  /// Value for `toolType` when the tool type is a stylus.
+  static const int kToolTypeStylus = 2;
+
+  /// Value for `toolType` when the tool type is a mouse.
+  static const int kToolTypeMouse = 3;
+
+  /// Value for `toolType` when the tool type is an eraser.
+  static const int kToolTypeEraser = 4;
+
   /// Creates an AndroidPointerProperties.
   ///
   /// All parameters must not be null.
