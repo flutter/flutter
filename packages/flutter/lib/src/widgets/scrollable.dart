@@ -77,6 +77,7 @@ class Scrollable extends StatefulWidget {
     this.axisDirection = AxisDirection.down,
     this.controller,
     this.physics,
+    this.behavior: HitTestBehavior.opaque,
     @required this.viewportBuilder,
     this.excludeFromSemantics = false,
   }) : assert(axisDirection != null),
@@ -160,6 +161,10 @@ class Scrollable extends StatefulWidget {
   ///  * [GestureDetector.excludeFromSemantics], which is used to accomplish the
   ///    exclusion.
   final bool excludeFromSemantics;
+
+  /// The hit test behavior that should be used by the gesture recognizers
+  /// handling the scrolling.  Defaults to HitTestBehavior.opaque.
+  final HitTestBehavior behavior;
 
   /// The axis along which the scroll view scrolls.
   ///
@@ -486,7 +491,7 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin
     Widget result = new RawGestureDetector(
       key: _gestureDetectorKey,
       gestures: _gestureRecognizers,
-      behavior: HitTestBehavior.opaque,
+      behavior: widget.behavior,
       excludeFromSemantics: widget.excludeFromSemantics,
       child: new Semantics(
         explicitChildNodes: !widget.excludeFromSemantics,

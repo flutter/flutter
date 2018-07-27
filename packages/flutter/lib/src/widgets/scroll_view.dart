@@ -57,6 +57,7 @@ abstract class ScrollView extends StatelessWidget {
     this.controller,
     bool primary,
     ScrollPhysics physics,
+    this.behavior: HitTestBehavior.opaque,
     this.shrinkWrap = false,
     this.cacheExtent,
   }) : assert(reverse != null),
@@ -168,6 +169,10 @@ abstract class ScrollView extends StatelessWidget {
   /// Defaults to false.
   final bool shrinkWrap;
 
+  /// The hit test behavior that should be used by the gesture recognizers
+  /// handling the scrolling.  Defaults to HitTestBehavior.opaque.
+  final HitTestBehavior behavior;
+
   /// {@macro flutter.rendering.viewport.cacheExtent}
   final double cacheExtent;
 
@@ -233,6 +238,7 @@ abstract class ScrollView extends StatelessWidget {
       axisDirection: axisDirection,
       controller: scrollController,
       physics: physics,
+      behavior: behavior,
       viewportBuilder: (BuildContext context, ViewportOffset offset) {
         return buildViewport(context, offset, axisDirection, slivers);
       },
@@ -341,6 +347,7 @@ class CustomScrollView extends ScrollView {
     ScrollPhysics physics,
     bool shrinkWrap = false,
     double cacheExtent,
+    HitTestBehavior behavior: HitTestBehavior.opaque,
     this.slivers = const <Widget>[],
   }) : super(
     key: key,
@@ -351,6 +358,7 @@ class CustomScrollView extends ScrollView {
     physics: physics,
     shrinkWrap: shrinkWrap,
     cacheExtent: cacheExtent,
+    behavior: behavior,
   );
 
   /// The slivers to place inside the viewport.
