@@ -165,11 +165,11 @@ class _ReorderableListContentState extends State<_ReorderableListContent> with T
   static const double _dropAreaMargin = 8.0;
 
   // How long an animation to reorder an element in the list takes.
-  static const Duration _reorderAnimationDuration = Duration(milliseconds: 200);
+  static const Duration _reorderAnimationDuration = const Duration(milliseconds: 200);
 
   // How long an animation to scroll to an off-screen element in the
   // list takes.
-  static const Duration _scrollAnimationDuration = Duration(milliseconds: 200);
+  static const Duration _scrollAnimationDuration = const Duration(milliseconds: 200);
 
   // Controls scrolls and measures scroll progress.
   final ScrollController _scrollController = new ScrollController();
@@ -455,7 +455,7 @@ class _ReorderableListContentState extends State<_ReorderableListContent> with T
         for (int i = 0; i < widget.children.length; i += 1) {
           wrappedChildren.add(_wrap(widget.children[i], i, constraints));
         }
-        const Key endWidgetKey = Key('DraggableList - End Widget');
+        const Key endWidgetKey = const Key('DraggableList - End Widget');
         Widget finalDropArea;
         switch (widget.scrollDirection) {
           case Axis.horizontal:
