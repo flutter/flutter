@@ -92,11 +92,14 @@ class TextField extends StatefulWidget {
   /// The [keyboardType], [textAlign], [autofocus], [obscureText], and
   /// [autocorrect] arguments must not be null.
   ///
+  /// [autocorrect] defaults to true, unless the [keyboardType] is
+  /// [TextInputType.emailAddress].
+  ///
   /// See also:
   ///
   ///  * [maxLength], which discusses the precise meaning of "number of
   ///    characters" and how it may differ from the intuitive meaning.
-  const TextField({
+  TextField({
     Key key,
     this.controller,
     this.focusNode,
@@ -108,7 +111,7 @@ class TextField extends StatefulWidget {
     this.textAlign = TextAlign.start,
     this.autofocus = false,
     this.obscureText = false,
-    this.autocorrect = true,
+    bool autocorrect,
     this.maxLines = 1,
     this.maxLength,
     this.maxLengthEnforced = true,
@@ -127,12 +130,12 @@ class TextField extends StatefulWidget {
        assert(textAlign != null),
        assert(autofocus != null),
        assert(obscureText != null),
-       assert(autocorrect != null),
        assert(maxLengthEnforced != null),
        assert(scrollPadding != null),
        assert(maxLines == null || maxLines > 0),
        assert(maxLength == null || maxLength > 0),
        keyboardType = maxLines == 1 ? keyboardType : TextInputType.multiline,
+       autocorrect = autocorrect ?? (keyboardType == TextInputType.emailAddress ? false : true),
        super(key: key);
 
   /// Controls the text being edited.

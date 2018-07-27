@@ -151,13 +151,13 @@ void main() {
           child: new Material(
             child: new ListView(
               children: <Widget>[
-                const TextField(
-                  decoration: InputDecoration(
+                new TextField(
+                  decoration: const InputDecoration(
                     labelText: 'label1',
                   ),
                 ),
-                const TextField(
-                  decoration: InputDecoration(
+                new TextField(
+                  decoration: const InputDecoration(
                     labelText: 'label2',
                   ),
                 ),

@@ -38,9 +38,9 @@ void main() {
 
     await tester.pumpWidget(
       new MaterialApp(
-        home: const Material(
-          child: Center(
-            child: TextField(
+        home: new Material(
+          child: new Center(
+            child: new TextField(
               autofocus: true,
             ),
           ),
@@ -60,9 +60,9 @@ void main() {
 
     await tester.pumpWidget(
       new MaterialApp(
-        home: const Material(
-          child: Center(
-            child: TextField(),
+        home: new Material(
+          child: new Center(
+            child: new TextField(),
           ),
         ),
       ),
@@ -94,9 +94,9 @@ void main() {
 
     await tester.pumpWidget(
       new MaterialApp(
-        home: const Material(
-          child: Center(
-            child: TextField(
+        home: new Material(
+          child: new Center(
+            child: new TextField(
               autofocus: true,
             ),
           ),
@@ -212,9 +212,9 @@ void main() {
 
     await tester.pumpWidget(
       new MaterialApp(
-        home: const Material(
-          child: Center(
-            child: TextField(
+        home: new Material(
+          child: new Center(
+            child: new TextField(
               decoration: null
             ),
           ),
