@@ -194,20 +194,21 @@ void main() {
   testWidgets('entering text does not scroll a sourrounding PageView', (WidgetTester tester) async {
     // regression test for https://github.com/flutter/flutter/issues/19523
 
-    final TextEditingController controller = new TextEditingController();
+    final TextEditingController textController = new TextEditingController();
+    final PageController pageController = new PageController(initialPage: 1);
 
     await tester.pumpWidget(new Directionality(
       textDirection: TextDirection.ltr,
       child: new Material(
         child: new PageView(
-          controller: new PageController(initialPage: 1),
+          controller: pageController,
           children: <Widget>[
             new Container(
               color: Colors.red,
             ),
             new Container(
               child: new TextField(
-                controller: controller,
+                controller: textController,
               ),
               color: Colors.green,
             ),
@@ -221,7 +222,7 @@ void main() {
 
     await tester.showKeyboard(find.byType(EditableText));
     await tester.pumpAndSettle();
-    expect(controller.text, '');
+    expect(textController.text, '');
     tester.testTextInput.enterText('H');
     final int frames = await tester.pumpAndSettle();
 
@@ -229,7 +230,7 @@ void main() {
     // that the surrounding PageView is incorrectly scrolling back-and-forth.
     expect(frames, 1);
 
-    expect(controller.text, 'H');
+    expect(textController.text, 'H');
   });
 
   testWidgets('focused multi-line editable scrolls caret back into view when typing', (WidgetTester tester) async {
