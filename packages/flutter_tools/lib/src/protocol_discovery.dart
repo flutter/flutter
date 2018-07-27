@@ -63,7 +63,9 @@ class ProtocolDiscovery {
     Uri uri;
     final RegExp regExp = new RegExp(r'[a-z]+:\/\/[^ \n]*');
     final Match match = regExp.firstMatch(line);
-    if (match != null) {
+    final int index = line.indexOf(_prefix + 'http://');
+
+    if (index >= 0 && match != null) {
       try {
         uri = Uri.parse(match[0]);
       } catch (error) {
