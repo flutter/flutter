@@ -730,22 +730,28 @@ class _CupertinoPersistentNavigationBar extends StatelessWidget implements Prefe
               break;
           }
 
-          backOrCloseButtonContent = ConstrainedBox(
-            constraints: const BoxConstraints(minWidth: _kNavBarBackButtonTapWidth),
-            child: new Row(
-              mainAxisSize: MainAxisSize.min,
-              mainAxisAlignment: MainAxisAlignment.start,
-              children: <Widget>[
-                const Padding(padding: EdgeInsetsDirectional.only(start: 8.0)),
-                iconWidget,
-                const Padding(padding: EdgeInsetsDirectional.only(start: 6.0)),
-                new Flexible(
-                  child: new _BackLabel(
-                    specifiedPreviousTitle: previousPageTitle,
-                    route: currentRoute,
+          backOrCloseButtonContent = new Semantics(
+            container: true,
+            excludeSemantics: true,
+            label: 'Back',
+            button: true,
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(minWidth: _kNavBarBackButtonTapWidth),
+              child: new Row(
+                mainAxisSize: MainAxisSize.min,
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: <Widget>[
+                  const Padding(padding: EdgeInsetsDirectional.only(start: 8.0)),
+                  iconWidget,
+                  const Padding(padding: EdgeInsetsDirectional.only(start: 6.0)),
+                  new Flexible(
+                    child: new _BackLabel(
+                      specifiedPreviousTitle: previousPageTitle,
+                      route: currentRoute,
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           );
         }
