@@ -187,6 +187,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 LIBRARY: engine
 ORIGIN: ../../../LICENSE
 TYPE: LicenseType.bsd
+FILE: ../../../flutter/.cirrus.yml
 FILE: ../../../flutter/DEPS
 FILE: ../../../flutter/lib/io/dart_io.cc
 FILE: ../../../flutter/lib/io/dart_io.h

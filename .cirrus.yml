@@ -1,0 +1,27 @@
+gcp_credentials: ENCRYPTED[987a78af29b91ce8489594c9ab3fec21845bbe5ba68294b8f6def3cf0d380830f06687a89ea69c87344c5ade369700fe]
+
+gce_instance:
+  image_project: flutter-cirrus
+  image_name: flutter-engine-ubuntu1604
+  zone: us-central1-a
+  cpu: 24
+  memory: 32Gb
+  disk: 60
+
+build_android_task:
+  env:
+    CIRRUS_WORKING_DIR: "/tmp/github_repo"
+    ENGINE_PATH: "/var/tmp/flutter/engine"
+    PATH: $PATH:/var/tmp/depot_tools
+
+  replace_engine_script: |
+    cd $ENGINE_PATH/src
+    rm -r flutter
+    cp $CIRRUS_WORKING_DIR -r ./flutter
+    gclient sync
+
+  compile_android_script: |
+    cd $ENGINE_PATH/src
+    ./flutter/tools/gn --android --unoptimized
+    ninja -C out/android_debug_unopt
+
