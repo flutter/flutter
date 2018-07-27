@@ -43,8 +43,15 @@ if (Test-Path $dartSdkPath) {
 }
 New-Item $dartSdkPath -force -type directory | Out-Null
 $dartSdkZip = "$cachePath\$dartZipName"
-Import-Module BitsTransfer
-Start-BitsTransfer -Source $dartSdkUrl -Destination $dartSdkZip
+
+Try {
+    Import-Module BitsTransfer
+    Start-BitsTransfer -Source $dartSdkUrl -Destination $dartSdkZip
+}
+Catch {
+    Write-Host "Downloading the Dart SDK using the BITS service failed, retrying with WebRequest..."
+    Invoke-WebRequest -Uri $dartSdkUrl -OutFile $dartSdkZip
+}
 
 Write-Host "Unzipping Dart SDK..."
 If (Get-Command 7z -errorAction SilentlyContinue) {
