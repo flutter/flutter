@@ -34,7 +34,7 @@ import 'goldens.dart';
 ///  * [findsWidgets], when you want the finder to find one or more widgets.
 ///  * [findsOneWidget], when you want the finder to find exactly one widget.
 ///  * [findsNWidgets], when you want the finder to find a specific number of widgets.
-const Matcher findsNothing = _FindsWidgetMatcher(null, 0);
+const Matcher findsNothing = const _FindsWidgetMatcher(null, 0);
 
 /// Asserts that the [Finder] locates at least one widget in the widget tree.
 ///
@@ -49,7 +49,7 @@ const Matcher findsNothing = _FindsWidgetMatcher(null, 0);
 ///  * [findsNothing], when you want the finder to not find anything.
 ///  * [findsOneWidget], when you want the finder to find exactly one widget.
 ///  * [findsNWidgets], when you want the finder to find a specific number of widgets.
-const Matcher findsWidgets = _FindsWidgetMatcher(1, null);
+const Matcher findsWidgets = const _FindsWidgetMatcher(1, null);
 
 /// Asserts that the [Finder] locates at exactly one widget in the widget tree.
 ///
@@ -64,7 +64,7 @@ const Matcher findsWidgets = _FindsWidgetMatcher(1, null);
 ///  * [findsNothing], when you want the finder to not find anything.
 ///  * [findsWidgets], when you want the finder to find one or more widgets.
 ///  * [findsNWidgets], when you want the finder to find a specific number of widgets.
-const Matcher findsOneWidget = _FindsWidgetMatcher(1, 1);
+const Matcher findsOneWidget = const _FindsWidgetMatcher(1, 1);
 
 /// Asserts that the [Finder] locates the specified number of widgets in the widget tree.
 ///
@@ -96,7 +96,7 @@ Matcher findsNWidgets(int n) => new _FindsWidgetMatcher(n, n);
 /// See also:
 ///
 ///  * [isOnstage], the opposite.
-const Matcher isOffstage = _IsOffstage();
+const Matcher isOffstage = const _IsOffstage();
 
 /// Asserts that the [Finder] locates the a single widget that has no
 /// [Offstage] widget ancestors.
@@ -104,7 +104,7 @@ const Matcher isOffstage = _IsOffstage();
 /// See also:
 ///
 ///  * [isOffstage], the opposite.
-const Matcher isOnstage = _IsOnstage();
+const Matcher isOnstage = const _IsOnstage();
 
 /// Asserts that the [Finder] locates the a single widget that has at
 /// least one [Card] widget ancestor.
@@ -112,7 +112,7 @@ const Matcher isOnstage = _IsOnstage();
 /// See also:
 ///
 ///  * [isNotInCard], the opposite.
-const Matcher isInCard = _IsInCard();
+const Matcher isInCard = const _IsInCard();
 
 /// Asserts that the [Finder] locates the a single widget that has no
 /// [Card] widget ancestors.
@@ -122,14 +122,14 @@ const Matcher isInCard = _IsInCard();
 /// See also:
 ///
 ///  * [isInCard], the opposite.
-const Matcher isNotInCard = _IsNotInCard();
+const Matcher isNotInCard = const _IsNotInCard();
 
 /// Asserts that an object's toString() is a plausible one-line description.
 ///
 /// Specifically, this matcher checks that the string does not contains newline
 /// characters, and does not have leading or trailing whitespace, is not
 /// empty, and does not contain the default `Instance of ...` string.
-const Matcher hasOneLineDescription = _HasOneLineDescription();
+const Matcher hasOneLineDescription = const _HasOneLineDescription();
 
 /// Asserts that an object's toStringDeep() is a plausible multi-line
 /// description.
@@ -146,7 +146,7 @@ const Matcher hasOneLineDescription = _HasOneLineDescription();
 ///  * Has multiple lines.
 ///  * The first line starts with `prefixLineOne`
 ///  * All subsequent lines start with `prefixOtherLines`.
-const Matcher hasAGoodToStringDeep = _HasGoodToStringDeep();
+const Matcher hasAGoodToStringDeep = const _HasGoodToStringDeep();
 
 /// A matcher for functions that throw [FlutterError].
 ///
@@ -815,7 +815,7 @@ typedef num DistanceFunction<T>(T a, T b);
 /// first casting it to a [DistanceFunction<T>] for some concrete T.
 typedef num AnyDistanceFunction(Null a, Null b);
 
-const Map<Type, AnyDistanceFunction> _kStandardDistanceFunctions = <Type, AnyDistanceFunction>{
+const Map<Type, AnyDistanceFunction> _kStandardDistanceFunctions = const <Type, AnyDistanceFunction>{
   Color: _maxComponentColorDistance,
   HSVColor: _maxComponentHSVColorDistance,
   HSLColor: _maxComponentHSLColorDistance,
@@ -1022,7 +1022,7 @@ class _IsMethodCall extends Matcher {
 /// Asserts that a [Finder] locates a single object whose root RenderObject
 /// is a [RenderClipRect] with no clipper set, or an equivalent
 /// [RenderClipPath].
-const Matcher clipsWithBoundingRect = _ClipsWithBoundingRect();
+const Matcher clipsWithBoundingRect = const _ClipsWithBoundingRect();
 
 /// Asserts that a [Finder] locates a single object whose root RenderObject
 /// is a [RenderClipRRect] with no clipper set, and border radius equals to

@@ -18,9 +18,9 @@ import '../src/common.dart';
 
 // Set this to true for debugging to get JSON written to stdout.
 const bool _printJsonAndStderr = false;
-const Duration defaultTimeout = Duration(seconds: 20);
-const Duration appStartTimeout = Duration(seconds: 60);
-const Duration quitTimeout = Duration(seconds: 5);
+const Duration defaultTimeout = const Duration(seconds: 20);
+const Duration appStartTimeout = const Duration(seconds: 60);
+const Duration quitTimeout = const Duration(seconds: 5);
 
 class FlutterTestDriver {
   final Directory _projectFolder;
@@ -78,7 +78,7 @@ class FlutterTestDriver {
     final String flutterBin = fs.path.join(getFlutterRoot(), 'bin', 'flutter');
     _debugPrint('Spawning flutter $args in ${_projectFolder.path}');
 
-    const ProcessManager _processManager = LocalProcessManager();
+    const ProcessManager _processManager = const LocalProcessManager();
     _proc = await _processManager.start(
         <String>[flutterBin]
             .followedBy(args)

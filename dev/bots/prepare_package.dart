@@ -520,7 +520,7 @@ class ArchivePublisher {
 
     jsonData = _addRelease(jsonData);
 
-    const JsonEncoder encoder = JsonEncoder.withIndent('  ');
+    const JsonEncoder encoder = const JsonEncoder.withIndent('  ');
     metadataFile.writeAsStringSync(encoder.convert(jsonData));
     await _cloudCopy(metadataFile.absolute.path, metadataGsPath);
   }

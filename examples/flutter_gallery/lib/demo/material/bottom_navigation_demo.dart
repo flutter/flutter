@@ -217,11 +217,11 @@ class _BottomNavigationDemoState extends State<BottomNavigationDemo>
             itemBuilder: (BuildContext context) => <PopupMenuItem<BottomNavigationBarType>>[
               const PopupMenuItem<BottomNavigationBarType>(
                 value: BottomNavigationBarType.fixed,
-                child: Text('Fixed'),
+                child: const Text('Fixed'),
               ),
               const PopupMenuItem<BottomNavigationBarType>(
                 value: BottomNavigationBarType.shifting,
-                child: Text('Shifting'),
+                child: const Text('Shifting'),
               )
             ],
           )

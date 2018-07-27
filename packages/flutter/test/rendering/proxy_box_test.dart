@@ -105,24 +105,24 @@ void main() {
     test('shape change triggers repaint', () {
       final RenderPhysicalShape root = new RenderPhysicalShape(
         color: const Color(0xffff00ff),
-        clipper: const ShapeBorderClipper(shape: CircleBorder()),
+        clipper: const ShapeBorderClipper(shape: const CircleBorder()),
       );
       layout(root, phase: EnginePhase.composite);
       expect(root.debugNeedsPaint, isFalse);
 
       // Same shape, no repaint.
-      root.clipper = const ShapeBorderClipper(shape: CircleBorder());
+      root.clipper = const ShapeBorderClipper(shape: const CircleBorder());
       expect(root.debugNeedsPaint, isFalse);
 
       // Different shape triggers repaint.
-      root.clipper = const ShapeBorderClipper(shape: StadiumBorder());
+      root.clipper = const ShapeBorderClipper(shape: const StadiumBorder());
       expect(root.debugNeedsPaint, isTrue);
     });
 
     test('compositing on non-Fuchsia', () {
       final RenderPhysicalShape root = new RenderPhysicalShape(
         color: const Color(0xffff00ff),
-        clipper: const ShapeBorderClipper(shape: CircleBorder()),
+        clipper: const ShapeBorderClipper(shape: const CircleBorder()),
       );
       layout(root, phase: EnginePhase.composite);
       expect(root.needsCompositing, isFalse);
@@ -160,7 +160,7 @@ void main() {
     boundary = new RenderRepaintBoundary();
     final RenderStack stack = new RenderStack()..alignment = Alignment.topLeft;
     final RenderDecoratedBox blackBox = new RenderDecoratedBox(
-        decoration: const BoxDecoration(color: Color(0xff000000)),
+        decoration: const BoxDecoration(color: const Color(0xff000000)),
         child: new RenderConstrainedBox(
           additionalConstraints: new BoxConstraints.tight(const Size.square(20.0)),
         ));
@@ -168,7 +168,7 @@ void main() {
       ..opacity = 0.5
       ..child = blackBox);
     final RenderDecoratedBox whiteBox = new RenderDecoratedBox(
-        decoration: const BoxDecoration(color: Color(0xffffffff)),
+        decoration: const BoxDecoration(color: const Color(0xffffffff)),
         child: new RenderConstrainedBox(
           additionalConstraints: new BoxConstraints.tight(const Size.square(10.0)),
         ));

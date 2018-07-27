@@ -193,7 +193,7 @@ class MockProcessManager extends Mock implements ProcessManager {
       'system-images;android-27;google_apis_playstore;x86\n'
       'null\n'; // Yep, these really end with null (on dantup's machine at least)
 
-  static const ListEquality<String> _equality = ListEquality<String>();
+  static const ListEquality<String> _equality = const ListEquality<String>();
   final List<String> _existingAvds = <String>['existing-avd-1'];
 
   @override

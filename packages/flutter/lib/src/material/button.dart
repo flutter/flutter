@@ -444,9 +444,9 @@ class MaterialButton extends StatelessWidget {
 }
 
 /// A widget to pad the area around a [MaterialButton]'s inner [Material].
-///
-/// Redirect taps that occur in the padded area around the child to the center
-/// of the child. This increases the size of the button and the button's
+/// 
+/// Redirect taps that occur in the padded area around the child to the center 
+/// of the child. This increases the size of the button and the button's 
 /// "tap target", but not its material or its ink splashes.
 class _InputPadding extends SingleChildRenderObjectWidget {
   const _InputPadding({
@@ -524,7 +524,7 @@ class _RenderInputPadding extends RenderShiftedBox {
 
   @override
   bool hitTest(HitTestResult result, {Offset position}) {
-    return super.hitTest(result, position: position) ||
+    return super.hitTest(result, position: position) || 
       child.hitTest(result, position: child.size.center(Offset.zero));
   }
 }

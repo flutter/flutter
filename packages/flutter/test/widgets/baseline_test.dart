@@ -9,12 +9,12 @@ void main() {
   testWidgets('Baseline - control test', (WidgetTester tester) async {
     await tester.pumpWidget(
       const Center(
-        child: DefaultTextStyle(
-          style: TextStyle(
+        child: const DefaultTextStyle(
+          style: const TextStyle(
             fontFamily: 'Ahem',
             fontSize: 100.0,
           ),
-          child: Text('X', textDirection: TextDirection.ltr),
+          child: const Text('X', textDirection: TextDirection.ltr),
         ),
       ),
     );
@@ -24,15 +24,15 @@ void main() {
   testWidgets('Baseline - position test', (WidgetTester tester) async {
     await tester.pumpWidget(
       const Center(
-        child: Baseline(
+        child: const Baseline(
           baseline: 180.0,
           baselineType: TextBaseline.alphabetic,
-          child: DefaultTextStyle(
-            style: TextStyle(
+          child: const DefaultTextStyle(
+            style: const TextStyle(
               fontFamily: 'Ahem',
               fontSize: 100.0,
             ),
-            child: Text('X', textDirection: TextDirection.ltr),
+            child: const Text('X', textDirection: TextDirection.ltr),
           ),
         ),
       ),

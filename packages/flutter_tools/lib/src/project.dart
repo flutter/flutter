@@ -219,7 +219,7 @@ class AndroidProject {
   bool isUsingGradle() {
     return directory.childFile('build.gradle').existsSync();
   }
-
+  
   final Directory directory;
 
   Future<String> applicationId() {

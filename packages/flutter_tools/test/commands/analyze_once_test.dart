@@ -17,7 +17,7 @@ import '../src/common.dart';
 import '../src/context.dart';
 
 /// Test case timeout for tests involving project analysis.
-const Timeout allowForSlowAnalyzeTests = Timeout.factor(5.0);
+const Timeout allowForSlowAnalyzeTests = const Timeout.factor(5.0);
 
 void main() {
   final String analyzerSeparator = platform.isWindows ? '-' : '•';
@@ -170,7 +170,7 @@ void bar() {
 
     testUsingContext('--preview-dart-2', () async {
       const String contents = '''
-StringBuffer bar = StringBuffer('baz');
+StringBuffer bar = new StringBuffer('baz');
 ''';
 
       final Directory tempDir = fs.systemTempDirectory.createTempSync();
@@ -189,7 +189,7 @@ StringBuffer bar = StringBuffer('baz');
 
     testUsingContext('no --preview-dart-2 shows errors', () async {
       const String contents = '''
-StringBuffer bar = StringBuffer('baz');
+StringBuffer bar = new StringBuffer('baz');
 ''';
 
       final Directory tempDir = fs.systemTempDirectory.createTempSync();

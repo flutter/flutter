@@ -27,63 +27,63 @@ void main() {
   setUp(ensureGestureBinding);
 
   // Down/up pair 1: normal tap sequence
-  const PointerDownEvent down1 = PointerDownEvent(
+  const PointerDownEvent down1 = const PointerDownEvent(
     pointer: 1,
-    position: Offset(10.0, 10.0)
+    position: const Offset(10.0, 10.0)
   );
 
-  const PointerUpEvent up1 = PointerUpEvent(
+  const PointerUpEvent up1 = const PointerUpEvent(
     pointer: 1,
-    position: Offset(11.0, 9.0)
+    position: const Offset(11.0, 9.0)
   );
 
   // Down/up pair 2: normal tap sequence close to pair 1
-  const PointerDownEvent down2 = PointerDownEvent(
+  const PointerDownEvent down2 = const PointerDownEvent(
     pointer: 2,
-    position: Offset(12.0, 12.0)
+    position: const Offset(12.0, 12.0)
   );
 
-  const PointerUpEvent up2 = PointerUpEvent(
+  const PointerUpEvent up2 = const PointerUpEvent(
     pointer: 2,
-    position: Offset(13.0, 11.0)
+    position: const Offset(13.0, 11.0)
   );
 
   // Down/up pair 3: normal tap sequence far away from pair 1
-  const PointerDownEvent down3 = PointerDownEvent(
+  const PointerDownEvent down3 = const PointerDownEvent(
     pointer: 3,
-    position: Offset(130.0, 130.0)
+    position: const Offset(130.0, 130.0)
   );
 
-  const PointerUpEvent up3 = PointerUpEvent(
+  const PointerUpEvent up3 = const PointerUpEvent(
     pointer: 3,
-    position: Offset(131.0, 129.0)
+    position: const Offset(131.0, 129.0)
   );
 
   // Down/move/up sequence 4: intervening motion
-  const PointerDownEvent down4 = PointerDownEvent(
+  const PointerDownEvent down4 = const PointerDownEvent(
     pointer: 4,
-    position: Offset(10.0, 10.0)
+    position: const Offset(10.0, 10.0)
   );
 
-  const PointerMoveEvent move4 = PointerMoveEvent(
+  const PointerMoveEvent move4 = const PointerMoveEvent(
     pointer: 4,
-    position: Offset(25.0, 25.0)
+    position: const Offset(25.0, 25.0)
   );
 
-  const PointerUpEvent up4 = PointerUpEvent(
+  const PointerUpEvent up4 = const PointerUpEvent(
     pointer: 4,
-    position: Offset(25.0, 25.0)
+    position: const Offset(25.0, 25.0)
   );
 
   // Down/up pair 5: normal tap sequence identical to pair 1 with different pointer
-  const PointerDownEvent down5 = PointerDownEvent(
+  const PointerDownEvent down5 = const PointerDownEvent(
     pointer: 5,
-    position: Offset(10.0, 10.0)
+    position: const Offset(10.0, 10.0)
   );
 
-  const PointerUpEvent up5 = PointerUpEvent(
+  const PointerUpEvent up5 = const PointerUpEvent(
     pointer: 5,
-    position: Offset(11.0, 9.0)
+    position: const Offset(11.0, 9.0)
   );
 
   testGesture('Should recognize double tap', (GestureTester tester) {

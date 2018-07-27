@@ -16,7 +16,7 @@ import 'overlay.dart';
 import 'page_storage.dart';
 import 'transitions.dart';
 
-const Color _kTransparent = Color(0x00000000);
+const Color _kTransparent = const Color(0x00000000);
 
 /// A route that displays widgets in the [Navigator]'s [Overlay].
 abstract class OverlayRoute<T> extends Route<T> {

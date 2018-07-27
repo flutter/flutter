@@ -10,8 +10,8 @@ import 'package:flutter/services.dart';
 
 
 void main() {
-  const TextStyle textStyle = TextStyle();
-  const Color cursorColor = Color.fromARGB(0xFF, 0xFF, 0x00, 0x00);
+  const TextStyle textStyle = const TextStyle();
+  const Color cursorColor = const Color.fromARGB(0xFF, 0xFF, 0x00, 0x00);
 
   testWidgets('tapping on a partly visible editable brings it fully on screen', (WidgetTester tester) async {
     final ScrollController scrollController = new ScrollController();
@@ -196,7 +196,7 @@ void main() {
     final TextEditingController controller = new TextEditingController();
     final FocusNode focusNode = new FocusNode();
 
-    const Key container = Key('container');
+    const Key container = const Key('container');
 
     await tester.pumpWidget(new MaterialApp(
       home: new Align(
