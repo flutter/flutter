@@ -18,6 +18,8 @@ const Duration _kPressDuration = const Duration(milliseconds: 150);
 // elevation.
 const Duration _kElevationDuration = const Duration(milliseconds: 75);
 
+const double _kOutlineOpacity = 0.12;
+
 /// A cross between [RaisedButton] and [FlatButton]: a bordered button whose
 /// elevation increases and whose background becomes opaque when the button
 /// is pressed.
@@ -349,27 +351,49 @@ class _OutlineButtonState extends State<OutlineButton> with SingleTickerProvider
       case ButtonTextTheme.primary:
         return theme.brightness == Brightness.dark
           ? Colors.white12
-          : theme.primaryColor.withOpacity(0.12);
+          : theme.primaryColor.withOpacity(_kOutlineOpacity);
     }
     return Colors.transparent;
   }
 
+
+  // TODO(clocksmith): Logic like this may be common accross components once
+  // the theming architecture is formalized.
+  Color _getOutlineColor(ThemeData theme) {
+    if (_pressed && widget.highlightedBorderColor != null) {
+      return widget.highlightedBorderColor;
+    } else if (!widget.enabled && widget.disabledBorderColor != null) {
+      return widget.disabledBorderColor;
+    } else if (widget.borderSide != null) {
+      return widget.borderSide.color;
+    } else {
+      // TODO(clocksmith): Check theme.surfaceColor once its available.
+      // TODO(clocksmith): Check buttonThemeData once its passed.
+      final Color themeColor = theme.primaryColor ??
+                               _getOutlineColorForBrightness(theme.brightness);
+      return themeColor.withOpacity(_kOutlineOpacity);
+    }
+  }
+
+  Color _getOutlineColorForBrightness(Brightness brightness) {
+    switch (brightness) {
+      case Brightness.light:
+        return Colors.black;
+      case Brightness.dark:
+        return Colors.white;
+      default:
+        return Colors.black;
+    }
+  }
+
+  // TODO(clocksmith): Use buttonTheme to determine color and width.
   BorderSide _getOutline(ThemeData theme, ButtonThemeData buttonTheme) {
-    final bool themeIsDark = theme.brightness == Brightness.dark;
     if (widget.borderSide?.style == BorderStyle.none)
       return widget.borderSide;
 
-    final Color color = widget.enabled
-      ? (_pressed
-         ? widget.highlightedBorderColor ?? theme.primaryColor
-         : (widget.borderSide?.color ??
-            (themeIsDark ? Colors.grey[600] : Colors.grey[200])))
-      : (widget.disabledBorderColor ??
-         (themeIsDark ? Colors.grey[800] : Colors.grey[100]));
-
     return new BorderSide(
-      color: color,
-      width: widget.borderSide?.width ?? 2.0,
+      color: _getOutlineColor(theme),
+      width: widget.borderSide?.width ?? 1.0,
     );
   }
 
