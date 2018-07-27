@@ -36,7 +36,7 @@ bool CheckException(JNIEnv* env) {
 
   jthrowable exception = env->ExceptionOccurred();
   env->ExceptionClear();
-  FML_LOG(INFO) << fml::jni::GetJavaExceptionInfo(env, exception);
+  FML_LOG(ERROR) << fml::jni::GetJavaExceptionInfo(env, exception);
   env->DeleteLocalRef(exception);
   return false;
 }
