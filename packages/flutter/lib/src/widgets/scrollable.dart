@@ -77,7 +77,7 @@ class Scrollable extends StatefulWidget {
     this.axisDirection = AxisDirection.down,
     this.controller,
     this.physics,
-    this.behavior: HitTestBehavior.opaque,
+    this.behavior = HitTestBehavior.opaque,
     @required this.viewportBuilder,
     this.excludeFromSemantics = false,
   }) : assert(axisDirection != null),

@@ -57,7 +57,7 @@ abstract class ScrollView extends StatelessWidget {
     this.controller,
     bool primary,
     ScrollPhysics physics,
-    this.behavior: HitTestBehavior.opaque,
+    this.behavior = HitTestBehavior.opaque,
     this.shrinkWrap = false,
     this.cacheExtent,
   }) : assert(reverse != null),
@@ -347,7 +347,7 @@ class CustomScrollView extends ScrollView {
     ScrollPhysics physics,
     bool shrinkWrap = false,
     double cacheExtent,
-    HitTestBehavior behavior: HitTestBehavior.opaque,
+    HitTestBehavior behavior = HitTestBehavior.opaque,
     this.slivers = const <Widget>[],
   }) : super(
     key: key,
