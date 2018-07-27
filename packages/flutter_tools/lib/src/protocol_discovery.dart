@@ -17,8 +17,8 @@ class ProtocolDiscovery {
     this.portForwarder,
     this.hostPort,
     this.ipv6,
-  }) : assert(logReader != null),
-       _prefix = '$serviceName listening on ' {
+  })  : assert(logReader != null),
+        _prefix = '$serviceName listening on ' {
     _deviceLogSubscription = logReader.logLines.listen(_handleLine);
   }
 
@@ -30,7 +30,8 @@ class ProtocolDiscovery {
   }) {
     const String kObservatoryService = 'Observatory';
     return new ProtocolDiscovery._(
-      logReader, kObservatoryService,
+      logReader,
+      kObservatoryService,
       portForwarder: portForwarder,
       hostPort: hostPort,
       ipv6: ipv6,
@@ -60,8 +61,8 @@ class ProtocolDiscovery {
 
   void _handleLine(String line) {
     Uri uri;
-    RegExp regExp = new RegExp(r"[a-z]+:\/\/[^ \n]*");
-    Match match = regExp.firstMatch(line);
+    final RegExp regExp = new RegExp(r'[a-z]+:\/\/[^ \n]*');
+    final Match match = regExp.firstMatch(line);
     if (match != null) {
       try {
         uri = Uri.parse(match[0]);
@@ -84,8 +85,10 @@ class ProtocolDiscovery {
 
     if (portForwarder != null) {
       final int actualDevicePort = deviceUri.port;
-      final int actualHostPort = await portForwarder.forward(actualDevicePort, hostPort: hostPort);
-      printTrace('Forwarded host port $actualHostPort to device port $actualDevicePort for $serviceName');
+      final int actualHostPort =
+          await portForwarder.forward(actualDevicePort, hostPort: hostPort);
+      printTrace(
+          'Forwarded host port $actualHostPort to device port $actualDevicePort for $serviceName');
       hostUri = deviceUri.replace(port: actualHostPort);
     }
 
