@@ -43,6 +43,7 @@ class ProtocolDiscovery {
   final DevicePortForwarder portForwarder;
   final int hostPort;
   final bool ipv6;
+  final String _prefix;
 
   final Completer<Uri> _completer = new Completer<Uri>();
 
