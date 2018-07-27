@@ -1,0 +1,22 @@
+name: android_views
+description: An integration test for embedded Android views
+version: 1.0.0+1
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_driver:
+    sdk: flutter
+  path_provider: ^0.4.1
+  collection: ^1.14.6
+  assets_for_android_views:
+    path: ../../../bin/cache/pkg/goldens/dev/integration_tests/assets_for_android_views
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_goldens:
+    sdk: flutter
+
+flutter:
+  uses-material-design: true
