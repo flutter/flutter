@@ -429,7 +429,7 @@ public class FlutterView
             return;
         }
 
-        int pointerKind = event.getToolType(pointerIndex);
+        int pointerKind = getPointerDeviceTypeForToolType(event.getToolType(pointerIndex));
         if (pointerKind == -1) {
             return;
         }
