@@ -433,7 +433,7 @@ void main() {
   });
 
   testWidgets('ListView should not paint hidden children', (WidgetTester tester) async {
-    const Text text = const Text('test');
+    const Text text = Text('test');
     await tester.pumpWidget(
         new Directionality(
             textDirection: TextDirection.ltr,

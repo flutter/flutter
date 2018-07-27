@@ -33,7 +33,7 @@ void main() {
 
     testUsingContext('getAvailableDeviceIDs throws ToolExit when libimobiledevice is not installed', () async {
       when(mockProcessManager.run(<String>['idevice_id', '-l']))
-          .thenThrow(const ProcessException('idevice_id', const <String>['-l']));
+          .thenThrow(const ProcessException('idevice_id', <String>['-l']));
       expect(() async => await iMobileDevice.getAvailableDeviceIDs(), throwsToolExit());
     }, overrides: <Type, Generator>{
       ProcessManager: () => mockProcessManager,
@@ -109,7 +109,7 @@ void main() {
 
     testUsingContext('xcodeSelectPath returns null when xcode-select is not installed', () {
       when(mockProcessManager.runSync(<String>['/usr/bin/xcode-select', '--print-path']))
-          .thenThrow(const ProcessException('/usr/bin/xcode-select', const <String>['--print-path']));
+          .thenThrow(const ProcessException('/usr/bin/xcode-select', <String>['--print-path']));
       expect(xcode.xcodeSelectPath, isNull);
     }, overrides: <Type, Generator>{
       ProcessManager: () => mockProcessManager,
@@ -169,7 +169,7 @@ void main() {
 
     testUsingContext('eulaSigned is false when clang is not installed', () {
       when(mockProcessManager.runSync(<String>['/usr/bin/xcrun', 'clang']))
-          .thenThrow(const ProcessException('/usr/bin/xcrun', const <String>['clang']));
+          .thenThrow(const ProcessException('/usr/bin/xcrun', <String>['clang']));
       expect(xcode.eulaSigned, isFalse);
     }, overrides: <Type, Generator>{
       ProcessManager: () => mockProcessManager,

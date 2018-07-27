@@ -403,7 +403,7 @@ void fakeData(
 
   final Answering<ProcessResult> syncAnswer = (Invocation invocation) {
     bool argsAre(String a1, [String a2, String a3, String a4, String a5, String a6, String a7, String a8]) {
-      const ListEquality<String> equality = const ListEquality<String>();
+      const ListEquality<String> equality = ListEquality<String>();
       final List<String> args = invocation.positionalArguments.single;
       final List<String> expectedArgs =
       <String>[a1, a2, a3, a4, a5, a6, a7, a8]

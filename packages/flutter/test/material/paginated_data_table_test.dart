@@ -62,9 +62,9 @@ void main() {
           log.add('page-changed: $rowIndex');
         },
         columns: const <DataColumn>[
-          const DataColumn(label: const Text('Name')),
-          const DataColumn(label: const Text('Calories'), numeric: true),
-          const DataColumn(label: const Text('Generation')),
+          DataColumn(label: Text('Name')),
+          DataColumn(label: Text('Calories'), numeric: true),
+          DataColumn(label: Text('Generation')),
         ],
       )
     ));
@@ -120,7 +120,7 @@ void main() {
         },
         columns: <DataColumn>[
           const DataColumn(
-            label: const Text('Name'),
+            label: Text('Name'),
             tooltip: 'Name',
           ),
           new DataColumn(
@@ -132,7 +132,7 @@ void main() {
             }
           ),
           const DataColumn(
-            label: const Text('Generation'),
+            label: Text('Generation'),
             tooltip: 'Generation',
           ),
         ],
@@ -204,9 +204,9 @@ void main() {
         ],
         onRowsPerPageChanged: (int rowsPerPage) { },
         columns: const <DataColumn>[
-          const DataColumn(label: const Text('COL1')),
-          const DataColumn(label: const Text('COL2')),
-          const DataColumn(label: const Text('COL3')),
+          DataColumn(label: Text('COL1')),
+          DataColumn(label: Text('COL2')),
+          DataColumn(label: Text('COL3')),
         ],
       ),
     ));
@@ -229,9 +229,9 @@ void main() {
           availableRowsPerPage: const <int>[ 501 ],
           onRowsPerPageChanged: (int rowsPerPage) { },
           columns: const <DataColumn>[
-            const DataColumn(label: const Text('COL1')),
-            const DataColumn(label: const Text('COL2')),
-            const DataColumn(label: const Text('COL3')),
+            DataColumn(label: Text('COL1')),
+            DataColumn(label: Text('COL2')),
+            DataColumn(label: Text('COL3')),
           ],
         ),
       ),
@@ -260,9 +260,9 @@ void main() {
             availableRowsPerPage: const <int>[ 5 ],
             onRowsPerPageChanged: (int rowsPerPage) { },
             columns: const <DataColumn>[
-              const DataColumn(label: const Text('COL1')),
-              const DataColumn(label: const Text('COL2')),
-              const DataColumn(label: const Text('COL3')),
+              DataColumn(label: Text('COL1')),
+              DataColumn(label: Text('COL2')),
+              DataColumn(label: Text('COL3')),
             ],
           ),
         ),

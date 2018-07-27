@@ -65,6 +65,6 @@ Future<T> debugInstrumentAction<T>(String description, Future<T> action()) {
 
 /// Arguments to whitelist [Timeline] events in order to be shown in the
 /// developer centric version of the Observatory Timeline.
-const Map<String, String> timelineWhitelistArguments = const <String, String>{
+const Map<String, String> timelineWhitelistArguments = <String, String>{
   'mode': 'basic'
 };

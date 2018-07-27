@@ -196,17 +196,17 @@ void main() {
     const double leftPadding = 10.0;
     const double rightPadding = 20.0;
     await tester.pumpWidget(const MediaQuery(
-      data: const MediaQueryData(
-        padding: const EdgeInsets.only(left: leftPadding, right: rightPadding),
+      data: MediaQueryData(
+        padding: EdgeInsets.only(left: leftPadding, right: rightPadding),
       ),
-      child: const Directionality(
+      child: Directionality(
         textDirection: TextDirection.rtl,
-        child: const Material(
-          child: const Center(
-            child: const ListTile(
-              leading: const Text('L'),
-              title: const Text('title'),
-              trailing: const Text('T'),
+        child: Material(
+          child: Center(
+            child: ListTile(
+              leading: Text('L'),
+              title: Text('title'),
+              trailing: Text('T'),
             ),
           ),
         ),
@@ -290,8 +290,8 @@ void main() {
       );
     }
 
-    const Color green = const Color(0xFF00FF00);
-    const Color red = const Color(0xFFFF0000);
+    const Color green = Color(0xFF00FF00);
+    const Color red = Color(0xFFFF0000);
 
     Color iconColor(Key key) => tester.state<TestIconState>(find.byKey(key)).iconTheme.color;
     Color textColor(Key key) => tester.state<TestTextState>(find.byKey(key)).textStyle.color;
@@ -350,15 +350,15 @@ void main() {
             data: const MediaQueryData(),
             child: new Column(
               children: const <Widget>[
-                const ListTile(
-                  title: const Text('one'),
+                ListTile(
+                  title: Text('one'),
                 ),
-                const ListTile(
-                  title: const Text('two'),
+                ListTile(
+                  title: Text('two'),
                   selected: true,
                 ),
-                const ListTile(
-                  title: const Text('three'),
+                ListTile(
+                  title: Text('three'),
                   enabled: false,
                 ),
               ],
@@ -413,15 +413,15 @@ void main() {
             child: new Container(
               alignment: Alignment.topLeft,
               child: const ListTile(
-                contentPadding: const EdgeInsetsDirectional.only(
+                contentPadding: EdgeInsetsDirectional.only(
                   start: 10.0,
                   end: 20.0,
                   top: 30.0,
                   bottom: 40.0,
                 ),
-                leading: const Text('L'),
-                title: const Text('title'),
-                trailing: const Text('T'),
+                leading: Text('L'),
+                title: Text('title'),
+                trailing: Text('T'),
               ),
             ),
           ),
@@ -458,15 +458,15 @@ void main() {
             child: new Container(
               alignment: Alignment.topLeft,
               child: const ListTile(
-                contentPadding: const EdgeInsetsDirectional.only(
+                contentPadding: EdgeInsetsDirectional.only(
                   start: 10.0,
                   end: 20.0,
                   top: 30.0,
                   bottom: 40.0,
                 ),
-                leading: const Text('L'),
-                title: const Text('title'),
-                trailing: const Text('T'),
+                leading: Text('L'),
+                title: Text('title'),
+                trailing: Text('T'),
               ),
             ),
           ),
@@ -491,7 +491,7 @@ void main() {
   });
 
   testWidgets('ListTileTheme wide leading Widget', (WidgetTester tester) async {
-    const Key leadingKey = const ValueKey<String>('L');
+    const Key leadingKey = ValueKey<String>('L');
 
     Widget buildFrame(double leadingWidth, TextDirection textDirection) {
       return new MediaQuery(

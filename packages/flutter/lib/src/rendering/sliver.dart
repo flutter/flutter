@@ -510,7 +510,7 @@ class SliverGeometry extends Diagnosticable {
        visible = visible ?? paintExtent > 0.0;
 
   /// A sliver that occupies no space at all.
-  static const SliverGeometry zero = const SliverGeometry();
+  static const SliverGeometry zero = SliverGeometry();
 
   /// The (estimated) total scrollable extent that this sliver has content for.
   ///

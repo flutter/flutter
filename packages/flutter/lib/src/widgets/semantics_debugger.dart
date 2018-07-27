@@ -259,8 +259,8 @@ String _getMessage(SemanticsNode node) {
   return message.trim();
 }
 
-const TextStyle _messageStyle = const TextStyle(
-  color: const Color(0xFF000000),
+const TextStyle _messageStyle = TextStyle(
+  color: Color(0xFF000000),
   fontSize: 10.0,
   height: 0.8
 );

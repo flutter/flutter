@@ -4,6 +4,7 @@
 
 import 'package:file/file.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
+import 'package:flutter_tools/src/base/platform.dart';
 import 'package:test/test.dart';
 
 import '../src/context.dart';
@@ -39,5 +40,6 @@ void main() {
 
       await _flutterAttach.hotReload();
     });
-  }, timeout: const Timeout.factor(3));
+    // Skip on Windows due to https://github.com/flutter/flutter/issues/17833
+  }, timeout: const Timeout.factor(3), skip: platform.isWindows);
 }

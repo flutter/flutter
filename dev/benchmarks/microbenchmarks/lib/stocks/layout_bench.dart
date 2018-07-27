@@ -13,7 +13,7 @@ import 'package:stocks/stock_data.dart' as stock_data;
 
 import '../common.dart';
 
-const Duration kBenchmarkTime = const Duration(seconds: 15);
+const Duration kBenchmarkTime = Duration(seconds: 15);
 
 Future<Null> main() async {
   stock_data.StockData.actuallyFetchData = false;

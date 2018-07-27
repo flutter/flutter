@@ -7,7 +7,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   testWidgets('Drawer control test', (WidgetTester tester) async {
-    const Key containerKey = const Key('container');
+    const Key containerKey = Key('container');
 
     await tester.pumpWidget(
       new MaterialApp(
@@ -22,8 +22,8 @@ void main() {
                   ),
                 ),
                 const ListTile(
-                  leading: const Icon(Icons.archive),
-                  title: const Text('Archive'),
+                  leading: Icon(Icons.archive),
+                  title: Text('Archive'),
                 ),
               ],
             ),

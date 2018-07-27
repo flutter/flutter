@@ -33,7 +33,7 @@ class AnsiTerminal {
 
   /// Setting the line mode can throw for some terminals (with "Operation not
   /// supported on socket"), but the error can be safely ignored.
-  static const List<int> _lineModeIgnorableErrors = const <int>[
+  static const List<int> _lineModeIgnorableErrors = <int>[
     _EBADF,
     _ENXIO,
     _ENOTTY,
