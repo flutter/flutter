@@ -596,10 +596,18 @@ class ListWheelElement extends RenderObjectElement {
   @override
   RenderListWheelViewport get renderObject => super.renderObject;
 
+  // We inflate widgets at two different times:
+  //  1. When we ourselves are told to rebuild (see performRebuild).
+  //  2. When our render object needs a new child (see createChild).
+  // In both cases, we cache the results of calling into our delegate to get the widget,
+  // so that if we do case 2 later, we don't call the builder again.
+  // Any time we do case 1, though, we reset the cache.
+
   /// A cache of widgets so that we don't have to rebuild every time.
   final Map<int, Widget> _childWidgets = new HashMap<int, Widget>();
 
-  /// The map containing all active child elements.
+  /// The map containing all active child elements. SplayTreeMap is used so that
+  /// we have all elements ordered and iterable by their keys.
   final SplayTreeMap<int, Element> _childElements = new SplayTreeMap<int, Element>();
 
   @override
@@ -613,9 +621,10 @@ class ListWheelElement extends RenderObjectElement {
       performRebuild();
   }
 
-  /// The number of children that will be provided. Be null if number of
-  /// children is infinite.
-  int get childCount => widget.childDelegate.estimatedChildCount;
+  /// The number of children that will be provided. The children will have
+  /// index in the range [0, childSize - 1]. childSize should be null if either
+  /// the child list is infinite or there are children with negative indexes.
+  int get childSize => widget.childDelegate.estimatedChildCount;
 
   @override
   void performRebuild() {
@@ -628,7 +637,7 @@ class ListWheelElement extends RenderObjectElement {
     final int lastIndex = _childElements.lastKey();
 
     for (int index = firstIndex; index <= lastIndex; ++index) {
-      final Element newChild = updateChild(_childElements[index], _build(index), index);
+      final Element newChild = updateChild(_childElements[index], retrieveWidget(index), index);
       if (newChild != null) {
         _childElements[index] = newChild;
       } else {
@@ -637,7 +646,8 @@ class ListWheelElement extends RenderObjectElement {
     }
   }
 
-  Widget _build(int index) {
+  /// Ask the underlying delegate to build and return widget at the given index.
+  Widget retrieveWidget(int index) {
     return _childWidgets.putIfAbsent(index, () => widget.childDelegate.build(this, index));
   }
 
@@ -645,9 +655,9 @@ class ListWheelElement extends RenderObjectElement {
   void createChild(int index, { @required RenderBox after }) {
     owner.buildScope(this, () {
       final bool insertFirst = after == null;
-      assert(insertFirst || _childElements[index-1] != null);
+      assert(insertFirst || _childElements[index - 1] != null);
       Element newChild;
-      newChild = updateChild(_childElements[index], _build(index), index);
+      newChild = updateChild(_childElements[index], retrieveWidget(index), index);
       if (newChild != null) {
         _childElements[index] = newChild;
       } else {
@@ -670,10 +680,13 @@ class ListWheelElement extends RenderObjectElement {
 
   @override
   Element updateChild(Element child, Widget newWidget, dynamic newSlot) {
+    final ListWheelParentData oldParentData = child?.renderObject?.parentData;
     final Element newChild = super.updateChild(child, newWidget, newSlot);
     final ListWheelParentData newParentData = newChild?.renderObject?.parentData;
     if(newParentData != null) {
       newParentData.index = newSlot;
+      if(oldParentData != null)
+        newParentData.offset = oldParentData.offset;
     }
 
     return newChild;
@@ -689,9 +702,11 @@ class ListWheelElement extends RenderObjectElement {
 
   @override
   void moveChildRenderObject(RenderObject child, dynamic slot) {
-    /// Currently we maintain the list in contiguous increasing order, so
-    /// shuffling the list is disabled.
-    assert(false);
+
+    const String moveChildRenderObjectErrorMessage =
+        'Currently we maintain the list in contiguous increasing order, so '
+        'shuffling the list is disabled.';
+    assert(false, moveChildRenderObjectErrorMessage);
   }
 
   @override

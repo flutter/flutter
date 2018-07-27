@@ -18,7 +18,7 @@ const double _kForegroundScreenOpacityFraction = 0.7;
 
 /// An iOS-styled picker.
 ///
-/// Displays the provided [children] widgets on a wheel for selection and
+/// Displays its children widgets on a wheel for selection and
 /// calls back when the currently selected item changes.
 ///
 /// Can be used with [showModalBottomSheet] to display the picker modally at the
@@ -30,7 +30,7 @@ const double _kForegroundScreenOpacityFraction = 0.7;
 ///    the iOS design specific chrome.
 ///  * <https://developer.apple.com/ios/human-interface-guidelines/controls/pickers/>
 class CupertinoPicker extends StatefulWidget {
-  /// Creates a control used for selecting values.
+  /// Creates a Picker from a concrete list of children.
   ///
   /// The [diameterRatio] and [itemExtent] arguments must not be null. The
   /// [itemExtent] must be greater than zero.
@@ -58,7 +58,12 @@ class CupertinoPicker extends StatefulWidget {
         childDelegate = new SliverChildListDelegate(children, addRepaintBoundaries: false, addAutomaticKeepAlives: false),
         super(key: key);
 
-  /// Create picker from a lazy builder.
+  /// Create Picker from a child builder where its children is dynamically
+  /// built during layout.
+  ///
+  /// The [itemBuilder] argument must not be null. The [childCount] argument
+  /// reflects the number of children that will be provided by the [itemBuilder].
+  /// In case that number is infinite, [childCount] is null.
   CupertinoPicker.builder({
     Key key,
     this.diameterRatio = _kDefaultDiameterRatio,
