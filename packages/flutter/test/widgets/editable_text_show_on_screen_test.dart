@@ -203,7 +203,7 @@ void main() {
           controller: new PageController(initialPage: 1),
           children: <Widget>[
             new Container(
-              color: Colors.blue,
+              color: Colors.red,
             ),
             new Container(
               child: new TextField(
@@ -221,12 +221,15 @@ void main() {
 
     await tester.showKeyboard(find.byType(EditableText));
     await tester.pumpAndSettle();
+    expect(controller.text, '');
     tester.testTextInput.enterText('H');
     final int frames = await tester.pumpAndSettle();
 
     // The text input should not trigger any animations, which would indicate
-    // that the sourounding PageView is incorrectly scrolling back-and-forth.
+    // that the surrounding PageView is incorrectly scrolling back-and-forth.
     expect(frames, 1);
+
+    expect(controller.text, 'H');
   });
 
   testWidgets('focused multi-line editable scrolls caret back into view when typing', (WidgetTester tester) async {
