@@ -50,7 +50,7 @@ const String _kColorForegroundWarning = 'Cannot provide both a color and a foreg
 /// [RichText] widget is explicitly given the ambient [DefaultTextStyle], since
 /// [RichText] does not do that automatically. The inner [TextStyle] objects are
 /// implicitly mixed with the parent [TextSpan]'s [TextSpan.style].
-/// 
+///
 /// If [color] is specified, [foreground] must be null and vice versa. [color] is
 /// treated as a shorthand for `new Paint()..color = color`.
 ///
@@ -260,10 +260,10 @@ class TextStyle extends Diagnosticable {
   final bool inherit;
 
   /// The color to use when painting the text.
-  /// 
+  ///
   /// If [foreground] is specified, this value must be null. The [color] property
   /// is shorthand for `new Paint()..color = color`.
-  ///   
+  ///
   /// In [merge], [apply], and [lerp], conflicts between [color] and [foreground]
   /// specification are resolved in [foreground]'s favor - i.e. if [foreground] is
   /// specified in one place, it will dominate [color] in another.
@@ -331,15 +331,15 @@ class TextStyle extends Diagnosticable {
   /// styles are created with the same paint settings. Otherwise, each time it
   /// will appear like the style changed, which will result in unnecessary
   /// updates all the way through the framework.
-  /// 
+  ///
   /// If [color] is specified, this value must be null. The [color] property
   /// is shorthand for `new Paint()..color = color`.
-  /// 
+  ///
   /// In [merge], [apply], and [lerp], conflicts between [color] and [foreground]
   /// specification are resolved in [foreground]'s favor - i.e. if [foreground] is
   /// specified in one place, it will dominate [color] in another.
-  final Paint foreground;  
-  
+  final Paint foreground;
+
   /// The paint drawn as a background for the text.
   ///
   /// The value should ideally be cached and reused each time if multiple text
@@ -372,7 +372,7 @@ class TextStyle extends Diagnosticable {
 
   /// Creates a copy of this text style but with the given fields replaced with
   /// the new values.
-  /// 
+  ///
   /// One of [color] or [foreground] must be null, and if this has [foreground]
   /// specified it will be given preference over any color parameter.
   TextStyle copyWith({
@@ -426,7 +426,7 @@ class TextStyle extends Diagnosticable {
   ///
   /// The non-numeric properties [color], [fontFamily], [decoration],
   /// [decorationColor] and [decorationStyle] are replaced with the new values.
-  /// 
+  ///
   /// [foreground] will be given preference over [color] if it is not null.
   ///
   /// The numeric properties are multiplied by the given factors and then
@@ -444,7 +444,7 @@ class TextStyle extends Diagnosticable {
   ///
   /// If the underlying values are null, then the corresponding factors and/or
   /// deltas must not be specified.
-  /// 
+  ///
   /// If [foreground] is specified on this object, then applying [color] here
   /// will have no effect.
   TextStyle apply({
@@ -520,7 +520,7 @@ class TextStyle extends Diagnosticable {
   /// inherit properties of this style.
   ///
   /// If the given text style is null, returns this text style.
-  /// 
+  ///
   /// One of [color] or [foreground] must be null, and if this or `other` has
   /// [foreground] specified it will be given preference over any color parameter.
   TextStyle merge(TextStyle other) {
@@ -571,7 +571,7 @@ class TextStyle extends Diagnosticable {
   ///
   /// Values for `t` are usually obtained from an [Animation<double>], such as
   /// an [AnimationController].
-  /// 
+  ///
   /// If [foreground] is specified on either of `a` or `b`, both will be treated
   /// as if they have a [foreground] paint (creating a new [Paint] if necessary
   /// based on the [color] property).
@@ -645,7 +645,7 @@ class TextStyle extends Diagnosticable {
       height: ui.lerpDouble(a.height ?? b.height, b.height ?? a.height, t),
       locale: t < 0.5 ? a.locale : b.locale,
       foreground: (a.foreground != null || b.foreground != null)
-        ? t < 0.5 
+        ? t < 0.5
           ? a.foreground ?? (new Paint()..color = a.color)
           : b.foreground ?? (new Paint()..color = b.color)
         : null,

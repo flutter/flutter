@@ -30,7 +30,7 @@ class ColdRunner extends ResidentRunner {
              ipv6: ipv6);
 
   final bool traceStartup;
-  final String applicationBinary;
+  final File applicationBinary;
 
   @override
   Future<int> run({
