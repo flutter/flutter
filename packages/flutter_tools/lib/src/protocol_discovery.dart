@@ -60,10 +60,11 @@ class ProtocolDiscovery {
 
   void _handleLine(String line) {
     Uri uri;
-    final int index = line.indexOf(_prefix + 'http://');
-    if (index >= 0) {
+    RegExp regExp = new RegExp(r"[a-z]+:\/\/[^ \n]*");
+    Match match = regExp.firstMatch(line);
+    if (match.length > 0) {
       try {
-        uri = Uri.parse(line.substring(index + _prefix.length));
+        uri = Uri.parse(match[0]);
       } catch (error) {
         _stopScrapingLogs();
         _completer.completeError(error);
