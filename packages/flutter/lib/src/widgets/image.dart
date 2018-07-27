@@ -612,7 +612,7 @@ class _ImageState extends State<Image> {
 
   @override
   Widget build(BuildContext context) {
-    final RawImage image = RawImage(
+    final RawImage image = new RawImage(
       image: _imageInfo?.image,
       width: widget.width,
       height: widget.height,

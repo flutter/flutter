@@ -239,13 +239,13 @@ class PaginatedDataTableState extends State<PaginatedDataTable> {
     final List<DataCell> cells = widget.columns.map<DataCell>((DataColumn column) {
       if (!column.numeric) {
         haveProgressIndicator = true;
-        return const DataCell(CircularProgressIndicator());
+        return const DataCell(const CircularProgressIndicator());
       }
       return DataCell.empty;
     }).toList();
     if (!haveProgressIndicator) {
       haveProgressIndicator = true;
-      cells[0] = const DataCell(CircularProgressIndicator());
+      cells[0] = const DataCell(const CircularProgressIndicator());
     }
     return new DataRow.byIndex(
       index: index,

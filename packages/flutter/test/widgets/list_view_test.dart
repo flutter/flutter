@@ -191,7 +191,7 @@ void main() {
             child: new ListView(
               padding: const EdgeInsets.all(8.0),
               children: const <Widget>[
-                Text('padded', textDirection: TextDirection.ltr),
+                const Text('padded', textDirection: TextDirection.ltr),
               ],
             ),
           ),
@@ -276,7 +276,7 @@ void main() {
         textDirection: TextDirection.ltr,
         child: new MediaQuery(
           data: const MediaQueryData(
-            padding: EdgeInsets.all(30.0),
+            padding: const EdgeInsets.all(30.0),
           ),
           child: new ListView(
             children: <Widget>[

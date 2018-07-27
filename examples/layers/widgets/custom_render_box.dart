@@ -49,9 +49,9 @@ void main() {
   runApp(
     const Directionality(
       textDirection: TextDirection.ltr,
-      child: Dots(
-        child: Center(
-          child: Text('Touch me!'),
+      child: const Dots(
+        child: const Center(
+          child: const Text('Touch me!'),
         ),
       ),
     ),

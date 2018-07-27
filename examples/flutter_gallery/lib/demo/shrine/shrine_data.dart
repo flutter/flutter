@@ -6,7 +6,7 @@ import 'shrine_types.dart';
 
 const String _kGalleryAssetsPackage = 'flutter_gallery_assets';
 
-const Vendor _ali = Vendor(
+const Vendor _ali = const Vendor(
   name: 'Ali’s shop',
   avatarAsset: 'people/square/ali.png',
   avatarAssetPackage: _kGalleryAssetsPackage,
@@ -16,7 +16,7 @@ const Vendor _ali = Vendor(
     'Custom orders are available upon request if you need something extra special.'
 );
 
-const Vendor _peter = Vendor(
+const Vendor _peter = const Vendor(
   name: 'Peter’s shop',
   avatarAsset: 'people/square/peter.png',
   avatarAssetPackage: _kGalleryAssetsPackage,
@@ -26,7 +26,7 @@ const Vendor _peter = Vendor(
     'available upon request if you need something extra special.'
 );
 
-const Vendor _sandra = Vendor(
+const Vendor _sandra = const Vendor(
     name: 'Sandra’s shop',
     avatarAsset: 'people/square/sandra.png',
     avatarAssetPackage: _kGalleryAssetsPackage,
@@ -35,7 +35,7 @@ const Vendor _sandra = Vendor(
         'Custom orders are available if you’re looking for a certain color or material.'
 );
 
-const Vendor _stella = Vendor(
+const Vendor _stella = const Vendor(
   name: 'Stella’s shop',
   avatarAsset: 'people/square/stella.png',
   avatarAssetPackage: _kGalleryAssetsPackage,
@@ -45,7 +45,7 @@ const Vendor _stella = Vendor(
     'if you need something extra special.'
 );
 
-const Vendor _trevor = Vendor(
+const Vendor _trevor = const Vendor(
     name: 'Trevor’s shop',
     avatarAsset: 'people/square/trevor.png',
     avatarAssetPackage: _kGalleryAssetsPackage,
@@ -55,23 +55,23 @@ const Vendor _trevor = Vendor(
         'available upon request if you need something extra special.'
 );
 
-const List<Product> _allProducts = <Product> [
-  Product(
+const List<Product> _allProducts = const <Product> [
+  const Product(
     name: 'Vintage Brown Belt',
     imageAsset: 'products/belt.png',
     imageAssetPackage: _kGalleryAssetsPackage,
-    categories: <String>['fashion', 'latest'],
+    categories: const <String>['fashion', 'latest'],
     price: 300.00,
     vendor: _sandra,
     description:
       'Isn’t it cool when things look old, but they\'re not. Looks Old But Not makes '
       'awesome vintage goods that are super smart. This ol’ belt just got an upgrade. '
   ),
-  Product(
+  const Product(
     name: 'Sunglasses',
     imageAsset: 'products/sunnies.png',
     imageAssetPackage: _kGalleryAssetsPackage,
-    categories: <String>['travel', 'fashion', 'beauty'],
+    categories: const <String>['travel', 'fashion', 'beauty'],
     price: 20.00,
     vendor: _trevor,
     description:
@@ -80,21 +80,21 @@ const List<Product> _allProducts = <Product> [
       'so you can look at the sun for however long you want. Sunglasses make you '
       'look cool, wear them.'
   ),
-  Product(
+  const Product(
     name: 'Flatwear',
     imageAsset: 'products/flatwear.png',
     imageAssetPackage: _kGalleryAssetsPackage,
-    categories: <String>['furniture'],
+    categories: const <String>['furniture'],
     price: 30.00,
     vendor: _trevor,
     description:
     'Leave the tunnel and the rain is fallin amazing things happen when you wait'
   ),
-  Product(
+  const Product(
     name: 'Salmon Sweater',
     imageAsset: 'products/sweater.png',
     imageAssetPackage: _kGalleryAssetsPackage,
-    categories: <String>['fashion'],
+    categories: const <String>['fashion'],
     price: 300.00,
     vendor: _stella,
     description:
@@ -102,41 +102,41 @@ const List<Product> _allProducts = <Product> [
       'flavors, including salmon, that pop as soon as they hit your eyes. '
       'Sweaters heat quickly, so savor the warmth.'
   ),
-  Product(
+  const Product(
     name: 'Pine Table',
     imageAsset: 'products/table.png',
     imageAssetPackage: _kGalleryAssetsPackage,
-    categories: <String>['furniture'],
+    categories: const <String>['furniture'],
     price: 63.00,
     vendor: _stella,
     description:
       'Leave the tunnel and the rain is fallin amazing things happen when you wait'
   ),
-  Product(
+  const Product(
     name: 'Green Comfort Jacket',
     imageAsset: 'products/jacket.png',
     imageAssetPackage: _kGalleryAssetsPackage,
-    categories: <String>['fashion'],
+    categories: const <String>['fashion'],
     price: 36.00,
     vendor: _ali,
     description:
       'Leave the tunnel and the rain is fallin amazing things happen when you wait'
   ),
-  Product(
+  const Product(
     name: 'Chambray Top',
     imageAsset: 'products/top.png',
     imageAssetPackage: _kGalleryAssetsPackage,
-    categories: <String>['fashion'],
+    categories: const <String>['fashion'],
     price: 125.00,
     vendor: _peter,
     description:
       'Leave the tunnel and the rain is fallin amazing things happen when you wait'
   ),
-  Product(
+  const Product(
     name: 'Blue Cup',
     imageAsset: 'products/cup.png',
     imageAssetPackage: _kGalleryAssetsPackage,
-    categories: <String>['travel', 'furniture'],
+    categories: const <String>['travel', 'furniture'],
     price: 75.00,
     vendor: _sandra,
     description:
@@ -144,11 +144,11 @@ const List<Product> _allProducts = <Product> [
       'cup purchased Drinksy donates a cup to those in need. Buy yourself a mug, '
       'buy someone else a mug.'
   ),
-  Product(
+  const Product(
     name: 'Tea Set',
     imageAsset: 'products/teaset.png',
     imageAssetPackage: _kGalleryAssetsPackage,
-    categories: <String>['furniture', 'fashion'],
+    categories: const <String>['furniture', 'fashion'],
     price: 70.00,
     vendor: _trevor,
     featureTitle: 'Beautiful glass teapot',
@@ -159,22 +159,22 @@ const List<Product> _allProducts = <Product> [
       'hot liquids and pours them from the spout. Use the handle, shown on the right, '
       'so your fingers don’t get burnt while pouring.'
   ),
-  Product(
+  const Product(
     name: 'Blue linen napkins',
     imageAsset: 'products/napkins.png',
     imageAssetPackage: _kGalleryAssetsPackage,
-    categories: <String>['furniture', 'fashion'],
+    categories: const <String>['furniture', 'fashion'],
     price: 89.00,
     vendor: _trevor,
     description:
       'Blue linen napkins were meant to go with friends, so you may want to pick '
       'up a bunch of these. These things are absorbant.'
   ),
-  Product(
+  const Product(
     name: 'Dipped Earrings',
     imageAsset: 'products/earrings.png',
     imageAssetPackage: _kGalleryAssetsPackage,
-    categories: <String>['fashion', 'beauty'],
+    categories: const <String>['fashion', 'beauty'],
     price: 25.00,
     vendor: _stella,
     description:
@@ -182,11 +182,11 @@ const List<Product> _allProducts = <Product> [
       'the office or the beach. Just be sure you don’t drop it in a bucket of '
       'red paint, then they won’t look dipped anymore.'
   ),
-  Product(
+  const Product(
     name: 'Perfect Planters',
     imageAsset: 'products/planters.png',
     imageAssetPackage: _kGalleryAssetsPackage,
-    categories: <String>['latest', 'furniture'],
+    categories: const <String>['latest', 'furniture'],
     price: 30.00,
     vendor: _ali,
     description:
@@ -194,11 +194,11 @@ const List<Product> _allProducts = <Product> [
       'can pot. This set of Perfect Planters holds succulents and cuttings perfectly. '
       'Looks great in any room. Keep out of reach from cats.'
   ),
-  Product(
+  const Product(
     name: 'Cloud-White Dress',
     imageAsset: 'products/dress.png',
     imageAssetPackage: _kGalleryAssetsPackage,
-    categories: <String>['fashion'],
+    categories: const <String>['fashion'],
     price: 54.00,
     vendor: _sandra,
     description:
@@ -206,11 +206,11 @@ const List<Product> _allProducts = <Product> [
       'This Cloud-White Dress has you covered for those nights when you need '
       'to get out, or even if you’re just headed to work.'
   ),
-  Product(
+  const Product(
     name: 'Backpack',
     imageAsset: 'products/backpack.png',
     imageAssetPackage: _kGalleryAssetsPackage,
-    categories: <String>['travel', 'fashion'],
+    categories: const <String>['travel', 'fashion'],
     price: 25.00,
     vendor: _peter,
     description:
@@ -218,11 +218,11 @@ const List<Product> _allProducts = <Product> [
       'a pen, a protractor, notebooks, small animals, plugs for your devices, '
       'sunglasses, gym clothes, shoes, gloves, two kittens, and even lunch!'
   ),
-  Product(
+  const Product(
     name: 'Charcoal Straw Hat',
     imageAsset: 'products/hat.png',
     imageAssetPackage: _kGalleryAssetsPackage,
-    categories: <String>['travel', 'fashion', 'latest'],
+    categories: const <String>['travel', 'fashion', 'latest'],
     price: 25.00,
     vendor: _ali,
     description:
@@ -230,41 +230,41 @@ const List<Product> _allProducts = <Product> [
       'Jetset approved, these hats have been rigorously tested. Keep that face '
       'protected from the sun.'
   ),
-  Product(
+  const Product(
     name: 'Ginger Scarf',
     imageAsset: 'products/scarf.png',
     imageAssetPackage: _kGalleryAssetsPackage,
-    categories: <String>['latest', 'fashion'],
+    categories: const <String>['latest', 'fashion'],
     price: 17.00,
     vendor: _peter,
     description:
     'Leave the tunnel and the rain is fallin amazing things happen when you wait'
   ),
-  Product(
+  const Product(
     name: 'Blush Sweats',
     imageAsset: 'products/sweats.png',
     imageAssetPackage: _kGalleryAssetsPackage,
-    categories: <String>['travel', 'fashion', 'latest'],
+    categories: const <String>['travel', 'fashion', 'latest'],
     price: 25.00,
     vendor: _stella,
     description:
     'Leave the tunnel and the rain is fallin amazing things happen when you wait'
   ),
-  Product(
+  const Product(
     name: 'Mint Jumper',
     imageAsset: 'products/jumper.png',
     imageAssetPackage: _kGalleryAssetsPackage,
-    categories: <String>['travel', 'fashion', 'beauty'],
+    categories: const <String>['travel', 'fashion', 'beauty'],
     price: 25.00,
     vendor: _peter,
     description:
     'Leave the tunnel and the rain is fallin amazing things happen when you wait'
   ),
-  Product(
+  const Product(
     name: 'Ochre Shirt',
     imageAsset: 'products/shirt.png',
     imageAssetPackage: _kGalleryAssetsPackage,
-    categories: <String>[ 'fashion', 'latest'],
+    categories: const <String>[ 'fashion', 'latest'],
     price: 120.00,
     vendor: _stella,
     description:

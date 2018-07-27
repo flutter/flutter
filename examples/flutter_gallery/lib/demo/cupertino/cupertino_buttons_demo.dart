@@ -24,8 +24,8 @@ class _CupertinoButtonDemoState extends State<CupertinoButtonsDemo> {
       body: new Column(
         children: <Widget> [
           const Padding(
-            padding: EdgeInsets.all(16.0),
-            child: Text(
+            padding: const EdgeInsets.all(16.0),
+            child: const Text(
               'iOS themed buttons are flat. They can have borders or backgrounds but '
               'only when necessary.'
             ),
@@ -37,7 +37,7 @@ class _CupertinoButtonDemoState extends State<CupertinoButtonsDemo> {
                 new Text(_pressedCount > 0
                     ? 'Button pressed $_pressedCount time${_pressedCount == 1 ? "" : "s"}'
                     : ' '),
-                const Padding(padding: EdgeInsets.all(12.0)),
+                const Padding(padding: const EdgeInsets.all(12.0)),
                 new Align(
                   alignment: const Alignment(0.0, -0.2),
                   child: new Row(
@@ -50,13 +50,13 @@ class _CupertinoButtonDemoState extends State<CupertinoButtonsDemo> {
                         }
                       ),
                       const CupertinoButton(
-                        child: Text('Disabled'),
+                        child: const Text('Disabled'),
                         onPressed: null,
                       ),
                     ],
                   ),
                 ),
-                const Padding(padding: EdgeInsets.all(12.0)),
+                const Padding(padding: const EdgeInsets.all(12.0)),
                 new CupertinoButton(
                   child: const Text('With Background'),
                   color: CupertinoColors.activeBlue,
@@ -64,9 +64,9 @@ class _CupertinoButtonDemoState extends State<CupertinoButtonsDemo> {
                     setState(() { _pressedCount += 1; });
                   }
                 ),
-                const Padding(padding: EdgeInsets.all(12.0)),
+                const Padding(padding: const EdgeInsets.all(12.0)),
                 const CupertinoButton(
-                  child: Text('Disabled'),
+                  child: const Text('Disabled'),
                   color: CupertinoColors.activeBlue,
                   onPressed: null,
                 ),

@@ -18,14 +18,14 @@ import 'scrollbar.dart';
 import 'shadows.dart';
 import 'theme.dart';
 
-const Duration _kDropdownMenuDuration = Duration(milliseconds: 300);
+const Duration _kDropdownMenuDuration = const Duration(milliseconds: 300);
 const double _kMenuItemHeight = 48.0;
 const double _kDenseButtonHeight = 24.0;
-const EdgeInsets _kMenuItemPadding = EdgeInsets.symmetric(horizontal: 16.0);
-const EdgeInsetsGeometry _kAlignedButtonPadding = EdgeInsetsDirectional.only(start: 16.0, end: 4.0);
+const EdgeInsets _kMenuItemPadding = const EdgeInsets.symmetric(horizontal: 16.0);
+const EdgeInsetsGeometry _kAlignedButtonPadding = const EdgeInsetsDirectional.only(start: 16.0, end: 4.0);
 const EdgeInsets _kUnalignedButtonPadding = EdgeInsets.zero;
 const EdgeInsets _kAlignedMenuMargin = EdgeInsets.zero;
-const EdgeInsetsGeometry _kUnalignedMenuMargin = EdgeInsetsDirectional.only(start: 16.0, end: 24.0);
+const EdgeInsetsGeometry _kUnalignedMenuMargin = const EdgeInsetsDirectional.only(start: 16.0, end: 24.0);
 
 class _DropdownMenuPainter extends CustomPainter {
   _DropdownMenuPainter({
@@ -673,7 +673,7 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
             child: new Container(
               height: 1.0,
               decoration: const BoxDecoration(
-                border: Border(bottom: BorderSide(color: Color(0xFFBDBDBD), width: 0.0))
+                border: const Border(bottom: const BorderSide(color: const Color(0xFFBDBDBD), width: 0.0))
               ),
             ),
           ),

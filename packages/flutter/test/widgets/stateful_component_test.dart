@@ -23,8 +23,8 @@ void main() {
 
     await tester.pumpWidget(
       const FlipWidget(
-        left: DecoratedBox(decoration: kBoxDecorationA),
-        right: DecoratedBox(decoration: kBoxDecorationB)
+        left: const DecoratedBox(decoration: kBoxDecorationA),
+        right: const DecoratedBox(decoration: kBoxDecorationB)
       )
     );
 
@@ -32,8 +32,8 @@ void main() {
 
     await tester.pumpWidget(
       const FlipWidget(
-        left: DecoratedBox(decoration: kBoxDecorationB),
-        right: DecoratedBox(decoration: kBoxDecorationA)
+        left: const DecoratedBox(decoration: kBoxDecorationB),
+        right: const DecoratedBox(decoration: kBoxDecorationA)
       )
     );
 
@@ -47,8 +47,8 @@ void main() {
 
     await tester.pumpWidget(
       const FlipWidget(
-        left: DecoratedBox(decoration: kBoxDecorationA),
-        right: DecoratedBox(decoration: kBoxDecorationB)
+        left: const DecoratedBox(decoration: kBoxDecorationA),
+        right: const DecoratedBox(decoration: kBoxDecorationB)
       )
     );
 

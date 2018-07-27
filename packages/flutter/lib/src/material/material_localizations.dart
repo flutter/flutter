@@ -326,7 +326,7 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
   const DefaultMaterialLocalizations();
 
   // Ordered to match DateTime.monday=1, DateTime.sunday=6
-  static const List<String> _shortWeekdays = <String>[
+  static const List<String> _shortWeekdays = const <String>[
     'Mon',
     'Tue',
     'Wed',
@@ -337,7 +337,7 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
   ];
 
   // Ordered to match DateTime.monday=1, DateTime.sunday=6
-  static const List<String> _weekdays = <String>[
+  static const List<String> _weekdays = const <String>[
     'Monday',
     'Tuesday',
     'Wednesday',
@@ -347,7 +347,7 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
     'Sunday',
   ];
 
-  static const List<String> _narrowWeekdays = <String>[
+  static const List<String> _narrowWeekdays = const <String>[
     'S',
     'M',
     'T',
@@ -357,7 +357,7 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
     'S',
   ];
 
-  static const List<String> _shortMonths = <String>[
+  static const List<String> _shortMonths = const <String>[
     'Jan',
     'Feb',
     'Mar',
@@ -372,7 +372,7 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
     'Dec',
   ];
 
-  static const List<String> _months = <String>[
+  static const List<String> _months = const <String>[
     'January',
     'February',
     'March',
@@ -656,5 +656,5 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
   /// to create an instance of this class.
   ///
   /// [MaterialApp] automatically adds this value to [MaterialApp.localizationsDelegates].
-  static const LocalizationsDelegate<MaterialLocalizations> delegate = _MaterialLocalizationsDelegate();
+  static const LocalizationsDelegate<MaterialLocalizations> delegate = const _MaterialLocalizationsDelegate();
 }

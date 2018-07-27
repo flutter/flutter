@@ -359,7 +359,7 @@ void main() {
 
       testWidgets('if finder finds multiple widgets', (WidgetTester tester) async {
         await tester.pumpWidget(boilerplate(new Column(
-          children: const <Widget>[Text('hello'), Text('world')],
+          children: const <Widget>[const Text('hello'), const Text('world')],
         )));
         final Finder finder = find.byType(Text);
         try {
@@ -387,7 +387,7 @@ void main() {
   group('matchesSemanticsData', () {
     testWidgets('matches SemanticsData', (WidgetTester tester) async {
       final SemanticsHandle handle = tester.ensureSemantics();
-      const Key key = Key('semantics');
+      const Key key = const Key('semantics');
       await tester.pumpWidget(new Semantics(
         key: key,
         namesRoute: true,

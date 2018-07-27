@@ -11,7 +11,7 @@ import 'package:flutter/rendering.dart';
 
 import '../widgets/semantics_tester.dart';
 
-const List<String> menuItems = <String>['one', 'two', 'three', 'four'];
+const List<String> menuItems = const <String>['one', 'two', 'three', 'four'];
 
 final Type dropdownButtonType = new DropdownButton<String>(
   onChanged: (_) { },
@@ -470,7 +470,7 @@ void main() {
     // In all of the tests that follow we're assuming that the dropdown menu
     // is horizontally aligned with the center of the dropdown button and padded
     // on the top, left, and right.
-    const EdgeInsets buttonPadding = EdgeInsets.only(top: 8.0, left: 16.0, right: 24.0);
+    const EdgeInsets buttonPadding = const EdgeInsets.only(top: 8.0, left: 16.0, right: 24.0);
 
     Rect getExpandedButtonRect() {
       final RenderBox box = tester.renderObject<RenderBox>(find.byType(dropdownButtonType));

@@ -71,9 +71,9 @@ class BuildInfo {
   /// On Xcode builds it is used as CFBundleShortVersionString,
   final String buildName;
 
-  static const BuildInfo debug = BuildInfo(BuildMode.debug, null);
-  static const BuildInfo profile = BuildInfo(BuildMode.profile, null);
-  static const BuildInfo release = BuildInfo(BuildMode.release, null);
+  static const BuildInfo debug = const BuildInfo(BuildMode.debug, null);
+  static const BuildInfo profile = const BuildInfo(BuildMode.profile, null);
+  static const BuildInfo release = const BuildInfo(BuildMode.release, null);
 
   /// Returns whether a debug build is requested.
   ///
@@ -174,7 +174,7 @@ enum IOSArch {
 }
 
 /// The default set of iOS device architectures to build for.
-const List<IOSArch> defaultIOSArchs = <IOSArch>[
+const List<IOSArch> defaultIOSArchs = const <IOSArch>[
   IOSArch.arm64,
 ];
 
