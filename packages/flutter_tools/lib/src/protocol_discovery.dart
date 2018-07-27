@@ -44,7 +44,6 @@ class ProtocolDiscovery {
   final int hostPort;
   final bool ipv6;
 
-  final String _prefix;
   final Completer<Uri> _completer = new Completer<Uri>();
 
   StreamSubscription<String> _deviceLogSubscription;
