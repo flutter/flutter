@@ -9,7 +9,7 @@ import 'package:flutter/material.dart';
 void main() {
   group('$ReorderableListView', () {
     const double itemHeight = 48.0;
-    const List<String> originalListItems = const <String>['Item 1', 'Item 2', 'Item 3', 'Item 4'];
+    const List<String> originalListItems = <String>['Item 1', 'Item 2', 'Item 3', 'Item 4'];
     List<String> listItems;
 
     void onReorder(int oldIndex, int newIndex) {
@@ -111,20 +111,20 @@ void main() {
       testWidgets('properly determines the vertical drop area extents', (WidgetTester tester) async {
         final Widget reorderableListView = new ReorderableListView(
           children: const <Widget>[
-            const SizedBox(
-              key: const Key('Normal item'),
+            SizedBox(
+              key: Key('Normal item'),
               height: itemHeight,
-              child: const Text('Normal item'),
+              child: Text('Normal item'),
             ),
-            const SizedBox(
-              key: const Key('Tall item'),
+            SizedBox(
+              key: Key('Tall item'),
               height: itemHeight * 2,
-              child: const Text('Tall item'),
+              child: Text('Tall item'),
             ),
-            const SizedBox(
-              key: const Key('Last item'),
+            SizedBox(
+              key: Key('Last item'),
               height: itemHeight,
-              child: const Text('Last item'),
+              child: Text('Last item'),
             )
           ],
           scrollDirection: Axis.vertical,
@@ -282,20 +282,20 @@ void main() {
       testWidgets('properly determines the horizontal drop area extents', (WidgetTester tester) async {
         final Widget reorderableListView = new ReorderableListView(
           children: const <Widget>[
-            const SizedBox(
-              key: const Key('Normal item'),
+            SizedBox(
+              key: Key('Normal item'),
               width: itemHeight,
-              child: const Text('Normal item'),
+              child: Text('Normal item'),
             ),
-            const SizedBox(
-              key: const Key('Tall item'),
+            SizedBox(
+              key: Key('Tall item'),
               width: itemHeight * 2,
-              child: const Text('Tall item'),
+              child: Text('Tall item'),
             ),
-            const SizedBox(
-              key: const Key('Last item'),
+            SizedBox(
+              key: Key('Last item'),
               width: itemHeight,
-              child: const Text('Last item'),
+              child: Text('Last item'),
             )
           ],
           scrollDirection: Axis.horizontal,
