@@ -3901,13 +3901,13 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
   }
 
   /// The handlers and supported [CustomSemanticsAction]s for this node.
-  /// 
+  ///
   /// These handlers are called whenever the user performs the associated
   /// custom accessibility action from a special platform menu. Providing any
   /// custom actions here also adds [SemanticsAction.customAction] to the node.
-  /// 
+  ///
   /// See also:
-  /// 
+  ///
   ///   * [CustomSemanticsAction], for an explaination of custom actions.
   Map<CustomSemanticsAction, VoidCallback> get customSemanticsActions => _customSemanticsActions;
   Map<CustomSemanticsAction, VoidCallback> _customSemanticsActions;
