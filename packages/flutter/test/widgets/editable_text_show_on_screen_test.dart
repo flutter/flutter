@@ -191,6 +191,44 @@ void main() {
     expect(find.byType(EditableText), findsNothing);
   });
 
+  testWidgets('entering text does not scroll a sourrounding PageView', (WidgetTester tester) async {
+    // regression test for https://github.com/flutter/flutter/issues/19523
+
+    final TextEditingController controller = new TextEditingController();
+
+    await tester.pumpWidget(new Directionality(
+      textDirection: TextDirection.ltr,
+      child: new Material(
+        child: new PageView(
+          controller: new PageController(initialPage: 1),
+          children: <Widget>[
+            new Container(
+              color: Colors.blue,
+            ),
+            new Container(
+              child: new TextField(
+                controller: controller,
+              ),
+              color: Colors.green,
+            ),
+            new Container(
+              color: Colors.red,
+            ),
+          ],
+        ),
+      ),
+    ));
+
+    await tester.showKeyboard(find.byType(EditableText));
+    await tester.pumpAndSettle();
+    tester.testTextInput.enterText('H');
+    final int frames = await tester.pumpAndSettle();
+
+    // The text input should not trigger any animations, which would indicate
+    // that the sourounding PageView is incorrectly scrolling back-and-forth.
+    expect(frames, 1);
+  });
+
   testWidgets('focused multi-line editable scrolls caret back into view when typing', (WidgetTester tester) async {
     final ScrollController scrollController = new ScrollController();
     final TextEditingController controller = new TextEditingController();
@@ -285,7 +323,6 @@ void main() {
 }
 
 class NoImplicitScrollPhysics extends AlwaysScrollableScrollPhysics {
-
   const NoImplicitScrollPhysics({ ScrollPhysics parent }) : super(parent: parent);
 
   @override
