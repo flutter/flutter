@@ -86,7 +86,6 @@ class ReorderableListView extends StatefulWidget {
 
   @override
   _ReorderableListViewState createState() => new _ReorderableListViewState();
-  
 }
 
 // This top-level state manages an Overlay that contains the list and

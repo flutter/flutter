@@ -428,7 +428,7 @@ class _StatefulState extends State<_Stateful> {
       height: 48.0,
       child: new Material(
         child: new Checkbox(
-          value: checked, 
+          value: checked,
           onChanged: (bool newValue) => checked = newValue,
         ),
       ),
