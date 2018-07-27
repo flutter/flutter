@@ -39,12 +39,14 @@ import 'framework.dart';
 class AndroidView extends StatefulWidget {
   /// Creates a widget that embeds an Android view.
   ///
-  /// The `viewType` parameter must not be null.
+  /// The `viewType` and `hitTestBehavior` parameters must not be null.
   const AndroidView({
     Key key,
     @required this.viewType,
-    this.onPlatformViewCreated
+    this.onPlatformViewCreated,
+    this.hitTestBehavior = PlatformViewHitTestBehavior.opaque,
   }) : assert(viewType != null),
+       assert(hitTestBehavior != null),
        super(key: key);
 
   /// The unique identifier for Android view type to be embedded by this widget.
@@ -59,6 +61,11 @@ class AndroidView extends StatefulWidget {
   /// May be null.
   final PlatformViewCreatedCallback onPlatformViewCreated;
 
+  /// How this widget should behave during hit testing.
+  ///
+  /// This defaults to [PlatformViewHitTestBehavior.opaque].
+  final PlatformViewHitTestBehavior hitTestBehavior;
+
   @override
   State createState() => new _AndroidViewState();
 }
@@ -69,7 +76,10 @@ class _AndroidViewState extends State<AndroidView> {
 
   @override
   Widget build(BuildContext context) {
-    return new _AndroidPlatformView(controller: _controller);
+    return new _AndroidPlatformView(
+        controller: _controller,
+        hitTestBehavior: widget.hitTestBehavior
+    );
   }
 
   @override
@@ -108,17 +118,21 @@ class _AndroidPlatformView extends LeafRenderObjectWidget {
   const _AndroidPlatformView({
     Key key,
     @required this.controller,
+    @required this.hitTestBehavior,
   }) : assert(controller != null),
+       assert(hitTestBehavior != null),
        super(key: key);
 
   final AndroidViewController controller;
+  final PlatformViewHitTestBehavior hitTestBehavior;
 
   @override
   RenderObject createRenderObject(BuildContext context) =>
-    new RenderAndroidView(viewController: controller);
+    new RenderAndroidView(viewController: controller, hitTestBehavior: hitTestBehavior);
 
   @override
   void updateRenderObject(BuildContext context, RenderAndroidView renderObject) {
     renderObject.viewController = controller;
+    renderObject.hitTestBehavior = hitTestBehavior;
   }
 }
