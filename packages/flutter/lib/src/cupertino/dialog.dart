@@ -1162,9 +1162,11 @@ class _RenderCupertinoDialogActions extends RenderBox
         );
       } else {
         // Each button gets half the available width, minus a single divider.
-        final BoxConstraints perButtonConstraints = constraints.copyWith(
+        final BoxConstraints perButtonConstraints = new BoxConstraints(
           minWidth: (constraints.minWidth - dividerThickness) / 2.0,
           maxWidth: (constraints.maxWidth - dividerThickness) / 2.0,
+          minHeight: 0.0,
+          maxHeight: double.infinity,
         );
 
         // Layout the 2 buttons.
@@ -1187,9 +1189,9 @@ class _RenderCupertinoDialogActions extends RenderBox
           new Size(
             _kCupertinoDialogWidth,
             math.max(
-              firstChild.size.height,
-              lastChild.size.height,
-            ) + dividerThickness,
+              firstChild.size.height + dividerThickness,
+              lastChild.size.height + dividerThickness,
+            ),
           )
         );
       }
@@ -1197,7 +1199,7 @@ class _RenderCupertinoDialogActions extends RenderBox
       // We need to stack buttons vertically, plus dividers above each button.
       final BoxConstraints perButtonConstraints = constraints.copyWith(
         minHeight: 0.0,
-        maxHeight: (constraints.maxHeight - (dividerThickness * childCount)) / childCount,
+        maxHeight: double.infinity,
       );
 
       RenderBox child = firstChild;

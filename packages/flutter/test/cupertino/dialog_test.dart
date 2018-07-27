@@ -365,7 +365,7 @@ void main() {
     await tester.pump();
 
     final RenderBox okButtonBox = findActionButtonRenderBoxByTitle(tester, 'OK');
-    final RenderBox actionsSectionBox = findActionsSectionRenderBox(tester);
+    final RenderBox actionsSectionBox = findScrollableActionsSectionRenderBox(tester);
 
     expect(okButtonBox.size.width, actionsSectionBox.size.width);
     expect(okButtonBox.size.height + dividerWidth, actionsSectionBox.size.height);
@@ -402,7 +402,7 @@ void main() {
 
     final RenderBox okButtonBox = findActionButtonRenderBoxByTitle(tester, 'OK');
     final RenderBox cancelButtonBox = findActionButtonRenderBoxByTitle(tester, 'Cancel');
-    final RenderBox actionsSectionBox = findActionsSectionRenderBox(tester);
+    final RenderBox actionsSectionBox = findScrollableActionsSectionRenderBox(tester);
 
     expect(okButtonBox.size.width, cancelButtonBox.size.width);
 
@@ -448,7 +448,7 @@ void main() {
 
     final RenderBox okButtonBox = findActionButtonRenderBoxByTitle(tester, 'OK');
     final RenderBox longButtonBox = findActionButtonRenderBoxByTitle(tester, 'This is too long to fit');
-    final RenderBox actionsSectionBox = findActionsSectionRenderBox(tester);
+    final RenderBox actionsSectionBox = findScrollableActionsSectionRenderBox(tester);
 
     expect(okButtonBox.size.width, longButtonBox.size.width);
 
@@ -460,17 +460,15 @@ void main() {
     );
   });
 
-  testWidgets('Actions section height for 3 buttons is 1.5 buttons tall.',
+  testWidgets('Actions section height for 3 buttons without enough room is 1.5 buttons tall.',
           (WidgetTester tester) async {
     final ScrollController scrollController = new ScrollController();
-    double dividerWidth; // Will be set when the dialog builder runs. Needs a BuildContext.
     await tester.pumpWidget(
       createAppWithButtonThatLaunchesDialog(
         dialogBuilder: (BuildContext context) {
-          dividerWidth = 1.0 / MediaQuery.of(context).devicePixelRatio;
           return new CupertinoAlertDialog(
             title: const Text('The Title'),
-            content: const Text('The message'),
+            content: new Text('The message\n' * 40),
             actions: const <Widget>[
               CupertinoDialogAction(
                 child: Text('Option 1'),
@@ -490,23 +488,23 @@ void main() {
 
     await tester.tap(find.text('Go'));
     await tester.pump();
+    await tester.pumpAndSettle();
 
     final RenderBox option1ButtonBox = findActionButtonRenderBoxByTitle(tester, 'Option 1');
     final RenderBox option2ButtonBox = findActionButtonRenderBoxByTitle(tester, 'Option 2');
-    final RenderBox option3ButtonBox = findActionButtonRenderBoxByTitle(tester, 'Option 3');
-    final RenderBox actionsSectionBox = findActionsSectionRenderBox(tester);
+    final RenderBox actionsSectionBox = findScrollableActionsSectionRenderBox(tester);
 
     expect(option1ButtonBox.size.width, option2ButtonBox.size.width);
-    expect(option2ButtonBox.size.width, option3ButtonBox.size.width);
     expect(option1ButtonBox.size.width, actionsSectionBox.size.width);
 
-    final double expectedHeight = option1ButtonBox.size.height
-        + option2ButtonBox.size.height
-        + option3ButtonBox.size.height
-        + (3 * dividerWidth);
+    // Expected Height = available dialog height - content height = 560.0 - 491.83333333333337
+    // Technically this number is off by 0.00000000000004 but I think it's a
+    // Dart precision issue. I ran the subtraction directly in dartpad and still
+    // got 68.16666666666663.
+    const double expectedHeight = 68.16666666666663;
     expect(
-      expectedHeight,
       actionsSectionBox.size.height,
+      expectedHeight,
     );
   });
 
@@ -538,7 +536,7 @@ void main() {
     await tester.tap(find.text('Go'));
     await tester.pump();
 
-    final RenderBox actionsSectionBox = findActionsSectionRenderBox(tester);
+    final RenderBox actionsSectionBox = findScrollableActionsSectionRenderBox(tester);
 
     // The way that overscroll white is accomplished in a scrollable action
     // section is that the custom RenderBox that lays out the buttons and draws
@@ -591,7 +589,7 @@ void main() {
     const Color pressedButtonBackgroundColor = Color(0x90ffffff);
     final RenderBox firstButtonBox = findActionButtonRenderBoxByTitle(tester, 'Option 1');
     final RenderBox secondButtonBox = findActionButtonRenderBoxByTitle(tester, 'Option 2');
-    final RenderBox actionsSectionBox = findActionsSectionRenderBox(tester);
+    final RenderBox actionsSectionBox = findScrollableActionsSectionRenderBox(tester);
 
     final Offset pressedButtonCenter = new Offset(
       secondButtonBox.size.width / 2.0,
@@ -677,10 +675,10 @@ RenderBox findActionButtonRenderBoxByTitle(WidgetTester tester, String title) {
   return buttonBox;
 }
 
-RenderBox findActionsSectionRenderBox(WidgetTester tester) {
+RenderBox findScrollableActionsSectionRenderBox(WidgetTester tester) {
   final RenderObject actionsSection = tester.renderObject(find.byElementPredicate(
     (Element element) {
-      return element.renderObject.runtimeType.toString() == '_RenderCupertinoDialogActions';
+      return element.widget.runtimeType.toString() == '_CupertinoAlertActionSection';
     }),
   );
   assert(actionsSection is RenderBox);
