@@ -16,3 +16,5 @@ pub get
 gclient sync
 dart lib/main.dart --release --src ../../.. --out ../../../out/licenses > ../../sky/packages/sky_engine/LICENSE
 ```
+
+**In order for the license script to work, please remove all untracked files inside `engine/src` (not just `engine/src/flutter`)**
