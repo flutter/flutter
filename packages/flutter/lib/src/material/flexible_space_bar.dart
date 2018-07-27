@@ -134,9 +134,8 @@ class _FlexibleSpaceBarState extends State<FlexibleSpaceBar> {
       case CollapseMode.parallax:
         final double deltaExtent = settings.maxExtent - settings.minExtent;
         return -new Tween<double>(begin: 0.0, end: deltaExtent / 4.0).lerp(t);
-      default:
-        throw new ArgumentError('Invalid collapse mode.');
     }
+    return null;
   }
 
   @override
