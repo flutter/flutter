@@ -63,6 +63,10 @@ class Rasterizer final {
   // the surface on the GPU task runner.
   void SetNextFrameCallback(fml::closure callback);
 
+  flow::CompositorContext* compositor_context() {
+    return compositor_context_.get();
+  }
+
  private:
   blink::TaskRunners task_runners_;
   std::unique_ptr<Surface> surface_;
