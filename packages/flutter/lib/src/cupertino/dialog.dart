@@ -1118,9 +1118,13 @@ class _RenderCupertinoDialogActions extends RenderBox
     assert(childCount >= 2);
 
     final double allDividersHeight = childCount * dividerThickness;
-    return getChildrenAsList().fold(allDividersHeight, (double heightAccumulation, RenderBox button) {
-      return heightAccumulation + button.getMaxIntrinsicHeight(width);
-    });
+    double heightAccumulation = allDividersHeight;
+    RenderBox button = firstChild;
+    while (button != null) {
+      heightAccumulation += button.getMaxIntrinsicHeight(width);
+      button = childAfter(button);
+    }
+    return heightAccumulation;
   }
 
   bool _isSingleButtonRow(double width) {
@@ -1160,12 +1164,14 @@ class _RenderCupertinoDialogActions extends RenderBox
         );
 
         // Layout the 2 buttons.
-        for (RenderBox button in getChildrenAsList()) {
-          button.layout(
-            perButtonConstraints,
-            parentUsesSize: true,
-          );
-        }
+        firstChild.layout(
+          perButtonConstraints,
+          parentUsesSize: true,
+        );
+        lastChild.layout(
+          perButtonConstraints,
+          parentUsesSize: true,
+        );
 
         // The 2nd button needs to be offset to the right.
         assert(lastChild.parentData is MultiChildLayoutParentData);
@@ -1188,11 +1194,10 @@ class _RenderCupertinoDialogActions extends RenderBox
         maxHeight: (constraints.maxHeight - (dividerThickness * childCount)) / childCount,
       );
 
-      final List<RenderBox> children = getChildrenAsList();
+      RenderBox child = firstChild;
+      int index = 0;
       double verticalOffset = dividerThickness;
-      for (int i = 0; i < children.length; ++i) {
-        final RenderBox child = children[i];
-
+      while (child != null) {
         child.layout(
           perButtonConstraints,
           parentUsesSize: true,
@@ -1203,10 +1208,13 @@ class _RenderCupertinoDialogActions extends RenderBox
         parentData.offset = new Offset(0.0, verticalOffset);
 
         verticalOffset += child.size.height;
-        if (i < children.length - 1) {
+        if (index < childCount - 1) {
           // Add a gap for the next divider.
           verticalOffset += dividerThickness;
         }
+
+        index += 1;
+        child = childAfter(child);
       }
 
       // Our height is the accumulated height of all buttons and dividers.
@@ -1315,21 +1323,22 @@ class _RenderCupertinoDialogActions extends RenderBox
 
     Offset accumulatingOffset = offset;
 
-    final List<RenderBox> children = getChildrenAsList();
-    for (int i = 0; i < children.length; i += 1) {
-      assert(children[i].parentData is _ActionButtonParentData);
-      final _ActionButtonParentData currentButtonParentData = children[i].parentData;
+    RenderBox child = firstChild;
+    RenderBox prevChild;
+    while (child != null) {
+      assert(child.parentData is _ActionButtonParentData);
+      final _ActionButtonParentData currentButtonParentData = child.parentData;
       final bool isButtonPressed = currentButtonParentData.isPressed;
 
       bool isPrevButtonPressed = false;
-      if (i > 0) {
-        assert(children[i - 1].parentData is _ActionButtonParentData);
-        final _ActionButtonParentData previousButtonParentData = children[i - 1]
+      if (prevChild != null) {
+        assert(prevChild.parentData is _ActionButtonParentData);
+        final _ActionButtonParentData previousButtonParentData = prevChild
             .parentData;
         isPrevButtonPressed = previousButtonParentData.isPressed;
       }
 
-      final bool dividerNeeded = i == 0 || !(isButtonPressed || isPrevButtonPressed);
+      final bool dividerNeeded = child == firstChild || !(isButtonPressed || isPrevButtonPressed);
 
       final Rect dividerRect = new Rect.fromLTWH(
         accumulatingOffset.dx,
@@ -1342,7 +1351,7 @@ class _RenderCupertinoDialogActions extends RenderBox
         accumulatingOffset.dx,
         accumulatingOffset.dy + dividerThickness,
         size.width,
-        children[i].size.height,
+        child.size.height,
       );
 
       // If this button is pressed, then we don't want a white background to be
@@ -1360,7 +1369,10 @@ class _RenderCupertinoDialogActions extends RenderBox
         dividersPath.addRect(dividerRect);
       }
 
-      accumulatingOffset += dividerOffset + new Offset(0.0, children[i].size.height);
+      accumulatingOffset += dividerOffset + new Offset(0.0, child.size.height);
+
+      prevChild = child;
+      child = childAfter(child);
     }
 
     canvas.drawPath(backgroundFillPath, _buttonBackgroundPaint);
@@ -1369,9 +1381,11 @@ class _RenderCupertinoDialogActions extends RenderBox
   }
 
   void _drawButtons(PaintingContext context, Offset offset) {
-    for (RenderBox child in getChildrenAsList()) {
+    RenderBox child = firstChild;
+    while (child != null) {
       final MultiChildLayoutParentData childParentData = child.parentData;
       context.paintChild(child, childParentData.offset + offset);
+      child = childAfter(child);
     }
   }
 
