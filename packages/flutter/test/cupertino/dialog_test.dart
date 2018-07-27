@@ -141,6 +141,49 @@ void main() {
     expect(tester.getSize(find.widgetWithText(CupertinoDialogAction, 'OK')), equals(const Size(270.0, 98.0)));
   });
 
+  testWidgets('Dialog respects small constraints.', (WidgetTester tester) async {
+    final ScrollController scrollController = new ScrollController();
+    await tester.pumpWidget(
+      createAppWithButtonThatLaunchesDialog(
+        dialogBuilder: (BuildContext context) {
+          return new Center(
+            child: new ConstrainedBox(
+              // Constrain the dialog to a tiny size and ensure it respects
+              // these exact constraints.
+              constraints: new BoxConstraints.tight(const Size(200.0, 100.0)),
+              child: new CupertinoAlertDialog(
+                title: const Text('The Title'),
+                content: const Text('The message'),
+                actions: const <Widget>[
+                  CupertinoDialogAction(
+                    child: Text('Option 1'),
+                  ),
+                  CupertinoDialogAction(
+                    child: Text('Option 2'),
+                  ),
+                  CupertinoDialogAction(
+                    child: Text('Option 3'),
+                  ),
+                ],
+                scrollController: scrollController,
+              ),
+            ),
+          );
+        },
+      ),
+    );
+
+    await tester.tap(find.text('Go'));
+    await tester.pump();
+
+    const double topAndBottomMargin = 40.0;
+    final Finder modalFinder = find.byType(ClipRRect);
+    expect(
+      tester.getSize(modalFinder),
+      equals(const Size(200.0, 100.0 - topAndBottomMargin)),
+    );
+  });
+
   testWidgets('Button list is scrollable, has correct position with large text sizes.',
       (WidgetTester tester) async {
     final ScrollController actionScrollController = new ScrollController();

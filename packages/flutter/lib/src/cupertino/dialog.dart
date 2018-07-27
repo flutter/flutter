@@ -536,7 +536,9 @@ class _RenderCupertinoDialog extends RenderBox {
     final double dialogHeight = contentSize.height + actionsSize.height;
 
     // Set our size now that layout calculations are complete.
-    size = new Size(_kCupertinoDialogWidth, dialogHeight);
+    size = constraints.constrain(
+      new Size(_kCupertinoDialogWidth, dialogHeight)
+    );
 
     // Set the position of the actions box to sit at the bottom of the dialog.
     // The content box defaults to the top left, which is where we want it.
@@ -1155,7 +1157,9 @@ class _RenderCupertinoDialogActions extends RenderBox
           parentUsesSize: true,
         );
 
-        size = new Size(_kCupertinoDialogWidth, firstChild.size.height + dividerThickness);
+        size = constraints.constrain(
+          new Size(_kCupertinoDialogWidth, firstChild.size.height + dividerThickness)
+        );
       } else {
         // Each button gets half the available width, minus a single divider.
         final BoxConstraints perButtonConstraints = constraints.copyWith(
@@ -1179,12 +1183,14 @@ class _RenderCupertinoDialogActions extends RenderBox
         secondButtonParentData.offset = new Offset(firstChild.size.width + dividerThickness, 0.0);
 
         // Calculate our size based on the button sizes.
-        size = new Size(
-          _kCupertinoDialogWidth,
-          math.max(
-            firstChild.size.height,
-            lastChild.size.height,
-          ) + dividerThickness,
+        size = constraints.constrain(
+          new Size(
+            _kCupertinoDialogWidth,
+            math.max(
+              firstChild.size.height,
+              lastChild.size.height,
+            ) + dividerThickness,
+          )
         );
       }
     } else {
@@ -1218,7 +1224,9 @@ class _RenderCupertinoDialogActions extends RenderBox
       }
 
       // Our height is the accumulated height of all buttons and dividers.
-      size = new Size(_kCupertinoDialogWidth, verticalOffset);
+      size = constraints.constrain(
+        new Size(_kCupertinoDialogWidth, verticalOffset)
+      );
     }
   }
 
