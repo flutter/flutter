@@ -36,10 +36,10 @@ void main() {
     await tester.pumpWidget(
       new MaterialApp(
         home: const Scaffold(
-          floatingActionButton: FloatingActionButton(
+          floatingActionButton: const FloatingActionButton(
             onPressed: null,
             tooltip: 'Add',
-            child: Icon(Icons.add),
+            child: const Icon(Icons.add),
           ),
         ),
       ),
@@ -53,7 +53,7 @@ void main() {
     await tester.pumpWidget(
       new MaterialApp(
         home: const Scaffold(
-          floatingActionButton: FloatingActionButton(
+          floatingActionButton: const FloatingActionButton(
             onPressed: null,
             tooltip: 'Add',
           ),
@@ -109,7 +109,7 @@ void main() {
     await tester.pumpWidget(
       new MaterialApp(
         home: const Scaffold(
-          floatingActionButton: FloatingActionButton(onPressed: null),
+          floatingActionButton: const FloatingActionButton(onPressed: null),
         ),
       ),
     );
@@ -129,7 +129,7 @@ void main() {
           floatingActionButton: new FloatingActionButton.extended(
             label: const SizedBox(
               width: 100.0,
-              child: Text('label'),
+              child: const Text('label'),
             ),
             icon: const Icon(Icons.android),
             onPressed: null,
@@ -275,10 +275,10 @@ void main() {
     await tester.pumpWidget(
       const Directionality(
         textDirection: TextDirection.ltr,
-        child: Center(
-          child: FloatingActionButton(
+        child: const Center(
+          child: const FloatingActionButton(
             onPressed: null,
-            child: Icon(Icons.add, semanticLabel: 'Add'),
+            child: const Icon(Icons.add, semanticLabel: 'Add'),
           ),
         ),
       ),
@@ -380,7 +380,7 @@ void main() {
             },
           ),
           body: const Center(
-            child: Text('Hello World'),
+            child: const Text('Hello World'),
           ),
         ),
       ),

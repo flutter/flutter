@@ -4,7 +4,7 @@
 
 import 'package:flutter/material.dart';
 
-const List<String> _defaultMaterials = <String>[
+const List<String> _defaultMaterials = const <String>[
   'poker',
   'tortilla',
   'fish and',
@@ -12,7 +12,7 @@ const List<String> _defaultMaterials = <String>[
   'wood',
 ];
 
-const List<String> _defaultActions = <String>[
+const List<String> _defaultActions = const <String>[
   'flake',
   'cut',
   'fragment',
@@ -24,7 +24,7 @@ const List<String> _defaultActions = <String>[
   'eat',
 ];
 
-const Map<String, String> _results = <String, String>{
+const Map<String, String> _results = const <String, String>{
   'flake': 'flaking',
   'cut': 'cutting',
   'fragment': 'fragmenting',
@@ -36,7 +36,7 @@ const Map<String, String> _results = <String, String>{
   'eat': 'eating',
 };
 
-const List<String> _defaultTools = <String>[
+const List<String> _defaultTools = const <String>[
   'hammer',
   'chisel',
   'fryer',
@@ -44,7 +44,7 @@ const List<String> _defaultTools = <String>[
   'customer',
 ];
 
-const Map<String, String> _avatars = <String, String>{
+const Map<String, String> _avatars = const <String, String>{
   'hammer': 'people/square/ali.png',
   'chisel': 'people/square/sandra.png',
   'fryer': 'people/square/trevor.png',

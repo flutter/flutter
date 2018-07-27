@@ -135,8 +135,8 @@ void _tests() {
   });
 
   group('haptic feedback', () {
-    const Duration kFastFeedbackInterval = Duration(milliseconds: 10);
-    const Duration kSlowFeedbackInterval = Duration(milliseconds: 200);
+    const Duration kFastFeedbackInterval = const Duration(milliseconds: 10);
+    const Duration kSlowFeedbackInterval = const Duration(milliseconds: 200);
     FeedbackTester feedback;
 
     setUp(() {
@@ -219,9 +219,9 @@ void _tests() {
     });
   });
 
-  const List<String> labels12To11 = <String>['12', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11'];
-  const List<String> labels12To11TwoDigit = <String>['12', '01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11'];
-  const List<String> labels00To23 = <String>['00', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', '23'];
+  const List<String> labels12To11 = const <String>['12', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11'];
+  const List<String> labels12To11TwoDigit = const <String>['12', '01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11'];
+  const List<String> labels00To23 = const <String>['00', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', '23'];
 
   Future<Null> mediaQueryBoilerplate(WidgetTester tester, bool alwaysUse24HourFormat,
       { TimeOfDay initialTime = const TimeOfDay(hour: 7, minute: 0) }) async {

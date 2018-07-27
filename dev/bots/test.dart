@@ -28,7 +28,7 @@ final String reset = hasColor ? '\x1B[0m' : '';
 const String arrow = '⏩';
 const String clock = '🕐';
 
-const Map<String, ShardRunner> _kShards = <String, ShardRunner>{
+const Map<String, ShardRunner> _kShards = const <String, ShardRunner>{
   'analyze': _analyzeRepo,
   'tests': _runTests,
   'tool_tests': _runToolTests,
@@ -37,8 +37,8 @@ const Map<String, ShardRunner> _kShards = <String, ShardRunner>{
   // 'build_and_deploy_gallery': handled by travis_script.sh
 };
 
-const Duration _kLongTimeout = Duration(minutes: 45);
-const Duration _kShortTimeout = Duration(minutes: 5);
+const Duration _kLongTimeout = const Duration(minutes: 45);
+const Duration _kShortTimeout = const Duration(minutes: 5);
 
 /// When you call this, you can pass additional arguments to pass custom
 /// arguments to flutter test. For example, you might want to call this

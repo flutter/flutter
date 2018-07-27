@@ -15,7 +15,7 @@ import 'context.dart';
 import 'file_system.dart';
 import 'platform.dart';
 
-const BotDetector _kBotDetector = BotDetector();
+const BotDetector _kBotDetector = const BotDetector();
 
 class BotDetector {
   const BotDetector();

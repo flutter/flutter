@@ -479,7 +479,7 @@ class Curves {
   /// cases where a [Curve] is required but no actual curve is desired.
   ///
   /// ![](https://flutter.github.io/assets-for-api-docs/assets/animation/curve_linear.png)
-  static const Curve linear = _Linear._();
+  static const Curve linear = const _Linear._();
 
   /// A curve where the rate of change starts out quickly and then decelerates; an
   /// upside-down `f(t) = t²` parabola.
@@ -488,27 +488,27 @@ class Curves {
   /// factor (the default factor).
   ///
   /// ![](https://flutter.github.io/assets-for-api-docs/assets/animation/curve_decelerate.png)
-  static const Curve decelerate = _DecelerateCurve._();
+  static const Curve decelerate = const _DecelerateCurve._();
 
   /// A cubic animation curve that speeds up quickly and ends slowly.
   ///
   /// ![](https://flutter.github.io/assets-for-api-docs/assets/animation/curve_ease.png)
-  static const Cubic ease = Cubic(0.25, 0.1, 0.25, 1.0);
+  static const Cubic ease = const Cubic(0.25, 0.1, 0.25, 1.0);
 
   /// A cubic animation curve that starts slowly and ends quickly.
   ///
   /// ![](https://flutter.github.io/assets-for-api-docs/assets/animation/curve_ease_in.png)
-  static const Cubic easeIn = Cubic(0.42, 0.0, 1.0, 1.0);
+  static const Cubic easeIn = const Cubic(0.42, 0.0, 1.0, 1.0);
 
   /// A cubic animation curve that starts quickly and ends slowly.
   ///
   /// ![](https://flutter.github.io/assets-for-api-docs/assets/animation/curve_ease_out.png)
-  static const Cubic easeOut = Cubic(0.0, 0.0, 0.58, 1.0);
+  static const Cubic easeOut = const Cubic(0.0, 0.0, 0.58, 1.0);
 
   /// A cubic animation curve that starts slowly, speeds up, and then and ends slowly.
   ///
   /// ![](https://flutter.github.io/assets-for-api-docs/assets/animation/curve_ease_in_out.png)
-  static const Cubic easeInOut = Cubic(0.42, 0.0, 0.58, 1.0);
+  static const Cubic easeInOut = const Cubic(0.42, 0.0, 0.58, 1.0);
 
   /// A curve that starts quickly and eases into its final position.
   ///
@@ -517,35 +517,35 @@ class Curves {
   /// animation to finish, and the negative effects of motion are minimized.
   ///
   /// ![](https://flutter.github.io/assets-for-api-docs/assets/animation/curve_fast_out_slow_in.png)
-  static const Cubic fastOutSlowIn = Cubic(0.4, 0.0, 0.2, 1.0);
+  static const Cubic fastOutSlowIn = const Cubic(0.4, 0.0, 0.2, 1.0);
 
   /// An oscillating curve that grows in magnitude.
   ///
   /// ![](https://flutter.github.io/assets-for-api-docs/assets/animation/curve_bounce_in.png)
-  static const Curve bounceIn = _BounceInCurve._();
+  static const Curve bounceIn = const _BounceInCurve._();
 
   /// An oscillating curve that first grows and then shrink in magnitude.
   ///
   /// ![](https://flutter.github.io/assets-for-api-docs/assets/animation/curve_bounce_out.png)
-  static const Curve bounceOut = _BounceOutCurve._();
+  static const Curve bounceOut = const _BounceOutCurve._();
 
   /// An oscillating curve that first grows and then shrink in magnitude.
   ///
   /// ![](https://flutter.github.io/assets-for-api-docs/assets/animation/curve_bounce_in_out.png)
-  static const Curve bounceInOut = _BounceInOutCurve._();
+  static const Curve bounceInOut = const _BounceInOutCurve._();
 
   /// An oscillating curve that grows in magnitude while overshooting its bounds.
   ///
   /// ![](https://flutter.github.io/assets-for-api-docs/assets/animation/curve_elastic_in.png)
-  static const ElasticInCurve elasticIn = ElasticInCurve();
+  static const ElasticInCurve elasticIn = const ElasticInCurve();
 
   /// An oscillating curve that shrinks in magnitude while overshooting its bounds.
   ///
   /// ![](https://flutter.github.io/assets-for-api-docs/assets/animation/curve_elastic_out.png)
-  static const ElasticOutCurve elasticOut = ElasticOutCurve();
+  static const ElasticOutCurve elasticOut = const ElasticOutCurve();
 
   /// An oscillating curve that grows and then shrinks in magnitude while overshooting its bounds.
   ///
   /// ![](https://flutter.github.io/assets-for-api-docs/assets/animation/curve_elastic_in_out.png)
-  static const ElasticInOutCurve elasticInOut = ElasticInOutCurve();
+  static const ElasticInOutCurve elasticInOut = const ElasticInOutCurve();
 }

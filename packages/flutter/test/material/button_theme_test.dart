@@ -7,23 +7,23 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   test('ButtonThemeData defaults', () {
-    const ButtonThemeData theme = ButtonThemeData();
+    const ButtonThemeData theme = const ButtonThemeData();
     expect(theme.textTheme, ButtonTextTheme.normal);
     expect(theme.constraints, const BoxConstraints(minWidth: 88.0, minHeight: 36.0));
     expect(theme.padding, const EdgeInsets.symmetric(horizontal: 16.0));
     expect(theme.shape, const RoundedRectangleBorder(
-      borderRadius: BorderRadius.all(Radius.circular(2.0)),
+      borderRadius: const BorderRadius.all(const Radius.circular(2.0)),
     ));
     expect(theme.alignedDropdown, false);
   });
 
   test('ButtonThemeData default overrides', () {
-    const ButtonThemeData theme = ButtonThemeData(
+    const ButtonThemeData theme = const ButtonThemeData(
       textTheme: ButtonTextTheme.primary,
       minWidth: 100.0,
       height: 200.0,
       padding: EdgeInsets.zero,
-      shape: RoundedRectangleBorder(),
+      shape: const RoundedRectangleBorder(),
       alignedDropdown: true,
     );
     expect(theme.textTheme, ButtonTextTheme.primary);
@@ -52,9 +52,9 @@ void main() {
               alignment: Alignment.topLeft,
               child: const Directionality(
                 textDirection: TextDirection.ltr,
-                child: FlatButton(
+                child: const FlatButton(
                   onPressed: null,
-                  child: Text('b'), // intrinsic width < minimum width
+                  child: const Text('b'), // intrinsic width < minimum width
                 ),
               ),
             );
@@ -67,7 +67,7 @@ void main() {
     expect(constraints, const BoxConstraints(minWidth: 88.0, minHeight: 36.0));
     expect(padding, const EdgeInsets.symmetric(horizontal: 16.0));
     expect(shape, const RoundedRectangleBorder(
-      borderRadius: BorderRadius.all(Radius.circular(2.0)),
+      borderRadius: const BorderRadius.all(const Radius.circular(2.0)),
     ));
 
     expect(tester.widget<Material>(find.byType(Material)).shape, shape);
@@ -80,7 +80,7 @@ void main() {
     expect(theme.constraints, const BoxConstraints(minWidth: 88.0, minHeight: 36.0));
     expect(theme.padding, const EdgeInsets.symmetric(horizontal: 16.0));
     expect(theme.shape, const RoundedRectangleBorder(
-      borderRadius: BorderRadius.all(Radius.circular(2.0)),
+      borderRadius: const BorderRadius.all(const Radius.circular(2.0)),
     ));
     expect(theme.alignedDropdown, false);
 
@@ -129,9 +129,9 @@ void main() {
               alignment: Alignment.topLeft,
               child: const Directionality(
                 textDirection: TextDirection.ltr,
-                child: RaisedButton(
+                child: const RaisedButton(
                   onPressed: null,
-                  child: Text('b'), // intrinsic width < minimum width
+                  child: const Text('b'), // intrinsic width < minimum width
                 ),
               ),
             );
@@ -144,7 +144,7 @@ void main() {
     expect(constraints, const BoxConstraints(minWidth: 88.0, minHeight: 36.0));
     expect(padding, const EdgeInsets.symmetric(horizontal: 16.0));
     expect(shape, const RoundedRectangleBorder(
-      borderRadius: BorderRadius.all(Radius.circular(2.0)),
+      borderRadius: const BorderRadius.all(const Radius.circular(2.0)),
     ));
 
     expect(tester.widget<Material>(find.byType(Material)).shape, shape);
@@ -228,13 +228,13 @@ void main() {
                         onChanged: (String value) { },
                         value: 'foo',
                         items: const <DropdownMenuItem<String>>[
-                          DropdownMenuItem<String>(
+                          const DropdownMenuItem<String>(
                             value: 'foo',
-                            child: Text('foo'),
+                            child: const Text('foo'),
                           ),
-                          DropdownMenuItem<String>(
+                          const DropdownMenuItem<String>(
                             value: 'bar',
-                            child: Text('bar'),
+                            child: const Text('bar'),
                           ),
                         ],
                       ),

@@ -155,8 +155,8 @@ const double _kSwitchWidth = 59.0;
 const double _kSwitchHeight = 39.0;
 
 const Color _kTrackColor = CupertinoColors.lightBackgroundGray;
-const Duration _kReactionDuration = Duration(milliseconds: 300);
-const Duration _kToggleDuration = Duration(milliseconds: 200);
+const Duration _kReactionDuration = const Duration(milliseconds: 300);
+const Duration _kToggleDuration = const Duration(milliseconds: 200);
 
 class _RenderCupertinoSwitch extends RenderConstrainedBox {
   _RenderCupertinoSwitch({

@@ -131,7 +131,7 @@ class Card extends StatelessWidget {
           color: color ?? Theme.of(context).cardColor,
           elevation: elevation ?? 1.0,
           shape: shape ?? const RoundedRectangleBorder(
-            borderRadius: BorderRadius.all(Radius.circular(4.0)),
+            borderRadius: const BorderRadius.all(const Radius.circular(4.0)),
           ),
           child: child,
         ),

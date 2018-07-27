@@ -17,7 +17,7 @@ import '../src/common.dart';
 import '../src/context.dart';
 
 /// Test case timeout for tests involving project analysis.
-const Timeout allowForSlowAnalyzeTests = Timeout.factor(5.0);
+const Timeout allowForSlowAnalyzeTests = const Timeout.factor(5.0);
 
 void main() {
   final String analyzerSeparator = platform.isWindows ? '-' : '•';

@@ -21,7 +21,7 @@ Future<TaskResult> runEndToEndTests() async {
     if (deviceOperatingSystem == DeviceOperatingSystem.ios)
       await prepareProvisioningCertificates(testDirectory.path);
 
-    const List<String> entryPoints = <String>[
+    const List<String> entryPoints = const <String>[
       'lib/keyboard_resize.dart',
       'lib/driver.dart',
       'lib/screenshot.dart',
