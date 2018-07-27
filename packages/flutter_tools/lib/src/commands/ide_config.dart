@@ -29,6 +29,14 @@ class IdeConfigCommand extends FlutterCommand {
           'update any out-of-date files, and remove any deleted files from the '
           'template directory.',
     );
+    argParser.addFlag(
+      'with-root-module',
+      negatable: true,
+      defaultsTo: false,
+      help: 'Also create module that corresponds to the root of Flutter tree. '
+          'This makes the entire Flutter tree browseable and searchable in IDE. '
+          'Without this flag, only the child modules will be visible in IDE.',
+    );
   }
 
   @override
@@ -238,7 +246,9 @@ class IdeConfigCommand extends FlutterCommand {
 
     printStatus('Updating IDE configuration for Flutter tree at $dirPath...');
     int generatedCount = 0;
-    generatedCount += _renderTemplate(_ideName, dirPath, <String, dynamic>{});
+    generatedCount += _renderTemplate(_ideName, dirPath, <String, dynamic>{
+      'withRootModule': argResults['with-root-module'],
+    });
 
     printStatus('Wrote $generatedCount files.');
     printStatus('');

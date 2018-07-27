@@ -107,6 +107,9 @@ class Template {
     }
 
     _templateFilePaths.forEach((String relativeDestinationPath, String absoluteSourcePath) {
+      if (!context['withRootModule'] && absoluteSourcePath.contains('flutter_root'))
+        return;
+
       final String finalDestinationPath = renderPath(relativeDestinationPath);
       if (finalDestinationPath == null)
         return;
