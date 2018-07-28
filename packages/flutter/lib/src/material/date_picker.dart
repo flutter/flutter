@@ -40,11 +40,11 @@ enum DatePickerMode {
   year,
 }
 
-const double _kDatePickerHeaderPortraitHeight = 100.0;
+const double _kDatePickerHeaderPortraitHeight = 104.0;
 const double _kDatePickerHeaderLandscapeWidth = 168.0;
 
 const Duration _kMonthScrollDuration = const Duration(milliseconds: 200);
-const double _kDayPickerRowHeight = 42.0;
+const double _kDayPickerRowHeight = 48.0;
 const int _kMaxDayPickerRowCount = 6; // A 31 day month that starts on Saturday.
 // Two extra rows: one for the day-of-week header and one for the month header.
 const double _kMaxDayPickerHeight = _kDayPickerRowHeight * (_kMaxDayPickerRowCount + 2);
@@ -125,15 +125,24 @@ class _DatePickerHeader extends StatelessWidget {
         break;
     }
 
-    final Widget yearButton = new IgnorePointer(
-      ignoring: mode != DatePickerMode.day,
-      ignoringSemantics: false,
-      child: new _DateHeaderButton(
-        color: backgroundColor,
-        onTap: Feedback.wrapForTap(() => _handleChangeMode(DatePickerMode.year), context),
-        child: new Semantics(
-          selected: mode == DatePickerMode.year,
-          child: new Text(localizations.formatYear(selectedDate), style: yearStyle),
+    final Widget yearButton = new Semantics(
+      container: true,
+      button: true,
+      selected: mode == DatePickerMode.year,
+      child: new ConstrainedBox(
+        constraints: const BoxConstraints(minHeight: 48.0, minWidth: 48.0),
+        child: new Center(
+          widthFactor: 1.0,
+          heightFactor: 1.0,
+          child: new IgnorePointer(
+            ignoring: mode != DatePickerMode.day,
+            ignoringSemantics: false,
+            child: new _DateHeaderButton(
+              color: backgroundColor,
+              onTap: Feedback.wrapForTap(() => _handleChangeMode(DatePickerMode.year), context),
+              child: new Text(localizations.formatYear(selectedDate), style: yearStyle),
+            ),
+          ),
         ),
       ),
     );
@@ -145,6 +154,7 @@ class _DatePickerHeader extends StatelessWidget {
         color: backgroundColor,
         onTap: Feedback.wrapForTap(() => _handleChangeMode(DatePickerMode.day), context),
         child: new Semantics(
+          button: true,
           selected: mode == DatePickerMode.day,
           child: new Text(localizations.formatMediumDate(selectedDate), style: dayStyle),
         ),
@@ -425,11 +435,11 @@ class DayPicker extends StatelessWidget {
               // formatted full date.
               label: '${localizations.formatDecimal(day)}, ${localizations.formatFullDate(dayToBuild)}',
               selected: isSelectedDay,
-              child: new ExcludeSemantics(
+              excludeSemantics: true,
+              sortKey: new OrdinalSortKey(i.toDouble()),
                 child: new Text(localizations.formatDecimal(day), style: itemStyle),
               ),
             ),
-          ),
         );
 
         if (!disabled) {
@@ -446,11 +456,11 @@ class DayPicker extends StatelessWidget {
       }
     }
 
-    return new Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 8.0),
-      child: new Column(
-        children: <Widget>[
-          new Container(
+    return new Column(
+      children: <Widget>[
+        new Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 8.0),
+          child: new Container(
             height: _kDayPickerRowHeight,
             child: new Center(
               child: new ExcludeSemantics(
@@ -461,14 +471,14 @@ class DayPicker extends StatelessWidget {
               ),
             ),
           ),
-          new Flexible(
-            child: new GridView.custom(
-              gridDelegate: _kDayPickerGridDelegate,
-              childrenDelegate: new SliverChildListDelegate(labels, addRepaintBoundaries: false),
-            ),
+        ),
+        new Flexible(
+          child: new GridView.custom(
+            gridDelegate: _kDayPickerGridDelegate,
+            childrenDelegate: new SliverChildListDelegate(labels, addRepaintBoundaries: false),
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }
@@ -611,14 +621,12 @@ class _MonthPickerState extends State<MonthPicker> with SingleTickerProviderStat
 
   void _handleNextMonth() {
     if (!_isDisplayingLastMonth) {
-      SemanticsService.announce(localizations.formatMonthYear(_nextMonthDate), textDirection);
       _dayPickerController.nextPage(duration: _kMonthScrollDuration, curve: Curves.ease);
     }
   }
 
   void _handlePreviousMonth() {
     if (!_isDisplayingFirstMonth) {
-      SemanticsService.announce(localizations.formatMonthYear(_previousMonthDate), textDirection);
       _dayPickerController.previousPage(duration: _kMonthScrollDuration, curve: Curves.ease);
     }
   }
@@ -850,8 +858,6 @@ class _DatePickerDialogState extends State<_DatePickerDialog> {
     _mode = widget.initialDatePickerMode;
   }
 
-  bool _announcedInitialDate = false;
-
   MaterialLocalizations localizations;
   TextDirection textDirection;
 
@@ -860,13 +866,6 @@ class _DatePickerDialogState extends State<_DatePickerDialog> {
     super.didChangeDependencies();
     localizations = MaterialLocalizations.of(context);
     textDirection = Directionality.of(context);
-    if (!_announcedInitialDate) {
-      _announcedInitialDate = true;
-      SemanticsService.announce(
-        localizations.formatFullDate(_selectedDate),
-        textDirection,
-      );
-    }
   }
 
   DateTime _selectedDate;
@@ -888,11 +887,6 @@ class _DatePickerDialogState extends State<_DatePickerDialog> {
     _vibrate();
     setState(() {
       _mode = mode;
-      if (_mode == DatePickerMode.day) {
-        SemanticsService.announce(localizations.formatMonthYear(_selectedDate), textDirection);
-      } else {
-        SemanticsService.announce(localizations.formatYear(_selectedDate), textDirection);
-      }
     });
   }
 
@@ -1031,7 +1025,13 @@ class _DatePickerDialogState extends State<_DatePickerDialog> {
       data: theme.copyWith(
         dialogBackgroundColor: Colors.transparent,
       ),
-      child: dialog,
+      child: new Semantics(
+        namesRoute: true,
+        scopesRoute: true,
+        explicitChildNodes: true,
+        label: localizations.formatFullDate(_selectedDate),
+        child: dialog,
+      )
     );
   }
 }
