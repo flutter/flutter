@@ -325,20 +325,15 @@ class _HourControl extends StatelessWidget {
     return new GestureDetector(
       onTap: Feedback.wrapForTap(() => fragmentContext.onModeChange(_TimePickerMode.hour), context),
       child: new Semantics(
-        liveRegion:  fragmentContext.mode == _TimePickerMode.hour ? true : false,
         hint: localizations.timePickerHourModeAnnouncement,
         value: formattedHour,
         excludeSemantics: true,
         increasedValue: formattedNextHour,
         onIncrease: () {
-          final RenderObject renderObject = context.findRenderObject();
-          renderObject?.sendSemanticsEvent(const UpdateLiveRegionEvent());
           fragmentContext.onTimeChange(nextHour);
         },
         decreasedValue: formattedPreviousHour,
         onDecrease: () {
-          final RenderObject renderObject = context.findRenderObject();
-          renderObject?.sendSemanticsEvent(const UpdateLiveRegionEvent());
           fragmentContext.onTimeChange(previousHour);
         },
           child: new Text(formattedHour, style: hourStyle),
@@ -378,8 +373,7 @@ class _MinuteControl extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final MaterialLocalizations localizations = MaterialLocalizations.of(context);
-    final bool isActive = fragmentContext.mode == _TimePickerMode.minute;
-    final TextStyle minuteStyle = isActive
+    final TextStyle minuteStyle = fragmentContext.mode == _TimePickerMode.minute
         ? fragmentContext.activeStyle
         : fragmentContext.inactiveStyle;
     final String formattedMinute = localizations.formatMinute(fragmentContext.selectedTime);
@@ -395,20 +389,15 @@ class _MinuteControl extends StatelessWidget {
     return new GestureDetector(
       onTap: Feedback.wrapForTap(() => fragmentContext.onModeChange(_TimePickerMode.minute), context),
       child: new Semantics(
-        liveRegion: true,
         excludeSemantics: true,
         hint: localizations.timePickerMinuteModeAnnouncement,
         value: formattedMinute,
         increasedValue: formattedNextMinute,
         onIncrease: () {
-          final RenderObject renderObject = context.findRenderObject();
-          renderObject?.sendSemanticsEvent(const UpdateLiveRegionEvent());
           fragmentContext.onTimeChange(nextMinute);
         },
         decreasedValue: formattedPreviousMinute,
         onDecrease: () {
-          final RenderObject renderObject = context.findRenderObject();
-          renderObject?.sendSemanticsEvent(const UpdateLiveRegionEvent());
           fragmentContext.onTimeChange(previousMinute);
         },
           child: new Text(formattedMinute, style: minuteStyle),
