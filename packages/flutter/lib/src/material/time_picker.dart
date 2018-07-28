@@ -325,20 +325,24 @@ class _HourControl extends StatelessWidget {
     return new GestureDetector(
       onTap: Feedback.wrapForTap(() => fragmentContext.onModeChange(_TimePickerMode.hour), context),
       child: new Semantics(
+        liveRegion:  fragmentContext.mode == _TimePickerMode.hour ? true : false,
         hint: localizations.timePickerHourModeAnnouncement,
         value: formattedHour,
+        excludeSemantics: true,
         increasedValue: formattedNextHour,
         onIncrease: () {
+          final RenderObject renderObject = context.findRenderObject();
+          renderObject?.sendSemanticsEvent(const UpdateLiveRegionEvent());
           fragmentContext.onTimeChange(nextHour);
         },
         decreasedValue: formattedPreviousHour,
         onDecrease: () {
+          final RenderObject renderObject = context.findRenderObject();
+          renderObject?.sendSemanticsEvent(const UpdateLiveRegionEvent());
           fragmentContext.onTimeChange(previousHour);
         },
-        child: new ExcludeSemantics(
           child: new Text(formattedHour, style: hourStyle),
         ),
-      ),
     );
   }
 }
@@ -374,16 +378,15 @@ class _MinuteControl extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final MaterialLocalizations localizations = MaterialLocalizations.of(context);
-    final TextStyle minuteStyle = fragmentContext.mode == _TimePickerMode.minute
+    final bool isActive = fragmentContext.mode == _TimePickerMode.minute;
+    final TextStyle minuteStyle = isActive
         ? fragmentContext.activeStyle
         : fragmentContext.inactiveStyle;
     final String formattedMinute = localizations.formatMinute(fragmentContext.selectedTime);
-
     final TimeOfDay nextMinute = fragmentContext.selectedTime.replacing(
       minute: (fragmentContext.selectedTime.minute + 1) % TimeOfDay.minutesPerHour,
     );
     final String formattedNextMinute = localizations.formatMinute(nextMinute);
-
     final TimeOfDay previousMinute = fragmentContext.selectedTime.replacing(
       minute: (fragmentContext.selectedTime.minute - 1) % TimeOfDay.minutesPerHour,
     );
@@ -392,20 +395,24 @@ class _MinuteControl extends StatelessWidget {
     return new GestureDetector(
       onTap: Feedback.wrapForTap(() => fragmentContext.onModeChange(_TimePickerMode.minute), context),
       child: new Semantics(
+        liveRegion: true,
+        excludeSemantics: true,
         hint: localizations.timePickerMinuteModeAnnouncement,
         value: formattedMinute,
         increasedValue: formattedNextMinute,
         onIncrease: () {
+          final RenderObject renderObject = context.findRenderObject();
+          renderObject?.sendSemanticsEvent(const UpdateLiveRegionEvent());
           fragmentContext.onTimeChange(nextMinute);
         },
         decreasedValue: formattedPreviousMinute,
         onDecrease: () {
+          final RenderObject renderObject = context.findRenderObject();
+          renderObject?.sendSemanticsEvent(const UpdateLiveRegionEvent());
           fragmentContext.onTimeChange(previousMinute);
         },
-        child: new ExcludeSemantics(
           child: new Text(formattedMinute, style: minuteStyle),
         ),
-      ),
     );
   }
 }
@@ -937,21 +944,23 @@ class _DialPainter extends CustomPainter {
       final double labelThetaIncrement = -_kTwoPi / labels.length;
       double labelTheta = math.pi / 2.0;
 
-      for (_TappableLabel label in labels) {
+      for (int i = 0; i < labels.length; i++) {
+        final _TappableLabel label = labels[i];
         final TextPainter labelPainter = label.painter;
         final double width = labelPainter.width * _semanticNodeSizeScale;
         final double height = labelPainter.height * _semanticNodeSizeScale;
         final Offset nodeOffset = getOffsetForTheta(labelTheta, ring) + new Offset(-width / 2.0, -height / 2.0);
         final CustomPainterSemantics node = new CustomPainterSemantics(
           rect: new Rect.fromLTRB(
-            nodeOffset.dx,
-            nodeOffset.dy,
-            nodeOffset.dx + width,
-            nodeOffset.dy + height
+            nodeOffset.dx - 24.0 + width / 2,
+            nodeOffset.dy - 24.0 + height / 2,
+            nodeOffset.dx + 24.0 + width / 2,
+            nodeOffset.dy + 24.0 + height / 2,
           ),
           properties: new SemanticsProperties(
+            sortKey: new OrdinalSortKey(i.toDouble()),
             selected: label.value == selectedValue,
-            value: labelPainter.text.text,
+            label: labelPainter.text.text,
             textDirection: textDirection,
             onTap: label.onTap,
           ),
@@ -960,7 +969,6 @@ class _DialPainter extends CustomPainter {
             const SemanticsTag('dial-label'),
           ]),
         );
-
         nodes.add(node);
         labelTheta += labelThetaIncrement;
       }
