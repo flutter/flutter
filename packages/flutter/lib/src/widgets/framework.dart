@@ -1572,9 +1572,91 @@ abstract class InheritedWidget extends ProxyWidget {
   /// object.
   @protected
   bool updateShouldNotify(covariant InheritedWidget oldWidget);
+}
+
+abstract class InheritedModel<T> extends InheritedWidget {
+  const InheritedModel({ Key key, Widget child }) : super(key: key, child: child);
+
+  @override
+  InheritedModelElement<T> createElement() => new InheritedModelElement<T>(this);
 
   @protected
-  Set<dynamic> getUpdateScope(covariant InheritedWidget oldWidget) => _kEmptySet;
+  bool updateShouldNotifyDependent(covariant InheritedModel<T> oldWidget, Set<T> changes);
+
+  @protected
+  T getChangeFor(dynamic token) => token;
+}
+
+class _TokenChange<T> {
+  _TokenChange(this.token, this.change) : assert(token != null), assert(change != null);
+
+  final dynamic token;
+  final T change;
+
+  @override
+  bool operator ==(dynamic other) {
+    if (other.runtimeType != runtimeType)
+      return false;
+    final _TokenChange<T> typedOther = other;
+    return token == typedOther.token;
+  }
+
+  @override
+  int get hashCode => token.hashCode;
+}
+
+class InheritedModelElement<T> extends InheritedElement {
+  InheritedModelElement(InheritedModel<T> widget) : super(widget);
+
+  @override
+  InheritedModel<T> get widget => super.widget;
+
+  _TokenChange<T> _getTokenChange(dynamic token) {
+    return new _TokenChange<T>(token, widget.getChangeFor(token));
+  }
+
+  // If `token` is ever null, then always rebuild element when this inherited
+  // widget changes, regardless of which tokens have changed.
+  void _addDependent(Element element, dynamic token) {
+    if (token == null) {
+      _dependents[element] = _kEmptySet;
+    } else if (_dependents[element] == null) {
+      _dependents[element] = new HashSet<_TokenChange<T>>.of(<_TokenChange<T>>[ _getTokenChange(token) ]);
+    } else if (_dependents[element].isNotEmpty) {
+      _dependents[element].add(_getTokenChange(token));
+    } // otherwise _addDependent was already called with token == null
+  }
+
+  // The value of _dependents[dependent] is a Set<_TokenChange>. Return a
+  // new set that just contains the changes.
+  Set<T> _getChanges(Element dependent) {
+    return new HashSet<T>.of(
+      _dependents[dependent].map((dynamic tokenChangeValue) {
+        final _TokenChange<T> tokenChange = tokenChangeValue;
+        return tokenChange.change;
+      })
+    );
+  }
+
+  @override
+  void notifyClients(InheritedModel<T> oldWidget) {
+    if (!widget.updateShouldNotify(oldWidget))
+      return;
+    assert(_debugCheckOwnerBuildTargetExists('notifyClients'));
+    for (Element dependent in _dependents.keys) {
+      assert(() {
+        // check that it really is our descendant
+        Element ancestor = dependent._parent;
+        while (ancestor != this && ancestor != null)
+          ancestor = ancestor._parent;
+        return ancestor == this;
+      }());
+      // check that it really depends on us
+      assert(dependent._dependencies.contains(this));
+      if (widget.updateShouldNotifyDependent(oldWidget, _getChanges(dependent)))
+        dependent.didChangeDependencies();
+    }
+  }
 }
 
 /// RenderObjectWidgets provide the configuration for [RenderObjectElement]s,
@@ -1910,7 +1992,7 @@ abstract class BuildContext {
   /// called, whenever changes occur relating to that widget until the next time
   /// the widget or one of its ancestors is moved (for example, because an
   /// ancestor is added or removed).
-  InheritedWidget inheritFromWidgetOfExactType(Type targetType, { dynamic scope });
+  InheritedWidget inheritFromWidgetOfExactType(Type targetType, { dynamic token });
 
   /// Obtains the element corresponding to the nearest widget of the given type,
   /// which must be the type of a concrete [InheritedWidget] subclass.
@@ -3232,21 +3314,21 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   }
 
   @override
-  InheritedWidget inheritFromWidgetOfExactType(Type targetType, { dynamic scope }) {
+  InheritedWidget inheritFromWidgetOfExactType(Type targetType, { dynamic token }) {
     assert(_debugCheckStateIsActiveForAncestorLookup());
     final InheritedElement ancestor = _inheritedWidgets == null ? null : _inheritedWidgets[targetType];
     if (ancestor != null) {
       assert(ancestor is InheritedElement);
       _dependencies ??= new HashSet<InheritedElement>();
       _dependencies.add(ancestor);
-      // If we're ever called with scope == null (the common case) then
+      // If we're ever called with token == null (the common case) then
       // InheritedElement.notifyClients will unconditionally rebuild all dependents.
-      if (scope == null) {
+      if (token == null) {
         ancestor._dependents[this] = _kEmptySet;
-      } else if (ancestor._dependents[this] == null) {
-        ancestor._dependents[this] = new HashSet<dynamic>.of(<dynamic>[scope]);
-      } else if (ancestor._dependents[this].isNotEmpty) {
-        ancestor._dependents[this].add(scope);
+      } else {
+        assert(ancestor is InheritedModelElement);
+        final InheritedModelElement<dynamic> modelElement = ancestor;
+        modelElement._addDependent(this, token);
       }
       return ancestor.widget;
     }
@@ -3859,7 +3941,7 @@ class StatefulElement extends ComponentElement {
   }
 
   @override
-  InheritedWidget inheritFromWidgetOfExactType(Type targetType, { dynamic scope }) {
+  InheritedWidget inheritFromWidgetOfExactType(Type targetType, { dynamic token }) {
     assert(() {
       if (state._debugLifecycleState == _StateLifecycle.created) {
         throw new FlutterError(
@@ -3896,7 +3978,7 @@ class StatefulElement extends ComponentElement {
       }
       return true;
     }());
-    return super.inheritFromWidgetOfExactType(targetType, scope: scope);
+    return super.inheritFromWidgetOfExactType(targetType, token: token);
   }
 
   @override
@@ -4068,15 +4150,6 @@ class InheritedElement extends ProxyElement {
     super.debugDeactivated();
   }
 
-  // True if the two sets intersect.
-  bool _scopesIntersect(Set<dynamic> widgetScope, Set<dynamic> dependentScope) {
-    for (dynamic value in dependentScope) {
-      if (widgetScope.contains(value))
-        return true;
-    }
-    return false;
-  }
-
   /// Calls [Element.didChangeDependencies] of all dependent elements, if
   /// [InheritedWidget.updateShouldNotify] returns true.
   ///
@@ -4093,7 +4166,6 @@ class InheritedElement extends ProxyElement {
     if (!widget.updateShouldNotify(oldWidget))
       return;
     assert(_debugCheckOwnerBuildTargetExists('notifyClients'));
-    final Set<dynamic> scope = widget.getUpdateScope(oldWidget);
     for (Element dependent in _dependents.keys) {
       assert(() {
         // check that it really is our descendant
@@ -4104,10 +4176,7 @@ class InheritedElement extends ProxyElement {
       }());
       // check that it really depends on us
       assert(dependent._dependencies.contains(this));
-      if (scope.isEmpty || _dependents[dependent].isEmpty)
-        dependent.didChangeDependencies();
-      else if (_scopesIntersect(scope, _dependents[dependent]))
-        dependent.didChangeDependencies();
+      dependent.didChangeDependencies();
     }
   }
 }
