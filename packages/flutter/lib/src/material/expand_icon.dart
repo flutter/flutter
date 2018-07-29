@@ -111,7 +111,7 @@ class _ExpandIconState extends State<ExpandIcon> with SingleTickerProviderStateM
       icon: new RotationTransition(
         turns: _iconTurns,
         child: const Icon(Icons.expand_more)
-      )
+      ),
     );
   }
 }

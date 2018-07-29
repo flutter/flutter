@@ -451,10 +451,20 @@ class SemanticsProperties extends DiagnosticableTree {
     this.onPaste,
     this.onMoveCursorForwardByCharacter,
     this.onMoveCursorBackwardByCharacter,
+    this.onMoveCursorForwardByWord,
+    this.onMoveCursorBackwardByWord,
+    this.onMoveCursorForwardByLine,
+    this.onMoveCursorBackwardByLine,
+    this.onMoveCursorForwardByParagraph,
+    this.onMoveCursorBackwardByParagraph,
+    this.onMoveCursorForwardByPage,
+    this.onMoveCursorBackwardByPage,
     this.onSetSelection,
     this.onDidGainAccessibilityFocus,
     this.onDidLoseAccessibilityFocus,
     this.onDismiss,
+    this.onExpand,
+    this.onCollapse,
     this.customSemanticsActions,
   });
 
@@ -811,6 +821,15 @@ class SemanticsProperties extends DiagnosticableTree {
   /// input focus is in a text field.
   final MoveCursorHandler onMoveCursorBackwardByCharacter;
 
+  final MoveCursorHandler onMoveCursorForwardByWord;
+  final MoveCursorHandler onMoveCursorBackwardByWord;
+  final MoveCursorHandler onMoveCursorForwardByLine;
+  final MoveCursorHandler onMoveCursorBackwardByLine;
+  final MoveCursorHandler onMoveCursorForwardByParagraph;
+  final MoveCursorHandler onMoveCursorBackwardByParagraph;
+  final MoveCursorHandler onMoveCursorForwardByPage;
+  final MoveCursorHandler onMoveCursorBackwardByPage;
+
   /// The handler for [SemanticsAction.setSelection].
   ///
   /// This handler is invoked when the user either wants to change the currently
@@ -866,6 +885,10 @@ class SemanticsProperties extends DiagnosticableTree {
   /// menu, and VoiceOver users on iOS can trigger this action with a standard
   /// gesture or menu option.
   final VoidCallback onDismiss;
+
+  final VoidCallback onExpand;
+
+  final VoidCallback onCollapse;
 
   /// A map from each supported [CustomSemanticsAction] to a provided handler.
   ///
@@ -2589,6 +2612,102 @@ class SemanticsConfiguration {
   set onMoveCursorBackwardByCharacter(MoveCursorHandler value) {
     assert(value != null);
     _addAction(SemanticsAction.moveCursorBackwardByCharacter, (dynamic args) {
+      final bool extentSelection = args;
+      assert(extentSelection != null);
+      value(extentSelection);
+    });
+    _onMoveCursorBackwardByCharacter = value;
+  }
+
+  MoveCursorHandler get onMoveCursorForwardByWord => _onMoveCursorForwardByWord;
+  MoveCursorHandler _onMoveCursorForwardByWord;
+  set onMoveCursorForwardByWord(MoveCursorHandler value) {
+    assert(value != null);
+    _addAction(SemanticsAction.moveCursorForwardByWord, (dynamic args) {
+      final bool extentSelection = args;
+      assert(extentSelection != null);
+      value(extentSelection);
+    });
+    _onMoveCursorForwardByCharacter = value;
+  }
+
+  MoveCursorHandler get onMoveCursorBackwardByWord => _onMoveCursorBackwardByWord;
+  MoveCursorHandler _onMoveCursorBackwardByWord;
+  set onMoveCursorBackwardByWord(MoveCursorHandler value) {
+    assert(value != null);
+    _addAction(SemanticsAction.moveCursorBackwardByWord, (dynamic args) {
+      final bool extentSelection = args;
+      assert(extentSelection != null);
+      value(extentSelection);
+    });
+    _onMoveCursorBackwardByCharacter = value;
+  }
+
+  MoveCursorHandler get onMoveCursorForwardByLine => _onMoveCursorForwardByLine;
+  MoveCursorHandler _onMoveCursorForwardByLine;
+  set onMoveCursorForwardByLine(MoveCursorHandler value) {
+    assert(value != null);
+    _addAction(SemanticsAction.moveCursorForwardByLine, (dynamic args) {
+      final bool extentSelection = args;
+      assert(extentSelection != null);
+      value(extentSelection);
+    });
+    _onMoveCursorForwardByCharacter = value;
+  }
+
+  MoveCursorHandler get onMoveCursorBackwardByLine => _onMoveCursorBackwardByLine;
+  MoveCursorHandler _onMoveCursorBackwardByLine;
+  set onMoveCursorBackwardByLine(MoveCursorHandler value) {
+    assert(value != null);
+    _addAction(SemanticsAction.moveCursorBackwardByLine, (dynamic args) {
+      final bool extentSelection = args;
+      assert(extentSelection != null);
+      value(extentSelection);
+    });
+    _onMoveCursorBackwardByCharacter = value;
+  }
+
+  MoveCursorHandler get onMoveCursorForwardByParagraph => _onMoveCursorForwardByParagraph;
+  MoveCursorHandler _onMoveCursorForwardByParagraph;
+  set onMoveCursorForwardByParagraph(MoveCursorHandler value) {
+    assert(value != null);
+    _addAction(SemanticsAction.moveCursorForwardByParagraph, (dynamic args) {
+      final bool extentSelection = args;
+      assert(extentSelection != null);
+      value(extentSelection);
+    });
+    _onMoveCursorForwardByCharacter = value;
+  }
+
+  MoveCursorHandler get onMoveCursorBackwardByParagraph => _onMoveCursorBackwardByParagraph;
+  MoveCursorHandler _onMoveCursorBackwardByParagraph;
+  set onMoveCursorBackwardByParagraph(MoveCursorHandler value) {
+    assert(value != null);
+    _addAction(SemanticsAction.moveCursorBackwardByParagraph, (dynamic args) {
+      final bool extentSelection = args;
+      assert(extentSelection != null);
+      value(extentSelection);
+    });
+    _onMoveCursorBackwardByCharacter = value;
+  }
+
+  MoveCursorHandler get onMoveCursorForwardByPage => _onMoveCursorForwardByPage;
+  MoveCursorHandler _onMoveCursorForwardByPage;
+  set onMoveCursorForwardByPage(MoveCursorHandler value) {
+    assert(value != null);
+    _addAction(SemanticsAction.moveCursorForwardByPage, (dynamic args) {
+      final bool extentSelection = args;
+      assert(extentSelection != null);
+      value(extentSelection);
+    });
+    _onMoveCursorForwardByCharacter = value;
+  }
+
+  MoveCursorHandler get onMoveCursorBackwardByPage => _onMoveCursorBackwardByPage;
+  MoveCursorHandler _onMoveCursorBackwardByPage;
+  set onMoveCursorBackwardByPage(MoveCursorHandler value) {
+    assert(value != null);
+    _addAction(SemanticsAction.moveCursorBackwardByPage, (dynamic args) {
       final bool extentSelection = args;
       assert(extentSelection != null);
       value(extentSelection);

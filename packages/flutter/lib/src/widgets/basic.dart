@@ -5264,6 +5264,14 @@ class Semantics extends SingleChildRenderObjectWidget {
       onPaste: properties.onPaste,
       onMoveCursorForwardByCharacter: properties.onMoveCursorForwardByCharacter,
       onMoveCursorBackwardByCharacter: properties.onMoveCursorBackwardByCharacter,
+      onMoveCursorForwardByWord: properties.onMoveCursorForwardByWord,
+      onMoveCursorBackwardByWord: properties.onMoveCursorBackwardByWord,
+      onMoveCursorForwardByLine: properties.onMoveCursorForwardByLine,
+      onMoveCursorBackwardByLine: properties.onMoveCursorBackwardByLine,
+      onMoveCursorForwardByParagraph: properties.onMoveCursorForwardByParagraph,
+      onMoveCursorBackwardByParagraph: properties.onMoveCursorBackwardByParagraph,
+      onMoveCursorForwardByPage: properties.onMoveCursorForwardByPage,
+      onMoveCursorBackwardByPage: properties.onMoveCursorBackwardByPage,
       onSetSelection: properties.onSetSelection,
       onDidGainAccessibilityFocus: properties.onDidGainAccessibilityFocus,
       onDidLoseAccessibilityFocus: properties.onDidLoseAccessibilityFocus,
@@ -5325,6 +5333,14 @@ class Semantics extends SingleChildRenderObjectWidget {
       ..onPaste = properties.onPaste
       ..onMoveCursorForwardByCharacter = properties.onMoveCursorForwardByCharacter
       ..onMoveCursorBackwardByCharacter = properties.onMoveCursorForwardByCharacter
+      ..onMoveCursorForwardByWord = properties.onMoveCursorForwardByWord
+      ..onMoveCursorBackwardByWord = properties.onMoveCursorBackwardByWord
+      ..onMoveCursorForwardByLine = properties.onMoveCursorForwardByLine
+      ..onMoveCursorBackwardByLine = properties.onMoveCursorBackwardByLine
+      ..onMoveCursorForwardByParagraph = properties.onMoveCursorForwardByParagraph
+      ..onMoveCursorBackwardByParagraph = properties.onMoveCursorBackwardByParagraph
+      ..onMoveCursorForwardByPage = properties.onMoveCursorForwardByPage
+      ..onMoveCursorBackwardByPage = properties.onMoveCursorBackwardByPage
       ..onSetSelection = properties.onSetSelection
       ..onDidGainAccessibilityFocus = properties.onDidGainAccessibilityFocus
       ..onDidLoseAccessibilityFocus = properties.onDidLoseAccessibilityFocus
