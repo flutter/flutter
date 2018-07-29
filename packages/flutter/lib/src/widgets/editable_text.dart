@@ -399,6 +399,15 @@ class EditableText extends StatefulWidget {
   /// Defaults to EdgeInserts.all(20.0).
   final EdgeInsets scrollPadding;
 
+  static bool get debugDeterministicCursor => _debugDeterministicCursor;
+  static bool _debugDeterministicCursor = false;
+  static set debugDeterministicCursor(bool value) {
+    if (_debugDeterministicCursor == value) {
+      return;
+    }
+    _debugDeterministicCursor = value;
+  }
+
   @override
   EditableTextState createState() => new EditableTextState();
 
@@ -881,7 +890,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
               textSpan: buildTextSpan(),
               value: _value,
               cursorColor: widget.cursorColor,
-              showCursor: _showCursor,
+              showCursor: EditableText.debugDeterministicCursor ? ValueNotifier<bool>(true) : _showCursor,
               hasFocus: _hasFocus,
               maxLines: widget.maxLines,
               selectionColor: widget.selectionColor,
