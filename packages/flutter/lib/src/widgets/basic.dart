@@ -5168,11 +5168,10 @@ class Semantics extends SingleChildRenderObjectWidget {
       onSetSelection: onSetSelection,
       customSemanticsActions: customSemanticsActions,
       hintOverrides: onTapHint != null || onLongPressHint != null ?
-        SemanticsHintOverrides(
-         onTapHint: onTapHint,
-         onLongPressHint: onLongPressHint,
+        new SemanticsHintOverrides(
+          onTapHint: onTapHint,
+          onLongPressHint: onLongPressHint,
         ) : null,
-      ),
     ),
   );
 
