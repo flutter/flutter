@@ -53,6 +53,12 @@ const Duration _kFadeDuration = const Duration(milliseconds: 165);
 /// [children] will then be expanded to fill the calculated space, so each
 /// widget will appear to have the same dimensions.
 ///
+/// A segmented control may optionally be created with custom colors. The
+/// [unselectedColor], [selectedColor], [borderColor], and [pressedColor]
+/// arguments can be used to change the segmented control's colors from
+/// [CupertinoColors.activeBlue] and [CupertinoColors.white] to a custom
+/// configuration.
+///
 /// See also:
 ///
 ///  * <https://developer.apple.com/design/human-interface-guidelines/ios/controls/segmented-controls/>
@@ -80,7 +86,7 @@ class SegmentedControl<T> extends StatefulWidget {
     this.unselectedColor = CupertinoColors.white,
     this.selectedColor = CupertinoColors.activeBlue,
     this.borderColor = CupertinoColors.activeBlue,
-    this.pressedColor = const Color(0x33007aff),
+    this.pressedColor = const Color(0x33007AFF),
   })  : assert(children != null),
         assert(children.length >= 2),
         assert(onValueChanged != null),
@@ -169,7 +175,7 @@ class SegmentedControl<T> extends StatefulWidget {
   /// The color used to fill the background of the widget the user is
   /// temporarily interacting with through a long press or drag.
   ///
-  /// If this attribute is null, this color will be Color(0x33007aff), a light,
+  /// If this attribute is null, this color will be 'Color(0x33007AFF)', a light,
   /// partially-transparent blue color.
   final Color pressedColor;
 
@@ -184,22 +190,22 @@ class _SegmentedControlState<T> extends State<SegmentedControl<T>>
   final List<AnimationController> _selectionControllers = <AnimationController>[];
   final List<ColorTween> _childTweens = <ColorTween>[];
 
-  static ColorTween forwardBackgroundColorTween;
-  static ColorTween reverseBackgroundColorTween;
-  static ColorTween textColorTween;
+  ColorTween _forwardBackgroundColorTween;
+  ColorTween _reverseBackgroundColorTween;
+  ColorTween _textColorTween;
 
   @override
   void initState() {
     super.initState();
-    forwardBackgroundColorTween = new ColorTween(
+    _forwardBackgroundColorTween = new ColorTween(
       begin: widget.pressedColor,
       end: widget.selectedColor,
     );
-    reverseBackgroundColorTween = new ColorTween(
+    _reverseBackgroundColorTween = new ColorTween(
       begin: widget.unselectedColor,
       end: widget.selectedColor,
     );
-    textColorTween = new ColorTween(
+    _textColorTween = new ColorTween(
       begin: widget.selectedColor,
       end: widget.unselectedColor,
     );
@@ -207,10 +213,10 @@ class _SegmentedControlState<T> extends State<SegmentedControl<T>>
     for (T key in widget.children.keys) {
       final AnimationController animationController = createAnimationController();
       if (widget.groupValue == key) {
-        _childTweens.add(reverseBackgroundColorTween);
+        _childTweens.add(_reverseBackgroundColorTween);
         animationController.value = 1.0;
       } else {
-        _childTweens.add(forwardBackgroundColorTween);
+        _childTweens.add(_forwardBackgroundColorTween);
       }
       _selectionControllers.add(animationController);
     }
@@ -258,7 +264,7 @@ class _SegmentedControlState<T> extends State<SegmentedControl<T>>
 
   Color getTextColor(int index, T currentKey) {
     if (_selectionControllers[index].isAnimating)
-      return textColorTween.evaluate(_selectionControllers[index]);
+      return _textColorTween.evaluate(_selectionControllers[index]);
     if (widget.groupValue == currentKey)
       return widget.unselectedColor;
     return widget.selectedColor;
@@ -281,7 +287,7 @@ class _SegmentedControlState<T> extends State<SegmentedControl<T>>
     } else {
       for (int index = _selectionControllers.length; index < widget.children.length; index += 1) {
         _selectionControllers.add(createAnimationController());
-        _childTweens.add(reverseBackgroundColorTween);
+        _childTweens.add(_reverseBackgroundColorTween);
       }
     }
   }
@@ -298,10 +304,10 @@ class _SegmentedControlState<T> extends State<SegmentedControl<T>>
       int index = 0;
       for (T key in widget.children.keys) {
         if (widget.groupValue == key) {
-          _childTweens[index] = forwardBackgroundColorTween;
+          _childTweens[index] = _forwardBackgroundColorTween;
           _selectionControllers[index].forward();
         } else {
-          _childTweens[index] = reverseBackgroundColorTween;
+          _childTweens[index] = _reverseBackgroundColorTween;
           _selectionControllers[index].reverse();
         }
         index += 1;
