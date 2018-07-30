@@ -222,6 +222,9 @@ bool AndroidContextGL::MakeCurrent() {
 }
 
 bool AndroidContextGL::ClearCurrent() {
+  if (eglGetCurrentContext() != context_) {
+    return true;
+  }
   if (eglMakeCurrent(environment_->Display(), EGL_NO_SURFACE, EGL_NO_SURFACE,
                      EGL_NO_CONTEXT) != EGL_TRUE) {
     FML_LOG(ERROR) << "Could not clear the current context";
