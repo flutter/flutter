@@ -372,6 +372,9 @@ class PageScrollPhysics extends ScrollPhysics {
       return new ScrollSpringSimulation(spring, position.pixels, target, velocity, tolerance: tolerance);
     return null;
   }
+
+  @override
+  bool get allowImplicitScrolling => false;
 }
 
 // Having this global (mutable) page controller is a bit of a hack. We need it
