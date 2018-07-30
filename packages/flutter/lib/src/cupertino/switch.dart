@@ -380,10 +380,11 @@ class _RenderCupertinoSwitch extends RenderConstrainedBox {
   void describeSemanticsConfiguration(SemanticsConfiguration config) {
     super.describeSemanticsConfiguration(config);
 
-    config.isSemanticBoundary = isInteractive;
     if (isInteractive)
       config.onTap = _handleTap;
-    config.isChecked = _value;
+
+    config.isEnabled = isInteractive;
+    config.isToggled = _value;
   }
 
   final CupertinoThumbPainter _thumbPainter = new CupertinoThumbPainter();
