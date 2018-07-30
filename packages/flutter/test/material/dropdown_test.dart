@@ -24,6 +24,7 @@ Widget buildFrame({
   ValueChanged<String> onChanged,
   bool isDense = false,
   Widget hint,
+  Widget disabledHint,
   List<String> items = menuItems,
   Alignment alignment = Alignment.center,
   TextDirection textDirection = TextDirection.ltr,
@@ -37,6 +38,7 @@ Widget buildFrame({
           key: buttonKey,
           value: value,
           hint: hint,
+          disabledHint: disabledHint,
           onChanged: onChanged,
           isDense: isDense,
           items: items.map((String item) {
@@ -580,4 +582,26 @@ void main() {
 
     semantics.dispose();
   });
+
+  testWidgets('Empty items or onChangedHandler == null, displays disabledHint', (WidgetTester tester) async {
+  final Key buttonKey = new UniqueKey();
+  String value;
+
+  // The hint will define the dropdown's width
+  Widget build() => buildFrame(buttonKey: buttonKey, value: value, hint: const Text('onetwothree'), disabledHint: const Text('four'));
+
+  await tester.pumpWidget(build());
+  expect(find.text('for'), findsOneWidget);
+  final RenderBox buttonBoxHintValue = tester.renderObject(find.byKey(buttonKey));
+  assert(buttonBoxHintValue.attached);
+
+
+  // value = 'three';
+  // await tester.pumpWidget(build());
+  // final RenderBox buttonBox = tester.renderObject(find.byKey(buttonKey));
+  // assert(buttonBox.attached);
+
+});
+
+
 }
