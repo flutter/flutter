@@ -123,12 +123,12 @@ class ImageStream extends Diagnosticable {
     if (_listeners != null) {
       final List<_ImageListenerPair> initialListeners = _listeners;
       _listeners = null;
-      initialListeners.forEach((_ImageListenerPair listenerPair) {
+      for (_ImageListenerPair listenerPair in initialListeners) {
         _completer.addListener(
           listenerPair.listener,
           onError: listenerPair.errorListener,
         );
-      });
+      }
     }
   }
 
