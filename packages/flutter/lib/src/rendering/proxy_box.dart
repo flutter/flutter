@@ -794,9 +794,11 @@ class RenderAnimatedOpacity extends RenderProxyBox {
   /// The [opacity] argument must not be null.
   RenderAnimatedOpacity({
     @required Animation<double> opacity,
-    @required bool alwaysIncludeSemantics,
+    bool alwaysIncludeSemantics = false,
     RenderBox child,
-  }) : _alwaysIncludeSemantics = alwaysIncludeSemantics,
+  }) : assert(opacity != null),
+       assert(alwaysIncludeSemantics != null),
+       _alwaysIncludeSemantics = alwaysIncludeSemantics,
        super(child) {
     this.opacity = opacity;
   }
@@ -829,6 +831,8 @@ class RenderAnimatedOpacity extends RenderProxyBox {
   }
 
   /// Whether child semantics are included regardless of the opacity.
+  ///
+  /// Defaults to false.
   bool get alwaysIncludeSemantics => _alwaysIncludeSemantics;
   bool _alwaysIncludeSemantics;
   set alwaysIncludeSemantics(bool value) {
@@ -881,7 +885,7 @@ class RenderAnimatedOpacity extends RenderProxyBox {
 
   @override
   void visitChildrenForSemantics(RenderObjectVisitor visitor) {
-    if (alwaysIncludeSemantics || (child != null && _alpha != 0))
+    if (child != null && (_alpha != 0 || alwaysIncludeSemantics))
       visitor(child);
   }
 
