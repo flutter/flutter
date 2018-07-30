@@ -641,7 +641,7 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
   }
 
 
-  bool get _enabled => widget.items != null && widget.onChanged != null;
+  bool get _enabled => widget.items != null && widget.items.isNotEmpty && widget.onChanged != null;
 
   @override
   Widget build(BuildContext context) {
