@@ -142,7 +142,8 @@ void main() {
     }
   });
 
-  testWidgets('Children and onValueChanged can not be null', (WidgetTester tester) async {
+  testWidgets('Children, onValueChanged, and color arguments can not be null',
+          (WidgetTester tester) async {
     try {
       await tester.pumpWidget(
         boilerplate(
@@ -173,6 +174,21 @@ void main() {
       fail('Should not be possible to create segmented control with null onValueChanged');
     } on AssertionError catch (e) {
       expect(e.toString(), contains('onValueChanged'));
+    }
+
+    try {
+      await tester.pumpWidget(
+        boilerplate(
+          child: new SegmentedControl<int>(
+            children: children,
+            onValueChanged: (int newValue) {},
+            unselectedColor: null,
+          ),
+        ),
+      );
+      fail('Should not be possible to create segmented control with null unselectedColor');
+    } on AssertionError catch (e) {
+      expect(e.toString(), contains('unselectedColor'));
     }
   });
 

@@ -65,7 +65,8 @@ const Duration _kFadeDuration = const Duration(milliseconds: 165);
 class SegmentedControl<T> extends StatefulWidget {
   /// Creates an iOS-style segmented control bar.
   ///
-  /// The [children] and [onValueChanged] arguments must not be null. The
+  /// The [children], [onValueChanged], [unselectedColor], [selectedColor],
+  /// [borderColor], and [pressedColor] arguments must not be null. The
   /// [children] argument must be an ordered [Map] such as a [LinkedHashMap].
   /// Further, the length of the [children] list must be greater than one.
   ///
@@ -91,6 +92,10 @@ class SegmentedControl<T> extends StatefulWidget {
         assert(children.length >= 2),
         assert(onValueChanged != null),
         assert(groupValue == null || children.keys.any((T child) => child == groupValue)),
+        assert(unselectedColor != null),
+        assert(selectedColor != null),
+        assert(borderColor != null),
+        assert(pressedColor != null),
         super(key: key);
 
   /// The identifying keys and corresponding widget values in the
@@ -155,6 +160,8 @@ class SegmentedControl<T> extends StatefulWidget {
   /// The color used to fill the backgrounds of unselected widgets and as the
   /// text color of the selected widget.
   ///
+  /// This attribute must not be null.
+  ///
   /// If this attribute is unspecified, this color will default to
   /// [CupertinoColors.white].
   final Color unselectedColor;
@@ -162,18 +169,24 @@ class SegmentedControl<T> extends StatefulWidget {
   /// The color used to fill the background of the selected widget and as the text
   /// color of unselected widgets.
   ///
+  /// This attribute must not be null.
+  ///
   /// If this attribute is unspecified, this color will default to
   /// [CupertinoColors.activeBlue].
   final Color selectedColor;
 
   /// The color used as the border around each widget.
   ///
-  /// If this attribute is unspecified, this color will defualt to
+  /// This attribute must not be null.
+  ///
+  /// If this attribute is unspecified, this color will default to
   /// [CupertinoColors.activeBlue].
   final Color borderColor;
 
   /// The color used to fill the background of the widget the user is
   /// temporarily interacting with through a long press or drag.
+  ///
+  /// This attribute must not be null.
   ///
   /// If this attribute is unspecified, this color will default to
   /// 'Color(0x33007AFF)', a light, partially-transparent blue color.
