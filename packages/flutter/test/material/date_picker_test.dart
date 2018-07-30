@@ -621,7 +621,7 @@ void _tests() {
             children: <TestSemantics>[
               new TestSemantics(
                 flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
-                children: [expected],
+                children: <TestSemantics>[expected],
               ),
             ],
           ),
