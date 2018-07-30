@@ -321,7 +321,7 @@ class PaintingContext {
     if (needsCompositing) {
       pushLayer(new ClipRectLayer(clipRect: offsetClipRect, clipBehavior: clipBehavior), painter, offset, childPaintBounds: offsetClipRect);
     } else {
-      Layer.clipRectAndPaint(canvas, clipBehavior, offsetClipRect, offsetClipRect, () => painter(this, offset));
+      clipRectAndPaint(clipBehavior, offsetClipRect, offsetClipRect, () => painter(this, offset));
     }
   }
 
@@ -346,7 +346,7 @@ class PaintingContext {
     if (needsCompositing) {
       pushLayer(new ClipRRectLayer(clipRRect: offsetClipRRect, clipBehavior: clipBehavior), painter, offset, childPaintBounds: offsetBounds);
     } else {
-      Layer.clipRRectAndPaint(canvas, clipBehavior, offsetClipRRect, offsetBounds, () => painter(this, offset));
+      clipRRectAndPaint(clipBehavior, offsetClipRRect, offsetBounds, () => painter(this, offset));
     }
   }
 
@@ -370,7 +370,7 @@ class PaintingContext {
     if (needsCompositing) {
       pushLayer(new ClipPathLayer(clipPath: offsetClipPath, clipBehavior: clipBehavior), painter, offset, childPaintBounds: offsetBounds);
     } else {
-      Layer.clipPathAndPaint(canvas, clipBehavior, offsetClipPath, offsetBounds, () => painter(this, offset));
+      clipPathAndPaint(clipBehavior, offsetClipPath, offsetBounds, () => painter(this, offset));
     }
   }
 
@@ -419,6 +419,48 @@ class PaintingContext {
   /// layer, which, for example, causes them to use composited clips.
   void pushOpacity(Offset offset, int alpha, PaintingContextCallback painter) {
     pushLayer(new OpacityLayer(alpha: alpha), painter, offset);
+  }
+
+  void _clipAndPaint(Clip clipBehavior, void canvasClipCall(bool doAntiAlias), Rect bounds, void painter()) {
+    assert(canvasClipCall != null);
+    canvas.save();
+    switch (clipBehavior) {
+      case Clip.none:
+        break;
+      case Clip.hardEdge:
+        canvasClipCall(false);
+        break;
+      case Clip.antiAlias:
+        canvasClipCall(true);
+        break;
+      case Clip.antiAliasWithSaveLayer:
+        canvasClipCall(true);
+        canvas.saveLayer(bounds, new Paint());
+        break;
+    }
+    painter();
+    if (clipBehavior == Clip.antiAliasWithSaveLayer) {
+      canvas.restore();
+    }
+    canvas.restore();
+  }
+
+  /// Clip [canvas] with [Path] according to [Clip] and then paint. [canvas] is
+  /// restored to the pre-clip status afterwards.
+  void clipPathAndPaint(Clip clipBehavior, Path path, Rect bounds, void painter()) {
+    _clipAndPaint(clipBehavior, (bool doAntiAias) => canvas.clipPath(path, doAntiAlias: doAntiAias), bounds, painter);
+  }
+
+  /// Clip [canvas] with [Path] according to [RRect] and then paint. [canvas] is
+  /// restored to the pre-clip status afterwards.
+  void clipRRectAndPaint(Clip clipBehavior, RRect rrect, Rect bounds, void painter()) {
+    _clipAndPaint(clipBehavior, (bool doAntiAias) => canvas.clipRRect(rrect, doAntiAlias: doAntiAias), bounds, painter);
+  }
+
+  /// Clip [canvas] with [Path] according to [Rect] and then paint. [canvas] is
+  /// restored to the pre-clip status afterwards.
+  void clipRectAndPaint(Clip clipBehavior, Rect rect, Rect bounds, void painter()) {
+    _clipAndPaint(clipBehavior, (bool doAntiAias) => canvas.clipRect(rect, doAntiAlias: doAntiAias), bounds, painter);
   }
 
   @override

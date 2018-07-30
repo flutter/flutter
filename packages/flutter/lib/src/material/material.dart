@@ -89,14 +89,13 @@ abstract class MaterialInkController {
 ///
 /// The Material widget is responsible for:
 ///
-/// 1. Elevation: Material elevates its widget sub-tree on the Z axis by
+/// 1. Clipping: If [clipBehavior] is not [Clip.none], Material clips its widget
+///    sub-tree to the shape specified by [shape], [type], and [borderRadius].
+///    By default, [clipBehavior] is [Clip.none] for performance considerations.
+/// 2. Elevation: Material elevates its widget sub-tree on the Z axis by
 ///    [elevation] pixels, and draws the appropriate shadow.
-/// 2. Ink effects: Material shows ink effects implemented by [InkFeature]s
+/// 3. Ink effects: Material shows ink effects implemented by [InkFeature]s
 ///    like [InkSplash] and [InkHighlight] below its children.
-///
-/// By default, [clipBehavior] is [Clip.none] and no clipping is performed. It
-/// can be overridden to other [Clip] enums to explicitly clip its widget
-/// sub-tree to the shape specified by [shape], [type], and [borderRadius].
 ///
 /// ## The Material Metaphor
 ///
@@ -235,7 +234,8 @@ class Material extends StatefulWidget {
   /// {@template flutter.widgets.Clip}
   /// The content will be clipped (or not) according to this option.
   ///
-  /// See enum [Clip] for details of all possible options and their common use cases.
+  /// See the enum [Clip] for details of all possible options and their common
+  /// use cases.
   /// {@endtemplate}
   final Clip clipBehavior;
 

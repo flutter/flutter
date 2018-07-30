@@ -123,56 +123,6 @@ abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
     properties.add(new DiagnosticsProperty<Object>('owner', owner, level: parent != null ? DiagnosticLevel.hidden : DiagnosticLevel.info, defaultValue: null));
     properties.add(new DiagnosticsProperty<dynamic>('creator', debugCreator, defaultValue: null, level: DiagnosticLevel.debug));
   }
-
-  static void _clipAndPaint<T>(Canvas canvas, Clip clipBehavior, T t, Rect bounds, void painter()) {
-    void Function(bool doAA) canvasClipCall;
-    if (t is Path) {
-      canvasClipCall = (bool doAA) => canvas.clipPath(t, doAntiAlias: doAA);
-    } else if (t is RRect) {
-      canvasClipCall = (bool doAA) => canvas.clipRRect(t, doAntiAlias: doAA);
-    } else if (t is Rect) {
-      canvasClipCall = (bool doAA) => canvas.clipRect(t, doAntiAlias: doAA);
-    }
-    assert(canvasClipCall != null); // t should be one of Path, RRect, Rect
-    canvas.save();
-    switch (clipBehavior) {
-      case Clip.none:
-        break;
-      case Clip.hardEdge:
-        canvasClipCall(false);
-        break;
-      case Clip.antiAlias:
-        canvasClipCall(true);
-        break;
-      case Clip.antiAliasWithSaveLayer:
-        canvasClipCall(true);
-        canvas.saveLayer(bounds, new Paint());
-        break;
-    }
-    painter();
-    if (clipBehavior == Clip.antiAliasWithSaveLayer) {
-      canvas.restore();
-    }
-    canvas.restore();
-  }
-
-  /// Clip [Canvas] with [Path] according to [Clip] and then paint. [Canvas] is
-  /// restored to the pre-clip status afterwards.
-  static void clipPathAndPaint(Canvas canvas, Clip clipBehavior, Path path, Rect bounds, void painter()) {
-    _clipAndPaint(canvas, clipBehavior, path, bounds, painter);
-  }
-
-  /// Clip [Canvas] with [Path] according to [RRect] and then paint. [Canvas] is
-  /// restored to the pre-clip status afterwards.
-  static void clipRRectAndPaint(Canvas canvas, Clip clipBehavior, RRect rrect, Rect bounds, void painter()) {
-    _clipAndPaint(canvas, clipBehavior, rrect, bounds, painter);
-  }
-
-  /// Clip [Canvas] with [Path] according to [Rect] and then paint. [Canvas] is
-  /// restored to the pre-clip status afterwards.
-  static void clipRectAndPaint(Canvas canvas, Clip clipBehavior, Rect rect, Rect bounds, void painter()) {
-    _clipAndPaint(canvas, clipBehavior, rect, bounds, painter);
-  }
 }
 
 /// A composited layer containing a [Picture].
@@ -655,7 +605,7 @@ class ClipRectLayer extends ContainerLayer {
   ///
   /// The [clipRect] property must be non-null before the compositing phase of
   /// the pipeline.
-  ClipRectLayer({ this.clipRect, this.clipBehavior = Clip.antiAlias }) : assert(clipBehavior != null && clipBehavior != Clip.none);
+  ClipRectLayer({ this.clipRect, this.clipBehavior = Clip.antiAlias }) : assert(clipBehavior != null), assert(clipBehavior != Clip.none);
 
   /// The rectangle to clip in the parent's coordinate system.
   ///
@@ -675,7 +625,7 @@ class ClipRectLayer extends ContainerLayer {
 
   @override
   void addToScene(ui.SceneBuilder builder, Offset layerOffset) {
-    bool enabled = true;
+    bool enabled = clipBehavior != Clip.none;
     assert(() {
       enabled = !debugDisableClipLayers;
       return true;
@@ -704,7 +654,7 @@ class ClipRRectLayer extends ContainerLayer {
   ///
   /// The [clipRRect] property must be non-null before the compositing phase of
   /// the pipeline.
-  ClipRRectLayer({ this.clipRRect, this.clipBehavior = Clip.antiAlias });
+  ClipRRectLayer({ this.clipRRect, this.clipBehavior = Clip.antiAlias }): assert(clipBehavior != null), assert(clipBehavior != Clip.none);
 
   /// The rounded-rect to clip in the parent's coordinate system.
   ///
@@ -753,7 +703,7 @@ class ClipPathLayer extends ContainerLayer {
   ///
   /// The [clipPath] property must be non-null before the compositing phase of
   /// the pipeline.
-  ClipPathLayer({ this.clipPath, this.clipBehavior = Clip.antiAlias }) : assert(clipBehavior != null && clipBehavior != Clip.none);
+  ClipPathLayer({ this.clipPath, this.clipBehavior = Clip.antiAlias }) : assert(clipBehavior != null), assert(clipBehavior != Clip.none);
 
   /// The path to clip in the parent's coordinate system.
   ///
@@ -762,8 +712,9 @@ class ClipPathLayer extends ContainerLayer {
   Path clipPath;
 
   /// {@template flutter.layer.clipBehavior}
-  /// Controls how to clip (default to [Clip.antiAlias]). [Clip.none] is not
-  /// allowed here.
+  /// Controls how to clip (default to [Clip.antiAlias]).
+  ///
+  /// [Clip.none] is not allowed here.
   /// {@endtemplate}
   Clip clipBehavior;
 

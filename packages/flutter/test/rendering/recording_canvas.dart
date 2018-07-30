@@ -106,18 +106,18 @@ class TestRecordingPaintingContext implements PaintingContext {
 
   @override
   void pushClipRect(bool needsCompositing, Offset offset, Rect clipRect, PaintingContextCallback painter, {Clip clipBehavior = Clip.antiAlias}) {
-    Layer.clipRectAndPaint(canvas, clipBehavior, clipRect.shift(offset), clipRect.shift(offset), () => painter(this, offset));
+    clipRectAndPaint(clipBehavior, clipRect.shift(offset), clipRect.shift(offset), () => painter(this, offset));
   }
 
   @override
   void pushClipRRect(bool needsCompositing, Offset offset, Rect bounds, RRect clipRRect, PaintingContextCallback painter, {Clip clipBehavior = Clip.antiAlias}) {
     assert(clipBehavior != null);
-    Layer.clipRRectAndPaint(canvas, clipBehavior, clipRRect.shift(offset), bounds.shift(offset), () => painter(this, offset));
+    clipRRectAndPaint(clipBehavior, clipRRect.shift(offset), bounds.shift(offset), () => painter(this, offset));
   }
 
   @override
   void pushClipPath(bool needsCompositing, Offset offset, Rect bounds, Path clipPath, PaintingContextCallback painter, {Clip clipBehavior = Clip.antiAlias}) {
-    Layer.clipPathAndPaint(canvas, clipBehavior, clipPath.shift(offset), bounds.shift(offset), () => painter(this, offset));
+    clipPathAndPaint(clipBehavior, clipPath.shift(offset), bounds.shift(offset), () => painter(this, offset));
   }
 
   @override

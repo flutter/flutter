@@ -1169,10 +1169,12 @@ abstract class _RenderCustomClip<T> extends RenderProxyBox {
   T _clip;
 
   /// {@template flutter.widget.clipper.clipBehavior}
-  /// Controls how to clip when clipper is null. Otherwise, clipper controls the
-  /// clip behavior.
+  /// Controls how to clip when [clipper] is null. Otherwise, [clipper] controls
+  /// the clip behavior.
   ///
-  /// Default to [Clip.antiAlias]. [Clip.none] is not allowed here.
+  /// Default to [Clip.antiAlias].
+  ///
+  /// [Clip.none] is not allowed here.
   /// {@endtemplate}
   Clip _clipBehavior;
 
@@ -1690,7 +1692,7 @@ class RenderPhysicalModel extends _RenderPhysicalModelBase<RRect> {
           );
         }
         canvas.drawRRect(offsetRRect, new Paint()..color = color);
-        Layer.clipRRectAndPaint(canvas, clipBehavior, offsetRRect, offsetBounds, () => super.paint(context, offset));
+        context.clipRRectAndPaint(clipBehavior, offsetRRect, offsetBounds, () => super.paint(context, offset));
         assert(context.canvas == canvas, 'canvas changed even though needsCompositing was false');
       }
     }
@@ -1801,7 +1803,7 @@ class RenderPhysicalShape extends _RenderPhysicalModelBase<Path> {
           );
         }
         canvas.drawPath(offsetPath, new Paint()..color = color..style = PaintingStyle.fill);
-        Layer.clipPathAndPaint(canvas, clipBehavior, offsetPath, offsetBounds, () => super.paint(context, offset));
+        context.clipPathAndPaint(clipBehavior, offsetPath, offsetBounds, () => super.paint(context, offset));
         assert(context.canvas == canvas, 'canvas changed even though needsCompositing was false');
       }
     }
