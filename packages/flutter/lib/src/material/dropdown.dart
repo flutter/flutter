@@ -22,10 +22,12 @@ const Duration _kDropdownMenuDuration = const Duration(milliseconds: 300);
 const double _kMenuItemHeight = 48.0;
 const double _kDenseButtonHeight = 24.0;
 const EdgeInsets _kMenuItemPadding = const EdgeInsets.symmetric(horizontal: 16.0);
-const EdgeInsetsGeometry _kAlignedButtonPadding = const EdgeInsetsDirectional.only(start: 16.0, end: 4.0);
+const EdgeInsetsGeometry _kAlignedButtonPadding =
+    const EdgeInsetsDirectional.only(start: 16.0, end: 4.0);
 const EdgeInsets _kUnalignedButtonPadding = EdgeInsets.zero;
 const EdgeInsets _kAlignedMenuMargin = EdgeInsets.zero;
-const EdgeInsetsGeometry _kUnalignedMenuMargin = const EdgeInsetsDirectional.only(start: 16.0, end: 24.0);
+const EdgeInsetsGeometry _kUnalignedMenuMargin =
+    const EdgeInsetsDirectional.only(start: 16.0, end: 24.0);
 
 class _DropdownMenuPainter extends CustomPainter {
   _DropdownMenuPainter({
@@ -33,14 +35,14 @@ class _DropdownMenuPainter extends CustomPainter {
     this.elevation,
     this.selectedIndex,
     this.resize,
-  }) : _painter = new BoxDecoration(
-    // If you add an image here, you must provide a real
-    // configuration in the paint() function and you must provide some sort
-    // of onChanged callback here.
-      color: color,
-      borderRadius: new BorderRadius.circular(2.0),
-      boxShadow: kElevationToShadow[elevation]
-  ).createBoxPainter(),
+  })  : _painter = new BoxDecoration(
+                // If you add an image here, you must provide a real
+                // configuration in the paint() function and you must provide some sort
+                // of onChanged callback here.
+                color: color,
+                borderRadius: new BorderRadius.circular(2.0),
+                boxShadow: kElevationToShadow[elevation])
+            .createBoxPainter(),
         super(repaint: resize);
 
   final Color color;
@@ -63,17 +65,18 @@ class _DropdownMenuPainter extends CustomPainter {
       end: size.height,
     );
 
-    final Rect rect = new Rect.fromLTRB(0.0, top.evaluate(resize), size.width, bottom.evaluate(resize));
+    final Rect rect =
+        new Rect.fromLTRB(0.0, top.evaluate(resize), size.width, bottom.evaluate(resize));
 
     _painter.paint(canvas, rect.topLeft, new ImageConfiguration(size: rect.size));
   }
 
   @override
   bool shouldRepaint(_DropdownMenuPainter oldPainter) {
-    return oldPainter.color != color
-        || oldPainter.elevation != elevation
-        || oldPainter.selectedIndex != selectedIndex
-        || oldPainter.resize != resize;
+    return oldPainter.color != color ||
+        oldPainter.elevation != elevation ||
+        oldPainter.selectedIndex != selectedIndex ||
+        oldPainter.resize != resize;
   }
 }
 
@@ -86,7 +89,8 @@ class _DropdownScrollBehavior extends ScrollBehavior {
   TargetPlatform getPlatform(BuildContext context) => Theme.of(context).platform;
 
   @override
-  Widget buildViewportChrome(BuildContext context, Widget child, AxisDirection axisDirection) => child;
+  Widget buildViewportChrome(BuildContext context, Widget child, AxisDirection axisDirection) =>
+      child;
 
   @override
   ScrollPhysics getScrollPhysics(BuildContext context) => const ClampingScrollPhysics();
@@ -159,9 +163,9 @@ class _DropdownMenuState<T> extends State<_DropdownMenu<T>> {
             child: route.items[itemIndex],
           ),
           onTap: () => Navigator.pop(
-            context,
-            new _DropdownRouteResult<T>(route.items[itemIndex].value),
-          ),
+                context,
+                new _DropdownRouteResult<T>(route.items[itemIndex].value),
+              ),
         ),
       ));
     }
@@ -255,10 +259,10 @@ class _DropdownMenuRouteLayout<T> extends SingleChildLayoutDelegate {
 
   @override
   bool shouldRelayout(_DropdownMenuRouteLayout<T> oldDelegate) {
-    return buttonRect != oldDelegate.buttonRect
-        || menuTop != oldDelegate.menuTop
-        || menuHeight != oldDelegate.menuHeight
-        || textDirection != oldDelegate.textDirection;
+    return buttonRect != oldDelegate.buttonRect ||
+        menuTop != oldDelegate.menuTop ||
+        menuHeight != oldDelegate.menuHeight ||
+        textDirection != oldDelegate.textDirection;
   }
 }
 
@@ -272,8 +276,7 @@ class _DropdownRouteResult<T> {
 
   @override
   bool operator ==(dynamic other) {
-    if (other is! _DropdownRouteResult<T>)
-      return false;
+    if (other is! _DropdownRouteResult<T>) return false;
     final _DropdownRouteResult<T> typedOther = other;
     return result == typedOther.result;
   }
@@ -317,19 +320,21 @@ class _DropdownRoute<T> extends PopupRoute<_DropdownRouteResult<T>> {
   final String barrierLabel;
 
   @override
-  Widget buildPage(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
+  Widget buildPage(
+      BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
     assert(debugCheckHasDirectionality(context));
     final double screenHeight = MediaQuery.of(context).size.height;
     final double maxMenuHeight = screenHeight - 2.0 * _kMenuItemHeight;
-    final double preferredMenuHeight = (items.length * _kMenuItemHeight) + kMaterialListPadding.vertical;
+    final double preferredMenuHeight =
+        (items.length * _kMenuItemHeight) + kMaterialListPadding.vertical;
     final double menuHeight = math.min(maxMenuHeight, preferredMenuHeight);
 
     final double buttonTop = buttonRect.top;
     final double selectedItemOffset = selectedIndex * _kMenuItemHeight + kMaterialListPadding.top;
-    double menuTop = (buttonTop - selectedItemOffset) - (_kMenuItemHeight - buttonRect.height) / 2.0;
+    double menuTop =
+        (buttonTop - selectedItemOffset) - (_kMenuItemHeight - buttonRect.height) / 2.0;
     const double topPreferredLimit = _kMenuItemHeight;
-    if (menuTop < topPreferredLimit)
-      menuTop = math.min(buttonTop, topPreferredLimit);
+    if (menuTop < topPreferredLimit) menuTop = math.min(buttonTop, topPreferredLimit);
     double bottom = menuTop + menuHeight;
     final double bottomPreferredLimit = screenHeight - _kMenuItemHeight;
     if (bottom > bottomPreferredLimit) {
@@ -350,8 +355,7 @@ class _DropdownRoute<T> extends PopupRoute<_DropdownRouteResult<T>> {
       padding: padding.resolve(textDirection),
     );
 
-    if (theme != null)
-      menu = new Theme(data: theme, child: menu);
+    if (theme != null) menu = new Theme(data: theme, child: menu);
 
     return new MediaQuery.removePadding(
       context: context,
@@ -392,7 +396,7 @@ class DropdownMenuItem<T> extends StatelessWidget {
     Key key,
     this.value,
     @required this.child,
-  }) : assert(child != null),
+  })  : assert(child != null),
         super(key: key);
 
   /// The widget below this widget in the tree.
@@ -427,7 +431,7 @@ class DropdownButtonHideUnderline extends InheritedWidget {
   const DropdownButtonHideUnderline({
     Key key,
     @required Widget child,
-  }) : assert(child != null),
+  })  : assert(child != null),
         super(key: key, child: child);
 
   /// Returns whether the underline of [DropdownButton] widgets should
@@ -466,7 +470,7 @@ class DropdownButton<T> extends StatefulWidget {
   /// The [items] must have distinct values and if [value] isn't null it must be among them.
   /// If [items] or [onChanged] is null, the button will be disabled, the down arrow will be grayed out, and
   /// the [disabledHint] will be shown (if provided).
-  /// 
+  ///
   /// The [elevation] and [iconSize] arguments must not be null (they both have
   /// defaults, so do not need to be specified).
   DropdownButton({
@@ -480,8 +484,9 @@ class DropdownButton<T> extends StatefulWidget {
     this.style,
     this.iconSize = 24.0,
     this.isDense = false,
-  })  : assert(items == null || value == null   || 
-               items.where((DropdownMenuItem<T> item) => item.value == value).length == 1),
+  })  : assert(items == null ||
+            value == null ||
+            items.where((DropdownMenuItem<T> item) => item.value == value).length == 1),
         super(key: key);
 
   /// The list of possible items to select among.
@@ -571,9 +576,7 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
   void _updateSelectedIndex() {
     if (widget.items != null) {
       assert(widget.value == null ||
-          widget.items
-              .where((DropdownMenuItem<T> item) => item.value == widget.value)
-              .length == 1);
+          widget.items.where((DropdownMenuItem<T> item) => item.value == widget.value).length == 1);
       _selectedIndex = null;
       for (int itemIndex = 0; itemIndex < widget.items.length; itemIndex++) {
         if (widget.items[itemIndex].value == widget.value) {
@@ -590,9 +593,8 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
     final RenderBox itemBox = context.findRenderObject();
     final Rect itemRect = itemBox.localToGlobal(Offset.zero) & itemBox.size;
     final TextDirection textDirection = Directionality.of(context);
-    final EdgeInsetsGeometry menuMargin = ButtonTheme.of(context).alignedDropdown
-        ?_kAlignedMenuMargin
-        : _kUnalignedMenuMargin;
+    final EdgeInsetsGeometry menuMargin =
+        ButtonTheme.of(context).alignedDropdown ? _kAlignedMenuMargin : _kUnalignedMenuMargin;
 
     assert(_dropdownRoute == null);
     _dropdownRoute = new _DropdownRoute<T>(
@@ -608,10 +610,8 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
 
     Navigator.push(context, _dropdownRoute).then<void>((_DropdownRouteResult<T> newValue) {
       _dropdownRoute = null;
-      if (!mounted || newValue == null)
-        return;
-      if (widget.onChanged != null)
-        widget.onChanged(newValue.result);
+      if (!mounted || newValue == null) return;
+      if (widget.onChanged != null) widget.onChanged(newValue.result);
     });
   }
 
@@ -623,8 +623,25 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
     return math.max(_textStyle.fontSize, math.max(widget.iconSize, _kDenseButtonHeight));
   }
 
-  // just so we don't have to repeat this test and make it easier to understand
-  bool get _enabled => widget.items != null && onChanged != null;
+
+  Color get _downArrowColor {
+    if (_enabled) {
+      if (Theme.of(context).brightness == Brightness.light) {
+        return Colors.grey.shade700;
+      } else {
+        return Colors.white70;
+      }
+    } else {
+      if (Theme.of(context).brightness == Brightness.light) {
+        return Colors.grey.shade400;
+      } else {
+        return Colors.white10;
+      }
+    }
+  }
+
+
+  bool get _enabled => widget.items != null && widget.onChanged != null;
 
   @override
   Widget build(BuildContext context) {
@@ -632,8 +649,7 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
 
     // The width of the button and the menu are defined by the widest
     // item and the width of the hint.
-    final List<Widget> items =
-    _enabled ? new List<Widget>.from(widget.items) : <Widget>[];
+    final List<Widget> items = _enabled ? new List<Widget>.from(widget.items) : <Widget>[];
     int hintIndex;
     if (widget.hint != null || (!_enabled && widget.disabledHint != null)) {
       hintIndex = items.length;
@@ -645,9 +661,8 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
       ));
     }
 
-    final EdgeInsetsGeometry padding = ButtonTheme.of(context).alignedDropdown
-        ? _kAlignedButtonPadding
-        : _kUnalignedButtonPadding;
+    final EdgeInsetsGeometry padding =
+        ButtonTheme.of(context).alignedDropdown ? _kAlignedButtonPadding : _kUnalignedButtonPadding;
 
     Widget result = new DefaultTextStyle(
       style: _textStyle,
@@ -665,16 +680,11 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
               alignment: AlignmentDirectional.centerStart,
               children: items,
             ),
-            new Icon(Icons.arrow_drop_down,
+            new Icon(
+              Icons.arrow_drop_down,
               size: widget.iconSize,
               // These colors are not defined in the Material Design spec.
-              color: _enabled
-                  ? Theme.of(context).brightness == Brightness.light
-                  ? Colors.grey.shade700
-                  : Colors.white70
-                  : Theme.of(context).brightness == Brightness.light
-                  ? Colors.grey.shade400
-                  : Colors.white10,
+              color: _downArrowColor,
             ),
           ],
         ),
@@ -693,8 +703,8 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
             child: new Container(
               height: 1.0,
               decoration: const BoxDecoration(
-                  border: const Border(bottom: const BorderSide(color: const Color(0xFFBDBDBD), width: 0.0))
-              ),
+                  border: const Border(
+                    bottom: const BorderSide(color: const Color(0xFFBDBDBD), width: 0.0))),
             ),
           ),
         ],
@@ -707,4 +717,5 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
       child: result,
     );
   }
+
 }
