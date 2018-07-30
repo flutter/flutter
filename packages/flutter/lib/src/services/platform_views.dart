@@ -135,8 +135,8 @@ class AndroidPointerCoords {
   /// See Android's [MotionEvent.PointerCoords#y](https://developer.android.com/reference/android/view/MotionEvent.PointerCoords.html#y).
   final double y;
 
-  List<double> _asList() =>
-    <double> [
+  List<double> _asList() {
+    return <double>[
       orientation,
       pressure,
       size,
@@ -147,6 +147,7 @@ class AndroidPointerCoords {
       x,
       y,
     ];
+  }
 
   @override
   String toString() {
@@ -203,23 +204,25 @@ class AndroidMotionEvent {
   /// See Android's [MotionEvent#getFlags](https://developer.android.com/reference/android/view/MotionEvent.html#getFlags()).
   final int flags;
 
-  List<dynamic> _asList() =>
-      <dynamic> [
-        downTime,
-        eventTime,
-        action,
-        pointerCount,
-        pointerProperties.map((AndroidPointerProperties p) => p._asList()).toList(),
-        pointerCoords.map((AndroidPointerCoords p) => p._asList()).toList(),
-        metaState,
-        buttonState,
-        xPrecision,
-        yPrecision,
-        deviceId,
-        edgeFlags,
-        source,
-        flags,
-      ];
+  List<dynamic> _asList(int viewId) {
+    return <dynamic>[
+      viewId,
+      downTime,
+      eventTime,
+      action,
+      pointerCount,
+      pointerProperties.map((AndroidPointerProperties p) => p._asList()).toList(),
+      pointerCoords.map((AndroidPointerCoords p) => p._asList()).toList(),
+      metaState,
+      buttonState,
+      xPrecision,
+      yPrecision,
+      deviceId,
+      edgeFlags,
+      source,
+      flags,
+    ];
+  }
 
   @override
   String toString() {
@@ -321,9 +324,7 @@ class AndroidViewController {
   Future<void> sendMotionEvent(AndroidMotionEvent event) async {
     await SystemChannels.platform_views.invokeMethod(
         'touch',
-        <dynamic>[
-          id,
-        ]..addAll(event._asList())
+        event._asList(id),
     );
   }
 
