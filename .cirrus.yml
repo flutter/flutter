@@ -3,26 +3,26 @@ container:
 
 task:
   env:
+    OS_NAME: linux
+    # Rename the SDK directory to include a space so that we constantly
+    # test path names with spaces in them.
     CIRRUS_WORKING_DIR: "/tmp/flutter sdk"
     PATH: "$CIRRUS_WORKING_DIR/bin:$CIRRUS_WORKING_DIR/bin/cache/dart-sdk/bin:$PATH"
-
   git_fetch_script: git fetch origin
-  setup_script: |
-    echo "SDK directory is: $PWD"
-    ./bin/flutter --version
-
-    # disable analytics on the bots and download Flutter dependencies
-    ./bin/flutter config --no-analytics
-
-    # run pub get in all the repo packages
-    ./bin/flutter update-packages
-
-    git fetch origin master
+  setup_script: ./dev/bots/cirrus_setup.sh
   matrix:
     - name: docs
       env:
         SHARD: docs
+        # For uploading docs to Firebase
+        FIREBASE_TOKEN: ENCRYPTED[a40fcb68452b92254b7f532a460529b5e4ca51d6d338a8fae8db9db832ad3c2a7efb962e257de79686a9345f4a18661a]
       docs_script: ./dev/bots/docs.sh
+    - name: deploy_gallery
+      env:
+        SHARD: deploy_gallery
+        GOOGLE_DEVELOPER_SERVICE_ACCOUNT_ACTOR_FASTLANE: ENCRYPTED[d9ac1462c3c556fc2f8165c9d5566a16497d8ebc38a50357f7f3abf136b7f83e1d1d76dde36fee356cb0f9ebf7a89346]
+        ANDROID_GALLERY_UPLOAD_KEY: ENCRYPTED[0b3e681b4507aec433ef29c79b715f15f8c75ecd25315ea286b0b2bcb8b28d578634eead5aa2c54086a25e8da1bb219a]
+      test_script: ./dev/bots/deploy_gallery.sh
     - name: analyze
       env:
         SHARD: analyze
@@ -49,6 +49,7 @@ task:
   name: tests-windows
   env:
     SHARD: tests
+    OS_NAME: windows
   windows_container:
     image: cirrusci/windowsservercore:2016
     os_version: 2016
@@ -67,6 +68,7 @@ task:
   name: tool_tests-windows
   env:
     SHARD: tool_tests
+    OS_NAME: windows
   windows_container:
     image: cirrusci/windowsservercore:2016
     os_version: 2016
@@ -82,9 +84,30 @@ task:
     - bin\cache\dart-sdk\bin\dart.exe -c dev\bots\test.dart
 
 task:
+  name: deploy_gallery-macos
+  env:
+    SHARD: deploy_gallery
+    OS_NAME: macos
+    # Apple Certificates Match Passphrase
+    MATCH_PASSWORD: ENCRYPTED[db07f252234397090e3ec59152d9ec1831f5ecd0ef97d247b1dca757bbb9ef9b7c832a39bce2caf1949ccdf097e59a73]
+    # Apple Fastlane Password
+    FASTLANE_PASSWORD: ENCRYPTED[0bf9bb0cc2cb32a0ed18470cf2c9df0f587cce5f8b04adbd6cff15ca5bde7a74f721ee580227b132ab6b032f08e52ae0]
+    # Private repo for publishing certificates.
+    PUBLISHING_MATCH_CERTIFICATE_REPO: git@github.com:flutter/private_publishing_certificates.git
+  osx_instance:
+    image: high-sierra-xcode-9.4.1
+  git_fetch_script: git fetch origin
+  setup_script:
+    - bin/flutter config --no-analytics
+    - bin/flutter update-packages
+  test_all_script:
+    - ./dev/bots/deploy_gallery.sh
+    
+task:
   name: tests-macos
   env:
     SHARD: tests
+    OS_NAME: macos
   osx_instance:
     image: high-sierra-xcode-9.4.1
   git_fetch_script: git fetch origin
@@ -99,6 +122,7 @@ task:
   name: tool_tests-macos
   env:
     SHARD: tool_tests
+    OS_NAME: macos
   osx_instance:
     image: high-sierra-xcode-9.4.1
   git_fetch_script: git fetch origin
