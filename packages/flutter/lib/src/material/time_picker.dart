@@ -931,6 +931,7 @@ class _DialPainter extends CustomPainter {
       if (labels == null)
         return;
       final double labelThetaIncrement = -_kTwoPi / labels.length;
+      final double ordinalOffset = ring == _DialRing.inner ? 12.0 : 0.0;
       double labelTheta = math.pi / 2.0;
 
       for (int i = 0; i < labels.length; i++) {
@@ -947,9 +948,9 @@ class _DialPainter extends CustomPainter {
             nodeOffset.dy + 24.0 + height / 2,
           ),
           properties: new SemanticsProperties(
-            sortKey: new OrdinalSortKey(i.toDouble()),
+            sortKey: new OrdinalSortKey(i.toDouble() + ordinalOffset),
             selected: label.value == selectedValue,
-            label: labelPainter.text.text,
+            value: labelPainter.text.text,
             textDirection: textDirection,
             onTap: label.onTap,
           ),

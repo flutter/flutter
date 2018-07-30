@@ -812,7 +812,6 @@ class RenderCustomPaint extends RenderProxyBox {
     if (properties.sortKey != null) {
       config.sortKey = properties.sortKey;
     }
-
     if (properties.checked != null) {
       config.isChecked = properties.checked;
     }
