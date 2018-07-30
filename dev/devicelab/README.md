@@ -106,6 +106,18 @@ You must set the `ANDROID_HOME` environment variable to run tests on Android. If
 you have a local build of the Flutter engine, then you have a copy of the
 Android SDK at `.../engine/src/third_party/android_tools/sdk`.
 
+You can find where your Android SDK is using `flutter doctor`.
+
+## Running all tests
+
+To run all tests defined in `manifest.yaml`, use option `-a` (`--all`):
+
+```sh
+dart bin/run.dart -a
+```
+
+## Running specific tests
+
 To run a test, use option `-t` (`--task`):
 
 ```sh
@@ -127,19 +139,14 @@ To run multiple tests, repeat option `-t` (`--task`) multiple times:
 dart bin/run.dart -t test1 -t test2 -t test3
 ```
 
-To run all tests defined in `manifest.yaml`, use option `-a` (`--all`):
+To run tests from a specific stage, use option `-s` (`--stage`).
+Currently there are only three stages defined, `devicelab`,
+`devicelab_ios` and `devicelab_win`.
 
-```sh
-dart bin/run.dart -a
-```
-
-To run tests from a specific stage, use option `-s` (`--stage`):
 
 ```sh
 dart bin/run.dart -s {NAME_OF_STAGE}
 ```
-
-Currently there are only three stages defined, `devicelab`, `devicelab_ios` and `devicelab_win`.
 
 # Reproducing broken builds locally
 

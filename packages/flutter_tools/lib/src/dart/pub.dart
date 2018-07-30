@@ -109,8 +109,10 @@ Future<Null> pubGet({
         failureMessage: 'pub $command failed',
         retry: true,
       );
-    } finally {
       status.stop();
+    } catch (exception) {
+      status.cancel();
+      rethrow;
     }
   }
 
