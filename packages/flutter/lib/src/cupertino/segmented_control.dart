@@ -155,28 +155,28 @@ class SegmentedControl<T> extends StatefulWidget {
   /// The color used to fill the backgrounds of unselected widgets and as the
   /// text color of the selected widget.
   ///
-  /// If this attribute is null, this color will be
+  /// If this attribute is unspecified, this color will default to
   /// [CupertinoColors.white].
   final Color unselectedColor;
 
   /// The color used to fill the background of the selected widget and as the text
   /// color of unselected widgets.
   ///
-  /// If this attribute is null, this color will be
+  /// If this attribute is unspecified, this color will default to
   /// [CupertinoColors.activeBlue].
   final Color selectedColor;
 
   /// The color used as the border around each widget.
   ///
-  /// If this attribute is null, this color will be
+  /// If this attribute is unspecified, this color will defualt to
   /// [CupertinoColors.activeBlue].
   final Color borderColor;
 
   /// The color used to fill the background of the widget the user is
   /// temporarily interacting with through a long press or drag.
   ///
-  /// If this attribute is null, this color will be 'Color(0x33007AFF)', a light,
-  /// partially-transparent blue color.
+  /// If this attribute is unspecified, this color will default to
+  /// 'Color(0x33007AFF)', a light, partially-transparent blue color.
   final Color pressedColor;
 
   @override
