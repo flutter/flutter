@@ -779,11 +779,13 @@ class PhysicalShape extends SingleChildRenderObjectWidget {
   const PhysicalShape({
     Key key,
     @required this.clipper,
+    this.clipBehavior = defaultClipBehavior, // ignore: deprecated_member_use
     this.elevation = 0.0,
     @required this.color,
     this.shadowColor = const Color(0xFF000000),
     Widget child,
   }) : assert(clipper != null),
+       assert(clipBehavior != null),
        assert(elevation != null),
        assert(color != null),
        assert(shadowColor != null),
@@ -795,6 +797,9 @@ class PhysicalShape extends SingleChildRenderObjectWidget {
   /// consider using the [ShapeBorderClipper] delegate class to adapt the
   /// shape for use with this widget.
   final CustomClipper<Path> clipper;
+
+  /// {@macro flutter.widgets.Clip}
+  final Clip clipBehavior;
 
   /// The z-coordinate at which to place this physical object.
   final double elevation;
@@ -809,6 +814,7 @@ class PhysicalShape extends SingleChildRenderObjectWidget {
   RenderPhysicalShape createRenderObject(BuildContext context) {
     return new RenderPhysicalShape(
       clipper: clipper,
+      clipBehavior: clipBehavior,
       elevation: elevation,
       color: color,
       shadowColor: shadowColor

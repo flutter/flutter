@@ -1036,16 +1036,13 @@ abstract class CustomClipper<T> {
   /// Creates a custom clipper.
   ///
   /// The clipper will update its clip whenever [reclip] notifies its listeners.
-  const CustomClipper({ Listenable reclip, this.clipBehavior = Clip.antiAlias }) : _reclip = reclip, assert(clipBehavior != null);
+  const CustomClipper({ Listenable reclip}) : _reclip = reclip;
 
   final Listenable _reclip;
 
   /// Returns a description of the clip given that the render object being
   /// clipped is of the given size.
   T getClip(Size size);
-
-  /// {@macro flutter.widgets.Clip}
-  final Clip clipBehavior;
 
   /// Returns an approximation of the clip returned by [getClip], as
   /// an axis-aligned Rect. This is used by the semantics layer to
@@ -1090,9 +1087,8 @@ class ShapeBorderClipper extends CustomClipper<Path> {
   /// the border will not need the text direction to paint itself.
   const ShapeBorderClipper({
     @required this.shape,
-    Clip clipBehavior = defaultClipBehavior, // ignore: deprecated_member_use
     this.textDirection,
-  }) : assert(shape != null), super(clipBehavior: clipBehavior);
+  }) : assert(shape != null);
 
   /// The shape border whose outer path this clipper clips to.
   final ShapeBorder shape;
@@ -1121,10 +1117,11 @@ class ShapeBorderClipper extends CustomClipper<Path> {
 abstract class _RenderCustomClip<T> extends RenderProxyBox {
   _RenderCustomClip({
     RenderBox child,
-    Clip clipBehavior = defaultClipBehavior, // ignore: deprecated_member_use
-    CustomClipper<T> clipper // this would override _clip and initialClip
-  }) : _clipper = clipper, _clipBehavior = clipBehavior,
-        assert(_clipper != null || _clipBehavior != null && _clipBehavior != Clip.none),
+    CustomClipper<T> clipper, // this would override _clip
+    this.clipBehavior = defaultClipBehavior, // ignore: deprecated_member_use
+  }) : _clipper = clipper,
+        assert(clipBehavior != null),
+        assert(clipBehavior != Clip.none),
         super(child);
 
   /// If non-null, determines which clip to use on the child.
@@ -1168,17 +1165,12 @@ abstract class _RenderCustomClip<T> extends RenderProxyBox {
   T get _defaultClip;
   T _clip;
 
-  /// {@template flutter.widget.clipper.clipBehavior}
-  /// Controls how to clip when [clipper] is null. Otherwise, [clipper] controls
-  /// the clip behavior.
-  ///
-  /// Default to [Clip.antiAlias].
+  /// {@template flutter.clipper.clipBehavior}
+  /// Controls how to clip (default to [Clip.antiAlias]).
   ///
   /// [Clip.none] is not allowed here.
   /// {@endtemplate}
-  Clip _clipBehavior;
-
-  Clip get clipBehavior => clipper == null ? _clipBehavior : clipper.clipBehavior;
+  final Clip clipBehavior;
 
   @override
   void performLayout() {
@@ -1724,6 +1716,7 @@ class RenderPhysicalShape extends _RenderPhysicalModelBase<Path> {
   RenderPhysicalShape({
     RenderBox child,
     @required CustomClipper<Path> clipper,
+    Clip clipBehavior,
     double elevation = 0.0,
     @required Color color,
     Color shadowColor = const Color(0xFF000000),
@@ -1737,6 +1730,7 @@ class RenderPhysicalShape extends _RenderPhysicalModelBase<Path> {
          color: color,
          shadowColor: shadowColor,
          clipper: clipper,
+         clipBehavior: clipBehavior
        );
 
   @override

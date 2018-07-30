@@ -377,8 +377,8 @@ class _MaterialState extends State<Material> with TickerProviderStateMixin {
       ),
       clipper: new ShapeBorderClipper(
         shape: shape,
-        clipBehavior: clipBehavior,
       ),
+      clipBehavior: clipBehavior,
     );
   }
 
@@ -670,9 +670,9 @@ class _MaterialInteriorState extends AnimatedWidgetBaseState<_MaterialInterior> 
       ),
       clipper: new ShapeBorderClipper(
         shape: shape,
-        clipBehavior: widget.clipBehavior,
         textDirection: Directionality.of(context)
       ),
+      clipBehavior: widget.clipBehavior,
       elevation: _elevation.evaluate(animation),
       color: widget.color,
       shadowColor: _shadowColor.evaluate(animation),

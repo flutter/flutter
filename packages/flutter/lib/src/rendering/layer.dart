@@ -711,11 +711,7 @@ class ClipPathLayer extends ContainerLayer {
   /// (as described at [Layer]).
   Path clipPath;
 
-  /// {@template flutter.layer.clipBehavior}
-  /// Controls how to clip (default to [Clip.antiAlias]).
-  ///
-  /// [Clip.none] is not allowed here.
-  /// {@endtemplate}
+  /// {@macro flutter.clipper.clipBehavior}
   Clip clipBehavior;
 
   @override
