@@ -773,7 +773,7 @@ Shell::GetServiceProtocolDescription() const {
 }
 
 static void ServiceProtocolParameterError(rapidjson::Document& response,
-                                          std::string parameter_name) {
+                                          std::string error_details) {
   auto& allocator = response.GetAllocator();
   response.SetObject();
   const int64_t kInvalidParams = -32602;
@@ -781,9 +781,18 @@ static void ServiceProtocolParameterError(rapidjson::Document& response,
   response.AddMember("message", "Invalid params", allocator);
   {
     rapidjson::Value details(rapidjson::kObjectType);
-    details.AddMember("details", parameter_name, allocator);
+    details.AddMember("details", error_details, allocator);
     response.AddMember("data", details, allocator);
   }
+}
+
+static void ServiceProtocolFailureError(rapidjson::Document& response,
+                                        std::string message) {
+  auto& allocator = response.GetAllocator();
+  response.SetObject();
+  const int64_t kJsonServerError = -32000;
+  response.AddMember("code", kJsonServerError, allocator);
+  response.AddMember("message", message, allocator);
 }
 
 // Service protocol handler
@@ -803,8 +812,7 @@ bool Shell::OnServiceProtocolScreenshot(
     response.AddMember("screenshot", image, allocator);
     return true;
   }
-  ServiceProtocolParameterError(response,
-                                "Could not capture image screenshot.");
+  ServiceProtocolFailureError(response, "Could not capture image screenshot.");
   return false;
 }
 
@@ -825,7 +833,7 @@ bool Shell::OnServiceProtocolScreenshotSKP(
     response.AddMember("skp", skp, allocator);
     return true;
   }
-  ServiceProtocolParameterError(response, "Could not capture SKP screenshot.");
+  ServiceProtocolFailureError(response, "Could not capture SKP screenshot.");
   return false;
 }
 
@@ -897,7 +905,8 @@ bool Shell::OnServiceProtocolRunInView(
     return true;
   } else {
     FML_DLOG(ERROR) << "Could not run configuration in engine.";
-    response.AddMember("type", "Failure", allocator);
+    ServiceProtocolFailureError(response,
+                                "Could not run configuration in engine.");
     return false;
   }
 
@@ -951,7 +960,7 @@ bool Shell::OnServiceProtocolSetAssetBundlePath(
     return true;
   } else {
     FML_DLOG(ERROR) << "Could not update asset directory.";
-    response.AddMember("type", "Failure", allocator);
+    ServiceProtocolFailureError(response, "Could not update asset directory.");
     return false;
   }
 
