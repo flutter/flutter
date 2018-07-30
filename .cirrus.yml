@@ -16,6 +16,10 @@ task:
         SHARD: docs
         # For uploading docs to Firebase
         FIREBASE_TOKEN: ENCRYPTED[a40fcb68452b92254b7f532a460529b5e4ca51d6d338a8fae8db9db832ad3c2a7efb962e257de79686a9345f4a18661a]
+      install_firebase_script:
+        - curl -sL https://deb.nodesource.com/setup_8.x | sudo -E bash -
+        - sudo apt-get install -y nodejs
+        - sudo npm install -g firebase-tools
       docs_script: ./dev/bots/docs.sh
     - name: deploy_gallery
       only_if: $CIRRUS_BRANCH == 'dev'
