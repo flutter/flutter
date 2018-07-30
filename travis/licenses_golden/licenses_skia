@@ -1,4 +1,4 @@
-Signature: 403dcf3bb8e8981d1de9e9fdaa7198fe
+Signature: 9edfcad87c0f3aaf1cb39067a1a0b1e8
 
 UNUSED LICENSES:
 
@@ -1283,6 +1283,7 @@ FILE: ../../../third_party/skia/fuzz/oss_fuzz/FuzzPathDeserialize.cpp
 FILE: ../../../third_party/skia/fuzz/oss_fuzz/FuzzRegionDeserialize.cpp
 FILE: ../../../third_party/skia/fuzz/oss_fuzz/FuzzRegionSetPath.cpp
 FILE: ../../../third_party/skia/gm/3dgm.cpp
+FILE: ../../../third_party/skia/gm/clockwise.cpp
 FILE: ../../../third_party/skia/gm/hugepath.cpp
 FILE: ../../../third_party/skia/gm/localmatrixshader.cpp
 FILE: ../../../third_party/skia/gm/makeRasterImage.cpp
