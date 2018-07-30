@@ -1019,6 +1019,19 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
   /// Whether this scaffold has a non-null [Scaffold.endDrawer].
   bool get hasEndDrawer => widget.endDrawer != null;
 
+  bool _drawerOpened = false;
+  bool _endDrawerOpened = false;
+
+  void _drawerOpenedCallback(bool isOpened) {
+    _drawerOpened = isOpened;
+    setState(() {});
+  }
+
+  void _endDrawerOpenedCallback(bool isOpened) {
+    _endDrawerOpened = isOpened;
+    setState(() {});
+  }
+
   /// Opens the [Drawer] (if any).
   ///
   /// If the scaffold has a non-null [Scaffold.drawer], this function will cause
@@ -1031,7 +1044,12 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
   /// To close the drawer once it is open, use [Navigator.pop].
   ///
   /// See [Scaffold.of] for information about how to obtain the [ScaffoldState].
+  ///
+  /// The side [Drawer] cannot be opened if the end [Drawer] is already
+  /// opened.
   void openDrawer() {
+    assert(!_endDrawerOpened, 'You cannot open the drawer if the end drawer is '
+      'already opened.');
     _drawerKey.currentState?.open();
   }
 
@@ -1047,7 +1065,12 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
   /// To close the end side drawer once it is open, use [Navigator.pop].
   ///
   /// See [Scaffold.of] for information about how to obtain the [ScaffoldState].
+  ///
+  /// The end side [Drawer] cannot be opened if the [Drawer] is already
+  /// opened.
   void openEndDrawer() {
+    assert(!_drawerOpened, 'You cannot open the end drawer if the drawer is '
+      'already opened.');
     _endDrawerKey.currentState?.open();
   }
 
@@ -1422,7 +1445,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
         if (_snackBarController.isCompleted && _snackBarTimer == null)
           _snackBarTimer = new Timer(_snackBars.first._widget.duration, () {
             assert(_snackBarController.status == AnimationStatus.forward ||
-                   _snackBarController.status == AnimationStatus.completed);
+                _snackBarController.status == AnimationStatus.completed);
             hideCurrentSnackBar(reason: SnackBarClosedReason.timeout);
           });
       } else {
@@ -1440,7 +1463,8 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
       removeLeftPadding: false,
       removeTopPadding: widget.appBar != null,
       removeRightPadding: false,
-      removeBottomPadding: widget.bottomNavigationBar != null || widget.persistentFooterButtons != null,
+      removeBottomPadding: widget.bottomNavigationBar != null ||
+          widget.persistentFooterButtons != null,
     );
 
     if (widget.appBar != null) {
@@ -1465,7 +1489,8 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
     }
 
     if (_snackBars.isNotEmpty) {
-      final bool removeBottomPadding = widget.persistentFooterButtons != null || widget.bottomNavigationBar != null;
+      final bool removeBottomPadding = widget.persistentFooterButtons != null ||
+          widget.bottomNavigationBar != null;
       _addIfNonNull(
         children,
         _snackBars.first._widget,
@@ -1491,7 +1516,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
               child: new SafeArea(
                 top: false,
                 child: new ButtonBar(
-                  children: widget.persistentFooterButtons
+                    children: widget.persistentFooterButtons
                 ),
               ),
             ),
@@ -1570,40 +1595,46 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
       );
     }
 
-    if (widget.drawer != null) {
-      assert(hasDrawer);
-      _addIfNonNull(
-        children,
-        new DrawerController(
-          key: _drawerKey,
-          alignment: DrawerAlignment.start,
-          child: widget.drawer,
-        ),
-        _ScaffoldSlot.drawer,
-        // remove the side padding from the side we're not touching
-        removeLeftPadding: textDirection == TextDirection.rtl,
-        removeTopPadding: false,
-        removeRightPadding: textDirection == TextDirection.ltr,
-        removeBottomPadding: false,
-      );
+    if(!_endDrawerOpened) {
+      if (widget.drawer != null) {
+        assert(hasDrawer);
+        _addIfNonNull(
+          children,
+          new DrawerController(
+            key: _drawerKey,
+            alignment: DrawerAlignment.start,
+            child: widget.drawer,
+            drawerCallback: _drawerOpenedCallback,
+          ),
+          _ScaffoldSlot.drawer,
+          // remove the side padding from the side we're not touching
+          removeLeftPadding: textDirection == TextDirection.rtl,
+          removeTopPadding: false,
+          removeRightPadding: textDirection == TextDirection.ltr,
+          removeBottomPadding: false,
+        );
+      }
     }
 
-    if (widget.endDrawer != null) {
-      assert(hasEndDrawer);
-      _addIfNonNull(
-        children,
-        new DrawerController(
-          key: _endDrawerKey,
-          alignment: DrawerAlignment.end,
-          child: widget.endDrawer,
-        ),
-        _ScaffoldSlot.endDrawer,
-        // remove the side padding from the side we're not touching
-        removeLeftPadding: textDirection == TextDirection.ltr,
-        removeTopPadding: false,
-        removeRightPadding: textDirection == TextDirection.rtl,
-        removeBottomPadding: false,
-      );
+    if (!_drawerOpened) {
+      if (widget.endDrawer != null) {
+        assert(hasEndDrawer);
+        _addIfNonNull(
+          children,
+          new DrawerController(
+            key: _endDrawerKey,
+            alignment: DrawerAlignment.end,
+            child: widget.endDrawer,
+            drawerCallback: _endDrawerOpenedCallback,
+          ),
+          _ScaffoldSlot.endDrawer,
+          // remove the side padding from the side we're not touching
+          removeLeftPadding: textDirection == TextDirection.ltr,
+          removeTopPadding: false,
+          removeRightPadding: textDirection == TextDirection.rtl,
+          removeBottomPadding: false,
+        );
+      }
     }
 
     // The minimum insets for contents of the Scaffold to keep visible.

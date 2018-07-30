@@ -4,6 +4,7 @@
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter/material.dart';
 
 import 'colors.dart';
 import 'list_tile.dart';
@@ -141,6 +142,10 @@ class Drawer extends StatelessWidget {
   }
 }
 
+/// Signature for the callback that's called when a [DrawerController] is
+/// opened or closed.
+typedef void DrawerCallback(bool isOpened);
+
 /// Provides interactive behavior for [Drawer] widgets.
 ///
 /// Rarely used directly. Drawer controllers are typically created automatically
@@ -161,10 +166,11 @@ class DrawerController extends StatefulWidget {
   /// Rarely used directly.
   ///
   /// The [child] argument must not be null and is typically a [Drawer].
-  const DrawerController({
+  DrawerController({
     GlobalKey key,
     @required this.child,
     @required this.alignment,
+    this.drawerCallback,
   }) : assert(child != null),
        assert(alignment != null),
        super(key: key);
@@ -179,6 +185,9 @@ class DrawerController extends StatefulWidget {
   /// This controls the direction in which the user should swipe to open and
   /// close the drawer.
   final DrawerAlignment alignment;
+
+  /// Optional callback that is called when a [Drawer] is opened or closed.
+  final DrawerCallback drawerCallback;
 
   @override
   DrawerControllerState createState() => new DrawerControllerState();
@@ -270,6 +279,8 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
     return _kWidth; // drawer not being shown currently
   }
 
+  bool _previouslyOpened = false;
+
   void _move(DragUpdateDetails details) {
     double delta = details.primaryDelta / _width;
     switch (widget.alignment) {
@@ -287,6 +298,11 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
         _controller.value += delta;
         break;
     }
+
+    final bool opened = _controller.value > 0.5 ? true : false;
+    if (opened != _previouslyOpened && widget.drawerCallback != null)
+      widget.drawerCallback(opened);
+    _previouslyOpened = opened;
   }
 
   void _settle(DragEndDetails details) {
@@ -321,11 +337,15 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
   /// Typically called by [ScaffoldState.openDrawer].
   void open() {
     _controller.fling(velocity: 1.0);
+    if(widget.drawerCallback != null)
+      widget.drawerCallback(true);
   }
 
   /// Starts an animation to close the drawer.
   void close() {
     _controller.fling(velocity: -1.0);
+    if(widget.drawerCallback != null)
+      widget.drawerCallback(false);
   }
 
   final ColorTween _color = new ColorTween(begin: Colors.transparent, end: Colors.black54);
@@ -358,12 +378,12 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
       return new Align(
         alignment: _drawerOuterAlignment,
         child: new GestureDetector(
-          key: _gestureDetectorKey,
-          onHorizontalDragUpdate: _move,
-          onHorizontalDragEnd: _settle,
-          behavior: HitTestBehavior.translucent,
-          excludeFromSemantics: true,
-          child: new Container(width: _kEdgeDragWidth)
+            key: _gestureDetectorKey,
+            onHorizontalDragUpdate: _move,
+            onHorizontalDragEnd: _settle,
+            behavior: HitTestBehavior.translucent,
+            excludeFromSemantics: true,
+            child: new Container(width: _kEdgeDragWidth)
         ),
       );
     } else {
@@ -383,7 +403,7 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
                   excludeFromSemantics: defaultTargetPlatform == TargetPlatform.android,
                   onTap: close,
                   child: new Container(
-                    color: _color.evaluate(_controller)
+                      color: _color.evaluate(_controller)
                   ),
                 ),
               ),
@@ -394,9 +414,9 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
                   widthFactor: _controller.value,
                   child: new RepaintBoundary(
                     child: new FocusScope(
-                      key: _drawerKey,
-                      node: _focusScopeNode,
-                      child: widget.child
+                        key: _drawerKey,
+                        node: _focusScopeNode,
+                        child: widget.child
                     ),
                   ),
                 ),

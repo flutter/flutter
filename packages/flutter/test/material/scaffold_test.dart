@@ -133,7 +133,7 @@ void main() {
     expect(tester.binding.transientCallbackCount, 0);
 
     await tester.pumpWidget(new MaterialApp(home: const Scaffold()));
-    
+
     expect(tester.binding.transientCallbackCount, 0);
 
     await tester.pumpWidget(new MaterialApp(home: const Scaffold(
@@ -766,39 +766,6 @@ void main() {
     expect(tester.getRect(find.byKey(insideDrawer)), new Rect.fromLTRB(596.0, 30.0, 750.0, 540.0));
   });
 
-  testWidgets('Simultaneous drawers on either side', (WidgetTester tester) async {
-    const String bodyLabel = 'I am the body';
-    const String drawerLabel = 'I am the label on start side';
-    const String endDrawerLabel = 'I am the label on end side';
-
-    final SemanticsTester semantics = new SemanticsTester(tester);
-    await tester.pumpWidget(new MaterialApp(home: const Scaffold(
-      body: const Text(bodyLabel),
-      drawer: const Drawer(child: const Text(drawerLabel)),
-      endDrawer: const Drawer(child: const Text(endDrawerLabel)),
-    )));
-
-    expect(semantics, includesNodeWith(label: bodyLabel));
-    expect(semantics, isNot(includesNodeWith(label: drawerLabel)));
-    expect(semantics, isNot(includesNodeWith(label: endDrawerLabel)));
-
-    final ScaffoldState state = tester.firstState(find.byType(Scaffold));
-    state.openDrawer();
-    await tester.pump();
-    await tester.pump(const Duration(seconds: 1));
-
-    expect(semantics, isNot(includesNodeWith(label: bodyLabel)));
-    expect(semantics, includesNodeWith(label: drawerLabel));
-
-    state.openEndDrawer();
-    await tester.pump();
-    await tester.pump(const Duration(seconds: 1));
-
-    expect(semantics, isNot(includesNodeWith(label: bodyLabel)));
-    expect(semantics, includesNodeWith(label: endDrawerLabel));
-
-    semantics.dispose();
-  });
 
   group('ScaffoldGeometry', () {
     testWidgets('bottomNavigationBar', (WidgetTester tester) async {
@@ -969,6 +936,58 @@ void main() {
       numNotificationsAtLastFrame = listenerState.numNotifications;
     });
 
+    testWidgets('Dual Drawer Opening', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        new MaterialApp(
+          home: new SafeArea(
+            left: false,
+            top: true,
+            right: false,
+            bottom: false,
+            child: new Scaffold(
+                endDrawer: new Drawer(
+                  child: new Text("endDrawer"),
+                ),
+                drawer: new Drawer(
+                  child: new Text("drawer"),
+                ),
+                body: new Text("scaffold body"),
+                appBar: new AppBar(
+                  centerTitle: true,
+                  title: new Text("Title")
+                )
+            ),
+          ),
+        ),
+      );
+
+      // Open Drawer, tap on end drawer, which closes the drawer, but does
+      // not open the drawer.
+      await tester.tap(find.byType(IconButton).first);
+      await tester.pumpAndSettle();
+      await tester.tap(find.byType(IconButton).last);
+      await tester.pumpAndSettle();
+
+      expect(find.text('endDrawer'), findsNothing);
+      expect(find.text('drawer'), findsNothing);
+
+      // Tapping the first opens the first drawer
+      await tester.tap(find.byType(IconButton).first);
+      await tester.pumpAndSettle();
+
+      expect(find.text('endDrawer'), findsNothing);
+      expect(find.text('drawer'), findsOneWidget);
+
+      // Tapping on the end drawer and then on the drawer should close the
+      // drawer and then reopen it.
+      await tester.tap(find.byType(IconButton).last);
+      await tester.pumpAndSettle();
+      await tester.tap(find.byType(IconButton).first);
+      await tester.pumpAndSettle();
+
+      expect(find.text('endDrawer'), findsNothing);
+      expect(find.text('drawer'), findsOneWidget);
+    });
   });
 }
 
