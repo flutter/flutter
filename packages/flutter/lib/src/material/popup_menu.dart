@@ -458,13 +458,19 @@ class _PopupMenu<T> extends StatelessWidget {
       ),
       child: new IntrinsicWidth(
         stepWidth: _kMenuWidthStep,
-        child: new SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(
-            vertical: _kMenuVerticalPadding
+        child: new Semantics(
+          scopesRoute: true,
+          namesRoute: true,
+          explicitChildNodes: true,
+          label: semanticLabel,
+          child: new SingleChildScrollView(
+            padding: const EdgeInsets.symmetric(
+              vertical: _kMenuVerticalPadding
+            ),
+            child: new ListBody(children: children),
           ),
-          child: new ListBody(children: children),
-        )
-      )
+        ),
+      ),
     );
 
     return new AnimatedBuilder(
@@ -479,13 +485,7 @@ class _PopupMenu<T> extends StatelessWidget {
               alignment: AlignmentDirectional.topEnd,
               widthFactor: width.evaluate(route.animation),
               heightFactor: height.evaluate(route.animation),
-              child: new Semantics(
-                scopesRoute: true,
-                namesRoute: true,
-                explicitChildNodes: true,
-                label: semanticLabel,
-                child: child,
-              ),
+              child: child,
             ),
           ),
         );
