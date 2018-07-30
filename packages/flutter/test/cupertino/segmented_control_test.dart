@@ -220,6 +220,66 @@ void main() {
     expect(iconTheme.data.color, CupertinoColors.white);
   });
 
+  testWidgets('SegmentedControl is correct when user provides custom colors',
+          (WidgetTester tester) async {
+        final Map<int, Widget> children = <int, Widget>{};
+        children[0] = const Text('Child 1');
+        children[1] = const Icon(IconData(1));
+
+        int sharedValue = 0;
+
+        await tester.pumpWidget(
+          new StatefulBuilder(
+            builder: (BuildContext context, StateSetter setState) {
+              return boilerplate(
+                child: new SegmentedControl<int>(
+                  children: children,
+                  onValueChanged: (int newValue) {
+                    setState(() {
+                      sharedValue = newValue;
+                    });
+                  },
+                  groupValue: sharedValue,
+                  unselectedColor: CupertinoColors.lightBackgroundGray,
+                  selectedColor: CupertinoColors.activeGreen,
+                  borderColor: CupertinoColors.black,
+                  pressedColor: const Color(0x638CFC7B),
+                ),
+              );
+            },
+          ),
+        );
+
+        await tester.pumpAndSettle();
+
+        DefaultTextStyle textStyle = tester.widget(find.widgetWithText(DefaultTextStyle, 'Child 1'));
+        IconTheme iconTheme = tester.widget(find.widgetWithIcon(IconTheme, const IconData(1)));
+
+        expect(getRenderSegmentedControl(tester).borderColor, CupertinoColors.black);
+        expect(textStyle.style.color, CupertinoColors.lightBackgroundGray);
+        expect(iconTheme.data.color, CupertinoColors.activeGreen);
+        expect(getBackgroundColor(tester, 0), CupertinoColors.activeGreen);
+        expect(getBackgroundColor(tester, 1), CupertinoColors.lightBackgroundGray);
+
+        await tester.tap(find.widgetWithIcon(IconTheme, const IconData(1)));
+        await tester.pumpAndSettle();
+
+        textStyle = tester.widget(find.widgetWithText(DefaultTextStyle, 'Child 1'));
+        iconTheme = tester.widget(find.widgetWithIcon(IconTheme, const IconData(1)));
+
+        expect(textStyle.style.color, CupertinoColors.activeGreen);
+        expect(iconTheme.data.color, CupertinoColors.lightBackgroundGray);
+        expect(getBackgroundColor(tester, 0), CupertinoColors.lightBackgroundGray);
+        expect(getBackgroundColor(tester, 1), CupertinoColors.activeGreen);
+
+        final Offset center = tester.getCenter(find.text('Child 1'));
+        await tester.startGesture(center);
+        await tester.pumpAndSettle();
+
+        expect(getBackgroundColor(tester, 0), const Color(0x638CFC7B));
+        expect(getBackgroundColor(tester, 1), CupertinoColors.activeGreen);
+      });
+
   testWidgets('Tap calls onValueChanged', (WidgetTester tester) async {
     final Map<int, Widget> children = <int, Widget>{};
     children[0] = const Text('Child 1');
