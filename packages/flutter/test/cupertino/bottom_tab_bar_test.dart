@@ -193,14 +193,13 @@ void main() {
     expect(semantics, includesNodeWith(
       label: 'Tab 1',
       hint: 'tab, 1 of 2',
-      flags: <SemanticsFlag>[SemanticsFlag.isSelected, SemanticsFlag.isImage],
+      flags: <SemanticsFlag>[SemanticsFlag.isSelected],
       textDirection: TextDirection.ltr,
     ));
 
     expect(semantics, includesNodeWith(
       label: 'Tab 2',
       hint: 'tab, 2 of 2',
-      flags: <SemanticsFlag>[SemanticsFlag.isImage],
       textDirection: TextDirection.ltr,
     ));
 
