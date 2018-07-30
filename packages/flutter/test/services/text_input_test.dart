@@ -8,7 +8,7 @@ import 'package:test/test.dart';
 void main() {
   group('TextInputConfiguration', () {
     test('sets expected defaults', () {
-      const TextInputConfiguration configuration = TextInputConfiguration();
+      const TextInputConfiguration configuration = const TextInputConfiguration();
       expect(configuration.inputType, TextInputType.text);
       expect(configuration.obscureText, false);
       expect(configuration.autocorrect, true);
@@ -18,7 +18,7 @@ void main() {
     });
 
     test('text serializes to JSON', () async {
-      const TextInputConfiguration configuration = TextInputConfiguration(
+      const TextInputConfiguration configuration = const TextInputConfiguration(
         inputType: TextInputType.text,
         obscureText: true,
         autocorrect: false,
@@ -34,8 +34,8 @@ void main() {
     });
 
     test('number serializes to JSON', () async {
-      const TextInputConfiguration configuration = TextInputConfiguration(
-        inputType: TextInputType.numberWithOptions(decimal: true),
+      const TextInputConfiguration configuration = const TextInputConfiguration(
+        inputType: const TextInputType.numberWithOptions(decimal: true),
         obscureText: true,
         autocorrect: false,
         actionLabel: 'xyzzy',
@@ -52,12 +52,12 @@ void main() {
     test('basic structure', () async {
       const TextInputType text = TextInputType.text;
       const TextInputType number = TextInputType.number;
-      const TextInputType number2 = TextInputType.numberWithOptions();
-      const TextInputType signed = TextInputType.numberWithOptions(signed: true);
-      const TextInputType signed2 = TextInputType.numberWithOptions(signed: true);
-      const TextInputType decimal = TextInputType.numberWithOptions(decimal: true);
+      const TextInputType number2 = const TextInputType.numberWithOptions();
+      const TextInputType signed = const TextInputType.numberWithOptions(signed: true);
+      const TextInputType signed2 = const TextInputType.numberWithOptions(signed: true);
+      const TextInputType decimal = const TextInputType.numberWithOptions(decimal: true);
       const TextInputType signedDecimal =
-        TextInputType.numberWithOptions(signed: true, decimal: true);
+        const TextInputType.numberWithOptions(signed: true, decimal: true);
 
       expect(text.toString(), 'TextInputType(name: TextInputType.text, signed: null, decimal: null)');
       expect(number.toString(), 'TextInputType(name: TextInputType.number, signed: false, decimal: false)');

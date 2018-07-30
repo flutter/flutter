@@ -69,15 +69,15 @@ class MenuDemoState extends State<MenuDemo> {
             itemBuilder: (BuildContext context) => <PopupMenuItem<String>>[
               const PopupMenuItem<String>(
                 value: 'Toolbar menu',
-                child: Text('Toolbar menu')
+                child: const Text('Toolbar menu')
               ),
               const PopupMenuItem<String>(
                 value: 'Right here',
-                child: Text('Right here')
+                child: const Text('Right here')
               ),
               const PopupMenuItem<String>(
                 value: 'Hooray!',
-                child: Text('Hooray!')
+                child: const Text('Hooray!')
               ),
             ],
           ),
@@ -101,7 +101,7 @@ class MenuDemoState extends State<MenuDemo> {
                 ),
                 const PopupMenuItem<String>(
                   enabled: false,
-                  child: Text('A disabled menu item')
+                  child: const Text('A disabled menu item')
                 ),
                 new PopupMenuItem<String>(
                   value: _simpleValue3,
@@ -121,31 +121,31 @@ class MenuDemoState extends State<MenuDemo> {
               itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
                 const PopupMenuItem<String>(
                   value: 'Preview',
-                  child: ListTile(
-                    leading: Icon(Icons.visibility),
-                    title: Text('Preview')
+                  child: const ListTile(
+                    leading: const Icon(Icons.visibility),
+                    title: const Text('Preview')
                   )
                 ),
                 const PopupMenuItem<String>(
                   value: 'Share',
-                  child: ListTile(
-                    leading: Icon(Icons.person_add),
-                    title: Text('Share')
+                  child: const ListTile(
+                    leading: const Icon(Icons.person_add),
+                    title: const Text('Share')
                   )
                 ),
                 const PopupMenuItem<String>(
                   value: 'Get Link',
-                  child: ListTile(
-                    leading: Icon(Icons.link),
-                    title: Text('Get link')
+                  child: const ListTile(
+                    leading: const Icon(Icons.link),
+                    title: const Text('Get link')
                   )
                 ),
                 const PopupMenuDivider(), // ignore: list_element_type_not_assignable, https://github.com/flutter/flutter/issues/5771
                 const PopupMenuItem<String>(
                   value: 'Remove',
-                  child: ListTile(
-                    leading: Icon(Icons.delete),
-                    title: Text('Remove')
+                  child: const ListTile(
+                    leading: const Icon(Icons.delete),
+                    title: const Text('Remove')
                   )
                 )
               ]

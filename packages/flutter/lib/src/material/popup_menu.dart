@@ -21,7 +21,7 @@ import 'theme.dart';
 // enum Commands { heroAndScholar, hurricaneCame }
 // dynamic _heroAndScholar;
 
-const Duration _kMenuDuration = Duration(milliseconds: 300);
+const Duration _kMenuDuration = const Duration(milliseconds: 300);
 const double _kBaselineOffsetFromBottom = 20.0;
 const double _kMenuCloseIntervalEnd = 2.0 / 3.0;
 const double _kMenuHorizontalPadding = 16.0;
@@ -377,7 +377,7 @@ class CheckedPopupMenuItem<T> extends PopupMenuItem<T> {
 }
 
 class _CheckedPopupMenuItemState<T> extends PopupMenuItemState<T, CheckedPopupMenuItem<T>> with SingleTickerProviderStateMixin {
-  static const Duration _fadeDuration = Duration(milliseconds: 150);
+  static const Duration _fadeDuration = const Duration(milliseconds: 150);
   AnimationController _controller;
   Animation<double> get _opacity => _controller.view;
 
@@ -458,13 +458,19 @@ class _PopupMenu<T> extends StatelessWidget {
       ),
       child: new IntrinsicWidth(
         stepWidth: _kMenuWidthStep,
-        child: new SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(
-            vertical: _kMenuVerticalPadding
+        child: new Semantics(
+          scopesRoute: true,
+          namesRoute: true,
+          explicitChildNodes: true,
+          label: semanticLabel,
+          child: new SingleChildScrollView(
+            padding: const EdgeInsets.symmetric(
+              vertical: _kMenuVerticalPadding
+            ),
+            child: new ListBody(children: children),
           ),
-          child: new ListBody(children: children),
-        )
-      )
+        ),
+      ),
     );
 
     return new AnimatedBuilder(
@@ -479,13 +485,7 @@ class _PopupMenu<T> extends StatelessWidget {
               alignment: AlignmentDirectional.topEnd,
               widthFactor: width.evaluate(route.animation),
               heightFactor: height.evaluate(route.animation),
-              child: new Semantics(
-                scopesRoute: true,
-                namesRoute: true,
-                explicitChildNodes: true,
-                label: semanticLabel,
-                child: child,
-              ),
+              child: child,
             ),
           ),
         );

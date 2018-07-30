@@ -12,7 +12,7 @@ import 'package:test/test.dart' hide test;
 
 import 'package:flutter_test/flutter_test.dart' show goldenFileComparator, LocalFileComparator;
 
-const List<int> _kExpectedBytes = <int>[1, 2, 3];
+const List<int> _kExpectedBytes = const <int>[1, 2, 3];
 
 void main() {
   MemoryFileSystem fs;
@@ -171,14 +171,14 @@ void main() {
     group('update', () {
       test('updates existing file', () async {
         fs.file(fix('/golden.png')).writeAsBytesSync(_kExpectedBytes);
-        const List<int> newBytes = <int>[11, 12, 13];
+        const List<int> newBytes = const <int>[11, 12, 13];
         await comparator.update(fs.file('golden.png').uri, new Uint8List.fromList(newBytes));
         expect(fs.file(fix('/golden.png')).readAsBytesSync(), newBytes);
       });
 
       test('creates non-existent file', () async {
         expect(fs.file(fix('/foo.png')).existsSync(), isFalse);
-        const List<int> newBytes = <int>[11, 12, 13];
+        const List<int> newBytes = const <int>[11, 12, 13];
         await comparator.update(fs.file('foo.png').uri, new Uint8List.fromList(newBytes));
         expect(fs.file(fix('/foo.png')).existsSync(), isTrue);
         expect(fs.file(fix('/foo.png')).readAsBytesSync(), newBytes);

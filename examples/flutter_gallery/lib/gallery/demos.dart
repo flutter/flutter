@@ -31,27 +31,27 @@ class GalleryDemoCategory {
   }
 }
 
-const GalleryDemoCategory _kDemos = GalleryDemoCategory._(
+const GalleryDemoCategory _kDemos = const GalleryDemoCategory._(
   name: 'Studies',
   icon: GalleryIcons.animation,
 );
 
-const GalleryDemoCategory _kStyle = GalleryDemoCategory._(
+const GalleryDemoCategory _kStyle = const GalleryDemoCategory._(
   name: 'Style',
   icon: GalleryIcons.custom_typography,
 );
 
-const GalleryDemoCategory _kMaterialComponents = GalleryDemoCategory._(
+const GalleryDemoCategory _kMaterialComponents = const GalleryDemoCategory._(
   name: 'Material',
   icon: GalleryIcons.category_mdc,
 );
 
-const GalleryDemoCategory _kCupertinoComponents = GalleryDemoCategory._(
+const GalleryDemoCategory _kCupertinoComponents = const GalleryDemoCategory._(
   name: 'Cupertino',
   icon: GalleryIcons.phone_iphone,
 );
 
-const GalleryDemoCategory _kMedia = GalleryDemoCategory._(
+const GalleryDemoCategory _kMedia = const GalleryDemoCategory._(
   name: 'Media',
   icon: GalleryIcons.drive_video,
 );
@@ -264,6 +264,14 @@ List<GalleryDemo> _buildGalleryDemos() {
       category: _kMaterialComponents,
       routeName: LeaveBehindDemo.routeName,
       buildRoute: (BuildContext context) => const LeaveBehindDemo(),
+    ),
+    new GalleryDemo(
+      title: 'Lists: reorderable',
+      subtitle: 'Reorderable lists',
+      icon: GalleryIcons.list_alt,
+      category: _kMaterialComponents,
+      routeName: ReorderableListDemo.routeName,
+      buildRoute: (BuildContext context) => const ReorderableListDemo(),
     ),
     new GalleryDemo(
       title: 'Menus',

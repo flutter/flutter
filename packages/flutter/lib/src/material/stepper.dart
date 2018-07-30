@@ -53,7 +53,7 @@ enum StepperType {
   horizontal,
 }
 
-const TextStyle _kStepStyle = TextStyle(
+const TextStyle _kStepStyle = const TextStyle(
   fontSize: 12.0,
   color: Colors.white,
 );

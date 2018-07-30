@@ -235,7 +235,7 @@ class _GeometryCachePainter extends CustomPainter {
 Widget buildFrame({
   FloatingActionButton fab = const FloatingActionButton(
     onPressed: null,
-    child: Text('1'),
+    child: const Text('1'),
   ),
   FloatingActionButtonLocation location,
   _GeometryListener listener,

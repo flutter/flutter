@@ -384,7 +384,7 @@ class SemanticsData extends Diagnosticable {
       scrollExtentMax,
       scrollExtentMin,
       transform,
-      customSemanticsActionIds,
+      ui.hashList(customSemanticsActionIds),
     );
   }
 

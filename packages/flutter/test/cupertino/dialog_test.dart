@@ -25,7 +25,7 @@ void main() {
                         content: const Text('The content'),
                         actions: <Widget>[
                           const CupertinoDialogAction(
-                            child: Text('Cancel'),
+                            child: const Text('Cancel'),
                           ),
                           new CupertinoDialogAction(
                             isDestructiveAction: true,
@@ -68,7 +68,7 @@ void main() {
   testWidgets('Dialog destructive action styles', (WidgetTester tester) async {
     await tester.pumpWidget(boilerplate(const CupertinoDialogAction(
       isDestructiveAction: true,
-      child: Text('Ok'),
+      child: const Text('Ok'),
     )));
 
     final DefaultTextStyle widget = tester.widget(find.byType(DefaultTextStyle));
@@ -80,7 +80,7 @@ void main() {
   testWidgets('Dialog default action styles', (WidgetTester tester) async {
     await tester.pumpWidget(boilerplate(const CupertinoDialogAction(
       isDefaultAction: true,
-      child: Text('Ok'),
+      child: const Text('Ok'),
     )));
 
     final DefaultTextStyle widget = tester.widget(find.byType(DefaultTextStyle));
@@ -92,7 +92,7 @@ void main() {
     await tester.pumpWidget(boilerplate(const CupertinoDialogAction(
       isDefaultAction: true,
       isDestructiveAction: true,
-      child: Text('Ok'),
+      child: const Text('Ok'),
     )));
 
     final DefaultTextStyle widget = tester.widget(find.byType(DefaultTextStyle));
@@ -119,12 +119,12 @@ void main() {
                         title: const Text('The Title'),
                         content: new Text('Very long content ' * 20),
                         actions: const <Widget>[
-                          CupertinoDialogAction(
-                            child: Text('Cancel'),
+                          const CupertinoDialogAction(
+                            child: const Text('Cancel'),
                           ),
-                          CupertinoDialogAction(
+                          const CupertinoDialogAction(
                             isDestructiveAction: true,
-                            child: Text('OK'),
+                            child: const Text('OK'),
                           ),
                         ],
                         scrollController: scrollController,
@@ -185,21 +185,21 @@ void main() {
                         title: const Text('The title'),
                         content: const Text('The content.'),
                         actions: const <Widget>[
-                          CupertinoDialogAction(
-                            child: Text('One'),
+                          const CupertinoDialogAction(
+                            child: const Text('One'),
                           ),
-                          CupertinoDialogAction(
-                            child: Text('Two'),
+                          const CupertinoDialogAction(
+                            child: const Text('Two'),
                           ),
-                          CupertinoDialogAction(
-                            child: Text('Three'),
+                          const CupertinoDialogAction(
+                            child: const Text('Three'),
                           ),
-                          CupertinoDialogAction(
-                            child: Text('Chocolate Brownies'),
+                          const CupertinoDialogAction(
+                            child: const Text('Chocolate Brownies'),
                           ),
-                          CupertinoDialogAction(
+                          const CupertinoDialogAction(
                             isDestructiveAction: true,
-                            child: Text('Cancel'),
+                            child: const Text('Cancel'),
                           ),
                         ],
                         actionScrollController: scrollController,
@@ -258,11 +258,11 @@ void main() {
                       data: MediaQuery.of(context).copyWith(textScaleFactor: textScaleFactor),
                       child: new CupertinoAlertDialog(
                         actions: const <Widget>[
-                          CupertinoDialogAction(
-                            child: Text('One'),
+                          const CupertinoDialogAction(
+                            child: const Text('One'),
                           ),
-                          CupertinoDialogAction(
-                            child: Text('Two'),
+                          const CupertinoDialogAction(
+                            child: const Text('Two'),
                           ),
                         ],
                         actionScrollController: scrollController,

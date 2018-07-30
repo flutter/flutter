@@ -47,8 +47,8 @@ void main() {
   runApp(
     const Directionality(
       textDirection: TextDirection.ltr,
-      child: Center(
-        child: LifecycleWatcher(),
+      child: const Center(
+        child: const LifecycleWatcher(),
       ),
     ),
   );
