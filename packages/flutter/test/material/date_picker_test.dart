@@ -391,15 +391,22 @@ void _tests() {
       final TestSemantics expected = new TestSemantics(
         flags: <SemanticsFlag>[
           SemanticsFlag.scopesRoute,
+          SemanticsFlag.namesRoute,
         ],
+        label: 'Friday, January 15, 2016',
+        textDirection: TextDirection.ltr,
         children: <TestSemantics>[
           new TestSemantics(
+            flags: <SemanticsFlag>[SemanticsFlag.isButton],
             actions: <SemanticsAction>[SemanticsAction.tap],
             label: '2016',
             textDirection: TextDirection.ltr,
           ),
           new TestSemantics(
-            flags: <SemanticsFlag>[SemanticsFlag.isSelected],
+            flags: <SemanticsFlag>[
+              SemanticsFlag.isSelected,
+              SemanticsFlag.isButton,
+            ],
             actions: <SemanticsAction>[SemanticsAction.tap],
             label: 'Fri, Jan 15',
             textDirection: TextDirection.ltr,
@@ -611,7 +618,12 @@ void _tests() {
       expect(semantics, hasSemantics(
         new TestSemantics.root(children: <TestSemantics>[
           new TestSemantics(
-            children: <TestSemantics>[expected],
+            children: <TestSemantics>[
+              new TestSemantics(
+                flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
+                children: [expected],
+              ),
+            ],
           ),
         ]),
         ignoreId: true,
