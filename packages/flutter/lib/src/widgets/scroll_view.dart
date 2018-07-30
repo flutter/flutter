@@ -517,7 +517,7 @@ abstract class BoxScrollView extends ScrollView {
 /// In order to preserve state as child elements are scrolled in and out of
 /// view, the following options are possible:
 ///
-/// 1. By moving the ownership of non-trivial UI-state-driving business logic
+/// 1. Moving the ownership of non-trivial UI-state-driving business logic
 ///    out of the list child subtree. For instance, if a list contains posts
 ///    with their number of upvotes coming from a cached network response, store
 ///    the list of posts and upvote number in a data model outside the list. Let
@@ -537,7 +537,7 @@ abstract class BoxScrollView extends ScrollView {
 ///    are false since those parameters cause the [ListView] to wrap each child
 ///    widget subtree with other widgets.
 ///
-/// 3. By using [AutomaticKeepAlive] widgets (inserted by default when
+/// 3. Using [AutomaticKeepAlive] widgets (inserted by default when
 ///    [addAutomaticKeepAlives] is true). Instead of unconditionally caching the
 ///    child element subtree when scrolling off-screen like [KeepAlive],
 ///    [AutomaticKeepAlive] can let whether to cache the subtree be determined
