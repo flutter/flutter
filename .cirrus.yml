@@ -18,6 +18,12 @@ task:
         FIREBASE_TOKEN: ENCRYPTED[a40fcb68452b92254b7f532a460529b5e4ca51d6d338a8fae8db9db832ad3c2a7efb962e257de79686a9345f4a18661a]
       docs_script: ./dev/bots/docs.sh
     - name: deploy_gallery
+      only_if: $CIRRUS_BRANCH == 'dev'
+      depends_on:
+        - docs
+        - analyze
+        - tests-linux
+        - tool_tests-linux
       env:
         SHARD: deploy_gallery
         GOOGLE_DEVELOPER_SERVICE_ACCOUNT_ACTOR_FASTLANE: ENCRYPTED[d9ac1462c3c556fc2f8165c9d5566a16497d8ebc38a50357f7f3abf136b7f83e1d1d76dde36fee356cb0f9ebf7a89346]
@@ -85,6 +91,12 @@ task:
 
 task:
   name: deploy_gallery-macos
+  only_if: $CIRRUS_BRANCH == 'dev'
+  depends_on:
+    - docs
+    - analyze
+    - tests-macos
+    - tool_tests-macos
   env:
     SHARD: deploy_gallery
     OS_NAME: macos
