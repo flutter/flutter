@@ -3258,12 +3258,6 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
        _onMoveCursorBackwardByCharacter = onMoveCursorBackwardByCharacter,
        _onMoveCursorForwardByWord = onMoveCursorForwardByWord,
        _onMoveCursorBackwardByWord = onMoveCursorBackwardByWord,
-       _onMoveCursorForwarddByLine = onMoveCursorForwardByLine,
-       _onMoveCursorBackwardByLine = onMoveCursorBackwardByLine,
-       _onMoveCursorForwardByParagraph = onMoveCursorForwardByParagraph,
-       _onMoveCursorBackwardByParagraph = onMoveCursorBackwardByParagraph,
-       _onMoveCursorForwardByPage = onMoveCursorForwardByPage,
-       _onMoveCursorBackwardByPage = onMoveCursorBackwardByPage,
        _onSetSelection = onSetSelection,
        _onDidGainAccessibilityFocus = onDidGainAccessibilityFocus,
        _onDidLoseAccessibilityFocus = onDidLoseAccessibilityFocus,
@@ -3842,6 +3836,13 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
       markNeedsSemanticsUpdate();
   }
 
+  /// The handler for [SemanticsAction.onMoveCursorForwardByWord].
+  ///
+  /// This handler is invoked when the user wants to move the cursor in a
+  /// text field backward by one character.
+  ///
+  /// TalkBack users can trigger this by pressing the volume down key while the
+  /// input focus is in a text field.
   MoveCursorHandler get onMoveCursorForwardByWord => _onMoveCursorForwardByWord;
   MoveCursorHandler _onMoveCursorForwardByWord;
   set onMoveCursorForwardByWord(MoveCursorHandler handler) {
@@ -3853,6 +3854,13 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
       markNeedsSemanticsUpdate();
   }
 
+  /// The handler for [SemanticsAction.onMoveCursorBackwardByWord].
+  ///
+  /// This handler is invoked when the user wants to move the cursor in a
+  /// text field backward by one character.
+  ///
+  /// TalkBack users can trigger this by pressing the volume down key while the
+  /// input focus is in a text field.
   MoveCursorHandler get onMoveCursorBackwardByWord => _onMoveCursorBackwardByWord;
   MoveCursorHandler _onMoveCursorBackwardByWord;
   set onMoveCursorBackwardByWord(MoveCursorHandler handler) {
@@ -3860,73 +3868,6 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
       return;
     final bool hadValue = _onMoveCursorBackwardByWord != null;
     _onMoveCursorBackwardByWord = handler;
-    if ((handler != null) != hadValue)
-      markNeedsSemanticsUpdate();
-  }
-
-  MoveCursorHandler get onMoveCursorForwardByLine => _onMoveCursorForwarddByLine;
-  MoveCursorHandler _onMoveCursorForwarddByLine;
-  set onMoveCursorForwardByLine(MoveCursorHandler handler) {
-    if (_onMoveCursorForwarddByLine == handler)
-      return;
-    final bool hadValue = _onMoveCursorForwarddByLine != null;
-    _onMoveCursorForwarddByLine = handler;
-    if ((handler != null) != hadValue)
-      markNeedsSemanticsUpdate();
-  }
-
-  MoveCursorHandler get onMoveCursorBackwardByLine => _onMoveCursorBackwardByLine;
-  MoveCursorHandler _onMoveCursorBackwardByLine;
-  set onMoveCursorBackwardByLine(MoveCursorHandler handler) {
-    if (_onMoveCursorBackwardByLine == handler)
-      return;
-    final bool hadValue = _onMoveCursorBackwardByLine != null;
-    _onMoveCursorBackwardByLine = handler;
-    if ((handler != null) != hadValue)
-      markNeedsSemanticsUpdate();
-  }
-
-  MoveCursorHandler get onMoveCursorForwardByParagraph => _onMoveCursorForwardByParagraph;
-  MoveCursorHandler _onMoveCursorForwardByParagraph;
-  set onMoveCursorForwardByParagraph(MoveCursorHandler handler) {
-    if (_onMoveCursorForwardByParagraph == handler)
-      return;
-    final bool hadValue = _onMoveCursorForwardByParagraph != null;
-    _onMoveCursorForwardByParagraph = handler;
-    if ((handler != null) != hadValue)
-      markNeedsSemanticsUpdate();
-  }
-
-  MoveCursorHandler get onMoveCursorBackwardByParagraph => _onMoveCursorBackwardByParagraph;
-  MoveCursorHandler _onMoveCursorBackwardByParagraph;
-  set onMoveCursorBackwardByParagraph(MoveCursorHandler handler) {
-    if (_onMoveCursorBackwardByParagraph == handler)
-      return;
-    final bool hadValue = _onMoveCursorBackwardByParagraph != null;
-    _onMoveCursorBackwardByParagraph = handler;
-    if ((handler != null) != hadValue)
-      markNeedsSemanticsUpdate();
-  }
-
-  MoveCursorHandler get onMoveCursorForwardByPage => _onMoveCursorForwardByPage;
-  MoveCursorHandler _onMoveCursorForwardByPage;
-  set onMoveCursorForwardByPage(MoveCursorHandler handler) {
-    if (_onMoveCursorForwardByPage == handler)
-      return;
-    final bool hadValue = _onMoveCursorForwardByPage != null;
-    _onMoveCursorForwardByPage = handler;
-    if ((handler != null) != hadValue)
-      markNeedsSemanticsUpdate();
-  }
-
-
-  MoveCursorHandler get onMoveCursorBackwardByPage => _onMoveCursorBackwardByPage;
-  MoveCursorHandler _onMoveCursorBackwardByPage;
-  set onMoveCursorBackwardByPage(MoveCursorHandler handler) {
-    if (_onMoveCursorBackwardByPage == handler)
-      return;
-    final bool hadValue = _onMoveCursorBackwardByPage != null;
-    _onMoveCursorBackwardByPage = handler;
     if ((handler != null) != hadValue)
       markNeedsSemanticsUpdate();
   }
@@ -4120,18 +4061,6 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
       config.onMoveCursorForwardByWord = _performMoveCursorForwardByWord;
     if (onMoveCursorBackwardByWord != null)
       config.onMoveCursorBackwardByWord = _performMoveCursorBackwardByWord;
-    if (onMoveCursorForwardByLine != null)
-      config.onMoveCursorForwardByLine = _performMoveCursorForwardByLine;
-    if (onMoveCursorBackwardByLine != null)
-      config.onMoveCursorBackwardByLine = _performMoveCursorBackwardByLine;
-    if (onMoveCursorForwardByParagraph != null)
-      config.onMoveCursorForwardByParagraph = _performMoveCursorForwardByParagraph;
-    if (onMoveCursorBackwardByParagraph != null)
-      config.onMoveCursorBackwardByParagraph = _performMoveCursorBackwardByParagraph;
-    if (onMoveCursorForwardByPage != null)
-      config.onMoveCursorForwardByPage = _performMoveCursorForwardByPage;
-    if (onMoveCursorBackwardByPage != null)
-      config.onMoveCursorBackwardByPage = _performMoveCursorBackwardByPage;
     if (onSetSelection != null)
       config.onSetSelection = _performSetSelection;
     if (onDidGainAccessibilityFocus != null)
@@ -4220,36 +4149,6 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
   void _performMoveCursorBackwardByWord(bool extendSelection) {
     if (onMoveCursorBackwardByWord != null)
       onMoveCursorBackwardByWord(extendSelection);
-  }
-
-  void _performMoveCursorForwardByLine(bool extendSelection) {
-    if (onMoveCursorForwardByLine != null)
-      onMoveCursorForwardByLine(extendSelection);
-  }
-
-  void _performMoveCursorBackwardByLine(bool extendSelection) {
-    if (onMoveCursorBackwardByLine != null)
-      onMoveCursorBackwardByLine(extendSelection);
-  }
-
-  void _performMoveCursorForwardByParagraph(bool extendSelection) {
-    if (onMoveCursorForwardByParagraph != null)
-      onMoveCursorForwardByParagraph(extendSelection);
-  }
-
-  void _performMoveCursorBackwardByParagraph(bool extendSelection) {
-    if (onMoveCursorBackwardByParagraph != null)
-      onMoveCursorBackwardByParagraph(extendSelection);
-  }
-
-  void _performMoveCursorForwardByPage(bool extendSelection) {
-    if (onMoveCursorForwardByPage != null)
-      onMoveCursorForwardByPage(extendSelection);
-  }
-
-  void _performMoveCursorBackwardByPage(bool extendSelection) {
-    if (onMoveCursorBackwardByPage != null)
-      onMoveCursorBackwardByPage(extendSelection);
   }
 
   void _performSetSelection(TextSelection selection) {

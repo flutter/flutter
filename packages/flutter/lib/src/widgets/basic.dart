@@ -5266,12 +5266,6 @@ class Semantics extends SingleChildRenderObjectWidget {
       onMoveCursorBackwardByCharacter: properties.onMoveCursorBackwardByCharacter,
       onMoveCursorForwardByWord: properties.onMoveCursorForwardByWord,
       onMoveCursorBackwardByWord: properties.onMoveCursorBackwardByWord,
-      onMoveCursorForwardByLine: properties.onMoveCursorForwardByLine,
-      onMoveCursorBackwardByLine: properties.onMoveCursorBackwardByLine,
-      onMoveCursorForwardByParagraph: properties.onMoveCursorForwardByParagraph,
-      onMoveCursorBackwardByParagraph: properties.onMoveCursorBackwardByParagraph,
-      onMoveCursorForwardByPage: properties.onMoveCursorForwardByPage,
-      onMoveCursorBackwardByPage: properties.onMoveCursorBackwardByPage,
       onSetSelection: properties.onSetSelection,
       onDidGainAccessibilityFocus: properties.onDidGainAccessibilityFocus,
       onDidLoseAccessibilityFocus: properties.onDidLoseAccessibilityFocus,
@@ -5335,12 +5329,6 @@ class Semantics extends SingleChildRenderObjectWidget {
       ..onMoveCursorBackwardByCharacter = properties.onMoveCursorForwardByCharacter
       ..onMoveCursorForwardByWord = properties.onMoveCursorForwardByWord
       ..onMoveCursorBackwardByWord = properties.onMoveCursorBackwardByWord
-      ..onMoveCursorForwardByLine = properties.onMoveCursorForwardByLine
-      ..onMoveCursorBackwardByLine = properties.onMoveCursorBackwardByLine
-      ..onMoveCursorForwardByParagraph = properties.onMoveCursorForwardByParagraph
-      ..onMoveCursorBackwardByParagraph = properties.onMoveCursorBackwardByParagraph
-      ..onMoveCursorForwardByPage = properties.onMoveCursorForwardByPage
-      ..onMoveCursorBackwardByPage = properties.onMoveCursorBackwardByPage
       ..onSetSelection = properties.onSetSelection
       ..onDidGainAccessibilityFocus = properties.onDidGainAccessibilityFocus
       ..onDidLoseAccessibilityFocus = properties.onDidLoseAccessibilityFocus
