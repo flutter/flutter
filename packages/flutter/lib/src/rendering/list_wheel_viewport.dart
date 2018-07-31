@@ -401,7 +401,6 @@ class RenderListWheelViewport
 
   void _hasScrolled() {
     markNeedsLayout();
-    markNeedsPaint();
     markNeedsSemanticsUpdate();
   }
 
@@ -601,9 +600,18 @@ class RenderListWheelViewport
         minWidth: 0.0,
       );
 
+    // The range, in pixel, that children will be visible and might be laid out
+    // and painted.
+    double visibleRange = size.height + _itemExtent;
+    // If [renderChildrenOutsideViewport] is true, we spawn a redundant amount
+    // of children, those that are in the backside of the cylinder won't be
+    // painted anyway.
+    if (renderChildrenOutsideViewport)
+      visibleRange *= 2;
+
     // The index range that we want to spawn children.
-    int targetFirstIndex = scrollOffsetToIndex(offset.pixels - size.height / 2 - _itemExtent / 2);
-    int targetLastIndex = scrollOffsetToIndex(offset.pixels + size.height / 2 + _itemExtent / 2);
+    int targetFirstIndex = scrollOffsetToIndex(offset.pixels - visibleRange / 2);
+    int targetLastIndex = scrollOffsetToIndex(offset.pixels + visibleRange / 2);
 
     if (childManager.childSize != null) {
       targetFirstIndex = targetFirstIndex.clamp(0, childManager.childSize - 1);
@@ -620,12 +628,12 @@ class RenderListWheelViewport
     int currentLastIndex = indexOf(lastChild);
 
     // Remove all unnecessary children.
-    while(currentFirstIndex < targetFirstIndex) {
+    while (currentFirstIndex < targetFirstIndex) {
       _destroyChild(firstChild);
       currentFirstIndex++;
     }
 
-    while(currentLastIndex > targetLastIndex) {
+    while (currentLastIndex > targetLastIndex) {
       _destroyChild(lastChild);
       currentLastIndex--;
     }
@@ -638,18 +646,18 @@ class RenderListWheelViewport
 
     // Relayout all active children.
     RenderBox child = firstChild;
-    while(child != null) {
+    while (child != null) {
       child.layout(childConstraints, parentUsesSize: true);
       child = childAfter(child);
     }
 
     // Spawning new children that are actually visible but not in child list.
-    while(currentFirstIndex > targetFirstIndex) {
+    while (currentFirstIndex > targetFirstIndex) {
       if (_createChild(currentFirstIndex - 1, after: null))
         _layoutChild(firstChild, childConstraints, --currentFirstIndex);
       else break;
     }
-    while(currentLastIndex < targetLastIndex) {
+    while (currentLastIndex < targetLastIndex) {
       if (_createChild(currentLastIndex + 1, after: lastChild))
         _layoutChild(lastChild, childConstraints, ++currentLastIndex);
       else break;

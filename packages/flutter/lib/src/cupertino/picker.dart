@@ -30,7 +30,7 @@ const double _kForegroundScreenOpacityFraction = 0.7;
 ///    the iOS design specific chrome.
 ///  * <https://developer.apple.com/ios/human-interface-guidelines/controls/pickers/>
 class CupertinoPicker extends StatefulWidget {
-  /// Creates a Picker from a concrete list of children.
+  /// Creates a picker from a concrete list of children.
   ///
   /// The [diameterRatio] and [itemExtent] arguments must not be null. The
   /// [itemExtent] must be greater than zero.
@@ -49,13 +49,16 @@ class CupertinoPicker extends StatefulWidget {
     @required this.itemExtent,
     @required this.onSelectedItemChanged,
     @required List<Widget> children,
+    bool looping = false,
   }) :  assert(children != null),
         assert(diameterRatio != null),
         assert(diameterRatio > 0.0, RenderListWheelViewport.diameterRatioZeroMessage),
         assert(magnification > 0),
         assert(itemExtent != null),
         assert(itemExtent > 0),
-        childDelegate = new SliverChildListDelegate(children, addRepaintBoundaries: false, addAutomaticKeepAlives: false),
+        childDelegate = looping
+                        ? new ChildLoopingListDelegate(children)
+                        : new ChildListDelegate(children),
         super(key: key);
 
   /// Create Picker from a child builder where its children is dynamically
@@ -82,7 +85,7 @@ class CupertinoPicker extends StatefulWidget {
         assert(magnification > 0),
         assert(itemExtent != null),
         assert(itemExtent > 0),
-        childDelegate = new NegativeIndexChildBuilderDelegate(itemBuilder, childCount: childCount),
+        childDelegate = new ChildBuilderDelegate(itemBuilder, childCount: childCount),
         super(key: key);
 
   /// Relative ratio between this picker's height and the simulated cylinder's diameter.
@@ -132,7 +135,7 @@ class CupertinoPicker extends StatefulWidget {
   final ValueChanged<int> onSelectedItemChanged;
 
   /// A delegate that helps lazily instantiating child.
-  final SliverChildDelegate childDelegate;
+  final ChildDelegate childDelegate;
 
   @override
   State<StatefulWidget> createState() => new _CupertinoPickerState();

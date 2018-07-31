@@ -78,7 +78,7 @@ class _CupertinoPickerDemoState extends State<CupertinoPickerDemo> {
     return new Row(
       children: <Widget>[
         new Expanded(
-          child: new CupertinoPicker.builder(
+          child: new CupertinoPicker(
             scrollController: new FixedExtentScrollController(
               initialItem: _selectedHour,
             ),
@@ -89,21 +89,21 @@ class _CupertinoPickerDemoState extends State<CupertinoPickerDemo> {
             backgroundColor: CupertinoColors.white,
             onSelectedItemChanged: (int index) {
               setState(() {
-                _selectedHour = index % 24;
+                _selectedHour = index;
               });
             },
-            itemBuilder: (BuildContext context, int index) {
-              final int modIndex = index % 24;
+            children: new List<Widget>.generate(24, (int index) {
               return new Container(
                 alignment: Alignment.centerRight,
                 padding: const EdgeInsets.only(right: 32.0),
-                child: new Text(modIndex.toString()),
+                child: new Text(index.toString()),
               );
-            },
+            }),
+            looping: true,
           ),
         ),
         new Expanded(
-          child: new CupertinoPicker.builder(
+          child: new CupertinoPicker(
             scrollController: new FixedExtentScrollController(
               initialItem: _selectedMinute,
             ),
@@ -117,14 +117,14 @@ class _CupertinoPickerDemoState extends State<CupertinoPickerDemo> {
                 _selectedMinute = index % 60;
               });
             },
-            itemBuilder: (BuildContext context, int index) {
-              final int modIndex = index % 60;
+            children: new List<Widget>.generate(60, (int index) {
               return new Container(
                 alignment: Alignment.centerLeft,
                 padding: const EdgeInsets.only(left: 32.0),
-                child: new Text(modIndex.toString()),
+                child: new Text(index.toString()),
               );
-            },
+            }),
+            looping: true,
           ),
         ),
       ],
