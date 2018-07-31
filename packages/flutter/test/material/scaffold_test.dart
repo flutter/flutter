@@ -936,6 +936,40 @@ void main() {
       numNotificationsAtLastFrame = listenerState.numNotifications;
     });
 
+    testWidgets('Simultaneous drawers on either side', (WidgetTester tester) async {
+      const String bodyLabel = 'I am the body';
+      const String drawerLabel = 'I am the label on start side';
+      const String endDrawerLabel = 'I am the label on end side';
+
+      final SemanticsTester semantics = new SemanticsTester(tester);
+      await tester.pumpWidget(new MaterialApp(home: const Scaffold(
+        body: const Text(bodyLabel),
+        drawer: const Drawer(child: const Text(drawerLabel)),
+        endDrawer: const Drawer(child: const Text(endDrawerLabel)),
+      )));
+
+      expect(semantics, includesNodeWith(label: bodyLabel));
+      expect(semantics, isNot(includesNodeWith(label: drawerLabel)));
+      expect(semantics, isNot(includesNodeWith(label: endDrawerLabel)));
+
+      final ScaffoldState state = tester.firstState(find.byType(Scaffold));
+      state.openDrawer();
+      await tester.pump();
+      await tester.pump(const Duration(seconds: 1));
+
+      expect(semantics, isNot(includesNodeWith(label: bodyLabel)));
+      expect(semantics, includesNodeWith(label: drawerLabel));
+
+      state.openEndDrawer();
+      await tester.pump();
+      await tester.pump(const Duration(seconds: 1));
+
+      expect(semantics, isNot(includesNodeWith(label: bodyLabel)));
+      expect(semantics, includesNodeWith(label: endDrawerLabel));
+
+      semantics.dispose();
+    });
+
     testWidgets('Dual Drawer Opening', (WidgetTester tester) async {
       await tester.pumpWidget(
         new MaterialApp(
@@ -945,17 +979,17 @@ void main() {
             right: false,
             bottom: false,
             child: new Scaffold(
-                endDrawer: new Drawer(
-                  child: new Text("endDrawer"),
-                ),
-                drawer: new Drawer(
-                  child: new Text("drawer"),
-                ),
-                body: new Text("scaffold body"),
-                appBar: new AppBar(
-                  centerTitle: true,
-                  title: new Text("Title")
-                )
+              endDrawer: new Drawer(
+                child: new Text('endDrawer'),
+              ),
+              drawer: new Drawer(
+                child: new Text('drawer'),
+              ),
+              body: new Text('scaffold body'),
+              appBar: new AppBar(
+                centerTitle: true,
+                title: new Text('Title')
+              )
             ),
           ),
         ),

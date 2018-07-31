@@ -4,6 +4,7 @@
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
+
 import 'package:flutter/material.dart';
 
 import 'colors.dart';
@@ -166,7 +167,7 @@ class DrawerController extends StatefulWidget {
   /// Rarely used directly.
   ///
   /// The [child] argument must not be null and is typically a [Drawer].
-  DrawerController({
+  const DrawerController({
     GlobalKey key,
     @required this.child,
     @required this.alignment,
@@ -337,14 +338,14 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
   /// Typically called by [ScaffoldState.openDrawer].
   void open() {
     _controller.fling(velocity: 1.0);
-    if(widget.drawerCallback != null)
+    if (widget.drawerCallback != null)
       widget.drawerCallback(true);
   }
 
   /// Starts an animation to close the drawer.
   void close() {
     _controller.fling(velocity: -1.0);
-    if(widget.drawerCallback != null)
+    if (widget.drawerCallback != null)
       widget.drawerCallback(false);
   }
 

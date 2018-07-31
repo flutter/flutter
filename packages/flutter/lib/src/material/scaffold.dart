@@ -1023,13 +1023,15 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
   bool _endDrawerOpened = false;
 
   void _drawerOpenedCallback(bool isOpened) {
-    _drawerOpened = isOpened;
-    setState(() {});
+    setState(() {
+      _drawerOpened = isOpened;
+    });
   }
 
   void _endDrawerOpenedCallback(bool isOpened) {
-    _endDrawerOpened = isOpened;
-    setState(() {});
+    setState(() {
+      _endDrawerOpened = isOpened;
+    });
   }
 
   /// Opens the [Drawer] (if any).
@@ -1048,8 +1050,8 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
   /// The side [Drawer] cannot be opened if the end [Drawer] is already
   /// opened.
   void openDrawer() {
-    assert(!_endDrawerOpened, 'You cannot open the drawer if the end drawer is '
-      'already opened.');
+    if (_endDrawerKey.currentState != null && _endDrawerOpened)
+      _endDrawerKey.currentState.close();
     _drawerKey.currentState?.open();
   }
 
@@ -1069,8 +1071,8 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
   /// The end side [Drawer] cannot be opened if the [Drawer] is already
   /// opened.
   void openEndDrawer() {
-    assert(!_drawerOpened, 'You cannot open the end drawer if the drawer is '
-      'already opened.');
+    if (_drawerKey.currentState != null && _drawerOpened)
+      _drawerKey.currentState.close();
     _endDrawerKey.currentState?.open();
   }
 
@@ -1431,6 +1433,48 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
     }
   }
 
+  void _buildEndDrawer(List<LayoutId> children, TextDirection textDirection) {
+    if (widget.endDrawer != null) {
+      assert(hasEndDrawer);
+      _addIfNonNull(
+        children,
+        new DrawerController(
+          key: _endDrawerKey,
+          alignment: DrawerAlignment.end,
+          child: widget.endDrawer,
+          drawerCallback: _endDrawerOpenedCallback,
+        ),
+        _ScaffoldSlot.endDrawer,
+        // remove the side padding from the side we're not touching
+        removeLeftPadding: textDirection == TextDirection.ltr,
+        removeTopPadding: false,
+        removeRightPadding: textDirection == TextDirection.rtl,
+        removeBottomPadding: false,
+      );
+    }
+  }
+
+  void _buildDrawer(List<LayoutId> children, TextDirection textDirection) {
+    if (widget.drawer != null) {
+      assert(hasDrawer);
+      _addIfNonNull(
+        children,
+        new DrawerController(
+          key: _drawerKey,
+          alignment: DrawerAlignment.start,
+          child: widget.drawer,
+          drawerCallback: _drawerOpenedCallback,
+        ),
+        _ScaffoldSlot.drawer,
+        // remove the side padding from the side we're not touching
+        removeLeftPadding: textDirection == TextDirection.rtl,
+        removeTopPadding: false,
+        removeRightPadding: textDirection == TextDirection.ltr,
+        removeBottomPadding: false,
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMediaQuery(context));
@@ -1595,46 +1639,12 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
       );
     }
 
-    if(!_endDrawerOpened) {
-      if (widget.drawer != null) {
-        assert(hasDrawer);
-        _addIfNonNull(
-          children,
-          new DrawerController(
-            key: _drawerKey,
-            alignment: DrawerAlignment.start,
-            child: widget.drawer,
-            drawerCallback: _drawerOpenedCallback,
-          ),
-          _ScaffoldSlot.drawer,
-          // remove the side padding from the side we're not touching
-          removeLeftPadding: textDirection == TextDirection.rtl,
-          removeTopPadding: false,
-          removeRightPadding: textDirection == TextDirection.ltr,
-          removeBottomPadding: false,
-        );
-      }
-    }
-
-    if (!_drawerOpened) {
-      if (widget.endDrawer != null) {
-        assert(hasEndDrawer);
-        _addIfNonNull(
-          children,
-          new DrawerController(
-            key: _endDrawerKey,
-            alignment: DrawerAlignment.end,
-            child: widget.endDrawer,
-            drawerCallback: _endDrawerOpenedCallback,
-          ),
-          _ScaffoldSlot.endDrawer,
-          // remove the side padding from the side we're not touching
-          removeLeftPadding: textDirection == TextDirection.ltr,
-          removeTopPadding: false,
-          removeRightPadding: textDirection == TextDirection.rtl,
-          removeBottomPadding: false,
-        );
-      }
+    if (_endDrawerOpened) {
+      _buildDrawer(children, textDirection);
+      _buildEndDrawer(children, textDirection);
+    } else {
+      _buildEndDrawer(children, textDirection);
+      _buildDrawer(children, textDirection);
     }
 
     // The minimum insets for contents of the Scaffold to keep visible.
