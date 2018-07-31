@@ -156,25 +156,32 @@ class CupertinoTabBar extends StatelessWidget implements PreferredSizeWidget {
     final List<Widget> result = <Widget>[];
 
     for (int index = 0; index < items.length; index += 1) {
+      final bool active = index == currentIndex;
       result.add(
         _wrapActiveItem(
           new Expanded(
-            child: new GestureDetector(
-              behavior: HitTestBehavior.opaque,
-              onTap: onTap == null ? null : () { onTap(index); },
-              child: new Padding(
-                padding: const EdgeInsets.only(bottom: 4.0),
-                child: new Column(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: <Widget> [
-                    new Expanded(child: new Center(child: items[index].icon)),
-                    items[index].title,
-                  ],
+            child: new Semantics(
+              selected: active,
+              // TODO(https://github.com/flutter/flutter/issues/13452):
+              // This needs localization support.
+              hint: 'tab, ${index + 1} of ${items.length}',
+              child: new GestureDetector(
+                behavior: HitTestBehavior.opaque,
+                onTap: onTap == null ? null : () { onTap(index); },
+                child: new Padding(
+                  padding: const EdgeInsets.only(bottom: 4.0),
+                  child: new Column(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: <Widget> [
+                      new Expanded(child: new Center(child: items[index].icon)),
+                      items[index].title,
+                    ],
+                  ),
                 ),
               ),
             ),
           ),
-          active: index == currentIndex,
+          active: active,
         ),
       );
     }
@@ -183,7 +190,7 @@ class CupertinoTabBar extends StatelessWidget implements PreferredSizeWidget {
   }
 
   /// Change the active tab item's icon and title colors to active.
-  Widget _wrapActiveItem(Widget item, { bool active }) {
+  Widget _wrapActiveItem(Widget item, { @required bool active }) {
     if (!active)
       return item;
 
