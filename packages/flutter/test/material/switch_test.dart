@@ -314,4 +314,54 @@ void main() {
     semanticsTester.dispose();
     SystemChannels.accessibility.setMockMessageHandler(null);
   });
+
+  testWidgets('switch sends semantic events from parent if fully merged', (WidgetTester tester) async {
+    dynamic semanticEvent;
+    bool value = false;
+    SystemChannels.accessibility.setMockMessageHandler((dynamic message) {
+      semanticEvent = message;
+    });
+    final SemanticsTester semanticsTester = new SemanticsTester(tester);
+
+    await tester.pumpWidget(
+      new MaterialApp(
+        home: new StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            void onChanged(bool newValue) {
+              setState(() {
+                value = newValue;
+              });
+            }
+            return new Material(
+              child: new MergeSemantics(
+                child: new ListTile(
+                  leading: const Text('test'),
+                  onTap: () {
+                    onChanged(!value);
+                  },
+                  trailing: new Switch(
+                    value: value,
+                    onChanged: onChanged,
+                  ),
+                ),
+              ),
+            );
+          },
+        ),
+      ),
+    );
+    await tester.tap(find.byType(MergeSemantics));
+    final RenderObject object = tester.firstRenderObject(find.byType(MergeSemantics));
+
+    expect(value, true);
+    expect(semanticEvent, <String, dynamic>{
+      'type': 'tap',
+      'nodeId': object.debugSemantics.id,
+      'data': <String, dynamic>{},
+    });
+    expect(object.debugSemantics.getSemanticsData().hasAction(SemanticsAction.tap), true);
+
+    semanticsTester.dispose();
+    SystemChannels.accessibility.setMockMessageHandler(null);
+  });
 }
