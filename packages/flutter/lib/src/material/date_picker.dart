@@ -5,6 +5,7 @@
 import 'dart:async';
 import 'dart:math' as math;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
@@ -1021,6 +1022,15 @@ class _DatePickerDialogState extends State<_DatePickerDialog> {
       )
     );
 
+    String routeName;
+    switch (defaultTargetPlatform) {
+      case TargetPlatform.iOS:
+        break;
+      case TargetPlatform.android:
+      case TargetPlatform.fuchsia:
+        routeName = localizations.formatFullDate(_selectedDate);
+    }
+
     return new Theme(
       data: theme.copyWith(
         dialogBackgroundColor: Colors.transparent,
@@ -1029,7 +1039,7 @@ class _DatePickerDialogState extends State<_DatePickerDialog> {
         namesRoute: true,
         scopesRoute: true,
         explicitChildNodes: true,
-        label: localizations.formatFullDate(_selectedDate),
+        label: routeName,
         child: dialog,
       )
     );

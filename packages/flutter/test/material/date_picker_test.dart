@@ -4,6 +4,7 @@
 
 import 'dart:ui';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
@@ -621,7 +622,7 @@ void _tests() {
             children: <TestSemantics>[
               new TestSemantics(
                 flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
-                children: [expected],
+                children: <TestSemantics>[expected],
               ),
             ],
           ),
@@ -633,6 +634,22 @@ void _tests() {
     });
 
     semantics.dispose();
+  });
+
+  testWidgets('does not include initial route name on iOS', (WidgetTester tester) async {
+    debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
+    final SemanticsTester semantics = new SemanticsTester(tester);
+    await preparePicker(tester, (Future<DateTime> date) async {
+      expect(semantics.nodesWith(
+        flags: <SemanticsFlag>[
+          SemanticsFlag.scopesRoute,
+          SemanticsFlag.namesRoute,
+        ],
+        label: null,
+      ), hasLength(1));
+    });
+    semantics.dispose();
+    debugDefaultTargetPlatformOverride = null;
   });
 
   testWidgets('chervons animate when scrolling month picker', (WidgetTester tester) async {
