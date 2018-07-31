@@ -2206,7 +2206,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   void sendSemanticsEvent(SemanticsEvent semanticsEvent) {
     if (owner.semanticsOwner == null)
       return;
-    if (_semantics != null) {
+    if (_semantics != null && !_semantics.isMergedIntoParent) {
       _semantics.sendEvent(semanticsEvent);
     } else if (parent != null) {
       final RenderObject renderParent = parent;
