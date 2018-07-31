@@ -430,7 +430,7 @@ class RenderEditable extends RenderBox {
       }
       if (_textPainter.getOffsetAfter(_selection.extentOffset) != null) {
         config
-          ..onMoveCursorForwardByWord = _handleMoveCursorFowardByWord
+          ..onMoveCursorForwardByWord = _handleMoveCursorForwardByWord
           ..onMoveCursorForwardByCharacter = _handleMoveCursorForwardByCharacter;
       }
     }
@@ -460,34 +460,30 @@ class RenderEditable extends RenderBox {
     );
   }
 
-  void _handleMoveCursorFowardByWord(bool extentSelection) {
+  void _handleMoveCursorForwardByWord(bool extentSelection) {
     final TextAffinity forwardAffinity = textDirection == TextDirection.ltr ? TextAffinity.downstream : TextAffinity.upstream;
-    TextRange currentWord = _textPainter.getWordBoundary(_selection.extent);
-    int endOffset = currentWord?.end;
-    do {
-      currentWord = _textPainter.getWordBoundary(new TextPosition(offset: endOffset, affinity: forwardAffinity));
-      endOffset = currentWord?.end;
-    } while (endOffset != null && !currentWord.isValid);
+    final TextRange currentWord = _textPainter.getWordBoundary(_selection.extent);
     if (currentWord == null)
       return;
-    final int baseOffset = !extentSelection ? currentWord.start : _selection.baseOffset;
+    final TextRange nextWord = _textPainter.getWordBoundary(new TextPosition(offset: currentWord.end, affinity: forwardAffinity));
+    if (nextWord == null)
+      return;
+    final int baseOffset = !extentSelection ? nextWord.start : _selection.baseOffset;
     onSelectionChanged(
-      new TextSelection(baseOffset: baseOffset, extentOffset: currentWord.end), this, SelectionChangedCause.keyboard);
+      new TextSelection(baseOffset: baseOffset, extentOffset: nextWord.start), this, SelectionChangedCause.keyboard);
   }
 
   void _handleMoveCursorBackwardByWord(bool extentSelection) {
     final TextAffinity backwardAffinity = textDirection == TextDirection.ltr ? TextAffinity.upstream : TextAffinity.downstream;
-    TextRange currentWord = _textPainter.getWordBoundary(_selection.extent);
-    int startOffset = currentWord?.start;
-    do {
-      currentWord = _textPainter.getWordBoundary(new TextPosition(offset: startOffset - 1, affinity: backwardAffinity));
-      startOffset = currentWord?.start;
-    } while (startOffset != null && startOffset > 0 && !currentWord.isValid);
+    final TextRange currentWord = _textPainter.getWordBoundary(_selection.extent);
     if (currentWord == null)
       return;
-    final int baseOffset = !extentSelection ? currentWord.start : _selection.baseOffset;
+    final TextRange previousWord = _textPainter.getWordBoundary(new TextPosition(offset: currentWord.start - 1, affinity: backwardAffinity));
+    if (previousWord == null)
+      return;
+    final int baseOffset = !extentSelection ? previousWord.start : _selection.baseOffset;
     onSelectionChanged(
-        new TextSelection(baseOffset: baseOffset, extentOffset: currentWord.end), this, SelectionChangedCause.keyboard);
+      new TextSelection(baseOffset: baseOffset, extentOffset: previousWord.start), this, SelectionChangedCause.keyboard);
   }
 
   @override
