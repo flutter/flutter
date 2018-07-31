@@ -449,7 +449,7 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('Duplicate error listener is called once', (WidgetTester tester) async {
+  testWidgets('Duplicate error listeners are all called', (WidgetTester tester) async {
     dynamic capturedException;
     StackTrace capturedStackTrace;
     ImageInfo capturedImage;
@@ -489,8 +489,7 @@ void main() {
     // The image stream error handler should have the original exception.
     expect(capturedException, testException);
     expect(capturedStackTrace, testStack);
-    // Error listener registered twice but should be called once.
-    expect(errorListenerCalled, 1);
+    expect(errorListenerCalled, 2);
     // If there is an error listener, there should be no FlutterError reported.
     expect(tester.takeException(), isNull);
   });

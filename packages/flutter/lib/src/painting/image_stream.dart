@@ -312,11 +312,12 @@ abstract class ImageStreamCompleter extends Diagnosticable {
     );
 
     // Many listeners can have the same error listener. De-duplicate.
-    final Set<ImageErrorListener> localErrorListeners =
+    final List<ImageErrorListener> localErrorListeners =
         _listeners.map<ImageErrorListener>(
           (_ImageListenerPair listenerPair) => listenerPair.errorListener
-        ).toSet()
-            ..remove(null);
+        ).where(
+          (ImageErrorListener errorListener) => errorListener != null
+        ).toList();
 
     if (localErrorListeners.isEmpty) {
       FlutterError.reportError(_currentError);
