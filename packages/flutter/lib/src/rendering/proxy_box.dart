@@ -1036,7 +1036,7 @@ abstract class CustomClipper<T> {
   /// Creates a custom clipper.
   ///
   /// The clipper will update its clip whenever [reclip] notifies its listeners.
-  const CustomClipper({ Listenable reclip}) : _reclip = reclip;
+  const CustomClipper({ Listenable reclip }) : _reclip = reclip;
 
   final Listenable _reclip;
 
@@ -1117,12 +1117,9 @@ class ShapeBorderClipper extends CustomClipper<Path> {
 abstract class _RenderCustomClip<T> extends RenderProxyBox {
   _RenderCustomClip({
     RenderBox child,
-    CustomClipper<T> clipper, // this would override _clip
+    CustomClipper<T> clipper,
     this.clipBehavior = defaultClipBehavior, // ignore: deprecated_member_use
-  }) : _clipper = clipper,
-        assert(clipBehavior != null),
-        assert(clipBehavior != Clip.none),
-        super(child);
+  }) : _clipper = clipper, assert(clipBehavior != null), assert(clipBehavior != Clip.none), super(child);
 
   /// If non-null, determines which clip to use on the child.
   CustomClipper<T> get clipper => _clipper;
@@ -1684,7 +1681,7 @@ class RenderPhysicalModel extends _RenderPhysicalModelBase<RRect> {
           );
         }
         canvas.drawRRect(offsetRRect, new Paint()..color = color);
-        context.clipRRectAndPaint(clipBehavior, offsetRRect, offsetBounds, () => super.paint(context, offset));
+        context.clipRRectAndPaint(offsetRRect, clipBehavior, offsetBounds, () => super.paint(context, offset));
         assert(context.canvas == canvas, 'canvas changed even though needsCompositing was false');
       }
     }
@@ -1716,7 +1713,7 @@ class RenderPhysicalShape extends _RenderPhysicalModelBase<Path> {
   RenderPhysicalShape({
     RenderBox child,
     @required CustomClipper<Path> clipper,
-    Clip clipBehavior = Clip.antiAlias,
+    Clip clipBehavior = defaultClipBehavior, // ignore: deprecated_member_use
     double elevation = 0.0,
     @required Color color,
     Color shadowColor = const Color(0xFF000000),
@@ -1797,7 +1794,7 @@ class RenderPhysicalShape extends _RenderPhysicalModelBase<Path> {
           );
         }
         canvas.drawPath(offsetPath, new Paint()..color = color..style = PaintingStyle.fill);
-        context.clipPathAndPaint(clipBehavior, offsetPath, offsetBounds, () => super.paint(context, offset));
+        context.clipPathAndPaint(offsetPath, clipBehavior, offsetBounds, () => super.paint(context, offset));
         assert(context.canvas == canvas, 'canvas changed even though needsCompositing was false');
       }
     }

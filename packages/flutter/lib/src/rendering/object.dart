@@ -4,7 +4,7 @@
 
 import 'dart:developer';
 import 'dart:ui' as ui show PictureRecorder;
-import 'dart:ui' show Clip, defaultClipBehavior; // ignore: deprecated_member_use
+import 'dart:ui' show Clip;
 
 import 'package:flutter/animation.dart';
 import 'package:flutter/foundation.dart';
@@ -50,7 +50,8 @@ abstract class ClipContext {
   /// The canvas on which to paint.
   Canvas get canvas;
 
-  void _clipAndPaint(Clip clipBehavior, void canvasClipCall(bool doAntiAlias), Rect bounds, void painter()) {
+  // TODO(liyuqian): change argument order
+  void _clipAndPaint(void canvasClipCall(bool doAntiAlias), Clip clipBehavior, Rect bounds, void painter()) {
     assert(canvasClipCall != null);
     canvas.save();
     switch (clipBehavior) {
@@ -76,20 +77,26 @@ abstract class ClipContext {
 
   /// Clip [canvas] with [Path] according to [Clip] and then paint. [canvas] is
   /// restored to the pre-clip status afterwards.
-  void clipPathAndPaint(Clip clipBehavior, Path path, Rect bounds, void painter()) {
-    _clipAndPaint(clipBehavior, (bool doAntiAias) => canvas.clipPath(path, doAntiAlias: doAntiAias), bounds, painter);
+  ///
+  /// `bounds` is the saveLayer bounds used for [Clip.antiAliasWithSaveLayer].
+  void clipPathAndPaint(Path path, Clip clipBehavior, Rect bounds, void painter()) {
+    _clipAndPaint((bool doAntiAias) => canvas.clipPath(path, doAntiAlias: doAntiAias), clipBehavior, bounds, painter);
   }
 
   /// Clip [canvas] with [Path] according to [RRect] and then paint. [canvas] is
   /// restored to the pre-clip status afterwards.
-  void clipRRectAndPaint(Clip clipBehavior, RRect rrect, Rect bounds, void painter()) {
-    _clipAndPaint(clipBehavior, (bool doAntiAias) => canvas.clipRRect(rrect, doAntiAlias: doAntiAias), bounds, painter);
+  ///
+  /// `bounds` is the saveLayer bounds used for [Clip.antiAliasWithSaveLayer].
+  void clipRRectAndPaint(RRect rrect, Clip clipBehavior, Rect bounds, void painter()) {
+    _clipAndPaint((bool doAntiAias) => canvas.clipRRect(rrect, doAntiAlias: doAntiAias), clipBehavior, bounds, painter);
   }
 
   /// Clip [canvas] with [Path] according to [Rect] and then paint. [canvas] is
   /// restored to the pre-clip status afterwards.
-  void clipRectAndPaint(Clip clipBehavior, Rect rect, Rect bounds, void painter()) {
-    _clipAndPaint(clipBehavior, (bool doAntiAias) => canvas.clipRect(rect, doAntiAlias: doAntiAias), bounds, painter);
+  ///
+  /// `bounds` is the saveLayer bounds used for [Clip.antiAliasWithSaveLayer].
+  void clipRectAndPaint(Rect rect, Clip clipBehavior, Rect bounds, void painter()) {
+    _clipAndPaint((bool doAntiAias) => canvas.clipRect(rect, doAntiAlias: doAntiAias), clipBehavior, bounds, painter);
   }
 }
 
@@ -365,12 +372,13 @@ class PaintingContext extends ClipContext {
   ///   clip the painting done by [painter].
   /// * `painter` is a callback that will paint with the [clipRect] applied. This
   ///   function calls the [painter] synchronously.
+  /// * `clipBehavior` controls how the rectangle is clipped.
   void pushClipRect(bool needsCompositing, Offset offset, Rect clipRect, PaintingContextCallback painter, {Clip clipBehavior = Clip.antiAlias}) {
     final Rect offsetClipRect = clipRect.shift(offset);
     if (needsCompositing) {
       pushLayer(new ClipRectLayer(clipRect: offsetClipRect, clipBehavior: clipBehavior), painter, offset, childPaintBounds: offsetClipRect);
     } else {
-      clipRectAndPaint(clipBehavior, offsetClipRect, offsetClipRect, () => painter(this, offset));
+      clipRectAndPaint(offsetClipRect, clipBehavior, offsetClipRect, () => painter(this, offset));
     }
   }
 
@@ -386,16 +394,16 @@ class PaintingContext extends ClipContext {
   ///   to use to clip the painting done by `painter`.
   /// * `painter` is a callback that will paint with the `clipRRect` applied. This
   ///   function calls the `painter` synchronously.
-  /// * `clip` controls how the rounded rectangle is clipped.
+  /// * `clipBehavior` controls how the path is clipped.
   // ignore: deprecated_member_use
-  void pushClipRRect(bool needsCompositing, Offset offset, Rect bounds, RRect clipRRect, PaintingContextCallback painter, {Clip clipBehavior = defaultClipBehavior}) {
+  void pushClipRRect(bool needsCompositing, Offset offset, Rect bounds, RRect clipRRect, PaintingContextCallback painter, {Clip clipBehavior = Clip.antiAlias}) {
     assert(clipBehavior != null);
     final Rect offsetBounds = bounds.shift(offset);
     final RRect offsetClipRRect = clipRRect.shift(offset);
     if (needsCompositing) {
       pushLayer(new ClipRRectLayer(clipRRect: offsetClipRRect, clipBehavior: clipBehavior), painter, offset, childPaintBounds: offsetBounds);
     } else {
-      clipRRectAndPaint(clipBehavior, offsetClipRRect, offsetBounds, () => painter(this, offset));
+      clipRRectAndPaint(offsetClipRRect, clipBehavior, offsetBounds, () => painter(this, offset));
     }
   }
 
@@ -411,15 +419,16 @@ class PaintingContext extends ClipContext {
   ///   clip the painting done by `painter`.
   /// * `painter` is a callback that will paint with the `clipPath` applied. This
   ///   function calls the `painter` synchronously.
+  /// * `clipBehavior` controls how the rounded rectangle is clipped.
   // ignore: deprecated_member_use
-  void pushClipPath(bool needsCompositing, Offset offset, Rect bounds, Path clipPath, PaintingContextCallback painter, {Clip clipBehavior = defaultClipBehavior}) {
+  void pushClipPath(bool needsCompositing, Offset offset, Rect bounds, Path clipPath, PaintingContextCallback painter, {Clip clipBehavior = Clip.antiAlias}) {
     assert(clipBehavior != null);
     final Rect offsetBounds = bounds.shift(offset);
     final Path offsetClipPath = clipPath.shift(offset);
     if (needsCompositing) {
       pushLayer(new ClipPathLayer(clipPath: offsetClipPath, clipBehavior: clipBehavior), painter, offset, childPaintBounds: offsetBounds);
     } else {
-      clipPathAndPaint(clipBehavior, offsetClipPath, offsetBounds, () => painter(this, offset));
+      clipPathAndPaint(offsetClipPath, clipBehavior, offsetBounds, () => painter(this, offset));
     }
   }
 

@@ -530,7 +530,8 @@ class ClipRRect extends SingleChildRenderObjectWidget {
     this.clipper,
     this.clipBehavior = Clip.antiAlias,
     Widget child,
-  }) : assert(borderRadius != null && clipBehavior != null || clipper != null),
+  }) : assert(borderRadius != null || clipper != null),
+       assert(clipBehavior != null),
        super(key: key, child: child);
 
   /// The border radius of the rounded corners.
