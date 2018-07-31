@@ -692,75 +692,23 @@ class _CupertinoPersistentNavigationBar extends StatelessWidget implements Prefe
     if (styledLeading == null && automaticallyImplyLeading) {
       final ModalRoute<dynamic> currentRoute = ModalRoute.of(context);
       if (currentRoute?.canPop == true) {
-        Widget backOrCloseButtonContent;
         if (currentRoute is PageRoute && currentRoute?.fullscreenDialog == true) {
-          backOrCloseButtonContent = const Padding(
-            padding: EdgeInsetsDirectional.only(
-              start: _kNavBarEdgePadding,
+          backOrCloseButton = new CupertinoButton(
+            child: const Padding(
+              padding: EdgeInsetsDirectional.only(
+                start: _kNavBarEdgePadding,
+              ),
+              child: Text('Close'),
             ),
-            child: Text('Close'),
+            padding: EdgeInsets.zero,
+            onPressed: () { Navigator.maybePop(context); },
           );
         } else {
-          final TextDirection textDirection = Directionality.of(context);
-
-          // Replicate the Icon logic here to get a tightly sized icon and add
-          // custom non-square padding.
-          Widget iconWidget = new Text.rich(
-            new TextSpan(
-              text: new String.fromCharCode(CupertinoIcons.back.codePoint),
-              style: new TextStyle(
-                inherit: false,
-                color: actionsForegroundColor,
-                fontSize: 34.0,
-                fontFamily: CupertinoIcons.back.fontFamily,
-                package: CupertinoIcons.back.fontPackage,
-              ),
-            ),
-          );
-          switch (textDirection) {
-            case TextDirection.rtl:
-              iconWidget = new Transform(
-                transform: new Matrix4.identity()..scale(-1.0, 1.0, 1.0),
-                alignment: Alignment.center,
-                transformHitTests: false,
-                child: iconWidget,
-              );
-              break;
-            case TextDirection.ltr:
-              break;
-          }
-
-          backOrCloseButtonContent = new Semantics(
-            container: true,
-            excludeSemantics: true,
-            label: 'Back',
-            button: true,
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(minWidth: _kNavBarBackButtonTapWidth),
-              child: new Row(
-                mainAxisSize: MainAxisSize.min,
-                mainAxisAlignment: MainAxisAlignment.start,
-                children: <Widget>[
-                  const Padding(padding: EdgeInsetsDirectional.only(start: 8.0)),
-                  iconWidget,
-                  const Padding(padding: EdgeInsetsDirectional.only(start: 6.0)),
-                  new Flexible(
-                    child: new _BackLabel(
-                      specifiedPreviousTitle: previousPageTitle,
-                      route: currentRoute,
-                    ),
-                  ),
-                ],
-              ),
-            ),
+          backOrCloseButton = new CupertinoNavigationBarBackButton(
+            color: actionsForegroundColor,
+            previousPageTitle: previousPageTitle,
           );
         }
-
-        backOrCloseButton = new CupertinoButton(
-          child: backOrCloseButtonContent,
-          padding: EdgeInsets.zero,
-          onPressed: () { Navigator.maybePop(context); },
-        );
       }
     }
 
@@ -784,17 +732,121 @@ class _CupertinoPersistentNavigationBar extends StatelessWidget implements Prefe
 
     return new SizedBox(
       height: _kNavBarPersistentHeight + MediaQuery.of(context).padding.top,
-      child: IconTheme.merge(
-        data: new IconThemeData(
-          color: actionsForegroundColor,
-          size: 22.0,
+      child: new SafeArea(
+        bottom: false,
+        child: paddedToolbar,
+      ),
+    );
+  }
+}
+
+/// A nav bar back button typically used in [CupertinoNavigationBar].
+///
+/// This is automatically inserted into [CupertinoNavigationBar] and
+/// [CupertinoSliverNavigationBar]'s `leading` slot when
+/// `automaticallyImplyLeading` is true.
+///
+/// Shows a back chevron and the previous route's title when available from
+/// the previous [CupertinoPageRoute.title]. If [previousPageTitle] is specified,
+/// it will be shown instead.
+class CupertinoNavigationBarBackButton extends StatelessWidget {
+  /// Construct a [CupertinoNavigationBarBackButton] that can be used to pop
+  /// the current route.
+  ///
+  /// The [color] parameter must not be null.
+  const CupertinoNavigationBarBackButton({
+    @required this.color,
+    this.previousPageTitle,
+  }) : assert(color != null);
+
+  /// The [Color] of the back chevron.
+  ///
+  /// Must not be null.
+  final Color color;
+
+  /// An override for showing the previous route's title. If null, it will be
+  /// automatically derived from [CupertinoPageRoute.title] if the current and
+  /// previous routes are both [CupertinoPageRoute]s.
+  final String previousPageTitle;
+
+  @override
+  Widget build(BuildContext context) {
+    final ModalRoute<dynamic> currentRoute = ModalRoute.of(context);
+    assert(
+      currentRoute.canPop,
+      'CupertinoNavigationBarBackButton should only be used in routes that can be popped',
+    );
+
+    return new CupertinoButton(
+      child: new Semantics(
+        container: true,
+        excludeSemantics: true,
+        label: 'Back',
+        button: true,
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(minWidth: _kNavBarBackButtonTapWidth),
+          child: new Row(
+            mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: <Widget>[
+              const Padding(padding: EdgeInsetsDirectional.only(start: 8.0)),
+              new _BackChevron(color: color),
+              const Padding(padding: EdgeInsetsDirectional.only(start: 6.0)),
+              new Flexible(
+                child: new _BackLabel(
+                  specifiedPreviousTitle: previousPageTitle,
+                  route: currentRoute,
+                ),
+              ),
+            ],
+          ),
         ),
-        child: new SafeArea(
-          bottom: false,
-          child: paddedToolbar,
+      ),
+      padding: EdgeInsets.zero,
+      onPressed: () { Navigator.maybePop(context); },
+    );
+  }
+}
+
+class _BackChevron extends StatelessWidget {
+  const _BackChevron({
+    @required this.color,
+  }) : assert(color != null);
+
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    final TextDirection textDirection = Directionality.of(context);
+
+    // Replicate the Icon logic here to get a tightly sized icon and add
+    // custom non-square padding.
+    Widget iconWidget = new Text.rich(
+      new TextSpan(
+        text: new String.fromCharCode(CupertinoIcons.back.codePoint),
+        style: new TextStyle(
+          inherit: false,
+          color: color,
+          fontSize: 34.0,
+          fontFamily: CupertinoIcons.back.fontFamily,
+          package: CupertinoIcons.back.fontPackage,
         ),
       ),
     );
+    switch (textDirection) {
+      case TextDirection.rtl:
+        iconWidget = new Transform(
+          transform: new Matrix4.identity()..scale(-1.0, 1.0, 1.0),
+          alignment: Alignment.center,
+          transformHitTests: false,
+          child: iconWidget,
+        );
+        break;
+      case TextDirection.ltr:
+        break;
+    }
+
+    return iconWidget;
   }
 }
 
