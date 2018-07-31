@@ -409,6 +409,8 @@ void main() {
         onPaste: () => performedActions.add(SemanticsAction.paste),
         onMoveCursorForwardByCharacter: (bool _) => performedActions.add(SemanticsAction.moveCursorForwardByCharacter),
         onMoveCursorBackwardByCharacter: (bool _) => performedActions.add(SemanticsAction.moveCursorBackwardByCharacter),
+        onMoveCursorForwardByWord: (bool _) => performedActions.add(SemanticsAction.moveCursorForwardByCharacter),
+        onMoveCursorBackwardByWord: (bool _) => performedActions.add(SemanticsAction.moveCursorBackwardByCharacter),
         onSetSelection: (TextSelection _) => performedActions.add(SemanticsAction.setSelection),
         onDidGainAccessibilityFocus: () => performedActions.add(SemanticsAction.didGainAccessibilityFocus),
         onDidLoseAccessibilityFocus: () => performedActions.add(SemanticsAction.didLoseAccessibilityFocus),
