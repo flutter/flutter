@@ -167,45 +167,6 @@ void bar() {
         tempDir.deleteSync(recursive: true);
       }
     });
-
-    testUsingContext('--preview-dart-2', () async {
-      const String contents = '''
-StringBuffer bar = StringBuffer('baz');
-''';
-
-      final Directory tempDir = fs.systemTempDirectory.createTempSync();
-      tempDir.childFile('main.dart').writeAsStringSync(contents);
-
-      try {
-        await runCommand(
-          command: new AnalyzeCommand(workingDirectory: fs.directory(tempDir)),
-          arguments: <String>['analyze', '--preview-dart-2'],
-          statusTextContains: <String>['No issues found!'],
-        );
-      } finally {
-        tempDir.deleteSync(recursive: true);
-      }
-    });
-
-    testUsingContext('no --preview-dart-2 shows errors', () async {
-      const String contents = '''
-StringBuffer bar = StringBuffer('baz');
-''';
-
-      final Directory tempDir = fs.systemTempDirectory.createTempSync();
-      tempDir.childFile('main.dart').writeAsStringSync(contents);
-
-      try {
-        await runCommand(
-          command: new AnalyzeCommand(workingDirectory: fs.directory(tempDir)),
-          arguments: <String>['analyze', '--no-preview-dart-2'],
-          statusTextContains: <String>['1 issue found.'],
-          toolExit: true,
-        );
-      } finally {
-        tempDir.deleteSync(recursive: true);
-      }
-    });
   });
 }
 
