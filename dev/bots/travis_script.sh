@@ -58,8 +58,6 @@ elif [ "$SHARD" = "docs" ]; then
     # Generate the API docs, upload them
     ./dev/bots/docs.sh
   fi
-elif [ "$SHARD" = "codelabs_build_test" ]; then
-  ./dev/bots/codelabs_build_test.sh
 else
   TEST_COMMIT_RANGE="${TRAVIS_COMMIT_RANGE}" dart ./dev/bots/test.dart
 fi
