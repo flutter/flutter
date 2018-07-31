@@ -28,6 +28,8 @@ class SemanticsAction {
   static const int _kDidLoseAccessibilityFocusIndex = 1 << 16;
   static const int _kCustomAction = 1 << 17;
   static const int _kDismissIndex = 1 << 18;
+  static const int _kMoveCursorForwardByWordIndex = 1 << 19;
+  static const int _kMoveCursorBackwardByWordIndex = 1 << 20;
 
   /// The numerical value for this action.
   ///
@@ -163,6 +165,22 @@ class SemanticsAction {
   /// (with VoiceOver) users can perform a standard gesture to dismiss it.
   static const SemanticsAction dismiss = const SemanticsAction._(_kDismissIndex);
 
+  /// Move the cursor forward by one word.
+  ///
+  /// This is for example used by the cursor control in text fields.
+  ///
+  /// The action includes a boolean argument, which indicates whether the cursor
+  /// movement should extend (or start) a selection.
+  static const SemanticsAction moveCursorForwardByWord = const SemanticsAction._(_kMoveCursorForwardByWordIndex);
+
+  /// Move the cursor backward by one word.
+  ///
+  /// This is for example used by the cursor control in text fields.
+  ///
+  /// The action includes a boolean argument, which indicates whether the cursor
+  /// movement should extend (or start) a selection.
+  static const SemanticsAction moveCursorBackwardByWord = const SemanticsAction._(_kMoveCursorBackwardByWordIndex);
+
   /// The possible semantics actions.
   ///
   /// The map's key is the [index] of the action and the value is the action
@@ -187,6 +205,8 @@ class SemanticsAction {
     _kDidLoseAccessibilityFocusIndex: didLoseAccessibilityFocus,
     _kCustomAction: customAction,
     _kDismissIndex: dismiss,
+    _kMoveCursorForwardByWordIndex: moveCursorForwardByWord,
+    _kMoveCursorBackwardByWordIndex: moveCursorBackwardByWord,
   };
 
   @override
@@ -230,6 +250,10 @@ class SemanticsAction {
         return 'SemanticsAction.customAction';
       case _kDismissIndex:
         return 'SemanticsAction.dismiss';
+      case _kMoveCursorForwardByWordIndex:
+        return 'SemanticsAction.moveCursorForwardByWord';
+      case _kMoveCursorBackwardByWordIndex:
+        return 'SemanticsAction.moveCursorBackwardByWord';
     }
     return null;
   }
