@@ -379,12 +379,12 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
       return new Align(
         alignment: _drawerOuterAlignment,
         child: new GestureDetector(
-            key: _gestureDetectorKey,
-            onHorizontalDragUpdate: _move,
-            onHorizontalDragEnd: _settle,
-            behavior: HitTestBehavior.translucent,
-            excludeFromSemantics: true,
-            child: new Container(width: _kEdgeDragWidth)
+          key: _gestureDetectorKey,
+          onHorizontalDragUpdate: _move,
+          onHorizontalDragEnd: _settle,
+          behavior: HitTestBehavior.translucent,
+          excludeFromSemantics: true,
+          child: new Container(width: _kEdgeDragWidth)
         ),
       );
     } else {
@@ -415,9 +415,9 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
                   widthFactor: _controller.value,
                   child: new RepaintBoundary(
                     child: new FocusScope(
-                        key: _drawerKey,
-                        node: _focusScopeNode,
-                        child: widget.child
+                      key: _drawerKey,
+                      node: _focusScopeNode,
+                      child: widget.child
                     ),
                   ),
                 ),

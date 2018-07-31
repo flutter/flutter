@@ -1046,9 +1046,6 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
   /// To close the drawer once it is open, use [Navigator.pop].
   ///
   /// See [Scaffold.of] for information about how to obtain the [ScaffoldState].
-  ///
-  /// The side [Drawer] cannot be opened if the end [Drawer] is already
-  /// opened.
   void openDrawer() {
     if (_endDrawerKey.currentState != null && _endDrawerOpened)
       _endDrawerKey.currentState.close();
@@ -1067,9 +1064,6 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
   /// To close the end side drawer once it is open, use [Navigator.pop].
   ///
   /// See [Scaffold.of] for information about how to obtain the [ScaffoldState].
-  ///
-  /// The end side [Drawer] cannot be opened if the [Drawer] is already
-  /// opened.
   void openEndDrawer() {
     if (_drawerKey.currentState != null && _drawerOpened)
       _drawerKey.currentState.close();
@@ -1489,7 +1483,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
         if (_snackBarController.isCompleted && _snackBarTimer == null)
           _snackBarTimer = new Timer(_snackBars.first._widget.duration, () {
             assert(_snackBarController.status == AnimationStatus.forward ||
-                _snackBarController.status == AnimationStatus.completed);
+              _snackBarController.status == AnimationStatus.completed);
             hideCurrentSnackBar(reason: SnackBarClosedReason.timeout);
           });
       } else {
@@ -1508,7 +1502,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
       removeTopPadding: widget.appBar != null,
       removeRightPadding: false,
       removeBottomPadding: widget.bottomNavigationBar != null ||
-          widget.persistentFooterButtons != null,
+        widget.persistentFooterButtons != null,
     );
 
     if (widget.appBar != null) {
@@ -1560,7 +1554,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
               child: new SafeArea(
                 top: false,
                 child: new ButtonBar(
-                    children: widget.persistentFooterButtons
+                  children: widget.persistentFooterButtons
                 ),
               ),
             ),
