@@ -971,6 +971,7 @@ void main() {
     });
 
     testWidgets('Dual Drawer Opening', (WidgetTester tester) async {
+
       await tester.pumpWidget(
         new MaterialApp(
           home: new SafeArea(
@@ -979,16 +980,16 @@ void main() {
             right: false,
             bottom: false,
             child: new Scaffold(
-              endDrawer: new Drawer(
-                child: new Text('endDrawer'),
+              endDrawer: const Drawer(
+                child: const Text('endDrawer'),
               ),
-              drawer: new Drawer(
-                child: new Text('drawer'),
+              drawer: const Drawer(
+                child: const Text('drawer'),
               ),
-              body: new Text('scaffold body'),
+              body: const Text('scaffold body'),
               appBar: new AppBar(
                 centerTitle: true,
-                title: new Text('Title')
+                title: const Text('Title')
               )
             ),
           ),
