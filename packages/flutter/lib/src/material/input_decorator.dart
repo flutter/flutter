@@ -1746,7 +1746,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
       errorMaxLines: decoration.errorMaxLines,
     );
 
-    final Widget counter = decoration.counterText == null ? null :
+    final Widget counter = (decoration.counterText == null || decorationIsDense) ? null :
       new Text(
         decoration.counterText,
         style: _getHelperStyle(themeData).merge(decoration.counterStyle),

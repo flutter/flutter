@@ -2250,4 +2250,34 @@ void main() {
     expect(focusNode.hasFocus, isFalse);
   });
 
+  testWidgets('TextField decoration has no counter text when isDense is true', (WidgetTester tester) async{
+    await tester.pumpWidget(const Directionality(
+      textDirection: TextDirection.ltr,
+      child: Material(
+        child: TextField(
+          decoration: InputDecoration(
+            counterText: 'test',
+            isDense: false,
+          ),
+        ),
+      ),
+    ));
+
+    expect(find.text('test'), findsOneWidget);
+
+    await tester.pumpWidget(const Directionality(
+      textDirection: TextDirection.ltr,
+      child: Material(
+        child: TextField(
+          decoration: InputDecoration(
+            counterText: 'test',
+            isDense: true,
+          ),
+        ),
+      ),
+    ));
+
+    expect(find.text('test'), findsNothing);
+  });
+
 }
