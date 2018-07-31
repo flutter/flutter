@@ -866,3 +866,20 @@ class _BackLabel extends StatelessWidget {
     }
   }
 }
+
+class CupertinoNavigationBarTransition extends StatelessWidget {
+  CupertinoNavigationBarTransition({
+    this.animation,
+    this.navBar1,
+    this.navBar2,
+  });
+
+  final Animation<double> animation;
+  final Widget navBar1;
+  final Widget navBar2;
+
+  @override
+  Widget build(BuildContext context) {
+    // TODO: implement build
+  }
+}
