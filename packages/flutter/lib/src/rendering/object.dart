@@ -45,6 +45,54 @@ class ParentData {
 /// Used by many of the methods of [PaintingContext].
 typedef void PaintingContextCallback(PaintingContext context, Offset offset);
 
+/// Clip utilities used by [PaintingContext] and [TestRecordingPaintingContext].
+abstract class ClipContext {
+  /// The canvas on which to paint.
+  Canvas get canvas;
+
+  void _clipAndPaint(Clip clipBehavior, void canvasClipCall(bool doAntiAlias), Rect bounds, void painter()) {
+    assert(canvasClipCall != null);
+    canvas.save();
+    switch (clipBehavior) {
+      case Clip.none:
+        break;
+      case Clip.hardEdge:
+        canvasClipCall(false);
+        break;
+      case Clip.antiAlias:
+        canvasClipCall(true);
+        break;
+      case Clip.antiAliasWithSaveLayer:
+        canvasClipCall(true);
+        canvas.saveLayer(bounds, new Paint());
+        break;
+    }
+    painter();
+    if (clipBehavior == Clip.antiAliasWithSaveLayer) {
+      canvas.restore();
+    }
+    canvas.restore();
+  }
+
+  /// Clip [canvas] with [Path] according to [Clip] and then paint. [canvas] is
+  /// restored to the pre-clip status afterwards.
+  void clipPathAndPaint(Clip clipBehavior, Path path, Rect bounds, void painter()) {
+    _clipAndPaint(clipBehavior, (bool doAntiAias) => canvas.clipPath(path, doAntiAlias: doAntiAias), bounds, painter);
+  }
+
+  /// Clip [canvas] with [Path] according to [RRect] and then paint. [canvas] is
+  /// restored to the pre-clip status afterwards.
+  void clipRRectAndPaint(Clip clipBehavior, RRect rrect, Rect bounds, void painter()) {
+    _clipAndPaint(clipBehavior, (bool doAntiAias) => canvas.clipRRect(rrect, doAntiAlias: doAntiAias), bounds, painter);
+  }
+
+  /// Clip [canvas] with [Path] according to [Rect] and then paint. [canvas] is
+  /// restored to the pre-clip status afterwards.
+  void clipRectAndPaint(Clip clipBehavior, Rect rect, Rect bounds, void painter()) {
+    _clipAndPaint(clipBehavior, (bool doAntiAias) => canvas.clipRect(rect, doAntiAlias: doAntiAias), bounds, painter);
+  }
+}
+
 /// A place to paint.
 ///
 /// Rather than holding a canvas directly, [RenderObject]s paint using a painting
@@ -60,7 +108,7 @@ typedef void PaintingContextCallback(PaintingContext context, Offset offset);
 ///
 /// New [PaintingContext] objects are created automatically when using
 /// [PaintingContext.repaintCompositedChild] and [pushLayer].
-class PaintingContext {
+class PaintingContext extends ClipContext {
   PaintingContext._(this._containerLayer, this.estimatedBounds)
     : assert(_containerLayer != null),
       assert(estimatedBounds != null);
@@ -196,6 +244,7 @@ class PaintingContext {
   /// The current canvas can change whenever you paint a child using this
   /// context, which means it's fragile to hold a reference to the canvas
   /// returned by this getter.
+  @override
   Canvas get canvas {
     if (_canvas == null)
       _startRecording();
@@ -419,48 +468,6 @@ class PaintingContext {
   /// layer, which, for example, causes them to use composited clips.
   void pushOpacity(Offset offset, int alpha, PaintingContextCallback painter) {
     pushLayer(new OpacityLayer(alpha: alpha), painter, offset);
-  }
-
-  void _clipAndPaint(Clip clipBehavior, void canvasClipCall(bool doAntiAlias), Rect bounds, void painter()) {
-    assert(canvasClipCall != null);
-    canvas.save();
-    switch (clipBehavior) {
-      case Clip.none:
-        break;
-      case Clip.hardEdge:
-        canvasClipCall(false);
-        break;
-      case Clip.antiAlias:
-        canvasClipCall(true);
-        break;
-      case Clip.antiAliasWithSaveLayer:
-        canvasClipCall(true);
-        canvas.saveLayer(bounds, new Paint());
-        break;
-    }
-    painter();
-    if (clipBehavior == Clip.antiAliasWithSaveLayer) {
-      canvas.restore();
-    }
-    canvas.restore();
-  }
-
-  /// Clip [canvas] with [Path] according to [Clip] and then paint. [canvas] is
-  /// restored to the pre-clip status afterwards.
-  void clipPathAndPaint(Clip clipBehavior, Path path, Rect bounds, void painter()) {
-    _clipAndPaint(clipBehavior, (bool doAntiAias) => canvas.clipPath(path, doAntiAlias: doAntiAias), bounds, painter);
-  }
-
-  /// Clip [canvas] with [Path] according to [RRect] and then paint. [canvas] is
-  /// restored to the pre-clip status afterwards.
-  void clipRRectAndPaint(Clip clipBehavior, RRect rrect, Rect bounds, void painter()) {
-    _clipAndPaint(clipBehavior, (bool doAntiAias) => canvas.clipRRect(rrect, doAntiAlias: doAntiAias), bounds, painter);
-  }
-
-  /// Clip [canvas] with [Path] according to [Rect] and then paint. [canvas] is
-  /// restored to the pre-clip status afterwards.
-  void clipRectAndPaint(Clip clipBehavior, Rect rect, Rect bounds, void painter()) {
-    _clipAndPaint(clipBehavior, (bool doAntiAias) => canvas.clipRect(rect, doAntiAlias: doAntiAias), bounds, painter);
   }
 
   @override

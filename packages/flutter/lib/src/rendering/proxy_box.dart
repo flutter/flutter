@@ -1716,7 +1716,7 @@ class RenderPhysicalShape extends _RenderPhysicalModelBase<Path> {
   RenderPhysicalShape({
     RenderBox child,
     @required CustomClipper<Path> clipper,
-    Clip clipBehavior,
+    Clip clipBehavior = Clip.antiAlias,
     double elevation = 0.0,
     @required Color color,
     Color shadowColor = const Color(0xFF000000),
