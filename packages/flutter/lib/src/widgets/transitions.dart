@@ -342,6 +342,7 @@ class FadeTransition extends SingleChildRenderObjectWidget {
     Key key,
     @required this.opacity,
     Widget child,
+    this.alwaysIncludeSemantics = false,
   }) : super(key: key, child: child);
 
   /// The animation that controls the opacity of the child.
@@ -352,17 +353,29 @@ class FadeTransition extends SingleChildRenderObjectWidget {
   /// completely transparent.
   final Animation<double> opacity;
 
+  /// Whether the semantic information of the children is always included.
+  ///
+  /// Defaults to false.
+  ///
+  /// When true, regardless of the opacity settings the child semantic
+  /// information is exposed as if the widget were fully visible. This is
+  /// useful in cases where labels may be hidden during animations that
+  /// would otherwise contribute relevant semantics.
+  final bool alwaysIncludeSemantics;
+
   @override
   RenderAnimatedOpacity createRenderObject(BuildContext context) {
     return new RenderAnimatedOpacity(
       opacity: opacity,
+      alwaysIncludeSemantics: alwaysIncludeSemantics,
     );
   }
 
   @override
   void updateRenderObject(BuildContext context, RenderAnimatedOpacity renderObject) {
     renderObject
-      ..opacity = opacity;
+      ..opacity = opacity
+      ..alwaysIncludeSemantics = alwaysIncludeSemantics;
   }
 
   @override
