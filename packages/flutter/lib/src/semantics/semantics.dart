@@ -2272,7 +2272,7 @@ class SemanticsOwner extends ChangeNotifier {
     _dirtyNodes.clear();
     for (int actionId in customSemanticsActionIds) {
       final CustomSemanticsAction action = CustomSemanticsAction.getAction(actionId);
-      builder.updateCustomAction(id: actionId, label: action.label, hint: action.hint, overrideId: action.action?.index);
+      builder.updateCustomAction(id: actionId, label: action.label, hint: action.hint, overrideId: action.action?.index ?? -1);
     }
     ui.window.updateSemantics(builder.build());
     notifyListeners();
