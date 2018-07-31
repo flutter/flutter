@@ -1584,9 +1584,9 @@ abstract class InheritedWidget extends ProxyWidget {
 /// will also be rebuilt, but only if there was a change in the model
 /// that corresponds to the token they provided.
 ///
-/// An inherited model converts tokens into "dependencies"
-/// with [getDependencyFor] (by default this method just
-/// returns the token). The inherited model's [updateShouldNotifyDependent]
+/// An inherited model converts tokens into "dependencies" of type `T`
+/// with [getDependencyFor]. By default this method just returns its
+/// `token` argument. The inherited model's [updateShouldNotifyDependent]
 /// method is tested for each dependent and its dependencies.
 ///
 /// Inherited widget descendants create a dependency on the inherited widget
@@ -1609,13 +1609,13 @@ abstract class InheritedWidget extends ProxyWidget {
 /// `foo` aspect of `MyModel`.
 ///
 /// The [updateShouldNotifyDependent] method decides if a change in the model
-/// warrants rebuilding the dependent (BuildContext). It must compare the old
+/// warrants rebuilding a dependent (BuildContext). It must compare the old
 /// and new [InheritedModel] widget configurations with a set of dependencies
 /// and decide if the model's changes correspond to any of the dependencies.
 ///
 /// For example:
 /// ```
-/// class ABCModel extends InheritedModel<String> {
+/// class ABModel extends InheritedModel<String> {
 ///   ABModel({ this.a, this.b, Widget child }) : super(child: child);
 ///
 ///   final int a;
@@ -1632,7 +1632,7 @@ abstract class InheritedWidget extends ProxyWidget {
 /// ```
 ///
 /// In the previous example the dependency checked by
-/// `updateShouldNotifyDependent` is just the token string passed to
+/// [updateShouldNotifyDependent] is just the token string passed to
 /// `inheritFromWidgetOfExactType`. Sometimes it's useful to have the
 /// model create a dependency object that's based on the token but takes
 /// the current state of the model into account. The [getDependencyFor]
@@ -1683,17 +1683,29 @@ abstract class InheritedWidget extends ProxyWidget {
 ///   // ...
 /// }
 /// ```
+///
+/// By default [InheritedWidget.updateShouldNotify] returns true. Subclasses
+/// can override it to quickly short circuit the update and skip calling
+/// [updateShouldNotifyDependent].
 abstract class InheritedModel<T> extends InheritedWidget {
   const InheritedModel({ Key key, Widget child }) : super(key: key, child: child);
 
   @override
   InheritedModelElement<T> createElement() => new InheritedModelElement<T>(this);
 
-  @protected
-  bool updateShouldNotifyDependent(covariant InheritedModel<T> oldWidget, Set<T> dependencies);
-
+  /// Returns a `T` that represents a dependency on this model.
+  ///
+  /// Returns [token] by default.
   @protected
   T getDependencyFor(dynamic token) => token;
+
+  @override
+  bool updateShouldNotify(covariant InheritedWidget oldWidget) => true;
+
+  /// Return true if the changes between this model and [oldWidget] match any
+  /// of the [dependencies].
+  @protected
+  bool updateShouldNotifyDependent(covariant InheritedModel<T> oldWidget, Set<T> dependencies);
 }
 
 // The dependency, produced by getDependencyFor(token), between an element and an
