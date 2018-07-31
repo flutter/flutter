@@ -1528,7 +1528,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
 
     if (_snackBars.isNotEmpty) {
       final bool removeBottomPadding = widget.persistentFooterButtons != null ||
-          widget.bottomNavigationBar != null;
+        widget.bottomNavigationBar != null;
       _addIfNonNull(
         children,
         _snackBars.first._widget,

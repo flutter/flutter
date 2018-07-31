@@ -404,7 +404,7 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
                   excludeFromSemantics: defaultTargetPlatform == TargetPlatform.android,
                   onTap: close,
                   child: new Container(
-                      color: _color.evaluate(_controller)
+                    color: _color.evaluate(_controller)
                   ),
                 ),
               ),
