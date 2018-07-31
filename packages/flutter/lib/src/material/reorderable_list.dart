@@ -374,7 +374,7 @@ class _ReorderableListContentState extends State<_ReorderableListContent> with T
       }
 
       // If the item can move to after its current position in the list.
-      if (index < widget.children.length) {
+      if (index < widget.children.length - 1) {
         String reorderItemAfter = localizations.reorderItemDown;
         if (widget.scrollDirection == Axis.horizontal) {
           reorderItemAfter = Directionality.of(context) == TextDirection.ltr
