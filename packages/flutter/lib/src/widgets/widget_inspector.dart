@@ -31,6 +31,397 @@ typedef void _RegisterServiceExtensionCallback({
   @required ServiceExtensionCallback callback
 });
 
+
+/// A place to paint.
+///
+/// Rather than holding a canvas directly, [RenderObject]s paint using a painting
+/// context. The painting context has a [Canvas], which receives the
+/// individual draw operations, and also has functions for painting child
+/// render objects.
+///
+/// When painting a child render object, the canvas held by the painting context
+/// can change because the draw operations issued before and after painting the
+/// child might be recorded in separate compositing layers. For this reason, do
+/// not hold a reference to the canvas across operations that might paint
+/// child render objects.
+///
+/// New [PaintingContext] objects are created automatically when using
+/// [PaintingContext.repaintCompositedChild] and [pushLayer].
+class ScreenshotPaintingContext implements PaintingContext {
+  ScreenshotPaintingContext._(this._containerLayer, this.estimatedBounds)
+      : assert(_containerLayer != null),
+        assert(estimatedBounds != null);
+
+  final ContainerLayer _containerLayer;
+
+  /// An estimate of the bounds within which the painting context's [canvas]
+  /// will record painting commands. This can be useful for debugging.
+  ///
+  /// The canvas will allow painting outside these bounds.
+  ///
+  /// The [estimatedBounds] rectangle is in the [canvas] coordinate system.
+  final Rect estimatedBounds;
+
+  /// Repaint the given render object.
+  ///
+  /// The render object must be attached to a [PipelineOwner], must have a
+  /// composited layer, and must be in need of painting. The render object's
+  /// layer, if any, is re-used, along with any layers in the subtree that don't
+  /// need to be repainted.
+  ///
+  /// See also:
+  ///
+  ///  * [RenderObject.isRepaintBoundary], which determines if a [RenderObject]
+  ///    has a composited layer.
+  static void repaintCompositedChild(RenderObject child, { bool debugAlsoPaintedParent = false }) {
+    assert(child.isRepaintBoundary);
+    assert(child._needsPaint);
+    assert(() {
+      // register the call for RepaintBoundary metrics
+      child.debugRegisterRepaintBoundaryPaint(
+        includedParent: debugAlsoPaintedParent,
+        includedChild: true,
+      );
+      return true;
+    }());
+    if (child._layer == null) {
+      assert(debugAlsoPaintedParent);
+      child._layer = new OffsetLayer();
+    } else {
+      assert(debugAlsoPaintedParent || child._layer.attached);
+      child._layer.removeAllChildren();
+    }
+    assert(() {
+      child._layer.debugCreator = child.debugCreator ?? child.runtimeType;
+      return true;
+    }());
+    final PaintingContext childContext = new PaintingContext._(child._layer, child.paintBounds);
+    child._paintWithContext(childContext, Offset.zero);
+    childContext._stopRecordingIfNeeded();
+  }
+
+  /// Paint a child [RenderObject].
+  ///
+  /// If the child has its own composited layer, the child will be composited
+  /// into the layer subtree associated with this painting context. Otherwise,
+  /// the child will be painted into the current PictureLayer for this context.
+  void paintChild(RenderObject child, Offset offset) {
+    assert(() {
+      if (debugProfilePaintsEnabled)
+        Timeline.startSync('${child.runtimeType}', arguments: timelineWhitelistArguments);
+      return true;
+    }());
+
+    if (child.isRepaintBoundary) {
+      _stopRecordingIfNeeded();
+      _compositeChild(child, offset);
+    } else {
+      child._paintWithContext(this, offset);
+    }
+
+    assert(() {
+      if (debugProfilePaintsEnabled)
+        Timeline.finishSync();
+      return true;
+    }());
+  }
+
+  void _compositeChild(RenderObject child, Offset offset) {
+    assert(!_isRecording);
+    assert(child.isRepaintBoundary);
+    assert(_canvas == null || _canvas.getSaveCount() == 1);
+
+    // Create a layer for our child, and paint the child into it.
+    if (child._needsPaint) {
+      repaintCompositedChild(child, debugAlsoPaintedParent: true);
+    } else {
+      assert(child._layer != null);
+      assert(() {
+        // register the call for RepaintBoundary metrics
+        child.debugRegisterRepaintBoundaryPaint(
+          includedParent: true,
+          includedChild: false,
+        );
+        child._layer.debugCreator = child.debugCreator ?? child;
+        return true;
+      }());
+    }
+    child._layer.offset = offset;
+    _appendLayer(child._layer);
+  }
+
+  void _appendLayer(Layer layer) {
+    assert(!_isRecording);
+    layer.remove();
+    _containerLayer.append(layer);
+  }
+
+  bool get _isRecording {
+    final bool hasCanvas = _canvas != null;
+    assert(() {
+      if (hasCanvas) {
+        assert(_currentLayer != null);
+        assert(_recorder != null);
+        assert(_canvas != null);
+      } else {
+        assert(_currentLayer == null);
+        assert(_recorder == null);
+        assert(_canvas == null);
+      }
+      return true;
+    }());
+    return hasCanvas;
+  }
+
+  // Recording state
+  PictureLayer _currentLayer;
+  ui.PictureRecorder _recorder;
+  Canvas _canvas;
+
+  /// The canvas on which to paint.
+  ///
+  /// The current canvas can change whenever you paint a child using this
+  /// context, which means it's fragile to hold a reference to the canvas
+  /// returned by this getter.
+  Canvas get canvas {
+    if (_canvas == null)
+      _startRecording();
+    return _canvas;
+  }
+
+  void _startRecording() {
+    assert(!_isRecording);
+    _currentLayer = new PictureLayer(estimatedBounds);
+    _recorder = new ui.PictureRecorder();
+    _canvas = new Canvas(_recorder);
+    _containerLayer.append(_currentLayer);
+  }
+
+  void _stopRecordingIfNeeded() {
+    if (!_isRecording)
+      return;
+    assert(() {
+      if (debugRepaintRainbowEnabled) {
+        final Paint paint = new Paint()
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = 6.0
+          ..color = debugCurrentRepaintColor.toColor();
+        canvas.drawRect(estimatedBounds.deflate(3.0), paint);
+      }
+      if (debugPaintLayerBordersEnabled) {
+        final Paint paint = new Paint()
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = 1.0
+          ..color = const Color(0xFFFF9800);
+        canvas.drawRect(estimatedBounds, paint);
+      }
+      return true;
+    }());
+    _currentLayer.picture = _recorder.endRecording();
+    _currentLayer = null;
+    _recorder = null;
+    _canvas = null;
+  }
+
+  /// Hints that the painting in the current layer is complex and would benefit
+  /// from caching.
+  ///
+  /// If this hint is not set, the compositor will apply its own heuristics to
+  /// decide whether the current layer is complex enough to benefit from
+  /// caching.
+  void setIsComplexHint() {
+    _currentLayer?.isComplexHint = true;
+  }
+
+  /// Hints that the painting in the current layer is likely to change next frame.
+  ///
+  /// This hint tells the compositor not to cache the current layer because the
+  /// cache will not be used in the future. If this hint is not set, the
+  /// compositor will apply its own heuristics to decide whether the current
+  /// layer is likely to be reused in the future.
+  void setWillChangeHint() {
+    _currentLayer?.willChangeHint = true;
+  }
+
+  /// Adds a composited leaf layer to the recording.
+  ///
+  /// After calling this function, the [canvas] property will change to refer to
+  /// a new [Canvas] that draws on top of the given layer.
+  ///
+  /// A [RenderObject] that uses this function is very likely to require its
+  /// [RenderObject.alwaysNeedsCompositing] property to return true. That informs
+  /// ancestor render objects that this render object will include a composited
+  /// layer, which, for example, causes them to use composited clips.
+  ///
+  /// See also:
+  ///
+  ///  * [pushLayer], for adding a layer and using its canvas to paint with that
+  ///    layer.
+  void addLayer(Layer layer) {
+    _stopRecordingIfNeeded();
+    _appendLayer(layer);
+  }
+
+  /// Appends the given layer to the recording, and calls the `painter` callback
+  /// with that layer, providing the `childPaintBounds` as the estimated paint
+  /// bounds of the child. The `childPaintBounds` can be used for debugging but
+  /// have no effect on painting.
+  ///
+  /// The given layer must be an unattached orphan. (Providing a newly created
+  /// object, rather than reusing an existing layer, satisfies that
+  /// requirement.)
+  ///
+  /// The `offset` is the offset to pass to the `painter`.
+  ///
+  /// If the `childPaintBounds` are not specified then the current layer's paint
+  /// bounds are used. This is appropriate if the child layer does not apply any
+  /// transformation or clipping to its contents. The `childPaintBounds`, if
+  /// specified, must be in the coordinate system of the new layer, and should
+  /// not go outside the current layer's paint bounds.
+  ///
+  /// See also:
+  ///
+  ///  * [addLayer], for pushing a leaf layer whose canvas is not used.
+  void pushLayer(Layer childLayer, PaintingContextCallback painter, Offset offset, { Rect childPaintBounds }) {
+    assert(!childLayer.attached);
+    assert(childLayer.parent == null);
+    assert(painter != null);
+    _stopRecordingIfNeeded();
+    _appendLayer(childLayer);
+    final PaintingContext childContext = new PaintingContext._(childLayer, childPaintBounds ?? estimatedBounds);
+    painter(childContext, offset);
+    childContext._stopRecordingIfNeeded();
+  }
+
+  /// Clip further painting using a rectangle.
+  ///
+  /// * `needsCompositing` is whether the child needs compositing. Typically
+  ///   matches the value of [RenderObject.needsCompositing] for the caller.
+  /// * `offset` is the offset from the origin of the canvas' coordinate system
+  ///   to the origin of the caller's coordinate system.
+  /// * `clipRect` is rectangle (in the caller's coordinate system) to use to
+  ///   clip the painting done by [painter].
+  /// * `painter` is a callback that will paint with the [clipRect] applied. This
+  ///   function calls the [painter] synchronously.
+  void pushClipRect(bool needsCompositing, Offset offset, Rect clipRect, PaintingContextCallback painter) {
+    final Rect offsetClipRect = clipRect.shift(offset);
+    if (needsCompositing) {
+      pushLayer(new ClipRectLayer(clipRect: offsetClipRect), painter, offset, childPaintBounds: offsetClipRect);
+    } else {
+      canvas
+        ..save()
+        ..clipRect(offsetClipRect);
+      painter(this, offset);
+      canvas
+        ..restore();
+    }
+  }
+
+  /// Clip further painting using a rounded rectangle.
+  ///
+  /// * `needsCompositing` is whether the child needs compositing. Typically
+  ///   matches the value of [RenderObject.needsCompositing] for the caller.
+  /// * `offset` is the offset from the origin of the canvas' coordinate system
+  ///   to the origin of the caller's coordinate system.
+  /// * `bounds` is the region of the canvas (in the caller's coordinate system)
+  ///   into which `painter` will paint in.
+  /// * `clipRRect` is the rounded-rectangle (in the caller's coordinate system)
+  ///   to use to clip the painting done by `painter`.
+  /// * `painter` is a callback that will paint with the `clipRRect` applied. This
+  ///   function calls the `painter` synchronously.
+  void pushClipRRect(bool needsCompositing, Offset offset, Rect bounds, RRect clipRRect, PaintingContextCallback painter) {
+    final Rect offsetBounds = bounds.shift(offset);
+    final RRect offsetClipRRect = clipRRect.shift(offset);
+    if (needsCompositing) {
+      pushLayer(new ClipRRectLayer(clipRRect: offsetClipRRect), painter, offset, childPaintBounds: offsetBounds);
+    } else {
+      canvas
+        ..save()
+        ..clipRRect(offsetClipRRect);
+      painter(this, offset);
+      canvas
+        ..restore();
+    }
+  }
+
+  /// Clip further painting using a path.
+  ///
+  /// * `needsCompositing` is whether the child needs compositing. Typically
+  ///   matches the value of [RenderObject.needsCompositing] for the caller.
+  /// * `offset` is the offset from the origin of the canvas' coordinate system
+  ///   to the origin of the caller's coordinate system.
+  /// * `bounds` is the region of the canvas (in the caller's coordinate system)
+  ///   into which `painter` will paint in.
+  /// * `clipPath` is the path (in the coordinate system of the caller) to use to
+  ///   clip the painting done by `painter`.
+  /// * `painter` is a callback that will paint with the `clipPath` applied. This
+  ///   function calls the `painter` synchronously.
+  void pushClipPath(bool needsCompositing, Offset offset, Rect bounds, Path clipPath, PaintingContextCallback painter) {
+    final Rect offsetBounds = bounds.shift(offset);
+    final Path offsetClipPath = clipPath.shift(offset);
+    if (needsCompositing) {
+      pushLayer(new ClipPathLayer(clipPath: offsetClipPath), painter, offset, childPaintBounds: offsetBounds);
+    } else {
+      canvas
+        ..save()
+        ..clipPath(clipPath.shift(offset));
+      painter(this, offset);
+      canvas
+        ..restore();
+    }
+  }
+
+  /// Transform further painting using a matrix.
+  ///
+  /// * `needsCompositing` is whether the child needs compositing. Typically
+  ///   matches the value of [RenderObject.needsCompositing] for the caller.
+  /// * `offset` is the offset from the origin of the canvas' coordinate system
+  ///   to the origin of the caller's coordinate system.
+  /// * `transform` is the matrix to apply to the painting done by `painter`.
+  /// * `painter` is a callback that will paint with the `transform` applied. This
+  ///   function calls the `painter` synchronously.
+  void pushTransform(bool needsCompositing, Offset offset, Matrix4 transform, PaintingContextCallback painter) {
+    final Matrix4 effectiveTransform = new Matrix4.translationValues(offset.dx, offset.dy, 0.0)
+      ..multiply(transform)..translate(-offset.dx, -offset.dy);
+    if (needsCompositing) {
+      pushLayer(
+        new TransformLayer(transform: effectiveTransform),
+        painter,
+        offset,
+        childPaintBounds: MatrixUtils.inverseTransformRect(effectiveTransform, estimatedBounds),
+      );
+    } else {
+      canvas
+        ..save()
+        ..transform(effectiveTransform.storage);
+      painter(this, offset);
+      canvas
+        ..restore();
+    }
+  }
+
+  /// Blend further painting with an alpha value.
+  ///
+  /// * `offset` is the offset from the origin of the canvas' coordinate system
+  ///   to the origin of the caller's coordinate system.
+  /// * `alpha` is the alpha value to use when blending the painting done by
+  ///   `painter`. An alpha value of 0 means the painting is fully transparent
+  ///   and an alpha value of 255 means the painting is fully opaque.
+  /// * `painter` is a callback that will paint with the `alpha` applied. This
+  ///   function calls the `painter` synchronously.
+  ///
+  /// A [RenderObject] that uses this function is very likely to require its
+  /// [RenderObject.alwaysNeedsCompositing] property to return true. That informs
+  /// ancestor render objects that this render object will include a composited
+  /// layer, which, for example, causes them to use composited clips.
+  void pushOpacity(Offset offset, int alpha, PaintingContextCallback painter) {
+    pushLayer(new OpacityLayer(alpha: alpha), painter, offset);
+  }
+
+  @override
+  String toString() => '$runtimeType#$hashCode(layer: $_containerLayer, canvas bounds: $estimatedBounds)';
+}
+
 /// A class describing a step along a path through a tree of [DiagnosticsNode]
 /// objects.
 ///
