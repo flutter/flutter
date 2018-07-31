@@ -103,7 +103,7 @@ class CustomSemanticsAction {
       action = null;
 
   /// Creates a new [CustomSemanticsAction] that shadows a standard semantics action.
-  /// 
+  ///
   /// The [hint] must not be null or the empty string.
   const CustomSemanticsAction.standard({@required this.hint, @required this.action})
     : assert(hint != null),
