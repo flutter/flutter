@@ -17,7 +17,7 @@ import 'material.dart';
 import 'text_selection.dart';
 import 'theme.dart';
 
-export 'package:flutter/services.dart' show TextInputType, TextInputAction;
+export 'package:flutter/services.dart' show TextInputType, TextInputAction, TextCapitalization;
 
 /// A material design text field.
 ///
@@ -117,6 +117,9 @@ class TextField extends StatefulWidget {
     this.onSubmitted,
     this.inputFormatters,
     this.enabled,
+    this.cursorWidth = 2.0,
+    this.cursorRadius,
+    this.cursorColor,
     this.keyboardAppearance,
     this.scrollPadding = const EdgeInsets.all(20.0),
   }) : assert(keyboardType != null),
@@ -313,6 +316,18 @@ class TextField extends StatefulWidget {
   /// If non-null this property overrides the [decoration]'s
   /// [Decoration.enabled] property.
   final bool enabled;
+
+  /// How thick the cursor will be.
+  ///
+  /// Defaults to 2.0.
+  final double cursorWidth;
+
+  /// How rounded the corners of the cursor should be.
+  /// By default, the cursor has a null Radius
+  final Radius cursorRadius;
+
+  /// The color to use when painting the cursor.
+  final Color cursorColor;
 
   /// The appearance of the keyboard.
   ///
@@ -542,7 +557,6 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
         obscureText: widget.obscureText,
         autocorrect: widget.autocorrect,
         maxLines: widget.maxLines,
-        cursorColor: themeData.textSelectionColor,
         selectionColor: themeData.textSelectionColor,
         selectionControls: themeData.platform == TargetPlatform.iOS
             ? cupertinoTextSelectionControls
@@ -553,6 +567,9 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
         onSelectionChanged: _handleSelectionChanged,
         inputFormatters: formatters,
         rendererIgnoresPointer: true,
+        cursorWidth: widget.cursorWidth,
+        cursorRadius: widget.cursorRadius,
+        cursorColor: widget.cursorColor ?? Theme.of(context).cursorColor,
         scrollPadding: widget.scrollPadding,
         keyboardAppearance: keyboardAppearance,
       ),

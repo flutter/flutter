@@ -6,6 +6,7 @@ import 'dart:async';
 
 import 'package:args/args.dart';
 import 'package:flutter_tools/src/base/common.dart';
+import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/cache.dart';
@@ -32,17 +33,18 @@ const String _kOptionCoverage = 'coverage';
 const String _kOptionCoveragePath = 'coverage-path';
 
 void main(List<String> args) {
-  runInContext<Null>(() => run(args), overrides: <Type, dynamic>{
-    Usage: new DisabledUsage(),
+  runInContext<Null>(() => run(args), overrides: <Type, Generator>{
+    Usage: () => new DisabledUsage(),
   });
 }
 
-Iterable<String> _findTests(Directory directory) {
+List<String> _findTests(Directory directory) {
   return directory
       .listSync(recursive: true, followLinks: false)
       .where((FileSystemEntity entity) =>
           entity.path.endsWith('_test.dart') && fs.isFileSync(entity.path))
-      .map((FileSystemEntity entity) => fs.path.absolute(entity.path));
+      .map((FileSystemEntity entity) => fs.path.absolute(entity.path))
+      .toList();
 }
 
 Future<Null> run(List<String> args) async {
@@ -70,7 +72,7 @@ Future<Null> run(List<String> args) async {
     Cache.flutterRoot = tempDirectory.path;
     final Directory testDirectory =
         fs.directory(argResults[_kOptionTestDirectory]);
-    final Iterable<String> tests = _findTests(testDirectory);
+    final List<String> tests = _findTests(testDirectory);
 
     final List<String> testArgs = <String>[];
     testArgs.add('--');

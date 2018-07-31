@@ -39,6 +39,7 @@ const Map<String, _HardwareType> _knownHardware = const <String, _HardwareType>{
   'samsungexynos7870': _HardwareType.physical,
   'samsungexynos8890': _HardwareType.physical,
   'samsungexynos8895': _HardwareType.physical,
+  'samsungexynos9810': _HardwareType.physical,
 };
 
 class AndroidDevices extends PollingDeviceDiscovery {
@@ -210,8 +211,8 @@ class AndroidDevice extends Device {
       // Sample output: '22'
       final String sdkVersion = await _getProperty('ro.build.version.sdk');
 
-      // ignore: deprecated_member_use
-      final int sdkVersionParsed = int.parse(sdkVersion, onError: (String source) => null);
+
+      final int sdkVersionParsed = int.tryParse(sdkVersion);
       if (sdkVersionParsed == null) {
         printError('Unexpected response from getprop: "$sdkVersion"');
         return false;
@@ -822,8 +823,8 @@ class _AndroidDevicePortForwarder extends DevicePortForwarder {
   final AndroidDevice device;
 
   static int _extractPort(String portString) {
-    // ignore: deprecated_member_use
-    return int.parse(portString.trim(), onError: (_) => null);
+
+    return int.tryParse(portString.trim());
   }
 
   @override

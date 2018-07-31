@@ -454,6 +454,10 @@ void main() {
          namesRoute: true,
          scopesRoute: true,
          isHidden: true,
+         isImage: true,
+         isLiveRegion: true,
+         hasToggledState: true,
+         isToggled: true,
          /* Actions */
          hasTapAction: true,
          hasLongPressAction: true,
@@ -473,6 +477,7 @@ void main() {
          hasDidGainAccessibilityFocusAction: true,
          hasDidLoseAccessibilityFocusAction: true,
          hasCustomAction: true,
+         hasDismissAction: true,
       ));
     });
   });

@@ -435,7 +435,7 @@ class IOSSimulator extends Device {
   void clearLogs() {
     final File logFile = fs.file(logFilePath);
     if (logFile.existsSync()) {
-      final RandomAccessFile randomFile = logFile.openSync(mode: FileMode.WRITE); // ignore: deprecated_member_use
+      final RandomAccessFile randomFile = logFile.openSync(mode: FileMode.write);
       randomFile.truncateSync(0);
       randomFile.closeSync();
     }
