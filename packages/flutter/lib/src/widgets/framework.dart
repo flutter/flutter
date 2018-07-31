@@ -1623,13 +1623,15 @@ class InheritedModelElement<T> extends InheritedElement {
     } else if (_dependents[element] == null) {
       _dependents[element] = new HashSet<_TokenChange<T>>.of(<_TokenChange<T>>[ _getTokenChange(token) ]);
     } else if (_dependents[element].isNotEmpty) {
-      _dependents[element].add(_getTokenChange(token));
+      bool foo = _dependents[element].add(_getTokenChange(token));
     } // otherwise _addDependent was already called with token == null
   }
 
   // The value of _dependents[dependent] is a Set<_TokenChange>. Return a
   // new set that just contains the changes.
   Set<T> _getChanges(Element dependent) {
+    if (_dependents[dependent].isEmpty)
+      return _kEmptySet;
     return new HashSet<T>.of(
       _dependents[dependent].map((dynamic tokenChangeValue) {
         final _TokenChange<T> tokenChange = tokenChangeValue;
@@ -1655,6 +1657,18 @@ class InheritedModelElement<T> extends InheritedElement {
       assert(dependent._dependencies.contains(this));
       if (widget.updateShouldNotifyDependent(oldWidget, _getChanges(dependent)))
         dependent.didChangeDependencies();
+    }
+    // Recreate the set of changes for each dependent to give
+    // widget.getChangeFor() an opportunity to sync with its model.
+    for (Element dependent in _dependents.keys) {
+      if (_dependents[dependent].isEmpty)
+        continue;
+      _dependents[dependent] = new HashSet<_TokenChange<T>>.of(
+        _dependents[dependent].map((dynamic tokenChangeValue) {
+          final _TokenChange<T> tokenChange = tokenChangeValue;
+          return _getTokenChange(tokenChangeValue.token);
+        })
+      );
     }
   }
 }
