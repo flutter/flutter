@@ -539,7 +539,7 @@ void main() {
     expect(find.byKey(stroked), findsOneWidget);
   });
 
-  testWidgets('BottomNavigationBar semantics', (WidgetTester tester) async {
+  testWidgets('BottomNavigationBar.fixed semantics', (WidgetTester tester) async {
     final SemanticsTester semantics = new SemanticsTester(tester);
 
     await tester.pumpWidget(
@@ -567,26 +567,30 @@ void main() {
     final TestSemantics expected = new TestSemantics.root(
       children: <TestSemantics>[
         new TestSemantics(
-          id: 1,
           children: <TestSemantics>[
             new TestSemantics(
-              id: 2,
               children: <TestSemantics>[
                 new TestSemantics(
-                  id: 3,
-                  flags: <SemanticsFlag>[SemanticsFlag.isSelected],
+                  flags: <SemanticsFlag>[
+                    SemanticsFlag.isSelected,
+                    SemanticsFlag.isHeader,
+                  ],
                   actions: <SemanticsAction>[SemanticsAction.tap],
                   label: 'AC\nTab 1 of 3',
                   textDirection: TextDirection.ltr,
                 ),
                 new TestSemantics(
-                  id: 4,
+                  flags: <SemanticsFlag>[
+                    SemanticsFlag.isHeader,
+                  ],
                   actions: <SemanticsAction>[SemanticsAction.tap],
                   label: 'Alarm\nTab 2 of 3',
                   textDirection: TextDirection.ltr,
                 ),
                 new TestSemantics(
-                  id: 5,
+                  flags: <SemanticsFlag>[
+                    SemanticsFlag.isHeader,
+                  ],
                   actions: <SemanticsAction>[SemanticsAction.tap],
                   label: 'Hot Tub\nTab 3 of 3',
                   textDirection: TextDirection.ltr,
@@ -597,7 +601,75 @@ void main() {
         ),
       ],
     );
-    expect(semantics, hasSemantics(expected, ignoreTransform: true, ignoreRect: true));
+    expect(semantics, hasSemantics(expected, ignoreId: true, ignoreTransform: true, ignoreRect: true));
+
+    semantics.dispose();
+  });
+
+  testWidgets('BottomNavigationBar.shifting semantics', (WidgetTester tester) async {
+    final SemanticsTester semantics = new SemanticsTester(tester);
+
+    await tester.pumpWidget(
+      boilerplate(
+        textDirection: TextDirection.ltr,
+        bottomNavigationBar: new BottomNavigationBar(
+          type: BottomNavigationBarType.shifting,
+          items: const <BottomNavigationBarItem>[
+            const BottomNavigationBarItem(
+              icon: const Icon(Icons.ac_unit),
+              title: const Text('AC'),
+            ),
+            const BottomNavigationBarItem(
+              icon: const Icon(Icons.access_alarm),
+              title: const Text('Alarm'),
+            ),
+            const BottomNavigationBarItem(
+              icon: const Icon(Icons.hot_tub),
+              title: const Text('Hot Tub'),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    final TestSemantics expected = new TestSemantics.root(
+      children: <TestSemantics>[
+        new TestSemantics(
+          children: <TestSemantics>[
+            new TestSemantics(
+              children: <TestSemantics>[
+                new TestSemantics(
+                  flags: <SemanticsFlag>[
+                    SemanticsFlag.isSelected,
+                    SemanticsFlag.isHeader,
+                  ],
+                  actions: <SemanticsAction>[SemanticsAction.tap],
+                  label: 'AC\nTab 1 of 3',
+                  textDirection: TextDirection.ltr,
+                ),
+                new TestSemantics(
+                  flags: <SemanticsFlag>[
+                    SemanticsFlag.isHeader,
+                  ],
+                  actions: <SemanticsAction>[SemanticsAction.tap],
+                  label: 'Alarm\nTab 2 of 3',
+                  textDirection: TextDirection.ltr,
+                ),
+                new TestSemantics(
+                  flags: <SemanticsFlag>[
+                    SemanticsFlag.isHeader,
+                  ],
+                  actions: <SemanticsAction>[SemanticsAction.tap],
+                  label: 'Hot Tub\nTab 3 of 3',
+                  textDirection: TextDirection.ltr,
+                ),
+              ],
+            ),
+          ],
+        ),
+      ],
+    );
+    expect(semantics, hasSemantics(expected, ignoreId: true, ignoreTransform: true, ignoreRect: true));
 
     semantics.dispose();
   });

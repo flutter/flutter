@@ -64,7 +64,7 @@ class HotRunner extends ResidentRunner {
              ipv6: ipv6);
 
   final bool benchmarkMode;
-  final String applicationBinary;
+  final File applicationBinary;
   final bool hostIsIde;
   Set<String> _dartDependencies;
   final String dillOutputPath;
@@ -441,8 +441,7 @@ class HotRunner extends ResidentRunner {
         : mainPath;
     await _launchFromDevFS(launchPath);
     restartTimer.stop();
-    printTrace('Restart performed in '
-        '${getElapsedAsMilliseconds(restartTimer.elapsed)}.');
+    printTrace('Hot restart performed in ${getElapsedAsMilliseconds(restartTimer.elapsed)}.');
     // We are now running from sources.
     _runningFromSnapshot = false;
     _addBenchmarkData('hotRestartMillisecondsToFrame',
@@ -494,26 +493,21 @@ class HotRunner extends ResidentRunner {
 
   @override
   Future<OperationResult> restart({ bool fullRestart = false, bool pauseAfterRestart = false }) async {
+    final Stopwatch timer = new Stopwatch()..start();
     if (fullRestart) {
       final Status status = logger.startProgress(
         'Performing hot restart...',
-        progressId: 'hot.restart'
+        progressId: 'hot.restart',
       );
       try {
-        final Stopwatch timer = new Stopwatch()..start();
-        if (!(await hotRunnerConfig.setupHotRestart())) {
-          status.cancel();
+        if (!(await hotRunnerConfig.setupHotRestart()))
           return new OperationResult(1, 'setupHotRestart failed');
-        }
         await _restartFromSources();
-        timer.stop();
+      } finally {
         status.cancel();
-        printStatus('Restarted app in ${getElapsedAsMilliseconds(timer.elapsed)}.');
-        return OperationResult.ok;
-      } catch (error) {
-        status.cancel();
-        rethrow;
       }
+      printStatus('Restarted application in ${getElapsedAsMilliseconds(timer.elapsed)}.');
+      return OperationResult.ok;
     } else {
       final bool reloadOnTopOfSnapshot = _runningFromSnapshot;
       final String progressPrefix = reloadOnTopOfSnapshot ? 'Initializing' : 'Performing';
@@ -521,20 +515,17 @@ class HotRunner extends ResidentRunner {
         '$progressPrefix hot reload...',
         progressId: 'hot.reload'
       );
+      OperationResult result;
       try {
-        final Stopwatch timer = new Stopwatch()..start();
-        final OperationResult result = await _reloadSources(pause: pauseAfterRestart);
-        timer.stop();
+        result = await _reloadSources(pause: pauseAfterRestart);
+      } finally {
         status.cancel();
-        if (result.isOk)
-          printStatus('${result.message} in ${getElapsedAsMilliseconds(timer.elapsed)}.');
-        if (result.hintMessage != null)
-          printStatus('\n${result.hintMessage}');
-        return result;
-      } catch (error) {
-        status.cancel();
-        rethrow;
       }
+      if (result.isOk)
+        printStatus('${result.message} in ${getElapsedAsMilliseconds(timer.elapsed)}.');
+      if (result.hintMessage != null)
+        printStatus('\n${result.hintMessage}');
+      return result;
     }
   }
 
@@ -637,9 +628,11 @@ class HotRunner extends ResidentRunner {
       final int errorCode = error['code'];
       final String errorMessage = error['message'];
       if (errorCode == Isolate.kIsolateReloadBarred) {
-        printError('Unable to hot reload app due to an unrecoverable error in '
-                   'the source code. Please address the error and then use '
-                   '"R" to restart the app.');
+        printError(
+          'Unable to hot reload application due to an unrecoverable error in '
+          'the source code. Please address the error and then use "R" to '
+          'restart the app.'
+        );
         flutterUsage.sendEvent('hot', 'reload-barred');
         return new OperationResult(errorCode, errorMessage);
       }
@@ -714,8 +707,7 @@ class HotRunner extends ResidentRunner {
         reassembleTimer.elapsed.inMilliseconds);
 
     reloadTimer.stop();
-    printTrace('Hot reload performed in '
-        '${getElapsedAsMilliseconds(reloadTimer.elapsed)}.');
+    printTrace('Hot reload performed in ${getElapsedAsMilliseconds(reloadTimer.elapsed)}.');
     // Record complete time it took for the reload.
     _addBenchmarkData('hotReloadMillisecondsToFrame',
         reloadTimer.elapsed.inMilliseconds);

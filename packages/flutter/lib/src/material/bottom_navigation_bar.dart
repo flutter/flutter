@@ -242,6 +242,7 @@ class _BottomNavigationTile extends StatelessWidget {
           ).evaluate(animation),
         ),
         child: new FadeTransition(
+          alwaysIncludeSemantics: true,
           opacity: animation,
           child: DefaultTextStyle.merge(
             style: const TextStyle(
@@ -277,6 +278,7 @@ class _BottomNavigationTile extends StatelessWidget {
       flex: size,
       child: new Semantics(
         container: true,
+        header: true,
         selected: selected,
         child: new Stack(
           children: <Widget>[

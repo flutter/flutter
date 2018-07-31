@@ -201,29 +201,34 @@ class _DrawerDemoState extends State<DrawerDemo> with TickerProviderStateMixin {
           onTap: () {
             _scaffoldKey.currentState.openDrawer();
           },
-          child: new Column(
-            mainAxisSize: MainAxisSize.min,
-            children: <Widget>[
-              new Container(
-                width: 100.0,
-                height: 100.0,
-                decoration: const BoxDecoration(
-                  shape: BoxShape.circle,
-                  image: const DecorationImage(
-                    image: const AssetImage(
-                      _kAsset0,
-                      package: _kGalleryAssetsPackage,
+          child: new Semantics(
+            button: true,
+            label: 'Open drawer',
+            excludeSemantics: true,
+            child: new Column(
+              mainAxisSize: MainAxisSize.min,
+              children: <Widget>[
+                new Container(
+                  width: 100.0,
+                  height: 100.0,
+                  decoration: const BoxDecoration(
+                    shape: BoxShape.circle,
+                    image: const DecorationImage(
+                      image: const AssetImage(
+                        _kAsset0,
+                        package: _kGalleryAssetsPackage,
+                      ),
                     ),
                   ),
                 ),
-              ),
-              new Padding(
-                padding: const EdgeInsets.only(top: 8.0),
-                child: new Text('Tap here to open the drawer',
-                  style: Theme.of(context).textTheme.subhead,
+                new Padding(
+                  padding: const EdgeInsets.only(top: 8.0),
+                  child: new Text('Tap here to open the drawer',
+                    style: Theme.of(context).textTheme.subhead,
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),

@@ -877,6 +877,15 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
     Duration duration = Duration.zero,
     Curve curve = Curves.ease,
   }) {
+    if (!offset.allowImplicitScrolling) {
+      return super.showOnScreen(
+        descendant: descendant,
+        rect: rect,
+        duration: duration,
+        curve: curve,
+      );
+    }
+
     final Rect newRect = RenderViewportBase.showInViewport(
       descendant: descendant,
       viewport: this,

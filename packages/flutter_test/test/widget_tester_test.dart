@@ -564,7 +564,7 @@ void main() {
           throwsA(isInstanceOf<StateError>()));
       semanticsHandle.dispose();
     });
-    
+
     testWidgets('Returns the correct SemanticsData', (WidgetTester tester) async {
       final SemanticsHandle semanticsHandle = tester.ensureSemantics();
 

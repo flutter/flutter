@@ -6,6 +6,7 @@ import 'dart:async';
 
 import 'package:args/args.dart';
 import 'package:flutter_tools/src/asset.dart';
+import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/file_system.dart' as libfs;
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/platform.dart';
@@ -28,8 +29,8 @@ const List<String> _kRequiredOptions = const <String>[
 ];
 
 Future<Null> main(List<String> args) {
-  return runInContext<Null>(() => run(args), overrides: <Type, dynamic>{
-    Usage: new DisabledUsage(),
+  return runInContext<Null>(() => run(args), overrides: <Type, Generator>{
+    Usage: () => new DisabledUsage(),
   });
 }
 

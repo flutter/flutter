@@ -272,6 +272,7 @@ class RecipeCard extends StatelessWidget {
                 recipe.imagePath,
                 package: recipe.imagePackage,
                 fit: BoxFit.contain,
+                semanticLabel: recipe.name,
               ),
             ),
             new Expanded(

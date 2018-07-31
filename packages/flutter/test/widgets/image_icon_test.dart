@@ -96,4 +96,26 @@ void main() {
     final RenderBox renderObject = tester.renderObject(find.byType(ImageIcon));
     expect(renderObject.size, equals(const Size.square(24.0)));
   });
+
+  testWidgets('ImageIcon has semantics data', (WidgetTester tester) async {
+    final SemanticsHandle handle = tester.ensureSemantics();
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: const Center(
+          child: const IconTheme(
+            data: const IconThemeData(),
+            child: const ImageIcon(null, semanticLabel: 'test')
+          ),
+        ),
+      ),
+    );
+
+    expect(tester.getSemanticsData(find.byType(ImageIcon)), matchesSemanticsData(
+      label: 'test',
+      textDirection: TextDirection.ltr,
+    ));
+    handle.dispose();
+  });
+
 }

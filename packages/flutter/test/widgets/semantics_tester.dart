@@ -384,6 +384,7 @@ class SemanticsTester {
   Iterable<SemanticsNode> nodesWith({
     String label,
     String value,
+    String hint,
     TextDirection textDirection,
     List<SemanticsAction> actions,
     List<SemanticsFlag> flags,
@@ -396,6 +397,8 @@ class SemanticsTester {
       if (label != null && node.label != label)
         return false;
       if (value != null && node.value != value)
+        return false;
+      if (hint != null && node.hint != hint)
         return false;
       if (textDirection != null && node.textDirection != textDirection)
         return false;
@@ -636,6 +639,7 @@ class _IncludesNodeWith extends Matcher {
   const _IncludesNodeWith({
     this.label,
     this.value,
+    this.hint,
     this.textDirection,
     this.actions,
     this.flags,
@@ -646,6 +650,7 @@ class _IncludesNodeWith extends Matcher {
 
   final String label;
   final String value;
+  final String hint;
   final TextDirection textDirection;
   final List<SemanticsAction> actions;
   final List<SemanticsFlag> flags;
@@ -658,6 +663,7 @@ class _IncludesNodeWith extends Matcher {
     return item.nodesWith(
       label: label,
       value: value,
+      hint: hint,
       textDirection: textDirection,
       actions: actions,
       flags: flags,
@@ -683,6 +689,8 @@ class _IncludesNodeWith extends Matcher {
       strings.add('label "$label"');
     if (value != null)
       strings.add('value "$value"');
+    if (hint != null)
+      strings.add('hint "$hint"');
     if (textDirection != null)
       strings.add(' (${describeEnum(textDirection)})');
     if (actions != null)
@@ -706,6 +714,7 @@ class _IncludesNodeWith extends Matcher {
 Matcher includesNodeWith({
   String label,
   String value,
+  String hint,
   TextDirection textDirection,
   List<SemanticsAction> actions,
   List<SemanticsFlag> flags,
@@ -716,6 +725,7 @@ Matcher includesNodeWith({
   return new _IncludesNodeWith(
     label: label,
     value: value,
+    hint: hint,
     textDirection: textDirection,
     actions: actions,
     flags: flags,
