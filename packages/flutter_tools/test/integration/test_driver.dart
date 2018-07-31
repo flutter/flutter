@@ -195,7 +195,7 @@ class FlutterTestDriver {
     // Currently these tests only have a single isolate. If this
     // ceases to be the case, this code will need changing.
     final VM vm = await vmService.getVM();
-    return await vm.isolates.first.load();
+    return await vm.isolates.single.load();
   }
 
   Future<void> addBreakpoint(String path, int line) async {
