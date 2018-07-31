@@ -185,12 +185,43 @@ void main() {
     image = await boundary.toImage();
     expect(image.width, equals(20));
     expect(image.height, equals(20));
-    final ByteData data = await image.toByteData();
+    ByteData data = await image.toByteData();
+
+    int getPixel(int x, int y) => data.getUint32((x + y * image.width) * 4);
+
     expect(data.lengthInBytes, equals(20 * 20 * 4));
     expect(data.elementSizeInBytes, equals(1));
-    const int stride = 20 * 4;
-    expect(data.getUint32(0), equals(0x00000080));
-    expect(data.getUint32(stride - 4), equals(0xffffffff));
+    expect(getPixel(0, 0), equals(0x00000080));
+    expect(getPixel(image.width - 1, 0 ), equals(0xffffffff));
+
+    final OffsetLayer layer = boundary.layer;
+
+    image = await layer.toImage(Offset.zero & const Size(20.0, 20.0));
+    expect(image.width, equals(20));
+    expect(image.height, equals(20));
+    data = await image.toByteData();
+    expect(getPixel(0, 0), equals(0x00000080));
+    expect(getPixel(image.width - 1, 0 ), equals(0xffffffff));
+
+    // non-zero offsets.
+    image = await layer.toImage(const Offset(-10.0, -10.0) & const Size(30.0, 30.0));
+    expect(image.width, equals(30));
+    expect(image.height, equals(30));
+    data = await image.toByteData();
+    expect(getPixel(0, 0), equals(0x00000000));
+    expect(getPixel(10, 10), equals(0x00000080));
+    expect(getPixel(image.width - 1, 0), equals(0x00000000));
+    expect(getPixel(image.width - 1, 10), equals(0xffffffff));
+
+    // offset combined with a custom pixel ratio.
+    image = await layer.toImage(const Offset(-10.0, -10.0) & const Size(30.0, 30.0), pixelRatio: 2.0);
+    expect(image.width, equals(60));
+    expect(image.height, equals(60));
+    data = await image.toByteData();
+    expect(getPixel(0, 0), equals(0x00000000));
+    expect(getPixel(20, 20), equals(0x00000080));
+    expect(getPixel(image.width - 1, 0), equals(0x00000000));
+    expect(getPixel(image.width - 1, 20), equals(0xffffffff));
   });
 
   test('RenderOpacity does not composite if it is transparent', () {
