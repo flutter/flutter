@@ -1,4 +1,4 @@
-Signature: 6e79e19c58b6006b6ff5d8015a97ee9a
+Signature: 9c29063abe2e1277814ba6aeb49290f1
 
 UNUSED LICENSES:
 
@@ -1438,9 +1438,6 @@ FILE: ../../../third_party/skia/src/gpu/effects/GrConfigConversionEffect.h
 FILE: ../../../third_party/skia/src/gpu/effects/GrConstColorProcessor.cpp
 FILE: ../../../third_party/skia/src/gpu/effects/GrConstColorProcessor.fp
 FILE: ../../../third_party/skia/src/gpu/effects/GrConstColorProcessor.h
-FILE: ../../../third_party/skia/src/gpu/effects/GrDitherEffect.cpp
-FILE: ../../../third_party/skia/src/gpu/effects/GrDitherEffect.fp
-FILE: ../../../third_party/skia/src/gpu/effects/GrDitherEffect.h
 FILE: ../../../third_party/skia/src/gpu/effects/GrLumaColorFilterEffect.cpp
 FILE: ../../../third_party/skia/src/gpu/effects/GrLumaColorFilterEffect.fp
 FILE: ../../../third_party/skia/src/gpu/effects/GrLumaColorFilterEffect.h
@@ -1459,13 +1456,21 @@ FILE: ../../../third_party/skia/src/gpu/effects/GrRRectBlurEffect.h
 FILE: ../../../third_party/skia/src/gpu/effects/GrRectBlurEffect.cpp
 FILE: ../../../third_party/skia/src/gpu/effects/GrRectBlurEffect.fp
 FILE: ../../../third_party/skia/src/gpu/effects/GrRectBlurEffect.h
+FILE: ../../../third_party/skia/src/gpu/effects/GrSkSLFP.cpp
+FILE: ../../../third_party/skia/src/gpu/effects/GrSkSLFP.h
 FILE: ../../../third_party/skia/src/gpu/effects/GrUnpremulInputFragmentProcessor.cpp
 FILE: ../../../third_party/skia/src/gpu/effects/GrUnpremulInputFragmentProcessor.fp
 FILE: ../../../third_party/skia/src/gpu/effects/GrUnpremulInputFragmentProcessor.h
 FILE: ../../../third_party/skia/src/gpu/effects/GrYUVtoRGBEffect.cpp
 FILE: ../../../third_party/skia/src/gpu/effects/GrYUVtoRGBEffect.fp
 FILE: ../../../third_party/skia/src/gpu/effects/GrYUVtoRGBEffect.h
+FILE: ../../../third_party/skia/src/gpu/mtl/GrMtlCopyManager.h
+FILE: ../../../third_party/skia/src/gpu/mtl/GrMtlCopyManager.mm
+FILE: ../../../third_party/skia/src/gpu/mtl/GrMtlCopyPipelineState.h
+FILE: ../../../third_party/skia/src/gpu/mtl/GrMtlCopyPipelineState.mm
 FILE: ../../../third_party/skia/src/gpu/mtl/GrMtlGpuCommandBuffer.h
+FILE: ../../../third_party/skia/src/gpu/mtl/GrMtlResourceProvider.h
+FILE: ../../../third_party/skia/src/gpu/mtl/GrMtlResourceProvider.mm
 FILE: ../../../third_party/skia/src/gpu/mtl/GrMtlTextureRenderTarget.h
 FILE: ../../../third_party/skia/src/gpu/mtl/GrMtlTextureRenderTarget.mm
 FILE: ../../../third_party/skia/src/gpu/ops/GrClearStencilClipOp.cpp
@@ -1488,6 +1493,7 @@ FILE: ../../../third_party/skia/src/sksl/SkSLInterpreter.cpp
 FILE: ../../../third_party/skia/src/sksl/SkSLInterpreter.h
 FILE: ../../../third_party/skia/src/sksl/SkSLJIT.cpp
 FILE: ../../../third_party/skia/src/sksl/SkSLJIT.h
+FILE: ../../../third_party/skia/src/sksl/SkSLPipelineStageCodeGenerator.cpp
 FILE: ../../../third_party/skia/src/sksl/ir/SkSLAppendStage.h
 FILE: ../../../third_party/skia/src/sksl/ir/SkSLVariableReference.cpp
 FILE: ../../../third_party/skia/src/utils/Sk3D.cpp
@@ -2252,10 +2258,10 @@ FILE: ../../../third_party/skia/site/user/sample/transfer_fn.png
 FILE: ../../../third_party/skia/src/core/SkOrderedReadBuffer.h
 FILE: ../../../third_party/skia/src/sksl/lex/sksl.lex
 FILE: ../../../third_party/skia/src/sksl/sksl.inc
-FILE: ../../../third_party/skia/src/sksl/sksl_cpu.inc
 FILE: ../../../third_party/skia/src/sksl/sksl_fp.inc
 FILE: ../../../third_party/skia/src/sksl/sksl_frag.inc
 FILE: ../../../third_party/skia/src/sksl/sksl_geom.inc
+FILE: ../../../third_party/skia/src/sksl/sksl_pipeline.inc
 FILE: ../../../third_party/skia/src/sksl/sksl_vert.inc
 ----------------------------------------------------------------------------------------------------
 Copyright (c) 2011 Google Inc. All rights reserved.
@@ -2752,10 +2758,9 @@ FILE: ../../../third_party/skia/src/gpu/GrDefaultGeoProcFactory.cpp
 FILE: ../../../third_party/skia/src/gpu/GrDefaultGeoProcFactory.h
 FILE: ../../../third_party/skia/src/gpu/GrFragmentProcessor.h
 FILE: ../../../third_party/skia/src/gpu/GrGpuResourceCacheAccess.h
-FILE: ../../../third_party/skia/src/gpu/GrGpuResourceRef.cpp
-FILE: ../../../third_party/skia/src/gpu/GrGpuResourceRef.h
 FILE: ../../../third_party/skia/src/gpu/GrPathRendering.cpp
 FILE: ../../../third_party/skia/src/gpu/GrPathRendering.h
+FILE: ../../../third_party/skia/src/gpu/GrPendingIOResource.h
 FILE: ../../../third_party/skia/src/gpu/GrPendingProgramElement.h
 FILE: ../../../third_party/skia/src/gpu/GrPrimitiveProcessor.cpp
 FILE: ../../../third_party/skia/src/gpu/GrProcessorAnalysis.cpp
@@ -4143,6 +4148,7 @@ FILE: ../../../third_party/skia/src/sksl/SkSLHCodeGenerator.h
 FILE: ../../../third_party/skia/src/sksl/SkSLLexer.cpp
 FILE: ../../../third_party/skia/src/sksl/SkSLLexer.h
 FILE: ../../../third_party/skia/src/sksl/SkSLOutputStream.h
+FILE: ../../../third_party/skia/src/sksl/SkSLPipelineStageCodeGenerator.h
 FILE: ../../../third_party/skia/src/sksl/SkSLSectionAndParameterHelper.h
 FILE: ../../../third_party/skia/src/sksl/SkSLString.cpp
 FILE: ../../../third_party/skia/src/sksl/SkSLString.h
@@ -4276,6 +4282,7 @@ TYPE: LicenseType.bsd
 FILE: ../../../third_party/skia/experimental/wasm/wasm_main.cpp
 FILE: ../../../third_party/skia/fuzz/FuzzEncoders.cpp
 FILE: ../../../third_party/skia/fuzz/FuzzPolyUtils.cpp
+FILE: ../../../third_party/skia/include/private/GrSkSLFPFactoryCache.h
 ----------------------------------------------------------------------------------------------------
 Copyright 2018 Google LLC
 
