@@ -60,16 +60,16 @@
 
 #pragma mark - Manage and override all designated initializers
 
-- (instancetype)initWithProject:(FlutterDartProject*)project
+- (instancetype)initWithProject:(FlutterDartProject*)projectOrNil
                         nibName:(NSString*)nibNameOrNil
                          bundle:(NSBundle*)nibBundleOrNil {
   self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
 
   if (self) {
-    if (project == nil)
-      _dartProject.reset([[FlutterDartProject alloc] initFromDefaultSourceForConfiguration]);
+    if (projectOrNil == nil)
+      _dartProject.reset([[FlutterDartProject alloc] init]);
     else
-      _dartProject.reset([project retain]);
+      _dartProject.reset([projectOrNil retain]);
 
     [self performCommonViewControllerInitialization];
   }

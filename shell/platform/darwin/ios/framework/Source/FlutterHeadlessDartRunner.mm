@@ -93,8 +93,7 @@ static std::string CreateShellLabel() {
     return;
   }
 
-  FlutterDartProject* project =
-      [[[FlutterDartProject alloc] initFromDefaultSourceForConfiguration] autorelease];
+  FlutterDartProject* project = [[[FlutterDartProject alloc] init] autorelease];
 
   auto config = project.runConfiguration;
   config.SetEntrypointAndLibrary(entrypoint.UTF8String, uri.UTF8String);

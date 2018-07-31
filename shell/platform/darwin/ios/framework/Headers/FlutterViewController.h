@@ -15,9 +15,10 @@
 #include "FlutterTexture.h"
 
 FLUTTER_EXPORT
-@interface FlutterViewController : UIViewController<FlutterBinaryMessenger, FlutterTextureRegistry, FlutterPluginRegistry>
+@interface FlutterViewController
+    : UIViewController <FlutterBinaryMessenger, FlutterTextureRegistry, FlutterPluginRegistry>
 
-- (instancetype)initWithProject:(FlutterDartProject*)project
+- (instancetype)initWithProject:(FlutterDartProject*)projectOrNil
                         nibName:(NSString*)nibNameOrNil
                          bundle:(NSBundle*)nibBundleOrNil NS_DESIGNATED_INITIALIZER;
 
