@@ -45,11 +45,8 @@ void main() {
         expect(actualLine, equals(expectedLine),
           reason: 'After $i steps, debugger should stop at $expectedLine but stopped at $actualLine');
       }
-      // Fails initially because of
-      // https://github.com/flutter/flutter/issues/18877
-      // but
-      // TODO(dantup): test may need tweaking once that's fixed because I'm
-      // unable to run it to completion.
+
+      // Fails due to https://github.com/dart-lang/vm_service_client/issues/41.
     });
   }, timeout: const Timeout.factor(3));
 }
