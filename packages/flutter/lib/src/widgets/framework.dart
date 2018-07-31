@@ -1574,6 +1574,115 @@ abstract class InheritedWidget extends ProxyWidget {
   bool updateShouldNotify(covariant InheritedWidget oldWidget);
 }
 
+/// An [InheritedWidget] that's intended to be used as the base class for data
+/// models which are scoped to a widget tree.
+///
+/// An inherited widget's dependents are unconditionally rebuilt when the
+/// inherited widget changes per [InheritedWidget.updateShouldNotify].
+/// Widgets that depend on an [InheritedModel] qualify their dependence
+/// with an arbitrary "token" value. When the model is rebuilt, dependents
+/// will also be rebuilt, but only if there was a change in the model
+/// that corresponds to the token they provided.
+///
+/// An inherited model converts tokens into "dependencies"
+/// with [getDependencyFor] (by default this method just
+/// returns the token). The inherited model's [updateShouldNotifyDependent]
+/// method is tested for each dependent and its dependencies.
+///
+/// Inherited widget descendants create a dependency on the inherited widget
+/// with [BuildContext.inheritFromWidgetOfExactType]. Typically this
+/// BuildContext method is called by a static `of` utility method
+/// defined by the [InheritedWidget] subclass. Inherited model dependencies
+/// are created similarly, with the addition of a parameter that's
+/// use as the dependency token. For example:
+///
+/// ```
+/// class MyModel extends InheritedModel<String> {
+///   // ...
+///   static MyModel of(BuildContext context, String dependency) {
+///     return context.inheritFromWidgetOfExactType(IntegerModel, token: dependency);
+///   }
+/// }
+/// ```
+///
+/// Calling `MyModel.of(context, 'foo')` means that `context` depends on the
+/// `foo` aspect of `MyModel`.
+///
+/// The [updateShouldNotifyDependent] method decides if a change in the model
+/// warrants rebuilding the dependent (BuildContext). It must compare the old
+/// and new [InheritedModel] widget configurations with a set of dependencies
+/// and decide if the model's changes correspond to any of the dependencies.
+///
+/// For example:
+/// ```
+/// class ABCModel extends InheritedModel<String> {
+///   ABModel({ this.a, this.b, Widget child }) : super(child: child);
+///
+///   final int a;
+///   final int b;
+///
+///   @override
+///   bool updateShouldNotifyDependent(ABCModel old, Set<String> dependencies) {
+///     return (a != old.a && dependencies.contains('a'))
+///         || (b != old.b && dependencies.contains('b'))
+///   }
+///
+///   // ...
+/// }
+/// ```
+///
+/// In the previous example the dependency checked by
+/// `updateShouldNotifyDependent` is just the token string passed to
+/// `inheritFromWidgetOfExactType`. Sometimes it's useful to have the
+/// model create a dependency object that's based on the token but takes
+/// the current state of the model into account. The [getDependencyFor]
+/// method is called when a dependency is first created with
+/// `inheritFromWidgetOfExactType` and each time [update] process is
+/// completed.
+///
+/// In the following code example, `IntegerTree` represents a data model
+/// whose values are specified with paths, like '/a/b/c'. The IntegerModel
+/// has-a integer tree instance and is rebuilt when its descendants' view
+/// of the model should be updated. The [getDependencyFor] override
+/// converts the token, which is a path, to a `PathDependency` object. The
+/// path dependency saves the value of the path so that
+/// `updateShouldNotifyDependent` can compare it with the current value.
+///
+/// ```
+/// class IntegerTree {
+///   int valueOf(String path) => _lookup(path);
+///   // ...
+/// }
+///
+/// class PathDependency {
+///   PathDependency(this.path, this.value);
+///   final String path;
+///   final int value;
+/// }
+///
+/// class IntegerModel extends InheritedModel<PathDependency> {
+///   IntegerModel({ this.integerTree, Widget child }) : super(child: child);
+///
+///   final IntegerTree integerTree;
+///
+///   @override
+///   PathDependency getDependencyFor(dynamic token) {
+///     final String path = token;
+///     return new PathDependency(path, integerTree.valueOf(path));
+///   }
+///
+///   @override
+///   bool updateShouldNotifyDependent(IntegerModel old, Set<PathDependency> dependencies ) {
+///     for (PathDependency dependency in dependencies) {
+///       if (dependency.value != integerTree.valueOf(dependency.path))
+///         return true;
+///     }
+///     return false;
+///   }
+///
+///   // ...
+/// }
+/// ```
 abstract class InheritedModel<T> extends InheritedWidget {
   const InheritedModel({ Key key, Widget child }) : super(key: key, child: child);
 
@@ -1581,23 +1690,26 @@ abstract class InheritedModel<T> extends InheritedWidget {
   InheritedModelElement<T> createElement() => new InheritedModelElement<T>(this);
 
   @protected
-  bool updateShouldNotifyDependent(covariant InheritedModel<T> oldWidget, Set<T> changes);
+  bool updateShouldNotifyDependent(covariant InheritedModel<T> oldWidget, Set<T> dependencies);
 
   @protected
-  T getChangeFor(dynamic token) => token;
+  T getDependencyFor(dynamic token) => token;
 }
 
-class _TokenChange<T> {
-  _TokenChange(this.token, this.change) : assert(token != null), assert(change != null);
+// The dependency, produced by getDependencyFor(token), between an element and an
+// InheritedModel. Two dependencies are equal if they tokens they were based on
+// are equal.
+class _TokenDependency<T> {
+  _TokenDependency(this.token, this.dependency) : assert(token != null), assert(dependency != null);
 
   final dynamic token;
-  final T change;
+  final T dependency;
 
   @override
   bool operator ==(dynamic other) {
     if (other.runtimeType != runtimeType)
       return false;
-    final _TokenChange<T> typedOther = other;
+    final _TokenDependency<T> typedOther = other;
     return token == typedOther.token;
   }
 
@@ -1611,8 +1723,8 @@ class InheritedModelElement<T> extends InheritedElement {
   @override
   InheritedModel<T> get widget => super.widget;
 
-  _TokenChange<T> _getTokenChange(dynamic token) {
-    return new _TokenChange<T>(token, widget.getChangeFor(token));
+  _TokenDependency<T> _getTokenDependency(dynamic token) {
+    return new _TokenDependency<T>(token, widget.getDependencyFor(token));
   }
 
   // If `token` is ever null, then always rebuild element when this inherited
@@ -1621,21 +1733,23 @@ class InheritedModelElement<T> extends InheritedElement {
     if (token == null) {
       _dependents[element] = _kEmptySet;
     } else if (_dependents[element] == null) {
-      _dependents[element] = new HashSet<_TokenChange<T>>.of(<_TokenChange<T>>[ _getTokenChange(token) ]);
+      _dependents[element] = new HashSet<_TokenDependency<T>>.of(
+        <_TokenDependency<T>>[ _getTokenDependency(token) ]
+      );
     } else if (_dependents[element].isNotEmpty) {
-      bool foo = _dependents[element].add(_getTokenChange(token));
+      _dependents[element].add(_getTokenDependency(token));
     } // otherwise _addDependent was already called with token == null
   }
 
-  // The value of _dependents[dependent] is a Set<_TokenChange>. Return a
-  // new set that just contains the changes.
-  Set<T> _getChanges(Element dependent) {
+  // The value of _dependents[dependent] is a Set<_TokenDependency>. Return a
+  // new set that just contains the dependencies.
+  Set<T> _getDependencies(Element dependent) {
     if (_dependents[dependent].isEmpty)
       return _kEmptySet;
     return new HashSet<T>.of(
-      _dependents[dependent].map((dynamic tokenChangeValue) {
-        final _TokenChange<T> tokenChange = tokenChangeValue;
-        return tokenChange.change;
+      _dependents[dependent].map((dynamic tokenDependencyValue) {
+        final _TokenDependency<T> tokenDependency = tokenDependencyValue;
+        return tokenDependency.dependency;
       })
     );
   }
@@ -1655,18 +1769,18 @@ class InheritedModelElement<T> extends InheritedElement {
       }());
       // check that it really depends on us
       assert(dependent._dependencies.contains(this));
-      if (widget.updateShouldNotifyDependent(oldWidget, _getChanges(dependent)))
+      if (widget.updateShouldNotifyDependent(oldWidget, _getDependencies(dependent)))
         dependent.didChangeDependencies();
     }
-    // Recreate the set of changes for each dependent to give
-    // widget.getChangeFor() an opportunity to sync with its model.
+    // Recreate the set of depedencies for each dependent to give
+    // widget.getDependencyFor() an opportunity to sync with its model.
     for (Element dependent in _dependents.keys) {
       if (_dependents[dependent].isEmpty)
         continue;
-      _dependents[dependent] = new HashSet<_TokenChange<T>>.of(
-        _dependents[dependent].map((dynamic tokenChangeValue) {
-          final _TokenChange<T> tokenChange = tokenChangeValue;
-          return _getTokenChange(tokenChangeValue.token);
+      _dependents[dependent] = new HashSet<_TokenDependency<T>>.of(
+        _dependents[dependent].map((dynamic tokenDependencyValue) {
+          final _TokenDependency<T> tokenDependency = tokenDependencyValue;
+          return _getTokenDependency(tokenDependency.token);
         })
       );
     }
