@@ -5,8 +5,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
-import 'package:flutter/material.dart';
-
 import 'colors.dart';
 import 'list_tile.dart';
 import 'material.dart';
