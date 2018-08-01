@@ -176,7 +176,7 @@ void main() {
   });
 
   testWidgets('Navigator.of fails gracefully when not found in context', (WidgetTester tester) async {
-    const Key targetKey = Key('foo');
+    const Key targetKey = const Key('foo');
     dynamic exception;
     final Widget widget = new ThirdWidget(
       targetKey: targetKey,
@@ -197,7 +197,7 @@ void main() {
           children: <Widget>[
             const SizedBox(
               height: 300.0,
-              child: Text('Root page'),
+              child: const Text('Root page'),
             ),
             new SizedBox(
               height: 300.0,

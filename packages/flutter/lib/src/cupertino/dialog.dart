@@ -10,7 +10,7 @@ import 'scrollbar.dart';
 
 // TODO(abarth): These constants probably belong somewhere more general.
 
-const TextStyle _kCupertinoDialogTitleStyle = TextStyle(
+const TextStyle _kCupertinoDialogTitleStyle = const TextStyle(
   fontFamily: '.SF UI Display',
   inherit: false,
   fontSize: 18.0,
@@ -21,7 +21,7 @@ const TextStyle _kCupertinoDialogTitleStyle = TextStyle(
   textBaseline: TextBaseline.alphabetic,
 );
 
-const TextStyle _kCupertinoDialogContentStyle = TextStyle(
+const TextStyle _kCupertinoDialogContentStyle = const TextStyle(
   fontFamily: '.SF UI Text',
   inherit: false,
   fontSize: 13.4,
@@ -31,7 +31,7 @@ const TextStyle _kCupertinoDialogContentStyle = TextStyle(
   textBaseline: TextBaseline.alphabetic,
 );
 
-const TextStyle _kCupertinoDialogActionStyle = TextStyle(
+const TextStyle _kCupertinoDialogActionStyle = const TextStyle(
   fontFamily: '.SF UI Text',
   inherit: false,
   fontSize: 16.8,
@@ -41,11 +41,11 @@ const TextStyle _kCupertinoDialogActionStyle = TextStyle(
 );
 
 const double _kCupertinoDialogWidth = 270.0;
-const BoxDecoration _kCupertinoDialogFrontFillDecoration = BoxDecoration(
-  color: Color(0xccffffff),
+const BoxDecoration _kCupertinoDialogFrontFillDecoration = const BoxDecoration(
+  color: const Color(0xccffffff),
 );
-const BoxDecoration _kCupertinoDialogBackFill = BoxDecoration(
-  color: Color(0x77ffffff),
+const BoxDecoration _kCupertinoDialogBackFill = const BoxDecoration(
+  color: const Color(0x77ffffff),
 );
 
 const double _kEdgePadding = 20.0;
@@ -53,7 +53,7 @@ const double _kButtonHeight = 45.0;
 
 // TODO(gspencer): This color isn't correct. Instead, we should carve a hole in
 // the dialog and show more of the background.
-const Color _kButtonDividerColor = Color(0xffd5d5d5);
+const Color _kButtonDividerColor = const Color(0xffd5d5d5);
 
 /// An iOS-style dialog.
 ///
@@ -83,7 +83,7 @@ class CupertinoDialog extends StatelessWidget {
   Widget build(BuildContext context) {
     return new Center(
       child: new ClipRRect(
-        borderRadius: const BorderRadius.all(Radius.circular(12.0)),
+        borderRadius: const BorderRadius.all(const Radius.circular(12.0)),
         child: new DecoratedBox(
           // To get the effect, 2 white fills are needed. One blended with the
           // background before applying the blur and one overlaid on top of
@@ -193,7 +193,7 @@ class CupertinoAlertDialog extends StatelessWidget {
       );
       children.add(new Flexible(flex: 3, child: titleSection));
       // Add padding between the sections.
-      children.add(const Padding(padding: EdgeInsets.only(top: 8.0)));
+      children.add(const Padding(padding: const EdgeInsets.only(top: 8.0)));
     }
 
     if (actions.isNotEmpty) {
@@ -371,7 +371,7 @@ class _CupertinoAlertTitleSection extends StatelessWidget {
 
     // Add padding between the widgets if necessary.
     if (titleContentGroup.length > 1) {
-      titleContentGroup.insert(1, const Padding(padding: EdgeInsets.only(top: 8.0)));
+      titleContentGroup.insert(1, const Padding(padding: const EdgeInsets.only(top: 8.0)));
     }
 
     return new CupertinoScrollbar(

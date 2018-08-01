@@ -229,7 +229,7 @@ void main() {
   testWidgets('debugPaintSizeEnabled', (WidgetTester tester) async {
     await tester.pumpWidget(
       const ClipRect(
-        child: Placeholder(),
+        child: const Placeholder(),
       ),
     );
     expect(tester.renderObject(find.byType(ClipRect)).paint, paints
@@ -306,10 +306,10 @@ void main() {
                   angle: 1.0, // radians
                   child: new ClipRRect(
                     borderRadius: const BorderRadius.only(
-                      topLeft: Radius.elliptical(10.0, 20.0),
-                      topRight: Radius.elliptical(5.0, 30.0),
-                      bottomLeft: Radius.elliptical(2.5, 12.0),
-                      bottomRight: Radius.elliptical(15.0, 6.0),
+                      topLeft: const Radius.elliptical(10.0, 20.0),
+                      topRight: const Radius.elliptical(5.0, 30.0),
+                      bottomLeft: const Radius.elliptical(2.5, 12.0),
+                      bottomRight: const Radius.elliptical(15.0, 6.0),
                     ),
                     child: new Container(
                       color: Colors.red,

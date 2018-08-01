@@ -116,12 +116,12 @@ class ProcessSignal implements io.ProcessSignal {
   @visibleForTesting
   const ProcessSignal(this._delegate);
 
-  static const ProcessSignal SIGWINCH = _PosixProcessSignal._(io.ProcessSignal.sigwinch);
-  static const ProcessSignal SIGTERM = _PosixProcessSignal._(io.ProcessSignal.sigterm);
-  static const ProcessSignal SIGUSR1 = _PosixProcessSignal._(io.ProcessSignal.sigusr1);
-  static const ProcessSignal SIGUSR2 = _PosixProcessSignal._(io.ProcessSignal.sigusr2);
-  static const ProcessSignal SIGINT =  ProcessSignal(io.ProcessSignal.sigint);
-  static const ProcessSignal SIGKILL =  ProcessSignal(io.ProcessSignal.sigkill);
+  static const ProcessSignal SIGWINCH = const _PosixProcessSignal._(io.ProcessSignal.sigwinch);
+  static const ProcessSignal SIGTERM = const _PosixProcessSignal._(io.ProcessSignal.sigterm);
+  static const ProcessSignal SIGUSR1 = const _PosixProcessSignal._(io.ProcessSignal.sigusr1);
+  static const ProcessSignal SIGUSR2 = const _PosixProcessSignal._(io.ProcessSignal.sigusr2);
+  static const ProcessSignal SIGINT =  const ProcessSignal(io.ProcessSignal.sigint);
+  static const ProcessSignal SIGKILL =  const ProcessSignal(io.ProcessSignal.sigkill);
 
   final io.ProcessSignal _delegate;
 

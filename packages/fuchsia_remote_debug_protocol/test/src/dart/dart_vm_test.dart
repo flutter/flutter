@@ -299,7 +299,7 @@ void main() {
     });
 
     test('verify timeout fires', () async {
-      const Duration timeoutTime = Duration(milliseconds: 100);
+      const Duration timeoutTime = const Duration(milliseconds: 100);
       Future<json_rpc.Peer> mockVmConnectionFunction(Uri uri) {
         // Return a command that will never complete.
         when(mockPeer.sendRequest(any, any))

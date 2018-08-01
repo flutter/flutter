@@ -807,7 +807,7 @@ class RenderObjectToWidgetElement<T extends RenderObject> extends RootRenderObje
 
   Element _child;
 
-  static const Object _rootChildSlot = Object();
+  static const Object _rootChildSlot = const Object();
 
   @override
   void visitChildren(ElementVisitor visitor) {

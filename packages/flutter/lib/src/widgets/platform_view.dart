@@ -54,7 +54,7 @@ class AndroidView extends StatefulWidget {
   /// See also: [AndroidView] for an example of registering a platform view factory.
   final String viewType;
 
-  /// Callback to invoke when after the Android view has been created.
+  /// Callback to invoke after the Android view has been created.
   ///
   /// May be null.
   final OnPlatformViewCreated onPlatformViewCreated;

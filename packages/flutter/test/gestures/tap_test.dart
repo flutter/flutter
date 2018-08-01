@@ -20,57 +20,57 @@ void main() {
   setUp(ensureGestureBinding);
 
   // Down/up pair 1: normal tap sequence
-  const PointerDownEvent down1 = PointerDownEvent(
+  const PointerDownEvent down1 = const PointerDownEvent(
     pointer: 1,
-    position: Offset(10.0, 10.0)
+    position: const Offset(10.0, 10.0)
   );
 
-  const PointerUpEvent up1 = PointerUpEvent(
+  const PointerUpEvent up1 = const PointerUpEvent(
     pointer: 1,
-    position: Offset(11.0, 9.0)
+    position: const Offset(11.0, 9.0)
   );
 
   // Down/up pair 2: normal tap sequence far away from pair 1
-  const PointerDownEvent down2 = PointerDownEvent(
+  const PointerDownEvent down2 = const PointerDownEvent(
     pointer: 2,
-    position: Offset(30.0, 30.0)
+    position: const Offset(30.0, 30.0)
   );
 
-  const PointerUpEvent up2 = PointerUpEvent(
+  const PointerUpEvent up2 = const PointerUpEvent(
     pointer: 2,
-    position: Offset(31.0, 29.0)
+    position: const Offset(31.0, 29.0)
   );
 
   // Down/move/up sequence 3: intervening motion, more than kTouchSlop. (~21px)
-  const PointerDownEvent down3 = PointerDownEvent(
+  const PointerDownEvent down3 = const PointerDownEvent(
     pointer: 3,
-    position: Offset(10.0, 10.0)
+    position: const Offset(10.0, 10.0)
   );
 
-  const PointerMoveEvent move3 = PointerMoveEvent(
+  const PointerMoveEvent move3 = const PointerMoveEvent(
     pointer: 3,
-    position: Offset(25.0, 25.0)
+    position: const Offset(25.0, 25.0)
   );
 
-  const PointerUpEvent up3 = PointerUpEvent(
+  const PointerUpEvent up3 = const PointerUpEvent(
     pointer: 3,
-    position: Offset(25.0, 25.0)
+    position: const Offset(25.0, 25.0)
   );
 
   // Down/move/up sequence 4: intervening motion, less than kTouchSlop. (~17px)
-  const PointerDownEvent down4 = PointerDownEvent(
+  const PointerDownEvent down4 = const PointerDownEvent(
     pointer: 4,
-    position: Offset(10.0, 10.0)
+    position: const Offset(10.0, 10.0)
   );
 
-  const PointerMoveEvent move4 = PointerMoveEvent(
+  const PointerMoveEvent move4 = const PointerMoveEvent(
     pointer: 4,
-    position: Offset(22.0, 22.0)
+    position: const Offset(22.0, 22.0)
   );
 
-  const PointerUpEvent up4 = PointerUpEvent(
+  const PointerUpEvent up4 = const PointerUpEvent(
     pointer: 4,
-    position: Offset(22.0, 22.0)
+    position: const Offset(22.0, 22.0)
   );
 
   testGesture('Should recognize tap', (GestureTester tester) {

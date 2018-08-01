@@ -83,8 +83,8 @@ void main() {
         children: <Widget>[
           const Draggable<int>(
             data: 1,
-            child: Text('Source'),
-            feedback: Text('Dragging'),
+            child: const Text('Source'),
+            feedback: const Text('Dragging'),
           ),
           new DragTarget<int>(
             builder: (BuildContext context, List<int> data, List<dynamic> rejects) {
@@ -148,8 +148,8 @@ void main() {
         children: <Widget>[
           const Draggable<int>(
             data: 1,
-            child: Text('Source'),
-            feedback: Text('Dragging'),
+            child: const Text('Source'),
+            feedback: const Text('Dragging'),
           ),
           new Stack(
             children: <Widget>[
@@ -292,8 +292,8 @@ void main() {
         children: <Widget>[
           const LongPressDraggable<int>(
             data: 1,
-            child: Text('Source'),
-            feedback: Text('Dragging'),
+            child: const Text('Source'),
+            feedback: const Text('Dragging'),
           ),
           new DragTarget<int>(
             builder: (BuildContext context, List<int> data, List<dynamic> rejects) {
@@ -338,8 +338,8 @@ void main() {
         children: <Widget>[
           const Draggable<int>(
             data: 1,
-            child: Text('Source'),
-            feedback: Text('Dragging'),
+            child: const Text('Source'),
+            feedback: const Text('Dragging'),
           ),
           new DragTarget<int>(
             builder: (BuildContext context, List<int> data, List<dynamic> rejects) {
@@ -395,14 +395,14 @@ void main() {
           new Container(height: 400.0),
           const Draggable<int>(
             data: 1,
-            child: Text('H'),
-            feedback: Text('Dragging'),
+            child: const Text('H'),
+            feedback: const Text('Dragging'),
             affinity: Axis.horizontal,
           ),
           const Draggable<int>(
             data: 2,
-            child: Text('V'),
-            feedback: Text('Dragging'),
+            child: const Text('V'),
+            feedback: const Text('Dragging'),
             affinity: Axis.vertical,
           ),
           new Container(height: 500.0),
@@ -502,14 +502,14 @@ void main() {
           new Container(width: 400.0),
           const Draggable<int>(
             data: 1,
-            child: Text('H'),
-            feedback: Text('Dragging'),
+            child: const Text('H'),
+            feedback: const Text('Dragging'),
             affinity: Axis.horizontal,
           ),
           const Draggable<int>(
             data: 2,
-            child: Text('V'),
-            feedback: Text('Dragging'),
+            child: const Text('V'),
+            feedback: const Text('Dragging'),
             affinity: Axis.vertical,
           ),
           new Container(width: 500.0),
@@ -609,23 +609,23 @@ void main() {
             new Container(width: 400.0),
             const Draggable<int>(
               data: 1,
-              child: Text('H'),
-              feedback: Text('H'),
-              childWhenDragging: SizedBox(),
+              child: const Text('H'),
+              feedback: const Text('H'),
+              childWhenDragging: const SizedBox(),
               axis: Axis.horizontal,
             ),
             const Draggable<int>(
               data: 2,
-              child: Text('V'),
-              feedback: Text('V'),
-              childWhenDragging: SizedBox(),
+              child: const Text('V'),
+              feedback: const Text('V'),
+              childWhenDragging: const SizedBox(),
               axis: Axis.vertical,
             ),
             const Draggable<int>(
               data: 3,
-              child: Text('N'),
-              feedback: Text('N'),
-              childWhenDragging: SizedBox(),
+              child: const Text('N'),
+              feedback: const Text('N'),
+              childWhenDragging: const SizedBox(),
             ),
             new Container(width: 500.0),
             new Container(width: 500.0),
@@ -1033,13 +1033,13 @@ void main() {
         children: <Widget>[
           const Draggable<int>(
             data: 1,
-            child: Text('IntSource'),
-            feedback: Text('IntDragging'),
+            child: const Text('IntSource'),
+            feedback: const Text('IntDragging'),
           ),
           const Draggable<double>(
             data: 1.0,
-            child: Text('DoubleSource'),
-            feedback: Text('DoubleDragging'),
+            child: const Text('DoubleSource'),
+            feedback: const Text('DoubleDragging'),
           ),
           new Stack(
             children: <Widget>[
@@ -1388,8 +1388,8 @@ void main() {
         children: <Widget>[
           const Draggable<int>(
             data: 1,
-            child: Text('Source'),
-            feedback: Text('Dragging')
+            child: const Text('Source'),
+            feedback: const Text('Dragging')
           ),
           new DragTarget<int>(
             builder: (BuildContext context, List<int> data, List<dynamic> rejects) {
@@ -1424,10 +1424,10 @@ void main() {
     await tester.pumpWidget(new MaterialApp(
       home: new Column(
         children: const <Widget>[
-          Draggable<int>(
+          const Draggable<int>(
             data: 1,
-            child: Text('Source'),
-            feedback: Text('Dragging')
+            child: const Text('Source'),
+            feedback: const Text('Dragging')
           ),
         ]
       )
@@ -1446,8 +1446,8 @@ void main() {
         children: <Widget>[
           const Draggable<int>(
             data: 1,
-            child: Text('Source'),
-            feedback: Text('Dragging')
+            child: const Text('Source'),
+            feedback: const Text('Dragging')
           ),
           new DragTarget<int>(
             builder: (BuildContext context, List<int> data, List<dynamic> rejects) {
@@ -1520,8 +1520,8 @@ void main() {
               events.add('tap');
             },
             child: const LongPressDraggable<int>(
-              feedback: Text('Feedback'),
-              child: Text('X'),
+              feedback: const Text('Feedback'),
+              child: const Text('X'),
             ),
           ),
         ),
@@ -1667,25 +1667,25 @@ void main() {
             new Container(width: 400.0),
             const Draggable<int>(
               data: 1,
-              child: Text('H'),
-              feedback: Text('H'),
-              childWhenDragging: SizedBox(),
+              child: const Text('H'),
+              feedback: const Text('H'),
+              childWhenDragging: const SizedBox(),
               axis: Axis.horizontal,
               ignoringFeedbackSemantics: false,
             ),
             const Draggable<int>(
               data: 2,
-              child: Text('V'),
-              feedback: Text('V'),
-              childWhenDragging: SizedBox(),
+              child: const Text('V'),
+              feedback: const Text('V'),
+              childWhenDragging: const SizedBox(),
               axis: Axis.vertical,
               ignoringFeedbackSemantics: false,
             ),
             const Draggable<int>(
               data: 3,
-              child: Text('N'),
-              feedback: Text('N'),
-              childWhenDragging: SizedBox(),
+              child: const Text('N'),
+              feedback: const Text('N'),
+              childWhenDragging: const SizedBox(),
             ),
           ],
         ),

@@ -252,7 +252,7 @@ void main() {
     await tester.pumpWidget(
       const Directionality(
         textDirection: TextDirection.ltr,
-        child: Banner(message: 'Hello', location: BannerLocation.topEnd),
+        child: const Banner(message: 'Hello', location: BannerLocation.topEnd),
       ),
     );
     expect(find.byType(CustomPaint), paints

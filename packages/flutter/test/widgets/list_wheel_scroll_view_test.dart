@@ -43,7 +43,7 @@ void main() {
       await tester.pumpWidget(
         Directionality(
           textDirection: TextDirection.ltr,
-          child: ListWheelScrollView(
+          child: const ListWheelScrollView(
             itemExtent: 50.0,
             children: const <Widget>[],
           ),
@@ -115,14 +115,14 @@ void main() {
       await tester.pumpWidget(
         Directionality(
           textDirection: TextDirection.ltr,
-          child: ListWheelScrollView(
+          child: const ListWheelScrollView(
             itemExtent: 50.0,
             children: const <Widget>[
               SizedBox(
                 height: 200.0,
                 width: 200.0,
-                child: Center(
-                  child: Text('blah'),
+                child: const Center(
+                  child: const Text('blah'),
                 ),
               ),
             ],
@@ -290,7 +290,7 @@ void main() {
               new Container(
                 width: 200.0,
                 child: const Center(
-                  child: Text('blah'),
+                  child: const Text('blah'),
                 ),
               ),
             ],
@@ -348,7 +348,7 @@ void main() {
               new Container(
                 width: 200.0,
                 child: const Center(
-                  child: Text('blah'),
+                  child: const Text('blah'),
                 ),
               ),
             ],
@@ -378,7 +378,7 @@ void main() {
               new Container(
                 width: 200.0,
                 child: const Center(
-                  child: Text('blah'),
+                  child: const Text('blah'),
                 ),
               ),
             ],
@@ -407,7 +407,7 @@ void main() {
               new Container(
                 width: 200.0,
                 child: const Center(
-                  child: Text('blah'),
+                  child: const Text('blah'),
                 ),
               ),
             ],
@@ -436,7 +436,7 @@ void main() {
               new Container(
                 width: 200.0,
                 child: const Center(
-                  child: Text('blah'),
+                  child: const Text('blah'),
                 ),
               ),
             ],
@@ -469,7 +469,7 @@ void main() {
               new Container(
                 width: 200.0,
                 child: const Center(
-                  child: Text('blah'),
+                  child: const Text('blah'),
                 ),
               ),
             ],
@@ -515,7 +515,7 @@ void main() {
               new Container(
                 width: 200.0,
                 child: const Center(
-                  child: Text('blah'),
+                  child: const Text('blah'),
                 ),
               ),
             ],
@@ -563,7 +563,7 @@ void main() {
               new Container(
                 width: 200.0,
                 child: const Center(
-                  child: Text('blah'),
+                  child: const Text('blah'),
                 ),
               ),
             ],

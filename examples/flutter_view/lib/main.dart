@@ -30,7 +30,7 @@ class _MyHomePageState extends State<MyHomePage> {
   static const String _pong = 'pong';
   static const String _emptyMessage = '';
   static const BasicMessageChannel<String> platform =
-      BasicMessageChannel<String>(_channel, StringCodec());
+      const BasicMessageChannel<String>(_channel, const StringCodec());
 
   int _counter = 0;
 
@@ -69,7 +69,7 @@ class _MyHomePageState extends State<MyHomePage> {
             child: new Row(
               children: <Widget>[
                 new Image.asset('assets/flutter-mark-square-64.png', scale: 1.5),
-                const Text('Flutter', style: TextStyle(fontSize: 30.0)),
+                const Text('Flutter', style: const TextStyle(fontSize: 30.0)),
               ],
             ),
           ),

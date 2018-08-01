@@ -95,7 +95,7 @@ void main() {
     testUsingContext('moved flutter sdk', () async {
       final Directory destinationPath = fs.systemTempDirectory.createTempSync('dependency_checker_test_');
       // Copy the golden input and let the test run in an isolated temporary in-memory file system.
-      const LocalFileSystem localFileSystem = LocalFileSystem();
+      const LocalFileSystem localFileSystem = const LocalFileSystem();
       final Directory sourcePath = localFileSystem.directory(localFileSystem.path.join(dataPath, 'changed_sdk_location'));
       copyDirectorySync(sourcePath, destinationPath);
       fs.currentDirectory = destinationPath;

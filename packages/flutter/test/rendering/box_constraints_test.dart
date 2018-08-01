@@ -13,7 +13,7 @@ void main() {
   });
 
   test('BoxConstraints copyWith', () {
-    const BoxConstraints constraints = BoxConstraints(
+    const BoxConstraints constraints = const BoxConstraints(
       minWidth: 3.0,
       maxWidth: 7.0,
       minHeight: 11.0,
@@ -36,7 +36,7 @@ void main() {
   });
 
   test('BoxConstraints operators', () {
-    const BoxConstraints constraints = BoxConstraints(
+    const BoxConstraints constraints = const BoxConstraints(
       minWidth: 3.0,
       maxWidth: 7.0,
       minHeight: 11.0,
@@ -62,7 +62,7 @@ void main() {
 
   test('BoxConstraints lerp', () {
     expect(BoxConstraints.lerp(null, null, 0.5), isNull);
-    const BoxConstraints constraints = BoxConstraints(
+    const BoxConstraints constraints = const BoxConstraints(
       minWidth: 3.0,
       maxWidth: 7.0,
       minHeight: 11.0,
@@ -91,19 +91,19 @@ void main() {
   });
 
   test('BoxConstraints lerp with unbounded width', () {
-    const BoxConstraints constraints1 = BoxConstraints(
+    const BoxConstraints constraints1 = const BoxConstraints(
       minWidth: double.infinity,
       maxWidth: double.infinity,
       minHeight: 10.0,
       maxHeight: 20.0,
     );
-    const BoxConstraints constraints2 = BoxConstraints(
+    const BoxConstraints constraints2 = const BoxConstraints(
       minWidth: double.infinity,
       maxWidth: double.infinity,
       minHeight: 20.0,
       maxHeight: 30.0,
     );
-    const BoxConstraints constraints3 = BoxConstraints(
+    const BoxConstraints constraints3 = const BoxConstraints(
       minWidth: double.infinity,
       maxWidth: double.infinity,
       minHeight: 15.0,
@@ -113,19 +113,19 @@ void main() {
   });
 
   test('BoxConstraints lerp with unbounded height', () {
-    const BoxConstraints constraints1 = BoxConstraints(
+    const BoxConstraints constraints1 = const BoxConstraints(
       minWidth: 10.0,
       maxWidth: 20.0,
       minHeight: double.infinity,
       maxHeight: double.infinity,
     );
-    const BoxConstraints constraints2 = BoxConstraints(
+    const BoxConstraints constraints2 = const BoxConstraints(
       minWidth: 20.0,
       maxWidth: 30.0,
       minHeight: double.infinity,
       maxHeight: double.infinity,
     );
-    const BoxConstraints constraints3 = BoxConstraints(
+    const BoxConstraints constraints3 = const BoxConstraints(
       minWidth: 15.0,
       maxWidth: 25.0,
       minHeight: double.infinity,
@@ -135,19 +135,19 @@ void main() {
   });
 
   test('BoxConstraints lerp from bounded to unbounded', () {
-    const BoxConstraints constraints1 = BoxConstraints(
+    const BoxConstraints constraints1 = const BoxConstraints(
       minWidth: double.infinity,
       maxWidth: double.infinity,
       minHeight: double.infinity,
       maxHeight: double.infinity,
     );
-    const BoxConstraints constraints2 = BoxConstraints(
+    const BoxConstraints constraints2 = const BoxConstraints(
       minWidth: 20.0,
       maxWidth: 30.0,
       minHeight: double.infinity,
       maxHeight: double.infinity,
     );
-    const BoxConstraints constraints3 = BoxConstraints(
+    const BoxConstraints constraints3 = const BoxConstraints(
       minWidth: double.infinity,
       maxWidth: double.infinity,
       minHeight: 20.0,
@@ -159,7 +159,7 @@ void main() {
   });
 
   test('BoxConstraints normalize', () {
-    const BoxConstraints constraints = BoxConstraints(
+    const BoxConstraints constraints = const BoxConstraints(
       minWidth: 3.0,
       maxWidth: 2.0,
       minHeight: 11.0,

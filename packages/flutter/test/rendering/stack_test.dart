@@ -15,14 +15,14 @@ void main() {
 
     final RenderBox red = new RenderDecoratedBox(
       decoration: const BoxDecoration(
-        color: Color(0xFFFF0000),
+        color: const Color(0xFFFF0000),
       ),
       child: size
     );
 
     final RenderBox green = new RenderDecoratedBox(
       decoration: const BoxDecoration(
-        color: Color(0xFFFF0000),
+        color: const Color(0xFFFF0000),
       ),
     );
 

@@ -16,7 +16,7 @@ export 'package:file/file.dart';
 export 'package:file/local.dart';
 
 const String _kRecordingType = 'file';
-const FileSystem _kLocalFs = LocalFileSystem();
+const FileSystem _kLocalFs = const LocalFileSystem();
 
 /// Currently active implementation of the file system.
 ///

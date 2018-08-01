@@ -16,10 +16,10 @@ void main() {
     await tester.pumpWidget(
       // The bug only manifests itself when the screen's orientation is portrait
       const Center(
-        child: SizedBox(
+        child: const SizedBox(
           width: 450.0,
           height: 800.0,
-          child: GalleryApp(testMode: true)
+          child: const GalleryApp(testMode: true)
         )
       )
     );

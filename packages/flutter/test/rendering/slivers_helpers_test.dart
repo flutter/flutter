@@ -17,7 +17,7 @@ void main() {
   });
 
   test('SliverConstraints', () {
-    const SliverConstraints a = SliverConstraints(
+    const SliverConstraints a = const SliverConstraints(
       axisDirection: AxisDirection.down,
       growthDirection: GrowthDirection.forward,
       userScrollDirection: ScrollDirection.idle,
@@ -47,7 +47,7 @@ void main() {
       crossAxisExtent: 40.0,
       viewportMainAxisExtent: 30.0,
     );
-    const SliverConstraints d = SliverConstraints(
+    const SliverConstraints d = const SliverConstraints(
       axisDirection: AxisDirection.up,
       growthDirection: GrowthDirection.reverse,
       userScrollDirection: ScrollDirection.forward,

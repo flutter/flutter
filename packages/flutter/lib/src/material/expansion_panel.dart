@@ -247,7 +247,7 @@ class _ExpansionPanelListState extends State<ExpansionPanelList> {
   @override
   Widget build(BuildContext context) {
     final List<MergeableMaterialItem> items = <MergeableMaterialItem>[];
-    const EdgeInsets kExpandedEdgeInsets = EdgeInsets.symmetric(
+    const EdgeInsets kExpandedEdgeInsets = const EdgeInsets.symmetric(
       vertical: _kPanelHeaderExpandedHeight - _kPanelHeaderCollapsedHeight
     );
 

@@ -182,9 +182,9 @@ class TextFormFieldDemoState extends State<TextFormFieldDemo> {
                 new TextFormField(
                   textCapitalization: TextCapitalization.words,
                   decoration: const InputDecoration(
-                    border: UnderlineInputBorder(),
+                    border: const UnderlineInputBorder(),
                     filled: true,
-                    icon: Icon(Icons.person),
+                    icon: const Icon(Icons.person),
                     hintText: 'What do people call you?',
                     labelText: 'Name *',
                   ),
@@ -194,9 +194,9 @@ class TextFormFieldDemoState extends State<TextFormFieldDemo> {
                 const SizedBox(height: 24.0),
                 new TextFormField(
                   decoration: const InputDecoration(
-                    border: UnderlineInputBorder(),
+                    border: const UnderlineInputBorder(),
                     filled: true,
-                    icon: Icon(Icons.phone),
+                    icon: const Icon(Icons.phone),
                     hintText: 'Where can we reach you?',
                     labelText: 'Phone Number *',
                     prefixText: '+1',
@@ -214,9 +214,9 @@ class TextFormFieldDemoState extends State<TextFormFieldDemo> {
                 const SizedBox(height: 24.0),
                 new TextFormField(
                   decoration: const InputDecoration(
-                    border: UnderlineInputBorder(),
+                    border: const UnderlineInputBorder(),
                     filled: true,
-                    icon: Icon(Icons.email),
+                    icon: const Icon(Icons.email),
                     hintText: 'Your email address',
                     labelText: 'E-mail',
                   ),
@@ -226,7 +226,7 @@ class TextFormFieldDemoState extends State<TextFormFieldDemo> {
                 const SizedBox(height: 24.0),
                 new TextFormField(
                   decoration: const InputDecoration(
-                    border: OutlineInputBorder(),
+                    border: const OutlineInputBorder(),
                     hintText: 'Tell us about yourself',
                     helperText: 'Keep it short, this is just a demo.',
                     labelText: 'Life story',
@@ -237,11 +237,11 @@ class TextFormFieldDemoState extends State<TextFormFieldDemo> {
                 new TextFormField(
                   keyboardType: TextInputType.number,
                   decoration: const InputDecoration(
-                    border: OutlineInputBorder(),
+                    border: const OutlineInputBorder(),
                     labelText: 'Salary',
                     prefixText: '\$',
                     suffixText: 'USD',
-                    suffixStyle: TextStyle(color: Colors.green)
+                    suffixStyle: const TextStyle(color: Colors.green)
                   ),
                   maxLines: 1,
                 ),
@@ -260,7 +260,7 @@ class TextFormFieldDemoState extends State<TextFormFieldDemo> {
                 new TextFormField(
                   enabled: person.password != null && person.password.isNotEmpty,
                   decoration: const InputDecoration(
-                    border: UnderlineInputBorder(),
+                    border: const UnderlineInputBorder(),
                     filled: true,
                     labelText: 'Re-type password',
                   ),

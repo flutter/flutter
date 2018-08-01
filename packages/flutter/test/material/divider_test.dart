@@ -11,8 +11,8 @@ void main() {
     await tester.pumpWidget(
       const Directionality(
         textDirection: TextDirection.ltr,
-        child: Center(
-          child: Divider(),
+        child: const Center(
+          child: const Divider(),
         ),
       ),
     );
