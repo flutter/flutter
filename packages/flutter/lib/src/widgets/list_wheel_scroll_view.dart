@@ -511,7 +511,7 @@ class ListWheelScrollView extends StatefulWidget {
     this.onSelectedItemChanged,
     this.clipToSize = true,
     this.renderChildrenOutsideViewport = false,
-    List<Widget> children,
+    @required List<Widget> children,
   }) :  assert(children != null),
         assert(diameterRatio != null),
         assert(diameterRatio > 0.0, RenderListWheelViewport.diameterRatioZeroMessage),
@@ -530,6 +530,8 @@ class ListWheelScrollView extends StatefulWidget {
         childDelegate = new ChildListDelegate(children),
         super(key: key);
 
+  /// Construct a list in which children are scrolled a wheel. Its children
+  /// are managed by a delegate and can be lazily built during layout.
   const ListWheelScrollView.useDelegate({
     Key key,
     this.controller,
@@ -659,7 +661,7 @@ class _ListWheelScrollViewState extends State<ListWheelScrollView> {
           final int currentItemIndex = metrics.itemIndex;
           if (currentItemIndex != _lastReportedItemIndex) {
             _lastReportedItemIndex = currentItemIndex;
-            int trueIndex = widget.childDelegate.trueIndexOf(currentItemIndex);
+            final int trueIndex = widget.childDelegate.trueIndexOf(currentItemIndex);
             widget.onSelectedItemChanged(trueIndex);
           }
         }

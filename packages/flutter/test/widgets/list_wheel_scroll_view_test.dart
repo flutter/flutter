@@ -45,7 +45,7 @@ void main() {
           textDirection: TextDirection.ltr,
           child: ListWheelScrollView(
             itemExtent: 50.0,
-            children: <Widget>[],
+            children: const <Widget>[],
           ),
         ),
       );
@@ -117,7 +117,7 @@ void main() {
           textDirection: TextDirection.ltr,
           child: ListWheelScrollView(
             itemExtent: 50.0,
-            children: <Widget>[
+            children: const <Widget>[
               SizedBox(
                 height: 200.0,
                 width: 200.0,

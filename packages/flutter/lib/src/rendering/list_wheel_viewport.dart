@@ -101,7 +101,7 @@ class RenderListWheelViewport
   ///
   /// All arguments must not be null. Optional arguments have reasonable defaults.
   RenderListWheelViewport({
-    ListWheelElement childManager,
+    @required ListWheelElement childManager,
     @required ViewportOffset offset,
     double diameterRatio = defaultDiameterRatio,
     double perspective = defaultPerspective,
