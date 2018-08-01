@@ -17,7 +17,7 @@ import 'material.dart';
 import 'text_selection.dart';
 import 'theme.dart';
 
-export 'package:flutter/services.dart' show TextInputType, TextInputAction;
+export 'package:flutter/services.dart' show TextInputType, TextInputAction, TextCapitalization;
 
 /// A material design text field.
 ///

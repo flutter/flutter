@@ -580,4 +580,102 @@ void main() {
 
     semantics.dispose();
   });
+
+  testWidgets('Dropdown button includes semantics', (WidgetTester tester) async {
+    final SemanticsHandle handle = tester.ensureSemantics();
+    const Key key = const Key('test');
+    await tester.pumpWidget(buildFrame(
+      buttonKey: key,
+      value: null,
+      items: menuItems,
+      onChanged: (String _) {},
+      hint: const Text('test'),
+    ));
+
+    // By default the hint contributes the label.
+    expect(tester.getSemanticsData(find.byKey(key)), matchesSemanticsData(
+      isButton: true,
+      label: 'test',
+      hasTapAction: true,
+    ));
+
+    await tester.pumpWidget(buildFrame(
+      buttonKey: key,
+      value: 'three',
+      items: menuItems,
+      onChanged: null,
+      hint: const Text('test'),
+    ));
+
+    // Displays label of select item and is no longer tappable.
+    expect(tester.getSemanticsData(find.byKey(key)), matchesSemanticsData(
+      isButton: true,
+      label: 'three',
+      hasTapAction: true,
+    ));
+    handle.dispose();
+  });
+
+  testWidgets('Dropdown menu includes semantics', (WidgetTester tester) async {
+    final SemanticsTester semantics = new SemanticsTester(tester);
+    const Key key = const Key('test');
+    await tester.pumpWidget(buildFrame(
+      buttonKey: key,
+      value: null,
+      items: menuItems,
+    ));
+    await tester.tap(find.byKey(key));
+    await tester.pumpAndSettle();
+
+    expect(semantics, hasSemantics(new TestSemantics.root(
+      children: <TestSemantics>[
+        new TestSemantics.rootChild(
+          children: <TestSemantics>[
+            new TestSemantics(
+              flags: <SemanticsFlag>[
+                SemanticsFlag.scopesRoute,
+                SemanticsFlag.namesRoute,
+              ],
+              label: 'Popup menu',
+              children: <TestSemantics>[
+                new TestSemantics(
+                  children: <TestSemantics>[
+                    new TestSemantics(
+                      children: <TestSemantics>[
+                        new TestSemantics(
+                          label: 'one',
+                          textDirection: TextDirection.ltr,
+                          tags: <SemanticsTag>[const SemanticsTag('RenderViewport.twoPane')],
+                          actions: <SemanticsAction>[SemanticsAction.tap],
+                        ),
+                        new TestSemantics(
+                          label: 'two',
+                          textDirection: TextDirection.ltr,
+                          tags: <SemanticsTag>[const SemanticsTag('RenderViewport.twoPane')],
+                          actions: <SemanticsAction>[SemanticsAction.tap],
+                        ),
+                        new TestSemantics(
+                          label: 'three',
+                          textDirection: TextDirection.ltr,
+                          tags: <SemanticsTag>[const SemanticsTag('RenderViewport.twoPane')],
+                          actions: <SemanticsAction>[SemanticsAction.tap],
+                        ),
+                        new TestSemantics(
+                          label: 'four',
+                          textDirection: TextDirection.ltr,
+                          tags: <SemanticsTag>[const SemanticsTag('RenderViewport.twoPane')],
+                          actions: <SemanticsAction>[SemanticsAction.tap],
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ],
+        ),
+      ],
+    ), ignoreId: true, ignoreRect: true, ignoreTransform: true));
+    semantics.dispose();
+  });
 }
