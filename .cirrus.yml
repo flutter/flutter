@@ -9,7 +9,7 @@ task:
   git_fetch_script: git fetch origin
   pub_cache:
     folder: $HOME/.pub-cache
-    fingerprint_script: find . -name 'pubspec.yaml' -exec grep -H 'PUBSPEC CHECKSUM' {} +
+    fingerprint_script: grep -r --include=pubspec.yaml 'PUBSPEC CHECKSUM' "$CIRRUS_WORKING_DIR"
   flutter_pkg_cache:
     folder: bin/cache/pkg
     fingerprint_script: cat bin/internal/engine.version
@@ -94,7 +94,7 @@ task:
   git_fetch_script: git fetch origin
   pub_cache:
     folder: $HOME/.pub-cache
-    fingerprint_script: find . -name 'pubspec.yaml' -exec grep -H 'PUBSPEC CHECKSUM' {} +
+    fingerprint_script: grep -r --include=pubspec.yaml 'PUBSPEC CHECKSUM' "$CIRRUS_WORKING_DIR"
   flutter_pkg_cache:
     folder: bin/cache/pkg
     fingerprint_script: cat bin/internal/engine.version
