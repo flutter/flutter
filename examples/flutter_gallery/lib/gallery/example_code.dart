@@ -26,7 +26,7 @@ new RaisedButton(
 // Buttons are disabled when onPressed isn't
 // specified or is null.
 const RaisedButton(
-  child: const Text('BUTTON TITLE'),
+  child: Text('BUTTON TITLE'),
   onPressed: null
 );
 
@@ -54,7 +54,7 @@ new OutlineButton(
 // Buttons are disabled when onPressed isn't
 // specified or is null.
 const OutlineButton(
-  child: const Text('BUTTON TITLE'),
+  child: Text('BUTTON TITLE'),
   onPressed: null
 );
 
@@ -82,7 +82,7 @@ new FlatButton(
 // Buttons are disabled when onPressed isn't
 // specified or is null.
 const FlatButton(
-  child: const Text('BUTTON TITLE'),
+  child: Text('BUTTON TITLE'),
   onPressed: null
 );
 // END
@@ -136,7 +136,7 @@ new Scaffold(
     title: const Text('Demo')
   ),
   floatingActionButton: const FloatingActionButton(
-    child: const Icon(Icons.add),
+    child: Icon(Icons.add),
     onPressed: null
   )
 );

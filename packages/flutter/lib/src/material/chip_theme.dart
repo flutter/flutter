@@ -228,9 +228,9 @@ class ChipThemeData extends Diagnosticable {
     const int disabledAlpha = 0x0c; // 38% * 12% = 5%
     const int selectAlpha = 0x3d; // 12% + 12% = 24%
     const int textLabelAlpha = 0xde; // 87%
-    const ShapeBorder shape = const StadiumBorder();
-    const EdgeInsetsGeometry labelPadding = const EdgeInsets.symmetric(horizontal: 8.0);
-    const EdgeInsetsGeometry padding = const EdgeInsets.all(4.0);
+    const ShapeBorder shape = StadiumBorder();
+    const EdgeInsetsGeometry labelPadding = EdgeInsets.symmetric(horizontal: 8.0);
+    const EdgeInsetsGeometry padding = EdgeInsets.all(4.0);
 
     primaryColor = primaryColor ?? (brightness == Brightness.light ? Colors.black : Colors.white);
     final Color backgroundColor = primaryColor.withAlpha(backgroundAlpha);

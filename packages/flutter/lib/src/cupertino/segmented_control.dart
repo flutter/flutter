@@ -13,14 +13,14 @@ import 'colors.dart';
 
 // Minimum padding from horizontal edges of segmented control to edges of
 // encompassing widget.
-const EdgeInsets _kHorizontalItemPadding = const EdgeInsets.symmetric(horizontal: 16.0);
+const EdgeInsets _kHorizontalItemPadding = EdgeInsets.symmetric(horizontal: 16.0);
 
 // Minimum height of the segmented control.
 const double _kMinSegmentedControlHeight = 28.0;
 
 // The duration of the fade animation used to transition when a new widget
 // is selected.
-const Duration _kFadeDuration = const Duration(milliseconds: 165);
+const Duration _kFadeDuration = Duration(milliseconds: 165);
 
 /// An iOS-style segmented control.
 ///

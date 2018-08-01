@@ -9,7 +9,7 @@ void main() {
   test('editable intrinsics', () {
     final RenderEditable editable = new RenderEditable(
       text: const TextSpan(
-        style: const TextStyle(height: 1.0, fontSize: 10.0, fontFamily: 'Ahem'),
+        style: TextStyle(height: 1.0, fontSize: 10.0, fontFamily: 'Ahem'),
         text: '12345',
       ),
       textAlign: TextAlign.start,

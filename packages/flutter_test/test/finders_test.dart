@@ -19,8 +19,8 @@ void main() {
       await tester.pumpWidget(_boilerplate(
         const Text.rich(
           TextSpan(text: 't', children: <TextSpan>[
-            const TextSpan(text: 'e'),
-            const TextSpan(text: 'st'),
+            TextSpan(text: 'e'),
+            TextSpan(text: 'st'),
           ]
         ),
       )));

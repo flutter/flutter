@@ -142,8 +142,8 @@ Widget buildFrame({
   WidgetBuilder buildContent,
   LocaleResolutionCallback localeResolutionCallback,
   List<Locale> supportedLocales = const <Locale>[
-    const Locale('en', 'US'),
-    const Locale('en', 'GB'),
+    Locale('en', 'US'),
+    Locale('en', 'GB'),
   ],
 }) {
   return new WidgetsApp(
@@ -202,7 +202,7 @@ void main() {
   });
 
   testWidgets('Localizations.localeFor in a WidgetsApp with an explicit locale', (WidgetTester tester) async {
-    const Locale locale = const Locale('en', 'US');
+    const Locale locale = Locale('en', 'US');
     BuildContext pageContext;
 
     await tester.pumpWidget(
@@ -483,8 +483,8 @@ void main() {
           GlobalWidgetsLocalizations.delegate,
         ],
         supportedLocales: const <Locale>[
-          const Locale('en', 'GB'),
-          const Locale('ar', 'EG'),
+          Locale('en', 'GB'),
+          Locale('ar', 'EG'),
         ],
         buildContent: (BuildContext context) {
           pageContext = context;
@@ -527,9 +527,9 @@ void main() {
     await tester.pumpWidget(
       buildFrame(
         supportedLocales: const <Locale>[
-          const Locale('zh', 'CN'),
-          const Locale('en', 'GB'),
-          const Locale('en', 'CA'),
+          Locale('zh', 'CN'),
+          Locale('en', 'GB'),
+          Locale('en', 'CA'),
         ],
         buildContent: (BuildContext context) {
           return new Text(Localizations.localeOf(context).toString());
@@ -608,7 +608,7 @@ void main() {
             context: context,
             delegates: const <OnlyRTLDefaultWidgetsLocalizationsDelegate>[
               // Override: no matter what the locale, textDirection is always RTL.
-              const OnlyRTLDefaultWidgetsLocalizationsDelegate(),
+              OnlyRTLDefaultWidgetsLocalizationsDelegate(),
             ],
             child: new Builder(
               builder: (BuildContext context) {

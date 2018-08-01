@@ -48,11 +48,11 @@ class _CupertinoSwitchDemoState extends State<CupertinoSwitchDemo> {
               container: true,
               child: new Column(
                 children: const <Widget>[
-                  const CupertinoSwitch(
+                  CupertinoSwitch(
                     value: true,
                     onChanged: null,
                   ),
-                  const Text(
+                  Text(
                     'Disabled'
                   ),
                 ],
@@ -62,11 +62,11 @@ class _CupertinoSwitchDemoState extends State<CupertinoSwitchDemo> {
               container: true,
               child: new Column(
                 children: const <Widget>[
-                  const CupertinoSwitch(
+                  CupertinoSwitch(
                     value: false,
                     onChanged: null,
                   ),
-                  const Text(
+                  Text(
                     'Disabled'
                   ),
                 ],

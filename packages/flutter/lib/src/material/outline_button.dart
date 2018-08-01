@@ -12,11 +12,11 @@ import 'theme.dart';
 
 // The total time to make the button's fill color opaque and change
 // its elevation.
-const Duration _kPressDuration = const Duration(milliseconds: 150);
+const Duration _kPressDuration = Duration(milliseconds: 150);
 
 // Half of _kPressDuration: just the time to change the button's
 // elevation.
-const Duration _kElevationDuration = const Duration(milliseconds: 75);
+const Duration _kElevationDuration = Duration(milliseconds: 75);
 
 /// A cross between [RaisedButton] and [FlatButton]: a bordered button whose
 /// elevation increases and whose background becomes opaque when the button

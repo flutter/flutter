@@ -14,7 +14,7 @@ void main() {
     await tester.pumpWidget(new MaterialApp(
       home: new Scaffold(
         key: scaffoldKey,
-        body: const Center(child: const Text('body'))
+        body: const Center(child: Text('body'))
       )
     ));
 
@@ -41,7 +41,7 @@ void main() {
     await tester.pumpWidget(new MaterialApp(
       home: new Scaffold(
         key: scaffoldKey,
-        body: const Center(child: const Text('body'))
+        body: const Center(child: Text('body'))
       )
     ));
 
@@ -98,7 +98,7 @@ void main() {
     await tester.pumpWidget(new MaterialApp(
       home: new MediaQuery(
         data: const MediaQueryData(
-          padding: const EdgeInsets.all(50.0),
+          padding: EdgeInsets.all(50.0),
         ),
         child: new Scaffold(
           resizeToAvoidBottomPadding: false,
@@ -183,7 +183,7 @@ void main() {
       new MaterialApp(
         home: const Scaffold(
           bottomSheet: null,
-          body: const Placeholder(),
+          body: Placeholder(),
         ),
       ),
     );

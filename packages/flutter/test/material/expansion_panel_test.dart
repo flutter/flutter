@@ -112,7 +112,7 @@ void main() {
   });
 
   testWidgets('Open/close animations', (WidgetTester tester) async {
-    const Duration kSizeAnimationDuration = const Duration(milliseconds: 1000);
+    const Duration kSizeAnimationDuration = Duration(milliseconds: 1000);
     // The MaterialGaps animate in using kThemeAnimationDuration (hardcoded),
     // which should be less than our test size animation length. So we can assume that they
     // appear immediately. Here we just verify that our assumption is true.
@@ -129,7 +129,7 @@ void main() {
                   headerBuilder: (BuildContext context, bool isExpanded) => const Placeholder(
                     fallbackHeight: 12.0,
                   ),
-                  body: const SizedBox(height: 100.0, child: const Placeholder(
+                  body: const SizedBox(height: 100.0, child: Placeholder(
                     fallbackHeight: 12.0,
                   )),
                   isExpanded: a,
@@ -138,14 +138,14 @@ void main() {
                   headerBuilder: (BuildContext context, bool isExpanded) => const Placeholder(
                     fallbackHeight: 12.0,
                   ),
-                  body: const SizedBox(height: 100.0, child: const Placeholder()),
+                  body: const SizedBox(height: 100.0, child: Placeholder()),
                   isExpanded: b,
                 ),
                 new ExpansionPanel(
                   headerBuilder: (BuildContext context, bool isExpanded) => const Placeholder(
                     fallbackHeight: 12.0,
                   ),
-                  body: const SizedBox(height: 100.0, child: const Placeholder()),
+                  body: const SizedBox(height: 100.0, child: Placeholder()),
                   isExpanded: c,
                 ),
               ],

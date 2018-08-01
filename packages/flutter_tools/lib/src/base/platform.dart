@@ -11,7 +11,7 @@ import 'file_system.dart';
 
 export 'package:platform/platform.dart';
 
-const Platform _kLocalPlatform = const LocalPlatform();
+const Platform _kLocalPlatform = LocalPlatform();
 const String _kRecordingType = 'platform';
 
 Platform get platform => context[Platform] ?? _kLocalPlatform;
