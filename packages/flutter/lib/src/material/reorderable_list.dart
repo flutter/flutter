@@ -12,20 +12,20 @@ import 'material_localizations.dart';
 
 /// The callback used by [ReorderableListView] to move an item to a new
 /// position in a list.
-/// 
+///
 /// Implementations should remove the corresponding list item at [oldIndex]
 /// and reinsert it at [newIndex].
-/// 
+///
 /// Note that if [oldIndex] is before [newIndex], removing the item at [oldIndex]
 /// from the list will reduce the list's length by one. Implementations used
 /// by [ReorderableListView] will need to account for this when inserting before
 /// [newIndex].
-/// 
+///
 /// Example implementation:
-/// 
+///
 /// ```dart
 /// final List<MyDataObject> backingList = <MyDataObject>[/* ... */];
-/// 
+///
 /// void onReorder(int oldIndex, int newIndex) {
 ///   if (oldIndex < newIndex) {
 ///     // removing the item at oldIndex will shorten the list by 1.
@@ -38,7 +38,7 @@ import 'material_localizations.dart';
 typedef void OnReorderCallback(int oldIndex, int newIndex);
 
 /// A list whose items the user can interactively reorder by dragging.
-/// 
+///
 /// This class is appropriate for views with a small number of
 /// children because constructing the [List] requires doing work for every
 /// child that could possibly be displayed in the list view instead of just
@@ -50,15 +50,15 @@ class ReorderableListView extends StatefulWidget {
   /// Creates a reorderable list.
   ReorderableListView({
     this.header,
-    @required this.children, 
+    @required this.children,
     @required this.onReorder,
-    this.scrollDirection = Axis.vertical, 
-    this.padding, 
+    this.scrollDirection = Axis.vertical,
+    this.padding,
   }): assert(scrollDirection != null),
       assert(onReorder != null),
       assert(children != null),
       assert(
-        children.every((Widget w) => w.key != null), 
+        children.every((Widget w) => w.key != null),
         'All children of this widget must have a key.',
       );
 
@@ -71,7 +71,7 @@ class ReorderableListView extends StatefulWidget {
   final List<Widget> children;
 
   /// The [Axis] along which the list scrolls.
-  /// 
+  ///
   /// List [children] can only drag along this [Axis].
   final Axis scrollDirection;
 
@@ -399,7 +399,7 @@ class _ReorderableListContentState extends State<_ReorderableListContent> with T
 
     Widget buildDragTarget(BuildContext context, List<Key> acceptedCandidates, List<dynamic> rejectedCandidates) {
       final Widget toWrapWithSemantics = wrapWithSemantics();
-      
+
       // We build the draggable inside of a layout builder so that we can
       // constrain the size of the feedback dragging widget.
       Widget child = new LongPressDraggable<Key>(
