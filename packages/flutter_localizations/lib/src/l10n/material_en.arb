@@ -212,7 +212,7 @@
   },
 
   "reorderItemToEnd": "Move to the end",
-  "@reorderItemToStart": {
+  "@reorderItemToEnd": {
     "description": "The audio announcement to move an item in a Reorderable List to the end of the list."
   },
 
