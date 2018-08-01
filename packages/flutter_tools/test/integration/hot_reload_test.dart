@@ -33,41 +33,19 @@ void main() {
 
     test('works without error', () async {
       await _flutter.run();
-
-      // Due to https://github.com/flutter/flutter/issues/17833 this will
-      // throw on Windows. If you merge a fix for this and this test starts failing
-      // because it didn't throw on Windows, you should delete the wrapping expect()
-      // and just `await` the hotReload directly
-      // (dantup)
-
-      await expectLater(
-        _flutter.hotReload(),
-        platform.isWindows ? throwsA(anything) : completes,
-      );
-    });
+      await _flutter.hotReload();
+      // SKIP(dantup): https://github.com/flutter/flutter/issues/17833.
+    }, skip: platform.isWindows);
 
     test('hits breakpoints with file:// prefixes after reload', () async {
       await _flutter.run(withDebugger: true);
 
-      // This test fails due to // https://github.com/flutter/flutter/issues/18441
-      // If you merge a fix for this and the test starts failing because it's not
-      // throwing, delete the wrapping expect/return below.
-      // (dantup)
-      //
-      // final VMIsolate isolate = await _flutter.breakAt(
-      //     new Uri.file(_project.breakpointFile).toString(),
-      //     _project.breakpointLine
-      // );
-      // expect(isolate.pauseEvent, const isInstanceOf<VMPauseBreakpointEvent>());
-      await expectLater(() async {
-        // Hit breakpoint using a file:// URI.
-        final VMIsolate isolate = await _flutter.breakAt(
-            new Uri.file(_project.breakpointFile).toString(),
-            _project.breakpointLine
-        );
-        expect(isolate.pauseEvent, const isInstanceOf<VMPauseBreakpointEvent>());
-      }(), platform.isLinux ? completes : throwsA(anything)
-      );
-    });
+      // Hit breakpoint using a file:// URI.
+      final VMIsolate isolate = await _flutter.breakAt(
+          new Uri.file(_project.breakpointFile).toString(),
+          _project.breakpointLine);
+      expect(isolate.pauseEvent, const isInstanceOf<VMPauseBreakpointEvent>());
+      // SKIP(dantup): https://github.com/flutter/flutter/issues/18441.
+    }, skip: !platform.isLinux);
   }, timeout: const Timeout.factor(3));
 }
