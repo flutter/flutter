@@ -94,13 +94,13 @@ Future<StreamChannel<String>> _defaultOpenChannel(Uri uri) async {
 }
 
 /// The default VM service request timeout.
-const Duration kDefaultRequestTimeout = Duration(seconds: 30);
+const Duration kDefaultRequestTimeout = const Duration(seconds: 30);
 
 /// Used for RPC requests that may take a long time.
-const Duration kLongRequestTimeout = Duration(minutes: 1);
+const Duration kLongRequestTimeout = const Duration(minutes: 1);
 
 /// Used for RPC requests that should never take a long time.
-const Duration kShortRequestTimeout = Duration(seconds: 5);
+const Duration kShortRequestTimeout = const Duration(seconds: 5);
 
 /// A connection to the Dart VM Service.
 class VMService {

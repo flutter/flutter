@@ -12,17 +12,17 @@ void main() {
     await tester.pumpWidget(
       const Directionality(
         textDirection: TextDirection.ltr,
-        child: Center(
-          child: AnimatedCrossFade(
-            firstChild: SizedBox(
+        child: const Center(
+          child: const AnimatedCrossFade(
+            firstChild: const SizedBox(
               width: 100.0,
               height: 100.0,
             ),
-            secondChild: SizedBox(
+            secondChild: const SizedBox(
               width: 200.0,
               height: 200.0,
             ),
-            duration: Duration(milliseconds: 200),
+            duration: const Duration(milliseconds: 200),
             crossFadeState: CrossFadeState.showFirst,
           ),
         ),
@@ -37,17 +37,17 @@ void main() {
     await tester.pumpWidget(
       const Directionality(
         textDirection: TextDirection.ltr,
-        child: Center(
-          child: AnimatedCrossFade(
-            firstChild: SizedBox(
+        child: const Center(
+          child: const AnimatedCrossFade(
+            firstChild: const SizedBox(
               width: 100.0,
               height: 100.0,
             ),
-            secondChild: SizedBox(
+            secondChild: const SizedBox(
               width: 200.0,
               height: 200.0,
             ),
-            duration: Duration(milliseconds: 200),
+            duration: const Duration(milliseconds: 200),
             crossFadeState: CrossFadeState.showSecond,
           ),
         ),
@@ -66,17 +66,17 @@ void main() {
     await tester.pumpWidget(
       const Directionality(
         textDirection: TextDirection.ltr,
-        child: Center(
-          child: AnimatedCrossFade(
-            firstChild: SizedBox(
+        child: const Center(
+          child: const AnimatedCrossFade(
+            firstChild: const SizedBox(
               width: 100.0,
               height: 100.0,
             ),
-            secondChild: SizedBox(
+            secondChild: const SizedBox(
               width: 200.0,
               height: 200.0,
             ),
-            duration: Duration(milliseconds: 200),
+            duration: const Duration(milliseconds: 200),
             crossFadeState: CrossFadeState.showSecond,
           ),
         ),
@@ -322,11 +322,11 @@ void main() {
     await tester.pumpWidget(
       const Directionality(
         textDirection: TextDirection.ltr,
-        child: AnimatedCrossFade(
-          firstChild: Text('AAA', textDirection: TextDirection.ltr),
-          secondChild: Text('BBB', textDirection: TextDirection.ltr),
+        child: const AnimatedCrossFade(
+          firstChild: const Text('AAA', textDirection: TextDirection.ltr),
+          secondChild: const Text('BBB', textDirection: TextDirection.ltr),
           crossFadeState: CrossFadeState.showFirst,
-          duration: Duration(milliseconds: 50),
+          duration: const Duration(milliseconds: 50),
         ),
       ),
     );

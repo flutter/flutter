@@ -12,7 +12,7 @@ import '../widgets/semantics_tester.dart';
 import 'feedback_tester.dart';
 
 void main () {
-  const Duration kWaitDuration = Duration(seconds: 1);
+  const Duration kWaitDuration = const Duration(seconds: 1);
 
   FeedbackTester feedback;
 

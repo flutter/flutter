@@ -43,7 +43,7 @@ enum DatePickerMode {
 const double _kDatePickerHeaderPortraitHeight = 100.0;
 const double _kDatePickerHeaderLandscapeWidth = 168.0;
 
-const Duration _kMonthScrollDuration = Duration(milliseconds: 200);
+const Duration _kMonthScrollDuration = const Duration(milliseconds: 200);
 const double _kDayPickerRowHeight = 42.0;
 const int _kMaxDayPickerRowCount = 6; // A 31 day month that starts on Saturday.
 // Two extra rows: one for the day-of-week header and one for the month header.
@@ -220,7 +220,7 @@ class _DayPickerGridDelegate extends SliverGridDelegate {
   bool shouldRelayout(_DayPickerGridDelegate oldDelegate) => false;
 }
 
-const _DayPickerGridDelegate _kDayPickerGridDelegate = _DayPickerGridDelegate();
+const _DayPickerGridDelegate _kDayPickerGridDelegate = const _DayPickerGridDelegate();
 
 /// Displays the days of a given month and allows choosing a day.
 ///
@@ -310,7 +310,7 @@ class DayPicker extends StatelessWidget {
   }
 
   // Do not use this directly - call getDaysInMonth instead.
-  static const List<int> _daysInMonth = <int>[31, -1, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+  static const List<int> _daysInMonth = const <int>[31, -1, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
 
   /// Returns the number of days in a month, according to the proleptic
   /// Gregorian calendar.
@@ -722,9 +722,9 @@ class _MonthPickerState extends State<MonthPicker> with SingleTickerProviderStat
 // Defines semantic traversal order of the top-level widgets inside the month
 // picker.
 class _MonthPickerSortKey extends OrdinalSortKey {
-  static const _MonthPickerSortKey previousMonth = _MonthPickerSortKey(1.0);
-  static const _MonthPickerSortKey nextMonth = _MonthPickerSortKey(2.0);
-  static const _MonthPickerSortKey calendar = _MonthPickerSortKey(3.0);
+  static const _MonthPickerSortKey previousMonth = const _MonthPickerSortKey(1.0);
+  static const _MonthPickerSortKey nextMonth = const _MonthPickerSortKey(2.0);
+  static const _MonthPickerSortKey calendar = const _MonthPickerSortKey(3.0);
 
   const _MonthPickerSortKey(double order) : super(order);
 }

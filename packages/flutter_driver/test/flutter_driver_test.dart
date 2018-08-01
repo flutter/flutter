@@ -14,7 +14,7 @@ import 'package:test/test.dart';
 import 'package:vm_service_client/vm_service_client.dart';
 
 /// Magical timeout value that's different from the default.
-const Duration _kTestTimeout = Duration(milliseconds: 1234);
+const Duration _kTestTimeout = const Duration(milliseconds: 1234);
 const String _kSerializedTestTimeout = '1234';
 
 void main() {

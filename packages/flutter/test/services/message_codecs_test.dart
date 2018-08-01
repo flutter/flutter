@@ -9,7 +9,7 @@ import 'package:test/test.dart';
 
 void main() {
   group('Binary codec', () {
-    const MessageCodec<ByteData> binary = BinaryCodec();
+    const MessageCodec<ByteData> binary = const BinaryCodec();
     test('should encode and decode simple messages', () {
       _checkEncodeDecode<ByteData>(binary, null);
       _checkEncodeDecode<ByteData>(binary, new ByteData(0));
@@ -17,7 +17,7 @@ void main() {
     });
   });
   group('String codec', () {
-    const MessageCodec<String> string = StringCodec();
+    const MessageCodec<String> string = const StringCodec();
     test('should encode and decode simple messages', () {
       _checkEncodeDecode<String>(string, null);
       _checkEncodeDecode<String>(string, '');
@@ -26,7 +26,7 @@ void main() {
     });
   });
   group('JSON message codec', () {
-    const MessageCodec<dynamic> json = JSONMessageCodec();
+    const MessageCodec<dynamic> json = const JSONMessageCodec();
     test('should encode and decode simple messages', () {
       _checkEncodeDecode<dynamic>(json, null);
       _checkEncodeDecode<dynamic>(json, true);
@@ -61,7 +61,7 @@ void main() {
     });
   });
   group('Standard message codec', () {
-    const MessageCodec<dynamic> standard = StandardMessageCodec();
+    const MessageCodec<dynamic> standard = const StandardMessageCodec();
     test('should encode integers correctly at boundary cases', () {
       _checkEncoding<dynamic>(
         standard,

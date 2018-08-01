@@ -82,7 +82,7 @@ class WidgetsApp extends StatefulWidget {
     this.locale,
     this.localizationsDelegates,
     this.localeResolutionCallback,
-    this.supportedLocales = const <Locale>[Locale('en', 'US')],
+    this.supportedLocales = const <Locale>[const Locale('en', 'US')],
     this.showPerformanceOverlay = false,
     this.checkerboardRasterCacheImages = false,
     this.checkerboardOffscreenLayers = false,

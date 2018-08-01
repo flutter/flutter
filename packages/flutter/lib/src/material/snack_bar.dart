@@ -13,7 +13,7 @@ import 'theme_data.dart';
 
 const double _kSnackBarPadding = 24.0;
 const double _kSingleLineVerticalPadding = 14.0;
-const Color _kSnackBackground = Color(0xFF323232);
+const Color _kSnackBackground = const Color(0xFF323232);
 
 // TODO(ianh): We should check if the given text and actions are going to fit on
 // one line or not, and if they are, use the single-line layout, and if not, use
@@ -21,10 +21,10 @@ const Color _kSnackBackground = Color(0xFF323232);
 
 // TODO(ianh): Implement the Tablet version of snackbar if we're "on a tablet".
 
-const Duration _kSnackBarTransitionDuration = Duration(milliseconds: 250);
-const Duration _kSnackBarDisplayDuration = Duration(milliseconds: 4000);
+const Duration _kSnackBarTransitionDuration = const Duration(milliseconds: 250);
+const Duration _kSnackBarDisplayDuration = const Duration(milliseconds: 4000);
 const Curve _snackBarHeightCurve = Curves.fastOutSlowIn;
-const Curve _snackBarFadeCurve = Interval(0.72, 1.0, curve: Curves.fastOutSlowIn);
+const Curve _snackBarFadeCurve = const Interval(0.72, 1.0, curve: Curves.fastOutSlowIn);
 
 /// Specify how a [SnackBar] was closed.
 ///

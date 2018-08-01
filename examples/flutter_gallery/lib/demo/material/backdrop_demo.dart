@@ -18,10 +18,10 @@ class Category {
   String toString() => '$runtimeType("$title")';
 }
 
-const List<Category> allCategories = <Category>[
-  Category(
+const List<Category> allCategories = const <Category>[
+  const Category(
     title: 'Accessories',
-    assets: <String>[
+    assets: const <String>[
       'products/belt.png',
       'products/earrings.png',
       'products/backpack.png',
@@ -30,18 +30,18 @@ const List<Category> allCategories = <Category>[
       'products/sunnies.png',
     ],
   ),
-  Category(
+  const Category(
     title: 'Blue',
-    assets: <String>[
+    assets: const <String>[
       'products/backpack.png',
       'products/cup.png',
       'products/napkins.png',
       'products/top.png',
     ],
   ),
-  Category(
+  const Category(
     title: 'Cold Weather',
-    assets: <String>[
+    assets: const <String>[
       'products/jacket.png',
       'products/jumper.png',
       'products/scarf.png',
@@ -49,9 +49,9 @@ const List<Category> allCategories = <Category>[
       'products/sweats.png',
     ],
   ),
-  Category(
+  const Category(
     title: 'Home',
-    assets: <String>[
+    assets: const <String>[
       'products/cup.png',
       'products/napkins.png',
       'products/planters.png',
@@ -59,18 +59,18 @@ const List<Category> allCategories = <Category>[
       'products/teaset.png',
     ],
   ),
-  Category(
+  const Category(
     title: 'Tops',
-    assets: <String>[
+    assets: const <String>[
       'products/jumper.png',
       'products/shirt.png',
       'products/sweater.png',
       'products/top.png',
     ],
   ),
-  Category(
+  const Category(
     title: 'Everything',
-    assets: <String>[
+    assets: const <String>[
       'products/backpack.png',
       'products/belt.png',
       'products/cup.png',
@@ -167,8 +167,8 @@ class BackdropPanel extends StatelessWidget {
     return new Material(
       elevation: 2.0,
       borderRadius: const BorderRadius.only(
-        topLeft: Radius.circular(16.0),
-        topRight: Radius.circular(16.0),
+        topLeft: const Radius.circular(16.0),
+        topRight: const Radius.circular(16.0),
       ),
       child: new Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -338,7 +338,7 @@ class _BackdropDemoState extends State<BackdropDemo> with SingleTickerProviderSt
       final bool selected = category == _category;
       return new Material(
         shape: const RoundedRectangleBorder(
-          borderRadius: BorderRadius.all(Radius.circular(4.0)),
+          borderRadius: const BorderRadius.all(const Radius.circular(4.0)),
         ),
         color: selected
           ? Colors.white.withOpacity(0.25)

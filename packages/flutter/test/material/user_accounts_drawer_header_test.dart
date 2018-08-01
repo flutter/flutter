@@ -8,9 +8,9 @@ import 'package:flutter_test/flutter_test.dart';
 
 import '../widgets/semantics_tester.dart';
 
-const Key avatarA = Key('A');
-const Key avatarC = Key('C');
-const Key avatarD = Key('D');
+const Key avatarA = const Key('A');
+const Key avatarC = const Key('C');
+const Key avatarD = const Key('D');
 
 Future<Null> pumpTestWidget(WidgetTester tester, {
   bool withName = true,
@@ -21,7 +21,7 @@ Future<Null> pumpTestWidget(WidgetTester tester, {
     new MaterialApp(
       home: new MediaQuery(
         data: const MediaQueryData(
-          padding: EdgeInsets.only(
+          padding: const EdgeInsets.only(
             left: 10.0,
             top: 20.0,
             right: 30.0,
@@ -33,25 +33,25 @@ Future<Null> pumpTestWidget(WidgetTester tester, {
             child: new UserAccountsDrawerHeader(
               onDetailsPressed: withOnDetailsPressedHandler ? () {} : null,
               currentAccountPicture: const ExcludeSemantics(
-                child: CircleAvatar(
+                child: const CircleAvatar(
                   key: avatarA,
-                  child: Text('A'),
+                  child: const Text('A'),
                 ),
               ),
               otherAccountsPictures: const <Widget>[
-                CircleAvatar(
-                  child: Text('B'),
+                const CircleAvatar(
+                  child: const Text('B'),
                 ),
-                CircleAvatar(
+                const CircleAvatar(
                   key: avatarC,
-                  child: Text('C'),
+                  child: const Text('C'),
                 ),
-                CircleAvatar(
+                const CircleAvatar(
                   key: avatarD,
-                  child: Text('D'),
+                  child: const Text('D'),
                 ),
-                CircleAvatar(
-                  child: Text('E'),
+                const CircleAvatar(
+                  child: const Text('E'),
                 )
               ],
               accountName: withName ? const Text('name') : null,
@@ -188,18 +188,18 @@ void main() {
     );
 
     await tester.pumpWidget(buildFrame(
-      currentAccountPicture: const CircleAvatar(child: Text('A')),
+      currentAccountPicture: const CircleAvatar(child: const Text('A')),
     ));
     expect(find.text('A'), findsOneWidget);
 
     await tester.pumpWidget(buildFrame(
-      otherAccountsPictures: <Widget>[const CircleAvatar(child: Text('A'))],
+      otherAccountsPictures: <Widget>[const CircleAvatar(child: const Text('A'))],
     ));
     expect(find.text('A'), findsOneWidget);
 
-    const Key avatarA = Key('A');
+    const Key avatarA = const Key('A');
     await tester.pumpWidget(buildFrame(
-      currentAccountPicture: const CircleAvatar(key: avatarA, child: Text('A')),
+      currentAccountPicture: const CircleAvatar(key: avatarA, child: const Text('A')),
       accountName: const Text('accountName'),
     ));
     expect(
@@ -299,18 +299,18 @@ void main() {
     );
 
     await tester.pumpWidget(buildFrame(
-      currentAccountPicture: const CircleAvatar(child: Text('A')),
+      currentAccountPicture: const CircleAvatar(child: const Text('A')),
     ));
     expect(find.text('A'), findsOneWidget);
 
     await tester.pumpWidget(buildFrame(
-      otherAccountsPictures: <Widget>[const CircleAvatar(child: Text('A'))],
+      otherAccountsPictures: <Widget>[const CircleAvatar(child: const Text('A'))],
     ));
     expect(find.text('A'), findsOneWidget);
 
-    const Key avatarA = Key('A');
+    const Key avatarA = const Key('A');
     await tester.pumpWidget(buildFrame(
-      currentAccountPicture: const CircleAvatar(key: avatarA, child: Text('A')),
+      currentAccountPicture: const CircleAvatar(key: avatarA, child: const Text('A')),
       accountName: const Text('accountName'),
     ));
     expect(

@@ -54,13 +54,13 @@ void main() {
       new Stack(
         textDirection: TextDirection.ltr,
         children: const <Widget>[
-          DecoratedBox(decoration: kBoxDecorationA),
-          Positioned(
+          const DecoratedBox(decoration: kBoxDecorationA),
+          const Positioned(
             top: 10.0,
             left: 10.0,
-            child: DecoratedBox(decoration: kBoxDecorationB),
+            child: const DecoratedBox(decoration: kBoxDecorationB),
           ),
-          DecoratedBox(decoration: kBoxDecorationC),
+          const DecoratedBox(decoration: kBoxDecorationC),
         ],
       ),
     );
@@ -75,17 +75,17 @@ void main() {
       new Stack(
         textDirection: TextDirection.ltr,
         children: const <Widget>[
-          Positioned(
+          const Positioned(
             bottom: 5.0,
             right: 7.0,
-            child: DecoratedBox(decoration: kBoxDecorationA),
+            child: const DecoratedBox(decoration: kBoxDecorationA),
           ),
-          Positioned(
+          const Positioned(
             top: 10.0,
             left: 10.0,
-            child: DecoratedBox(decoration: kBoxDecorationB),
+            child: const DecoratedBox(decoration: kBoxDecorationB),
           ),
-          DecoratedBox(decoration: kBoxDecorationC),
+          const DecoratedBox(decoration: kBoxDecorationC),
         ],
       ),
     );
@@ -96,20 +96,20 @@ void main() {
       kNonPositioned,
     ]);
 
-    const DecoratedBox kDecoratedBoxA = DecoratedBox(decoration: kBoxDecorationA);
-    const DecoratedBox kDecoratedBoxB = DecoratedBox(decoration: kBoxDecorationB);
-    const DecoratedBox kDecoratedBoxC = DecoratedBox(decoration: kBoxDecorationC);
+    const DecoratedBox kDecoratedBoxA = const DecoratedBox(decoration: kBoxDecorationA);
+    const DecoratedBox kDecoratedBoxB = const DecoratedBox(decoration: kBoxDecorationB);
+    const DecoratedBox kDecoratedBoxC = const DecoratedBox(decoration: kBoxDecorationC);
 
     await tester.pumpWidget(
       new Stack(
         textDirection: TextDirection.ltr,
         children: const <Widget>[
-          Positioned(
+          const Positioned(
             bottom: 5.0,
             right: 7.0,
             child: kDecoratedBoxA,
           ),
-          Positioned(
+          const Positioned(
             top: 10.0,
             left: 10.0,
             child: kDecoratedBoxB,
@@ -129,12 +129,12 @@ void main() {
       new Stack(
         textDirection: TextDirection.ltr,
         children: const <Widget>[
-          Positioned(
+          const Positioned(
             bottom: 6.0,
             right: 8.0,
             child: kDecoratedBoxA,
           ),
-          Positioned(
+          const Positioned(
             left: 10.0,
             right: 10.0,
             child: kDecoratedBoxB,
@@ -200,9 +200,9 @@ void main() {
       new Stack(
         textDirection: TextDirection.ltr,
         children: const <Widget>[
-          Positioned(
+          const Positioned(
             right: 10.0,
-            child: FlipWidget(left: kDecoratedBoxA, right: kDecoratedBoxB),
+            child: const FlipWidget(left: kDecoratedBoxA, right: kDecoratedBoxB),
           ),
         ],
       ),
@@ -223,9 +223,9 @@ void main() {
       new Stack(
         textDirection: TextDirection.ltr,
         children: const <Widget>[
-          Positioned(
+          const Positioned(
             top: 7.0,
-            child: FlipWidget(left: kDecoratedBoxA, right: kDecoratedBoxB),
+            child: const FlipWidget(left: kDecoratedBoxA, right: kDecoratedBoxB),
           ),
         ],
       ),
@@ -254,13 +254,13 @@ void main() {
       new Stack(
         textDirection: TextDirection.ltr,
         children: const <Widget>[
-          Positioned(
+          const Positioned(
             top: 5.0,
             bottom: 8.0,
-            child: Positioned(
+            child: const Positioned(
               top: 6.0,
               left: 7.0,
-              child: DecoratedBox(decoration: kBoxDecorationB),
+              child: const DecoratedBox(decoration: kBoxDecorationB),
             ),
           ),
         ],
@@ -276,10 +276,10 @@ void main() {
       new Container(
         child: new Row(
           children: const <Widget>[
-            Positioned(
+            const Positioned(
               top: 6.0,
               left: 7.0,
-              child: DecoratedBox(decoration: kBoxDecorationB),
+              child: const DecoratedBox(decoration: kBoxDecorationB),
             ),
           ],
         ),

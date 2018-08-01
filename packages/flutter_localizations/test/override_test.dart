@@ -43,8 +43,8 @@ Widget buildFrame({
   WidgetBuilder buildContent,
   LocaleResolutionCallback localeResolutionCallback,
   Iterable<Locale> supportedLocales = const <Locale>[
-    Locale('en', 'US'),
-    Locale('es', 'es'),
+    const Locale('en', 'US'),
+    const Locale('es', 'es'),
   ],
 }) {
   return new MaterialApp(
@@ -164,9 +164,9 @@ void main() {
           const FooMaterialLocalizationsDelegate(supportedLanguage: 'de', backButtonTooltip: 'DE'),
         ],
         supportedLocales: const <Locale>[
-          Locale('en', ''),
-          Locale('fr', ''),
-          Locale('de', ''),
+          const Locale('en', ''),
+          const Locale('fr', ''),
+          const Locale('de', ''),
         ],
         buildContent: (BuildContext context) {
           // Should always be 'foo', no matter what the locale is

@@ -116,7 +116,7 @@ class PackageDependency {
 
 class PackageDependencyTracker {
   /// Packages whose source is defined in the vended SDK.
-  static const List<String> _vendedSdkPackages = <String>['analyzer', 'front_end', 'kernel'];
+  static const List<String> _vendedSdkPackages = const <String>['analyzer', 'front_end', 'kernel'];
 
   // This is a map from package names to objects that track the paths
   // involved (sources and targets).

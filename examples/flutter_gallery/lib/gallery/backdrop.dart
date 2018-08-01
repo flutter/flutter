@@ -14,12 +14,12 @@ const double _kBackAppBarHeight = 56.0; // back layer (options) appbar height
 // The size of the front layer heading's left and right beveled corners.
 final Tween<BorderRadius> _kFrontHeadingBevelRadius = new BorderRadiusTween(
   begin: const BorderRadius.only(
-    topLeft: Radius.circular(12.0),
-    topRight: Radius.circular(12.0),
+    topLeft: const Radius.circular(12.0),
+    topRight: const Radius.circular(12.0),
   ),
   end: const BorderRadius.only(
-    topLeft: Radius.circular(_kFrontHeadingHeight),
-    topRight: Radius.circular(_kFrontHeadingHeight),
+    topLeft: const Radius.circular(_kFrontHeadingHeight),
+    topRight: const Radius.circular(_kFrontHeadingHeight),
   ),
 );
 

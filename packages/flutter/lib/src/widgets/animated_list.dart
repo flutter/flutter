@@ -20,7 +20,7 @@ typedef Widget AnimatedListItemBuilder(BuildContext context, int index, Animatio
 typedef Widget AnimatedListRemovedItemBuilder(BuildContext context, Animation<double> animation);
 
 // The default insert/remove animation duration.
-const Duration _kDuration = Duration(milliseconds: 300);
+const Duration _kDuration = const Duration(milliseconds: 300);
 
 // Incoming and outgoing AnimatedList items.
 class _ActiveItem implements Comparable<_ActiveItem> {
