@@ -59,7 +59,7 @@ const String kMultiLicenseFileHeader = 'Notices for files contained in';
 
 bool isMultiLicenseNotice(Reader reader) {
   List<int> bytes = reader();
-  return (ASCII.decode(bytes.take(kMultiLicenseFileHeader.length).toList(), allowInvalid: true) == kMultiLicenseFileHeader);
+  return (ascii.decode(bytes.take(kMultiLicenseFileHeader.length).toList(), allowInvalid: true) == kMultiLicenseFileHeader);
 }
 
 FileType identifyFile(String name, Reader reader) {
@@ -314,7 +314,7 @@ abstract class UTF8TextFile extends TextFile {
   @override
   String readString() {
     try {
-      return cache(new UTF8Of(this), () => UTF8.decode(readBytes()));
+      return cache(new UTF8Of(this), () => utf8.decode(readBytes()));
     } on FormatException {
       print(fullName);
       rethrow;
@@ -332,13 +332,13 @@ abstract class Latin1TextFile extends TextFile {
         throw '$fullName contains a U+0000 NULL and is probably not actually encoded as Win1252';
       bool isUTF8 = false;
       try {
-        cache(new UTF8Of(this), () => UTF8.decode(readBytes()));
+        cache(new UTF8Of(this), () => utf8.decode(readBytes()));
         isUTF8 = true;
       } on FormatException {
       }
       if (isUTF8)
         throw '$fullName contains valid UTF-8 and is probably not actually encoded as Win1252';
-      return LATIN1.decode(bytes);
+      return latin1.decode(bytes);
     });
   }
 }

@@ -2,9 +2,9 @@
 
 analyzer:
   language:
-    enableStrictCallChecks: true
     enableSuperMixins: true
-  strong-mode: true
+  strong-mode:
+    implicit-dynamic: false
   errors:
     strong_mode_invalid_field_override: ignore
     strong_mode_down_cast_composite: ignore
@@ -19,7 +19,7 @@ linter:
     - control_flow_in_finally
     - empty_statements
     - hash_and_equals
-    - invariant_booleans
+    # - invariant_booleans  # Produces false positives, see https://github.com/flutter/flutter/issues/5790
     - iterable_contains_unrelated_type
     - list_remove_unrelated_type
     - literal_only_boolean_expressions
@@ -53,6 +53,6 @@ linter:
     - type_annotate_public_apis
     - type_init_formals
     - unawaited_futures
-    - unnecessary_brace_in_string_interp
+    - unnecessary_brace_in_string_interps
     - unnecessary_getters_setters
     - package_names
