@@ -41,7 +41,7 @@ void main() {
 
     testWidgets('ListWheelScrollView can have zero child', (WidgetTester tester) async {
       await tester.pumpWidget(
-        const Directionality(
+        Directionality(
           textDirection: TextDirection.ltr,
           child: ListWheelScrollView(
             itemExtent: 50.0,
@@ -113,7 +113,7 @@ void main() {
 
     testWidgets("ListWheelScrollView children can't be bigger than itemExtent", (WidgetTester tester) async {
       await tester.pumpWidget(
-        const Directionality(
+        Directionality(
           textDirection: TextDirection.ltr,
           child: ListWheelScrollView(
             itemExtent: 50.0,
@@ -1014,6 +1014,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(controller.offset, 500.0);
 
+    // Test failing here.
     tester.renderObject(find.byWidget(innerChildren[9])).showOnScreen();
     await tester.pumpAndSettle();
     expect(controller.offset, 900.0);

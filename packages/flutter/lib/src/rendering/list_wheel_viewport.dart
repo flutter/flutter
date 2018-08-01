@@ -435,7 +435,7 @@ class RenderListWheelViewport
   /// the first item in the center.
   double get _minEstimatedScrollExtent {
     assert(hasSize);
-    if (childManager.childSize == null)
+    if (childManager.childCount == null)
       return double.negativeInfinity;
     return 0.0;
   }
@@ -444,10 +444,10 @@ class RenderListWheelViewport
   /// the last item in the center.
   double get _maxEstimatedScrollExtent {
     assert(hasSize);
-    if (childManager.childSize == null)
+    if (childManager.childCount == null)
       return double.infinity;
 
-    return math.max(0.0, (childManager.childSize - 1) * _itemExtent);
+    return math.max(0.0, (childManager.childCount - 1) * _itemExtent);
   }
 
   /// Scroll extent distance in the untransformed plane between the center
@@ -482,11 +482,11 @@ class RenderListWheelViewport
     return math.asin(1.0 / _diameterRatio);
   }
 
-  double _getIntrinsicCrossAxis(_ChildSizingFunction childSize) {
+  double _getIntrinsicCrossAxis(_ChildSizingFunction childCount) {
     double extent = 0.0;
     RenderBox child = firstChild;
     while (child != null) {
-      extent = math.max(extent, childSize(child));
+      extent = math.max(extent, childCount(child));
       child = childAfter(child);
     }
     return extent;
@@ -508,16 +508,16 @@ class RenderListWheelViewport
 
   @override
   double computeMinIntrinsicHeight(double width) {
-    if (childManager.childSize == null)
+    if (childManager.childCount == null)
       return double.infinity;
-      return childManager.childSize * _itemExtent;
+      return childManager.childCount * _itemExtent;
   }
 
   @override
   double computeMaxIntrinsicHeight(double width) {
-    if (childManager.childSize == null)
+    if (childManager.childCount == null)
       return double.infinity;
-    return childManager.childSize * _itemExtent;
+    return childManager.childCount * _itemExtent;
   }
 
   @override
@@ -538,22 +538,22 @@ class RenderListWheelViewport
 
   /// Return the index of the child that should be at the given offset.
   int scrollOffsetToIndex(double scrollOffset) {
-    if (scrollOffset < 0)
-     return scrollOffset ~/ itemExtent - 1;
-    return scrollOffset ~/ itemExtent;
+
+    return (scrollOffset / itemExtent).floor();
   }
 
   /// Return the scroll offset of the child with the given index.
   double indexToScrollOffset(int index) => index * itemExtent;
 
-  // Create a child at the given index. Return true if successful.
-  bool _createChild(int index, {RenderBox after}) {
-    if (childManager.retrieveWidget(index) == null) return false;
+  /// Check whether a child exists at a given index.
+  bool childExistsAt(int index) => childManager.retrieveWidget(index) != null;
+
+  // Create a child at the given index.
+  void _createChild(int index, {RenderBox after}) {
     invokeLayoutCallback<BoxConstraints>((BoxConstraints constraints) {
       assert(constraints == this.constraints);
       childManager.createChild(index, after: after);
     });
-    return true;
   }
 
   void _destroyChild(RenderBox child) {
@@ -568,19 +568,6 @@ class RenderListWheelViewport
     final ListWheelParentData childParentData = child.parentData;
     final double crossPosition = size.width / 2.0 - child.size.width / 2.0;
     childParentData.offset = new Offset(crossPosition, indexToScrollOffset(index));
-  }
-
-  // Called when the child list is empty and we want to find and insert a valid
-  // child in the given range. Return true if successful.
-  bool _insertAnyChild(int fromIndex, int toIndex, BoxConstraints constraints) {
-    assert(childCount == 0);
-    for(int index = fromIndex; index <= toIndex; index++) {
-      if (_createChild(index, after: null)) {
-        _layoutChild(firstChild, constraints, index);
-        return true;
-      }
-    }
-    return false;
   }
 
   /// Layout base on children provided by [childManager].
@@ -602,30 +589,64 @@ class RenderListWheelViewport
 
     // The range, in pixel, that children will be visible and might be laid out
     // and painted.
-    double visibleRange = size.height + _itemExtent;
+    double visibleRange = size.height;
     // If [renderChildrenOutsideViewport] is true, we spawn a redundant amount
     // of children, those that are in the backside of the cylinder won't be
     // painted anyway.
     if (renderChildrenOutsideViewport)
       visibleRange *= 2;
 
-    // The index range that we want to spawn children.
-    int targetFirstIndex = scrollOffsetToIndex(offset.pixels - visibleRange / 2);
-    int targetLastIndex = scrollOffsetToIndex(offset.pixels + visibleRange / 2);
+    final double firstVisibleOffset =
+        offset.pixels + _itemExtent / 2 - visibleRange / 2;
+    final double lastVisibleOffset = firstVisibleOffset + visibleRange;
 
-    if (childManager.childSize != null) {
-      targetFirstIndex = targetFirstIndex.clamp(0, childManager.childSize - 1);
-      targetLastIndex = targetLastIndex.clamp(0, childManager.childSize - 1);
+    // The index range that we want to spawn children. We find indexes that
+    // are in the interval [firstVisibleOffset, lastVisibleOffset).
+    int targetFirstIndex = scrollOffsetToIndex(firstVisibleOffset);
+    int targetLastIndex = scrollOffsetToIndex(lastVisibleOffset);
+    if (targetLastIndex * _itemExtent == offset.pixels + _itemExtent / 2 + visibleRange / 2)
+      targetLastIndex--;
+
+    // Validate the target range.
+    while (!childExistsAt(targetFirstIndex) && targetFirstIndex <= targetLastIndex)
+      targetFirstIndex++;
+    while (!childExistsAt(targetLastIndex) && targetFirstIndex <= targetLastIndex)
+      targetLastIndex--;
+
+    // If it turns out there's no children to layout, we remove old children and
+    // return.
+    if (targetFirstIndex > targetLastIndex) {
+      while (firstChild != null)
+        _destroyChild(firstChild);
+      return;
     }
 
     // When the render object is laying out for the first time, the child list
-    // is empty - populate it with any child in target range.
-    if (firstChild == null &&
-        !_insertAnyChild(targetFirstIndex, targetLastIndex, childConstraints))
-        return;
+    // is empty - populate it with the first child in target range.
+    if (firstChild == null) {
+      _createChild(targetFirstIndex);
+      _layoutChild(firstChild, childConstraints, targetFirstIndex);
+    }
 
     int currentFirstIndex = indexOf(firstChild);
     int currentLastIndex = indexOf(lastChild);
+
+    // Now there are 2 cases:
+    //  - The two intervals have intersection (most of the time): We shorten and
+    //    extend so that the current and target interval match.
+    //  - The two intervals have no intersection: We first remove all children
+    //    and then add one child from the target interval => this case become
+    //    the other case.
+
+    // If there's no intersection.
+    if (currentLastIndex < targetFirstIndex || currentFirstIndex > targetLastIndex) {
+      while (firstChild != null)
+        _destroyChild(firstChild);
+
+      _createChild(targetFirstIndex);
+      _layoutChild(firstChild, childConstraints, targetFirstIndex);
+      currentFirstIndex = currentLastIndex = targetFirstIndex;
+    }
 
     // Remove all unnecessary children.
     while (currentFirstIndex < targetFirstIndex) {
@@ -638,12 +659,6 @@ class RenderListWheelViewport
       currentLastIndex--;
     }
 
-    // It can happen that after removing unnecessary children, there's no child
-    // left. In that case insert any child in target range.
-    if (firstChild == null &&
-        !_insertAnyChild(targetFirstIndex, targetLastIndex, childConstraints))
-      return;
-
     // Relayout all active children.
     RenderBox child = firstChild;
     while (child != null) {
@@ -653,27 +668,25 @@ class RenderListWheelViewport
 
     // Spawning new children that are actually visible but not in child list.
     while (currentFirstIndex > targetFirstIndex) {
-      if (_createChild(currentFirstIndex - 1, after: null))
-        _layoutChild(firstChild, childConstraints, --currentFirstIndex);
-      else break;
+      _createChild(currentFirstIndex - 1);
+      _layoutChild(firstChild, childConstraints, --currentFirstIndex);
     }
     while (currentLastIndex < targetLastIndex) {
-      if (_createChild(currentLastIndex + 1, after: lastChild))
-        _layoutChild(lastChild, childConstraints, ++currentLastIndex);
-      else break;
+      _createChild(currentLastIndex + 1, after: lastChild);
+      _layoutChild(lastChild, childConstraints, ++currentLastIndex);
     }
 
     offset.applyViewportDimension(_viewportExtent);
 
     // Applying content dimensions bases on how the childManager builds widgets:
-    // if it is unable to provide a child at some index, we also limit the
-    // scrolling to that specific point.
-    final double minScrollExtent = (currentFirstIndex == targetFirstIndex)
+    // if it is available to provide a child just out of target range, then
+    // we don't know whether there's a limit yet.
+    final double minScrollExtent = childExistsAt(targetFirstIndex - 1)
       ? _minEstimatedScrollExtent
-      : indexToScrollOffset(currentFirstIndex);
-    final double maxScrollExtent = (currentLastIndex == targetLastIndex)
+      : indexToScrollOffset(targetFirstIndex);
+    final double maxScrollExtent = childExistsAt(targetLastIndex + 1)
         ? _maxEstimatedScrollExtent
-        : indexToScrollOffset(currentLastIndex);
+        : indexToScrollOffset(targetLastIndex);
     offset.applyContentDimensions(minScrollExtent, maxScrollExtent);
   }
 
@@ -702,7 +715,8 @@ class RenderListWheelViewport
 
   /// Paints all children visible in the current viewport.
   void _paintVisibleChildren(PaintingContext context, Offset offset) {
-    assert(childCount > 0);
+    if (childCount == 0)
+      return;
 
     RenderBox childToPaint = firstChild;
     ListWheelParentData childParentData = childToPaint?.parentData;

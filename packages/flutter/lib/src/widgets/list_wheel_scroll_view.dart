@@ -498,7 +498,39 @@ class FixedExtentScrollPhysics extends ScrollPhysics {
 /// a plane.
 class ListWheelScrollView extends StatefulWidget {
   /// Creates a box in which children are scrolled on a wheel.
-  const ListWheelScrollView({
+  ListWheelScrollView({
+    Key key,
+    this.controller,
+    this.physics,
+    this.diameterRatio = RenderListWheelViewport.defaultDiameterRatio,
+    this.perspective = RenderListWheelViewport.defaultPerspective,
+    this.offAxisFraction = 0.0,
+    this.useMagnifier = false,
+    this.magnification = 1.0,
+    @required this.itemExtent,
+    this.onSelectedItemChanged,
+    this.clipToSize = true,
+    this.renderChildrenOutsideViewport = false,
+    List<Widget> children,
+  }) :  assert(children != null),
+        assert(diameterRatio != null),
+        assert(diameterRatio > 0.0, RenderListWheelViewport.diameterRatioZeroMessage),
+        assert(perspective != null),
+        assert(perspective > 0),
+        assert(perspective <= 0.01, RenderListWheelViewport.perspectiveTooHighMessage),
+        assert(magnification > 0),
+        assert(itemExtent != null),
+        assert(itemExtent > 0),
+        assert(clipToSize != null),
+        assert(renderChildrenOutsideViewport != null),
+        assert(
+        !renderChildrenOutsideViewport || !clipToSize,
+        RenderListWheelViewport.clipToSizeAndRenderChildrenOutsideViewportConflict,
+        ),
+        childDelegate = new ChildListDelegate(children),
+        super(key: key);
+
+  const ListWheelScrollView.useDelegate({
     Key key,
     this.controller,
     this.physics,
@@ -512,21 +544,22 @@ class ListWheelScrollView extends StatefulWidget {
     this.clipToSize = true,
     this.renderChildrenOutsideViewport = false,
     @required this.childDelegate,
-  }) : assert(diameterRatio != null),
-       assert(diameterRatio > 0.0, RenderListWheelViewport.diameterRatioZeroMessage),
-       assert(perspective != null),
-       assert(perspective > 0),
-       assert(perspective <= 0.01, RenderListWheelViewport.perspectiveTooHighMessage),
-       assert(magnification > 0),
-       assert(itemExtent != null),
-       assert(itemExtent > 0),
-       assert(clipToSize != null),
-       assert(renderChildrenOutsideViewport != null),
-       assert(
-         !renderChildrenOutsideViewport || !clipToSize,
-         RenderListWheelViewport.clipToSizeAndRenderChildrenOutsideViewportConflict,
-       ),
-       super(key: key);
+  }) :  assert(childDelegate != null),
+        assert(diameterRatio != null),
+        assert(diameterRatio > 0.0, RenderListWheelViewport.diameterRatioZeroMessage),
+        assert(perspective != null),
+        assert(perspective > 0),
+        assert(perspective <= 0.01, RenderListWheelViewport.perspectiveTooHighMessage),
+        assert(magnification > 0),
+        assert(itemExtent != null),
+        assert(itemExtent > 0),
+        assert(clipToSize != null),
+        assert(renderChildrenOutsideViewport != null),
+        assert(
+          !renderChildrenOutsideViewport || !clipToSize,
+          RenderListWheelViewport.clipToSizeAndRenderChildrenOutsideViewportConflict,
+        ),
+        super(key: key);
 
   /// Typically a [FixedExtentScrollController] used to control the current item.
   ///
@@ -692,9 +725,9 @@ class ListWheelElement extends RenderObjectElement {
   }
 
   /// The number of children that will be provided. The children will have
-  /// index in the range [0, childSize - 1]. childSize should be null if either
+  /// index in the range [0, childCount - 1]. childCount should be null if either
   /// the child list is infinite or there are children with negative indexes.
-  int get childSize => widget.childDelegate.estimatedChildCount;
+  int get childCount => widget.childDelegate.estimatedChildCount;
 
   @override
   void performRebuild() {

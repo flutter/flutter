@@ -228,7 +228,7 @@ class _CupertinoPickerState extends State<CupertinoPicker> {
     Widget result = new Stack(
       children: <Widget>[
         new Positioned.fill(
-          child: new ListWheelScrollView(
+          child: new ListWheelScrollView.useDelegate(
             controller: widget.scrollController,
             physics: const FixedExtentScrollPhysics(),
             diameterRatio: widget.diameterRatio,
