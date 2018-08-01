@@ -470,6 +470,8 @@ void main() {
          hasShowOnScreenAction: true,
          hasMoveCursorForwardByCharacterAction: true,
          hasMoveCursorBackwardByCharacterAction: true,
+         hasMoveCursorForwardByWordAction: true,
+         hasMoveCursorBackwardByWordAction: true,
          hasSetSelectionAction: true,
          hasCopyAction: true,
          hasCutAction: true,

@@ -360,6 +360,7 @@ class _SegmentedControlState<T> extends State<SegmentedControl<T>>
           child: new DefaultTextStyle(
             style: textStyle,
             child: new Semantics(
+              button: true,
               inMutuallyExclusiveGroup: true,
               selected: widget.groupValue == currentKey,
               child: child,

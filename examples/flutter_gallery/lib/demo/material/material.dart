@@ -23,6 +23,7 @@ export 'overscroll_demo.dart';
 export 'page_selector_demo.dart';
 export 'persistent_bottom_sheet_demo.dart';
 export 'progress_indicator_demo.dart';
+export 'reorderable_list_demo.dart';
 export 'scrollable_tabs_demo.dart';
 export 'search_demo.dart';
 export 'selection_controls_demo.dart';

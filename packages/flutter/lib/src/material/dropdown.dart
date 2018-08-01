@@ -139,6 +139,7 @@ class _DropdownMenuState<T> extends State<_DropdownMenu<T>> {
     //
     // When the menu is dismissed we just fade the entire thing out
     // in the first 0.25s.
+    final MaterialLocalizations localizations = MaterialLocalizations.of(context);
     final _DropdownRoute<T> route = widget.route;
     final double unit = 0.5 / (route.items.length + 1.5);
     final List<Widget> children = <Widget>[];
@@ -175,24 +176,30 @@ class _DropdownMenuState<T> extends State<_DropdownMenu<T>> {
           selectedIndex: route.selectedIndex,
           resize: _resize,
         ),
-        child: new Material(
-          type: MaterialType.transparency,
-          textStyle: route.style,
-          child: new ScrollConfiguration(
-            behavior: const _DropdownScrollBehavior(),
-            child: new Scrollbar(
-              child: new ListView(
-                controller: widget.route.scrollController,
-                padding: kMaterialListPadding,
-                itemExtent: _kMenuItemHeight,
-                shrinkWrap: true,
-                children: children,
+        child: new Semantics(
+          scopesRoute: true,
+          namesRoute: true,
+          explicitChildNodes: true,
+          label: localizations.popupMenuLabel,
+          child: new Material(
+              type: MaterialType.transparency,
+              textStyle: route.style,
+              child: new ScrollConfiguration(
+                behavior: const _DropdownScrollBehavior(),
+                child: new Scrollbar(
+                  child: new ListView(
+                    controller: widget.route.scrollController,
+                    padding: kMaterialListPadding,
+                    itemExtent: _kMenuItemHeight,
+                    shrinkWrap: true,
+                    children: children,
+                  ),
+                ),
               ),
             ),
           ),
         ),
-      ),
-    );
+      );
   }
 }
 
@@ -627,6 +634,7 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
         style: _textStyle.copyWith(color: Theme.of(context).hintColor),
         child: new IgnorePointer(
           child: widget.hint,
+          ignoringSemantics: false,
         ),
       ));
     }
@@ -681,10 +689,13 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
       );
     }
 
-    return new GestureDetector(
-      onTap: _handleTap,
-      behavior: HitTestBehavior.opaque,
-      child: result
+    return new Semantics(
+      button: true,
+      child: new GestureDetector(
+        onTap: _handleTap,
+        behavior: HitTestBehavior.opaque,
+        child: result
+      ),
     );
   }
 }

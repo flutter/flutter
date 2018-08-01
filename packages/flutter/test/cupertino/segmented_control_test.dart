@@ -682,6 +682,7 @@ void main() {
               new TestSemantics.rootChild(
                 label: 'Child 1',
                 flags: <SemanticsFlag>[
+                  SemanticsFlag.isButton,
                   SemanticsFlag.isInMutuallyExclusiveGroup,
                   SemanticsFlag.isSelected,
                 ],
@@ -692,6 +693,7 @@ void main() {
               new TestSemantics.rootChild(
                 label: 'Child 2',
                 flags: <SemanticsFlag>[
+                  SemanticsFlag.isButton,
                   SemanticsFlag.isInMutuallyExclusiveGroup,
                 ],
                 actions: <SemanticsAction>[
@@ -716,6 +718,7 @@ void main() {
               new TestSemantics.rootChild(
                 label: 'Child 1',
                 flags: <SemanticsFlag>[
+                  SemanticsFlag.isButton,
                   SemanticsFlag.isInMutuallyExclusiveGroup,
                 ],
                 actions: <SemanticsAction>[
@@ -725,6 +728,7 @@ void main() {
               new TestSemantics.rootChild(
                 label: 'Child 2',
                 flags: <SemanticsFlag>[
+                  SemanticsFlag.isButton,
                   SemanticsFlag.isInMutuallyExclusiveGroup,
                   SemanticsFlag.isSelected,
                 ],

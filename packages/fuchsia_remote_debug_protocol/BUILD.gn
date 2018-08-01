@@ -3,10 +3,17 @@ import("//build/dart/dart_library.gni")
 dart_library("fuchsia_remote_debug_protocol") {
   package_name = "fuchsia_remote_debug_protocol"
 
-  # Can be left empty as analysis is disabled.
-  sources = []
-
   disable_analysis = true
+
+  sources = [
+    "fuchsia_remote_debug_protocol.dart",
+    "logging.dart",
+    "src/common/logging.dart",
+    "src/common/network.dart",
+    "src/dart/dart_vm.dart",
+    "src/fuchsia_remote_connection.dart",
+    "src/runners/ssh_command_runner.dart",
+  ]
 
   deps = [
     "//third_party/dart-pkg/git/flutter/packages/flutter",
