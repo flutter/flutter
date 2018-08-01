@@ -37,9 +37,8 @@ void main() {
     testUsingContext('can hot reload', () async {
       await _flutterRun.run(withDebugger: true);
       await _flutterAttach.attach(_flutterRun.vmServicePort);
-
       await _flutterAttach.hotReload();
     });
-    // Skip on Windows due to https://github.com/flutter/flutter/issues/17833
+    // SKIP(dantup): https://github.com/flutter/flutter/issues/17833.
   }, timeout: const Timeout.factor(3), skip: platform.isWindows);
 }

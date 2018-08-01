@@ -44,6 +44,6 @@ void main() {
       await new Future<void>.delayed(requiredLifespan);
       expect(_flutter.hasExited, equals(false));
     });
-    // Skip on Windows due to https://github.com/flutter/flutter/issues/17833
+    // SKIP(dantup): https://github.com/flutter/flutter/issues/17833.
   }, timeout: const Timeout.factor(3), skip: platform.isWindows);
 }
