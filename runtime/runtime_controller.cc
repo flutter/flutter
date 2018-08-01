@@ -126,8 +126,7 @@ bool RuntimeController::FlushRuntimeStateToIsolate() {
   return SetViewportMetrics(window_data_.viewport_metrics) &&
          SetLocale(window_data_.language_code, window_data_.country_code) &&
          SetSemanticsEnabled(window_data_.semantics_enabled) &&
-         SetAssistiveTechnologyEnabled(
-             window_data_.assistive_technology_enabled);
+         SetAccessibilityFeatures(window_data_.accessibility_feature_flags_);
 }
 
 bool RuntimeController::SetViewportMetrics(const ViewportMetrics& metrics) {
@@ -175,11 +174,11 @@ bool RuntimeController::SetSemanticsEnabled(bool enabled) {
   return false;
 }
 
-bool RuntimeController::SetAssistiveTechnologyEnabled(bool enabled) {
-  window_data_.assistive_technology_enabled = enabled;
+bool RuntimeController::SetAccessibilityFeatures(int32_t flags) {
+  window_data_.accessibility_feature_flags_ = flags;
   if (auto window = GetWindowIfAvailable()) {
-    window->UpdateAssistiveTechnologyEnabled(
-        window_data_.assistive_technology_enabled);
+    window->UpdateAccessibilityFeatures(
+        window_data_.accessibility_feature_flags_);
     return true;
   }
 

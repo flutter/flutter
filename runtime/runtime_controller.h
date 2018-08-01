@@ -47,7 +47,7 @@ class RuntimeController final : public WindowClient {
 
   bool SetSemanticsEnabled(bool enabled);
 
-  bool SetAssistiveTechnologyEnabled(bool enabled);
+  bool SetAccessibilityFeatures(int32_t flags);
 
   bool BeginFrame(fml::TimePoint frame_time);
 
@@ -83,6 +83,7 @@ class RuntimeController final : public WindowClient {
     std::string user_settings_data = "{}";
     bool semantics_enabled = false;
     bool assistive_technology_enabled = false;
+    int32_t accessibility_feature_flags_ = 0;
   };
 
   RuntimeDelegate& client_;

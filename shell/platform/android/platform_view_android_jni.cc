@@ -443,12 +443,11 @@ static void SetSemanticsEnabled(JNIEnv* env,
   ANDROID_SHELL_HOLDER->GetPlatformView()->SetSemanticsEnabled(enabled);
 }
 
-static void SetAssistiveTechnologyEnabled(JNIEnv* env,
-                                          jobject jcaller,
-                                          jlong shell_holder,
-                                          jboolean enabled) {
-  ANDROID_SHELL_HOLDER->GetPlatformView()->SetAssistiveTechnologyEnabled(
-      enabled);
+static void SetAccessibilityFeatures(JNIEnv* env,
+                                     jobject jcaller,
+                                     jlong shell_holder,
+                                     jint flags) {
+  ANDROID_SHELL_HOLDER->GetPlatformView()->SetAccessibilityFeatures(flags);
 }
 
 static jboolean GetIsSoftwareRendering(JNIEnv* env, jobject jcaller) {
@@ -623,10 +622,9 @@ bool PlatformViewAndroid::Register(JNIEnv* env) {
           .fnPtr = reinterpret_cast<void*>(&shell::SetSemanticsEnabled),
       },
       {
-          .name = "nativeSetAssistiveTechnologyEnabled",
-          .signature = "(JZ)V",
-          .fnPtr =
-              reinterpret_cast<void*>(&shell::SetAssistiveTechnologyEnabled),
+          .name = "nativeSetAccessibilityFeatures",
+          .signature = "(JI)V",
+          .fnPtr = reinterpret_cast<void*>(&shell::SetAccessibilityFeatures),
       },
       {
           .name = "nativeGetIsSoftwareRenderingEnabled",

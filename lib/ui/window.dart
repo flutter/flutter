@@ -649,31 +649,6 @@ class Window {
     _onSemanticsEnabledChangedZone = Zone.current;
   }
 
-  /// Whether the user is using assitive technologies to interact with the
-  /// application.
-  ///
-  /// This includes screen readers such as TalkBack on Android and VoiceOVer
-  /// on iOS, as well as hardware switches, and more.
-  ///
-  /// The [onAssistiveTechnologyEnabled] callback is called whenever this value
-  /// changes.
-  bool get assistiveTechnologyEnabled => _assistiveTechnologyEnabled;
-  bool _assistiveTechnologyEnabled = false;
-
-  /// A callback that is invoked when the value of [assistiveTechnologyEnabled]
-  /// changes.
-  ///
-  /// The framework invokes this callback in the same zone in which the callback
-  /// was set.
-  VoidCallback get onAssistiveTechnologyEnabled => _onAssistiveTechnologyEnabled;
-  VoidCallback _onAssistiveTechnologyEnabled;
-  Zone _onAssistiveTechnologyEnabledZone;
-  set onAssistiveTechnologyEnabled(VoidCallback callback) {
-     _onAssistiveTechnologyEnabled = callback;
-    _onAssistiveTechnologyEnabledZone = Zone.current;
-  }
-
-
   /// A callback that is invoked whenever the user requests an action to be
   /// performed.
   ///
@@ -688,6 +663,22 @@ class Window {
   set onSemanticsAction(SemanticsActionCallback callback) {
     _onSemanticsAction = callback;
     _onSemanticsActionZone = Zone.current;
+  }
+
+  /// Additional accessibility features that may be enabled by the platform.
+  AccessibilityFeatures get accessibilityFeatures => _accessibilityFeatures;
+  AccessibilityFeatures _accessibilityFeatures;
+
+  /// A callback that is invoked when the value of [accessibilityFlags] changes.
+  ///
+  /// The framework invokes this callback in the same zone in which the
+  /// callback was set.
+  VoidCallback get onAccessibilityFeaturesChanged => _onAccessibilityFeaturesChanged;
+  VoidCallback _onAccessibilityFeaturesChanged;
+  Zone _onAccessibilityFlagsChangedZone;
+  set onAccessibilityFeaturesChanged(VoidCallback callback) {
+    _onAccessibilityFeaturesChanged = callback;
+    _onAccessibilityFlagsChangedZone = Zone.current;
   }
 
   /// Change the retained semantics data about this window.
@@ -758,6 +749,57 @@ class Window {
       registrationZone.runUnaryGuarded(callback, data);
     };
   }
+}
+
+/// Additional accessibility features that may be enabled by the platform.
+///
+/// It is not possible to enable these settings from Flutter, instead they are
+/// used by the platform to indicate that additional accessibility features are
+/// enabled.
+class AccessibilityFeatures {
+  const AccessibilityFeatures._(this._index);
+
+  static const int _kAccessibleNavigation = 1 << 0;
+  static const int _kInvertColorsIndex = 1 << 1;
+  static const int _kDisableAnimationsIndex = 1 << 2;
+
+  // A bitfield which represents each enabled feature.
+  final int _index;
+
+  /// Whether there is a running accessibility service which is changing the
+  /// interaction model of the device.
+  ///
+  /// For example, TalkBack on Android and VoiceOver on iOS enable this flag.
+  bool get accessibleNavigation => _kAccessibleNavigation & _index != 0;
+
+  /// The platform is inverting the colors of the application.
+  bool get invertColors => _kInvertColorsIndex & _index != 0;
+
+  /// The platform is requesting that animations be disabled or simplified.
+  bool get disableAnimations => _kDisableAnimationsIndex & _index != 0;
+
+  @override
+  String toString() {
+    final List<String> features = <String>[];
+    if (accessibleNavigation)
+      features.add('accessibleNavigation');
+    if (invertColors)
+      features.add('invertColors');
+    if (disableAnimations)
+      features.add('disableAnimations');
+    return 'AccessibilityFeatures$features';
+  }
+
+  @override
+  bool operator ==(dynamic other) {
+    if (other.runtimeType != runtimeType)
+      return false;
+    final AccessibilityFeatures typedOther = other;
+    return _index == typedOther._index;
+  }
+
+  @override
+  int get hashCode => _index.hashCode;
 }
 
 /// The [Window] singleton. This object exposes the size of the display, the

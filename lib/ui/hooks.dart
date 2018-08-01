@@ -70,9 +70,12 @@ void _updateSemanticsEnabled(bool enabled) {
   _invoke(window.onSemanticsEnabledChanged, window._onSemanticsEnabledChangedZone);
 }
 
-void _updateAssistiveTechnologyEnabled(bool enabled) {
-  window._assistiveTechnologyEnabled = enabled;
-  _invoke(window.onAssistiveTechnologyEnabled, window._onAssistiveTechnologyEnabledZone);
+void _updateAccessibilityFeatures(int values) {
+  final AccessibilityFeatures newFeatures = new AccessibilityFeatures._(values);
+  if (newFeatures == window._accessibilityFeatures)
+    return;
+  window._accessibilityFeatures = newFeatures;
+  _invoke(window.onAccessibilityFeaturesChanged, window._onAccessibilityFlagsChangedZone);
 }
 
 void _dispatchPlatformMessage(String name, ByteData data, int responseId) {
