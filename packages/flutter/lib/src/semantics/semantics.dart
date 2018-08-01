@@ -1536,7 +1536,7 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
 
     assert(
       !_canPerformAction(SemanticsAction.increase) || (_value == '') == (_increasedValue == ''),
-      'A SemanticsNode with actixon "increase" needs to be annotated with either both "value" and "increasedValue" or neither',
+      'A SemanticsNode with action "increase" needs to be annotated with either both "value" and "increasedValue" or neither',
     );
     assert(
       !_canPerformAction(SemanticsAction.decrease) || (_value == '') == (_decreasedValue == ''),
