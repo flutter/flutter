@@ -1,6 +1,6 @@
 Flutter Engine
 ==============
-[![Build Status](https://travis-ci.org/flutter/engine.svg)](https://travis-ci.org/flutter/engine)
+[![Build Status](https://api.cirrus-ci.com/github/flutter/engine.svg)](https://cirrus-ci.com/github/flutter/engine)
 
 Flutter is a new way to build high-performance, cross-platform mobile apps.
 Flutter is optimized for today's, and tomorrow's, mobile devices. We are
