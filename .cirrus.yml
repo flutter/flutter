@@ -7,6 +7,9 @@ task:
     PATH: "$CIRRUS_WORKING_DIR/bin:$CIRRUS_WORKING_DIR/bin/cache/dart-sdk/bin:$PATH"
 
   git_fetch_script: git fetch origin
+  pkg_cache:
+    folder: bin/cache/pkg
+    fingerprint_script: cat bin/internal/engine.version
   setup_script: |
     echo "SDK directory is: $PWD"
     ./bin/flutter --version
@@ -53,6 +56,9 @@ task:
   env:
     CIRRUS_WORKING_DIR: "C:\\Windows\\Temp\\flutter sdk"
   git_fetch_script: git fetch origin
+  pkg_cache:
+    folder: bin\cache\pkg
+    fingerprint_script: type bin\internal\engine.version
   setup_script:
     - bin\flutter.bat config --no-analytics
     - bin\flutter.bat update-packages
@@ -73,6 +79,9 @@ task:
   env:
     CIRRUS_WORKING_DIR: "/tmp/flutter sdk"
   git_fetch_script: git fetch origin
+  pkg_cache:
+    folder: bin/cache/pkg
+    fingerprint_script: cat bin/internal/engine.version
   setup_script:
     - bin/flutter config --no-analytics
     - bin/flutter update-packages
