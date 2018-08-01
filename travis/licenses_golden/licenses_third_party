@@ -1,4 +1,4 @@
-Signature: 9c2e8832352ffc7775c039012cb195af
+Signature: 7d1459d5f0304c3567e608822215c746
 
 UNUSED LICENSES:
 
@@ -5493,6 +5493,8 @@ FILE: ../../../third_party/dart/runtime/vm/compiler/backend/code_statistics.cc
 FILE: ../../../third_party/dart/runtime/vm/compiler/backend/code_statistics.h
 FILE: ../../../third_party/dart/runtime/vm/compiler/compiler_pass.cc
 FILE: ../../../third_party/dart/runtime/vm/compiler/compiler_pass.h
+FILE: ../../../third_party/dart/runtime/vm/compiler/frontend/base_flow_graph_builder.cc
+FILE: ../../../third_party/dart/runtime/vm/compiler/frontend/base_flow_graph_builder.h
 FILE: ../../../third_party/dart/runtime/vm/compiler/frontend/bytecode_reader.cc
 FILE: ../../../third_party/dart/runtime/vm/compiler/frontend/bytecode_reader.h
 FILE: ../../../third_party/dart/runtime/vm/compiler/frontend/constant_evaluator.cc
