@@ -39,6 +39,6 @@ void main() {
       await _flutterAttach.attach(_flutterRun.vmServicePort);
       await _flutterAttach.hotReload();
     });
-    // SKIP(dantup): https://github.com/flutter/flutter/issues/17833.
+    // TODO(dantup): Unskip after https://github.com/flutter/flutter/issues/17833.
   }, timeout: const Timeout.factor(3), skip: platform.isWindows);
 }

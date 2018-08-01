@@ -34,7 +34,7 @@ void main() {
     test('works without error', () async {
       await _flutter.run();
       await _flutter.hotReload();
-      // SKIP(dantup): https://github.com/flutter/flutter/issues/17833.
+      // TODO(dantup): Unskip after https://github.com/flutter/flutter/issues/17833.
     }, skip: platform.isWindows);
 
     test('hits breakpoints with file:// prefixes after reload', () async {
@@ -45,7 +45,7 @@ void main() {
           new Uri.file(_project.breakpointFile).toString(),
           _project.breakpointLine);
       expect(isolate.pauseEvent, const isInstanceOf<VMPauseBreakpointEvent>());
-      // SKIP(dantup): https://github.com/flutter/flutter/issues/18441.
+      // TODO(dantup): Unskip after https://github.com/flutter/flutter/issues/18441.
     }, skip: !platform.isLinux);
   }, timeout: const Timeout.factor(3));
 }
