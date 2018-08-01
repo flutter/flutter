@@ -81,29 +81,41 @@ class _ChipsTile extends StatelessWidget {
   // Wraps a list of chips into a ListTile for display as a section in the demo.
   @override
   Widget build(BuildContext context) {
-    return new ListTile(
-      title: new Padding(
+    final List<Widget> cardChildren = <Widget>[
+      new Container(
         padding: const EdgeInsets.only(top: 16.0, bottom: 4.0),
+        alignment: Alignment.center,
         child: new Text(label, textAlign: TextAlign.start),
       ),
-      subtitle: children.isEmpty
-          ? new Center(
-              child: new Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: new Text(
-                  'None',
-                  style: Theme.of(context).textTheme.caption.copyWith(fontStyle: FontStyle.italic),
-                ),
-              ),
-            )
-          : new Wrap(
-              children: children
-                  .map((Widget chip) => new Padding(
-                        padding: const EdgeInsets.all(4.0),
-                        child: chip,
-                      ))
-                  .toList(),
-            ),
+    ];
+    if (children.isNotEmpty) {
+      cardChildren.add(new Wrap(
+        children: children.map((Widget chip) {
+        return new Padding(
+          padding: const EdgeInsets.all(2.0),
+          child: chip,
+        );
+      }).toList()));
+    } else {
+      final TextStyle textStyle = Theme.of(context).textTheme.caption.copyWith(fontStyle: FontStyle.italic);
+      cardChildren.add(
+        new Semantics(
+          container: true,
+          child: new Container(
+            alignment: Alignment.center,
+            constraints: const BoxConstraints(minWidth: 48.0, minHeight: 48.0),
+            padding: const EdgeInsets.all(8.0),
+            child: new Text('None', style: textStyle),
+          ),
+        ));
+    }
+
+    return new Card(
+      semanticContainer: false,
+      child: new Column(
+        mainAxisSize: MainAxisSize.min,
+        children: cardChildren,
+      )
     );
   }
 }
@@ -297,7 +309,7 @@ class _ChipDemoState extends State<ChipDemo> {
                 _showShapeBorder = !_showShapeBorder;
               });
             },
-            icon: const Icon(Icons.vignette),
+            icon: const Icon(Icons.vignette, semanticLabel: 'Update border shape'),
           )
         ],
       ),
@@ -313,7 +325,7 @@ class _ChipDemoState extends State<ChipDemo> {
       ),
       floatingActionButton: new FloatingActionButton(
         onPressed: () => setState(_reset),
-        child: const Icon(Icons.refresh),
+        child: const Icon(Icons.refresh, semanticLabel: 'Reset chips'),
       ),
     );
   }
