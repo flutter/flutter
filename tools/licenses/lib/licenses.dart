@@ -325,19 +325,19 @@ abstract class License implements Comparable<License> {
     bool isUTF8 = true;
     List<int> latin1Encoded;
     try {
-      latin1Encoded = LATIN1.encode(body);
+      latin1Encoded = latin1.encode(body);
       isUTF8 = false;
     } on ArgumentError { }
     if (!isUTF8) {
       bool isAscii = false;
       try {
-        ASCII.decode(latin1Encoded);
+        ascii.decode(latin1Encoded);
         isAscii = true;
       } on FormatException { }
       if (isAscii)
         return;
       try {
-        UTF8.decode(latin1Encoded);
+        utf8.decode(latin1Encoded);
         isUTF8 = true;
       } on FormatException { }
       if (isUTF8)
@@ -530,7 +530,7 @@ _SplitLicense _splitLicense(String body, { bool verifyResults: true }) {
   if (!lines.moveNext())
     throw 'tried to split empty license';
   int end = 0;
-  while (true) {
+  while (true) { // ignore: literal_only_boolean_expressions
     final String line = lines.current.value;
     if (line == 'Author:' ||
         line == 'This code is derived from software contributed to Berkeley by' ||
