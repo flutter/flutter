@@ -11,6 +11,7 @@
 
 #include "flutter/flow/compositor_context.h"
 #include "flutter/fml/build_config.h"
+#include "flutter/fml/compiler_specific.h"
 #include "flutter/fml/logging.h"
 #include "flutter/fml/macros.h"
 #include "lib/ui/scenic/cpp/resources.h"

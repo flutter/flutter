@@ -60,6 +60,8 @@ source_set("fml") {
     "unique_object.h",
   ]
 
+  public_deps = []
+
   deps = [
     "//third_party/dart/runtime:dart_api",
 
@@ -129,6 +131,8 @@ source_set("fml") {
 
   if (is_fuchsia) {
     sources += [ "platform/fuchsia/paths_fuchsia.cc" ]
+
+    public_deps += [ "//zircon/public/lib/trace-provider" ]
   }
 
   if (is_win) {

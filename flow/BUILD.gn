@@ -60,6 +60,8 @@ source_set("flow") {
 
   public_configs = [ "$flutter_root:config" ]
 
+  public_deps = []
+
   deps = [
     "$flutter_root/common",
     "$flutter_root/fml",

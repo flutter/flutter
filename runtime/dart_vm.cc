@@ -14,6 +14,7 @@
 #include "flutter/fml/compiler_specific.h"
 #include "flutter/fml/file.h"
 #include "flutter/fml/logging.h"
+#include "flutter/fml/mapping.h"
 #include "flutter/fml/time/time_delta.h"
 #include "flutter/fml/trace_event.h"
 #include "flutter/lib/io/dart_io.h"
@@ -155,14 +156,13 @@ Dart_Handle GetVMServiceAssetsArchiveCallback() {
     (FLUTTER_RUNTIME_MODE == FLUTTER_RUNTIME_MODE_DYNAMIC_RELEASE)
   return nullptr;
 #elif OS_FUCHSIA
-  std::vector<uint8_t> observatory_assets_archive;
-  if (!files::ReadFileToVector("pkg/data/observatory.tar",
-                               &observatory_assets_archive)) {
+  fml::FileMapping mapping("pkg/data/observatory.tar", false /* executable */);
+  if (mapping.GetSize() == 0 || mapping.GetMapping() == nullptr) {
     FML_LOG(ERROR) << "Fail to load Observatory archive";
     return nullptr;
   }
-  return tonic::DartConverter<tonic::Uint8List>::ToDart(
-      observatory_assets_archive.data(), observatory_assets_archive.size());
+  return tonic::DartConverter<tonic::Uint8List>::ToDart(mapping.GetMapping(),
+                                                        mapping.GetSize());
 #else
   return tonic::DartConverter<tonic::Uint8List>::ToDart(
       ::dart::observatory::observatory_assets_archive,
