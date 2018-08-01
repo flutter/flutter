@@ -337,6 +337,8 @@ Matcher matchesSemanticsData({
   bool hasShowOnScreenAction = false,
   bool hasMoveCursorForwardByCharacterAction = false,
   bool hasMoveCursorBackwardByCharacterAction = false,
+  bool hasMoveCursorForwardByWordAction = true,
+  bool hasMoveCursorBackwardByWordAction = true,
   bool hasSetSelectionAction = false,
   bool hasCopyAction = false,
   bool hasCutAction = false,
@@ -423,6 +425,10 @@ Matcher matchesSemanticsData({
     actions.add(SemanticsAction.customAction);
   if (hasDismissAction)
     actions.add(SemanticsAction.dismiss);
+  if (hasMoveCursorForwardByWordAction)
+    actions.add(SemanticsAction.moveCursorForwardByWord);
+  if (hasMoveCursorBackwardByWordAction)
+    actions.add(SemanticsAction.moveCursorBackwardByWord);
 
   return new _MatchesSemanticsData(
     label: label,
