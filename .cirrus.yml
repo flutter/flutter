@@ -65,7 +65,7 @@ task:
   pub_cache:
     folder: $APPDATA\Pub\Cache
     fingerprint_script:
-      - ps:  Get-ChildItem pubspec.yaml -Recurse | Select-String -Pattern "PUBSPEC CHECKSUM" -SimpleMatch
+      - ps:  Get-ChildItem -Path $Env:CIRRUS_WORKING_DIR" pubspec.yaml -Recurse | Select-String -Pattern "PUBSPEC CHECKSUM" -SimpleMatch
   flutter_pkg_cache:
     folder: bin\cache\pkg
     fingerprint_script: type bin\internal\engine.version
