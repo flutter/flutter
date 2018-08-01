@@ -241,11 +241,6 @@ void main() {
       );
 
       expect(
-        tester.getTopLeft(find.widgetWithText(Container, '0')).dy,
-        // Should have been flung far enough to go off screen.
-        greaterThan(600.0),
-      );
-      expect(
         selectedItems,
         // This specific throw was fast enough that each scroll update landed
         // on every second item.

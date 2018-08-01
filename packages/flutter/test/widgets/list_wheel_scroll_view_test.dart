@@ -1014,7 +1014,10 @@ void main() {
     await tester.pumpAndSettle();
     expect(controller.offset, 500.0);
 
-    // Test failing here.
+    tester.renderObject(find.byWidget(outerChildren[7])).showOnScreen();
+    await tester.pumpAndSettle();
+    expect(controller.offset, 700.0);
+
     tester.renderObject(find.byWidget(innerChildren[9])).showOnScreen();
     await tester.pumpAndSettle();
     expect(controller.offset, 900.0);
