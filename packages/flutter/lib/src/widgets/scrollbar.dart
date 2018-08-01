@@ -47,6 +47,7 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
     this.crossAxisMargin = 0.0,
     this.radius,
     this.minLength = _kMinThumbExtent,
+    this.minOverscrollLength = _kMinThumbExtent,
   }) : assert(color != null),
        assert(textDirection != null),
        assert(thickness != null),
@@ -86,9 +87,13 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
   final Radius radius;
 
   /// The smallest size the scrollbar can shrink to when the total scrollable
-  /// extent is large and the current visible viewport is small. Mustn't be
-  /// null.
+  /// extent is large and the current visible viewport is small, and the
+  /// viewport is not overscrolled. Mustn't be null.
   final double minLength;
+
+  /// The smallest size the scrollbar can shrink to when viewport is
+  /// overscrolled. Mustn't be null;
+  final double minOverscrollLength;
 
   ScrollMetrics _lastMetrics;
   AxisDirection _lastAxisDirection;
@@ -152,13 +157,31 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
     void painter(Canvas canvas, Size size, double thumbOffset, double thumbExtent),
   ) {
     // Establish the minimum size possible.
-    double thumbExtent = math.min(viewport, minLength);
+    double thumbExtent = math.min(viewport, minOverscrollLength);
+
     if (before + inside + after > 0.0) {
+      // Thumb extent reflects fraction of content visible, if possible.
       final double fractionVisible = inside / (before + inside + after);
       thumbExtent = math.max(
         thumbExtent,
         viewport * fractionVisible - 2 * mainAxisMargin,
       );
+      // Thumb extent is no smaller than minLength if scrolling normally.
+      if (before != 0.0 && after != 0.0) {
+        thumbExtent = math.max(
+          minLength,
+          thumbExtent,
+        );
+      }
+      // Thumb extent is fraction of minLength if in overscroll. iOS behavior
+      // appears to be thumb reaching minimum size with ~20% of overscroll.
+      // Percentage of minLength maps from [0.8, 1.0] to [0.0, 1.0].
+      if (before == 0.0 || after == 0.0) {
+        thumbExtent = math.max(
+          thumbExtent,
+          minLength * (((inside / viewport) - 0.8) / 0.2),
+        );
+      }
     }
 
     final double fractionPast = before / (before + after);
