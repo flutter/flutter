@@ -398,6 +398,10 @@ void main() {
         hint: 'bar',
         value: 'baz',
         textDirection: TextDirection.rtl,
+        customSemanticsActions: <CustomSemanticsAction, VoidCallback>{
+          const CustomSemanticsAction(label: 'foo'): () {},
+          const CustomSemanticsAction(label: 'bar'): () {},
+        },
       ));
 
       expect(tester.getSemanticsData(find.byKey(key)),
@@ -410,7 +414,29 @@ void main() {
           isButton: true,
           isHeader: true,
           namesRoute: true,
+          customActions: <CustomSemanticsAction>[
+            const CustomSemanticsAction(label: 'foo'),
+            const CustomSemanticsAction(label: 'bar')
+          ],
         ),
+      );
+
+      // Doesn't match custom actions
+      expect(tester.getSemanticsData(find.byKey(key)),
+        isNot(matchesSemanticsData(
+          label: 'foo',
+          hint: 'bar',
+          value: 'baz',
+          textDirection: TextDirection.rtl,
+          hasTapAction: true,
+          isButton: true,
+          isHeader: true,
+          namesRoute: true,
+          customActions: <CustomSemanticsAction>[
+            const CustomSemanticsAction(label: 'foo'),
+            const CustomSemanticsAction(label: 'barz')
+          ],
+        )),
       );
       handle.dispose();
     });
@@ -418,6 +444,7 @@ void main() {
     testWidgets('Can match all semantics flags and actions', (WidgetTester tester) async {
       int actions = 0;
       int flags = 0;
+      const CustomSemanticsAction action = const CustomSemanticsAction(label: 'test');
       for (int index in SemanticsAction.values.keys)
         actions |= index;
       for (int index in SemanticsFlag.values.keys)
@@ -436,6 +463,7 @@ void main() {
         scrollPosition: null,
         scrollExtentMax: null,
         scrollExtentMin: null,
+        customSemanticsActionIds: <int>[CustomSemanticsAction.getIdentifier(action)],
       );
 
       expect(data, matchesSemanticsData(
@@ -478,8 +506,8 @@ void main() {
          hasPasteAction: true,
          hasDidGainAccessibilityFocusAction: true,
          hasDidLoseAccessibilityFocusAction: true,
-         hasCustomAction: true,
          hasDismissAction: true,
+         customActions: <CustomSemanticsAction>[action],
       ));
     });
   });

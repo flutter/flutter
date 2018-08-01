@@ -140,7 +140,6 @@ class CustomSemanticsAction {
   static final Map<CustomSemanticsAction, int> _ids = <CustomSemanticsAction, int>{};
 
   /// Get the identifier for a given `action`.
-  @visibleForTesting
   static int getIdentifier(CustomSemanticsAction action) {
     int result = _ids[action];
     if (result == null) {
@@ -152,7 +151,6 @@ class CustomSemanticsAction {
   }
 
   /// Get the `action` for a given identifier.
-  @visibleForTesting
   static CustomSemanticsAction getAction(int id) {
     return _actions[id];
   }
