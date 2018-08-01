@@ -114,7 +114,7 @@ class _CupertinoPickerDemoState extends State<CupertinoPickerDemo> {
             backgroundColor: CupertinoColors.white,
             onSelectedItemChanged: (int index) {
               setState(() {
-                _selectedMinute = index % 60;
+                _selectedMinute = index;
               });
             },
             children: new List<Widget>.generate(60, (int index) {
