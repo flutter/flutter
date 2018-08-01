@@ -40,5 +40,11 @@
   "popupMenuLabel": "Menu pop timbul",
   "dialogLabel": "Dialog",
   "alertDialogLabel": "Amaran",
-  "searchFieldLabel": "Carian"
+  "searchFieldLabel": "Carian",
+  "reorderItemToStart": "Move to the start",
+  "reorderItemToEnd": "Move to the end",
+  "reorderItemUp": "Move up",
+  "reorderItemDown": "Move down",
+  "reorderItemLeft": "Move left",
+  "reorderItemRight": "Move right"
 }

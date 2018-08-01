@@ -39,5 +39,11 @@
   "popupMenuLabel": "پاپ اپ مینو",
   "dialogLabel": "ڈائلاگ",
   "alertDialogLabel": "انتباہ",
-  "searchFieldLabel": "تلاش کریں"
+  "searchFieldLabel": "تلاش کریں",
+  "reorderItemToStart": "Move to the start",
+  "reorderItemToEnd": "Move to the end",
+  "reorderItemUp": "Move up",
+  "reorderItemDown": "Move down",
+  "reorderItemLeft": "Move left",
+  "reorderItemRight": "Move right"
 }

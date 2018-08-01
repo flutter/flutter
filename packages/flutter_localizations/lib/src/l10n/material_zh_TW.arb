@@ -39,5 +39,11 @@
   "popupMenuLabel": "彈出式選單",
   "dialogLabel": "對話方塊",
   "alertDialogLabel": "警报",
-  "searchFieldLabel": "搜索"
+  "searchFieldLabel": "搜索",
+  "reorderItemToStart": "Move to the start",
+  "reorderItemToEnd": "Move to the end",
+  "reorderItemUp": "Move up",
+  "reorderItemDown": "Move down",
+  "reorderItemLeft": "Move left",
+  "reorderItemRight": "Move right"
 }

@@ -41,5 +41,11 @@
   "popupMenuLabel": "Menu pop-up",
   "dialogLabel": "Caixa de diálogo",
   "alertDialogLabel": "Alerta",
-  "searchFieldLabel": "Pesquisa"
+  "searchFieldLabel": "Pesquisa",
+  "reorderItemToStart": "Move to the start",
+  "reorderItemToEnd": "Move to the end",
+  "reorderItemUp": "Move up",
+  "reorderItemDown": "Move down",
+  "reorderItemLeft": "Move left",
+  "reorderItemRight": "Move right"
 }

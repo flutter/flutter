@@ -42,5 +42,11 @@
   "popupMenuLabel": "Всплывающее меню",
   "dialogLabel": "Диалоговое окно",
   "alertDialogLabel": "бдительный",
-  "searchFieldLabel": "Поиск"
+  "searchFieldLabel": "Поиск",
+  "reorderItemToStart": "Move to the start",
+  "reorderItemToEnd": "Move to the end",
+  "reorderItemUp": "Move up",
+  "reorderItemDown": "Move down",
+  "reorderItemLeft": "Move left",
+  "reorderItemRight": "Move right"
 }

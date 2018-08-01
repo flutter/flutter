@@ -39,5 +39,11 @@
   "popupMenuLabel": "Popup menü",
   "dialogLabel": "İletişim kutusu",
   "alertDialogLabel": "Alarm",
-  "searchFieldLabel": "Arama"
+  "searchFieldLabel": "Arama",
+  "reorderItemToStart": "Move to the start",
+  "reorderItemToEnd": "Move to the end",
+  "reorderItemUp": "Move up",
+  "reorderItemDown": "Move down",
+  "reorderItemLeft": "Move left",
+  "reorderItemRight": "Move right"
 }

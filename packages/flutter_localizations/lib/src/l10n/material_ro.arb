@@ -41,5 +41,11 @@
   "popupMenuLabel": "Meniu pop-up",
   "dialogLabel": "Casetă de dialog",
   "alertDialogLabel": "Alerta",
-  "searchFieldLabel": "Căutare"
+  "searchFieldLabel": "Căutare",
+  "reorderItemToStart": "Move to the start",
+  "reorderItemToEnd": "Move to the end",
+  "reorderItemUp": "Move up",
+  "reorderItemDown": "Move down",
+  "reorderItemLeft": "Move left",
+  "reorderItemRight": "Move right"
 }

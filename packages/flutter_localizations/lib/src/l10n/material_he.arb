@@ -41,5 +41,11 @@
   "popupMenuLabel": "תפריט קופץ",
   "dialogLabel": "תיבת דו-שיח",
   "alertDialogLabel": "עֵרָנִי",
-  "searchFieldLabel": "לחפש"
+  "searchFieldLabel": "לחפש",
+  "reorderItemToStart": "Move to the start",
+  "reorderItemToEnd": "Move to the end",
+  "reorderItemUp": "Move up",
+  "reorderItemDown": "Move down",
+  "reorderItemLeft": "Move left",
+  "reorderItemRight": "Move right"
 }
