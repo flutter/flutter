@@ -135,7 +135,7 @@ deps = {
    Var('fuchsia_git') + '/third_party/rapidjson' + '@' + '9defbb0209a534ffeb3a2b79d5ee440a77407292',
 
   'src/third_party/harfbuzz':
-   Var('fuchsia_git') + '/third_party/harfbuzz' + '@' + '39b423660aacf916f1cb01f24913f78eaacb3baf',
+   Var('fuchsia_git') + '/third_party/harfbuzz' + '@' + 'd837034f09a957faf2814002e8ebd81da6151d1b',
 
    # Chromium-style
    #
@@ -149,7 +149,7 @@ deps = {
    Var('chromium_git') + '/chromium/src/ios.git' + '@' + Var('ios_tools_revision'),
 
   'src/third_party/icu':
-   Var('chromium_git') + '/chromium/deps/icu.git' + '@' + '08cb956852a5ccdba7f9c941728bb833529ba3c6',
+   Var('chromium_git') + '/chromium/deps/icu.git' + '@' + '6cf2ab2580888e520683c2d993133018c91e612c',
 
   'src/third_party/dart':
    Var('dart_git') + '/sdk.git' + '@' + Var('dart_revision'),
