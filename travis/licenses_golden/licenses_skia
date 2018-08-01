@@ -1,4 +1,4 @@
-Signature: 7088c3df64bab05215d734c8e8c0df6b
+Signature: bbca9e49c82c045ef509f23f32361943
 
 UNUSED LICENSES:
 
@@ -835,6 +835,7 @@ FILE: ../../../third_party/skia/include/effects/SkOverdrawColorFilter.h
 FILE: ../../../third_party/skia/include/effects/SkPaintImageFilter.h
 FILE: ../../../third_party/skia/include/gpu/vk/GrVkBackendContext.h
 FILE: ../../../third_party/skia/include/gpu/vk/GrVkDefines.h
+FILE: ../../../third_party/skia/include/gpu/vk/GrVkExtensions.h
 FILE: ../../../third_party/skia/include/gpu/vk/GrVkTypes.h
 FILE: ../../../third_party/skia/include/ports/SkFontMgr_FontConfigInterface.h
 FILE: ../../../third_party/skia/include/ports/SkImageGeneratorCG.h
@@ -1067,7 +1068,6 @@ FILE: ../../../third_party/skia/src/gpu/vk/GrVkDescriptorSet.h
 FILE: ../../../third_party/skia/src/gpu/vk/GrVkDescriptorSetManager.cpp
 FILE: ../../../third_party/skia/src/gpu/vk/GrVkDescriptorSetManager.h
 FILE: ../../../third_party/skia/src/gpu/vk/GrVkExtensions.cpp
-FILE: ../../../third_party/skia/src/gpu/vk/GrVkExtensions.h
 FILE: ../../../third_party/skia/src/gpu/vk/GrVkFramebuffer.cpp
 FILE: ../../../third_party/skia/src/gpu/vk/GrVkFramebuffer.h
 FILE: ../../../third_party/skia/src/gpu/vk/GrVkGpuCommandBuffer.cpp
@@ -1268,6 +1268,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ====================================================================================================
 LIBRARY: skcms
 LIBRARY: skia
+LIBRARY: vulkan
 LIBRARY: vulkanmemoryallocator
 ORIGIN: ../../../third_party/skia/bench/GrCCGeometryBench.cpp + ../../../third_party/skia/LICENSE
 TYPE: LicenseType.bsd
@@ -1293,6 +1294,7 @@ FILE: ../../../third_party/skia/gm/pathmeasure.cpp
 FILE: ../../../third_party/skia/gm/perspimages.cpp
 FILE: ../../../third_party/skia/gm/polygonoffset.cpp
 FILE: ../../../third_party/skia/gm/scaledemoji.cpp
+FILE: ../../../third_party/skia/gm/scaledemoji_rendering.cpp
 FILE: ../../../third_party/skia/gm/shadermaskfilter.cpp
 FILE: ../../../third_party/skia/gm/sharedcorners.cpp
 FILE: ../../../third_party/skia/gm/skinning.cpp
@@ -1307,7 +1309,7 @@ FILE: ../../../third_party/skia/include/gpu/GrDriverBugWorkarounds.h
 FILE: ../../../third_party/skia/include/gpu/vk/GrVkMemoryAllocator.h
 FILE: ../../../third_party/skia/include/private/GrCCClipPath.h
 FILE: ../../../third_party/skia/include/private/GrCCPerOpListPaths.h
-FILE: ../../../third_party/skia/include/private/GrSurfaceProxyRef.h
+FILE: ../../../third_party/skia/include/private/GrProxyRef.h
 FILE: ../../../third_party/skia/include/private/GrVkTypesPriv.h
 FILE: ../../../third_party/skia/include/private/SkMacros.h
 FILE: ../../../third_party/skia/include/private/SkSafe32.h
@@ -1407,7 +1409,6 @@ FILE: ../../../third_party/skia/src/gpu/GrProxyProvider.h
 FILE: ../../../third_party/skia/src/gpu/GrQuad.cpp
 FILE: ../../../third_party/skia/src/gpu/GrRenderTargetProxyPriv.h
 FILE: ../../../third_party/skia/src/gpu/GrResourceProviderPriv.h
-FILE: ../../../third_party/skia/src/gpu/GrSurfaceProxyRef.cpp
 FILE: ../../../third_party/skia/src/gpu/GrUninstantiateProxyTracker.cpp
 FILE: ../../../third_party/skia/src/gpu/GrUninstantiateProxyTracker.h
 FILE: ../../../third_party/skia/src/gpu/ccpr/GrCCClipPath.cpp
@@ -1438,6 +1439,8 @@ FILE: ../../../third_party/skia/src/gpu/effects/GrConfigConversionEffect.h
 FILE: ../../../third_party/skia/src/gpu/effects/GrConstColorProcessor.cpp
 FILE: ../../../third_party/skia/src/gpu/effects/GrConstColorProcessor.fp
 FILE: ../../../third_party/skia/src/gpu/effects/GrConstColorProcessor.h
+FILE: ../../../third_party/skia/src/gpu/effects/GrDynamicTextureStripAtlas.cpp
+FILE: ../../../third_party/skia/src/gpu/effects/GrDynamicTextureStripAtlas.h
 FILE: ../../../third_party/skia/src/gpu/effects/GrLumaColorFilterEffect.cpp
 FILE: ../../../third_party/skia/src/gpu/effects/GrLumaColorFilterEffect.fp
 FILE: ../../../third_party/skia/src/gpu/effects/GrLumaColorFilterEffect.h
@@ -1504,6 +1507,7 @@ FILE: ../../../third_party/skia/third_party/skcms/skcms.cc
 FILE: ../../../third_party/skia/third_party/skcms/skcms.h
 FILE: ../../../third_party/skia/third_party/skcms/skcms_internal.h
 FILE: ../../../third_party/skia/third_party/skcms/src/Transform_inl.h
+FILE: ../../../third_party/skia/third_party/vulkan/SkiaVulkan.h
 FILE: ../../../third_party/skia/third_party/vulkanmemoryallocator/GrVulkanMemoryAllocator.cpp
 FILE: ../../../third_party/skia/third_party/vulkanmemoryallocator/GrVulkanMemoryAllocator.h
 ----------------------------------------------------------------------------------------------------
@@ -3217,7 +3221,6 @@ FILE: ../../../third_party/skia/include/effects/SkTableColorFilter.h
 FILE: ../../../third_party/skia/include/gpu/GrContextOptions.h
 FILE: ../../../third_party/skia/include/gpu/GrSamplerState.h
 FILE: ../../../third_party/skia/include/gpu/gl/GrGLTypes.h
-FILE: ../../../third_party/skia/include/gpu/vk/GrVkInterface.h
 FILE: ../../../third_party/skia/include/ports/SkFontMgr_android.h
 FILE: ../../../third_party/skia/include/ports/SkFontMgr_directory.h
 FILE: ../../../third_party/skia/include/ports/SkFontMgr_empty.h
@@ -3441,6 +3444,7 @@ FILE: ../../../third_party/skia/src/gpu/vk/GrVkImage.h
 FILE: ../../../third_party/skia/src/gpu/vk/GrVkIndexBuffer.cpp
 FILE: ../../../third_party/skia/src/gpu/vk/GrVkIndexBuffer.h
 FILE: ../../../third_party/skia/src/gpu/vk/GrVkInterface.cpp
+FILE: ../../../third_party/skia/src/gpu/vk/GrVkInterface.h
 FILE: ../../../third_party/skia/src/gpu/vk/GrVkMemory.cpp
 FILE: ../../../third_party/skia/src/gpu/vk/GrVkMemory.h
 FILE: ../../../third_party/skia/src/gpu/vk/GrVkRenderPass.cpp
