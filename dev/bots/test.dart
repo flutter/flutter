@@ -128,18 +128,18 @@ Future<Null> _checkForTrailingSpaces() async {
         ? Platform.environment['TEST_COMMIT_RANGE']
         : await _getCommitRange();
     final List<String> fileTypes = <String>[
-      '*.dart', '*.cxx', '*.cpp', '*.cc', '*.c', '*.C', '*.h', '*.java', '*.mm', '*.m', '.yml',
+      '*.dart', '*.cxx', '*.cpp', '*.cc', '*.c', '*.C', '*.h', '*.java', '*.mm', '*.m', '*.yml',
     ];
     final EvalResult changedFilesResult = await _evalCommand(
       'git', <String>['diff', '-U0', '--no-color', '--name-only', commitRange, '--'] + fileTypes,
       workingDirectory: flutterRoot,
     );
     if (changedFilesResult.stdout == null) {
-      print('No Results for whitespace check.');
+      print('No files found that need to be checked for trailing whitespace.');
       return;
     }
     // Only include files that actually exist, so that we don't try and grep for
-    // nonexistent files (can occur when files are deleted or moved).
+    // nonexistent files, which can occur when files are deleted or moved.
     final List<String> changedFiles = changedFilesResult.stdout.split('\n').where((String filename) {
       return new File(filename).existsSync();
     }).toList();
@@ -148,7 +148,7 @@ Future<Null> _checkForTrailingSpaces() async {
         <String>[
           '--line-number',
           '--extended-regexp',
-          r'[[:space:]]+$',
+          r'[[:blank:]]$',
         ] + changedFiles,
         workingDirectory: flutterRoot,
         failureMessage: '${red}Whitespace detected at the end of source code lines.$reset\nPlease remove:',
