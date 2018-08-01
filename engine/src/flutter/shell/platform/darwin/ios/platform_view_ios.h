@@ -58,7 +58,7 @@ class PlatformViewIOS final : public HeadlessPlatformViewIOS {
   void SetSemanticsEnabled(bool enabled) override;
 
   // |shell::PlatformView|
-  void SetAssistiveTechnologyEnabled(bool enabled) override;
+  void SetAccessibilityFeatures(int32_t flags) override;
 
   // |shell::PlatformView|
   void UpdateSemantics(

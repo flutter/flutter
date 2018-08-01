@@ -19,7 +19,7 @@ dart:ui,::,_getScheduleMicrotaskClosure
 dart:ui,::,_setupHooks
 dart:ui,::,_updateLocale
 dart:ui,::,_updateSemanticsEnabled
-dart:ui,::,_updateAssistiveTechnologyEnabled
+dart:ui,::,_updateAccessibilityFeatures
 dart:ui,::,_updateUserSettingsData
 dart:ui,::,_updateWindowMetrics
 dart:ui,_ImageInfo,get:width

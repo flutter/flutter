@@ -52,8 +52,8 @@ void PlatformView::SetSemanticsEnabled(bool enabled) {
   delegate_.OnPlatformViewSetSemanticsEnabled(*this, enabled);
 }
 
-void PlatformView::SetAssistiveTechnologyEnabled(bool enabled) {
-  delegate_.OnPlatformViewSetAssistiveTechnologyEnabled(*this, enabled);
+void PlatformView::SetAccessibilityFeatures(int32_t flags) {
+  delegate_.OnPlatformViewSetAccessibilityFeatures(*this, flags);
 }
 
 void PlatformView::SetViewportMetrics(const blink::ViewportMetrics& metrics) {

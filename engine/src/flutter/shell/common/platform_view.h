@@ -58,9 +58,9 @@ class PlatformView {
     virtual void OnPlatformViewSetSemanticsEnabled(const PlatformView& view,
                                                    bool enabled) = 0;
 
-    virtual void OnPlatformViewSetAssistiveTechnologyEnabled(
+    virtual void OnPlatformViewSetAccessibilityFeatures(
         const PlatformView& view,
-        bool enabled) = 0;
+        int32_t flags) = 0;
 
     virtual void OnPlatformViewRegisterTexture(
         const PlatformView& view,
@@ -88,7 +88,7 @@ class PlatformView {
 
   virtual void SetSemanticsEnabled(bool enabled);
 
-  virtual void SetAssistiveTechnologyEnabled(bool enabled);
+  virtual void SetAccessibilityFeatures(int32_t flags);
 
   void SetViewportMetrics(const blink::ViewportMetrics& metrics);
 

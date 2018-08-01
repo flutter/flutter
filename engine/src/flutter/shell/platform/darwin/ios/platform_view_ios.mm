@@ -68,14 +68,8 @@ void PlatformViewIOS::SetSemanticsEnabled(bool enabled) {
 }
 
 // |shell:PlatformView|
-void PlatformViewIOS::SetAssistiveTechnologyEnabled(bool enabled) {
-  if (enabled && !accessibility_bridge_) {
-    accessibility_bridge_ = std::make_unique<AccessibilityBridge>(owner_view_, this);
-  }
-  // Note: since the accessibility bridge is needed for both semantics and
-  // assistive technologies, but you cannot have the latter without the
-  // former, we only destroy the bridge in SetSemanticsEnabled and not here.
-  PlatformView::SetAssistiveTechnologyEnabled(enabled);
+void PlatformViewIOS::SetAccessibilityFeatures(int32_t flags) {
+  PlatformView::SetAccessibilityFeatures(flags);
 }
 
 // |shell::PlatformView|

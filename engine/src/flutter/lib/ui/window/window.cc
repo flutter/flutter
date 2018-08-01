@@ -198,14 +198,14 @@ void Window::UpdateSemanticsEnabled(bool enabled) {
                   {ToDart(enabled)});
 }
 
-void Window::UpdateAssistiveTechnologyEnabled(bool enabled) {
+void Window::UpdateAccessibilityFeatures(int32_t values) {
   std::shared_ptr<tonic::DartState> dart_state = library_.dart_state().lock();
   if (!dart_state)
     return;
   tonic::DartState::Scope scope(dart_state);
 
-  DartInvokeField(library_.value(), "_updateAssistiveTechnologyEnabled",
-                  {ToDart(enabled)});
+  DartInvokeField(library_.value(), "_updateAccessibilityFeatures",
+                  {ToDart(values)});
 }
 
 void Window::DispatchPlatformMessage(fml::RefPtr<PlatformMessage> message) {

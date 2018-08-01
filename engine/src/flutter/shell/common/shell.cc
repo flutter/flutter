@@ -562,17 +562,17 @@ void Shell::OnPlatformViewSetSemanticsEnabled(const PlatformView& view,
       });
 }
 
-void Shell::OnPlatformViewSetAssistiveTechnologyEnabled(
-    const PlatformView& view,
-    bool enabled) {
+// |shell::PlatformView::Delegate|
+void Shell::OnPlatformViewSetAccessibilityFeatures(const PlatformView& view,
+                                                   int32_t flags) {
   FML_DCHECK(is_setup_);
   FML_DCHECK(&view == platform_view_.get());
   FML_DCHECK(task_runners_.GetPlatformTaskRunner()->RunsTasksOnCurrentThread());
 
   task_runners_.GetUITaskRunner()->PostTask(
-      [engine = engine_->GetWeakPtr(), enabled] {
+      [engine = engine_->GetWeakPtr(), flags] {
         if (engine) {
-          engine->SetAssistiveTechnologyEnabled(enabled);
+          engine->SetAccessibilityFeatures(flags);
         }
       });
 }
