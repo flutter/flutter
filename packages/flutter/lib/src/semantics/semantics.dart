@@ -133,6 +133,11 @@ class CustomSemanticsAction {
       && typedOther.action == action;
   }
 
+  @override
+  String toString() {
+    return 'CustomSemanticsAction(${_ids[this]}, label:$label, hint:$hint, action:$action)';
+  }
+
   // Logic to assign a unique id to each custom action without requiring
   // user specification.
   static int _nextId = 0;
@@ -288,7 +293,8 @@ class SemanticsData extends Diagnosticable {
   /// parent).
   final Matrix4 transform;
 
-  /// The identifiers for the custom semantics action defined for this node.
+  /// The identifiers for the custom semantics actions and standard action
+  /// overrides for this node.
   ///
   /// The list must be sorted in increasing order.
   ///
@@ -427,11 +433,7 @@ class _SemanticsDiagnosticableNode extends DiagnosticableNode<SemanticsNode> {
 /// Provides hint values which override the default hints on supported
 /// platforms.
 ///
-/// On Android, If no hint overrides are used then the semantic node's `hint`
-/// will be combined with the `label`. Otherwise, `hint` will be ignored as long
-/// as there as at least one non-null hint override.
-///
-/// On iOS, these are always ignored and the default `hint` is used instead.
+/// On iOS, these are always ignored.
 @immutable
 class SemanticsHintOverrides extends DiagnosticableTree {
   /// Creates a semantics hint overrides.

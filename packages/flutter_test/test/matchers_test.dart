@@ -394,10 +394,13 @@ void main() {
         header: true,
         button: true,
         onTap: () {},
+        onLongPress: () {},
         label: 'foo',
         hint: 'bar',
         value: 'baz',
         textDirection: TextDirection.rtl,
+        onTapHint: 'scan',
+        onLongPressHint: 'fill',
         customSemanticsActions: <CustomSemanticsAction, VoidCallback>{
           const CustomSemanticsAction(label: 'foo'): () {},
           const CustomSemanticsAction(label: 'bar'): () {},
@@ -411,9 +414,12 @@ void main() {
           value: 'baz',
           textDirection: TextDirection.rtl,
           hasTapAction: true,
+          hasLongPressAction: true,
           isButton: true,
           isHeader: true,
           namesRoute: true,
+          onTapHint: 'scan',
+          onLongPressHint: 'fill',
           customActions: <CustomSemanticsAction>[
             const CustomSemanticsAction(label: 'foo'),
             const CustomSemanticsAction(label: 'bar')
@@ -429,15 +435,40 @@ void main() {
           value: 'baz',
           textDirection: TextDirection.rtl,
           hasTapAction: true,
+          hasLongPressAction: true,
           isButton: true,
           isHeader: true,
           namesRoute: true,
+          onTapHint: 'scan',
+          onLongPressHint: 'fill',
           customActions: <CustomSemanticsAction>[
             const CustomSemanticsAction(label: 'foo'),
             const CustomSemanticsAction(label: 'barz')
           ],
         )),
       );
+
+      // Doesn't match wrong hints
+      expect(tester.getSemanticsData(find.byKey(key)),
+        isNot(matchesSemanticsData(
+          label: 'foo',
+          hint: 'bar',
+          value: 'baz',
+          textDirection: TextDirection.rtl,
+          hasTapAction: true,
+          hasLongPressAction: true,
+          isButton: true,
+          isHeader: true,
+          namesRoute: true,
+          onTapHint: 'scans',
+          onLongPressHint: 'fills',
+          customActions: <CustomSemanticsAction>[
+            const CustomSemanticsAction(label: 'foo'),
+            const CustomSemanticsAction(label: 'bar')
+          ],
+        )),
+      );
+
       handle.dispose();
     });
 
