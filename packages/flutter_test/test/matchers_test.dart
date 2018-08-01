@@ -398,6 +398,10 @@ void main() {
         hint: 'bar',
         value: 'baz',
         textDirection: TextDirection.rtl,
+        customSemanticsActions: <CustomSemanticsAction, VoidCallback>{
+          const CustomSemanticsAction(label: 'foo'): () {},
+          const CustomSemanticsAction(label: 'bar'): () {},
+        },
       ));
 
       expect(tester.getSemanticsData(find.byKey(key)),
@@ -410,7 +414,29 @@ void main() {
           isButton: true,
           isHeader: true,
           namesRoute: true,
+          customActions: <CustomSemanticsAction>[
+            const CustomSemanticsAction(label: 'foo'),
+            const CustomSemanticsAction(label: 'bar')
+          ],
         ),
+      );
+
+      // Doesn't match custom actions
+      expect(tester.getSemanticsData(find.byKey(key)),
+        isNot(matchesSemanticsData(
+          label: 'foo',
+          hint: 'bar',
+          value: 'baz',
+          textDirection: TextDirection.rtl,
+          hasTapAction: true,
+          isButton: true,
+          isHeader: true,
+          namesRoute: true,
+          customActions: <CustomSemanticsAction>[
+            const CustomSemanticsAction(label: 'foo'),
+            const CustomSemanticsAction(label: 'barz')
+          ],
+        )),
       );
       handle.dispose();
     });
