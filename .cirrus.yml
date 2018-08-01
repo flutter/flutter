@@ -7,6 +7,9 @@ task:
     PATH: "$CIRRUS_WORKING_DIR/bin:$CIRRUS_WORKING_DIR/bin/cache/dart-sdk/bin:$PATH"
 
   git_fetch_script: git fetch origin
+  pub_cache:
+    folder: $HOME/.pub-cache
+    fingerprint_script: find . -name 'pubspec.yaml' -exec grep -H 'PUBSPEC CHECKSUM' {} +
   pkg_cache:
     folder: bin/cache/pkg
     fingerprint_script: cat bin/internal/engine.version
@@ -59,6 +62,10 @@ task:
   env:
     CIRRUS_WORKING_DIR: "C:\\Windows\\Temp\\flutter sdk"
   git_fetch_script: git fetch origin
+  pub_cache:
+    folder: $APPDATA\Pub\Cache
+    fingerprint_script:
+      - ps:  Get-ChildItem pubspec.yaml -Recurse | Select-String -Pattern "PUBSPEC CHECKSUM" -SimpleMatch
   pkg_cache:
     folder: bin\cache\pkg
     fingerprint_script: type bin\internal\engine.version
@@ -85,6 +92,9 @@ task:
   env:
     CIRRUS_WORKING_DIR: "/tmp/flutter sdk"
   git_fetch_script: git fetch origin
+  pub_cache:
+    folder: $HOME/.pub-cache
+    fingerprint_script: find . -name 'pubspec.yaml' -exec grep -H 'PUBSPEC CHECKSUM' {} +
   pkg_cache:
     folder: bin/cache/pkg
     fingerprint_script: cat bin/internal/engine.version
