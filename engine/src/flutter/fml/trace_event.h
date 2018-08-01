@@ -5,7 +5,9 @@
 #ifndef FLUTTER_FML_TRACE_EVENT_H_
 #define FLUTTER_FML_TRACE_EVENT_H_
 
-#if defined(__Fuchsia__)
+#include "flutter/fml/build_config.h"
+
+#if defined(OS_FUCHSIA)
 
 // Forward to the system tracing mechanism on Fuchsia.
 
@@ -19,13 +21,15 @@
 #define TRACE_EVENT_ASYNC_BEGIN1(a, b, c, d, e) TRACE_ASYNC_BEGIN(a, b, c, d, e)
 #define TRACE_EVENT_ASYNC_END1(a, b, c, d, e) TRACE_ASYNC_END(a, b, c, d, e)
 
-#else  // defined(__Fuchsia__)
+#endif  // defined(OS_FUCHSIA)
 
 #include <cstddef>
 #include <cstdint>
 #include <string>
 
 #include "flutter/fml/macros.h"
+
+#if !defined(OS_FUCHSIA)
 
 #ifndef TRACE_EVENT_HIDE_MACROS
 
@@ -71,6 +75,8 @@
   ::fml::tracing::TraceEventFlowEnd0(category, name, id);
 
 #endif  // TRACE_EVENT_HIDE_MACROS
+
+#endif  // !defined(OS_FUCHSIA)
 
 namespace fml {
 namespace tracing {
@@ -136,7 +142,5 @@ class ScopedInstantEnd {
 
 }  // namespace tracing
 }  // namespace fml
-
-#endif  // defined(__Fuchsia__)
 
 #endif  // FLUTTER_FML_TRACE_EVENT_H_

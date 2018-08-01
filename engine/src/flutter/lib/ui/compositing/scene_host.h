@@ -7,6 +7,7 @@
 
 #include <stdint.h>
 
+#include "flutter/fml/build_config.h"
 #include "flutter/lib/ui/dart_wrapper.h"
 
 #if defined(OS_FUCHSIA)
