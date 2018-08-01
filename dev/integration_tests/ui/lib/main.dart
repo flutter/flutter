@@ -4,7 +4,7 @@
 
 import 'package:flutter/widgets.dart';
 
-void main() => runApp(const Center(child: Text(
+void main() => runApp(const Center(child: const Text(
   'flutter drive lib/xxx.dart',
   textDirection: TextDirection.ltr,
 )));

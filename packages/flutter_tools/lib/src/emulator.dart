@@ -127,7 +127,7 @@ class EmulatorManager {
     );
   }
 
-  static const List<String> preferredDevices = <String>[
+  static const List<String> preferredDevices = const <String>[
     'pixel',
     'pixel_xl',
   ];

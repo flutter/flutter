@@ -104,23 +104,23 @@ void main() {
       );
     }
 
-    const List<String> pubOutput = <String>[
+    const List<String> pubOutput = const <String>[
       '.packages',
       'pubspec.lock',
     ];
 
-    const List<String> pluginRegistrants = <String>[
+    const List<String> pluginRegistrants = const <String>[
       'ios/Runner/GeneratedPluginRegistrant.h',
       'ios/Runner/GeneratedPluginRegistrant.m',
       'android/app/src/main/java/io/flutter/plugins/GeneratedPluginRegistrant.java',
     ];
 
-    const List<String> pluginWitnesses = <String>[
+    const List<String> pluginWitnesses = const <String>[
       '.flutter-plugins',
       'ios/Podfile',
     ];
 
-    const Map<String, String> pluginContentWitnesses = <String, String>{
+    const Map<String, String> pluginContentWitnesses = const <String, String>{
       'ios/Flutter/Debug.xcconfig': '#include "Pods/Target Support Files/Pods-Runner/Pods-Runner.debug.xcconfig"',
       'ios/Flutter/Release.xcconfig': '#include "Pods/Target Support Files/Pods-Runner/Pods-Runner.release.xcconfig"',
     };

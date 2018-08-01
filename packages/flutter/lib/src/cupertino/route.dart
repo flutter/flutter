@@ -32,18 +32,18 @@ final Tween<Offset> _kBottomUpTween = new Tween<Offset>(
 final DecorationTween _kGradientShadowTween = new DecorationTween(
   begin: _CupertinoEdgeShadowDecoration.none, // No decoration initially.
   end: const _CupertinoEdgeShadowDecoration(
-    edgeGradient: LinearGradient(
+    edgeGradient: const LinearGradient(
       // Spans 5% of the page.
-      begin: AlignmentDirectional(0.90, 0.0),
+      begin: const AlignmentDirectional(0.90, 0.0),
       end: AlignmentDirectional.centerEnd,
       // Eyeballed gradient used to mimic a drop shadow on the start side only.
-      colors: <Color>[
-        Color(0x00000000),
-        Color(0x04000000),
-        Color(0x12000000),
-        Color(0x38000000)
+      colors: const <Color>[
+        const Color(0x00000000),
+        const Color(0x04000000),
+        const Color(0x12000000),
+        const Color(0x38000000)
       ],
-      stops: <double>[0.0, 0.3, 0.6, 1.0],
+      stops: const <double>[0.0, 0.3, 0.6, 1.0],
     ),
   ),
 );
@@ -600,7 +600,7 @@ class _CupertinoEdgeShadowDecoration extends Decoration {
   // An edge shadow decoration where the shadow is null. This is used
   // for interpolating from no shadow.
   static const _CupertinoEdgeShadowDecoration none =
-      _CupertinoEdgeShadowDecoration();
+      const _CupertinoEdgeShadowDecoration();
 
   // A gradient to draw to the left of the box being decorated.
   // Alignments are relative to the original box translated one box

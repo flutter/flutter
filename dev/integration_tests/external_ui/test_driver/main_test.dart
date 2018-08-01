@@ -8,7 +8,7 @@ import 'package:test/test.dart';
 
 final RegExp calibrationRegExp = new RegExp('Flutter frame rate is (.*)fps');
 final RegExp statsRegExp = new RegExp('Produced: (.*)fps\nConsumed: (.*)fps\nWidget builds: (.*)');
-const Duration samplingTime = Duration(seconds: 8);
+const Duration samplingTime = const Duration(seconds: 8);
 
 Future<Null> main() async {
   group('texture suite', () {
@@ -58,7 +58,7 @@ Future<Null> main() async {
       expect(double.parse(matchFast.group(1)), closeTo(flutterFrameRate * 2.0, 5.0));
       expect(double.parse(matchFast.group(2)), closeTo(flutterFrameRate, 10.0));
       expect(int.parse(matchFast.group(3)), 1);
-    }, timeout: const Timeout(Duration(minutes: 1)));
+    }, timeout: const Timeout(const Duration(minutes: 1)));
 
     tearDownAll(() async {
       driver?.close();

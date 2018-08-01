@@ -47,7 +47,7 @@ void _tests() {
                 const SliverAppBar(
                   pinned: true,
                   expandedHeight: appBarExpandedHeight,
-                  title: Text('Semantics Test with Slivers'),
+                  title: const Text('Semantics Test with Slivers'),
                 ),
                 new SliverList(
                   delegate: new SliverChildListDelegate(listChildren),
@@ -443,7 +443,7 @@ void _tests() {
               const SliverAppBar(
                 pinned: true,
                 expandedHeight: 100.0,
-                title: Text('AppBar'),
+                title: const Text('AppBar'),
               ),
               new SliverList(
                 delegate: new SliverChildListDelegate(listChildren),
@@ -549,7 +549,7 @@ void _tests() {
               const SliverAppBar(
                 pinned: true,
                 expandedHeight: 100.0,
-                title: Text('AppBar'),
+                title: const Text('AppBar'),
               ),
             ]..addAll(slivers),
           ),
@@ -649,7 +649,7 @@ void _tests() {
               const SliverAppBar(
                 pinned: true,
                 expandedHeight: 100.0,
-                title: Text('AppBar'),
+                title: const Text('AppBar'),
               ),
               new SliverList(
                 delegate: new SliverChildListDelegate(listChildren),
@@ -756,7 +756,7 @@ void _tests() {
               const SliverAppBar(
                 pinned: true,
                 expandedHeight: 100.0,
-                title: Text('AppBar'),
+                title: const Text('AppBar'),
               ),
             ]..addAll(slivers),
           ),
@@ -868,8 +868,8 @@ void _tests() {
                   const SliverAppBar(
                     pinned: true,
                     expandedHeight: 100.0,
-                    flexibleSpace: FlexibleSpaceBar(
-                      title: Text('Backward app bar', textDirection: TextDirection.ltr),
+                    flexibleSpace: const FlexibleSpaceBar(
+                      title: const Text('Backward app bar', textDirection: TextDirection.ltr),
                     ),
                   ),
                   new SliverAppBar(
@@ -877,7 +877,7 @@ void _tests() {
                     key: forwardAppBarKey,
                     expandedHeight: 100.0,
                     flexibleSpace: const FlexibleSpaceBar(
-                      title: Text('Forward app bar', textDirection: TextDirection.ltr),
+                      title: const Text('Forward app bar', textDirection: TextDirection.ltr),
                     ),
                   ),
                   new SliverList(

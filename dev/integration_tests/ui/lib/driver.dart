@@ -40,7 +40,7 @@ class DriverTestAppState extends State<DriverTestApp> {
                 new RaisedButton(
                   child: const Text(
                     'toggle',
-                    key: ValueKey<String>('togglePresent'),
+                    key: const ValueKey<String>('togglePresent'),
                   ),
                   onPressed: () {
                     setState(() {
@@ -53,7 +53,7 @@ class DriverTestAppState extends State<DriverTestApp> {
             new Row(
               children: <Widget>[
                 const Expanded(
-                  child: Text('hit testability'),
+                  child: const Text('hit testability'),
                 ),
                 new DropdownButton<Letter>(
                   key: const ValueKey<String>('dropdown'),
@@ -64,24 +64,24 @@ class DriverTestAppState extends State<DriverTestApp> {
                     });
                   },
                   items: const <DropdownMenuItem<Letter>>[
-                    DropdownMenuItem<Letter>(
+                    const DropdownMenuItem<Letter>(
                       value: Letter.a,
-                      child: Text('Aaa', key: ValueKey<String>('a')),
+                      child: const Text('Aaa', key: const ValueKey<String>('a')),
                     ),
-                    DropdownMenuItem<Letter>(
+                    const DropdownMenuItem<Letter>(
                       value: Letter.b,
-                      child: Text('Bbb', key: ValueKey<String>('b')),
+                      child: const Text('Bbb', key: const ValueKey<String>('b')),
                     ),
-                    DropdownMenuItem<Letter>(
+                    const DropdownMenuItem<Letter>(
                       value: Letter.c,
-                      child: Text('Ccc', key: ValueKey<String>('c')),
+                      child: const Text('Ccc', key: const ValueKey<String>('c')),
                     ),
                   ],
                 ),
               ],
             ),
             const TextField(
-              key: ValueKey<String>('enter-text-field'),
+              key: const ValueKey<String>('enter-text-field'),
             ),
           ],
         ),

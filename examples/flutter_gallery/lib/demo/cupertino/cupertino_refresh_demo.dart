@@ -45,11 +45,11 @@ class _CupertinoRefreshControlDemoState extends State<CupertinoRefreshControlDem
       ),
       child: new CupertinoPageScaffold(
         child: new DecoratedBox(
-          decoration: const BoxDecoration(color: Color(0xFFEFEFF4)),
+          decoration: const BoxDecoration(color: const Color(0xFFEFEFF4)),
           child: new CustomScrollView(
             slivers: <Widget>[
               const CupertinoSliverNavigationBar(
-                largeTitle: Text('Cupertino Refresh'),
+                largeTitle: const Text('Cupertino Refresh'),
               ),
               new CupertinoSliverRefreshControl(
                 onRefresh: () {
@@ -154,7 +154,7 @@ class _ListItem extends StatelessWidget {
             child: called
                 ? const Align(
                     alignment: Alignment.topCenter,
-                    child: Icon(
+                    child: const Icon(
                       CupertinoIcons.phone_solid,
                       color: CupertinoColors.inactiveGray,
                       size: 18.0,
@@ -165,8 +165,8 @@ class _ListItem extends StatelessWidget {
         new Expanded(
           child: new Container(
               decoration: const BoxDecoration(
-                border: Border(
-                  bottom: BorderSide(color: Color(0xFFBCBBC1), width: 0.0),
+                border: const Border(
+                  bottom: const BorderSide(color: const Color(0xFFBCBBC1), width: 0.0),
                 ),
               ),
               padding: const EdgeInsets.only(left: 1.0, bottom: 9.0, right: 10.0),
@@ -208,8 +208,8 @@ class _ListItem extends StatelessWidget {
                     ),
                   ),
                   const Padding(
-                    padding: EdgeInsets.only(left: 9.0),
-                    child: Icon(
+                    padding: const EdgeInsets.only(left: 9.0),
+                    child: const Icon(
                       CupertinoIcons.info,
                       color: CupertinoColors.activeBlue
                     ),

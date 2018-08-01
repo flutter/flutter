@@ -8,7 +8,7 @@ import 'package:flutter/material.dart';
 void main() {
   testWidgets('SnackBar control test', (WidgetTester tester) async {
     const String helloSnackBar = 'Hello SnackBar';
-    const Key tapTarget = Key('tap-target');
+    const Key tapTarget = const Key('tap-target');
     await tester.pumpWidget(new MaterialApp(
       home: new Scaffold(
         body: new Builder(
@@ -16,8 +16,8 @@ void main() {
             return new GestureDetector(
               onTap: () {
                 Scaffold.of(context).showSnackBar(const SnackBar(
-                  content: Text(helloSnackBar),
-                  duration: Duration(seconds: 2)
+                  content: const Text(helloSnackBar),
+                  duration: const Duration(seconds: 2)
                 ));
               },
               behavior: HitTestBehavior.opaque,
@@ -53,7 +53,7 @@ void main() {
 
   testWidgets('SnackBar twice test', (WidgetTester tester) async {
     int snackBarCount = 0;
-    const Key tapTarget = Key('tap-target');
+    const Key tapTarget = const Key('tap-target');
     await tester.pumpWidget(new MaterialApp(
       home: new Scaffold(
         body: new Builder(
@@ -128,7 +128,7 @@ void main() {
 
   testWidgets('SnackBar cancel test', (WidgetTester tester) async {
     int snackBarCount = 0;
-    const Key tapTarget = Key('tap-target');
+    const Key tapTarget = const Key('tap-target');
     int time;
     ScaffoldFeatureController<SnackBar, SnackBarClosedReason> lastController;
     await tester.pumpWidget(new MaterialApp(
@@ -214,7 +214,7 @@ void main() {
 
   testWidgets('SnackBar dismiss test', (WidgetTester tester) async {
     int snackBarCount = 0;
-    const Key tapTarget = Key('tap-target');
+    const Key tapTarget = const Key('tap-target');
     await tester.pumpWidget(new MaterialApp(
       home: new Scaffold(
         body: new Builder(
@@ -300,7 +300,7 @@ void main() {
     await tester.pumpWidget(new MaterialApp(
       home: new MediaQuery(
         data: const MediaQueryData(
-          padding: EdgeInsets.only(
+          padding: const EdgeInsets.only(
             left: 10.0,
             top: 20.0,
             right: 30.0,
@@ -351,7 +351,7 @@ void main() {
     await tester.pumpWidget(new MaterialApp(
       home: new MediaQuery(
         data: const MediaQueryData(
-          padding: EdgeInsets.only(
+          padding: const EdgeInsets.only(
             left: 10.0,
             top: 20.0,
             right: 30.0,
@@ -361,8 +361,8 @@ void main() {
         child: new Scaffold(
           bottomNavigationBar: new BottomNavigationBar(
             items: const <BottomNavigationBarItem>[
-              BottomNavigationBarItem(icon: Icon(Icons.favorite), title: Text('Animutation')),
-              BottomNavigationBarItem(icon: Icon(Icons.block), title: Text('Zombo.com')),
+              const BottomNavigationBarItem(icon: const Icon(Icons.favorite), title: const Text('Animutation')),
+              const BottomNavigationBarItem(icon: const Icon(Icons.block), title: const Text('Zombo.com')),
             ],
           ),
           body: new Builder(
@@ -484,7 +484,7 @@ void main() {
 
   testWidgets('SnackBar default display duration test', (WidgetTester tester) async {
     const String helloSnackBar = 'Hello SnackBar';
-    const Key tapTarget = Key('tap-target');
+    const Key tapTarget = const Key('tap-target');
     await tester.pumpWidget(new MaterialApp(
         home: new Scaffold(
             body: new Builder(
@@ -492,7 +492,7 @@ void main() {
                   return new GestureDetector(
                       onTap: () {
                         Scaffold.of(context).showSnackBar(const SnackBar(
-                            content: Text(helloSnackBar)
+                            content: const Text(helloSnackBar)
                         ));
                       },
                       behavior: HitTestBehavior.opaque,

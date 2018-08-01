@@ -265,13 +265,13 @@ class ScrollDragController implements Drag {
   /// pointer update events before losing the momentum carried from a previous
   /// scroll activity.
   static const Duration momentumRetainStationaryDurationThreshold =
-      Duration(milliseconds: 20);
+      const Duration(milliseconds: 20);
 
   /// Maximum amount of time interval the drag can have consecutive stationary
   /// pointer update events before needing to break the
   /// [motionStartDistanceThreshold] to start motion again.
   static const Duration motionStoppedDurationThreshold =
-      Duration(milliseconds: 50);
+      const Duration(milliseconds: 50);
 
   /// The drag distance past which, a [motionStartDistanceThreshold] breaking
   /// drag is considered a deliberate fling.

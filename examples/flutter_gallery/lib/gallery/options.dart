@@ -84,7 +84,7 @@ class GalleryOptions {
 }
 
 const double _kItemHeight = 48.0;
-const EdgeInsetsDirectional _kItemPadding = EdgeInsetsDirectional.only(start: 56.0);
+const EdgeInsetsDirectional _kItemPadding = const EdgeInsetsDirectional.only(start: 56.0);
 
 class _OptionsItem extends StatelessWidget {
   const _OptionsItem({ Key key, this.child }) : super(key: key);

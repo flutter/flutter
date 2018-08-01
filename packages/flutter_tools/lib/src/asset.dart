@@ -18,7 +18,7 @@ import 'devfs.dart';
 import 'flutter_manifest.dart';
 import 'globals.dart';
 
-const AssetBundleFactory _kManifestFactory = _ManifestAssetBundleFactory();
+const AssetBundleFactory _kManifestFactory = const _ManifestAssetBundleFactory();
 
 /// Injected factory class for spawning [AssetBundle] instances.
 abstract class AssetBundleFactory {

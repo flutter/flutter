@@ -5077,9 +5077,11 @@ class Semantics extends SingleChildRenderObjectWidget {
     Widget child,
     bool container = false,
     bool explicitChildNodes = false,
+    bool excludeSemantics = false,
     bool enabled,
     bool checked,
     bool selected,
+    bool toggled,
     bool button,
     bool header,
     bool textField,
@@ -5089,6 +5091,8 @@ class Semantics extends SingleChildRenderObjectWidget {
     bool scopesRoute,
     bool namesRoute,
     bool hidden,
+    bool image,
+    bool liveRegion,
     String label,
     String value,
     String increasedValue,
@@ -5107,6 +5111,7 @@ class Semantics extends SingleChildRenderObjectWidget {
     VoidCallback onCopy,
     VoidCallback onCut,
     VoidCallback onPaste,
+    VoidCallback onDismiss,
     MoveCursorHandler onMoveCursorForwardByCharacter,
     MoveCursorHandler onMoveCursorBackwardByCharacter,
     SetSelectionHandler onSetSelection,
@@ -5118,9 +5123,11 @@ class Semantics extends SingleChildRenderObjectWidget {
     child: child,
     container: container,
     explicitChildNodes: explicitChildNodes,
+    excludeSemantics: excludeSemantics,
     properties: new SemanticsProperties(
       enabled: enabled,
       checked: checked,
+      toggled: toggled,
       selected: selected,
       button: button,
       header: header,
@@ -5131,6 +5138,8 @@ class Semantics extends SingleChildRenderObjectWidget {
       scopesRoute: scopesRoute,
       namesRoute: namesRoute,
       hidden: hidden,
+      image: image,
+      liveRegion: liveRegion,
       label: label,
       value: value,
       increasedValue: increasedValue,
@@ -5153,8 +5162,10 @@ class Semantics extends SingleChildRenderObjectWidget {
       onMoveCursorBackwardByCharacter: onMoveCursorBackwardByCharacter,
       onDidGainAccessibilityFocus: onDidGainAccessibilityFocus,
       onDidLoseAccessibilityFocus: onDidLoseAccessibilityFocus,
+      onDismiss: onDismiss,
+      onSetSelection: onSetSelection,
       customSemanticsActions: customSemanticsActions,
-    onSetSelection: onSetSelection,),
+    ),
   );
 
   /// Creates a semantic annotation using [SemanticsProperties].
@@ -5165,6 +5176,7 @@ class Semantics extends SingleChildRenderObjectWidget {
     Widget child,
     this.container = false,
     this.explicitChildNodes = false,
+    this.excludeSemantics = false,
     @required this.properties,
   }) : assert(container != null),
        assert(properties != null),
@@ -5201,23 +5213,36 @@ class Semantics extends SingleChildRenderObjectWidget {
   /// to create semantic boundaries that are either writable or not for children.
   final bool explicitChildNodes;
 
+  /// Whether to replace all child semantics with this node.
+  ///
+  /// Defaults to false.
+  ///
+  /// When this flag is set to true, all child semantics nodes are ignored.
+  /// This can be used as a convenience for cases where a child is wrapped in
+  /// an [ExcludeSemantics] widget and then another [Semantics] widget.
+  final bool excludeSemantics;
+
   @override
   RenderSemanticsAnnotations createRenderObject(BuildContext context) {
     return new RenderSemanticsAnnotations(
       container: container,
       explicitChildNodes: explicitChildNodes,
+      excludeSemantics: excludeSemantics,
       enabled: properties.enabled,
       checked: properties.checked,
+      toggled: properties.toggled,
       selected: properties.selected,
       button: properties.button,
       header: properties.header,
       textField: properties.textField,
       focused: properties.focused,
+      liveRegion: properties.liveRegion,
       inMutuallyExclusiveGroup: properties.inMutuallyExclusiveGroup,
       obscured: properties.obscured,
       scopesRoute: properties.scopesRoute,
       namesRoute: properties.namesRoute,
       hidden: properties.hidden,
+      image: properties.image,
       label: properties.label,
       value: properties.value,
       increasedValue: properties.increasedValue,
@@ -5234,6 +5259,7 @@ class Semantics extends SingleChildRenderObjectWidget {
       onIncrease: properties.onIncrease,
       onDecrease: properties.onDecrease,
       onCopy: properties.onCopy,
+      onDismiss: properties.onDismiss,
       onCut: properties.onCut,
       onPaste: properties.onPaste,
       onMoveCursorForwardByCharacter: properties.onMoveCursorForwardByCharacter,
@@ -5261,10 +5287,12 @@ class Semantics extends SingleChildRenderObjectWidget {
   void updateRenderObject(BuildContext context, RenderSemanticsAnnotations renderObject) {
     renderObject
       ..container = container
-      ..scopesRoute = properties.scopesRoute
       ..explicitChildNodes = explicitChildNodes
+      ..excludeSemantics = excludeSemantics
+      ..scopesRoute = properties.scopesRoute
       ..enabled = properties.enabled
       ..checked = properties.checked
+      ..toggled = properties.toggled
       ..selected = properties.selected
       ..button = properties.button
       ..header = properties.header
@@ -5273,6 +5301,8 @@ class Semantics extends SingleChildRenderObjectWidget {
       ..inMutuallyExclusiveGroup = properties.inMutuallyExclusiveGroup
       ..obscured = properties.obscured
       ..hidden = properties.hidden
+      ..image = properties.image
+      ..liveRegion = properties.liveRegion
       ..label = properties.label
       ..value = properties.value
       ..increasedValue = properties.increasedValue
@@ -5288,6 +5318,7 @@ class Semantics extends SingleChildRenderObjectWidget {
       ..onScrollUp = properties.onScrollUp
       ..onScrollDown = properties.onScrollDown
       ..onIncrease = properties.onIncrease
+      ..onDismiss = properties.onDismiss
       ..onDecrease = properties.onDecrease
       ..onCopy = properties.onCopy
       ..onCut = properties.onCut

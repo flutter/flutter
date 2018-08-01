@@ -37,7 +37,7 @@ import 'version.dart';
 
 Future<T> runInContext<T>(
   FutureOr<T> runner(), {
-  Map<Type, dynamic> overrides,
+  Map<Type, Generator> overrides,
 }) async {
   return await context.run<T>(
     name: 'global fallbacks',

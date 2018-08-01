@@ -17,10 +17,10 @@ void main() {
 
     await tester.pumpWidget(
         const Center(
-            child: SizedBox(
+            child: const SizedBox(
               width: 200.0,
               height: 100.0,
-              child: AndroidView(viewType: 'webview'),
+              child: const AndroidView(viewType: 'webview'),
             )
         )
     );
@@ -39,20 +39,20 @@ void main() {
     viewsController.registerViewType('webview');
     await tester.pumpWidget(
         const Center(
-            child: SizedBox(
+            child: const SizedBox(
               width: 200.0,
               height: 100.0,
-              child: AndroidView(viewType: 'webview'),
+              child: const AndroidView(viewType: 'webview'),
             )
         )
     );
 
     await tester.pumpWidget(
         const Center(
-            child: SizedBox(
+            child: const SizedBox(
               width: 400.0,
               height: 200.0,
-              child: AndroidView(viewType: 'webview'),
+              child: const AndroidView(viewType: 'webview'),
             )
         )
     );
@@ -72,20 +72,20 @@ void main() {
     viewsController.registerViewType('maps');
     await tester.pumpWidget(
         const Center(
-            child: SizedBox(
+            child: const SizedBox(
               width: 200.0,
               height: 100.0,
-              child: AndroidView(viewType: 'webview'),
+              child: const AndroidView(viewType: 'webview'),
             )
         )
     );
 
     await tester.pumpWidget(
         const Center(
-            child: SizedBox(
+            child: const SizedBox(
               width: 200.0,
               height: 100.0,
-              child: AndroidView(viewType: 'maps'),
+              child: const AndroidView(viewType: 'maps'),
             )
         )
     );
@@ -103,17 +103,17 @@ void main() {
     viewsController.registerViewType('webview');
     await tester.pumpWidget(
         const Center(
-            child: SizedBox(
+            child: const SizedBox(
               width: 200.0,
               height: 100.0,
-              child: AndroidView(viewType: 'webview'),
+              child: const AndroidView(viewType: 'webview'),
             )
         )
     );
 
     await tester.pumpWidget(
         const Center(
-            child: SizedBox(
+            child: const SizedBox(
               width: 200.0,
               height: 100.0,
             )

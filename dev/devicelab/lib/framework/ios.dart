@@ -13,7 +13,7 @@ import 'utils.dart';
 
 const String _kProvisioningConfigFileEnvironmentVariable = 'FLUTTER_DEVICELAB_XCODE_PROVISIONING_CONFIG';
 const String _kTestXcconfigFileName = 'TestConfig.xcconfig';
-const FileSystem _fs = io.LocalFileSystem();
+const FileSystem _fs = const io.LocalFileSystem();
 
 /// Patches the given Xcode project adding provisioning certificates and team
 /// information required to build and run the project, if

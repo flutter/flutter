@@ -140,7 +140,7 @@ void main() {
           color: const Color(0xff00ffff),
           child: const Hero(
             tag: kHeroTag,
-            child: Text('Home')
+            child: const Text('Home')
           )
         )
       ),
@@ -151,7 +151,7 @@ void main() {
           color: const Color(0xffff00ff),
           child: const Hero(
             tag: kHeroTag,
-            child: Text('Settings')
+            child: const Text('Settings')
           )
         )
       ),
@@ -306,15 +306,15 @@ void main() {
 
   testWidgets('Test completed future', (WidgetTester tester) async {
     final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
-      '/': (_) => const Center(child: Text('home')),
-      '/next': (_) => const Center(child: Text('next')),
+      '/': (_) => const Center(child: const Text('home')),
+      '/next': (_) => const Center(child: const Text('next')),
     };
 
     await tester.pumpWidget(new MaterialApp(routes: routes));
 
     final PageRoute<void> route = new MaterialPageRoute<void>(
       settings: const RouteSettings(name: '/page'),
-      builder: (BuildContext context) => const Center(child: Text('page')),
+      builder: (BuildContext context) => const Center(child: const Text('page')),
     );
 
     int popCount = 0;

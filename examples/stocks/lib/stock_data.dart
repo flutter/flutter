@@ -84,7 +84,7 @@ class StockData extends ChangeNotifier {
         _end();
         return;
       }
-      const JsonDecoder decoder = JsonDecoder();
+      const JsonDecoder decoder = const JsonDecoder();
       add(decoder.convert(json));
       if (_nextChunk < _chunkCount) {
         _fetchNextChunk();

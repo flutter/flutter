@@ -204,10 +204,10 @@ void main() {
           slivers: <Widget>[
             new SliverPersistentHeader(delegate: new TestDelegate(), floating: true),
             const SliverList(
-              delegate: SliverChildListDelegate(<Widget>[
-                SizedBox(
+              delegate: const SliverChildListDelegate(const <Widget>[
+                const SizedBox(
                   height: 300.0,
-                  child: Text('X'),
+                  child: const Text('X'),
                 ),
               ]),
             ),

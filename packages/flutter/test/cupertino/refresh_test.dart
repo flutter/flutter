@@ -383,7 +383,7 @@ void main() {
     testWidgets('expanded refreshing sliver scrolls normally', (WidgetTester tester) async {
       debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
 
-      refreshIndicator = const Center(child: Text('-1'));
+      refreshIndicator = const Center(child: const Text('-1'));
 
       await tester.pumpWidget(
         new Directionality(
@@ -463,7 +463,7 @@ void main() {
     testWidgets('expanded refreshing sliver goes away when done', (WidgetTester tester) async {
       debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
 
-      refreshIndicator = const Center(child: Text('-1'));
+      refreshIndicator = const Center(child: const Text('-1'));
 
       await tester.pumpWidget(
         new Directionality(
@@ -540,7 +540,7 @@ void main() {
       (WidgetTester tester) async {
         debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
 
-        refreshIndicator = const Center(child: Text('-1'));
+        refreshIndicator = const Center(child: const Text('-1'));
 
         await tester.pumpWidget(
           new Directionality(
@@ -629,7 +629,7 @@ void main() {
       (WidgetTester tester) async {
         debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
 
-        refreshIndicator = const Center(child: Text('-1'));
+        refreshIndicator = const Center(child: const Text('-1'));
 
         await tester.pumpWidget(
           new Directionality(
@@ -690,7 +690,7 @@ void main() {
         }
         debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
 
-        refreshIndicator = const Center(child: Text('-1'));
+        refreshIndicator = const Center(child: const Text('-1'));
 
         await tester.pumpWidget(
           new Directionality(
@@ -777,7 +777,7 @@ void main() {
       (WidgetTester tester) async {
         debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
 
-        refreshIndicator = const Center(child: Text('-1'));
+        refreshIndicator = const Center(child: const Text('-1'));
 
         await tester.pumpWidget(
           new Directionality(
@@ -810,7 +810,7 @@ void main() {
       (WidgetTester tester) async {
         debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
 
-        refreshIndicator = const Center(child: Text('-1'));
+        refreshIndicator = const Center(child: const Text('-1'));
 
         await tester.pumpWidget(
           new Directionality(
@@ -1183,7 +1183,7 @@ void main() {
       (WidgetTester tester) async {
         debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
 
-        refreshIndicator = const Center(child: Text('-1'));
+        refreshIndicator = const Center(child: const Text('-1'));
 
         await tester.pumpWidget(
           new Directionality(

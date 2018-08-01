@@ -52,7 +52,7 @@ class _ListDemoState extends State<ListDemo> {
     final PersistentBottomSheetController<Null> bottomSheet = scaffoldKey.currentState.showBottomSheet((BuildContext bottomSheetContext) {
       return new Container(
         decoration: const BoxDecoration(
-          border: Border(top: BorderSide(color: Colors.black26)),
+          border: const Border(top: const BorderSide(color: Colors.black26)),
         ),
         child: new ListView(
           shrinkWrap: true,
