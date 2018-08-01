@@ -15,9 +15,7 @@
 namespace fml {
 
 TaskRunner::TaskRunner(fml::RefPtr<MessageLoopImpl> loop)
-    : loop_(std::move(loop)) {
-  FML_CHECK(loop_);
-}
+    : loop_(std::move(loop)) {}
 
 TaskRunner::~TaskRunner() = default;
 

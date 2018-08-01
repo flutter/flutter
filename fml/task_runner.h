@@ -17,23 +17,24 @@ class MessageLoopImpl;
 
 class TaskRunner : public fml::RefCountedThreadSafe<TaskRunner> {
  public:
-  void PostTask(fml::closure task);
+  virtual void PostTask(fml::closure task);
 
-  void PostTaskForTime(fml::closure task, fml::TimePoint target_time);
+  virtual void PostTaskForTime(fml::closure task, fml::TimePoint target_time);
 
-  void PostDelayedTask(fml::closure task, fml::TimeDelta delay);
+  virtual void PostDelayedTask(fml::closure task, fml::TimeDelta delay);
 
-  bool RunsTasksOnCurrentThread();
+  virtual bool RunsTasksOnCurrentThread();
+
+  virtual ~TaskRunner();
 
   static void RunNowOrPostTask(fml::RefPtr<fml::TaskRunner> runner,
                                fml::closure task);
 
- private:
-  fml::RefPtr<MessageLoopImpl> loop_;
-
+ protected:
   TaskRunner(fml::RefPtr<MessageLoopImpl> loop);
 
-  ~TaskRunner();
+ private:
+  fml::RefPtr<MessageLoopImpl> loop_;
 
   FML_FRIEND_MAKE_REF_COUNTED(TaskRunner);
   FML_FRIEND_REF_COUNTED_THREAD_SAFE(TaskRunner);
