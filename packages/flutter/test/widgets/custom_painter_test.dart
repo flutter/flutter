@@ -349,6 +349,8 @@ void _defineTests() {
       ),
     ));
     final Set<SemanticsAction> allActions = SemanticsAction.values.values.toSet()
+      ..remove(SemanticsAction.moveCursorForwardByWord)
+      ..remove(SemanticsAction.moveCursorBackwardByWord)
       ..remove(SemanticsAction.customAction) // customAction is not user-exposed.
       ..remove(SemanticsAction.showOnScreen); // showOnScreen is not user-exposed
 
