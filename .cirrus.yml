@@ -72,6 +72,8 @@ task:
 task:
   osx_instance:
     image: high-sierra-xcode-9.4.1
+  env:
+    CIRRUS_WORKING_DIR: "/tmp/flutter sdk"
   git_fetch_script: git fetch origin
   setup_script:
     - bin/flutter config --no-analytics
