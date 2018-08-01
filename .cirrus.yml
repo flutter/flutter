@@ -64,7 +64,7 @@ task:
     fingerprint_script: type bin\internal\engine.version
   artifacts_cache:
     folder: bin\cache\artifacts
-    fingerprint_script: cat bin\internal\engine.version
+    fingerprint_script: type bin\internal\engine.version
   setup_script:
     - bin\flutter.bat config --no-analytics
     - bin\flutter.bat update-packages
