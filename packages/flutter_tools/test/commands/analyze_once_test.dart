@@ -169,8 +169,8 @@ void bar() {
     });
 
     testUsingContext('analyze', () async {
-      const String contents = '''	
-StringBuffer bar = StringBuffer('baz');	
+      const String contents = '''
+StringBuffer bar = StringBuffer('baz');
 ''';
       final Directory tempDir = fs.systemTempDirectory.createTempSync();
       tempDir.childFile('main.dart').writeAsStringSync(contents);
