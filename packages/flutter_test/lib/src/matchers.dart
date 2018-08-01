@@ -345,8 +345,8 @@ Matcher matchesSemanticsData({
   bool hasPasteAction = false,
   bool hasDidGainAccessibilityFocusAction = false,
   bool hasDidLoseAccessibilityFocusAction = false,
-  bool hasCustomAction = false,
   bool hasDismissAction = false,
+  List<CustomSemanticsAction> customActions,
 }) {
   final List<SemanticsFlag> flags = <SemanticsFlag>[];
   if (hasCheckedState)
@@ -421,7 +421,7 @@ Matcher matchesSemanticsData({
     actions.add(SemanticsAction.didGainAccessibilityFocus);
   if (hasDidLoseAccessibilityFocusAction)
     actions.add(SemanticsAction.didLoseAccessibilityFocus);
-  if (hasCustomAction)
+  if (customActions != null && customActions.isNotEmpty)
     actions.add(SemanticsAction.customAction);
   if (hasDismissAction)
     actions.add(SemanticsAction.dismiss);
@@ -438,6 +438,7 @@ Matcher matchesSemanticsData({
     flags: flags,
     textDirection: textDirection,
     rect: rect,
+    customActions: customActions,
   );
 }
 
@@ -1467,12 +1468,14 @@ class _MatchesSemanticsData extends Matcher {
     this.actions,
     this.textDirection,
     this.rect,
+    this.customActions,
   });
 
   final String label;
   final String value;
   final String hint;
   final List<SemanticsAction> actions;
+  final List<CustomSemanticsAction> customActions;
   final List<SemanticsFlag> flags;
   final TextDirection textDirection;
   final Rect rect;
@@ -1494,6 +1497,8 @@ class _MatchesSemanticsData extends Matcher {
       description.add('with textDirection: $textDirection ');
     if (rect != null)
       description.add('with rect: $rect');
+    if (customActions != null)
+      description.add('with custom actions: $customActions');
     return description;
   }
 
@@ -1511,7 +1516,7 @@ class _MatchesSemanticsData extends Matcher {
       return failWithDescription(matchState, 'value was: ${data.value}');
     if (textDirection != null && textDirection != data.textDirection)
       return failWithDescription(matchState, 'textDirection was: $textDirection');
-    if (rect != null && rect == data.rect) {
+    if (rect != null && rect != data.rect) {
       return failWithDescription(matchState, 'rect was: $rect');
     }
     if (actions != null) {
@@ -1525,6 +1530,18 @@ class _MatchesSemanticsData extends Matcher {
             actionSummary.add(describeEnum(action));
         }
         return failWithDescription(matchState, 'actions were: $actionSummary');
+      }
+    }
+    if (customActions != null) {
+      if (customActions.length != data.customSemanticsActionIds.length)
+        return failWithDescription(matchState, 'custom semanitcs action ids were: ${data.customSemanticsActionIds}');
+      outer: for (int i = 0; i < customActions.length; i++) {
+        for (int j = 0; j < customActions.length; j++) {
+          if (CustomSemanticsAction.getIdentifier(customActions[i]) == data.customSemanticsActionIds[j]) {
+            continue outer;
+          }
+        }
+        return failWithDescription(matchState, 'custom semanitcs action ids were: ${data.customSemanticsActionIds}');
       }
     }
     if (flags != null) {
