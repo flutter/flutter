@@ -10,6 +10,9 @@ task:
   pkg_cache:
     folder: bin/cache/pkg
     fingerprint_script: cat bin/internal/engine.version
+  artifacts_cache:
+    folder: bin/cache/artifacts
+    fingerprint_script: cat bin/internal/engine.version
   setup_script: |
     echo "SDK directory is: $PWD"
     ./bin/flutter --version
@@ -59,6 +62,9 @@ task:
   pkg_cache:
     folder: bin\cache\pkg
     fingerprint_script: type bin\internal\engine.version
+  artifacts_cache:
+    folder: bin\cache\artifacts
+    fingerprint_script: cat bin\internal\engine.version
   setup_script:
     - bin\flutter.bat config --no-analytics
     - bin\flutter.bat update-packages
@@ -81,6 +87,9 @@ task:
   git_fetch_script: git fetch origin
   pkg_cache:
     folder: bin/cache/pkg
+    fingerprint_script: cat bin/internal/engine.version
+  artifacts_cache:
+    folder: bin/cache/artifacts
     fingerprint_script: cat bin/internal/engine.version
   setup_script:
     - bin/flutter config --no-analytics
