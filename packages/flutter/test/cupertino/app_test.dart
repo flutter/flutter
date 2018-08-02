@@ -11,7 +11,7 @@ void main() {
       home:
         new ListView(
           children: <Widget>[
-            const Hero(tag: 'a', child: const Text('foo')),
+            const Hero(tag: 'a', child: Text('foo')),
             new Builder(builder: (BuildContext context) {
               return new CupertinoButton(
                 child: const Text('next'),
@@ -20,7 +20,7 @@ void main() {
                     context,
                     new CupertinoPageRoute<void>(
                       builder: (BuildContext context) {
-                        return const Hero(tag: 'a', child: const Text('foo'));
+                        return const Hero(tag: 'a', child: Text('foo'));
                       }
                     ),
                   );

@@ -228,8 +228,8 @@ void main() {
               child: new Container(
                 height: 400.0,
                 child: new Stack(children: const <Widget>[
-                  const Leaf(key: const GlobalObjectKey<_LeafState>(0), child: const Placeholder()),
-                  const Leaf(key: const GlobalObjectKey<_LeafState>(1), child: const Placeholder()),
+                  Leaf(key: GlobalObjectKey<_LeafState>(0), child: Placeholder()),
+                  Leaf(key: GlobalObjectKey<_LeafState>(1), child: Placeholder()),
                 ]),
               ),
             ),
@@ -311,8 +311,8 @@ void main() {
               child: new Container(
                 height: 400.0,
                 child: new Stack(children: const <Widget>[
-                  const Leaf(key: const GlobalObjectKey<_LeafState>(0), child: const Placeholder()),
-                  const Leaf(key: const GlobalObjectKey<_LeafState>(1), child: const Placeholder()),
+                  Leaf(key: GlobalObjectKey<_LeafState>(0), child: Placeholder()),
+                  Leaf(key: GlobalObjectKey<_LeafState>(1), child: Placeholder()),
                 ]),
               ),
             ),
@@ -320,8 +320,8 @@ void main() {
               child: new Container(
                 height: 400.0,
                 child: new Stack(children: const <Widget>[
-                  const Leaf(key: const GlobalObjectKey<_LeafState>(2), child: const Placeholder()),
-                  const Leaf(key: const GlobalObjectKey<_LeafState>(3), child: const Placeholder()),
+                  Leaf(key: GlobalObjectKey<_LeafState>(2), child: Placeholder()),
+                  Leaf(key: GlobalObjectKey<_LeafState>(3), child: Placeholder()),
                 ]),
               ),
             ),
@@ -329,8 +329,8 @@ void main() {
               child: new Container(
                 height: 400.0,
                 child: new Stack(children: const <Widget>[
-                  const Leaf(key: const GlobalObjectKey<_LeafState>(4), child: const Placeholder()),
-                  const Leaf(key: const GlobalObjectKey<_LeafState>(5), child: const Placeholder()),
+                  Leaf(key: GlobalObjectKey<_LeafState>(4), child: Placeholder()),
+                  Leaf(key: GlobalObjectKey<_LeafState>(5), child: Placeholder()),
                 ]),
               ),
             ),
@@ -366,7 +366,7 @@ void main() {
             child: new Container(
               height: 400.0,
               child: new Stack(children: const <Widget>[
-                const Leaf(key: const GlobalObjectKey<_LeafState>(1), child: const Placeholder()),
+                Leaf(key: GlobalObjectKey<_LeafState>(1), child: Placeholder()),
               ]),
             ),
           ),
@@ -374,8 +374,8 @@ void main() {
             child: new Container(
               height: 400.0,
               child: new Stack(children: const <Widget>[
-                const Leaf(key: const GlobalObjectKey<_LeafState>(2), child: const Placeholder()),
-                const Leaf(key: const GlobalObjectKey<_LeafState>(3), child: const Placeholder()),
+                Leaf(key: GlobalObjectKey<_LeafState>(2), child: Placeholder()),
+                Leaf(key: GlobalObjectKey<_LeafState>(3), child: Placeholder()),
               ]),
             ),
           ),
@@ -383,9 +383,9 @@ void main() {
             child: new Container(
               height: 400.0,
               child: new Stack(children: const <Widget>[
-                const Leaf(key: const GlobalObjectKey<_LeafState>(4), child: const Placeholder()),
-                const Leaf(key: const GlobalObjectKey<_LeafState>(5), child: const Placeholder()),
-                const Leaf(key: const GlobalObjectKey<_LeafState>(0), child: const Placeholder()),
+                Leaf(key: GlobalObjectKey<_LeafState>(4), child: Placeholder()),
+                Leaf(key: GlobalObjectKey<_LeafState>(5), child: Placeholder()),
+                Leaf(key: GlobalObjectKey<_LeafState>(0), child: Placeholder()),
               ]),
             ),
           ),
@@ -429,8 +429,8 @@ void main() {
             child: new Container(
               height: 400.0,
               child: new Stack(children: const <Widget>[
-                const Leaf(key: const GlobalObjectKey<_LeafState>(1), child: const Placeholder()),
-                const Leaf(key: const GlobalObjectKey<_LeafState>(2), child: const Placeholder()),
+                Leaf(key: GlobalObjectKey<_LeafState>(1), child: Placeholder()),
+                Leaf(key: GlobalObjectKey<_LeafState>(2), child: Placeholder()),
               ]),
             ),
           ),
@@ -445,10 +445,10 @@ void main() {
             child: new Container(
               height: 400.0,
               child: new Stack(children: const <Widget>[
-                const Leaf(key: const GlobalObjectKey<_LeafState>(3), child: const Placeholder()),
-                const Leaf(key: const GlobalObjectKey<_LeafState>(4), child: const Placeholder()),
-                const Leaf(key: const GlobalObjectKey<_LeafState>(5), child: const Placeholder()),
-                const Leaf(key: const GlobalObjectKey<_LeafState>(0), child: const Placeholder()),
+                Leaf(key: GlobalObjectKey<_LeafState>(3), child: Placeholder()),
+                Leaf(key: GlobalObjectKey<_LeafState>(4), child: Placeholder()),
+                Leaf(key: GlobalObjectKey<_LeafState>(5), child: Placeholder()),
+                Leaf(key: GlobalObjectKey<_LeafState>(0), child: Placeholder()),
               ]),
             ),
           ),
@@ -472,7 +472,7 @@ void main() {
         itemBuilder: (BuildContext context, int index){
           if (index == 0){
             return const _AlwaysKeepAlive(
-              key: const GlobalObjectKey<_AlwaysKeepAliveState>(0),
+              key: GlobalObjectKey<_AlwaysKeepAliveState>(0),
             );
           }
           return new Container(

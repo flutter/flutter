@@ -13,10 +13,10 @@ void main() {
     await tester.pumpWidget(
       new MaterialApp(
         theme: new ThemeData(platform: TargetPlatform.android),
-        home: const Material(child: const Text('Page 1')),
+        home: const Material(child: Text('Page 1')),
         routes: <String, WidgetBuilder>{
           '/next': (BuildContext context) {
-            return const Material(child: const Text('Page 2'));
+            return const Material(child: Text('Page 2'));
           },
         },
       )
@@ -72,7 +72,7 @@ void main() {
     await tester.pumpWidget(
       new MaterialApp(
         theme: new ThemeData(platform: TargetPlatform.iOS),
-        home: const Material(child: const Text('Page 1')),
+        home: const Material(child: Text('Page 1')),
         routes: <String, WidgetBuilder>{
           '/next': (BuildContext context) {
             return new Material(
@@ -150,7 +150,7 @@ void main() {
     await tester.pumpWidget(
       new MaterialApp(
         theme: new ThemeData(platform: TargetPlatform.iOS),
-        home: const Material(child: const Text('Page 1')),
+        home: const Material(child: Text('Page 1')),
       )
     );
 
@@ -158,7 +158,7 @@ void main() {
 
     tester.state<NavigatorState>(find.byType(Navigator)).push(new MaterialPageRoute<void>(
       builder: (BuildContext context) {
-        return const Material(child: const Text('Page 2'));
+        return const Material(child: Text('Page 2'));
       },
       fullscreenDialog: true,
     ));
@@ -211,10 +211,10 @@ void main() {
     await tester.pumpWidget(
       new MaterialApp(
         theme: new ThemeData(platform: TargetPlatform.android),
-        home: const Scaffold(body: const Text('Page 1')),
+        home: const Scaffold(body: Text('Page 1')),
         routes: <String, WidgetBuilder>{
           '/next': (BuildContext context) {
-            return const Scaffold(body: const Text('Page 2'));
+            return const Scaffold(body: Text('Page 2'));
           },
         },
       )
@@ -242,10 +242,10 @@ void main() {
     await tester.pumpWidget(
       new MaterialApp(
         theme: new ThemeData(platform: TargetPlatform.iOS),
-        home: const Scaffold(body: const Text('Page 1')),
+        home: const Scaffold(body: Text('Page 1')),
         routes: <String, WidgetBuilder>{
           '/next': (BuildContext context) {
-            return const Scaffold(body: const Text('Page 2'));
+            return const Scaffold(body: Text('Page 2'));
           },
         },
       )
@@ -351,13 +351,13 @@ void main() {
     await tester.pumpWidget(
       new MaterialApp(
         theme: new ThemeData(platform: TargetPlatform.iOS),
-        home: const Scaffold(body: const Text('Page 1')),
+        home: const Scaffold(body: Text('Page 1')),
       )
     );
 
     tester.state<NavigatorState>(find.byType(Navigator)).push(new MaterialPageRoute<void>(
       builder: (BuildContext context) {
-        return const Scaffold(body: const Text('Page 2'));
+        return const Scaffold(body: Text('Page 2'));
       },
       fullscreenDialog: true,
     ));
@@ -382,10 +382,10 @@ void main() {
     await tester.pumpWidget(
       new MaterialApp(
         theme: new ThemeData(platform: TargetPlatform.android),
-        home: const Material(child: const Text('Page 1')),
+        home: const Material(child: Text('Page 1')),
         routes: <String, WidgetBuilder>{
           '/next': (BuildContext context) {
-            return const Material(child: const Text('Page 2'));
+            return const Material(child: Text('Page 2'));
           },
         },
       )
@@ -417,10 +417,10 @@ void main() {
     await tester.pumpWidget(
       new MaterialApp(
         theme: new ThemeData(platform: TargetPlatform.iOS),
-        home: const Material(child: const Text('Page 1')),
+        home: const Material(child: Text('Page 1')),
         routes: <String, WidgetBuilder>{
           '/next': (BuildContext context) {
-            return const Material(child: const Text('Page 2'));
+            return const Material(child: Text('Page 2'));
           },
         },
       )
