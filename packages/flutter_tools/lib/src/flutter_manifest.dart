@@ -20,6 +20,14 @@ final RegExp _versionPattern = new RegExp(r'^(\d+)(\.(\d+)(\.(\d+))?)?(\+(\d+))?
 class FlutterManifest {
   FlutterManifest._();
 
+  /// Returns an empty manifest.
+  static FlutterManifest empty() {
+    final FlutterManifest manifest = new FlutterManifest._();
+    manifest._descriptor = <String, dynamic>{};
+    manifest._flutterDescriptor = <String, dynamic>{};
+    return manifest;
+  }
+
   /// Returns null on invalid manifest. Returns empty manifest on missing file.
   static Future<FlutterManifest> createFromPath(String path) async {
     if (path == null || !fs.isFileSync(path))
