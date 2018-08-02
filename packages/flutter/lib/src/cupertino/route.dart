@@ -2,12 +2,17 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
 const double _kBackGestureWidth = 20.0;
 const double _kMinFlingVelocity = 1.0; // Screen widths per second.
+
+// Barrier color for a Cupertino modal barrier.
+const Color _kModalBarrierColor = const Color(0x6604040F);
 
 // Offset from offscreen to the right to fully on screen.
 final Tween<Offset> _kRightMiddleTween = new Tween<Offset>(
@@ -708,4 +713,76 @@ class _CupertinoEdgeShadowPainter extends BoxPainter {
 
     canvas.drawRect(rect, paint);
   }
+}
+
+/// Displays an iOS-style dialog above the current contents of the app.
+///
+/// This function takes a `builder` which typically builds a [CupertinoDialog]
+/// or [CupertinoAlertDialog] widget. Content below the dialog is dimmed with a
+/// [ModalBarrier]. This widget does not share a context with the location that
+/// `showCupertinoDialog` is originally called from. Use a [StatefulBuilder] or
+///  a custom [StatefulWidget] if the dialog needs to update dynamically.
+///
+/// The `context` argument is used to look up the [Navigator] for the dialog.
+/// It is only used when the method is called. Its corresponding widget can
+/// be safely removed from the tree before the dialog is closed.
+///
+/// Returns a [Future] that resolves to the value (if any) that was passed to
+/// [Navigator.pop] when the dialog was closed.
+///
+/// The dialog route created by this method is pushed to the root navigator.
+/// If the application has multiple [Navigator] objects, it may be necessary to
+/// call `Navigator.of(context, rootNavigator: true).pop(result)` to close the
+/// dialog rather just 'Navigator.pop(context, result)`.
+///
+/// See also:
+///  * [CupertinoDialog], an iOS-style dialog.
+///  * [CupertinoAlertDialog], an iOS-style alert dialog.
+///  * [Dialog], on which [SimpleDialog] and [AlertDialog] are based.
+///  * <https://developer.apple.com/ios/human-interface-guidelines/views/alerts/>
+Future<T> showCupertinoDialog<T>({
+  @required BuildContext context,
+  @required WidgetBuilder builder,
+}) {
+  assert(builder != null);
+  return showGeneralDialog(
+    context: context,
+    builder: builder,
+    barrierDismissible: false,
+    barrierLabel: 'Dismiss',
+    barrierColor: _kModalBarrierColor,
+    transitionDuration: const Duration(milliseconds: 300),
+    pageBuilder: (BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
+      return new SafeArea(
+        child: builder(context),
+      );
+    },
+    transitionBuilder: (BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, Widget child) {
+      final CurvedAnimation fadeAnimation = new CurvedAnimation(
+        parent: animation,
+        curve: Curves.easeInOut,
+      );
+      if (animation.status == AnimationStatus.reverse) {
+        return new FadeTransition(
+          opacity: fadeAnimation,
+          child: child,
+        );
+      }
+      return new FadeTransition(
+          opacity: fadeAnimation,
+          child: ScaleTransition(
+            child: child,
+            scale: new Tween<double>(
+              begin: 1.2,
+              end: 1.0,
+            ).animate(
+              new CurvedAnimation(
+                parent: animation,
+                curve: Curves.fastOutSlowIn,
+              ),
+            ),
+          )
+      );
+    },
+  );
 }
