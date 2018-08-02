@@ -4,16 +4,11 @@
 
 import 'dart:async';
 
+import 'package:flutter_devicelab/tasks/perf_tests.dart';
 import 'package:flutter_devicelab/framework/adb.dart';
 import 'package:flutter_devicelab/framework/framework.dart';
-import 'package:flutter_devicelab/framework/utils.dart';
-import 'package:flutter_devicelab/tasks/perf_tests.dart';
 
 Future<Null> main() async {
   deviceOperatingSystem = DeviceOperatingSystem.android;
-  await task(new MemoryTest(
-    '${flutterDirectory.path}/dev/benchmarks/complex_layout',
-    'test_memory/scroll_perf.dart',
-    'com.yourcompany.complexLayout',
-  ).run);
+  await task(createComplexLayoutScrollMemoryTest());
 }

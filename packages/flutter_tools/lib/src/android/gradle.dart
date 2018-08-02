@@ -360,11 +360,11 @@ Future<Null> _buildGradleProjectV2(
 
   command.add(assembleTask);
   final int exitCode = await runCommandAndStreamOutput(
-    command,
-    workingDirectory: flutterProject.android.directory.path,
-    allowReentrantFlutter: true,
-    environment: _gradleEnv,
-    filter: logger.isVerbose ? null : ndkMessageFilter,
+      command,
+      workingDirectory: flutterProject.android.directory.path,
+      allowReentrantFlutter: true,
+      environment: _gradleEnv,
+      filter: logger.isVerbose ? null : ndkMessageFilter,
   );
   status.stop();
 
