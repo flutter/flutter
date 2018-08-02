@@ -447,19 +447,19 @@ class FlutterDriver {
   /// ensure the item's final position matches [alignment].
   ///
   /// The [scrollable] must locate the scrolling widget that contains [item].
-  /// Typically `find.byType('ListView') or `find.byType('CustomScrollView')`.
+  /// Typically `find.byType('ListView')` or `find.byType('CustomScrollView')`.
   ///
-  /// Atleast one of [dxScroll] and [dyScroll] must be non-zero.
+  /// At least one of [dxScroll] and [dyScroll] must be non-zero.
   ///
   /// If [item] is below the currently visible items, then specify a negative
   /// value for [dyScroll] that's a small enough increment to expose [item]
   /// without potentially scrolling it up and completely out of view. Similarly
-  /// if [item] is above, then specify a positve value for [dyScroll].
+  /// if [item] is above, then specify a positive value for [dyScroll].
   ///
-  /// If [item] is to the right of the the currently visible items, then
+  /// If [item] is to the right of the currently visible items, then
   /// specify a negative value for [dxScroll] that's a small enough increment to
   /// expose [item] without potentially scrolling it up and completely out of
-  /// view. Similarly if [item] is to the left, then specify a positve value
+  /// view. Similarly if [item] is to the left, then specify a positive value
   /// for [dyScroll].
   ///
   /// The [timeout] value should be long enough to accommodate as many scrolls
@@ -483,7 +483,7 @@ class FlutterDriver {
     // the chance to complete if the item is already onscreen; if not, scroll
     // repeatedly until we either find the item or time out.
     bool isVisible = false;
-    waitFor(item, timeout: timeout).then((Null _) { isVisible = true; });
+    waitFor(item, timeout: timeout).then((Null value) { isVisible = true; });
     await new Future<Null>.delayed(const Duration(milliseconds: 500));
     while (!isVisible) {
       await scroll(scrollable, dxScroll, dyScroll, const Duration(milliseconds: 100));
