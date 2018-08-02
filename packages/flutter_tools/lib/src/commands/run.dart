@@ -242,6 +242,9 @@ class RunCommand extends RunCommandBase {
   bool get runningWithPrebuiltApplication =>
       argResults['use-application-binary'] != null;
 
+  File get applicationBinary =>
+      runningWithPrebuiltApplication ? fs.file(argResults['use-application-binary']) : null;
+
   bool get stayResident => argResults['resident'];
 
   @override
@@ -289,13 +292,10 @@ class RunCommand extends RunCommandBase {
           notifyingLogger: new NotifyingLogger(), logToStdout: true);
       AppInstance app;
       try {
-        final String applicationBinaryPath = argResults['use-application-binary'];
         app = await daemon.appDomain.startApp(
           devices.first, fs.currentDirectory.path, targetFile, route,
           _createDebuggingOptions(), hotMode,
-          applicationBinary: applicationBinaryPath == null
-              ? null
-              : fs.file(applicationBinaryPath),
+          applicationBinary: applicationBinary,
           trackWidgetCreation: argResults['track-widget-creation'],
           projectRootPath: argResults['project-root'],
           packagesFilePath: globalResults['packages'],
@@ -370,7 +370,7 @@ class RunCommand extends RunCommandBase {
         target: targetFile,
         debuggingOptions: _createDebuggingOptions(),
         benchmarkMode: argResults['benchmark'],
-        applicationBinary: argResults['use-application-binary'],
+        applicationBinary: applicationBinary,
         projectRootPath: argResults['project-root'],
         packagesFilePath: globalResults['packages'],
         dillOutputPath: argResults['output-dill'],
@@ -383,7 +383,7 @@ class RunCommand extends RunCommandBase {
         target: targetFile,
         debuggingOptions: _createDebuggingOptions(),
         traceStartup: traceStartup,
-        applicationBinary: argResults['use-application-binary'],
+        applicationBinary: applicationBinary,
         stayResident: stayResident,
         ipv6: ipv6,
       );
