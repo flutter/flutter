@@ -48,7 +48,7 @@ if (!is_fuchsia_host) {
 
   resource_copy_mac("mac_desktop_resources") {
     app_name = "FlutterTester"
-    resources = [ "//third_party/icu/common/icudtl.dat" ]
+    resources = [ "//third_party/icu/flutter/icudtl.dat" ]
     bundle_directory = "."
   }
 
