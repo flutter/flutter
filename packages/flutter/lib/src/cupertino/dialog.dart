@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:ui' show ImageFilter;
+
 import 'package:flutter/widgets.dart';
 
 import 'colors.dart';
@@ -250,12 +251,12 @@ class CupertinoAlertDialog extends StatelessWidget {
 ///     builder: (BuildContext context) {
 ///       return new CupertinoSimpleDialog(
 ///         title: const Text('Select assignment'),
-///         children: <Widget>[
-///           new CupertinoSimpleDialogOption(
+///         content: Column(children: <Widget>[
+///           new Button(
 ///             onPressed: () { Navigator.pop(context, Department.treasury); },
 ///             child: const Text('Treasury department'),
 ///           ),
-///           new CupertinoSimpleDialogOption(
+///           new Button(
 ///             onPressed: () { Navigator.pop(context, Department.state); },
 ///             child: const Text('State department'),
 ///           ),
@@ -287,8 +288,10 @@ class CupertinoSimpleDialog extends StatelessWidget {
     Key key,
     this.title,
     this.content,
+    this.titlePadding,
+    this.contentPadding,
     this.scrollController,
-  })  : super(key: key);
+  }) : super(key: key);
 
   /// The (optional) title of the dialog is displayed in a large font at the top
   /// of the dialog.
@@ -296,11 +299,17 @@ class CupertinoSimpleDialog extends StatelessWidget {
   /// Typically a [Text] widget.
   final Widget title;
 
+  /// Padding around the title.
+  final EdgeInsetsGeometry titlePadding;
+
   /// The (optional) content of the dialog is displayed in the center of the
   /// dialog in a lighter font.
   ///
   /// Typically a [Text] widget.
   final Widget content;
+
+  /// Padding around the content.
+  final EdgeInsetsGeometry contentPadding;
 
   /// A scroll controller that can be used to control the scrolling of the
   /// [content] in the dialog.
@@ -316,7 +325,9 @@ class CupertinoSimpleDialog extends StatelessWidget {
     if (title != null || content != null) {
       final Widget titleSection = new _CupertinoAlertTitleSection(
         title: title,
+        titlePadding: titlePadding,
         content: content,
+        contentPadding: contentPadding,
         scrollController: scrollController,
       );
       children.add(new Flexible(flex: 3, child: titleSection));
@@ -422,6 +433,8 @@ class _CupertinoAlertTitleSection extends StatelessWidget {
     this.title,
     this.content,
     this.scrollController,
+    this.titlePadding,
+    this.contentPadding,
   }) : super(key: key);
 
   // The (optional) title of the dialog is displayed in a large font at the top
@@ -430,11 +443,17 @@ class _CupertinoAlertTitleSection extends StatelessWidget {
   // Typically a Text widget.
   final Widget title;
 
+  // Padding around the title.
+  final EdgeInsetsGeometry titlePadding;
+
   // The (optional) content of the dialog is displayed in the center of the
   // dialog in a lighter font.
   //
   // Typically a Text widget.
   final Widget content;
+
+  // Padding around the content.
+  final EdgeInsetsGeometry contentPadding;
 
   // A scroll controller that can be used to control the scrolling of the
   // content in the dialog.
@@ -448,12 +467,13 @@ class _CupertinoAlertTitleSection extends StatelessWidget {
     final List<Widget> titleContentGroup = <Widget>[];
     if (title != null) {
       titleContentGroup.add(new Padding(
-        padding: new EdgeInsets.only(
-          left: _kEdgePadding,
-          right: _kEdgePadding,
-          bottom: content == null ? _kEdgePadding : 1.0,
-          top: _kEdgePadding,
-        ),
+        padding: titlePadding ??
+            new EdgeInsets.only(
+              left: _kEdgePadding,
+              right: _kEdgePadding,
+              bottom: content == null ? _kEdgePadding : 1.0,
+              top: _kEdgePadding,
+            ),
         child: new DefaultTextStyle(
           style: _kCupertinoDialogTitleStyle,
           textAlign: TextAlign.center,
@@ -465,12 +485,13 @@ class _CupertinoAlertTitleSection extends StatelessWidget {
     if (content != null) {
       titleContentGroup.add(
         new Padding(
-          padding: new EdgeInsets.only(
-            left: _kEdgePadding,
-            right: _kEdgePadding,
-            bottom: _kEdgePadding,
-            top: title == null ? _kEdgePadding : 1.0,
-          ),
+          padding: contentPadding ??
+              new EdgeInsets.only(
+                left: _kEdgePadding,
+                right: _kEdgePadding,
+                bottom: _kEdgePadding,
+                top: title == null ? _kEdgePadding : 1.0,
+              ),
           child: new DefaultTextStyle(
             style: _kCupertinoDialogContentStyle,
             textAlign: TextAlign.center,
