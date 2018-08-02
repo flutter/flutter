@@ -63,7 +63,7 @@ class ProtocolDiscovery {
     final int index = line.indexOf(_prefix + 'http://');
     if (index >= 0) {
       try {
-        uri = Uri.parse(line.substring(index + _prefix.length));
+        uri = Uri.parse(line.substring(index + _prefix.length, line.lastIndexOf('/')));
       } catch (error) {
         _stopScrapingLogs();
         _completer.completeError(error);
