@@ -360,6 +360,9 @@ flutter:
 ''';
       final FlutterManifest flutterManifest = await FlutterManifest.createFromString(manifest);
       expect(flutterManifest.isEmpty, false);
+      expect(flutterManifest.isModule, false);
+      expect(flutterManifest.isPlugin, false);
+      expect(flutterManifest.androidPackage, null);
     });
 
     test('allows a module declaration', () async {
