@@ -46,8 +46,6 @@ task:
         memory: 8G
 
 task:
-  env:
-    SHARD: tests
   windows_container:
     image: cirrusci/windowsservercore:2016
     os_version: 2016
