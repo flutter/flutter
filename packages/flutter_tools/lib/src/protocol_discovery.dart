@@ -17,7 +17,7 @@ class ProtocolDiscovery {
     this.portForwarder,
     this.hostPort,
     this.ipv6,
-  })  : assert(logReader != null),
+  }) : assert(logReader != null),
         _prefix = '$serviceName listening on ' {
     _deviceLogSubscription = logReader.logLines.listen(_handleLine);
   }
@@ -62,13 +62,12 @@ class ProtocolDiscovery {
   void _handleLine(String line) {
     Uri uri;
 
-    final RegExp regExp = new RegExp(r'[a-z]+:\/\/[^ \n]*');
-    final Match match = regExp.firstMatch(line);
-    final int index = line.indexOf(_prefix + 'http://');
+    final RegExp _regexp = new RegExp('$_prefix (http://[^ \n]+)');
+    final Match _match = _regexp.firstMatch(line);
 
-    if (index >= 0 && match != null) {
+    if (_match != null) {
       try {
-        uri = Uri.parse(match[0]);
+        uri = Uri.parse(_match[0]);
       } catch (error) {
         _stopScrapingLogs();
         _completer.completeError(error);
@@ -90,8 +89,7 @@ class ProtocolDiscovery {
       final int actualDevicePort = deviceUri.port;
       final int actualHostPort =
           await portForwarder.forward(actualDevicePort, hostPort: hostPort);
-      printTrace(
-          'Forwarded host port $actualHostPort to device port $actualDevicePort for $serviceName');
+      printTrace('Forwarded host port $actualHostPort to device port $actualDevicePort for $serviceName');
       hostUri = deviceUri.replace(port: actualHostPort);
     }
 
