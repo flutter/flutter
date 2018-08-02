@@ -81,15 +81,12 @@ class _TaskRunner {
   Future<TaskResult> run(Duration taskTimeout) async {
     try {
       _taskStarted = true;
-      print('Running task.');
       final TaskResult result = await _performTask().timeout(taskTimeout);
       _completer.complete(result);
       return result;
     } on TimeoutException catch (_) {
-      print('Task timed out after $taskTimeout.');
       return new TaskResult.failure('Task timed out after $taskTimeout');
     } finally {
-      print('Cleaning up after task...');
       await forceQuitRunningProcesses();
       _closeKeepAlivePort();
     }

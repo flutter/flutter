@@ -93,15 +93,6 @@ void main() {
         ]);
       });
     });
-
-    group('adb', () {
-      test('tap', () async {
-        await device.tap(100, 200);
-        expectLog(<CommandArgs>[
-          cmd(command: 'input', arguments: <String>['tap', '100', '200']),
-        ]);
-      });
-    });
   });
 }
 
