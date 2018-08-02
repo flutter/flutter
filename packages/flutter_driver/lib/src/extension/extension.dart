@@ -146,7 +146,7 @@ class FlutterDriverExtension {
 
   static final Logger _log = new Logger('FlutterDriverExtension');
 
-  final WidgetController _prober = new LiveWidgetController(WidgetsBinding.instance);
+  final WidgetController _prober = new WidgetController(WidgetsBinding.instance);
   final Map<String, CommandHandlerCallback> _commandHandlers = <String, CommandHandlerCallback>{};
   final Map<String, CommandDeserializerCallback> _commandDeserializers = <String, CommandDeserializerCallback>{};
   final Map<String, FinderConstructor> _finders = <String, FinderConstructor>{};

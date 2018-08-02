@@ -15,12 +15,8 @@ import 'test_pointer.dart';
 
 /// Class that programmatically interacts with widgets.
 ///
-/// For a variant of this class suited specifically for unit tests, see
-/// [WidgetTester]. For one suitable for live tests on a device, consider
-/// [LiveWidgetController].
-///
-/// Concrete subclasses must implement the [pump] method.
-abstract class WidgetController {
+/// For a variant of this class suited specifically for unit tests, see [WidgetTester].
+class WidgetController {
   /// Creates a widget controller that uses the given binding.
   WidgetController(this.binding);
 
@@ -396,11 +392,10 @@ abstract class WidgetController {
   /// This is invoked by [flingFrom], for instance, so that the sequence of
   /// pointer events occurs over time.
   ///
-  /// The [WidgetTester] subclass implements this by deferring to the [binding].
+  /// The default implementation does nothing.
   ///
-  /// See also [SchedulerBinding.endOfFrame], which returns a future that could
-  /// be appropriate to return in the implementation of this method.
-  Future<Null> pump(Duration duration);
+  /// The [WidgetTester] subclass implements this by deferring to the [binding].
+  Future<Null> pump(Duration duration) => new Future<Null>.value(null);
 
   /// Attempts to drag the given widget by the given offset, by
   /// starting a drag in the middle of the widget.
@@ -520,21 +515,4 @@ abstract class WidgetController {
   /// Returns the rect of the given widget. This is only valid once
   /// the widget's render object has been laid out at least once.
   Rect getRect(Finder finder) => getTopLeft(finder) & getSize(finder);
-}
-
-/// Variant of [WidgetController] that can be used in tests running
-/// on a device.
-///
-/// This is used, for instance, by [FlutterDriver].
-class LiveWidgetController extends WidgetController {
-  /// Creates a widget controller that uses the given binding.
-  LiveWidgetController(WidgetsBinding binding) : super(binding);
-
-  @override
-  Future<Null> pump(Duration duration) async {
-    if (duration != null)
-      await new Future<void>.delayed(duration);
-    binding.scheduleFrame();
-    await binding.endOfFrame;
-  }
 }

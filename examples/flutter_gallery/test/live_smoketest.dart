@@ -44,7 +44,7 @@ Future<Null> main() async {
       fail('Unrecognized demo names in _kSkippedDemoTitles: $_kSkippedDemoTitles');
 
     runApp(const GalleryApp(testMode: true));
-    final _LiveWidgetController controller = new _LiveWidgetController(WidgetsBinding.instance);
+    final _LiveWidgetController controller = new _LiveWidgetController();
     for (GalleryDemoCategory category in kAllGalleryDemoCategories) {
       await controller.tap(find.text(category.name));
       for (GalleryDemo demo in kGalleryCategoryToDemos[category]) {
@@ -73,8 +73,9 @@ Future<Null> main() async {
   }
 }
 
-class _LiveWidgetController extends LiveWidgetController {
-  _LiveWidgetController(WidgetsBinding binding) : super(binding);
+class _LiveWidgetController {
+
+  final WidgetController _controller = new WidgetController(WidgetsBinding.instance);
 
   /// With [frameSync] enabled, Flutter Driver will wait to perform an action
   /// until there are no pending frames in the app under test.
@@ -106,9 +107,8 @@ class _LiveWidgetController extends LiveWidgetController {
     return finder;
   }
 
-  @override
-  Future<Null> tap(Finder finder, { int pointer }) async {
-    await tap(await _waitForElement(finder), pointer: pointer);
+  Future<Null> tap(Finder finder) async {
+    await _controller.tap(await _waitForElement(finder));
   }
 
   Future<Null> scrollIntoView(Finder finder, {double alignment}) async {
