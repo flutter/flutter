@@ -302,10 +302,11 @@ String runSync(List<String> cmd, {
 
 void _traceCommand(List<String> args, { String workingDirectory }) {
   final String argsText = args.join(' ');
-  if (workingDirectory == null)
-    printTrace(argsText);
-  else
-    printTrace('[$workingDirectory${fs.path.separator}] $argsText');
+  if (workingDirectory == null) {
+    printTrace('executing: $argsText');
+  } else {
+    printTrace('executing: [$workingDirectory${fs.path.separator}] $argsText');
+  }
 }
 
 String _runWithLoggingSync(List<String> cmd, {
