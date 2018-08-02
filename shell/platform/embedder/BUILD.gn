@@ -114,7 +114,7 @@ if (is_mac) {
   copy("copy_icu") {
     visibility = [ ":*" ]
     sources = [
-      "//third_party/icu/common/icudtl.dat",
+      "//third_party/icu/flutter/icudtl.dat",
     ]
     outputs = [
       "$_flutter_embedder_framework_dir/Versions/A/Resources/icudtl.dat",
