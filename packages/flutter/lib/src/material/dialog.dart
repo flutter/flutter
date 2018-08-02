@@ -543,63 +543,6 @@ class SimpleDialog extends StatelessWidget {
   }
 }
 
-class _DialogRoute<T> extends PopupRoute<T> {
-  _DialogRoute({
-    @required this.theme,
-    bool barrierDismissible = true,
-    this.barrierLabel,
-    @required this.child,
-    RouteSettings settings,
-  }) : assert(barrierDismissible != null),
-       _barrierDismissible = barrierDismissible,
-       super(settings: settings);
-
-  final Widget child;
-  final ThemeData theme;
-
-  @override
-  Duration get transitionDuration => const Duration(milliseconds: 150);
-
-  @override
-  bool get barrierDismissible => _barrierDismissible;
-  final bool _barrierDismissible;
-
-  @override
-  Color get barrierColor => Colors.black54;
-
-  @override
-  final String barrierLabel;
-
-  @override
-  Widget buildPage(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
-    return new SafeArea(
-      child: new Builder(
-        builder: (BuildContext context) {
-          final Widget annotatedChild = new Semantics(
-            child: child,
-            scopesRoute: true,
-            explicitChildNodes: true,
-          );
-          return theme != null
-            ? new Theme(data: theme, child: annotatedChild)
-            : annotatedChild;
-        }
-      ),
-    );
-  }
-
-  @override
-  Widget buildTransitions(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, Widget child) {
-    return new FadeTransition(
-      opacity: new CurvedAnimation(
-        parent: animation,
-        curve: Curves.easeOut
-      ),
-      child: child
-    );
-  }
-}
-
 /// Displays a dialog above the current contents of the app.
 ///
 /// This function takes a `builder` which typically builds a [Dialog] widget.
@@ -632,17 +575,45 @@ Future<T> showDialog<T>({
   @required BuildContext context,
   bool barrierDismissible = true,
   @Deprecated(
-    'Instead of using the "child" argument, return the child from a closure '
-    'provided to the "builder" argument. This will ensure that the BuildContext '
-    'is appropriate for widgets built in the dialog.'
+      'Instead of using the "child" argument, return the child from a closure '
+          'provided to the "builder" argument. This will ensure that the BuildContext '
+          'is appropriate for widgets built in the dialog.'
   ) Widget child,
   WidgetBuilder builder,
 }) {
   assert(child == null || builder == null);
-  return Navigator.of(context, rootNavigator: true).push(new _DialogRoute<T>(
-    child: child ?? new Builder(builder: builder),
-    theme: Theme.of(context, shadowThemeOnly: true),
+  return showGeneralDialog(
+    context: context,
+    pageBuilder: (BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
+      final ThemeData theme = Theme.of(context, shadowThemeOnly: true);
+      final Widget pageChild =  child ?? new Builder(builder: builder);
+      return new SafeArea(
+        child: new Builder(
+          builder: (BuildContext context) {
+            final Widget annotatedChild = new Semantics(
+              child: pageChild,
+              scopesRoute: true,
+              explicitChildNodes: true,
+            );
+            return theme != null
+                ? new Theme(data: theme, child: annotatedChild)
+                : annotatedChild;
+          }
+        ),
+      );
+    },
     barrierDismissible: barrierDismissible,
     barrierLabel: MaterialLocalizations.of(context).modalBarrierDismissLabel,
-  ));
+    barrierColor: Colors.black54,
+    transitionDuration: const Duration(milliseconds: 150),
+    transitionBuilder: (BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, Widget child) {
+      return new FadeTransition(
+        opacity: new CurvedAnimation(
+          parent: animation,
+          curve: Curves.easeOut,
+        ),
+        child: child,
+      );
+    },
+  );
 }

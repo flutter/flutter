@@ -738,7 +738,6 @@ class _CupertinoEdgeShadowPainter extends BoxPainter {
 /// See also:
 ///  * [CupertinoDialog], an iOS-style dialog.
 ///  * [CupertinoAlertDialog], an iOS-style alert dialog.
-///  * [Dialog], on which [SimpleDialog] and [AlertDialog] are based.
 ///  * <https://developer.apple.com/ios/human-interface-guidelines/views/alerts/>
 Future<T> showCupertinoDialog<T>({
   @required BuildContext context,
@@ -747,7 +746,6 @@ Future<T> showCupertinoDialog<T>({
   assert(builder != null);
   return showGeneralDialog(
     context: context,
-    builder: builder,
     barrierDismissible: false,
     barrierLabel: 'Dismiss',
     barrierColor: _kModalBarrierColor,
@@ -769,19 +767,19 @@ Future<T> showCupertinoDialog<T>({
         );
       }
       return new FadeTransition(
-          opacity: fadeAnimation,
-          child: ScaleTransition(
-            child: child,
-            scale: new Tween<double>(
-              begin: 1.2,
-              end: 1.0,
-            ).animate(
-              new CurvedAnimation(
-                parent: animation,
-                curve: Curves.fastOutSlowIn,
-              ),
+        opacity: fadeAnimation,
+        child: ScaleTransition(
+          child: child,
+          scale: new Tween<double>(
+            begin: 1.2,
+            end: 1.0,
+          ).animate(
+            new CurvedAnimation(
+              parent: animation,
+              curve: Curves.fastOutSlowIn,
             ),
-          )
+          ),
+        ),
       );
     },
   );

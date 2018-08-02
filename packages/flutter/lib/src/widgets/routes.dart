@@ -57,13 +57,15 @@ abstract class OverlayRoute<T> extends Route<T> {
   bool didPop(T result) {
     final bool returnValue = super.didPop(result);
     assert(returnValue);
-    if (finishedWhenPopped) navigator.finalizeRoute(this);
+    if (finishedWhenPopped)
+      navigator.finalizeRoute(this);
     return returnValue;
   }
 
   @override
   void dispose() {
-    for (OverlayEntry entry in _overlayEntries) entry.remove();
+    for (OverlayEntry entry in _overlayEntries)
+      entry.remove();
     _overlayEntries.clear();
     super.dispose();
   }
@@ -141,11 +143,13 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> {
   void _handleStatusChanged(AnimationStatus status) {
     switch (status) {
       case AnimationStatus.completed:
-        if (overlayEntries.isNotEmpty) overlayEntries.first.opaque = opaque;
+        if (overlayEntries.isNotEmpty)
+          overlayEntries.first.opaque = opaque;
         break;
       case AnimationStatus.forward:
       case AnimationStatus.reverse:
-        if (overlayEntries.isNotEmpty) overlayEntries.first.opaque = false;
+        if (overlayEntries.isNotEmpty)
+          overlayEntries.first.opaque = false;
         break;
       case AnimationStatus.dismissed:
         assert(!overlayEntries.first.opaque);
@@ -190,7 +194,8 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> {
   void didReplace(Route<dynamic> oldRoute) {
     assert(_controller != null, '$runtimeType.didReplace called before calling install() or after calling dispose().');
     assert(!_transitionCompleter.isCompleted, 'Cannot reuse a $runtimeType after disposing it.');
-    if (oldRoute is TransitionRoute) _controller.value = oldRoute._controller.value;
+    if (oldRoute is TransitionRoute)
+      _controller.value = oldRoute._controller.value;
     _animation.addStatusListener(_handleStatusChanged);
     super.didReplace(oldRoute);
   }
@@ -289,7 +294,8 @@ class LocalHistoryEntry {
   }
 
   void _notifyRemoved() {
-    if (onRemove != null) onRemove();
+    if (onRemove != null)
+      onRemove();
   }
 }
 
@@ -437,7 +443,8 @@ abstract class LocalHistoryRoute<T> extends Route<T> {
     _localHistory ??= <LocalHistoryEntry>[];
     final bool wasEmpty = _localHistory.isEmpty;
     _localHistory.add(entry);
-    if (wasEmpty) changedInternalState();
+    if (wasEmpty)
+      changedInternalState();
   }
 
   /// Remove a local history entry from this route.
@@ -451,12 +458,14 @@ abstract class LocalHistoryRoute<T> extends Route<T> {
     _localHistory.remove(entry);
     entry._owner = null;
     entry._notifyRemoved();
-    if (_localHistory.isEmpty) changedInternalState();
+    if (_localHistory.isEmpty)
+      changedInternalState();
   }
 
   @override
   Future<RoutePopDisposition> willPop() async {
-    if (willHandlePopInternally) return RoutePopDisposition.pop;
+    if (willHandlePopInternally)
+      return RoutePopDisposition.pop;
     return await super.willPop();
   }
 
@@ -467,7 +476,8 @@ abstract class LocalHistoryRoute<T> extends Route<T> {
       assert(entry._owner == this);
       entry._owner = null;
       entry._notifyRemoved();
-      if (_localHistory.isEmpty) changedInternalState();
+      if (_localHistory.isEmpty)
+        changedInternalState();
       return false;
     }
     return super.didPop(result);
@@ -493,7 +503,9 @@ class _ModalScopeStatus extends InheritedWidget {
 
   @override
   bool updateShouldNotify(_ModalScopeStatus old) {
-    return isCurrent != old.isCurrent || canPop != old.canPop || route != old.route;
+    return isCurrent != old.isCurrent ||
+           canPop != old.canPop ||
+           route != old.route;
   }
 
   @override
@@ -530,8 +542,10 @@ class _ModalScopeState<T> extends State<_ModalScope<T>> {
   void initState() {
     super.initState();
     final List<Listenable> animations = <Listenable>[];
-    if (widget.route.animation != null) animations.add(widget.route.animation);
-    if (widget.route.secondaryAnimation != null) animations.add(widget.route.secondaryAnimation);
+    if (widget.route.animation != null)
+      animations.add(widget.route.animation);
+    if (widget.route.secondaryAnimation != null)
+      animations.add(widget.route.secondaryAnimation);
     _listenable = new Listenable.merge(animations);
   }
 
@@ -670,7 +684,9 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   /// This function is typically used with [Navigator.popUntil()].
   static RoutePredicate withName(String name) {
     return (Route<dynamic> route) {
-      return !route.willHandlePopInternally && route is ModalRoute && route.settings.name == name;
+      return !route.willHandlePopInternally
+          && route is ModalRoute
+          && route.settings.name == name;
     };
   }
 
@@ -951,7 +967,8 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   bool get offstage => _offstage;
   bool _offstage = false;
   set offstage(bool value) {
-    if (_offstage == value) return;
+    if (_offstage == value)
+      return;
     setState(() {
       _offstage = value;
     });
@@ -993,7 +1010,8 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
     final _ModalScopeState<T> scope = _scopeKey.currentState;
     assert(scope != null);
     for (WillPopCallback callback in new List<WillPopCallback>.from(_willPopCallbacks)) {
-      if (!await callback()) return RoutePopDisposition.doNotPop;
+      if (!await callback())
+        return RoutePopDisposition.doNotPop;
     }
     return await super.willPop();
   }
@@ -1112,7 +1130,8 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   @override
   void changedExternalState() {
     super.changedExternalState();
-    if (_scopeKey.currentState != null) _scopeKey.currentState._forceRebuildPage();
+    if (_scopeKey.currentState != null)
+      _scopeKey.currentState._forceRebuildPage();
   }
 
   /// Whether this route can be popped.
@@ -1154,7 +1173,7 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
     }
     return new IgnorePointer(
       ignoring: animation.status == AnimationStatus.reverse || // changedInternalState is called when this updates
-          animation.status == AnimationStatus.dismissed, // dismissed is possible when doing a manual pop gesture
+                animation.status == AnimationStatus.dismissed, // dismissed is possible when doing a manual pop gesture
       child: barrier,
     );
   }
@@ -1354,24 +1373,23 @@ abstract class RouteAware {
 
 class _DialogRoute<T> extends PopupRoute<T> {
   _DialogRoute({
-    @required this.child,
+    @required RoutePageBuilder pageBuilder,
     bool barrierDismissible = true,
     String barrierLabel = 'Dismiss',
     Color barrierColor = const Color(0x80000000),
     Duration transitionDuration = const Duration(milliseconds: 200),
-    DialogPageBuilder pageBuilder,
-    DialogTransitionBuilder transitionBuilder,
+    RouteTransitionsBuilder transitionBuilder,
     RouteSettings settings,
   })  : assert(barrierDismissible != null),
+        _pageBuilder = pageBuilder,
         _barrierDismissible = barrierDismissible,
         _barrierLabel = barrierLabel,
         _barrierColor = barrierColor,
         _transitionDuration = transitionDuration,
-        _pageBuilder = pageBuilder,
         _transitionBuilder = transitionBuilder,
         super(settings: settings);
 
-  final Widget child;
+  final RoutePageBuilder _pageBuilder;
 
   @override
   bool get barrierDismissible => _barrierDismissible;
@@ -1389,15 +1407,10 @@ class _DialogRoute<T> extends PopupRoute<T> {
   Duration get transitionDuration => _transitionDuration;
   final Duration _transitionDuration;
 
-  final DialogPageBuilder _pageBuilder;
-
-  final DialogTransitionBuilder _transitionBuilder;
+  final RouteTransitionsBuilder _transitionBuilder;
 
   @override
   Widget buildPage(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
-    if (_pageBuilder == null) {
-      return child;
-    }
     return _pageBuilder(context, animation, secondaryAnimation);
   }
 
@@ -1415,53 +1428,36 @@ class _DialogRoute<T> extends PopupRoute<T> {
   }
 }
 
-/// Signature for the page builder callback used by [showGeneralDialog].
-typedef Widget DialogPageBuilder(
-  BuildContext context,
-  Animation<double> animation,
-  Animation<double> secondaryAnimation,
-);
-
-/// Signature for the transition builder callback used by [showGeneralDialog].
-typedef Widget DialogTransitionBuilder(
-  BuildContext context,
-  Animation<double> animation,
-  Animation<double> secondaryAnimation,
-  Widget child,
-);
-
 /// Displays a dialog above the current contents of the app.
 ///
 /// This function allows for customization of aspects of the dialog popup.
 ///
-/// This function takes a `builder` which typically builds a dialog widget.
-/// Content below the dialog is dimmed with a [ModalBarrier]. This widget does
-/// not share a context with the location that `showGeneralDialog` is
-/// originally called from. Use a [StatefulBuilder] or a custom
-/// [StatefulWidget] if the dialog needs to update dynamically.
+/// This function takes a 'pageBuilder' which is used to build the primary
+/// content of the route (typically a dialog widget). Content below the dialog
+/// is dimmed with a [ModalBarrier]. This widget does not share a context with
+/// the location that `showGeneralDialog` is originally called from. Use a
+/// [StatefulBuilder] or a custom [StatefulWidget] if the dialog needs to update
+/// dynamically. The 'pageBuilder' argument can not be null.
 ///
 /// The `context` argument is used to look up the [Navigator] for the dialog.
 /// It is only used when the method is called. Its corresponding widget can
 /// be safely removed from the tree before the dialog is closed.
 ///
-/// The 'barrierDismissible' argument is used to determine whether you can
-/// dismiss this route by tapping the modal barrier. This argument defaults
+/// The 'barrierDismissible' argument is used to determine whether this route
+/// can be dismissed by tapping the modal barrier. This argument defaults
 /// to true.
 ///
 /// The 'barrierLabel' argument is the semantic label used for a dismissible
 /// barrier. This argument defaults to "Dismiss".
 ///
-/// The 'barrierColor' argument is the color to use for the modal barrier. This
+/// The 'barrierColor' argument is the color used for the modal barrier. This
 /// argument defaults to 'Color(0x80000000)'.
 ///
-/// The 'transitionDuration' argument is the duration the transition lasts.
-/// This argument defaults to 200 milliseconds.
+/// The 'transitionDuration' argument is used to determine how long it takes
+/// for the route to arrive on or leave off the screen. This argument defaults
+/// to 200 milliseconds.
 ///
-/// The 'pageBuilder' argument is used to build the primary content of the
-/// route. By default, the page will consist of the widget built by the
-/// 'builder'.
-///
-/// The 'transitionBuilder' argument is used to define how the route arrives
+/// The 'transitionBuilder' argument is used to define how the route arrives on
 /// and leaves off the screen. By default, the transition is a linear fade of
 /// the page's contents.
 ///
@@ -1478,22 +1474,32 @@ typedef Widget DialogTransitionBuilder(
 ///  * [showCupertinoDialog], which displays an iOS-style dialog.
 Future<T> showGeneralDialog<T>({
   @required BuildContext context,
-  @required WidgetBuilder builder,
+  @required RoutePageBuilder pageBuilder,
   bool barrierDismissible,
   String barrierLabel,
   Color barrierColor,
   Duration transitionDuration,
-  DialogPageBuilder pageBuilder,
-  DialogTransitionBuilder transitionBuilder,
+  RouteTransitionsBuilder transitionBuilder,
 }) {
-  assert(builder != null);
+  assert(pageBuilder != null);
   return Navigator.of(context, rootNavigator: true).push(new _DialogRoute<T>(
-    child: new Builder(builder: builder),
+    pageBuilder: pageBuilder,
     barrierDismissible: barrierDismissible,
     barrierLabel: barrierLabel,
     barrierColor: barrierColor,
     transitionDuration: transitionDuration,
-    pageBuilder: pageBuilder,
     transitionBuilder: transitionBuilder,
   ));
 }
+
+/// Signature for the function that builds a route's primary contents.
+/// Used in [PageRouteBuilder] and [showGeneralDialog].
+///
+/// See [ModalRoute.buildPage] for complete definition of the parameters.
+typedef Widget RoutePageBuilder(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation);
+
+/// Signature for the function that builds a route's transitions.
+/// Used in [PageRouteBuilder] and [showGeneralDialog].
+///
+/// See [ModalRoute.buildTransitions] for complete definition of the parameters.
+typedef Widget RouteTransitionsBuilder(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, Widget child);
