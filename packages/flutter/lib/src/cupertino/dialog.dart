@@ -219,6 +219,124 @@ class CupertinoAlertDialog extends StatelessWidget {
   }
 }
 
+/// A simple iOS design dialog.
+///
+/// A simple dialog offers the user a choice between several options. A simple
+/// dialog has an optional title that is displayed above the choices.
+///
+/// For dialogs that inform the user about a situation, consider using an
+/// [CupertinoAlertDialog].
+///
+/// Typically passed as the child widget to [showDialog], which displays the
+/// dialog.
+///
+/// ## Sample code
+///
+/// In this example, the user is asked to select between two options. These
+/// options are represented as an enum. The [showDialog] method here returns
+/// a [Future] that completes to a value of that enum. If the user cancels
+/// the dialog (e.g. by tapping on the mask behind the dialog) then the
+/// future completes with the null value.
+///
+/// The return value in this example is used as the index for a switch statement.
+/// One advantage of using an enum as the return value and then using that to
+/// drive a switch statement is that the analyzer will flag any switch statement
+/// that doesn't mention every value in the enum.
+///
+/// ```dart
+/// Future<Null> _askedToLead() async {
+///   switch (await showDialog<Department>(
+///     context: context,
+///     builder: (BuildContext context) {
+///       return new CupertinoSimpleDialog(
+///         title: const Text('Select assignment'),
+///         children: <Widget>[
+///           new CupertinoSimpleDialogOption(
+///             onPressed: () { Navigator.pop(context, Department.treasury); },
+///             child: const Text('Treasury department'),
+///           ),
+///           new CupertinoSimpleDialogOption(
+///             onPressed: () { Navigator.pop(context, Department.state); },
+///             child: const Text('State department'),
+///           ),
+///         ],
+///       );
+///     }
+///   )) {
+///     case Department.treasury:
+///       // Let's go.
+///       // ...
+///     break;
+///     case Department.state:
+///       // ...
+///     break;
+///   }
+/// }
+/// ```
+///
+/// See also:
+///
+///  * [CupertinoSimpleDialogOption], which are options used in this type of dialog.
+///  * [CupertinoAlertDialog], for dialogs that have a row of buttons below the body.
+///  * [CupertinoDialog], on which [CupertinoSimpleDialogOption] and [CupertinoAlertDialog] are based.
+///  * [showDialog], which actually displays the dialog and returns its result.
+///  * <https://developer.apple.com/ios/human-interface-guidelines/views/alerts/>
+class CupertinoSimpleDialog extends StatelessWidget {
+  /// Creates an iOS-style alert dialog.
+  const CupertinoSimpleDialog({
+    Key key,
+    this.title,
+    this.content,
+    this.scrollController,
+  })  : super(key: key);
+
+  /// The (optional) title of the dialog is displayed in a large font at the top
+  /// of the dialog.
+  ///
+  /// Typically a [Text] widget.
+  final Widget title;
+
+  /// The (optional) content of the dialog is displayed in the center of the
+  /// dialog in a lighter font.
+  ///
+  /// Typically a [Text] widget.
+  final Widget content;
+
+  /// A scroll controller that can be used to control the scrolling of the
+  /// [content] in the dialog.
+  ///
+  /// Defaults to null, and is typically not needed, since most alert messages
+  /// are short.
+  final ScrollController scrollController;
+
+  @override
+  Widget build(BuildContext context) {
+    final List<Widget> children = <Widget>[];
+
+    if (title != null || content != null) {
+      final Widget titleSection = new _CupertinoAlertTitleSection(
+        title: title,
+        content: content,
+        scrollController: scrollController,
+      );
+      children.add(new Flexible(flex: 3, child: titleSection));
+      // Add padding between the sections.
+      children.add(const Padding(padding: EdgeInsets.only(top: 8.0)));
+    }
+
+    return new Padding(
+      padding: const EdgeInsets.symmetric(vertical: _kEdgePadding),
+      child: new CupertinoDialog(
+        child: new Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: children,
+        ),
+      ),
+    );
+  }
+}
+
 /// A button typically used in a [CupertinoAlertDialog].
 ///
 /// See also:
