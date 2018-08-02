@@ -475,7 +475,7 @@ void main() {
     testWidgets('Can match all semantics flags and actions', (WidgetTester tester) async {
       int actions = 0;
       int flags = 0;
-      const CustomSemanticsAction action = const CustomSemanticsAction(label: 'test');
+      const CustomSemanticsAction action = CustomSemanticsAction(label: 'test');
       for (int index in SemanticsAction.values.keys)
         actions |= index;
       for (int index in SemanticsFlag.values.keys)
