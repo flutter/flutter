@@ -20,40 +20,40 @@ class _BottomAppBarDemoState extends State<BottomAppBarDemo> {
 
   // FAB shape
 
-  static const _ChoiceValue<Widget> kNoFab = const _ChoiceValue<Widget>(
+  static const _ChoiceValue<Widget> kNoFab = _ChoiceValue<Widget>(
     title: 'None',
     label: 'do not show a floating action button',
     value: null,
   );
 
-  static const _ChoiceValue<Widget> kCircularFab = const _ChoiceValue<Widget>(
+  static const _ChoiceValue<Widget> kCircularFab = _ChoiceValue<Widget>(
     title: 'Circular',
     label: 'circular floating action button',
-    value: const FloatingActionButton(
+    value: FloatingActionButton(
       onPressed: _showSnackbar,
-      child: const Icon(Icons.add),
+      child: Icon(Icons.add),
       backgroundColor: Colors.orange,
     ),
   );
 
-  static const _ChoiceValue<Widget> kDiamondFab = const _ChoiceValue<Widget>(
+  static const _ChoiceValue<Widget> kDiamondFab = _ChoiceValue<Widget>(
     title: 'Diamond',
     label: 'diamond shape floating action button',
-    value: const _DiamondFab(
+    value: _DiamondFab(
       onPressed: _showSnackbar,
-      child: const Icon(Icons.add),
+      child: Icon(Icons.add),
     ),
   );
 
   // Notch
 
-  static const _ChoiceValue<bool> kShowNotchTrue = const _ChoiceValue<bool>(
+  static const _ChoiceValue<bool> kShowNotchTrue = _ChoiceValue<bool>(
     title: 'On',
     label: 'show bottom appbar notch',
     value: true,
   );
 
-  static const _ChoiceValue<bool> kShowNotchFalse = const _ChoiceValue<bool>(
+  static const _ChoiceValue<bool> kShowNotchFalse = _ChoiceValue<bool>(
     title: 'Off',
     label: 'do not show bottom appbar notch',
     value: false,
@@ -61,25 +61,25 @@ class _BottomAppBarDemoState extends State<BottomAppBarDemo> {
 
   // FAB Position
 
-  static const _ChoiceValue<FloatingActionButtonLocation> kFabEndDocked = const _ChoiceValue<FloatingActionButtonLocation>(
+  static const _ChoiceValue<FloatingActionButtonLocation> kFabEndDocked = _ChoiceValue<FloatingActionButtonLocation>(
     title: 'Attached - End',
     label: 'floating action button is docked at the end of the bottom app bar',
     value: FloatingActionButtonLocation.endDocked,
   );
 
-  static const _ChoiceValue<FloatingActionButtonLocation> kFabCenterDocked = const _ChoiceValue<FloatingActionButtonLocation>(
+  static const _ChoiceValue<FloatingActionButtonLocation> kFabCenterDocked = _ChoiceValue<FloatingActionButtonLocation>(
     title: 'Attached - Center',
     label: 'floating action button is docked at the center of the bottom app bar',
     value: FloatingActionButtonLocation.centerDocked,
   );
 
-  static const _ChoiceValue<FloatingActionButtonLocation> kFabEndFloat= const _ChoiceValue<FloatingActionButtonLocation>(
+  static const _ChoiceValue<FloatingActionButtonLocation> kFabEndFloat= _ChoiceValue<FloatingActionButtonLocation>(
     title: 'Free - End',
     label: 'floating action button floats above the end of the bottom app bar',
     value: FloatingActionButtonLocation.endFloat,
   );
 
-  static const _ChoiceValue<FloatingActionButtonLocation> kFabCenterFloat = const _ChoiceValue<FloatingActionButtonLocation>(
+  static const _ChoiceValue<FloatingActionButtonLocation> kFabCenterFloat = _ChoiceValue<FloatingActionButtonLocation>(
     title: 'Free - Center',
     label: 'floating action button is floats above the center of the bottom app bar',
     value: FloatingActionButtonLocation.centerFloat,
@@ -91,19 +91,19 @@ class _BottomAppBarDemoState extends State<BottomAppBarDemo> {
       'the floating action button animates to its new position.'
       'The BottomAppBar adapts its shape appropriately.';
     _scaffoldKey.currentState.showSnackBar(
-      const SnackBar(content: const Text(text)),
+      const SnackBar(content: Text(text)),
     );
   }
 
   // App bar color
 
-  static const List<_NamedColor> kBabColors = const <_NamedColor>[
-    const _NamedColor(null, 'Clear'),
-    const _NamedColor(const Color(0xFFFFC100), 'Orange'),
-    const _NamedColor(const Color(0xFF91FAFF), 'Light Blue'),
-    const _NamedColor(const Color(0xFF00D1FF), 'Cyan'),
-    const _NamedColor(const Color(0xFF00BCFF), 'Cerulean'),
-    const _NamedColor(const Color(0xFF009BEE), 'Blue'),
+  static const List<_NamedColor> kBabColors = <_NamedColor>[
+    _NamedColor(null, 'Clear'),
+    _NamedColor(Color(0xFFFFC100), 'Orange'),
+    _NamedColor(Color(0xFF91FAFF), 'Light Blue'),
+    _NamedColor(Color(0xFF00D1FF), 'Cyan'),
+    _NamedColor(Color(0xFF00BCFF), 'Cerulean'),
+    _NamedColor(Color(0xFF009BEE), 'Blue'),
   ];
 
   _ChoiceValue<Widget> _fabShape = kCircularFab;
@@ -358,7 +358,7 @@ class _DemoBottomAppBar extends StatelessWidget {
 
     if (kCenterLocations.contains(fabLocation)) {
       rowContents.add(
-        const Expanded(child: const SizedBox()),
+        const Expanded(child: SizedBox()),
       );
     }
 
@@ -367,7 +367,7 @@ class _DemoBottomAppBar extends StatelessWidget {
         icon: const Icon(Icons.search),
         onPressed: () {
           Scaffold.of(context).showSnackBar(
-            const SnackBar(content: const Text('This is a dummy search action.')),
+            const SnackBar(content: Text('This is a dummy search action.')),
           );
         },
       ),
@@ -375,7 +375,7 @@ class _DemoBottomAppBar extends StatelessWidget {
         icon: const Icon(Icons.more_vert),
         onPressed: () {
           Scaffold.of(context).showSnackBar(
-            const SnackBar(content: const Text('This is a dummy menu action.')),
+            const SnackBar(content: Text('This is a dummy menu action.')),
           );
         },
       ),
@@ -398,13 +398,13 @@ class _DemoDrawer extends StatelessWidget {
     return new Drawer(
       child: new Column(
         children: const <Widget>[
-          const ListTile(
-            leading: const Icon(Icons.search),
-            title: const Text('Search'),
+          ListTile(
+            leading: Icon(Icons.search),
+            title: Text('Search'),
           ),
-          const ListTile(
-            leading: const Icon(Icons.threed_rotation),
-            title: const Text('3D'),
+          ListTile(
+            leading: Icon(Icons.threed_rotation),
+            title: Text('3D'),
           ),
         ],
       ),

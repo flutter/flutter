@@ -13,7 +13,7 @@ Future<Null> pumpTest(WidgetTester tester, TargetPlatform platform) async {
     ),
     home: new CustomScrollView(
       slivers: const <Widget>[
-        const SliverToBoxAdapter(child: const SizedBox(height: 2000.0)),
+        SliverToBoxAdapter(child: SizedBox(height: 2000.0)),
       ],
     ),
   ));

@@ -236,11 +236,11 @@ class ButtonThemeData extends Diagnosticable {
       case ButtonTextTheme.normal:
       case ButtonTextTheme.accent:
         return const RoundedRectangleBorder(
-          borderRadius: const BorderRadius.all(const Radius.circular(2.0)),
+          borderRadius: BorderRadius.all(Radius.circular(2.0)),
         );
       case ButtonTextTheme.primary:
         return const RoundedRectangleBorder(
-          borderRadius: const BorderRadius.all(const Radius.circular(4.0)),
+          borderRadius: BorderRadius.all(Radius.circular(4.0)),
         );
     }
     return const RoundedRectangleBorder();
@@ -306,7 +306,7 @@ class ButtonThemeData extends Diagnosticable {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    const ButtonThemeData defaultTheme = const ButtonThemeData();
+    const ButtonThemeData defaultTheme = ButtonThemeData();
     properties.add(new EnumProperty<ButtonTextTheme>('textTheme', textTheme, defaultValue: defaultTheme.textTheme));
     properties.add(new DoubleProperty('minWidth', minWidth, defaultValue: defaultTheme.minWidth));
     properties.add(new DoubleProperty('height', height, defaultValue: defaultTheme.height));
