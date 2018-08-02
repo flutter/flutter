@@ -40,8 +40,8 @@ typedef Widget ValueWidgetBuilder<T>(BuildContext context, T value, Widget child
 ///
 /// See also:
 ///
-///  * [AnimatedBuilder], which invokes a builder on [Animation] ticks rather
-///    than a [ValueListenable] changing value.
+///  * [AnimatedBuilder], which also triggers rebuilds from a [Listenable]
+///    without passing back a specific value from a [ValueListenable].
 ///  * [NotificationListener], which lets you rebuild based on [Notification]
 ///    coming from its descendent widgets rather than a [ValueListenable] that
 ///    you have a direct reference to.
