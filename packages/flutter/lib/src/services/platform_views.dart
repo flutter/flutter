@@ -191,7 +191,7 @@ class AndroidMotionEvent {
   /// Creates an AndroidMotionEvent.
   ///
   /// All parameters must not be null.
-  const AndroidMotionEvent({
+  AndroidMotionEvent({
     @required this.downTime,
     @required this.eventTime,
     @required this.action,
@@ -219,7 +219,9 @@ class AndroidMotionEvent {
        assert(deviceId != null),
        assert(edgeFlags != null),
        assert(source != null),
-       assert(flags != null);
+       assert(flags != null),
+       assert(pointerProperties.length == pointerCount),
+       assert(pointerCoords.length == pointerCount);
 
   /// The time (in ms) when the user originally pressed down to start a stream of position events,
   /// relative to an arbitrary timeline.
