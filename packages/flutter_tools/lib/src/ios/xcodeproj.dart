@@ -32,9 +32,9 @@ String flutterFrameworkDir(BuildMode mode) {
 /// if project is an iOS project and such files are out of date or do not
 /// already exist.
 Future<void> generateXcodeProperties({FlutterProject project}) async {
-  if ((await project.manifest).isModule ||
+  if (project.manifest.isModule ||
       project.ios.directory.existsSync()) {
-    if (!Cache.instance.fileOlderThanToolsStamp(await project.generatedXcodePropertiesFile)) {
+    if (!Cache.instance.fileOlderThanToolsStamp(project.generatedXcodePropertiesFile)) {
       return;
     }
 
@@ -79,7 +79,7 @@ Future<void> updateGeneratedXcodeProperties({
 
   localsBuffer.writeln('SYMROOT=\${SOURCE_ROOT}/../${getIosBuildDirectory()}');
 
-  final FlutterManifest manifest = await project.manifest;
+  final FlutterManifest manifest = project.manifest;
   if (!manifest.isModule) {
     // For module projects we do not want to write the FLUTTER_FRAMEWORK_DIR
     // explicitly. Rather we rely on the xcode backend script and the Podfile
@@ -119,7 +119,7 @@ Future<void> updateGeneratedXcodeProperties({
     localsBuffer.writeln('TRACK_WIDGET_CREATION=true');
   }
 
-  final File generatedXcodePropertiesFile = await project.generatedXcodePropertiesFile;
+  final File generatedXcodePropertiesFile = project.generatedXcodePropertiesFile;
   generatedXcodePropertiesFile.createSync(recursive: true);
   generatedXcodePropertiesFile.writeAsStringSync(localsBuffer.toString());
 }

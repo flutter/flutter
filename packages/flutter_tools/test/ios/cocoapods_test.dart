@@ -40,12 +40,12 @@ void main() {
     resultOfPodVersion = () async => exitsHappy(versionText);
   }
 
-  setUp(() {
+  setUp(() async {
     Cache.flutterRoot = 'flutter';
     fs = new MemoryFileSystem();
     mockProcessManager = new MockProcessManager();
     mockXcodeProjectInterpreter = new MockXcodeProjectInterpreter();
-    projectUnderTest = new FlutterProject(fs.directory('project'));
+    projectUnderTest = await FlutterProject.fromDirectory(fs.directory('project'));
     projectUnderTest.ios.directory.createSync(recursive: true);
     cocoaPodsUnderTest = new CocoaPods();
     pretendPodVersionIs('1.5.0');
@@ -138,7 +138,7 @@ void main() {
         'SWIFT_VERSION': '4.0',
       });
 
-      final FlutterProject project = new FlutterProject.fromPath('project');
+      final FlutterProject project = await FlutterProject.fromPath('project');
       cocoaPodsUnderTest.setupPodfile(project.ios);
 
       expect(projectUnderTest.ios.podfile.readAsStringSync(), 'Swift podfile template');
@@ -150,7 +150,7 @@ void main() {
     testUsingContext('does not recreate Podfile when already present', () async {
       projectUnderTest.ios.podfile..createSync()..writeAsStringSync('Existing Podfile');
 
-      final FlutterProject project = new FlutterProject.fromPath('project');
+      final FlutterProject project = await FlutterProject.fromPath('project');
       cocoaPodsUnderTest.setupPodfile(project.ios);
 
       expect(projectUnderTest.ios.podfile.readAsStringSync(), 'Existing Podfile');
@@ -161,7 +161,7 @@ void main() {
     testUsingContext('does not create Podfile when we cannot interpret Xcode projects', () async {
       when(mockXcodeProjectInterpreter.isInstalled).thenReturn(false);
 
-      final FlutterProject project = new FlutterProject.fromPath('project');
+      final FlutterProject project = await FlutterProject.fromPath('project');
       cocoaPodsUnderTest.setupPodfile(project.ios);
 
       expect(projectUnderTest.ios.podfile.existsSync(), false);
@@ -179,7 +179,7 @@ void main() {
         ..createSync(recursive: true)
         ..writeAsStringSync('Existing release config');
 
-      final FlutterProject project = new FlutterProject.fromPath('project');
+      final FlutterProject project = await FlutterProject.fromPath('project');
       cocoaPodsUnderTest.setupPodfile(project.ios);
 
       final String debugContents = projectUnderTest.ios.xcodeConfigFor('Debug').readAsStringSync();
