@@ -605,7 +605,8 @@ class ClipRectLayer extends ContainerLayer {
   ///
   /// The [clipRect] property must be non-null before the compositing phase of
   /// the pipeline.
-  ClipRectLayer({ this.clipRect, this.clipBehavior = Clip.antiAlias }) : assert(clipBehavior != null), assert(clipBehavior != Clip.none);
+  ClipRectLayer({ this.clipRect, Clip clipBehavior = Clip.antiAlias }) :
+        _clipBehavior = clipBehavior, assert(clipBehavior != null), assert(clipBehavior != Clip.none);
 
   /// The rectangle to clip in the parent's coordinate system.
   ///
@@ -613,8 +614,14 @@ class ClipRectLayer extends ContainerLayer {
   /// (as described at [Layer]).
   Rect clipRect;
 
-  /// {@macro flutter.layer.clipBehavior}
-  Clip clipBehavior;
+  /// {@macro flutter.clipper.clipBehavior}
+  Clip get clipBehavior => _clipBehavior;
+  Clip _clipBehavior;
+  set clipBehavior(Clip value) {
+    assert(value != null);
+    assert(value != Clip.none);
+    _clipBehavior = value;
+  }
 
   @override
   S find<S>(Offset regionOffset) {
@@ -625,7 +632,7 @@ class ClipRectLayer extends ContainerLayer {
 
   @override
   void addToScene(ui.SceneBuilder builder, Offset layerOffset) {
-    bool enabled = clipBehavior != Clip.none;
+    bool enabled = true;
     assert(() {
       enabled = !debugDisableClipLayers;
       return true;
@@ -654,7 +661,8 @@ class ClipRRectLayer extends ContainerLayer {
   ///
   /// The [clipRRect] property must be non-null before the compositing phase of
   /// the pipeline.
-  ClipRRectLayer({ this.clipRRect, this.clipBehavior = Clip.antiAlias }): assert(clipBehavior != null), assert(clipBehavior != Clip.none);
+  ClipRRectLayer({ this.clipRRect, Clip clipBehavior = Clip.antiAlias }) :
+        _clipBehavior = clipBehavior, assert(clipBehavior != null), assert(clipBehavior != Clip.none);
 
   /// The rounded-rect to clip in the parent's coordinate system.
   ///
@@ -662,8 +670,14 @@ class ClipRRectLayer extends ContainerLayer {
   /// (as described at [Layer]).
   RRect clipRRect;
 
-  /// {@macro flutter.layer.clipBehavior}
-  Clip clipBehavior;
+  /// {@macro flutter.clipper.clipBehavior}
+  Clip get clipBehavior => _clipBehavior;
+  Clip _clipBehavior;
+  set clipBehavior(Clip value) {
+    assert(value != null);
+    assert(value != Clip.none);
+    _clipBehavior = value;
+  }
 
   @override
   S find<S>(Offset regionOffset) {
@@ -674,9 +688,9 @@ class ClipRRectLayer extends ContainerLayer {
 
   @override
   void addToScene(ui.SceneBuilder builder, Offset layerOffset) {
-    bool enabled = clipBehavior != Clip.none;
+    bool enabled = true;
     assert(() {
-      enabled = enabled && !debugDisableClipLayers;
+      enabled = !debugDisableClipLayers;
       return true;
     }());
     if (enabled)
@@ -703,7 +717,8 @@ class ClipPathLayer extends ContainerLayer {
   ///
   /// The [clipPath] property must be non-null before the compositing phase of
   /// the pipeline.
-  ClipPathLayer({ this.clipPath, this.clipBehavior = Clip.antiAlias }) : assert(clipBehavior != null), assert(clipBehavior != Clip.none);
+  ClipPathLayer({ this.clipPath, Clip clipBehavior = Clip.antiAlias }) :
+        _clipBehavior = clipBehavior, assert(clipBehavior != null), assert(clipBehavior != Clip.none);
 
   /// The path to clip in the parent's coordinate system.
   ///
@@ -712,7 +727,13 @@ class ClipPathLayer extends ContainerLayer {
   Path clipPath;
 
   /// {@macro flutter.clipper.clipBehavior}
-  Clip clipBehavior;
+  Clip get clipBehavior => _clipBehavior;
+  Clip _clipBehavior;
+  set clipBehavior(Clip value) {
+    assert(value != null);
+    assert(value != Clip.none);
+    _clipBehavior = value;
+  }
 
   @override
   S find<S>(Offset regionOffset) {
@@ -723,9 +744,9 @@ class ClipPathLayer extends ContainerLayer {
 
   @override
   void addToScene(ui.SceneBuilder builder, Offset layerOffset) {
-    bool enabled = clipBehavior != Clip.none;
+    bool enabled = true;
     assert(() {
-      enabled = enabled && !debugDisableClipLayers;
+      enabled = !debugDisableClipLayers;
       return true;
     }());
     if (enabled)
