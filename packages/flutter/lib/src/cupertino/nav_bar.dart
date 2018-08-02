@@ -15,6 +15,8 @@ import 'page_scaffold.dart';
 import 'route.dart';
 
 /// Standard iOS navigation bar height without the status bar.
+///
+/// This height is constant and independent of accessibility as is in iOS.
 const double _kNavBarPersistentHeight = 44.0;
 
 /// Size increase from expanding the navigation bar into an iOS-11-style large title
@@ -551,29 +553,7 @@ class _CupertinoPersistentNavigationBar extends StatelessWidget {
     final Widget backLabel = components.backLabel;
 
     if (leading == null && backChevron != null && backLabel != null) {
-      leading = new CupertinoButton(
-        child: new Semantics(
-          container: true,
-          excludeSemantics: true,
-          label: 'Back',
-          button: true,
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(minWidth: _kNavBarBackButtonTapWidth),
-            child: new Row(
-              mainAxisSize: MainAxisSize.min,
-              mainAxisAlignment: MainAxisAlignment.start,
-              children: <Widget>[
-                const Padding(padding: EdgeInsetsDirectional.only(start: 8.0)),
-                backChevron,
-                const Padding(padding: EdgeInsetsDirectional.only(start: 6.0)),
-                backLabel,
-              ],
-            ),
-          ),
-        ),
-        padding: EdgeInsets.zero,
-        onPressed: () { Navigator.maybePop(context); },
-      );
+      leading = new CupertinoNavigationBarBackButton._assemble(backChevron, backLabel);
     }
 
     Widget paddedToolbar = new NavigationToolbar(
@@ -630,16 +610,15 @@ class _CupertinoNavigationBarComponents {
        _padding = padding,
        _actionsForegroundColor = actionsForegroundColor,
        _middleVisible = middleVisible,
-       _large = large {
-    _actionsStyle = new TextStyle(
-      fontFamily: '.SF UI Text',
-      fontSize: 17.0,
-      letterSpacing: -0.24,
-      color: actionsForegroundColor,
-    );
-  }
+       _large = large,
+       _actionsStyle = new TextStyle(
+         fontFamily: '.SF UI Text',
+         fontSize: 17.0,
+         letterSpacing: -0.24,
+         color: actionsForegroundColor,
+       );
 
-  TextStyle _actionsStyle;
+  final TextStyle _actionsStyle;
 
   final ModalRoute<dynamic> _route;
 
@@ -825,7 +804,15 @@ class CupertinoNavigationBarBackButton extends StatelessWidget {
   const CupertinoNavigationBarBackButton({
     @required this.color,
     this.previousPageTitle,
-  }) : assert(color != null);
+  }) : _backChevron = null,
+       _backLabel = null,
+       assert(color != null);
+
+  const CupertinoNavigationBarBackButton._assemble(
+    this._backChevron,
+    this._backLabel,
+  ) : color = null,
+      previousPageTitle = null;
 
   /// The [Color] of the back chevron.
   ///
@@ -836,6 +823,10 @@ class CupertinoNavigationBarBackButton extends StatelessWidget {
   /// automatically derived from [CupertinoPageRoute.title] if the current and
   /// previous routes are both [CupertinoPageRoute]s.
   final String previousPageTitle;
+
+  final _BackChevron _backChevron;
+
+  final _BackLabel _backLabel;
 
   @override
   Widget build(BuildContext context) {
@@ -858,10 +849,10 @@ class CupertinoNavigationBarBackButton extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.start,
             children: <Widget>[
               const Padding(padding: EdgeInsetsDirectional.only(start: 8.0)),
-              new _BackChevron(color: color),
+              _backChevron ?? new _BackChevron(color: color),
               const Padding(padding: EdgeInsetsDirectional.only(start: 6.0)),
               new Flexible(
-                child: new _BackLabel(
+                child: _backLabel ?? new _BackLabel(
                   specifiedPreviousTitle: previousPageTitle,
                   route: currentRoute,
                 ),
