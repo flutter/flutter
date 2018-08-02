@@ -66,6 +66,15 @@ void main() {
         expect('$uri', 'http://127.0.0.1:3333');
       });
 
+      testUsingContext('discover usi if logs has ESC Ascii', () async {
+        initialize();
+        final Future<Uri> uriFuture = discoverer.uri;
+        logReader.addLine('Observatory listening on http://127.0.0.1:3333 \x1b[');
+        final Uri uri = await uriFuture;
+        expect(uri.port, 3333);
+        expect('$uri', 'http://127.0.0.1:3333');
+      });
+
       testUsingContext('discover uri if logs has newline chars', () async {
         initialize();
         final Future<Uri> uriFuture = discoverer.uri;
@@ -73,7 +82,7 @@ void main() {
         final Uri uri = await uriFuture;
         expect(uri.port, 3333);
         expect('$uri', 'http://127.0.0.1:3333');
-      }
+      });
 
       testUsingContext('uri throws if logs produce bad line', () async {
         initialize();
