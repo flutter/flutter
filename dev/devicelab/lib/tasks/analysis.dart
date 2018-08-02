@@ -12,7 +12,7 @@ import '../framework/framework.dart';
 import '../framework/utils.dart';
 
 /// Run each benchmark this many times and compute average.
-const int _kRunsPerBenchmark = 4;
+const int _kRunsPerBenchmark = 3;
 
 /// Runs a benchmark once and reports the result as a lower-is-better numeric
 /// value.
