@@ -911,6 +911,7 @@ void main() {
           value: 'test',
           actions: <SemanticsAction>[
             SemanticsAction.moveCursorBackwardByCharacter,
+            SemanticsAction.moveCursorBackwardByWord,
             SemanticsAction.setSelection,
           ],
         ));
@@ -927,6 +928,8 @@ void main() {
           actions: <SemanticsAction>[
             SemanticsAction.moveCursorBackwardByCharacter,
             SemanticsAction.moveCursorForwardByCharacter,
+            SemanticsAction.moveCursorBackwardByWord,
+            SemanticsAction.moveCursorForwardByWord,
             SemanticsAction.setSelection,
           ],
         ));
@@ -941,6 +944,7 @@ void main() {
           value: 'test',
           actions: <SemanticsAction>[
             SemanticsAction.moveCursorForwardByCharacter,
+            SemanticsAction.moveCursorForwardByWord,
             SemanticsAction.setSelection,
           ],
         ));
@@ -995,6 +999,8 @@ void main() {
           actions: <SemanticsAction>[
             SemanticsAction.moveCursorBackwardByCharacter,
             SemanticsAction.moveCursorForwardByCharacter,
+            SemanticsAction.moveCursorBackwardByWord,
+            SemanticsAction.moveCursorForwardByWord,
             SemanticsAction.setSelection,
           ],
         ));
@@ -1082,6 +1088,8 @@ void main() {
           actions: <SemanticsAction>[
             SemanticsAction.moveCursorBackwardByCharacter,
             SemanticsAction.moveCursorForwardByCharacter,
+            SemanticsAction.moveCursorBackwardByWord,
+            SemanticsAction.moveCursorForwardByWord,
             SemanticsAction.setSelection,
           ],
         ));
@@ -1106,6 +1114,7 @@ void main() {
           value: 'test',
           actions: <SemanticsAction>[
             SemanticsAction.moveCursorForwardByCharacter,
+            SemanticsAction.moveCursorForwardByWord,
             SemanticsAction.setSelection,
           ],
         ));
@@ -1220,6 +1229,7 @@ void main() {
             value: 'test',
             actions: <SemanticsAction>[
               SemanticsAction.moveCursorBackwardByCharacter,
+              SemanticsAction.moveCursorBackwardByWord,
               SemanticsAction.setSelection,
             ],
           ));
@@ -1232,6 +1242,7 @@ void main() {
             value: 'test',
             actions: <SemanticsAction>[
               SemanticsAction.moveCursorBackwardByCharacter,
+              SemanticsAction.moveCursorBackwardByWord,
               SemanticsAction.setSelection,
               SemanticsAction.copy,
             ],
@@ -1246,6 +1257,7 @@ void main() {
             value: 'test',
             actions: <SemanticsAction>[
               SemanticsAction.moveCursorBackwardByCharacter,
+              SemanticsAction.moveCursorBackwardByWord,
               SemanticsAction.setSelection,
               SemanticsAction.paste,
             ],
@@ -1260,6 +1272,7 @@ void main() {
             value: 'test',
             actions: <SemanticsAction>[
               SemanticsAction.moveCursorBackwardByCharacter,
+              SemanticsAction.moveCursorBackwardByWord,
               SemanticsAction.setSelection,
               SemanticsAction.cut,
             ],
@@ -1275,6 +1288,7 @@ void main() {
             value: 'test',
             actions: <SemanticsAction>[
               SemanticsAction.moveCursorBackwardByCharacter,
+              SemanticsAction.moveCursorBackwardByWord,
               SemanticsAction.setSelection,
               SemanticsAction.cut,
               SemanticsAction.copy,
@@ -1318,6 +1332,7 @@ void main() {
                             ],
                             actions: <SemanticsAction>[
                               SemanticsAction.moveCursorBackwardByCharacter,
+                              SemanticsAction.moveCursorBackwardByWord,
                               SemanticsAction.setSelection,
                               SemanticsAction.copy,
                               SemanticsAction.cut,
