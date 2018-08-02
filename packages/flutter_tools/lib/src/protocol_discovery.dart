@@ -65,7 +65,7 @@ class ProtocolDiscovery {
 
     if (_match != null) {
       try {
-        uri = Uri.parse(_match[0]);
+        uri = Uri.parse(_match[1]);
       } catch (error) {
         _stopScrapingLogs();
         _completer.completeError(error);
