@@ -394,10 +394,17 @@ void main() {
         header: true,
         button: true,
         onTap: () {},
+        onLongPress: () {},
         label: 'foo',
         hint: 'bar',
         value: 'baz',
         textDirection: TextDirection.rtl,
+        onTapHint: 'scan',
+        onLongPressHint: 'fill',
+        customSemanticsActions: <CustomSemanticsAction, VoidCallback>{
+          const CustomSemanticsAction(label: 'foo'): () {},
+          const CustomSemanticsAction(label: 'bar'): () {},
+        },
       ));
 
       expect(tester.getSemanticsData(find.byKey(key)),
@@ -407,17 +414,68 @@ void main() {
           value: 'baz',
           textDirection: TextDirection.rtl,
           hasTapAction: true,
+          hasLongPressAction: true,
           isButton: true,
           isHeader: true,
           namesRoute: true,
+          onTapHint: 'scan',
+          onLongPressHint: 'fill',
+          customActions: <CustomSemanticsAction>[
+            const CustomSemanticsAction(label: 'foo'),
+            const CustomSemanticsAction(label: 'bar')
+          ],
         ),
       );
+
+      // Doesn't match custom actions
+      expect(tester.getSemanticsData(find.byKey(key)),
+        isNot(matchesSemanticsData(
+          label: 'foo',
+          hint: 'bar',
+          value: 'baz',
+          textDirection: TextDirection.rtl,
+          hasTapAction: true,
+          hasLongPressAction: true,
+          isButton: true,
+          isHeader: true,
+          namesRoute: true,
+          onTapHint: 'scan',
+          onLongPressHint: 'fill',
+          customActions: <CustomSemanticsAction>[
+            const CustomSemanticsAction(label: 'foo'),
+            const CustomSemanticsAction(label: 'barz')
+          ],
+        )),
+      );
+
+      // Doesn't match wrong hints
+      expect(tester.getSemanticsData(find.byKey(key)),
+        isNot(matchesSemanticsData(
+          label: 'foo',
+          hint: 'bar',
+          value: 'baz',
+          textDirection: TextDirection.rtl,
+          hasTapAction: true,
+          hasLongPressAction: true,
+          isButton: true,
+          isHeader: true,
+          namesRoute: true,
+          onTapHint: 'scans',
+          onLongPressHint: 'fills',
+          customActions: <CustomSemanticsAction>[
+            const CustomSemanticsAction(label: 'foo'),
+            const CustomSemanticsAction(label: 'bar')
+          ],
+        )),
+      );
+
       handle.dispose();
     });
 
     testWidgets('Can match all semantics flags and actions', (WidgetTester tester) async {
       int actions = 0;
       int flags = 0;
+      const CustomSemanticsAction action = const CustomSemanticsAction(label: 'test');
       for (int index in SemanticsAction.values.keys)
         actions |= index;
       for (int index in SemanticsFlag.values.keys)
@@ -436,6 +494,7 @@ void main() {
         scrollPosition: null,
         scrollExtentMax: null,
         scrollExtentMin: null,
+        customSemanticsActionIds: <int>[CustomSemanticsAction.getIdentifier(action)],
       );
 
       expect(data, matchesSemanticsData(
@@ -478,8 +537,8 @@ void main() {
          hasPasteAction: true,
          hasDidGainAccessibilityFocusAction: true,
          hasDidLoseAccessibilityFocusAction: true,
-         hasCustomAction: true,
          hasDismissAction: true,
+         customActions: <CustomSemanticsAction>[action],
       ));
     });
   });
