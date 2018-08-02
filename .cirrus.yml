@@ -68,6 +68,8 @@ task:
         SHARD: tool_tests
 
 task:
+  depends_on:
+    - analyze
   osx_instance:
     image: high-sierra-xcode-9.4.1
   env:
