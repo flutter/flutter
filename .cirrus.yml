@@ -7,6 +7,15 @@ task:
     PATH: "$CIRRUS_WORKING_DIR/bin:$CIRRUS_WORKING_DIR/bin/cache/dart-sdk/bin:$PATH"
 
   git_fetch_script: git fetch origin
+  pub_cache:
+    folder: $HOME/.pub-cache
+    fingerprint_script: echo $OS; grep -r --include=pubspec.yaml 'PUBSPEC CHECKSUM' "$CIRRUS_WORKING_DIR"
+  flutter_pkg_cache:
+    folder: bin/cache/pkg
+    fingerprint_script: echo $OS; cat bin/internal/engine.version
+  artifacts_cache:
+    folder: bin/cache/artifacts
+    fingerprint_script: echo $OS; cat bin/internal/engine.version
   setup_script: |
     echo "SDK directory is: $PWD"
     ./bin/flutter --version
@@ -53,6 +62,16 @@ task:
   env:
     CIRRUS_WORKING_DIR: "C:\\Windows\\Temp\\flutter sdk"
   git_fetch_script: git fetch origin
+  pub_cache:
+    folder: $APPDATA\Pub\Cache
+    fingerprint_script:
+      - ps:  $Env:OS; Get-ChildItem -Path "$Env:CIRRUS_WORKING_DIR" pubspec.yaml -Recurse | Select-String -Pattern "PUBSPEC CHECKSUM" -SimpleMatch
+  flutter_pkg_cache:
+    folder: bin\cache\pkg
+    fingerprint_script: echo %OS% & type bin\internal\engine.version
+  artifacts_cache:
+    folder: bin\cache\artifacts
+    fingerprint_script: echo %OS% & type bin\internal\engine.version
   setup_script:
     - bin\flutter.bat config --no-analytics
     - bin\flutter.bat update-packages
@@ -75,6 +94,15 @@ task:
   env:
     CIRRUS_WORKING_DIR: "/tmp/flutter sdk"
   git_fetch_script: git fetch origin
+  pub_cache:
+    folder: $HOME/.pub-cache
+    fingerprint_script: echo $OS; grep -r --include=pubspec.yaml 'PUBSPEC CHECKSUM' "$CIRRUS_WORKING_DIR"
+  flutter_pkg_cache:
+    folder: bin/cache/pkg
+    fingerprint_script: echo $OS; cat bin/internal/engine.version
+  artifacts_cache:
+    folder: bin/cache/artifacts
+    fingerprint_script: echo $OS; cat bin/internal/engine.version
   setup_script:
     - bin/flutter config --no-analytics
     - bin/flutter update-packages
