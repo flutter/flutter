@@ -24,9 +24,19 @@ import 'scrollable.dart';
 /// Class that supplies children for the [ListWheelScrollView].
 ///
 /// Instead of providing a concrete list of children to [ListWheelScrollView],
-/// this class allows several methods to lazily provide children, which helps
-/// when there is an infinite amount of children.
-abstract class ChildDelegate {
+/// this class allows several methods to lazily provide children, which is more
+/// efficient when there are too many or infinite children, by bringing in
+/// only the children that are visible in viewport, and remove them when they
+/// are no longer visible.
+///
+/// See also:
+///  * [ListWheelChildListDelegate], a delegate that supplies children using an
+///    explicit list.
+///  * [ListWheelChildLoopingListDelegate], a delegate that supplies infinite
+///    children by looping an explicit list.
+///  * [ListWheelChildBuilderDelegate], a delegate that supplies children using
+///    a builder callback.
+abstract class ListWheelChildDelegate {
   /// Return the child at the given index. If the child at the given
   /// index does not exist, return null.
   Widget build(BuildContext context, int index);
@@ -35,19 +45,21 @@ abstract class ChildDelegate {
   int get estimatedChildCount;
 
   /// Returns the true index for a child built at a given index. Defaults to
-  /// the given index, however if the delegate is [ChildLoopingListDelegate],
-  /// this value is different.
+  /// the given index, however if the delegate is [ListWheelChildLoopingListDelegate],
+  /// this value is the index of the true element that the delegate is looping to.
   int trueIndexOf(int index) => index;
 
   /// Called to check whether this and the old delegate are actually 'different',
   /// so that the caller can decide to rebuild or not.
-  bool shouldRebuild(covariant ChildDelegate oldDelegate) => true;
+  bool shouldRebuild(covariant ListWheelChildDelegate oldDelegate);
 }
 
-/// A delegate that supplies children using an explicit list.
-class ChildListDelegate extends ChildDelegate {
+/// Class that supplies children using an explicit list. Children are provided
+/// in the range [0, list.length - 1], outside of that range a null child will
+/// be returned.
+class ListWheelChildListDelegate extends ListWheelChildDelegate {
   /// Construct the delegate from a concrete list of children.
-  ChildListDelegate(this.children) : assert(children != null);
+  ListWheelChildListDelegate(this.children) : assert(children != null);
 
   /// The list containing all children that can be supply.
   final List<Widget> children;
@@ -63,7 +75,7 @@ class ChildListDelegate extends ChildDelegate {
   }
 
   @override
-  bool shouldRebuild(covariant ChildListDelegate oldDelegate) {
+  bool shouldRebuild(covariant ListWheelChildListDelegate oldDelegate) {
     return children != oldDelegate.children;
   }
 }
@@ -71,11 +83,13 @@ class ChildListDelegate extends ChildDelegate {
 /// A delegate that supplies an infinite amount of children from an explicit
 /// list by looping the list.
 ///
-/// When build is called with index out of range [0, estimatedChildCount - 1],
-/// the child at index modulo estimatedChildCount will be returned.
-class ChildLoopingListDelegate extends ChildDelegate {
+/// Same as [ListWheelChildListDelegate] when build function is called with
+/// indexes in the list. With index larger than the list's length, it
+/// will be looped back to the beginning, and with negative index, it will be
+/// looped back to the end.
+class ListWheelChildLoopingListDelegate extends ListWheelChildDelegate {
   /// Construct the delegate from a concrete list of children.
-  ChildLoopingListDelegate(this.children) : assert(children != null);
+  ListWheelChildLoopingListDelegate(this.children) : assert(children != null);
 
   /// The list containing all children that can be supply.
   final List<Widget> children;
@@ -94,24 +108,36 @@ class ChildLoopingListDelegate extends ChildDelegate {
   }
 
   @override
-  bool shouldRebuild(covariant ChildLoopingListDelegate oldDelegate) {
+  bool shouldRebuild(covariant ListWheelChildLoopingListDelegate oldDelegate) {
     return children != oldDelegate.children;
   }
 }
 
 /// A delegate that supplies children using a builder callback.
-class ChildBuilderDelegate extends ChildDelegate {
+///
+/// By using the builder, the delegate will be able to provide children in
+/// custom range (infinitely, has either or both lower and upper limit, lower
+/// limit does not have to be 0, etc.) However the builder is expected to
+/// provide children for a contiguous segment, and returning null at some index
+/// means the segment is terminated there.
+class ListWheelChildBuilderDelegate extends ListWheelChildDelegate {
   /// Construct the delegate from a builder callback.
-  ChildBuilderDelegate(
-      this.builder, {
-      this.childCount,
-  }) :  assert(builder != null);
+  ListWheelChildBuilderDelegate(
+    this.builder, {
+    this.childCount,
+  }) : assert(builder != null);
 
   /// Called lazily to build children.
   final IndexedWidgetBuilder builder;
 
-  /// The maximum number of children that can be built.
-  /// Null if number of children is infinite.
+  /// {@template flutter.widgets.wheelList.childCount}
+  /// If non-null, [childCount] is the maximum number of children that can be
+  /// provided, and children are available from 0 to [childCount] - 1.
+  ///
+  /// If null, then the lower and upper limit are not known. However the [builder]
+  /// must provide children for a contiguous segment and returning null at
+  /// some index means the segment is terminated there.
+  /// {@endtemplate}
   final int childCount;
 
   @override
@@ -124,6 +150,11 @@ class ChildBuilderDelegate extends ChildDelegate {
     if (index < 0 || index >= childCount)
       return null;
     return builder(context, index);
+  }
+
+  @override
+  bool shouldRebuild(covariant ListWheelChildBuilderDelegate oldDelegate) {
+    return builder != oldDelegate.builder || childCount != oldDelegate.childCount;
   }
 }
 
@@ -496,7 +527,8 @@ class FixedExtentScrollPhysics extends ScrollPhysics {
 /// The children are rendered as if rotating on a wheel instead of scrolling on
 /// a plane.
 class ListWheelScrollView extends StatefulWidget {
-  /// Creates a box in which children are scrolled on a wheel.
+  /// Construct a list in which children are scrolled a wheel. Its children
+  /// are passed to a delegate and lazily built during layout.
   ListWheelScrollView({
     Key key,
     this.controller,
@@ -511,26 +543,26 @@ class ListWheelScrollView extends StatefulWidget {
     this.clipToSize = true,
     this.renderChildrenOutsideViewport = false,
     @required List<Widget> children,
-  }) :  assert(children != null),
-        assert(diameterRatio != null),
-        assert(diameterRatio > 0.0, RenderListWheelViewport.diameterRatioZeroMessage),
-        assert(perspective != null),
-        assert(perspective > 0),
-        assert(perspective <= 0.01, RenderListWheelViewport.perspectiveTooHighMessage),
-        assert(magnification > 0),
-        assert(itemExtent != null),
-        assert(itemExtent > 0),
-        assert(clipToSize != null),
-        assert(renderChildrenOutsideViewport != null),
-        assert(
-        !renderChildrenOutsideViewport || !clipToSize,
-        RenderListWheelViewport.clipToSizeAndRenderChildrenOutsideViewportConflict,
-        ),
-        childDelegate = new ChildListDelegate(children),
-        super(key: key);
+  }) : assert(children != null),
+       assert(diameterRatio != null),
+       assert(diameterRatio > 0.0, RenderListWheelViewport.diameterRatioZeroMessage),
+       assert(perspective != null),
+       assert(perspective > 0),
+       assert(perspective <= 0.01, RenderListWheelViewport.perspectiveTooHighMessage),
+       assert(magnification > 0),
+       assert(itemExtent != null),
+       assert(itemExtent > 0),
+       assert(clipToSize != null),
+       assert(renderChildrenOutsideViewport != null),
+       assert(
+         !renderChildrenOutsideViewport || !clipToSize,
+         RenderListWheelViewport.clipToSizeAndRenderChildrenOutsideViewportConflict,
+       ),
+       childDelegate = new ListWheelChildListDelegate(children),
+       super(key: key);
 
   /// Construct a list in which children are scrolled a wheel. Its children
-  /// are managed by a delegate and can be lazily built during layout.
+  /// are managed by a delegate and are lazily built during layout.
   const ListWheelScrollView.useDelegate({
     Key key,
     this.controller,
@@ -545,22 +577,22 @@ class ListWheelScrollView extends StatefulWidget {
     this.clipToSize = true,
     this.renderChildrenOutsideViewport = false,
     @required this.childDelegate,
-  }) :  assert(childDelegate != null),
-        assert(diameterRatio != null),
-        assert(diameterRatio > 0.0, RenderListWheelViewport.diameterRatioZeroMessage),
-        assert(perspective != null),
-        assert(perspective > 0),
-        assert(perspective <= 0.01, RenderListWheelViewport.perspectiveTooHighMessage),
-        assert(magnification > 0),
-        assert(itemExtent != null),
-        assert(itemExtent > 0),
-        assert(clipToSize != null),
-        assert(renderChildrenOutsideViewport != null),
-        assert(
-          !renderChildrenOutsideViewport || !clipToSize,
-          RenderListWheelViewport.clipToSizeAndRenderChildrenOutsideViewportConflict,
-        ),
-        super(key: key);
+  }) : assert(childDelegate != null),
+       assert(diameterRatio != null),
+       assert(diameterRatio > 0.0, RenderListWheelViewport.diameterRatioZeroMessage),
+       assert(perspective != null),
+       assert(perspective > 0),
+       assert(perspective <= 0.01, RenderListWheelViewport.perspectiveTooHighMessage),
+       assert(magnification > 0),
+       assert(itemExtent != null),
+       assert(itemExtent > 0),
+       assert(clipToSize != null),
+       assert(renderChildrenOutsideViewport != null),
+       assert(
+         !renderChildrenOutsideViewport || !clipToSize,
+         RenderListWheelViewport.clipToSizeAndRenderChildrenOutsideViewportConflict,
+       ),
+       super(key: key);
 
   /// Typically a [FixedExtentScrollController] used to control the current item.
   ///
@@ -616,7 +648,7 @@ class ListWheelScrollView extends StatefulWidget {
   final bool renderChildrenOutsideViewport;
 
   /// A delegate that helps lazily instantiating child.
-  final ChildDelegate childDelegate;
+  final ListWheelChildDelegate childDelegate;
 
   @override
   _ListWheelScrollViewState createState() => new _ListWheelScrollViewState();
@@ -690,7 +722,7 @@ class _ListWheelScrollViewState extends State<ListWheelScrollView> {
 }
 
 /// Element that supports building children lazily for [ListWheelViewport].
-class ListWheelElement extends RenderObjectElement {
+class ListWheelElement extends RenderObjectElement implements ListWheelChildManager {
   /// Creates an element that lazily builds children for the given widget.
   ListWheelElement(ListWheelViewport widget) : super(widget);
 
@@ -718,16 +750,13 @@ class ListWheelElement extends RenderObjectElement {
   void update(covariant ListWheelViewport newWidget) {
     final ListWheelViewport oldWidget = widget;
     super.update(newWidget);
-    final ChildDelegate newDelegate = newWidget.childDelegate;
-    final ChildDelegate oldDelegate = oldWidget.childDelegate;
+    final ListWheelChildDelegate newDelegate = newWidget.childDelegate;
+    final ListWheelChildDelegate oldDelegate = oldWidget.childDelegate;
     if (newDelegate != oldDelegate &&
         (newDelegate.runtimeType != oldDelegate.runtimeType || newDelegate.shouldRebuild(oldDelegate)))
       performRebuild();
   }
 
-  /// The number of children that will be provided. The children will have
-  /// index in the range [0, childCount - 1]. childCount should be null if either
-  /// the child list is infinite or there are children with negative indexes.
   int get childCount => widget.childDelegate.estimatedChildCount;
 
   @override
@@ -750,12 +779,21 @@ class ListWheelElement extends RenderObjectElement {
     }
   }
 
-  /// Ask the underlying delegate to build and return widget at the given index.
+  /// Ask the underlying delegate for a widget at the given index.
+  ///
+  /// Normally the builder is only called once for each index and the result
+  /// will be cached. However when the element is rebuilt, the cache will be
+  /// cleared.
+  ///
+  /// This function is often called when a new child needs to be created.
   Widget retrieveWidget(int index) {
     return _childWidgets.putIfAbsent(index, () => widget.childDelegate.build(this, index));
   }
 
-  /// Create and insert a new child at the given index.
+  @override
+  bool childExistsAt(int index) => retrieveWidget(index) != null;
+
+  @override
   void createChild(int index, { @required RenderBox after }) {
     owner.buildScope(this, () {
       final bool insertFirst = after == null;
@@ -770,7 +808,7 @@ class ListWheelElement extends RenderObjectElement {
     });
   }
 
-  /// Remove the child element corresponding with the given RenderBox.
+  @override
   void removeChild(RenderBox child) {
     final int index = renderObject.indexOf(child);
     owner.buildScope(this, () {
@@ -918,15 +956,16 @@ class ListWheelViewport extends RenderObjectWidget {
   final ViewportOffset offset;
 
   /// Builder to help lazily instantiate child.
-  final ChildDelegate childDelegate;
+  final ListWheelChildDelegate childDelegate;
 
   @override
   ListWheelElement createElement() => new ListWheelElement(this);
 
   @override
   RenderListWheelViewport createRenderObject(BuildContext context) {
+    final ListWheelElement childManager = context;
     return new RenderListWheelViewport(
-      childManager: context,
+      childManager: childManager,
       offset: offset,
       diameterRatio: diameterRatio,
       perspective: perspective,

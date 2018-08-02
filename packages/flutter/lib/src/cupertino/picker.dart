@@ -38,6 +38,10 @@ class CupertinoPicker extends StatefulWidget {
   /// The [backgroundColor] defaults to light gray. It can be set to null to
   /// disable the background painting entirely; this is mildly more efficient
   /// than using [Colors.transparent].
+  ///
+  /// The [looping] argument decides whether the child list is circular, in
+  /// other words, the list can be scrolled infinitely, and scrolling past the
+  /// end of the list will return to the beginning.
   CupertinoPicker({
     Key key,
     this.diameterRatio = _kDefaultDiameterRatio,
@@ -50,23 +54,38 @@ class CupertinoPicker extends StatefulWidget {
     @required this.onSelectedItemChanged,
     @required List<Widget> children,
     bool looping = false,
-  }) :  assert(children != null),
-        assert(diameterRatio != null),
-        assert(diameterRatio > 0.0, RenderListWheelViewport.diameterRatioZeroMessage),
-        assert(magnification > 0),
-        assert(itemExtent != null),
-        assert(itemExtent > 0),
-        childDelegate = looping
-                        ? new ChildLoopingListDelegate(children)
-                        : new ChildListDelegate(children),
-        super(key: key);
+  }) : assert(children != null),
+       assert(diameterRatio != null),
+       assert(diameterRatio > 0.0, RenderListWheelViewport.diameterRatioZeroMessage),
+       assert(magnification > 0),
+       assert(itemExtent != null),
+       assert(itemExtent > 0),
+       childDelegate = looping
+                       ? new ListWheelChildLoopingListDelegate(children)
+                       : new ListWheelChildListDelegate(children),
+       super(key: key);
 
-  /// Create Picker from a child builder where its children is dynamically
+  /// Create picker from an indexed builder where its children is dynamically
   /// built during layout.
+  ///
+  /// A child is lazily created when it starts becoming visible in the viewport.
+  /// All of the children provided by the builder are cached and reused, so
+  /// normally the builder is only called once for each index (except when
+  /// rebuilding - the cache is cleared). Therefore, the builder has to be
+  /// consistent and returns the same widget for the same index.
   ///
   /// The [itemBuilder] argument must not be null. The [childCount] argument
   /// reflects the number of children that will be provided by the [itemBuilder].
-  /// In case that number is infinite, [childCount] is null.
+  /// {@macro flutter.widgets.wheelList.childCount}
+  /// It is very important that the initial item of the scroll controller has
+  /// to be available via the builder. It does not make sense if the children
+  /// are from 1 to 10, and the initial item is 0.
+  ///
+  /// The [itemExtent] argument must be non-null and positive.
+  ///
+  /// The [backgroundColor] defaults to light gray. It can be set to null to
+  /// disable the background painting entirely; this is mildly more efficient
+  /// than using [Colors.transparent].
   CupertinoPicker.builder({
     Key key,
     this.diameterRatio = _kDefaultDiameterRatio,
@@ -79,14 +98,14 @@ class CupertinoPicker extends StatefulWidget {
     @required this.onSelectedItemChanged,
     @required IndexedWidgetBuilder itemBuilder,
     int childCount,
-  }) :  assert(itemBuilder != null),
-        assert(diameterRatio != null),
-        assert(diameterRatio > 0.0, RenderListWheelViewport.diameterRatioZeroMessage),
-        assert(magnification > 0),
-        assert(itemExtent != null),
-        assert(itemExtent > 0),
-        childDelegate = new ChildBuilderDelegate(itemBuilder, childCount: childCount),
-        super(key: key);
+  }) : assert(itemBuilder != null),
+       assert(diameterRatio != null),
+       assert(diameterRatio > 0.0, RenderListWheelViewport.diameterRatioZeroMessage),
+       assert(magnification > 0),
+       assert(itemExtent != null),
+       assert(itemExtent > 0),
+       childDelegate = new ListWheelChildBuilderDelegate(itemBuilder, childCount: childCount),
+       super(key: key);
 
   /// Relative ratio between this picker's height and the simulated cylinder's diameter.
   ///
@@ -135,7 +154,7 @@ class CupertinoPicker extends StatefulWidget {
   final ValueChanged<int> onSelectedItemChanged;
 
   /// A delegate that helps lazily instantiating child.
-  final ChildDelegate childDelegate;
+  final ListWheelChildDelegate childDelegate;
 
   @override
   State<StatefulWidget> createState() => new _CupertinoPickerState();
