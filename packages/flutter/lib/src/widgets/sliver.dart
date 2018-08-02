@@ -49,7 +49,7 @@ export 'package:flutter/rendering.dart' show
 /// In order to preserve state as child elements are scrolled in and out of
 /// view, the following options are possible:
 ///
-/// 1. Moving the ownership of non-trivial UI-state-driving business logic
+///  * Moving the ownership of non-trivial UI-state-driving business logic
 ///    out of the sliver child subtree. For instance, if a list contains posts
 ///    with their number of upvotes coming from a cached network response, store
 ///    the list of posts and upvote number in a data model outside the list. Let
@@ -57,7 +57,7 @@ export 'package:flutter/rendering.dart' show
 ///    source-of-truth model object. Use [StatefulWidget]s in the child widget
 ///    subtree to store instantaneous UI state only.
 ///
-/// 2. Letting [KeepAlive] be the root widget of the sliver child widget subtree
+///  * Letting [KeepAlive] be the root widget of the sliver child widget subtree
 ///    that needs to be preserved. The [KeepAlive] widget marks the child
 ///    subtree's top render object child for keep-alive. When the associated top
 ///    render object is scrolled out of view, the sliver keeps the child's
@@ -71,7 +71,7 @@ export 'package:flutter/rendering.dart' show
 ///    [RepaintBoundary] via `addAutomaticKeepAlives` and
 ///    `addRepaintBoundaries`.
 ///
-/// 3. Using [AutomaticKeepAlive] widgets (inserted by default in
+///  * Using [AutomaticKeepAlive] widgets (inserted by default in
 ///    [SliverChildListDelegate] or [SliverChildListDelegate]). Instead of
 ///    unconditionally caching the child element subtree when scrolling
 ///    off-screen like [KeepAlive], [AutomaticKeepAlive] can let whether to
