@@ -94,7 +94,7 @@ void _createEntry(File mainFile, int copies) {
   final StringBuffer imports = new StringBuffer();
 
   for (int i = 1; i < copies; i++) {
-    imports.writeln("// ignore: unused_import");
+    imports.writeln('// ignore: unused_import');
     imports.writeln("import 'gallery_$i/main.dart' as main_$i;");
   }
 
