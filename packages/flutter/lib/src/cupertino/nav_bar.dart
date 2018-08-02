@@ -466,23 +466,23 @@ class _CupertinoLargeTitleNavigationBarSliverDelegate
                 minHeight: 0.0,
                 maxHeight: double.infinity,
                 alignment: AlignmentDirectional.bottomStart,
-                child: new Padding(
-                  padding: const EdgeInsetsDirectional.only(
-                    start: _kNavBarEdgePadding,
-                    bottom: 8.0, // Bottom has a different padding.
-                  ),
-                  child: new DefaultTextStyle(
-                    style: _kLargeTitleTextStyle,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    child: new AnimatedOpacity(
-                      opacity: showLargeTitle ? 1.0 : 0.0,
-                      duration: _kNavBarTitleFadeDuration,
-                      child: new SafeArea(
-                        top: false,
-                        bottom: false,
-                        child: new Semantics(
-                          header: true,
+                child: new AnimatedOpacity(
+                  opacity: showLargeTitle ? 1.0 : 0.0,
+                  duration: _kNavBarTitleFadeDuration,
+                  child: new Padding(
+                    padding: const EdgeInsetsDirectional.only(
+                      start: _kNavBarEdgePadding,
+                      bottom: 8.0, // Bottom has a different padding.
+                    ),
+                    child: new SafeArea(
+                      top: false,
+                      bottom: false,
+                      child: new Semantics(
+                        header: true,
+                        child: new DefaultTextStyle(
+                          style: _kLargeTitleTextStyle,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                           child: largeTitle,
                         ),
                       ),
@@ -572,7 +572,7 @@ Widget _effectiveTitle({
 /// Consists of the entire navigation bar without background and border when used
 /// without large titles. With large titles, it's the top static half that
 /// doesn't scroll.
-class _CupertinoPersistentNavigationBar extends StatelessWidget implements PreferredSizeWidget {
+class _CupertinoPersistentNavigationBar extends StatelessWidget {
   const _CupertinoPersistentNavigationBar({
     Key key,
     this.leading,
@@ -602,9 +602,6 @@ class _CupertinoPersistentNavigationBar extends StatelessWidget implements Prefe
   /// Whether the middle widget has a visible animated opacity. A null value
   /// means the middle opacity will not be animated.
   final bool middleVisible;
-
-  @override
-  Size get preferredSize => const Size.fromHeight(_kNavBarPersistentHeight);
 
   @override
   Widget build(BuildContext context) {
@@ -657,7 +654,7 @@ class _CupertinoPersistentNavigationBar extends StatelessWidget implements Prefe
       : new AnimatedOpacity(
         opacity: middleVisible ? 1.0 : 0.0,
         duration: _kNavBarTitleFadeDuration,
-        child: styledMiddle,
+        child: new Semantics(child: styledMiddle, header: true),
       );
 
     // Auto add back button if leading not provided.
@@ -711,6 +708,210 @@ class _CupertinoPersistentNavigationBar extends StatelessWidget implements Prefe
       ),
     );
   }
+}
+
+@immutable
+class _CupertinoNavigationBarComponents {
+  _CupertinoNavigationBarComponents({
+    ModalRoute<dynamic> route,
+    Widget leading,
+    bool automaticallyImplyLeading,
+    bool automaticallyImplyTitle,
+    String previousPageTitle,
+    Widget middle,
+    Widget trailing,
+    Widget largeTitle,
+    EdgeInsetsDirectional padding,
+    Color actionsForegroundColor,
+    bool middleVisible,
+    bool large,
+  }) : _route = route,
+       _leading = leading,
+       _automaticallyImplyLeading = automaticallyImplyLeading,
+       _automaticallyImplyTitle = automaticallyImplyTitle,
+       _previousPageTitle = previousPageTitle,
+       _middle = middle,
+       _trailing = trailing,
+       _largeTitle = largeTitle,
+       _padding = padding,
+       _actionsForegroundColor = actionsForegroundColor,
+       _middleVisible = middleVisible,
+       _large = large {
+    _actionsStyle = new TextStyle(
+      fontFamily: '.SF UI Text',
+      fontSize: 17.0,
+      letterSpacing: -0.24,
+      color: actionsForegroundColor,
+    );
+  }
+
+  TextStyle _actionsStyle;
+
+  final ModalRoute<dynamic> _route;
+
+  final Widget _leading;
+  Widget get leading {
+    Widget leadingContent;
+    // Final allows implicit casting inside statements.
+    final ModalRoute<dynamic> currentRoute = _route;
+
+    if (_leading != null) {
+      leadingContent = _leading;
+    } else if (
+      _automaticallyImplyLeading &&
+      currentRoute.canPop &&
+      currentRoute is PageRoute &&
+      currentRoute.fullscreenDialog
+    ) {
+      leadingContent = new CupertinoButton(
+        child: const Text('Close'),
+        padding: EdgeInsets.zero,
+        onPressed: () { currentRoute.navigator.maybePop(); },
+      );
+    }
+
+    if (leadingContent == null) {
+      return null;
+    }
+
+    return new Padding(
+      padding: new EdgeInsetsDirectional.only(
+        start: _padding?.start ?? _kNavBarEdgePadding,
+      ),
+      child: new DefaultTextStyle(
+        style: _actionsStyle,
+        child: leading,
+      ),
+    );
+  }
+
+  Widget get backChevron {
+    // Final allows implicit casting inside statements.
+    final ModalRoute<dynamic> currentRoute = _route;
+
+    if (
+      _leading != null ||
+      !_automaticallyImplyLeading ||
+      !currentRoute.canPop ||
+      (currentRoute is PageRoute && currentRoute.fullscreenDialog)
+    ) {
+      return null;
+    }
+
+    return new _BackChevron(color: _actionsForegroundColor);
+  }
+
+  Widget get backLabel {
+    // Final allows implicit casting inside statements.
+    final ModalRoute<dynamic> currentRoute = _route;
+
+    if (
+      _leading != null ||
+      !_automaticallyImplyLeading ||
+      !currentRoute.canPop ||
+      (currentRoute is PageRoute && currentRoute.fullscreenDialog)
+    ) {
+      return null;
+    }
+
+    return new _BackLabel(
+      specifiedPreviousTitle: _previousPageTitle,
+      route: currentRoute,
+    );
+  }
+
+  final bool _automaticallyImplyLeading;
+  final bool _automaticallyImplyTitle;
+  final String _previousPageTitle;
+
+  final Widget _middle;
+  Widget get middle {
+    Widget middleContent;
+
+    if (_large) {
+      middleContent = _middle;
+    } else {
+      middleContent = _effectiveTitle(
+        title: _middle,
+        automaticallyImplyTitle: _automaticallyImplyTitle,
+        currentRoute: _route,
+      );
+    }
+
+    if (middleContent == null) {
+      return null;
+    }
+
+    return new DefaultTextStyle(
+      style: _actionsStyle.copyWith(
+        fontWeight: FontWeight.w600,
+        letterSpacing: -0.08,
+        color: CupertinoColors.black,
+      ),
+      child: middleContent,
+    );
+  }
+
+  final Widget _trailing;
+  Widget get trailing {
+    if (_trailing == null) {
+      return null;
+    }
+
+    return new Padding(
+      padding: new EdgeInsetsDirectional.only(
+        end: _padding?.end ?? _kNavBarEdgePadding,
+      ),
+      child: new DefaultTextStyle(
+        style: _actionsStyle,
+        child: _trailing,
+      ),
+    );
+  }
+
+  final Widget _largeTitle;
+  Widget get largeTitle {
+    if (!_large) {
+      return null;
+    }
+
+    final Widget effectiveLargeTitle = _effectiveTitle(
+      title: _largeTitle,
+      automaticallyImplyTitle: _automaticallyImplyTitle,
+      currentRoute: _route,
+    );
+
+    if (effectiveLargeTitle == null) {
+      return null;
+    }
+
+    return new Padding(
+      padding: const EdgeInsetsDirectional.only(
+        start: _kNavBarEdgePadding,
+        bottom: 8.0, // Bottom has a different padding.
+      ),
+      child: new SafeArea(
+        top: false,
+        bottom: false,
+        child: new Semantics(
+          header: true,
+          child: new DefaultTextStyle(
+            style: _kLargeTitleTextStyle,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            child: largeTitle,
+          ),
+        ),
+      ),
+    );
+  }
+
+  final EdgeInsetsDirectional _padding;
+  final Color _actionsForegroundColor;
+  /// Whether the middle widget has a visible animated opacity. A null value
+  /// means the middle opacity will not be animated.
+  final bool _middleVisible;
+  final bool _large;
 }
 
 /// A nav bar back button typically used in [CupertinoNavigationBar].
@@ -867,19 +1068,45 @@ class _BackLabel extends StatelessWidget {
   }
 }
 
-class CupertinoNavigationBarTransition extends StatelessWidget {
-  CupertinoNavigationBarTransition({
-    this.animation,
-    this.navBar1,
-    this.navBar2,
-  });
+// class _CupertinoNavigationBarTransition extends StatelessWidget {
+//   CupertinoNavigationBarTransition({
+//     this.animation,
+//     this.topNavBar,
+//     this.bottomNavBar,
+//     this.topRoute,
+//     this.bottomRoute,
+//   });
 
-  final Animation<double> animation;
-  final Widget navBar1;
-  final Widget navBar2;
+//   final Animation<double> animation;
+//   final Widget topNavBar;
+//   final Widget bottomNavBar;
+//   final CupertinoPageRoute<dynamic> topRoute;
+//   final CupertinoPageRoute<dynamic> bottomRoute;
 
-  @override
-  Widget build(BuildContext context) {
-    // TODO: implement build
-  }
-}
+//   double getNavBarHeight(Widget navBar) {
+//     if (navBar is CupertinoNavigationBar) {
+//       return _kNavBarPersistentHeight;
+//     } else if (navBar is CupertinoSliverNavigationBar) {
+//       return _kNavBarPersistentHeight + _kNavBarLargeTitleHeightExtension;
+//     } else {
+//       assert(
+//         false,
+//         'Can only transition between CupertinoNavigationBars and '
+//         'CupertinoSliverNavigationBars',
+//       );
+//       return null;
+//     }
+//   }
+
+//   @override
+//   Widget build(BuildContext context) {
+//     final double topHeight = getNavBarHeight(topNavBar);
+//     final double bottomHeight = getNavBarHeight(bottomNavBar);
+//   }
+// }
+
+// class _RenderCupertinoNavigationBarTransition extends RenderBox {
+
+//   double _topHeight;
+//   double _bottomHeight;
+// }
