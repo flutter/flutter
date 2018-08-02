@@ -1552,9 +1552,9 @@ class _MatchesSemanticsData extends Matcher {
       }).toList();
       final List<CustomSemanticsAction> expectedCustomActions = new List<CustomSemanticsAction>.from(customActions ?? const <int>[]);
       if (hintOverrides?.onTapHint != null)
-        expectedCustomActions.add(new CustomSemanticsAction.standard(hint: hintOverrides.onTapHint, action: SemanticsAction.tap));
+        expectedCustomActions.add(new CustomSemanticsAction.overridingAction(hint: hintOverrides.onTapHint, action: SemanticsAction.tap));
       if (hintOverrides?.onLongPressHint != null)
-        expectedCustomActions.add(new CustomSemanticsAction.standard(hint: hintOverrides.onLongPressHint, action: SemanticsAction.longPress));
+        expectedCustomActions.add(new CustomSemanticsAction.overridingAction(hint: hintOverrides.onLongPressHint, action: SemanticsAction.longPress));
       if (expectedCustomActions.length != providedCustomActions.length)
         return failWithDescription(matchState, 'custom actions where: $providedCustomActions');
       int sortActions(CustomSemanticsAction left, CustomSemanticsAction right) {

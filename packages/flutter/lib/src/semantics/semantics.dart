@@ -83,7 +83,7 @@ class SemanticsTag {
 /// these are presented in the radial context menu.
 ///
 /// Localization and text direction do not automatically apply to the provided
-/// label.
+/// label or hint.
 ///
 /// Instances of this class should either be instantiated with const or
 /// new instances cached in static fields.
@@ -102,10 +102,11 @@ class CustomSemanticsAction {
       hint = null,
       action = null;
 
-  /// Creates a new [CustomSemanticsAction] that shadows a standard semantics action.
+  /// Creates a new [CustomSemanticsAction] that overrides a standard semantics
+  /// action.
   ///
   /// The [hint] must not be null or the empty string.
-  const CustomSemanticsAction.standard({@required this.hint, @required this.action})
+  const CustomSemanticsAction.overridingAction({@required this.hint, @required this.action})
     : assert(hint != null),
       assert(hint != ''),
       assert(action != null),
@@ -433,7 +434,7 @@ class _SemanticsDiagnosticableNode extends DiagnosticableNode<SemanticsNode> {
 /// Provides hint values which override the default hints on supported
 /// platforms.
 ///
-/// On iOS, these are always ignored.
+/// On iOS, these values are always ignored.
 @immutable
 class SemanticsHintOverrides extends DiagnosticableTree {
   /// Creates a semantics hint overrides.
@@ -1569,14 +1570,14 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
       customSemanticsActionIds.add(CustomSemanticsAction.getIdentifier(action));
     if (hintOverrides != null) {
       if (hintOverrides.onTapHint != null) {
-        final CustomSemanticsAction action = new CustomSemanticsAction.standard(
+        final CustomSemanticsAction action = new CustomSemanticsAction.overridingAction(
           hint: hintOverrides.onTapHint,
           action: SemanticsAction.tap,
         );
         customSemanticsActionIds.add(CustomSemanticsAction.getIdentifier(action));
       }
       if (hintOverrides.onLongPressHint != null) {
-        final CustomSemanticsAction action = new CustomSemanticsAction.standard(
+        final CustomSemanticsAction action = new CustomSemanticsAction.overridingAction(
           hint: hintOverrides.onLongPressHint,
           action: SemanticsAction.longPress,
         );
@@ -1610,14 +1611,14 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
         }
         if (node.hintOverrides != null) {
           if (node.hintOverrides.onTapHint != null) {
-            final CustomSemanticsAction action = new CustomSemanticsAction.standard(
+            final CustomSemanticsAction action = new CustomSemanticsAction.overridingAction(
               hint: node.hintOverrides.onTapHint,
               action: SemanticsAction.tap,
             );
             customSemanticsActionIds.add(CustomSemanticsAction.getIdentifier(action));
           }
           if (node.hintOverrides.onLongPressHint != null) {
-            final CustomSemanticsAction action = new CustomSemanticsAction.standard(
+            final CustomSemanticsAction action = new CustomSemanticsAction.overridingAction(
               hint: node.hintOverrides.onLongPressHint,
               action: SemanticsAction.longPress,
             );
