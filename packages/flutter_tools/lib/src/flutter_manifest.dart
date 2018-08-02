@@ -23,8 +23,16 @@ class FlutterManifest {
   /// Returns an empty manifest.
   static FlutterManifest empty() {
     final FlutterManifest manifest = new FlutterManifest._();
-    manifest._descriptor = <String, dynamic>{};
-    manifest._flutterDescriptor = <String, dynamic>{};
+    manifest._descriptor = const <String, dynamic>{};
+    manifest._flutterDescriptor = const <String, dynamic>{};
+    return manifest;
+  }
+
+  /// Returns a mock manifest with the given contents.
+  static FlutterManifest mock(Map<String, dynamic> contents) {
+    final FlutterManifest manifest = new FlutterManifest._();
+    manifest._descriptor = contents ?? const <String, dynamic>{};
+    manifest._flutterDescriptor = manifest._descriptor['flutter'] ?? const <String, dynamic>{};
     return manifest;
   }
 
@@ -108,14 +116,6 @@ class FlutterManifest {
     return _flutterDescriptor['uses-material-design'] ?? false;
   }
 
-  /// Properties defining how to expose this Flutter project as a module
-  /// for integration into an unspecified host app.
-  YamlMap get moduleDescriptor {
-    return _flutterDescriptor.containsKey('module')
-        ? _flutterDescriptor['module'] ?? const <String, dynamic>{}
-        : null;
-  }
-
   /// True if this manifest declares a Flutter module project.
   ///
   /// A Flutter project is considered a module when it has a `module:`
@@ -123,7 +123,28 @@ class FlutterManifest {
   /// existing host app.
   ///
   /// Such a project can be created using `flutter create -t module`.
-  bool get isModule => moduleDescriptor != null;
+  bool get isModule => _flutterDescriptor.containsKey('module');
+
+  /// True if this manifest declares a Flutter plugin project.
+  ///
+  /// A Flutter project is considered a plugin when it has a `plugin:`
+  /// descriptor. A Flutter plugin project wraps custom Android and/or
+  /// iOS code in a Dart interface for consumption by other Flutter app
+  /// projects.
+  ///
+  /// Such a project can be created using `flutter create -t plugin`.
+  bool get isPlugin => _flutterDescriptor.containsKey('plugin');
+
+  /// Returns the Android package declared by this manifest in its
+  /// module or plugin descriptor. Returns null, if there is no
+  /// such declaration.
+  String get androidPackage {
+    if (isModule)
+      return _flutterDescriptor['module']['androidPackage'];
+    if (isPlugin)
+      return _flutterDescriptor['plugin']['androidPackage'];
+    return null;
+  }
 
   List<Map<String, dynamic>> get fontsDescriptor {
     final List<dynamic> fontList = _flutterDescriptor['fonts'];
