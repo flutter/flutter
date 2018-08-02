@@ -41,7 +41,8 @@ class CupertinoPicker extends StatefulWidget {
   ///
   /// The [looping] argument decides whether the child list is circular, in
   /// other words, the list can be scrolled infinitely, and scrolling past the
-  /// end of the list will return to the beginning.
+  /// end of the list will return to the beginning (and scrolling in
+  /// reverse direction will loop the beginning to the end).
   CupertinoPicker({
     Key key,
     this.diameterRatio = _kDefaultDiameterRatio,

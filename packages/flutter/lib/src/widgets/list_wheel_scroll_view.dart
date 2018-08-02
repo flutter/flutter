@@ -116,7 +116,7 @@ class ListWheelChildLoopingListDelegate extends ListWheelChildDelegate {
 /// A delegate that supplies children using a builder callback.
 ///
 /// By using the builder, the delegate will be able to provide children in
-/// custom range (infinitely, has either or both lower and upper limit, lower
+/// custom range (infinite range, has either or both lower and upper limit, lower
 /// limit does not have to be 0, etc.) However the builder is expected to
 /// provide children for a contiguous segment, and returning null at some index
 /// means the segment is terminated there.

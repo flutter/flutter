@@ -20,7 +20,7 @@ typedef double _ChildSizingFunction(RenderBox child);
 /// [RenderListWheelViewport] during layout will asked the delegate to create
 /// children that are visible in the viewport and remove those that are not.
 abstract class ListWheelChildManager {
-  /// The number of children that will be provided.\
+  /// The number of children that will be provided.
   ///
   /// If non-null, the children will have index in the range [0, childCount - 1].
   ///
