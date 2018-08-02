@@ -97,28 +97,32 @@ class CupertinoNavigationBar extends StatelessWidget implements ObstructingPrefe
        assert(automaticallyImplyMiddle != null),
        super(key: key);
 
+  /// {@template flutter.cupertino.navBar.leading}
   /// Widget to place at the start of the navigation bar. Normally a back button
   /// for a normal page or a cancel button for full page dialogs.
   ///
   /// If null and [automaticallyImplyLeading] is true, an appropriate button
   /// will be automatically created.
+  /// {@endtemplate}
   final Widget leading;
 
+  /// {@template flutter.cupertino.navBar.automaticallyImplyLeading}
   /// Controls whether we should try to imply the leading widget if null.
   ///
   /// If true and [leading] is null, automatically try to deduce what the [leading]
   /// widget should be. If [leading] widget is not null, this parameter has no effect.
   ///
-  /// Specifically [CupertinoNavigationBar] would:
+  /// Specifically this navigation bar will:
   ///
   /// 1. Show a 'Close' button if the current route is a `fullscreenDialog`.
   /// 2. Show a back chevron with [previousPageTitle] if [previousPageTitle] is
   ///    not null.
-  /// 3. If the current route is a [CupertinoPageRoute] and the previous route
-  ///    is also a [CupertinoPageRoute], show a back chevron with the previous
-  ///    route's `title`.
+  /// 3. Show a back chevron with the previous route's `title` if the current
+  ///    route is a [CupertinoPageRoute] and the previous route is also a
+  ///    [CupertinoPageRoute].
   ///
   /// This value cannot be null.
+  /// {@endtemplate}
   final bool automaticallyImplyLeading;
 
   /// Controls whether we should try to imply the middle widget if null.
@@ -130,6 +134,7 @@ class CupertinoNavigationBar extends StatelessWidget implements ObstructingPrefe
   /// This value cannot be null.
   final bool automaticallyImplyMiddle;
 
+  /// {@template flutter.cupertino.navBar.previousPageTitle}
   /// Manually specify the previous route's title when automatically implying
   /// the leading back button.
   ///
@@ -139,6 +144,7 @@ class CupertinoNavigationBar extends StatelessWidget implements ObstructingPrefe
   ///
   /// Has no effect when [leading] is not null or if [automaticallyImplyLeading]
   /// is false.
+  /// {@endtemplate}
   final String previousPageTitle;
 
   /// Widget to place in the middle of the navigation bar. Normally a title or
@@ -149,17 +155,22 @@ class CupertinoNavigationBar extends StatelessWidget implements ObstructingPrefe
   /// has a `title`.
   final Widget middle;
 
+  /// {@template flutter.cupertino.navBar.trailing}
   /// Widget to place at the end of the navigation bar. Normally additional actions
   /// taken on the page such as a search or edit function.
+  /// {@endtemplate}
   final Widget trailing;
 
   // TODO(xster): implement support for double row navigation bars.
 
+  /// {@template flutter.cupertino.navBar.backgroundColor}
   /// The background color of the navigation bar. If it contains transparency, the
   /// tab bar will automatically produce a blurring effect to the content
   /// behind it.
+  /// {@endtemplate}
   final Color backgroundColor;
 
+  /// {@template flutter.cupertino.navBar.padding}
   /// Padding for the contents of the navigation bar.
   ///
   /// If null, the navigation bar will adopt the following defaults:
@@ -171,11 +182,14 @@ class CupertinoNavigationBar extends StatelessWidget implements ObstructingPrefe
   ///    which case the padding will be 0.
   ///
   /// Vertical padding won't change the height of the nav bar.
+  /// {@endtemplate}
   final EdgeInsetsDirectional padding;
 
+  /// {@template flutter.cupertino.navBar.border}
   /// The border of the navigation bar. By default renders a single pixel bottom border side.
   ///
   /// If a border is null, the navigation bar will not display a border.
+  /// {@endtemplate}
   final Border border;
 
   /// Default color used for text and icons of the [leading] and [trailing]
@@ -292,30 +306,12 @@ class CupertinoSliverNavigationBar extends StatelessWidget {
   /// has a `title`.
   final Widget largeTitle;
 
-  /// Widget to place at the start of the static navigation bar. Normally a back button
-  /// for a normal page or a cancel button for full page dialogs.
+  /// {@macro flutter.cupertino.navBar.leading}
   ///
   /// This widget is visible in both collapsed and expanded states.
-  ///
-  /// If null and [automaticallyImplyLeading] is true, an appropriate button
-  /// will be automatically created.
   final Widget leading;
 
-  /// Controls whether we should try to imply the leading widget if null.
-  ///
-  /// If true and [leading] is null, automatically try to deduce what the [leading]
-  /// widget should be. If [leading] widget is not null, this parameter has no effect.
-  ///
-  /// Specifically [CupertinoSliverNavigationBar] would:
-  ///
-  /// 1. Show a 'Close' button if the current route is a `fullscreenDialog`.
-  /// 2. Show a back chevron with [previousPageTitle] if [previousPageTitle] is
-  ///    not null.
-  /// 3. If the current route is a [CupertinoPageRoute] and the previous route
-  ///    is also a [CupertinoPageRoute], show a back chevron with the previous
-  ///    route's `title`.
-  ///
-  /// This value cannot be null.
+  /// {@macro flutter.cupertino.navBar.automaticallyImplyLeading}
   final bool automaticallyImplyLeading;
 
   /// Controls whether we should try to imply the [largeTitle] widget if null.
@@ -327,15 +323,7 @@ class CupertinoSliverNavigationBar extends StatelessWidget {
   /// This value cannot be null.
   final bool automaticallyImplyTitle;
 
-  /// Manually specify the previous route's title when automatically implying
-  /// the leading back button.
-  ///
-  /// Overrides the text shown with the back chevron instead of automatically
-  /// showing the previous [CupertinoPageRoute]'s `title` when
-  /// [automaticallyImplyLeading] is true.
-  ///
-  /// Has no effect when [leading] is not null or if [automaticallyImplyLeading]
-  /// is false.
+  /// {@macro flutter.cupertino.navBar.previousPageTitle}
   final String previousPageTitle;
 
   /// A widget to place in the middle of the static navigation bar instead of
@@ -346,39 +334,24 @@ class CupertinoSliverNavigationBar extends StatelessWidget {
   /// [middle] widget is provided.
   final Widget middle;
 
-  /// Widget to place at the end of the static navigation bar. Normally
-  /// additional actions taken on the page such as a search or edit function.
+  /// {@macro flutter.cupertino.navBar.trailing}
   ///
   /// This widget is visible in both collapsed and expanded states.
   final Widget trailing;
 
-  /// Padding for the contents of the navigation bar.
-  ///
-  /// If null, the navigation bar will adopt the following defaults:
-  ///
-  ///  * Vertically, contents will be sized to the same height as the navigation
-  ///    bar itself minus the status bar.
-  ///  * Horizontally, padding will be 16 pixels according to iOS specifications
-  ///    unless the leading widget is an automatically inserted back button, in
-  ///    which case the padding will be 0.
-  ///
-  /// Vertical padding won't change the height of the nav bar.
+  /// {@macro flutter.cupertino.navBar.backgroundColor}
+  final Color backgroundColor;
+
+  /// {@macro flutter.cupertino.navBar.padding}
   final EdgeInsetsDirectional padding;
 
-  /// The border of the navigation bar. By default renders a single pixel bottom border side.
-  ///
-  /// If a border is null, the navigation bar will not display a border.
+  /// {@macro flutter.cupertino.navBar.border}
   final Border border;
-
-  /// The background color of the navigation bar. If it contains transparency, the
-  /// tab bar will automatically produce a blurring effect to the content
-  /// behind it.
-  final Color backgroundColor;
 
   /// Default color used for text and icons of the [leading] and [trailing]
   /// widgets in the navigation bar.
   ///
-  /// The default color for text in the [middle] slot is always black, as per
+  /// The default color for text in the [largeTitle] slot is always black, as per
   /// iOS standard design.
   final Color actionsForegroundColor;
 
@@ -584,14 +557,14 @@ Widget _effectiveTitle({
   ModalRoute<dynamic> currentRoute,
 }) {
   // Auto use the CupertinoPageRoute's title if middle not provided.
-  if (title == null
-      && automaticallyImplyTitle
-      && currentRoute is CupertinoPageRoute
-      && currentRoute.title?.isNotEmpty == true) {
+  if (title == null &&
+      automaticallyImplyTitle &&
+      currentRoute is CupertinoPageRoute &&
+      currentRoute.title != null) {
     return new Text(currentRoute.title);
-  } else {
-    return title;
   }
+
+  return title;
 }
 
 /// The top part of the navigation bar that's never scrolled away.
@@ -864,23 +837,26 @@ class _BackLabel extends StatelessWidget {
   // `child` is never passed in into ValueListenableBuilder so it's always
   // null here and unused.
   Widget _buildPreviousTitleWidget(BuildContext context, String previousTitle, Widget child) {
-    if (previousTitle?.isNotEmpty == true) {
-      if (previousTitle.length > 10) {
-        return const Text('Back');
-      } else {
-        return new Text(previousTitle, maxLines: 1);
-      }
-    } else {
+    if (previousTitle == null) {
       return const SizedBox(height: 0.0, width: 0.0);
     }
+
+    if (previousTitle.length > 10) {
+      return const Text('Back');
+    }
+
+    return new Text(previousTitle, maxLines: 1);
   }
 
   @override
   Widget build(BuildContext context) {
-    if (specifiedPreviousTitle?.isNotEmpty == true) {
+    if (specifiedPreviousTitle != null) {
       return _buildPreviousTitleWidget(context, specifiedPreviousTitle, null);
     } else if (route is CupertinoPageRoute<dynamic>) {
       final CupertinoPageRoute<dynamic> cupertinoRoute = route;
+      // There is no timing issue because the previousTitle Listenable changes
+      // happen during route modifications before the ValueListenableBuilder
+      // is built.
       return new ValueListenableBuilder<String>(
         valueListenable: cupertinoRoute.previousTitle,
         builder: _buildPreviousTitleWidget,

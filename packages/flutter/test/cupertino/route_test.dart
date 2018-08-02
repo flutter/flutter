@@ -82,6 +82,49 @@ void main() {
     expect(tester.getTopLeft(find.text('An iPod')).dx, 8.0 + 34.0 + 6.0);
   });
 
+  testWidgets('Previous title is correct on first transition frame', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      new CupertinoApp(
+        home: const Placeholder(),
+      ),
+    );
+
+    tester.state<NavigatorState>(find.byType(Navigator)).push(
+      new CupertinoPageRoute<void>(
+        title: 'An iPod',
+        builder: (BuildContext context) {
+          return const CupertinoPageScaffold(
+            navigationBar: CupertinoNavigationBar(),
+            child: Placeholder(),
+          );
+        }
+      )
+    );
+
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 500));
+
+    tester.state<NavigatorState>(find.byType(Navigator)).push(
+      new CupertinoPageRoute<void>(
+        title: 'A Phone',
+        builder: (BuildContext context) {
+          return const CupertinoPageScaffold(
+            navigationBar: CupertinoNavigationBar(),
+            child: Placeholder(),
+          );
+        }
+      )
+    );
+
+    // Trigger the route push
+    await tester.pump();
+    // Draw the first frame.
+    await tester.pump();
+
+    // Also shows the previous page's title next to the back button.
+    expect(find.widgetWithText(CupertinoButton, 'An iPod'), findsOneWidget);
+  });
+
   testWidgets('Previous title stays up to date with changing routes', (WidgetTester tester) async {
     await tester.pumpWidget(
       new CupertinoApp(
