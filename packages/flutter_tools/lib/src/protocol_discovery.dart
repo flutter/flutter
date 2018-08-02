@@ -17,8 +17,7 @@ class ProtocolDiscovery {
     this.portForwarder,
     this.hostPort,
     this.ipv6,
-  }) : assert(logReader != null),
-        _prefix = '$serviceName listening on ' {
+  }) : assert(logReader != null) {
     _deviceLogSubscription = logReader.logLines.listen(_handleLine);
   }
 
@@ -43,7 +42,6 @@ class ProtocolDiscovery {
   final DevicePortForwarder portForwarder;
   final int hostPort;
   final bool ipv6;
-  final String _prefix;
 
   final Completer<Uri> _completer = new Completer<Uri>();
 
@@ -62,7 +60,7 @@ class ProtocolDiscovery {
   void _handleLine(String line) {
     Uri uri;
 
-    final RegExp _regexp = new RegExp('$_prefix (http://[^ \n]+)');
+    final RegExp _regexp = new RegExp('${RegExp.escape(serviceName)} (http://[^ \n]+)');
     final Match _match = _regexp.firstMatch(line);
 
     if (_match != null) {
