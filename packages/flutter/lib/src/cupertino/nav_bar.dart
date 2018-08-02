@@ -210,23 +210,22 @@ class CupertinoNavigationBar extends StatelessWidget implements ObstructingPrefe
 
   @override
   Widget build(BuildContext context) {
-    final Widget effectiveMiddle = _effectiveTitle(
-      title: middle,
-      automaticallyImplyTitle: automaticallyImplyMiddle,
-      currentRoute: ModalRoute.of(context),
-    );
-
     return _wrapWithBackground(
       border: border,
       backgroundColor: backgroundColor,
       child: new _CupertinoPersistentNavigationBar(
-        leading: leading,
-        automaticallyImplyLeading: automaticallyImplyLeading,
-        previousPageTitle: previousPageTitle,
-        middle: effectiveMiddle,
-        trailing: trailing,
-        padding: padding,
-        actionsForegroundColor: actionsForegroundColor,
+        components: new _CupertinoNavigationBarComponents(
+          route: ModalRoute.of(context),
+          leading: leading,
+          automaticallyImplyLeading: automaticallyImplyLeading,
+          automaticallyImplyTitle: automaticallyImplyMiddle,
+          previousPageTitle: previousPageTitle,
+          middle: middle,
+          trailing: trailing,
+          padding: padding,
+          actionsForegroundColor: actionsForegroundColor,
+          large: false,
+        ),
       ),
     );
   }
@@ -360,26 +359,25 @@ class CupertinoSliverNavigationBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final Widget effectiveTitle = _effectiveTitle(
-      title: largeTitle,
-      automaticallyImplyTitle: automaticallyImplyTitle,
-      currentRoute: ModalRoute.of(context),
-    );
-
     return new SliverPersistentHeader(
       pinned: true, // iOS navigation bars are always pinned.
       delegate: new _CupertinoLargeTitleNavigationBarSliverDelegate(
+        components: new _CupertinoNavigationBarComponents(
+          route: ModalRoute.of(context),
+          largeTitle: largeTitle,
+          leading: leading,
+          automaticallyImplyLeading: automaticallyImplyLeading,
+          automaticallyImplyTitle: automaticallyImplyTitle,
+          previousPageTitle: previousPageTitle,
+          middle: middle,
+          trailing: trailing,
+          padding: padding,
+          actionsForegroundColor: actionsForegroundColor,
+          large: true,
+        ),
         persistentHeight: _kNavBarPersistentHeight + MediaQuery.of(context).padding.top,
-        largeTitle: effectiveTitle,
-        leading: leading,
-        automaticallyImplyLeading: automaticallyImplyLeading,
-        previousPageTitle: previousPageTitle,
-        middle: middle,
-        trailing: trailing,
-        padding: padding,
         border: border,
         backgroundColor: backgroundColor,
-        actionsForegroundColor: actionsForegroundColor,
       ),
     );
   }
@@ -388,40 +386,19 @@ class CupertinoSliverNavigationBar extends StatelessWidget {
 class _CupertinoLargeTitleNavigationBarSliverDelegate
     extends SliverPersistentHeaderDelegate with DiagnosticableTreeMixin {
   _CupertinoLargeTitleNavigationBarSliverDelegate({
+    @required this.components,
     @required this.persistentHeight,
-    @required this.largeTitle,
-    this.leading,
-    this.automaticallyImplyLeading,
-    this.previousPageTitle,
-    this.middle,
-    this.trailing,
-    this.padding,
     this.border,
     this.backgroundColor,
-    this.actionsForegroundColor,
   }) : assert(persistentHeight != null);
 
+  final _CupertinoNavigationBarComponents components;
+
   final double persistentHeight;
-
-  final Widget largeTitle;
-
-  final Widget leading;
-
-  final bool automaticallyImplyLeading;
-
-  final String previousPageTitle;
-
-  final Widget middle;
-
-  final Widget trailing;
-
-  final EdgeInsetsDirectional padding;
 
   final Color backgroundColor;
 
   final Border border;
-
-  final Color actionsForegroundColor;
 
   @override
   double get minExtent => persistentHeight;
@@ -435,16 +412,10 @@ class _CupertinoLargeTitleNavigationBarSliverDelegate
 
     final _CupertinoPersistentNavigationBar persistentNavigationBar =
         new _CupertinoPersistentNavigationBar(
-      leading: leading,
-      automaticallyImplyLeading: automaticallyImplyLeading,
-      previousPageTitle: previousPageTitle,
-      middle: middle ?? largeTitle,
-      trailing: trailing,
+      components: components,
       // If middle widget exists, always show it. Otherwise, show title
       // when collapsed.
-      middleVisible: middle != null ? null : !showLargeTitle,
-      padding: padding,
-      actionsForegroundColor: actionsForegroundColor,
+      middleVisible: components.middle != null ? null : !showLargeTitle,
     );
 
     return _wrapWithBackground(
@@ -469,25 +440,7 @@ class _CupertinoLargeTitleNavigationBarSliverDelegate
                 child: new AnimatedOpacity(
                   opacity: showLargeTitle ? 1.0 : 0.0,
                   duration: _kNavBarTitleFadeDuration,
-                  child: new Padding(
-                    padding: const EdgeInsetsDirectional.only(
-                      start: _kNavBarEdgePadding,
-                      bottom: 8.0, // Bottom has a different padding.
-                    ),
-                    child: new SafeArea(
-                      top: false,
-                      bottom: false,
-                      child: new Semantics(
-                        header: true,
-                        child: new DefaultTextStyle(
-                          style: _kLargeTitleTextStyle,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          child: largeTitle,
-                        ),
-                      ),
-                    ),
-                  ),
+                  child: components.largeTitle,
                 ),
               ),
             ),
@@ -505,14 +458,10 @@ class _CupertinoLargeTitleNavigationBarSliverDelegate
 
   @override
   bool shouldRebuild(_CupertinoLargeTitleNavigationBarSliverDelegate oldDelegate) {
-    return persistentHeight != oldDelegate.persistentHeight
-        || largeTitle != oldDelegate.largeTitle
-        || leading != oldDelegate.leading
-        || middle != oldDelegate.middle
-        || trailing != oldDelegate.trailing
+    return components != oldDelegate.components
+        || persistentHeight != oldDelegate.persistentHeight
         || border != oldDelegate.border
-        || backgroundColor != oldDelegate.backgroundColor
-        || actionsForegroundColor != oldDelegate.actionsForegroundColor;
+        || backgroundColor != oldDelegate.backgroundColor;
   }
 }
 
@@ -575,29 +524,11 @@ Widget _effectiveTitle({
 class _CupertinoPersistentNavigationBar extends StatelessWidget {
   const _CupertinoPersistentNavigationBar({
     Key key,
-    this.leading,
-    this.automaticallyImplyLeading,
-    this.previousPageTitle,
-    this.middle,
-    this.trailing,
-    this.padding,
-    this.actionsForegroundColor,
+    this.components,
     this.middleVisible,
   }) : super(key: key);
 
-  final Widget leading;
-
-  final bool automaticallyImplyLeading;
-
-  final String previousPageTitle;
-
-  final Widget middle;
-
-  final Widget trailing;
-
-  final EdgeInsetsDirectional padding;
-
-  final Color actionsForegroundColor;
+  final _CupertinoNavigationBarComponents components;
 
   /// Whether the middle widget has a visible animated opacity. A null value
   /// means the middle opacity will not be animated.
@@ -605,96 +536,59 @@ class _CupertinoPersistentNavigationBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final TextStyle actionsStyle = new TextStyle(
-      fontFamily: '.SF UI Text',
-      fontSize: 17.0,
-      letterSpacing: -0.24,
-      color: actionsForegroundColor,
-    );
+    Widget middle = components.middle;
 
-    final Widget styledLeading = leading == null
-        ? null
-        : new Padding(
-          padding: new EdgeInsetsDirectional.only(
-            start: padding?.start ?? _kNavBarEdgePadding,
-          ),
-          child: new DefaultTextStyle(
-            style: actionsStyle,
-            child: leading,
-          ),
-        );
-
-    final Widget styledTrailing = trailing == null
-        ? null
-        : Padding(
-          padding: new EdgeInsetsDirectional.only(
-            end: padding?.end ?? _kNavBarEdgePadding,
-          ),
-          child: new DefaultTextStyle(
-            style: actionsStyle,
-            child: trailing,
-          ),
-        );
-
-    // Let the middle be black rather than `actionsForegroundColor` in case
-    // it's a plain text title.
-    final Widget styledMiddle = middle == null
-        ? null
-        : new DefaultTextStyle(
-          style: actionsStyle.copyWith(
-            fontWeight: FontWeight.w600,
-            letterSpacing: -0.08,
-            color: CupertinoColors.black,
-          ),
-          child: new Semantics(child: middle, header: true),
-        );
-
-    final Widget animatedStyledMiddle = middleVisible == null
-      ? styledMiddle
+    middle = middleVisible == null
+      ? middle
       : new AnimatedOpacity(
         opacity: middleVisible ? 1.0 : 0.0,
         duration: _kNavBarTitleFadeDuration,
-        child: new Semantics(child: styledMiddle, header: true),
+        child: new Semantics(child: middle, header: true),
       );
 
-    // Auto add back button if leading not provided.
-    Widget backOrCloseButton;
-    if (styledLeading == null && automaticallyImplyLeading) {
-      final ModalRoute<dynamic> currentRoute = ModalRoute.of(context);
-      if (currentRoute?.canPop == true) {
-        if (currentRoute is PageRoute && currentRoute?.fullscreenDialog == true) {
-          backOrCloseButton = new CupertinoButton(
-            child: const Padding(
-              padding: EdgeInsetsDirectional.only(
-                start: _kNavBarEdgePadding,
-              ),
-              child: Text('Close'),
+    Widget leading = components.leading;
+    final Widget backChevron = components.backChevron;
+    final Widget backLabel = components.backLabel;
+
+    if (leading == null && backChevron != null && backLabel != null) {
+      leading = new CupertinoButton(
+        child: new Semantics(
+          container: true,
+          excludeSemantics: true,
+          label: 'Back',
+          button: true,
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(minWidth: _kNavBarBackButtonTapWidth),
+            child: new Row(
+              mainAxisSize: MainAxisSize.min,
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: <Widget>[
+                const Padding(padding: EdgeInsetsDirectional.only(start: 8.0)),
+                backChevron,
+                const Padding(padding: EdgeInsetsDirectional.only(start: 6.0)),
+                backLabel,
+              ],
             ),
-            padding: EdgeInsets.zero,
-            onPressed: () { Navigator.maybePop(context); },
-          );
-        } else {
-          backOrCloseButton = new CupertinoNavigationBarBackButton(
-            color: actionsForegroundColor,
-            previousPageTitle: previousPageTitle,
-          );
-        }
-      }
+          ),
+        ),
+        padding: EdgeInsets.zero,
+        onPressed: () { Navigator.maybePop(context); },
+      );
     }
 
     Widget paddedToolbar = new NavigationToolbar(
-      leading: styledLeading ?? backOrCloseButton,
-      middle: animatedStyledMiddle,
-      trailing: styledTrailing,
+      leading: leading,
+      middle: middle,
+      trailing: components.trailing,
       centerMiddle: true,
       middleSpacing: 6.0,
     );
 
-    if (padding != null) {
+    if (components._padding != null) {
       paddedToolbar = new Padding(
         padding: EdgeInsets.only(
-          top: padding.top,
-          bottom: padding.bottom,
+          top: components._padding.top,
+          bottom: components._padding.bottom,
         ),
         child: paddedToolbar,
       );
@@ -780,7 +674,7 @@ class _CupertinoNavigationBarComponents {
       ),
       child: new DefaultTextStyle(
         style: _actionsStyle,
-        child: leading,
+        child: leadingContent,
       ),
     );
   }
@@ -899,7 +793,7 @@ class _CupertinoNavigationBarComponents {
             style: _kLargeTitleTextStyle,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
-            child: largeTitle,
+            child: effectiveLargeTitle,
           ),
         ),
       ),
