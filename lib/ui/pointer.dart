@@ -49,6 +49,9 @@ enum PointerDeviceKind {
 
   /// A pointer device with a stylus that has been inverted.
   invertedStylus,
+
+  /// An unknown pointer device.
+  unknown
 }
 
 /// Information about the state of a pointer.
