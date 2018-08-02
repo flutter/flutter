@@ -231,7 +231,7 @@ class AndroidModuleProject {
       template.render(
         directory,
         <String, dynamic>{
-          'androidIdentifier': project.manifest.moduleDescriptor['androidPackage'],
+          'androidIdentifier': project.manifest.androidPackage,
         },
         printStatusWhenWriting: false,
       );

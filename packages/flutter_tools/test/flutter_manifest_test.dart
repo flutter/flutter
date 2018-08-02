@@ -362,6 +362,30 @@ flutter:
       expect(flutterManifest.isEmpty, false);
     });
 
+    test('allows a module declaration', () async {
+      const String manifest = '''
+name: test
+flutter:
+  module:
+    androidPackage: com.example
+''';
+      final FlutterManifest flutterManifest = await FlutterManifest.createFromString(manifest);
+      expect(flutterManifest.isModule, true);
+      expect(flutterManifest.androidPackage, 'com.example');
+    });
+
+    test('allows a plugin declaration', () async {
+      const String manifest = '''
+name: test
+flutter:
+  plugin:
+    androidPackage: com.example
+''';
+      final FlutterManifest flutterManifest = await FlutterManifest.createFromString(manifest);
+      expect(flutterManifest.isPlugin, true);
+      expect(flutterManifest.androidPackage, 'com.example');
+    });
+
     Future<void> checkManifestVersion({
       String manifest,
       String expectedAppVersion,
