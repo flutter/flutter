@@ -7668,9 +7668,9 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
     ],
     'AMPMS': <dynamic>[r'''AM''', r'''PM'''],
     'DATEFORMATS': <dynamic>[
-      r'''EEEE, MMMM d, y''',
-      r'''MMMM d, y''',
-      r'''MMM d, y''',
+      r'''EEEE، d MMMM، y''',
+      r'''d MMMM، y''',
+      r'''d MMM، y''',
       r'''d/M/yy'''
     ],
     'TIMEFORMATS': <dynamic>[
@@ -9994,7 +9994,7 @@ const Map<String, Map<String, String>> datePatterns =
     'MMMd': r'''d MMM''',
     'MMMEd': r'''EEE، d MMM''',
     'MMMM': r'''LLLL''',
-    'MMMMd': r'''MMMM d''',
+    'MMMMd': r'''d MMMM''',
     'MMMMEEEEd': r'''EEEE، d MMMM''',
     'QQQ': r'''QQQ''',
     'QQQQ': r'''QQQQ''',
@@ -10006,8 +10006,8 @@ const Map<String, Map<String, String>> datePatterns =
     'yMMMd': r'''d MMM، y''',
     'yMMMEd': r'''EEE، d MMM، y''',
     'yMMMM': r'''MMMM y''',
-    'yMMMMd': r'''MMMM d, y''',
-    'yMMMMEEEEd': r'''EEEE, MMMM d, y''',
+    'yMMMMd': r'''d MMMM، y''',
+    'yMMMMEEEEd': r'''EEEE، d MMMM، y''',
     'yQQQ': r'''QQQ y''',
     'yQQQQ': r'''QQQQ y''',
     'H': r'''HH''',
