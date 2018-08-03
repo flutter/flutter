@@ -54,7 +54,7 @@ class TweenSequence<T> extends Animatable<T> {
     assert(totalWeight > 0.0);
 
     double start = 0.0;
-    for (int i = 0; i < _items.length; i++) {
+    for (int i = 0; i < _items.length; i += 1) {
       final double end = i == _items.length - 1 ? 1.0 : start + _items[i].weight / totalWeight;
       _intervals.add(new _Interval(start, end));
       start = end;
@@ -81,7 +81,8 @@ class TweenSequence<T> extends Animatable<T> {
         return _evaluateAt(t, index);
     }
     // Should be unreachable.
-    throw new FlutterError('TweenSequence.evaluate() could not find a interval for $t');
+    assert(false, 'TweenSequence.evaluate() could not find a interval for $t');
+    return null;
   }
 }
 
