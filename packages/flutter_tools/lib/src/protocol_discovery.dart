@@ -60,12 +60,13 @@ class ProtocolDiscovery {
   void _handleLine(String line) {
     Uri uri;
 
-    final RegExp r = new RegExp('$serviceName (http://[^ \n]+)');
+    final RegExp r =
+        new RegExp('${RegExp.escape(serviceName)} (.*) (http://[^ \n]+)');
     final Match match = r.firstMatch(line);
 
     if (match != null) {
       try {
-        uri = Uri.parse(match[1]);
+        uri = Uri.parse(match[2]);
       } catch (error) {
         _stopScrapingLogs();
         _completer.completeError(error);
@@ -77,6 +78,9 @@ class ProtocolDiscovery {
       _stopScrapingLogs();
       _completer.complete(_forwardPort(uri));
     }
+
+    _stopScrapingLogs();
+    _completer.completeError('uri not found');
   }
 
   Future<Uri> _forwardPort(Uri deviceUri) async {
