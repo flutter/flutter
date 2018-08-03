@@ -1376,6 +1376,33 @@ class _Decorator extends RenderObjectWidget {
   }
 }
 
+class _AffixText extends StatelessWidget {
+  const _AffixText({
+    this.labelIsFloating,
+    this.text,
+    this.style,
+    this.child
+  });
+
+  final bool labelIsFloating;
+  final String text;
+  final TextStyle style;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return DefaultTextStyle.merge(
+      style: style,
+      child: new AnimatedOpacity(
+        duration: _kTransitionDuration,
+        curve: _kTransitionCurve,
+        opacity: labelIsFloating ? 1.0 : 0.0,
+        child: child ?? new Text(text, style: style,),
+      ),
+    );
+  }
+}
+
 /// Defines the appearance of a Material Design text field.
 ///
 /// [InputDecorator] displays the visual elements of a Material Design text
@@ -1711,26 +1738,20 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
       ),
     );
 
-    final Widget prefix = decoration.prefixText == null ? null :
-      new AnimatedOpacity(
-        duration: _kTransitionDuration,
-        curve: _kTransitionCurve,
-        opacity: widget._labelIsFloating ? 1.0 : 0.0,
-        child: new Text(
-          decoration.prefixText,
-          style: decoration.prefixStyle ?? hintStyle
-        ),
+    final Widget prefix = decoration.prefix == null && decoration.prefixText == null ? null :
+      new _AffixText(
+        labelIsFloating: widget._labelIsFloating,
+        text: decoration.prefixText,
+        style: decoration.prefixStyle ?? hintStyle,
+        child: decoration.prefix,
       );
 
-    final Widget suffix = decoration.suffixText == null ? null :
-      new AnimatedOpacity(
-        duration: _kTransitionDuration,
-        curve: _kTransitionCurve,
-        opacity: widget._labelIsFloating ? 1.0 : 0.0,
-        child: new Text(
-          decoration.suffixText,
-          style: decoration.suffixStyle ?? hintStyle
-        ),
+    final Widget suffix = decoration.suffix == null && decoration.suffixText == null ? null :
+      new _AffixText(
+        labelIsFloating: widget._labelIsFloating,
+        text: decoration.suffixText,
+        style: decoration.suffixStyle ?? hintStyle,
+        child: decoration.suffix,
       );
 
     final Color activeColor = _getActiveColor(themeData);
@@ -1884,6 +1905,9 @@ class InputDecoration {
   /// no border is drawn.
   ///
   /// The [enabled] argument must not be null.
+  ///
+  /// Only [prefix] or [prefixText] can be specified.
+  /// The same applies for [suffix] and [suffixText].
   const InputDecoration({
     this.icon,
     this.labelText,
@@ -1898,10 +1922,12 @@ class InputDecoration {
     this.isDense,
     this.contentPadding,
     this.prefixIcon,
+    this.prefix,
     this.prefixText,
     this.prefixStyle,
-    this.suffixText,
     this.suffixIcon,
+    this.suffix,
+    this.suffixText,
     this.suffixStyle,
     this.counterText,
     this.counterStyle,
@@ -1914,7 +1940,10 @@ class InputDecoration {
     this.enabledBorder,
     this.border,
     this.enabled = true,
-  }) : assert(enabled != null), isCollapsed = false;
+  }) : assert(enabled != null),
+       assert(!(prefix != null && prefixText != null), 'Declaring both prefix and prefixText is not allowed'),
+       assert(!(suffix != null && suffixText != null), 'Declaring both suffix and suffixText is not allowed'),
+       isCollapsed = false;
 
   /// Defines an [InputDecorator] that is the same size as the input field.
   ///
@@ -1941,8 +1970,10 @@ class InputDecoration {
        contentPadding = EdgeInsets.zero,
        isCollapsed = true,
        prefixIcon = null,
+       prefix = null,
        prefixText = null,
        prefixStyle = null,
+       suffix = null,
        suffixIcon = null,
        suffixText = null,
        suffixStyle = null,
@@ -2096,6 +2127,14 @@ class InputDecoration {
   /// See [Icon], [ImageIcon].
   final Widget prefixIcon;
 
+  /// Optional widget to place on the line before the input.
+  /// Can be used to add some padding to the [prefixText] or to
+  /// add a custom widget in front of the input. The widget's baseline
+  /// is lined up with the input baseline.
+  ///
+  /// Only one of [prefix] and [prefixText] can be specified.
+  final Widget prefix;
+
   /// Optional text prefix to place on the line before the input.
   ///
   /// Uses the [prefixStyle]. Uses [hintStyle] if [prefixStyle] isn't
@@ -2134,6 +2173,14 @@ class InputDecoration {
   ///
   /// See [Icon], [ImageIcon].
   final Widget suffixIcon;
+
+  /// Optional widget to place on the line after the input.
+  /// Can be used to add some padding to the [suffixText] or to
+  /// add a custom widget after the input. The widget's baseline
+  /// is lined up with the input baseline.
+  ///
+  /// Only one of [suffix] and [suffixText] can be specified.
+  final Widget suffix;
 
   /// Optional text suffix to place on the line after the input.
   ///
@@ -2351,9 +2398,11 @@ class InputDecoration {
     bool isDense,
     EdgeInsetsGeometry contentPadding,
     Widget prefixIcon,
+    Widget prefix,
     String prefixText,
     TextStyle prefixStyle,
     Widget suffixIcon,
+    Widget suffix,
     String suffixText,
     TextStyle suffixStyle,
     String counterText,
@@ -2382,9 +2431,11 @@ class InputDecoration {
       isDense: isDense ?? this.isDense,
       contentPadding: contentPadding ?? this.contentPadding,
       prefixIcon: prefixIcon ?? this.prefixIcon,
+      prefix: prefix ?? this.prefix,
       prefixText: prefixText ?? this.prefixText,
       prefixStyle: prefixStyle ?? this.prefixStyle,
       suffixIcon: suffixIcon ?? this.suffixIcon,
+      suffix: suffix ?? this.suffix,
       suffixText: suffixText ?? this.suffixText,
       suffixStyle: suffixStyle ?? this.suffixStyle,
       counterText: counterText ?? this.counterText,
@@ -2450,9 +2501,11 @@ class InputDecoration {
         && typedOther.contentPadding == contentPadding
         && typedOther.isCollapsed == isCollapsed
         && typedOther.prefixIcon == prefixIcon
+        && typedOther.prefix == prefix
         && typedOther.prefixText == prefixText
         && typedOther.prefixStyle == prefixStyle
         && typedOther.suffixIcon == suffixIcon
+        && typedOther.suffix == suffix
         && typedOther.suffixText == suffixText
         && typedOther.suffixStyle == suffixStyle
         && typedOther.counterText == counterText
@@ -2470,6 +2523,8 @@ class InputDecoration {
 
   @override
   int get hashCode {
+    // Split into multiple hashValues calls
+    // because the hashValues function is limited to 20 parameters.
     return hashValues(
       icon,
       labelText,
@@ -2482,14 +2537,22 @@ class InputDecoration {
       errorStyle,
       errorMaxLines,
       isDense,
-      hashValues( // Over 20 fields...
+      hashValues(
         contentPadding,
         isCollapsed,
+        filled,
+        fillColor,
+        border,
+        enabled,
         prefixIcon,
+        prefix,
         prefixText,
         prefixStyle,
         suffixIcon,
+        suffix,
         suffixText,
+      ),
+      hashValues(
         suffixStyle,
         counterText,
         counterStyle,
@@ -2531,12 +2594,16 @@ class InputDecoration {
       description.add('isCollapsed: $isCollapsed');
     if (prefixIcon != null)
       description.add('prefixIcon: $prefixIcon');
+    if (prefix != null)
+      description.add('prefix: $prefix');
     if (prefixText != null)
       description.add('prefixText: $prefixText');
     if (prefixStyle != null)
       description.add('prefixStyle: $prefixStyle');
     if (suffixIcon != null)
       description.add('suffixIcon: $suffixIcon');
+    if (suffix != null)
+      description.add('suffix: $suffix');
     if (suffixText != null)
       description.add('suffixText: $suffixText');
     if (suffixStyle != null)
