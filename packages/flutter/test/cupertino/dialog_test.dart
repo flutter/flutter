@@ -71,7 +71,7 @@ void main() {
 
     final DefaultTextStyle widget = tester.widget(find.byType(DefaultTextStyle));
 
-    expect(widget.style.fontWeight, equals(FontWeight.w600));
+    expect(widget.style.fontWeight, equals(FontWeight.w400));
   });
 
   testWidgets('Default and destructive style', (WidgetTester tester) async {
@@ -83,7 +83,7 @@ void main() {
 
     final DefaultTextStyle widget = tester.widget(find.byType(DefaultTextStyle));
 
-    expect(widget.style.fontWeight, equals(FontWeight.w600));
+    expect(widget.style.fontWeight, equals(FontWeight.w400));
     expect(widget.style.color.red, greaterThan(widget.style.color.blue));
   });
 
@@ -115,7 +115,7 @@ void main() {
     );
 
     await tester.tap(find.text('Go'));
-    await tester.pump();
+    await tester.pumpAndSettle();
 
     expect(scrollController.offset, 0.0);
     scrollController.jumpTo(100.0);
@@ -123,22 +123,24 @@ void main() {
     // Set the scroll position back to zero.
     scrollController.jumpTo(0.0);
 
+    await tester.pumpAndSettle();
+
     // Expect the modal dialog box to take all available height.
     expect(
       tester.getSize(
         find.byType(ClipRRect)
       ),
-      equals(const Size(270.0, 560.0)),
+      equals(const Size(310.0, 560.0)),
     );
 
     // Check sizes/locations of the text. The text is large so these 2 buttons are stacked.
-    // Visually the "Cancel" button and "OK" button are the same height. I don't know why
-    // the test is reporting different height. I allowed it because the test looks correct
-    // when run.
-    expect(tester.getSize(find.text('The Title')), equals(const Size(230.0, 171.0)));
-    expect(tester.getTopLeft(find.text('The Title')), equals(const Offset(285.0, 40.0)));
-    expect(tester.getSize(find.widgetWithText(CupertinoDialogAction, 'Cancel')), equals(const Size(270.0, 148.0)));
-    expect(tester.getSize(find.widgetWithText(CupertinoDialogAction, 'OK')), equals(const Size(270.0, 98.0)));
+    // Visually the "Cancel" button and "OK" button are the same height when using the
+    // regular font. However, when using the test font, "Cancel" becomes 2 lines which
+    // is why the height we're verifying for "Cancel" is larger than "OK".
+    expect(tester.getSize(find.text('The Title')), equals(const Size(270.0, 162.0)));
+    expect(tester.getTopLeft(find.text('The Title')), equals(const Offset(265.0, 80.0)));
+    expect(tester.getSize(find.widgetWithText(CupertinoDialogAction, 'Cancel')), equals(const Size(310.0, 148.0)));
+    expect(tester.getSize(find.widgetWithText(CupertinoDialogAction, 'OK')), equals(const Size(310.0, 98.0)));
   });
 
   testWidgets('Dialog respects small constraints.', (WidgetTester tester) async {
@@ -240,8 +242,8 @@ void main() {
     // Check that the action buttons are the correct heights.
     expect(tester.getSize(find.widgetWithText(CupertinoDialogAction, 'One')).height, equals(98.0));
     expect(tester.getSize(find.widgetWithText(CupertinoDialogAction, 'Two')).height, equals(98.0));
-    expect(tester.getSize(find.widgetWithText(CupertinoDialogAction, 'Three')).height, equals(148.0));
-    expect(tester.getSize(find.widgetWithText(CupertinoDialogAction, 'Chocolate Brownies')).height, equals(298.0));
+    expect(tester.getSize(find.widgetWithText(CupertinoDialogAction, 'Three')).height, equals(98.0));
+    expect(tester.getSize(find.widgetWithText(CupertinoDialogAction, 'Chocolate Brownies')).height, equals(248.0));
     expect(tester.getSize(find.widgetWithText(CupertinoDialogAction, 'Cancel')).height, equals(148.0));
   });
 
@@ -290,7 +292,7 @@ void main() {
 
     // Check that the title/message section is not displayed
     expect(actionScrollController.offset, 0.0);
-    expect(tester.getTopLeft(find.widgetWithText(CupertinoDialogAction, 'One')).dy, equals(277.3333333333333));
+    expect(tester.getTopLeft(find.widgetWithText(CupertinoDialogAction, 'One')).dy, equals(277.5));
 
     // Check that the button's vertical size is the same.
     expect(tester.getSize(find.widgetWithText(CupertinoDialogAction, 'One')).height,
@@ -342,11 +344,9 @@ void main() {
   testWidgets('Actions section height for 1 button is height of button.',
           (WidgetTester tester) async {
     final ScrollController scrollController = new ScrollController();
-    double dividerWidth; // Will be set when the dialog builder runs. Needs a BuildContext.
     await tester.pumpWidget(
       createAppWithButtonThatLaunchesDialog(
         dialogBuilder: (BuildContext context) {
-          dividerWidth = 1.0 / MediaQuery.of(context).devicePixelRatio;
           return new CupertinoAlertDialog(
             title: const Text('The Title'),
             content: const Text('The message'),
@@ -368,7 +368,7 @@ void main() {
     final RenderBox actionsSectionBox = findScrollableActionsSectionRenderBox(tester);
 
     expect(okButtonBox.size.width, actionsSectionBox.size.width);
-    expect(okButtonBox.size.height + dividerWidth, actionsSectionBox.size.height);
+    expect(okButtonBox.size.height, actionsSectionBox.size.height);
   });
 
   testWidgets('Actions section height for 2 side-by-side buttons is height of tallest button.',
@@ -413,18 +413,17 @@ void main() {
 
     expect(
       actionsSectionBox.size.height,
-      max(okButtonBox.size.height, cancelButtonBox.size.height) + dividerWidth,
+      max(okButtonBox.size.height, cancelButtonBox.size.height),
     );
   });
 
-  testWidgets('Actions section height for 2 stacked buttons is height of both buttons.',
-          (WidgetTester tester) async {
+  testWidgets('Actions section height for 2 stacked buttons with enough room is height of both buttons.', (WidgetTester tester) async {
     final ScrollController scrollController = new ScrollController();
-    double dividerWidth; // Will be set when the dialog builder runs. Needs a BuildContext.
+    double dividerThickness; // Will be set when the dialog builder runs. Needs a BuildContext.
     await tester.pumpWidget(
       createAppWithButtonThatLaunchesDialog(
         dialogBuilder: (BuildContext context) {
-          dividerWidth = 1.0 / MediaQuery.of(context).devicePixelRatio;
+          dividerThickness = 1.0 / MediaQuery.of(context).devicePixelRatio;
           return new CupertinoAlertDialog(
             title: const Text('The Title'),
             content: const Text('The message'),
@@ -455,8 +454,82 @@ void main() {
     expect(okButtonBox.size.width, actionsSectionBox.size.width);
 
     expect(
-      okButtonBox.size.height + longButtonBox.size.height + (2.0 * dividerWidth),
+      okButtonBox.size.height + dividerThickness + longButtonBox.size.height,
       actionsSectionBox.size.height,
+    );
+  });
+
+  testWidgets('Actions section height for 2 stacked buttons without enough room and regular font is 1.5 buttons tall.', (WidgetTester tester) async {
+    final ScrollController scrollController = new ScrollController();
+    await tester.pumpWidget(
+      createAppWithButtonThatLaunchesDialog(
+        dialogBuilder: (BuildContext context) {
+          return new CupertinoAlertDialog(
+            title: const Text('The Title'),
+            content: new Text('The message\n' * 40),
+            actions: const <Widget>[
+              CupertinoDialogAction(
+                child: Text('OK'),
+              ),
+              CupertinoDialogAction(
+                isDestructiveAction: true,
+                child: Text('This is too long to fit'),
+              ),
+            ],
+            scrollController: scrollController,
+          );
+        },
+      ),
+    );
+
+    await tester.tap(find.text('Go'));
+    await tester.pumpAndSettle();
+
+    final RenderBox actionsSectionBox = findScrollableActionsSectionRenderBox(tester);
+
+    expect(
+      actionsSectionBox.size.height,
+      67.83333333333337,
+    );
+  });
+
+  testWidgets('Actions section height for 2 stacked buttons without enough room and large accessibility font is 50% of dialog height.', (WidgetTester tester) async {
+    final ScrollController scrollController = new ScrollController();
+    await tester.pumpWidget(
+      createAppWithButtonThatLaunchesDialog(
+        dialogBuilder: (BuildContext context) {
+          return new MediaQuery(
+            data: MediaQuery.of(context).copyWith(textScaleFactor: 3.0),
+            child: new CupertinoAlertDialog(
+              title: const Text('The Title'),
+              content: new Text('The message\n' * 20),
+              actions: const <Widget>[
+                CupertinoDialogAction(
+                  child: Text('This button is multi line'),
+                ),
+                CupertinoDialogAction(
+                  isDestructiveAction: true,
+                  child: Text('This button is multi line'),
+                ),
+              ],
+              scrollController: scrollController,
+            ),
+          );
+        },
+      ),
+    );
+
+    await tester.tap(find.text('Go'));
+    await tester.pumpAndSettle();
+
+    final RenderBox actionsSectionBox = findScrollableActionsSectionRenderBox(tester);
+
+    // The two multi-line buttons with large text are taller than 50% of the
+    // dialog height, but with the accessibility layout policy, the 2 buttons
+    // should be in a scrollable area equal to half the dialog height.
+    expect(
+      actionsSectionBox.size.height,
+      280.0,
     );
   });
 
@@ -497,11 +570,11 @@ void main() {
     expect(option1ButtonBox.size.width, option2ButtonBox.size.width);
     expect(option1ButtonBox.size.width, actionsSectionBox.size.width);
 
-    // Expected Height = available dialog height - content height = 560.0 - 491.83333333333337
-    // Technically this number is off by 0.00000000000004 but I think it's a
+    // Expected Height = button 1 + divider + 1/2 button 2 = 67.83333333333334
+    // Technically the following number is off by 0.00000000000003 but I think it's a
     // Dart precision issue. I ran the subtraction directly in dartpad and still
-    // got 68.16666666666663.
-    const double expectedHeight = 68.16666666666663;
+    // got 67.83333333333337.
+    const double expectedHeight = 67.83333333333337;
     expect(
       actionsSectionBox.size.height,
       expectedHeight,
@@ -557,11 +630,11 @@ void main() {
 
   testWidgets('Pressed button changes appearance and dividers disappear.', (WidgetTester tester) async {
     final ScrollController scrollController = new ScrollController();
-    double dividerWidth; // Will be set when the dialog builder runs. Needs a BuildContext.
+    double dividerThickness; // Will be set when the dialog builder runs. Needs a BuildContext.
     await tester.pumpWidget(
       createAppWithButtonThatLaunchesDialog(
         dialogBuilder: (BuildContext context) {
-          dividerWidth = 1.0 / MediaQuery.of(context).devicePixelRatio;
+          dividerThickness = 1.0 / MediaQuery.of(context).devicePixelRatio;
           return new CupertinoAlertDialog(
             title: const Text('The Title'),
             content: const Text('The message'),
@@ -593,18 +666,18 @@ void main() {
 
     final Offset pressedButtonCenter = new Offset(
       secondButtonBox.size.width / 2.0,
-      (2 * dividerWidth) + firstButtonBox.size.height + (secondButtonBox.size.height / 2.0),
+      firstButtonBox.size.height + dividerThickness + (secondButtonBox.size.height / 2.0),
     );
     final Offset topDividerCenter = new Offset(
       secondButtonBox.size.width / 2.0,
-      dividerWidth + firstButtonBox.size.height + (0.5 * dividerWidth),
+      firstButtonBox.size.height + (0.5 * dividerThickness),
     );
     final Offset bottomDividerCenter = new Offset(
       secondButtonBox.size.width / 2.0,
-      (2 * dividerWidth)
-          + firstButtonBox.size.height
-          + secondButtonBox.size.height
-          + (0.5 * dividerWidth),
+      firstButtonBox.size.height
+        + dividerThickness
+        + secondButtonBox.size.height
+        + (0.5 * dividerThickness),
     );
 
     // Before pressing the button, verify following expectations:
