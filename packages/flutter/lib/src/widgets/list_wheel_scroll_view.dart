@@ -59,7 +59,7 @@ abstract class ListWheelChildDelegate {
 /// be returned.
 class ListWheelChildListDelegate extends ListWheelChildDelegate {
   /// Construct the delegate from a concrete list of children.
-  ListWheelChildListDelegate(this.children) : assert(children != null);
+  ListWheelChildListDelegate({@required this.children}) : assert(children != null);
 
   /// The list containing all children that can be supply.
   final List<Widget> children;
@@ -89,7 +89,7 @@ class ListWheelChildListDelegate extends ListWheelChildDelegate {
 /// looped back to the end.
 class ListWheelChildLoopingListDelegate extends ListWheelChildDelegate {
   /// Construct the delegate from a concrete list of children.
-  ListWheelChildLoopingListDelegate(this.children) : assert(children != null);
+  ListWheelChildLoopingListDelegate({@required this.children}) : assert(children != null);
 
   /// The list containing all children that can be supply.
   final List<Widget> children;
@@ -122,8 +122,8 @@ class ListWheelChildLoopingListDelegate extends ListWheelChildDelegate {
 /// means the segment is terminated there.
 class ListWheelChildBuilderDelegate extends ListWheelChildDelegate {
   /// Construct the delegate from a builder callback.
-  ListWheelChildBuilderDelegate(
-    this.builder, {
+  ListWheelChildBuilderDelegate({
+    @required this.builder,
     this.childCount,
   }) : assert(builder != null);
 
@@ -558,7 +558,7 @@ class ListWheelScrollView extends StatefulWidget {
          !renderChildrenOutsideViewport || !clipToSize,
          RenderListWheelViewport.clipToSizeAndRenderChildrenOutsideViewportConflict,
        ),
-       childDelegate = new ListWheelChildListDelegate(children),
+       childDelegate = new ListWheelChildListDelegate(children: children),
        super(key: key);
 
   /// Construct a list in which children are scrolled a wheel. Its children
@@ -757,6 +757,7 @@ class ListWheelElement extends RenderObjectElement implements ListWheelChildMana
       performRebuild();
   }
 
+  @override
   int get childCount => widget.childDelegate.estimatedChildCount;
 
   @override

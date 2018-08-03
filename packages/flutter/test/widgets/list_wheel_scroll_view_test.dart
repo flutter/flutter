@@ -68,6 +68,143 @@ void main() {
     });
   });
 
+  group('infinite scrolling', () {
+    testWidgets('infinite looping list', (WidgetTester tester) async {
+      final FixedExtentScrollController controller =
+        new FixedExtentScrollController();
+
+      await tester.pumpWidget(
+        new Directionality(
+          textDirection: TextDirection.ltr,
+          child: new ListWheelScrollView.useDelegate(
+            controller: controller,
+            itemExtent: 100.0,
+            onSelectedItemChanged: (_) {},
+            childDelegate: new ListWheelChildLoopingListDelegate(
+              children: List<Widget>.generate(10, (int index) {
+                return new Container(
+                  width: 400.0,
+                  height: 100.0,
+                  child: Text(index.toString()),
+                );
+              }),
+            ),
+          ),
+        ),
+      );
+
+      // The last item is before the first item.
+      expect(
+        tester.getTopLeft(find.widgetWithText(Container, '9')),
+        const Offset(0.0, 150.0)
+      );
+
+      controller.jumpTo(1000.0);
+      await tester.pump();
+
+      // We have reached the end of the list, should loop back.
+      expect(
+        tester.getTopLeft(find.widgetWithText(Container, '0')),
+        const Offset(0.0, 250.0)
+      );
+    });
+
+    testWidgets('infinite child builder', (WidgetTester tester) async {
+      final FixedExtentScrollController controller =
+        new FixedExtentScrollController();
+
+      await tester.pumpWidget(
+        new Directionality(
+          textDirection: TextDirection.ltr,
+          child: new ListWheelScrollView.useDelegate(
+            controller: controller,
+            itemExtent: 100.0,
+            onSelectedItemChanged: (_) {},
+            childDelegate: new ListWheelChildBuilderDelegate(
+              builder: (BuildContext context, int index) {
+                return new Container(
+                  width: 400.0,
+                  height: 100.0,
+                  child: Text(index.toString()),
+                );
+              },
+            ),
+          ),
+        )
+      );
+
+      // Can be scrolled infinitely for negative indexes.
+      controller.jumpTo(-100000.0);
+      await tester.pump();
+      expect(
+        tester.getTopLeft(find.widgetWithText(Container, '-1000')),
+        const Offset(0.0, 250.0)
+      );
+
+      // Can be scrolled infinitely for positive indexes.
+      controller.jumpTo(100000.0);
+      await tester.pump();
+      expect(
+        tester.getTopLeft(find.widgetWithText(Container, '1000')),
+        const Offset(0.0, 250.0)
+      );
+    });
+
+    testWidgets('child builder with lower and upper limits', (WidgetTester tester) async {
+      final List<int> paintedChildren = <int>[];
+
+      final FixedExtentScrollController controller =
+        new FixedExtentScrollController(initialItem: -10);
+
+      await tester.pumpWidget(
+        new Directionality(
+          textDirection: TextDirection.ltr,
+          child: new ListWheelScrollView.useDelegate(
+            controller: controller,
+            itemExtent: 100.0,
+            onSelectedItemChanged: (_) {},
+            childDelegate: new ListWheelChildBuilderDelegate(
+              builder: (BuildContext context, int index) {
+                if (index < -15 || index > -5)
+                  return null;
+                return new Container(
+                  width: 400.0,
+                  height: 100.0,
+                  child: new CustomPaint(
+                    painter: new TestCallbackPainter(onPaint: () {
+                      paintedChildren.add(index);
+                    }),
+                  ),
+                );
+              },
+            ),
+          ),
+        )
+      );
+
+      expect(paintedChildren, <int>[-13, -12, -11, -10, -9, -8, -7]);
+
+      // Fling with high velocity to meet the lower limit.
+      paintedChildren.clear();
+      await tester.fling(
+        find.byType(ListWheelScrollView),
+        const Offset(0.0, 1000.0),
+        1000.0,
+      );
+      await tester.pumpAndSettle();
+      expect(controller.selectedItem, -15);
+
+      // Fling with high velocity to meet the upper limit.
+      await tester.fling(
+        find.byType(ListWheelScrollView),
+        const Offset(0.0, -1000.0),
+        1000.0,
+      );
+      await tester.pumpAndSettle();
+      expect(controller.selectedItem, -5);
+    });
+  });
+
   group('layout', () {
     testWidgets("ListWheelScrollView takes parent's size with small children", (WidgetTester tester) async {
       await tester.pumpWidget(

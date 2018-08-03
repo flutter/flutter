@@ -62,8 +62,8 @@ class CupertinoPicker extends StatefulWidget {
        assert(itemExtent != null),
        assert(itemExtent > 0),
        childDelegate = looping
-                       ? new ListWheelChildLoopingListDelegate(children)
-                       : new ListWheelChildListDelegate(children),
+                       ? new ListWheelChildLoopingListDelegate(children: children)
+                       : new ListWheelChildListDelegate(children: children),
        super(key: key);
 
   /// Create picker from an indexed builder where its children is dynamically
@@ -105,7 +105,7 @@ class CupertinoPicker extends StatefulWidget {
        assert(magnification > 0),
        assert(itemExtent != null),
        assert(itemExtent > 0),
-       childDelegate = new ListWheelChildBuilderDelegate(itemBuilder, childCount: childCount),
+       childDelegate = new ListWheelChildBuilderDelegate(builder: itemBuilder, childCount: childCount),
        super(key: key);
 
   /// Relative ratio between this picker's height and the simulated cylinder's diameter.
