@@ -59,7 +59,7 @@ class _ListDemoState extends State<ReorderableListDemo> {
       _bottomSheet = scaffoldKey.currentState.showBottomSheet((BuildContext bottomSheetContext) {
         return new DecoratedBox(
           decoration: const BoxDecoration(
-            border: const Border(top: const BorderSide(color: Colors.black26)),
+            border: Border(top: BorderSide(color: Colors.black26)),
           ),
           child: new ListView(
             shrinkWrap: true,
@@ -103,7 +103,7 @@ class _ListDemoState extends State<ReorderableListDemo> {
   }
 
   Widget buildListTile(_ListItem item) {
-    const Widget secondary = const Text(
+    const Widget secondary = Text(
       'Even more additional list item information appears on line three.',
     );
     Widget listTile;

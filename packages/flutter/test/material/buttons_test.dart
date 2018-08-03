@@ -170,8 +170,8 @@ void main() {
   // This test is very similar to the '...explicit splashColor and highlightColor' test
   // in icon_button_test.dart. If you change this one, you may want to also change that one.
   testWidgets('MaterialButton with explicit splashColor and highlightColor', (WidgetTester tester) async {
-    const Color directSplashColor = const Color(0xFF000011);
-    const Color directHighlightColor = const Color(0xFF000011);
+    const Color directSplashColor = Color(0xFF000011);
+    const Color directHighlightColor = Color(0xFF000011);
 
     Widget buttonWidget = new Material(
       child: new Center(
@@ -217,8 +217,8 @@ void main() {
         ..rect(color: directHighlightColor)
     );
 
-    const Color themeSplashColor1 = const Color(0xFF001100);
-    const Color themeHighlightColor1 = const Color(0xFF001100);
+    const Color themeSplashColor1 = Color(0xFF001100);
+    const Color themeHighlightColor1 = Color(0xFF001100);
 
     buttonWidget = new Material(
       child: new Center(
@@ -253,8 +253,8 @@ void main() {
         ..rect(color: themeHighlightColor1)
     );
 
-    const Color themeSplashColor2 = const Color(0xFF002200);
-    const Color themeHighlightColor2 = const Color(0xFF002200);
+    const Color themeSplashColor2 = Color(0xFF002200);
+    const Color themeHighlightColor2 = Color(0xFF002200);
 
     await tester.pumpWidget(
       new Directionality(
@@ -328,10 +328,10 @@ void main() {
     // disabled button
     await tester.pumpWidget(const Directionality(
       textDirection: TextDirection.ltr,
-      child: const Material(
-        child: const Center(
-          child: const MaterialButton(
-            child: const Text('Button'),
+      child: Material(
+        child: Center(
+          child: MaterialButton(
+            child: Text('Button'),
             onPressed: null, // button is disabled
           ),
         ),

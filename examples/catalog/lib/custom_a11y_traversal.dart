@@ -261,7 +261,7 @@ class CustomTraversalExampleState extends State<CustomTraversalExample> {
                       'How many pets do you own?',
                     ),
                   ),
-                  const Padding(padding: const EdgeInsets.symmetric(vertical: 10.0)),
+                  const Padding(padding: EdgeInsets.symmetric(vertical: 10.0)),
                   new Row(
                     mainAxisAlignment: MainAxisAlignment.spaceAround,
                     children: <Widget>[
@@ -294,7 +294,7 @@ class CustomTraversalExampleState extends State<CustomTraversalExample> {
                       _makeSpinnerButton(4, 2, Field.FISH, increment: false),
                     ],
                   ),
-                  const Padding(padding: const EdgeInsets.symmetric(vertical: 10.0)),
+                  const Padding(padding: EdgeInsets.symmetric(vertical: 10.0)),
                   new Semantics(
                     // Since this is the only sort key that the reset button has, it
                     // will be compared with the 'column' OrdinalSortKeys of all the

@@ -52,7 +52,7 @@ void main() {
 
   test('getBoxesForSelection control test', () {
     final RenderParagraph paragraph = new RenderParagraph(
-      const TextSpan(text: _kText, style: const TextStyle(fontSize: 10.0)),
+      const TextSpan(text: _kText, style: TextStyle(fontSize: 10.0)),
       textDirection: TextDirection.ltr,
     );
     layout(paragraph);
@@ -95,7 +95,7 @@ void main() {
       const TextSpan(
         text: 'This\n' // 4 characters * 10px font size = 40px width on the first line
               'is a wrapping test. It should wrap at manual newlines, and if softWrap is true, also at spaces.',
-        style: const TextStyle(fontFamily: 'Ahem', fontSize: 10.0),
+        style: TextStyle(fontFamily: 'Ahem', fontSize: 10.0),
       ),
       textDirection: TextDirection.ltr,
       maxLines: 1,
@@ -172,7 +172,7 @@ void main() {
         text: 'How do you write like you\'re running out of time? Write day and night like you\'re running out of time?',
             // 0123456789 0123456789 012 345 0123456 012345 01234 012345678 012345678 0123 012 345 0123456 012345 01234
             // 0          1          2       3       4      5     6         7         8    9       10      11     12
-        style: const TextStyle(fontFamily: 'Ahem', fontSize: 10.0),
+        style: TextStyle(fontFamily: 'Ahem', fontSize: 10.0),
       ),
       textDirection: TextDirection.ltr,
     );
@@ -199,7 +199,7 @@ void main() {
     final RenderParagraph paragraph = new RenderParagraph(
       const TextSpan(
         text: 'Hello',
-        style: const TextStyle(color: const Color(0xFF000000)),
+        style: TextStyle(color: Color(0xFF000000)),
       ),
       textDirection: TextDirection.ltr,
     );
@@ -208,7 +208,7 @@ void main() {
     expect(paragraph.debugNeedsPaint, isFalse);
     paragraph.text = const TextSpan(
       text: 'Hello World',
-      style: const TextStyle(color: const Color(0xFF000000)),
+      style: TextStyle(color: Color(0xFF000000)),
     );
     expect(paragraph.debugNeedsLayout, isTrue);
     expect(paragraph.debugNeedsPaint, isFalse);
@@ -217,7 +217,7 @@ void main() {
     expect(paragraph.debugNeedsPaint, isFalse);
     paragraph.text = const TextSpan(
       text: 'Hello World',
-      style: const TextStyle(color: const Color(0xFFFFFFFF)),
+      style: TextStyle(color: Color(0xFFFFFFFF)),
     );
     expect(paragraph.debugNeedsLayout, isFalse);
     expect(paragraph.debugNeedsPaint, isTrue);
@@ -227,22 +227,22 @@ void main() {
   });
 
   test('nested TextSpans in paragraph handle textScaleFactor correctly.', () {
-    const TextSpan testSpan = const TextSpan(
+    const TextSpan testSpan = TextSpan(
       text: 'a',
-      style: const TextStyle(
+      style: TextStyle(
         fontSize: 10.0,
       ),
-      children: const <TextSpan>[
-        const TextSpan(
+      children: <TextSpan>[
+        TextSpan(
           text: 'b',
-          children: const <TextSpan>[
-            const TextSpan(text: 'c'),
+          children: <TextSpan>[
+            TextSpan(text: 'c'),
           ],
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 20.0,
           ),
         ),
-        const TextSpan(
+        TextSpan(
           text: 'd',
         ),
       ],

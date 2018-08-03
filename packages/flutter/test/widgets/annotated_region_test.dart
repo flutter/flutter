@@ -10,7 +10,7 @@ void main() {
   testWidgets('provides a value to the layer tree', (WidgetTester tester) async {
     await tester.pumpWidget(
       const AnnotatedRegion<int>(
-        child: const SizedBox(width: 100.0, height: 100.0),
+        child: SizedBox(width: 100.0, height: 100.0),
         value: 1,
       ),
     );

@@ -26,14 +26,14 @@ class CardCollection extends StatefulWidget {
 class CardCollectionState extends State<CardCollection> {
 
   static const TextStyle cardLabelStyle =
-    const TextStyle(color: Colors.white, fontSize: 18.0, fontWeight: FontWeight.bold);
+    TextStyle(color: Colors.white, fontSize: 18.0, fontWeight: FontWeight.bold);
 
   // TODO(hansmuller): need a local image asset
   static const String _sunshineURL = 'http://www.walltor.com/images/wallpaper/good-morning-sunshine-58540.jpg';
 
   static const double kCardMargins = 8.0;
   static const double kFixedCardHeight = 100.0;
-  static const List<double> _cardHeights = const <double>[
+  static const List<double> _cardHeights = <double>[
     48.0, 63.0, 85.0, 146.0, 60.0, 55.0, 84.0, 96.0, 50.0,
     48.0, 63.0, 85.0, 146.0, 60.0, 55.0, 84.0, 96.0, 50.0,
     48.0, 63.0, 85.0, 146.0, 60.0, 55.0, 84.0, 96.0, 50.0,
@@ -102,7 +102,7 @@ class CardCollectionState extends State<CardCollection> {
         data: const IconThemeData(color: Colors.black),
         child: new ListView(
           children: <Widget>[
-            const DrawerHeader(child: const Center(child: const Text('Options'))),
+            const DrawerHeader(child: Center(child: Text('Options'))),
             buildDrawerCheckbox('Make card labels editable', _editable, _toggleEditable),
             buildDrawerCheckbox('Fixed size cards', _fixedSizeCards, _toggleFixedSizeCards),
             buildDrawerCheckbox('Let the sun shine', _sunshine, _toggleSunshine),
@@ -347,8 +347,8 @@ class CardCollectionState extends State<CardCollection> {
     return const LinearGradient(
         begin: Alignment.topCenter,
         end: Alignment.bottomCenter,
-        colors: const <Color>[const Color(0x00FFFFFF), const Color(0xFFFFFFFF)],
-        stops: const <double>[0.1, 0.35],
+        colors: <Color>[Color(0x00FFFFFF), Color(0xFFFFFFFF)],
+        stops: <double>[0.1, 0.35],
     )
     .createShader(bounds);
   }

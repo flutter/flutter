@@ -479,7 +479,7 @@ class Curves {
   /// cases where a [Curve] is required but no actual curve is desired.
   ///
   /// {@animation 464 192 https://flutter.github.io/assets-for-api-docs/assets/animation/curve_linear.mp4}
-  static const Curve linear = const _Linear._();
+  static const Curve linear = _Linear._();
 
   /// A curve where the rate of change starts out quickly and then decelerates; an
   /// upside-down `f(t) = t²` parabola.
@@ -488,27 +488,27 @@ class Curves {
   /// factor (the default factor).
   ///
   /// {@animation 464 192 https://flutter.github.io/assets-for-api-docs/assets/animation/curve_decelerate.mp4}
-  static const Curve decelerate = const _DecelerateCurve._();
+  static const Curve decelerate = _DecelerateCurve._();
 
   /// A cubic animation curve that speeds up quickly and ends slowly.
   ///
   /// {@animation 464 192 https://flutter.github.io/assets-for-api-docs/assets/animation/curve_ease.mp4}
-  static const Cubic ease = const Cubic(0.25, 0.1, 0.25, 1.0);
+  static const Cubic ease = Cubic(0.25, 0.1, 0.25, 1.0);
 
   /// A cubic animation curve that starts slowly and ends quickly.
   ///
   /// {@animation 464 192 https://flutter.github.io/assets-for-api-docs/assets/animation/curve_ease_in.mp4}
-  static const Cubic easeIn = const Cubic(0.42, 0.0, 1.0, 1.0);
+  static const Cubic easeIn = Cubic(0.42, 0.0, 1.0, 1.0);
 
   /// A cubic animation curve that starts quickly and ends slowly.
   ///
   /// {@animation 464 192 https://flutter.github.io/assets-for-api-docs/assets/animation/curve_ease_out.mp4}
-  static const Cubic easeOut = const Cubic(0.0, 0.0, 0.58, 1.0);
+  static const Cubic easeOut = Cubic(0.0, 0.0, 0.58, 1.0);
 
   /// A cubic animation curve that starts slowly, speeds up, and then and ends slowly.
   ///
   /// {@animation 464 192 https://flutter.github.io/assets-for-api-docs/assets/animation/curve_ease_in_out.mp4}
-  static const Cubic easeInOut = const Cubic(0.42, 0.0, 0.58, 1.0);
+  static const Cubic easeInOut = Cubic(0.42, 0.0, 0.58, 1.0);
 
   /// A curve that starts quickly and eases into its final position.
   ///
@@ -517,35 +517,35 @@ class Curves {
   /// animation to finish, and the negative effects of motion are minimized.
   ///
   /// {@animation 464 192 https://flutter.github.io/assets-for-api-docs/assets/animation/curve_fast_out_slow_in.mp4}
-  static const Cubic fastOutSlowIn = const Cubic(0.4, 0.0, 0.2, 1.0);
+  static const Cubic fastOutSlowIn = Cubic(0.4, 0.0, 0.2, 1.0);
 
   /// An oscillating curve that grows in magnitude.
   ///
   /// {@animation 464 192 https://flutter.github.io/assets-for-api-docs/assets/animation/curve_bounce_in.mp4}
-  static const Curve bounceIn = const _BounceInCurve._();
+  static const Curve bounceIn = _BounceInCurve._();
 
   /// An oscillating curve that first grows and then shrink in magnitude.
   ///
   /// {@animation 464 192 https://flutter.github.io/assets-for-api-docs/assets/animation/curve_bounce_out.mp4}
-  static const Curve bounceOut = const _BounceOutCurve._();
+  static const Curve bounceOut = _BounceOutCurve._();
 
   /// An oscillating curve that first grows and then shrink in magnitude.
   ///
   /// {@animation 464 192 https://flutter.github.io/assets-for-api-docs/assets/animation/curve_bounce_in_out.mp4}
-  static const Curve bounceInOut = const _BounceInOutCurve._();
+  static const Curve bounceInOut = _BounceInOutCurve._();
 
   /// An oscillating curve that grows in magnitude while overshooting its bounds.
   ///
   /// {@animation 464 192 https://flutter.github.io/assets-for-api-docs/assets/animation/curve_elastic_in.mp4}
-  static const ElasticInCurve elasticIn = const ElasticInCurve();
+  static const ElasticInCurve elasticIn = ElasticInCurve();
 
   /// An oscillating curve that shrinks in magnitude while overshooting its bounds.
   ///
   /// {@animation 464 192 https://flutter.github.io/assets-for-api-docs/assets/animation/curve_elastic_out.mp4}
-  static const ElasticOutCurve elasticOut = const ElasticOutCurve();
+  static const ElasticOutCurve elasticOut = ElasticOutCurve();
 
   /// An oscillating curve that grows and then shrinks in magnitude while overshooting its bounds.
   ///
   /// {@animation 464 192 https://flutter.github.io/assets-for-api-docs/assets/animation/curve_elastic_in_out.mp4}
-  static const ElasticInOutCurve elasticInOut = const ElasticInOutCurve();
+  static const ElasticInOutCurve elasticInOut = ElasticInOutCurve();
 }

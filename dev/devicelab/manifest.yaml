@@ -106,6 +106,13 @@ tasks:
     stage: devicelab
     required_agent_capabilities: ["mac/android"]
 
+  tiles_scroll_perf__timeline_summary:
+    description: >
+      Measures the runtime performance of the tiles tab in the Complex Layout sample app on Android.
+    stage: devicelab
+    flaky: true
+    required_agent_capabilities: ["mac/android"]
+
   flavors_test:
     description: >
       Checks that flavored builds work on Android.
