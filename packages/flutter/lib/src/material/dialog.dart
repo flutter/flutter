@@ -598,7 +598,7 @@ Future<T> showDialog<T>({
   assert(child == null || builder == null);
   return showGeneralDialog(
     context: context,
-    pageBuilder: (BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
+    pageBuilder: (BuildContext buildContext, Animation<double> animation, Animation<double> secondaryAnimation) {
       final ThemeData theme = Theme.of(context, shadowThemeOnly: true);
       final Widget pageChild =  child ?? new Builder(builder: builder);
       return new SafeArea(
