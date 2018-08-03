@@ -1420,7 +1420,11 @@ class _DialogRoute<T> extends PopupRoute<T> {
 
   @override
   Widget buildPage(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
-    return _pageBuilder(context, animation, secondaryAnimation);
+    return new Semantics(
+      child: _pageBuilder(context, animation, secondaryAnimation),
+      scopesRoute: true,
+      explicitChildNodes: true,
+    );
   }
 
   @override
@@ -1441,33 +1445,34 @@ class _DialogRoute<T> extends PopupRoute<T> {
 ///
 /// This function allows for customization of aspects of the dialog popup.
 ///
-/// This function takes a 'pageBuilder' which is used to build the primary
+/// This function takes a `pageBuilder` which is used to build the primary
 /// content of the route (typically a dialog widget). Content below the dialog
-/// is dimmed with a [ModalBarrier]. This widget does not share a context with
-/// the location that `showGeneralDialog` is originally called from. Use a
-/// [StatefulBuilder] or a custom [StatefulWidget] if the dialog needs to update
-/// dynamically. The 'pageBuilder' argument can not be null.
+/// is dimmed with a [ModalBarrier]. The widget returned by the `pageBuilder`
+/// does not share a context with the location that `showGeneralDialog` is
+/// originally called from. Use a [StatefulBuilder] or a custom
+/// [StatefulWidget] if the dialog needs to update dynamically. The
+/// `pageBuilder` argument can not be null.
 ///
 /// The `context` argument is used to look up the [Navigator] for the dialog.
 /// It is only used when the method is called. Its corresponding widget can
 /// be safely removed from the tree before the dialog is closed.
 ///
-/// The 'barrierDismissible' argument is used to determine whether this route
+/// The `barrierDismissible` argument is used to determine whether this route
 /// can be dismissed by tapping the modal barrier. This argument defaults
-/// to true. If 'barrierDismissible' is true, a non-null 'barrierLabel' must be
+/// to true. If `barrierDismissible` is true, a non-null `barrierLabel` must be
 /// provided.
 ///
-/// The 'barrierLabel' argument is the semantic label used for a dismissible
+/// The `barrierLabel` argument is the semantic label used for a dismissible
 /// barrier. This argument defaults to "Dismiss".
 ///
-/// The 'barrierColor' argument is the color used for the modal barrier. This
-/// argument defaults to 'Color(0x80000000)'.
+/// The `barrierColor` argument is the color used for the modal barrier. This
+/// argument defaults to `Color(0x80000000)`.
 ///
-/// The 'transitionDuration' argument is used to determine how long it takes
+/// The `transitionDuration` argument is used to determine how long it takes
 /// for the route to arrive on or leave off the screen. This argument defaults
 /// to 200 milliseconds.
 ///
-/// The 'transitionBuilder' argument is used to define how the route arrives on
+/// The `transitionBuilder` argument is used to define how the route arrives on
 /// and leaves off the screen. By default, the transition is a linear fade of
 /// the page's contents.
 ///
@@ -1477,7 +1482,7 @@ class _DialogRoute<T> extends PopupRoute<T> {
 /// The dialog route created by this method is pushed to the root navigator.
 /// If the application has multiple [Navigator] objects, it may be necessary to
 /// call `Navigator.of(context, rootNavigator: true).pop(result)` to close the
-/// dialog rather than just 'Navigator.pop(context, result)`.
+/// dialog rather than just `Navigator.pop(context, result)`.
 ///
 /// See also:
 ///  * [showDialog], which displays a Material-style dialog.

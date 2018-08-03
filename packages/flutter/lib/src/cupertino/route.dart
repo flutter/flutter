@@ -12,7 +12,7 @@ const double _kBackGestureWidth = 20.0;
 const double _kMinFlingVelocity = 1.0; // Screen widths per second.
 
 // Barrier color for a Cupertino modal barrier.
-const Color _kModalBarrierColor = const Color(0x6604040F);
+const Color _kModalBarrierColor = Color(0x6604040F);
 
 // Offset from offscreen to the right to fully on screen.
 final Tween<Offset> _kRightMiddleTween = new Tween<Offset>(
@@ -715,13 +715,44 @@ class _CupertinoEdgeShadowPainter extends BoxPainter {
   }
 }
 
-/// Displays an iOS-style dialog above the current contents of the app.
+Widget _buildCupertinoDialogTransitions(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, Widget child) {
+  final CurvedAnimation fadeAnimation = new CurvedAnimation(
+    parent: animation,
+    curve: Curves.easeInOut,
+  );
+  if (animation.status == AnimationStatus.reverse) {
+    return new FadeTransition(
+      opacity: fadeAnimation,
+      child: child,
+    );
+  }
+  return new FadeTransition(
+    opacity: fadeAnimation,
+    child: ScaleTransition(
+      child: child,
+      scale: new Tween<double>(
+        begin: 1.2,
+        end: 1.0,
+      ).animate(
+        new CurvedAnimation(
+          parent: animation,
+          curve: Curves.fastOutSlowIn,
+        ),
+      ),
+    ),
+  );
+}
+
+/// Displays an iOS-style dialog above the current contents of the app, with
+/// iOS-style entrance and exit animations, modal barrier color, and modal
+/// barrier behavior (the dialog is not dismissible with a tap on the barrier).
 ///
 /// This function takes a `builder` which typically builds a [CupertinoDialog]
 /// or [CupertinoAlertDialog] widget. Content below the dialog is dimmed with a
-/// [ModalBarrier]. This widget does not share a context with the location that
-/// `showCupertinoDialog` is originally called from. Use a [StatefulBuilder] or
-///  a custom [StatefulWidget] if the dialog needs to update dynamically.
+/// [ModalBarrier]. The widget returned by the `builder` does not share a
+/// context with the location that `showCupertinoDialog` is originally called
+/// from. Use a [StatefulBuilder] or a custom [StatefulWidget] if the dialog
+/// needs to update dynamically.
 ///
 /// The `context` argument is used to look up the [Navigator] for the dialog.
 /// It is only used when the method is called. Its corresponding widget can
@@ -733,11 +764,13 @@ class _CupertinoEdgeShadowPainter extends BoxPainter {
 /// The dialog route created by this method is pushed to the root navigator.
 /// If the application has multiple [Navigator] objects, it may be necessary to
 /// call `Navigator.of(context, rootNavigator: true).pop(result)` to close the
-/// dialog rather than just 'Navigator.pop(context, result)`.
+/// dialog rather than just `Navigator.pop(context, result)`.
 ///
 /// See also:
 ///  * [CupertinoDialog], an iOS-style dialog.
 ///  * [CupertinoAlertDialog], an iOS-style alert dialog.
+///  * [showDialog], which displays a Material-style dialog.
+///  * [showGeneralDialog], which allows for customization of the dialog popup.
 ///  * <https://developer.apple.com/ios/human-interface-guidelines/views/alerts/>
 Future<T> showCupertinoDialog<T>({
   @required BuildContext context,
@@ -750,36 +783,8 @@ Future<T> showCupertinoDialog<T>({
     barrierColor: _kModalBarrierColor,
     transitionDuration: const Duration(milliseconds: 300),
     pageBuilder: (BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
-      return new SafeArea(
-        child: builder(context),
-      );
+      return builder(context);
     },
-    transitionBuilder: (BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, Widget child) {
-      final CurvedAnimation fadeAnimation = new CurvedAnimation(
-        parent: animation,
-        curve: Curves.easeInOut,
-      );
-      if (animation.status == AnimationStatus.reverse) {
-        return new FadeTransition(
-          opacity: fadeAnimation,
-          child: child,
-        );
-      }
-      return new FadeTransition(
-        opacity: fadeAnimation,
-        child: ScaleTransition(
-          child: child,
-          scale: new Tween<double>(
-            begin: 1.2,
-            end: 1.0,
-          ).animate(
-            new CurvedAnimation(
-              parent: animation,
-              curve: Curves.fastOutSlowIn,
-            ),
-          ),
-        ),
-      );
-    },
+    transitionBuilder: _buildCupertinoDialogTransitions,
   );
 }

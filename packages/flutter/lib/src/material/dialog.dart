@@ -543,13 +543,25 @@ class SimpleDialog extends StatelessWidget {
   }
 }
 
-/// Displays a dialog above the current contents of the app.
+Widget _buildMaterialDialogTransitions(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, Widget child) {
+  return new FadeTransition(
+    opacity: new CurvedAnimation(
+      parent: animation,
+      curve: Curves.easeOut,
+    ),
+    child: child,
+  );
+}
+
+/// Displays a Material dialog above the current contents of the app, with
+/// Material entrance and exit animations, modal barrier color, and modal
+/// barrier behavior (dialog is dismissible with a tap on the barrier).
 ///
 /// This function takes a `builder` which typically builds a [Dialog] widget.
-/// Content below the dialog is dimmed with a [ModalBarrier]. This widget does
-/// not share a context with the location that `showDialog` is originally
-/// called from. Use a [StatefulBuilder] or a custom [StatefulWidget] if the
-/// dialog needs to update dynamically.
+/// Content below the dialog is dimmed with a [ModalBarrier]. The widget
+/// returned by the `builder` does not share a context with the location that
+/// `showDialog` is originally called from. Use a [StatefulBuilder] or a
+/// custom [StatefulWidget] if the dialog needs to update dynamically.
 ///
 /// The `context` argument is used to look up the [Navigator] and [Theme] for
 /// the dialog. It is only used when the method is called. Its corresponding
@@ -563,13 +575,15 @@ class SimpleDialog extends StatelessWidget {
 /// The dialog route created by this method is pushed to the root navigator.
 /// If the application has multiple [Navigator] objects, it may be necessary to
 /// call `Navigator.of(context, rootNavigator: true).pop(result)` to close the
-/// dialog rather than just 'Navigator.pop(context, result)`.
+/// dialog rather than just `Navigator.pop(context, result)`.
 ///
 /// See also:
 ///  * [AlertDialog], for dialogs that have a row of buttons below a body.
 ///  * [SimpleDialog], which handles the scrolling of the contents and does
 ///    not show buttons below its body.
 ///  * [Dialog], on which [SimpleDialog] and [AlertDialog] are based.
+///  * [showCupertinoDialog], which displays an iOS-style dialog.
+///  * [showGeneralDialog], which allows for customization of the dialog popup.
 ///  * <https://material.google.com/components/dialogs.html>
 Future<T> showDialog<T>({
   @required BuildContext context,
@@ -590,14 +604,9 @@ Future<T> showDialog<T>({
       return new SafeArea(
         child: new Builder(
           builder: (BuildContext context) {
-            final Widget annotatedChild = new Semantics(
-              child: pageChild,
-              scopesRoute: true,
-              explicitChildNodes: true,
-            );
             return theme != null
-                ? new Theme(data: theme, child: annotatedChild)
-                : annotatedChild;
+                ? new Theme(data: theme, child: pageChild)
+                : pageChild;
           }
         ),
       );
@@ -606,14 +615,6 @@ Future<T> showDialog<T>({
     barrierLabel: MaterialLocalizations.of(context).modalBarrierDismissLabel,
     barrierColor: Colors.black54,
     transitionDuration: const Duration(milliseconds: 150),
-    transitionBuilder: (BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, Widget child) {
-      return new FadeTransition(
-        opacity: new CurvedAnimation(
-          parent: animation,
-          curve: Curves.easeOut,
-        ),
-        child: child,
-      );
-    },
+    transitionBuilder: _buildMaterialDialogTransitions,
   );
 }
