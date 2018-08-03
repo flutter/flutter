@@ -23,7 +23,7 @@ class TraceCommand extends FlutterCommand {
     argParser.addFlag('stop', negatable: false, help: 'Stop tracing. Implied if --start is also omitted.');
     argParser.addOption('duration',
       abbr: 'd',
-      help: 'Time to wait after starting (if --start is specified or implied) and before\n'
+      help: 'Time to wait after starting (if --start is specified or implied) and before '
             'stopping (if --stop is specified or implied).\n'
             'Defaults to ten seconds if --stop is specified or implied, zero otherwise.',
     );

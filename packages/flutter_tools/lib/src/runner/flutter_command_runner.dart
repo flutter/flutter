@@ -17,6 +17,7 @@ import '../base/common.dart';
 import '../base/context.dart';
 import '../base/file_system.dart';
 import '../base/flags.dart';
+import '../base/io.dart' as io;
 import '../base/logger.dart';
 import '../base/os.dart';
 import '../base/platform.dart';
@@ -103,8 +104,8 @@ class FlutterCommandRunner extends CommandRunner<void> {
     argParser.addOption('flutter-root',
         hide: !verboseHelp,
         help: 'The root directory of the Flutter repository.\n'
-              'Defaults to \$$kFlutterRootEnvironmentVariableName if set, otherwise uses the parent of the\n'
-              'directory that the "flutter" script itself is in.');
+              'Defaults to \$$kFlutterRootEnvironmentVariableName if set, otherwise uses the parent '
+              'of the directory that the "flutter" script itself is in.');
 
     if (verboseHelp)
       argParser.addSeparator('Local build selection options (not normally required):');
@@ -112,9 +113,10 @@ class FlutterCommandRunner extends CommandRunner<void> {
     argParser.addOption('local-engine-src-path',
         hide: !verboseHelp,
         help: 'Path to your engine src directory, if you are building Flutter locally.\n'
-              'Defaults to \$$kFlutterEngineEnvironmentVariableName if set, otherwise defaults to the path given in your pubspec.yaml\n'
-              'dependency_overrides for $kFlutterEnginePackageName, if any, or, failing that, tries to guess at the location\n'
-              'based on the value of the --flutter-root option.');
+              'Defaults to \$$kFlutterEngineEnvironmentVariableName if set, otherwise defaults to '
+              'the path given in your pubspec.yaml dependency_overrides for $kFlutterEnginePackageName, '
+              'if any, or, failing that, tries to guess at the location based on the value of the '
+              '--flutter-root option.');
 
     argParser.addOption('local-engine',
         hide: !verboseHelp,
@@ -127,15 +129,15 @@ class FlutterCommandRunner extends CommandRunner<void> {
 
     argParser.addOption('record-to',
         hide: !verboseHelp,
-        help: 'Enables recording of process invocations (including stdout and stderr of all such invocations),\n'
+        help: 'Enables recording of process invocations (including stdout and stderr of all such invocations), '
               'and file system access (reads and writes).\n'
-              'Serializes that recording to a directory with the path specified in this flag. If the\n'
+              'Serializes that recording to a directory with the path specified in this flag. If the '
               'directory does not already exist, it will be created.');
     argParser.addOption('replay-from',
         hide: !verboseHelp,
-        help: 'Enables mocking of process invocations by replaying their stdout, stderr, and exit code from\n'
-              'the specified recording (obtained via --record-to). The path specified in this flag must refer\n'
-              'to a directory that holds serialized process invocations structured according to the output of\n'
+        help: 'Enables mocking of process invocations by replaying their stdout, stderr, and exit code from '
+              'the specified recording (obtained via --record-to). The path specified in this flag must refer '
+              'to a directory that holds serialized process invocations structured according to the output of '
               '--record-to.');
     argParser.addFlag('show-test-device',
         negatable: false,
@@ -146,11 +148,20 @@ class FlutterCommandRunner extends CommandRunner<void> {
 
   @override
   ArgParser get argParser => _argParser;
-  final ArgParser _argParser = ArgParser(allowTrailingOptions: false);
+  final ArgParser _argParser = ArgParser(
+    allowTrailingOptions: false,
+    usageLineLength: const io.Stdio().terminalColumns ?? kDefaultTerminalColumns,
+  );
 
   @override
   String get usageFooter {
-    return 'Run "flutter help -v" for verbose help output, including less commonly used options.';
+    return wrapText('Run "flutter help -v" for verbose help output, including less commonly used options.');
+  }
+
+  @override
+  String get usage {
+    final String usageWithoutDescription = super.usage.substring(description.length + 2);
+    return  '${wrapText(description)}\n\n$usageWithoutDescription';
   }
 
   static String get _defaultFlutterRoot {
@@ -377,8 +388,8 @@ class FlutterCommandRunner extends CommandRunner<void> {
 
       if (engineSourcePath == null) {
         throwToolExit('Unable to detect local Flutter engine build directory.\n'
-          'Either specify a dependency_override for the $kFlutterEnginePackageName package in your pubspec.yaml and\n'
-          'ensure --package-root is set if necessary, or set the \$$kFlutterEngineEnvironmentVariableName environment variable, or\n'
+          'Either specify a dependency_override for the $kFlutterEnginePackageName package in your pubspec.yaml and '
+          'ensure --package-root is set if necessary, or set the \$$kFlutterEngineEnvironmentVariableName environment variable, or '
           'use --local-engine-src-path to specify the path to the root of your flutter/engine repository.',
           exitCode: 2);
       }
@@ -386,7 +397,7 @@ class FlutterCommandRunner extends CommandRunner<void> {
 
     if (engineSourcePath != null && _tryEnginePath(engineSourcePath) == null) {
       throwToolExit('Unable to detect a Flutter engine build directory in $engineSourcePath.\n'
-        'Please ensure that $engineSourcePath is a Flutter engine \'src\' directory and that\n'
+        'Please ensure that $engineSourcePath is a Flutter engine \'src\' directory and that '
         'you have compiled the engine in that directory, which should produce an \'out\' directory',
         exitCode: 2);
     }
@@ -469,7 +480,7 @@ class FlutterCommandRunner extends CommandRunner<void> {
             'Warning: the \'flutter\' tool you are currently running is not the one from the current directory:\n'
             '  running Flutter  : ${Cache.flutterRoot}\n'
             '  current directory: $directory\n'
-            'This can happen when you have multiple copies of flutter installed. Please check your system path to verify\n'
+            'This can happen when you have multiple copies of flutter installed. Please check your system path to verify '
             'that you\'re running the expected version (run \'flutter --version\' to see which flutter is on your path).\n'
           );
         }
@@ -495,25 +506,25 @@ class FlutterCommandRunner extends CommandRunner<void> {
 
         if (!fs.isDirectorySync(flutterPath)) {
           printError(
-            'Warning! This package referenced a Flutter repository via the .packages file that is\n'
-            'no longer available. The repository from which the \'flutter\' tool is currently\n'
+            'Warning! This package referenced a Flutter repository via the .packages file that is '
+            'no longer available. The repository from which the \'flutter\' tool is currently '
             'executing will be used instead.\n'
             '  running Flutter tool: ${Cache.flutterRoot}\n'
             '  previous reference  : $flutterPath\n'
-            'This can happen if you deleted or moved your copy of the Flutter repository, or\n'
-            'if it was on a volume that is no longer mounted or has been mounted at a\n'
-            'different location. Please check your system path to verify that you are running\n'
+            'This can happen if you deleted or moved your copy of the Flutter repository, or '
+            'if it was on a volume that is no longer mounted or has been mounted at a '
+            'different location. Please check your system path to verify that you are running '
             'the expected version (run \'flutter --version\' to see which flutter is on your path).\n'
           );
         } else if (!_compareResolvedPaths(flutterPath, Cache.flutterRoot)) {
           printError(
-            'Warning! The \'flutter\' tool you are currently running is from a different Flutter\n'
-            'repository than the one last used by this package. The repository from which the\n'
+            'Warning! The \'flutter\' tool you are currently running is from a different Flutter '
+            'repository than the one last used by this package. The repository from which the '
             '\'flutter\' tool is currently executing will be used instead.\n'
             '  running Flutter tool: ${Cache.flutterRoot}\n'
             '  previous reference  : $flutterPath\n'
-            'This can happen when you have multiple copies of flutter installed. Please check\n'
-            'your system path to verify that you are running the expected version (run\n'
+            'This can happen when you have multiple copies of flutter installed. Please check '
+            'your system path to verify that you are running the expected version (run '
             '\'flutter --version\' to see which flutter is on your path).\n'
           );
         }

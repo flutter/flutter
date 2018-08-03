@@ -35,7 +35,7 @@ class TestCommand extends FlutterCommand {
         negatable: false,
         help: 'Start in a paused mode and wait for a debugger to connect.\n'
               'You must specify a single test file to run, explicitly.\n'
-              'Instructions for connecting with a debugger and printed to the\n'
+              'Instructions for connecting with a debugger and printed to the '
               'console once the test has started.',
       )
       ..addFlag('coverage',
@@ -72,7 +72,7 @@ class TestCommand extends FlutterCommand {
       )
       ..addFlag('update-goldens',
         negatable: false,
-        help: 'Whether matchesGoldenFile() calls within your test methods should\n'
+        help: 'Whether matchesGoldenFile() calls within your test methods should '
               'update the golden files rather than test for an existing match.',
       )
       ..addOption('concurrency',

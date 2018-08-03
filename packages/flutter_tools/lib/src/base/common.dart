@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import '../globals.dart';
 import 'file_system.dart';
 import 'platform.dart';
 
@@ -37,5 +38,5 @@ class ToolExit implements Exception {
   final int exitCode;
 
   @override
-  String toString() => 'Exception: $message';
+  String toString() => wrapText('Exception: $message');
 }

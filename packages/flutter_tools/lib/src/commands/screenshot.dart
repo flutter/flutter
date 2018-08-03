@@ -33,7 +33,7 @@ class ScreenshotCommand extends FlutterCommand {
       valueHelp: 'port',
       help: 'The observatory port to connect to.\n'
           'This is required when --$_kType is "$_kSkiaType" or "$_kRasterizerType".\n'
-          'To find the observatory port number, use "flutter run --verbose"\n'
+          'To find the observatory port number, use "flutter run --verbose" '
           'and look for "Forwarded host port ... for Observatory" in the output.',
     );
     argParser.addOption(
