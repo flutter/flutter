@@ -18,7 +18,7 @@ class Router extends StatelessWidget {
   Widget build(BuildContext context) {
     final String route = window.defaultRouteName;
     switch (route) {
-      case 'route1':
+      case '/':
         return Container(
           child: Center(child: Text('Route 1\n${packageInfo.appName}')),
           color: Colors.green,
