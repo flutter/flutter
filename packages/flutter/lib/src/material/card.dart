@@ -67,7 +67,7 @@ class Card extends StatelessWidget {
     this.shape,
     this.margin = const EdgeInsets.all(4.0),
     this.child,
-    this.semanticContainer = false,
+    this.semanticContainer = true,
   }) : super(key: key);
 
   /// The card's background color.
@@ -104,7 +104,7 @@ class Card extends StatelessWidget {
   /// Whether this widget represents a single semantic container, or if false
   /// a collection of individual semantic nodes.
   ///
-  /// Defaults to false.
+  /// Defaults to true.
   ///
   /// Setting this flag to true will attempt to merge all child semantics into
   /// this node. Setting this flag to false will force all child semantic nodes

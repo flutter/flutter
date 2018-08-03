@@ -364,13 +364,16 @@ class DataTable extends StatelessWidget {
     VoidCallback onRowTap,
     ValueChanged<bool> onCheckboxChanged
   }) {
-    Widget contents = new Padding(
-      padding: const EdgeInsetsDirectional.only(start: _tablePadding, end: _tablePadding / 2.0),
-      child: new Center(
-        child: new Checkbox(
-          activeColor: color,
-          value: checked,
-          onChanged: onCheckboxChanged,
+    Widget contents = new Semantics(
+      container: true,
+      child: new Padding(
+        padding: const EdgeInsetsDirectional.only(start: _tablePadding, end: _tablePadding / 2.0),
+        child: new Center(
+          child: new Checkbox(
+            activeColor: color,
+            value: checked,
+            onChanged: onCheckboxChanged,
+          ),
         ),
       ),
     );

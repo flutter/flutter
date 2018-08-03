@@ -294,7 +294,7 @@ class LongPressDraggable<T> extends Draggable<T> {
       ..onStart = (Offset position) {
         final Drag result = onStart(position);
         if (result != null && hapticFeedbackOnStart)
-          HapticFeedback.vibrate();
+          HapticFeedback.selectionClick();
         return result;
       };
   }

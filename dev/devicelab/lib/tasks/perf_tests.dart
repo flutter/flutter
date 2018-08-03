@@ -22,6 +22,14 @@ TaskFunction createComplexLayoutScrollPerfTest() {
   ).run;
 }
 
+TaskFunction createTilesScrollPerfTest() {
+  return new PerfTest(
+    '${flutterDirectory.path}/dev/benchmarks/complex_layout',
+    'test_driver/scroll_perf.dart',
+    'tiles_scroll_perf',
+  ).run;
+}
+
 TaskFunction createComplexLayoutScrollMemoryTest() {
   return new MemoryTest(
     '${flutterDirectory.path}/dev/benchmarks/complex_layout',

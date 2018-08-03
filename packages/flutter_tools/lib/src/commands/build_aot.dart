@@ -74,8 +74,10 @@ class BuildAotCommand extends BuildSubCommand {
     Status status;
     if (!argResults['quiet']) {
       final String typeName = artifacts.getEngineType(platform, buildMode);
-      status = logger.startProgress('Building AOT snapshot in ${getModeName(getBuildMode())} mode ($typeName)...',
-          expectSlowOperation: true);
+      status = logger.startProgress(
+        'Building AOT snapshot in ${getModeName(getBuildMode())} mode ($typeName)...',
+        expectSlowOperation: true,
+      );
     }
     final String outputPath = argResults['output-dir'] ?? getAotBuildDirectory();
     try {
@@ -120,8 +122,6 @@ class BuildAotCommand extends BuildSubCommand {
             buildSharedLibrary: false,
             extraGenSnapshotOptions: argResults[FlutterOptions.kExtraGenSnapshotOptions],
           ).then((int buildExitCode) {
-            if (buildExitCode != 0)
-              printError('Snapshotting ($iosArch) exited with non-zero exit code: $buildExitCode');
             return buildExitCode;
           });
         });
@@ -134,6 +134,12 @@ class BuildAotCommand extends BuildSubCommand {
             ..addAll(dylibs)
             ..addAll(<String>['-create', '-output', fs.path.join(outputPath, 'App.framework', 'App')]),
           );
+        } else {
+          status?.cancel();
+          exitCodes.forEach((IOSArch iosArch, Future<int> exitCodeFuture) async {
+            final int buildExitCode = await exitCodeFuture;
+            printError('Snapshotting ($iosArch) exited with non-zero exit code: $buildExitCode');
+          });
         }
       } else {
         // Android AOT snapshot.
@@ -148,12 +154,14 @@ class BuildAotCommand extends BuildSubCommand {
           extraGenSnapshotOptions: argResults[FlutterOptions.kExtraGenSnapshotOptions],
         );
         if (snapshotExitCode != 0) {
+          status?.cancel();
           printError('Snapshotting exited with non-zero exit code: $snapshotExitCode');
           return;
         }
       }
     } on String catch (error) {
       // Catch the String exceptions thrown from the `runCheckedSync` methods below.
+      status?.cancel();
       printError(error);
       return;
     }

@@ -104,23 +104,21 @@ class GlobalMaterialLocalizations implements MaterialLocalizations {
     _translationBundle = translationBundleForLocale(locale);
     assert(_translationBundle != null);
 
-    const String kMediumDatePattern = 'E, MMM\u00a0d';
     if (intl.DateFormat.localeExists(_localeName)) {
       _fullYearFormat = new intl.DateFormat.y(_localeName);
-      _mediumDateFormat = new intl.DateFormat(kMediumDatePattern, _localeName);
+      _mediumDateFormat = new intl.DateFormat.MMMEd(_localeName);
       _longDateFormat = new intl.DateFormat.yMMMMEEEEd(_localeName);
-      _yearMonthFormat = new intl.DateFormat('yMMMM', _localeName);
+      _yearMonthFormat = new intl.DateFormat.yMMMM(_localeName);
     } else if (intl.DateFormat.localeExists(locale.languageCode)) {
       _fullYearFormat = new intl.DateFormat.y(locale.languageCode);
-      _mediumDateFormat = new intl.DateFormat(kMediumDatePattern, locale.languageCode);
-
+      _mediumDateFormat = new intl.DateFormat.MMMEd(locale.languageCode);
       _longDateFormat = new intl.DateFormat.yMMMMEEEEd(locale.languageCode);
-      _yearMonthFormat = new intl.DateFormat('yMMMM', locale.languageCode);
+      _yearMonthFormat = new intl.DateFormat.yMMMM(locale.languageCode);
     } else {
       _fullYearFormat = new intl.DateFormat.y();
-      _mediumDateFormat = new intl.DateFormat(kMediumDatePattern);
+      _mediumDateFormat = new intl.DateFormat.MMMEd();
       _longDateFormat = new intl.DateFormat.yMMMMEEEEd();
-      _yearMonthFormat = new intl.DateFormat('yMMMM');
+      _yearMonthFormat = new intl.DateFormat.yMMMM();
     }
 
     if (intl.NumberFormat.localeExists(_localeName)) {

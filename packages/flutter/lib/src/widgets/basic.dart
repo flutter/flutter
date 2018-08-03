@@ -5098,6 +5098,8 @@ class Semantics extends SingleChildRenderObjectWidget {
     String increasedValue,
     String decreasedValue,
     String hint,
+    String onTapHint,
+    String onLongPressHint,
     TextDirection textDirection,
     SemanticsSortKey sortKey,
     VoidCallback onTap,
@@ -5165,6 +5167,11 @@ class Semantics extends SingleChildRenderObjectWidget {
       onDismiss: onDismiss,
       onSetSelection: onSetSelection,
       customSemanticsActions: customSemanticsActions,
+      hintOverrides: onTapHint != null || onLongPressHint != null ?
+        new SemanticsHintOverrides(
+          onTapHint: onTapHint,
+          onLongPressHint: onLongPressHint,
+        ) : null,
     ),
   );
 
@@ -5248,6 +5255,7 @@ class Semantics extends SingleChildRenderObjectWidget {
       increasedValue: properties.increasedValue,
       decreasedValue: properties.decreasedValue,
       hint: properties.hint,
+      hintOverrides: properties.hintOverrides,
       textDirection: _getTextDirection(context),
       sortKey: properties.sortKey,
       onTap: properties.onTap,
@@ -5308,6 +5316,7 @@ class Semantics extends SingleChildRenderObjectWidget {
       ..increasedValue = properties.increasedValue
       ..decreasedValue = properties.decreasedValue
       ..hint = properties.hint
+      ..hintOverrides = properties.hintOverrides
       ..namesRoute = properties.namesRoute
       ..textDirection = _getTextDirection(context)
       ..sortKey = properties.sortKey
