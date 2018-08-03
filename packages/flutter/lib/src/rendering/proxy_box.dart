@@ -1119,7 +1119,7 @@ abstract class _RenderCustomClip<T> extends RenderProxyBox {
     RenderBox child,
     CustomClipper<T> clipper,
     this.clipBehavior = Clip.antiAlias,
-  }) : _clipper = clipper, assert(clipBehavior != null), assert(clipBehavior != Clip.none), super(child);
+  }) : _clipper = clipper, assert(clipBehavior != null), super(child);
 
   /// If non-null, determines which clip to use on the child.
   CustomClipper<T> get clipper => _clipper;
@@ -1162,11 +1162,6 @@ abstract class _RenderCustomClip<T> extends RenderProxyBox {
   T get _defaultClip;
   T _clip;
 
-  /// {@template flutter.clipper.clipBehavior}
-  /// Controls how to clip (default to [Clip.antiAlias]).
-  ///
-  /// [Clip.none] is not allowed here.
-  /// {@endtemplate}
   final Clip clipBehavior;
 
   @override
@@ -1227,6 +1222,8 @@ class RenderClipRect extends _RenderCustomClip<Rect> {
   ///
   /// If [clipper] is null, the clip will match the layout size and position of
   /// the child.
+  ///
+  /// [clipBehavior] cannot be [Clip.none].
   RenderClipRect({
     RenderBox child,
     CustomClipper<Rect> clipper,
@@ -1280,12 +1277,14 @@ class RenderClipRRect extends _RenderCustomClip<RRect> {
   /// right-angled corners.
   ///
   /// If [clipper] is non-null, then [borderRadius] is ignored.
+  ///
+  /// [clipBehavior] cannot be [Clip.none].
   RenderClipRRect({
     RenderBox child,
     BorderRadius borderRadius = BorderRadius.zero,
     CustomClipper<RRect> clipper,
     Clip clipBehavior = Clip.antiAlias,
-  }) : _borderRadius = borderRadius, super(child: child, clipper: clipper, clipBehavior: clipBehavior) {
+  }) : assert(clipBehavior != Clip.none), _borderRadius = borderRadius, super(child: child, clipper: clipper, clipBehavior: clipBehavior) {
     assert(_borderRadius != null || clipper != null);
   }
 
@@ -1350,11 +1349,13 @@ class RenderClipOval extends _RenderCustomClip<Rect> {
   ///
   /// If [clipper] is null, the oval will be inscribed into the layout size and
   /// position of the child.
+  ///
+  /// [clipBehavior] cannot be [Clip.none].
   RenderClipOval({
     RenderBox child,
     CustomClipper<Rect> clipper,
     Clip clipBehavior = Clip.antiAlias,
-  }) : super(child: child, clipper: clipper, clipBehavior: clipBehavior);
+  }) : assert(clipBehavior != Clip.none), super(child: child, clipper: clipper, clipBehavior: clipBehavior);
 
   Rect _cachedRect;
   Path _cachedPath;
@@ -1423,11 +1424,13 @@ class RenderClipPath extends _RenderCustomClip<Path> {
   /// size and location of the child. However, rather than use this default,
   /// consider using a [RenderClipRect], which can achieve the same effect more
   /// efficiently.
+  ///
+  /// [clipBehavior] cannot be [Clip.none].
   RenderClipPath({
     RenderBox child,
     CustomClipper<Path> clipper,
     Clip clipBehavior = Clip.antiAlias,
-  }) : super(child: child, clipper: clipper, clipBehavior: clipBehavior);
+  }) : assert(clipBehavior != Clip.none), super(child: child, clipper: clipper, clipBehavior: clipBehavior);
 
   @override
   Path get _defaultClip => new Path()..addRect(Offset.zero & size);

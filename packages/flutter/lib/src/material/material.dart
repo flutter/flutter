@@ -374,13 +374,14 @@ class _MaterialState extends State<Material> with TickerProviderStateMixin {
       child: contents,
       shape: shape,
     );
-    return clipBehavior == Clip.none
-        ? child
-        : new ClipPath(
-          child: child,
-          clipper: new ShapeBorderClipper(shape: shape),
-          clipBehavior: clipBehavior,
-        );
+    if (clipBehavior == Clip.none) {
+      return child;
+    } else {
+      return new ClipPath(
+        child: child,
+        clipper: new ShapeBorderClipper(shape: shape),
+        clipBehavior: clipBehavior,
+      );
     }
   }
 

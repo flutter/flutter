@@ -618,7 +618,11 @@ class ClipRectLayer extends ContainerLayer {
   /// (as described at [Layer]).
   Rect clipRect;
 
-  /// {@macro flutter.clipper.clipBehavior}
+  /// {@template flutter.clipper.clipBehavior}
+  /// Controls how to clip (default to [Clip.antiAlias]).
+  ///
+  /// [Clip.none] is not allowed here.
+  /// {@endtemplate}
   Clip get clipBehavior => _clipBehavior;
   Clip _clipBehavior;
   set clipBehavior(Clip value) {
