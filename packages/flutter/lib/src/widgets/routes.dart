@@ -232,15 +232,15 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> {
         if (current is TrainHoppingAnimation) {
           TrainHoppingAnimation newAnimation;
           newAnimation = new TrainHoppingAnimation(
-              current.currentTrain,
-              nextRoute._animation,
-              onSwitchedTrain: () {
-                assert(_secondaryAnimation.parent == newAnimation);
-                assert(newAnimation.currentTrain == nextRoute._animation);
-                _secondaryAnimation.parent = newAnimation.currentTrain;
-                newAnimation.dispose();
-              }
-            );
+            current.currentTrain,
+            nextRoute._animation,
+            onSwitchedTrain: () {
+              assert(_secondaryAnimation.parent == newAnimation);
+              assert(newAnimation.currentTrain == nextRoute._animation);
+              _secondaryAnimation.parent = newAnimation.currentTrain;
+              newAnimation.dispose();
+            }
+          );
           _secondaryAnimation.parent = newAnimation;
           current.dispose();
         } else {
