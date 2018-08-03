@@ -24,9 +24,9 @@ import 'scrollable.dart';
 /// Class that supplies children for the [ListWheelScrollView].
 ///
 /// Instead of providing a concrete list of children to [ListWheelScrollView],
-/// this class allows several methods to lazily provide children, which is more
+/// this class allows several methods to lazily provide children. This is more
 /// efficient when there are too many or infinite children, by bringing in
-/// only the children that are visible in viewport, and remove them when they
+/// only the children that are visible in viewport, and removing them when they
 /// are no longer visible.
 ///
 /// See also:
@@ -54,11 +54,18 @@ abstract class ListWheelChildDelegate {
   bool shouldRebuild(covariant ListWheelChildDelegate oldDelegate);
 }
 
-/// Class that supplies children using an explicit list. Children are provided
-/// in the range [0, list.length - 1], outside of that range a null child will
-/// be returned.
+/// Class that supplies children for the [ListWheelScrollView].
+///
+/// Instead of providing a concrete list of children to [ListWheelScrollView],
+/// this class lazily supplies children using an explicit list. This is more
+/// efficient when there are too many children in the list, by bringing in
+/// only the children that are visible in viewport, and removing them when they
+/// are no longer visible.
+///
+/// Children are available in the range [0, explicit_list.length - 1], outside
+/// of that range a null child will be returned.
 class ListWheelChildListDelegate extends ListWheelChildDelegate {
-  /// Construct the delegate from a concrete list of children.
+  /// Constructs the delegate from a concrete list of children.
   ListWheelChildListDelegate({@required this.children}) : assert(children != null);
 
   /// The list containing all children that can be supply.
@@ -80,15 +87,15 @@ class ListWheelChildListDelegate extends ListWheelChildDelegate {
   }
 }
 
-/// A delegate that supplies an infinite amount of children from an explicit
-/// list by looping the list.
+
+/// Class that supplies children for the [ListWheelScrollView].
 ///
-/// Same as [ListWheelChildListDelegate] when build function is called with
-/// indexes in the list. With index larger than the list's length, it
-/// will be looped back to the beginning, and with negative index, it will be
-/// looped back to the end.
+/// Instead of providing a concrete list of children to [ListWheelScrollView],
+/// this class lazily supplies an infinite amount of children from an explicit
+/// list by looping the list. The class only brings in children that are visible
+/// in the viewport, and removes them when they are no longer visible.
 class ListWheelChildLoopingListDelegate extends ListWheelChildDelegate {
-  /// Construct the delegate from a concrete list of children.
+  /// Constructs the delegate from a concrete list of children.
   ListWheelChildLoopingListDelegate({@required this.children}) : assert(children != null);
 
   /// The list containing all children that can be supply.
@@ -113,15 +120,20 @@ class ListWheelChildLoopingListDelegate extends ListWheelChildDelegate {
   }
 }
 
-/// A delegate that supplies children using a builder callback.
+/// Class that supplies children for the [ListWheelScrollView].
 ///
-/// By using the builder, the delegate will be able to provide children in
-/// custom range (infinite range, has either or both lower and upper limit, lower
-/// limit does not have to be 0, etc.) However the builder is expected to
-/// provide children for a contiguous segment, and returning null at some index
-/// means the segment is terminated there.
+/// Instead of providing a concrete list of children to [ListWheelScrollView],
+/// this class lazily supplies children by using a builder callback. By using
+/// the builder, the delegate will be able to provide children in custom range
+/// (infinite range, has either or both lower and upper limit, lower limit does
+/// not have to be 0, etc.) However the builder is expected to provide children
+/// for a contiguous segment, and returning null at some index means the segment
+/// is terminated there.
+///
+/// The class only brings in children that are visible in the viewport, and
+/// removes them when they are no longer visible.
 class ListWheelChildBuilderDelegate extends ListWheelChildDelegate {
-  /// Construct the delegate from a builder callback.
+  /// Constructs the delegate from a builder callback.
   ListWheelChildBuilderDelegate({
     @required this.builder,
     this.childCount,
@@ -527,7 +539,7 @@ class FixedExtentScrollPhysics extends ScrollPhysics {
 /// The children are rendered as if rotating on a wheel instead of scrolling on
 /// a plane.
 class ListWheelScrollView extends StatefulWidget {
-  /// Construct a list in which children are scrolled a wheel. Its children
+  /// Constructs a list in which children are scrolled a wheel. Its children
   /// are passed to a delegate and lazily built during layout.
   ListWheelScrollView({
     Key key,
@@ -561,7 +573,7 @@ class ListWheelScrollView extends StatefulWidget {
        childDelegate = new ListWheelChildListDelegate(children: children),
        super(key: key);
 
-  /// Construct a list in which children are scrolled a wheel. Its children
+  /// Constructs a list in which children are scrolled a wheel. Its children
   /// are managed by a delegate and are lazily built during layout.
   const ListWheelScrollView.useDelegate({
     Key key,
@@ -780,7 +792,7 @@ class ListWheelElement extends RenderObjectElement implements ListWheelChildMana
     }
   }
 
-  /// Ask the underlying delegate for a widget at the given index.
+  /// Asks the underlying delegate for a widget at the given index.
   ///
   /// Normally the builder is only called once for each index and the result
   /// will be cached. However when the element is rebuilt, the cache will be
@@ -799,8 +811,8 @@ class ListWheelElement extends RenderObjectElement implements ListWheelChildMana
     owner.buildScope(this, () {
       final bool insertFirst = after == null;
       assert(insertFirst || _childElements[index - 1] != null);
-      Element newChild;
-      newChild = updateChild(_childElements[index], retrieveWidget(index), index);
+      final Element newChild =
+        updateChild(_childElements[index], retrieveWidget(index), index);
       if (newChild != null) {
         _childElements[index] = newChild;
       } else {
@@ -885,7 +897,7 @@ class ListWheelElement extends RenderObjectElement implements ListWheelChildMana
 ///  * [RenderListWheelViewport], the render object that renders the children
 ///    on a wheel.
 class ListWheelViewport extends RenderObjectWidget {
-  /// Create a viewport where children are rendered onto a wheel.
+  /// Creates a viewport where children are rendered onto a wheel.
   ///
   /// The [diameterRatio] argument defaults to 2.0 and must not be null.
   ///
@@ -956,7 +968,7 @@ class ListWheelViewport extends RenderObjectWidget {
   /// in the viewport.
   final ViewportOffset offset;
 
-  /// Builder to help lazily instantiate child.
+  /// A delegate that lazily instantiates children.
   final ListWheelChildDelegate childDelegate;
 
   @override

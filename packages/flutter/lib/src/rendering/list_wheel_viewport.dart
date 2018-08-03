@@ -589,14 +589,14 @@ class RenderListWheelViewport
     childParentData.offset = new Offset(crossPosition, indexToScrollOffset(index));
   }
 
-  /// Layout base on children provided by [childManager].
+  /// Performing layout depends on how [childManager] provides children.
   ///
   /// From the current scroll offset, we can calculate the minimum index and
   /// maximum index that is visible in the viewport. We can also get the index
-  /// range of the children that are currently active.
-  /// We will modify the child list so that children that are not visible
-  /// will be removed, and those that should visible but not yet created will be
-  /// instantiate by the childManager.
+  /// range of the children that are currently active. Our goal is to modify the
+  /// current index range to match the target index range by removing children
+  /// that are no longer visible and creating those that should visible but not
+  /// yet provided by [childManager].
   @override
   void performLayout() {
     final BoxConstraints childConstraints =
@@ -609,7 +609,7 @@ class RenderListWheelViewport
     // The height, in pixel, that children will be visible and might be laid out
     // and painted.
     double visibleHeight = size.height;
-    // If [renderChildrenOutsideViewport] is true, we spawn a redundant amount
+    // If renderChildrenOutsideViewport is true, we spawn a redundant amount
     // of children, those that are in the backside of the cylinder won't be
     // painted anyway.
     if (renderChildrenOutsideViewport)
@@ -628,7 +628,7 @@ class RenderListWheelViewport
     if (targetLastIndex * _itemExtent == lastVisibleOffset)
       targetLastIndex--;
 
-    // Validate the target range.
+    // Validates the target index range.
     while (!childManager.childExistsAt(targetFirstIndex) && targetFirstIndex <= targetLastIndex)
       targetFirstIndex++;
     while (!childManager.childExistsAt(targetLastIndex) && targetFirstIndex <= targetLastIndex)
@@ -643,7 +643,7 @@ class RenderListWheelViewport
     }
 
     // Now there are 2 cases:
-    //  - The target child list and our current child list have intersection:
+    //  - The target index range and our current index range have intersection:
     //    We shorten and extend our current child list so that the two lists
     //    match. Most of the time we are in this case.
     //  - The target list and our current child list have no intersection:

@@ -93,7 +93,13 @@ void main() {
         ),
       );
 
-      // The last item is before the first item.
+      // The first item is at the center of the viewport.
+      expect(
+      tester.getTopLeft(find.widgetWithText(Container, '0')),
+      const Offset(0.0, 250.0)
+      );
+
+      // The last item is just before the first item.
       expect(
         tester.getTopLeft(find.widgetWithText(Container, '9')),
         const Offset(0.0, 150.0)
@@ -102,7 +108,7 @@ void main() {
       controller.jumpTo(1000.0);
       await tester.pump();
 
-      // We have reached the end of the list, should loop back.
+      // We have passed the end of the list, the list should have looped back.
       expect(
         tester.getTopLeft(find.widgetWithText(Container, '0')),
         const Offset(0.0, 250.0)

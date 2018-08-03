@@ -39,10 +39,10 @@ class CupertinoPicker extends StatefulWidget {
   /// disable the background painting entirely; this is mildly more efficient
   /// than using [Colors.transparent].
   ///
-  /// The [looping] argument decides whether the child list is circular, in
-  /// other words, the list can be scrolled infinitely, and scrolling past the
-  /// end of the list will return to the beginning (and scrolling in
-  /// reverse direction will loop the beginning to the end).
+  /// The [looping] argument decides whether the child list loops and can be
+  /// scrolled infinitely.  If set to true scrolling past the end of the list
+  /// will loop the list back to the beginning.  If set to false, the list will
+  /// stop scrolling when you reach the end or the beginning.
   CupertinoPicker({
     Key key,
     this.diameterRatio = _kDefaultDiameterRatio,
@@ -66,8 +66,8 @@ class CupertinoPicker extends StatefulWidget {
                        : new ListWheelChildListDelegate(children: children),
        super(key: key);
 
-  /// Create picker from an indexed builder where its children is dynamically
-  /// built during layout.
+  /// Creates a picker from an indexed builder where its children are
+  /// dynamically built during layout.
   ///
   /// A child is lazily created when it starts becoming visible in the viewport.
   /// All of the children provided by the builder are cached and reused, so
@@ -80,7 +80,8 @@ class CupertinoPicker extends StatefulWidget {
   /// {@macro flutter.widgets.wheelList.childCount}
   /// It is very important that the initial item of the scroll controller has
   /// to be available via the builder. It does not make sense if the children
-  /// are from 1 to 10, and the initial item is 0.
+  /// are from 1 to 10, and the initial item is 0 (The picker starts with an
+  /// invalid child at the center and will cause an error).
   ///
   /// The [itemExtent] argument must be non-null and positive.
   ///
@@ -154,7 +155,7 @@ class CupertinoPicker extends StatefulWidget {
   /// listen for [ScrollEndNotification] and read its [FixedExtentMetrics].
   final ValueChanged<int> onSelectedItemChanged;
 
-  /// A delegate that helps lazily instantiating child.
+  /// A delegate that lazily instantiates children.
   final ListWheelChildDelegate childDelegate;
 
   @override
