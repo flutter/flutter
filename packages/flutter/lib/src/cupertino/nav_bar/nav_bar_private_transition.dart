@@ -119,12 +119,24 @@ class _CupertinoNavigationBarComponentsTransition {
   final _CupertinoNavigationBarComponents topNavBarComponents;
 
   Widget get bottomMiddle {
-    final bottomMiddle = bottomNavBarComponents.middle;
-    final topBackLabel = topNavBarComponents.backLabel;
+    final Widget bottomMiddle = bottomNavBarComponents.middle;
+    final Widget topBackLabel = topNavBarComponents.backLabel;
 
-    if (bottomMiddle
+    if (bottomMiddle != null && topBackLabel != null) {
+      return new DefaultTextStyleTransition(
+        style: TextStyleTween(
+          begin: _kMiddleTitleTextStyle,
+          end: topNavBarComponents._actionsStyle,
+        ).animate(animation),
+        child: bottomMiddle,
+      );
+    }
 
-    return
+    if (bottomMiddle != null && topBackLabel == null) {
+      return bottomMiddle;
+    }
+
+    return null;
   }
 }
 

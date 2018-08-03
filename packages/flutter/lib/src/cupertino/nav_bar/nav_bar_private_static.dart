@@ -35,6 +35,14 @@ const Border _kDefaultNavBarBorder = const Border(
   ),
 );
 
+const TextStyle _kMiddleTitleTextStyle = const TextStyle(
+  fontFamily: '.SF UI Text',
+  fontSize: 17.0,
+  fontWeight: FontWeight.w600,
+  letterSpacing: -0.08,
+  color: CupertinoColors.black,
+);
+
 const TextStyle _kLargeTitleTextStyle = const TextStyle(
   fontFamily: '.SF Pro Display',
   fontSize: 34.0,
@@ -42,6 +50,54 @@ const TextStyle _kLargeTitleTextStyle = const TextStyle(
   letterSpacing: 0.24,
   color: CupertinoColors.black,
 );
+
+TextStyle _navBarItemStyle(Color color) {
+  return new TextStyle(
+    fontFamily: '.SF UI Text',
+    fontSize: 17.0,
+    letterSpacing: -0.24,
+    color: color,
+  );
+}
+
+/// Returns `child` wrapped with background and a bottom border if background color
+/// is opaque. Otherwise, also blur with [BackdropFilter].
+Widget _wrapWithBackground({
+  Border border,
+  Color backgroundColor,
+  Widget child,
+  bool annotate = true,
+}) {
+  Widget result = child;
+  if (annotate) {
+    final bool darkBackground = backgroundColor.computeLuminance() < 0.179;
+    final SystemUiOverlayStyle overlayStyle = darkBackground
+        ? SystemUiOverlayStyle.light
+        : SystemUiOverlayStyle.dark;
+    result = new AnnotatedRegion<SystemUiOverlayStyle>(
+      value: overlayStyle,
+      sized: true,
+      child: result,
+    );
+  }
+  final DecoratedBox childWithBackground = new DecoratedBox(
+    decoration: new BoxDecoration(
+      border: border,
+      color: backgroundColor,
+    ),
+    child: result,
+  );
+
+  if (backgroundColor.alpha == 0xFF)
+    return childWithBackground;
+
+  return new ClipRect(
+    child: new BackdropFilter(
+      filter: new ImageFilter.blur(sigmaX: 10.0, sigmaY: 10.0),
+      child: childWithBackground,
+    ),
+  );
+}
 
 class _CupertinoLargeTitleNavigationBarSliverDelegate
     extends SliverPersistentHeaderDelegate with DiagnosticableTreeMixin {
@@ -132,45 +188,6 @@ class _CupertinoLargeTitleNavigationBarSliverDelegate
   }
 }
 
-/// Returns `child` wrapped with background and a bottom border if background color
-/// is opaque. Otherwise, also blur with [BackdropFilter].
-Widget _wrapWithBackground({
-  Border border,
-  Color backgroundColor,
-  Widget child,
-  bool annotate = true,
-}) {
-  Widget result = child;
-  if (annotate) {
-    final bool darkBackground = backgroundColor.computeLuminance() < 0.179;
-    final SystemUiOverlayStyle overlayStyle = darkBackground
-        ? SystemUiOverlayStyle.light
-        : SystemUiOverlayStyle.dark;
-    result = new AnnotatedRegion<SystemUiOverlayStyle>(
-      value: overlayStyle,
-      sized: true,
-      child: result,
-    );
-  }
-  final DecoratedBox childWithBackground = new DecoratedBox(
-    decoration: new BoxDecoration(
-      border: border,
-      color: backgroundColor,
-    ),
-    child: result,
-  );
-
-  if (backgroundColor.alpha == 0xFF)
-    return childWithBackground;
-
-  return new ClipRect(
-    child: new BackdropFilter(
-      filter: new ImageFilter.blur(sigmaX: 10.0, sigmaY: 10.0),
-      child: childWithBackground,
-    ),
-  );
-}
-
 /// The top part of the navigation bar that's never scrolled away.
 ///
 /// Consists of the entire navigation bar without background and border when used
@@ -195,13 +212,20 @@ class _CupertinoPersistentNavigationBar extends StatelessWidget {
   Widget build(BuildContext context) {
     Widget middle = components.middle;
 
-    middle = middleVisible == null
-      ? middle
-      : new AnimatedOpacity(
-        opacity: middleVisible ? 1.0 : 0.0,
-        duration: _kNavBarTitleFadeDuration,
-        child: middle,
+    if (middle != null) {
+      middle = new DefaultTextStyle(
+        style: _kMiddleTitleTextStyle,
+        child: new Semantics(header: true, child: middle),
       );
+      middle = middleVisible == null
+        ? middle
+        : new AnimatedOpacity(
+          opacity: middleVisible ? 1.0 : 0.0,
+          duration: _kNavBarTitleFadeDuration,
+          child: middle,
+        );
+    }
+
 
     Widget leading = components.leading;
     final Widget backChevron = components.backChevron;
@@ -264,12 +288,7 @@ class _CupertinoNavigationBarComponents {
        _padding = padding,
        _actionsForegroundColor = actionsForegroundColor,
        _large = large,
-       _actionsStyle = new TextStyle(
-         fontFamily: '.SF UI Text',
-         fontSize: 17.0,
-         letterSpacing: -0.24,
-         color: actionsForegroundColor,
-       );
+       _actionsStyle = _navBarItemStyle(actionsForegroundColor);
 
   static Widget _derivedTitle({
     bool automaticallyImplyTitle,
@@ -377,20 +396,7 @@ class _CupertinoNavigationBarComponents {
       currentRoute: _route,
     );
 
-    if (middleContent == null) {
-      return null;
-    }
-
-    return new DefaultTextStyle(
-      style: const TextStyle(
-        fontFamily: '.SF UI Text',
-        fontSize: 17.0,
-        fontWeight: FontWeight.w600,
-        letterSpacing: -0.08,
-        color: CupertinoColors.black,
-      ),
-      child: new Semantics(header: true, child: middleContent),
-    );
+    return middleContent;
   }
 
   final Widget _trailing;
