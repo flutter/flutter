@@ -161,11 +161,13 @@ class RenderEditable extends RenderBox {
        _obscureText = obscureText {
     assert(_showCursor != null);
     assert(!_showCursor.value || cursorColor != null);
+    
     _tap = new TapGestureRecognizer(debugOwner: this)
       ..onTapDown = _handleTapDown
       ..onTap = _handleTap;
     _longPress = new LongPressGestureRecognizer(debugOwner: this)
       ..onLongPress = _handleLongPress;
+    RawKeyboard.instance.addListener(_keyEvent);
   }
 
   /// Character used to obscure text if [obscureText] is true.
@@ -197,6 +199,122 @@ class RenderEditable extends RenderBox {
   }
 
   Rect _lastCaretRect;
+
+  bool _shiftIsDown = false;
+  bool _ctrlIsDown = false;
+  bool _rightArrowDown = false;
+  bool _leftArrowDown = false;
+  bool _upArrowDown = false;
+  bool _downArrowDown = false;
+
+  final int _leftShiftCode = 59;
+  final int _rightShiftCode = 60;
+  final int _leftControlCode = 113;
+  final int _rightControlCode = 114;
+  final int _leftArrowCode = 21;
+  final int _rightArrowCode = 22;
+  final int _upArrowCode = 19;
+  final int _downArrowCode = 20;
+
+  int _extentOffset = -1;
+  int _baseOffset = -1;
+
+  int _previousCursorLocation = -1;
+  bool _resetCursor = false;
+
+  void _keyEvent(RawKeyEvent keyEvent){
+    final RawKeyEventDataAndroid rawAndroidEvent = keyEvent.data;
+    final int pressedKeyCode = rawAndroidEvent.keyCode;
+
+    if (selection.isCollapsed) {
+      _extentOffset = selection.extentOffset;
+      _baseOffset = selection.baseOffset;
+    }
+
+    final bool pressedDown = keyEvent is RawKeyDownEvent;
+
+    if (pressedKeyCode == _leftShiftCode || pressedKeyCode == _rightShiftCode)
+      _shiftIsDown = keyEvent is RawKeyDownEvent ? true : false;
+    else if (pressedKeyCode == _leftControlCode || pressedKeyCode == _rightControlCode)
+      _ctrlIsDown = keyEvent is RawKeyDownEvent ? true : false;
+    else if (pressedKeyCode == _leftArrowCode)
+      _leftArrowDown = keyEvent is RawKeyDownEvent ? true : false;
+    else if (pressedKeyCode == _rightArrowCode)
+      _rightArrowDown = keyEvent is RawKeyDownEvent ? true : false;
+    else if (pressedKeyCode == _upArrowCode)
+      _upArrowDown = keyEvent is RawKeyDownEvent ? true : false;
+    else if (pressedKeyCode == _downArrowCode)
+      _downArrowDown = keyEvent is RawKeyDownEvent ? true : false;
+
+    final bool pressedSpecial = _shiftIsDown || _ctrlIsDown ||
+      _leftArrowDown || _rightArrowDown || _upArrowDown || _downArrowDown;
+
+    if (pressedSpecial && _extentOffset != -1) {
+      int newOffset = _extentOffset;
+
+      if (pressedDown && _ctrlIsDown) {
+        if (_leftArrowDown && _extentOffset > 2) {
+          final TextSelection textSelection = _selectWordAtOffset(new TextPosition(offset: _extentOffset - 2));
+          newOffset = textSelection.baseOffset + 1;
+        } else if (_rightArrowDown && _extentOffset < text.text.length - 2) {
+          final TextSelection textSelection = _selectWordAtOffset(new TextPosition(offset: _extentOffset + 1));
+          newOffset = textSelection.extentOffset - 1;
+        }
+      }
+      if (_rightArrowDown && _extentOffset < text.text.length)
+        newOffset += 1;
+      if (_leftArrowDown && _extentOffset > 0)
+        newOffset -= 1;
+      if (_downArrowDown || _upArrowDown) {
+        double verticalOffset = _textPainter.preferredLineHeight;
+        if (_upArrowDown)
+          verticalOffset *= -1;
+
+        final Offset caretOffset = _textPainter.getOffsetForCaret(new TextPosition(offset: _extentOffset), _caretPrototype);
+        final Offset caretOffsetTranslated = caretOffset.translate(0.0, verticalOffset);
+        final TextPosition position = _textPainter.getPositionForOffset(caretOffsetTranslated);
+
+        if (position.offset != _extentOffset) {
+          if (_resetCursor) {
+            newOffset = _previousCursorLocation;
+            _resetCursor = false;
+          } else {
+            newOffset = position.offset;
+            _previousCursorLocation = newOffset;
+          }
+        } else {
+          if (_downArrowDown)
+            newOffset = text.text.length;
+          else if (_upArrowDown)
+            newOffset = 0;
+          _resetCursor = true;
+        }
+      }
+
+      if (_shiftIsDown) {
+        if (_baseOffset < newOffset)
+          onSelectionChanged(new TextSelection(
+            baseOffset: _baseOffset, extentOffset: newOffset),
+            this, SelectionChangedCause.keyboard);
+        else
+          onSelectionChanged(new TextSelection(
+            baseOffset: newOffset , extentOffset: _baseOffset),
+            this, SelectionChangedCause.keyboard);
+      } else if (pressedDown){
+        if (!selection.isCollapsed) {
+          if (_leftArrowDown)
+            newOffset = _baseOffset < _extentOffset ? _baseOffset : _extentOffset;
+          else if (_rightArrowDown)
+            newOffset = _baseOffset > _extentOffset ? _baseOffset : _extentOffset;
+        }
+        onSelectionChanged(new TextSelection.fromPosition(
+          new TextPosition(offset: newOffset)),
+            this, SelectionChangedCause.keyboard);
+      }
+      _extentOffset = newOffset;
+    }
+  }
+
 
   /// Marks the render object as needing to be laid out again and have its text
   /// metrics recomputed.
@@ -465,6 +583,7 @@ class RenderEditable extends RenderBox {
   void detach() {
     _offset.removeListener(markNeedsPaint);
     _showCursor.removeListener(markNeedsPaint);
+    RawKeyboard.instance.removeListener(_keyEvent);
     super.detach();
   }
 
