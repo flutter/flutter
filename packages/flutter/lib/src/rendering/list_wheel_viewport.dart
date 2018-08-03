@@ -535,7 +535,7 @@ class RenderListWheelViewport
   double computeMinIntrinsicHeight(double width) {
     if (childManager.childCount == null)
       return 0.0;
-      return childManager.childCount * _itemExtent;
+    return childManager.childCount * _itemExtent;
   }
 
   @override
