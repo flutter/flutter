@@ -860,7 +860,7 @@ class ListWheelElement extends RenderObjectElement implements ListWheelChildMana
 
     const String moveChildRenderObjectErrorMessage =
         'Currently we maintain the list in contiguous increasing order, so '
-        'shuffling the list is disabled.';
+        'moving children around is not allowed.';
     assert(false, moveChildRenderObjectErrorMessage);
   }
 

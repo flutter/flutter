@@ -17,7 +17,7 @@ typedef double _ChildSizingFunction(RenderBox child);
 
 /// A delegate used by [RenderListWheelViewport] to manage its children.
 ///
-/// [RenderListWheelViewport] during layout will asked the delegate to create
+/// [RenderListWheelViewport] during layout will ask the delegate to create
 /// children that are visible in the viewport and remove those that are not.
 abstract class ListWheelChildManager {
   /// The number of children that will be provided.
@@ -26,18 +26,18 @@ abstract class ListWheelChildManager {
   ///
   /// If null, then there's no explicit limits to the range of the children
   /// except that it has to be contiguous. If [childExistsAt] for a certain
-  /// index return false, that means the index is either a lower or upper limit.
+  /// index returns false, that means the index is either a lower or upper limit.
   int get childCount;
 
-  /// Check whether the delegate is able to provide a child widget at the given
+  /// Checks whether the delegate is able to provide a child widget at the given
   /// index (this function is not about whether the child at the given index is
   /// active or not).
   bool childExistsAt(int index);
 
-  /// Create and insert a new child at the given index.
+  /// Creates and inserts a new child at the given index.
   void createChild(int index, {@required RenderBox after});
 
-  /// Remove the child element corresponding with the given RenderBox.
+  /// Removes the child element corresponding with the given RenderBox.
   void removeChild(RenderBox child);
 }
 
@@ -553,7 +553,7 @@ class RenderListWheelViewport
     size = constraints.biggest;
   }
 
-  /// Get the index of a child by looking at its parentData.
+  /// Gets the index of a child by looking at its parentData.
   int indexOf(RenderBox child) {
     assert(child != null);
     final ListWheelParentData childParentData = child.parentData;
@@ -561,13 +561,12 @@ class RenderListWheelViewport
     return childParentData.index;
   }
 
-  /// Return the index of the child that should be at the given offset.
+  /// Returns the index of the child that should be at the given offset.
   int scrollOffsetToIndex(double scrollOffset) => (scrollOffset / itemExtent).floor();
 
-  /// Return the scroll offset of the child with the given index.
+  /// Returns the scroll offset of the child with the given index.
   double indexToScrollOffset(int index) => index * itemExtent;
 
-  // Create a child at the given index.
   void _createChild(int index, {RenderBox after}) {
     invokeLayoutCallback<BoxConstraints>((BoxConstraints constraints) {
       assert(constraints == this.constraints);
@@ -589,14 +588,15 @@ class RenderListWheelViewport
     childParentData.offset = new Offset(crossPosition, indexToScrollOffset(index));
   }
 
-  /// Performing layout depends on how [childManager] provides children.
+  /// Performs layout based on how [childManager] provides children.
   ///
-  /// From the current scroll offset, we can calculate the minimum index and
-  /// maximum index that is visible in the viewport. We can also get the index
-  /// range of the children that are currently active. Our goal is to modify the
-  /// current index range to match the target index range by removing children
-  /// that are no longer visible and creating those that should visible but not
-  /// yet provided by [childManager].
+  /// From the current scroll offset, the minimum index and maximum index that
+  /// is visible in the viewport can be calculated. The index range of the
+  /// currently active children can also be acquired by looking directly at
+  /// the current child list. This function has to modify the current index
+  /// range to match the target index range by removing children that are no
+  /// longer visible and creating those that are visible but not yet provided
+  /// by [childManager].
   @override
   void performLayout() {
     final BoxConstraints childConstraints =

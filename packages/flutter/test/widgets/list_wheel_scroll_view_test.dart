@@ -190,7 +190,7 @@ void main() {
 
       expect(paintedChildren, <int>[-13, -12, -11, -10, -9, -8, -7]);
 
-      // Fling with high velocity and stop at the lower limit.
+      // Flings with high velocity and stop at the lower limit.
       paintedChildren.clear();
       await tester.fling(
         find.byType(ListWheelScrollView),
@@ -200,7 +200,7 @@ void main() {
       await tester.pumpAndSettle();
       expect(controller.selectedItem, -15);
 
-      // Fling with high velocity and stop at the upper limit.
+      // Flings with high velocity and stop at the upper limit.
       await tester.fling(
         find.byType(ListWheelScrollView),
         const Offset(0.0, -1000.0),
@@ -274,6 +274,43 @@ void main() {
       );
       expect(tester.getSize(find.byType(SizedBox)), const Size(200.0, 50.0));
       expect(find.text('blah'), findsOneWidget);
+    });
+
+    testWidgets('builder is never called twice for same index', (WidgetTester tester) async {
+      final Set<int> builtChildren = Set<int>();
+      final FixedExtentScrollController controller =
+        new FixedExtentScrollController();
+
+      await tester.pumpWidget(
+        new Directionality(
+          textDirection: TextDirection.ltr,
+          child: new ListWheelScrollView.useDelegate(
+            controller: controller,
+            itemExtent: 100.0,
+            onSelectedItemChanged: (_) {},
+            childDelegate: new ListWheelChildBuilderDelegate(
+              builder: (BuildContext context, int index) {
+                expect(builtChildren.contains(index), false);
+                builtChildren.add(index);
+
+                return new Container(
+                  width: 400.0,
+                  height: 100.0,
+                  child: Text(index.toString()),
+                );
+              },
+            ),
+          ),
+        )
+      );
+
+      // Scrolls up and down to check if builder is called twice.
+      controller.jumpTo(-10000.0);
+      await tester.pump();
+      controller.jumpTo(10000.0);
+      await tester.pump();
+      controller.jumpTo(-10000.0);
+      await tester.pump();
     });
   });
 
