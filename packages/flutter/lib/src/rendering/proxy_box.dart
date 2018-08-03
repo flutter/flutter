@@ -5,7 +5,7 @@
 import 'dart:async';
 
 import 'dart:ui' as ui show ImageFilter, Gradient, Image;
-import 'dart:ui' show Clip, defaultClipBehavior; // ignore: deprecated_member_use
+import 'dart:ui' show Clip;
 
 import 'package:flutter/animation.dart';
 import 'package:flutter/foundation.dart';
@@ -1118,7 +1118,7 @@ abstract class _RenderCustomClip<T> extends RenderProxyBox {
   _RenderCustomClip({
     RenderBox child,
     CustomClipper<T> clipper,
-    this.clipBehavior = defaultClipBehavior, // ignore: deprecated_member_use
+    this.clipBehavior = Clip.none,
   }) : _clipper = clipper, assert(clipBehavior != null), assert(clipBehavior != Clip.none), super(child);
 
   /// If non-null, determines which clip to use on the child.
@@ -1475,7 +1475,7 @@ abstract class _RenderPhysicalModelBase<T> extends _RenderCustomClip<T> {
     @required double elevation,
     @required Color color,
     @required Color shadowColor,
-    Clip clipBehavior = defaultClipBehavior, // ignore: deprecated_member_use
+    Clip clipBehavior = Clip.none,
     CustomClipper<T> clipper,
   }) : assert(elevation != null),
        assert(color != null),
@@ -1554,7 +1554,7 @@ class RenderPhysicalModel extends _RenderPhysicalModelBase<RRect> {
   RenderPhysicalModel({
     RenderBox child,
     BoxShape shape = BoxShape.rectangle,
-    Clip clipBehavior = defaultClipBehavior, // ignore: deprecated_member_use
+    Clip clipBehavior = Clip.none,
     BorderRadius borderRadius,
     double elevation = 0.0,
     @required Color color,
@@ -1713,7 +1713,7 @@ class RenderPhysicalShape extends _RenderPhysicalModelBase<Path> {
   RenderPhysicalShape({
     RenderBox child,
     @required CustomClipper<Path> clipper,
-    Clip clipBehavior = defaultClipBehavior, // ignore: deprecated_member_use
+    Clip clipBehavior = Clip.none,
     double elevation = 0.0,
     @required Color color,
     Color shadowColor = const Color(0xFF000000),

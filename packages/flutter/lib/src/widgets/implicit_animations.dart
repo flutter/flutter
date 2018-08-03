@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' show Clip, defaultClipBehavior; // ignore: deprecated_member_use
+import 'dart:ui' show Clip;
 
 import 'package:flutter/animation.dart';
 import 'package:flutter/foundation.dart';
@@ -1183,7 +1183,7 @@ class AnimatedPhysicalModel extends ImplicitlyAnimatedWidget {
     Key key,
     @required this.child,
     @required this.shape,
-    this.clipBehavior = defaultClipBehavior, // ignore: deprecated_member_use
+    this.clipBehavior = Clip.none,
     this.borderRadius = BorderRadius.zero,
     @required this.elevation,
     @required this.color,
