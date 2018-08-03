@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:ui' show Clip;
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
@@ -63,6 +65,7 @@ class RaisedButton extends StatelessWidget {
     this.disabledElevation = 0.0,
     this.padding,
     this.shape,
+    this.clipBehavior = Clip.none,
     this.materialTapTargetSize,
     this.animationDuration = kThemeChangeDuration,
     this.child,
@@ -70,6 +73,7 @@ class RaisedButton extends StatelessWidget {
        assert(highlightElevation != null),
        assert(disabledElevation != null),
        assert(animationDuration != null),
+       assert(clipBehavior != null),
        super(key: key);
 
   /// Create a filled button from a pair of widgets that serve as the button's
@@ -96,6 +100,7 @@ class RaisedButton extends StatelessWidget {
     this.highlightElevation = 8.0,
     this.disabledElevation = 0.0,
     this.shape,
+    this.clipBehavior = Clip.none,
     this.materialTapTargetSize,
     this.animationDuration = kThemeChangeDuration,
     @required Widget icon,
@@ -106,6 +111,7 @@ class RaisedButton extends StatelessWidget {
        assert(icon != null),
        assert(label != null),
        assert(animationDuration != null),
+       assert(clipBehavior != null),
        padding = const EdgeInsetsDirectional.only(start: 12.0, end: 16.0),
        child = new Row(
          mainAxisSize: MainAxisSize.min,
@@ -287,6 +293,9 @@ class RaisedButton extends StatelessWidget {
   /// shape as well.
   final ShapeBorder shape;
 
+  /// {@macro flutter.widgets.Clip}
+  final Clip clipBehavior;
+
   /// Defines the duration of animated changes for [shape] and [elevation].
   ///
   /// The default value is [kThemeChangeDuration].
@@ -390,6 +399,7 @@ class RaisedButton extends StatelessWidget {
       padding: padding ?? buttonTheme.padding,
       constraints: buttonTheme.constraints,
       shape: shape ?? buttonTheme.shape,
+      clipBehavior: clipBehavior,
       animationDuration: animationDuration,
       child: child,
       materialTapTargetSize: materialTapTargetSize ?? theme.materialTapTargetSize,

@@ -286,7 +286,7 @@ void main() {
 
   testWidgets('MaterialButton has no clip by default', (WidgetTester tester) async {
     final GlobalKey buttonKey = new GlobalKey();
-    Widget buttonWidget = new Material(
+    final Widget buttonWidget = new Material(
       child: new Center(
         child: new MaterialButton(
           key: buttonKey,

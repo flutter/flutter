@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:ui' show Clip;
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
@@ -68,8 +70,10 @@ class OutlineButton extends StatefulWidget {
     this.highlightedBorderColor,
     this.padding,
     this.shape,
+    this.clipBehavior = Clip.none,
     this.child,
   }) : assert(highlightElevation != null && highlightElevation >= 0.0),
+       assert(clipBehavior != null),
        super(key: key);
 
   /// Create an outline button from a pair of widgets that serve as the button's
@@ -93,11 +97,13 @@ class OutlineButton extends StatefulWidget {
     this.disabledBorderColor,
     this.highlightedBorderColor,
     this.shape,
+    this.clipBehavior = Clip.none,
     @required Widget icon,
     @required Widget label,
   }) : assert(highlightElevation != null && highlightElevation >= 0.0),
        assert(icon != null),
        assert(label != null),
+       assert(clipBehavior != Clip.none),
        padding = const EdgeInsetsDirectional.only(start: 12.0, end: 16.0),
        child = new Row(
          mainAxisSize: MainAxisSize.min,
@@ -222,6 +228,9 @@ class OutlineButton extends StatefulWidget {
   /// button has a [highlightElevation], then its drop shadow is defined by this
   /// shape as well.
   final ShapeBorder shape;
+
+  /// {@macro flutter.widgets.Clip}
+  final Clip clipBehavior;
 
   /// The button's label.
   ///
@@ -415,6 +424,7 @@ class _OutlineButtonState extends State<OutlineButton> with SingleTickerProvider
             shape: widget.shape ?? buttonTheme.shape,
             side: _getOutline(theme, buttonTheme),
           ),
+          clipBehavior: widget.clipBehavior,
           animationDuration: _kElevationDuration,
           child: widget.child,
         );
