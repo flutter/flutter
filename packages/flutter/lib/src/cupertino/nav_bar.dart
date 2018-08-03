@@ -176,24 +176,29 @@ class CupertinoNavigationBar extends StatelessWidget implements ObstructingPrefe
     return const Size.fromHeight(_kNavBarPersistentHeight);
   }
 
+  _CupertinoNavigationBarComponents _components(ModalRoute<dynamic> route) {
+    return new _CupertinoNavigationBarComponents(
+      route: route,
+      leading: leading,
+      automaticallyImplyLeading: automaticallyImplyLeading,
+      automaticallyImplyTitle: automaticallyImplyMiddle,
+      previousPageTitle: previousPageTitle,
+      middle: middle,
+      trailing: trailing,
+      padding: padding,
+      actionsForegroundColor: actionsForegroundColor,
+      large: false,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return _wrapWithBackground(
       border: border,
       backgroundColor: backgroundColor,
       child: new _CupertinoPersistentNavigationBar(
-        components: new _CupertinoNavigationBarComponents(
-          route: ModalRoute.of(context),
-          leading: leading,
-          automaticallyImplyLeading: automaticallyImplyLeading,
-          automaticallyImplyTitle: automaticallyImplyMiddle,
-          previousPageTitle: previousPageTitle,
-          middle: middle,
-          trailing: trailing,
-          padding: padding,
-          actionsForegroundColor: actionsForegroundColor,
-          large: false,
-        ),
+        components: _components(ModalRoute.of(context)),
+        padding: padding,
       ),
     );
   }
@@ -325,25 +330,30 @@ class CupertinoSliverNavigationBar extends StatelessWidget {
   /// True if the navigation bar's background color has no transparency.
   bool get opaque => backgroundColor.alpha == 0xFF;
 
+  _CupertinoNavigationBarComponents _components(ModalRoute<dynamic> route) {
+    return new _CupertinoNavigationBarComponents(
+      route: route,
+      largeTitle: largeTitle,
+      leading: leading,
+      automaticallyImplyLeading: automaticallyImplyLeading,
+      automaticallyImplyTitle: automaticallyImplyTitle,
+      previousPageTitle: previousPageTitle,
+      middle: middle,
+      trailing: trailing,
+      padding: padding,
+      actionsForegroundColor: actionsForegroundColor,
+      large: true,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return new SliverPersistentHeader(
       pinned: true, // iOS navigation bars are always pinned.
       delegate: new _CupertinoLargeTitleNavigationBarSliverDelegate(
-        components: new _CupertinoNavigationBarComponents(
-          route: ModalRoute.of(context),
-          largeTitle: largeTitle,
-          leading: leading,
-          automaticallyImplyLeading: automaticallyImplyLeading,
-          automaticallyImplyTitle: automaticallyImplyTitle,
-          previousPageTitle: previousPageTitle,
-          middle: middle,
-          trailing: trailing,
-          padding: padding,
-          actionsForegroundColor: actionsForegroundColor,
-          large: true,
-        ),
+        components: _components(ModalRoute.of(context)),
         persistentHeight: _kNavBarPersistentHeight + MediaQuery.of(context).padding.top,
+        padding: padding,
         border: border,
         backgroundColor: backgroundColor,
         alwaysShowMiddle: middle != null,

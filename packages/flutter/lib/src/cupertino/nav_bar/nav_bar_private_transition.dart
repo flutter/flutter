@@ -4,45 +4,132 @@
 
 part of nav_bar;
 
-// class _CupertinoNavigationBarTransition extends StatelessWidget {
-//   CupertinoNavigationBarTransition({
-//     this.animation,
-//     this.topNavBar,
-//     this.bottomNavBar,
-//     this.topRoute,
-//     this.bottomRoute,
-//   });
+class CupertinoNavigationBarTransition extends StatelessWidget {
+  CupertinoNavigationBarTransition({
+    this.animation,
+    this.topNavBar,
+    this.bottomNavBar,
+    this.topRoute,
+    this.bottomRoute,
+  }) : assert(
+         topNavBar is CupertinoNavigationBar || topNavBar is CupertinoSliverNavigationBar,
+         typeError,
+       ),
+       assert(
+         bottomNavBar is CupertinoNavigationBar || bottomNavBar is CupertinoSliverNavigationBar,
+         typeError,
+       ),
+       heightTween = new Tween<double>(
+         begin: getNavBarHeight(bottomNavBar),
+         end: getNavBarHeight(topNavBar),
+       ),
+       backgroundTween = new ColorTween(
+         begin: getNavBarBackgroundColor(bottomNavBar),
+         end: getNavBarBackgroundColor(topNavBar),
+       ),
+       borderTween = new BorderTween(
+         begin: getNavBarBorder(bottomNavBar),
+         end: getNavBarBorder(topNavBar),
+       );
 
-//   final Animation<double> animation;
-//   final Widget topNavBar;
-//   final Widget bottomNavBar;
-//   final CupertinoPageRoute<dynamic> topRoute;
-//   final CupertinoPageRoute<dynamic> bottomRoute;
+  static const String typeError =
+      'Can only transition between CupertinoNavigationBars and CupertinoSliverNavigationBars';
 
-//   double getNavBarHeight(Widget navBar) {
-//     if (navBar is CupertinoNavigationBar) {
-//       return _kNavBarPersistentHeight;
-//     } else if (navBar is CupertinoSliverNavigationBar) {
-//       return _kNavBarPersistentHeight + _kNavBarLargeTitleHeightExtension;
-//     } else {
-//       assert(
-//         false,
-//         'Can only transition between CupertinoNavigationBars and '
-//         'CupertinoSliverNavigationBars',
-//       );
-//       return null;
-//     }
-//   }
+  final Animation<double> animation;
+  final Widget topNavBar;
+  final Widget bottomNavBar;
+  final CupertinoPageRoute<dynamic> topRoute;
+  final CupertinoPageRoute<dynamic> bottomRoute;
 
-//   @override
-//   Widget build(BuildContext context) {
-//     final double topHeight = getNavBarHeight(topNavBar);
-//     final double bottomHeight = getNavBarHeight(bottomNavBar);
-//   }
-// }
+  final Tween<double> heightTween;
+  final ColorTween backgroundTween;
+  final BorderTween borderTween;
 
-// class _RenderCupertinoNavigationBarTransition extends RenderBox {
+  static double getNavBarHeight(Widget navBar) {
+    if (navBar is CupertinoNavigationBar) {
+      return _kNavBarPersistentHeight;
+    } else if (navBar is CupertinoSliverNavigationBar) {
+      return _kNavBarPersistentHeight + _kNavBarLargeTitleHeightExtension;
+    } else {
+      assert(
+        false,
+        typeError,
+      );
+      return null;
+    }
+  }
 
-//   double _topHeight;
-//   double _bottomHeight;
-// }
+  static Color getNavBarBackgroundColor(Widget navBar) {
+    if (navBar is CupertinoNavigationBar) {
+      return navBar.backgroundColor;
+    } else if (navBar is CupertinoSliverNavigationBar) {
+      return navBar.backgroundColor;
+    } else {
+      assert(
+        false,
+        typeError,
+      );
+      return null;
+    }
+  }
+
+  static Border getNavBarBorder(Widget navBar) {
+    if (navBar is CupertinoNavigationBar) {
+      return navBar.border;
+    } else if (navBar is CupertinoSliverNavigationBar) {
+      return navBar.border;
+    } else {
+      assert(
+        false,
+        typeError,
+      );
+      return null;
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: animation,
+      builder: (BuildContext context, Widget child) {
+        return _wrapWithBackground(
+          annotate: false,
+          backgroundColor: backgroundTween.evaluate(animation),
+          border: borderTween.evaluate(animation),
+          child: new SizedBox(
+            height: heightTween.evaluate(animation) + MediaQuery.of(context).padding.top,
+            width: double.infinity,
+          ),
+        );
+      },
+    );
+  }
+}
+
+@immutable
+class _CupertinoNavigationBarComponentsTransition {
+  const _CupertinoNavigationBarComponentsTransition({
+    this.animation,
+    this.bottomNavBarComponents,
+    this.topNavBarComponents,
+  });
+
+  final Animation<double> animation;
+  final _CupertinoNavigationBarComponents bottomNavBarComponents;
+  final _CupertinoNavigationBarComponents topNavBarComponents;
+
+  Widget get bottomMiddle {
+    final bottomMiddle = bottomNavBarComponents.middle;
+    final topBackLabel = topNavBarComponents.backLabel;
+
+    if (bottomMiddle
+
+    return
+  }
+}
+
+class _RenderCupertinoNavigationBarTransition extends RenderBox {
+
+  double _topHeight;
+  double _bottomHeight;
+}

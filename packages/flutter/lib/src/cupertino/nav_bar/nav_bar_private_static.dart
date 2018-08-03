@@ -48,6 +48,7 @@ class _CupertinoLargeTitleNavigationBarSliverDelegate
   _CupertinoLargeTitleNavigationBarSliverDelegate({
     @required this.components,
     @required this.persistentHeight,
+    this.padding,
     this.border,
     this.backgroundColor,
     this.alwaysShowMiddle,
@@ -57,9 +58,11 @@ class _CupertinoLargeTitleNavigationBarSliverDelegate
 
   final double persistentHeight;
 
-  final Color backgroundColor;
+  final EdgeInsetsDirectional padding;
 
   final Border border;
+
+  final Color backgroundColor;
 
   final bool alwaysShowMiddle;
 
@@ -76,6 +79,7 @@ class _CupertinoLargeTitleNavigationBarSliverDelegate
     final _CupertinoPersistentNavigationBar persistentNavigationBar =
         new _CupertinoPersistentNavigationBar(
       components: components,
+      padding: padding,
       // If a user specified middle exists, always show it. Otherwise, show
       // title when collapsed.
       middleVisible: alwaysShowMiddle ? null : !showLargeTitle,
@@ -134,21 +138,26 @@ Widget _wrapWithBackground({
   Border border,
   Color backgroundColor,
   Widget child,
+  bool annotate = true,
 }) {
-  final bool darkBackground = backgroundColor.computeLuminance() < 0.179;
-  final SystemUiOverlayStyle overlayStyle = darkBackground
-      ? SystemUiOverlayStyle.light
-      : SystemUiOverlayStyle.dark;
+  Widget result = child;
+  if (annotate) {
+    final bool darkBackground = backgroundColor.computeLuminance() < 0.179;
+    final SystemUiOverlayStyle overlayStyle = darkBackground
+        ? SystemUiOverlayStyle.light
+        : SystemUiOverlayStyle.dark;
+    result = new AnnotatedRegion<SystemUiOverlayStyle>(
+      value: overlayStyle,
+      sized: true,
+      child: result,
+    );
+  }
   final DecoratedBox childWithBackground = new DecoratedBox(
     decoration: new BoxDecoration(
       border: border,
       color: backgroundColor,
     ),
-    child: new AnnotatedRegion<SystemUiOverlayStyle>(
-      value: overlayStyle,
-      sized: true,
-      child: child,
-    ),
+    child: result,
   );
 
   if (backgroundColor.alpha == 0xFF)
@@ -171,11 +180,13 @@ class _CupertinoPersistentNavigationBar extends StatelessWidget {
   const _CupertinoPersistentNavigationBar({
     Key key,
     this.components,
+    this.padding,
     this.middleVisible,
   }) : super(key: key);
 
   final _CupertinoNavigationBarComponents components;
 
+  final EdgeInsetsDirectional padding;
   /// Whether the middle widget has a visible animated opacity. A null value
   /// means the middle opacity will not be animated.
   final bool middleVisible;
@@ -208,11 +219,11 @@ class _CupertinoPersistentNavigationBar extends StatelessWidget {
       middleSpacing: 6.0,
     );
 
-    if (components._padding != null) {
+    if (padding != null) {
       paddedToolbar = new Padding(
         padding: EdgeInsets.only(
-          top: components._padding.top,
-          bottom: components._padding.bottom,
+          top: padding.top,
+          bottom: padding.bottom,
         ),
         child: paddedToolbar,
       );
@@ -241,7 +252,6 @@ class _CupertinoNavigationBarComponents {
     Widget largeTitle,
     EdgeInsetsDirectional padding,
     Color actionsForegroundColor,
-    bool middleVisible,
     bool large,
   }) : _route = route,
        _leading = leading,
@@ -253,7 +263,6 @@ class _CupertinoNavigationBarComponents {
        _largeTitle = largeTitle,
        _padding = padding,
        _actionsForegroundColor = actionsForegroundColor,
-       _middleVisible = middleVisible,
        _large = large,
        _actionsStyle = new TextStyle(
          fontFamily: '.SF UI Text',
@@ -373,7 +382,9 @@ class _CupertinoNavigationBarComponents {
     }
 
     return new DefaultTextStyle(
-      style: _actionsStyle.copyWith(
+      style: const TextStyle(
+        fontFamily: '.SF UI Text',
+        fontSize: 17.0,
         fontWeight: FontWeight.w600,
         letterSpacing: -0.08,
         color: CupertinoColors.black,
@@ -437,9 +448,6 @@ class _CupertinoNavigationBarComponents {
 
   final EdgeInsetsDirectional _padding;
   final Color _actionsForegroundColor;
-  /// Whether the middle widget has a visible animated opacity. A null value
-  /// means the middle opacity will not be animated.
-  final bool _middleVisible;
   final bool _large;
 }
 
