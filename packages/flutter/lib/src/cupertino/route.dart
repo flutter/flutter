@@ -733,7 +733,7 @@ class _CupertinoEdgeShadowPainter extends BoxPainter {
 /// The dialog route created by this method is pushed to the root navigator.
 /// If the application has multiple [Navigator] objects, it may be necessary to
 /// call `Navigator.of(context, rootNavigator: true).pop(result)` to close the
-/// dialog rather just 'Navigator.pop(context, result)`.
+/// dialog rather than just 'Navigator.pop(context, result)`.
 ///
 /// See also:
 ///  * [CupertinoDialog], an iOS-style dialog.
@@ -747,7 +747,6 @@ Future<T> showCupertinoDialog<T>({
   return showGeneralDialog(
     context: context,
     barrierDismissible: false,
-    barrierLabel: 'Dismiss',
     barrierColor: _kModalBarrierColor,
     transitionDuration: const Duration(milliseconds: 300),
     pageBuilder: (BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {

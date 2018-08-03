@@ -563,7 +563,7 @@ class SimpleDialog extends StatelessWidget {
 /// The dialog route created by this method is pushed to the root navigator.
 /// If the application has multiple [Navigator] objects, it may be necessary to
 /// call `Navigator.of(context, rootNavigator: true).pop(result)` to close the
-/// dialog rather just 'Navigator.pop(context, result)`.
+/// dialog rather than just 'Navigator.pop(context, result)`.
 ///
 /// See also:
 ///  * [AlertDialog], for dialogs that have a row of buttons below a body.
@@ -575,9 +575,9 @@ Future<T> showDialog<T>({
   @required BuildContext context,
   bool barrierDismissible = true,
   @Deprecated(
-      'Instead of using the "child" argument, return the child from a closure '
-          'provided to the "builder" argument. This will ensure that the BuildContext '
-          'is appropriate for widgets built in the dialog.'
+    'Instead of using the "child" argument, return the child from a closure '
+    'provided to the "builder" argument. This will ensure that the BuildContext '
+    'is appropriate for widgets built in the dialog.'
   ) Widget child,
   WidgetBuilder builder,
 }) {

@@ -231,12 +231,16 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> {
       if (current != null) {
         if (current is TrainHoppingAnimation) {
           TrainHoppingAnimation newAnimation;
-          newAnimation = new TrainHoppingAnimation(current.currentTrain, nextRoute._animation, onSwitchedTrain: () {
-            assert(_secondaryAnimation.parent == newAnimation);
-            assert(newAnimation.currentTrain == nextRoute._animation);
-            _secondaryAnimation.parent = newAnimation.currentTrain;
-            newAnimation.dispose();
-          });
+          newAnimation = new TrainHoppingAnimation(
+              current.currentTrain,
+              nextRoute._animation,
+              onSwitchedTrain: () {
+                assert(_secondaryAnimation.parent == newAnimation);
+                assert(newAnimation.currentTrain == nextRoute._animation);
+                _secondaryAnimation.parent = newAnimation.currentTrain;
+                newAnimation.dispose();
+              }
+            );
           _secondaryAnimation.parent = newAnimation;
           current.dispose();
         } else {
@@ -280,7 +284,7 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> {
 /// An entry in the history of a [LocalHistoryRoute].
 class LocalHistoryEntry {
   /// Creates an entry in the history of a [LocalHistoryRoute].
-  LocalHistoryEntry({this.onRemove});
+  LocalHistoryEntry({ this.onRemove });
 
   /// Called when this entry is removed from the history of its associated [LocalHistoryRoute].
   final VoidCallback onRemove;
@@ -490,12 +494,17 @@ abstract class LocalHistoryRoute<T> extends Route<T> {
 }
 
 class _ModalScopeStatus extends InheritedWidget {
-  const _ModalScopeStatus({Key key, @required this.isCurrent, @required this.canPop, @required this.route, @required Widget child})
-      : assert(isCurrent != null),
-        assert(canPop != null),
-        assert(route != null),
-        assert(child != null),
-        super(key: key, child: child);
+  const _ModalScopeStatus({
+    Key key,
+    @required this.isCurrent,
+    @required this.canPop,
+    @required this.route,
+    @required Widget child
+  }) : assert(isCurrent != null),
+       assert(canPop != null),
+       assert(route != null),
+       assert(child != null),
+       super(key: key, child: child);
 
   final bool isCurrent;
   final bool canPop;
@@ -833,10 +842,10 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   ///  * [buildPage], which is used to describe the actual contents of the page,
   ///    and whose result is passed to the `child` argument of this method.
   Widget buildTransitions(
-    BuildContext context,
-    Animation<double> animation,
-    Animation<double> secondaryAnimation,
-    Widget child,
+      BuildContext context,
+      Animation<double> animation,
+      Animation<double> secondaryAnimation,
+      Widget child,
   ) {
     return child;
   }
@@ -951,6 +960,7 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   /// object. It is used by [createOverlayEntries], which is called by
   /// [install] near the beginning of the route lifecycle.
   bool get maintainState;
+
 
   // The API for _ModalScope and HeroController
 
@@ -1123,7 +1133,7 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   @override
   void changedInternalState() {
     super.changedInternalState();
-    setState(() {/* internal state already changed */});
+    setState(() { /* internal state already changed */ });
     _modalBarrier.markNeedsBuild();
   }
 
@@ -1150,8 +1160,7 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   OverlayEntry _modalBarrier;
   Widget _buildModalBarrier(BuildContext context) {
     Widget barrier;
-    if (barrierColor != null && !offstage) {
-      // changedInternalState is called if these update
+    if (barrierColor != null && !offstage) { // changedInternalState is called if these update
       assert(barrierColor != _kTransparent);
       final Animation<Color> color = new ColorTween(
         begin: _kTransparent,
@@ -1358,24 +1367,24 @@ class RouteObserver<R extends Route<dynamic>> extends NavigatorObserver {
 abstract class RouteAware {
   /// Called when the top route has been popped off, and the current route
   /// shows up.
-  void didPopNext() {}
+  void didPopNext() { }
 
   /// Called when the current route has been pushed.
-  void didPush() {}
+  void didPush() { }
 
   /// Called when the current route has been popped off.
-  void didPop() {}
+  void didPop() { }
 
   /// Called when a new route has been pushed, and the current route is no
   /// longer visible.
-  void didPushNext() {}
+  void didPushNext() { }
 }
 
 class _DialogRoute<T> extends PopupRoute<T> {
   _DialogRoute({
     @required RoutePageBuilder pageBuilder,
     bool barrierDismissible = true,
-    String barrierLabel = 'Dismiss',
+    String barrierLabel,
     Color barrierColor = const Color(0x80000000),
     Duration transitionDuration = const Duration(milliseconds: 200),
     RouteTransitionsBuilder transitionBuilder,
@@ -1445,7 +1454,8 @@ class _DialogRoute<T> extends PopupRoute<T> {
 ///
 /// The 'barrierDismissible' argument is used to determine whether this route
 /// can be dismissed by tapping the modal barrier. This argument defaults
-/// to true.
+/// to true. If 'barrierDismissible' is true, a non-null 'barrierLabel' must be
+/// provided.
 ///
 /// The 'barrierLabel' argument is the semantic label used for a dismissible
 /// barrier. This argument defaults to "Dismiss".
@@ -1467,7 +1477,7 @@ class _DialogRoute<T> extends PopupRoute<T> {
 /// The dialog route created by this method is pushed to the root navigator.
 /// If the application has multiple [Navigator] objects, it may be necessary to
 /// call `Navigator.of(context, rootNavigator: true).pop(result)` to close the
-/// dialog rather just 'Navigator.pop(context, result)`.
+/// dialog rather than just 'Navigator.pop(context, result)`.
 ///
 /// See also:
 ///  * [showDialog], which displays a Material-style dialog.
@@ -1482,6 +1492,7 @@ Future<T> showGeneralDialog<T>({
   RouteTransitionsBuilder transitionBuilder,
 }) {
   assert(pageBuilder != null);
+  assert(!barrierDismissible || barrierLabel != null);
   return Navigator.of(context, rootNavigator: true).push(new _DialogRoute<T>(
     pageBuilder: pageBuilder,
     barrierDismissible: barrierDismissible,
