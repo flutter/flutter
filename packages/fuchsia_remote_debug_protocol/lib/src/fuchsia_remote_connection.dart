@@ -17,11 +17,11 @@ final String _ipv4Loopback = InternetAddress.loopbackIPv4.address;
 
 final String _ipv6Loopback = InternetAddress.loopbackIPv6.address;
 
-const ProcessManager _processManager = const LocalProcessManager();
+const ProcessManager _processManager = LocalProcessManager();
 
-const Duration _kIsolateFindTimeout = const Duration(minutes: 1);
+const Duration _kIsolateFindTimeout = Duration(minutes: 1);
 
-const Duration _kVmPollInterval = const Duration(milliseconds: 1500);
+const Duration _kVmPollInterval = Duration(milliseconds: 1500);
 
 final Logger _log = new Logger('FuchsiaRemoteConnection');
 

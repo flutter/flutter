@@ -119,7 +119,7 @@ baz=qux
   });
 
   group('Poller', () {
-    const Duration kShortDelay = const Duration(milliseconds: 100);
+    const Duration kShortDelay = Duration(milliseconds: 100);
 
     Poller poller;
 

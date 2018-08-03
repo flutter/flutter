@@ -104,23 +104,21 @@ class GlobalMaterialLocalizations implements MaterialLocalizations {
     _translationBundle = translationBundleForLocale(locale);
     assert(_translationBundle != null);
 
-    const String kMediumDatePattern = 'E, MMM\u00a0d';
     if (intl.DateFormat.localeExists(_localeName)) {
       _fullYearFormat = new intl.DateFormat.y(_localeName);
-      _mediumDateFormat = new intl.DateFormat(kMediumDatePattern, _localeName);
+      _mediumDateFormat = new intl.DateFormat.MMMEd(_localeName);
       _longDateFormat = new intl.DateFormat.yMMMMEEEEd(_localeName);
-      _yearMonthFormat = new intl.DateFormat('yMMMM', _localeName);
+      _yearMonthFormat = new intl.DateFormat.yMMMM(_localeName);
     } else if (intl.DateFormat.localeExists(locale.languageCode)) {
       _fullYearFormat = new intl.DateFormat.y(locale.languageCode);
-      _mediumDateFormat = new intl.DateFormat(kMediumDatePattern, locale.languageCode);
-
+      _mediumDateFormat = new intl.DateFormat.MMMEd(locale.languageCode);
       _longDateFormat = new intl.DateFormat.yMMMMEEEEd(locale.languageCode);
-      _yearMonthFormat = new intl.DateFormat('yMMMM', locale.languageCode);
+      _yearMonthFormat = new intl.DateFormat.yMMMM(locale.languageCode);
     } else {
       _fullYearFormat = new intl.DateFormat.y();
-      _mediumDateFormat = new intl.DateFormat(kMediumDatePattern);
+      _mediumDateFormat = new intl.DateFormat.MMMEd();
       _longDateFormat = new intl.DateFormat.yMMMMEEEEd();
-      _yearMonthFormat = new intl.DateFormat('yMMMM');
+      _yearMonthFormat = new intl.DateFormat.yMMMM();
     }
 
     if (intl.NumberFormat.localeExists(_localeName)) {
@@ -456,7 +454,7 @@ class GlobalMaterialLocalizations implements MaterialLocalizations {
   /// Most internationalized apps will use [GlobalMaterialLocalizations.delegates]
   /// as the value of [MaterialApp.localizationsDelegates] to include
   /// the localizations for both the material and widget libraries.
-  static const LocalizationsDelegate<MaterialLocalizations> delegate = const _MaterialLocalizationsDelegate();
+  static const LocalizationsDelegate<MaterialLocalizations> delegate = _MaterialLocalizationsDelegate();
 
   /// A value for [MaterialApp.localizationsDelegates] that's typically used by
   /// internationalized apps.
@@ -477,13 +475,13 @@ class GlobalMaterialLocalizations implements MaterialLocalizations {
   ///   // ...
   /// )
   /// ```
-  static const List<LocalizationsDelegate<dynamic>> delegates = const <LocalizationsDelegate<dynamic>>[
+  static const List<LocalizationsDelegate<dynamic>> delegates = <LocalizationsDelegate<dynamic>>[
     GlobalMaterialLocalizations.delegate,
     GlobalWidgetsLocalizations.delegate,
   ];
 }
 
-const Map<String, TimeOfDayFormat> _icuTimeOfDayToEnum = const <String, TimeOfDayFormat>{
+const Map<String, TimeOfDayFormat> _icuTimeOfDayToEnum = <String, TimeOfDayFormat>{
   'HH:mm': TimeOfDayFormat.HH_colon_mm,
   'HH.mm': TimeOfDayFormat.HH_dot_mm,
   "HH 'h' mm": TimeOfDayFormat.frenchCanadian,
@@ -538,7 +536,7 @@ class _MaterialLocalizationsDelegate extends LocalizationsDelegate<MaterialLocal
 
   // Watch out: this list must match the one in the GlobalMaterialLocalizations
   // class doc and the list we test, see test/translations_test.dart.
-  static const List<String> _supportedLanguages = const <String>[
+  static const List<String> _supportedLanguages = <String>[
     'ar', // Arabic
     'bg', // Bulgarian
     'bs', // Bosnian

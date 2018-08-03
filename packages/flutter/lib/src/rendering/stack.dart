@@ -55,7 +55,7 @@ class RelativeRect {
   }
 
   /// A rect that covers the entire container.
-  static const RelativeRect fill = const RelativeRect.fromLTRB(0.0, 0.0, 0.0, 0.0);
+  static const RelativeRect fill = RelativeRect.fromLTRB(0.0, 0.0, 0.0, 0.0);
 
   /// Distance from the left side of the container to the left side of this rectangle.
   ///

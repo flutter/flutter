@@ -17,12 +17,12 @@ void main() {
     await tester.pumpWidget(
       const Directionality(
         textDirection: TextDirection.ltr,
-        child: const IconTheme(
-          data: const IconThemeData(
-            color: const Color(0xFF666666),
+        child: IconTheme(
+          data: IconThemeData(
+            color: Color(0xFF666666),
           ),
-          child: const AnimatedIcon(
-            progress: const AlwaysStoppedAnimation<double>(0.0),
+          child: AnimatedIcon(
+            progress: AlwaysStoppedAnimation<double>(0.0),
             icon: AnimatedIcons.arrow_menu,
           )
         ),
@@ -38,13 +38,13 @@ void main() {
     await tester.pumpWidget(
       const Directionality(
         textDirection: TextDirection.ltr,
-        child: const IconTheme(
-          data: const IconThemeData(
-            color: const Color(0xFF666666),
+        child: IconTheme(
+          data: IconThemeData(
+            color: Color(0xFF666666),
             opacity: 0.5,
           ),
-          child: const AnimatedIcon(
-            progress: const AlwaysStoppedAnimation<double>(0.0),
+          child: AnimatedIcon(
+            progress: AlwaysStoppedAnimation<double>(0.0),
             icon: AnimatedIcons.arrow_menu,
           )
         ),
@@ -60,14 +60,14 @@ void main() {
     await tester.pumpWidget(
       const Directionality(
         textDirection: TextDirection.ltr,
-        child: const IconTheme(
-          data: const IconThemeData(
-            color: const Color(0xFF666666),
+        child: IconTheme(
+          data: IconThemeData(
+            color: Color(0xFF666666),
           ),
-          child: const AnimatedIcon(
-            progress: const AlwaysStoppedAnimation<double>(0.0),
+          child: AnimatedIcon(
+            progress: AlwaysStoppedAnimation<double>(0.0),
             icon: AnimatedIcons.arrow_menu,
-            color: const Color(0xFF0000FF),
+            color: Color(0xFF0000FF),
           )
         ),
       ),
@@ -82,13 +82,13 @@ void main() {
     await tester.pumpWidget(
       const Directionality(
         textDirection: TextDirection.ltr,
-        child: const IconTheme(
-          data: const IconThemeData(
-            color: const Color(0xFF666666),
+        child: IconTheme(
+          data: IconThemeData(
+            color: Color(0xFF666666),
             size: 12.0,
           ),
-          child: const AnimatedIcon(
-            progress: const AlwaysStoppedAnimation<double>(0.0),
+          child: AnimatedIcon(
+            progress: AlwaysStoppedAnimation<double>(0.0),
             icon: AnimatedIcons.arrow_menu,
           )
         ),
@@ -105,13 +105,13 @@ void main() {
     await tester.pumpWidget(
       const Directionality(
         textDirection: TextDirection.ltr,
-        child: const IconTheme(
-          data: const IconThemeData(
-            color: const Color(0xFF666666),
+        child: IconTheme(
+          data: IconThemeData(
+            color: Color(0xFF666666),
             size: 12.0,
           ),
-          child: const AnimatedIcon(
-            progress: const AlwaysStoppedAnimation<double>(0.0),
+          child: AnimatedIcon(
+            progress: AlwaysStoppedAnimation<double>(0.0),
             icon: AnimatedIcons.arrow_menu,
             size: 96.0,
           )
@@ -131,8 +131,8 @@ void main() {
     await tester.pumpWidget(
       const Directionality(
         textDirection: TextDirection.ltr,
-        child: const AnimatedIcon(
-          progress: const AlwaysStoppedAnimation<double>(0.0),
+        child: AnimatedIcon(
+          progress: AlwaysStoppedAnimation<double>(0.0),
           icon: AnimatedIcons.arrow_menu,
           size: 96.0,
           semanticLabel: 'a label',
@@ -149,12 +149,12 @@ void main() {
     await tester.pumpWidget(
       const Directionality(
         textDirection: TextDirection.rtl,
-        child: const IconTheme(
-          data: const IconThemeData(
-            color: const Color(0xFF666666),
+        child: IconTheme(
+          data: IconThemeData(
+            color: Color(0xFF666666),
           ),
-          child: const AnimatedIcon(
-            progress: const AlwaysStoppedAnimation<double>(0.0),
+          child: AnimatedIcon(
+            progress: AlwaysStoppedAnimation<double>(0.0),
             icon: AnimatedIcons.arrow_menu,
           )
         ),
@@ -173,12 +173,12 @@ void main() {
     await tester.pumpWidget(
       const Directionality(
         textDirection: TextDirection.ltr,
-        child: const IconTheme(
-          data: const IconThemeData(
-            color: const Color(0xFF666666),
+        child: IconTheme(
+          data: IconThemeData(
+            color: Color(0xFF666666),
           ),
-          child: const AnimatedIcon(
-            progress: const AlwaysStoppedAnimation<double>(0.0),
+          child: AnimatedIcon(
+            progress: AlwaysStoppedAnimation<double>(0.0),
             icon: AnimatedIcons.arrow_menu,
           )
         ),
@@ -195,12 +195,12 @@ void main() {
     await tester.pumpWidget(
       const Directionality(
         textDirection: TextDirection.ltr,
-        child: const IconTheme(
-          data: const IconThemeData(
-            color: const Color(0xFF666666),
+        child: IconTheme(
+          data: IconThemeData(
+            color: Color(0xFF666666),
           ),
-          child: const AnimatedIcon(
-            progress: const AlwaysStoppedAnimation<double>(0.0),
+          child: AnimatedIcon(
+            progress: AlwaysStoppedAnimation<double>(0.0),
             icon: AnimatedIcons.arrow_menu,
             textDirection: TextDirection.rtl,
           )

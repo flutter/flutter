@@ -112,8 +112,8 @@ void main() {
   });
 
   testWidgets('swap instances around', (WidgetTester tester) async {
-    const Widget a = const TestWidget(persistentState: 0x61, syncedState: 0x41, child: const Text('apple', textDirection: TextDirection.ltr));
-    const Widget b = const TestWidget(persistentState: 0x62, syncedState: 0x42, child: const Text('banana', textDirection: TextDirection.ltr));
+    const Widget a = TestWidget(persistentState: 0x61, syncedState: 0x41, child: Text('apple', textDirection: TextDirection.ltr));
+    const Widget b = TestWidget(persistentState: 0x62, syncedState: 0x42, child: Text('banana', textDirection: TextDirection.ltr));
     await tester.pumpWidget(new Column());
 
     final GlobalKey keyA = new GlobalKey();

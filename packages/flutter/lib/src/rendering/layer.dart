@@ -5,7 +5,7 @@
 import 'dart:async';
 import 'dart:collection';
 import 'dart:ui' as ui show Image, ImageFilter, Picture, Scene, SceneBuilder;
-import 'dart:ui' show Offset;
+import 'dart:ui' show Clip, Offset, defaultClipBehavior; // ignore: deprecated_member_use
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
@@ -605,13 +605,23 @@ class ClipRectLayer extends ContainerLayer {
   ///
   /// The [clipRect] property must be non-null before the compositing phase of
   /// the pipeline.
-  ClipRectLayer({ this.clipRect });
+  ClipRectLayer({ this.clipRect, Clip clipBehavior = Clip.antiAlias }) :
+        _clipBehavior = clipBehavior, assert(clipBehavior != null), assert(clipBehavior != Clip.none);
 
   /// The rectangle to clip in the parent's coordinate system.
   ///
   /// The scene must be explicitly recomposited after this property is changed
   /// (as described at [Layer]).
   Rect clipRect;
+
+  /// {@macro flutter.clipper.clipBehavior}
+  Clip get clipBehavior => _clipBehavior;
+  Clip _clipBehavior;
+  set clipBehavior(Clip value) {
+    assert(value != null);
+    assert(value != Clip.none);
+    _clipBehavior = value;
+  }
 
   @override
   S find<S>(Offset regionOffset) {
@@ -628,7 +638,7 @@ class ClipRectLayer extends ContainerLayer {
       return true;
     }());
     if (enabled)
-      builder.pushClipRect(clipRect.shift(layerOffset));
+      builder.pushClipRect(clipRect.shift(layerOffset), clipBehavior: clipBehavior);
     addChildrenToScene(builder, layerOffset);
     if (enabled)
       builder.pop();
@@ -651,13 +661,23 @@ class ClipRRectLayer extends ContainerLayer {
   ///
   /// The [clipRRect] property must be non-null before the compositing phase of
   /// the pipeline.
-  ClipRRectLayer({ this.clipRRect });
+  ClipRRectLayer({ this.clipRRect, Clip clipBehavior = Clip.antiAlias }) :
+        _clipBehavior = clipBehavior, assert(clipBehavior != null), assert(clipBehavior != Clip.none);
 
   /// The rounded-rect to clip in the parent's coordinate system.
   ///
   /// The scene must be explicitly recomposited after this property is changed
   /// (as described at [Layer]).
   RRect clipRRect;
+
+  /// {@macro flutter.clipper.clipBehavior}
+  Clip get clipBehavior => _clipBehavior;
+  Clip _clipBehavior;
+  set clipBehavior(Clip value) {
+    assert(value != null);
+    assert(value != Clip.none);
+    _clipBehavior = value;
+  }
 
   @override
   S find<S>(Offset regionOffset) {
@@ -674,7 +694,7 @@ class ClipRRectLayer extends ContainerLayer {
       return true;
     }());
     if (enabled)
-      builder.pushClipRRect(clipRRect.shift(layerOffset));
+      builder.pushClipRRect(clipRRect.shift(layerOffset), clipBehavior: clipBehavior);
     addChildrenToScene(builder, layerOffset);
     if (enabled)
       builder.pop();
@@ -697,13 +717,23 @@ class ClipPathLayer extends ContainerLayer {
   ///
   /// The [clipPath] property must be non-null before the compositing phase of
   /// the pipeline.
-  ClipPathLayer({ this.clipPath });
+  ClipPathLayer({ this.clipPath, Clip clipBehavior = Clip.antiAlias }) :
+        _clipBehavior = clipBehavior, assert(clipBehavior != null), assert(clipBehavior != Clip.none);
 
   /// The path to clip in the parent's coordinate system.
   ///
   /// The scene must be explicitly recomposited after this property is changed
   /// (as described at [Layer]).
   Path clipPath;
+
+  /// {@macro flutter.clipper.clipBehavior}
+  Clip get clipBehavior => _clipBehavior;
+  Clip _clipBehavior;
+  set clipBehavior(Clip value) {
+    assert(value != null);
+    assert(value != Clip.none);
+    _clipBehavior = value;
+  }
 
   @override
   S find<S>(Offset regionOffset) {
@@ -720,7 +750,7 @@ class ClipPathLayer extends ContainerLayer {
       return true;
     }());
     if (enabled)
-      builder.pushClipPath(clipPath.shift(layerOffset));
+      builder.pushClipPath(clipPath.shift(layerOffset), clipBehavior: clipBehavior);
     addChildrenToScene(builder, layerOffset);
     if (enabled)
       builder.pop();
@@ -925,10 +955,12 @@ class PhysicalModelLayer extends ContainerLayer {
   /// The [clipPath], [elevation], and [color] arguments must not be null.
   PhysicalModelLayer({
     @required this.clipPath,
+    this.clipBehavior = defaultClipBehavior, // ignore: deprecated_member_use
     @required this.elevation,
     @required this.color,
     @required this.shadowColor,
   }) : assert(clipPath != null),
+       assert(clipBehavior != null),
        assert(elevation != null),
        assert(color != null),
        assert(shadowColor != null);
@@ -938,6 +970,9 @@ class PhysicalModelLayer extends ContainerLayer {
   /// The scene must be explicitly recomposited after this property is changed
   /// (as described at [Layer]).
   Path clipPath;
+
+  /// {@macro flutter.widgets.Clip}
+  Clip clipBehavior;
 
   /// The z-coordinate at which to place this physical object.
   ///
@@ -980,6 +1015,7 @@ class PhysicalModelLayer extends ContainerLayer {
         elevation: elevation,
         color: color,
         shadowColor: shadowColor,
+        clipBehavior: clipBehavior,
       );
     }
     addChildrenToScene(builder, layerOffset);

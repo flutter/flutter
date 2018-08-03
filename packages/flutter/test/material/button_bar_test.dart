@@ -10,7 +10,7 @@ void main() {
     await tester.pumpWidget(
       const Directionality(
         textDirection: TextDirection.ltr,
-        child: const ButtonBar(),
+        child: ButtonBar(),
       ),
     );
   });

@@ -194,8 +194,8 @@ void main() {
   // This test is very similar to the '...explicit splashColor and highlightColor' test
   // in buttons_test.dart. If you change this one, you may want to also change that one.
   testWidgets('IconButton with explicit splashColor and highlightColor', (WidgetTester tester) async {
-    const Color directSplashColor = const Color(0xFF00000F);
-    const Color directHighlightColor = const Color(0xFF0000F0);
+    const Color directSplashColor = Color(0xFF00000F);
+    const Color directHighlightColor = Color(0xFF0000F0);
 
     Widget buttonWidget = wrap(
         child: new IconButton(
@@ -225,8 +225,8 @@ void main() {
         ..circle(color: directHighlightColor)
     );
 
-    const Color themeSplashColor1 = const Color(0xFF000F00);
-    const Color themeHighlightColor1 = const Color(0xFF00FF00);
+    const Color themeSplashColor1 = Color(0xFF000F00);
+    const Color themeHighlightColor1 = Color(0xFF00FF00);
 
     buttonWidget = wrap(
         child: new IconButton(
@@ -252,8 +252,8 @@ void main() {
         ..circle(color: themeHighlightColor1)
     );
 
-    const Color themeSplashColor2 = const Color(0xFF002200);
-    const Color themeHighlightColor2 = const Color(0xFF001100);
+    const Color themeSplashColor2 = Color(0xFF002200);
+    const Color themeHighlightColor2 = Color(0xFF001100);
 
     await tester.pumpWidget(
       new Theme(
@@ -314,7 +314,7 @@ void main() {
       wrap(
         child: const IconButton(
           onPressed: null,
-          icon: const Icon(Icons.link, semanticLabel: 'link'),
+          icon: Icon(Icons.link, semanticLabel: 'link'),
         ),
       ),
     );

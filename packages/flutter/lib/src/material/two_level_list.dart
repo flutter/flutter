@@ -35,7 +35,7 @@ Map<MaterialListType, double> kListTileExtent = const <MaterialListType, double>
   MaterialListType.threeLine: 88.0,
 };
 
-const Duration _kExpand = const Duration(milliseconds: 200);
+const Duration _kExpand = Duration(milliseconds: 200);
 
 /// This class is deprecated. Please use [ListTile] instead.
 @deprecated
