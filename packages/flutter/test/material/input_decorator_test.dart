@@ -678,7 +678,7 @@ void main() {
     expect(tester.getBottomLeft(find.text(kError1)), const Offset(12.0, 76.0));
   });
 
-  testWidgets('InputDecorator prefix/suffix', (WidgetTester tester) async {
+  testWidgets('InputDecorator prefix/suffix texts', (WidgetTester tester) async {
     await tester.pumpWidget(
       buildInputDecorator(
         // isEmpty: false (default)
@@ -752,6 +752,57 @@ void main() {
     expect(tester.getTopRight(find.byType(Icon)).dx, lessThanOrEqualTo(tester.getTopLeft(find.text('p')).dx));
     expect(tester.getTopRight(find.text('p')).dx, lessThanOrEqualTo(tester.getTopLeft(find.text('text')).dx));
     expect(tester.getTopRight(find.text('text')).dx, lessThanOrEqualTo(tester.getTopLeft(find.text('s')).dx));
+  });
+
+  testWidgets('InputDecorator prefix/suffix widgets', (WidgetTester tester) async {
+    const Key pKey = Key('p');
+    const Key sKey = Key('s');
+    await tester.pumpWidget(
+      buildInputDecorator(
+        // isEmpty: false (default)
+        // isFocused: false (default)
+        decoration: const InputDecoration(
+          prefix: Padding(
+            key: pKey,
+            padding: EdgeInsets.all(4.0),
+            child: Text('p'),
+          ),
+          suffix: Padding(
+            key: sKey,
+            padding: EdgeInsets.all(4.0),
+            child: Text('s'),
+          ),
+          filled: true,
+        ),
+      ),
+    );
+
+    // Overall height for this InputDecorator is 48dps because
+    // the prefix and the suffix widget is surrounded with padding:
+    //   12 - top padding
+    //    4 - top prefix/suffix padding
+    //   16 - input text (ahem font size 16dps)
+    //    4 - bottom prefix/suffix padding
+    //   12 - bottom padding
+
+    expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, 48.0));
+    expect(tester.getSize(find.text('text')).height, 16.0);
+    expect(tester.getSize(find.byKey(pKey)).height, 24.0);
+    expect(tester.getSize(find.text('p')).height, 16.0);
+    expect(tester.getSize(find.byKey(sKey)).height, 24.0);
+    expect(tester.getSize(find.text('s')).height, 16.0);
+    expect(tester.getTopLeft(find.text('text')).dy, 16.0);
+    expect(tester.getTopLeft(find.byKey(pKey)).dy, 12.0);
+    expect(tester.getTopLeft(find.text('p')).dy, 16.0);
+    expect(tester.getTopLeft(find.byKey(sKey)).dy, 12.0);
+    expect(tester.getTopLeft(find.text('s')).dy, 16.0);
+    expect(tester.getTopRight(find.byKey(sKey)).dx, 788.0);
+    expect(tester.getTopRight(find.text('s')).dx, 784.0);
+
+    // layout is a row: [prefix text suffix]
+    expect(tester.getTopLeft(find.byKey(pKey)).dx, 12.0);
+    expect(tester.getTopRight(find.byKey(pKey)).dx, tester.getTopLeft(find.text('text')).dx);
+    expect(tester.getTopRight(find.text('text')).dx, lessThanOrEqualTo(tester.getTopRight(find.byKey(sKey)).dx));
   });
 
   testWidgets('InputDecorator prefixIcon/suffixIcon', (WidgetTester tester) async {
