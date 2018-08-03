@@ -1,4 +1,4 @@
-Signature: b7952bf32d50b45ba910603b2c13fbbb
+Signature: 92f0ccfba5adbc2142e4f4594dfd9029
 
 UNUSED LICENSES:
 
@@ -1907,6 +1907,7 @@ FILE: ../../../third_party/skia/infra/bots/assets/clang_win/VERSION
 FILE: ../../../third_party/skia/infra/bots/assets/cmake_linux/VERSION
 FILE: ../../../third_party/skia/infra/bots/assets/gcloud_linux/VERSION
 FILE: ../../../third_party/skia/infra/bots/assets/go/VERSION
+FILE: ../../../third_party/skia/infra/bots/assets/go_deps/VERSION
 FILE: ../../../third_party/skia/infra/bots/assets/linux_vulkan_intel_driver_debug/VERSION
 FILE: ../../../third_party/skia/infra/bots/assets/linux_vulkan_intel_driver_release/VERSION
 FILE: ../../../third_party/skia/infra/bots/assets/linux_vulkan_sdk/VERSION
@@ -2023,8 +2024,6 @@ FILE: ../../../third_party/skia/infra/bots/recipe_modules/git/examples/full.expe
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/gsutil/examples/full.expected/failed_all_uploads.json
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/gsutil/examples/full.expected/failed_one_upload.json
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/gsutil/examples/full.expected/gsutil_tests.json
-FILE: ../../../third_party/skia/infra/bots/recipe_modules/infra/examples/full.expected/failed_all_updates.json
-FILE: ../../../third_party/skia/infra/bots/recipe_modules/infra/examples/full.expected/failed_one_update.json
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/infra/examples/full.expected/infra_tests.json
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/isolate/examples/full.expected/always-use-exparchive.json
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/isolate/examples/full.expected/basic.json
@@ -2088,8 +2087,6 @@ FILE: ../../../third_party/skia/infra/bots/recipes/ct_skps.expected/CT_IMG_DECOD
 FILE: ../../../third_party/skia/infra/bots/recipes/ct_skps.expected/CT_IMG_DECODE_10k_SKPs_Trybot.json
 FILE: ../../../third_party/skia/infra/bots/recipes/housekeeper.expected/Housekeeper-PerCommit-Trybot.json
 FILE: ../../../third_party/skia/infra/bots/recipes/housekeeper.expected/Housekeeper-PerCommit.json
-FILE: ../../../third_party/skia/infra/bots/recipes/infra.expected/failed_all_updates.json
-FILE: ../../../third_party/skia/infra/bots/recipes/infra.expected/failed_one_update.json
 FILE: ../../../third_party/skia/infra/bots/recipes/infra.expected/infra_tests.json
 FILE: ../../../third_party/skia/infra/bots/recipes/perf.expected/Perf-Android-Clang-Nexus5-GPU-Adreno330-arm-Debug-All-Android.json
 FILE: ../../../third_party/skia/infra/bots/recipes/perf.expected/Perf-Android-Clang-Nexus5x-GPU-Adreno418-arm64-Release-All-Android_NoGPUThreads.json
