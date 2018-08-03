@@ -60,8 +60,7 @@ class ProtocolDiscovery {
   void _handleLine(String line) {
     Uri uri;
 
-    final RegExp r =
-        new RegExp('${RegExp.escape(serviceName)} (.*) (http://[^ \n]+)');
+    final RegExp r = new RegExp('${RegExp.escape(serviceName)} listening on (http://[^ \n]+)');
     final Match match = r.firstMatch(line);
 
     if (match != null) {
@@ -87,10 +86,8 @@ class ProtocolDiscovery {
 
     if (portForwarder != null) {
       final int actualDevicePort = deviceUri.port;
-      final int actualHostPort =
-          await portForwarder.forward(actualDevicePort, hostPort: hostPort);
-      printTrace(
-          'Forwarded host port $actualHostPort to device port $actualDevicePort for $serviceName');
+      final int actualHostPort = await portForwarder.forward(actualDevicePort, hostPort: hostPort);
+      printTrace('Forwarded host port $actualHostPort to device port $actualDevicePort for $serviceName');
       hostUri = deviceUri.replace(port: actualHostPort);
     }
 
