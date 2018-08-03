@@ -614,4 +614,52 @@ void main() {
     expect(find.text(helloSnackBar), findsNothing);
   });
 
+  testWidgets('SnackBar handles updates to accessibleNavigation', (WidgetTester tester) async {
+    Future<void> boilerplate({bool accessibleNavigation}) {
+      return tester.pumpWidget(new MaterialApp(
+          home: new MediaQuery(
+              data: new MediaQueryData(accessibleNavigation: accessibleNavigation),
+              child: new Scaffold(
+                  body: new Builder(
+                      builder: (BuildContext context) {
+                        return new GestureDetector(
+                            onTap: () {
+                              Scaffold.of(context).showSnackBar(new SnackBar(
+                                  content: const Text('test'),
+                                  action: new SnackBarAction(label: 'foo', onPressed: () {}),
+                              ));
+                            },
+                            behavior: HitTestBehavior.opaque,
+                            child: const Text('X'),
+                        );
+                      }
+                  )
+              )
+          )
+      ));
+    }
+
+    await boilerplate(accessibleNavigation: false);
+    expect(find.text('test'), findsNothing);
+    await tester.tap(find.text('X'));
+    await tester.pump(); // schedule animation
+    expect(find.text('test'), findsOneWidget);
+    await tester.pump(); // begin animation
+    await tester.pump(const Duration(milliseconds: 4750)); // 4.75s
+    expect(find.text('test'), findsOneWidget);
+
+    // Enabled accessible navigation
+    await boilerplate(accessibleNavigation: true);
+
+    await tester.pump(const Duration(milliseconds: 4000)); // 8.75s
+    await tester.pump();
+    expect(find.text('test'), findsOneWidget);
+
+    // disable accessible navigation
+    await boilerplate(accessibleNavigation: false);
+    await tester.pumpAndSettle(const Duration(milliseconds: 5750));
+
+    expect(find.text('test'), findsNothing);
+  });
+
 }
