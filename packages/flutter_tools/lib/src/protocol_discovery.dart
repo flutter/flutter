@@ -79,8 +79,6 @@ class ProtocolDiscovery {
       _completer.complete(_forwardPort(uri));
     }
 
-    _stopScrapingLogs();
-    _completer.completeError('uri not found');
   }
 
   Future<Uri> _forwardPort(Uri deviceUri) async {
