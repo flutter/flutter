@@ -975,6 +975,7 @@ void main() {
           value: 'test',
           actions: <SemanticsAction>[
             SemanticsAction.moveCursorBackwardByCharacter,
+            SemanticsAction.moveCursorBackwardByWord,
           ],
         ));
 
@@ -1025,6 +1026,7 @@ void main() {
           value: 'test',
           actions: <SemanticsAction>[
             SemanticsAction.moveCursorForwardByCharacter,
+            SemanticsAction.moveCursorForwardByWord,
             SemanticsAction.setSelection,
           ],
         ));
@@ -1064,6 +1066,7 @@ void main() {
           value: 'test',
           actions: <SemanticsAction>[
             SemanticsAction.moveCursorBackwardByCharacter,
+            SemanticsAction.moveCursorBackwardByWord,
           ],
         ));
 

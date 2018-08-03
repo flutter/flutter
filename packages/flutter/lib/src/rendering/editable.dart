@@ -461,11 +461,10 @@ class RenderEditable extends RenderBox {
   }
 
   void _handleMoveCursorForwardByWord(bool extentSelection) {
-    final TextAffinity forwardAffinity = textDirection == TextDirection.ltr ? TextAffinity.downstream : TextAffinity.upstream;
     final TextRange currentWord = _textPainter.getWordBoundary(_selection.extent);
     if (currentWord == null)
       return;
-    final TextRange nextWord = _textPainter.getWordBoundary(new TextPosition(offset: currentWord.end, affinity: forwardAffinity));
+    final TextRange nextWord = _getNextWord(currentWord.end);
     if (nextWord == null)
       return;
     final int baseOffset = !extentSelection ? nextWord.start : _selection.baseOffset;
@@ -474,16 +473,78 @@ class RenderEditable extends RenderBox {
   }
 
   void _handleMoveCursorBackwardByWord(bool extentSelection) {
-    final TextAffinity backwardAffinity = textDirection == TextDirection.ltr ? TextAffinity.upstream : TextAffinity.downstream;
     final TextRange currentWord = _textPainter.getWordBoundary(_selection.extent);
     if (currentWord == null)
       return;
-    final TextRange previousWord = _textPainter.getWordBoundary(new TextPosition(offset: currentWord.start - 1, affinity: backwardAffinity));
+    final TextRange previousWord = _getPreviousWord(currentWord.start - 1);
     if (previousWord == null)
       return;
     final int baseOffset = !extentSelection ? previousWord.start : _selection.baseOffset;
     onSelectionChanged(
       new TextSelection(baseOffset: baseOffset, extentOffset: previousWord.start), this, SelectionChangedCause.keyboard);
+  }
+
+  TextRange _getNextWord(int offset) {
+    while (true) {
+      final TextRange range = _textPainter.getWordBoundary(new TextPosition(offset: offset));
+      if (range == null || !range.isValid || range.isCollapsed)
+        return null;
+      if (!_onlyWhitespace(range))
+        return range;
+      offset = range.end;
+    }
+  }
+
+  TextRange _getPreviousWord(int offset) {
+    while (offset >= 0) {
+      final TextRange range = _textPainter.getWordBoundary(new TextPosition(offset: offset));
+      if (range == null || !range.isValid || range.isCollapsed)
+        return null;
+      if (!_onlyWhitespace(range))
+        return range;
+      offset = range.start - 1;
+    }
+  }
+
+  // Check if the given text range only contains white space or separator
+  // characters.
+  // TODO(jonahwilliams): replace when we expose this ICU information.
+  bool _onlyWhitespace(TextRange range) {
+    for (int i = range.start; i < range.end; i++) {
+      final int codeUnit = text.codeUnitAt(i);
+      switch (codeUnit) {
+        case 0x9: // horizontal tab
+        case 0xA: // line feed
+        case 0xB: // vertical tab
+        case 0xC: // form feed
+        case 0xD: // carriage return
+        case 0x1C: // file separator
+        case 0x1D: // group separator
+        case 0x1E: // record separator
+        case 0x1F: // unit separator
+        case 0x20: // space
+        case 0xA0: // no-break space
+        case 0x1680: // ogham space mark
+        case 0x2000: // en quad
+        case 0x2001: // em quad
+        case 0x2002: // en space
+        case 0x2003: // em space
+        case 0x2004: // three-per-em space
+        case 0x2005: // four-er-em space
+        case 0x2006: // six-per-em space
+        case 0x2007: // figure space
+        case 0x2008: // punctuation space
+        case 0x2009: // thin space
+        case 0x200A: // hair space
+        case 0x202F: // narrow no-break space
+        case 0x205F: // medium mathematical space
+        case 0x3000: // ideographic space
+          break;
+        default:
+          return false;
+      }
+    }
+    return true;
   }
 
   @override
