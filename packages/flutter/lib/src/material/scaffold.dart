@@ -1488,11 +1488,14 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
       if (route == null || route.isCurrent) {
         if (_snackBarController.isCompleted && _snackBarTimer == null) {
           final SnackBar snackBar = _snackBars.first._widget;
-          _snackBarTimer = new Timer(snackBar.duration, () {
+          _snackBarTimer = new Timer.periodic(snackBar.duration, (Timer timer) {
             assert(_snackBarController.status == AnimationStatus.forward ||
                    _snackBarController.status == AnimationStatus.completed);
+            // Look up MediaQuery again in case the setting changed.
+            final MediaQueryData mediaQuery = MediaQuery.of(context);
             if (mediaQuery.accessibleNavigation && snackBar.action != null)
               return;
+            timer.cancel();
             hideCurrentSnackBar(reason: SnackBarClosedReason.timeout);
           });
         }
