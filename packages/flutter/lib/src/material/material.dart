@@ -370,16 +370,18 @@ class _MaterialState extends State<Material> with TickerProviderStateMixin {
   }
 
   static Widget _transparentInterior({ShapeBorder shape, Clip clipBehavior, Widget contents}) {
-    return new ClipPath(
-      child: new _ShapeBorderPaint(
-        child: contents,
-        shape: shape,
-      ),
-      clipper: new ShapeBorderClipper(
-        shape: shape,
-      ),
-      clipBehavior: clipBehavior,
+    final _ShapeBorderPaint child = new _ShapeBorderPaint(
+      child: contents,
+      shape: shape,
     );
+    return clipBehavior == Clip.none
+        ? child
+        : new ClipPath(
+          child: child,
+          clipper: new ShapeBorderClipper(shape: shape),
+          clipBehavior: clipBehavior,
+        );
+    }
   }
 
   // Determines the shape for this Material.

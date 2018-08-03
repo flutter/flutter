@@ -1118,7 +1118,7 @@ abstract class _RenderCustomClip<T> extends RenderProxyBox {
   _RenderCustomClip({
     RenderBox child,
     CustomClipper<T> clipper,
-    this.clipBehavior = Clip.none,
+    this.clipBehavior = Clip.antiAlias,
   }) : _clipper = clipper, assert(clipBehavior != null), assert(clipBehavior != Clip.none), super(child);
 
   /// If non-null, determines which clip to use on the child.
