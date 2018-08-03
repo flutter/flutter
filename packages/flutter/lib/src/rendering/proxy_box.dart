@@ -5,6 +5,7 @@
 import 'dart:async';
 
 import 'dart:ui' as ui show ImageFilter, Gradient, Image;
+import 'dart:ui' show Clip, defaultClipBehavior; // ignore: deprecated_member_use
 
 import 'package:flutter/animation.dart';
 import 'package:flutter/foundation.dart';
@@ -1116,8 +1117,9 @@ class ShapeBorderClipper extends CustomClipper<Path> {
 abstract class _RenderCustomClip<T> extends RenderProxyBox {
   _RenderCustomClip({
     RenderBox child,
-    CustomClipper<T> clipper
-  }) : _clipper = clipper, super(child);
+    CustomClipper<T> clipper,
+    this.clipBehavior = defaultClipBehavior, // ignore: deprecated_member_use
+  }) : _clipper = clipper, assert(clipBehavior != null), assert(clipBehavior != Clip.none), super(child);
 
   /// If non-null, determines which clip to use on the child.
   CustomClipper<T> get clipper => _clipper;
@@ -1159,6 +1161,13 @@ abstract class _RenderCustomClip<T> extends RenderProxyBox {
 
   T get _defaultClip;
   T _clip;
+
+  /// {@template flutter.clipper.clipBehavior}
+  /// Controls how to clip (default to [Clip.antiAlias]).
+  ///
+  /// [Clip.none] is not allowed here.
+  /// {@endtemplate}
+  final Clip clipBehavior;
 
   @override
   void performLayout() {
@@ -1220,8 +1229,9 @@ class RenderClipRect extends _RenderCustomClip<Rect> {
   /// the child.
   RenderClipRect({
     RenderBox child,
-    CustomClipper<Rect> clipper
-  }) : super(child: child, clipper: clipper);
+    CustomClipper<Rect> clipper,
+    Clip clipBehavior = Clip.antiAlias,
+  }) : super(child: child, clipper: clipper, clipBehavior: clipBehavior);
 
   @override
   Rect get _defaultClip => Offset.zero & size;
@@ -1241,7 +1251,7 @@ class RenderClipRect extends _RenderCustomClip<Rect> {
   void paint(PaintingContext context, Offset offset) {
     if (child != null) {
       _updateClip();
-      context.pushClipRect(needsCompositing, offset, _clip, super.paint);
+      context.pushClipRect(needsCompositing, offset, _clip, super.paint, clipBehavior: clipBehavior);
     }
   }
 
@@ -1274,7 +1284,8 @@ class RenderClipRRect extends _RenderCustomClip<RRect> {
     RenderBox child,
     BorderRadius borderRadius = BorderRadius.zero,
     CustomClipper<RRect> clipper,
-  }) : _borderRadius = borderRadius, super(child: child, clipper: clipper) {
+    Clip clipBehavior = Clip.antiAlias,
+  }) : _borderRadius = borderRadius, super(child: child, clipper: clipper, clipBehavior: clipBehavior) {
     assert(_borderRadius != null || clipper != null);
   }
 
@@ -1312,7 +1323,7 @@ class RenderClipRRect extends _RenderCustomClip<RRect> {
   void paint(PaintingContext context, Offset offset) {
     if (child != null) {
       _updateClip();
-      context.pushClipRRect(needsCompositing, offset, _clip.outerRect, _clip, super.paint);
+      context.pushClipRRect(needsCompositing, offset, _clip.outerRect, _clip, super.paint, clipBehavior: clipBehavior);
     }
   }
 
@@ -1341,8 +1352,9 @@ class RenderClipOval extends _RenderCustomClip<Rect> {
   /// position of the child.
   RenderClipOval({
     RenderBox child,
-    CustomClipper<Rect> clipper
-  }) : super(child: child, clipper: clipper);
+    CustomClipper<Rect> clipper,
+    Clip clipBehavior = Clip.antiAlias,
+  }) : super(child: child, clipper: clipper, clipBehavior: clipBehavior);
 
   Rect _cachedRect;
   Path _cachedPath;
@@ -1376,7 +1388,7 @@ class RenderClipOval extends _RenderCustomClip<Rect> {
   void paint(PaintingContext context, Offset offset) {
     if (child != null) {
       _updateClip();
-      context.pushClipPath(needsCompositing, offset, _clip, _getClipPath(_clip), super.paint);
+      context.pushClipPath(needsCompositing, offset, _clip, _getClipPath(_clip), super.paint, clipBehavior: clipBehavior);
     }
   }
 
@@ -1413,8 +1425,9 @@ class RenderClipPath extends _RenderCustomClip<Path> {
   /// efficiently.
   RenderClipPath({
     RenderBox child,
-    CustomClipper<Path> clipper
-  }) : super(child: child, clipper: clipper);
+    CustomClipper<Path> clipper,
+    Clip clipBehavior = Clip.antiAlias,
+  }) : super(child: child, clipper: clipper, clipBehavior: clipBehavior);
 
   @override
   Path get _defaultClip => new Path()..addRect(Offset.zero & size);
@@ -1434,7 +1447,7 @@ class RenderClipPath extends _RenderCustomClip<Path> {
   void paint(PaintingContext context, Offset offset) {
     if (child != null) {
       _updateClip();
-      context.pushClipPath(needsCompositing, offset, Offset.zero & size, _clip, super.paint);
+      context.pushClipPath(needsCompositing, offset, Offset.zero & size, _clip, super.paint, clipBehavior: clipBehavior);
     }
   }
 
@@ -1462,14 +1475,16 @@ abstract class _RenderPhysicalModelBase<T> extends _RenderCustomClip<T> {
     @required double elevation,
     @required Color color,
     @required Color shadowColor,
+    Clip clipBehavior = defaultClipBehavior, // ignore: deprecated_member_use
     CustomClipper<T> clipper,
   }) : assert(elevation != null),
        assert(color != null),
        assert(shadowColor != null),
+       assert(clipBehavior != null),
        _elevation = elevation,
        _color = color,
        _shadowColor = shadowColor,
-       super(child: child, clipper: clipper);
+       super(child: child, clipBehavior: clipBehavior, clipper: clipper);
 
   /// The z-coordinate at which to place this material.
   ///
@@ -1539,17 +1554,20 @@ class RenderPhysicalModel extends _RenderPhysicalModelBase<RRect> {
   RenderPhysicalModel({
     RenderBox child,
     BoxShape shape = BoxShape.rectangle,
+    Clip clipBehavior = defaultClipBehavior, // ignore: deprecated_member_use
     BorderRadius borderRadius,
     double elevation = 0.0,
     @required Color color,
     Color shadowColor = const Color(0xFF000000),
   }) : assert(shape != null),
+       assert(clipBehavior != null),
        assert(elevation != null),
        assert(color != null),
        assert(shadowColor != null),
        _shape = shape,
        _borderRadius = borderRadius,
        super(
+         clipBehavior: clipBehavior,
          child: child,
          elevation: elevation,
          color: color,
@@ -1638,6 +1656,7 @@ class RenderPhysicalModel extends _RenderPhysicalModelBase<RRect> {
       if (needsCompositing) {
         final PhysicalModelLayer physicalModel = new PhysicalModelLayer(
           clipPath: offsetRRectAsPath,
+          clipBehavior: clipBehavior,
           elevation: paintShadows ? elevation : 0.0,
           color: color,
           shadowColor: shadowColor,
@@ -1662,10 +1681,7 @@ class RenderPhysicalModel extends _RenderPhysicalModelBase<RRect> {
           );
         }
         canvas.drawRRect(offsetRRect, new Paint()..color = color);
-        canvas.save();
-        canvas.clipRRect(offsetRRect);
-        super.paint(context, offset);
-        canvas.restore();
+        context.clipRRectAndPaint(offsetRRect, clipBehavior, offsetBounds, () => super.paint(context, offset));
         assert(context.canvas == canvas, 'canvas changed even though needsCompositing was false');
       }
     }
@@ -1697,6 +1713,7 @@ class RenderPhysicalShape extends _RenderPhysicalModelBase<Path> {
   RenderPhysicalShape({
     RenderBox child,
     @required CustomClipper<Path> clipper,
+    Clip clipBehavior = defaultClipBehavior, // ignore: deprecated_member_use
     double elevation = 0.0,
     @required Color color,
     Color shadowColor = const Color(0xFF000000),
@@ -1710,6 +1727,7 @@ class RenderPhysicalShape extends _RenderPhysicalModelBase<Path> {
          color: color,
          shadowColor: shadowColor,
          clipper: clipper,
+         clipBehavior: clipBehavior
        );
 
   @override
@@ -1751,6 +1769,7 @@ class RenderPhysicalShape extends _RenderPhysicalModelBase<Path> {
       if (needsCompositing) {
         final PhysicalModelLayer physicalModel = new PhysicalModelLayer(
           clipPath: offsetPath,
+          clipBehavior: clipBehavior,
           elevation: paintShadows ? elevation : 0.0,
           color: color,
           shadowColor: shadowColor,
@@ -1775,10 +1794,7 @@ class RenderPhysicalShape extends _RenderPhysicalModelBase<Path> {
           );
         }
         canvas.drawPath(offsetPath, new Paint()..color = color..style = PaintingStyle.fill);
-        canvas.save();
-        canvas.clipPath(offsetPath);
-        super.paint(context, offset);
-        canvas.restore();
+        context.clipPathAndPaint(offsetPath, clipBehavior, offsetBounds, () => super.paint(context, offset));
         assert(context.canvas == canvas, 'canvas changed even though needsCompositing was false');
       }
     }
