@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:ui' as ui show Image, ImageFilter;
+import 'dart:ui' show Clip, defaultClipBehavior; // ignore: deprecated_member_use
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
@@ -476,13 +477,16 @@ class ClipRect extends SingleChildRenderObjectWidget {
   ///
   /// If [clipper] is null, the clip will match the layout size and position of
   /// the child.
-  const ClipRect({ Key key, this.clipper, Widget child }) : super(key: key, child: child);
+  const ClipRect({ Key key, this.clipper, this.clipBehavior = Clip.antiAlias, Widget child }) : super(key: key, child: child);
 
   /// If non-null, determines which clip to use.
   final CustomClipper<Rect> clipper;
 
+  /// {@macro flutter.widget.clipper.clipBehavior}
+  final Clip clipBehavior;
+
   @override
-  RenderClipRect createRenderObject(BuildContext context) => new RenderClipRect(clipper: clipper);
+  RenderClipRect createRenderObject(BuildContext context) => new RenderClipRect(clipper: clipper, clipBehavior: clipBehavior);
 
   @override
   void updateRenderObject(BuildContext context, RenderClipRect renderObject) {
@@ -524,8 +528,10 @@ class ClipRRect extends SingleChildRenderObjectWidget {
     Key key,
     this.borderRadius,
     this.clipper,
+    this.clipBehavior = Clip.antiAlias,
     Widget child,
   }) : assert(borderRadius != null || clipper != null),
+       assert(clipBehavior != null),
        super(key: key, child: child);
 
   /// The border radius of the rounded corners.
@@ -539,8 +545,11 @@ class ClipRRect extends SingleChildRenderObjectWidget {
   /// If non-null, determines which clip to use.
   final CustomClipper<RRect> clipper;
 
+  /// {@macro flutter.widget.clipper.clipBehavior}
+  final Clip clipBehavior;
+
   @override
-  RenderClipRRect createRenderObject(BuildContext context) => new RenderClipRRect(borderRadius: borderRadius, clipper: clipper);
+  RenderClipRRect createRenderObject(BuildContext context) => new RenderClipRRect(borderRadius: borderRadius, clipper: clipper, clipBehavior: clipBehavior);
 
   @override
   void updateRenderObject(BuildContext context, RenderClipRRect renderObject) {
@@ -575,7 +584,7 @@ class ClipOval extends SingleChildRenderObjectWidget {
   ///
   /// If [clipper] is null, the oval will be inscribed into the layout size and
   /// position of the child.
-  const ClipOval({ Key key, this.clipper, Widget child }) : super(key: key, child: child);
+  const ClipOval({ Key key, this.clipper, this.clipBehavior = Clip.antiAlias, Widget child }) : super(key: key, child: child);
 
   /// If non-null, determines which clip to use.
   ///
@@ -588,8 +597,11 @@ class ClipOval extends SingleChildRenderObjectWidget {
   /// object) instead.
   final CustomClipper<Rect> clipper;
 
+  /// {@macro flutter.widget.clipper.clipBehavior}
+  final Clip clipBehavior;
+
   @override
-  RenderClipOval createRenderObject(BuildContext context) => new RenderClipOval(clipper: clipper);
+  RenderClipOval createRenderObject(BuildContext context) => new RenderClipOval(clipper: clipper, clipBehavior: clipBehavior);
 
   @override
   void updateRenderObject(BuildContext context, RenderClipOval renderObject) {
@@ -627,7 +639,7 @@ class ClipPath extends SingleChildRenderObjectWidget {
   /// size and location of the child. However, rather than use this default,
   /// consider using a [ClipRect], which can achieve the same effect more
   /// efficiently.
-  const ClipPath({ Key key, this.clipper, Widget child }) : super(key: key, child: child);
+  const ClipPath({ Key key, this.clipper, this.clipBehavior = Clip.antiAlias, Widget child }) : super(key: key, child: child);
 
   /// If non-null, determines which clip to use.
   ///
@@ -636,8 +648,11 @@ class ClipPath extends SingleChildRenderObjectWidget {
   /// efficient way of obtaining that effect.
   final CustomClipper<Path> clipper;
 
+  /// {@macro flutter.widget.clipper.clipBehavior}
+  final Clip clipBehavior;
+
   @override
-  RenderClipPath createRenderObject(BuildContext context) => new RenderClipPath(clipper: clipper);
+  RenderClipPath createRenderObject(BuildContext context) => new RenderClipPath(clipper: clipper, clipBehavior: clipBehavior);
 
   @override
   void updateRenderObject(BuildContext context, RenderClipPath renderObject) {
@@ -677,6 +692,7 @@ class PhysicalModel extends SingleChildRenderObjectWidget {
   const PhysicalModel({
     Key key,
     this.shape = BoxShape.rectangle,
+    this.clipBehavior = defaultClipBehavior, // ignore: deprecated_member_use
     this.borderRadius,
     this.elevation = 0.0,
     @required this.color,
@@ -690,6 +706,9 @@ class PhysicalModel extends SingleChildRenderObjectWidget {
 
   /// The type of shape.
   final BoxShape shape;
+
+  /// {@macro flutter.widgets.Clip}
+  final Clip clipBehavior;
 
   /// The border radius of the rounded corners.
   ///
@@ -712,6 +731,7 @@ class PhysicalModel extends SingleChildRenderObjectWidget {
   RenderPhysicalModel createRenderObject(BuildContext context) {
     return new RenderPhysicalModel(
       shape: shape,
+      clipBehavior: clipBehavior,
       borderRadius: borderRadius,
       elevation: elevation, color: color,
       shadowColor: shadowColor,
@@ -760,11 +780,13 @@ class PhysicalShape extends SingleChildRenderObjectWidget {
   const PhysicalShape({
     Key key,
     @required this.clipper,
+    this.clipBehavior = defaultClipBehavior, // ignore: deprecated_member_use
     this.elevation = 0.0,
     @required this.color,
     this.shadowColor = const Color(0xFF000000),
     Widget child,
   }) : assert(clipper != null),
+       assert(clipBehavior != null),
        assert(elevation != null),
        assert(color != null),
        assert(shadowColor != null),
@@ -776,6 +798,9 @@ class PhysicalShape extends SingleChildRenderObjectWidget {
   /// consider using the [ShapeBorderClipper] delegate class to adapt the
   /// shape for use with this widget.
   final CustomClipper<Path> clipper;
+
+  /// {@macro flutter.widgets.Clip}
+  final Clip clipBehavior;
 
   /// The z-coordinate at which to place this physical object.
   final double elevation;
@@ -790,6 +815,7 @@ class PhysicalShape extends SingleChildRenderObjectWidget {
   RenderPhysicalShape createRenderObject(BuildContext context) {
     return new RenderPhysicalShape(
       clipper: clipper,
+      clipBehavior: clipBehavior,
       elevation: elevation,
       color: color,
       shadowColor: shadowColor
