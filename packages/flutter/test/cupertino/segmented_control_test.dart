@@ -27,7 +27,7 @@ StatefulBuilder setupSimpleSegmentedControl() {
   return new StatefulBuilder(
     builder: (BuildContext context, StateSetter setState) {
       return boilerplate(
-        child: new SegmentedControl<int>(
+        child: new CupertinoSegmentedControl<int>(
           children: children,
           onValueChanged: (int newValue) {
             setState(() {
@@ -65,7 +65,7 @@ void main() {
       new StatefulBuilder(
         builder: (BuildContext context, StateSetter setState) {
           return boilerplate(
-            child: new SegmentedControl<int>(
+            child: new CupertinoSegmentedControl<int>(
               key: const ValueKey<String>('Segmented Control'),
               children: children,
               onValueChanged: (int newValue) {
@@ -92,7 +92,7 @@ void main() {
     try {
       await tester.pumpWidget(
         boilerplate(
-          child: new SegmentedControl<int>(
+          child: new CupertinoSegmentedControl<int>(
             children: children,
             onValueChanged: (int newValue) {},
           ),
@@ -107,7 +107,7 @@ void main() {
 
       await tester.pumpWidget(
         boilerplate(
-          child: new SegmentedControl<int>(
+          child: new CupertinoSegmentedControl<int>(
             children: children,
             onValueChanged: (int newValue) {},
           ),
@@ -128,7 +128,7 @@ void main() {
     try {
       await tester.pumpWidget(
         boilerplate(
-          child: new SegmentedControl<int>(
+          child: new CupertinoSegmentedControl<int>(
             children: children,
             onValueChanged: (int newValue) {},
             groupValue: 2,
@@ -146,7 +146,7 @@ void main() {
     try {
       await tester.pumpWidget(
         boilerplate(
-          child: new SegmentedControl<int>(
+          child: new CupertinoSegmentedControl<int>(
             children: null,
             onValueChanged: (int newValue) {},
           ),
@@ -164,7 +164,7 @@ void main() {
     try {
       await tester.pumpWidget(
         boilerplate(
-          child: new SegmentedControl<int>(
+          child: new CupertinoSegmentedControl<int>(
             children: children,
             onValueChanged: null,
           ),
@@ -188,7 +188,7 @@ void main() {
       new StatefulBuilder(
         builder: (BuildContext context, StateSetter setState) {
           return boilerplate(
-            child: new SegmentedControl<int>(
+            child: new CupertinoSegmentedControl<int>(
               children: children,
               onValueChanged: (int newValue) {
                 setState(() {
@@ -231,7 +231,7 @@ void main() {
       new StatefulBuilder(
         builder: (BuildContext context, StateSetter setState) {
           return boilerplate(
-            child: new SegmentedControl<int>(
+            child: new CupertinoSegmentedControl<int>(
               children: children,
               onValueChanged: (int newValue) {
                 value = true;
@@ -261,7 +261,7 @@ void main() {
       new StatefulBuilder(
         builder: (BuildContext context, StateSetter setState) {
           return boilerplate(
-            child: new SegmentedControl<int>(
+            child: new CupertinoSegmentedControl<int>(
               children: children,
               onValueChanged: (int newValue) {},
               groupValue: sharedValue,
@@ -316,7 +316,7 @@ void main() {
         new StatefulBuilder(
           builder: (BuildContext context, StateSetter setState) {
             return boilerplate(
-              child: new SegmentedControl<int>(
+              child: new CupertinoSegmentedControl<int>(
                 children: children,
                 onValueChanged: (int newValue) {
                   setState(() {
@@ -354,7 +354,7 @@ void main() {
       new StatefulBuilder(
         builder: (BuildContext context, StateSetter setState) {
           return boilerplate(
-            child: new SegmentedControl<int>(
+            child: new CupertinoSegmentedControl<int>(
               children: children,
               onValueChanged: (int newValue) {
                 setState(() {
@@ -421,7 +421,7 @@ void main() {
       new StatefulBuilder(
         builder: (BuildContext context, StateSetter setState) {
           return boilerplate(
-            child: new SegmentedControl<int>(
+            child: new CupertinoSegmentedControl<int>(
               key: const ValueKey<String>('Segmented Control'),
               children: children,
               onValueChanged: (int newValue) {},
@@ -449,7 +449,7 @@ void main() {
       new StatefulBuilder(
         builder: (BuildContext context, StateSetter setState) {
           return boilerplate(
-            child: new SegmentedControl<int>(
+            child: new CupertinoSegmentedControl<int>(
               key: const ValueKey<String>('Segmented Control'),
               children: children,
               onValueChanged: (int newValue) {},
@@ -485,7 +485,7 @@ void main() {
           return boilerplate(
             child: Row(
               children: <Widget>[
-                new SegmentedControl<int>(
+                new CupertinoSegmentedControl<int>(
                   key: const ValueKey<String>('Segmented Control'),
                   children: children,
                   onValueChanged: (int newValue) {},
@@ -513,7 +513,7 @@ void main() {
       Directionality(
         textDirection: TextDirection.rtl,
         child: new Center(
-          child: new SegmentedControl<int>(
+          child: new CupertinoSegmentedControl<int>(
             children: children,
             onValueChanged: (int newValue) {},
           ),
@@ -539,7 +539,7 @@ void main() {
           return Directionality(
             textDirection: TextDirection.rtl,
             child: new Center(
-              child: new SegmentedControl<int>(
+              child: new CupertinoSegmentedControl<int>(
                 children: children,
                 onValueChanged: (int newValue) {
                   setState(() {
@@ -583,7 +583,7 @@ void main() {
           return Directionality(
             textDirection: TextDirection.ltr,
             child: new Center(
-              child: new SegmentedControl<int>(
+              child: new CupertinoSegmentedControl<int>(
                 children: children,
                 onValueChanged: (int newValue) {
                   setState(() {
@@ -681,7 +681,7 @@ void main() {
       new StatefulBuilder(
         builder: (BuildContext context, StateSetter setState) {
           return boilerplate(
-            child: new SegmentedControl<int>(
+            child: new CupertinoSegmentedControl<int>(
               key: const ValueKey<String>('Segmented Control'),
               children: children,
               onValueChanged: (int newValue) {
@@ -748,7 +748,7 @@ void main() {
       new StatefulBuilder(
         builder: (BuildContext context, StateSetter setState) {
           return boilerplate(
-            child: new SegmentedControl<int>(
+            child: new CupertinoSegmentedControl<int>(
               children: children,
               onValueChanged: (int newValue) {
                 setState(() {
@@ -768,7 +768,7 @@ void main() {
       new StatefulBuilder(
         builder: (BuildContext context, StateSetter setState) {
           return boilerplate(
-            child: new SegmentedControl<int>(
+            child: new CupertinoSegmentedControl<int>(
               children: children,
               onValueChanged: (int newValue) {
                 setState(() {
@@ -788,7 +788,7 @@ void main() {
       new StatefulBuilder(
         builder: (BuildContext context, StateSetter setState) {
           return boilerplate(
-            child: new SegmentedControl<int>(
+            child: new CupertinoSegmentedControl<int>(
               children: children,
               onValueChanged: (int newValue) {
                 setState(() {
@@ -809,7 +809,7 @@ void main() {
       new StatefulBuilder(
         builder: (BuildContext context, StateSetter setState) {
           return boilerplate(
-            child: new SegmentedControl<int>(
+            child: new CupertinoSegmentedControl<int>(
               children: children,
               onValueChanged: (int newValue) {
                 setState(() {
@@ -830,7 +830,7 @@ void main() {
       new StatefulBuilder(
         builder: (BuildContext context, StateSetter setState) {
           return boilerplate(
-            child: new SegmentedControl<int>(
+            child: new CupertinoSegmentedControl<int>(
               children: children,
               onValueChanged: (int newValue) {
                 setState(() {
@@ -851,7 +851,7 @@ void main() {
       new StatefulBuilder(
         builder: (BuildContext context, StateSetter setState) {
           return boilerplate(
-            child: new SegmentedControl<int>(
+            child: new CupertinoSegmentedControl<int>(
               children: children,
               onValueChanged: (int newValue) {
                 setState(() {
@@ -872,7 +872,7 @@ void main() {
       new StatefulBuilder(
         builder: (BuildContext context, StateSetter setState) {
           return boilerplate(
-            child: new SegmentedControl<int>(
+            child: new CupertinoSegmentedControl<int>(
               children: children,
               onValueChanged: (int newValue) {
                 setState(() {
@@ -901,7 +901,7 @@ void main() {
       new StatefulBuilder(
         builder: (BuildContext context, StateSetter setState) {
           return boilerplate(
-            child: new SegmentedControl<int>(
+            child: new CupertinoSegmentedControl<int>(
               key: const ValueKey<String>('Segmented Control'),
               children: children,
               onValueChanged: (int newValue) {
@@ -944,7 +944,7 @@ void main() {
       new StatefulBuilder(
         builder: (BuildContext context, StateSetter setState) {
           return boilerplate(
-            child: new SegmentedControl<int>(
+            child: new CupertinoSegmentedControl<int>(
               key: const ValueKey<String>('Segmented Control'),
               children: children,
               onValueChanged: (int newValue) {
@@ -1035,7 +1035,7 @@ void main() {
       new StatefulBuilder(
         builder: (BuildContext context, StateSetter setState) {
           return boilerplate(
-            child: new SegmentedControl<int>(
+            child: new CupertinoSegmentedControl<int>(
               key: const ValueKey<String>('Segmented Control'),
               children: children,
               onValueChanged: (int newValue) {
@@ -1083,7 +1083,7 @@ void main() {
       new StatefulBuilder(
         builder: (BuildContext context, StateSetter setState) {
           return boilerplate(
-            child: new SegmentedControl<int>(
+            child: new CupertinoSegmentedControl<int>(
               key: const ValueKey<String>('Segmented Control'),
               children: children,
               onValueChanged: (int newValue) {
@@ -1128,7 +1128,7 @@ void main() {
       new StatefulBuilder(
         builder: (BuildContext context, StateSetter setState) {
           return boilerplate(
-            child: new SegmentedControl<int>(
+            child: new CupertinoSegmentedControl<int>(
               key: const ValueKey<String>('Segmented Control'),
               children: children,
               onValueChanged: (int newValue) {
@@ -1181,7 +1181,7 @@ void main() {
         child: new StatefulBuilder(
           builder: (BuildContext context, StateSetter setState) {
             return boilerplate(
-              child: new SegmentedControl<int>(
+              child: new CupertinoSegmentedControl<int>(
                 key: const ValueKey<String>('Segmented Control'),
                 children: children,
                 onValueChanged: (int newValue) {},
@@ -1212,7 +1212,7 @@ void main() {
         child: new StatefulBuilder(
           builder: (BuildContext context, StateSetter setState) {
             return boilerplate(
-              child: new SegmentedControl<int>(
+              child: new CupertinoSegmentedControl<int>(
                 key: const ValueKey<String>('Segmented Control'),
                 children: children,
                 onValueChanged: (int newValue) {},
