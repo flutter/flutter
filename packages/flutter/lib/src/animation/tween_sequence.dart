@@ -93,7 +93,7 @@ class TweenSequenceItem<T> {
   const TweenSequenceItem({
     @required this.tween,
     @required this.weight,
-  }) : assert(tween != null), assert(weight != null), assert(weight > 0.0) {
+  }) : assert(tween != null), assert(weight != null), assert(weight > 0.0);
 
   /// Defines the value of the [TweenSequence] for the interval within the
   /// animation's duration indicated by [weight] and this item's position
