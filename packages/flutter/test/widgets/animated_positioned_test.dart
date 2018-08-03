@@ -65,8 +65,8 @@ void main() {
       ),
     );
 
-    const Offset first = const Offset(50.0 + 70.0 / 2.0, 30.0 + 110.0 / 2.0);
-    const Offset last = const Offset(37.0 + 59.0 / 2.0, 31.0 + 71.0 / 2.0);
+    const Offset first = Offset(50.0 + 70.0 / 2.0, 30.0 + 110.0 / 2.0);
+    const Offset last = Offset(37.0 + 59.0 / 2.0, 31.0 + 71.0 / 2.0);
 
     box = key.currentContext.findRenderObject();
     expect(box.localToGlobal(box.size.center(Offset.zero)), equals(first));
@@ -151,8 +151,8 @@ void main() {
       ),
     );
 
-    const Offset first = const Offset(50.0 + 70.0 / 2.0, 30.0 + 110.0 / 2.0);
-    const Offset last = const Offset(37.0 + 59.0 / 2.0, 31.0 + 71.0 / 2.0);
+    const Offset first = Offset(50.0 + 70.0 / 2.0, 30.0 + 110.0 / 2.0);
+    const Offset last = Offset(37.0 + 59.0 / 2.0, 31.0 + 71.0 / 2.0);
 
     box = key.currentContext.findRenderObject();
     expect(box.localToGlobal(box.size.center(Offset.zero)), equals(first));
@@ -237,8 +237,8 @@ void main() {
       ),
     );
 
-    const Offset first = const Offset(800.0 - 50.0 - 70.0 / 2.0, 30.0 + 110.0 / 2.0);
-    const Offset last = const Offset(800.0 - 37.0 - 59.0 / 2.0, 31.0 + 71.0 / 2.0);
+    const Offset first = Offset(800.0 - 50.0 - 70.0 / 2.0, 30.0 + 110.0 / 2.0);
+    const Offset last = Offset(800.0 - 37.0 - 59.0 / 2.0, 31.0 + 71.0 / 2.0);
 
     box = key.currentContext.findRenderObject();
     expect(box.localToGlobal(box.size.center(Offset.zero)), equals(first));

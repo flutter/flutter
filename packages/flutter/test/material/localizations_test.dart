@@ -7,7 +7,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   testWidgets('English translations exist for all MaterialLocalizations properties', (WidgetTester tester) async {
-    const MaterialLocalizations localizations = const DefaultMaterialLocalizations();
+    const MaterialLocalizations localizations = DefaultMaterialLocalizations();
 
     expect(localizations.openAppDrawerTooltip, isNotNull);
     expect(localizations.backButtonTooltip, isNotNull);

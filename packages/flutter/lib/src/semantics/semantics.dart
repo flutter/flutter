@@ -83,7 +83,7 @@ class SemanticsTag {
 /// these are presented in the radial context menu.
 ///
 /// Localization and text direction do not automatically apply to the provided
-/// label.
+/// label or hint.
 ///
 /// Instances of this class should either be instantiated with const or
 /// new instances cached in static fields.
@@ -98,20 +98,45 @@ class CustomSemanticsAction {
   /// The [label] must not be null or the empty string.
   const CustomSemanticsAction({@required this.label})
     : assert(label != null),
-      assert(label != '');
+      assert(label != ''),
+      hint = null,
+      action = null;
 
-  /// The user readable name of this custom accessibility action.
+  /// Creates a new [CustomSemanticsAction] that overrides a standard semantics
+  /// action.
+  ///
+  /// The [hint] must not be null or the empty string.
+  const CustomSemanticsAction.overridingAction({@required this.hint, @required this.action})
+    : assert(hint != null),
+      assert(hint != ''),
+      assert(action != null),
+      label = null;
+
+  /// The user readable name of this custom semantics action.
   final String label;
 
+  /// The hint description of this custom semantics action.
+  final String hint;
+
+  /// The standard semantics action this action replaces.
+  final SemanticsAction action;
+
   @override
-  int get hashCode => label.hashCode;
+  int get hashCode => ui.hashValues(label, hint, action);
 
   @override
   bool operator ==(dynamic other) {
     if (other.runtimeType != runtimeType)
       return false;
     final CustomSemanticsAction typedOther = other;
-    return typedOther.label == label;
+    return typedOther.label == label
+      && typedOther.hint == hint
+      && typedOther.action == action;
+  }
+
+  @override
+  String toString() {
+    return 'CustomSemanticsAction(${_ids[this]}, label:$label, hint:$hint, action:$action)';
   }
 
   // Logic to assign a unique id to each custom action without requiring
@@ -121,7 +146,6 @@ class CustomSemanticsAction {
   static final Map<CustomSemanticsAction, int> _ids = <CustomSemanticsAction, int>{};
 
   /// Get the identifier for a given `action`.
-  @visibleForTesting
   static int getIdentifier(CustomSemanticsAction action) {
     int result = _ids[action];
     if (result == null) {
@@ -133,7 +157,6 @@ class CustomSemanticsAction {
   }
 
   /// Get the `action` for a given identifier.
-  @visibleForTesting
   static CustomSemanticsAction getAction(int id) {
     return _actions[id];
   }
@@ -271,7 +294,8 @@ class SemanticsData extends Diagnosticable {
   /// parent).
   final Matrix4 transform;
 
-  /// The identifiers for the custom semantics action defined for this node.
+  /// The identifiers for the custom semantics actions and standard action
+  /// overrides for this node.
   ///
   /// The list must be sorted in increasing order.
   ///
@@ -407,6 +431,64 @@ class _SemanticsDiagnosticableNode extends DiagnosticableNode<SemanticsNode> {
   }
 }
 
+/// Provides hint values which override the default hints on supported
+/// platforms.
+///
+/// On iOS, these values are always ignored.
+@immutable
+class SemanticsHintOverrides extends DiagnosticableTree {
+  /// Creates a semantics hint overrides.
+  const SemanticsHintOverrides({
+    this.onTapHint,
+    this.onLongPressHint,
+  }) : assert(onTapHint != ''),
+       assert(onLongPressHint != '');
+
+  /// The hint text for a tap action.
+  ///
+  /// If null, the standard hint is used instead.
+  ///
+  /// The hint should describe what happens when a tap occurs, not the
+  /// manner in which a tap is accomplished.
+  ///
+  /// Bad: 'Double tap to show movies'.
+  /// Good: 'show movies'.
+  final String onTapHint;
+
+  /// The hint text for a long press action.
+  ///
+  /// If null, the standard hint is used instead.
+  ///
+  /// The hint should describe what happens when a long press occurs, not
+  /// the manner in which the long press is accomplished.
+  ///
+  /// Bad: 'Double tap and hold to show tooltip'.
+  /// Good: 'show tooltip'.
+  final String onLongPressHint;
+
+  /// Whether there are any non-null hint values.
+  bool get isNotEmpty => onTapHint != null || onLongPressHint != null;
+
+  @override
+  int get hashCode => ui.hashValues(onTapHint, onLongPressHint);
+
+  @override
+  bool operator ==(dynamic other) {
+    if (other.runtimeType != runtimeType)
+      return false;
+    final SemanticsHintOverrides typedOther = other;
+    return typedOther.onTapHint == onTapHint
+      && typedOther.onLongPressHint == onLongPressHint;
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(new StringProperty('onTapHint', onTapHint, defaultValue: null));
+    properties.add(new StringProperty('onLongPressHint', onLongPressHint, defaultValue: null));
+  }
+}
+
 /// Contains properties used by assistive technologies to make the application
 /// more accessible.
 ///
@@ -436,6 +518,7 @@ class SemanticsProperties extends DiagnosticableTree {
     this.increasedValue,
     this.decreasedValue,
     this.hint,
+    this.hintOverrides,
     this.textDirection,
     this.sortKey,
     this.onTap,
@@ -655,6 +738,16 @@ class SemanticsProperties extends DiagnosticableTree {
   ///  * [SemanticsConfiguration.hint] for a description of how this is exposed
   ///    in TalkBack and VoiceOver.
   final String hint;
+
+  /// Provides hint values which override the default hints on supported
+  /// platforms.
+  ///
+  /// On Android, If no hint overrides are used then default [hint] will be
+  /// combined with the [label]. Otherwise, the [hint] will be ignored as long
+  /// as there as at least one non-null hint override.
+  ///
+  /// On iOS, these are always ignored and the default [hint] is used instead.
+  final SemanticsHintOverrides hintOverrides;
 
   /// The reading direction of the [label], [value], [hint], [increasedValue],
   /// and [decreasedValue].
@@ -889,6 +982,7 @@ class SemanticsProperties extends DiagnosticableTree {
     properties.add(new StringProperty('hint', hint));
     properties.add(new EnumProperty<TextDirection>('textDirection', textDirection, defaultValue: null));
     properties.add(new DiagnosticsProperty<SemanticsSortKey>('sortKey', sortKey, defaultValue: null));
+    properties.add(new DiagnosticsProperty<SemanticsHintOverrides>('hintOverrides', hintOverrides));
   }
 
   @override
@@ -1341,6 +1435,11 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
   String get hint => _hint;
   String _hint = _kEmptyConfig.hint;
 
+  /// Provides hint values which override the default hints on supported
+  /// platforms.
+  SemanticsHintOverrides get hintOverrides => _hintOverrides;
+  SemanticsHintOverrides _hintOverrides;
+
   /// The reading direction for [label], [value], [hint], [increasedValue], and
   /// [decreasedValue].
   TextDirection get textDirection => _textDirection;
@@ -1422,6 +1521,7 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
     _value = config.value;
     _increasedValue = config.increasedValue;
     _hint = config.hint;
+    _hintOverrides = config.hintOverrides;
     _flags = config._flags;
     _textDirection = config.textDirection;
     _sortKey = config.sortKey;
@@ -1468,6 +1568,22 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
     final Set<int> customSemanticsActionIds = new Set<int>();
     for (CustomSemanticsAction action in _customSemanticsActions.keys)
       customSemanticsActionIds.add(CustomSemanticsAction.getIdentifier(action));
+    if (hintOverrides != null) {
+      if (hintOverrides.onTapHint != null) {
+        final CustomSemanticsAction action = new CustomSemanticsAction.overridingAction(
+          hint: hintOverrides.onTapHint,
+          action: SemanticsAction.tap,
+        );
+        customSemanticsActionIds.add(CustomSemanticsAction.getIdentifier(action));
+      }
+      if (hintOverrides.onLongPressHint != null) {
+        final CustomSemanticsAction action = new CustomSemanticsAction.overridingAction(
+          hint: hintOverrides.onLongPressHint,
+          action: SemanticsAction.longPress,
+        );
+        customSemanticsActionIds.add(CustomSemanticsAction.getIdentifier(action));
+      }
+    }
 
     if (mergeAllDescendantsIntoThisNode) {
       _visitDescendants((SemanticsNode node) {
@@ -1492,6 +1608,22 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
         if (node._customSemanticsActions != null) {
           for (CustomSemanticsAction action in _customSemanticsActions.keys)
             customSemanticsActionIds.add(CustomSemanticsAction.getIdentifier(action));
+        }
+        if (node.hintOverrides != null) {
+          if (node.hintOverrides.onTapHint != null) {
+            final CustomSemanticsAction action = new CustomSemanticsAction.overridingAction(
+              hint: node.hintOverrides.onTapHint,
+              action: SemanticsAction.tap,
+            );
+            customSemanticsActionIds.add(CustomSemanticsAction.getIdentifier(action));
+          }
+          if (node.hintOverrides.onLongPressHint != null) {
+            final CustomSemanticsAction action = new CustomSemanticsAction.overridingAction(
+              hint: node.hintOverrides.onLongPressHint,
+              action: SemanticsAction.longPress,
+            );
+            customSemanticsActionIds.add(CustomSemanticsAction.getIdentifier(action));
+          }
         }
         label = _concatStrings(
           thisString: label,
@@ -2139,8 +2271,10 @@ class SemanticsOwner extends ChangeNotifier {
         node._addToUpdate(builder, customSemanticsActionIds);
     }
     _dirtyNodes.clear();
-    for (int actionId in customSemanticsActionIds)
-      builder.updateCustomAction(id: actionId, label: CustomSemanticsAction.getAction(actionId).label);
+    for (int actionId in customSemanticsActionIds) {
+      final CustomSemanticsAction action = CustomSemanticsAction.getAction(actionId);
+      builder.updateCustomAction(id: actionId, label: action.label, hint: action.hint, overrideId: action.action?.index ?? -1);
+    }
     ui.window.updateSemantics(builder.build());
     notifyListeners();
   }
@@ -2818,6 +2952,17 @@ class SemanticsConfiguration {
     _hasBeenAnnotated = true;
   }
 
+  /// Provides hint values which override the default hints on supported
+  /// platforms.
+  SemanticsHintOverrides get hintOverrides => _hintOverrides;
+  SemanticsHintOverrides _hintOverrides;
+  set hintOverrides(SemanticsHintOverrides value) {
+    if (value == null)
+      return;
+    _hintOverrides = value;
+    _hasBeenAnnotated = true;
+  }
+
   /// Whether the semantics node is the root of a subtree for which values
   /// should be announced.
   ///
@@ -3138,6 +3283,7 @@ class SemanticsConfiguration {
     _scrollPosition ??= other._scrollPosition;
     _scrollExtentMax ??= other._scrollExtentMax;
     _scrollExtentMin ??= other._scrollExtentMin;
+    _hintOverrides ??= other._hintOverrides;
 
     textDirection ??= other.textDirection;
     _sortKey ??= other._sortKey;
@@ -3178,6 +3324,7 @@ class SemanticsConfiguration {
       .._value = _value
       .._decreasedValue = _decreasedValue
       .._hint = _hint
+      .._hintOverrides = _hintOverrides
       .._flags = _flags
       .._tagsForChildren = _tagsForChildren
       .._textSelection = _textSelection

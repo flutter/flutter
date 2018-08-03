@@ -38,15 +38,15 @@ void main() {
 
   test('RoundedRectangleBorder and CircleBorder', () {
     final RoundedRectangleBorder r = new RoundedRectangleBorder(side: BorderSide.none, borderRadius: new BorderRadius.circular(10.0));
-    const CircleBorder c = const CircleBorder(side: BorderSide.none);
+    const CircleBorder c = CircleBorder(side: BorderSide.none);
     final Rect rect = new Rect.fromLTWH(0.0, 0.0, 100.0, 20.0); // center is x=40..60 y=10
     final Matcher looksLikeR = isPathThat(
-      includes: const <Offset>[ const Offset(30.0, 10.0), const Offset(50.0, 10.0), ],
-      excludes: const <Offset>[ const Offset(1.0, 1.0), const Offset(99.0, 19.0), ],
+      includes: const <Offset>[ Offset(30.0, 10.0), Offset(50.0, 10.0), ],
+      excludes: const <Offset>[ Offset(1.0, 1.0), Offset(99.0, 19.0), ],
     );
     final Matcher looksLikeC = isPathThat(
-      includes: const <Offset>[ const Offset(50.0, 10.0), ],
-      excludes: const <Offset>[ const Offset(1.0, 1.0), const Offset(30.0, 10.0), const Offset(99.0, 19.0), ],
+      includes: const <Offset>[ Offset(50.0, 10.0), ],
+      excludes: const <Offset>[ Offset(1.0, 1.0), Offset(30.0, 10.0), Offset(99.0, 19.0), ],
     );
     expect(r.getOuterPath(rect), looksLikeR);
     expect(c.getOuterPath(rect), looksLikeC);

@@ -276,7 +276,7 @@ class FlutterDevice {
 
     if (package == null) {
       String message = 'No application found for $targetPlatform.';
-      final String hint = getMissingPackageHintForPlatform(targetPlatform);
+      final String hint = await getMissingPackageHintForPlatform(targetPlatform);
       if (hint != null)
         message += '\n$hint';
       printError(message);
@@ -335,7 +335,7 @@ class FlutterDevice {
 
     if (package == null) {
       String message = 'No application found for $targetPlatform.';
-      final String hint = getMissingPackageHintForPlatform(targetPlatform);
+      final String hint = await getMissingPackageHintForPlatform(targetPlatform);
       if (hint != null)
         message += '\n$hint';
       printError(message);
@@ -898,13 +898,13 @@ String findMainDartFile([String target]) {
     return targetPath;
 }
 
-String getMissingPackageHintForPlatform(TargetPlatform platform) {
+Future<String> getMissingPackageHintForPlatform(TargetPlatform platform) async {
   switch (platform) {
     case TargetPlatform.android_arm:
     case TargetPlatform.android_arm64:
     case TargetPlatform.android_x64:
     case TargetPlatform.android_x86:
-      final FlutterProject project = new FlutterProject(fs.currentDirectory);
+      final FlutterProject project = await FlutterProject.current();
       final String manifestPath = fs.path.relative(project.android.gradleManifestFile.path);
       return 'Is your project missing an $manifestPath?\nConsider running "flutter create ." to create one.';
     case TargetPlatform.ios:

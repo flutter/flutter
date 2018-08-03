@@ -342,16 +342,16 @@ void main() {
   testWidgets('FittedBox layers - contain', (WidgetTester tester) async {
     await tester.pumpWidget(
       const Center(
-        child: const SizedBox(
+        child: SizedBox(
           width: 100.0,
           height: 10.0,
-          child: const FittedBox(
+          child: FittedBox(
             fit: BoxFit.contain,
-            child: const SizedBox(
+            child: SizedBox(
               width: 50.0,
               height: 50.0,
-              child: const RepaintBoundary(
-                child: const Placeholder(),
+              child: RepaintBoundary(
+                child: Placeholder(),
               ),
             ),
           ),
@@ -364,16 +364,16 @@ void main() {
   testWidgets('FittedBox layers - cover - horizontal', (WidgetTester tester) async {
     await tester.pumpWidget(
       const Center(
-        child: const SizedBox(
+        child: SizedBox(
           width: 100.0,
           height: 10.0,
-          child: const FittedBox(
+          child: FittedBox(
             fit: BoxFit.cover,
-            child: const SizedBox(
+            child: SizedBox(
               width: 10.0,
               height: 50.0,
-              child: const RepaintBoundary(
-                child: const Placeholder(),
+              child: RepaintBoundary(
+                child: Placeholder(),
               ),
             ),
           ),
@@ -386,16 +386,16 @@ void main() {
   testWidgets('FittedBox layers - cover - vertical', (WidgetTester tester) async {
     await tester.pumpWidget(
       const Center(
-        child: const SizedBox(
+        child: SizedBox(
           width: 10.0,
           height: 100.0,
-          child: const FittedBox(
+          child: FittedBox(
             fit: BoxFit.cover,
-            child: const SizedBox(
+            child: SizedBox(
               width: 50.0,
               height: 10.0,
-              child: const RepaintBoundary(
-                child: const Placeholder(),
+              child: RepaintBoundary(
+                child: Placeholder(),
               ),
             ),
           ),
@@ -422,7 +422,7 @@ void main() {
                       width: c,
                       height: d,
                       child: const RepaintBoundary(
-                        child: const Placeholder(),
+                        child: Placeholder(),
                       ),
                     ),
                   ),
