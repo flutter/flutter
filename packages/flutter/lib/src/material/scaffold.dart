@@ -1164,7 +1164,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
       return;
     final MediaQueryData mediaQuery = MediaQuery.of(context);
     final Completer<SnackBarClosedReason> completer = _snackBars.first._completer;
-    if (mediaQuery.assistiveTechnologyEnabled) {
+    if (mediaQuery.accessibleNavigation) {
       _snackBarController.value = 0.0;
       completer.complete(reason);
     } else {
@@ -1491,7 +1491,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
           _snackBarTimer = new Timer(snackBar.duration, () {
             assert(_snackBarController.status == AnimationStatus.forward ||
                    _snackBarController.status == AnimationStatus.completed);
-            if (mediaQuery.assistiveTechnologyEnabled && snackBar.action != null)
+            if (mediaQuery.accessibleNavigation && snackBar.action != null)
               return;
             hideCurrentSnackBar(reason: SnackBarClosedReason.timeout);
           });

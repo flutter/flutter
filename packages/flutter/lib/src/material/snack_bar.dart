@@ -47,6 +47,9 @@ enum SnackBarClosedReason {
   /// The snack bar was closed after the user tapped a [SnackBarAction].
   action,
 
+  /// The snack bar was closed through a [SemanticAction.dismiss].
+  dismiss,
+
   /// The snack bar was closed by a user's swipe.
   swipe,
 
@@ -226,7 +229,7 @@ class SnackBar extends StatelessWidget {
       container: true,
       liveRegion: true,
       onDismiss: () {
-        Scaffold.of(context).removeCurrentSnackBar(reason: SnackBarClosedReason.swipe);
+        Scaffold.of(context).removeCurrentSnackBar(reason: SnackBarClosedReason.dismiss);
       },
       child: new Dismissible(
         key: const Key('dismissible'),
@@ -240,7 +243,7 @@ class SnackBar extends StatelessWidget {
           color: backgroundColor ?? _kSnackBackground,
           child: new Theme(
             data: darkTheme,
-            child: mediaQueryData.assistiveTechnologyEnabled ? snackbar : new FadeTransition(
+            child: mediaQueryData.accessibleNavigation ? snackbar : new FadeTransition(
               opacity: fadeAnimation,
               child: snackbar,
             ),
@@ -249,7 +252,7 @@ class SnackBar extends StatelessWidget {
       ),
     );
     return new ClipRect(
-      child: mediaQueryData.assistiveTechnologyEnabled ? snackbar : new AnimatedBuilder(
+      child: mediaQueryData.accessibleNavigation ? snackbar : new AnimatedBuilder(
         animation: heightAnimation,
         builder: (BuildContext context, Widget child) {
           return new Align(

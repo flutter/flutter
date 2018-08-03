@@ -482,12 +482,12 @@ void main() {
     expect(closedReason, equals(SnackBarClosedReason.timeout));
   });
 
-  testWidgets('assistiveTechnologyEnabled behavior with action', (WidgetTester tester) async {
+  testWidgets('accessible navigation behavior with action', (WidgetTester tester) async {
       final GlobalKey<ScaffoldState> scaffoldKey = new GlobalKey<ScaffoldState>();
 
       await tester.pumpWidget(new MaterialApp(
         home: new MediaQuery(
-          data: const MediaQueryData(assistiveTechnologyEnabled: true),
+          data: const MediaQueryData(accessibleNavigation: true),
           child: Scaffold(
             key: scaffoldKey,
             body: new Builder(
@@ -521,6 +521,49 @@ void main() {
       await tester.pump();
       // Snackbar closes immediately
       expect(find.text('ACTION'), findsNothing);
+  });
+
+  testWidgets('contributes dismiss semantics', (WidgetTester tester) async {
+    final SemanticsHandle handle = tester.ensureSemantics();
+    final GlobalKey<ScaffoldState> scaffoldKey = new GlobalKey<ScaffoldState>();
+
+    await tester.pumpWidget(new MaterialApp(
+        home: new MediaQuery(
+            data: const MediaQueryData(accessibleNavigation: true),
+            child: Scaffold(
+                key: scaffoldKey,
+                body: new Builder(
+                  builder: (BuildContext context) {
+                    return new GestureDetector(
+                        onTap: () {
+                          Scaffold.of(context).showSnackBar(new SnackBar(
+                            content: const Text('snack'),
+                            duration: const Duration(seconds: 1),
+                            action: new SnackBarAction(
+                                label: 'ACTION',
+                                onPressed: () {}
+                            ),
+                          ));
+                        },
+                        child: const Text('X')
+                    );
+                  },
+                )
+            )
+        )
+    ));
+    await tester.tap(find.text('X'));
+    await tester.pumpAndSettle();
+
+    expect(tester.getSemanticsData(find.text('snack')), matchesSemanticsData(
+      isLiveRegion: true,
+      hasDismissAction: true,
+      hasScrollDownAction: true,
+      hasScrollUpAction: true,
+      label: 'snack',
+      textDirection: TextDirection.ltr,
+    ));
+    handle.dispose();
   });
 
   testWidgets('SnackBar default display duration test', (WidgetTester tester) async {
