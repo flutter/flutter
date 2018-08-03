@@ -43,7 +43,7 @@ void main() {
       await tester.pumpWidget(
         Directionality(
           textDirection: TextDirection.ltr,
-          child: new ListWheelScrollView(
+          child: ListWheelScrollView(
             itemExtent: 50.0,
             children: const <Widget>[],
           ),
@@ -184,7 +184,7 @@ void main() {
 
       expect(paintedChildren, <int>[-13, -12, -11, -10, -9, -8, -7]);
 
-      // Fling with high velocity to meet the lower limit.
+      // Fling with high velocity and stop at the lower limit.
       paintedChildren.clear();
       await tester.fling(
         find.byType(ListWheelScrollView),
@@ -194,7 +194,7 @@ void main() {
       await tester.pumpAndSettle();
       expect(controller.selectedItem, -15);
 
-      // Fling with high velocity to meet the upper limit.
+      // Fling with high velocity and stop at the upper limit.
       await tester.fling(
         find.byType(ListWheelScrollView),
         const Offset(0.0, -1000.0),
