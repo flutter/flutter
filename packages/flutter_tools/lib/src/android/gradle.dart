@@ -44,7 +44,6 @@ final RegExp ndkMessageFilter = new RegExp(r'^(?!NDK is missing a ".*" directory
   r'|If you are using NDK, verify the ndk.dir is set to a valid NDK directory.  It is currently set to .*)');
 
 
-
 FlutterPluginVersion getFlutterPluginVersion(AndroidProject project) {
   final File plugin = project.directory.childFile(
       fs.path.join('buildSrc', 'src', 'main', 'groovy', 'FlutterPlugin.groovy'));
@@ -61,6 +60,9 @@ FlutterPluginVersion getFlutterPluginVersion(AndroidProject project) {
     for (String line in appGradle.readAsLinesSync()) {
       if (line.contains(new RegExp(r'apply from: .*/flutter.gradle'))) {
         return FlutterPluginVersion.managed;
+      }
+      if (line.contains("def flutterPluginVersion = 'managed'")) {
+        return  FlutterPluginVersion.managed;
       }
     }
   }

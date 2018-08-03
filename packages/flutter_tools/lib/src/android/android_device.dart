@@ -372,7 +372,6 @@ class AndroidDevice extends Device {
     BuildInfo buildInfo = debuggingOptions.buildInfo;
     if (buildInfo.targetPlatform == null && devicePlatform == TargetPlatform.android_arm64)
       buildInfo = buildInfo.withTargetPlatform(TargetPlatform.android_arm64);
-
     if (!prebuiltApplication) {
       printTrace('Building APK');
       final FlutterProject project = await FlutterProject.current();
