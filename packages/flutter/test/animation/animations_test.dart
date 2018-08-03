@@ -280,19 +280,19 @@ void main() {
     final Animation<double> animation = new TweenSequence<double>(
       <TweenSequenceItem<double>>[
         new TweenSequenceItem<double>(
-          tween: new Tween<double>(begin: 5.0, end: 10.0),
+          tween: new Tween<double>(begin: 5.0, end: 10.0)
+            .chain(new CurveTween(curve: const Interval(0.5, 1.0))),
           weight: 4.0,
-          curve: const Interval(0.5, 1.0),
         ),
         new TweenSequenceItem<double>(
-          tween: new ConstantTween<double>(10.0),
+          tween: new ConstantTween<double>(10.0)
+            .chain(new CurveTween(curve: Curves.linear)), // linear is a no-op
           weight: 2.0,
-          curve: Curves.linear,
         ),
         new TweenSequenceItem<double>(
-          tween: new Tween<double>(begin: 10.0, end: 5.0),
+          tween: new Tween<double>(begin: 10.0, end: 5.0)
+            .chain(new CurveTween(curve: const Interval(0.0, 0.5))),
           weight: 4.0,
-          curve: const Interval(0.0, 0.5),
         ),
       ],
     ).animate(controller);
