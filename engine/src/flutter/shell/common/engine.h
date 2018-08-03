@@ -39,6 +39,8 @@ class Engine final : public blink::RuntimeDelegate {
     virtual void OnEngineHandlePlatformMessage(
         const Engine& engine,
         fml::RefPtr<blink::PlatformMessage> message) = 0;
+
+    virtual void OnPreEngineRestart() = 0;
   };
 
   Engine(Delegate& delegate,

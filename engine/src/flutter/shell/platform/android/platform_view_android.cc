@@ -157,6 +157,17 @@ void PlatformViewAndroid::HandlePlatformMessage(
   }
 }
 
+// |shell::PlatformView|
+void PlatformViewAndroid::OnPreEngineRestart() const {
+  JNIEnv* env = fml::jni::AttachCurrentThread();
+  fml::jni::ScopedJavaLocalRef<jobject> view = java_object_.get(env);
+  if (view.is_null()) {
+    // The Java object died.
+    return;
+  }
+  FlutterViewOnPreEngineRestart(fml::jni::AttachCurrentThread(), view.obj());
+}
+
 void PlatformViewAndroid::DispatchSemanticsAction(JNIEnv* env,
                                                   jint id,
                                                   jint action,

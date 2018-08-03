@@ -69,10 +69,11 @@ public class PlatformViewsController implements MethodChannel.MethodCallHandler 
     }
 
     public void onFlutterViewDestroyed() {
-        for (VirtualDisplayController controller : vdControllers.values()) {
-            controller.dispose();
-        }
-        vdControllers.clear();
+        flushAllViews();
+    }
+
+    public void onPreEngineRestart() {
+        flushAllViews();
     }
 
     @Override
@@ -297,4 +298,10 @@ public class PlatformViewsController implements MethodChannel.MethodCallHandler 
         return (int) Math.round(logicalPixels * density);
     }
 
+    private void flushAllViews() {
+        for (VirtualDisplayController controller : vdControllers.values()) {
+            controller.dispose();
+        }
+        vdControllers.clear();
+    }
 }

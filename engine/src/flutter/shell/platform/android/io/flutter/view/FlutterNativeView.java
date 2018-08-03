@@ -198,6 +198,14 @@ public class FlutterNativeView implements BinaryMessenger {
         mFlutterView.onFirstFrame();
     }
 
+    // Called by native to notify when the engine is restarted (cold reload).
+    @SuppressWarnings("unused")
+    private void onPreEngineRestart() {
+        if (mPluginRegistry == null)
+            return;
+        mPluginRegistry.onPreEngineRestart();
+    }
+
     private static native long nativeAttach(FlutterNativeView view);
     private static native void nativeDestroy(long nativePlatformViewAndroid);
     private static native void nativeDetach(long nativePlatformViewAndroid);

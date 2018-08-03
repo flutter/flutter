@@ -101,6 +101,7 @@ bool Engine::Restart(RunConfiguration configuration) {
     FML_LOG(ERROR) << "Engine run configuration was invalid.";
     return false;
   }
+  delegate_.OnPreEngineRestart();
   runtime_controller_ = runtime_controller_->Clone();
   UpdateAssetManager(nullptr);
   return Run(std::move(configuration));

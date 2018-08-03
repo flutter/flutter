@@ -195,6 +195,9 @@ class Shell final : public PlatformView::Delegate,
       const Engine& engine,
       fml::RefPtr<blink::PlatformMessage> message) override;
 
+  // |shell::Engine::Delegate|
+  void OnPreEngineRestart() override;
+
   // |blink::ServiceProtocol::Handler|
   fml::RefPtr<fml::TaskRunner> GetServiceProtocolHandlerTaskRunner(
       fml::StringView method) const override;
