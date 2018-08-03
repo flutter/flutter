@@ -740,6 +740,25 @@ void Shell::OnEngineHandlePlatformMessage(
       });
 }
 
+// |shell::Engine::Delegate|
+void Shell::OnPreEngineRestart() {
+  FML_DCHECK(is_setup_);
+  FML_DCHECK(task_runners_.GetUITaskRunner()->RunsTasksOnCurrentThread());
+
+  fml::AutoResetWaitableEvent latch;
+  fml::TaskRunner::RunNowOrPostTask(
+      task_runners_.GetPlatformTaskRunner(),
+      [view = platform_view_->GetWeakPtr(), &latch]() {
+        if (view) {
+          view->OnPreEngineRestart();
+        }
+        latch.Signal();
+      });
+  // This is blocking as any embedded platform views has to be flushed before
+  // we re-run the Dart code.
+  latch.Wait();
+}
+
 // |blink::ServiceProtocol::Handler|
 fml::RefPtr<fml::TaskRunner> Shell::GetServiceProtocolHandlerTaskRunner(
     fml::StringView method) const {
