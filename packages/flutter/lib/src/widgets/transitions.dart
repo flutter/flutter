@@ -334,6 +334,56 @@ class SizeTransition extends AnimatedWidget {
 ///
 /// For a widget that automatically animates between the sizes of two children,
 /// fading between them, see [AnimatedCrossFade].
+///
+/// ## Sample code
+///
+/// This code creates a widget that fades in some text. It needs to be implemented
+/// using a [StatefulWidget] to manage the state of the animation as it progresses.
+/// FadeTransition requires an [Animation], which is created from an
+/// [AnimationController] and a [Tween]. The [AnimationController] determines the
+/// duration of the animation, and is both initialized and started in the stateful
+/// widget's initState. The [Tween] defines the opacity value range from the
+/// beginning to the end of the animation.
+///
+/// ```dart
+/// class TextFadeIn extends StatefulWidget {
+///   final String text;
+///   final Duration duration;
+///   TextFadeIn(this.text, {this.duration});
+///
+///   @override
+///   createState() => _MyTextFadeInState();
+/// }
+///
+/// class _MyTextFadeInState extends State<TextFadeIn>
+///     with SingleTickerProviderStateMixin {
+///   AnimationController _controller;
+///
+///   @override
+///   void initState() {
+///     super.initState();
+///     _controller = AnimationController(
+///       vsync: this,
+///       duration: widget.duration,
+///     );
+///     _controller.forward();
+///   }
+///
+///   @override
+///   Widget build(BuildContext context) {
+///     return FadeTransition(
+///         opacity: Tween(begin: 0.0, end: 1.0).animate(_controller),
+///         child: Text(widget.text));
+///   }
+///
+///   @override
+///   dispose() {
+///     _controller.dispose();
+///     super.dispose();
+///   }
+/// }
+/// ```
+///
 class FadeTransition extends SingleChildRenderObjectWidget {
   /// Creates an opacity transition.
   ///
