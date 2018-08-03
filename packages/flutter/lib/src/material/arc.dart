@@ -186,11 +186,11 @@ class _Diagonal {
   final _CornerId endId;
 }
 
-const List<_Diagonal> _allDiagonals = const <_Diagonal>[
-  const _Diagonal(_CornerId.topLeft, _CornerId.bottomRight),
-  const _Diagonal(_CornerId.bottomRight, _CornerId.topLeft),
-  const _Diagonal(_CornerId.topRight, _CornerId.bottomLeft),
-  const _Diagonal(_CornerId.bottomLeft, _CornerId.topRight),
+const List<_Diagonal> _allDiagonals = <_Diagonal>[
+  _Diagonal(_CornerId.topLeft, _CornerId.bottomRight),
+  _Diagonal(_CornerId.bottomRight, _CornerId.topLeft),
+  _Diagonal(_CornerId.topRight, _CornerId.bottomLeft),
+  _Diagonal(_CornerId.bottomLeft, _CornerId.topRight),
 ];
 
 typedef dynamic _KeyFunc<T>(T input);

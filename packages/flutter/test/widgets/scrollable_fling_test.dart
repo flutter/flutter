@@ -5,8 +5,8 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
 
-const TextStyle testFont = const TextStyle(
-  color: const Color(0xFF00FF00),
+const TextStyle testFont = TextStyle(
+  color: Color(0xFF00FF00),
   fontFamily: 'Ahem',
 );
 

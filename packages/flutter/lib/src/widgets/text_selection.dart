@@ -278,7 +278,7 @@ class TextSelectionOverlay {
   final TextSelectionDelegate selectionDelegate;
 
   /// Controls the fade-in animations.
-  static const Duration _fadeDuration = const Duration(milliseconds: 150);
+  static const Duration _fadeDuration = Duration(milliseconds: 150);
   AnimationController _handleController;
   AnimationController _toolbarController;
   Animation<double> get _handleOpacity => _handleController.view;

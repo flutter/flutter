@@ -314,7 +314,7 @@ Future<ApplicationPackage> getApplicationPackageForPlatform(
     case TargetPlatform.android_x64:
     case TargetPlatform.android_x86:
       return applicationBinary == null
-          ? await AndroidApk.fromAndroidProject(new FlutterProject(fs.currentDirectory).android)
+          ? await AndroidApk.fromAndroidProject((await FlutterProject.current()).android)
           : new AndroidApk.fromApk(applicationBinary);
     case TargetPlatform.ios:
       return applicationBinary == null
@@ -344,7 +344,7 @@ class ApplicationPackageStore {
       case TargetPlatform.android_arm64:
       case TargetPlatform.android_x64:
       case TargetPlatform.android_x86:
-        android ??= await AndroidApk.fromAndroidProject(new FlutterProject(fs.currentDirectory).android);
+        android ??= await AndroidApk.fromAndroidProject((await FlutterProject.current()).android);
         return android;
       case TargetPlatform.ios:
         iOS ??= new IOSApp.fromCurrentDirectory();

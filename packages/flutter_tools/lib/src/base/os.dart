@@ -59,7 +59,7 @@ abstract class OperatingSystemUtils {
   ///
   /// If available, the detailed version of the OS is included.
   String get name {
-    const Map<String, String> osNames = const <String, String>{
+    const Map<String, String> osNames = <String, String>{
       'macos': 'Mac OS',
       'linux': 'Linux',
       'windows': 'Windows'

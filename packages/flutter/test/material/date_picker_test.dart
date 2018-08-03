@@ -307,7 +307,7 @@ void _tests() {
   });
 
   group('haptic feedback', () {
-    const Duration kHapticFeedbackInterval = const Duration(milliseconds: 10);
+    const Duration kHapticFeedbackInterval = Duration(milliseconds: 10);
     FeedbackTester feedback;
 
     setUp(() {

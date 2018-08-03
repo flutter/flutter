@@ -16,7 +16,7 @@ import 'utils.dart';
 /// Maximum amount of time a single task is allowed to take to run.
 ///
 /// If exceeded the task is considered to have failed.
-const Duration _kDefaultTaskTimeout = const Duration(minutes: 15);
+const Duration _kDefaultTaskTimeout = Duration(minutes: 15);
 
 /// Represents a unit of work performed in the CI environment that can
 /// succeed, fail and be retried independently of others.
@@ -103,7 +103,7 @@ class _TaskRunner {
     _keepAlivePort = new RawReceivePort();
 
     // Timeout if nothing bothers to connect and ask us to run the task.
-    const Duration taskStartTimeout = const Duration(seconds: 10);
+    const Duration taskStartTimeout = Duration(seconds: 10);
     _startTaskTimeout = new Timer(taskStartTimeout, () {
       if (!_taskStarted) {
         logger.severe('Task did not start in $taskStartTimeout.');
@@ -147,7 +147,7 @@ class TaskResult {
   TaskResult.success(this.data, {this.benchmarkScoreKeys = const <String>[]})
       : this.succeeded = true,
         this.message = 'success' {
-    const JsonEncoder prettyJson = const JsonEncoder.withIndent('  ');
+    const JsonEncoder prettyJson = JsonEncoder.withIndent('  ');
     if (benchmarkScoreKeys != null) {
       for (String key in benchmarkScoreKeys) {
         if (!data.containsKey(key)) {

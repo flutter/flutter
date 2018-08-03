@@ -539,8 +539,8 @@ void main() {
   });
 
   testWidgets('Slider uses the right theme colors for the right components', (WidgetTester tester) async {
-    const Color customColor1 = const Color(0xcafefeed);
-    const Color customColor2 = const Color(0xdeadbeef);
+    const Color customColor1 = Color(0xcafefeed);
+    const Color customColor2 = Color(0xdeadbeef);
     final ThemeData theme = new ThemeData(
       platform: TargetPlatform.android,
       primarySwatch: Colors.blue,
@@ -828,8 +828,8 @@ void main() {
       child: new MediaQuery(
         data: new MediaQueryData.fromWindow(window),
         child: const Material(
-          child: const Center(
-            child: const Slider(
+          child: Center(
+            child: Slider(
               value: 0.5,
               onChanged: null,
             ),
@@ -844,9 +844,9 @@ void main() {
       child: new MediaQuery(
         data: new MediaQueryData.fromWindow(window),
         child: const Material(
-          child: const Center(
-            child: const IntrinsicWidth(
-              child: const Slider(
+          child: Center(
+            child: IntrinsicWidth(
+              child: Slider(
                 value: 0.5,
                 onChanged: null,
               ),
@@ -862,11 +862,11 @@ void main() {
       child: new MediaQuery(
         data: new MediaQueryData.fromWindow(window),
         child: const Material(
-          child: const Center(
-            child: const OverflowBox(
+          child: Center(
+            child: OverflowBox(
               maxWidth: double.infinity,
               maxHeight: double.infinity,
-              child: const Slider(
+              child: Slider(
                 value: 0.5,
                 onChanged: null,
               ),
@@ -1141,7 +1141,7 @@ void main() {
       child: new MediaQuery(
         data: new MediaQueryData.fromWindow(window),
         child: const Material(
-          child: const Slider(
+          child: Slider(
             value: 0.5,
             onChanged: null,
           ),

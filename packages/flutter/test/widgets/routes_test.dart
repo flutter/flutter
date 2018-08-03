@@ -104,7 +104,7 @@ Future<Null> runNavigatorTest(
 
 void main() {
   testWidgets('Route settings', (WidgetTester tester) async {
-    const RouteSettings settings = const RouteSettings(name: 'A');
+    const RouteSettings settings = RouteSettings(name: 'A');
     expect(settings, hasOneLineDescription);
     final RouteSettings settings2 = settings.copyWith(name: 'B');
     expect(settings2.name, 'B');

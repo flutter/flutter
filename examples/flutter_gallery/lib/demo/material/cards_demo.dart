@@ -28,7 +28,7 @@ final List<TravelDestination> destinations = <TravelDestination>[
     assetName: 'places/india_thanjavur_market.png',
     assetPackage: _kGalleryAssetsPackage,
     title: 'Top 10 Cities to Visit in Tamil Nadu',
-    description: const <String>[
+    description: <String>[
       'Number 10',
       'Thanjavur',
       'Thanjavur, Tamil Nadu',
@@ -38,7 +38,7 @@ final List<TravelDestination> destinations = <TravelDestination>[
     assetName: 'places/india_chettinad_silk_maker.png',
     assetPackage: _kGalleryAssetsPackage,
     title: 'Artisans of Southern India',
-    description: const <String>[
+    description: <String>[
       'Silk Spinners',
       'Chettinad',
       'Sivaganga, Tamil Nadu',
@@ -173,11 +173,11 @@ class _CardsDemoState extends State<CardsDemo> {
             onPressed: () {
               setState(() {
                 _shape = _shape != null ? null : const RoundedRectangleBorder(
-                  borderRadius: const BorderRadius.only(
-                    topLeft: const Radius.circular(16.0),
-                    topRight: const Radius.circular(16.0),
-                    bottomLeft: const Radius.circular(2.0),
-                    bottomRight: const Radius.circular(2.0),
+                  borderRadius: BorderRadius.only(
+                    topLeft: Radius.circular(16.0),
+                    topRight: Radius.circular(16.0),
+                    bottomLeft: Radius.circular(2.0),
+                    bottomRight: Radius.circular(2.0),
                   ),
                 );
               });
