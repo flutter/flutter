@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:ui' show Clip;
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -431,7 +433,74 @@ void main() {
     );
   });
 
-  testWidgets('PhysicalModel painting', (WidgetTester tester) async {
+  // We should not rotate here if we want to test different bleeding edge
+  // artifacts. If rotated, the inner container will draw a rotated rect in
+  // anti-alias and that will cause some bleeding edges due to anti-aliasing
+  // regardless of what clip we have (i.e., not matter what clipBehavior we
+  // have, paths are always drawn in anti-alias).
+  const double physicalRotatianRadians = 0.0;
+
+  final Center Function(Clip) genPhysicalModel = (Clip clipBehavior) => new Center(
+    child: new RepaintBoundary(
+      child: new Container(
+        color: Colors.white,
+        child: new Padding(
+          padding: const EdgeInsets.all(100.0),
+          child: new SizedBox(
+            height: 100.0,
+            width: 100.0,
+            child: new Transform.rotate(
+              angle: physicalRotatianRadians,
+              child: new PhysicalModel(
+                borderRadius: new BorderRadius.circular(20.0),
+                color: Colors.red,
+                clipBehavior: clipBehavior,
+                child: new Container(
+                  color: Colors.white,
+                  child: new RepaintBoundary(
+                    child: new Center(
+                      child: new Container(
+                        color: Colors.black,
+                        height: 10.0,
+                        width: 10.0,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    ),
+  );
+
+
+  testWidgets('PhysicalModel painting with Clip.antiAlias', (WidgetTester tester) async {
+    await tester.pumpWidget(genPhysicalModel(Clip.antiAlias));
+    await expectLater(
+      find.byType(RepaintBoundary).first,
+      matchesGoldenFile('clip.PhysicalModel.antiAlias.png'),
+    );
+  });
+
+  testWidgets('PhysicalModel painting with Clip.hardEdge', (WidgetTester tester) async {
+    await tester.pumpWidget(genPhysicalModel(Clip.hardEdge));
+    await expectLater(
+      find.byType(RepaintBoundary).first,
+      matchesGoldenFile('clip.PhysicalModel.hardEdge.png'),
+    );
+  });
+
+  testWidgets('PhysicalModel painting with Clip.antiAliasWithSaveLayer', (WidgetTester tester) async {
+    await tester.pumpWidget(genPhysicalModel(Clip.antiAliasWithSaveLayer));
+    await expectLater(
+      find.byType(RepaintBoundary).first,
+      matchesGoldenFile('clip.PhysicalModel.antiAliasWithSaveLayer.png'),
+    );
+  });
+
+  testWidgets('Default PhysicalModel painting', (WidgetTester tester) async {
     await tester.pumpWidget(
       new Center(
         child: new RepaintBoundary(
@@ -443,7 +512,7 @@ void main() {
                 height: 100.0,
                 width: 100.0,
                 child: new Transform.rotate(
-                  angle: 1.0, // radians
+                  angle: physicalRotatianRadians,
                   child: new PhysicalModel(
                     borderRadius: new BorderRadius.circular(20.0),
                     color: Colors.red,
@@ -469,7 +538,71 @@ void main() {
     );
     await expectLater(
       find.byType(RepaintBoundary).first,
-      matchesGoldenFile('clip.PhysicalModel.1.png'),
+      matchesGoldenFile('clip.PhysicalModel.default.png'),
+    );
+  });
+
+  final Center Function(Clip) genPhysicalShape = (Clip clipBehavior) => new Center(
+    child: new RepaintBoundary(
+      child: new Container(
+        color: Colors.white,
+        child: new Padding(
+          padding: const EdgeInsets.all(100.0),
+          child: new SizedBox(
+            height: 100.0,
+            width: 100.0,
+            child: new Transform.rotate(
+              angle: physicalRotatianRadians,
+              child: new PhysicalShape(
+                clipper: new ShapeBorderClipper(
+                  shape: new BeveledRectangleBorder(
+                    borderRadius: new BorderRadius.circular(20.0),
+                  ),
+                ),
+                clipBehavior: clipBehavior,
+                color: Colors.red,
+                child: new Container(
+                  color: Colors.white,
+                  child: new RepaintBoundary(
+                    child: new Center(
+                      child: new Container(
+                        color: Colors.black,
+                        height: 10.0,
+                        width: 10.0,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    ),
+  );
+
+
+  testWidgets('PhysicalShape painting with Clip.antiAlias', (WidgetTester tester) async {
+    await tester.pumpWidget(genPhysicalShape(Clip.antiAlias));
+    await expectLater(
+      find.byType(RepaintBoundary).first,
+      matchesGoldenFile('clip.PhysicalShape.antiAlias.png'),
+    );
+  });
+
+  testWidgets('PhysicalShape painting with Clip.hardEdge', (WidgetTester tester) async {
+    await tester.pumpWidget(genPhysicalShape(Clip.hardEdge));
+    await expectLater(
+      find.byType(RepaintBoundary).first,
+      matchesGoldenFile('clip.PhysicalShape.hardEdge.png'),
+    );
+  });
+
+  testWidgets('PhysicalShape painting with Clip.antiAliasWithSaveLayer', (WidgetTester tester) async {
+    await tester.pumpWidget(genPhysicalShape(Clip.antiAliasWithSaveLayer));
+    await expectLater(
+      find.byType(RepaintBoundary).first,
+      matchesGoldenFile('clip.PhysicalShape.antiAliasWithSaveLayer.png'),
     );
   });
 
@@ -485,7 +618,7 @@ void main() {
                 height: 100.0,
                 width: 100.0,
                 child: new Transform.rotate(
-                  angle: 1.0, // radians
+                  angle: physicalRotatianRadians,
                   child: new PhysicalShape(
                     clipper: new ShapeBorderClipper(
                       shape: new BeveledRectangleBorder(
@@ -515,7 +648,7 @@ void main() {
     );
     await expectLater(
       find.byType(RepaintBoundary).first,
-      matchesGoldenFile('clip.PhysicalShape.1.png'),
+      matchesGoldenFile('clip.PhysicalShape.default.png'),
     );
   });
 }
