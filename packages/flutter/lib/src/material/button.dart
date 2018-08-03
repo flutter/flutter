@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:math' as math;
+import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
@@ -46,6 +47,7 @@ class RawMaterialButton extends StatefulWidget {
     this.constraints = const BoxConstraints(minWidth: 88.0, minHeight: 36.0),
     this.shape = const RoundedRectangleBorder(),
     this.animationDuration = kThemeChangeDuration,
+    this.clipBehavior = Clip.none,
     MaterialTapTargetSize materialTapTargetSize,
     this.child,
   }) : this.materialTapTargetSize = materialTapTargetSize ?? MaterialTapTargetSize.padded,
@@ -56,6 +58,7 @@ class RawMaterialButton extends StatefulWidget {
        assert(padding != null),
        assert(constraints != null),
        assert(animationDuration != null),
+       assert(clipBehavior != null),
        super(key: key);
 
   /// Called when the button is tapped or otherwise activated.
@@ -148,6 +151,9 @@ class RawMaterialButton extends StatefulWidget {
   ///   * [MaterialTapTargetSize], for a description of how this affects tap targets.
   final MaterialTapTargetSize materialTapTargetSize;
 
+  /// {@macro flutter.widgets.Clip}
+  final Clip clipBehavior;
+
   @override
   _RawMaterialButtonState createState() => new _RawMaterialButtonState();
 }
@@ -177,6 +183,7 @@ class _RawMaterialButtonState extends State<RawMaterialButton> {
         color: widget.fillColor,
         type: widget.fillColor == null ? MaterialType.transparency : MaterialType.button,
         animationDuration: widget.animationDuration,
+        clipBehavior: widget.clipBehavior,
         child: new InkWell(
           onHighlightChanged: _handleHighlightChanged,
           splashColor: widget.splashColor,
@@ -259,6 +266,7 @@ class MaterialButton extends StatelessWidget {
     this.height,
     this.padding,
     this.materialTapTargetSize,
+    this.clipBehavior = Clip.none,
     @required this.onPressed,
     this.child
   }) : super(key: key);
@@ -373,6 +381,9 @@ class MaterialButton extends StatelessWidget {
   ///   * [MaterialTapTargetSize], for a description of how this affects tap targets.
   final MaterialTapTargetSize materialTapTargetSize;
 
+  /// {@macro flutter.widgets.Clip}
+  final Clip clipBehavior;
+
   /// Whether the button is enabled or disabled. Buttons are disabled by default. To
   /// enable a button, set its [onPressed] property to a non-null value.
   bool get enabled => onPressed != null;
@@ -433,6 +444,7 @@ class MaterialButton extends StatelessWidget {
       shape: buttonTheme.shape,
       child: child,
       materialTapTargetSize: materialTapTargetSize ?? theme.materialTapTargetSize,
+      clipBehavior: clipBehavior,
     );
   }
 

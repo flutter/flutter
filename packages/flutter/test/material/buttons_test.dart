@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:ui' show Clip;
+
 import 'package:flutter/rendering.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
@@ -179,6 +181,7 @@ void main() {
           splashColor: directSplashColor,
           highlightColor: directHighlightColor,
           onPressed: () { /* to make sure the button is enabled */ },
+          clipBehavior: Clip.antiAlias,
         ),
       ),
     );
@@ -224,6 +227,7 @@ void main() {
       child: new Center(
         child: new MaterialButton(
           onPressed: () { /* to make sure the button is enabled */ },
+          clipBehavior: Clip.antiAlias,
         ),
       ),
     );
@@ -278,6 +282,35 @@ void main() {
     );
 
     await gesture.up();
+  });
+
+  testWidgets('MaterialButton has no clip by default', (WidgetTester tester) async {
+    final GlobalKey buttonKey = new GlobalKey();
+    Widget buttonWidget = new Material(
+      child: new Center(
+        child: new MaterialButton(
+          key: buttonKey,
+          onPressed: () { /* to make sure the button is enabled */ },
+        ),
+      ),
+    );
+
+    await tester.pumpWidget(
+      new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new Theme(
+          data: new ThemeData(
+            materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+          ),
+          child: buttonWidget,
+        ),
+      ),
+    );
+
+    expect(
+        tester.renderObject(find.byKey(buttonKey)),
+        paintsExactlyCountTimes(#clipPath, 0)
+    );
   });
 
   testWidgets('Disabled MaterialButton has same semantic size as enabled and exposes disabled semantics', (WidgetTester tester) async {
