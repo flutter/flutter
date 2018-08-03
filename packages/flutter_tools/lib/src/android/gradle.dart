@@ -90,32 +90,37 @@ Future<GradleProject> _gradleProject() async {
 // Note: Dependencies are resolved and possibly downloaded as a side-effect
 // of calculating the app properties using Gradle. This may take minutes.
 Future<GradleProject> _readGradleProject() async {
-  final FlutterProject flutterProject =  new FlutterProject(fs.currentDirectory);
+  final FlutterProject flutterProject = await FlutterProject.current();
   final String gradle = await _ensureGradle(flutterProject);
   await updateLocalProperties(project: flutterProject);
+  final Status status = logger.startProgress('Resolving dependencies...', expectSlowOperation: true);
+  GradleProject project;
   try {
-    final Status status = logger.startProgress('Resolving dependencies...', expectSlowOperation: true);
     final RunResult runResult = await runCheckedAsync(
       <String>[gradle, 'app:properties'],
       workingDirectory: flutterProject.android.directory.path,
       environment: _gradleEnv,
     );
     final String properties = runResult.stdout.trim();
-    final GradleProject project = new GradleProject.fromAppProperties(properties);
-    status.stop();
-    return project;
-  } catch (e) {
+    project = new GradleProject.fromAppProperties(properties);
+  } catch (exception) {
     if (getFlutterPluginVersion(flutterProject.android) == FlutterPluginVersion.managed) {
+      status.cancel();
       // Handle known exceptions. This will exit if handled.
-      handleKnownGradleExceptions(e);
+      handleKnownGradleExceptions(exception);
 
       // Print a general Gradle error and exit.
-      printError('* Error running Gradle:\n$e\n');
+      printError('* Error running Gradle:\n$exception\n');
       throwToolExit('Please review your Gradle project setup in the android/ folder.');
     }
+    // Fall back to the default
+    project = new GradleProject(
+      <String>['debug', 'profile', 'release'],
+      <String>[], flutterProject.android.gradleAppOutV1Directory,
+    );
   }
-  // Fall back to the default
-  return new GradleProject(<String>['debug', 'profile', 'release'], <String>[], flutterProject.android.gradleAppOutV1Directory);
+  status.stop();
+  return project;
 }
 
 void handleKnownGradleExceptions(String exceptionString) {
@@ -209,7 +214,7 @@ Future<void> updateLocalProperties({
     throwToolExit('Unable to locate Android SDK. Please run `flutter doctor` for more details.');
   }
 
-  final File localProperties = await project.androidLocalPropertiesFile;
+  final File localProperties = project.androidLocalPropertiesFile;
   bool changed = false;
 
   SettingsFile settings;
@@ -227,7 +232,7 @@ Future<void> updateLocalProperties({
     }
   }
 
-  final FlutterManifest manifest = await project.manifest;
+  final FlutterManifest manifest = project.manifest;
 
   if (androidSdk != null)
     changeIfNecessary('sdk.dir', escapePath(androidSdk.directory));

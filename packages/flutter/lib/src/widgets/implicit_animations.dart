@@ -1046,7 +1046,7 @@ class _AnimatedOpacityState extends ImplicitlyAnimatedWidgetState<AnimatedOpacit
 
   @override
   void didUpdateTweens() {
-    _opacityAnimation = _opacity.animate(controller);
+    _opacityAnimation = _opacity.animate(animation);
   }
 
   @override
