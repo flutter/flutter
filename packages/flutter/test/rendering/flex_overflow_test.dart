@@ -13,7 +13,7 @@ void main() {
       new Center(
         child: new Column(
           children: const <Widget>[
-            const SizedBox(width: 200.0, height: 200.0),
+            SizedBox(width: 200.0, height: 200.0),
           ],
         ),
       ),
@@ -27,7 +27,7 @@ void main() {
           height: 100.0,
           child: new Column(
             children: const <Widget>[
-              const SizedBox(width: 200.0, height: 200.0),
+              SizedBox(width: 200.0, height: 200.0),
             ],
           ),
         ),
@@ -44,7 +44,7 @@ void main() {
           height: 0.0,
           child: new Column(
             children: const <Widget>[
-              const SizedBox(width: 200.0, height: 200.0),
+              SizedBox(width: 200.0, height: 200.0),
             ],
           ),
         ),

@@ -13,7 +13,7 @@ import 'file_system.dart';
 import 'process.dart';
 
 const String _kRecordingType = 'process';
-const ProcessManager _kLocalProcessManager = const LocalProcessManager();
+const ProcessManager _kLocalProcessManager = LocalProcessManager();
 
 /// The active process manager.
 ProcessManager get processManager => context[ProcessManager] ?? _kLocalProcessManager;
@@ -27,7 +27,7 @@ ProcessManager get processManager => context[ProcessManager] ?? _kLocalProcessMa
 /// subdirectory.
 RecordingProcessManager getRecordingProcessManager(String location) {
   final Directory dir = getRecordingSink(location, _kRecordingType);
-  const ProcessManager delegate = const LocalProcessManager();
+  const ProcessManager delegate = LocalProcessManager();
   final RecordingProcessManager manager = new RecordingProcessManager(delegate, dir);
   addShutdownHook(() async {
     await manager.flush(finishRunningProcesses: true);

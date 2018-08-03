@@ -142,7 +142,8 @@ void main() {
     }
   });
 
-  testWidgets('Children and onValueChanged can not be null', (WidgetTester tester) async {
+  testWidgets('Children, onValueChanged, and color arguments can not be null',
+          (WidgetTester tester) async {
     try {
       await tester.pumpWidget(
         boilerplate(
@@ -173,6 +174,21 @@ void main() {
       fail('Should not be possible to create segmented control with null onValueChanged');
     } on AssertionError catch (e) {
       expect(e.toString(), contains('onValueChanged'));
+    }
+
+    try {
+      await tester.pumpWidget(
+        boilerplate(
+          child: new SegmentedControl<int>(
+            children: children,
+            onValueChanged: (int newValue) {},
+            unselectedColor: null,
+          ),
+        ),
+      );
+      fail('Should not be possible to create segmented control with null unselectedColor');
+    } on AssertionError catch (e) {
+      expect(e.toString(), contains('unselectedColor'));
     }
   });
 
@@ -219,6 +235,66 @@ void main() {
     expect(textStyle.style.color, CupertinoColors.activeBlue);
     expect(iconTheme.data.color, CupertinoColors.white);
   });
+
+  testWidgets('SegmentedControl is correct when user provides custom colors',
+          (WidgetTester tester) async {
+        final Map<int, Widget> children = <int, Widget>{};
+        children[0] = const Text('Child 1');
+        children[1] = const Icon(IconData(1));
+
+        int sharedValue = 0;
+
+        await tester.pumpWidget(
+          new StatefulBuilder(
+            builder: (BuildContext context, StateSetter setState) {
+              return boilerplate(
+                child: new SegmentedControl<int>(
+                  children: children,
+                  onValueChanged: (int newValue) {
+                    setState(() {
+                      sharedValue = newValue;
+                    });
+                  },
+                  groupValue: sharedValue,
+                  unselectedColor: CupertinoColors.lightBackgroundGray,
+                  selectedColor: CupertinoColors.activeGreen,
+                  borderColor: CupertinoColors.black,
+                  pressedColor: const Color(0x638CFC7B),
+                ),
+              );
+            },
+          ),
+        );
+
+        await tester.pumpAndSettle();
+
+        DefaultTextStyle textStyle = tester.widget(find.widgetWithText(DefaultTextStyle, 'Child 1'));
+        IconTheme iconTheme = tester.widget(find.widgetWithIcon(IconTheme, const IconData(1)));
+
+        expect(getRenderSegmentedControl(tester).borderColor, CupertinoColors.black);
+        expect(textStyle.style.color, CupertinoColors.lightBackgroundGray);
+        expect(iconTheme.data.color, CupertinoColors.activeGreen);
+        expect(getBackgroundColor(tester, 0), CupertinoColors.activeGreen);
+        expect(getBackgroundColor(tester, 1), CupertinoColors.lightBackgroundGray);
+
+        await tester.tap(find.widgetWithIcon(IconTheme, const IconData(1)));
+        await tester.pumpAndSettle();
+
+        textStyle = tester.widget(find.widgetWithText(DefaultTextStyle, 'Child 1'));
+        iconTheme = tester.widget(find.widgetWithIcon(IconTheme, const IconData(1)));
+
+        expect(textStyle.style.color, CupertinoColors.activeGreen);
+        expect(iconTheme.data.color, CupertinoColors.lightBackgroundGray);
+        expect(getBackgroundColor(tester, 0), CupertinoColors.lightBackgroundGray);
+        expect(getBackgroundColor(tester, 1), CupertinoColors.activeGreen);
+
+        final Offset center = tester.getCenter(find.text('Child 1'));
+        await tester.startGesture(center);
+        await tester.pumpAndSettle();
+
+        expect(getBackgroundColor(tester, 0), const Color(0x638CFC7B));
+        expect(getBackgroundColor(tester, 1), CupertinoColors.activeGreen);
+      });
 
   testWidgets('Tap calls onValueChanged', (WidgetTester tester) async {
     final Map<int, Widget> children = <int, Widget>{};

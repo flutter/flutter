@@ -378,7 +378,7 @@ class EdgeInsets extends EdgeInsetsGeometry {
       bottom = padding.bottom / devicePixelRatio;
 
   /// An [EdgeInsets] with zero offsets in each direction.
-  static const EdgeInsets zero = const EdgeInsets.only();
+  static const EdgeInsets zero = EdgeInsets.only();
 
   /// The offset from the left.
   final double left;
@@ -638,7 +638,7 @@ class EdgeInsetsDirectional extends EdgeInsetsGeometry {
   ///
   /// Consider using [EdgeInsets.zero] instead, since that object has the same
   /// effect, but will be cheaper to [resolve].
-  static const EdgeInsetsDirectional zero = const EdgeInsetsDirectional.only();
+  static const EdgeInsetsDirectional zero = EdgeInsetsDirectional.only();
 
   /// The offset from the start side, the side from which the user will start
   /// reading text.

@@ -53,7 +53,7 @@ void main() {
     final GlobalKey left = new GlobalKey();
     final GlobalKey right = new GlobalKey();
 
-    const StateMarker grandchild = const StateMarker();
+    const StateMarker grandchild = StateMarker();
     await tester.pumpWidget(
       new Stack(
         textDirection: TextDirection.ltr,
@@ -80,7 +80,7 @@ void main() {
     expect(grandchildState, isNotNull);
     grandchildState.marker = 'grandchild';
 
-    const StateMarker newGrandchild = const StateMarker();
+    const StateMarker newGrandchild = StateMarker();
     await tester.pumpWidget(
       new Stack(
         textDirection: TextDirection.ltr,
@@ -128,7 +128,7 @@ void main() {
     final GlobalKey left = new GlobalKey();
     final GlobalKey right = new GlobalKey();
 
-    const StateMarker grandchild = const StateMarker();
+    const StateMarker grandchild = StateMarker();
     await tester.pumpWidget(
       new Stack(
         textDirection: TextDirection.ltr,
@@ -151,7 +151,7 @@ void main() {
     expect(grandchildState, isNotNull);
     grandchildState.marker = 'grandchild';
 
-    const StateMarker newGrandchild = const StateMarker();
+    const StateMarker newGrandchild = StateMarker();
     await tester.pumpWidget(
       new Stack(
         textDirection: TextDirection.ltr,

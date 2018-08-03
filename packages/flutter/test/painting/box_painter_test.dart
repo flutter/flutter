@@ -7,7 +7,7 @@ import 'package:flutter/painting.dart';
 
 void main() {
   test('BorderSide control test', () {
-    const BorderSide side1 = const BorderSide();
+    const BorderSide side1 = BorderSide();
     final BorderSide side2 = side1.copyWith(
       color: const Color(0xFF00FFFF),
       width: 2.0,
@@ -40,7 +40,7 @@ void main() {
   });
 
   test('BorderSide toString test', () {
-    const BorderSide side1 = const BorderSide();
+    const BorderSide side1 = BorderSide();
     final BorderSide side2 = side1.copyWith(
       color: const Color(0xFF00FFFF),
       width: 2.0,
@@ -75,10 +75,10 @@ void main() {
     );
     expect(
       const Border(
-        top: const BorderSide(width: 3.0),
-        right: const BorderSide(width: 3.0),
-        bottom: const BorderSide(width: 3.0),
-        left: const BorderSide(width: 3.0),
+        top: BorderSide(width: 3.0),
+        right: BorderSide(width: 3.0),
+        bottom: BorderSide(width: 3.0),
+        left: BorderSide(width: 3.0),
       ).toString(),
       equals(
         'Border.all(BorderSide(Color(0xff000000), 3.0, BorderStyle.solid))',
@@ -87,7 +87,7 @@ void main() {
   });
 
   test('BoxShadow control test', () {
-    const BoxShadow shadow1 = const BoxShadow(blurRadius: 4.0);
+    const BoxShadow shadow1 = BoxShadow(blurRadius: 4.0);
     final BoxShadow shadow2 = BoxShadow.lerp(null, shadow1, 0.25);
     final BoxShadow shadow3 = BoxShadow.lerp(shadow1, null, 0.25);
 

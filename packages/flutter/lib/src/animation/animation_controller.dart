@@ -33,7 +33,7 @@ final SpringDescription _kFlingSpringDescription = new SpringDescription.withDam
   ratio: 1.0,
 );
 
-const Tolerance _kFlingTolerance = const Tolerance(
+const Tolerance _kFlingTolerance = Tolerance(
   velocity: double.infinity,
   distance: 0.01,
 );

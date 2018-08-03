@@ -11,8 +11,8 @@ Shader createShader(Rect bounds) {
   return const LinearGradient(
     begin: Alignment.topCenter,
     end: Alignment.bottomCenter,
-    colors: const <Color>[const Color(0x00FFFFFF), const Color(0xFFFFFFFF)],
-    stops: const <double>[0.1, 0.35]
+    colors: <Color>[Color(0x00FFFFFF), Color(0xFFFFFFFF)],
+    stops: <double>[0.1, 0.35]
   ).createShader(bounds);
 }
 

@@ -74,6 +74,245 @@ class PlatformViewsService {
   }
 }
 
+/// Properties of an Android pointer.
+///
+/// A Dart version of Android's [MotionEvent.PointerProperties](https://developer.android.com/reference/android/view/MotionEvent.PointerProperties).
+class AndroidPointerProperties {
+  /// Creates an AndroidPointerProperties.
+  ///
+  /// All parameters must not be null.
+  const AndroidPointerProperties({
+    @required this.id,
+    @required this.toolType
+  }) : assert(id != null),
+       assert(toolType != null);
+
+  /// See Android's [MotionEvent.PointerProperties#id](https://developer.android.com/reference/android/view/MotionEvent.PointerProperties.html#id).
+  final int id;
+
+  /// The type of tool used to make contact such as a finger or stylus, if known.
+  /// See Android's [MotionEvent.PointerProperties#toolType](https://developer.android.com/reference/android/view/MotionEvent.PointerProperties.html#toolType).
+  final int toolType;
+
+  List<int> _asList() => <int>[id, toolType];
+
+  @override
+  String toString() {
+    return 'AndroidPointerProperties(id: $id, toolType: $toolType)';
+  }
+}
+
+/// Position information for an Android pointer.
+///
+/// A Dart version of Android's [MotionEvent.PointerCoords](https://developer.android.com/reference/android/view/MotionEvent.PointerCoords).
+class AndroidPointerCoords {
+  /// Creates an AndroidPointerCoords.
+  ///
+  /// All parameters must not be null.
+  const AndroidPointerCoords({
+    @required this.orientation,
+    @required this.pressure,
+    @required this.size,
+    @required this.toolMajor,
+    @required this.toolMinor,
+    @required this.touchMajor,
+    @required this.touchMinor,
+    @required this.x,
+    @required this.y
+  }) : assert(orientation != null),
+       assert(pressure != null),
+       assert(size != null),
+       assert(toolMajor != null),
+       assert(toolMinor != null),
+       assert(touchMajor != null),
+       assert(touchMinor != null),
+       assert(x != null),
+       assert(y != null);
+
+  /// The orientation of the touch area and tool area in radians clockwise from vertical.
+  ///
+  /// See Android's [MotionEvent.PointerCoords#orientation](https://developer.android.com/reference/android/view/MotionEvent.PointerCoords.html#orientation).
+  final double orientation;
+
+  /// A normalized value that describes the pressure applied to the device by a finger or other tool.
+  ///
+  /// See Android's [MotionEvent.PointerCoords#pressure](https://developer.android.com/reference/android/view/MotionEvent.PointerCoords.html#pressure).
+  final double pressure;
+
+  /// A normalized value that describes the approximate size of the pointer touch area in relation to the maximum detectable size of the device.
+  ///
+  /// See Android's [MotionEvent.PointerCoords#size](https://developer.android.com/reference/android/view/MotionEvent.PointerCoords.html#size).
+  final double size;
+
+  /// See Android's [MotionEvent.PointerCoords#toolMajor](https://developer.android.com/reference/android/view/MotionEvent.PointerCoords.html#toolMajor).
+  final double toolMajor;
+
+  /// See Android's [MotionEvent.PointerCoords#toolMinor](https://developer.android.com/reference/android/view/MotionEvent.PointerCoords.html#toolMinor).
+  final double toolMinor;
+
+  /// See Android's [MotionEvent.PointerCoords#touchMajor](https://developer.android.com/reference/android/view/MotionEvent.PointerCoords.html#touchMajor).
+  final double touchMajor;
+
+  /// See Android's [MotionEvent.PointerCoords#touchMinor](https://developer.android.com/reference/android/view/MotionEvent.PointerCoords.html#touchMinor).
+  final double touchMinor;
+
+  /// The X component of the pointer movement.
+  ///
+  /// See Android's [MotionEvent.PointerCoords#x](https://developer.android.com/reference/android/view/MotionEvent.PointerCoords.html#x).
+  final double x;
+
+  /// The Y component of the pointer movement.
+  ///
+  /// See Android's [MotionEvent.PointerCoords#y](https://developer.android.com/reference/android/view/MotionEvent.PointerCoords.html#y).
+  final double y;
+
+  List<double> _asList() {
+    return <double>[
+      orientation,
+      pressure,
+      size,
+      toolMajor,
+      toolMinor,
+      touchMajor,
+      touchMinor,
+      x,
+      y,
+    ];
+  }
+
+  @override
+  String toString() {
+    return 'AndroidPointerCoords(orientation: $orientation, pressure: $pressure, size: $size, toolMajor: $toolMajor, toolMinor: $toolMinor, touchMajor: $touchMajor, touchMinor: $touchMinor, x: $x, y: $y)';
+  }
+}
+
+/// A Dart version of Android's [MotionEvent](https://developer.android.com/reference/android/view/MotionEvent).
+class AndroidMotionEvent {
+  /// Creates an AndroidMotionEvent.
+  ///
+  /// All parameters must not be null.
+  AndroidMotionEvent({
+    @required this.downTime,
+    @required this.eventTime,
+    @required this.action,
+    @required this.pointerCount,
+    @required this.pointerProperties,
+    @required this.pointerCoords,
+    @required this.metaState,
+    @required this.buttonState,
+    @required this.xPrecision,
+    @required this.yPrecision,
+    @required this.deviceId,
+    @required this.edgeFlags,
+    @required this.source,
+    @required this.flags
+  }) : assert(downTime != null),
+       assert(eventTime != null),
+       assert(action != null),
+       assert(pointerCount != null),
+       assert(pointerProperties != null),
+       assert(pointerCoords != null),
+       assert(metaState != null),
+       assert(buttonState != null),
+       assert(xPrecision != null),
+       assert(yPrecision != null),
+       assert(deviceId != null),
+       assert(edgeFlags != null),
+       assert(source != null),
+       assert(flags != null),
+       assert(pointerProperties.length == pointerCount),
+       assert(pointerCoords.length == pointerCount);
+
+  /// The time (in ms) when the user originally pressed down to start a stream of position events,
+  /// relative to an arbitrary timeline.
+  ///
+  /// See Android's [MotionEvent#getDownTime](https://developer.android.com/reference/android/view/MotionEvent.html#getDownTime()).
+  final int downTime;
+
+  /// The time this event occurred, relative to an arbitrary timeline.
+  ///
+  /// See Android's [MotionEvent#getEventTime](https://developer.android.com/reference/android/view/MotionEvent.html#getEventTime()).
+  final int eventTime;
+
+  /// A value representing the kind of action being performed.
+  ///
+  /// See Android's [MotionEvent#getAction](https://developer.android.com/reference/android/view/MotionEvent.html#getAction()).
+  final int action;
+
+  /// The number of pointers that are part of this event.
+  /// This must be equivalent to the length of `pointerProperties` and `pointerCoords`.
+  ///
+  /// See Android's [MotionEvent#getPointerCount](https://developer.android.com/reference/android/view/MotionEvent.html#getPointerCount()).
+  final int pointerCount;
+
+  /// List of [AndroidPointerProperties] for each pointer that is part of this event.
+  final List<AndroidPointerProperties> pointerProperties;
+
+  /// List of [AndroidPointerCoords] for each pointer that is part of this event.
+  final List<AndroidPointerCoords> pointerCoords;
+
+  /// The state of any meta / modifier keys that were in effect when the event was generated.
+  ///
+  /// See Android's [MotionEvent#getMetaState](https://developer.android.com/reference/android/view/MotionEvent.html#getMetaState()).
+  final int metaState;
+
+  /// The state of all buttons that are pressed such as a mouse or stylus button.
+  ///
+  /// See Android's [MotionEvent#getButtonState](https://developer.android.com/reference/android/view/MotionEvent.html#getButtonState()).
+  final int buttonState;
+
+  /// The precision of the X coordinates being reported, in physical pixels.
+  ///
+  /// See Android's [MotionEvent#getXPrecision](https://developer.android.com/reference/android/view/MotionEvent.html#getXPrecision()).
+  final double xPrecision;
+
+  /// The precision of the Y coordinates being reported, in physical pixels.
+  ///
+  /// See Android's [MotionEvent#getYPrecision](https://developer.android.com/reference/android/view/MotionEvent.html#getYPrecision()).
+  final double yPrecision;
+
+  /// See Android's [MotionEvent#getDeviceId](https://developer.android.com/reference/android/view/MotionEvent.html#getDeviceId()).
+  final int deviceId;
+
+  /// A bitfield indicating which edges, if any, were touched by this MotionEvent.
+  ///
+  /// See Android's [MotionEvent#getEdgeFlags](https://developer.android.com/reference/android/view/MotionEvent.html#getEdgeFlags()).
+  final int edgeFlags;
+
+  /// The source of this event (e.g a touchpad or stylus).
+  ///
+  /// See Android's [MotionEvent#getSource](https://developer.android.com/reference/android/view/MotionEvent.html#getSource()).
+  final int source;
+
+  /// See Android's [MotionEvent#getFlags](https://developer.android.com/reference/android/view/MotionEvent.html#getFlags()).
+  final int flags;
+
+  List<dynamic> _asList(int viewId) {
+    return <dynamic>[
+      viewId,
+      downTime,
+      eventTime,
+      action,
+      pointerCount,
+      pointerProperties.map((AndroidPointerProperties p) => p._asList()).toList(),
+      pointerCoords.map((AndroidPointerCoords p) => p._asList()).toList(),
+      metaState,
+      buttonState,
+      xPrecision,
+      yPrecision,
+      deviceId,
+      edgeFlags,
+      source,
+      flags,
+    ];
+  }
+
+  @override
+  String toString() {
+    return 'AndroidPointerEvent(downTime: $downTime, eventTime: $eventTime, action: $action, pointerCount: $pointerCount, pointerProperties: $pointerProperties, pointerCoords: $pointerCoords, metaState: $metaState, buttonState: $buttonState, xPrecision: $xPrecision, yPrecision: $yPrecision, deviceId: $deviceId, edgeFlags: $edgeFlags, source: $source, flags: $flags)';
+  }
+}
+
 enum _AndroidViewState {
   waitingForSize,
   creating,
@@ -95,6 +334,36 @@ class AndroidViewController {
       _viewType = viewType,
       _onPlatformViewCreated = onPlatformViewCreated,
       _state = _AndroidViewState.waitingForSize;
+
+  /// Action code for when a primary pointer touched the screen.
+  ///
+  /// Android's [MotionEvent.ACTION_DOWN](https://developer.android.com/reference/android/view/MotionEvent#ACTION_DOWN)
+  static const int kActionDown =  0;
+
+  /// Action code for when a primary pointer stopped touching the screen.
+  ///
+  /// Android's [MotionEvent.ACTION_UP](https://developer.android.com/reference/android/view/MotionEvent#ACTION_UP)
+  static const int kActionUp =  1;
+
+  /// Action code for when the event only includes information about pointer movement.
+  ///
+  /// Android's [MotionEvent.ACTION_MOVE](https://developer.android.com/reference/android/view/MotionEvent#ACTION_MOVE)
+  static const int kActionMove = 2;
+
+  /// Action code for when a motion event has been cancelled.
+  ///
+  /// Android's [MotionEvent.ACTION_CANCEL](https://developer.android.com/reference/android/view/MotionEvent#ACTION_CANCEL)
+  static const int kActionCancel = 3;
+
+  /// Action code for when a secondary pointer touched the screen.
+  ///
+  /// Android's [MotionEvent.ACTION_POINTER_DOWN](https://developer.android.com/reference/android/view/MotionEvent#ACTION_POINTER_DOWN)
+  static const int kActionPointerDown =  5;
+
+  /// Action code for when a secondary pointer stopped touching the screen.
+  ///
+  /// Android's [MotionEvent.ACTION_POINTER_UP](https://developer.android.com/reference/android/view/MotionEvent#ACTION_POINTER_UP)
+  static const int kActionPointerUp =  6;
 
   /// The unique identifier of the Android view controlled by this controller.
   final int id;
@@ -146,9 +415,27 @@ class AndroidViewController {
     });
   }
 
+  /// Sends an Android [MotionEvent](https://developer.android.com/reference/android/view/MotionEvent)
+  /// to the view.
+  ///
+  /// The Android MotionEvent object is created with [MotionEvent.obtain](https://developer.android.com/reference/android/view/MotionEvent.html#obtain(long,%20long,%20int,%20float,%20float,%20float,%20float,%20int,%20float,%20float,%20int,%20int)).
+  /// See documentation of [MotionEvent.obtain](https://developer.android.com/reference/android/view/MotionEvent.html#obtain(long,%20long,%20int,%20float,%20float,%20float,%20float,%20int,%20float,%20float,%20int,%20int))
+  /// for description of the parameters.
+  Future<void> sendMotionEvent(AndroidMotionEvent event) async {
+    await SystemChannels.platform_views.invokeMethod(
+        'touch',
+        event._asList(id),
+    );
+  }
+
+  /// Creates a masked Android MotionEvent action value for an indexed pointer.
+  static int pointerAction(int pointerId, int action) {
+    return ((pointerId << 8) & 0xff00) | (action & 0xff);
+  }
+
   Future<void> _create(Size size) async {
     _textureId = await SystemChannels.platform_views.invokeMethod('create', <String, dynamic> {
-      'id':  id,
+      'id': id,
       'viewType': _viewType,
       'width': size.width,
       'height': size.height,

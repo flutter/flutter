@@ -106,9 +106,9 @@ void main() {
   });
 
   testWidgets('uses two-ring 24-hour dial for H and HH hour formats', (WidgetTester tester) async {
-    const List<Locale> locales = const <Locale>[
-      const Locale('en', 'GB'), // HH
-      const Locale('es', 'ES'), // H
+    const List<Locale> locales = <Locale>[
+      Locale('en', 'GB'), // HH
+      Locale('es', 'ES'), // H
     ];
     for (Locale locale in locales) {
       // Tap along the segment stretching from the center to the edge at
@@ -126,9 +126,9 @@ void main() {
     }
   });
 
-  const List<String> labels12To11 = const <String>['12', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11'];
-  const List<String> labels12To11TwoDigit = const <String>['12', '01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11'];
-  const List<String> labels00To23 = const <String>['00', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', '23'];
+  const List<String> labels12To11 = <String>['12', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11'];
+  const List<String> labels12To11TwoDigit = <String>['12', '01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11'];
+  const List<String> labels00To23 = <String>['00', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', '23'];
 
   Future<Null> mediaQueryBoilerplate(WidgetTester tester, bool alwaysUse24HourFormat) async {
     await tester.pumpWidget(

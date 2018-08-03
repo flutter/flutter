@@ -40,7 +40,7 @@ class RenderSolidColorBox extends RenderDecoratedBox {
   @override
   void handleEvent(PointerEvent event, BoxHitTestEntry entry) {
     if (event is PointerDownEvent) {
-      decoration = const BoxDecoration(color: const Color(0xFFFF0000));
+      decoration = const BoxDecoration(color: Color(0xFFFF0000));
     } else if (event is PointerUpEvent) {
       decoration = new BoxDecoration(color: backgroundColor);
     }

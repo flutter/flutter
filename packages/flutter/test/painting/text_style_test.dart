@@ -18,7 +18,7 @@ void main() {
       equals('TextStyle(<all styles inherited>)'),
     );
 
-    const TextStyle s1 = const TextStyle(
+    const TextStyle s1 = TextStyle(
       fontSize: 10.0,
       fontWeight: FontWeight.w800,
       height: 123.0,
@@ -187,20 +187,20 @@ void main() {
   });
 
   test('TextStyle using package font', () {
-    const TextStyle s6 = const TextStyle(fontFamily: 'test');
+    const TextStyle s6 = TextStyle(fontFamily: 'test');
     expect(s6.fontFamily, 'test');
     expect(s6.getTextStyle().toString(), 'TextStyle(color: unspecified, decoration: unspecified, decorationColor: unspecified, decorationStyle: unspecified, fontWeight: unspecified, fontStyle: unspecified, textBaseline: unspecified, fontFamily: test, fontSize: unspecified, letterSpacing: unspecified, wordSpacing: unspecified, height: unspecified, locale: unspecified, background: unspecified, foreground: unspecified)');
 
-    const TextStyle s7 = const TextStyle(fontFamily: 'test', package: 'p');
+    const TextStyle s7 = TextStyle(fontFamily: 'test', package: 'p');
     expect(s7.fontFamily, 'packages/p/test');
     expect(s7.getTextStyle().toString(), 'TextStyle(color: unspecified, decoration: unspecified, decorationColor: unspecified, decorationStyle: unspecified, fontWeight: unspecified, fontStyle: unspecified, textBaseline: unspecified, fontFamily: packages/p/test, fontSize: unspecified, letterSpacing: unspecified, wordSpacing: unspecified, height: unspecified, locale: unspecified, background: unspecified, foreground: unspecified)');
   });
 
   test('TextStyle.debugLabel', () {
-    const TextStyle unknown = const TextStyle();
-    const TextStyle foo = const TextStyle(debugLabel: 'foo', fontSize: 1.0);
-    const TextStyle bar = const TextStyle(debugLabel: 'bar', fontSize: 2.0);
-    const TextStyle baz = const TextStyle(debugLabel: 'baz', fontSize: 3.0);
+    const TextStyle unknown = TextStyle();
+    const TextStyle foo = TextStyle(debugLabel: 'foo', fontSize: 1.0);
+    const TextStyle bar = TextStyle(debugLabel: 'bar', fontSize: 2.0);
+    const TextStyle baz = TextStyle(debugLabel: 'baz', fontSize: 3.0);
 
     expect(unknown.debugLabel, null);
     expect(unknown.toString(), 'TextStyle(<all styles inherited>)');
@@ -218,10 +218,10 @@ void main() {
   });
 
   test('TextStyle foreground and color combos', () {
-    const Color red = const Color.fromARGB(255, 255, 0, 0);
-    const Color blue = const Color.fromARGB(255, 0, 0, 255);
-    const TextStyle redTextStyle = const TextStyle(color: red);
-    const TextStyle blueTextStyle = const TextStyle(color: blue);
+    const Color red = Color.fromARGB(255, 255, 0, 0);
+    const Color blue = Color.fromARGB(255, 0, 0, 255);
+    const TextStyle redTextStyle = TextStyle(color: red);
+    const TextStyle blueTextStyle = TextStyle(color: blue);
     final TextStyle redPaintTextStyle = new TextStyle(foreground: new Paint()..color = red);
     final TextStyle bluePaintTextStyle = new TextStyle(foreground: new Paint()..color = blue);
 

@@ -7,14 +7,14 @@ import 'dart:async';
 import 'package:flutter/widgets.dart';
 
 // All values eyeballed.
-const Color _kScrollbarColor = const Color(0x99777777);
+const Color _kScrollbarColor = Color(0x99777777);
 const double _kScrollbarThickness = 2.5;
 const double _kScrollbarMainAxisMargin = 4.0;
 const double _kScrollbarCrossAxisMargin = 2.5;
 const double _kScrollbarMinLength = 4.0;
-const Radius _kScrollbarRadius = const Radius.circular(1.25);
-const Duration _kScrollbarTimeToFade = const Duration(milliseconds: 50);
-const Duration _kScrollbarFadeDuration = const Duration(milliseconds: 250);
+const Radius _kScrollbarRadius = Radius.circular(1.25);
+const Duration _kScrollbarTimeToFade = Duration(milliseconds: 50);
+const Duration _kScrollbarFadeDuration = Duration(milliseconds: 250);
 
 /// An iOS style scrollbar.
 ///

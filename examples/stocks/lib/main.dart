@@ -128,8 +128,8 @@ class StocksAppState extends State<StocksApp> {
         GlobalWidgetsLocalizations.delegate,
       ],
       supportedLocales: const <Locale>[
-        const Locale('en', 'US'),
-        const Locale('es', 'ES'),
+        Locale('en', 'US'),
+        Locale('es', 'ES'),
       ],
       debugShowMaterialGrid: _configuration.debugShowGrid,
       showPerformanceOverlay: _configuration.showPerformanceOverlay,

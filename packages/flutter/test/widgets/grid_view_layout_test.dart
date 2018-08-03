@@ -8,10 +8,10 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   testWidgets('Empty GridView', (WidgetTester tester) async {
     final List<Widget> children = <Widget>[
-      const DecoratedBox(decoration: const BoxDecoration()),
-      const DecoratedBox(decoration: const BoxDecoration()),
-      const DecoratedBox(decoration: const BoxDecoration()),
-      const DecoratedBox(decoration: const BoxDecoration()),
+      const DecoratedBox(decoration: BoxDecoration()),
+      const DecoratedBox(decoration: BoxDecoration()),
+      const DecoratedBox(decoration: BoxDecoration()),
+      const DecoratedBox(decoration: BoxDecoration()),
     ];
 
     await tester.pumpWidget(

@@ -90,7 +90,7 @@ Future<GradleProject> _gradleProject() async {
 // Note: Dependencies are resolved and possibly downloaded as a side-effect
 // of calculating the app properties using Gradle. This may take minutes.
 Future<GradleProject> _readGradleProject() async {
-  final FlutterProject flutterProject =  new FlutterProject(fs.currentDirectory);
+  final FlutterProject flutterProject = await FlutterProject.current();
   final String gradle = await _ensureGradle(flutterProject);
   await updateLocalProperties(project: flutterProject);
   final Status status = logger.startProgress('Resolving dependencies...', expectSlowOperation: true);
@@ -214,7 +214,7 @@ Future<void> updateLocalProperties({
     throwToolExit('Unable to locate Android SDK. Please run `flutter doctor` for more details.');
   }
 
-  final File localProperties = await project.androidLocalPropertiesFile;
+  final File localProperties = project.androidLocalPropertiesFile;
   bool changed = false;
 
   SettingsFile settings;
@@ -232,7 +232,7 @@ Future<void> updateLocalProperties({
     }
   }
 
-  final FlutterManifest manifest = await project.manifest;
+  final FlutterManifest manifest = project.manifest;
 
   if (androidSdk != null)
     changeIfNecessary('sdk.dir', escapePath(androidSdk.directory));
