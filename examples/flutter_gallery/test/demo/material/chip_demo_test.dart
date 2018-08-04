@@ -21,7 +21,7 @@ void main() {
       hasTapAction: true,
       label: 'Update border shape',
     ));
-    
+
     expect(tester.getSemanticsData(find.byIcon(Icons.refresh)), matchesSemanticsData(
       isButton: true,
       hasEnabledState: true,
