@@ -314,7 +314,12 @@ class _CupertinoNavigationBarComponents {
          large: large,
        ),
        _userTrailing = trailing,
-       _userLargeTitle = largeTitle,
+       largeTitle = createLargeTitle(
+         userLargeTitle: largeTitle,
+         route: route,
+         automaticImplyTitle: automaticallyImplyTitle,
+         large: large,
+       ),
        _padding = padding,
        _actionsForegroundColor = actionsForegroundColor,
        _large = large,
@@ -373,7 +378,13 @@ class _CupertinoNavigationBarComponents {
         ),
         child: new DefaultTextStyle(
           style: _navBarItemStyle(actionsForegroundColor),
-          child: leadingContent,
+          child: IconTheme.merge(
+            data: new IconThemeData(
+              color: actionsForegroundColor,
+              size: 32.0,
+            ),
+            child: leadingContent,
+          ),
         ),
       ),
     );
@@ -383,8 +394,8 @@ class _CupertinoNavigationBarComponents {
     return leading?.renderBox;
   }
 
-  final Widget backChevron;
-  static Widget createBackChevron({
+  final _RenderObjectFindingWidget backChevron;
+  static _RenderObjectFindingWidget createBackChevron({
     @required Widget userLeading,
     @required ModalRoute<dynamic> route,
     @required bool automaticallyImplyLeading,
@@ -399,7 +410,9 @@ class _CupertinoNavigationBarComponents {
       return null;
     }
 
-    return new _BackChevron(color: actionsForegroundColor);
+    return new _RenderObjectFindingWidget(
+      child: new _BackChevron(color: actionsForegroundColor),
+    );
   }
 
   final _RenderObjectFindingWidget backLabel;
@@ -474,41 +487,54 @@ class _CupertinoNavigationBarComponents {
       ),
       child: new DefaultTextStyle(
         style: _actionsStyle,
-        child: _userTrailing,
+        child: IconTheme.merge(
+          data: new IconThemeData(
+            // color: actionsForegroundColor,
+            size: 32.0,
+          ),
+          child: _userTrailing,
+        ),
       ),
     );
   }
 
-  final Widget _userLargeTitle;
-  Widget get largeTitle {
-    if (!_large) {
+  final _RenderObjectFindingWidget largeTitle;
+  static _RenderObjectFindingWidget createLargeTitle({
+    @required Widget userLargeTitle,
+    @required bool large,
+    @required bool automaticImplyTitle,
+    @required ModalRoute<dynamic> route,
+  }) {
+    if (!large) {
       return null;
     }
 
-    final Widget effectiveLargeTitle = _userLargeTitle ?? _derivedTitle(
-      automaticallyImplyTitle: _automaticallyImplyTitle,
-      currentRoute: _route,
+    final Widget largeTitleContent = userLargeTitle ?? _derivedTitle(
+      automaticallyImplyTitle: automaticImplyTitle,
+      currentRoute: route,
     );
 
-    if (effectiveLargeTitle == null) {
+    if (largeTitleContent == null) {
       return null;
     }
 
-    return new Padding(
-      padding: const EdgeInsetsDirectional.only(
-        start: _kNavBarEdgePadding,
-        bottom: 8.0, // Bottom has a different padding.
-      ),
-      child: new SafeArea(
-        top: false,
-        bottom: false,
-        child: new Semantics(
-          header: true,
-          child: new DefaultTextStyle(
-            style: _kLargeTitleTextStyle,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            child: effectiveLargeTitle,
+    return new _RenderObjectFindingWidget(
+      child: new Padding(
+        padding: const EdgeInsetsDirectional.only(
+          start: _kNavBarEdgePadding,
+          bottom: 8.0, // Bottom has a different padding.
+        ),
+        child: new SafeArea(
+          top: false,
+          bottom: false,
+          child: new Semantics(
+            header: true,
+            child: new DefaultTextStyle(
+              style: _kLargeTitleTextStyle,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              child: largeTitleContent,
+            ),
           ),
         ),
       ),

@@ -4,6 +4,7 @@
 
 library nav_bar;
 
+import 'dart:math' as math;
 import 'dart:ui' show ImageFilter;
 
 import 'package:flutter/foundation.dart';
@@ -467,7 +468,7 @@ class CupertinoNavigationBarBackButton extends StatelessWidget {
   /// previous routes are both [CupertinoPageRoute]s.
   final String previousPageTitle;
 
-  final _BackChevron _backChevron;
+  final Widget _backChevron;
 
   final Widget _backLabel;
 
